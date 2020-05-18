@@ -8,6 +8,7 @@ option(CMAKE_BUILD_CORE "Build Core library" ON)
 option(CMAKE_BUILD_PROCESSES "Build physics processes" ON)
 option(CMAKE_BUILD_ADDONS "Build AddOns" ON)
 option(CMAKE_BUILD_SCAN "Build cross-section scan utilitary" OFF)
+option(CMAKE_BUILD_CARD_CONV "Build steering cards converter utilitary" OFF)
 option(CMAKE_BUILD_TESTS "Build tests" OFF)
 option(CMAKE_BUILD_FOAM "Build FOAM integrator" OFF)
 

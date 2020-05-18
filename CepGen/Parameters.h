@@ -42,7 +42,7 @@ namespace cepgen
       /// Initialise the timekeeper instance
       void setTimeKeeper( utils::TimeKeeper* );
       /// Pointer to a timekeeper instance
-      utils::TimeKeeper* timeKeeeper() { return tmr_.get(); }
+      utils::TimeKeeper* timeKeeper() { return tmr_.get(); }
 
       /// Common user-defined parameters
       std::shared_ptr<ParametersList> general;
@@ -76,7 +76,7 @@ namespace cepgen
       /// Collection of events generation parameters
       struct Generation
       {
-        Generation();
+        Generation( const ParametersList& );
         Generation( const Generation& );
         bool enabled; ///< Are we generating events ? (true) or are we only computing the cross-section ? (false)
         unsigned long maxgen; ///< Maximal number of events to generate in this run

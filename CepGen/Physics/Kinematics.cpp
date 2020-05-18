@@ -6,7 +6,10 @@
 
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
+
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
+
 #include "CepGen/Utils/String.h"
 
 #include <cmath>
@@ -17,6 +20,43 @@ namespace cepgen
     incoming_beams( { { 6500., PDG::proton, KTFlux::invalid }, { 6500., PDG::proton, KTFlux::invalid } } ),
     mode( KinematicsMode::invalid )
   {}
+
+  Kinematics::Kinematics( const ParametersList& params ) :
+    mode( (KinematicsMode)params.get<int>( "mode", (int)KinematicsMode::invalid ) )
+  {
+    incoming_beams.first.pdg = params.get<int>( "beam1id", 2212 );
+    params.fill<double>( "beam1pz", incoming_beams.first.pz );
+    const int hi_A1 = params.get<int>( "beam1A", 1 );
+    const int hi_Z1 = params.get<int>( "beam1Z", 0 );
+    if ( hi_Z1 != 0 )
+      incoming_beams.first.pdg = HeavyIon( hi_A1, (Element)hi_Z1 );
+    incoming_beams.second.pdg = params.get<int>( "beam2id", 2212 );
+    params.fill<double>( "beam2pz", incoming_beams.second.pz );
+    const int hi_A2 = params.get<int>( "beam2A", 1 );
+    const int hi_Z2 = params.get<int>( "beam2Z", 0 );
+    if ( hi_Z2 != 0 )
+      incoming_beams.second.pdg = HeavyIon( hi_A2, (Element)hi_Z2 );
+    const double sqrt_s = params.get<double>( "sqrts", -1. );
+    if ( sqrt_s > 0. )
+      setSqrtS( sqrt_s );
+    for ( auto& lim : cuts.central.rawList() ) {
+      params.fill<Limits>( lim.name, lim.limits );
+      params.fill<double>( lim.name+"min", lim.limits.min() );
+      params.fill<double>( lim.name+"max", lim.limits.max() );
+    }
+    //FIXME add the single-particles cuts parsing
+    //--- outgoing remnants
+    params.fill<Limits>( "mx", cuts.remnants.mass_single() );
+    params.fill<double>( "mxmin", cuts.remnants.mass_single().min() );
+    params.fill<double>( "mxmax", cuts.remnants.mass_single().max() );
+    Limits xi_rng;
+    params.fill<Limits>( "xi", xi_rng );
+    if ( !xi_rng.valid() )
+      xi_rng
+        = { params.get<double>( "ximin", 0. ), params.get<double>( "ximax", 1. ) };
+    if ( xi_rng.valid() )
+      cuts.remnants.energy_single() = -( xi_rng-1. )*0.5*sqrtS();
+  }
 
   void
   Kinematics::setSqrtS( double sqrts )
@@ -91,8 +131,8 @@ namespace cepgen
 
   Kinematics::CutsList::CutsList()
   {
-    initial.q2 = { 0., 1.e5 };
-    central.pt_single.min() = 0.;
-    remnants.mass_single = { 1.07, 320. };
+    initial.q2() = { 0., 1.e5 };
+    central.pt_single().min() = 0.;
+    remnants.mass_single() = { 1.07, 320. };
   }
 }

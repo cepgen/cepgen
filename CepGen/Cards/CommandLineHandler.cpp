@@ -93,47 +93,7 @@ namespace cepgen
       }
 
       //----- phase space definition
-      const auto& kin = pars.get<ParametersList>( "kinematics" );
-      if ( kin.has<int>( "mode" ) )
-        params_->kinematics.mode = (KinematicsMode)kin.get<int>( "mode" );
-      //--- incoming beams
-      if ( kin.has<int>( "beam1id" ) )
-        params_->kinematics.incoming_beams.first.pdg = kin.get<int>( "beam1id", 2212 );
-      kin.fill<double>( "beam1pz", params_->kinematics.incoming_beams.first.pz );
-      const int hi_A1 = kin.get<int>( "beam1A", 1 ), hi_Z1 = kin.get<int>( "beam1Z", 0 );
-      if ( hi_Z1 != 0 )
-        params_->kinematics.incoming_beams.first.pdg = HeavyIon( hi_A1, (Element)hi_Z1 );
-      if ( kin.has<int>( "beam2id" ) )
-        params_->kinematics.incoming_beams.second.pdg = kin.get<int>( "beam2id", 2212 );
-      kin.fill<double>( "beam2pz", params_->kinematics.incoming_beams.second.pz );
-      const int hi_A2 = kin.get<int>( "beam2A", 1 ), hi_Z2 = kin.get<int>( "beam2Z", 0 );
-      if ( hi_Z2 != 0 )
-        params_->kinematics.incoming_beams.second.pdg = HeavyIon( hi_A2, (Element)hi_Z2 );
-      const double sqrt_s = kin.get<double>( "sqrts", INVALID );
-      if ( sqrt_s != INVALID )
-        params_->kinematics.setSqrtS( sqrt_s );
-      //--- incoming partons
-      kin.fill<double>( "q2min", params_->kinematics.cuts.central.q2.min() );
-      kin.fill<double>( "q2max", params_->kinematics.cuts.central.q2.max() );
-      kin.fill<double>( "qtmin", params_->kinematics.cuts.central.qt.min() );
-      kin.fill<double>( "qtmax", params_->kinematics.cuts.central.qt.max() );
-      //--- outgoing remnants
-      kin.fill<double>( "mxmin", params_->kinematics.cuts.remnants.mass_single.min() );
-      kin.fill<double>( "mxmax", params_->kinematics.cuts.remnants.mass_single.max() );
-      const Limits xi_rng = { kin.get<double>( "ximin", 0. ), kin.get<double>( "ximax", 1. ) };
-      if ( xi_rng.valid() )
-        params_->kinematics.cuts.remnants.energy_single = -( xi_rng-1. )*0.5*params_->kinematics.sqrtS();
-      //--- central system
-      kin.fill<double>( "ptmin", params_->kinematics.cuts.central.pt_single.min() );
-      kin.fill<double>( "ptmax", params_->kinematics.cuts.central.pt_single.max() );
-      kin.fill<double>( "etamin", params_->kinematics.cuts.central.eta_single.min() );
-      kin.fill<double>( "etamax", params_->kinematics.cuts.central.eta_single.max() );
-      kin.fill<double>( "rapmin", params_->kinematics.cuts.central.rapidity_single.min() );
-      kin.fill<double>( "rapmax", params_->kinematics.cuts.central.rapidity_single.max() );
-      kin.fill<double>( "ptsummin", params_->kinematics.cuts.central.pt_sum.min() );
-      kin.fill<double>( "ptsummax", params_->kinematics.cuts.central.pt_sum.max() );
-      kin.fill<double>( "msummin", params_->kinematics.cuts.central.mass_sum.min() );
-      kin.fill<double>( "msummax", params_->kinematics.cuts.central.mass_sum.max() );
+      params_->kinematics = Kinematics( pars.get<ParametersList>( "kinematics" ) );
 
       //----- integration
       pars.fill<ParametersList>( "integrator", *params_->integrator );

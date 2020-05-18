@@ -18,9 +18,11 @@ namespace cepgen
         /// Read a LPAIR steering card
         explicit LpairHandler( const ParametersList& );
 
+        void pack( const Parameters* ) override;
         Parameters* parse( const std::string&, Parameters* ) override;
         /// Store a configuration into a LPAIR steering card
         void store( const char* file );
+        void write( const std::string& file ) const override;
 
       private:
         /// Single parameter handler
@@ -50,7 +52,7 @@ namespace cepgen
 
         void init();
         std::shared_ptr<ParametersList> proc_params_;
-        bool timer_;
+        int timer_;
         int str_fun_, sr_type_, lepton_id_;
         double xi_min_, xi_max_;
         std::string proc_name_, evt_mod_name_, out_mod_name_;
@@ -68,8 +70,6 @@ namespace cepgen
     template<> inline void LpairHandler::registerParameter<double>( const char* key, const char* description, double* def ) { p_doubles_.insert( std::make_pair( key, Parameter<double>( key, description, def ) ) ); }
     /// Register an integer parameter
     template<> inline void LpairHandler::registerParameter<int>( const char* key, const char* description, int* def ) { p_ints_.insert( std::make_pair( key, Parameter<int>( key, description, def ) ) ); }
-    /// Register a boolean parameter
-    template<> inline void LpairHandler::registerParameter<bool>( const char* key, const char* description, bool* def ) { registerParameter<int>( key, description, (int*)def ); }
 
     //----- specialised setters
 
@@ -85,7 +85,6 @@ namespace cepgen
       auto it = p_ints_.find( key );
       if ( it != p_ints_.end() ) *it->second.value = value;
     }
-    template<> inline void LpairHandler::setValue<bool>( const char* key, const bool& value ) { setValue<int>( key, (int)value ); }
 
     //----- specialised getters
 
@@ -107,8 +106,6 @@ namespace cepgen
       if ( it != p_ints_.end() ) return *it->second.value;
       return -999999;
     }
-    /// Retrieve a boolean parameter value
-    template<> inline bool LpairHandler::getValue( const char* key ) const { return (bool)getValue<int>( key ); }
   }
 }
 

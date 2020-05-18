@@ -135,10 +135,10 @@ namespace cepgen
       // register the incoming partons' variables
       //============================================================================================
 
-      defineVariable( qt1_, Mapping::exponential, kin_.cuts.initial.qt, { 1.e-10, 500. }, "First incoming parton virtuality" );
-      defineVariable( qt2_, Mapping::exponential, kin_.cuts.initial.qt, { 1.e-10, 500. }, "Second incoming parton virtuality" );
-      defineVariable( phi_qt1_, Mapping::linear, kin_.cuts.initial.phi_qt, { 0., 2.*M_PI }, "First incoming parton azimuthal angle" );
-      defineVariable( phi_qt2_, Mapping::linear, kin_.cuts.initial.phi_qt, { 0., 2.*M_PI }, "Second incoming parton azimuthal angle" );
+      defineVariable( qt1_, Mapping::exponential, kin_.cuts.initial.qt(), { 1.e-10, 500. }, "First incoming parton virtuality" );
+      defineVariable( qt2_, Mapping::exponential, kin_.cuts.initial.qt(), { 1.e-10, 500. }, "Second incoming parton virtuality" );
+      defineVariable( phi_qt1_, Mapping::linear, kin_.cuts.initial.phi_qt(), { 0., 2.*M_PI }, "First incoming parton azimuthal angle" );
+      defineVariable( phi_qt2_, Mapping::linear, kin_.cuts.initial.phi_qt(), { 0., 2.*M_PI }, "Second incoming parton azimuthal angle" );
 
       //============================================================================================
       // register the incoming partons
@@ -186,9 +186,9 @@ namespace cepgen
       mX2_ = event_->oneWithRole( Particle::IncomingBeam1 ).mass2();
       mY2_ = event_->oneWithRole( Particle::IncomingBeam2 ).mass2();
       if ( kin_.mode == KinematicsMode::InelasticElastic || kin_.mode == KinematicsMode::InelasticInelastic )
-        defineVariable( mX2_, Mapping::square, kin_.cuts.remnants.mass_single, { 1.07, 1000. }, "Positive z proton remnant squared mass" );
+        defineVariable( mX2_, Mapping::square, kin_.cuts.remnants.mass_single(), { 1.07, 1000. }, "Positive z proton remnant squared mass" );
       if ( kin_.mode == KinematicsMode::ElasticInelastic || kin_.mode == KinematicsMode::InelasticInelastic )
-        defineVariable( mY2_, Mapping::square, kin_.cuts.remnants.mass_single, { 1.07, 1000. }, "Negative z proton remnant squared mass" );
+        defineVariable( mY2_, Mapping::square, kin_.cuts.remnants.mass_single(), { 1.07, 1000. }, "Negative z proton remnant squared mass" );
     }
 
     double

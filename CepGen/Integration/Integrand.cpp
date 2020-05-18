@@ -53,7 +53,7 @@ namespace cepgen
   double
   Integrand::eval( const std::vector<double>& x )
   {
-    CG_TICKER( const_cast<Parameters*>( params_ )->timeKeeeper() );
+    CG_TICKER( const_cast<Parameters*>( params_ )->timeKeeper() );
 
     //--- start the timer
     tmr_->reset();
@@ -116,13 +116,13 @@ namespace cepgen
           continue;
         const auto& cuts_pdgid = params_->kinematics.cuts.central_particles.at( part.pdgId() );
         // apply these cuts on the given particle
-        if ( !cuts_pdgid.pt_single.contains( part.momentum().pt() ) )
+        if ( !cuts_pdgid.pt_single().contains( part.momentum().pt() ) )
           return 0.;
-        if ( !cuts_pdgid.energy_single.contains( part.momentum().energy() ) )
+        if ( !cuts_pdgid.energy_single().contains( part.momentum().energy() ) )
           return 0.;
-        if ( !cuts_pdgid.eta_single.contains( part.momentum().eta() ) )
+        if ( !cuts_pdgid.eta_single().contains( part.momentum().eta() ) )
           return 0.;
-        if ( !cuts_pdgid.rapidity_single.contains( part.momentum().rapidity() ) )
+        if ( !cuts_pdgid.rapidity_single().contains( part.momentum().rapidity() ) )
           return 0.;
       }
     const auto& remn_cut = params_->kinematics.cuts.remnants;
@@ -130,9 +130,9 @@ namespace cepgen
       for ( const auto& part : (*event_)[system] ) {
         if ( part.status() != Particle::Status::FinalState )
           continue;
-        if ( !remn_cut.energy_single.contains( part.momentum().energy() ) )
+        if ( !remn_cut.energy_single().contains( part.momentum().energy() ) )
           return 0.;
-        if ( !remn_cut.rapidity_single.contains( fabs( part.momentum().rapidity() ) ) )
+        if ( !remn_cut.rapidity_single().contains( fabs( part.momentum().rapidity() ) ) )
           return 0.;
       }
 

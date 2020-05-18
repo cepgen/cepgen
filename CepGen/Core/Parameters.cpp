@@ -21,7 +21,8 @@ namespace cepgen
 {
   Parameters::Parameters() :
     general( new ParametersList ), integrator( new ParametersList ),
-    total_gen_time_( 0. ), num_gen_events_( 0ul )
+    total_gen_time_( 0. ), num_gen_events_( 0ul ),
+    generation_( ParametersList() )
   {}
 
   Parameters::Parameters( Parameters& param ) :
@@ -275,28 +276,29 @@ namespace cepgen
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? utils::boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << "\n\n";
-    for ( const auto& lim : param->kinematics.cuts.initial.list() ) // map(particles class, limits)
-      if ( lim.second.valid() )
-        os << std::setw( wt ) << lim.first << lim.second << "\n";
+    const auto& cuts = param->kinematics.cuts;
+    for ( const auto& lim : cuts.initial.list() ) // map(particles class, limits)
+      if ( lim.limits.valid() )
+        os << std::setw( wt ) << lim.description << lim.limits << "\n";
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? utils::boldify( " Outgoing central system " ) : "Outgoing central system" ) << std::setfill( ' ' ) << "\n\n";
-    for ( const auto& lim : param->kinematics.cuts.central.list() )
-      if ( lim.second.valid() )
-        os << std::setw( wt ) << lim.first << lim.second << "\n";
-    if ( param->kinematics.cuts.central_particles.size() > 0 ) {
+    for ( const auto& lim : cuts.central.list() )
+      if ( lim.limits.valid() )
+        os << std::setw( wt ) << lim.description << lim.limits << "\n";
+    if ( cuts.central_particles.size() > 0 ) {
       os << std::setw( wt ) << ( pretty ? utils::boldify( ">>> per-particle cuts:" ) : ">>> per-particle cuts:" ) << "\n";
-      for ( const auto& part_per_lim : param->kinematics.cuts.central_particles ) {
+      for ( const auto& part_per_lim : cuts.central_particles ) {
         os << " * all single " << std::setw( wt-3 ) << PDG::get().name( part_per_lim.first ) << "\n";
-        for ( const auto& lim : part_per_lim.second.list() )
-          if ( lim.second.valid() )
-            os << "   - " << std::setw( wt-5 ) << lim.first << lim.second << "\n";
+        for ( const auto& lim : const_cast<Cuts&>( part_per_lim.second ).list() )
+          if ( lim.limits.valid() )
+            os << "   - " << std::setw( wt-5 ) << lim.description << lim.limits << "\n";
       }
     }
     os << "\n";
     os << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? utils::boldify( " Proton / remnants " ) : "Proton / remnants" ) << std::setfill( ' ' ) << "\n";
-    for ( const auto& lim : param->kinematics.cuts.remnants.list() )
-      os << "\n" << std::setw( wt ) << lim.first << lim.second;
+    for ( const auto& lim : cuts.remnants.list() )
+      os << "\n" << std::setw( wt ) << lim.description << lim.limits;
     return os
       << "\n"
       << std::setfill('_') << std::setw( wb ) << ""
@@ -305,10 +307,13 @@ namespace cepgen
 
   //-----------------------------------------------------------------------------------------------
 
-  Parameters::Generation::Generation() :
-    enabled( false ), maxgen( 0 ),
-    symmetrise( false ), gen_print_every( 10000 ),
-    num_threads( 2 ), num_points( 100 )
+  Parameters::Generation::Generation( const ParametersList& params ) :
+    enabled( params.get<bool>( "enabled", false ) ),
+    maxgen( params.get<int>( "maxgen", 0 ) ),
+    symmetrise( params.get<bool>( "symmetrise", false ) ),
+    gen_print_every( params.get<int>( "printEvery", 10000 ) ),
+    num_threads( params.get<int>( "numThreads", 2 ) ),
+    num_points( params.get<int>( "numPoints", 100 ) )
   {}
 
   Parameters::Generation::Generation( const Generation& rhs ) :

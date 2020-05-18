@@ -103,6 +103,7 @@ find_library(YODA YODA HINTS $ENV{YODA_DIR} PATH_SUFFIXES lib)
 find_path(YODA_INCLUDE YODA HINTS $ENV{YODA_DIR} PATH_SUFFIXES include)
 #--- other utilitaries
 find_package(PythonLibs 2.7)
+find_package(Boost)
 find_library(MUPARSER muparser)
 find_path(EXPRTK exprtk.hpp PATH_SUFFIXES include)
 #--- semi-external dependencies

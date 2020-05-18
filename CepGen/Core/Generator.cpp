@@ -66,9 +66,9 @@ namespace cepgen
 
   Generator::~Generator()
   {
-    if ( parameters_->timeKeeeper() )
+    if ( parameters_->timeKeeper() )
       CG_INFO( "Generator:destructor" )
-        << parameters_->timeKeeeper()->summary();
+        << parameters_->timeKeeper()->summary();
   }
 
   void
@@ -159,7 +159,7 @@ namespace cepgen
   void
   Generator::setIntegrator( std::unique_ptr<Integrator> integ )
   {
-    CG_TICKER( parameters_->timeKeeeper() );
+    CG_TICKER( parameters_->timeKeeper() );
 
     if ( !integ ) {
       if ( !parameters_->integrator )
@@ -178,7 +178,7 @@ namespace cepgen
   void
   Generator::integrate()
   {
-    CG_TICKER( parameters_->timeKeeeper() );
+    CG_TICKER( parameters_->timeKeeper() );
 
     clearRun();
     if ( !parameters_->hasProcess() )
@@ -213,7 +213,7 @@ namespace cepgen
   void
   Generator::generate( size_t num_events, Event::callback callback )
   {
-    CG_TICKER( parameters_->timeKeeeper() );
+    CG_TICKER( parameters_->timeKeeper() );
 
     if ( !parameters_ )
       throw CG_FATAL( "Generator:generate" ) << "No steering parameters specified!";

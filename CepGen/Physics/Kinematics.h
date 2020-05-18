@@ -14,12 +14,14 @@
 namespace cepgen
 {
   enum class KTFlux;
+  class ParametersList;
   namespace strfun { class Parameterisation; }
   /// List of kinematic constraints to apply on the process phase space.
   class Kinematics
   {
     public:
       Kinematics();
+      Kinematics( const ParametersList& );
       ~Kinematics() = default;
 
       /// Set the incoming particles' momenta (if the collision is symmetric)

@@ -104,7 +104,7 @@ namespace cepgen
 
       const Limits lim_xi{ xi_min_, xi_max_ };
       if ( lim_xi.valid() )
-        params_->kinematics.cuts.remnants.energy_single = ( lim_xi+(-1.) )*( -params_->kinematics.incoming_beams.first.pz );
+        params_->kinematics.cuts.remnants.energy_single() = ( lim_xi+(-1.) )*( -params_->kinematics.incoming_beams.first.pz );
 
       //--- parse the structure functions code
       auto sf_params = ParametersList()
@@ -173,8 +173,8 @@ namespace cepgen
       // General parameters
       //-------------------------------------------------------------------------------------------
 
-      registerParameter<bool>( "NTRT", "Smoothen the integrand", &params_->integrator->operator[]<bool>( "treat" ) );
-      registerParameter<bool>( "TIMR", "Enable the time ticker", &timer_ );
+      registerParameter<int>( "NTRT", "Smoothen the integrand", (int*)&params_->integrator->operator[]<bool>( "treat" ) );
+      registerParameter<int>( "TIMR", "Enable the time ticker", &timer_ );
       registerParameter<int>( "IEND", "Generation type", &iend_ );
       registerParameter<int>( "DEBG", "Debugging verbosity", (int*)&utils::Logger::get().level );
       registerParameter<int>( "NCVG", "Number of function calls", (int*)&params_->integrator->operator[]<int>( "numFunctionCalls" ) );
@@ -212,22 +212,22 @@ namespace cepgen
       registerParameter<double>( "INP2", "Momentum (2nd primary particle)", &params_->kinematics.incoming_beams.second.pz );
       registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params_->kinematics.incoming_beams.first.pz );
       registerParameter<double>( "INPE", "Momentum (2nd primary particle)", &params_->kinematics.incoming_beams.second.pz );
-      registerParameter<double>( "PTCT", "Minimal transverse momentum (single central outgoing particle)", &params_->kinematics.cuts.central.pt_single.min() );
-      registerParameter<double>( "PTMX", "Maximal transverse momentum (single central outgoing particle)", &params_->kinematics.cuts.central.pt_single.max() );
-      registerParameter<double>( "MSCT", "Minimal central system mass", &params_->kinematics.cuts.central.mass_sum.min() );
-      registerParameter<double>( "ECUT", "Minimal energy (single central outgoing particle)", &params_->kinematics.cuts.central.energy_single.min() );
-      registerParameter<double>( "ETMN", "Minimal pseudo-rapidity (central outgoing particles)", &params_->kinematics.cuts.central.eta_single.min() );
-      registerParameter<double>( "ETMX", "Maximal pseudo-rapidity (central outgoing particles)", &params_->kinematics.cuts.central.eta_single.max() );
-      registerParameter<double>( "YMIN", "Minimal rapidity (central outgoing particles)", &params_->kinematics.cuts.central.rapidity_single.min() );
-      registerParameter<double>( "YMAX", "Maximal rapidity (central outgoing particles)", &params_->kinematics.cuts.central.rapidity_single.max() );
-      registerParameter<double>( "PDMN", "Minimal transverse momentum difference (central outgoing particles)", &params_->kinematics.cuts.central.pt_diff.min() );
-      registerParameter<double>( "PDMX", "Maximal transverse momentum difference (central outgoing particles)", &params_->kinematics.cuts.central.pt_diff.max() );
-      registerParameter<double>( "Q2MN", "Minimal Q² = -q² (exchanged parton)", &params_->kinematics.cuts.initial.q2.min() );
-      registerParameter<double>( "Q2MX", "Maximal Q² = -q² (exchanged parton)", &params_->kinematics.cuts.initial.q2.max() );
-      registerParameter<double>( "QTMN", "Minimal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt.min() );
-      registerParameter<double>( "QTMX", "Maximal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt.max() );
-      registerParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", &params_->kinematics.cuts.remnants.mass_single.min() );
-      registerParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", &params_->kinematics.cuts.remnants.mass_single.max() );
+      registerParameter<double>( "PTCT", "Minimal transverse momentum (single central outgoing particle)", &params_->kinematics.cuts.central.pt_single().min() );
+      registerParameter<double>( "PTMX", "Maximal transverse momentum (single central outgoing particle)", &params_->kinematics.cuts.central.pt_single().max() );
+      registerParameter<double>( "MSCT", "Minimal central system mass", &params_->kinematics.cuts.central.mass_sum().min() );
+      registerParameter<double>( "ECUT", "Minimal energy (single central outgoing particle)", &params_->kinematics.cuts.central.energy_single().min() );
+      registerParameter<double>( "ETMN", "Minimal pseudo-rapidity (central outgoing particles)", &params_->kinematics.cuts.central.eta_single().min() );
+      registerParameter<double>( "ETMX", "Maximal pseudo-rapidity (central outgoing particles)", &params_->kinematics.cuts.central.eta_single().max() );
+      registerParameter<double>( "YMIN", "Minimal rapidity (central outgoing particles)", &params_->kinematics.cuts.central.rapidity_single().min() );
+      registerParameter<double>( "YMAX", "Maximal rapidity (central outgoing particles)", &params_->kinematics.cuts.central.rapidity_single().max() );
+      registerParameter<double>( "PDMN", "Minimal transverse momentum difference (central outgoing particles)", &params_->kinematics.cuts.central.pt_diff().min() );
+      registerParameter<double>( "PDMX", "Maximal transverse momentum difference (central outgoing particles)", &params_->kinematics.cuts.central.pt_diff().max() );
+      registerParameter<double>( "Q2MN", "Minimal Q² = -q² (exchanged parton)", &params_->kinematics.cuts.initial.q2().min() );
+      registerParameter<double>( "Q2MX", "Maximal Q² = -q² (exchanged parton)", &params_->kinematics.cuts.initial.q2().max() );
+      registerParameter<double>( "QTMN", "Minimal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt().min() );
+      registerParameter<double>( "QTMX", "Maximal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt().max() );
+      registerParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", &params_->kinematics.cuts.remnants.mass_single().min() );
+      registerParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", &params_->kinematics.cuts.remnants.mass_single().max() );
       registerParameter<double>( "XIMN", "Minimal fractional momentum loss of outgoing proton (ξ)", &xi_min_ );
       registerParameter<double>( "XIMX", "Maximal fractional momentum loss of outgoing proton (ξ)", &xi_max_ );
 
@@ -235,37 +235,99 @@ namespace cepgen
       // PPtoLL cards backward compatibility
       //-------------------------------------------------------------------------------------------
 
-      registerParameter<bool>( "NTREAT", "Smoothen the integrand", &params_->integrator->operator[]<bool>( "treat" ) );
+      registerParameter<int>( "NTREAT", "Smoothen the integrand", (int*)&params_->integrator->operator[]<bool>( "treat" ) );
       registerParameter<int>( "ITMX", "Number of integration iterations", (int*)&params_->integrator->operator[]<int>( "iterations" ) );
       registerParameter<int>( "NCVG", "Number of points to probe", (int*)&params_->generation().num_points );
       registerParameter<int>( "METHOD", "Computation method (kT-factorisation)", &proc_params_->operator[]<int>( "method" ) );
       registerParameter<int>( "LEPTON", "Outgoing leptons' flavour", &lepton_id_ );
-      registerParameter<double>( "PTMIN", "Minimal transverse momentum (single central outgoing particle)", &params_->kinematics.cuts.central.pt_single.min() );
-      registerParameter<double>( "PTMAX", "Maximal transverse momentum (single central outgoing particle)", &params_->kinematics.cuts.central.pt_single.max() );
-      registerParameter<double>( "Q1TMIN", "Minimal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt.min() );
-      registerParameter<double>( "Q1TMAX", "Maximal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt.max() );
-      registerParameter<double>( "Q2TMIN", "Minimal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt.min() );
-      registerParameter<double>( "Q2TMAX", "Maximal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt.max() );
-      registerParameter<double>( "MXMIN", "Minimal invariant mass of proton remnants", &params_->kinematics.cuts.remnants.mass_single.min() );
-      registerParameter<double>( "MXMAX", "Maximal invariant mass of proton remnants", &params_->kinematics.cuts.remnants.mass_single.max() );
+      registerParameter<double>( "PTMIN", "Minimal transverse momentum (single central outgoing particle)", &params_->kinematics.cuts.central.pt_single().min() );
+      registerParameter<double>( "PTMAX", "Maximal transverse momentum (single central outgoing particle)", &params_->kinematics.cuts.central.pt_single().max() );
+      registerParameter<double>( "Q1TMIN", "Minimal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt().min() );
+      registerParameter<double>( "Q1TMAX", "Maximal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt().max() );
+      registerParameter<double>( "Q2TMIN", "Minimal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt().min() );
+      registerParameter<double>( "Q2TMAX", "Maximal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt().max() );
+      registerParameter<double>( "MXMIN", "Minimal invariant mass of proton remnants", &params_->kinematics.cuts.remnants.mass_single().min() );
+      registerParameter<double>( "MXMAX", "Maximal invariant mass of proton remnants", &params_->kinematics.cuts.remnants.mass_single().max() );
     }
 
     void
-    LpairHandler::store( const char* file )
+    LpairHandler::write( const std::string& file ) const
     {
+      std::map<std::string,std::string> out_map;
+      std::ostringstream os;
+      for ( const auto& it : p_strings_ )
+        if ( it.second.value && !it.second.value->empty() ) {
+          os.str( "" );
+          os << std::left << std::setw( 8 ) << it.first << std::setw( 20 ) << *it.second.value << " ! " << it.second.description << "\n";
+          out_map[it.first] = os.str();
+        }
+      for ( const auto& it : p_ints_ )
+        if ( it.second.value && *it.second.value != kInvalid ) {
+          os.str( "" );
+          os << std::left << std::setw( 8 ) << it.first << std::setw( 20 ) << *it.second.value << " ! " << it.second.description << "\n";
+          out_map[it.first] = os.str();
+        }
+      for ( const auto& it : p_doubles_ )
+        if ( it.second.value && *it.second.value != Limits::INVALID ) {
+          os.str( "" );
+          os << std::left << std::setw( 8 ) << it.first << std::setw( 20 ) << std::fixed << *it.second.value << " ! " << it.second.description << "\n";
+          out_map[it.first] = os.str();
+        }
+
       std::ofstream f( file, std::fstream::out | std::fstream::trunc );
       if ( !f.is_open() )
         throw CG_ERROR( "LpairHandler" ) << "Failed to open file \"" << file << "%s\" for writing.";
-      for ( const auto& it : p_strings_ )
-        if ( it.second.value )
-          f << it.first << " = " << *it.second.value << "\n";
-      for ( const auto& it : p_ints_ )
-        if ( it.second.value )
-          f << it.first << " = " << *it.second.value << "\n";
-      for ( const auto& it : p_doubles_ )
-        if ( it.second.value )
-          f << it.first << " = " << *it.second.value << "\n";
+      for ( const auto& ln : out_map )
+        f << ln.second;
       f.close();
+    }
+
+    void
+    LpairHandler::pack( const Parameters* params )
+    {
+      params_ = const_cast<Parameters*>( params );
+      str_fun_ = (int)params_->kinematics.structure_functions->type;
+      //sr_type_ =
+      //kmr_grid_path_ =
+      //mstw_grid_path_ =
+      //pdg_input_path_ =
+      iend_ = (int)params_->generation().enabled;
+      proc_name_ = params_->processName();
+      *proc_params_ += params_->process().parameters();
+      if ( proc_params_->has<ParticleProperties>( "pair" ) )
+        proc_params_->set<int>( "pair", proc_params_->get<ParticleProperties>( "pair" ).pdgid );
+      if ( proc_name_ == "pptoff" )
+        lepton_id_ = ( params_->process().parameters().get<int>( "pair" )-11 )/2.+1;
+      {
+        std::vector<std::string> evt_mod;
+        for ( const auto& mod : params_->eventModifiersSequence() )
+          evt_mod.emplace_back( mod->name() );
+        evt_mod_name_ = utils::merge( evt_mod, "," );
+      }
+      {
+        std::vector<std::string> out_mod, out_mod_file;
+        for ( const auto& out : params_->outputModulesSequence() ) {
+          out_mod.emplace_back( out->name() );
+          out_mod_file.emplace_back( out->parameters().get<std::string>( "filename" ) );
+        }
+        out_mod_name_ = utils::merge( out_mod, "," );
+        out_file_name_ = utils::merge( out_mod_file, "," );
+      }
+      const HeavyIon hi1( params_->kinematics.incoming_beams.first.pdg );
+      if ( hi1 )
+        hi_1_ = std::make_pair( hi1.A, (unsigned short)hi1.Z );
+      const HeavyIon hi2( params_->kinematics.incoming_beams.second.pdg );
+      if ( hi2 )
+        hi_2_ = std::make_pair( hi2.A, (unsigned short)hi2.Z );
+      timer_ = ( params_->timeKeeper() != nullptr );
+      if ( params_->kinematics.cuts.remnants.energy_single().valid() ) {
+        const auto lim_xi = params_->kinematics.cuts.remnants.energy_single()
+                            *( -1./params_->kinematics.incoming_beams.first.pz )+1.;
+        xi_min_ = lim_xi.min(), xi_max_ = lim_xi.max();
+      }
+//                *proc_params_ = ParametersList( params_->process().parameters() )+*proc_params_;
+
+      init();
     }
 
     void
@@ -277,6 +339,11 @@ namespace cepgen
           setValue<double>( key.c_str(), std::stod( value ) );
           return;
         } catch ( const std::logic_error& ) {
+          for ( const auto& let : value )
+            if ( isalpha( let ) && let != 'E' && let != 'e' ) {
+              setValue<std::string>( key.c_str(), value );
+              return;
+            }
           throw CG_FATAL( "LpairHandler:setParameter" )
             << "Failed to parse a floating-point parameter \"" << key << "\" → \"" << value << "\"!";
         }

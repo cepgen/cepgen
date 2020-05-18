@@ -64,7 +64,7 @@ namespace cepgen
     {
       masses_.Ml2 = (*event_)[Particle::CentralSystem][0].mass2();
 
-      w_limits_ = kin_.cuts.central.mass_single;
+      w_limits_ = kin_.cuts.central.mass_single();
       if ( !w_limits_.hasMax() )
         w_limits_.max() = s_;
       // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
@@ -79,9 +79,9 @@ namespace cepgen
       p2_lab_ = (*event_)[Particle::IncomingBeam2][0].momentum();
 
       const double mx0 = mp_+PDG::get().mass( PDG::piPlus ); // 1.07
-      const double min_wx = pow( std::max( mx0, kin_.cuts.remnants.mass_single.min() ), 2 );
-      const Limits wx_lim_ob1( min_wx, pow( std::min( sqs_-p1_lab_.mass()-2.*sqrt( masses_.Ml2 ), kin_.cuts.remnants.mass_single.max() ), 2 ) );
-      const Limits wx_lim_ob2( min_wx, pow( std::min( sqs_-p2_lab_.mass()-2.*sqrt( masses_.Ml2 ), kin_.cuts.remnants.mass_single.max() ), 2 ) );
+      const double min_wx = pow( std::max( mx0, kin_.cuts.remnants.mass_single().min() ), 2 );
+      const Limits wx_lim_ob1( min_wx, pow( std::min( sqs_-p1_lab_.mass()-2.*sqrt( masses_.Ml2 ), kin_.cuts.remnants.mass_single().max() ), 2 ) );
+      const Limits wx_lim_ob2( min_wx, pow( std::min( sqs_-p2_lab_.mass()-2.*sqrt( masses_.Ml2 ), kin_.cuts.remnants.mass_single().max() ), 2 ) );
 
       //--- variables mapping
 
@@ -175,18 +175,18 @@ namespace cepgen
       double t1_min = ( masses_.w31*d3+( d3-masses_.w31 )*( d3*mA2_-masses_.w31*mB2_ )/s_ )/t1_max; // definition from eq. (A.5) in [1]
 
       // FIXME dropped in CDF version
-      if ( t1_max > -kin_.cuts.initial.q2.min() ) {
-        CG_DEBUG_LOOP( "LPAIR" ) << "t1max = " << t1_max << " > -q2min = " << -kin_.cuts.initial.q2.min();
+      if ( t1_max > -kin_.cuts.initial.q2().min() ) {
+        CG_DEBUG_LOOP( "LPAIR" ) << "t1max = " << t1_max << " > -q2min = " << -kin_.cuts.initial.q2().min();
         return false;
       }
-      if ( t1_min < -kin_.cuts.initial.q2.max() && kin_.cuts.initial.q2.hasMax() ) {
-        CG_DEBUG_LOOP( "LPAIR" ) << "t1min = " << t1_min << " < -q2max = " << -kin_.cuts.initial.q2.max();
+      if ( t1_min < -kin_.cuts.initial.q2().max() && kin_.cuts.initial.q2().hasMax() ) {
+        CG_DEBUG_LOOP( "LPAIR" ) << "t1min = " << t1_min << " < -q2max = " << -kin_.cuts.initial.q2().max();
         return false;
       }
-      if ( t1_max < -kin_.cuts.initial.q2.max() && kin_.cuts.initial.q2.hasMax() )
-        t1_max = -kin_.cuts.initial.q2.max();
-      if ( t1_min > -kin_.cuts.initial.q2.min() && kin_.cuts.initial.q2.hasMin() )
-        t1_min = -kin_.cuts.initial.q2.min();
+      if ( t1_max < -kin_.cuts.initial.q2().max() && kin_.cuts.initial.q2().hasMax() )
+        t1_max = -kin_.cuts.initial.q2().max();
+      if ( t1_min > -kin_.cuts.initial.q2().min() && kin_.cuts.initial.q2().hasMin() )
+        t1_min = -kin_.cuts.initial.q2().min();
       /////
 
       // t1, the first photon propagator, is defined here
@@ -810,43 +810,43 @@ namespace cepgen
 
       //--- cut on mass of final hadronic system (MX/Y)
 
-      if ( kin_.cuts.remnants.mass_single.valid() ) {
+      if ( kin_.cuts.remnants.mass_single().valid() ) {
         if ( ( kin_.mode == KinematicsMode::InelasticElastic
             || kin_.mode == KinematicsMode::InelasticInelastic )
-          && !kin_.cuts.remnants.mass_single.contains( mx ) )
+          && !kin_.cuts.remnants.mass_single().contains( mx ) )
           return 0.;
         if ( ( kin_.mode == KinematicsMode::ElasticInelastic
             || kin_.mode == KinematicsMode::InelasticInelastic )
-          && !kin_.cuts.remnants.mass_single.contains( my ) )
+          && !kin_.cuts.remnants.mass_single().contains( my ) )
           return 0.;
       }
 
       //--- cut on the proton's Q2 (first photon propagator T1)
 
-      if ( !kin_.cuts.initial.q2.contains( -t1_ ) )
+      if ( !kin_.cuts.initial.q2().contains( -t1_ ) )
         return 0.;
 
       //--- cuts on outgoing leptons' kinematics
 
-      if ( !kin_.cuts.central.mass_sum.contains( ( p6_cm_+p7_cm_ ).mass() ) )
+      if ( !kin_.cuts.central.mass_sum().contains( ( p6_cm_+p7_cm_ ).mass() ) )
         return 0.;
 
       //----- cuts on the individual leptons
 
-      if ( kin_.cuts.central.pt_single.valid() ) {
-        const Limits& pt_limits = kin_.cuts.central.pt_single;
+      if ( kin_.cuts.central.pt_single().valid() ) {
+        const Limits& pt_limits = kin_.cuts.central.pt_single();
         if ( !pt_limits.contains( p6_cm_.pt() ) || !pt_limits.contains( p7_cm_.pt() ) )
           return 0.;
       }
 
-      if ( kin_.cuts.central.energy_single.valid() ) {
-        const Limits& energy_limits = kin_.cuts.central.energy_single;
+      if ( kin_.cuts.central.energy_single().valid() ) {
+        const Limits& energy_limits = kin_.cuts.central.energy_single();
         if ( !energy_limits.contains( p6_cm_.energy() ) || !energy_limits.contains( p7_cm_.energy() ) )
           return 0.;
       }
 
-      if ( kin_.cuts.central.eta_single.valid() ) {
-        const Limits& eta_limits = kin_.cuts.central.eta_single;
+      if ( kin_.cuts.central.eta_single().valid() ) {
+        const Limits& eta_limits = kin_.cuts.central.eta_single();
         if ( !eta_limits.contains( p6_cm_.eta() ) || !eta_limits.contains( p7_cm_.eta() ) )
           return 0.;
       }

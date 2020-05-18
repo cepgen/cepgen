@@ -17,6 +17,15 @@ if(PYTHONLIBS_FOUND)
   list(APPEND cards_includes ${PYTHON_INCLUDE_DIRS})
 endif()
 
+#----- add JSON parser if found
+
+if(Boost_FOUND)
+  file(GLOB json_sources JsonHandler.cpp)
+  list(APPEND cards_sources ${json_sources})
+  list(APPEND cards_libraries ${Boost_LIBRARIES})
+  list(APPEND cards_includes ${Boost_INCLUDE_DIRS})
+endif()
+
 #----- build the object
 
 add_library(CepGenCards SHARED ${cards_sources})

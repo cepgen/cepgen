@@ -27,6 +27,6 @@ process = Module('ktProcess',
         rapidity = (-6., 6.),
         #--- cuts on the pt(outgoing system) (hyper-)plane
         ptdiff = (0., 500.),
-        phiptdiff = (0., 2.*pi),
+        phidiff = (0., 2.*pi),
     ),
 )

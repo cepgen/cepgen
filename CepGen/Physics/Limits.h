@@ -47,11 +47,12 @@ namespace cepgen
       bool contains( double val ) const;
       /// Is there a lower and upper limit?
       bool valid() const;
+      /// Raw value of the limits
+      const std::pair<double,double> raw() const { return *this; }
 
       /// Human-readable expression of the limits
       friend std::ostream& operator<<( std::ostream&, const Limits& );
 
-    private:
       /// Placeholder for an invalid value in a limit (for single-edged or invalid limits)
       static constexpr double INVALID = -999.999;
   };

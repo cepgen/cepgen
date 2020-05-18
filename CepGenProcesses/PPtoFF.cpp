@@ -91,8 +91,8 @@ namespace cepgen
         << "charge = " << std::setprecision( 2 ) << qf3_/3. << " e)\n\t"
         << "matrix element computation method: " << (int)method_ << ".";
 
-      if ( !kin_.cuts.central.pt_diff.valid() )
-        kin_.cuts.central.pt_diff = { 0., 50. }; // tighter cut for fermions
+      if ( !kin_.cuts.central.pt_diff().valid() )
+        kin_.cuts.central.pt_diff() = { 0., 50. }; // tighter cut for fermions
 
       CG_DEBUG( "PPtoFF:prepare" ) << "Incoming state:\n\t"
         << "mp(1/2) = " << sqrt( mA2_ ) << "/" << sqrt( mB2_ ) << ".";

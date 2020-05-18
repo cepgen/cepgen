@@ -45,38 +45,39 @@ namespace cepgen
           os << "\n";
         }
       }
+      const auto& cuts = params.kinematics.cuts;
       os
         << prep << "  **** incoming state\n";
-      if ( params.kinematics.cuts.initial.q2.valid() )
+      if ( cuts.initial.q2().valid() )
         os
           << prep << "  * Q2 range (GeV2): "
-          << params.kinematics.cuts.initial.q2 << "\n";
+          << cuts.initial.q2() << "\n";
       if ( params.kinematics.mode != KinematicsMode::ElasticElastic
-        && params.kinematics.cuts.remnants.mass_single.valid() )
+        && cuts.remnants.mass_single().valid() )
         os
           << prep << "  * remnants mass range (GeV/c2): "
-          << params.kinematics.cuts.remnants.mass_single << "\n";
+          << cuts.remnants.mass_single() << "\n";
       os << prep << "  **** central system\n";
-      if ( params.kinematics.cuts.central.pt_single.valid() )
+      if ( cuts.central.pt_single().valid() )
         os
           << prep << "  * single particle pt (GeV/c): "
-          << params.kinematics.cuts.central.pt_single << "\n";
-      if ( params.kinematics.cuts.central.energy_single.valid() )
+          << cuts.central.pt_single() << "\n";
+      if ( cuts.central.energy_single().valid() )
         os
           << prep << "  * single particle energy (GeV): "
-          << params.kinematics.cuts.central.energy_single << "\n";
-      if ( params.kinematics.cuts.central.eta_single.valid() )
+          << cuts.central.energy_single() << "\n";
+      if ( cuts.central.eta_single().valid() )
         os
           << prep << "  * single particle eta: "
-          << params.kinematics.cuts.central.eta_single << "\n";
-      if ( params.kinematics.cuts.central.pt_sum.valid() )
+          << cuts.central.eta_single() << "\n";
+      if ( cuts.central.pt_sum().valid() )
         os
           << prep << "  * total pt (GeV/c): "
-          << params.kinematics.cuts.central.mass_sum << "\n";
-      if ( params.kinematics.cuts.central.mass_sum.valid() )
+          << cuts.central.mass_sum() << "\n";
+      if ( cuts.central.mass_sum().valid() )
         os
           << prep << "  * total invariant mass (GeV/c2): "
-          << params.kinematics.cuts.central.mass_sum << "\n";
+          << cuts.central.mass_sum() << "\n";
       os
         << prep << "  **************************************************";
       return os.str();

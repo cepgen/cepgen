@@ -305,41 +305,35 @@ namespace cepgen
         const auto pdg = (pdgid_t)stoi( part );
         const auto& cuts = part_cuts.get<ParametersList>( part );
         if ( cuts.has<Limits>( "pt" ) )
-          params_->kinematics.cuts.central_particles[pdg].pt_single = cuts.get<Limits>( "pt" );
+          params_->kinematics.cuts.central_particles[pdg].pt_single() = cuts.get<Limits>( "pt" );
         if ( cuts.has<Limits>( "energy" ) )
-          params_->kinematics.cuts.central_particles[pdg].energy_single = cuts.get<Limits>( "energy" );
+          params_->kinematics.cuts.central_particles[pdg].energy_single() = cuts.get<Limits>( "energy" );
         if ( cuts.has<Limits>( "eta" ) )
-          params_->kinematics.cuts.central_particles[pdg].eta_single = cuts.get<Limits>( "eta" );
+          params_->kinematics.cuts.central_particles[pdg].eta_single() = cuts.get<Limits>( "eta" );
         if ( cuts.has<Limits>( "rapidity" ) )
-          params_->kinematics.cuts.central_particles[pdg].rapidity_single = cuts.get<Limits>( "rapidity" );
+          params_->kinematics.cuts.central_particles[pdg].rapidity_single() = cuts.get<Limits>( "rapidity" );
       }
 
-      // for LPAIR/collinear matrix elements
-      fillParameter( kin, "q2", params_->kinematics.cuts.initial.q2 );
+      for ( auto& lim : params_->kinematics.cuts.initial.rawList() )
+        fillParameter( kin, lim.name.c_str(), lim.limits );
+      for ( auto& lim : params_->kinematics.cuts.central.rawList() )
+        fillParameter( kin, lim.name.c_str(), lim.limits );
 
       // for the kT factorised matrix elements
-      fillParameter( kin, "qt", params_->kinematics.cuts.initial.qt );
-      fillParameter( kin, "phiqt", params_->kinematics.cuts.initial.phi_qt );
-      fillParameter( kin, "ptdiff", params_->kinematics.cuts.central.pt_diff );
-      fillParameter( kin, "phiptdiff", params_->kinematics.cuts.central.phi_pt_diff );
-      fillParameter( kin, "rapiditydiff", params_->kinematics.cuts.central.rapidity_diff );
+      if ( element( kin, "phiptdiff" ) )
+        CG_WARNING( "PythonHandler" )
+          << "\"phiptdiff\" parameter is deprecated! "
+          << "Please use \"phidiff\" instead.";
+      fillParameter( kin, "phiptdiff", params_->kinematics.cuts.central.phi_diff() ); //legacy
 
       // generic phase space limits
-      fillParameter( kin, "rapidity", params_->kinematics.cuts.central.rapidity_single );
-      fillParameter( kin, "eta", params_->kinematics.cuts.central.eta_single );
-      fillParameter( kin, "pt", params_->kinematics.cuts.central.pt_single );
-
-      fillParameter( kin, "ptsum", params_->kinematics.cuts.central.pt_sum );
-      fillParameter( kin, "invmass", params_->kinematics.cuts.central.mass_sum );
-
-      fillParameter( kin, "mx", params_->kinematics.cuts.remnants.mass_single );
-      fillParameter( kin, "yj", params_->kinematics.cuts.remnants.rapidity_single );
+      fillParameter( kin, "mx", params_->kinematics.cuts.remnants.mass_single() );
+      fillParameter( kin, "yj", params_->kinematics.cuts.remnants.rapidity_single() );
 
       Limits lim_xi;
       fillParameter( kin, "xi", lim_xi );
       if ( lim_xi.valid() )
-        //params_->kinematics.cuts.remnants.energy_single = ( lim_xi+(-1.) )*( -params_->kinematics.incoming_beams.first.pz );
-        params_->kinematics.cuts.remnants.energy_single = -( lim_xi-1. )*params_->kinematics.incoming_beams.first.pz;
+        params_->kinematics.cuts.remnants.energy_single() = -( lim_xi-1. )*params_->kinematics.incoming_beams.first.pz;
     }
 
     void

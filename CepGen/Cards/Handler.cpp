@@ -20,5 +20,19 @@ namespace cepgen
           << err.what();
       }
     }
+
+    void
+    Handler::write( const Parameters* params, const std::string& filename )
+    {
+      try {
+        auto writer = CardsHandlerFactory::get().build( extension( filename ) );
+        writer->pack( params );
+        return writer->write( filename );
+      } catch ( const std::invalid_argument& err ) {
+        throw CG_FATAL( "Cards:handler" )
+          << "Failed to write the configuration to \"" << filename << "\"!\n"
+          << err.what();
+      }
+    }
   }
 }

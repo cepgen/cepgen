@@ -64,7 +64,7 @@ namespace cepgen
   bool
   GeneratorWorker::next( Event::callback callback )
   {
-    CG_TICKER( const_cast<Parameters*>( params_ )->timeKeeeper() );
+    CG_TICKER( const_cast<Parameters*>( params_ )->timeKeeper() );
 
     if ( !integrator_ )
       throw CG_FATAL( "GeneratorWorker:generate" ) << "No integrator object handled!";
@@ -133,7 +133,7 @@ namespace cepgen
   bool
   GeneratorWorker::correctionCycle( std::vector<double>& x, bool& has_correction )
   {
-    CG_TICKER( const_cast<Parameters*>( params_ )->timeKeeeper() );
+    CG_TICKER( const_cast<Parameters*>( params_ )->timeKeeper() );
 
     CG_DEBUG_LOOP( "GeneratorWorker:correction" )
       << "Correction cycles are started.\n\t"
@@ -200,7 +200,7 @@ namespace cepgen
       if ( callback )
         callback( event, ngen );
       for ( auto& mod : params_->outputModulesSequence() ) {
-        CG_TICKER( const_cast<Parameters*>( params_ )->timeKeeeper() );
+        CG_TICKER( const_cast<Parameters*>( params_ )->timeKeeper() );
         *mod << event;
       }
       const_cast<Parameters*>( params_ )->addGenerationTime( event.time_total );
