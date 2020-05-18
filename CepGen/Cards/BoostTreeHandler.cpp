@@ -17,6 +17,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/info_parser.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 namespace pt = boost::property_tree;
 
@@ -24,16 +25,21 @@ namespace cepgen
 {
   namespace card
   {
-    /// CepGen JSON configuration cards reader/writer
-    class JsonHandler : public Handler
+    /// Boost configuration cards reader/writer
+    class BoostTreeHandler : public Handler
     {
       public:
         /// Read a standard configuration card
-        explicit JsonHandler( const ParametersList& );
+        explicit BoostTreeHandler( const ParametersList& );
 
         Parameters* parse( const std::string&, Parameters* ) override;
         void pack( const Parameters* params ) override;
-        void write( const std::string& ) const override;
+
+      protected:
+        virtual void read( const std::string& ) = 0;
+
+        std::string filename_;
+        pt::ptree tree_;
 
       private:
         static constexpr const char* DAUGH_KEY = "DAUGHTER";
@@ -55,29 +61,26 @@ namespace cepgen
 
         static void add( ParametersList&, const std::string&, const pt::ptree& );
 
-        std::string filename_;
-        pt::ptree tree_;
-
         ParametersList proc_, kin_, gen_, log_;
         ParametersList evt_mod_, evt_out_;
     };
 
-    JsonHandler::JsonHandler( const ParametersList& params ) :
+    BoostTreeHandler::BoostTreeHandler( const ParametersList& params ) :
       filename_( params.get<std::string>( FILENAME_KEY ) )
     {}
 
     Parameters*
-    JsonHandler::parse( const std::string& filename, Parameters* params )
+    BoostTreeHandler::parse( const std::string& filename, Parameters* params )
     {
       params_ = params;
       filename_ = filename;
+      read( filename );
 
-      pt::read_json( filename_, tree_ );
       try {
         proc_ = unpack( tree_.get_child( PROCESS_NAME ) );
         params_->setProcess( proc::ProcessesFactory::get().build( proc_ ) );
       } catch ( const boost::wrapexcept<pt::ptree_bad_path>& ) {
-        throw CG_FATAL( "JsonHandler" )
+        throw CG_FATAL( "BoostTreeHandler" )
           << "Failed to retrieve a valid \"" << PROCESS_NAME << "\" block"
           << " in the steering card!";
       }
@@ -118,7 +121,7 @@ namespace cepgen
     }
 
     template<> pt::ptree
-    JsonHandler::pack<ParametersList>( const std::vector<ParametersList>& vec )
+    BoostTreeHandler::pack<ParametersList>( const std::vector<ParametersList>& vec )
     {
       pt::ptree out;
       for ( const auto& elem : vec )
@@ -127,7 +130,7 @@ namespace cepgen
     }
 
     template<typename T> pt::ptree
-    JsonHandler::pack( const std::vector<T>& vec )
+    BoostTreeHandler::pack( const std::vector<T>& vec )
     {
       pt::ptree out;
       for ( const auto& elem : vec ) {
@@ -139,7 +142,7 @@ namespace cepgen
     }
 
     pt::ptree
-    JsonHandler::pack( const ParametersList& params )
+    BoostTreeHandler::pack( const ParametersList& params )
     {
       pt::ptree out;
       for ( const auto& key : params.keys() ) {
@@ -162,7 +165,7 @@ namespace cepgen
         else if ( params.has<std::vector<std::string> >( key ) )
           out.add_child( key, pack( params.get<std::vector<std::string> >( key ) ) );
         else
-          throw CG_FATAL( "JsonHandler" )
+          throw CG_FATAL( "BoostTreeHandler" )
             << "Failed to recast the key \"" << key << "\" "
             << "with value \"" << params.getString( key ) << "\"!";
       }
@@ -170,7 +173,7 @@ namespace cepgen
     }
 
     pt::ptree
-    JsonHandler::pack( const Limits& lim )
+    BoostTreeHandler::pack( const Limits& lim )
     {
       pt::ptree out;
       if ( lim.hasMin() ) {
@@ -187,7 +190,7 @@ namespace cepgen
     }
 
     ParametersList
-    JsonHandler::unpack( const pt::ptree& tree )
+    BoostTreeHandler::unpack( const pt::ptree& tree )
     {
       ParametersList out;
       if ( tree.empty() )
@@ -226,7 +229,7 @@ namespace cepgen
     }
 
     void
-    JsonHandler::add( ParametersList& base, const std::string& name, const pt::ptree& tree )
+    BoostTreeHandler::add( ParametersList& base, const std::string& name, const pt::ptree& tree )
     {
       auto plist = unpack( tree );
       //--- first check if we have a limits set
@@ -252,7 +255,7 @@ namespace cepgen
     }
 
     void
-    JsonHandler::pack( const Parameters* params )
+    BoostTreeHandler::pack( const Parameters* params )
     {
       params_ = const_cast<Parameters*>( params );
       tree_.add_child( PROCESS_NAME, pack( params_->process().parameters() ) );
@@ -314,14 +317,42 @@ namespace cepgen
       tree_.add_child( LOGGER_NAME, pack( log_ ) );
     }
 
-    void
-    JsonHandler::write( const std::string& filename ) const
+    class JsonHandler : public BoostTreeHandler
     {
-      pt::write_json( filename, tree_ );
-      //pt::write_info( filename, tree_ );
-      //pt::write_xml( file, tree_, pt::xml_writer_make_settings<std::string>( ' ', 2 ) );
-    }
+      using BoostTreeHandler::BoostTreeHandler;
+      void read( const std::string& filename ) override {
+        pt::read_json( filename_, tree_ );
+      }
+      void write( const std::string& filename ) const override {
+        pt::write_json( filename, tree_ );
+      }
+    };
+
+    class InfoHandler : public BoostTreeHandler
+    {
+      using BoostTreeHandler::BoostTreeHandler;
+      void read( const std::string& filename ) override {
+        pt::read_info( filename_, tree_ );
+      }
+      void write( const std::string& filename ) const override {
+        pt::write_info( filename, tree_ );
+      }
+    };
+
+    class XmlHandler : public BoostTreeHandler
+    {
+      using BoostTreeHandler::BoostTreeHandler;
+      void read( const std::string& filename ) override {
+        pt::read_xml( filename_, tree_ );
+      }
+      void write( const std::string& filename ) const override {
+        std::ofstream file( filename );
+        pt::write_xml( file, tree_, pt::xml_writer_make_settings<std::string>( ' ', 2 ) );
+      }
+    };
   }
 }
 
 REGISTER_CARD_HANDLER( "json", JsonHandler )
+REGISTER_CARD_HANDLER( "info", InfoHandler )
+REGISTER_CARD_HANDLER( "xml", XmlHandler )
