@@ -22,7 +22,7 @@ int main( int argc, char* argv[] )
 
   cepgen::ArgumentsParser parser( argc, argv );
   parser
-    .addArgument( "config", "path to the configuration file", &input_card, 'i' )
+    .addOptionalArgument( "config", "path to the configuration file", &input_card, 'i' )
     .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
     .addOptionalArgument( "list-modules", "list all runtime modules", false, &list_mods, 'l' )
     .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
@@ -41,7 +41,9 @@ int main( int argc, char* argv[] )
 
   //--- no steering card nor additional flags found
   if ( input_card.empty() && parser.extra_config().empty() )
-    throw CG_FATAL( "main" ) << "Neither input card nor configuration word provided!";
+    throw CG_FATAL( "main" )
+      << "Neither input card nor configuration word provided!\n\n "
+      << parser.help_message();
   else {
     //--- parse the steering card
     if ( !input_card.empty() )
