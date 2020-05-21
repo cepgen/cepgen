@@ -254,22 +254,21 @@ namespace cepgen
     LpairHandler::write( const std::string& file ) const
     {
       std::map<std::string,std::string> out_map;
-      std::ostringstream os;
       for ( const auto& it : p_strings_ )
         if ( it.second.value && !it.second.value->empty() ) {
-          os.str( "" );
+          std::ostringstream os;
           os << std::left << std::setw( 8 ) << it.first << std::setw( 20 ) << *it.second.value << " ! " << it.second.description << "\n";
           out_map[it.first] = os.str();
         }
       for ( const auto& it : p_ints_ )
         if ( it.second.value && *it.second.value != kInvalid ) {
-          os.str( "" );
+          std::ostringstream os;
           os << std::left << std::setw( 8 ) << it.first << std::setw( 20 ) << *it.second.value << " ! " << it.second.description << "\n";
           out_map[it.first] = os.str();
         }
       for ( const auto& it : p_doubles_ )
         if ( it.second.value && *it.second.value != Limits::INVALID ) {
-          os.str( "" );
+          std::ostringstream os;
           os << std::left << std::setw( 8 ) << it.first << std::setw( 20 ) << std::fixed << *it.second.value << " ! " << it.second.description << "\n";
           out_map[it.first] = os.str();
         }

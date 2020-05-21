@@ -25,11 +25,11 @@ namespace cepgen
 {
   namespace card
   {
-    /// Boost configuration cards reader/writer
+    /// Boost tree configuration cards reader/writer
     class BoostTreeHandler : public Handler
     {
       public:
-        /// Read a standard configuration card
+        /// Boost tree parser from a configuration card
         explicit BoostTreeHandler( const ParametersList& );
 
         Parameters* parse( const std::string&, Parameters* ) override;
@@ -45,6 +45,7 @@ namespace cepgen
         static constexpr const char* DAUGH_KEY = "DAUGHTER";
 
         static constexpr const char* PROCESS_NAME = "process";
+        static constexpr const char* KIN_NAME = "kinematics";
         static constexpr const char* INTEGR_NAME = "integrator";
         static constexpr const char* GENERAL_NAME = "general";
         static constexpr const char* GENERATOR_NAME = "generator";
@@ -85,8 +86,8 @@ namespace cepgen
           << " in the steering card!";
       }
       try {
-        if ( tree_.count( "kinematics" ) ) {
-          kin_ = unpack( tree_.get_child( "kinematics" ) );
+        if ( tree_.count( KIN_NAME ) ) {
+          kin_ = unpack( tree_.get_child( KIN_NAME ) );
           params_->kinematics = Kinematics( kin_ );
         }
         if ( tree_.count( INTEGR_NAME ) )
@@ -97,20 +98,26 @@ namespace cepgen
           params_->generation() = Parameters::Generation( unpack( tree_.get_child( GENERATOR_NAME ) ) );
         if ( tree_.count( EVT_MOD_SEQ_NAME ) ) {
           evt_mod_ = unpack( tree_.get_child( EVT_MOD_SEQ_NAME ) );
-          if ( !evt_mod_.keys( true ).empty() )
-            params_->addModifier( EventModifierFactory::get().build( evt_mod_ ) );
+          for ( const auto& name : evt_mod_.keys() ) {
+            const auto& mod = evt_mod_.get<ParametersList>( name );
+            if ( !mod.empty() )
+              params_->addModifier( EventModifierFactory::get().build( name, mod ) );
+          }
         }
         if ( tree_.count( OUTPUT_NAME ) ) {
           evt_out_ = unpack( tree_.get_child( OUTPUT_NAME ) );
-          CG_WARNING("")<<evt_out_;
-          if ( !evt_out_.keys( true ).empty() )
-            params_->addOutputModule( io::ExportModuleFactory::get().build( evt_out_ ) );
+          for ( const auto& name : evt_out_.keys() ) {
+            const auto& mod = evt_out_.get<ParametersList>( name );
+            if ( !mod.empty() )
+              params_->addOutputModule( io::ExportModuleFactory::get().build( name, mod ) );
+          }
         }
         if ( tree_.count( TIMER_NAME ) )
           params_->setTimeKeeper( new utils::TimeKeeper );
         if ( tree_.count( LOGGER_NAME ) ) {
           log_ = unpack( tree_.get_child( LOGGER_NAME ) );
-          utils::Logger::get().level = (utils::Logger::Level)log_.get<int>( "level" );
+          utils::Logger::get().level =
+            (utils::Logger::Level)log_.get<int>( "level", (int)utils::Logger::Level::information );
           for ( const auto& mod : log_.get<std::vector<std::string> >( "enabledModules" ) )
             utils::Logger::get().addExceptionRule( mod );
         }
@@ -281,7 +288,7 @@ namespace cepgen
       if ( params_->kinematics.cuts.remnants.energy_single().valid() )
         kin_.set<Limits>( "xi", params_->kinematics.cuts.remnants.energy_single()*( -2./params_->kinematics.sqrtS() )+1. );
 
-      tree_.add_child( "kinematics", pack( kin_ ) );
+      tree_.add_child( KIN_NAME, pack( kin_ ) );
 
       //----- generation block
       gen_
@@ -316,6 +323,10 @@ namespace cepgen
       //  log_.operator[]<std::vector<std::string> >( "enabledModules" ).emplace_back( mod );
       tree_.add_child( LOGGER_NAME, pack( log_ ) );
     }
+
+    //------------------------------------------------------------------
+    // class specialisations for each Boost format to be handled
+    //------------------------------------------------------------------
 
     class JsonHandler : public BoostTreeHandler
     {
