@@ -24,6 +24,7 @@ namespace cepgen
   Kinematics::Kinematics( const ParametersList& params ) :
     mode( (KinematicsMode)params.get<int>( "mode", (int)KinematicsMode::invalid ) )
   {
+    //--- incoming beams
     incoming_beams.first.pdg = params.get<int>( "beam1id", 2212 );
     params.fill<double>( "beam1pz", incoming_beams.first.pz );
     const int hi_A1 = params.get<int>( "beam1A", 1 );
@@ -39,11 +40,32 @@ namespace cepgen
     const double sqrt_s = params.get<double>( "sqrts", -1. );
     if ( sqrt_s > 0. )
       setSqrtS( sqrt_s );
+    //--- structure functions
+    auto strfun = params.get<ParametersList>( "structureFunctions" );
+    if ( !strfun.empty() || !structure_functions ) {
+      if ( strfun.name<int>( -999 ) == -999 )
+        strfun.setName<int>( 11 ); // default is Suri-Yennie
+      structure_functions = strfun::StructureFunctionsFactory::get().build( strfun );
+    }
+    //--- phase space definition
     for ( auto& lim : cuts.central.rawList() ) {
       params.fill<Limits>( lim.name, lim.limits );
       params.fill<double>( lim.name+"min", lim.limits.min() );
       params.fill<double>( lim.name+"max", lim.limits.max() );
     }
+    //--- parton fluxes for kt-factorisation
+    if ( params.has<std::vector<int> >( "ktFluxes" ) ) {
+      auto kt_fluxes = params.get<std::vector<int> >( "ktFluxes" );
+      if ( !kt_fluxes.empty() ) {
+        incoming_beams.first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
+        incoming_beams.second.kt_flux = ( kt_fluxes.size() > 1 )
+          ? (KTFlux)kt_fluxes.at( 1 )
+          : (KTFlux)kt_fluxes.at( 0 );
+      }
+    }
+    else if ( params.has<int>( "ktFluxes" ) )
+      incoming_beams.first.kt_flux = incoming_beams.second.kt_flux
+        = (KTFlux)params.get<int>( "ktFluxes" );
     //FIXME add the single-particles cuts parsing
     //--- outgoing remnants
     params.fill<Limits>( "mx", cuts.remnants.mass_single() );

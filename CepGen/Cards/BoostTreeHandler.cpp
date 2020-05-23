@@ -50,7 +50,6 @@ namespace cepgen
 
         static constexpr const char* PROCESS_NAME = "process";
         static constexpr const char* KIN_NAME = "kinematics";
-        static constexpr const char* STRFUN_NAME = "structureFunctions";
         static constexpr const char* INTEGR_NAME = "integrator";
         static constexpr const char* GENERAL_NAME = "general";
         static constexpr const char* GENERATOR_NAME = "generator";
@@ -94,15 +93,6 @@ namespace cepgen
         if ( tree_.count( KIN_NAME ) ) {
           kin_ = unpack( tree_.get_child( KIN_NAME ) );
           params_->kinematics = Kinematics( kin_ );
-        }
-        //----- structure functions
-        if ( tree_.count( STRFUN_NAME ) ) {
-          ParametersList strfun = unpack( tree_.get_child( STRFUN_NAME ) );
-          if ( !strfun.empty() || !params_->kinematics.structure_functions ) {
-            if ( strfun.name<int>( -999 ) == -999 )
-              strfun.setName<int>( 11 ); // default is Suri-Yennie
-            params_->kinematics.structure_functions = strfun::StructureFunctionsFactory::get().build( strfun );
-          }
         }
         if ( tree_.count( INTEGR_NAME ) )
           *params_->integrator += unpack( tree_.get_child( INTEGR_NAME ) );
@@ -326,10 +316,9 @@ namespace cepgen
       if ( params_->kinematics.cuts.remnants.energy_single().valid() )
         kin_.set<Limits>( "xi", params_->kinematics.cuts.remnants.energy_single()*( -2./params_->kinematics.sqrtS() )+1. );
 
+      kin_
+        .set<ParametersList>( "structureFunctions", params_->kinematics.structure_functions->parameters() );
       tree_.add_child( KIN_NAME, pack( kin_ ) );
-
-      //----- structure functions block
-      tree_.add_child( STRFUN_NAME, pack( params_->kinematics.structure_functions->parameters() ) );
 
       //----- generation block
       gen_
@@ -399,7 +388,7 @@ namespace cepgen
       }
       void write( const std::string& filename ) const override {
         std::ofstream file( filename );
-        pt::write_xml( file, tree_, pt::xml_writer_make_settings<std::string>( ' ', 2 ) );
+        pt::write_xml( file, tree_, pt::xml_writer_make_settings<std::string>( '\t', 1 ) );
       }
     };
   }

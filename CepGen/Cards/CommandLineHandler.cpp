@@ -84,16 +84,10 @@ namespace cepgen
         params_->setProcess( proc::ProcessesFactory::get().build( proc ) );
       }
 
-      //----- structure functions
-      auto strfun = pars.get<ParametersList>( "strfun" ); // copy
-      if ( !strfun.empty() || !params_->kinematics.structure_functions ) {
-        if ( strfun.name<int>( -999 ) == -999 )
-          strfun.setName<int>( 11 ); // default is Suri-Yennie
-        params_->kinematics.structure_functions = strfun::StructureFunctionsFactory::get().build( strfun );
-      }
-
       //----- phase space definition
-      params_->kinematics = Kinematics( pars.get<ParametersList>( "kinematics" ) );
+      auto kin = pars.get<ParametersList>( "kinematics" )
+        .set<ParametersList>( "structureFunctions", pars.get<ParametersList>( "strfun" ) );
+      params_->kinematics = Kinematics( kin );
 
       //----- integration
       pars.fill<ParametersList>( "integrator", *params_->integrator );

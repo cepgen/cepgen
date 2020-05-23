@@ -227,6 +227,7 @@ namespace cepgen
     void
     PythonHandler::parseIncomingKinematics( PyObject* kin )
     {
+      params_->kinematics = Kinematics( get<ParametersList>( kin ) );
       //--- retrieve the beams PDG ids
       std::vector<ParametersList> beams_pdg;
       fillParameter( kin, "pdgIds", beams_pdg );
@@ -249,33 +250,6 @@ namespace cepgen
       fillParameter( kin, "cmEnergy", sqrt_s );
       if ( sqrt_s != -1. )
         params_->kinematics.setSqrtS( sqrt_s );
-      //--- structure functions set for incoming beams
-      PyObject* psf = element( kin, "structureFunctions" ); // borrowed
-      if ( psf )
-        params_->kinematics.structure_functions = strfun::StructureFunctionsFactory::get().build( get<ParametersList>( psf ) );
-      else
-        params_->kinematics.structure_functions = strfun::StructureFunctionsFactory::get().build( (int)strfun::Type::SuriYennie );
-      //--- types of parton fluxes for kt-factorisation
-      PyObject* pktf = element( kin, "ktFluxes" ); // borrowed
-      if ( pktf ) {
-        if ( isVector<int>( pktf ) ) {
-          std::vector<int> kt_fluxes;
-          fillParameter( kin, "ktFluxes", kt_fluxes );
-          if ( !kt_fluxes.empty() ) {
-            params_->kinematics.incoming_beams.first.kt_flux = (KTFlux)kt_fluxes.at( 0 );
-            params_->kinematics.incoming_beams.second.kt_flux = ( kt_fluxes.size() > 1 )
-              ? (KTFlux)kt_fluxes.at( 1 )
-              : (KTFlux)kt_fluxes.at( 0 );
-          }
-        }
-        else if ( is<int>( pktf ) ) {
-          int kt_fluxes;
-          fillParameter( kin, "ktFluxes", kt_fluxes );
-          params_->kinematics.incoming_beams.first.kt_flux = params_->kinematics.incoming_beams.second.kt_flux = (KTFlux)kt_fluxes;
-        }
-        else
-          throwPythonError( "Unsupported format for the ktFluxes definition!" );
-      }
       //--- specify where to look for the grid path for gluon emission
       std::string kmr_grid_path;
       fillParameter( kin, "kmrGridPath", kmr_grid_path );
