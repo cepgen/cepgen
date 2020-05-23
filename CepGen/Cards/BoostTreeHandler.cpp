@@ -157,8 +157,13 @@ namespace cepgen
           out.add_child( key, pack( params.get<ParametersList>( key ) ) );
         else if ( params.has<int>( key ) )
           out.put( key, params.get<int>( key ) );
-        else if ( params.has<double>( key ) )
-          out.put( key, params.get<double>( key ) );
+        else if ( params.has<double>( key ) ) {
+          double dummy;
+          const auto& value = params.get<double>( key );
+          const double value_scl = std::modf( value, &dummy ) == 0.
+            ? value+1.e-12 : value; // ensure floating point storage
+          out.put( key, value_scl );
+        }
         else if ( params.has<std::string>( key ) )
           out.put( key, params.get<std::string>( key ) );
         else if ( params.has<Limits>( key ) )
@@ -183,14 +188,19 @@ namespace cepgen
     BoostTreeHandler::pack( const Limits& lim )
     {
       pt::ptree out;
+      double dummy;
       if ( lim.hasMin() ) {
         pt::ptree min;
-        min.put( "", lim.min() );
+        const double min_scl = std::modf( lim.min(), &dummy ) == 0.
+          ? lim.min()+1.e-12 : lim.min(); // ensure floating point storage
+        min.put( "", min_scl );
         out.push_back( std::make_pair( "min", min ) );
       }
       if ( lim.hasMax() ) {
         pt::ptree max;
-        max.put( "", lim.max() );
+        const double max_scl = std::modf( lim.max(), &dummy ) == 0.
+          ? lim.max()+1.e-12 : lim.max(); // ensure floating point storage
+        max.put( "", max_scl );
         out.push_back( std::make_pair( "max", max ) );
       }
       return out;
@@ -221,15 +231,18 @@ namespace cepgen
           else
             add( out, it.first, it.second );
         } catch ( const Exception& ) {
-          try {
-            out.set<double>( it.first, it.second.get_value<double>() );
-          } catch ( const boost::wrapexcept<pt::ptree_bad_data>& ) {
+          if ( it.second.get_value<std::string>().find( '.' ) != std::string::npos )
+            try {
+              out.set<double>( it.first, it.second.get_value<double>() );
+            } catch ( const boost::wrapexcept<pt::ptree_bad_data>& ) {
+              out.set<std::string>( it.first, it.second.get_value<std::string>() );
+            }
+          else
             try {
               out.set<int>( it.first, it.second.get_value<int>() );
             } catch ( const boost::wrapexcept<pt::ptree_bad_data>& ) {
               out.set<std::string>( it.first, it.second.get_value<std::string>() );
             }
-          }
         }
       }
       return out;

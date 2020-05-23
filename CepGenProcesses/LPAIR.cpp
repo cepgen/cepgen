@@ -18,7 +18,7 @@ namespace cepgen
     LPAIR::LPAIR( const ParametersList& params ) :
       Process( params, true ),
       n_opt_( params.get<int>( "nopt", 0 ) ),
-      pair_( params.get<ParticleProperties>( "pair" ).pdgid ),
+      pair_( params.get<int>( "pair" ) ),
       symmetrise_( params.get<bool>( "symmetrise", false ) ),
       theta4_( 0. ), phi6_cm_( 0. ), x6_( 0. ),
       ep1_( 0. ), ep2_( 0. ), p_cm_( 0. ),
@@ -38,7 +38,10 @@ namespace cepgen
       al4_( 0. ), be4_( 0. ), de3_( 0. ), de5_( 0. ),
       pt4_( 0. ),
       jacobian_( 0. )
-    {}
+    {
+      if ( params_.has<ParticleProperties>( "pair" ) )
+        pair_ = params_.get<ParticleProperties>( "pair" ).pdgid;
+    }
 
     //---------------------------------------------------------------------------------------------
 
