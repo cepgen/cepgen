@@ -25,6 +25,7 @@
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/HeavyIon.h"
 
 #include <fstream>
 #include <iomanip>
@@ -105,9 +106,9 @@ namespace cepgen
 
       //--- parse the structure functions code
       if ( str_fun_ == (int)strfun::Type::MSTWgrid && !mstw_grid_path_.empty() )
-        params_->kinematics.structure_functions
-          = strfun::StructureFunctionsFactory::get().build( str_fun_,
-            ParametersList().set<std::string>( "gridPath", mstw_grid_path_ ) );
+        params_->kinematics.setStructureFunctions(
+          strfun::StructureFunctionsFactory::get().build( str_fun_,
+            ParametersList().set<std::string>( "gridPath", mstw_grid_path_ ) ) );
       else
         params_->kinematics.setStructureFunctions( str_fun_, sr_type_ );
 
@@ -274,7 +275,7 @@ namespace cepgen
     LpairHandler::pack( const Parameters* params )
     {
       params_ = const_cast<Parameters*>( params );
-      str_fun_ = (int)params_->kinematics.structure_functions->type;
+      str_fun_ = (int)params_->kinematics.structureFunctions()->type;
       //sr_type_ =
       //kmr_grid_path_ =
       //mstw_grid_path_ =

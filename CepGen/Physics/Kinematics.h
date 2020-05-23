@@ -3,13 +3,10 @@
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Physics/KinematicsMode.h"
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Cuts.h"
-#include "CepGen/Physics/HeavyIon.h"
 
-#include <ostream>
+#include <iosfwd>
 #include <vector>
-#include <unordered_map>
 #include <memory>
 
 namespace cepgen
@@ -23,6 +20,9 @@ namespace cepgen
       Kinematics();
       Kinematics( const ParametersList& );
       ~Kinematics() = default;
+
+      /// List containing all parameters handled
+      ParametersList parameters() const;
 
       /// Set the incoming particles' momenta (if the collision is symmetric)
       Kinematics& setSqrtS( double sqrts );
@@ -38,8 +38,6 @@ namespace cepgen
       };
       /// Human-readable description of a beam particle/system
       friend std::ostream& operator<<( std::ostream&, const Beam& );
-      /// List containing all parameters handled
-      ParametersList parameters() const;
 
       /// Beam/primary particle's kinematics
       std::pair<Beam,Beam> incoming_beams;
@@ -47,9 +45,12 @@ namespace cepgen
       std::vector<pdgid_t> minimum_final_state;
       /// Type of kinematics to consider for the phase space
       KinematicsMode mode;
-      /// Type of structure functions to consider
-      std::shared_ptr<strfun::Parameterisation> structure_functions;
-      /// Set the integer-type of structure functions parameterisation to build
+
+      /// Structure functions evaluator
+      strfun::Parameterisation* structureFunctions() const { return str_fun_.get(); }
+      /// Set a structure functions evaluator object
+      Kinematics& setStructureFunctions( std::unique_ptr<strfun::Parameterisation> );
+      /// Set the integer-type of structure functions evaluator to build
       Kinematics& setStructureFunctions( int, int );
 
       /// A collection of cuts to apply on the physical phase space
@@ -61,6 +62,10 @@ namespace cepgen
         PerIdCuts central_particles; ///< Cuts on the central individual particles
         Cuts remnants; ///< Cuts on the beam remnants system
       } cuts; ///< Phase space cuts
+
+    private:
+      /// Type of structure functions to consider
+      std::shared_ptr<strfun::Parameterisation> str_fun_;
   };
 }
 

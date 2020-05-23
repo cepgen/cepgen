@@ -23,6 +23,7 @@
 #include "CepGen/Physics/TamingFunction.h"
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/HeavyIon.h"
 
 #include "CepGen/Utils/TimeKeeper.h"
 

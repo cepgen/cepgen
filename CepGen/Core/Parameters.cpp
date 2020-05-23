@@ -85,9 +85,9 @@ namespace cepgen
         << "Process mode considered: " << kinematics.mode << "\n\t"
         << "   first beam: " << kinematics.incoming_beams.first << "\n\t"
         << "  second beam: " << kinematics.incoming_beams.second;
-      if ( kinematics.structure_functions )
+      if ( kinematics.structureFunctions() )
         oss
-          << "  structure functions: " << *kinematics.structure_functions;
+          << "  structure functions: " << kinematics.structureFunctions();
       CG_DEBUG( "Parameters" ) << oss.str();
     }
     if ( process_->hasEvent() )
@@ -271,8 +271,8 @@ namespace cepgen
       << param->kinematics.incoming_beams.second << "\n"
       << std::setw( wt ) << "C.m. energy (GeV)" << param->kinematics.sqrtS() << "\n";
     if ( param->kinematics.mode != KinematicsMode::ElasticElastic
-      && param->kinematics.structure_functions )
-      os << std::setw( wt ) << "Structure functions" << param->kinematics.structure_functions.get() << "\n";
+      && param->kinematics.structureFunctions() )
+      os << std::setw( wt ) << "Structure functions" << param->kinematics.structureFunctions() << "\n";
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? utils::boldify( " Incoming partons " ) : "Incoming partons" ) << std::setfill( ' ' ) << "\n\n";

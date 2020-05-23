@@ -40,10 +40,10 @@ namespace cepgen
       setSqrtS( sqrt_s );
     //--- structure functions
     auto strfun = params.get<ParametersList>( "structureFunctions" );
-    if ( !strfun.empty() || !structure_functions ) {
+    if ( !strfun.empty() || !str_fun_ ) {
       if ( strfun.name<int>( -999 ) == -999 )
         strfun.setName<int>( 11 ); // default is Suri-Yennie
-      structure_functions = strfun::StructureFunctionsFactory::get().build( strfun );
+      str_fun_ = strfun::StructureFunctionsFactory::get().build( strfun );
     }
     //--- phase space definition
     for ( auto& lim : cuts.central.rawList() ) {
@@ -86,54 +86,12 @@ namespace cepgen
     }
   }
 
-  Kinematics&
-  Kinematics::setSqrtS( double sqrts )
-  {
-    if ( incoming_beams.first.pdg != incoming_beams.second.pdg )
-      throw CG_FATAL( "Kinematics" )
-        << "Trying to set √s with asymmetric beams"
-        << " (" << incoming_beams.first.pdg << "/" << incoming_beams.second.pdg << ").\n"
-        << "Please fill incoming beams objects manually!";
-    incoming_beams.first.pz = incoming_beams.second.pz = 0.5 * sqrts;
-    return *this;
-  }
-
-  double
-  Kinematics::sqrtS() const
-  {
-    const HeavyIon hi1( incoming_beams.first.pdg ), hi2( incoming_beams.second.pdg );
-    const double m1 = hi1 ? HeavyIon::mass( hi1 ) : PDG::get().mass( incoming_beams.first .pdg );
-    const double m2 = hi2 ? HeavyIon::mass( hi2 ) : PDG::get().mass( incoming_beams.second.pdg );
-    const auto p1 = Momentum::fromPxPyPzM( 0., 0., +incoming_beams.first .pz, m1 );
-    const auto p2 = Momentum::fromPxPyPzM( 0., 0., -incoming_beams.second.pz, m2 );
-    return ( p1+p2 ).mass();
-  }
-
-  Kinematics&
-  Kinematics::setStructureFunctions( int sf_model, int sr_model )
-  {
-    auto sf_params = ParametersList()
-      .setName<int>( sf_model )
-      .set<ParametersList>( "sigmaRatio", ParametersList()
-        .setName<int>( sr_model ) );
-    const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
-    if ( sf_model / kLHAPDFCodeDec == 1 ) { // SF from parton
-      const unsigned long icode = sf_model % kLHAPDFCodeDec;
-      sf_params
-        .setName<int>( (int)strfun::Type::Partonic )
-        .set<int>( "pdfId", icode % kLHAPDFPartDec )
-        .set<int>( "mode", icode / kLHAPDFPartDec ); // 0, 1, 2
-    }
-    structure_functions = strfun::StructureFunctionsFactory::get().build( sf_params );
-    return *this;
-  }
-
   ParametersList
   Kinematics::parameters() const
   {
     ParametersList params;
     params
-      .set<ParametersList>( "structureFunctions", structure_functions->parameters() )
+      .set<ParametersList>( "structureFunctions", str_fun_->parameters() )
       .set<int>( "mode", (int)mode )
       .set<int>( "beam1id", incoming_beams.first.pdg )
       .set<double>( "beam1pz", incoming_beams.first.pz )
@@ -176,6 +134,55 @@ namespace cepgen
     }
 
     return params;
+  }
+
+  Kinematics&
+  Kinematics::setSqrtS( double sqrts )
+  {
+    if ( incoming_beams.first.pdg != incoming_beams.second.pdg )
+      throw CG_FATAL( "Kinematics" )
+        << "Trying to set √s with asymmetric beams"
+        << " (" << incoming_beams.first.pdg << "/" << incoming_beams.second.pdg << ").\n"
+        << "Please fill incoming beams objects manually!";
+    incoming_beams.first.pz = incoming_beams.second.pz = 0.5 * sqrts;
+    return *this;
+  }
+
+  double
+  Kinematics::sqrtS() const
+  {
+    const HeavyIon hi1( incoming_beams.first.pdg ), hi2( incoming_beams.second.pdg );
+    const double m1 = hi1 ? HeavyIon::mass( hi1 ) : PDG::get().mass( incoming_beams.first .pdg );
+    const double m2 = hi2 ? HeavyIon::mass( hi2 ) : PDG::get().mass( incoming_beams.second.pdg );
+    const auto p1 = Momentum::fromPxPyPzM( 0., 0., +incoming_beams.first .pz, m1 );
+    const auto p2 = Momentum::fromPxPyPzM( 0., 0., -incoming_beams.second.pz, m2 );
+    return ( p1+p2 ).mass();
+  }
+
+  Kinematics&
+  Kinematics::setStructureFunctions( int sf_model, int sr_model )
+  {
+    auto sf_params = ParametersList()
+      .setName<int>( sf_model )
+      .set<ParametersList>( "sigmaRatio", ParametersList()
+        .setName<int>( sr_model ) );
+    const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
+    if ( sf_model / kLHAPDFCodeDec == 1 ) { // SF from parton
+      const unsigned long icode = sf_model % kLHAPDFCodeDec;
+      sf_params
+        .setName<int>( (int)strfun::Type::Partonic )
+        .set<int>( "pdfId", icode % kLHAPDFPartDec )
+        .set<int>( "mode", icode / kLHAPDFPartDec ); // 0, 1, 2
+    }
+    str_fun_ = strfun::StructureFunctionsFactory::get().build( sf_params );
+    return *this;
+  }
+
+  Kinematics&
+  Kinematics::setStructureFunctions( std::unique_ptr<strfun::Parameterisation> param )
+  {
+    str_fun_ = std::move( param );
+    return *this;
   }
 
   //--------------------------------------------------------------------

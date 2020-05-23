@@ -1006,15 +1006,15 @@ namespace cepgen
         } break;
         case KinematicsMode::ElasticInelastic: {
           fp1 = FormFactors::protonElastic( -t1_ );
-          fp2 = FormFactors::protonInelastic( -t2_, mB2_, mY2_, *kin_.structure_functions );
+          fp2 = FormFactors::protonInelastic( -t2_, mB2_, mY2_, *kin_.structureFunctions() );
         } break;
         case KinematicsMode::InelasticElastic: {
-          fp1 = FormFactors::protonInelastic( -t1_, mA2_, mX2_, *kin_.structure_functions );
+          fp1 = FormFactors::protonInelastic( -t1_, mA2_, mX2_, *kin_.structureFunctions() );
           fp2 = FormFactors::protonElastic( -t2_ );
         } break;
         case KinematicsMode::InelasticInelastic: {
-          fp1 = FormFactors::protonInelastic( -t1_, mA2_, mX2_, *kin_.structure_functions );
-          fp2 = FormFactors::protonInelastic( -t2_, mB2_, mY2_, *kin_.structure_functions );
+          fp1 = FormFactors::protonInelastic( -t1_, mA2_, mX2_, *kin_.structureFunctions() );
+          fp2 = FormFactors::protonInelastic( -t2_, mB2_, mY2_, *kin_.structureFunctions() );
         } break;
       }
 

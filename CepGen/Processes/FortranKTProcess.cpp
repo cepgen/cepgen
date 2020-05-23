@@ -9,6 +9,7 @@
 
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/HeavyIon.h"
 
 extern "C"
 {
@@ -86,8 +87,8 @@ namespace cepgen
       //===========================================================================================
 
       genparams_.icontri = (int)kin_.mode;
-      if ( kin_.structure_functions )
-        genparams_.sfmod = (int)kin_.structure_functions->type;
+      if ( kin_.structureFunctions() )
+        genparams_.sfmod = (int)kin_.structureFunctions()->type;
 
       //-------------------------------------------------------------------------------------------
       // incoming beams information

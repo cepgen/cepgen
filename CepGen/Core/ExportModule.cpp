@@ -36,7 +36,7 @@ namespace cepgen
         << prep << "  ***** Sample generated with CepGen v" << version() << " *****\n"
         << prep << "  * process: " << params.processName() << " (" << params.kinematics.mode << ")\n";
       if ( params.kinematics.mode != KinematicsMode::ElasticElastic ) {
-        os << prep << "  * structure functions: " << params.kinematics.structure_functions->description() << "\n";
+        os << prep << "  * structure functions: " << params.kinematics.structureFunctions()->description() << "\n";
         if ( !params.eventModifiersSequence().empty() ) {
           os << prep << "  * " << utils::s( "event modifier", params.eventModifiersSequence().size() ) << ": ";
           std::string sep;
