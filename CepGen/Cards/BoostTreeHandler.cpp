@@ -158,11 +158,9 @@ namespace cepgen
         else if ( params.has<int>( key ) )
           out.put( key, params.get<int>( key ) );
         else if ( params.has<double>( key ) ) {
-          double dummy;
-          const auto& value = params.get<double>( key );
-          const double value_scl = std::modf( value, &dummy ) == 0.
-            ? value+1.e-12 : value; // ensure floating point storage
-          out.put( key, value_scl );
+          std::ostringstream os; // ensure floating point storage
+          os << std::scientific << params.get<double>( key );
+          out.put( key, os.str() );
         }
         else if ( params.has<std::string>( key ) )
           out.put( key, params.get<std::string>( key ) );
@@ -188,19 +186,18 @@ namespace cepgen
     BoostTreeHandler::pack( const Limits& lim )
     {
       pt::ptree out;
-      double dummy;
       if ( lim.hasMin() ) {
         pt::ptree min;
-        const double min_scl = std::modf( lim.min(), &dummy ) == 0.
-          ? lim.min()+1.e-12 : lim.min(); // ensure floating point storage
-        min.put( "", min_scl );
+        std::ostringstream os; // ensure floating point storage
+        os << std::scientific << lim.min();
+        min.put( "", os.str() );
         out.push_back( std::make_pair( "min", min ) );
       }
       if ( lim.hasMax() ) {
         pt::ptree max;
-        const double max_scl = std::modf( lim.max(), &dummy ) == 0.
-          ? lim.max()+1.e-12 : lim.max(); // ensure floating point storage
-        max.put( "", max_scl );
+        std::ostringstream os; // ensure floating point storage
+        os << std::scientific << lim.max();
+        max.put( "", os.str() );
         out.push_back( std::make_pair( "max", max ) );
       }
       return out;
