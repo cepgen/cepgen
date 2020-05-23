@@ -38,10 +38,9 @@ namespace cepgen
     //----- specialization for LPAIR input cards
 
     LpairHandler::LpairHandler( const ParametersList& params ) :
-      proc_params_( new ParametersList ),
+      proc_params_( new ParametersList ), kin_params_( new ParametersList ),
       timer_( false ),
       str_fun_( 11 ), sr_type_( 1 ), lepton_id_( 0 ),
-      xi_min_( 0. ), xi_max_( 1. ),
       pdg_input_path_( "External/mass_width_2019.mcd" ), iend_( 1 ),
       hi_1_( { 0, 0 } ), hi_2_( { 0, 0 } )
     {
@@ -102,27 +101,15 @@ namespace cepgen
         params_->setProcess( proc::ProcessesFactory::get().build( proc_name_, *proc_params_ ) );
       }
 
-      const Limits lim_xi{ xi_min_, xi_max_ };
-      if ( lim_xi.valid() )
-        params_->kinematics.cuts.remnants.energy_single() = ( lim_xi+(-1.) )*( -params_->kinematics.incoming_beams.first.pz );
+      params_->kinematics = Kinematics( *kin_params_ );
 
       //--- parse the structure functions code
-      auto sf_params = ParametersList()
-        .setName<int>( str_fun_ )
-        .set<ParametersList>( "sigmaRatio", ParametersList()
-          .setName<int>( sr_type_ ) );
-      const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
-      if ( str_fun_ / kLHAPDFCodeDec == 1 ) { // SF from parton
-        const unsigned long icode = str_fun_ % kLHAPDFCodeDec;
-        sf_params
-          .setName<int>( (int)strfun::Type::Partonic )
-          .set<int>( "pdfId", icode % kLHAPDFPartDec )
-          .set<int>( "mode", icode / kLHAPDFPartDec ); // 0, 1, 2
-      }
-      else if ( str_fun_ == (int)strfun::Type::MSTWgrid )
-        sf_params
-          .set<std::string>( "gridPath", mstw_grid_path_ );
-      params_->kinematics.structure_functions = strfun::StructureFunctionsFactory::get().build( sf_params );
+      if ( str_fun_ == (int)strfun::Type::MSTWgrid && !mstw_grid_path_.empty() )
+        params_->kinematics.structure_functions
+          = strfun::StructureFunctionsFactory::get().build( str_fun_,
+            ParametersList().set<std::string>( "gridPath", mstw_grid_path_ ) );
+      else
+        params_->kinematics.setStructureFunctions( str_fun_, sr_type_ );
 
       //--- check if event generation is required
       params_->generation().enabled = iend_ > 1;
@@ -181,7 +168,7 @@ namespace cepgen
       registerParameter<int>( "ITVG", "Number of integration iterations", (int*)&params_->integrator->operator[]<int>( "iterations" ) );
       registerParameter<int>( "SEED", "Random generator seed", (int*)&params_->integrator->operator[]<int>( "seed" ) );
       registerParameter<int>( "NTHR", "Number of threads to use for events generation", (int*)&params_->generation().num_threads );
-      registerParameter<int>( "MODE", "Subprocess' mode", (int*)&params_->kinematics.mode );
+      registerParameter<int>( "MODE", "Subprocess' mode", &kin_params_->operator[]<int>( "mode" ) );
       registerParameter<int>( "NCSG", "Number of points to probe", (int*)&params_->generation().num_points );
       registerParameter<int>( "NGEN", "Number of events to generate", (int*)&params_->generation().maxgen );
       registerParameter<int>( "NPRN", "Number of events before printout", (int*)&params_->generation().gen_print_every );
@@ -204,32 +191,34 @@ namespace cepgen
       registerParameter<int>( "EMOD", "Outgoing primary particles' mode", &str_fun_ );
       registerParameter<int>( "RTYP", "R-ratio computation type", &sr_type_ );
       registerParameter<int>( "PAIR", "Outgoing particles' PDG id", (int*)&proc_params_->operator[]<int>( "pair" ) );
-      registerParameter<int>( "INA1", "Heavy ion atomic weight (1st incoming beam)", (int*)&hi_1_.first );
-      registerParameter<int>( "INZ1", "Heavy ion atomic number (1st incoming beam)", (int*)&hi_1_.second );
-      registerParameter<int>( "INA2", "Heavy ion atomic weight (2nd incoming beam)", (int*)&hi_2_.first );
-      registerParameter<int>( "INZ2", "Heavy ion atomic number (2nd incoming beam)", (int*)&hi_2_.second );
-      registerParameter<double>( "INP1", "Momentum (1st primary particle)", &params_->kinematics.incoming_beams.first.pz );
-      registerParameter<double>( "INP2", "Momentum (2nd primary particle)", &params_->kinematics.incoming_beams.second.pz );
-      registerParameter<double>( "INPP", "Momentum (1st primary particle)", &params_->kinematics.incoming_beams.first.pz );
-      registerParameter<double>( "INPE", "Momentum (2nd primary particle)", &params_->kinematics.incoming_beams.second.pz );
-      registerParameter<double>( "PTCT", "Minimal transverse momentum (single central outgoing particle)", &params_->kinematics.cuts.central.pt_single().min() );
-      registerParameter<double>( "PTMX", "Maximal transverse momentum (single central outgoing particle)", &params_->kinematics.cuts.central.pt_single().max() );
-      registerParameter<double>( "MSCT", "Minimal central system mass", &params_->kinematics.cuts.central.mass_sum().min() );
-      registerParameter<double>( "ECUT", "Minimal energy (single central outgoing particle)", &params_->kinematics.cuts.central.energy_single().min() );
-      registerParameter<double>( "ETMN", "Minimal pseudo-rapidity (central outgoing particles)", &params_->kinematics.cuts.central.eta_single().min() );
-      registerParameter<double>( "ETMX", "Maximal pseudo-rapidity (central outgoing particles)", &params_->kinematics.cuts.central.eta_single().max() );
-      registerParameter<double>( "YMIN", "Minimal rapidity (central outgoing particles)", &params_->kinematics.cuts.central.rapidity_single().min() );
-      registerParameter<double>( "YMAX", "Maximal rapidity (central outgoing particles)", &params_->kinematics.cuts.central.rapidity_single().max() );
-      registerParameter<double>( "PDMN", "Minimal transverse momentum difference (central outgoing particles)", &params_->kinematics.cuts.central.pt_diff().min() );
-      registerParameter<double>( "PDMX", "Maximal transverse momentum difference (central outgoing particles)", &params_->kinematics.cuts.central.pt_diff().max() );
-      registerParameter<double>( "Q2MN", "Minimal Q² = -q² (exchanged parton)", &params_->kinematics.cuts.initial.q2().min() );
-      registerParameter<double>( "Q2MX", "Maximal Q² = -q² (exchanged parton)", &params_->kinematics.cuts.initial.q2().max() );
-      registerParameter<double>( "QTMN", "Minimal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt().min() );
-      registerParameter<double>( "QTMX", "Maximal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt().max() );
-      registerParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", &params_->kinematics.cuts.remnants.mass_single().min() );
-      registerParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", &params_->kinematics.cuts.remnants.mass_single().max() );
-      registerParameter<double>( "XIMN", "Minimal fractional momentum loss of outgoing proton (ξ)", &xi_min_ );
-      registerParameter<double>( "XIMX", "Maximal fractional momentum loss of outgoing proton (ξ)", &xi_max_ );
+      registerKinematicsParameter<int>( "INA1", "Heavy ion atomic weight (1st incoming beam)", "beam1A" );
+      registerKinematicsParameter<int>( "INZ1", "Heavy ion atomic number (1st incoming beam)", "beam1Z" );
+      registerKinematicsParameter<int>( "INA2", "Heavy ion atomic weight (2nd incoming beam)", "beam2A" );
+      registerKinematicsParameter<int>( "INZ2", "Heavy ion atomic number (2nd incoming beam)", "beam2Z" );
+      registerKinematicsParameter<double>( "INP1", "Momentum (1st primary particle)", "beam1pz" );
+      registerKinematicsParameter<double>( "INP2", "Momentum (2nd primary particle)", "beam2pz" );
+      registerKinematicsParameter<double>( "INPP", "Momentum (1st primary particle)", "beam1pz" );
+      registerKinematicsParameter<double>( "INPE", "Momentum (2nd primary particle)", "beam2pz" );
+      registerKinematicsParameter<double>( "PTCT", "Minimal transverse momentum (single central outgoing particle)", "ptmin" );
+      registerKinematicsParameter<double>( "PTMX", "Maximal transverse momentum (single central outgoing particle)", "ptmax" );
+      registerKinematicsParameter<double>( "MSCT", "Minimal central system mass", "invmassmin" );
+      registerKinematicsParameter<double>( "ECUT", "Minimal energy (single central outgoing particle)", "energysummin" );
+      registerKinematicsParameter<double>( "ETMN", "Minimal pseudo-rapidity (central outgoing particles)", "etamin" );
+      registerKinematicsParameter<double>( "ETMX", "Maximal pseudo-rapidity (central outgoing particles)", "etamax" );
+      registerKinematicsParameter<double>( "YMIN", "Minimal rapidity (central outgoing particles)", "rapiditymin" );
+      registerKinematicsParameter<double>( "YMAX", "Maximal rapidity (central outgoing particles)", "rapiditymax" );
+      registerKinematicsParameter<double>( "PDMN", "Minimal transverse momentum difference (central outgoing particles)", "ptdiffmin" );
+      registerKinematicsParameter<double>( "PDMX", "Maximal transverse momentum difference (central outgoing particles)", "ptdiffmax" );
+      registerKinematicsParameter<double>( "Q2MN", "Minimal Q² = -q² (exchanged parton)", "q2min" );
+      registerKinematicsParameter<double>( "Q2MX", "Maximal Q² = -q² (exchanged parton)", "q2max" );
+      registerKinematicsParameter<double>( "QTMN", "Minimal Q_T (exchanged parton)", "qtmin" );
+      registerKinematicsParameter<double>( "QTMX", "Maximal Q_T (exchanged parton)", "qtmax" );
+      registerKinematicsParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", "mxmin" );
+      registerKinematicsParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", "mxmax" );
+      registerKinematicsParameter<double>( "XIMN", "Minimal fractional momentum loss of outgoing proton (ξ)", "ximin" );
+      registerKinematicsParameter<double>( "XIMX", "Maximal fractional momentum loss of outgoing proton (ξ)", "ximax" );
+      registerKinematicsParameter<double>( "YJMN", "Minimal remnant jet rapidity", "yjmin" );
+      registerKinematicsParameter<double>( "YJMX", "Maximal remnant jet rapidity", "yjmax" );
 
       //-------------------------------------------------------------------------------------------
       // PPtoLL cards backward compatibility
@@ -240,14 +229,14 @@ namespace cepgen
       registerParameter<int>( "NCVG", "Number of points to probe", (int*)&params_->generation().num_points );
       registerParameter<int>( "METHOD", "Computation method (kT-factorisation)", &proc_params_->operator[]<int>( "method" ) );
       registerParameter<int>( "LEPTON", "Outgoing leptons' flavour", &lepton_id_ );
-      registerParameter<double>( "PTMIN", "Minimal transverse momentum (single central outgoing particle)", &params_->kinematics.cuts.central.pt_single().min() );
-      registerParameter<double>( "PTMAX", "Maximal transverse momentum (single central outgoing particle)", &params_->kinematics.cuts.central.pt_single().max() );
-      registerParameter<double>( "Q1TMIN", "Minimal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt().min() );
-      registerParameter<double>( "Q1TMAX", "Maximal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt().max() );
-      registerParameter<double>( "Q2TMIN", "Minimal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt().min() );
-      registerParameter<double>( "Q2TMAX", "Maximal Q_T (exchanged parton)", &params_->kinematics.cuts.initial.qt().max() );
-      registerParameter<double>( "MXMIN", "Minimal invariant mass of proton remnants", &params_->kinematics.cuts.remnants.mass_single().min() );
-      registerParameter<double>( "MXMAX", "Maximal invariant mass of proton remnants", &params_->kinematics.cuts.remnants.mass_single().max() );
+      registerKinematicsParameter<double>( "PTMIN", "Minimal transverse momentum (single central outgoing particle)", "ptmin" );
+      registerKinematicsParameter<double>( "PTMAX", "Maximal transverse momentum (single central outgoing particle)", "ptmax" );
+      registerKinematicsParameter<double>( "Q1TMIN", "Minimal Q_T (exchanged parton)", "qtmin" );
+      registerKinematicsParameter<double>( "Q1TMAX", "Maximal Q_T (exchanged parton)", "qtmax" );
+      registerKinematicsParameter<double>( "Q2TMIN", "Minimal Q_T (exchanged parton)", "qtmin" );
+      registerKinematicsParameter<double>( "Q2TMAX", "Maximal Q_T (exchanged parton)", "qtmax" );
+      registerKinematicsParameter<double>( "MXMIN", "Minimal invariant mass of proton remnants", "mxmin" );
+      registerKinematicsParameter<double>( "MXMAX", "Maximal invariant mass of proton remnants", "mxmax" );
     }
 
     void
@@ -319,14 +308,11 @@ namespace cepgen
       if ( hi2 )
         hi_2_ = std::make_pair( hi2.A, (unsigned short)hi2.Z );
       timer_ = ( params_->timeKeeper() != nullptr );
-      if ( params_->kinematics.cuts.remnants.energy_single().valid() ) {
-        const auto lim_xi = params_->kinematics.cuts.remnants.energy_single()
-                            *( -1./params_->kinematics.incoming_beams.first.pz )+1.;
-        xi_min_ = lim_xi.min(), xi_max_ = lim_xi.max();
-      }
-//                *proc_params_ = ParametersList( params_->process().parameters() )+*proc_params_;
 
+      const auto& kin = params_->kinematics;
+      *kin_params_ += kin.parameters();
       init();
+      CG_INFO("")<<"haha:"<<*kin_params_;
     }
 
     void

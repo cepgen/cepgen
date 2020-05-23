@@ -21,7 +21,6 @@ namespace cepgen
         void pack( const Parameters* ) override;
         Parameters* parse( const std::string&, Parameters* ) override;
         /// Store a configuration into a LPAIR steering card
-        void store( const char* file );
         void write( const std::string& file ) const override;
 
       private:
@@ -29,16 +28,19 @@ namespace cepgen
         /// \tparam T Parameter type
         template<typename T> struct Parameter
         {
-          Parameter( const char* key, const char* descr, T* value ) : key( key ), description( descr ), value( value ) {}
           std::string key, description;
           T* value;
         };
         /// Register a parameter to be steered to a configuration variable
-        template<typename T> void registerParameter( const char* key, const char* description, T* def ) {}
+        template<typename T> void registerParameter( const std::string& key, const std::string& description, T* def ) {}
+        /// Register a kinematics block parameter to be steered
+        template<typename T> void registerKinematicsParameter( const std::string& key, const std::string& description, const std::string& kin_key ) {
+          registerParameter<T>( key, description, &kin_params_->operator[]<T>( kin_key ) );
+        }
         /// Set a parameter value
-        template<typename T> void setValue( const char* key, const T& value ) {}
+        template<typename T> void setValue( const std::string& key, const T& value ) {}
         /// Retrieve a parameter value
-        template<typename T> T getValue( const char* key ) const {}
+        template<typename T> T getValue( const std::string& key ) const {}
 
         void setParameter( const std::string& key, const std::string& value );
         std::string parameter( std::string key ) const;
@@ -51,10 +53,9 @@ namespace cepgen
         std::unordered_map<std::string, Parameter<int> > p_ints_;
 
         void init();
-        std::shared_ptr<ParametersList> proc_params_;
+        std::shared_ptr<ParametersList> proc_params_, kin_params_;
         int timer_;
         int str_fun_, sr_type_, lepton_id_;
-        double xi_min_, xi_max_;
         std::string proc_name_, evt_mod_name_, out_mod_name_;
         std::string out_file_name_;
         std::string kmr_grid_path_, mstw_grid_path_, pdg_input_path_;
@@ -65,23 +66,23 @@ namespace cepgen
     //----- specialised registerers
 
     /// Register a string parameter
-    template<> inline void LpairHandler::registerParameter<std::string>( const char* key, const char* description, std::string* def ) { p_strings_.insert( std::make_pair( key, Parameter<std::string>( key, description, def ) ) ); }
+    template<> inline void LpairHandler::registerParameter<std::string>( const std::string& key, const std::string& description, std::string* def ) { p_strings_.insert( std::make_pair( key, Parameter<std::string>{ key, description, def } ) ); }
     /// Register a double floating point parameter
-    template<> inline void LpairHandler::registerParameter<double>( const char* key, const char* description, double* def ) { p_doubles_.insert( std::make_pair( key, Parameter<double>( key, description, def ) ) ); }
+    template<> inline void LpairHandler::registerParameter<double>( const std::string& key, const std::string& description, double* def ) { p_doubles_.insert( std::make_pair( key, Parameter<double>{ key, description, def } ) ); }
     /// Register an integer parameter
-    template<> inline void LpairHandler::registerParameter<int>( const char* key, const char* description, int* def ) { p_ints_.insert( std::make_pair( key, Parameter<int>( key, description, def ) ) ); }
+    template<> inline void LpairHandler::registerParameter<int>( const std::string& key, const std::string& description, int* def ) { p_ints_.insert( std::make_pair( key, Parameter<int>{ key, description, def } ) ); }
 
     //----- specialised setters
 
-    template<> inline void LpairHandler::setValue<std::string>( const char* key, const std::string& value ) {
+    template<> inline void LpairHandler::setValue<std::string>( const std::string& key, const std::string& value ) {
       auto it = p_strings_.find( key );
       if ( it != p_strings_.end() ) *it->second.value = value;
     }
-    template<> inline void LpairHandler::setValue<double>( const char* key, const double& value ) {
+    template<> inline void LpairHandler::setValue<double>( const std::string& key, const double& value ) {
       auto it = p_doubles_.find( key );
       if ( it != p_doubles_.end() ) *it->second.value = value;
     }
-    template<> inline void LpairHandler::setValue<int>( const char* key, const int& value ) {
+    template<> inline void LpairHandler::setValue<int>( const std::string& key, const int& value ) {
       auto it = p_ints_.find( key );
       if ( it != p_ints_.end() ) *it->second.value = value;
     }
@@ -89,19 +90,19 @@ namespace cepgen
     //----- specialised getters
 
     /// Retrieve a string parameter value
-    template<> inline std::string LpairHandler::getValue( const char* key ) const {
+    template<> inline std::string LpairHandler::getValue( const std::string& key ) const {
       const auto& it = p_strings_.find( key );
       if ( it != p_strings_.end() ) return *it->second.value;
       return "null";
     }
     /// Retrieve a floating point parameter value
-    template<> inline double LpairHandler::getValue( const char* key ) const {
+    template<> inline double LpairHandler::getValue( const std::string& key ) const {
       const auto& it = p_doubles_.find( key );
       if ( it != p_doubles_.end() ) return *it->second.value;
       return -999.;
     }
     /// Retrieve an integer parameter value
-    template<> inline int LpairHandler::getValue( const char* key ) const {
+    template<> inline int LpairHandler::getValue( const std::string& key ) const {
       const auto& it = p_ints_.find( key );
       if ( it != p_ints_.end() ) return *it->second.value;
       return -999999;

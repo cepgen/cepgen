@@ -1,6 +1,7 @@
 #ifndef CepGen_Physics_Kinematics_h
 #define CepGen_Physics_Kinematics_h
 
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Physics/KinematicsMode.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Cuts.h"
@@ -14,7 +15,6 @@
 namespace cepgen
 {
   enum class KTFlux;
-  class ParametersList;
   namespace strfun { class Parameterisation; }
   /// List of kinematic constraints to apply on the process phase space.
   class Kinematics
@@ -25,7 +25,7 @@ namespace cepgen
       ~Kinematics() = default;
 
       /// Set the incoming particles' momenta (if the collision is symmetric)
-      void setSqrtS( double sqrts );
+      Kinematics& setSqrtS( double sqrts );
       /// Process centre of mass energy
       double sqrtS() const;
 
@@ -38,6 +38,8 @@ namespace cepgen
       };
       /// Human-readable description of a beam particle/system
       friend std::ostream& operator<<( std::ostream&, const Beam& );
+      /// List containing all parameters handled
+      ParametersList parameters() const;
 
       /// Beam/primary particle's kinematics
       std::pair<Beam,Beam> incoming_beams;
@@ -47,6 +49,8 @@ namespace cepgen
       KinematicsMode mode;
       /// Type of structure functions to consider
       std::shared_ptr<strfun::Parameterisation> structure_functions;
+      /// Set the integer-type of structure functions parameterisation to build
+      Kinematics& setStructureFunctions( int, int );
 
       /// A collection of cuts to apply on the physical phase space
       struct CutsList

@@ -1,8 +1,6 @@
 #ifndef CepGen_Processes_Process_h
 #define CepGen_Processes_Process_h
 
-#include "CepGen/Core/ParametersList.h"
-
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Event/Particle.h"
 

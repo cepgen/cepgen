@@ -70,6 +70,7 @@ namespace cepgen
         void parseExtraParticles( PyObject* );
 
         std::string filename_;
+        int kin_mode_;
     };
     template<> bool PythonHandler::is<bool>( PyObject* obj ) const;
     template<> bool PythonHandler::is<int>( PyObject* obj ) const;

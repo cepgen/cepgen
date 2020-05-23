@@ -90,6 +90,8 @@ namespace cepgen
   bool
   Limits::valid() const
   {
+    if ( min() == max() )
+      return false;
     return hasMin() || hasMax();
   }
 

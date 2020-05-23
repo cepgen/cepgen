@@ -37,7 +37,8 @@ namespace cepgen
   namespace card
   {
     PythonHandler::PythonHandler( const ParametersList& params ) :
-      filename_( params.get<std::string>( FILENAME_KEY ) )
+      filename_( params.get<std::string>( FILENAME_KEY ) ),
+      kin_mode_( (int)KinematicsMode::invalid )
     {
       setenv( "PYTHONPATH", ".:Cards:test:../Cards", 1 );
       setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
@@ -48,7 +49,7 @@ namespace cepgen
     }
 
     PythonHandler::PythonHandler( const std::string& file ) :
-      filename_( file )
+      filename_( file ), kin_mode_( (int)KinematicsMode::invalid )
     {
       setenv( "PYTHONPATH", ".:Cards:test:../Cards", 1 );
       setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
@@ -142,7 +143,7 @@ namespace cepgen
       const std::string proc_name = get<std::string>( pproc_name );
 
       //--- process mode
-      params_->kinematics.mode = (KinematicsMode)proc_params.get<int>( "mode", (int)KinematicsMode::invalid );
+      proc_params.fill<int>( "mode", kin_mode_ );
       params_->setProcess( proc::ProcessesFactory::get().build( proc_name, proc_params ) );
 
       //--- process kinematics
@@ -228,6 +229,8 @@ namespace cepgen
     PythonHandler::parseIncomingKinematics( PyObject* kin )
     {
       params_->kinematics = Kinematics( get<ParametersList>( kin ) );
+      if ( kin_mode_ != (int)KinematicsMode::invalid )
+        params_->kinematics.mode = (KinematicsMode)kin_mode_;
       //--- retrieve the beams PDG ids
       std::vector<ParametersList> beams_pdg;
       fillParameter( kin, "pdgIds", beams_pdg );

@@ -65,7 +65,7 @@ namespace cepgen
 
         static void add( ParametersList&, const std::string&, const pt::ptree& );
 
-        ParametersList proc_, kin_, gen_, log_;
+        ParametersList proc_, gen_, log_;
         ParametersList evt_mod_, evt_out_;
     };
 
@@ -90,10 +90,8 @@ namespace cepgen
       }
       try {
         //----- phase space definition
-        if ( tree_.count( KIN_NAME ) ) {
-          kin_ = unpack( tree_.get_child( KIN_NAME ) );
-          params_->kinematics = Kinematics( kin_ );
-        }
+        if ( tree_.count( KIN_NAME ) )
+          params_->kinematics = Kinematics( unpack( tree_.get_child( KIN_NAME ) ) );
         if ( tree_.count( INTEGR_NAME ) )
           *params_->integrator += unpack( tree_.get_child( INTEGR_NAME ) );
         if ( tree_.count( GENERAL_NAME ) )
@@ -300,25 +298,7 @@ namespace cepgen
         tree_.add_child( GENERAL_NAME, pack( *params_->general ) );
 
       //----- kinematics block
-      kin_
-        .set<int>( "mode", (int)params_->kinematics.mode )
-        //--- incoming beams
-        .set<int>( "beam1id", params_->kinematics.incoming_beams.first.pdg )
-        .set<double>( "beam1pz", params_->kinematics.incoming_beams.first.pz )
-        .set<int>( "beam2id", params_->kinematics.incoming_beams.second.pdg )
-        .set<double>( "beam2pz", params_->kinematics.incoming_beams.second.pz );
-
-      for ( auto& lim : params_->kinematics.cuts.central.list() )
-        kin_.set<Limits>( lim.name, lim.limits );
-      kin_
-        .set<Limits>( "mx", params_->kinematics.cuts.remnants.mass_single() )
-        .set<Limits>( "yj", params_->kinematics.cuts.remnants.rapidity_single() );
-      if ( params_->kinematics.cuts.remnants.energy_single().valid() )
-        kin_.set<Limits>( "xi", params_->kinematics.cuts.remnants.energy_single()*( -2./params_->kinematics.sqrtS() )+1. );
-
-      kin_
-        .set<ParametersList>( "structureFunctions", params_->kinematics.structure_functions->parameters() );
-      tree_.add_child( KIN_NAME, pack( kin_ ) );
+      tree_.add_child( KIN_NAME, pack( params_->kinematics.parameters() ) );
 
       //----- generation block
       gen_
