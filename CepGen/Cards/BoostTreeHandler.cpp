@@ -43,6 +43,8 @@ namespace cepgen
 
       private:
         static constexpr const char* DAUGH_KEY = "DAUGHTER";
+        static constexpr const char* MIN_KEY = "min";
+        static constexpr const char* MAX_KEY = "max";
 
         static constexpr const char* PROCESS_NAME = "process";
         static constexpr const char* KIN_NAME = "kinematics";
@@ -52,7 +54,6 @@ namespace cepgen
         static constexpr const char* EVT_MOD_SEQ_NAME = "eventSequence";
         static constexpr const char* OUTPUT_NAME = "output";
         static constexpr const char* TIMER_NAME = "timer";
-
         static constexpr const char* LOGGER_NAME = "logger";
 
         template<typename T> static pt::ptree pack( const std::vector<T>& );
@@ -205,14 +206,14 @@ namespace cepgen
         std::ostringstream os; // ensure floating point storage
         os << std::scientific << lim.min();
         min.put( "", os.str() );
-        out.push_back( std::make_pair( "min", min ) );
+        out.push_back( std::make_pair( MIN_KEY, min ) );
       }
       if ( lim.hasMax() ) {
         pt::ptree max;
         std::ostringstream os; // ensure floating point storage
         os << std::scientific << lim.max();
         max.put( "", os.str() );
-        out.push_back( std::make_pair( "max", max ) );
+        out.push_back( std::make_pair( MAX_KEY, max ) );
       }
       return out;
     }
@@ -265,11 +266,11 @@ namespace cepgen
       auto plist = unpack( tree );
       //--- first check if we have a limits set
       if ( plist.keys().size() <= 2
-        && ( plist.has<double>( "min" )
-          || plist.has<double>( "max" ) ) ) {
+        && ( plist.has<double>( MIN_KEY )
+          || plist.has<double>( MAX_KEY ) ) ) {
         Limits lim;
-        plist.fill<double>( "min", lim.min() );
-        plist.fill<double>( "max", lim.max() );
+        plist.fill<double>( MIN_KEY, lim.min() );
+        plist.fill<double>( MAX_KEY, lim.max() );
         base.set<Limits>( name, lim );
       }
       //--- then check if daughter is a vector; if true, skip one hierarchy level
