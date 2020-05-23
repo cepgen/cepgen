@@ -148,6 +148,20 @@ namespace cepgen
       return out;
     }
 
+    template<> pt::ptree
+    BoostTreeHandler::pack<double>( const std::vector<double>& vec )
+    {
+      pt::ptree out;
+      for ( const auto& elem : vec ) {
+        pt::ptree elem_tree;
+        std::ostringstream os; // ensure floating point storage
+        os << std::scientific << elem;
+        elem_tree.put( "", elem );
+        out.push_back( std::make_pair( "", elem_tree ) );
+      }
+      return out;
+    }
+
     pt::ptree
     BoostTreeHandler::pack( const ParametersList& params )
     {
