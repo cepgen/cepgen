@@ -21,7 +21,6 @@
 
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/TamingFunction.h"
-#include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/HeavyIon.h"
 
@@ -38,8 +37,7 @@ namespace cepgen
   namespace card
   {
     PythonHandler::PythonHandler( const ParametersList& params ) :
-      filename_( params.get<std::string>( FILENAME_KEY ) ),
-      kin_mode_( (int)KinematicsMode::invalid )
+      filename_( params.get<std::string>( FILENAME_KEY ) )
     {
       setenv( "PYTHONPATH", ".:Cards:test:../Cards", 1 );
       setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
@@ -50,7 +48,7 @@ namespace cepgen
     }
 
     PythonHandler::PythonHandler( const std::string& file ) :
-      filename_( file ), kin_mode_( (int)KinematicsMode::invalid )
+      filename_( file )
     {
       setenv( "PYTHONPATH", ".:Cards:test:../Cards", 1 );
       setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
@@ -141,20 +139,25 @@ namespace cepgen
       PyObject* pproc_name = element( process, ParametersList::MODULE_NAME ); // borrowed
       if ( !pproc_name )
         throwPythonError( "Failed to extract the process name from the configuration card '"+file+"'!" );
-      const std::string proc_name = get<std::string>( pproc_name );
 
       //--- process mode
-      proc_params.fill<int>( "mode", kin_mode_ );
-      params_->setProcess( proc::ProcessesFactory::get().build( proc_name, proc_params ) );
+      params_->setProcess( proc::ProcessesFactory::get().build( get<std::string>( pproc_name ), proc_params ) );
 
       //--- process kinematics
+      ParametersList pkin;
       PyObject* pin_kinematics = element( process, "inKinematics" ); // borrowed
       if ( pin_kinematics )
-        parseIncomingKinematics( pin_kinematics );
+        pkin += get<ParametersList>( pin_kinematics );
 
       PyObject* pout_kinematics = element( process, "outKinematics" ); // borrowed
       if ( pout_kinematics )
-        parseOutgoingKinematics( pout_kinematics );
+        pkin += get<ParametersList>( pout_kinematics );
+
+      params_->kinematics = Kinematics( pkin );
+      int kin_mode = (int)KinematicsMode::invalid;
+      proc_params.fill<int>( "mode", kin_mode );
+      if ( kin_mode != (int)KinematicsMode::invalid )
+        params_->kinematics.mode = (KinematicsMode)kin_mode;
 
       //--- taming functions
       PyObject* ptam = element( process, "tamingFunctions" ); // borrowed
@@ -224,94 +227,6 @@ namespace cepgen
         Py_Finalize();
 
       return params_;
-    }
-
-    void
-    PythonHandler::parseIncomingKinematics( PyObject* kin )
-    {
-      params_->kinematics = Kinematics( get<ParametersList>( kin ) );
-      if ( kin_mode_ != (int)KinematicsMode::invalid )
-        params_->kinematics.mode = (KinematicsMode)kin_mode_;
-      //--- retrieve the beams PDG ids
-      std::vector<ParametersList> beams_pdg;
-      fillParameter( kin, "pdgIds", beams_pdg );
-      if ( !beams_pdg.empty() ) {
-        if ( beams_pdg.size() != 2 )
-          throwPythonError( utils::format( "Invalid list of PDG ids retrieved for incoming beams:\n\t2 PDG ids are expected, %d provided!", beams_pdg.size() ) );
-        params_->kinematics.incoming_beams. first.pdg = (pdgid_t)beams_pdg.at( 0 ).get<int>( "pdgid" );
-        params_->kinematics.incoming_beams.second.pdg = (pdgid_t)beams_pdg.at( 1 ).get<int>( "pdgid" );
-      }
-      //--- incoming beams kinematics
-      std::vector<double> beams_pz;
-      fillParameter( kin, "pz", beams_pz );
-      if ( !beams_pz.empty() ) {
-        if ( beams_pz.size() != 2 )
-          throwPythonError( utils::format( "Invalid list of pz's retrieved for incoming beams:\n\t2 pz's are expected, %d provided!", beams_pz.size() ) );
-        params_->kinematics.incoming_beams. first.pz = beams_pz.at( 0 );
-        params_->kinematics.incoming_beams.second.pz = beams_pz.at( 1 );
-      }
-      double sqrt_s = -1.;
-      fillParameter( kin, "cmEnergy", sqrt_s );
-      if ( sqrt_s != -1. )
-        params_->kinematics.setSqrtS( sqrt_s );
-      //--- specify where to look for the grid path for gluon emission
-      std::string kmr_grid_path;
-      fillParameter( kin, "kmrGridPath", kmr_grid_path );
-      if ( !kmr_grid_path.empty() )
-        kmr::GluonGrid::get( kmr_grid_path.c_str() );
-      //--- parse heavy ions beams
-      std::vector<int> hi_beam1, hi_beam2;
-      fillParameter( kin, "heavyIonA", hi_beam1 );
-      if ( hi_beam1.size() == 2 )
-        params_->kinematics.incoming_beams. first.pdg = HeavyIon{ (unsigned short)hi_beam1[0], (Element)hi_beam1[1] };
-      fillParameter( kin, "heavyIonB", hi_beam2 );
-      if ( hi_beam2.size() == 2 )
-        params_->kinematics.incoming_beams.second.pdg = HeavyIon{ (unsigned short)hi_beam2[0], (Element)hi_beam2[1] };
-    }
-
-    void
-    PythonHandler::parseOutgoingKinematics( PyObject* kin )
-    {
-      std::vector<int> parts;
-      fillParameter( kin, "minFinalState", parts );
-      for ( const auto& pdg : parts )
-        params_->kinematics.minimum_final_state.emplace_back( (pdgid_t)pdg );
-
-      ParametersList part_cuts;
-      fillParameter( kin, "cuts", part_cuts );
-      for ( const auto& part : part_cuts.keys( true ) ) {
-        const auto pdg = (pdgid_t)stoi( part );
-        const auto& cuts = part_cuts.get<ParametersList>( part );
-        if ( cuts.has<Limits>( "pt" ) )
-          params_->kinematics.cuts.central_particles[pdg].pt_single() = cuts.get<Limits>( "pt" );
-        if ( cuts.has<Limits>( "energy" ) )
-          params_->kinematics.cuts.central_particles[pdg].energy_single() = cuts.get<Limits>( "energy" );
-        if ( cuts.has<Limits>( "eta" ) )
-          params_->kinematics.cuts.central_particles[pdg].eta_single() = cuts.get<Limits>( "eta" );
-        if ( cuts.has<Limits>( "rapidity" ) )
-          params_->kinematics.cuts.central_particles[pdg].rapidity_single() = cuts.get<Limits>( "rapidity" );
-      }
-
-      for ( auto& lim : params_->kinematics.cuts.initial.rawList() )
-        fillParameter( kin, lim.name.c_str(), lim.limits );
-      for ( auto& lim : params_->kinematics.cuts.central.rawList() )
-        fillParameter( kin, lim.name.c_str(), lim.limits );
-
-      // for the kT factorised matrix elements
-      if ( element( kin, "phiptdiff" ) )
-        CG_WARNING( "PythonHandler" )
-          << "\"phiptdiff\" parameter is deprecated! "
-          << "Please use \"phidiff\" instead.";
-      fillParameter( kin, "phiptdiff", params_->kinematics.cuts.central.phi_diff() ); //legacy
-
-      // generic phase space limits
-      fillParameter( kin, "mx", params_->kinematics.cuts.remnants.mass_single() );
-      fillParameter( kin, "yj", params_->kinematics.cuts.remnants.rapidity_single() );
-
-      Limits lim_xi;
-      fillParameter( kin, "xi", lim_xi );
-      if ( lim_xi.valid() )
-        params_->kinematics.cuts.remnants.energy_single() = -( lim_xi-1. )*params_->kinematics.incoming_beams.first.pz;
     }
 
     void

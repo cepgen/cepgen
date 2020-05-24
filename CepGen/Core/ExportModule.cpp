@@ -48,36 +48,23 @@ namespace cepgen
       const auto& cuts = params.kinematics.cuts;
       os
         << prep << "  **** incoming state\n";
-      if ( cuts.initial.q2().valid() )
+      for ( const auto& cut : cuts.initial.list() )
         os
-          << prep << "  * Q2 range (GeV2): "
-          << cuts.initial.q2() << "\n";
-      if ( params.kinematics.mode != KinematicsMode::ElasticElastic
-        && cuts.remnants.mass_single().valid() )
-        os
-          << prep << "  * remnants mass range (GeV/c2): "
-          << cuts.remnants.mass_single() << "\n";
+          << prep << "  * " << cut.description << ": "
+          << cut.limits << "\n";
       os << prep << "  **** central system\n";
-      if ( cuts.central.pt_single().valid() )
+      for ( const auto& cut : cuts.central.list() )
         os
-          << prep << "  * single particle pt (GeV/c): "
-          << cuts.central.pt_single() << "\n";
-      if ( cuts.central.energy_single().valid() )
+          << prep << "  * " << cut.description << ": "
+          << cut.limits << "\n";
+      if ( params.kinematics.mode != KinematicsMode::ElasticElastic ) {
         os
-          << prep << "  * single particle energy (GeV): "
-          << cuts.central.energy_single() << "\n";
-      if ( cuts.central.eta_single().valid() )
-        os
-          << prep << "  * single particle eta: "
-          << cuts.central.eta_single() << "\n";
-      if ( cuts.central.pt_sum().valid() )
-        os
-          << prep << "  * total pt (GeV/c): "
-          << cuts.central.mass_sum() << "\n";
-      if ( cuts.central.mass_sum().valid() )
-        os
-          << prep << "  * total invariant mass (GeV/c2): "
-          << cuts.central.mass_sum() << "\n";
+          << prep << "  **** remnants states\n";
+        for ( const auto& cut : cuts.remnants.list() )
+          os
+            << prep << "  * " << cut.description << ": "
+            << cut.limits << "\n";
+      }
       os
         << prep << "  **************************************************";
       return os.str();

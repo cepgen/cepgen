@@ -13,14 +13,28 @@ namespace cepgen
   class Cuts
   {
     public:
-      explicit Cuts();
-
       /// A set of properties for a given cut
       struct Property
       {
         std::string name, description;
         Limits limits;
       };
+
+      /// A collection of limits properties
+      std::vector<Property>& rawList() { return limits_; }
+      /// A collection of valid limits properties
+      std::vector<Property> list();
+      /// A collection of const-qualified limits properties
+      std::vector<Property> list() const;
+
+    protected:
+      std::vector<Property> limits_;
+  };
+
+  class CentralCuts : public Cuts
+  {
+    public:
+      explicit CentralCuts();
 
       /// single particle transverse momentum
       Limits& pt_single() { return limits_.at( e_pt_single ).limits; }
@@ -70,6 +84,24 @@ namespace cepgen
       Limits& rapidity_diff() { return limits_.at( e_rapidity_diff ).limits; }
       /// rapidity balance between the central particles
       const Limits& rapidity_diff()  const{ return limits_.at( e_rapidity_diff ).limits; }
+
+    private:
+      enum CentralCutsProperties
+      {
+        e_pt_single, e_eta_single, e_rapidity_single, e_energy_single, e_mass_single,
+        e_pt_sum, e_eta_sum, e_energy_sum, e_mass_sum,
+        e_pt_diff, e_phi_diff, e_rapidity_diff,
+        num_properties
+      };
+  };
+  /// Collection of cuts to be applied on all particle with a given PDG id
+  typedef std::unordered_map<pdgid_t,CentralCuts> PerIdCuts;
+
+  class InitialCuts : public Cuts
+  {
+    public:
+      explicit InitialCuts();
+
       /// parton virtuality
       Limits& q2() { return limits_.at( e_q2 ).limits; }
       /// parton virtuality
@@ -83,26 +115,37 @@ namespace cepgen
       /// parton azimuthal angle difference
       const Limits& phi_qt() const { return limits_.at( e_phi_qt ).limits; }
 
-      /// A collection of limits properties
-      std::vector<Property>& rawList() { return limits_; }
-      /// A collection of valid limits properties
-      std::vector<Property> list();
-      /// A collection of const-qualified limits properties
-      std::vector<Property> list() const;
+    private:
+      enum InitialCutsProperties
+      {
+        e_q2, e_qt, e_phi_qt, num_properties
+      };
+  };
+
+  class RemnantsCuts : public Cuts
+  {
+    public:
+      explicit RemnantsCuts();
+
+      /// diffractive mass
+      Limits& mx() { return limits_.at( e_mx ).limits; }
+      /// diffractive mass
+      const Limits& mx() const { return limits_.at( e_mx ).limits; }
+      /// diffractive jet rapidity
+      Limits& yj() { return limits_.at( e_yj ).limits; }
+      /// diffractive jet rapidity
+      const Limits& yj() const { return limits_.at( e_yj ).limits; }
+      /// longitudinal momentum fraction
+      Limits& xi() { return limits_.at( e_xi ).limits; }
+      /// longitudinal momentum fraction
+      const Limits& xi() const { return limits_.at( e_xi ).limits; }
 
     private:
-      enum Properties
+      enum RemnantsCutsProperties
       {
-        e_pt_single, e_eta_single, e_rapidity_single, e_energy_single, e_mass_single,
-        e_pt_sum, e_eta_sum, e_energy_sum, e_mass_sum,
-        e_pt_diff, e_phi_diff, e_rapidity_diff,
-        e_q2, e_qt, e_phi_qt,
-        num_properties
+        e_mx, e_yj, e_xi, num_properties
       };
-      std::vector<Property> limits_;
   };
-  /// Collection of cuts to be applied on all particle with a given PDG id
-  typedef std::unordered_map<pdgid_t,Cuts> PerIdCuts;
 }
 
 #endif

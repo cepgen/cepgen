@@ -187,9 +187,9 @@ namespace cepgen
       mX2_ = event_->oneWithRole( Particle::IncomingBeam1 ).mass2();
       mY2_ = event_->oneWithRole( Particle::IncomingBeam2 ).mass2();
       if ( kin_.mode == KinematicsMode::InelasticElastic || kin_.mode == KinematicsMode::InelasticInelastic )
-        defineVariable( mX2_, Mapping::square, kin_.cuts.remnants.mass_single(), { 1.07, 1000. }, "Positive z proton remnant squared mass" );
+        defineVariable( mX2_, Mapping::square, kin_.cuts.remnants.mx(), { 1.07, 1000. }, "Positive z proton remnant squared mass" );
       if ( kin_.mode == KinematicsMode::ElasticInelastic || kin_.mode == KinematicsMode::InelasticInelastic )
-        defineVariable( mY2_, Mapping::square, kin_.cuts.remnants.mass_single(), { 1.07, 1000. }, "Negative z proton remnant squared mass" );
+        defineVariable( mY2_, Mapping::square, kin_.cuts.remnants.mx(), { 1.07, 1000. }, "Negative z proton remnant squared mass" );
     }
 
     double

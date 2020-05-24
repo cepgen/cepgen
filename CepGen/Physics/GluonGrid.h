@@ -17,7 +17,7 @@ namespace kmr
       void operator=( const GridHandler& ) = delete;
 
       /// Retrieve the grid interpolator (singleton)
-      static GluonGrid& get( const char* path = DEFAULT_KMR_GRID_PATH );
+      static GluonGrid& get( const std::string& path = DEFAULT_KMR_GRID_PATH );
 
       /// Compute the gluon flux
       double operator()( double x, double kt2, double mu2 ) const;

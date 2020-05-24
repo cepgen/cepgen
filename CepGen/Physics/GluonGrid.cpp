@@ -9,7 +9,7 @@
 namespace kmr
 {
   GluonGrid&
-  GluonGrid::get( const char* filename )
+  GluonGrid::get( const std::string& filename )
   {
     static GluonGrid instance( cepgen::ParametersList()
       .set<std::string>( "path", filename ) );

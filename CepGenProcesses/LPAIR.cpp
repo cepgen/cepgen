@@ -82,9 +82,9 @@ namespace cepgen
       p2_lab_ = (*event_)[Particle::IncomingBeam2][0].momentum();
 
       const double mx0 = mp_+PDG::get().mass( PDG::piPlus ); // 1.07
-      const double min_wx = pow( std::max( mx0, kin_.cuts.remnants.mass_single().min() ), 2 );
-      const Limits wx_lim_ob1( min_wx, pow( std::min( sqs_-p1_lab_.mass()-2.*sqrt( masses_.Ml2 ), kin_.cuts.remnants.mass_single().max() ), 2 ) );
-      const Limits wx_lim_ob2( min_wx, pow( std::min( sqs_-p2_lab_.mass()-2.*sqrt( masses_.Ml2 ), kin_.cuts.remnants.mass_single().max() ), 2 ) );
+      const double min_wx = pow( std::max( mx0, kin_.cuts.remnants.mx().min() ), 2 );
+      const Limits wx_lim_ob1( min_wx, pow( std::min( sqs_-p1_lab_.mass()-2.*sqrt( masses_.Ml2 ), kin_.cuts.remnants.mx().max() ), 2 ) );
+      const Limits wx_lim_ob2( min_wx, pow( std::min( sqs_-p2_lab_.mass()-2.*sqrt( masses_.Ml2 ), kin_.cuts.remnants.mx().max() ), 2 ) );
 
       //--- variables mapping
 
@@ -813,14 +813,14 @@ namespace cepgen
 
       //--- cut on mass of final hadronic system (MX/Y)
 
-      if ( kin_.cuts.remnants.mass_single().valid() ) {
+      if ( kin_.cuts.remnants.mx().valid() ) {
         if ( ( kin_.mode == KinematicsMode::InelasticElastic
             || kin_.mode == KinematicsMode::InelasticInelastic )
-          && !kin_.cuts.remnants.mass_single().contains( mx ) )
+          && !kin_.cuts.remnants.mx().contains( mx ) )
           return 0.;
         if ( ( kin_.mode == KinematicsMode::ElasticInelastic
             || kin_.mode == KinematicsMode::InelasticInelastic )
-          && !kin_.cuts.remnants.mass_single().contains( my ) )
+          && !kin_.cuts.remnants.mx().contains( my ) )
           return 0.;
       }
 

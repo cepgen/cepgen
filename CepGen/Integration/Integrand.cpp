@@ -130,9 +130,9 @@ namespace cepgen
       for ( const auto& part : (*event_)[system] ) {
         if ( part.status() != Particle::Status::FinalState )
           continue;
-        if ( !remn_cut.energy_single().contains( part.momentum().energy() ) )
+        if ( !remn_cut.xi().contains( 1.-part.momentum().pz()/(*event_)[*part.mothers().begin()].momentum().pz() ) )
           return 0.;
-        if ( !remn_cut.rapidity_single().contains( fabs( part.momentum().rapidity() ) ) )
+        if ( !remn_cut.yj().contains( fabs( part.momentum().rapidity() ) ) )
           return 0.;
       }
 

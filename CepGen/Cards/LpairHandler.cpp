@@ -85,7 +85,7 @@ namespace cepgen
       if ( !pdg_input_path_.empty() )
         pdg::MCDFileParser::parse( pdg_input_path_.c_str() );
       if ( !kmr_grid_path_.empty() )
-        kmr::GluonGrid::get( kmr_grid_path_.c_str() );
+        kmr::GluonGrid::get( kmr_grid_path_ );
 
       //--- build the ticker if required
       if ( timer_ )

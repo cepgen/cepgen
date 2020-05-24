@@ -27,7 +27,7 @@ namespace cepgen
     {}
 
     void
-    Process2to4::setCuts( const Cuts& single )
+    Process2to4::setCuts( const CentralCuts& single )
     {
       single_limits_ = single;
     }

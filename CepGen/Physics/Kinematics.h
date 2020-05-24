@@ -57,10 +57,10 @@ namespace cepgen
       struct CutsList
       {
         CutsList();
-        Cuts initial; ///< Cuts on the initial particles kinematics
-        Cuts central; ///< Cuts on the central system produced
+        InitialCuts initial; ///< Cuts on the initial particles kinematics
+        CentralCuts central; ///< Cuts on the central system produced
         PerIdCuts central_particles; ///< Cuts on the central individual particles
-        Cuts remnants; ///< Cuts on the beam remnants system
+        RemnantsCuts remnants; ///< Cuts on the beam remnants system
       } cuts; ///< Phase space cuts
 
     private:
