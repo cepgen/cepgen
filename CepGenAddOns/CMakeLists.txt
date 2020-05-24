@@ -119,4 +119,4 @@ endif()
 
 #----- installation rules
 
-install(TARGETS CepGenAddOns DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT lib)
+install(TARGETS CepGenAddOns DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT lib)

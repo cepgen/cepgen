@@ -9,4 +9,4 @@ target_include_directories(CepGenProcesses PUBLIC ${CEPGEN_LIB_DIR}/Processes/Fo
 
 #----- installation rules
 
-install(TARGETS CepGenProcesses DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT lib)
+install(TARGETS CepGenProcesses DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT lib)

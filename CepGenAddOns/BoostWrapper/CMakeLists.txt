@@ -14,4 +14,4 @@ target_include_directories(CepGenBoost PUBLIC ${Boost_INCLUDE_DIRS})
 
 #----- installation rules
 
-install(TARGETS CepGenBoost DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT boost)
+install(TARGETS CepGenBoost DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT boost)
