@@ -41,6 +41,7 @@ set(CEPGEN_HAS_FUNCTIONALS OFF)
 set(CEPGEN_ROOT_FUNCTIONALS OFF CACHE_INTERNAL "Are functionals parsed using ROOT?")
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 set(CEPGEN_CORE_EXT ${GSL_LIB} ${GSL_CBLAS_LIB})
+set(CEPGEN_BOOST_EXT)
 
 #----- enable fortran for external libraries linking
 

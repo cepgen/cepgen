@@ -8,6 +8,10 @@ set(addons_includes)
 
 #----- check the external dependencies for physics utilities
 
+if(Boost_FOUND)
+  add_subdirectory(BoostWrapper)
+endif()
+
 #--- linking with Pythia 6
 
 if(PYTHIA6)
