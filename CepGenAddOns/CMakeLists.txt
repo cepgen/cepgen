@@ -11,6 +11,12 @@ set(addons_includes)
 if(Boost_FOUND)
   add_subdirectory(BoostWrapper)
 endif()
+if(PYTHIA8)
+  add_subdirectory(PythiaWrapper)
+endif()
+if(ROOT_FOUND)
+  add_subdirectory(ROOTWrapper)
+endif()
 
 #--- linking with Pythia 6
 
@@ -31,30 +37,13 @@ elseif(EXISTS $ENV{PYTHIA6_SRC})
   list(APPEND addons_libraries pythia6)
 endif()
 
-#--- linking with Pythia 8
-
-if(PYTHIA8)
-  message(STATUS "Pythia 8 found in ${PYTHIA8}; will be used for LHEF output")
-  list(APPEND addons_libraries ${PYTHIA8} dl)
-  list(APPEND addons_includes ${PYTHIA8_INCLUDE})
-  list(APPEND addons_definitions -DPYTHIA8)
-  list(APPEND modif_sources Hadronisers/Pythia8Hadroniser.cpp)
-  list(APPEND output_sources EventInterfaces/PythiaEventInterface.cpp OutputModules/LHEFPythiaHandler.cpp)
-endif()
-
 #--- linking with ROOT/Delphes
 
-if(ROOT_FOUND)
-  list(APPEND addons_libraries ${ROOT_LIBRARIES})
-  list(APPEND addons_definitions ${ROOT_DEFINITIONS})
-  list(APPEND addons_includes ${ROOT_INCLUDE_DIRS})
-  list(APPEND output_sources EventInterfaces/ROOTTreeInfo.cpp OutputModules/ROOTHistsHandler.cpp OutputModules/ROOTTreeHandler.cpp)
-  if(DELPHES)
-    message(STATUS "Delphes found in ${DELPHES}")
-    list(APPEND addons_libraries ${DELPHES})
-    list(APPEND addons_includes ${DELPHES_INCLUDE} ${DELPHES_EXT_INCLUDE})
-    list(APPEND output_sources OutputModules/DelphesHandler.cpp)
-  endif()
+if(DELPHES)
+  message(STATUS "Delphes found in ${DELPHES}")
+  list(APPEND addons_libraries ${DELPHES})
+  list(APPEND addons_includes ${DELPHES_INCLUDE} ${DELPHES_EXT_INCLUDE})
+  list(APPEND output_sources OutputModules/DelphesHandler.cpp)
 endif()
 
 #--- linking with HepMC

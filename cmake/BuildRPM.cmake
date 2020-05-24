@@ -10,16 +10,22 @@ set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CP
 set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 #--- register packages
-set(CPACK_COMPONENTS_ALL lib devel boost)
+set(CPACK_COMPONENTS_ALL lib devel root pythia8 boost)
 set(CPACK_COMPONENT_lib_DISPLAY_NAME "CepGen core library")
 set(CPACK_COMPONENT_lib_DESCRIPTION "The full set of core libraries embedded within CepGen")
 set(CPACK_COMPONENT_devel_DISPLAY_NAME "CepGen development headers")
 set(CPACK_COMPONENT_devel_DESCRIPTION "A set of C and C++ includes for the development of CepGen-dependent libraries")
+set(CPACK_COMPONENT_root_DISPLAY_NAME "CepGen ROOT wrappers library")
+set(CPACK_COMPONENT_root_DESCRIPTION "A collection of wrappers to the ROOT library")
+set(CPACK_COMPONENT_pythia8_DISPLAY_NAME "CepGen Pythia 8 wrappers library")
+set(CPACK_COMPONENT_pythia8_DESCRIPTION "A collection of wrappers to Pythia 8")
 set(CPACK_COMPONENT_boost_DISPLAY_NAME "CepGen Boost wrappers library")
 set(CPACK_COMPONENT_boost_DESCRIPTION "A collection of wrappers to the Boost library")
 set(CPACK_COMPONENT_INSTALL ON)
 #--- interdependency between packages
 set(CPACK_COMPONENT_devel DEPENDS lib)
+set(CPACK_COMPONENT_root DEPENDS lib)
+set(CPACK_COMPONENT_pythia8 DEPENDS lib)
 set(CPACK_COMPONENT_boost DEPENDS lib)
 #--- RPM information
 set(CPACK_RPM_MAIN_COMPONENT lib)

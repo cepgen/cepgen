@@ -1,4 +1,4 @@
-#include "CepGenAddOns/EventInterfaces/ROOTTreeInfo.h"
+#include "CepGenAddOns/ROOTWrapper/ROOTTreeInfo.h"
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Core/Exception.h"
