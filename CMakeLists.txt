@@ -34,7 +34,6 @@ set(LIB_INSTALL_DIR lib)
 
 include(GNUInstallDirs)
 include(UseEnvironment)
-include(BuildRPM)
 
 set(CEPGEN_LIBRARIES)
 set(CEPGEN_HAS_FUNCTIONALS OFF)
@@ -98,7 +97,8 @@ endif()
 install(DIRECTORY CepGen CepGenAddOns CepGenProcesses
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   COMPONENT devel FILES_MATCHING PATTERN "*.h")
-export(PACKAGE cepgen)
+export(PACKAGE CepGen)
+include(BuildRPM)
 
 #----- documentation
 

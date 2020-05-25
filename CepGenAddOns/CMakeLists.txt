@@ -17,6 +17,9 @@ endif()
 if(ROOT_FOUND)
   add_subdirectory(ROOTWrapper)
 endif()
+if(YODA)
+  add_subdirectory(RivetWrapper)
+endif()
 
 #--- linking with Pythia 6
 
@@ -93,15 +96,6 @@ if(PROMC_LIB)
   list(APPEND addons_libraries ${PROMC_LIB})
   list(APPEND addons_includes ${PROMC_INCLUDE} ${PROMC_EXT_INCLUDE})
   list(APPEND output_sources OutputModules/ProMCHandler.cpp)
-endif()
-
-#--- linking with YODA
-
-if(YODA)
-  message(STATUS "YODA found in ${YODA}")
-  list(APPEND addons_libraries ${YODA})
-  list(APPEND addons_includes ${YODA_INCLUDE})
-  list(APPEND output_sources OutputModules/YODAHistsHandler.cpp)
 endif()
 
 #----- build the objects
