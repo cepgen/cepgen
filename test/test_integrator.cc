@@ -1,6 +1,7 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
 
+#include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Integration/Integrator.h"
 
@@ -8,6 +9,7 @@
 
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Core/Exception.h"
 
 #include <iostream>
 
@@ -18,9 +20,14 @@ template<size_t N> class TestProcess : public cepgen::proc::Process
 {
   public:
     /// Test process constructor
-    inline explicit TestProcess( const string& formula, const vector<string>& args ) :
-      cepgen::proc::Process( cepgen::ParametersList().set<string>( "description", formula ), false ),
-      funct_( formula, args ) {}
+    inline explicit TestProcess( const string& func_mod, const string& formula, const vector<string>& args ) :
+      cepgen::proc::Process( cepgen::ParametersList().set<string>( "description", formula ), false ) {
+      funct_ = cepgen::utils::FunctionalFactory::get().build( func_mod,
+        cepgen::ParametersList()
+          .set<string>( "expression", formula )
+          .set<vector<string> >( "arguments", args )
+      );
+    }
     /// Dummy function to be called on phase space definition
     void prepareKinematics() override {
       for ( auto& var : variables_ )
@@ -30,14 +37,14 @@ template<size_t N> class TestProcess : public cepgen::proc::Process
     void fillKinematics( bool ) override {}
     /// Generic formula to compute a weight out of a point in the phase space
     double computeWeight() override {
-      array<double,N> args;
+      vector<double> args;
       copy_n( variables_.begin(), N, args.begin() );
-      return funct_.eval( args );
+      return funct_->operator()( args );
     }
 
   private:
-    array<double,N> variables_;
-    cepgen::utils::Functional<N> funct_;
+    vector<double> variables_;
+    std::unique_ptr<cepgen::utils::Functional> funct_;
 };
 
 int
@@ -45,12 +52,13 @@ main( int argc, char* argv[] )
 {
   bool debug;
   double num_sigma;
-  string integrator;
+  string integrator, func_mod;
 
   cepgen::ArgumentsParser( argc, argv )
     .addOptionalArgument( "num-sigma", "max. number of std.dev.", 3., &num_sigma, 'n' )
     .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
     .addOptionalArgument( "integrator", "type of integrator used", "Vegas", &integrator, 'i' )
+    .addOptionalArgument( "functional", "type of functional parser user", "ROOT", &func_mod, 'f' )
     .parse();
 
   if ( debug )
@@ -69,9 +77,9 @@ main( int argc, char* argv[] )
     double result;
   };
   vector<test_t> tests = {
-    { new TestProcess<2>( "x^2+y^2", { "x", "y" } ), 2./3 },
-    { new TestProcess<3>( "x+y^2+z^3", { "x", "y", "z" } ), 13./12. },
-    { new TestProcess<3>( "1./(1.-cos(x*3.141592654)*cos(y*3.141592654)*cos(z*3.141592654))", { "x", "y", "z" } ), 1.3932039296856768591842462603255 },
+    { new TestProcess<2>( func_mod, "x^2+y^2", { "x", "y" } ), 2./3 },
+    { new TestProcess<3>( func_mod, "x+y^2+z^3", { "x", "y", "z" } ), 13./12. },
+    { new TestProcess<3>( func_mod, "1./(1.-cos(x*3.141592654)*cos(y*3.141592654)*cos(z*3.141592654))", { "x", "y", "z" } ), 1.3932039296856768591842462603255 },
   };
 
   //--- integration part

@@ -28,6 +28,7 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/FunctionalFactory.h"
 
 #include "CepGen/Event/Event.h"
 
@@ -303,6 +304,13 @@ namespace cepgen
       if ( io::ExportModuleFactory::get().modules().empty() )
         oss << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
       for ( const auto& mod : io::ExportModuleFactory::get().modules() )
+        oss << "\n> " << utils::colourise( mod, utils::Colour::green );
+    }
+    { oss << "\n" << sep_mid << "\n"
+        << utils::boldify( "Functional evaluators" );
+      if ( utils::FunctionalFactory::get().modules().empty() )
+        oss << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
+      for ( const auto& mod : utils::FunctionalFactory::get().modules() )
         oss << "\n> " << utils::colourise( mod, utils::Colour::green );
     }
     { oss << "\n" << sep_mid << "\n"

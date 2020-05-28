@@ -11,9 +11,11 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Processes/Process.h"
 
-#include "CepGen/Physics/TamingFunction.h"
 #include "CepGen/Physics/PDG.h"
+
+#include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/TimeKeeper.h"
+#include "CepGen/Utils/String.h"
 
 #include <iomanip>
 
@@ -28,10 +30,10 @@ namespace cepgen
   Parameters::Parameters( Parameters& param ) :
     general( param.general ), integrator( param.integrator ),
     kinematics( param.kinematics ),
-    taming_functions( param.taming_functions ),
     process_( std::move( param.process_ ) ),
     evt_modifiers_( std::move( param.evt_modifiers_ ) ),
     out_modules_( std::move( param.out_modules_ ) ),
+    taming_functions_( std::move( param.taming_functions_ ) ),
     total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ ),
     generation_( param.generation_ ),
     tmr_( std::move( param.tmr_ ) )
@@ -40,7 +42,6 @@ namespace cepgen
   Parameters::Parameters( const Parameters& param ) :
     general( param.general ), integrator( param.integrator ),
     kinematics( param.kinematics ),
-    taming_functions( param.taming_functions ),
     total_gen_time_( param.total_gen_time_ ), num_gen_events_( param.num_gen_events_ ),
     generation_( param.generation_ )
   {}
@@ -56,10 +57,10 @@ namespace cepgen
     general = param.general;
     integrator = param.integrator;
     kinematics = param.kinematics;
-    taming_functions = param.taming_functions;
     process_ = std::move( param.process_ );
     evt_modifiers_ = std::move( param.evt_modifiers_ );
     out_modules_ = std::move( param.out_modules_ );
+    taming_functions_ = std::move( param.taming_functions_ );
     total_gen_time_ = param.total_gen_time_;
     num_gen_events_ = param.num_gen_events_;
     generation_ = param.generation_;
@@ -190,6 +191,12 @@ namespace cepgen
     out_modules_.emplace_back( std::unique_ptr<io::ExportModule>( mod ) );
   }
 
+  void
+  Parameters::addTamingFunction( std::unique_ptr<utils::Functional> fct )
+  {
+    taming_functions_.emplace_back( std::move( fct ) );
+  }
+
   std::ostream&
   operator<<( std::ostream& os, const Parameters* param )
   {
@@ -225,7 +232,7 @@ namespace cepgen
     os
       << std::setw( wt ) << "Number of points to try per bin" << param->generation_.num_points << "\n"
       << std::setw( wt ) << "Verbosity level " << utils::Logger::get().level << "\n";
-    if ( !param->evt_modifiers_.empty() || param->out_modules_.empty() || !param->taming_functions.empty() )
+    if ( !param->evt_modifiers_.empty() || param->out_modules_.empty() || !param->taming_functions_.empty() )
       os
         << "\n"
         << std::setfill( '-' ) << std::setw( wb+6 )
@@ -248,12 +255,11 @@ namespace cepgen
           os << std::setw( wt ) << "" << par << ": " << mod->parameters().getString( par ) << "\n";
       }
     }
-    if ( !param->taming_functions.empty() ) {
-      os << std::setw( wt ) << utils::s( "Taming function", param->taming_functions.size(), false ) << "\n";
-      for ( const auto& tf : param->taming_functions )
+    if ( !param->taming_functions_.empty() ) {
+      os << std::setw( wt ) << utils::s( "Taming function", param->taming_functions_.size(), false ) << "\n";
+      for ( const auto& tf : param->taming_functions_ )
         os << std::setw( wt ) << ""
-          << ( pretty ? utils::boldify( tf.var_orig ) : tf.var_orig ) << ": "
-          << tf.expr_orig << "\n";
+          << tf->variables().at( 0 ) << ": " << tf->expression() << "\n";
     }
     os
       << "\n"

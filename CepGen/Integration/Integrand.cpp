@@ -5,7 +5,6 @@
 
 #include "CepGen/Processes/Process.h"
 
-#include "CepGen/Physics/TamingFunction.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
 
@@ -13,6 +12,7 @@
 #include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
 #include "CepGen/Parameters.h"
@@ -69,8 +69,8 @@ namespace cepgen
     if ( !event_ )
       return weight;
     if ( !storage_
-      && !params_->taming_functions.empty()
       && !params_->eventModifiersSequence().empty()
+      && !params_->tamingFunctions().empty()
       &&  params_->kinematics.cuts.central_particles.empty() )
       return weight;
 
@@ -81,8 +81,8 @@ namespace cepgen
     //    collection of taming functions
     try {
       utils::EventBrowser bws;
-      for ( const auto& tam : params_->taming_functions )
-        weight *= tam.function.eval( bws.get( *event_, tam.var_orig ) );
+      for ( const auto& tam : params_->tamingFunctions() )
+        weight *= (*tam)( bws.get( *event_, tam->variables().at( 0 ) ) );
     } catch ( const Exception& ) {
       throw CG_FATAL( "Integrand" )
         << "Failed to apply taming function(s) taming!";
