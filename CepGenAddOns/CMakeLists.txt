@@ -110,6 +110,7 @@ endif()
 if(PYTHIA8)
   set_property(TARGET CepGenAddOns PROPERTY CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-misleading-indentation")
 endif()
+set(CEPGEN_ADDONS_EXT ${CEPGEN_ADDONS_EXT} PARENT_SCOPE)
 
 #----- installation rules
 

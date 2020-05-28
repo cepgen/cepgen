@@ -24,7 +24,10 @@ if(NOT CMAKE_BUILD_CORE AND NOT CMAKE_BUILD_PROCESSES AND NOT CMAKE_BUILD_ADDONS
   message(FATAL_ERROR "Nothing to be built!")
 endif()
 
+#set(CMAKE_INSTALL_RPATH "$ORIGIN")
+#set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake $ENV{ROOTSYS}/cmake)
+
 set(CMAKE_CXX_FLAGS_DEBUG "-pg") # for gprof
 #set(CMAKE_CXX_FLAGS_DEBUG "-fprofile-arcs -ftest-coverage") # for gcov
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
@@ -36,11 +39,9 @@ include(GNUInstallDirs)
 include(UseEnvironment)
 
 set(CEPGEN_LIBRARIES)
-set(CEPGEN_HAS_FUNCTIONALS OFF)
-set(CEPGEN_ROOT_FUNCTIONALS OFF CACHE_INTERNAL "Are functionals parsed using ROOT?")
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 set(CEPGEN_CORE_EXT ${GSL_LIB} ${GSL_CBLAS_LIB})
-set(CEPGEN_BOOST_EXT)
+set(CEPGEN_ADDONS_EXT)
 
 #----- enable fortran for external libraries linking
 
@@ -55,7 +56,7 @@ if(CMAKE_BUILD_PROCESSES)
 endif()
 if(CMAKE_BUILD_ADDONS)
   add_subdirectory(CepGenAddOns)
-  list(APPEND CEPGEN_LIBRARIES CepGenAddOns)
+  list(APPEND CEPGEN_LIBRARIES CepGenAddOns ${CEPGEN_ADDONS_EXT})
 endif()
 if(CMAKE_BUILD_CORE)
   add_subdirectory(CepGen/Event)
