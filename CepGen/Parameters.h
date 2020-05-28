@@ -15,14 +15,16 @@ namespace cepgen
   namespace proc { class Process; }
   namespace io { class ExportModule; }
   namespace utils {
-    class TamingFunction;
     class TimeKeeper;
+    class Functional;
   }
   enum class IntegratorType;
   /// An ordered collection of event modification algorithms
   typedef std::vector<std::unique_ptr<EventModifier> > EventModifiersSequence;
   /// An ordered collection of event export modules
   typedef std::vector<std::unique_ptr<io::ExportModule> > ExportModulesSequence;
+  /// An ordered collection of taming functions evaluators
+  typedef std::vector<std::unique_ptr<utils::Functional> > TamingFunctionsSequence;
   /// List of parameters used to start and run the simulation job
   class Parameters
   {
@@ -118,8 +120,10 @@ namespace cepgen
 
       //----- taming functions
 
-      /// Functionals to be used to account for rescattering corrections (implemented within the process)
-      std::vector<utils::TamingFunction> taming_functions;
+      /// List of all taming functions definitions
+      const TamingFunctionsSequence& tamingFunctions() const { return taming_functions_; }
+      /// Set a new taming function definition
+      void addTamingFunction( std::unique_ptr<utils::Functional> );
 
       //----- run operations
 
@@ -140,6 +144,8 @@ namespace cepgen
       EventModifiersSequence evt_modifiers_;
       /// Collection of event output modules to be applied
       ExportModulesSequence out_modules_;
+      /// Functionals to be used to account for rescattering corrections
+      TamingFunctionsSequence taming_functions_;
       /// Total generation time (in seconds)
       double total_gen_time_;
       /// Number of events already generated

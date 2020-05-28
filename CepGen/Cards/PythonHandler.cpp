@@ -14,13 +14,15 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
+#include "CepGen/Utils/Functional.h"
+#include "CepGen/Modules/FunctionalFactory.h"
+
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
 
 #include "CepGen/Physics/MCDFileParser.h"
-#include "CepGen/Physics/TamingFunction.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/HeavyIon.h"
 
@@ -163,7 +165,7 @@ namespace cepgen
       PyObject* ptam = element( process, "tamingFunctions" ); // borrowed
       if ( ptam )
         for ( const auto& p : getVector<ParametersList>( ptam ) )
-          params_->taming_functions.emplace_back( p.get<std::string>( "variable" ), p.get<std::string>( "expression" ) );
+          params_->addTamingFunction( utils::FunctionalFactory::get().build( "ROOT", p ) );
 
       Py_CLEAR( process );
 
