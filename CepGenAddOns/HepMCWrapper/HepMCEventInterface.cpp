@@ -1,4 +1,4 @@
-#include "CepGenAddOns/EventInterfaces/HepMCEventInterface.h"
+#include "CepGenAddOns/HepMCWrapper/HepMCEventInterface.h"
 
 #include "CepGen/Parameters.h"
 #include "CepGen/Core/Exception.h"

@@ -13,22 +13,6 @@ set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/CepGen/README")
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_PACKAGE_RELEASE}.${CMAKE_SYSTEM_PROCESSOR}")
 set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-#--- register packages
-set(CPACK_COMPONENTS_ALL lib devel root pythia8 boost lhapdf)
-set(CPACK_COMPONENT_LIB_DISPLAY_NAME "CepGen core library")
-set(CPACK_COMPONENT_LIB_DESCRIPTION "The full set of core libraries embedded within CepGen")
-set(CPACK_COMPONENT_DEVEL_DISPLAY_NAME "CepGen development headers")
-set(CPACK_COMPONENT_DEVEL_DESCRIPTION "Collection of C and C++ includes for the development of CepGen-dependent libraries")
-set(CPACK_COMPONENT_ROOT_DISPLAY_NAME "CepGen ROOT wrappers library")
-set(CPACK_COMPONENT_ROOT_DESCRIPTION "Collection of CepGen wrappers to the ROOT library")
-set(CPACK_COMPONENT_PYTHIA8_DISPLAY_NAME "CepGen Pythia 8 wrappers library")
-set(CPACK_COMPONENT_PYTHIA8_DESCRIPTION "Collection of CepGen wrappers to Pythia 8")
-set(CPACK_COMPONENT_BOOST_DISPLAY_NAME "CepGen Boost wrappers library")
-set(CPACK_COMPONENT_BOOST_DESCRIPTION "Collection of CepGen wrappers to the Boost library")
-set(CPACK_COMPONENT_LHAPDF_DISPLAY_NAME "CepGen LHAPDF wrappers library")
-set(CPACK_COMPONENT_LHAPDF_DESCRIPTION "Collection of CepGen wrappers to the LHAPDF library")
-set(CPACK_COMPONENT_RIVET_DISPLAY_NAME "CepGen Rivet wrappers library")
-set(CPACK_COMPONENT_RIVET_DESCRIPTION "Collection of CepGen wrappers to the Rivet library")
 #--- RPM information
 set(CPACK_RPM_MAIN_COMPONENT lib)
 set(CPACK_RPM_FILE_NAME RPM-DEFAULT)
@@ -42,7 +26,7 @@ set(CPACK_RPM_LIB_PACKAGE_REQUIRES "gsl >= 2.1")
 set(CEPGEN_MIN_REQ "cepgen == ${VERSION}")
 set(CPACK_RPM_DEVEL_PACKAGE_REQUIRES ${CEPGEN_MIN_REQ})
 set(CPACK_RPM_ROOT_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, root >= 6.0")
-set(CPACK_RPM_PYTHIA8_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, pythia >= 8.2.30")
+set(CPACK_RPM_PYTHIA8_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, pythia8 >= 8.2.30")
 set(CPACK_RPM_BOOST_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, boost >= 1.33")
 set(CPACK_RPM_LHAPDF_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, lhapdf")
 set(CPACK_RPM_RIVET_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
@@ -58,3 +42,34 @@ list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /usr/local/lib)
 list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /usr/local/lib64)
 list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /usr/local/include)
 include(CPack)
+#--- register packages
+cpack_add_component(lib
+    DISPLAY_NAME "CepGen core library"
+    DESCRIPTION "The full set of core libraries embedded within CepGen"
+    REQUIRED)
+#set(CPACK_COMPONENTS_ALL lib devel root pythia8 boost lhapdf)
+cpack_add_component(devel
+    DISPLAY_NAME "CepGen development headers"
+    DESCRIPTION "Collection of C and C++ includes for the development of CepGen-dependent libraries"
+    DEPENDS lib)
+cpack_add_component(root
+    DISPLAY_NAME "CepGen ROOT wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the ROOT library"
+    DEPENDS lib)
+cpack_add_component(pythia8
+    DISPLAY_NAME "CepGen Pythia 8 wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to Pythia 8"
+    DEPENDS lib)
+cpack_add_component(boost
+    DISPLAY_NAME "CepGen Boost wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the Boost library"
+    DEPENDS lib)
+cpack_add_component(lhapdf
+    DISPLAY_NAME "CepGen LHAPDF wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the LHAPDF library"
+    DEPENDS lib)
+cpack_add_component(rivet
+    DISPLAY_NAME "CepGen Rivet wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the Rivet library"
+    DEPENDS lib)
+message(STATUS ">>> ${CPACK_COMPONENTS_ALL}")

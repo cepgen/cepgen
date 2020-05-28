@@ -1,4 +1,4 @@
-#include "CepGenAddOns/EventInterfaces/HepMCEventInterface.h"
+#include "CepGenAddOns/HepMCWrapper/HepMCEventInterface.h"
 
 #include "CepGen/Core/ExportModule.h"
 #include "CepGen/Modules/ExportModuleFactory.h"

@@ -37,7 +37,7 @@ namespace cepgen
         void initialise( const Parameters& ) override;
         /// Writer operator
         void operator<<( const Event& ) override;
-        void setCrossSection( double, double ) override {}
+        void setCrossSection( double, double ) override;
 
       private:
         /// Writer object (from HepMC)
@@ -53,21 +53,24 @@ namespace cepgen
     {}
 
     void
+    LHEFHepMCHandler::setCrossSection( double xsec, double err )
+    {
+      lhe_output_->heprup.NPRUP = 1;
+      lhe_output_->heprup.resize();
+      lhe_output_->heprup.XMAXUP[0] = 1.;
+      lhe_output_->heprup.LPRUP[0] = 1;
+      lhe_output_->heprup.XSECUP[0] = xsec;
+      lhe_output_->heprup.XERRUP[0] = err;
+    }
+
+    void
     LHEFHepMCHandler::initialise( const Parameters& params )
     {
       lhe_output_->headerBlock()
         << "<!--\n" << banner( params ) << "\n-->";
       //--- first specify information about the run
-      LHEF::HEPRUP run = lhe_output_->heprup;
-      run.IDBMUP = { (int)params.kinematics.incoming_beams.first.pdg, (int)params.kinematics.incoming_beams.second.pdg };
-      run.EBMUP = { (double)params.kinematics.incoming_beams.first.pz, (double)params.kinematics.incoming_beams.second.pz };
-      run.NPRUP = 1;
-      run.resize();
-      run.XSECUP[0] = params.integration().result;
-      run.XERRUP[0] = params.integration().err_result;
-      run.XMAXUP[0] = 1.;
-      run.LPRUP[0] = 1;
-      lhe_output_->heprup = run;
+      lhe_output_->heprup.IDBMUP = { (int)params.kinematics.incoming_beams.first.pdg, (int)params.kinematics.incoming_beams.second.pdg };
+      lhe_output_->heprup.EBMUP = { (double)params.kinematics.incoming_beams.first.pz, (double)params.kinematics.incoming_beams.second.pz };
       //--- ensure everything is properly parsed
       lhe_output_->init();
     }
@@ -108,5 +111,5 @@ namespace cepgen
   }
 }
 
-REGISTER_IO_MODULE( "lhef", LHEFHepMCHandler )
+REGISTER_IO_MODULE( "lhef_hepmc", LHEFHepMCHandler )
 #endif
