@@ -27,6 +27,7 @@
 #include "CepGen/Physics/HeavyIon.h"
 
 #include "CepGen/Utils/TimeKeeper.h"
+#include "CepGen/Utils/String.h"
 
 #include <algorithm>
 
@@ -41,28 +42,18 @@ namespace cepgen
     PythonHandler::PythonHandler( const ParametersList& params ) :
       filename_( params.get<std::string>( FILENAME_KEY ) )
     {
-      setenv( "PYTHONPATH", ".:Cards:test:../Cards", 1 );
-      setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
-      CG_DEBUG( "PythonHandler" )
-        << "Python PATH: " << getenv( "PYTHONPATH" ) << ".";
       if ( !filename_.empty() )
         parse( filename_, params_ );
-    }
-
-    PythonHandler::PythonHandler( const std::string& file ) :
-      filename_( file )
-    {
-      setenv( "PYTHONPATH", ".:Cards:test:../Cards", 1 );
-      setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
-      CG_DEBUG( "PythonHandler" )
-        << "Python PATH: " << getenv( "PYTHONPATH" ) << ".";
-      if ( !filename_.empty() )
-        parse( file, params_ );
     }
 
     Parameters*
     PythonHandler::parse( const std::string& file, Parameters* params )
     {
+      setenv( "PYTHONPATH", ( utils::environ( "CEPGEN_PATH", "." )+":.:Cards:test:../Cards" ).c_str(), 1 );
+      setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
+      CG_DEBUG( "PythonHandler" )
+        << "Python PATH: " << getenv( "PYTHONPATH" ) << ".";
+
       params_ = params;
       std::string filename = pythonPath( file );
       const size_t fn_len = filename.length()+1;
