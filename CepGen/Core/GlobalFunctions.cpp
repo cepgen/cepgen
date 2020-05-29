@@ -32,6 +32,14 @@
 
 namespace cepgen
 {
+  const std::vector<std::string> libs{
+    "CepGenRoot",
+    "CepGenPythia",
+    "CepGenLHAPDF",
+    "CepGenHepMC",
+    "CepGenBoost",
+    "CepGenRivet",
+  };
   namespace utils
   {
     std::atomic<int> gSignal; ///< Abort signal handler
@@ -41,12 +49,12 @@ namespace cepgen
   loadLibrary( const std::string& path )
   {
 #ifdef WIN32
-    if ( LoadLibraryA( path.c_str() ) == nullptr )
+    if ( LoadLibraryA( ( path+".dll" ).c_str() ) == nullptr )
       throw CG_WARNING( "loadLibrary" )
         << "Failed to load library \"" << path << "\".\n\t"
         << "Error code #" << GetLastError() << ".";
 #else
-    if ( dlopen( path.c_str(), RTLD_LAZY | RTLD_LOCAL ) == nullptr )
+    if ( dlopen( ( "lib"+path+".so" ).c_str(), RTLD_LAZY | RTLD_LOCAL ) == nullptr )
       throw CG_WARNING( "loadLibrary" )
         << "Failed to load library \"" << path << "\".\n\t"
         << dlerror();
@@ -61,10 +69,9 @@ namespace cepgen
     static const std::string pdg_file = "External/mass_width_2019.mcd";
     pdg::MCDFileParser::parse( pdg_file.c_str() );
     //--- load all necessary modules
-    const std::vector<std::string> libs{ "Root", "Pythia", "LHAPDF", "HepMC", "Boost" };
     for ( const auto& lib : libs )
       try {
-        loadLibrary( "libCepGen"+lib+".so" );
+        loadLibrary( lib );
       } catch ( const Exception& e ) {}
     //--- header message
     try { printHeader(); } catch ( const Exception& e ) { e.dump(); }
