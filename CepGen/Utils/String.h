@@ -41,6 +41,8 @@ namespace cepgen
           return std::move( str )+sep+std::to_string( xv );
         } );
     }
+    /// Get an environment variable
+    std::string environ( const std::string&, const std::string& def = "" );
   }
 }
 

@@ -103,5 +103,14 @@ namespace cepgen
       std::copy( vec.begin(), std::prev( vec.end() ), std::ostream_iterator<std::string>( oss, delim.c_str() ) );
       return oss.str()+*vec.rbegin();
     }
+
+    std::string
+    environ( const std::string& env, const std::string& def )
+    {
+      const auto out = std::getenv( env.c_str() );
+      if ( !out )
+        return def;
+      return std::string( out );
+    }
   }
 }

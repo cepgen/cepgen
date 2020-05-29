@@ -19,8 +19,9 @@ namespace pdg
   };
 
   void
-  MCDFileParser::parse( const char* path )
+  MCDFileParser::parse( const std::string& path )
   {
+    CG_WARNING("")<<path;
     std::ifstream ifile( path );
     std::string line;
     while ( std::getline( ifile, line ) ) {

@@ -23,6 +23,7 @@
 
 #include <fstream>
 #include <atomic>
+#include <utility>
 
 #ifdef _WIN32
 # include <libloaderapi.h>
@@ -66,8 +67,8 @@ namespace cepgen
   initialise()
   {
     //--- parse all particles properties
-    static const std::string pdg_file = "External/mass_width_2019.mcd";
-    pdg::MCDFileParser::parse( pdg_file.c_str() );
+    static const std::string pdg_file = "";
+    pdg::MCDFileParser::parse( utils::environ( "CEPGEN_PATH", "." )+"/External/mass_width_2019.mcd" );
     //--- load all necessary modules
     for ( const auto& lib : utils::libraries )
       try {
@@ -82,18 +83,12 @@ namespace cepgen
   void
   printHeader()
   {
-    std::string tmp;
-    std::ostringstream os;
-    std::ifstream hf( "README" );
+    std::ifstream hf( utils::environ( "CEPGEN_PATH", "." )+"/README" );
     if ( !hf.good() )
       throw CG_WARNING( "printHeader" ) << "Failed to open README file.";
-    while ( true ) {
-      if ( !hf.good() ) break;
-      getline( hf, tmp );
-      os << "\n " << tmp;
-    }
-    hf.close();
-    CG_LOG( "printHeader" ) << os.str();
+    CG_LOG( "printHeader" )
+      << std::string( std::istreambuf_iterator<char>( hf ),
+                      std::istreambuf_iterator<char>() );
   }
 
   void
