@@ -38,6 +38,14 @@
 
 namespace cepgen
 {
+  void
+  initialise()
+  {
+    static const std::string pdg_file = "External/mass_width_2019.mcd";
+    pdg::MCDFileParser::parse( pdg_file.c_str() );
+    CG_DEBUG( "init" ) << "CepGen initialised.";
+  }
+
   namespace utils
   {
     std::atomic<int> gSignal; ///< Abort signal handler
@@ -47,9 +55,12 @@ namespace cepgen
     parameters_( new Parameters ),
     result_( -1. ), result_error_( -1. )
   {
-    static const std::string pdg_file = "External/mass_width_2019.mcd";
-    pdg::MCDFileParser::parse( pdg_file.c_str() );
     CG_DEBUG( "Generator:init" ) << "Generator initialized";
+    static bool init = false;
+    if ( !init ) {
+      initialise();
+      init = true;
+    }
     try {
       printHeader();
     } catch ( const Exception& e ) {

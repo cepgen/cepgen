@@ -32,6 +32,8 @@ namespace cepgen
   class GeneratorWorker;
   class Parameters;
 
+  void initialise();
+
   ////////////////////////////////////////////////////////////////////////////////
 
   /**
