@@ -11,7 +11,6 @@ option(CMAKE_BUILD_SCAN "Build cross-section scan utilitary" OFF)
 option(CMAKE_BUILD_CARD_CONV "Build steering cards converter utilitary" OFF)
 option(CMAKE_BUILD_TESTS "Build tests" OFF)
 option(CMAKE_BUILD_FOAM "Build FOAM integrator" OFF)
-
 #----- release build by default
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -28,6 +27,7 @@ endif()
 #set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_PREFIX "/usr")
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake $ENV{ROOTSYS}/cmake)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 set(CMAKE_CXX_FLAGS_DEBUG "-pg") # for gprof
 #set(CMAKE_CXX_FLAGS_DEBUG "-fprofile-arcs -ftest-coverage") # for gcov
@@ -57,7 +57,7 @@ endif()
 if(CMAKE_BUILD_ADDONS)
   add_subdirectory(CepGenAddOns)
   list(APPEND CEPGEN_LIBRARIES CepGenAddOns)
-  #list(APPEND CEPGEN_LIBRARIES ${CEPGEN_ADDONS_EXT})
+  message(STATUS "Found addons: ${CEPGEN_ADDONS_EXT}")
 endif()
 if(CMAKE_BUILD_CORE)
   add_subdirectory(CepGen/Event)

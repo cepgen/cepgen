@@ -70,4 +70,3 @@ target_include_directories(CepGenCore PUBLIC ${core_includes})
 #----- installation rules
 
 install(TARGETS CepGenCore DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT lib)
-

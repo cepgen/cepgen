@@ -42,15 +42,16 @@ namespace cepgen
   {
 #ifdef WIN32
     if ( LoadLibraryA( path.c_str() ) == nullptr )
-      CG_WARNING( "loadLibrary" )
+      throw CG_WARNING( "loadLibrary" )
         << "Failed to load library \"" << path << "\".\n\t"
         << "Error code #" << GetLastError() << ".";
 #else
     if ( dlopen( path.c_str(), RTLD_LAZY | RTLD_LOCAL ) == nullptr )
-      CG_WARNING( "loadLibrary" )
+      throw CG_WARNING( "loadLibrary" )
         << "Failed to load library \"" << path << "\".\n\t"
         << dlerror();
 #endif
+    CG_DEBUG( "loadLibrary" ) << "Loaded library \"" << path << "\".";
   }
 
   void
@@ -60,11 +61,11 @@ namespace cepgen
     static const std::string pdg_file = "External/mass_width_2019.mcd";
     pdg::MCDFileParser::parse( pdg_file.c_str() );
     //--- load all necessary modules
-    loadLibrary( "CepGenAddOns/ROOTWrapper/libCepGenRoot.so" );
-    loadLibrary( "CepGenAddOns/PythiaWrapper/libCepGenPythia.so" );
-    loadLibrary( "CepGenAddOns/LHAPDFWrapper/libCepGenLHAPDF.so" );
-    loadLibrary( "CepGenAddOns/HepMCWrapper/libCepGenHepMC.so" );
-    loadLibrary( "CepGenAddOns/BoostWrapper/libCepGenBoost.so" );
+    const std::vector<std::string> libs{ "Root", "Pythia", "LHAPDF", "HepMC", "Boost" };
+    for ( const auto& lib : libs )
+      try {
+        loadLibrary( "libCepGen"+lib+".so" );
+      } catch ( const Exception& e ) {}
     //--- header message
     try { printHeader(); } catch ( const Exception& e ) { e.dump(); }
     //--- greetings message

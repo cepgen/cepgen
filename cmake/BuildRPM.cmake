@@ -70,4 +70,4 @@ cpack_add_component(rivet
     DISPLAY_NAME "CepGen Rivet wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the Rivet library"
     DEPENDS lib)
-message(STATUS ">>> ${CPACK_COMPONENTS_ALL}")
+#message(STATUS ">>> ${CPACK_COMPONENTS_ALL}")
