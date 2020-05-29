@@ -33,7 +33,7 @@ int main( int argc, char* argv[] )
 
   //--- if modules listing is requested
   if ( list_mods ) {
-    gen.dumpModules();
+    cepgen::dumpModules();
     return 0;
   }
   if ( debug )

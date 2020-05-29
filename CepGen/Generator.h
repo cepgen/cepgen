@@ -33,6 +33,10 @@ namespace cepgen
   class Parameters;
 
   void initialise();
+  /// Dump this program's header into the standard output stream
+  void printHeader();
+  /// List the modules registered in the runtime database
+  void dumpModules();
 
   ////////////////////////////////////////////////////////////////////////////////
 
@@ -65,11 +69,6 @@ namespace cepgen
       /// \param[in] ip List of input parameters defining the phase space on which to perform the integration
       Generator( Parameters *ip );
       ~Generator();
-
-      /// Dump this program's header into the standard output stream
-      void printHeader() const;
-      /// List the modules registered in the runtime database
-      void dumpModules() const;
 
       const Parameters* parametersPtr() const { return parameters_.get(); }
       /// Getter to the run parameters block
