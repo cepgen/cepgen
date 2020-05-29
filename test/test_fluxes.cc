@@ -24,7 +24,7 @@ int main( int argc, char* argv[] )
     .addOptionalArgument( "output", "output file name", "flux.scan.output.txt", &output_file, 'o' )
     .parse();
 
-  cepgen::Generator gen;
+  cepgen::initialise();
   const double mi = cepgen::PDG::get().mass( cepgen::PDG::proton );
   const double mi2 = mi*mi, mx2 = mx*mx;
 

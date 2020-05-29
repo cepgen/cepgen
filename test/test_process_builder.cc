@@ -22,7 +22,7 @@ int main( int argc, char* argv[] )
     .addOptionalArgument( "list", "list all processes", false, &list, 'l' )
     .parse();
 
-  cepgen::Generator gen;
+  cepgen::initialise();
 
   if ( list ) {
     cout << "List of modules registered in the runtime database:";

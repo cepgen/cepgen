@@ -15,7 +15,7 @@ using namespace cepgen;
 
 int main( int argc, char* argv[] )
 {
-  Generator gen;
+  initialise();
 
   string type;
   bool list;
