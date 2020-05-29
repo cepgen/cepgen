@@ -24,7 +24,7 @@
 #include <fstream>
 #include <atomic>
 
-#ifdef WIN32
+#ifdef _WIN32
 # include <libloaderapi.h>
 #else
 # include <dlfcn.h>
@@ -32,23 +32,23 @@
 
 namespace cepgen
 {
-  const std::vector<std::string> libs{
-    "CepGenRoot",
-    "CepGenPythia",
-    "CepGenLHAPDF",
-    "CepGenHepMC",
-    "CepGenBoost",
-    "CepGenRivet",
-  };
   namespace utils
   {
+    const std::vector<std::string> libraries{
+      "CepGenRoot",
+      "CepGenPythia",
+      "CepGenLHAPDF",
+      "CepGenHepMC",
+      "CepGenBoost",
+      "CepGenRivet",
+    };
     std::atomic<int> gSignal; ///< Abort signal handler
   }
 
   void
   loadLibrary( const std::string& path )
   {
-#ifdef WIN32
+#ifdef _WIN32
     if ( LoadLibraryA( ( path+".dll" ).c_str() ) == nullptr )
       throw CG_WARNING( "loadLibrary" )
         << "Failed to load library \"" << path << "\".\n\t"
@@ -69,7 +69,7 @@ namespace cepgen
     static const std::string pdg_file = "External/mass_width_2019.mcd";
     pdg::MCDFileParser::parse( pdg_file.c_str() );
     //--- load all necessary modules
-    for ( const auto& lib : libs )
+    for ( const auto& lib : utils::libraries )
       try {
         loadLibrary( lib );
       } catch ( const Exception& e ) {}
