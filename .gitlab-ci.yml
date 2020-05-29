@@ -1,5 +1,6 @@
 stages:
   - compile
+  - deploy
   - run
   - test
 
@@ -20,6 +21,18 @@ stages:
     expire_in: 2 hrs
     paths:
       - build/
+
+.package_template: &package_definition
+  stage: deploy
+  script:
+    - cd build
+    - echo "Starting the packaging"
+    - make package
+  when: on_success
+  allow_failure: false
+  artifacts:
+    paths:
+      - build/*.rpm
 
 .run_cepgen_template: &run_cepgen_definition
   stage: run
@@ -144,6 +157,12 @@ run_cepgen:cc7:
   needs: ["compile:cc7"]
   <<: *run_cepgen_definition
 
+package:cc7:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
+  dependencies: ["compile:cc7"]
+  needs: ["compile:cc7"]
+  <<: *package_definition
+
 test:cc7:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
   dependencies: ["compile:cc7"]
@@ -181,6 +200,12 @@ test_function_parser:cc7:
 compile:f30:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f30
   <<: *build_definition
+
+package:f30:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f30
+  dependencies: ["compile:f30"]
+  needs: ["compile:f30"]
+  <<: *package_definition
 
 run_cepgen:f30:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f30
