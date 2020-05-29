@@ -40,7 +40,6 @@ namespace cepgen
       protected:
         virtual void read( const std::string& ) = 0;
 
-        std::string filename_;
         pt::ptree tree_;
 
       private:
@@ -70,14 +69,13 @@ namespace cepgen
     };
 
     BoostTreeHandler::BoostTreeHandler( const ParametersList& params ) :
-      filename_( params.get<std::string>( FILENAME_KEY ) )
+      Handler( params )
     {}
 
     Parameters*
     BoostTreeHandler::parse( const std::string& filename, Parameters* params )
     {
       params_ = params;
-      filename_ = filename;
       read( filename );
 
       try {

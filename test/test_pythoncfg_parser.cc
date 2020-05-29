@@ -21,7 +21,7 @@ main( int argc, char* argv[] )
 
   try {
     CG_INFO( "main" )
-      << card::PythonHandler( card.c_str() ).parameters();
+      << card::PythonHandler( ParametersList().set<string>( "filename", card ) ).parameters();
   } catch ( const Exception& e ) {
     e.dump();
   }

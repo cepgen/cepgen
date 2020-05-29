@@ -39,15 +39,15 @@ namespace cepgen
     //----- specialization for LPAIR input cards
 
     LpairHandler::LpairHandler( const ParametersList& params ) :
+      Handler( params ),
       proc_params_( new ParametersList ), kin_params_( new ParametersList ),
       timer_( false ),
       str_fun_( 11 ), sr_type_( 1 ), lepton_id_( 0 ),
       pdg_input_path_( "External/mass_width_2019.mcd" ), iend_( 1 ),
       hi_1_( { 0, 0 } ), hi_2_( { 0, 0 } )
     {
-      const auto file = params.get<std::string>( FILENAME_KEY );
-      if ( !file.empty() )
-        parse( file, params_ );
+      if ( !filename_.empty() )
+        parse( filename_, params_ );
     }
 
     Parameters*

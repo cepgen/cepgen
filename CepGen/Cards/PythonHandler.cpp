@@ -40,7 +40,7 @@ namespace cepgen
   namespace card
   {
     PythonHandler::PythonHandler( const ParametersList& params ) :
-      filename_( params.get<std::string>( FILENAME_KEY ) )
+      Handler( params )
     {
       if ( !filename_.empty() )
         parse( filename_, params_ );

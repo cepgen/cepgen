@@ -65,8 +65,6 @@ namespace cepgen
         void parseOutputModule( PyObject* );
         void parseOutputModules( PyObject* );
         void parseExtraParticles( PyObject* );
-
-        std::string filename_;
     };
     template<> bool PythonHandler::is<bool>( PyObject* obj ) const;
     template<> bool PythonHandler::is<int>( PyObject* obj ) const;

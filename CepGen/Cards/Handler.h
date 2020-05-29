@@ -6,6 +6,7 @@
 namespace cepgen
 {
   class Parameters;
+  class ParametersList;
   /// Location for all steering card parsers/writers
   namespace card
   {
@@ -14,7 +15,7 @@ namespace cepgen
     {
       public:
         /// Build a configuration from an external steering card
-        Handler() = default;
+        explicit Handler( const ParametersList& );
         ~Handler() = default;
 
         /// Small utility to retrieve the extension of a filename
@@ -36,7 +37,8 @@ namespace cepgen
         static void write( const Parameters* params, const std::string& filename );
 
       protected:
-        static constexpr const char* FILENAME_KEY = "filename";
+        /// Input filename
+        const std::string filename_;
         /// List of parameters parsed from a card handler
         Parameters* params_;
     };
