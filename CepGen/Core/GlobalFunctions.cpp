@@ -1,19 +1,10 @@
 #include "CepGen/Generator.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
 
-#include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Processes/Process.h"
-#include "CepGen/Core/EventModifier.h"
-#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Utils/String.h"
-#include "CepGen/Utils/TimeKeeper.h"
-
-#include "CepGen/Integration/Integrator.h"
-#include "CepGen/Integration/Integrand.h"
-#include "CepGen/Integration/GridParameters.h"
 
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
@@ -30,10 +21,7 @@
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 
-#include "CepGen/Event/Event.h"
-
 #include <fstream>
-#include <chrono>
 #include <atomic>
 
 namespace cepgen
@@ -49,8 +37,11 @@ namespace cepgen
     //--- parse all particles properties
     static const std::string pdg_file = "External/mass_width_2019.mcd";
     pdg::MCDFileParser::parse( pdg_file.c_str() );
+    //--- load all necessary modules
+    //--- header message
     try { printHeader(); } catch ( const Exception& e ) { e.dump(); }
-    CG_INFO( "init" ) << "CepGen v" << version() << " initialised.";
+    //--- greetings message
+    CG_INFO( "init" ) << "CepGen v" << version() << " initialised. Greetings!";
   }
 
   void

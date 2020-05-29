@@ -1,6 +1,5 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
-#include "CepGen/Version.h"
 
 #include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Processes/Process.h"
@@ -15,26 +14,10 @@
 #include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/GridParameters.h"
 
-#include "CepGen/Physics/MCDFileParser.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/AlphaS.h"
-
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/StructureFunctions/SigmaRatio.h"
-
-#include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Modules/ProcessesFactory.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Modules/EventModifierFactory.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
-#include "CepGen/Modules/FunctionalFactory.h"
-
 #include "CepGen/Event/Event.h"
 
-#include <fstream>
 #include <chrono>
-#include <atomic>
 
 namespace cepgen
 {
