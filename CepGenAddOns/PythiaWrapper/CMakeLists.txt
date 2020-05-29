@@ -13,6 +13,7 @@ file(GLOB sources *.cpp)
 add_library(CepGenPythia SHARED ${sources})
 target_link_libraries(CepGenPythia PUBLIC ${PYTHIA8} dl)
 target_include_directories(CepGenPythia PUBLIC ${PYTHIA8_INCLUDE})
+set_property(TARGET CepGenPythia PROPERTY CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-misleading-indentation")
 list(APPEND CEPGEN_ADDONS_EXT CepGenPythia)
 set(CEPGEN_ADDONS_EXT ${CEPGEN_ADDONS_EXT} PARENT_SCOPE)
 
