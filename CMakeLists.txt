@@ -26,12 +26,12 @@ endif()
 
 #set(CMAKE_INSTALL_RPATH "$ORIGIN")
 #set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_INSTALL_PREFIX "/usr")
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake $ENV{ROOTSYS}/cmake)
 
 set(CMAKE_CXX_FLAGS_DEBUG "-pg") # for gprof
 #set(CMAKE_CXX_FLAGS_DEBUG "-fprofile-arcs -ftest-coverage") # for gcov
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
-set(LIB_INSTALL_DIR lib)
 
 #----- include external paths
 
@@ -56,7 +56,8 @@ if(CMAKE_BUILD_PROCESSES)
 endif()
 if(CMAKE_BUILD_ADDONS)
   add_subdirectory(CepGenAddOns)
-  list(APPEND CEPGEN_LIBRARIES CepGenAddOns ${CEPGEN_ADDONS_EXT})
+  list(APPEND CEPGEN_LIBRARIES CepGenAddOns)
+  #list(APPEND CEPGEN_LIBRARIES ${CEPGEN_ADDONS_EXT})
 endif()
 if(CMAKE_BUILD_CORE)
   add_subdirectory(CepGen/Event)

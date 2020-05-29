@@ -1,8 +1,6 @@
 set(CPACK_PACKAGE_VERSION ${VERSION})
 set(CPACK_GENERATOR "RPM")
-#set(CPACK_INSTALL_PREFIX "/usr")
 set(CPACK_SET_DESTDIR TRUE)
-set(CMAKE_INSTALL_PREFIX ${CPACK_INSTALL_PREFIX})
 set(CPACK_PACKAGE_NAME "CepGen")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A generic central exclusive processes event generator")
 set(CPACK_PACKAGE_RELOCATABLE FALSE)
@@ -29,18 +27,14 @@ set(CPACK_RPM_ROOT_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, root >= 6.0")
 set(CPACK_RPM_PYTHIA8_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, pythia8 >= 8.2.30")
 set(CPACK_RPM_BOOST_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, boost >= 1.33")
 set(CPACK_RPM_LHAPDF_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, lhapdf")
+set(CPACK_RPM_HEPMC_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, HepMC >= 2.01")
 set(CPACK_RPM_RIVET_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
 #set(CPACK_RPM_PACKAGE_AUTOREQPROV " no")
 list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /usr)
-list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /usr/lib)
 list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /usr/bin)
+list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /usr/lib)
 list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /usr/lib64)
 list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /usr/include)
-list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /usr/local)
-list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /usr/local/bin)
-list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /usr/local/lib)
-list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /usr/local/lib64)
-list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /usr/local/include)
 include(CPack)
 #--- register packages
 cpack_add_component(lib
@@ -63,6 +57,10 @@ cpack_add_component(pythia8
 cpack_add_component(boost
     DISPLAY_NAME "CepGen Boost wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the Boost library"
+    DEPENDS lib)
+cpack_add_component(hepmc
+    DISPLAY_NAME "CepGen HepMC wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the HepMC library"
     DEPENDS lib)
 cpack_add_component(lhapdf
     DISPLAY_NAME "CepGen LHAPDF wrappers library"
