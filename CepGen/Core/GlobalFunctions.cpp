@@ -51,12 +51,12 @@ namespace cepgen
   {
 #ifdef _WIN32
     if ( LoadLibraryA( ( path+".dll" ).c_str() ) == nullptr )
-      throw CG_WARNING( "loadLibrary" )
+      CG_DEBUG( "loadLibrary" )
         << "Failed to load library \"" << path << "\".\n\t"
         << "Error code #" << GetLastError() << ".";
 #else
     if ( dlopen( ( "lib"+path+".so" ).c_str(), RTLD_LAZY | RTLD_LOCAL ) == nullptr )
-      throw CG_WARNING( "loadLibrary" )
+      CG_DEBUG( "loadLibrary" )
         << "Failed to load library \"" << path << "\".\n\t"
         << dlerror();
 #endif
@@ -71,9 +71,7 @@ namespace cepgen
     pdg::MCDFileParser::parse( utils::environ( "CEPGEN_PATH", "." )+"/External/mass_width_2019.mcd" );
     //--- load all necessary modules
     for ( const auto& lib : utils::libraries )
-      try {
-        loadLibrary( lib );
-      } catch ( const Exception& e ) {}
+      loadLibrary( lib );
     //--- header message
     try { printHeader(); } catch ( const Exception& e ) { e.dump(); }
     //--- greetings message
