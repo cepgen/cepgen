@@ -95,7 +95,7 @@ install(DIRECTORY CepGen CepGenAddOns CepGenProcesses
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   COMPONENT devel FILES_MATCHING PATTERN "*.h")
 export(PACKAGE CepGen)
-include(BuildRPM)
+include(BuildPackage)
 
 #----- documentation
 

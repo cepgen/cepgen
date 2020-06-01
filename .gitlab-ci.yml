@@ -33,6 +33,7 @@ stages:
   artifacts:
     paths:
       - build/*.rpm
+      - build/*.deb
 
 .run_cepgen_template: &run_cepgen_definition
   stage: run
@@ -302,6 +303,12 @@ compile:ubuntu_trusty:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_trusty
   <<: *build_definition
 
+package:ubuntu_trusty:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_trusty
+  dependencies: ["compile:ubuntu_trusty"]
+  needs: ["compile:ubuntu_trusty"]
+  <<: *package_definition
+
 run_cepgen:ubuntu_trusty:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_trusty
   dependencies: ["compile:ubuntu_trusty"]
@@ -352,6 +359,12 @@ compile:ubuntu_xenial:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_xenial
   <<: *build_definition
 
+package:ubuntu_xenial:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_xenial
+  dependencies: ["compile:ubuntu_xenial"]
+  needs: ["compile:ubuntu_xenial"]
+  <<: *package_definition
+
 run_cepgen:ubuntu_xenial:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_xenial
   dependencies: ["compile:ubuntu_xenial"]
@@ -395,6 +408,12 @@ test_function_parser:ubuntu_xenial:
 compile:ubuntu_focal:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_focal
   <<: *build_definition
+
+package:ubuntu_focal:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_focal
+  dependencies: ["compile:ubuntu_focal"]
+  needs: ["compile:ubuntu_focal"]
+  <<: *package_definition
 
 run_cepgen:ubuntu_focal:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_focal
