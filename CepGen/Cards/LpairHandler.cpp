@@ -45,10 +45,7 @@ namespace cepgen
       str_fun_( 11 ), sr_type_( 1 ), lepton_id_( 0 ),
       pdg_input_path_( "External/mass_width_2019.mcd" ), iend_( 1 ),
       hi_1_( { 0, 0 } ), hi_2_( { 0, 0 } )
-    {
-      if ( !filename_.empty() )
-        parse( filename_, params_ );
-    }
+    {}
 
     Parameters*
     LpairHandler::parse( const std::string& file, Parameters* params )

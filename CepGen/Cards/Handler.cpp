@@ -11,7 +11,10 @@ namespace cepgen
     Handler::Handler( const ParametersList& params ) :
       filename_( params.get<std::string>( "filename" ) ),
       params_( new Parameters )
-    {}
+    {
+      if ( !filename_.empty() )
+        parse( filename_, params_ );
+    }
 
     Parameters*
     Handler::parse( const std::string& filename )

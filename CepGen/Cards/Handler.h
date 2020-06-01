@@ -28,7 +28,9 @@ namespace cepgen
         /// Specify runtime parameters to the handler
         virtual void pack( const Parameters* ) {};
         /// Retrieve a configuration from a parsed steering card
-        virtual Parameters* parse( const std::string& filename, Parameters* params ) = 0;
+        virtual Parameters* parse( const std::string& filename, Parameters* params ) {
+          return params;
+        }
         /// Build a configuration from a steering card
         static Parameters* parse( const std::string& filename );
         /// Write the current configuration into a steering card

@@ -41,10 +41,7 @@ namespace cepgen
   {
     PythonHandler::PythonHandler( const ParametersList& params ) :
       Handler( params )
-    {
-      if ( !filename_.empty() )
-        parse( filename_, params_ );
-    }
+    {}
 
     Parameters*
     PythonHandler::parse( const std::string& file, Parameters* params )

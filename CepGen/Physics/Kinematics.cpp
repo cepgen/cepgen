@@ -174,13 +174,17 @@ namespace cepgen
       params.set<int>( "beam2A", hi2.A ).set<int>( "beam2Z", (int)hi2.Z );
     for ( const auto& lim : cuts.initial.list() ) {
       params.set<Limits>( lim.name, lim.limits );
-      params.set<double>( lim.name+"min", lim.limits.min() );
-      params.set<double>( lim.name+"max", lim.limits.max() );
+      if ( lim.limits.hasMin() )
+        params.set<double>( lim.name+"min", lim.limits.min() );
+      if ( lim.limits.hasMax() )
+        params.set<double>( lim.name+"max", lim.limits.max() );
     }
     for ( auto& lim : cuts.central.list() ) {
       params.set<Limits>( lim.name, lim.limits );
-      params.set<double>( lim.name+"min", lim.limits.min() );
-      params.set<double>( lim.name+"max", lim.limits.max() );
+      if ( lim.limits.hasMin() )
+        params.set<double>( lim.name+"min", lim.limits.min() );
+      if ( lim.limits.hasMax() )
+        params.set<double>( lim.name+"max", lim.limits.max() );
     }
     if ( !minimum_final_state.empty() ) {
       std::vector<int> min_pdgs;
@@ -194,7 +198,9 @@ namespace cepgen
         ParametersList cuts_vs_id;
         for ( const auto& lim : cuts_vs_part.second.list() ) {
           params.set<Limits>( lim.name, lim.limits );
+        if ( lim.limits.hasMin() )
           params.set<double>( lim.name+"min", lim.limits.min() );
+        if ( lim.limits.hasMax() )
           params.set<double>( lim.name+"max", lim.limits.max() );
         }
         per_part.set<ParametersList>( std::to_string( cuts_vs_part.first ), cuts_vs_id );
@@ -203,8 +209,10 @@ namespace cepgen
     }
     for ( const auto& lim : cuts.remnants.list() ) {
       params.set<Limits>( lim.name, lim.limits );
-      params.set<double>( lim.name+"min", lim.limits.min() );
-      params.set<double>( lim.name+"max", lim.limits.max() );
+      if ( lim.limits.hasMin() )
+        params.set<double>( lim.name+"min", lim.limits.min() );
+      if ( lim.limits.hasMax() )
+        params.set<double>( lim.name+"max", lim.limits.max() );
     }
     return params;
   }

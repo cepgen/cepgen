@@ -81,7 +81,7 @@ namespace cepgen
       try {
         proc_ = unpack( tree_.get_child( PROCESS_NAME ) );
         params_->setProcess( proc::ProcessesFactory::get().build( proc_ ) );
-      } catch ( const boost::wrapexcept<pt::ptree_bad_path>& ) {
+      } catch ( const boost::exception& ) {
         throw CG_FATAL( "BoostTreeHandler" )
           << "Failed to retrieve a valid \"" << PROCESS_NAME << "\" block"
           << " in the steering card!";
@@ -121,7 +121,7 @@ namespace cepgen
           for ( const auto& mod : log_.get<std::vector<std::string> >( "enabledModules" ) )
             utils::Logger::get().addExceptionRule( mod );
         }
-      } catch ( const boost::wrapexcept<pt::ptree_bad_path>& ) {
+      } catch ( const boost::exception& ) {
       } catch ( const Exception& ) {}
 
       return params_;
@@ -228,13 +228,13 @@ namespace cepgen
           if ( it.first.empty() ) // this might be a vector
             try {
               out.operator[]<std::vector<ParametersList> >( DAUGH_KEY ).emplace_back( unpack( it.second ) );
-            } catch ( const boost::wrapexcept<pt::ptree_bad_data>& ) {
+            } catch ( const boost::exception& ) {
               try {
                 out.operator[]<std::vector<double> >( DAUGH_KEY ).emplace_back( it.second.get_value<double>() );
-              } catch ( const boost::wrapexcept<pt::ptree_bad_data>& ) {
+              } catch ( const boost::exception& ) {
                 try {
                   out.operator[]<std::vector<int> >( DAUGH_KEY ).emplace_back( it.second.get_value<int>() );
-                } catch ( const boost::wrapexcept<pt::ptree_bad_data>& ) {
+                } catch ( const boost::exception& ) {
                   out.operator[]<std::vector<std::string> >( DAUGH_KEY ).emplace_back( it.second.get_value<std::string>() );
                 }
               }
@@ -245,13 +245,13 @@ namespace cepgen
           if ( it.second.get_value<std::string>().find( '.' ) != std::string::npos )
             try {
               out.set<double>( it.first, it.second.get_value<double>() );
-            } catch ( const boost::wrapexcept<pt::ptree_bad_data>& ) {
+            } catch ( const boost::exception& ) {
               out.set<std::string>( it.first, it.second.get_value<std::string>() );
             }
           else
             try {
               out.set<int>( it.first, it.second.get_value<int>() );
-            } catch ( const boost::wrapexcept<pt::ptree_bad_data>& ) {
+            } catch ( const boost::exception& ) {
               out.set<std::string>( it.first, it.second.get_value<std::string>() );
             }
         }
@@ -340,7 +340,7 @@ namespace cepgen
     {
       using BoostTreeHandler::BoostTreeHandler;
       void read( const std::string& filename ) override {
-        pt::read_json( filename_, tree_ );
+        pt::read_json( filename, tree_ );
       }
       void write( const std::string& filename ) const override {
         pt::write_json( filename, tree_ );
@@ -351,7 +351,7 @@ namespace cepgen
     {
       using BoostTreeHandler::BoostTreeHandler;
       void read( const std::string& filename ) override {
-        pt::read_info( filename_, tree_ );
+        pt::read_info( filename, tree_ );
       }
       void write( const std::string& filename ) const override {
         pt::write_info( filename, tree_ );
@@ -362,7 +362,7 @@ namespace cepgen
     {
       using BoostTreeHandler::BoostTreeHandler;
       void read( const std::string& filename ) override {
-        pt::read_xml( filename_, tree_ );
+        pt::read_xml( filename, tree_ );
       }
       void write( const std::string& filename ) const override {
         std::ofstream file( filename );
