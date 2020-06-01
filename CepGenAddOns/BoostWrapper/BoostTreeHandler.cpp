@@ -366,7 +366,7 @@ namespace cepgen
       }
       void write( const std::string& filename ) const override {
         std::ofstream file( filename );
-        pt::write_xml( file, tree_, pt::xml_writer_make_settings<std::string>( '\t', 1 ) );
+        pt::write_xml( file, tree_, pt::xml_writer_make_settings<pt::ptree::key_type>( '\t', 1 ) );
       }
     };
   }
