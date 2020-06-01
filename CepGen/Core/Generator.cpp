@@ -4,7 +4,6 @@
 #include "CepGen/Processes/Process.h"
 
 #include "CepGen/Core/GeneratorWorker.h"
-#include "CepGen/Core/GlobalFunctions.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/Exception.h"

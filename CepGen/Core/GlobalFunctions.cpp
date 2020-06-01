@@ -1,5 +1,5 @@
-#include "CepGen/Core/GlobalFunctions.h"
-#include "CepGen/Core/Exception.h"
+#include "CepGen/Generator.h"
+#include "CepGen/Version.h"
 
 #include "CepGen/Processes/Process.h"
 #include "CepGen/Event/Event.h"
@@ -19,8 +19,8 @@
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"
-#include "CepGen/Version.h"
 
 #include <fstream>
 #include <atomic>
