@@ -78,7 +78,7 @@ namespace cepgen
       incoming_beams.second.pz = beams_pz.at( 1 );
     }
     //--- centre-of-mass energy
-    const double sqrt_s = params.get<double>( "sqrts", -1. );
+    const double sqrt_s = params.get<double>( "sqrtS", params.get<double>( "cmEnergy", -1. ) );
     if ( sqrt_s > 0. )
       setSqrtS( sqrt_s );
     //--- structure functions
