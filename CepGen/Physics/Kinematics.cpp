@@ -206,8 +206,6 @@ namespace cepgen
       params.set<double>( lim.name+"min", lim.limits.min() );
       params.set<double>( lim.name+"max", lim.limits.max() );
     }
-
-CG_WARNING("")<<params;
     return params;
   }
 
