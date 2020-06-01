@@ -12,7 +12,7 @@ stages:
 .build_template: &build_definition
   stage: compile
   before_script:
-    - scl enable devtoolset-7 bash || echo ignoring exit code so CI does not bomb when it should not > /dev/null
+    - source scl_source enable devtoolset-7 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
     - gcc --version
     - mkdir build
     - cd build
