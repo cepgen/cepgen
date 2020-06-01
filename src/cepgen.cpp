@@ -1,8 +1,10 @@
 #include "CepGen/Generator.h"
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Cards/Handler.h"
+
+#include "CepGen/Core/GlobalFunctions.h" // for dumpModules
+#include "CepGen/Core/Exception.h"
 
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/AbortHandler.h"

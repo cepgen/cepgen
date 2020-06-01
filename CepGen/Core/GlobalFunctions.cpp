@@ -1,10 +1,8 @@
-#include "CepGen/Generator.h"
-#include "CepGen/Version.h"
-
-#include "CepGen/Processes/Process.h"
+#include "CepGen/Core/GlobalFunctions.h"
 #include "CepGen/Core/Exception.h"
 
-#include "CepGen/Utils/String.h"
+#include "CepGen/Processes/Process.h"
+#include "CepGen/Event/Event.h"
 
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
@@ -21,6 +19,9 @@
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 
+#include "CepGen/Utils/String.h"
+#include "CepGen/Version.h"
+
 #include <fstream>
 #include <atomic>
 #include <utility>
@@ -36,6 +37,7 @@ namespace cepgen
   namespace utils
   {
     const std::vector<std::string> libraries{
+      "CepGenAddOns",
       "CepGenRoot",
       "CepGenPythia",
       "CepGenLHAPDF",
@@ -46,21 +48,26 @@ namespace cepgen
     std::atomic<int> gSignal; ///< Abort signal handler
   }
 
-  void
+  bool
   loadLibrary( const std::string& path )
   {
 #ifdef _WIN32
-    if ( LoadLibraryA( ( path+".dll" ).c_str() ) == nullptr )
+    if ( LoadLibraryA( ( path+".dll" ).c_str() ) == nullptr ) {
       CG_DEBUG( "loadLibrary" )
         << "Failed to load library \"" << path << "\".\n\t"
         << "Error code #" << GetLastError() << ".";
+      return false;
+    }
 #else
-    if ( dlopen( ( "lib"+path+".so" ).c_str(), RTLD_LAZY | RTLD_LOCAL ) == nullptr )
+    if ( dlopen( ( "lib"+path+".so" ).c_str(), RTLD_LAZY | RTLD_LOCAL ) == nullptr ) {
       CG_DEBUG( "loadLibrary" )
         << "Failed to load library \"" << path << "\".\n\t"
         << dlerror();
+      return false;
+    }
 #endif
     CG_DEBUG( "loadLibrary" ) << "Loaded library \"" << path << "\".";
+    return true;
   }
 
   void
@@ -70,12 +77,17 @@ namespace cepgen
     static const std::string pdg_file = "";
     pdg::MCDFileParser::parse( utils::environ( "CEPGEN_PATH", "." )+"/External/mass_width_2019.mcd" );
     //--- load all necessary modules
+    std::vector<std::string> loaded_libs;
     for ( const auto& lib : utils::libraries )
-      loadLibrary( lib );
+      if ( loadLibrary( lib ) )
+        loaded_libs.emplace_back( lib );
     //--- header message
     try { printHeader(); } catch ( const Exception& e ) { e.dump(); }
     //--- greetings message
-    CG_INFO( "init" ) << "CepGen v" << version() << " initialised. Greetings!";
+    CG_INFO( "init" )
+      << "CepGen v" << version() << " initialised with the following add-ons: "
+      << loaded_libs << ".\n\t"
+      << "Greetings!";
   }
 
   void

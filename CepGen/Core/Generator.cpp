@@ -1,8 +1,10 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
 
-#include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Processes/Process.h"
+
+#include "CepGen/Core/GeneratorWorker.h"
+#include "CepGen/Core/GlobalFunctions.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/Exception.h"
@@ -15,7 +17,6 @@
 #include "CepGen/Integration/GridParameters.h"
 
 #include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Event/Event.h"
 
 #include <chrono>
 
