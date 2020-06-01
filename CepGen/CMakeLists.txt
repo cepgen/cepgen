@@ -1,7 +1,7 @@
 include_directories(${PROJECT_SOURCE_DIR})
 
 file(GLOB core_sources Core/*.cpp Modules/*.cpp Utils/*.cpp *.cpp)
-file(GLOB phys_sources Physics/*.cpp)
+file(GLOB phys_sources Event/*.cpp Physics/*.cpp)
 file(GLOB int_sources Integration/*.cpp)
 file(GLOB proc_sources Processes/*.cpp Processes/Fortran/*.f)
 file(GLOB sf_sources StructureFunctions/*.cpp)

@@ -59,11 +59,10 @@ if(CMAKE_BUILD_ADDONS)
   message(STATUS "Found addons: ${CEPGEN_ADDONS_EXT}")
 endif()
 if(CMAKE_BUILD_CORE)
-  add_subdirectory(CepGen/Event)
-  add_subdirectory(CepGen/Cards)
-  list(APPEND CEPGEN_LIBRARIES CepGenEvent CepGenCards)
   add_subdirectory(CepGen)
   list(APPEND CEPGEN_LIBRARIES CepGenCore)
+  add_subdirectory(CepGen/Cards)
+  list(APPEND CEPGEN_LIBRARIES CepGenCards)
 endif()
 
 #----- copy the input cards and other files
