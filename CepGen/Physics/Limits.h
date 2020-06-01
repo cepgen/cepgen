@@ -23,6 +23,9 @@ namespace cepgen
       friend Limits operator-( Limits lim, double c ); ///< Subtract a constant to a limit
       friend Limits operator*( Limits lim, double c ); ///< Multiply a limit by a constant
 
+      /// Ensure the limit object is valid by correcting it if necessary
+      Limits& validate();
+
       /// Lower limit to apply on the variable
       double min() const { return first; }
       /// Lower limit to apply on the variable

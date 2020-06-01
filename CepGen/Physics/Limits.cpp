@@ -95,6 +95,14 @@ namespace cepgen
     return hasMin() || hasMax();
   }
 
+  Limits&
+  Limits::validate()
+  {
+    if ( second < first )
+      second = INVALID;
+    return *this;
+  }
+
   void
   Limits::save( bool& on, double& lmin, double& lmax ) const
   {

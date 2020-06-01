@@ -1,4 +1,5 @@
 #include "CepGen/Parameters.h"
+#include "CepGen/Generator.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/ArgumentsParser.h"
@@ -11,6 +12,8 @@ using namespace std;
 int main( int argc, char* argv[] )
 {
   string input_config, output_config;
+
+  cepgen::initialise();
 
   cepgen::ArgumentsParser parser( argc, argv );
   parser
