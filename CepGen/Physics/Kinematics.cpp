@@ -105,19 +105,21 @@ namespace cepgen
     //----- phase space definition
 
     //--- initial partons
-    for ( auto& lim : cuts.initial.rawList() ) {
-      params.fill<Limits>( lim.name, lim.limits );
-      params.fill<double>( lim.name+"min", lim.limits.min() );
-      params.fill<double>( lim.name+"max", lim.limits.max() );
-      lim.limits.validate();
+    for ( auto& cut : cuts.initial.rawList() ) {
+      params
+        .fill<Limits>( cut.name, cut.limits )
+        .fill<double>( cut.name+"min", cut.limits.min() )
+        .fill<double>( cut.name+"max", cut.limits.max() );
+      cut.limits.validate();
     }
 
     //--- central system
-    for ( auto& lim : cuts.central.rawList() ) {
-      params.fill<Limits>( lim.name, lim.limits );
-      params.fill<double>( lim.name+"min", lim.limits.min() );
-      params.fill<double>( lim.name+"max", lim.limits.max() );
-      lim.limits.validate();
+    for ( auto& cut : cuts.central.rawList() ) {
+      params
+        .fill<Limits>( cut.name, cut.limits )
+        .fill<double>( cut.name+"min", cut.limits.min() )
+        .fill<double>( cut.name+"max", cut.limits.max() );
+      cut.limits.validate();
     }
     if ( params.has<Limits>( "phiptdiff" ) ) {
       CG_WARNING( "PythonHandler" )
@@ -132,21 +134,23 @@ namespace cepgen
       const auto& per_parts = params.get<ParametersList>( "cuts" );
       for ( const auto& part : per_parts.keys() ) {
         const auto& part_cuts = per_parts.get<ParametersList>( part );
-        for ( auto& lim : cuts.central_particles[(pdgid_t)stoi( part )].rawList() ) {
-          part_cuts.fill<Limits>( lim.name, lim.limits );
-          part_cuts.fill<double>( lim.name+"min", lim.limits.min() );
-          part_cuts.fill<double>( lim.name+"max", lim.limits.max() );
-          lim.limits.validate();
+        for ( auto& cut : cuts.central_particles[(pdgid_t)stoi( part )].rawList() ) {
+          part_cuts
+            .fill<Limits>( cut.name, cut.limits )
+            .fill<double>( cut.name+"min", cut.limits.min() )
+            .fill<double>( cut.name+"max", cut.limits.max() );
+          cut.limits.validate();
         }
       }
     }
 
     //--- outgoing remnants
-    for ( auto& lim : cuts.remnants.rawList() ) {
-      params.fill<Limits>( lim.name, lim.limits );
-      params.fill<double>( lim.name+"min", lim.limits.min() );
-      params.fill<double>( lim.name+"max", lim.limits.max() );
-      lim.limits.validate();
+    for ( auto& cut : cuts.remnants.rawList() ) {
+      params
+        .fill<Limits>( cut.name, cut.limits )
+        .fill<double>( cut.name+"min", cut.limits.min() )
+        .fill<double>( cut.name+"max", cut.limits.max() );
+      cut.limits.validate();
     }
 
     //--- specify where to look for the grid path for gluon emission

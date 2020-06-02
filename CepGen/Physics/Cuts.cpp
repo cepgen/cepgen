@@ -52,7 +52,6 @@ namespace cepgen
     limits_.resize( RemnantsCutsProperties::num_properties );
     limits_.at( e_mx ) = Property{ "mx", "Diffractive mass (GeV/c^2)" };
     limits_.at( e_yj ) = Property{ "yj", "Diffractive jet rapidity" };
-    limits_.at( e_xi ) = Property{ "xi", "Longitudinal momentum loss (GeV)" };
+    limits_.at( e_xi ) = Property{ "xi", "Longit. fractional momentum loss" };
   }
 }
-
