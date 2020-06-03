@@ -129,6 +129,8 @@ namespace cepgen
       integ = IntegratorFactory::get().build( *parameters_->integrator );
     }
     integrator_ = std::move( integ );
+    if ( !generator_ )
+      clearRun();
     integrator_->setIntegrand( generator_->integrand() );
     generator_->setIntegrator( integrator_.get() );
     CG_INFO( "Generator:integrator" )
