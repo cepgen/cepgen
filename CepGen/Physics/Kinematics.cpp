@@ -25,7 +25,7 @@ namespace cepgen
   {
     //----- per-incoming beam kinematics
 
-    incoming_beams.first.pdg = params.get<int>( "beam1id", 2212 );
+    incoming_beams.first.pdg = params.get<int>( "beam1id", (int)PDG::proton );
     params.fill<double>( "beam1pz", incoming_beams.first.pz );
     const int hi_A1 = params.get<int>( "beam1A", 1 );
     const int hi_Z1 = params.get<int>( "beam1Z", 0 );
@@ -40,7 +40,7 @@ namespace cepgen
       incoming_beams.first.pdg = HeavyIon{ (unsigned short)hi_beam.at( 0 ), (Element)hi_beam.at( 1 ) };
     }
 
-    incoming_beams.second.pdg = params.get<int>( "beam2id", 2212 );
+    incoming_beams.second.pdg = params.get<int>( "beam2id", (int)PDG::proton );
     params.fill<double>( "beam2pz", incoming_beams.second.pz );
     const int hi_A2 = params.get<int>( "beam2A", 1 );
     const int hi_Z2 = params.get<int>( "beam2Z", 0 );
@@ -152,6 +152,7 @@ namespace cepgen
         .fill<double>( cut.name+"max", cut.limits.max() );
       cut.limits.validate();
     }
+    cuts.remnants.mx().min() = std::max( cuts.remnants.mx().min(), MX_MIN );
 
     //--- specify where to look for the grid path for gluon emission
     if ( params.has<std::string>( "kmrGridPath" ) )
@@ -323,6 +324,6 @@ namespace cepgen
   {
     initial.q2() = { 0., 1.e5 };
     central.pt_single().min() = 0.;
-    remnants.mx() = { 1.07, 320. };
+    remnants.mx() = { MX_MIN, 320. };
   }
 }

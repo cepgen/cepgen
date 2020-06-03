@@ -313,6 +313,19 @@ namespace cepgen
     return def;
   }
 
+  template<> const ParametersList&
+  ParametersList::fill<Limits>( std::string key, Limits& value ) const
+  {
+    if ( has<Limits>( key ) ) {
+      const auto& lim = get<Limits>( key );
+      if ( lim.hasMin() )
+        value.min() = lim.min();
+      if ( lim.hasMax() )
+        value.max() = lim.max();
+    }
+    return *this;
+  }
+
   //------------------------------------------------------------------
   // particle properties-type attributes
   //------------------------------------------------------------------

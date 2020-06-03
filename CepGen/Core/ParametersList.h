@@ -154,6 +154,8 @@ namespace cepgen
   template<> inline bool ParametersList::has<Limits>( std::string key ) const { return lim_values_.count( key ) != 0; }
   /// Get a boundary limits parameter value
   template<> Limits ParametersList::get<Limits>( std::string key, const Limits& def ) const;
+  /// Fill a limits definition with a valid object if the key content exists
+  template<> const ParametersList& ParametersList::fill<Limits>( std::string key, Limits& ) const;
   /// Reference to a boundary limits parameter value
   template<> inline Limits& ParametersList::operator[]<Limits>( std::string key ) { return lim_values_[key]; }
   /// Set a boundary limits parameter value
