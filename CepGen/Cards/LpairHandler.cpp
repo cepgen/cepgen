@@ -12,6 +12,7 @@
 #include "CepGen/Modules/ProcessesFactory.h"
 
 #include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Integration/Integrator.h"
@@ -265,9 +266,9 @@ namespace cepgen
     {
       params_ = const_cast<Parameters*>( params );
       str_fun_ = (int)params_->kinematics.structureFunctions()->type;
-      if ( params_->kinemtaics.structureFunctions()
-        && params_->kinematics.structureFunctions()->rRatio() )
-        sr_type_ = params_->kinematics.structureFunctions()->rRatio()->type;
+      if ( params_->kinematics.structureFunctions()
+        && params_->kinematics.structureFunctions()->sigmaRatio() )
+        sr_type_ = (int)params_->kinematics.structureFunctions()->sigmaRatio()->type;
       //kmr_grid_path_ =
       //mstw_grid_path_ =
       //pdg_input_path_ =

@@ -61,7 +61,7 @@ namespace cepgen
         /// Set of parameters used to build this parameterisation
         const ParametersList& parameters() const { return params_; }
         /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
-        const sigrat::Parameterisation* rRatio() const { return r_ratio_.get(); }
+        const sigrat::Parameterisation* sigmaRatio() const { return r_ratio_.get(); }
 
         /// Compute all relevant structure functions for a given \f$(x_{\rm Bj},Q^2)\f$ couple
         virtual Parameterisation& operator()( double /*xbj*/, double /*q2*/ ) { return *this; }

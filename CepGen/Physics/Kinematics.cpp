@@ -104,12 +104,15 @@ namespace cepgen
 
     //----- phase space definition
 
+    Limits buf;
+
     //--- initial partons
     for ( auto& cut : cuts.initial.rawList() ) {
       params
         .fill<Limits>( cut.name, cut.limits )
-        .fill<double>( cut.name+"min", cut.limits.min() )
-        .fill<double>( cut.name+"max", cut.limits.max() );
+        .fill<double>( cut.name+"min", buf.min() ).fill<double>( cut.name+"max", buf.max() );
+      if ( buf.valid() )
+        cut.limits = buf;
       cut.limits.validate();
     }
 
@@ -117,8 +120,9 @@ namespace cepgen
     for ( auto& cut : cuts.central.rawList() ) {
       params
         .fill<Limits>( cut.name, cut.limits )
-        .fill<double>( cut.name+"min", cut.limits.min() )
-        .fill<double>( cut.name+"max", cut.limits.max() );
+        .fill<double>( cut.name+"min", buf.min() ).fill<double>( cut.name+"max", buf.max() );
+      if ( buf.valid() )
+        cut.limits = buf;
       cut.limits.validate();
     }
     if ( params.has<Limits>( "phiptdiff" ) ) {
@@ -137,8 +141,9 @@ namespace cepgen
         for ( auto& cut : cuts.central_particles[(pdgid_t)stoi( part )].rawList() ) {
           part_cuts
             .fill<Limits>( cut.name, cut.limits )
-            .fill<double>( cut.name+"min", cut.limits.min() )
-            .fill<double>( cut.name+"max", cut.limits.max() );
+            .fill<double>( cut.name+"min", buf.min() ).fill<double>( cut.name+"max", buf.max() );
+          if ( buf.valid() )
+            cut.limits = buf;
           cut.limits.validate();
         }
       }
@@ -148,8 +153,9 @@ namespace cepgen
     for ( auto& cut : cuts.remnants.rawList() ) {
       params
         .fill<Limits>( cut.name, cut.limits )
-        .fill<double>( cut.name+"min", cut.limits.min() )
-        .fill<double>( cut.name+"max", cut.limits.max() );
+        .fill<double>( cut.name+"min", buf.min() ).fill<double>( cut.name+"max", buf.max() );
+      if ( buf.valid() )
+        cut.limits = buf;
       cut.limits.validate();
     }
     cuts.remnants.mx().min() = std::max( cuts.remnants.mx().min(), MX_MIN );

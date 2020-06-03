@@ -105,7 +105,7 @@ namespace cepgen
     operator<<( std::ostream& os, const strfun::Type& sf )
     {
       switch ( sf ) {
-        case strfun::Type::Invalid:             return os << "[INVALID]";
+        case strfun::Type::Invalid:             return os << "<invalid>";
         case strfun::Type::Electron:            return os << "electron";
         case strfun::Type::ElasticProton:       return os << "elastic proton";
         case strfun::Type::SuriYennie:          return os << "Suri-Yennie";
