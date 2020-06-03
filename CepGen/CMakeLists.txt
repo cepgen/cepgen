@@ -60,6 +60,8 @@ else()
   list(REMOVE_ITEM core_sources ${func_exprtk})
 endif()
 
+set(CEPGEN_HAS_FUNCTIONALS ${CEPGEN_HAS_FUNCTIONALS} PARENT_SCOPE)
+
 #----- build the objects
 
 add_library(CepGenCore SHARED ${core_sources} ${int_sources} ${phys_sources} ${proc_sources} ${sf_sources})

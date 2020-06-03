@@ -42,6 +42,7 @@ set(CEPGEN_LIBRARIES)
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 set(CEPGEN_CORE_EXT ${GSL_LIB} ${GSL_CBLAS_LIB} dl)
 set(CEPGEN_ADDONS_EXT)
+set(CEPGEN_HAS_FUNCTIONALS OFF)
 
 #----- enable fortran for external libraries linking
 

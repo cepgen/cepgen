@@ -3,7 +3,6 @@
 file(GLOB tests_standalone RELATIVE ${PROJECT_SOURCE_DIR}/test *.cc)
 file(GLOB tests_root RELATIVE ${PROJECT_SOURCE_DIR}/test *.cxx)
 file(GLOB tests_fortran RELATIVE ${PROJECT_SOURCE_DIR}/test *.f)
-file(GLOB tests_functionals RELATIVE ${PROJECT_SOURCE_DIR}/test test_function_parser*.*)
 
 #----- include the utilitaries
 
@@ -13,6 +12,7 @@ set(tests_libraries ${CEPGEN_LIBRARIES})
 #----- skip functionals tests if no parsing library is found
 
 if(NOT CEPGEN_HAS_FUNCTIONALS)
+  file(GLOB tests_functionals RELATIVE ${PROJECT_SOURCE_DIR}/test test_function_parser*.*)
   list(REMOVE_ITEM tests_standalone ${tests_functionals})
   list(REMOVE_ITEM tests_root ${tests_functionals})
 endif()
