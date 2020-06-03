@@ -64,8 +64,11 @@ stages:
   script:
     - cd build
     - test/test_function_parser
+    - test/test_function_parser_rootcomp -d
+    paths:
+      - build/test_graph.pdf
   when: on_success
-  allow_failure: false
+  allow_failure: true
 
 .test_integrator_template: &test_integrator_definition
   stage: test
@@ -75,7 +78,7 @@ stages:
     - test/test_integrator -i MISER
     - test/test_integrator -i plain
   when: on_success
-  allow_failure: false
+  allow_failure: true
 
 .test_cross_sections_template: &test_cross_sections_definition
   stage: test
@@ -87,18 +90,6 @@ stages:
     - test/test_physics_processes -i MISER -q -cfg test/test_processes.cfg
   when: on_success
   allow_failure: true
-
-.test_function_parser_template: &test_function_parser_definition
-  stage: test
-  script:
-    - cd build
-    - test/test_function_parser
-    - test/test_function_parser_rootcomp -d
-  artifacts:
-    paths:
-      - build/test_graph.pdf
-  when: on_success
-  allow_failure: false
 
 #######################################
 # SLC6 jobs
