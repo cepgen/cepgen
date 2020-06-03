@@ -71,6 +71,7 @@ target_compile_definitions(CepGenAddOns PUBLIC ${addons_definitions})
 target_include_directories(CepGenAddOns PUBLIC ${addons_includes})
 target_link_libraries(CepGenAddOns PUBLIC ${addons_libraries})
 set(CEPGEN_ADDONS_EXT ${CEPGEN_ADDONS_EXT} PARENT_SCOPE)
+set(CEPGEN_HAS_FUNCTIONALS ${CEPGEN_HAS_FUNCTIONALS} PARENT_SCOPE)
 
 #----- installation rules
 
