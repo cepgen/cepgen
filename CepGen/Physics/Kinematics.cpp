@@ -6,6 +6,7 @@
 #include "CepGen/Physics/GluonGrid.h"
 
 #include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Core/Exception.h"
@@ -254,11 +255,12 @@ namespace cepgen
   Kinematics&
   Kinematics::setStructureFunctions( int sf_model, int sr_model )
   {
+    const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
+    sf_model = ( sf_model == 0 ? (int)strfun::Type::SuriYennie : sf_model );
+    sr_model = ( sr_model == 0 ? (int)sigrat::Type::E143 : sr_model );
     auto sf_params = ParametersList()
       .setName<int>( sf_model )
-      .set<ParametersList>( "sigmaRatio", ParametersList()
-        .setName<int>( sr_model ) );
-    const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
+      .set<ParametersList>( "sigmaRatio", ParametersList().setName<int>( sr_model ) );
     if ( sf_model / kLHAPDFCodeDec == 1 ) { // SF from parton
       const unsigned long icode = sf_model % kLHAPDFCodeDec;
       sf_params
