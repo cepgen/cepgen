@@ -65,6 +65,8 @@ namespace cepgen
         PerIdCuts central_particles; ///< Cuts on the central individual particles
         RemnantsCuts remnants; ///< Cuts on the beam remnants system
       } cuts; ///< Phase space cuts
+      /// Human-readable description of a full kinematics cuts definition
+      friend std::ostream& operator<<( std::ostream&, const CutsList& );
 
     private:
       /// Type of structure functions to consider

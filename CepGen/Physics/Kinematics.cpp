@@ -300,7 +300,7 @@ namespace cepgen
   }
 
   //--------------------------------------------------------------------
-  // User-friendly display of incoming particles
+  // User-friendly display of various members
   //--------------------------------------------------------------------
 
   std::ostream&
@@ -314,6 +314,24 @@ namespace cepgen
     if ( beam.kt_flux != KTFlux::invalid )
       os << " [unint.flux: " << beam.kt_flux << "]";
     return os;
+  }
+
+  std::ostream&
+  operator<<( std::ostream& os, const Kinematics::CutsList& kin )
+  {
+    std::string sep;
+    os << "initial: {";
+    for ( const auto& cut : kin.initial.list() )
+      os << sep << cut, sep = ", ";
+    os << "}, central: {";
+    sep.clear();
+    for ( const auto& cut : kin.central.list() )
+      os << sep << cut, sep = ", ";
+    os << "}, remnants: {";
+    sep.clear();
+    for ( const auto& cut : kin.remnants.list() )
+      os << sep << cut, sep = ", ";
+    return os << "}";
   }
 
   //--------------------------------------------------------------------
