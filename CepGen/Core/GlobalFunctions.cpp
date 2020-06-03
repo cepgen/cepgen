@@ -37,6 +37,7 @@ namespace cepgen
   namespace utils
   {
     const std::vector<std::string> libraries{
+      "CepGenProcesses",
       "CepGenAddOns",
       "CepGenRoot",
       "CepGenPythia",
