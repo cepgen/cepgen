@@ -43,8 +43,7 @@ namespace cepgen
       proc_params_( new ParametersList ), kin_params_( new ParametersList ),
       timer_( false ),
       str_fun_( 11 ), sr_type_( 1 ), lepton_id_( 0 ),
-      pdg_input_path_( "External/mass_width_2019.mcd" ), iend_( 1 ),
-      hi_1_( { 0, 0 } ), hi_2_( { 0, 0 } )
+      pdg_input_path_( "External/mass_width_2019.mcd" ), iend_( 1 )
     {}
 
     Parameters*
@@ -130,13 +129,6 @@ namespace cepgen
         }
       }
 
-      //--- check if we are dealing with heavy ions for incoming states
-      HeavyIon hi1{ hi_1_.first, (Element)hi_1_.second }, hi2{ hi_2_.first, (Element)hi_2_.second };
-      if ( hi1 )
-        params_->kinematics.incoming_beams.first.pdg = hi1;
-      if ( hi2 )
-        params_->kinematics.incoming_beams.second.pdg = hi2;
-
       return params_;
     }
 
@@ -207,8 +199,8 @@ namespace cepgen
       registerKinematicsParameter<double>( "YMAX", "Maximal rapidity (central outgoing particles)", "rapiditymax" );
       registerKinematicsParameter<double>( "PDMN", "Minimal transverse momentum difference (central outgoing particles)", "ptdiffmin" );
       registerKinematicsParameter<double>( "PDMX", "Maximal transverse momentum difference (central outgoing particles)", "ptdiffmax" );
-      registerKinematicsParameter<double>( "Q2MN", "Minimal Q² = -q² (exchanged parton)", "q2min" );
-      registerKinematicsParameter<double>( "Q2MX", "Maximal Q² = -q² (exchanged parton)", "q2max" );
+      registerKinematicsParameter<double>( "Q2MN", "Minimal Q^2 = -q^2 (exchanged parton)", "q2min" );
+      registerKinematicsParameter<double>( "Q2MX", "Maximal Q^2 = -q^2 (exchanged parton)", "q2max" );
       registerKinematicsParameter<double>( "QTMN", "Minimal Q_T (exchanged parton)", "qtmin" );
       registerKinematicsParameter<double>( "QTMX", "Maximal Q_T (exchanged parton)", "qtmax" );
       registerKinematicsParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", "mxmin" );
@@ -299,12 +291,6 @@ namespace cepgen
         out_mod_name_ = utils::merge( out_mod, "," );
         out_file_name_ = utils::merge( out_mod_file, "," );
       }
-      const HeavyIon hi1( params_->kinematics.incoming_beams.first.pdg );
-      if ( hi1 )
-        hi_1_ = std::make_pair( hi1.A, (unsigned short)hi1.Z );
-      const HeavyIon hi2( params_->kinematics.incoming_beams.second.pdg );
-      if ( hi2 )
-        hi_2_ = std::make_pair( hi2.A, (unsigned short)hi2.Z );
       timer_ = ( params_->timeKeeper() != nullptr );
 
       const auto& kin = params_->kinematics;

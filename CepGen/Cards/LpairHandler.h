@@ -60,7 +60,6 @@ namespace cepgen
         std::string out_file_name_;
         std::string kmr_grid_path_, mstw_grid_path_, pdg_input_path_;
         int iend_;
-        std::pair<unsigned short,unsigned short> hi_1_, hi_2_;
     };
 
     //----- specialised registerers
