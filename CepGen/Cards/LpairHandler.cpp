@@ -205,8 +205,8 @@ namespace cepgen
       registerKinematicsParameter<double>( "QTMX", "Maximal Q_T (exchanged parton)", "qtmax" );
       registerKinematicsParameter<double>( "MXMN", "Minimal invariant mass of proton remnants", "mxmin" );
       registerKinematicsParameter<double>( "MXMX", "Maximal invariant mass of proton remnants", "mxmax" );
-      registerKinematicsParameter<double>( "XIMN", "Minimal fractional momentum loss of outgoing proton (ξ)", "ximin" );
-      registerKinematicsParameter<double>( "XIMX", "Maximal fractional momentum loss of outgoing proton (ξ)", "ximax" );
+      registerKinematicsParameter<double>( "XIMN", "Minimal fractional momentum loss of outgoing proton (xi)", "ximin" );
+      registerKinematicsParameter<double>( "XIMX", "Maximal fractional momentum loss of outgoing proton (xi)", "ximax" );
       registerKinematicsParameter<double>( "YJMN", "Minimal remnant jet rapidity", "yjmin" );
       registerKinematicsParameter<double>( "YJMX", "Maximal remnant jet rapidity", "yjmax" );
 
@@ -265,7 +265,9 @@ namespace cepgen
     {
       params_ = const_cast<Parameters*>( params );
       str_fun_ = (int)params_->kinematics.structureFunctions()->type;
-      //sr_type_ =
+      if ( params_->kinemtaics.structureFunctions()
+        && params_->kinematics.structureFunctions()->rRatio() )
+        sr_type_ = params_->kinematics.structureFunctions()->rRatio()->type;
       //kmr_grid_path_ =
       //mstw_grid_path_ =
       //pdg_input_path_ =
@@ -293,10 +295,8 @@ namespace cepgen
       }
       timer_ = ( params_->timeKeeper() != nullptr );
 
-      const auto& kin = params_->kinematics;
-      *kin_params_ += kin.parameters();
+      *kin_params_ += params_->kinematics.parameters();
       init();
-      CG_INFO("")<<"haha:"<<*kin_params_;
     }
 
     void
