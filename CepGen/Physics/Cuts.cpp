@@ -1,26 +1,11 @@
 #include "CepGen/Physics/Cuts.h"
+#include <iostream>
 
 namespace cepgen
 {
-  std::vector<Cuts::Property>
-  Cuts::list()
-  {
-    std::vector<Property> out;
-    for ( auto& lim : limits_ )
-      if ( lim.limits.valid() )
-        out.emplace_back( lim );
-    return out;
-  }
-
-  std::vector<Cuts::Property>
-  Cuts::list() const
-  {
-    std::vector<Property> out;
-    for ( auto& lim : limits_ )
-      if ( lim.limits.valid() )
-        out.emplace_back( lim );
-    return out;
-  }
+  //--------------------------------------------------------------------
+  // physics system kinematic properties
+  //--------------------------------------------------------------------
 
   CentralCuts::CentralCuts()
   {
@@ -53,5 +38,35 @@ namespace cepgen
     limits_.at( e_mx ) = Property{ "mx", "Diffractive mass (GeV/c^2)" };
     limits_.at( e_yj ) = Property{ "yj", "Diffractive jet rapidity" };
     limits_.at( e_xi ) = Property{ "xi", "Longit. fractional momentum loss" };
+  }
+
+  //--------------------------------------------------------------------
+  // utilitaries
+  //--------------------------------------------------------------------
+
+  std::vector<Cuts::Property>
+  Cuts::list()
+  {
+    std::vector<Property> out;
+    for ( auto& lim : limits_ )
+      if ( lim.limits.valid() )
+        out.emplace_back( lim );
+    return out;
+  }
+
+  std::vector<Cuts::Property>
+  Cuts::list() const
+  {
+    std::vector<Property> out;
+    for ( auto& lim : limits_ )
+      if ( lim.limits.valid() )
+        out.emplace_back( lim );
+    return out;
+  }
+
+  std::ostream&
+  operator<<( std::ostream& os, const Cuts::Property& prop )
+  {
+    return os << "{" << prop.name << ": " << prop.limits << "}";
   }
 }

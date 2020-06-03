@@ -48,20 +48,20 @@ namespace cepgen
     {}
 
     Parameters*
-    LpairHandler::parse( const std::string& file, Parameters* params )
+    LpairHandler::parse( const std::string& filename, Parameters* params )
     {
       params_ = params;
       std::ostringstream os;
       { //--- file parsing part
-        std::ifstream f( file, std::fstream::in );
-        if ( !f.is_open() )
-          throw CG_FATAL( "LpairHandler" ) << "Failed to parse file \"" << file << "%s\".";
+        std::ifstream file( filename, std::fstream::in );
+        if ( !file.is_open() )
+          throw CG_FATAL( "LpairHandler" ) << "Failed to parse file \"" << filename << "\".";
 
         init();
 
         //--- parse all fields
         std::string line, key, value;
-        while ( getline( f, line ) ) {
+        while ( getline( file, line ) ) {
           std::istringstream iss( line );
           iss >> key >> value;
           if ( key[0] == '#' ) // FIXME need to ensure there is no extra space before!
@@ -71,10 +71,10 @@ namespace cepgen
             os << "\n>> " << std::setw( 8 ) << key << " = " << std::setw( 25 ) << parameter( key )
                << " (" << description( key ) << ")";
         }
-        f.close();
+        file.close();
       }
 
-      CG_INFO( "LpairHandler" ) << "File '" << file << "' succesfully retrieved!\n\t"
+      CG_INFO( "LpairHandler" ) << "File '" << filename << "' succesfully retrieved!\n\t"
         << "The following parameters are set:" << os.str() << "\n\t"
         << "Now parsing the configuration.";
 

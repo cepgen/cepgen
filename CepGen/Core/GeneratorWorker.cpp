@@ -54,9 +54,8 @@ namespace cepgen
     try {
       while ( params_->numGeneratedEvents() < num_events )
         next( callback );
-    } catch ( const Exception& e ) {
+    } catch ( const Exception& ) {
       CG_WARNING( "GeneratorWorker:generate" ) << "Generation ended with exception.";
-      e.dump();
       return;
     }
   }

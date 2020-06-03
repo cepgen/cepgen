@@ -19,6 +19,7 @@ namespace cepgen
         std::string name, description;
         Limits limits;
       };
+      friend std::ostream& operator<<( std::ostream&, const Property& );
 
       /// A collection of limits properties
       std::vector<Property>& rawList() { return limits_; }
