@@ -65,10 +65,11 @@ stages:
     - cd build
     - test/test_function_parser
     - test/test_function_parser_rootcomp -d
-    paths:
-      - build/test_graph.pdf
   when: on_success
   allow_failure: true
+  artifacts:
+    paths:
+      - build/test_graph.pdf
 
 .test_integrator_template: &test_integrator_definition
   stage: test
