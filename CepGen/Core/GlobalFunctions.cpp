@@ -68,6 +68,7 @@ namespace cepgen
     }
 #endif
     CG_DEBUG( "loadLibrary" ) << "Loaded library \"" << path << "\".";
+    loaded_libraries.emplace_back( path );
     return true;
   }
 
@@ -78,16 +79,14 @@ namespace cepgen
     static const std::string pdg_file = "";
     pdg::MCDFileParser::parse( utils::environ( "CEPGEN_PATH", "." )+"/External/mass_width_2019.mcd" );
     //--- load all necessary modules
-    std::vector<std::string> loaded_libs;
     for ( const auto& lib : utils::libraries )
-      if ( loadLibrary( lib ) )
-        loaded_libs.emplace_back( lib );
+      loadLibrary( lib );
     //--- header message
     try { printHeader(); } catch ( const Exception& e ) { e.dump(); }
     //--- greetings message
     CG_INFO( "init" )
-      << "CepGen v" << version() << " initialised with the following add-ons: "
-      << loaded_libs << ".\n\t"
+      << "CepGen v" << version() << " initialised with the following add-ons:\n\t"
+      << loaded_libraries << ".\n\t"
       << "Greetings!";
   }
 

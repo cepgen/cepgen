@@ -20,16 +20,20 @@ int main( int argc, char* argv[] )
   std::string input_card;
   int num_events;
   bool list_mods = false, debug = false;
+  vector<string> addons;
 
   cepgen::ArgumentsParser parser( argc, argv );
   parser
     .addOptionalArgument( "config", "path to the configuration file", &input_card, 'i' )
     .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
     .addOptionalArgument( "list-modules", "list all runtime modules", false, &list_mods, 'l' )
+    .addOptionalArgument( "add-ons", "add an external plugin to the runtime environment", vector<string>{}, &addons, 'a' )
     .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
     .parse();
 
   //--- first start by defining the generator object
+  for ( const auto& lib : addons )
+    cepgen::loadLibrary( lib );
   cepgen::Generator gen;
 
   //--- if modules listing is requested

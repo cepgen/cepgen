@@ -1,4 +1,5 @@
 #include "CepGen/Cards/LpairHandler.h"
+#include "CepGen/Generator.h" // for library loading
 
 #include "CepGen/Modules/CardsHandlerFactory.h"
 
@@ -78,6 +79,10 @@ namespace cepgen
         << "The following parameters are set:" << os.str() << "\n\t"
         << "Now parsing the configuration.";
 
+      if ( !addons_list_.empty() )
+        for ( const auto& lib : utils::split( addons_list_, ',' ) )
+          loadLibrary( lib );
+
       //--- parse the PDG library
       if ( !pdg_input_path_.empty() )
         pdg::MCDFileParser::parse( pdg_input_path_.c_str() );
@@ -146,6 +151,7 @@ namespace cepgen
       registerParameter<std::string>( "EVMD", "Events modification algorithms", &evt_mod_name_ );
       registerParameter<std::string>( "OUTP", "Output module", &out_mod_name_ );
       registerParameter<std::string>( "OUTF", "Output file name", &out_file_name_ );
+      registerParameter<std::string>( "ADDN", "Additional libraries to load", &addons_list_ );
 
       //-------------------------------------------------------------------------------------------
       // General parameters

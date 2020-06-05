@@ -1,4 +1,5 @@
 #include "CepGen/Cards/Handler.h"
+#include "CepGen/Generator.h" // for library loading
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Core/Exception.h"
@@ -47,6 +48,7 @@ namespace cepgen
         static constexpr const char* MIN_KEY = "min";
         static constexpr const char* MAX_KEY = "max";
 
+        static constexpr const char* ADDONS_NAME = "addons";
         static constexpr const char* PROCESS_NAME = "process";
         static constexpr const char* KIN_NAME = "kinematics";
         static constexpr const char* INTEGR_NAME = "integrator";
@@ -77,6 +79,10 @@ namespace cepgen
     {
       params_ = params;
       read( filename );
+
+      if ( tree_.count( ADDONS_NAME ) )
+        for ( const auto& lib : unpack( tree_.get_child( ADDONS_NAME ) ).keys() )
+          loadLibrary( lib );
 
       try {
         proc_ = unpack( tree_.get_child( PROCESS_NAME ) );

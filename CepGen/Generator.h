@@ -32,6 +32,8 @@ namespace cepgen
   class GeneratorWorker;
   class Parameters;
 
+  /// Collection of libraries loaded in the runtime environment
+  static std::vector<std::string> loaded_libraries;
   /// Import a shared library in the runtime environment
   bool loadLibrary( const std::string& );
   /// Launch the initialisation procedure

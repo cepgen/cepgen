@@ -22,6 +22,7 @@ namespace cepgen
         Parameters* parse( const std::string&, Parameters* ) override;
 
       private:
+        static constexpr const char* ADDONS_NAME = "addons";
         static constexpr const char* TIMER_NAME = "timer";
         static constexpr const char* PROCESS_NAME = "process";
         static constexpr const char* HADR_NAME = "hadroniser";

@@ -1,4 +1,5 @@
 #include "CepGen/Cards/PythonHandler.h"
+#include "CepGen/Generator.h" // for library loading
 
 #include "CepGen/Modules/CardsHandlerFactory.h"
 
@@ -87,6 +88,16 @@ namespace cepgen
       PyObject* cfg = PyImport_ImportModule( filename.c_str() ); // new
       if ( !cfg )
         throwPythonError( "Failed to import the configuration card '"+file+"'\n (parsed as '"+filename+"')" );
+
+      //--- additional libraries to load
+      if ( PyObject_HasAttrString( cfg, ADDONS_NAME ) == 1 ) {
+        PyObject* padd = PyObject_GetAttrString( cfg, ADDONS_NAME ); // new
+        if ( padd ) {
+          for ( const auto& lib : getVector<std::string>( padd ) )
+            loadLibrary( lib );
+          Py_CLEAR( padd );
+        }
+      }
 
       //--- timekeeper definition
       if ( PyObject_HasAttrString( cfg, TIMER_NAME ) == 1 ) {
