@@ -5,7 +5,6 @@ file(GLOB proc_sources *.cpp *.f)
 #----- build the objects
 
 add_library(CepGenProcesses SHARED ${proc_sources})
-target_include_directories(CepGenProcesses PUBLIC ${CEPGEN_LIB_DIR}/Processes/Fortran)
 
 #----- installation rules
 
