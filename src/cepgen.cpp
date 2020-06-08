@@ -27,9 +27,9 @@ int main( int argc, char* argv[] )
     .addOptionalArgument( "config", "path to the configuration file", &input_card, 'i' )
     .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
     .addOptionalArgument( "list-modules", "list all runtime modules", false, &list_mods, 'l' )
-    .addOptionalArgument( "add-ons", "add an external plugin to the runtime environment", vector<string>{}, &addons, 'a' )
+    .addOptionalArgument( "add-ons", "external runtime plugin", vector<string>{}, &addons, 'a' )
     .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
-    .parse();
+    .parse().dump();
 
   //--- first start by defining the generator object
   for ( const auto& lib : addons )

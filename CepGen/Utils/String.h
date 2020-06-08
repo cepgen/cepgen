@@ -26,6 +26,10 @@ namespace cepgen
     std::vector<std::string> split( const std::string&, char );
     /// Merge a collection of strings in a single string
     std::string merge( const std::vector<std::string>&, const std::string& );
+    /// Capitalise a string
+    std::string toupper( const std::string& );
+    /// Lowercase version of a string
+    std::string tolower( const std::string& );
     /// Add a trailing "s" when needed
     inline const char* s( size_t num ) { return ( num > 1 ) ? "s" : ""; }
     /// Add a trailing "s" when needed

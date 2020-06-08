@@ -105,6 +105,22 @@ namespace cepgen
     }
 
     std::string
+    toupper( const std::string& str )
+    {
+      std::string out; out.resize( str.size() );
+      std::transform( str.begin(), str.end(), out.begin(), ::toupper );
+      return out;
+    }
+
+    std::string
+    tolower( const std::string& str )
+    {
+      std::string out; out.resize( str.size() );
+      std::transform( str.begin(), str.end(), out.begin(), ::tolower );
+      return out;
+    }
+
+    std::string
     environ( const std::string& env, const std::string& def )
     {
       const auto out = std::getenv( env.c_str() );

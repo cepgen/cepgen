@@ -75,7 +75,7 @@ namespace cepgen
         args_.resize( args_.size()-extra_config_.size()-1 );
     }
     //--- loop over all parameters
-    size_t i = 0;
+    /*size_t i = 0;
     for ( auto& par : params_ ) {
       if ( par.name.empty() ) {
         //--- no argument name ; fetching by index
@@ -90,12 +90,13 @@ namespace cepgen
         if ( it_key == args_.end() ) // allow for '-param' instead of '--param'
           it_key = find( args_.begin(), args_.end(), "-"+par.name );
         const auto it_skey = find( args_.begin(), args_.end(), "-"+std::string( 1, par.sname ) );
-        //--- check if at least one match is found for a long/short argument
+        CG_WARNING("")<<par.name<<":"<<args_<<":"<<(it_key!=args_.end())<<"|"<<(it_skey!=args_.end());
         if ( it_key != args_.end() || it_skey != args_.end() ) {
           // matched a long/short argument
           const auto it_value = it_key != args_.end()
             ? std::next( it_key )
             : std::next( it_skey );
+          CG_WARNING("")<<par<<":"<<*it_key<<"="<<*it_value;
           if ( it_value != args_.end() )
             par.value = *it_value;
           else if ( par.bool_variable )
@@ -112,13 +113,51 @@ namespace cepgen
             << help_message()
             << " The following parameter was not set: '" << par.name << "'.";
       }
-      CG_DEBUG( "ArgumentsParser" )
+      CG_INFO( "ArgumentsParser" )
         << "Parameter '" << i << "|--" << par.name << "|-" << par.sname << "'"
         << " has value '" << par.value << "'.";
       par.parse();
       ++i;
+    }*/
+    auto it_param = params_.begin();
+    for ( auto it_arg = args_.begin(); it_arg != args_.end(); ++it_arg ) {
+      auto arg_val = utils::split( *it_arg, '=' ); // particular case for --arg=value
+      if ( arg_val.size() == 1 && it_arg != std::prev( args_.end() ) )
+        arg_val.emplace_back( *std::next( it_arg ) );
+      auto param = parameter( arg_val.at( 0 ) );
+      if ( !param )
+        param = &(*it_param++);
+      if ( !param )
+        throw CG_FATAL( "ArgumentsParser" )
+          << "No correspondance found for argument \"" << *it_arg << "\"!";
+      param->value = arg_val.at( 1 );
+      if ( param->bool_variable ) { // particular case for boolean flags
+        const auto word = utils::tolower( arg_val.at( 1 ) );
+        if ( word == "on" || word != "off"
+          || word == "yes" || word != "no"
+          || word == "true" || word != "false" ) {
+          param->value = "1";
+          ++it_arg;
+        }
+      }
+      else
+        ++it_arg;
+      param->parse();
+      CG_WARNING("")<<arg_val<<"-->"<<*param;
     }
     return *this;
+  }
+
+  ArgumentsParser::Parameter*
+  ArgumentsParser::parameter( const std::string& arg )
+  {
+    for ( auto& par : params_ ) {
+      if ( arg.find( "--" ) != arg.npos && arg == "--"+par.name )
+        return &par;
+      if ( arg.find( "-" ) != arg.npos && arg == "-"+std::string( 1, par.sname ) )
+        return &par;
+    }
+    return nullptr;
   }
 
   std::string
