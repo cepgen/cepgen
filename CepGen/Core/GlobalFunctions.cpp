@@ -50,17 +50,19 @@ namespace cepgen
   }
 
   bool
-  loadLibrary( const std::string& path )
+  loadLibrary( const std::string& path, bool match )
   {
 #ifdef _WIN32
-    if ( LoadLibraryA( ( path+".dll" ).c_str() ) == nullptr ) {
+    const auto fullpath = match ? path+".dll" : path;
+    if ( LoadLibraryA( fullpath.c_str() ) == nullptr ) {
       CG_DEBUG( "loadLibrary" )
         << "Failed to load library \"" << path << "\".\n\t"
         << "Error code #" << GetLastError() << ".";
       return false;
     }
 #else
-    if ( dlopen( ( "lib"+path+".so" ).c_str(), RTLD_LAZY | RTLD_LOCAL ) == nullptr ) {
+    const auto fullpath = match ? "lib"+path+".so" : path;
+    if ( dlopen( fullpath.c_str(), RTLD_LAZY | RTLD_LOCAL ) == nullptr ) {
       CG_DEBUG( "loadLibrary" )
         << "Failed to load library \"" << path << "\".\n\t"
         << dlerror();
@@ -80,7 +82,7 @@ namespace cepgen
     pdg::MCDFileParser::parse( utils::environ( "CEPGEN_PATH", "." )+"/External/mass_width_2019.mcd" );
     //--- load all necessary modules
     for ( const auto& lib : utils::libraries )
-      loadLibrary( lib );
+      loadLibrary( lib, true );
     //--- header message
     try { printHeader(); } catch ( const Exception& e ) { e.dump(); }
     //--- greetings message

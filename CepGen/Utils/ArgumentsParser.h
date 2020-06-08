@@ -122,7 +122,6 @@ namespace cepgen
       const std::vector<std::string>& extra_config() const { return extra_config_; }
 
     private:
-      Parameter* parameter( const std::string& );
       /// A collection of parameters
       typedef std::vector<Parameter> ParametersCollection;
 

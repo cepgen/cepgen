@@ -29,11 +29,13 @@ int main( int argc, char* argv[] )
     .addOptionalArgument( "list-modules", "list all runtime modules", false, &list_mods, 'l' )
     .addOptionalArgument( "add-ons", "external runtime plugin", vector<string>{}, &addons, 'a' )
     .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
-    .parse().dump();
+    .parse();
 
   //--- first start by defining the generator object
   for ( const auto& lib : addons )
-    cepgen::loadLibrary( lib );
+    if ( !cepgen::loadLibrary( lib ) )
+      CG_WARNING( "main" ) << "Failed load library \"" << lib << "\".";
+
   cepgen::Generator gen;
 
   //--- if modules listing is requested
