@@ -55,6 +55,7 @@ namespace cepgen
   ArgumentsParser&
   ArgumentsParser::parse()
   {
+    std::vector<std::pair<std::string,std::string> > arguments;
     if ( !args_.empty() ) {
       //--- check if help message is requested
       for ( const auto& str : help_str_ )
@@ -73,9 +74,16 @@ namespace cepgen
       }
       if ( !extra_config_.empty() )
         args_.resize( args_.size()-extra_config_.size()-1 );
+      for ( auto it_arg = args_.begin(); it_arg != args_.end(); ++it_arg ) {
+        auto arg_val = utils::split( *it_arg, '=' ); // particular case for --arg=value
+        if ( arg_val.size() == 1 )
+          arg_val.emplace_back( it_arg != std::prev( args_.end() ) : *std::next( it_arg ) : "" );
+        arguments.emplace_back( std::make_pair( arg_val.at( 0 ), arg_val.at( 1 ) ) );
+      }
+      CG_WARNING("")<<arguments;
     }
     //--- loop over all parameters
-    /*size_t i = 0;
+    size_t i = 0;
     for ( auto& par : params_ ) {
       if ( par.name.empty() ) {
         //--- no argument name ; fetching by index
@@ -118,8 +126,8 @@ namespace cepgen
         << " has value '" << par.value << "'.";
       par.parse();
       ++i;
-    }*/
-    auto it_param = params_.begin();
+    }
+    /*auto it_param = params_.begin();
     for ( auto it_arg = args_.begin(); it_arg != args_.end(); ++it_arg ) {
       auto arg_val = utils::split( *it_arg, '=' ); // particular case for --arg=value
       if ( arg_val.size() == 1 && it_arg != std::prev( args_.end() ) )
@@ -144,7 +152,7 @@ namespace cepgen
         ++it_arg;
       param->parse();
       CG_WARNING("")<<arg_val<<"-->"<<*param;
-    }
+    }*/
     return *this;
   }
 
