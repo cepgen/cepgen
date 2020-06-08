@@ -17,11 +17,11 @@ int main( int argc, char* argv[] )
   std::string output_file;
 
   cepgen::ArgumentsParser( argc, argv )
-    .addOptionalArgument( "sf", "structure functions modelling", 301, &strfun_type, 's' )
-    .addOptionalArgument( "kt2", "parton transverse virtuality (GeV^2)", 100., &kt2, 'k' )
-    .addOptionalArgument( "mx", "diffractive state mass (GeV)", 1.5, &mx, 'm' )
-    .addOptionalArgument( "npoints", "number of x-points to scan", 100, &num_points, 'n' )
-    .addOptionalArgument( "output", "output file name", "flux.scan.output.txt", &output_file, 'o' )
+    .addOptionalArgument( "sf,s", "structure functions modelling", &strfun_type, 301 )
+    .addOptionalArgument( "kt2,k", "parton transverse virtuality (GeV^2)", &kt2, 100. )
+    .addOptionalArgument( "mx,m", "diffractive state mass (GeV)", &mx, 1.5 )
+    .addOptionalArgument( "npoints,n", "number of x-points to scan", &num_points, 100 )
+    .addOptionalArgument( "output,o", "output file name", &output_file, "flux.scan.output.txt" )
     .parse();
 
   cepgen::initialise();

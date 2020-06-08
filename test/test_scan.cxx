@@ -19,10 +19,10 @@ int main( int argc, char* argv[] )
   double def;
 
   cepgen::ArgumentsParser( argc, argv )
-    .addArgument( "input", "input card", &input_card, 'i' )
-    .addOptionalArgument( "default", "default value for non-varying coordinates", 0.5, &def, 'v' )
-    .addOptionalArgument( "dim", "dimensions to probe", vector<int>{}, &dim, 'd' )
-    .addOptionalArgument( "num-points", "number of points to probe", 100, &npoints, 'n' )
+    .addArgument( "input,i", "input card", &input_card )
+    .addOptionalArgument( "default,v", "default value for non-varying coordinates", &def, 0.5 )
+    .addOptionalArgument( "dim,d", "dimensions to probe", &dim, vector<int>{} )
+    .addOptionalArgument( "num-points,n", "number of points to probe", &npoints, 100 )
     .parse();
 
   TGraph gr_scan_1d;

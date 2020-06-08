@@ -19,54 +19,35 @@ namespace cepgen
         //----- parameters constructors
 
         //--- string
-        /// An optional string parameter
-        Parameter( std::string name, std::string description = "", std::string default_value = "", std::string* var = nullptr, char sname = '\0' );
         /// A string parameter
-        Parameter( std::string name, std::string description, std::string* var = nullptr, char sname = '\0' );
-        /// Smallest string parameter
-        Parameter( std::string name, char sname = '\0' ) : Parameter( name, "", ( std::string* )nullptr, sname ) {}
+        Parameter( std::string name, std::string description = "", std::string* var = nullptr, std::string default_value = "" );
 
         //----- unsigned/signed integers
-        /// An optional unsigned integer parameter
-        Parameter( std::string name, std::string description, unsigned int default_value, unsigned int* var = nullptr, char sname = '\0' );
         /// An unsigned integer parameter
-        Parameter( std::string name, std::string description, unsigned int* var = nullptr, char sname = '\0' );
-        /// An optional integer parameter
-        Parameter( std::string name, std::string description, int default_value, int* var = nullptr, char sname = '\0' );
+        Parameter( std::string name, std::string description, unsigned int* var = nullptr, unsigned int default_value = 0 );
         /// An integer parameter
-        Parameter( std::string name, std::string description, int* var = nullptr, char sname = '\0' );
-        /// An optional boolean parameter
-        Parameter( std::string name, std::string description, bool default_value, bool* var = nullptr, char sname = '\0' );
+        Parameter( std::string name, std::string description, int* var = nullptr, int default_value = 0 );
         /// A boolean parameter
-        Parameter( std::string name, std::string description, bool* var = nullptr, char sname = '\0' );
+        Parameter( std::string name, std::string description, bool* var = nullptr, bool default_value = false );
 
         //--- floats
-        /// An optional double-precision floating point parameter
-        Parameter( std::string name, std::string description, double default_value, double* var = nullptr, char sname = '\0' );
         /// A double-precision floating point parameter
-        Parameter( std::string name, std::string description, double* var = nullptr, char sname = '\0' );
+        Parameter( std::string name, std::string description, double* var = nullptr, double default_value = -999.999 );
 
         //--- complex formats
-        /// An optional vector of strings parameter
-        Parameter( std::string name, std::string description, std::vector<std::string> default_value, std::vector<std::string>* var = nullptr, char sname = '\0');
         /// A vector of strings parameter
-        Parameter( std::string name, std::string description, std::vector<std::string>* var = nullptr, char sname = '\0' );
-        /// An optional vector of integer parameter
-        Parameter( std::string name, std::string description, std::vector<int> default_value, std::vector<int>* var = nullptr, char sname = '\0');
+        Parameter( std::string name, std::string description, std::vector<std::string>* var = nullptr, std::vector<std::string> default_value = {} );
         /// A vector of integer parameter
-        Parameter( std::string name, std::string description, std::vector<int>* var = nullptr, char sname = '\0' );
-        /// An optional vector of floating point parameter
-        Parameter( std::string name, std::string description, std::vector<double> default_value, std::vector<double>* var = nullptr, char sname = '\0');
+        Parameter( std::string name, std::string description, std::vector<int>* var = nullptr, std::vector<int> default_value = {} );
         /// A vector of floating point parameter
-        Parameter( std::string name, std::string description, std::vector<double>* var = nullptr, char sname = '\0' );
+        Parameter( std::string name, std::string description, std::vector<double>* var = nullptr, std::vector<double> default_value = {} );
 
         void parse();
         friend std::ostream& operator<<( std::ostream&, const Parameter& );
 
         //----- parameters attributes
 
-        std::string name; ///< Computer-readable name
-        char sname; ///< Short computer-readable name
+	std::vector<std::string> name; ///< Computer-readable name
         std::string description; ///< User-friendly parameter description
         std::string value; ///< Value (or default value)
         bool optional;

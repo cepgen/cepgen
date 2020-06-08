@@ -16,9 +16,9 @@ int main( int argc, char* argv[] )
   bool debug;
 
   cepgen::ArgumentsParser( argc, argv )
-    .addArgument( "input", "input card", &input_card, 'i' )
-    .addOptionalArgument( "point", "point to test", vector<double>( ps_size, 0.3 ), &point, 'p' )
-    .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
+    .addArgument( "input,i", "input card", &input_card )
+    .addOptionalArgument( "point,p", "point to test", &point, vector<double>( ps_size, 0.3 ) )
+    .addOptionalArgument( "debug,d", "debugging mode", &debug, false )
     .parse();
 
   cepgen::Generator gen;

@@ -16,7 +16,7 @@ main( int argc, char* argv[] )
   string card;
 
   ArgumentsParser( argc, argv )
-    .addArgument( "card", "input card", &card, 'i' )
+    .addArgument( "card,i", "input card", &card )
     .parse();
 
   try {

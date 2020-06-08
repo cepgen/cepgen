@@ -61,10 +61,10 @@ main( int argc, char* argv[] )
   cepgen::initialise();
 
   cepgen::ArgumentsParser( argc, argv )
-    .addOptionalArgument( "num-sigma", "max. number of std.dev.", 5., &num_sigma, 'n' )
-    .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
-    .addOptionalArgument( "integrator", "type of integrator used", "Vegas", &integrator, 'i' )
-    .addOptionalArgument( "functional", "type of functional parser user", "ROOT", &func_mod, 'f' )
+    .addOptionalArgument( "num-sigma,n", "max. number of std.dev.", &num_sigma, 5. )
+    .addOptionalArgument( "debug,d", "debugging mode", &debug, false )
+    .addOptionalArgument( "integrator,i", "type of integrator used", &integrator, "Vegas" )
+    .addOptionalArgument( "functional,f", "type of functional parser user", &func_mod, "ROOT" )
     .parse();
 
   if ( debug )
@@ -75,6 +75,8 @@ main( int argc, char* argv[] )
   cepgen::Parameters params;
   //--- integrator definition
   auto integr = cepgen::IntegratorFactory::get().build( integrator );
+
+CG_WARNING("")<<func_mod;
 
   //--- tests definition
   struct test_t

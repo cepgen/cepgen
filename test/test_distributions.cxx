@@ -30,8 +30,8 @@ int main( int argc, char* argv[] )
   int num_events;
 
   cepgen::ArgumentsParser( argc, argv )
-    .addArgument( "input", "input card", &input_card, 'i' )
-    .addOptionalArgument( "num-events", "number of events to generate", 100, &num_events, 'n' )
+    .addArgument( "input,i", "input card", &input_card )
+    .addOptionalArgument( "num-events,n", "number of events to generate", &num_events, 100 )
     .parse();
 
   mg.setParameters( cepgen::card::Handler::parse( input_card ) );

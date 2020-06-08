@@ -19,10 +19,10 @@ int main( int argc, char* argv[] )
   double min_x, max_x;
 
   cepgen::ArgumentsParser( argc, argv )
-    .addOptionalArgument( "draw", "do draw the canvas?", false, &draw, 'd' )
-    .addOptionalArgument( "num-points", "number of points to consider", 100, &num_points, 'n' )
-    .addOptionalArgument( "min-x", "minimal range", -1., &min_x, 'l' )
-    .addOptionalArgument( "max-x", "maximal range", 1., &max_x, 'H' )
+    .addOptionalArgument( "draw,d", "do draw the canvas?", &draw, false )
+    .addOptionalArgument( "num-points,n", "number of points to consider", &num_points, 100 )
+    .addOptionalArgument( "min-x,l", "minimal range", &min_x, -1. )
+    .addOptionalArgument( "max-x,H", "maximal range", &max_x, +1. )
     .parse();
 
   TGraph gr_rt;

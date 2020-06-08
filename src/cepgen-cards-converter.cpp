@@ -17,8 +17,8 @@ int main( int argc, char* argv[] )
 
   cepgen::ArgumentsParser parser( argc, argv );
   parser
-    .addArgument( "input", "input configuration", &input_config, 'i' )
-    .addArgument( "output", "output output", &output_config, 'o' )
+    .addArgument( "input,i", "input configuration", &input_config )
+    .addArgument( "output,o", "output output", &output_config )
     .parse();
 
   try {

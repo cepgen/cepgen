@@ -24,11 +24,11 @@ int main( int argc, char* argv[] )
 
   cepgen::ArgumentsParser parser( argc, argv );
   parser
-    .addOptionalArgument( "config", "path to the configuration file", &input_card, 'i' )
-    .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
-    .addOptionalArgument( "list-modules", "list all runtime modules", false, &list_mods, 'l' )
-    .addOptionalArgument( "add-ons", "external runtime plugin", vector<string>{}, &addons, 'a' )
-    .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
+    .addOptionalArgument( "config,i", "path to the configuration file", &input_card )
+    .addOptionalArgument( "num-events,n", "number of events to generate", &num_events, -1 )
+    .addOptionalArgument( "list-modules,l", "list all runtime modules", &list_mods, false )
+    .addOptionalArgument( "add-ons,a", "external runtime plugin", &addons )
+    .addOptionalArgument( "debug,d", "debugging mode", &debug, false )
     .parse();
 
   //--- first start by defining the generator object

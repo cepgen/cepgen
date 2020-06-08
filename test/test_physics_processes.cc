@@ -24,11 +24,11 @@ int main( int argc, char* argv[] )
   bool debug, quiet;
 
   ArgumentsParser( argc, argv )
-    .addArgument( "cfg", "configuration file", &cfg_filename, 'c' )
-    .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
-    .addOptionalArgument( "quiet", "quiet mode", false, &quiet, 'q' )
-    .addOptionalArgument( "num-sigma", "max. number of std.dev.", 3., &num_sigma, 'n' )
-    .addOptionalArgument( "integrator", "type of integrator used", "Vegas", &integrator, 'i' )
+    .addArgument( "cfg,c", "configuration file", &cfg_filename )
+    .addOptionalArgument( "debug,d", "debugging mode", &debug, false )
+    .addOptionalArgument( "quiet,q", "quiet mode", &quiet, false )
+    .addOptionalArgument( "num-sigma,n", "max. number of std.dev.", &num_sigma, 3. )
+    .addOptionalArgument( "integrator,i", "type of integrator used", &integrator, "Vegas" )
     .parse();
 
   if ( debug )

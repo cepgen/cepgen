@@ -9,8 +9,8 @@
 namespace cepgen
 {
   ArgumentsParser::ArgumentsParser( int argc, char* argv[] ) :
-    help_str_( { { "help", 'h' } } ),
-    config_str_( { { "cmd", 'c' } } )
+    help_str_( { { "help,h" } } ),
+    config_str_( { { "cmd,c" } } )
   {
     command_name_ = argv[0];
     //--- first remove the program name
@@ -46,8 +46,8 @@ namespace cepgen
       << "List of parameters retrieved from command-line:";
     for ( const auto& par : params_ )
       os
-        << "\n[--" << par.name
-        << ( par.sname != '\0' ? "|-"+std::string( 1, par.sname ) : "" )
+        << "\n[--" << par.name.at( 0 )
+        << ( par.name.size() > 1 ? "|-"+par.name.at( 1 ) : "" )
         << "] = " << par.value << ( par.optional ? ", optional" : "" );
     CG_INFO( "ArgumentsParser" ) << os.str();
   }
@@ -57,27 +57,25 @@ namespace cepgen
   {
     std::vector<std::pair<std::string,std::string> > arguments;
     if ( !args_.empty() ) {
-      //--- check if help message is requested
-      for ( const auto& str : help_str_ )
-        if ( find( args_.begin(), args_.end(), "--"+str.name ) != args_.end()
-          || find( args_.begin(), args_.end(), "-"+std::string( 1, str.sname ) ) != args_.end() ) {
-          print_help();
-          exit(0);
-        }
-      for ( const auto& str : config_str_ ) {
-        auto cfg_long = find( args_.begin(), args_.end(), "--"+str.name );
-        if ( cfg_long != args_.end() )
-          extra_config_ = std::vector<std::string>( cfg_long+1, args_.end() );
-        auto cfg_short = find( args_.begin(), args_.end(), "-"+std::string( 1, str.sname ) );
-        if ( cfg_short != args_.end() )
-          extra_config_ = std::vector<std::string>( cfg_short+1, args_.end() );
-      }
       if ( !extra_config_.empty() )
         args_.resize( args_.size()-extra_config_.size()-1 );
       // first loop on user arguments to identify word -> value pairs
       for ( auto it_arg = args_.begin(); it_arg != args_.end(); ++it_arg ) {
         auto arg_val = utils::split( *it_arg, '=' ); // particular case for --arg=value
-        if ( arg_val.size() == 1 && it_arg != std::prev( args_.end() ) ) { // argument found after
+        //--- check if help message is requested
+        for ( const auto& str : help_str_ )
+          if ( arg_val.at( 0 ) == "--"+str.name.at( 0 )
+            || ( str.name.size() > 1 && arg_val.at( 0 ) == "-"+str.name.at( 1 ) ) ) {
+            print_help();
+            exit(0);
+          }
+        //--- check if configuration word is requested
+        for ( const auto& str : config_str_ )
+          if ( arg_val.at( 0 ) == "--"+str.name.at( 0 )
+            || ( str.name.size() > 1 && arg_val.at( 0 ) == "-"+str.name.at( 1 ) ) )
+            extra_config_ = std::vector<std::string>( it_arg+1, args_.end() );
+        //--- find arguments if found after
+        if ( arg_val.size() == 1 && it_arg != std::prev( args_.end() ) ) {
           const auto& word = *std::next( it_arg );
           if ( word[0] != '-' ) {
             arg_val.emplace_back( *std::next( it_arg ) );
@@ -103,8 +101,8 @@ namespace cepgen
         // for each parameter, loop over arguments to find correspondance
         bool found_value = false;
         for ( const auto& arg : arguments ) {
-          if ( arg.first == "-"+std::string( 1, par.sname )
-            || arg.first == "--"+par.name ) {
+          if ( arg.first == "--"+par.name.at( 0 )
+            || ( par.name.size() > 1 && arg.first == "-"+par.name.at( 1 ) ) ) {
             par.value = arg.second;
             if ( par.bool_variable ) { // all particular cases for boolean arguments
               const auto word = utils::tolower( arg.second );
@@ -127,13 +125,14 @@ namespace cepgen
           else if ( !par.optional ) // no match
             throw CG_FATAL( "ArgumentsParser" )
               << help_message()
-              << " The following parameter was not set: '" << par.name << "'.";
+              << " The following parameter was not set: '" << par.name.at( 0 ) << "'.";
         }
         if ( found_value )
           par.parse();
       }
       CG_DEBUG( "ArgumentsParser" )
-        << "Parameter '" << i << "|--" << par.name << "|-" << par.sname << "'"
+        << "Parameter '" << i << "|--" << par.name.at( 0 )
+        << ( par.name.size() > 1 ? "|-"+par.name.at( 1 ) : "" ) << "'"
         << " has value '" << par.value << "'.";
       ++i;
     }
@@ -144,8 +143,9 @@ namespace cepgen
   ArgumentsParser::operator[]( std::string name ) const
   {
     for ( const auto& par : params_ ) {
-      if ( "--"+par.name == name ) return par.value;
-      if ( par.sname != '\0' && "-"+std::string( 1, par.sname ) == name )
+      if ( "--"+par.name.at( 0 ) == name )
+        return par.value;
+      if ( par.name.size() > 1 && "-"+par.name.at( 1 ) == name )
         return par.value;
     }
     throw CG_FATAL( "ArgumentsParser" )
@@ -169,9 +169,10 @@ namespace cepgen
         req_params.emplace_back( std::make_pair( par, i ) );
         oss << " ";
       }
-      oss << ( !par.name.empty() ? "--" : " <arg"+std::to_string( i )+">" ) << par.name;
-      if ( par.sname != '\0' )
-        oss << ( !par.name.empty() ? "|" : "" ) << "-" << par.sname;
+      oss << ( !par.name.at( 0 ).empty() ? "--" : " <arg"+std::to_string( i )+">" )
+        << par.name.at( 0 );
+      if ( par.name.size() > 1 )
+        oss << ( !par.name.at( 0 ).empty() ? "|" : "" ) << "-" << par.name.at( 1 );
       if ( par.optional )
         oss << "]";
       ++i;
@@ -180,16 +181,16 @@ namespace cepgen
       oss << "\n    " << utils::s( "required argument", req_params.size(), false ) << ":";
       for ( const auto& par : req_params )
         oss << utils::format( "\n\t%s%-18s\t%-28s",
-          ( par.first.sname != '\0' ? "-"+std::string( 1, par.first.sname )+"|" : "" ).c_str(),
-          ( !par.first.name.empty() ? "--"+par.first.name : "<arg"+std::to_string( par.second )+">" ).c_str(),
+          ( par.first.name.size() > 1 ? "-"+par.first.name.at( 1 )+"|" : "" ).c_str(),
+          ( !par.first.name.at( 0 ).empty() ? "--"+par.first.name.at( 0 ) : "<arg"+std::to_string( par.second )+">" ).c_str(),
           par.first.description.c_str() );
     }
     if ( opt_params.size() > 0 ) {
       oss << "\n    " << utils::s( "optional argument", opt_params.size(), false ) << ":";
       for ( const auto& par : opt_params )
         oss << utils::format( "\n\t%s%-18s\t%-28s\tdefault = '%s'",
-          ( par.first.sname != '\0' ? "-"+std::string( 1, par.first.sname )+"|" : "" ).c_str(),
-          ( !par.first.name.empty() ? "--"+par.first.name : "<arg"+std::to_string( par.second )+">" ).c_str(),
+          ( par.first.name.size() > 1 ? "-"+par.first.name.at( 1 )+"|" : "" ).c_str(),
+          ( !par.first.name.at( 0 ).empty() ? "--"+par.first.name.at( 0 ) : "<arg"+std::to_string( par.second )+">" ).c_str(),
           par.first.description.c_str(), par.first.value.c_str() );
     }
     oss << std::endl;
@@ -198,130 +199,78 @@ namespace cepgen
 
   //----- simple parameters
 
-  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, std::string default_value, std::string* var, char sname ) :
-    name( name ), sname( sname ), description( description ),
+  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, std::string* var, std::string default_value ) :
+    name( utils::split( name, ',' ) ), description( description ),
     value( default_value ), optional( true ),
     str_variable( var ), float_variable( nullptr ),
     int_variable( nullptr ), uint_variable( nullptr ), bool_variable( nullptr ),
     vec_str_variable( nullptr ), vec_int_variable( nullptr ), vec_float_variable( nullptr )
   {}
 
-  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, std::string* var, char sname ) :
-    Parameter( name, description, "", var, sname )
-  {
-    optional = false;
-  }
-
-  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, unsigned int default_value, unsigned int* var, char sname ) :
-    name( name ), sname( sname ), description( description ),
+  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, unsigned int* var, unsigned int default_value ) :
+    name( utils::split( name, ',' ) ), description( description ),
     value( std::to_string( default_value ) ), optional( true ),
     str_variable( nullptr ), float_variable( nullptr ),
     int_variable( nullptr ), uint_variable( var ), bool_variable( nullptr ),
     vec_str_variable( nullptr ), vec_int_variable( nullptr ), vec_float_variable( nullptr )
   {}
 
-  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, unsigned int* var, char sname ) :
-    Parameter( name, description, 0, var, sname )
-  {
-    optional = false;
-  }
-
-  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, int default_value, int* var, char sname ) :
-    name( name ), sname( sname ), description( description ),
+  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, int* var, int default_value ) :
+    name( utils::split( name, ',' ) ), description( description ),
     value( utils::format( "%+i", default_value ) ), optional( true ),
     str_variable( nullptr ), float_variable( nullptr ),
     int_variable( var ), uint_variable( nullptr ), bool_variable( nullptr ),
     vec_str_variable( nullptr ), vec_int_variable( nullptr ), vec_float_variable( nullptr )
   {}
 
-  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, int* var, char sname ) :
-    Parameter( name, description, 0, var, sname )
-  {
-    optional = false;
-  }
-
-  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, bool default_value, bool* var, char sname ) :
-    name( name ), sname( sname ), description( description ),
+  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, bool* var, bool default_value ) :
+    name( utils::split( name, ',' ) ), description( description ),
     value( utils::format( "%d", default_value ) ), optional( true ),
     str_variable( nullptr ), float_variable( nullptr ),
     int_variable( nullptr ), uint_variable( nullptr ), bool_variable( var ),
     vec_str_variable( nullptr ), vec_int_variable( nullptr ), vec_float_variable( nullptr )
   {}
 
-  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, bool* var, char sname ) :
-    Parameter( name, description, 0, var, sname )
-  {
-    optional = false;
-  }
-
-  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, double default_value, double* var, char sname ) :
-    name( name ), sname( sname ), description( description ),
+  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, double* var, double default_value ) :
+    name( utils::split( name, ',' ) ), description( description ),
     value( utils::format( "%g", default_value ) ), optional( true ),
     str_variable( nullptr ), float_variable( var ),
     int_variable( nullptr ), uint_variable( nullptr ), bool_variable( nullptr ),
     vec_str_variable( nullptr ), vec_int_variable( nullptr ), vec_float_variable( nullptr )
   {}
 
-  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, double* var, char sname ) :
-    Parameter( name, description, 0., var, sname )
-  {
-    optional = false;
-  }
-
   //----- vector of parameters
 
-  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, std::vector<std::string> default_value, std::vector<std::string>* var, char sname ) :
-    name( name ), sname( sname ), description( description ),
-    value( "" ), optional( true ),
+  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, std::vector<std::string>* var, std::vector<std::string> default_value ) :
+    name( utils::split( name, ',' ) ), description( description ),
+    value( utils::merge( default_value, "," ) ), optional( true ),
     str_variable( nullptr ), float_variable( nullptr ),
     int_variable( nullptr ), uint_variable( nullptr ), bool_variable( nullptr ),
     vec_str_variable( var ), vec_int_variable( nullptr ), vec_float_variable( nullptr )
-  {
-    unsigned short i = 0;
-    for ( const auto& str : default_value )
-      value += ( ( ( i++ > 0 ) ? "," : "" )+str );
-  }
+  {}
 
-  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, std::vector<std::string>* var, char sname ) :
-    Parameter( name, description, std::vector<std::string>{ { } }, var, sname )
-  {
-    optional = false;
-  }
-
-  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, std::vector<int> default_value, std::vector<int>* var, char sname ) :
-    name( name ), sname( sname ), description( description ),
+  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, std::vector<int>* var, std::vector<int> default_value ) :
+    name( utils::split( name, ',' ) ), description( description ),
     value( "" ), optional( true ),
     str_variable( nullptr ), float_variable( nullptr ),
     int_variable( nullptr ), uint_variable( nullptr ), bool_variable( nullptr ),
     vec_str_variable( nullptr ), vec_int_variable( var ), vec_float_variable( nullptr )
   {
-    unsigned short i = 0;
-    for ( const auto& var : default_value )
-      value += ( ( ( i++ > 0 ) ? "," : "" )+utils::format( "%d", var ) );
+    std::string sep;
+    for ( const auto& val : default_value )
+      value += sep+utils::format( "%d", val ), sep = ",";
   }
 
-  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, std::vector<int>* var, char sname ) :
-    Parameter( name, description, std::vector<int>{ { } }, var, sname )
-  {
-    optional = false;
-  }
-
-  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, std::vector<double> default_value, std::vector<double>* var, char sname ) :
-    name( name ), sname( sname ), description( description ),
+  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, std::vector<double>* var, std::vector<double> default_value ) :
+    name( utils::split( name, ',' ) ), description( description ),
     value( "" ), optional( true ),
     str_variable( nullptr ), float_variable( nullptr ),
     int_variable( nullptr ), uint_variable( nullptr ), bool_variable( nullptr ),
     vec_str_variable( nullptr ), vec_int_variable( nullptr ), vec_float_variable( var )
   {
-    unsigned short i = 0;
-    for ( const auto& flt : default_value )
-      value += ( ( ( i++ > 0 ) ? "," : "" )+utils::format( "%g", flt ) );
-  }
-
-  ArgumentsParser::Parameter::Parameter( std::string name, std::string description, std::vector<double>* var, char sname ) :
-    Parameter( name, description, std::vector<double>{ { } }, var, sname )
-  {
-    optional = false;
+    std::string sep;
+    for ( const auto& val : default_value )
+      value += sep+utils::format( "%g", val ), sep = ",";
   }
 
   void
@@ -387,8 +336,8 @@ namespace cepgen
   operator<<( std::ostream& os, const ArgumentsParser::Parameter& par )
   {
     return os << "Parameter{"
-      << "--" << par.name
-      << ",-" << std::string( 1, par.sname )
+      << "--" << par.name.at( 0 )
+      << ( par.name.size() > 1 ? ",-"+par.name.at( 1 ) : "" )
       << ( !par.description.empty() ? ","+par.description : "" )
       << ",val=" << par.value
       << ",opt:" << std::boolalpha << par.optional

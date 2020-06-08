@@ -21,8 +21,8 @@ int main( int argc, char* argv[] )
   bool list;
 
   ArgumentsParser( argc, argv )
-    .addOptionalArgument( "format", "type of format to build", "hepmc", &type )
-    .addOptionalArgument( "list", "list all formats", false, &list, 'l' )
+    .addOptionalArgument( "format", "type of format to build", &type, "hepmc" )
+    .addOptionalArgument( "list,l", "list all formats", &list, false )
     .parse();
 
   if ( list ) {
