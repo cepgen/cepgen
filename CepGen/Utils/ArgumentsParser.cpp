@@ -97,11 +97,10 @@ namespace cepgen
             << help_message()
             << " Failed to retrieve required <arg" << i << ">.";
         par.value = !par.bool_variable ? args_.at( i ) : "1";
+        par.parse();
       }
       else {
-        auto it_key = find( args_.begin(), args_.end(), "--"+par.name );
-        if ( it_key == args_.end() ) // allow for '-param' instead of '--param'
-          it_key = find( args_.begin(), args_.end(), "-"+par.name );
+        // for each parameter, loop over arguments to find correspondance
         bool found_value = false;
         for ( const auto& arg : arguments ) {
           if ( arg.first == "-"+std::string( 1, par.sname )
@@ -121,18 +120,21 @@ namespace cepgen
           }
         }
         if ( !found_value ) {
-          if ( args_.size() > i && args_.at( i )[0] != '-' )
-            par.value = args_.at( i );
+          if ( arguments.size() > i && arguments.at( i ).first[0] != '-' ) {
+            par.value = arguments.at( i ).first;
+            found_value = true;
+          }
           else if ( !par.optional ) // no match
             throw CG_FATAL( "ArgumentsParser" )
               << help_message()
               << " The following parameter was not set: '" << par.name << "'.";
         }
+        if ( found_value )
+          par.parse();
       }
       CG_DEBUG( "ArgumentsParser" )
         << "Parameter '" << i << "|--" << par.name << "|-" << par.sname << "'"
         << " has value '" << par.value << "'.";
-      par.parse();
       ++i;
     }
     return *this;
@@ -388,7 +390,7 @@ namespace cepgen
       << "--" << par.name
       << ",-" << std::string( 1, par.sname )
       << ( !par.description.empty() ? ","+par.description : "" )
-      << par.value
+      << ",val=" << par.value
       << ",opt:" << std::boolalpha << par.optional
       << "}";
   }
