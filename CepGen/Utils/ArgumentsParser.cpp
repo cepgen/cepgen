@@ -35,7 +35,7 @@ namespace cepgen
           || ( str.name.size() > 1 && arg_val.at( 0 ) == "-"+str.name.at( 1 ) ) )
           extra_config_ = std::vector<std::string>( it_arg+1, args_tmp.end() );
       //--- parse arguments if word found after
-      if ( arg_val.size() == 1 && it_arg != std::prev( args_tmp.end() ) ) {
+      if ( arg_val.size() == 1 && arg_val.at( 0 )[0] == '-' && it_arg != std::prev( args_tmp.end() ) ) {
         const auto& word = *std::next( it_arg );
         if ( word[0] != '-' ) {
           arg_val.emplace_back( *std::next( it_arg ) );
