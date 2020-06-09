@@ -34,6 +34,8 @@ namespace cepgen
 
   /// Collection of libraries loaded in the runtime environment
   static std::vector<std::string> loaded_libraries;
+  /// Collection of search paths to build the runtime environment
+  static std::vector<std::string> search_paths;
   /// Import a shared library in the runtime environment
   bool loadLibrary( const std::string&, bool match = false );
   /// Launch the initialisation procedure

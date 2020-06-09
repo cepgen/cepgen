@@ -54,7 +54,7 @@ namespace mstw
       Grid& computeFL( double xbj, double q2, double r ) override { return *this; }
 
       /// Default location for the MSTW grid values
-      static constexpr const char* DEFAULT_MSTW_GRID_PATH = "External/mstw_sf_scan_nnlo.dat";
+      static constexpr const char* DEFAULT_MSTW_GRID_PATH = "mstw_sf_scan_nnlo.dat";
 
     private:
       static constexpr unsigned int GOOD_MAGIC = 0x5754534d; // MSTW in ASCII

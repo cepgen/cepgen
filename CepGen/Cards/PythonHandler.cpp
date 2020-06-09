@@ -47,7 +47,8 @@ namespace cepgen
     Parameters*
     PythonHandler::parse( const std::string& file, Parameters* params )
     {
-      setenv( "PYTHONPATH", ( utils::environ( "CEPGEN_PATH", "." )+":.:Cards:test:../Cards" ).c_str(), 1 );
+      setenv( "PYTHONPATH", ( utils::environ( "CEPGEN_PATH", "." )
+                              +":.:Cards:test:../Cards:/usr/share/CepGen/Cards" ).c_str(), 1 );
       setenv( "PYTHONDONTWRITEBYTECODE", "1", 1 );
       CG_DEBUG( "PythonHandler" )
         << "Python PATH: " << getenv( "PYTHONPATH" ) << ".";

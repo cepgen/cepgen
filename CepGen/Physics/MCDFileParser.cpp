@@ -97,8 +97,8 @@ namespace pdg
         ++i;
       }
     }
-    CG_DEBUG( "MCDFileParser" )
-      << "File \"" << path << "\" successfully parsed. "
-      << cepgen::utils::s( "particle", cepgen::PDG::get().size() ) << " defined.";
+    CG_INFO( "MCDFileParser" )
+      << cepgen::utils::s( "particle", cepgen::PDG::get().size() ) << " defined"
+      << " from MCD file \"" << path << "\". ";
   }
 }

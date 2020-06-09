@@ -79,12 +79,21 @@ namespace cepgen
   {
     //--- parse all particles properties
     static const std::string pdg_file = "";
-    pdg::MCDFileParser::parse( utils::environ( "CEPGEN_PATH", "." )+"/External/mass_width_2019.mcd" );
+    search_paths = std::vector<std::string>{
+      utils::environ( "CEPGEN_PATH", "." ),
+      "/usr/share/CepGen"
+    };
     //--- load all necessary modules
     for ( const auto& lib : utils::libraries )
       loadLibrary( lib, true );
     //--- header message
     try { printHeader(); } catch ( const Exception& e ) { e.dump(); }
+    //--- particles table parsing
+    for ( const auto& path : search_paths )
+      if ( (bool)std::ifstream( path+"/mass_width_2019.mcd" ) ) {
+        pdg::MCDFileParser::parse( path+"/mass_width_2019.mcd" );
+        break;
+      }
     //--- greetings message
     CG_INFO( "init" )
       << "CepGen v" << version() << " initialised with the following add-ons:\n\t"
@@ -95,12 +104,16 @@ namespace cepgen
   void
   printHeader()
   {
-    std::ifstream hf( utils::environ( "CEPGEN_PATH", "." )+"/README" );
-    if ( !hf.good() )
-      throw CG_WARNING( "printHeader" ) << "Failed to open README file.";
-    CG_LOG( "printHeader" )
-      << std::string( std::istreambuf_iterator<char>( hf ),
-                      std::istreambuf_iterator<char>() );
+    for ( const auto& path : search_paths ) {
+      std::ifstream hf( path+"/README" );
+      if ( hf.good() ) {
+        CG_LOG( "printHeader" )
+          << std::string( std::istreambuf_iterator<char>( hf ),
+                          std::istreambuf_iterator<char>() );
+        return;
+      }
+    }
+    throw CG_WARNING( "printHeader" ) << "Failed to open README file.";
   }
 
   void

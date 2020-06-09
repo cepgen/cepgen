@@ -72,7 +72,7 @@ foreach(_files ${input_cards})
   configure_file(${_files} ${_files} COPYONLY)
 endforeach()
 file(GLOB external_files ${PROJECT_SOURCE_DIR}/External/mstw_sf_scan_nnlo.dat ${PROJECT_SOURCE_DIR}/External/*.mcd)
-file(COPY ${external_files} DESTINATION ${PROJECT_BINARY_DIR}/External)
+file(COPY ${external_files} DESTINATION ${PROJECT_BINARY_DIR})
 file(GLOB readme_file ${PROJECT_SOURCE_DIR}/CepGen/README)
 file(COPY ${readme_file} DESTINATION ${PROJECT_BINARY_DIR})
 
@@ -94,6 +94,12 @@ endif()
 install(DIRECTORY CepGen CepGenAddOns CepGenProcesses
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   COMPONENT devel FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY Cards
+  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
+  COMPONENT lib FILES_MATCHING PATTERN "*.py")
+install(FILES ${external_files} ${readme_file}
+  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
+  COMPONENT lib)
 export(PACKAGE CepGen)
 include(BuildPackage)
 
