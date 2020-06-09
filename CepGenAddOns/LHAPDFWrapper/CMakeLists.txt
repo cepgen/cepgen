@@ -11,8 +11,8 @@ file(GLOB sources PartonicStructureFunctionsLHAPDF.cpp AlphaSLHAPDF.cpp)
 #----- build the objects
 
 add_library(CepGenLHAPDF SHARED ${sources})
-target_link_libraries(CepGenLHAPDF PUBLIC ${LHAPDF})
-target_include_directories(CepGenLHAPDF PUBLIC ${LHAPDF_INCLUDE})
+target_link_libraries(CepGenLHAPDF PRIVATE ${LHAPDF})
+target_include_directories(CepGenLHAPDF PRIVATE ${LHAPDF_INCLUDE})
 list(APPEND CEPGEN_ADDONS_EXT CepGenLHAPDF)
 set(CEPGEN_ADDONS_EXT ${CEPGEN_ADDONS_EXT} PARENT_SCOPE)
 

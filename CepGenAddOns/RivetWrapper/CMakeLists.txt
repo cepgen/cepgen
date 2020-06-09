@@ -9,8 +9,8 @@ file(GLOB sources YODAHistsHandler.cpp)
 #----- build the objects
 
 add_library(CepGenRivet SHARED ${sources})
-target_link_libraries(CepGenRivet PUBLIC ${YODA})
-target_include_directories(CepGenRivet PUBLIC ${YODA_INCLUDE})
+target_link_libraries(CepGenRivet PRIVATE ${YODA})
+target_include_directories(CepGenRivet PRIVATE ${YODA_INCLUDE})
 list(APPEND CEPGEN_ADDONS_EXT CepGenRivet)
 set(CEPGEN_ADDONS_EXT ${CEPGEN_ADDONS_EXT} PARENT_SCOPE)
 

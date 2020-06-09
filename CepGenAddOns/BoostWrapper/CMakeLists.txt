@@ -9,8 +9,8 @@ file(GLOB cards_sources BoostTreeHandler.cpp)
 #----- build the objects
 
 add_library(CepGenBoost SHARED ${cards_sources})
-target_link_libraries(CepGenBoost PUBLIC ${Boost_LIBRARIES})
-target_include_directories(CepGenBoost PUBLIC ${Boost_INCLUDE_DIRS})
+target_link_libraries(CepGenBoost PRIVATE ${Boost_LIBRARIES})
+target_include_directories(CepGenBoost PRIVATE ${Boost_INCLUDE_DIRS})
 list(APPEND CEPGEN_ADDONS_EXT CepGenBoost)
 set(CEPGEN_ADDONS_EXT ${CEPGEN_ADDONS_EXT} PARENT_SCOPE)
 

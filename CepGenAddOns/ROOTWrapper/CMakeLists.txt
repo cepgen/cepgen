@@ -9,9 +9,9 @@ file(GLOB sources *.cpp)
 #----- build the objects
 
 add_library(CepGenRoot SHARED ${sources})
-target_compile_definitions(CepGenRoot PUBLIC ${ROOT_DEFINITIONS})
-target_link_libraries(CepGenRoot PUBLIC ${ROOT_LIBRARIES})
-target_include_directories(CepGenRoot PUBLIC ${ROOT_INCLUDE_DIRS})
+target_compile_definitions(CepGenRoot PRIVATE ${ROOT_DEFINITIONS})
+target_link_libraries(CepGenRoot PRIVATE ${ROOT_LIBRARIES})
+target_include_directories(CepGenRoot PRIVATE ${ROOT_INCLUDE_DIRS})
 set_property(TARGET CepGenRoot PROPERTY CXX_STANDARD 14)
 list(APPEND CEPGEN_ADDONS_EXT CepGenRoot)
 set(CEPGEN_ADDONS_EXT ${CEPGEN_ADDONS_EXT} PARENT_SCOPE)

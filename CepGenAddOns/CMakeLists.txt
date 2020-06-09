@@ -67,9 +67,9 @@ endif()
 #----- build the objects
 
 add_library(CepGenAddOns SHARED ${modif_sources} ${output_sources})
-target_compile_definitions(CepGenAddOns PUBLIC ${addons_definitions})
-target_include_directories(CepGenAddOns PUBLIC ${addons_includes})
-target_link_libraries(CepGenAddOns PUBLIC ${addons_libraries})
+target_compile_definitions(CepGenAddOns PRIVATE ${addons_definitions})
+target_include_directories(CepGenAddOns PRIVATE ${addons_includes})
+target_link_libraries(CepGenAddOns PRIVATE ${addons_libraries})
 
 #----- propagate global variables to parent scope
 
