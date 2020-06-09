@@ -90,10 +90,15 @@ namespace cepgen
     try { printHeader(); } catch ( const Exception& e ) { e.dump(); }
     //--- particles table parsing
     for ( const auto& path : search_paths )
-      if ( (bool)std::ifstream( path+"/mass_width_2019.mcd" ) ) {
-        pdg::MCDFileParser::parse( path+"/mass_width_2019.mcd" );
+      if ( (bool)std::ifstream( path+"/mass_width_2020.mcd" ) ) {
+        pdg::MCDFileParser::parse( path+"/mass_width_2020.mcd" );
         break;
       }
+    if ( PDG::get().size() < 10 )
+      CG_WARNING( "init" )
+        << "Only " << utils::s( "particle", PDG::get().size(), true )
+        << " are defined in the runtime environment.\n\t"
+        << "Make sure the path to the MCD file is correct.";
     //--- greetings message
     CG_INFO( "init" )
       << "CepGen v" << version() << " initialised with the following add-ons:\n\t"
