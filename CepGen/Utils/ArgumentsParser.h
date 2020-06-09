@@ -109,6 +109,7 @@ namespace cepgen
       std::string command_name_;
       const ParametersCollection help_str_;
       const ParametersCollection config_str_;
+      bool help_req_;
       ParametersCollection params_;
       std::vector<std::pair<std::string,std::string> > args_;
       std::vector<std::string> extra_config_;

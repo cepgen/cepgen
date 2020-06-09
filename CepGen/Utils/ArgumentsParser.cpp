@@ -9,8 +9,8 @@
 namespace cepgen
 {
   ArgumentsParser::ArgumentsParser( int argc, char* argv[] ) :
-    help_str_( { { "help,h" } } ),
-    config_str_( { { "cmd,c" } } )
+    help_str_( { { "help,h" } } ), config_str_( { { "cmd,c" } } ),
+    help_req_( false )
   {
     command_name_ = argv[0];
     //--- first remove the program name
@@ -25,10 +25,8 @@ namespace cepgen
       //--- check if help message is requested
       for ( const auto& str : help_str_ )
         if ( arg_val.at( 0 ) == "--"+str.name.at( 0 )
-          || ( str.name.size() > 1 && arg_val.at( 0 ) == "-"+str.name.at( 1 ) ) ) {
-          print_help();
-          exit(0);
-        }
+          || ( str.name.size() > 1 && arg_val.at( 0 ) == "-"+str.name.at( 1 ) ) )
+          help_req_ = true;
       //--- check if configuration word is requested
       for ( const auto& str : config_str_ )
         if ( arg_val.at( 0 ) == "--"+str.name.at( 0 )
@@ -69,6 +67,10 @@ namespace cepgen
   ArgumentsParser&
   ArgumentsParser::parse()
   {
+    if ( help_req_ ) {
+      print_help();
+      exit(0);
+    }
     //--- loop over all parameters
     size_t i = 0;
     for ( auto& par : params_ ) {
