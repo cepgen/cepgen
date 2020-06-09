@@ -19,16 +19,30 @@ namespace cepgen
       args_tmp.resize( argc-1 );
       std::copy( argv+1, argv+argc, args_tmp.begin() );
     }
-    //--- then build the arguments list
-    for ( const auto& arg : args_tmp ) {
-      //--- skip the '='
-      const auto eq_pos = arg.find( '=' );
-      if ( eq_pos != std::string::npos ) {
-        args_.emplace_back( arg.substr( 0, eq_pos ) );
-        args_.emplace_back( arg.substr( eq_pos+1 ) );
-        continue;
+    //--- then loop on user arguments to identify word -> value pairs
+    for ( auto it_arg = args_tmp.begin(); it_arg != args_tmp.end(); ++it_arg ) {
+      auto arg_val = utils::split( *it_arg, '=' ); // particular case for --arg=value
+      //--- check if help message is requested
+      for ( const auto& str : help_str_ )
+        if ( arg_val.at( 0 ) == "--"+str.name.at( 0 )
+          || ( str.name.size() > 1 && arg_val.at( 0 ) == "-"+str.name.at( 1 ) ) ) {
+          print_help();
+          exit(0);
+        }
+      //--- check if configuration word is requested
+      for ( const auto& str : config_str_ )
+        if ( arg_val.at( 0 ) == "--"+str.name.at( 0 )
+          || ( str.name.size() > 1 && arg_val.at( 0 ) == "-"+str.name.at( 1 ) ) )
+          extra_config_ = std::vector<std::string>( it_arg+1, args_tmp.end() );
+      //--- parse arguments if word found after
+      if ( arg_val.size() == 1 && it_arg != std::prev( args_tmp.end() ) ) {
+        const auto& word = *std::next( it_arg );
+        if ( word[0] != '-' ) {
+          arg_val.emplace_back( *std::next( it_arg ) );
+          ++it_arg;
+        }
       }
-      args_.emplace_back( arg );
+      args_.emplace_back( std::make_pair( arg_val.at( 0 ), arg_val.size() > 1 ? arg_val.at( 1 ) : "" ) );
     }
   }
 
@@ -55,36 +69,6 @@ namespace cepgen
   ArgumentsParser&
   ArgumentsParser::parse()
   {
-    std::vector<std::pair<std::string,std::string> > arguments;
-    if ( !args_.empty() ) {
-      if ( !extra_config_.empty() )
-        args_.resize( args_.size()-extra_config_.size()-1 );
-      // first loop on user arguments to identify word -> value pairs
-      for ( auto it_arg = args_.begin(); it_arg != args_.end(); ++it_arg ) {
-        auto arg_val = utils::split( *it_arg, '=' ); // particular case for --arg=value
-        //--- check if help message is requested
-        for ( const auto& str : help_str_ )
-          if ( arg_val.at( 0 ) == "--"+str.name.at( 0 )
-            || ( str.name.size() > 1 && arg_val.at( 0 ) == "-"+str.name.at( 1 ) ) ) {
-            print_help();
-            exit(0);
-          }
-        //--- check if configuration word is requested
-        for ( const auto& str : config_str_ )
-          if ( arg_val.at( 0 ) == "--"+str.name.at( 0 )
-            || ( str.name.size() > 1 && arg_val.at( 0 ) == "-"+str.name.at( 1 ) ) )
-            extra_config_ = std::vector<std::string>( it_arg+1, args_.end() );
-        //--- parse arguments if word found after
-        if ( arg_val.size() == 1 && it_arg != std::prev( args_.end() ) ) {
-          const auto& word = *std::next( it_arg );
-          if ( word[0] != '-' ) {
-            arg_val.emplace_back( *std::next( it_arg ) );
-            ++it_arg;
-          }
-        }
-        arguments.emplace_back( std::make_pair( arg_val.at( 0 ), arg_val.size() > 1 ? arg_val.at( 1 ) : "" ) );
-      }
-    }
     //--- loop over all parameters
     size_t i = 0;
     for ( auto& par : params_ ) {
@@ -94,12 +78,12 @@ namespace cepgen
           throw CG_FATAL( "ArgumentsParser" )
             << help_message()
             << " Failed to retrieve required <arg" << i << ">.";
-        par.value = !par.bool_variable ? args_.at( i ) : "1";
+        par.value = !par.bool_variable ? args_.at( i ).second : "1";
       }
       else {
         // for each parameter, loop over arguments to find correspondance
         bool found_value = false;
-        for ( const auto& arg : arguments ) {
+        for ( const auto& arg : args_ ) {
           if ( arg.first == "--"+par.name.at( 0 )
             || ( par.name.size() > 1 && arg.first == "-"+par.name.at( 1 ) ) ) {
             par.value = arg.second;
@@ -116,8 +100,8 @@ namespace cepgen
             break;
           }
         }
-        if ( !found_value && arguments.size() > i && arguments.at( i ).first[0] != '-' )
-          par.value = arguments.at( i ).first;
+        if ( !found_value && args_.size() > i && args_.at( i ).first[0] != '-' )
+          par.value = args_.at( i ).first;
         else if ( !found_value && !par.optional ) // no match
           throw CG_FATAL( "ArgumentsParser" )
             << help_message()
