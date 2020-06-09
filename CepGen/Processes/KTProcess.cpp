@@ -51,11 +51,11 @@ namespace cepgen
         bool el1 = ( flux1 == KTFlux::P_Photon_Elastic
                   || flux1 == KTFlux::P_Photon_Elastic_Budnev
                   || flux1 == KTFlux::HI_Photon_Elastic
-                  || flux1 == KTFlux::P_Gluon_KMR || flux1 == KTFlux::P_Gluon_KMR_legacy );
+                  || flux1 == KTFlux::P_Gluon_KMR );
         bool el2 = ( flux2 == KTFlux::P_Photon_Elastic
                   || flux2 == KTFlux::P_Photon_Elastic_Budnev
                   || flux2 == KTFlux::HI_Photon_Elastic
-                  || flux2 == KTFlux::P_Gluon_KMR || flux2 == KTFlux::P_Gluon_KMR_legacy );
+                  || flux2 == KTFlux::P_Gluon_KMR );
         if ( el1 && el2 )
           kin_.mode = KinematicsMode::ElasticElastic;
         else if ( el1 )
@@ -147,7 +147,6 @@ namespace cepgen
 
       switch ( kin_.incoming_beams.first.kt_flux ) {
         case KTFlux::P_Gluon_KMR:
-        case KTFlux::P_Gluon_KMR_legacy:
           event_->oneWithRole( Particle::Parton1 ).setPdgId( (pdgid_t)PDG::gluon ); break;
         case KTFlux::P_Photon_Elastic:
         case KTFlux::P_Photon_Elastic_Budnev:
@@ -161,7 +160,6 @@ namespace cepgen
       }
       switch ( kin_.incoming_beams.second.kt_flux ) {
         case KTFlux::P_Gluon_KMR:
-        case KTFlux::P_Gluon_KMR_legacy:
           event_->oneWithRole( Particle::Parton2 ).setPdgId( (pdgid_t)PDG::gluon ); break;
         case KTFlux::P_Photon_Elastic:
         case KTFlux::P_Photon_Elastic_Budnev:

@@ -110,4 +110,3 @@ find_path(EXPRTK exprtk.hpp PATH_SUFFIXES include)
 #--- semi-external dependencies
 file(GLOB ALPHAS_SRC ${PROJECT_SOURCE_DIR}/External/alphaS.f)
 file(GLOB GRV_SRC ${PROJECT_SOURCE_DIR}/External/grv_*.f)
-file(GLOB KMR_INTERP ${PROJECT_SOURCE_DIR}/External/f_inter_kmr_fg.f)
