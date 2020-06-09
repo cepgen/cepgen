@@ -47,7 +47,7 @@ namespace cepgen
   void
   ArgumentsParser::print_help() const
   {
-    CG_INFO( "ArgumentsParser" ) << help_message();
+    CG_LOG( "ArgumentsParser" ) << help_message();
   }
 
   void
