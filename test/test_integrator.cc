@@ -76,8 +76,6 @@ main( int argc, char* argv[] )
   //--- integrator definition
   auto integr = cepgen::IntegratorFactory::get().build( integrator );
 
-CG_WARNING("")<<func_mod;
-
   //--- tests definition
   struct test_t
   {

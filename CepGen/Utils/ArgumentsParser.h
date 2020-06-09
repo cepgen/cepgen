@@ -42,7 +42,7 @@ namespace cepgen
         /// A vector of floating point parameter
         Parameter( std::string name, std::string description, std::vector<double>* var = nullptr, std::vector<double> default_value = {} );
 
-        void parse();
+        Parameter& parse();
         friend std::ostream& operator<<( std::ostream&, const Parameter& );
 
         //----- parameters attributes
