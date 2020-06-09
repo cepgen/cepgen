@@ -89,9 +89,11 @@ namespace cepgen
        * Codes 1-10 correspond to currently existing partons/particles, and larger codes contain partons/particles which no longer exist, or other kinds of event information
        * \brief Particle status
        */
-      Status status() const { return status_; }
+      Status status() const { return (Status)status_; }
       /// Set the particle decay/stability status
-      Particle& setStatus( Status status ) { status_ = status; return *this; }
+      Particle& setStatus( Status status ) { status_ = (int)status; return *this; }
+      /// Set the particle decay/stability status
+      Particle& setStatus( int status ) { status_ = status; return *this; }
 
       /// Set the PDG identifier (along with the particle's electric charge)
       /// \param[in] pdg PDG identifier
@@ -193,7 +195,7 @@ namespace cepgen
       /// Role in the process
       Role role_;
       /// Decay/stability status
-      Status status_;
+      int status_;
       /// List of mother particles
       ParticlesIds mothers_;
       /// List of daughter particles

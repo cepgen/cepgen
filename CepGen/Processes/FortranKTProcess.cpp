@@ -7,9 +7,9 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Event/Event.h"
 
-#include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/HeavyIon.h"
 
 extern "C"
 {
@@ -66,29 +66,29 @@ namespace cepgen
       mom_ip1_ = event_->oneWithRole( Particle::IncomingBeam1 ).momentum();
       mom_ip2_ = event_->oneWithRole( Particle::IncomingBeam2 ).momentum();
 
-      defineVariable( y1_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "First central particle rapidity" );
-      defineVariable( y2_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "Second central particle rapidity" );
-      defineVariable( pt_diff_, Mapping::linear, kin_.cuts.central.pt_diff, { 0., 50. }, "Transverse momentum difference between central particles" );
-      defineVariable( phi_pt_diff_, Mapping::linear, kin_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Central particles azimuthal angle difference" );
+      defineVariable( y1_, Mapping::linear, kin_.cuts.central.rapidity_single(), { -6., 6. }, "First central particle rapidity" );
+      defineVariable( y2_, Mapping::linear, kin_.cuts.central.rapidity_single(), { -6., 6. }, "Second central particle rapidity" );
+      defineVariable( pt_diff_, Mapping::linear, kin_.cuts.central.pt_diff(), { 0., 50. }, "Transverse momentum difference between central particles" );
+      defineVariable( phi_pt_diff_, Mapping::linear, kin_.cuts.central.phi_diff(), { 0., 2.*M_PI }, "Central particles azimuthal angle difference" );
 
       //===========================================================================================
       // feed phase space cuts to the common block
       //===========================================================================================
 
-      kin_.cuts.central.pt_single.save( kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max );
-      kin_.cuts.central.energy_single.save( kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max );
-      kin_.cuts.central.eta_single.save( kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max );
-      kin_.cuts.central.mass_sum.save( kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max );
-      kin_.cuts.central.pt_sum.save( kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max );
-      kin_.cuts.central.rapidity_diff.save( kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max );
+      kin_.cuts.central.pt_single().save( kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max );
+      kin_.cuts.central.energy_single().save( kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max );
+      kin_.cuts.central.eta_single().save( kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max );
+      kin_.cuts.central.mass_sum().save( kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max );
+      kin_.cuts.central.pt_sum().save( kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max );
+      kin_.cuts.central.rapidity_diff().save( kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max );
 
       //===========================================================================================
       // feed run parameters to the common block
       //===========================================================================================
 
       genparams_.icontri = (int)kin_.mode;
-      if ( kin_.structure_functions )
-        genparams_.sfmod = (int)kin_.structure_functions->type;
+      if ( kin_.structureFunctions() )
+        genparams_.sfmod = (int)kin_.structureFunctions()->type;
 
       //-------------------------------------------------------------------------------------------
       // incoming beams information

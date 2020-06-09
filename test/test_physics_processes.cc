@@ -1,4 +1,4 @@
-#include "CepGen/Cards/PythonHandler.h"
+#include "CepGen/Cards/Handler.h"
 
 #include "CepGen/Generator.h"
 #include "CepGen/Core/ParametersList.h"
@@ -24,11 +24,11 @@ int main( int argc, char* argv[] )
   bool debug, quiet;
 
   ArgumentsParser( argc, argv )
-    .addArgument( "cfg", "configuration file", &cfg_filename, 'c' )
-    .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
-    .addOptionalArgument( "quiet", "quiet mode", false, &quiet, 'q' )
-    .addOptionalArgument( "num-sigma", "max. number of std.dev.", 3., &num_sigma, 'n' )
-    .addOptionalArgument( "integrator", "type of integrator used", "vegas", &integrator, 'i' )
+    .addArgument( "cfg,c", "configuration file", &cfg_filename )
+    .addOptionalArgument( "debug,d", "debugging mode", &debug, false )
+    .addOptionalArgument( "quiet,q", "quiet mode", &quiet, false )
+    .addOptionalArgument( "num-sigma,n", "max. number of std.dev.", &num_sigma, 3. )
+    .addOptionalArgument( "integrator,i", "type of integrator used", &integrator, "Vegas" )
     .parse();
 
   if ( debug )
@@ -82,7 +82,7 @@ int main( int argc, char* argv[] )
       gen.parameters().clearProcess();
 
       const std::string filename = "test_processes/"+test.filename+"_cfg.py";
-      gen.setParameters( cepgen::card::PythonHandler( filename ).parameters() );
+      gen.setParameters( cepgen::card::Handler::parse( filename ) );
       gen.parameters().integrator->setName<std::string>( integrator );
       CG_INFO( "main" )
         << "Process: "<< gen.parameters().processName() << "\n\t"

@@ -1,7 +1,7 @@
 if(CMAKE_VERSION VERSION_GREATER 3.1)
-  set(CMAKE_CXX_STANDARD 11)
+  set(CMAKE_CXX_STANDARD 14)
 else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif()
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wall -cpp")
 #--- check if we are at CERN
@@ -105,10 +105,11 @@ find_path(YODA_INCLUDE YODA HINTS $ENV{YODA_DIR} PATH_SUFFIXES include)
 find_path(CUBA_INCLUDE tools HINTS $ENV{CUBA_DIR})
 find_library(CUBA cuba HINTS $ENV{CUBA_DIR})
 #--- other utilitaries
-find_package(PythonLibs 2.7)
+find_package(PythonInterp)
+find_package(PythonLibs)
+find_package(Boost)
 find_library(MUPARSER muparser)
 find_path(EXPRTK exprtk.hpp PATH_SUFFIXES include)
 #--- semi-external dependencies
 file(GLOB ALPHAS_SRC ${PROJECT_SOURCE_DIR}/External/alphaS.f)
 file(GLOB GRV_SRC ${PROJECT_SOURCE_DIR}/External/grv_*.f)
-file(GLOB KMR_INTERP ${PROJECT_SOURCE_DIR}/External/f_inter_kmr_fg.f)

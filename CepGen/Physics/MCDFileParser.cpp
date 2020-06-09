@@ -19,7 +19,7 @@ namespace pdg
   };
 
   void
-  MCDFileParser::parse( const char* path )
+  MCDFileParser::parse( const std::string& path )
   {
     std::ifstream ifile( path );
     std::string line;
@@ -97,8 +97,8 @@ namespace pdg
         ++i;
       }
     }
-    CG_DEBUG( "MCDFileParser" )
-      << "File \"" << path << "\" successfully parsed. "
-      << cepgen::utils::s( "particle", cepgen::PDG::get().size() ) << " defined.";
+    CG_INFO( "MCDFileParser" )
+      << cepgen::utils::s( "particle", cepgen::PDG::get().size() )
+      << " defined from \"" << path << "\". ";
   }
 }

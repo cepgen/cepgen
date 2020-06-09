@@ -1,4 +1,5 @@
 #include "CepGen/Integration/GridParameters.h"
+#include "CepGen/Integration/Integrator.h"
 #include "CepGen/Core/Exception.h"
 
 #include <cmath> // pow
@@ -40,7 +41,7 @@ namespace cepgen
   GridParameters::setValue( size_t coord, double val )
   {
     //--- update function local and global maxima if needed
-    f_max_[coord] = std::max( f_max_[coord], val );
+    f_max_[coord] = std::max( f_max_.at( coord ), val );
     f_max_global_ = std::max( f_max_global_, val );
   }
 
@@ -63,11 +64,11 @@ namespace cepgen
   }
 
   void
-  GridParameters::shoot( const gsl_rng* rng, size_t coord, std::vector<double>& out ) const
+  GridParameters::shoot( const Integrator* integr, size_t coord, std::vector<double>& out ) const
   {
     const auto& nv = n_map_.at( coord );
     for ( size_t i = 0; i < nv.size(); ++i )
-      out[i] = ( gsl_rng_uniform( rng )+nv.at( i ) ) * INV_M_BIN;
+      out[i] = ( integr->uniform()+nv.at( i ) ) * INV_M_BIN;
   }
 
   void

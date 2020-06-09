@@ -2,7 +2,7 @@
       subroutine cepgen_print
       !> Print useful run information in standard stream
       implicit none
-      include 'KTBlocks.inc'
+      include 'CepGen/Processes/Fortran/KTBlocks.inc'
       logical params_shown
       data params_shown/.false./
       save params_shown

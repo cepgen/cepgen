@@ -18,11 +18,11 @@ int main( int argc, char* argv[] )
   bool list;
 
   cepgen::ArgumentsParser( argc, argv )
-    .addOptionalArgument( "proc-name", "name of the process", "", &proc_name, 'p' )
-    .addOptionalArgument( "list", "list all processes", false, &list, 'l' )
+    .addOptionalArgument( "proc-name,p", "name of the process", &proc_name )
+    .addOptionalArgument( "list,l", "list all processes", &list, false )
     .parse();
 
-  cepgen::Generator gen;
+  cepgen::initialise();
 
   if ( list ) {
     cout << "List of modules registered in the runtime database:";

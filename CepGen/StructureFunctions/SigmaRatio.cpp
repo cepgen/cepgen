@@ -12,6 +12,7 @@ namespace cepgen
   namespace sigrat
   {
     Parameterisation::Parameterisation( const ParametersList& params ) :
+      type( (Type)params.name<int>( (int)Type::Invalid ) ),
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ )
     {}
 
@@ -120,14 +121,11 @@ namespace cepgen
   operator<<( std::ostream& os, const sigrat::Type& sf )
   {
     switch ( sf ) {
-      case sigrat::Type::E143:
-        return os << "E143";
-      case sigrat::Type::R1990:
-        return os << "R1990";
-      case sigrat::Type::CLAS:
-        return os << "CLAS";
-      case sigrat::Type::SibirtsevBlunden:
-        return os << "SibirtsevBlunden";
+      case sigrat::Type::Invalid:         return os << "<invalid>";
+      case sigrat::Type::E143:            return os << "E143";
+      case sigrat::Type::R1990:           return os << "R1990";
+      case sigrat::Type::CLAS:            return os << "CLAS";
+      case sigrat::Type::SibirtsevBlunden:return os << "SibirtsevBlunden";
     }
     return os;
   }

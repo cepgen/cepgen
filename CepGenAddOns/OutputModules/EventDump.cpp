@@ -1,4 +1,4 @@
-#include "CepGen/Modules/ExportModule.h"
+#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 
 #include "CepGen/Core/Exception.h"
@@ -13,11 +13,9 @@ namespace cepgen
 {
   namespace io
   {
-    /**
-     * \brief Simple event dump module
-     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-     * \date Jan 2020
-     */
+    /// Simple event dump module
+    /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+    /// \date Jan 2020
     class EventDump : public ExportModule
     {
       public:
@@ -37,7 +35,7 @@ namespace cepgen
     EventDump::EventDump( const ParametersList& params ) :
       ExportModule( params ),
       save_banner_( params.get<bool>( "saveBanner", true ) ),
-      print_every_( params.get<int>( "printEvery", 1 ) ),
+      print_every_( params.get<int>( "printEvery", 10 ) ),
       out_( nullptr )
     {
       if ( params.has<std::string>( "filename" ) )
@@ -48,7 +46,8 @@ namespace cepgen
 
     EventDump::~EventDump()
     {
-      //file_.close();
+      if ( out_ != &std::cout )
+        dynamic_cast<std::ofstream*>( out_ )->close();
     }
 
     void

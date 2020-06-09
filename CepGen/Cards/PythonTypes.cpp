@@ -67,7 +67,7 @@ namespace cepgen
       return PyInt_AsUnsignedLongMask( obj );
 #else
       if ( !PyLong_Check( obj ) )
-        throwPythonError( utils::format( "Object \"%s\" has invalid type: unsigned long != %s", key, obj->ob_type->tp_name ) );
+        throwPythonError( utils::format( "Object has invalid type: unsigned long != %s", obj->ob_type->tp_name ) );
       return PyLong_AsUnsignedLong( obj );
 #endif
     }
@@ -177,13 +177,14 @@ namespace cepgen
           out.set<std::string>( skey, get<std::string>( pvalue ) );
         else if ( is<ParametersList>( pvalue ) )
           out.set<ParametersList>( skey, get<ParametersList>( pvalue ) );
-        else if ( is<Limits>( pvalue ) )
-          out.set<Limits>( skey, get<Limits>( pvalue ) );
         else if ( PyTuple_Check( pvalue ) || PyList_Check( pvalue ) ) { // vector
           if ( isVector<int>( pvalue ) )
             out.set<std::vector<int> >( skey, getVector<int>( pvalue ) );
-          else if ( isVector<double>( pvalue ) )
+          else if ( isVector<double>( pvalue ) ) {
             out.set<std::vector<double> >( skey, getVector<double>( pvalue ) );
+            if ( is<Limits>( pvalue ) )
+              out.set<Limits>( skey, get<Limits>( pvalue ) );
+          }
           else if ( isVector<std::string>( pvalue ) )
             out.set<std::vector<std::string> >( skey, getVector<std::string>( pvalue ) );
           else if ( isVector<ParametersList>( pvalue ) )

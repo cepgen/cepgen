@@ -12,10 +12,9 @@ namespace cepgen
   class PDG
   {
     public:
-      /** \brief PDG ids of all known particles
-       * \note From \cite Beringer:1900zz :
-       * `The Monte Carlo particle numbering scheme [...] is intended to facilitate interfacing between event generators, detector simulators, and analysis packages used in particle physics.`
-       */
+      /// PDG ids of all known particles
+      /// \note From \cite Beringer:1900zz :
+      /// > The Monte Carlo particle numbering scheme [...] is intended to facilitate interfacing between event generators, detector simulators, and analysis packages used in particle physics.
       enum PdgId : pdgid_t
       {
         invalid = 0,
@@ -34,17 +33,21 @@ namespace cepgen
       /// Default destructor
       ~PDG() = default;
 
+      /// Add a new particle definition to the library
       void define( const ParticleProperties& props );
-      bool has( pdgid_t ) const;
-      const ParticleProperties& operator()( pdgid_t ) const;
-      const std::vector<pdgid_t> particles() const;
-      void dump() const;
-      size_t size() const;
-      const std::string& name( pdgid_t ) const;
-      double colours( pdgid_t ) const;
-      double mass( pdgid_t ) const;
-      double width( pdgid_t ) const;
-      double charge( pdgid_t ) const;
+      const std::vector<pdgid_t> particles() const; ///< All particles ids in this library
+      void dump() const; ///< Dump all particles in this library
+      size_t size() const; ///< Number of particles defined in this library
+
+      //--- per-particles information
+
+      bool has( pdgid_t ) const; ///< Is the particle defined for a given PDG id
+      const ParticleProperties& operator()( pdgid_t ) const; ///< All physical properties for one particle
+      const std::string& name( pdgid_t ) const; ///< Human-readable name for this particle
+      double colours( pdgid_t ) const; ///< Colour factor for this particle
+      double mass( pdgid_t ) const; ///< Particle mass (in GeV)
+      double width( pdgid_t ) const; ///< Resonance width (in GeV)
+      double charge( pdgid_t ) const; ///< Electric charge (in \f$e\f$) for this particle
 
     private:
       explicit PDG();

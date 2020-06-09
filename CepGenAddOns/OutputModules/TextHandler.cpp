@@ -1,4 +1,4 @@
-#include "CepGen/Modules/ExportModule.h"
+#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 
 #include "CepGen/Core/Exception.h"
@@ -35,7 +35,7 @@ namespace cepgen
         void operator<<( const Event& ) override;
 
       private:
-        std::string textHistogram( const std::string&, const gsl_histogram* ) const;
+        static std::string textHistogram( const std::string&, const gsl_histogram* );
 
         static constexpr size_t PLOT_WIDTH = 50;
         static constexpr char PLOT_CHAR = '#';
@@ -151,7 +151,7 @@ namespace cepgen
     }
 
     std::string
-    TextHandler::textHistogram( const std::string& var, const gsl_histogram* hist ) const
+    TextHandler::textHistogram( const std::string& var, const gsl_histogram* hist )
     {
       std::ostringstream os;
       const size_t nbins = gsl_histogram_bins( hist );

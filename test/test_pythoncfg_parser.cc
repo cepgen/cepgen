@@ -16,12 +16,12 @@ main( int argc, char* argv[] )
   string card;
 
   ArgumentsParser( argc, argv )
-    .addArgument( "card", "input card", &card, 'i' )
+    .addArgument( "card,i", "input card", &card )
     .parse();
 
   try {
     CG_INFO( "main" )
-      << &card::PythonHandler( card.c_str() ).parameters();
+      << card::PythonHandler( ParametersList().set<string>( "filename", card ) ).parameters();
   } catch ( const Exception& e ) {
     e.dump();
   }

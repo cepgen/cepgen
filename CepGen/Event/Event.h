@@ -27,8 +27,10 @@ namespace cepgen
       /// Compress the event record
       Event compress() const;
 
+      /// Callback function each event is required to pass through
       typedef std::function<void( const Event&, unsigned long long )> callback;
 
+      /// Human-readable version of the event content
       friend std::ostream& operator<<( std::ostream&, const Event& );
       /// Dump all the known information on every Particle object contained in this Event container in the output stream
       void dump() const;
@@ -54,50 +56,37 @@ namespace cepgen
       const Particles particles() const;
       /// Vector of all stable particles in the event
       const Particles stableParticles() const;
-      /** Get a list of Particle objects corresponding to a certain role in the process kinematics
-       * \param[in] role The role the particles have to play in the process
-       * \return A vector of references to the requested Particle objects
-       */
+      /// List of references to Particle objects corresponding to a certain role in the process kinematics
+      /// \param[in] role The role the particles have to play in the process
       Particles& operator[]( Particle::Role role );
       /// Get a list of constant Particle objects corresponding to a certain role in the process kinematics
       const Particles& operator[]( Particle::Role role ) const;
       /// Get a list of particle identifiers in Event corresponding to a certain role in the process kinematics
       ParticlesIds ids( Particle::Role role ) const;
-      /** \brief Get the first Particle object in the particles list whose role corresponds to the given argument
-       * \param[in] role The role the particle has to play in the event
-       * \return A Particle object corresponding to the first particle with the role
-       */
+      /// First Particle object with a given role in the event
+      /// \param[in] role The role the particle has to play in the event
       Particle& oneWithRole( Particle::Role role );
+      /// First constant Particle object with a given role in the event
       const Particle& oneWithRole( Particle::Role role ) const;
-      /** \brief Get the reference to the Particle object corresponding to a unique identifier in the event
-       * \param[in] id The unique identifier to this particle in the event
-       * \return A reference to the requested Particle object
-       */
+      /// Reference to the Particle object corresponding to a unique identifier in the event
+      /// \param[in] id The unique identifier to this particle in the event
       Particle& operator[]( int id );
-      /** \brief Get a const Particle object using its unique identifier
-       * \param[in] id Unique identifier of the particle in the event
-       * \return Constant object to be retrieved
-       */
+      /// Constant Particle reference object using its unique identifier
+      /// \param[in] id Unique identifier of the particle in the event
       const Particle& operator[]( int id ) const;
-      /** \brief Get references to the Particle objects corresponding to the unique identifiers in the event
-       * \param[in] ids_ The unique identifiers to the particles to be selected in the event
-       * \return A vector of references to the requested Particle objects
-       */
+      /// References to the Particle objects corresponding to the unique identifiers in the event
+      /// \param[in] ids_ The unique identifiers to the particles to be selected in the event
       Particles operator[]( const ParticlesIds& ids_ ) const;
-      /** \brief Get the list of mother particles of any given Particle object in this event
-       * \param[in] part The reference to the Particle object from which we want to extract the mother particles
-       * \return A list of parenting Particle object
-       */
 
       //----- general particles information retriever
 
+      /// List of all parent Particle object for this given particle
+      /// \param[in] part The particle for which the mother particles have to be retrieved
       Particles mothers( const Particle& part ) const;
-      /// Get a vector containing all the daughters from a particle
+      /// List of all the daughters from a particle
       /// \param[in] part The particle for which the daughter particles have to be retrieved
-      /// \return Vector of Particle objects containing all the daughters' kinematic information
       Particles daughters( const Particle& part ) const;
-      /// Get a list of roles for the given event (really process-dependant for the central system)
-      /// \return Vector of integers corresponding to all the roles the particles can play in the event
+      /// List of roles defined for the given event (really process-dependant for the central system)
       ParticleRoles roles() const;
 
       /// Number of trials before the event was "correctly" hadronised

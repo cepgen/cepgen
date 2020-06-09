@@ -8,6 +8,7 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include <fstream>
+#include <cmath>
 
 /// Martin-Stirling-Thorne-Watt PDFs structure functions
 namespace mstw
@@ -16,6 +17,7 @@ namespace mstw
   class Grid : public cepgen::strfun::Parameterisation, private cepgen::GridHandler<2,2>
   {
     public:
+      /// Grid MSTW structure functions evaluator
       Grid( const cepgen::ParametersList& params = cepgen::ParametersList() );
 
       /// Grid header information as parsed from the file
@@ -51,7 +53,8 @@ namespace mstw
       Grid& computeFL( double xbj, double q2 ) override { return *this; }
       Grid& computeFL( double xbj, double q2, double r ) override { return *this; }
 
-      static constexpr const char* DEFAULT_MSTW_GRID_PATH = "External/mstw_sf_scan_nnlo.dat";
+      /// Default location for the MSTW grid values
+      static constexpr const char* DEFAULT_MSTW_GRID_PATH = "mstw_sf_scan_nnlo.dat";
 
     private:
       static constexpr unsigned int GOOD_MAGIC = 0x5754534d; // MSTW in ASCII
@@ -98,8 +101,8 @@ namespace mstw
     CG_DEBUG( "MSTW" )
       << "MSTW@" << header_.order << " grid evaluator built "
       << "for " << header_.nucleon << " structure functions (" << header_.cl << ")\n\t"
-      << "xBj in range [" << pow( 10., bounds[0].first ) << ":" << pow( 10., bounds[0].second ) << "]\n\t"
-      << " Q² in range [" << pow( 10., bounds[1].first ) << ":" << pow( 10., bounds[1].second ) << "].";
+      << "xBj in range [" << std::pow( 10., bounds[0].first ) << ":" << std::pow( 10., bounds[0].second ) << "]\n\t"
+      << " Q² in range [" << std::pow( 10., bounds[1].first ) << ":" << std::pow( 10., bounds[1].second ) << "].";
   }
 
   std::string

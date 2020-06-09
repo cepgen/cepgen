@@ -7,6 +7,7 @@ process = cepgen.Module('pptoff',
     ),
     inKinematics = cepgen.Parameters(
         cmEnergy = 13.e3,
+        ktFluxes = 1,
         structureFunctions = cepgen.StructureFunctions.SzczurekUleshchenko,
     ),
     outKinematics = cepgen.Parameters(

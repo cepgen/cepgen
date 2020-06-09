@@ -9,14 +9,18 @@ namespace cepgen
   namespace sigrat
   {
     /// \f$R=\sigma_L/\sigma_T\f$ ratio modelling type
-    enum struct Type { E143 = 1, R1990 = 2, CLAS = 3, SibirtsevBlunden = 4 };
+    enum struct Type { Invalid = 0, E143 = 1, R1990 = 2, CLAS = 3, SibirtsevBlunden = 4 };
     /// A generic modelling of the \f$R=\sigma_L/\sigma_T\f$ ratio
     class Parameterisation
     {
       public:
-        Parameterisation( const ParametersList& params = ParametersList() );
+        /// \f$R=\sigma_L/\sigma_T\f$ ratio computation algorithm constructor
+        explicit Parameterisation( const ParametersList& params = ParametersList() );
         /// Extract the longitudinal/transverse cross section ratio and associated error for a given \f$(x_{\rm Bj},Q^2)\f$ couple.
         virtual double operator()( double xbj, double q2, double& err ) const = 0;
+
+        /// Interpolation type of sigma ratio evaluator
+        Type type;
 
       protected:
         /// \f$x_{\rm Bj}\f$ dependence for QCD-matching of R at high-\f$Q^2\f$

@@ -38,6 +38,7 @@ namespace cepgen
   {
     if ( !initialised_ ) {
       miser_state_.reset( gsl_monte_miser_alloc( function_->dim ) );
+      miser_state_->verbose = verbosity_;
       gsl_monte_miser_params_get( miser_state_.get(), &miser_params_ );
       miser_params_.estimate_frac = params_.get<double>( "estimateFraction", 0.1 );
       miser_params_.min_calls = params_.get<int>( "minCalls", 16*10 );

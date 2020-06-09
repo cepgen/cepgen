@@ -68,10 +68,35 @@ namespace cepgen
 
       /// Generic templated message feeder operator
       template<typename T>
-      inline friend const LoggedException& operator<<( const LoggedException& exc, T var ) {
+      inline friend const LoggedException& operator<<( const LoggedException& exc, const T& var ) {
         LoggedException& nc_except = const_cast<LoggedException&>( exc );
         nc_except.message_ << var;
         return exc;
+      }
+      /// Generic templated pair-variables feeder operator
+      template<typename T,typename U>
+      inline friend const LoggedException& operator<<( const LoggedException& exc, const std::pair<T,U>& pair_var ) {
+        return exc << "(" << pair_var.first << ", " << pair_var.second << ")";
+      }
+      /// Generic templated vector-variables feeder operator
+      template<typename T>
+      inline friend const LoggedException& operator<<( const LoggedException& exc, const std::vector<T>& vec_var ) {
+        exc << "{";
+        std::string sep;
+        if ( !vec_var.empty() )
+          for ( const auto& var : vec_var )
+            exc << sep << var, sep = ", ";
+        return exc << "}";
+      }
+      /// Generic templated mapping-variables feeder operator
+      template<typename T,typename U>
+      inline friend const LoggedException& operator<<( const LoggedException& exc, const std::map<T,U>& map_var ) {
+        exc << "{";
+        std::string sep;
+        if ( !map_var.empty() )
+          for ( const auto& var : map_var )
+            exc << sep << "{" << var.first << " -> " << var.second << "}", sep = ", ";
+        return exc << "}";
       }
       /// Pipe modifier operator
       inline friend const LoggedException& operator<<( const LoggedException& exc, std::ios_base&( *f )( std::ios_base& ) ) {

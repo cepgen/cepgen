@@ -12,10 +12,12 @@
 
 namespace cepgen
 {
+  /// A generic \f$\alpha_S(Q^2)\f$ evaluation algoritm
   class AlphaS
   {
     public:
       AlphaS() = default;
+      /// Compute \f$\alpha_S\f$ for a given \f$Q^2\f$
       virtual double operator()( double q ) const = 0;
   };
   /// An alpha(S) evolution algorithms factory

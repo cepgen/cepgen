@@ -1,4 +1,4 @@
-from containers_cfi import Module
+from .containers_cfi import Module
 
 class SigmaRatio:
     '''R-ratio computation method'''

@@ -18,11 +18,12 @@ namespace cepgen
       public:
         /// Read a standard configuration card
         explicit PythonHandler( const ParametersList& );
-        PythonHandler( const std::string& );
 
-        Parameters& parse( const std::string& );
+        Parameters* parse( const std::string&, Parameters* ) override;
 
       private:
+        static constexpr const char* ADDONS_NAME = "addons";
+        static constexpr const char* TIMER_NAME = "timer";
         static constexpr const char* PROCESS_NAME = "process";
         static constexpr const char* HADR_NAME = "hadroniser";
         static constexpr const char* EVT_MOD_SEQ_NAME = "eventSequence";
@@ -57,8 +58,6 @@ namespace cepgen
         void fillParameter( PyObject* parent, const char* key, ParametersList& out );
         void fillParameter( PyObject* parent, const char* key, std::vector<ParametersList>& out );
 
-        void parseIncomingKinematics( PyObject* );
-        void parseOutgoingKinematics( PyObject* );
         void parseLogging( PyObject* );
         void parseIntegrator( PyObject* );
         void parseGenerator( PyObject* );
@@ -67,8 +66,6 @@ namespace cepgen
         void parseOutputModule( PyObject* );
         void parseOutputModules( PyObject* );
         void parseExtraParticles( PyObject* );
-
-        std::string filename_;
     };
     template<> bool PythonHandler::is<bool>( PyObject* obj ) const;
     template<> bool PythonHandler::is<int>( PyObject* obj ) const;

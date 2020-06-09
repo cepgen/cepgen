@@ -2,6 +2,7 @@
 
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/KTFlux.h"
+#include "CepGen/Physics/HeavyIon.h"
 
 #include "CepGen/Event/Event.h"
 
@@ -26,7 +27,7 @@ namespace cepgen
     {}
 
     void
-    Process2to4::setCuts( const Cuts& single )
+    Process2to4::setCuts( const CentralCuts& single )
     {
       single_limits_ = single;
     }
@@ -49,10 +50,10 @@ namespace cepgen
 
       ww_ = 0.5 * ( 1.+sqrt( 1.-4.*sqrt( mA2_*mB2_ )/s_ ) );
 
-      defineVariable( y_c1_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "First outgoing particle rapidity" );
-      defineVariable( y_c2_, Mapping::linear, kin_.cuts.central.rapidity_single, { -6., 6. }, "Second outgoing particle rapidity" );
-      defineVariable( pt_diff_, Mapping::linear, kin_.cuts.central.pt_diff, { 0., 500. }, "Final state particles transverse momentum difference" );
-      defineVariable( phi_pt_diff_, Mapping::linear, kin_.cuts.central.phi_pt_diff, { 0., 2.*M_PI }, "Final state particles azimuthal angle difference" );
+      defineVariable( y_c1_, Mapping::linear, kin_.cuts.central.rapidity_single(), { -6., 6. }, "First outgoing particle rapidity" );
+      defineVariable( y_c2_, Mapping::linear, kin_.cuts.central.rapidity_single(), { -6., 6. }, "Second outgoing particle rapidity" );
+      defineVariable( pt_diff_, Mapping::linear, kin_.cuts.central.pt_diff(), { 0., 500. }, "Final state particles transverse momentum difference" );
+      defineVariable( phi_pt_diff_, Mapping::linear, kin_.cuts.central.phi_diff(), { 0., 2.*M_PI }, "Final state particles azimuthal angle difference" );
 
       prepareProcessKinematics();
     }
@@ -96,21 +97,21 @@ namespace cepgen
         << "p(1/2)t = " << p1t << " / " << p2t;
 
       //--- window in rapidity distance
-      if ( !kin_.cuts.central.rapidity_diff.contains( fabs( y_c1_-y_c2_ ) ) )
+      if ( !kin_.cuts.central.rapidity_diff().contains( fabs( y_c1_-y_c2_ ) ) )
         return 0.;
 
       //--- apply the pt cut already at this stage (remains unchanged)
-      if ( !kin_.cuts.central.pt_single.contains( p1t ) )
+      if ( !kin_.cuts.central.pt_single().contains( p1t ) )
         return 0.;
-      if ( !kin_.cuts.central.pt_single.contains( p2t ) )
+      if ( !kin_.cuts.central.pt_single().contains( p2t ) )
         return 0.;
-      if ( !single_limits_.pt_single.contains( p1t ) )
+      if ( !single_limits_.pt_single().contains( p1t ) )
         return 0.;
-      if ( !single_limits_.pt_single.contains( p2t ) )
+      if ( !single_limits_.pt_single().contains( p2t ) )
         return 0.;
 
       //--- window in transverse momentum difference
-      if ( !kin_.cuts.central.pt_diff.contains( fabs( p1t-p2t ) ) )
+      if ( !kin_.cuts.central.pt_diff().contains( fabs( p1t-p2t ) ) )
         return 0.;
 
       //--- transverse mass for the two central particles
@@ -119,7 +120,7 @@ namespace cepgen
 
       //--- window in central system invariant mass
       const double invm = sqrt( amt1_*amt1_+amt2_*amt2_+2.*amt1_*amt2_*cosh( y_c1_-y_c2_ )-qt_sum.pt2() );
-      if ( !kin_.cuts.central.mass_sum.contains( invm ) )
+      if ( !kin_.cuts.central.mass_sum().contains( invm ) )
         return 0.;
 
       //--- auxiliary quantities
@@ -224,15 +225,15 @@ namespace cepgen
       double f1 = 0;
       if ( hi1 ) // check if we are in heavy ion mode
         f1 = ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, hi1 );
-      else if ( kin_.structure_functions )
-        f1 = ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, *kin_.structure_functions, mA2_, mX2_ );
+      else if ( kin_.structureFunctions() )
+        f1 = ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, *kin_.structureFunctions(), mA2_, mX2_ );
 
       double f2 = 0.;
       const HeavyIon hi2( kin_.incoming_beams.second.pdg );
       if ( hi2 ) // check if we are in heavy ion mode
         f2 = ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, hi2 );
-      else if ( kin_.structure_functions )
-        f2 = ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, *kin_.structure_functions, mB2_, mY2_ );
+      else if ( kin_.structureFunctions() )
+        f2 = ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, *kin_.structureFunctions(), mB2_, mY2_ );
 
       CG_DEBUG_LOOP( "2to4:fluxes" )
         << "Incoming fluxes for (x/kt2) = "

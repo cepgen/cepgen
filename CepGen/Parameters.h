@@ -14,10 +14,17 @@ namespace cepgen
   class ParametersList;
   namespace proc { class Process; }
   namespace io { class ExportModule; }
-  namespace utils { class TamingFunction; }
+  namespace utils {
+    class TimeKeeper;
+    class Functional;
+  }
   enum class IntegratorType;
+  /// An ordered collection of event modification algorithms
   typedef std::vector<std::unique_ptr<EventModifier> > EventModifiersSequence;
+  /// An ordered collection of event export modules
   typedef std::vector<std::unique_ptr<io::ExportModule> > ExportModulesSequence;
+  /// An ordered collection of taming functions evaluators
+  typedef std::vector<std::unique_ptr<utils::Functional> > TamingFunctionsSequence;
   /// List of parameters used to start and run the simulation job
   class Parameters
   {
@@ -34,11 +41,19 @@ namespace cepgen
       /// Dump the input parameters in the terminal
       friend std::ostream& operator<<( std::ostream&, const Parameters* );
 
+      /// Initialise the timekeeper instance
+      void setTimeKeeper( utils::TimeKeeper* );
+      /// Pointer to a timekeeper instance
+      utils::TimeKeeper* timeKeeper() { return tmr_.get(); }
+
+      /// Common user-defined parameters
       std::shared_ptr<ParametersList> general;
+      /// Integrator specific user-defined parameters
       std::shared_ptr<ParametersList> integrator;
 
       //----- process to compute
 
+      /// Is this parameters collection holding any physics process?
       bool hasProcess() const { return !( !process_ ); }
       /// Process for which the cross-section will be computed and the events will be generated
       proc::Process& process();
@@ -63,23 +78,19 @@ namespace cepgen
       /// Collection of events generation parameters
       struct Generation
       {
-        Generation();
+        Generation( const ParametersList& );
         Generation( const Generation& );
         bool enabled; ///< Are we generating events ? (true) or are we only computing the cross-section ? (false)
         unsigned long maxgen; ///< Maximal number of events to generate in this run
         bool symmetrise; ///< Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
-        bool treat; ///< Is the integrand to be smoothed for events generation?
         unsigned int gen_print_every; ///< Frequency at which the events are displayed to the end-user
         unsigned int num_threads; ///< Number of threads to perform the integration
         unsigned int num_points; ///< Number of points to "shoot" in each integration bin by the algorithm
       };
+      /// Get the events generation parameters
       Generation& generation() { return generation_; }
+      /// Get the events generation parameters
       const Generation& generation() const { return generation_; }
-
-      /// Specify if the generated events are to be stored
-      void setStorage( bool store ) { store_ = store; }
-      /// Are the events generated in this run to be stored in the output file ?
-      bool storage() const { return store_; }
 
       //----- event modification (e.g. hadronisation, decay) algorithm
 
@@ -109,8 +120,10 @@ namespace cepgen
 
       //----- taming functions
 
-      /// Functionals to be used to account for rescattering corrections (implemented within the process)
-      std::vector<utils::TamingFunction> taming_functions;
+      /// List of all taming functions definitions
+      const TamingFunctionsSequence& tamingFunctions() const { return taming_functions_; }
+      /// Set a new taming function definition
+      void addTamingFunction( std::unique_ptr<utils::Functional> );
 
       //----- run operations
 
@@ -125,17 +138,22 @@ namespace cepgen
       inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
 
     private:
+      /// Physics process held by these parameters
       std::unique_ptr<proc::Process> process_;
+      /// Collection of event modification algorithms to be applied
       EventModifiersSequence evt_modifiers_;
-      /// Storage object
+      /// Collection of event output modules to be applied
       ExportModulesSequence out_modules_;
-      bool store_;
+      /// Functionals to be used to account for rescattering corrections
+      TamingFunctionsSequence taming_functions_;
       /// Total generation time (in seconds)
       double total_gen_time_;
       /// Number of events already generated
       unsigned long num_gen_events_;
       /// Events generation parameters
       Generation generation_;
+      /// A collection of stopwatches for timing
+      std::unique_ptr<utils::TimeKeeper> tmr_;
   };
 }
 

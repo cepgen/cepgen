@@ -42,6 +42,7 @@ namespace cepgen
         Parameterisation( double f2 = 0., double fl = 0. );
         /// Copy constructor
         Parameterisation( const Parameterisation& );
+        /// User-steered parameterisation object constructor
         Parameterisation( const ParametersList& );
         ~Parameterisation() {}
 
@@ -59,6 +60,8 @@ namespace cepgen
 
         /// Set of parameters used to build this parameterisation
         const ParametersList& parameters() const { return params_; }
+        /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
+        const sigrat::Parameterisation* sigmaRatio() const { return r_ratio_.get(); }
 
         /// Compute all relevant structure functions for a given \f$(x_{\rm Bj},Q^2)\f$ couple
         virtual Parameterisation& operator()( double /*xbj*/, double /*q2*/ ) { return *this; }
@@ -68,6 +71,7 @@ namespace cepgen
         virtual Parameterisation& computeFL( double xbj, double q2, double r );
         /// Compute the \f$F_1\f$ structure function for a given point
         double F1( double xbj, double q2 ) const;
+        /// Compute the dimensionless variable \f$\tau=\frac{4x_{\rm Bj}^2m_p^2}{Q^2}\f$
         double tau( double xbj, double q2 ) const;
 
       public:

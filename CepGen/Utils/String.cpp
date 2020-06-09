@@ -42,18 +42,21 @@ namespace cepgen
         : "\033[31;1mno\033[0m";
     }
 
+    /// String implementation of the boldification procedure
     template<> std::string
     boldify<std::string>( std::string str )
     {
       return format( "\033[1m%s\033[0m", str.c_str() );
     }
 
+    /// C-style character array implementation of the boldification procedure
     template<> std::string
     boldify<const char*>( const char* str )
     {
       return boldify( std::string( str ) );
     }
 
+    /// Unsigned long integer implementation of the boldification procedure
     template<> std::string
     boldify( unsigned long ui )
     {
@@ -99,6 +102,31 @@ namespace cepgen
       std::ostringstream oss;
       std::copy( vec.begin(), std::prev( vec.end() ), std::ostream_iterator<std::string>( oss, delim.c_str() ) );
       return oss.str()+*vec.rbegin();
+    }
+
+    std::string
+    toupper( const std::string& str )
+    {
+      std::string out; out.resize( str.size() );
+      std::transform( str.begin(), str.end(), out.begin(), ::toupper );
+      return out;
+    }
+
+    std::string
+    tolower( const std::string& str )
+    {
+      std::string out; out.resize( str.size() );
+      std::transform( str.begin(), str.end(), out.begin(), ::tolower );
+      return out;
+    }
+
+    std::string
+    environ( const std::string& env, const std::string& def )
+    {
+      const auto out = std::getenv( env.c_str() );
+      if ( !out )
+        return def;
+      return std::string( out );
     }
   }
 }

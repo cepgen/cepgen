@@ -1,5 +1,6 @@
 #include "CepGen/Modules/ProcessesFactory.h"
 #include "CepGen/Processes/FortranKTProcess.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 
 #include "CepGen/Event/Event.h"
 

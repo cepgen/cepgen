@@ -1,8 +1,11 @@
 #include "CepGen/Core/GeneratorWorker.h"
 
 #include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/GridParameters.h"
 
+#include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
@@ -10,28 +13,29 @@
 #include "CepGen/Processes/Process.h"
 #include "CepGen/Event/Event.h"
 
-#include "CepGen/Modules/EventModifier.h"
-#include "CepGen/Modules/ExportModule.h"
-
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/ProgressBar.h"
+#include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen
 {
   GeneratorWorker::GeneratorWorker( Parameters* params ) :
-    input_params_( params ), integrator_( nullptr ),
-    ps_bin_( INVALID_BIN ),
-    initialised_( false )
-  {}
+    integrand_( new Integrand( params ) ), integrator_( nullptr ), params_( params ),
+    ps_bin_( INVALID_BIN )
+  {
+    CG_DEBUG( "GeneratorWorker" )
+      << "New generator worker initialised for integration/event generation.\n\t"
+      << "Parameters at " << (void*)params_ << ".";
+  }
 
   void
-  GeneratorWorker::setIntegrator( Integrator* integr )
+  GeneratorWorker::setIntegrator( const Integrator* integr )
   {
     integrator_ = integr;
     grid_.reset( new GridParameters( integrator_->size() ) );
     CG_DEBUG( "GeneratorWorker:integrator" )
-      << integrator_->name() << " integrator "
-      << "and dim-" << integrator_->size() << " grid set.";
+      << "Dim-" << integrator_->size() << " " << integrator_->name() << " integrator "
+      << "set for dim-" << grid_->n( 0 ).size() << " grid.";
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -41,25 +45,26 @@ namespace cepgen
   void
   GeneratorWorker::generate( size_t num_events, Event::callback callback )
   {
-    if ( !input_params_ )
+    if ( !params_ )
       throw CG_FATAL( "GeneratorWorker:generate" ) << "No steering parameters specified!";
 
     if ( num_events < 1 )
-      num_events = input_params_->generation().maxgen;
+      num_events = params_->generation().maxgen;
 
     try {
-      while ( input_params_->numGeneratedEvents() < num_events )
-        generateOne( callback );
-    } catch ( const Exception& e ) {
+      while ( params_->numGeneratedEvents() < num_events )
+        next( callback );
+    } catch ( const Exception& ) {
       CG_WARNING( "GeneratorWorker:generate" ) << "Generation ended with exception.";
-      e.dump();
       return;
     }
   }
 
-  void
-  GeneratorWorker::generateOne( Event::callback callback )
+  bool
+  GeneratorWorker::next( Event::callback callback )
   {
+    CG_TICKER( const_cast<Parameters*>( params_ )->timeKeeper() );
+
     if ( !integrator_ )
       throw CG_FATAL( "GeneratorWorker:generate" ) << "No integrator object handled!";
 
@@ -76,10 +81,8 @@ namespace cepgen
     if ( ps_bin_ != INVALID_BIN ) {
       bool has_correction = false;
       while ( !correctionCycle( xtmp, has_correction ) ) {}
-      if ( has_correction ) {
-        storeEvent( xtmp, callback );
-        return;
-      }
+      if ( has_correction )
+        return storeEvent( xtmp, callback );
     }
 
     double weight = 0.;
@@ -98,7 +101,7 @@ namespace cepgen
           break;
       }
       // shoot a point x in this bin
-      grid_->shoot( &integrator_->rng(), ps_bin_, xtmp );
+      grid_->shoot( integrator_, ps_bin_, xtmp );
       // get weight for selected x value
       weight = integrator_->eval( xtmp );
       if ( weight <= 0. )
@@ -123,13 +126,14 @@ namespace cepgen
     }
 
     // return with an accepted event
-    if ( weight > 0. )
-      storeEvent( xtmp, callback );
+    return storeEvent( xtmp, callback );
   }
 
   bool
   GeneratorWorker::correctionCycle( std::vector<double>& x, bool& has_correction )
   {
+    CG_TICKER( const_cast<Parameters*>( params_ )->timeKeeper() );
+
     CG_DEBUG_LOOP( "GeneratorWorker:correction" )
       << "Correction cycles are started.\n\t"
       << "bin = " << ps_bin_ << "\t"
@@ -143,7 +147,7 @@ namespace cepgen
       grid_->correc = -1.;
       std::vector<double> xtmp( integrator_->size() );
       // Select x values in phase space bin
-      grid_->shoot( &integrator_->rng(), ps_bin_, xtmp );
+      grid_->shoot( integrator_, ps_bin_, xtmp );
       const double weight = integrator_->eval( xtmp );
       // Parameter for correction of correction
       if ( weight > grid_->maxValue( ps_bin_ ) ) {
@@ -186,18 +190,19 @@ namespace cepgen
     if ( weight <= 0. )
       return false;
 
-    const auto ngen = input_params_->numGeneratedEvents();
-    if ( input_params_->process().hasEvent() ) {
-      auto& event = input_params_->process().event();
-      if ( ( ngen+1 ) % input_params_->generation().gen_print_every == 0 )
+    const auto ngen = params_->numGeneratedEvents();
+    if ( integrand_->process().hasEvent() ) {
+      auto& event = integrand_->process().event();
+      if ( ( ngen+1 ) % params_->generation().gen_print_every == 0 )
         CG_INFO( "GeneratorWorker:store" )
-          << "Generated events: " << ngen+1 << "\n"
-          << event;
+          << utils::s( "event", ngen+1, true ) << " generated.";
       if ( callback )
         callback( event, ngen );
-      for ( auto& mod : input_params_->outputModulesSequence() )
+      for ( auto& mod : params_->outputModulesSequence() ) {
+        CG_TICKER( const_cast<Parameters*>( params_ )->timeKeeper() );
         *mod << event;
-      input_params_->addGenerationTime( event.time_total );
+      }
+      const_cast<Parameters*>( params_ )->addGenerationTime( event.time_total );
     }
     return true;
   }
@@ -209,21 +214,16 @@ namespace cepgen
   void
   GeneratorWorker::computeGenerationParameters()
   {
-    if ( !input_params_ )
+    if ( !params_ )
       throw CG_FATAL( "GeneratorWorker:setGen" ) << "No steering parameters specified!";
 
-    input_params_->setStorage( false );
+    integrand_->setStorage( false );
 
-    if ( input_params_->generation().treat && integrator_->name() != "Vegas" ) {
-      throw CG_FATAL( "GeneratorWorker:setGen" )
-        << "Treat switched on without a proper Vegas grid!\n\t"
-        << "Try to re-run while disabling integrand treatment...";
-    }
     CG_INFO( "GeneratorWorker:setGen" )
-      << "Preparing the grid (" << input_params_->generation().num_points << " points/bin) "
+      << "Preparing the grid (" << params_->generation().num_points << " points/bin) "
       << "for the generation of unweighted events.";
 
-    const double inv_num_points = 1./input_params_->generation().num_points;
+    const double inv_num_points = 1./params_->generation().num_points;
     std::vector<double> point_coord( integrator_->size(), 0. );
     if ( point_coord.size() < grid_->n( 0 ).size() )
       throw CG_FATAL( "GridParameters:shoot" )
@@ -237,8 +237,8 @@ namespace cepgen
     //--- main loop
     for ( unsigned int i = 0; i < grid_->size(); ++i ) {
       double fsum = 0., fsum2 = 0.;
-      for ( unsigned int j = 0; j < input_params_->generation().num_points; ++j ) {
-        grid_->shoot( &integrator_->rng(), i, point_coord );
+      for ( unsigned int j = 0; j < params_->generation().num_points; ++j ) {
+        grid_->shoot( integrator_, i, point_coord );
         const double weight = integrator_->eval( point_coord );
         grid_->setValue( i, weight );
         fsum += weight;
@@ -288,8 +288,11 @@ namespace cepgen
       << "Overall inefficiency           = " << eff2;
 
     grid_->gen_prepared = true;
-    input_params_->setStorage( true );
-    CG_INFO( "GeneratorWorker:setGen" ) << "Grid prepared! Now launching the production.";
+    //--- from now on events will be stored
+    integrand_->setStorage( true );
+
+    CG_INFO( "GeneratorWorker:setGen" )
+      << "Grid prepared! Now launching the production.";
   }
 }
 

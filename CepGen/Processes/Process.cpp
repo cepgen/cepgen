@@ -4,6 +4,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/HeavyIon.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"
@@ -39,7 +40,7 @@ namespace cepgen
       is_point_set_( false )
     {
       if ( proc.event_ )
-        event_.reset( new Event( *proc.event_.get() ) );
+        event_.reset( new Event( *proc.event_ ) );
     }
 
     std::unique_ptr<Process>
@@ -196,17 +197,6 @@ namespace cepgen
       return jac;
     }
 
-    void
-    Process::setPoint( double* x, const size_t ndim )
-    {
-      std::copy( x, x+ndim, point_coord_.begin() );
-      is_point_set_ = true;
-
-      if ( CG_LOG_MATCH( "Process:dumpPoint", debugInsideLoop ) )
-        dumpPoint();
-      clearEvent();
-    }
-
     double
     Process::x( unsigned int idx ) const
     {
@@ -220,12 +210,12 @@ namespace cepgen
     }
 
     double
-    Process::weight()
+    Process::weight( const std::vector<double>& x )
     {
-      if ( !is_point_set_ )
-        throw CG_FATAL( "Process:weight" )
-          << "Trying to evaluate weight while phase space point\n\t"
-          << "coordinates are not set!";
+      point_coord_ = x;
+      if ( CG_LOG_MATCH( "Process:dumpPoint", debugInsideLoop ) )
+        dumpPoint();
+      clearEvent();
 
       //--- generate and initialise all variables
       generateVariables();

@@ -1,5 +1,5 @@
-from containers_cfi import Module
-from SigmaRatio_cfi import SigmaRatio
+from .containers_cfi import Module
+from .SigmaRatio_cfi import SigmaRatio
 
 ## Quarks flavours contributions to consider in perturbative SFs definition
 class PDFMode:
