@@ -98,7 +98,7 @@ namespace pdg
       }
     }
     CG_INFO( "MCDFileParser" )
-      << cepgen::utils::s( "particle", cepgen::PDG::get().size() ) << " defined"
-      << " from MCD file \"" << path << "\". ";
+      << cepgen::utils::s( "particle", cepgen::PDG::get().size() )
+      << " defined from \"" << path << "\". ";
   }
 }

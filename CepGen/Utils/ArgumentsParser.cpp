@@ -160,7 +160,7 @@ namespace cepgen
     if ( req_params.size() > 0 ) {
       oss << "\n    " << utils::s( "required argument", req_params.size(), false ) << ":";
       for ( const auto& par : req_params )
-        oss << utils::format( "\n\t%s%-18s\t%-35s",
+        oss << utils::format( "\n\t%s%-18s\t%-30s",
           ( par.first.name.size() > 1 ? "-"+par.first.name.at( 1 )+"|" : "" ).c_str(),
           ( !par.first.name.at( 0 ).empty() ? "--"+par.first.name.at( 0 ) : "<arg"+std::to_string( par.second )+">" ).c_str(),
           par.first.description.c_str() );
@@ -168,7 +168,7 @@ namespace cepgen
     if ( opt_params.size() > 0 ) {
       oss << "\n    " << utils::s( "optional argument", opt_params.size(), false ) << ":";
       for ( const auto& par : opt_params )
-        oss << utils::format( "\n\t%s%-18s\t%-35s\tdefault = '%s'",
+        oss << utils::format( "\n\t%s%-18s\t%-30s\tdef: '%s'",
           ( par.first.name.size() > 1 ? "-"+par.first.name.at( 1 )+"|" : "" ).c_str(),
           ( !par.first.name.at( 0 ).empty() ? "--"+par.first.name.at( 0 ) : "<arg"+std::to_string( par.second )+">" ).c_str(),
           par.first.description.c_str(), par.first.value.c_str() );
