@@ -41,6 +41,7 @@ stages:
   stage: run
   script:
     - cd build
+    - ls
     - echo "Modules dump"
     - ./cepgen -l
     - echo "Python card test"
