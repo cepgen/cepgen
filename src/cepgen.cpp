@@ -33,8 +33,9 @@ int main( int argc, char* argv[] )
 
   //--- first start by defining the generator object
   for ( const auto& lib : addons )
-    if ( !cepgen::loadLibrary( lib ) )
-      CG_WARNING( "main" ) << "Failed load library \"" << lib << "\".";
+    try { cepgen::loadLibrary( lib ); } catch ( const cepgen::Exception& e ) {
+      e.dump();
+    }
 
   cepgen::Generator gen;
 

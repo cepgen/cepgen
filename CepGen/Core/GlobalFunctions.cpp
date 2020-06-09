@@ -49,29 +49,24 @@ namespace cepgen
     std::atomic<int> gSignal; ///< Abort signal handler
   }
 
-  bool
+  void
   loadLibrary( const std::string& path, bool match )
   {
 #ifdef _WIN32
     const auto fullpath = match ? path+".dll" : path;
-    if ( LoadLibraryA( fullpath.c_str() ) == nullptr ) {
-      CG_DEBUG( "loadLibrary" )
+    if ( LoadLibraryA( fullpath.c_str() ) == nullptr )
+      throw CG_WARNING( "loadLibrary" )
         << "Failed to load library \"" << path << "\".\n\t"
         << "Error code #" << GetLastError() << ".";
-      return false;
-    }
 #else
     const auto fullpath = match ? "lib"+path+".so" : path;
-    if ( dlopen( fullpath.c_str(), RTLD_LAZY | RTLD_LOCAL ) == nullptr ) {
-      CG_DEBUG( "loadLibrary" )
+    if ( dlopen( fullpath.c_str(), RTLD_LAZY | RTLD_LOCAL ) == nullptr )
+      throw CG_WARNING( "loadLibrary" )
         << "Failed to load library \"" << path << "\".\n\t"
         << dlerror();
-      return false;
-    }
 #endif
     CG_DEBUG( "loadLibrary" ) << "Loaded library \"" << path << "\".";
     loaded_libraries.emplace_back( path );
-    return true;
   }
 
   void
@@ -83,11 +78,10 @@ namespace cepgen
       utils::environ( "CEPGEN_PATH", "." ),
       "/usr/share/CepGen"
     };
-    //--- load all necessary modules
-    for ( const auto& lib : utils::libraries )
-      loadLibrary( lib, true );
+
     //--- header message
     try { printHeader(); } catch ( const Exception& e ) { e.dump(); }
+
     //--- particles table parsing
     for ( const auto& path : search_paths )
       if ( (bool)std::ifstream( path+"/mass_width_2020.mcd" ) ) {
@@ -99,6 +93,11 @@ namespace cepgen
         << "Only " << utils::s( "particle", PDG::get().size(), true )
         << " are defined in the runtime environment.\n\t"
         << "Make sure the path to the MCD file is correct.";
+
+    //--- load all necessary modules
+    for ( const auto& lib : utils::libraries )
+      try { loadLibrary( lib, true ); } catch ( const Exception& ) {}
+
     //--- greetings message
     CG_INFO( "init" )
       << "CepGen v" << version() << " initialised with the following add-ons:\n\t"

@@ -16,7 +16,7 @@ if(NOT CEPGEN_HAS_FUNCTIONALS)
   file(GLOB tests_functionals
       RELATIVE ${PROJECT_SOURCE_DIR}/test
       test_integrator.cc test_function_parser*.*)
-  list(REMOVE_ITEM tests_standalone ${tests_functionals})
+  #list(REMOVE_ITEM tests_standalone ${tests_functionals})
   list(REMOVE_ITEM tests_root ${tests_functionals})
 endif()
 
