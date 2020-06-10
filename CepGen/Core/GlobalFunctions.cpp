@@ -96,7 +96,9 @@ namespace cepgen
 
     //--- load all necessary modules
     for ( const auto& lib : utils::libraries )
-      try { loadLibrary( lib, true ); } catch ( const Exception& ) {}
+      try { loadLibrary( lib, true ); } catch ( const Exception& e ) {
+        e.dump(); //FIXME temporary
+      }
 
     //--- greetings message
     CG_INFO( "init" )
