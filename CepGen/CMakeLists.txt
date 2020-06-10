@@ -59,7 +59,7 @@ set(CEPGEN_HAS_FUNCTIONALS ${CEPGEN_HAS_FUNCTIONALS} PARENT_SCOPE)
 
 #----- build the objects
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Version.cpp ${CMAKE_CURRENT_BINARY_DIR}/_version.cpp
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Version.cpp
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/FindVersion.cmake)
 list(APPEND core_sources ${CMAKE_CURRENT_BINARY_DIR}/Version.cpp)
 
