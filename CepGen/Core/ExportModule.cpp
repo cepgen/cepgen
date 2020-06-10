@@ -33,7 +33,7 @@ namespace cepgen
     {
       std::ostringstream os;
       os
-        << prep << "  ***** Sample generated with CepGen " << Version::VERSION_LONG << " *****\n"
+        << prep << "  ***** Sample generated with CepGen " << version::tag << " *****\n"
         << prep << "  * process: " << params.processName() << " (" << params.kinematics.mode << ")\n";
       if ( params.kinematics.mode != KinematicsMode::ElasticElastic ) {
         os << prep << "  * structure functions: " << params.kinematics.structureFunctions()->description() << "\n";

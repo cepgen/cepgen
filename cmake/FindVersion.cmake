@@ -20,8 +20,8 @@ set(VERSION
 "#include \"CepGen/Version.h\"
 
 namespace cepgen {
-  const std::string Version::VERSION_LONG = \"${GIT_HASH}${GIT_DIFF} (${GIT_BRANCH})\";
-  const std::string Version::VERSION = \"${GIT_TAG}\";
+  const std::string version::extended = \"${GIT_HASH}${GIT_DIFF} (${GIT_BRANCH})\";
+  const std::string version::tag = \"${GIT_TAG}\";
 }")
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/Version.cpp)

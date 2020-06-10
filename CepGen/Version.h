@@ -5,12 +5,12 @@
 
 namespace cepgen
 {
-  struct Version
+  struct version
   {
     /// CepGen version
-    static const std::string VERSION;
+    static const std::string tag;
     /// CepGen detailed version
-    static const std::string VERSION_LONG;
+    static const std::string extended;
   };
 }
 
