@@ -1,4 +1,5 @@
 #include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/Integrand.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 
 #include "CepGen/Core/Exception.h"
@@ -25,6 +26,13 @@ namespace cepgen
       int verbose_;
   };
 
+  Integrand* gIntegrand = nullptr;
+  int cuba_integrand( const int* ndim, const cubareal xx[], const int* ncomp, cubareal ff[], void* userdata )
+  {
+    ff[0] = gIntegrand->eval( std::vector<double>( xx, xx+*ndim ) );
+    return 0;
+  }
+
   IntegratorCuba::IntegratorCuba( const ParametersList& params ) :
     Integrator( params ),
     nvec_( params.get<int>( "NVEC", 1 ) ),
@@ -45,15 +53,17 @@ namespace cepgen
   void
   IntegratorCuba::integrate( double& result, double& abserr )
   {
-    auto integr = [&]( const int* ndim, const cubareal xx[], const int* ncomp, cubareal ff[], void* userdata ) -> int {
-      ff[0] = function_->f( (double*)xx, function_->dim, (void*)function_->params );
+    gIntegrand = integrand_;
+    /*auto integr = [&]( const int* ndim, const cubareal xx[], const int* ncomp, cubareal ff[], void* userdata ) -> int {
+      //ff[0] = function_->f( (double*)xx, function_->dim, (void*)function_->params );
+      ff[0] = integrand_->eval( std::vector<double>( xx, xx+*ndim ) );
       return 0;
-    };
+    };*/
 
     int neval, fail;
     cubareal integral, error, prob;
 
-    Vegas( function_->dim, 1, integr, nullptr, nvec_,
+    Vegas( function_->dim, 1, cuba_integrand, nullptr, nvec_,
       epsrel_, epsabs_, verbose_, seed_,
       mineval_, maxeval_, nstart_, nincrease_, nbatch_,
       gridno_, nullptr, nullptr,

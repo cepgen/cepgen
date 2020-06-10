@@ -72,6 +72,7 @@ add_library(CepGenCore SHARED ${core_sources} ${int_sources} ${phys_sources} ${p
 target_compile_definitions(CepGenCore PRIVATE ${core_definitions})
 target_link_libraries(CepGenCore INTERFACE ${CEPGEN_CORE_EXT})
 target_include_directories(CepGenCore PRIVATE ${core_includes})
+#set_target_properties(CepGenCore PROPERTIES COMPILE_FLAGS "-ffast-math -lm")
 
 #----- installation rules
 
