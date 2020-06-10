@@ -59,9 +59,8 @@ set(CEPGEN_HAS_FUNCTIONALS ${CEPGEN_HAS_FUNCTIONALS} PARENT_SCOPE)
 
 #----- build the objects
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/Version.cpp ${CMAKE_CURRENT_BINARY_DIR}/_version.cpp
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/FindVersion.cmake)
-list(APPEND core_sources ${CMAKE_CURRENT_BINARY_DIR}/Version.cpp)
+include(FindVersion)
+add_version_definition(${core_sources})
 
 add_library(CepGenCore SHARED ${core_sources} ${int_sources} ${phys_sources} ${proc_sources} ${sf_sources})
 target_compile_definitions(CepGenCore PRIVATE ${core_definitions})
