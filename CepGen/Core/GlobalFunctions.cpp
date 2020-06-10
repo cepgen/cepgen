@@ -102,7 +102,7 @@ namespace cepgen
 
     //--- greetings message
     CG_INFO( "init" )
-      << "CepGen v" << version() << " initialised with the following add-ons:\n\t"
+      << "CepGen " << Version::VERSION_LONG << " initialised with the following add-ons:\n\t"
       << loaded_libraries << ".\n\t"
       << "Greetings!";
   }

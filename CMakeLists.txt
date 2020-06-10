@@ -2,7 +2,7 @@ set(CPACK_RPM_COMPONENT_INSTALL ON)
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(CepGen)
 set(PROJECT_VERSION 1)
-set(VERSION 0.9.7)
+#set(VERSION 1.0.0.alpha1)
 
 option(CMAKE_BUILD_CORE "Build Core library" ON)
 option(CMAKE_BUILD_PROCESSES "Build physics processes" ON)

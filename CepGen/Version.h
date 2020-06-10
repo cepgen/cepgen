@@ -5,14 +5,13 @@
 
 namespace cepgen
 {
-  /// CepGen version
-  /// \note Format: 0xMMmmff, with
-  ///  - MM = major version
-  ///  - mm = minor version
-  ///  - ff = feature(s) release
-  const unsigned int cepgen_version = 0x000907;
-  /// Human-readable version number
-  const std::string version();
+  struct Version
+  {
+    /// CepGen version
+    static const std::string VERSION;
+    /// CepGen detailed version
+    static const std::string VERSION_LONG;
+  };
 }
 
 #endif
