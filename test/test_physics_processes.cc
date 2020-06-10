@@ -113,13 +113,13 @@ int main( int argc, char* argv[] )
       tmr.reset();
 
       const string test_res = utils::format(
-        "%-26s\tref=%g\tgot=%g\tpull=%+g",
-        test.filename.c_str(), test.ref_cs, new_cs, pull );
+        "%-40s\tref=%g\tgot=%g\tratio=%g\tpull=%+10.5f",
+        test.filename.c_str(), test.ref_cs, new_cs, ratio, pull );
       if ( success )
         passed_tests.emplace_back( test_res );
       else
         failed_tests.emplace_back( test_res );
-      num_tests++;
+      ++num_tests;
       if ( debug )
         progress->update( num_tests );
       CG_LOG( "main" )
@@ -130,12 +130,12 @@ int main( int argc, char* argv[] )
   if ( failed_tests.size() != 0 ) {
     ostringstream os_failed, os_passed;
     for ( const auto& fail : failed_tests )
-      os_failed << " (*) " << fail << endl;
+      os_failed << "  " << fail << endl;
     for ( const auto& pass : passed_tests )
-      os_passed << " (*) " << pass << endl;
+      os_passed << "  " << pass << endl;
     throw CG_FATAL( "main" )
-      << "Some tests failed!\n"
-      << os_failed.str() << "\n"
+      << "Some tests failed (abs(pull) > " << num_sigma << "):\n"
+      << os_failed.str() << "\n "
       << "Passed tests:\n"
       << os_passed.str() << ".";
   }

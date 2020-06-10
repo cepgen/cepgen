@@ -4,6 +4,7 @@ process = cepgen.Module('pptoff',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.InelasticElastic,
         pair = 13,
+        offShellParameters = cepgen.Parameters(mat1 = 2, mat2 = 0)
     ),
     inKinematics = cepgen.Parameters(
         cmEnergy = 13.e3,
