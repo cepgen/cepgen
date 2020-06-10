@@ -20,6 +20,7 @@ namespace cepgen
     name_( params.name<std::string>() ),
     seed_( params.get<int>( "seed", time( nullptr ) ) ),
     verbosity_( params.get<int>( "verbose", 1 ) ),
+    funct_( [=]( double* x, size_t ndim, void* ) -> double { return integrand_->eval( std::vector<double>( x, x+ndim ) ); } ),
     initialised_( false )
   {
     //--- initialise the random number generator
@@ -50,10 +51,7 @@ namespace cepgen
   {
     integrand_ = &integr;
     //--- specify the integrand through the GSL wrapper
-    static auto func = [=]( double* x, size_t ndim, void* ) -> double {
-      return integrand_->eval( std::vector<double>( x, x+ndim ) );
-    };
-    function_.reset( new gsl_monte_function_wrapper<decltype( func )>( func, integrand_->size() ) );
+    function_.reset( new gsl_monte_function_wrapper<decltype( funct_ )>( funct_, integrand_->size() ) );
 
     CG_DEBUG( "Integrator:integrand" )
       << "Number of integration dimensions: " << function_->dim << ".";
@@ -78,7 +76,7 @@ namespace cepgen
   double
   Integrator::eval( const std::vector<double>& x ) const
   {
-    if ( !function_ )
+    if ( !integrand_ )
       throw CG_FATAL( "Integrator:eval" )
         << "Trying to evaluate the weight on a phase space point "
         << "on an unitialised integrand!";

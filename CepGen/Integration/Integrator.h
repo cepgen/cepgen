@@ -52,6 +52,8 @@ namespace cepgen
         /// Destructor method for the random number generator service
         inline void operator()( gsl_rng* rng ) { gsl_rng_free( rng ); }
       };
+      /// A functor wrapping GSL's function footprint
+      std::function<double( double*, size_t, void* )> funct_;
       /// Instance of random number generator service
       std::unique_ptr<gsl_rng,gsl_rng_deleter> rng_;
       Integrand* integrand_; ///< Integrand to be evaluated
