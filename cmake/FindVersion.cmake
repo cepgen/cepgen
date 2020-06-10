@@ -1,12 +1,10 @@
 macro(add_version_definition core_sources)
     find_package(Git)
     set(GIT_HASH "N/A")
-    set(GIT_DIFF "")
     set(GIT_BRANCH "N/A")
     if(Git_FOUND)
         execute_process(COMMAND ${GIT_EXECUTABLE} log --pretty=format:'%h' -n 1 OUTPUT_VARIABLE GIT_HASH ERROR_QUIET)
         if(NOT "${GIT_HASH}" STREQUAL "")
-            execute_process(COMMAND bash -c "${GIT_EXECUTABLE} diff --quiet --exit-code || echo +" OUTPUT_VARIABLE GIT_DIFF)
             execute_process(COMMAND ${GIT_EXECUTABLE} describe --exact-match --tags OUTPUT_VARIABLE GIT_TAG ERROR_QUIET)
             execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD OUTPUT_VARIABLE GIT_BRANCH)
             message(STATUS "${VERSION} -> ${GIT_TAG}")
@@ -15,7 +13,6 @@ macro(add_version_definition core_sources)
             endif()
             string(STRIP "${GIT_HASH}" GIT_HASH)
             string(SUBSTRING "${GIT_HASH}" 1 7 GIT_HASH)
-            string(STRIP "${GIT_DIFF}" GIT_DIFF)
             string(STRIP "${VERSION}" VERSION)
             string(STRIP "${GIT_BRANCH}" GIT_BRANCH)
         endif()
@@ -26,7 +23,7 @@ macro(add_version_definition core_sources)
 
 namespace cepgen {
   const std::string version::tag = \"${VERSION}\";
-  const std::string version::extended = \"${GIT_HASH}${GIT_DIFF}(${GIT_BRANCH})\";
+  const std::string version::extended = \"${GIT_HASH}(${GIT_BRANCH})\";
 }")
     set(VERSION_FILE_ "")
     set(output "${CMAKE_CURRENT_BINARY_DIR}/Version.cpp")
