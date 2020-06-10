@@ -87,6 +87,7 @@ namespace cepgen
     double
     CLAS::operator()( double xbj, double q2, double& err ) const
     {
+      err = 0.;
       //--- 2 kinematic regions: resonances ( w < wth ), and DIS ( w > wth )
       const double w2 = mp2_ + q2*( 1.-xbj )/xbj, w = sqrt( w2 );
       const double xth = q2/( q2+wth_*wth_-mp2_ ); // xth = x( W = wth )
@@ -108,7 +109,7 @@ namespace cepgen
     {}
 
     double
-    SibirtsevBlunden::operator()( double xbj, double q2, double& err ) const
+    SibirtsevBlunden::operator()( double, double q2, double& err ) const
     {
       err = 0.;
       //--- equation (10) of reference paper

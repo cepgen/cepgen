@@ -28,15 +28,15 @@ namespace cepgen
         /// Specify runtime parameters to the handler
         virtual void pack( const Parameters* ) {};
         /// Retrieve a configuration from a parsed steering card
-        virtual Parameters* parse( const std::string& filename, Parameters* params ) {
+        virtual Parameters* parse( const std::string&, Parameters* params ) {
           return params;
         }
         /// Build a configuration from a steering card
-        static Parameters* parse( const std::string& filename );
+        static Parameters* parse( const std::string& );
         /// Write the current configuration into a steering card
-        virtual void write( const std::string& filename ) const {}
+        virtual void write( const std::string& ) const {}
         /// Write a steering card from a configuration
-        static void write( const Parameters* params, const std::string& filename );
+        static void write( const Parameters*, const std::string& );
 
       protected:
         /// Input filename

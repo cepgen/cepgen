@@ -25,7 +25,7 @@ namespace cepgen
   }
 
   FormFactors
-  FormFactors::compositeScalar( double q2 )
+  FormFactors::compositeScalar( double )
   {
     throw CG_FATAL( "FormFactors:compositeScalar" ) << "Not yet supported!";
   }

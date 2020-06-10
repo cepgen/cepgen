@@ -36,7 +36,7 @@ namespace cepgen
         /// \brief Class constructor: set the mandatory parameters before integration and events generation
         /// \param[in] params General process parameters (nopt = Optimisation, legacy from LPAIR)
         explicit LPAIR( const ParametersList& params = ParametersList() );
-        ProcessPtr clone( const ParametersList& params ) const override {
+        ProcessPtr clone( const ParametersList& ) const override {
           return ProcessPtr( new LPAIR( *this ) );
         }
 

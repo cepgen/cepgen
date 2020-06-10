@@ -80,6 +80,7 @@ namespace cepgen
       {
         Generation( const ParametersList& );
         Generation( const Generation& );
+        Generation& operator=( const Generation& ) = default; ///< Assignment operator
         bool enabled; ///< Are we generating events ? (true) or are we only computing the cross-section ? (false)
         unsigned long maxgen; ///< Maximal number of events to generate in this run
         bool symmetrise; ///< Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?

@@ -38,6 +38,7 @@ namespace cepgen
     FunctionalMuParser::eval( const std::vector<double>& x ) const
     {
       try {
+        values_ = x;
         return parser_.Eval();
       } catch ( const mu::Parser::exception_type& e ) {
         throw CG_WARNING( "FunctionalMuParser" )

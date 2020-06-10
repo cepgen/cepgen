@@ -196,7 +196,7 @@ namespace cepgen
     inline NullStream() {}
     /// Empty constructor
     inline NullStream( const LoggedException& ) {}
-    void dump( std::ostream& os = *utils::Logger::get().output ) const override {}
+    void dump( std::ostream& ) const override {}
     std::string message() const override { return ""; }
   };
 }

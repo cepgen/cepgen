@@ -50,8 +50,8 @@ namespace mstw
       std::string description() const override;
 
         //--- already retrieved from grid, so no need to recompute it
-      Grid& computeFL( double xbj, double q2 ) override { return *this; }
-      Grid& computeFL( double xbj, double q2, double r ) override { return *this; }
+      Grid& computeFL( double, double ) override { return *this; }
+      Grid& computeFL( double, double, double ) override { return *this; }
 
       /// Default location for the MSTW grid values
       static constexpr const char* DEFAULT_MSTW_GRID_PATH = "mstw_sf_scan_nnlo.dat";

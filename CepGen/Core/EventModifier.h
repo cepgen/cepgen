@@ -45,8 +45,8 @@ namespace cepgen
        * \return Boolean stating whether or not the modification occured successfully
        */
       virtual bool run( Event& ev, double& weight, bool full ) = 0;
-      /// Specify the process cross section, in pb
-      virtual void setCrossSection( double xsec, double xsec_err ) {}
+      /// Specify the process cross section and uncertainty, in pb
+      virtual void setCrossSection( double, double ) {}
 
     protected:
       /// Name of the algorithm
