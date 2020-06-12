@@ -52,6 +52,7 @@ process = kt.process.clone('pptoww',
         invmass = (0.,),
         ptsum = (0.,),
         #--- cuts on single particles' level
+        #minFinalState = [11, 13],
         cuts = {
             # cuts on the single W level
             #24: cepgen.Parameters(pt = (0.,)), # no pt cut on Ws

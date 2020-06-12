@@ -65,7 +65,7 @@ namespace cepgen
           pol_w1_ = { -1, 1 };
           pol_w2_ = { -1, 1 };
           break;
-        case Polarisation::full: default:
+        case Polarisation::full:
           pol_w1_ = { -1, 0, 1 };
           pol_w2_ = { -1, 0, 1 };
           break;
@@ -101,14 +101,14 @@ namespace cepgen
         case 1: {
           mat_el *= offShellME( phi_qt1_+phi_qt2_, phi_qt1_-phi_qt2_ );
         } break;
+        default:
+          throw CG_FATAL( "PPtoWW:ME" )
+            << "Invalid ME calculation method (" << method_ << ")!";
       }
       CG_DEBUG_LOOP( "PPtoWW:ME" )
         << "prefactor: " << prefactor_ << "\n\t"
         << "matrix element: " << mat_el << ".";
       return mat_el;
-
-      throw CG_FATAL( "PPtoWW:ME" )
-        << "Invalid ME calculation method (" << method_ << ")!";
     }
 
     double
