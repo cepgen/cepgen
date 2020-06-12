@@ -1,5 +1,6 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/String.h"
 
 #include "CepGen/Physics/PDG.h"
 
@@ -43,6 +44,50 @@ namespace cepgen
     ParametersList out = *this;
     out += oth;
     return out;
+  }
+
+  ParametersList&
+  ParametersList::feed( const std::string& arg )
+  {
+    auto cmd = utils::split( arg, '/' );
+    auto& plist = cmd.size() > 1
+      ? operator[]<ParametersList>( cmd.at( 0 ) )
+      : *this;
+    if ( cmd.size() > 1 ) // sub-parameters word found
+      plist.feed( utils::merge(
+        std::vector<std::string>( cmd.begin()+1, cmd.end() ), "/" ) );
+    else {
+      const auto word = cmd.at( 0 );
+      auto words = utils::split( word, '=' );
+      auto key = words.at( 0 );
+      if ( key == "name" )
+        key = ParametersList::MODULE_NAME;
+      if ( words.size() == 1 ) // basic key=true
+        plist.set<bool>( key, true );
+      else if ( words.size() == 2 ) { // basic key=value
+        const auto value = words.at( 1 );
+        try {
+          if ( value.find( '.' ) != std::string::npos
+            || value.find( 'e' ) != std::string::npos
+            || value.find( 'E' ) != std::string::npos )
+            // double if contains a '.'/'e'
+            plist.set<double>( key, std::stod( value ) );
+          else
+            plist.set<int>( key, std::stod( value ) );
+        } catch ( const std::invalid_argument& ) {
+          if ( value == "off" || value == "no" || value == "false" )
+            plist.set<bool>( key, false );
+          else if ( value == "on" || value == "yes" || value == "true" )
+            plist.set<bool>( key, true );
+          else
+            plist.set<std::string>( key, value );
+        }
+      }
+      else
+        throw CG_FATAL( "ParametersList:feed" )
+          << "Invalid key=value unpacking: " << word << "!";
+    }
+    return *this;
   }
 
   size_t
