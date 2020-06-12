@@ -87,7 +87,7 @@ namespace cepgen
     for ( const auto& kv : params.str_values_ )
       os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=string(" << kv.second << ")";
     for ( const auto& kv : params.param_values_ )
-      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=param({" << kv.second << "})";
+      os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=param{" << kv.second << "}";
     for ( const auto& kv : params.lim_values_ )
       os << ( os.tellp() > beg ? ", " : "" ) << kv.first << "=limits(" << kv.second << ")";
     for ( const auto& kv : params.vec_int_values_ ) {

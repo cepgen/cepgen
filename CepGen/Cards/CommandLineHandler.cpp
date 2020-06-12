@@ -41,7 +41,7 @@ namespace cepgen
       private:
         typedef std::vector<std::string> Args;
 
-        static ParametersList vectorise( const Args& );
+        static ParametersList vectorise( const std::string& );
         static const double INVALID;
 
         Args argv_;
@@ -68,7 +68,12 @@ namespace cepgen
         file.close();
       }
 
-      const auto pars = vectorise( argv_ );
+      ParametersList pars;
+      for ( const auto& arg : argv_ )
+        pars += vectorise( arg );
+      CG_INFO( "CommandLineHandler" )
+        << "Arguments list: " << argv_ << " unpacked to:\n\t"
+        << pars << ".";
 
       params_ = params;
 
@@ -116,32 +121,27 @@ namespace cepgen
     }
 
     ParametersList
-    CommandLineHandler::vectorise( const Args& args )
+    CommandLineHandler::vectorise( const std::string& arg )
     {
-      const char delim_block = ':', delim_eq1 = '[', delim_eq2 = ']';
       ParametersList params;
-      for ( const auto& arg : args ) {
-        auto cmd = utils::split( arg, delim_block );
-        auto& plist = cmd.size() < 2
-          ? params
-          : params.operator[]<ParametersList>( cmd.at( 0 ) );
-        if ( cmd.size() > 2 ){ // sub-parameters word found
-          plist += vectorise( Args( 1,
-            utils::merge( std::vector<std::string>( cmd.begin()+1, cmd.end() ), std::string( delim_block, 1 ) ) ) );
-          continue;
-        }
-        const auto word = cmd.size() < 2 ? cmd.at( 0 ) : cmd.at( 1 );
-        auto words = utils::split( word, delim_eq1 );
+      auto cmd = utils::split( arg, ':' );
+      auto& plist = cmd.size() > 2
+        ? params.operator[]<ParametersList>( cmd.at( 0 ) )
+        : params;
+      if ( cmd.size() > 1 ){ // sub-parameters word found
+        plist += vectorise( utils::merge(
+          std::vector<std::string>( std::next( cmd.begin() ), cmd.end() ), ":" ) );
+      }
+      else {
+        const auto word = cmd.at( 0 );
+        auto words = utils::split( word, '=' );
         auto key = words.at( 0 );
         if ( key == "name" )
           key = ParametersList::MODULE_NAME;
         if ( words.size() == 1 ) // basic key=true
           plist.set<bool>( key, true );
         else if ( words.size() == 2 ) { // basic key=value
-          words = utils::split( words.at( 1 ), delim_eq2 );
-          if ( words.size() != 1 )
-            throw CG_FATAL( "CommandLineHandler" ) << "Invalid syntax for key \"" << key << "\"!";
-          const auto value = words.at( 0 );
+          const auto value = words.at( 1 );
           try {
             if ( value.find( '.' ) != std::string::npos
               || value.find( 'e' ) != std::string::npos
@@ -159,8 +159,10 @@ namespace cepgen
               plist.set<std::string>( key, value );
           }
         }
+        else
+          throw CG_FATAL( "CommandLineHandler" )
+            << "Invalid key=value unpacking: " << word << "!";
       }
-      CG_INFO("")<<params;
       return params;
     }
   }
