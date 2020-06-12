@@ -77,9 +77,12 @@ namespace cepgen
       Generator( Parameters *ip );
       ~Generator();
 
-      const Parameters* parametersPtr() const { return parameters_.get(); }
+      /// Pointer to the parameters block
+      const Parameters* parameters() const { return parameters_.get(); }
+      /// Extracted pointer to the parameters block
+      Parameters* parametersPtr() { return parameters_.release(); }
       /// Getter to the run parameters block
-      Parameters& parameters();
+      Parameters& parametersRef();
       /// Feed the generator with a Parameters object
       void setParameters( Parameters* ip );
       /// Specify an integrator algorithm configuration

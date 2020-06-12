@@ -57,7 +57,7 @@ namespace cepgen
   }
 
   Parameters&
-  Generator::parameters()
+  Generator::parametersRef()
   {
     return *parameters_;
   }

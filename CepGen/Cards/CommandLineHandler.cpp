@@ -92,7 +92,7 @@ namespace cepgen
       //----- phase space definition
       auto kin = pars.get<ParametersList>( "kinematics" )
         .set<ParametersList>( "structureFunctions", pars.get<ParametersList>( "strfun" ) );
-      params_->kinematics = Kinematics( kin );
+      params_->kinematics = Kinematics( params_->kinematics.parameters()+kin );
 
       //----- integration
       pars.fill<ParametersList>( "integrator", *params_->integrator );
@@ -124,14 +124,13 @@ namespace cepgen
     CommandLineHandler::vectorise( const std::string& arg )
     {
       ParametersList params;
-      auto cmd = utils::split( arg, ':' );
-      auto& plist = cmd.size() > 2
+      auto cmd = utils::split( arg, '/' );
+      auto& plist = cmd.size() > 1
         ? params.operator[]<ParametersList>( cmd.at( 0 ) )
         : params;
-      if ( cmd.size() > 1 ){ // sub-parameters word found
+      if ( cmd.size() > 1 ) // sub-parameters word found
         plist += vectorise( utils::merge(
-          std::vector<std::string>( std::next( cmd.begin() ), cmd.end() ), ":" ) );
-      }
+          std::vector<std::string>( cmd.begin()+1, cmd.end() ), "/" ) );
       else {
         const auto word = cmd.at( 0 );
         auto words = utils::split( word, '=' );
@@ -151,9 +150,9 @@ namespace cepgen
             else
               plist.set<int>( key, std::stod( value ) );
           } catch ( const std::invalid_argument& ) {
-            if ( value == "off" || value == "no" )
+            if ( value == "off" || value == "no" || value == "false" )
               plist.set<bool>( key, false );
-            else if ( value == "on" || value == "yes" )
+            else if ( value == "on" || value == "yes" || value == "true" )
               plist.set<bool>( key, true );
             else
               plist.set<std::string>( key, value );

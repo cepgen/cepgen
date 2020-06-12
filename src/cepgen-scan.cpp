@@ -52,7 +52,7 @@ int main( int argc, char* argv[] )
       cepgen::ParametersList().set<std::vector<std::string> >( "args", parser.extra_config() ) )
       ->parse( "", mg.parameters() ) );
 
-  CG_INFO( "main" ) << mg.parametersPtr();
+  CG_INFO( "main" ) << mg.parameters();
 
   double xsect, err_xsect;
 

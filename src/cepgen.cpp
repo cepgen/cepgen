@@ -60,20 +60,20 @@ int main( int argc, char* argv[] )
     if ( !parser.extra_config().empty() )
       gen.setParameters( cepgen::card::CardsHandlerFactory::get().build( "cmd",
         cepgen::ParametersList().set<std::vector<std::string> >( "args", parser.extra_config() ) )
-        ->parse( "", &gen.parameters() ) );
+        ->parse( std::string(), gen.parametersPtr() ) );
   }
 
   cepgen::utils::AbortHandler ctrl_c;
 
   try {
-    auto& params = gen.parameters();
+    auto& params = gen.parametersRef();
     if ( num_events >= 0 ) { // user specified a number of events to generate
       params.generation().maxgen = num_events;
       params.generation().enabled = num_events > 0;
     }
 
     //--- list all parameters
-    CG_LOG( "main" ) << gen.parametersPtr();
+    CG_LOG( "main" ) << gen.parameters();
 
     //--- let there be a cross-section...
     double xsec = 0., err = 0.;
