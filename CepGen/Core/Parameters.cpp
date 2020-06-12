@@ -289,6 +289,13 @@ namespace cepgen
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? utils::boldify( " Outgoing central system " ) : "Outgoing central system" ) << std::setfill( ' ' ) << "\n\n";
+    if ( !param->kinematics.minimum_final_state.empty() ) {
+      os << std::setw( wt ) << "Minimum final state";
+      std::string sep;
+      for ( const auto& part : param->kinematics.minimum_final_state )
+        os << sep << PDG::get().name( part ), sep = ", ";
+      os << "\n";
+    }
     for ( const auto& lim : cuts.central.list() )
       if ( lim.limits.valid() )
         os << std::setw( wt ) << lim.description << lim.limits << "\n";

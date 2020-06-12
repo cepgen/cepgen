@@ -91,8 +91,11 @@ namespace cepgen
 
       double mat_el = prefactor_;
       switch ( method_ ) {
-        case 0: { // on-shell matrix element
-          // (Denner+Dittmaier+Schuster, + work in collaboration with C. Royon)
+        case 0: {
+          // On-shell matrix element
+          // references:
+          //  Phys.Rev.D 51 (1995) 4738
+          //  JHEP 02 (2015) 098
           mat_el *= onShellME();
         } break;
         case 1: {
