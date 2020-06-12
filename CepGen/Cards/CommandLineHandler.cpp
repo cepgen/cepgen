@@ -79,6 +79,10 @@ namespace cepgen
       if ( pars.get<bool>( "timer", false ) )
         params_->setTimeKeeper( new utils::TimeKeeper );
 
+      //----- logging definition
+      if ( pars.get<int>( "logging", -1 ) != -1 )
+        utils::Logger::get().level = (cepgen::utils::Logger::Level)pars.get<int>( "logging" );
+
       //----- process definition
       auto proc = pars.get<ParametersList>( "process" );
       if ( !proc.empty() ) {
