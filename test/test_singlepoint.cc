@@ -26,7 +26,7 @@ int main( int argc, char* argv[] )
   CG_INFO( "main" ) << gen.parameters();
 
   if ( point.size() < 2 ) {
-    point = vector<double>( gen.parameters().process().ndim(), point[0] );
+    point = vector<double>( gen.parameters()->process().ndim(), point[0] );
     point.resize( ps_size );
   }
 

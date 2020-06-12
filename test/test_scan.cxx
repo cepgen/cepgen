@@ -34,7 +34,7 @@ int main( int argc, char* argv[] )
   cepgen::Generator gen;
   gen.setParameters( cepgen::card::Handler::parse( input_card ) );
   CG_INFO( "main" ) << gen.parameters();
-  const size_t ndim = gen.parameters().process().ndim();
+  const size_t ndim = gen.parameters()->process().ndim();
 
   vector<double> coord( ndim, def );
 

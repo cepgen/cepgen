@@ -79,13 +79,13 @@ int main( int argc, char* argv[] )
   try {
     unsigned short num_tests = 0;
     for ( const auto& test : tests ) {
-      gen.parameters().clearProcess();
+      gen.parametersRef().clearProcess();
 
       const std::string filename = "test_processes/"+test.filename+"_cfg.py";
       gen.setParameters( cepgen::card::Handler::parse( filename ) );
-      gen.parameters().integrator->setName<std::string>( integrator );
+      gen.parameters()->integrator->setName<std::string>( integrator );
       CG_INFO( "main" )
-        << "Process: "<< gen.parameters().processName() << "\n\t"
+        << "Process: "<< gen.parameters()->processName() << "\n\t"
         << "File: " << filename << "\n\t"
         << "Configuration time: " << tmr.elapsed()*1.e3 << " ms.";
 
