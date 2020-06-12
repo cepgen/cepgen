@@ -30,8 +30,11 @@ namespace cepgen
       //--- check if configuration word is requested
       for ( const auto& str : config_str_ )
         if ( arg_val.at( 0 ) == "--"+str.name.at( 0 )
-          || ( str.name.size() > 1 && arg_val.at( 0 ) == "-"+str.name.at( 1 ) ) )
+          || ( str.name.size() > 1 && arg_val.at( 0 ) == "-"+str.name.at( 1 ) ) ) {
+          // if a configuration word is found, all the remaining flags are parsed as such
           extra_config_ = std::vector<std::string>( it_arg+1, args_tmp.end() );
+          return;
+        }
       //--- parse arguments if word found after
       if ( arg_val.size() == 1 && arg_val.at( 0 )[0] == '-' && it_arg != std::prev( args_tmp.end() ) ) {
         const auto& word = *std::next( it_arg );
