@@ -13,13 +13,13 @@ int main( int argc, char* argv[] )
 {
   string input_config, output_config;
 
-  cepgen::initialise();
-
   cepgen::ArgumentsParser parser( argc, argv );
   parser
     .addArgument( "input,i", "input configuration", &input_config )
     .addArgument( "output,o", "output output", &output_config )
     .parse();
+
+  cepgen::initialise();
 
   try {
     auto params = cepgen::card::Handler::parse( input_config );

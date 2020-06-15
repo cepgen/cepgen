@@ -29,14 +29,14 @@ int main( int argc, char* argv[] )
 
   cepgen::ArgumentsParser parser( argc, argv );
   parser
-    .addArgument( "config", "base configuration", &input_config, 'i' )
-    .addOptionalArgument( "scan", "type of scan to perform", "ptmin", &scan, 's' )
-    .addOptionalArgument( "min", "minimum value of scan", 1., &min_value, 'l' )
-    .addOptionalArgument( "max", "maximum value of scan", 11., &max_value, 'H' )
-    .addOptionalArgument( "num-points", "number of points to consider", 10, &npoints, 'n' )
-    .addOptionalArgument( "points", "list of points to consider", vector<double>{}, &points, 'p' )
-    .addOptionalArgument( "output", "output file", "xsect.dat", &output_file, 'o' )
-    .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
+    .addArgument( "config,i", "base configuration", &input_config )
+    .addOptionalArgument( "scan,s", "type of scan to perform", &scan, "ptmin" )
+    .addOptionalArgument( "min,l", "minimum value of scan", &min_value, 1. )
+    .addOptionalArgument( "max,H", "maximum value of scan", &max_value, 11. )
+    .addOptionalArgument( "num-points,n", "number of points to consider", &npoints, 10 )
+    .addOptionalArgument( "points,p", "list of points to consider", &points, vector<double>{} )
+    .addOptionalArgument( "output,o", "output file", &output_file, "xsect.dat" )
+    .addOptionalArgument( "debug,d", "debugging mode", &debug, false )
     .parse();
 
   if ( debug )
@@ -50,7 +50,7 @@ int main( int argc, char* argv[] )
   if ( !parser.extra_config().empty() )
     mg.setParameters( cepgen::card::CardsHandlerFactory::get().build( "cmd",
       cepgen::ParametersList().set<std::vector<std::string> >( "args", parser.extra_config() ) )
-      ->parse( "", mg.parameters() ) );
+      ->parse( "", mg.parametersPtr() ) );
 
   CG_INFO( "main" ) << mg.parameters();
 
@@ -61,7 +61,7 @@ int main( int argc, char* argv[] )
     throw CG_FATAL( "main" ) << "Output file \"" << output_file << "\" cannot be opened!";
   xsect_file << "# " << scan << "\txsect (pb)\td(xsect) (pb)\n";
 
-  auto& par = mg.parameters();
+  auto& par = mg.parametersRef();
   //--- ensure nothing is written in the output sequence
   par.outputModulesSequence().clear();
 
@@ -71,28 +71,28 @@ int main( int argc, char* argv[] )
 
   for ( const auto& value : points ) {
     if ( scan == "ptmin" )
-      par.kinematics.cuts.central.pt_single.min() = value;
+      par.kinematics.cuts.central.pt_single().min() = value;
     else if ( scan == "ptmax" )
-      par.kinematics.cuts.central.pt_single.max() = value;
+      par.kinematics.cuts.central.pt_single().max() = value;
     else if ( scan == "q2min" )
-      par.kinematics.cuts.initial.q2.min() = value;
+      par.kinematics.cuts.initial.q2().min() = value;
     else if ( scan == "q2max" )
-      par.kinematics.cuts.initial.q2.max() = value;
+      par.kinematics.cuts.initial.q2().max() = value;
     else if ( scan == "wmin" )
-      par.kinematics.cuts.central.mass_sum.min() = value;
+      par.kinematics.cuts.central.mass_sum().min() = value;
     else if ( scan == "wmax" )
-      par.kinematics.cuts.central.mass_sum.max() = value;
+      par.kinematics.cuts.central.mass_sum().max() = value;
     else if ( scan == "mxmin" )
-      par.kinematics.cuts.remnants.mass_single.min() = value;
+      par.kinematics.cuts.remnants.mx().min() = value;
     else if ( scan == "mxmax" )
-      par.kinematics.cuts.remnants.mass_single.max() = value;
+      par.kinematics.cuts.remnants.mx().max() = value;
     else if ( scan == "abseta" ) {
-      par.kinematics.cuts.central.eta_single.min() = -value;
-      par.kinematics.cuts.central.eta_single.max() = +value;
+      par.kinematics.cuts.central.eta_single().min() = -value;
+      par.kinematics.cuts.central.eta_single().max() = +value;
     }
     else if ( scan == "absrap" ) {
-      par.kinematics.cuts.central.rapidity_single.min() = -value;
-      par.kinematics.cuts.central.rapidity_single.max() = +value;
+      par.kinematics.cuts.central.rapidity_single().min() = -value;
+      par.kinematics.cuts.central.rapidity_single().max() = +value;
     }
     else if ( scan == "mpart" ) {
       auto prop = cepgen::PDG::get()( par.process().event()[cepgen::Particle::CentralSystem][0].pdgId() );
