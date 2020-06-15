@@ -2,8 +2,6 @@
 #define CepGen_Core_GridParameters_h
 
 #include <vector>
-#include <map>
-#include <gsl/gsl_rng.h>
 
 namespace cepgen
 {
@@ -31,16 +29,20 @@ namespace cepgen
       void setValue( size_t coord, double val );
       /// Shoot a phase space point for a grid coordinate
       void shoot( const Integrator* integ, size_t coord, std::vector<double>& out ) const;
-      void setTrial( size_t coord );
+      /// Specify a new trial has been attempted for bin
+      void increment( size_t coord );
       /// Number of points already shot for a given grid coordinate
       size_t numPoints( size_t coord ) const;
 
       /// Maximal number of dimensions handled by this integrator instance
       static constexpr unsigned short MAX_DIM = 15;
-      static constexpr unsigned short M_BIN = 3; ///< Integration grid size parameter
-      static constexpr double INV_M_BIN = 1./M_BIN; ///< Weight of each grid coordinate
+      /// Integration grid size parameter
+      static constexpr unsigned short M_BIN = 3;
+      /// Weight of each grid coordinate
+      static constexpr double INV_M_BIN = 1./M_BIN;
 
-      bool gen_prepared; ///< Has the grid been already prepared?
+      /// Has the grid been already prepared?
+      bool gen_prepared;
       double correc;
       double correc2;
       double f_max2;
@@ -49,10 +51,14 @@ namespace cepgen
 
     private:
       size_t max_;
-      std::vector<coord_t> n_map_; ///< List of grid coordinates
-      std::vector<size_t> num_points_; ///< Number of functions values evaluated for this point
-      std::vector<double> f_max_; ///< Maximal value of the function at one given point
-      double f_max_global_; ///< Maximal value of the function in the considered integration range
+      /// List of grid coordinates
+      std::vector<coord_t> n_map_;
+      /// Number of functions values evaluated for this point
+      std::vector<size_t> num_points_;
+      /// Maximal value of the function at one given point
+      std::vector<double> f_max_;
+      /// Maximal value of the function in the considered integration range
+      double f_max_global_;
   };
 }
 

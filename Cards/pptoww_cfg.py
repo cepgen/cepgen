@@ -3,7 +3,7 @@ from Config.Integration.vegas_cff import integrator
 #--------------------------------------------------------------------
 # Logging/debugging example
 #--------------------------------------------------------------------
-#from Config.logger_cfi import logger
+#from Config.Logger_cfi import logger
 #logger.enabledModules += ('Hadroniser.configure', 'Generator.*',)
 #--------------------------------------------------------------------
 # Pythia 6 example (with fully leptonic WW decay)

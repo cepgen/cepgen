@@ -58,7 +58,7 @@ namespace cepgen
   }
 
   void
-  GridParameters::setTrial( size_t coord )
+  GridParameters::increment( size_t coord )
   {
     num_points_[coord]++;
   }
