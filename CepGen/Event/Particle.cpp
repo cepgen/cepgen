@@ -131,15 +131,13 @@ namespace cepgen
   {
     const auto ret = daughters_.insert( part.id() );
 
-    if ( CG_LOG_MATCH( "Particle", debugInsideLoop ) ) {
-      std::ostringstream os;
+    CG_DEBUG_LOOP( "Particle" ).log( [&]( auto& dbg ) {
+      dbg
+        << "Particle " << role_ << " (pdgId=" << (int)pdg_id_ << ")"
+        << " has now " << utils::s( "daughter", daughters_.size(), true ) << ":";
       for ( const auto& daugh : daughters_ )
-        os << utils::format( "\n\t * id=%d", daugh );
-      CG_DEBUG_LOOP( "Particle" )
-        << "Particle " << role_ << " (pdgId=" << (int)pdg_id_ << ") "
-        << "has now " << daughters_.size() << " daughter(s):"
-        << os.str();
-    }
+        dbg << utils::format( "\n\t * id=%d", daugh );
+    } );
 
     if ( ret.second ) {
       CG_DEBUG_LOOP( "Particle" )

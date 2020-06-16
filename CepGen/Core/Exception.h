@@ -105,6 +105,12 @@ namespace cepgen
         return exc;
       }
 
+      /// Lambda function handler
+      template<typename T> inline LoggedException& log( T&& lam ) {
+        lam( *this );
+        return *this;
+      }
+
       inline std::string message() const override {
         return message_.str();
       }

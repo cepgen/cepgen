@@ -190,32 +190,24 @@ namespace cepgen
     else if ( has<std::string>( key ) ) os << get<std::string>( key );
     else if ( has<Limits>( key ) )      os << get<Limits>( key );
     else if ( has<std::vector<ParametersList> >( key ) ) {
-      bool first = true;
-      for ( const auto& p : get<std::vector<ParametersList> >( key ) ) {
-        os << ( first ? "" : ", " ) << p;
-        first = false;
-      }
+      std::string sep;
+      for ( const auto& p : get<std::vector<ParametersList> >( key ) )
+        os << sep << p, sep = ", ";
     }
     else if ( has<std::vector<int> >( key ) ) {
-      bool first = true;
-      for ( const auto& p : get<std::vector<int> >( key ) ) {
-        os << ( first ? "" : ", " ) << p;
-        first = false;
-      }
+      std::string sep;
+      for ( const auto& p : get<std::vector<ParametersList> >( key ) )
+        os << sep << p, sep = ", ";
     }
     else if ( has<std::vector<double> >( key ) ) {
-      bool first = true;
-      for ( const auto& p : get<std::vector<double> >( key ) ) {
-        os << ( first ? "" : ", " ) << p;
-        first = false;
-      }
+      std::string sep;
+      for ( const auto& p : get<std::vector<ParametersList> >( key ) )
+        os << sep << p, sep = ", ";
     }
     else if ( has<std::vector<std::string> >( key ) ) {
-      bool first = true;
-      for ( const auto& p : get<std::vector<std::string> >( key ) ) {
-        os << ( first ? "" : ", " ) << p;
-        first = false;
-      }
+      std::string sep;
+      for ( const auto& p : get<std::vector<ParametersList> >( key ) )
+        os << sep << p, sep = ", ";
     }
     return os.str();
   }

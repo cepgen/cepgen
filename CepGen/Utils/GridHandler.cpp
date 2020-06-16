@@ -1,4 +1,5 @@
 #include "CepGen/Utils/GridHandler.h"
+#include "CepGen/Utils/String.h"
 #include "CepGen/Core/Exception.h"
 
 #include <gsl/gsl_errno.h>
@@ -147,17 +148,19 @@ namespace cepgen
     }
     for ( auto& c : coords_ )
       std::sort( c.begin(), c.end() );
-    if ( CG_LOG_MATCH( "GridHandler", debug ) ) { // debugging of the grid coordinates
-      std::ostringstream os;
+    CG_DEBUG( "GridHandler" ).log( [&]( auto& dbg ) {
+      dbg << "Grid dump:";
+      // debugging of the grid coordinates
       unsigned short i = 0;
       for ( const auto& cs : coords_ ) {
-        os << "\n>> coordinate " << (i++) << " has " << cs.size() << " member" << ( cs.size() > 1 ? "s" : "" ) << ":";
+        dbg
+          << "\n>> coordinate " << (i++) << " has "
+          << utils::s( "member", cs.size(), true ) << ":";
         unsigned short j = 0;
         for ( const auto& val : cs )
-          os << ( j++ % 20 == 0 ? "\n  " : " " ) << val;
+          dbg << ( j++ % 20 == 0 ? "\n  " : " " ) << val;
       }
-      CG_DEBUG( "GridHandler" ) << "Grid dump:" << os.str();
-    }
+    } );
     //--- particularise by dimension
     switch ( D ) {
       case 1: { //--- x |-> (f1,...)

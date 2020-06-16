@@ -244,18 +244,18 @@ namespace cepgen
       sum2p += sig2;
 
       // per-bin debugging loop
-      if ( CG_LOG_MATCH( "GeneratorWorker:setGen", debugInsideLoop ) ) {
+      CG_DEBUG_LOOP( "GeneratorWorker:setGen" ).log( [&]( auto& dbg ) {
         const double sig = sqrt( sig2 );
         const double eff = ( grid_->maxValue( i ) != 0. )
           ? av/grid_->maxValue( i )
           : 0.;
-        CG_DEBUG_LOOP( "GeneratorWorker:setGen" )
+        dbg
           << "n-vector for bin " << i << ": " << utils::repr( grid_->n( i ) ) << "\n\t"
           << "av   = " << av << "\n\t"
           << "sig  = " << sig << "\n\t"
           << "fmax = " << grid_->maxValue( i ) << "\n\t"
           << "eff  = " << eff;
-      }
+      } );
       prog_bar.update( i+1 );
     } // end of main loop
 

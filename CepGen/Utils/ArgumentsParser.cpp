@@ -56,15 +56,16 @@ namespace cepgen
   void
   ArgumentsParser::dump() const
   {
-    std::ostringstream os;
-    os << "List of parameters retrieved from command-line:";
-    for ( const auto& par : params_ )
-      os
-        << "\n\t[--" << par.name.at( 0 )
-        << ( par.name.size() > 1 ? "|-"+par.name.at( 1 ) : "" )
-        << ( par.optional ? ", optional" : "" )
-        << "] = " << par.value;
-    CG_INFO( "ArgumentsParser" ) << os.str();
+    CG_INFO( "ArgumentsParser" ).log( [&]( auto& info ) {
+      info
+        << "List of parameters retrieved from command-line:";
+      for ( const auto& par : params_ )
+        info
+          << "\n\t[--" << par.name.at( 0 )
+          << ( par.name.size() > 1 ? "|-"+par.name.at( 1 ) : "" )
+          << ( par.optional ? ", optional" : "" )
+          << "] = " << par.value;
+    } );
   }
 
   ArgumentsParser&

@@ -78,19 +78,17 @@ namespace cepgen
     //--- first-run preparation
     if ( !process_ || !process_->first_run )
       return;
-    {
-      std::ostringstream oss;
-      oss
+    CG_DEBUG( "Parameters" ).log( [&]( auto& dbg ) {
+      dbg
         << "Run started for " << process_->name() << " process "
         << std::hex << (void*)process_.get() << std::dec << ".\n\t"
         << "Process mode considered: " << kinematics.mode << "\n\t"
         << "   first beam: " << kinematics.incoming_beams.first << "\n\t"
         << "  second beam: " << kinematics.incoming_beams.second;
       if ( kinematics.structureFunctions() )
-        oss
+        dbg
           << "  structure functions: " << kinematics.structureFunctions();
-      CG_DEBUG( "Parameters" ) << oss.str();
-    }
+    } );
     if ( process_->hasEvent() )
       process_->clearEvent();
     //--- clear the run statistics

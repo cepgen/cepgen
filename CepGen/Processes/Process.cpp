@@ -63,12 +63,14 @@ namespace cepgen
     void
     Process::dumpVariables() const
     {
-      std::ostringstream os;
-      for ( const auto& var : mapped_variables_ )
-        os << "\n\t(" << var.index << ") " << var.type << " mapping (" << var.description << ") in range " << var.limits;
-      CG_INFO( "Process:dumpVariables" )
-        << "List of variables handled by this process:"
-        << os.str();
+      CG_INFO( "Process:dumpVariables" ).log( [&]( auto& info ) {
+        info << "List of variables handled by this process:";
+        for ( const auto& var : mapped_variables_ )
+          info
+            << "\n\t(" << var.index << ") " << var.type
+            << " mapping (" << var.description << ")"
+            << " in range " << var.limits;
+      } );
     }
 
     Process&
@@ -148,8 +150,7 @@ namespace cepgen
           } break;
         }
       }
-      if ( CG_LOG_MATCH( "Process:vars", debugInsideLoop ) ) {
-        std::ostringstream oss;
+      CG_DEBUG_LOOP( "Process:vars" ).log( [&]( auto& dbg ) {
         std::string sep;
         for ( const auto& var : mapped_variables_ ) {
           double value = 0.;
@@ -163,7 +164,7 @@ namespace cepgen
               value = sqrt( var.value );
               break;
           }
-          oss << sep
+          dbg << sep
             << "variable " << var.index
             << std::left << std::setw( 60 )
             << ( !var.description.empty() ? " ("+var.description+")" : "" )
@@ -171,8 +172,7 @@ namespace cepgen
             << " has value " << std::setw( 20 ) << value
             << " (x=" << x( var.index ) << std::right << ")", sep = "\n\t";
         }
-        CG_DEBUG_LOOP( "Process:vars" ) << oss.str();
-      }
+      } );
     }
 
     double
@@ -297,12 +297,13 @@ namespace cepgen
     void
     Process::dumpPoint() const
     {
-      std::ostringstream os;
-      for ( unsigned short i = 0; i < point_coord_.size(); ++i )
-        os << utils::format( "\n\t  x(%2d) = %8.6f", i, point_coord_[i] );
-      CG_INFO( "Process" )
-        << "Number of integration parameters: " << mapped_variables_.size()
-        << os.str() << ".";
+      CG_INFO( "Process" ).log( [&]( auto& info ) {
+        info
+          << "Number of integration parameters: " << mapped_variables_.size();
+        for ( unsigned short i = 0; i < point_coord_.size(); ++i )
+          info << utils::format( "\n\t  x(%2d) = %8.6f", i, point_coord_[i] );
+        info << ".";
+      } );
     }
 
     void

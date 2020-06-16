@@ -119,10 +119,11 @@ namespace cepgen
         return a.first < b.first;
       } );
     //--- then the proper dump begins
-    std::ostringstream oss;
-    for ( const auto& prt : tmp )
-      if ( prt.first != PDG::invalid )
-        oss << "\n" << prt.second;
-    CG_INFO( "PDG" ) << "List of particles registered:" << oss.str();
+    CG_INFO( "PDG" ).log( [&tmp]( auto& info ) {
+      info << "List of particles registered:";
+      for ( const auto& prt : tmp )
+        if ( prt.first != PDG::invalid )
+          info << "\n" << prt.second;
+    } );
   }
 }

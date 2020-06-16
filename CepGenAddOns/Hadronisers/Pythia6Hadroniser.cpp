@@ -68,7 +68,7 @@ namespace cepgen
         void init() override;
         bool run( Event& ev, double& weight, bool full ) override;
 
-        void setCrossSection( double xsec, double xsec_err ) override {}
+        void setCrossSection( double, double ) override {}
 
       private:
         static constexpr unsigned short MAX_PART_STRING = 3;
@@ -132,18 +132,17 @@ namespace cepgen
         if ( !prepareHadronisation( ev ) )
           return false;
 
-      if ( CG_LOG_MATCH( "Pythia6Hadroniser:dump", debugInsideLoop ) ) {
-        CG_DEBUG_LOOP( "Pythia6Hadroniser" )
-          << "Dump of the event before the hadronisation:";
-        ev.dump();
-      }
+      CG_DEBUG_LOOP( "Pythia6Hadroniser" ).log( [&ev]( auto& dbg ) {
+        dbg << "Dump of the event before the hadronisation:" << ev;
+      } );
 
       //--- fill Pythia 6 common blocks
       const unsigned short str_in_evt = fillParticles( ev );
 
       CG_DEBUG_LOOP( "Pythia6Hadroniser" )
         << "Passed the string construction stage.\n\t "
-        << utils::s( "string object", str_in_evt ) << " identified and constructed.";
+        << utils::s( "string object", str_in_evt, true )
+        << " identified and constructed.";
 
       const int old_npart = pyjets_.n;
 
@@ -304,17 +303,15 @@ namespace cepgen
         if ( num_part_in_str[i] < 2 )
           continue;
 
-        if ( CG_LOG_MATCH( "Pythia6Hadroniser", debugInsideLoop ) ) {
-          std::ostringstream dbg;
+        CG_DEBUG_LOOP( "Pythia6Hadroniser" ).log( [&]( auto& dbg ) {
+          dbg
+            << "Joining " << utils::s( "particle", num_part_in_str[i] )
+            << " with " << ev[jlpsf[i][0]].role() << " role"
+            << " in a same string (id=" << i << ")";
           for ( unsigned short j = 0; j < num_part_in_str[i]; ++j )
             if ( jlpsf[i][j] != -1 )
               dbg << utils::format( "\n\t * %2d (pdgId=%4d)", jlpsf[i][j], pyjets_.k[1][jlpsf[i][j]-1] );
-          CG_DEBUG( "Pythia6Hadroniser" )
-            << "Joining " << utils::s( "particle", num_part_in_str[i] )
-            << " with " << ev[jlpsf[i][0]].role() << " role"
-            << " in a same string (id=" << i << ")"
-            << dbg.str();
-        }
+        } );
         pyjoin( num_part_in_str[i], jlpsf[i] );
       }
       return str_in_evt;
