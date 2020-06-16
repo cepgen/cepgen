@@ -1,9 +1,9 @@
 #ifndef CepGen_Core_Exception_h
 #define CepGen_Core_Exception_h
 
-#include <csignal>
-
 #include "CepGen/Utils/Logger.h"
+
+#include <csignal>
 
 namespace cepgen
 {
@@ -24,10 +24,6 @@ namespace cepgen
       error, ///< General non-stopping error
       fatal ///< Critical and stopping error
     };
-    /// Stream operator (null and void)
-    template<class T> Exception& operator<<( const T& ) { return *this; }
-    /// Lambda function handler (null and void)
-    template<typename T> Exception& log( T&& ) { return *this; }
     /// Dump the full exception information in a given output stream
     /// \param[inout] os the output stream where the information is dumped
     virtual void dump( std::ostream& os = *utils::Logger::get().output ) const = 0;
@@ -136,8 +132,6 @@ namespace cepgen
       }
 
       inline void dump( std::ostream& os = *utils::Logger::get().output ) const override {
-        if ( !utils::Logger::get().output )
-          return;
         os << fullMessage() << std::endl;
       }
       /// Extract a one-line summary of the exception
@@ -205,6 +199,10 @@ namespace cepgen
     /// Empty constructor
     inline NullStream( const LoggedException& ) {}
     void dump( std::ostream& ) const override {}
+    /// Stream operator (null and void)
+    template<class T> NullStream& operator<<( const T& ) { return *this; }
+    /// Lambda function handler (null and void)
+    template<typename T> NullStream& log( T&& ) { return *this; }
     std::string message() const override { return ""; }
   };
 }
