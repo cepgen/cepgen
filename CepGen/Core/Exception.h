@@ -26,6 +26,8 @@ namespace cepgen
     };
     /// Stream operator (null and void)
     template<class T> Exception& operator<<( const T& ) { return *this; }
+    /// Lambda function handler (null and void)
+    template<typename T> Exception& log( T&& ) { return *this; }
     /// Dump the full exception information in a given output stream
     /// \param[inout] os the output stream where the information is dumped
     virtual void dump( std::ostream& os = *utils::Logger::get().output ) const = 0;
