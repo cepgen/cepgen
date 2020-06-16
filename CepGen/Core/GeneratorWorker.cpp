@@ -21,7 +21,7 @@ namespace cepgen
 {
   GeneratorWorker::GeneratorWorker( Parameters* params ) :
     integrand_( new Integrand( params ) ), integrator_( nullptr ), params_( params ),
-    ps_bin_( INVALID_BIN )
+    ps_bin_( UNASSIGNED_BIN )
   {
     CG_DEBUG( "GeneratorWorker" )
       << "New generator worker initialised for integration/event generation.\n\t"
@@ -78,7 +78,7 @@ namespace cepgen
 
     //--- apply correction cycles if required from previous event
 
-    if ( ps_bin_ != INVALID_BIN ) {
+    if ( ps_bin_ != UNASSIGNED_BIN ) {
       bool store = false;
       while ( !correctionCycle( store ) ) {}
         if ( store )
@@ -120,7 +120,7 @@ namespace cepgen
         << "Maxima ratio: " << ( grid_->f_max_diff / grid_->globalMax() ) << ".";
     }
     else // no grid correction needed for this bin
-      ps_bin_ = INVALID_BIN;
+      ps_bin_ = UNASSIGNED_BIN;
 
     // return with an accepted event
     return storeEvent( callback );

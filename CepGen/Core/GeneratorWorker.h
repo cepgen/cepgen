@@ -28,6 +28,9 @@ namespace cepgen
       Integrand& integrand() { return *integrand_; }
 
     private:
+      /// Placeholder for invalid bin indexing
+      static constexpr int UNASSIGNED_BIN = -999;
+
       /// Generate a single event
       /// \param[in] callback The callback function applied on every event generated
       bool next( Event::callback callback = nullptr );
@@ -43,15 +46,16 @@ namespace cepgen
       /// Local event weight evaluator
       std::unique_ptr<Integrand> integrand_;
       /// Pointer to the mother-handled integrator instance
-      const Integrator* integrator_; // not owning
+      /// \note NOT owning
+      const Integrator* integrator_;
       /// Steering parameters for the event generation
-      const Parameters* params_; // not owning
+      /// \note NOT owning
+      const Parameters* params_;
       /// Set of parameters for the integration/event generation grid
       std::unique_ptr<GridParameters> grid_;
       /// Selected bin at which the function will be evaluated
       int ps_bin_; ///< Last bin to be corrected
       std::vector<double> coords_; ///< Phase space coordinates being evaluated
-      static constexpr int INVALID_BIN = -999; ///< Placeholder for invalid bin indexing
   };
 }
 
