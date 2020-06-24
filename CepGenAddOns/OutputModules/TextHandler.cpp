@@ -57,8 +57,14 @@ namespace cepgen
         void operator<<( const Event& ) override;
 
       private:
-        static std::string textHistogram( const std::string&, const gsl_histogram* );
-        static std::string textHistogram( const std::vector<std::string>&, const gsl_histogram2d* );
+        struct info_t
+        {
+          std::vector<std::string> name;
+          bool log;
+        };
+
+        static std::string textHistogram( const info_t&, const gsl_histogram* );
+        static std::string textHistogram( const info_t&, const gsl_histogram2d* );
 
         static constexpr size_t PLOT_WIDTH = 50;
         static constexpr char PLOT_CHAR = '#';
@@ -81,12 +87,12 @@ namespace cepgen
         //--- kinematic variables
         double sqrts_;
         unsigned long num_evts_;
-        std::vector<std::pair<std::string,gsl_histogram_ptr> > hists_;
-        std::vector<std::pair<std::vector<std::string>,gsl_histogram2d_ptr> > hists2d_;
+        std::vector<std::pair<info_t,gsl_histogram_ptr> > hists_;
+        std::vector<std::pair<info_t,gsl_histogram2d_ptr> > hists2d_;
     };
 
     const std::vector<char>
-    TextHandler::PLOT_2D_CHARS = {' ', '.', 'o', 'O', '0', '#'};
+    TextHandler::PLOT_2D_CHARS = {' ', '.', 'o', 'O', '0', '@', '#'};
 
     TextHandler::TextHandler( const ParametersList& params ) :
       ExportModule( params ),
@@ -117,10 +123,11 @@ namespace cepgen
         const int nbins_x = hvar.get<int>( "nbinsX", hvar.get<int>( "nbins", PLOT_WIDTH/2 ) );
         const double min_x = hvar.get<double>( "lowX", hvar.get<double>( "low", 0. ) );
         const double max_x = hvar.get<double>( "highX", hvar.get<double>( "high", 1. ) );
+        const bool log = hvar.get<bool>( "log", false );
         if ( vars.size() == 1 ) { // 1D histogram
           auto hist = gsl_histogram_alloc( nbins_x );
           gsl_histogram_set_ranges_uniform( hist, min_x, max_x );
-          hists_.emplace_back( std::make_pair( key, gsl_histogram_ptr( hist ) ) );
+          hists_.emplace_back( std::make_pair( info_t{ vars, log }, gsl_histogram_ptr( hist ) ) );
           CG_INFO( "TextHandler" )
             << "Booking a 1D histogram with " << utils::s( "bin", nbins_x )
             << " between " << min_x << " and " << max_x << " for \"" << key << "\".";
@@ -131,7 +138,7 @@ namespace cepgen
           const double max_y = hvar.get<double>( "highY", 1. );
           auto hist = gsl_histogram2d_alloc( nbins_x, nbins_y );
           gsl_histogram2d_set_ranges_uniform( hist, min_x, max_x, min_y, max_y );
-          hists2d_.emplace_back( std::make_pair( vars, gsl_histogram2d_ptr( hist ) ) );
+          hists2d_.emplace_back( std::make_pair( info_t{ vars, log }, gsl_histogram2d_ptr( hist ) ) );
           CG_INFO( "TextHandler" )
             << "Booking a 2D correlation plot with " << utils::s( "bin", nbins_x+nbins_y )
             << " between (" << min_x << ", " << max_x << ") and (" << min_y << ", " << max_y << ")"
@@ -196,22 +203,24 @@ namespace cepgen
       file_ << "\n";
       //--- increment the corresponding histograms
       for ( const auto& h_var : hists_ )
-        gsl_histogram_increment( h_var.second.get(), browser_.get( ev, h_var.first ) );
+        gsl_histogram_increment( h_var.second.get(),
+          browser_.get( ev, h_var.first.name[0] ) );
       for ( const auto& h_var : hists2d_ )
         gsl_histogram2d_increment( h_var.second.get(),
-          browser_.get( ev, h_var.first[0] ),
-          browser_.get( ev, h_var.first[1] ) );
+          browser_.get( ev, h_var.first.name[0] ),
+          browser_.get( ev, h_var.first.name[1] ) );
       ++num_evts_;
     }
 
     std::string
-    TextHandler::textHistogram( const std::string& var, const gsl_histogram* hist )
+    TextHandler::textHistogram( const info_t& info, const gsl_histogram* hist )
     {
       std::ostringstream os;
       const size_t nbins = gsl_histogram_bins( hist );
       const double max_bin = gsl_histogram_max_val( hist );
       const double inv_max_bin = max_bin > 0. ? 1./max_bin : 0.;
       const std::string sep( 17, ' ' );
+      const auto& var = info.name.at( 0 );
       os
         << "plot of \"" << var << "\"\n"
         << sep << std::string( PLOT_WIDTH-15-var.size(), ' ' )
@@ -243,7 +252,7 @@ namespace cepgen
     }
 
     std::string
-    TextHandler::textHistogram( const std::vector<std::string>& vars, const gsl_histogram2d* hist )
+    TextHandler::textHistogram( const info_t& info, const gsl_histogram2d* hist )
     {
       std::ostringstream os;
       const size_t nbins_x = gsl_histogram2d_nx( hist );
@@ -251,6 +260,7 @@ namespace cepgen
       const double max_bin = gsl_histogram2d_max_val( hist );
       const double inv_max_bin = max_bin > 0. ? 1./max_bin : 0.;
       const std::string sep( 17, ' ' );
+      const auto& vars = info.name;
       const auto var = utils::merge( vars, "/" );
       os
         << "plot of \"" << var << "\"\n"
@@ -268,7 +278,10 @@ namespace cepgen
         os
           << "\n" << utils::format( "[%7.2f,%7.2f):", min_x, max_x );
         for ( size_t j = 0; j < nbins_y; ++j ) {
-          const double value_norm = gsl_histogram2d_get( hist, i, j )*inv_max_bin;
+          const double value = gsl_histogram2d_get( hist, i, j );
+          const double value_norm = info.log
+            ? ( value == 0. ? 0. : log( value )/log( max_bin ) )
+            : value*inv_max_bin;
           os << PLOT_2D_CHARS[ceil(value_norm*(PLOT_2D_CHARS.size()-1))];
         }
         os << ":";
@@ -277,7 +290,7 @@ namespace cepgen
       for ( size_t j = 0; j < nbins_y; ++j ) {
         double min_y, max_y;
         gsl_histogram2d_get_yrange( hist, j, &min_y, &max_y );
-        ylabels.emplace_back( utils::format( "%g", min_y ) );
+        ylabels.emplace_back( utils::format( "%+g", min_y ) );
       }
       struct stringlen {
         bool operator()( const std::string& a, const std::string& b ) {

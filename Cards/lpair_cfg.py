@@ -49,7 +49,7 @@ text = cepgen.Module('text', # histogramming/ASCII output capability
     histVariables={
         'm(4)': cepgen.Parameters(low=0., high=250., nbins=20),
         'm(ob1)': cepgen.Parameters(low=0., high=250., nbins=10),
-        'xi(ob1):m(ob1)': cepgen.Parameters(highX=1., highY=250.)
+        'pt(7):pt(8)': cepgen.Parameters(highX=250., highY=250., log=True)
     }
 )
 #... or standard event formats
