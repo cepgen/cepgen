@@ -58,11 +58,11 @@ namespace cepgen
 
       private:
         static std::string textHistogram( const std::string&, const gsl_histogram* );
-        static std::string textHistogram( const std::string&, const gsl_histogram2d* );
+        static std::string textHistogram( const std::vector<std::string>&, const gsl_histogram2d* );
 
         static constexpr size_t PLOT_WIDTH = 50;
         static constexpr char PLOT_CHAR = '#';
-        static constexpr char PLOT_2D_CHARS[9] = {' ', '.', 'o', 'x', '+', '*', '0', 'X', '#'};
+        static const std::vector<char> PLOT_2D_CHARS;
 
         std::ofstream file_, hist_file_;
         std::string hist_filename_;
@@ -84,6 +84,9 @@ namespace cepgen
         std::vector<std::pair<std::string,gsl_histogram_ptr> > hists_;
         std::vector<std::pair<std::vector<std::string>,gsl_histogram2d_ptr> > hists2d_;
     };
+
+    const std::vector<char>
+    TextHandler::PLOT_2D_CHARS = {' ', '.', 'o', 'O', '0', '#'};
 
     TextHandler::TextHandler( const ParametersList& params ) :
       ExportModule( params ),
@@ -111,7 +114,7 @@ namespace cepgen
             << "Invalid number of variables to correlate for '" << key << "'!";
 
         const auto& hvar = hist_vars.get<ParametersList>( key );
-        const int nbins_x = hvar.get<int>( "nbinsX", hvar.get<int>( "nbins", 10 ) );
+        const int nbins_x = hvar.get<int>( "nbinsX", hvar.get<int>( "nbins", PLOT_WIDTH/2 ) );
         const double min_x = hvar.get<double>( "lowX", hvar.get<double>( "low", 0. ) );
         const double max_x = hvar.get<double>( "highX", hvar.get<double>( "high", 1. ) );
         if ( vars.size() == 1 ) { // 1D histogram
@@ -123,7 +126,7 @@ namespace cepgen
             << " between " << min_x << " and " << max_x << " for \"" << key << "\".";
         }
         else if ( vars.size() == 2 ) { // 2D histogram
-          const int nbins_y = hvar.get<int>( "nbinsY", 10 );
+          const int nbins_y = hvar.get<int>( "nbinsY", PLOT_WIDTH );
           const double min_y = hvar.get<double>( "lowY", 0. );
           const double max_y = hvar.get<double>( "highY", 1. );
           auto hist = gsl_histogram2d_alloc( nbins_x, nbins_y );
@@ -149,6 +152,15 @@ namespace cepgen
       for ( const auto& h_var : hists_ ) {
         const auto& hist = h_var.second.get();
         gsl_histogram_scale( hist, xsec_/( num_evts_+1 ) );
+        const auto& h_out = textHistogram( h_var.first, hist );
+        if ( show_hists_ )
+          CG_INFO( "TextHandler" ) << h_out;
+        if ( save_hists_ )
+          hist_file_ << "\n" << h_out << "\n";
+      }
+      for ( const auto& h_var : hists2d_ ) {
+        const auto& hist = h_var.second.get();
+        //gsl_histogram_scale( hist, xsec_/( num_evts_+1 ) );
         const auto& h_out = textHistogram( h_var.first, hist );
         if ( show_hists_ )
           CG_INFO( "TextHandler" ) << h_out;
@@ -231,40 +243,68 @@ namespace cepgen
     }
 
     std::string
-    TextHandler::textHistogram( const std::string& var, const gsl_histogram2d* hist )
+    TextHandler::textHistogram( const std::vector<std::string>& vars, const gsl_histogram2d* hist )
     {
       std::ostringstream os;
-      /*const size_t nbins = gsl_histogram_bins( hist );
-      const double max_bin = gsl_histogram_max_val( hist );
+      const size_t nbins_x = gsl_histogram2d_nx( hist );
+      const size_t nbins_y = gsl_histogram2d_ny( hist );
+      const double max_bin = gsl_histogram2d_max_val( hist );
       const double inv_max_bin = max_bin > 0. ? 1./max_bin : 0.;
       const std::string sep( 17, ' ' );
+      const auto var = utils::merge( vars, "/" );
       os
         << "plot of \"" << var << "\"\n"
-        << sep << std::string( PLOT_WIDTH-15-var.size(), ' ' )
-        << "d(sig)/d" << var << " (pb/bin)\n"
-        << sep << utils::format( "%-5.2f", gsl_histogram_min_val( hist ) )
-        << std::string( PLOT_WIDTH-11, ' ' )
-        << utils::format( "%5.2e", gsl_histogram_max_val( hist ) ) << "\n"
-        << sep << std::string( PLOT_WIDTH+2, '.' ); // abscissa axis
-      for ( size_t i = 0; i < nbins; ++i ) {
-        double min, max;
-        gsl_histogram_get_range( hist, i, &min, &max );
-        const double value = gsl_histogram_get( hist, i );
-        const int val = value*PLOT_WIDTH*inv_max_bin;
-        os
-          << "\n" << utils::format( "[%7.2f,%7.2f):", min, max )
-          << std::string( val, PLOT_CHAR ) << std::string( PLOT_WIDTH-val, ' ' )
-          << ": " << utils::format( "%6.2e", value );
-      }
-      const double bin_width = ( gsl_histogram_max( hist )-gsl_histogram_min( hist ) )/nbins;
+        << sep << std::string( (size_t)std::max( 0., nbins_y-15.-var.size() ), ' ' );
       os
-        << "\n"
-        << utils::format( "%17s", var.c_str() ) << ":" << std::string( PLOT_WIDTH, '.' ) << ":\n" // 2nd abscissa axis
-        << "\t("
-        << "bin width=" << bin_width << utils::s( " unit", (int)bin_width, false ) << ", "
-        << "mean=" << gsl_histogram_mean( hist ) << ", "
-        << "st.dev.=" << gsl_histogram_sigma( hist )
-        << ")";*/
+        << "d^2(sig)/d" << vars.at( 0 ) << "/d" << vars.at( 1 ) << " (pb/bin)\n"
+        << sep << utils::format( "%-5.2f", gsl_histogram2d_ymin( hist ) )
+        << std::string( nbins_y-11, ' ' )
+        << utils::format( "%5.2e", gsl_histogram2d_ymax( hist ) ) << "\n"
+        << utils::format( "%17s", vars.at( 0 ).c_str() )
+        << std::string( nbins_y+2, '.' ); // abscissa axis
+      for ( size_t i = 0; i < nbins_x; ++i ) {
+        double min_x, max_x;
+        gsl_histogram2d_get_xrange( hist, i, &min_x, &max_x );
+        os
+          << "\n" << utils::format( "[%7.2f,%7.2f):", min_x, max_x );
+        for ( size_t j = 0; j < nbins_y; ++j ) {
+          const double value_norm = gsl_histogram2d_get( hist, i, j )*inv_max_bin;
+          os << PLOT_2D_CHARS[ceil(value_norm*(PLOT_2D_CHARS.size()-1))];
+        }
+        os << ":";
+      }
+      std::vector<std::string> ylabels;
+      for ( size_t j = 0; j < nbins_y; ++j ) {
+        double min_y, max_y;
+        gsl_histogram2d_get_yrange( hist, j, &min_y, &max_y );
+        ylabels.emplace_back( utils::format( "%g", min_y ) );
+      }
+      struct stringlen {
+        bool operator()( const std::string& a, const std::string& b ) {
+          return a.size() < b.size();
+        }
+      };
+      for ( size_t i = 0; i < std::max_element( ylabels.begin(), ylabels.end(), stringlen() )->size(); ++i ) {
+        os << "\n" << sep << ":";
+        for ( const auto& lab : ylabels )
+          os << ( lab.size() > i ? lab.at( i ) : ' ' );
+        os << ":";
+      }
+      const double bin_width_x = ( gsl_histogram2d_xmax( hist )-gsl_histogram2d_xmin( hist ) )/nbins_x;
+      const double bin_width_y = ( gsl_histogram2d_ymax( hist )-gsl_histogram2d_ymin( hist ) )/nbins_y;
+      os
+        << "\n" << sep
+        << ":" << std::string( nbins_y, '.' ) << ": " // 2nd abscissa axis
+        << vars.at( 1 ) << "\n\t("
+        << "x-axis: "
+        << "bin width=" << bin_width_x << utils::s( " unit", (int)bin_width_x, false ) << ", "
+        << "mean=" << gsl_histogram2d_xmean( hist ) << ","
+        << "st.dev.=" << gsl_histogram2d_xsigma( hist ) << "\n\t"
+        << " y-axis: "
+        << "bin width=" << bin_width_y << utils::s( " unit", (int)bin_width_y, false ) << ", "
+        << "mean=" << gsl_histogram2d_ymean( hist ) << ","
+        << "st.dev.=" << gsl_histogram2d_ysigma( hist )
+        << ")";
       return os.str();
     }
   }
