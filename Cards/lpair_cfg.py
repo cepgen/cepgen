@@ -48,7 +48,8 @@ text = cepgen.Module('text', # histogramming/ASCII output capability
     #variables = ['nev', 'm(4)', 'tgen'],
     histVariables={
         'm(4)': cepgen.Parameters(low=0., high=250., nbins=20),
-        'm(ob1)': cepgen.Parameters(low=0., high=250., nbins=10)
+        'm(ob1)': cepgen.Parameters(low=0., high=250., nbins=10),
+        'm(4):m(ob1)': cepgen.Parameters(lowX=0., highX=250., lowY=0., highY=250.)
     }
 )
 #... or standard event formats

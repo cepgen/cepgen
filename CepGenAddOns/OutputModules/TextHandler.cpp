@@ -121,6 +121,16 @@ namespace cepgen
             << " between " << min_x << " and " << max_x << " for \"" << key << "\".";
         }
         else if ( vars.size() == 2 ) { // 2D histogram
+          const int nbins_y = hvar.get<int>( "nbinsY", 10 );
+          const double min_y = hvar.get<double>( "lowY", 0. );
+          const double max_y = hvar.get<double>( "highY", 1. );
+          auto hist = gsl_histogram2d_alloc( nbins_x, nbins_y );
+          gsl_histogram2d_set_ranges_uniform( hist, min_x, max_x, min_y, max_y );
+          hists2d_.emplace_back( std::make_pair( key, gsl_histogram2d_ptr( hist ) ) );
+          CG_INFO( "TextHandler" )
+            << "Booking a 2D correlation plot with " << utils::s( "bin", nbins_x+nbins_y )
+            << " between (" << min_x << ", " << max_x << ") and (" << min_y << ", " << max_y << ")"
+            << " for \"" << key << "\".";
         }
       }
       if ( save_hists_ && !hists_.empty() )
