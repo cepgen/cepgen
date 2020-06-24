@@ -16,6 +16,27 @@
 #include <iomanip>
 #include <fstream>
 
+namespace
+{
+  //--- 1D histograms
+  struct gsl_histogram_deleter
+  {
+    void operator()( gsl_histogram* h ) {
+      gsl_histogram_free( h );
+    }
+  };
+  typedef std::unique_ptr<gsl_histogram,gsl_histogram_deleter> gsl_histogram_ptr;
+
+  //--- 2D histograms
+  struct gsl_histogram2d_deleter
+  {
+    void operator()( gsl_histogram2d* h ) {
+      gsl_histogram2d_free( h );
+    }
+  };
+  typedef std::unique_ptr<gsl_histogram2d,gsl_histogram2d_deleter> gsl_histogram2d_ptr;
+}
+
 namespace cepgen
 {
   namespace io
@@ -58,21 +79,7 @@ namespace cepgen
         //--- kinematic variables
         double sqrts_;
         unsigned long num_evts_;
-        struct gsl_histogram_deleter
-        {
-          void operator()( gsl_histogram* h ) {
-            gsl_histogram_free( h );
-          }
-        };
-        typedef std::unique_ptr<gsl_histogram,gsl_histogram_deleter> gsl_histogram_ptr;
         std::vector<std::pair<std::string,gsl_histogram_ptr> > hists_;
-        struct gsl_histogram2d_deleter
-        {
-          void operator()( gsl_histogram2d* h ) {
-            gsl_histogram2d_free( h );
-          }
-        };
-        typedef std::unique_ptr<gsl_histogram2d,gsl_histogram2d_deleter> gsl_histogram2d_ptr;
         std::vector<std::pair<std::string,gsl_histogram2d_ptr> > hists2d_;
     };
 
@@ -95,16 +102,26 @@ namespace cepgen
         oss_vars_ << sep << var, sep = separator_;
       //--- then extract list of variables to be plotted in histogram
       const auto& hist_vars = params.get<ParametersList>( "histVariables" );
-      for ( const auto& var : hist_vars.keys() ) {
-        const auto& hvar = hist_vars.get<ParametersList>( var );
-        const int nbins = hvar.get<int>( "nbins", 10 );
-        const double min = hvar.get<double>( "low", 0. ), max = hvar.get<double>( "high", 1. );
-        auto hist = gsl_histogram_alloc( nbins );
-        gsl_histogram_set_ranges_uniform( hist, min, max );
-        hists_.emplace_back( std::make_pair( var, gsl_histogram_ptr( hist ) ) );
-        CG_INFO( "TextHandler" )
-          << "Booking a histogram with " << utils::s( "bin", nbins )
-          << " between " << min << " and " << max << " for \"" << var << "\".";
+      for ( const auto& key : hist_vars.keys() ) {
+        const auto& vars = utils::split( key, ':' );
+        if ( vars.size() < 1 || vars.size() > 2 )
+          throw CG_FATAL( "ROOTHistsHandler" )
+            << "Invalid number of variables to correlate for '" << key << "'!";
+
+        const auto& hvar = hist_vars.get<ParametersList>( key );
+        const int nbins_x = hvar.get<int>( "nbinsX", hvar.get<int>( "nbins", 10 ) );
+        const double min_x = hvar.get<double>( "lowX", hvar.get<double>( "low", 0. ) );
+        const double max_x = hvar.get<double>( "highX", hvar.get<double>( "high", 1. ) );
+        if ( vars.size() == 1 ) { // 1D histogram
+          auto hist = gsl_histogram_alloc( nbins_x );
+          gsl_histogram_set_ranges_uniform( hist, min_x, max_x );
+          hists_.emplace_back( std::make_pair( key, gsl_histogram_ptr( hist ) ) );
+          CG_INFO( "TextHandler" )
+            << "Booking a 1D histogram with " << utils::s( "bin", nbins_x )
+            << " between " << min_x << " and " << max_x << " for \"" << key << "\".";
+        }
+        else if ( vars.size() == 2 ) { // 2D histogram
+        }
       }
       if ( save_hists_ && !hists_.empty() )
         hist_file_.open( hist_filename_ );
