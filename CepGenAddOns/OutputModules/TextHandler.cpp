@@ -68,7 +68,10 @@ namespace cepgen
 
         static constexpr size_t PLOT_WIDTH = 50;
         static constexpr char PLOT_CHAR = '#';
-        static const std::vector<char> PLOT_2D_CHARS;
+        // greyscale ascii art from http://paulbourke.net/dataformats/asciiart/
+        //static constexpr const char* PLOT_2D_CHARS = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+        //static constexpr const char* PLOT_2D_CHARS = " .:-=+*#%@";
+        static constexpr const char* PLOT_2D_CHARS = " .:oO0@#";
 
         std::ofstream file_, hist_file_;
         std::string hist_filename_;
@@ -90,9 +93,6 @@ namespace cepgen
         std::vector<std::pair<info_t,gsl_histogram_ptr> > hists_;
         std::vector<std::pair<info_t,gsl_histogram2d_ptr> > hists2d_;
     };
-
-    const std::vector<char>
-    TextHandler::PLOT_2D_CHARS = {' ', '.', 'o', 'O', '0', '@', '#'};
 
     TextHandler::TextHandler( const ParametersList& params ) :
       ExportModule( params ),
@@ -282,7 +282,7 @@ namespace cepgen
           const double value_norm = info.log
             ? ( value == 0. ? 0. : log( value )/log( max_bin ) )
             : value*inv_max_bin;
-          os << PLOT_2D_CHARS[ceil(value_norm*(PLOT_2D_CHARS.size()-1))];
+          os << PLOT_2D_CHARS[(size_t)ceil(value_norm*(strlen(PLOT_2D_CHARS)-1))];
         }
         os << ":";
       }
