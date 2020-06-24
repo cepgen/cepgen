@@ -11,6 +11,7 @@
 #include "CepGen/Version.h"
 
 #include <gsl/gsl_histogram.h>
+#include <gsl/gsl_histogram2d.h>
 
 #include <iomanip>
 #include <fstream>
@@ -65,6 +66,14 @@ namespace cepgen
         };
         typedef std::unique_ptr<gsl_histogram,gsl_histogram_deleter> gsl_histogram_ptr;
         std::vector<std::pair<std::string,gsl_histogram_ptr> > hists_;
+        struct gsl_histogram2d_deleter
+        {
+          void operator()( gsl_histogram2d* h ) {
+            gsl_histogram2d_free( h );
+          }
+        };
+        typedef std::unique_ptr<gsl_histogram2d,gsl_histogram2d_deleter> gsl_histogram2d_ptr;
+        std::vector<std::pair<std::string,gsl_histogram2d_ptr> > hists2d_;
     };
 
     TextHandler::TextHandler( const ParametersList& params ) :
