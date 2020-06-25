@@ -170,7 +170,7 @@ namespace cepgen
             << ( !var.description.empty() ? " ("+var.description+")" : "" )
             << " in range " << std::setw( 20 ) << var.limits
             << " has value " << std::setw( 20 ) << value
-            << " (x=" << x( var.index ) << std::right << ")", sep = "\n\t";
+            << " (x=" << this->x( var.index ) << std::right << ")", sep = "\n\t";
         }
       } );
     }

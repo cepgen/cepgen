@@ -158,7 +158,7 @@ namespace cepgen
           Limits limits; ///< Kinematic limits to apply on the variable
           double& value; ///< Reference to the process variable to generate/map
           Mapping type; ///< Interpolation type
-          unsigned short index; ///< Corresponding integration variable
+          size_t index; ///< Corresponding integration variable
         };
         /// Collection of variables to be mapped at the weight generation stage
         std::vector<MappingVariable> mapped_variables_;
