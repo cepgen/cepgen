@@ -5,7 +5,10 @@ endif()
 include_directories(${PROJECT_SOURCE_DIR})
 
 file(GLOB cards_sources BoostTreeHandler.cpp)
-file(GLOB int_sources IntegratorNaive.cpp)
+file(GLOB boost_int_include ${Boost_INCLUDE_DIRS}/boost/math/quadrature/naive_monte_carlo.hpp)
+if(boost_int_include)
+  file(GLOB int_sources IntegratorNaive.cpp)
+endif()
 
 #----- build the objects
 
