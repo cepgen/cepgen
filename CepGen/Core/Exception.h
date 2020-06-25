@@ -132,7 +132,8 @@ namespace cepgen
       }
 
       inline void dump( std::ostream& os = *utils::Logger::get().output ) const override {
-        os << fullMessage() << std::endl;
+        if ( utils::Logger::get().output )
+          os << fullMessage() << std::endl;
       }
       /// Extract a one-line summary of the exception
       inline std::string shortMessage() const {

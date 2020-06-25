@@ -229,7 +229,7 @@ namespace cepgen
         << "d(sig)/d" << var << " (pb/bin)\n"
         << sep << utils::format( "%-5.2f", info.log ? exp( min_range_log ) : min_bin )
         << std::setw( PLOT_WIDTH-11 ) << std::left
-        << ( info.log ? " logarithmic scale" : "linear scale" )
+        << ( info.log ? "logarithmic scale" : "linear scale" )
         << utils::format( "%5.2e", info.log ? exp( max_range_log ) : max_bin ) << "\n"
         << sep << std::string( PLOT_WIDTH+2, '.' ); // abscissa axis
       for ( size_t i = 0; i < nbins; ++i ) {
