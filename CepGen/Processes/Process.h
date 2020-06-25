@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <cstddef> // size_t
 
 namespace cepgen
 {
