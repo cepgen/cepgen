@@ -9,80 +9,77 @@ namespace cepgen
   GridParameters::GridParameters( size_t ndim ) :
     gen_prepared( false ),
     f_max_diff( 0. ),
-    max_( pow( M_BIN, ndim ) ), num_points_( max_, 0ul ),
-    f_max_( max_, 0. ), f_max_global_( 0. )
+    ndim_( ndim ), f_max_global_( 0. )
   {
-    if ( ndim > MAX_DIM )
-      throw CG_FATAL( "GridParameters" ) << "Phase space too large!\n\t"
-        << "Either reduce the number of integration dimensions, or\n\t"
-        << "increase the GridParameters::MAX_DIM parameter (not recommended).";
-
     //--- build and populate the grid
-    coord_t coord( ndim );
-    for ( size_t i = 0; i < max_; ++i ) {
+    coord_t coord( ndim, 0 );
+    for ( size_t i = 0; i < pow( M_BIN, ndim_ ); ++i ) {
       size_t jj = i;
       for ( size_t j = 0; j < ndim; ++j ) {
         size_t tmp = jj*INV_M_BIN;
-        //coord[j] = roundf( jj-tmp*M_BIN );
         coord[j] = jj-tmp*M_BIN;
         jj = tmp;
       }
-      n_map_.emplace_back( coord );
+      n_map_.emplace_back( point_t{ coord, 0ul, 0. } );
     }
+  }
+
+  size_t
+  GridParameters::size() const
+  {
+    return n_map_.size();
   }
 
   const GridParameters::coord_t&
   GridParameters::n( size_t coord ) const
   {
-    return n_map_.at( coord );
+    return n_map_.at( coord ).coordinates;
   }
 
   void
   GridParameters::setValue( size_t coord, double val )
   {
     //--- update function local and global maxima if needed
-    f_max_[coord] = std::max( f_max_.at( coord ), val );
+    n_map_.at( coord ).f_max = std::max( n_map_.at( coord ).f_max, val );
     f_max_global_ = std::max( f_max_global_, val );
   }
 
   double
   GridParameters::maxValue( size_t coord ) const
   {
-    return f_max_.at( coord );
+    return n_map_.at( coord ).f_max;
   }
 
   size_t
   GridParameters::numPoints( size_t coord ) const
   {
-    return num_points_.at( coord );
+    return n_map_.at( coord ).num_points;
   }
 
   void
   GridParameters::increment( size_t coord )
   {
-    num_points_[coord]++;
+    n_map_.at( coord ).num_points++;
   }
 
   void
   GridParameters::shoot( const Integrator* integr, size_t coord, std::vector<double>& out ) const
   {
     const auto& nv = n_map_.at( coord );
-    for ( size_t i = 0; i < nv.size(); ++i )
-      out[i] = ( integr->uniform()+nv.at( i ) ) * INV_M_BIN;
+    for ( size_t i = 0; i < nv.coordinates.size(); ++i )
+      out[i] = ( integr->uniform()+nv.coordinates.at( i ) ) * INV_M_BIN;
   }
 
   void
   GridParameters::dump() const
   {
-    std::ostringstream os;
-    size_t i = 0;
-    for ( const auto& n : n_map_ ) {
-      os << "n[" << i++ << "] = {";
-      std::string sep;
-      for ( const auto& v : n )
-        os << sep << v, sep = ", ";
-      os << "}" << std::endl;
-    }
-    CG_INFO( "GridParameters:dump" ) << os.str();
+    CG_INFO( "GridParameters:dump" ).log( [&]( auto& info ) {
+      size_t i = 0;
+      for ( const auto& point : n_map_ )
+        info << "\nn[" << i++ << "]: "
+          << "coord=" << point.coordinates << ", "
+          << "num points: " << point.num_points << ", "
+          << "max=" << point.f_max << ".";
+    } );
   }
 }

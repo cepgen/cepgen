@@ -2,7 +2,7 @@
 #define CepGen_Core_GridParameters_h
 
 #include <vector>
-#include <cstring>
+#include <cstddef>
 
 namespace cepgen
 {
@@ -20,7 +20,7 @@ namespace cepgen
       void dump() const;
 
       /// Grid multiplicity
-      size_t size() const { return max_; }
+      size_t size() const;
       const coord_t& n( size_t coord ) const;
       /// Global function maximum
       double globalMax() const { return f_max_global_; }
@@ -35,8 +35,6 @@ namespace cepgen
       /// Number of points already shot for a given grid coordinate
       size_t numPoints( size_t coord ) const;
 
-      /// Maximal number of dimensions handled by this integrator instance
-      static constexpr unsigned short MAX_DIM = 15;
       /// Integration grid size parameter
       static constexpr unsigned short M_BIN = 3;
       /// Weight of each grid coordinate
@@ -51,13 +49,15 @@ namespace cepgen
       double f_max_old;
 
     private:
-      size_t max_;
-      /// List of grid coordinates
-      std::vector<coord_t> n_map_;
-      /// Number of functions values evaluated for this point
-      std::vector<size_t> num_points_;
-      /// Maximal value of the function at one given point
-      std::vector<double> f_max_;
+      /// Phase space multiplicity
+      size_t ndim_;
+      struct point_t
+      {
+        coord_t coordinates; ///< Point coordinates in grid
+        size_t num_points; ///< Number of functions values evaluated for this point
+        double f_max; ///< Maximal value of the function at one given point
+      };
+      std::vector<point_t> n_map_;
       /// Maximal value of the function in the considered integration range
       double f_max_global_;
   };
