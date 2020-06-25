@@ -67,11 +67,11 @@ namespace cepgen
         static std::string textHistogram( const info_t&, const gsl_histogram2d* );
 
         static constexpr size_t PLOT_WIDTH = 50;
-        static constexpr char PLOT_CHAR = '#';
+        static constexpr char PLOT_CHAR = '*';
         // greyscale ascii art from http://paulbourke.net/dataformats/asciiart/
         //static constexpr const char* PLOT_2D_CHARS = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
         //static constexpr const char* PLOT_2D_CHARS = " .:-=+*#%@";
-        static constexpr const char* PLOT_2D_CHARS = " .:oO0@#";
+        static constexpr const char* PLOT_2D_CHARS = " .:oO0@%#";
 
         std::ofstream file_, hist_file_;
         std::string hist_filename_;
@@ -218,26 +218,40 @@ namespace cepgen
       std::ostringstream os;
       const size_t nbins = gsl_histogram_bins( hist );
       const double max_bin = gsl_histogram_max_val( hist );
-      const double inv_max_bin = max_bin > 0. ? 1./max_bin : 0.;
+      const double min_bin = gsl_histogram_min_val( hist );
+      const double min_range_log = log( std::max( min_bin, 1.e-6 ) );
+      const double max_range_log = log( max_bin );
       const std::string sep( 17, ' ' );
       const auto& var = info.name.at( 0 );
       os
         << "plot of \"" << var << "\"\n"
         << sep << std::string( PLOT_WIDTH-15-var.size(), ' ' )
         << "d(sig)/d" << var << " (pb/bin)\n"
-        << sep << utils::format( "%-5.2f", gsl_histogram_min_val( hist ) )
-        << std::string( PLOT_WIDTH-11, ' ' )
-        << utils::format( "%5.2e", gsl_histogram_max_val( hist ) ) << "\n"
+        << sep << utils::format( "%-5.2f", info.log ? exp( min_range_log ) : min_bin )
+        << std::setw( PLOT_WIDTH-11 ) << std::left
+        << ( info.log ? " logarithmic scale" : "linear scale" )
+        << utils::format( "%5.2e", info.log ? exp( max_range_log ) : max_bin ) << "\n"
         << sep << std::string( PLOT_WIDTH+2, '.' ); // abscissa axis
       for ( size_t i = 0; i < nbins; ++i ) {
         double min, max;
         gsl_histogram_get_range( hist, i, &min, &max );
-        const double value = gsl_histogram_get( hist, i );
-        const int val = value*PLOT_WIDTH*inv_max_bin;
+        const double value = gsl_histogram_get( hist, i ), unc = sqrt( value );
+        size_t val;
+        {
+          double val_dbl = PLOT_WIDTH;
+          if ( info.log )
+            val_dbl *= ( value != 0. )
+              ? ( log( value )-min_range_log )/( max_range_log-min_range_log ) : 0.;
+          else
+            val_dbl *= value/max_bin;
+          val = val_dbl;
+        }
         os
           << "\n" << utils::format( "[%7.2f,%7.2f):", min, max )
-          << std::string( val, PLOT_CHAR ) << std::string( PLOT_WIDTH-val, ' ' )
-          << ": " << utils::format( "%6.2e", value );
+          << std::string( val, PLOT_CHAR )
+          << std::string( PLOT_WIDTH-val, ' ' ) << ": "
+          << utils::format( "%6.2e", value ) << " +/- "
+          << utils::format( "%6.2e", unc );
       }
       const double bin_width = ( gsl_histogram_max( hist )-gsl_histogram_min( hist ) )/nbins;
       os
@@ -258,7 +272,6 @@ namespace cepgen
       const size_t nbins_x = gsl_histogram2d_nx( hist );
       const size_t nbins_y = gsl_histogram2d_ny( hist );
       const double max_bin = gsl_histogram2d_max_val( hist );
-      const double inv_max_bin = max_bin > 0. ? 1./max_bin : 0.;
       const std::string sep( 17, ' ' );
       const auto& vars = info.name;
       const auto var = utils::merge( vars, "/" );
@@ -281,7 +294,7 @@ namespace cepgen
           const double value = gsl_histogram2d_get( hist, i, j );
           const double value_norm = info.log
             ? ( value == 0. ? 0. : log( value )/log( max_bin ) )
-            : value*inv_max_bin;
+            : value/max_bin;
           os << PLOT_2D_CHARS[(size_t)ceil(value_norm*(strlen(PLOT_2D_CHARS)-1))];
         }
         os << ":";
