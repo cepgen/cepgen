@@ -51,13 +51,12 @@ namespace cepgen
     private:
       /// Phase space multiplicity
       size_t ndim_;
-      struct point_t
-      {
-        coord_t coordinates; ///< Point coordinates in grid
-        size_t num_points; ///< Number of functions values evaluated for this point
-        double f_max; ///< Maximal value of the function at one given point
-      };
-      std::vector<point_t> n_map_;
+      /// Point coordinates in grid
+      std::vector<coord_t> coords_;
+      /// Number of functions values evaluated for this point
+      std::vector<size_t> num_points_;
+      /// Maximal value of the function at one given point
+      std::vector<double> f_max_;
       /// Maximal value of the function in the considered integration range
       double f_max_global_;
   };
