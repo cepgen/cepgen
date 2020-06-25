@@ -2,6 +2,7 @@
 #define CepGen_Core_GridParameters_h
 
 #include <vector>
+#include <cstring>
 
 namespace cepgen
 {
