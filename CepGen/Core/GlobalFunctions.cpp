@@ -60,7 +60,7 @@ namespace cepgen
         << "Error code #" << GetLastError() << ".";
 #else
     const auto fullpath = match ? "lib"+path+".so" : path;
-    if ( dlopen( fullpath.c_str(), RTLD_LAZY | RTLD_LOCAL ) == nullptr )
+    if ( dlopen( fullpath.c_str(), RTLD_LAZY | RTLD_GLOBAL ) == nullptr )
       throw CG_WARNING( "loadLibrary" )
         << "Failed to load library \"" << path << "\".\n\t"
         << dlerror();
