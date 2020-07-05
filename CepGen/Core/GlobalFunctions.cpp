@@ -135,7 +135,7 @@ namespace cepgen
         if ( card::CardsHandlerFactory::get().modules().empty() )
           info << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
         for ( const auto& mod : card::CardsHandlerFactory::get().modules() )
-          info << "\n> ." << utils::colourise( mod, utils::Colour::green )
+          info << "\n> ." << utils::colourise( mod, utils::Colour::green, utils::Modifier::bold )
             << " extension";
       }
       { info << "\n" << sep_mid << "\n"
@@ -143,14 +143,14 @@ namespace cepgen
         if ( IntegratorFactory::get().modules().empty() )
           info << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
         for ( const auto& mod : IntegratorFactory::get().modules() )
-          info << "\n> " << utils::colourise( mod, utils::Colour::green );
+          info << "\n> " << utils::colourise( mod, utils::Colour::green, utils::Modifier::bold );
       }
       { info << "\n" << sep_mid << "\n"
           << utils::boldify( "Physics processes" );
         if ( proc::ProcessesFactory::get().modules().empty() )
           info << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
         for ( const auto& mod : proc::ProcessesFactory::get().modules() )
-          info << "\n> " << utils::colourise( mod, utils::Colour::green )
+          info << "\n> " << utils::colourise( mod, utils::Colour::green, utils::Modifier::bold )
             << ": " << proc::ProcessesFactory::get().build( mod )->description();
       }
       { info << "\n" << sep_mid << "\n"
@@ -158,7 +158,7 @@ namespace cepgen
         if ( strfun::StructureFunctionsFactory::get().modules().empty() )
           info << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
         for ( const auto& mod : strfun::StructureFunctionsFactory::get().modules() )
-          info << "\n> " << utils::colourise( std::to_string( mod ), utils::Colour::green )
+          info << "\n> " << utils::colourise( std::to_string( mod ), utils::Colour::green, utils::Modifier::bold )
             << ": " << (strfun::Type)mod;
       }
       { info << "\n" << sep_mid << "\n"
@@ -166,7 +166,7 @@ namespace cepgen
         if ( sigrat::SigmaRatiosFactory::get().modules().empty() )
           info << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
         for ( const auto& mod : sigrat::SigmaRatiosFactory::get().modules() )
-          info << "\n> " << utils::colourise( std::to_string( mod ), utils::Colour::green )
+          info << "\n> " << utils::colourise( std::to_string( mod ), utils::Colour::green, utils::Modifier::bold )
             << ": " << (sigrat::Type)mod;
       }
       { info << "\n" << sep_mid << "\n"
@@ -174,28 +174,28 @@ namespace cepgen
         if ( EventModifierFactory::get().modules().empty() )
           info << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
         for ( const auto& mod : EventModifierFactory::get().modules() )
-          info << "\n> " << utils::colourise( mod, utils::Colour::green );
+          info << "\n> " << utils::colourise( mod, utils::Colour::green, utils::Modifier::bold );
       }
       { info << "\n" << sep_mid << "\n"
           << utils::boldify( "Export modules" );
         if ( io::ExportModuleFactory::get().modules().empty() )
           info << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
         for ( const auto& mod : io::ExportModuleFactory::get().modules() )
-          info << "\n> " << utils::colourise( mod, utils::Colour::green );
+          info << "\n> " << utils::colourise( mod, utils::Colour::green, utils::Modifier::bold );
       }
       { info << "\n" << sep_mid << "\n"
           << utils::boldify( "Functional evaluators" );
         if ( utils::FunctionalFactory::get().modules().empty() )
           info << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
         for ( const auto& mod : utils::FunctionalFactory::get().modules() )
-          info << "\n> " << utils::colourise( mod, utils::Colour::green );
+          info << "\n> " << utils::colourise( mod, utils::Colour::green, utils::Modifier::bold );
       }
       { info << "\n" << sep_mid << "\n"
           << utils::boldify( "alpha(s) evolution algorithms" );
         if ( AlphaSFactory::get().modules().empty() )
           info << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
         for ( const auto& mod : AlphaSFactory::get().modules() )
-          info << "\n> " << utils::colourise( mod, utils::Colour::green );
+          info << "\n> " << utils::colourise( mod, utils::Colour::green, utils::Modifier::bold );
       }
     } );
   }
