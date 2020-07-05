@@ -1,4 +1,4 @@
-#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/IntegratorGSL.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 
 #include "CepGen/Core/Exception.h"
@@ -8,7 +8,7 @@
 namespace cepgen
 {
   /// Plain integration algorithm randomly sampling points in the phase space
-  class IntegratorPlain : public Integrator
+  class IntegratorPlain : public IntegratorGSL
   {
     public:
       explicit IntegratorPlain( const ParametersList& params );
@@ -20,7 +20,7 @@ namespace cepgen
   };
 
   IntegratorPlain::IntegratorPlain( const ParametersList& params ) :
-    Integrator( params ),
+    IntegratorGSL( params ),
     ncvg_( params.get<int>( "numFunctionCalls", 50000 ) )
   {}
 

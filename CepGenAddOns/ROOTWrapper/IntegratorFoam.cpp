@@ -1,4 +1,5 @@
 #include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/Integrand.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 
 #include "CepGen/Core/Exception.h"
@@ -13,30 +14,29 @@
 
 namespace cepgen
 {
-  /// Integrand interfacing object used in FOAM
+  /// Integrand interfacing object used in Foam
   class FoamDensity : public TFoamIntegrand
   {
     public:
       explicit FoamDensity() = default;
-      /// Specify the runtime parameters for the integrand steering
-      void setParameters( Parameters* params ) {
-        params_.reset( params );
-      }
-      /// Specify the integrand functional
-      inline void setFunction( double(*func)( double*, unsigned long, void* ) ) {
-        function_ = func;
+      /// Specify the integrand
+      void setIntegrand( Integrand* integr ) {
+        integr_ = integr;
       }
       /// Compute the weight for a given phase space point
       inline double Density( int ndim, double* x ) override {
-        return function_( x, ndim, (void*)params_.get() );
+        if ( !integr_ )
+          throw CG_FATAL( "FoamDensity" )
+            << "Integrand object not yet initialised!";
+        return integr_->eval( std::vector<double>( x, x+ndim ) );
       }
 
     private:
-      std::shared_ptr<Parameters> params_; ///< Runtime parameters
-      std::function<double( double*, size_t, void* )> function_; ///< Integrand
+      Integrand* integr_; ///< Integrand
   };
 
-  /// FOAM general-purpose integration algorithm
+  /// Foam general-purpose integration algorithm
+  /// as developed by S. Jadach (Institute of Nuclear Physics, Krakow, PL)
   class IntegratorFoam : public Integrator
   {
     public:
@@ -82,22 +82,38 @@ namespace cepgen
   IntegratorFoam::integrate( double& result, double& abserr )
   {
     if ( !initialised_ ) {
-      density_->setParameters( (Parameters*)function_->params );
-      density_->setFunction( function_->f );
-      foam_->SetkDim( function_->dim );
-      foam_->SetRho( density_.get() );
+      foam_->SetkDim( integrand_->size() );
+      density_->setIntegrand( integrand_ );
+      foam_->ResetRho( density_.get() );
+    CG_WARNING("")<<1;
       foam_->Initialize();
+    CG_WARNING("")<<2;
       initialised_ = true;
     }
     for ( size_t i = 0; i < 100000; ++i )
       foam_->MakeEvent();
     //--- launch integration
-    foam_->GetIntegMC( result, abserr );
     double norm, err;
     foam_->Finalize( norm, err );
 
+    foam_->GetIntegMC( result, abserr );
     result_ = result;
     err_result_ = abserr;
+
+    CG_DEBUG( "IntegratorFoam" ).log( [&]( auto& log ) {
+      double eps = 5.e-4, avewt, wtmax, sigma;
+      foam_->GetWtParams( eps, avewt, wtmax, sigma );
+      const double ncalls = foam_->GetnCalls();
+      const double effic = wtmax > 0 ? avewt/wtmax : 0.;
+      log
+        << "Result: " << result_ << " +- " << err_result_ << "\n\t"
+        << "Relative error: " << err_result_/result_*100. << "%\n\t"
+        << "Dispersion/<wt>= " << sigma
+        << ", <wt>= " << avewt
+        << ", <wt>/wtmax= " << effic << ",\n\t"
+        << " for epsilon = " << eps << "\n\t"
+        << " nCalls (initialisation only)= " << ncalls << ".";
+    } );
   }
 }
 

@@ -1,4 +1,4 @@
-#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/IntegratorGSL.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 
 #include "CepGen/Core/Exception.h"
@@ -10,7 +10,7 @@
 namespace cepgen
 {
   /// MISER integration algorithm developed by W.H. Press and G.R. Farrar, as documented in \cite Press:1989vk.
-  class IntegratorMISER : public Integrator
+  class IntegratorMISER : public IntegratorGSL
   {
     public:
       IntegratorMISER( const ParametersList& );
@@ -29,7 +29,7 @@ namespace cepgen
   };
 
   IntegratorMISER::IntegratorMISER( const ParametersList& params ) :
-    Integrator( params ),
+    IntegratorGSL( params ),
     ncvg_( params.get<int>( "numFunctionCalls", 50000 ) )
   {}
 
