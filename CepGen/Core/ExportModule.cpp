@@ -18,8 +18,7 @@ namespace cepgen
   namespace io
   {
     ExportModule::ExportModule( const ParametersList& params ) :
-      params_( params ),
-      name_( params_.name<std::string>() ),
+      NamedModule( params ),
       event_num_( 0ull )
     {}
 

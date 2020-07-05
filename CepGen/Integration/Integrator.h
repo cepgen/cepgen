@@ -1,7 +1,7 @@
 #ifndef CepGen_Integration_Integrator_h
 #define CepGen_Integration_Integrator_h
 
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Event/Event.h"
 
 #include <vector>
@@ -13,7 +13,7 @@ namespace cepgen
 {
   class Integrand;
   /// Monte-Carlo integration algorithm
-  class Integrator
+  class Integrator : public NamedModule<std::string>
   {
     public:
       /// Integrator algorithm constructor
@@ -24,8 +24,6 @@ namespace cepgen
       virtual void setIntegrand( Integrand& integr );
       /// Dimensional size of the phase space
       size_t size() const;
-      /// Integration algorithm name
-      const std::string& name() const { return name_; }
 
       /// Compute the function value at the given phase space point
       virtual double eval( const std::vector<double>& x ) const;
@@ -38,8 +36,6 @@ namespace cepgen
       virtual void integrate( double& result_, double& abserr_ ) = 0;
 
     protected:
-      const ParametersList params_; ///< Steering parameters for this algorithm
-      const std::string name_; ///< Integration algorithm name
       const unsigned long seed_; ///< Random number generator seed
       int verbosity_; ///< Integrator verbosity
       Integrand* integrand_; ///< Integrand to be evaluated

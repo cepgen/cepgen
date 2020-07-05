@@ -2,7 +2,9 @@
 #define CepGen_Cards_LpairReader_h
 
 #include "CepGen/Cards/Handler.h"
+
 #include <unordered_map>
+#include <memory>
 
 using std::string;
 

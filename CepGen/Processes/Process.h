@@ -1,6 +1,7 @@
 #ifndef CepGen_Processes_Process_h
 #define CepGen_Processes_Process_h
 
+#include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Event/Particle.h"
 
@@ -19,7 +20,7 @@ namespace cepgen
     /// \brief Class template to define any process to compute using this MC integrator/events generator
     /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
     /// \date Jan 2014
-    class Process
+    class Process : public NamedModule<std::string>
     {
       public:
         /// Default constructor for an undefined process
@@ -77,12 +78,6 @@ namespace cepgen
         inline size_t ndim() const { return mapped_variables_.size(); }
         /// Get the value of a component of the d-dimensional point considered
         double x( unsigned int idx ) const;
-        /// Process-specific parameters
-        inline const ParametersList& parameters() const { return params_; }
-        /// Name of the process considered
-        inline const std::string& name() const { return name_; }
-        /// Human-readable description of the process
-        inline const std::string& description() const { return description_; }
 
         /// Does the process contain (and hold) an event?
         bool hasEvent() const { return (bool)event_; }
@@ -136,13 +131,6 @@ namespace cepgen
         void setEventContent( const IncomingState& ini, const OutgoingState& fin );
 
         // ---
-
-        /// Process-specific parameters
-        ParametersList params_;
-        /// Name of the process
-        std::string name_;
-        /// Process human-readable description
-        std::string description_;
 
       public:
         /// Is it the first time the process is computed?

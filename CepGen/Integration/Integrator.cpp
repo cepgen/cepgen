@@ -14,8 +14,7 @@
 namespace cepgen
 {
   Integrator::Integrator( const ParametersList& params ) :
-    params_( params ),
-    name_( params.name<std::string>() ),
+    NamedModule( params ),
     seed_( params.get<int>( "seed", time( nullptr ) ) ),
     verbosity_( params.get<int>( "verbose", 1 ) ),
     initialised_( false )

@@ -1,5 +1,6 @@
 #include "CepGen/Cards/LpairHandler.h"
 #include "CepGen/Generator.h" // for library loading
+#include "CepGen/Parameters.h"
 
 #include "CepGen/Modules/CardsHandlerFactory.h"
 

@@ -1,7 +1,7 @@
 #ifndef CepGen_Cards_Handler_h
 #define CepGen_Cards_Handler_h
 
-#include "CepGen/Parameters.h"
+#include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen
 {
@@ -11,7 +11,7 @@ namespace cepgen
   namespace card
   {
     /// Base steering card module
-    class Handler
+    class Handler : public NamedModule<std::string>
     {
       public:
         /// Build a configuration from an external steering card
