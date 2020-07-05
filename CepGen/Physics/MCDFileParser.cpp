@@ -22,6 +22,9 @@ namespace pdg
   MCDFileParser::parse( const std::string& path )
   {
     std::ifstream ifile( path );
+    if ( !ifile.is_open() )
+      throw CG_FATAL( "MCDFileParser" )
+        << "Failed to parse MCD file \"" << path << "\"!";
     std::string line;
     while ( std::getline( ifile, line ) ) {
       if ( line[0] == '*' ) // skip comments

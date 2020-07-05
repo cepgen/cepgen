@@ -38,15 +38,15 @@ namespace cepgen
     yesno( bool test )
     {
       return test
-        ? "\033[32;1myes\033[0m"
-        : "\033[31;1mno\033[0m";
+        ? colourise( "yes", Colour::green )
+        : colourise( "no", Colour::red );
     }
 
     /// String implementation of the boldification procedure
     template<> std::string
     boldify<std::string>( std::string str )
     {
-      return format( "\033[1m%s\033[0m", str.c_str() );
+      return colourise( str, Colour::reset, Modifier::bold );
     }
 
     /// C-style character array implementation of the boldification procedure
@@ -64,9 +64,13 @@ namespace cepgen
     }
 
     std::string
-    colourise( const std::string& str, const Colour& col )
+    colourise( const std::string& str, const Colour& col, const Modifier& mod )
     {
-      return format( "\033[0;%dm%s\033[0m", (int)col, str.c_str() );
+      if ( mod == Modifier::reset )
+        return format( "\033[%dm%s\033[0m", (int)col, str.c_str() );
+      if ( col == Colour::reset )
+        return format( "\033[%dm%s\033[0m", (int)mod, str.c_str() );
+      return format( "\033[%d;%dm%s\033[0m", (int)col, (int)mod, str.c_str() );
     }
 
     size_t

@@ -103,6 +103,8 @@ main( int argc, char* argv[] )
     << "Will test with " << cepgen::utils::s( "integrator", integrators.size(), true ) << ": "
     << integrators;
 
+  cepgen::Parameters params;
+
   for ( const auto& integ : integrators ) {
     CG_LOG( "main" ) << "Running with " << integ << " integrator.";
     auto integr = cepgen::IntegratorFactory::get().build( integ );
@@ -111,7 +113,6 @@ main( int argc, char* argv[] )
     size_t i = 0;
     double result, error;
     for ( auto& test : tests ) {
-      cepgen::Parameters params;
       params.setProcess( test.process );
       cepgen::Integrand integrand( &params );
       integr->setIntegrand( integrand );

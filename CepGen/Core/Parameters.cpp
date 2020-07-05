@@ -113,13 +113,13 @@ namespace cepgen
   proc::Process&
   Parameters::process()
   {
-    return *process_;
+    return *process_.get();
   }
 
   const proc::Process&
   Parameters::process() const
   {
-    return *process_;
+    return *process_.get();
   }
 
   std::string
