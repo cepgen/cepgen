@@ -20,6 +20,10 @@ namespace cepgen
               << "Failed to define the function\n\t"
               << expression_;
         }
+        static std::string description() {
+          return "Plain old TFormula evaluator from ROOT";
+        }
+
         double eval( const std::vector<double>& x ) const override {
           if ( !func_.IsValid() )
             throw CG_WARNING( "FunctionalROOT" )

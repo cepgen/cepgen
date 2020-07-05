@@ -27,6 +27,7 @@ namespace cepgen
         /// Class constructor
         explicit ROOTTreeHandler( const ParametersList& );
         ~ROOTTreeHandler();
+        static std::string description() { return "ROOT TTree storage module"; }
 
         void initialise( const Parameters& ) override;
         /// Writer operator

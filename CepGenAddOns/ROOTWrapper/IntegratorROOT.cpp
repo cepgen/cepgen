@@ -13,6 +13,7 @@ namespace cepgen
   {
     public:
       explicit IntegratorROOT( const ParametersList& );
+      static std::string description() { return "ROOT general purpose MC integrator"; }
 
       void integrate( double&, double& ) override;
 

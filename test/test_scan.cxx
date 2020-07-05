@@ -1,9 +1,10 @@
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Parameters.h"
+
 #include "CepGen/Processes/Process.h"
 
 #include "CepGen/Core/Exception.h"
-
 #include "CepGen/Utils/ArgumentsParser.h"
 
 #include "Canvas.h"

@@ -14,6 +14,7 @@ namespace cepgen
   {
     public:
       IntegratorMISER( const ParametersList& );
+      static std::string description() { return "MISER adaptive importance sampling integrator"; }
 
       void integrate( double&, double& ) override;
 

@@ -41,6 +41,7 @@ namespace cepgen
   {
     public:
       explicit IntegratorFoam( const ParametersList& );
+      static std::string description() { return "FOAM general purpose MC integrator"; }
 
       void integrate( double&, double& ) override;
       inline double uniform() const override { return rnd_->Rndm(); }

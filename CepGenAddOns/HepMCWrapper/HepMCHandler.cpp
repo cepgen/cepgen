@@ -38,6 +38,7 @@ namespace cepgen
         /// Class constructor
         explicit HepMCHandler( const ParametersList& );
         ~HepMCHandler();
+        static std::string description() { return "HepMC 2/3 ASCII file output module"; }
 
         void initialise( const Parameters& /*params*/ ) override {}
         /// Writer operator

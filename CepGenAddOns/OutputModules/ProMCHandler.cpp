@@ -26,6 +26,7 @@ namespace cepgen
       public:
         explicit ProMCHandler( const ParametersList& );
         ~ProMCHandler();
+        static std::string description() { return "ProMC file output module"; }
 
         void initialise( const Parameters& ) override;
         void setCrossSection( double xsec, double err ) override { xsec_ = xsec, xsec_err_ = err; }

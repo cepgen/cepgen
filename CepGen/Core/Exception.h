@@ -11,7 +11,7 @@ namespace cepgen
   struct Exception
   {
     explicit inline Exception() = default;
-    virtual ~Exception() noexcept = default;
+    virtual ~Exception() noexcept( false ) = default;
     /// Enumeration of exception severities
     enum class Type {
       undefined = -1, ///< Irregular exception
@@ -48,7 +48,7 @@ namespace cepgen
       /// Copy constructor
       LoggedException( const LoggedException& rhs );
       /// Default destructor (potentially killing the process)
-      ~LoggedException() noexcept override;
+      ~LoggedException() noexcept( false ) override;
 
       //----- Overloaded stream operators
 

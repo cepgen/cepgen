@@ -52,6 +52,7 @@ namespace cepgen
 
         /// Standard parameterisation interpolator constructor (photon from proton)
         explicit CLAS( const ParametersList& params = ParametersList() );
+        static std::string description() { return "CLAS parameterisation for nucleon data at Q2 > 0.5 GeV2 / xBj > 0.15"; }
 
         CLAS& operator()( double xbj, double q2 ) override;
 

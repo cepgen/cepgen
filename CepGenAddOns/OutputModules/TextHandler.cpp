@@ -51,6 +51,7 @@ namespace cepgen
       public:
         explicit TextHandler( const ParametersList& );
         ~TextHandler();
+        static std::string description() { return "Text-based histogramming tool"; }
 
         void initialise( const Parameters& ) override;
         void setCrossSection( double xsec, double ) override { xsec_ = xsec; }

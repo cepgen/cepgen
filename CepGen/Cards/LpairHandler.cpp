@@ -69,9 +69,9 @@ namespace cepgen
           if ( key[0] == '#' ) // FIXME need to ensure there is no extra space before!
             continue;
           setParameter( key, value );
-          if ( description( key ) != "null" )
+          if ( describe( key ) != "null" )
             os << "\n>> " << std::setw( 8 ) << key << " = " << std::setw( 25 ) << parameter( key )
-               << " (" << description( key ) << ")";
+               << " (" << describe( key ) << ")";
         }
         file.close();
       }
@@ -272,10 +272,10 @@ namespace cepgen
     LpairHandler::pack( const Parameters* params )
     {
       params_ = const_cast<Parameters*>( params );
-      str_fun_ = (int)params_->kinematics.structureFunctions()->type;
+      str_fun_ = params_->kinematics.structureFunctions()->name();
       if ( params_->kinematics.structureFunctions()
         && params_->kinematics.structureFunctions()->sigmaRatio() )
-        sr_type_ = (int)params_->kinematics.structureFunctions()->sigmaRatio()->type;
+        sr_type_ = params_->kinematics.structureFunctions()->sigmaRatio()->name();
       //kmr_grid_path_ =
       //mstw_grid_path_ =
       //pdg_input_path_ =
@@ -348,7 +348,7 @@ namespace cepgen
     }
 
     std::string
-    LpairHandler::description( std::string key ) const
+    LpairHandler::describe( std::string key ) const
     {
       if ( p_strings_.count( key ) )
         return p_strings_.find( key )->second.description;

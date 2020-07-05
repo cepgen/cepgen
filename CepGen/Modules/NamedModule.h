@@ -11,13 +11,12 @@ namespace cepgen
     public:
       explicit NamedModule( const ParametersList& params ) :
         params_( params ),
-        name_( params.name<T>( "<invalid>" ) ),
-        description_( params.get<std::string>( "description" ) ) {}
+        name_( params.name<T>() ) {}
 
       /// Module unique name
       const T& name() const { return name_; }
       /// Module description
-      const std::string& description() const { return description_; }
+      static std::string description() { return "No description"; }
       /// Module user-defined parameters
       inline const ParametersList& parameters() const { return params_; }
 
@@ -26,8 +25,6 @@ namespace cepgen
       const ParametersList params_;
       /// Module unique name
       const T name_;
-      /// Module description
-      const std::string description_;
   };
 }
 

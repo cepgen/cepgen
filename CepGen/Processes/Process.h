@@ -89,8 +89,8 @@ namespace cepgen
         inline Event* eventPtr() { return event_.get(); }
 
       protected:
-        const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
-        const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
+        double mp_; ///< Proton mass, in GeV/c\f$^2\f$
+        double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
         /// Type of mapping to apply on the variable
         enum class Mapping
         {

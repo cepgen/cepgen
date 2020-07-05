@@ -23,6 +23,8 @@ namespace cepgen
 
         /// User-steered Suri-Yennie continuum structure functions calculator
         explicit SuriYennie( const ParametersList& params = ParametersList() );
+        static std::string description() { return "Suri-Yennie FE/FM"; }
+
         SuriYennie& operator()( double xbj, double q2 ) override;
 
         double F1; ///< Longitudinal form factor

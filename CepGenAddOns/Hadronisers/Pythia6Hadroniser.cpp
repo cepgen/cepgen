@@ -62,6 +62,9 @@ namespace cepgen
     {
       public:
         using Hadroniser::Hadroniser;
+        static std::string description() {
+          return "Interface to the Pythia 6 string hadronisation/fragmentation algorithm";
+        }
 
         void setParameters( const Parameters& ) override {}
         inline void readString( const char* param ) override { pygive( param ); }

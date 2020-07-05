@@ -17,8 +17,10 @@ namespace cepgen
       public:
         /// User-steered Schäfer hybrid structure functions calculator
         explicit Schaefer( const ParametersList& params = ParametersList() );
+        static std::string description() { return "LUXlike structure functions"; }
+
         Schaefer& operator()( double xbj, double q2 ) override;
-        std::string description() const override;
+        std::string describe() const override;
 
       private:
         double rho( double w2 ) const;
@@ -60,13 +62,13 @@ namespace cepgen
     {}
 
     std::string
-    Schaefer::description() const
+    Schaefer::describe() const
     {
       std::ostringstream os;
       os << "LUXlike{"
-         << "r=" << resonances_model_->description() << ","
-         << "p=" << perturbative_model_->description() << ","
-         << "c=" << continuum_model_->description();
+         << "r=" << resonances_model_->describe() << ","
+         << "p=" << perturbative_model_->describe() << ","
+         << "c=" << continuum_model_->describe();
       if ( higher_twist_ )
         os << ",HT";
       os << "}";

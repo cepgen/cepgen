@@ -24,6 +24,7 @@ namespace cepgen
         ProcessPtr clone( const ParametersList& ) const override {
           return ProcessPtr( new PPtoFF( *this ) );
         }
+        static std::string description() { return "ɣɣ → f⁺f¯ (kt-factor.)"; }
 
       private:
         void prepareProcessKinematics() override;
@@ -275,4 +276,4 @@ namespace cepgen
   }
 }
 // register process
-REGISTER_PROCESS( "pptoff", "ɣɣ → f⁺f¯ (kt-factor.)", PPtoFF )
+REGISTER_PROCESS( "pptoff", PPtoFF )

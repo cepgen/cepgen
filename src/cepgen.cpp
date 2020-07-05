@@ -1,4 +1,5 @@
 #include "CepGen/Generator.h"
+#include "CepGen/Parameters.h"
 
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Cards/Handler.h"

@@ -1,6 +1,7 @@
 #include "CepGen/Cards/Handler.h"
-
 #include "CepGen/Generator.h"
+#include "CepGen/Parameters.h"
+
 #include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/Utils/AbortHandler.h"

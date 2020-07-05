@@ -33,6 +33,7 @@ namespace cepgen
       public:
         /// Class constructor
         explicit LHEFHepMCHandler( const ParametersList& );
+        static std::string description() { return "HepMC 3-based LHEF output module"; }
 
         void initialise( const Parameters& ) override;
         /// Writer operator

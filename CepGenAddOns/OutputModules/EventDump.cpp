@@ -21,6 +21,7 @@ namespace cepgen
       public:
         explicit EventDump( const ParametersList& );
         ~EventDump();
+        static std::string description() { return "Simple text-based event dumper"; }
 
         void initialise( const Parameters& ) override;
         void setCrossSection( double, double ) override;

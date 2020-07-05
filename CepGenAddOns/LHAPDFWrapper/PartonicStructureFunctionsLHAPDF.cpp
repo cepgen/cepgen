@@ -27,8 +27,10 @@ namespace cepgen
         explicit Partonic( const ParametersList& params = ParametersList() );
         /// Build a calculator from a set, its member, and the contributing quarks
         explicit Partonic( const char* set, unsigned short member = 0, const Mode& mode = Mode::full );
+        static std::string description() { return "Partonic structure functions"; }
+
         Partonic& operator()( double xbj, double q2 ) override;
-        std::string description() const override;
+        std::string describe() const override;
 
       private:
         void initialise();
@@ -89,7 +91,7 @@ namespace cepgen
     {}
 
     std::string
-    Partonic::description() const
+    Partonic::describe() const
     {
       std::ostringstream os;
       os << "Partonic{" << pdf_set_ << ",m=" << pdf_member_ << ",mode=" << mode_ << "}";

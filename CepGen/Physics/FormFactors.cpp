@@ -43,7 +43,7 @@ namespace cepgen
   FormFactors::protonInelastic( double q2, double mi2, double mf2, strfun::Parameterisation& sf )
   {
     const double xbj = q2 / ( q2+mf2-mi2 );
-    switch ( sf.type ) {
+    switch ( (strfun::Type)sf.name() ) {
       case strfun::Type::ElasticProton:
         CG_WARNING( "FormFactors" ) << "Elastic proton form factors requested! Check your process definition!";
         return FormFactors::protonElastic( q2 );

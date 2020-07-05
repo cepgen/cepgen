@@ -50,8 +50,10 @@ namespace cepgen
         };
 
         explicit ALLM( const ParametersList& params = ParametersList() );
+        static std::string description() { return "Abramowicz, Levin, Levy, and Maor parameterisations of F2/FL"; }
+
         ALLM& operator()( double xbj, double q2 ) override;
-        std::string description() const override { return descr_; }
+        std::string describe() const override { return descr_; }
 
       private:
         Parameters params_;

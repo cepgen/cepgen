@@ -17,7 +17,6 @@ namespace cepgen
   {
     Process::Process( const ParametersList& params, bool has_event ) :
       NamedModule( params ),
-      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       first_run( true ), base_jacobian_( 1. ),
       s_( -1. ), sqs_( -1. ),
       mA2_( -1. ), mB2_( -1. ), mX2_( -1. ), mY2_( -1. ),
@@ -30,7 +29,6 @@ namespace cepgen
 
     Process::Process( const Process& proc ) :
       NamedModule<>( proc.parameters() ),
-      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       first_run( proc.first_run ), base_jacobian_( proc.base_jacobian_ ),
       s_( proc.s_ ), sqs_( proc.sqs_ ),
       mA2_( proc.mA2_ ), mB2_( proc.mB2_ ), mX2_( proc.mX2_ ), mY2_( proc.mY2_ ),
@@ -254,6 +252,8 @@ namespace cepgen
     Process::setKinematics( const Kinematics& kin )
     {
       clear();
+      mp_ = PDG::get().mass( PDG::proton );
+      mp2_ = mp_*mp_;
       kin_ = kin;
 
       //--- define incoming system

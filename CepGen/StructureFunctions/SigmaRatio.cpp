@@ -11,11 +11,6 @@ namespace cepgen
 {
   namespace sigrat
   {
-    Parameterisation::Parameterisation( const ParametersList& params ) :
-      type( (Type)params.name<int>( (int)Type::Invalid ) ),
-      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ )
-    {}
-
     double
     Parameterisation::theta( double xbj, double q2 ) const
     {
@@ -23,6 +18,20 @@ namespace cepgen
     }
 
     //---------------------------------------------------------------------------------------------
+
+    /// E143 experimental R measurement \cite Abe:1998ym
+    class E143 : public Parameterisation
+    {
+      public:
+        explicit E143( const ParametersList& params = ParametersList() );
+        static std::string description() { return "E143 experimental R measurement"; }
+
+        double operator()( double xbj, double q2, double& err ) const override;
+
+      private:
+        double q2_b_, lambda2_;
+        std::vector<double> a_, b_, c_;
+    };
 
     E143::E143( const ParametersList& params ) :
       q2_b_   ( params.get<double>( "q2_b", 0.34 ) ),
@@ -60,6 +69,21 @@ namespace cepgen
 
     //---------------------------------------------------------------------------------------------
 
+    /// SLAC experimental R measurement \cite Whitlow:1990gk
+    /// \warning valid for \f$Q^2\f$ > 0.3 GeV\f$^2\f$
+    class R1990: public Parameterisation
+    {
+      public:
+        explicit R1990( const ParametersList& params = ParametersList() );
+        static std::string description() { return "SLAC experimental R measurement"; }
+
+        double operator()( double xbj, double q2, double& err ) const override;
+
+      private:
+        double lambda2_;
+        std::vector<double> b_;
+    };
+
     R1990::R1990( const ParametersList& params ) :
       lambda2_( params.get<double>( "lambda2", 0.04 ) ),
       b_      ( params.get<std::vector<double> >( "b", { 0.0635, 0.5747, -0.3534 } ) )
@@ -75,6 +99,20 @@ namespace cepgen
     }
 
     //---------------------------------------------------------------------------------------------
+
+    /// CLAS experimental R measurement
+    class CLAS : public Parameterisation
+    {
+      public:
+        explicit CLAS( const ParametersList& params = ParametersList() );
+        static std::string description() { return "CLAS experimental R measurement"; }
+
+        double operator()( double xbj, double q2, double& err ) const override;
+
+      private:
+        std::vector<double> p_;
+        double wth_, q20_;
+    };
 
     CLAS::CLAS( const ParametersList& params ) :
       p_  ( params.get<std::vector<double> >( "p", { 0.041, 0.592, 0.331 } ) ),
@@ -100,6 +138,23 @@ namespace cepgen
     }
 
     //---------------------------------------------------------------------------------------------
+
+    /// Sibirtsev & Blunden parameterisation of the R ratio \cite Sibirtsev:2013cga
+    class SibirtsevBlunden : public Parameterisation
+    {
+      public:
+        explicit SibirtsevBlunden( const ParametersList& params = ParametersList() );
+        static std::string description() { return "Sibirtsev-Blunden theoretical R parameterisation"; }
+
+        double operator()( double xbj, double q2, double& err ) const override;
+
+      private:
+        double a_, b1_, b2_, c_;
+    };
+    Parameterisation::Parameterisation( const ParametersList& params ) :
+      NamedModule<int>( params ),
+      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ )
+    {}
 
     SibirtsevBlunden::SibirtsevBlunden( const ParametersList& params ) :
       a_ ( params.get<double>( "a", 0.014 ) ),

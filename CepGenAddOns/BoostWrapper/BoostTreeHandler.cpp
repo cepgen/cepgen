@@ -1,5 +1,6 @@
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Generator.h" // for library loading
+#include "CepGen/Parameters.h"
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Core/Exception.h"

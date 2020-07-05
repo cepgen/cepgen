@@ -30,6 +30,7 @@ namespace cepgen
       public:
         explicit DelphesHandler( const ParametersList& );
         ~DelphesHandler();
+        static std::string description() { return "Delphes interfacing module"; }
 
         void initialise( const Parameters& ) override;
         void setCrossSection( double xsec, double /*err_xsec*/ ) override { xsec_ = xsec; }

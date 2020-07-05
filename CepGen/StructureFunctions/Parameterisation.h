@@ -1,7 +1,7 @@
 #ifndef CepGen_StructureFunctions_Parameterisation_h
 #define CepGen_StructureFunctions_Parameterisation_h
 
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Modules/NamedModule.h"
 
 #include <iosfwd>
 #include <memory>
@@ -35,7 +35,7 @@ namespace cepgen
     /// Human-readable description of this SF parameterisation type
     std::ostream& operator<<( std::ostream&, const strfun::Type& );
     /// Generic placeholder for the parameterisation of nucleon structure functions
-    class Parameterisation
+    class Parameterisation : public NamedModule<int>
     {
       public:
         /// Standard SF parameterisation constructor
@@ -46,9 +46,11 @@ namespace cepgen
         Parameterisation( const ParametersList& );
         ~Parameterisation() {}
 
+        static std::string description() { return "Unnamed structure functions"; }
+
         /// Assign from another SF parameterisation object
         Parameterisation& operator=( const Parameterisation& sf ) {
-          type = sf.type, F2 = sf.F2, FL = sf.FL, old_vals_ = sf.old_vals_;
+          F2 = sf.F2, FL = sf.FL, old_vals_ = sf.old_vals_;
           return *this;
         }
         /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
@@ -56,7 +58,7 @@ namespace cepgen
         /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
         friend std::ostream& operator<<( std::ostream&, const Parameterisation& );
         /// Human-readable description of this SF parameterisation
-        virtual std::string description() const; ///< Human-readable description of this SF set
+        virtual std::string describe() const; ///< Human-readable description of this SF set
 
         /// Set of parameters used to build this parameterisation
         const ParametersList& parameters() const { return params_; }
@@ -75,8 +77,6 @@ namespace cepgen
         double tau( double xbj, double q2 ) const;
 
       public:
-        /// Interpolation type of structure functions
-        Type type;
         double F2; ///< Last computed transverse structure function value
         double FL; ///< Last computed longitudinal structure function value
 

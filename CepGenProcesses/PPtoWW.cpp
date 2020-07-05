@@ -24,6 +24,7 @@ namespace cepgen
           return ProcessPtr( new PPtoWW( *this ) );
         }
         enum class Polarisation { full = 0, LL = 1, LT = 2, TL = 3, TT = 4 };
+        static std::string description() { return "ɣɣ → W⁺W¯ (kt-factor.)"; }
 
       private:
         void prepareProcessKinematics() override;
@@ -179,5 +180,5 @@ namespace cepgen
   }
 }
 // register process
-REGISTER_PROCESS( "pptoww", "ɣɣ → W⁺W¯ (kt-factor.)", PPtoWW )
+REGISTER_PROCESS( "pptoww", PPtoWW )
 

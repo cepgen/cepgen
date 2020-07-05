@@ -24,6 +24,7 @@ namespace cepgen
         /// Class constructor
         explicit LHEFPythiaHandler( const ParametersList& );
         ~LHEFPythiaHandler();
+        static std::string description() { return "Pythia 8-based LHEF output module"; }
 
         void initialise( const Parameters& ) override;
         /// Writer operator

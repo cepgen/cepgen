@@ -46,7 +46,7 @@ namespace cepgen
 
         void setParameter( const std::string& key, const std::string& value );
         std::string parameter( std::string key ) const;
-        std::string description( std::string key ) const;
+        std::string describe( std::string key ) const;
 
         static const int kInvalid;
 
