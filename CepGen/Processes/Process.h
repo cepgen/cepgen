@@ -49,7 +49,7 @@ namespace cepgen
 
       public:
         /// Copy all process attributes into a new object
-        virtual std::unique_ptr<Process> clone( const ParametersList& params = ParametersList() ) const;
+        virtual std::unique_ptr<Process> clone() const;
         /// Set the incoming and outgoing state to be expected in the process
         inline virtual void addEventContent() {}
         /// Compute the phase space point weight

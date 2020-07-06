@@ -21,7 +21,7 @@ namespace cepgen
     {
       public:
         PPtoFF( const ParametersList& params = ParametersList() );
-        ProcessPtr clone( const ParametersList& ) const override {
+        ProcessPtr clone() const override {
           return ProcessPtr( new PPtoFF( *this ) );
         }
         static std::string description() { return "ɣɣ → f⁺f¯ (kt-factor.)"; }

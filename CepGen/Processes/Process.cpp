@@ -40,7 +40,7 @@ namespace cepgen
     }
 
     std::unique_ptr<Process>
-    Process::clone( const ParametersList& ) const
+    Process::clone() const
     {
       throw CG_FATAL( "Process:clone" )
         << "Process \"" << name_ << "\" has no cloning method implementation!";

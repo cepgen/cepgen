@@ -18,7 +18,7 @@ namespace cepgen
       void integrate( double&, double& ) override;
 
     private:
-      std::function<double(const double*)> funct_;
+      std::function<double(const double*)> func_;
       std::vector<double> min_, max_;
       /// integration type (adaptive, MC methods, etc..)
       const std::string type_;
@@ -34,7 +34,7 @@ namespace cepgen
 
   IntegratorROOT::IntegratorROOT( const ParametersList& params ) :
     Integrator( params ),
-    funct_( [=]( const double* x ) -> double { return integrand_->eval( std::vector<double>( x, x+integrand_->size() ) ); } ),
+    func_( [=]( const double* x ) -> double { return integrand_->eval( std::vector<double>( x, x+integrand_->size() ) ); } ),
     type_( params.get<std::string>( "type", "default" ) ),
     absTol_( params.get<double>( "absTol", -1. ) ),
     relTol_( params.get<double>( "relTol", -1. ) ),
@@ -67,7 +67,7 @@ namespace cepgen
   IntegratorROOT::integrate( double& result, double& abserr )
   {
     if ( !initialised_ ) {
-      integr_->SetFunction( funct_, integrand_->size() );
+      integr_->SetFunction( func_, integrand_->size() );
       min_ = std::vector<double>( integrand_->size(), 0. );
       max_ = std::vector<double>( integrand_->size(), 1. );
       initialised_ = true;

@@ -35,7 +35,7 @@ class TestProcess : public cepgen::proc::Process
       );
     }
     /// Process cloning method
-    cepgen::proc::ProcessPtr clone( const cepgen::ParametersList& ) const override {
+    cepgen::proc::ProcessPtr clone() const override {
       return cepgen::proc::ProcessPtr( new TestProcess( *this ) );
     }
     /// Dummy function to be called on phase space definition
@@ -58,46 +58,47 @@ class TestProcess : public cepgen::proc::Process
 int
 main( int argc, char* argv[] )
 {
-  bool debug, run_all;
+  bool debug, quiet, run_all;
   double num_sigma;
-  string integrator, func_mod;
+  vector<string> integrators;
+  string func_mod;
 
   cepgen::initialise();
 
   cepgen::ArgumentsParser( argc, argv )
     .addOptionalArgument( "num-sigma,n", "max. number of std.dev.", &num_sigma, 5. )
     .addOptionalArgument( "debug,d", "debugging mode", &debug, false )
-    .addOptionalArgument( "integrator,i", "type of integrator used", &integrator, "Vegas" )
+    .addOptionalArgument( "integrator,i", "type of integrator used", &integrators, vector<string>{ "Vegas" } )
     .addOptionalArgument( "functional,f", "type of functional parser user", &func_mod, "ROOT" )
     .addOptionalArgument( "all,a", "run the tests for all integrators", &run_all, false )
+    .addOptionalArgument( "quiet,q", "quiet mode", &quiet, false )
     .parse();
 
   if ( debug )
     cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
+  else if ( quiet )
+    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::nothing;
   else
     cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::information;
 
   //--- tests definition
   struct test_t
   {
-    cepgen::proc::Process* process;
+    TestProcess process;
     double result;
     bool success;
   };
 
   vector<test_t> tests = {
-    { new TestProcess( func_mod, "x^2+y^2", { "x", "y" } ), 2./3, false },
-    { new TestProcess( func_mod, "x+y^2+z^3", { "x", "y", "z" } ), 13./12., false },
-    { new TestProcess( func_mod, "1./(1.-cos(x*3.141592654)*cos(y*3.141592654)*cos(z*3.141592654))", { "x", "y", "z" } ), 1.3932039296856768591842462603255, false },
+    { TestProcess( func_mod, "x^2+y^2", { "x", "y" } ), 2./3, false },
+    { TestProcess( func_mod, "x+y^2+z^3", { "x", "y", "z" } ), 13./12., false },
+    { TestProcess( func_mod, "1./(1.-cos(x*3.141592654)*cos(y*3.141592654)*cos(z*3.141592654))", { "x", "y", "z" } ), 1.3932039296856768591842462603255, false },
   };
 
   //--- integrator definition
-  vector<string> integrators;
-  if ( run_all ) // will perform the test with all integrators
-    for ( const auto& integr : cepgen::IntegratorFactory::get().modules() )
-      integrators.emplace_back( integr );
-  else // single integrator mode
-    integrators.emplace_back( integrator );
+  if ( run_all )
+    // will perform the test with all integrators
+    integrators = cepgen::IntegratorFactory::get().modules();
 
   CG_INFO( "main" )
     << "Will test with " << cepgen::utils::s( "integrator", integrators.size(), true ) << ": "
@@ -113,7 +114,7 @@ main( int argc, char* argv[] )
     size_t i = 0;
     double result, error;
     for ( auto& test : tests ) {
-      params.setProcess( test.process );
+      params.setProcess( test.process.clone() );
       cepgen::Integrand integrand( &params );
       integr->setIntegrand( integrand );
       integr->integrate( result, error );
