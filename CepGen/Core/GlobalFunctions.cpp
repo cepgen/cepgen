@@ -134,7 +134,7 @@ namespace cepgen
           info << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
         for ( const auto& mod : card::CardsHandlerFactory::get().modules() )
           info << "\n> ." << utils::colourise( mod, utils::Colour::green, utils::Modifier::bold )
-            << " extension";
+            << " extension: " << card::CardsHandlerFactory::get().describe( mod );
       }
       { info << "\n" << sep_mid << "\n"
           << utils::boldify( "Integration algorithms" );

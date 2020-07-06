@@ -18,6 +18,7 @@ namespace cepgen
       public:
         /// Read a standard configuration card
         explicit PythonHandler( const ParametersList& );
+        static std::string description() { return "Python 2/3 cards parser"; }
 
         Parameters* parse( const std::string&, Parameters* ) override;
 

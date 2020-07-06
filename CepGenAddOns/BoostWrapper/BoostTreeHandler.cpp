@@ -35,6 +35,7 @@ namespace cepgen
       public:
         /// Boost tree parser from a configuration card
         explicit BoostTreeHandler( const ParametersList& );
+        static std::string description() { return "Boost tree parser/writer"; }
 
         Parameters* parse( const std::string&, Parameters* ) override;
         void pack( const Parameters* params ) override;

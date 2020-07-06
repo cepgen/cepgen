@@ -19,6 +19,7 @@ namespace cepgen
       public:
         /// Read a LPAIR steering card
         explicit LpairHandler( const ParametersList& );
+        static std::string description() { return "LPAIR-like cards parser"; }
 
         void pack( const Parameters* ) override;
         Parameters* parse( const std::string&, Parameters* ) override;
