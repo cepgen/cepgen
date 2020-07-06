@@ -1,5 +1,5 @@
-#ifndef CepGen_Core_ModuleFactory_h
-#define CepGen_Core_ModuleFactory_h
+#ifndef CepGen_Modules_ModuleFactory_h
+#define CepGen_Modules_ModuleFactory_h
 
 #include "CepGen/Modules/NamedModule.h"
 

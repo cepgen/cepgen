@@ -1,7 +1,7 @@
 #ifndef CepGen_Processes_ProcessesFactory_h
 #define CepGen_Processes_ProcessesFactory_h
 
-#include "CepGen/Core/ModuleFactory.h"
+#include "CepGen/Modules/ModuleFactory.h"
 
 /** \file */
 

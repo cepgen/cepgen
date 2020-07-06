@@ -2,7 +2,7 @@
 #define CepGen_Physics_AlphaS_h
 
 #include "CepGen/Modules/NamedModule.h"
-#include "CepGen/Core/ModuleFactory.h"
+#include "CepGen/Modules/ModuleFactory.h"
 
 #define REGISTER_ALPHAS_MODULE( name, obj ) \
   namespace cepgen { \

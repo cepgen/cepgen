@@ -17,6 +17,7 @@ namespace cepgen
       const T& name() const { return name_; }
       /// Module description
       static std::string description() { return "No description"; }
+      static ParametersList defaultParameters() { return ParametersList(); }
       /// Module user-defined parameters
       inline const ParametersList& parameters() const { return params_; }
 

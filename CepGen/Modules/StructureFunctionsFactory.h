@@ -1,7 +1,7 @@
 #ifndef CepGen_Modules_StructureFunctionsFactory_h
 #define CepGen_Modules_StructureFunctionsFactory_h
 
-#include "CepGen/Core/ModuleFactory.h"
+#include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a structure functions definition to the list of handled parameterisation
 #define REGISTER_STRFUN( id, obj ) \
