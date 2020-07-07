@@ -103,7 +103,7 @@ namespace cepgen
 
       //----- events generation
       const auto& gen = pars.get<ParametersList>( "generation" );
-      params_->generation().maxgen = (unsigned long)gen.get<int>( "ngen", 10000 );
+      params_->generation().maxgen = (unsigned long)gen.get<int>( "ngen", params_->generation().maxgen );
       params_->generation().enabled = params_->generation().maxgen > 1;
       if ( gen.has<int>( "nthreads" ) )
         params_->generation().num_threads = gen.get<int>( "nthreads" );
