@@ -1,5 +1,7 @@
 #include "CepGen/Physics/Cuts.h"
+
 #include <iostream>
+#include <algorithm>
 
 namespace cepgen
 {
@@ -45,22 +47,12 @@ namespace cepgen
   //--------------------------------------------------------------------
 
   std::vector<Cuts::Property>
-  Cuts::list()
-  {
-    std::vector<Property> out;
-    for ( auto& lim : limits_ )
-      if ( lim.limits.valid() )
-        out.emplace_back( lim );
-    return out;
-  }
-
-  std::vector<Cuts::Property>
   Cuts::list() const
   {
     std::vector<Property> out;
-    for ( auto& lim : limits_ )
-      if ( lim.limits.valid() )
-        out.emplace_back( lim );
+    std::copy_if( limits_.begin(), limits_.end(),
+      std::back_inserter( out ),
+      []( const Property& lim ) { return lim.limits.valid(); } );
     return out;
   }
 
