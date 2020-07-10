@@ -68,7 +68,7 @@ namespace cepgen
   }
 
   void
-  initialise()
+  initialise( bool safe_mode )
   {
     //--- parse all particles properties
     static const std::string pdg_file = "";
@@ -93,10 +93,11 @@ namespace cepgen
         << "Make sure the path to the MCD file is correct.";
 
     //--- load all necessary modules
-    for ( const auto& lib : utils::libraries )
-      try { loadLibrary( lib, true ); } catch ( const Exception& e ) {
-        e.dump(); //FIXME temporary
-      }
+    if ( !safe_mode )
+      for ( const auto& lib : utils::libraries )
+        try { loadLibrary( lib, true ); } catch ( const Exception& e ) {
+          e.dump(); //FIXME temporary
+        }
 
     //--- greetings message
     CG_INFO( "init" )

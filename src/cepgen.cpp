@@ -20,7 +20,7 @@ int main( int argc, char* argv[] )
 {
   std::string input_card;
   int num_events;
-  bool list_mods = false, debug = false;
+  bool list_mods, debug, safe_mode;
   vector<string> addons;
 
   cepgen::ArgumentsParser parser( argc, argv );
@@ -30,6 +30,7 @@ int main( int argc, char* argv[] )
     .addOptionalArgument( "list-modules,l", "list all runtime modules", &list_mods, false )
     .addOptionalArgument( "add-ons,a", "external runtime plugin", &addons )
     .addOptionalArgument( "debug,d", "debugging mode", &debug, false )
+    .addOptionalArgument( "safe-mode,s", "safe mode", &safe_mode, false )
     .parse();
 
   //--- first start by defining the generator object
@@ -38,7 +39,7 @@ int main( int argc, char* argv[] )
       e.dump();
     }
 
-  cepgen::Generator gen;
+  cepgen::Generator gen( safe_mode );
 
   //--- if modules listing is requested
   if ( list_mods ) {
