@@ -3,10 +3,10 @@ import Config.ktProcess_cfi as kt
 from Config.Integration.vegas_cff import integrator
 from Config.PDG_cfi import PDG
 
-from Config.logger_cfi import logger
+from Config.Logger_cfi import logger
 logger.enabledModules += ('GenericKTProcess.registerVariable',)
 
-process = kt.process.clone('patoff',
+process = kt.process.clone('pptoff_f77',
     processParameters = cepgen.Parameters(
         pair = PDG.charm,
     ),

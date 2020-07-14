@@ -5,48 +5,63 @@
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/GluonGrid.h"
 
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/Timer.h"
 
 namespace cepgen
 {
   const double KTFluxParameters::kMinKTFlux = 1.e-20;
 
   double
-  ktFlux( const KTFlux& type, double x, double kt2, strfun::Parameterisation& sf, double mx )
+  ktFlux( const KTFlux& type, double x, double kt2, strfun::Parameterisation& sf, double mi2, double mf2 )
   {
-    double flux = 0.;
-    const double& mp = PDG::get().mass( PDG::proton ), mp2 = mp*mp;
     switch ( type ) {
-      case KTFlux::P_Photon_Elastic: {
+      case KTFlux::P_Photon_Elastic:
+      case KTFlux::P_Photon_Elastic_Budnev: {
         const double x2 = x*x;
-        const double q2min = x2*mp2/( 1.-x ), q2 = q2min + kt2/( 1.-x );
+        const double q2min = x2*mi2/( 1.-x ), q2 = q2min + kt2/( 1.-x );
+        const double qnorm = 1.-q2min/q2;
         //--- proton electromagnetic form factors
         const auto& ff = FormFactors::protonElastic( q2 );
-        flux = constants::ALPHA_EM*M_1_PI/( 1.-x )/q2*( ( 1.-x )*( 1.-q2min/q2 )*ff.FE + 0.25*x2*ff.FM );
+        if ( type == KTFlux::P_Photon_Elastic ) {
+          const double f_aux = ff.FE*qnorm*qnorm;
+          return constants::ALPHA_EM*M_1_PI/q2*f_aux;
+        }
+        else {
+          const double f_D = ff.FE*( 1.-x )*qnorm;
+          const double f_C = ff.FM;
+          return constants::ALPHA_EM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
+        }
       } break;
+      case KTFlux::P_Photon_Inelastic:
       case KTFlux::P_Photon_Inelastic_Budnev: {
-        const double mx2 = mx*mx, x2 = x*x;
-        const double q2min = ( x2*mp2+x*( mx2-mp2 ) )/( 1.-x ), q2 = q2min + kt2/( 1.-x );
-        const double denom = 1./( q2+mx2-mp2 );
-        const double xbj = denom*q2;
+        const double x2 = x*x;
+        const double q2min = ( x*( mf2-mi2 )+x2*mi2 )/( 1.-x );
+        const double q2 = q2min + kt2/( 1.-x );
+        const double qnorm = 1.-q2min/q2;
         //--- proton structure functions
+        const double denom = 1./( q2+mf2-mi2 );
+        const double xbj = denom*q2;
         auto& str_fun = sf( xbj, q2 );
-        str_fun.computeFL( xbj, q2 );
-        const double f_D = str_fun.F2*denom*( 1.-x )*( 1.-q2min/q2 );
-        const double f_C = str_fun.F1( xbj, q2 ) * 2./q2;
-        flux = constants::ALPHA_EM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
+        if ( type == KTFlux::P_Photon_Inelastic ) {
+          const double f_aux = str_fun.F2*denom*qnorm*qnorm;
+          return constants::ALPHA_EM*M_1_PI*( 1.-x )/q2*f_aux;
+        }
+        else {
+          str_fun.computeFL( xbj, q2 );
+          const double f_D = str_fun.F2*denom*( 1.-x )*qnorm;
+          const double f_C = str_fun.F1( xbj, q2 ) * 2./q2;
+          return constants::ALPHA_EM*M_1_PI*( 1.-x )/q2*( f_D+0.5*x2*f_C );
+        }
       } break;
       case KTFlux::P_Gluon_KMR: {
-        flux = kmr::GluonGrid::get()( log10( x ), log10( kt2 ), 2.*log10( mx ) );
+        return kmr::GluonGrid::get()( x, kt2, mf2 );
       } break;
       default:
-        throw CG_FATAL( "GenericKTProcess:flux" ) << "Invalid flux type: " << type;
+        throw CG_FATAL( "KTFlux" ) << "Invalid flux type: " << type;
     }
-    if ( flux < KTFluxParameters::kMinKTFlux )
-      return 0.;
-    return flux;
   }
 
   double
@@ -68,7 +83,7 @@ namespace cepgen
         flux = constants::ALPHA_EM*M_1_PI*z*z*ela1*ela2/q2_ela;
       } break;
       default:
-        throw CG_FATAL("GenericKTProcess:flux") << "Invalid flux type: " << type;
+        throw CG_FATAL("KTFlux") << "Invalid flux type: " << type;
     }
     if ( flux < KTFluxParameters::kMinKTFlux )
       return 0.;
@@ -81,6 +96,8 @@ namespace cepgen
     switch ( type ) {
       case KTFlux::P_Photon_Elastic:
         return os << "elastic photon from proton";
+      case KTFlux::P_Photon_Elastic_Budnev:
+        return os << "elastic photon from proton (Budnev)";
       case KTFlux::P_Photon_Inelastic:
         return os << "inelastic photon from proton";
       case KTFlux::P_Photon_Inelastic_Budnev:
@@ -90,7 +107,7 @@ namespace cepgen
       case KTFlux::HI_Photon_Elastic:
         return os << "elastic photon from HI";
       case KTFlux::invalid: default:
-        return os << "unrecognized flux (" << (int)type << ")";
+        return os << "unrecognised flux (" << (int)type << ")";
     }
   }
 }

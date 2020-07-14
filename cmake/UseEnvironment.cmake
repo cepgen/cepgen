@@ -1,7 +1,7 @@
 if(CMAKE_VERSION VERSION_GREATER 3.1)
-  set(CMAKE_CXX_STANDARD 11)
+  set(CMAKE_CXX_STANDARD 14)
 else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif()
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wall -cpp")
 #--- check if we are at CERN
@@ -44,11 +44,17 @@ find_library(GSL_CBLAS_LIB gslcblas HINTS ${GSL_DIR} PATH_SUFFIXES lib)
 find_path(GSL_INCLUDE gsl HINTS ${GSL_DIR} PATH_SUFFIXES include)
 if(NOT GSL_LIB OR NOT GSL_CBLAS_LIB)
   message(FATAL_ERROR "GSL with CBLAS bindings was not found!")
+else()
+  message(STATUS "GSL found in ${GSL_LIB}")
+  message(STATUS "GSL CBLAS found in ${GSL_CBLAS_LIB}")
 endif()
 include_directories(${GSL_INCLUDE})
 #--- searching for LHAPDF
 find_library(LHAPDF LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES lib)
 find_path(LHAPDF_INCLUDE LHAPDF HINTS ${LHAPDF_DIR} PATH_SUFFIXES include)
+#--- searching for APFEL
+find_library(APFEL APFEL HINTS ${APFEL_DIR} PATH_SUFFIXES lib)
+find_path(APFEL_INCLUDE APFEL HINTS ${APFEL_DIR} PATH_SUFFIXES include)
 #--- searching for HepMC
 set(HEPMC_DIRS $ENV{HEPMC_DIR} ${HEPMC_DIR} /usr /usr/local)
 find_library(HEPMC_LIB NAMES HepMC3 HepMC HINTS ${HEPMC_DIRS} PATH_SUFFIXES lib64 lib)
@@ -69,8 +75,9 @@ set(PYTHIA8_DIRS $ENV{PYTHIA8_DIR} ${PYTHIA8_DIR} /usr /usr/local /opt/pythia8)
 find_library(PYTHIA8 pythia8 HINTS ${PYTHIA8_DIRS} PATH_SUFFIXES lib)
 find_path(PYTHIA8_INCLUDE Pythia8 HINTS ${PYTHIA8_DIRS} PATH_SUFFIXES include/Pythia8 include/pythia8 include)
 #--- searching for ROOT
-find_package(ROOT)
+find_package(ROOT QUIET COMPONENTS Hist MathCore Foam)
 if(ROOT_FOUND)
+  message(STATUS "ROOT found in ${ROOT_INCLUDE_DIRS}")
   if(IS_LXPLUS)
     #--- LXPLUS/CVMFS tweak for missing dependencies
     find_library(TBB tbb HINTS ${TBB_DIR} PATH_SUFFIXES lib QUIET)
@@ -95,10 +102,11 @@ endif()
 find_library(YODA YODA HINTS $ENV{YODA_DIR} PATH_SUFFIXES lib)
 find_path(YODA_INCLUDE YODA HINTS $ENV{YODA_DIR} PATH_SUFFIXES include)
 #--- other utilitaries
-find_package(PythonLibs 2.7)
+find_package(PythonInterp)
+find_package(PythonLibs)
+find_package(Boost)
 find_library(MUPARSER muparser)
 find_path(EXPRTK exprtk.hpp PATH_SUFFIXES include)
 #--- semi-external dependencies
 file(GLOB ALPHAS_SRC ${PROJECT_SOURCE_DIR}/External/alphaS.f)
 file(GLOB GRV_SRC ${PROJECT_SOURCE_DIR}/External/grv_*.f)
-

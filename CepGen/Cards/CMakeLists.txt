@@ -1,4 +1,4 @@
-file(GLOB cards_sources Handler.cpp LpairHandler.cpp)
+file(GLOB cards_sources Handler.cpp LpairHandler.cpp CommandLineHandler.cpp)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
@@ -26,5 +26,4 @@ target_include_directories(CepGenCards PUBLIC ${cards_includes})
 
 #----- installation rules
 
-install(TARGETS CepGenCards DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT lib)
-
+install(TARGETS CepGenCards DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT lib)

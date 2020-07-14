@@ -1,18 +1,16 @@
 #include "CepGen/StructureFunctions/SigmaRatio.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Physics/PDG.h"
 
 #include <cmath>
 #include <cassert>
+#include <iostream>
 
 namespace cepgen
 {
   namespace sigrat
   {
-    Parameterisation::Parameterisation( const ParametersList& params ) :
-      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ )
-    {}
-
     double
     Parameterisation::theta( double xbj, double q2 ) const
     {
@@ -20,6 +18,20 @@ namespace cepgen
     }
 
     //---------------------------------------------------------------------------------------------
+
+    /// E143 experimental R measurement \cite Abe:1998ym
+    class E143 : public Parameterisation
+    {
+      public:
+        explicit E143( const ParametersList& params = ParametersList() );
+        static std::string description() { return "E143 experimental R measurement"; }
+
+        double operator()( double xbj, double q2, double& err ) const override;
+
+      private:
+        double q2_b_, lambda2_;
+        std::vector<double> a_, b_, c_;
+    };
 
     E143::E143( const ParametersList& params ) :
       q2_b_   ( params.get<double>( "q2_b", 0.34 ) ),
@@ -57,6 +69,21 @@ namespace cepgen
 
     //---------------------------------------------------------------------------------------------
 
+    /// SLAC experimental R measurement \cite Whitlow:1990gk
+    /// \warning valid for \f$Q^2\f$ > 0.3 GeV\f$^2\f$
+    class R1990: public Parameterisation
+    {
+      public:
+        explicit R1990( const ParametersList& params = ParametersList() );
+        static std::string description() { return "SLAC experimental R measurement"; }
+
+        double operator()( double xbj, double q2, double& err ) const override;
+
+      private:
+        double lambda2_;
+        std::vector<double> b_;
+    };
+
     R1990::R1990( const ParametersList& params ) :
       lambda2_( params.get<double>( "lambda2", 0.04 ) ),
       b_      ( params.get<std::vector<double> >( "b", { 0.0635, 0.5747, -0.3534 } ) )
@@ -73,6 +100,20 @@ namespace cepgen
 
     //---------------------------------------------------------------------------------------------
 
+    /// CLAS experimental R measurement
+    class CLAS : public Parameterisation
+    {
+      public:
+        explicit CLAS( const ParametersList& params = ParametersList() );
+        static std::string description() { return "CLAS experimental R measurement"; }
+
+        double operator()( double xbj, double q2, double& err ) const override;
+
+      private:
+        std::vector<double> p_;
+        double wth_, q20_;
+    };
+
     CLAS::CLAS( const ParametersList& params ) :
       p_  ( params.get<std::vector<double> >( "p", { 0.041, 0.592, 0.331 } ) ),
       wth_( params.get<double>( "wth", 2.5 ) ),
@@ -84,6 +125,7 @@ namespace cepgen
     double
     CLAS::operator()( double xbj, double q2, double& err ) const
     {
+      err = 0.;
       //--- 2 kinematic regions: resonances ( w < wth ), and DIS ( w > wth )
       const double w2 = mp2_ + q2*( 1.-xbj )/xbj, w = sqrt( w2 );
       const double xth = q2/( q2+wth_*wth_-mp2_ ); // xth = x( W = wth )
@@ -97,6 +139,23 @@ namespace cepgen
 
     //---------------------------------------------------------------------------------------------
 
+    /// Sibirtsev & Blunden parameterisation of the R ratio \cite Sibirtsev:2013cga
+    class SibirtsevBlunden : public Parameterisation
+    {
+      public:
+        explicit SibirtsevBlunden( const ParametersList& params = ParametersList() );
+        static std::string description() { return "Sibirtsev-Blunden theoretical R parameterisation"; }
+
+        double operator()( double xbj, double q2, double& err ) const override;
+
+      private:
+        double a_, b1_, b2_, c_;
+    };
+    Parameterisation::Parameterisation( const ParametersList& params ) :
+      NamedModule<int>( params ),
+      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ )
+    {}
+
     SibirtsevBlunden::SibirtsevBlunden( const ParametersList& params ) :
       a_ ( params.get<double>( "a", 0.014 ) ),
       b1_( params.get<double>( "b1", -0.07 ) ),
@@ -105,12 +164,30 @@ namespace cepgen
     {}
 
     double
-    SibirtsevBlunden::operator()( double xbj, double q2, double& err ) const
+    SibirtsevBlunden::operator()( double, double q2, double& err ) const
     {
       err = 0.;
       //--- equation (10) of reference paper
       return a_*q2*( exp( b1_*q2 )+c_*exp( b2_*q2 ) );
     }
   }
+
+  /// Human-readable format of a R-ratio computation method
+  std::ostream&
+  operator<<( std::ostream& os, const sigrat::Type& sf )
+  {
+    switch ( sf ) {
+      case sigrat::Type::Invalid:         return os << "<invalid>";
+      case sigrat::Type::E143:            return os << "E143";
+      case sigrat::Type::R1990:           return os << "R1990";
+      case sigrat::Type::CLAS:            return os << "CLAS";
+      case sigrat::Type::SibirtsevBlunden:return os << "SibirtsevBlunden";
+    }
+    return os;
+  }
 }
 
+REGISTER_SIGRAT( E143, sigrat::E143 )
+REGISTER_SIGRAT( R1990, sigrat::R1990 )
+REGISTER_SIGRAT( CLAS, sigrat::CLAS )
+REGISTER_SIGRAT( SibirtsevBlunden, sigrat::SibirtsevBlunden )

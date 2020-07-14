@@ -1,36 +1,35 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
-#include "CepGen/Version.h"
 
-#include "CepGen/Core/Integrator.h"
+#include "CepGen/Processes/Process.h"
+
+#include "CepGen/Core/GeneratorWorker.h"
+#include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/Exception.h"
 
-#include "CepGen/Utils/Timer.h"
 #include "CepGen/Utils/String.h"
+#include "CepGen/Utils/TimeKeeper.h"
 
-#include "CepGen/Physics/MCDFileParser.h"
-#include "CepGen/Physics/PDG.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/Integrand.h"
+#include "CepGen/Integration/GridParameters.h"
 
-#include "CepGen/Processes/ProcessesHandler.h"
-#include "CepGen/Event/Event.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 
-#include <fstream>
 #include <chrono>
-#include <atomic>
 
 namespace cepgen
 {
-  namespace utils { std::atomic<int> gSignal; }
-  Generator::Generator() :
-    parameters_( new Parameters ), result_( -1. ), result_error_( -1. )
+  Generator::Generator( bool safe_mode ) :
+    parameters_( new Parameters ),
+    result_( -1. ), result_error_( -1. )
   {
-    static const std::string pdg_file = "External/mass_width_2019.mcd";
-    pdg::MCDFileParser::parse( pdg_file.c_str() );
     CG_DEBUG( "Generator:init" ) << "Generator initialized";
-    try {
-      printHeader();
-    } catch ( const Exception& e ) {
-      e.dump();
+    static bool init = false;
+    if ( !init ) {
+      initialise( safe_mode );
+      init = true;
     }
     //--- random number initialization
     std::chrono::system_clock::time_point time = std::chrono::system_clock::now();
@@ -38,78 +37,54 @@ namespace cepgen
   }
 
   Generator::Generator( Parameters* ip ) :
-    parameters_( ip ), result_( -1. ), result_error_( -1. )
+    parameters_( ip ),
+    result_( -1. ), result_error_( -1. )
   {}
 
   Generator::~Generator()
-  {}
-
-  size_t
-  Generator::numDimensions() const
   {
-    if ( !parameters_->process() )
-     return 0;
-    return parameters_->process()->ndim();
+    if ( parameters_->timeKeeper() )
+      CG_INFO( "Generator:destructor" )
+        << parameters_->timeKeeper()->summary();
   }
 
   void
   Generator::clearRun()
   {
-    if ( parameters_->process() ) {
-      parameters_->process()->first_run = true;
-      parameters_->process()->addEventContent();
-      parameters_->process()->setKinematics( parameters_->kinematics );
-    }
+    generator_.reset( new GeneratorWorker( parameters_.get() ) );
     result_ = result_error_ = -1.;
-    {
-      std::ostringstream os;
-      for ( const auto& pr : cepgen::proc::ProcessesHandler::get().modules() )
-        os << " " << pr;
-      CG_DEBUG( "Generator:clearRun" ) << "Processes handled:" << os.str() << ".";
-    }
+    parameters_->prepareRun();
   }
 
   Parameters&
-  Generator::parameters()
+  Generator::parametersRef()
   {
-    return *parameters_.get();
+    return *parameters_;
   }
 
   void
-  Generator::setParameters( Parameters& ip )
+  Generator::setParameters( Parameters* ip )
   {
-    parameters_.reset( new Parameters( ip ) ); // copy constructor
-  }
-
-  void
-  Generator::printHeader()
-  {
-    std::string tmp;
-    std::ostringstream os; os << "version " << version() << std::endl;
-    std::ifstream hf( "README" );
-    if ( !hf.good() )
-      throw CG_WARNING( "Generator" ) << "Failed to open README file.";
-    while ( true ) {
-      if ( !hf.good() ) break;
-      getline( hf, tmp );
-      os << "\n " << tmp;
-    }
-    hf.close();
-    CG_LOG( "Generator" ) << os.str();
+    parameters_.reset( ip );
+    if ( parameters_->hasProcess() )
+      parameters_->process().setKinematics( parameters_->kinematics );
   }
 
   double
-  Generator::computePoint( double* x )
+  Generator::computePoint( const std::vector<double>& coord )
   {
-    clearRun();
-
-    double res = integrand::eval( x, numDimensions(), (void*)parameters_.get() );
-    std::ostringstream os;
-    for ( size_t i = 0; i < numDimensions(); ++i )
-      os << x[i] << " ";
+    if ( !generator_ )
+      clearRun();
+    if ( !parameters_->hasProcess() )
+      throw CG_FATAL( "Generator:computePoint" )
+        << "Trying to compute a point with no process specified!";
+    const size_t ndim = parameters_->process().ndim();
+    if ( coord.size() != ndim )
+      throw CG_FATAL( "Generator:computePoint" )
+        << "Invalid phase space dimension (ndim=" << ndim << ")!";
+    double res = generator_->integrand().eval( coord );
     CG_DEBUG( "Generator:computePoint" )
-      << "Result for x[" << numDimensions() << "] = { " << os.str() << "}:\n\t"
-      << res << ".";
+      << "Result for x[" << ndim << "] = " << coord << ":\n\t" << res << ".";
     return res;
   }
 
@@ -125,65 +100,110 @@ namespace cepgen
     err = result_error_;
 
     if ( xsec < 1.e-2 )
-      CG_INFO( "Generator" )
-        << "Total cross section: " << xsec*1.e3
-        << " +/- " << err*1.e3 << " fb.";
+      CG_INFO( "Generator" ) << "Total cross section: "
+        << xsec*1.e3 << " +/- " << err*1.e3 << " fb.";
     else if ( xsec < 0.5e3 )
-      CG_INFO( "Generator" )
-        << "Total cross section: " << xsec
-        << " +/- " << err << " pb.";
+      CG_INFO( "Generator" ) << "Total cross section: "
+        << xsec << " +/- " << err << " pb.";
     else if ( xsec < 0.5e6 )
-      CG_INFO( "Generator" )
-        << "Total cross section: " << xsec*1.e-3
-        << " +/- " << err*1.e-3 << " nb.";
+      CG_INFO( "Generator" ) << "Total cross section: "
+        << xsec*1.e-3 << " +/- " << err*1.e-3 << " nb.";
     else if ( xsec < 0.5e9 )
-      CG_INFO( "Generator" )
-        << "Total cross section: " << xsec*1.e-6
-        << " +/- " << err*1.e-6 << " µb.";
+      CG_INFO( "Generator" ) << "Total cross section: "
+        << xsec*1.e-6 << " +/- " << err*1.e-6 << " µb.";
     else
-      CG_INFO( "Generator" )
-        << "Total cross section: " << xsec*1.e-9
-        << " +/- " << err*1.e-9 << " mb.";
+      CG_INFO( "Generator" ) << "Total cross section: "
+        << xsec*1.e-9 << " +/- " << err*1.e-9 << " mb.";
+  }
+
+  void
+  Generator::setIntegrator( std::unique_ptr<Integrator> integ )
+  {
+    CG_TICKER( parameters_->timeKeeper() );
+
+    if ( !integ ) {
+      if ( !parameters_->integrator )
+        throw CG_FATAL( "Generator:integrate" ) << "No integrator parameters found!";
+      if ( parameters_->integrator->name<std::string>().empty() )
+        parameters_->integrator->setName<std::string>( "Vegas" );
+      integ = IntegratorFactory::get().build( *parameters_->integrator );
+    }
+    integrator_ = std::move( integ );
+    if ( !generator_ )
+      clearRun();
+    integrator_->setIntegrand( generator_->integrand() );
+    generator_->setIntegrator( integrator_.get() );
+    CG_INFO( "Generator:integrator" )
+      << "Generator will use a " << integrator_->name() << "-type integrator.";
   }
 
   void
   Generator::integrate()
   {
+    CG_TICKER( parameters_->timeKeeper() );
+
     clearRun();
+    if ( !parameters_->hasProcess() )
+      throw CG_FATAL( "Generator:integrate" )
+        << "Trying to integrate while no process is specified!";
+    const size_t ndim = parameters_->process().ndim();
+    if ( ndim < 1 )
+      throw CG_FATAL( "Generator:computePoint" )
+        << "Invalid phase space dimension (ndim=" << ndim << ")!";
 
     // first destroy and recreate the integrator instance
-    if ( !integrator_ || integrator_->dimensions() != numDimensions() )
-      integrator_.reset( new Integrator( numDimensions(), integrand::eval, *parameters_ ) );
+    setIntegrator( nullptr );
 
-    CG_DEBUG( "Generator:newInstance" )
-      << "New integrator instance created\n\t"
-      << "Considered topology: " << parameters_->kinematics.mode << " case\n\t"
-      << "Will proceed with " << numDimensions() << "-dimensional integration.";
+    CG_DEBUG( "Generator:integrate" )
+      << "New integrator instance created for " << ndim << "-dimensional integration.";
 
     integrator_->integrate( result_, result_error_ );
+
+    for ( auto& mod : parameters_->eventModifiersSequence() )
+      mod->setCrossSection( result_, result_error_ );
+    for ( auto& mod : parameters_->outputModulesSequence() )
+      mod->setCrossSection( result_, result_error_ );
   }
 
-  std::shared_ptr<Event>
-  Generator::generateOneEvent()
+  const Event&
+  Generator::generateOneEvent( Event::callback callback )
   {
-    integrator_->generateOne();
-    return parameters_->process()->last_event;
+    generate( 1, callback );
+    return parameters_->process().event();
   }
 
   void
-  Generator::generate( std::function<void( const Event&, unsigned long )> callback )
+  Generator::generate( size_t num_events, Event::callback callback )
   {
-    const utils::Timer tmr;
+    CG_TICKER( parameters_->timeKeeper() );
+
+    if ( !parameters_ )
+      throw CG_FATAL( "Generator:generate" ) << "No steering parameters specified!";
+
+    for ( auto& mod : parameters_->outputModulesSequence() )
+      mod->initialise( *parameters_ );
+
+    //--- if invalid argument, retrieve from runtime parameters
+    if ( num_events < 1 )
+      num_events = parameters_->generation().maxgen;
 
     CG_INFO( "Generator" )
-      << parameters_->generation().maxgen << " events will be generated.";
+      << utils::s( "event", num_events, true ) << " will be generated.";
 
-    integrator_->generate( parameters_->generation().maxgen, callback );
+    const utils::Timer tmr;
+
+    //--- launch the event generation
+
+    generator_->generate( num_events, callback );
 
     const double gen_time_s = tmr.elapsed();
+    const double rate_ms = ( parameters_->numGeneratedEvents() > 0 )
+      ? gen_time_s/parameters_->numGeneratedEvents()*1.e3 : 0.;
+    const double equiv_lumi = parameters_->numGeneratedEvents()/crossSection();
     CG_INFO( "Generator" )
       << utils::s( "event", parameters_->numGeneratedEvents() )
       << " generated in " << gen_time_s << " s "
-      << "(" << gen_time_s/parameters_->numGeneratedEvents()*1.e3 << " ms/event).";
+      << "(" << rate_ms << " ms/event).\n\t"
+      << "Equivalent luminosity: " << utils::format( "%g", equiv_lumi ) << " pb^-1.";
   }
 }

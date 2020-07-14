@@ -1,15 +1,14 @@
-#include "CepGen/Cards/PythonHandler.h"
-
+#include "CepGen/Cards/Handler.h"
 #include "CepGen/Generator.h"
-#include "CepGen/Core/Integrator.h"
+#include "CepGen/Parameters.h"
+
 #include "CepGen/Core/ParametersList.h"
 
+#include "CepGen/Utils/AbortHandler.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/Timer.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/ProgressBar.h"
-
-#include "AbortHandler.h"
 
 #include <fstream>
 #include <iostream>
@@ -18,39 +17,30 @@
 using namespace std;
 using namespace cepgen;
 
-int
-main( int argc, char* argv[] )
+int main( int argc, char* argv[] )
 {
   double num_sigma;
   string cfg_filename;
   string integrator;
-  bool debug;
+  bool debug, quiet;
 
   ArgumentsParser( argc, argv )
-    .addArgument( "cfg", "configuration file", &cfg_filename, 'c' )
-    .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
-    .addOptionalArgument( "num-sigma", "max. number of std.dev.", 3., &num_sigma, 'n' )
-    .addOptionalArgument( "integrator", "type of integrator used", "vegas", &integrator, 'i' )
+    .addArgument( "cfg,c", "configuration file", &cfg_filename )
+    .addOptionalArgument( "debug,d", "debugging mode", &debug, false )
+    .addOptionalArgument( "quiet,q", "quiet mode", &quiet, false )
+    .addOptionalArgument( "num-sigma,n", "max. number of std.dev.", &num_sigma, 3. )
+    .addOptionalArgument( "integrator,i", "type of integrator used", &integrator, "Vegas" )
     .parse();
 
   if ( debug )
     utils::Logger::get().level = utils::Logger::Level::information;
-  else
+  else if ( quiet )
     utils::Logger::get().level = utils::Logger::Level::error;
 
   utils::Timer tmr;
-  Generator mg;
+  Generator gen;
 
-  if ( integrator == "plain" )
-    mg.parameters().integration().type = IntegratorType::plain;
-  else if ( integrator == "vegas" )
-    mg.parameters().integration().type = IntegratorType::Vegas;
-  else if ( integrator == "miser" )
-    mg.parameters().integration().type = IntegratorType::MISER;
-  else
-    throw CG_FATAL( "main" ) << "Unhandled integrator type: " << integrator << ".";
-
-  CG_LOG( "main" ) << "Testing with " << mg.parameters().integration().type << " integrator.";
+  CG_LOG( "main" ) << "Testing with " << integrator << " integrator.";
 
   vector<string> failed_tests, passed_tests;
 
@@ -66,73 +56,87 @@ main( int argc, char* argv[] )
   };
   vector<Test> tests;
 
-  ifstream cfg( cfg_filename );
-  string line;
-  while ( !cfg.eof() ) {
-    getline( cfg, line );
-    if ( line[0] == '#' || line.empty() )
-      continue;
-    stringstream os( line );
-    Test test;
-    os >> test.filename >> test.ref_cs >> test.err_ref_cs;
-    tests.emplace_back( test );
+  { // parse the various tests to be performed
+    ifstream cfg( cfg_filename );
+    string line;
+    while ( !cfg.eof() ) {
+      getline( cfg, line );
+      if ( line[0] == '#' || line.empty() )
+        continue;
+      stringstream os( line );
+      Test test;
+      os >> test.filename >> test.ref_cs >> test.err_ref_cs;
+      tests.emplace_back( test );
+    }
   }
 
   CG_INFO( "main" )
     << "Will run " << utils::s( "test", tests.size() ) << ".";
 
-  utils::ProgressBar progress( tests.size() );
+  std::unique_ptr<utils::ProgressBar> progress;
+  if ( debug )
+    progress.reset( new utils::ProgressBar( tests.size() ) );
 
   try {
-    auto pyhnd = cepgen::card::PythonHandler( cepgen::ParametersList() );
     unsigned short num_tests = 0;
     for ( const auto& test : tests ) {
-      mg.clearRun();
+      gen.parametersRef().clearProcess();
+
       const std::string filename = "test_processes/"+test.filename+"_cfg.py";
-      mg.setParameters( pyhnd.parse( filename ).parameters() );
-      //CG_LOG( "main" ) << mg.parametersPtr();
+      gen.setParameters( cepgen::card::Handler::parse( filename ) );
+      gen.parameters()->integrator->setName<std::string>( integrator );
       CG_INFO( "main" )
-        << "Process: "<< mg.parameters().processName() << "\n\t"
+        << "Process: "<< gen.parameters()->processName() << "\n\t"
         << "File: " << filename << "\n\t"
         << "Configuration time: " << tmr.elapsed()*1.e3 << " ms.";
 
       tmr.reset();
 
       double new_cs, err_new_cs;
-      mg.computeXsection( new_cs, err_new_cs );
+      gen.computeXsection( new_cs, err_new_cs );
 
-      const double sigma = ( new_cs-test.ref_cs ) / hypot( err_new_cs, test.err_ref_cs );
+      const double ratio = new_cs/test.ref_cs;
+      const double err_ratio = ratio * hypot( err_new_cs/new_cs, test.err_ref_cs/test.ref_cs );
+      const double pull = ( new_cs-test.ref_cs ) / hypot( err_new_cs, test.err_ref_cs );
+
+      const bool success = fabs( pull ) < num_sigma;
 
       CG_INFO( "main" )
         << "Computed cross section:\n\t"
         << "Ref.   = " << test.ref_cs << " +/- " << test.err_ref_cs << "\n\t"
         << "CepGen = " << new_cs << " +/- " << err_new_cs << "\n\t"
-        << "Pull: " << sigma << ".";
+        << "Ratio: " << ratio << " +/- " << err_ratio << "\n\t"
+        << "Pull: " << pull << " (abs(pull) "
+        << ( success ? "<" : ">" ) << " " << num_sigma << ").";
 
-      CG_INFO( "main" ) << "Computation time: " << tmr.elapsed()*1.e3 << " ms.";
+      CG_INFO( "main" )
+        << "Computation time: " << tmr.elapsed()*1.e3 << " ms.";
       tmr.reset();
 
-      const string test_res = utils::format( "%-26s\tref=%g\tgot=%g\tpull=%+g", test.filename.c_str(), test.ref_cs, new_cs, sigma );
-      bool success = fabs( sigma ) < num_sigma;
+      const string test_res = utils::format(
+        "%-40s\tref=%g\tgot=%g\tratio=%g\tpull=%+10.5f",
+        test.filename.c_str(), test.ref_cs, new_cs, ratio, pull );
       if ( success )
         passed_tests.emplace_back( test_res );
       else
         failed_tests.emplace_back( test_res );
-      progress.update( num_tests++ );
+      ++num_tests;
+      if ( debug )
+        progress->update( num_tests );
       CG_LOG( "main" )
-        << "Test " << passed_tests.size() << "/" << num_tests << " finished. Success:"
-        << utils::yesno( success );
+        << "Test " << num_tests << "/" << tests.size() << " finished. "
+        << "Success: " << utils::yesno( success ) << ".";
     }
   } catch ( const Exception& e ) {}
   if ( failed_tests.size() != 0 ) {
     ostringstream os_failed, os_passed;
     for ( const auto& fail : failed_tests )
-      os_failed << " (*) " << fail << endl;
+      os_failed << "  " << fail << endl;
     for ( const auto& pass : passed_tests )
-      os_passed << " (*) " << pass << endl;
+      os_passed << "  " << pass << endl;
     throw CG_FATAL( "main" )
-      << "Some tests failed!\n"
-      << os_failed.str() << "\n"
+      << "Some tests failed (abs(pull) > " << num_sigma << "):\n"
+      << os_failed.str() << "\n "
       << "Passed tests:\n"
       << os_passed.str() << ".";
   }

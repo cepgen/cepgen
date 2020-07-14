@@ -15,8 +15,10 @@ namespace cepgen
   class ParametersList
   {
     private:
+      /// Retrieve the default argument for a given variable type
       template<typename T> struct default_arg
       {
+        /// Default variable argument
         static T get() { return T(); }
       };
 
@@ -25,25 +27,53 @@ namespace cepgen
       /// Copy constructor
       ParametersList( const ParametersList& );
       ~ParametersList() {} // required for unique_ptr initialisation! avoids cleaning all individual objects
+      ParametersList& operator=( const ParametersList& ) = default; ///< Assignment operator
+      /// Feed a control string to the list of parameters
+      ParametersList& feed( const std::string& );
       /// Check if a given parameter is handled in this list
       template<typename T> bool has( std::string key ) const;
+      /// Erase a parameter with key
+      /// \return Number of key-indexed values erased
+      size_t erase( std::string key );
+      /// Retrieve the module name if any
+      template<typename T> T name( const T& def = default_arg<T>::get() ) const {
+        if ( !has<T>( MODULE_NAME ) )
+          return def;
+        return get<T>( MODULE_NAME );
+      }
+      /// Fill a variable with the key content if exists
+      template<typename T> const ParametersList& fill( std::string key, T& value ) const {
+        if ( has<T>( key ) )
+          value = get<T>( key );
+        return *this;
+      }
       /// Get a parameter value
       template<typename T> T get( std::string key, const T& def = default_arg<T>::get() ) const;
       /// Reference to a parameter value
       template<typename T> T& operator[]( std::string key );
       /// Set a parameter value
       template<typename T> ParametersList& set( std::string key, const T& value );
+      /// Set the module name
+      template<typename T> ParametersList& setName( const T& value ) {
+        return set<T>( MODULE_NAME, value );
+      }
       /// Concatenate two parameters containers
       ParametersList& operator+=( const ParametersList& oth );
+      /// Concatenation of two parameters containers
+      ParametersList operator+( const ParametersList& oth ) const;
+      /// Is the list empty?
+      bool empty() const;
 
       /// List of keys handled in this list of parameters
-      std::vector<std::string> keys() const;
+      /// \param[in] name_key Include the name variable?
+      std::vector<std::string> keys( bool name_key = true ) const;
       /// Get a string-converted version of a value
       std::string getString( const std::string& key ) const;
 
       /// Human-readable version of a parameters container
       friend std::ostream& operator<<( std::ostream& os, const ParametersList& );
-      static constexpr const char* MODULE_NAME = "mod_name";
+      /// Indexing key for the module name
+      static const std::string MODULE_NAME;
 
     private:
       std::map<std::string,ParametersList> param_values_;
@@ -127,6 +157,8 @@ namespace cepgen
   template<> inline bool ParametersList::has<Limits>( std::string key ) const { return lim_values_.count( key ) != 0; }
   /// Get a boundary limits parameter value
   template<> Limits ParametersList::get<Limits>( std::string key, const Limits& def ) const;
+  /// Fill a limits definition with a valid object if the key content exists
+  template<> const ParametersList& ParametersList::fill<Limits>( std::string key, Limits& ) const;
   /// Reference to a boundary limits parameter value
   template<> inline Limits& ParametersList::operator[]<Limits>( std::string key ) { return lim_values_[key]; }
   /// Set a boundary limits parameter value

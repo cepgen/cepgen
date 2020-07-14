@@ -1,4 +1,5 @@
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Processes/FortranKTProcess.h"
 
 #include "CepGen/Physics/KTFlux.h"
@@ -17,7 +18,7 @@ extern "C" {
   cepgen_structure_functions_( int& sfmode, double& xbj, double& q2, double& f2, double& fl )
   {
     using namespace cepgen;
-    static auto sf = strfun::StructureFunctionsHandler::get().build( sfmode );
+    static auto sf = strfun::StructureFunctionsFactory::get().build( sfmode );
     const auto& val = ( *sf )( xbj, q2 );
     f2 = val.F2;
     fl = val.FL;
@@ -28,13 +29,14 @@ extern "C" {
   /// \param[in] x Fractional momentum loss
   /// \param[in] kt2 The \f$k_{\rm T}\f$ transverse momentum norm
   /// \param[in] sfmode Structure functions set for dissociative emission
-  /// \param[in] mx Diffractive state mass for dissociative emission
+  /// \param[in] min Incoming particle mass
+  /// \param[in] mout Diffractive state mass for dissociative emission
   double
-  cepgen_kt_flux_( int& fmode, double& x, double& kt2, int& sfmode, double& mx )
+  cepgen_kt_flux_( int& fmode, double& x, double& kt2, int& sfmode, double& min, double& mout )
   {
     using namespace cepgen;
-    static auto sf = strfun::StructureFunctionsHandler::get().build( sfmode );
-    return ktFlux( (KTFlux)fmode, x, kt2, *sf, mx );
+    static auto sf = strfun::StructureFunctionsFactory::get().build( sfmode );
+    return ktFlux( (KTFlux)fmode, x, kt2, *sf, min*min, mout*mout );
   }
 
   /// Compute a \f$k_{\rm T}\f$-dependent flux for heavy ions
@@ -68,6 +70,18 @@ extern "C" {
   {
     try {
       return cepgen::PDG::get().charge( (cepgen::pdgid_t)pdg_id );
+    } catch ( const cepgen::Exception& e ) {
+      e.dump();
+      exit( 0 );
+    }
+  }
+
+  /// Colour factor of a particle
+  double
+  cepgen_particle_colour_( int& pdg_id )
+  {
+    try {
+      return cepgen::PDG::get().colours( (cepgen::pdgid_t)pdg_id );
     } catch ( const cepgen::Exception& e ) {
       e.dump();
       exit( 0 );

@@ -10,14 +10,21 @@
 
 namespace cepgen
 {
-  class Event;
   class EventModifier;
   class ParametersList;
   namespace proc { class Process; }
   namespace io { class ExportModule; }
-  namespace utils { class TamingFunction; }
+  namespace utils {
+    class TimeKeeper;
+    class Functional;
+  }
   enum class IntegratorType;
+  /// An ordered collection of event modification algorithms
   typedef std::vector<std::unique_ptr<EventModifier> > EventModifiersSequence;
+  /// An ordered collection of event export modules
+  typedef std::vector<std::unique_ptr<io::ExportModule> > ExportModulesSequence;
+  /// An ordered collection of taming functions evaluators
+  typedef std::vector<std::unique_ptr<utils::Functional> > TamingFunctionsSequence;
   /// List of parameters used to start and run the simulation job
   class Parameters
   {
@@ -34,19 +41,31 @@ namespace cepgen
       /// Dump the input parameters in the terminal
       friend std::ostream& operator<<( std::ostream&, const Parameters* );
 
+      /// Initialise the timekeeper instance
+      void setTimeKeeper( utils::TimeKeeper* );
+      /// Pointer to a timekeeper instance
+      utils::TimeKeeper* timeKeeper() { return tmr_.get(); }
+
+      /// Common user-defined parameters
       std::shared_ptr<ParametersList> general;
+      /// Integrator specific user-defined parameters
+      std::shared_ptr<ParametersList> integrator;
 
       //----- process to compute
 
+      /// Is this parameters collection holding any physics process?
+      bool hasProcess() const { return !( !process_ ); }
       /// Process for which the cross-section will be computed and the events will be generated
-      proc::Process* process();
+      proc::Process& process();
       /// Process for which the cross-section will be computed and the events will be generated
-      const proc::Process* process() const;
+      const proc::Process& process() const;
       /// Name of the process considered
       std::string processName() const;
-      /// Set the process to study
+      /// Remove the process pointer
+      void clearProcess();
+      /// Copy a process configuration
       void setProcess( std::unique_ptr<proc::Process> proc );
-      /// Set the process to study
+      /// Set a process configuration
       void setProcess( proc::Process* proc );
 
       //----- events kinematics
@@ -54,77 +73,58 @@ namespace cepgen
       /// Events kinematics for phase space definition
       Kinematics kinematics;
 
-      //----- VEGAS
-
-      /// Collection of integrator parameters
-      struct Integration
-      {
-        Integration();
-        Integration( const Integration& );
-        ~Integration();
-        IntegratorType type;
-        unsigned int ncvg; ///< Number of function calls to be computed for each point
-        long rng_seed; ///< Random number generator seed
-        gsl_rng_type* rng_engine; ///< Random number generator engine
-        gsl_monte_vegas_params vegas;
-        double vegas_chisq_cut;
-        gsl_monte_miser_params miser;
-        double result, err_result;
-      };
-      Integration& integration() { return integration_; }
-      const Integration& integration() const { return integration_; }
-
       //----- events generation
 
       /// Collection of events generation parameters
       struct Generation
       {
-        Generation();
+        Generation( const ParametersList& );
         Generation( const Generation& );
+        Generation& operator=( const Generation& ) = default; ///< Assignment operator
         bool enabled; ///< Are we generating events ? (true) or are we only computing the cross-section ? (false)
         unsigned long maxgen; ///< Maximal number of events to generate in this run
         bool symmetrise; ///< Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
-        bool treat; ///< Is the integrand to be smoothed for events generation?
         unsigned int gen_print_every; ///< Frequency at which the events are displayed to the end-user
         unsigned int num_threads; ///< Number of threads to perform the integration
         unsigned int num_points; ///< Number of points to "shoot" in each integration bin by the algorithm
       };
+      /// Get the events generation parameters
       Generation& generation() { return generation_; }
+      /// Get the events generation parameters
       const Generation& generation() const { return generation_; }
-
-      /// Specify if the generated events are to be stored
-      void setStorage( bool store ) { store_ = store; }
-      /// Are the events generated in this run to be stored in the output file ?
-      bool storage() const { return store_; }
-
-      /// Set a new output module definition
-      void setOutputModule( std::unique_ptr<io::ExportModule> mod );
-      /// Set the pointer to a output module
-      void setOutputModule( io::ExportModule* mod );
-      /// Output module definition
-      io::ExportModule* outputModule();
 
       //----- event modification (e.g. hadronisation, decay) algorithm
 
       /// Event modification algorithm to use
-      EventModifier* eventModifier( size_t );
+      EventModifier& eventModifier( size_t );
       /// Retrieve the list of event modification algorithms to run
       EventModifiersSequence& eventModifiersSequence() { return evt_modifiers_; }
       /// Retrieve the list of event modification algorithms to run
       const EventModifiersSequence& eventModifiersSequence() const { return evt_modifiers_; }
-      /// Name of the modification algorithm (if applicable)
-      std::string eventModifierName( size_t ) const;
       /// Add a new event modification algorithm to the sequence
       void addModifier( std::unique_ptr<EventModifier> );
       /// Add a new event modification algorithm to the sequence
       void addModifier( EventModifier* );
-      /// Set the event modification algorithms sequence
-      void setModifiersSequence( EventModifiersSequence& );
+
+      //----- event output algorithms
+
+      /// Output module
+      io::ExportModule& outputModule( size_t );
+      /// Retrieve the list of output modules to run
+      ExportModulesSequence& outputModulesSequence() { return out_modules_; }
+      /// Retrieve the list of output modules to run
+      const ExportModulesSequence& outputModulesSequence() const { return out_modules_; }
+      /// Set a new output module definition
+      void addOutputModule( std::unique_ptr<io::ExportModule> mod );
+      /// Set the pointer to a output module
+      void addOutputModule( io::ExportModule* mod );
 
       //----- taming functions
 
-      /// Functionals to be used to account for rescattering corrections (implemented within the process)
-      std::vector<utils::TamingFunction> taming_functions;
+      /// List of all taming functions definitions
+      const TamingFunctionsSequence& tamingFunctions() const { return taming_functions_; }
+      /// Set a new taming function definition
+      void addTamingFunction( std::unique_ptr<utils::Functional> );
 
       //----- run operations
 
@@ -139,19 +139,22 @@ namespace cepgen
       inline unsigned int numGeneratedEvents() const { return num_gen_events_; }
 
     private:
+      /// Physics process held by these parameters
       std::unique_ptr<proc::Process> process_;
+      /// Collection of event modification algorithms to be applied
       EventModifiersSequence evt_modifiers_;
-      /// Storage object
-      std::unique_ptr<io::ExportModule> out_module_;
-      bool store_;
+      /// Collection of event output modules to be applied
+      ExportModulesSequence out_modules_;
+      /// Functionals to be used to account for rescattering corrections
+      TamingFunctionsSequence taming_functions_;
       /// Total generation time (in seconds)
       double total_gen_time_;
       /// Number of events already generated
       unsigned long num_gen_events_;
-      /// Integrator parameters
-      Integration integration_;
       /// Events generation parameters
       Generation generation_;
+      /// A collection of stopwatches for timing
+      std::unique_ptr<utils::TimeKeeper> tmr_;
   };
 }
 

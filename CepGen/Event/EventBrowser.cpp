@@ -7,8 +7,8 @@ namespace cepgen
 {
   namespace utils
   {
-    const std::regex EventBrowser::rgx_select_id_( "([a-zA-Z]w+)\\(([0-9]+)\\)", std::regex_constants::basic );
-    const std::regex EventBrowser::rgx_select_role_( "([a-zA-Z]+)\\(([a-z]+[0-9]?)\\)", std::regex_constants::basic );
+    const std::regex EventBrowser::rgx_select_id_( "([a-zA-Z]+)\\(([0-9]+)\\)", std::regex_constants::extended );
+    const std::regex EventBrowser::rgx_select_role_( "([a-zA-Z]+)\\(([a-z]+[0-9]?)\\)", std::regex_constants::extended );
 
     double
     EventBrowser::get( const Event& ev, const std::string& var ) const

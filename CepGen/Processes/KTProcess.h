@@ -1,11 +1,10 @@
-#ifndef CepGen_Modules_KTProcess_h
-#define CepGen_Modules_KTProcess_h
+#ifndef CepGen_Processes_KTProcess_h
+#define CepGen_Processes_KTProcess_h
 
-#include "CepGen/Modules/Process.h"
+#include "CepGen/Processes/Process.h"
 
 namespace cepgen
 {
-  class ParametersList;
   namespace proc
   {
     /**
@@ -24,13 +23,9 @@ namespace cepgen
       public:
         /// Class constructor
         /// \param[in] params Parameters list
-        /// \param[in] name Generic process name
-        /// \param[in] description Human-readable \f$k_{\rm T}\f$-factorised process name
         /// \param[in] partons First and second incoming parton
         /// \param[in] output Produced final state particles
         KTProcess( const ParametersList& params,
-                   const std::string& name,
-                   const std::string& description,
                    const std::array<pdgid_t,2>& partons,
                    const std::vector<pdgid_t>& output );
 
@@ -55,6 +50,8 @@ namespace cepgen
         void fillPrimaryParticlesKinematics();
         /// Set the kinematics of the outgoing central system
         virtual void fillCentralParticlesKinematics() = 0;
+        /// Set the list of central particles produced
+        void setProducedParticles( const std::vector<pdgid_t>& prod ) { kProducedParts = prod; }
 
         /// Log-virtuality range of the intermediate parton
         Limits log_qt_limits_;
@@ -73,9 +70,9 @@ namespace cepgen
         double phi_qt2_;
 
         /// First outgoing proton
-        Momentum PX_;
+        Momentum pX_;
         /// Second outgoing proton
-        Momentum PY_;
+        Momentum pY_;
 
       private:
         /// First and second intermediate parton (photon, pomeron, ...)

@@ -1,4 +1,5 @@
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Core/Exception.h"
 
@@ -32,6 +33,8 @@ namespace cepgen
         };
         /// Fiore \cite Fiore:2002re and Brasse \cite Brasse:1976bf proton structure functions
         explicit FioreBrasse( const ParametersList& params = ParametersList() );
+        static std::string description() { return "Fiore-Brasse F2 parameterisation of low-mass resonances"; }
+
         FioreBrasse& operator()( double xbj, double q2 ) override;
 
       private:

@@ -37,10 +37,14 @@ namespace cepgen
         /// \param[in] rule Regex rule to handle
         void addExceptionRule( const std::string& rule ) {
 #if !defined(__CINT__) && !defined(__CLING__)
-          allowed_exc_.emplace_back( rule, std::regex_constants::basic );
+          allowed_exc_.emplace_back( rule, std::regex_constants::extended );
 #endif
         }
-        /// \brief Is the module set to be displayed/logged?
+        /// Collection of logging exceptions
+        const std::vector<std::regex>& exceptionRules() const {
+          return allowed_exc_;
+        }
+        /// Is the module set to be displayed/logged?
         /// \param[in] tmpl Module name to probe
         /// \param[in] lev Upper verbosity level
         bool passExceptionRule( const std::string& tmpl, const Level& lev ) const {

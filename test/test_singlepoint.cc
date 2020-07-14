@@ -1,5 +1,7 @@
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Processes/Process.h"
 
 #include "CepGen/Core/Exception.h"
 
@@ -9,41 +11,36 @@ using namespace std;
 
 int main( int argc, char* argv[] )
 {
-  string input_card, point;
+  const size_t ps_size = 12;
+  string input_card;
+  vector<double> point;
   bool debug;
 
   cepgen::ArgumentsParser( argc, argv )
-    .addArgument( "input", "input card", &input_card, 'i' )
-    .addOptionalArgument( "point", "point to test", "", &point, 'p' )
-    .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
+    .addArgument( "input,i", "input card", &input_card )
+    .addOptionalArgument( "point,p", "point to test", &point, vector<double>( ps_size, 0.3 ) )
+    .addOptionalArgument( "debug,d", "debugging mode", &debug, false )
     .parse();
+
+  cepgen::Generator gen;
+  gen.setParameters( cepgen::card::Handler::parse( input_card ) );
+  CG_INFO( "main" ) << gen.parameters();
+
+  if ( point.size() < 2 ) {
+    point = vector<double>( gen.parameters()->process().ndim(), point[0] );
+    point.resize( ps_size );
+  }
 
   if ( !debug )
     cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debugInsideLoop;
 
-  vector<double> x;
-  if ( !point.empty() ) {
-    stringstream iss( point );
-    double buf;
-    while ( iss >> buf )
-      x.emplace_back( buf );
-    if ( x.size() < 2 )
-      x = vector<double>( 12, x[0] );
-    x.resize( 12 );
-  }
-  else
-    x = vector<double>( 12, 0.3 );
-
-  cepgen::Generator gen;
-  gen.setParameters( cepgen::card::Handler::parse( input_card )->parameters() );
-  CG_INFO( "main" ) << gen.parametersPtr();
-
   cout << "point: ";
   string delim;
-  for ( const auto& v : x )
+  for ( const auto& v : point )
     cout << delim << v, delim = ", ";
   cout << endl;
-  cout << "weight: " << gen.computePoint( &x[0] ) << endl;
+  const double weight = gen.computePoint( point );
+  cout << "weight: " << weight << endl;
 
   return 0;
 }

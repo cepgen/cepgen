@@ -3,7 +3,7 @@
 
 #include <Python.h>
 
-#include "Handler.h"
+#include "CepGen/Cards/Handler.h"
 
 namespace cepgen
 {
@@ -18,12 +18,13 @@ namespace cepgen
       public:
         /// Read a standard configuration card
         explicit PythonHandler( const ParametersList& );
-        PythonHandler( const std::string& );
-        ~PythonHandler();
+        static std::string description() { return "Python 2/3 cards parser"; }
 
-        PythonHandler& parse( const std::string& );
+        Parameters* parse( const std::string&, Parameters* ) override;
 
       private:
+        static constexpr const char* ADDONS_NAME = "addons";
+        static constexpr const char* TIMER_NAME = "timer";
         static constexpr const char* PROCESS_NAME = "process";
         static constexpr const char* HADR_NAME = "hadroniser";
         static constexpr const char* EVT_MOD_SEQ_NAME = "eventSequence";
@@ -37,7 +38,7 @@ namespace cepgen
 
         void throwPythonError( const std::string& ) const;
         std::string pythonPath( const std::string& ) const;
-        PyObject* element( PyObject*, const char* ) const;
+        PyObject* element( PyObject*, const std::string& ) const;
         PyObject* encode( const char* str ) const;
 
         template<typename T> bool is( PyObject* obj ) const;
@@ -58,17 +59,14 @@ namespace cepgen
         void fillParameter( PyObject* parent, const char* key, ParametersList& out );
         void fillParameter( PyObject* parent, const char* key, std::vector<ParametersList>& out );
 
-        void parseIncomingKinematics( PyObject* );
-        void parseOutgoingKinematics( PyObject* );
         void parseLogging( PyObject* );
         void parseIntegrator( PyObject* );
         void parseGenerator( PyObject* );
         void parseHadroniser( PyObject* );
         void parseEventModifiers( PyObject* );
         void parseOutputModule( PyObject* );
+        void parseOutputModules( PyObject* );
         void parseExtraParticles( PyObject* );
-
-        std::string filename_;
     };
     template<> bool PythonHandler::is<bool>( PyObject* obj ) const;
     template<> bool PythonHandler::is<int>( PyObject* obj ) const;

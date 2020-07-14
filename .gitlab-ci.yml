@@ -1,5 +1,6 @@
 stages:
   - compile
+  - deploy
   - run
   - test
 
@@ -11,23 +12,43 @@ stages:
 .build_template: &build_definition
   stage: compile
   before_script:
+    - source scl_source enable devtoolset-7 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
+    - gcc --version
     - mkdir build
     - cd build
   script:
-    - cmake -DCMAKE_BUILD_TESTS=1 ..
-    - make -j 4
+    - cmake -DCMAKE_BUILD_TESTS=1 -DCMAKE_BUILD_CARD_CONV=1 ..
+    - make -j 8
   artifacts:
     expire_in: 2 hrs
     paths:
       - build/
 
+.package_template: &package_definition
+  stage: deploy
+  script:
+    - cd build
+    - echo "Starting the packaging"
+    - make package -j 8
+  when: on_success
+  allow_failure: false
+  artifacts:
+    paths:
+      - build/*.rpm
+      - build/*.deb
+
 .run_cepgen_template: &run_cepgen_definition
   stage: run
   script:
     - cd build
+    - ls
+    - echo "Modules dump"
     - ./cepgen -l
+    - echo "Python card test"
     - ./cepgen Cards/lpair_cfg.py -n 10000
-    - ./cepgen Cards/legacy/lpair.card -n 10000
+    - echo "LPAIR card test"
+    - ./cepgen-cards-converter Cards/lpair_cfg.py lpair.card
+    - ./cepgen lpair.card -n 10000
   when: on_success
   allow_failure: false
 
@@ -39,35 +60,36 @@ stages:
   when: on_success
   allow_failure: false
 
-.test_integrator_template: &test_integrator_definition
-  stage: test
-  script:
-    - cd build
-    - test/test_integrator -i vegas
-    - test/test_integrator -i miser
-  when: on_success
-  allow_failure: false
-
-.test_cross_sections_template: &test_cross_sections_definition
-  stage: test
-  script:
-    - cd build
-    - test/test_physics_processes -i vegas
-    - test/test_physics_processes -i miser
-  when: on_success
-  allow_failure: true
-
 .test_function_parser_template: &test_function_parser_definition
   stage: test
   script:
     - cd build
     - test/test_function_parser
     - test/test_function_parser_rootcomp -d
+  when: on_success
+  allow_failure: true
   artifacts:
     paths:
       - build/test_graph.pdf
+
+.test_integrator_template: &test_integrator_definition
+  stage: test
+  script:
+    - cd build
+    - test/test_integrator -a # test all integrators
   when: on_success
-  allow_failure: false
+  allow_failure: true
+
+.test_cross_sections_template: &test_cross_sections_definition
+  stage: test
+  script:
+    - cd build
+    - echo "VEGAS test"
+    - test/test_physics_processes -i Vegas -q --cfg test/test_processes.cfg
+    - echo "MISER test"
+    - test/test_physics_processes -i MISER -q --cfg test/test_processes.cfg
+  when: on_success
+  allow_failure: true
 
 #######################################
 # SLC6 jobs
@@ -90,6 +112,12 @@ stages:
 #  dependencies: ["compile:slc6"]
 #  needs: ["compile:slc6"]
 #  <<: *test_definition
+#
+#test_function_parser:slc6:
+#  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:slc6
+#  dependencies: ["compile:slc6"]
+#  needs: ["compile:slc6"]
+#  <<: *test_function_parser_definition
 #
 #test_integrator:slc6:
 #  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:slc6
@@ -124,11 +152,23 @@ run_cepgen:cc7:
   needs: ["compile:cc7"]
   <<: *run_cepgen_definition
 
+package:cc7:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
+  dependencies: ["compile:cc7"]
+  needs: ["compile:cc7"]
+  <<: *package_definition
+
 test:cc7:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
   dependencies: ["compile:cc7"]
   needs: ["compile:cc7"]
   <<: *test_definition
+
+test_function_parser:cc7:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
+  dependencies: ["compile:cc7"]
+  needs: ["compile:cc7"]
+  <<: *test_function_parser_definition
 
 test_integrator:cc7:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
@@ -149,41 +189,103 @@ test_function_parser:cc7:
   <<: *test_function_parser_definition
 
 #######################################
-# Fedora 30 jobs
+# Fedora 31 jobs
 #######################################
 
-compile:f30:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f30
+compile:f31:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f31
   <<: *build_definition
 
-run_cepgen:f30:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f30
-  dependencies: ["compile:f30"]
-  needs: ["compile:f30"]
+package:f31:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f31
+  dependencies: ["compile:f31"]
+  needs: ["compile:f31"]
+  <<: *package_definition
+
+run_cepgen:f31:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f31
+  dependencies: ["compile:f31"]
+  needs: ["compile:f31"]
   <<: *run_cepgen_definition
 
-test:f30:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f30
-  dependencies: ["compile:f30"]
-  needs: ["compile:f30"]
+test:f31:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f31
+  dependencies: ["compile:f31"]
+  needs: ["compile:f31"]
   <<: *test_definition
 
-test_integrator:f30:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f30
-  dependencies: ["compile:f30"]
-  needs: ["compile:f30"]
+test_function_parser:f31:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f31
+  dependencies: ["compile:f31"]
+  needs: ["compile:f31"]
+  <<: *test_function_parser_definition
+
+test_integrator:f31:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f31
+  dependencies: ["compile:f31"]
+  needs: ["compile:f31"]
   <<: *test_integrator_definition
 
-test_cross_sections:f30:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f30
-  dependencies: ["compile:f30"]
-  needs: ["compile:f30"]
+test_cross_sections:f31:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f31
+  dependencies: ["compile:f31"]
+  needs: ["compile:f31"]
   <<: *test_cross_sections_definition
 
-test_function_parser:f30:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f30
-  dependencies: ["compile:f30"]
-  needs: ["compile:f30"]
+test_function_parser:f31:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f31
+  dependencies: ["compile:f31"]
+  needs: ["compile:f31"]
+  <<: *test_function_parser_definition
+
+#######################################
+# Fedora 32 jobs
+#######################################
+
+compile:f32:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f32
+  <<: *build_definition
+
+package:f32:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f32
+  dependencies: ["compile:f32"]
+  needs: ["compile:f32"]
+  <<: *package_definition
+
+run_cepgen:f32:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f32
+  dependencies: ["compile:f32"]
+  needs: ["compile:f32"]
+  <<: *run_cepgen_definition
+
+test:f32:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f32
+  dependencies: ["compile:f32"]
+  needs: ["compile:f32"]
+  <<: *test_definition
+
+test_function_parser:f32:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f32
+  dependencies: ["compile:f32"]
+  needs: ["compile:f32"]
+  <<: *test_function_parser_definition
+
+test_integrator:f32:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f32
+  dependencies: ["compile:f32"]
+  needs: ["compile:f32"]
+  <<: *test_integrator_definition
+
+test_cross_sections:f32:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f32
+  dependencies: ["compile:f32"]
+  needs: ["compile:f32"]
+  <<: *test_cross_sections_definition
+
+test_function_parser:f32:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f32
+  dependencies: ["compile:f32"]
+  needs: ["compile:f32"]
   <<: *test_function_parser_definition
 
 #######################################
@@ -193,6 +295,12 @@ test_function_parser:f30:
 compile:ubuntu_trusty:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_trusty
   <<: *build_definition
+
+package:ubuntu_trusty:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_trusty
+  dependencies: ["compile:ubuntu_trusty"]
+  needs: ["compile:ubuntu_trusty"]
+  <<: *package_definition
 
 run_cepgen:ubuntu_trusty:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_trusty
@@ -206,6 +314,13 @@ test:ubuntu_trusty:
   dependencies: ["compile:ubuntu_trusty"]
   needs: ["compile:ubuntu_trusty"]
   <<: *test_definition
+  allow_failure: true # quite instable as it is...
+
+test_function_parser:ubuntu_trusty:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_trusty
+  dependencies: ["compile:ubuntu_trusty"]
+  needs: ["compile:ubuntu_trusty"]
+  <<: *test_function_parser_definition
   allow_failure: true # quite instable as it is...
 
 test_integrator:ubuntu_trusty:
@@ -228,4 +343,104 @@ test_function_parser:ubuntu_trusty:
   needs: ["compile:ubuntu_trusty"]
   <<: *test_function_parser_definition
   allow_failure: true # quite instable as it is...
+
+#######################################
+# Ubuntu Xenial (16.04) jobs
+#######################################
+
+compile:ubuntu_xenial:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_xenial
+  <<: *build_definition
+
+package:ubuntu_xenial:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_xenial
+  dependencies: ["compile:ubuntu_xenial"]
+  needs: ["compile:ubuntu_xenial"]
+  <<: *package_definition
+
+run_cepgen:ubuntu_xenial:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_xenial
+  dependencies: ["compile:ubuntu_xenial"]
+  needs: ["compile:ubuntu_xenial"]
+  <<: *run_cepgen_definition
+
+test:ubuntu_xenial:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_xenial
+  dependencies: ["compile:ubuntu_xenial"]
+  needs: ["compile:ubuntu_xenial"]
+  <<: *test_definition
+
+test_function_parser:ubuntu_xenial:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_xenial
+  dependencies: ["compile:ubuntu_xenial"]
+  needs: ["compile:ubuntu_xenial"]
+  <<: *test_function_parser_definition
+
+test_integrator:ubuntu_xenial:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_xenial
+  dependencies: ["compile:ubuntu_xenial"]
+  needs: ["compile:ubuntu_xenial"]
+  <<: *test_integrator_definition
+
+test_cross_sections:ubuntu_xenial:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_xenial
+  dependencies: ["compile:ubuntu_xenial"]
+  needs: ["compile:ubuntu_xenial"]
+  <<: *test_cross_sections_definition
+
+test_function_parser:ubuntu_xenial:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_xenial
+  dependencies: ["compile:ubuntu_xenial"]
+  needs: ["compile:ubuntu_xenial"]
+  <<: *test_function_parser_definition
+
+#######################################
+# Ubuntu Focal (20.04) jobs
+#######################################
+
+compile:ubuntu_focal:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_focal
+  <<: *build_definition
+
+package:ubuntu_focal:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_focal
+  dependencies: ["compile:ubuntu_focal"]
+  needs: ["compile:ubuntu_focal"]
+  <<: *package_definition
+
+run_cepgen:ubuntu_focal:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_focal
+  dependencies: ["compile:ubuntu_focal"]
+  needs: ["compile:ubuntu_focal"]
+  <<: *run_cepgen_definition
+
+test:ubuntu_focal:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_focal
+  dependencies: ["compile:ubuntu_focal"]
+  needs: ["compile:ubuntu_focal"]
+  <<: *test_definition
+
+test_function_parser:ubuntu_focal:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_focal
+  dependencies: ["compile:ubuntu_focal"]
+  needs: ["compile:ubuntu_focal"]
+  <<: *test_function_parser_definition
+
+test_integrator:ubuntu_focal:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_focal
+  dependencies: ["compile:ubuntu_focal"]
+  needs: ["compile:ubuntu_focal"]
+  <<: *test_integrator_definition
+
+test_cross_sections:ubuntu_focal:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_focal
+  dependencies: ["compile:ubuntu_focal"]
+  needs: ["compile:ubuntu_focal"]
+  <<: *test_cross_sections_definition
+
+test_function_parser:ubuntu_focal:
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:ubuntu_focal
+  dependencies: ["compile:ubuntu_focal"]
+  needs: ["compile:ubuntu_focal"]
+  <<: *test_function_parser_definition
 

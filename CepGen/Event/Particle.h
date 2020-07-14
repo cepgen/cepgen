@@ -65,6 +65,7 @@ namespace cepgen
       /// Copy constructor
       Particle( const Particle& );
       inline ~Particle() {}
+      Particle& operator=( const Particle& ) = default; ///< Assignment operator
       /// Comparison operator (from unique identifier)
       bool operator<( const Particle& rhs ) const;
       /// Comparison operator (from their reference's unique identifier)
@@ -76,30 +77,32 @@ namespace cepgen
       int id() const { return id_; }
       //void setId( int id ) { id_ = id; }
       /// Set the particle unique identifier in an event
-      void setId( int id ) { id_ = id; }
+      Particle& setId( int id ) { id_ = id; return *this; }
       /// Electric charge (given as a float number, for the quarks and bound states)
       float charge() const;
       /// Set the electric charge sign (+-1 for charged or 0 for neutral particles)
-      void setChargeSign( int sign ) { charge_sign_ = sign; }
+      Particle& setChargeSign( int sign ) { charge_sign_ = sign; return *this; }
       /// Role in the considered process
       Role role() const { return role_; }
       /// Set the particle role in the process
-      void setRole( const Role& role ) { role_ = role; }
+      Particle& setRole( const Role& role ) { role_ = role; return *this; }
       /**
        * Codes 1-10 correspond to currently existing partons/particles, and larger codes contain partons/particles which no longer exist, or other kinds of event information
        * \brief Particle status
        */
-      Status status() const { return status_; }
+      Status status() const { return (Status)status_; }
       /// Set the particle decay/stability status
-      void setStatus( Status status ) { status_ = status; }
+      Particle& setStatus( Status status ) { status_ = (int)status; return *this; }
+      /// Set the particle decay/stability status
+      Particle& setStatus( int status ) { status_ = status; return *this; }
 
       /// Set the PDG identifier (along with the particle's electric charge)
       /// \param[in] pdg PDG identifier
       /// \param[in] ch Electric charge (0, 1, or -1)
-      void setPdgId( pdgid_t pdg, short ch = 0 );
+      Particle& setPdgId( pdgid_t pdg, short ch = 0 );
       /// Set the PDG identifier (along with the particle's electric charge)
       /// \param[in] pdg_id PDG identifier (incl. electric charge in e)
-      void setPdgId( long pdg_id );
+      Particle& setPdgId( long pdg_id );
       /// Retrieve the objectified PDG identifier
       pdgid_t pdgId() const;
       /// Retrieve the integer value of the PDG identifier
@@ -107,18 +110,18 @@ namespace cepgen
       /// Particle's helicity
       float helicity() const { return helicity_; }
       /// Set the helicity of the particle
-      void setHelicity( float heli ) { helicity_ = heli; }
+      Particle& setHelicity( float heli ) { helicity_ = heli; return *this; }
       /// Particle mass in GeV/c\f$^2\f$
       /// \return Particle's mass
       inline double mass() const { return mass_; };
       /// Compute the particle mass
       /// \param[in] off_shell Allow the particle to be produced off-shell?
       /// \note This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
-      void computeMass( bool off_shell = false );
+      Particle& computeMass( bool off_shell = false );
       /// Set the particle mass, in GeV/c\f$^2\f$
       /// \param m Mass in GeV/c\f$^2\f$
       /// \note This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
-      void setMass( double m = -1. );
+      Particle& setMass( double m = -1. );
       /// Particle squared mass, in GeV\f$^2\f$/c\f$^4\f$
       inline double mass2() const { return mass_*mass_; };
       /// Retrieve the momentum object associated with this particle
@@ -126,7 +129,7 @@ namespace cepgen
       /// Retrieve the momentum object associated with this particle
       inline Momentum momentum() const { return momentum_; }
       /// Associate a momentum object to this particle
-      void setMomentum( const Momentum& mom, bool offshell = false );
+      Particle& setMomentum( const Momentum& mom, bool offshell = false );
       /**
        * \brief Set the 3- or 4-momentum associated to the particle
        * \param[in] px Momentum along the \f$x\f$-axis, in GeV/c
@@ -134,13 +137,13 @@ namespace cepgen
        * \param[in] pz Momentum along the \f$z\f$-axis, in GeV/c
        * \param[in] e Energy, in GeV
        */
-      void setMomentum( double px, double py, double pz, double e = -1. );
+      Particle& setMomentum( double px, double py, double pz, double e = -1. );
       /// Set the 4-momentum associated to the particle
       /// \param[in] p 4-momentum
-      inline void setMomentum( double p[4] ) { setMomentum( p[0], p[1], p[2], p[3] ); }
+      inline Particle& setMomentum( double p[4] ) { return setMomentum( p[0], p[1], p[2], p[3] ); }
       /// Set the particle's energy
       /// \param[in] e Energy, in GeV
-      void setEnergy( double e = -1. );
+      Particle& setEnergy( double e = -1. );
       /// Get the particle's energy, in GeV
       double energy() const;
       /// Get the particle's squared energy, in GeV\f$^2\f$
@@ -153,21 +156,21 @@ namespace cepgen
       /// Is this particle a primary particle?
       inline bool primary() const { return mothers_.empty(); }
       /// Clear the particle parentage
-      void clearMothers();
+      Particle& clearMothers();
       /// Set the mother particle
       /// \param[in] part A Particle object containing all the information on the mother particle
-      void addMother( Particle& part );
+      Particle& addMother( Particle& part );
       /// Get the unique identifier to the mother particle from which this particle arises
       /// \return An integer representing the unique identifier to the mother of this particle in the event
       inline ParticlesIds mothers() const { return mothers_; }
       /// Remove the decay products linking
-      void clearDaughters();
+      Particle& clearDaughters();
       /**
        * \brief Add a decay product
        * \param[in] part The Particle object in which this particle will desintegrate or convert
        * \return A boolean stating if the particle has been added to the daughters list or if it was already present before
        */
-      void addDaughter( Particle& part );
+      Particle& addDaughter( Particle& part );
       /// Gets the number of daughter particles
       inline unsigned int numDaughters() const { return daughters_.size(); };
       /// Get an identifiers list all daughter particles
@@ -193,7 +196,7 @@ namespace cepgen
       /// Role in the process
       Role role_;
       /// Decay/stability status
-      Status status_;
+      int status_;
       /// List of mother particles
       ParticlesIds mothers_;
       /// List of daughter particles

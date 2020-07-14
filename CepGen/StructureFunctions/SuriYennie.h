@@ -1,7 +1,7 @@
 #ifndef CepGen_StructureFunctions_SuriYennie_h
 #define CepGen_StructureFunctions_SuriYennie_h
 
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 
 namespace cepgen
 {
@@ -13,17 +13,21 @@ namespace cepgen
       public:
         /// Collection of parameterisation-dependent couplings
         struct Parameters {
-          // values extracted from experimental fits
-          static Parameters standard();
-          static Parameters alternative();
-
-          double C1, C2, D1, rho2, Cp, Bp;
+          static Parameters standard(); ///< Standard parameterisation extracted from experimental fits
+          static Parameters alternative(); ///< Alternative parameterisation extracted from experimental fits
+          double C1, C2;
+          double D1;
+          double rho2;
+          double Cp, Bp;
         };
 
+        /// User-steered Suri-Yennie continuum structure functions calculator
         explicit SuriYennie( const ParametersList& params = ParametersList() );
+        static std::string description() { return "Suri-Yennie FE/FM"; }
+
         SuriYennie& operator()( double xbj, double q2 ) override;
 
-        double F1;
+        double F1; ///< Longitudinal form factor
         double FE; ///< Electric proton form factor
         double FM; ///< Magnetic proton form factor
       private:

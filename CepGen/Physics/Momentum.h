@@ -1,7 +1,7 @@
 #ifndef CepGen_Physics_Momentum_h
 #define CepGen_Physics_Momentum_h
 
-#include <vector>
+#include <array>
 #include <iosfwd>
 
 namespace cepgen
@@ -12,7 +12,7 @@ namespace cepgen
    * \date Dec 2015
    * \author Laurent Forthomme <laurent.forthomme@cern.ch>
    */
-  class Momentum {
+  class Momentum : private std::array<double,4> {
     public:
       /// Build a 4-momentum at rest with an invalid energy (no mass information known)
       Momentum();
@@ -64,8 +64,6 @@ namespace cepgen
       Momentum& operator*=( double c );
       /// Left-multiply all 4-momentum coordinates by a scalar
       friend Momentum operator*( double, const Momentum& );
-      /// Equality operator
-      bool operator==( const Momentum& ) const;
       /// Human-readable format for a particle's momentum
       friend std::ostream& operator<<( std::ostream&, const Momentum& );
 
@@ -79,38 +77,34 @@ namespace cepgen
       Momentum& setP( double px, double py, double pz, double e );
       /// Set all the components of the 3-momentum (in GeV)
       Momentum& setP( double px, double py, double pz );
-      /// Get one component of the 4-momentum (in GeV)
-      double operator[]( const unsigned int i ) const;
-      /// Get one component of the 4-momentum (in GeV)
-      double& operator[]( const unsigned int i );
       /// Set the momentum along the \f$x\f$-axis (in GeV)
-      inline void setPx( double px ) { px_ = px; }
+      inline Momentum& setPx( double px ) { (*this)[X] = px; return *this; }
       /// Momentum along the \f$x\f$-axis (in GeV)
-      inline double px() const { return px_; }
+      inline double px() const { return (*this)[X]; }
       /// Set the momentum along the \f$y\f$-axis (in GeV)
-      inline void setPy( double py ) { py_ = py; }
+      inline Momentum& setPy( double py ) { (*this)[Y] = py; return *this; }
       /// Momentum along the \f$y\f$-axis (in GeV)
-      inline double py() const { return py_; }
+      inline double py() const { return (*this)[Y]; }
       /// Set the longitudinal momentum (in GeV)
-      inline void setPz( double pz ) { pz_ = pz; }
+      inline Momentum& setPz( double pz ) { (*this)[Z] = pz; return *this; }
       /// Longitudinal momentum (in GeV)
-      inline double pz() const { return pz_; }
+      inline double pz() const { return (*this)[Z]; }
       /// Transverse momentum (in GeV)
       double pt() const;
       /// Squared transverse momentum (in GeV\f$^2\f$)
       double pt2() const;
       /// 5-vector of double precision floats (in GeV)
-      const std::vector<double> pVector() const;
+      std::array<double,5> pVector() const;
       /// 3-momentum norm (in GeV)
       inline double p() const { return p_; }
       /// Squared 3-momentum norm (in GeV\f$^2\f$)
       inline double p2() const { return p_*p_; }
       /// Set the energy (in GeV)
-      inline Momentum& setEnergy( double e ) { energy_ = e; return *this; }
+      inline Momentum& setEnergy( double e ) { (*this)[E] = e; return *this; }
       /// Energy (in GeV)
-      inline double energy() const { return energy_; }
+      inline double energy() const { return (*this)[E]; }
       /// Squared energy (in GeV\f$^2\f$)
-      inline double energy2() const { return energy_*energy_; }
+      inline double energy2() const { return (*this)[E]*(*this)[E]; }
       /// Compute the energy from the mass
       Momentum& setMass2( double m2 );
       /// Squared mass (in GeV\f$^2\f$) as computed from its energy and momentum
@@ -133,22 +127,19 @@ namespace cepgen
       Momentum& rotatePhi( double phi, double sign );
       /// Rotate the particle's momentum by a polar/azimuthal angle
       Momentum& rotateThetaPhi( double theta_, double phi_ );
+      /// Apply a \f$ x\rightarrow -x\f$ transformation
+      inline Momentum& mirrorX() { (*this)[X] *= -1.; return *this; }
+      /// Apply a \f$ y\rightarrow -y\f$ transformation
+      inline Momentum& mirrorY() { (*this)[Y] *= -1.; return *this; }
       /// Apply a \f$ z\rightarrow -z\f$ transformation
-      inline Momentum& mirrorZ() { pz_ = -pz_; return *this; }
+      inline Momentum& mirrorZ() { (*this)[Z] *= -1.; return *this; }
 
     private:
+      enum coord_t { X = 0, Y = 1, Z = 2, E = 3 };
       /// Compute the 3-momentum's norm
       Momentum& computeP();
-      /// Momentum along the \f$x\f$-axis
-      double px_;
-      /// Momentum along the \f$y\f$-axis
-      double py_;
-      /// Momentum along the \f$z\f$-axis
-      double pz_;
       /// 3-momentum's norm (in GeV/c)
       double p_;
-      /// Energy (in GeV)
-      double energy_;
   };
   /// Compute the centre of mass energy of two particles momenta
   double CMEnergy( const Momentum& m1, const Momentum& m2 );

@@ -38,13 +38,20 @@ namespace cepgen
     return instance;
   }
 
+  bool
+  PDG::has( pdgid_t id ) const
+  {
+    return particles_.count( id ) > 0;
+  }
+
   const ParticleProperties&
   PDG::operator()( pdgid_t id ) const
   {
     if ( particles_.count( id ) > 0 )
       return particles_.at( id );
+    dump();
     throw CG_WARNING( "PDG" )
-      << "Failed to retrieve particle properties for PDG id " << id << "!";
+      << "No particle with PDG id " << id << " in the catalogue.";
   }
 
   void
@@ -70,7 +77,7 @@ namespace cepgen
     return operator()( id ).description;
   }
 
-  short
+  double
   PDG::colours( pdgid_t id ) const
   {
     return operator()( id ).colours;
@@ -113,10 +120,11 @@ namespace cepgen
         return a.first < b.first;
       } );
     //--- then the proper dump begins
-    std::ostringstream oss;
-    for ( const auto& prt : tmp )
-      if ( prt.first != PDG::invalid )
-        oss << "\n" << prt.second;
-    CG_INFO( "PDG" ) << "List of particles registered:" << oss.str();
+    CG_INFO( "PDG" ).log( [&tmp]( auto& info ) {
+      info << "List of particles registered:";
+      for ( const auto& prt : tmp )
+        if ( prt.first != PDG::invalid )
+          info << "\n" << prt.second;
+    } );
   }
 }

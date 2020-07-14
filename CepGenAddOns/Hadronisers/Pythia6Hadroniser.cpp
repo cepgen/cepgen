@@ -1,6 +1,6 @@
-#include "CepGen/Modules/Hadroniser.h"
+#include "CepGen/Physics/Hadroniser.h"
+#include "CepGen/Modules/EventModifierFactory.h"
 
-#include "CepGen/Core/EventModifierHandler.h"
 #include "CepGen/Core/ParametersList.h" //FIXME
 
 #include "CepGen/Event/Event.h"
@@ -9,6 +9,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Hasher.h"
 
 #include <algorithm>
 
@@ -61,20 +62,25 @@ namespace cepgen
     {
       public:
         using Hadroniser::Hadroniser;
+        static std::string description() {
+          return "Interface to the Pythia 6 string hadronisation/fragmentation algorithm";
+        }
 
         void setParameters( const Parameters& ) override {}
         inline void readString( const char* param ) override { pygive( param ); }
         void init() override;
         bool run( Event& ev, double& weight, bool full ) override;
 
-        void setCrossSection( double xsec, double xsec_err ) override {}
+        void setCrossSection( double, double ) override {}
 
       private:
         static constexpr unsigned short MAX_PART_STRING = 3;
         static constexpr unsigned short MAX_STRING_EVENT = 2;
         /// Maximal number of characters to fetch for the particle's name
         static constexpr unsigned short NAME_CHR = 16;
-        static const std::unordered_map<Particle::Status,int> kStatusMatchMap;
+
+        typedef std::unordered_map<Particle::Status,int,utils::EnumHash<Particle::Status> > ParticlesStatusMap;
+        static const ParticlesStatusMap kStatusMatchMap;
 
         inline static double pymass(int pdgid_) { return pymass_(pdgid_); }
         inline static void pyckbd() { pyckbd_(); }
@@ -99,7 +105,7 @@ namespace cepgen
         unsigned int fillParticles( const Event& ) const;
     };
 
-    const std::unordered_map<Particle::Status,int>
+    const Pythia6Hadroniser::ParticlesStatusMap
     Pythia6Hadroniser::kStatusMatchMap = {
       { Particle::Status::PrimordialIncoming, 21 },
       { Particle::Status::FinalState, 1 },
@@ -126,20 +132,20 @@ namespace cepgen
 
       //--- only prepare remnants for fragmentation in full (event builder) mode
       if ( full && remn_fragm_ )
-        prepareHadronisation( ev );
+        if ( !prepareHadronisation( ev ) )
+          return false;
 
-      if ( CG_LOG_MATCH( "Pythia6Hadroniser:dump", debug ) ) {
-        CG_DEBUG( "Pythia6Hadroniser" )
-          << "Dump of the event before the hadronisation:";
-        ev.dump();
-      }
+      CG_DEBUG_LOOP( "Pythia6Hadroniser" ).log( [&ev]( auto& dbg ) {
+        dbg << "Dump of the event before the hadronisation:" << ev;
+      } );
 
       //--- fill Pythia 6 common blocks
       const unsigned short str_in_evt = fillParticles( ev );
 
-      CG_DEBUG( "Pythia6Hadroniser" )
+      CG_DEBUG_LOOP( "Pythia6Hadroniser" )
         << "Passed the string construction stage.\n\t "
-        << utils::s( "string object", str_in_evt ) << " identified and constructed.";
+        << utils::s( "string object", str_in_evt, true )
+        << " identified and constructed.";
 
       const int old_npart = pyjets_.n;
 
@@ -155,7 +161,7 @@ namespace cepgen
         const pdgid_t pdg_id = abs( pyjets_.k[1][p] );
         ParticleProperties prop;
         if ( full )
-          try { prop = PDG::get()( pdg_id ); } catch ( const Exception& ) {
+          if ( !PDG::get().has( pdg_id ) ) {
             prop = ParticleProperties{ pdg_id,
               pyname( pdg_id ), pyname( pdg_id ),
               (short)pyk( p+1, 12 ), // colour factor
@@ -173,20 +179,16 @@ namespace cepgen
 
         auto& pa = ev.addParticle( role );
         pa.setId( p );
+        pa.setStatus( pyjets_.k[0][p] );
         pa.setPdgId( (long)pyjets_.k[1][p] );
-        int status = pyjets_.k[0][p];
-        if ( status == 11 || status == 14 )
-          status = -3;
-        pa.setStatus( (Particle::Status)status );
         pa.setMomentum( Momentum( pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p] ) );
         pa.setMass( pyjets_.p[4][p] );
-        if ( role != Particle::Role::UnknownRole ) {
-          auto& moth = ev[moth_id];
+        auto& moth = ev[moth_id];
+        if ( role != Particle::Role::UnknownRole )
           moth.setStatus( role == Particle::Role::CentralSystem
             ? Particle::Status::Resonance
             : Particle::Status::Fragmented );
-          pa.addMother( moth );
-        }
+        pa.addMother( moth );
       }
       return true;
     }
@@ -194,7 +196,7 @@ namespace cepgen
     bool
     Pythia6Hadroniser::prepareHadronisation( Event& ev )
     {
-      CG_DEBUG( "Pythia6Hadroniser" ) << "Hadronisation preparation called.";
+      CG_DEBUG_LOOP( "Pythia6Hadroniser" ) << "Hadronisation preparation called.";
 
       for ( const auto& part : ev.particles() ) {
         if ( part.status() != Particle::Status::Unfragmented )
@@ -210,7 +212,13 @@ namespace cepgen
         const double phi = 2.*M_PI*drand(), theta = acos( 2.*drand()-1. ); // theta angle
 
         //--- compute momentum of decay particles from MX
-        const double px = std::sqrt( 0.25*std::pow( mx2-mdq2+mq2, 2 )/mx2-mq2 );
+        const double px2 = 0.25*std::pow( mx2-mdq2+mq2, 2 )/mx2-mq2;
+        if ( px2 < 0. ) {
+          CG_WARNING( "Pythia6Hadroniser" )
+            << "Invalid remnants kinematics for " << part.role() << ".";
+          return false;
+        }
+        const double px = std::sqrt( px2 );
 
         //--- build 4-vectors and boost decay particles
         auto pdq = Momentum::fromPThetaPhi( px, theta, phi, std::hypot( px, mdq ) );
@@ -298,17 +306,15 @@ namespace cepgen
         if ( num_part_in_str[i] < 2 )
           continue;
 
-        if ( CG_LOG_MATCH( "Pythia6Hadroniser", debug ) ) {
-          std::ostringstream dbg;
+        CG_DEBUG_LOOP( "Pythia6Hadroniser" ).log( [&]( auto& dbg ) {
+          dbg
+            << "Joining " << utils::s( "particle", num_part_in_str[i] )
+            << " with " << ev[jlpsf[i][0]].role() << " role"
+            << " in a same string (id=" << i << ")";
           for ( unsigned short j = 0; j < num_part_in_str[i]; ++j )
             if ( jlpsf[i][j] != -1 )
               dbg << utils::format( "\n\t * %2d (pdgId=%4d)", jlpsf[i][j], pyjets_.k[1][jlpsf[i][j]-1] );
-          CG_DEBUG( "Pythia6Hadroniser" )
-            << "Joining " << utils::s( "particle", num_part_in_str[i] )
-            << " with " << ev[jlpsf[i][0]].role() << " role"
-            << " in a same string (id=" << i << ")"
-            << dbg.str();
-        }
+        } );
         pyjoin( num_part_in_str[i], jlpsf[i] );
       }
       return str_in_evt;

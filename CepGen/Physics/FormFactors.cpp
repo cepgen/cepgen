@@ -25,7 +25,7 @@ namespace cepgen
   }
 
   FormFactors
-  FormFactors::compositeScalar( double q2 )
+  FormFactors::compositeScalar( double )
   {
     throw CG_FATAL( "FormFactors:compositeScalar" ) << "Not yet supported!";
   }
@@ -33,7 +33,7 @@ namespace cepgen
   FormFactors
   FormFactors::protonElastic( double q2 )
   {
-    const double mp = PDG::get().mass( PDG::proton ), mp2 = mp*mp;
+    static const double mp = PDG::get().mass( PDG::proton ), mp2 = mp*mp;
     const double GE = pow( 1.+q2/0.71, -2. ), GE2 = GE*GE;
     const double GM = 2.79*GE, GM2 = GM*GM;
     return FormFactors( ( 4.*mp2*GE2+q2*GM2 ) / ( 4.*mp2+q2 ), GM2 );
@@ -42,13 +42,14 @@ namespace cepgen
   FormFactors
   FormFactors::protonInelastic( double q2, double mi2, double mf2, strfun::Parameterisation& sf )
   {
-    const double xbj = q2 / ( q2 + mf2 - mi2 );
-    switch ( sf.type ) {
+    const double xbj = q2 / ( q2+mf2-mi2 );
+    switch ( (strfun::Type)sf.name() ) {
       case strfun::Type::ElasticProton:
         CG_WARNING( "FormFactors" ) << "Elastic proton form factors requested! Check your process definition!";
         return FormFactors::protonElastic( q2 );
       case strfun::Type::SuriYennie: {
-        strfun::SuriYennie sy = strfun::SuriYennie()( xbj, q2 );
+        static strfun::SuriYennie sy;
+        sy = sy( xbj, q2 );
         return FormFactors( sy.F2 * xbj * sqrt( mi2 ) / q2, sy.FM ); //FIXME
       } break;
       default: {

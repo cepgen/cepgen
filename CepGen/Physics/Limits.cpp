@@ -58,6 +58,8 @@ namespace cepgen
   double
   Limits::range() const
   {
+    if ( !hasMin() && hasMax() ) // if no lower limit, assume 0
+      return second;
     if ( !hasMin() || !hasMax() )
       return 0.;
     return second-first;
@@ -76,7 +78,7 @@ namespace cepgen
   }
 
   bool
-  Limits::passes( double val ) const
+  Limits::contains( double val ) const
   {
     if ( hasMin() && val < min() )
       return false;
@@ -88,7 +90,17 @@ namespace cepgen
   bool
   Limits::valid() const
   {
+    if ( min() == max() )
+      return false;
     return hasMin() || hasMax();
+  }
+
+  Limits&
+  Limits::validate()
+  {
+    if ( second < first )
+      second = INVALID;
+    return *this;
   }
 
   void
@@ -112,6 +124,10 @@ namespace cepgen
     if ( v < 0. || v > 1. )
       throw CG_ERROR( "Limits:shoot" )
         << "x must be comprised between 0 and 1; x value = " << v << ".";
+
+    if ( !hasMin() && hasMax() ) // if no lower limit, assume 0
+      return second * v;
+
     if ( !valid() )
       return INVALID;
 

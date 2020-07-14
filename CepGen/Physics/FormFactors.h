@@ -1,7 +1,8 @@
 #ifndef CepGen_Physics_FormFactors_h
 #define CepGen_Physics_FormFactors_h
 
-#include <math.h>
+#include <cmath>
+#include <iosfwd>
 #include <array>
 
 namespace cepgen

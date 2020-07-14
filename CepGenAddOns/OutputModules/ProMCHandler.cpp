@@ -1,5 +1,5 @@
-#include "CepGen/Modules/ExportModule.h"
-#include "CepGen/Core/ExportModuleHandler.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/PDG.h"
@@ -26,6 +26,7 @@ namespace cepgen
       public:
         explicit ProMCHandler( const ParametersList& );
         ~ProMCHandler();
+        static std::string description() { return "ProMC file output module"; }
 
         void initialise( const Parameters& ) override;
         void setCrossSection( double xsec, double err ) override { xsec_ = xsec, xsec_err_ = err; }
@@ -106,7 +107,7 @@ namespace cepgen
 
       unsigned short i = 0;
       const auto& parts = compress_evt_
-        ? ev.compressed().particles()
+        ? ev.compress().particles()
         : ev.particles();
       for ( const auto& par : parts ) {
         auto part = event.mutable_particles();

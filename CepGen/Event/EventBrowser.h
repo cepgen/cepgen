@@ -18,6 +18,7 @@ namespace cepgen
     {
       public:
         EventBrowser() = default;
+        /// Get/compute a variable value
         double get( const Event& ev, const std::string& var ) const;
 
       private:

@@ -3,7 +3,8 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Event/Event.h"
 
-#include "CepGen/Core/ExportModuleHandler.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
 
 #include "CepGen/Utils/ArgumentsParser.h"
 
@@ -14,26 +15,26 @@ using namespace cepgen;
 
 int main( int argc, char* argv[] )
 {
-  Generator gen;
+  initialise();
 
   string type;
   bool list;
 
   ArgumentsParser( argc, argv )
-    .addOptionalArgument( "format", "type of format to build", "hepmc", &type )
-    .addOptionalArgument( "list", "list all formats", false, &list, 'l' )
+    .addOptionalArgument( "format", "type of format to build", &type, "hepmc" )
+    .addOptionalArgument( "list,l", "list all formats", &list, false )
     .parse();
 
   if ( list ) {
     cout
       << "List of export modules available:\n"
       << "=================================\n";
-    for ( const auto& mod : io::ExportModuleHandler::get().modules() )
+    for ( const auto& mod : io::ExportModuleFactory::get().modules() )
       cout << mod << std::endl;
     return 0;
   }
 
-  auto writer = io::ExportModuleHandler::get().build( type );
+  auto writer = io::ExportModuleFactory::get().build( type );
   writer->setCrossSection( 1., 2. );
 
   Event ev;

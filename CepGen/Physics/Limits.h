@@ -12,15 +12,20 @@ namespace cepgen
     public:
       /// Define lower and upper limits on a quantity
       Limits( double min = INVALID, double max = INVALID );
+      /// Copy constructor
       Limits( const Limits& );
 
-      Limits operator-() const;
-      Limits& operator+=( double c );
-      Limits& operator-=( double c );
-      Limits& operator*=( double c );
-      friend Limits operator+( Limits lim, double c );
-      friend Limits operator-( Limits lim, double c );
-      friend Limits operator*( Limits lim, double c );
+      Limits operator-() const; ///< Invert this limit
+      Limits& operator=( const Limits& ) = default; ///< Assignment operator
+      Limits& operator+=( double c ); ///< Add a constant to this limit
+      Limits& operator-=( double c ); ///< Subtract a constant to this limit
+      Limits& operator*=( double c ); ///< Multiply this limit by a constant
+      friend Limits operator+( Limits lim, double c ); ///< Add a constant to a limit
+      friend Limits operator-( Limits lim, double c ); ///< Subtract a constant to a limit
+      friend Limits operator*( Limits lim, double c ); ///< Multiply a limit by a constant
+
+      /// Ensure the limit object is valid by correcting it if necessary
+      Limits& validate();
 
       /// Lower limit to apply on the variable
       double min() const { return first; }
@@ -43,14 +48,16 @@ namespace cepgen
       /// Have an upper limit?
       bool hasMax() const;
       /// Check if the value is inside limits' boundaries
-      bool passes( double val ) const;
+      bool contains( double val ) const;
       /// Is there a lower and upper limit?
       bool valid() const;
+      /// Raw value of the limits
+      const std::pair<double,double> raw() const { return *this; }
 
       /// Human-readable expression of the limits
       friend std::ostream& operator<<( std::ostream&, const Limits& );
 
-    private:
+      /// Placeholder for an invalid value in a limit (for single-edged or invalid limits)
       static constexpr double INVALID = -999.999;
   };
 }
