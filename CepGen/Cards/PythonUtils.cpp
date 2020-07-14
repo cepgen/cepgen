@@ -23,7 +23,6 @@ namespace cepgen
     PythonHandler::pythonPath( const std::string& file ) const
     {
       std::string s_filename = file;
-      s_filename = s_filename.substr( 0, s_filename.find_last_of( "." ) ); // remove the extension
       auto path = utils::split( s_filename, '/' );
       if ( path.size() > 1 ) {
         s_filename = *path.rbegin();
@@ -33,6 +32,7 @@ namespace cepgen
           << "Adding \"" << dir << "\" to the default search paths.";
         setenv( "PYTHONPATH", dir.c_str(), 1 );
       }
+      s_filename = s_filename.substr( 0, s_filename.find_last_of( "." ) ); // remove the extension
       CG_DEBUG( "PythonHandler" )
         << "Python path: " << s_filename;
       return s_filename;
