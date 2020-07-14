@@ -53,13 +53,8 @@ namespace cepgen
     if ( num_events < 1 )
       num_events = params_->generation().maxgen;
 
-    try {
-      while ( params_->numGeneratedEvents() < num_events )
-        next( callback );
-    } catch ( const Exception& ) {
-      CG_WARNING( "GeneratorWorker:generate" ) << "Generation ended with exception.";
-      return;
-    }
+    while ( params_->numGeneratedEvents() < num_events )
+      next( callback );
   }
 
   bool

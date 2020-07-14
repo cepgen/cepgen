@@ -85,7 +85,7 @@ int main( int argc, char* argv[] )
       //--- events generation starts here
       // (one may use a callback function)
       gen.generate();
-  } catch ( const cepgen::utils::RunAbortedException& e ) {
+  } catch ( const cepgen::utils::RunAbortedException& ) {
     CG_DEBUG( "main" ) << "Run aborted!";
   } catch ( const cepgen::Exception& e ) {
     e.dump();
