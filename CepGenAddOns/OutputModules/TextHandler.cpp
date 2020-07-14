@@ -322,8 +322,9 @@ namespace cepgen
       os
         << "\n" << sep
         << ":" << std::string( nbins_y, '.' ) << ": " // 2nd abscissa axis
-        << vars.at( 1 ) << "\n\t("
-        << "x-axis: "
+        << vars.at( 1 ) << "\n\t"
+        << "(scale: \"" << std::string( PLOT_2D_CHARS ) << "\"\n\t"
+        << " x-axis: "
         << "bin width=" << bin_width_x << utils::s( " unit", (int)bin_width_x, false ) << ", "
         << "mean=" << gsl_histogram2d_xmean( hist ) << ","
         << "st.dev.=" << gsl_histogram2d_xsigma( hist ) << "\n\t"

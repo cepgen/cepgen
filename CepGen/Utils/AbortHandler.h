@@ -12,15 +12,13 @@ namespace cepgen
   {
     extern std::atomic<int> gSignal;
     /// Exception raised when the user terminates the process
-    struct RunAbortedException : Exception
+    struct RunAbortedException : NullStream
     {
-      using Exception::Exception;
+      using NullStream::NullStream;
       ~RunAbortedException() override {
         CG_LOG( "RunAbortedException" );
         CG_INFO( "RunAbortedException" ) << "User abort through C-c.";
       }
-      std::ostream& dump( std::ostream& os ) const override { return os; }
-      std::string message() const override { return ""; }
     };
 
     /// Object handling an user-driven process abortion
