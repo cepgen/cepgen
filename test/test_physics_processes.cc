@@ -82,7 +82,7 @@ int main( int argc, char* argv[] )
     for ( const auto& test : tests ) {
       gen.parametersRef().clearProcess();
 
-      const std::string filename = "test_processes/"+test.filename+"_cfg.py";
+      const std::string filename = "test/test_processes/"+test.filename+"_cfg.py";
       gen.setParameters( cepgen::card::Handler::parse( filename ) );
       gen.parameters()->integrator->setName<std::string>( integrator );
       CG_INFO( "main" )

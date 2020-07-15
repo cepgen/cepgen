@@ -1,4 +1,4 @@
-#include "CepGenAddOns/PythiaWrapper/PythiaEventInterface.h"
+#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
 #include "CepGen/Physics/Hadroniser.h"
 #include "CepGen/Modules/EventModifierFactory.h"
