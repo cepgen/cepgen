@@ -71,6 +71,10 @@ cpack_add_component(root
     DISPLAY_NAME "CepGen ROOT wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the ROOT library"
     DEPENDS lib)
+cpack_add_component(pythia6
+    DISPLAY_NAME "CepGen Pythia 6 wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to Pythia 6"
+    DEPENDS lib)
 cpack_add_component(pythia8
     DISPLAY_NAME "CepGen Pythia 8 wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to Pythia 8"
