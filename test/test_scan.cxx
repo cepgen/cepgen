@@ -21,7 +21,7 @@ int main( int argc, char* argv[] )
 
   cepgen::ArgumentsParser( argc, argv )
     .addArgument( "input,i", "input card", &input_card )
-    .addOptionalArgument( "default,v", "default value for non-varying coordinates", &def, 0.5 )
+    .addOptionalArgument( "default,D", "default value for non-varying coordinates", &def, 0.5 )
     .addOptionalArgument( "dim,d", "dimensions to probe", &dim, vector<int>{} )
     .addOptionalArgument( "num-points,n", "number of points to probe", &npoints, 100 )
     .parse();

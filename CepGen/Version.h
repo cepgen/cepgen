@@ -11,6 +11,8 @@ namespace cepgen
     static const std::string tag;
     /// CepGen detailed version
     static const std::string extended;
+    /// CepGen banner
+    static const std::string banner;
   };
 }
 
