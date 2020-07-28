@@ -1,7 +1,7 @@
 if(PYTHIA8)
   message(STATUS "Pythia 8 found in ${PYTHIA8}")
 else()
-  message(FATAL_ERROR "Trying to build Pythia8 wrapper library while no Pythia8 installation was found on system!")
+  return()
 endif()
 
 include_directories(${PROJECT_SOURCE_DIR})

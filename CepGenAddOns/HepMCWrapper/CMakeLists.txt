@@ -1,7 +1,7 @@
 if(HEPMC_LIB)
   message(STATUS "HepMC found in ${HEPMC_LIB}; headers found in ${HEPMC_INCLUDE}")
 else()
-  message(FATAL_ERROR "Trying to build HepMC wrapper library while no HepMC installation was found on system!")
+  return()
 endif()
 
 include_directories(${PROJECT_SOURCE_DIR})

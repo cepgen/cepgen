@@ -1,5 +1,5 @@
 if(NOT Boost_FOUND)
-  message(FATAL_ERROR "Trying to build Boost wrapper library while no Boost installation was found on system!")
+  return()
 endif()
 
 include_directories(${PROJECT_SOURCE_DIR})

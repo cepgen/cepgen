@@ -1,5 +1,5 @@
 if(NOT YODA)
-  message(FATAL_ERROR "Trying to build Rivet wrapper library while no Rivet installation was found on system!")
+  return()
 endif()
 
 include_directories(${PROJECT_SOURCE_DIR})

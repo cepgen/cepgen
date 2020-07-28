@@ -8,25 +8,13 @@ set(addons_includes)
 
 #----- check the external dependencies for physics utilities
 
-if(Boost_FOUND)
-  add_subdirectory(BoostWrapper)
-endif()
+add_subdirectory(BoostWrapper)
 add_subdirectory(Pythia6Wrapper)
-if(PYTHIA8)
-  add_subdirectory(Pythia8Wrapper)
-endif()
-if(ROOT_FOUND)
-  add_subdirectory(ROOTWrapper)
-endif()
-if(HEPMC_LIB)
-  add_subdirectory(HepMCWrapper)
-endif()
-if(LHAPDF)
-  add_subdirectory(LHAPDFWrapper)
-endif()
-if(YODA)
-  add_subdirectory(RivetWrapper)
-endif()
+add_subdirectory(Pythia8Wrapper)
+add_subdirectory(ROOTWrapper)
+add_subdirectory(HepMCWrapper)
+add_subdirectory(LHAPDFWrapper)
+add_subdirectory(RivetWrapper)
 
 #--- linking with ROOT/Delphes
 
