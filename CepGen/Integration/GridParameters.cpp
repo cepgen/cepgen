@@ -8,7 +8,8 @@ namespace cepgen
 {
   GridParameters::GridParameters( size_t ndim ) :
     gen_prepared( false ),
-    f_max_diff( 0. ),
+    correc( 0. ), correc2( 0. ),
+    f_max2( 0. ), f_max_diff( 0. ), f_max_old( 0. ),
     ndim_( ndim ), f_max_global_( 0. )
   {
     //--- build and populate the grid
