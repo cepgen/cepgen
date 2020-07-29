@@ -200,6 +200,7 @@ namespace cepgen
       registerKinematicsParameter<double>( "PTCT", "Minimal transverse momentum (single central outgoing particle)", "ptmin" );
       registerKinematicsParameter<double>( "PTMX", "Maximal transverse momentum (single central outgoing particle)", "ptmax" );
       registerKinematicsParameter<double>( "MSCT", "Minimal central system mass", "invmassmin" );
+      registerKinematicsParameter<double>( "MSMX", "Maximal central system mass", "invmassmax" );
       registerKinematicsParameter<double>( "ECUT", "Minimal energy (single central outgoing particle)", "energysummin" );
       registerKinematicsParameter<double>( "ETMN", "Minimal pseudo-rapidity (central outgoing particles)", "etamin" );
       registerKinematicsParameter<double>( "ETMX", "Maximal pseudo-rapidity (central outgoing particles)", "etamax" );
