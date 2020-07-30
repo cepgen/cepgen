@@ -81,7 +81,7 @@ namespace cepgen
     }
 
     void
-    DelphesHandler::initialise( const Parameters& params )
+    DelphesHandler::initialise( const Parameters& )
     {
       factory_ = delphes_->GetFactory();
       if ( !factory_ )

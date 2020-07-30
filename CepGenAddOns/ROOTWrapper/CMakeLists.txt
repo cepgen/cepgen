@@ -13,6 +13,14 @@ if(${_idx} GREATER -1)
   list(APPEND int_sources IntegratorFoam.cpp)
 endif()
 
+#--- Delphes part
+if(DELPHES)
+  message(STATUS "Delphes found in ${DELPHES}")
+  list(APPEND utils_sources DelphesHandler.cpp)
+  list(APPEND ROOT_LIBRARIES ${DELPHES})
+  list(APPEND ROOT_INCLUDE_DIRS ${DELPHES_INCLUDE} ${DELPHES_EXT_INCLUDE})
+endif()
+
 #----- build the objects
 
 add_library(CepGenRoot SHARED ${int_sources} ${out_sources} ${utils_sources})

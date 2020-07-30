@@ -16,15 +16,6 @@ add_subdirectory(HepMCWrapper)
 add_subdirectory(LHAPDFWrapper)
 add_subdirectory(RivetWrapper)
 
-#--- linking with ROOT/Delphes
-
-if(DELPHES)
-  message(STATUS "Delphes found in ${DELPHES}")
-  list(APPEND addons_libraries ${DELPHES})
-  list(APPEND addons_includes ${DELPHES_INCLUDE} ${DELPHES_EXT_INCLUDE})
-  list(APPEND output_sources OutputModules/DelphesHandler.cpp)
-endif()
-
 #--- linking with ProMC
 
 if(PROMC_LIB)
