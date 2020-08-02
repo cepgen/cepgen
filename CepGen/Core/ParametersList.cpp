@@ -250,7 +250,8 @@ namespace cepgen
     for ( const auto& kv : param_values_ )
       if ( kv.first == key )
         return kv.second;
-    CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameters with key=" << key << ". "
+      << "Default value: " << def << ".";
     return def;
   }
 
@@ -260,7 +261,8 @@ namespace cepgen
     for ( const auto& kv : vec_param_values_ )
       if ( kv.first == key )
         return kv.second;
-    CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameters collection with key=" << key << ". "
+      << "Default value: " << def << ".";
     return def;
   }
 
@@ -274,7 +276,8 @@ namespace cepgen
     for ( const auto& kv : int_values_ )
       if ( kv.first == key )
         return kv.second;
-    CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    CG_DEBUG( "ParametersList" ) << "Failed to retrieve integer parameter with key=" << key << ". "
+      << "Default value: " << def << ".";
     return def;
   }
 
@@ -284,7 +287,8 @@ namespace cepgen
     for ( const auto& kv : vec_int_values_ )
       if ( kv.first == key )
         return kv.second;
-    CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    CG_DEBUG( "ParametersList" ) << "Failed to retrieve integer collection with key=" << key << ". "
+      << "Default value: " << def << ".";
     return def;
   }
 
@@ -298,7 +302,8 @@ namespace cepgen
     for ( const auto& kv : dbl_values_ )
       if ( kv.first == key )
         return kv.second;
-    CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    CG_DEBUG( "ParametersList" ) << "Failed to retrieve double parameter with key=" << key << ". "
+      << "Default value: " << def << ".";
     return def;
   }
 
@@ -308,7 +313,8 @@ namespace cepgen
     for ( const auto& kv : vec_dbl_values_ )
       if ( kv.first == key )
         return kv.second;
-    CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    CG_DEBUG( "ParametersList" ) << "Failed to retrieve double collection with key=" << key << ". "
+      << "Default value: " << def << ".";
     return def;
   }
 
@@ -322,7 +328,8 @@ namespace cepgen
     for ( const auto& kv : str_values_ )
       if ( kv.first == key )
         return kv.second;
-    CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    CG_DEBUG( "ParametersList" ) << "Failed to retrieve string parameter with key=" << key << ". "
+      << "Default value: " << def << ".";
     return def;
   }
 
@@ -332,7 +339,8 @@ namespace cepgen
     for ( const auto& kv : vec_str_values_ )
       if ( kv.first == key )
         return kv.second;
-    CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    CG_DEBUG( "ParametersList" ) << "Failed to retrieve string collection with key=" << key << ". "
+      << "Default value: " << def << ".";
     return def;
   }
 
@@ -346,7 +354,8 @@ namespace cepgen
     for ( const auto& kv : lim_values_ )
       if ( kv.first == key )
         return kv.second;
-    CG_DEBUG( "ParametersList" ) << "Failed to retrieve parameter with key=" << key << ".";
+    CG_DEBUG( "ParametersList" ) << "Failed to retrieve limits parameter with key=" << key << ". "
+      << "Default value: " << def << ".";
     return def;
   }
 
