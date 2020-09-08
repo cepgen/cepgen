@@ -26,14 +26,6 @@ else()
   file(GLOB pegasus_alphas Physics/AlphaSPEGASUS.cpp)
   file(REMOVE_ITEM phys_sources ${pegasus_alphas})
 endif()
-if(APFEL)
-  message(STATUS "APFEL found in ${APFEL}")
-  list(APPEND core_includes ${APFEL_INCLUDE})
-  list(APPEND CEPGEN_CORE_EXT ${APFEL})
-else()
-  file(GLOB apfel_alphas Physics/AlphaSAPFEL.cpp)
-  list(REMOVE_ITEM phys_sources ${apfel_alphas})
-endif()
 
 #----- check the external dependencies for physics utilities
 

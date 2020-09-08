@@ -15,6 +15,7 @@ add_subdirectory(ROOTWrapper)
 add_subdirectory(HepMCWrapper)
 add_subdirectory(LHAPDFWrapper)
 add_subdirectory(RivetWrapper)
+add_subdirectory(APFELWrapper)
 
 #--- linking with ProMC
 

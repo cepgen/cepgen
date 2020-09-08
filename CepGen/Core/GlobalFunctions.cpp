@@ -42,7 +42,7 @@ namespace cepgen
       "CepGenLHAPDF",
       "CepGenHepMC",
       "CepGenBoost",
-      "CepGenRivet",
+      "CepGenRivet", "CepGenAPFEL"
     };
     std::atomic<int> gSignal; ///< Abort signal handler
   }
