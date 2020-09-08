@@ -35,6 +35,7 @@ if(RPMBUILD)
     set(CPACK_RPM_LHAPDF_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, lhapdf")
     set(CPACK_RPM_HEPMC_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, HepMC >= 2.01")
     set(CPACK_RPM_RIVET_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
+    set(CPACK_RPM_APFEL_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
     set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
       /usr /usr/bin /usr/lib /usr/lib64 /usr/include)
 else()
@@ -57,6 +58,7 @@ else()
     set(CPACK_DEB_LHAPDF_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, lhapdf")
     set(CPACK_DEB_HEPMC_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, HepMC >= 2.01")
     set(CPACK_DEB_RIVET_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}")
+    set(CPACK_DEB_APFEL_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}")
 endif()
 include(CPack)
 #--- register packages
@@ -96,5 +98,9 @@ cpack_add_component(lhapdf
 cpack_add_component(rivet
     DISPLAY_NAME "CepGen Rivet wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the Rivet library"
+    DEPENDS lib)
+cpack_add_component(apfel
+    DISPLAY_NAME "CepGen APFEL wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the APFEL library"
     DEPENDS lib)
 #message(STATUS ">>> ${CPACK_COMPONENTS_ALL}")
