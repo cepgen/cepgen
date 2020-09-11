@@ -8,6 +8,8 @@ set(cards_includes)
 
 #----- add Python parser if found
 
+find_package(PythonInterp)
+find_package(PythonLibs)
 if(PYTHONLIBS_FOUND)
   message(STATUS "Python v${PYTHONLIBS_VERSION_STRING} found")
   file(GLOB python_sources Python*.cpp)

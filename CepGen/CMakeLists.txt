@@ -32,6 +32,7 @@ endif()
 
 #----- check the external dependencies for physics utilities
 
+find_library(MUPARSER muparser)
 if(MUPARSER)
   message(STATUS "Formulas parsing will use muParser found in ${MUPARSER}")
   list(APPEND CEPGEN_CORE_EXT ${MUPARSER})
@@ -41,6 +42,7 @@ else()
   list(REMOVE_ITEM core_sources ${func_muparser})
 endif()
 
+find_path(EXPRTK exprtk.hpp PATH_SUFFIXES include)
 if(EXPRTK)
   message(STATUS "Formulas parsing will use exprtk found in ${EXPRTK}")
   list(APPEND core_includes ${EXPRTK}) # header-only

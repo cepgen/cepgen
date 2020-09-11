@@ -1,3 +1,5 @@
+find_package(Boost)
+
 if(NOT Boost_FOUND)
   return()
 endif()
