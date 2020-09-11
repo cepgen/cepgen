@@ -1,3 +1,28 @@
+#--- searching for ROOT
+find_package(ROOT QUIET COMPONENTS Hist MathCore Foam)
+if(ROOT_FOUND)
+  message(STATUS "ROOT found in ${ROOT_INCLUDE_DIRS}")
+  if(IS_LXPLUS)
+    #--- LXPLUS/CVMFS tweak for missing dependencies
+    find_library(TBB tbb HINTS $ENV{TBB_DIR} PATH_SUFFIXES lib QUIET)
+    if(TBB)
+      list(APPEND ROOT_LIBRARIES ${TBB})
+    endif()
+    find_library(DAVIX davix HINTS $ENV{DAVIX_DIR} PATH_SUFFIXES lib64)
+    if(DAVIX)
+      list(APPEND ROOT_LIBRARIES ${DAVIX})
+    endif()
+    find_library(VDT vdt HINTS $ENV{VDT_DIR} PATH_SUFFIXES lib)
+    if(VDT)
+      list(APPEND ROOT_LIBRARIES ${VDT})
+    endif()
+  endif()
+  #--- searching for Delphes
+  find_library(DELPHES Delphes HINTS $ENV{DELPHES_DIR} PATH_SUFFIXES lib)
+  find_path(DELPHES_INCLUDE NAMES modules classes HINTS $ENV{DELPHES_DIR} PATH_SUFFIXES include)
+  find_path(DELPHES_EXT_INCLUDE NAMES ExRootAnalysis HINTS $ENV{DELPHES_DIR} PATH_SUFFIXES external include)
+endif()
+
 if(NOT ROOT_FOUND)
   return()
 endif()

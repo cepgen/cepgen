@@ -13,18 +13,10 @@ add_subdirectory(Pythia6Wrapper)
 add_subdirectory(Pythia8Wrapper)
 add_subdirectory(ROOTWrapper)
 add_subdirectory(HepMCWrapper)
+add_subdirectory(ProMCWrapper)
 add_subdirectory(LHAPDFWrapper)
 add_subdirectory(RivetWrapper)
 add_subdirectory(APFELWrapper)
-
-#--- linking with ProMC
-
-if(PROMC_LIB)
-  message(STATUS "ProMC found in ${PROMC_LIB}")
-  list(APPEND addons_libraries ${PROMC_LIB})
-  list(APPEND addons_includes ${PROMC_INCLUDE} ${PROMC_EXT_INCLUDE})
-  list(APPEND output_sources OutputModules/ProMCHandler.cpp)
-endif()
 
 #----- build the objects
 

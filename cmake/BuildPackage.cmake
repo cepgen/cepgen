@@ -34,6 +34,7 @@ if(RPMBUILD)
     set(CPACK_RPM_BOOST_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, boost >= 1.33")
     set(CPACK_RPM_LHAPDF_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, lhapdf")
     set(CPACK_RPM_HEPMC_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, HepMC >= 2.01")
+    set(CPACK_RPM_PROMC_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
     set(CPACK_RPM_RIVET_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
     set(CPACK_RPM_APFEL_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
     set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
@@ -57,6 +58,7 @@ else()
     set(CPACK_DEB_BOOST_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, boost >= 1.33")
     set(CPACK_DEB_LHAPDF_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, lhapdf")
     set(CPACK_DEB_HEPMC_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, HepMC >= 2.01")
+    set(CPACK_DEB_PROMC_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}")
     set(CPACK_DEB_RIVET_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}")
     set(CPACK_DEB_APFEL_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}")
 endif()
@@ -90,6 +92,10 @@ cpack_add_component(boost
 cpack_add_component(hepmc
     DISPLAY_NAME "CepGen HepMC wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the HepMC library"
+    DEPENDS lib)
+cpack_add_component(promc
+    DISPLAY_NAME "CepGen ProMC wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the ProMC library"
     DEPENDS lib)
 cpack_add_component(lhapdf
     DISPLAY_NAME "CepGen LHAPDF wrappers library"

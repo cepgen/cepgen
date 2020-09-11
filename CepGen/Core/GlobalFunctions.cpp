@@ -40,7 +40,7 @@ namespace cepgen
       "CepGenRoot",
       "CepGenPythia6", "CepGenPythia8",
       "CepGenLHAPDF",
-      "CepGenHepMC",
+      "CepGenHepMC", "CepGenProMC",
       "CepGenBoost",
       "CepGenRivet", "CepGenAPFEL"
     };

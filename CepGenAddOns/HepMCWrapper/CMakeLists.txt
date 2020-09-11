@@ -1,3 +1,10 @@
+#--- searching for HepMC
+set(HEPMC_DIRS $ENV{HEPMC_DIR} /usr /usr/local)
+find_library(HEPMC_LIB NAMES HepMC3 HepMC HINTS ${HEPMC_DIRS} PATH_SUFFIXES lib64 lib)
+find_library(HEPMC_ROOT_LIB NAMES HepMC3rootIO HepMCrootIO HINTS ${HEPMC_DIRS} PATH_SUFFIXES root)
+find_path(HEPMC_INCLUDE NAMES HepMC3 HepMC HINTS ${HEPMC_DIRS} PATH_SUFFIXES include)
+find_path(HEPMC_EXTRA_PLUGINS NAMES ConvertExample HINTS ${HEPMC_DIRS} $HEPMC_EXTRA_PLUGINS_DIR $ENV{HEPMC_EXTRA_PLUGINS_DIR})
+
 if(HEPMC_LIB)
   message(STATUS "HepMC found in ${HEPMC_LIB}; headers found in ${HEPMC_INCLUDE}")
 else()

@@ -69,7 +69,7 @@ namespace cepgen
     void
     ProMCHandler::initialise( const Parameters& params )
     {
-      file_->setDescription( params.generation().maxgen, "Sample generated using CepGen v"+version() );
+      file_->setDescription( params.generation().maxgen, "Sample generated using CepGen v"+version::extended );
       log_file_ << banner( params ) << "\n";
       ProMCHeader hdr;
       hdr.set_momentumunit( GEV_UNIT );

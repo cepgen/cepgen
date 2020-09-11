@@ -1,3 +1,7 @@
+#--- searching for LHAPDF
+find_library(LHAPDF LHAPDF HINTS $ENV{LHAPDF_PATH} PATH_SUFFIXES lib)
+find_path(LHAPDF_INCLUDE LHAPDF HINTS $ENV{LHAPDF_PATH} PATH_SUFFIXES include)
+
 if(LHAPDF)
   message(STATUS "LHAPDF found in ${LHAPDF}")
 else()

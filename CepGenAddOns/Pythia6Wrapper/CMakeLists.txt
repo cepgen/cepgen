@@ -1,3 +1,8 @@
+#--- searching for Pythia 6
+set(PYTHIA6_DIRS $ENV{PYTHIA6_DIR} /usr /usr/local /opt/pythia6)
+find_library(PYTHIA6 pythia6 HINTS ${PYTHIA6_DIRS} PATH_SUFFIXES lib)
+find_library(PYTHIA6DUMMY pythia6_dummy HINTS ${PYTHIA6_DIRS} PATH_SUFFIXES lib)
+
 set(PYTHIA6LIB)
 if(PYTHIA6)
   message(STATUS "Pythia 6 found in ${PYTHIA6}")
