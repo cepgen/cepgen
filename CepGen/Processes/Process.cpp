@@ -16,10 +16,7 @@ namespace cepgen
   namespace proc
   {
     Process::Process( const ParametersList& params, bool has_event ) :
-      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
-      params_( params ),
-      name_( params.name<std::string>( "<invalid>" ) ),
-      description_( params.get<std::string>( "description" ) ),
+      NamedModule( params ),
       first_run( true ), base_jacobian_( 1. ),
       s_( -1. ), sqs_( -1. ),
       mA2_( -1. ), mB2_( -1. ), mX2_( -1. ), mY2_( -1. ),
@@ -31,8 +28,7 @@ namespace cepgen
     }
 
     Process::Process( const Process& proc ) :
-      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
-      params_( proc.params_ ), name_( proc.name_ ), description_( proc.description_ ),
+      NamedModule<>( proc.parameters() ),
       first_run( proc.first_run ), base_jacobian_( proc.base_jacobian_ ),
       s_( proc.s_ ), sqs_( proc.sqs_ ),
       mA2_( proc.mA2_ ), mB2_( proc.mB2_ ), mX2_( proc.mX2_ ), mY2_( proc.mY2_ ),
@@ -44,7 +40,7 @@ namespace cepgen
     }
 
     std::unique_ptr<Process>
-    Process::clone( const ParametersList& ) const
+    Process::clone() const
     {
       throw CG_FATAL( "Process:clone" )
         << "Process \"" << name_ << "\" has no cloning method implementation!";
@@ -63,12 +59,14 @@ namespace cepgen
     void
     Process::dumpVariables() const
     {
-      std::ostringstream os;
-      for ( const auto& var : mapped_variables_ )
-        os << "\n\t(" << var.index << ") " << var.type << " mapping (" << var.description << ") in range " << var.limits;
-      CG_INFO( "Process:dumpVariables" )
-        << "List of variables handled by this process:"
-        << os.str();
+      CG_INFO( "Process:dumpVariables" ).log( [&]( auto& info ) {
+        info << "List of variables handled by this process:";
+        for ( const auto& var : mapped_variables_ )
+          info
+            << "\n\t(" << var.index << ") " << var.type
+            << " mapping (" << var.description << ")"
+            << " in range " << var.limits;
+      } );
     }
 
     Process&
@@ -148,8 +146,7 @@ namespace cepgen
           } break;
         }
       }
-      if ( CG_LOG_MATCH( "Process:vars", debugInsideLoop ) ) {
-        std::ostringstream oss;
+      CG_DEBUG_LOOP( "Process:vars" ).log( [&]( auto& dbg ) {
         std::string sep;
         for ( const auto& var : mapped_variables_ ) {
           double value = 0.;
@@ -163,16 +160,15 @@ namespace cepgen
               value = sqrt( var.value );
               break;
           }
-          oss << sep
+          dbg << sep
             << "variable " << var.index
             << std::left << std::setw( 60 )
             << ( !var.description.empty() ? " ("+var.description+")" : "" )
             << " in range " << std::setw( 20 ) << var.limits
             << " has value " << std::setw( 20 ) << value
-            << " (x=" << x( var.index ) << std::right << ")", sep = "\n\t";
+            << " (x=" << this->x( var.index ) << std::right << ")", sep = "\n\t";
         }
-        CG_DEBUG_LOOP( "Process:vars" ) << oss.str();
-      }
+      } );
     }
 
     double
@@ -256,6 +252,8 @@ namespace cepgen
     Process::setKinematics( const Kinematics& kin )
     {
       clear();
+      mp_ = PDG::get().mass( PDG::proton );
+      mp2_ = mp_*mp_;
       kin_ = kin;
 
       //--- define incoming system
@@ -297,12 +295,13 @@ namespace cepgen
     void
     Process::dumpPoint() const
     {
-      std::ostringstream os;
-      for ( unsigned short i = 0; i < point_coord_.size(); ++i )
-        os << utils::format( "\n\t  x(%2d) = %8.6f", i, point_coord_[i] );
-      CG_INFO( "Process" )
-        << "Number of integration parameters: " << mapped_variables_.size()
-        << os.str() << ".";
+      CG_INFO( "Process" ).log( [&]( auto& info ) {
+        info
+          << "Number of integration parameters: " << mapped_variables_.size();
+        for ( unsigned short i = 0; i < point_coord_.size(); ++i )
+          info << utils::format( "\n\t  x(%2d) = %8.6f", i, point_coord_[i] );
+        info << ".";
+      } );
     }
 
     void

@@ -1,6 +1,8 @@
 #ifndef CepGen_Core_EventModifier_h
 #define CepGen_Core_EventModifier_h
 
+#include "CepGen/Modules/NamedModule.h"
+
 #include <string>
 #include <vector>
 
@@ -12,7 +14,7 @@ namespace cepgen
   /// Class template to interface (external/internal) events modification algorithms
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date July 2019
-  class EventModifier
+  class EventModifier : public NamedModule<std::string>
   {
     public:
       /// Default constructor for an undefined modifier
@@ -45,12 +47,10 @@ namespace cepgen
        * \return Boolean stating whether or not the modification occured successfully
        */
       virtual bool run( Event& ev, double& weight, bool full ) = 0;
-      /// Specify the process cross section, in pb
-      virtual void setCrossSection( double xsec, double xsec_err ) {}
+      /// Specify the process cross section and uncertainty, in pb
+      virtual void setCrossSection( double, double ) {}
 
     protected:
-      /// Name of the algorithm
-      std::string name_;
       /// Random numbers generator seed fed to the algorithm
       long long seed_;
       /// Maximal number of trials for the algorithm

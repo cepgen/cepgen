@@ -12,9 +12,10 @@ namespace cepgen
   class AlphaSLHAPDF : public AlphaS
   {
     public:
-      explicit AlphaSLHAPDF( const ParametersList& params )
+      explicit AlphaSLHAPDF( const ParametersList& params ) :
+        AlphaS( params )
 #ifdef LHAPDF_GE_6
-      : lhapdf_( LHAPDF::mkPDF(
+       ,lhapdf_( LHAPDF::mkPDF(
         params.get<std::string>( "pdfSet", "cteq6" ),
         params.get<int>( "pdfMember", 0 ) ) )
 #endif
@@ -26,6 +27,7 @@ namespace cepgen
           params.get<int>( "pdfMember", 0 ) );
 #endif
       }
+      static std::string description() { return "Perturbative PDF-oriented evolution algorithm"; }
 
       double operator()( double q ) const override {
 #ifdef LHAPDF_GE_6

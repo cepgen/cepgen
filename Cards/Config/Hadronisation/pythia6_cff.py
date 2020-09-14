@@ -1,5 +1,5 @@
 from Config.containers_cfi import Module
-from pythia6Tunes_cfi import *
+from .pythia6Tunes_cfi import *
 
 pythia6 = Module('pythia6',
     seed = 1000,

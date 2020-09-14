@@ -26,6 +26,7 @@ namespace cepgen
       public:
         explicit ProMCHandler( const ParametersList& );
         ~ProMCHandler();
+        static std::string description() { return "ProMC file output module"; }
 
         void initialise( const Parameters& ) override;
         void setCrossSection( double xsec, double err ) override { xsec_ = xsec, xsec_err_ = err; }
@@ -68,7 +69,7 @@ namespace cepgen
     void
     ProMCHandler::initialise( const Parameters& params )
     {
-      file_->setDescription( params.generation().maxgen, "Sample generated using CepGen v"+version() );
+      file_->setDescription( params.generation().maxgen, "Sample generated using CepGen v"+version::tag );
       log_file_ << banner( params ) << "\n";
       ProMCHeader hdr;
       hdr.set_momentumunit( GEV_UNIT );

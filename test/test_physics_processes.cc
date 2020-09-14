@@ -1,6 +1,7 @@
 #include "CepGen/Cards/Handler.h"
-
 #include "CepGen/Generator.h"
+#include "CepGen/Parameters.h"
+
 #include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/Utils/AbortHandler.h"
@@ -79,13 +80,13 @@ int main( int argc, char* argv[] )
   try {
     unsigned short num_tests = 0;
     for ( const auto& test : tests ) {
-      gen.parameters().clearProcess();
+      gen.parametersRef().clearProcess();
 
-      const std::string filename = "test_processes/"+test.filename+"_cfg.py";
+      const std::string filename = "test/test_processes/"+test.filename+"_cfg.py";
       gen.setParameters( cepgen::card::Handler::parse( filename ) );
-      gen.parameters().integrator->setName<std::string>( integrator );
+      gen.parameters()->integrator->setName<std::string>( integrator );
       CG_INFO( "main" )
-        << "Process: "<< gen.parameters().processName() << "\n\t"
+        << "Process: "<< gen.parameters()->processName() << "\n\t"
         << "File: " << filename << "\n\t"
         << "Configuration time: " << tmr.elapsed()*1.e3 << " ms.";
 
@@ -113,13 +114,13 @@ int main( int argc, char* argv[] )
       tmr.reset();
 
       const string test_res = utils::format(
-        "%-26s\tref=%g\tgot=%g\tpull=%+g",
-        test.filename.c_str(), test.ref_cs, new_cs, pull );
+        "%-40s\tref=%g\tgot=%g\tratio=%g\tpull=%+10.5f",
+        test.filename.c_str(), test.ref_cs, new_cs, ratio, pull );
       if ( success )
         passed_tests.emplace_back( test_res );
       else
         failed_tests.emplace_back( test_res );
-      num_tests++;
+      ++num_tests;
       if ( debug )
         progress->update( num_tests );
       CG_LOG( "main" )
@@ -130,12 +131,12 @@ int main( int argc, char* argv[] )
   if ( failed_tests.size() != 0 ) {
     ostringstream os_failed, os_passed;
     for ( const auto& fail : failed_tests )
-      os_failed << " (*) " << fail << endl;
+      os_failed << "  " << fail << endl;
     for ( const auto& pass : passed_tests )
-      os_passed << " (*) " << pass << endl;
+      os_passed << "  " << pass << endl;
     throw CG_FATAL( "main" )
-      << "Some tests failed!\n"
-      << os_failed.str() << "\n"
+      << "Some tests failed (abs(pull) > " << num_sigma << "):\n"
+      << os_failed.str() << "\n "
       << "Passed tests:\n"
       << os_passed.str() << ".";
   }

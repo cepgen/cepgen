@@ -9,6 +9,7 @@ namespace cepgen
   namespace utils
   {
     Functional::Functional( const ParametersList& params ) :
+      NamedModule( params ),
       vars_orig_( params.get<std::vector<std::string> >( "variables" ) ),
       expression_orig_( params.get<std::string>( "expression" ) ),
       vars_( vars_orig_ ), expression_( expression_orig_ ),

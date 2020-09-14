@@ -17,9 +17,28 @@ namespace cepgen
     /// \tparam T type of variable to be boldified
     template<typename T> std::string boldify( T str );
     /// TTY-type enumeration of colours
-    enum class Colour { gray = 30, red = 31, green = 32, yellow = 33, blue = 34, purple = 35 };
+    enum class Colour {
+      reset = -1,
+      black = 30,
+      red = 31,
+      green = 32,
+      yellow = 33,
+      blue = 34,
+      magenta = 35,
+      cyan = 36,
+      white = 37
+    };
+    enum class Modifier {
+      reset = -1,
+      bold = 1,
+      dimmed = 2,
+      italic = 3,
+      underline = 4,
+      blink = 5,
+      reverse = 7
+    };
     /// Colourise a string for TTY-type output streams
-    std::string colourise( const std::string& str, const Colour& col );
+    std::string colourise( const std::string& str, const Colour& col, const Modifier& mod = Modifier::reset );
     /// Replace all occurences of a text by another
     size_t replace_all( std::string& str, const std::string& from, const std::string& to );
     /// Split a string according to a separation character

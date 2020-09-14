@@ -11,6 +11,7 @@ set(core_includes)
 
 #----- check the external dependencies for SFs/alphaS
 
+file(GLOB GRV_SRC ${PROJECT_SOURCE_DIR}/External/grv_*.f)
 if(GRV_SRC)
   message(STATUS "GRV PDFset found in ${GRV_SRC}!")
   list(APPEND sf_sources ${GRV_SRC})
@@ -19,6 +20,8 @@ else()
   file(GLOB su_sf StructureFunctions/SzczurekUleshchenko.cpp)
   list(REMOVE_ITEM sf_sources ${su_sf})
 endif()
+
+file(GLOB ALPHAS_SRC ${PROJECT_SOURCE_DIR}/External/alphaS.f)
 if(ALPHAS_SRC)
   message(STATUS "alphaS evolution algorithm found in ${ALPHAS_SRC}")
   list(APPEND phys_sources ${ALPHAS_SRC})
@@ -26,17 +29,11 @@ else()
   file(GLOB pegasus_alphas Physics/AlphaSPEGASUS.cpp)
   file(REMOVE_ITEM phys_sources ${pegasus_alphas})
 endif()
-if(APFEL)
-  message(STATUS "APFEL found in ${APFEL}")
-  list(APPEND core_includes ${APFEL_INCLUDE})
-  list(APPEND CEPGEN_CORE_EXT ${APFEL})
-else()
-  file(GLOB apfel_alphas Physics/AlphaSAPFEL.cpp)
-  list(REMOVE_ITEM phys_sources ${apfel_alphas})
-endif()
 
 #----- check the external dependencies for physics utilities
 
+find_path(CUBA_INCLUDE tools HINTS $ENV{CUBA_DIR})
+find_library(CUBA cuba HINTS $ENV{CUBA_DIR})
 if(CUBA)
   message(STATUS "CUBA found in ${CUBA}")
   list(APPEND core_includes ${CUBA_INCLUDE})
@@ -46,6 +43,7 @@ else()
   list(REMOVE_ITEM int_sources ${int_cuba})
 endif()
 
+find_library(MUPARSER muparser)
 if(MUPARSER)
   message(STATUS "Formulas parsing will use muParser found in ${MUPARSER}")
   list(APPEND CEPGEN_CORE_EXT ${MUPARSER})
@@ -55,6 +53,7 @@ else()
   list(REMOVE_ITEM core_sources ${func_muparser})
 endif()
 
+find_path(EXPRTK exprtk.hpp PATH_SUFFIXES include)
 if(EXPRTK)
   message(STATUS "Formulas parsing will use exprtk found in ${EXPRTK}")
   list(APPEND core_includes ${EXPRTK}) # header-only
@@ -67,6 +66,9 @@ endif()
 set(CEPGEN_HAS_FUNCTIONALS ${CEPGEN_HAS_FUNCTIONALS} PARENT_SCOPE)
 
 #----- build the objects
+
+include(FindVersion)
+add_version_definition(${core_sources})
 
 add_library(CepGenCore SHARED ${core_sources} ${int_sources} ${phys_sources} ${proc_sources} ${sf_sources})
 target_compile_definitions(CepGenCore PRIVATE ${core_definitions})

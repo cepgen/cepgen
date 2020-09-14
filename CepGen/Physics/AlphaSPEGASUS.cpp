@@ -18,6 +18,7 @@ namespace cepgen
   {
     public:
       explicit AlphaSPEGASUS( const ParametersList& params ) :
+        AlphaS( params ),
         iord_( params.get<int>( "iord", 2 ) ),
         fr2_( params.get<double>( "fr2", 1. ) ),
         mur_( params.get<double>( "mur", 1. ) ),
@@ -31,6 +32,7 @@ namespace cepgen
           << "mur: " << mur_ << ", asmur: " << asmur_ << "\n\t"
           << "quark masses (GeV): charm: " << mc << ", bottom: " << mb << ", top: " << mt << ".";
       }
+      static std::string description() { return "PEGASUS alphaS evolution algorithm"; }
 
       double operator()( double q ) const override {
         return alphas_( q );

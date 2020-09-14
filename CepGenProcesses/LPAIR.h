@@ -36,7 +36,7 @@ namespace cepgen
         /// \brief Class constructor: set the mandatory parameters before integration and events generation
         /// \param[in] params General process parameters (nopt = Optimisation, legacy from LPAIR)
         explicit LPAIR( const ParametersList& params = ParametersList() );
-        ProcessPtr clone( const ParametersList& params ) const override {
+        ProcessPtr clone() const override {
           return ProcessPtr( new LPAIR( *this ) );
         }
 
@@ -44,6 +44,7 @@ namespace cepgen
         double computeWeight() override;
         void prepareKinematics() override;
         void fillKinematics( bool ) override;
+        static std::string description() { return "ɣɣ → l⁺l¯ (LPAIR)"; }
 
       private:
         /**

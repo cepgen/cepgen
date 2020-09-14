@@ -39,7 +39,8 @@ namespace cepgen
   /// Import a shared library in the runtime environment
   void loadLibrary( const std::string&, bool match = false );
   /// Launch the initialisation procedure
-  void initialise();
+  /// \param[in] safe_mode Drop libraries initialisation?
+  void initialise( bool safe_mode = false );
   /// Dump this program's header into the standard output stream
   void printHeader();
   /// List the modules registered in the runtime database
@@ -71,15 +72,19 @@ namespace cepgen
   class Generator {
     public:
       /// Core of the Monte Carlo integrator and events generator
-      Generator();
+      /// \param[in] safe_mode Load the generator without external libraries?
+      Generator( bool safe_mode = false );
       /// Core of the Monte Carlo integrator and events generator
       /// \param[in] ip List of input parameters defining the phase space on which to perform the integration
       Generator( Parameters *ip );
       ~Generator();
 
-      const Parameters* parametersPtr() const { return parameters_.get(); }
+      /// Pointer to the parameters block
+      const Parameters* parameters() const { return parameters_.get(); }
+      /// Extracted pointer to the parameters block
+      Parameters* parametersPtr() { return parameters_.release(); }
       /// Getter to the run parameters block
-      Parameters& parameters();
+      Parameters& parametersRef();
       /// Feed the generator with a Parameters object
       void setParameters( Parameters* ip );
       /// Specify an integrator algorithm configuration

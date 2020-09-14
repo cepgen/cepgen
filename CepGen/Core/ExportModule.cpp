@@ -11,14 +11,14 @@
 #include "CepGen/Version.h"
 
 #include <sstream>
+#include <iomanip>
 
 namespace cepgen
 {
   namespace io
   {
     ExportModule::ExportModule( const ParametersList& params ) :
-      params_( params ),
-      name_( params_.name<std::string>() ),
+      NamedModule( params ),
       event_num_( 0ull )
     {}
 
@@ -31,14 +31,15 @@ namespace cepgen
     std::string
     ExportModule::banner( const Parameters& params, const std::string& prep )
     {
+      const size_t len = 45+version::tag.size();
       std::ostringstream os;
       os
-        << prep << "  ***** Sample generated with CepGen v" << version() << " *****\n"
-        << prep << "  * process: " << params.processName() << " (" << params.kinematics.mode << ")\n";
+        << prep << "******* Sample generated with CepGen " << version::tag << " *******\n"
+        << prep << " Process: " << params.processName() << " (" << params.kinematics.mode << ")\n";
       if ( params.kinematics.mode != KinematicsMode::ElasticElastic ) {
-        os << prep << "  * structure functions: " << params.kinematics.structureFunctions()->description() << "\n";
+        os << prep << " Structure functions: " << params.kinematics.structureFunctions()->description() << "\n";
         if ( !params.eventModifiersSequence().empty() ) {
-          os << prep << "  * " << utils::s( "event modifier", params.eventModifiersSequence().size() ) << ": ";
+          os << prep << " " << utils::s( "Event modifier", params.eventModifiersSequence().size() ) << ": ";
           std::string sep;
           for ( const auto& mod : params.eventModifiersSequence() )
             os << sep << mod->name(), sep = ", ";
@@ -46,27 +47,28 @@ namespace cepgen
         }
       }
       const auto& cuts = params.kinematics.cuts;
-      os
-        << prep << "  **** incoming state\n";
+      os << prep << std::left << std::setw( len ) << std::setfill( '*' )
+        << "*** Incoming state " << "\n";
       for ( const auto& cut : cuts.initial.list() )
         os
-          << prep << "  * " << cut.description << ": "
+          << prep << " " << cut.description << ": "
           << cut.limits << "\n";
-      os << prep << "  **** central system\n";
+      os << prep << std::setw( len ) << std::setfill( '*' )
+        << "*** Central system " << "\n";
       for ( const auto& cut : cuts.central.list() )
         os
-          << prep << "  * " << cut.description << ": "
+          << prep << " " << cut.description << ": "
           << cut.limits << "\n";
       if ( params.kinematics.mode != KinematicsMode::ElasticElastic ) {
-        os
-          << prep << "  **** remnants states\n";
+        os << prep << std::setw( len ) << std::setfill( '*' )
+          << "*** Remnants states " << "\n";
         for ( const auto& cut : cuts.remnants.list() )
           os
-            << prep << "  * " << cut.description << ": "
+            << prep << " " << cut.description << ": "
             << cut.limits << "\n";
       }
       os
-        << prep << "  **************************************************";
+        << prep << std::string( 45+version::tag.size(), '*' );
       return os.str();
     }
   }

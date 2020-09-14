@@ -65,6 +65,7 @@ namespace cepgen
       /// Copy constructor
       Particle( const Particle& );
       inline ~Particle() {}
+      Particle& operator=( const Particle& ) = default; ///< Assignment operator
       /// Comparison operator (from unique identifier)
       bool operator<( const Particle& rhs ) const;
       /// Comparison operator (from their reference's unique identifier)

@@ -78,19 +78,17 @@ namespace cepgen
     //--- first-run preparation
     if ( !process_ || !process_->first_run )
       return;
-    {
-      std::ostringstream oss;
-      oss
+    CG_DEBUG( "Parameters" ).log( [&]( auto& dbg ) {
+      dbg
         << "Run started for " << process_->name() << " process "
         << std::hex << (void*)process_.get() << std::dec << ".\n\t"
         << "Process mode considered: " << kinematics.mode << "\n\t"
         << "   first beam: " << kinematics.incoming_beams.first << "\n\t"
         << "  second beam: " << kinematics.incoming_beams.second;
       if ( kinematics.structureFunctions() )
-        oss
+        dbg
           << "  structure functions: " << kinematics.structureFunctions();
-      CG_DEBUG( "Parameters" ) << oss.str();
-    }
+    } );
     if ( process_->hasEvent() )
       process_->clearEvent();
     //--- clear the run statistics
@@ -115,13 +113,13 @@ namespace cepgen
   proc::Process&
   Parameters::process()
   {
-    return *process_;
+    return *process_.get();
   }
 
   const proc::Process&
   Parameters::process() const
   {
-    return *process_;
+    return *process_.get();
   }
 
   std::string
@@ -289,6 +287,13 @@ namespace cepgen
     os
       << "\n"
       << std::setfill( '-' ) << std::setw( wb+6 ) << ( pretty ? utils::boldify( " Outgoing central system " ) : "Outgoing central system" ) << std::setfill( ' ' ) << "\n\n";
+    if ( !param->kinematics.minimum_final_state.empty() ) {
+      os << std::setw( wt ) << "Minimum final state";
+      std::string sep;
+      for ( const auto& part : param->kinematics.minimum_final_state )
+        os << sep << PDG::get().name( part ), sep = ", ";
+      os << "\n";
+    }
     for ( const auto& lim : cuts.central.list() )
       if ( lim.limits.valid() )
         os << std::setw( wt ) << lim.description << lim.limits << "\n";

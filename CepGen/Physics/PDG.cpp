@@ -49,6 +49,7 @@ namespace cepgen
   {
     if ( particles_.count( id ) > 0 )
       return particles_.at( id );
+    dump();
     throw CG_WARNING( "PDG" )
       << "No particle with PDG id " << id << " in the catalogue.";
   }
@@ -119,10 +120,11 @@ namespace cepgen
         return a.first < b.first;
       } );
     //--- then the proper dump begins
-    std::ostringstream oss;
-    for ( const auto& prt : tmp )
-      if ( prt.first != PDG::invalid )
-        oss << "\n" << prt.second;
-    CG_INFO( "PDG" ) << "List of particles registered:" << oss.str();
+    CG_INFO( "PDG" ).log( [&tmp]( auto& info ) {
+      info << "List of particles registered:";
+      for ( const auto& prt : tmp )
+        if ( prt.first != PDG::invalid )
+          info << "\n" << prt.second;
+    } );
   }
 }

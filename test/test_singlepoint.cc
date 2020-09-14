@@ -1,5 +1,6 @@
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Parameters.h"
 #include "CepGen/Processes/Process.h"
 
 #include "CepGen/Core/Exception.h"
@@ -23,10 +24,10 @@ int main( int argc, char* argv[] )
 
   cepgen::Generator gen;
   gen.setParameters( cepgen::card::Handler::parse( input_card ) );
-  CG_INFO( "main" ) << gen.parametersPtr();
+  CG_INFO( "main" ) << gen.parameters();
 
   if ( point.size() < 2 ) {
-    point = vector<double>( gen.parameters().process().ndim(), point[0] );
+    point = vector<double>( gen.parameters()->process().ndim(), point[0] );
     point.resize( ps_size );
   }
 

@@ -37,6 +37,8 @@ namespace cepgen
       void dump() const;
       /// Show usage
       void print_help() const;
+      /// Show version
+      void print_version() const;
       /// Return usage message
       std::string help_message() const;
       /// Are extra configuration flags found in arguments list?
@@ -101,8 +103,9 @@ namespace cepgen
 
       std::string command_name_;
       const ParametersCollection help_str_;
+      const ParametersCollection version_str_;
       const ParametersCollection config_str_;
-      bool help_req_;
+      bool help_req_, version_req_;
       ParametersCollection params_;
       std::vector<std::pair<std::string,std::string> > args_;
       std::vector<std::string> extra_config_;

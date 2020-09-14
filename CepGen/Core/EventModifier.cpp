@@ -5,7 +5,7 @@
 namespace cepgen
 {
   EventModifier::EventModifier( const ParametersList& plist ) :
-    name_( plist.name<std::string>( "<invalid>" ) ),
+    NamedModule( plist ),
     seed_( plist.get<int>( "seed", -1ll ) ),
     max_trials_( plist.get<int>( "maxTrials", 1 ) )
   {

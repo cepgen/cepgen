@@ -1,7 +1,8 @@
 #ifndef CepGen_Physics_AlphaS_h
 #define CepGen_Physics_AlphaS_h
 
-#include "CepGen/Core/ModuleFactory.h"
+#include "CepGen/Modules/NamedModule.h"
+#include "CepGen/Modules/ModuleFactory.h"
 
 #define REGISTER_ALPHAS_MODULE( name, obj ) \
   namespace cepgen { \
@@ -13,10 +14,10 @@
 namespace cepgen
 {
   /// A generic \f$\alpha_S(Q^2)\f$ evaluation algoritm
-  class AlphaS
+  class AlphaS : public NamedModule<>
   {
     public:
-      AlphaS() = default;
+      AlphaS( const ParametersList& params ) : NamedModule( params ) {}
       /// Compute \f$\alpha_S\f$ for a given \f$Q^2\f$
       virtual double operator()( double q ) const = 0;
   };

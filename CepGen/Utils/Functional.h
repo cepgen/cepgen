@@ -1,6 +1,8 @@
 #ifndef CepGen_Utils_Functional_h
 #define CepGen_Utils_Functional_h
 
+#include "CepGen/Modules/NamedModule.h"
+
 #include <vector>
 #include <array>
 #include <string>
@@ -13,7 +15,7 @@ namespace cepgen
     /// A string-to-functional parser
     /// \author L. Forthomme <laurent.forthomme@cern.ch>
     /// \date 21 Aug 2017
-    class Functional
+    class Functional : public NamedModule<std::string>
     {
       public:
         /// Default constructor

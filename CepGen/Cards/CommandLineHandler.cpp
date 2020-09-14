@@ -21,8 +21,8 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
-#include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
+#include "CepGen/Parameters.h"
 
 #include <fstream>
 
@@ -35,13 +35,13 @@ namespace cepgen
     {
       public:
         explicit CommandLineHandler( const ParametersList& );
+        static std::string description() { return "Command line configuration parser"; }
 
         Parameters* parse( const std::string&, Parameters* ) override;
 
       private:
         typedef std::vector<std::string> Args;
 
-        static ParametersList vectorise( const Args& );
         static const double INVALID;
 
         Args argv_;
@@ -68,13 +68,22 @@ namespace cepgen
         file.close();
       }
 
-      const auto pars = vectorise( argv_ );
+      ParametersList pars;
+      for ( const auto& arg : argv_ )
+        pars.feed( arg );
+      CG_INFO( "CommandLineHandler" )
+        << "Arguments list: " << argv_ << " unpacked to:\n\t"
+        << pars << ".";
 
       params_ = params;
 
       //----- timer definition
       if ( pars.get<bool>( "timer", false ) )
         params_->setTimeKeeper( new utils::TimeKeeper );
+
+      //----- logging definition
+      if ( pars.get<int>( "logging", -1 ) != -1 )
+        utils::Logger::get().level = (cepgen::utils::Logger::Level)pars.get<int>( "logging" );
 
       //----- process definition
       auto proc = pars.get<ParametersList>( "process" );
@@ -87,14 +96,14 @@ namespace cepgen
       //----- phase space definition
       auto kin = pars.get<ParametersList>( "kinematics" )
         .set<ParametersList>( "structureFunctions", pars.get<ParametersList>( "strfun" ) );
-      params_->kinematics = Kinematics( kin );
+      params_->kinematics = Kinematics( params_->kinematics.parameters()+kin );
 
       //----- integration
       pars.fill<ParametersList>( "integrator", *params_->integrator );
 
       //----- events generation
       const auto& gen = pars.get<ParametersList>( "generation" );
-      params_->generation().maxgen = (unsigned long)gen.get<int>( "ngen", 10000 );
+      params_->generation().maxgen = (unsigned long)gen.get<int>( "ngen", params_->generation().maxgen );
       params_->generation().enabled = params_->generation().maxgen > 1;
       if ( gen.has<int>( "nthreads" ) )
         params_->generation().num_threads = gen.get<int>( "nthreads" );
@@ -105,63 +114,16 @@ namespace cepgen
 
       //----- event modification modules
       const auto& mod = pars.get<ParametersList>( "eventmod" );
-      if ( !mod.keys( true ).empty() )
+      if ( !mod.keys( true ).empty() ) {
         params_->addModifier( EventModifierFactory::get().build( mod ) );
+        params_->eventModifiersSequence().rbegin()->get()->init();
+      }
 
       //----- output modules definition
       const auto& out = pars.get<ParametersList>( "output" );
       if ( !out.keys( true ).empty() )
         params_->addOutputModule( io::ExportModuleFactory::get().build( out ) );
       return params_;
-    }
-
-    ParametersList
-    CommandLineHandler::vectorise( const Args& args )
-    {
-      const char delim_block = ':', delim_eq1 = '[', delim_eq2 = ']';
-      ParametersList params;
-      for ( const auto& arg : args ) {
-        auto cmd = utils::split( arg, delim_block );
-        auto& plist = cmd.size() < 2
-          ? params
-          : params.operator[]<ParametersList>( cmd.at( 0 ) );
-        if ( cmd.size() > 2 ){ // sub-parameters word found
-          plist += vectorise( Args( 1,
-            utils::merge( std::vector<std::string>( cmd.begin()+1, cmd.end() ), std::string( delim_block, 1 ) ) ) );
-          continue;
-        }
-        const auto word = cmd.size() < 2 ? cmd.at( 0 ) : cmd.at( 1 );
-        auto words = utils::split( word, delim_eq1 );
-        auto key = words.at( 0 );
-        if ( key == "name" )
-          key = ParametersList::MODULE_NAME;
-        if ( words.size() == 1 ) // basic key=true
-          plist.set<bool>( key, true );
-        else if ( words.size() == 2 ) { // basic key=value
-          words = utils::split( words.at( 1 ), delim_eq2 );
-          if ( words.size() != 1 )
-            throw CG_FATAL( "CommandLineHandler" ) << "Invalid syntax for key \"" << key << "\"!";
-          const auto value = words.at( 0 );
-          try {
-            if ( value.find( '.' ) != std::string::npos
-              || value.find( 'e' ) != std::string::npos
-              || value.find( 'E' ) != std::string::npos )
-              // double if contains a '.'/'e'
-              plist.set<double>( key, std::stod( value ) );
-            else
-              plist.set<int>( key, std::stod( value ) );
-          } catch ( const std::invalid_argument& ) {
-            if ( value == "off" || value == "no" )
-              plist.set<bool>( key, false );
-            else if ( value == "on" || value == "yes" )
-              plist.set<bool>( key, true );
-            else
-              plist.set<std::string>( key, value );
-          }
-        }
-      }
-      CG_INFO("")<<params;
-      return params;
     }
   }
 }

@@ -65,12 +65,12 @@ namespace cepgen
       //--- displaying the various probes
 
       std::ostringstream oss;
-      oss << utils::format( "%7s | %-100s  %12s\t%10s\t%5s",
-                            "ncalls", "caller", "total (ms)",
-                            "average (ms)", "rms (ms)" );
+      oss << utils::format( "%2s | %-90s | %12s\t%10s\t%5s",
+                            "#", "Caller", "Total (ms)",
+                            "Average (ms)", "RMS (ms)" );
       for ( const auto& mon : mons )
         oss
-          << utils::format( "\n* [%12u | %-100s] %12.6f\t%10e\t%5.3e",
+          << utils::format( "\n%10u | %-90s | %12.6f\t%10e\t%5.3e",
                             mon.size, mon.name.c_str(), mon.total*1.e3,
                             mon.mean*1.e3, mon.rms*1.e3 );
 

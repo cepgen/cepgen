@@ -1,4 +1,5 @@
 #include "CepGen/Generator.h"
+#include "CepGen/Parameters.h"
 
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Cards/Handler.h"
@@ -19,7 +20,7 @@ int main( int argc, char* argv[] )
 {
   std::string input_card;
   int num_events;
-  bool list_mods = false, debug = false;
+  bool list_mods, debug, safe_mode;
   vector<string> addons;
 
   cepgen::ArgumentsParser parser( argc, argv );
@@ -29,6 +30,7 @@ int main( int argc, char* argv[] )
     .addOptionalArgument( "list-modules,l", "list all runtime modules", &list_mods, false )
     .addOptionalArgument( "add-ons,a", "external runtime plugin", &addons )
     .addOptionalArgument( "debug,d", "debugging mode", &debug, false )
+    .addOptionalArgument( "safe-mode,s", "safe mode", &safe_mode, false )
     .parse();
 
   //--- first start by defining the generator object
@@ -37,7 +39,7 @@ int main( int argc, char* argv[] )
       e.dump();
     }
 
-  cepgen::Generator gen;
+  cepgen::Generator gen( safe_mode );
 
   //--- if modules listing is requested
   if ( list_mods ) {
@@ -60,20 +62,20 @@ int main( int argc, char* argv[] )
     if ( !parser.extra_config().empty() )
       gen.setParameters( cepgen::card::CardsHandlerFactory::get().build( "cmd",
         cepgen::ParametersList().set<std::vector<std::string> >( "args", parser.extra_config() ) )
-        ->parse( "", &gen.parameters() ) );
+        ->parse( std::string(), gen.parametersPtr() ) );
   }
 
   cepgen::utils::AbortHandler ctrl_c;
 
   try {
-    auto& params = gen.parameters();
+    auto& params = gen.parametersRef();
     if ( num_events >= 0 ) { // user specified a number of events to generate
       params.generation().maxgen = num_events;
       params.generation().enabled = num_events > 0;
     }
 
     //--- list all parameters
-    CG_LOG( "main" ) << gen.parametersPtr();
+    CG_LOG( "main" ) << gen.parameters();
 
     //--- let there be a cross-section...
     double xsec = 0., err = 0.;
@@ -83,7 +85,7 @@ int main( int argc, char* argv[] )
       //--- events generation starts here
       // (one may use a callback function)
       gen.generate();
-  } catch ( const cepgen::utils::RunAbortedException& e ) {
+  } catch ( const cepgen::utils::RunAbortedException& ) {
     CG_DEBUG( "main" ) << "Run aborted!";
   } catch ( const cepgen::Exception& e ) {
     e.dump();

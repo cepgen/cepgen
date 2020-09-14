@@ -1,5 +1,6 @@
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Generator.h" // for library loading
+#include "CepGen/Parameters.h"
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Core/Exception.h"
@@ -34,6 +35,7 @@ namespace cepgen
       public:
         /// Boost tree parser from a configuration card
         explicit BoostTreeHandler( const ParametersList& );
+        static std::string description() { return "Boost tree parser/writer"; }
 
         Parameters* parse( const std::string&, Parameters* ) override;
         void pack( const Parameters* params ) override;

@@ -1,12 +1,14 @@
 #ifndef CepGen_Processes_Process_h
 #define CepGen_Processes_Process_h
 
+#include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Event/Particle.h"
 
 #include <map>
 #include <vector>
 #include <memory>
+#include <cstddef> // size_t
 
 namespace cepgen
 {
@@ -18,7 +20,7 @@ namespace cepgen
     /// \brief Class template to define any process to compute using this MC integrator/events generator
     /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
     /// \date Jan 2014
-    class Process
+    class Process : public NamedModule<std::string>
     {
       public:
         /// Default constructor for an undefined process
@@ -47,7 +49,7 @@ namespace cepgen
 
       public:
         /// Copy all process attributes into a new object
-        virtual std::unique_ptr<Process> clone( const ParametersList& params = ParametersList() ) const;
+        virtual std::unique_ptr<Process> clone() const;
         /// Set the incoming and outgoing state to be expected in the process
         inline virtual void addEventContent() {}
         /// Compute the phase space point weight
@@ -76,12 +78,6 @@ namespace cepgen
         inline size_t ndim() const { return mapped_variables_.size(); }
         /// Get the value of a component of the d-dimensional point considered
         double x( unsigned int idx ) const;
-        /// Process-specific parameters
-        inline const ParametersList& parameters() const { return params_; }
-        /// Name of the process considered
-        inline const std::string& name() const { return name_; }
-        /// Human-readable description of the process
-        inline const std::string& description() const { return description_; }
 
         /// Does the process contain (and hold) an event?
         bool hasEvent() const { return (bool)event_; }
@@ -93,8 +89,8 @@ namespace cepgen
         inline Event* eventPtr() { return event_.get(); }
 
       protected:
-        const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
-        const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
+        double mp_; ///< Proton mass, in GeV/c\f$^2\f$
+        double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
         /// Type of mapping to apply on the variable
         enum class Mapping
         {
@@ -136,13 +132,6 @@ namespace cepgen
 
         // ---
 
-        /// Process-specific parameters
-        ParametersList params_;
-        /// Name of the process
-        std::string name_;
-        /// Process human-readable description
-        std::string description_;
-
       public:
         /// Is it the first time the process is computed?
         bool first_run;
@@ -157,7 +146,7 @@ namespace cepgen
           Limits limits; ///< Kinematic limits to apply on the variable
           double& value; ///< Reference to the process variable to generate/map
           Mapping type; ///< Interpolation type
-          unsigned short index; ///< Corresponding integration variable
+          size_t index; ///< Corresponding integration variable
         };
         /// Collection of variables to be mapped at the weight generation stage
         std::vector<MappingVariable> mapped_variables_;

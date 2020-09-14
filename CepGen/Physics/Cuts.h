@@ -23,8 +23,6 @@ namespace cepgen
 
       /// A collection of limits properties
       std::vector<Property>& rawList() { return limits_; }
-      /// A collection of valid limits properties
-      std::vector<Property> list();
       /// A collection of const-qualified limits properties
       std::vector<Property> list() const;
 

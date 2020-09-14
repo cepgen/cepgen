@@ -1,9 +1,10 @@
-#include "CepGenAddOns/PythiaWrapper/PythiaEventInterface.h"
+#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
 #include "CepGen/Core/ExportModule.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 
 #include "CepGen/Event/Event.h"
+#include "CepGen/Core/Exception.h"
 
 #include "Pythia8/Pythia.h"
 
@@ -24,6 +25,7 @@ namespace cepgen
         /// Class constructor
         explicit LHEFPythiaHandler( const ParametersList& );
         ~LHEFPythiaHandler();
+        static std::string description() { return "Pythia 8-based LHEF output module"; }
 
         void initialise( const Parameters& ) override;
         /// Writer operator
@@ -41,7 +43,14 @@ namespace cepgen
       pythia_( new Pythia8::Pythia ), lhaevt_( new Pythia8::CepGenEvent ),
       compress_( params.get<bool>( "compress", true ) )
     {
-      lhaevt_->openLHEF( params.get<std::string>( "filename", "output.lhe" ) );
+      const auto filename = params.get<std::string>( "filename", "output.lhe" );
+      {
+        auto file_tmp = std::ofstream( filename );
+        if ( !file_tmp.is_open() )
+          throw CG_FATAL( "LHEFPythiaHandler" )
+            << "Failed to open output filename \"" << filename << "\" for writing!";
+      }
+      lhaevt_->openLHEF( filename );
     }
 
     LHEFPythiaHandler::~LHEFPythiaHandler()

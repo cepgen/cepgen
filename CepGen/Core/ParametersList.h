@@ -27,6 +27,9 @@ namespace cepgen
       /// Copy constructor
       ParametersList( const ParametersList& );
       ~ParametersList() {} // required for unique_ptr initialisation! avoids cleaning all individual objects
+      ParametersList& operator=( const ParametersList& ) = default; ///< Assignment operator
+      /// Feed a control string to the list of parameters
+      ParametersList& feed( const std::string& );
       /// Check if a given parameter is handled in this list
       template<typename T> bool has( std::string key ) const;
       /// Erase a parameter with key

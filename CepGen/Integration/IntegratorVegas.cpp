@@ -1,4 +1,4 @@
-#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/IntegratorGSL.h"
 #include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/GridParameters.h"
 #include "CepGen/Modules/IntegratorFactory.h"
@@ -14,10 +14,11 @@
 namespace cepgen
 {
   /// Vegas integration algorithm developed by P. Lepage, as documented in \cite Lepage:1977sw
-  class IntegratorVegas : public Integrator
+  class IntegratorVegas : public IntegratorGSL
   {
     public:
       IntegratorVegas( const ParametersList& );
+      static std::string description() { return "Vegas stratified sampling integrator"; }
 
       void integrate( double&, double& ) override;
 
@@ -45,7 +46,7 @@ namespace cepgen
   std::ostream& operator<<( std::ostream&, const IntegratorVegas::Mode& );
 
   IntegratorVegas::IntegratorVegas( const ParametersList& params ) :
-    Integrator( params ),
+    IntegratorGSL( params ),
     ncvg_( params.get<int>( "numFunctionCalls", 50000 ) ),
     chisq_cut_( params.get<double>( "chiSqCut", 1.5 ) ),
     treat_( params.get<bool>( "treat", true ) ),

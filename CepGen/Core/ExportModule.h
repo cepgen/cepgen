@@ -1,7 +1,7 @@
 #ifndef CepGen_Modules_ExportModule_h
 #define CepGen_Modules_ExportModule_h
 
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Modules/NamedModule.h"
 
 #include <iosfwd>
 #include <string>
@@ -18,7 +18,7 @@ namespace cepgen
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Sep 2016
      */
-    class ExportModule
+    class ExportModule : public NamedModule<std::string>
     {
       public:
         /// Class constructor
@@ -43,10 +43,6 @@ namespace cepgen
       protected:
         /// Print a banner containing all runtime parameters information
         static std::string banner( const Parameters&, const std::string& prep = "" );
-        /// Set of parameters to steer this output module
-        const ParametersList params_;
-        /// Module unique name
-        const std::string name_;
         /// Event index
         unsigned long long event_num_;
     };

@@ -12,6 +12,8 @@ namespace cepgen
     {
       public:
         explicit FunctionalMuParser( const ParametersList& );
+        static std::string description() { return "MuParser-based functional evaluator"; }
+
         double eval( const std::vector<double>& ) const override;
 
       private:
@@ -38,6 +40,7 @@ namespace cepgen
     FunctionalMuParser::eval( const std::vector<double>& x ) const
     {
       try {
+        values_ = x;
         return parser_.Eval();
       } catch ( const mu::Parser::exception_type& e ) {
         throw CG_WARNING( "FunctionalMuParser" )

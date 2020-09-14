@@ -5,6 +5,7 @@
 #include "CepGen/Event/Event.h"
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/Timer.h"
 
 #include "modules/Delphes.h"
 #include "classes/DelphesFactory.h"
@@ -14,7 +15,6 @@
 #include "ExRootAnalysis/ExRootTreeBranch.h"
 
 #include "TFile.h"
-#include <chrono>
 
 namespace cepgen
 {
@@ -30,6 +30,7 @@ namespace cepgen
       public:
         explicit DelphesHandler( const ParametersList& );
         ~DelphesHandler();
+        static std::string description() { return "Delphes interfacing module"; }
 
         void initialise( const Parameters& ) override;
         void setCrossSection( double xsec, double /*err_xsec*/ ) override { xsec_ = xsec; }
@@ -80,7 +81,7 @@ namespace cepgen
     }
 
     void
-    DelphesHandler::initialise( const Parameters& params )
+    DelphesHandler::initialise( const Parameters& )
     {
       factory_ = delphes_->GetFactory();
       if ( !factory_ )
@@ -108,7 +109,7 @@ namespace cepgen
       evt_aux->AlphaQED = constants::ALPHA_EM;
       evt_aux->AlphaQCD = constants::ALPHA_QCD;
       evt_aux->ReadTime = ev.time_generation;
-      auto start = std::chrono::system_clock::now();
+      utils::Timer tmr;
       const auto& parts = compress_
         ? ev.compress().particles()
         : ev.particles();
@@ -136,7 +137,7 @@ namespace cepgen
           out_partons_->Add( cand );
       }
       delphes_->ProcessTask();
-      evt_aux->ProcTime = std::chrono::duration<double>( std::chrono::system_clock::now()-start ).count();
+      evt_aux->ProcTime = tmr.elapsed();
       tree_writer_->Fill();
     }
   }

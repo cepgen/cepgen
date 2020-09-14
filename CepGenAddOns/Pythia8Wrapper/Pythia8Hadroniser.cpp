@@ -1,4 +1,4 @@
-#include "CepGenAddOns/PythiaWrapper/PythiaEventInterface.h"
+#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
 #include "CepGen/Physics/Hadroniser.h"
 #include "CepGen/Modules/EventModifierFactory.h"
@@ -35,6 +35,9 @@ namespace cepgen
       public:
         explicit Pythia8Hadroniser( const ParametersList& );
         ~Pythia8Hadroniser();
+        static std::string description() {
+          return "Interface to the Pythia 8 string hadronisation/fragmentation algorithm";
+        }
 
         void setParameters( const Parameters& ) override;
         void readString( const char* param ) override;

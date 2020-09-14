@@ -4,11 +4,14 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Parameters.h"
+
 namespace cepgen
 {
   namespace card
   {
     Handler::Handler( const ParametersList& params ) :
+      NamedModule( params ),
       filename_( params.get<std::string>( "filename" ) ),
       params_( new Parameters )
     {

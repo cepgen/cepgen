@@ -1,7 +1,7 @@
-#ifndef CepGen_Core_ModuleFactory_h
-#define CepGen_Core_ModuleFactory_h
+#ifndef CepGen_Modules_ModuleFactory_h
+#define CepGen_Modules_ModuleFactory_h
 
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Modules/NamedModule.h"
 
 #include <unordered_map>
 #include <vector>
@@ -36,6 +36,7 @@ namespace cepgen
           throw std::invalid_argument( oss.str() );
         }
         map_[name] = &build<U>;
+        descr_map_[name] = U::description();
         params_map_[name] = def_params;
       }
       /// Build one instance of a named module
@@ -69,6 +70,10 @@ namespace cepgen
         else
           throw std::invalid_argument( std::string( __PRETTY_FUNCTION__ )+"\n\n  *** Failed to retrieve an indexing key from parameters to build from factory! ***\n" );
       }
+      /// Describe one named module
+      const std::string& describe( const I& name ) const {
+        return descr_map_.at( name );
+      }
       /// List of modules registred in the database
       std::vector<I> modules() const {
         std::vector<I> out;
@@ -89,6 +94,8 @@ namespace cepgen
       typedef std::unique_ptr<T> (*ModCreate)( const ParametersList& );
       /// Database of modules handled by this instance
       std::unordered_map<I,ModCreate> map_;
+      /// Database of default-constructed objects
+      std::unordered_map<I,std::string> descr_map_;
       /// Database of default parameters associated to modules
       std::unordered_map<I,ParametersList> params_map_;
 

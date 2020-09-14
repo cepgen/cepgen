@@ -1070,4 +1070,4 @@ namespace cepgen
   }
 }
 // register process
-REGISTER_PROCESS( "lpair", "ɣɣ → l⁺l¯ (LPAIR)", LPAIR )
+REGISTER_PROCESS( "lpair", LPAIR )

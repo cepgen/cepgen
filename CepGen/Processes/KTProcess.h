@@ -50,6 +50,8 @@ namespace cepgen
         void fillPrimaryParticlesKinematics();
         /// Set the kinematics of the outgoing central system
         virtual void fillCentralParticlesKinematics() = 0;
+        /// Set the list of central particles produced
+        void setProducedParticles( const std::vector<pdgid_t>& prod ) { kProducedParts = prod; }
 
         /// Log-virtuality range of the intermediate parton
         Limits log_qt_limits_;

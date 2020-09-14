@@ -2,6 +2,8 @@
 #include "CepGen/Utils/String.h"
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Version.h"
+
 #include <sstream>
 #include <algorithm>
 #include <cstring>
@@ -9,8 +11,9 @@
 namespace cepgen
 {
   ArgumentsParser::ArgumentsParser( int argc, char* argv[] ) :
-    help_str_( { { "help,h" } } ), config_str_( { { "cmd,c" } } ),
-    help_req_( false )
+    help_str_( { { "help,h" } } ), version_str_( { { "version,v" } } ),
+    config_str_( { { "cmd,c" } } ),
+    help_req_( false ), version_req_( false )
   {
     command_name_ = argv[0];
     //--- first remove the program name
@@ -27,11 +30,19 @@ namespace cepgen
         if ( arg_val.at( 0 ) == "--"+str.name.at( 0 )
           || ( str.name.size() > 1 && arg_val.at( 0 ) == "-"+str.name.at( 1 ) ) )
           help_req_ = true;
+      //--- check if version message is requested
+      for ( const auto& str : version_str_ )
+        if ( arg_val.at( 0 ) == "--"+str.name.at( 0 )
+          || ( str.name.size() > 1 && arg_val.at( 0 ) == "-"+str.name.at( 1 ) ) )
+          version_req_ = true;
       //--- check if configuration word is requested
       for ( const auto& str : config_str_ )
         if ( arg_val.at( 0 ) == "--"+str.name.at( 0 )
-          || ( str.name.size() > 1 && arg_val.at( 0 ) == "-"+str.name.at( 1 ) ) )
+          || ( str.name.size() > 1 && arg_val.at( 0 ) == "-"+str.name.at( 1 ) ) ) {
+          // if a configuration word is found, all the remaining flags are parsed as such
           extra_config_ = std::vector<std::string>( it_arg+1, args_tmp.end() );
+          return;
+        }
       //--- parse arguments if word found after
       if ( arg_val.size() == 1 && arg_val.at( 0 )[0] == '-' && it_arg != std::prev( args_tmp.end() ) ) {
         const auto& word = *std::next( it_arg );
@@ -51,17 +62,24 @@ namespace cepgen
   }
 
   void
+  ArgumentsParser::print_version() const
+  {
+    CG_LOG( "ArgumentsParser" ) << cepgen::version::banner;
+  }
+
+  void
   ArgumentsParser::dump() const
   {
-    std::ostringstream os;
-    os << "List of parameters retrieved from command-line:";
-    for ( const auto& par : params_ )
-      os
-        << "\n\t[--" << par.name.at( 0 )
-        << ( par.name.size() > 1 ? "|-"+par.name.at( 1 ) : "" )
-        << ( par.optional ? ", optional" : "" )
-        << "] = " << par.value;
-    CG_INFO( "ArgumentsParser" ) << os.str();
+    CG_INFO( "ArgumentsParser" ).log( [&]( auto& info ) {
+      info
+        << "List of parameters retrieved from command-line:";
+      for ( const auto& par : params_ )
+        info
+          << "\n\t[--" << par.name.at( 0 )
+          << ( par.name.size() > 1 ? "|-"+par.name.at( 1 ) : "" )
+          << ( par.optional ? ", optional" : "" )
+          << "] = " << par.value;
+    } );
   }
 
   ArgumentsParser&
@@ -69,6 +87,11 @@ namespace cepgen
   {
     if ( help_req_ ) {
       print_help();
+      exit(0);
+    }
+    //--- dump the generator version
+    if ( version_req_ ) {
+      print_version();
       exit(0);
     }
     //--- loop over all parameters

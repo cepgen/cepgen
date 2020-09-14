@@ -2,7 +2,7 @@ set(CPACK_RPM_COMPONENT_INSTALL ON)
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(CepGen)
 set(PROJECT_VERSION 1)
-set(VERSION 0.9.7)
+set(VERSION 1.0.alpha1)
 
 option(CMAKE_BUILD_CORE "Build Core library" ON)
 option(CMAKE_BUILD_PROCESSES "Build physics processes" ON)
@@ -31,7 +31,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 set(CMAKE_CXX_FLAGS_DEBUG "-pg") # for gprof
 #set(CMAKE_CXX_FLAGS_DEBUG "-fprofile-arcs -ftest-coverage") # for gcov
-set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -O2")
+set(CMAKE_C_FLAGS_RELEASE "-O2")
 
 #----- include external paths
 

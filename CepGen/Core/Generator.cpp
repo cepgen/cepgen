@@ -21,14 +21,14 @@
 
 namespace cepgen
 {
-  Generator::Generator() :
+  Generator::Generator( bool safe_mode ) :
     parameters_( new Parameters ),
     result_( -1. ), result_error_( -1. )
   {
     CG_DEBUG( "Generator:init" ) << "Generator initialized";
     static bool init = false;
     if ( !init ) {
-      initialise();
+      initialise( safe_mode );
       init = true;
     }
     //--- random number initialization
@@ -57,7 +57,7 @@ namespace cepgen
   }
 
   Parameters&
-  Generator::parameters()
+  Generator::parametersRef()
   {
     return *parameters_;
   }

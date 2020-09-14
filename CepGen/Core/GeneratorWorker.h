@@ -28,32 +28,34 @@ namespace cepgen
       Integrand& integrand() { return *integrand_; }
 
     private:
+      /// Placeholder for invalid bin indexing
+      static constexpr int UNASSIGNED_BIN = -999;
+
       /// Generate a single event
       /// \param[in] callback The callback function applied on every event generated
       bool next( Event::callback callback = nullptr );
       /// Store the event in the output file
-      /// \param[in] x The d-dimensional point in the phase space defining the unique event to store
       /// \param[in] callback The callback function for every event generated
       /// \return A boolean stating whether or not the event was successfully saved
-      bool storeEvent( const std::vector<double>& x, Event::callback callback = nullptr );
-      /// Start the correction cycle on the grid
-      /// \param[inout] x Point in the phase space considered
-      /// \param[inout] has_correction Correction cycle started?
-      bool correctionCycle( std::vector<double>& x, bool& has_correction );
+      bool storeEvent( Event::callback );
+      /// Apply a correction cycle to the grid
+      bool correctionCycle( bool& );
       /// Prepare the object for event generation
       void computeGenerationParameters();
 
       /// Local event weight evaluator
       std::unique_ptr<Integrand> integrand_;
       /// Pointer to the mother-handled integrator instance
-      const Integrator* integrator_; // not owning
+      /// \note NOT owning
+      const Integrator* integrator_;
       /// Steering parameters for the event generation
-      const Parameters* params_; // not owning
+      /// \note NOT owning
+      const Parameters* params_;
       /// Set of parameters for the integration/event generation grid
       std::unique_ptr<GridParameters> grid_;
       /// Selected bin at which the function will be evaluated
       int ps_bin_; ///< Last bin to be corrected
-      static constexpr int INVALID_BIN = -999; ///< Placeholder for invalid bin indexing
+      std::vector<double> coords_; ///< Phase space coordinates being evaluated
   };
 }
 

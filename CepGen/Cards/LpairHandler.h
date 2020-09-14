@@ -2,7 +2,9 @@
 #define CepGen_Cards_LpairReader_h
 
 #include "CepGen/Cards/Handler.h"
+
 #include <unordered_map>
+#include <memory>
 
 using std::string;
 
@@ -17,6 +19,7 @@ namespace cepgen
       public:
         /// Read a LPAIR steering card
         explicit LpairHandler( const ParametersList& );
+        static std::string description() { return "LPAIR-like cards parser"; }
 
         void pack( const Parameters* ) override;
         Parameters* parse( const std::string&, Parameters* ) override;
@@ -44,7 +47,7 @@ namespace cepgen
 
         void setParameter( const std::string& key, const std::string& value );
         std::string parameter( std::string key ) const;
-        std::string description( std::string key ) const;
+        std::string describe( std::string key ) const;
 
         static const int kInvalid;
 

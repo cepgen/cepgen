@@ -12,10 +12,13 @@ namespace cepgen
   {
     extern std::atomic<int> gSignal;
     /// Exception raised when the user terminates the process
-    struct RunAbortedException : LoggedException
+    struct RunAbortedException : NullStream
     {
-      using LoggedException::LoggedException;
-      ~RunAbortedException() override {}
+      using NullStream::NullStream;
+      ~RunAbortedException() override {
+        CG_LOG( "RunAbortedException" );
+        CG_INFO( "RunAbortedException" ) << "User abort through C-c.";
+      }
     };
 
     /// Object handling an user-driven process abortion
@@ -44,8 +47,7 @@ namespace cepgen
         }
         static void handle_ctrl_c( int signal, siginfo_t*, void* ) {
           gSignal = signal;
-          throw RunAbortedException( __PRETTY_FUNCTION__, cepgen::Exception::Type::info )
-            << "Run aborted.";
+          throw RunAbortedException();
         }
         void init() {
           if ( sigaction( SIGINT, &action_, nullptr ) != 0

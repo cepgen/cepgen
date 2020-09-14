@@ -1,14 +1,54 @@
+#--- searching for ROOT
+find_package(ROOT QUIET COMPONENTS Hist MathCore Foam)
+if(ROOT_FOUND)
+  message(STATUS "ROOT found in ${ROOT_INCLUDE_DIRS}")
+  if(IS_LXPLUS)
+    #--- LXPLUS/CVMFS tweak for missing dependencies
+    find_library(TBB tbb HINTS $ENV{TBB_DIR} PATH_SUFFIXES lib QUIET)
+    if(TBB)
+      list(APPEND ROOT_LIBRARIES ${TBB})
+    endif()
+    find_library(DAVIX davix HINTS $ENV{DAVIX_DIR} PATH_SUFFIXES lib64)
+    if(DAVIX)
+      list(APPEND ROOT_LIBRARIES ${DAVIX})
+    endif()
+    find_library(VDT vdt HINTS $ENV{VDT_DIR} PATH_SUFFIXES lib)
+    if(VDT)
+      list(APPEND ROOT_LIBRARIES ${VDT})
+    endif()
+  endif()
+  #--- searching for Delphes
+  find_library(DELPHES Delphes HINTS $ENV{DELPHES_DIR} PATH_SUFFIXES lib)
+  find_path(DELPHES_INCLUDE NAMES modules classes HINTS $ENV{DELPHES_DIR} PATH_SUFFIXES include)
+  find_path(DELPHES_EXT_INCLUDE NAMES ExRootAnalysis HINTS $ENV{DELPHES_DIR} PATH_SUFFIXES external include)
+endif()
+
 if(NOT ROOT_FOUND)
-  message(FATAL_ERROR "Trying to build ROOT wrapper library while no ROOT installation was found on system!")
+  return()
 endif()
 
 include_directories(${PROJECT_SOURCE_DIR})
 
-file(GLOB sources *.cpp)
+file(GLOB int_sources IntegratorROOT.cpp)
+file(GLOB out_sources ROOTTree*.cpp ROOTHistsHandler.cpp)
+file(GLOB utils_sources FunctionalROOT.cpp)
+
+list(FIND ROOT_LIBRARIES "/usr/lib64/root/libFoam.so" _idx)
+if(${_idx} GREATER -1)
+  list(APPEND int_sources IntegratorFoam.cpp)
+endif()
+
+#--- Delphes part
+if(DELPHES)
+  message(STATUS "Delphes found in ${DELPHES}")
+  list(APPEND utils_sources DelphesHandler.cpp)
+  list(APPEND ROOT_LIBRARIES ${DELPHES})
+  list(APPEND ROOT_INCLUDE_DIRS ${DELPHES_INCLUDE} ${DELPHES_EXT_INCLUDE})
+endif()
 
 #----- build the objects
 
-add_library(CepGenRoot SHARED ${sources})
+add_library(CepGenRoot SHARED ${int_sources} ${out_sources} ${utils_sources})
 target_compile_definitions(CepGenRoot PRIVATE ${ROOT_DEFINITIONS})
 target_link_libraries(CepGenRoot PRIVATE ${ROOT_LIBRARIES})
 target_include_directories(CepGenRoot PRIVATE ${ROOT_INCLUDE_DIRS})

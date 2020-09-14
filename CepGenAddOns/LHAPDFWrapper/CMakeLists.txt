@@ -1,7 +1,11 @@
+#--- searching for LHAPDF
+find_library(LHAPDF LHAPDF HINTS $ENV{LHAPDF_PATH} PATH_SUFFIXES lib)
+find_path(LHAPDF_INCLUDE LHAPDF HINTS $ENV{LHAPDF_PATH} PATH_SUFFIXES include)
+
 if(LHAPDF)
   message(STATUS "LHAPDF found in ${LHAPDF}")
 else()
-  message(FATAL_ERROR "Trying to build LHAPDF wrapper library while no LHAPDF installation was found on system!")
+  return()
 endif()
 
 include_directories(${PROJECT_SOURCE_DIR})
