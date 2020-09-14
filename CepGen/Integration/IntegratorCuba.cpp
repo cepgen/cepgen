@@ -27,7 +27,7 @@ namespace cepgen
   };
 
   Integrand* gIntegrand = nullptr;
-  int cuba_integrand( const int* ndim, const cubareal xx[], const int* ncomp, cubareal ff[], void* userdata )
+  int cuba_integrand( const int* ndim, const double xx[], const int* ncomp, double ff[], void* userdata )
   {
     ff[0] = gIntegrand->eval( std::vector<double>( xx, xx+*ndim ) );
     return 0;
@@ -54,16 +54,16 @@ namespace cepgen
   IntegratorCuba::integrate( double& result, double& abserr )
   {
     gIntegrand = integrand_;
-    /*auto integr = [&]( const int* ndim, const cubareal xx[], const int* ncomp, cubareal ff[], void* userdata ) -> int {
+    /*auto integr = [&]( const int* ndim, const double xx[], const int* ncomp, double ff[], void* userdata ) -> int {
       //ff[0] = function_->f( (double*)xx, function_->dim, (void*)function_->params );
       ff[0] = integrand_->eval( std::vector<double>( xx, xx+*ndim ) );
       return 0;
     };*/
 
     int neval, fail;
-    cubareal integral, error, prob;
+    double integral, error, prob;
 
-    Vegas( function_->dim, 1, cuba_integrand, nullptr, nvec_,
+    Vegas( integrand_->size(), 1, cuba_integrand, nullptr, nvec_,
       epsrel_, epsabs_, verbose_, seed_,
       mineval_, maxeval_, nstart_, nincrease_, nbatch_,
       gridno_, nullptr, nullptr,
