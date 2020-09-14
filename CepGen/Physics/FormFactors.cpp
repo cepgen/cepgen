@@ -38,10 +38,7 @@ namespace cepgen
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       last_q2_( -1. ),
       FE( 0. ), FM( 0. ), GE( 0. ), GM( 0. )
-    {
-      if ( params.has<ParametersList>( "structureFunctions" ) )
-        str_fun_ = strfun::StructureFunctionsFactory::get().build( params.get<ParametersList>( "structureFunctions" ) );
-    }
+    {}
 
     void
     Parameterisation::setStructureFunctions( strfun::Parameterisation* sfmod )
