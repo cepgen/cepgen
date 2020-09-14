@@ -1,7 +1,7 @@
 #ifndef CepGen_Module_ExportModuleFactory_h
 #define CepGen_Module_ExportModuleFactory_h
 
-#include "CepGen/Core/ModuleFactory.h"
+#include "CepGen/Modules/ModuleFactory.h"
 
 /** \file */
 

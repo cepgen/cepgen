@@ -2,13 +2,15 @@ set(CPACK_RPM_COMPONENT_INSTALL ON)
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(CepGen)
 set(PROJECT_VERSION 1)
-set(VERSION 0.9.7)
+set(VERSION 1.0.alpha1)
 
 option(CMAKE_BUILD_CORE "Build Core library" ON)
 option(CMAKE_BUILD_PROCESSES "Build physics processes" ON)
 option(CMAKE_BUILD_ADDONS "Build AddOns" ON)
+option(CMAKE_BUILD_SCAN "Build cross-section scan utilitary" OFF)
+option(CMAKE_BUILD_CARD_CONV "Build steering cards converter utilitary" OFF)
 option(CMAKE_BUILD_TESTS "Build tests" OFF)
-
+option(CMAKE_BUILD_FOAM "Build FOAM integrator" OFF)
 #----- release build by default
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -21,23 +23,27 @@ if(NOT CMAKE_BUILD_CORE AND NOT CMAKE_BUILD_PROCESSES AND NOT CMAKE_BUILD_ADDONS
   message(FATAL_ERROR "Nothing to be built!")
 endif()
 
+#set(CMAKE_INSTALL_RPATH "$ORIGIN")
+#set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_INSTALL_PREFIX "/usr")
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake $ENV{ROOTSYS}/cmake)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
 set(CMAKE_CXX_FLAGS_DEBUG "-pg") # for gprof
 #set(CMAKE_CXX_FLAGS_DEBUG "-fprofile-arcs -ftest-coverage") # for gcov
-set(CMAKE_CXX_FLAGS_RELEASE "-O2")
-set(LIB_INSTALL_DIR lib)
+set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -O2")
+set(CMAKE_C_FLAGS_RELEASE "-O2")
 
 #----- include external paths
 
 include(GNUInstallDirs)
 include(UseEnvironment)
-include(BuildRPM)
 
 set(CEPGEN_LIBRARIES)
-set(CEPGEN_HAS_FUNCTIONALS OFF)
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
-set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
-set(CEPGEN_CORE_EXT ${GSL_LIB} ${GSL_CBLAS_LIB})
+set(CEPGEN_CORE_EXT ${GSL_LIB} ${GSL_CBLAS_LIB} dl)
+set(CEPGEN_ADDONS_EXT)
+set(CEPGEN_HAS_FUNCTIONALS OFF)
 
 #----- enable fortran for external libraries linking
 
@@ -48,21 +54,16 @@ enable_language(Fortran)
 include_directories(${PROJECT_SOURCE_DIR})
 if(CMAKE_BUILD_PROCESSES)
   add_subdirectory(CepGenProcesses)
-  list(APPEND CEPGEN_LIBRARIES CepGenProcesses)
 endif()
 if(CMAKE_BUILD_ADDONS)
   add_subdirectory(CepGenAddOns)
-  list(APPEND CEPGEN_LIBRARIES CepGenAddOns)
+  message(STATUS "Found addons: ${CEPGEN_ADDONS_EXT}")
 endif()
 if(CMAKE_BUILD_CORE)
-  add_subdirectory(CepGen/Event)
-  add_subdirectory(CepGen/Cards)
-  list(APPEND CEPGEN_LIBRARIES CepGenEvent CepGenCards)
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.2)
-    list(APPEND CEPGEN_CORE_EXT ${CEPGEN_LIBRARIES})
-  endif()
   add_subdirectory(CepGen)
   list(APPEND CEPGEN_LIBRARIES CepGenCore)
+  add_subdirectory(CepGen/Cards)
+  list(APPEND CEPGEN_LIBRARIES CepGenCards)
 endif()
 
 #----- copy the input cards and other files
@@ -72,7 +73,7 @@ foreach(_files ${input_cards})
   configure_file(${_files} ${_files} COPYONLY)
 endforeach()
 file(GLOB external_files ${PROJECT_SOURCE_DIR}/External/mstw_sf_scan_nnlo.dat ${PROJECT_SOURCE_DIR}/External/*.mcd)
-file(COPY ${external_files} DESTINATION ${PROJECT_BINARY_DIR}/External)
+file(COPY ${external_files} DESTINATION ${PROJECT_BINARY_DIR})
 file(GLOB readme_file ${PROJECT_SOURCE_DIR}/CepGen/README)
 file(COPY ${readme_file} DESTINATION ${PROJECT_BINARY_DIR})
 
@@ -80,12 +81,7 @@ file(COPY ${readme_file} DESTINATION ${PROJECT_BINARY_DIR})
 
 if(CMAKE_BUILD_CORE)
   #--- build the executables
-  file(GLOB_RECURSE exec_sources RELATIVE ${CEPGEN_SOURCE_DIR} ${CEPGEN_SOURCE_DIR}/*.cpp)
-  foreach(exec_src ${exec_sources})
-    string(REPLACE ".cpp" "" exec_bin ${exec_src})
-    add_executable(${exec_bin} ${CEPGEN_SOURCE_DIR}/${exec_src})
-    target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES})
-  endforeach()
+  add_subdirectory(src)
   #--- build the tests
   if(CMAKE_BUILD_TESTS)
     enable_testing()
@@ -99,7 +95,14 @@ endif()
 install(DIRECTORY CepGen CepGenAddOns CepGenProcesses
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   COMPONENT devel FILES_MATCHING PATTERN "*.h")
-export(PACKAGE cepgen)
+install(DIRECTORY Cards
+  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
+  COMPONENT lib FILES_MATCHING PATTERN "*.py")
+install(FILES ${external_files} ${readme_file}
+  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
+  COMPONENT lib)
+export(PACKAGE CepGen)
+include(BuildPackage)
 
 #----- documentation
 

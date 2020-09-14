@@ -1,7 +1,7 @@
 #ifndef CepGen_Modules_EventModifierFactory_h
 #define CepGen_Modules_EventModifierFactory_h
 
-#include "CepGen/Core/ModuleFactory.h"
+#include "CepGen/Modules/ModuleFactory.h"
 
 /** \file */
 

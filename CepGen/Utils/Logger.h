@@ -40,7 +40,11 @@ namespace cepgen
           allowed_exc_.emplace_back( rule, std::regex_constants::extended );
 #endif
         }
-        /// \brief Is the module set to be displayed/logged?
+        /// Collection of logging exceptions
+        const std::vector<std::regex>& exceptionRules() const {
+          return allowed_exc_;
+        }
+        /// Is the module set to be displayed/logged?
         /// \param[in] tmpl Module name to probe
         /// \param[in] lev Upper verbosity level
         bool passExceptionRule( const std::string& tmpl, const Level& lev ) const {

@@ -3,7 +3,7 @@ from Config.Integration.vegas_cff import integrator
 #--------------------------------------------------------------------
 # Logging/debugging example
 #--------------------------------------------------------------------
-#from Config.logger_cfi import logger
+#from Config.Logger_cfi import logger
 #logger.enabledModules += ('Hadroniser.configure', 'Generator.*',)
 #--------------------------------------------------------------------
 # Pythia 6 example (with fully leptonic WW decay)
@@ -52,6 +52,7 @@ process = kt.process.clone('pptoww',
         invmass = (0.,),
         ptsum = (0.,),
         #--- cuts on single particles' level
+        #minFinalState = [11, 13],
         cuts = {
             # cuts on the single W level
             #24: cepgen.Parameters(pt = (0.,)), # no pt cut on Ws

@@ -13,7 +13,7 @@ namespace cepgen
     {
       public:
         FortranKTProcess( const ParametersList& params, std::function<double(void)> func );
-        ProcessPtr clone( const ParametersList& /*params*/ ) const override { return ProcessPtr( new FortranKTProcess( *this ) ); }
+        ProcessPtr clone() const override { return ProcessPtr( new FortranKTProcess( *this ) ); }
 
         static ParametersList kProcParameters;
 

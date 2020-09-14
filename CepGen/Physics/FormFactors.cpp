@@ -10,27 +10,30 @@
 
 #include <cmath>
 #include <cassert>
+//#include <iosfwd>
 
 namespace cepgen
 {
   namespace ff
   {
     Parameterisation::Parameterisation() :
-      model_( Model::Invalid ), type_( Type::Invalid ),
+      NamedModule<int>( ParametersList() ),
+      type_( Type::Invalid ),
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       last_q2_( -1. ),
       FE( 0. ), FM( 0. ), GE( 0. ), GM( 0. )
     {}
 
     Parameterisation::Parameterisation( const Parameterisation& param ) :
-      model_( param.model_ ), type_( param.type_ ),
+      NamedModule<int>( param.parameters() ),
+      type_( param.type_ ),
       mp_( param.mp_ ), mp2_( param.mp2_ ),
       last_q2_( -1. ),
       FE( param.FE ), FM( param.FM ), GE( param.GE ), GM( param.GM )
     {}
 
     Parameterisation::Parameterisation( const ParametersList& params ) :
-      model_( (Model)params.name<int>( (int)Model::Invalid ) ),
+      NamedModule<int>( params ),
       type_( (Type)params.get<int>( "type", (int)Type::Invalid ) ),
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       last_q2_( -1. ),
@@ -41,9 +44,9 @@ namespace cepgen
     }
 
     void
-    Parameterisation::setStructureFunctions( std::unique_ptr<strfun::Parameterisation> sfmod )
+    Parameterisation::setStructureFunctions( strfun::Parameterisation* sfmod )
     {
-      str_fun_ = std::move( sfmod );
+      str_fun_.reset( sfmod );
     }
 
     double
@@ -53,17 +56,6 @@ namespace cepgen
         throw CG_FATAL( "FormFactors:tau" )
           << "Invalid proton mass! check the form factors constructor!";
       return 0.25*q2/mp2_;
-    }
-
-    std::string
-    Parameterisation::description() const
-    {
-      std::ostringstream os;
-      os << "FF{" << model_ << "," << type_;
-      if ( str_fun_ )
-        os << ",str.fun.=" << *str_fun_;
-      os << "}";
-      return os.str();
     }
 
     Parameterisation&
@@ -91,13 +83,14 @@ namespace cepgen
             throw CG_FATAL( "FormFactors" )
               << "Inelastic proton form factors computation requires "
               << "a structure functions definition!";
-          switch ( str_fun_->type ) {
+          switch ( (strfun::Type)str_fun_->name() ) {
             case strfun::Type::ElasticProton:
               throw CG_FATAL( "FormFactors" )
                 << "Elastic proton form factors requested!\n"
                 << "Check your process definition!";
             case strfun::Type::SuriYennie: { //FIXME
-              const auto sy = strfun::SuriYennie()( xbj, q2 );
+              static strfun::SuriYennie sy;
+              sy = sy( xbj, q2 );
               FE = sy.F2 * xbj * sqrt( mi2 ) / q2;
               FM = sy.FM;
             } break;
@@ -114,18 +107,33 @@ namespace cepgen
 
     //------------------------------------------------------------------
 
-    StandardDipole::StandardDipole( const ParametersList& params ) :
-      Parameterisation( params )
-    {}
-
-    void
-    StandardDipole::compute( double q2 )
+    class StandardDipole : public Parameterisation
     {
-      GE = pow( 1.+q2/0.71, -2. );
-      GM = MU*GE;
-    }
+      public:
+        using Parameterisation::Parameterisation;
+        static std::string description() { return "Standard dipole"; }
+
+      private:
+        void compute( double q2 ) override {
+          GE = pow( 1.+q2/0.71, -2. );
+          GM = MU*GE;
+        }
+    };
 
     //------------------------------------------------------------------
+
+    class ArringtonEtAl : public Parameterisation
+    {
+      public:
+        ArringtonEtAl( const ParametersList& );
+        static std::string description() { return "Arrington et al."; }
+
+      private:
+        void compute( double q2 ) override;
+        const int mode_;
+        std::vector<double> a_e_, b_e_;
+        std::vector<double> a_m_, b_m_;
+    };
 
     ArringtonEtAl::ArringtonEtAl( const ParametersList& params ) :
       Parameterisation( params ),
@@ -181,26 +189,46 @@ namespace cepgen
 
     //------------------------------------------------------------------
 
-    void
-    BrashEtAl::compute( double q2 )
+    class BrashEtAl : public Parameterisation
     {
-      if ( q2 > MAX_Q2 )
-        CG_WARNING( "BrashEtAl" )
-          << "Q² = " << q2 << " > " << MAX_Q2 << " GeV² = max(Q²).\n\t"
-          << "Brash et al. FF parameterisation not designed for high-Q² values.";
-      const double q = sqrt( q2 );
-      GM = 1./( 1.+q*( 0.116+q*( 2.874+q*( 0.241+q*( 1.006+q*0.345 ) ) ) ) );
+      public:
+        using Parameterisation::Parameterisation;
+        static std::string description() { return "Brash et al."; }
 
-      const double r = std::min( 1., 1.-0.13*( q2-0.04 ) );
-      if ( r < 0. ) {
-        GM = GE = 0.;
-        return;
-      }
-      GE = r*GM;
-      GM *= MU;
-    }
+      private:
+        static constexpr float MAX_Q2 = 7.7;
+        void compute( double q2 ) override {
+          if ( q2 > MAX_Q2 )
+            CG_WARNING( "BrashEtAl" )
+            << "Q² = " << q2 << " > " << MAX_Q2 << " GeV² = max(Q²).\n\t"
+            << "Brash et al. FF parameterisation not designed for high-Q² values.";
+          const double q = sqrt( q2 );
+          GM = 1./( 1.+q*( 0.116+q*( 2.874+q*( 0.241+q*( 1.006+q*0.345 ) ) ) ) );
+
+          const double r = std::min( 1., 1.-0.13*( q2-0.04 ) );
+          if ( r < 0. ) {
+            GM = GE = 0.;
+            return;
+          }
+          GE = r*GM;
+          GM *= MU;
+        }
+    };
 
     //------------------------------------------------------------------
+
+    class MergellEtAl : public Parameterisation
+    {
+      public:
+        MergellEtAl( const ParametersList& );
+        static std::string description() { return "Mergell et al."; }
+
+      private:
+        void compute( double q2 ) override;
+        static constexpr double Q2_RESCL = 9.733, INV_DENUM = 1./0.350;
+        static constexpr double EXPO = 2.148;
+        const std::vector<double> par1_, par2_;
+    };
 
     MergellEtAl::MergellEtAl( const ParametersList& params ) :
       Parameterisation( params ),

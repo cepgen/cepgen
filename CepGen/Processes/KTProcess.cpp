@@ -7,6 +7,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/HeavyIon.h"
 
 namespace cepgen
 {
@@ -48,9 +49,11 @@ namespace cepgen
       if ( kin_.mode == KinematicsMode::invalid ) {
         //--- try to extrapolate kinematics mode from unintegrated fluxes
         bool el1 = ( flux1 == KTFlux::P_Photon_Elastic
+                  || flux1 == KTFlux::P_Photon_Elastic_Budnev
                   || flux1 == KTFlux::HI_Photon_Elastic
                   || flux1 == KTFlux::P_Gluon_KMR );
         bool el2 = ( flux2 == KTFlux::P_Photon_Elastic
+                  || flux2 == KTFlux::P_Photon_Elastic_Budnev
                   || flux2 == KTFlux::HI_Photon_Elastic
                   || flux2 == KTFlux::P_Gluon_KMR );
         if ( el1 && el2 )
@@ -68,48 +71,64 @@ namespace cepgen
         //==========================================================================================
         // ensure the first incoming flux is compatible with the kinematics mode
         //==========================================================================================
-        if ( ( kin_.mode == KinematicsMode::ElasticElastic
-            || kin_.mode == KinematicsMode::ElasticInelastic )
-          && ( flux1 != KTFlux::P_Photon_Elastic ) ) {
-          kin_.incoming_beams.first.kt_flux = hi1
-            ? KTFlux::HI_Photon_Elastic
-            : KTFlux::P_Photon_Elastic;
-          CG_DEBUG( "KTProcess:kinematics" )
-            << "KT flux for first incoming parton set to \""
-            << kin_.incoming_beams.first.kt_flux << "\".";
-        }
-        else if ( flux1 != KTFlux::P_Photon_Inelastic
-               && flux1 != KTFlux::P_Photon_Inelastic_Budnev ) {
-          if ( hi1 )
-            throw CG_FATAL( "KTProcess:kinematics" )
-              << "Inelastic photon emission from HI not yet supported!";
-          kin_.incoming_beams.first.kt_flux = KTFlux::P_Photon_Inelastic_Budnev;
-          CG_INFO( "KTProcess:kinematics" )
-            << "KT flux for first incoming parton set to \""
-            << kin_.incoming_beams.first.kt_flux << "\".";
+        switch ( kin_.mode ) {
+          case KinematicsMode::ElasticElastic:
+          case KinematicsMode::ElasticInelastic:
+          default: {
+            if ( flux1 != KTFlux::P_Photon_Elastic
+              && flux1 != KTFlux::P_Photon_Elastic_Budnev ) {
+              kin_.incoming_beams.first.kt_flux = hi1
+                ? KTFlux::HI_Photon_Elastic
+                : KTFlux::P_Photon_Elastic_Budnev;
+              CG_DEBUG( "KTProcess:kinematics" )
+                << "KT flux for first incoming parton set to \""
+                << kin_.incoming_beams.first.kt_flux << "\".";
+            }
+          } break;
+          case KinematicsMode::InelasticElastic:
+          case KinematicsMode::InelasticInelastic: {
+            if ( flux1 != KTFlux::P_Photon_Inelastic
+              && flux1 != KTFlux::P_Photon_Inelastic_Budnev ) {
+              if ( hi1 )
+                throw CG_FATAL( "KTProcess:kinematics" )
+                  << "Inelastic photon emission from HI not yet supported!";
+              kin_.incoming_beams.first.kt_flux = KTFlux::P_Photon_Inelastic_Budnev;
+              CG_INFO( "KTProcess:kinematics" )
+                << "KT flux for first incoming parton set to \""
+                << kin_.incoming_beams.first.kt_flux << "\".";
+            }
+          } break;
         }
         //==========================================================================================
         // ensure the second incoming flux is compatible with the kinematics mode
         //==========================================================================================
-        if ( ( kin_.mode == KinematicsMode::ElasticElastic
-            || kin_.mode == KinematicsMode::InelasticElastic )
-          && ( flux2 != KTFlux::P_Photon_Elastic ) ) {
-          kin_.incoming_beams.second.kt_flux = hi2
-            ? KTFlux::HI_Photon_Elastic
-            : KTFlux::P_Photon_Elastic;
-          CG_DEBUG( "KTProcess:kinematics" )
-            << "KT flux for second incoming parton set to \""
-            << kin_.incoming_beams.second.kt_flux << "\".";
-        }
-        else if ( flux2 != KTFlux::P_Photon_Inelastic
-               && flux2 != KTFlux::P_Photon_Inelastic_Budnev ) {
-          if ( hi2 )
-            throw CG_FATAL( "KTProcess:kinematics" )
-              << "Inelastic photon emission from HI not yet supported!";
-          kin_.incoming_beams.second.kt_flux = KTFlux::P_Photon_Inelastic_Budnev;
-          CG_INFO( "KTProcess:kinematics" )
-            << "KT flux for second incoming parton set to \""
-            << kin_.incoming_beams.second.kt_flux << "\".";
+        switch ( kin_.mode ) {
+          case KinematicsMode::ElasticElastic:
+          case KinematicsMode::InelasticElastic:
+          default: {
+            if ( flux2 != KTFlux::P_Photon_Elastic
+              && flux2 != KTFlux::P_Photon_Elastic_Budnev ) {
+            kin_.incoming_beams.second.kt_flux = hi2
+              ? KTFlux::HI_Photon_Elastic
+              : KTFlux::P_Photon_Elastic_Budnev;
+            CG_DEBUG( "KTProcess:kinematics" )
+              << "KT flux for second incoming parton set to \""
+              << kin_.incoming_beams.second.kt_flux << "\".";
+            }
+          } break;
+          case KinematicsMode::ElasticInelastic:
+          case KinematicsMode::InelasticInelastic: {
+            if ( flux2 != KTFlux::P_Photon_Inelastic
+              && flux2 != KTFlux::P_Photon_Inelastic_Budnev ) {
+              if ( hi2 )
+                throw CG_FATAL( "KTProcess:kinematics" )
+                  << "Inelastic photon emission from HI not yet supported!";
+              kin_.incoming_beams.second.kt_flux = KTFlux::P_Photon_Inelastic_Budnev;
+              CG_INFO( "KTProcess:kinematics" )
+                << "KT flux for second incoming parton set to \""
+                << kin_.incoming_beams.second.kt_flux << "\".";
+            }
+          } break;
         }
       }
 
@@ -117,10 +136,10 @@ namespace cepgen
       // register the incoming partons' variables
       //============================================================================================
 
-      defineVariable( qt1_, Mapping::exponential, kin_.cuts.initial.qt, { 1.e-10, 500. }, "First incoming parton virtuality" );
-      defineVariable( qt2_, Mapping::exponential, kin_.cuts.initial.qt, { 1.e-10, 500. }, "Second incoming parton virtuality" );
-      defineVariable( phi_qt1_, Mapping::linear, kin_.cuts.initial.phi_qt, { 0., 2.*M_PI }, "First incoming parton azimuthal angle" );
-      defineVariable( phi_qt2_, Mapping::linear, kin_.cuts.initial.phi_qt, { 0., 2.*M_PI }, "Second incoming parton azimuthal angle" );
+      defineVariable( qt1_, Mapping::exponential, kin_.cuts.initial.qt(), { 1.e-10, 500. }, "First incoming parton virtuality" );
+      defineVariable( qt2_, Mapping::exponential, kin_.cuts.initial.qt(), { 1.e-10, 500. }, "Second incoming parton virtuality" );
+      defineVariable( phi_qt1_, Mapping::linear, kin_.cuts.initial.phi_qt(), { 0., 2.*M_PI }, "First incoming parton azimuthal angle" );
+      defineVariable( phi_qt2_, Mapping::linear, kin_.cuts.initial.phi_qt(), { 0., 2.*M_PI }, "Second incoming parton azimuthal angle" );
 
       //============================================================================================
       // register the incoming partons
@@ -130,6 +149,7 @@ namespace cepgen
         case KTFlux::P_Gluon_KMR:
           event_->oneWithRole( Particle::Parton1 ).setPdgId( (pdgid_t)PDG::gluon ); break;
         case KTFlux::P_Photon_Elastic:
+        case KTFlux::P_Photon_Elastic_Budnev:
         case KTFlux::P_Photon_Inelastic:
         case KTFlux::P_Photon_Inelastic_Budnev:
         case KTFlux::HI_Photon_Elastic:
@@ -142,6 +162,7 @@ namespace cepgen
         case KTFlux::P_Gluon_KMR:
           event_->oneWithRole( Particle::Parton2 ).setPdgId( (pdgid_t)PDG::gluon ); break;
         case KTFlux::P_Photon_Elastic:
+        case KTFlux::P_Photon_Elastic_Budnev:
         case KTFlux::P_Photon_Inelastic:
         case KTFlux::P_Photon_Inelastic_Budnev:
         case KTFlux::HI_Photon_Elastic:
@@ -164,9 +185,9 @@ namespace cepgen
       mX2_ = event_->oneWithRole( Particle::IncomingBeam1 ).mass2();
       mY2_ = event_->oneWithRole( Particle::IncomingBeam2 ).mass2();
       if ( kin_.mode == KinematicsMode::InelasticElastic || kin_.mode == KinematicsMode::InelasticInelastic )
-        defineVariable( mX2_, Mapping::square, kin_.cuts.remnants.mass_single, { 1.07, 1000. }, "Positive z proton remnant squared mass" );
+        defineVariable( mX2_, Mapping::square, kin_.cuts.remnants.mx(), { 1.07, 1000. }, "Positive z proton remnant squared mass" );
       if ( kin_.mode == KinematicsMode::ElasticInelastic || kin_.mode == KinematicsMode::InelasticInelastic )
-        defineVariable( mY2_, Mapping::square, kin_.cuts.remnants.mass_single, { 1.07, 1000. }, "Negative z proton remnant squared mass" );
+        defineVariable( mY2_, Mapping::square, kin_.cuts.remnants.mx(), { 1.07, 1000. }, "Negative z proton remnant squared mass" );
     }
 
     double

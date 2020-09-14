@@ -37,7 +37,8 @@ extern "C" {
   {
     using namespace cepgen;
     static auto ff = ff::FormFactorsFactory::get().build( (int)ff::Model::StandardDipole ); // use another argument for the modelling?
-    ff->setStructureFunctions( strfun::StructureFunctionsFactory::get().build( sfmode ) );
+    static auto sf = strfun::StructureFunctionsFactory::get().build( sfmode );
+    ff->setStructureFunctions( sf.get() );
     return ktFlux( (KTFlux)fmode, x, kt2, *ff, min*min, mout*mout );
   }
 

@@ -1,7 +1,10 @@
 #include "CepGen/Generator.h"
+#include "CepGen/Parameters.h"
+
+#include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Cards/Handler.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Cards/Handler.h"
 
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/AbortHandler.h"
@@ -17,45 +20,72 @@ int main( int argc, char* argv[] )
 {
   std::string input_card;
   int num_events;
-  bool list_mods;
+  bool list_mods, debug, safe_mode;
+  vector<string> addons;
 
-  cepgen::ArgumentsParser( argc, argv )
-    .addArgument( "", "path to the configuration file", &input_card, 'i' )
-    .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
-    .addOptionalArgument( "list-modules", "list all runtime modules", false, &list_mods, 'l' )
+  cepgen::ArgumentsParser parser( argc, argv );
+  parser
+    .addOptionalArgument( "config,i", "path to the configuration file", &input_card )
+    .addOptionalArgument( "num-events,n", "number of events to generate", &num_events, -1 )
+    .addOptionalArgument( "list-modules,l", "list all runtime modules", &list_mods, false )
+    .addOptionalArgument( "add-ons,a", "external runtime plugin", &addons )
+    .addOptionalArgument( "debug,d", "debugging mode", &debug, false )
+    .addOptionalArgument( "safe-mode,s", "safe mode", &safe_mode, false )
     .parse();
+
+  //--- first start by defining the generator object
+  for ( const auto& lib : addons )
+    try { cepgen::loadLibrary( lib ); } catch ( const cepgen::Exception& e ) {
+      e.dump();
+    }
+
+  cepgen::Generator gen( safe_mode );
+
+  //--- if modules listing is requested
+  if ( list_mods ) {
+    cepgen::dumpModules();
+    return 0;
+  }
+  if ( debug )
+    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
+
+  //--- no steering card nor additional flags found
+  if ( input_card.empty() && parser.extra_config().empty() )
+    throw CG_FATAL( "main" )
+      << "Neither input card nor configuration word provided!\n\n "
+      << parser.help_message();
+  else {
+    //--- parse the steering card
+    if ( !input_card.empty() )
+      gen.setParameters( cepgen::card::Handler::parse( input_card ) );
+    //--- parse the additional flags
+    if ( !parser.extra_config().empty() )
+      gen.setParameters( cepgen::card::CardsHandlerFactory::get().build( "cmd",
+        cepgen::ParametersList().set<std::vector<std::string> >( "args", parser.extra_config() ) )
+        ->parse( std::string(), gen.parametersPtr() ) );
+  }
 
   cepgen::utils::AbortHandler ctrl_c;
 
-  //--- first start by defining the generator object
-  cepgen::Generator gen;
-
-  if ( list_mods ) {
-    gen.dumpModules();
-    return 0;
-  }
-
   try {
-    //--- parse the steering card
-    gen.setParameters( cepgen::card::Handler::parse( input_card )->parameters() );
-
+    auto& params = gen.parametersRef();
     if ( num_events >= 0 ) { // user specified a number of events to generate
-      gen.parameters().generation().maxgen = num_events;
-      gen.parameters().generation().enabled = num_events > 0;
+      params.generation().maxgen = num_events;
+      params.generation().enabled = num_events > 0;
     }
 
     //--- list all parameters
-    CG_LOG( "main" ) << gen.parametersPtr();
+    CG_LOG( "main" ) << gen.parameters();
 
     //--- let there be a cross-section...
     double xsec = 0., err = 0.;
     gen.computeXsection( xsec, err );
 
-    if ( gen.parameters().generation().enabled )
+    if ( params.generation().enabled )
       //--- events generation starts here
       // (one may use a callback function)
       gen.generate();
-  } catch ( const cepgen::utils::RunAbortedException& e ) {
+  } catch ( const cepgen::utils::RunAbortedException& ) {
     CG_DEBUG( "main" ) << "Run aborted!";
   } catch ( const cepgen::Exception& e ) {
     e.dump();

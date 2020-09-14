@@ -4,6 +4,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/HeavyIon.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"
@@ -15,10 +16,7 @@ namespace cepgen
   namespace proc
   {
     Process::Process( const ParametersList& params, bool has_event ) :
-      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
-      params_( params ),
-      name_( params.name<std::string>( "<invalid>" ) ),
-      description_( params.get<std::string>( "description" ) ),
+      NamedModule( params ),
       first_run( true ), base_jacobian_( 1. ),
       s_( -1. ), sqs_( -1. ),
       mA2_( -1. ), mB2_( -1. ), mX2_( -1. ), mY2_( -1. ),
@@ -30,8 +28,7 @@ namespace cepgen
     }
 
     Process::Process( const Process& proc ) :
-      mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
-      params_( proc.params_ ), name_( proc.name_ ), description_( proc.description_ ),
+      NamedModule<>( proc.parameters() ),
       first_run( proc.first_run ), base_jacobian_( proc.base_jacobian_ ),
       s_( proc.s_ ), sqs_( proc.sqs_ ),
       mA2_( proc.mA2_ ), mB2_( proc.mB2_ ), mX2_( proc.mX2_ ), mY2_( proc.mY2_ ),
@@ -39,18 +36,37 @@ namespace cepgen
       is_point_set_( false )
     {
       if ( proc.event_ )
-        event_.reset( new Event( *proc.event_.get() ) );
+        event_.reset( new Event( *proc.event_ ) );
+    }
+
+    std::unique_ptr<Process>
+    Process::clone() const
+    {
+      throw CG_FATAL( "Process:clone" )
+        << "Process \"" << name_ << "\" has no cloning method implementation!";
+    }
+
+    void
+    Process::clear()
+    {
+      first_run = true;
+      addEventContent();
+      //--- initialise the "constant" (wrt x) part of the Jacobian
+      base_jacobian_ = 1.;
+      mapped_variables_.clear();
     }
 
     void
     Process::dumpVariables() const
     {
-      std::ostringstream os;
-      for ( const auto& var : mapped_variables_ )
-        os << "\n\t(" << var.index << ") " << var.type << " mapping (" << var.description << ") in range " << var.limits;
-      CG_INFO( "Process:dumpVariables" )
-        << "List of variables handled by this process:"
-        << os.str();
+      CG_INFO( "Process:dumpVariables" ).log( [&]( auto& info ) {
+        info << "List of variables handled by this process:";
+        for ( const auto& var : mapped_variables_ )
+          info
+            << "\n\t(" << var.index << ") " << var.type
+            << " mapping (" << var.description << ")"
+            << " in range " << var.limits;
+      } );
     }
 
     Process&
@@ -130,8 +146,7 @@ namespace cepgen
           } break;
         }
       }
-      if ( CG_LOG_MATCH( "Process:vars", debugInsideLoop ) ) {
-        std::ostringstream oss;
+      CG_DEBUG_LOOP( "Process:vars" ).log( [&]( auto& dbg ) {
         std::string sep;
         for ( const auto& var : mapped_variables_ ) {
           double value = 0.;
@@ -145,16 +160,15 @@ namespace cepgen
               value = sqrt( var.value );
               break;
           }
-          oss << sep
+          dbg << sep
             << "variable " << var.index
             << std::left << std::setw( 60 )
             << ( !var.description.empty() ? " ("+var.description+")" : "" )
             << " in range " << std::setw( 20 ) << var.limits
             << " has value " << std::setw( 20 ) << value
-            << " (x=" << x( var.index ) << std::right << ")", sep = "\n\t";
+            << " (x=" << this->x( var.index ) << std::right << ")", sep = "\n\t";
         }
-        CG_DEBUG_LOOP( "Process:vars" ) << oss.str();
-      }
+      } );
     }
 
     double
@@ -179,17 +193,6 @@ namespace cepgen
       return jac;
     }
 
-    void
-    Process::setPoint( double* x, const size_t ndim )
-    {
-      std::copy( x, x+ndim, point_coord_.begin() );
-      is_point_set_ = true;
-
-      if ( CG_LOG_MATCH( "Process:dumpPoint", debugInsideLoop ) )
-        dumpPoint();
-      clearEvent();
-    }
-
     double
     Process::x( unsigned int idx ) const
     {
@@ -203,12 +206,12 @@ namespace cepgen
     }
 
     double
-    Process::weight()
+    Process::weight( const std::vector<double>& x )
     {
-      if ( !is_point_set_ )
-        throw CG_FATAL( "Process:weight" )
-          << "Trying to evaluate weight while phase space point\n\t"
-          << "coordinates are not set!";
+      point_coord_ = x;
+      if ( CG_LOG_MATCH( "Process:dumpPoint", debugInsideLoop ) )
+        dumpPoint();
+      clearEvent();
 
       //--- generate and initialise all variables
       generateVariables();
@@ -241,16 +244,17 @@ namespace cepgen
     void
     Process::clearEvent()
     {
-      event_->restore();
+      if ( event_ )
+        event_->restore();
     }
 
     void
     Process::setKinematics( const Kinematics& kin )
     {
+      clear();
+      mp_ = PDG::get().mass( PDG::proton );
+      mp2_ = mp_*mp_;
       kin_ = kin;
-      //--- initialise the "constant" (wrt x) part of the Jacobian
-      base_jacobian_ = 1.;
-      mapped_variables_.clear();
 
       //--- define incoming system
       // at some point introduce non head-on colliding beams?
@@ -268,11 +272,6 @@ namespace cepgen
       const auto p2 = Momentum::fromPxPyPzM( 0., 0., -kin_.incoming_beams.second.pz, m2 );
 
       if ( event_ ) {
-        CG_DEBUG( "Process:incomingBeams" )
-          << "Incoming primary particles:\n"
-          << "  " << p1 << "\n"
-          << "  " << p2;
-
         event_->oneWithRole( Particle::IncomingBeam1 ).setMomentum( p1 );
         event_->oneWithRole( Particle::IncomingBeam2 ).setMomentum( p2 );
       }
@@ -283,10 +282,11 @@ namespace cepgen
       mA2_ = p1.mass2();
       mB2_ = p2.mass2();
 
-      CG_DEBUG( "Process" ) << "Kinematics successfully set!\n"
-        << "  √s = " << sqs_*1.e-3 << " TeV,\n"
-        << "  p1=" << p1 << ",\tmass=" << p1.mass() << " GeV\n"
-        << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.";
+      if ( event_ )
+        CG_DEBUG( "Process" ) << "Kinematics successfully set!\n"
+          << "  √s = " << sqs_*1.e-3 << " TeV,\n"
+          << "  p1=" << p1 << ",\tmass=" << p1.mass() << " GeV\n"
+          << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.";
 
       //--- process-specific phase space definition
       prepareKinematics();
@@ -295,12 +295,13 @@ namespace cepgen
     void
     Process::dumpPoint() const
     {
-      std::ostringstream os;
-      for ( unsigned short i = 0; i < point_coord_.size(); ++i )
-        os << utils::format( "\n\t  x(%2d) = %8.6f", i, point_coord_[i] );
-      CG_INFO( "Process" )
-        << "Number of integration parameters: " << mapped_variables_.size()
-        << os.str() << ".";
+      CG_INFO( "Process" ).log( [&]( auto& info ) {
+        info
+          << "Number of integration parameters: " << mapped_variables_.size();
+        for ( unsigned short i = 0; i < point_coord_.size(); ++i )
+          info << utils::format( "\n\t  x(%2d) = %8.6f", i, point_coord_[i] );
+        info << ".";
+      } );
     }
 
     void

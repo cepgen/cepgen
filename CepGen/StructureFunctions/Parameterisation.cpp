@@ -1,5 +1,6 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
+
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Physics/PDG.h"
@@ -12,15 +13,15 @@ namespace cepgen
   namespace strfun
   {
     Parameterisation::Parameterisation( double f2, double fl ) :
-      type( Type::Invalid ),
+      NamedModule<int>( ParametersList() ),
       F2( f2 ), FL( fl ),
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       old_vals_({ 0., 0. }),
-      r_ratio_( new sigrat::E143 )
+      r_ratio_( sigrat::SigmaRatiosFactory::get().build( (int)sigrat::Type::E143 ) )
     {}
 
     Parameterisation::Parameterisation( const Parameterisation& sf ) :
-      type( sf.type ), F2( sf.F2 ), FL( sf.FL ),
+      NamedModule<int>( sf.parameters() ),
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       params_( sf.params_ ),
       old_vals_( sf.old_vals_ ),
@@ -28,7 +29,7 @@ namespace cepgen
     {}
 
     Parameterisation::Parameterisation( const ParametersList& params ) :
-      type( (Type)params.name<int>() ),
+      NamedModule<int>( params ),
       F2( 0. ), FL( 0. ),
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       params_( params ), old_vals_({ 0., 0. }),
@@ -77,17 +78,17 @@ namespace cepgen
     }
 
     std::string
-    Parameterisation::description() const
+    Parameterisation::describe() const
     {
       std::ostringstream os;
-      os << type;
+      os << (Type)name_;
       return os.str();
     }
 
     std::ostream&
     operator<<( std::ostream& os, const Parameterisation* sf )
     {
-      os << sf->description();
+      os << sf->describe();
       if ( sf->old_vals_ != std::pair<double,double>{ 0., 0. } )
         os << " at (" << sf->old_vals_.first << ", " << sf->old_vals_.second << "): "
            << "F2 = " << sf->F2 << ", FL = " << sf->FL;
@@ -105,21 +106,21 @@ namespace cepgen
     operator<<( std::ostream& os, const strfun::Type& sf )
     {
       switch ( sf ) {
-        case strfun::Type::Invalid:             return os << "[INVALID]";
-        case strfun::Type::Electron:            return os << "electron";
-        case strfun::Type::ElasticProton:       return os << "elastic proton";
-        case strfun::Type::SuriYennie:          return os << "Suri-Yennie";
-        case strfun::Type::SzczurekUleshchenko: return os << "Szczurek-Uleshchenko";
-        case strfun::Type::FioreBrasse:         return os << "Fiore-Brasse";
-        case strfun::Type::ChristyBosted:       return os << "Christy-Bosted";
+        case strfun::Type::Invalid:             return os << "<invalid>";
+        case strfun::Type::Electron:            return os << "Electron";
+        case strfun::Type::ElasticProton:       return os << "ElasticProton";
+        case strfun::Type::SuriYennie:          return os << "SuriYennie";
+        case strfun::Type::SzczurekUleshchenko: return os << "SzczurekUleshchenko";
+        case strfun::Type::FioreBrasse:         return os << "FioreBrasse";
+        case strfun::Type::ChristyBosted:       return os << "ChristyBosted";
         case strfun::Type::CLAS:                return os << "CLAS";
-        case strfun::Type::BlockDurandHa:       return os << "BDH";
+        case strfun::Type::BlockDurandHa:       return os << "BlockDurandHa";
         case strfun::Type::ALLM91:              return os << "ALLM91";
         case strfun::Type::ALLM97:              return os << "ALLM97";
         case strfun::Type::GD07p:               return os << "GD07p";
         case strfun::Type::GD11p:               return os << "GD11p";
         case strfun::Type::Schaefer:            return os << "LUXlike";
-        case strfun::Type::MSTWgrid:            return os << "MSTW (grid)";
+        case strfun::Type::MSTWgrid:            return os << "MSTWgrid";
         case strfun::Type::Partonic:            return os << "Partonic";
       }
       return os;

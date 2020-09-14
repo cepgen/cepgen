@@ -1,7 +1,8 @@
 include_directories(${PROJECT_SOURCE_DIR})
 
 file(GLOB core_sources Core/*.cpp Modules/*.cpp Utils/*.cpp *.cpp)
-file(GLOB phys_sources Physics/*.cpp)
+file(GLOB phys_sources Event/*.cpp Physics/*.cpp)
+file(GLOB int_sources Integration/*.cpp)
 file(GLOB proc_sources Processes/*.cpp Processes/Fortran/*.f)
 file(GLOB sf_sources StructureFunctions/*.cpp)
 
@@ -10,6 +11,7 @@ set(core_includes)
 
 #----- check the external dependencies for SFs/alphaS
 
+file(GLOB GRV_SRC ${PROJECT_SOURCE_DIR}/External/grv_*.f)
 if(GRV_SRC)
   message(STATUS "GRV PDFset found in ${GRV_SRC}!")
   list(APPEND sf_sources ${GRV_SRC})
@@ -18,16 +20,8 @@ else()
   file(GLOB su_sf StructureFunctions/SzczurekUleshchenko.cpp)
   list(REMOVE_ITEM sf_sources ${su_sf})
 endif()
-if(LHAPDF)
-  message(STATUS "LHAPDF found in ${LHAPDF}")
-  list(APPEND CEPGEN_CORE_EXT ${LHAPDF})
-  list(APPEND core_includes ${LHAPDF_INCLUDE})
-else()
-  file(GLOB partonic_sf StructureFunctions/Partonic.cpp)
-  list(REMOVE_ITEM sf_sources ${partonic_sf})
-  file(GLOB lhapdf_alphas Physics/AlphaSLHAPDF.cpp)
-  list(REMOVE_ITEM phys_sources ${lhapdf_alphas})
-endif()
+
+file(GLOB ALPHAS_SRC ${PROJECT_SOURCE_DIR}/External/alphaS.f)
 if(ALPHAS_SRC)
   message(STATUS "alphaS evolution algorithm found in ${ALPHAS_SRC}")
   list(APPEND phys_sources ${ALPHAS_SRC})
@@ -35,46 +29,41 @@ else()
   file(GLOB pegasus_alphas Physics/AlphaSPEGASUS.cpp)
   file(REMOVE_ITEM phys_sources ${pegasus_alphas})
 endif()
-if(APFEL)
-  message(STATUS "APFEL found in ${APFEL}")
-  list(APPEND core_includes ${APFEL_INCLUDE})
-  list(APPEND CEPGEN_CORE_EXT ${APFEL})
-else()
-  file(GLOB apfel_alphas Physics/AlphaSAPFEL.cpp)
-  list(REMOVE_ITEM phys_sources ${apfel_alphas})
-endif()
 
 #----- check the external dependencies for physics utilities
 
-if(KMR_INTERP)
-  message(STATUS "KMR interpolation algorithm found in ${KMR_INTERP}")
-  list(APPEND phys_sources ${KMR_INTERP})
-endif()
+find_library(MUPARSER muparser)
 if(MUPARSER)
   message(STATUS "Formulas parsing will use muParser found in ${MUPARSER}")
-  list(APPEND core_definitions -DFUNC_MUPARSER)
   list(APPEND CEPGEN_CORE_EXT ${MUPARSER})
   set(CEPGEN_HAS_FUNCTIONALS ON)
-elseif(EXPRTK)
+else()
+  file(GLOB func_muparser Utils/FunctionalMuParser.cpp)
+  list(REMOVE_ITEM core_sources ${func_muparser})
+endif()
+
+find_path(EXPRTK exprtk.hpp PATH_SUFFIXES include)
+if(EXPRTK)
   message(STATUS "Formulas parsing will use exprtk found in ${EXPRTK}")
-  list(APPEND core_definitions -DFUNC_EXPRTK)
   list(APPEND core_includes ${EXPRTK}) # header-only
   set(CEPGEN_HAS_FUNCTIONALS ON)
-elseif(ROOT_FOUND)
-  message(STATUS "Formulas parsing will use ROOT")
-  list(APPEND core_definitions -DFUNC_ROOT)
-  list(APPEND core_includes ${ROOT_INCLUDE_DIRS})
-  list(APPEND CEPGEN_CORE_EXT ${ROOT_LIBRARIES})
-  set(CEPGEN_HAS_FUNCTIONALS ON)
+else()
+  file(GLOB func_exprtk Utils/FunctionalExprTk.cpp)
+  list(REMOVE_ITEM core_sources ${func_exprtk})
 endif()
+
+set(CEPGEN_HAS_FUNCTIONALS ${CEPGEN_HAS_FUNCTIONALS} PARENT_SCOPE)
 
 #----- build the objects
 
-add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${proc_sources} ${sf_sources})
-target_compile_definitions(CepGenCore PUBLIC ${core_definitions})
-target_link_libraries(CepGenCore PUBLIC ${CEPGEN_CORE_EXT})
+include(FindVersion)
+add_version_definition(${core_sources})
+
+add_library(CepGenCore SHARED ${core_sources} ${int_sources} ${phys_sources} ${proc_sources} ${sf_sources})
+target_compile_definitions(CepGenCore PRIVATE ${core_definitions})
+target_link_libraries(CepGenCore INTERFACE ${CEPGEN_CORE_EXT})
+target_include_directories(CepGenCore PRIVATE ${core_includes})
 
 #----- installation rules
 
-install(TARGETS CepGenCore DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT lib)
-
+install(TARGETS CepGenCore DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT lib)

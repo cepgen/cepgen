@@ -20,10 +20,11 @@ namespace cepgen
     {
       public:
         PPtoWW( const ParametersList& params = ParametersList() );
-        ProcessPtr clone( const ParametersList& params ) const override {
+        ProcessPtr clone() const override {
           return ProcessPtr( new PPtoWW( *this ) );
         }
         enum class Polarisation { full = 0, LL = 1, LT = 2, TL = 3, TT = 4 };
+        static std::string description() { return "ɣɣ → W⁺W¯ (kt-factor.)"; }
 
       private:
         void prepareProcessKinematics() override;
@@ -65,7 +66,7 @@ namespace cepgen
           pol_w1_ = { -1, 1 };
           pol_w2_ = { -1, 1 };
           break;
-        case Polarisation::full: default:
+        case Polarisation::full:
           pol_w1_ = { -1, 0, 1 };
           pol_w2_ = { -1, 0, 1 };
           break;
@@ -77,7 +78,7 @@ namespace cepgen
     void
     PPtoWW::prepareProcessKinematics()
     {
-      Cuts single_w_cuts;
+      CentralCuts single_w_cuts;
       if ( kin_.cuts.central_particles.count( PDG::W ) > 0 )
         single_w_cuts = kin_.cuts.central_particles.at( PDG::W );
       setCuts( single_w_cuts );
@@ -91,21 +92,24 @@ namespace cepgen
 
       double mat_el = prefactor_;
       switch ( method_ ) {
-        case 0: { // on-shell matrix element
-          // (Denner+Dittmaier+Schuster, + work in collaboration with C. Royon)
+        case 0: {
+          // On-shell matrix element
+          // references:
+          //  Phys.Rev.D 51 (1995) 4738
+          //  JHEP 02 (2015) 098
           mat_el *= onShellME();
         } break;
         case 1: {
           mat_el *= offShellME( phi_qt1_+phi_qt2_, phi_qt1_-phi_qt2_ );
         } break;
+        default:
+          throw CG_FATAL( "PPtoWW:ME" )
+            << "Invalid ME calculation method (" << method_ << ")!";
       }
       CG_DEBUG_LOOP( "PPtoWW:ME" )
         << "prefactor: " << prefactor_ << "\n\t"
         << "matrix element: " << mat_el << ".";
       return mat_el;
-
-      throw CG_FATAL( "PPtoWW:ME" )
-        << "Invalid ME calculation method (" << method_ << ")!";
     }
 
     double
@@ -176,5 +180,5 @@ namespace cepgen
   }
 }
 // register process
-REGISTER_PROCESS( "pptoww", "ɣɣ → W⁺W¯ (kt-factor.)", PPtoWW )
+REGISTER_PROCESS( "pptoww", PPtoWW )
 

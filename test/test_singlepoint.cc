@@ -1,5 +1,7 @@
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Processes/Process.h"
 
 #include "CepGen/Core/Exception.h"
 
@@ -15,19 +17,19 @@ int main( int argc, char* argv[] )
   bool debug;
 
   cepgen::ArgumentsParser( argc, argv )
-    .addArgument( "input", "input card", &input_card, 'i' )
-    .addOptionalArgument( "point", "point to test", vector<double>( ps_size, 0.3 ), &point, 'p' )
-    .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
+    .addArgument( "input,i", "input card", &input_card )
+    .addOptionalArgument( "point,p", "point to test", &point, vector<double>( ps_size, 0.3 ) )
+    .addOptionalArgument( "debug,d", "debugging mode", &debug, false )
     .parse();
 
+  cepgen::Generator gen;
+  gen.setParameters( cepgen::card::Handler::parse( input_card ) );
+  CG_INFO( "main" ) << gen.parameters();
+
   if ( point.size() < 2 ) {
-    point = vector<double>( ps_size, point[0] );
+    point = vector<double>( gen.parameters()->process().ndim(), point[0] );
     point.resize( ps_size );
   }
-
-  cepgen::Generator gen;
-  gen.setParameters( cepgen::card::Handler::parse( input_card )->parameters() );
-  CG_INFO( "main" ) << gen.parametersPtr();
 
   if ( !debug )
     cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debugInsideLoop;
@@ -37,7 +39,7 @@ int main( int argc, char* argv[] )
   for ( const auto& v : point )
     cout << delim << v, delim = ", ";
   cout << endl;
-  const double weight = gen.computePoint( &point[0] );
+  const double weight = gen.computePoint( point );
   cout << "weight: " << weight << endl;
 
   return 0;

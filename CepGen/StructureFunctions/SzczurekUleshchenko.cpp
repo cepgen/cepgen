@@ -16,25 +16,24 @@ namespace cepgen
 {
   namespace strfun
   {
-    /// Szcurek and Uleshchenko modelling of \f$F_{1,2}\f$ \cite Szczurek:1999wp
+    /// Szcurek and Uleshchenko modelling of \f$F_2\f$ based on GRV parton content \cite Szczurek:1999wp
     class SzczurekUleshchenko : public Parameterisation
     {
       public:
         SzczurekUleshchenko( const ParametersList& params = ParametersList() );
         SzczurekUleshchenko& operator()( double xbj, double q2 ) override;
+        static std::string description() {
+          return "Szcurek-Uleshchenko modelling of F2 based on GRV parton content";
+        }
 
       private:
         /// \f$Q^2\f$ scale shift
         const float q2_shift_;
-
-      public:
-        double F1;
     };
 
     SzczurekUleshchenko::SzczurekUleshchenko( const ParametersList& params ) :
       Parameterisation( params ),
-      q2_shift_( params.get<double>( "q2shift", 0.8 ) ),
-      F1( 0. )
+      q2_shift_( params.get<double>( "q2shift", 0.8 ) )
     {}
 
     SzczurekUleshchenko&

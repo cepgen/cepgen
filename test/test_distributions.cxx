@@ -1,5 +1,6 @@
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Parameters.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Core/Exception.h"
 
@@ -30,27 +31,22 @@ int main( int argc, char* argv[] )
   int num_events;
 
   cepgen::ArgumentsParser( argc, argv )
-    .addArgument( "input", "input card", &input_card, 'i' )
-    .addOptionalArgument( "num-events", "number of events to generate", -1, &num_events, 'n' )
+    .addArgument( "input,i", "input card", &input_card )
+    .addOptionalArgument( "num-events,n", "number of events to generate", &num_events, 100 )
     .parse();
 
-  mg.setParameters( cepgen::card::Handler::parse( input_card )->parameters() );
-  if ( num_events >= 0 ) { // user specified a number of events to generate
-    mg.parameters().generation().maxgen = num_events;
-    mg.parameters().generation().enabled = num_events > 0;
-  }
+  mg.setParameters( cepgen::card::Handler::parse( input_card ) );
 
   h_mass.reset( new TH1D( "invm", ";Dilepton invariant mass;d#sigma/dM (pb/GeV)", 500, 0., 500. ) );
   h_ptpair.reset( new TH1D( "ptpair", ";Dilepton p_{T};d#sigma/dp_{T} (pb/GeV)", 500, 0., 50. ) );
   h_ptsingle.reset( new TH1D( "pt_single", ";Single lepton p_{T};d#sigma/dp_{T} (pb/GeV)", 100, 0., 100. ) );
   h_etasingle.reset( new TH1D( "eta_single", ";Single lepton #eta;d#sigma/d#eta (pb)\\?.2f", 60, -3., 3. ) );
 
-  CG_INFO( "main" ) << "Process name: " << mg.parameters().processName() << ".";
-  //mg.parameters->taming_functions.dump();
+  CG_INFO( "main" ) << "Process name: " << mg.parameters()->processName() << ".";
 
-  mg.generate( process_event );
+  mg.generate( num_events, process_event );
 
-  const double weight = mg.crossSection()/mg.parameters().generation().maxgen;
+  const double weight = mg.crossSection()/num_events;
   h_mass->Scale( weight, "width" );
   h_ptpair->Scale( weight, "width" );
   h_ptsingle->Scale( weight, "width" );

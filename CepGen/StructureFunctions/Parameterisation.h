@@ -1,7 +1,7 @@
 #ifndef CepGen_StructureFunctions_Parameterisation_h
 #define CepGen_StructureFunctions_Parameterisation_h
 
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Modules/NamedModule.h"
 
 #include <iosfwd>
 #include <memory>
@@ -35,19 +35,22 @@ namespace cepgen
     /// Human-readable description of this SF parameterisation type
     std::ostream& operator<<( std::ostream&, const strfun::Type& );
     /// Generic placeholder for the parameterisation of nucleon structure functions
-    class Parameterisation
+    class Parameterisation : public NamedModule<int>
     {
       public:
         /// Standard SF parameterisation constructor
         Parameterisation( double f2 = 0., double fl = 0. );
         /// Copy constructor
         Parameterisation( const Parameterisation& );
+        /// User-steered parameterisation object constructor
         Parameterisation( const ParametersList& );
         virtual ~Parameterisation() = default;
 
+        static std::string description() { return "Unnamed structure functions"; }
+
         /// Assign from another SF parameterisation object
         Parameterisation& operator=( const Parameterisation& sf ) {
-          type = sf.type, F2 = sf.F2, FL = sf.FL, old_vals_ = sf.old_vals_;
+          F2 = sf.F2, FL = sf.FL, old_vals_ = sf.old_vals_;
           return *this;
         }
         /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
@@ -55,10 +58,12 @@ namespace cepgen
         /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
         friend std::ostream& operator<<( std::ostream&, const Parameterisation& );
         /// Human-readable description of this SF parameterisation
-        virtual std::string description() const; ///< Human-readable description of this SF set
+        virtual std::string describe() const; ///< Human-readable description of this SF set
 
         /// Set of parameters used to build this parameterisation
         const ParametersList& parameters() const { return params_; }
+        /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
+        const sigrat::Parameterisation* sigmaRatio() const { return r_ratio_.get(); }
 
         /// Compute all relevant structure functions for a given \f$(x_{\rm Bj},Q^2)\f$ couple
         virtual Parameterisation& operator()( double /*xbj*/, double /*q2*/ ) { return *this; }
@@ -68,11 +73,10 @@ namespace cepgen
         virtual Parameterisation& computeFL( double xbj, double q2, double r );
         /// Compute the \f$F_1\f$ structure function for a given point
         double F1( double xbj, double q2 ) const;
+        /// Compute the dimensionless variable \f$\tau=\frac{4x_{\rm Bj}^2m_p^2}{Q^2}\f$
         double tau( double xbj, double q2 ) const;
 
       public:
-        /// Interpolation type of structure functions
-        Type type;
         double F2; ///< Last computed transverse structure function value
         double FL; ///< Last computed longitudinal structure function value
 

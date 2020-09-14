@@ -8,123 +8,28 @@ set(addons_includes)
 
 #----- check the external dependencies for physics utilities
 
-#--- linking with Pythia 6
-
-if(PYTHIA6)
-  message(STATUS "Pythia 6 found in ${PYTHIA6}")
-  list(APPEND modif_sources Hadronisers/Pythia6Hadroniser.cpp)
-  list(APPEND addons_libraries ${PYTHIA6})
-  if(PYTHIA6DUMMY)
-    message(STATUS "Pythia 6 addons found in ${PYTHIA6DUMMY}")
-    list(APPEND addons_libraries ${PYTHIA6DUMMY})
-  endif()
-elseif(EXISTS $ENV{PYTHIA6_SRC})
-  file(GLOB pythia6_src $ENV{PYTHIA6_SRC})
-  message(STATUS "Pythia 6 source found in ${pythia6_src}")
-  add_library(pythia6 SHARED ${pythia6_src})
-  set_property(TARGET pythia6 PROPERTY Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wno-tabs -Wno-maybe-uninitialized -Wno-integer-division -Wno-unused-variable -Wno-unused-dummy-argument")
-  list(APPEND modif_sources Hadronisers/Pythia6Hadroniser.cpp)
-  list(APPEND addons_libraries pythia6)
-endif()
-
-#--- linking with Pythia 8
-
-if(PYTHIA8)
-  message(STATUS "Pythia 8 found in ${PYTHIA8}; will be used for LHEF output")
-  list(APPEND addons_libraries ${PYTHIA8} dl)
-  list(APPEND addons_includes ${PYTHIA8_INCLUDE})
-  list(APPEND addons_definitions -DPYTHIA8)
-  list(APPEND modif_sources Hadronisers/Pythia8Hadroniser.cpp)
-  list(APPEND output_sources EventInterfaces/PythiaEventInterface.cpp OutputModules/LHEFPythiaHandler.cpp)
-endif()
-
-#--- linking with ROOT/Delphes
-
-if(ROOT_FOUND)
-  message(STATUS "ROOT found in ${ROOT_LIBRARY_DIR}")
-  list(APPEND addons_libraries ${ROOT_LIBRARIES})
-  list(APPEND addons_definitions ${ROOT_DEFINITIONS})
-  list(APPEND addons_includes ${ROOT_INCLUDE_DIRS})
-  list(APPEND output_sources EventInterfaces/ROOTTreeInfo.cpp OutputModules/ROOTHistsHandler.cpp OutputModules/ROOTTreeHandler.cpp)
-  if(DELPHES)
-    message(STATUS "Delphes found in ${DELPHES}")
-    list(APPEND addons_libraries ${DELPHES})
-    list(APPEND addons_includes ${DELPHES_INCLUDE} ${DELPHES_EXT_INCLUDE})
-    list(APPEND output_sources OutputModules/DelphesHandler.cpp)
-  endif()
-endif()
-
-#--- linking with HepMC
-
-if(HEPMC_LIB)
-  message(STATUS "HepMC found in ${HEPMC_LIB}; headers found in ${HEPMC_INCLUDE}")
-  if(HEPMC_LIB MATCHES ".*HepMC3.?.so")
-    message(STATUS "HepMC version 3 found")
-    if(HEPMC_ROOT_LIB)
-      message(STATUS "HepMC ROOT I/O library found")
-      list(APPEND addons_libraries ${HEPMC_ROOT_LIB})
-      list(APPEND addons_definitions -DHEPMC3_ROOTIO)
-    endif()
-    if(HEPMC_EXTRA_PLUGINS)
-      message(STATUS "HepMC example plugins found in ${HEPMC_EXTRA_PLUGINS}")
-      file(GLOB ConvertExample_sources ${HEPMC_EXTRA_PLUGINS}/ConvertExample/src/*.cc)
-      set(hepmc_example_includes ${HEPMC_EXTRA_PLUGINS}/ConvertExample/include)
-      if(ROOT_FOUND)
-        list(APPEND hepmc_example_includes ${ROOT_INCLUDE_DIRS})
-      else()
-        list(REMOVE_ITEM ConvertExample_sources ${HEPMC_EXTRA_PLUGINS}/ConvertExample/src/WriterRootTreeOPAL.cc)
-      endif()
-      add_library(HepMCExamples SHARED ${ConvertExample_sources})
-      target_include_directories(HepMCExamples PUBLIC ${hepmc_example_includes})
-      if(ROOT_FOUND)
-        set_property(TARGET HepMCExamples PROPERTY CXX_STANDARD 14)
-      endif()
-      list(APPEND addons_libraries HepMCExamples)
-      list(APPEND addons_includes ${HEPMC_EXTRA_PLUGINS})
-      list(APPEND addons_definitions -DHEPMC3_EXTRA_PLUGINS)
-    endif()
-    list(APPEND addons_definitions -DHEPMC3)
-  endif()
-  list(APPEND output_sources EventInterfaces/HepMCEventInterface.cpp OutputModules/HepMCHandler.cpp)
-  if(NOT PYTHIA8)
-    message(STATUS "HepMC will be used for LHEF output")
-    list(APPEND output_sources OutputModules/LHEFHepMCHandler.cpp)
-  endif()
-  list(APPEND addons_libraries ${HEPMC_LIB})
-  list(APPEND addons_includes ${HEPMC_INCLUDE})
-endif()
-
-#--- linking with ProMC
-
-if(PROMC_LIB)
-  message(STATUS "ProMC found in ${PROMC_LIB}")
-  list(APPEND addons_libraries ${PROMC_LIB})
-  list(APPEND addons_includes ${PROMC_INCLUDE} ${PROMC_EXT_INCLUDE})
-  list(APPEND output_sources OutputModules/ProMCHandler.cpp)
-endif()
-
-#--- linking with YODA
-
-if(YODA)
-  message(STATUS "YODA found in ${YODA}")
-  list(APPEND addons_libraries ${YODA})
-  list(APPEND addons_includes ${YODA_INCLUDE})
-  list(APPEND output_sources OutputModules/YODAHistsHandler.cpp)
-endif()
+add_subdirectory(BoostWrapper)
+add_subdirectory(Pythia6Wrapper)
+add_subdirectory(Pythia8Wrapper)
+add_subdirectory(ROOTWrapper)
+add_subdirectory(HepMCWrapper)
+add_subdirectory(ProMCWrapper)
+add_subdirectory(LHAPDFWrapper)
+add_subdirectory(RivetWrapper)
+add_subdirectory(APFELWrapper)
 
 #----- build the objects
 
 add_library(CepGenAddOns SHARED ${modif_sources} ${output_sources})
-target_compile_definitions(CepGenAddOns PUBLIC ${addons_definitions})
-target_include_directories(CepGenAddOns PUBLIC ${addons_includes})
-target_link_libraries(CepGenAddOns PUBLIC ${addons_libraries})
-if(ROOT_FOUND)
-  set_property(TARGET CepGenAddOns PROPERTY CXX_STANDARD 14)
-endif()
-if(PYTHIA8)
-  set_property(TARGET CepGenAddOns PROPERTY CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-misleading-indentation")
-endif()
+target_compile_definitions(CepGenAddOns PRIVATE ${addons_definitions})
+target_include_directories(CepGenAddOns PRIVATE ${addons_includes})
+target_link_libraries(CepGenAddOns PRIVATE ${addons_libraries})
+
+#----- propagate global variables to parent scope
+
+set(CEPGEN_ADDONS_EXT ${CEPGEN_ADDONS_EXT} PARENT_SCOPE)
+set(CEPGEN_HAS_FUNCTIONALS ${CEPGEN_HAS_FUNCTIONALS} PARENT_SCOPE)
 
 #----- installation rules
 
-install(TARGETS CepGenAddOns DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT lib)
+install(TARGETS CepGenAddOns DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT lib)

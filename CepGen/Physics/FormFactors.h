@@ -1,7 +1,7 @@
 #ifndef CepGen_Physics_FormFactors_h
 #define CepGen_Physics_FormFactors_h
 
-#include "CepGen/Core/ModuleFactory.h"
+#include "CepGen/Modules/NamedModule.h"
 
 #include <memory>
 
@@ -30,22 +30,23 @@ namespace cepgen
     };
     std::ostream& operator<<( std::ostream&, const Model& );
     /// Form factors parameterisation (electric and magnetic parts)
-    class Parameterisation
+    class Parameterisation : public NamedModule<int>
     {
       public:
         explicit Parameterisation();
         Parameterisation( const ParametersList& );
         Parameterisation( const Parameterisation& );
 
+        static std::string description() { return "Unnamed form factors parameterisation"; }
         /// Dumping operator for standard output streams
         friend std::ostream& operator<<( std::ostream&, const Parameterisation& );
 
         /// Specify the structure functions modelling where applicable
-        void setStructureFunctions( std::unique_ptr<strfun::Parameterisation> );
-        const std::unique_ptr<strfun::Parameterisation>& structureFunctions() const { return str_fun_; }
+        void setStructureFunctions( strfun::Parameterisation* );
+        strfun::Parameterisation* structureFunctions() const { return str_fun_.get(); }
+
         const Type& type() const { return type_; }
         void setType( const Type& type ) { type_ = type; }
-        const Model& model() const { return model_; }
 
         double tau( double q2 ) const;
 
@@ -55,17 +56,15 @@ namespace cepgen
       protected:
         static constexpr double MU = 2.79;
 
-        virtual void compute( double q2 ) {}
-        virtual std::string description() const; ///< Human-readable description of this parameterisation
+        virtual void compute( double ) {}
 
-        const Model model_;
         Type type_;
 
         const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
         const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
 
       private:
-        std::unique_ptr<strfun::Parameterisation> str_fun_;
+        std::shared_ptr<strfun::Parameterisation> str_fun_;
         double last_q2_;
 
       public:
@@ -75,50 +74,6 @@ namespace cepgen
         double GE;
         double GM;
     };
-
-    class StandardDipole : public Parameterisation
-    {
-      public:
-        StandardDipole( const ParametersList& = ParametersList() );
-
-      private:
-        void compute( double q2 ) override;
-    };
-
-    class ArringtonEtAl : public Parameterisation
-    {
-      public:
-        ArringtonEtAl( const ParametersList& );
-
-      private:
-        void compute( double q2 ) override;
-        const int mode_;
-        std::vector<double> a_e_, b_e_;
-        std::vector<double> a_m_, b_m_;
-    };
-
-    class BrashEtAl : public Parameterisation
-    {
-      public:
-        using Parameterisation::Parameterisation;
-
-      private:
-        static constexpr float MAX_Q2 = 7.7;
-        void compute( double q2 ) override;
-    };
-
-    class MergellEtAl : public Parameterisation
-    {
-      public:
-        MergellEtAl( const ParametersList& );
-
-      private:
-        void compute( double q2 ) override;
-        static constexpr double Q2_RESCL = 9.733, INV_DENUM = 1./0.350;
-        static constexpr double EXPO = 2.148;
-        const std::vector<double> par1_, par2_;
-    };
-
   }
 }
 

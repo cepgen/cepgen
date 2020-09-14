@@ -73,11 +73,13 @@ namespace cepgen
         };
 
         explicit ChristyBosted( const ParametersList& params = ParametersList() );
+        static std::string description() { return "Christy-Bosted F2/FL parameterisation of low-mass resonances"; }
+
         ChristyBosted& operator()( double xbj, double q2 ) override;
 
         //--- already computed internally during F2 computation
-        ChristyBosted& computeFL( double xbj, double q2 ) override { return *this; }
-        ChristyBosted& computeFL( double xbj, double q2, double r ) override { return *this; }
+        ChristyBosted& computeFL( double, double ) override { return *this; }
+        ChristyBosted& computeFL( double, double, double ) override { return *this; }
 
       private:
         double resmod507( char sf, double w2, double q2 ) const;
