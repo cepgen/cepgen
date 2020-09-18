@@ -158,7 +158,7 @@ namespace cepgen
         if ( formfac::FormFactorsFactory::get().modules().empty() )
           info << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
         for ( const auto& mod : formfac::FormFactorsFactory::get().modules() ) {
-          info << "\n> " << utils::colourise( std::to_string( mod ), utils::Colour::green, utils::Modifier::bold )
+          info << "\n> " << utils::colourise( mod, utils::Colour::green, utils::Modifier::bold )
             << ": " << formfac::FormFactorsFactory::get().describe( mod );
         }
       }

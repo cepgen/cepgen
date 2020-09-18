@@ -96,7 +96,7 @@ namespace cepgen
       //----- phase space definition
       auto kin = pars.get<ParametersList>( "kinematics" )
         .set<ParametersList>( "structureFunctions", pars.get<ParametersList>( "strfun" ) )
-        .set<int>( "formFactors", pars.get<int>( "formfac" ) );
+        .set<std::string>( "formFactors", pars.get<std::string>( "formfac" ) );
       params_->kinematics = Kinematics( params_->kinematics.parameters()+kin );
 
       //----- integration

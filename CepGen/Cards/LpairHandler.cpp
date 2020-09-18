@@ -189,6 +189,7 @@ namespace cepgen
       registerParameter<int>( "EMOD", "Outgoing primary particles' mode", &str_fun_ );
       registerParameter<int>( "RTYP", "R-ratio computation type", &sr_type_ );
       registerParameter<int>( "PAIR", "Outgoing particles' PDG id", (int*)&proc_params_->operator[]<int>( "pair" ) );
+      registerKinematicsParameter<std::string>( "FFAC", "Form factors for the incoming beams", "formFactors" );
       registerKinematicsParameter<int>( "INA1", "Heavy ion atomic weight (1st incoming beam)", "beam1A" );
       registerKinematicsParameter<int>( "INZ1", "Heavy ion atomic number (1st incoming beam)", "beam1Z" );
       registerKinematicsParameter<int>( "INA2", "Heavy ion atomic weight (2nd incoming beam)", "beam2A" );

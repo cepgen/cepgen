@@ -2,23 +2,24 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/KTFlux.h"
-#include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/FormFactors/Parameterisation.h"
 
 #include "CepGen/Utils/ArgumentsParser.h"
 #include <fstream>
 
 int main( int argc, char* argv[] )
 {
-  int formfac_type, strfun_type, num_points;
+  std::string formfac_type;
+  int strfun_type, num_points;
   double kt2, mx;
   std::string output_file;
 
   cepgen::ArgumentsParser( argc, argv )
-    .addOptionalArgument( "ff,f", "form factors modelling", &formfac_type, 1 )
+    .addOptionalArgument( "ff,f", "form factors modelling", &formfac_type, "StandardDipole" )
     .addOptionalArgument( "sf,s", "structure functions modelling", &strfun_type, 301 )
     .addOptionalArgument( "kt2,k", "parton transverse virtuality (GeV^2)", &kt2, 100. )
     .addOptionalArgument( "mx,m", "diffractive state mass (GeV)", &mx, 1.5 )

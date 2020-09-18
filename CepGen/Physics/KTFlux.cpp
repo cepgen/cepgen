@@ -1,10 +1,10 @@
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/GluonGrid.h"
 
+#include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
 #include "CepGen/Core/Exception.h"

@@ -7,11 +7,11 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
-#include "CepGen/Event/Event.h"
+#include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Processes/Process.h"
 
-#include "CepGen/Physics/FormFactors.h"
+#include "CepGen/Processes/Process.h"
+#include "CepGen/Event/Event.h"
 #include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Utils/Functional.h"

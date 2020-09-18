@@ -2,10 +2,10 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/KTFlux.h"
-#include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/GluonGrid.h"
 
+#include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
@@ -77,10 +77,11 @@ namespace cepgen
     const double sqrt_s = params.get<double>( "sqrtS", params.get<double>( "cmEnergy", -1. ) );
     if ( sqrt_s > 0. )
       setSqrtS( sqrt_s );
+    CG_WARNING("")<<params;
     //--- form factors
-    if ( !params.has<int>( "formFactors" ) || !form_factors_ )
+    if ( params.has<std::string>( "formFactors" ) || !form_factors_ )
       form_factors_ = formfac::FormFactorsFactory::get().build(
-        params.get<int>( "formFactors", (int)formfac::Model::StandardDipole ) );
+        params.get<std::string>( "formFactors", "StandardDipole" ) );
     if ( params.get<int>( "mode", (int)mode::Kinematics::invalid ) != (int)mode::Kinematics::invalid )
       setMode( (mode::Kinematics)params.get<int>( "mode" ) );
     //--- structure functions

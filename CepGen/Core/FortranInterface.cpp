@@ -1,11 +1,11 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Processes/FortranKTProcess.h"
 
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/FormFactors.h"
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
@@ -36,7 +36,7 @@ extern "C" {
   cepgen_kt_flux_( int& fmode, double& x, double& kt2, int& sfmode, double& min, double& mout )
   {
     using namespace cepgen;
-    static auto ff = formfac::FormFactorsFactory::get().build( (int)formfac::Model::StandardDipole ); // use another argument for the modelling?
+    static auto ff = formfac::FormFactorsFactory::get().build( "StandardDipole" ); // use another argument for the modelling?
     static auto sf = strfun::StructureFunctionsFactory::get().build( sfmode );
     ff->setStructureFunctions( sf.get() );
     return ktFlux( (KTFlux)fmode, x, kt2, *ff, min*min, mout*mout );

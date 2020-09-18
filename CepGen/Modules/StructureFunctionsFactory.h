@@ -28,12 +28,12 @@
   }
 
 /// Add a form factors definition to the list of handled parameterisation
-#define REGISTER_FF_MODEL( id, obj ) \
-  namespace cepgen { \
-    struct BUILDERNM( id ) { \
-      BUILDERNM( id )() { formfac::FormFactorsFactory::get().registerModule<obj>( (int)formfac::Model::id ); } }; \
-    static BUILDERNM( id ) gFF ## id; \
-  }
+#define REGISTER_FF_MODEL( name, obj ) \
+  namespace cepgen { namespace formfac { \
+    struct BUILDERNM( obj ) { \
+      BUILDERNM( obj )() { FormFactorsFactory::get().registerModule<obj>( name ); } }; \
+    static BUILDERNM( obj ) gFF ## obj; \
+  } }
 
 namespace cepgen
 {
@@ -53,7 +53,7 @@ namespace cepgen
   {
     class Parameterisation;
     /// A form factors parameterisations factory
-    typedef ModuleFactory<Parameterisation,int> FormFactorsFactory;
+    typedef ModuleFactory<Parameterisation,std::string> FormFactorsFactory;
   }
 }
 

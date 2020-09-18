@@ -1,5 +1,5 @@
-#ifndef CepGen_Physics_FormFactors_h
-#define CepGen_Physics_FormFactors_h
+#ifndef CepGen_FormFactors_Parameterisation_h
+#define CepGen_FormFactors_Parameterisation_h
 
 #include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Physics/Modes.h"
@@ -10,17 +10,8 @@ namespace cepgen
   namespace strfun { class Parameterisation; }
   namespace formfac
   {
-    /// Proton form factors to be used in the outgoing state description
-    enum struct Model {
-      Invalid        = 0,
-      StandardDipole = 1,
-      ArringtonEtAl  = 2, ///< \cite Arrington:2007ux
-      BrashEtAl      = 3, ///< \cite Brash:2001qq
-      MergellEtAl    = 4, ///< \cite Mergell:1995bf
-    };
-    std::ostream& operator<<( std::ostream&, const Model& );
     /// Form factors parameterisation (electric and magnetic parts)
-    class Parameterisation : public NamedModule<int>
+    class Parameterisation : public NamedModule<std::string>
     {
       public:
         explicit Parameterisation();
@@ -35,7 +26,7 @@ namespace cepgen
         friend std::ostream& operator<<( std::ostream&, const Parameterisation& );
 
         /// Specify the structure functions modelling where applicable
-        void setStructureFunctions( strfun::Parameterisation* );
+        void setStructureFunctions( strfun::Parameterisation* sfmod ) { str_fun_ = sfmod; }
         strfun::Parameterisation* structureFunctions() const { return str_fun_; }
 
         double tau( double q2 ) const;
@@ -62,8 +53,6 @@ namespace cepgen
         double GE;
         double GM;
     };
-    /// Human-readable dump of the form factor parameterisation
-    std::ostream& operator<<( std::ostream&, const formfac::Parameterisation* );
   }
 }
 
