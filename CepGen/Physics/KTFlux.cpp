@@ -15,7 +15,7 @@ namespace cepgen
   const double KTFluxParameters::kMinKTFlux = 1.e-20;
 
   double
-  ktFlux( const KTFlux& type, double x, double kt2, ff::Parameterisation& ff, double mi2, double mf2 )
+  ktFlux( const KTFlux& type, double x, double kt2, formfac::Parameterisation& ff, double mi2, double mf2 )
   {
     switch ( type ) {
       case KTFlux::P_Photon_Elastic:

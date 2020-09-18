@@ -81,8 +81,8 @@ namespace cepgen
     auto ff = params.get<ParametersList>( "formFactors" );
     if ( !ff.empty() || !form_factors_ ) {
       if ( ff.name<int>( -999 ) == -999 )
-        ff.setName<int>( (int)ff::Model::StandardDipole );
-      form_factors_ = ff::FormFactorsFactory::get().build( ff );
+        ff.setName<int>( (int)formfac::Model::StandardDipole );
+      form_factors_ = formfac::FormFactorsFactory::get().build( ff );
     }
     if ( params.get<int>( "mode", (int)mode::Kinematics::invalid ) != (int)mode::Kinematics::invalid )
       setMode( (mode::Kinematics)params.get<int>( "mode" ) );
@@ -373,7 +373,8 @@ namespace cepgen
   //--------------------------------------------------------------------
 
   Kinematics::Beam::Beam() :
-    pz( 0. ), pdg( PDG::proton ), kt_flux( KTFlux::invalid )
+    pz( 0. ), pdg( PDG::proton ),
+    mode( mode::Beam::invalid ), kt_flux( KTFlux::invalid )
   {}
 
   //--------------------------------------------------------------------

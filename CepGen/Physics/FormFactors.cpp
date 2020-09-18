@@ -14,7 +14,7 @@
 
 namespace cepgen
 {
-  namespace ff
+  namespace formfac
   {
     Parameterisation::Parameterisation() :
       NamedModule<int>( ParametersList() ),
@@ -40,7 +40,7 @@ namespace cepgen
     void
     Parameterisation::setStructureFunctions( strfun::Parameterisation* sfmod )
     {
-      str_fun_.reset( sfmod );
+      str_fun_ = sfmod;
     }
 
     double
@@ -282,7 +282,7 @@ namespace cepgen
   }
 }
 
-REGISTER_FF_MODEL( StandardDipole, ff::StandardDipole )
-REGISTER_FF_MODEL( ArringtonEtAl, ff::ArringtonEtAl )
-REGISTER_FF_MODEL( BrashEtAl, ff::BrashEtAl )
-REGISTER_FF_MODEL( MergellEtAl, ff::MergellEtAl )
+REGISTER_FF_MODEL( StandardDipole, formfac::StandardDipole )
+REGISTER_FF_MODEL( ArringtonEtAl, formfac::ArringtonEtAl )
+REGISTER_FF_MODEL( BrashEtAl, formfac::BrashEtAl )
+REGISTER_FF_MODEL( MergellEtAl, formfac::MergellEtAl )

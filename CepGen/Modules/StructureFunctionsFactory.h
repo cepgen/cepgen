@@ -31,7 +31,7 @@
 #define REGISTER_FF_MODEL( id, obj ) \
   namespace cepgen { \
     struct BUILDERNM( id ) { \
-      BUILDERNM( id )() { ff::FormFactorsFactory::get().registerModule<obj>( (int)ff::Model::id ); } }; \
+      BUILDERNM( id )() { formfac::FormFactorsFactory::get().registerModule<obj>( (int)formfac::Model::id ); } }; \
     static BUILDERNM( id ) gFF ## id; \
   }
 
@@ -49,7 +49,7 @@ namespace cepgen
     /// A sigma ratio parameterisations factory
     typedef ModuleFactory<Parameterisation,int> SigmaRatiosFactory;
   }
-  namespace ff
+  namespace formfac
   {
     class Parameterisation;
     /// A form factors parameterisations factory

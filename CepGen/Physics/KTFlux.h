@@ -6,7 +6,7 @@
 
 namespace cepgen
 {
-  namespace ff { class Parameterisation; }
+  namespace formfac { class Parameterisation; }
   class HeavyIon;
   /// Collection of fundamental constants for \f$k_{\rm T}\f$ fluxes definition
   struct KTFluxParameters
@@ -33,7 +33,7 @@ namespace cepgen
   /// \param[in] ff Form factors evaluator
   /// \param[in] mi2 Incoming particle squared mass
   /// \param[in] mf2 Outgoing diffractive squared mass
-  double ktFlux( const KTFlux& type, double x, double kt2, ff::Parameterisation& sf, double mi2, double mf2 );
+  double ktFlux( const KTFlux& type, double x, double kt2, formfac::Parameterisation& sf, double mi2, double mf2 );
   /// \brief Compute the flux (from heavy ion) for a given parton \f$(x,k_{\rm T})\f$
   /// \param[in] type Flux modelling
   /// \param[in] x Parton momentum fraction

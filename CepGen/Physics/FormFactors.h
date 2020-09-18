@@ -4,13 +4,11 @@
 #include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Physics/Modes.h"
 
-#include <memory>
-
 namespace cepgen
 {
   class ParametersList;
   namespace strfun { class Parameterisation; }
-  namespace ff
+  namespace formfac
   {
     /// Proton form factors to be used in the outgoing state description
     enum struct Model {
@@ -35,7 +33,7 @@ namespace cepgen
 
         /// Specify the structure functions modelling where applicable
         void setStructureFunctions( strfun::Parameterisation* );
-        strfun::Parameterisation* structureFunctions() const { return str_fun_.get(); }
+        strfun::Parameterisation* structureFunctions() const { return str_fun_; }
 
         double tau( double q2 ) const;
 
@@ -51,7 +49,7 @@ namespace cepgen
         const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
 
       private:
-        std::shared_ptr<strfun::Parameterisation> str_fun_;
+        strfun::Parameterisation* str_fun_;
         double last_q2_;
 
       public:

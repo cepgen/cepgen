@@ -36,7 +36,7 @@ extern "C" {
   cepgen_kt_flux_( int& fmode, double& x, double& kt2, int& sfmode, double& min, double& mout )
   {
     using namespace cepgen;
-    static auto ff = ff::FormFactorsFactory::get().build( (int)ff::Model::StandardDipole ); // use another argument for the modelling?
+    static auto ff = formfac::FormFactorsFactory::get().build( (int)formfac::Model::StandardDipole ); // use another argument for the modelling?
     static auto sf = strfun::StructureFunctionsFactory::get().build( sfmode );
     ff->setStructureFunctions( sf.get() );
     return ktFlux( (KTFlux)fmode, x, kt2, *ff, min*min, mout*mout );
