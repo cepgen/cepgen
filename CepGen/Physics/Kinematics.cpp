@@ -78,12 +78,9 @@ namespace cepgen
     if ( sqrt_s > 0. )
       setSqrtS( sqrt_s );
     //--- form factors
-    auto ff = params.get<ParametersList>( "formFactors" );
-    if ( !ff.empty() || !form_factors_ ) {
-      if ( ff.name<int>( -999 ) == -999 )
-        ff.setName<int>( (int)formfac::Model::StandardDipole );
-      form_factors_ = formfac::FormFactorsFactory::get().build( ff );
-    }
+    if ( !params.has<int>( "formFactors" ) || !form_factors_ )
+      form_factors_ = formfac::FormFactorsFactory::get().build(
+        params.get<int>( "formFactors", (int)formfac::Model::StandardDipole ) );
     if ( params.get<int>( "mode", (int)mode::Kinematics::invalid ) != (int)mode::Kinematics::invalid )
       setMode( (mode::Kinematics)params.get<int>( "mode" ) );
     //--- structure functions

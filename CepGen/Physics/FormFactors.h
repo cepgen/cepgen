@@ -28,6 +28,9 @@ namespace cepgen
         Parameterisation( const Parameterisation& );
 
         static std::string description() { return "Unnamed form factors parameterisation"; }
+
+        /// Dumping operator for standard output streams
+        friend std::ostream& operator<<( std::ostream&, const Parameterisation* );
         /// Dumping operator for standard output streams
         friend std::ostream& operator<<( std::ostream&, const Parameterisation& );
 
@@ -59,6 +62,8 @@ namespace cepgen
         double GE;
         double GM;
     };
+    /// Human-readable dump of the form factor parameterisation
+    std::ostream& operator<<( std::ostream&, const formfac::Parameterisation* );
   }
 }
 

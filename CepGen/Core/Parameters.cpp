@@ -11,6 +11,7 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Processes/Process.h"
 
+#include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Utils/Functional.h"
@@ -273,7 +274,8 @@ namespace cepgen
       << std::setw( wt ) << "Incoming particles"
       << param->kinematics.incoming_beams.first << ",\n" << std::setw( wt ) << ""
       << param->kinematics.incoming_beams.second << "\n"
-      << std::setw( wt ) << "C.m. energy (GeV)" << param->kinematics.sqrtS() << "\n";
+      << std::setw( wt ) << "C.m. energy (GeV)" << param->kinematics.sqrtS() << "\n"
+      << std::setw( wt ) << "Form factors" << param->kinematics.formFactors() << "\n";
     if ( param->kinematics.mode() != mode::Kinematics::ElasticElastic
       && param->kinematics.structureFunctions() )
       os << std::setw( wt ) << "Structure functions" << param->kinematics.structureFunctions() << "\n";

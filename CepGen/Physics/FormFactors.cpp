@@ -257,13 +257,19 @@ namespace cepgen
     //------------------------------------------------------------------
 
     std::ostream&
-    operator<<( std::ostream& os, const Parameterisation& formfac )
+    operator<<( std::ostream& os, const Parameterisation* ff )
     {
-      os << formfac.description();
-      if ( formfac.last_q2_ >= 0. )
-        os << "(Q²=" << formfac.last_q2_ << " GeV²): "
-           << "FE=" << formfac.FE << ",FM=" << formfac.FM;
+      os << (formfac::Model)ff->name();
+      if ( ff->last_q2_ >= 0. )
+        os << "(Q²=" << ff->last_q2_ << " GeV²): "
+           << "FE=" << ff->FE << ",FM=" << ff->FM;
       return os;
+    }
+
+    std::ostream&
+    operator<<( std::ostream& os, const Parameterisation& ff )
+    {
+      return os << &ff;
     }
 
     std::ostream&
