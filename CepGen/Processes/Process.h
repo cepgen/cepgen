@@ -2,11 +2,7 @@
 #define CepGen_Processes_Process_h
 
 #include "CepGen/Modules/NamedModule.h"
-
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Physics/FormFactors.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
-
 #include "CepGen/Event/Particle.h"
 
 #include <map>

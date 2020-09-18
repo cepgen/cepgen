@@ -16,7 +16,6 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Physics/FormFactors.h"
 
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Core/Exception.h"

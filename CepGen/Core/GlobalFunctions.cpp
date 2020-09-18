@@ -154,6 +154,15 @@ namespace cepgen
             << ": " << proc::ProcessesFactory::get().describe( mod );
       }
       { info << "\n" << sep_mid << "\n"
+          << utils::boldify( "Beam form factors modellings" );
+        if ( formfac::FormFactorsFactory::get().modules().empty() )
+          info << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";
+        for ( const auto& mod : formfac::FormFactorsFactory::get().modules() ) {
+          info << "\n> " << utils::colourise( std::to_string( mod ), utils::Colour::green, utils::Modifier::bold )
+            << ": " << formfac::FormFactorsFactory::get().describe( mod );
+        }
+      }
+      { info << "\n" << sep_mid << "\n"
           << utils::boldify( "Structure functions modellings" );
         if ( strfun::StructureFunctionsFactory::get().modules().empty() )
           info << "\n>>> " << utils::colourise( "none found", utils::Colour::red ) << " <<<";

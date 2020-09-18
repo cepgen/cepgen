@@ -12,15 +12,10 @@
 #include "CepGen/Processes/Process.h"
 
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/FormFactors.h"
 
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/TimeKeeper.h"
 #include "CepGen/Utils/String.h"
-
-//--- for debugging
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Modules/ProcessesFactory.h"
 
 #include <iomanip>
 

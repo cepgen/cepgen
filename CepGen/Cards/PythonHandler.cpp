@@ -26,7 +26,6 @@
 
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/HeavyIon.h"
 
 #include "CepGen/Utils/TimeKeeper.h"
