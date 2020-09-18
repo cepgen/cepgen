@@ -53,25 +53,25 @@ namespace cepgen
     }
 
     Parameterisation&
-    Parameterisation::operator()( const Type& type, double q2, double mi2, double mf2 )
+    Parameterisation::operator()( const mode::Beam& type, double q2, double mi2, double mf2 )
     {
       last_q2_ = q2;
       switch ( type ) {
-        case Type::Invalid:
-        case Type::CompositeScalar:
+        case mode::Beam::invalid:
+        case mode::Beam::CompositeScalar:
           throw CG_FATAL( "FormFactors" )
             << type << " mode is not yet supported!";
-        case Type::PointLikeScalar:
+        case mode::Beam::PointLikeScalar:
           FE = 1., FM = 0.; break;
-        case Type::PointLikeFermion:
+        case mode::Beam::PointLikeFermion:
           FE = FM = 1.; break;
-        case Type::ProtonElastic: {
+        case mode::Beam::ProtonElastic: {
           compute( q2 );
           const double GE2 = GE*GE, GM2 = GM*GM;
           FE = ( 4.*mp2_*GE2+q2*GM2 ) / ( 4.*mp2_+q2 );
           FM = GM2;
         } break;
-        case Type::ProtonInelastic: {
+        case mode::Beam::ProtonInelastic: {
           const double xbj = q2/( q2+mf2-mi2 );
           if ( !str_fun_ )
             throw CG_FATAL( "FormFactors" )
@@ -264,20 +264,6 @@ namespace cepgen
       if ( formfac.last_q2_ >= 0. )
         os << "(Q²=" << formfac.last_q2_ << " GeV²): "
            << "FE=" << formfac.FE << ",FM=" << formfac.FM;
-      return os;
-    }
-
-    std::ostream&
-    operator<<( std::ostream& os, const Type& type )
-    {
-      switch ( type ) {
-        case Type::Invalid: return os << "{invalid}";
-        case Type::ProtonElastic: return os << "el.proton";
-        case Type::PointLikeScalar: return os << "gen.scalar";
-        case Type::PointLikeFermion: return os << "gen.fermion";
-        case Type::CompositeScalar: return os << "comp.scalar";
-        case Type::ProtonInelastic: return os << "inel.proton";
-      }
       return os;
     }
 

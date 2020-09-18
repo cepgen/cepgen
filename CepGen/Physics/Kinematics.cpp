@@ -84,8 +84,10 @@ namespace cepgen
         ff.setName<int>( (int)ff::Model::StandardDipole );
       form_factors_ = ff::FormFactorsFactory::get().build( ff );
     }
-    if ( params.get<int>( "mode", (int)KinematicsMode::invalid ) != (int)KinematicsMode::invalid )
-      setMode( (KinematicsMode)params.get<int>( "mode" ) );
+    if ( params.get<int>( "mode", (int)mode::Kinematics::invalid ) != (int)mode::Kinematics::invalid )
+      setMode( (mode::Kinematics)params.get<int>( "mode" ) );
+    if ( params.get<ParametersList>( "process" ).get<int>( "mode", (int)mode::Kinematics::invalid ) != (int)mode::Kinematics::invalid )
+      setMode( (mode::Kinematics)params.get<ParametersList>( "process" ).get<int>( "mode" ) );
     //--- structure functions
     auto strfun = params.get<ParametersList>( "structureFunctions" );
     if ( !strfun.empty() || !str_fun_ ) {
@@ -257,24 +259,24 @@ namespace cepgen
   }
 
   Kinematics&
-  Kinematics::setMode( const KinematicsMode& mode )
+  Kinematics::setMode( const mode::Kinematics& mode )
   {
     switch ( mode ) {
-      case KinematicsMode::ElasticElastic:
-        incoming_beams.first.form_factors = ff::Type::ProtonElastic;
-        incoming_beams.second.form_factors = ff::Type::ProtonElastic;
+      case mode::Kinematics::ElasticElastic:
+        incoming_beams.first.mode = mode::Beam::ProtonElastic;
+        incoming_beams.second.mode = mode::Beam::ProtonElastic;
         break;
-      case KinematicsMode::ElasticInelastic:
-        incoming_beams.first.form_factors = ff::Type::ProtonElastic;
-        incoming_beams.second.form_factors = ff::Type::ProtonInelastic;
+      case mode::Kinematics::ElasticInelastic:
+        incoming_beams.first.mode = mode::Beam::ProtonElastic;
+        incoming_beams.second.mode = mode::Beam::ProtonInelastic;
         break;
-      case KinematicsMode::InelasticElastic:
-        incoming_beams.first.form_factors = ff::Type::ProtonInelastic;
-        incoming_beams.second.form_factors = ff::Type::ProtonElastic;
+      case mode::Kinematics::InelasticElastic:
+        incoming_beams.first.mode = mode::Beam::ProtonInelastic;
+        incoming_beams.second.mode = mode::Beam::ProtonElastic;
         break;
-      case KinematicsMode::InelasticInelastic:
-        incoming_beams.first.form_factors = ff::Type::ProtonInelastic;
-        incoming_beams.second.form_factors = ff::Type::ProtonInelastic;
+      case mode::Kinematics::InelasticInelastic:
+        incoming_beams.first.mode = mode::Beam::ProtonInelastic;
+        incoming_beams.second.mode = mode::Beam::ProtonInelastic;
         break;
       default:
         throw CG_FATAL( "Kinematics:mode" )
@@ -283,24 +285,27 @@ namespace cepgen
     return *this;
   }
 
-  KinematicsMode
+  mode::Kinematics
   Kinematics::mode() const
   {
-    if ( incoming_beams.first.form_factors == ff::Type::ProtonElastic ) {
-      if ( incoming_beams.second.form_factors == ff::Type::ProtonElastic )
-        return KinematicsMode::ElasticElastic;
-      else
-        return KinematicsMode::ElasticInelastic;
+    switch ( incoming_beams.first.mode ) {
+      case mode::Beam::ProtonElastic: {
+        if ( incoming_beams.second.mode == mode::Beam::ProtonElastic )
+          return mode::Kinematics::ElasticElastic;
+        else
+          return mode::Kinematics::ElasticInelastic;
+      }
+      case mode::Beam::ProtonInelastic: {
+        if ( incoming_beams.second.mode == mode::Beam::ProtonElastic )
+          return mode::Kinematics::InelasticElastic;
+        else
+          return mode::Kinematics::InelasticInelastic;
+      }
+      default:
+        throw CG_FATAL( "Kinematics:mode" )
+          << "Unsupported kinematics mode for beams with modes:\n\t"
+          << incoming_beams.first.mode << " / " << incoming_beams.second.mode << "!";
     }
-    else if ( incoming_beams.first.form_factors == ff::Type::ProtonInelastic ) {
-      if ( incoming_beams.second.form_factors == ff::Type::ProtonElastic )
-        return KinematicsMode::InelasticElastic;
-      else
-        return KinematicsMode::InelasticInelastic;
-    }
-    throw CG_FATAL( "Kinematics:mode" )
-      << "Unsupported kinematics mode for beams with form factors:\n\t"
-      << incoming_beams.first.form_factors << " / " << incoming_beams.second.form_factors << "!";
   }
 
   Kinematics&
@@ -328,34 +333,6 @@ namespace cepgen
     str_fun_ = std::move( param );
     form_factors_->setStructureFunctions( str_fun_.get() );
     return *this;
-  }
-
-  //--------------------------------------------------------------------
-  // User-friendly display of the kinematics mode
-  //--------------------------------------------------------------------
-
-  std::ostream&
-  operator<<( std::ostream& os, const KinematicsMode& pm )
-  {
-    switch ( pm ) {
-      case KinematicsMode::invalid:
-        return os << "invalid";
-      case KinematicsMode::ElectronElectron:
-        return os << "electron/electron";
-      case KinematicsMode::ElectronProton:
-        return os << "electron/proton";
-      case KinematicsMode::ProtonElectron:
-        return os << "proton/electron";
-      case KinematicsMode::ElasticElastic:
-        return os << "elastic/elastic";
-      case KinematicsMode::InelasticElastic:
-        return os << "inelastic/elastic";
-      case KinematicsMode::ElasticInelastic:
-        return os << "elastic/inelastic";
-      case KinematicsMode::InelasticInelastic:
-        return os << "inelastic/inelastic";
-    }
-    return os;
   }
 
   //--------------------------------------------------------------------

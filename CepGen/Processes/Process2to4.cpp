@@ -148,10 +148,10 @@ namespace cepgen
         << "s(1/2)_eff = " << s1_eff << " / " << s2_eff << " GeV^2\n\t"
         << "central system invariant mass = " << invm << " GeV";
 
-      if ( kin_.incoming_beams.first.form_factors == ff::Type::ProtonInelastic
+      if ( kin_.incoming_beams.first.mode == mode::Beam::ProtonInelastic
         && ( sqrt( s2_eff ) <= sqrt( mX2_ )+invm ) )
         return 0.;
-      if ( kin_.incoming_beams.second.form_factors == ff::Type::ProtonInelastic
+      if ( kin_.incoming_beams.second.mode == mode::Beam::ProtonInelastic
         && ( sqrt( s1_eff ) <= sqrt( mY2_ )+invm ) )
         return 0.;
 

@@ -2,6 +2,7 @@
 #define CepGen_Physics_FormFactors_h
 
 #include "CepGen/Modules/NamedModule.h"
+#include "CepGen/Physics/Modes.h"
 
 #include <memory>
 
@@ -11,15 +12,6 @@ namespace cepgen
   namespace strfun { class Parameterisation; }
   namespace ff
   {
-    enum struct Type {
-      Invalid          = 0,
-      ProtonElastic    = 1, ///< Elastic proton form factors
-      PointLikeScalar  = 2, ///< Trivial, spin-0 form factors
-      PointLikeFermion = 3, ///< Trivial, spin-1/2 form factors
-      CompositeScalar  = 4, ///< Composite pion form factors
-      ProtonInelastic  = 5, ///< Inelastic proton form factors (according to the proton structure functions set)
-    };
-    std::ostream& operator<<( std::ostream&, const Type& );
     /// Proton form factors to be used in the outgoing state description
     enum struct Model {
       Invalid        = 0,
@@ -48,7 +40,7 @@ namespace cepgen
         double tau( double q2 ) const;
 
         /// Compute all relevant form factors functions for a given \f$Q^2\f$ value
-        Parameterisation& operator()( const Type& /*type*/, double /*q2*/, double mi2 = 0., double mf2 = 0. );
+        Parameterisation& operator()( const mode::Beam& /*type*/, double /*q2*/, double mi2 = 0., double mf2 = 0. );
 
       protected:
         static constexpr double MU = 2.79;

@@ -4,7 +4,6 @@
 
 #include "CepGen/Parameters.h"
 
-#include "CepGen/Physics/KinematicsMode.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Constants.h"
 
@@ -30,8 +29,8 @@ namespace Pythia8
   CepGenEvent::initialise( const cepgen::Parameters& params )
   {
     params_ = &params;
-    inel1_ = params_->kinematics.incoming_beams.first.form_factors == cepgen::ff::Type::ProtonInelastic;
-    inel2_ = params_->kinematics.incoming_beams.second.form_factors == cepgen::ff::Type::ProtonInelastic;
+    inel1_ = params_->kinematics.incoming_beams.first.mode == cepgen::mode::Beam::ProtonInelastic;
+    inel2_ = params_->kinematics.incoming_beams.second.mode == cepgen::mode::Beam::ProtonInelastic;
 
     setBeamA( (short)params_->kinematics.incoming_beams.first.pdg, params_->kinematics.incoming_beams.first.pz );
     setBeamB( (short)params_->kinematics.incoming_beams.second.pdg, params_->kinematics.incoming_beams.second.pz );

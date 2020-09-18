@@ -218,7 +218,7 @@ namespace cepgen
         if ( par != "mode" )
           os << "\n" << std::setw( wt ) << "" << par << ": " << param->process_->parameters().getString( par );
       std::ostringstream proc_mode; proc_mode << param->kinematics.mode();
-      if ( param->kinematics.mode() != KinematicsMode::invalid )
+      if ( param->kinematics.mode() != mode::Kinematics::invalid )
         os << "\n" << std::setw( wt ) << "Subprocess mode" << ( pretty ? utils::boldify( proc_mode.str() ) : proc_mode.str() ) << "\n";
     }
     os
@@ -279,7 +279,7 @@ namespace cepgen
       << param->kinematics.incoming_beams.first << ",\n" << std::setw( wt ) << ""
       << param->kinematics.incoming_beams.second << "\n"
       << std::setw( wt ) << "C.m. energy (GeV)" << param->kinematics.sqrtS() << "\n";
-    if ( param->kinematics.mode() != KinematicsMode::ElasticElastic
+    if ( param->kinematics.mode() != mode::Kinematics::ElasticElastic
       && param->kinematics.structureFunctions() )
       os << std::setw( wt ) << "Structure functions" << param->kinematics.structureFunctions() << "\n";
     os

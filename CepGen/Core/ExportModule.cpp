@@ -36,7 +36,7 @@ namespace cepgen
       os
         << prep << "******* Sample generated with CepGen " << version::tag << " *******\n"
         << prep << " Process: " << params.processName() << " (" << params.kinematics.mode() << ")\n";
-      if ( params.kinematics.mode() != KinematicsMode::ElasticElastic )
+      if ( params.kinematics.mode() != mode::Kinematics::ElasticElastic )
         os << prep << " Structure functions: " << params.kinematics.structureFunctions()->description() << "\n";
       if ( !params.eventModifiersSequence().empty() ) {
         os << prep << " " << utils::s( "Event modifier", params.eventModifiersSequence().size() ) << ": ";
@@ -58,7 +58,7 @@ namespace cepgen
         os
           << prep << " " << cut.description << ": "
           << cut.limits << "\n";
-      if ( params.kinematics.mode() != KinematicsMode::ElasticElastic ) {
+      if ( params.kinematics.mode() != mode::Kinematics::ElasticElastic ) {
         os << prep << std::setw( len ) << std::setfill( '*' )
           << "*** Remnants states " << "\n";
         for ( const auto& cut : cuts.remnants.list() )

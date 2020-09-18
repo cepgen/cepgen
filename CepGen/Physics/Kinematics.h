@@ -2,7 +2,6 @@
 #define CepGen_Physics_Kinematics_h
 
 #include "CepGen/Core/ParametersList.h"
-#include "CepGen/Physics/KinematicsMode.h"
 #include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/Cuts.h"
 
@@ -34,9 +33,9 @@ namespace cepgen
       double sqrtS() const;
 
       /// Set the beams for the type of kinematics to consider
-      Kinematics& setMode( const KinematicsMode& );
+      Kinematics& setMode( const mode::Kinematics& );
       /// Type of kinematics to consider for the phase space
-      KinematicsMode mode() const;
+      mode::Kinematics mode() const;
 
       /// Incoming beams characteristics
       struct Beam
@@ -45,7 +44,7 @@ namespace cepgen
         double pz; ///< Incoming particle momentum, in GeV/c
         pdgid_t pdg; ///< PDG identifier for the beam
         KTFlux kt_flux; ///< Type of \f$k_{\rm T}\f$-factorised flux to be considered (if any)
-        ff::Type form_factors; ///< Form factors type
+        mode::Beam mode; ///< Beam treatment mode
       };
       /// Human-readable description of a beam particle/system
       friend std::ostream& operator<<( std::ostream&, const Beam& );

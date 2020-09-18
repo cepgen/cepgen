@@ -23,7 +23,7 @@ namespace cepgen
         const double x2 = x*x;
         const double q2min = x2*mi2/( 1.-x ), q2 = q2min + kt2/( 1.-x );
         const double qnorm = 1.-q2min/q2;
-        const auto& formfac = ff( ff::Type::ProtonElastic, q2 );
+        const auto& formfac = ff( mode::Beam::ProtonElastic, q2 );
         if ( type == KTFlux::P_Photon_Elastic ) {
           const double f_aux = formfac.FE*qnorm*qnorm;
           return constants::ALPHA_EM*M_1_PI/q2*f_aux;
