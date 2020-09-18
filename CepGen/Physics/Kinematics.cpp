@@ -86,8 +86,6 @@ namespace cepgen
     }
     if ( params.get<int>( "mode", (int)mode::Kinematics::invalid ) != (int)mode::Kinematics::invalid )
       setMode( (mode::Kinematics)params.get<int>( "mode" ) );
-    if ( params.get<ParametersList>( "process" ).get<int>( "mode", (int)mode::Kinematics::invalid ) != (int)mode::Kinematics::invalid )
-      setMode( (mode::Kinematics)params.get<ParametersList>( "process" ).get<int>( "mode" ) );
     //--- structure functions
     auto strfun = params.get<ParametersList>( "structureFunctions" );
     if ( !strfun.empty() || !str_fun_ ) {
