@@ -87,7 +87,7 @@ namespace cepgen
       // feed run parameters to the common block
       //===========================================================================================
 
-      genparams_.icontri = (int)kin_.mode;
+      genparams_.icontri = (int)kin_.mode();
       if ( kin_.structureFunctions() )
         genparams_.sfmod = kin_.structureFunctions()->name();
 

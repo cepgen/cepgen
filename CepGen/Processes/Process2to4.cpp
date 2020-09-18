@@ -148,13 +148,11 @@ namespace cepgen
         << "s(1/2)_eff = " << s1_eff << " / " << s2_eff << " GeV^2\n\t"
         << "central system invariant mass = " << invm << " GeV";
 
-      if ( ( kin_.mode == KinematicsMode::ElasticInelastic
-          || kin_.mode == KinematicsMode::InelasticInelastic )
-        && ( sqrt( s1_eff ) <= sqrt( mY2_ )+invm ) )
-        return 0.;
-      if ( ( kin_.mode == KinematicsMode::InelasticElastic
-          || kin_.mode == KinematicsMode::InelasticInelastic )
+      if ( kin_.incoming_beams.first.form_factors == ff::Type::ProtonInelastic
         && ( sqrt( s2_eff ) <= sqrt( mX2_ )+invm ) )
+        return 0.;
+      if ( kin_.incoming_beams.second.form_factors == ff::Type::ProtonInelastic
+        && ( sqrt( s1_eff ) <= sqrt( mY2_ )+invm ) )
         return 0.;
 
       //--- four-momenta of the outgoing protons (or remnants)
@@ -224,12 +222,12 @@ namespace cepgen
       const HeavyIon hi1( kin_.incoming_beams.first.pdg );
       const double f1 = ( hi1 ) // check if we are in heavy ion mode
         ? ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, hi1 )
-        : ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, *kin_.incoming_beams.first.form_factors, mA2_, mX2_ );
+        : ktFlux( (KTFlux)kin_.incoming_beams.first.kt_flux, x1, q1t2, *kin_.formFactors(), mA2_, mX2_ );
 
       const HeavyIon hi2( kin_.incoming_beams.second.pdg );
       const double f2 = ( hi2 ) // check if we are in heavy ion mode
         ? ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, hi2 )
-        : ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, *kin_.incoming_beams.second.form_factors, mB2_, mY2_ );
+        : ktFlux( (KTFlux)kin_.incoming_beams.second.kt_flux, x2, q2t2, *kin_.formFactors(), mB2_, mY2_ );
 
       CG_DEBUG_LOOP( "2to4:fluxes" )
         << "Incoming fluxes for (x/kt2) = "

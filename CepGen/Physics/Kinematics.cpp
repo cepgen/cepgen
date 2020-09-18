@@ -17,12 +17,7 @@
 
 namespace cepgen
 {
-  Kinematics::Kinematics() :
-    mode( KinematicsMode::invalid )
-  {}
-
-  Kinematics::Kinematics( const ParametersList& params ) :
-    mode( (KinematicsMode)params.get<int>( "mode", (int)KinematicsMode::invalid ) )
+  Kinematics::Kinematics( const ParametersList& params )
   {
     //----- per-incoming beam kinematics
 
@@ -82,12 +77,23 @@ namespace cepgen
     const double sqrt_s = params.get<double>( "sqrtS", params.get<double>( "cmEnergy", -1. ) );
     if ( sqrt_s > 0. )
       setSqrtS( sqrt_s );
+    //--- form factors
+    auto ff = params.get<ParametersList>( "formFactors" );
+    if ( !ff.empty() || !form_factors_ ) {
+      if ( ff.name<int>( -999 ) == -999 )
+        ff.setName<int>( (int)ff::Model::StandardDipole );
+      form_factors_ = ff::FormFactorsFactory::get().build( ff );
+    }
+    if ( params.get<int>( "mode", (int)KinematicsMode::invalid ) != (int)KinematicsMode::invalid )
+      setMode( (KinematicsMode)params.get<int>( "mode" ) );
     //--- structure functions
     auto strfun = params.get<ParametersList>( "structureFunctions" );
     if ( !strfun.empty() || !str_fun_ ) {
       if ( strfun.name<int>( -999 ) == -999 )
         strfun.setName<int>( 11 ); // default is Suri-Yennie
       str_fun_ = strfun::StructureFunctionsFactory::get().build( strfun );
+      if ( form_factors_ )
+        form_factors_->setStructureFunctions( str_fun_.get() );
     }
     //--- parton fluxes for kt-factorisation
     if ( params.has<std::vector<int> >( "ktFluxes" ) ) {
@@ -170,7 +176,7 @@ namespace cepgen
     ParametersList params;
     params
       .set<ParametersList>( "structureFunctions", str_fun_->parameters() )
-      .set<int>( "mode", (int)mode )
+      .set<int>( "mode", (int)mode() )
       .set<int>( "beam1id", incoming_beams.first.pdg )
       .set<double>( "beam1pz", incoming_beams.first.pz )
       .set<int>( "beam2id", incoming_beams.second.pdg )
@@ -251,6 +257,53 @@ namespace cepgen
   }
 
   Kinematics&
+  Kinematics::setMode( const KinematicsMode& mode )
+  {
+    switch ( mode ) {
+      case KinematicsMode::ElasticElastic:
+        incoming_beams.first.form_factors = ff::Type::ProtonElastic;
+        incoming_beams.second.form_factors = ff::Type::ProtonElastic;
+        break;
+      case KinematicsMode::ElasticInelastic:
+        incoming_beams.first.form_factors = ff::Type::ProtonElastic;
+        incoming_beams.second.form_factors = ff::Type::ProtonInelastic;
+        break;
+      case KinematicsMode::InelasticElastic:
+        incoming_beams.first.form_factors = ff::Type::ProtonInelastic;
+        incoming_beams.second.form_factors = ff::Type::ProtonElastic;
+        break;
+      case KinematicsMode::InelasticInelastic:
+        incoming_beams.first.form_factors = ff::Type::ProtonInelastic;
+        incoming_beams.second.form_factors = ff::Type::ProtonInelastic;
+        break;
+      default:
+        throw CG_FATAL( "Kinematics:mode" )
+          << "Unsupported kinematics mode: " << mode << "!";
+    }
+    return *this;
+  }
+
+  KinematicsMode
+  Kinematics::mode() const
+  {
+    if ( incoming_beams.first.form_factors == ff::Type::ProtonElastic ) {
+      if ( incoming_beams.second.form_factors == ff::Type::ProtonElastic )
+        return KinematicsMode::ElasticElastic;
+      else
+        return KinematicsMode::ElasticInelastic;
+    }
+    else if ( incoming_beams.first.form_factors == ff::Type::ProtonInelastic ) {
+      if ( incoming_beams.second.form_factors == ff::Type::ProtonElastic )
+        return KinematicsMode::InelasticElastic;
+      else
+        return KinematicsMode::InelasticInelastic;
+    }
+    throw CG_FATAL( "Kinematics:mode" )
+      << "Unsupported kinematics mode for beams with form factors:\n\t"
+      << incoming_beams.first.form_factors << " / " << incoming_beams.second.form_factors << "!";
+  }
+
+  Kinematics&
   Kinematics::setStructureFunctions( int sf_model, int sr_model )
   {
     const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
@@ -273,8 +326,7 @@ namespace cepgen
   Kinematics::setStructureFunctions( std::unique_ptr<strfun::Parameterisation> param )
   {
     str_fun_ = std::move( param );
-    incoming_beams.first.form_factors->setStructureFunctions( str_fun_.get() );
-    incoming_beams.second.form_factors->setStructureFunctions( str_fun_.get() );
+    form_factors_->setStructureFunctions( str_fun_.get() );
     return *this;
   }
 
@@ -320,8 +372,6 @@ namespace cepgen
     os << " (" << beam.pz << " GeV/c)";
     if ( beam.kt_flux != KTFlux::invalid )
       os << " [unint.flux: " << beam.kt_flux << "]";
-    if ( beam.form_factors )
-      os << ", " << *beam.form_factors;
     return os;
   }
 
@@ -348,8 +398,7 @@ namespace cepgen
   //--------------------------------------------------------------------
 
   Kinematics::Beam::Beam() :
-    pz( 0. ), pdg( PDG::proton ), kt_flux( KTFlux::invalid ),
-    form_factors( ff::FormFactorsFactory::get().build( (int)ff::Model::StandardDipole ) )
+    pz( 0. ), pdg( PDG::proton ), kt_flux( KTFlux::invalid )
   {}
 
   //--------------------------------------------------------------------

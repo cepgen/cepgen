@@ -100,24 +100,26 @@ namespace cepgen
       defineVariable( x6_, Mapping::linear, { 0., 1. }, { 0., 1. }, "x6" );
 
       //--- first outgoing beam particle or remnant mass
-      if ( kin_.mode == KinematicsMode::InelasticElastic
-        || kin_.mode == KinematicsMode::InelasticInelastic ) {
-        defineVariable( mX2_, Mapping::power_law, wx_lim_ob1, wx_lim_ob1, "MX2" );
-        kin_.incoming_beams.first.form_factors->setType( ff::Type::ProtonInelastic );
-      }
-      else {
-        mX2_ = p1_lab_.mass2();
-        kin_.incoming_beams.first.form_factors->setType( ff::Type::ProtonElastic );
+      switch ( kin_.incoming_beams.first.form_factors ) {
+        case ff::Type::ProtonInelastic:
+          defineVariable( mX2_, Mapping::power_law, wx_lim_ob1, wx_lim_ob1, "MX2" ); break;
+        case ff::Type::ProtonElastic:
+          mX2_ = p1_lab_.mass2(); break;
+        default:
+          throw CG_FATAL( "LPAIR:kinematics" )
+            << "Invalid form factors mode for beam 1: "
+            << kin_.incoming_beams.first.form_factors << " is not supported!";
       }
       //--- second outgoing beam particle or remnant mass
-      if ( kin_.mode == KinematicsMode::ElasticInelastic
-        || kin_.mode == KinematicsMode::InelasticInelastic ) {
-        defineVariable( mY2_, Mapping::power_law, wx_lim_ob2, wx_lim_ob2, "MY2" );
-        kin_.incoming_beams.second.form_factors->setType( ff::Type::ProtonInelastic );
-      }
-      else {
-        mY2_ = p2_lab_.mass2();
-        kin_.incoming_beams.second.form_factors->setType( ff::Type::ProtonElastic );
+      switch ( kin_.incoming_beams.second.form_factors ) {
+        case ff::Type::ProtonInelastic:
+          defineVariable( mY2_, Mapping::power_law, wx_lim_ob2, wx_lim_ob2, "MY2" ); break;
+        case ff::Type::ProtonElastic:
+          mY2_ = p2_lab_.mass2(); break;
+        default:
+          throw CG_FATAL( "LPAIR:kinematics" )
+            << "Invalid form factors mode for beam 2: "
+            << kin_.incoming_beams.second.form_factors << " is not supported!";
       }
     }
 
@@ -823,12 +825,10 @@ namespace cepgen
       //--- cut on mass of final hadronic system (MX/Y)
 
       if ( kin_.cuts.remnants.mx().valid() ) {
-        if ( ( kin_.mode == KinematicsMode::InelasticElastic
-            || kin_.mode == KinematicsMode::InelasticInelastic )
+        if ( kin_.incoming_beams.first.form_factors == ff::Type::ProtonInelastic
           && !kin_.cuts.remnants.mx().contains( mx ) )
           return 0.;
-        if ( ( kin_.mode == KinematicsMode::ElasticInelastic
-            || kin_.mode == KinematicsMode::InelasticInelastic )
+        if ( kin_.incoming_beams.second.form_factors == ff::Type::ProtonInelastic
           && !kin_.cuts.remnants.mx().contains( my ) )
           return 0.;
       }
@@ -868,7 +868,6 @@ namespace cepgen
       jacobian_ *= periPP();
 
       CG_DEBUG_LOOP( "LPAIR:f" )
-        << "kinematics mode: " << kin_.mode << "\n\t"
         << "Jacobian: " << jacobian_;
 
       //--- compute the event weight using the Jacobian
@@ -939,14 +938,12 @@ namespace cepgen
 
       p3_lab_.setPz( p3_lab_.pz()*ranz );
       op1.setMomentum( p3_lab_ );
-      switch ( kin_.mode ) {
-        case KinematicsMode::ElasticElastic:
-        case KinematicsMode::ElasticInelastic:
+      switch ( kin_.incoming_beams.first.form_factors ) {
+        case ff::Type::ProtonElastic:
         default:
           op1.setStatus( Particle::Status::FinalState ); // stable proton
           break;
-        case KinematicsMode::InelasticElastic:
-        case KinematicsMode::InelasticInelastic:
+        case ff::Type::ProtonInelastic:
           op1.setStatus( Particle::Status::Unfragmented ); // fragmenting remnants
           op1.setMass( sqrt( mX2_ ) );
           break;
@@ -957,14 +954,12 @@ namespace cepgen
 
       p5_lab_.setPz( p5_lab_.pz()*ranz );
       op2.setMomentum( p5_lab_ );
-      switch ( kin_.mode ) {
-        case KinematicsMode::ElasticElastic:
-        case KinematicsMode::InelasticElastic:
+      switch ( kin_.incoming_beams.second.form_factors ) {
+        case ff::Type::ProtonElastic:
         default:
           op2.setStatus( Particle::Status::FinalState ); // stable proton
           break;
-        case KinematicsMode::ElasticInelastic:
-        case KinematicsMode::InelasticInelastic:
+        case ff::Type::ProtonInelastic:
           op2.setStatus( Particle::Status::Unfragmented ); // fragmenting remnants
           op2.setMass( sqrt( mY2_ ) );
           break;
@@ -1007,8 +1002,8 @@ namespace cepgen
     {
       //--- compute the electric/magnetic form factors for the two
       //    considered parton momenta transfers
-      const auto fp1 = ( *kin_.incoming_beams.first.form_factors )( -t1_, mA2_, mX2_ );
-      const auto fp2 = ( *kin_.incoming_beams.second.form_factors )( -t2_, mB2_, mY2_ );
+      const auto fp1 = ( *kin_.formFactors() )( kin_.incoming_beams.first.form_factors, -t1_, mA2_, mX2_ );
+      const auto fp2 = ( *kin_.formFactors() )( kin_.incoming_beams.second.form_factors, -t2_, mB2_, mY2_ );
 
       CG_DEBUG_LOOP( "LPAIR:peripp" )
         << "(u1,u2) = " << fp1 << "\n\t"

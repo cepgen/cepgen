@@ -18,8 +18,8 @@ namespace cepgen
   class Kinematics
   {
     public:
-      Kinematics();
-      Kinematics( const ParametersList& );
+      Kinematics() = default;
+      explicit Kinematics( const ParametersList& );
       ~Kinematics() = default;
 
       /// Minimal diffractive mass for dissociative proton treatment
@@ -33,6 +33,11 @@ namespace cepgen
       /// Process centre of mass energy
       double sqrtS() const;
 
+      /// Set the beams for the type of kinematics to consider
+      Kinematics& setMode( const KinematicsMode& );
+      /// Type of kinematics to consider for the phase space
+      KinematicsMode mode() const;
+
       /// Incoming beams characteristics
       struct Beam
       {
@@ -40,7 +45,7 @@ namespace cepgen
         double pz; ///< Incoming particle momentum, in GeV/c
         pdgid_t pdg; ///< PDG identifier for the beam
         KTFlux kt_flux; ///< Type of \f$k_{\rm T}\f$-factorised flux to be considered (if any)
-        std::shared_ptr<ff::Parameterisation> form_factors; ///< Type of form factors to consider
+        ff::Type form_factors; ///< Form factors type
       };
       /// Human-readable description of a beam particle/system
       friend std::ostream& operator<<( std::ostream&, const Beam& );
@@ -49,8 +54,11 @@ namespace cepgen
       std::pair<Beam,Beam> incoming_beams;
       /// Minimum list of central particles required
       std::vector<pdgid_t> minimum_final_state;
-      /// Type of kinematics to consider for the phase space
-      KinematicsMode mode;
+
+      /// Form factors evaluator
+      ff::Parameterisation* formFactors() const { return form_factors_.get(); }
+      /// Set a form factors evaluator object
+      Kinematics& setFormFactors( std::unique_ptr<ff::Parameterisation> );
 
       /// Structure functions evaluator
       strfun::Parameterisation* structureFunctions() const { return str_fun_.get(); }
@@ -74,6 +82,8 @@ namespace cepgen
     private:
       /// Type of structure functions to consider
       std::shared_ptr<strfun::Parameterisation> str_fun_;
+      /// Type of form factors to consider
+      std::shared_ptr<ff::Parameterisation> form_factors_;
   };
 }
 

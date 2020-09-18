@@ -18,7 +18,6 @@ namespace cepgen
   {
     Parameterisation::Parameterisation() :
       NamedModule<int>( ParametersList() ),
-      type_( Type::Invalid ),
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       last_q2_( -1. ),
       FE( 0. ), FM( 0. ), GE( 0. ), GM( 0. )
@@ -26,7 +25,6 @@ namespace cepgen
 
     Parameterisation::Parameterisation( const Parameterisation& param ) :
       NamedModule<int>( param.parameters() ),
-      type_( param.type_ ),
       mp_( param.mp_ ), mp2_( param.mp2_ ),
       last_q2_( -1. ),
       FE( param.FE ), FM( param.FM ), GE( param.GE ), GM( param.GM )
@@ -34,7 +32,6 @@ namespace cepgen
 
     Parameterisation::Parameterisation( const ParametersList& params ) :
       NamedModule<int>( params ),
-      type_( (Type)params.get<int>( "type", (int)Type::Invalid ) ),
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       last_q2_( -1. ),
       FE( 0. ), FM( 0. ), GE( 0. ), GM( 0. )
@@ -56,14 +53,14 @@ namespace cepgen
     }
 
     Parameterisation&
-    Parameterisation::operator()( double q2, double mi2, double mf2 )
+    Parameterisation::operator()( const Type& type, double q2, double mi2, double mf2 )
     {
       last_q2_ = q2;
-      switch ( type_ ) {
+      switch ( type ) {
         case Type::Invalid:
         case Type::CompositeScalar:
           throw CG_FATAL( "FormFactors" )
-            << type_ << " mode is not yet supported!";
+            << type << " mode is not yet supported!";
         case Type::PointLikeScalar:
           FE = 1., FM = 0.; break;
         case Type::PointLikeFermion:

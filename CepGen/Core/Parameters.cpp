@@ -87,7 +87,7 @@ namespace cepgen
       dbg
         << "Run started for " << process_->name() << " process "
         << std::hex << (void*)process_.get() << std::dec << ".\n\t"
-        << "Process mode considered: " << kinematics.mode << "\n\t"
+        << "Process mode considered: " << kinematics.mode() << "\n\t"
         << "   first beam: " << kinematics.incoming_beams.first << "\n\t"
         << "  second beam: " << kinematics.incoming_beams.second;
       if ( kinematics.structureFunctions() )
@@ -217,8 +217,8 @@ namespace cepgen
       for ( const auto& par : param->process().parameters().keys( false ) )
         if ( par != "mode" )
           os << "\n" << std::setw( wt ) << "" << par << ": " << param->process_->parameters().getString( par );
-      std::ostringstream proc_mode; proc_mode << param->kinematics.mode;
-      if ( param->kinematics.mode != KinematicsMode::invalid )
+      std::ostringstream proc_mode; proc_mode << param->kinematics.mode();
+      if ( param->kinematics.mode() != KinematicsMode::invalid )
         os << "\n" << std::setw( wt ) << "Subprocess mode" << ( pretty ? utils::boldify( proc_mode.str() ) : proc_mode.str() ) << "\n";
     }
     os
@@ -279,7 +279,7 @@ namespace cepgen
       << param->kinematics.incoming_beams.first << ",\n" << std::setw( wt ) << ""
       << param->kinematics.incoming_beams.second << "\n"
       << std::setw( wt ) << "C.m. energy (GeV)" << param->kinematics.sqrtS() << "\n";
-    if ( param->kinematics.mode != KinematicsMode::ElasticElastic
+    if ( param->kinematics.mode() != KinematicsMode::ElasticElastic
       && param->kinematics.structureFunctions() )
       os << std::setw( wt ) << "Structure functions" << param->kinematics.structureFunctions() << "\n";
     os

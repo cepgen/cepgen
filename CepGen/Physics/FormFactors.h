@@ -45,20 +45,15 @@ namespace cepgen
         void setStructureFunctions( strfun::Parameterisation* );
         strfun::Parameterisation* structureFunctions() const { return str_fun_.get(); }
 
-        const Type& type() const { return type_; }
-        void setType( const Type& type ) { type_ = type; }
-
         double tau( double q2 ) const;
 
         /// Compute all relevant form factors functions for a given \f$Q^2\f$ value
-        Parameterisation& operator()( double /*q2*/, double mi2 = 0., double mf2 = 0. );
+        Parameterisation& operator()( const Type& /*type*/, double /*q2*/, double mi2 = 0., double mf2 = 0. );
 
       protected:
         static constexpr double MU = 2.79;
 
         virtual void compute( double ) {}
-
-        Type type_;
 
         const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
         const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$

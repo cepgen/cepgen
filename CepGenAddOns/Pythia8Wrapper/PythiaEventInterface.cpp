@@ -30,9 +30,8 @@ namespace Pythia8
   CepGenEvent::initialise( const cepgen::Parameters& params )
   {
     params_ = &params;
-    const cepgen::KinematicsMode& mode = params_->kinematics.mode;
-    inel1_ = ( mode == cepgen::KinematicsMode::InelasticElastic || mode == cepgen::KinematicsMode::InelasticInelastic );
-    inel2_ = ( mode == cepgen::KinematicsMode::ElasticInelastic || mode == cepgen::KinematicsMode::InelasticInelastic );
+    inel1_ = params_->kinematics.incoming_beams.first.form_factors == cepgen::ff::Type::ProtonInelastic;
+    inel2_ = params_->kinematics.incoming_beams.second.form_factors == cepgen::ff::Type::ProtonInelastic;
 
     setBeamA( (short)params_->kinematics.incoming_beams.first.pdg, params_->kinematics.incoming_beams.first.pz );
     setBeamB( (short)params_->kinematics.incoming_beams.second.pdg, params_->kinematics.incoming_beams.second.pz );

@@ -123,7 +123,7 @@ namespace cepgen
       }
 
 #if defined( PYTHIA_VERSION_INTEGER ) && PYTHIA_VERSION_INTEGER >= 8226
-      switch ( params_->kinematics.mode ) {
+      switch ( params_->kinematics.mode() ) {
         case KinematicsMode::ElasticElastic: {
           pythia_->settings.mode( "BeamRemnants:unresolvedHadron", 3 );
           pythia_->settings.flag( "PartonLevel:all", false );
