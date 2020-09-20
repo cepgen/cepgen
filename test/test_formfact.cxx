@@ -31,7 +31,7 @@ int main( int argc, char* argv[] )
     .addOptionalArgument( "q2min,m", "minimal parton virtuality (GeV^2)", &q2min, 1. )
     .addOptionalArgument( "q2max,M", "maximal parton virtuality (GeV^2)", &q2max, 10000. )
     .addOptionalArgument( "npoints,n", "number of x-points to scan", &num_points, 500 )
-    .addOptionalArgument( "output,o", "output file name", &output_file, "flux.scan.output.txt" )
+    .addOptionalArgument( "output,o", "output file name", &output_file, "formfacs.scan.output.txt" )
     .parse();
 
   cepgen::initialise();
