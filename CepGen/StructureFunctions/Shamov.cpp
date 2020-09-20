@@ -191,6 +191,8 @@ namespace cepgen
         W1 = sgp/ratio/s1;
         W2 = sgp/s2;
       }
+      const double nu = 0.5*mx/mp_;
+      F2 = 2.*W2*nu/mp_;
       return *this;
     }
   }
