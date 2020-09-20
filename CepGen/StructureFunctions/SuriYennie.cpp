@@ -37,7 +37,7 @@ namespace cepgen
 
     SuriYennie::SuriYennie( const ParametersList& params ) :
       Parameterisation( params ),
-      F1( 0. ), FE( 0. ), FM( 0. )
+      W1( 0. ), W2( 0. ), FE( 0. ), FM( 0. )
     {
       const auto& model = params.get<std::string>( "model", "standard" );
       if ( model == "standard" )
@@ -69,7 +69,8 @@ namespace cepgen
 
       //const double w2 = 2.*mp*FE;
 
-      F1 = 0.5*FM*q2/mp_;
+      W1 = 0.5*FM*q2/mp_;
+      W2 = 2.*mp_*FE;
       F2 = 2.*nu*FE;
       return *this;
     }

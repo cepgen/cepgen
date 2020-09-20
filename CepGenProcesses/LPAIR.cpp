@@ -1002,8 +1002,8 @@ namespace cepgen
     {
       //--- compute the electric/magnetic form factors for the two
       //    considered parton momenta transfers
-      const auto fp1 = ( *kin_.formFactors() )( kin_.incoming_beams.first.mode, -t1_, mA2_, mX2_ );
-      const auto fp2 = ( *kin_.formFactors() )( kin_.incoming_beams.second.mode, -t2_, mB2_, mY2_ );
+      const auto fp1 = ( *kin_.formFactors() )( kin_.incoming_beams.first.mode, -t1_, mX2_ );
+      const auto fp2 = ( *kin_.formFactors() )( kin_.incoming_beams.second.mode, -t2_, mY2_ );
 
       CG_DEBUG_LOOP( "LPAIR:peripp" )
         << "(u1,u2) = " << fp1 << "\n\t"

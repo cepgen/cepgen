@@ -22,6 +22,7 @@ namespace cepgen
 
     Parameterisation::Parameterisation( const Parameterisation& sf ) :
       NamedModule<int>( sf.parameters() ),
+      F2( sf.F2 ), FL( sf.FL ),
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       params_( sf.params_ ),
       old_vals_( sf.old_vals_ ),
@@ -38,6 +39,14 @@ namespace cepgen
           .setName<int>( (int)sigrat::Type::SibirtsevBlunden ) )
       ) )
     {}
+
+    Parameterisation&
+    Parameterisation::operator=( const Parameterisation& sf )
+    {
+      F2 = sf.F2, FL = sf.FL;
+      old_vals_ = sf.old_vals_;
+      return *this;
+    }
 
     double
     Parameterisation::tau( double xbj, double q2 ) const
@@ -120,6 +129,7 @@ namespace cepgen
         case strfun::Type::GD07p:               return os << "GD07p";
         case strfun::Type::GD11p:               return os << "GD11p";
         case strfun::Type::Schaefer:            return os << "LUXlike";
+        case strfun::Type::Shamov:              return os << "Shamov";
         case strfun::Type::MSTWgrid:            return os << "MSTWgrid";
         case strfun::Type::Partonic:            return os << "Partonic";
       }

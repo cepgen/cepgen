@@ -27,7 +27,8 @@ namespace cepgen
 
         SuriYennie& operator()( double xbj, double q2 ) override;
 
-        double F1; ///< Longitudinal form factor
+        double W1; ///< Longitudinal form factor
+        double W2;
         double FE; ///< Electric proton form factor
         double FM; ///< Magnetic proton form factor
       private:

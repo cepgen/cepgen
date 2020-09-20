@@ -30,6 +30,7 @@ namespace cepgen
       GD11p               = 204,
       MSTWgrid            = 205,
       Schaefer            = 301,
+      Shamov              = 302,
       Partonic            = 401,
     };
     /// Human-readable description of this SF parameterisation type
@@ -46,13 +47,11 @@ namespace cepgen
         Parameterisation( const ParametersList& );
         virtual ~Parameterisation() = default;
 
+        /// Assign from another SF parameterisation object
+        Parameterisation& operator=( const Parameterisation& sf );
+
         static std::string description() { return "Unnamed structure functions"; }
 
-        /// Assign from another SF parameterisation object
-        Parameterisation& operator=( const Parameterisation& sf ) {
-          F2 = sf.F2, FL = sf.FL, old_vals_ = sf.old_vals_;
-          return *this;
-        }
         /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
         friend std::ostream& operator<<( std::ostream&, const Parameterisation* );
         /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value

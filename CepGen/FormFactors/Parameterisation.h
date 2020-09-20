@@ -10,7 +10,7 @@ namespace cepgen
   namespace strfun { class Parameterisation; }
   namespace formfac
   {
-    /// Form factors parameterisation (electric and magnetic parts)
+    /// Nucleon electromagnetic form factors parameterisation
     class Parameterisation : public NamedModule<std::string>
     {
       public:
@@ -32,7 +32,7 @@ namespace cepgen
         double tau( double q2 ) const;
 
         /// Compute all relevant form factors functions for a given \f$Q^2\f$ value
-        Parameterisation& operator()( const mode::Beam& /*type*/, double /*q2*/, double mi2 = 0., double mf2 = 0. );
+        Parameterisation& operator()( const mode::Beam& /*type*/, double /*q2*/, double mf2 = 0. );
 
       protected:
         static constexpr double MU = 2.79;
@@ -50,8 +50,8 @@ namespace cepgen
         double FE; ///< Electric form factor
         double FM; ///< Magnetic form factor
 
-        double GE;
-        double GM;
+        double GE; ///< Sachs electric form factor
+        double GM; ///< Sachs magnetic form factor
     };
   }
 }

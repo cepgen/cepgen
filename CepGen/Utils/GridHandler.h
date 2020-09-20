@@ -77,6 +77,7 @@ namespace cepgen
       };
   };
   template class GridHandler<1,1>;
+  template class GridHandler<1,2>;
   template class GridHandler<2,2>;
   template class GridHandler<3,1>;
 }

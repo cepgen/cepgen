@@ -45,7 +45,7 @@ namespace cepgen
     }
 
     Parameterisation&
-    Parameterisation::operator()( const mode::Beam& type, double q2, double mi2, double mf2 )
+    Parameterisation::operator()( const mode::Beam& type, double q2, double mf2 )
     {
       last_q2_ = q2;
       switch ( type ) {
@@ -64,7 +64,7 @@ namespace cepgen
           FM = GM2;
         } break;
         case mode::Beam::ProtonInelastic: {
-          const double xbj = q2/( q2+mf2-mi2 );
+          const double xbj = q2/( q2+mf2-mp2_ );
           if ( !str_fun_ )
             throw CG_FATAL( "FormFactors" )
               << "Inelastic proton form factors computation requires "
@@ -77,7 +77,7 @@ namespace cepgen
             case strfun::Type::SuriYennie: { //FIXME
               static strfun::SuriYennie sy;
               sy = sy( xbj, q2 );
-              FE = sy.F2 * xbj * sqrt( mi2 ) / q2;
+              FE = sy.F2 * xbj * mp_/q2;
               FM = sy.FM;
             } break;
             default: {

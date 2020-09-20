@@ -41,6 +41,7 @@ endforeach()
 
 #----- specify the tests requiring ROOT
 
+find_package(ROOT QUIET)
 if(ROOT_FOUND)
   foreach(exec_src ${tests_root})
     string(REPLACE ".cxx" "" exec_bin ${exec_src})
