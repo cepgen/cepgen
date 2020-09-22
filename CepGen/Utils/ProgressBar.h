@@ -20,7 +20,7 @@ namespace cepgen
         void update( size_t iter ) const;
 
       private:
-        static constexpr size_t BAR_LENGTH = 50;
+        const size_t bar_length_;
         const std::string bar_pattern_;
         size_t total_, frequency_;
     };
