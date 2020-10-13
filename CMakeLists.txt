@@ -92,7 +92,7 @@ endif()
 
 #----- installation rules
 
-install(DIRECTORY CepGen CepGenAddOns CepGenProcesses
+install(DIRECTORY CepGen
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   COMPONENT devel FILES_MATCHING PATTERN "*.h")
 install(DIRECTORY Cards

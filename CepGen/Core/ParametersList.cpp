@@ -8,8 +8,6 @@
 
 namespace cepgen
 {
-  const std::string ParametersList::MODULE_NAME = "mod_name";
-
   ParametersList::ParametersList( const ParametersList& oth ) :
     param_values_( oth.param_values_ ), int_values_( oth.int_values_ ),
     dbl_values_( oth.dbl_values_ ), str_values_( oth.str_values_ ),

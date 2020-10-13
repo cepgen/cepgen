@@ -23,9 +23,7 @@ namespace cepgen
         Logger( std::ostream* os ) :
           level( Level::information ), output( os ) {}
 
-#if !defined(__CINT__) && !defined(__CLING__)
         std::vector<std::regex> allowed_exc_;
-#endif
 
       public:
         /// Retrieve the running instance of the logger
@@ -36,9 +34,7 @@ namespace cepgen
         /// \brief Add a new rule to display exceptions/messages
         /// \param[in] rule Regex rule to handle
         void addExceptionRule( const std::string& rule ) {
-#if !defined(__CINT__) && !defined(__CLING__)
           allowed_exc_.emplace_back( rule, std::regex_constants::extended );
-#endif
         }
         /// Collection of logging exceptions
         const std::vector<std::regex>& exceptionRules() const {
@@ -48,7 +44,6 @@ namespace cepgen
         /// \param[in] tmpl Module name to probe
         /// \param[in] lev Upper verbosity level
         bool passExceptionRule( const std::string& tmpl, const Level& lev ) const {
-#if !defined(__CINT__) && !defined(__CLING__)
           if ( level >= lev )
             return true;
           if ( allowed_exc_.empty() )
@@ -60,7 +55,6 @@ namespace cepgen
             } catch ( const std::regex_error& err ) {
               throw std::runtime_error( "Failed to evaluate regex for logging tool.\n"+std::string( err.what() ) );
             }
-#endif
           return false;
         }
 

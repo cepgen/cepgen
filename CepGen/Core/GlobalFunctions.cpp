@@ -47,24 +47,31 @@ namespace cepgen
     std::atomic<int> gSignal; ///< Abort signal handler
   }
 
-  void
+  bool
   loadLibrary( const std::string& path, bool match )
   {
 #ifdef _WIN32
     const auto fullpath = match ? path+".dll" : path;
-    if ( LoadLibraryA( fullpath.c_str() ) == nullptr )
-      throw CG_WARNING( "loadLibrary" )
+    if ( LoadLibraryA( fullpath.c_str() ) == nullptr ) {
+      CG_DEBUG( "loadLibrary" )
         << "Failed to load library \"" << path << "\".\n\t"
         << "Error code #" << GetLastError() << ".";
+      invalid_libraries.emplace_back( path );
+      return false;
+    }
 #else
     const auto fullpath = match ? "lib"+path+".so" : path;
-    if ( dlopen( fullpath.c_str(), RTLD_LAZY | RTLD_GLOBAL ) == nullptr )
-      throw CG_WARNING( "loadLibrary" )
+    if ( dlopen( fullpath.c_str(), RTLD_LAZY | RTLD_GLOBAL ) == nullptr ) {
+      CG_DEBUG( "loadLibrary" )
         << "Failed to load library \"" << path << "\".\n\t"
         << dlerror();
+      invalid_libraries.emplace_back( path );
+      return false;
+    }
 #endif
     CG_DEBUG( "loadLibrary" ) << "Loaded library \"" << path << "\".";
     loaded_libraries.emplace_back( path );
+    return true;
   }
 
   void
@@ -95,9 +102,10 @@ namespace cepgen
     //--- load all necessary modules
     if ( !safe_mode )
       for ( const auto& lib : utils::libraries )
-        try { loadLibrary( lib, true ); } catch ( const Exception& e ) {
-          e.dump(); //FIXME temporary
-        }
+        loadLibrary( lib, true );
+    CG_WARNING( "init" )
+      << "Failed to load the following libraries:\n\t"
+      << invalid_libraries << ".";
 
     //--- greetings message
     CG_INFO( "init" )

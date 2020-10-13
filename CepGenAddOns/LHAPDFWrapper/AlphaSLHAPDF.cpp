@@ -17,16 +17,15 @@ namespace cepgen
 #ifdef LHAPDF_GE_6
        ,lhapdf_( LHAPDF::mkPDF(
         params.get<std::string>( "pdfSet", "cteq6" ),
-        params.get<int>( "pdfMember", 0 ) ) )
-#endif
+        params.get<int>( "pdfMember", 0 ) ) ) {}
+#else
       {
-#ifndef LHAPDF_GE_6
         LHAPDF::initPDFSet(
           params.get<std::string>( "pdfSet" ),
           LHAPDF::LHGRID,
           params.get<int>( "pdfMember", 0 ) );
-#endif
       }
+#endif
       static std::string description() { return "Perturbative PDF-oriented evolution algorithm"; }
 
       double operator()( double q ) const override {

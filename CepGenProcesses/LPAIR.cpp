@@ -635,11 +635,9 @@ namespace cepgen
       CG_DEBUG_LOOP( "LPAIR" )
         << "Computed value for w4 = " << w4_ << " → mc4 = " << mc4_;
 
-      if ( !orient() )
-        return 0.;
-
-      if ( jacobian_ == 0. ) {
-        CG_WARNING( "LPAIR" ) << "dj = " << jacobian_;
+      if ( !orient() || jacobian_ == 0. ) {
+        CG_WARNING( "LPAIR" )
+          << "Orient failed! Jacobian = " << jacobian_;
         return 0.;
       }
 
@@ -819,8 +817,14 @@ namespace cepgen
         << "unboosted P(l1)=" << p6_cm_ << "\n\t"
         << "unboosted P(l2)=" << p7_cm_;
 
+      const double mass_before = ( p6_cm_+p7_cm_ ).mass();
+
       p6_cm_.betaGammaBoost( gamma, betgam );
       p7_cm_.betaGammaBoost( gamma, betgam );
+
+      CG_DEBUG_LOOP( "LPAIR:gmufil" )
+        << "Invariant mass difference from boost:"
+        << ( p6_cm_+p7_cm_ ).mass()-mass_before << ".";
 
       //--- cut on mass of final hadronic system (MX/Y)
 
@@ -836,11 +840,6 @@ namespace cepgen
       //--- cut on the proton's Q2 (first photon propagator T1)
 
       if ( !kin_.cuts.initial.q2().contains( -t1_ ) )
-        return 0.;
-
-      //--- cuts on outgoing leptons' kinematics
-
-      if ( !kin_.cuts.central.mass_sum().contains( ( p6_cm_+p7_cm_ ).mass() ) )
         return 0.;
 
       //----- cuts on the individual leptons
@@ -862,6 +861,11 @@ namespace cepgen
         if ( !eta_limits.contains( p6_cm_.eta() ) || !eta_limits.contains( p7_cm_.eta() ) )
           return 0.;
       }
+
+      //--- cuts on outgoing leptons' kinematics
+
+      if ( !kin_.cuts.central.mass_sum().contains( ( p6_cm_+p7_cm_ ).mass() ) )
+        return 0.;
 
       //--- compute the structure functions factors
 

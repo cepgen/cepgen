@@ -34,10 +34,12 @@ namespace cepgen
 
   /// Collection of libraries loaded in the runtime environment
   static std::vector<std::string> loaded_libraries;
+  /// Collection of libraries tested not to work in the runtime environment
+  static std::vector<std::string> invalid_libraries;
   /// Collection of search paths to build the runtime environment
   static std::vector<std::string> search_paths;
   /// Import a shared library in the runtime environment
-  void loadLibrary( const std::string&, bool match = false );
+  bool loadLibrary( const std::string&, bool match = false );
   /// Launch the initialisation procedure
   /// \param[in] safe_mode Drop libraries initialisation?
   void initialise( bool safe_mode = false );
