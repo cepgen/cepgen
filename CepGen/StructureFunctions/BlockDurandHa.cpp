@@ -15,7 +15,7 @@ namespace cepgen
     {
       public:
         explicit BlockDurandHa( const ParametersList& params = ParametersList() );
-        BlockDurandHa& operator()( double xbj, double q2 ) override;
+        BlockDurandHa& eval( double xbj, double q2 ) override;
 
       private:
         std::vector<double> a_, b_, c_;
@@ -44,13 +44,8 @@ namespace cepgen
     }
 
     BlockDurandHa&
-    BlockDurandHa::operator()( double xbj, double q2 )
+    BlockDurandHa::eval( double xbj, double q2 )
     {
-      std::pair<double,double> nv = { xbj, q2 };
-      if ( nv == old_vals_ )
-        return *this;
-      old_vals_ = nv;
-
       if ( q2 <= 0 ) {
         F2 = 0.;
         return *this;

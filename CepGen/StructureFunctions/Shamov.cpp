@@ -4,12 +4,11 @@
 
 #include "CepGen/Core/Exception.h"
 
-#include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Utils/GridHandler.h"
+#include "CepGen/Utils/Physics.h"
 
 #include <complex>
-#include <vector>
 
 namespace cepgen
 {
@@ -21,7 +20,7 @@ namespace cepgen
         explicit Shamov( const ParametersList& params = ParametersList() );
         static std::string description() { return "Shamov composite soft structure functions"; }
 
-        Shamov& operator()( double xbj, double q2 ) override;
+        Shamov& eval( double xbj, double q2 ) override;
 
         double W1, W2;
 
@@ -127,15 +126,10 @@ namespace cepgen
     }
 
     Shamov&
-    Shamov::operator()( double xbj, double q2 )
+    Shamov::eval( double xbj, double q2 )
     {
-      std::pair<double,double> nv = { xbj, q2 };
-      if ( nv == old_vals_ )
-        return *this;
-      old_vals_ = nv;
-
       //--- Suri & Yennie structure functions
-      auto sy = sy_sf_( xbj, q2 );
+      auto sy = (SuriYennie&)sy_sf_( xbj, q2 );
 
       if ( mode_ == Mode::SuriYennie ) {
         W1 = sy.W1;
@@ -144,7 +138,7 @@ namespace cepgen
         return *this;
       }
 
-      const double mx2 = mp2_+q2*( 1.-xbj )/xbj, mx = sqrt( mx2 );
+      const double mx2 = utils::mX2( xbj, q2, mp2_ ), mx = sqrt( mx2 );
 
       const double w1_sy = sy.W1;
       const double w2_sy = sy.W2;
@@ -163,7 +157,7 @@ namespace cepgen
         if ( mode_ == Mode::RealAndFitNonRes )
           Gm = qsdepnr( q2, 2 );
         else {
-          auto sy = sy_sf_( xbj, 1.e-7 );
+          auto sy = (SuriYennie&)sy_sf_( xbj, 1.e-7 );
           Gm = sy.W1/sy.W2;
         }
       }

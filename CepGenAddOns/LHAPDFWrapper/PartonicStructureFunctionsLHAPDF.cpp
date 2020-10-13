@@ -29,7 +29,7 @@ namespace cepgen
         explicit Partonic( const char* set, unsigned short member = 0, const Mode& mode = Mode::full );
         static std::string description() { return "Partonic structure functions"; }
 
-        Partonic& operator()( double xbj, double q2 ) override;
+        Partonic& eval( double xbj, double q2 ) override;
         std::string describe() const override;
 
       private:
@@ -148,16 +148,14 @@ namespace cepgen
     }
 
     Partonic&
-    Partonic::operator()( double xbj, double q2 )
+    Partonic::eval( double xbj, double q2 )
     {
-      std::pair<double,double> nv = { xbj, q2 };
-      if ( nv == old_vals_ )
-        return *this;
-      old_vals_ = nv;
-
       F2 = 0.;
-      if ( num_flavours_ == 0 || num_flavours_ > 6 )
+      if ( num_flavours_ == 0 || num_flavours_ > 6 ) {
+        CG_WARNING( "Partonic" )
+          << "Invalid number of flavours (" << num_flavours_ << " selected.";
         return *this;
+      }
 
       if ( !initialised_ )
         initialise();

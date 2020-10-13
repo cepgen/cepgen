@@ -48,6 +48,24 @@ namespace cepgen
       return *this;
     }
 
+    Parameterisation&
+    Parameterisation::operator()( double xbj, double q2 )
+    {
+      std::pair<double,double> nv = { xbj, q2 };
+      if ( nv == old_vals_ )
+        return *this;
+      old_vals_ = nv;
+      return eval( xbj, q2 );
+    }
+
+    Parameterisation&
+    Parameterisation::eval( double, double )
+    {
+      CG_WARNING( "StructureFunctions" )
+        << "Evaluation method called on base object!";
+      return *this;
+    }
+
     double
     Parameterisation::tau( double xbj, double q2 ) const
     {

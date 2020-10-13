@@ -2,6 +2,7 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/Physics.h"
 #include "CepGen/Physics/Constants.h"
 
 #include <vector>
@@ -19,7 +20,7 @@ namespace cepgen
         explicit Schaefer( const ParametersList& params = ParametersList() );
         static std::string description() { return "LUXlike structure functions"; }
 
-        Schaefer& operator()( double xbj, double q2 ) override;
+        Schaefer& eval( double xbj, double q2 ) override;
         std::string describe() const override;
 
       private:
@@ -90,22 +91,21 @@ namespace cepgen
     }
 
     Schaefer&
-    Schaefer::operator()( double xbj, double q2 )
+    Schaefer::eval( double xbj, double q2 )
     {
       if ( !initialised_ )
         initialise();
 
-      std::pair<double,double> nv = { xbj, q2 };
-      if ( nv == old_vals_ )
-        return *this;
-      old_vals_ = nv;
+      const double w2 = utils::mX2( xbj, q2, mp2_ );
 
-      const double w2 = mp2_+q2*( 1.-xbj )/xbj;
-
-      strfun::Parameterisation sel_sf;
       if ( q2 < q2_cut_ ) {
-        if ( w2 < w2_lim_.at( 0 ) )
-          sel_sf = ( *resonances_model_ )( xbj, q2 );
+        if ( w2 < w2_lim_.at( 0 ) ) {
+          auto sf = ( *resonances_model_ )( xbj, q2 );
+          sf.computeFL( xbj, q2 );
+          F2 = sf.F2;
+          FL = sf.FL;
+          return *this;
+        }
         else if ( w2 < w2_lim_.at( 1 ) ) {
           auto sf_r = ( *resonances_model_ )( xbj, q2 );
           auto sf_c = ( *continuum_model_ )( xbj, q2 );
@@ -116,12 +116,22 @@ namespace cepgen
           FL = r*sf_c.FL + ( 1.-r )*sf_r.FL;
           return *this;
         }
-        else
-          sel_sf = ( *continuum_model_ )( xbj, q2 );
+        else {
+          auto sf = ( *continuum_model_ )( xbj, q2 );
+          sf.computeFL( xbj, q2 );
+          F2 = sf.F2;
+          FL = sf.FL;
+          return *this;
+        }
       }
       else {
-        if ( w2 < w2_lim_.at( 1 ) )
-          sel_sf = ( *continuum_model_ )( xbj, q2 );
+        if ( w2 < w2_lim_.at( 1 ) ) {
+          auto sf = ( *continuum_model_ )( xbj, q2 );
+          sf.computeFL( xbj, q2 );
+          F2 = sf.F2;
+          FL = sf.FL;
+          return *this;
+        }
         else {
           auto sf_p = ( *perturbative_model_ )( xbj, q2 );
           F2 = sf_p.F2;
@@ -132,12 +142,8 @@ namespace cepgen
           return *this;
         }
       }
-
-      F2 = sel_sf( xbj, q2 ).F2;
-      sel_sf.computeFL( xbj, q2 );
-      FL = sel_sf.FL;
-
-      return *this;
+      throw CG_FATAL( "LUXlike" )
+        << "Invalid Q2/xbj range! (" << q2 << ", " << xbj << ").";
     }
 
     double

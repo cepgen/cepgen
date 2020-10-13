@@ -380,8 +380,13 @@ namespace cepgen
       }
 
       jacobian_ = ds2 * dt1 * dt2 * 0.125 * 0.5/( sl1_*sqrt( -ap ) );
+      if ( jacobian_ == 0. ) {
+        CG_WARNING( "LPAIR:pickin" ) << "Null Jacobian.\n\t"
+          << "D(s2)=" << ds2 << ", D(t1)=" << dt1 << ", D(t2)=" << dt2 << ".";
+        return false;
+      }
 
-      CG_DEBUG_LOOP( "LPAIR" )
+      CG_DEBUG_LOOP( "LPAIR:pickin" )
         << "ds2=" << ds2 << ", dt1=" << dt1 << ", dt2=" << dt2 << "\n\t"
         << "Jacobian=" << std::scientific << jacobian_ << std::fixed;
 
@@ -444,9 +449,8 @@ namespace cepgen
     bool
     LPAIR::orient()
     {
-      if ( !pickin() || jacobian_ == 0. ) {
-        CG_DEBUG_LOOP( "LPAIR" )
-          << "Pickin failed! Jacobian = " << jacobian_;
+      if ( !pickin() ) {
+        CG_DEBUG_LOOP( "LPAIR:orient" ) << "Pickin failed.";
         return false;
       }
 
@@ -635,9 +639,8 @@ namespace cepgen
       CG_DEBUG_LOOP( "LPAIR" )
         << "Computed value for w4 = " << w4_ << " → mc4 = " << mc4_;
 
-      if ( !orient() || jacobian_ == 0. ) {
-        CG_WARNING( "LPAIR" )
-          << "Orient failed! Jacobian = " << jacobian_;
+      if ( !orient() ) {
+        CG_DEBUG_LOOP( "LPAIR" ) << "Orient failed.";
         return 0.;
       }
 

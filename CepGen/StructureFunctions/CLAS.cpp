@@ -1,6 +1,7 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
+#include "CepGen/Utils/Physics.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Constants.h"
 
@@ -54,7 +55,7 @@ namespace cepgen
         explicit CLAS( const ParametersList& params = ParametersList() );
         static std::string description() { return "CLAS parameterisation for nucleon data at Q2 > 0.5 GeV2 / xBj > 0.15"; }
 
-        CLAS& operator()( double xbj, double q2 ) override;
+        CLAS& eval( double xbj, double q2 ) override;
 
       private:
         /// \brief Method to evaluate the background/resonance terms of
@@ -187,24 +188,19 @@ namespace cepgen
     }
 
     CLAS&
-    CLAS::operator()( double xbj, double q2 )
+    CLAS::eval( double xbj, double q2 )
     {
-      std::pair<double,double> nv = { xbj, q2 };
-      if ( nv == old_vals_ )
-        return *this;
-      old_vals_ = nv;
-
       const double mp2 = params_.mp*params_.mp;
-      const double w2 = mp2 + q2*( 1.-xbj )/xbj;
+      const double w2 = utils::mX2( xbj, q2, mp2_ ), w = sqrt( w2 );
       const double w_min = params_.mp+params_.mpi0;
 
-      if ( sqrt( w2 ) < w_min ) {
+      if ( w < w_min ) {
         F2 = 0.;
         return *this;
       }
 
       F2 = f2slac( xbj, q2 );
-      std::pair<double,double> rb = resbkg( q2, sqrt( w2 ) );
+      std::pair<double,double> rb = resbkg( q2, w2 );
 
       F2 *= ( rb.first+rb.second );
       return *this;

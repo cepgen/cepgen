@@ -45,7 +45,7 @@ namespace mstw
       };
 
       /// Compute the structure functions at a given \f$Q^2/x_{\rm Bj}\f$
-      Grid& operator()( double xbj, double q2 ) override;
+      Grid& eval( double xbj, double q2 ) override;
       /// Retrieve the grid's header information
       header_t header() const { return header_; }
       std::string describe() const override;
@@ -118,7 +118,7 @@ namespace mstw
   }
 
   Grid&
-  Grid::operator()( double xbj, double q2 )
+  Grid::eval( double xbj, double q2 )
   {
     const std::array<double,2> val = cepgen::GridHandler<2,2>::eval( { xbj, q2 } );
     F2 = val[0];

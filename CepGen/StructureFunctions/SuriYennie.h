@@ -13,8 +13,6 @@ namespace cepgen
       public:
         /// Collection of parameterisation-dependent couplings
         struct Parameters {
-          static Parameters standard(); ///< Standard parameterisation extracted from experimental fits
-          static Parameters alternative(); ///< Alternative parameterisation extracted from experimental fits
           double C1, C2;
           double D1;
           double rho2;
@@ -25,7 +23,7 @@ namespace cepgen
         explicit SuriYennie( const ParametersList& params = ParametersList() );
         static std::string description() { return "Suri-Yennie FE/FM"; }
 
-        SuriYennie& operator()( double xbj, double q2 ) override;
+        SuriYennie& eval( double xbj, double q2 ) override;
 
         double W1; ///< Longitudinal form factor
         double W2;

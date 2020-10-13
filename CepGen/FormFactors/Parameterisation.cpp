@@ -76,7 +76,7 @@ namespace cepgen
                 << "Check your process definition!";
             case strfun::Type::SuriYennie: { //FIXME
               static strfun::SuriYennie sy;
-              sy = sy( xbj, q2 );
+              sy = (strfun::SuriYennie&)sy( xbj, q2 );
               FE = sy.F2 * xbj * mp_/q2;
               FM = sy.FM;
             } break;

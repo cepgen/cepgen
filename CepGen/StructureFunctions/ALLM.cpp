@@ -1,6 +1,7 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
+#include "CepGen/Utils/Physics.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
@@ -52,7 +53,7 @@ namespace cepgen
         explicit ALLM( const ParametersList& params = ParametersList() );
         static std::string description() { return "Abramowicz, Levin, Levy, and Maor parameterisations of F2/FL"; }
 
-        ALLM& operator()( double xbj, double q2 ) override;
+        ALLM& eval( double xbj, double q2 ) override;
         std::string describe() const override { return descr_; }
 
       private:
@@ -104,10 +105,10 @@ namespace cepgen
     }
 
     ALLM&
-    ALLM::operator()( double xbj, double q2 )
+    ALLM::eval( double xbj, double q2 )
     {
-      const double W2_eff = q2*( 1.-xbj )/xbj;
-      const double xp = ( q2+params_.mp2 )/( q2+W2_eff+params_.mp2 ), xr = ( q2+params_.mr2 )/( q2+W2_eff+params_.mr2 );
+      const double w2_eff = utils::mX2( xbj, q2, mp2_ )-mp2_;;
+      const double xp = ( q2+params_.mp2 )/( q2+w2_eff+params_.mp2 ), xr = ( q2+params_.mr2 )/( q2+w2_eff+params_.mr2 );
 
       const double xlog1 = log( ( q2+params_.q02 )/ params_.lambda2 ), xlog2 = log( params_.q02/params_.lambda2 );
       const double t = log( xlog1/xlog2 );

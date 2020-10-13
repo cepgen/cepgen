@@ -3,6 +3,7 @@
 
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Utils/Physics.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Constants.h"
 
@@ -35,7 +36,7 @@ namespace cepgen
         explicit FioreBrasse( const ParametersList& params = ParametersList() );
         static std::string description() { return "Fiore-Brasse F2 parameterisation of low-mass resonances"; }
 
-        FioreBrasse& operator()( double xbj, double q2 ) override;
+        FioreBrasse& eval( double xbj, double q2 ) override;
 
       private:
         Parameters params_;
@@ -79,16 +80,11 @@ namespace cepgen
     }
 
     FioreBrasse&
-    FioreBrasse::operator()( double xbj, double q2 )
+    FioreBrasse::eval( double xbj, double q2 )
     {
-      std::pair<double,double> nv = { xbj, q2 };
-      if ( nv == old_vals_ )
-        return *this;
-      old_vals_ = nv;
-
       const double akin = 1. + 4.*mp2_ * xbj*xbj/q2;
       const double prefactor = q2*( 1.-xbj ) / ( 4.*M_PI*constants::ALPHA_EM*akin );
-      const double s = q2*( 1.-xbj )/xbj + mp2_;
+      const double s = utils::mX2( xbj, q2, mp2_ );
 
       double ampli_res = 0., ampli_bg = 0., ampli_tot = 0.;
       for ( unsigned short i = 0; i < 3; ++i ) { //FIXME 4??

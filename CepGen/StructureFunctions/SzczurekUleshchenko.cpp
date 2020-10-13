@@ -21,7 +21,7 @@ namespace cepgen
     {
       public:
         SzczurekUleshchenko( const ParametersList& params = ParametersList() );
-        SzczurekUleshchenko& operator()( double xbj, double q2 ) override;
+        SzczurekUleshchenko& eval( double xbj, double q2 ) override;
         static std::string description() {
           return "Szcurek-Uleshchenko modelling of F2 based on GRV parton content";
         }
@@ -37,13 +37,8 @@ namespace cepgen
     {}
 
     SzczurekUleshchenko&
-    SzczurekUleshchenko::operator()( double xbj, double q2 )
+    SzczurekUleshchenko::eval( double xbj, double q2 )
     {
-      std::pair<double,double> nv = { xbj, q2 };
-      if ( nv == old_vals_ )
-        return *this;
-      old_vals_ = nv;
-
       float amu2 = q2+q2_shift_; // shift the overall scale
       float xuv, xdv, xus, xds, xss, xg;
       float xbj_arg = xbj;

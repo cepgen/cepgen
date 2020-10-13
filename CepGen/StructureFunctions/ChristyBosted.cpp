@@ -3,6 +3,7 @@
 
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Utils/Physics.h"
 
 #include "CepGen/Core/Exception.h"
 
@@ -75,7 +76,7 @@ namespace cepgen
         explicit ChristyBosted( const ParametersList& params = ParametersList() );
         static std::string description() { return "Christy-Bosted F2/FL parameterisation of low-mass resonances"; }
 
-        ChristyBosted& operator()( double xbj, double q2 ) override;
+        ChristyBosted& eval( double xbj, double q2 ) override;
 
         //--- already computed internally during F2 computation
         ChristyBosted& computeFL( double, double ) override { return *this; }
@@ -325,14 +326,14 @@ namespace cepgen
     }
 
     ChristyBosted&
-    ChristyBosted::operator()( double xbj, double q2 )
+    ChristyBosted::eval( double xbj, double q2 )
     {
       std::pair<double,double> nv = { xbj, q2 };
       if ( nv == old_vals_ )
         return *this;
       old_vals_ = nv;
 
-      const double w2 = mp2_ + q2*( 1.-xbj )/xbj;
+      const double w2 = utils::mX2( xbj, q2, mp2_ );
       const double w_min = mp_+PDG::get().mass( PDG::piZero );
 
       if ( sqrt( w2 ) < w_min ) {
@@ -352,7 +353,7 @@ namespace cepgen
       double q2_eff = q2, w2_eff = w2;
       if ( q2 > q20 ) {
         q2_eff = q20 + delq2/( 1.+delq2/qq );
-        w2_eff = mp2_ + q2_eff*( 1.-xbj )/xbj;
+        w2_eff = utils::mX2( xbj, q2_eff, mp2_ );
       }
       const double sigT = resmod507( 'T', w2_eff, q2_eff ), sigL = resmod507( 'L', w2_eff, q2_eff );
 

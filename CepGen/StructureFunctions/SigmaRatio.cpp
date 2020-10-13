@@ -2,6 +2,7 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Physics.h"
 
 #include <cmath>
 #include <cassert>
@@ -127,7 +128,7 @@ namespace cepgen
     {
       err = 0.;
       //--- 2 kinematic regions: resonances ( w < wth ), and DIS ( w > wth )
-      const double w2 = mp2_ + q2*( 1.-xbj )/xbj, w = sqrt( w2 );
+      const double w2 = utils::mX2( xbj, q2, mp2_ ), w = sqrt( w2 );
       const double xth = q2/( q2+wth_*wth_-mp2_ ); // xth = x( W = wth )
       const double zeta = log( 25.*q2 );
       const double xitmp = ( w < wth_ ) ? theta( xth, q2 ) : theta( xbj, q2 );

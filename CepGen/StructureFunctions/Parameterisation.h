@@ -65,13 +65,14 @@ namespace cepgen
         const sigrat::Parameterisation* sigmaRatio() const { return r_ratio_.get(); }
 
         /// Compute all relevant structure functions for a given \f$(x_{\rm Bj},Q^2)\f$ couple
-        virtual Parameterisation& operator()( double /*xbj*/, double /*q2*/ ) { return *this; }
+        Parameterisation& operator()( double /*xbj*/, double /*q2*/ );
         /// Compute the longitudinal structure function for a given point
         virtual Parameterisation& computeFL( double xbj, double q2 );
         /// Compute the longitudinal structure function for a given point
         virtual Parameterisation& computeFL( double xbj, double q2, double r );
         /// Compute the \f$F_1\f$ structure function for a given point
         double F1( double xbj, double q2 ) const;
+
         /// Compute the dimensionless variable \f$\tau=\frac{4x_{\rm Bj}^2m_p^2}{Q^2}\f$
         double tau( double xbj, double q2 ) const;
 
@@ -80,6 +81,7 @@ namespace cepgen
         double FL; ///< Last computed longitudinal structure function value
 
       protected:
+        virtual Parameterisation& eval( double xbj, double q2 );
         const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
         const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
         ParametersList params_; ///< List of parameters used for this builder definition
