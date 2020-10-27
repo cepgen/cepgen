@@ -18,12 +18,34 @@ namespace cepgen
     class ChristyBosted : public Parameterisation
     {
       public:
+        explicit ChristyBosted( const ParametersList& params = ParametersList() );
+        static std::string description() { return "Christy-Bosted F2/FL parameterisation of low-mass resonances"; }
+
+        ChristyBosted& eval( double xbj, double q2 ) override;
+
+        //--- already computed internally during F2 computation
+        ChristyBosted& computeFL( double, double ) override { return *this; }
+        ChristyBosted& computeFL( double, double, double ) override { return *this; }
+
+      private:
+        enum Polarisation { L, T };
+        static constexpr double prefac_ = 0.25 * M_1_PI*M_1_PI/constants::ALPHA_EM;
+
+        double resmod507( const Polarisation& pol, double w2, double q2 ) const;
+
         struct Parameters
         {
           static Parameters standard();
 
           struct Resonance
           {
+            explicit Resonance();
+
+            double kr() const;
+            double ecmr( double m2 ) const;
+            double kcmr() const { return ecmr( 0. ); }
+            double pcmr( double m2 ) const { return sqrt( std::max( 0., ecmr( m2 )*ecmr( m2 )-m2 ) ); }
+
             /// Branching ratios container for resonance decay into single, double pion or eta states
             struct BR
             {
@@ -36,14 +58,9 @@ namespace cepgen
               double doublepi;
               /// eta meson branching ratio
               double eta;
-            };
-            Resonance();
-            double kr() const;
-            double ecmr( double m2 ) const;
-            double kcmr() const { return ecmr( 0. ); }
-            double pcmr( double m2 ) const { return sqrt( std::max( 0., ecmr( m2 )*ecmr( m2 )-m2 ) ); }
+            } br;
+            /// proton mass, in GeV/c2
             double mp;
-            BR br;
             /// meson angular momentum
             double angular_momentum;
             /// damping parameter
@@ -60,35 +77,26 @@ namespace cepgen
           {
             struct Direction
             {
-              Direction() : sig0( 0. ) {}
-              Direction( double sig0, const std::vector<double>& params ) : sig0( sig0 ), fit_parameters( params ) {}
+              explicit Direction() : sig0( 0. ) {}
+              Direction( double sig0, const std::vector<double>& params ) :
+                sig0( sig0 ), fit_parameters( params ) {}
               double sig0;
               std::vector<double> fit_parameters;
             };
             std::array<Direction,2> transverse;
             std::array<Direction,1> longitudinal;
-          };
+          } continuum;
           double m0;
           std::vector<Resonance> resonances;
-          Continuum continuum;
-        };
-
-        explicit ChristyBosted( const ParametersList& params = ParametersList() );
-        static std::string description() { return "Christy-Bosted F2/FL parameterisation of low-mass resonances"; }
-
-        ChristyBosted& eval( double xbj, double q2 ) override;
-
-        //--- already computed internally during F2 computation
-        ChristyBosted& computeFL( double, double ) override { return *this; }
-        ChristyBosted& computeFL( double, double, double ) override { return *this; }
-
-      private:
-        double resmod507( char sf, double w2, double q2 ) const;
-        Parameters params_;
+        } params_;
+        const double mpi_, mpi2_;
+        const double meta_, meta2_;
     };
 
     ChristyBosted::ChristyBosted( const ParametersList& params ) :
-      Parameterisation( params )
+      Parameterisation( params ),
+      mpi_( PDG::get().mass( PDG::piZero ) ), mpi2_( mpi_*mpi_ ),
+      meta_( PDG::get().mass( PDG::eta ) ), meta2_( meta_*meta_ )
     {
       const auto& model = params.get<std::string>( "model", "standard" );
       if ( model == "standard" )
@@ -98,22 +106,21 @@ namespace cepgen
     }
 
     double
-    ChristyBosted::resmod507( char sf, double w2, double q2 ) const
+    ChristyBosted::resmod507( const Polarisation& pol, double w2, double q2 ) const
     {
-      const double mpi = PDG::get().mass( PDG::piZero ), mpi2 = mpi*mpi,
-                   meta = PDG::get().mass( PDG::eta ), meta2 = meta*meta;
       const double w = sqrt( w2 );
 
-      const double xb = q2/( q2+w2-mp2_ );
+      const double xb = utils::xBj( q2, mp2_, w2 );
       double m0 = 0., q20 = 0.;
 
-      if ( sf == 'T' ) // transverse
-        m0 = 0.125, q20 = 0.05;
-      else if ( sf == 'L' ) // longitudinal
-        m0 = params_.m0, q20 = 0.125;
-      else
-        throw CG_FATAL( "ChristyBosted" )
-          << "Invalid direction retrieved ('" << sf << "')! Aborting.";
+      switch ( pol ) {
+        case Polarisation::T: { // transverse
+          m0 = 0.125, q20 = 0.05;
+        } break;
+        case Polarisation::L: { // longitudinal
+          m0 = params_.m0, q20 = 0.125;
+        } break;
+      }
 
       const double norm_q2 = 1./0.330/0.330;
       const double t = log( log( ( q2+m0 )*norm_q2 )/log( m0*norm_q2 ) );
@@ -123,9 +130,9 @@ namespace cepgen
       const double k   = 0.5 * ( w2 - mp2_ )/mp_;
       const double kcm = 0.5 * ( w2 - mp2_ )/w;
 
-      const double epicm  = 0.5 * ( w2 +    mpi2 - mp2_ )/w, ppicm  = sqrt( std::max( 0.,  epicm* epicm -   mpi2 ) );
-      const double epi2cm = 0.5 * ( w2 + 4.*mpi2 - mp2_ )/w, ppi2cm = sqrt( std::max( 0., epi2cm*epi2cm - 4*mpi2 ) );
-      const double eetacm = 0.5 * ( w2 +   meta2 - mp2_ )/w, petacm = sqrt( std::max( 0., eetacm*eetacm -  meta2 ) );
+      const double epicm  = 0.5 * ( w2+   mpi2_-mp2_ )/w, ppicm  = sqrt( std::max( 0.,  epicm* epicm-  mpi2_ ) );
+      const double epi2cm = 0.5 * ( w2+4.*mpi2_-mp2_ )/w, ppi2cm = sqrt( std::max( 0., epi2cm*epi2cm-4*mpi2_ ) );
+      const double eetacm = 0.5 * ( w2+  meta2_-mp2_ )/w, petacm = sqrt( std::max( 0., eetacm*eetacm- meta2_ ) );
 
       std::array<double,7> width, height, pgam;
       for ( unsigned short i = 0; i < 7; ++i ) {
@@ -135,16 +142,18 @@ namespace cepgen
         //--- calculate partial widths
         //----- 1-pion decay mode
         const double x02 = res.x0*res.x0;
-        const double partial_width_singlepi = pow( ppicm /res.pcmr(    mpi2 ), 2.*res.angular_momentum+1. )
-                                            * pow( ( res.pcmr(    mpi2 )*res.pcmr(    mpi2 )+x02 )/( ppicm *ppicm +x02 ), res.angular_momentum );
+        const double partial_width_singlepi =
+          pow( ppicm /res.pcmr(    mpi2_ ), 2.*res.angular_momentum+1. )
+        * pow( ( res.pcmr(    mpi2_ )*res.pcmr(    mpi2_ )+x02 )/( ppicm *ppicm +x02 ), res.angular_momentum );
         //----- 2-pion decay mode
-        const double partial_width_doublepi = pow( ppi2cm/res.pcmr( 4.*mpi2 ), 2.*( res.angular_momentum+2. ) )
-                                            * pow( ( res.pcmr( 4.*mpi2 )*res.pcmr( 4.*mpi2 )+x02 )/( ppi2cm*ppi2cm+x02 ), res.angular_momentum+2 )
-                                            * w / res.mass;
+        const double partial_width_doublepi =
+          pow( ppi2cm/res.pcmr( 4.*mpi2_ ), 2.*( res.angular_momentum+2. ) )
+        * pow( ( res.pcmr( 4.*mpi2_ )*res.pcmr( 4.*mpi2_ )+x02 )/( ppi2cm*ppi2cm+x02 ), res.angular_momentum+2 )
+        * w / res.mass;
         //----- eta decay mode (only for S11's)
         const double partial_width_eta = ( res.br.eta == 0. ) ? 0. :
-                                              pow( petacm/res.pcmr(   meta2 ), 2.*res.angular_momentum+1. )
-                                            * pow( ( res.pcmr(   meta2 )*res.pcmr(   meta2 )+x02 )/( petacm*petacm+x02 ), res.angular_momentum );
+          pow( petacm/res.pcmr(   meta2_ ), 2.*res.angular_momentum+1. )
+        * pow( ( res.pcmr(   meta2_ )*res.pcmr(   meta2_ )+x02 )/( petacm*petacm+x02 ), res.angular_momentum );
 
         // virtual photon width
         pgam[i] = res.width * pow( kcm/res.kcmr(), 2 ) * ( res.kcmr()*res.kcmr()+x02 )/( kcm*kcm+x02 );
@@ -155,9 +164,15 @@ namespace cepgen
 
         //--- resonance Q^2 dependence calculations
 
-        if      ( sf == 'T' ) height[i] = res.A0_T*( 1.+res.fit_parameters[0]*q2/( 1.+res.fit_parameters[1]*q2 ) )/pow( 1.+q2/0.91, res.fit_parameters[2] );
-        else if ( sf == 'L' ) height[i] = res.A0_L/( 1.+res.fit_parameters[3]*q2 )*q2*exp( -q2*res.fit_parameters[4] );
-        height[i] = height[i]*height[i];
+        switch ( pol ) {
+          case Polarisation::T:
+            height[i] = res.A0_T*( 1.+res.fit_parameters[0]*q2/( 1.+res.fit_parameters[1]*q2 ) )/pow( 1.+q2/0.91, res.fit_parameters[2] );
+            break;
+          case Polarisation::L:
+            height[i] = res.A0_L/( 1.+res.fit_parameters[3]*q2 )*q2*exp( -q2*res.fit_parameters[4] );
+            break;
+        }
+        height[i] *= height[i];
       }
 
       //--- calculate Breit-Wigners for all resonances
@@ -172,32 +187,34 @@ namespace cepgen
       sig_res *= w;
 
       //--- non-resonant background calculation
-      const double xpr = 1./( 1.+( w2-pow( mp_+mpi, 2 ) )/( q2+q20 ) );
+      const double xpr = 1./( 1.+( w2-mx_min_*mx_min_ )/( q2+q20 ) );
       if ( xpr > 1. )
         return 0.;
 
       double sig_nr = 0.;
-      if ( sf == 'T' ) { // transverse
-        const double wdif = w-( mp_+mpi );
-        if ( wdif >= 0. ) {
-          for ( unsigned short i = 0; i < 2; ++i ) {
-            const double expo = params_.continuum.transverse[i].fit_parameters[1]
-                              + params_.continuum.transverse[i].fit_parameters[2]*q2
-                              + params_.continuum.transverse[i].fit_parameters[3]*q2*q2;
-            sig_nr += params_.continuum.transverse[i].sig0 / pow( q2+params_.continuum.transverse[i].fit_parameters[0], expo ) * pow( wdif, i+1.5 );
+      switch ( pol ) {
+        case Polarisation::T: { // transverse
+          const double wdif = w-mx_min_;
+          if ( wdif >= 0. ) {
+            for ( unsigned short i = 0; i < 2; ++i ) {
+              const double expo = params_.continuum.transverse[i].fit_parameters[1]
+                                + params_.continuum.transverse[i].fit_parameters[2]*q2
+                                + params_.continuum.transverse[i].fit_parameters[3]*q2*q2;
+              sig_nr += params_.continuum.transverse[i].sig0 / pow( q2+params_.continuum.transverse[i].fit_parameters[0], expo ) * pow( wdif, i+1.5 );
+            }
           }
-        }
 
-        sig_nr *= xpr;
-      }
-      else if ( sf == 'L' ) { // longitudinal
-        for ( unsigned short i = 0; i < 1; ++i ) {
-          const double expo = params_.continuum.longitudinal[i].fit_parameters[0]
-                            + params_.continuum.longitudinal[i].fit_parameters[1];
-          sig_nr += params_.continuum.longitudinal[i].sig0
-                    * pow( 1.-xpr, expo )/( 1.-xb )
-                    * pow( q2/( q2+q20 ), params_.continuum.longitudinal[i].fit_parameters[2] )/( q2+q20 )
-                    * pow( xpr, params_.continuum.longitudinal[i].fit_parameters[3]+params_.continuum.longitudinal[i].fit_parameters[4]*t );
+          sig_nr *= xpr;
+        } break;
+        case Polarisation::L: { // longitudinal
+          for ( unsigned short i = 0; i < 1; ++i ) {
+            const double expo = params_.continuum.longitudinal[i].fit_parameters[0]
+                              + params_.continuum.longitudinal[i].fit_parameters[1];
+            sig_nr += params_.continuum.longitudinal[i].sig0
+                      * pow( 1.-xpr, expo )/( 1.-xb )
+                      * pow( q2/( q2+q20 ), params_.continuum.longitudinal[i].fit_parameters[2] )/( q2+q20 )
+                      * pow( xpr, params_.continuum.longitudinal[i].fit_parameters[3]+params_.continuum.longitudinal[i].fit_parameters[4]*t );
+          }
         }
       }
       return sig_res + sig_nr;
@@ -328,15 +345,9 @@ namespace cepgen
     ChristyBosted&
     ChristyBosted::eval( double xbj, double q2 )
     {
-      std::pair<double,double> nv = { xbj, q2 };
-      if ( nv == old_vals_ )
-        return *this;
-      old_vals_ = nv;
-
       const double w2 = utils::mX2( xbj, q2, mp2_ );
-      const double w_min = mp_+PDG::get().mass( PDG::piZero );
 
-      if ( sqrt( w2 ) < w_min ) {
+      if ( sqrt( w2 ) < mx_min_ ) {
         F2 = 0.;
         return *this;
       }
@@ -347,7 +358,6 @@ namespace cepgen
       const double q21 = 30., q20 = 8.;
       const double delq2 = q2 - q20;
       const double qq = q21 - q20;
-      const double prefac = 0.25 * M_1_PI*M_1_PI/constants::ALPHA_EM * ( 1.-xbj );
       //------------------------------
 
       double q2_eff = q2, w2_eff = w2;
@@ -355,9 +365,10 @@ namespace cepgen
         q2_eff = q20 + delq2/( 1.+delq2/qq );
         w2_eff = utils::mX2( xbj, q2_eff, mp2_ );
       }
-      const double sigT = resmod507( 'T', w2_eff, q2_eff ), sigL = resmod507( 'L', w2_eff, q2_eff );
+      const double sigT = resmod507( Polarisation::T, w2_eff, q2_eff );
+      const double sigL = resmod507( Polarisation::L, w2_eff, q2_eff );
 
-      F2 = prefac * q2_eff / ( 1+tau( xbj, q2_eff ) ) * ( sigT+sigL ) / constants::GEVM2_TO_PB * 1.e6;
+      F2 = prefac_ * ( 1.-xbj ) * q2_eff / ( 1+tau( xbj, q2_eff ) ) * ( sigT+sigL ) / constants::GEVM2_TO_PB * 1.e6;
       if ( q2 > q20 )
         F2 *= q21/( q21 + delq2 );
 

@@ -82,8 +82,10 @@ namespace cepgen
 
       protected:
         virtual Parameterisation& eval( double xbj, double q2 );
-        const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
-        const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
+        const double mp_; ///< Proton mass, in GeV/c^2
+        const double mp2_; ///< Squared proton mass, in GeV^2/c^4
+        const double mx_min_; ///< Minimum diffractive mass, in GeV/c^2
+
         ParametersList params_; ///< List of parameters used for this builder definition
         std::pair<double,double> old_vals_; ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed
 

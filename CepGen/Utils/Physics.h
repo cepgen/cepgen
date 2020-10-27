@@ -7,6 +7,8 @@ namespace cepgen
   {
     /// Compute the diffractive mass from virtuality/Bjorken x
     double mX2( double xbj, double q2, double mp2 );
+    /// Compute Bjorken x from virtuality/diffractive mass
+    double xBj( double q2, double mp2, double mx2 );
   }
 }
 

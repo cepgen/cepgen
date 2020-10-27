@@ -9,7 +9,7 @@ namespace cepgen
 {
   template<size_t D,size_t N>
   GridHandler<D,N>::GridHandler( const GridType& grid_type ) :
-    grid_type_( grid_type ), accel_{}
+    grid_type_( grid_type ), accel_{}, init_( false )
   {
     for ( size_t i = 0; i < D; ++i )
       accel_.emplace_back( gsl_interp_accel_alloc(), gsl_interp_accel_free );
@@ -19,6 +19,10 @@ namespace cepgen
   typename GridHandler<D,N>::values_t
   GridHandler<D,N>::eval( coord_t in_coords ) const
   {
+    if ( !init_ )
+      throw CG_FATAL( "GridHandler" )
+        << "Grid extrapolator called but not initialised!";
+
     values_t out;
     coord_t coord = in_coords;
     switch ( grid_type_ ) {
@@ -47,7 +51,7 @@ namespace cepgen
         }
       } break;
       case 2: {
-#ifdef GOOD_GSL
+#ifdef GSL_VERSION_ABOVE_2_1
         const double x = coord.at( 0 ), y = coord.at( 1 );
         for ( size_t i = 0; i < N; ++i ) {
           int res = gsl_spline2d_eval_e( splines_2d_.at( i ).get(), x, y, accel_.at( 0 ).get(), accel_.at( 1 ).get(), &out[i] );
@@ -126,7 +130,11 @@ namespace cepgen
             c *= c; break;
           default: break;
         }
+    if ( values_raw_.count( mod_coord ) != 0 )
+      CG_WARNING( "GridHandler" )
+        << "Duplicate coordinate detected for x=" << coord << ".";
     values_raw_[mod_coord] = value;
+    init_ = false;
   }
 
   template<size_t D,size_t N> void
@@ -166,7 +174,7 @@ namespace cepgen
       case 1: { //--- x |-> (f1,...)
         const gsl_interp_type* type = gsl_interp_cspline;
         //const gsl_interp_type* type = gsl_interp_steffen;
-#ifdef GOOD_GSL
+#ifdef GSL_VERSION_ABOVE_2_1
         const unsigned short min_size = gsl_interp_type_min_size( type );
 #else
         const unsigned short min_size = type->min_size;
@@ -180,18 +188,18 @@ namespace cepgen
           splines_1d_.emplace_back( gsl_spline_alloc( type, values_raw_.size() ), gsl_spline_free );
         }
         std::vector<double> x_vec;
-        unsigned short i = 0;
+        size_t i = 0;
         for ( const auto& vals : values_raw_ ) {
           x_vec.emplace_back( vals.first.at( 0 ) );
           unsigned short j = 0;
           for ( const auto& val : vals.second )
             values_[j++].get()[i++] = val;
         }
-        for ( unsigned short i = 0; i < splines_1d_.size(); ++i )
+        for ( size_t i = 0; i < N; ++i )
           gsl_spline_init( splines_1d_.at( i ).get(), &x_vec[0], values_[i].get(), values_raw_.size() );
       } break;
       case 2: { //--- (x,y) |-> (f1,...)
-#ifdef GOOD_GSL
+#ifdef GSL_VERSION_ABOVE_2_1
         const gsl_interp2d_type* type = gsl_interp2d_bilinear;
         splines_2d_.clear();
         for ( size_t i = 0; i < N; ++i ) {
@@ -221,6 +229,11 @@ namespace cepgen
 #endif
       } break;
     }
+    init_ = true;
+    CG_DEBUG( "GridHandler" )
+      << "Grid evaluator initialised with boundaries: " << boundaries() << "\n"
+      << "Values handled:\n"
+      << values_raw_;
   }
 
   template<size_t D,size_t N> std::array<std::pair<double,double>,D>

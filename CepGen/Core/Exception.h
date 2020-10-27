@@ -74,6 +74,16 @@ namespace cepgen
             exc << sep << var, sep = ", ";
         return exc << "}";
       }
+      /// Generic templated vector-variables feeder operator
+      template<typename T,std::size_t N>
+      inline friend const LoggedException& operator<<( const LoggedException& exc, const std::array<T,N>& vec_var ) {
+        exc << "{";
+        std::string sep;
+        if ( !vec_var.empty() )
+          for ( const auto& var : vec_var )
+            exc << sep << var, sep = ", ";
+        return exc << "}";
+      }
       /// Generic templated mapping-variables feeder operator
       template<typename T,typename U>
       inline friend const LoggedException& operator<<( const LoggedException& exc, const std::map<T,U>& map_var ) {

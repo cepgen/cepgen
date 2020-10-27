@@ -7,7 +7,7 @@
 #if defined( GSL_MAJOR_VERSION ) && ( GSL_MAJOR_VERSION > 2 || ( GSL_MAJOR_VERSION == 2 && GSL_MINOR_VERSION >= 1 ) )
 #  include <gsl/gsl_interp2d.h>
 #  include <gsl/gsl_spline2d.h>
-#  define GOOD_GSL 1
+#  define GSL_VERSION_ABOVE_2_1 1
 #endif
 
 #include <memory>
@@ -56,7 +56,7 @@ namespace cepgen
       std::vector<std::unique_ptr<gsl_interp_accel,void(*)( gsl_interp_accel* )> > accel_;
       /// Collection of splines for linear interpolations
       std::vector<std::unique_ptr<gsl_spline,void(*)( gsl_spline* )> > splines_1d_;
-#ifdef GOOD_GSL
+#ifdef GSL_VERSION_ABOVE_2_1
       /// Collection of splines for bilinear interpolations
       std::vector<std::unique_ptr<gsl_spline2d,void(*)( gsl_spline2d* )> > splines_2d_;
 #endif
@@ -75,6 +75,8 @@ namespace cepgen
         gridpoint_t operator*( double c ) const;
         gridpoint_t operator+( const gridpoint_t& rhs ) const;
       };
+      /// Has the extrapolator been initialised?
+      bool init_;
   };
   template class GridHandler<1,1>;
   template class GridHandler<1,2>;

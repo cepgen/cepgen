@@ -54,6 +54,9 @@ namespace mstw
       Grid& computeFL( double, double ) override { return *this; }
       Grid& computeFL( double, double, double ) override { return *this; }
 
+      /// Get the associated grid object
+      const cepgen::GridHandler<2,2>& grid() const { return *this; }
+
       /// Default location for the MSTW grid values
       static constexpr const char* DEFAULT_MSTW_GRID_PATH = "mstw_sf_scan_nnlo.dat";
 

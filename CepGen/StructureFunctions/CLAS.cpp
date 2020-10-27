@@ -39,8 +39,6 @@ namespace cepgen
           };
 
           enum { neutron = 0, proton = 1, deuteron = 2 } mode; ///< Nucleon type
-          double mp; ///< Proton mass
-          double mpi0; ///< Neutral pion mass
           // SLAC fit parameters
           std::array<double,7> c_slac;
           // CLAS parameterisation
@@ -70,6 +68,7 @@ namespace cepgen
         double f2slac( double xbj, double q2 ) const;
         Parameters params_;
         static constexpr double COEFF = 6.08974;
+        double mpi0_; ///< Neutral pion mass
     };
 
     CLAS::Parameters
@@ -77,8 +76,6 @@ namespace cepgen
     {
       Parameters params;
       params.mode = Parameters::proton;
-      params.mp = PDG::get().mass( PDG::proton );
-      params.mpi0 = PDG::get().mass( PDG::piZero );
       // SLAC fit parameters
       params.c_slac = { { 0.25615, 2.1785, 0.89784, -6.7162, 3.7557, 1.6421, 0.37636 } };
       // CLAS parameterisation
@@ -174,7 +171,7 @@ namespace cepgen
     }
 
     CLAS::CLAS( const ParametersList& params ) :
-      Parameterisation( params )
+      Parameterisation( params ), mpi0_( PDG::get().mass( PDG::piZero ) )
     {
       const auto& model = params.get<std::string>( "model", "proton" );
       if ( model == "proton" )
@@ -190,17 +187,15 @@ namespace cepgen
     CLAS&
     CLAS::eval( double xbj, double q2 )
     {
-      const double mp2 = params_.mp*params_.mp;
       const double w2 = utils::mX2( xbj, q2, mp2_ ), w = sqrt( w2 );
-      const double w_min = params_.mp+params_.mpi0;
 
-      if ( w < w_min ) {
+      if ( w < mx_min_ ) {
         F2 = 0.;
         return *this;
       }
 
       F2 = f2slac( xbj, q2 );
-      std::pair<double,double> rb = resbkg( q2, w2 );
+      std::pair<double,double> rb = resbkg( q2, w );
 
       F2 *= ( rb.first+rb.second );
       return *this;
@@ -220,7 +215,7 @@ namespace cepgen
         f2 += params_.c_slac[i]*pow( 1.-xs, i );
 
       if ( params_.mode == Parameters::deuteron && xbj > 0. )
-        f2 /= ( 1.-exp( -7.70*( 1./xbj-1.+params_.mp*params_.mp/q2 ) ) );
+        f2 /= ( 1.-exp( -7.70*( 1./xbj-1.+mp2_/q2 ) ) );
 
       return f2 * pow( 1.-xs, 3 ) / xsxb;
     }
@@ -228,28 +223,28 @@ namespace cepgen
     std::pair<double,double>
     CLAS::resbkg( double q2, double w ) const
     {
-      const double mp2 = params_.mp*params_.mp, mpi02 = params_.mpi0*params_.mpi0;
+      const double mpi02 = mpi0_*mpi0_;
 
-      double wth = params_.mp+params_.mpi0;
-      if ( w < wth )
+      if ( w < mx_min_ )
         return std::make_pair( 0., 0. );
       if ( w > 4. )
         return std::make_pair( 1., 0. );
 
       const double w2 = w*w;
 
-      double qs = pow( w2+mp2-mpi02, 2 )-4.*mp2*w2;
-      if ( qs <= 0. ) return std::make_pair( 1., 0. );
+      double qs = pow( w2+mp2_-mpi02, 2 )-4.*mp2_*w2;
+      if ( qs <= 0. )
+        return std::make_pair( 1., 0. );
       qs = 0.5 * sqrt( qs )/w;
 
-      const double omega = 0.5*( w2+q2-mp2 )/params_.mp;
-      const double xn = 0.5*q2/( params_.mp*omega );
+      const double omega = 0.5*( w2+q2-mp2_ )/mp_;
+      const double xn = 0.5*q2/( mp_*omega );
 
       const double bkg2 = ( w > params_.b[3] )
         ? exp( -params_.b[2]*( w2-params_.b[3]*params_.b[3] ) )
         : 1.;
 
-      double f2bkg = (    params_.b[0] )*( 1.-exp( -params_.b[1]*( w-wth ) ) )
+      double f2bkg = (    params_.b[0] )*( 1.-exp( -params_.b[1]*( w-mx_min_ ) ) )
                    + ( 1.-params_.b[0] )*( 1.-bkg2 );
       f2bkg *= ( 1.+( 1.-f2bkg )*( params_.x[0]+params_.x[1]*pow( xn-params_.x[2], 2 ) ) );
 
@@ -270,7 +265,7 @@ namespace cepgen
         const double dmi = ( i == 2 )
           ? res.mass * ( 1.+params_.mu/( 1.+params_.mup*q2 ) )
           : res.mass;
-        double qs0 = pow( dmi*dmi+mp2-mpi02, 2 )-4.*mp2*dmi*dmi;
+        double qs0 = pow( dmi*dmi+mp2_-mpi02, 2 )-4.*mp2_*dmi*dmi;
         if ( qs0 <= 0. )
           break;
         qs0 = 0.5*sqrt( qs0 )/dmi;
@@ -279,7 +274,7 @@ namespace cepgen
         f2resn += ai*dg/( ( w-dmi )*( w-dmi )+dg*dg );
         ++i;
       }
-      f2resn *= 0.5*( 1.-params_.b[0] )*bkg2/params_.mp*M_1_PI;
+      f2resn *= 0.5*( 1.-params_.b[0] )*bkg2/mp_*M_1_PI;
 
       return std::make_pair( f2bkg, f2resn );
     }
