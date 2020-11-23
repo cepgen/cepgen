@@ -161,14 +161,11 @@ namespace cepgen
         return;
       for ( const auto& h_var : hists_ ) {
         gsl_histogram_scale( h_var.second.get(), xsec_/( num_evts_+1 ) );
-        CG_INFO("")<<"good1"<<h_var.first.name;
         const auto& h_out = textHistogram( h_var );
-        CG_INFO("")<<"good2"<<h_var.first.name;
         if ( show_hists_ )
           CG_INFO( "TextHandler" ) << h_out;
         if ( save_hists_ )
           hist_file_ << "\n" << h_out << "\n";
-        CG_INFO("")<<"good3"<<h_var.first.name;
       }
       for ( const auto& h_var : hists2d_ ) {
         //gsl_histogram_scale( hist, xsec_/( num_evts_+1 ) );
@@ -224,8 +221,8 @@ namespace cepgen
       const size_t nbins = gsl_histogram_bins( hist );
       const double max_bin = gsl_histogram_max_val( hist );
       const double min_bin = gsl_histogram_min_val( hist );
-      const double min_range_log = log( std::max( min_bin, 1.e-6 ) );
-      const double max_range_log = log( max_bin );
+      const double min_range_log = log( std::max( min_bin, 1.e-10 ) );
+      const double max_range_log = log( std::min( max_bin, 1.e10 ) );
       const std::string sep( 17, ' ' );
       const auto& var = hist_info.first.name.at( 0 );
       os
@@ -241,15 +238,18 @@ namespace cepgen
         double min, max;
         gsl_histogram_get_range( hist, i, &min, &max );
         const double value = gsl_histogram_get( hist, i ), unc = sqrt( value );
-        size_t val;
+        size_t val = 0ull;
         {
           double val_dbl = PLOT_WIDTH;
           if ( hist_info.first.log )
-            val_dbl *= ( value != 0. )
-              ? ( log( value )-min_range_log )/( max_range_log-min_range_log ) : 0.;
-          else
-            val_dbl *= value/max_bin;
-          val = val_dbl;
+            val_dbl *= ( value > 0. && max_bin > 0. )
+              ? std::max( ( log( value )-min_range_log )/( max_range_log-min_range_log ), 0. )
+              : 0.;
+          else if ( max_bin > 0. )
+            val_dbl *= ( value > 0. && max_bin > 0. )
+              ? value/max_bin
+              : 0.;
+          val = std::ceil( val_dbl );
         }
         os
           << "\n" << utils::format( "[%7.2f,%7.2f):", min, max )
