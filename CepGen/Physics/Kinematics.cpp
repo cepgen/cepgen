@@ -77,11 +77,13 @@ namespace cepgen
     const double sqrt_s = params.get<double>( "sqrtS", params.get<double>( "cmEnergy", -1. ) );
     if ( sqrt_s > 0. )
       setSqrtS( sqrt_s );
-    CG_WARNING("")<<params;
     //--- form factors
-    if ( params.has<std::string>( "formFactors" ) || !form_factors_ )
-      form_factors_ = formfac::FormFactorsFactory::get().build(
-        params.get<std::string>( "formFactors", "StandardDipole" ) );
+    if ( params.has<std::string>( "formFactors" ) || !form_factors_ ) {
+      std::string ff_mod = params.get<std::string>( "formFactors" );
+      if ( ff_mod.empty() )
+        ff_mod = "StandardDipole";
+      form_factors_ = formfac::FormFactorsFactory::get().build( ff_mod );
+    }
     if ( params.get<int>( "mode", (int)mode::Kinematics::invalid ) != (int)mode::Kinematics::invalid )
       setMode( (mode::Kinematics)params.get<int>( "mode" ) );
     //--- structure functions
@@ -129,7 +131,7 @@ namespace cepgen
         cut.limits = buf.validate();
     }
     if ( params.has<Limits>( "phiptdiff" ) ) {
-      CG_WARNING( "PythonHandler" )
+      CG_WARNING( "Kinematics" )
         << "\"phiptdiff\" parameter is deprecated! "
         << "Please use \"phidiff\" instead.";
       params.fill<Limits>( "phiptdiff", cuts.central.phi_diff() ); //legacy

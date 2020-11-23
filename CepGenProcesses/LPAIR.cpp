@@ -68,12 +68,11 @@ namespace cepgen
     {
       masses_.Ml2 = (*event_)[Particle::CentralSystem][0].mass2();
 
-      w_limits_ = kin_.cuts.central.mass_single();
-      if ( !w_limits_.hasMax() )
-        w_limits_.max() = s_;
-      // The minimal energy for the central system is its outgoing leptons' mass energy (or wmin_ if specified)
-      if ( !w_limits_.hasMin() )
-        w_limits_.min() = 4.*masses_.Ml2;
+      //--- first define the squared mass range for the diphoton/dilepton system
+      const auto& mll_limits = kin_.cuts.central.mass_sum();
+      w_limits_ = Limits(
+        mll_limits.hasMin() ? std::pow( mll_limits.min(), 2 ) : 4.*masses_.Ml2,
+        mll_limits.hasMax() ? std::pow( mll_limits.max(), 2 ) : s_ );
 
       CG_DEBUG_LOOP( "LPAIR:setKinematics" )
         << "w limits = " << w_limits_ << "\n\t"
@@ -440,6 +439,11 @@ namespace cepgen
       //const double acc4 = ( s1_-s1pm )/( s1_+s1pm );
       dd5_ = dd1_+dd3_+( ( p12_*( t1_-masses_.w31 )*0.5-mA2_*p2k1_ )*( p2k1_*( t2_-masses_.w52 )-mB2_*r3 )
                         -delta_*( 2.*p12_*p2k1_-mB2_*( t1_-masses_.w31 ) ) ) / p2k1_;
+      if ( dd5_ < 0. ) {
+        CG_WARNING( "LPAIR" )
+          <<  "dd5 = " << dd5_ << " < 0";
+        return false;
+      }
 
       return true;
     }
@@ -471,11 +475,9 @@ namespace cepgen
       de3_ = re*( s2_-mX2_+masses_.w12 );
       de5_ = re*( s1_-mY2_-masses_.w12 );
 
-      // Final state energies
-      const double ep3 = ep1_-de3_,
-                   ep5 = ep2_-de5_;
-      ec4_ = de3_+de5_;
+      //----- central two-photon/lepton system
 
+      ec4_ = de3_+de5_;
       if ( ec4_ < mc4_ ) {
         CG_WARNING( "LPAIR" )
           << "ec4_ = " << ec4_ << " < mc4_ = " << mc4_ << "\n\t"
@@ -485,7 +487,6 @@ namespace cepgen
 
       // What if the protons' momenta are not along the z-axis?
       pc4_ = sqrt( ec4_*ec4_-mc4_*mc4_ );
-
       if ( pc4_ == 0. ) {
         CG_WARNING( "LPAIR" ) << "pzc4 is null and should not be...";
         return false;
@@ -494,46 +495,8 @@ namespace cepgen
       CG_DEBUG_LOOP( "LPAIR" )
         << "Central system's energy: E4 = " << ec4_ << "\n\t"
         << "               momentum: p4 = " << pc4_ << "\n\t"
-        << "         invariant mass: m4 = " << mc4_ << "\n\t"
-        << "Outgoing particles' energy: E3 = " << ep3 << "\n\t"
-        << "                            E5 = " << ep5;
+        << "         invariant mass: m4 = " << mc4_ << ".";
 
-      const double pp3 = sqrt( ep3*ep3-mX2_ ), pt3 = sqrt( dd1_/s_ )/p_cm_;
-      const double pp5 = sqrt( ep5*ep5-mY2_ ), pt5 = sqrt( dd3_/s_ )/p_cm_;
-
-      const double sin_theta3 = pt3/pp3, sin_theta5 = pt5/pp5;
-
-      CG_DEBUG_LOOP( "LPAIR" )
-        << std::scientific
-        << "sin(theta3) = " << sin_theta3 << "\n\t"
-        << "sin(theta5) = " << sin_theta5
-        << std::fixed;
-
-      if ( sin_theta3 > 1. ) {
-        CG_WARNING( "LPAIR" )
-          << "sin(theta3) = " << sin_theta3 << " > 1";
-        return false;
-      }
-      if ( sin_theta5 > 1. ) {
-        CG_WARNING( "LPAIR" )
-          << "sin(theta5) = " << sin_theta5 << " > 1";
-        return false;
-      }
-
-      const double ct3 = ( ep1_*ep3 < p13_ ? -1. : +1. )*sqrt( 1.-sin_theta3*sin_theta3 );
-      const double ct5 = ( ep2_*ep5 > p25_ ? -1. : +1. )*sqrt( 1.-sin_theta5*sin_theta5 );
-
-      CG_DEBUG_LOOP( "LPAIR" )
-        << "ct3 = " << ct3 << "\n\t"
-        << "ct5 = " << ct5;
-
-      if ( dd5_ < 0. ) {
-        CG_WARNING( "LPAIR" )
-          <<  "dd5 = " << dd5_ << " < 0";
-        return false;
-      }
-
-      // Centre of mass system kinematics (theta4 and phi4)
       pt4_ = sqrt( dd5_/s_ )/p_cm_;
       sin_theta4_ = pt4_/pc4_;
 
@@ -556,47 +519,62 @@ namespace cepgen
         al4_ = sin_theta4_*sin_theta4_/be4_;
 
       CG_DEBUG_LOOP( "LPAIR" )
-        << "ct4 = " << cos_theta4_ << "\n\t"
+        << "cos(theta4) = " << cos_theta4_ << "\t" << "sin(theta4) = " << sin_theta4_ << "\n\t"
         << "al4 = " << al4_ << ", be4 = " << be4_;
 
-      const double rr  = sqrt( -gram_/s_ )/( p_cm_*pt4_ );
-      const double sin_phi3 =  rr / pt3, sin_phi5 = -rr / pt5;
+      const double rr = sqrt( -gram_/s_ )/( p_cm_*pt4_ );
 
-      if ( fabs( sin_phi3 ) > 1. ) {
-        CG_WARNING( "LPAIR" )
-          << "sin(phi_3) = " << sin_phi3 << " while it must be in (" << Limits( -1., 1. ) << ")";
+      //----- outgoing beam states
+
+      //--- beam 1 -> 3
+      const double ep3 = ep1_-de3_, pp3 = sqrt( ep3*ep3-mX2_ );
+      const double pt3 = sqrt( dd1_/s_ )/p_cm_;
+
+      if ( pt3 > pp3 ) {
+        CG_WARNING( "LPAIR" ) << "Invalid momentum for outgoing beam 1.";
         return false;
       }
-      if ( fabs( sin_phi5 ) > 1. ) {
-        CG_WARNING( "LPAIR" )
-          << "sin(phi_5) = " << sin_phi5 << " while it must be in (" << Limits( -1., 1. ) << ")";
+      if ( fabs( rr ) > pt3 ) {
+        CG_WARNING( "LPAIR" ) << "Invalid momentum balance for outgoing beam 1.";
         return false;
       }
 
-      const double cos_phi3 = -sqrt( 1.-sin_phi3*sin_phi3 ), cos_phi5 = -sqrt( 1.-sin_phi5*sin_phi5 );
+      p3_lab_ = Momentum::fromPThetaPhi( pp3, -asin( pt3/pp3 ), asin( -rr/pt3 ), ep3 );
 
-      p3_lab_ = Momentum( pp3*sin_theta3*cos_phi3, pp3*sin_theta3*sin_phi3, pp3*ct3, ep3 );
-      p5_lab_ = Momentum( pp5*sin_theta5*cos_phi5, pp5*sin_theta5*sin_phi5, pp5*ct5, ep5 );
+      CG_DEBUG_LOOP( "LPAIR" ) << "Positive-z beam state:\n\t"
+        << std::scientific
+        << "energy: E3 = " << ep3 << ", pt3 = " << pt3 << "\n\t"
+        << "momentum = " << p3_lab_ << ".";
 
+      //--- beam 2 -> 5
+      const double ep5 = ep2_-de5_, pp5 = sqrt( ep5*ep5-mY2_ );
+      const double pt5 = sqrt( dd3_/s_ )/p_cm_;
+
+      if ( pt5 > pp5 ) {
+        CG_WARNING( "LPAIR" ) << "Invalid momentum for outgoing beam 2.";
+        return false;
+      }
+      if ( fabs( rr ) > pt5 ) {
+        CG_WARNING( "LPAIR" ) << "Invalid momentum balance for outgoing beam 2.";
+        return false;
+      }
+
+      p5_lab_ = Momentum::fromPThetaPhi( pp5, M_PI+asin( pt5/pp5 ), asin( rr/pt5 ), ep5 );
+
+      CG_DEBUG_LOOP( "LPAIR" ) << "Negative-z beam state:\n\t"
+        << std::scientific
+        << "energy: E5 = " << ep5 << ", pt5 = " << pt5 << "\n\t"
+        << "momentum = " << p5_lab_ << ".";
+
+      //--- mirroring
       const double a1 = p3_lab_.px()-p5_lab_.px();
 
-      CG_DEBUG_LOOP( "LPAIR" )
-        << "Kinematic quantities\n\t"
-        << "cos(theta3) = " << ct3 << "\t" << "sin(theta3) = " << sin_theta3 << "\n\t"
-        << "cos( phi3 ) = " << cos_phi3 << "\t" << "sin( phi3 ) = " << sin_phi3 << "\n\t"
-        << "cos(theta4) = " << cos_theta4_ << "\t" << "sin(theta4) = " << sin_theta4_ << "\n\t"
-        << "cos(theta5) = " << ct5 << "\t" << "sin(theta5) = " << sin_theta5 << "\n\t"
-        << "cos( phi5 ) = " << cos_phi5 << "\t" << "sin( phi5 ) = " << sin_phi5 << "\n\t"
-        << "a1 = " << a1;
+      CG_DEBUG_LOOP( "LPAIR" ) << "a1 = " << a1;
 
       if ( fabs( pt4_+p3_lab_.px()+p5_lab_.px() ) < fabs( fabs( a1 )-pt4_ ) ) {
         CG_DEBUG_LOOP( "LPAIR" )
           << "|pt4+pt3*cos(phi3)+pt5*cos(phi5)| < | |a1|-pt4 |\n\t"
-          << "pt4 = " << pt4_ << "\t"
-          << "pt5 = " << pt5 << "\n\t"
-          << "cos(phi3) = " << cos_phi3 << "\t"
-          << "cos(phi5) = " << cos_phi5 << "\n\t"
-          << "a1 = " << a1;
+          << "pt4 = " << pt4_ << ".";
         return true;
       }
       if ( a1 < 0. )
@@ -667,25 +645,28 @@ namespace cepgen
 
       // 2-photon system kinematics ?!
       const double eg = ( w4_+t1_-t2_ )/( 2.*mc4_ );
-      double pg = sqrt( eg*eg-t1_ );
+      double p_gam = sqrt( eg*eg-t1_ );
 
-      const double pgx = -p3_lab_.px()*cos_theta4_-sin_theta4_*( de3_-e1mp1 + e3mp3 + p3_lab_.p()*al3 ),
+      /*const double pgx = -p3_lab_.px()*cos_theta4_-sin_theta4_*( de3_-e1mp1 + e3mp3 + p3_lab_.p()*al3 ),
                    pgy = -p3_lab_.py(),
-                   pgz = mc4_*de3_/( ec4_+pc4_ )-ec4_*de3_*al4_/mc4_-p3_lab_.px()*ec4_*sin_theta4_/mc4_+ec4_*cos_theta4_/mc4_*( p3_lab_.p()*al3+e3mp3-e1mp1 );
+                   pgz = mc4_*de3_/( ec4_+pc4_ )-ec4_*de3_*al4_/mc4_-p3_lab_.px()*ec4_*sin_theta4_/mc4_+ec4_*cos_theta4_/mc4_*( p3_lab_.p()*al3+e3mp3-e1mp1 );*/
+      const double gam4 = ec4_/mc4_;
+      const Momentum pg( -     p3_lab_.px()*cos_theta4_ - ( p3_lab_.p()*al3+e3mp3-e1mp1+de3_ )*sin_theta4_,
+                         -     p3_lab_.py(),
+                         -gam4*p3_lab_.px()*sin_theta4_ + ( p3_lab_.p()*al3+e3mp3-e1mp1 )*gam4*cos_theta4_ + mc4_*de3_/( ec4_+pc4_ )-gam4*de3_*al4_ );
 
-      CG_DEBUG_LOOP( "LPAIR" ) << "pg = " << Momentum( pgx, pgy, pgz );
+      CG_DEBUG_LOOP( "LPAIR" ) << "pg = " << pg;
 
-      const double pgp = std::hypot( pgx, pgy ), // outgoing proton (3)'s transverse momentum
-                   pgg = std::hypot( pgp, pgz ); // outgoing proton (3)'s momentum
-      if ( pgg > pgp*0.9 && pgg > pg )
-        pg = pgg; //FIXME ???
+      const double pt_gam = pg.pt(), p_gam_tmp = pg.p();
+      if ( p_gam_tmp > pt_gam*0.9 && p_gam_tmp > p_gam )
+        p_gam = p_gam_tmp; //FIXME ???
 
       // angles for the 2-photon system ?!
-      const double cpg = pgx/pgp, spg = pgy/pgp;
-      const double stg = pgp/pg;
+      const double cos_phi_gam = pg.px()/pt_gam, sin_phi_gam = pg.py()/pt_gam;
+      const double sin_theta_gam = pt_gam/p_gam;
 
-      const int theta_sign = ( pgz>0. ) ? 1 : -1;
-      const double ctg = theta_sign*sqrt( 1.-stg*stg );
+      const int theta_sign = pg.pz() > 0. ? 1 : -1;
+      const double cos_theta_gam = theta_sign*sqrt( 1.-sin_theta_gam*sin_theta_gam );
 
       const double amap = 0.5 * ( w4_-t1_-t2_ ),
                    bmap = 0.5 * sqrt( ( pow( w4_-t1_-t2_, 2 )-4.*t1_*t2_ )*( 1.-4.*masses_.Ml2/w4_ ) ),
@@ -722,22 +703,22 @@ namespace cepgen
 
       CG_DEBUG_LOOP( "LPAIR" ) << "p3cm6 = " << p6cm;
 
-      const double h1 = stg*p6cm.pz()+ctg*p6cm.px();
-      const double pc6z = ctg*p6cm.pz()-stg*p6cm.px(), pc6x = cpg*h1-spg*p6cm.py();
+      const double h1   = p6cm.pz()*sin_theta_gam + p6cm.px()*cos_theta_gam;
+      const double pc6z = p6cm.pz()*cos_theta_gam - p6cm.px()*sin_theta_gam;
+      const double pc6x = h1       *cos_phi_gam   - p6cm.py()*sin_phi_gam;
 
       const double qcx = 2.*pc6x, qcz = 2.*pc6z;
-      // qcy == QCY is never defined
 
       const double el6 = ( ec4_*ecm6+pc4_*pc6z ) / mc4_;
       const double h2  = ( ec4_*pc6z+pc4_*ecm6 ) / mc4_;
 
-      CG_DEBUG_LOOP( "LPAIR" ) << "h1 = " << h1 << "\n\th2 = " << h2;
+      CG_DEBUG_LOOP( "LPAIR" ) << "h1 = " << h1 << ", h2 = " << h2;
 
       // first outgoing lepton's kinematics
       p6_cm_ = Momentum(
-        cos_theta4_*pc6x+sin_theta4_*h2,
-        cpg*p6cm.py()+spg*h1,
-        cos_theta4_*h2-sin_theta4_*pc6x,
+        +pc6x*cos_theta4_     + h2*sin_theta4_,
+        p6cm.py()*cos_phi_gam + h1*sin_phi_gam,
+        -pc6x*sin_theta4_     + h2*cos_theta4_,
         el6 );
 
       CG_DEBUG_LOOP( "LPAIR" ) << "p6(cm) = " << p6_cm_;
@@ -745,32 +726,32 @@ namespace cepgen
       const double hq = ec4_*qcz/mc4_;
 
       const Momentum qve(
-        cos_theta4_*qcx+sin_theta4_*hq,
+        +qcx*cos_theta4_ + hq*sin_theta4_,
         2.*p6_cm_.py(),
-        cos_theta4_*hq-sin_theta4_*qcx,
-        pc4_*qcz/mc4_ // energy
+        -qcx*sin_theta4_ + hq*cos_theta4_,
+        +qcz*pc4_/mc4_ // energy
       );
 
       // second outgoing lepton's kinematics
-      p7_cm_ = Momentum( pt4_, 0., pc4_*cos_theta4_, ec4_ )-p6_cm_;
+      p7_cm_ = Momentum::fromPThetaPhi( pc4_, acos( cos_theta4_ ), 0., ec4_ )-p6_cm_;
 
       CG_DEBUG_LOOP( "LPAIR" )
         << "Outgoing kinematics\n\t"
         << " first outgoing lepton: p = " << p6_cm_.p() << ", E = " << p6_cm_.energy() << "\n\t"
         << "second outgoing lepton: p = " << p7_cm_.p() << ", E = " << p7_cm_.energy();
 
-      q1dq_ = eg*( 2.*ecm6-mc4_ )-2.*pg*p6cm.pz();
+      q1dq_ = eg*( 2.*ecm6-mc4_ )-2.*p_gam*p6cm.pz();
       q1dq2_ = 0.5*( w4_-t1_-t2_ );
 
       CG_DEBUG_LOOP( "LPAIR" )
         << "ecm6 = " << ecm6 << ", mc4 = " << mc4_ << "\n\t"
-        << "eg = " << eg << ", pg = " << pg << "\n\t"
+        << "eg = " << eg << ", pg = " << p_gam << "\n\t"
         << "q1dq = " << q1dq_ << ", q1dq2 = " << q1dq2_;
 
-      const double phi3 = p3_lab_.phi(), cos_phi3 = cos( phi3 ), sin_phi3 = sin( phi3 ),
-                   phi5 = p5_lab_.phi(), cos_phi5 = cos( phi5 ), sin_phi5 = sin( phi5 );
+      const double phi3 = p3_lab_.phi(), cos_phi3 = cos( phi3 ), sin_phi3 = sin( phi3 );
+      const double phi5 = p5_lab_.phi(), cos_phi5 = cos( phi5 ), sin_phi5 = sin( phi5 );
 
-      bb_ = t1_*t2_+( w4_*pow( sin( theta6cm ), 2 ) + 4.*masses_.Ml2*pow( cos( theta6cm ), 2 ) )*pg*pg;
+      bb_ = t1_*t2_+( w4_*pow( sin( theta6cm ), 2 ) + 4.*masses_.Ml2*pow( cos( theta6cm ), 2 ) )*p_gam*p_gam;
 
       const double c1 = p3_lab_.pt() * ( qve.px()*sin_phi3  - qve.py()*cos_phi3   ),
                    c2 = p3_lab_.pt() * ( qve.pz()*ep1_ - qve.energy() *p_cm_ ),
@@ -780,11 +761,11 @@ namespace cepgen
                    b2 = p5_lab_.pt() * ( qve.pz()*ep2_ + qve.energy() *p_cm_ ),
                    b3 = ( masses_.w52*ep2_*ep2_ + 2.*mB2_*de5_*ep2_ - mB2_*de5_*de5_ + p5_lab_.pt2()*ep2_*ep2_ ) / ( ep2_*p5_lab_.pz() - p5_lab_.energy()*p_cm_ );
 
-      const double r12 =  c2*sin_phi3 + qve.py()*c3,
-                   r13 = -c2*cos_phi3 - qve.px()*c3;
+      const double r12 =  c2*sin_phi3 + c3*qve.py(),
+                   r13 = -c2*cos_phi3 - c3*qve.px();
 
-      const double r22 =  b2*sin_phi5 + qve.py()*b3,
-                   r23 = -b2*cos_phi5 - qve.px()*b3;
+      const double r22 =  b2*sin_phi5 + b3*qve.py(),
+                   r23 = -b2*cos_phi5 - b3*qve.px();
 
       epsi_ = p12_*c1*b1 + r12*r22 + r13*r23;
 
@@ -864,11 +845,6 @@ namespace cepgen
         if ( !eta_limits.contains( p6_cm_.eta() ) || !eta_limits.contains( p7_cm_.eta() ) )
           return 0.;
       }
-
-      //--- cuts on outgoing leptons' kinematics
-
-      if ( !kin_.cuts.central.mass_sum().contains( ( p6_cm_+p7_cm_ ).mass() ) )
-        return 0.;
 
       //--- compute the structure functions factors
 
@@ -1016,12 +992,11 @@ namespace cepgen
         << "(u1,u2) = " << fp1 << "\n\t"
         << "(v1,v2) = " << fp2;
 
-      const double qqq = q1dq_*q1dq_,
-                   qdq = 4.*masses_.Ml2-w4_;
-      const double t11 = 64. *(  bb_*( qqq-g4_-qdq*( t1_+t2_+2.*masses_.Ml2 ) )-2.*( t1_+2.*masses_.Ml2 )*( t2_+2.*masses_.Ml2 )*qqq ) * t1_*t2_, // magnetic-magnetic
-                   t12 = 128.*( -bb_*( dd2_+g6_ )-2.*( t1_+2.*masses_.Ml2 )*( sa2_*qqq+a6_*a6_ ) ) * t1_, // electric-magnetic
-                   t21 = 128.*( -bb_*( dd4_+g5_ )-2.*( t2_+2.*masses_.Ml2 )*( sa1_*qqq+a5_*a5_ ) ) * t2_, // magnetic-electric
-                   t22 = 512.*(  bb_*( delta_*delta_-gram_ )-pow( epsi_-delta_*( qdq+q1dq2_ ), 2 )-sa1_*a6_*a6_-sa2_*a5_*a5_-sa1_*sa2_*qqq ); // electric-electric
+      const double qqq = q1dq_*q1dq_, qdq = 4.*masses_.Ml2-w4_;
+      const double t11 = 64. *(  bb_*( qqq-g4_-qdq*( t1_+t2_+2.*masses_.Ml2 ) )-2.*( t1_+2.*masses_.Ml2 )*( t2_+2.*masses_.Ml2 )*qqq ) * t1_*t2_; // magnetic-magnetic
+      const double t12 = 128.*( -bb_*( dd2_+g6_ )-2.*( t1_+2.*masses_.Ml2 )*( sa2_*qqq+a6_*a6_ ) ) * t1_; // electric-magnetic
+      const double t21 = 128.*( -bb_*( dd4_+g5_ )-2.*( t2_+2.*masses_.Ml2 )*( sa1_*qqq+a5_*a5_ ) ) * t2_; // magnetic-electric
+      const double t22 = 512.*(  bb_*( delta_*delta_-gram_ )-pow( epsi_-delta_*( qdq+q1dq2_ ), 2 )-sa1_*a6_*a6_-sa2_*a5_*a5_-sa1_*sa2_*qqq ); // electric-electric
 
       const double peripp = ( fp1.FM*fp2.FM*t11
                              +fp1.FE*fp2.FM*t21
