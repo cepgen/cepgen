@@ -63,9 +63,11 @@ namespace cepgen
           std::vector<std::string> name;
           bool log;
         };
+        typedef std::pair<info_t,gsl_histogram_ptr> hist1d_t;
+        typedef std::pair<info_t,gsl_histogram2d_ptr> hist2d_t;
 
-        static std::string textHistogram( const info_t&, const gsl_histogram* );
-        static std::string textHistogram( const info_t&, const gsl_histogram2d* );
+        static std::string textHistogram( const hist1d_t& );
+        static std::string textHistogram( const hist2d_t& );
 
         static constexpr size_t PLOT_WIDTH = 50;
         static constexpr char PLOT_CHAR = '*';
@@ -91,8 +93,8 @@ namespace cepgen
         //--- kinematic variables
         double sqrts_;
         unsigned long num_evts_;
-        std::vector<std::pair<info_t,gsl_histogram_ptr> > hists_;
-        std::vector<std::pair<info_t,gsl_histogram2d_ptr> > hists2d_;
+        std::vector<hist1d_t> hists_;
+        std::vector<hist2d_t> hists2d_;
     };
 
     TextHandler::TextHandler( const ParametersList& params ) :
@@ -158,18 +160,19 @@ namespace cepgen
       if ( !show_hists_ && !save_hists_ )
         return;
       for ( const auto& h_var : hists_ ) {
-        const auto& hist = h_var.second.get();
-        gsl_histogram_scale( hist, xsec_/( num_evts_+1 ) );
-        const auto& h_out = textHistogram( h_var.first, hist );
+        gsl_histogram_scale( h_var.second.get(), xsec_/( num_evts_+1 ) );
+        CG_INFO("")<<"good1"<<h_var.first.name;
+        const auto& h_out = textHistogram( h_var );
+        CG_INFO("")<<"good2"<<h_var.first.name;
         if ( show_hists_ )
           CG_INFO( "TextHandler" ) << h_out;
         if ( save_hists_ )
           hist_file_ << "\n" << h_out << "\n";
+        CG_INFO("")<<"good3"<<h_var.first.name;
       }
       for ( const auto& h_var : hists2d_ ) {
-        const auto& hist = h_var.second.get();
         //gsl_histogram_scale( hist, xsec_/( num_evts_+1 ) );
-        const auto& h_out = textHistogram( h_var.first, hist );
+        const auto& h_out = textHistogram( h_var );
         if ( show_hists_ )
           CG_INFO( "TextHandler" ) << h_out;
         if ( save_hists_ )
@@ -214,8 +217,9 @@ namespace cepgen
     }
 
     std::string
-    TextHandler::textHistogram( const info_t& info, const gsl_histogram* hist )
+    TextHandler::textHistogram( const hist1d_t& hist_info )
     {
+      auto hist = hist_info.second.get();
       std::ostringstream os;
       const size_t nbins = gsl_histogram_bins( hist );
       const double max_bin = gsl_histogram_max_val( hist );
@@ -223,15 +227,15 @@ namespace cepgen
       const double min_range_log = log( std::max( min_bin, 1.e-6 ) );
       const double max_range_log = log( max_bin );
       const std::string sep( 17, ' ' );
-      const auto& var = info.name.at( 0 );
+      const auto& var = hist_info.first.name.at( 0 );
       os
         << "plot of \"" << var << "\"\n"
         << sep << std::string( PLOT_WIDTH-15-var.size(), ' ' )
         << "d(sig)/d" << var << " (pb/bin)\n"
-        << sep << utils::format( "%-5.2f", info.log ? exp( min_range_log ) : min_bin )
+        << sep << utils::format( "%-5.2f", hist_info.first.log ? exp( min_range_log ) : min_bin )
         << std::setw( PLOT_WIDTH-11 ) << std::left
-        << ( info.log ? "logarithmic scale" : "linear scale" )
-        << utils::format( "%5.2e", info.log ? exp( max_range_log ) : max_bin ) << "\n"
+        << ( hist_info.first.log ? "logarithmic scale" : "linear scale" )
+        << utils::format( "%5.2e", hist_info.first.log ? exp( max_range_log ) : max_bin ) << "\n"
         << sep << std::string( PLOT_WIDTH+2, '.' ); // abscissa axis
       for ( size_t i = 0; i < nbins; ++i ) {
         double min, max;
@@ -240,7 +244,7 @@ namespace cepgen
         size_t val;
         {
           double val_dbl = PLOT_WIDTH;
-          if ( info.log )
+          if ( hist_info.first.log )
             val_dbl *= ( value != 0. )
               ? ( log( value )-min_range_log )/( max_range_log-min_range_log ) : 0.;
           else
@@ -267,14 +271,15 @@ namespace cepgen
     }
 
     std::string
-    TextHandler::textHistogram( const info_t& info, const gsl_histogram2d* hist )
+    TextHandler::textHistogram( const hist2d_t& hist_info )
     {
+      auto hist = hist_info.second.get();
       std::ostringstream os;
       const size_t nbins_x = gsl_histogram2d_nx( hist );
       const size_t nbins_y = gsl_histogram2d_ny( hist );
       const double max_bin = gsl_histogram2d_max_val( hist );
       const std::string sep( 17, ' ' );
-      const auto& vars = info.name;
+      const auto& vars = hist_info.first.name;
       const auto var = utils::merge( vars, "/" );
       os
         << "plot of \"" << var << "\"\n"
@@ -293,7 +298,7 @@ namespace cepgen
           << "\n" << utils::format( "[%7.2f,%7.2f):", min_x, max_x );
         for ( size_t j = 0; j < nbins_y; ++j ) {
           const double value = gsl_histogram2d_get( hist, i, j );
-          const double value_norm = info.log
+          const double value_norm = hist_info.first.log
             ? ( value == 0. ? 0. : log( value )/log( max_bin ) )
             : value/max_bin;
           os << PLOT_2D_CHARS[(size_t)ceil(value_norm*(strlen(PLOT_2D_CHARS)-1))];
