@@ -45,15 +45,15 @@ namespace cepgen
     SuriYennie::eval( double xbj, double q2 )
     {
       const double mx2 = utils::mX2( xbj, q2, mp2_ ), dm2 = mx2-mp2_; // [GeV^2]
-      const double en = q2+dm2, en2 = en*en; // [GeV^2]
-      const double nu = 0.5 * en / mp_, x_pr = q2/( q2+mx2 ), tau = 0.25 * q2/mp2_;
+      const double en = q2+dm2; // [GeV^2]
+      const double nu = 0.5*en/mp_, x_pr = q2/( q2+mx2 ), tau = 0.25*q2/mp2_;
       const double mq = params_.rho2+q2;
 
       const double inv_q2 = 1./q2;
 
       FM = ( params_.C1*dm2*pow( params_.rho2/mq, 2 )
             + ( params_.C2*mp2_*pow( 1.-x_pr, 4 ) ) / ( 1.+x_pr*( x_pr*params_.Cp-2.*params_.Bp ) ) ) * inv_q2;
-      FE = ( tau*FM + params_.D1*dm2*q2*params_.rho2/mp2_*pow( dm2/mq, 2 )/en2 ) / ( 1.+0.25*en2/mp2_*inv_q2 );
+      FE = ( tau*FM + params_.D1*dm2*q2*params_.rho2/mp2_*pow( dm2/mq/en, 2 ) ) / ( 1.+nu*nu*inv_q2 );
 
       W1 = 0.5*FM*q2/mp_;
       W2 = 2.*mp_*FE;

@@ -187,15 +187,20 @@ namespace cepgen
           values_[i].reset( new double[values_raw_.size()] );
           splines_1d_.emplace_back( gsl_spline_alloc( type, values_raw_.size() ), gsl_spline_free );
         }
+        // transform a map(coord -> values) to
+        // - 1 vector(coordinates)
+        // - N vectors(values)
         std::vector<double> x_vec;
         size_t i = 0;
         for ( const auto& vals : values_raw_ ) {
           x_vec.emplace_back( vals.first.at( 0 ) );
           unsigned short j = 0;
           for ( const auto& val : vals.second )
-            values_[j++].get()[i++] = val;
+            values_[j++].get()[i] = val;
+           ++i;
         }
-        for ( size_t i = 0; i < N; ++i )
+        // initialise spline interpolation objects (one for each value)
+        for ( size_t i = 0; i < splines_1d_.size(); ++i )
           gsl_spline_init( splines_1d_.at( i ).get(), &x_vec[0], values_[i].get(), values_raw_.size() );
       } break;
       case 2: { //--- (x,y) |-> (f1,...)
@@ -217,9 +222,9 @@ namespace cepgen
             gsl_spline2d_set( splines_2d_.at( i ).get(), values_[i].get(), id_x, id_y, val.second[i] );
         }
 
-        // initialise splines objects
+        // initialise spline interpolation objects (one for each value)
         const coord_t& x_vec = coords_.at( 0 ), &y_vec = coords_.at( 1 );
-        for ( unsigned short i = 0; i < splines_2d_.size(); ++i )
+        for ( size_t i = 0; i < splines_2d_.size(); ++i )
           gsl_spline2d_init( splines_2d_.at( i ).get(), &x_vec[0], &y_vec[0], values_[i].get(), x_vec.size(), y_vec.size() );
 #else
         CG_WARNING( "GridHandler" )
@@ -240,13 +245,32 @@ namespace cepgen
   GridHandler<D,N>::boundaries() const
   {
     std::array<std::pair<double,double>,D> out;
-    unsigned short i = 0;
+    const auto min_val = min(), max_val = max();
+    for ( size_t i = 0; i < D; ++i )
+      out[i] = { min_val[i], max_val[i] };
+    return out;
+  }
+
+  template<size_t D,size_t N> std::array<double,D>
+  GridHandler<D,N>::min() const
+  {
+    std::array<double,D> out;
+    size_t i = 0;
     for ( const auto& c : coords_ ) { // loop over all dimensions
       const auto& min = std::min_element( c.begin(), c.end() );
+      out[i++] = min != c.end() ? *min : std::numeric_limits<double>::infinity();
+    }
+    return out;
+  }
+
+  template<size_t D,size_t N> std::array<double,D>
+  GridHandler<D,N>::max() const
+  {
+    std::array<double,D> out;
+    size_t i = 0;
+    for ( const auto& c : coords_ ) { // loop over all dimensions
       const auto& max = std::max_element( c.begin(), c.end() );
-      out[i++] = {
-        ( min != c.end() ) ? *min : std::numeric_limits<double>::infinity(),
-        ( max != c.end() ) ? *max : std::numeric_limits<double>::infinity() };
+      out[i++] = max != c.end() ? *max : std::numeric_limits<double>::infinity();
     }
     return out;
   }

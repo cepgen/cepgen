@@ -46,6 +46,10 @@ namespace cepgen
       void init();
       /// Grid boundaries (collection of pair(min,max))
       std::array<std::pair<double,double>,D> boundaries() const;
+      /// Lowest bound of the grid coordinates
+      std::array<double,D> min() const;
+      /// Highest bound of the grid coordinates
+      std::array<double,D> max() const;
 
     protected:
       /// Type of interpolation for the grid members

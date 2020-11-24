@@ -25,7 +25,7 @@ namespace cepgen
       NamedModule<int>( sf.parameters() ),
       F2( sf.F2 ), FL( sf.FL ),
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
-      mx_min_( mp_+PDG::get().mass( PDG::piZero ) ),
+      mx_min_( mp_+PDG::get().mass( PDG::piPlus ) ),
       params_( sf.params_ ),
       old_vals_( sf.old_vals_ ),
       r_ratio_( sf.r_ratio_ )
