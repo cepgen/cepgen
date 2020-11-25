@@ -39,6 +39,7 @@ namespace cepgen
       "CepGenAddOns",
       "CepGenRoot",
       "CepGenPythia6", "CepGenPythia8",
+      "CepGenMadGraph",
       "CepGenLHAPDF",
       "CepGenHepMC", "CepGenProMC",
       "CepGenBoost",

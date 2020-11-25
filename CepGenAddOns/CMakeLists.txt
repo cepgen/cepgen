@@ -17,6 +17,7 @@ add_subdirectory(ProMCWrapper)
 add_subdirectory(LHAPDFWrapper)
 add_subdirectory(RivetWrapper)
 add_subdirectory(APFELWrapper)
+add_subdirectory(MadGraphWrapper)
 
 #----- build the objects
 
