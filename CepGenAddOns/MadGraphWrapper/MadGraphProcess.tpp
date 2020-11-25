@@ -103,5 +103,11 @@ MadGraphProcess::fillCentralParticlesKinematics()
   event_->dump();
 }
 
+std::string
+madgraph_process_name()
+{
+  return "XXX_PROC_NAME_XXX";
+}
+
 REGISTER_PROCESS( "XXX_PROC_NAME_XXX", MadGraphProcess )
 //=============================================================================

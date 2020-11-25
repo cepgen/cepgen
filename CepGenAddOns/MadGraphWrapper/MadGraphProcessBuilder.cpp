@@ -24,17 +24,24 @@ class MadGraphProcessBuilder : public proc::Process
     void fillKinematics( bool ) override;
 
   private:
-    const MadGraphInterface interf_;
     std::shared_ptr<proc::Process> mg5_proc_;
 };
 
+extern std::string madgraph_process_name();
+
 MadGraphProcessBuilder::MadGraphProcessBuilder( const ParametersList& params ) :
-  Process( params, true ),
-  interf_( params )
+  Process( params, true )
 {
-  const auto lib_path = interf_.run();
-  loadLibrary( lib_path );
-  mg5_proc_ = std::move( proc::ProcessesFactory::get().build( params.get<std::string>( "process" ) ) );
+  auto proc_name = params.get<std::string>( "process" );
+  if ( params.has<std::string>( "lib" ) ) {
+    loadLibrary( params.get<std::string>( "lib" ) );
+    proc_name = madgraph_process_name();
+  }
+  else {
+    const MadGraphInterface interf( params );
+    loadLibrary( interf.run() );
+  }
+  mg5_proc_ = std::move( proc::ProcessesFactory::get().build( proc_name ) );
 }
 
 void

@@ -15,16 +15,17 @@ namespace cepgen
       std::string run() const;
 
     private:
-      std::string runCommand( const std::string& ) const;
+      static std::string runCommand( const std::string& );
+      static std::string generateLibrary( const std::string&, const std::string&, const std::string& );
+      static std::string generateProcess( const std::string& );
+
       void prepareCard() const;
       std::string prepareMadGraphProcess() const;
-
-      std::string generateProcess() const;
-      std::string generateLibrary( const std::string& ) const;
 
       const std::string proc_;
       const std::string model_;
       const std::string card_path_;
+      const std::string standalone_cpp_path_;
       const std::string tmp_dir_;
       const std::string log_filename_;
   };
