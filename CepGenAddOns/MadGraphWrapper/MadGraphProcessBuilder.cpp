@@ -24,7 +24,7 @@ class MadGraphProcessBuilder : public proc::KTProcess
     void fillCentralParticlesKinematics() override;
 
   private:
-    std::shared_ptr<proc::KTProcess> mg5_proc_;
+    std::shared_ptr<MadGraphProcess> mg5_proc_;
 };
 
 extern std::string madgraph_process_name();
@@ -32,16 +32,15 @@ extern std::string madgraph_process_name();
 MadGraphProcessBuilder::MadGraphProcessBuilder( const ParametersList& params ) :
   KTProcess( params, std::array<pdgid_t,2>{}, std::vector<pdgid_t>{} )
 {
-  auto proc_name = params.get<std::string>( "process" );
-  if ( params.has<std::string>( "lib" ) ) {
+  if ( params.has<std::string>( "lib" ) )
     loadLibrary( params.get<std::string>( "lib" ) );
-    proc_name = madgraph_process_name();
-  }
   else {
     const MadGraphInterface interf( params );
     loadLibrary( interf.run() );
   }
-  mg5_proc_.reset( dynamic_cast<proc::KTProcess*>( proc::ProcessesFactory::get().build( proc_name ).release() ) );
+  //--- once MadGraph process library is loaded into runtime environment
+  //    can define its wrapper object
+  mg5_proc_.reset( new MadGraphProcess );
 }
 
 void
@@ -49,7 +48,7 @@ MadGraphProcessBuilder::preparePhaseSpace()
 {
   if ( !mg5_proc_ )
     CG_FATAL( "MadGraphProcessBuilder" ) << "Process not properly linked!";
-  mg5_proc_->preparePhaseSpace();
+  mg5_proc_->initialise( params_.get<std::string>( "parametersCard", "param_card.dat" ) );
 }
 
 void
@@ -57,7 +56,8 @@ MadGraphProcessBuilder::fillCentralParticlesKinematics()
 {
   if ( !mg5_proc_ )
     CG_FATAL( "MadGraphProcessBuilder" ) << "Process not properly linked!";
-  mg5_proc_->fillCentralParticlesKinematics();
+  const auto parts = mg5_proc_->particles();
+  //mg5_proc_->fillCentralParticlesKinematics();
 }
 
 double
@@ -65,7 +65,13 @@ MadGraphProcessBuilder::computeKTFactorisedMatrixElement()
 {
   if ( !mg5_proc_ )
     CG_FATAL( "MadGraphProcessBuilder" ) << "Process not properly linked!";
-  return mg5_proc_->computeKTFactorisedMatrixElement();
+
+  // first incoming parton
+  mg5_proc_->setMomentum( 0, Momentum::fromPtEtaPhi( qt1_, 0., phi_qt1_ ) );
+  // second incoming parton
+  mg5_proc_->setMomentum( 1, Momentum::fromPtEtaPhi( qt2_, 0., phi_qt2_ ) );
+
+  return mg5_proc_->eval();
 }
 
 REGISTER_PROCESS( "mg5_aMC", MadGraphProcessBuilder )

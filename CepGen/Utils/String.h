@@ -64,6 +64,12 @@ namespace cepgen
           return std::move( str )+sep+std::to_string( xv );
         } );
     }
+    /// Trim leading spaces
+    void ltrim( std::string& );
+    /// Trim trailing spaces
+    void rtrim( std::string& );
+    /// Trim leading and trailing spaces
+    inline void trim( std::string& s ) { ltrim( s ); rtrim( s ); }
     /// Get an environment variable
     std::string environ( const std::string&, const std::string& def = "" );
   }

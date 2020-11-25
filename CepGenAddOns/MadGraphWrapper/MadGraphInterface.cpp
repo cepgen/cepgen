@@ -97,15 +97,48 @@ namespace cepgen
   std::string
   MadGraphInterface::prepareMadGraphProcess() const
   {
+    //--- open template file
     std::ifstream tmpl_file( MADGRAPH_PROC_TMPL );
     std::string tmpl = std::string(
       std::istreambuf_iterator<char>( tmpl_file ),
       std::istreambuf_iterator<char>() );
+
+    { //--- dirty fix to specify incoming- and outgoing states
+      //    as extracted from the mg5_aMC process string
+      auto proc_name = proc_;
+      utils::trim( proc_name );
+      const auto prim_proc = utils::split( proc_name, ',' )[0];
+      auto parts = utils::split( prim_proc, '>' );
+      if ( parts.size() != 2 )
+        CG_FATAL( "MadGraphProcessBuilder" )
+          << "Unable to unpack particles from process name: \"" << proc_name << "\"";
+      for ( auto& p : parts )
+        utils::trim( p );
+      //--- incoming parton-like particles
+      auto prim_parts = utils::split( parts[0], ' ' );
+      for ( auto& p : prim_parts )
+        utils::trim( p );
+      if ( prim_parts.size() != 2 )
+        CG_FATAL( "MadGraphProcessBuilder" )
+          << "Unable to unpack particles from process name: \"" << proc_name << "\"";
+      utils::replace_all( tmpl, "XXX_PART1_XXX", std::to_string( mg5_parts_.at( prim_parts[0] ) ) );
+      utils::replace_all( tmpl, "XXX_PART2_XXX", std::to_string( mg5_parts_.at( prim_parts[0] ) ) );
+      //---- outgoing system
+      auto dec_parts = utils::split( parts[1], ' ' );
+      std::ostringstream out_parts;
+      std::string sep;
+      for ( auto& p : dec_parts ) {
+        utils::trim( p );
+        out_parts << sep << mg5_parts_.at( p ), sep = ", ";
+      }
+      utils::replace_all( tmpl, "XXX_OUT_PART_XXX", out_parts.str() );
+    }
+
+    utils::replace_all( tmpl, "XXX_PROC_NAME_XXX", proc_ );
     std::string descr = proc_;
     if ( !model_.empty() )
       descr += " (model: "+model_+")";
     utils::replace_all( tmpl, "XXX_PROC_DESCRIPTION_XXX", descr );
-    utils::replace_all( tmpl, "XXX_PROC_NAME_XXX", proc_ );
 
     std::string src_filename = fs::path( tmp_dir_)/"cepgen_proc_interface.cpp";
     std::ofstream src_file( src_filename );
@@ -118,8 +151,11 @@ namespace cepgen
   MadGraphInterface::linkCards() const
   {
     for ( const auto& f : fs::directory_iterator( fs::path( tmp_dir_ )/"Cards" ) )
-      if ( f.path().extension() == ".dat" && !fs::exists( f.path().filename() ) )
-        fs::create_symlink( f, f.path().filename() );
+      if ( f.path().extension() == ".dat" ) {
+        fs::path link_path = f.path().filename();
+        if ( !fs::exists( link_path ) )
+          fs::create_symlink( f, link_path );
+      }
   }
 
   std::string
@@ -180,5 +216,19 @@ namespace cepgen
     while ( fgets( buffer.data(), buffer.size(), pipe.get() ) )
       result += buffer.data();
     return result;
+  }
+
+  //----------------------------------------------------------------------------
+
+  void
+  MadGraphProcess::setMomentum( size_t i, const Momentum& mom )
+  {
+    if ( i > momenta_.size() )
+      throw CG_FATAL( "MadGraphProcess" )
+        << "Invalid index for momentum: " << i << "!";
+    momenta_[i][0] = mom.energy();
+    momenta_[i][1] = mom.px();
+    momenta_[i][2] = mom.py();
+    momenta_[i][3] = mom.pz();
   }
 }
