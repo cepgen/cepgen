@@ -75,6 +75,10 @@ namespace cepgen
     const auto cg_proc = prepareMadGraphProcess();
     log << generateLibrary( cg_proc, cpp_path, lib_path );
 
+    CG_INFO( "MadGraphInterface:run" )
+      << "Creating links for all cards in current directory.";
+    linkCards();
+
     return lib_path;
   }
 
@@ -110,6 +114,14 @@ namespace cepgen
     return src_filename;
   }
 
+  void
+  MadGraphInterface::linkCards() const
+  {
+    for ( const auto& f : fs::directory_iterator( fs::path( tmp_dir_ )/"Cards" ) )
+      if ( f.path().extension() == ".dat" && !fs::exists( f.path().filename() ) )
+        fs::create_symlink( f, f.path().filename() );
+  }
+
   std::string
   MadGraphInterface::generateProcess( const std::string& in_path )
   {
@@ -140,19 +152,16 @@ namespace cepgen
       throw CG_FATAL( "MadGraphInterface:generateLibrary" )
         << "Currently only single-process cases are supported!";
 
-    //--- find all model libraries
-    std::vector<std::string> models;
-    for ( const auto& p : fs::directory_iterator( tmp_path/"lib" ) )
-      models.emplace_back( p.path() );
+    //--- find all model source files
+    for ( const auto& f : fs::directory_iterator( tmp_path/"src" ) )
+      if ( f.path().extension() == ".cc" )
+        src_files.emplace_back( f.path() );
 
     std::string cmd = CC_CFLAGS;
     cmd += " -fPIC -shared";
     cmd += " -Wno-unused-variable -Wno-int-in-bool-context";
     cmd += " -I"+( tmp_path/"src" ).string();
     cmd += " -I"+processes.at( 0 );
-    //cmd += " -L"+( tmp_path/"lib" ).string();
-    for ( const auto& m : models )
-      cmd += " "+m;
     cmd += " "+utils::merge( src_files, " " );
     cmd += " -o "+out_lib;
     return runCommand( cmd );

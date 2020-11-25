@@ -21,6 +21,7 @@ namespace cepgen
 
       void prepareCard() const;
       std::string prepareMadGraphProcess() const;
+      void linkCards() const;
 
       const std::string proc_;
       const std::string model_;

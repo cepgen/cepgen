@@ -1,6 +1,6 @@
 #include "CepGenAddOns/MadGraphWrapper/MadGraphInterface.h"
 
-#include "CepGen/Processes/Process.h"
+#include "CepGen/Processes/KTProcess.h"
 #include "CepGen/Modules/ProcessesFactory.h"
 #include "CepGen/Event/Event.h"
 
@@ -10,7 +10,7 @@
 
 using namespace cepgen;
 
-class MadGraphProcessBuilder : public proc::Process
+class MadGraphProcessBuilder : public proc::KTProcess
 {
   public:
     MadGraphProcessBuilder( const ParametersList& params );
@@ -19,18 +19,18 @@ class MadGraphProcessBuilder : public proc::Process
     }
     static std::string description() { return "MadGraph_aMC process builder"; }
 
-    double computeWeight() override;
-    void prepareKinematics();
-    void fillKinematics( bool ) override;
+    void preparePhaseSpace() override;
+    double computeKTFactorisedMatrixElement() override;
+    void fillCentralParticlesKinematics() override;
 
   private:
-    std::shared_ptr<proc::Process> mg5_proc_;
+    std::shared_ptr<proc::KTProcess> mg5_proc_;
 };
 
 extern std::string madgraph_process_name();
 
 MadGraphProcessBuilder::MadGraphProcessBuilder( const ParametersList& params ) :
-  Process( params, true )
+  KTProcess( params, std::array<pdgid_t,2>{}, std::vector<pdgid_t>{} )
 {
   auto proc_name = params.get<std::string>( "process" );
   if ( params.has<std::string>( "lib" ) ) {
@@ -41,25 +41,31 @@ MadGraphProcessBuilder::MadGraphProcessBuilder( const ParametersList& params ) :
     const MadGraphInterface interf( params );
     loadLibrary( interf.run() );
   }
-  mg5_proc_ = std::move( proc::ProcessesFactory::get().build( proc_name ) );
+  mg5_proc_.reset( dynamic_cast<proc::KTProcess*>( proc::ProcessesFactory::get().build( proc_name ).release() ) );
 }
 
 void
-MadGraphProcessBuilder::prepareKinematics()
+MadGraphProcessBuilder::preparePhaseSpace()
 {
-  mg5_proc_->prepareKinematics();
+  if ( !mg5_proc_ )
+    CG_FATAL( "MadGraphProcessBuilder" ) << "Process not properly linked!";
+  mg5_proc_->preparePhaseSpace();
 }
 
 void
-MadGraphProcessBuilder::fillKinematics( bool symm )
+MadGraphProcessBuilder::fillCentralParticlesKinematics()
 {
-  mg5_proc_->fillKinematics( symm );
+  if ( !mg5_proc_ )
+    CG_FATAL( "MadGraphProcessBuilder" ) << "Process not properly linked!";
+  mg5_proc_->fillCentralParticlesKinematics();
 }
 
 double
-MadGraphProcessBuilder::computeWeight()
+MadGraphProcessBuilder::computeKTFactorisedMatrixElement()
 {
-  return mg5_proc_->computeWeight();
+  if ( !mg5_proc_ )
+    CG_FATAL( "MadGraphProcessBuilder" ) << "Process not properly linked!";
+  return mg5_proc_->computeKTFactorisedMatrixElement();
 }
 
 REGISTER_PROCESS( "mg5_aMC", MadGraphProcessBuilder )

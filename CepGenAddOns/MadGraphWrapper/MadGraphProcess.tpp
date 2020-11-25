@@ -20,11 +20,11 @@ class MadGraphProcess : public proc::KTProcess
     }
     static std::string description() { return "XXX_PROC_DESCRIPTION_XXX"; }
 
-  private:
     void preparePhaseSpace() override;
     double computeKTFactorisedMatrixElement() override;
     void fillCentralParticlesKinematics() override;
 
+  private:
     CPPProcess proc_;
     const std::string param_card_;
     Momentum qt_1_, qt_2_;
@@ -60,7 +60,7 @@ MadGraphProcess::preparePhaseSpace()
   //CG_INFO("")<<
   event_->dump();
 //  CG_WARNING("")<<momenta_;
-//  CG_FATAL("");
+  CG_FATAL("");
 }
 
 double
@@ -92,6 +92,7 @@ MadGraphProcess::computeKTFactorisedMatrixElement()
 void
 MadGraphProcess::fillCentralParticlesKinematics()
 {
+  CG_WARNING("");
   const auto& p4 = proc_.getMomenta();
   /*CG_WARNING("")<<":::";
   for(const auto& m:mom_filled)
