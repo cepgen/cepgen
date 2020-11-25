@@ -22,9 +22,6 @@ namespace cepgen
 
         Shamov& eval( double xbj, double q2 ) override;
 
-        const GridHandler<1,2>& sigmaGrid() const { return sigma_grid_; }
-        const GridHandler<1,1>& gmGrid() const { return gm_grid_; }
-
         double W1, W2;
         bool resonant;
 
