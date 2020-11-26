@@ -11,6 +11,7 @@
 #include "CepGenAddOns/MadGraphWrapper/MadGraphInterface.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Physics/PDG.h"
 
 #include <fstream>
 #include <array>
@@ -220,15 +221,16 @@ namespace cepgen
 
   //----------------------------------------------------------------------------
 
-  void
+  MadGraphProcess&
   MadGraphProcess::setMomentum( size_t i, const Momentum& mom )
   {
-    if ( i > momenta_.size() )
+    if ( i > mom_.size() )
       throw CG_FATAL( "MadGraphProcess" )
         << "Invalid index for momentum: " << i << "!";
-    momenta_[i][0] = mom.energy();
-    momenta_[i][1] = mom.px();
-    momenta_[i][2] = mom.py();
-    momenta_[i][3] = mom.pz();
+    mom_[i][0] = mom.energy();
+    mom_[i][1] = mom.px();
+    mom_[i][2] = mom.py();
+    mom_[i][3] = mom.pz();
+    return *this;
   }
 }

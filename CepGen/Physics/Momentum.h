@@ -25,6 +25,8 @@ namespace cepgen
 
       /// Build a 3-momentum from its three pseudo-cylindric coordinates
       static Momentum fromPtEtaPhi( double pt, double eta, double phi, double e = -1. );
+      /// Build a 3-momentum from its three pseudo-cylindric coordinates
+      static Momentum fromPtEtaPhiM( double pt, double eta, double phi, double m );
       /// Build a 4-momentum from its scalar momentum, and its polar and azimuthal angles
       static Momentum fromPThetaPhi( double p, double theta, double phi, double e = -1. );
       /// Build a 4-momentum from its four momentum and energy coordinates

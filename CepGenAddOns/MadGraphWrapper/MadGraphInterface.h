@@ -67,18 +67,22 @@ namespace cepgen
       const std::string& description() const { return descr_; }
 
       void initialise( const std::string& );
-      void setMomentum( size_t, const Momentum& );
-
       double eval();
-      const Particles& particles();
+
+      MadGraphProcess& setMomentum( size_t, const Momentum& );
+      const std::vector<Momentum>& momenta();
+      const std::vector<double>& masses() const;
 
     private:
       std::unique_ptr<CPPProcess> proc_;
-      std::vector<double*> momenta_;
+      std::vector<double*> mom_;
+
       const std::string name_;
       const std::string descr_;
+      const std::array<int,2> incoming_pdgids_;
       const std::vector<int> central_pdgids_;
-      Particles particles_;
+
+      std::vector<Momentum> momenta_;
   };
 }
 

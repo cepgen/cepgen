@@ -34,6 +34,16 @@ namespace cepgen
   }
 
   Momentum
+  Momentum::fromPtEtaPhiM( double pt, double eta, double phi, double m )
+  {
+    const double px = pt*cos( phi ),
+                 py = pt*sin( phi ),
+                 pz = pt*sinh( eta ),
+                 e = px*px + py*py + pz*pz + m*m;
+    return Momentum( px, py, pz, e );
+  }
+
+  Momentum
   Momentum::fromPThetaPhi( double p, double theta, double phi, double e )
   {
     const double px = p*sin( theta )*cos( phi ),
