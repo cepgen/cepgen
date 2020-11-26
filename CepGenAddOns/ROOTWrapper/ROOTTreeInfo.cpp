@@ -60,7 +60,7 @@ namespace ROOT
     for ( unsigned short i = 0; i < np; ++i ) {
       auto& part = ev[i];
       part.setPdgId( (long)pdg_id[i] );
-      part.setMomentum( cepgen::Momentum::fromPtEtaPhi( pt[i], eta[i], phi[i], E[i] ) );
+      part.setMomentum( cepgen::Momentum::fromPtEtaPhiE( pt[i], eta[i], phi[i], E[i] ) );
       part.setRole( (cepgen::Particle::Role)role[i] );
       part.setStatus( (cepgen::Particle::Status)status[i] );
     }
