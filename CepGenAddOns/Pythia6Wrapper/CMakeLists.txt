@@ -28,19 +28,9 @@ else()
   list(APPEND PYTHIA6LIB pythia6)
 endif()
 
-include_directories(${PROJECT_SOURCE_DIR})
-
-file(GLOB sources *.cpp)
-
 #----- build the objects
 
-add_library(CepGenPythia6 SHARED ${sources})
-target_link_libraries(CepGenPythia6 PRIVATE ${PYTHIA6LIB})
-set_property(TARGET CepGenPythia6 PROPERTY CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-misleading-indentation")
-list(APPEND CEPGEN_ADDONS_EXT CepGenPythia6)
-set(CEPGEN_ADDONS_EXT ${CEPGEN_ADDONS_EXT} PARENT_SCOPE)
-
-#----- installation rules
-
-install(TARGETS CepGenPythia6 DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT pythia6)
+cepgen_build(CepGenPythia6 SOURCES *.cpp
+    PROPERTY CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-misleading-indentation"
+    INSTALL_COMPONENT pythia6)
 

@@ -221,7 +221,7 @@ namespace cepgen
         const double px = std::sqrt( px2 );
 
         //--- build 4-vectors and boost decay particles
-        auto pdq = Momentum::fromPThetaPhi( px, theta, phi, std::hypot( px, mdq ) );
+        auto pdq = Momentum::fromPThetaPhiE( px, theta, phi, std::hypot( px, mdq ) );
         auto pq = -pdq; pq.setEnergy( std::hypot( px, mq ) );
 
         //--- singlet

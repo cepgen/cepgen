@@ -42,8 +42,9 @@ include(UseEnvironment)
 set(CEPGEN_LIBRARIES)
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 set(CEPGEN_CORE_EXT ${GSL_LIB} ${GSL_CBLAS_LIB} dl)
-set(CEPGEN_ADDONS_EXT)
 set(CEPGEN_HAS_FUNCTIONALS OFF)
+
+include(BuildUtils)
 
 #----- enable fortran for external libraries linking
 
@@ -57,7 +58,6 @@ if(CMAKE_BUILD_PROCESSES)
 endif()
 if(CMAKE_BUILD_ADDONS)
   add_subdirectory(CepGenAddOns)
-  message(STATUS "Found addons: ${CEPGEN_ADDONS_EXT}")
 endif()
 if(CMAKE_BUILD_CORE)
   add_subdirectory(CepGen)
