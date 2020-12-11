@@ -1,9 +1,9 @@
 function(cepgen_build mod_name)
     set(options)
-    set(one_val_args)
-    set(multi_val_args SOURCES EXT_LIBS EXT_HEADERS DEFINITIONS PROPERTY INSTALL_COMPONENT)
-    cmake_parse_arguments(ARG "${options}" "${one_val_args}" "${multi_val_args}" ${ARGN})
-    message(STATUS "Will build ${mod_name} add-on")
+    set(one_val)
+    set(multi_vals SOURCES EXT_LIBS EXT_HEADERS DEFINITIONS PROPERTY INSTALL_COMPONENT)
+    cmake_parse_arguments(ARG "${options}" "${one_val}" "${multi_vals}" ${ARGN})
+    message(STATUS "Building ${mod_name} add-on")
     if(ARG_SOURCES)
         set(sources)
         foreach(_s ${ARG_SOURCES})
@@ -32,8 +32,13 @@ function(cepgen_build mod_name)
     target_include_directories(${mod_name} INTERFACE ${PROJECT_SOURCE_DIR})
     if(ARG_INSTALL_COMPONENT)
         #----- installation rules
-        install(TARGETS ${mod_name} DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${ARG_INSTALL_COMPONENT})
-        install(DIRECTORY DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} COMPONENT ${ARG_INSTALL_COMPONENTS} FILES_MATCHING PATTERN "*.h")
+        install(TARGETS ${mod_name}
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            COMPONENT ${ARG_INSTALL_COMPONENT})
+        install(DIRECTORY
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+            COMPONENT ${ARG_INSTALL_COMPONENTS}
+            FILES_MATCHING PATTERN "*.h")
     endif()
     set(CEPGEN_ADDONS_EXT ${CEPGEN_ADDONS_EXT} PARENT_SCOPE)
 endfunction()
