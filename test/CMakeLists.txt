@@ -34,7 +34,7 @@ foreach(exec_src ${tests_fortran})
   get_filename_component(exec_bin ${exec_src} NAME_WE)
   add_executable(${exec_bin} ${exec_src})
   target_link_libraries(${exec_bin} ${tests_libraries} stdc++)
-#list(APPEND tests ${exec_bin}) #for the moment, excluding F77 tests
+  #list(APPEND tests ${exec_bin}) # for the moment, excluding F77 tests
 endforeach()
 
 message(STATUS ">>> Miscellaneous tests <<<")
