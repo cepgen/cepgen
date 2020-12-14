@@ -62,7 +62,7 @@ add_version_definition(${core_sources})
 
 add_library(CepGenCore SHARED ${core_sources} ${int_sources} ${phys_sources} ${proc_sources} ${sf_sources} ${ff_sources})
 target_compile_definitions(CepGenCore PRIVATE ${core_definitions})
-target_link_libraries(CepGenCore INTERFACE ${CEPGEN_CORE_EXT})
+target_link_libraries(CepGenCore INTERFACE ${CEPGEN_CORE_EXT} stdc++fs)
 target_include_directories(CepGenCore PRIVATE ${core_includes})
 
 #----- installation rules

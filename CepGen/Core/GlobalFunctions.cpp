@@ -3,10 +3,12 @@
 
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 
 #include "CepGen/Core/Exception.h"
+
 #include "CepGen/Utils/String.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/Filesystem.h"
 
 #include <fstream>
 #include <atomic>
@@ -70,7 +72,7 @@ namespace cepgen
     static const std::string pdg_file = "";
     search_paths = std::vector<std::string>{
       utils::environ( "CEPGEN_PATH", "." ),
-      "/usr/share/CepGen"
+      fs::path()/"usr"/"share"/"CepGen"
     };
 
     //--- header message
