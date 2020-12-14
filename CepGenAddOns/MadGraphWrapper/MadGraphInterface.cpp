@@ -10,21 +10,12 @@
 
 #include "CepGenAddOns/MadGraphWrapper/MadGraphInterface.h"
 #include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/PDG.h"
 
 #include <fstream>
 #include <array>
-
-#if __cplusplus >= 201703L
-#include <filesystem>
-namespace fs = std::filesystem;
-#elif __cplusplus >= 201103L
-#include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
-#else
-#error "*** no support for filesystem! ***"
-#endif
 
 namespace cepgen
 {
@@ -177,13 +168,19 @@ namespace cepgen
 
     //--- find all processes registered
     std::vector<std::string> processes;
-    for ( const auto& p : fs::directory_iterator( tmp_path/"SubProcesses" ) )
-      if ( p.path().filename().string()[0] == 'P' ) {
-        processes.emplace_back( p.path() );
-        for ( const auto& f : fs::directory_iterator( p ) )
-          if ( f.path().extension() == ".cc" )
-            src_files.emplace_back( f.path() );
-      }
+    try {
+      for ( const auto& p : fs::directory_iterator( tmp_path/"SubProcesses" ) )
+        if ( p.path().filename().string()[0] == 'P' ) {
+          processes.emplace_back( p.path() );
+          for ( const auto& f : fs::directory_iterator( p ) )
+            if ( f.path().extension() == ".cc" )
+              src_files.emplace_back( f.path() );
+        }
+    } catch ( const fs::filesystem_error& err ) {
+      throw CG_FATAL( "MadGraphInterface:generateLibrary" )
+        << "Failed to retrieve all subprocesses in path " << tmp_path << "!\n"
+        << err.what();
+    }
 
     if ( processes.size() != 1 )
       throw CG_FATAL( "MadGraphInterface:generateLibrary" )
