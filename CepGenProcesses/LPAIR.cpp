@@ -539,7 +539,7 @@ namespace cepgen
         return false;
       }
 
-      p3_lab_ = Momentum::fromPThetaPhi( pp3, -asin( pt3/pp3 ), asin( -rr/pt3 ), ep3 );
+      p3_lab_ = Momentum::fromPThetaPhiE( pp3, -asin( pt3/pp3 ), asin( -rr/pt3 ), ep3 );
 
       CG_DEBUG_LOOP( "LPAIR" ) << "Positive-z beam state:\n\t"
         << std::scientific
@@ -559,7 +559,7 @@ namespace cepgen
         return false;
       }
 
-      p5_lab_ = Momentum::fromPThetaPhi( pp5, M_PI+asin( pt5/pp5 ), asin( rr/pt5 ), ep5 );
+      p5_lab_ = Momentum::fromPThetaPhiE( pp5, M_PI+asin( pt5/pp5 ), asin( rr/pt5 ), ep5 );
 
       CG_DEBUG_LOOP( "LPAIR" ) << "Negative-z beam state:\n\t"
         << std::scientific
@@ -699,7 +699,7 @@ namespace cepgen
         << "stcm6 = " << sin( theta6cm );
 
       // First outgoing lepton's 3-momentum in the centre of mass system
-      auto p6cm = Momentum::fromPThetaPhi( pp6cm, theta6cm, phi6_cm_ );
+      auto p6cm = Momentum::fromPThetaPhiE( pp6cm, theta6cm, phi6_cm_ );
 
       CG_DEBUG_LOOP( "LPAIR" ) << "p3cm6 = " << p6cm;
 
@@ -733,7 +733,7 @@ namespace cepgen
       );
 
       // second outgoing lepton's kinematics
-      p7_cm_ = Momentum::fromPThetaPhi( pc4_, acos( cos_theta4_ ), 0., ec4_ )-p6_cm_;
+      p7_cm_ = Momentum::fromPThetaPhiE( pc4_, acos( cos_theta4_ ), 0., ec4_ )-p6_cm_;
 
       CG_DEBUG_LOOP( "LPAIR" )
         << "Outgoing kinematics\n\t"

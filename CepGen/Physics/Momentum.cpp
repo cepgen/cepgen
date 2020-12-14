@@ -25,7 +25,7 @@ namespace cepgen
   //--- static constructors
 
   Momentum
-  Momentum::fromPtEtaPhi( double pt, double eta, double phi, double e )
+  Momentum::fromPtEtaPhiE( double pt, double eta, double phi, double e )
   {
     const double px = pt*cos( phi ),
                  py = pt*sin( phi ),
@@ -44,7 +44,7 @@ namespace cepgen
   }
 
   Momentum
-  Momentum::fromPThetaPhi( double p, double theta, double phi, double e )
+  Momentum::fromPThetaPhiE( double p, double theta, double phi, double e )
   {
     const double px = p*sin( theta )*cos( phi ),
                  py = p*sin( theta )*sin( phi ),

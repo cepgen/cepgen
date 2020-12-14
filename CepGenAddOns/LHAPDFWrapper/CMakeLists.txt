@@ -2,24 +2,13 @@
 find_library(LHAPDF LHAPDF HINTS $ENV{LHAPDF_PATH} PATH_SUFFIXES lib)
 find_path(LHAPDF_INCLUDE LHAPDF HINTS $ENV{LHAPDF_PATH} PATH_SUFFIXES include)
 
-if(LHAPDF)
-  message(STATUS "LHAPDF found in ${LHAPDF}")
-else()
+if(NOT LHAPDF)
   return()
 endif()
 
-include_directories(${PROJECT_SOURCE_DIR})
+#----- build the object
 
-file(GLOB sources PartonicStructureFunctionsLHAPDF.cpp AlphaSLHAPDF.cpp)
-
-#----- build the objects
-
-add_library(CepGenLHAPDF SHARED ${sources})
-target_link_libraries(CepGenLHAPDF PRIVATE ${LHAPDF})
-target_include_directories(CepGenLHAPDF PRIVATE ${LHAPDF_INCLUDE})
-list(APPEND CEPGEN_ADDONS_EXT CepGenLHAPDF)
-set(CEPGEN_ADDONS_EXT ${CEPGEN_ADDONS_EXT} PARENT_SCOPE)
-
-#----- installation rules
-
-install(TARGETS CepGenLHAPDF DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT lhapdf)
+cepgen_build(CepGenLHAPDF SOURCES PartonicStructureFunctionsLHAPDF.cpp AlphaSLHAPDF.cpp
+    EXT_LIBS ${LHAPDF}
+    EXT_HEADERS ${LHAPDF_INCLUDE}
+    INSTALL_COMPONENT lhapdf)

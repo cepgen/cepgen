@@ -62,12 +62,12 @@ namespace cepgen
     Process2to4::computeKTFactorisedMatrixElement()
     {
       //--- transverse kinematics of initial partons
-      const auto qt_1 = Momentum::fromPtEtaPhi( qt1_, 0., phi_qt1_ );
+      const auto qt_1 = Momentum::fromPtEtaPhiE( qt1_, 0., phi_qt1_ );
       if ( fabs( qt_1.pt()-qt1_ ) > NUM_LIMITS )
         throw CG_FATAL( "Process2to4" )
           << "|qt1|=" << qt1_ << " != qt1.pt()=" << qt_1.pt() << ", qt1=" << qt_1 << ".";
 
-      const auto qt_2 = Momentum::fromPtEtaPhi( qt2_, 0., phi_qt2_ );
+      const auto qt_2 = Momentum::fromPtEtaPhiE( qt2_, 0., phi_qt2_ );
       if ( fabs( qt_2.pt()-qt2_ ) > NUM_LIMITS )
         throw CG_FATAL( "Process2to4" )
           << "|qt2|=" << qt1_ << " != qt2.pt()=" << qt_2.pt() << ", qt2=" << qt_2 << ".";
@@ -81,7 +81,7 @@ namespace cepgen
         << "sum(qt) = " << qt_sum;
 
       //--- transverse kinematics of outgoing central system
-      const auto pt_diff = Momentum::fromPtEtaPhi( pt_diff_, 0., phi_pt_diff_ );
+      const auto pt_diff = Momentum::fromPtEtaPhiE( pt_diff_, 0., phi_pt_diff_ );
       if ( fabs( pt_diff.pt()-pt_diff_ ) > NUM_LIMITS )
         throw CG_FATAL( "Process2to4" )
           << "|dpt|=" << pt_diff_ << " != dpt.pt()=" << pt_diff.pt() << ", dpt=" << pt_diff << ".";
