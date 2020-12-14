@@ -14,7 +14,7 @@ endif()
 
 #----- build the object
 
-cepgen_build(CepGenBOOST SOURCES ${sources}
+cepgen_build(CepGenBoost SOURCES ${sources}
     EXT_LIBS ${Boost_LIBRARIES}
     EXT_HEADERS ${Boost_INCLUDE_DIRS}
     INSTALL_COMPONENT boost)

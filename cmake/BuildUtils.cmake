@@ -1,4 +1,4 @@
-function(cepgen_build mod_name)
+macro(cepgen_build mod_name)
     set(options)
     set(one_val)
     set(multi_vals SOURCES EXT_LIBS EXT_HEADERS DEFINITIONS PROPERTY INSTALL_COMPONENT)
@@ -41,5 +41,5 @@ function(cepgen_build mod_name)
             FILES_MATCHING PATTERN "*.h")
     endif()
     set(CEPGEN_ADDONS_EXT ${CEPGEN_ADDONS_EXT} PARENT_SCOPE)
-endfunction()
+endmacro()
 
