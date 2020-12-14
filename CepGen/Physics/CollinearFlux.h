@@ -7,20 +7,20 @@
 namespace CepGen
 {
   class Limits;
-  class StructureFunctions;
+  namespace formfac{ class Parameterisation; }
   class HeavyIon;
   enum class KTFlux;
   struct FluxArguments
   {
-    double x, mx;
+    double x, mi2, mf2;
     KTFlux flux_type;
-    StructureFunctions* str_functions;
+    formfac::Parameterisation* form_factors;
     HeavyIon* heavy_ion;
   };
   class CollinearFlux
   {
     public:
-      CollinearFlux( const KTFlux& flux_type, const Limits& range, StructureFunctions* str_fun = nullptr );
+      CollinearFlux( const KTFlux& flux_type, const Limits& range, formfac::Parameterisation* form_fac = nullptr );
       CollinearFlux( const KTFlux& flux_type, const Limits& range, HeavyIon* hi );
       double operator()( double x, double mx ) const;
 

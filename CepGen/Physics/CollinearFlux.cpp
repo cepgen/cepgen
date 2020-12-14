@@ -22,18 +22,18 @@ namespace CepGen
         throw CG_FATAL( "CollinearFlux" ) << "Heavy ion not specified!";
       return ktFlux( args->flux_type, args->x, kt2, *args->heavy_ion );
     }
-    return ktFlux( args->flux_type, args->x, kt2, *args->str_functions, args->mx );
+    return ktFlux( args->flux_type, args->x, kt2, *args->form_factors, args->mi2, args->mf2 );
   }
 
-  CollinearFlux::CollinearFlux( const KTFlux& flux_type, const Limits& range, StructureFunctions* str_fun ) :
+  CollinearFlux::CollinearFlux( const KTFlux& flux_type, const Limits& range, formfac::Parameterisation* form_fac ) :
     workspace_( gsl_integration_fixed_alloc( INTEGR_TYPE, 50, range.min(), range.max(), 0., 0. ) ),
-    params_( new FluxArguments{ 0., 0., flux_type, str_fun, nullptr } ),
+    params_( new FluxArguments{ 0., std::pow( PDG::get().mass( PDG::proton ), 2 ), 0., flux_type, form_fac, nullptr } ),
     function_( { &unintegrated_flux, (void*)params_.get() } )
   {}
 
   CollinearFlux::CollinearFlux( const KTFlux& flux_type, const Limits& range, HeavyIon* hi ) :
     workspace_( gsl_integration_fixed_alloc( INTEGR_TYPE, 50, range.min(), range.max(), 0., 0. ) ),
-    params_( new FluxArguments{ 0., 0., flux_type, nullptr, hi } ),
+    params_( new FluxArguments{ 0., std::pow( PDG::get().mass( PDG::proton ), 2 ), 0., flux_type, nullptr, hi } ),
     function_( { &unintegrated_flux, (void*)params_.get() } )
   {}
 
@@ -42,7 +42,7 @@ namespace CepGen
   {
     double result = 0.;
     params_->x = x;
-    params_->mx = mx;
+    params_->mf2 = mx*mx;
     const int res = gsl_integration_fixed( &function_, &result, workspace_.get() );
     if ( res != GSL_SUCCESS )
       CG_ERROR( "CollinearFlux" ) << gsl_strerror( res );
