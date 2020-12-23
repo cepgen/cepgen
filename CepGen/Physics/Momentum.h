@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
 #include <array>
 #include <iosfwd>
 
+#include "CepGen/Utils/Algebra.h"
+
 namespace cepgen {
   /**
    * Container for a particle's 4-momentum, along with useful methods to ease the development of any matrix element level generator
@@ -29,12 +31,14 @@ namespace cepgen {
    * \date Dec 2015
    * \author Laurent Forthomme <laurent.forthomme@cern.ch>
    */
-  class Momentum : private std::array<double, 4> {
+  class Momentum : public Vector {
   public:
     /// Build a 4-momentum using its 3-momentum coordinates and its energy
     explicit Momentum(double x = 0., double y = 0., double z = 0., double t = -1.);
     /// Build a 4-momentum using its 3-momentum coordinates and its energy
     explicit Momentum(double* p);
+    /// Build a 4-momentum using its coordinates
+    explicit Momentum(const Matrix&);
 
     //--- static definitions
 
@@ -61,30 +65,6 @@ namespace cepgen {
     double fourProduct(const Momentum&) const;
     /// Vector product of the 3-momentum with another 3-momentum
     double crossProduct(const Momentum&) const;
-    /// Compute the 4-vector sum of two 4-momenta
-    Momentum operator+(const Momentum&) const;
-    /// Add a 4-momentum through a 4-vector sum
-    Momentum& operator+=(const Momentum&);
-    /// Unary inverse operator
-    Momentum operator-() const;
-    /// Compute the inverse per-coordinate 4-vector
-    Momentum operator-(const Momentum&) const;
-    /// Subtract a 4-momentum through a 4-vector sum
-    Momentum& operator-=(const Momentum&);
-    /// Scalar product of two 3-momenta
-    double operator*(const Momentum&) const;
-    /// Vector product of two 3-momenta
-    Momentum operator%(const Momentum&) const;
-    /// Scalar product of the 3-momentum with another 3-momentum
-    double operator*=(const Momentum&);
-    /// Multiply all components of a 4-momentum by a scalar
-    Momentum operator*(double c) const;
-    /// Multiply all 4-momentum coordinates by a scalar
-    Momentum& operator*=(double c);
-    /// Left-multiply all 4-momentum coordinates by a scalar
-    friend Momentum operator*(double, const Momentum&);
-    /// Human-readable format for a particle's momentum
-    friend std::ostream& operator<<(std::ostream&, const Momentum&);
 
     /// Forward \f$\beta-\gamma\f$ boost
     Momentum& betaGammaBoost(double gamma, double betagamma);
@@ -100,15 +80,15 @@ namespace cepgen {
     /// Set the momentum along the \f$x\f$-axis (in GeV)
     Momentum& setPx(double px);
     /// Momentum along the \f$x\f$-axis (in GeV)
-    inline double px() const { return (*this)[X]; }
+    inline double px() const { return (*this)(X); }
     /// Set the momentum along the \f$y\f$-axis (in GeV)
     Momentum& setPy(double py);
     /// Momentum along the \f$y\f$-axis (in GeV)
-    inline double py() const { return (*this)[Y]; }
+    inline double py() const { return (*this)(Y); }
     /// Set the longitudinal momentum (in GeV)
     Momentum& setPz(double pz);
     /// Longitudinal momentum (in GeV)
-    inline double pz() const { return (*this)[Z]; }
+    inline double pz() const { return (*this)(Z); }
     /// Transverse momentum (in GeV)
     double pt() const;
     /// Squared transverse momentum (in GeV\f$^2\f$)
@@ -124,9 +104,9 @@ namespace cepgen {
     /// Set the energy (in GeV)
     Momentum& setEnergy(double);
     /// Energy (in GeV)
-    inline double energy() const { return (*this)[E]; }
+    inline double energy() const { return (*this)(E); }
     /// Squared energy (in GeV\f$^2\f$)
-    inline double energy2() const { return (*this)[E] * (*this)[E]; }
+    inline double energy2() const { return energy() * energy(); }
     /// Tranverse energy component (in GeV)
     double energyT() const;
     /// Squared tranverse energy component (in GeV\f$^2\f$)
@@ -185,17 +165,17 @@ namespace cepgen {
     Momentum& rotateThetaPhi(double theta_, double phi_);
     /// Apply a \f$ x\rightarrow -x\f$ transformation
     inline Momentum& mirrorX() {
-      (*this)[X] *= -1.;
+      (*this)(X) *= -1.;
       return *this;
     }
     /// Apply a \f$ y\rightarrow -y\f$ transformation
     inline Momentum& mirrorY() {
-      (*this)[Y] *= -1.;
+      (*this)(Y) *= -1.;
       return *this;
     }
     /// Apply a \f$ z\rightarrow -z\f$ transformation
     inline Momentum& mirrorZ() {
-      (*this)[Z] *= -1.;
+      (*this)(Z) *= -1.;
       return *this;
     }
 
