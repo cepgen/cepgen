@@ -42,14 +42,11 @@ namespace cepgen {
 
   static double normaliseSqrt(double x2) { return std::sqrt(x2 < 0. ? -x2 : x2); }
 
-  Momentum::Momentum(double x, double y, double z, double t) : std::array<double, 4>{{x, y, z, t == -1. ? 0. : t}} {
-    computeP();
-  }
+  Momentum::Momentum(double x, double y, double z, double t) : Vector{x, y, z, t == -1. ? 0. : t} { computeP(); }
 
-  Momentum::Momentum(double* p) {
-    std::copy_n(p, 4, begin());
-    computeP();
-  }
+  Momentum::Momentum(double* p) : Vector{p[0], p[1], p[2], p[3]} { computeP(); }
+
+  Momentum::Momentum(const Matrix& mat) : Vector(mat.column(0)) { computeP(); }
 
   Momentum::Momentum(const Vector& vec) {
     if (vec.size() < 3)
@@ -101,44 +98,6 @@ namespace cepgen {
 
   //--- arithmetic operators
 
-  Momentum Momentum::operator+(const Momentum& mom) const {
-    return Momentum(px() + mom.px(), py() + mom.py(), pz() + mom.pz(), energy() + mom.energy());
-  }
-
-  Momentum& Momentum::operator+=(const Momentum& mom) {
-    *this = *this + mom;
-    return computeP();
-  }
-
-  Momentum Momentum::operator-() const { return Momentum(-px(), -py(), -pz(), energy()); }
-
-  Momentum Momentum::operator-(const Momentum& mom) const {
-    return Momentum(px() - mom.px(), py() - mom.py(), pz() - mom.pz(), energy() - mom.energy());
-  }
-
-  Momentum& Momentum::operator-=(const Momentum& mom) {
-    *this = *this - mom;
-    return computeP();
-  }
-
-  double Momentum::operator*(const Momentum& mom) const { return threeProduct(mom); }
-
-  Momentum Momentum::operator%(const Momentum& mom) const {
-    return Momentum(
-        py() * mom.pz() - pz() * mom.py(), pz() * mom.px() - px() * mom.pz(), px() * mom.py() - py() * mom.px());
-  }
-
-  Momentum Momentum::operator*(double c) const { return Momentum(c * px(), c * py(), c * pz(), c * energy()); }
-
-  Momentum& Momentum::operator*=(double c) {
-    *this = *this * c;
-    return computeP();
-  }
-
-  Momentum operator*(double c, const Momentum& mom) {
-    return Momentum(c * mom.px(), c * mom.py(), c * mom.pz(), c * mom.energy());
-  }
-
   double Momentum::threeProduct(const Momentum& mom) const {
     CG_DEBUG_LOOP("Momentum") << "  (" << px() << ", " << py() << ", " << pz() << ")\n\t"
                               << "* (" << mom.px() << ", " << mom.py() << ", " << mom.pz() << ")\n\t"
@@ -159,22 +118,22 @@ namespace cepgen {
   //--- various setters
 
   Momentum& Momentum::setPx(double px) {
-    (*this)[X] = px;
+    (*this)(X) = px;
     return computeP();
   }
 
   Momentum& Momentum::setPy(double py) {
-    (*this)[Y] = py;
+    (*this)(Y) = py;
     return computeP();
   }
 
   Momentum& Momentum::setPz(double pz) {
-    (*this)[Z] = pz;
+    (*this)(Z) = pz;
     return computeP();
   }
 
   Momentum& Momentum::setEnergy(double e) {
-    (*this)[E] = e;
+    (*this)(E) = e;
     return *this;
   }
 
@@ -332,24 +291,13 @@ namespace cepgen {
   }
 
   Momentum& Momentum::rotateThetaPhi(double theta, double phi) {
-    const double cos_theta = std::cos(theta), sin_theta = std::sin(theta);
-    const double cos_phi = std::cos(phi), sin_phi = std::sin(phi);
-    double rotation_matrix[3][3];  //FIXME check this! cos(phi)->-sin(phi) & sin(phi)->cos(phi) --> phi->phi+pi/2 ?
-    std::vector<double> mom(3, 0.);
-    rotation_matrix[X][X] = -sin_phi;
-    rotation_matrix[X][Y] = -cos_theta * cos_phi;
-    rotation_matrix[X][Z] = sin_theta * cos_phi;
-    rotation_matrix[Y][X] = cos_phi;
-    rotation_matrix[Y][Y] = -cos_theta * sin_phi;
-    rotation_matrix[Y][Z] = sin_theta * sin_phi;
-    rotation_matrix[Z][X] = 0.;
-    rotation_matrix[Z][Y] = sin_theta;
-    rotation_matrix[Z][Z] = cos_theta;
-
-    for (size_t i = X; i <= Z; ++i)
-      for (size_t j = X; j <= Z; ++j)
-        mom[i] += rotation_matrix[i][j] * (*this)[j];
-    return setP(mom.at(X), mom.at(Y), mom.at(Z));
+    const double ctheta = cos(theta), stheta = sin(theta);
+    const double cphi = cos(phi), sphi = sin(phi);
+    const Matrix rot{
+        {-sphi, -ctheta * cphi, stheta * cphi}, {cphi, -ctheta * sphi, stheta * sphi}, {0., stheta, ctheta}};
+    //FIXME check this! cos(phi)->-sin(phi) & sin(phi)->cos(phi) --> phi->phi+pi/2 ?
+    *this = rot * (*this);
+    return *this;
   }
 
   //--- printout

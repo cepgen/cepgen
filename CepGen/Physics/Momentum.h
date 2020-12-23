@@ -1,6 +1,10 @@
 /*
  *  CepGen: a central exclusive processes event generator
+<<<<<<< HEAD
  *  Copyright (C) 2015-2024  Laurent Forthomme
+=======
+ *  Copyright (C) 2022-2024  Laurent Forthomme
+>>>>>>> 22bf0315 (Momentum is now a standard Vector)
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,22 +26,24 @@
 #include <array>
 #include <iosfwd>
 
-namespace cepgen {
-  class Vector;
-  /// Container for a particle's 4-momentum, along with useful methods to ease the development of any matrix element level generator
-  /// \date Dec 2015
-  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
-  class Momentum : private std::array<double, 4> {
-  public:
-    explicit Momentum(double x = 0.,
-                      double y = 0.,
-                      double z = 0.,
-                      double t = -1.);  ///< Build a 4-momentum using its 3-momentum coordinates and its energy
-    explicit Momentum(double* p);       ///< Build a 4-momentum using its 3-momentum coordinates and its energy
-    explicit Momentum(const Vector&);   ///< Build a 4-momentum using its 3-momentum coordinates and its energy
+#include "CepGen/Utils/Algebra.h"
 
-    bool operator==(const Momentum&) const;                                         ///< Equality operator
-    inline bool operator!=(const Momentum& oth) const { return !operator==(oth); }  ///< Inequality operator
+namespace cepgen {
+  /**
+   * Container for a particle's 4-momentum, along with useful methods to ease the development of any matrix element level generator
+   * \brief 4-momentum for a particle
+   * \date Dec 2015
+   * \author Laurent Forthomme <laurent.forthomme@cern.ch>
+   */
+  class Momentum : public Vector {
+  public:
+    /// Build a 4-momentum using its 3-momentum coordinates and its energy
+    explicit Momentum(double x = 0., double y = 0., double z = 0., double t = -1.);
+    /// Build a 4-momentum using its 3-momentum coordinates and its energy
+    explicit Momentum(double* p);
+    /// Build a 4-momentum using its coordinates
+    explicit Momentum(const Matrix&);
+>>>>>>> 22bf0315 (Momentum is now a standard Vector)
 
     //--- static definitions
 
@@ -87,9 +93,9 @@ namespace cepgen {
     Momentum& setPx(double px);                                 ///< Set the momentum along the \f$x\f$-axis (in GeV)
     Momentum& setPy(double py);                                 ///< Set the momentum along the \f$y\f$-axis (in GeV)
     Momentum& setPz(double pz);                                 ///< Set the longitudinal momentum (in GeV)
-    inline double px() const { return (*this)[X]; }             ///< Momentum along the \f$x\f$-axis (in GeV)
-    inline double py() const { return (*this)[Y]; }             ///< Momentum along the \f$y\f$-axis (in GeV)
-    inline double pz() const { return (*this)[Z]; }             ///< Longitudinal momentum (in GeV)
+    inline double px() const { return (*this)(X); }             ///< Momentum along the \f$x\f$-axis (in GeV)
+    inline double py() const { return (*this)(Y); }             ///< Momentum along the \f$y\f$-axis (in GeV)
+    inline double pz() const { return (*this)(Z); }             ///< Longitudinal momentum (in GeV)
     double pt() const;                                          ///< Transverse momentum (in GeV)
     double pt2() const;                                         ///< Squared transverse momentum (in GeV\f$^2\f$)
     Momentum transverse() const;                                ///< Transverse coordinates of a momentum
@@ -97,9 +103,9 @@ namespace cepgen {
     inline double p() const { return p_; }                      ///< 3-momentum norm (in GeV)
     inline double p2() const { return p_ * p_; }                ///< Squared 3-momentum norm (in GeV\f$^2\f$)
     Momentum& setEnergy(double);                                ///< Set the energy (in GeV)
-    inline double energy() const { return (*this)[E]; }         ///< Energy (in GeV)
-    inline double energy2() const { return (*this)[E] * (*this)[E]; }  ///< Squared energy (in GeV\f$^2\f$)
-    double energyT() const;                                            ///< Transverse energy component (in GeV)
+    inline double energy() const { return (*this)(E); }         ///< Energy (in GeV)
+    inline double energy2() const { return energy() * energy(); }  ///< Squared energy (in GeV\f$^2\f$)
+    double energyT() const;                                        ///< Transverse energy component (in GeV)
     double energyT2() const;     ///< Squared transverse energy component (in GeV\f$^2\f$)
     Momentum& setMass2(double);  ///< Compute the energy from the mass
     double mass2() const;        ///< Squared mass (in GeV\f$^2\f$) as computed from its energy and momentum
@@ -138,17 +144,17 @@ namespace cepgen {
     Momentum& rotateThetaPhi(double theta, double phi);  ///< Rotate the particle's momentum by a polar/azimuthal angle
     /// Apply an \f$ x\rightarrow -x\f$ transformation
     inline Momentum& mirrorX() {
-      (*this)[X] *= -1.;
+      (*this)(X) *= -1.;
       return *this;
     }
     /// Apply a \f$ y\rightarrow -y\f$ transformation
     inline Momentum& mirrorY() {
-      (*this)[Y] *= -1.;
+      (*this)(Y) *= -1.;
       return *this;
     }
     /// Apply a \f$ z\rightarrow -z\f$ transformation
     inline Momentum& mirrorZ() {
-      (*this)[Z] *= -1.;
+      (*this)(Z) *= -1.;
       return *this;
     }
 
