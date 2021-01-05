@@ -165,12 +165,7 @@ namespace cepgen {
 
   //--- various getters
 
-  std::array<double, 5> Momentum::pVector() const {
-    std::array<double, 5> out;
-    std::copy(begin(), end(), out.begin());
-    out[4] = mass();
-    return out;
-  }
+  std::array<double, 5> Momentum::pVector() const { return std::array<double, 5>{px(), py(), pz(), energy(), mass()}; }
 
   Momentum::operator Vector() const { return Vector{px(), py(), pz(), energy()}; }
 
@@ -286,15 +281,25 @@ namespace cepgen {
 
   Momentum& Momentum::rotatePhi(double phi, double sign) {
     const auto sin_phi = std::sin(phi), cos_phi = std::cos(phi);
-    const auto pxp = px() * cos_phi + sign * py() * sin_phi, pyp = -px() * sin_phi + sign * py() * cos_phi;
-    return setPx(pxp).setPy(pyp);
+    const Matrix rot{
+        {+cphi, sign * sphi, 0., 0.},  // px
+        {-sphi, sign * cphi, 0., 0.},  // py
+        {0., 0., 1., 0.},              // pz
+        {0., 0., 0., 1.}               // e
+    };
+    *this = rot * (*this);
+    return *this;
   }
 
   Momentum& Momentum::rotateThetaPhi(double theta, double phi) {
     const double ctheta = cos(theta), stheta = sin(theta);
     const double cphi = cos(phi), sphi = sin(phi);
     const Matrix rot{
-        {-sphi, -ctheta * cphi, stheta * cphi}, {cphi, -ctheta * sphi, stheta * sphi}, {0., stheta, ctheta}};
+        {-sphi, -ctheta * cphi, stheta * cphi, 0.},  // px
+        {cphi, -ctheta * sphi, stheta * sphi, 0.},   // py
+        {0., stheta, ctheta, 0.},                    // pz
+        {0., 0., 0., 1.}                             // e
+    };
     //FIXME check this! cos(phi)->-sin(phi) & sin(phi)->cos(phi) --> phi->phi+pi/2 ?
     *this = rot * (*this);
     return *this;
