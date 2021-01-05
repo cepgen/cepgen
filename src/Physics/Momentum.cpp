@@ -42,6 +42,13 @@ namespace cepgen {
 
   static double normaliseSqrt(double x2) { return std::sqrt(x2 < 0. ? -x2 : x2); }
 
+  const Matrix metricMatrix{
+      {-1., 0., 0., 0.},  // x
+      {0., -1., 0., 0.},  // y
+      {0., 0., -1., 0.},  // z
+      {0., 0., 0., 1.}    // t
+  };
+
   Momentum::Momentum(double x, double y, double z, double t) : Vector{x, y, z, t == -1. ? 0. : t} { computeP(); }
 
   Momentum::Momentum(double* p) : Vector{p[0], p[1], p[2], p[3]} { computeP(); }
@@ -105,13 +112,7 @@ namespace cepgen {
     return px() * mom.px() + py() * mom.py() + pz() * mom.pz();
   }
 
-  double Momentum::fourProduct(const Momentum& mom) const {
-    CG_DEBUG_LOOP("Momentum") << "  (" << px() << ", " << py() << ", " << pz() << ", " << energy() << ")\n\t"
-                              << "* (" << mom.px() << ", " << mom.py() << ", " << mom.pz() << ", " << mom.energy()
-                              << ")\n\t"
-                              << "= " << energy() * mom.energy() - threeProduct(mom);
-    return energy() * mom.energy() - threeProduct(mom);
-  }
+  double Momentum::fourProduct(const Momentum& mom) const { return (transposed() * metricMatrix * mom)(0); }
 
   double Momentum::crossProduct(const Momentum& mom) const { return px() * mom.py() - py() * mom.px(); }
 
@@ -265,7 +266,7 @@ namespace cepgen {
     const auto mass = mom.mass();
     if (mass == 0.)
       return *this;
-    const auto pf4 = (threeProduct(mom) + energy() * mom.energy()) / mass;
+    const double pf4 = dot(mom) / mass;
     const auto fn = (pf4 + energy()) / (mass + mom.energy());
     (*this) += fn * mom;
     return setEnergy(pf4);
