@@ -5,41 +5,44 @@
 
 namespace cepgen
 {
-  //--------------------------------------------------------------------
-  // physics system kinematic properties
-  //--------------------------------------------------------------------
-
-  CentralCuts::CentralCuts()
+  namespace cuts
   {
-    limits_.resize( CentralCutsProperties::num_properties );
-    limits_.at( e_pt_single ) = Property{ "pt", "Single particle pt (GeV/c)", Limits() };
-    limits_.at( e_eta_single ) = Property{ "eta", "Single particle eta", Limits() };
-    limits_.at( e_rapidity_single ) = Property{ "rapidity", "Single particle rapidity", Limits() };
-    limits_.at( e_energy_single ) = Property{ "energy", "Single particle energy (GeV)", Limits() };
-    limits_.at( e_mass_single ) = Property{ "mass", "Single particle mass (GeV/c^2)", Limits() };
-    limits_.at( e_pt_sum ) = Property{ "ptsum", "System pt (GeV/c)", Limits() };
-    limits_.at( e_eta_sum ) = Property{ "etasum", "System eta", Limits() };
-    limits_.at( e_energy_sum ) = Property{ "energysum", "System energy (GeV)", Limits() };
-    limits_.at( e_mass_sum ) = Property{ "invmass", "System mass (GeV/c^2)", Limits() };
-    limits_.at( e_pt_diff ) = Property{ "ptdiff", "System D(pt) (GeV/c)", Limits() };
-    limits_.at( e_phi_diff ) = Property{ "dphi", "System D(phi) (rad)", Limits() };
-    limits_.at( e_rapidity_diff ) = Property{ "rapiditydiff", "System D(Y)", Limits() };
-  }
+    //--------------------------------------------------------------------
+    // physics system kinematic properties
+    //--------------------------------------------------------------------
 
-  InitialCuts::InitialCuts()
-  {
-    limits_.resize( InitialCutsProperties::num_properties );
-    limits_.at( e_q2 ) = Property{ "q2", "Virtuality (GeV^2)", Limits() };
-    limits_.at( e_qt ) = Property{ "qt", "Transverse virtuality (GeV)", Limits() };
-    limits_.at( e_phi_qt ) = Property{ "phiqt", "Partons D(phi) (rad)", Limits() };
-  }
+    Central::Central()
+    {
+      limits_.resize( CentralProperties::num_properties );
+      limits_.at( e_pt_single ) = Property{ "pt", "Single particle pt (GeV/c)", Limits() };
+      limits_.at( e_eta_single ) = Property{ "eta", "Single particle eta", Limits() };
+      limits_.at( e_rapidity_single ) = Property{ "rapidity", "Single particle rapidity", Limits() };
+      limits_.at( e_energy_single ) = Property{ "energy", "Single particle energy (GeV)", Limits() };
+      limits_.at( e_mass_single ) = Property{ "mass", "Single particle mass (GeV/c^2)", Limits() };
+      limits_.at( e_pt_sum ) = Property{ "ptsum", "System pt (GeV/c)", Limits() };
+      limits_.at( e_eta_sum ) = Property{ "etasum", "System eta", Limits() };
+      limits_.at( e_energy_sum ) = Property{ "energysum", "System energy (GeV)", Limits() };
+      limits_.at( e_mass_sum ) = Property{ "invmass", "System mass (GeV/c^2)", Limits() };
+      limits_.at( e_pt_diff ) = Property{ "ptdiff", "System D(pt) (GeV/c)", Limits() };
+      limits_.at( e_phi_diff ) = Property{ "dphi", "System D(phi) (rad)", Limits() };
+      limits_.at( e_rapidity_diff ) = Property{ "rapiditydiff", "System D(Y)", Limits() };
+    }
 
-  RemnantsCuts::RemnantsCuts()
-  {
-    limits_.resize( RemnantsCutsProperties::num_properties );
-    limits_.at( e_mx ) = Property{ "mx", "Diffractive mass (GeV/c^2)", Limits() };
-    limits_.at( e_yj ) = Property{ "yj", "Diffractive jet rapidity", Limits() };
-    limits_.at( e_xi ) = Property{ "xi", "Longit. fractional momentum loss", Limits() };
+    Initial::Initial()
+    {
+      limits_.resize( InitialProperties::num_properties );
+      limits_.at( e_q2 ) = Property{ "q2", "Virtuality (GeV^2)", Limits() };
+      limits_.at( e_qt ) = Property{ "qt", "Transverse virtuality (GeV)", Limits() };
+      limits_.at( e_phi_qt ) = Property{ "phiqt", "Partons D(phi) (rad)", Limits() };
+    }
+
+    Remnants::Remnants()
+    {
+      limits_.resize( RemnantsProperties::num_properties );
+      limits_.at( e_mx ) = Property{ "mx", "Diffractive mass (GeV/c^2)", Limits() };
+      limits_.at( e_yj ) = Property{ "yj", "Diffractive jet rapidity", Limits() };
+      limits_.at( e_xi ) = Property{ "xi", "Longit. fractional momentum loss", Limits() };
+    }
   }
 
   //--------------------------------------------------------------------

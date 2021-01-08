@@ -19,7 +19,7 @@ namespace cepgen
 
       protected:
         /// Set all cuts for the single outgoing particle phase space definition
-        void setCuts( const CentralCuts& single );
+        void setCuts( const cuts::Central& single );
 
         void preparePhaseSpace() override;
         void fillCentralParticlesKinematics() override;
@@ -38,7 +38,7 @@ namespace cepgen
         static const Limits x_limits_; ///< Standard [0,1] limits for input variables
         ParticleProperties cs_prop_; ///< PDG id of the central particles
 
-        CentralCuts single_limits_; ///< Limits to be applied on single central system's particles
+        cuts::Central single_limits_; ///< Limits to be applied on single central system's particles
 
         Momentum pA_; ///< Momentum of the positive-z incoming beam particle
         Momentum pB_; ///< Momentum of the negative-z incoming beam particle
