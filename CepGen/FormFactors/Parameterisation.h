@@ -45,8 +45,7 @@ namespace cepgen
         static constexpr double MU = 2.79;
 
         /// Local form factors evaluation method
-        /// \param[in] q2 Squared 4-momentum transfer (in GeV^2)
-        virtual void compute( double q2 ) {}
+        virtual void compute( double ) {}
 
         const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
         const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
