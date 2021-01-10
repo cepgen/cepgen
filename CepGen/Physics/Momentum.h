@@ -69,6 +69,7 @@ namespace cepgen
       /// Human-readable format for a particle's momentum
       friend std::ostream& operator<<( std::ostream&, const Momentum& );
 
+      /// Forward \f$\beta-\gamma\f$ boost
       Momentum& betaGammaBoost( double gamma, double betagamma );
       /// Forward Lorentz boost
       Momentum& lorentzBoost( const Momentum& p );
@@ -124,6 +125,7 @@ namespace cepgen
       double eta() const;
       /// Rapidity
       double rapidity() const;
+      /// Apply a threshold to all values with a given tolerance
       Momentum& truncate( double tolerance = 1.e-10 );
       /// Rotate the transverse components by an angle phi (and reflect the y coordinate)
       Momentum& rotatePhi( double phi, double sign );

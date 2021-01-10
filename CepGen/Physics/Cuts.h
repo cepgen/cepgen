@@ -27,12 +27,14 @@ namespace cepgen
       std::vector<Property> list() const;
 
     protected:
+      /// List of limits associated to this phase space cuts definition
       std::vector<Property> limits_;
   };
 
   /// A namespace for all kinematic cuts
   namespace cuts
   {
+    /// Centrally produced particles phase space cuts
     class Central : public Cuts
     {
       public:
@@ -97,6 +99,7 @@ namespace cepgen
         };
     };
 
+    /// Initial parton-like particles phase space cuts
     class Initial : public Cuts
     {
       public:
@@ -122,6 +125,7 @@ namespace cepgen
         };
     };
 
+    /// Outgoing beam remant-like particles phase space cuts
     class Remnants : public Cuts
     {
       public:

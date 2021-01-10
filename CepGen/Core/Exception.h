@@ -10,6 +10,7 @@ namespace cepgen
   /// \date 27 Mar 2015
   struct Exception
   {
+    /// Generic exception constructor
     explicit inline Exception() = default;
     virtual ~Exception() noexcept = default;
     /// Enumeration of exception severities

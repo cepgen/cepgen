@@ -48,7 +48,7 @@ namespace cepgen
   namespace proc
   {
     ParametersList
-    FortranKTProcess::kProcParameters;
+    FortranKTProcess::kProcParameters; ///< List of parameters to steer the process
 
     FortranKTProcess::FortranKTProcess( const ParametersList& params, std::function<double( void )> func ) :
       KTProcess( params, { { PDG::photon, PDG::photon } }, { PDG::muon, PDG::muon } ),

@@ -5,10 +5,12 @@
 
 namespace cepgen
 {
+  /// Base runtime module object
   template<typename T=std::string>
   class NamedModule
   {
     public:
+      /// Build a module from its steering parameters
       explicit NamedModule( const ParametersList& params ) :
         params_( params ),
         name_( params.name<T>() ) {}
@@ -16,8 +18,9 @@ namespace cepgen
       /// Module unique name
       const T& name() const { return name_; }
       /// Module description
-      static std::string description() { return "No description"; }
-      static ParametersList defaultParameters() { return ParametersList(); }
+      static inline std::string description() { return "No description"; }
+      /// Collection of default parameters steering the module initialisation
+      static inline ParametersList defaultParameters() { return ParametersList(); }
       /// Module user-defined parameters
       inline const ParametersList& parameters() const { return params_; }
 

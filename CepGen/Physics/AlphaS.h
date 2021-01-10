@@ -17,6 +17,7 @@ namespace cepgen
   class AlphaS : public NamedModule<>
   {
     public:
+      /// Build an \f$\alpha_S\f$ interpolator object
       AlphaS( const ParametersList& params ) : NamedModule( params ) {}
       /// Compute \f$\alpha_S\f$ for a given \f$Q^2\f$
       virtual double operator()( double q ) const = 0;

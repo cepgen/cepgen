@@ -19,6 +19,7 @@ namespace cepgen
     class TimeKeeper
     {
       public:
+        /// Object constructor
         explicit TimeKeeper();
 
         /// Reset all counters and the timer
@@ -38,6 +39,7 @@ namespace cepgen
         class Ticker
         {
           public:
+            /// Build a named and scoped time ticker
             explicit Ticker( TimeKeeper*, const std::string& );
             /// Ticker destructor to store the timing information to the parent timekeeper
             ~Ticker();

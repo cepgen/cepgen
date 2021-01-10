@@ -8,14 +8,18 @@ namespace cepgen
 {
   class ParametersList;
   namespace strfun { class Parameterisation; }
+  /// Form factors definition scope
   namespace formfac
   {
     /// Nucleon electromagnetic form factors parameterisation
     class Parameterisation : public NamedModule<std::string>
     {
       public:
+        /// Empty parameterisation object constructor
         explicit Parameterisation();
+        /// Steered parameterisation object constructor
         Parameterisation( const ParametersList& );
+        /// Copy constructor
         Parameterisation( const Parameterisation& );
 
         static std::string description() { return "Unnamed form factors parameterisation"; }
@@ -27,17 +31,22 @@ namespace cepgen
 
         /// Specify the structure functions modelling where applicable
         void setStructureFunctions( strfun::Parameterisation* sfmod ) { str_fun_ = sfmod; }
+        /// Retrieve the structure function interpolation object used here
         strfun::Parameterisation* structureFunctions() const { return str_fun_; }
 
+        /// \f$\tau=Q^2/4m_p^2\f$ variable definition
         double tau( double q2 ) const;
 
         /// Compute all relevant form factors functions for a given \f$Q^2\f$ value
         Parameterisation& operator()( const mode::Beam& /*type*/, double /*q2*/, double mf2 = 0. );
 
       protected:
+        /// Proton magnetic moment
         static constexpr double MU = 2.79;
 
-        virtual void compute( double ) {}
+        /// Local form factors evaluation method
+        /// \param[in] q2 Squared 4-momentum transfer (in GeV^2)
+        virtual void compute( double q2 ) {}
 
         const double mp_; ///< Proton mass, in GeV/c\f$^2\f$
         const double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
