@@ -78,7 +78,7 @@ namespace cepgen
     void
     PPtoWW::prepareProcessKinematics()
     {
-      CentralCuts single_w_cuts;
+      cuts::Central single_w_cuts;
       if ( kin_.cuts.central_particles.count( PDG::W ) > 0 )
         single_w_cuts = kin_.cuts.central_particles.at( PDG::W );
       setCuts( single_w_cuts );

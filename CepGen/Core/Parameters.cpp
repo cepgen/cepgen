@@ -303,7 +303,7 @@ namespace cepgen
       os << std::setw( wt ) << ( pretty ? utils::boldify( ">>> per-particle cuts:" ) : ">>> per-particle cuts:" ) << "\n";
       for ( const auto& part_per_lim : cuts.central_particles ) {
         os << " * all single " << std::setw( wt-3 ) << PDG::get().name( part_per_lim.first ) << "\n";
-        for ( const auto& lim : const_cast<CentralCuts&>( part_per_lim.second ).list() )
+        for ( const auto& lim : const_cast<cuts::Central&>( part_per_lim.second ).list() )
           if ( lim.limits.valid() )
             os << "   - " << std::setw( wt-5 ) << lim.description << lim.limits << "\n";
       }

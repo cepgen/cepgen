@@ -28,8 +28,6 @@ namespace cepgen
 
         /// Unique name of the output module
         const std::string& name() const { return name_; }
-        /// Global list of steering parameters
-        const ParametersList& parameters() { return params_; }
         /// Set the process cross section and its associated error
         virtual void setCrossSection( double /*xsec*/, double /*err_xsec*/ ) {}
         /// Set the event number

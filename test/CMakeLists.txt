@@ -35,7 +35,7 @@ endforeach()
 foreach(exec_src ${tests_fortran})
   string(REPLACE ".f" "" exec_bin ${exec_src})
   add_executable(${exec_bin} ${exec_src})
-  target_link_libraries(${exec_bin} ${tests_libraries})
+  target_link_libraries(${exec_bin} ${tests_libraries} stdc++)
   #list(APPEND tests ${exec_bin}) # for the moment, excluding F77 tests
 endforeach()
 

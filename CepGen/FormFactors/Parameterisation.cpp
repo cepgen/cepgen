@@ -21,18 +21,18 @@ namespace cepgen
       FE( 0. ), FM( 0. ), GE( 0. ), GM( 0. )
     {}
 
-    Parameterisation::Parameterisation( const Parameterisation& param ) :
-      NamedModule<std::string>( param.parameters() ),
-      mp_( param.mp_ ), mp2_( param.mp2_ ),
-      last_q2_( -1. ),
-      FE( param.FE ), FM( param.FM ), GE( param.GE ), GM( param.GM )
-    {}
-
     Parameterisation::Parameterisation( const ParametersList& params ) :
       NamedModule<std::string>( params ),
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       last_q2_( -1. ),
       FE( 0. ), FM( 0. ), GE( 0. ), GM( 0. )
+    {}
+
+    Parameterisation::Parameterisation( const Parameterisation& param ) :
+      NamedModule<std::string>( param.parameters() ),
+      mp_( param.mp_ ), mp2_( param.mp2_ ),
+      last_q2_( -1. ),
+      FE( param.FE ), FM( param.FM ), GE( param.GE ), GM( param.GM )
     {}
 
     double

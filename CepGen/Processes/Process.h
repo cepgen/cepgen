@@ -90,7 +90,9 @@ namespace cepgen
       protected:
         double mp_; ///< Proton mass, in GeV/c\f$^2\f$
         double mp2_; ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
-        /// Type of mapping to apply on the variable
+        /**
+         * \brief Type of mapping to apply on the variable
+         */
         enum class Mapping
         {
           linear = 0, ///< a linear \f${\rm d}x\f$ mapping

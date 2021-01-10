@@ -78,8 +78,9 @@ namespace cepgen
       /// Collection of events generation parameters
       struct Generation
       {
+        /// Build a generation parameters collection from a user input
         Generation( const ParametersList& );
-        Generation( const Generation& );
+        Generation( const Generation& ); ///< Copy constructor
         Generation& operator=( const Generation& ) = default; ///< Assignment operator
         bool enabled; ///< Are we generating events ? (true) or are we only computing the cross-section ? (false)
         unsigned long maxgen; ///< Maximal number of events to generate in this run

@@ -11,6 +11,7 @@ namespace cepgen
   class GridParameters
   {
     public:
+      /// Build a generation grid for a ndim-dimensional phase space
       GridParameters( size_t ndim );
 
       /// Coordinates definition
@@ -21,6 +22,7 @@ namespace cepgen
 
       /// Grid multiplicity
       size_t size() const;
+      /// Number of times a phase space point has been randomly selected
       const coord_t& n( size_t coord ) const;
       /// Global function maximum
       double globalMax() const { return f_max_global_; }
@@ -42,6 +44,7 @@ namespace cepgen
 
       /// Has the grid been already prepared?
       bool gen_prepared;
+      /// Correction to apply on the next phase space point generation
       double correc;
       double correc2;
       double f_max2;

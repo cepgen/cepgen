@@ -26,7 +26,6 @@ namespace cepgen
       F2( sf.F2 ), FL( sf.FL ),
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       mx_min_( mp_+PDG::get().mass( PDG::piPlus ) ),
-      params_( sf.params_ ),
       old_vals_( sf.old_vals_ ),
       r_ratio_( sf.r_ratio_ )
     {}
@@ -36,7 +35,7 @@ namespace cepgen
       F2( 0. ), FL( 0. ),
       mp_( PDG::get().mass( PDG::proton ) ), mp2_( mp_*mp_ ),
       mx_min_( mp_+PDG::get().mass( PDG::piZero ) ),
-      params_( params ), old_vals_({ 0., 0. }),
+      old_vals_({ 0., 0. }),
       r_ratio_( sigrat::SigmaRatiosFactory::get().build(
         params.get<ParametersList>( "sigmaRatio", ParametersList()
           .setName<int>( (int)sigrat::Type::SibirtsevBlunden ) )

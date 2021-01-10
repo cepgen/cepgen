@@ -41,8 +41,10 @@ namespace cepgen
         void pack( const Parameters* params ) override;
 
       protected:
+        /// Read and cast a file into the property tree
         virtual void read( const std::string& ) = 0;
 
+        /// The BOOST property tree translated by this configuration
         pt::ptree tree_;
 
       private:
@@ -344,6 +346,7 @@ namespace cepgen
     // class specialisations for each Boost format to be handled
     //------------------------------------------------------------------
 
+    /// A JSON configuration file parser
     class JsonHandler : public BoostTreeHandler
     {
       using BoostTreeHandler::BoostTreeHandler;
@@ -355,6 +358,7 @@ namespace cepgen
       }
     };
 
+    /// An INFO configuration file parser
     class InfoHandler : public BoostTreeHandler
     {
       using BoostTreeHandler::BoostTreeHandler;
@@ -366,6 +370,7 @@ namespace cepgen
       }
     };
 
+    /// An XML configuration file parser
     class XmlHandler : public BoostTreeHandler
     {
       using BoostTreeHandler::BoostTreeHandler;

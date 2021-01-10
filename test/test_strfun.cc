@@ -11,26 +11,34 @@
 #include "CepGen/Utils/ArgumentsParser.h"
 #include <fstream>
 
+using namespace std;
+
 int main( int argc, char* argv[] )
 {
-  int strfun_type, num_points;
-  std::vector<double> q2in, xbjin;
-  std::string output_file;
+  vector<int> strfun_type;
+  int num_points;
+  vector<double> q2in, xbjin;
+  string output_file;
 
   cepgen::ArgumentsParser( argc, argv )
-    .addOptionalArgument( "sf,s", "structure functions modelling", &strfun_type, 301 )
-    .addOptionalArgument( "q2,q", "parton virtuality (GeV^2)", &q2in, std::vector<double>{} )
-    .addOptionalArgument( "xbj,x", "Bjorken-x", &xbjin, std::vector<double>{} )
+    .addOptionalArgument( "sf,s", "structure functions modelling", &strfun_type, vector<int>{ 301 } )
+    .addOptionalArgument( "q2,q", "parton virtuality (GeV^2)", &q2in, vector<double>{} )
+    .addOptionalArgument( "xbj,x", "Bjorken-x", &xbjin, vector<double>{} )
     .addOptionalArgument( "npoints,n", "number of x-points to scan", &num_points, 100 )
     .addOptionalArgument( "output,o", "output file name", &output_file, "flux.scan.output.txt" )
     .parse();
 
   cepgen::initialise();
-  std::vector<double> q2vals, xbjvals;
+  vector<double> q2vals, xbjvals;
 
-  auto sf = cepgen::strfun::StructureFunctionsFactory::get().build( strfun_type );
-  std::ofstream out( output_file );
-  out << "# structure functions: " << sf.get() << "\n";
+  ofstream out( output_file );
+  out << "# structure functions:\n";
+  vector<std::unique_ptr<cepgen::strfun::Parameterisation> > params;
+  for ( const auto& type : strfun_type ) {
+    params.emplace_back( cepgen::strfun::StructureFunctionsFactory::get().build( type ) );
+    auto& sf = *params.rbegin();
+    out << "# * " << sf.get() << "\n";
+  }
   if ( q2in.empty() )
     throw CG_FATAL( "main" ) << "At least one value of Q^2 is required!";
   else if ( q2in.size() == 2 ) { // min-max
@@ -55,9 +63,13 @@ int main( int argc, char* argv[] )
 
   for ( const auto& xbj : xbjvals )
     for ( const auto& q2 : q2vals ) {
-      auto& sfval = (*sf)( xbj, q2 );
-      sfval.computeFL( xbj, q2 );
-      out << q2 << "\t" << xbj << "\t" << sfval.F2 << "\t" << sfval.FL << "\n";
+      out << q2 << "\t" << xbj;
+      for ( auto& sf : params ) {
+        auto& sfval = (*sf)( xbj, q2 );
+        sfval.computeFL( xbj, q2 );
+        out << "\t" << sfval.F2 << "\t" << sfval.FL;
+      }
+      out << "\n";
     }
 
   CG_INFO( "main" )

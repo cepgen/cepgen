@@ -5,6 +5,7 @@
 
 namespace cepgen
 {
+  /// Collection of CepGen version information handlers
   struct version
   {
     /// CepGen version

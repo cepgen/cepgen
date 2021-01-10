@@ -50,6 +50,7 @@ namespace cepgen
         /// Assign from another SF parameterisation object
         Parameterisation& operator=( const Parameterisation& sf );
 
+        /// Generic description for the structure functions
         static std::string description() { return "Unnamed structure functions"; }
 
         /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
@@ -59,8 +60,6 @@ namespace cepgen
         /// Human-readable description of this SF parameterisation
         virtual std::string describe() const; ///< Human-readable description of this SF set
 
-        /// Set of parameters used to build this parameterisation
-        const ParametersList& parameters() const { return params_; }
         /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
         const sigrat::Parameterisation* sigmaRatio() const { return r_ratio_.get(); }
 
@@ -81,12 +80,14 @@ namespace cepgen
         double FL; ///< Last computed longitudinal structure function value
 
       protected:
+        /// Local structure functions evaluation method
+        /// \param[in] xbj Bjorken's x variable
+        /// \param[in] q2 Squared 4-momentum transfer (in GeV^2)
         virtual Parameterisation& eval( double xbj, double q2 );
         const double mp_; ///< Proton mass, in GeV/c^2
         const double mp2_; ///< Squared proton mass, in GeV^2/c^4
         const double mx_min_; ///< Minimum diffractive mass, in GeV/c^2
 
-        ParametersList params_; ///< List of parameters used for this builder definition
         std::pair<double,double> old_vals_; ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed
 
         /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$

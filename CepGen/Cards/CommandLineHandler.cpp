@@ -34,6 +34,7 @@ namespace cepgen
     class CommandLineHandler : public Handler
     {
       public:
+        /// Cast command line arguments into a configuration word
         explicit CommandLineHandler( const ParametersList& );
         static std::string description() { return "Command line configuration parser"; }
 

@@ -16,6 +16,7 @@
 
 namespace cepgen
 {
+  /// A "prettified" text box object
   class PaveText : public TPaveText
   {
     public:
@@ -42,9 +43,13 @@ namespace cepgen
       }
   };
 
+  /// A "prettified" generic figure canvas
   class Canvas : public TCanvas
   {
     public:
+      /// Build a canvas from its name, title, and attributes
+      /// \param[in] name Canvas name (and subsequently filename on save)
+      /// \param[in] ratio Divide the canvas into a main and ratio plots subparts?
       explicit inline Canvas( const char* name, const char* title="", bool ratio=false ) :
         //TCanvas( name, "", 450, 450 ),
         TCanvas( name, "", 600, 600 ),

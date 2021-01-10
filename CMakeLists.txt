@@ -11,6 +11,7 @@ option(CMAKE_BUILD_SCAN "Build cross-section scan utilitary" OFF)
 option(CMAKE_BUILD_CARD_CONV "Build steering cards converter utilitary" OFF)
 option(CMAKE_BUILD_TESTS "Build tests" OFF)
 option(CMAKE_BUILD_FOAM "Build FOAM integrator" OFF)
+option(CMAKE_COVERAGE "Generate code coverage" OFF)
 #----- release build by default
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -21,6 +22,18 @@ endif()
 
 if(NOT CMAKE_BUILD_CORE AND NOT CMAKE_BUILD_PROCESSES AND NOT CMAKE_BUILD_ADDONS)
   message(FATAL_ERROR "Nothing to be built!")
+endif()
+
+if(CMAKE_COVERAGE AND CMAKE_BUILD_TESTS)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+  set(LINK_FLAGS "${LINK_FLAGS} -fprofile-arcs -ftest-coverage")
+  add_custom_command(OUTPUT run_coverage
+    COMMAND ctest
+    #COMMAND cepgen Cards/lpair_cfg.py -n 1000
+    COMMAND lcov --capture --directory CepGen --output-file coverage.info
+    COMMAND genhtml -q coverage.info --output-directory coverage
+    COMMENT Collecting and creating coverage information)
+  add_custom_target(coverage DEPENDS run_coverage)
 endif()
 
 #set(CMAKE_INSTALL_RPATH "$ORIGIN")

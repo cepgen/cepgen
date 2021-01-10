@@ -44,7 +44,7 @@ namespace cepgen
       protected:
         std::vector<std::string> vars_; ///< Computer-readable variable to be reached
         std::string expression_; ///< Computer-readable expression
-        mutable std::vector<double> values_;
+        mutable std::vector<double> values_; ///< Last arguments list fed to the functional
     };
   }
 }

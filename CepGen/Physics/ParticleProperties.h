@@ -6,6 +6,7 @@
 
 namespace cepgen
 {
+  /// Alias for the integer-like particle PDG id
   typedef unsigned long pdgid_t;
   /// A collection of physics constants associated to a single particle
   struct ParticleProperties
