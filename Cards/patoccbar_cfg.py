@@ -1,9 +1,8 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
-from Config.Integration.vegas_cff import integrator
+from Config.Logger_cfi import logger
 from Config.PDG_cfi import PDG
 
-from Config.Logger_cfi import logger
 logger.enabledModules += ('GenericKTProcess.registerVariable',)
 
 process = kt.process.clone('pptoff_f77',
@@ -37,4 +36,3 @@ process = kt.process.clone('pptoff_f77',
 from Config.generator_cff import generator
 generator.numEvents = 10000
 generator.numThreads = 1
-

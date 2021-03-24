@@ -35,7 +35,7 @@ namespace cepgen
 
         double amplitudeWW( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 ) const;
 
-        static constexpr double prefactor_ = pow( constants::G_EM, 4 );
+        static constexpr double prefactor_ = std::pow( constants::G_EM, 4 );
 
         const double mW_, mW2_;
         const int method_;

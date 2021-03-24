@@ -1,5 +1,4 @@
 import Config.Core as cepgen
-from Config.Integration.vegas_cff import integrator
 #--------------------------------------------------------------------
 # Logging/debugging example
 #--------------------------------------------------------------------
@@ -34,8 +33,8 @@ process = kt.process.clone('pptoww',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
         #mode = cepgen.ProcessMode.InelasticInelastic,
-        method = 1, # on-shell (0) or off-shell (1) formula
-        polarisationStates = 0, # full
+        method = 1,  # on-shell (0) or off-shell (1) formula
+        polarisationStates = 0,  # full
     ),
     inKinematics = cepgen.Parameters(
         cmEnergy = 13.e3,
