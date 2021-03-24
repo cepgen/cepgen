@@ -153,7 +153,7 @@ namespace cepgen
         std::vector<MappingVariable> mapped_variables_;
         /// Point coordinate for matrix element computation
         std::vector<double> point_coord_;
-        /// Phase space point-independant component of the Jacobian weight of the point in the phase space for integration
+        /// Phase space point-independent component of the Jacobian weight of the point in the phase space for integration
         double base_jacobian_;
         /// \f$s\f$, squared centre of mass energy of the incoming particles' system, in \f$\mathrm{GeV}^2\f$
         double s_;

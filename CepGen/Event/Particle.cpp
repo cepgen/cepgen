@@ -135,8 +135,8 @@ namespace cepgen
       dbg
         << "Particle " << role_ << " (pdgId=" << (int)pdg_id_ << ")"
         << " has now " << utils::s( "daughter", daughters_.size(), true ) << ":";
-      for ( const auto& daugh : daughters_ )
-        dbg << utils::format( "\n\t * id=%d", daugh );
+      for ( const auto& daughter : daughters_ )
+        dbg << utils::format( "\n\t * id=%d", daughter );
     } );
 
     if ( ret.second ) {
@@ -196,15 +196,15 @@ namespace cepgen
   Particle&
   Particle::setPdgId( long pdg )
   {
-    pdg_id_ = abs( pdg );
+    pdg_id_ = labs( pdg );
     try {
       phys_prop_ = PDG::get()( pdg_id_ );
     } catch ( const Exception& ) {}
     switch ( pdg_id_ ) {
       case PDG::electron: case PDG::muon: case PDG::tau:
-        charge_sign_ = -pdg/abs( pdg ); break;
+        charge_sign_ = -pdg/labs( pdg ); break;
       default:
-        charge_sign_ = pdg/abs( pdg ); break;
+        charge_sign_ = pdg/labs( pdg ); break;
     }
     return *this;
   }
@@ -257,8 +257,8 @@ namespace cepgen
     if ( !daughters_list.empty() ) {
       os << ", " << utils::s( "daughter", daughters_list.size() ) << "=";
       std::string delim;
-      for ( const auto& daugh : daughters_list )
-        os << delim << daugh, delim = ",";
+      for ( const auto& daughter : daughters_list )
+        os << delim << daughter, delim = ",";
     }
     return os << "}";
   }

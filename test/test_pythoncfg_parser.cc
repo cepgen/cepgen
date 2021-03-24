@@ -5,7 +5,6 @@
 #include "CepGen/Utils/ArgumentsParser.h"
 
 #include <string>
-#include <iostream>
 
 using namespace std;
 using namespace cepgen;

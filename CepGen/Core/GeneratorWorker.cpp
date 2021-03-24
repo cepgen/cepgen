@@ -6,7 +6,6 @@
 
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/ExportModule.h"
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Parameters.h"

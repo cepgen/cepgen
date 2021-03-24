@@ -221,7 +221,7 @@ namespace Pythia8
   CepGenEvent::dumpCorresp() const
   {
     std::ostringstream oss;
-    oss << "List of Pythia ←|→ CepGen particle ids correspondance";
+    oss << "List of Pythia ←|→ CepGen particle ids correspondence";
     for ( const auto& py_cg : py_cg_corresp_ )
       oss << "\n\t" << py_cg.first << " <-> " << py_cg.second;
     CG_INFO( "CepGenEvent:dump" ) << oss.str();

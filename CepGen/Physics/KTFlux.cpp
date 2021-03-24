@@ -8,7 +8,6 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/Timer.h"
 
 namespace cepgen
 {

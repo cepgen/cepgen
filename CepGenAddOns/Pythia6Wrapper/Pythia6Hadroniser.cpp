@@ -1,8 +1,6 @@
 #include "CepGen/Physics/Hadroniser.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 
-#include "CepGen/Core/ParametersList.h" //FIXME
-
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/PDG.h"
@@ -249,7 +247,7 @@ namespace cepgen
       //--- initialising the string fragmentation variables
       unsigned int str_in_evt = 0;
       unsigned int num_part_in_str[MAX_STRING_EVENT] = { 0 };
-      int jlpsf[MAX_STRING_EVENT][MAX_PART_STRING] = { 0 };
+      int jlpsf[MAX_STRING_EVENT][MAX_PART_STRING] = { { 0 } };
 
       pyjets_.n = 0; // reinitialise the event content
 

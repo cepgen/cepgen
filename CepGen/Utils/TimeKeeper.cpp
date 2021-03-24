@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <numeric>
 #include <sstream>
-#include <iomanip>
 #include <cmath>
 
 namespace cepgen

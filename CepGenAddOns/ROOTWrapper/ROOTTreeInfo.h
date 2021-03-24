@@ -80,7 +80,7 @@ namespace ROOT
   class CepGenEvent
   {
     public:
-      // book a sufficienly large number to allow the large multiplicity
+      // book a sufficiently large number to allow the large multiplicity
       // of excited proton fragmentation products
       static constexpr size_t MAX_PART = 5000; ///< Maximal number of particles in event
       static constexpr const char* TREE_NAME = "events"; ///< Output tree name
@@ -91,7 +91,7 @@ namespace ROOT
       int np; ///< Number of particles in the event
       double pt[MAX_PART]; ///< Particles transverse momentum
       double eta[MAX_PART]; ///< Particles pseudo-rapidity
-      double phi[MAX_PART]; ///< Particles azimutal angle
+      double phi[MAX_PART]; ///< Particles azimuthal angle
       double rapidity[MAX_PART]; ///< Particles rapidity
       double E[MAX_PART]; ///< Particles energy, in GeV
       double m[MAX_PART]; ///< Particles mass, in GeV/c\f${}^2\f$

@@ -200,8 +200,8 @@ namespace cepgen
            ++i;
         }
         // initialise spline interpolation objects (one for each value)
-        for ( size_t i = 0; i < splines_1d_.size(); ++i )
-          gsl_spline_init( splines_1d_.at( i ).get(), &x_vec[0], values_[i].get(), values_raw_.size() );
+        for ( size_t j = 0; j < splines_1d_.size(); ++j )
+          gsl_spline_init( splines_1d_.at( j ).get(), &x_vec[0], values_[j].get(), values_raw_.size() );
       } break;
       case 2: { //--- (x,y) |-> (f1,...)
 #ifdef GSL_VERSION_ABOVE_2_1
@@ -303,7 +303,7 @@ namespace cepgen
   }
 
   //----------------------------------------------------------------------------
-  // grid manipulation utilitary
+  // grid manipulation utility
   //----------------------------------------------------------------------------
 
   template<size_t D,size_t N>

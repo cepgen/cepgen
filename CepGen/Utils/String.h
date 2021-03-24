@@ -39,7 +39,7 @@ namespace cepgen
     };
     /// Colourise a string for TTY-type output streams
     std::string colourise( const std::string& str, const Colour& col, const Modifier& mod = Modifier::reset );
-    /// Replace all occurences of a text by another
+    /// Replace all occurrences of a text by another
     size_t replace_all( std::string& str, const std::string& from, const std::string& to );
     /// Split a string according to a separation character
     std::vector<std::string> split( const std::string&, char );

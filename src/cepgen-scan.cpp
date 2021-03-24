@@ -9,7 +9,6 @@
 #include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Modules/CardsHandlerFactory.h"
-#include "CepGen/Modules/ProcessesFactory.h"
 
 #include "CepGen/Utils/Logger.h"
 #include "CepGen/Utils/String.h"

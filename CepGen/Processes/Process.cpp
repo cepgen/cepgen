@@ -121,7 +121,7 @@ namespace cepgen
           << "No variables are mapped for this process!";
       if ( base_jacobian_ == 0. )
         throw CG_FATAL( "Process:vars" )
-          << "Point-independant component of the Jacobian for this "
+          << "Point-independent component of the Jacobian for this "
           << "process is null.\n\t"
           << "Please check the validity of the phase space!";
 
@@ -133,7 +133,7 @@ namespace cepgen
           case Mapping::linear: {
             var.value = var.limits.x( xv );
           } break;
-          case Mapping::exponential: { // limits aleady logarithmic
+          case Mapping::exponential: { // limits already logarithmic
             var.value = exp( var.limits.x( xv ) ); // transform back to linear
           } break;
           case Mapping::square: {

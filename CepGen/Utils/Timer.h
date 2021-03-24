@@ -5,7 +5,7 @@
 
 namespace cepgen
 {
-  /// Collection of utilitaries
+  /// Collection of utilities
   namespace utils
   {
     /** \brief A generic timer to extract the processing time between two steps in this software's flow

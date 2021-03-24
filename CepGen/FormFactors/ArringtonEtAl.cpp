@@ -38,13 +38,13 @@ namespace cepgen
           a_m_ = { -1.472,1.210,0.334 };
           b_m_ = {  9.486,0.,0., 9.440,15.416 };
           break;
-        case 2: // fit of quted Ge-dGe values
+        case 2: // fit of quoted Ge-dGe values
           a_e_ = { 4.286,-1.281,-0.486 };
           b_e_ = { 16.308,54.535,138.03,7.005,0.014 };
           a_m_ = { -1.374,1.080,0.124 };
           b_m_ = { 10.003,0.,0., 7.680, 9.009 };
           break;
-        case 3: // fit of quted Ge values
+        case 3: // fit of quoted Ge values
           a_e_ = { 4.109,-1.052,-0.375 };
           b_e_ = { 15.602,55.519,123.96,11.403,1.931 };
           a_m_ = { -1.436,1.196,0.210 };

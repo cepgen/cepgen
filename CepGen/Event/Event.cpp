@@ -6,7 +6,7 @@
 #include "CepGen/Utils/String.h"
 
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 
 namespace cepgen
 {
@@ -233,7 +233,7 @@ namespace cepgen
     Particles& part_with_same_role = operator[]( part.role() );
 
     //--- specify the id
-    if ( part_with_same_role.empty() && part.id() < 0 ) part.setId( size() ); // set the id if previously invalid/inexistent
+    if ( part_with_same_role.empty() && part.id() < 0 ) part.setId( size() ); // set the id if previously invalid/nonexistent
     if ( !part_with_same_role.empty() ) {
       if ( replace ) part.setId( part_with_same_role[0].id() ); // set the previous id if replacing a particle
       else part.setId( size() );
@@ -295,8 +295,8 @@ namespace cepgen
       if ( daughters.empty() )
         continue;
       Momentum ptot;
-      for ( const auto& daugh : daughters ) {
-        const Particle& d = operator[]( daugh );
+      for ( const auto& daughter : daughters ) {
+        const Particle& d = operator[]( daughter );
         const ParticlesIds mothers = d.mothers();
         ptot += d.momentum();
         if ( mothers.size() < 2 )

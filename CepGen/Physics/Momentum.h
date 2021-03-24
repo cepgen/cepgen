@@ -23,9 +23,9 @@ namespace cepgen
 
       //--- static definitions
 
-      /// Build a 3-momentum from its three pseudo-cylindric coordinates
+      /// Build a 3-momentum from its three pseudo-cylindrical coordinates
       static Momentum fromPtEtaPhiE( double pt, double eta, double phi, double e = -1. );
-      /// Build a 3-momentum from its three pseudo-cylindric coordinates
+      /// Build a 3-momentum from its three pseudo-cylindrical coordinates
       static Momentum fromPtEtaPhiM( double pt, double eta, double phi, double m );
       /// Build a 4-momentum from its scalar momentum, and its polar and azimuthal angles
       static Momentum fromPThetaPhiE( double p, double theta, double phi, double e = -1. );
@@ -119,7 +119,7 @@ namespace cepgen
       double mass() const;
       /// Polar angle (angle with respect to the longitudinal direction)
       double theta() const;
-      /// Azimutal angle (angle in the transverse plane)
+      /// Azimuthal angle (angle in the transverse plane)
       double phi() const;
       /// Pseudo-rapidity
       double eta() const;

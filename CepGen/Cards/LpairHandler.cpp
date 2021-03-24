@@ -20,7 +20,6 @@
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
-#include "CepGen/Event/Event.h"
 
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
@@ -76,7 +75,7 @@ namespace cepgen
         file.close();
       }
 
-      CG_INFO( "LpairHandler" ) << "File '" << filename << "' succesfully retrieved!\n\t"
+      CG_INFO( "LpairHandler" ) << "File '" << filename << "' successfully retrieved!\n\t"
         << "The following parameters are set:" << os.str() << "\n\t"
         << "Now parsing the configuration.";
 

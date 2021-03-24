@@ -13,7 +13,7 @@
 
 namespace cepgen
 {
-  /// A generic \f$\alpha_S(Q^2)\f$ evaluation algoritm
+  /// A generic \f$\alpha_S(Q^2)\f$ evaluation algorithm
   class AlphaS : public NamedModule<>
   {
     public:

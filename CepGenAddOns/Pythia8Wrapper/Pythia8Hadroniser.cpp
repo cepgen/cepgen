@@ -4,6 +4,7 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/Exception.h"
 
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/Kinematics.h"
@@ -12,9 +13,6 @@
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
-
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/String.h"
 
 #include <Pythia8/Pythia.h>
 

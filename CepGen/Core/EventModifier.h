@@ -44,7 +44,7 @@ namespace cepgen
        * \param[inout] ev Input/output event
        * \param[inout] weight Event weight after modification
        * \param[in] full Perform the full state modification
-       * \return Boolean stating whether or not the modification occured successfully
+       * \return Boolean stating whether or not the modification occurred successfully
        */
       virtual bool run( Event& ev, double& weight, bool full ) = 0;
       /// Specify the process cross section and uncertainty, in pb

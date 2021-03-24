@@ -1,14 +1,10 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/StructureFunctions/SuriYennie.h"
 
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"
-
-#include <cmath>
-#include <cassert>
 
 namespace cepgen
 {

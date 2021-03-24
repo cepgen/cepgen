@@ -5,7 +5,6 @@
 #include "CepGen/Utils/ArgumentsParser.h"
 
 #include "CepGen/Cards/Handler.h"
-#include "CepGen/Modules/CardsHandlerFactory.h"
 
 using namespace std;
 

@@ -1,13 +1,11 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Processes/FortranKTProcess.h"
 
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
 

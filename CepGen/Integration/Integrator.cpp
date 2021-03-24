@@ -6,10 +6,8 @@
 
 #include "CepGen/Parameters.h"
 #include "CepGen/Processes/Process.h"
-#include "CepGen/Event/Event.h"
 
 #include "CepGen/Utils/String.h"
-
 
 namespace cepgen
 {

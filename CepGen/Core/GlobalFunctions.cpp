@@ -3,7 +3,6 @@
 
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
 
 #include "CepGen/Core/Exception.h"
 
@@ -12,7 +11,6 @@
 
 #include <fstream>
 #include <atomic>
-#include <utility>
 
 #ifdef _WIN32
 # include <libloaderapi.h>

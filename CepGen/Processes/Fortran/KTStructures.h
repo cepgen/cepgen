@@ -30,12 +30,12 @@ namespace cepgen
     struct KTKinematics {
       double q1t; ///< Transverse momentum of the first incoming parton
       double q2t; ///< Transverse momentum of the second incoming parton
-      double phiq1t; ///< Azimutal angle of the first incoming parton
-      double phiq2t; ///< Azimutal angle of the second incoming parton
+      double phiq1t; ///< Azimuthal angle of the first incoming parton
+      double phiq2t; ///< Azimuthal angle of the second incoming parton
       double y1; ///< First incoming parton rapidity
       double y2; ///< Second incoming parton rapidity
       double ptdiff; ///< Central system pT balance
-      double phiptdiff; ///< Central system azimutal angle difference
+      double phiptdiff; ///< Central system azimuthal angle difference
       double m_x; ///< Invariant mass for the first diffractive state
       double m_y; ///< Invariant mass for the second diffractive state
     };
@@ -46,7 +46,7 @@ namespace cepgen
       bool ieta; ///< Switch for cut on single particle pseudo-rapidity
       bool iinvm; ///< Switch for cut on central system invariant mass
       bool iptsum; ///< Switch for cut on central system transverse momentum
-      bool idely; ///< Switch for cut on rapididty difference
+      bool idely; ///< Switch for cut on rapidity difference
       double pt_min; ///< Minimal single particle transverse momentum
       double pt_max; ///< Maximal single particle transverse momentum
       double ene_min; ///< Minimal single particle energy

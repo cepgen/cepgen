@@ -167,15 +167,12 @@ namespace cepgen
       if ( lam3 == 0 )              // longitudinal-transverse
         return invA*( -M_SQRT2*inv_gamma*( lam2-lam1 )*( 1.+lam2*lam4*cos_theta )*sin_theta );
 
-      if ( lam3 != 0 && lam4 != 0 ) // transverse-transverse
+      else // transverse-transverse
         return -0.5*invA*( 2.*beta*( lam1+lam2 )*( lam3+lam4 )
                           -inv_gamma2*( 1.+lam3*lam4 )*( 2.*lam1*lam2+( 1.-lam1*lam2 ) * cos_theta2 )
                           +( 1.+lam1*lam2*lam3*lam4 )*( 3.+lam1*lam2 )
                           +2.*( lam1-lam2 )*( lam3-lam4 )*cos_theta
                           +( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta2 );
-
-      throw CG_FATAL( "PPtoWW:ampl" ) << "Invalid helicities mixing:"
-        << " (" << lam1 << "/" << lam2 << "/" << lam3 << "/" << lam4 << ").";
     }
   }
 }

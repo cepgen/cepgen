@@ -3,8 +3,6 @@
 
 #include "CepGen/Core/Exception.h"
 
-#include <sstream>
-
 namespace cepgen
 {
   HeavyIon::HeavyIon( pdgid_t pdg ) :

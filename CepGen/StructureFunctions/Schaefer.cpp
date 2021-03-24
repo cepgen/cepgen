@@ -3,7 +3,6 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Physics.h"
-#include "CepGen/Physics/Constants.h"
 
 #include <vector>
 #include <memory>

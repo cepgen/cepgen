@@ -2,7 +2,6 @@
 #include "CepGen/Processes/Process.h"
 
 #include "CepGen/Generator.h"
-#include "CepGen/Event/Event.h"
 #include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/Utils/ArgumentsParser.h"

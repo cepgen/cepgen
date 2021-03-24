@@ -2,8 +2,6 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
 
-#include "CepGen/Core/ParametersList.h"
-
 #include "CepGen/Utils/AbortHandler.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/Timer.h"
@@ -47,7 +45,7 @@ int main( int argc, char* argv[] )
   CG_INFO( "main" ) << "Initial configuration time: " << tmr.elapsed()*1.e3 << " ms.";
   tmr.reset();
 
-  utils::AbortHandler ctrl_c;
+  new utils::AbortHandler;
 
   struct Test
   {

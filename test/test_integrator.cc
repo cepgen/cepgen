@@ -14,8 +14,6 @@
 
 #include "CepGen/Core/Exception.h"
 
-#include <iostream>
-
 using namespace std;
 
 /// Generic process to test the integrator instance
@@ -28,7 +26,7 @@ class TestProcess : public cepgen::proc::Process
         .setName<string>( formula )
         .set<string>( "description", formula ), false ),
       variables_( args.size() ) {
-      funct_ = cepgen::utils::FunctionalFactory::get().build( func_mod,
+      function_ = cepgen::utils::FunctionalFactory::get().build( func_mod,
         cepgen::ParametersList()
           .set<string>( "expression", formula )
           .set<vector<string> >( "arguments", args )
@@ -47,12 +45,12 @@ class TestProcess : public cepgen::proc::Process
     void fillKinematics( bool ) override {}
     /// Generic formula to compute a weight out of a point in the phase space
     double computeWeight() override {
-      return funct_->operator()( variables_ );
+      return function_->operator()( variables_ );
     }
 
   private:
     vector<double> variables_;
-    shared_ptr<cepgen::utils::Functional> funct_;
+    shared_ptr<cepgen::utils::Functional> function_;
 };
 
 int
@@ -106,9 +104,9 @@ main( int argc, char* argv[] )
 
   cepgen::Parameters params;
 
-  for ( const auto& integ : integrators ) {
-    CG_LOG( "main" ) << "Running with " << integ << " integrator.";
-    auto integr = cepgen::IntegratorFactory::get().build( integ );
+  for ( const auto& integrator : integrators ) {
+    CG_LOG( "main" ) << "Running with " << integrator << " integrator.";
+    auto integr = cepgen::IntegratorFactory::get().build( integrator );
 
     //--- integration part
     size_t i = 0;
@@ -131,7 +129,7 @@ main( int argc, char* argv[] )
       success &= test.success;
     }
     if ( !success )
-      throw CG_FATAL( "main" ) << integ << " integrator tests failed!";
+      throw CG_FATAL( "main" ) << integrator << " integrator tests failed!";
   }
   return 0;
 }

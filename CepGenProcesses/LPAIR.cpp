@@ -403,8 +403,8 @@ namespace cepgen
         const double sbb = 0.5 * ( s_*( t2_-masses_.w52 )-masses_.w12*t25 )*inv_w2 + mY2_,
                      sdd = 0.5 * sl1_*sl6*inv_w2,
                      see = ( s_*( t2_*( s_+t25-mA2_ )-mA2_*masses_.w52 )+mY2_*( mA2_*mY2_-masses_.w12*( t2_-mA2_ ) ) )*inv_w2;
-        double s1m = 0., s1p = 0.;
-        if ( sbb/sdd >= 0. ) {
+        double s1m, s1p;
+        if ( sbb*sdd >= 0. ) { // multiplication is more effective than division to check sign+non-null
           s1p = sbb+sdd;
           s1m = see/s1p;
         }
@@ -608,7 +608,7 @@ namespace cepgen
         << "m(X1) = " << mx << " GeV\t"
         << "m(X2) = " << my << " GeV";
 
-      // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy substracted (or wmax if specified)
+      // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy subtracted (or wmax if specified)
       w_limits_.max() = std::min( pow( sqs_-mx-my, 2 ), w_limits_.max() );
 
       // compute the two-photon energy for this point

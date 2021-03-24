@@ -125,7 +125,7 @@ namespace cepgen
         };
     };
 
-    /// Outgoing beam remant-like particles phase space cuts
+    /// Outgoing beam remnant-like particles phase space cuts
     class Remnants : public Cuts
     {
       public:

@@ -2,9 +2,8 @@
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Core/Exception.h"
 
-#include <math.h>
+#include <cmath>
 #include <string>
-#include <iostream>
 
 using namespace std;
 

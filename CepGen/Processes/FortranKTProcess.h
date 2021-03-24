@@ -26,7 +26,7 @@ namespace cepgen
         double y1_; ///< First outgoing particle rapidity
         double y2_; ///< Second outgoing particle rapidity
         double pt_diff_; ///< Transverse momentum balance between outgoing particles
-        double phi_pt_diff_; ///< Azimutal angle difference between outgoing particles
+        double phi_pt_diff_; ///< Azimuthal angle difference between outgoing particles
 
         Momentum mom_ip1_; ///< First incoming beam momentum
         Momentum mom_ip2_; ///< Second incoming beam momentum

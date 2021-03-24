@@ -35,7 +35,7 @@ namespace cepgen
 
         /// Local timer object
         const Timer& timer() const;
-        /// A scoped timekeeping utilitary
+        /// A scoped timekeeping utility
         class Ticker
         {
           public:

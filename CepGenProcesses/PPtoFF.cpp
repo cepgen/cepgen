@@ -129,7 +129,7 @@ namespace cepgen
     double
     PPtoFF::computeCentralMatrixElement() const
     {
-      double mat_el = 0.;
+      double mat_el;
       switch ( method_ ) {
         case Mode::onShell:
           mat_el = onShellME(); break;

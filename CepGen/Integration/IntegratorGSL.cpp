@@ -7,8 +7,6 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Processes/Process.h"
 
-#include "CepGen/Utils/String.h"
-
 namespace cepgen
 {
   IntegratorGSL::IntegratorGSL( const ParametersList& params ) :

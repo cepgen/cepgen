@@ -1,9 +1,8 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Core/Exception.h"
 
-#include <math.h>
-#include <assert.h>
+#include <cmath>
+#include <cassert>
 #include <vector>
 
 namespace cepgen

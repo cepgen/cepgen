@@ -8,8 +8,6 @@
 #include "CepGen/Utils/GridHandler.h"
 #include "CepGen/Utils/Physics.h"
 
-#include <complex>
-
 namespace cepgen
 {
   namespace strfun

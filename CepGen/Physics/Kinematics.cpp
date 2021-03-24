@@ -13,8 +13,6 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"
 
-#include <cmath>
-
 namespace cepgen
 {
   Kinematics::Kinematics( const ParametersList& params )

@@ -42,8 +42,8 @@ int main( int argc, char* argv[] )
   out
     << "# form factors: ";
   string sep;
-  for ( const auto& fftype : cepgen::formfac::FormFactorsFactory::get().modules() )
-    out << sep << fftype, sep = ", ";
+  for ( const auto& ff_type : cepgen::formfac::FormFactorsFactory::get().modules() )
+    out << sep << ff_type, sep = ", ";
 
   auto sf = cepgen::strfun::StructureFunctionsFactory::get().build( strfun_type );
   out
@@ -51,25 +51,25 @@ int main( int argc, char* argv[] )
     << "# structure functions: " << sf.get() << "\n"
     << "# q2 in [" << q2min << ", " << q2max << "] GeV^2\n";
 
-  vector<unique_ptr<cepgen::formfac::Parameterisation> > formfacs;
-  vector<TGraph*> g_formfacs_fe, g_formfacs_fm;
-  for ( const auto& fftype : cepgen::formfac::FormFactorsFactory::get().modules() ) {
-    formfacs.emplace_back( cepgen::formfac::FormFactorsFactory::get().build( fftype ) );
-    ( *formfacs.rbegin() )->setStructureFunctions( sf.get() );
-    g_formfacs_fe.emplace_back( new TGraph );
-    ( *g_formfacs_fe.rbegin() )->SetTitle( ( fftype+";Q^{2} (GeV^{2});F_{E}" ).c_str() );
-    g_formfacs_fm.emplace_back( new TGraph );
-    ( *g_formfacs_fm.rbegin() )->SetTitle( ( fftype+";Q^{2} (GeV^{2});F_{M}" ).c_str() );
+  vector<unique_ptr<cepgen::formfac::Parameterisation> > form_factors;
+  vector<TGraph*> g_form_factors_fe, g_form_factors_fm;
+  for ( const auto& ff_type : cepgen::formfac::FormFactorsFactory::get().modules() ) {
+    form_factors.emplace_back( cepgen::formfac::FormFactorsFactory::get().build( ff_type ) );
+    ( *form_factors.rbegin() )->setStructureFunctions( sf.get() );
+    g_form_factors_fe.emplace_back( new TGraph );
+    ( *g_form_factors_fe.rbegin() )->SetTitle( ( ff_type+";Q^{2} (GeV^{2});F_{E}" ).c_str() );
+    g_form_factors_fm.emplace_back( new TGraph );
+    ( *g_form_factors_fm.rbegin() )->SetTitle( ( ff_type+";Q^{2} (GeV^{2});F_{M}" ).c_str() );
   }
   for ( int i = 0; i < num_points; ++i ) {
     const double q2 = q2min+i*( q2max-q2min )/( num_points-1 );
     out << q2 << "\t";
     size_t j = 0;
-    for ( auto& ff : formfacs ) {
-      const auto formfac = ( *ff )( (cepgen::mode::Beam)mode, q2, mx );
-      out << "\t" << formfac.FE << "\t" << formfac.FM;
-      g_formfacs_fe.at( j )->SetPoint( g_formfacs_fe.at( j )->GetN(), q2, formfac.FE );
-      g_formfacs_fm.at( j )->SetPoint( g_formfacs_fm.at( j )->GetN(), q2, formfac.FM );
+    for ( auto& ff : form_factors ) {
+      const auto form_factor = ( *ff )( (cepgen::mode::Beam)mode, q2, mx );
+      out << "\t" << form_factor.FE << "\t" << form_factor.FM;
+      g_form_factors_fe.at( j )->SetPoint( g_form_factors_fe.at( j )->GetN(), q2, form_factor.FE );
+      g_form_factors_fm.at( j )->SetPoint( g_form_factors_fm.at( j )->GetN(), q2, form_factor.FM );
       ++j;
     }
     out << "\n";
@@ -80,7 +80,7 @@ int main( int argc, char* argv[] )
 
   vector<int> colours = { kBlack, kRed+1, kBlue-2, kGreen+1, kOrange+1 };
 
-  for ( auto& plt : map<const char*,vector<TGraph*> >{ { "FE", g_formfacs_fe }, { "FM", g_formfacs_fm } } ) {
+  for ( auto& plt : map<const char*,vector<TGraph*> >{ { "FE", g_form_factors_fe }, { "FM", g_form_factors_fm } } ) {
     cepgen::Canvas c( plt.first, Form( "M_{X} = %g GeV/c^{2}", mx ) );
     c.SetLogy();
     TMultiGraph mg;

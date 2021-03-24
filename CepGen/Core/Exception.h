@@ -123,7 +123,7 @@ namespace cepgen
       static char* now();
       /// Origin of the exception
       std::string from_;
-      /// Exception classificator
+      /// Exception classification
       std::string module_;
       /// Message to throw
       std::ostringstream message_;

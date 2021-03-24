@@ -167,7 +167,7 @@ namespace cepgen
       Particle& clearDaughters();
       /**
        * \brief Add a decay product
-       * \param[in] part The Particle object in which this particle will desintegrate or convert
+       * \param[in] part The Particle object in which this particle will disintegrate or convert
        * \return A boolean stating if the particle has been added to the daughters list or if it was already present before
        */
       Particle& addDaughter( Particle& part );

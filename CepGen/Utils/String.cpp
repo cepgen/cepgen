@@ -1,6 +1,5 @@
 #include "CepGen/Utils/String.h"
 
-#include <iomanip>
 #include <iterator>
 #include <algorithm>
 #include <sstream>

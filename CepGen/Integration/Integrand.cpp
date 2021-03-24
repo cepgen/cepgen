@@ -5,9 +5,6 @@
 
 #include "CepGen/Processes/Process.h"
 
-#include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Physics/PDG.h"
-
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/Exception.h"

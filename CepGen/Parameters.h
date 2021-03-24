@@ -84,7 +84,7 @@ namespace cepgen
         Generation& operator=( const Generation& ) = default; ///< Assignment operator
         bool enabled; ///< Are we generating events ? (true) or are we only computing the cross-section ? (false)
         unsigned long maxgen; ///< Maximal number of events to generate in this run
-        bool symmetrise; ///< Do we want the events to be symmetrised with respect to the \f$z\f$-axis ?
+        bool symmetrise; ///< Do we want the events to be symmetric with respect to the \f$z\f$-axis ?
         unsigned int gen_print_every; ///< Frequency at which the events are displayed to the end-user
         unsigned int num_threads; ///< Number of threads to perform the integration
         unsigned int num_points; ///< Number of points to "shoot" in each integration bin by the algorithm
@@ -146,7 +146,7 @@ namespace cepgen
       EventModifiersSequence evt_modifiers_;
       /// Collection of event output modules to be applied
       ExportModulesSequence out_modules_;
-      /// Functionals to be used to account for rescattering corrections
+      /// Functions to be used to account for rescattering corrections
       TamingFunctionsSequence taming_functions_;
       /// Total generation time (in seconds)
       double total_gen_time_;

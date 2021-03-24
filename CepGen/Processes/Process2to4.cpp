@@ -9,8 +9,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"
 
-#include <assert.h>
-#include <math.h>
+#include <cmath>
 
 namespace cepgen
 {
@@ -267,7 +266,7 @@ namespace cepgen
       oc2.setMomentum( p_c2_ );
     }
 
-    //----- utilitaries
+    //----- utilities
 
     double
     Process2to4::shat() const

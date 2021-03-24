@@ -5,7 +5,6 @@
 #include "CepGen/Utils/String.h"
 
 #include <fstream>
-#include <sstream>
 #include <string>
 
 namespace pdg
