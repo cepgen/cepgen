@@ -6,11 +6,9 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Version.h"
 
-#include "CepGen/Core/Exception.h"
-
 #include "ProMCBook.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 namespace cepgen
 {
@@ -29,7 +27,7 @@ namespace cepgen
         static std::string description() { return "ProMC file output module"; }
 
         void initialise( const Parameters& ) override;
-        void setCrossSection( double xsec, double err ) override { xsec_ = xsec, xsec_err_ = err; }
+        void setCrossSection( double cross_section, double err ) override { cross_section_ = cross_section, cross_section_err_ = err; }
         void operator<<( const Event& ) override;
 
       private:
@@ -40,7 +38,7 @@ namespace cepgen
         std::unique_ptr<ProMCBook> file_;
         const bool compress_evt_;
         std::ofstream log_file_;
-        double xsec_, xsec_err_;
+        double cross_section_, cross_section_err_;
     };
 
     ProMCHandler::ProMCHandler( const ParametersList& params ) :
@@ -48,15 +46,15 @@ namespace cepgen
       file_( new ProMCBook( params.get<std::string>( "filename", "output.promc" ).c_str(), "w" ) ),
       compress_evt_( params.get<bool>( "compress", false ) ),
       log_file_( "logfile.txt" ),
-      xsec_( -1. ), xsec_err_( -1. )
+      cross_section_( -1. ), cross_section_err_( -1. )
     {}
 
     ProMCHandler::~ProMCHandler()
     {
       ProMCStat stat;
-      stat.set_cross_section_accumulated( xsec_ );
-      stat.set_cross_section_error_accumulated( xsec_err_ );
-      stat.set_luminosity_accumulated( event_num_/xsec_ );
+      stat.set_cross_section_accumulated( cross_section_ );
+      stat.set_cross_section_error_accumulated( cross_section_err_ );
+      stat.set_luminosity_accumulated( event_num_/cross_section_ );
       stat.set_ntried( event_num_ );
       stat.set_nselected( event_num_ );
       stat.set_naccepted( event_num_ );
@@ -122,9 +120,9 @@ namespace cepgen
         part->add_mass( inGeV( par.mass() ) );
         part->add_barcode( 0 );
         //--- parentage
-        const auto& daugh = par.daughters(), &moth = par.mothers();
-        part->add_daughter1( daugh.empty() ? 0 : *daugh.begin()+1 );
-        part->add_daughter2( daugh.size() > 1 ? *daugh.rbegin()+1 : 0 );
+        const auto& daughter = par.daughters(), &moth = par.mothers();
+        part->add_daughter1( daughter.empty() ? 0 : *daughter.begin()+1 );
+        part->add_daughter2( daughter.size() > 1 ? *daughter.rbegin()+1 : 0 );
         part->add_mother1( moth.empty() ? 0 : *moth.begin()+1 );
         part->add_mother2( moth.size() > 1 ? *moth.rbegin()+1 : 0 );
         //--- vertex

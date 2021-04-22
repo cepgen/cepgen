@@ -61,10 +61,13 @@ namespace mstw
       static constexpr const char* DEFAULT_MSTW_GRID_PATH = "mstw_sf_scan_nnlo.dat";
 
     private:
-      static constexpr unsigned int GOOD_MAGIC = 0x5754534d; // MSTW in ASCII
+      static const unsigned int GOOD_MAGIC;
 
       header_t header_;
   };
+
+  const unsigned int
+  Grid::GOOD_MAGIC = 0x5754534d; // MSTW in ASCII
 
   std::ostream& operator<<( std::ostream&, const Grid::sfval_t& ); ///< Human-readable description of a values point
   std::ostream& operator<<( std::ostream&, const Grid::header_t::order_t& ); ///< Human-readable description of an interpolation order

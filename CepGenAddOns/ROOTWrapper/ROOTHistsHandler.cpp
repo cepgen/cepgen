@@ -34,7 +34,7 @@ namespace cepgen
         static std::string description() { return "ROOT histograming/profiling module"; }
 
         void initialise( const Parameters& ) override {}
-        void setCrossSection( double xsec, double ) override { xsec_ = xsec; }
+        void setCrossSection( double cross_section, double ) override { cross_section_ = cross_section; }
         void operator<<( const Event& ) override;
 
       private:
@@ -47,7 +47,7 @@ namespace cepgen
 
         const ParametersList variables_;
 
-        double xsec_;
+        double cross_section_;
         const utils::EventBrowser browser_;
     };
 
@@ -55,7 +55,7 @@ namespace cepgen
       ExportModule( params ),
       file_( params.get<std::string>( "filename", "output.root" ).c_str(), "recreate" ),
       variables_( params.get<ParametersList>( "variables" ) ),
-      xsec_( 1. )
+      cross_section_( 1. )
     {
       //--- extract list of variables/correlations to be plotted in histograms
       for ( const auto& key : variables_.keys() ) {
@@ -152,25 +152,25 @@ namespace cepgen
       //--- increment the corresponding histograms
       for ( const auto& h_var : hists1d_ )
         h_var.second->Fill(
-          browser_.get( ev, h_var.first ), xsec_ );
+          browser_.get( ev, h_var.first ), cross_section_ );
       for ( const auto& h_var : hists2d_ )
         h_var.second->Fill(
           browser_.get( ev, h_var.first[0] ),
-          browser_.get( ev, h_var.first[1] ), xsec_ );
+          browser_.get( ev, h_var.first[1] ), cross_section_ );
       for ( const auto& h_var : hists3d_ )
         h_var.second->Fill(
           browser_.get( ev, h_var.first[0] ),
           browser_.get( ev, h_var.first[1] ),
-          browser_.get( ev, h_var.first[2] ), xsec_ );
+          browser_.get( ev, h_var.first[2] ), cross_section_ );
       for ( const auto& h_var : profiles1d_ )
         h_var.second->Fill(
           browser_.get( ev, h_var.first[0] ),
-          browser_.get( ev, h_var.first[1] ), xsec_ );
+          browser_.get( ev, h_var.first[1] ), cross_section_ );
       for ( const auto& h_var : profiles2d_ )
         h_var.second->Fill(
           browser_.get( ev, h_var.first[0] ),
           browser_.get( ev, h_var.first[1] ),
-          browser_.get( ev, h_var.first[2] ), xsec_ );
+          browser_.get( ev, h_var.first[2] ), cross_section_ );
     }
   }
 }

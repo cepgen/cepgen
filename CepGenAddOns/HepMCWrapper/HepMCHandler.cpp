@@ -5,7 +5,6 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Parameters.h"
 
 #if defined( HEPMC3 ) || defined( HEPMC_VERSION_CODE )
@@ -52,7 +51,7 @@ namespace cepgen
         std::shared_ptr<GenCrossSection> xs_;
 #ifdef HEPMC3
         /// Auxiliary information on run
-        std::shared_ptr<GenRunInfo> runinfo_;
+        std::shared_ptr<GenRunInfo> run_info_;
 #endif
     };
 
@@ -62,12 +61,12 @@ namespace cepgen
       output_( new T( params.get<std::string>( "filename", "output.hepmc" ).c_str() ) ),
       xs_( new GenCrossSection )
 #ifdef HEPMC3
-      , runinfo_( new GenRunInfo )
+      , run_info_( new GenRunInfo )
 #endif
     {
 #ifdef HEPMC3
-      output_->set_run_info( runinfo_ );
-      runinfo_->set_weight_names( { "Default" } );
+      output_->set_run_info( run_info_ );
+      run_info_->set_weight_names( { "Default" } );
 #endif
       CG_INFO( "HepMC" )
         << "Interfacing module initialised "
@@ -89,7 +88,7 @@ namespace cepgen
       // general information
 #ifdef HEPMC3
       event.set_cross_section( xs_ );
-      event.set_run_info( runinfo_ );
+      event.set_run_info( run_info_ );
 #else
       event.set_cross_section( *xs_ );
 #endif
@@ -102,9 +101,9 @@ namespace cepgen
     }
 
     template<typename T> void
-    HepMCHandler<T>::setCrossSection( double xsect, double xsect_err )
+    HepMCHandler<T>::setCrossSection( double cross_section, double cross_section_err )
     {
-      xs_->set_cross_section( xsect, xsect_err );
+      xs_->set_cross_section( cross_section, cross_section_err );
     }
   }
 }

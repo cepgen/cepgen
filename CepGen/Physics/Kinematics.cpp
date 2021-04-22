@@ -15,6 +15,9 @@
 
 namespace cepgen
 {
+  const double
+  Kinematics::MX_MIN = 1.07; // mp+mpi+-
+
   Kinematics::Kinematics( const ParametersList& params )
   {
     //----- per-incoming beam kinematics

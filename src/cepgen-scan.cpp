@@ -53,7 +53,7 @@ int main( int argc, char* argv[] )
 
   CG_INFO( "main" ) << mg.parameters();
 
-  double xsect, err_xsect;
+  double cross_section, err_cross_section;
 
   ofstream xsect_file( output_file );
   if ( !xsect_file.is_open() )
@@ -102,8 +102,8 @@ int main( int argc, char* argv[] )
     else
       throw CG_FATAL( "main" ) << "Invalid variable to be scanned: \"" << scan << "\"!";
     CG_LOG( "main" ) << "Scan of \"" << scan << "\". Value = " << value << ".";
-    mg.computeXsection( xsect, err_xsect );
-    string out_line = cepgen::utils::format( "%.2f\t%.8e\t%.8e\n", value, xsect, err_xsect );
+    mg.computeXsection( cross_section, err_cross_section );
+    string out_line = cepgen::utils::format( "%.2f\t%.8e\t%.8e\n", value, cross_section, err_cross_section );
     xsect_file << out_line;
     cout << out_line;
     xsect_file.flush();

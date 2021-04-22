@@ -46,11 +46,11 @@ namespace Pythia8
   }
 
   void
-  CepGenEvent::setCrossSection( int id, double xsec, double xsec_err )
+  CepGenEvent::setCrossSection( int id, double cross_section, double cross_section_err )
   {
-    addProcess( 0, xsec, xsec_err, 100. );
-    setXSec( id, xsec );
-    setXErr( id, xsec_err );
+    addProcess( 0, cross_section, cross_section_err, 100. );
+    setXSec( id, cross_section );
+    setXErr( id, cross_section_err );
     //listInit();
   }
 
@@ -71,7 +71,7 @@ namespace Pythia8
 
     if ( type == Type::centralAndBeamRemnants ) { // full event content (with collinear partons)
       Vec4 mom_iq1 = mom_part1, mom_iq2 = mom_part2;
-      unsigned short parton1_id = 0, parton2_id = 0;
+      unsigned short parton1_id, parton2_id;
       unsigned short parton1_pdgid = part1.integerPdgId(), parton2_pdgid = part2.integerPdgId();
       unsigned short parton1_colour = 0, parton2_colour = 0;
       //FIXME select quark flavours accordingly
@@ -165,9 +165,9 @@ namespace Pythia8
   }
 
   void
-  CepGenEvent::setProcess( int id, double xsec, double q2_scale, double alpha_qed, double alpha_qcd )
+  CepGenEvent::setProcess( int id, double cross_section, double q2_scale, double alpha_qed, double alpha_qcd )
   {
-    LHAup::setProcess( id, xsec, q2_scale, alpha_qed, alpha_qcd );
+    LHAup::setProcess( id, cross_section, q2_scale, alpha_qed, alpha_qcd );
     py_cg_corresp_.clear();
   }
 

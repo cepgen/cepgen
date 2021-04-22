@@ -73,10 +73,10 @@ namespace cepgen
     }
 
     void
-    ROOTTreeHandler::setCrossSection( double xsect, double xsect_err )
+    ROOTTreeHandler::setCrossSection( double cross_section, double cross_section_err )
     {
-      run_tree_.xsect = xsect;
-      run_tree_.errxsect = xsect_err;
+      run_tree_.xsect = cross_section;
+      run_tree_.errxsect = cross_section_err;
     }
   }
 }

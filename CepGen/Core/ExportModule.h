@@ -29,7 +29,7 @@ namespace cepgen
         /// Unique name of the output module
         const std::string& name() const { return name_; }
         /// Set the process cross section and its associated error
-        virtual void setCrossSection( double /*xsec*/, double /*err_xsec*/ ) {}
+        virtual void setCrossSection( double /*cross_section*/, double /*err_cross_section*/ ) {}
         /// Set the event number
         void setEventNumber( const unsigned int& ev_id ) { event_num_ = ev_id; }
 

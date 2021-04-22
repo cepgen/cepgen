@@ -42,7 +42,7 @@ namespace cepgen
         void init() override;
         bool run( Event& ev, double& weight, bool full ) override;
 
-        void setCrossSection( double xsec, double xsec_err ) override;
+        void setCrossSection( double cross_section, double cross_section_err ) override;
 
       private:
         static constexpr unsigned short PYTHIA_STATUS_IN_BEAM = 12;
@@ -159,9 +159,9 @@ namespace cepgen
     }
 
     void
-    Pythia8Hadroniser::setCrossSection( double xsec, double xsec_err )
+    Pythia8Hadroniser::setCrossSection( double cross_section, double cross_section_err )
     {
-      cg_evt_->setCrossSection( 0, xsec, xsec_err );
+      cg_evt_->setCrossSection( 0, cross_section, cross_section_err );
     }
 
     bool

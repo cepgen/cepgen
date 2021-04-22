@@ -23,11 +23,7 @@ namespace HepMC
       CepGenEvent( const cepgen::Event& ev );
 
     private:
-#ifdef HEPMC3
       std::unordered_map<unsigned short,std::shared_ptr<GenParticle> > assoc_map_;
-#else
-      std::unordered_map<unsigned short,GenParticle*> assoc_map_;
-#endif
   };
 }
 #endif

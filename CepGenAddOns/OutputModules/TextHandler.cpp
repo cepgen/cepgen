@@ -54,7 +54,7 @@ namespace cepgen
         static std::string description() { return "Text-based histogramming tool"; }
 
         void initialise( const Parameters& ) override;
-        void setCrossSection( double xsec, double ) override { xsec_ = xsec; }
+        void setCrossSection( double cross_section, double ) override { cross_section_ = cross_section; }
         void operator<<( const Event& ) override;
 
       private:
@@ -88,7 +88,7 @@ namespace cepgen
 
         std::ostringstream oss_vars_;
 
-        double xsec_;
+        double cross_section_;
 
         //--- kinematic variables
         double sqrts_;
@@ -107,7 +107,7 @@ namespace cepgen
       show_hists_    ( params.get<bool>( "showHistograms", true ) ),
       save_hists_    ( params.get<bool>( "saveHistograms", false ) ),
       separator_     ( params.get<std::string>( "separator", "\t" ) ),
-      xsec_( 1. ), sqrts_( 0. ), num_evts_( 0ul )
+      cross_section_( 1. ), sqrts_( 0. ), num_evts_( 0ul )
     {
       //--- first extract list of variables to store in output file
       oss_vars_.clear();
@@ -160,7 +160,7 @@ namespace cepgen
       if ( !show_hists_ && !save_hists_ )
         return;
       for ( const auto& h_var : hists_ ) {
-        gsl_histogram_scale( h_var.second.get(), xsec_/( num_evts_+1 ) );
+        gsl_histogram_scale( h_var.second.get(), cross_section_/( num_evts_+1 ) );
         const auto& h_out = textHistogram( h_var );
         if ( show_hists_ )
           CG_INFO( "TextHandler" ) << h_out;
@@ -168,7 +168,7 @@ namespace cepgen
           hist_file_ << "\n" << h_out << "\n";
       }
       for ( const auto& h_var : hists2d_ ) {
-        //gsl_histogram_scale( hist, xsec_/( num_evts_+1 ) );
+        //gsl_histogram_scale( hist, cross_section_/( num_evts_+1 ) );
         const auto& h_out = textHistogram( h_var );
         if ( show_hists_ )
           CG_INFO( "TextHandler" ) << h_out;

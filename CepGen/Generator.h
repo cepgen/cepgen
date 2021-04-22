@@ -102,7 +102,7 @@ namespace cepgen
        * \param[out] xsec The computed cross-section, in pb
        * \param[out] err The absolute integration error on the computed cross-section, in pb
        */
-      void computeXsection( double& xsec, double& err );
+      void computeXsection( double& cross_section, double& err );
       /// Last cross section computed by the generator
       double crossSection() const { return result_; }
       /// Last error on the cross section computed by the generator

@@ -73,7 +73,7 @@ namespace cepgen
       /// Human-readable version of a parameters container
       friend std::ostream& operator<<( std::ostream& os, const ParametersList& );
       /// Indexing key for the module name
-      static constexpr const char* MODULE_NAME = "mod_name";
+      static const std::string MODULE_NAME;
 
     private:
       std::map<std::string,ParametersList> param_values_;

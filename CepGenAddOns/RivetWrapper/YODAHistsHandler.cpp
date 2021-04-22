@@ -36,7 +36,7 @@ namespace cepgen
         static std::string description() { return "YODA histograms/profiles file output module"; }
 
         void initialise( const Parameters& ) override {}
-        void setCrossSection( double xsec, double ) override { xsec_ = xsec; }
+        void setCrossSection( double cross_section, double ) override { cross_section_ = cross_section; }
         void operator<<( const Event& ) override;
 
       private:
@@ -48,7 +48,7 @@ namespace cepgen
         YODA::Counter weight_cnt_;
         const ParametersList variables_;
 
-        double xsec_;
+        double cross_section_;
         const utils::EventBrowser browser_;
     };
 
@@ -57,7 +57,7 @@ namespace cepgen
       ExportModule( params ),
       file_( params.get<std::string>( "filename", "output.yoda" ) ),
       variables_( params.get<ParametersList>( "variables" ) ),
-      xsec_( 1. )
+      cross_section_( 1. )
     {
       //--- extract list of variables/correlations to be plotted in histograms
       for ( const auto& key : variables_.keys() ) {
@@ -135,20 +135,20 @@ namespace cepgen
     {
       //--- increment the corresponding histograms
       for ( auto& h_var : hists1d_ )
-        h_var.second.fillBin( browser_.get( ev, h_var.first ), xsec_ );
+        h_var.second.fillBin( browser_.get( ev, h_var.first ), cross_section_ );
       for ( auto& h_var : hists2d_ )
         h_var.second.fillBin(
           browser_.get( ev, h_var.first[0] ),
-          browser_.get( ev, h_var.first[1] ), xsec_ );
+          browser_.get( ev, h_var.first[1] ), cross_section_ );
       for ( auto& h_var : profiles1d_ )
         h_var.second.fill(
           browser_.get( ev, h_var.first[0] ),
-          browser_.get( ev, h_var.first[1] ), xsec_ );
+          browser_.get( ev, h_var.first[1] ), cross_section_ );
       for ( auto& h_var : profiles2d_ )
         h_var.second.fill(
           browser_.get( ev, h_var.first[0] ),
           browser_.get( ev, h_var.first[1] ),
-          browser_.get( ev, h_var.first[2] ), xsec_ );
+          browser_.get( ev, h_var.first[2] ), cross_section_ );
       weight_cnt_.fill( ev.weight );
     }
   }

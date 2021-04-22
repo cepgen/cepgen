@@ -16,7 +16,7 @@ namespace cepgen
         static std::string description() { return "Brash et al."; }
 
       private:
-        static constexpr float MAX_Q2 = 7.7;
+        static const float MAX_Q2;
         void compute( double q2 ) override {
           if ( q2 > MAX_Q2 )
             CG_WARNING( "BrashEtAl" )
@@ -34,6 +34,8 @@ namespace cepgen
           GM *= MU;
         }
     };
+
+    const float BrashEtAl::MAX_Q2 = 7.7;
   }
 }
 

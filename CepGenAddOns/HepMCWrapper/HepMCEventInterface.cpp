@@ -63,11 +63,13 @@ namespace HepMC
       const auto& mom_orig = part_orig.momentum();
       FourVector pmom( mom_orig.px(), mom_orig.py(), mom_orig.pz(), part_orig.energy() );
       auto part = BUILD(GenParticle)( pmom, part_orig.integerPdgId(), (int)part_orig.status() );
-#ifndef HEPMC3
-      part->suggest_barcode( idx );
-#endif
       part->set_generated_mass( cepgen::PDG::get().mass( part_orig.pdgId() ) );
+#ifdef HEPMC3
       assoc_map_[idx] = part;
+#else
+      part->suggest_barcode( idx );
+      assoc_map_[idx].reset(part);
+#endif
 
       switch ( part_orig.role() ) {
         case cepgen::Particle::IncomingBeam1:
@@ -117,7 +119,11 @@ namespace HepMC
             if ( !vprod ) {
               vprod = BUILD(GenVertex)();
               for ( const auto& id : ids )
+#ifdef HEPMC3
                 vprod->add_particle_in( assoc_map_.at( id ) );
+#else
+                vprod->add_particle_in( assoc_map_.at( id ).get() );
+#endif
               add_vertex( vprod );
             }
             vprod->add_particle_out( part );

@@ -59,7 +59,7 @@ namespace cepgen
   }
 
   void
-  IntegratorFoam::integrate( double& result, double& abserr )
+  IntegratorFoam::integrate( double& result, double& abs_error )
   {
     if ( !initialised_ ) {
       foam_.reset( new TFoam( "Foam" ) );
@@ -80,9 +80,9 @@ namespace cepgen
     double norm, err;
     foam_->Finalize( norm, err );
 
-    foam_->GetIntegMC( result, abserr );
+    foam_->GetIntegMC( result, abs_error );
     result_ = result;
-    err_result_ = abserr;
+    err_result_ = abs_error;
 
     CG_DEBUG( "IntegratorFoam" ).log( [&]( auto& log ) {
       double eps = 5.e-4, avewt, wtmax, sigma;

@@ -24,7 +24,7 @@ namespace cepgen
       ~Kinematics() = default;
 
       /// Minimal diffractive mass for dissociative proton treatment
-      static constexpr double MX_MIN = 1.07; // mp+mpi+-
+      static const double MX_MIN;
 
       /// List containing all parameters handled
       ParametersList parameters() const;

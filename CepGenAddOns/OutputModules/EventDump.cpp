@@ -59,9 +59,9 @@ namespace cepgen
     }
 
     void
-    EventDump::setCrossSection( double xsec, double xsec_err )
+    EventDump::setCrossSection( double cross_section, double cross_section_err )
     {
-      *out_ << "Total cross-section: " << xsec << " +/- " << xsec_err << " pb.\n";
+      *out_ << "Total cross-section: " << cross_section << " +/- " << cross_section_err << " pb.\n";
     }
 
     void

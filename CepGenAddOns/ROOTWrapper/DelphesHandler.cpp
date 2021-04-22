@@ -33,7 +33,7 @@ namespace cepgen
         static std::string description() { return "Delphes interfacing module"; }
 
         void initialise( const Parameters& ) override;
-        void setCrossSection( double xsec, double /*err_xsec*/ ) override { xsec_ = xsec; }
+        void setCrossSection( double cross_section, double /*err_cross_section*/ ) override { cross_section_ = cross_section; }
         void operator<<( const Event& ) override;
 
       private:
@@ -48,7 +48,7 @@ namespace cepgen
         DelphesFactory* factory_;
         ExRootTreeBranch* evt_branch_;
         TObjArray* out_all_parts_, *out_stab_parts_, *out_partons_;
-        double xsec_;
+        double cross_section_;
     };
 
     DelphesHandler::DelphesHandler( const ParametersList& params ) :
@@ -61,7 +61,7 @@ namespace cepgen
       tree_writer_( new ExRootTreeWriter( output_.get(), "Delphes") ),
       factory_( nullptr ), evt_branch_( nullptr ),
       out_all_parts_( nullptr ), out_stab_parts_( nullptr ), out_partons_( nullptr ),
-      xsec_( -1. )
+      cross_section_( -1. )
     {
       try {
         conf_reader_->ReadFile( input_card_.c_str() );
@@ -104,7 +104,7 @@ namespace cepgen
       evt_aux->Number = event_num_++;
       evt_aux->ProcessID = 0;
       evt_aux->Weight = ev.weight; // events are normally unweighted in CepGen
-      //evt_aux->CrossSection = xsec_; // not yet fully supported
+      //evt_aux->CrossSection = cross_section_; // not yet fully supported
       evt_aux->ScalePDF = 0.; // for the time being
       evt_aux->AlphaQED = constants::ALPHA_EM;
       evt_aux->AlphaQCD = constants::ALPHA_QCD;

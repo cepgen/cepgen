@@ -54,13 +54,13 @@ namespace cepgen
     {}
 
     void
-    LHEFHepMCHandler::setCrossSection( double xsec, double err )
+    LHEFHepMCHandler::setCrossSection( double cross_section, double err )
     {
       lhe_output_->heprup.NPRUP = 1;
       lhe_output_->heprup.resize();
       lhe_output_->heprup.XMAXUP[0] = 1.;
       lhe_output_->heprup.LPRUP[0] = 1;
-      lhe_output_->heprup.XSECUP[0] = xsec;
+      lhe_output_->heprup.XSECUP[0] = cross_section;
       lhe_output_->heprup.XERRUP[0] = err;
     }
 

@@ -88,9 +88,9 @@ namespace cepgen
     }
 
     void
-    LHEFPythiaHandler::setCrossSection( double xsect, double xsect_err )
+    LHEFPythiaHandler::setCrossSection( double cross_section, double cross_section_err )
     {
-      lhaevt_->setCrossSection( 0, xsect, xsect_err );
+      lhaevt_->setCrossSection( 0, cross_section, cross_section_err );
     }
   }
 }
