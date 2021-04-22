@@ -35,7 +35,7 @@ namespace cepgen
 
         double amplitudeWW( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 ) const;
 
-        static constexpr double prefactor_ = pow( constants::G_EM, 4 );
+        static constexpr double prefactor_ = std::pow( constants::G_EM, 4 );
 
         const double mW_, mW2_;
         const int method_;
@@ -78,7 +78,7 @@ namespace cepgen
     void
     PPtoWW::prepareProcessKinematics()
     {
-      CentralCuts single_w_cuts;
+      cuts::Central single_w_cuts;
       if ( kin_.cuts.central_particles.count( PDG::W ) > 0 )
         single_w_cuts = kin_.cuts.central_particles.at( PDG::W );
       setCuts( single_w_cuts );
@@ -167,15 +167,12 @@ namespace cepgen
       if ( lam3 == 0 )              // longitudinal-transverse
         return invA*( -M_SQRT2*inv_gamma*( lam2-lam1 )*( 1.+lam2*lam4*cos_theta )*sin_theta );
 
-      if ( lam3 != 0 && lam4 != 0 ) // transverse-transverse
+      else // transverse-transverse
         return -0.5*invA*( 2.*beta*( lam1+lam2 )*( lam3+lam4 )
                           -inv_gamma2*( 1.+lam3*lam4 )*( 2.*lam1*lam2+( 1.-lam1*lam2 ) * cos_theta2 )
                           +( 1.+lam1*lam2*lam3*lam4 )*( 3.+lam1*lam2 )
                           +2.*( lam1-lam2 )*( lam3-lam4 )*cos_theta
                           +( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta2 );
-
-      throw CG_FATAL( "PPtoWW:ampl" ) << "Invalid helicities mixing:"
-        << " (" << lam1 << "/" << lam2 << "/" << lam3 << "/" << lam4 << ").";
     }
   }
 }

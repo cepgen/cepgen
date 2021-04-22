@@ -1,26 +1,26 @@
-#----- list all test executables
+#-- list all test executables
 
 file(GLOB tests_standalone RELATIVE ${PROJECT_SOURCE_DIR}/test *.cc)
 file(GLOB tests_root RELATIVE ${PROJECT_SOURCE_DIR}/test *.cxx)
 file(GLOB tests_fortran RELATIVE ${PROJECT_SOURCE_DIR}/test *.f)
 
-#----- include the utilitaries
+#-- include the utilitaries
 
 set(tests)
 set(tests_libraries ${CEPGEN_LIBRARIES})
 
-#----- skip functionals tests if no parsing library is found
+#-- skip functionals tests if no parsing library is found
 
 if(NOT CEPGEN_HAS_FUNCTIONALS)
   message(STATUS "No functionals parser found on this system. Disabling the corresponding tests.")
   file(GLOB tests_functionals
       RELATIVE ${PROJECT_SOURCE_DIR}/test
       test_integrator.cc test_function_parser*.*)
-  #list(REMOVE_ITEM tests_standalone ${tests_functionals})
+#list(REMOVE_ITEM tests_standalone ${tests_functionals})
   list(REMOVE_ITEM tests_root ${tests_functionals})
 endif()
 
-#----- build all tests and link them to the core library
+#-- build all tests and link them to the core library
 
 foreach(exec_src ${tests_standalone})
   string(REPLACE ".cc" "" exec_bin ${exec_src})
@@ -35,12 +35,13 @@ endforeach()
 foreach(exec_src ${tests_fortran})
   string(REPLACE ".f" "" exec_bin ${exec_src})
   add_executable(${exec_bin} ${exec_src})
-  target_link_libraries(${exec_bin} ${tests_libraries})
-  #list(APPEND tests ${exec_bin}) # for the moment, excluding F77 tests
+  target_link_libraries(${exec_bin} ${tests_libraries} stdc++)
+#list(APPEND tests ${exec_bin}) #for the moment, excluding F77 tests
 endforeach()
 
-#----- specify the tests requiring ROOT
+#-- specify the tests requiring ROOT
 
+find_package(ROOT QUIET)
 if(ROOT_FOUND)
   foreach(exec_src ${tests_root})
     string(REPLACE ".cxx" "" exec_bin ${exec_src})

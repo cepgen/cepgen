@@ -65,7 +65,7 @@ int main( int argc, char* argv[] )
         ->parse( std::string(), gen.parametersPtr() ) );
   }
 
-  cepgen::utils::AbortHandler ctrl_c;
+  new cepgen::utils::AbortHandler;
 
   try {
     auto& params = gen.parametersRef();

@@ -3,10 +3,9 @@
 
 #include <string>
 
-namespace cepgen
-{
-  struct version
-  {
+namespace cepgen {
+  /// Collection of CepGen version information handlers
+  struct version {
     /// CepGen version
     static const std::string tag;
     /// CepGen detailed version
@@ -14,6 +13,6 @@ namespace cepgen
     /// CepGen banner
     static const std::string banner;
   };
-}
+}  // namespace cepgen
 
 #endif

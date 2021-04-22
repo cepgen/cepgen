@@ -176,11 +176,11 @@ namespace cepgen
       private:
         /**
          * Define modified variables of integration to avoid peaks integrations (see \cite Vermaseren:1982cz for details)
-         * Return a set of two modified variables of integration to maintain the stability of the integrant. These two new variables are :
+         * Return a set of two modified variables of integration to maintain the stability of the integrand. These two new variables are :
          * - \f$y_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\f$ the new variable
          * - \f$\mathrm dy_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\log\frac{x_{min}}{x_{max}}\f$, the new variable's differential form
-         * \brief Redefine the variables of integration in order to avoid the strong peaking of the integrant
-         * \param[in] expo Exponant
+         * \brief Redefine the variables of integration in order to avoid the strong peaking of the integrand
+         * \param[in] expo Exponent
          * \param[in] lim Min/maximal value of the variable
          * \param[in] var_name The variable name
          * \return A pair containing the value and the bin width the new variable definition

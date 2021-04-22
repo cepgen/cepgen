@@ -6,7 +6,6 @@
 #include "CepGen/Event/Event.h"
 
 #include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/FormFactors.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/AlphaS.h"
 
@@ -130,7 +129,7 @@ namespace cepgen
     double
     PPtoFF::computeCentralMatrixElement() const
     {
-      double mat_el = 0.;
+      double mat_el;
       switch ( method_ ) {
         case Mode::onShell:
           mat_el = onShellME(); break;

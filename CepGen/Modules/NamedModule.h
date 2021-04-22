@@ -3,31 +3,29 @@
 
 #include "CepGen/Core/ParametersList.h"
 
-namespace cepgen
-{
-  template<typename T=std::string>
-  class NamedModule
-  {
-    public:
-      explicit NamedModule( const ParametersList& params ) :
-        params_( params ),
-        name_( params.name<T>() ) {}
+namespace cepgen {
+  /// Base runtime module object
+  template <typename T = std::string>
+  class NamedModule {
+  public:
+    /// Build a module from its steering parameters
+    explicit NamedModule(const ParametersList& params) : params_(params), name_(params.name<T>()) {}
 
-      /// Module unique name
-      const T& name() const { return name_; }
-      /// Module description
-      static std::string description() { return "No description"; }
-      static ParametersList defaultParameters() { return ParametersList(); }
-      /// Module user-defined parameters
-      inline const ParametersList& parameters() const { return params_; }
+    /// Module unique name
+    const T& name() const { return name_; }
+    /// Module description
+    static inline std::string description() { return "No description"; }
+    /// Collection of default parameters steering the module initialisation
+    static inline ParametersList defaultParameters() { return ParametersList(); }
+    /// Module user-defined parameters
+    inline const ParametersList& parameters() const { return params_; }
 
-    protected:
-      /// Set of parameters to steer this output module
-      const ParametersList params_;
-      /// Module unique name
-      const T name_;
+  protected:
+    /// Set of parameters to steer this output module
+    const ParametersList params_;
+    /// Module unique name
+    const T name_;
   };
-}
+}  // namespace cepgen
 
 #endif
-

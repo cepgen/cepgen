@@ -5,22 +5,13 @@ find_library(PROMC_LIB NAMES promc HINTS ${PROMC_DIRS} PATH_SUFFIXES lib)
 find_path(PROMC_INCLUDE NAMES ProMCBook.h HINTS ${PROMC_DIRS} PATH_SUFFIXES src)
 find_path(PROMC_EXT_INCLUDE NAMES CBook HINTS ${PROMC_DIRS} PATH_SUFFIXES include)
 
-if(PROMC_LIB)
-  message(STATUS "ProMC found in ${PROMC_LIB}")
-else()
+if(NOT PROMC_LIB)
   return()
 endif()
 
-include_directories(${PROJECT_SOURCE_DIR})
+#----- build the object
 
-file(GLOB sources *.cpp)
-
-#----- build the objects
-
-add_library(CepGenProMC SHARED ${sources})
-target_link_libraries(CepGenProMC PRIVATE ${PROMC_LIB})
-target_include_directories(CepGenProMC PRIVATE ${PROMC_INCLUDE} ${PROMC_EXT_INCLUDE})
-
-#----- installation rules
-
-install(TARGETS CepGenProMC DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT promc)
+cepgen_build(CepGenProMC SOURCES *.cpp
+    EXT_LIBS ${PROMC_LIB}
+    EXT_HEADERS ${PROMC_INCLUDE} ${PROMC_EXT_INCLUDE}
+    INSTALL_COMPONENT promc)

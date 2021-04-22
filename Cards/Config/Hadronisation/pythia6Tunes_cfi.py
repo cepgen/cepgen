@@ -8,7 +8,8 @@ pythia6noUESettings = (
 )
 
 pythia6CUEP6S1Settings = (
-    # shamelessly stolen from https://github.com/cms-sw/cmssw/blob/master/Configuration/Generator/python/Pythia6CUEP6S1Settings_cfi.py
+    # shamelessly stolen from
+    # https://github.com/cms-sw/cmssw/blob/master/Configuration/Generator/python/Pythia6CUEP6S1Settings_cfi.py
     'MSTU(21)=1     ! Check on possible errors during program execution',
     'MSTJ(22)=2     ! Decay those unstable particles',
     'PARJ(71)=10 .  ! for which ctau  10 mm',
@@ -43,7 +44,8 @@ pythia6CUEP6S1Settings = (
 )
 
 pythiaUEZ2starSettings = (
-    # shamelessly stolen from https://github.com/cms-sw/cmssw/blob/master/Configuration/Generator/python/PythiaUEZ2starSettings_cfi.py
+    # shamelessly stolen from
+    # https://github.com/cms-sw/cmssw/blob/master/Configuration/Generator/python/PythiaUEZ2starSettings_cfi.py
     'MSTU(21)=1     ! Check on possible errors during program execution',
     'MSTJ(22)=2     ! Decay those unstable particles',
     'PARJ(71)=10 .  ! for which ctau  10 mm',

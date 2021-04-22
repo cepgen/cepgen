@@ -4,43 +4,59 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a structure functions definition to the list of handled parameterisation
-#define REGISTER_STRFUN( id, obj ) \
-  namespace cepgen { \
-    struct BUILDERNM( id ) { \
-      BUILDERNM( id )() { strfun::StructureFunctionsFactory::get().registerModule<obj>( (int)strfun::Type::id ); } }; \
-    static BUILDERNM( id ) gStrFun ## id; \
+#define REGISTER_STRFUN(id, obj)                                                                               \
+  namespace cepgen {                                                                                           \
+    struct BUILDERNM(id) {                                                                                     \
+      BUILDERNM(id)() { strfun::StructureFunctionsFactory::get().registerModule<obj>((int)strfun::Type::id); } \
+    };                                                                                                         \
+    static BUILDERNM(id) gStrFun##id;                                                                          \
   }
 /// Add a structure functions definition (with its associated default parameters) to the list of handled parameterisation
-#define REGISTER_STRFUN_PARAMS( id, obj, params ) \
-  namespace cepgen { \
-    struct BUILDERNM( id ) { \
-      BUILDERNM( id )() { strfun::StructureFunctionsFactory::get().registerModule<obj>( (int)strfun::Type::id, params ); } }; \
-    static BUILDERNM( id ) gStrFun ## id; \
+#define REGISTER_STRFUN_PARAMS(id, obj, params)                                                                        \
+  namespace cepgen {                                                                                                   \
+    struct BUILDERNM(id) {                                                                                             \
+      BUILDERNM(id)() { strfun::StructureFunctionsFactory::get().registerModule<obj>((int)strfun::Type::id, params); } \
+    };                                                                                                                 \
+    static BUILDERNM(id) gStrFun##id;                                                                                  \
   }
 
 /// Add a sigma ratio definition to the list of handled parameterisation
-#define SRBUILDERNM( id ) Ratio ## id ## Builder
-#define REGISTER_SIGRAT( id, obj ) \
-  namespace cepgen { \
-    struct SRBUILDERNM( id ) { \
-      SRBUILDERNM( id )() { sigrat::SigmaRatiosFactory::get().registerModule<obj>( (int)sigrat::Type::id ); } }; \
-    static SRBUILDERNM( id ) gSigRat ## id; \
+#define SRBUILDERNM(id) Ratio##id##Builder
+#define REGISTER_SIGRAT(id, obj)                                                                          \
+  namespace cepgen {                                                                                      \
+    struct SRBUILDERNM(id) {                                                                              \
+      SRBUILDERNM(id)() { sigrat::SigmaRatiosFactory::get().registerModule<obj>((int)sigrat::Type::id); } \
+    };                                                                                                    \
+    static SRBUILDERNM(id) gSigRat##id;                                                                   \
   }
 
-namespace cepgen
-{
-  namespace strfun
-  {
+/// Add a form factors definition to the list of handled parameterisation
+#define REGISTER_FF_MODEL(name, obj)                                              \
+  namespace cepgen {                                                              \
+    namespace formfac {                                                           \
+      struct BUILDERNM(obj) {                                                     \
+        BUILDERNM(obj)() { FormFactorsFactory::get().registerModule<obj>(name); } \
+      };                                                                          \
+      static BUILDERNM(obj) gFF##obj;                                             \
+    }                                                                             \
+  }
+
+namespace cepgen {
+  namespace strfun {
     class Parameterisation;
     /// A structure functions parameterisations factory
-    typedef ModuleFactory<Parameterisation,int> StructureFunctionsFactory;
-  }
-  namespace sigrat
-  {
+    typedef ModuleFactory<Parameterisation, int> StructureFunctionsFactory;
+  }  // namespace strfun
+  namespace sigrat {
     class Parameterisation;
     /// A sigma ratio parameterisations factory
-    typedef ModuleFactory<Parameterisation,int> SigmaRatiosFactory;
-  }
-}
+    typedef ModuleFactory<Parameterisation, int> SigmaRatiosFactory;
+  }  // namespace sigrat
+  namespace formfac {
+    class Parameterisation;
+    /// A form factors parameterisations factory
+    typedef ModuleFactory<Parameterisation, std::string> FormFactorsFactory;
+  }  // namespace formfac
+}  // namespace cepgen
 
 #endif

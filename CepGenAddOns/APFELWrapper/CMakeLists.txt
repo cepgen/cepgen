@@ -2,22 +2,15 @@
 find_library(APFEL APFEL HINTS $ENV{APFEL_DIR} PATH_SUFFIXES lib)
 find_path(APFEL_INCLUDE APFEL HINTS $ENV{APFEL_DIR} PATH_SUFFIXES include)
 
-if(APFEL)
-  message(STATUS "APFEL found in ${APFEL}")
-else()
+if(NOT APFEL)
   return()
 endif()
 
-include_directories(${PROJECT_SOURCE_DIR})
-
 file(GLOB sources AlphaSAPFEL.cpp)
 
-#----- build the objects
+#----- build the object
 
-add_library(CepGenAPFEL SHARED ${sources})
-target_link_libraries(CepGenAPFEL PRIVATE ${APFEL})
-target_include_directories(CepGenAPFEL PRIVATE ${APFEL_INCLUDE})
-
-#----- installation rules
-
-install(TARGETS CepGenAPFEL DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT apfel)
+cepgen_build(CepGenAPFEL SOURCES AlphaSAPFEL.cpp
+    EXT_LIBS ${APFEL}
+    EXT_HEADERS ${APFEL_INCLUDE}
+    INSTALL_COMPONENT apfel)
