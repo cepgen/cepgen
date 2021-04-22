@@ -161,8 +161,9 @@ namespace cepgen {
 
   ParametersList Kinematics::parameters() const {
     ParametersList params;
-    params.set<ParametersList>("structureFunctions", str_fun_->parameters())
-        .set<int>("mode", (int)mode())
+    if (str_fun_)
+      params.set<ParametersList>("structureFunctions", str_fun_->parameters());
+    params.set<int>("mode", (int)mode())
         .set<int>("beam1id", incoming_beams.first.pdg)
         .set<double>("beam1pz", incoming_beams.first.pz)
         .set<int>("beam2id", incoming_beams.second.pdg)

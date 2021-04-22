@@ -91,6 +91,8 @@ namespace cepgen {
     //------------------------------------------------------------------
 
     std::ostream& operator<<(std::ostream& os, const Parameterisation* ff) {
+      if (!ff)
+        return os << "[uninitialised form factors]";
       os << ff->name();
       if (ff->last_q2_ >= 0.)
         os << "(Q²=" << ff->last_q2_ << " GeV²): "
