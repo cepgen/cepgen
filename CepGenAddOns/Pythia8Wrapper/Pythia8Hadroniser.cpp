@@ -52,7 +52,7 @@ namespace cepgen {
       Particle& addParticle(Event& ev, const Pythia8::Particle&, const Pythia8::Vec4& mom, unsigned short) const;
       /// A Pythia8 core to be wrapped
       std::unique_ptr<Pythia8::Pythia> pythia_;
-      std::unique_ptr<Pythia8::CepGenEvent> cg_evt_;
+      std::shared_ptr<Pythia8::CepGenEvent> cg_evt_;
       const bool correct_central_;
       const bool debug_lhef_;
       const std::string output_config_;
@@ -77,7 +77,11 @@ namespace cepgen {
     void Pythia8Hadroniser::setParameters(const Parameters& params) {
       params_ = &params;
       cg_evt_->initialise(params);
-      pythia_->setLHAupPtr((Pythia8::LHAup*)cg_evt_.get());
+#if PYTHIA_VERSION_INTEGER < 8300
+      pythia_->setLHAupPtr(cg_evt_.get());
+#else
+      pythia_->setLHAupPtr(cg_evt_);
+#endif
       pythia_->settings.parm("Beams:idA", (long)params_->kinematics.incoming_beams.first.pdg);
       pythia_->settings.parm("Beams:idB", (long)params_->kinematics.incoming_beams.second.pdg);
       // specify we will be using a LHA input

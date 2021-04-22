@@ -31,7 +31,7 @@ namespace cepgen {
 
     private:
       std::unique_ptr<Pythia8::Pythia> pythia_;
-      std::unique_ptr<Pythia8::CepGenEvent> lhaevt_;
+      std::shared_ptr<Pythia8::CepGenEvent> lhaevt_;
       bool compress_;
     };
 
@@ -61,7 +61,11 @@ namespace cepgen {
                               // we're physicists, what do you expect?
       lhaevt_->addComments(oss_init.str());
       lhaevt_->initialise(params);
+#if PYTHIA_VERSION_INTEGER < 8300
       pythia_->setLHAupPtr(lhaevt_.get());
+#else
+      pythia_->setLHAupPtr(lhaevt_);
+#endif
       pythia_->settings.flag("ProcessLevel:all", false);  // we do not want Pythia to interfere...
       pythia_->settings.flag("PartonLevel:all", false);   // we do not want Pythia to interfere...
       pythia_->settings.flag("HadronLevel:all", false);   // we do not want Pythia to interfere...
