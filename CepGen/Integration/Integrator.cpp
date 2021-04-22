@@ -9,18 +9,14 @@
 
 #include "CepGen/Utils/String.h"
 
-namespace cepgen
-{
-  Integrator::Integrator( const ParametersList& params ) :
-    NamedModule( params ),
-    seed_( params.get<int>( "seed", time( nullptr ) ) ),
-    verbosity_( params.get<int>( "verbose", 1 ) ),
-    initialised_( false )
-  {}
+namespace cepgen {
+  Integrator::Integrator(const ParametersList& params)
+      : NamedModule(params),
+        seed_(params.get<int>("seed", time(nullptr))),
+        verbosity_(params.get<int>("verbose", 1)),
+        initialised_(false) {}
 
-  void
-  Integrator::setIntegrand( Integrand& integr )
-  {
+  void Integrator::setIntegrand(Integrand& integr) {
     integrand_ = &integr;
 
     //--- force the reinitialisation
@@ -31,29 +27,18 @@ namespace cepgen
   // helper / alias methods
   //------------------------------------------------------------------------------------------------
 
-  size_t
-  Integrator::size() const
-  {
-    if ( !integrand_ )
-      throw CG_FATAL( "Integrator:size" )
-        << "Trying to retrieve phase space size on an unitialised integrand!";
+  size_t Integrator::size() const {
+    if (!integrand_)
+      throw CG_FATAL("Integrator:size") << "Trying to retrieve phase space size on an unitialised integrand!";
     return integrand_->size();
   }
 
-  double
-  Integrator::eval( const std::vector<double>& x ) const
-  {
-    if ( !integrand_ )
-      throw CG_FATAL( "Integrator:eval" )
-        << "Trying to evaluate the weight on a phase space point "
-        << "on an unitialised integrand!";
-    return integrand_->eval( x );
+  double Integrator::eval(const std::vector<double>& x) const {
+    if (!integrand_)
+      throw CG_FATAL("Integrator:eval") << "Trying to evaluate the weight on a phase space point "
+                                        << "on an unitialised integrand!";
+    return integrand_->eval(x);
   }
 
-  double
-  Integrator::uniform() const
-  {
-    return rand()*1./RAND_MAX;
-  }
-}
-
+  double Integrator::uniform() const { return rand() * 1. / RAND_MAX; }
+}  // namespace cepgen

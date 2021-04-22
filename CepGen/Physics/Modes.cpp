@@ -2,12 +2,9 @@
 
 #include <iostream>
 
-namespace cepgen
-{
-  std::ostream&
-  operator<<( std::ostream& os, const mode::Kinematics& pm )
-  {
-    switch ( pm ) {
+namespace cepgen {
+  std::ostream& operator<<(std::ostream& os, const mode::Kinematics& pm) {
+    switch (pm) {
       case mode::Kinematics::invalid:
         return os << "{invalid}";
       case mode::Kinematics::ElasticElastic:
@@ -22,10 +19,8 @@ namespace cepgen
     return os;
   }
 
-  std::ostream&
-  operator<<( std::ostream& os, const mode::Beam& type )
-  {
-    switch ( type ) {
+  std::ostream& operator<<(std::ostream& os, const mode::Beam& type) {
+    switch (type) {
       case mode::Beam::invalid:
         return os << "{invalid}";
       case mode::Beam::ProtonElastic:
@@ -41,4 +36,4 @@ namespace cepgen
     }
     return os;
   }
-}
+}  // namespace cepgen

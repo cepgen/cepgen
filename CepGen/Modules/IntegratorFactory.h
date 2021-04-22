@@ -6,19 +6,18 @@
 /** \file */
 
 /// Add a generic process definition to the list of handled processes
-#define REGISTER_INTEGRATOR( name, obj ) \
-  namespace cepgen { \
-    struct BUILDERNM( obj ) { \
-      BUILDERNM( obj )() { IntegratorFactory::get().registerModule<obj>( name ); } }; \
-    static BUILDERNM( obj ) gIntegr ## obj; \
+#define REGISTER_INTEGRATOR(name, obj)                                         \
+  namespace cepgen {                                                           \
+    struct BUILDERNM(obj) {                                                    \
+      BUILDERNM(obj)() { IntegratorFactory::get().registerModule<obj>(name); } \
+    };                                                                         \
+    static BUILDERNM(obj) gIntegr##obj;                                        \
   }
 
-namespace cepgen
-{
+namespace cepgen {
   class Integrator;
   /// A processes factory
   typedef ModuleFactory<Integrator> IntegratorFactory;
-}
+}  // namespace cepgen
 
 #endif
-
