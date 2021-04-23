@@ -2,40 +2,29 @@
 #define CepGen_Physics_GluonGrid_h
 
 #include "CepGen/Utils/GridHandler.h"
+#include "CepGen/Core/ParametersList.h"
 
 #define DEFAULT_KMR_GRID_PATH "gluon_mmht2014nlo_Watt.dat"
 
 /// Kimber-Martin-Ryskin unintegrated gluon densities
-namespace kmr
-{
+namespace kmr {
   /// A KMR unintegrated gluon densities grid interpolator
-  class GluonGrid : private cepgen::GridHandler<3,1>
-  {
-    public:
-      struct Parameters {
-        Parameters() : grid_path( DEFAULT_KMR_GRID_PATH ) {}
-        /// Location of the grid to be interpolated
-        std::string grid_path;
-      };
+  class GluonGrid : private cepgen::GridHandler<3, 1> {
+  public:
+    GluonGrid(const GluonGrid&) = delete;
+    void operator=(const GridHandler&) = delete;
 
-    public:
-      /// Retrieve the grid interpolator (singleton)
-      static GluonGrid& get( const char* path = DEFAULT_KMR_GRID_PATH );
+    /// Retrieve the grid interpolator (singleton)
+    static GluonGrid& get(const std::string& path = DEFAULT_KMR_GRID_PATH);
 
-      /// Compute the gluon flux
-      double operator()( double x, double kt2, double mu2 ) const;
-      /// Grid parameterisation object
-      Parameters params;
+    /// Compute the gluon flux
+    double operator()(double x, double kt2, double mu2) const;
 
-    public:
-      GluonGrid( const GluonGrid& ) = delete;
-      void operator=( const GridHandler& ) = delete;
-
-    private:
-      explicit GluonGrid( const Parameters& = Parameters() );
+  private:
+    explicit GluonGrid(const cepgen::ParametersList& = cepgen::ParametersList());
+    /// Location of the grid to be interpolated
+    const std::string grid_path_;
   };
-}
-
-#undef DEFAULT_KMR_GRID_PATH
+}  // namespace kmr
 
 #endif

@@ -2,12 +2,16 @@ set(CPACK_RPM_COMPONENT_INSTALL ON)
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(CepGen)
 set(PROJECT_VERSION 1)
-set(VERSION 0.9.7)
+set(VERSION 1.0.alpha1)
 
 option(CMAKE_BUILD_CORE "Build Core library" ON)
+option(CMAKE_BUILD_PROCESSES "Build physics processes" ON)
 option(CMAKE_BUILD_ADDONS "Build AddOns" ON)
+option(CMAKE_BUILD_SCAN "Build cross-section scan utilitary" OFF)
+option(CMAKE_BUILD_CARD_CONV "Build steering cards converter utilitary" OFF)
 option(CMAKE_BUILD_TESTS "Build tests" OFF)
-
+option(CMAKE_BUILD_FOAM "Build FOAM integrator" OFF)
+option(CMAKE_COVERAGE "Generate code coverage" OFF)
 #----- release build by default
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -16,29 +20,44 @@ endif()
 
 #----- check that at least one target is to be built
 
-if(NOT CMAKE_BUILD_CORE AND NOT CMAKE_BUILD_ADDONS)
+if(NOT CMAKE_BUILD_CORE AND NOT CMAKE_BUILD_PROCESSES AND NOT CMAKE_BUILD_ADDONS)
   message(FATAL_ERROR "Nothing to be built!")
 endif()
 
+if(CMAKE_COVERAGE AND CMAKE_BUILD_TESTS)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+  set(LINK_FLAGS "${LINK_FLAGS} -fprofile-arcs -ftest-coverage")
+  add_custom_command(OUTPUT run_coverage
+    COMMAND ctest
+    #COMMAND cepgen Cards/lpair_cfg.py -n 1000
+    COMMAND lcov --capture --directory CepGen --output-file coverage.info
+    COMMAND genhtml -q coverage.info --output-directory coverage
+    COMMENT Collecting and creating coverage information)
+  add_custom_target(coverage DEPENDS run_coverage)
+endif()
+
+#set(CMAKE_INSTALL_RPATH "$ORIGIN")
+#set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_INSTALL_PREFIX "/usr")
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake $ENV{ROOTSYS}/cmake)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
 set(CMAKE_CXX_FLAGS_DEBUG "-pg") # for gprof
 #set(CMAKE_CXX_FLAGS_DEBUG "-fprofile-arcs -ftest-coverage") # for gcov
-set(CMAKE_CXX_FLAGS_RELEASE "-O2")
-set(LIB_INSTALL_DIR lib)
+set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -O2")
+set(CMAKE_C_FLAGS_RELEASE "-O2")
 
 #----- include external paths
 
 include(GNUInstallDirs)
 include(UseEnvironment)
-include(BuildRPM)
 
 set(CEPGEN_LIBRARIES)
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
-set(CEPGEN_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
+set(CEPGEN_CORE_EXT ${GSL_LIB} ${GSL_CBLAS_LIB} dl)
+set(CEPGEN_HAS_FUNCTIONALS OFF)
 
-#----- define all individual modules/libraries to be built beforehand
-
-set(CEPGEN_MODULES Event Cards)
+include(BuildUtils)
 
 #----- enable fortran for external libraries linking
 
@@ -47,16 +66,17 @@ enable_language(Fortran)
 #----- build all the intermediate objects
 
 include_directories(${PROJECT_SOURCE_DIR})
-if(CMAKE_BUILD_CORE)
-  add_subdirectory(CepGen)
-  foreach(_module ${CEPGEN_MODULES})
-    add_subdirectory(${CEPGEN_LIB_DIR}/${_module})
-  endforeach()
-  list(APPEND CEPGEN_LIBRARIES CepGenCore CepGenProcesses CepGenEvent CepGenCards)
+if(CMAKE_BUILD_PROCESSES)
+  add_subdirectory(CepGenProcesses)
 endif()
 if(CMAKE_BUILD_ADDONS)
   add_subdirectory(CepGenAddOns)
-  list(APPEND CEPGEN_LIBRARIES CepGenAddOns)
+endif()
+if(CMAKE_BUILD_CORE)
+  add_subdirectory(CepGen)
+  list(APPEND CEPGEN_LIBRARIES CepGenCore)
+  add_subdirectory(CepGen/Cards)
+  list(APPEND CEPGEN_LIBRARIES CepGenCards)
 endif()
 
 #----- copy the input cards and other files
@@ -66,28 +86,15 @@ foreach(_files ${input_cards})
   configure_file(${_files} ${_files} COPYONLY)
 endforeach()
 file(GLOB external_files ${PROJECT_SOURCE_DIR}/External/mstw_sf_scan_nnlo.dat ${PROJECT_SOURCE_DIR}/External/*.mcd)
-file(COPY ${external_files} DESTINATION ${PROJECT_BINARY_DIR}/External)
+file(COPY ${external_files} DESTINATION ${PROJECT_BINARY_DIR})
 file(GLOB readme_file ${PROJECT_SOURCE_DIR}/CepGen/README)
 file(COPY ${readme_file} DESTINATION ${PROJECT_BINARY_DIR})
-
-#----- installation rules
-
-set(MODS)
-foreach(_module ${CEPGEN_MODULES})
-  list(APPEND MODS CepGen/${module})
-endforeach()
-install(DIRECTORY ${MODS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/CepGen COMPONENT devel FILES_MATCHING PATTERN "*.h")
 
 #----- set the tests/utils directory
 
 if(CMAKE_BUILD_CORE)
   #--- build the executables
-  file(GLOB_RECURSE exec_sources RELATIVE ${CEPGEN_SOURCE_DIR} ${CEPGEN_SOURCE_DIR}/*.cpp)
-  foreach(exec_src ${exec_sources})
-    string(REPLACE ".cpp" "" exec_bin ${exec_src})
-    add_executable(${exec_bin} ${CEPGEN_SOURCE_DIR}/${exec_src})
-    target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES})
-  endforeach()
+  add_subdirectory(src)
   #--- build the tests
   if(CMAKE_BUILD_TESTS)
     enable_testing()
@@ -95,6 +102,20 @@ if(CMAKE_BUILD_CORE)
     add_subdirectory(test)
   endif()
 endif()
+
+#----- installation rules
+
+install(DIRECTORY CepGen
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  COMPONENT devel FILES_MATCHING PATTERN "*.h")
+install(DIRECTORY Cards
+  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
+  COMPONENT lib FILES_MATCHING PATTERN "*.py")
+install(FILES ${external_files} ${readme_file}
+  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
+  COMPONENT lib)
+export(PACKAGE CepGen)
+include(BuildPackage)
 
 #----- documentation
 
@@ -104,6 +125,8 @@ if(DOXYGEN_FOUND)
   set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
   configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
   message(STATUS "Doxygen found")
-  add_custom_target(doc_doxygen COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "Generating documentation with Doxygen" VERBATIM)
+  add_custom_target(doc_doxygen
+    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Generating documentation with Doxygen" VERBATIM)
 endif()
-

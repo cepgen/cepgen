@@ -3,16 +3,16 @@
 
 #include <string>
 
-namespace cepgen
-{
-  /// CepGen version
-  /// \note Format: 0xMMmmff, with
-  ///  - MM = major version
-  ///  - mm = minor version
-  ///  - ff = feature(s) release
-  const unsigned int cepgen_version = 0x000907;
-  /// Human-readable version number
-  const std::string version();
-}
+namespace cepgen {
+  /// Collection of CepGen version information handlers
+  struct version {
+    /// CepGen version
+    static const std::string tag;
+    /// CepGen detailed version
+    static const std::string extended;
+    /// CepGen banner
+    static const std::string banner;
+  };
+}  // namespace cepgen
 
 #endif

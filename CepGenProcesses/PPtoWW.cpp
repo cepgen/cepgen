@@ -1,5 +1,7 @@
 #include "CepGen/Core/Exception.h"
 
+#include "CepGen/Event/Event.h"
+
 #include "CepGen/Processes/Process2to4.h"
 #include "CepGen/Modules/ProcessesFactory.h"
 
@@ -18,10 +20,11 @@ namespace cepgen
     {
       public:
         PPtoWW( const ParametersList& params = ParametersList() );
-        ProcessPtr clone( const ParametersList& params ) const override {
+        ProcessPtr clone() const override {
           return ProcessPtr( new PPtoWW( *this ) );
         }
         enum class Polarisation { full = 0, LL = 1, LT = 2, TL = 3, TT = 4 };
+        static std::string description() { return "ɣɣ → W⁺W¯ (kt-factor.)"; }
 
       private:
         void prepareProcessKinematics() override;
@@ -32,7 +35,7 @@ namespace cepgen
 
         double amplitudeWW( double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4 ) const;
 
-        static constexpr double prefactor_ = pow( constants::G_EM, 4 );
+        static constexpr double prefactor_ = std::pow( constants::G_EM, 4 );
 
         const double mW_, mW2_;
         const int method_;
@@ -42,7 +45,7 @@ namespace cepgen
 
 
     PPtoWW::PPtoWW( const ParametersList& params ) :
-      Process2to4( params, "pptoww", "ɣɣ → W⁺W¯", { PDG::photon, PDG::photon }, PDG::W ),
+      Process2to4( params, { PDG::photon, PDG::photon }, PDG::W ),
       mW_( PDG::get().mass( PDG::W ) ), mW2_( mW_*mW_ ),
       method_( params.get<int>( "method", 1 ) )
     {
@@ -63,7 +66,7 @@ namespace cepgen
           pol_w1_ = { -1, 1 };
           pol_w2_ = { -1, 1 };
           break;
-        case Polarisation::full: default:
+        case Polarisation::full:
           pol_w1_ = { -1, 0, 1 };
           pol_w2_ = { -1, 0, 1 };
           break;
@@ -75,7 +78,7 @@ namespace cepgen
     void
     PPtoWW::prepareProcessKinematics()
     {
-      Cuts single_w_cuts;
+      cuts::Central single_w_cuts;
       if ( kin_.cuts.central_particles.count( PDG::W ) > 0 )
         single_w_cuts = kin_.cuts.central_particles.at( PDG::W );
       setCuts( single_w_cuts );
@@ -89,21 +92,24 @@ namespace cepgen
 
       double mat_el = prefactor_;
       switch ( method_ ) {
-        case 0: { // on-shell matrix element
-          // (Denner+Dittmaier+Schuster, + work in collaboration with C. Royon)
+        case 0: {
+          // On-shell matrix element
+          // references:
+          //  Phys.Rev.D 51 (1995) 4738
+          //  JHEP 02 (2015) 098
           mat_el *= onShellME();
         } break;
         case 1: {
           mat_el *= offShellME( phi_qt1_+phi_qt2_, phi_qt1_-phi_qt2_ );
         } break;
+        default:
+          throw CG_FATAL( "PPtoWW:ME" )
+            << "Invalid ME calculation method (" << method_ << ")!";
       }
       CG_DEBUG_LOOP( "PPtoWW:ME" )
         << "prefactor: " << prefactor_ << "\n\t"
         << "matrix element: " << mat_el << ".";
       return mat_el;
-
-      throw CG_FATAL( "PPtoWW:ME" )
-        << "Invalid ME calculation method (" << method_ << ")!";
     }
 
     double
@@ -161,15 +167,12 @@ namespace cepgen
       if ( lam3 == 0 )              // longitudinal-transverse
         return invA*( -M_SQRT2*inv_gamma*( lam2-lam1 )*( 1.+lam2*lam4*cos_theta )*sin_theta );
 
-      if ( lam3 != 0 && lam4 != 0 ) // transverse-transverse
+      else // transverse-transverse
         return -0.5*invA*( 2.*beta*( lam1+lam2 )*( lam3+lam4 )
                           -inv_gamma2*( 1.+lam3*lam4 )*( 2.*lam1*lam2+( 1.-lam1*lam2 ) * cos_theta2 )
                           +( 1.+lam1*lam2*lam3*lam4 )*( 3.+lam1*lam2 )
                           +2.*( lam1-lam2 )*( lam3-lam4 )*cos_theta
                           +( 1.-lam1*lam2 )*( 1.-lam3*lam4 )*cos_theta2 );
-
-      throw CG_FATAL( "PPtoWW:ampl" ) << "Invalid helicities mixing:"
-        << " (" << lam1 << "/" << lam2 << "/" << lam3 << "/" << lam4 << ").";
     }
   }
 }
