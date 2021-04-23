@@ -253,11 +253,11 @@ namespace Pythia8 {
   void CepGenEvent::addCorresp(unsigned short py_id, unsigned short cg_id) { py_cg_corresp_[py_id] = cg_id; }
 
   void CepGenEvent::dumpCorresp() const {
-    std::ostringstream oss;
-    oss << "List of Pythia ←|→ CepGen particle ids correspondence";
-    for (const auto& py_cg : py_cg_corresp_)
-      oss << "\n\t" << py_cg.first << " <-> " << py_cg.second;
-    CG_INFO("CepGenEvent:dump") << oss.str();
+    CG_INFO("CepGenEvent:dump").log([&](auto& msg) {
+      msg << "List of Pythia ←|→ CepGen particle ids correspondence";
+      for (const auto& py_cg : py_cg_corresp_)
+        msg << "\n\t" << py_cg.first << " <-> " << py_cg.second;
+    });
   }
 
   std::pair<int, int> CepGenEvent::findMothers(const cepgen::Event& ev, const cepgen::Particle& p) const {
