@@ -10,7 +10,8 @@
 #include "TGraphErrors.h"
 #include "TStyle.h"
 
-#include <string.h>
+#include <cstring>
+#include <vector>
 
 #define font_type(x) 130 + x
 
@@ -43,6 +44,8 @@ namespace cepgen {
   /// A "prettified" generic figure canvas
   class Canvas : public TCanvas {
   public:
+    static const std::vector<int> colours;
+
     /// Build a canvas from its name, title, and attributes
     /// \param[in] name Canvas name (and subsequently filename on save)
     /// \param[in] ratio Divide the canvas into a main and ratio plots subparts?
@@ -358,6 +361,7 @@ namespace cepgen {
     double fLegX1, fLegY1;
     bool fRatio;
   };
+  const std::vector<int> Canvas::colours = {kBlack, kRed + 1, kBlue - 2, kGreen + 1, kOrange + 1};
 }  // namespace cepgen
 
 #endif
