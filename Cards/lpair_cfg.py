@@ -1,5 +1,4 @@
 import Config.Core as cepgen
-from Config.Integration.vegas_cff import integrator
 from Config.PDG_cfi import PDG
 #--- enable timing framework
 #from Config.Timer_cfi import timer
@@ -44,7 +43,7 @@ generator = generator.clone(
 
 #--- example of an output module(s) procedure
 #from Config.OutputModule.ROOTTree_cfi import rootTree # dump everything into a flat tree
-text = cepgen.Module('text', # histogramming/ASCII output capability
+text = cepgen.Module('text',  # histogramming/ASCII output capability
     #variables = ['nev', 'm(4)', 'tgen'],
     histVariables={
         'm(4)': cepgen.Parameters(low=0., high=250., nbins=20),
@@ -63,4 +62,3 @@ output = cepgen.Sequence(
     #hepmc,
     dump,
 )
-
