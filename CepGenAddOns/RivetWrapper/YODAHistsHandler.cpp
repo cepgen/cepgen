@@ -7,6 +7,8 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"
 
+#include <limits>
+
 #include "YODA/Histo1D.h"
 #include "YODA/Histo2D.h"
 #include "YODA/Profile1D.h"

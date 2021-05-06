@@ -45,10 +45,14 @@ namespace cepgen {
     }
 #else
     const auto fullpath = match ? "lib" + path + ".so" : path;
+    if (!std::ifstream(fullpath).good()) {
+      invalid_libraries.emplace_back(path);
+      return false;
+    }
     if (dlopen(fullpath.c_str(), RTLD_LAZY | RTLD_GLOBAL) == nullptr) {
       const char* err = dlerror();
-      CG_DEBUG("loadLibrary") << "Failed to load library \"" << path << "\"."
-                              << (err != nullptr ? utils::format("\n\t%s", err) : "");
+      CG_WARNING("loadLibrary") << "Failed to load library \"" << path << "\"."
+                                << (err != nullptr ? utils::format("\n\t%s", err) : "");
       invalid_libraries.emplace_back(path);
       return false;
     }
