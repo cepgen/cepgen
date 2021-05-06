@@ -2,6 +2,10 @@
 
 set(MADGRAPH_DIRS $ENV{MADGRAPH_DIR} /usr /usr/local)
 find_program(MADGRAPH_BIN NAMES mg5_aMC HINTS ${MADGRAPH_DIRS} PATH_SUFFIXES bin)
+if(MADGRAPH_BIN)
+else()
+  return()
+endif()
 
 file(GLOB tmpl *.tpp)
 
