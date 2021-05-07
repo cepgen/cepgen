@@ -117,12 +117,12 @@ namespace cepgen {
 
       //--- first outgoing beam particle or remnant mass
       switch (kin_.incoming_beams.positive().mode) {
+        case mode::Beam::Electron:
+        case mode::Beam::ProtonElastic:
+          mX2_ = p1_lab_.mass2();
+          break;
         case mode::Beam::ProtonInelastic:
           defineVariable(mX2_, Mapping::power_law, wx_lim_ob1, wx_lim_ob1, "MX2");
-          break;
-        case mode::Beam::ProtonElastic:
-        case mode::Beam::Electron:
-          mX2_ = p1_lab_.mass2();
           break;
         default:
           throw CG_FATAL("LPAIR:kinematics")
@@ -130,12 +130,12 @@ namespace cepgen {
       }
       //--- second outgoing beam particle or remnant mass
       switch (kin_.incoming_beams.negative().mode) {
+        case mode::Beam::Electron:
+        case mode::Beam::ProtonElastic:
+          mY2_ = p2_lab_.mass2();
+          break;
         case mode::Beam::ProtonInelastic:
           defineVariable(mY2_, Mapping::power_law, wx_lim_ob2, wx_lim_ob2, "MY2");
-          break;
-        case mode::Beam::ProtonElastic:
-        case mode::Beam::Electron:
-          mY2_ = p2_lab_.mass2();
           break;
         default:
           throw CG_FATAL("LPAIR:kinematics")
