@@ -82,8 +82,8 @@ namespace cepgen {
 #else
       pythia_->setLHAupPtr(cg_evt_);
 #endif
-      pythia_->settings.parm("Beams:idA", (long)params_->kinematics.incoming_beams.first.pdg);
-      pythia_->settings.parm("Beams:idB", (long)params_->kinematics.incoming_beams.second.pdg);
+      pythia_->settings.parm("Beams:idA", (long)params_->kinematics.incoming_beams.positive().pdg);
+      pythia_->settings.parm("Beams:idB", (long)params_->kinematics.incoming_beams.negative().pdg);
       // specify we will be using a LHA input
       pythia_->settings.mode("Beams:frameType", 5);
       pythia_->settings.parm("Beams:eCM", params_->kinematics.sqrtS());
@@ -117,7 +117,7 @@ namespace cepgen {
       }
 
 #if defined(PYTHIA_VERSION_INTEGER) && PYTHIA_VERSION_INTEGER >= 8226
-      switch (params_->kinematics.mode()) {
+      switch (params_->kinematics.incoming_beams.mode()) {
         case mode::Kinematics::ElasticElastic: {
           pythia_->settings.mode("BeamRemnants:unresolvedHadron", 3);
           pythia_->settings.flag("PartonLevel:all", false);

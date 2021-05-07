@@ -61,10 +61,10 @@ namespace cepgen {
     void LHEFHepMCHandler::initialise(const Parameters& params) {
       lhe_output_->headerBlock() << "<!--\n" << banner(params) << "\n-->";
       //--- first specify information about the run
-      lhe_output_->heprup.IDBMUP = {(int)params.kinematics.incoming_beams.first.pdg,
-                                    (int)params.kinematics.incoming_beams.second.pdg};
-      lhe_output_->heprup.EBMUP = {(double)params.kinematics.incoming_beams.first.pz,
-                                   (double)params.kinematics.incoming_beams.second.pz};
+      lhe_output_->heprup.IDBMUP = {(int)params.kinematics.incoming_beams.positive().pdg,
+                                    (int)params.kinematics.incoming_beams.negative().pdg};
+      lhe_output_->heprup.EBMUP = {(double)params.kinematics.incoming_beams.positive().pz,
+                                   (double)params.kinematics.incoming_beams.negative().pz};
       //--- ensure everything is properly parsed
       lhe_output_->init();
     }

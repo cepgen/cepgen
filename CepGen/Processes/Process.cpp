@@ -240,21 +240,21 @@ namespace cepgen {
       //--- define incoming system
       // at some point introduce non head-on colliding beams?
 
-      const HeavyIon hi1(kin_.incoming_beams.first.pdg);
-      const double m1 = hi1 ? HeavyIon::mass(hi1) : PDG::get().mass(kin_.incoming_beams.first.pdg);
-      const auto p1 = Momentum::fromPxPyPzM(0., 0., +kin_.incoming_beams.first.pz, m1);
+      const HeavyIon hi1(kin_.incoming_beams.positive().pdg);
+      const double m1 = hi1 ? HeavyIon::mass(hi1) : PDG::get().mass(kin_.incoming_beams.positive().pdg);
+      const auto p1 = Momentum::fromPxPyPzM(0., 0., +kin_.incoming_beams.positive().pz, m1);
 
-      const HeavyIon hi2(kin_.incoming_beams.second.pdg);
-      const double m2 = hi2 ? HeavyIon::mass(hi2) : PDG::get().mass(kin_.incoming_beams.second.pdg);
-      const auto p2 = Momentum::fromPxPyPzM(0., 0., -kin_.incoming_beams.second.pz, m2);
+      const HeavyIon hi2(kin_.incoming_beams.negative().pdg);
+      const double m2 = hi2 ? HeavyIon::mass(hi2) : PDG::get().mass(kin_.incoming_beams.negative().pdg);
+      const auto p2 = Momentum::fromPxPyPzM(0., 0., -kin_.incoming_beams.negative().pz, m2);
 
       if (event_) {
         event_->oneWithRole(Particle::IncomingBeam1).setMomentum(p1);
         event_->oneWithRole(Particle::IncomingBeam2).setMomentum(p2);
       }
 
-      s_ = (p1 + p2).mass2();
-      sqs_ = sqrt(s_);
+      sqs_ = kin.incoming_beams.sqrtS();
+      s_ = sqs_ * sqs_;
 
       mA2_ = p1.mass2();
       mB2_ = p2.mass2();

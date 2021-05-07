@@ -149,7 +149,7 @@ namespace cepgen {
 
       params_->kinematics = Kinematics(pkin);
       if (proc_params.has<int>("mode"))
-        params_->kinematics.setMode((mode::Kinematics)proc_params.get<int>("mode"));
+        params_->kinematics.incoming_beams.setMode((mode::Kinematics)proc_params.get<int>("mode"));
 
       //--- taming functions
       PyObject* ptam = element(process, "tamingFunctions");  // borrowed

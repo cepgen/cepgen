@@ -107,10 +107,10 @@ namespace cepgen {
 
       //--- parse the structure functions code
       if (str_fun_ == (int)strfun::Type::MSTWgrid && !mstw_grid_path_.empty())
-        params_->kinematics.setStructureFunctions(strfun::StructureFunctionsFactory::get().build(
+        params_->kinematics.incoming_beams.setStructureFunctions(strfun::StructureFunctionsFactory::get().build(
             str_fun_, ParametersList().set<std::string>("gridPath", mstw_grid_path_)));
       else
-        params_->kinematics.setStructureFunctions(str_fun_, sr_type_);
+        params_->kinematics.incoming_beams.setStructureFunctions(str_fun_, sr_type_);
 
       //--- check if event generation is required
       params_->generation().enabled = iend_ > 1;
@@ -281,9 +281,10 @@ namespace cepgen {
 
     void LpairHandler::pack(const Parameters* params) {
       params_ = const_cast<Parameters*>(params);
-      str_fun_ = params_->kinematics.structureFunctions()->name();
-      if (params_->kinematics.structureFunctions() && params_->kinematics.structureFunctions()->sigmaRatio())
-        sr_type_ = params_->kinematics.structureFunctions()->sigmaRatio()->name();
+      str_fun_ = params_->kinematics.incoming_beams.structureFunctions()->name();
+      if (params_->kinematics.incoming_beams.structureFunctions() &&
+          params_->kinematics.incoming_beams.structureFunctions()->sigmaRatio())
+        sr_type_ = params_->kinematics.incoming_beams.structureFunctions()->sigmaRatio()->name();
       //kmr_grid_path_ =
       //mstw_grid_path_ =
       //pdg_input_path_ =
