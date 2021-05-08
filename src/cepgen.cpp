@@ -31,6 +31,10 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("safe-mode,s", "safe mode", &safe_mode, false)
       .parse();
 
+  //--- handle any debugging flag
+  if (debug)
+    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
+
   //--- first start by defining the generator object
   for (const auto& lib : addons)
     try {
@@ -46,8 +50,6 @@ int main(int argc, char* argv[]) {
     cepgen::dumpModules();
     return 0;
   }
-  if (debug)
-    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
 
   //--- no steering card nor additional flags found
   if (input_card.empty() && parser.extra_config().empty())
@@ -64,7 +66,7 @@ int main(int argc, char* argv[]) {
               ->parse(std::string(), gen.parametersPtr()));
   }
 
-  new cepgen::utils::AbortHandler;
+  cepgen::utils::AbortHandler();
 
   try {
     auto& params = gen.parametersRef();
