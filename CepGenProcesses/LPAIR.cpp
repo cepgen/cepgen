@@ -117,7 +117,7 @@ namespace cepgen {
 
       //--- first outgoing beam particle or remnant mass
       switch (kin_.incoming_beams.positive().mode) {
-        case mode::Beam::Electron:
+        case mode::Beam::PointLikeFermion:
         case mode::Beam::ProtonElastic:
           mX2_ = p1_lab_.mass2();
           break;
@@ -130,7 +130,7 @@ namespace cepgen {
       }
       //--- second outgoing beam particle or remnant mass
       switch (kin_.incoming_beams.negative().mode) {
-        case mode::Beam::Electron:
+        case mode::Beam::PointLikeFermion:
         case mode::Beam::ProtonElastic:
           mY2_ = p2_lab_.mass2();
           break;

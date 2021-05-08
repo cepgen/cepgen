@@ -62,9 +62,9 @@ namespace cepgen {
       negative().pdg = abs(beams_pdg.at(1));
     }
     if (positive().pdg == PDG::electron)
-      positive().mode = mode::Beam::Electron;
+      positive().mode = mode::Beam::PointLikeFermion;
     if (negative().pdg == PDG::electron)
-      negative().mode = mode::Beam::Electron;
+      negative().mode = mode::Beam::PointLikeFermion;
 
     //--- beams longitudinal momentum
     double p1z = 0., p2z = 0;
@@ -177,9 +177,9 @@ namespace cepgen {
 
   mode::Kinematics IncomingBeams::mode() const {
     switch (positive().mode) {
-      case mode::Beam::Electron:
+      case mode::Beam::PointLikeFermion:
       case mode::Beam::ProtonElastic: {
-        if (negative().mode == mode::Beam::ProtonElastic || negative().mode == mode::Beam::Electron)
+        if (negative().mode == mode::Beam::ProtonElastic || negative().mode == mode::Beam::PointLikeFermion)
           return mode::Kinematics::ElasticElastic;
         else
           return mode::Kinematics::ElasticInelastic;

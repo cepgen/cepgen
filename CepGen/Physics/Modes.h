@@ -23,7 +23,6 @@ namespace cepgen {
       PointLikeScalar = 3,   ///< Trivial, spin-0 emission
       PointLikeFermion = 4,  ///< Trivial, spin-1/2 emission
       CompositeScalar = 5,   ///< Composite pion emission
-      Electron = 6,
     };
   }  // namespace mode
   /// Human-readable format of a process mode (elastic/dissociative parts)
