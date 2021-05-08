@@ -52,7 +52,8 @@ namespace cepgen {
     }
 
     void EventDump::setCrossSection(double cross_section, double cross_section_err) {
-      *out_ << "Total cross-section: " << cross_section << " +/- " << cross_section_err << " pb.\n";
+      if (out_ != &std::cout)
+        *out_ << "Total cross-section: " << cross_section << " +/- " << cross_section_err << " pb.\n";
     }
 
     void EventDump::operator<<(const Event& ev) {
