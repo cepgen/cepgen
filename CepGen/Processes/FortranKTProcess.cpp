@@ -88,7 +88,7 @@ namespace cepgen {
       //-------------------------------------------------------------------------------------------
 
       //--- positive-z incoming beam
-      genparams_.inp1 = kin_.incoming_beams.positive().pz;
+      genparams_.inp1 = kin_.incoming_beams.positive().momentum.pz();
       //--- check if first incoming beam is a heavy ion
       const HeavyIon in1 = (HeavyIon)kin_.incoming_beams.positive().pdg;
       if (in1) {
@@ -102,7 +102,7 @@ namespace cepgen {
         genparams_.a_nuc1 = genparams_.z_nuc1 = 1;
 
       //--- negative-z incoming beam
-      genparams_.inp2 = kin_.incoming_beams.negative().pz;
+      genparams_.inp2 = kin_.incoming_beams.negative().momentum.pz();
       //--- check if second incoming beam is a heavy ion
       const HeavyIon in2 = (HeavyIon)kin_.incoming_beams.negative().pdg;
       if (in2) {

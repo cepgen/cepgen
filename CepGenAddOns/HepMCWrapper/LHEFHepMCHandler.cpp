@@ -63,8 +63,8 @@ namespace cepgen {
       //--- first specify information about the run
       lhe_output_->heprup.IDBMUP = {(int)params.kinematics.incoming_beams.positive().pdg,
                                     (int)params.kinematics.incoming_beams.negative().pdg};
-      lhe_output_->heprup.EBMUP = {(double)params.kinematics.incoming_beams.positive().pz,
-                                   (double)params.kinematics.incoming_beams.negative().pz};
+      lhe_output_->heprup.EBMUP = {(double)params.kinematics.incoming_beams.positive().momentum.pz(),
+                                   (double)params.kinematics.incoming_beams.negative().momentum.pz()};
       //--- ensure everything is properly parsed
       lhe_output_->init();
     }

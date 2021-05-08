@@ -23,6 +23,8 @@ namespace cepgen {
     switch (type) {
       case mode::Beam::invalid:
         return os << "{invalid}";
+      case mode::Beam::Electron:
+        return os << "electron";
       case mode::Beam::ProtonElastic:
         return os << "el.proton";
       case mode::Beam::PointLikeScalar:

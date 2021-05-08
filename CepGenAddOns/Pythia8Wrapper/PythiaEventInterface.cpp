@@ -28,9 +28,9 @@ namespace Pythia8 {
     inel2_ = params_->kinematics.incoming_beams.negative().mode == cepgen::mode::Beam::ProtonInelastic;
 
     setBeamA((short)params_->kinematics.incoming_beams.positive().pdg,
-             params_->kinematics.incoming_beams.positive().pz);
+             params_->kinematics.incoming_beams.positive().momentum.pz());
     setBeamB((short)params_->kinematics.incoming_beams.negative().pdg,
-             params_->kinematics.incoming_beams.negative().pz);
+             params_->kinematics.incoming_beams.negative().momentum.pz());
     //addProcess( 0, params_->integration().result, params_->integration().err_result, 100. );
   }
 

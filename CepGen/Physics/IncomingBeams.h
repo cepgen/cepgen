@@ -4,6 +4,7 @@
 #include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/Physics/Modes.h"
+#include "CepGen/Physics/Momentum.h"
 
 #include <iosfwd>
 #include <vector>
@@ -20,11 +21,11 @@ namespace cepgen {
 
   /// Incoming beams characteristics
   struct Beam {
-    Beam();           ///< Default constructor
-    double pz;        ///< Incoming particle momentum, in GeV/c
-    pdgid_t pdg;      ///< PDG identifier for the beam
-    mode::Beam mode;  ///< Beam treatment mode
-    KTFlux kt_flux;   ///< Type of \f$k_{\rm T}\f$-factorised flux to be considered (if any)
+    Beam();             ///< Default constructor
+    Momentum momentum;  ///< Incoming particle momentum
+    pdgid_t pdg;        ///< PDG identifier for the beam
+    mode::Beam mode;    ///< Beam treatment mode
+    KTFlux kt_flux;     ///< Type of \f$k_{\rm T}\f$-factorised flux to be considered (if any)
   };
   /// Human-readable description of a beam particle/system
   std::ostream& operator<<(std::ostream&, const Beam&);

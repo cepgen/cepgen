@@ -15,10 +15,8 @@
 
 namespace cepgen {
   IncomingBeams::IncomingBeams(const ParametersList& params) {
-    //----- per-incoming beam kinematics
-
+    // positive-z incoming beam
     positive().pdg = params.get<int>("beam1id", (int)PDG::proton);
-    params.fill<double>("beam1pz", positive().pz);
     const int hi_A1 = params.get<int>("beam1A", 1);
     const int hi_Z1 = params.get<int>("beam1Z", 0);
     if (hi_Z1 != 0)
@@ -31,8 +29,8 @@ namespace cepgen {
       positive().pdg = HeavyIon{(unsigned short)hi_beam.at(0), (Element)hi_beam.at(1)};
     }
 
+    // negative-z incoming beam
     negative().pdg = params.get<int>("beam2id", (int)PDG::proton);
-    params.fill<double>("beam2pz", negative().pz);
     const int hi_A2 = params.get<int>("beam2A", 1);
     const int hi_Z2 = params.get<int>("beam2Z", 0);
     if (hi_Z2 != 0)
@@ -53,36 +51,53 @@ namespace cepgen {
       if (beams_pdg.size() != 2)
         throw CG_FATAL("Kinematics") << "Invalid list of PDG ids retrieved for incoming beams:\n\t"
                                      << "2 PDG ids are expected, " << beams_pdg << " provided.";
-      positive().pdg = beams_pdg.at(0).get<int>("pdgid");
-      negative().pdg = beams_pdg.at(1).get<int>("pdgid");
+      positive().pdg = abs(beams_pdg.at(0).get<int>("pdgid"));
+      negative().pdg = abs(beams_pdg.at(1).get<int>("pdgid"));
     } else if (params.has<std::vector<int> >("pdgIds")) {
       const auto& beams_pdg = params.get<std::vector<int> >("pdgIds");
       if (beams_pdg.size() != 2)
         throw CG_FATAL("Kinematics") << "Invalid list of PDG ids retrieved for incoming beams:\n\t"
                                      << "2 PDG ids are expected, " << beams_pdg << " provided.";
-      positive().pdg = beams_pdg.at(0);
-      negative().pdg = beams_pdg.at(1);
+      positive().pdg = abs(beams_pdg.at(0));
+      negative().pdg = abs(beams_pdg.at(1));
     }
+    if (positive().pdg == PDG::electron)
+      positive().mode = mode::Beam::Electron;
+    if (negative().pdg == PDG::electron)
+      negative().mode = mode::Beam::Electron;
+
     //--- beams longitudinal momentum
+    double p1z = 0., p2z = 0;
+    if (params.has<double>("beam1pz"))
+      params.fill<double>("beam1pz", p1z);
+    if (params.has<double>("beam2pz"))
+      params.fill<double>("beam2pz", p2z);
     if (params.has<std::vector<double> >("pz")) {
       const auto& beams_pz = params.get<std::vector<double> >("pz");
       if (beams_pz.size() != 2)
         throw CG_FATAL("Kinematics") << "Invalid format for beams pz specification!\n\t"
                                      << "A vector of two pz's is required.";
-      positive().pz = beams_pz.at(0);
-      negative().pz = beams_pz.at(1);
+      p1z = beams_pz.at(0);
+      p2z = beams_pz.at(1);
     }
+    const HeavyIon hi1(positive().pdg), hi2(negative().pdg);
+    const double m1 = hi1 ? HeavyIon::mass(hi1) : PDG::get().mass(positive().pdg);
+    const double m2 = hi2 ? HeavyIon::mass(hi2) : PDG::get().mass(negative().pdg);
+
+    if (p1z * p2z < 0. && p1z < 0.)
+      std::swap(p1z, p2z);
+    positive().momentum = Momentum::fromPxPyPzM(0., 0., +fabs(p1z), m1);
+    negative().momentum = Momentum::fromPxPyPzM(0., 0., -fabs(p2z), m2);
+
     //--- centre-of-mass energy
-    const double sqrt_s = params.get<double>("sqrtS", params.get<double>("cmEnergy", -1.));
-    if (sqrt_s > 0.)
-      setSqrtS(sqrt_s);
+    const double sqrts = params.get<double>("sqrtS", params.get<double>("cmEnergy", -1.));
+    if (sqrts > 0.)
+      setSqrtS(sqrts);
     //--- form factors
-    if (params.has<std::string>("formFactors") || !form_factors_) {
-      std::string ff_mod = params.get<std::string>("formFactors");
-      if (ff_mod.empty())
-        ff_mod = "StandardDipole";
-      form_factors_ = formfac::FormFactorsFactory::get().build(ff_mod);
-    }
+    if (params.has<std::string>("formFactors") || !form_factors_)
+      form_factors_ =
+          formfac::FormFactorsFactory::get().build(params.get<std::string>("formFactors", "StandardDipole"));
+
     if (params.get<int>("mode", (int)mode::Kinematics::invalid) != (int)mode::Kinematics::invalid)
       setMode((mode::Kinematics)params.get<int>("mode"));
     //--- structure functions
@@ -111,9 +126,9 @@ namespace cepgen {
       params.set<ParametersList>("structureFunctions", str_fun_->parameters());
     params.set<int>("mode", (int)mode())
         .set<int>("beam1id", positive().pdg)
-        .set<double>("beam1pz", positive().pz)
+        .set<double>("beam1pz", +positive().momentum.pz())
         .set<int>("beam2id", negative().pdg)
-        .set<double>("beam2pz", negative().pz)
+        .set<double>("beam2pz", -negative().momentum.pz())
         .set<std::vector<int> >("ktFluxes", {(int)positive().kt_flux, (int)negative().kt_flux})
         .set<double>("sqrtS", sqrtS());
     const HeavyIon hi1(positive().pdg), hi2(negative().pdg);
@@ -129,17 +144,11 @@ namespace cepgen {
       throw CG_FATAL("Kinematics") << "Trying to set √s with asymmetric beams"
                                    << " (" << first.pdg << "/" << second.pdg << ").\n"
                                    << "Please fill incoming beams objects manually!";
-    first.pz = second.pz = 0.5 * sqrts;
+    positive().momentum = Momentum::fromPxPyPzM(0., 0., +0.5 * sqrts, PDG::get().mass(positive().pdg));
+    negative().momentum = Momentum::fromPxPyPzM(0., 0., -0.5 * sqrts, PDG::get().mass(negative().pdg));
   }
 
-  double IncomingBeams::s() const {
-    const HeavyIon hi1(first.pdg), hi2(second.pdg);
-    const double m1 = hi1 ? HeavyIon::mass(hi1) : PDG::get().mass(first.pdg);
-    const double m2 = hi2 ? HeavyIon::mass(hi2) : PDG::get().mass(second.pdg);
-    const auto p1 = Momentum::fromPxPyPzM(0., 0., +first.pz, m1);
-    const auto p2 = Momentum::fromPxPyPzM(0., 0., -second.pz, m2);
-    return (p1 + p2).mass2();
-  }
+  double IncomingBeams::s() const { return (positive().momentum + negative().momentum).mass2(); }
 
   double IncomingBeams::sqrtS() const { return std::sqrt(s()); }
 
@@ -168,8 +177,9 @@ namespace cepgen {
 
   mode::Kinematics IncomingBeams::mode() const {
     switch (positive().mode) {
+      case mode::Beam::Electron:
       case mode::Beam::ProtonElastic: {
-        if (negative().mode == mode::Beam::ProtonElastic)
+        if (negative().mode == mode::Beam::ProtonElastic || negative().mode == mode::Beam::Electron)
           return mode::Kinematics::ElasticElastic;
         else
           return mode::Kinematics::ElasticInelastic;
@@ -206,14 +216,14 @@ namespace cepgen {
     form_factors_->setStructureFunctions(str_fun_.get());
   }
 
-  Beam::Beam() : pz(0.), pdg(PDG::proton), mode(mode::Beam::invalid), kt_flux(KTFlux::invalid) {}
+  Beam::Beam() : pdg(PDG::proton), mode(mode::Beam::invalid), kt_flux(KTFlux::invalid) {}
 
   std::ostream& operator<<(std::ostream& os, const Beam& beam) {
     if ((HeavyIon)beam.pdg)
       os << (HeavyIon)beam.pdg;
     else
       os << PDG::get().name(beam.pdg);
-    os << " (" << beam.pz << " GeV/c), " << beam.mode;
+    os << " (" << beam.momentum.pz() << " GeV/c), " << beam.mode;
     if (beam.kt_flux != KTFlux::invalid)
       os << " [unint.flux: " << beam.kt_flux << "]";
     return os;
