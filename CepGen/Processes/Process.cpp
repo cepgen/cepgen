@@ -241,8 +241,12 @@ namespace cepgen {
       const auto& p2 = kin_.incoming_beams.negative().momentum;
       //--- define incoming system
       if (event_) {
-        event_->oneWithRole(Particle::IncomingBeam1).setMomentum(p1);
-        event_->oneWithRole(Particle::IncomingBeam2).setMomentum(p2);
+        auto& ib1 = event_->oneWithRole(Particle::IncomingBeam1);
+        ib1.setPdgId(kin_.incoming_beams.positive().pdg);
+        ib1.setMomentum(p1);
+        auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
+        ib2.setPdgId(kin_.incoming_beams.negative().pdg);
+        ib2.setMomentum(p2);
       }
 
       s_ = kin.incoming_beams.s();

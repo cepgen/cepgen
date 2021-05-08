@@ -119,6 +119,7 @@ namespace cepgen {
       switch (kin_.incoming_beams.positive().mode) {
         case mode::Beam::PointLikeFermion:
         case mode::Beam::ProtonElastic:
+          event_->oneWithRole(Particle::OutgoingBeam1).setPdgId(event_->oneWithRole(Particle::IncomingBeam1).pdgId());
           mX2_ = p1_lab_.mass2();
           break;
         case mode::Beam::ProtonInelastic:
@@ -132,6 +133,7 @@ namespace cepgen {
       switch (kin_.incoming_beams.negative().mode) {
         case mode::Beam::PointLikeFermion:
         case mode::Beam::ProtonElastic:
+          event_->oneWithRole(Particle::OutgoingBeam2).setPdgId(event_->oneWithRole(Particle::IncomingBeam2).pdgId());
           mY2_ = p2_lab_.mass2();
           break;
         case mode::Beam::ProtonInelastic:
