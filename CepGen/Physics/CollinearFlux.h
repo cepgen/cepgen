@@ -20,9 +20,9 @@ namespace cepgen {
   };
   class CollinearFlux {
   public:
-    CollinearFlux(const KTFlux& flux_type, const Limits& range, formfac::Parameterisation* form_fac = nullptr);
-    CollinearFlux(const KTFlux& flux_type, const Limits& range, HeavyIon* hi);
-    double operator()(double x, double mx) const;
+    CollinearFlux(const Limits& range, formfac::Parameterisation* form_fac = nullptr);
+    CollinearFlux(const Limits& range, HeavyIon* hi);
+    double operator()(double x, double mx, const KTFlux& flux_type) const;
 
   private:
     struct gsl_integration_fixed_workspace_del {

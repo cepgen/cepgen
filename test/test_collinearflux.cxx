@@ -14,15 +14,17 @@
 #include <fstream>
 
 using namespace std;
+using namespace cepgen;
 
 int main(int argc, char* argv[]) {
-  int mode, strfun_type, num_points;
+  vector<int> modes;
+  int strfun_type, num_points;
   double mx, xmin, xmax;
   string ffmode, output_file;
 
   cepgen::ArgumentsParser(argc, argv)
       .addArgument("formfac,f", "form factors modelling", &ffmode, ffmode)
-      .addArgument("mode,t", "beam modelling", &mode, (int)cepgen::mode::Beam::ProtonElastic)
+      .addOptionalArgument("modes,t", "beam modelling(s)", &modes, vector<int>{(int)cepgen::mode::Beam::ProtonElastic})
       .addOptionalArgument("mx,M", "diffractive mass (GeV/c^2)", &mx, 100.)
       .addOptionalArgument("sf,s", "structure functions modelling", &strfun_type, 301)
       .addOptionalArgument("xmin,x", "minimal fractional loss", &xmin, 0.)
@@ -35,25 +37,37 @@ int main(int argc, char* argv[]) {
 
   ofstream out(output_file);
 
+  out << "# struct. functions: " << strfun_type << "\n"
+      << "# form factors: " << ffmode << "\n"
+      << "# diffractive mass: " << mx << " GeV/c2\n"
+      << "# fractional momentum loss: " << cepgen::Limits(xmin, xmax) << "\n"
+      << "# fluxes modes:";
   auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(strfun_type);
-  cepgen::KTFlux ktflux;
-  switch ((cepgen::mode::Beam)mode) {
-    case cepgen::mode::Beam::ProtonElastic:
-      ktflux = cepgen::KTFlux::P_Photon_Elastic;
-      break;
-    case cepgen::mode::Beam::ProtonInelastic:
-      ktflux = cepgen::KTFlux::P_Photon_Inelastic;
-      break;
-    default:
-      throw CG_FATAL("main") << "Invalid beam mode: " << mode << "!";
+  vector<cepgen::KTFlux> ktfluxes;
+  for (const auto& mode : modes) {
+    switch ((cepgen::mode::Beam)mode) {
+      case cepgen::mode::Beam::ProtonElastic:
+        ktfluxes.emplace_back(cepgen::KTFlux::P_Photon_Elastic);
+        break;
+      case cepgen::mode::Beam::ProtonInelastic:
+        ktfluxes.emplace_back(cepgen::KTFlux::P_Photon_Inelastic);
+        break;
+      default:
+        throw CG_FATAL("main") << "Invalid beam mode: " << mode << "!";
+    }
+    out << "\t" << (cepgen::mode::Beam)mode;
   }
+  out << "\n";
   auto ff = cepgen::formfac::FormFactorsFactory::get().build(ffmode);
   ff->setStructureFunctions(sf.get());
 
-  cepgen::CollinearFlux flux(ktflux, cepgen::Limits(0., 10000.), ff.get());
+  cepgen::CollinearFlux flux(cepgen::Limits(0., 10000.), ff.get());
   for (int i = 0; i < num_points; ++i) {
     const double x = xmin + i * (xmax - xmin) / (num_points - 1);
-    out << x << "\t" << flux(x, mx) << "\n";
+    out << x;
+    for (const auto& ktflux : ktfluxes)
+      out << "\t" << flux(x, mx, ktflux);
+    out << "\n";
   }
   out.close();
 

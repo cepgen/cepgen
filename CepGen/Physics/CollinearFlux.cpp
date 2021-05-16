@@ -20,20 +20,22 @@ namespace cepgen {
     return ktFlux(args->flux_type, args->x, kt2, *args->form_factors, args->mi2, args->mf2);
   }
 
-  CollinearFlux::CollinearFlux(const KTFlux& flux_type, const Limits& range, formfac::Parameterisation* form_fac)
+  CollinearFlux::CollinearFlux(const Limits& range, formfac::Parameterisation* form_fac)
       : workspace_(gsl_integration_fixed_alloc(INTEGR_TYPE, 50, range.min(), range.max(), 0., 0.)),
-        params_(new FluxArguments{0., std::pow(PDG::get().mass(PDG::proton), 2), 0., flux_type, form_fac, nullptr}),
+        params_(
+            new FluxArguments{0., std::pow(PDG::get().mass(PDG::proton), 2), 0., KTFlux::invalid, form_fac, nullptr}),
         function_({&unintegrated_flux, (void*)params_.get()}) {}
 
-  CollinearFlux::CollinearFlux(const KTFlux& flux_type, const Limits& range, HeavyIon* hi)
+  CollinearFlux::CollinearFlux(const Limits& range, HeavyIon* hi)
       : workspace_(gsl_integration_fixed_alloc(INTEGR_TYPE, 50, range.min(), range.max(), 0., 0.)),
-        params_(new FluxArguments{0., std::pow(PDG::get().mass(PDG::proton), 2), 0., flux_type, nullptr, hi}),
+        params_(new FluxArguments{0., std::pow(PDG::get().mass(PDG::proton), 2), 0., KTFlux::invalid, nullptr, hi}),
         function_({&unintegrated_flux, (void*)params_.get()}) {}
 
-  double CollinearFlux::operator()(double x, double mx) const {
+  double CollinearFlux::operator()(double x, double mx, const KTFlux& flux) const {
     double result = 0.;
     params_->x = x;
     params_->mf2 = mx * mx;
+    params_->flux_type = flux;
     const int res = gsl_integration_fixed(&function_, &result, workspace_.get());
     if (res != GSL_SUCCESS)
       CG_ERROR("CollinearFlux") << gsl_strerror(res);
