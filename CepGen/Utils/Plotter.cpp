@@ -68,6 +68,8 @@ namespace cepgen {
       return range;
     }
 
+    double Hist1D::value(size_t bin) const { return gsl_histogram_get(hist_.get(), bin); }
+
     double Hist1D::mean() const { return gsl_histogram_mean(hist_.get()); }
     double Hist1D::rms() const { return gsl_histogram_sigma(hist_.get()); }
     double Hist1D::minimum() const { return gsl_histogram_min_val(hist_.get()); }
@@ -75,34 +77,34 @@ namespace cepgen {
     double Hist1D::integral() const { return gsl_histogram_sum(hist_.get()); }
 
     void Hist1D::draw(std::ostream& os, size_t width) const {
-      const double max_value = maximum(), min_value = minimum();
-      const double min_range_log = std::log(std::max(min_value, 1.e-10));
-      const double max_range_log = std::log(std::min(max_value, 1.e+10));
+      const double max_val = maximum() * (log_ ? 2. : 1.1), min_val = minimum();
+      const double min_range_log = std::log(std::max(min_val, 1.e-10));
+      const double max_range_log = std::log(std::min(max_val, 1.e+10));
       const std::string sep(17, ' ');
       if (!name_.empty())
         os << "plot of \"" << name_ << "\"\n";
       os << sep << std::string(std::max(0., 2. + width - ylabel_.size()), ' ') << ylabel_ << "\n"
-         << sep << utils::format("%-5.2f", log_ ? std::exp(min_range_log) : min_value) << std::setw(width - 11)
+         << sep << utils::format("%-5.2f", log_ ? std::exp(min_range_log) : min_val) << std::setw(width - 11)
          << std::left << (log_ ? "logarithmic scale" : "linear scale")
-         << utils::format("%5.2e", log_ ? std::exp(max_range_log) : max_value) << "\n"
+         << utils::format("%5.2e", log_ ? std::exp(max_range_log) : max_val) << "\n"
          << sep << std::string(width + 2, '.');  // abscissa axis
       for (size_t i = 0; i < nbins(); ++i) {
         const auto range_i = binRange(i);
-        const double value = gsl_histogram_get(hist_.get(), i), unc = sqrt(value);
-        size_t val = 0ull;
+        const double val = value(i), unc = sqrt(val);
+        size_t ival = 0ull;
         {
           double val_dbl = width;
           if (log_)
-            val_dbl *= (value > 0. && max_value > 0.)
-                           ? std::max((std::log(value) - min_range_log) / (max_range_log - min_range_log), 0.)
+            val_dbl *= (val > 0. && max_val > 0.)
+                           ? std::max((std::log(val) - min_range_log) / (max_range_log - min_range_log), 0.)
                            : 0.;
-          else if (max_value > 0.)
-            val_dbl *= (value > 0. && max_value > 0.) ? value / max_value : 0.;
-          val = std::ceil(val_dbl);
+          else if (max_val > 0.)
+            val_dbl *= (val > 0. && max_val > 0.) ? val / max_val : 0.;
+          ival = std::ceil(val_dbl);
         }
         os << "\n"
-           << utils::format("[%7.2f,%7.2f):", range_i.min(), range_i.max()) << std::string(val, CHAR)
-           << std::string(width - val, ' ') << ": " << utils::format("%6.2e", value) << " +/- "
+           << utils::format("[%7.2f,%7.2f):", range_i.min(), range_i.max()) << std::string(ival, ' ') << CHAR
+           << std::string(width - ival - 1, ' ') << ": " << utils::format("%6.2e", val) << " +/- "
            << utils::format("%6.2e", unc);
       }
       const double bin_width = range().range() / nbins();
@@ -199,6 +201,8 @@ namespace cepgen {
       return range;
     }
 
+    double Hist2D::value(size_t bin_x, size_t bin_y) const { return gsl_histogram2d_get(hist_.get(), bin_x, bin_y); }
+
     double Hist2D::meanX() const { return gsl_histogram2d_xmean(hist_.get()); }
     double Hist2D::rmsX() const { return gsl_histogram2d_xsigma(hist_.get()); }
     double Hist2D::meanY() const { return gsl_histogram2d_ymean(hist_.get()); }
@@ -210,7 +214,7 @@ namespace cepgen {
     void Hist2D::draw(std::ostream& os, size_t) const {
       const size_t nbins_x = gsl_histogram2d_nx(hist_.get());
       const size_t nbins_y = gsl_histogram2d_ny(hist_.get());
-      const double max_value = maximum();
+      const double max_val = maximum();
       const std::string sep(17, ' ');
       if (!name_.empty())
         os << "plot of \"" << name_ << "\"\n";
@@ -223,10 +227,9 @@ namespace cepgen {
         const auto& xrange_i = binRangeX(i);
         os << "\n" << utils::format("[%7.2f,%7.2f):", xrange_i.min(), xrange_i.max());
         for (size_t j = 0; j < nbins_y; ++j) {
-          const double value = gsl_histogram2d_get(hist_.get(), i, j);
-          const double value_norm =
-              log_ ? (value == 0. ? 0. : std::log(value) / std::log(max_value)) : value / max_value;
-          os << CHARS[(size_t)ceil(value_norm * (strlen(CHARS) - 1))];
+          const double val = value(i, j);
+          const double val_norm = log_ ? (val == 0. ? 0. : std::log(val) / std::log(max_val)) : val / max_val;
+          os << CHARS[(size_t)ceil(val_norm * (strlen(CHARS) - 1))];
         }
         os << ":";
       }

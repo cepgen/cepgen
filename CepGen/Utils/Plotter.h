@@ -50,6 +50,8 @@ namespace cepgen {
       void add(Hist1D, double scaling = 1.);
       void scale(double) override;
 
+      double value(size_t bin_x) const;
+
       size_t nbins() const;
       Limits range() const;
       Limits binRange(size_t bin) const;
@@ -80,6 +82,8 @@ namespace cepgen {
       void fill(double x, double y, double weight = 1.);
       void add(Hist2D, double scaling = 1.);
       void scale(double) override;
+
+      double value(size_t bin_x, size_t bin_y) const;
 
       size_t nbinsX() const;
       Limits rangeX() const;
