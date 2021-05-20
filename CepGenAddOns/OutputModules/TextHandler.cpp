@@ -51,12 +51,12 @@ namespace cepgen {
       unsigned long num_evts_;
       struct Hist1DInfo {
         std::string var;
-        utils::Plotter::Hist1D hist;
+        utils::Hist1D hist;
       };
       std::vector<Hist1DInfo> hists_;
       struct Hist2DInfo {
         std::string var1, var2;
-        utils::Plotter::Hist2D hist;
+        utils::Hist2D hist;
       };
       std::vector<Hist2DInfo> hists2d_;
     };
@@ -88,18 +88,18 @@ namespace cepgen {
 
         const auto& hvar = hist_vars.get<ParametersList>(key);
         if (vars.size() == 1) {  // 1D histogram
-          utils::Plotter::Hist1D hist(hvar.get<int>("nbinsX", hvar.get<int>("nbins", 25)),
-                                      hvar.get<Limits>("xrange", Limits(0., 1.)));
+          utils::Hist1D hist(hvar.get<int>("nbinsX", hvar.get<int>("nbins", 25)),
+                             hvar.get<Limits>("xrange", Limits(0., 1.)));
           hist.setLog(hvar.get<bool>("log", false));
           hist.setName(key);
           hist.setXlabel(vars.at(0));
           hist.setYlabel("d(sig)/d" + vars.at(0) + " (pb/bin)");
           hists_.emplace_back(Hist1DInfo{vars.at(0), hist});
         } else if (vars.size() == 2) {  // 2D histogram
-          utils::Plotter::Hist2D hist(hvar.get<int>("nbinsX", hvar.get<int>("nbins", 25)),
-                                      hvar.get<Limits>("xrange", Limits(0., 1.)),
-                                      hvar.get<int>("nbinsY", 50),
-                                      hvar.get<Limits>("yrange", Limits(0., 1.)));
+          utils::Hist2D hist(hvar.get<int>("nbinsX", hvar.get<int>("nbins", 25)),
+                             hvar.get<Limits>("xrange", Limits(0., 1.)),
+                             hvar.get<int>("nbinsY", 50),
+                             hvar.get<Limits>("yrange", Limits(0., 1.)));
           hist.setName(key);
           hist.setXlabel(vars.at(0));
           hist.setYlabel(vars.at(1));
