@@ -97,10 +97,16 @@ namespace cepgen {
     if (!invalid_libraries.empty())
       CG_WARNING("init") << "Failed to load the following libraries:\n\t" << invalid_libraries << ".";
 
-    //--- greetings message
-    CG_INFO("init") << "CepGen " << version::tag << " (" << version::extended << ") "
-                    << "initialised with the following add-ons:\n\t" << loaded_libraries << ".\n\t"
-                    << "Greetings!";
+    //--- greeting message
+    CG_INFO("init").log([&](auto& log) {
+      log << "CepGen " << version::tag << " (" << version::extended << ") "
+          << "initialised";
+      if (!loaded_libraries.empty())
+        log << " with the following add-ons:\n\t" << loaded_libraries << ".\n\t";
+      else
+        log << ". ";
+      log << "Greetings!";
+    });
   }
 
   void printHeader() {

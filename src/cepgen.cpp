@@ -3,6 +3,8 @@
 
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Cards/Handler.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Core/ExportModule.h"
 
 #include "CepGen/Core/Exception.h"
 
@@ -20,13 +22,14 @@ int main(int argc, char* argv[]) {
   std::string input_card;
   int num_events;
   bool list_mods, debug, safe_mode;
-  vector<string> addons;
+  vector<string> addons, outputs;
 
   cepgen::ArgumentsParser parser(argc, argv);
   parser.addOptionalArgument("config,i", "path to the configuration file", &input_card)
       .addOptionalArgument("num-events,n", "number of events to generate", &num_events, -1)
       .addOptionalArgument("list-modules,l", "list all runtime modules", &list_mods, false)
       .addOptionalArgument("add-ons,a", "external runtime plugin", &addons)
+      .addOptionalArgument("output,o", "additional output module(s)", &outputs)
       .addOptionalArgument("debug,d", "debugging mode", &debug, false)
       .addOptionalArgument("safe-mode,s", "safe mode", &safe_mode, false)
       .parse();
@@ -74,6 +77,10 @@ int main(int argc, char* argv[]) {
       params.generation().maxgen = num_events;
       params.generation().enabled = num_events > 0;
     }
+
+    if (params.generation().enabled && !outputs.empty())
+      for (const auto& output : outputs)
+        gen.parametersRef().addOutputModule(cepgen::io::ExportModuleFactory::get().build(output));
 
     //--- list all parameters
     CG_LOG("main") << gen.parameters();
