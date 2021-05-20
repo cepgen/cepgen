@@ -24,7 +24,7 @@ namespace cepgen {
         throw CG_FATAL("Hist1D") << gsl_strerror(ret);
       hist_ = gsl_histogram_ptr(hist);
       hist_w2_ = gsl_histogram_ptr(gsl_histogram_clone(hist_.get()));
-      CG_INFO("Plotter:Hist1D") << "Booking a 1D histogram with " << utils::s("bin", num_bins_x) << " in range "
+      CG_INFO("Plotter:Hist1D") << "Booking a 1D histogram with " << utils::s("bin", num_bins_x, true) << " in range "
                                 << xrange << ".";
     }
 
@@ -129,7 +129,7 @@ namespace cepgen {
         os << "\n"
            << utils::format("[%7.2f,%7.2f):", range_i.min(), range_i.max())
            << (ival > ierr ? std::string(ival - ierr, ' ') : "") << (ierr > 0 ? std::string(ierr, ERR_CHAR) : "")
-           << CHAR << (ierr > 0 ? std::string(ierr, ERR_CHAR) : "")
+           << CHAR << (ierr > 0 ? std::string(std::min(width - ival - 1, ierr), ERR_CHAR) : "")
            << (ival + ierr < width ? std::string(width - ival - ierr - 1, ' ') : "") << ": "
            << utils::format("%6.2e +/- %6.2e", val, unc);
       }
