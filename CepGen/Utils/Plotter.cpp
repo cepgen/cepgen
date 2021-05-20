@@ -5,10 +5,10 @@
 
 #include <gsl/gsl_histogram.h>
 #include <gsl/gsl_histogram2d.h>
+#include <gsl/gsl_errno.h>
 
 #include <iomanip>
 #include <cmath>
-#include <fstream>
 
 namespace cepgen {
   namespace utils {
@@ -19,20 +19,55 @@ namespace cepgen {
 
     Plotter::Hist::~Hist() {}
 
-    Plotter::Hist1D::Hist1D(size_t num_bins_x, double min_x, double max_x) {
+    Plotter::Hist1D::Hist1D(size_t num_bins_x, const Limits& xrange) : underflow_(0ull), overflow_(0ull) {
       //info_.log = hvar.get<bool>("log", false);
       auto hist = gsl_histogram_alloc(num_bins_x);
-      gsl_histogram_set_ranges_uniform(hist, min_x, max_x);
+      auto ret = gsl_histogram_set_ranges_uniform(hist, xrange.min(), xrange.max());
+      if (ret != GSL_SUCCESS)
+        throw CG_FATAL("Hist1D") << gsl_strerror(ret);
       hist_ = gsl_histogram_ptr(hist);
-      CG_INFO("Plotter:Hist1D") << "Booking a 1D histogram with " << utils::s("bin", num_bins_x) << " between " << min_x
-                                << " and " << max_x << ".";
+      CG_INFO("Plotter:Hist1D") << "Booking a 1D histogram with " << utils::s("bin", num_bins_x) << " in range "
+                                << xrange << ".";
     }
 
-    Plotter::Hist1D::Hist1D(const Hist1D& oth) : Hist(oth), hist_(gsl_histogram_clone(oth.hist_.get())) {}
+    Plotter::Hist1D::Hist1D(const Hist1D& oth)
+        : Hist(oth),
+          hist_(gsl_histogram_clone(oth.hist_.get())),
+          underflow_(oth.underflow_),
+          overflow_(oth.overflow_) {}
 
-    void Plotter::Hist1D::fill(double x, double weight) { gsl_histogram_accumulate(hist_.get(), x, weight); }
+    void Plotter::Hist1D::fill(double x, double weight) {
+      auto ret = gsl_histogram_accumulate(hist_.get(), x, weight);
+      if (ret == GSL_SUCCESS)
+        return;
+      if (ret != GSL_EDOM)
+        throw CG_FATAL("Hist1D:fill") << gsl_strerror(ret);
+      const auto& rng = xrange();
+      if (x < rng.min())
+        underflow_++;
+      else
+        overflow_++;
+    }
 
-    void Plotter::Hist1D::scale(double scaling) { gsl_histogram_scale(hist_.get(), scaling); }
+    void Plotter::Hist1D::add(Hist1D oth, double scaling) {
+      oth.scale(scaling);
+      auto ret = gsl_histogram_add(hist_.get(), oth.hist_.get());
+      if (ret != GSL_SUCCESS)
+        throw CG_FATAL("Hist1D:add") << gsl_strerror(ret);
+    }
+
+    void Plotter::Hist1D::scale(double scaling) {
+      auto ret = gsl_histogram_scale(hist_.get(), scaling);
+      if (ret != GSL_SUCCESS)
+        throw CG_FATAL("Hist1D:scale") << gsl_strerror(ret);
+    }
+
+    Limits Plotter::Hist1D::xrange() const {
+      return Limits{gsl_histogram_min(hist_.get()), gsl_histogram_max(hist_.get())};
+    }
+
+    double Plotter::Hist1D::mean() const { return gsl_histogram_mean(hist_.get()); }
+    double Plotter::Hist1D::rms() const { return gsl_histogram_sigma(hist_.get()); }
 
     void Plotter::Hist1D::draw(std::ostream& os, size_t width) const {
       const size_t nbins = gsl_histogram_bins(hist_.get());
@@ -67,31 +102,87 @@ namespace cepgen {
            << utils::format("[%7.2f,%7.2f):", min, max) << std::string(val, CHAR) << std::string(width - val, ' ')
            << ": " << utils::format("%6.2e", value) << " +/- " << utils::format("%6.2e", unc);
       }
-      const double bin_width = (gsl_histogram_max(hist_.get()) - gsl_histogram_min(hist_.get())) / nbins;
+      const double bin_width = xrange().range() / nbins;
       os << "\n"
          << utils::format("%17s", name_.c_str()) << ":" << std::string(width, '.') << ":\n"  // 2nd abscissa axis
          << "\t("
-         << "bin width=" << bin_width << utils::s(" unit", (int)bin_width, false) << ", "
-         << "mean=" << gsl_histogram_mean(hist_.get()) << ", "
-         << "st.dev.=" << gsl_histogram_sigma(hist_.get()) << ")";
+         << "bin width=" << utils::s("unit", bin_width, true) << ", "
+         << "mean=" << mean() << ", "
+         << "st.dev.=" << rms();
+      if (underflow_ > 0ull)
+        os << ", underflow: " << underflow_;
+      if (overflow_ > 0ull)
+        os << ", overflow: " << overflow_;
+      os << ")";
     }
 
-    Plotter::Hist2D::Hist2D(
-        size_t num_bins_x, double min_x, double max_x, size_t num_bins_y, double min_y, double max_y) {
+    Plotter::Hist2D::Hist2D(size_t num_bins_x, const Limits& xrange, size_t num_bins_y, const Limits& yrange) {
       auto hist = gsl_histogram2d_alloc(num_bins_x, num_bins_y);
-      gsl_histogram2d_set_ranges_uniform(hist, min_x, max_x, min_y, max_y);
+      auto ret = gsl_histogram2d_set_ranges_uniform(hist, xrange.min(), xrange.max(), yrange.min(), yrange.max());
+      if (ret != GSL_SUCCESS)
+        throw CG_FATAL("Hist2D") << gsl_strerror(ret);
       hist_ = gsl_histogram2d_ptr(hist);
-      CG_INFO("TextHandler") << "Booking a 2D correlation plot with " << utils::s("bin", num_bins_x + num_bins_y)
-                             << " between (" << min_x << ", " << max_x << ") and (" << min_y << ", " << max_y << ").";
+      CG_INFO("TextHandler") << "Booking a 2D correlation plot with " << utils::s("bin", num_bins_x + num_bins_y, true)
+                             << " in ranges " << xrange << " and " << yrange << ".";
     }
 
-    Plotter::Hist2D::Hist2D(const Hist2D& oth) : Hist(oth), hist_(gsl_histogram2d_clone(oth.hist_.get())) {}
+    Plotter::Hist2D::Hist2D(const Hist2D& oth)
+        : Hist(oth), hist_(gsl_histogram2d_clone(oth.hist_.get())), values_(oth.values_) {}
 
     void Plotter::Hist2D::fill(double x, double y, double weight) {
-      gsl_histogram2d_accumulate(hist_.get(), x, y, weight);
+      auto ret = gsl_histogram2d_accumulate(hist_.get(), x, y, weight);
+      if (ret == GSL_SUCCESS)
+        return;
+      if (ret != GSL_EDOM)
+        throw CG_FATAL("Hist2D:fill") << gsl_strerror(ret);
+      const auto &xrng = xrange(), &yrng = yrange();
+      if (xrng.contains(x)) {
+        if (y < yrng.min())
+          values_.IN_LT++;
+        else
+          values_.IN_GT++;
+      } else if (x < xrng.min()) {
+        if (yrng.contains(y))
+          values_.LT_IN++;
+        else if (y < yrng.min())
+          values_.LT_LT++;
+        else
+          values_.LT_GT++;
+      } else {
+        if (yrng.contains(y))
+          values_.GT_IN++;
+        else if (y < yrng.min())
+          values_.GT_LT++;
+        else
+          values_.GT_GT++;
+      }
     }
 
-    void Plotter::Hist2D::scale(double scaling) { gsl_histogram2d_scale(hist_.get(), scaling); }
+    void Plotter::Hist2D::add(Hist2D oth, double scaling) {
+      oth.scale(scaling);
+      auto ret = gsl_histogram2d_add(hist_.get(), oth.hist_.get());
+      if (ret != GSL_SUCCESS)
+        throw CG_FATAL("Hist2D:add") << gsl_strerror(ret);
+    }
+
+    void Plotter::Hist2D::scale(double scaling) {
+      auto ret = gsl_histogram2d_scale(hist_.get(), scaling);
+      if (ret != GSL_SUCCESS)
+        throw CG_FATAL("Hist2D:scale") << gsl_strerror(ret);
+    }
+
+    Limits Plotter::Hist2D::xrange() const {
+      return Limits{gsl_histogram2d_xmin(hist_.get()), gsl_histogram2d_xmax(hist_.get())};
+    }
+
+    Limits Plotter::Hist2D::yrange() const {
+      return Limits{gsl_histogram2d_ymin(hist_.get()), gsl_histogram2d_ymax(hist_.get())};
+    }
+
+    double Plotter::Hist2D::meanX() const { return gsl_histogram2d_xmean(hist_.get()); }
+    double Plotter::Hist2D::rmsX() const { return gsl_histogram2d_xsigma(hist_.get()); }
+    double Plotter::Hist2D::meanY() const { return gsl_histogram2d_ymean(hist_.get()); }
+    double Plotter::Hist2D::rmsY() const { return gsl_histogram2d_ysigma(hist_.get()); }
 
     void Plotter::Hist2D::draw(std::ostream& os, size_t) const {
       const size_t nbins_x = gsl_histogram2d_nx(hist_.get());
@@ -100,9 +191,10 @@ namespace cepgen {
       const std::string sep(17, ' ');
       if (!name_.empty())
         os << "plot of \"" << name_ << "\"\n";
+      const auto x_range = xrange(), y_range = yrange();
       os << sep << std::string((size_t)std::max(0., 2. + nbins_y - ylabel_.size()), ' ') << ylabel_ << "\n"
-         << sep << utils::format("%-5.2f", gsl_histogram2d_ymin(hist_.get())) << std::string(nbins_y - 11, ' ')
-         << utils::format("%5.2e", gsl_histogram2d_ymax(hist_.get())) << "\n"
+         << sep << utils::format("%-5.2f", y_range.min()) << std::string(nbins_y - 11, ' ')
+         << utils::format("%5.2e", y_range.max()) << "\n"
          << utils::format("%17s", xlabel_.c_str()) << std::string(nbins_y + 2, '.');  // abscissa axis
       for (size_t i = 0; i < nbins_x; ++i) {
         double min_x, max_x;
@@ -130,20 +222,19 @@ namespace cepgen {
           os << (lab.size() > i ? lab.at(i) : ' ');
         os << ":";
       }
-      const double bin_width_x = (gsl_histogram2d_xmax(hist_.get()) - gsl_histogram2d_xmin(hist_.get())) / nbins_x;
-      const double bin_width_y = (gsl_histogram2d_ymax(hist_.get()) - gsl_histogram2d_ymin(hist_.get())) / nbins_y;
+      const double bin_width_x = x_range.range() / nbins_x, bin_width_y = y_range.range() / nbins_y;
       os << "\n"
          << sep << ":" << std::string(nbins_y, '.') << ": "  // 2nd abscissa axis
          << ylabel_ << "\n\t"
          << "(scale: \"" << std::string(CHARS) << "\"\n\t"
          << " x-axis: "
-         << "bin width=" << bin_width_x << utils::s(" unit", (int)bin_width_x, false) << ", "
-         << "mean=" << gsl_histogram2d_xmean(hist_.get()) << ","
-         << "st.dev.=" << gsl_histogram2d_xsigma(hist_.get()) << "\n\t"
+         << "bin width=" << utils::s("unit", bin_width_x, true) << ", "
+         << "mean=" << meanX() << ","
+         << "st.dev.=" << rmsX() << "\n\t"
          << " y-axis: "
-         << "bin width=" << bin_width_y << utils::s(" unit", (int)bin_width_y, false) << ", "
-         << "mean=" << gsl_histogram2d_ymean(hist_.get()) << ","
-         << "st.dev.=" << gsl_histogram2d_ysigma(hist_.get()) << ")";
+         << "bin width=" << utils::s("unit", bin_width_y, true) << ", "
+         << "mean=" << meanY() << ","
+         << "st.dev.=" << rmsY() << ")";
     }
   }  // namespace utils
 }  // namespace cepgen

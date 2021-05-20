@@ -1,7 +1,7 @@
-#include "CepGen/Physics/Limits.h"
+#include "CepGen/Utils/Limits.h"
+#include "CepGen/Utils/String.h"
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   Limits::Limits(double min, double max) : std::pair<double, double>(min, max) {}
@@ -25,11 +25,8 @@ namespace cepgen {
   Limits& Limits::operator*=(double c) {
     first *= c;
     second *= c;
-    if (c < 0.) {
-      const double tmp = first;  // will be optimised by compiler anyway...
-      first = second;
-      second = tmp;
-    }
+    if (c < 0.)
+      std::swap(first, second);
     return *this;
   }
 

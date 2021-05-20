@@ -43,9 +43,9 @@ namespace cepgen {
     /// Add a trailing "s" when needed
     inline const char* s(size_t num) { return (num > 1) ? "s" : ""; }
     /// Add a trailing "s" when needed
-    inline std::string s(const std::string& word, size_t num, bool show_number = true) {
-      return show_number ? format("%i %s%s", num, word.c_str(), (num > 1) ? "s" : "")
-                         : format("%s%s", word.c_str(), (num > 1) ? "s" : "");
+    inline std::string s(const std::string& word, float num, bool show_number = true) {
+      return show_number ? format("%g %s%s", num, word.c_str(), (num > 1.) ? "s" : "")
+                         : format("%s%s", word.c_str(), (num > 1.) ? "s" : "");
     }
     /// Helper to print a vector
     template <class T>

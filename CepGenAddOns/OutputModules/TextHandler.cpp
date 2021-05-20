@@ -11,10 +11,6 @@
 #include "CepGen/Utils/Plotter.h"
 #include "CepGen/Version.h"
 
-#include <gsl/gsl_histogram.h>
-#include <gsl/gsl_histogram2d.h>
-
-#include <iomanip>
 #include <fstream>
 
 namespace cepgen {
@@ -93,8 +89,7 @@ namespace cepgen {
         const auto& hvar = hist_vars.get<ParametersList>(key);
         if (vars.size() == 1) {  // 1D histogram
           utils::Plotter::Hist1D hist(hvar.get<int>("nbinsX", hvar.get<int>("nbins", 25)),
-                                      hvar.get<double>("lowX", hvar.get<double>("low", 0.)),
-                                      hvar.get<double>("highX", hvar.get<double>("high", 1.)));
+                                      hvar.get<Limits>("xrange", Limits(0., 1.)));
           hist.setLog(hvar.get<bool>("log", false));
           hist.setName(key);
           hist.setXlabel(vars.at(0));
@@ -102,11 +97,9 @@ namespace cepgen {
           hists_.emplace_back(Hist1DInfo{vars.at(0), hist});
         } else if (vars.size() == 2) {  // 2D histogram
           utils::Plotter::Hist2D hist(hvar.get<int>("nbinsX", hvar.get<int>("nbins", 25)),
-                                      hvar.get<double>("lowX", hvar.get<double>("low", 0.)),
-                                      hvar.get<double>("highX", hvar.get<double>("high", 1.)),
+                                      hvar.get<Limits>("xrange", Limits(0., 1.)),
                                       hvar.get<int>("nbinsY", 50),
-                                      hvar.get<double>("lowY", 0.),
-                                      hvar.get<double>("highY", 1.));
+                                      hvar.get<Limits>("yrange", Limits(0., 1.)));
           hist.setName(key);
           hist.setXlabel(vars.at(0));
           hist.setYlabel(vars.at(1));

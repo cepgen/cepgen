@@ -1,6 +1,8 @@
 #ifndef CepGen_Utils_Plotter_h
 #define CepGen_Utils_Plotter_h
 
+#include "CepGen/Utils/Limits.h"
+
 #include <gsl/gsl_histogram.h>
 #include <gsl/gsl_histogram2d.h>
 
@@ -48,11 +50,17 @@ namespace cepgen {
       /// 1D histogram container
       class Hist1D : public Hist {
       public:
-        Hist1D(size_t num_bins_x, double min_x, double max_x);
+        Hist1D(size_t num_bins_x, const Limits&);
         Hist1D(const Hist1D&);
 
         void fill(double x, double weight = 1.);
+        void add(Hist1D, double scaling = 1.);
         void scale(double) override;
+
+        Limits xrange() const;
+
+        double mean() const;
+        double rms() const;
         void draw(std::ostream&, size_t width = 50) const override;
 
       private:
@@ -63,15 +71,25 @@ namespace cepgen {
         };
         typedef std::unique_ptr<gsl_histogram, gsl_histogram_deleter> gsl_histogram_ptr;
         gsl_histogram_ptr hist_;
+        size_t underflow_, overflow_;
       };
       /// 2D histogram container
       class Hist2D : public Hist {
       public:
-        Hist2D(size_t num_bins_x, double min_x, double max_x, size_t num_bins_y, double min_y, double max_y);
+        Hist2D(size_t num_bins_x, const Limits& xlim, size_t num_bins_y, const Limits& ylim);
         Hist2D(const Hist2D&);
 
         void fill(double x, double y, double weight = 1.);
+        void add(Hist2D, double scaling = 1.);
         void scale(double) override;
+
+        Limits xrange() const;
+        Limits yrange() const;
+
+        double meanX() const;
+        double rmsX() const;
+        double meanY() const;
+        double rmsY() const;
         void draw(std::ostream&, size_t width = 50) const override;
 
       private:
@@ -85,6 +103,11 @@ namespace cepgen {
         };
         typedef std::unique_ptr<gsl_histogram2d, gsl_histogram2d_deleter> gsl_histogram2d_ptr;
         gsl_histogram2d_ptr hist_;
+        struct values_t {
+          size_t LT_GT = 0ull, IN_GT = 0ull, GT_GT = 0ull;
+          size_t LT_IN = 0ull, /* INSIDE  */ GT_IN = 0ull;
+          size_t LT_LT = 0ull, IN_LT = 0ull, GT_LT = 0ull;
+        } values_;
       };
     };
   }  // namespace utils

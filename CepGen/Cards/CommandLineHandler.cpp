@@ -14,7 +14,7 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 
 #include "CepGen/Event/Event.h"
-#include "CepGen/Physics/Limits.h"
+#include "CepGen/Utils/Limits.h"
 
 #include "CepGen/Integration/Integrator.h"
 
