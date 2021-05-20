@@ -25,6 +25,8 @@ namespace cepgen {
 
       virtual void scale(double) = 0;
       virtual double integral() const = 0;
+      virtual double minimum() const = 0;
+      virtual double maximum() const = 0;
       virtual void draw(std::ostream&, size_t width) const = 0;
 
       void setName(const std::string& name) { name_ = name; }
@@ -48,10 +50,14 @@ namespace cepgen {
       void add(Hist1D, double scaling = 1.);
       void scale(double) override;
 
-      Limits xrange() const;
+      size_t nbins() const;
+      Limits range() const;
+      Limits binRange(size_t bin) const;
 
       double mean() const;
       double rms() const;
+      double minimum() const override;
+      double maximum() const override;
       double integral() const override;
       void draw(std::ostream&, size_t width = 50) const override;
 
@@ -75,13 +81,19 @@ namespace cepgen {
       void add(Hist2D, double scaling = 1.);
       void scale(double) override;
 
-      Limits xrange() const;
-      Limits yrange() const;
+      size_t nbinsX() const;
+      Limits rangeX() const;
+      Limits binRangeX(size_t bin) const;
+      size_t nbinsY() const;
+      Limits rangeY() const;
+      Limits binRangeY(size_t bin) const;
 
       double meanX() const;
       double rmsX() const;
       double meanY() const;
       double rmsY() const;
+      double minimum() const override;
+      double maximum() const override;
       double integral() const override;
       void draw(std::ostream&, size_t width = 50) const override;
 

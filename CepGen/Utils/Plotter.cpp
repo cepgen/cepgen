@@ -3,8 +3,6 @@
 
 #include "CepGen/Core/Exception.h"
 
-#include <gsl/gsl_histogram.h>
-#include <gsl/gsl_histogram2d.h>
 #include <gsl/gsl_errno.h>
 
 #include <iomanip>
@@ -41,8 +39,7 @@ namespace cepgen {
         return;
       if (ret != GSL_EDOM)
         throw CG_FATAL("Hist1D:fill") << gsl_strerror(ret);
-      const auto& rng = xrange();
-      if (x < rng.min())
+      if (x < range().min())
         underflow_ += weight;
       else
         overflow_ += weight;
@@ -61,46 +58,54 @@ namespace cepgen {
         throw CG_FATAL("Hist1D:scale") << gsl_strerror(ret);
     }
 
-    Limits Hist1D::xrange() const { return Limits{gsl_histogram_min(hist_.get()), gsl_histogram_max(hist_.get())}; }
+    size_t Hist1D::nbins() const { return gsl_histogram_bins(hist_.get()); }
+    Limits Hist1D::range() const { return Limits{gsl_histogram_min(hist_.get()), gsl_histogram_max(hist_.get())}; }
+    Limits Hist1D::binRange(size_t bin) const {
+      Limits range;
+      auto ret = gsl_histogram_get_range(hist_.get(), bin, &range.min(), &range.max());
+      if (ret != GSL_SUCCESS)
+        throw CG_FATAL("Hist1D:binRange") << "Bin " << bin << ": " << gsl_strerror(ret);
+      return range;
+    }
 
     double Hist1D::mean() const { return gsl_histogram_mean(hist_.get()); }
     double Hist1D::rms() const { return gsl_histogram_sigma(hist_.get()); }
+    double Hist1D::minimum() const { return gsl_histogram_min_val(hist_.get()); }
+    double Hist1D::maximum() const { return gsl_histogram_max_val(hist_.get()); }
     double Hist1D::integral() const { return gsl_histogram_sum(hist_.get()); }
 
     void Hist1D::draw(std::ostream& os, size_t width) const {
-      const size_t nbins = gsl_histogram_bins(hist_.get());
-      const double max_bin = gsl_histogram_max_val(hist_.get());
-      const double min_bin = gsl_histogram_min_val(hist_.get());
-      const double min_range_log = std::log(std::max(min_bin, 1.e-10));
-      const double max_range_log = std::log(std::min(max_bin, 1.e+10));
+      const double max_value = maximum(), min_value = minimum();
+      const double min_range_log = std::log(std::max(min_value, 1.e-10));
+      const double max_range_log = std::log(std::min(max_value, 1.e+10));
       const std::string sep(17, ' ');
       if (!name_.empty())
         os << "plot of \"" << name_ << "\"\n";
       os << sep << std::string(std::max(0., 2. + width - ylabel_.size()), ' ') << ylabel_ << "\n"
-         << sep << utils::format("%-5.2f", log_ ? std::exp(min_range_log) : min_bin) << std::setw(width - 11)
+         << sep << utils::format("%-5.2f", log_ ? std::exp(min_range_log) : min_value) << std::setw(width - 11)
          << std::left << (log_ ? "logarithmic scale" : "linear scale")
-         << utils::format("%5.2e", log_ ? std::exp(max_range_log) : max_bin) << "\n"
+         << utils::format("%5.2e", log_ ? std::exp(max_range_log) : max_value) << "\n"
          << sep << std::string(width + 2, '.');  // abscissa axis
-      for (size_t i = 0; i < nbins; ++i) {
-        double min, max;
-        gsl_histogram_get_range(hist_.get(), i, &min, &max);
+      for (size_t i = 0; i < nbins(); ++i) {
+        const auto range_i = binRange(i);
         const double value = gsl_histogram_get(hist_.get(), i), unc = sqrt(value);
         size_t val = 0ull;
         {
           double val_dbl = width;
           if (log_)
-            val_dbl *= (value > 0. && max_bin > 0.)
+            val_dbl *= (value > 0. && max_value > 0.)
                            ? std::max((std::log(value) - min_range_log) / (max_range_log - min_range_log), 0.)
                            : 0.;
-          else if (max_bin > 0.)
-            val_dbl *= (value > 0. && max_bin > 0.) ? value / max_bin : 0.;
+          else if (max_value > 0.)
+            val_dbl *= (value > 0. && max_value > 0.) ? value / max_value : 0.;
           val = std::ceil(val_dbl);
         }
         os << "\n"
-           << utils::format("[%7.2f,%7.2f):", min, max) << std::string(val, CHAR) << std::string(width - val, ' ')
-           << ": " << utils::format("%6.2e", value) << " +/- " << utils::format("%6.2e", unc);
+           << utils::format("[%7.2f,%7.2f):", range_i.min(), range_i.max()) << std::string(val, CHAR)
+           << std::string(width - val, ' ') << ": " << utils::format("%6.2e", value) << " +/- "
+           << utils::format("%6.2e", unc);
       }
-      const double bin_width = xrange().range() / nbins;
+      const double bin_width = range().range() / nbins();
       os << "\n"
          << utils::format("%17s", name_.c_str()) << ":" << std::string(width, '.') << ":\n"  // 2nd abscissa axis
          << "\t("
@@ -134,7 +139,7 @@ namespace cepgen {
         return;
       if (ret != GSL_EDOM)
         throw CG_FATAL("Hist2D:fill") << gsl_strerror(ret);
-      const auto &xrng = xrange(), &yrng = yrange();
+      const auto &xrng = rangeX(), &yrng = rangeY();
       if (xrng.contains(x)) {
         if (y < yrng.min())
           values_.IN_LT += weight;
@@ -170,39 +175,57 @@ namespace cepgen {
         throw CG_FATAL("Hist2D:scale") << gsl_strerror(ret);
     }
 
-    Limits Hist2D::xrange() const {
+    size_t Hist2D::nbinsX() const { return gsl_histogram2d_nx(hist_.get()); }
+    Limits Hist2D::rangeX() const {
       return Limits{gsl_histogram2d_xmin(hist_.get()), gsl_histogram2d_xmax(hist_.get())};
     }
+    Limits Hist2D::binRangeX(size_t bin) const {
+      Limits range;
+      auto ret = gsl_histogram2d_get_xrange(hist_.get(), bin, &range.min(), &range.max());
+      if (ret != GSL_SUCCESS)
+        throw CG_FATAL("Hist1D:binRange") << "Bin " << bin << ": " << gsl_strerror(ret);
+      return range;
+    }
 
-    Limits Hist2D::yrange() const {
+    size_t Hist2D::nbinsY() const { return gsl_histogram2d_ny(hist_.get()); }
+    Limits Hist2D::rangeY() const {
       return Limits{gsl_histogram2d_ymin(hist_.get()), gsl_histogram2d_ymax(hist_.get())};
+    }
+    Limits Hist2D::binRangeY(size_t bin) const {
+      Limits range;
+      auto ret = gsl_histogram2d_get_yrange(hist_.get(), bin, &range.min(), &range.max());
+      if (ret != GSL_SUCCESS)
+        throw CG_FATAL("Hist1D:binRange") << "Bin " << bin << ": " << gsl_strerror(ret);
+      return range;
     }
 
     double Hist2D::meanX() const { return gsl_histogram2d_xmean(hist_.get()); }
     double Hist2D::rmsX() const { return gsl_histogram2d_xsigma(hist_.get()); }
     double Hist2D::meanY() const { return gsl_histogram2d_ymean(hist_.get()); }
     double Hist2D::rmsY() const { return gsl_histogram2d_ysigma(hist_.get()); }
+    double Hist2D::minimum() const { return gsl_histogram2d_min_val(hist_.get()); }
+    double Hist2D::maximum() const { return gsl_histogram2d_max_val(hist_.get()); }
     double Hist2D::integral() const { return gsl_histogram2d_sum(hist_.get()); }
 
     void Hist2D::draw(std::ostream& os, size_t) const {
       const size_t nbins_x = gsl_histogram2d_nx(hist_.get());
       const size_t nbins_y = gsl_histogram2d_ny(hist_.get());
-      const double max_bin = gsl_histogram2d_max_val(hist_.get());
+      const double max_value = maximum();
       const std::string sep(17, ' ');
       if (!name_.empty())
         os << "plot of \"" << name_ << "\"\n";
-      const auto x_range = xrange(), y_range = yrange();
+      const auto x_range = rangeX(), y_range = rangeY();
       os << sep << std::string((size_t)std::max(0., 2. + nbins_y - ylabel_.size()), ' ') << ylabel_ << "\n"
          << sep << utils::format("%-5.2f", y_range.min()) << std::string(nbins_y - 11, ' ')
          << utils::format("%5.2e", y_range.max()) << "\n"
          << utils::format("%17s", xlabel_.c_str()) << std::string(nbins_y + 2, '.');  // abscissa axis
       for (size_t i = 0; i < nbins_x; ++i) {
-        double min_x, max_x;
-        gsl_histogram2d_get_xrange(hist_.get(), i, &min_x, &max_x);
-        os << "\n" << utils::format("[%7.2f,%7.2f):", min_x, max_x);
+        const auto& xrange_i = binRangeX(i);
+        os << "\n" << utils::format("[%7.2f,%7.2f):", xrange_i.min(), xrange_i.max());
         for (size_t j = 0; j < nbins_y; ++j) {
           const double value = gsl_histogram2d_get(hist_.get(), i, j);
-          const double value_norm = log_ ? (value == 0. ? 0. : std::log(value) / std::log(max_bin)) : value / max_bin;
+          const double value_norm =
+              log_ ? (value == 0. ? 0. : std::log(value) / std::log(max_value)) : value / max_value;
           os << CHARS[(size_t)ceil(value_norm * (strlen(CHARS) - 1))];
         }
         os << ":";
