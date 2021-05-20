@@ -23,6 +23,7 @@ namespace cepgen {
       explicit Hist(const Hist&);
       virtual ~Hist();
 
+      virtual void clear() = 0;
       virtual void scale(double) = 0;
       virtual double integral() const = 0;
       virtual double minimum() const = 0;
@@ -46,6 +47,7 @@ namespace cepgen {
       Hist1D(size_t num_bins_x, const Limits&);
       Hist1D(const Hist1D&);
 
+      void clear() override;
       void fill(double x, double weight = 1.);
       void add(Hist1D, double scaling = 1.);
       void scale(double) override;
@@ -80,6 +82,7 @@ namespace cepgen {
       Hist2D(size_t num_bins_x, const Limits& xlim, size_t num_bins_y, const Limits& ylim);
       Hist2D(const Hist2D&);
 
+      void clear() override;
       void fill(double x, double y, double weight = 1.);
       void add(Hist2D, double scaling = 1.);
       void scale(double) override;

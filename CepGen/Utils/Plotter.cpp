@@ -35,6 +35,11 @@ namespace cepgen {
           underflow_(oth.underflow_),
           overflow_(oth.overflow_) {}
 
+    void Hist1D::clear() {
+      gsl_histogram_reset(hist_.get());
+      gsl_histogram_reset(hist_w2_.get());
+    }
+
     void Hist1D::fill(double x, double weight) {
       auto ret = gsl_histogram_accumulate(hist_.get(), x, weight);
       if (ret == GSL_SUCCESS) {
@@ -159,6 +164,11 @@ namespace cepgen {
           hist_(gsl_histogram2d_clone(oth.hist_.get())),
           hist_w2_(gsl_histogram2d_clone(oth.hist_w2_.get())),
           values_(oth.values_) {}
+
+    void Hist2D::clear() {
+      gsl_histogram2d_reset(hist_.get());
+      gsl_histogram2d_reset(hist_w2_.get());
+    }
 
     void Hist2D::fill(double x, double y, double weight) {
       auto ret = gsl_histogram2d_accumulate(hist_.get(), x, y, weight);
