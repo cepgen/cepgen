@@ -20,25 +20,44 @@ namespace cepgen {
       explicit Plotter();
       ~Plotter();
 
-    private:
       struct info_t {
-        std::vector<std::string> name;
-        std::string xlabel, ylabel;
+        std::string name, xlabel, ylabel;
         bool log;
       };
+
+      class Hist {
+      public:
+        Hist();
+        explicit Hist(const Hist&);
+        virtual ~Hist();
+
+        virtual void scale(double) = 0;
+        virtual void draw(std::ostream&, size_t width) const = 0;
+
+        void setName(const std::string& name) { name_ = name; }
+        void setXlabel(const std::string& lab) { xlabel_ = lab; }
+        void setYlabel(const std::string& lab) { ylabel_ = lab; }
+        void setLog(bool log = true) { log_ = log; }
+
+      protected:
+        std::string name_;
+        std::string xlabel_, ylabel_;
+        bool log_;
+      };
+
       /// 1D histogram container
-      class Hist1D {
+      class Hist1D : public Hist {
       public:
         Hist1D(size_t num_bins_x, double min_x, double max_x);
+        Hist1D(const Hist1D&);
 
-        void setXlabel(const std::string& lab) { info_.xlabel = lab; }
         void fill(double x, double weight = 1.);
-        void draw(std::ostream&, size_t width = 50) const;
+        void scale(double) override;
+        void draw(std::ostream&, size_t width = 50) const override;
 
       private:
         static constexpr char CHAR = '*';
 
-        info_t info_;
         struct gsl_histogram_deleter {
           void operator()(gsl_histogram* h) { gsl_histogram_free(h); }
         };
@@ -46,14 +65,14 @@ namespace cepgen {
         gsl_histogram_ptr hist_;
       };
       /// 2D histogram container
-      class Hist2D {
+      class Hist2D : public Hist {
       public:
         Hist2D(size_t num_bins_x, double min_x, double max_x, size_t num_bins_y, double min_y, double max_y);
+        Hist2D(const Hist2D&);
 
-        void setXlabel(const std::string& lab) { info_.xlabel = lab; }
-        void setYlabel(const std::string& lab) { info_.ylabel = lab; }
         void fill(double x, double y, double weight = 1.);
-        void draw(std::ostream&, size_t width = 50) const;
+        void scale(double) override;
+        void draw(std::ostream&, size_t width = 50) const override;
 
       private:
         // greyscale ascii art from http://paulbourke.net/dataformats/asciiart/
@@ -61,15 +80,12 @@ namespace cepgen {
         //static constexpr const char* CHARS = " .:-=+*#%@";
         static constexpr const char* CHARS = " .:oO0@%#";
 
-        info_t info_;
         struct gsl_histogram2d_deleter {
           void operator()(gsl_histogram2d* h) { gsl_histogram2d_free(h); }
         };
         typedef std::unique_ptr<gsl_histogram2d, gsl_histogram2d_deleter> gsl_histogram2d_ptr;
         gsl_histogram2d_ptr hist_;
       };
-
-      static Hist1D newHist1D(size_t num_bins, double min_x, double max_x);
     };
   }  // namespace utils
 }  // namespace cepgen
