@@ -23,6 +23,7 @@ namespace cepgen {
       if (ret != GSL_SUCCESS)
         throw CG_FATAL("Hist1D") << gsl_strerror(ret);
       hist_ = gsl_histogram_ptr(hist);
+      hist_w2_ = gsl_histogram_ptr(gsl_histogram_clone(hist_.get()));
       CG_INFO("Plotter:Hist1D") << "Booking a 1D histogram with " << utils::s("bin", num_bins_x) << " in range "
                                 << xrange << ".";
     }
@@ -30,13 +31,16 @@ namespace cepgen {
     Hist1D::Hist1D(const Hist1D& oth)
         : Hist(oth),
           hist_(gsl_histogram_clone(oth.hist_.get())),
+          hist_w2_(gsl_histogram_clone(oth.hist_w2_.get())),
           underflow_(oth.underflow_),
           overflow_(oth.overflow_) {}
 
     void Hist1D::fill(double x, double weight) {
       auto ret = gsl_histogram_accumulate(hist_.get(), x, weight);
-      if (ret == GSL_SUCCESS)
+      if (ret == GSL_SUCCESS) {
+        gsl_histogram_accumulate(hist_w2_.get(), x, weight * weight);
         return;
+      }
       if (ret != GSL_EDOM)
         throw CG_FATAL("Hist1D:fill") << gsl_strerror(ret);
       if (x < range().min())
@@ -46,16 +50,24 @@ namespace cepgen {
     }
 
     void Hist1D::add(Hist1D oth, double scaling) {
+      if (oth.integral() == 0.) {
+        CG_WARNING("Hist1D:add") << "Other histogram is empty.";
+        return;
+      }
+      const double scl = std::pow(oth.integral(), -2);
       oth.scale(scaling);
+      gsl_histogram_scale(oth.hist_w2_.get(), scl);
       auto ret = gsl_histogram_add(hist_.get(), oth.hist_.get());
       if (ret != GSL_SUCCESS)
         throw CG_FATAL("Hist1D:add") << gsl_strerror(ret);
+      gsl_histogram_add(hist_w2_.get(), oth.hist_w2_.get());
     }
 
     void Hist1D::scale(double scaling) {
       auto ret = gsl_histogram_scale(hist_.get(), scaling);
       if (ret != GSL_SUCCESS)
         throw CG_FATAL("Hist1D:scale") << gsl_strerror(ret);
+      gsl_histogram_scale(hist_w2_.get(), scaling * scaling);
     }
 
     size_t Hist1D::nbins() const { return gsl_histogram_bins(hist_.get()); }
@@ -69,6 +81,7 @@ namespace cepgen {
     }
 
     double Hist1D::value(size_t bin) const { return gsl_histogram_get(hist_.get(), bin); }
+    double Hist1D::valueUnc(size_t bin) const { return std::sqrt(gsl_histogram_get(hist_w2_.get(), bin)); }
 
     double Hist1D::mean() const { return gsl_histogram_mean(hist_.get()); }
     double Hist1D::rms() const { return gsl_histogram_sigma(hist_.get()); }
@@ -77,7 +90,7 @@ namespace cepgen {
     double Hist1D::integral() const { return gsl_histogram_sum(hist_.get()); }
 
     void Hist1D::draw(std::ostream& os, size_t width) const {
-      const double max_val = maximum() * (log_ ? 2. : 1.1), min_val = minimum();
+      const double max_val = maximum() * (log_ ? 5. : 1.2), min_val = minimum();
       const double min_range_log = std::log(std::max(min_val, 1.e-10));
       const double max_range_log = std::log(std::min(max_val, 1.e+10));
       const std::string sep(17, ' ');
@@ -90,22 +103,30 @@ namespace cepgen {
          << sep << std::string(width + 2, '.');  // abscissa axis
       for (size_t i = 0; i < nbins(); ++i) {
         const auto range_i = binRange(i);
-        const double val = value(i), unc = sqrt(val);
-        size_t ival = 0ull;
+        const double val = value(i), unc = valueUnc(i);
+        size_t ival = 0ull, ierr = 0ull;
         {
-          double val_dbl = width;
-          if (log_)
+          double val_dbl = width, unc_dbl = width;
+          if (log_) {
             val_dbl *= (val > 0. && max_val > 0.)
                            ? std::max((std::log(val) - min_range_log) / (max_range_log - min_range_log), 0.)
                            : 0.;
-          else if (max_val > 0.)
+            unc_dbl *= (val > 0. && max_val > 0.)
+                           ? std::max((std::log(unc) - min_range_log) / (max_range_log - min_range_log), 0.)
+                           : 0.;
+          } else if (max_val > 0.) {
             val_dbl *= (val > 0. && max_val > 0.) ? val / max_val : 0.;
+            unc_dbl *= (unc > 0. && max_val > 0.) ? unc / max_val : 0.;
+          }
           ival = std::ceil(val_dbl);
+          ierr = std::ceil(unc_dbl);
         }
         os << "\n"
-           << utils::format("[%7.2f,%7.2f):", range_i.min(), range_i.max()) << std::string(ival, ' ') << CHAR
-           << std::string(width - ival - 1, ' ') << ": " << utils::format("%6.2e", val) << " +/- "
-           << utils::format("%6.2e", unc);
+           << utils::format("[%7.2f,%7.2f):", range_i.min(), range_i.max())
+           << (ival > ierr ? std::string(ival - ierr, ' ') : "") << (ierr > 0 ? std::string(ierr, ERR_CHAR) : "")
+           << CHAR << (ierr > 0 ? std::string(ierr, ERR_CHAR) : "")
+           << (ival + ierr < width ? std::string(width - ival - ierr - 1, ' ') : "") << ": "
+           << utils::format("%6.2e +/- %6.2e", val, unc);
       }
       const double bin_width = range().range() / nbins();
       os << "\n"
@@ -128,17 +149,23 @@ namespace cepgen {
       if (ret != GSL_SUCCESS)
         throw CG_FATAL("Hist2D") << gsl_strerror(ret);
       hist_ = gsl_histogram2d_ptr(hist);
+      hist_w2_ = gsl_histogram2d_ptr(gsl_histogram2d_clone(hist_.get()));
       CG_INFO("TextHandler") << "Booking a 2D correlation plot with " << utils::s("bin", num_bins_x + num_bins_y, true)
                              << " in ranges " << xrange << " and " << yrange << ".";
     }
 
     Hist2D::Hist2D(const Hist2D& oth)
-        : Hist(oth), hist_(gsl_histogram2d_clone(oth.hist_.get())), values_(oth.values_) {}
+        : Hist(oth),
+          hist_(gsl_histogram2d_clone(oth.hist_.get())),
+          hist_w2_(gsl_histogram2d_clone(oth.hist_w2_.get())),
+          values_(oth.values_) {}
 
     void Hist2D::fill(double x, double y, double weight) {
       auto ret = gsl_histogram2d_accumulate(hist_.get(), x, y, weight);
-      if (ret == GSL_SUCCESS)
+      if (ret == GSL_SUCCESS) {
+        gsl_histogram2d_accumulate(hist_w2_.get(), x, y, weight * weight);
         return;
+      }
       if (ret != GSL_EDOM)
         throw CG_FATAL("Hist2D:fill") << gsl_strerror(ret);
       const auto &xrng = rangeX(), &yrng = rangeY();
@@ -165,16 +192,24 @@ namespace cepgen {
     }
 
     void Hist2D::add(Hist2D oth, double scaling) {
+      if (oth.integral() == 0.) {
+        CG_WARNING("Hist1D:add") << "Other histogram is empty.";
+        return;
+      }
+      const double scl = std::pow(oth.integral(), -2);
       oth.scale(scaling);
+      gsl_histogram2d_scale(oth.hist_w2_.get(), scl);
       auto ret = gsl_histogram2d_add(hist_.get(), oth.hist_.get());
       if (ret != GSL_SUCCESS)
         throw CG_FATAL("Hist2D:add") << gsl_strerror(ret);
+      gsl_histogram2d_add(hist_w2_.get(), oth.hist_w2_.get());
     }
 
     void Hist2D::scale(double scaling) {
       auto ret = gsl_histogram2d_scale(hist_.get(), scaling);
       if (ret != GSL_SUCCESS)
         throw CG_FATAL("Hist2D:scale") << gsl_strerror(ret);
+      gsl_histogram2d_scale(hist_w2_.get(), scaling * scaling);
     }
 
     size_t Hist2D::nbinsX() const { return gsl_histogram2d_nx(hist_.get()); }
@@ -202,6 +237,9 @@ namespace cepgen {
     }
 
     double Hist2D::value(size_t bin_x, size_t bin_y) const { return gsl_histogram2d_get(hist_.get(), bin_x, bin_y); }
+    double Hist2D::valueUnc(size_t bin_x, size_t bin_y) const {
+      return std::sqrt(gsl_histogram2d_get(hist_w2_.get(), bin_x, bin_y));
+    }
 
     double Hist2D::meanX() const { return gsl_histogram2d_xmean(hist_.get()); }
     double Hist2D::rmsX() const { return gsl_histogram2d_xsigma(hist_.get()); }

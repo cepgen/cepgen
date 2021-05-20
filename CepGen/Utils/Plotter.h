@@ -50,7 +50,8 @@ namespace cepgen {
       void add(Hist1D, double scaling = 1.);
       void scale(double) override;
 
-      double value(size_t bin_x) const;
+      double value(size_t bin) const;
+      double valueUnc(size_t bin) const;
 
       size_t nbins() const;
       Limits range() const;
@@ -64,13 +65,13 @@ namespace cepgen {
       void draw(std::ostream&, size_t width = 50) const override;
 
     private:
-      static constexpr char CHAR = '*';
+      static constexpr char CHAR = '*', ERR_CHAR = '-';
 
       struct gsl_histogram_deleter {
         void operator()(gsl_histogram* h) { gsl_histogram_free(h); }
       };
       typedef std::unique_ptr<gsl_histogram, gsl_histogram_deleter> gsl_histogram_ptr;
-      gsl_histogram_ptr hist_;
+      gsl_histogram_ptr hist_, hist_w2_;
       size_t underflow_, overflow_;
     };
     /// 2D histogram container
@@ -84,6 +85,7 @@ namespace cepgen {
       void scale(double) override;
 
       double value(size_t bin_x, size_t bin_y) const;
+      double valueUnc(size_t bin_x, size_t bin_y) const;
 
       size_t nbinsX() const;
       Limits rangeX() const;
@@ -111,7 +113,7 @@ namespace cepgen {
         void operator()(gsl_histogram2d* h) { gsl_histogram2d_free(h); }
       };
       typedef std::unique_ptr<gsl_histogram2d, gsl_histogram2d_deleter> gsl_histogram2d_ptr;
-      gsl_histogram2d_ptr hist_;
+      gsl_histogram2d_ptr hist_, hist_w2_;
       struct values_t {
         size_t LT_GT = 0ull, IN_GT = 0ull, GT_GT = 0ull;
         size_t LT_IN = 0ull, /* INSIDE  */ GT_IN = 0ull;
