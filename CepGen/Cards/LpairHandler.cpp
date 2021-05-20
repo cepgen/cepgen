@@ -17,20 +17,17 @@
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
-#include "CepGen/Integration/Integrator.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
+#include "CepGen/Utils/Filesystem.h"
 
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/GluonGrid.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/HeavyIon.h"
 
 #include <fstream>
-#include <iomanip>
 
 namespace cepgen {
   namespace card {
@@ -50,6 +47,8 @@ namespace cepgen {
           iend_(1) {}
 
     Parameters* LpairHandler::parse(const std::string& filename, Parameters* params) {
+      if (!utils::fileExists(filename))
+        throw CG_FATAL("LpairHandler") << "Unable to locate steering card \"" << filename << "\".";
       params_ = params;
       std::ostringstream os;
       {  //--- file parsing part
@@ -68,8 +67,7 @@ namespace cepgen {
             continue;
           setParameter(key, value);
           if (describe(key) != "null")
-            os << "\n>> " << std::setw(8) << key << " = " << std::setw(25) << parameter(key) << " (" << describe(key)
-               << ")";
+            os << utils::format("\n>> %-8s %-25s (%s)", key.c_str(), parameter(key).c_str(), describe(key).c_str());
         }
         file.close();
       }
@@ -250,26 +248,17 @@ namespace cepgen {
     void LpairHandler::write(const std::string& file) const {
       std::map<std::string, std::string> out_map;
       for (const auto& it : p_strings_)
-        if (it.second.value && !it.second.value->empty()) {
-          std::ostringstream os;
-          os << std::left << std::setw(8) << it.first << std::setw(20) << *it.second.value << " ! "
-             << it.second.description << "\n";
-          out_map[it.first] = os.str();
-        }
+        if (it.second.value && !it.second.value->empty())
+          out_map[it.first] = utils::format(
+              "%-8s %-20s ! %s\n", it.first.data(), it.second.value->data(), it.second.description.data());
       for (const auto& it : p_ints_)
-        if (it.second.value && *it.second.value != kInvalid) {
-          std::ostringstream os;
-          os << std::left << std::setw(8) << it.first << std::setw(20) << *it.second.value << " ! "
-             << it.second.description << "\n";
-          out_map[it.first] = os.str();
-        }
+        if (it.second.value && *it.second.value != kInvalid)
+          out_map[it.first] =
+              utils::format("%-8s %-20d ! %s\n", it.first.data(), *it.second.value, it.second.description.data());
       for (const auto& it : p_doubles_)
-        if (it.second.value && *it.second.value != Limits::INVALID) {
-          std::ostringstream os;
-          os << std::left << std::setw(8) << it.first << std::setw(20) << std::fixed << *it.second.value << " ! "
-             << it.second.description << "\n";
-          out_map[it.first] = os.str();
-        }
+        if (it.second.value && *it.second.value != Limits::INVALID)
+          out_map[it.first] =
+              utils::format("%-8s %-20e ! %s\n", it.first.data(), *it.second.value, it.second.description.data());
 
       std::ofstream f(file, std::fstream::out | std::fstream::trunc);
       if (!f.is_open())
@@ -369,4 +358,4 @@ namespace cepgen {
   }  // namespace card
 }  // namespace cepgen
 
-REGISTER_CARD_HANDLER("card", LpairHandler)
+REGISTER_CARD_HANDLER(".card", LpairHandler)

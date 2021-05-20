@@ -30,6 +30,7 @@
 
 #include "CepGen/Utils/TimeKeeper.h"
 #include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Filesystem.h"
 
 #include <algorithm>
 
@@ -42,6 +43,8 @@ namespace cepgen {
     PythonHandler::PythonHandler(const ParametersList& params) : Handler(params) {}
 
     Parameters* PythonHandler::parse(const std::string& file, Parameters* params) {
+      if (!utils::fileExists(file))
+        throw CG_FATAL("PythonHandler") << "Unable to locate steering card \"" << file << "\".";
       setenv(
           "PYTHONPATH", (utils::environ("CEPGEN_PATH", ".") + ":.:Cards:../Cards:/usr/share/CepGen/Cards").c_str(), 1);
       setenv("PYTHONDONTWRITEBYTECODE", "1", 1);
@@ -320,4 +323,4 @@ namespace cepgen {
   }  // namespace card
 }  // namespace cepgen
 
-REGISTER_CARD_HANDLER("py", PythonHandler)
+REGISTER_CARD_HANDLER(".py", PythonHandler)

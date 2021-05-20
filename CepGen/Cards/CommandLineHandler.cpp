@@ -14,9 +14,6 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 
 #include "CepGen/Event/Event.h"
-#include "CepGen/Utils/Limits.h"
-
-#include "CepGen/Integration/Integrator.h"
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
@@ -121,4 +118,4 @@ namespace cepgen {
   }  // namespace card
 }  // namespace cepgen
 
-REGISTER_CARD_HANDLER("cmd", CommandLineHandler)
+REGISTER_CARD_HANDLER(".cmd", CommandLineHandler)

@@ -347,6 +347,6 @@ namespace cepgen {
   }  // namespace card
 }  // namespace cepgen
 
-REGISTER_CARD_HANDLER("json", JsonHandler)
-REGISTER_CARD_HANDLER("info", InfoHandler)
-REGISTER_CARD_HANDLER("xml", XmlHandler)
+REGISTER_CARD_HANDLER(".json", JsonHandler)
+REGISTER_CARD_HANDLER(".info", InfoHandler)
+REGISTER_CARD_HANDLER(".xml", XmlHandler)

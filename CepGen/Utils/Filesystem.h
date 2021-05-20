@@ -14,7 +14,10 @@ namespace fs = std::experimental::filesystem;
 
 namespace cepgen {
   namespace utils {
-    bool fileExists(const std::string& path);
+    /// Check if the file exists
+    inline bool fileExists(const std::string& path) { return fs::exists(path); }
+    /// Small utility to retrieve the extension of a filename
+    inline std::string fileExtension(const std::string& file) { return fs::path(file).extension(); }
   }  //namespace utils
 }  // namespace cepgen
 
