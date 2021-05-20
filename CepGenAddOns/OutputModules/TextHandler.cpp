@@ -65,7 +65,7 @@ namespace cepgen {
         : ExportModule(params),
           file_(params.get<std::string>("filename", "output.txt")),
           hist_filename_(params.get<std::string>("histFilename", "output.hists.txt")),
-          variables_(params.get<std::vector<std::string> >("variables")),
+          variables_(params.get<std::vector<std::string>>("variables")),
           save_banner_(params.get<bool>("saveBanner", true)),
           save_variables_(params.get<bool>("saveVariables", true)),
           show_hists_(params.get<bool>("showHistograms", true)),
@@ -84,28 +84,50 @@ namespace cepgen {
       for (const auto& key : hist_vars.keys()) {
         const auto& vars = utils::split(key, ':');
         if (vars.size() < 1 || vars.size() > 2)
-          throw CG_FATAL("ROOTHistsHandler") << "Invalid number of variables to correlate for '" << key << "'!";
+          throw CG_FATAL("TextHandler") << "Invalid number of variables to correlate for '" << key << "'!";
 
         const auto& hvar = hist_vars.get<ParametersList>(key);
         if (vars.size() == 1) {  // 1D histogram
-          utils::Hist1D hist(hvar.get<int>("nbinsX", hvar.get<int>("nbins", 25)),
-                             hvar.get<Limits>("xrange", Limits(0., 1.)));
+          if (hvar.has<std::vector<double>>("xbins"))
+            hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(hvar.get<std::vector<double>>("xbins"))});
+          else if (hvar.has<Limits>("xrange"))
+            hists_.emplace_back(Hist1DInfo{vars.at(0),
+                                           utils::Hist1D(hvar.get<int>("nbinsX", hvar.get<int>("nbins", 25)),
+                                                         hvar.get<Limits>("xrange", Limits(0., 1.)))});
+          else {
+            CG_WARNING("TextHandler") << "Neither xrange nor xbins found in parameters for 1D plot of variable \""
+                                      << vars.at(0) << "\".";
+            continue;
+          }
+          auto& hist = hists_.rbegin()->hist;
           hist.setLog(hvar.get<bool>("log", false));
           hist.setName(key);
           hist.setXlabel(vars.at(0));
           hist.setYlabel("d(sig)/d" + vars.at(0) + " (pb/bin)");
-          hists_.emplace_back(Hist1DInfo{vars.at(0), hist});
         } else if (vars.size() == 2) {  // 2D histogram
-          utils::Hist2D hist(hvar.get<int>("nbinsX", hvar.get<int>("nbins", 25)),
-                             hvar.get<Limits>("xrange", Limits(0., 1.)),
-                             hvar.get<int>("nbinsY", 50),
-                             hvar.get<Limits>("yrange", Limits(0., 1.)));
+          if (hvar.has<std::vector<double>>("xbins") && hvar.has<std::vector<double>>("ybins"))
+            hists2d_.emplace_back(Hist2DInfo{
+                vars.at(0),
+                vars.at(1),
+                utils::Hist2D(hvar.get<std::vector<double>>("xbins"), hvar.get<std::vector<double>>("ybins"))});
+          else if (hvar.has<Limits>("xrange"))
+            hists2d_.emplace_back(Hist2DInfo{vars.at(0),
+                                             vars.at(1),
+                                             utils::Hist2D(hvar.get<int>("nbinsX", hvar.get<int>("nbins", 25)),
+                                                           hvar.get<Limits>("xrange", Limits(0., 1.)),
+                                                           hvar.get<int>("nbinsY", 50),
+                                                           hvar.get<Limits>("yrange", Limits(0., 1.)))});
+          else {
+            CG_WARNING("TextHandler")
+                << "Neither (x/y)range nor (x/y)bins found in parameters for 1D plot of variables \"" << vars << "\".";
+            continue;
+          }
+          auto& hist = hists2d_.rbegin()->hist;
           hist.setName(key);
           hist.setXlabel(vars.at(0));
           hist.setYlabel(vars.at(1));
           hist.setName("d^2(sig)/d" + vars.at(0) + "/d" + vars.at(1) + " (pb/bin)");
           hist.setLog(hvar.get<bool>("log", false));
-          hists2d_.emplace_back(Hist2DInfo{vars.at(0), vars.at(1), hist});
         }
       }
       if (save_hists_ && !hists_.empty())

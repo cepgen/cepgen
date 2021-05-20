@@ -45,6 +45,7 @@ namespace cepgen {
     class Hist1D : public Hist {
     public:
       Hist1D(size_t num_bins_x, const Limits&);
+      Hist1D(const std::vector<double>&);
       Hist1D(const Hist1D&);
 
       void clear() override;
@@ -80,6 +81,7 @@ namespace cepgen {
     class Hist2D : public Hist {
     public:
       Hist2D(size_t num_bins_x, const Limits& xlim, size_t num_bins_y, const Limits& ylim);
+      Hist2D(const std::vector<double>&, const std::vector<double>&);
       Hist2D(const Hist2D&);
 
       void clear() override;

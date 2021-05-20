@@ -17,7 +17,6 @@ namespace cepgen {
     Hist::~Hist() {}
 
     Hist1D::Hist1D(size_t num_bins_x, const Limits& xrange) : underflow_(0ull), overflow_(0ull) {
-      //info_.log = hvar.get<bool>("log", false);
       auto hist = gsl_histogram_alloc(num_bins_x);
       auto ret = gsl_histogram_set_ranges_uniform(hist, xrange.min(), xrange.max());
       if (ret != GSL_SUCCESS)
@@ -26,6 +25,17 @@ namespace cepgen {
       hist_w2_ = gsl_histogram_ptr(gsl_histogram_clone(hist_.get()));
       CG_INFO("Plotter:Hist1D") << "Booking a 1D histogram with " << utils::s("bin", num_bins_x, true) << " in range "
                                 << xrange << ".";
+    }
+
+    Hist1D::Hist1D(const std::vector<double>& xbins) : underflow_(0ull), overflow_(0ull) {
+      auto hist = gsl_histogram_alloc(xbins.size() - 1);
+      auto ret = gsl_histogram_set_ranges(hist, xbins.data(), xbins.size());
+      if (ret != GSL_SUCCESS)
+        throw CG_FATAL("Hist1D") << gsl_strerror(ret);
+      hist_ = gsl_histogram_ptr(hist);
+      hist_w2_ = gsl_histogram_ptr(gsl_histogram_clone(hist_.get()));
+      CG_INFO("Plotter:Hist1D") << "Booking a 1D histogram with " << utils::s("bin", xbins.size(), true) << " in range "
+                                << xbins << ".";
     }
 
     Hist1D::Hist1D(const Hist1D& oth)
@@ -157,6 +167,18 @@ namespace cepgen {
       hist_w2_ = gsl_histogram2d_ptr(gsl_histogram2d_clone(hist_.get()));
       CG_INFO("TextHandler") << "Booking a 2D correlation plot with " << utils::s("bin", num_bins_x + num_bins_y, true)
                              << " in ranges " << xrange << " and " << yrange << ".";
+    }
+
+    Hist2D::Hist2D(const std::vector<double>& xbins, const std::vector<double>& ybins) {
+      auto hist = gsl_histogram2d_alloc(xbins.size() - 1, ybins.size() - 1);
+      auto ret = gsl_histogram2d_set_ranges(hist, xbins.data(), xbins.size(), ybins.data(), ybins.size());
+      if (ret != GSL_SUCCESS)
+        throw CG_FATAL("Hist2D") << gsl_strerror(ret);
+      hist_ = gsl_histogram2d_ptr(hist);
+      hist_w2_ = gsl_histogram2d_ptr(gsl_histogram2d_clone(hist_.get()));
+      CG_INFO("TextHandler") << "Booking a 2D correlation plot with "
+                             << utils::s("bin", xbins.size() + ybins.size(), true) << " in ranges x=(" << xbins
+                             << ") and y=" << ybins << ".";
     }
 
     Hist2D::Hist2D(const Hist2D& oth)
