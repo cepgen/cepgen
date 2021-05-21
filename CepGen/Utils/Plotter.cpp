@@ -364,7 +364,8 @@ namespace cepgen {
 
     void Graph1D::draw(std::ostream& os) const { drawValues(os, values_); }
 
-    void Graph1D::draw(std::ostream& os, size_t width) const { drawValues(os, values_); }
+    void Graph2D::addPoint(double x, double y, double z) { values_[coord_t{x}][coord_t{y}] = value_t{z}; }
 
+    void Graph2D::draw(std::ostream& os) const { drawValues(os, values_); }
   }  // namespace utils
 }  // namespace cepgen
