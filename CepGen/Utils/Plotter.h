@@ -7,6 +7,7 @@
 #include <gsl/gsl_histogram2d.h>
 
 #include <vector>
+#include <map>
 #include <string>
 #include <memory>
 
@@ -37,39 +38,56 @@ namespace cepgen {
 
     class Drawable {
     public:
-      Drawable() : log_(false) {}
+      Drawable() : width_(50ul), log_(false) {}
       Drawable(const Drawable&);
-      virtual void draw(std::ostream&, size_t width) const = 0;
+      virtual void draw(std::ostream&) const = 0;
 
+      void setWidth(size_t width) { width_ = width; }
       void setXlabel(const std::string& lab) { xlabel_ = lab; }
       void setYlabel(const std::string& lab) { ylabel_ = lab; }
       void setLog(bool log = true) { log_ = log; }
 
     protected:
+      struct coord_t {
+        bool operator<(const coord_t& oth) const { return value < oth.value; }
+        double value;
+        std::string label = "";
+      };
+      struct value_t {
+        bool operator<(const value_t& oth) const { return value < oth.value; }
+        double value, value_unc = 0.;
+      };
+      typedef std::map<coord_t, value_t> axis_t;
+      struct map_elements {
+        bool operator()(const std::pair<coord_t, value_t>& lhs, const std::pair<coord_t, value_t>& rhs) {
+          return lhs.second.value < rhs.second.value;
+        }
+      };
+      size_t width_;
       std::string xlabel_, ylabel_;
       bool log_;
     };
 
     class Drawable1D : public Drawable {
-    public:
-      explicit Drawable1D(size_t width) : width_(width) {}
-
     protected:
-      struct value_t {
-        double coord, value, value_unc = 0.;
-        std::string label = "";
-      };
-      typedef std::vector<value_t> values_t;
-
-      void drawValues(std::ostream&, const values_t&) const;
-
-      const size_t width_;
+      void drawValues(std::ostream&, const axis_t&) const;
 
     private:
       static constexpr char CHAR = '*', ERR_CHAR = '-';
     };
 
-    class Drawable2D : public Drawable {};
+    class Drawable2D : public Drawable {
+    protected:
+      typedef std::map<coord_t, axis_t> dualaxis_t;
+
+      void drawValues(std::ostream&, const dualaxis_t&) const;
+
+    private:
+      // greyscale ascii art from http://paulbourke.net/dataformats/asciiart/
+      //static constexpr const char* CHARS = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+      //static constexpr const char* CHARS = " .:-=+*#%@";
+      static constexpr const char* CHARS = " .:oO0@%#";
+    };
 
     /// 1D histogram container
     class Hist1D : public Hist, public Drawable1D {
@@ -95,7 +113,7 @@ namespace cepgen {
       double minimum() const override;
       double maximum() const override;
       double integral() const override;
-      void draw(std::ostream&, size_t width = 50) const override;
+      void draw(std::ostream&) const override;
 
     private:
       struct gsl_histogram_deleter {
@@ -135,20 +153,15 @@ namespace cepgen {
       double minimum() const override;
       double maximum() const override;
       double integral() const override;
-      void draw(std::ostream&, size_t width = 50) const override;
+      void draw(std::ostream&) const override;
 
     private:
-      // greyscale ascii art from http://paulbourke.net/dataformats/asciiart/
-      //static constexpr const char* CHARS = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
-      //static constexpr const char* CHARS = " .:-=+*#%@";
-      static constexpr const char* CHARS = " .:oO0@%#";
-
       struct gsl_histogram2d_deleter {
         void operator()(gsl_histogram2d* h) { gsl_histogram2d_free(h); }
       };
       typedef std::unique_ptr<gsl_histogram2d, gsl_histogram2d_deleter> gsl_histogram2d_ptr;
       gsl_histogram2d_ptr hist_, hist_w2_;
-      struct values_t {
+      struct contents_t {
         size_t LT_GT = 0ull, IN_GT = 0ull, GT_GT = 0ull;
         size_t LT_IN = 0ull, /* INSIDE  */ GT_IN = 0ull;
         size_t LT_LT = 0ull, IN_LT = 0ull, GT_LT = 0ull;
@@ -157,14 +170,26 @@ namespace cepgen {
 
     class Graph1D : public Drawable1D {
     public:
-      Graph1D();
+      Graph1D() = default;
 
       void addPoint(double x, double y);
 
-      void draw(std::ostream&, size_t width = 50) const override;
+      void draw(std::ostream&) const override;
 
     private:
-      values_t values_;
+      axis_t values_;
+    };
+
+    class Graph2D : public Drawable2D {
+    public:
+      Graph2D() = default;
+
+      void addPoint(double x, double y, double z);
+
+      void draw(std::ostream&) const override;
+
+    private:
+      dualaxis_t values_;
     };
   }  // namespace utils
 }  // namespace cepgen

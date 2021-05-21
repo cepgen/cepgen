@@ -10,29 +10,27 @@
 
 namespace cepgen {
   namespace utils {
-    Drawable::Drawable(const Drawable& oth) : xlabel_(oth.xlabel_), ylabel_(oth.ylabel_), log_(oth.log_) {}
+    Drawable::Drawable(const Drawable& oth)
+        : width_(50ul), xlabel_(oth.xlabel_), ylabel_(oth.ylabel_), log_(oth.log_) {}
 
     Hist::Hist(const Hist& oth) : name_(oth.name_) {}
     Hist::~Hist() {}
 
-    void Drawable1D::drawValues(std::ostream& os, const values_t& values) const {
+    void Drawable1D::drawValues(std::ostream& os, const axis_t& axis) const {
       const std::string sep(17, ' ');
-      struct compare_values {
-        bool operator()(const value_t& a, const value_t& b) { return a.value < b.value; }
-      };
       const double max_val =
-                       std::max_element(values.begin(), values.end(), compare_values())->value * (log_ ? 5. : 1.2),
-                   min_val = std::min_element(values.begin(), values.end(), compare_values())->value;
+                       std::max_element(axis.begin(), axis.end(), map_elements())->second.value * (log_ ? 5. : 1.2),
+                   min_val = std::min_element(axis.begin(), axis.end(), map_elements())->second.value;
       const double min_val_log = std::log(std::max(min_val, 1.e-10));
       const double max_val_log = std::log(std::min(max_val, 1.e+10));
       if (!ylabel_.empty())
         os << sep << std::string(std::max(0., 2. + width_ - ylabel_.size()), ' ') << ylabel_ << "\n";
-      os << sep << utils::format("%-5.2f", log_ ? std::exp(min_val_log) : min_val) << std::setw(width_ - 11)
+      os << sep << utils::format("%-5.2f ", log_ ? std::exp(min_val_log) : min_val) << std::setw(width_ - 11)
          << std::left << (log_ ? "logarithmic scale" : "linear scale")
          << utils::format("%5.2e", log_ ? std::exp(max_val_log) : max_val) << "\n"
          << sep << std::string(width_ + 2, '.');  // abscissa axis
-      for (size_t i = 0; i < values.size(); ++i) {
-        const auto& set = values.at(i);
+      for (const auto& coord_set : axis) {
+        const auto& set = coord_set.second;
         const double val = set.value, unc = set.value_unc;
         size_t ival = 0ull, ierr = 0ull;
         {
@@ -52,8 +50,8 @@ namespace cepgen {
           ierr = std::ceil(unc_dbl);
         }
         os << "\n"
-           << (set.label.empty() ? utils::format("%17g", set.coord) : set.label) << ":"
-           << (ival > ierr ? std::string(ival - ierr, ' ') : "") << (ierr > 0 ? std::string(ierr, ERR_CHAR) : "")
+           << (coord_set.first.label.empty() ? utils::format("%17g", coord_set.first.value) : coord_set.first.label)
+           << ":" << (ival > ierr ? std::string(ival - ierr, ' ') : "") << (ierr > 0 ? std::string(ierr, ERR_CHAR) : "")
            << CHAR << (ierr > 0 ? std::string(std::min(width_ - ival - 1, ierr), ERR_CHAR) : "")
            << (ival + ierr < width_ + 1 ? std::string(width_ - ival - ierr - 1, ' ') : "") << ": "
            << utils::format("%6.2e +/- %6.2e", val, unc);
@@ -62,7 +60,47 @@ namespace cepgen {
          << utils::format("%17s", xlabel_.c_str()) << ":" << std::string(width_, '.') << ":\n";  // 2nd abscissa axis
     }
 
-    Hist1D::Hist1D(size_t num_bins_x, const Limits& xrange) : Drawable1D(50), underflow_(0ull), overflow_(0ull) {
+    void Drawable2D::drawValues(std::ostream& os, const dualaxis_t& axes) const {
+      const std::string sep(17, ' ');
+      if (!ylabel_.empty())
+        os << sep << std::string(std::max(0., 2. + width_ - ylabel_.size()), ' ') << ylabel_ << "\n";
+      // find the maximum element of the graph
+      double max_val = -999.;
+      for (const auto& xval : axes)
+        max_val =
+            std::max(max_val, std::max_element(xval.second.begin(), xval.second.end(), map_elements())->second.value);
+      const auto& y_axis = axes.begin()->second;
+      os << sep << utils::format("%-5.2f", y_axis.begin()->first.value) << std::string(axes.size() - 11, ' ')
+         << utils::format("%5.2e", y_axis.rbegin()->first.value) << "\n"
+         << utils::format("%17s", xlabel_.c_str()) << std::string(1 + y_axis.size() + 1, '.');  // abscissa axis
+      for (const auto& xval : axes) {
+        os << "\n" << xval.first.label << ":";
+        for (const auto& yval : xval.second) {
+          const double val = yval.second.value;
+          const double val_norm = log_ ? (val == 0. ? 0. : std::log(val) / std::log(max_val)) : val / max_val;
+          os << CHARS[(size_t)ceil(val_norm * (strlen(CHARS) - 1))];
+        }
+        os << ":";
+      }
+      std::vector<std::string> ylabels;
+      for (const auto& ybin : y_axis)
+        ylabels.emplace_back(ybin.first.label.empty() ? utils::format("%+g", ybin.first.value) : ybin.first.label);
+      struct stringlen {
+        bool operator()(const std::string& a, const std::string& b) { return a.size() < b.size(); }
+      };
+      for (size_t i = 0; i < std::max_element(ylabels.begin(), ylabels.end(), stringlen())->size(); ++i) {
+        os << "\n" << sep << ":";
+        for (const auto& lab : ylabels)
+          os << (lab.size() > i ? lab.at(i) : ' ');
+        os << ":";
+      }
+      os << "\n"
+         << sep << ":" << std::string(y_axis.size(), '.') << ": "  // 2nd abscissa axis
+         << ylabel_ << "\n\t"
+         << "(scale: \"" << std::string(CHARS) << "\")\n";
+    }
+
+    Hist1D::Hist1D(size_t num_bins_x, const Limits& xrange) : underflow_(0ull), overflow_(0ull) {
       auto hist = gsl_histogram_alloc(num_bins_x);
       auto ret = gsl_histogram_set_ranges_uniform(hist, xrange.min(), xrange.max());
       if (ret != GSL_SUCCESS)
@@ -73,7 +111,7 @@ namespace cepgen {
                                 << xrange << ".";
     }
 
-    Hist1D::Hist1D(const std::vector<double>& xbins) : Drawable1D(50), underflow_(0ull), overflow_(0ull) {
+    Hist1D::Hist1D(const std::vector<double>& xbins) : underflow_(0ull), overflow_(0ull) {
       auto hist = gsl_histogram_alloc(xbins.size() - 1);
       auto ret = gsl_histogram_set_ranges(hist, xbins.data(), xbins.size());
       if (ret != GSL_SUCCESS)
@@ -86,7 +124,6 @@ namespace cepgen {
 
     Hist1D::Hist1D(const Hist1D& oth)
         : Hist(oth),
-          Drawable1D(50),
           hist_(gsl_histogram_clone(oth.hist_.get())),
           hist_w2_(gsl_histogram_clone(oth.hist_w2_.get())),
           underflow_(oth.underflow_),
@@ -151,27 +188,25 @@ namespace cepgen {
     double Hist1D::maximum() const { return gsl_histogram_max_val(hist_.get()); }
     double Hist1D::integral() const { return gsl_histogram_sum(hist_.get()); }
 
-    void Hist1D::draw(std::ostream& os, size_t width) const {
+    void Hist1D::draw(std::ostream& os) const {
       if (!name_.empty())
         os << "plot of \"" << name_ << "\"\n";
-      values_t vals;
+      axis_t axis;
       for (size_t bin = 0; bin < nbins(); ++bin) {
         const auto& range_i = binRange(bin);
-        vals.emplace_back(
-            value_t{0., value(bin), valueUnc(bin), utils::format("[%7.2f,%7.2f)", range_i.min(), range_i.max())});
+        axis[coord_t{range_i.x(0.5), utils::format("[%7.2f,%7.2f)", range_i.min(), range_i.max())}] =
+            value_t{value(bin), valueUnc(bin)};
       }
-      drawValues(os, vals);
+      drawValues(os, axis);
       const double bin_width = range().range() / nbins();
-      os << "\t("
-         << "bin width=" << utils::s("unit", bin_width, true) << ", "
+      os << "\tbin width=" << utils::s("unit", bin_width, true) << ", "
          << "mean=" << mean() << ", "
-         << "st.dev.=" << rms() << ", "
+         << "st.dev.=" << rms() << "\n\t"
          << "integr.=" << integral();
       if (underflow_ > 0ull)
         os << ", underflow: " << underflow_;
       if (overflow_ > 0ull)
         os << ", overflow: " << overflow_;
-      os << ")";
     }
 
     Hist2D::Hist2D(size_t num_bins_x, const Limits& xrange, size_t num_bins_y, const Limits& yrange) {
@@ -297,48 +332,23 @@ namespace cepgen {
     double Hist2D::maximum() const { return gsl_histogram2d_max_val(hist_.get()); }
     double Hist2D::integral() const { return gsl_histogram2d_sum(hist_.get()); }
 
-    void Hist2D::draw(std::ostream& os, size_t) const {
-      const size_t nbins_x = gsl_histogram2d_nx(hist_.get());
-      const size_t nbins_y = gsl_histogram2d_ny(hist_.get());
-      const double max_val = maximum();
-      const std::string sep(17, ' ');
+    void Hist2D::draw(std::ostream& os) const {
       if (!name_.empty())
         os << "plot of \"" << name_ << "\"\n";
-      const auto x_range = rangeX(), y_range = rangeY();
-      os << sep << std::string((size_t)std::max(0., 2. + nbins_y - ylabel_.size()), ' ') << ylabel_ << "\n"
-         << sep << utils::format("%-5.2f", y_range.min()) << std::string(nbins_y - 11, ' ')
-         << utils::format("%5.2e", y_range.max()) << "\n"
-         << utils::format("%17s", xlabel_.c_str()) << std::string(nbins_y + 2, '.');  // abscissa axis
-      for (size_t i = 0; i < nbins_x; ++i) {
-        const auto& xrange_i = binRangeX(i);
-        os << "\n" << utils::format("[%7.2f,%7.2f):", xrange_i.min(), xrange_i.max());
-        for (size_t j = 0; j < nbins_y; ++j) {
-          const double val = value(i, j);
-          const double val_norm = log_ ? (val == 0. ? 0. : std::log(val) / std::log(max_val)) : val / max_val;
-          os << CHARS[(size_t)ceil(val_norm * (strlen(CHARS) - 1))];
+      dualaxis_t axes;
+      for (size_t binx = 0; binx < nbinsX(); ++binx) {
+        const auto& range_x = binRangeX(binx);
+        auto& axis_x = axes[coord_t{range_x.x(0.5), utils::format("[%7.2f,%7.2f)", range_x.min(), range_x.max())}];
+        for (size_t biny = 0; biny < nbinsY(); ++biny) {
+          const auto& range_y = binRangeY(biny);
+          axis_x[coord_t{range_y.x(0.5), utils::format("%+g", range_y.min())}] =
+              value_t{value(binx, biny), valueUnc(binx, biny)};
         }
-        os << ":";
       }
-      std::vector<std::string> ylabels;
-      for (size_t j = 0; j < nbins_y; ++j) {
-        double min_y, max_y;
-        gsl_histogram2d_get_yrange(hist_.get(), j, &min_y, &max_y);
-        ylabels.emplace_back(utils::format("%+g", min_y));
-      }
-      struct stringlen {
-        bool operator()(const std::string& a, const std::string& b) { return a.size() < b.size(); }
-      };
-      for (size_t i = 0; i < std::max_element(ylabels.begin(), ylabels.end(), stringlen())->size(); ++i) {
-        os << "\n" << sep << ":";
-        for (const auto& lab : ylabels)
-          os << (lab.size() > i ? lab.at(i) : ' ');
-        os << ":";
-      }
-      const double bin_width_x = x_range.range() / nbins_x, bin_width_y = y_range.range() / nbins_y;
-      os << "\n"
-         << sep << ":" << std::string(nbins_y, '.') << ": "  // 2nd abscissa axis
-         << ylabel_ << "\n\t"
-         << "(scale: \"" << std::string(CHARS) << "\"\n\t"
+      drawValues(os, axes);
+      const auto &x_range = rangeX(), &y_range = rangeY();
+      const double bin_width_x = x_range.range() / nbinsX(), bin_width_y = y_range.range() / nbinsY();
+      os << "\t"
          << " x-axis: "
          << "bin width=" << utils::s("unit", bin_width_x, true) << ", "
          << "mean=" << meanX() << ","
@@ -347,18 +357,12 @@ namespace cepgen {
          << "bin width=" << utils::s("unit", bin_width_y, true) << ", "
          << "mean=" << meanY() << ","
          << "st.dev.=" << rmsY() << ",\n\t"
-         << " integr.=" << integral() << ")";
+         << " integral=" << integral();
     }
 
-    Graph1D::Graph1D() : Drawable1D(50) {}
+    void Graph1D::addPoint(double x, double y) { values_[coord_t{x}] = value_t{y}; }
 
-    void Graph1D::addPoint(double x, double y) {
-      values_.emplace_back(value_t{x, y});
-      struct compare_coords {
-        bool operator()(const value_t& a, const value_t& b) { return a.coord < b.coord; }
-      };
-      std::sort(values_.begin(), values_.end(), compare_coords());
-    }
+    void Graph1D::draw(std::ostream& os) const { drawValues(os, values_); }
 
     void Graph1D::draw(std::ostream& os, size_t width) const { drawValues(os, values_); }
 
