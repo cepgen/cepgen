@@ -19,7 +19,7 @@ namespace cepgen {
      */
     class Hist {
     public:
-      Hist();
+      Hist() = default;
       explicit Hist(const Hist&);
       virtual ~Hist();
 
@@ -28,21 +28,51 @@ namespace cepgen {
       virtual double integral() const = 0;
       virtual double minimum() const = 0;
       virtual double maximum() const = 0;
-      virtual void draw(std::ostream&, size_t width) const = 0;
 
       void setName(const std::string& name) { name_ = name; }
+
+    protected:
+      std::string name_;
+    };
+
+    class Drawable {
+    public:
+      Drawable() : log_(false) {}
+      Drawable(const Drawable&);
+      virtual void draw(std::ostream&, size_t width) const = 0;
+
       void setXlabel(const std::string& lab) { xlabel_ = lab; }
       void setYlabel(const std::string& lab) { ylabel_ = lab; }
       void setLog(bool log = true) { log_ = log; }
 
     protected:
-      std::string name_;
       std::string xlabel_, ylabel_;
       bool log_;
     };
 
+    class Drawable1D : public Drawable {
+    public:
+      explicit Drawable1D(size_t width) : width_(width) {}
+
+    protected:
+      struct value_t {
+        double coord, value, value_unc = 0.;
+        std::string label = "";
+      };
+      typedef std::vector<value_t> values_t;
+
+      void drawValues(std::ostream&, const values_t&) const;
+
+      const size_t width_;
+
+    private:
+      static constexpr char CHAR = '*', ERR_CHAR = '-';
+    };
+
+    class Drawable2D : public Drawable {};
+
     /// 1D histogram container
-    class Hist1D : public Hist {
+    class Hist1D : public Hist, public Drawable1D {
     public:
       Hist1D(size_t num_bins_x, const Limits&);
       Hist1D(const std::vector<double>&);
@@ -68,8 +98,6 @@ namespace cepgen {
       void draw(std::ostream&, size_t width = 50) const override;
 
     private:
-      static constexpr char CHAR = '*', ERR_CHAR = '-';
-
       struct gsl_histogram_deleter {
         void operator()(gsl_histogram* h) { gsl_histogram_free(h); }
       };
@@ -77,8 +105,9 @@ namespace cepgen {
       gsl_histogram_ptr hist_, hist_w2_;
       size_t underflow_, overflow_;
     };
+
     /// 2D histogram container
-    class Hist2D : public Hist {
+    class Hist2D : public Hist, public Drawable2D {
     public:
       Hist2D(size_t num_bins_x, const Limits& xlim, size_t num_bins_y, const Limits& ylim);
       Hist2D(const std::vector<double>&, const std::vector<double>&);
@@ -124,6 +153,18 @@ namespace cepgen {
         size_t LT_IN = 0ull, /* INSIDE  */ GT_IN = 0ull;
         size_t LT_LT = 0ull, IN_LT = 0ull, GT_LT = 0ull;
       } values_;
+    };
+
+    class Graph1D : public Drawable1D {
+    public:
+      Graph1D();
+
+      void addPoint(double x, double y);
+
+      void draw(std::ostream&, size_t width = 50) const override;
+
+    private:
+      values_t values_;
     };
   }  // namespace utils
 }  // namespace cepgen

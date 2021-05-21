@@ -10,13 +10,59 @@
 
 namespace cepgen {
   namespace utils {
-    Hist::Hist() : log_(false) {}
+    Drawable::Drawable(const Drawable& oth) : xlabel_(oth.xlabel_), ylabel_(oth.ylabel_), log_(oth.log_) {}
 
-    Hist::Hist(const Hist& oth) : name_(oth.name_), xlabel_(oth.xlabel_), ylabel_(oth.ylabel_), log_(oth.log_) {}
-
+    Hist::Hist(const Hist& oth) : name_(oth.name_) {}
     Hist::~Hist() {}
 
-    Hist1D::Hist1D(size_t num_bins_x, const Limits& xrange) : underflow_(0ull), overflow_(0ull) {
+    void Drawable1D::drawValues(std::ostream& os, const values_t& values) const {
+      const std::string sep(17, ' ');
+      struct compare_values {
+        bool operator()(const value_t& a, const value_t& b) { return a.value < b.value; }
+      };
+      const double max_val =
+                       std::max_element(values.begin(), values.end(), compare_values())->value * (log_ ? 5. : 1.2),
+                   min_val = std::min_element(values.begin(), values.end(), compare_values())->value;
+      const double min_val_log = std::log(std::max(min_val, 1.e-10));
+      const double max_val_log = std::log(std::min(max_val, 1.e+10));
+      if (!ylabel_.empty())
+        os << sep << std::string(std::max(0., 2. + width_ - ylabel_.size()), ' ') << ylabel_ << "\n";
+      os << sep << utils::format("%-5.2f", log_ ? std::exp(min_val_log) : min_val) << std::setw(width_ - 11)
+         << std::left << (log_ ? "logarithmic scale" : "linear scale")
+         << utils::format("%5.2e", log_ ? std::exp(max_val_log) : max_val) << "\n"
+         << sep << std::string(width_ + 2, '.');  // abscissa axis
+      for (size_t i = 0; i < values.size(); ++i) {
+        const auto& set = values.at(i);
+        const double val = set.value, unc = set.value_unc;
+        size_t ival = 0ull, ierr = 0ull;
+        {
+          double val_dbl = width_, unc_dbl = width_;
+          if (log_) {
+            val_dbl *= (val > 0. && max_val > 0.)
+                           ? std::max((std::log(val) - min_val_log) / (max_val_log - min_val_log), 0.)
+                           : 0.;
+            unc_dbl *= (val > 0. && max_val > 0.)
+                           ? std::max((std::log(unc) - min_val_log) / (max_val_log - min_val_log), 0.)
+                           : 0.;
+          } else if (max_val > 0.) {
+            val_dbl *= (val - min_val) / (max_val - min_val);
+            unc_dbl *= unc / (max_val - min_val);
+          }
+          ival = std::ceil(val_dbl);
+          ierr = std::ceil(unc_dbl);
+        }
+        os << "\n"
+           << (set.label.empty() ? utils::format("%17g", set.coord) : set.label) << ":"
+           << (ival > ierr ? std::string(ival - ierr, ' ') : "") << (ierr > 0 ? std::string(ierr, ERR_CHAR) : "")
+           << CHAR << (ierr > 0 ? std::string(std::min(width_ - ival - 1, ierr), ERR_CHAR) : "")
+           << (ival + ierr < width_ + 1 ? std::string(width_ - ival - ierr - 1, ' ') : "") << ": "
+           << utils::format("%6.2e +/- %6.2e", val, unc);
+      }
+      os << "\n"
+         << utils::format("%17s", xlabel_.c_str()) << ":" << std::string(width_, '.') << ":\n";  // 2nd abscissa axis
+    }
+
+    Hist1D::Hist1D(size_t num_bins_x, const Limits& xrange) : Drawable1D(50), underflow_(0ull), overflow_(0ull) {
       auto hist = gsl_histogram_alloc(num_bins_x);
       auto ret = gsl_histogram_set_ranges_uniform(hist, xrange.min(), xrange.max());
       if (ret != GSL_SUCCESS)
@@ -27,7 +73,7 @@ namespace cepgen {
                                 << xrange << ".";
     }
 
-    Hist1D::Hist1D(const std::vector<double>& xbins) : underflow_(0ull), overflow_(0ull) {
+    Hist1D::Hist1D(const std::vector<double>& xbins) : Drawable1D(50), underflow_(0ull), overflow_(0ull) {
       auto hist = gsl_histogram_alloc(xbins.size() - 1);
       auto ret = gsl_histogram_set_ranges(hist, xbins.data(), xbins.size());
       if (ret != GSL_SUCCESS)
@@ -40,6 +86,7 @@ namespace cepgen {
 
     Hist1D::Hist1D(const Hist1D& oth)
         : Hist(oth),
+          Drawable1D(50),
           hist_(gsl_histogram_clone(oth.hist_.get())),
           hist_w2_(gsl_histogram_clone(oth.hist_w2_.get())),
           underflow_(oth.underflow_),
@@ -105,48 +152,17 @@ namespace cepgen {
     double Hist1D::integral() const { return gsl_histogram_sum(hist_.get()); }
 
     void Hist1D::draw(std::ostream& os, size_t width) const {
-      const double max_val = maximum() * (log_ ? 5. : 1.2), min_val = minimum();
-      const double min_range_log = std::log(std::max(min_val, 1.e-10));
-      const double max_range_log = std::log(std::min(max_val, 1.e+10));
-      const std::string sep(17, ' ');
       if (!name_.empty())
         os << "plot of \"" << name_ << "\"\n";
-      os << sep << std::string(std::max(0., 2. + width - ylabel_.size()), ' ') << ylabel_ << "\n"
-         << sep << utils::format("%-5.2f", log_ ? std::exp(min_range_log) : min_val) << std::setw(width - 11)
-         << std::left << (log_ ? "logarithmic scale" : "linear scale")
-         << utils::format("%5.2e", log_ ? std::exp(max_range_log) : max_val) << "\n"
-         << sep << std::string(width + 2, '.');  // abscissa axis
-      for (size_t i = 0; i < nbins(); ++i) {
-        const auto range_i = binRange(i);
-        const double val = value(i), unc = valueUnc(i);
-        size_t ival = 0ull, ierr = 0ull;
-        {
-          double val_dbl = width, unc_dbl = width;
-          if (log_) {
-            val_dbl *= (val > 0. && max_val > 0.)
-                           ? std::max((std::log(val) - min_range_log) / (max_range_log - min_range_log), 0.)
-                           : 0.;
-            unc_dbl *= (val > 0. && max_val > 0.)
-                           ? std::max((std::log(unc) - min_range_log) / (max_range_log - min_range_log), 0.)
-                           : 0.;
-          } else if (max_val > 0.) {
-            val_dbl *= (val > 0. && max_val > 0.) ? val / max_val : 0.;
-            unc_dbl *= (unc > 0. && max_val > 0.) ? unc / max_val : 0.;
-          }
-          ival = std::ceil(val_dbl);
-          ierr = std::ceil(unc_dbl);
-        }
-        os << "\n"
-           << utils::format("[%7.2f,%7.2f):", range_i.min(), range_i.max())
-           << (ival > ierr ? std::string(ival - ierr, ' ') : "") << (ierr > 0 ? std::string(ierr, ERR_CHAR) : "")
-           << CHAR << (ierr > 0 ? std::string(std::min(width - ival - 1, ierr), ERR_CHAR) : "")
-           << (ival + ierr < width ? std::string(width - ival - ierr - 1, ' ') : "") << ": "
-           << utils::format("%6.2e +/- %6.2e", val, unc);
+      values_t vals;
+      for (size_t bin = 0; bin < nbins(); ++bin) {
+        const auto& range_i = binRange(bin);
+        vals.emplace_back(
+            value_t{0., value(bin), valueUnc(bin), utils::format("[%7.2f,%7.2f)", range_i.min(), range_i.max())});
       }
+      drawValues(os, vals);
       const double bin_width = range().range() / nbins();
-      os << "\n"
-         << utils::format("%17s", name_.c_str()) << ":" << std::string(width, '.') << ":\n"  // 2nd abscissa axis
-         << "\t("
+      os << "\t("
          << "bin width=" << utils::s("unit", bin_width, true) << ", "
          << "mean=" << mean() << ", "
          << "st.dev.=" << rms() << ", "
@@ -333,5 +349,18 @@ namespace cepgen {
          << "st.dev.=" << rmsY() << ",\n\t"
          << " integr.=" << integral() << ")";
     }
+
+    Graph1D::Graph1D() : Drawable1D(50) {}
+
+    void Graph1D::addPoint(double x, double y) {
+      values_.emplace_back(value_t{x, y});
+      struct compare_coords {
+        bool operator()(const value_t& a, const value_t& b) { return a.coord < b.coord; }
+      };
+      std::sort(values_.begin(), values_.end(), compare_coords());
+    }
+
+    void Graph1D::draw(std::ostream& os, size_t width) const { drawValues(os, values_); }
+
   }  // namespace utils
 }  // namespace cepgen
