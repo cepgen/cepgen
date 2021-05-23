@@ -74,11 +74,17 @@ namespace cepgen {
          << utils::format("%5.2e", y_axis.rbegin()->first.value) << "\n"
          << utils::format("%17s", xlabel_.c_str()) << std::string(1 + y_axis.size() + 1, '.');  // abscissa axis
       for (const auto& xval : axes) {
-        os << "\n" << xval.first.label << ":";
+        os << "\n" << (xval.first.label.empty() ? utils::format("%16g ", xval.first.value) : xval.first.label) << ":";
         for (const auto& yval : xval.second) {
           const double val = yval.second.value;
           const double val_norm = log_ ? (val == 0. ? 0. : std::log(val) / std::log(max_val)) : val / max_val;
-          os << CHARS[(size_t)ceil(val_norm * (strlen(CHARS) - 1))];
+          const short sign = val_norm / fabs(val_norm);
+          if (std::isnan(val_norm))
+            os << "!";
+          else if (sign == -1)
+            os << NEG_CHAR;
+          else
+            os << CHARS[(size_t)ceil(val_norm * (strlen(CHARS) - 1))];
         }
         os << ":";
       }
@@ -365,6 +371,15 @@ namespace cepgen {
     void Graph1D::draw(std::ostream& os) const { drawValues(os, values_); }
 
     void Graph2D::addPoint(double x, double y, double z) { values_[coord_t{x}][coord_t{y}] = value_t{z}; }
+
+    void Graph2D::dumpPoints(std::ostream& os) const {
+      os << "Points registered in the 2D graph:";
+      size_t np = 0ul;
+      for (const auto& xaxis : values_)
+        for (const auto& yaxis : xaxis.second)
+          os << utils::format(
+              "\n%6zu: (%5g, %5g) = %5g", np++, xaxis.first.value, yaxis.first.value, yaxis.second.value);
+    }
 
     void Graph2D::draw(std::ostream& os) const { drawValues(os, values_); }
   }  // namespace utils

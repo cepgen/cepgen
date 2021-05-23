@@ -87,6 +87,7 @@ namespace cepgen {
       //static constexpr const char* CHARS = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
       //static constexpr const char* CHARS = " .:-=+*#%@";
       static constexpr const char* CHARS = " .:oO0@%#";
+      static constexpr const char NEG_CHAR = '-';
     };
 
     /// 1D histogram container
@@ -185,6 +186,7 @@ namespace cepgen {
       Graph2D() = default;
 
       void addPoint(double x, double y, double z);
+      void dumpPoints(std::ostream&) const;
 
       void draw(std::ostream&) const override;
 
