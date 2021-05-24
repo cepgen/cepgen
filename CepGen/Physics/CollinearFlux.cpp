@@ -8,8 +8,6 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
 namespace cepgen {
-  const gsl_integration_fixed_type* INTEGR_TYPE = gsl_integration_fixed_jacobi;
-
   double unintegrated_flux(double kt2, void* params) {
     const auto args = (FluxArguments*)params;
     if (args->flux_type == KTFlux::HI_Photon_Elastic) {
@@ -21,13 +19,13 @@ namespace cepgen {
   }
 
   CollinearFlux::CollinearFlux(const Limits& range, formfac::Parameterisation* form_fac)
-      : workspace_(gsl_integration_fixed_alloc(INTEGR_TYPE, 50, range.min(), range.max(), 0., 0.)),
+      : workspace_(gsl_integration_fixed_alloc(gsl_integration_fixed_jacobi, 50, range.min(), range.max(), 0., 0.)),
         params_(
             new FluxArguments{0., std::pow(PDG::get().mass(PDG::proton), 2), 0., KTFlux::invalid, form_fac, nullptr}),
         function_({&unintegrated_flux, (void*)params_.get()}) {}
 
   CollinearFlux::CollinearFlux(const Limits& range, HeavyIon* hi)
-      : workspace_(gsl_integration_fixed_alloc(INTEGR_TYPE, 50, range.min(), range.max(), 0., 0.)),
+      : workspace_(gsl_integration_fixed_alloc(gsl_integration_fixed_jacobi, 50, range.min(), range.max(), 0., 0.)),
         params_(new FluxArguments{0., std::pow(PDG::get().mass(PDG::proton), 2), 0., KTFlux::invalid, nullptr, hi}),
         function_({&unintegrated_flux, (void*)params_.get()}) {}
 

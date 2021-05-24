@@ -5,6 +5,12 @@ file(GLOB tests_fortran RELATIVE ${PROJECT_SOURCE_DIR}/test *.f)
 
 #-- include the utilitaries
 
+#--- searching for ROOT
+find_package(ROOT QUIET)
+#--- searching for LHAPDF
+find_library(LHAPDF LHAPDF HINTS $ENV{LHAPDF_PATH} PATH_SUFFIXES lib)
+find_path(LHAPDF_INCLUDE LHAPDF HINTS $ENV{LHAPDF_PATH} PATH_SUFFIXES include)
+
 set(tests)
 set(tests_libraries ${CEPGEN_LIBRARIES})
 
@@ -19,6 +25,20 @@ if(NOT CEPGEN_HAS_FUNCTIONAL)
 endif()
 
 #-- build all tests and link them to the core library
+
+if(tests_lhapdf AND LHAPDF)
+  list(REMOVE_ITEM tests_standalone ${tests_lhapdf})
+  list(REMOVE_ITEM tests_root ${tests_lhapdf})
+  foreach(exec_src ${tests_lhapdf})
+    string(REPLACE ".cxx" "" exec_bin ${exec_src})
+    string(REPLACE ".cc" "" exec_src ${exec_src})
+    add_executable(${exec_bin} ${exec_src})
+    set_property(TARGET ${exec_bin} PROPERTY CXX_STANDARD 14)
+    target_include_directories(${exec_bin} INTERFACE ${LHAPDF_INCLUDE} ${ROOT_INCLUDE_DIRS})
+    target_link_libraries(${exec_bin} PUBLIC ${tests_libraries} ${LHAPDF} ${ROOT_LIBRARIES})
+    list(APPEND tests ${exec_bin})
+  endforeach()
+endif()
 
 foreach(exec_src ${tests_standalone})
   get_filename_component(exec_bin ${exec_src} NAME_WE)
