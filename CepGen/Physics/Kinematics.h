@@ -38,17 +38,6 @@ namespace cepgen {
     }
     /// Process centre of mass energy
     double sqrtS() const { return incoming_beams.sqrtS(); }
-
-    /// Incoming beams characteristics
-    struct Beam {
-      Beam();           ///< Default constructor
-      double pz;        ///< Incoming particle momentum, in GeV/c
-      pdgid_t pdg;      ///< PDG identifier for the beam
-      mode::Beam mode;  ///< Beam treatment mode
-      KTFlux kt_flux;   ///< Type of \f$k_{\rm T}\f$-factorised flux to be considered (if any)
-    };
-    /// Human-readable description of a beam particle/system
-    friend std::ostream& operator<<(std::ostream&, const Beam&);
     /// Beam/primary particle's kinematics
     IncomingBeams incoming_beams;
 

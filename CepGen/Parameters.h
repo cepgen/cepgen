@@ -90,8 +90,10 @@ namespace cepgen {
       /// List containing all parameters handled
       ParametersList parameters() const;
 
-      /// Target luminosity to reach (in pb^-1)
+      /// Set the target luminosity to reach (in pb^-1)
       void setTargetLuminosity(double lumi_invpb) { target_lumi_ = lumi_invpb; }
+      /// Target luminosity to reach (in pb^-1)
+      double targetLuminosity() const { return target_lumi_; }
       /// Set the maximal number of events to generate
       void setMaxGen(size_t max_gen) { max_gen_ = max_gen; }
       /// Maximal number of events to generate
@@ -102,6 +104,7 @@ namespace cepgen {
       void setPrintEvery(size_t print_every) { gen_print_every_ = print_every; }
       /// Frequency at which events are displayed to the end-user
       size_t printEvery() const { return gen_print_every_; }
+      /// Switch on/off the symmetrisation of the z-axis for each event
       void setSymmetrise(bool sym) { symmetrise_ = sym; }
       /// Do we want the events to be symmetric with respect to the \f$z\f$-axis ?
       bool symmetrise() const { return symmetrise_; }

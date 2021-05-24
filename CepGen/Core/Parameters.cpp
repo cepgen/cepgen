@@ -250,6 +250,7 @@ namespace cepgen {
   Parameters::Generation::Generation(const ParametersList& params)
       : max_gen_(params.get<int>("maxgen", 0)),
         gen_print_every_(params.get<int>("printEvery", 10000)),
+        target_lumi_(params.get<double>("targetLumi", -1.)),
         symmetrise_(params.get<bool>("symmetrise", false)),
         num_threads_(params.get<int>("numThreads", 2)),
         num_points_(params.get<int>("numPoints", 100)) {}
@@ -257,6 +258,7 @@ namespace cepgen {
   Parameters::Generation::Generation(const Generation& rhs)
       : max_gen_(rhs.max_gen_),
         gen_print_every_(rhs.gen_print_every_),
+        target_lumi_(rhs.target_lumi_),
         symmetrise_(rhs.symmetrise_),
         num_threads_(rhs.num_threads_),
         num_points_(rhs.num_points_) {}
@@ -265,6 +267,7 @@ namespace cepgen {
     return ParametersList()
         .set<int>("maxgen", max_gen_)
         .set<int>("printEvery", gen_print_every_)
+        .set<double>("targetLumi", target_lumi_)
         .set<bool>("symmetrise", symmetrise_)
         .set<int>("numThreads", num_threads_)
         .set<int>("numPoints", num_points_);
