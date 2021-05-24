@@ -34,12 +34,24 @@ namespace cepgen {
       /// Register a parameter to be steered to a configuration variable
       template <typename T>
       void registerParameter(const std::string& key, const std::string& description, T* def) {}
+      template <typename T>
+      void registerProcessParameter(const std::string& key,
+                                    const std::string& description,
+                                    const std::string& proc_key) {
+        registerParameter<T>(key, description, &proc_params_->operator[]<T>(proc_key));
+      }
       /// Register a kinematics block parameter to be steered
       template <typename T>
       void registerKinematicsParameter(const std::string& key,
                                        const std::string& description,
                                        const std::string& kin_key) {
         registerParameter<T>(key, description, &kin_params_->operator[]<T>(kin_key));
+      }
+      template <typename T>
+      void registerGenerationParameter(const std::string& key,
+                                       const std::string& description,
+                                       const std::string& gen_key) {
+        registerParameter<T>(key, description, &gen_params_->operator[]<T>(gen_key));
       }
       /// Set a parameter value
       template <typename T>

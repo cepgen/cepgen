@@ -102,15 +102,23 @@ namespace cepgen {
       void setPrintEvery(size_t print_every) { gen_print_every_ = print_every; }
       /// Frequency at which events are displayed to the end-user
       size_t printEvery() const { return gen_print_every_; }
-
-      bool symmetrise;           ///< Do we want the events to be symmetric with respect to the \f$z\f$-axis ?
-      unsigned int num_threads;  ///< Number of threads to perform the integration
-      unsigned int num_points;   ///< Number of points to "shoot" in each integration bin by the algorithm
+      void setSymmetrise(bool sym) { symmetrise_ = sym; }
+      /// Do we want the events to be symmetric with respect to the \f$z\f$-axis ?
+      bool symmetrise() const { return symmetrise_; }
+      /// Set the number of threads for the events generation
+      void setNumThreads(size_t nt) { num_threads_ = nt; }
+      /// Number of threads to perform the events generation
+      size_t numThreads() const { return num_threads_; }
+      /// Set the number of points to probe in each integration bin
+      void setNumPoints(size_t np) { num_points_ = np; }
+      /// Number of points to "shoot" in each integration bin by the algorithm
+      size_t numPoints() const { return num_points_; }
 
     private:
-      size_t max_gen_;
+      size_t max_gen_, gen_print_every_;
       double target_lumi_;
-      size_t gen_print_every_;
+      bool symmetrise_;
+      size_t num_threads_, num_points_;
     };
     /// Get the events generation parameters
     Generation& generation() { return generation_; }

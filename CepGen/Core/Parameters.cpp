@@ -248,25 +248,25 @@ namespace cepgen {
   //-----------------------------------------------------------------------------------------------
 
   Parameters::Generation::Generation(const ParametersList& params)
-      : symmetrise(params.get<bool>("symmetrise", false)),
-        num_threads(params.get<int>("numThreads", 2)),
-        num_points(params.get<int>("numPoints", 100)),
-        max_gen_(params.get<int>("maxgen", 0)),
-        gen_print_every_(params.get<int>("printEvery", 10000)) {}
+      : max_gen_(params.get<int>("maxgen", 0)),
+        gen_print_every_(params.get<int>("printEvery", 10000)),
+        symmetrise_(params.get<bool>("symmetrise", false)),
+        num_threads_(params.get<int>("numThreads", 2)),
+        num_points_(params.get<int>("numPoints", 100)) {}
 
   Parameters::Generation::Generation(const Generation& rhs)
-      : symmetrise(rhs.symmetrise),
-        num_threads(rhs.num_threads),
-        num_points(rhs.num_points),
-        max_gen_(rhs.max_gen_),
-        gen_print_every_(rhs.gen_print_every_) {}
+      : max_gen_(rhs.max_gen_),
+        gen_print_every_(rhs.gen_print_every_),
+        symmetrise_(rhs.symmetrise_),
+        num_threads_(rhs.num_threads_),
+        num_points_(rhs.num_points_) {}
 
   ParametersList Parameters::Generation::parameters() const {
     return ParametersList()
-        .set<bool>("symmetrise", symmetrise)
-        .set<int>("numThreads", num_threads)
-        .set<int>("numPoints", num_points)
         .set<int>("maxgen", max_gen_)
-        .set<int>("printEvery", gen_print_every_);
+        .set<int>("printEvery", gen_print_every_)
+        .set<bool>("symmetrise", symmetrise_)
+        .set<int>("numThreads", num_threads_)
+        .set<int>("numPoints", num_points_);
   }
 }  // namespace cepgen

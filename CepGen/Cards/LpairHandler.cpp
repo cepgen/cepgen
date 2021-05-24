@@ -47,6 +47,114 @@ namespace cepgen {
           pdg_input_path_("mass_width_2020.mcd"),
           iend_(1) {}
 
+    void LpairHandler::init() {
+      //-------------------------------------------------------------------------------------------
+      // Process/integration/hadronisation parameters
+      //-------------------------------------------------------------------------------------------
+
+      registerParameter<std::string>("PROC", "Process name to simulate", &proc_name_);
+      registerParameter<std::string>(
+          "ITYP", "Integration algorithm", &params_->integrator->operator[]<std::string>(ParametersList::MODULE_NAME));
+      registerParameter<std::string>("HADR", "Hadronisation algorithm", &evt_mod_name_);
+      registerParameter<std::string>("EVMD", "Events modification algorithms", &evt_mod_name_);
+      registerParameter<std::string>("OUTP", "Output module", &out_mod_name_);
+      registerParameter<std::string>("OUTF", "Output file name", &out_file_name_);
+      registerParameter<std::string>("ADDN", "Additional libraries to load", &addons_list_);
+
+      //-------------------------------------------------------------------------------------------
+      // General parameters
+      //-------------------------------------------------------------------------------------------
+
+      registerParameter<int>("NTRT", "Smoothen the integrand", (int*)&params_->integrator->operator[]<bool>("treat"));
+      registerParameter<int>("TIMR", "Enable the time ticker", &timer_);
+      registerParameter<int>("IEND", "Generation type", &iend_);
+      registerParameter<int>("DEBG", "Debugging verbosity", (int*)&utils::Logger::get().level);
+      registerParameter<int>(
+          "NCVG", "Number of function calls", (int*)&params_->integrator->operator[]<int>("numFunctionCalls"));
+      registerParameter<int>(
+          "ITVG", "Number of integration iterations", (int*)&params_->integrator->operator[]<int>("iterations"));
+      registerParameter<int>("SEED", "Random generator seed", (int*)&params_->integrator->operator[]<int>("seed"));
+      registerKinematicsParameter<int>("MODE", "Subprocess' mode", "mode");
+      registerGenerationParameter<int>("NTHR", "Number of threads to use for events generation", "numThreads");
+      registerGenerationParameter<int>("NCSG", "Number of points to probe", "numPoints");
+      registerGenerationParameter<int>("NGEN", "Number of events to generate", "maxgen");
+      registerGenerationParameter<int>("NPRN", "Number of events before printout", "printEvery");
+
+      //-------------------------------------------------------------------------------------------
+      // Process-specific parameters
+      //-------------------------------------------------------------------------------------------
+
+      registerProcessParameter<int>("METH", "Computation method (kT-factorisation)", "method");
+      registerProcessParameter<int>("IPOL", "Polarisation states to consider", "polarisationStates");
+
+      //-------------------------------------------------------------------------------------------
+      // Process kinematics parameters
+      //-------------------------------------------------------------------------------------------
+
+      registerParameter<std::string>("KMRG", "KMR grid interpolation path", &kmr_grid_path_);
+      registerParameter<std::string>("MGRD", "MSTW grid interpolation path", &mstw_grid_path_);
+      registerParameter<std::string>("PDGI", "Input file for PDG information", &pdg_input_path_);
+      registerParameter<int>("PMOD", "Outgoing primary particles' mode", &str_fun_);
+      registerParameter<int>("EMOD", "Outgoing primary particles' mode", &str_fun_);
+      registerParameter<int>("RTYP", "R-ratio computation type", &sr_type_);
+      registerProcessParameter<int>("PAIR", "Outgoing particles' PDG id", "pair");
+      registerKinematicsParameter<std::string>("FFAC", "Form factors for the incoming beams", "formFactors");
+      registerKinematicsParameter<int>("INA1", "Heavy ion atomic weight (1st incoming beam)", "beam1A");
+      registerKinematicsParameter<int>("INZ1", "Heavy ion atomic number (1st incoming beam)", "beam1Z");
+      registerKinematicsParameter<int>("INA2", "Heavy ion atomic weight (2nd incoming beam)", "beam2A");
+      registerKinematicsParameter<int>("INZ2", "Heavy ion atomic number (2nd incoming beam)", "beam2Z");
+      registerKinematicsParameter<double>("INP1", "Momentum (1st primary particle)", "beam1pz");
+      registerKinematicsParameter<double>("INP2", "Momentum (2nd primary particle)", "beam2pz");
+      registerKinematicsParameter<double>("INPP", "Momentum (1st primary particle)", "beam1pz");
+      registerKinematicsParameter<double>("INPE", "Momentum (2nd primary particle)", "beam2pz");
+      registerKinematicsParameter<double>(
+          "PTCT", "Minimal transverse momentum (single central outgoing particle)", "ptmin");
+      registerKinematicsParameter<double>(
+          "PTMX", "Maximal transverse momentum (single central outgoing particle)", "ptmax");
+      registerKinematicsParameter<double>("MSCT", "Minimal central system mass", "invmassmin");
+      registerKinematicsParameter<double>("MSMX", "Maximal central system mass", "invmassmax");
+      registerKinematicsParameter<double>("ECUT", "Minimal energy (single central outgoing particle)", "energysummin");
+      registerKinematicsParameter<double>("ETMN", "Minimal pseudo-rapidity (central outgoing particles)", "etamin");
+      registerKinematicsParameter<double>("ETMX", "Maximal pseudo-rapidity (central outgoing particles)", "etamax");
+      registerKinematicsParameter<double>("YMIN", "Minimal rapidity (central outgoing particles)", "rapiditymin");
+      registerKinematicsParameter<double>("YMAX", "Maximal rapidity (central outgoing particles)", "rapiditymax");
+      registerKinematicsParameter<double>(
+          "PDMN", "Minimal transverse momentum difference (central outgoing particles)", "ptdiffmin");
+      registerKinematicsParameter<double>(
+          "PDMX", "Maximal transverse momentum difference (central outgoing particles)", "ptdiffmax");
+      registerKinematicsParameter<double>("Q2MN", "Minimal Q^2 = -q^2 (exchanged parton)", "q2min");
+      registerKinematicsParameter<double>("Q2MX", "Maximal Q^2 = -q^2 (exchanged parton)", "q2max");
+      registerKinematicsParameter<double>("QTMN", "Minimal Q_T (exchanged parton)", "qtmin");
+      registerKinematicsParameter<double>("QTMX", "Maximal Q_T (exchanged parton)", "qtmax");
+      registerKinematicsParameter<double>("MXMN", "Minimal invariant mass of proton remnants", "mxmin");
+      registerKinematicsParameter<double>("MXMX", "Maximal invariant mass of proton remnants", "mxmax");
+      registerKinematicsParameter<double>("XIMN", "Minimal fractional momentum loss of outgoing proton (xi)", "ximin");
+      registerKinematicsParameter<double>("XIMX", "Maximal fractional momentum loss of outgoing proton (xi)", "ximax");
+      registerKinematicsParameter<double>("YJMN", "Minimal remnant jet rapidity", "yjmin");
+      registerKinematicsParameter<double>("YJMX", "Maximal remnant jet rapidity", "yjmax");
+
+      //-------------------------------------------------------------------------------------------
+      // PPtoLL cards backward compatibility
+      //-------------------------------------------------------------------------------------------
+
+      registerParameter<int>("NTREAT", "Smoothen the integrand", (int*)&params_->integrator->operator[]<bool>("treat"));
+      registerParameter<int>(
+          "ITMX", "Number of integration iterations", (int*)&params_->integrator->operator[]<int>("iterations"));
+      registerGenerationParameter<int>("NCVG", "Number of points to probe", "numPoints");
+      registerProcessParameter<int>("METHOD", "Computation method (kT-factorisation)", "method");
+      registerParameter<int>("LEPTON", "Outgoing leptons' flavour", &lepton_id_);
+      registerKinematicsParameter<double>(
+          "PTMIN", "Minimal transverse momentum (single central outgoing particle)", "ptmin");
+      registerKinematicsParameter<double>(
+          "PTMAX", "Maximal transverse momentum (single central outgoing particle)", "ptmax");
+      registerKinematicsParameter<double>("Q1TMIN", "Minimal Q_T (exchanged parton)", "qtmin");
+      registerKinematicsParameter<double>("Q1TMAX", "Maximal Q_T (exchanged parton)", "qtmax");
+      registerKinematicsParameter<double>("Q2TMIN", "Minimal Q_T (exchanged parton)", "qtmin");
+      registerKinematicsParameter<double>("Q2TMAX", "Maximal Q_T (exchanged parton)", "qtmax");
+      registerKinematicsParameter<double>("MXMIN", "Minimal invariant mass of proton remnants", "mxmin");
+      registerKinematicsParameter<double>("MXMAX", "Maximal invariant mass of proton remnants", "mxmax");
+    }
+
     Parameters* LpairHandler::parse(const std::string& filename, Parameters* params) {
       if (!utils::fileExists(filename))
         throw CG_FATAL("LpairHandler") << "Unable to locate steering card \"" << filename << "\".";
@@ -131,117 +239,6 @@ namespace cepgen {
       }
 
       return params_;
-    }
-
-    void LpairHandler::init() {
-      //-------------------------------------------------------------------------------------------
-      // Process/integration/hadronisation parameters
-      //-------------------------------------------------------------------------------------------
-
-      registerParameter<std::string>("PROC", "Process name to simulate", &proc_name_);
-      registerParameter<std::string>(
-          "ITYP", "Integration algorithm", &params_->integrator->operator[]<std::string>(ParametersList::MODULE_NAME));
-      registerParameter<std::string>("HADR", "Hadronisation algorithm", &evt_mod_name_);
-      registerParameter<std::string>("EVMD", "Events modification algorithms", &evt_mod_name_);
-      registerParameter<std::string>("OUTP", "Output module", &out_mod_name_);
-      registerParameter<std::string>("OUTF", "Output file name", &out_file_name_);
-      registerParameter<std::string>("ADDN", "Additional libraries to load", &addons_list_);
-
-      //-------------------------------------------------------------------------------------------
-      // General parameters
-      //-------------------------------------------------------------------------------------------
-
-      registerParameter<int>("NTRT", "Smoothen the integrand", (int*)&params_->integrator->operator[]<bool>("treat"));
-      registerParameter<int>("TIMR", "Enable the time ticker", &timer_);
-      registerParameter<int>("IEND", "Generation type", &iend_);
-      registerParameter<int>("DEBG", "Debugging verbosity", (int*)&utils::Logger::get().level);
-      registerParameter<int>(
-          "NCVG", "Number of function calls", (int*)&params_->integrator->operator[]<int>("numFunctionCalls"));
-      registerParameter<int>(
-          "ITVG", "Number of integration iterations", (int*)&params_->integrator->operator[]<int>("iterations"));
-      registerParameter<int>("SEED", "Random generator seed", (int*)&params_->integrator->operator[]<int>("seed"));
-      registerParameter<int>("MODE", "Subprocess' mode", &kin_params_->operator[]<int>("mode"));
-      registerParameter<int>(
-          "NTHR", "Number of threads to use for events generation", &gen_params_->operator[]<int>("numThreads"));
-      registerParameter<int>("NCSG", "Number of points to probe", &gen_params_->operator[]<int>("numPoints"));
-      registerParameter<int>("NGEN", "Number of events to generate", &gen_params_->operator[]<int>("maxgen"));
-      registerParameter<int>("NPRN", "Number of events before printout", &gen_params_->operator[]<int>("printEvery"));
-
-      //-------------------------------------------------------------------------------------------
-      // Process-specific parameters
-      //-------------------------------------------------------------------------------------------
-
-      registerParameter<int>("METH", "Computation method (kT-factorisation)", &proc_params_->operator[]<int>("method"));
-      registerParameter<int>(
-          "IPOL", "Polarisation states to consider", &proc_params_->operator[]<int>("polarisationStates"));
-
-      //-------------------------------------------------------------------------------------------
-      // Process kinematics parameters
-      //-------------------------------------------------------------------------------------------
-
-      registerParameter<std::string>("KMRG", "KMR grid interpolation path", &kmr_grid_path_);
-      registerParameter<std::string>("MGRD", "MSTW grid interpolation path", &mstw_grid_path_);
-      registerParameter<std::string>("PDGI", "Input file for PDG information", &pdg_input_path_);
-      registerParameter<int>("PMOD", "Outgoing primary particles' mode", &str_fun_);
-      registerParameter<int>("EMOD", "Outgoing primary particles' mode", &str_fun_);
-      registerParameter<int>("RTYP", "R-ratio computation type", &sr_type_);
-      registerParameter<int>("PAIR", "Outgoing particles' PDG id", (int*)&proc_params_->operator[]<int>("pair"));
-      registerKinematicsParameter<std::string>("FFAC", "Form factors for the incoming beams", "formFactors");
-      registerKinematicsParameter<int>("INA1", "Heavy ion atomic weight (1st incoming beam)", "beam1A");
-      registerKinematicsParameter<int>("INZ1", "Heavy ion atomic number (1st incoming beam)", "beam1Z");
-      registerKinematicsParameter<int>("INA2", "Heavy ion atomic weight (2nd incoming beam)", "beam2A");
-      registerKinematicsParameter<int>("INZ2", "Heavy ion atomic number (2nd incoming beam)", "beam2Z");
-      registerKinematicsParameter<double>("INP1", "Momentum (1st primary particle)", "beam1pz");
-      registerKinematicsParameter<double>("INP2", "Momentum (2nd primary particle)", "beam2pz");
-      registerKinematicsParameter<double>("INPP", "Momentum (1st primary particle)", "beam1pz");
-      registerKinematicsParameter<double>("INPE", "Momentum (2nd primary particle)", "beam2pz");
-      registerKinematicsParameter<double>(
-          "PTCT", "Minimal transverse momentum (single central outgoing particle)", "ptmin");
-      registerKinematicsParameter<double>(
-          "PTMX", "Maximal transverse momentum (single central outgoing particle)", "ptmax");
-      registerKinematicsParameter<double>("MSCT", "Minimal central system mass", "invmassmin");
-      registerKinematicsParameter<double>("MSMX", "Maximal central system mass", "invmassmax");
-      registerKinematicsParameter<double>("ECUT", "Minimal energy (single central outgoing particle)", "energysummin");
-      registerKinematicsParameter<double>("ETMN", "Minimal pseudo-rapidity (central outgoing particles)", "etamin");
-      registerKinematicsParameter<double>("ETMX", "Maximal pseudo-rapidity (central outgoing particles)", "etamax");
-      registerKinematicsParameter<double>("YMIN", "Minimal rapidity (central outgoing particles)", "rapiditymin");
-      registerKinematicsParameter<double>("YMAX", "Maximal rapidity (central outgoing particles)", "rapiditymax");
-      registerKinematicsParameter<double>(
-          "PDMN", "Minimal transverse momentum difference (central outgoing particles)", "ptdiffmin");
-      registerKinematicsParameter<double>(
-          "PDMX", "Maximal transverse momentum difference (central outgoing particles)", "ptdiffmax");
-      registerKinematicsParameter<double>("Q2MN", "Minimal Q^2 = -q^2 (exchanged parton)", "q2min");
-      registerKinematicsParameter<double>("Q2MX", "Maximal Q^2 = -q^2 (exchanged parton)", "q2max");
-      registerKinematicsParameter<double>("QTMN", "Minimal Q_T (exchanged parton)", "qtmin");
-      registerKinematicsParameter<double>("QTMX", "Maximal Q_T (exchanged parton)", "qtmax");
-      registerKinematicsParameter<double>("MXMN", "Minimal invariant mass of proton remnants", "mxmin");
-      registerKinematicsParameter<double>("MXMX", "Maximal invariant mass of proton remnants", "mxmax");
-      registerKinematicsParameter<double>("XIMN", "Minimal fractional momentum loss of outgoing proton (xi)", "ximin");
-      registerKinematicsParameter<double>("XIMX", "Maximal fractional momentum loss of outgoing proton (xi)", "ximax");
-      registerKinematicsParameter<double>("YJMN", "Minimal remnant jet rapidity", "yjmin");
-      registerKinematicsParameter<double>("YJMX", "Maximal remnant jet rapidity", "yjmax");
-
-      //-------------------------------------------------------------------------------------------
-      // PPtoLL cards backward compatibility
-      //-------------------------------------------------------------------------------------------
-
-      registerParameter<int>("NTREAT", "Smoothen the integrand", (int*)&params_->integrator->operator[]<bool>("treat"));
-      registerParameter<int>(
-          "ITMX", "Number of integration iterations", (int*)&params_->integrator->operator[]<int>("iterations"));
-      registerParameter<int>("NCVG", "Number of points to probe", (int*)&params_->generation().num_points);
-      registerParameter<int>(
-          "METHOD", "Computation method (kT-factorisation)", &proc_params_->operator[]<int>("method"));
-      registerParameter<int>("LEPTON", "Outgoing leptons' flavour", &lepton_id_);
-      registerKinematicsParameter<double>(
-          "PTMIN", "Minimal transverse momentum (single central outgoing particle)", "ptmin");
-      registerKinematicsParameter<double>(
-          "PTMAX", "Maximal transverse momentum (single central outgoing particle)", "ptmax");
-      registerKinematicsParameter<double>("Q1TMIN", "Minimal Q_T (exchanged parton)", "qtmin");
-      registerKinematicsParameter<double>("Q1TMAX", "Maximal Q_T (exchanged parton)", "qtmax");
-      registerKinematicsParameter<double>("Q2TMIN", "Minimal Q_T (exchanged parton)", "qtmin");
-      registerKinematicsParameter<double>("Q2TMAX", "Maximal Q_T (exchanged parton)", "qtmax");
-      registerKinematicsParameter<double>("MXMIN", "Minimal invariant mass of proton remnants", "mxmin");
-      registerKinematicsParameter<double>("MXMAX", "Maximal invariant mass of proton remnants", "mxmax");
     }
 
     void LpairHandler::write(const std::string& file) const {

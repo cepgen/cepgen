@@ -187,10 +187,11 @@ namespace cepgen {
 
     integrand_->setStorage(false);
 
-    CG_INFO("GeneratorWorker:setGen") << "Preparing the grid (" << params_->generation().num_points << " points/bin) "
+    CG_INFO("GeneratorWorker:setGen") << "Preparing the grid ("
+                                      << utils::s("point", params_->generation().numPoints(), true) << "/bin) "
                                       << "for the generation of unweighted events.";
 
-    const double inv_num_points = 1. / params_->generation().num_points;
+    const double inv_num_points = 1. / params_->generation().numPoints();
     std::vector<double> point_coord(integrator_->size(), 0.);
     if (point_coord.size() < grid_->n(0).size())
       throw CG_FATAL("GridParameters:shoot") << "Coordinates vector multiplicity is insufficient!";
@@ -203,7 +204,7 @@ namespace cepgen {
     //--- main loop
     for (unsigned int i = 0; i < grid_->size(); ++i) {
       double fsum = 0., fsum2 = 0.;
-      for (unsigned int j = 0; j < params_->generation().num_points; ++j) {
+      for (size_t j = 0; j < params_->generation().numPoints(); ++j) {
         grid_->shoot(integrator_, i, point_coord);
         const double weight = integrator_->eval(point_coord);
         grid_->setValue(i, weight);
