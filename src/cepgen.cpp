@@ -73,12 +73,10 @@ int main(int argc, char* argv[]) {
 
   try {
     auto& params = gen.parametersRef();
-    if (num_events >= 0) {  // user specified a number of events to generate
+    if (num_events >= 0)  // user specified a number of events to generate
       params.generation().setMaxGen(num_events);
-      params.generation().enabled = num_events > 0;
-    }
 
-    if (params.generation().enabled && !outputs.empty())
+    if (params.generation().enabled() && !outputs.empty())
       for (const auto& output : outputs)
         gen.parametersRef().addOutputModule(cepgen::io::ExportModuleFactory::get().build(output));
 
@@ -89,7 +87,7 @@ int main(int argc, char* argv[]) {
     double xsec = 0., err = 0.;
     gen.computeXsection(xsec, err);
 
-    if (params.generation().enabled)
+    if (params.generation().enabled())
       //--- events generation starts here
       // (one may use a callback function)
       gen.generate();

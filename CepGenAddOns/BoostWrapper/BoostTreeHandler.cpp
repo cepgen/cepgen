@@ -285,8 +285,7 @@ namespace cepgen {
       tree_.add_child(KIN_NAME, pack(params_->kinematics.parameters()));
 
       //----- generation block
-      gen_.set<bool>("enabled", params_->generation().enabled)
-          .set<bool>("symmetrise", params_->generation().symmetrise)
+      gen_.set<bool>("symmetrise", params_->generation().symmetrise)
           .set<int>("maxgen", params_->generation().maxGen())
           .set<int>("printEvery", params_->generation().gen_print_every)
           .set<int>("numThreads", params_->generation().num_threads)

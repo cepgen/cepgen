@@ -93,9 +93,10 @@ namespace cepgen {
       void setMaxGen(size_t max_gen) { max_gen_ = max_gen; }
       /// Maximal number of events to generate
       size_t maxGen() const { return max_gen_; }
+      /// Are we generating events? (true) or only computing the cross-section? (false)
+      bool enabled() const { return max_gen_ > 0ull; }
 
-      bool enabled;     ///< Are we generating events ? (true) or are we only computing the cross-section ? (false)
-      bool symmetrise;  ///< Do we want the events to be symmetric with respect to the \f$z\f$-axis ?
+      bool symmetrise;               ///< Do we want the events to be symmetric with respect to the \f$z\f$-axis ?
       unsigned int gen_print_every;  ///< Frequency at which the events are displayed to the end-user
       unsigned int num_threads;      ///< Number of threads to perform the integration
       unsigned int num_points;       ///< Number of points to "shoot" in each integration bin by the algorithm

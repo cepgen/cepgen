@@ -170,7 +170,7 @@ namespace cepgen {
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "\n"
        << std::right << std::setw(wb) << std::left << std::endl
        << std::setw(wt) << "Events generation? "
-       << (pretty ? utils::yesno(param->generation_.enabled) : std::to_string(param->generation_.enabled)) << "\n"
+       << (pretty ? utils::yesno(param->generation_.enabled()) : std::to_string(param->generation_.enabled())) << "\n"
        << std::setw(wt) << "Number of events to generate"
        << (pretty ? utils::boldify(param->generation_.maxGen()) : std::to_string(param->generation_.maxGen())) << "\n";
     if (param->generation_.num_threads > 1)
@@ -264,16 +264,14 @@ namespace cepgen {
   //-----------------------------------------------------------------------------------------------
 
   Parameters::Generation::Generation(const ParametersList& params)
-      : enabled(params.get<bool>("enabled", false)),
-        symmetrise(params.get<bool>("symmetrise", false)),
+      : symmetrise(params.get<bool>("symmetrise", false)),
         gen_print_every(params.get<int>("printEvery", 10000)),
         num_threads(params.get<int>("numThreads", 2)),
         num_points(params.get<int>("numPoints", 100)),
         max_gen_(params.get<int>("maxgen", 0)) {}
 
   Parameters::Generation::Generation(const Generation& rhs)
-      : enabled(rhs.enabled),
-        symmetrise(rhs.symmetrise),
+      : symmetrise(rhs.symmetrise),
         gen_print_every(rhs.gen_print_every),
         num_threads(rhs.num_threads),
         num_points(rhs.num_points),

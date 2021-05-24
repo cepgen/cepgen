@@ -111,7 +111,6 @@ namespace cepgen {
         params_->kinematics.incoming_beams.setStructureFunctions(str_fun_, sr_type_);
 
       //--- check if event generation is required
-      params_->generation().enabled = iend_ > 1;
       params_->generation().setMaxGen(maxgen_);
 
       //--- parse the hadronisation algorithm name
@@ -278,7 +277,7 @@ namespace cepgen {
       //kmr_grid_path_ =
       //mstw_grid_path_ =
       //pdg_input_path_ =
-      iend_ = (int)params_->generation().enabled;
+      iend_ = (int)params_->generation().enabled();
       maxgen_ = params_->generation().maxGen();
       proc_name_ = params_->processName();
       *proc_params_ += params_->process().parameters();

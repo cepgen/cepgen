@@ -243,7 +243,6 @@ namespace cepgen {
     void PythonHandler::parseGenerator(PyObject* gen) {
       if (!PyDict_Check(gen))
         throwPythonError("Generation information object should be a dictionary!");
-      params_->generation().enabled = true;
       auto plist = get<ParametersList>(gen);
       plist.set<int>("maxgen", plist.get<int>("numEvents"));
       params_->generation() = Parameters::Generation(plist);
