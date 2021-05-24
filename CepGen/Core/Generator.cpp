@@ -143,7 +143,7 @@ namespace cepgen {
 
     //--- if invalid argument, retrieve from runtime parameters
     if (num_events < 1)
-      num_events = parameters_->generation().maxgen;
+      num_events = parameters_->generation().maxGen();
 
     CG_INFO("Generator") << utils::s("event", num_events, true) << " will be generated.";
 

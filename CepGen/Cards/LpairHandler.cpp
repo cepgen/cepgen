@@ -112,6 +112,7 @@ namespace cepgen {
 
       //--- check if event generation is required
       params_->generation().enabled = iend_ > 1;
+      params_->generation().setMaxGen(maxgen_);
 
       //--- parse the hadronisation algorithm name
       if (!evt_mod_name_.empty())
@@ -165,7 +166,7 @@ namespace cepgen {
           "NTHR", "Number of threads to use for events generation", (int*)&params_->generation().num_threads);
       registerParameter<int>("MODE", "Subprocess' mode", &kin_params_->operator[]<int>("mode"));
       registerParameter<int>("NCSG", "Number of points to probe", (int*)&params_->generation().num_points);
-      registerParameter<int>("NGEN", "Number of events to generate", (int*)&params_->generation().maxgen);
+      registerParameter<int>("NGEN", "Number of events to generate", &maxgen_);
       registerParameter<int>("NPRN", "Number of events before printout", (int*)&params_->generation().gen_print_every);
 
       //-------------------------------------------------------------------------------------------
@@ -278,6 +279,7 @@ namespace cepgen {
       //mstw_grid_path_ =
       //pdg_input_path_ =
       iend_ = (int)params_->generation().enabled;
+      maxgen_ = params_->generation().maxGen();
       proc_name_ = params_->processName();
       *proc_params_ += params_->process().parameters();
       if (proc_params_->has<ParticleProperties>("pair"))

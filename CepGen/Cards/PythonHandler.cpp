@@ -244,10 +244,9 @@ namespace cepgen {
       if (!PyDict_Check(gen))
         throwPythonError("Generation information object should be a dictionary!");
       params_->generation().enabled = true;
-      fillParameter(gen, "numEvents", params_->generation().maxgen);
-      fillParameter(gen, "printEvery", params_->generation().gen_print_every);
-      fillParameter(gen, "numThreads", params_->generation().num_threads);
-      fillParameter(gen, "numPoints", params_->generation().num_points);
+      auto plist = get<ParametersList>(gen);
+      plist.set<int>("maxgen", plist.get<int>("numEvents"));
+      params_->generation() = Parameters::Generation(plist);
     }
 
     void PythonHandler::parseEventModifiers(PyObject* mod) {

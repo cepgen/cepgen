@@ -78,17 +78,31 @@ namespace cepgen {
     //----- events generation
 
     /// Collection of events generation parameters
-    struct Generation {
+    class Generation {
+    public:
       /// Build a generation parameters collection from a user input
       Generation(const ParametersList&);
-      Generation(const Generation&);                       ///< Copy constructor
-      Generation& operator=(const Generation&) = default;  ///< Assignment operator
-      bool enabled;          ///< Are we generating events ? (true) or are we only computing the cross-section ? (false)
-      unsigned long maxgen;  ///< Maximal number of events to generate in this run
-      bool symmetrise;       ///< Do we want the events to be symmetric with respect to the \f$z\f$-axis ?
+      /// Copy constructor
+      Generation(const Generation&);
+      /// Assignment operator
+      Generation& operator=(const Generation&) = default;
+
+      /// Target luminosity to reach (in pb^-1)
+      void setTargetLuminosity(double lumi_invpb) { target_lumi_ = lumi_invpb; }
+      /// Set the maximal number of events to generate
+      void setMaxGen(size_t max_gen) { max_gen_ = max_gen; }
+      /// Maximal number of events to generate
+      size_t maxGen() const { return max_gen_; }
+
+      bool enabled;     ///< Are we generating events ? (true) or are we only computing the cross-section ? (false)
+      bool symmetrise;  ///< Do we want the events to be symmetric with respect to the \f$z\f$-axis ?
       unsigned int gen_print_every;  ///< Frequency at which the events are displayed to the end-user
       unsigned int num_threads;      ///< Number of threads to perform the integration
       unsigned int num_points;       ///< Number of points to "shoot" in each integration bin by the algorithm
+
+    private:
+      size_t max_gen_;
+      double target_lumi_;
     };
     /// Get the events generation parameters
     Generation& generation() { return generation_; }

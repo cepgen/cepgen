@@ -42,7 +42,7 @@ namespace cepgen {
       throw CG_FATAL("GeneratorWorker:generate") << "No steering parameters specified!";
 
     if (num_events < 1)
-      num_events = params_->generation().maxgen;
+      num_events = params_->generation().maxGen();
 
     while (params_->numGeneratedEvents() < num_events)
       next(callback);

@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
   try {
     auto& params = gen.parametersRef();
     if (num_events >= 0) {  // user specified a number of events to generate
-      params.generation().maxgen = num_events;
+      params.generation().setMaxGen(num_events);
       params.generation().enabled = num_events > 0;
     }
 
