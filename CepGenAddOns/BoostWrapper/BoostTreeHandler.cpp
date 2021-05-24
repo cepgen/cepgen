@@ -287,7 +287,7 @@ namespace cepgen {
       //----- generation block
       gen_.set<bool>("symmetrise", params_->generation().symmetrise)
           .set<int>("maxgen", params_->generation().maxGen())
-          .set<int>("printEvery", params_->generation().gen_print_every)
+          .set<int>("printEvery", params_->generation().printEvery())
           .set<int>("numThreads", params_->generation().num_threads)
           .set<int>("numPoints", params_->generation().num_points);
       tree_.add_child(GENERATOR_NAME, pack(gen_));

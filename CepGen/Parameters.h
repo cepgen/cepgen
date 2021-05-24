@@ -87,6 +87,9 @@ namespace cepgen {
       /// Assignment operator
       Generation& operator=(const Generation&) = default;
 
+      /// List containing all parameters handled
+      ParametersList parameters() const;
+
       /// Target luminosity to reach (in pb^-1)
       void setTargetLuminosity(double lumi_invpb) { target_lumi_ = lumi_invpb; }
       /// Set the maximal number of events to generate
@@ -95,15 +98,19 @@ namespace cepgen {
       size_t maxGen() const { return max_gen_; }
       /// Are we generating events? (true) or only computing the cross-section? (false)
       bool enabled() const { return max_gen_ > 0ull; }
+      /// Set the frequency at which events are displayed to the end-user
+      void setPrintEvery(size_t print_every) { gen_print_every_ = print_every; }
+      /// Frequency at which events are displayed to the end-user
+      size_t printEvery() const { return gen_print_every_; }
 
-      bool symmetrise;               ///< Do we want the events to be symmetric with respect to the \f$z\f$-axis ?
-      unsigned int gen_print_every;  ///< Frequency at which the events are displayed to the end-user
-      unsigned int num_threads;      ///< Number of threads to perform the integration
-      unsigned int num_points;       ///< Number of points to "shoot" in each integration bin by the algorithm
+      bool symmetrise;           ///< Do we want the events to be symmetric with respect to the \f$z\f$-axis ?
+      unsigned int num_threads;  ///< Number of threads to perform the integration
+      unsigned int num_points;   ///< Number of points to "shoot" in each integration bin by the algorithm
 
     private:
       size_t max_gen_;
       double target_lumi_;
+      size_t gen_print_every_;
     };
     /// Get the events generation parameters
     Generation& generation() { return generation_; }

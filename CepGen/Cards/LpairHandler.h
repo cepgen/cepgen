@@ -59,13 +59,13 @@ namespace cepgen {
       std::unordered_map<std::string, Parameter<int> > p_ints_;
 
       void init();
-      std::shared_ptr<ParametersList> proc_params_, kin_params_;
+      std::shared_ptr<ParametersList> proc_params_, kin_params_, gen_params_;
       int timer_;
       int str_fun_, sr_type_, lepton_id_;
       std::string proc_name_, evt_mod_name_, out_mod_name_;
       std::string out_file_name_, addons_list_;
       std::string kmr_grid_path_, mstw_grid_path_, pdg_input_path_;
-      int iend_, maxgen_;
+      int iend_;
     };
 
     //----- specialised registerers

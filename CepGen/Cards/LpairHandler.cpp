@@ -39,6 +39,7 @@ namespace cepgen {
         : Handler(params),
           proc_params_(new ParametersList),
           kin_params_(new ParametersList),
+          gen_params_(new ParametersList),
           timer_(false),
           str_fun_(11),
           sr_type_(1),
@@ -102,6 +103,7 @@ namespace cepgen {
       }
 
       params_->kinematics = Kinematics(*kin_params_);
+      params_->generation() = Parameters::Generation(*gen_params_);
 
       //--- parse the structure functions code
       if (str_fun_ == (int)strfun::Type::MSTWgrid && !mstw_grid_path_.empty())
@@ -109,9 +111,6 @@ namespace cepgen {
             str_fun_, ParametersList().set<std::string>("gridPath", mstw_grid_path_)));
       else
         params_->kinematics.incoming_beams.setStructureFunctions(str_fun_, sr_type_);
-
-      //--- check if event generation is required
-      params_->generation().setMaxGen(maxgen_);
 
       //--- parse the hadronisation algorithm name
       if (!evt_mod_name_.empty())
@@ -161,12 +160,12 @@ namespace cepgen {
       registerParameter<int>(
           "ITVG", "Number of integration iterations", (int*)&params_->integrator->operator[]<int>("iterations"));
       registerParameter<int>("SEED", "Random generator seed", (int*)&params_->integrator->operator[]<int>("seed"));
-      registerParameter<int>(
-          "NTHR", "Number of threads to use for events generation", (int*)&params_->generation().num_threads);
       registerParameter<int>("MODE", "Subprocess' mode", &kin_params_->operator[]<int>("mode"));
-      registerParameter<int>("NCSG", "Number of points to probe", (int*)&params_->generation().num_points);
-      registerParameter<int>("NGEN", "Number of events to generate", &maxgen_);
-      registerParameter<int>("NPRN", "Number of events before printout", (int*)&params_->generation().gen_print_every);
+      registerParameter<int>(
+          "NTHR", "Number of threads to use for events generation", &gen_params_->operator[]<int>("numThreads"));
+      registerParameter<int>("NCSG", "Number of points to probe", &gen_params_->operator[]<int>("numPoints"));
+      registerParameter<int>("NGEN", "Number of events to generate", &gen_params_->operator[]<int>("maxgen"));
+      registerParameter<int>("NPRN", "Number of events before printout", &gen_params_->operator[]<int>("printEvery"));
 
       //-------------------------------------------------------------------------------------------
       // Process-specific parameters
@@ -278,7 +277,6 @@ namespace cepgen {
       //mstw_grid_path_ =
       //pdg_input_path_ =
       iend_ = (int)params_->generation().enabled();
-      maxgen_ = params_->generation().maxGen();
       proc_name_ = params_->processName();
       *proc_params_ += params_->process().parameters();
       if (proc_params_->has<ParticleProperties>("pair"))
@@ -303,6 +301,7 @@ namespace cepgen {
       timer_ = (params_->timeKeeper() != nullptr);
 
       *kin_params_ += params_->kinematics.parameters();
+      *gen_params_ += params_->generation().parameters();
       init();
     }
 

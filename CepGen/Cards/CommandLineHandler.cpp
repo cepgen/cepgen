@@ -97,7 +97,7 @@ namespace cepgen {
       if (gen.has<int>("nthreads"))
         params_->generation().num_threads = gen.get<int>("nthreads");
       if (gen.has<int>("nprn"))
-        params_->generation().gen_print_every = gen.get<int>("nprn");
+        params_->generation().setPrintEvery(gen.get<int>("nprn"));
       if (gen.has<int>("seed"))
         params_->integrator->set<int>("seed", gen.get<int>("seed"));
 
