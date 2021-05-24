@@ -146,15 +146,12 @@ namespace cepgen {
   }
 
   std::ostream& operator<<(std::ostream& os, const Parameters* param) {
-    const bool pretty = true;
-
     const int wb = 90, wt = 33;
 
     os << std::left << "\n"
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ PROCESS INFORMATION ¯\\_" << std::setfill(' ') << "\n"
        << std::right << std::setw(wb) << std::left << std::endl
-       << std::setw(wt) << "Process to generate"
-       << (pretty ? utils::boldify(param->processName()) : param->processName());
+       << std::setw(wt) << "Process to generate" << utils::boldify(param->processName());
     if (param->process_) {
       for (const auto& par : param->process().parameters().keys(false))
         if (par != "mode")
@@ -162,37 +159,31 @@ namespace cepgen {
       std::ostringstream proc_mode;
       proc_mode << param->kinematics.incoming_beams.mode();
       if (param->kinematics.incoming_beams.mode() != mode::Kinematics::invalid)
-        os << "\n"
-           << std::setw(wt) << "Subprocess mode" << (pretty ? utils::boldify(proc_mode.str()) : proc_mode.str())
-           << "\n";
+        os << "\n" << std::setw(wt) << "Subprocess mode" << utils::boldify(proc_mode.str()) << "\n";
     }
     os << "\n"
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "\n"
        << std::right << std::setw(wb) << std::left << std::endl
-       << std::setw(wt) << "Events generation? "
-       << (pretty ? utils::yesno(param->generation_.enabled()) : std::to_string(param->generation_.enabled())) << "\n"
-       << std::setw(wt) << "Number of events to generate"
-       << (pretty ? utils::boldify(param->generation_.maxGen()) : std::to_string(param->generation_.maxGen())) << "\n";
-    if (param->generation_.num_threads > 1)
-      os << std::setw(wt) << "Number of threads" << param->generation_.num_threads << "\n";
-    os << std::setw(wt) << "Number of points to try per bin" << param->generation_.num_points << "\n"
+       << std::setw(wt) << "Events generation? " << utils::yesno(param->generation_.enabled()) << "\n"
+       << std::setw(wt) << "Number of events to generate" << utils::boldify(param->generation_.maxGen()) << "\n";
+    if (param->generation_.numThreads() > 1)
+      os << std::setw(wt) << "Number of threads" << param->generation_.numThreads() << "\n";
+    os << std::setw(wt) << "Number of points to try per bin" << param->generation_.numPoints() << "\n"
        << std::setw(wt) << "Verbosity level " << utils::Logger::get().level << "\n";
     if (!param->evt_modifiers_.empty() || param->out_modules_.empty() || !param->taming_functions_.empty())
       os << "\n"
-         << std::setfill('-') << std::setw(wb + 6) << (pretty ? utils::boldify(" Event treatment ") : "Event treatment")
-         << std::setfill(' ') << "\n\n";
+         << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Event treatment ") << std::setfill(' ')
+         << "\n\n";
     if (!param->evt_modifiers_.empty()) {
       std::string mod_name = utils::s("Event modifier", param->evt_modifiers_.size(), false), sep;
       for (const auto& mod : param->evt_modifiers_)
-        os << std::setw(wt) << mod_name << sep << (pretty ? utils::boldify(mod->name()) : mod->name()) << "\n",
-            sep = "+ ", mod_name.clear();
+        os << std::setw(wt) << mod_name << sep << utils::boldify(mod->name()) << "\n", sep = "+ ", mod_name.clear();
       os << "\n";
     }
     if (!param->out_modules_.empty()) {
       std::string mod_name = utils::s("Output module", param->out_modules_.size(), false);
       for (const auto& mod : param->out_modules_) {
-        os << std::setw(wt) << mod_name << (pretty ? utils::boldify(mod->name()) : mod->name()) << "\n",
-            mod_name.clear();
+        os << std::setw(wt) << mod_name << utils::boldify(mod->name()) << "\n", mod_name.clear();
         for (const auto& par : mod->parameters().keys(false))
           os << std::setw(wt) << "" << par << ": " << mod->parameters().getString(par) << "\n";
       }
@@ -203,13 +194,9 @@ namespace cepgen {
         os << std::setw(wt) << "" << tf->variables().at(0) << ": " << tf->expression() << "\n";
     }
     os << "\n"
-       << std::setfill('-') << std::setw(wb + 6)
-       << (pretty ? utils::boldify(" Integration parameters ") : "Integration parameters") << std::setfill(' ')
+       << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Integration parameters ") << std::setfill(' ')
        << "\n\n"
-       << std::setw(wt) << "Integration"
-       << (pretty ? utils::boldify(param->integrator->name<std::string>("N/A"))
-                  : param->integrator->name<std::string>("N/A"))
-       << "\n";
+       << std::setw(wt) << "Integration" << utils::boldify(param->integrator->name<std::string>("N/A")) << "\n";
     for (const auto& key : param->integrator->keys(false))
       os << std::setw(wt) << "" << key << ": " << param->integrator->getString(key) << "\n";
     os << "\n"
@@ -222,15 +209,13 @@ namespace cepgen {
         param->kinematics.incoming_beams.structureFunctions())
       os << std::setw(wt) << "Structure functions" << param->kinematics.incoming_beams.structureFunctions() << "\n";
     os << "\n"
-       << std::setfill('-') << std::setw(wb + 6) << (pretty ? utils::boldify(" Incoming partons ") : "Incoming partons")
-       << std::setfill(' ') << "\n\n";
+       << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Incoming partons ") << std::setfill(' ') << "\n\n";
     const auto& cuts = param->kinematics.cuts;
     for (const auto& lim : cuts.initial.list())  // map(particles class, limits)
       if (lim.limits.valid())
         os << std::setw(wt) << lim.description << lim.limits << "\n";
     os << "\n"
-       << std::setfill('-') << std::setw(wb + 6)
-       << (pretty ? utils::boldify(" Outgoing central system ") : "Outgoing central system") << std::setfill(' ')
+       << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Outgoing central system ") << std::setfill(' ')
        << "\n\n";
     if (!param->kinematics.minimum_final_state.empty()) {
       os << std::setw(wt) << "Minimum final state";
@@ -243,7 +228,7 @@ namespace cepgen {
       if (lim.limits.valid())
         os << std::setw(wt) << lim.description << lim.limits << "\n";
     if (cuts.central_particles.size() > 0) {
-      os << std::setw(wt) << (pretty ? utils::boldify(">>> per-particle cuts:") : ">>> per-particle cuts:") << "\n";
+      os << std::setw(wt) << utils::boldify(">>> per-particle cuts:") << "\n";
       for (const auto& part_per_lim : cuts.central_particles) {
         os << " * all single " << std::setw(wt - 3) << PDG::get().name(part_per_lim.first) << "\n";
         for (const auto& lim : const_cast<cuts::Central&>(part_per_lim.second).list())
@@ -252,8 +237,7 @@ namespace cepgen {
       }
     }
     os << "\n";
-    os << std::setfill('-') << std::setw(wb + 6)
-       << (pretty ? utils::boldify(" Proton / remnants ") : "Proton / remnants") << std::setfill(' ') << "\n";
+    os << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Proton / remnants ") << std::setfill(' ') << "\n";
     for (const auto& lim : cuts.remnants.list())
       os << "\n" << std::setw(wt) << lim.description << lim.limits;
     return os << "\n"
