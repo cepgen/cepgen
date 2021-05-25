@@ -73,9 +73,10 @@ int main(int argc, char* argv[]) {
     }
     i = 0;
     for (auto& gr_diff : m_gr_diff) {
-      gr_diff.second.SetLineStyle(2 + (i++));
-      gr_diff.second.SetLineColor(kBlue);
+      gr_diff.second.SetLineStyle(2 + i);
+      gr_diff.second.SetLineColor(cepgen::Canvas::colours[i]);
       gr_diff.second.Draw("same");
+      ++i;
     }
     mg.Draw("al");
     c.Prettify(mg.GetHistogram());

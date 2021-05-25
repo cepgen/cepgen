@@ -15,9 +15,6 @@ namespace cepgen {
       explicit Handler(const ParametersList&);
       ~Handler() = default;
 
-      /// Small utility to retrieve the extension of a filename
-      ///  (naive approach)
-      static std::string extension(const std::string& file) { return file.substr(file.find_last_of(".") + 1); }
       /// Get the list of runtime parameters parsed
       Parameters* parameters() { return params_; }
       /// Specify runtime parameters to the handler

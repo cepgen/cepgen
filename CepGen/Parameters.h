@@ -78,17 +78,50 @@ namespace cepgen {
     //----- events generation
 
     /// Collection of events generation parameters
-    struct Generation {
+    class Generation {
+    public:
       /// Build a generation parameters collection from a user input
       Generation(const ParametersList&);
-      Generation(const Generation&);                       ///< Copy constructor
-      Generation& operator=(const Generation&) = default;  ///< Assignment operator
-      bool enabled;          ///< Are we generating events ? (true) or are we only computing the cross-section ? (false)
-      unsigned long maxgen;  ///< Maximal number of events to generate in this run
-      bool symmetrise;       ///< Do we want the events to be symmetric with respect to the \f$z\f$-axis ?
-      unsigned int gen_print_every;  ///< Frequency at which the events are displayed to the end-user
-      unsigned int num_threads;      ///< Number of threads to perform the integration
-      unsigned int num_points;       ///< Number of points to "shoot" in each integration bin by the algorithm
+      /// Copy constructor
+      Generation(const Generation&);
+      /// Assignment operator
+      Generation& operator=(const Generation&) = default;
+
+      /// List containing all parameters handled
+      ParametersList parameters() const;
+
+      /// Set the target luminosity to reach (in pb^-1)
+      void setTargetLuminosity(double lumi_invpb) { target_lumi_ = lumi_invpb; }
+      /// Target luminosity to reach (in pb^-1)
+      double targetLuminosity() const { return target_lumi_; }
+      /// Set the maximal number of events to generate
+      void setMaxGen(size_t max_gen) { max_gen_ = max_gen; }
+      /// Maximal number of events to generate
+      size_t maxGen() const { return max_gen_; }
+      /// Are we generating events? (true) or only computing the cross-section? (false)
+      bool enabled() const { return max_gen_ > 0ull; }
+      /// Set the frequency at which events are displayed to the end-user
+      void setPrintEvery(size_t print_every) { gen_print_every_ = print_every; }
+      /// Frequency at which events are displayed to the end-user
+      size_t printEvery() const { return gen_print_every_; }
+      /// Switch on/off the symmetrisation of the z-axis for each event
+      void setSymmetrise(bool sym) { symmetrise_ = sym; }
+      /// Do we want the events to be symmetric with respect to the \f$z\f$-axis ?
+      bool symmetrise() const { return symmetrise_; }
+      /// Set the number of threads for the events generation
+      void setNumThreads(size_t nt) { num_threads_ = nt; }
+      /// Number of threads to perform the events generation
+      size_t numThreads() const { return num_threads_; }
+      /// Set the number of points to probe in each integration bin
+      void setNumPoints(size_t np) { num_points_ = np; }
+      /// Number of points to "shoot" in each integration bin by the algorithm
+      size_t numPoints() const { return num_points_; }
+
+    private:
+      size_t max_gen_, gen_print_every_;
+      double target_lumi_;
+      bool symmetrise_;
+      size_t num_threads_, num_points_;
     };
     /// Get the events generation parameters
     Generation& generation() { return generation_; }

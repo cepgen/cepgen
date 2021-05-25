@@ -27,9 +27,11 @@ find_path(DELPHES_EXT_INCLUDE NAMES ExRootAnalysis HINTS $ENV{DELPHES_DIR} PATH_
 set(sources IntegratorROOT.cpp ROOTTree*.cpp ROOTHistsHandler.cpp FunctionalROOT.cpp)
 
 #--- FOAM integrator
-list(FIND ROOT_LIBRARIES "/usr/lib64/root/libFoam.so" _idx)
-if(${_idx} GREATER -1)
-  list(APPEND sources IntegratorFoam.cpp)
+if(CMAKE_BUILD_FOAM)
+  list(FIND ROOT_LIBRARIES "/usr/lib64/root/libFoam.so" _idx)
+  if(${_idx} GREATER -1)
+    list(APPEND sources IntegratorFoam.cpp)
+  endif()
 endif()
 
 #--- Delphes

@@ -6,6 +6,7 @@
 
 #include <math.h>
 #include <stdarg.h>  // For va_start, etc.
+#include <unistd.h>
 
 namespace cepgen {
   namespace utils {
@@ -33,13 +34,13 @@ namespace cepgen {
 
     /// String implementation of the boldification procedure
     template <>
-    std::string boldify<std::string>(std::string str) {
+    std::string boldify(std::string str) {
       return colourise(str, Colour::reset, Modifier::bold);
     }
 
     /// C-style character array implementation of the boldification procedure
     template <>
-    std::string boldify<const char*>(const char* str) {
+    std::string boldify(const char* str) {
       return boldify(std::string(str));
     }
 
@@ -50,6 +51,8 @@ namespace cepgen {
     }
 
     std::string colourise(const std::string& str, const Colour& col, const Modifier& mod) {
+      if (!isatty(fileno(stdout)))
+        return str;
       if (mod == Modifier::reset)
         return format("\033[%dm%s\033[0m", (int)col, str.c_str());
       if (col == Colour::reset)

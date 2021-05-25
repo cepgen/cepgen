@@ -63,7 +63,7 @@ namespace cepgen {
     }
 
     void ProMCHandler::initialise(const Parameters& params) {
-      file_->setDescription(params.generation().maxgen, "Sample generated using CepGen v" + version::tag);
+      file_->setDescription(params.generation().maxGen(), "Sample generated using CepGen v" + version::tag);
       log_file_ << banner(params) << "\n";
       ProMCHeader hdr;
       hdr.set_momentumunit(GEV_UNIT);
@@ -77,8 +77,8 @@ namespace cepgen {
         data->set_width(desc.width);
         data->set_charge(desc.charge * 1. / 3.);
       }
-      hdr.set_id1(params.kinematics.incoming_beams.first.pdg);
-      hdr.set_id2(params.kinematics.incoming_beams.second.pdg);
+      hdr.set_id1(params.kinematics.incoming_beams.positive().pdg);
+      hdr.set_id2(params.kinematics.incoming_beams.negative().pdg);
       hdr.set_pdf1(0);
       hdr.set_pdf2(0);
       hdr.set_x1(0);

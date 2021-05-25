@@ -24,11 +24,13 @@ namespace Pythia8 {
 
   void CepGenEvent::initialise(const cepgen::Parameters& params) {
     params_ = &params;
-    inel1_ = params_->kinematics.incoming_beams.first.mode == cepgen::mode::Beam::ProtonInelastic;
-    inel2_ = params_->kinematics.incoming_beams.second.mode == cepgen::mode::Beam::ProtonInelastic;
+    inel1_ = params_->kinematics.incoming_beams.positive().mode == cepgen::mode::Beam::ProtonInelastic;
+    inel2_ = params_->kinematics.incoming_beams.negative().mode == cepgen::mode::Beam::ProtonInelastic;
 
-    setBeamA((short)params_->kinematics.incoming_beams.first.pdg, params_->kinematics.incoming_beams.first.pz);
-    setBeamB((short)params_->kinematics.incoming_beams.second.pdg, params_->kinematics.incoming_beams.second.pz);
+    setBeamA((short)params_->kinematics.incoming_beams.positive().pdg,
+             params_->kinematics.incoming_beams.positive().momentum.pz());
+    setBeamB((short)params_->kinematics.incoming_beams.negative().pdg,
+             params_->kinematics.incoming_beams.negative().momentum.pz());
     //addProcess( 0, params_->integration().result, params_->integration().err_result, 100. );
   }
 
@@ -253,11 +255,11 @@ namespace Pythia8 {
   void CepGenEvent::addCorresp(unsigned short py_id, unsigned short cg_id) { py_cg_corresp_[py_id] = cg_id; }
 
   void CepGenEvent::dumpCorresp() const {
-    std::ostringstream oss;
-    oss << "List of Pythia ←|→ CepGen particle ids correspondence";
-    for (const auto& py_cg : py_cg_corresp_)
-      oss << "\n\t" << py_cg.first << " <-> " << py_cg.second;
-    CG_INFO("CepGenEvent:dump") << oss.str();
+    CG_INFO("CepGenEvent:dump").log([&](auto& msg) {
+      msg << "List of Pythia ←|→ CepGen particle ids correspondence";
+      for (const auto& py_cg : py_cg_corresp_)
+        msg << "\n\t" << py_cg.first << " <-> " << py_cg.second;
+    });
   }
 
   std::pair<int, int> CepGenEvent::findMothers(const cepgen::Event& ev, const cepgen::Particle& p) const {

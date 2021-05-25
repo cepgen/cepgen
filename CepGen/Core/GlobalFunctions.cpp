@@ -37,6 +37,15 @@ namespace cepgen {
   bool loadLibrary(const std::string& path, bool match) {
 #ifdef _WIN32
     const auto fullpath = match ? path + ".dll" : path;
+#else
+    const auto fullpath = match ? "lib" + path + ".so" : path;
+#endif
+    if (!utils::fileExists(fullpath)) {
+      CG_DEBUG("loadLibrary") << "Library \"" << path << "\" does not exist.";
+      return false;
+    }
+
+#ifdef _WIN32
     if (LoadLibraryA(fullpath.c_str()) == nullptr) {
       CG_DEBUG("loadLibrary") << "Failed to load library \"" << path << "\".\n\t"
                               << "Error code #" << GetLastError() << ".";
@@ -44,11 +53,10 @@ namespace cepgen {
       return false;
     }
 #else
-    const auto fullpath = match ? "lib" + path + ".so" : path;
     if (dlopen(fullpath.c_str(), RTLD_LAZY | RTLD_GLOBAL) == nullptr) {
       const char* err = dlerror();
-      CG_DEBUG("loadLibrary") << "Failed to load library \"" << path << "\"."
-                              << (err != nullptr ? utils::format("\n\t%s", err) : "");
+      CG_WARNING("loadLibrary") << "Failed to load library \"" << path << "\"."
+                                << (err != nullptr ? utils::format("\n\t%s", err) : "");
       invalid_libraries.emplace_back(path);
       return false;
     }
@@ -86,12 +94,19 @@ namespace cepgen {
     if (!safe_mode)
       for (const auto& lib : utils::libraries)
         loadLibrary(lib, true);
-    CG_WARNING("init") << "Failed to load the following libraries:\n\t" << invalid_libraries << ".";
+    if (!invalid_libraries.empty())
+      CG_WARNING("init") << "Failed to load the following libraries:\n\t" << invalid_libraries << ".";
 
-    //--- greetings message
-    CG_INFO("init") << "CepGen " << version::tag << " (" << version::extended << ") "
-                    << "initialised with the following add-ons:\n\t" << loaded_libraries << ".\n\t"
-                    << "Greetings!";
+    //--- greeting message
+    CG_INFO("init").log([&](auto& log) {
+      log << "CepGen " << version::tag << " (" << version::extended << ") "
+          << "initialised";
+      if (!loaded_libraries.empty())
+        log << " with the following add-ons:\n\t" << loaded_libraries << ".\n\t";
+      else
+        log << ". ";
+      log << "Greetings!";
+    });
   }
 
   void printHeader() {

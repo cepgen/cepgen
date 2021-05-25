@@ -74,8 +74,6 @@ int main(int argc, char* argv[]) {
   CG_INFO("main") << "Scan written in \"" << output_file << "\".";
   out.close();
 
-  vector<int> colours = {kBlack, kRed + 1, kBlue - 2, kGreen + 1, kOrange + 1};
-
   for (auto& plt : map<const char*, vector<TGraph*> >{{"FE", g_form_factors_fe}, {"FM", g_form_factors_fm}}) {
     cepgen::Canvas c(plt.first, Form("M_{X} = %g GeV/c^{2}", mx));
     c.SetLogy();
@@ -83,7 +81,7 @@ int main(int argc, char* argv[]) {
     size_t i = 0;
     for (auto& gr : plt.second) {
       mg.Add(gr);
-      gr->SetLineColor(colours.at(i));
+      gr->SetLineColor(cepgen::Canvas::colours[i]);
       c.AddLegendEntry(gr, gr->GetTitle(), "l");
       ++i;
     }

@@ -1,5 +1,5 @@
-#ifndef CepGen_Physics_Limits_h
-#define CepGen_Physics_Limits_h
+#ifndef CepGen_Utils_Limits_h
+#define CepGen_Utils_Limits_h
 
 #include <utility>
 #include <iosfwd>

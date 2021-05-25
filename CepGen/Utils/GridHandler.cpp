@@ -4,6 +4,7 @@
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
+#include <limits>
 
 namespace cepgen {
   template <size_t D, size_t N>

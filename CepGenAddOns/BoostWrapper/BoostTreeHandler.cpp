@@ -285,13 +285,7 @@ namespace cepgen {
       tree_.add_child(KIN_NAME, pack(params_->kinematics.parameters()));
 
       //----- generation block
-      gen_.set<bool>("enabled", params_->generation().enabled)
-          .set<bool>("symmetrise", params_->generation().symmetrise)
-          .set<int>("maxgen", params_->generation().maxgen)
-          .set<int>("printEvery", params_->generation().gen_print_every)
-          .set<int>("numThreads", params_->generation().num_threads)
-          .set<int>("numPoints", params_->generation().num_points);
-      tree_.add_child(GENERATOR_NAME, pack(gen_));
+      tree_.add_child(GENERATOR_NAME, pack(params_->generation().parameters()));
 
       //----- event modification and output
       if (!params_->eventModifiersSequence().empty()) {
@@ -347,6 +341,6 @@ namespace cepgen {
   }  // namespace card
 }  // namespace cepgen
 
-REGISTER_CARD_HANDLER("json", JsonHandler)
-REGISTER_CARD_HANDLER("info", InfoHandler)
-REGISTER_CARD_HANDLER("xml", XmlHandler)
+REGISTER_CARD_HANDLER(".json", JsonHandler)
+REGISTER_CARD_HANDLER(".info", InfoHandler)
+REGISTER_CARD_HANDLER(".xml", XmlHandler)
