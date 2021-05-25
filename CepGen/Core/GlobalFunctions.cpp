@@ -30,6 +30,7 @@ namespace cepgen {
                                              "CepGenProMC",
                                              "CepGenBoost",
                                              "CepGenRivet",
+                                             "CepGenCuba",
                                              "CepGenAPFEL"};
     std::atomic<int> gSignal;  ///< Abort signal handler
   }                            // namespace utils

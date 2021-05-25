@@ -33,17 +33,6 @@ endif()
 
 #----- check the external dependencies for physics utilities
 
-find_path(CUBA_INCLUDE tools HINTS $ENV{CUBA_DIR})
-find_library(CUBA cuba HINTS $ENV{CUBA_DIR})
-if(CUBA)
-  message(STATUS "CUBA found in ${CUBA}")
-  list(APPEND core_includes ${CUBA_INCLUDE})
-  list(APPEND CEPGEN_CORE_EXT ${CUBA})
-else()
-  file(GLOB int_cuba Integration/IntegratorCuba.cpp)
-  list(REMOVE_ITEM int_sources ${int_cuba})
-endif()
-
 find_library(MUPARSER muparser)
 if(MUPARSER)
   message(STATUS "Formulas parsing will use muParser found in ${MUPARSER}")
@@ -75,7 +64,6 @@ add_library(CepGenCore SHARED ${core_sources} ${int_sources} ${phys_sources} ${p
 target_compile_definitions(CepGenCore PRIVATE ${core_definitions})
 target_link_libraries(CepGenCore INTERFACE ${CEPGEN_CORE_EXT} stdc++fs)
 target_include_directories(CepGenCore PRIVATE ${core_includes})
-#set_target_properties(CepGenCore PROPERTIES COMPILE_FLAGS "-ffast-math -lm")
 
 #----- installation rules
 
