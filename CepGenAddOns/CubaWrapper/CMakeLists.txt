@@ -11,6 +11,7 @@ endif()
 cepgen_build(CepGenCuba SOURCES IntegratorCuba*.cpp
     EXT_LIBS ${CUBA}
     EXT_HEADERS ${CUBA_INCLUDE}
+    PROPERTY POSITION_INDEPENDENT_CODE ON
     INSTALL_COMPONENT cuba)
 
 #set_target_properties(CepGenCore PROPERTIES COMPILE_FLAGS "-ffast-math -lm")

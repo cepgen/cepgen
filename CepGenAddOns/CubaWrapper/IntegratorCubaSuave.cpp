@@ -24,8 +24,7 @@ namespace cepgen {
       : IntegratorCuba(params),
         nnew_(params.get<int>("NNEW", 1000)),
         nmin_(params.get<int>("NMIN", 2)),
-        flatness_(params.get<double>("FLATNESS", 25.)),
-        verbose_(params.get<int>("verbose", 1)) {
+        flatness_(params.get<double>("FLATNESS", 25.)) {
     //--- a bit of printout for debugging
     CG_DEBUG("Integrator:build") << "Cuba-Suave integrator built.";
   }

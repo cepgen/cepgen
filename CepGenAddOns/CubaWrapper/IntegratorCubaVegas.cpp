@@ -17,7 +17,6 @@ namespace cepgen {
   private:
     int nstart_, nincrease_, nbatch_;
     int gridno_;
-    int verbose_;
   };
 
   IntegratorCubaVegas::IntegratorCubaVegas(const ParametersList& params)
@@ -25,8 +24,7 @@ namespace cepgen {
         nstart_(params.get<int>("NSTART", 1000)),
         nincrease_(params.get<int>("NINCREASE", 500)),
         nbatch_(params.get<int>("NBATCH", 1000)),
-        gridno_(params.get<int>("GRIDNO", 0)),
-        verbose_(params.get<int>("verbose", 1)) {
+        gridno_(params.get<int>("GRIDNO", 0)) {
     //--- a bit of printout for debugging
     CG_DEBUG("Integrator:build") << "Cuba-VEGAS integrator built.";
   }
