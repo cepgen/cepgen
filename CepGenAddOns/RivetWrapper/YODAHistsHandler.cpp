@@ -6,6 +6,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Limits.h"
 
 #include <limits>
 
@@ -66,29 +67,32 @@ namespace cepgen {
         const auto& hvars = variables_.get<ParametersList>(key);
         int nbins_x = hvars.get<int>("nbinsX", 10);
         nbins_x = hvars.get<int>("nbins", nbins_x);
-        double min_x = hvars.get<double>("lowX", 0.), max_x = hvars.get<double>("highX", 1.);
-        min_x = hvars.get<double>("low", min_x), max_x = hvars.get<double>("high", max_x);
+        const auto& xrange = hvars.get<Limits>("xrange", Limits{0., 1.});
         const bool profile = hvars.get<bool>("profile", false);
         if (vars.size() == 1) {  // 1D histogram
           const auto title = utils::format("d(sigma)/d(%s) (pb/bin)", key.c_str());
-          hists1d_.emplace_back(std::make_pair(key, YODA::Histo1D(nbins_x, min_x, max_x, key, title)));
-          CG_INFO("YODAHistsHandler") << "Booking a histogram with " << utils::s("bin", nbins_x) << " between " << min_x
-                                      << " and " << max_x << " for \"" << vars[0] << "\".";
+          hists1d_.emplace_back(std::make_pair(key, YODA::Histo1D(nbins_x, xrange.min(), xrange.max(), key, title)));
+          CG_INFO("YODAHistsHandler") << "Booking a histogram with " << utils::s("bin", nbins_x) << " in range "
+                                      << xrange << " for \"" << vars[0] << "\".";
           continue;
         }
         const int nbins_y = hvars.get<int>("nbinsY", 10);
-        const double min_y = hvars.get<double>("lowY", 0.), max_y = hvars.get<double>("highY", 1.);
+        const auto& yrange = hvars.get<Limits>("yrange", Limits{0., 1.});
         if (vars.size() == 2) {  // 2D histogram
           const auto title = utils::format("d^2(sigma)/d(%s)/d(%s) (pb/bin)", vars[0].c_str(), vars[1].c_str());
-          if (profile)
-            profiles1d_.emplace_back(std::make_pair(vars, YODA::Profile1D(nbins_x, min_x, max_x, key, title)));
-          else
-            hists2d_.emplace_back(
-                std::make_pair(vars, YODA::Histo2D(nbins_x, min_x, max_x, nbins_y, min_y, max_y, key, title)));
-          CG_INFO("YODAHistsHandler") << "Booking a " << (profile ? "1D profile" : "2D correlation plot") << " with "
-                                      << utils::s("bin", nbins_x + nbins_y) << " between (" << min_x << ", " << min_y
-                                      << ") and (" << max_x << ", " << max_y << ")"
-                                      << " for \"" << utils::merge(vars, " / ") << "\".";
+          if (profile) {
+            profiles1d_.emplace_back(
+                std::make_pair(vars, YODA::Profile1D(nbins_x, xrange.min(), xrange.max(), key, title)));
+            CG_INFO("YODAHistsHandler") << "Booking a 1D profile with " << utils::s("bin", nbins_x)
+                                        << " in range x=" << xrange << " for \"" << utils::merge(vars, " / ") << "\".";
+          } else {
+            hists2d_.emplace_back(std::make_pair(
+                vars,
+                YODA::Histo2D(nbins_x, xrange.min(), xrange.max(), nbins_y, yrange.min(), yrange.max(), key, title)));
+            CG_INFO("YODAHistsHandler") << "Booking a 2D correlation plot with " << utils::s("bin", nbins_x + nbins_y)
+                                        << " in range x=" << xrange << " and y=" << yrange << " for \""
+                                        << utils::merge(vars, " / ") << "\".";
+          }
           continue;
         }
         if (vars.size() == 3 && profile) {
@@ -102,13 +106,13 @@ namespace cepgen {
                                            vars[0].c_str(),
                                            vars[1].c_str(),
                                            vars[2].c_str());
-          profiles2d_.emplace_back(
-              std::make_pair(vars, YODA::Profile2D(nbins_x, min_x, max_x, nbins_y, min_y, max_y, key, title)));
+          profiles2d_.emplace_back(std::make_pair(
+              vars,
+              YODA::Profile2D(nbins_x, xrange.min(), xrange.max(), nbins_y, yrange.min(), yrange.max(), key, title)));
           CG_INFO("YODAHistsHandler") << "Booking a 2D profile"
-                                      << " with " << utils::s("bin", nbins_x + nbins_y) << " between (" << min_x << ", "
-                                      << min_y << ")"
-                                      << " and (" << max_x << ", " << max_y << ")"
-                                      << " for \"" << utils::merge(vars, " / ") << "\".";
+                                      << " with " << utils::s("bin", nbins_x + nbins_y, true)
+                                      << " in range x=" << xrange << " and y=" << yrange << " for \""
+                                      << utils::merge(vars, " / ") << "\".";
           continue;
         }
       }

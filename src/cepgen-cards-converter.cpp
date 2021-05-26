@@ -3,6 +3,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/Filesystem.h"
 
 #include "CepGen/Cards/Handler.h"
 
@@ -21,13 +22,13 @@ int main(int argc, char* argv[]) {
   try {
     auto params = cepgen::card::Handler::parse(input_config);
     cepgen::card::Handler::write(params, output_config);
-    CG_INFO("main") << "Successfully converted the \"" << cepgen::card::Handler::extension(input_config)
-                    << "\" card into a \"" << cepgen::card::Handler::extension(output_config) << "\" card.\n\t"
+    CG_INFO("main") << "Successfully converted the \"" << cepgen::utils::fileExtension(input_config)
+                    << "\" card into a \"" << cepgen::utils::fileExtension(output_config) << "\" card.\n\t"
                     << "\"" << output_config << "\" file created.";
 
   } catch (const cepgen::Exception& e) {
-    throw CG_FATAL("main") << "Failed to convert a \"" << cepgen::card::Handler::extension(input_config)
-                           << "\" card into a \"" << cepgen::card::Handler::extension(output_config) << "\" card!\n"
+    throw CG_FATAL("main") << "Failed to convert a \"" << cepgen::utils::fileExtension(input_config)
+                           << "\" card into a \"" << cepgen::utils::fileExtension(output_config) << "\" card!\n"
                            << e.message();
   }
 

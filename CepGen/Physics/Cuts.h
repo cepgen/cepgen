@@ -1,7 +1,7 @@
 #ifndef CepGen_Physics_Cuts_h
 #define CepGen_Physics_Cuts_h
 
-#include "CepGen/Physics/Limits.h"
+#include "CepGen/Utils/Limits.h"
 #include "CepGen/Physics/ParticleProperties.h"
 
 #include <vector>

@@ -14,9 +14,6 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 
 #include "CepGen/Event/Event.h"
-#include "CepGen/Physics/Limits.h"
-
-#include "CepGen/Integration/Integrator.h"
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
@@ -96,12 +93,11 @@ namespace cepgen {
 
       //----- events generation
       const auto& gen = pars.get<ParametersList>("generation");
-      params_->generation().maxgen = (unsigned long)gen.get<int>("ngen", params_->generation().maxgen);
-      params_->generation().enabled = params_->generation().maxgen > 1;
+      params_->generation().setMaxGen(gen.get<int>("ngen", params_->generation().maxGen()));
       if (gen.has<int>("nthreads"))
-        params_->generation().num_threads = gen.get<int>("nthreads");
+        params_->generation().setNumThreads(gen.get<int>("nthreads"));
       if (gen.has<int>("nprn"))
-        params_->generation().gen_print_every = gen.get<int>("nprn");
+        params_->generation().setPrintEvery(gen.get<int>("nprn"));
       if (gen.has<int>("seed"))
         params_->integrator->set<int>("seed", gen.get<int>("seed"));
 
@@ -121,4 +117,4 @@ namespace cepgen {
   }  // namespace card
 }  // namespace cepgen
 
-REGISTER_CARD_HANDLER("cmd", CommandLineHandler)
+REGISTER_CARD_HANDLER(".cmd", CommandLineHandler)

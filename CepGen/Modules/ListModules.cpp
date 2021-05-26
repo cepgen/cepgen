@@ -24,7 +24,7 @@ namespace cepgen {
         if (card::CardsHandlerFactory::get().modules().empty())
           info << "\n>>> " << utils::colourise("none found", utils::Colour::red) << " <<<";
         for (const auto& mod : card::CardsHandlerFactory::get().modules())
-          info << "\n> ." << utils::colourise(mod, utils::Colour::green, utils::Modifier::bold)
+          info << "\n> " << utils::colourise(mod, utils::Colour::green, utils::Modifier::bold)
                << " extension: " << card::CardsHandlerFactory::get().describe(mod);
       }
       {

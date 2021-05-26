@@ -142,8 +142,13 @@ namespace cepgen {
       mod->initialise(*parameters_);
 
     //--- if invalid argument, retrieve from runtime parameters
-    if (num_events < 1)
-      num_events = parameters_->generation().maxgen;
+    if (num_events < 1) {
+      if (parameters_->generation().targetLuminosity() > 0.) {
+        num_events = std::ceil(parameters_->generation().targetLuminosity() * result_);
+        CG_INFO("Generator") << "Target luminosity: " << parameters_->generation().targetLuminosity() << " pb-1.";
+      } else
+        num_events = parameters_->generation().maxGen();
+    }
 
     CG_INFO("Generator") << utils::s("event", num_events, true) << " will be generated.";
 

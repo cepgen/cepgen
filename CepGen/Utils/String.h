@@ -3,7 +3,9 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include <numeric>
+#include <algorithm>
 
 namespace cepgen {
   namespace utils {
@@ -36,6 +38,16 @@ namespace cepgen {
     std::vector<std::string> split(const std::string&, char);
     /// Merge a collection of strings in a single string
     std::string merge(const std::vector<std::string>&, const std::string&);
+    /// Check if a collection contains an item
+    template <typename T>
+    bool contains(const std::vector<T>& coll, const T& item) {
+      return std::find(coll.begin(), coll.end(), item) != coll.end();
+    }
+    /// Check if a collection contains an item
+    template <typename T>
+    bool contains(const std::set<T>& coll, const T& item) {
+      return std::find(coll.begin(), coll.end(), item) != coll.end();
+    }
     /// Capitalise a string
     std::string toupper(const std::string&);
     /// Lowercase version of a string
@@ -43,9 +55,9 @@ namespace cepgen {
     /// Add a trailing "s" when needed
     inline const char* s(size_t num) { return (num > 1) ? "s" : ""; }
     /// Add a trailing "s" when needed
-    inline std::string s(const std::string& word, size_t num, bool show_number = true) {
-      return show_number ? format("%i %s%s", num, word.c_str(), (num > 1) ? "s" : "")
-                         : format("%s%s", word.c_str(), (num > 1) ? "s" : "");
+    inline std::string s(const std::string& word, float num, bool show_number = true) {
+      return show_number ? format("%g %s%s", num, word.c_str(), (num > 1.) ? "s" : "")
+                         : format("%s%s", word.c_str(), (num > 1.) ? "s" : "");
     }
     /// Helper to print a vector
     template <class T>

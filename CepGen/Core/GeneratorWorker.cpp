@@ -42,7 +42,7 @@ namespace cepgen {
       throw CG_FATAL("GeneratorWorker:generate") << "No steering parameters specified!";
 
     if (num_events < 1)
-      num_events = params_->generation().maxgen;
+      num_events = params_->generation().maxGen();
 
     while (params_->numGeneratedEvents() < num_events)
       next(callback);
@@ -166,7 +166,7 @@ namespace cepgen {
     const auto ngen = params_->numGeneratedEvents();
     if (integrand_->process().hasEvent()) {
       auto& event = integrand_->process().event();
-      if ((ngen + 1) % params_->generation().gen_print_every == 0)
+      if ((ngen + 1) % params_->generation().printEvery() == 0)
         CG_INFO("GeneratorWorker:store") << utils::s("event", ngen + 1, true) << " generated.";
       if (callback)
         callback(event, ngen);
@@ -187,10 +187,11 @@ namespace cepgen {
 
     integrand_->setStorage(false);
 
-    CG_INFO("GeneratorWorker:setGen") << "Preparing the grid (" << params_->generation().num_points << " points/bin) "
+    CG_INFO("GeneratorWorker:setGen") << "Preparing the grid ("
+                                      << utils::s("point", params_->generation().numPoints(), true) << "/bin) "
                                       << "for the generation of unweighted events.";
 
-    const double inv_num_points = 1. / params_->generation().num_points;
+    const double inv_num_points = 1. / params_->generation().numPoints();
     std::vector<double> point_coord(integrator_->size(), 0.);
     if (point_coord.size() < grid_->n(0).size())
       throw CG_FATAL("GridParameters:shoot") << "Coordinates vector multiplicity is insufficient!";
@@ -203,7 +204,7 @@ namespace cepgen {
     //--- main loop
     for (unsigned int i = 0; i < grid_->size(); ++i) {
       double fsum = 0., fsum2 = 0.;
-      for (unsigned int j = 0; j < params_->generation().num_points; ++j) {
+      for (size_t j = 0; j < params_->generation().numPoints(); ++j) {
         grid_->shoot(integrator_, i, point_coord);
         const double weight = integrator_->eval(point_coord);
         grid_->setValue(i, weight);

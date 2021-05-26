@@ -30,6 +30,7 @@
 
 #include "CepGen/Utils/TimeKeeper.h"
 #include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Filesystem.h"
 
 #include <algorithm>
 
@@ -42,6 +43,8 @@ namespace cepgen {
     PythonHandler::PythonHandler(const ParametersList& params) : Handler(params) {}
 
     Parameters* PythonHandler::parse(const std::string& file, Parameters* params) {
+      if (!utils::fileExists(file))
+        throw CG_FATAL("PythonHandler") << "Unable to locate steering card \"" << file << "\".";
       setenv(
           "PYTHONPATH", (utils::environ("CEPGEN_PATH", ".") + ":.:Cards:../Cards:/usr/share/CepGen/Cards").c_str(), 1);
       setenv("PYTHONDONTWRITEBYTECODE", "1", 1);
@@ -149,7 +152,7 @@ namespace cepgen {
 
       params_->kinematics = Kinematics(pkin);
       if (proc_params.has<int>("mode"))
-        params_->kinematics.setMode((mode::Kinematics)proc_params.get<int>("mode"));
+        params_->kinematics.incoming_beams.setMode((mode::Kinematics)proc_params.get<int>("mode"));
 
       //--- taming functions
       PyObject* ptam = element(process, "tamingFunctions");  // borrowed
@@ -240,11 +243,9 @@ namespace cepgen {
     void PythonHandler::parseGenerator(PyObject* gen) {
       if (!PyDict_Check(gen))
         throwPythonError("Generation information object should be a dictionary!");
-      params_->generation().enabled = true;
-      fillParameter(gen, "numEvents", params_->generation().maxgen);
-      fillParameter(gen, "printEvery", params_->generation().gen_print_every);
-      fillParameter(gen, "numThreads", params_->generation().num_threads);
-      fillParameter(gen, "numPoints", params_->generation().num_points);
+      auto plist = get<ParametersList>(gen);
+      plist.set<int>("maxgen", plist.get<int>("numEvents"));
+      params_->generation() = Parameters::Generation(plist);
     }
 
     void PythonHandler::parseEventModifiers(PyObject* mod) {
@@ -320,4 +321,4 @@ namespace cepgen {
   }  // namespace card
 }  // namespace cepgen
 
-REGISTER_CARD_HANDLER("py", PythonHandler)
+REGISTER_CARD_HANDLER(".py", PythonHandler)
