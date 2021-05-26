@@ -3,7 +3,9 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include <numeric>
+#include <algorithm>
 
 namespace cepgen {
   namespace utils {
@@ -36,6 +38,16 @@ namespace cepgen {
     std::vector<std::string> split(const std::string&, char);
     /// Merge a collection of strings in a single string
     std::string merge(const std::vector<std::string>&, const std::string&);
+    /// Check if a collection contains an item
+    template <typename T>
+    bool contains(const std::vector<T>& coll, const T& item) {
+      return std::find(coll.begin(), coll.end(), item) != coll.end();
+    }
+    /// Check if a collection contains an item
+    template <typename T>
+    bool contains(const std::set<T>& coll, const T& item) {
+      return std::find(coll.begin(), coll.end(), item) != coll.end();
+    }
     /// Capitalise a string
     std::string toupper(const std::string&);
     /// Lowercase version of a string

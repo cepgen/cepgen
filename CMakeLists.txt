@@ -56,6 +56,7 @@ set(CEPGEN_LIBRARIES)
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 set(CEPGEN_CORE_EXT ${GSL_LIB} ${GSL_CBLAS_LIB} dl)
 set(CEPGEN_HAS_FUNCTIONALS OFF)
+set(CEPGEN_ADDONS_FILE "${CMAKE_CURRENT_BINARY_DIR}/CepGenAddOns.txt")
 
 include(BuildUtils)
 
@@ -111,7 +112,7 @@ install(DIRECTORY CepGen
 install(DIRECTORY Cards
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
   COMPONENT lib FILES_MATCHING PATTERN "*.py")
-install(FILES ${external_files} ${readme_file}
+install(FILES ${external_files} ${readme_file} ${CEPGEN_ADDONS_FILE}
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
   COMPONENT lib)
 export(PACKAGE CepGen)

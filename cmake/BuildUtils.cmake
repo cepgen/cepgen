@@ -39,6 +39,7 @@ macro(cepgen_build mod_name)
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
             COMPONENT ${ARG_INSTALL_COMPONENTS}
             FILES_MATCHING PATTERN "*.h")
+        file(APPEND ${CEPGEN_ADDONS_FILE} "${mod_name}\n")
     endif()
     set(CEPGEN_ADDONS_EXT ${CEPGEN_ADDONS_EXT} PARENT_SCOPE)
 endmacro()
