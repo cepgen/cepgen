@@ -87,6 +87,7 @@ namespace cepgen {
       //static constexpr const char* CHARS = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
       //static constexpr const char* CHARS = " .:-=+*#%@";
       static constexpr const char* CHARS = " .:oO0@%#";
+      static const int kColours[];
       static constexpr const char NEG_CHAR = '-';
     };
 

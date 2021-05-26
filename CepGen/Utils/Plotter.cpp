@@ -60,12 +60,21 @@ namespace cepgen {
          << utils::format("%17s", xlabel_.c_str()) << ":" << std::string(width_, '.') << ":\n";  // 2nd abscissa axis
     }
 
+    const int Drawable2D::kColours[] = {(int)Colour::red,
+                                        (int)Colour::cyan,
+                                        (int)Colour::blue,
+                                        (int)Colour::magenta,
+                                        (int)Colour::green,
+                                        (int)Colour::yellow,
+                                        (int)Colour::reset};
+
     void Drawable2D::drawValues(std::ostream& os, const dualaxis_t& axes) const {
       const std::string sep(17, ' ');
       if (!ylabel_.empty())
         os << sep << std::string(std::max(0., 2. + width_ - ylabel_.size()), ' ') << ylabel_ << "\n";
       // find the maximum element of the graph
-      double max_val = -999.;
+      double max_val = Limits::INVALID;
+      const double min_logval = -5.;
       for (const auto& xval : axes)
         max_val =
             std::max(max_val, std::max_element(xval.second.begin(), xval.second.end(), map_elements())->second.value);
@@ -77,14 +86,24 @@ namespace cepgen {
         os << "\n" << (xval.first.label.empty() ? utils::format("%16g ", xval.first.value) : xval.first.label) << ":";
         for (const auto& yval : xval.second) {
           const double val = yval.second.value;
-          const double val_norm = log_ ? (val == 0. ? 0. : std::log(val) / std::log(max_val)) : val / max_val;
-          const short sign = val_norm / fabs(val_norm);
-          if (std::isnan(val_norm))
-            os << "!";
-          else if (sign == -1)
-            os << NEG_CHAR;
+          double val_norm = 0.;
+          if (log_)
+            val_norm = val <= 0. ? 0. : (std::log(val / max_val) - min_logval) / fabs(min_logval);
           else
-            os << CHARS[(size_t)ceil(val_norm * (strlen(CHARS) - 1))];
+            val_norm = val / max_val;
+          const short sign = val_norm / fabs(val_norm);
+          val_norm *= sign;
+          if (std::isnan(val_norm))
+            os << utils::colourise("!", (utils::Colour)kColours[0]);
+          else if (sign == -1)
+            os << utils::colourise(std::string(1, NEG_CHAR), (utils::Colour)kColours[0]);
+          else {
+            size_t ch_id = ceil(val_norm * (strlen(CHARS) - 1));
+            size_t col_id = 1 + (val_norm * (sizeof(kColours) / (sizeof(int)) - 2));
+            os << utils::colourise(std::string(1, CHARS[ch_id]),
+                                   (utils::Colour)kColours[col_id],
+                                   (val_norm > 0.75 ? utils::Modifier::bold : utils::Modifier::reset));
+          }
         }
         os << ":";
       }
@@ -103,7 +122,10 @@ namespace cepgen {
       os << "\n"
          << sep << ":" << std::string(y_axis.size(), '.') << ": "  // 2nd abscissa axis
          << ylabel_ << "\n\t"
-         << "(scale: \"" << std::string(CHARS) << "\")\n";
+         << "(scale: \"" << std::string(CHARS) << "\", ";
+      for (size_t i = 0; i < sizeof(kColours) / sizeof(kColours[0]); ++i)
+        os << utils::colourise("*", (utils::Colour)kColours[i]) << (i == 0 ? "|" : "");
+      os << ")\n";
     }
 
     Hist1D::Hist1D(size_t num_bins_x, const Limits& xrange) : underflow_(0ull), overflow_(0ull) {
