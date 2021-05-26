@@ -18,6 +18,7 @@ if(IS_LXPLUS)
   if(VDT)
     list(APPEND ROOT_LIBRARIES ${VDT})
   endif()
+  list(APPEND ROOT_INCLUDE_DIRS ${ROOT_INCLUDE_DIR})
 endif()
 #--- searching for Delphes
 find_library(DELPHES Delphes HINTS $ENV{DELPHES_DIR} PATH_SUFFIXES lib)

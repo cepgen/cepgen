@@ -40,7 +40,7 @@ namespace cepgen {
     /// Insert a new value in the grid
     void insert(coord_t coord, values_t value);
     /// Return the list of values handled in the grid
-    std::map<coord_t, values_t> values() const { return values_raw_; }
+    inline std::map<coord_t, values_t> values() const { return values_raw_; }
 
     /// Initialise the grid and all useful interpolators/accelerators
     void init();
@@ -81,10 +81,6 @@ namespace cepgen {
     /// Has the extrapolator been initialised?
     bool init_;
   };
-  template class GridHandler<1, 1>;
-  template class GridHandler<1, 2>;
-  template class GridHandler<2, 2>;
-  template class GridHandler<3, 1>;
 }  // namespace cepgen
 
 #endif

@@ -10,6 +10,7 @@ namespace cepgen {
   public:
     /// Build a module from its steering parameters
     explicit NamedModule(const ParametersList& params) : params_(params), name_(params.name<T>()) {}
+    virtual ~NamedModule() = default;
 
     /// Module unique name
     const T& name() const { return name_; }

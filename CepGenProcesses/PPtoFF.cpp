@@ -99,7 +99,7 @@ namespace cepgen {
           prefactor_ *= 4. * M_PI;
           break;
         case PDG::photon:
-          prefactor_ *= pow(constants::G_EM * qf3_, 2) / 9.;
+          prefactor_ *= constants::G_EM_SQ * pow(qf3_, 2) / 9.;
           break;
         default:
           throw CG_FATAL("PPtoFF:prepare") << "Only photon & gluon partons are supported!";
@@ -110,7 +110,7 @@ namespace cepgen {
           prefactor_ *= 4. * M_PI;
           break;
         case PDG::photon:
-          prefactor_ *= pow(constants::G_EM * qf3_, 2) / 9.;
+          prefactor_ *= constants::G_EM_SQ * pow(qf3_, 2) / 9.;
           break;
         default:
           throw CG_FATAL("PPtoFF:prepare") << "Only photon & gluon partons are supported!";

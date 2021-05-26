@@ -223,6 +223,8 @@ namespace cepgen {
                                   << "Will use a simple bilinear approximation instead.";
 #endif
       } break;
+      default:
+        break;
     }
     init_ = true;
     CG_DEBUG("GridHandler") << "Grid evaluator initialised with boundaries: " << boundaries() << "\n"
@@ -302,4 +304,9 @@ namespace cepgen {
       out[i] += rhs[i];
     return out;
   }
+
+  template class GridHandler<1, 1>;
+  template class GridHandler<1, 2>;
+  template class GridHandler<2, 2>;
+  template class GridHandler<3, 1>;
 }  // namespace cepgen

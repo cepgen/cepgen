@@ -1,5 +1,5 @@
 set(CPACK_RPM_COMPONENT_INSTALL ON)
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(CepGen)
 set(PROJECT_VERSION 1)
 set(VERSION 1.0.alpha2)

@@ -17,7 +17,7 @@ namespace cepgen {
         type_(rhs.type_),
         error_num_(rhs.error_num_) {}
 
-  LoggedException::~LoggedException() {
+  LoggedException::~LoggedException() noexcept {
     if (type_ != Type::undefined)
       dump();
     // we stop this process' execution on fatal exception

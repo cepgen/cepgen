@@ -13,7 +13,7 @@ namespace cepgen {
     public:
       /// Build a configuration from an external steering card
       explicit Handler(const ParametersList&);
-      ~Handler() = default;
+      virtual ~Handler() = default;
 
       /// Get the list of runtime parameters parsed
       Parameters* parameters() { return params_; }

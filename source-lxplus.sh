@@ -2,7 +2,8 @@
 
 #--- proper gcc/gfortran version
 export CVMFS_DIR=/cvmfs/sft.cern.ch/lcg/releases
-source ${CVMFS_DIR}/gcc/6.2.0/x86_64-centos7/setup.sh
+source ${CVMFS_DIR}/clang/9.0.0-a1c77/x86_64-centos7-gcc9-opt/setup.sh
+export PATH=${CVMFS_DIR}/CMake/3.8.2-ece19/x86_64-centos7-gcc8-opt/bin:${PATH}
 #--- Delphes linking
 source ${CVMFS_DIR}/ROOT/6.18.04-b1762/x86_64-centos7-gcc62-opt/bin/thisroot.sh
 export DELPHES_DIR=${CVMFS_DIR}/delphes/3.4.2-7776a/x86_64-centos7-gcc62-opt

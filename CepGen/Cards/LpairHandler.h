@@ -33,7 +33,7 @@ namespace cepgen {
       };
       /// Register a parameter to be steered to a configuration variable
       template <typename T>
-      void registerParameter(const std::string& key, const std::string& description, T* def) {}
+      void registerParameter(const std::string& /*key*/, const std::string& /*description*/, T* /*def*/) {}
       template <typename T>
       void registerProcessParameter(const std::string& key,
                                     const std::string& description,
@@ -55,10 +55,10 @@ namespace cepgen {
       }
       /// Set a parameter value
       template <typename T>
-      void setValue(const std::string& key, const T& value) {}
+      void setValue(const std::string& /*key*/, const T& /*value*/) {}
       /// Retrieve a parameter value
       template <typename T>
-      T getValue(const std::string& key) const {}
+      T getValue(const std::string& /*key*/) const {}
 
       void setParameter(const std::string& key, const std::string& value);
       std::string parameter(std::string key) const;

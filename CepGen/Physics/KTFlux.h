@@ -8,7 +8,7 @@ namespace cepgen {
   namespace formfac {
     class Parameterisation;
   }
-  class HeavyIon;
+  struct HeavyIon;
   /// Collection of fundamental constants for \f$k_{\rm T}\f$ fluxes definition
   struct KTFluxParameters {
     static const double kMinKTFlux;  ///< Minimal value taken for a \f$\k_{\rm T}\f$-factorised flux
