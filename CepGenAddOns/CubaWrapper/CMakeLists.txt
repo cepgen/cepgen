@@ -8,7 +8,7 @@ endif()
 
 #----- build the object
 
-cepgen_build(CepGenCuba SOURCES IntegratorCuba.cpp
+cepgen_build(CepGenCuba SOURCES IntegratorCuba*.cpp
     EXT_LIBS ${CUBA}
     EXT_HEADERS ${CUBA_INCLUDE}
     INSTALL_COMPONENT cuba)
