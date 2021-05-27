@@ -14,7 +14,7 @@ int main() {
     graph1d.addPoint(x, sin(x));
   graph1d.draw(cout);
 
-  cout << "---------- 2D graph ----------" << endl;
+  cout << endl << "---------- 2D graph ----------" << endl;
 
   // test 2D graph
   cepgen::utils::Graph2D graph2d;
@@ -26,18 +26,18 @@ int main() {
 
   default_random_engine gen;
 
-  cout << "-------- 1D histogram --------" << endl;
+  cout << endl << "-------- 1D histogram --------" << endl;
 
   // test 1D histogram
   cepgen::utils::Hist1D hist1d(20, {-5., 5.});
-  normal_distribution<double> gaus(0., 1.);
-  for (size_t i = 0; i < 1000; ++i)
-    hist1d.fill(gaus(gen));
+  cauchy_distribution<double> bw(0., 1.);
+  for (size_t i = 0; i < 10000; ++i)
+    hist1d.fill(bw(gen));
   hist1d.setXlabel("Random variable");
   hist1d.setYlabel("Occurrences");
   hist1d.draw(cout);
 
-  cout << "-------- 2D histogram --------" << endl;
+  cout << endl << "-------- 2D histogram --------" << endl;
 
   // test 2d histogram
   cepgen::utils::Hist2D hist2d(20, {-5., 5.}, 50, {-5., 5.});

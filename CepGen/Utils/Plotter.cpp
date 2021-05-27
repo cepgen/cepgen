@@ -52,7 +52,8 @@ namespace cepgen {
         os << "\n"
            << (coord_set.first.label.empty() ? utils::format("%17g", coord_set.first.value) : coord_set.first.label)
            << ":" << (ival > ierr ? std::string(ival - ierr, ' ') : "") << (ierr > 0 ? std::string(ierr, ERR_CHAR) : "")
-           << CHAR << (ierr > 0 ? std::string(std::min(width_ - ival - 1, ierr), ERR_CHAR) : "")
+           << utils::boldify(std::string(1, CHAR))
+           << (ierr > 0 ? std::string(std::min(width_ - ival - 1, ierr), ERR_CHAR) : "")
            << (ival + ierr < width_ + 1 ? std::string(width_ - ival - ierr - 1, ' ') : "") << ": "
            << utils::format("%6.2e +/- %6.2e", val, unc);
       }
@@ -74,10 +75,15 @@ namespace cepgen {
         os << sep << std::string(std::max(0., 2. + width_ - ylabel_.size()), ' ') << ylabel_ << "\n";
       // find the maximum element of the graph
       double max_val = Limits::INVALID;
-      const double min_logval = -5.;
-      for (const auto& xval : axes)
+      double min_logval = -3.;
+      for (const auto& xval : axes) {
         max_val =
             std::max(max_val, std::max_element(xval.second.begin(), xval.second.end(), map_elements())->second.value);
+        if (log_)
+          for (const auto& yval : xval.second)
+            if (yval.second.value > 0.)
+              min_logval = std::min(min_logval, std::log(yval.second.value / max_val));
+      }
       const auto& y_axis = axes.begin()->second;
       os << sep << utils::format("%-5.2f", y_axis.begin()->first.value) << std::string(axes.size() - 11, ' ')
          << utils::format("%5.2e", y_axis.rbegin()->first.value) << "\n"
@@ -88,14 +94,16 @@ namespace cepgen {
           const double val = yval.second.value;
           double val_norm = 0.;
           if (log_)
-            val_norm = val <= 0. ? 0. : (std::log(val / max_val) - min_logval) / fabs(min_logval);
+            val_norm = val <= 0. ? 0. : std::max(0., (std::log(val / max_val) - min_logval) / fabs(min_logval));
           else
             val_norm = val / max_val;
-          const short sign = val_norm / fabs(val_norm);
-          val_norm *= sign;
-          if (std::isnan(val_norm))
+          if (std::isnan(val_norm)) {
             os << utils::colourise("!", (utils::Colour)kColours[0]);
-          else if (sign == -1)
+            continue;
+          }
+          const short sign = (val_norm == 0. ? 0 : val_norm / fabs(val_norm));
+          val_norm *= sign;
+          if (sign == -1)
             os << utils::colourise(std::string(1, NEG_CHAR), (utils::Colour)kColours[0]);
           else {
             size_t ch_id = ceil(val_norm * (strlen(CHARS) - 1));
