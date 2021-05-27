@@ -368,6 +368,22 @@ namespace cepgen {
     double Hist2D::maximum() const { return gsl_histogram2d_max_val(hist_.get()); }
     double Hist2D::integral() const { return gsl_histogram2d_sum(hist_.get()); }
 
+    std::string Hist2D::contents_t::summary() const {
+      return utils::format(
+          "%10zu | %10zu | %10zu\n"
+          "%10zu | %10s | %10zu\n"
+          "%10zu | %10zu | %10zu",
+          LT_LT,
+          LT_IN,
+          LT_GT,
+          IN_LT,
+          "-",
+          IN_GT,
+          GT_LT,
+          GT_IN,
+          GT_GT);
+    }
+
     void Hist2D::draw(std::ostream& os) const {
       if (!name_.empty())
         os << "plot of \"" << name_ << "\"\n";
@@ -394,6 +410,8 @@ namespace cepgen {
          << "mean=" << meanY() << ","
          << "st.dev.=" << rmsY() << ",\n\t"
          << " integral=" << integral();
+      if (values_.total() > 0)
+        os << ", outside range (in/overflow):\n" << values_.summary();
     }
 
     void Graph1D::addPoint(double x, double y) { values_[coord_t{x}] = value_t{y}; }

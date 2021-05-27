@@ -164,6 +164,8 @@ namespace cepgen {
       typedef std::unique_ptr<gsl_histogram2d, gsl_histogram2d_deleter> gsl_histogram2d_ptr;
       gsl_histogram2d_ptr hist_, hist_w2_;
       struct contents_t {
+        inline size_t total() const { return LT_GT + IN_GT + GT_GT + LT_IN + GT_IN + LT_LT + IN_LT + GT_LT; }
+        std::string summary() const;
         size_t LT_GT = 0ull, IN_GT = 0ull, GT_GT = 0ull;
         size_t LT_IN = 0ull, /* INSIDE  */ GT_IN = 0ull;
         size_t LT_LT = 0ull, IN_LT = 0ull, GT_LT = 0ull;
