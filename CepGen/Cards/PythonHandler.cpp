@@ -82,7 +82,7 @@ namespace cepgen {
 
       PyObject* cfg = PyImport_ImportModule(filename.c_str());  // new
       if (!cfg)
-        throwPythonError("Failed to import the configuration card '" + file + "'\n (parsed as '" + filename + "')");
+        throwPythonError("Failed to import the configuration card '" + filename + "'\n (parsed from '" + file + "')");
 
       //--- additional libraries to load
       if (PyObject_HasAttrString(cfg, ADDONS_NAME) == 1) {
@@ -122,45 +122,44 @@ namespace cepgen {
       }
 
       //--- process definition
-      PyObject* process = nullptr;
-      if (PyObject_HasAttrString(cfg, PROCESS_NAME) != 1 ||
-          !(process = PyObject_GetAttrString(cfg, PROCESS_NAME)))  // new
+      if (PyObject_HasAttrString(cfg, PROCESS_NAME)) {
+        PyObject* process = PyObject_GetAttrString(cfg, PROCESS_NAME);  // new
+        //--- list of process-specific parameters
+        ParametersList proc_params;
+        fillParameter(process, "processParameters", proc_params);
+
+        //--- type of process to consider
+        PyObject* pproc_name = element(process, ParametersList::MODULE_NAME);  // borrowed
+        if (!pproc_name)
+          throwPythonError("Failed to extract the process name from the configuration card '" + file + "'!");
+
+        //--- process mode
+        params_->setProcess(proc::ProcessesFactory::get().build(get<std::string>(pproc_name), proc_params));
+
+        //--- process kinematics
+        ParametersList pkin;
+        PyObject* pin_kinematics = element(process, "inKinematics");  // borrowed
+        if (pin_kinematics)
+          pkin += get<ParametersList>(pin_kinematics);
+
+        PyObject* pout_kinematics = element(process, "outKinematics");  // borrowed
+        if (pout_kinematics)
+          pkin += get<ParametersList>(pout_kinematics);
+
+        params_->kinematics = Kinematics(pkin);
+        if (proc_params.has<int>("mode"))
+          params_->kinematics.incoming_beams.setMode((mode::Kinematics)proc_params.get<int>("mode"));
+
+        //--- taming functions
+        PyObject* ptam = element(process, "tamingFunctions");  // borrowed
+        if (ptam)
+          for (const auto& p : getVector<ParametersList>(ptam))
+            params_->addTamingFunction(utils::FunctionalFactory::get().build("ROOT", p));
+
+        Py_CLEAR(process);
+      } /*else
         throwPythonError("Failed to extract a '" + std::string(PROCESS_NAME) +
-                         "' keyword from the configuration card '" + file + "'!");
-
-      //--- list of process-specific parameters
-      ParametersList proc_params;
-      fillParameter(process, "processParameters", proc_params);
-
-      //--- type of process to consider
-      PyObject* pproc_name = element(process, ParametersList::MODULE_NAME);  // borrowed
-      if (!pproc_name)
-        throwPythonError("Failed to extract the process name from the configuration card '" + file + "'!");
-
-      //--- process mode
-      params_->setProcess(proc::ProcessesFactory::get().build(get<std::string>(pproc_name), proc_params));
-
-      //--- process kinematics
-      ParametersList pkin;
-      PyObject* pin_kinematics = element(process, "inKinematics");  // borrowed
-      if (pin_kinematics)
-        pkin += get<ParametersList>(pin_kinematics);
-
-      PyObject* pout_kinematics = element(process, "outKinematics");  // borrowed
-      if (pout_kinematics)
-        pkin += get<ParametersList>(pout_kinematics);
-
-      params_->kinematics = Kinematics(pkin);
-      if (proc_params.has<int>("mode"))
-        params_->kinematics.incoming_beams.setMode((mode::Kinematics)proc_params.get<int>("mode"));
-
-      //--- taming functions
-      PyObject* ptam = element(process, "tamingFunctions");  // borrowed
-      if (ptam)
-        for (const auto& p : getVector<ParametersList>(ptam))
-          params_->addTamingFunction(utils::FunctionalFactory::get().build("ROOT", p));
-
-      Py_CLEAR(process);
+                         "' keyword from the configuration card '" + file + "'!");*/
 
       if (PyObject_HasAttrString(cfg, LOGGER_NAME) == 1) {
         PyObject* plog = PyObject_GetAttrString(cfg, LOGGER_NAME);  // new
