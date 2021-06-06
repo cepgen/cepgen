@@ -3,9 +3,7 @@
 
 #include "CepGen/Event/Event.h"
 
-#include <iosfwd>
 #include <memory>
-#include <functional>
 
 ////////////////////////////////////////////////////////////////////////////////
 

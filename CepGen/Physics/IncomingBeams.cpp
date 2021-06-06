@@ -98,8 +98,7 @@ namespace cepgen {
       form_factors_ =
           formfac::FormFactorsFactory::get().build(params.get<std::string>("formFactors", "StandardDipole"));
 
-    if (params.get<int>("mode", (int)mode::Kinematics::invalid) != (int)mode::Kinematics::invalid)
-      setMode((mode::Kinematics)params.get<int>("mode"));
+    setMode((mode::Kinematics)params.get<int>("mode", (int)mode::Kinematics::ElasticElastic));
     //--- structure functions
     auto strfun = params.get<ParametersList>("structureFunctions");
     if (!strfun.empty() || !str_fun_) {
@@ -179,16 +178,22 @@ namespace cepgen {
     switch (positive().mode) {
       case mode::Beam::PointLikeFermion:
       case mode::Beam::ProtonElastic: {
-        if (negative().mode == mode::Beam::ProtonElastic || negative().mode == mode::Beam::PointLikeFermion)
-          return mode::Kinematics::ElasticElastic;
-        else
-          return mode::Kinematics::ElasticInelastic;
+        switch (negative().mode) {
+          case mode::Beam::ProtonElastic:
+          case mode::Beam::PointLikeFermion:
+            return mode::Kinematics::ElasticElastic;
+          default:
+            return mode::Kinematics::ElasticInelastic;
+        }
       }
       case mode::Beam::ProtonInelastic: {
-        if (negative().mode == mode::Beam::ProtonElastic)
-          return mode::Kinematics::InelasticElastic;
-        else
-          return mode::Kinematics::InelasticInelastic;
+        switch (negative().mode) {
+          case mode::Beam::ProtonElastic:
+          case mode::Beam::PointLikeFermion:
+            return mode::Kinematics::InelasticElastic;
+          default:
+            return mode::Kinematics::InelasticInelastic;
+        }
       }
       default:
         throw CG_FATAL("Kinematics:IncomingBeams:mode") << "Unsupported kinematics mode for beams with modes:\n\t"

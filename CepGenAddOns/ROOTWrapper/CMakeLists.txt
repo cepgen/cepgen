@@ -53,5 +53,5 @@ cepgen_build(CepGenRoot SOURCES ${sources}
     INSTALL_COMPONENT root)
 
 message(STATUS "Formulas parsing will use ROOT found in ${ROOT_INCLUDE_DIRS}")
-set(CEPGEN_HAS_FUNCTIONALS ON PARENT_SCOPE)
+set(CEPGEN_HAS_FUNCTIONAL ON PARENT_SCOPE)
 
