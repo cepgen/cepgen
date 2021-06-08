@@ -7,14 +7,15 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Processes/Process.h"
 
-#include "CepGen/Utils/String.h"
-
 namespace cepgen {
   Integrator::Integrator(const ParametersList& params)
       : NamedModule(params),
         seed_(params.get<int>("seed", time(nullptr))),
         verbosity_(params.get<int>("verbose", 1)),
-        initialised_(false) {}
+        result_(0.),
+        err_result_(0.),
+        initialised_(false),
+        rnd_(0., 1.) {}
 
   void Integrator::setIntegrand(Integrand& integr) {
     integrand_ = &integr;
@@ -40,5 +41,5 @@ namespace cepgen {
     return integrand_->eval(x);
   }
 
-  double Integrator::uniform() const { return rand() * 1. / RAND_MAX; }
+  double Integrator::uniform() const { return rnd_(rnd_gen_); }
 }  // namespace cepgen

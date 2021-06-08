@@ -12,7 +12,7 @@ namespace cepgen {
     explicit IntegratorPlain(const ParametersList& params);
     static std::string description() { return "Plain (trial/error) integrator"; }
 
-    void integrate(double&, double&) override;
+    void integrate(double& result, double& abserr) override;
 
   private:
     int ncvg_;
@@ -29,7 +29,7 @@ namespace cepgen {
     std::unique_ptr<gsl_monte_plain_state, void (*)(gsl_monte_plain_state*)> pln_state(
         gsl_monte_plain_alloc(function_->dim), gsl_monte_plain_free);
     int res = gsl_monte_plain_integrate(
-        function_.get(), &x_low[0], &x_up[0], function_->dim, ncvg_, rng_.get(), pln_state.get(), &result, &abserr);
+        function_.get(), &x_low[0], &x_up[0], function_->dim, ncvg_, gsl_rng_.get(), pln_state.get(), &result, &abserr);
 
     if (res != GSL_SUCCESS)
       throw CG_FATAL("Integrator:integrate") << "Error while performing the integration!\n\t"

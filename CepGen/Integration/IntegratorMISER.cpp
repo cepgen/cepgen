@@ -54,8 +54,15 @@ namespace cepgen {
     std::vector<double> x_low(function_->dim, 0.), x_up(function_->dim, 1.);
 
     //--- launch integration
-    int res = gsl_monte_miser_integrate(
-        function_.get(), &x_low[0], &x_up[0], function_->dim, ncvg_, rng_.get(), miser_state_.get(), &result, &abserr);
+    int res = gsl_monte_miser_integrate(function_.get(),
+                                        &x_low[0],
+                                        &x_up[0],
+                                        function_->dim,
+                                        ncvg_,
+                                        gsl_rng_.get(),
+                                        miser_state_.get(),
+                                        &result,
+                                        &abserr);
 
     if (res != GSL_SUCCESS)
       throw CG_FATAL("Integrator:integrate") << "Error while performing the integration!\n\t"

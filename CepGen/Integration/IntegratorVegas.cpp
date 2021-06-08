@@ -9,13 +9,12 @@
 
 #include <gsl/gsl_monte_vegas.h>
 
-#define COORD(s, i, j) ((s)->xi[(i) * (s)->dim + (j)])
-
 namespace cepgen {
   /// Vegas integration algorithm developed by P. Lepage, as documented in \cite Lepage:1977sw
   class IntegratorVegas : public IntegratorGSL {
   public:
-    IntegratorVegas(const ParametersList&);
+    explicit IntegratorVegas(const ParametersList&);
+
     static std::string description() { return "Vegas stratified sampling integrator"; }
 
     void integrate(double&, double&) override;
@@ -24,22 +23,26 @@ namespace cepgen {
 
   private:
     void warmup(std::vector<double>&, std::vector<double>&, unsigned int);
+
     double eval(const std::vector<double>&) const override;
 
     const int ncvg_;
     const double chisq_cut_;
     const bool treat_;  ///< Is the integrand to be smoothed for events generation?
     gsl_monte_vegas_params vegas_params_;
+
     /// A trivial deleter for the Vegas integrator
     struct gsl_monte_vegas_deleter {
       inline void operator()(gsl_monte_vegas_state* state) { gsl_monte_vegas_free(state); }
     };
+
     /// A Vegas integrator state for integration (optional) and/or
     /// "treated" event generation
     std::unique_ptr<gsl_monte_vegas_state, gsl_monte_vegas_deleter> vegas_state_;
     mutable unsigned long long r_boxes_;
     mutable std::vector<double> x_new_;
   };
+
   std::ostream& operator<<(std::ostream&, const IntegratorVegas::Mode&);
 
   IntegratorVegas::IntegratorVegas(const ParametersList& params)
@@ -47,7 +50,7 @@ namespace cepgen {
         ncvg_(params.get<int>("numFunctionCalls", 50000)),
         chisq_cut_(params.get<double>("chiSqCut", 1.5)),
         treat_(params.get<bool>("treat", true)),
-        r_boxes_(0ull) {
+        r_boxes_(0) {
     verbosity_ = params.get<int>("verbose", -1);  // supersede the parent default verbosity level
   }
 
@@ -99,7 +102,7 @@ namespace cepgen {
                                           &x_up[0],
                                           function_->dim,
                                           0.2 * ncvg_,
-                                          rng_.get(),
+                                          gsl_rng_.get(),
                                           vegas_state_.get(),
                                           &result,
                                           &abserr);
@@ -130,8 +133,15 @@ namespace cepgen {
 
     // perform a first integration to warm up the grid
     double result = 0., abserr = 0.;
-    int res = gsl_monte_vegas_integrate(
-        function_.get(), &x_low[0], &x_up[0], function_->dim, ncall, rng_.get(), vegas_state_.get(), &result, &abserr);
+    int res = gsl_monte_vegas_integrate(function_.get(),
+                                        &x_low[0],
+                                        &x_up[0],
+                                        function_->dim,
+                                        ncall,
+                                        gsl_rng_.get(),
+                                        vegas_state_.get(),
+                                        &result,
+                                        &abserr);
 
     // ensure the operation was successful
     if (res != GSL_SUCCESS)
@@ -148,20 +158,21 @@ namespace cepgen {
     if (!treat_)
       return integrand_->eval(x);
     //--- treatment of the integration grid
-    if (r_boxes_ == 0ull) {
-      r_boxes_ = std::pow(vegas_state_->bins, integrand_->size());
+    if (r_boxes_ == 0) {
+      r_boxes_ = (size_t)std::pow(vegas_state_->bins, integrand_->size());
       x_new_.resize(integrand_->size());
     }
+    auto COORD = [](gsl_monte_vegas_state* s, size_t i, size_t j) { return s->xi[i * s->dim + j]; };
     double w = r_boxes_;
     for (size_t j = 0; j < integrand_->size(); ++j) {
       //--- find surrounding coordinates and interpolate
       const double z = x.at(j) * vegas_state_->bins;
-      const unsigned int id = z;      // coordinate of point before
+      const auto id = (size_t)z;      // coordinate of point before
       const double rel_pos = z - id;  // position between coordinates (norm.)
-      const double bin_width =
-          (id == 0) ? COORD(vegas_state_, 1, j) : COORD(vegas_state_, id + 1, j) - COORD(vegas_state_, id, j);
+      const double bin_width = (id == 0) ? COORD(vegas_state_.get(), 1, j)
+                                         : COORD(vegas_state_.get(), id + 1, j) - COORD(vegas_state_.get(), id, j);
       //--- build new coordinate from linear interpolation
-      x_new_[j] = COORD(vegas_state_, id + 1, j) - bin_width * (1. - rel_pos);
+      x_new_[j] = COORD(vegas_state_.get(), id + 1, j) - bin_width * (1. - rel_pos);
       w *= bin_width;
     }
     return w * integrand_->eval(x_new_);

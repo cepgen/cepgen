@@ -16,7 +16,7 @@ namespace cepgen {
         f_max_global_(0.) {
     //--- build and populate the grid
     coord_t coord(ndim, 0);
-    for (size_t i = 0; i < pow(M_BIN, ndim_); ++i) {
+    for (size_t i = 0; i < (size_t)pow(M_BIN, ndim_); ++i) {
       size_t jj = i;
       for (size_t j = 0; j < ndim; ++j) {
         size_t tmp = jj * INV_M_BIN;

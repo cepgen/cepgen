@@ -11,7 +11,7 @@
     struct BUILDERNM(obj) {                                                    \
       BUILDERNM(obj)() { IntegratorFactory::get().registerModule<obj>(name); } \
     };                                                                         \
-    static BUILDERNM(obj) gIntegr##obj;                                        \
+    static const BUILDERNM(obj) gIntegr##obj;                                  \
   }
 
 namespace cepgen {

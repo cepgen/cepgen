@@ -75,8 +75,8 @@ namespace cepgen {
       return 0.;
 
     //--- set the CepGen part of the event generation
-    if (event_ && storage_)
-      event_->time_generation = tmr_->elapsed();
+    if (storage_)
+      event_->time_generation = (float)tmr_->elapsed();
 
     //--- trigger all event modification algorithms
     if (!params_->eventModifiersSequence().empty()) {
@@ -120,9 +120,9 @@ namespace cepgen {
       }
 
     //--- store the last event in parameters block for a later usage
-    if (event_ && storage_) {
-      event_->weight = weight;
-      event_->time_total = tmr_->elapsed();
+    if (storage_) {
+      event_->weight = (float)weight;
+      event_->time_total = (float)tmr_->elapsed();
 
       CG_DEBUG_LOOP("Integrand") << "[process " << std::hex << (void*)process_.get() << std::dec << "]\n\t"
                                  << "Generation time: " << event_->time_generation * 1.e3 << " ms\n\t"

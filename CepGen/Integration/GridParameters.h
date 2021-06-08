@@ -10,7 +10,7 @@ namespace cepgen {
   class GridParameters {
   public:
     /// Build a generation grid for a ndim-dimensional phase space
-    GridParameters(size_t ndim);
+    explicit GridParameters(size_t ndim);
 
     /// Coordinates definition
     typedef std::vector<unsigned short> coord_t;

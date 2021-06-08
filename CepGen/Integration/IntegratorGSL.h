@@ -12,7 +12,7 @@
 namespace cepgen {
   class IntegratorGSL : public Integrator {
   public:
-    IntegratorGSL(const ParametersList&);
+    explicit IntegratorGSL(const ParametersList&);
     double uniform() const override;
     void setIntegrand(Integrand& integr) override;
 
@@ -28,7 +28,7 @@ namespace cepgen {
       inline void operator()(gsl_rng* rng) { gsl_rng_free(rng); }
     };
     /// Instance of random number generator service
-    std::unique_ptr<gsl_rng, gsl_rng_deleter> rng_;
+    std::unique_ptr<gsl_rng, gsl_rng_deleter> gsl_rng_;
 
   private:
     /**
