@@ -12,7 +12,7 @@
       struct BUILDERNM(obj) {                                                       \
         BUILDERNM(obj)() { EventModifierFactory::get().registerModule<obj>(name); } \
       };                                                                            \
-      static BUILDERNM(obj) gEveMod##obj;                                           \
+      static const BUILDERNM(obj) gEveMod##obj;                                     \
     }                                                                               \
   }
 

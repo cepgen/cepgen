@@ -22,7 +22,7 @@ namespace cepgen {
       /// Retrieve a named variable from a particle
       double variable(const Event&, const Particle&, const std::string&) const;
       /// Retrieve a named variable from the whole event
-      double variable(const Event&, const std::string&) const;
+      static double variable(const Event&, const std::string&);
 
       static const std::regex rgx_select_id_, rgx_select_role_;
       static constexpr double INVALID_OUTPUT = -999.;
@@ -36,7 +36,7 @@ namespace cepgen {
                                                                          {"pa2", Particle::Role::Parton2},
                                                                          {"cs", Particle::Role::CentralSystem},
                                                                          {"int", Particle::Role::Intermediate}};
-      typedef double (Momentum::*pMethod)(void) const;
+      typedef double (Momentum::*pMethod)() const;
       /// Mapping of string variables to momentum getter methods
       const std::unordered_map<std::string, pMethod> m_mom_str_ = {{"px", &Momentum::px},
                                                                    {"py", &Momentum::py},

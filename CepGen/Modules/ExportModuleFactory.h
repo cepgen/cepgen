@@ -12,7 +12,7 @@
       struct BUILDERNM(obj) {                                                      \
         BUILDERNM(obj)() { ExportModuleFactory::get().registerModule<obj>(name); } \
       };                                                                           \
-      static BUILDERNM(obj) gIO##obj;                                              \
+      static const BUILDERNM(obj) gIO##obj;                                        \
     }                                                                              \
   }
 

@@ -12,15 +12,6 @@ namespace cepgen {
   Event::Event(bool compressed)
       : num_hadronisation_trials(0), time_generation(-1.), time_total(-1.), weight(0.), compressed_(compressed) {}
 
-  Event::Event(const Event& rhs)
-      : num_hadronisation_trials(rhs.num_hadronisation_trials),
-        time_generation(rhs.time_generation),
-        time_total(rhs.time_total),
-        weight(rhs.weight),
-        particles_(rhs.particles_),
-        evtcontent_(rhs.evtcontent_),
-        compressed_(rhs.compressed_) {}
-
   void Event::clear() {
     particles_.clear();
     time_generation = -1.;
@@ -54,7 +45,7 @@ namespace cepgen {
     if (compressed_)
       return *this;
     Event out(/*compressed=*/true);
-    size_t i = 0;
+    int i = 0;
     //--- add all necessary particles
     for (const auto& role : {Particle::IncomingBeam1,
                              Particle::IncomingBeam2,
@@ -218,7 +209,7 @@ namespace cepgen {
     return out;
   }
 
-  const Particles Event::particles() const {
+  Particles Event::particles() const {
     Particles out;
     for (const auto& role_part : particles_)
       out.insert(out.end(), role_part.second.begin(), role_part.second.end());
@@ -227,7 +218,7 @@ namespace cepgen {
     return out;
   }
 
-  const Particles Event::stableParticles() const {
+  Particles Event::stableParticles() const {
     Particles out;
     for (const auto& role_part : particles_)
       for (const auto& part : role_part.second)
@@ -278,7 +269,7 @@ namespace cepgen {
         if (part.pdgId() == PDG::invalid && !mothers.empty()) {
           //--- if particles compound
           std::string delim;
-          for (unsigned short i = 0; i < mothers.size(); ++i)
+          for (size_t i = 0; i < mothers.size(); ++i)
             try {
               oss_pdg << delim << PDG::get().name(ev[*std::next(mothers.begin(), i)].pdgId()), delim = "/";
             } catch (const Exception&) {

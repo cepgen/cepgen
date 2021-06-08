@@ -63,7 +63,7 @@ namespace cepgen {
     Particle(Role role, pdgid_t id, Status st = Status::Undefined);
     /// Copy constructor
     Particle(const Particle&);
-    inline ~Particle() {}
+    inline ~Particle() = default;
     Particle& operator=(const Particle&) = default;  ///< Assignment operator
     /// Comparison operator (from unique identifier)
     bool operator<(const Particle& rhs) const;

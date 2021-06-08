@@ -57,7 +57,7 @@ namespace cepgen {
       throw CG_ERROR("EventBrowser") << "Failed to retrieve variable \"" << var << "\".";
     }
 
-    double EventBrowser::variable(const Event& ev, const std::string& var) const {
+    double EventBrowser::variable(const Event& ev, const std::string& var) {
       if (var == "np")
         return (double)ev.size();
       //if ( var == "nev" )
