@@ -81,9 +81,9 @@ namespace cepgen {
     class Generation {
     public:
       /// Build a generation parameters collection from a user input
-      Generation(const ParametersList&);
+      explicit Generation(const ParametersList&);
       /// Copy constructor
-      Generation(const Generation&);
+      explicit Generation(const Generation&);
       /// Assignment operator
       Generation& operator=(const Generation&) = default;
 

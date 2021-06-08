@@ -72,10 +72,10 @@ namespace cepgen {
   public:
     /// Core of the Monte Carlo integrator and events generator
     /// \param[in] safe_mode Load the generator without external libraries?
-    Generator(bool safe_mode = false);
+    explicit Generator(bool safe_mode = false);
     /// Core of the Monte Carlo integrator and events generator
     /// \param[in] ip List of input parameters defining the phase space on which to perform the integration
-    Generator(Parameters* ip);
+    explicit Generator(Parameters* ip);
     ~Generator();
 
     /// Pointer to the parameters block

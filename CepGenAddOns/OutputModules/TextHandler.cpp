@@ -31,7 +31,6 @@ namespace cepgen {
       void operator<<(const Event&) override;
 
     private:
-      static constexpr size_t PLOT_WIDTH = 50;
       std::ofstream file_, hist_file_;
       std::string hist_filename_;
       //--- variables definition
