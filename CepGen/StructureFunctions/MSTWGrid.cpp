@@ -16,7 +16,7 @@ namespace mstw {
   class Grid : public cepgen::strfun::Parameterisation, private cepgen::GridHandler<2, 2> {
   public:
     /// Grid MSTW structure functions evaluator
-    Grid(const cepgen::ParametersList& params = cepgen::ParametersList());
+    explicit Grid(const cepgen::ParametersList& params = cepgen::ParametersList());
     static std::string description() { return "MSTW(grid)"; }
 
     /// Grid header information as parsed from the file
@@ -59,7 +59,7 @@ namespace mstw {
   private:
     static const unsigned int GOOD_MAGIC;
 
-    header_t header_;
+    header_t header_ = {};
   };
 
   const unsigned int Grid::GOOD_MAGIC = 0x5754534d;  // MSTW in ASCII
@@ -93,7 +93,7 @@ namespace mstw {
 
       // retrieve all points and evaluate grid boundaries
 
-      sfval_t val;
+      sfval_t val{};
       while (file.read(reinterpret_cast<char*>(&val), sizeof(sfval_t)))
         insert({val.xbj, val.q2}, {val.f2, val.fl});
       file.close();

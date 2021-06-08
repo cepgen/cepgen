@@ -15,6 +15,13 @@ namespace cepgen {
     ///\f${\cal W}_{1,2}\f$ structure functions parameterisation by Fiore et al \cite Fiore:2002re and Brasse et al \cite Brasse:1976bf
     class FioreBrasse : public Parameterisation {
     public:
+      /// Fiore \cite Fiore:2002re and Brasse \cite Brasse:1976bf proton structure functions
+      explicit FioreBrasse(const ParametersList& params = ParametersList());
+      static std::string description() { return "Fiore-Brasse F2 parameterisation of low-mass resonances"; }
+
+      FioreBrasse& eval(double xbj, double q2) override;
+
+    private:
       /// General parameters for this modelling
       struct Parameters {
         static Parameters standard();
@@ -26,20 +33,12 @@ namespace cepgen {
         };
         /// All resonances considered in this modelling
         std::vector<Resonance> resonances;
-        double s0, norm;
-      };
-      /// Fiore \cite Fiore:2002re and Brasse \cite Brasse:1976bf proton structure functions
-      explicit FioreBrasse(const ParametersList& params = ParametersList());
-      static std::string description() { return "Fiore-Brasse F2 parameterisation of low-mass resonances"; }
-
-      FioreBrasse& eval(double xbj, double q2) override;
-
-    private:
-      Parameters params_;
+        double s0 = {0.}, norm = {0.};
+      } fb_params_;
     };
 
     FioreBrasse::Parameters FioreBrasse::Parameters::standard() {
-      Parameters p;
+      Parameters p{};
       p.s0 = 1.14;
       p.norm = 0.021;
       p.resonances.emplace_back(Resonance{-0.8377, 0.95, 0.1473, 1.0, 2.4617, 3. / 2.});    // N*(1520)
@@ -49,7 +48,7 @@ namespace cepgen {
       return p;
     }
     FioreBrasse::Parameters FioreBrasse::Parameters::alternative() {
-      Parameters p;
+      Parameters p{};
       p.s0 = 1.2871;
       p.norm = 0.0207;
       p.resonances.emplace_back(Resonance{-0.8070, 0.9632, 0.1387, 1.0, 2.6066, 3. / 2.});     // N*(1520)
@@ -62,9 +61,9 @@ namespace cepgen {
     FioreBrasse::FioreBrasse(const ParametersList& params) : Parameterisation(params) {
       const auto& model = params.get<std::string>("model", "standard");
       if (model == "standard")
-        params_ = Parameters::standard();
+        fb_params_ = Parameters::standard();
       else if (model == "alternative")
-        params_ = Parameters::alternative();
+        fb_params_ = Parameters::alternative();
       else
         throw CG_FATAL("FioreBrasse") << "Invalid modelling selected: " << model << "!";
     }
@@ -74,25 +73,27 @@ namespace cepgen {
       const double prefactor = q2 * (1. - xbj) / (4. * M_PI * constants::ALPHA_EM * akin);
       const double s = utils::mX2(xbj, q2, mp2_);
 
-      double ampli_res = 0., ampli_bg = 0., ampli_tot = 0.;
+      double amplitude_res = 0.;
       for (unsigned short i = 0; i < 3; ++i) {  //FIXME 4??
-        const Parameters::Resonance& res = params_.resonances[i];
-        const double sqrts0 = sqrt(params_.s0);
+        const Parameters::Resonance& res = fb_params_.resonances[i];
+        const double sqrts0 = sqrt(fb_params_.s0);
 
         std::complex<double> alpha;
-        if (s > params_.s0)
+        if (s > fb_params_.s0)
           alpha = std::complex<double>(res.alpha0 + res.alpha2 * sqrts0 + res.alpha1 * s,
-                                       res.alpha2 * sqrt(s - params_.s0));
+                                       res.alpha2 * sqrt(s - fb_params_.s0));
         else
-          alpha = std::complex<double>(res.alpha0 + res.alpha1 * s + res.alpha2 * (sqrts0 - sqrt(params_.s0 - s)), 0.);
+          alpha =
+              std::complex<double>(res.alpha0 + res.alpha1 * s + res.alpha2 * (sqrts0 - sqrt(fb_params_.s0 - s)), 0.);
 
         double formfactor = 1. / pow(1. + q2 / res.q02, 2);
         double denom = pow(res.spin - std::real(alpha), 2) + pow(std::imag(alpha), 2);
         double ampli_imag = res.a * formfactor * formfactor * std::imag(alpha) / denom;
-        ampli_res += ampli_imag;
+        amplitude_res += ampli_imag;
       }
+      double amplitude_bg = 0.;
       {
-        const Parameters::Resonance& res = params_.resonances[3];
+        const Parameters::Resonance& res = fb_params_.resonances[3];
         double sE = res.alpha2, sqrtsE = sqrt(sE);
         std::complex<double> alpha;
         if (s > sE)
@@ -102,16 +103,16 @@ namespace cepgen {
         double formfactor = 1. / pow(1. + q2 / res.q02, 2);
         double sp = 1.5 * res.spin;
         double denom = pow(sp - std::real(alpha), 2) + pow(std::imag(alpha), 2);
-        ampli_bg = res.a * formfactor * formfactor * std::imag(alpha) / denom;
+        amplitude_bg = res.a * formfactor * formfactor * std::imag(alpha) / denom;
       }
-      ampli_tot = params_.norm * (ampli_res + ampli_bg);
+      const double amplitude_tot = fb_params_.norm * (amplitude_res + amplitude_bg);
 
       CG_DEBUG_LOOP("FioreBrasse:amplitudes") << "Amplitudes:\n\t"
-                                              << " resonance part:  " << ampli_res << ",\n\t"
-                                              << " background part: " << ampli_bg << ",\n\t"
-                                              << " total (with norm.): " << ampli_tot << ".";
+                                              << " resonance part:  " << amplitude_res << ",\n\t"
+                                              << " background part: " << amplitude_bg << ",\n\t"
+                                              << " total (with norm.): " << amplitude_tot << ".";
 
-      F2 = prefactor * ampli_tot;
+      F2 = prefactor * amplitude_tot;
       return *this;
     }
   }  // namespace strfun

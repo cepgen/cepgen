@@ -39,11 +39,11 @@ namespace cepgen {
     class Parameterisation : public NamedModule<int> {
     public:
       /// Standard SF parameterisation constructor
-      Parameterisation(double f2 = 0., double fl = 0.);
+      explicit Parameterisation(double f2 = 0., double fl = 0.);
       /// Copy constructor
       Parameterisation(const Parameterisation&);
       /// User-steered parameterisation object constructor
-      Parameterisation(const ParametersList&);
+      explicit Parameterisation(const ParametersList&);
       virtual ~Parameterisation() = default;
 
       /// Assign from another SF parameterisation object

@@ -33,15 +33,14 @@ namespace cepgen {
           short angular_momentum;
         };
 
-        enum { neutron = 0, proton = 1, deuteron = 2 } mode;  ///< Nucleon type
+        enum { neutron = 0, proton = 1, deuteron = 2 } mode = proton;  ///< Nucleon type
         // SLAC fit parameters
-        std::array<double, 7> c_slac;
+        std::array<double, 7> c_slac = {};
         // CLAS parameterisation
-        double alpha, beta, mu, mup;
-        std::array<double, 3> x;
-        std::array<double, 4> b;
+        double alpha = 0., beta = 0., mu = 0., mup = 0.;
+        std::array<double, 3> x = {};
+        std::array<double, 4> b = {};
         std::vector<Resonance> resonances;
-        std::array<unsigned short, 4> lr;
       };
 
       /// Standard parameterisation interpolator constructor (photon from proton)
@@ -81,28 +80,28 @@ namespace cepgen {
       params.mu = -0.0352567;
       params.mup = 3.51852;
 
-      Parameters::Resonance r0;
+      Parameters::Resonance r0{};
       r0.amplitude = 1.04;
       r0.mass = 1.22991;
       r0.width = 0.106254;
       r0.angular_momentum = 1;
       params.resonances.emplace_back(r0);
 
-      Parameters::Resonance r1;
+      Parameters::Resonance r1{};
       r1.amplitude = 0.481327;
       r1.mass = 1.51015;
       r1.width = 0.0816620;
       r1.angular_momentum = 2;
       params.resonances.emplace_back(r1);
 
-      Parameters::Resonance r2;
+      Parameters::Resonance r2{};
       r2.amplitude = 0.655872;
       r2.mass = 1.71762;
       r2.width = 0.125520;
       r2.angular_momentum = 3;
       params.resonances.emplace_back(r2);
 
-      Parameters::Resonance r3;
+      Parameters::Resonance r3{};
       r3.amplitude = 0.747338;
       r3.mass = 1.95381;
       r3.width = 0.198915;
@@ -130,28 +129,28 @@ namespace cepgen {
 
       params.resonances.clear();
 
-      Parameters::Resonance r0;
+      Parameters::Resonance r0{};
       r0.amplitude = 0.74847;
       r0.mass = 1.2400;
       r0.width = 0.12115;
       r0.angular_momentum = 1;
       params.resonances.emplace_back(r0);
 
-      Parameters::Resonance r1;
+      Parameters::Resonance r1{};
       r1.amplitude = 0.011500;
       r1.mass = 1.4772;
       r1.width = 0.0069580;
       r1.angular_momentum = 2;
       params.resonances.emplace_back(r1);
 
-      Parameters::Resonance r2;
+      Parameters::Resonance r2{};
       r2.amplitude = 0.12662;
       r2.mass = 1.5233;
       r2.width = 0.084095;
       r2.angular_momentum = 3;
       params.resonances.emplace_back(r2);
 
-      Parameters::Resonance r3;
+      Parameters::Resonance r3{};
       r3.amplitude = 0.747338;
       r3.mass = 1.95381;
       r3.width = 0.198915;

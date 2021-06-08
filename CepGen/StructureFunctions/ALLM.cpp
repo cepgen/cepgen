@@ -17,12 +17,12 @@ namespace cepgen {
       class Parameters {
       private:
         struct Trajectory {
-          Trajectory(const ParametersList& params = ParametersList());
+          explicit Trajectory(const ParametersList& params = ParametersList());
           std::vector<double> a, b, c;
         };
 
       public:
-        Parameters(const ParametersList& params = ParametersList());
+        explicit Parameters(const ParametersList& params = ParametersList());
         /// Pre-HERA data fit (694 data points)
         static Parameters allm91();
         /// Fixed target and HERA photoproduction total cross sections (1356 points)
@@ -101,7 +101,6 @@ namespace cepgen {
 
     ALLM& ALLM::eval(double xbj, double q2) {
       const double w2_eff = utils::mX2(xbj, q2, mp2_) - mp2_;
-      ;
       const double xp = (q2 + params_.mp2) / (q2 + w2_eff + params_.mp2),
                    xr = (q2 + params_.mr2) / (q2 + w2_eff + params_.mr2);
 

@@ -8,6 +8,7 @@
 #include "CepGen/Core/Exception.h"
 
 #include <array>
+#include <utility>
 #include <vector>
 
 namespace cepgen {
@@ -26,7 +27,7 @@ namespace cepgen {
 
     private:
       enum Polarisation { L, T };
-      static constexpr double prefac_ = 0.25 * M_1_PI * M_1_PI / constants::ALPHA_EM;
+      static constexpr double prefactor_ = 0.25 * M_1_PI * M_1_PI / constants::ALPHA_EM;
 
       double resmod507(const Polarisation& pol, double w2, double q2) const;
 
@@ -70,7 +71,7 @@ namespace cepgen {
         struct Continuum {
           struct Direction {
             explicit Direction() : sig0(0.) {}
-            Direction(double sig0, const std::vector<double>& params) : sig0(sig0), fit_parameters(params) {}
+            Direction(double sig0, std::vector<double> params) : sig0(sig0), fit_parameters(std::move(params)) {}
             double sig0;
             std::vector<double> fit_parameters;
           };
@@ -350,7 +351,7 @@ namespace cepgen {
       const double sigT = resmod507(Polarisation::T, w2_eff, q2_eff);
       const double sigL = resmod507(Polarisation::L, w2_eff, q2_eff);
 
-      F2 = prefac_ * (1. - xbj) * q2_eff / (1 + tau(xbj, q2_eff)) * (sigT + sigL) / constants::GEVM2_TO_PB * 1.e6;
+      F2 = prefactor_ * (1. - xbj) * q2_eff / (1 + tau(xbj, q2_eff)) * (sigT + sigL) / constants::GEVM2_TO_PB * 1.e6;
       if (q2 > q20)
         F2 *= q21 / (q21 + delq2);
 

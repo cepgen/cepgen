@@ -10,7 +10,7 @@
 
 namespace cepgen {
   namespace sigrat {
-    double Parameterisation::theta(double xbj, double q2) const {
+    double Parameterisation::theta(double xbj, double q2) {
       return 1. + 12. * (q2 / (q2 + 1.)) * (0.125 * 0.125 / (0.125 * 0.125 + xbj * xbj));
     }
 

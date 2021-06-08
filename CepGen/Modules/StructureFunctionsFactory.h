@@ -9,7 +9,7 @@
     struct BUILDERNM(id) {                                                                                     \
       BUILDERNM(id)() { strfun::StructureFunctionsFactory::get().registerModule<obj>((int)strfun::Type::id); } \
     };                                                                                                         \
-    static BUILDERNM(id) gStrFun##id;                                                                          \
+    static const BUILDERNM(id) gStrFun##id;                                                                    \
   }
 /// Add a structure functions definition (with its associated default parameters) to the list of handled parameterisation
 #define REGISTER_STRFUN_PARAMS(id, obj, params)                                                                        \
@@ -17,7 +17,7 @@
     struct BUILDERNM(id) {                                                                                             \
       BUILDERNM(id)() { strfun::StructureFunctionsFactory::get().registerModule<obj>((int)strfun::Type::id, params); } \
     };                                                                                                                 \
-    static BUILDERNM(id) gStrFun##id;                                                                                  \
+    static const BUILDERNM(id) gStrFun##id;                                                                            \
   }
 
 /// Add a sigma ratio definition to the list of handled parameterisation
@@ -27,7 +27,7 @@
     struct SRBUILDERNM(id) {                                                                              \
       SRBUILDERNM(id)() { sigrat::SigmaRatiosFactory::get().registerModule<obj>((int)sigrat::Type::id); } \
     };                                                                                                    \
-    static SRBUILDERNM(id) gSigRat##id;                                                                   \
+    static const SRBUILDERNM(id) gSigRat##id;                                                             \
   }
 
 /// Add a form factors definition to the list of handled parameterisation
@@ -37,7 +37,7 @@
       struct BUILDERNM(obj) {                                                     \
         BUILDERNM(obj)() { FormFactorsFactory::get().registerModule<obj>(name); } \
       };                                                                          \
-      static BUILDERNM(obj) gFF##obj;                                             \
+      static const BUILDERNM(obj) gFF##obj;                                       \
     }                                                                             \
   }
 
