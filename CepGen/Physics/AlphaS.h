@@ -9,7 +9,7 @@
     struct BUILDERNM(obj) {                                                \
       BUILDERNM(obj)() { AlphaSFactory::get().registerModule<obj>(name); } \
     };                                                                     \
-    static BUILDERNM(obj) g##obj;                                          \
+    static const BUILDERNM(obj) g##obj;                                    \
   }
 
 namespace cepgen {

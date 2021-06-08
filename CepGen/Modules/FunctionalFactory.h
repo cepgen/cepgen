@@ -12,7 +12,7 @@
       struct BUILDERNM(obj) {                                                    \
         BUILDERNM(obj)() { FunctionalFactory::get().registerModule<obj>(name); } \
       };                                                                         \
-      static BUILDERNM(obj) gFunct##obj;                                         \
+      static const BUILDERNM(obj) gFunct##obj;                                   \
     }                                                                            \
   }
 

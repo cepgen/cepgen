@@ -12,7 +12,7 @@
       struct BUILDERNM(obj) {                                                      \
         BUILDERNM(obj)() { CardsHandlerFactory::get().registerModule<obj>(name); } \
       };                                                                           \
-      static BUILDERNM(obj) gCard##obj;                                            \
+      static const BUILDERNM(obj) gCard##obj;                                      \
     }                                                                              \
   }
 

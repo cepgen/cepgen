@@ -12,7 +12,7 @@
       struct BUILDERNM(obj) {                                                                             \
         BUILDERNM(obj)() { ProcessesFactory::get().registerModule<obj>(name, cepgen::ParametersList()); } \
       };                                                                                                  \
-      static BUILDERNM(obj) gProc##obj;                                                                   \
+      static const BUILDERNM(obj) gProc##obj;                                                             \
     }                                                                                                     \
   }
 /// Declare a Fortran process function name
