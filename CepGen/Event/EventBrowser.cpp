@@ -13,11 +13,11 @@ namespace cepgen {
       //--- particle-level variables (indexed by integer id)
       if (std::regex_match(var, sm, rgx_select_id_)) {
         const auto& var_name = sm[1].str();
-        const auto& part = ev[std::stod(sm[2].str())];
+        const auto& part = ev[std::stoul(sm[2].str())];
         return variable(ev, part, var_name);
       }
       //--- particle-level variables (indexed by role)
-      else if (std::regex_match(var, sm, rgx_select_role_)) {
+      if (std::regex_match(var, sm, rgx_select_role_)) {
         const auto& var_name = sm[1].str();
         const auto& str_role = sm[2].str();
         if (role_str_.count(str_role) == 0) {
@@ -29,8 +29,7 @@ namespace cepgen {
         return variable(ev, part, var_name);
       }
       //--- event-level variables
-      else
-        return variable(ev, var);
+      return variable(ev, var);
     }
 
     double EventBrowser::variable(const Event& ev, const Particle& part, const std::string& var) const {
