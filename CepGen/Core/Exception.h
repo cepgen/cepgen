@@ -30,7 +30,7 @@ namespace cepgen {
 
   /// A simple exception handler
   /// \date 24 Mar 2015
-  class LoggedException : public Exception {
+  class LoggedException final : public Exception, public std::exception {
   public:
     /// Generic constructor
     /// \param[in] module exception classifier
@@ -44,7 +44,7 @@ namespace cepgen {
     /// \param[in] id exception code (useful for logging)
     explicit LoggedException(const char* from, const char* module, Type type = Type::undefined, short id = 0);
     /// Copy constructor
-    LoggedException(const LoggedException& rhs);
+    LoggedException(const LoggedException& rhs) noexcept;
     /// Default destructor (potentially killing the process)
     ~LoggedException() noexcept override;
 

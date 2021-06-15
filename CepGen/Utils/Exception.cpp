@@ -10,7 +10,7 @@ namespace cepgen {
   LoggedException::LoggedException(const char* from, const char* module, Type type, short id)
       : from_(from), module_(module), type_(type), error_num_(id) {}
 
-  LoggedException::LoggedException(const LoggedException& rhs)
+  LoggedException::LoggedException(const LoggedException& rhs) noexcept
       : from_(rhs.from_),
         module_(rhs.module_),
         message_(rhs.message_.str()),
