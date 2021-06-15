@@ -105,10 +105,10 @@ namespace cepgen {
     ParticlesMap particles_;
     /// Typical event indices structure
     struct NumParticles {
-      size_t cs;   ///< Index of the first central system particle
-      size_t op1;  ///< Index of the first positive-z outgoing beam state
-      size_t op2;  ///< Index of the first negative-z outgoing beam state
-    } evtcontent_;
+      size_t cs{0};   ///< Index of the first central system particle
+      size_t op1{0};  ///< Index of the first positive-z outgoing beam state
+      size_t op2{0};  ///< Index of the first negative-z outgoing beam state
+    } evtcontent_{};
     /// Is the event "compressed"?
     bool compressed_;
   };
