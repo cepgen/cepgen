@@ -3,6 +3,10 @@
 
 #include "CepGen/Core/Exception.h"
 
+#define DEF_ELEM(x) \
+  case Element::x:  \
+    return os << "x"
+
 namespace cepgen {
   HeavyIon::HeavyIon(pdgid_t pdg)
       : Z(pdg / 1000000 == 0 ? Element::invalid : (Element)((pdg / 1000) % 1000)),
@@ -33,27 +37,19 @@ namespace cepgen {
 
   std::ostream& operator<<(std::ostream& os, const Element& elem) {
     switch (elem) {
-      case Element::invalid:
-        return os;
-      case Element::H:
-        return os << "H";
-      case Element::C:
-        return os << "C";
-      case Element::O:
-        return os << "O";
-      case Element::Al:
-        return os << "Al";
-      case Element::Cu:
-        return os << "Cu";
-      case Element::Xe:
-        return os << "Xe";
-      case Element::Au:
-        return os << "Au";
-      case Element::Pb:
-        return os << "Pb";
-      case Element::U:
-        return os << "U";
+      DEF_ELEM(invalid);
+      DEF_ELEM(H);
+      DEF_ELEM(C);
+      DEF_ELEM(O);
+      DEF_ELEM(Al);
+      DEF_ELEM(Cu);
+      DEF_ELEM(Xe);
+      DEF_ELEM(Au);
+      DEF_ELEM(Pb);
+      DEF_ELEM(U);
     }
     return os;
   }
 }  // namespace cepgen
+
+#undef DEF_ELEM
