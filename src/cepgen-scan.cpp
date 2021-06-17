@@ -45,10 +45,10 @@ int main(int argc, char* argv[]) {
   mg.setParameters(cepgen::card::Handler::parse(input_config));
 
   if (!parser.extra_config().empty())
-    mg.setParameters(
-        cepgen::card::CardsHandlerFactory::get()
-            .build("cmd", cepgen::ParametersList().set<std::vector<std::string> >("args", parser.extra_config()))
-            ->parse("", mg.parametersPtr()));
+    mg.setParameters(cepgen::card::CardsHandlerFactory::get()
+                         .build(cepgen::card::gCommandLineHandler,
+                                cepgen::ParametersList().set<std::vector<std::string> >("args", parser.extra_config()))
+                         ->parse("", mg.parametersPtr()));
 
   CG_INFO("main") << mg.parameters();
 

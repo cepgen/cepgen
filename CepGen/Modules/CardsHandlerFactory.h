@@ -21,6 +21,8 @@ namespace cepgen {
     class Handler;
     /// A cards handler factory
     typedef ModuleFactory<Handler> CardsHandlerFactory;
+    /// Standard name for the command line steering module handler
+    static constexpr const char* gCommandLineHandler = ".cmd";
   }  // namespace card
 }  // namespace cepgen
 

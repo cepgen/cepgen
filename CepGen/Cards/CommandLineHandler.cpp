@@ -117,4 +117,4 @@ namespace cepgen {
   }  // namespace card
 }  // namespace cepgen
 
-REGISTER_CARD_HANDLER(".cmd", CommandLineHandler)
+REGISTER_CARD_HANDLER(gCommandLineHandler, CommandLineHandler)

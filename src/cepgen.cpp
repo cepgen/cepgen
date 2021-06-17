@@ -65,7 +65,8 @@ int main(int argc, char* argv[]) {
     if (!parser.extra_config().empty())
       gen.setParameters(
           cepgen::card::CardsHandlerFactory::get()
-              .build("cmd", cepgen::ParametersList().set<std::vector<std::string> >("args", parser.extra_config()))
+              .build(cepgen::card::gCommandLineHandler,
+                     cepgen::ParametersList().set<std::vector<std::string> >("args", parser.extra_config()))
               ->parse(std::string(), gen.parametersPtr()));
   }
 
