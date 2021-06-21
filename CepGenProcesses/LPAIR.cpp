@@ -63,7 +63,9 @@ namespace cepgen {
           de3_(0.),
           de5_(0.),
           pt4_(0.),
-          jacobian_(0.) {
+          jacobian_(0.),
+          rnd_phi_(0., 2. * M_PI),
+          rnd_side_(0, 1) {
       if (params_.has<ParticleProperties>("pair"))
         pair_ = params_.get<ParticleProperties>("pair").pdgid;
     }
@@ -862,9 +864,9 @@ namespace cepgen {
                                     << "boosted P(l2)=" << p7_cm_;
 
       //----- parameterise a random rotation around z-axis
-      const short rany = drand() > 0.5 ? 1 : -1, ransign = drand() > 0.5 ? 1 : -1;
-      const double ranphi = 2 * drand() * M_PI;
-      const short ranz = symmetrise_ ? (rand() > 0.5 * RAND_MAX ? 1 : -1) : 1;
+      const short rany = rnd_side_(rnd_gen_) == 1 ? 1 : -1, ransign = rnd_side_(rnd_gen_) == 1 ? 1 : -1;
+      const double ranphi = rnd_phi_(rnd_gen_);
+      const short ranz = symmetrise_ ? (rnd_side_(rnd_gen_) == 1 ? 1 : -1) : 1;
 
       Momentum plab_ph1 = plab_ip1 - p3_lab_;
       plab_ph1.rotatePhi(ranphi, rany);
