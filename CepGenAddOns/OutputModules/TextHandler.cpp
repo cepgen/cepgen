@@ -174,10 +174,12 @@ namespace cepgen {
 
     void TextHandler::operator<<(const Event& ev) {
       //--- write down the variables list in the file
-      std::string sep;
-      for (const auto& var : variables_)
-        file_ << sep << browser_.get(ev, var), sep = separator_;
-      file_ << "\n";
+      if (!variables_.empty()) {
+        std::string sep;
+        for (const auto& var : variables_)
+          file_ << sep << browser_.get(ev, var), sep = separator_;
+        file_ << "\n";
+      }
       //--- increment the corresponding histograms
       for (auto& h_var : hists_)
         h_var.hist.fill(browser_.get(ev, h_var.var));
