@@ -22,7 +22,7 @@ namespace cepgen {
     virtual ~EventModifier() = default;
 
     /// Set all runtime parameters steering this module
-    virtual void setParameters(const Parameters& params) { params_ = &params; }
+    virtual void setRuntimeParameters(const Parameters& params) { rt_params_ = &params; }
     /// \brief Specify a random numbers generator seed for the external module
     /// \param[in] seed A RNG seed
     void setSeed(long long seed) { seed_ = seed; }
@@ -54,7 +54,7 @@ namespace cepgen {
     /// Maximal number of trials for the algorithm
     unsigned short max_trials_;
     /// List of runtime parameters steering this module
-    const Parameters* params_;  // not owning
+    const Parameters* rt_params_;  // not owning
   };
 }  // namespace cepgen
 

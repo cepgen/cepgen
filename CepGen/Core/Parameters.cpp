@@ -125,12 +125,12 @@ namespace cepgen {
 
   void Parameters::addModifier(std::unique_ptr<EventModifier> mod) {
     evt_modifiers_.emplace_back(std::move(mod));
-    (*evt_modifiers_.rbegin())->setParameters(*this);
+    (*evt_modifiers_.rbegin())->setRuntimeParameters(*this);
   }
 
   void Parameters::addModifier(EventModifier* mod) {
     evt_modifiers_.emplace_back(std::unique_ptr<EventModifier>(mod));
-    (*evt_modifiers_.rbegin())->setParameters(*this);
+    (*evt_modifiers_.rbegin())->setRuntimeParameters(*this);
   }
 
   io::ExportModule& Parameters::outputModule(size_t i) { return *out_modules_.at(i); }
