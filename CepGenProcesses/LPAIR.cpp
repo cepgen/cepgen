@@ -672,7 +672,12 @@ namespace cepgen {
       jacobian_ /= amap;
       jacobian_ /= bmap;
       jacobian_ *= log(ymap);
-      jacobian_ *= 0.5;
+      if ((kin_.incoming_beams.mode() == mode::Kinematics::ElasticInelastic ||
+           kin_.incoming_beams.mode() == mode::Kinematics::InelasticElastic) &&
+          symmetrise_)
+        jacobian_ *= 1.;
+      else
+        jacobian_ *= 0.5;
 
       CG_DEBUG_LOOP("LPAIR") << "Jacobian = " << jacobian_;
 
@@ -859,7 +864,7 @@ namespace cepgen {
       //----- parameterise a random rotation around z-axis
       const short rany = drand() > 0.5 ? 1 : -1, ransign = drand() > 0.5 ? 1 : -1;
       const double ranphi = 2 * drand() * M_PI;
-      const short ranz = symmetrise_ ? (drand() > 0.5 ? 1 : -1) : 1;
+      const short ranz = symmetrise_ ? (rand() > 0.5 * RAND_MAX ? 1 : -1) : 1;
 
       Momentum plab_ph1 = plab_ip1 - p3_lab_;
       plab_ph1.rotatePhi(ranphi, rany);
