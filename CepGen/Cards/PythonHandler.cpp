@@ -50,7 +50,7 @@ namespace cepgen {
       setenv("PYTHONDONTWRITEBYTECODE", "1", 1);
       CG_DEBUG("PythonHandler") << "Python PATH: \"" << utils::environ("PYTHONPATH") << "\".";
 
-      params_ = params;
+      rt_params_ = params;
       std::string filename = pythonPath(file);
       const size_t fn_len = filename.length() + 1;
 
@@ -98,7 +98,7 @@ namespace cepgen {
       if (PyObject_HasAttrString(cfg, TIMER_NAME) == 1) {
         PyObject* ptim = PyObject_GetAttrString(cfg, TIMER_NAME);  // new
         if (ptim) {
-          params_->setTimeKeeper(new utils::TimeKeeper);
+          rt_params_->setTimeKeeper(new utils::TimeKeeper);
           Py_CLEAR(ptim);
         }
       }
@@ -134,7 +134,7 @@ namespace cepgen {
           throwPythonError("Failed to extract the process name from the configuration card '" + file + "'!");
 
         //--- process mode
-        params_->setProcess(proc::ProcessesFactory::get().build(get<std::string>(pproc_name), proc_params));
+        rt_params_->setProcess(proc::ProcessesFactory::get().build(get<std::string>(pproc_name), proc_params));
 
         //--- process kinematics
         ParametersList pkin;
@@ -146,15 +146,15 @@ namespace cepgen {
         if (pout_kinematics)
           pkin += get<ParametersList>(pout_kinematics);
 
-        params_->kinematics = Kinematics(pkin);
+        rt_params_->kinematics = Kinematics(pkin);
         if (proc_params.has<int>("mode"))
-          params_->kinematics.incoming_beams.setMode((mode::Kinematics)proc_params.get<int>("mode"));
+          rt_params_->kinematics.incoming_beams.setMode((mode::Kinematics)proc_params.get<int>("mode"));
 
         //--- taming functions
         PyObject* ptam = element(process, "tamingFunctions");  // borrowed
         if (ptam)
           for (const auto& p : getVector<ParametersList>(ptam))
-            params_->addTamingFunction(utils::FunctionalFactory::get().build("ROOT", p));
+            rt_params_->addTamingFunction(utils::FunctionalFactory::get().build("ROOT", p));
 
         Py_CLEAR(process);
       } /*else
@@ -220,7 +220,7 @@ namespace cepgen {
       if (Py_IsInitialized())
         Py_Finalize();
 
-      return params_;
+      return rt_params_;
     }
 
     void PythonHandler::parseLogging(PyObject* log) {
@@ -236,7 +236,7 @@ namespace cepgen {
     void PythonHandler::parseIntegrator(PyObject* integr) {
       if (!PyDict_Check(integr))
         throwPythonError("Integrator object should be a dictionary!");
-      *params_->integrator = get<ParametersList>(integr);
+      *rt_params_->integrator = get<ParametersList>(integr);
     }
 
     void PythonHandler::parseGenerator(PyObject* gen) {
@@ -244,7 +244,7 @@ namespace cepgen {
         throwPythonError("Generation information object should be a dictionary!");
       auto plist = get<ParametersList>(gen);
       plist.set<int>("maxgen", plist.get<int>("numEvents"));
-      params_->generation() = Parameters::Generation(plist);
+      rt_params_->generation() = Parameters::Generation(plist);
     }
 
     void PythonHandler::parseEventModifiers(PyObject* mod) {
@@ -264,9 +264,9 @@ namespace cepgen {
         throwPythonError("Event modification algorithm name is required!");
       std::string mod_name = get<std::string>(pname);
 
-      params_->addModifier(EventModifierFactory::get().build(mod_name, get<ParametersList>(mod)));
+      rt_params_->addModifier(EventModifierFactory::get().build(mod_name, get<ParametersList>(mod)));
 
-      auto h = params_->eventModifiersSequence().rbegin()->get();
+      auto h = rt_params_->eventModifiersSequence().rbegin()->get();
       {  //--- before calling the init() method
         std::vector<std::string> config;
         fillParameter(mod, "preConfiguration", config);
@@ -299,7 +299,7 @@ namespace cepgen {
       PyObject* pname = element(pout, ParametersList::MODULE_NAME);  // borrowed
       if (!pname)
         throwPythonError("Output module name is required!");
-      params_->addOutputModule(
+      rt_params_->addOutputModule(
           io::ExportModuleFactory::get().build(get<std::string>(pname), get<ParametersList>(pout)));
     }
 

@@ -75,7 +75,7 @@ namespace cepgen {
     BoostTreeHandler::BoostTreeHandler(const ParametersList& params) : Handler(params) {}
 
     Parameters* BoostTreeHandler::parse(const std::string& filename, Parameters* params) {
-      params_ = params;
+      rt_params_ = params;
       read(filename);
 
       if (tree_.count(ADDONS_NAME))
@@ -84,7 +84,7 @@ namespace cepgen {
 
       try {
         proc_ = unpack(tree_.get_child(PROCESS_NAME));
-        params_->setProcess(proc::ProcessesFactory::get().build(proc_));
+        rt_params_->setProcess(proc::ProcessesFactory::get().build(proc_));
       } catch (const boost::exception&) {
         throw CG_FATAL("BoostTreeHandler") << "Failed to retrieve a valid \"" << PROCESS_NAME << "\" block"
                                            << " in the steering card!";
@@ -92,19 +92,19 @@ namespace cepgen {
       try {
         //----- phase space definition
         if (tree_.count(KIN_NAME))
-          params_->kinematics = Kinematics(unpack(tree_.get_child(KIN_NAME)));
+          rt_params_->kinematics = Kinematics(unpack(tree_.get_child(KIN_NAME)));
         if (tree_.count(INTEGR_NAME))
-          *params_->integrator += unpack(tree_.get_child(INTEGR_NAME));
+          *rt_params_->integrator += unpack(tree_.get_child(INTEGR_NAME));
         if (tree_.count(GENERAL_NAME))
-          *params_->general += unpack(tree_.get_child(GENERAL_NAME));
+          *rt_params_->general += unpack(tree_.get_child(GENERAL_NAME));
         if (tree_.count(GENERATOR_NAME))
-          params_->generation() = Parameters::Generation(unpack(tree_.get_child(GENERATOR_NAME)));
+          rt_params_->generation() = Parameters::Generation(unpack(tree_.get_child(GENERATOR_NAME)));
         if (tree_.count(EVT_MOD_SEQ_NAME)) {
           evt_mod_ = unpack(tree_.get_child(EVT_MOD_SEQ_NAME));
           for (const auto& name : evt_mod_.keys()) {
             const auto& mod = evt_mod_.get<ParametersList>(name);
             if (!mod.empty())
-              params_->addModifier(EventModifierFactory::get().build(name, mod));
+              rt_params_->addModifier(EventModifierFactory::get().build(name, mod));
           }
         }
         if (tree_.count(OUTPUT_NAME)) {
@@ -112,11 +112,11 @@ namespace cepgen {
           for (const auto& name : evt_out_.keys()) {
             const auto& mod = evt_out_.get<ParametersList>(name);
             if (!mod.empty())
-              params_->addOutputModule(io::ExportModuleFactory::get().build(name, mod));
+              rt_params_->addOutputModule(io::ExportModuleFactory::get().build(name, mod));
           }
         }
         if (tree_.count(TIMER_NAME))
-          params_->setTimeKeeper(new utils::TimeKeeper);
+          rt_params_->setTimeKeeper(new utils::TimeKeeper);
         if (tree_.count(LOGGER_NAME)) {
           log_ = unpack(tree_.get_child(LOGGER_NAME));
           utils::Logger::get().level =
@@ -128,7 +128,7 @@ namespace cepgen {
       } catch (const Exception&) {
       }
 
-      return params_;
+      return rt_params_;
     }
 
     template <>
@@ -274,35 +274,35 @@ namespace cepgen {
     }
 
     void BoostTreeHandler::pack(const Parameters* params) {
-      params_ = const_cast<Parameters*>(params);
-      tree_.add_child(PROCESS_NAME, pack(params_->process().parameters()));
-      if (params_->integrator && !params_->integrator->keys().empty())
-        tree_.add_child(INTEGR_NAME, pack(*params_->integrator));
-      if (params_->general && !params_->general->keys().empty())
-        tree_.add_child(GENERAL_NAME, pack(*params_->general));
+      rt_params_ = const_cast<Parameters*>(params);
+      tree_.add_child(PROCESS_NAME, pack(rt_params_->process().parameters()));
+      if (rt_params_->integrator && !rt_params_->integrator->keys().empty())
+        tree_.add_child(INTEGR_NAME, pack(*rt_params_->integrator));
+      if (rt_params_->general && !rt_params_->general->keys().empty())
+        tree_.add_child(GENERAL_NAME, pack(*rt_params_->general));
 
       //----- kinematics block
-      tree_.add_child(KIN_NAME, pack(params_->kinematics.parameters()));
+      tree_.add_child(KIN_NAME, pack(rt_params_->kinematics.parameters()));
 
       //----- generation block
-      tree_.add_child(GENERATOR_NAME, pack(params_->generation().parameters()));
+      tree_.add_child(GENERATOR_NAME, pack(rt_params_->generation().parameters()));
 
       //----- event modification and output
-      if (!params_->eventModifiersSequence().empty()) {
+      if (!rt_params_->eventModifiersSequence().empty()) {
         auto evt_mod_tree = pack(evt_mod_);
-        for (const auto& mod : params_->eventModifiersSequence())
+        for (const auto& mod : rt_params_->eventModifiersSequence())
           evt_mod_tree.put("", mod->name());
         tree_.add_child(EVT_MOD_SEQ_NAME, evt_mod_tree);
       }
-      if (!params_->outputModulesSequence().empty()) {
+      if (!rt_params_->outputModulesSequence().empty()) {
         auto out_mod_tree = pack(evt_out_);
-        for (const auto& mod : params_->outputModulesSequence())
+        for (const auto& mod : rt_params_->outputModulesSequence())
           out_mod_tree.add_child(mod->name(), pack(mod->parameters()));
         tree_.add_child(OUTPUT_NAME, out_mod_tree);
       }
 
       //----- timing and logging
-      if (params_->timeKeeper())
+      if (rt_params_->timeKeeper())
         tree_.add_child(TIMER_NAME, pack(ParametersList()));
       log_.set<int>("level", (int)utils::Logger::get().level);
       //FIXME not yet implemented
