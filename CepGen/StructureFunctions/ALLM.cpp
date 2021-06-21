@@ -52,75 +52,80 @@ namespace cepgen {
       std::string describe() const override { return descr_; }
 
     private:
-      Parameters params_;
+      Parameters mod_params_;
       std::string descr_;
     };
 
     ALLM::ALLM(const ParametersList& params)
-        : Parameterisation(params), params_(params.get<ParametersList>("parameterisation")) {
+        : Parameterisation(params), mod_params_(params.get<ParametersList>("parameterisation")) {
       const auto& model = params.get<std::string>("model");
       if (model == "GD07p") {
-        params_ = Parameters::gd07p();
+        mod_params_ = Parameters::gd07p();
         descr_ = "ALLM{GD07p}";
       } else if (model == "GD11p") {
-        params_ = Parameters::gd11p();
+        mod_params_ = Parameters::gd11p();
         descr_ = "ALLM{GD11p}";
       } else if (model == "ALLM91") {
-        params_ = Parameters::allm91();
+        mod_params_ = Parameters::allm91();
         descr_ = "ALLM{91}";
       } else if (model == "ALLM97") {
-        params_ = Parameters::allm97();
+        mod_params_ = Parameters::allm97();
         descr_ = "ALLM{97}";
       } else if (model == "HHT_ALLM") {
-        params_ = Parameters::hht_allm();
+        mod_params_ = Parameters::hht_allm();
         descr_ = "ALLM{HHT}";
       } else if (model == "HHT_ALLM_FT") {
-        params_ = Parameters::hht_allm_ft();
+        mod_params_ = Parameters::hht_allm_ft();
         descr_ = "ALLM{HHT_FT}";
       }
       CG_DEBUG("ALLM") << "ALLM structure functions builder initialised.\n"
-                       << "Parameterisation (" << params_.type << "):\n"
+                       << "Parameterisation (" << mod_params_.type << "):\n"
                        << " *) Pomeron trajectory:\n"
-                       << "   a = {" << params_.pomeron.a.at(0) << ", " << params_.pomeron.a.at(1) << ", "
-                       << params_.pomeron.a.at(2) << "}\n"
-                       << "   b = {" << params_.pomeron.b.at(0) << ", " << params_.pomeron.b.at(1) << ", "
-                       << params_.pomeron.b.at(2) << "}\n"
-                       << "   c = {" << params_.pomeron.c.at(0) << ", " << params_.pomeron.c.at(1) << ", "
-                       << params_.pomeron.c.at(2) << "}\n"
+                       << "   a = {" << mod_params_.pomeron.a.at(0) << ", " << mod_params_.pomeron.a.at(1) << ", "
+                       << mod_params_.pomeron.a.at(2) << "}\n"
+                       << "   b = {" << mod_params_.pomeron.b.at(0) << ", " << mod_params_.pomeron.b.at(1) << ", "
+                       << mod_params_.pomeron.b.at(2) << "}\n"
+                       << "   c = {" << mod_params_.pomeron.c.at(0) << ", " << mod_params_.pomeron.c.at(1) << ", "
+                       << mod_params_.pomeron.c.at(2) << "}\n"
                        << " *) Reggeon trajectory:\n"
-                       << "   a = {" << params_.reggeon.a.at(0) << ", " << params_.reggeon.a.at(1) << ", "
-                       << params_.reggeon.a.at(2) << "}\n"
-                       << "   b = {" << params_.reggeon.b.at(0) << ", " << params_.reggeon.b.at(1) << ", "
-                       << params_.reggeon.b.at(2) << "}\n"
-                       << "   c = {" << params_.reggeon.c.at(0) << ", " << params_.reggeon.c.at(1) << ", "
-                       << params_.reggeon.c.at(2) << "}\n"
-                       << " masses: m₀²=" << params_.m02 << ", mp²=" << params_.mp2 << ", mr²=" << params_.mr2
-                       << " GeV²\n"
-                       << " q₀²=" << params_.q02 << ", Λ²=" << params_.lambda2 << " GeV².";
+                       << "   a = {" << mod_params_.reggeon.a.at(0) << ", " << mod_params_.reggeon.a.at(1) << ", "
+                       << mod_params_.reggeon.a.at(2) << "}\n"
+                       << "   b = {" << mod_params_.reggeon.b.at(0) << ", " << mod_params_.reggeon.b.at(1) << ", "
+                       << mod_params_.reggeon.b.at(2) << "}\n"
+                       << "   c = {" << mod_params_.reggeon.c.at(0) << ", " << mod_params_.reggeon.c.at(1) << ", "
+                       << mod_params_.reggeon.c.at(2) << "}\n"
+                       << " masses: m₀²=" << mod_params_.m02 << ", mp²=" << mod_params_.mp2
+                       << ", mr²=" << mod_params_.mr2 << " GeV²\n"
+                       << " q₀²=" << mod_params_.q02 << ", Λ²=" << mod_params_.lambda2 << " GeV².";
     }
 
     ALLM& ALLM::eval(double xbj, double q2) {
       const double w2_eff = utils::mX2(xbj, q2, mp2_) - mp2_;
-      const double xp = (q2 + params_.mp2) / (q2 + w2_eff + params_.mp2),
-                   xr = (q2 + params_.mr2) / (q2 + w2_eff + params_.mr2);
+      const double xp = (q2 + mod_params_.mp2) / (q2 + w2_eff + mod_params_.mp2),
+                   xr = (q2 + mod_params_.mr2) / (q2 + w2_eff + mod_params_.mr2);
 
-      const double xlog1 = log((q2 + params_.q02) / params_.lambda2), xlog2 = log(params_.q02 / params_.lambda2);
+      const double xlog1 = log((q2 + mod_params_.q02) / mod_params_.lambda2),
+                   xlog2 = log(mod_params_.q02 / mod_params_.lambda2);
       const double t = log(xlog1 / xlog2);
 
-      const double apom = params_.pomeron.a.at(0) + (params_.pomeron.a.at(0) - params_.pomeron.a.at(1)) *
-                                                        (1. / (1. + pow(t, params_.pomeron.a.at(2))) - 1.);
-      const double bpom = params_.pomeron.b.at(0) + params_.pomeron.b.at(1) * pow(t, params_.pomeron.b.at(2));
-      const double cpom = params_.pomeron.c.at(0) + (params_.pomeron.c.at(0) - params_.pomeron.c.at(1)) *
-                                                        (1. / (1. + pow(t, params_.pomeron.c.at(2))) - 1.);
+      const double apom = mod_params_.pomeron.a.at(0) + (mod_params_.pomeron.a.at(0) - mod_params_.pomeron.a.at(1)) *
+                                                            (1. / (1. + pow(t, mod_params_.pomeron.a.at(2))) - 1.);
+      const double bpom =
+          mod_params_.pomeron.b.at(0) + mod_params_.pomeron.b.at(1) * pow(t, mod_params_.pomeron.b.at(2));
+      const double cpom = mod_params_.pomeron.c.at(0) + (mod_params_.pomeron.c.at(0) - mod_params_.pomeron.c.at(1)) *
+                                                            (1. / (1. + pow(t, mod_params_.pomeron.c.at(2))) - 1.);
 
-      const double areg = params_.reggeon.a.at(0) + params_.reggeon.a.at(1) * pow(t, params_.reggeon.a.at(2));
-      const double breg = params_.reggeon.b.at(0) + params_.reggeon.b.at(1) * pow(t, params_.reggeon.b.at(2));
-      const double creg = params_.reggeon.c.at(0) + params_.reggeon.c.at(1) * pow(t, params_.reggeon.c.at(2));
+      const double areg =
+          mod_params_.reggeon.a.at(0) + mod_params_.reggeon.a.at(1) * pow(t, mod_params_.reggeon.a.at(2));
+      const double breg =
+          mod_params_.reggeon.b.at(0) + mod_params_.reggeon.b.at(1) * pow(t, mod_params_.reggeon.b.at(2));
+      const double creg =
+          mod_params_.reggeon.c.at(0) + mod_params_.reggeon.c.at(1) * pow(t, mod_params_.reggeon.c.at(2));
 
       const double F2_Pom = cpom * pow(xp, apom) * pow(1. - xbj, bpom),
                    F2_Reg = creg * pow(xr, areg) * pow(1. - xbj, breg);
 
-      F2 = q2 / (q2 + params_.m02) * (F2_Pom + F2_Reg);
+      F2 = q2 / (q2 + mod_params_.m02) * (F2_Pom + F2_Reg);
 
       return *this;
     }

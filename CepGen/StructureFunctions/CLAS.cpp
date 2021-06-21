@@ -62,7 +62,7 @@ namespace cepgen {
       /// \param[in] xbj Bjorken scaling variable
       /// \return \f$F_{2}^{N}\f$
       double f2slac(double xbj, double q2) const;
-      Parameters params_;
+      Parameters mod_params_;
       static constexpr double COEFF = 6.08974;
       double mpi0_;  ///< Neutral pion mass
     };
@@ -163,11 +163,11 @@ namespace cepgen {
     CLAS::CLAS(const ParametersList& params) : Parameterisation(params), mpi0_(PDG::get().mass(PDG::piZero)) {
       const auto& model = params.get<std::string>("model", "proton");
       if (model == "proton")
-        params_ = Parameters::standard_proton();
+        mod_params_ = Parameters::standard_proton();
       else if (model == "neutron")
-        params_ = Parameters::standard_neutron();
+        mod_params_ = Parameters::standard_neutron();
       else if (model == "deuteron")
-        params_ = Parameters::standard_deuteron();
+        mod_params_ = Parameters::standard_deuteron();
       else
         throw CG_FATAL("CLAS") << "Invalid modelling selected: " << model << "!";
     }
@@ -191,14 +191,14 @@ namespace cepgen {
       if (xbj >= 1.)
         return 0.;
 
-      const double xsxb = (q2 + params_.c_slac[6]) / (q2 + params_.c_slac[5] * xbj);
+      const double xsxb = (q2 + mod_params_.c_slac[6]) / (q2 + mod_params_.c_slac[5] * xbj);
       const double xs = xbj * xsxb;
 
       double f2 = 0.;
       for (unsigned short i = 0; i < 5; ++i)
-        f2 += params_.c_slac[i] * pow(1. - xs, i);
+        f2 += mod_params_.c_slac[i] * pow(1. - xs, i);
 
-      if (params_.mode == Parameters::deuteron && xbj > 0.)
+      if (mod_params_.mode == Parameters::deuteron && xbj > 0.)
         f2 /= (1. - exp(-7.70 * (1. / xbj - 1. + mp2_ / q2)));
 
       return f2 * pow(1. - xs, 3) / xsxb;
@@ -222,13 +222,15 @@ namespace cepgen {
       const double omega = 0.5 * (w2 + q2 - mp2_) / mp_;
       const double xn = 0.5 * q2 / (mp_ * omega);
 
-      const double bkg2 = (w > params_.b[3]) ? exp(-params_.b[2] * (w2 - params_.b[3] * params_.b[3])) : 1.;
+      const double bkg2 =
+          (w > mod_params_.b[3]) ? exp(-mod_params_.b[2] * (w2 - mod_params_.b[3] * mod_params_.b[3])) : 1.;
 
-      double f2bkg = (params_.b[0]) * (1. - exp(-params_.b[1] * (w - mx_min_))) + (1. - params_.b[0]) * (1. - bkg2);
-      f2bkg *= (1. + (1. - f2bkg) * (params_.x[0] + params_.x[1] * pow(xn - params_.x[2], 2)));
+      double f2bkg =
+          (mod_params_.b[0]) * (1. - exp(-mod_params_.b[1] * (w - mx_min_))) + (1. - mod_params_.b[0]) * (1. - bkg2);
+      f2bkg *= (1. + (1. - f2bkg) * (mod_params_.x[0] + mod_params_.x[1] * pow(xn - mod_params_.x[2], 2)));
 
       double etab = 1., etad = 1.;
-      if (params_.mode != Parameters::deuteron && q2 <= 2. && w <= 2.5) {
+      if (mod_params_.mode != Parameters::deuteron && q2 <= 2. && w <= 2.5) {
         etab = 1. - 2.5 * q2 * exp(-12.5 * q2 * q2 - 50. * (w - 1.325) * (w - 1.325));
         etad = 1. + 2.5 * q2 * exp(-12.5 * q2 * q2);
       }
@@ -237,10 +239,11 @@ namespace cepgen {
       double f2resn = 0.;
 
       unsigned short i = 0;
-      for (const auto& res : params_.resonances) {
-        const double ai =
-            (i == 0) ? etad * (res.amplitude + q2 * std::min(0., params_.alpha + params_.beta * q2)) : res.amplitude;
-        const double dmi = (i == 2) ? res.mass * (1. + params_.mu / (1. + params_.mup * q2)) : res.mass;
+      for (const auto& res : mod_params_.resonances) {
+        const double ai = (i == 0)
+                              ? etad * (res.amplitude + q2 * std::min(0., mod_params_.alpha + mod_params_.beta * q2))
+                              : res.amplitude;
+        const double dmi = (i == 2) ? res.mass * (1. + mod_params_.mu / (1. + mod_params_.mup * q2)) : res.mass;
         double qs0 = pow(dmi * dmi + mp2_ - mpi02, 2) - 4. * mp2_ * dmi * dmi;
         if (qs0 <= 0.)
           break;
@@ -251,7 +254,7 @@ namespace cepgen {
         f2resn += ai * dg / ((w - dmi) * (w - dmi) + dg * dg);
         ++i;
       }
-      f2resn *= 0.5 * (1. - params_.b[0]) * bkg2 / mp_ * M_1_PI;
+      f2resn *= 0.5 * (1. - mod_params_.b[0]) * bkg2 / mp_ * M_1_PI;
 
       return std::make_pair(f2bkg, f2resn);
     }
