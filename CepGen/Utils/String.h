@@ -76,6 +76,8 @@ namespace cepgen {
       ltrim(s);
       rtrim(s);
     }
+    /// Strip all special characters from string
+    std::string strip(const std::string&);
     /// Get an environment variable
     std::string environ(const std::string&, const std::string& def = "");
   }  // namespace utils

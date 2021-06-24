@@ -110,6 +110,13 @@ namespace cepgen {
       s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), s.end());
     }
 
+    std::string strip(const std::string& str) {
+      auto out = str;
+      out.resize(std::remove_if(out.begin(), out.end(), [](char x) { return !std::isalnum(x) && !std::isspace(x); }) -
+                 out.begin());
+      return out;
+    }
+
     std::string environ(const std::string& env, const std::string& def) {
       const auto out = std::getenv(env.c_str());
       if (!out)
