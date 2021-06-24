@@ -45,7 +45,7 @@ endif()
 
 #----- build the object
 
-if(${ROOT_VERSION} LESS 6.22)
+if(${ROOT_VERSION} LESS 6.21)
   set(ROOT_CXX_STANDARD 14)
 else()
   set(ROOT_CXX_STANDARD 17)

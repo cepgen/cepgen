@@ -43,7 +43,7 @@ endforeach()
 
 find_package(ROOT QUIET)
 if(ROOT_FOUND)
-  if(${ROOT_VERSION} LESS 6.22)
+  if(${ROOT_VERSION} LESS 6.21)
     set(ROOT_CXX_STANDARD 14)
   else()
     set(ROOT_CXX_STANDARD 17)
