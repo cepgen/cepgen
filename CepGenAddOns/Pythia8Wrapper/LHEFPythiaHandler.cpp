@@ -5,6 +5,8 @@
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Filesystem.h"
 
 #include "Pythia8/Pythia.h"
 
@@ -32,26 +34,43 @@ namespace cepgen {
     private:
       std::unique_ptr<Pythia8::Pythia> pythia_;
       std::shared_ptr<Pythia8::CepGenEvent> lhaevt_;
-      bool compress_;
+      const bool compress_event_;
+      std::string filename_;
+      bool gzip_;
     };
 
     LHEFPythiaHandler::LHEFPythiaHandler(const ParametersList& params)
         : ExportModule(params),
           pythia_(new Pythia8::Pythia),
           lhaevt_(new Pythia8::CepGenEvent),
-          compress_(params.get<bool>("compress", true)) {
-      const auto filename = params.get<std::string>("filename", "output.lhe");
-      {
-        auto file_tmp = std::ofstream(filename);
-        if (!file_tmp.is_open())
-          throw CG_FATAL("LHEFPythiaHandler") << "Failed to open output filename \"" << filename << "\" for writing!";
+          compress_event_(params.get<bool>("compress", true)),
+          filename_(params.get<std::string>("filename", "output.lhe")),
+          gzip_(false) {
+#ifdef GZIP_BIN
+      if (utils::fileExtension(filename_) == ".gz") {
+        utils::replace_all(filename_, ".gz", "");
+        gzip_ = true;
       }
-      lhaevt_->openLHEF(filename);
-    }
+#endif
+      {
+        auto file_tmp = std::ofstream(filename_);
+        if (!file_tmp.is_open())
+          throw CG_FATAL("LHEFPythiaHandler") << "Failed to open output filename \"" << filename_ << "\" for writing!";
+      }
+      lhaevt_->openLHEF(filename_);
+    }  // namespace io
 
     LHEFPythiaHandler::~LHEFPythiaHandler() {
       if (lhaevt_)
         lhaevt_->closeLHEF(false);  // we do not want to rewrite the init block
+#ifdef GZIP_BIN
+      if (gzip_) {
+        std::string cmnd(GZIP_BIN);
+        cmnd += " -f " + filename_;
+        system(cmnd.c_str());
+        CG_INFO("") << cmnd;
+      }
+#endif
     }
 
     void LHEFPythiaHandler::initialise(const Parameters& params) {
@@ -76,7 +95,7 @@ namespace cepgen {
     }
 
     void LHEFPythiaHandler::operator<<(const Event& ev) {
-      lhaevt_->feedEvent(compress_ ? ev : ev.compress(), Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants);
+      lhaevt_->feedEvent(compress_event_ ? ev : ev.compress(), Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants);
       pythia_->next();
       lhaevt_->eventLHEF();
     }
