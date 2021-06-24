@@ -21,6 +21,8 @@ namespace cepgen {
       error,           ///< General non-stopping error
       fatal            ///< Critical and stopping error
     };
+    /// Printout operator for exception type
+    friend std::ostream& operator<<(std::ostream&, const Type&);
     /// Dump the full exception information in a given output stream
     /// \param[inout] os the output stream where the information is dumped
     virtual std::ostream& dump(std::ostream& os = *utils::Logger::get().output) const = 0;
@@ -106,6 +108,7 @@ namespace cepgen {
       return *this;
     }
 
+    const char* what() const noexcept override;
     std::string message() const override;
 
     /// Origin of the exception
