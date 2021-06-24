@@ -13,6 +13,7 @@
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
+#include "CepGen/Utils/String.h"
 
 #include <Pythia8/Pythia.h>
 
