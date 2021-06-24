@@ -14,10 +14,11 @@ stages:
   before_script:
     - source scl_source enable devtoolset-7 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
     - gcc --version
+    - cmake3 --version || cmake --version
     - mkdir build
     - cd build
   script:
-    - cmake -DCMAKE_BUILD_TESTS=1 -DCMAKE_BUILD_CARD_CONV=1 ..
+    - cmake3 -DCMAKE_BUILD_TESTS=1 -DCMAKE_BUILD_CARD_CONV=1 .. || cmake -DCMAKE_BUILD_TESTS=1 -DCMAKE_BUILD_CARD_CONV=1 ..
     - make -j 8
   artifacts:
     expire_in: 2 hrs
