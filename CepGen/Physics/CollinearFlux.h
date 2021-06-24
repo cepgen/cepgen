@@ -20,8 +20,8 @@ namespace cepgen {
   };
   class CollinearFlux {
   public:
-    CollinearFlux(const Limits& range, formfac::Parameterisation* form_fac = nullptr);
-    CollinearFlux(const Limits& range, HeavyIon* hi);
+    CollinearFlux(formfac::Parameterisation* form_fac, const Limits& kt2_range);
+    CollinearFlux(HeavyIon* hi, const Limits& kt2_range);
     double operator()(double x, double mx, const KTFlux& flux_type) const;
 
   private:

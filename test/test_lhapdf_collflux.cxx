@@ -17,7 +17,7 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   double q2, xmin, xmax;
-  string ffmode, set;
+  string ffmode, set, output;
   int strfun_type, member, num_points;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("q2", "Virtuality", &q2, 100.)
@@ -26,6 +26,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("formfac,f", "form factors modelling", &ffmode, "StandardDipole")
       .addOptionalArgument("sf,s", "structure functions modelling", &strfun_type, 301)
       .addOptionalArgument("set,s", "PDFset to use", &set, "LUXqed17_plus_PDF4LHC15_nnlo_100")
+      .addOptionalArgument("output,o", "Output filename", &output, argv[0])
       .addOptionalArgument("member,m", "PDF member", &member, 0)
       .addOptionalArgument("num-points,n", "Number of points to probe", &num_points, 100)
       .parse();
@@ -34,11 +35,15 @@ int main(int argc, char* argv[]) {
 
   unique_ptr<LHAPDF::PDF> pdf(LHAPDF::mkPDF(set, member));
 
-  auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(strfun_type);
+  //auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(strfun_type);
+  auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(
+      401, cepgen::ParametersList().set<std::string>("pdfSet", set).set<int>("pdfMember", member));
   auto ff = cepgen::formfac::FormFactorsFactory::get().build(ffmode);
   ff->setStructureFunctions(sf.get());
 
-  cepgen::CollinearFlux flux(cepgen::Limits(0., 10000.), ff.get());
+  const cepgen::Limits kt2_limits(0., 1000.);
+
+  const cepgen::CollinearFlux flux(ff.get(), kt2_limits);
 
   TGraph g_ref, g_cg, g_ratio;
   for (int i = 0; i < num_points; ++i) {
@@ -51,7 +56,7 @@ int main(int argc, char* argv[]) {
     g_ratio.SetPoint(g_ratio.GetN(), x, pdf / xfx);
   }
 
-  cepgen::Canvas c(argv[0]);
+  cepgen::Canvas c(output.c_str());
   TMultiGraph mg;
   g_ref.SetLineColor(kRed + 1);
   g_cg.SetLineColor(kBlue + 2);

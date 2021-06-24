@@ -61,7 +61,9 @@ int main(int argc, char* argv[]) {
   auto ff = cepgen::formfac::FormFactorsFactory::get().build(ffmode);
   ff->setStructureFunctions(sf.get());
 
-  cepgen::CollinearFlux flux(cepgen::Limits(0., 10000.), ff.get());
+  const cepgen::Limits kt2_limits(0., 10000.);
+
+  const cepgen::CollinearFlux flux(ff.get(), kt2_limits);
   for (int i = 0; i < num_points; ++i) {
     const double x = xmin + i * (xmax - xmin) / (num_points - 1);
     out << x;
