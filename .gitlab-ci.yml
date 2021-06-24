@@ -92,53 +92,6 @@ stages:
   allow_failure: true
 
 #######################################
-# SLC6 jobs
-# (disabled as only gcc 4.4.7 is
-# provided while 4.8 is required)
-#######################################
-#
-#compile:slc6:
-#  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:slc6
-#  <<: *build_definition
-#
-#run_cepgen:slc6:
-#  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:slc6
-#  dependencies: ["compile:slc6"]
-#  needs: ["compile:slc6"]
-#  <<: *run_cepgen_definition
-
-#test:slc6:
-#  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:slc6
-#  dependencies: ["compile:slc6"]
-#  needs: ["compile:slc6"]
-#  <<: *test_definition
-#
-#test_function_parser:slc6:
-#  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:slc6
-#  dependencies: ["compile:slc6"]
-#  needs: ["compile:slc6"]
-#  <<: *test_function_parser_definition
-#
-#test_integrator:slc6:
-#  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:slc6
-#  dependencies: ["compile:slc6"]
-#  needs: ["compile:slc6"]
-#  <<: *test_integrator_definition
-#
-#test_cross_sections:slc6:
-#  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:slc6
-#  dependencies: ["compile:slc6"]
-#  needs: ["compile:slc6"]
-#  <<: *test_cross_sections_definition
-#
-#test_function_parser:slc6:
-#  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:slc6
-#  dependencies: ["compile:slc6"]
-#  needs: ["compile:slc6"]
-#  <<: *test_function_parser_definition
-#
-
-#######################################
 # CC7 jobs
 #######################################
 
@@ -186,56 +139,6 @@ test_function_parser:cc7:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
   dependencies: ["compile:cc7"]
   needs: ["compile:cc7"]
-  <<: *test_function_parser_definition
-
-#######################################
-# Fedora 31 jobs
-#######################################
-
-compile:f31:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f31
-  <<: *build_definition
-
-package:f31:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f31
-  dependencies: ["compile:f31"]
-  needs: ["compile:f31"]
-  <<: *package_definition
-
-run_cepgen:f31:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f31
-  dependencies: ["compile:f31"]
-  needs: ["compile:f31"]
-  <<: *run_cepgen_definition
-
-test:f31:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f31
-  dependencies: ["compile:f31"]
-  needs: ["compile:f31"]
-  <<: *test_definition
-
-test_function_parser:f31:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f31
-  dependencies: ["compile:f31"]
-  needs: ["compile:f31"]
-  <<: *test_function_parser_definition
-
-test_integrator:f31:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f31
-  dependencies: ["compile:f31"]
-  needs: ["compile:f31"]
-  <<: *test_integrator_definition
-
-test_cross_sections:f31:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f31
-  dependencies: ["compile:f31"]
-  needs: ["compile:f31"]
-  <<: *test_cross_sections_definition
-
-test_function_parser:f31:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f31
-  dependencies: ["compile:f31"]
-  needs: ["compile:f31"]
   <<: *test_function_parser_definition
 
 #######################################
