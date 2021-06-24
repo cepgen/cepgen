@@ -145,43 +145,6 @@ namespace cepgen {
       return PyDict_Check(obj);
     }
 
-    template <>
-    ParametersList PythonHandler::get<ParametersList>(PyObject* obj) const {
-      if (!is<ParametersList>(obj))
-        throw CG_ERROR("PythonHandler:get")
-            << "Object has invalid type: parameters list != \"" << obj->ob_type->tp_name << "\".";
-      ParametersList out;
-      PyObject *pkey = nullptr, *pvalue = nullptr;
-      Py_ssize_t pos = 0;
-      while (PyDict_Next(obj, &pos, &pkey, &pvalue)) {
-        const std::string skey = is<std::string>(pkey) ? get<std::string>(pkey)
-                                 : is<int>(pkey)       ? std::to_string(get<int>(pkey))  // integer-type key
-                                                       : "invalid";
-        if (is<int>(pvalue))
-          out.set<int>(skey, get<int>(pvalue));
-        else if (is<double>(pvalue))
-          out.set<double>(skey, get<double>(pvalue));
-        else if (is<std::string>(pvalue))
-          out.set<std::string>(skey, get<std::string>(pvalue));
-        else if (is<ParametersList>(pvalue))
-          out.set<ParametersList>(skey, get<ParametersList>(pvalue));
-        else if (PyTuple_Check(pvalue) || PyList_Check(pvalue)) {  // vector
-          if (isVector<int>(pvalue))
-            out.set<std::vector<int> >(skey, getVector<int>(pvalue));
-          else if (isVector<double>(pvalue)) {
-            out.set<std::vector<double> >(skey, getVector<double>(pvalue));
-            if (is<Limits>(pvalue))
-              out.set<Limits>(skey, get<Limits>(pvalue));
-          } else if (isVector<std::string>(pvalue))
-            out.set<std::vector<std::string> >(skey, getVector<std::string>(pvalue));
-          else if (isVector<ParametersList>(pvalue))
-            out.set<std::vector<ParametersList> >(skey, getVector<ParametersList>(pvalue));
-        } else
-          throwPythonError("Invalid object retrieved as parameters list value!");
-      }
-      return out;
-    }
-
     template <typename T>
     bool PythonHandler::isVector(PyObject* obj) const {
       if (!obj)
@@ -213,6 +176,44 @@ namespace cepgen {
         vec.emplace_back(get<T>(pit));
       }
       return vec;
+    }
+
+    template <>
+    ParametersList PythonHandler::get<ParametersList>(PyObject* obj) const {
+      if (!is<ParametersList>(obj))
+        throw CG_ERROR("PythonHandler:get")
+            << "Object has invalid type: parameters list != \"" << obj->ob_type->tp_name << "\".";
+      ParametersList out;
+      PyObject *pkey = nullptr, *pvalue = nullptr;
+      Py_ssize_t pos = 0;
+      while (PyDict_Next(obj, &pos, &pkey, &pvalue)) {
+        const std::string skey = is<std::string>(pkey)
+                                     ? get<std::string>(pkey)
+                                     : is<int>(pkey) ? std::to_string(get<int>(pkey))  // integer-type key
+                                                     : "invalid";
+        if (is<int>(pvalue))
+          out.set<int>(skey, get<int>(pvalue));
+        else if (is<double>(pvalue))
+          out.set<double>(skey, get<double>(pvalue));
+        else if (is<std::string>(pvalue))
+          out.set<std::string>(skey, get<std::string>(pvalue));
+        else if (is<ParametersList>(pvalue))
+          out.set<ParametersList>(skey, get<ParametersList>(pvalue));
+        else if (PyTuple_Check(pvalue) || PyList_Check(pvalue)) {  // vector
+          if (isVector<int>(pvalue))
+            out.set<std::vector<int> >(skey, getVector<int>(pvalue));
+          else if (isVector<double>(pvalue)) {
+            out.set<std::vector<double> >(skey, getVector<double>(pvalue));
+            if (is<Limits>(pvalue))
+              out.set<Limits>(skey, get<Limits>(pvalue));
+          } else if (isVector<std::string>(pvalue))
+            out.set<std::vector<std::string> >(skey, getVector<std::string>(pvalue));
+          else  //if (isVector<ParametersList>(pvalue))
+            out.set<std::vector<ParametersList> >(skey, getVector<ParametersList>(pvalue));
+        } else
+          throwPythonError("Invalid object retrieved as parameters list value!");
+      }
+      return out;
     }
   }  // namespace card
 }  // namespace cepgen

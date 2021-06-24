@@ -13,7 +13,8 @@ export PYTHIA6_DIR=${CVMFS_DIR}/MCGenerators/pythia6/429.2-c4089/x86_64-centos7-
 export PYTHIA8_DIR=${CVMFS_DIR}/MCGenerators/pythia8/243-ac0f1/x86_64-centos7-gcc62-opt
 export PYTHIA8DATA=${PYTHIA8_DIR}/share/Pythia8/xmldoc
 #--- extra utilities
-export PYTHONHOME=${CVMFS_DIR}/Python/2.7.15-075d4/x86_64-centos7-gcc62-opt
+export PYTHONHOME=${CVMFS_DIR}/Python/3.9.5-82945/x86_64-centos7-gcc9-opt
+export PATH=${PYTHONHOME}/bin:${PATH}
 export GSL_DIR=${CVMFS_DIR}/GSL/2.5-32fc5/x86_64-centos7-gcc62-opt
 export HEPMC_DIR=${CVMFS_DIR}/HepMC/2.06.09-0a23a/x86_64-centos7-gcc62-opt
 export LHAPDF_PATH=${CVMFS_DIR}/MCGenerators/lhapdf/6.2.2-8a3e6/x86_64-centos7-gcc62-opt
