@@ -13,3 +13,5 @@ foreach(exec_src ${exec_sources})
   target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES})
   install(TARGETS ${exec_bin} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT lib)
 endforeach()
+
+add_subdirectory(utils)
