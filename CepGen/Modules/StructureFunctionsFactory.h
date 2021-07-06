@@ -10,7 +10,7 @@
       BUILDERNM(id)() {                                                                          \
         try {                                                                                    \
           strfun::StructureFunctionsFactory::get().registerModule<obj>((int)strfun::Type::id);   \
-        } catch (const Exception& exc) {                                                         \
+        } catch (const cepgen::Exception& exc) {                                                 \
           throw CG_FATAL("REGISTER_STRFUN")                                                      \
               << "Failed to register structure functions modelling " << strfun::Type::id << "!"; \
         }                                                                                        \
