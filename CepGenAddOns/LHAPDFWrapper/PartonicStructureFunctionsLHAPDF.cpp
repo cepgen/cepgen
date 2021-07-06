@@ -139,7 +139,7 @@ namespace cepgen {
 
     Partonic& Partonic::eval(double xbj, double q2) {
       F2 = 0.;
-      if (num_flavours_ == 0 || num_flavours_ > 6) {
+      if (num_flavours_ == 0 || num_flavours_ > QUARK_PDGS.size()) {
         CG_WARNING("Partonic") << "Invalid number of flavours (" << num_flavours_ << " selected.";
         return *this;
       }
@@ -170,15 +170,15 @@ namespace cepgen {
 #endif
 
       for (int i = 0; i < num_flavours_; ++i) {
-        const double prefactor = 1. / 9. * Q_TIMES_3[i] * Q_TIMES_3[i];
+        const double prefactor = 1. / 9. * Q_TIMES_3.at(i) * Q_TIMES_3.at(i);
 #ifdef LHAPDF_GE_6
-        if (!pdfs_[pdf_member_]->hasFlavor(QUARK_PDGS[i]))
-          throw CG_FATAL("Partonic") << "Flavour " << QUARK_PDGS[i] << " is unsupported!";
-        const double xq = member.xfxQ2(QUARK_PDGS[i], xbj, q2);
-        const double xqbar = member.xfxQ2(-QUARK_PDGS[i], xbj, q2);
+        if (!pdfs_[pdf_member_]->hasFlavor(QUARK_PDGS.at(i)))
+          throw CG_FATAL("Partonic") << "Flavour " << QUARK_PDGS.at(i) << " is unsupported!";
+        const double xq = member.xfxQ2(QUARK_PDGS.at(i), xbj, q2);
+        const double xqbar = member.xfxQ2(-QUARK_PDGS.at(i), xbj, q2);
 #else
-        const double xq = LHAPDF::xfx(xbj, q, QUARK_PDGS[i]);
-        const double xqbar = LHAPDF::xfx(xbj, q, -QUARK_PDGS[i]);
+        const double xq = LHAPDF::xfx(xbj, q, QUARK_PDGS.at(i));
+        const double xqbar = LHAPDF::xfx(xbj, q, -QUARK_PDGS.at(i));
 #endif
         switch (mode_) {
           case Mode::full:
