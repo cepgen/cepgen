@@ -30,8 +30,8 @@ void cepgen_structure_functions_(int& sfmode, double& xbj, double& q2, double& f
 /// \param[in] mout Diffractive state mass for dissociative emission
 double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& min, double& mout) {
   using namespace cepgen;
-  static auto ff =
-      formfac::FormFactorsFactory::get().build("StandardDipole");  // use another argument for the modelling?
+  static auto ff = formfac::FormFactorsFactory::get().build(
+      formfac::gFFStandardDipoleHandler);  // use another argument for the modelling?
   static auto sf = strfun::StructureFunctionsFactory::get().build(sfmode);
   ff->setStructureFunctions(sf.get());
   return ktFlux((KTFlux)fmode, x, kt2, *ff, min * min, mout * mout);
