@@ -3,6 +3,7 @@
 
 #include "CepGen/Physics/AlphaS.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/String.h"
 
 #include <fstream>
 
@@ -61,7 +62,10 @@ int main(int argc, char* argv[]) {
   for (size_t i = 0; i < alphas_vals.size(); ++i) {
     v_graphs[i].SetLineColor(cepgen::Canvas::colours[i]);
     mg.Add(&v_graphs[i]);
-    c.AddLegendEntry(&v_graphs[i], cepgen::AlphaSFactory::get().describe(alphas_vals[i].first).c_str());
+    auto descr = cepgen::AlphaSFactory::get().describe(alphas_vals[i].first);
+    cepgen::utils::replace_all(descr, " alphaS", "");
+    cepgen::utils::replace_all(descr, " evolution algorithm", "");
+    c.AddLegendEntry(&v_graphs[i], descr.c_str(), "l");
   }
   mg.Draw("al");
   mg.GetHistogram()->SetTitle(";Q (GeV);#alpha_{S}(Q)");
