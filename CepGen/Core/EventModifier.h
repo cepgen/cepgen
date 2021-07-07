@@ -26,8 +26,6 @@ namespace cepgen {
     /// \brief Specify a random numbers generator seed for the external module
     /// \param[in] seed A RNG seed
     void setSeed(long long seed) { seed_ = seed; }
-    /// Return a human-readable name for this modifier
-    const std::string& name() const { return name_; }
 
     /// Parse a configuration string
     virtual void readString(const char*) {}
