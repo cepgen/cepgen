@@ -1,6 +1,6 @@
 #-- build all utils and link them to the core library
 
-file(GLOB utils_standalone *.cc)
+file(GLOB utils_standalone RELATIVE ${PROJECT_SOURCE_DIR}/src/utils *.cc)
 foreach(exec_src ${utils_standalone})
   string(REPLACE ".cc" "" exec_bin ${exec_src})
   add_executable(${exec_bin} ${exec_src})
@@ -11,7 +11,7 @@ endforeach()
 
 find_package(ROOT QUIET)
 if(ROOT_FOUND)
-  file(GLOB utils_root RELATIVE ${. *.cxx)
+  file(GLOB utils_root RELATIVE ${PROJECT_SOURCE_DIR}/src/utils *.cxx)
   foreach(exec_src ${utils_root})
     string(REPLACE ".cxx" "" exec_bin ${exec_src})
     add_executable(${exec_bin} ${exec_src})
