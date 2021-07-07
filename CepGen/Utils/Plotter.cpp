@@ -29,33 +29,45 @@ namespace cepgen {
          << std::left << (log_ ? "logarithmic scale" : "linear scale")
          << utils::format("%5.2e", log_ ? std::exp(max_val_log) : max_val) << "\n"
          << sep << std::string(width_ + 2, '.');  // abscissa axis
+      size_t idx = 0;
       for (const auto& coord_set : axis) {
-        const auto& set = coord_set.second;
-        const double val = set.value, unc = set.value_unc;
-        size_t ival = 0ull, ierr = 0ull;
-        {
-          double val_dbl = width_, unc_dbl = width_;
-          if (log_) {
-            val_dbl *= (val > 0. && max_val > 0.)
-                           ? std::max((std::log(val) - min_val_log) / (max_val_log - min_val_log), 0.)
-                           : 0.;
-            unc_dbl *= (val > 0. && max_val > 0.)
-                           ? std::max((std::log(unc) - min_val_log) / (max_val_log - min_val_log), 0.)
-                           : 0.;
-          } else if (max_val > 0.) {
-            val_dbl *= (val - min_val) / (max_val - min_val);
-            unc_dbl *= unc / (max_val - min_val);
+        const auto left_label =
+            coord_set.first.label.empty() ? utils::format("%17g", coord_set.first.value) : coord_set.first.label;
+        if (min_val == max_val) {
+          os << "\n" << left_label << ":";
+          if (idx == axis.size() / 2)
+            os << std::string((width_ - 10) / 2, ' ') << "E M P T Y " << std::string((width_ - 10) / 2, ' ');
+          else
+            os << std::string(width_, ' ');
+          os << ":";
+        } else {
+          const auto& set = coord_set.second;
+          const double val = set.value, unc = set.value_unc;
+          size_t ival = 0ull, ierr = 0ull;
+          {
+            double val_dbl = width_, unc_dbl = width_;
+            if (log_) {
+              val_dbl *= (val > 0. && max_val > 0.)
+                             ? std::max((std::log(val) - min_val_log) / (max_val_log - min_val_log), 0.)
+                             : 0.;
+              unc_dbl *= (val > 0. && max_val > 0.)
+                             ? std::max((std::log(unc) - min_val_log) / (max_val_log - min_val_log), 0.)
+                             : 0.;
+            } else if (max_val > 0.) {
+              val_dbl *= (val - min_val) / (max_val - min_val);
+              unc_dbl *= unc / (max_val - min_val);
+            }
+            ival = std::ceil(val_dbl);
+            ierr = std::ceil(unc_dbl);
           }
-          ival = std::ceil(val_dbl);
-          ierr = std::ceil(unc_dbl);
+          os << "\n"
+             << left_label << ":" << (ival > ierr ? std::string(ival - ierr, ' ') : "")
+             << (ierr > 0 ? std::string(ierr, ERR_CHAR) : "") << utils::boldify(std::string(1, CHAR))
+             << (ierr > 0 ? std::string(std::min(width_ - ival - 1, ierr), ERR_CHAR) : "")
+             << (ival + ierr < width_ + 1 ? std::string(width_ - ival - ierr - 1, ' ') : "") << ": "
+             << utils::format("%6.2e +/- %6.2e", val, unc);
         }
-        os << "\n"
-           << (coord_set.first.label.empty() ? utils::format("%17g", coord_set.first.value) : coord_set.first.label)
-           << ":" << (ival > ierr ? std::string(ival - ierr, ' ') : "") << (ierr > 0 ? std::string(ierr, ERR_CHAR) : "")
-           << utils::boldify(std::string(1, CHAR))
-           << (ierr > 0 ? std::string(std::min(width_ - ival - 1, ierr), ERR_CHAR) : "")
-           << (ival + ierr < width_ + 1 ? std::string(width_ - ival - ierr - 1, ' ') : "") << ": "
-           << utils::format("%6.2e +/- %6.2e", val, unc);
+        ++idx;
       }
       os << "\n"
          << utils::format("%17s", xlabel_.c_str()) << ":" << std::string(width_, '.') << ":\n";  // 2nd abscissa axis
@@ -74,9 +86,11 @@ namespace cepgen {
       if (!ylabel_.empty())
         os << sep << std::string(std::max(0., 2. + width_ - ylabel_.size()), ' ') << ylabel_ << "\n";
       // find the maximum element of the graph
-      double max_val = Limits::INVALID;
+      double min_val = -Limits::INVALID, max_val = Limits::INVALID;
       double min_logval = -3.;
       for (const auto& xval : axes) {
+        min_val =
+            std::min(min_val, std::min_element(xval.second.begin(), xval.second.end(), map_elements())->second.value);
         max_val =
             std::max(max_val, std::max_element(xval.second.begin(), xval.second.end(), map_elements())->second.value);
         if (log_)
@@ -88,32 +102,41 @@ namespace cepgen {
       os << sep << utils::format("%-5.2f", y_axis.begin()->first.value) << std::string(axes.size() - 11, ' ')
          << utils::format("%5.2e", y_axis.rbegin()->first.value) << "\n"
          << utils::format("%17s", xlabel_.c_str()) << std::string(1 + y_axis.size() + 1, '.');  // abscissa axis
+      size_t idx = 0;
       for (const auto& xval : axes) {
         os << "\n" << (xval.first.label.empty() ? utils::format("%16g ", xval.first.value) : xval.first.label) << ":";
-        for (const auto& yval : xval.second) {
-          const double val = yval.second.value;
-          double val_norm = 0.;
-          if (log_)
-            val_norm = val <= 0. ? 0. : std::max(0., (std::log(val / max_val) - min_logval) / fabs(min_logval));
+        if (min_val == max_val) {
+          if (idx == axes.size() / 2)
+            os << std::string((width_ - 10) / 2, ' ') << "E M P T Y " << std::string((width_ - 10) / 2, ' ');
           else
-            val_norm = val / max_val;
-          if (std::isnan(val_norm)) {
-            os << utils::colourise("!", (utils::Colour)kColours[0]);
-            continue;
-          }
-          const short sign = (val_norm == 0. ? 0 : val_norm / fabs(val_norm));
-          val_norm *= sign;
-          if (sign == -1)
-            os << utils::colourise(std::string(1, NEG_CHAR), (utils::Colour)kColours[0]);
-          else {
-            size_t ch_id = ceil(val_norm * (strlen(CHARS) - 1));
-            size_t col_id = 1 + (val_norm * (sizeof(kColours) / (sizeof(int)) - 2));
-            os << utils::colourise(std::string(1, CHARS[ch_id]),
-                                   (utils::Colour)kColours[col_id],
-                                   (val_norm > 0.75 ? utils::Modifier::bold : utils::Modifier::reset));
+            os << std::string(width_, ' ');
+        } else {
+          for (const auto& yval : xval.second) {
+            const double val = yval.second.value;
+            double val_norm = 0.;
+            if (log_)
+              val_norm = val <= 0. ? 0. : std::max(0., (std::log(val / max_val) - min_logval) / fabs(min_logval));
+            else
+              val_norm = val / max_val;
+            if (std::isnan(val_norm)) {
+              os << utils::colourise("!", (utils::Colour)kColours[0]);
+              continue;
+            }
+            const short sign = (val_norm == 0. ? 0 : val_norm / fabs(val_norm));
+            val_norm *= sign;
+            if (sign == -1)
+              os << utils::colourise(std::string(1, NEG_CHAR), (utils::Colour)kColours[0]);
+            else {
+              size_t ch_id = ceil(val_norm * (strlen(CHARS) - 1));
+              size_t col_id = 1 + (val_norm * (sizeof(kColours) / (sizeof(int)) - 2));
+              os << utils::colourise(std::string(1, CHARS[ch_id]),
+                                     (utils::Colour)kColours[col_id],
+                                     (val_norm > 0.75 ? utils::Modifier::bold : utils::Modifier::reset));
+            }
           }
         }
         os << ":";
+        ++idx;
       }
       std::vector<std::string> ylabels;
       for (const auto& ybin : y_axis)
