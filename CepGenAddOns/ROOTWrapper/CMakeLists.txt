@@ -45,18 +45,13 @@ endif()
 
 #----- build the object
 
-if(${ROOT_VERSION} LESS 6.21)
-  set(ROOT_CXX_STANDARD 14)
-else()
-  set(ROOT_CXX_STANDARD 17)
-endif()
-
 cepgen_build(CepGenRoot SOURCES ${sources}
     EXT_HEADERS ${ROOT_INCLUDE_DIRS}
     EXT_LIBS ${ROOT_LIBRARIES}
     DEFINITIONS ${ROOT_DEFINITIONS}
     PROPERTY CXX_STANDARD ${ROOT_CXX_STANDARD}
     INSTALL_COMPONENT root)
+message(STATUS "... ROOT v${ROOT_VERSION} standard is c++${ROOT_CXX_STANDARD}")
 
 message(STATUS "Formulas parsing will use ROOT found in ${ROOT_INCLUDE_DIRS}")
 set(CEPGEN_HAS_FUNCTIONAL ON PARENT_SCOPE)

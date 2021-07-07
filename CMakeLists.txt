@@ -46,6 +46,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-pg") # for gprof
 #set(CMAKE_CXX_FLAGS_DEBUG "-fprofile-arcs -ftest-coverage") # for gcov
 set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -O2")
 set(CMAKE_C_FLAGS_RELEASE "-O2")
+set(ROOT_CXX_STANDARD 17)
 
 #----- include external paths
 
