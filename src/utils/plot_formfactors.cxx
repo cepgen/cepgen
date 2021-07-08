@@ -9,7 +9,7 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGenAddOns/ROOTWrapper/Canvas.h"
+#include "CepGenAddOns/ROOTWrapper/ROOTCanvas.h"
 
 #include <fstream>
 
@@ -75,13 +75,13 @@ int main(int argc, char* argv[]) {
   out.close();
 
   for (auto& plt : map<const char*, vector<TGraph*> >{{"FE", g_form_factors_fe}, {"FM", g_form_factors_fm}}) {
-    cepgen::Canvas c(plt.first, Form("M_{X} = %g GeV/c^{2}", mx));
+    cepgen::ROOTCanvas c(plt.first, Form("M_{X} = %g GeV/c^{2}", mx));
     c.SetLogy();
     TMultiGraph mg;
     size_t i = 0;
     for (auto& gr : plt.second) {
       mg.Add(gr);
-      gr->SetLineColor(cepgen::Canvas::colours[i]);
+      gr->SetLineColor(cepgen::ROOTCanvas::colours[i]);
       c.AddLegendEntry(gr, gr->GetTitle(), "l");
       ++i;
     }

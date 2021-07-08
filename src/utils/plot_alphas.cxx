@@ -4,7 +4,7 @@
 #include "CepGen/Physics/AlphaS.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/String.h"
-#include "CepGenAddOns/ROOTWrapper/Canvas.h"
+#include "CepGenAddOns/ROOTWrapper/ROOTCanvas.h"
 
 #include <fstream>
 
@@ -67,13 +67,13 @@ int main(int argc, char* argv[]) {
 
   // drawing part
   const auto top_label = cepgen::utils::s("CepGen #alpha_{S} modelling", alphas.size(), false);
-  cepgen::Canvas c("test_alphas", top_label.c_str(), alphas.size() > 1);
+  cepgen::ROOTCanvas c("test_alphas", top_label.c_str(), alphas.size() > 1);
   c.SetLegendX1(0.15);
   TMultiGraph mg;
   vector<TH1*> numers(alphas.size());
   for (size_t i = 0; i < alphas.size(); ++i) {
     auto& graph = alphas[i].graph;
-    graph.SetLineColor(cepgen::Canvas::colours[i]);
+    graph.SetLineColor(cepgen::ROOTCanvas::colours[i]);
     mg.Add(&graph);
     numers[i] = graph.GetHistogram();
     auto descr = cepgen::AlphaSFactory::get().describe(alphas[i].name);

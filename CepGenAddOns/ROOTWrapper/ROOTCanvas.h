@@ -1,5 +1,5 @@
-#ifndef Canvas_h
-#define Canvas_h
+#ifndef CepGenAddOns_ROOTWrapper_ROOTCanvas_h
+#define CepGenAddOns_ROOTWrapper_ROOTCanvas_h
 
 #include "TCanvas.h"
 #include "TLegend.h"
@@ -17,9 +17,9 @@
 
 namespace cepgen {
   /// A "prettified" text box object
-  class PaveText : public TPaveText {
+  class ROOTPaveText : public TPaveText {
   public:
-    inline PaveText(float x1, float y1, float x2, float y2, const char* text = "")
+    inline ROOTPaveText(float x1, float y1, float x2, float y2, const char* text = "")
         : TPaveText(x1, y1, x2, y2, "NB NDC") {
       TPaveText::SetTextAlign(13);
       if (strcmp(text, "") != 0) {
@@ -42,26 +42,26 @@ namespace cepgen {
   };
 
   /// A "prettified" generic figure canvas
-  class Canvas : public TCanvas {
+  class ROOTCanvas : public TCanvas {
   public:
     static const std::vector<int> colours;
 
     /// Build a canvas from its name, title, and attributes
     /// \param[in] name Canvas name (and subsequently filename on save)
     /// \param[in] ratio Divide the canvas into a main and ratio plots subparts?
-    explicit inline Canvas(const char* name, const char* title = "", bool ratio = false)
+    explicit inline ROOTCanvas(const char* name, const char* title = "", bool ratio = false)
         : TCanvas(name, "", 600, 600), fTitle(title), fTopLabel(0), fLeg(0), fLegX1(0.5), fLegY1(0.75), fRatio(ratio) {
       gStyle->SetOptStat(0);
       Build();
     }
-    inline ~Canvas() {
+    inline ~ROOTCanvas() {
       if (fLeg)
         delete fLeg;
       if (fTopLabel)
         delete fTopLabel;
     }
 
-    inline void SetSize(const float& size = 600) { TCanvas::SetCanvasSize(size, 600); }
+    inline void SetSize(float size = 600) { TCanvas::SetCanvasSize(size, 600); }
 
     inline void Prettify(TH1* obj) {
       TAxis *x = dynamic_cast<TAxis*>(obj->GetXaxis()), *y = dynamic_cast<TAxis*>(obj->GetYaxis()),
@@ -305,7 +305,7 @@ namespace cepgen {
 
     inline void BuildTopLabel() {
       TCanvas::cd();
-      fTopLabel = new PaveText(0.5, 0.95, 0.915, 0.96);
+      fTopLabel = new ROOTPaveText(0.5, 0.95, 0.915, 0.96);
       fTopLabel->SetTextSize(0.04);
       fTopLabel->SetTextAlign(kHAlignRight + kVAlignBottom);
     }
@@ -327,12 +327,12 @@ namespace cepgen {
     }
 
     TString fTitle;
-    PaveText* fTopLabel;
+    ROOTPaveText* fTopLabel;
     TLegend* fLeg;
     double fLegX1, fLegY1;
     bool fRatio;
   };
-  const std::vector<int> Canvas::colours = {kBlack, kRed + 1, kBlue - 2, kGreen + 1, kOrange + 1};
+  const std::vector<int> ROOTCanvas::colours = {kBlack, kRed + 1, kBlue - 2, kGreen + 1, kOrange + 1};
 }  // namespace cepgen
 
 #endif
