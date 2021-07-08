@@ -19,8 +19,8 @@ namespace cepgen {
   /// A "prettified" text box object
   class PaveText : public TPaveText {
   public:
-    inline PaveText(const float& x1, const float& y1, const float& x2, const float& y2, const char* text = "")
-        : TPaveText(x1, y1, x2, y2, "NDC") {
+    inline PaveText(float x1, float y1, float x2, float y2, const char* text = "")
+        : TPaveText(x1, y1, x2, y2, "NB NDC") {
       TPaveText::SetTextAlign(13);
       if (strcmp(text, "") != 0) {
         TString txt = text;
@@ -50,14 +50,7 @@ namespace cepgen {
     /// \param[in] name Canvas name (and subsequently filename on save)
     /// \param[in] ratio Divide the canvas into a main and ratio plots subparts?
     explicit inline Canvas(const char* name, const char* title = "", bool ratio = false)
-        :  //TCanvas( name, "", 450, 450 ),
-          TCanvas(name, "", 600, 600),
-          fTitle(title),
-          fTopLabel(0),
-          fLeg(0),
-          fLegX1(0.5),
-          fLegY1(0.75),
-          fRatio(ratio) {
+        : TCanvas(name, "", 600, 600), fTitle(title), fTopLabel(0), fLeg(0), fLegX1(0.5), fLegY1(0.75), fRatio(ratio) {
       gStyle->SetOptStat(0);
       Build();
     }
@@ -160,44 +153,27 @@ namespace cepgen {
                  obj->GetYaxis()->GetXmax());
     }
 
-    inline void RatioPlot(TH1* obj1, const TH1* obj2, const TH1* obj3, float ymin = -999., float ymax = -999.) {
+    inline void RatioPlot(TH1* numer, const std::vector<TH1*>& denoms, float ymin = -999., float ymax = -999.) {
       if (!fRatio)
         return;
-      TH1 *ratio1 = (TH1*)obj2->Clone(), *ratio2 = (TH1*)obj3->Clone();
-      //ratio1->Sumw2(); ratio2->Sumw2();
-      ratio1->Divide(obj1);
-      ratio2->Divide(obj1);
       TCanvas::cd(2);
-      ratio1->Draw("p");
-      ratio2->Draw("p same");
-      obj1->GetXaxis()->SetTitle("");
-      if (ymin != ymax) {
-        ratio1->GetYaxis()->SetRangeUser(ymin, ymax);
+      size_t i = 0;
+      for (const auto& denom : denoms) {
+        auto* ratio = dynamic_cast<TH1*>(denom->Clone("ratio"));
+        ratio->Divide(numer);
+        //ratio->Sumw2();
+        if (i == 0) {
+          ratio->Draw("p");
+          Prettify(ratio);
+          if (ymin != ymax)
+            ratio->GetYaxis()->SetRangeUser(ymin, ymax);
+          ratio->GetYaxis()->SetTitle("Ratio");
+        } else
+          ratio->Draw("p same");
+        ++i;
       }
-      Prettify(ratio1);
+      numer->GetXaxis()->SetTitle("");
       TCanvas::cd();
-    }
-
-    inline TH1* RatioPlot(
-        TH1* obj1, const TH1* obj2 = 0, float ymin = -999., float ymax = -999., const char* plot_type = "p") {
-      if (!fRatio)
-        return obj1;
-      TH1* ratio;
-      if (obj2) {
-        ratio = dynamic_cast<TH1*>(obj2->Clone());
-        ratio->Divide(obj1);
-      } else
-        ratio = dynamic_cast<TH1*>(obj1->Clone());
-
-      TCanvas::cd(2);
-      ratio->Draw(plot_type);
-      obj1->GetXaxis()->SetTitle("");
-      if (ymin != ymax)
-        ratio->GetYaxis()->SetRangeUser(ymin, ymax);
-      Prettify(ratio);
-      ratio->GetYaxis()->SetTitle("Ratio");
-      TCanvas::cd();
-      return ratio;
     }
 
     inline TGraphErrors* RatioPlot(TGraphErrors* obj1,
@@ -308,7 +284,7 @@ namespace cepgen {
 
     inline void DivideCanvas() {
       TCanvas::Divide(1, 2);
-      TPad *p1 = (TPad*)TCanvas::GetPad(1), *p2 = (TPad*)TCanvas::GetPad(2);
+      auto p1 = dynamic_cast<TPad*>(TCanvas::GetPad(1)), p2 = dynamic_cast<TPad*>(TCanvas::GetPad(2));
       p1->SetPad(0., 0.3, 1., 1.);
       p2->SetPad(0., 0.0, 1., 0.3);
       p1->SetFillStyle(0);
@@ -329,12 +305,7 @@ namespace cepgen {
 
     inline void BuildTopLabel() {
       TCanvas::cd();
-      fTopLabel = new TPaveText(0.5, 0.95, 0.915, 0.96, "NB NDC");
-      fTopLabel->SetFillStyle(0);
-      fTopLabel->SetFillColor(0);
-      fTopLabel->SetLineColor(0);
-      fTopLabel->SetLineStyle(0);
-      fTopLabel->SetTextFont(font_type(2));
+      fTopLabel = new PaveText(0.5, 0.95, 0.915, 0.96);
       fTopLabel->SetTextSize(0.04);
       fTopLabel->SetTextAlign(kHAlignRight + kVAlignBottom);
     }
@@ -356,7 +327,7 @@ namespace cepgen {
     }
 
     TString fTitle;
-    TPaveText* fTopLabel;
+    PaveText* fTopLabel;
     TLegend* fLeg;
     double fLegX1, fLegY1;
     bool fRatio;

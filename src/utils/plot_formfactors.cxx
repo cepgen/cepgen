@@ -9,10 +9,10 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGenAddOns/ROOTWrapper/Canvas.h"
 
 #include <fstream>
 
-#include "Canvas.h"
 #include "TMultiGraph.h"
 #include "TGraph.h"
 

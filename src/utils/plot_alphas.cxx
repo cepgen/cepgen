@@ -4,10 +4,10 @@
 #include "CepGen/Physics/AlphaS.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/String.h"
+#include "CepGenAddOns/ROOTWrapper/Canvas.h"
 
 #include <fstream>
 
-#include "Canvas.h"
 #include <TMultiGraph.h>
 #include <TGraph.h>
 
@@ -27,48 +27,64 @@ int main(int argc, char* argv[]) {
 
   cepgen::initialise();
 
+  struct alphas_t {
+    string name;
+    vector<double> vals;
+    TGraph graph;
+  };
+  vector<alphas_t> alphas;
+
   vector<double> qvals(num_points);
-  vector<pair<string, vector<double> > > alphas_vals;
   for (int i = 0; i < num_points; ++i)
     qvals[i] = qmin + (qmax - qmin) * i / num_points;
 
+  // alphaS(Q) modellings part
   size_t i = 0;
-  vector<TGraph> v_graphs;
   for (const auto& mod : cepgen::AlphaSFactory::get().modules()) {
-    const auto& algo = cepgen::AlphaSFactory::get().build(mod);
-    alphas_vals.emplace_back(make_pair(mod, vector<double>(num_points)));
-    v_graphs.emplace_back();
+    const auto& algo = cepgen::AlphaSFactory::get().build(
+        mod /*, cepgen::ParametersList().set<double>("asmur", 0.35).set<double>("mur", 1.4142)*/);
+    TGraph graph;
+    graph.SetName(mod.c_str());
+    alphas.emplace_back(alphas_t{mod, vector<double>(num_points), graph});
+    auto& as = alphas[i++];
     for (size_t j = 0; j < qvals.size(); ++j) {
       const auto val = (*algo)(qvals[j]);
-      alphas_vals[i].second[j] = val;
-      v_graphs[i].SetPoint(j, qvals[j], val);
+      as.vals[j] = val;
+      as.graph.SetPoint(j, qvals[j], val);
     }
-    ++i;
   }
 
+  // output ascii file
   ofstream out(output_file);
   out << "#";
-  for (const auto& smp : alphas_vals)
-    out << "\t" << smp.first;
+  for (const auto& smp : alphas)
+    out << "\t" << smp.name;
   for (size_t i = 0; i < qvals.size(); ++i) {
     out << "\n" << qvals[i];
-    for (const auto& smp : alphas_vals)
-      out << "\t" << smp.second[i];
+    for (const auto& smp : alphas)
+      out << "\t" << smp.vals[i];
   }
 
-  cepgen::Canvas c("test_alphas");
+  // drawing part
+  const auto top_label = cepgen::utils::s("CepGen #alpha_{S} modelling", alphas.size(), false);
+  cepgen::Canvas c("test_alphas", top_label.c_str(), alphas.size() > 1);
   c.SetLegendX1(0.15);
   TMultiGraph mg;
-  for (size_t i = 0; i < alphas_vals.size(); ++i) {
-    v_graphs[i].SetLineColor(cepgen::Canvas::colours[i]);
-    mg.Add(&v_graphs[i]);
-    auto descr = cepgen::AlphaSFactory::get().describe(alphas_vals[i].first);
+  vector<TH1*> numers(alphas.size());
+  for (size_t i = 0; i < alphas.size(); ++i) {
+    auto& graph = alphas[i].graph;
+    graph.SetLineColor(cepgen::Canvas::colours[i]);
+    mg.Add(&graph);
+    numers[i] = graph.GetHistogram();
+    auto descr = cepgen::AlphaSFactory::get().describe(alphas[i].name);
     cepgen::utils::replace_all(descr, " alphaS", "");
     cepgen::utils::replace_all(descr, " evolution algorithm", "");
-    c.AddLegendEntry(&v_graphs[i], descr.c_str(), "l");
+    c.AddLegendEntry(&graph, descr.c_str(), "l");
   }
+  c.RatioPlot(alphas[0].graph.GetHistogram(), numers);
   mg.Draw("al");
   mg.GetHistogram()->SetTitle(";Q (GeV);#alpha_{S}(Q)");
+  mg.GetXaxis()->SetRangeUser(*qvals.begin(), *qvals.rbegin());
   c.Prettify(mg.GetHistogram());
   c.SetLogx();
   c.Save("pdf");

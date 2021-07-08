@@ -6,8 +6,8 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGenAddOns/ROOTWrapper/Canvas.h"
 
-#include "Canvas.h"
 #include "TGraph2D.h"
 
 using namespace std;
