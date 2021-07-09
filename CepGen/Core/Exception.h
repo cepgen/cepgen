@@ -163,9 +163,7 @@ namespace cepgen {
 #define __FUNC__ __PRETTY_FUNCTION__
 #endif
 
-#define CG_LOG(mod)                                        \
-  (!CG_LOG_MATCH(mod, information)) ? cepgen::NullStream() \
-                                    : cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::verbatim)
+#define CG_LOG cepgen::LoggedException(__FUNC__, "Logging", cepgen::Exception::Type::verbatim)
 #define CG_INFO(mod)                                       \
   (!CG_LOG_MATCH(mod, information)) ? cepgen::NullStream() \
                                     : cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::info)

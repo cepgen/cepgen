@@ -1,12 +1,12 @@
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/String.h"
-#include "CepGen/Core/Exception.h"
 
-#include "CepGen/Version.h"
-
-#include <sstream>
 #include <algorithm>
 #include <cstring>
+#include <sstream>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/String.h"
+#include "CepGen/Version.h"
 
 namespace cepgen {
   ArgumentsParser::ArgumentsParser(int argc, char* argv[])
@@ -52,9 +52,9 @@ namespace cepgen {
     }
   }
 
-  void ArgumentsParser::print_help() const { CG_LOG("ArgumentsParser") << help_message(); }
+  void ArgumentsParser::print_help() const { CG_LOG << help_message(); }
 
-  void ArgumentsParser::print_version() const { CG_LOG("ArgumentsParser") << cepgen::version::banner; }
+  void ArgumentsParser::print_version() const { CG_LOG << cepgen::version::banner; }
 
   void ArgumentsParser::dump() const {
     CG_INFO("ArgumentsParser").log([&](auto& info) {

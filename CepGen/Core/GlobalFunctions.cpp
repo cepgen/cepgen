@@ -1,16 +1,13 @@
-#include "CepGen/Generator.h"
-#include "CepGen/Version.h"
-
-#include "CepGen/Physics/MCDFileParser.h"
-#include "CepGen/Physics/PDG.h"
+#include <atomic>
+#include <fstream>
 
 #include "CepGen/Core/Exception.h"
-
-#include "CepGen/Utils/String.h"
+#include "CepGen/Generator.h"
+#include "CepGen/Physics/MCDFileParser.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/Filesystem.h"
-
-#include <fstream>
-#include <atomic>
+#include "CepGen/Utils/String.h"
+#include "CepGen/Version.h"
 
 #ifdef _WIN32
 #include <libloaderapi.h>
@@ -114,7 +111,7 @@ namespace cepgen {
     for (const auto& path : search_paths) {
       std::ifstream hf(path + "/README");
       if (hf.good()) {
-        CG_LOG("printHeader") << std::string(std::istreambuf_iterator<char>(hf), std::istreambuf_iterator<char>());
+        CG_LOG << std::string(std::istreambuf_iterator<char>(hf), std::istreambuf_iterator<char>());
         return;
       }
     }

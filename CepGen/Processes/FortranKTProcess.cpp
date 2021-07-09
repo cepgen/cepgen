@@ -1,15 +1,13 @@
 #include "CepGen/Processes/FortranKTProcess.h"
-#include "CepGen/Processes/Fortran/KTStructures.h"
 
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
-
-#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
-
 #include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/HeavyIon.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Processes/Fortran/KTStructures.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 
 extern "C" {
 extern cepgen::ktblock::Constants constants_;
@@ -18,7 +16,7 @@ extern cepgen::ktblock::KTKinematics ktkin_;
 extern cepgen::ktblock::Cuts kincuts_;
 extern cepgen::ktblock::Event evtkin_;
 
-void cepgen_list_params_() { CG_LOG("cepgen_list_params") << "\t" << cepgen::proc::FortranKTProcess::kProcParameters; }
+void cepgen_list_params_() { CG_LOG << "\t" << cepgen::proc::FortranKTProcess::kProcParameters; }
 
 int cepgen_param_int_(char* pname, int& def) {
   //--- first check if the "integer" is a particle id

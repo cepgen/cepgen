@@ -1,18 +1,14 @@
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
-#include "CepGen/Parameters.h"
-
+#include "CepGen/Integration/Integrand.h"
+#include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Integration/Integrator.h"
-#include "CepGen/Integration/Integrand.h"
-
+#include "CepGen/Parameters.h"
 #include "CepGen/Processes/Process.h"
-
+#include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/String.h"
-#include "CepGen/Utils/ArgumentsParser.h"
-
-#include "CepGen/Core/Exception.h"
 
 using namespace std;
 
@@ -94,7 +90,7 @@ int main(int argc, char* argv[]) {
   cepgen::Parameters params;
 
   for (const auto& integrator : integrators) {
-    CG_LOG("main") << "Running with " << integrator << " integrator.";
+    CG_LOG << "Running with " << integrator << " integrator.";
     auto integr = cepgen::IntegratorFactory::get().build(integrator);
 
     //--- integration part
@@ -115,7 +111,7 @@ int main(int argc, char* argv[]) {
     bool success = true;
     i = 0;
     for (const auto& test : tests) {
-      CG_LOG("main") << "Test " << i++ << " passed: " << cepgen::utils::yesno(test.success);
+      CG_LOG << "Test " << i++ << " passed: " << cepgen::utils::yesno(test.success);
       success &= test.success;
     }
     if (!success)

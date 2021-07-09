@@ -1,22 +1,19 @@
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
-
-#include "CepGen/Physics/AlphaS.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
-
 #include "CepGen/Modules/CardsHandlerFactory.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Modules/ProcessesFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
-
-#include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Modules/ProcessesFactory.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/AlphaS.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
   void dumpModules() {
-    CG_LOG("dumpModules").log([](auto& info) {
+    CG_LOG.log([](auto& info) {
       const std::string sep_mid(80, '-');
       info << "List of modules registered in the runtime database:\n";
       {

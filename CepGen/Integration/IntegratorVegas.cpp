@@ -1,13 +1,12 @@
-#include "CepGen/Integration/IntegratorGSL.h"
-#include "CepGen/Integration/Integrand.h"
-#include "CepGen/Integration/GridParameters.h"
-#include "CepGen/Modules/IntegratorFactory.h"
+#include <gsl/gsl_monte_vegas.h>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Integration/GridParameters.h"
+#include "CepGen/Integration/Integrand.h"
+#include "CepGen/Integration/IntegratorGSL.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Utils/String.h"
-
-#include <gsl/gsl_monte_vegas.h>
 
 namespace cepgen {
   /// Vegas integration algorithm developed by P. Lepage, as documented in \cite Lepage:1977sw
@@ -106,13 +105,13 @@ namespace cepgen {
                                           vegas_state_.get(),
                                           &result,
                                           &abserr);
-      CG_LOG("Integrator:integrate") << "\t>> at call " << (++it_chisq) << ": "
-                                     << utils::format(
-                                            "average = %10.6f   "
-                                            "sigma = %10.6f   chi2 = %4.3f.",
-                                            result,
-                                            abserr,
-                                            gsl_monte_vegas_chisq(vegas_state_.get()));
+      CG_LOG << "\t>> at call " << (++it_chisq) << ": "
+             << utils::format(
+                    "average = %10.6f   "
+                    "sigma = %10.6f   chi2 = %4.3f.",
+                    result,
+                    abserr,
+                    gsl_monte_vegas_chisq(vegas_state_.get()));
       if (res != GSL_SUCCESS)
         throw CG_FATAL("Integrator:integrate")
             << "Error at iteration #" << it_chisq << " while performing the integration!\n\t"

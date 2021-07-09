@@ -1,10 +1,10 @@
 #ifndef CepGen_Utils_AbortHandler_h
 #define CepGen_Utils_AbortHandler_h
 
-#include "CepGen/Core/Exception.h"
-
-#include <csignal>
 #include <atomic>
+#include <csignal>
+
+#include "CepGen/Core/Exception.h"
 
 namespace cepgen {
   namespace utils {
@@ -12,10 +12,7 @@ namespace cepgen {
     /// Exception raised when the user terminates the process
     struct RunAbortedException : NullStream {
       using NullStream::NullStream;
-      ~RunAbortedException() override {
-        CG_LOG("RunAbortedException");
-        CG_INFO("RunAbortedException") << "User abort through C-c.";
-      }
+      ~RunAbortedException() override { CG_INFO("RunAbortedException") << "User abort through C-c."; }
     };
 
     /// Object handling an user-driven process abortion

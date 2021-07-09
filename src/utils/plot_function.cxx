@@ -30,11 +30,11 @@ int main(int argc, char* argv[]) {
     gr_rt.SetPoint(i, x, f_rt.Eval(x));
   }
 
-  CG_LOG("main") << "Function to be plotted: " << function;
+  CG_LOG << "Function to be plotted: " << function;
 
   map<string, TGraph> m_gr_fb, m_gr_diff;
   for (const auto& func : cepgen::utils::FunctionalFactory::get().modules()) {
-    CG_LOG("main") << "Building \"" << func << "\" functional.";
+    CG_LOG << "Building \"" << func << "\" functional.";
     try {
       auto test =
           cepgen::utils::FunctionalFactory::get().build(func,

@@ -1,20 +1,16 @@
-#include "CepGen/Generator.h"
-#include "CepGen/Parameters.h"
-
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Core/Exception.h"
+#include <fstream>
 
 #include "CepGen/Cards/Handler.h"
-#include "CepGen/Processes/Process.h"
-#include "CepGen/Physics/PDG.h"
-
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Generator.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
-
+#include "CepGen/Parameters.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Processes/Process.h"
+#include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Logger.h"
 #include "CepGen/Utils/String.h"
-#include "CepGen/Utils/ArgumentsParser.h"
-
-#include <fstream>
 
 using namespace std;
 
@@ -97,7 +93,7 @@ int main(int argc, char* argv[]) {
       par.process().clear();
     } else
       throw CG_FATAL("main") << "Invalid variable to be scanned: \"" << scan << "\"!";
-    CG_LOG("main") << "Scan of \"" << scan << "\". Value = " << value << ".";
+    CG_LOG << "Scan of \"" << scan << "\". Value = " << value << ".";
     mg.computeXsection(cross_section, err_cross_section);
     string out_line = cepgen::utils::format("%.2f\t%.8e\t%.8e\n", value, cross_section, err_cross_section);
     xsect_file << out_line;
