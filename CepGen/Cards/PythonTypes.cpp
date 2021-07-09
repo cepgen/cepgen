@@ -1,7 +1,6 @@
 #include "CepGen/Cards/PythonHandler.h"
-
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/String.h"
 
 #if PY_MAJOR_VERSION < 3
@@ -187,10 +186,9 @@ namespace cepgen {
       PyObject *pkey = nullptr, *pvalue = nullptr;
       Py_ssize_t pos = 0;
       while (PyDict_Next(obj, &pos, &pkey, &pvalue)) {
-        const std::string skey = is<std::string>(pkey)
-                                     ? get<std::string>(pkey)
-                                     : is<int>(pkey) ? std::to_string(get<int>(pkey))  // integer-type key
-                                                     : "invalid";
+        const std::string skey = is<std::string>(pkey) ? get<std::string>(pkey)
+                                 : is<int>(pkey)       ? std::to_string(get<int>(pkey))  // integer-type key
+                                                       : "invalid";
         if (is<int>(pvalue))
           out.set<int>(skey, get<int>(pvalue));
         else if (is<double>(pvalue))

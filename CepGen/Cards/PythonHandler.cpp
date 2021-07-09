@@ -1,38 +1,30 @@
 #include "CepGen/Cards/PythonHandler.h"
-#include "CepGen/Generator.h"  // for library loading
-#include "CepGen/Parameters.h"
-
-#include "CepGen/Modules/CardsHandlerFactory.h"
-
-#include "CepGen/Core/EventModifier.h"
-#include "CepGen/Modules/EventModifierFactory.h"
-
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
-
-#include "CepGen/Processes/Process.h"
-#include "CepGen/Modules/ProcessesFactory.h"
-
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-
-#include "CepGen/Utils/Functional.h"
-#include "CepGen/Modules/FunctionalFactory.h"
-
-#include "CepGen/Integration/Integrator.h"
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Event/Event.h"
-
-#include "CepGen/Physics/MCDFileParser.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/HeavyIon.h"
-
-#include "CepGen/Utils/TimeKeeper.h"
-#include "CepGen/Utils/String.h"
-#include "CepGen/Utils/Filesystem.h"
 
 #include <algorithm>
+
+#include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Generator.h"  // for library loading
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/FunctionalFactory.h"
+#include "CepGen/Modules/ProcessesFactory.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Physics/HeavyIon.h"
+#include "CepGen/Physics/MCDFileParser.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Processes/Process.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/Filesystem.h"
+#include "CepGen/Utils/Functional.h"
+#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/TimeKeeper.h"
 
 #if PY_MAJOR_VERSION < 3
 #define PYTHON2

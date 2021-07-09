@@ -1,23 +1,19 @@
 #include "CepGen/Generator.h"
-#include "CepGen/Parameters.h"
-
-#include "CepGen/Processes/Process.h"
-
-#include "CepGen/Core/GeneratorWorker.h"
-#include "CepGen/Core/EventModifier.h"
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Core/Exception.h"
-
-#include "CepGen/Utils/String.h"
-#include "CepGen/Utils/TimeKeeper.h"
-
-#include "CepGen/Integration/Integrator.h"
-#include "CepGen/Integration/Integrand.h"
-#include "CepGen/Integration/GridParameters.h"
-
-#include "CepGen/Modules/IntegratorFactory.h"
 
 #include <chrono>
+
+#include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Core/GeneratorWorker.h"
+#include "CepGen/Integration/GridParameters.h"
+#include "CepGen/Integration/Integrand.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Processes/Process.h"
+#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
   Generator::Generator(bool safe_mode) : parameters_(new Parameters), result_(-1.), result_error_(-1.) {
