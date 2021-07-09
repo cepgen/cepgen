@@ -1,17 +1,17 @@
 #ifndef CepGenAddOns_ROOTWrapper_ROOTCanvas_h
 #define CepGenAddOns_ROOTWrapper_ROOTCanvas_h
 
-#include "TCanvas.h"
-#include "TLegend.h"
-#include "TPaveText.h"
-#include "TObjArray.h"
-#include "TObjString.h"
-#include "TH1.h"
-#include "TGraphErrors.h"
-#include "TStyle.h"
-
 #include <cstring>
 #include <vector>
+
+#include "TCanvas.h"
+#include "TGraphErrors.h"
+#include "TH1.h"
+#include "TLegend.h"
+#include "TObjArray.h"
+#include "TObjString.h"
+#include "TPaveText.h"
+#include "TStyle.h"
 
 #define font_type(x) 130 + x
 
@@ -153,27 +153,34 @@ namespace cepgen {
                  obj->GetYaxis()->GetXmax());
     }
 
-    inline void RatioPlot(TH1* numer, const std::vector<TH1*>& denoms, float ymin = -999., float ymax = -999.) {
+    inline std::vector<TH1*> RatioPlot(TH1* denom,
+                                       const std::vector<TH1*>& numers,
+                                       float ymin = -999.,
+                                       float ymax = -999.,
+                                       Option_t* draw_style = "p") {
+      std::vector<TH1*> ratios;
       if (!fRatio)
-        return;
+        return ratios;
       TCanvas::cd(2);
       size_t i = 0;
-      for (const auto& denom : denoms) {
-        auto* ratio = dynamic_cast<TH1*>(denom->Clone("ratio"));
-        ratio->Divide(numer);
+      for (const auto& numer : numers) {
+        auto* ratio = dynamic_cast<TH1*>(numer->Clone("ratio"));
+        ratio->Divide(denom);
         //ratio->Sumw2();
         if (i == 0) {
-          ratio->Draw("p");
+          ratio->Draw(Form("a%s", draw_style));
           Prettify(ratio);
           if (ymin != ymax)
             ratio->GetYaxis()->SetRangeUser(ymin, ymax);
           ratio->GetYaxis()->SetTitle("Ratio");
         } else
-          ratio->Draw("p same");
+          ratio->Draw(Form("%s same", draw_style));
+        ratios.emplace_back(ratio);
         ++i;
       }
-      numer->GetXaxis()->SetTitle("");
+      denom->GetXaxis()->SetTitle("");
       TCanvas::cd();
+      return ratios;
     }
 
     inline TGraphErrors* RatioPlot(TGraphErrors* obj1,
