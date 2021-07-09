@@ -1,13 +1,11 @@
+#include <iostream>
+
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Generator.h"
 #include "CepGen/Modules/ProcessesFactory.h"
 #include "CepGen/Processes/Process.h"
-
-#include "CepGen/Generator.h"
-#include "CepGen/Core/ParametersList.h"
-
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/String.h"
-
-#include <iostream>
 
 using namespace std;
 
@@ -16,7 +14,7 @@ int main(int argc, char* argv[]) {
   bool list;
 
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("proc-name,p", "name of the process", &proc_name)
+      .addOptionalArgument("proc-name,p", "name of the process", &proc_name, "lpair")
       .addOptionalArgument("list,l", "list all processes", &list, false)
       .parse();
 
