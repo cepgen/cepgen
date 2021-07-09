@@ -15,7 +15,9 @@ namespace cepgen {
       explicit Handler(const ParametersList&);
       virtual ~Handler() = default;
 
-      /// Get the list of runtime parameters parsed
+      /// Get the list of runtime parameters as parsed
+      const Parameters* runtimeParameters() const { return rt_params_; }
+      /// Get the list of runtime parameters as parsed
       Parameters* runtimeParameters() { return rt_params_; }
       /// Specify runtime parameters to the handler
       virtual void pack(const Parameters*){};
