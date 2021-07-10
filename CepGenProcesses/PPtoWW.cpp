@@ -1,14 +1,11 @@
+#include <assert.h>
+
 #include "CepGen/Core/Exception.h"
-
 #include "CepGen/Event/Event.h"
-
-#include "CepGen/Processes/Process2to4.h"
 #include "CepGen/Modules/ProcessesFactory.h"
-
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
-
-#include <assert.h>
+#include "CepGen/Processes/Process2to4.h"
 
 namespace cepgen {
   namespace proc {
@@ -69,7 +66,7 @@ namespace cepgen {
     }
 
     void PPtoWW::prepareProcessKinematics() {
-      cuts::Central single_w_cuts;
+      cuts::Central single_w_cuts(cepgen::ParametersList{});
       if (kin_.cuts.central_particles.count(PDG::W) > 0)
         single_w_cuts = kin_.cuts.central_particles.at(PDG::W);
       setCuts(single_w_cuts);

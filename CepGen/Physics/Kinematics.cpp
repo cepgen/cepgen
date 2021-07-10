@@ -1,38 +1,26 @@
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/GluonGrid.h"
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Physics/GluonGrid.h"
+#include "CepGen/Physics/PDG.h"
 
 namespace cepgen {
   const double Kinematics::MX_MIN = 1.07;  // mp+mpi+-
 
   Kinematics::Kinematics(const ParametersList& params) {
     //----- per-incoming beam kinematics
-
     incoming_beams = IncomingBeams(params);
 
     //----- phase space definition
+    setParameters(params);
+  }
 
+  void Kinematics::setParameters(const ParametersList& params) {
     //--- initial partons
-    for (auto& cut : cuts.initial.rawList()) {
-      Limits buf;
-      params.fill<Limits>(cut.name, cut.limits)
-          .fill<double>(cut.name + "min", buf.min())
-          .fill<double>(cut.name + "max", buf.max());
-      if (buf.valid())
-        cut.limits = buf.validate();
-    }
+    cuts.initial = cuts::Initial(params);
 
     //--- central system
-    for (auto& cut : cuts.central.rawList()) {
-      Limits buf;
-      params.fill<Limits>(cut.name, buf)
-          .fill<double>(cut.name + "min", buf.min())
-          .fill<double>(cut.name + "max", buf.max());
-      if (buf.valid())
-        cut.limits = buf.validate();
-    }
+    cuts.central = cuts::Central(params);
     if (params.has<Limits>("phiptdiff")) {
       CG_WARNING("Kinematics") << "\"phiptdiff\" parameter is deprecated! "
                                << "Please use \"phidiff\" instead.";
@@ -43,28 +31,12 @@ namespace cepgen {
         minimum_final_state.emplace_back((pdgid_t)pdg);
     if (params.has<ParametersList>("cuts")) {  // per-particle cuts
       const auto& per_parts = params.get<ParametersList>("cuts");
-      for (const auto& part : per_parts.keys()) {
-        const auto& part_cuts = per_parts.get<ParametersList>(part);
-        for (auto& cut : cuts.central_particles[(pdgid_t)stoi(part)].rawList()) {
-          Limits buf;
-          part_cuts.fill<Limits>(cut.name, buf)
-              .fill<double>(cut.name + "min", buf.min())
-              .fill<double>(cut.name + "max", buf.max());
-          if (buf.valid())
-            cut.limits = buf.validate();
-        }
-      }
+      for (const auto& part : per_parts.keys())
+        cuts.central_particles[(pdgid_t)stoi(part)] = cuts::Central(per_parts.get<ParametersList>(part));
     }
 
     //--- outgoing remnants
-    for (auto& cut : cuts.remnants.rawList()) {
-      Limits buf;
-      params.fill<Limits>(cut.name, buf)
-          .fill<double>(cut.name + "min", buf.min())
-          .fill<double>(cut.name + "max", buf.max());
-      if (buf.valid())
-        cut.limits = buf.validate();
-    }
+    cuts.remnants = cuts::Remnants(params);
     cuts.remnants.mx().min() = std::max(cuts.remnants.mx().min(), MX_MIN);
 
     //--- specify where to look for the grid path for gluon emission
@@ -140,9 +112,8 @@ namespace cepgen {
   // List of kinematics limits
   //--------------------------------------------------------------------
 
-  Kinematics::CutsList::CutsList() {
-    initial.q2() = {0., 1.e5};
-    central.pt_single().min() = 0.;
-    remnants.mx() = {MX_MIN, 320.};
-  }
+  Kinematics::CutsList::CutsList()
+      : initial(ParametersList().set<Limits>("q2", {0., 1.e5})),
+        central(ParametersList().set<double>("ptmin", 0.)),
+        remnants(ParametersList().set<Limits>("mx", {MX_MIN, 320.})) {}
 }  // namespace cepgen
