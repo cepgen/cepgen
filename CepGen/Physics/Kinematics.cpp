@@ -17,10 +17,10 @@ namespace cepgen {
 
   void Kinematics::setParameters(const ParametersList& params) {
     //--- initial partons
-    cuts.initial = cuts::Initial(params);
+    cuts.initial.setParameters(params);
 
     //--- central system
-    cuts.central = cuts::Central(params);
+    cuts.central.setParameters(params);
     if (params.has<Limits>("phiptdiff")) {
       CG_WARNING("Kinematics") << "\"phiptdiff\" parameter is deprecated! "
                                << "Please use \"phidiff\" instead.";
@@ -32,11 +32,11 @@ namespace cepgen {
     if (params.has<ParametersList>("cuts")) {  // per-particle cuts
       const auto& per_parts = params.get<ParametersList>("cuts");
       for (const auto& part : per_parts.keys())
-        cuts.central_particles[(pdgid_t)stoi(part)] = cuts::Central(per_parts.get<ParametersList>(part));
+        cuts.central_particles[(pdgid_t)stoi(part)].setParameters(per_parts.get<ParametersList>(part));
     }
 
     //--- outgoing remnants
-    cuts.remnants = cuts::Remnants(params);
+    cuts.remnants.setParameters(params);
     cuts.remnants.mx().min() = std::max(cuts.remnants.mx().min(), MX_MIN);
 
     //--- specify where to look for the grid path for gluon emission
