@@ -1,22 +1,20 @@
-#include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/HeavyIon.h"
-#include "CepGen/Physics/KTFlux.h"
-#include "CepGen/Physics/Momentum.h"
-
-#include "CepGen/FormFactors/Parameterisation.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/StructureFunctions/SigmaRatio.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include <cmath>
 
 #include "CepGen/Core/Exception.h"
-
-#include <cmath>
+#include "CepGen/FormFactors/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/HeavyIon.h"
+#include "CepGen/Physics/KTFlux.h"
+#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Physics/Momentum.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
 
 namespace cepgen {
   IncomingBeams::IncomingBeams(const ParametersList& params) {
     // positive-z incoming beam
-    positive().pdg = params.get<int>("beam1id", (int)PDG::proton);
+    positive().pdg = params.get<int>("beam1id", positive().pdg);
     const int hi_A1 = params.get<int>("beam1A", 1);
     const int hi_Z1 = params.get<int>("beam1Z", 0);
     if (hi_Z1 != 0)
@@ -30,7 +28,7 @@ namespace cepgen {
     }
 
     // negative-z incoming beam
-    negative().pdg = params.get<int>("beam2id", (int)PDG::proton);
+    negative().pdg = params.get<int>("beam2id", negative().pdg);
     const int hi_A2 = params.get<int>("beam2A", 1);
     const int hi_Z2 = params.get<int>("beam2Z", 0);
     if (hi_Z2 != 0)
