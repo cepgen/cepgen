@@ -37,7 +37,11 @@ namespace cepgen {
 
     //--- outgoing remnants
     cuts.remnants.setParameters(params);
-    cuts.remnants.mx().min() = std::max(cuts.remnants.mx().min(), MX_MIN);
+    // sanity check
+    if (cuts.remnants.mx().min() < MX_MIN) {
+      CG_WARNING("Kinematics:setParameters") << "Minimum diffractive mass set to " << MX_MIN << " GeV.";
+      cuts.remnants.mx().min() = MX_MIN;
+    }
 
     //--- specify where to look for the grid path for gluon emission
     if (params.has<std::string>("kmrGridPath"))
