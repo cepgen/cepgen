@@ -1,13 +1,13 @@
 #ifndef CepGen_Core_ParametersList_h
 #define CepGen_Core_ParametersList_h
 
-#include "CepGen/Utils/Limits.h"
-#include "CepGen/Physics/ParticleProperties.h"
-
-#include <vector>
 #include <map>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
+#include <vector>
+
+#include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Utils/Limits.h"
 
 namespace cepgen {
   /// Parameters container
@@ -246,7 +246,11 @@ namespace cepgen {
   /// Check if a limits parameter is handled
   template <>
   inline bool ParametersList::has<Limits>(std::string key) const {
-    return lim_values_.count(key) != 0;
+    if (lim_values_.count(key) != 0)
+      return true;
+    if (dbl_values_.count(key + "min") || dbl_values_.count(key + "max"))
+      return true;
+    return false;
   }
   /// Get a boundary limits parameter value
   template <>
