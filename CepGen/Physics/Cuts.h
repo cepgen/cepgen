@@ -16,8 +16,13 @@ namespace cepgen {
     /// Define a cut from parameters list
     explicit Cuts(const ParametersList&);
 
+    /// Modify a few parameters values
+    void setParameters(const ParametersList&);
+
     /// A set of properties for a given cut
     struct Property {
+      Property() = default;
+      explicit Property(const std::string& name, const std::string& descr, const ParametersList&);
       std::string name, description;
       Limits limits;
     };
