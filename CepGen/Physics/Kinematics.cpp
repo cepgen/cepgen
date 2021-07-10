@@ -99,5 +99,5 @@ namespace cepgen {
   Kinematics::CutsList::CutsList()
       : initial(ParametersList().set<Limits>("q2", {0., 1.e5})),
         central(ParametersList().set<double>("ptmin", 0.)),
-        remnants(ParametersList().set<Limits>("mx", {MX_MIN, 320.})) {}
+        remnants(ParametersList().set<Limits>("mx", {MX_MIN, 1000.})) {}
 }  // namespace cepgen
