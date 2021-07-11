@@ -7,38 +7,40 @@
 #include "TCanvas.h"
 #include "TGraphErrors.h"
 #include "TH1.h"
+#include "THStack.h"
 #include "TLegend.h"
 #include "TObjArray.h"
 #include "TObjString.h"
 #include "TPaveText.h"
 #include "TStyle.h"
 
-#define font_type(x) 130 + x
-
 namespace cepgen {
   /// A "prettified" text box object
   class ROOTPaveText : public TPaveText {
   public:
-    inline ROOTPaveText(float x1, float y1, float x2, float y2, const char* text = "")
+    inline ROOTPaveText(float x1, float y1, float x2, float y2, const std::string& text = "")
         : TPaveText(x1, y1, x2, y2, "NB NDC") {
-      TPaveText::SetTextAlign(13);
-      if (strcmp(text, "") != 0) {
+      TPaveText::SetTextAlign(kHAlignLeft + kVAlignTop);
+      if (!text.empty()) {
         TString txt = text;
         if (txt.Contains("\\")) {
           TObjArray* tok = txt.Tokenize("\\");
           for (int i = 0; i < tok->GetEntries(); ++i)
             TPaveText::AddText(dynamic_cast<TObjString*>(tok->At(i))->String());
         } else
-          TPaveText::AddText(text);
+          TPaveText::AddText(txt);
       }
       TPaveText::SetFillColor(0);
       TPaveText::SetFillStyle(0);
       TPaveText::SetLineColor(0);
       TPaveText::SetLineWidth(0);
       TPaveText::SetShadowColor(0);
-      TPaveText::SetTextFont(font_type(2));
+      TPaveText::SetTextFont(fontType(2));
       TPaveText::SetTextSize(0.058);
     }
+
+    /// Force font to be Times New Roman-style
+    inline static int fontType(int mode) { return 130 + mode; }
   };
 
   /// A "prettified" generic figure canvas
@@ -49,39 +51,47 @@ namespace cepgen {
     /// Build a canvas from its name, title, and attributes
     /// \param[in] name Canvas name (and subsequently filename on save)
     /// \param[in] ratio Divide the canvas into a main and ratio plots subparts?
-    explicit inline ROOTCanvas(const char* name, const char* title = "", bool ratio = false)
-        : TCanvas(name, "", 600, 600), fTitle(title), fTopLabel(0), fLeg(0), fLegX1(0.5), fLegY1(0.75), fRatio(ratio) {
+    explicit inline ROOTCanvas(const std::string& name, const std::string& title = "", bool ratio = false)
+        : TCanvas(name.c_str(), "", 600, 600),
+          title_(title),
+          top_label_(nullptr),
+          leg_(nullptr),
+          leg_x1_(0.5),
+          leg_y1_(0.75),
+          ratio_(ratio) {
       gStyle->SetOptStat(0);
       Build();
     }
     inline ~ROOTCanvas() {
-      if (fLeg)
-        delete fLeg;
-      if (fTopLabel)
-        delete fTopLabel;
+      if (leg_)
+        delete leg_;
+      if (top_label_)
+        delete top_label_;
     }
 
+    /// Set horizontal canvas width
     inline void SetSize(float size = 600) { TCanvas::SetCanvasSize(size, 600); }
 
+    /// Draw main plot attributes in a pretty manner
     inline void Prettify(TH1* obj) {
       TAxis *x = dynamic_cast<TAxis*>(obj->GetXaxis()), *y = dynamic_cast<TAxis*>(obj->GetYaxis()),
             *z = dynamic_cast<TAxis*>(obj->GetZaxis());
       x->CenterTitle();
       y->CenterTitle();
       z->CenterTitle();
-      x->SetLabelFont(font_type(3));
+      x->SetLabelFont(ROOTPaveText::fontType(3));
       x->SetLabelSize(20);
-      x->SetTitleFont(font_type(3));
+      x->SetTitleFont(ROOTPaveText::fontType(3));
       x->SetTitleSize(29);
-      y->SetLabelFont(font_type(3));
+      y->SetLabelFont(ROOTPaveText::fontType(3));
       y->SetLabelSize(20);
-      y->SetTitleFont(font_type(3));
+      y->SetTitleFont(ROOTPaveText::fontType(3));
       y->SetTitleSize(29);
-      z->SetLabelFont(font_type(3));
+      z->SetLabelFont(ROOTPaveText::fontType(3));
       z->SetLabelSize(16);
-      z->SetTitleFont(font_type(3));
+      z->SetTitleFont(ROOTPaveText::fontType(3));
       z->SetTitleSize(29);
-      if (fRatio) {
+      if (ratio_) {
         x->SetTitleOffset(3.);
         x->SetLabelOffset(0.02);
       }
@@ -159,25 +169,25 @@ namespace cepgen {
                                        float ymax = -999.,
                                        Option_t* draw_style = "p") {
       std::vector<TH1*> ratios;
-      if (!fRatio)
+      if (!ratio_)
         return ratios;
       TCanvas::cd(2);
       size_t i = 0;
+      THStack hs;
       for (const auto& numer : numers) {
         auto* ratio = dynamic_cast<TH1*>(numer->Clone("ratio"));
         ratio->Divide(denom);
         //ratio->Sumw2();
-        if (i == 0) {
-          ratio->Draw(Form("a%s", draw_style));
+        hs.Add(ratio, draw_style);
+        if (i == 0)
           Prettify(ratio);
-          if (ymin != ymax)
-            ratio->GetYaxis()->SetRangeUser(ymin, ymax);
-          ratio->GetYaxis()->SetTitle("Ratio");
-        } else
-          ratio->Draw(Form("%s same", draw_style));
         ratios.emplace_back(ratio);
         ++i;
       }
+      hs.Draw("nostack");
+      if (ymin != ymax)
+        hs.GetYaxis()->SetRangeUser(ymin, ymax);
+      hs.GetYaxis()->SetTitle("Ratio");
       denom->GetXaxis()->SetTitle("");
       TCanvas::cd();
       return ratios;
@@ -187,7 +197,7 @@ namespace cepgen {
                                    const TGraphErrors* obj2,
                                    float ymin = -999.,
                                    float ymax = -999.) {
-      if (!fRatio)
+      if (!ratio_)
         return 0;
       TGraphErrors* ratio = new TGraphErrors;
       ratio->SetTitle(obj1->GetTitle());
@@ -232,47 +242,57 @@ namespace cepgen {
       return ratio;
     }
 
-    inline void SetTopLabel(const char* lab = "") {
+    inline void SetTopLabel(const std::string& lab) {
       TCanvas::cd();
-      if (strcmp(lab, "") != 0)
-        fTitle = lab;
-      if (!fTopLabel)
+      if (!lab.empty())
+        title_ = lab;
+      if (!top_label_)
         BuildTopLabel();
       else
-        fTopLabel->Clear();
-      fTopLabel->AddText(fTitle);
-      //fTopLabel->Draw();
+        top_label_->Clear();
+      top_label_->AddText(title_);
+      //top_label_->Draw();
     }
 
-    inline void SetLegendX1(double x) { fLegX1 = x; }
-    inline void SetLegendY1(double y) { fLegY1 = y; }
-    inline void AddLegendEntry(const TObject* obj, const char* title, Option_t* option = "lpf") {
-      if (!fLeg)
+    /// Set the horizontal coordinate of the low-left part of the legend object
+    /// \note To be called before the first legend entry is added
+    inline void SetLegendX1(double x) {
+      if (leg_)
+        perror("SetLegendX1");
+      leg_x1_ = x;
+    }
+    /// Set the vertical coordinate of the low-left part of the legend object
+    /// \note To be called before the first legend entry is added
+    inline void SetLegendY1(double y) {
+      if (leg_)
+        perror("SetLegendY1");
+      leg_y1_ = y;
+    }
+    /// Add one new entry to the legend object
+    inline void AddLegendEntry(const TObject* obj, const std::string& title, Option_t* option = "lpf") {
+      if (!leg_)
         BuildLeg();
-      fLeg->AddEntry(obj, title, option);
-      const unsigned int num_entries = fLeg->GetNRows();
+      leg_->AddEntry(obj, title.c_str(), option);
+      const unsigned int num_entries = leg_->GetNRows();
       if (num_entries > 3)
-        fLeg->SetY1(fLeg->GetY1() - (num_entries - 3) * 0.01);
+        leg_->SetY1(leg_->GetY1() - (num_entries - 3) * 0.01);
       if (num_entries > 6) {
-        fLeg->SetNColumns(1 + num_entries / 6);
-        fLeg->SetTextSize(0.035);
+        leg_->SetNColumns(1 + num_entries / 6);
+        leg_->SetTextSize(0.035);
       }
     }
 
-    inline void Save(const char* ext, const char* out_dir = ".") {
-      if (strstr(ext, "pdf") == NULL)
-        if (strstr(ext, "png") == NULL)
-          if (strstr(ext, "root") == NULL)
-            if (strstr(ext, "eps") == NULL)
-              return;
+    inline void Save(const std::string& ext, const std::string& out_dir = ".") {
+      if (ext != "pdf" && ext != "png" && ext != "root" && ext != "eps")
+        return;
       TCanvas::cd();
-      if (fLeg)
-        fLeg->Draw();
-      if (fTopLabel)
-        fTopLabel->Draw();
-      TCanvas::SaveAs(Form("%s/%s.%s", out_dir, TCanvas::GetName(), ext));
+      if (leg_)
+        leg_->Draw();
+      if (top_label_)
+        top_label_->Draw();
+      TCanvas::SaveAs(Form("%s/%s.%s", out_dir.c_str(), TCanvas::GetName(), ext.c_str()));
     }
-    inline TLegend* GetLegend() { return fLeg; }
+    inline TLegend* GetLegend() { return leg_; }
 
   private:
     inline void Build() {
@@ -284,60 +304,64 @@ namespace cepgen {
       TCanvas::SetFillStyle(0);
       Pad()->SetFillStyle(0);
 
-      SetTopLabel();
-      if (fRatio)
+      SetTopLabel("");
+      if (ratio_)
         DivideCanvas();
     }
 
     inline void DivideCanvas() {
       TCanvas::Divide(1, 2);
-      auto p1 = dynamic_cast<TPad*>(TCanvas::GetPad(1)), p2 = dynamic_cast<TPad*>(TCanvas::GetPad(2));
+      // main pad
+      auto* p1 = dynamic_cast<TPad*>(TCanvas::GetPad(1));
       p1->SetPad(0., 0.3, 1., 1.);
-      p2->SetPad(0., 0.0, 1., 0.3);
       p1->SetFillStyle(0);
-      p2->SetFillStyle(0);
       p1->SetLeftMargin(TCanvas::GetLeftMargin());
       p1->SetRightMargin(TCanvas::GetRightMargin());
-      p2->SetLeftMargin(TCanvas::GetLeftMargin());
-      p2->SetRightMargin(TCanvas::GetRightMargin());
       p1->SetTopMargin(TCanvas::GetTopMargin() + 0.025);
       p1->SetBottomMargin(0.02);
+      p1->SetTicks(1, 1);
+      // ratio plot(s) pad
+      auto* p2 = dynamic_cast<TPad*>(TCanvas::GetPad(2));
+      p2->SetPad(0., 0.0, 1., 0.3);
+      p2->SetFillStyle(0);
+      p2->SetLeftMargin(TCanvas::GetLeftMargin());
+      p2->SetRightMargin(TCanvas::GetRightMargin());
       p2->SetTopMargin(0.02);
       p2->SetBottomMargin(TCanvas::GetBottomMargin() + 0.25);
-      p1->SetTicks(1, 1);
       p2->SetTicks(1, 1);
       p2->SetGrid(0, 1);
+      // roll back to main pad
       TCanvas::cd(1);
     }
 
     inline void BuildTopLabel() {
       TCanvas::cd();
-      fTopLabel = new ROOTPaveText(0.5, 0.95, 0.915, 0.96);
-      fTopLabel->SetTextSize(0.04);
-      fTopLabel->SetTextAlign(kHAlignRight + kVAlignBottom);
+      top_label_ = new ROOTPaveText(0.5, 0.95, 0.915, 0.96);
+      top_label_->SetTextSize(0.04);
+      top_label_->SetTextAlign(kHAlignRight + kVAlignBottom);
     }
 
     inline void BuildLeg() {
-      if (fLeg)
+      if (leg_)
         return;
-      if (fRatio)
+      if (ratio_)
         TCanvas::cd(1);
-      fLeg = new TLegend(fLegX1, fLegY1, fLegX1 + 0.45, fLegY1 + 0.15);
-      fLeg->SetLineColor(kWhite);
-      fLeg->SetLineWidth(0);
-      fLeg->SetFillStyle(0);
-      fLeg->SetTextFont(font_type(2));
-      fLeg->SetTextSize(0.04);
+      leg_ = new TLegend(leg_x1_, leg_y1_, leg_x1_ + 0.45, leg_y1_ + 0.15);
+      leg_->SetLineColor(kWhite);
+      leg_->SetLineWidth(0);
+      leg_->SetFillStyle(0);
+      leg_->SetTextFont(ROOTPaveText::fontType(2));
+      leg_->SetTextSize(0.04);
     }
     inline float GetBinning(const TH1* h) {
       return (h->GetXaxis()->GetXmax() - h->GetXaxis()->GetXmin()) / h->GetXaxis()->GetNbins();
     }
 
-    TString fTitle;
-    ROOTPaveText* fTopLabel;
-    TLegend* fLeg;
-    double fLegX1, fLegY1;
-    bool fRatio;
+    TString title_;
+    ROOTPaveText* top_label_;
+    TLegend* leg_;
+    double leg_x1_, leg_y1_;
+    bool ratio_;
   };
   const std::vector<int> ROOTCanvas::colours = {kBlack, kRed + 1, kBlue - 2, kGreen + 1, kOrange + 1};
 }  // namespace cepgen
