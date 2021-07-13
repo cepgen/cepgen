@@ -1,11 +1,11 @@
 #ifndef CepGen_Utils_String_h
 #define CepGen_Utils_String_h
 
+#include <algorithm>
+#include <numeric>
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
-#include <numeric>
-#include <algorithm>
 
 namespace cepgen {
   namespace utils {
