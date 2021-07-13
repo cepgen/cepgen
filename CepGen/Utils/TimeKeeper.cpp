@@ -1,10 +1,11 @@
 #include "CepGen/Utils/TimeKeeper.h"
-#include "CepGen/Utils/String.h"
 
 #include <algorithm>
+#include <cmath>
 #include <numeric>
 #include <sstream>
-#include <cmath>
+
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace utils {
@@ -38,9 +39,9 @@ namespace cepgen {
       for (const auto& mon : monitors_) {
         const auto& tm = mon.second;
         const double total = tm.empty() ? -1. : std::accumulate(tm.begin(), tm.end(), 0.);
-        const double mean = total / tm.size();
-        const double rms =
-            std::sqrt(std::fabs(std::inner_product(tm.begin(), tm.end(), tm.begin(), 0.) / tm.size() - mean * mean));
+        const double mean = total / double(tm.size());
+        const double rms = std::sqrt(
+            std::fabs(std::inner_product(tm.begin(), tm.end(), tm.begin(), 0.) / double(tm.size()) - mean * mean));
         mons.emplace_back(Monitor{mon.first, tm.size(), total, mean, rms});
         total_time += total;
       }
@@ -51,15 +52,16 @@ namespace cepgen {
 
       //--- displaying the various probes
 
+      static const double s_to_ms = 1.e3;
       std::ostringstream oss;
       oss << utils::format("%2s | %-90s | %12s\t%10s\t%5s", "#", "Caller", "Total (ms)", "Average (ms)", "RMS (ms)");
       for (const auto& mon : mons)
         oss << utils::format("\n%10u | %-90s | %12.6f\t%10e\t%5.3e",
                              mon.size,
                              mon.name.c_str(),
-                             mon.total * 1.e3,
-                             mon.mean * 1.e3,
-                             mon.rms * 1.e3);
+                             mon.total * s_to_ms,
+                             mon.mean * s_to_ms,
+                             mon.rms * s_to_ms);
 
       return oss.str();
     }
