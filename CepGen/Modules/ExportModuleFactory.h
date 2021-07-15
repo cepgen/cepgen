@@ -1,5 +1,5 @@
-#ifndef CepGen_Module_ExportModuleFactory_h
-#define CepGen_Module_ExportModuleFactory_h
+#ifndef CepGen_Modules_ExportModuleFactory_h
+#define CepGen_Modules_ExportModuleFactory_h
 
 #include "CepGen/Modules/ModuleFactory.h"
 
@@ -20,7 +20,9 @@ namespace cepgen {
   namespace io {
     class ExportModule;
     /// An output modules factory
-    typedef ModuleFactory<ExportModule> ExportModuleFactory;
+    struct ExportModuleFactory : public ModuleFactory<ExportModule> {
+      static std::string description() { return "Export modules factory"; }
+    };
   }  // namespace io
 }  // namespace cepgen
 

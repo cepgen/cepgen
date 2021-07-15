@@ -5,7 +5,7 @@
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Modules/ProcessesFactory.h"
+#include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/AlphaS.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
@@ -34,11 +34,11 @@ namespace cepgen {
       }
       {
         info << "\n" << sep_mid << "\n" << utils::boldify("Physics processes");
-        if (proc::ProcessesFactory::get().modules().empty())
+        if (proc::ProcessFactory::get().modules().empty())
           info << "\n>>> " << utils::colourise("none found", utils::Colour::red) << " <<<";
-        for (const auto& mod : proc::ProcessesFactory::get().modules())
+        for (const auto& mod : proc::ProcessFactory::get().modules())
           info << "\n> " << utils::colourise(mod, utils::Colour::green, utils::Modifier::bold) << ": "
-               << proc::ProcessesFactory::get().describe(mod);
+               << proc::ProcessFactory::get().describe(mod);
       }
       {
         info << "\n" << sep_mid << "\n" << utils::boldify("Beam form factors modellings");

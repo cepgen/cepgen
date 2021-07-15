@@ -20,7 +20,9 @@ namespace cepgen {
   namespace card {
     class Handler;
     /// A cards handler factory
-    typedef ModuleFactory<Handler> CardsHandlerFactory;
+    struct CardsHandlerFactory : public ModuleFactory<Handler> {
+      static std::string description() { return "Cards handlers factory"; }
+    };
     /// Standard name for the command line steering module handler
     static constexpr const char* gCommandLineHandler = ".cmd";
   }  // namespace card

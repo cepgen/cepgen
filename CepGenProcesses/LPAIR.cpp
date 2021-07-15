@@ -1,15 +1,12 @@
 #include "CepGenProcesses/LPAIR.h"
 
-#include "CepGen/Modules/ProcessesFactory.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/FormFactors/Parameterisation.h"
-
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
-
+#include "CepGen/FormFactors/Parameterisation.h"
+#include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
-
-#include "CepGen/Core/Exception.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {

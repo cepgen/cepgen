@@ -1,33 +1,26 @@
 #include "CepGen/Cards/LpairHandler.h"
-#include "CepGen/Generator.h"  // for library loading
-#include "CepGen/Parameters.h"
-
-#include "CepGen/Modules/CardsHandlerFactory.h"
-
-#include "CepGen/Core/EventModifier.h"
-#include "CepGen/Modules/EventModifierFactory.h"
-
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
-
-#include "CepGen/Processes/Process.h"
-#include "CepGen/Modules/ProcessesFactory.h"
-
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/StructureFunctions/SigmaRatio.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
-
-#include "CepGen/Utils/String.h"
-#include "CepGen/Utils/TimeKeeper.h"
-#include "CepGen/Utils/Filesystem.h"
-
-#include "CepGen/Physics/MCDFileParser.h"
-#include "CepGen/Physics/GluonGrid.h"
 
 #include <fstream>
+
+#include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Generator.h"  // for library loading
+#include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Physics/GluonGrid.h"
+#include "CepGen/Physics/MCDFileParser.h"
+#include "CepGen/Processes/Process.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
+#include "CepGen/Utils/Filesystem.h"
+#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
   namespace card {
@@ -210,7 +203,7 @@ namespace cepgen {
           *proc_params_ = ParametersList(rt_params_->process().parameters()) + *proc_params_;
         if (proc_name_ == "pptoff" && lepton_id_ != 0)
           proc_params_->operator[]<int>("pair") = 11 + (lepton_id_ - 1) * 2;
-        rt_params_->setProcess(proc::ProcessesFactory::get().build(proc_name_, *proc_params_));
+        rt_params_->setProcess(proc::ProcessFactory::get().build(proc_name_, *proc_params_));
       }
 
       rt_params_->kinematics = Kinematics(*kin_params_);

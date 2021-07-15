@@ -1,27 +1,24 @@
+#include <boost/property_tree/info_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+
 #include "CepGen/Cards/Handler.h"
-#include "CepGen/Generator.h"  // for library loading
-#include "CepGen/Parameters.h"
-
-#include "CepGen/Event/Event.h"
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"
-#include "CepGen/Processes/Process.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
-
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Generator.h"  // for library loading
 #include "CepGen/Modules/CardsHandlerFactory.h"
-#include "CepGen/Modules/ProcessesFactory.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
-
+#include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Processes/Process.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/TimeKeeper.h"
-
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/info_parser.hpp>
-#include <boost/property_tree/xml_parser.hpp>
 
 namespace pt = boost::property_tree;
 
@@ -84,7 +81,7 @@ namespace cepgen {
 
       try {
         proc_ = unpack(tree_.get_child(PROCESS_NAME));
-        rt_params_->setProcess(proc::ProcessesFactory::get().build(proc_));
+        rt_params_->setProcess(proc::ProcessFactory::get().build(proc_));
       } catch (const boost::exception&) {
         throw CG_FATAL("BoostTreeHandler") << "Failed to retrieve a valid \"" << PROCESS_NAME << "\" block"
                                            << " in the steering card!";

@@ -1,14 +1,12 @@
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
-
-#include "CepGen/Event/Event.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Parameters.h"
-#include "CepGen/Version.h"
-
-#include "ProMCBook.h"
-
 #include <cstdio>
+
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Version.h"
+#include "ProMCBook.h"
 
 namespace cepgen {
   namespace io {

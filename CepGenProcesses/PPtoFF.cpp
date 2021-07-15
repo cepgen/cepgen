@@ -1,15 +1,12 @@
-#include "CepGen/Processes/Process2to4.h"
-#include "CepGen/Modules/ProcessesFactory.h"
+#include <iomanip>
 
 #include "CepGen/Core/Exception.h"
-
 #include "CepGen/Event/Event.h"
-
+#include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Physics/AlphaS.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/AlphaS.h"
-
-#include <iomanip>
+#include "CepGen/Processes/Process2to4.h"
 
 namespace cepgen {
   namespace proc {

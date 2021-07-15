@@ -13,7 +13,7 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
-#include "CepGen/Modules/ProcessesFactory.h"
+#include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/HeavyIon.h"
@@ -126,7 +126,7 @@ namespace cepgen {
           throwPythonError("Failed to extract the process name from the configuration card '" + file + "'!");
 
         //--- process mode
-        rt_params_->setProcess(proc::ProcessesFactory::get().build(get<std::string>(pproc_name), proc_params));
+        rt_params_->setProcess(proc::ProcessFactory::get().build(get<std::string>(pproc_name), proc_params));
 
         //--- process kinematics
         ParametersList pkin;

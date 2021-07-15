@@ -1,27 +1,20 @@
-#include "CepGen/Cards/Handler.h"
-#include "CepGen/Modules/CardsHandlerFactory.h"
-
-#include "CepGen/Processes/Process.h"
-#include "CepGen/Modules/ProcessesFactory.h"
-
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
-
-#include "CepGen/Core/EventModifier.h"
-#include "CepGen/Modules/EventModifierFactory.h"
-
-#include "CepGen/Event/Event.h"
-
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/Exception.h"
-
-#include "CepGen/Utils/TimeKeeper.h"
-#include "CepGen/Parameters.h"
-
 #include <fstream>
+
+#include "CepGen/Cards/Handler.h"
+#include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Processes/Process.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
   namespace card {
@@ -79,7 +72,7 @@ namespace cepgen {
       if (!proc.empty()) {
         if (rt_params_->hasProcess())
           proc = ParametersList(rt_params_->process().parameters()) + proc;
-        rt_params_->setProcess(proc::ProcessesFactory::get().build(proc));
+        rt_params_->setProcess(proc::ProcessFactory::get().build(proc));
       }
 
       //----- phase space definition

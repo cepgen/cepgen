@@ -1,11 +1,10 @@
-#include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Cards/Handler.h"
 
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/Filesystem.h"
-
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Parameters.h"
+#include "CepGen/Utils/Filesystem.h"
 
 namespace cepgen {
   namespace card {

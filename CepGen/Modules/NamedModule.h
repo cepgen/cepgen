@@ -1,5 +1,5 @@
-#ifndef CepGen_Module_NamedModule_h
-#define CepGen_Module_NamedModule_h
+#ifndef CepGen_Modules_NamedModule_h
+#define CepGen_Modules_NamedModule_h
 
 #include "CepGen/Core/ParametersList.h"
 
