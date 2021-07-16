@@ -1,5 +1,5 @@
 #--- searching for ROOT
-find_package(ROOT QUIET COMPONENTS Hist MathCore Foam)
+find_package(ROOT COMPONENTS Hist MathCore Foam)
 if(NOT ROOT_FOUND)
   return()
 endif()

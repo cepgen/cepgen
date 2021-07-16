@@ -9,6 +9,7 @@
 #include "TH1.h"
 #include "THStack.h"
 #include "TLegend.h"
+#include "TLine.h"
 #include "TObjArray.h"
 #include "TObjString.h"
 #include "TPaveText.h"
