@@ -6,6 +6,7 @@
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Physics/Modes.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"

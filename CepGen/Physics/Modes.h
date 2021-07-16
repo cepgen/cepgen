@@ -24,11 +24,11 @@ namespace cepgen {
       PointLikeFermion = 4,  ///< Trivial, spin-1/2 emission
       CompositeScalar = 5,   ///< Composite pion emission
     };
+    /// Human-readable format of a process mode (elastic/dissociative parts)
+    std::ostream& operator<<(std::ostream&, const cepgen::mode::Kinematics&);
+    /// Human-readable format of a beam mode (elastic/dissociative parts)
+    std::ostream& operator<<(std::ostream&, const cepgen::mode::Beam&);
   }  // namespace mode
-  /// Human-readable format of a process mode (elastic/dissociative parts)
-  std::ostream& operator<<(std::ostream&, const mode::Kinematics&);
-  /// Human-readable format of a beam mode (elastic/dissociative parts)
-  std::ostream& operator<<(std::ostream&, const mode::Beam&);
 }  // namespace cepgen
 
 #endif
