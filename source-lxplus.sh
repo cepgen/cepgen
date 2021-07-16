@@ -2,11 +2,11 @@
 
 #--- proper gcc/gfortran version
 export CVMFS_DIR=/cvmfs/sft.cern.ch/lcg/releases
-source ${CVMFS_DIR}/clang/9.0.0-a1c77/x86_64-centos7-gcc9-opt/setup.sh
+source ${CVMFS_DIR}/gcc/9.3.0-467e1/x86_64-centos7/setup.sh
 export PATH=${CVMFS_DIR}/CMake/3.8.2-ece19/x86_64-centos7-gcc8-opt/bin:${PATH}
 #--- Delphes linking
-source ${CVMFS_DIR}/ROOT/6.18.04-b1762/x86_64-centos7-gcc62-opt/bin/thisroot.sh
-export DELPHES_DIR=${CVMFS_DIR}/delphes/3.4.2-7776a/x86_64-centos7-gcc62-opt
+source ${CVMFS_DIR}/ROOT/v6.24.00-f4a14/x86_64-centos7-gcc9-opt/bin/thisroot.sh
+export DELPHES_DIR=${CVMFS_DIR}/delphes/3.4.3pre09-604d4/x86_64-centos7-gcc9-opt
 export ROOT_INCLUDE_PATH=$ROOT_INCLUDE_PATH:${DELPHES_DIR}/include
 #--- Pythia linking
 export PYTHIA6_DIR=${CVMFS_DIR}/MCGenerators/pythia6/429.2-c4089/x86_64-centos7-gcc62-opt
