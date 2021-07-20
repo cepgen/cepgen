@@ -19,9 +19,7 @@
 namespace cepgen {
   class EventModifier;
   /// A event modifier algorithms factory
-  struct EventModifierFactory : public ModuleFactory<EventModifier> {
-    static std::string description() { return "Event modifiers factory"; }
-  };
+  DEFINE_FACTORY(EventModifierFactory, EventModifier, "Event modifiers factory");
 }  // namespace cepgen
 
 #endif

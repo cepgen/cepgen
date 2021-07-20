@@ -52,23 +52,19 @@ namespace cepgen {
   namespace strfun {
     class Parameterisation;
     /// A structure functions parameterisations factory
-    struct StructureFunctionsFactory : public ModuleFactory<Parameterisation, int> {
-      static std::string description() { return "Nucleon structure functions factory"; }
-    };
+    DEFINE_FACTORY_INT(StructureFunctionsFactory,
+                       Parameterisation,
+                       "Nucleon structure functions parameterisations factory");
   }  // namespace strfun
   namespace sigrat {
     class Parameterisation;
     /// A sigma ratio parameterisations factory
-    struct SigmaRatiosFactory : public ModuleFactory<Parameterisation, int> {
-      static std::string description() { return "Sigma L/T parameterisations factory"; }
-    };
+    DEFINE_FACTORY_INT(SigmaRatiosFactory, Parameterisation, "Sigma L/T parameterisations factory");
   }  // namespace sigrat
   namespace formfac {
     class Parameterisation;
     /// A form factors parameterisations factory
-    struct FormFactorsFactory : public ModuleFactory<Parameterisation, std::string> {
-      static std::string description() { return "Nucleon form factors factory"; }
-    };
+    DEFINE_FACTORY(FormFactorsFactory, Parameterisation, "Nucleon form factors factory");
     /// Standard dipole handler name
     static constexpr const char* gFFStandardDipoleHandler = "StandardDipole";
   }  // namespace formfac

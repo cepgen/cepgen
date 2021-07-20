@@ -38,9 +38,7 @@ namespace cepgen {
   namespace proc {
     class Process;
     /// A processes factory
-    struct ProcessFactory : public ModuleFactory<Process> {
-      static std::string description() { return "Physics processes factory"; }
-    };
+    DEFINE_FACTORY(ProcessFactory, Process, "Physics processes factory");
   }  // namespace proc
 }  // namespace cepgen
 

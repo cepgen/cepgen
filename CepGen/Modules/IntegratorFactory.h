@@ -16,10 +16,8 @@
 
 namespace cepgen {
   class Integrator;
-  /// A processes factory
-  struct IntegratorFactory : public ModuleFactory<Integrator> {
-    static std::string description() { return "Integrators factory"; }
-  };
+  /// An integration algorithms factory
+  DEFINE_FACTORY(IntegratorFactory, Integrator, "Integrator factory");
 }  // namespace cepgen
 
 #endif
