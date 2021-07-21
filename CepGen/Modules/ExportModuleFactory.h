@@ -20,7 +20,7 @@ namespace cepgen {
   namespace io {
     class ExportModule;
     /// An output modules factory
-    DEFINE_FACTORY(ExportModuleFactory, ExportModule, "Export modules factory");
+    DEFINE_FACTORY_STR(ExportModuleFactory, ExportModule, "Export modules factory");
   }  // namespace io
 }  // namespace cepgen
 

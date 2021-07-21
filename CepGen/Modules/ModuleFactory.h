@@ -9,7 +9,7 @@
 #include "CepGen/Modules/NamedModule.h"
 
 #define BUILDERNM(obj) obj##Builder
-#define DEFINE_FACTORY(name, objtype, descr)                 \
+#define DEFINE_FACTORY_STR(name, objtype, descr)             \
   struct name : public ModuleFactory<objtype, std::string> { \
     explicit name() : ModuleFactory(descr) {}                \
     static name& get() {                                     \
@@ -48,8 +48,8 @@ namespace cepgen {
                     "\n\n  *** Failed to register an object with improper inheritance into the factory. ***\n");
       if (map_.count(name) > 0 || params_map_.count(name) > 0) {
         std::ostringstream oss;
-        oss << __PRETTY_FUNCTION__ << "\n\n  *** " << description_
-            << " detected a duplicate module registration for index/name \"" << name << "\"! ***\n";
+        oss << "\n\n  *** " << description_ << " detected a duplicate module registration for index/name \"" << name
+            << "\"! ***\n";
         throw std::invalid_argument(oss.str());
       }
       map_[name] = &build<U>;
@@ -62,8 +62,7 @@ namespace cepgen {
     std::unique_ptr<T> build(const I& name, ParametersList params = ParametersList()) const {
       if (name == I() || map_.count(name) == 0) {
         std::ostringstream oss;
-        oss << __PRETTY_FUNCTION__ << "\n\n  *** " << description_ << " failed to build a module with index/name \""
-            << name << "\"! ***\n";
+        oss << "\n\n  *** " << description_ << " failed to build a module with index/name \"" << name << "\"! ***\n";
         throw std::invalid_argument(oss.str());
       }
       params.setName<I>(name);
@@ -78,15 +77,14 @@ namespace cepgen {
         const I& idx = params.get<I>(ParametersList::MODULE_NAME);
         if (map_.count(idx) == 0) {
           std::ostringstream oss;
-          oss << __PRETTY_FUNCTION__ << "\n\n  *** " << description_ << " failed to build a module with index/name \""
-              << idx << "\"! ***\n";
+          oss << "\n\n  *** " << description_ << " failed to build a module with index/name \"" << idx << "\"! ***\n";
           throw std::invalid_argument(oss.str());
         }
         if (params_map_.count(idx) > 0)
           params += params_map_.at(idx);
         return map_.at(idx)(params);
       } else
-        throw std::invalid_argument(std::string(__PRETTY_FUNCTION__) + "\n\n  *** " + description_ +
+        throw std::invalid_argument("\n\n  *** " + description_ +
                                     " failed to retrieve an indexing key from parameters to build the module! ***\n");
     }
     /// Describe the modules factory

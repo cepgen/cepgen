@@ -19,7 +19,7 @@
 namespace cepgen {
   class EventModifier;
   /// A event modifier algorithms factory
-  DEFINE_FACTORY(EventModifierFactory, EventModifier, "Event modifiers factory");
+  DEFINE_FACTORY_STR(EventModifierFactory, EventModifier, "Event modifiers factory");
 }  // namespace cepgen
 
 #endif

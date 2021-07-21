@@ -20,7 +20,7 @@ namespace cepgen {
   namespace utils {
     class Functional;
     /// A functional objects factory
-    DEFINE_FACTORY(FunctionalFactory, Functional, "Functionals factory");
+    DEFINE_FACTORY_STR(FunctionalFactory, Functional, "Functionals factory");
   }  // namespace utils
 }  // namespace cepgen
 

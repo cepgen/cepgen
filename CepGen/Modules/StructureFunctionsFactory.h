@@ -64,7 +64,7 @@ namespace cepgen {
   namespace formfac {
     class Parameterisation;
     /// A form factors parameterisations factory
-    DEFINE_FACTORY(FormFactorsFactory, Parameterisation, "Nucleon form factors factory");
+    DEFINE_FACTORY_STR(FormFactorsFactory, Parameterisation, "Nucleon form factors factory");
     /// Standard dipole handler name
     static constexpr const char* gFFStandardDipoleHandler = "StandardDipole";
   }  // namespace formfac

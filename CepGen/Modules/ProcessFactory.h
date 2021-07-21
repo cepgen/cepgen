@@ -38,7 +38,7 @@ namespace cepgen {
   namespace proc {
     class Process;
     /// A processes factory
-    DEFINE_FACTORY(ProcessFactory, Process, "Physics processes factory");
+    DEFINE_FACTORY_STR(ProcessFactory, Process, "Physics processes factory");
   }  // namespace proc
 }  // namespace cepgen
 
