@@ -81,9 +81,9 @@ namespace cepgen {
     class Generation {
     public:
       /// Build a generation parameters collection from a user input
-      Generation(const ParametersList&);
+      explicit Generation(const ParametersList&);
       /// Copy constructor
-      Generation(const Generation&);
+      explicit Generation(const Generation&);
       /// Assignment operator
       Generation& operator=(const Generation&) = default;
 
@@ -136,6 +136,8 @@ namespace cepgen {
     EventModifiersSequence& eventModifiersSequence() { return evt_modifiers_; }
     /// Retrieve the list of event modification algorithms to run
     const EventModifiersSequence& eventModifiersSequence() const { return evt_modifiers_; }
+    /// Remove all event modifiers from sequence
+    void clearEventModifiersSequence();
     /// Add a new event modification algorithm to the sequence
     void addModifier(std::unique_ptr<EventModifier>);
     /// Add a new event modification algorithm to the sequence
@@ -149,6 +151,8 @@ namespace cepgen {
     ExportModulesSequence& outputModulesSequence() { return out_modules_; }
     /// Retrieve the list of output modules to run
     const ExportModulesSequence& outputModulesSequence() const { return out_modules_; }
+    /// Remove all output modules from sequence
+    void clearOutputModulesSequence();
     /// Set a new output module definition
     void addOutputModule(std::unique_ptr<io::ExportModule> mod);
     /// Set the pointer to a output module

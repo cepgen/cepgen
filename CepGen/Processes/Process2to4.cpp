@@ -1,15 +1,13 @@
 #include "CepGen/Processes/Process2to4.h"
 
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/KTFlux.h"
-#include "CepGen/Physics/HeavyIon.h"
-
-#include "CepGen/Event/Event.h"
+#include <cmath>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Physics/HeavyIon.h"
+#include "CepGen/Physics/KTFlux.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/String.h"
-
-#include <cmath>
 
 namespace cepgen {
   namespace proc {
@@ -18,6 +16,7 @@ namespace cepgen {
     Process2to4::Process2to4(const ParametersList& params, std::array<pdgid_t, 2> partons, pdgid_t cs_id)
         : KTProcess(params, partons, {cs_id, cs_id}),
           cs_prop_(PDG::get()(cs_id)),
+          single_limits_(params),
           y_c1_(0.),
           y_c2_(0.),
           pt_diff_(0.),

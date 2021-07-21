@@ -1,16 +1,15 @@
+#include <cmath>
+#include <fstream>
+#include <iostream>
+
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
-
 #include "CepGen/Utils/AbortHandler.h"
-#include "CepGen/Utils/String.h"
-#include "CepGen/Utils/Timer.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/ProgressBar.h"
-
-#include <fstream>
-#include <iostream>
-#include <cmath>
+#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Timer.h"
 
 using namespace std;
 using namespace cepgen;
@@ -37,7 +36,7 @@ int main(int argc, char* argv[]) {
   utils::Timer tmr;
   Generator gen;
 
-  CG_LOG("main") << "Testing with " << integrator << " integrator.";
+  CG_LOG << "Testing with " << integrator << " integrator.";
 
   vector<string> failed_tests, passed_tests;
 
@@ -113,8 +112,8 @@ int main(int argc, char* argv[]) {
       ++num_tests;
       if (debug)
         progress->update(num_tests);
-      CG_LOG("main") << "Test " << num_tests << "/" << tests.size() << " finished. "
-                     << "Success: " << utils::yesno(success) << ".";
+      CG_LOG << "Test " << num_tests << "/" << tests.size() << " finished. "
+             << "Success: " << utils::yesno(success) << ".";
     }
   } catch (const Exception& e) {
   }

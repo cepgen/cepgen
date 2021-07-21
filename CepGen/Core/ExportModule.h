@@ -23,8 +23,6 @@ namespace cepgen {
       explicit ExportModule(const ParametersList& params);
       virtual ~ExportModule();
 
-      /// Unique name of the output module
-      const std::string& name() const { return name_; }
       /// Set the process cross section and its associated error
       virtual void setCrossSection(double /*cross_section*/, double /*err_cross_section*/) {}
       /// Set the event number

@@ -11,13 +11,13 @@
     struct BUILDERNM(obj) {                                                    \
       BUILDERNM(obj)() { IntegratorFactory::get().registerModule<obj>(name); } \
     };                                                                         \
-    static BUILDERNM(obj) gIntegr##obj;                                        \
+    static const BUILDERNM(obj) gIntegr##obj;                                  \
   }
 
 namespace cepgen {
   class Integrator;
-  /// A processes factory
-  typedef ModuleFactory<Integrator> IntegratorFactory;
+  /// An integration algorithms factory
+  DEFINE_FACTORY_STR(IntegratorFactory, Integrator, "Integrator factory");
 }  // namespace cepgen
 
 #endif

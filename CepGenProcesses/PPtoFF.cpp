@@ -1,15 +1,12 @@
-#include "CepGen/Processes/Process2to4.h"
-#include "CepGen/Modules/ProcessesFactory.h"
+#include <iomanip>
 
 #include "CepGen/Core/Exception.h"
-
 #include "CepGen/Event/Event.h"
-
+#include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Physics/AlphaS.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/AlphaS.h"
-
-#include <iomanip>
+#include "CepGen/Processes/Process2to4.h"
 
 namespace cepgen {
   namespace proc {
@@ -99,7 +96,7 @@ namespace cepgen {
           prefactor_ *= 4. * M_PI;
           break;
         case PDG::photon:
-          prefactor_ *= pow(constants::G_EM * qf3_, 2) / 9.;
+          prefactor_ *= constants::G_EM_SQ * pow(qf3_, 2) / 9.;
           break;
         default:
           throw CG_FATAL("PPtoFF:prepare") << "Only photon & gluon partons are supported!";
@@ -110,7 +107,7 @@ namespace cepgen {
           prefactor_ *= 4. * M_PI;
           break;
         case PDG::photon:
-          prefactor_ *= pow(constants::G_EM * qf3_, 2) / 9.;
+          prefactor_ *= constants::G_EM_SQ * pow(qf3_, 2) / 9.;
           break;
         default:
           throw CG_FATAL("PPtoFF:prepare") << "Only photon & gluon partons are supported!";

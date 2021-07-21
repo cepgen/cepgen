@@ -1,16 +1,16 @@
-#include "CepGen/Utils/Functional.h"
-#include "CepGen/Modules/FunctionalFactory.h"
-#include "CepGen/Core/Exception.h"
-
 #include <cmath>
 #include <string>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/FunctionalFactory.h"
+#include "CepGen/Utils/Functional.h"
 
 using namespace std;
 
 int main() {
   const double epsilon = 1.e-9;  // tolerance
   for (const auto& func : cepgen::utils::FunctionalFactory::get().modules()) {
-    CG_LOG("main") << "Testing with \"" << func << "\" functional parser.";
+    CG_LOG << "Testing with \"" << func << "\" functional parser.";
     {  // test with a 1-variable function
       const double exp_result_test1 = 6.795704571;
       auto test =
@@ -22,7 +22,7 @@ int main() {
         throw CG_FATAL("main") << "Test 1.1 failed!";
       if (fabs((*test)({10.}) - exp_result_test1) > epsilon)
         throw CG_FATAL("main") << "Test 1.2 failed!";
-      CG_LOG("main") << "Test 1 passed!";
+      CG_LOG << "Test 1 passed!";
     }
     {  // test with an invalid function
       bool passed = false;
@@ -34,7 +34,7 @@ int main() {
                                                               .set<std::vector<std::string> >("variables", {"x"}));
         (*test)(10);
       } catch (const cepgen::Exception& e) {
-        CG_LOG("main") << "Test 2 passed!";
+        CG_LOG << "Test 2 passed!";
         passed = true;
       }
       if (!passed)
@@ -48,7 +48,7 @@ int main() {
                                                             .set<std::vector<std::string> >("variables", {"a", "b"}));
       if (fabs((*test)({3, 4}) - 5.0) > epsilon)
         throw CG_FATAL("main") << "Test 3 failed!";
-      CG_LOG("main") << "Test 3 passed!";
+      CG_LOG << "Test 3 passed!";
     }
     {  // test with an invalid function
       bool passed = true;
@@ -65,7 +65,7 @@ int main() {
       }
       if (!passed)
         throw CG_FATAL("main") << "Test 4 failed!";
-      CG_LOG("main") << "Test 4 passed!";
+      CG_LOG << "Test 4 passed!";
     }
   }
 

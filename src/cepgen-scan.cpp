@@ -1,20 +1,16 @@
-#include "CepGen/Generator.h"
-#include "CepGen/Parameters.h"
-
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Core/Exception.h"
+#include <fstream>
 
 #include "CepGen/Cards/Handler.h"
-#include "CepGen/Processes/Process.h"
-#include "CepGen/Physics/PDG.h"
-
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Generator.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
-
+#include "CepGen/Parameters.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Processes/Process.h"
+#include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Logger.h"
 #include "CepGen/Utils/String.h"
-#include "CepGen/Utils/ArgumentsParser.h"
-
-#include <fstream>
 
 using namespace std;
 
@@ -45,14 +41,12 @@ int main(int argc, char* argv[]) {
   mg.setParameters(cepgen::card::Handler::parse(input_config));
 
   if (!parser.extra_config().empty())
-    mg.setParameters(
-        cepgen::card::CardsHandlerFactory::get()
-            .build("cmd", cepgen::ParametersList().set<std::vector<std::string> >("args", parser.extra_config()))
-            ->parse("", mg.parametersPtr()));
+    mg.setParameters(cepgen::card::CardsHandlerFactory::get()
+                         .build(cepgen::card::gCommandLineHandler,
+                                cepgen::ParametersList().set<std::vector<std::string> >("args", parser.extra_config()))
+                         ->parse("", mg.parametersPtr()));
 
   CG_INFO("main") << mg.parameters();
-
-  double cross_section, err_cross_section;
 
   ofstream xsect_file(output_file);
   if (!xsect_file.is_open())
@@ -67,24 +61,9 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i <= npoints; ++i)
       points.emplace_back(min_value + (max_value - min_value) * i / npoints);
 
+  double cross_section, err_cross_section;
   for (const auto& value : points) {
-    if (scan == "ptmin")
-      par.kinematics.cuts.central.pt_single().min() = value;
-    else if (scan == "ptmax")
-      par.kinematics.cuts.central.pt_single().max() = value;
-    else if (scan == "q2min")
-      par.kinematics.cuts.initial.q2().min() = value;
-    else if (scan == "q2max")
-      par.kinematics.cuts.initial.q2().max() = value;
-    else if (scan == "wmin")
-      par.kinematics.cuts.central.mass_sum().min() = value;
-    else if (scan == "wmax")
-      par.kinematics.cuts.central.mass_sum().max() = value;
-    else if (scan == "mxmin")
-      par.kinematics.cuts.remnants.mx().min() = value;
-    else if (scan == "mxmax")
-      par.kinematics.cuts.remnants.mx().max() = value;
-    else if (scan == "abseta") {
+    if (scan == "abseta") {
       par.kinematics.cuts.central.eta_single().min() = -value;
       par.kinematics.cuts.central.eta_single().max() = +value;
     } else if (scan == "absrap") {
@@ -95,9 +74,12 @@ int main(int argc, char* argv[]) {
       prop.mass = value;
       cepgen::PDG::get().define(prop);
       par.process().clear();
-    } else
-      throw CG_FATAL("main") << "Invalid variable to be scanned: \"" << scan << "\"!";
-    CG_LOG("main") << "Scan of \"" << scan << "\". Value = " << value << ".";
+    } else {
+      auto modif = cepgen::ParametersList().set<double>(scan, value);
+      par.kinematics.setParameters(modif);
+      CG_LOG << modif << "\n\n" << par.kinematics.cuts;
+    }
+    CG_LOG << "Scan of \"" << scan << "\". Value = " << value << ".";
     mg.computeXsection(cross_section, err_cross_section);
     string out_line = cepgen::utils::format("%.2f\t%.8e\t%.8e\n", value, cross_section, err_cross_section);
     xsect_file << out_line;

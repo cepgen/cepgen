@@ -8,6 +8,7 @@
 #include "CepGen/Core/Exception.h"
 
 #include <array>
+#include <utility>
 #include <vector>
 
 namespace cepgen {
@@ -26,7 +27,7 @@ namespace cepgen {
 
     private:
       enum Polarisation { L, T };
-      static constexpr double prefac_ = 0.25 * M_1_PI * M_1_PI / constants::ALPHA_EM;
+      static constexpr double prefactor_ = 0.25 * M_1_PI * M_1_PI / constants::ALPHA_EM;
 
       double resmod507(const Polarisation& pol, double w2, double q2) const;
 
@@ -70,7 +71,7 @@ namespace cepgen {
         struct Continuum {
           struct Direction {
             explicit Direction() : sig0(0.) {}
-            Direction(double sig0, const std::vector<double>& params) : sig0(sig0), fit_parameters(params) {}
+            Direction(double sig0, std::vector<double> params) : sig0(sig0), fit_parameters(std::move(params)) {}
             double sig0;
             std::vector<double> fit_parameters;
           };
@@ -79,7 +80,7 @@ namespace cepgen {
         } continuum;
         double m0;
         std::vector<Resonance> resonances;
-      } params_;
+      } mod_params_;
       const double mpi_, mpi2_;
       const double meta_, meta2_;
     };
@@ -92,7 +93,7 @@ namespace cepgen {
           meta2_(meta_ * meta_) {
       const auto& model = params.get<std::string>("model", "standard");
       if (model == "standard")
-        params_ = Parameters::standard();
+        mod_params_ = Parameters::standard();
       else
         throw CG_FATAL("ChristyBosted") << "Invalid modelling selected: " << model << "!";
     }
@@ -108,7 +109,7 @@ namespace cepgen {
           m0 = 0.125, q20 = 0.05;
         } break;
         case Polarisation::L: {  // longitudinal
-          m0 = params_.m0, q20 = 0.125;
+          m0 = mod_params_.m0, q20 = 0.125;
         } break;
       }
 
@@ -127,7 +128,7 @@ namespace cepgen {
 
       std::array<double, 7> width, height, pgam;
       for (unsigned short i = 0; i < 7; ++i) {
-        const Parameters::Resonance& res = params_.resonances[i];
+        const Parameters::Resonance& res = mod_params_.resonances[i];
         width[i] = res.width;
 
         //--- calculate partial widths
@@ -174,7 +175,7 @@ namespace cepgen {
 
       double sig_res = 0.;
       for (unsigned short i = 0; i < 7; ++i) {
-        const Parameters::Resonance& res = params_.resonances[i];
+        const Parameters::Resonance& res = mod_params_.resonances[i];
         const double mass2 = res.mass * res.mass, width2 = width[i] * width[i];
         const double sigr = height[i] * res.kr() / k * res.kcmr() / kcm / res.width *
                             (width[i] * pgam[i] / (pow(w2 - mass2, 2) + mass2 * width2));
@@ -193,11 +194,11 @@ namespace cepgen {
           const double wdif = w - mx_min_;
           if (wdif >= 0.) {
             for (unsigned short i = 0; i < 2; ++i) {
-              const double expo = params_.continuum.transverse[i].fit_parameters[1] +
-                                  params_.continuum.transverse[i].fit_parameters[2] * q2 +
-                                  params_.continuum.transverse[i].fit_parameters[3] * q2 * q2;
-              sig_nr += params_.continuum.transverse[i].sig0 /
-                        pow(q2 + params_.continuum.transverse[i].fit_parameters[0], expo) * pow(wdif, i + 1.5);
+              const double expo = mod_params_.continuum.transverse[i].fit_parameters[1] +
+                                  mod_params_.continuum.transverse[i].fit_parameters[2] * q2 +
+                                  mod_params_.continuum.transverse[i].fit_parameters[3] * q2 * q2;
+              sig_nr += mod_params_.continuum.transverse[i].sig0 /
+                        pow(q2 + mod_params_.continuum.transverse[i].fit_parameters[0], expo) * pow(wdif, i + 1.5);
             }
           }
 
@@ -205,13 +206,13 @@ namespace cepgen {
         } break;
         case Polarisation::L: {  // longitudinal
           for (unsigned short i = 0; i < 1; ++i) {
-            const double expo = params_.continuum.longitudinal[i].fit_parameters[0] +
-                                params_.continuum.longitudinal[i].fit_parameters[1];
-            sig_nr += params_.continuum.longitudinal[i].sig0 * pow(1. - xpr, expo) / (1. - xb) *
-                      pow(q2 / (q2 + q20), params_.continuum.longitudinal[i].fit_parameters[2]) / (q2 + q20) *
+            const double expo = mod_params_.continuum.longitudinal[i].fit_parameters[0] +
+                                mod_params_.continuum.longitudinal[i].fit_parameters[1];
+            sig_nr += mod_params_.continuum.longitudinal[i].sig0 * pow(1. - xpr, expo) / (1. - xb) *
+                      pow(q2 / (q2 + q20), mod_params_.continuum.longitudinal[i].fit_parameters[2]) / (q2 + q20) *
                       pow(xpr,
-                          params_.continuum.longitudinal[i].fit_parameters[3] +
-                              params_.continuum.longitudinal[i].fit_parameters[4] * t);
+                          mod_params_.continuum.longitudinal[i].fit_parameters[3] +
+                              mod_params_.continuum.longitudinal[i].fit_parameters[4] * t);
           }
         }
       }
@@ -350,7 +351,7 @@ namespace cepgen {
       const double sigT = resmod507(Polarisation::T, w2_eff, q2_eff);
       const double sigL = resmod507(Polarisation::L, w2_eff, q2_eff);
 
-      F2 = prefac_ * (1. - xbj) * q2_eff / (1 + tau(xbj, q2_eff)) * (sigT + sigL) / constants::GEVM2_TO_PB * 1.e6;
+      F2 = prefactor_ * (1. - xbj) * q2_eff / (1 + tau(xbj, q2_eff)) * (sigT + sigL) / constants::GEVM2_TO_PB * 1.e6;
       if (q2 > q20)
         F2 *= q21 / (q21 + delq2);
 

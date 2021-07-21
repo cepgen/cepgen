@@ -8,6 +8,7 @@
 #include "HepMC/GenEvent.h"
 #endif
 #include <unordered_map>
+#include <memory>
 
 namespace cepgen {
   class Event;

@@ -5,8 +5,8 @@
 #include "CepGen/Core/Exception.h"
 
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGenAddOns/ROOTWrapper/ROOTCanvas.h"
 
-#include "Canvas.h"
 #include "TH1.h"
 
 using namespace std;
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
       {"singlelepton_eta", *h_etasingle},
   };
   for (auto& plt : plots) {
-    cepgen::Canvas c(plt.first, "CepGen Simulation");
+    cepgen::ROOTCanvas c(plt.first, "CepGen Simulation");
     plt.second.Draw("hist");
     c.Prettify(&plt.second);
     c.SetLogy();

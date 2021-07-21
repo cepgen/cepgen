@@ -1,5 +1,5 @@
 set(CPACK_RPM_COMPONENT_INSTALL ON)
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(CepGen)
 set(PROJECT_VERSION 1)
 set(VERSION 1.0.alpha2)
@@ -46,6 +46,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-pg") # for gprof
 #set(CMAKE_CXX_FLAGS_DEBUG "-fprofile-arcs -ftest-coverage") # for gcov
 set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -O2")
 set(CMAKE_C_FLAGS_RELEASE "-O2")
+set(ROOT_CXX_STANDARD 17)
 
 #----- include external paths
 
@@ -55,7 +56,7 @@ include(UseEnvironment)
 set(CEPGEN_LIBRARIES)
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 set(CEPGEN_CORE_EXT ${GSL_LIB} ${GSL_CBLAS_LIB} dl)
-set(CEPGEN_HAS_FUNCTIONALS OFF)
+set(CEPGEN_HAS_FUNCTIONAL OFF)
 set(CEPGEN_ADDONS_FILE "${CMAKE_CURRENT_BINARY_DIR}/CepGenAddOns.txt")
 
 include(BuildUtils)

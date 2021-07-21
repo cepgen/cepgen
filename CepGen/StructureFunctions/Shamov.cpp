@@ -198,7 +198,6 @@ namespace cepgen {
 
       const double mx2 = utils::mX2(xbj, q2, mp2_), mx = sqrt(mx2);
 
-      double Gm = 0.;
       const auto sigma = sigma_grid_.eval({mx});
       double sgp = sigma[0];  // cross section value at MX
 
@@ -208,6 +207,7 @@ namespace cepgen {
       );
 
       //--- q^2 dependence of sigma
+      double Gm;
       if (!resonant) {
         // nonresonant
         if (mode_ == Mode::RealAndFitNonRes)

@@ -1,5 +1,5 @@
-#ifndef CepGen_test_ArgumentsParser_h
-#define CepGen_test_ArgumentsParser_h
+#ifndef CepGen_Utils_ArgumentsParser_h
+#define CepGen_Utils_ArgumentsParser_h
 
 #include <vector>
 #include <string>

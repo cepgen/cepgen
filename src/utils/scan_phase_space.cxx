@@ -6,8 +6,8 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGenAddOns/ROOTWrapper/ROOTCanvas.h"
 
-#include "Canvas.h"
 #include "TGraph2D.h"
 
 using namespace std;
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
     }
   }
   {
-    cepgen::Canvas c("test_scan");
+    cepgen::ROOTCanvas c("test_scan");
     gStyle->SetPalette(kBeach);
     string xlabel, ylabel;
     switch (dim.size()) {

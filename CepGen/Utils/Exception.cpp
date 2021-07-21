@@ -10,19 +10,24 @@ namespace cepgen {
   LoggedException::LoggedException(const char* from, const char* module, Type type, short id)
       : from_(from), module_(module), type_(type), error_num_(id) {}
 
-  LoggedException::LoggedException(const LoggedException& rhs)
+  LoggedException::LoggedException(const LoggedException& rhs) noexcept
       : from_(rhs.from_),
         module_(rhs.module_),
         message_(rhs.message_.str()),
         type_(rhs.type_),
         error_num_(rhs.error_num_) {}
 
-  LoggedException::~LoggedException() {
+  LoggedException::~LoggedException() noexcept {
     if (type_ != Type::undefined)
       dump();
     // we stop this process' execution on fatal exception
     if (type_ == Type::fatal && raise(SIGINT) != 0)
       exit(0);
+  }
+
+  const char* LoggedException::what() const noexcept {
+    (*utils::Logger::get().output) << "\n" << message_.str() << "\n";
+    return from_.c_str();
   }
 
   std::string LoggedException::message() const { return message_.str(); }
@@ -39,15 +44,10 @@ namespace cepgen {
 
     switch (type_) {
       case Type::info:
-        return os << utils::colourise("Info:", utils::Colour::green, utils::Modifier::bold) << "\t" << message_.str()
-                  << "\n";
+        return os << type_ << ":\t" << message_.str() << "\n";
       case Type::debug:
-        return os << utils::colourise("Debug:", utils::Colour::yellow, utils::Modifier::reverse) << " "
-                  << utils::colourise(from_, utils::Colour::reset, utils::Modifier::underline) << "\n\t"
-                  << message_.str() << "\n";
       case Type::warning:
-        return os << utils::colourise("Warning:", utils::Colour::blue, utils::Modifier::bold) << " "
-                  << utils::colourise(from_, utils::Colour::reset, utils::Modifier::underline) << "\n\t"
+        return os << type_ << " " << utils::colourise(from_, utils::Colour::reset, utils::Modifier::underline) << "\n\t"
                   << message_.str() << "\n";
       case Type::verbatim:
         return os << message_.str() << "\n";
@@ -55,14 +55,7 @@ namespace cepgen {
       case Type::error:
       case Type::fatal: {
         const std::string sep(80, '-');
-        os << sep << "\n";
-        if (type_ == Type::error)
-          os << utils::colourise("Error", utils::Colour::red, utils::Modifier::bold);
-        else if (type_ == Type::fatal)
-          os << utils::colourise("Fatal error", utils::Colour::red, utils::Modifier::bold);
-        else if (type_ == Type::undefined)
-          os << utils::colourise("Undef'd exception", utils::Colour::reset, utils::Modifier::reverse);
-        os << " occured at " << now() << "\n";
+        os << sep << "\n" << type_ << " occured at " << now() << "\n";
         if (!from_.empty())
           os << "  raised by: " << utils::colourise(from_, utils::Colour::reset, utils::Modifier::underline) << "\n";
         if (errorNumber() != 0)
@@ -81,5 +74,25 @@ namespace cepgen {
     struct tm* timeinfo = localtime(&rawtime);
     strftime(buffer, 10, "%H:%M:%S", timeinfo);
     return buffer;
+  }
+
+  std::ostream& operator<<(std::ostream& os, const Exception::Type& type) {
+    switch (type) {
+      case Exception::Type::info:
+        return os << utils::colourise("Info:", utils::Colour::green, utils::Modifier::bold);
+      case Exception::Type::debug:
+        return os << utils::colourise("Debug:", utils::Colour::yellow, utils::Modifier::reverse);
+      case Exception::Type::warning:
+        return os << utils::colourise("Warning:", utils::Colour::blue, utils::Modifier::bold);
+      case Exception::Type::verbatim:
+        return os << utils::colourise("Verbatim", utils::Colour::reset, utils::Modifier::bold);
+      case Exception::Type::undefined:
+        return os << utils::colourise("Undef'd exception", utils::Colour::reset, utils::Modifier::reverse);
+      case Exception::Type::error:
+        return os << utils::colourise("Error", utils::Colour::red, utils::Modifier::bold);
+      case Exception::Type::fatal:
+        return os << utils::colourise("Fatal error", utils::Colour::red, utils::Modifier::bold);
+    }
+    return os;
   }
 }  // namespace cepgen

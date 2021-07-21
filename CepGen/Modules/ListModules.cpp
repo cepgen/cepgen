@@ -1,22 +1,19 @@
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
-
-#include "CepGen/Physics/AlphaS.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
-
 #include "CepGen/Modules/CardsHandlerFactory.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Modules/ProcessesFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
-
-#include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/AlphaS.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
   void dumpModules() {
-    CG_LOG("dumpModules").log([](auto& info) {
+    CG_LOG.log([](auto& info) {
       const std::string sep_mid(80, '-');
       info << "List of modules registered in the runtime database:\n";
       {
@@ -37,11 +34,11 @@ namespace cepgen {
       }
       {
         info << "\n" << sep_mid << "\n" << utils::boldify("Physics processes");
-        if (proc::ProcessesFactory::get().modules().empty())
+        if (proc::ProcessFactory::get().modules().empty())
           info << "\n>>> " << utils::colourise("none found", utils::Colour::red) << " <<<";
-        for (const auto& mod : proc::ProcessesFactory::get().modules())
+        for (const auto& mod : proc::ProcessFactory::get().modules())
           info << "\n> " << utils::colourise(mod, utils::Colour::green, utils::Modifier::bold) << ": "
-               << proc::ProcessesFactory::get().describe(mod);
+               << proc::ProcessFactory::get().describe(mod);
       }
       {
         info << "\n" << sep_mid << "\n" << utils::boldify("Beam form factors modellings");

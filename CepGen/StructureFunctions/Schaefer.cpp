@@ -125,7 +125,6 @@ namespace cepgen {
           return *this;
         }
       }
-      throw CG_FATAL("LUXlike") << "Invalid Q2/xbj range! (" << q2 << ", " << xbj << ").";
     }
 
     double Schaefer::rho(double w2) const {

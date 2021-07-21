@@ -8,14 +8,6 @@ namespace cepgen {
     /// \f$F_{1,2,E,M}\f$ modelling by Suri and Yennie \cite Suri:1971yx
     class SuriYennie : public Parameterisation {
     public:
-      /// Collection of parameterisation-dependent couplings
-      struct Parameters {
-        double C1, C2;
-        double D1;
-        double rho2;
-        double Cp, Bp;
-      };
-
       /// User-steered Suri-Yennie continuum structure functions calculator
       explicit SuriYennie(const ParametersList& params = ParametersList());
       static std::string description() { return "Suri-Yennie FE/FM"; }
@@ -27,7 +19,13 @@ namespace cepgen {
       double FE;  ///< Electric proton form factor
       double FM;  ///< Magnetic proton form factor
     private:
-      Parameters params_;
+      /// Collection of parameterisation-dependent couplings
+      struct Parameters {
+        double C1 = 0., C2 = 0.;
+        double D1 = 0.;
+        double rho2 = 0.;
+        double Cp = 0., Bp = 0.;
+      } sy_params_;
     };
   }  // namespace strfun
 }  // namespace cepgen

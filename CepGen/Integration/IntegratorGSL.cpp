@@ -33,12 +33,12 @@ namespace cepgen {
     if (!rng_engine)
       throw CG_FATAL("Integrator:build") << "Random number generator engine not set!";
 
-    rng_.reset(gsl_rng_alloc(rng_engine));
-    gsl_rng_set(rng_.get(), seed_);
+    gsl_rng_.reset(gsl_rng_alloc(rng_engine));
+    gsl_rng_set(gsl_rng_.get(), seed_);
 
     //--- a bit of printout for debugging
 
-    CG_DEBUG("Integrator:build") << "Random numbers generator: " << gsl_rng_name(rng_.get()) << ".\n\t"
+    CG_DEBUG("Integrator:build") << "Random numbers generator: " << gsl_rng_name(gsl_rng_.get()) << ".\n\t"
                                  << "Seed: " << seed_ << ".";
   }
 
@@ -54,8 +54,8 @@ namespace cepgen {
   }
 
   double IntegratorGSL::uniform() const {
-    if (!rng_)
+    if (!gsl_rng_)
       throw CG_FATAL("Integrator:uniform") << "Random number generator has not been initialised!";
-    return gsl_rng_uniform(rng_.get());
+    return gsl_rng_uniform(gsl_rng_.get());
   }
 }  // namespace cepgen

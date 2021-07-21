@@ -1,5 +1,5 @@
-#ifndef CepGen_Module_ExportModuleFactory_h
-#define CepGen_Module_ExportModuleFactory_h
+#ifndef CepGen_Modules_ExportModuleFactory_h
+#define CepGen_Modules_ExportModuleFactory_h
 
 #include "CepGen/Modules/ModuleFactory.h"
 
@@ -12,7 +12,7 @@
       struct BUILDERNM(obj) {                                                      \
         BUILDERNM(obj)() { ExportModuleFactory::get().registerModule<obj>(name); } \
       };                                                                           \
-      static BUILDERNM(obj) gIO##obj;                                              \
+      static const BUILDERNM(obj) gIO##obj;                                        \
     }                                                                              \
   }
 
@@ -20,7 +20,7 @@ namespace cepgen {
   namespace io {
     class ExportModule;
     /// An output modules factory
-    typedef ModuleFactory<ExportModule> ExportModuleFactory;
+    DEFINE_FACTORY_STR(ExportModuleFactory, ExportModule, "Export modules factory");
   }  // namespace io
 }  // namespace cepgen
 

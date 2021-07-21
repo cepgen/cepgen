@@ -1,26 +1,28 @@
 #include "CepGen/Utils/String.h"
 
-#include <iterator>
-#include <sstream>
+#include <unistd.h>
 
 #include <cmath>
 #include <cstdarg>  // For va_start, etc.
-#include <unistd.h>
+#include <iterator>
+#include <sstream>
+#include <vector>
 
 namespace cepgen {
   namespace utils {
     std::string format(const std::string fmt, ...) {
-      int size = ((int)fmt.size()) * 2 + 50;
+      static const size_t min_size = 50;
+      size_t size = fmt.size() * 2 + min_size;
       std::string str;
       va_list ap;
       while (true) {
         //--- maximum two passes on a POSIX system...
         str.resize(size);
         va_start(ap, fmt);
-        int n = vsnprintf((char*)str.data(), size, fmt.c_str(), ap);
+        ssize_t n = vsnprintf((char*)str.data(), size, fmt.c_str(), ap);
         va_end(ap);
         //--- check if everything worked
-        if (n > -1 && n < size) {
+        if (n > -1 && n < (ssize_t)size) {
           str.resize(n);
           return str;
         }
@@ -85,7 +87,7 @@ namespace cepgen {
         return vec.at(0);
       std::ostringstream oss;
       std::copy(vec.begin(), std::prev(vec.end()), std::ostream_iterator<std::string>(oss, delim.c_str()));
-      return oss.str() + *vec.rbegin();
+      return oss.str() + *vec.rbegin();  // treat last one separately to drop the last delimiter
     }
 
     std::string toupper(const std::string& str) {
@@ -108,6 +110,13 @@ namespace cepgen {
 
     void rtrim(std::string& s) {
       s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), s.end());
+    }
+
+    std::string strip(const std::string& str) {
+      auto out = str;
+      out.resize(std::remove_if(out.begin(), out.end(), [](char x) { return !std::isalnum(x) && !std::isspace(x); }) -
+                 out.begin());
+      return out;
     }
 
     std::string environ(const std::string& env, const std::string& def) {

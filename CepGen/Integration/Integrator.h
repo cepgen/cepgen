@@ -7,7 +7,7 @@
 #include <vector>
 #include <random>
 
-#include <string.h>
+#include <cstring>
 
 namespace cepgen {
   class Integrand;
@@ -42,6 +42,8 @@ namespace cepgen {
     double result_;             ///< Result of the last integration
     double err_result_;         ///< Standard deviation for the last integration
     bool initialised_;          ///< Has the algorithm alreay been initialised?
+    mutable std::default_random_engine rnd_gen_;
+    mutable std::uniform_real_distribution<double> rnd_;
   };
 }  // namespace cepgen
 

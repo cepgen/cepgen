@@ -1,18 +1,28 @@
 #ifndef CepGen_Physics_Cuts_h
 #define CepGen_Physics_Cuts_h
 
-#include "CepGen/Utils/Limits.h"
-#include "CepGen/Physics/ParticleProperties.h"
-
-#include <vector>
 #include <unordered_map>
+#include <vector>
+
+#include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Utils/Limits.h"
 
 namespace cepgen {
+  class ParametersList;
+
   /// Constraints to be applied on the events kinematics
   class Cuts {
   public:
+    /// Define a cut from parameters list
+    explicit Cuts(const ParametersList&);
+
+    /// Modify a few parameters values
+    void setParameters(const ParametersList&);
+
     /// A set of properties for a given cut
     struct Property {
+      Property() = default;
+      explicit Property(const std::string& name, const std::string& descr, const ParametersList&);
       std::string name, description;
       Limits limits;
     };
@@ -33,7 +43,8 @@ namespace cepgen {
     /// Centrally produced particles phase space cuts
     class Central : public Cuts {
     public:
-      explicit Central();
+      Central();
+      explicit Central(const ParametersList&);
 
       /// single particle transverse momentum
       Limits& pt_single() { return limits_.at(e_pt_single).limits; }
@@ -105,7 +116,7 @@ namespace cepgen {
     /// Initial parton-like particles phase space cuts
     class Initial : public Cuts {
     public:
-      explicit Initial();
+      explicit Initial(const ParametersList&);
 
       /// parton virtuality
       Limits& q2() { return limits_.at(e_q2).limits; }
@@ -127,7 +138,7 @@ namespace cepgen {
     /// Outgoing beam remnant-like particles phase space cuts
     class Remnants : public Cuts {
     public:
-      explicit Remnants();
+      explicit Remnants(const ParametersList&);
 
       /// diffractive mass
       Limits& mx() { return limits_.at(e_mx).limits; }

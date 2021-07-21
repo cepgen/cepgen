@@ -21,6 +21,8 @@ namespace cepgen {
       error,           ///< General non-stopping error
       fatal            ///< Critical and stopping error
     };
+    /// Printout operator for exception type
+    friend std::ostream& operator<<(std::ostream&, const Type&);
     /// Dump the full exception information in a given output stream
     /// \param[inout] os the output stream where the information is dumped
     virtual std::ostream& dump(std::ostream& os = *utils::Logger::get().output) const = 0;
@@ -30,7 +32,7 @@ namespace cepgen {
 
   /// A simple exception handler
   /// \date 24 Mar 2015
-  class LoggedException : public Exception {
+  class LoggedException final : public Exception, public std::exception {
   public:
     /// Generic constructor
     /// \param[in] module exception classifier
@@ -44,7 +46,7 @@ namespace cepgen {
     /// \param[in] id exception code (useful for logging)
     explicit LoggedException(const char* from, const char* module, Type type = Type::undefined, short id = 0);
     /// Copy constructor
-    LoggedException(const LoggedException& rhs);
+    LoggedException(const LoggedException& rhs) noexcept;
     /// Default destructor (potentially killing the process)
     ~LoggedException() noexcept override;
 
@@ -106,6 +108,7 @@ namespace cepgen {
       return *this;
     }
 
+    const char* what() const noexcept override;
     std::string message() const override;
 
     /// Origin of the exception
@@ -160,9 +163,7 @@ namespace cepgen {
 #define __FUNC__ __PRETTY_FUNCTION__
 #endif
 
-#define CG_LOG(mod)                                        \
-  (!CG_LOG_MATCH(mod, information)) ? cepgen::NullStream() \
-                                    : cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::verbatim)
+#define CG_LOG cepgen::LoggedException(__FUNC__, "Logging", cepgen::Exception::Type::verbatim)
 #define CG_INFO(mod)                                       \
   (!CG_LOG_MATCH(mod, information)) ? cepgen::NullStream() \
                                     : cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::info)

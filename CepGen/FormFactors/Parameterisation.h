@@ -17,7 +17,7 @@ namespace cepgen {
       /// Empty parameterisation object constructor
       explicit Parameterisation();
       /// Steered parameterisation object constructor
-      Parameterisation(const ParametersList&);
+      explicit Parameterisation(const ParametersList&);
       /// Copy constructor
       Parameterisation(const Parameterisation&);
 

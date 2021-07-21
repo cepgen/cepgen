@@ -1,14 +1,30 @@
 #ifndef CepGen_Modules_ModuleFactory_h
 #define CepGen_Modules_ModuleFactory_h
 
-#include "CepGen/Modules/NamedModule.h"
-
-#include <unordered_map>
-#include <vector>
 #include <memory>
 #include <sstream>
+#include <unordered_map>
+#include <vector>
+
+#include "CepGen/Modules/NamedModule.h"
 
 #define BUILDERNM(obj) obj##Builder
+#define DEFINE_FACTORY_STR(name, objtype, descr)             \
+  struct name : public ModuleFactory<objtype, std::string> { \
+    explicit name() : ModuleFactory(descr) {}                \
+    static name& get() {                                     \
+      static name instance;                                  \
+      return instance;                                       \
+    }                                                        \
+  }
+#define DEFINE_FACTORY_INT(name, objtype, descr)     \
+  struct name : public ModuleFactory<objtype, int> { \
+    explicit name() : ModuleFactory(descr) {}        \
+    static name& get() {                             \
+      static name instance;                          \
+      return instance;                               \
+    }                                                \
+  }
 
 namespace cepgen {
   /// A generic factory to build modules
@@ -23,7 +39,7 @@ namespace cepgen {
       return instance;
     }
     /// Default destructor
-    ~ModuleFactory() = default;
+    virtual ~ModuleFactory() = default;
     /// Register a named module in the database
     /// \tparam U Class to register (inherited from T base class)
     template <typename U>
@@ -32,7 +48,7 @@ namespace cepgen {
                     "\n\n  *** Failed to register an object with improper inheritance into the factory. ***\n");
       if (map_.count(name) > 0 || params_map_.count(name) > 0) {
         std::ostringstream oss;
-        oss << __PRETTY_FUNCTION__ << "\n\n  *** Duplicate module registration detected for index/name \"" << name
+        oss << "\n\n  *** " << description_ << " detected a duplicate module registration for index/name \"" << name
             << "\"! ***\n";
         throw std::invalid_argument(oss.str());
       }
@@ -46,8 +62,7 @@ namespace cepgen {
     std::unique_ptr<T> build(const I& name, ParametersList params = ParametersList()) const {
       if (name == I() || map_.count(name) == 0) {
         std::ostringstream oss;
-        oss << __PRETTY_FUNCTION__ << "\n\n  *** Failed to build a module with index/name \"" << name
-            << "\" from factory! ***\n";
+        oss << "\n\n  *** " << description_ << " failed to build a module with index/name \"" << name << "\"! ***\n";
         throw std::invalid_argument(oss.str());
       }
       params.setName<I>(name);
@@ -62,18 +77,18 @@ namespace cepgen {
         const I& idx = params.get<I>(ParametersList::MODULE_NAME);
         if (map_.count(idx) == 0) {
           std::ostringstream oss;
-          oss << __PRETTY_FUNCTION__ << "\n\n  *** Failed to build a module with index/name \"" << idx
-              << "\" from factory! ***\n";
+          oss << "\n\n  *** " << description_ << " failed to build a module with index/name \"" << idx << "\"! ***\n";
           throw std::invalid_argument(oss.str());
         }
         if (params_map_.count(idx) > 0)
           params += params_map_.at(idx);
         return map_.at(idx)(params);
       } else
-        throw std::invalid_argument(
-            std::string(__PRETTY_FUNCTION__) +
-            "\n\n  *** Failed to retrieve an indexing key from parameters to build from factory! ***\n");
+        throw std::invalid_argument("\n\n  *** " + description_ +
+                                    " failed to retrieve an indexing key from parameters to build the module! ***\n");
     }
+    /// Describe the modules factory
+    const std::string& description() { return description_; }
     /// Describe one named module
     const std::string& describe(const I& name) const { return descr_map_.at(name); }
     /// List of modules registred in the database
@@ -85,14 +100,13 @@ namespace cepgen {
     }
 
   private:
-    explicit ModuleFactory() = default;
     /// Construct a module with its parameters set
     template <typename U>
     static std::unique_ptr<T> build(const ParametersList& params) {
       return std::unique_ptr<T>(new U(params));
     }
-
-  protected:
+    /// Factory name
+    const std::string description_;
     /// Constructor type for a module
     typedef std::unique_ptr<T> (*ModCreate)(const ParametersList&);
     /// Database of modules handled by this instance
@@ -101,6 +115,9 @@ namespace cepgen {
     std::unordered_map<I, std::string> descr_map_;
     /// Database of default parameters associated to modules
     std::unordered_map<I, ParametersList> params_map_;
+
+  protected:
+    explicit ModuleFactory(const std::string& descr = "Unnamed factory") : description_(descr) {}
 
   public:
     ModuleFactory(const ModuleFactory&) = delete;

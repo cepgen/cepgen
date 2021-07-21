@@ -10,7 +10,7 @@ namespace cepgen {
     constexpr double ALPHA_EM = 1. / 137.035999;
 #if !defined(__CINT__) && !defined(__CLING__)
     /// Electromagnetic charge (~0.303 in natural units)
-    constexpr double G_EM = std::sqrt(4. * M_PI * ALPHA_EM);
+    constexpr double G_EM_SQ = 4. * M_PI * ALPHA_EM;
 #endif
     /// Strong coupling constant \f$\alpha_{\rm QCD}\f$
     constexpr double ALPHA_QCD = 0.1184;  // at the Z pole

@@ -1,7 +1,6 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
-#include <cassert>
 #include <cmath>
 
 namespace cepgen {
@@ -9,7 +8,7 @@ namespace cepgen {
     /// \cite Mergell:1995bf
     class MergellEtAl : public Parameterisation {
     public:
-      MergellEtAl(const ParametersList&);
+      explicit MergellEtAl(const ParametersList&);
       static std::string description() { return "Mergell et al."; }
 
     private:

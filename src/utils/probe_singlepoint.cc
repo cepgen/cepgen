@@ -10,36 +10,39 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-  const size_t ps_size = 12;
   string input_card;
   vector<double> point;
-  bool debug;
+  bool enable_plugins, debug;
 
   cepgen::ArgumentsParser(argc, argv)
       .addArgument("input,i", "input card", &input_card)
-      .addOptionalArgument("point,p", "point to test", &point, vector<double>(ps_size, 0.3))
+      .addOptionalArgument("point,p", "point to test", &point, vector<double>(12, 0.3))
       .addOptionalArgument("debug,d", "debugging mode", &debug, false)
+      .addOptionalArgument("enable-plugins,m", "enable the external plugins", &enable_plugins, false)
       .parse();
 
   cepgen::Generator gen;
   gen.setParameters(cepgen::card::Handler::parse(input_card));
-  CG_INFO("main") << gen.parameters();
 
-  if (point.size() < 2) {
-    point = vector<double>(gen.parameters()->process().ndim(), point[0]);
-    point.resize(ps_size);
-  }
+  const auto ndim = gen.parameters()->process().ndim();
+  if (point.size() < 2)
+    point = vector<double>(ndim, point[0]);
+  else if (point.size() != ndim)
+    point.resize(ndim);
 
-  if (!debug)
+  if (debug)
     cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debugInsideLoop;
 
-  cout << "point: ";
-  string delim;
-  for (const auto& v : point)
-    cout << delim << v, delim = ", ";
-  cout << endl;
+  if (!enable_plugins) {
+    gen.parametersPtr()->clearEventModifiersSequence();
+    gen.parametersPtr()->clearOutputModulesSequence();
+  }
+
+  CG_INFO("main") << gen.parameters();
+
+  CG_INFO("main") << "point: " << point;
   const double weight = gen.computePoint(point);
-  cout << "weight: " << weight << endl;
+  CG_INFO("main") << "weight: " << weight;
 
   return 0;
 }

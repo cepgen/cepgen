@@ -1,7 +1,6 @@
-#include "CepGen/Utils/Functional.h"
-#include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Core/Exception.h"
-
+#include "CepGen/Modules/FunctionalFactory.h"
+#include "CepGen/Utils/Functional.h"
 #include "TFormula.h"
 
 namespace cepgen {

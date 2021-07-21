@@ -1,27 +1,20 @@
-#include "CepGen/Cards/Handler.h"
-#include "CepGen/Modules/CardsHandlerFactory.h"
-
-#include "CepGen/Processes/Process.h"
-#include "CepGen/Modules/ProcessesFactory.h"
-
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
-
-#include "CepGen/Core/EventModifier.h"
-#include "CepGen/Modules/EventModifierFactory.h"
-
-#include "CepGen/Event/Event.h"
-
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/Exception.h"
-
-#include "CepGen/Utils/TimeKeeper.h"
-#include "CepGen/Parameters.h"
-
 #include <fstream>
+
+#include "CepGen/Cards/Handler.h"
+#include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Processes/Process.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
   namespace card {
@@ -47,7 +40,7 @@ namespace cepgen {
     CommandLineHandler::CommandLineHandler(const ParametersList& params)
         : Handler(params), argv_(params.get<std::vector<std::string> >("args")) {
       if (!filename_.empty())
-        parse(filename_, params_);
+        parse(filename_, rt_params_);
     }
 
     Parameters* CommandLineHandler::parse(const std::string& filename, Parameters* params) {
@@ -64,11 +57,11 @@ namespace cepgen {
         pars.feed(arg);
       CG_INFO("CommandLineHandler") << "Arguments list: " << argv_ << " unpacked to:\n\t" << pars << ".";
 
-      params_ = params;
+      rt_params_ = params;
 
       //----- timer definition
       if (pars.get<bool>("timer", false))
-        params_->setTimeKeeper(new utils::TimeKeeper);
+        rt_params_->setTimeKeeper(new utils::TimeKeeper);
 
       //----- logging definition
       if (pars.get<int>("logging", -1) != -1)
@@ -77,44 +70,44 @@ namespace cepgen {
       //----- process definition
       auto proc = pars.get<ParametersList>("process");
       if (!proc.empty()) {
-        if (params_->hasProcess())
-          proc = ParametersList(params_->process().parameters()) + proc;
-        params_->setProcess(proc::ProcessesFactory::get().build(proc));
+        if (rt_params_->hasProcess())
+          proc = ParametersList(rt_params_->process().parameters()) + proc;
+        rt_params_->setProcess(proc::ProcessFactory::get().build(proc));
       }
 
       //----- phase space definition
       auto kin = pars.get<ParametersList>("kinematics")
                      .set<ParametersList>("structureFunctions", pars.get<ParametersList>("strfun"))
                      .set<std::string>("formFactors", pars.get<std::string>("formfac"));
-      params_->kinematics = Kinematics(params_->kinematics.parameters() + kin);
+      rt_params_->kinematics = Kinematics(rt_params_->kinematics.parameters() + kin);
 
       //----- integration
-      pars.fill<ParametersList>("integrator", *params_->integrator);
+      pars.fill<ParametersList>("integrator", *rt_params_->integrator);
 
       //----- events generation
       const auto& gen = pars.get<ParametersList>("generation");
-      params_->generation().setMaxGen(gen.get<int>("ngen", params_->generation().maxGen()));
+      rt_params_->generation().setMaxGen(gen.get<int>("ngen", rt_params_->generation().maxGen()));
       if (gen.has<int>("nthreads"))
-        params_->generation().setNumThreads(gen.get<int>("nthreads"));
+        rt_params_->generation().setNumThreads(gen.get<int>("nthreads"));
       if (gen.has<int>("nprn"))
-        params_->generation().setPrintEvery(gen.get<int>("nprn"));
+        rt_params_->generation().setPrintEvery(gen.get<int>("nprn"));
       if (gen.has<int>("seed"))
-        params_->integrator->set<int>("seed", gen.get<int>("seed"));
+        rt_params_->integrator->set<int>("seed", gen.get<int>("seed"));
 
       //----- event modification modules
       const auto& mod = pars.get<ParametersList>("eventmod");
       if (!mod.keys(true).empty()) {
-        params_->addModifier(EventModifierFactory::get().build(mod));
-        params_->eventModifiersSequence().rbegin()->get()->init();
+        rt_params_->addModifier(EventModifierFactory::get().build(mod));
+        rt_params_->eventModifiersSequence().rbegin()->get()->init();
       }
 
       //----- output modules definition
       const auto& out = pars.get<ParametersList>("output");
       if (!out.keys(true).empty())
-        params_->addOutputModule(io::ExportModuleFactory::get().build(out));
-      return params_;
+        rt_params_->addOutputModule(io::ExportModuleFactory::get().build(out));
+      return rt_params_;
     }
   }  // namespace card
 }  // namespace cepgen
 
-REGISTER_CARD_HANDLER(".cmd", CommandLineHandler)
+REGISTER_CARD_HANDLER(gCommandLineHandler, CommandLineHandler)

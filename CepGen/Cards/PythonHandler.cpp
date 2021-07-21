@@ -1,38 +1,30 @@
 #include "CepGen/Cards/PythonHandler.h"
-#include "CepGen/Generator.h"  // for library loading
-#include "CepGen/Parameters.h"
-
-#include "CepGen/Modules/CardsHandlerFactory.h"
-
-#include "CepGen/Core/EventModifier.h"
-#include "CepGen/Modules/EventModifierFactory.h"
-
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
-
-#include "CepGen/Processes/Process.h"
-#include "CepGen/Modules/ProcessesFactory.h"
-
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-
-#include "CepGen/Utils/Functional.h"
-#include "CepGen/Modules/FunctionalFactory.h"
-
-#include "CepGen/Integration/Integrator.h"
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Event/Event.h"
-
-#include "CepGen/Physics/MCDFileParser.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/HeavyIon.h"
-
-#include "CepGen/Utils/TimeKeeper.h"
-#include "CepGen/Utils/String.h"
-#include "CepGen/Utils/Filesystem.h"
 
 #include <algorithm>
+
+#include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Generator.h"  // for library loading
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/FunctionalFactory.h"
+#include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Physics/HeavyIon.h"
+#include "CepGen/Physics/MCDFileParser.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Processes/Process.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/Filesystem.h"
+#include "CepGen/Utils/Functional.h"
+#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/TimeKeeper.h"
 
 #if PY_MAJOR_VERSION < 3
 #define PYTHON2
@@ -50,7 +42,7 @@ namespace cepgen {
       setenv("PYTHONDONTWRITEBYTECODE", "1", 1);
       CG_DEBUG("PythonHandler") << "Python PATH: \"" << utils::environ("PYTHONPATH") << "\".";
 
-      params_ = params;
+      rt_params_ = params;
       std::string filename = pythonPath(file);
       const size_t fn_len = filename.length() + 1;
 
@@ -82,7 +74,7 @@ namespace cepgen {
 
       PyObject* cfg = PyImport_ImportModule(filename.c_str());  // new
       if (!cfg)
-        throwPythonError("Failed to import the configuration card '" + file + "'\n (parsed as '" + filename + "')");
+        throwPythonError("Failed to import the configuration card '" + filename + "'\n (parsed from '" + file + "')");
 
       //--- additional libraries to load
       if (PyObject_HasAttrString(cfg, ADDONS_NAME) == 1) {
@@ -98,7 +90,7 @@ namespace cepgen {
       if (PyObject_HasAttrString(cfg, TIMER_NAME) == 1) {
         PyObject* ptim = PyObject_GetAttrString(cfg, TIMER_NAME);  // new
         if (ptim) {
-          params_->setTimeKeeper(new utils::TimeKeeper);
+          rt_params_->setTimeKeeper(new utils::TimeKeeper);
           Py_CLEAR(ptim);
         }
       }
@@ -122,45 +114,44 @@ namespace cepgen {
       }
 
       //--- process definition
-      PyObject* process = nullptr;
-      if (PyObject_HasAttrString(cfg, PROCESS_NAME) != 1 ||
-          !(process = PyObject_GetAttrString(cfg, PROCESS_NAME)))  // new
+      if (PyObject_HasAttrString(cfg, PROCESS_NAME)) {
+        PyObject* process = PyObject_GetAttrString(cfg, PROCESS_NAME);  // new
+        //--- list of process-specific parameters
+        ParametersList proc_params;
+        fillParameter(process, "processParameters", proc_params);
+
+        //--- type of process to consider
+        PyObject* pproc_name = element(process, ParametersList::MODULE_NAME);  // borrowed
+        if (!pproc_name)
+          throwPythonError("Failed to extract the process name from the configuration card '" + file + "'!");
+
+        //--- process mode
+        rt_params_->setProcess(proc::ProcessFactory::get().build(get<std::string>(pproc_name), proc_params));
+
+        //--- process kinematics
+        ParametersList pkin;
+        PyObject* pin_kinematics = element(process, "inKinematics");  // borrowed
+        if (pin_kinematics)
+          pkin += get<ParametersList>(pin_kinematics);
+
+        PyObject* pout_kinematics = element(process, "outKinematics");  // borrowed
+        if (pout_kinematics)
+          pkin += get<ParametersList>(pout_kinematics);
+
+        rt_params_->kinematics = Kinematics(pkin);
+        if (proc_params.has<int>("mode"))
+          rt_params_->kinematics.incoming_beams.setMode((mode::Kinematics)proc_params.get<int>("mode"));
+
+        //--- taming functions
+        PyObject* ptam = element(process, "tamingFunctions");  // borrowed
+        if (ptam)
+          for (const auto& p : getVector<ParametersList>(ptam))
+            rt_params_->addTamingFunction(utils::FunctionalFactory::get().build("ROOT", p));
+
+        Py_CLEAR(process);
+      } /*else
         throwPythonError("Failed to extract a '" + std::string(PROCESS_NAME) +
-                         "' keyword from the configuration card '" + file + "'!");
-
-      //--- list of process-specific parameters
-      ParametersList proc_params;
-      fillParameter(process, "processParameters", proc_params);
-
-      //--- type of process to consider
-      PyObject* pproc_name = element(process, ParametersList::MODULE_NAME);  // borrowed
-      if (!pproc_name)
-        throwPythonError("Failed to extract the process name from the configuration card '" + file + "'!");
-
-      //--- process mode
-      params_->setProcess(proc::ProcessesFactory::get().build(get<std::string>(pproc_name), proc_params));
-
-      //--- process kinematics
-      ParametersList pkin;
-      PyObject* pin_kinematics = element(process, "inKinematics");  // borrowed
-      if (pin_kinematics)
-        pkin += get<ParametersList>(pin_kinematics);
-
-      PyObject* pout_kinematics = element(process, "outKinematics");  // borrowed
-      if (pout_kinematics)
-        pkin += get<ParametersList>(pout_kinematics);
-
-      params_->kinematics = Kinematics(pkin);
-      if (proc_params.has<int>("mode"))
-        params_->kinematics.incoming_beams.setMode((mode::Kinematics)proc_params.get<int>("mode"));
-
-      //--- taming functions
-      PyObject* ptam = element(process, "tamingFunctions");  // borrowed
-      if (ptam)
-        for (const auto& p : getVector<ParametersList>(ptam))
-          params_->addTamingFunction(utils::FunctionalFactory::get().build("ROOT", p));
-
-      Py_CLEAR(process);
+                         "' keyword from the configuration card '" + file + "'!");*/
 
       if (PyObject_HasAttrString(cfg, LOGGER_NAME) == 1) {
         PyObject* plog = PyObject_GetAttrString(cfg, LOGGER_NAME);  // new
@@ -207,10 +198,10 @@ namespace cepgen {
       if (PyObject_HasAttrString(cfg, OUTPUT_NAME) == 1) {
         PyObject* pout = PyObject_GetAttrString(cfg, OUTPUT_NAME);  // new
         if (pout) {
-          if (isVector<ParametersList>(pout))
-            parseOutputModules(pout);
-          else
-            parseOutputModule(pout);
+          //if (isVector<ParametersList>(pout))
+          parseOutputModules(pout);
+          //else
+          //parseOutputModule(pout);
           Py_CLEAR(pout);
         }
       }
@@ -221,7 +212,7 @@ namespace cepgen {
       if (Py_IsInitialized())
         Py_Finalize();
 
-      return params_;
+      return rt_params_;
     }
 
     void PythonHandler::parseLogging(PyObject* log) {
@@ -237,7 +228,7 @@ namespace cepgen {
     void PythonHandler::parseIntegrator(PyObject* integr) {
       if (!PyDict_Check(integr))
         throwPythonError("Integrator object should be a dictionary!");
-      *params_->integrator = get<ParametersList>(integr);
+      *rt_params_->integrator = get<ParametersList>(integr);
     }
 
     void PythonHandler::parseGenerator(PyObject* gen) {
@@ -245,7 +236,7 @@ namespace cepgen {
         throwPythonError("Generation information object should be a dictionary!");
       auto plist = get<ParametersList>(gen);
       plist.set<int>("maxgen", plist.get<int>("numEvents"));
-      params_->generation() = Parameters::Generation(plist);
+      rt_params_->generation() = Parameters::Generation(plist);
     }
 
     void PythonHandler::parseEventModifiers(PyObject* mod) {
@@ -265,9 +256,9 @@ namespace cepgen {
         throwPythonError("Event modification algorithm name is required!");
       std::string mod_name = get<std::string>(pname);
 
-      params_->addModifier(EventModifierFactory::get().build(mod_name, get<ParametersList>(mod)));
+      rt_params_->addModifier(EventModifierFactory::get().build(mod_name, get<ParametersList>(mod)));
 
-      auto h = params_->eventModifiersSequence().rbegin()->get();
+      auto h = rt_params_->eventModifiersSequence().rbegin()->get();
       {  //--- before calling the init() method
         std::vector<std::string> config;
         fillParameter(mod, "preConfiguration", config);
@@ -300,7 +291,7 @@ namespace cepgen {
       PyObject* pname = element(pout, ParametersList::MODULE_NAME);  // borrowed
       if (!pname)
         throwPythonError("Output module name is required!");
-      params_->addOutputModule(
+      rt_params_->addOutputModule(
           io::ExportModuleFactory::get().build(get<std::string>(pname), get<ParametersList>(pout)));
     }
 

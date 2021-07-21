@@ -12,9 +12,9 @@ namespace cepgen {
   class Event {
   public:
     /// Build an empty event
-    Event(bool compressed = false);
+    explicit Event(bool compressed = false);
     /// Copy constructor
-    Event(const Event&);
+    Event(const Event&) = default;
     /// Empty the whole event content
     void clear();
     /// Initialize an "empty" event collection
@@ -52,9 +52,9 @@ namespace cepgen {
     /// Number of particles in the event
     size_t size() const;
     /// Vector of all particles in the event
-    const Particles particles() const;
+    Particles particles() const;
     /// Vector of all stable particles in the event
-    const Particles stableParticles() const;
+    Particles stableParticles() const;
     /// List of references to Particle objects corresponding to a certain role in the process kinematics
     /// \param[in] role The role the particles have to play in the process
     Particles& operator[](Particle::Role role);
@@ -105,10 +105,10 @@ namespace cepgen {
     ParticlesMap particles_;
     /// Typical event indices structure
     struct NumParticles {
-      size_t cs;   ///< Index of the first central system particle
-      size_t op1;  ///< Index of the first positive-z outgoing beam state
-      size_t op2;  ///< Index of the first negative-z outgoing beam state
-    } evtcontent_;
+      size_t cs{0};   ///< Index of the first central system particle
+      size_t op1{0};  ///< Index of the first positive-z outgoing beam state
+      size_t op2{0};  ///< Index of the first negative-z outgoing beam state
+    } evtcontent_{};
     /// Is the event "compressed"?
     bool compressed_;
   };

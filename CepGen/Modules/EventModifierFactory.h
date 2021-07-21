@@ -12,14 +12,14 @@
       struct BUILDERNM(obj) {                                                       \
         BUILDERNM(obj)() { EventModifierFactory::get().registerModule<obj>(name); } \
       };                                                                            \
-      static BUILDERNM(obj) gEveMod##obj;                                           \
+      static const BUILDERNM(obj) gEveMod##obj;                                     \
     }                                                                               \
   }
 
 namespace cepgen {
   class EventModifier;
   /// A event modifier algorithms factory
-  typedef ModuleFactory<EventModifier> EventModifierFactory;
+  DEFINE_FACTORY_STR(EventModifierFactory, EventModifier, "Event modifiers factory");
 }  // namespace cepgen
 
 #endif

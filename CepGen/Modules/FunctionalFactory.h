@@ -12,7 +12,7 @@
       struct BUILDERNM(obj) {                                                    \
         BUILDERNM(obj)() { FunctionalFactory::get().registerModule<obj>(name); } \
       };                                                                         \
-      static BUILDERNM(obj) gFunct##obj;                                         \
+      static const BUILDERNM(obj) gFunct##obj;                                   \
     }                                                                            \
   }
 
@@ -20,7 +20,7 @@ namespace cepgen {
   namespace utils {
     class Functional;
     /// A functional objects factory
-    typedef ModuleFactory<Functional> FunctionalFactory;
+    DEFINE_FACTORY_STR(FunctionalFactory, Functional, "Functionals factory");
   }  // namespace utils
 }  // namespace cepgen
 

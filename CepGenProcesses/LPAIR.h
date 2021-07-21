@@ -2,6 +2,7 @@
 #define CepGenProcesses_LPAIR_h
 
 #include "CepGen/Processes/Process.h"
+#include <random>
 
 namespace cepgen {
   namespace proc {
@@ -187,6 +188,9 @@ namespace cepgen {
          */
       std::pair<double, double> map(double expo, const Limits& lim, const std::string& var_name = "");
       std::pair<double, double> mapla(double y, double z, int u, const Limits& lim);
+      std::default_random_engine rnd_gen_;
+      std::uniform_real_distribution<double> rnd_phi_;
+      std::uniform_int_distribution<short> rnd_side_;
     };
   }  // namespace proc
 }  // namespace cepgen

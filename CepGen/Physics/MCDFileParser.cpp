@@ -91,7 +91,6 @@ namespace pdg {
         cepgen::ParticleProperties prop{
             (cepgen::pdgid_t)pdg_ids.at(i), part_name, part_name, colour_factor, mass, width, charges.at(i), is_fermion};
         cepgen::PDG::get().define(prop);
-        ++i;
       }
     }
     CG_INFO("MCDFileParser") << cepgen::utils::s("particle", cepgen::PDG::get().size()) << " defined from \"" << path

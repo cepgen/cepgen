@@ -1,13 +1,11 @@
-#include "CepGen/Modules/ProcessesFactory.h"
-#include "CepGen/Processes/Process.h"
+#include <iostream>
 
-#include "CepGen/Generator.h"
 #include "CepGen/Core/ParametersList.h"
-
+#include "CepGen/Generator.h"
+#include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Processes/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/String.h"
-
-#include <iostream>
 
 using namespace std;
 
@@ -16,7 +14,7 @@ int main(int argc, char* argv[]) {
   bool list;
 
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("proc-name,p", "name of the process", &proc_name)
+      .addOptionalArgument("proc-name,p", "name of the process", &proc_name, "lpair")
       .addOptionalArgument("list,l", "list all processes", &list, false)
       .parse();
 
@@ -24,7 +22,7 @@ int main(int argc, char* argv[]) {
 
   if (list) {
     cout << "List of modules registered in the runtime database:";
-    for (const auto& mod : cepgen::proc::ProcessesFactory::get().modules())
+    for (const auto& mod : cepgen::proc::ProcessFactory::get().modules())
       cout << "\n> " << cepgen::utils::boldify(mod);
     cout << endl;
     return 0;
@@ -33,7 +31,7 @@ int main(int argc, char* argv[]) {
   if (!proc_name.empty()) {
     cout << "Will build a process named \"" << proc_name << "\"." << endl;
 
-    auto proc = cepgen::proc::ProcessesFactory::get().build(proc_name, cepgen::ParametersList());
+    auto proc = cepgen::proc::ProcessFactory::get().build(proc_name, cepgen::ParametersList());
     //--- at this point, the process has been found
     std::cout << "Successfully built the process \"" << proc->name() << "\"!\n"
               << " *) description: " << proc->description() << "\n"

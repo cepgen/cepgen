@@ -1,19 +1,19 @@
-#ifndef CepGen_Processes_ProcessesFactory_h
-#define CepGen_Processes_ProcessesFactory_h
+#ifndef CepGen_Modules_ProcessFactory_h
+#define CepGen_Modules_ProcessFactory_h
 
 #include "CepGen/Modules/ModuleFactory.h"
 
 /** \file */
 
 /// Add a generic process definition to the list of handled processes
-#define REGISTER_PROCESS(name, obj)                                                                       \
-  namespace cepgen {                                                                                      \
-    namespace proc {                                                                                      \
-      struct BUILDERNM(obj) {                                                                             \
-        BUILDERNM(obj)() { ProcessesFactory::get().registerModule<obj>(name, cepgen::ParametersList()); } \
-      };                                                                                                  \
-      static BUILDERNM(obj) gProc##obj;                                                                   \
-    }                                                                                                     \
+#define REGISTER_PROCESS(name, obj)                                                                     \
+  namespace cepgen {                                                                                    \
+    namespace proc {                                                                                    \
+      struct BUILDERNM(obj) {                                                                           \
+        BUILDERNM(obj)() { ProcessFactory::get().registerModule<obj>(name, cepgen::ParametersList()); } \
+      };                                                                                                \
+      static const BUILDERNM(obj) gProc##obj;                                                           \
+    }                                                                                                   \
   }
 /// Declare a Fortran process function name
 #define DECLARE_FORTRAN_FUNCTION(f77_func) \
@@ -38,7 +38,7 @@ namespace cepgen {
   namespace proc {
     class Process;
     /// A processes factory
-    typedef ModuleFactory<Process> ProcessesFactory;
+    DEFINE_FACTORY_STR(ProcessFactory, Process, "Physics processes factory");
   }  // namespace proc
 }  // namespace cepgen
 

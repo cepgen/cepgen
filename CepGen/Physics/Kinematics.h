@@ -1,14 +1,13 @@
 #ifndef CepGen_Physics_Kinematics_h
 #define CepGen_Physics_Kinematics_h
 
-#include "CepGen/Core/ParametersList.h"
-
-#include "CepGen/Physics/IncomingBeams.h"
-#include "CepGen/Physics/Cuts.h"
-
 #include <iosfwd>
-#include <vector>
 #include <memory>
+#include <vector>
+
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Physics/Cuts.h"
+#include "CepGen/Physics/IncomingBeams.h"
 
 namespace cepgen {
   enum class KTFlux;
@@ -28,6 +27,8 @@ namespace cepgen {
     /// Minimal diffractive mass for dissociative proton treatment
     static const double MX_MIN;
 
+    /// Set a collection of kinematics parameters
+    void setParameters(const ParametersList&);
     /// List containing all parameters handled
     ParametersList parameters() const;
 

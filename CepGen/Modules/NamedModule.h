@@ -1,5 +1,5 @@
-#ifndef CepGen_Module_NamedModule_h
-#define CepGen_Module_NamedModule_h
+#ifndef CepGen_Modules_NamedModule_h
+#define CepGen_Modules_NamedModule_h
 
 #include "CepGen/Core/ParametersList.h"
 
@@ -10,6 +10,7 @@ namespace cepgen {
   public:
     /// Build a module from its steering parameters
     explicit NamedModule(const ParametersList& params) : params_(params), name_(params.name<T>()) {}
+    virtual ~NamedModule() = default;
 
     /// Module unique name
     const T& name() const { return name_; }

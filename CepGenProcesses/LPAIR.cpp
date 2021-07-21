@@ -1,15 +1,12 @@
 #include "CepGenProcesses/LPAIR.h"
 
-#include "CepGen/Modules/ProcessesFactory.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/FormFactors/Parameterisation.h"
-
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
-
+#include "CepGen/FormFactors/Parameterisation.h"
+#include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
-
-#include "CepGen/Core/Exception.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
@@ -63,7 +60,9 @@ namespace cepgen {
           de3_(0.),
           de5_(0.),
           pt4_(0.),
-          jacobian_(0.) {
+          jacobian_(0.),
+          rnd_phi_(0., 2. * M_PI),
+          rnd_side_(0, 1) {
       if (params_.has<ParticleProperties>("pair"))
         pair_ = params_.get<ParticleProperties>("pair").pdgid;
     }
@@ -672,7 +671,12 @@ namespace cepgen {
       jacobian_ /= amap;
       jacobian_ /= bmap;
       jacobian_ *= log(ymap);
-      jacobian_ *= 0.5;
+      if ((kin_.incoming_beams.mode() == mode::Kinematics::ElasticInelastic ||
+           kin_.incoming_beams.mode() == mode::Kinematics::InelasticElastic) &&
+          symmetrise_)
+        jacobian_ *= 1.;
+      else
+        jacobian_ *= 0.5;
 
       CG_DEBUG_LOOP("LPAIR") << "Jacobian = " << jacobian_;
 
@@ -857,9 +861,9 @@ namespace cepgen {
                                     << "boosted P(l2)=" << p7_cm_;
 
       //----- parameterise a random rotation around z-axis
-      const short rany = drand() > 0.5 ? 1 : -1, ransign = drand() > 0.5 ? 1 : -1;
-      const double ranphi = 2 * drand() * M_PI;
-      const short ranz = symmetrise_ ? (drand() > 0.5 ? 1 : -1) : 1;
+      const short rany = rnd_side_(rnd_gen_) == 1 ? 1 : -1, ransign = rnd_side_(rnd_gen_) == 1 ? 1 : -1;
+      const double ranphi = rnd_phi_(rnd_gen_);
+      const short ranz = symmetrise_ ? (rnd_side_(rnd_gen_) == 1 ? 1 : -1) : 1;
 
       Momentum plab_ph1 = plab_ip1 - p3_lab_;
       plab_ph1.rotatePhi(ranphi, rany);

@@ -1,15 +1,12 @@
-#include "CepGen/Generator.h"
-#include "CepGen/Parameters.h"
-
-#include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Cards/Handler.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
-#include "CepGen/Core/ExportModule.h"
-
 #include "CepGen/Core/Exception.h"
-
-#include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Generator.h"
+#include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Parameters.h"
 #include "CepGen/Utils/AbortHandler.h"
+#include "CepGen/Utils/ArgumentsParser.h"
 
 using namespace std;
 
@@ -65,7 +62,8 @@ int main(int argc, char* argv[]) {
     if (!parser.extra_config().empty())
       gen.setParameters(
           cepgen::card::CardsHandlerFactory::get()
-              .build("cmd", cepgen::ParametersList().set<std::vector<std::string> >("args", parser.extra_config()))
+              .build(cepgen::card::gCommandLineHandler,
+                     cepgen::ParametersList().set<std::vector<std::string> >("args", parser.extra_config()))
               ->parse(std::string(), gen.parametersPtr()));
   }
 
@@ -81,7 +79,7 @@ int main(int argc, char* argv[]) {
         gen.parametersRef().addOutputModule(cepgen::io::ExportModuleFactory::get().build(output));
 
     //--- list all parameters
-    CG_LOG("main") << gen.parameters();
+    CG_LOG << gen.parameters();
 
     //--- let there be a cross-section...
     double xsec = 0., err = 0.;

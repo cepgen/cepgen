@@ -1,10 +1,11 @@
+#include <algorithm>
+#include <string>
+
 #include "CepGen/Cards/PythonHandler.h"
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/String.h"
 
-#include <string>
-#include <algorithm>
 #include <frameobject.h>
 
 #if PY_MAJOR_VERSION < 3
@@ -58,11 +59,11 @@ namespace cepgen {
             if (pframe != nullptr) {
               int line = PyCode_Addr2Line(pframe->f_code, pframe->f_lasti);
 #ifdef PYTHON2
-              const char* filename = PyString_AsString(pframe->f_code->co_filename);
-              const char* funcname = PyString_AsString(pframe->f_code->co_name);
+              const std::string filename = PyString_AsString(pframe->f_code->co_filename);
+              const std::string = PyString_AsString(pframe->f_code->co_name);
 #else
-              const char* filename = PyUnicode_AsUTF8(pframe->f_code->co_filename);
-              const char* funcname = PyUnicode_AsUTF8(pframe->f_code->co_name);
+              const std::string filename = PyUnicode_AsUTF8(pframe->f_code->co_filename);
+              const std::string funcname = PyUnicode_AsUTF8(pframe->f_code->co_name);
 #endif
               oss << utils::format(
                   "\n\t%s%s on %s (line %d)", tabul.c_str(), utils::boldify(funcname).c_str(), filename, line);

@@ -1,18 +1,17 @@
-#include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Cards/Handler.h"
 
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/Filesystem.h"
-
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Parameters.h"
+#include "CepGen/Utils/Filesystem.h"
 
 namespace cepgen {
   namespace card {
     Handler::Handler(const ParametersList& params)
-        : NamedModule(params), filename_(params.get<std::string>("filename")), params_(new Parameters) {
+        : NamedModule(params), filename_(params.get<std::string>("filename")), rt_params_(new Parameters) {
       if (!filename_.empty())
-        parse(filename_, params_);
+        parse(filename_, rt_params_);
     }
 
     Parameters* Handler::parse(const std::string& filename) {

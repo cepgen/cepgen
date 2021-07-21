@@ -1,11 +1,11 @@
 #ifndef CepGen_Utils_String_h
 #define CepGen_Utils_String_h
 
+#include <algorithm>
+#include <numeric>
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
-#include <numeric>
-#include <algorithm>
 
 namespace cepgen {
   namespace utils {
@@ -76,6 +76,8 @@ namespace cepgen {
       ltrim(s);
       rtrim(s);
     }
+    /// Strip all special characters from string
+    std::string strip(const std::string&);
     /// Get an environment variable
     std::string environ(const std::string&, const std::string& def = "");
   }  // namespace utils

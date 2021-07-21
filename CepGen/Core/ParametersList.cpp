@@ -1,10 +1,10 @@
 #include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/String.h"
-
-#include "CepGen/Physics/PDG.h"
 
 #include <iomanip>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   const std::string ParametersList::MODULE_NAME = "mod_name";
@@ -329,9 +329,19 @@ namespace cepgen {
 
   template <>
   Limits ParametersList::get<Limits>(std::string key, const Limits& def) const {
+    // first try to find Limits object in collections
     for (const auto& kv : lim_values_)
       if (kv.first == key)
         return kv.second;
+    // Limits object not found ; still trying to build it from (min/max) attributes
+    Limits buf;
+    if (has<double>(key + "min"))
+      fill<double>(key + "min", buf.min());
+    if (has<double>(key + "max"))
+      fill<double>(key + "max", buf.max());
+    if (buf.valid())
+      return buf.validate();
+    // nothing found ; returning default
     CG_DEBUG("ParametersList") << "Failed to retrieve limits parameter with key=" << key << ". "
                                << "Default value: " << def << ".";
     return def;
@@ -345,7 +355,12 @@ namespace cepgen {
         value.min() = lim.min();
       if (lim.hasMax())
         value.max() = lim.max();
+      return *this;
     }
+    if (has<double>(key + "min"))
+      value.min() = get<double>(key + "min");
+    if (has<double>(key + "max"))
+      value.max() = get<double>(key + "max");
     return *this;
   }
 

@@ -13,10 +13,12 @@ namespace cepgen {
     public:
       /// Build a configuration from an external steering card
       explicit Handler(const ParametersList&);
-      ~Handler() = default;
+      virtual ~Handler() = default;
 
-      /// Get the list of runtime parameters parsed
-      Parameters* parameters() { return params_; }
+      /// Get the list of runtime parameters as parsed
+      const Parameters* runtimeParameters() const { return rt_params_; }
+      /// Get the list of runtime parameters as parsed
+      Parameters* runtimeParameters() { return rt_params_; }
       /// Specify runtime parameters to the handler
       virtual void pack(const Parameters*){};
       /// Retrieve a configuration from a parsed steering card
@@ -32,7 +34,7 @@ namespace cepgen {
       /// Input filename
       const std::string filename_;
       /// List of parameters parsed from a card handler
-      Parameters* params_;
+      Parameters* rt_params_;
     };
   }  // namespace card
 }  // namespace cepgen

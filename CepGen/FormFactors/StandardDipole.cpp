@@ -19,4 +19,4 @@ namespace cepgen {
   }  // namespace formfac
 }  // namespace cepgen
 
-REGISTER_FF_MODEL("StandardDipole", StandardDipole)
+REGISTER_FF_MODEL(gFFStandardDipoleHandler, StandardDipole)

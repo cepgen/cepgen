@@ -1,22 +1,20 @@
-#include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/HeavyIon.h"
-#include "CepGen/Physics/KTFlux.h"
-#include "CepGen/Physics/Momentum.h"
-
-#include "CepGen/FormFactors/Parameterisation.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/StructureFunctions/SigmaRatio.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include <cmath>
 
 #include "CepGen/Core/Exception.h"
-
-#include <cmath>
+#include "CepGen/FormFactors/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/HeavyIon.h"
+#include "CepGen/Physics/KTFlux.h"
+#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Physics/Momentum.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
 
 namespace cepgen {
   IncomingBeams::IncomingBeams(const ParametersList& params) {
     // positive-z incoming beam
-    positive().pdg = params.get<int>("beam1id", (int)PDG::proton);
+    positive().pdg = params.get<int>("beam1id", positive().pdg);
     const int hi_A1 = params.get<int>("beam1A", 1);
     const int hi_Z1 = params.get<int>("beam1Z", 0);
     if (hi_Z1 != 0)
@@ -30,7 +28,7 @@ namespace cepgen {
     }
 
     // negative-z incoming beam
-    negative().pdg = params.get<int>("beam2id", (int)PDG::proton);
+    negative().pdg = params.get<int>("beam2id", negative().pdg);
     const int hi_A2 = params.get<int>("beam2A", 1);
     const int hi_Z2 = params.get<int>("beam2Z", 0);
     if (hi_Z2 != 0)
@@ -95,11 +93,10 @@ namespace cepgen {
       setSqrtS(sqrts);
     //--- form factors
     if (params.has<std::string>("formFactors") || !form_factors_)
-      form_factors_ =
-          formfac::FormFactorsFactory::get().build(params.get<std::string>("formFactors", "StandardDipole"));
+      form_factors_ = formfac::FormFactorsFactory::get().build(
+          params.get<std::string>("formFactors", formfac::gFFStandardDipoleHandler));
 
-    if (params.get<int>("mode", (int)mode::Kinematics::invalid) != (int)mode::Kinematics::invalid)
-      setMode((mode::Kinematics)params.get<int>("mode"));
+    setMode((mode::Kinematics)params.get<int>("mode", (int)mode::Kinematics::ElasticElastic));
     //--- structure functions
     auto strfun = params.get<ParametersList>("structureFunctions");
     if (!strfun.empty() || !str_fun_) {
@@ -179,16 +176,22 @@ namespace cepgen {
     switch (positive().mode) {
       case mode::Beam::PointLikeFermion:
       case mode::Beam::ProtonElastic: {
-        if (negative().mode == mode::Beam::ProtonElastic || negative().mode == mode::Beam::PointLikeFermion)
-          return mode::Kinematics::ElasticElastic;
-        else
-          return mode::Kinematics::ElasticInelastic;
+        switch (negative().mode) {
+          case mode::Beam::ProtonElastic:
+          case mode::Beam::PointLikeFermion:
+            return mode::Kinematics::ElasticElastic;
+          default:
+            return mode::Kinematics::ElasticInelastic;
+        }
       }
       case mode::Beam::ProtonInelastic: {
-        if (negative().mode == mode::Beam::ProtonElastic)
-          return mode::Kinematics::InelasticElastic;
-        else
-          return mode::Kinematics::InelasticInelastic;
+        switch (negative().mode) {
+          case mode::Beam::ProtonElastic:
+          case mode::Beam::PointLikeFermion:
+            return mode::Kinematics::InelasticElastic;
+          default:
+            return mode::Kinematics::InelasticInelastic;
+        }
       }
       default:
         throw CG_FATAL("Kinematics:IncomingBeams:mode") << "Unsupported kinematics mode for beams with modes:\n\t"
