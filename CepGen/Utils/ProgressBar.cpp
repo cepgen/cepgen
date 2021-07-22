@@ -1,7 +1,8 @@
 #include "CepGen/Utils/ProgressBar.h"
-#include "CepGen/Utils/String.h"
 
 #include <cmath>
+
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace utils {

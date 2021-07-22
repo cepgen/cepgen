@@ -1,7 +1,8 @@
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/String.h"
 
 #include <csignal>
+
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   LoggedException::LoggedException(const char* module, Type type, short id)

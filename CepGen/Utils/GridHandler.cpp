@@ -1,10 +1,12 @@
 #include "CepGen/Utils/GridHandler.h"
-#include "CepGen/Utils/String.h"
-#include "CepGen/Core/Exception.h"
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
+
 #include <limits>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   template <size_t D, size_t N>

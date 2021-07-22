@@ -1,18 +1,18 @@
 #ifndef CepGen_Utils_GridHandler_h
 #define CepGen_Utils_GridHandler_h
 
-#include <gsl/gsl_version.h>
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
+#include <gsl/gsl_version.h>
 #if defined(GSL_MAJOR_VERSION) && (GSL_MAJOR_VERSION > 2 || (GSL_MAJOR_VERSION == 2 && GSL_MINOR_VERSION >= 1))
 #include <gsl/gsl_interp2d.h>
 #include <gsl/gsl_spline2d.h>
 #define GSL_VERSION_ABOVE_2_1 1
 #endif
 
+#include <map>
 #include <memory>
 #include <vector>
-#include <map>
 
 namespace cepgen {
   namespace strfun {

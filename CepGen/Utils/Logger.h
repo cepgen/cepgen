@@ -2,8 +2,8 @@
 #define CepGen_Utils_Logger_h
 
 #include <iostream>
-#include <vector>
 #include <regex>
+#include <vector>
 
 namespace cepgen {
   namespace utils {

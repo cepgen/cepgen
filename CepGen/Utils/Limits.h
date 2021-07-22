@@ -1,8 +1,8 @@
 #ifndef CepGen_Utils_Limits_h
 #define CepGen_Utils_Limits_h
 
-#include <utility>
 #include <iosfwd>
+#include <utility>
 
 namespace cepgen {
   /// Validity interval for a variable

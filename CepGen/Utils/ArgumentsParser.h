@@ -1,9 +1,9 @@
 #ifndef CepGen_Utils_ArgumentsParser_h
 #define CepGen_Utils_ArgumentsParser_h
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
 namespace cepgen {
   /// A generic command line arguments parser
