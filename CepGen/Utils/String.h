@@ -10,7 +10,16 @@
 namespace cepgen {
   namespace utils {
     /// Format a string using a printf style format descriptor.
-    std::string format(const std::string fmt, ...);
+    template <typename... Args>
+    std::string format(const std::string& fmt, Args... args) {
+      // first check how much space is required for output buffer
+      size_t size = snprintf(nullptr, 0, fmt.data(), args...) + 1;  // extra space for last '\0'
+      if (size <= 0)
+        return fmt;
+      std::vector<char> buffer(size);
+      snprintf(buffer.data(), size, fmt.data(), args...);
+      return std::string(buffer.data(), buffer.data() + size - 1);  // strip last '\0'
+    }
     /// Human-readable boolean printout
     std::string yesno(bool test);
     /// Boldify a string for TTY-type output streams
