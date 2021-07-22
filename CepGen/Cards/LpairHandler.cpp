@@ -37,7 +37,7 @@ namespace cepgen {
           str_fun_(11),
           sr_type_(1),
           lepton_id_(0),
-          pdg_input_path_("mass_width_2020.mcd"),
+          pdg_input_path_("mass_width_2021.mcd"),
           iend_(1) {}
 
     void LpairHandler::init() {
