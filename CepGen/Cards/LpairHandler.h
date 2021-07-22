@@ -1,10 +1,10 @@
 #ifndef CepGen_Cards_LpairReader_h
 #define CepGen_Cards_LpairReader_h
 
-#include "CepGen/Cards/Handler.h"
-
-#include <unordered_map>
 #include <memory>
+#include <unordered_map>
+
+#include "CepGen/Cards/Handler.h"
 
 using std::string;
 
@@ -12,7 +12,7 @@ namespace cepgen {
   class ParametersList;
   namespace card {
     /// LPAIR-like steering cards parser and writer
-    class LpairHandler : public Handler {
+    class LpairHandler final : public Handler {
     public:
       /// Read a LPAIR steering card
       explicit LpairHandler(const ParametersList&);

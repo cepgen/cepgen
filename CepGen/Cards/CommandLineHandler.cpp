@@ -19,7 +19,7 @@
 namespace cepgen {
   namespace card {
     /// Command line parser
-    class CommandLineHandler : public Handler {
+    class CommandLineHandler final : public Handler {
     public:
       /// Cast command line arguments into a configuration word
       explicit CommandLineHandler(const ParametersList&);

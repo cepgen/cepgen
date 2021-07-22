@@ -13,7 +13,7 @@ namespace cepgen {
   class ParametersList;
   namespace card {
     /// CepGen Python configuration cards reader/writer
-    class PythonHandler : public Handler {
+    class PythonHandler final : public Handler {
     public:
       /// Read a standard configuration card
       explicit PythonHandler(const ParametersList&);
