@@ -4,6 +4,7 @@
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Processes/Process2to4.h"
 #include "CepGenAddOns/MadGraphWrapper/MadGraphInterface.h"
+#include "CepGenAddOns/MadGraphWrapper/MadGraphProcess.h"
 
 using namespace cepgen;
 
