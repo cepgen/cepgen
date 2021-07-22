@@ -57,7 +57,7 @@ else()
   list(REMOVE_ITEM core_sources ${func_muparser})
 endif()
 
-find_path(EXPRTK exprtk.hpp PATH_SUFFIXES include)
+find_path(EXPRTK exprtk.hpp HINTS $ENV{EXPRTK_DIR} PATH_SUFFIXES include)
 if(EXPRTK)
   message(STATUS "Formulas parsing will use exprtk found in ${EXPRTK}")
   list(APPEND ext_includes ${EXPRTK}) # header-only
