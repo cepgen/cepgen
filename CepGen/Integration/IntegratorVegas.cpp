@@ -10,7 +10,7 @@
 
 namespace cepgen {
   /// Vegas integration algorithm developed by P. Lepage, as documented in \cite Lepage:1977sw
-  class IntegratorVegas : public IntegratorGSL {
+  class IntegratorVegas final : public IntegratorGSL {
   public:
     explicit IntegratorVegas(const ParametersList&);
 

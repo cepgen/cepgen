@@ -1,13 +1,9 @@
 #ifndef CepGen_Integration_Integrator_h
 #define CepGen_Integration_Integrator_h
 
-#include "CepGen/Modules/NamedModule.h"
-#include "CepGen/Event/Event.h"
-
-#include <vector>
 #include <random>
 
-#include <cstring>
+#include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen {
   class Integrand;

@@ -1,8 +1,8 @@
 #ifndef CepGen_Core_GridParameters_h
 #define CepGen_Core_GridParameters_h
 
-#include <vector>
 #include <cstddef>
+#include <vector>
 
 namespace cepgen {
   class Integrator;

@@ -1,21 +1,18 @@
-#include "CepGen/Integration/Integrator.h"
-#include "CepGen/Integration/Integrand.h"
-#include "CepGen/Modules/IntegratorFactory.h"
-
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Integration/Integrand.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Parameters.h"
-
+#include "TFoam.h"
+#include "TFoamIntegrand.h"
 #include "TRandom1.h"
 #include "TRandom2.h"
 #include "TRandom3.h"
 
-#include "TFoam.h"
-#include "TFoamIntegrand.h"
-
 namespace cepgen {
   /// Foam general-purpose integration algorithm
   /// as developed by S. Jadach (Institute of Nuclear Physics, Krakow, PL)
-  class IntegratorFoam : public Integrator, public TFoamIntegrand {
+  class IntegratorFoam final : public Integrator, public TFoamIntegrand {
   public:
     explicit IntegratorFoam(const ParametersList&);
     static std::string description() { return "FOAM general purpose MC integrator"; }
