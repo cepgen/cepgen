@@ -1,8 +1,9 @@
 #ifndef CepGenProcesses_LPAIR_h
 #define CepGenProcesses_LPAIR_h
 
-#include "CepGen/Processes/Process.h"
 #include <random>
+
+#include "CepGen/Processes/Process.h"
 
 namespace cepgen {
   namespace proc {

@@ -1,8 +1,9 @@
 #ifndef CepGen_Processes_FortranKTProcess_h
 #define CepGen_Processes_FortranKTProcess_h
 
-#include "CepGen/Processes/KTProcess.h"
 #include <functional>
+
+#include "CepGen/Processes/KTProcess.h"
 
 namespace cepgen {
   namespace proc {

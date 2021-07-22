@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <cassert>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
