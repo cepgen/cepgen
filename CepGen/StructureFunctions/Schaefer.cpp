@@ -1,16 +1,15 @@
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include <memory>
+#include <vector>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/Physics.h"
-
-#include <vector>
-#include <memory>
 
 namespace cepgen {
   namespace strfun {
     /// LUX-like hybrid modelling of \f$F_{2,L}\f$ structure functions
-    class Schaefer : public Parameterisation {
+    class Schaefer final : public Parameterisation {
     public:
       /// User-steered Schäfer hybrid structure functions calculator
       explicit Schaefer(const ParametersList& params = ParametersList());

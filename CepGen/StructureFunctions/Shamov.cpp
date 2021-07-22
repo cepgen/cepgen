@@ -1,16 +1,14 @@
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/Constants.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SuriYennie.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-
-#include "CepGen/Core/Exception.h"
-
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Utils/GridHandler.h"
 #include "CepGen/Utils/Physics.h"
 
 namespace cepgen {
   namespace strfun {
-    class Shamov : public Parameterisation {
+    class Shamov final : public Parameterisation {
     public:
       explicit Shamov(const ParametersList& params = ParametersList());
       static std::string description() { return "Shamov composite soft structure functions"; }

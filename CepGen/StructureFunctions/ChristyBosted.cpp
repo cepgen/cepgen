@@ -1,20 +1,18 @@
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/Constants.h"
-#include "CepGen/Utils/Physics.h"
-
-#include "CepGen/Core/Exception.h"
-
 #include <array>
 #include <utility>
 #include <vector>
 
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/Physics.h"
+
 namespace cepgen {
   namespace strfun {
     /// \f$F_{2,L}\f$ parameterisation by Christy and Bosted \cite Bosted:2007xd
-    class ChristyBosted : public Parameterisation {
+    class ChristyBosted final : public Parameterisation {
     public:
       explicit ChristyBosted(const ParametersList& params = ParametersList());
       static std::string description() { return "Christy-Bosted F2/FL parameterisation of low-mass resonances"; }
