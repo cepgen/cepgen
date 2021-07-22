@@ -7,7 +7,7 @@
 
 namespace cepgen {
   namespace utils {
-    class FunctionalExprTk : public Functional {
+    class FunctionalExprTk final : public Functional {
     public:
       explicit FunctionalExprTk(const ParametersList&);
       double eval(const std::vector<double>&) const override;
