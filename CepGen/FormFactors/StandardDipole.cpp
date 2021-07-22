@@ -1,11 +1,11 @@
+#include <cmath>
+
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
-#include <cmath>
-
 namespace cepgen {
   namespace formfac {
-    class StandardDipole : public Parameterisation {
+    class StandardDipole final : public Parameterisation {
     public:
       using Parameterisation::Parameterisation;
       static std::string description() { return "Standard dipole"; }
