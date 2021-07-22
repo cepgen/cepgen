@@ -30,7 +30,7 @@ namespace cepgen {
      * \brief Compute the matrix element for a CE \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
      *  process
      */
-    class LPAIR : public Process {
+    class LPAIR final : public Process {
     public:
       /// \brief Class constructor: set the mandatory parameters before integration and events generation
       /// \param[in] params General process parameters (nopt = Optimisation, legacy from LPAIR)
