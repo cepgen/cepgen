@@ -45,12 +45,7 @@ namespace cepgen {
       std::ostringstream oss;
       oss << message;
       if (ptype != nullptr) {  // we can start the traceback
-        oss << "\n\tError: "
-#ifdef PYTHON2
-            << PyString_AsString(PyObject_Str(pvalue));  // deprecated in python v3+
-#else
-            << PyUnicode_AsUTF8(PyObject_Str(pvalue));
-#endif
+        oss << "\n\tError: " << decode(PyObject_Str(pvalue));
         PyTracebackObject* ptraceback = (PyTracebackObject*)ptraceback_obj;
         std::string tabul = "↪ ";
         if (ptraceback != nullptr) {
@@ -58,15 +53,9 @@ namespace cepgen {
             PyFrameObject* pframe = ptraceback->tb_frame;
             if (pframe != nullptr) {
               int line = PyCode_Addr2Line(pframe->f_code, pframe->f_lasti);
-#ifdef PYTHON2
-              const std::string filename = PyString_AsString(pframe->f_code->co_filename);
-              const std::string = PyString_AsString(pframe->f_code->co_name);
-#else
-              const std::string filename = PyUnicode_AsUTF8(pframe->f_code->co_filename);
-              const std::string funcname = PyUnicode_AsUTF8(pframe->f_code->co_name);
-#endif
+              const auto filename = decode(pframe->f_code->co_filename), funcname = decode(pframe->f_code->co_name);
               oss << utils::format(
-                  "\n\t%s%s on %s (line %d)", tabul.c_str(), utils::boldify(funcname).c_str(), filename, line);
+                  "\n\t%s%s on %s (line %d)", tabul.c_str(), utils::boldify(funcname).c_str(), filename.c_str(), line);
             } else
               oss << utils::format("\n\t%s issue in line %d", tabul.c_str(), ptraceback->tb_lineno);
             tabul = std::string("  ") + tabul;
@@ -76,6 +65,20 @@ namespace cepgen {
       }
       Py_Finalize();
       throw CG_FATAL("PythonHandler:error") << oss.str();
+    }
+
+    std::string PythonHandler::decode(PyObject* obj) const {
+      if (!obj)
+        return "(none)";
+#ifdef PYTHON2
+      return PyString_AsString(obj);
+#else
+      if (PyUnicode_Check(obj))
+        return PyUnicode_AsUTF8(obj);
+      if (PyBytes_Check(obj))
+        return strdup(PyBytes_AS_STRING(obj));
+      return "(none)";
+#endif
     }
 
     PyObject* PythonHandler::encode(const char* str) const {

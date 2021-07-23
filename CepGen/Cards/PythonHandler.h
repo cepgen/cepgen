@@ -39,6 +39,7 @@ namespace cepgen {
       std::string pythonPath(const std::string&) const;
       PyObject* element(PyObject*, const std::string&) const;
       PyObject* encode(const char* str) const;
+      std::string decode(PyObject* obj) const;
 
       template <typename T>
       bool is(PyObject* obj) const;
