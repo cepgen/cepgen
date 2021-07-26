@@ -203,14 +203,14 @@ namespace cepgen {
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill(' ') << "\n\n"
        << std::setw(wt) << "Incoming particles" << param->kinematics.incomingBeams().positive() << ",\n"
        << std::setw(wt) << "" << param->kinematics.incomingBeams().negative() << "\n"
-       << std::setw(wt) << "C.m. energy (GeV)" << param->kinematics.sqrtS() << "\n"
+       << std::setw(wt) << "C.m. energy (GeV)" << param->kinematics.incomingBeams().sqrtS() << "\n"
        << std::setw(wt) << "Form factors" << param->kinematics.incomingBeams().formFactors() << "\n";
     if (param->kinematics.incomingBeams().mode() != mode::Kinematics::ElasticElastic &&
         param->kinematics.incomingBeams().structureFunctions())
       os << std::setw(wt) << "Structure functions" << param->kinematics.incomingBeams().structureFunctions() << "\n";
     os << "\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Incoming partons ") << std::setfill(' ') << "\n\n";
-    const auto& cuts = param->kinematics.cuts;
+    const auto& cuts = param->kinematics.cuts();
     for (const auto& lim : cuts.initial.list())  // map(particles class, limits)
       if (lim.limits.valid())
         os << std::setw(wt) << lim.description << lim.limits << "\n";

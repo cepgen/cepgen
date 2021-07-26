@@ -43,17 +43,17 @@ namespace cepgen {
       ww_ = 0.5 * (1. + sqrt(1. - 4. * sqrt(mA2_ * mB2_) / s_));
 
       defineVariable(
-          y_c1_, Mapping::linear, kin_.cuts.central.rapidity_single(), {-6., 6.}, "First outgoing particle rapidity");
+          y_c1_, Mapping::linear, kin_.cuts().central.rapidity_single(), {-6., 6.}, "First outgoing particle rapidity");
       defineVariable(
-          y_c2_, Mapping::linear, kin_.cuts.central.rapidity_single(), {-6., 6.}, "Second outgoing particle rapidity");
+          y_c2_, Mapping::linear, kin_.cuts().central.rapidity_single(), {-6., 6.}, "Second outgoing particle rapidity");
       defineVariable(pt_diff_,
                      Mapping::linear,
-                     kin_.cuts.central.pt_diff(),
+                     kin_.cuts().central.pt_diff(),
                      {0., 500.},
                      "Final state particles transverse momentum difference");
       defineVariable(phi_pt_diff_,
                      Mapping::linear,
-                     kin_.cuts.central.phi_diff(),
+                     kin_.cuts().central.phi_diff(),
                      {0., 2. * M_PI},
                      "Final state particles azimuthal angle difference");
 
@@ -93,13 +93,13 @@ namespace cepgen {
                                << "p(1/2)t = " << p1t << " / " << p2t;
 
       //--- window in rapidity distance
-      if (!kin_.cuts.central.rapidity_diff().contains(fabs(y_c1_ - y_c2_)))
+      if (!kin_.cuts().central.rapidity_diff().contains(fabs(y_c1_ - y_c2_)))
         return 0.;
 
       //--- apply the pt cut already at this stage (remains unchanged)
-      if (!kin_.cuts.central.pt_single().contains(p1t))
+      if (!kin_.cuts().central.pt_single().contains(p1t))
         return 0.;
-      if (!kin_.cuts.central.pt_single().contains(p2t))
+      if (!kin_.cuts().central.pt_single().contains(p2t))
         return 0.;
       if (!single_limits_.pt_single().contains(p1t))
         return 0.;
@@ -107,7 +107,7 @@ namespace cepgen {
         return 0.;
 
       //--- window in transverse momentum difference
-      if (!kin_.cuts.central.pt_diff().contains(fabs(p1t - p2t)))
+      if (!kin_.cuts().central.pt_diff().contains(fabs(p1t - p2t)))
         return 0.;
 
       //--- transverse mass for the two central particles
@@ -116,7 +116,7 @@ namespace cepgen {
 
       //--- window in central system invariant mass
       const double invm = sqrt(amt1_ * amt1_ + amt2_ * amt2_ + 2. * amt1_ * amt2_ * cosh(y_c1_ - y_c2_) - qt_sum.pt2());
-      if (!kin_.cuts.central.mass_sum().contains(invm))
+      if (!kin_.cuts().central.mass_sum().contains(invm))
         return 0.;
 
       //--- auxiliary quantities

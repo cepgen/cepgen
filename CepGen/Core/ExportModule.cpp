@@ -35,7 +35,7 @@ namespace cepgen {
           os << sep << mod->name(), sep = ", ";
         os << "\n";
       }
-      const auto& cuts = params.kinematics.cuts;
+      const auto& cuts = params.kinematics.cuts();
       os << prep << std::left << std::setw(len) << std::setfill('*') << "*** Incoming state "
          << "\n";
       for (const auto& cut : cuts.initial.list())

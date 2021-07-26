@@ -37,14 +37,6 @@ namespace cepgen {
     /// Const-qualified beam/primary particle's kinematics
     const IncomingBeams& incomingBeams() const { return incoming_beams_; }
 
-    /// Set the collision centre of mass energy (in GeV)
-    Kinematics& setSqrtS(double sqrts) {
-      incoming_beams_.setSqrtS(sqrts);
-      return *this;
-    }
-    /// Process centre of mass energy (in GeV)
-    double sqrtS() const { return incoming_beams_.sqrtS(); }
-
     /// Minimum list of central particles required
     std::vector<pdgid_t> minimum_final_state;
 
@@ -55,13 +47,19 @@ namespace cepgen {
       cuts::Central central;        ///< Cuts on the central system produced
       PerIdCuts central_particles;  ///< Cuts on the central individual particles
       cuts::Remnants remnants;      ///< Cuts on the beam remnants system
-    } cuts;                         ///< Phase space cuts
+    };
+    /// Phase space cuts
+    CutsList& cuts() { return cuts_; }
+    /// Const-qualified phase space cuts
+    const CutsList& cuts() const { return cuts_; }
+
     /// Human-readable description of a full kinematics cuts definition
     friend std::ostream& operator<<(std::ostream&, const CutsList&);
 
   private:
     /// Beam/primary particle's kinematics
     IncomingBeams incoming_beams_;
+    CutsList cuts_;  ///< Phase space cuts
   };
 }  // namespace cepgen
 

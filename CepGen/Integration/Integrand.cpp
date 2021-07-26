@@ -1,18 +1,14 @@
 #include "CepGen/Integration/Integrand.h"
 
+#include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/EventBrowser.h"
-
+#include "CepGen/Parameters.h"
 #include "CepGen/Processes/Process.h"
-
-#include "CepGen/Core/EventModifier.h"
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Core/Exception.h"
-
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/TimeKeeper.h"
-
-#include "CepGen/Parameters.h"
 
 namespace cepgen {
   Integrand::Integrand(const Parameters* params)
@@ -55,7 +51,7 @@ namespace cepgen {
     if (!event_)
       return weight;
     if (!storage_ && !params_->eventModifiersSequence().empty() && !params_->tamingFunctions().empty() &&
-        params_->kinematics.cuts.central_particles.empty())
+        params_->kinematics.cuts().central_particles.empty())
       return weight;
 
     //--- fill in the process' Event object
@@ -91,13 +87,13 @@ namespace cepgen {
     //--- apply cuts on final state system (after hadronisation!)
     //    (polish your cuts, as this might be very time-consuming...)
 
-    if (!params_->kinematics.cuts.central_particles.empty())
+    if (!params_->kinematics.cuts().central_particles.empty())
       for (const auto& part : (*event_)[Particle::CentralSystem]) {
         // retrieve all cuts associated to this final state particle in the
         // central system
-        if (params_->kinematics.cuts.central_particles.count(part.pdgId()) == 0)
+        if (params_->kinematics.cuts().central_particles.count(part.pdgId()) == 0)
           continue;
-        const auto& cuts_pdgid = params_->kinematics.cuts.central_particles.at(part.pdgId());
+        const auto& cuts_pdgid = params_->kinematics.cuts().central_particles.at(part.pdgId());
         // apply these cuts on the given particle
         if (!cuts_pdgid.pt_single().contains(part.momentum().pt()))
           return 0.;
@@ -108,7 +104,7 @@ namespace cepgen {
         if (!cuts_pdgid.rapidity_single().contains(part.momentum().rapidity()))
           return 0.;
       }
-    const auto& remn_cut = params_->kinematics.cuts.remnants;
+    const auto& remn_cut = params_->kinematics.cuts().remnants;
     for (const auto& system : {Particle::OutgoingBeam1, Particle::OutgoingBeam2})
       for (const auto& part : (*event_)[system]) {
         if (part.status() != Particle::Status::FinalState)

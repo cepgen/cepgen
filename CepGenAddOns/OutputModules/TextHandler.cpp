@@ -1,17 +1,14 @@
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
+#include <fstream>
 
 #include "CepGen/Core/Exception.h"
-
+#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/EventBrowser.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Parameters.h"
-
-#include "CepGen/Utils/String.h"
 #include "CepGen/Utils/Plotter.h"
+#include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
-
-#include <fstream>
 
 namespace cepgen {
   namespace io {
@@ -162,7 +159,7 @@ namespace cepgen {
     }
 
     void TextHandler::initialise(const Parameters& params) {
-      sqrts_ = params.kinematics.sqrtS();
+      sqrts_ = params.kinematics.incomingBeams().sqrtS();
       num_evts_ = 0ul;
       if (save_banner_)
         file_ << banner(params, "#") << "\n";

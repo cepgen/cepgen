@@ -1,16 +1,14 @@
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Parameters.h"
 #include "CepGenAddOns/ROOTWrapper/ROOTTreeInfo.h"
 
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
-#include "CepGen/Core/Exception.h"
-
-#include "CepGen/Event/Event.h"
-#include "CepGen/Parameters.h"
-
 // ROOT includes
-#include "TFile.h"
-
 #include <sstream>
+
+#include "TFile.h"
 
 namespace cepgen {
   namespace io {
@@ -55,7 +53,7 @@ namespace cepgen {
 
     void ROOTTreeHandler::initialise(const Parameters& params) {
       run_tree_.litigious_events = 0;
-      run_tree_.sqrt_s = params.kinematics.sqrtS();
+      run_tree_.sqrt_s = params.kinematics.incomingBeams().sqrtS();
     }
 
     void ROOTTreeHandler::operator<<(const Event& ev) {

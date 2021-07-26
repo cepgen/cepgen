@@ -85,7 +85,7 @@ namespace cepgen {
       masses_.Ml2 = (*event_)[Particle::CentralSystem][0].mass2();
 
       //--- first define the squared mass range for the diphoton/dilepton system
-      const auto& mll_limits = kin_.cuts.central.mass_sum();
+      const auto& mll_limits = kin_.cuts().central.mass_sum();
       w_limits_ = Limits(mll_limits.hasMin() ? std::pow(mll_limits.min(), 2) : 4. * masses_.Ml2,
                          mll_limits.hasMax() ? std::pow(mll_limits.max(), 2) : s_);
 
@@ -96,11 +96,11 @@ namespace cepgen {
       p2_lab_ = (*event_)[Particle::IncomingBeam2][0].momentum();
 
       const double mx0 = mp_ + PDG::get().mass(PDG::piPlus);  // 1.07
-      const double min_wx = pow(std::max(mx0, kin_.cuts.remnants.mx().min()), 2);
+      const double min_wx = pow(std::max(mx0, kin_.cuts().remnants.mx().min()), 2);
       const Limits wx_lim_ob1(
-          min_wx, pow(std::min(sqs_ - p1_lab_.mass() - 2. * sqrt(masses_.Ml2), kin_.cuts.remnants.mx().max()), 2));
+          min_wx, pow(std::min(sqs_ - p1_lab_.mass() - 2. * sqrt(masses_.Ml2), kin_.cuts().remnants.mx().max()), 2));
       const Limits wx_lim_ob2(
-          min_wx, pow(std::min(sqs_ - p2_lab_.mass() - 2. * sqrt(masses_.Ml2), kin_.cuts.remnants.mx().max()), 2));
+          min_wx, pow(std::min(sqs_ - p2_lab_.mass() - 2. * sqrt(masses_.Ml2), kin_.cuts().remnants.mx().max()), 2));
 
       //--- variables mapping
 
@@ -204,18 +204,18 @@ namespace cepgen {
                       t1_max;  // definition from eq. (A.5) in [1]
 
       // FIXME dropped in CDF version
-      if (t1_max > -kin_.cuts.initial.q2().min()) {
-        CG_DEBUG_LOOP("LPAIR") << "t1max = " << t1_max << " > -q2min = " << -kin_.cuts.initial.q2().min();
+      if (t1_max > -kin_.cuts().initial.q2().min()) {
+        CG_DEBUG_LOOP("LPAIR") << "t1max = " << t1_max << " > -q2min = " << -kin_.cuts().initial.q2().min();
         return false;
       }
-      if (t1_min < -kin_.cuts.initial.q2().max() && kin_.cuts.initial.q2().hasMax()) {
-        CG_DEBUG_LOOP("LPAIR") << "t1min = " << t1_min << " < -q2max = " << -kin_.cuts.initial.q2().max();
+      if (t1_min < -kin_.cuts().initial.q2().max() && kin_.cuts().initial.q2().hasMax()) {
+        CG_DEBUG_LOOP("LPAIR") << "t1min = " << t1_min << " < -q2max = " << -kin_.cuts().initial.q2().max();
         return false;
       }
-      if (t1_max < -kin_.cuts.initial.q2().max() && kin_.cuts.initial.q2().hasMax())
-        t1_max = -kin_.cuts.initial.q2().max();
-      if (t1_min > -kin_.cuts.initial.q2().min() && kin_.cuts.initial.q2().hasMin())
-        t1_min = -kin_.cuts.initial.q2().min();
+      if (t1_max < -kin_.cuts().initial.q2().max() && kin_.cuts().initial.q2().hasMax())
+        t1_max = -kin_.cuts().initial.q2().max();
+      if (t1_min > -kin_.cuts().initial.q2().min() && kin_.cuts().initial.q2().hasMin())
+        t1_min = -kin_.cuts().initial.q2().min();
       /////
 
       // t1, the first photon propagator, is defined here
@@ -792,36 +792,36 @@ namespace cepgen {
 
       //--- cut on mass of final hadronic system (MX/Y)
 
-      if (kin_.cuts.remnants.mx().valid()) {
+      if (kin_.cuts().remnants.mx().valid()) {
         if (kin_.incomingBeams().positive().mode == mode::Beam::ProtonInelastic &&
-            !kin_.cuts.remnants.mx().contains(mx))
+            !kin_.cuts().remnants.mx().contains(mx))
           return 0.;
         if (kin_.incomingBeams().negative().mode == mode::Beam::ProtonInelastic &&
-            !kin_.cuts.remnants.mx().contains(my))
+            !kin_.cuts().remnants.mx().contains(my))
           return 0.;
       }
 
       //--- cut on the proton's Q2 (first photon propagator T1)
 
-      if (!kin_.cuts.initial.q2().contains(-t1_))
+      if (!kin_.cuts().initial.q2().contains(-t1_))
         return 0.;
 
       //----- cuts on the individual leptons
 
-      if (kin_.cuts.central.pt_single().valid()) {
-        const Limits& pt_limits = kin_.cuts.central.pt_single();
+      if (kin_.cuts().central.pt_single().valid()) {
+        const Limits& pt_limits = kin_.cuts().central.pt_single();
         if (!pt_limits.contains(p6_cm_.pt()) || !pt_limits.contains(p7_cm_.pt()))
           return 0.;
       }
 
-      if (kin_.cuts.central.energy_single().valid()) {
-        const Limits& energy_limits = kin_.cuts.central.energy_single();
+      if (kin_.cuts().central.energy_single().valid()) {
+        const Limits& energy_limits = kin_.cuts().central.energy_single();
         if (!energy_limits.contains(p6_cm_.energy()) || !energy_limits.contains(p7_cm_.energy()))
           return 0.;
       }
 
-      if (kin_.cuts.central.eta_single().valid()) {
-        const Limits& eta_limits = kin_.cuts.central.eta_single();
+      if (kin_.cuts().central.eta_single().valid()) {
+        const Limits& eta_limits = kin_.cuts().central.eta_single();
         if (!eta_limits.contains(p6_cm_.eta()) || !eta_limits.contains(p7_cm_.eta()))
           return 0.;
       }
