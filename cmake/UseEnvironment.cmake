@@ -35,7 +35,7 @@ include_directories(${GSL_INCLUDE})
 #--- searching for ROOT
 find_package(ROOT QUIET)
 if(ROOT_FOUND)
-  if(${ROOT_VERSION} LESS 6.21)
+  if(${ROOT_VERSION} VERSION_LESS_EQUAL 6.22.06)
     set(ROOT_CXX_STANDARD 14)
   else()
     set(ROOT_CXX_STANDARD 17)
