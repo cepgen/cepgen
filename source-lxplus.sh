@@ -1,10 +1,11 @@
 #!/bin/sh
 
-#--- proper gcc/gfortran version
+#--- proper gcc/gfortran/cmake version
 export CVMFS_DIR=/cvmfs/sft.cern.ch/lcg/releases
 source ${CVMFS_DIR}/clang/9.0.0-a1c77/x86_64-centos7-gcc9-opt/setup.sh
 source ${CVMFS_DIR}/gcc/9.3.0-467e1/x86_64-centos7/setup.sh
-export PATH=${CVMFS_DIR}/CMake/3.8.2-ece19/x86_64-centos7-gcc8-opt/bin:${PATH}
+export CMAKE_DIR=${CVMFS_DIR}/CMake/3.8.2-ece19/x86_64-centos7-gcc8-opt
+export PATH=${CMAKE_DIR}/bin:${PATH}
 #--- Delphes linking
 source ${CVMFS_DIR}/ROOT/v6.24.00-f4a14/x86_64-centos7-gcc9-opt/bin/thisroot.sh
 export DELPHES_DIR=${CVMFS_DIR}/delphes/3.4.3pre09-604d4/x86_64-centos7-gcc9-opt
@@ -24,3 +25,4 @@ export VDT_DIR=${CVMFS_DIR}/vdt/0.4.3-992df/x86_64-centos7-gcc9-opt
 export JSONMCPP_DIR=${CVMFS_DIR}/jsonmcpp/3.9.1-72770/x86_64-centos7-gcc9-opt
 
 echo "Environment prepared for LXPLUS"
+export CEPGEN_LXPLUS_ENV=1
