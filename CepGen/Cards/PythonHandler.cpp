@@ -37,8 +37,9 @@ namespace cepgen {
     Parameters* PythonHandler::parse(const std::string& file, Parameters* params) {
       if (!utils::fileExists(file))
         throw CG_FATAL("PythonHandler") << "Unable to locate steering card \"" << file << "\".";
-      setenv(
-          "PYTHONPATH", (utils::environ("CEPGEN_PATH", ".") + ":.:Cards:../Cards:/usr/share/CepGen/Cards").c_str(), 1);
+      setenv("PYTHONPATH",
+             (utils::environ("CEPGEN_PATH", ".") + ":.:Cards:../Cards:../../Cards:/usr/share/CepGen/Cards").c_str(),
+             1);
       setenv("PYTHONDONTWRITEBYTECODE", "1", 1);
       CG_DEBUG("PythonHandler") << "Python PATH: \"" << utils::environ("PYTHONPATH") << "\".";
 
@@ -68,9 +69,13 @@ namespace cepgen {
       if (!Py_IsInitialized())
         throw CG_FATAL("PythonHandler") << "Failed to initialise the Python cards parser!";
 
-      CG_DEBUG("PythonHandler") << "Initialised the Python cards parser\n\t"
-                                << "Python version: " << Py_GetVersion() << "\n\t"
-                                << "Platform: " << Py_GetPlatform() << ".";
+      CG_DEBUG("PythonHandler").log([](auto& log) {
+        std::string version = Py_GetVersion();
+        utils::replace_all(version, "\n", " ");
+        log << "Initialised the Python cards parser\n\t"
+            << "Python version: " << version << "\n\t"
+            << "Platform: " << Py_GetPlatform() << ".";
+      });
 
       PyObject* cfg = PyImport_ImportModule(filename.c_str());  // new
       if (!cfg)

@@ -6,7 +6,9 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/String.h"
 
+// clang-format off
 #include <frameobject.h>
+// clang-format on
 
 #if PY_MAJOR_VERSION < 3
 #define PYTHON2
@@ -36,35 +38,35 @@ namespace cepgen {
     }
 
     void PythonHandler::throwPythonError(const std::string& message) const {
-      PyObject *ptype = nullptr, *pvalue = nullptr, *ptraceback_obj = nullptr;
-      // retrieve error indicator and clear it to handle ourself the error
-      PyErr_Fetch(&ptype, &pvalue, &ptraceback_obj);
-      PyErr_Clear();
-      // ensure the objects retrieved are properly normalised and point to compatible objects
-      PyErr_NormalizeException(&ptype, &pvalue, &ptraceback_obj);
-      std::ostringstream oss;
-      oss << message;
-      if (ptype != nullptr) {  // we can start the traceback
-        oss << "\n\tError: " << decode(PyObject_Str(pvalue));
-        PyTracebackObject* ptraceback = (PyTracebackObject*)ptraceback_obj;
-        std::string tabul = "↪ ";
-        if (ptraceback != nullptr) {
-          while (ptraceback->tb_next != nullptr) {
-            PyFrameObject* pframe = ptraceback->tb_frame;
-            if (pframe != nullptr) {
-              int line = PyCode_Addr2Line(pframe->f_code, pframe->f_lasti);
-              const auto filename = decode(pframe->f_code->co_filename), funcname = decode(pframe->f_code->co_name);
-              oss << utils::format(
-                  "\n\t%s%s on %s (line %d)", tabul.c_str(), utils::boldify(funcname).c_str(), filename.c_str(), line);
-            } else
-              oss << utils::format("\n\t%s issue in line %d", tabul.c_str(), ptraceback->tb_lineno);
-            tabul = std::string("  ") + tabul;
-            ptraceback = ptraceback->tb_next;
+      throw CG_FATAL("PythonHandler:error").log([this, &message](auto& err) {
+        PyObject *ptype = nullptr, *pvalue = nullptr, *ptraceback_obj = nullptr;
+        // retrieve error indicator and clear it to handle ourself the error
+        PyErr_Fetch(&ptype, &pvalue, &ptraceback_obj);
+        PyErr_Clear();
+        // ensure the objects retrieved are properly normalised and point to compatible objects
+        PyErr_NormalizeException(&ptype, &pvalue, &ptraceback_obj);
+        err << message;
+        if (ptype != nullptr) {  // we can start the traceback
+          err << "\n\tError: " << decode(PyObject_Str(pvalue));
+          PyTracebackObject* ptraceback = (PyTracebackObject*)ptraceback_obj;
+          std::string tabul = "↪ ";
+          if (ptraceback != nullptr) {
+            while (ptraceback->tb_next != nullptr) {
+              PyFrameObject* pframe = ptraceback->tb_frame;
+              if (pframe != nullptr) {
+                int line = PyCode_Addr2Line(pframe->f_code, pframe->f_lasti);
+                const auto filename = decode(pframe->f_code->co_filename), funcname = decode(pframe->f_code->co_name);
+                err << utils::format(
+                    "\n\t%s%s on %s (line %d)", tabul.c_str(), utils::boldify(funcname).c_str(), filename.c_str(), line);
+              } else
+                err << utils::format("\n\t%s issue in line %d", tabul.c_str(), ptraceback->tb_lineno);
+              tabul = std::string("  ") + tabul;
+              ptraceback = ptraceback->tb_next;
+            }
           }
         }
-      }
-      Py_Finalize();
-      throw CG_FATAL("PythonHandler:error") << oss.str();
+        Py_Finalize();
+      });
     }
 
     std::string PythonHandler::decode(PyObject* obj) const {
