@@ -1,10 +1,9 @@
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
-
-#include "CepGen/Event/Event.h"
-#include "CepGen/Parameters.h"
-
 #include <sstream>
+
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Parameters.h"
 
 #ifdef HEPMC3
 using namespace std;  // account for improper scoping in following includes
@@ -61,10 +60,10 @@ namespace cepgen {
     void LHEFHepMCHandler::initialise(const Parameters& params) {
       lhe_output_->headerBlock() << "<!--\n" << banner(params) << "\n-->";
       //--- first specify information about the run
-      lhe_output_->heprup.IDBMUP = {(int)params.kinematics.incoming_beams.positive().pdg,
-                                    (int)params.kinematics.incoming_beams.negative().pdg};
-      lhe_output_->heprup.EBMUP = {(double)params.kinematics.incoming_beams.positive().momentum.pz(),
-                                   (double)params.kinematics.incoming_beams.negative().momentum.pz()};
+      lhe_output_->heprup.IDBMUP = {(int)params.kinematics.incomingBeams().positive().pdg,
+                                    (int)params.kinematics.incomingBeams().negative().pdg};
+      lhe_output_->heprup.EBMUP = {(double)params.kinematics.incomingBeams().positive().momentum.pz(),
+                                   (double)params.kinematics.incomingBeams().negative().momentum.pz()};
       //--- ensure everything is properly parsed
       lhe_output_->init();
     }

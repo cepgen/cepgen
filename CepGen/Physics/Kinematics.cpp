@@ -7,10 +7,7 @@
 namespace cepgen {
   const double Kinematics::MX_MIN = 1.07;  // mp+mpi+-
 
-  Kinematics::Kinematics(const ParametersList& params) {
-    //----- per-incoming beam kinematics
-    incoming_beams = IncomingBeams(params);
-
+  Kinematics::Kinematics(const ParametersList& params) : incoming_beams_(params) {
     //----- phase space definition
     setParameters(params);
   }
@@ -50,7 +47,7 @@ namespace cepgen {
 
   ParametersList Kinematics::parameters() const {
     ParametersList params;
-    params += incoming_beams.parameters();
+    params += incoming_beams_.parameters();
     for (const auto& lim : cuts.initial.list())
       params.set<Limits>(lim.name, lim.limits);
     for (auto& lim : cuts.central.list())

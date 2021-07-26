@@ -75,8 +75,8 @@ namespace cepgen {
         data->set_width(desc.width);
         data->set_charge(desc.charge * 1. / 3.);
       }
-      hdr.set_id1(params.kinematics.incoming_beams.positive().pdg);
-      hdr.set_id2(params.kinematics.incoming_beams.negative().pdg);
+      hdr.set_id1(params.kinematics.incomingBeams().positive().pdg);
+      hdr.set_id2(params.kinematics.incomingBeams().negative().pdg);
       hdr.set_pdf1(0);
       hdr.set_pdf2(0);
       hdr.set_x1(0);

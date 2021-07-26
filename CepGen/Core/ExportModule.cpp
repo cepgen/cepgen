@@ -1,17 +1,16 @@
 #include "CepGen/Core/ExportModule.h"
-#include "CepGen/Core/EventModifier.h"
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/Exception.h"
 
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Physics/Constants.h"
-
-#include "CepGen/Utils/String.h"
-#include "CepGen/Parameters.h"
-#include "CepGen/Version.h"
-
-#include <sstream>
 #include <iomanip>
+#include <sstream>
+
+#include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/String.h"
+#include "CepGen/Version.h"
 
 namespace cepgen {
   namespace io {
@@ -25,9 +24,9 @@ namespace cepgen {
       const size_t len = 45 + version::tag.size();
       std::ostringstream os;
       os << prep << "******* Sample generated with CepGen " << version::tag << " *******\n"
-         << prep << " Process: " << params.processName() << " (" << params.kinematics.incoming_beams.mode() << ")\n";
-      if (params.kinematics.incoming_beams.mode() != mode::Kinematics::ElasticElastic)
-        os << prep << " Structure functions: " << params.kinematics.incoming_beams.structureFunctions()->description()
+         << prep << " Process: " << params.processName() << " (" << params.kinematics.incomingBeams().mode() << ")\n";
+      if (params.kinematics.incomingBeams().mode() != mode::Kinematics::ElasticElastic)
+        os << prep << " Structure functions: " << params.kinematics.incomingBeams().structureFunctions()->description()
            << "\n";
       if (!params.eventModifiersSequence().empty()) {
         os << prep << " " << utils::s("Event modifier", params.eventModifiersSequence().size()) << ": ";
@@ -45,7 +44,7 @@ namespace cepgen {
          << "\n";
       for (const auto& cut : cuts.central.list())
         os << prep << " " << cut.description << ": " << cut.limits << "\n";
-      if (params.kinematics.incoming_beams.mode() != mode::Kinematics::ElasticElastic) {
+      if (params.kinematics.incomingBeams().mode() != mode::Kinematics::ElasticElastic) {
         os << prep << std::setw(len) << std::setfill('*') << "*** Remnants states "
            << "\n";
         for (const auto& cut : cuts.remnants.list())

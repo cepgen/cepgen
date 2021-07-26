@@ -32,15 +32,18 @@ namespace cepgen {
     /// List containing all parameters handled
     ParametersList parameters() const;
 
-    /// Set the incoming particles' momenta (if the collision is symmetric)
+    /// Beam/primary particle's kinematics
+    IncomingBeams& incomingBeams() { return incoming_beams_; }
+    /// Const-qualified beam/primary particle's kinematics
+    const IncomingBeams& incomingBeams() const { return incoming_beams_; }
+
+    /// Set the collision centre of mass energy (in GeV)
     Kinematics& setSqrtS(double sqrts) {
-      incoming_beams.setSqrtS(sqrts);
+      incoming_beams_.setSqrtS(sqrts);
       return *this;
     }
-    /// Process centre of mass energy
-    double sqrtS() const { return incoming_beams.sqrtS(); }
-    /// Beam/primary particle's kinematics
-    IncomingBeams incoming_beams;
+    /// Process centre of mass energy (in GeV)
+    double sqrtS() const { return incoming_beams_.sqrtS(); }
 
     /// Minimum list of central particles required
     std::vector<pdgid_t> minimum_final_state;
@@ -55,6 +58,10 @@ namespace cepgen {
     } cuts;                         ///< Phase space cuts
     /// Human-readable description of a full kinematics cuts definition
     friend std::ostream& operator<<(std::ostream&, const CutsList&);
+
+  private:
+    /// Beam/primary particle's kinematics
+    IncomingBeams incoming_beams_;
   };
 }  // namespace cepgen
 

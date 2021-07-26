@@ -1,25 +1,21 @@
-#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
-
-#include "CepGen/Physics/Hadroniser.h"
-#include "CepGen/Modules/EventModifierFactory.h"
-
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/Exception.h"
-
-#include "CepGen/Parameters.h"
-#include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/PDG.h"
-
-#include "CepGen/Event/Event.h"
-#include "CepGen/Event/Particle.h"
-#include "CepGen/Utils/String.h"
-
 #include <Pythia8/Pythia.h>
 
 #include <memory>
 #include <unordered_map>
 #include <vector>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Event/Particle.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/Hadroniser.h"
+#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/String.h"
+#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
 namespace cepgen {
   namespace hadr {
@@ -83,8 +79,8 @@ namespace cepgen {
 #else
       pythia_->setLHAupPtr(cg_evt_);
 #endif
-      pythia_->settings.parm("Beams:idA", (long)rt_params_->kinematics.incoming_beams.positive().pdg);
-      pythia_->settings.parm("Beams:idB", (long)rt_params_->kinematics.incoming_beams.negative().pdg);
+      pythia_->settings.parm("Beams:idA", (long)rt_params_->kinematics.incomingBeams().positive().pdg);
+      pythia_->settings.parm("Beams:idB", (long)rt_params_->kinematics.incomingBeams().negative().pdg);
       // specify we will be using a LHA input
       pythia_->settings.mode("Beams:frameType", 5);
       pythia_->settings.parm("Beams:eCM", rt_params_->kinematics.sqrtS());
@@ -118,7 +114,7 @@ namespace cepgen {
       }
 
 #if defined(PYTHIA_VERSION_INTEGER) && PYTHIA_VERSION_INTEGER >= 8226
-      switch (rt_params_->kinematics.incoming_beams.mode()) {
+      switch (rt_params_->kinematics.incomingBeams().mode()) {
         case mode::Kinematics::ElasticElastic: {
           pythia_->settings.mode("BeamRemnants:unresolvedHadron", 3);
           pythia_->settings.flag("PartonLevel:all", false);

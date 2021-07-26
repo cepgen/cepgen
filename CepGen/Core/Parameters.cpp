@@ -1,24 +1,20 @@
 #include "CepGen/Parameters.h"
 
-#include "CepGen/Integration/Integrator.h"
+#include <iomanip>
 
 #include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/Exception.h"
-
-#include "CepGen/FormFactors/Parameterisation.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
-
-#include "CepGen/Processes/Process.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/FormFactors/Parameterisation.h"
+#include "CepGen/Integration/Integrator.h"
 #include "CepGen/Physics/PDG.h"
-
+#include "CepGen/Processes/Process.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/Functional.h"
-#include "CepGen/Utils/TimeKeeper.h"
 #include "CepGen/Utils/String.h"
-
-#include <iomanip>
+#include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
   Parameters::Parameters()
@@ -80,11 +76,11 @@ namespace cepgen {
     CG_DEBUG("Parameters").log([&](auto& dbg) {
       dbg << "Run started for " << process_->name() << " process " << std::hex << (void*)process_.get() << std::dec
           << ".\n\t"
-          << "Process mode considered: " << kinematics.incoming_beams.mode() << "\n\t"
-          << "  positive-z beam: " << kinematics.incoming_beams.positive() << "\n\t"
-          << "  negative-z beam: " << kinematics.incoming_beams.negative();
-      if (kinematics.incoming_beams.structureFunctions())
-        dbg << "  structure functions: " << kinematics.incoming_beams.structureFunctions();
+          << "Process mode considered: " << kinematics.incomingBeams().mode() << "\n\t"
+          << "  positive-z beam: " << kinematics.incomingBeams().positive() << "\n\t"
+          << "  negative-z beam: " << kinematics.incomingBeams().negative();
+      if (kinematics.incomingBeams().structureFunctions())
+        dbg << "  structure functions: " << kinematics.incomingBeams().structureFunctions();
     });
     if (process_->hasEvent())
       process_->clearEvent();
@@ -161,8 +157,8 @@ namespace cepgen {
         if (par != "mode")
           os << "\n" << std::setw(wt) << "" << par << ": " << param->process_->parameters().getString(par);
       std::ostringstream proc_mode;
-      proc_mode << param->kinematics.incoming_beams.mode();
-      if (param->kinematics.incoming_beams.mode() != mode::Kinematics::invalid)
+      proc_mode << param->kinematics.incomingBeams().mode();
+      if (param->kinematics.incomingBeams().mode() != mode::Kinematics::invalid)
         os << "\n" << std::setw(wt) << "Subprocess mode" << utils::boldify(proc_mode.str()) << "\n";
     }
     os << "\n"
@@ -205,13 +201,13 @@ namespace cepgen {
       os << std::setw(wt) << "" << key << ": " << param->integrator->getString(key) << "\n";
     os << "\n"
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill(' ') << "\n\n"
-       << std::setw(wt) << "Incoming particles" << param->kinematics.incoming_beams.positive() << ",\n"
-       << std::setw(wt) << "" << param->kinematics.incoming_beams.negative() << "\n"
+       << std::setw(wt) << "Incoming particles" << param->kinematics.incomingBeams().positive() << ",\n"
+       << std::setw(wt) << "" << param->kinematics.incomingBeams().negative() << "\n"
        << std::setw(wt) << "C.m. energy (GeV)" << param->kinematics.sqrtS() << "\n"
-       << std::setw(wt) << "Form factors" << param->kinematics.incoming_beams.formFactors() << "\n";
-    if (param->kinematics.incoming_beams.mode() != mode::Kinematics::ElasticElastic &&
-        param->kinematics.incoming_beams.structureFunctions())
-      os << std::setw(wt) << "Structure functions" << param->kinematics.incoming_beams.structureFunctions() << "\n";
+       << std::setw(wt) << "Form factors" << param->kinematics.incomingBeams().formFactors() << "\n";
+    if (param->kinematics.incomingBeams().mode() != mode::Kinematics::ElasticElastic &&
+        param->kinematics.incomingBeams().structureFunctions())
+      os << std::setw(wt) << "Structure functions" << param->kinematics.incomingBeams().structureFunctions() << "\n";
     os << "\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Incoming partons ") << std::setfill(' ') << "\n\n";
     const auto& cuts = param->kinematics.cuts;

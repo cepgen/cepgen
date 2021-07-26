@@ -115,7 +115,7 @@ namespace cepgen {
       defineVariable(x6_, Mapping::linear, {0., 1.}, {0., 1.}, "x6");
 
       //--- first outgoing beam particle or remnant mass
-      switch (kin_.incoming_beams.positive().mode) {
+      switch (kin_.incomingBeams().positive().mode) {
         case mode::Beam::PointLikeFermion:
         case mode::Beam::ProtonElastic:
           event_->oneWithRole(Particle::OutgoingBeam1).setPdgId(event_->oneWithRole(Particle::IncomingBeam1).pdgId());
@@ -126,10 +126,10 @@ namespace cepgen {
           break;
         default:
           throw CG_FATAL("LPAIR:kinematics")
-              << "Invalid mode for beam 1: " << kin_.incoming_beams.positive().mode << " is not supported!";
+              << "Invalid mode for beam 1: " << kin_.incomingBeams().positive().mode << " is not supported!";
       }
       //--- second outgoing beam particle or remnant mass
-      switch (kin_.incoming_beams.negative().mode) {
+      switch (kin_.incomingBeams().negative().mode) {
         case mode::Beam::PointLikeFermion:
         case mode::Beam::ProtonElastic:
           event_->oneWithRole(Particle::OutgoingBeam2).setPdgId(event_->oneWithRole(Particle::IncomingBeam2).pdgId());
@@ -140,7 +140,7 @@ namespace cepgen {
           break;
         default:
           throw CG_FATAL("LPAIR:kinematics")
-              << "Invalid mode for beam 2: " << kin_.incoming_beams.negative().mode << " is not supported!";
+              << "Invalid mode for beam 2: " << kin_.incomingBeams().negative().mode << " is not supported!";
       }
     }
 
@@ -671,8 +671,8 @@ namespace cepgen {
       jacobian_ /= amap;
       jacobian_ /= bmap;
       jacobian_ *= log(ymap);
-      if ((kin_.incoming_beams.mode() == mode::Kinematics::ElasticInelastic ||
-           kin_.incoming_beams.mode() == mode::Kinematics::InelasticElastic) &&
+      if ((kin_.incomingBeams().mode() == mode::Kinematics::ElasticInelastic ||
+           kin_.incomingBeams().mode() == mode::Kinematics::InelasticElastic) &&
           symmetrise_)
         jacobian_ *= 1.;
       else
@@ -793,9 +793,11 @@ namespace cepgen {
       //--- cut on mass of final hadronic system (MX/Y)
 
       if (kin_.cuts.remnants.mx().valid()) {
-        if (kin_.incoming_beams.positive().mode == mode::Beam::ProtonInelastic && !kin_.cuts.remnants.mx().contains(mx))
+        if (kin_.incomingBeams().positive().mode == mode::Beam::ProtonInelastic &&
+            !kin_.cuts.remnants.mx().contains(mx))
           return 0.;
-        if (kin_.incoming_beams.negative().mode == mode::Beam::ProtonInelastic && !kin_.cuts.remnants.mx().contains(my))
+        if (kin_.incomingBeams().negative().mode == mode::Beam::ProtonInelastic &&
+            !kin_.cuts.remnants.mx().contains(my))
           return 0.;
       }
 
@@ -890,7 +892,7 @@ namespace cepgen {
 
       p3_lab_.setPz(p3_lab_.pz() * ranz);
       op1.setMomentum(p3_lab_);
-      switch (kin_.incoming_beams.positive().mode) {
+      switch (kin_.incomingBeams().positive().mode) {
         case mode::Beam::ProtonElastic:
         default:
           op1.setStatus(Particle::Status::FinalState);  // stable proton
@@ -906,7 +908,7 @@ namespace cepgen {
 
       p5_lab_.setPz(p5_lab_.pz() * ranz);
       op2.setMomentum(p5_lab_);
-      switch (kin_.incoming_beams.negative().mode) {
+      switch (kin_.incomingBeams().negative().mode) {
         case mode::Beam::ProtonElastic:
         default:
           op2.setStatus(Particle::Status::FinalState);  // stable proton
@@ -952,8 +954,8 @@ namespace cepgen {
     double LPAIR::periPP() const {
       //--- compute the electric/magnetic form factors for the two
       //    considered parton momenta transfers
-      const auto fp1 = (*kin_.incoming_beams.formFactors())(kin_.incoming_beams.positive().mode, -t1_, mX2_);
-      const auto fp2 = (*kin_.incoming_beams.formFactors())(kin_.incoming_beams.negative().mode, -t2_, mY2_);
+      const auto fp1 = (*kin_.incomingBeams().formFactors())(kin_.incomingBeams().positive().mode, -t1_, mX2_);
+      const auto fp2 = (*kin_.incomingBeams().formFactors())(kin_.incomingBeams().negative().mode, -t2_, mY2_);
 
       CG_DEBUG_LOOP("LPAIR:peripp") << "(u1,u2) = " << fp1 << "\n\t"
                                     << "(v1,v2) = " << fp2;

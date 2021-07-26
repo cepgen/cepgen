@@ -1,14 +1,11 @@
 #include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
 #include "CepGen/Core/Exception.h"
-
-#include "CepGen/Parameters.h"
-
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/Constants.h"
-
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/PDG.h"
 
 namespace Pythia8 {
   /// Convert a CepGen particle momentum into its Pythia8 counterpart
@@ -24,13 +21,13 @@ namespace Pythia8 {
 
   void CepGenEvent::initialise(const cepgen::Parameters& params) {
     params_ = &params;
-    inel1_ = params_->kinematics.incoming_beams.positive().mode == cepgen::mode::Beam::ProtonInelastic;
-    inel2_ = params_->kinematics.incoming_beams.negative().mode == cepgen::mode::Beam::ProtonInelastic;
+    inel1_ = params_->kinematics.incomingBeams().positive().mode == cepgen::mode::Beam::ProtonInelastic;
+    inel2_ = params_->kinematics.incomingBeams().negative().mode == cepgen::mode::Beam::ProtonInelastic;
 
-    setBeamA((short)params_->kinematics.incoming_beams.positive().pdg,
-             params_->kinematics.incoming_beams.positive().momentum.pz());
-    setBeamB((short)params_->kinematics.incoming_beams.negative().pdg,
-             params_->kinematics.incoming_beams.negative().momentum.pz());
+    setBeamA((short)params_->kinematics.incomingBeams().positive().pdg,
+             params_->kinematics.incomingBeams().positive().momentum.pz());
+    setBeamB((short)params_->kinematics.incomingBeams().negative().pdg,
+             params_->kinematics.incomingBeams().negative().momentum.pz());
     //addProcess( 0, params_->integration().result, params_->integration().err_result, 100. );
   }
 

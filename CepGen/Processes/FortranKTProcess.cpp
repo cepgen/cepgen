@@ -77,18 +77,18 @@ namespace cepgen {
       // feed run parameters to the common block
       //===========================================================================================
 
-      genparams_.icontri = (int)kin_.incoming_beams.mode();
-      if (kin_.incoming_beams.structureFunctions())
-        genparams_.sfmod = kin_.incoming_beams.structureFunctions()->name();
+      genparams_.icontri = (int)kin_.incomingBeams().mode();
+      if (kin_.incomingBeams().structureFunctions())
+        genparams_.sfmod = kin_.incomingBeams().structureFunctions()->name();
 
       //-------------------------------------------------------------------------------------------
       // incoming beams information
       //-------------------------------------------------------------------------------------------
 
       //--- positive-z incoming beam
-      genparams_.inp1 = kin_.incoming_beams.positive().momentum.pz();
+      genparams_.inp1 = kin_.incomingBeams().positive().momentum.pz();
       //--- check if first incoming beam is a heavy ion
-      const HeavyIon in1 = (HeavyIon)kin_.incoming_beams.positive().pdg;
+      const HeavyIon in1 = (HeavyIon)kin_.incomingBeams().positive().pdg;
       if (in1) {
         genparams_.a_nuc1 = in1.A;
         genparams_.z_nuc1 = (unsigned short)in1.Z;
@@ -100,9 +100,9 @@ namespace cepgen {
         genparams_.a_nuc1 = genparams_.z_nuc1 = 1;
 
       //--- negative-z incoming beam
-      genparams_.inp2 = kin_.incoming_beams.negative().momentum.pz();
+      genparams_.inp2 = kin_.incomingBeams().negative().momentum.pz();
       //--- check if second incoming beam is a heavy ion
-      const HeavyIon in2 = (HeavyIon)kin_.incoming_beams.negative().pdg;
+      const HeavyIon in2 = (HeavyIon)kin_.incomingBeams().negative().pdg;
       if (in2) {
         genparams_.a_nuc2 = in2.A;
         genparams_.z_nuc2 = (unsigned short)in2.Z;
@@ -117,8 +117,8 @@ namespace cepgen {
       // intermediate partons information
       //-------------------------------------------------------------------------------------------
 
-      genparams_.iflux1 = (int)kin_.incoming_beams.positive().kt_flux;
-      genparams_.iflux2 = (int)kin_.incoming_beams.negative().kt_flux;
+      genparams_.iflux1 = (int)kin_.incomingBeams().positive().kt_flux;
+      genparams_.iflux2 = (int)kin_.incomingBeams().negative().kt_flux;
     }
 
     double FortranKTProcess::computeKTFactorisedMatrixElement() {

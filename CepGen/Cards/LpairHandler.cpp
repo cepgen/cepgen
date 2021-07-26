@@ -211,10 +211,10 @@ namespace cepgen {
 
       //--- parse the structure functions code
       if (str_fun_ == (int)strfun::Type::MSTWgrid && !mstw_grid_path_.empty())
-        rt_params_->kinematics.incoming_beams.setStructureFunctions(strfun::StructureFunctionsFactory::get().build(
+        rt_params_->kinematics.incomingBeams().setStructureFunctions(strfun::StructureFunctionsFactory::get().build(
             str_fun_, ParametersList().set<std::string>("gridPath", mstw_grid_path_)));
       else
-        rt_params_->kinematics.incoming_beams.setStructureFunctions(str_fun_, sr_type_);
+        rt_params_->kinematics.incomingBeams().setStructureFunctions(str_fun_, sr_type_);
 
       //--- parse the hadronisation algorithm name
       if (!evt_mod_name_.empty())
@@ -262,10 +262,10 @@ namespace cepgen {
 
     void LpairHandler::pack(const Parameters* params) {
       rt_params_ = const_cast<Parameters*>(params);
-      str_fun_ = rt_params_->kinematics.incoming_beams.structureFunctions()->name();
-      if (rt_params_->kinematics.incoming_beams.structureFunctions() &&
-          rt_params_->kinematics.incoming_beams.structureFunctions()->sigmaRatio())
-        sr_type_ = rt_params_->kinematics.incoming_beams.structureFunctions()->sigmaRatio()->name();
+      str_fun_ = rt_params_->kinematics.incomingBeams().structureFunctions()->name();
+      if (rt_params_->kinematics.incomingBeams().structureFunctions() &&
+          rt_params_->kinematics.incomingBeams().structureFunctions()->sigmaRatio())
+        sr_type_ = rt_params_->kinematics.incomingBeams().structureFunctions()->sigmaRatio()->name();
       //kmr_grid_path_ =
       //mstw_grid_path_ =
       //pdg_input_path_ =
