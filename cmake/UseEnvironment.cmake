@@ -35,10 +35,9 @@ include_directories(${GSL_INCLUDE})
 #--- searching for ROOT
 find_package(ROOT QUIET)
 if(ROOT_FOUND)
-  if(${ROOT_VERSION} VERSION_LESS_EQUAL 6.22.06)
-    set(ROOT_CXX_STANDARD 14)
-  else()
-    set(ROOT_CXX_STANDARD 17)
+  string(REGEX MATCH "\\-std\\=c\\+\\+([0-9]+)\\ " _buf "${ROOT_CXX_FLAGS}")
+  if(MATCHES)
+    set(ROOT_CXX_STANDARD ${CMAKE_MATCH_0})
   endif()
   if(IS_LXPLUS)
     #--- LXPLUS/CVMFS tweak for missing dependencies
