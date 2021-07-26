@@ -80,11 +80,11 @@ namespace cepgen {
   std::ostream& operator<<(std::ostream& os, const Exception::Type& type) {
     switch (type) {
       case Exception::Type::info:
-        return os << utils::colourise("Info:", utils::Colour::green, utils::Modifier::bold);
+        return os << utils::colourise("Info", utils::Colour::green, utils::Modifier::bold);
       case Exception::Type::debug:
-        return os << utils::colourise("Debug:", utils::Colour::yellow, utils::Modifier::reverse);
+        return os << utils::colourise("Debug", utils::Colour::yellow, utils::Modifier::reverse);
       case Exception::Type::warning:
-        return os << utils::colourise("Warning:", utils::Colour::blue, utils::Modifier::bold);
+        return os << utils::colourise("Warning", utils::Colour::blue, utils::Modifier::bold);
       case Exception::Type::verbatim:
         return os << utils::colourise("Verbatim", utils::Colour::reset, utils::Modifier::bold);
       case Exception::Type::undefined:
