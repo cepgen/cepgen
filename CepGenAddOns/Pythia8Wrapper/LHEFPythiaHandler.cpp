@@ -1,16 +1,13 @@
-#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
-
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
-
-#include "CepGen/Event/Event.h"
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/String.h"
-#include "CepGen/Utils/Filesystem.h"
-
-#include "Pythia8/Pythia.h"
-
 #include <sstream>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Utils/Filesystem.h"
+#include "CepGen/Utils/String.h"
+#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
+#include "Pythia8/Pythia.h"
 
 namespace cepgen {
   namespace io {
@@ -67,8 +64,9 @@ namespace cepgen {
       if (gzip_) {
         std::string cmnd(GZIP_BIN);
         cmnd += " -f " + filename_;
-        system(cmnd.c_str());
-        CG_INFO("") << cmnd;
+        if (system(cmnd.c_str()) != 0)
+          CG_WARNING("LHEFPythiaHandler") << "Failed to zip the output file with command \"" << cmnd << "\".";
+        CG_DEBUG("LHEFPythiaHandler") << cmnd;
       }
 #endif
     }
