@@ -22,6 +22,7 @@ export HEPMC_DIR=${CVMFS_DIR}/HepMC/2.06.09-0a23a/x86_64-centos7-gcc62-opt
 export LHAPDF_PATH=${CVMFS_DIR}/MCGenerators/lhapdf/6.2.2-8a3e6/x86_64-centos7-gcc62-opt
 export TBB_DIR=${CVMFS_DIR}/tbb/2020_U2-daa7e/x86_64-centos7-gcc9-opt
 export VDT_DIR=${CVMFS_DIR}/vdt/0.4.3-992df/x86_64-centos7-gcc9-opt
+export LD_LIBRARY_PATH=${TBB_DIR}/lib:${VDT_DIR}/lib:${LD_LIBRARY_PATH}
 export JSONMCPP_DIR=${CVMFS_DIR}/jsonmcpp/3.9.1-72770/x86_64-centos7-gcc9-opt
 
 echo "Environment prepared for LXPLUS"
