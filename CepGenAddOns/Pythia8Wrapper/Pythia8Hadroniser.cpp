@@ -42,7 +42,7 @@ namespace cepgen {
       static constexpr unsigned short PYTHIA_STATUS_IN_BEAM = 12;
       static constexpr unsigned short PYTHIA_STATUS_IN_PARTON_KT = 61;
 
-      std::vector<pdgid_t> min_ids_;
+      Kinematics::pdgids_t min_ids_;
       std::unordered_map<short, short> py_cg_corresp_;
       unsigned short findRole(const Event& ev, const Pythia8::Particle& p) const;
       void updateEvent(Event& ev, double& weight) const;
@@ -84,7 +84,7 @@ namespace cepgen {
       // specify we will be using a LHA input
       pythia_->settings.mode("Beams:frameType", 5);
       pythia_->settings.parm("Beams:eCM", rt_params_->kinematics.incomingBeams().sqrtS());
-      min_ids_ = rt_params_->kinematics.minimum_final_state;
+      min_ids_ = rt_params_->kinematics.minimumFinalState();
       if (debug_lhef_)
         cg_evt_->openLHEF("debug.lhe");
     }

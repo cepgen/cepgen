@@ -217,10 +217,10 @@ namespace cepgen {
     os << "\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Outgoing central system ") << std::setfill(' ')
        << "\n\n";
-    if (!param->kinematics.minimum_final_state.empty()) {
+    if (!param->kinematics.minimumFinalState().empty()) {
       os << std::setw(wt) << "Minimum final state";
       std::string sep;
-      for (const auto& part : param->kinematics.minimum_final_state)
+      for (const auto& part : param->kinematics.minimumFinalState())
         os << sep << PDG::get().name(part), sep = ", ";
       os << "\n";
     }

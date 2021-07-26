@@ -37,8 +37,9 @@ namespace cepgen {
     /// Const-qualified beam/primary particle's kinematics
     const IncomingBeams& incomingBeams() const { return incoming_beams_; }
 
+    typedef std::vector<pdgid_t> pdgids_t;
     /// Minimum list of central particles required
-    std::vector<pdgid_t> minimum_final_state;
+    const pdgids_t& minimumFinalState() const { return minimum_final_state_; }
 
     /// A collection of cuts to apply on the physical phase space
     struct CutsList {
@@ -60,6 +61,7 @@ namespace cepgen {
     /// Beam/primary particle's kinematics
     IncomingBeams incoming_beams_;
     CutsList cuts_;  ///< Phase space cuts
+    pdgids_t minimum_final_state_;
   };
 }  // namespace cepgen
 

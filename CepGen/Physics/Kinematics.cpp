@@ -25,7 +25,7 @@ namespace cepgen {
     }
     if (params.has<std::vector<int> >("minFinalState"))
       for (const auto& pdg : params.get<std::vector<int> >("minFinalState"))
-        minimum_final_state.emplace_back((pdgid_t)pdg);
+        minimum_final_state_.emplace_back((pdgid_t)pdg);
     if (params.has<ParametersList>("cuts")) {  // per-particle cuts
       const auto& per_parts = params.get<ParametersList>("cuts");
       for (const auto& part : per_parts.keys())
@@ -52,9 +52,9 @@ namespace cepgen {
       params.set<Limits>(lim.name, lim.limits);
     for (auto& lim : cuts_.central.list())
       params.set<Limits>(lim.name, lim.limits);
-    if (!minimum_final_state.empty()) {
+    if (!minimum_final_state_.empty()) {
       std::vector<int> min_pdgs;
-      for (const auto& pdg : minimum_final_state)
+      for (const auto& pdg : minimum_final_state_)
         min_pdgs.emplace_back((int)pdg);
       params.set<std::vector<int> >("minFinalState", min_pdgs);
     }
