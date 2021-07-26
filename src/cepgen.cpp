@@ -52,20 +52,19 @@ int main(int argc, char* argv[]) {
   }
 
   //--- no steering card nor additional flags found
-  if (input_card.empty() && parser.extra_config().empty())
-    throw CG_FATAL("main") << "Neither input card nor configuration word provided!\n\n " << parser.help_message();
-  else {
-    //--- parse the steering card
-    if (!input_card.empty())
-      gen.setParameters(cepgen::card::Handler::parse(input_card));
-    //--- parse the additional flags
-    if (!parser.extra_config().empty())
-      gen.setParameters(
-          cepgen::card::CardsHandlerFactory::get()
-              .build(cepgen::card::gCommandLineHandler,
-                     cepgen::ParametersList().set<std::vector<std::string> >("args", parser.extra_config()))
-              ->parse(std::string(), gen.parametersPtr()));
+  if (input_card.empty() && parser.extra_config().empty()) {
+    CG_INFO("main") << "Neither input card nor configuration word provided!\n\n " << parser.help_message();
+    return 0;
   }
+  //--- parse the steering card
+  if (!input_card.empty())
+    gen.setParameters(cepgen::card::Handler::parse(input_card));
+  //--- parse the additional flags
+  if (!parser.extra_config().empty())
+    gen.setParameters(cepgen::card::CardsHandlerFactory::get()
+                          .build(cepgen::card::gCommandLineHandler,
+                                 cepgen::ParametersList().set<std::vector<std::string> >("args", parser.extra_config()))
+                          ->parse(std::string(), gen.parametersPtr()));
 
   cepgen::utils::AbortHandler();
 
