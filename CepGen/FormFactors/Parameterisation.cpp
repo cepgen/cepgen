@@ -1,9 +1,9 @@
 #include "CepGen/FormFactors/Parameterisation.h"
-#include "CepGen/StructureFunctions/SuriYennie.h"
-
-#include "CepGen/Physics/PDG.h"
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/StructureFunctions/SuriYennie.h"
+#include "CepGen/Utils/Physics.h"
 
 namespace cepgen {
   namespace formfac {
@@ -53,7 +53,7 @@ namespace cepgen {
           FE = 1., FM = 0.;
           break;
         case mode::Beam::PointLikeFermion:
-          FE = FM = 1.;
+          FE = FM = 1.;  // FE=U2, FM=U1 in LPAIR
           break;
         case mode::Beam::ProtonElastic: {
           compute(q2);
@@ -62,17 +62,17 @@ namespace cepgen {
           FM = GM2;
         } break;
         case mode::Beam::ProtonInelastic: {
-          const double xbj = q2 / (q2 + mf2 - mp2_);
           if (!str_fun_)
-            throw CG_FATAL("FormFactors") << "Inelastic proton form factors computation requires "
-                                          << "a structure functions definition!";
+            throw CG_FATAL("FormFactors")
+                << "Inelastic proton form factors computation requires a structure functions definition!";
+          const double xbj = utils::xBj(q2, mp2_, mf2);
           switch ((strfun::Type)str_fun_->name()) {
             case strfun::Type::ElasticProton:
               throw CG_FATAL("FormFactors") << "Elastic proton form factors requested!\n"
                                             << "Check your process definition!";
-            case strfun::Type::SuriYennie: {  //FIXME
+            case strfun::Type::SuriYennie: {  // this one requires its own object to deal with FM
               static strfun::SuriYennie sy;
-              sy = (strfun::SuriYennie&)sy(xbj, q2);
+              sy = dynamic_cast<strfun::SuriYennie&>((*str_fun_)(xbj, q2));
               FE = sy.F2 * xbj * mp_ / q2;
               FM = sy.FM;
             } break;

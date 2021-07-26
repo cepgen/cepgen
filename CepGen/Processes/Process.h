@@ -1,14 +1,14 @@
 #ifndef CepGen_Processes_Process_h
 #define CepGen_Processes_Process_h
 
+#include <cstddef>  // size_t
+#include <map>
+#include <memory>
+#include <vector>
+
+#include "CepGen/Event/Particle.h"
 #include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Event/Particle.h"
-
-#include <map>
-#include <vector>
-#include <memory>
-#include <cstddef>  // size_t
 
 namespace cepgen {
   class Event;

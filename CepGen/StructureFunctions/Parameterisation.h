@@ -1,10 +1,10 @@
 #ifndef CepGen_StructureFunctions_Parameterisation_h
 #define CepGen_StructureFunctions_Parameterisation_h
 
-#include "CepGen/Modules/NamedModule.h"
-
 #include <iosfwd>
 #include <memory>
+
+#include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen {
   namespace sigrat {

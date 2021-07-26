@@ -1,13 +1,12 @@
+#include <gsl/gsl_monte_plain.h>
+
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/IntegratorGSL.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 
-#include "CepGen/Core/Exception.h"
-
-#include <gsl/gsl_monte_plain.h>
-
 namespace cepgen {
   /// Plain integration algorithm randomly sampling points in the phase space
-  class IntegratorPlain : public IntegratorGSL {
+  class IntegratorPlain final : public IntegratorGSL {
   public:
     explicit IntegratorPlain(const ParametersList& params);
     static std::string description() { return "Plain (trial/error) integrator"; }

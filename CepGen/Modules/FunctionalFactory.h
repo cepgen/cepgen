@@ -20,9 +20,7 @@ namespace cepgen {
   namespace utils {
     class Functional;
     /// A functional objects factory
-    struct FunctionalFactory : public ModuleFactory<Functional> {
-      static std::string description() { return "Functionals factory"; }
-    };
+    DEFINE_FACTORY_STR(FunctionalFactory, Functional, "Functionals factory");
   }  // namespace utils
 }  // namespace cepgen
 

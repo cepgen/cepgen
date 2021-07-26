@@ -11,7 +11,7 @@
 namespace cepgen {
   namespace proc {
     /// Compute the matrix element for a CE \f$\gamma\gamma\rightarrow f\bar f\f$ process using \f$k_{\rm T}\f$-factorization approach
-    class PPtoFF : public Process2to4 {
+    class PPtoFF final : public Process2to4 {
     public:
       PPtoFF(const ParametersList& params = ParametersList());
       ProcessPtr clone() const override { return ProcessPtr(new PPtoFF(*this)); }

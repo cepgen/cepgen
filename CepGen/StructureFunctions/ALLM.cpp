@@ -1,18 +1,17 @@
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-
-#include "CepGen/Utils/Physics.h"
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/Exception.h"
-
-#include <math.h>
-#include <assert.h>
+#include <cassert>
+#include <cmath>
 #include <vector>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/Physics.h"
 
 namespace cepgen {
   namespace strfun {
     /// \f$F_{2,L}\f$ parameterisation by Abramowicz, Levin, Levy, and Maor \cite Abramowicz:1991xz\cite Abramowicz:1997ms
-    class ALLM : public Parameterisation {
+    class ALLM final : public Parameterisation {
     public:
       class Parameters {
       private:

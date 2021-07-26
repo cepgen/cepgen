@@ -1,11 +1,11 @@
 #ifndef CepGen_Utils_TimeKeeper_h
 #define CepGen_Utils_TimeKeeper_h
 
-#include "CepGen/Utils/Timer.h"
-
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "CepGen/Utils/Timer.h"
 
 #define CG_CONCAT(a, b) a##b
 #define CG_TICKER_NAME(a, b) CG_CONCAT(a, b)

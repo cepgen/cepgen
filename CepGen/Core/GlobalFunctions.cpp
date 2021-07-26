@@ -70,8 +70,8 @@ namespace cepgen {
     //--- particles table parsing
     std::string mcd_file, addons_file;
     for (const auto& path : search_paths) {
-      if (mcd_file.empty() && utils::fileExists(path + "/mass_width_2020.mcd"))
-        mcd_file = path + "/mass_width_2020.mcd";
+      if (mcd_file.empty() && utils::fileExists(path + "/mass_width_2021.mcd"))
+        mcd_file = path + "/mass_width_2021.mcd";
       if (addons_file.empty() && utils::fileExists(path + "/CepGenAddOns.txt"))
         addons_file = path + "/CepGenAddOns.txt";
     }

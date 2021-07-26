@@ -1,6 +1,7 @@
 import Config.Core as cepgen
 from Config.PDG_cfi import PDG
 from Config.Timer_cfi import timer # enable timing framework
+from Config.Cuts_cfi import vermaserenCuts
 
 process = cepgen.Module('lpair',
     processParameters = cepgen.Parameters(
@@ -10,12 +11,7 @@ process = cepgen.Module('lpair',
         pz = (45., 45.),
         pdgIds = (11, -11),
     ),
-    outKinematics = cepgen.Parameters(
-        pt = (2.,),
-        energy = (0.,),
-        eta = (-2.5, 2.5),
-        mx = (1.07, 1000.),
-    ),
+    outKinematics = vermaserenCuts,
 )
 
 # events generation parameters

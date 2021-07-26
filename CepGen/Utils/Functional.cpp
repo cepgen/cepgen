@@ -1,8 +1,8 @@
 #include "CepGen/Utils/Functional.h"
-#include "CepGen/Utils/String.h"
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace utils {

@@ -20,9 +20,7 @@ namespace cepgen {
   namespace io {
     class ExportModule;
     /// An output modules factory
-    struct ExportModuleFactory : public ModuleFactory<ExportModule> {
-      static std::string description() { return "Export modules factory"; }
-    };
+    DEFINE_FACTORY_STR(ExportModuleFactory, ExportModule, "Export modules factory");
   }  // namespace io
 }  // namespace cepgen
 

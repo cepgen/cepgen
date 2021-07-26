@@ -1,12 +1,12 @@
+#include <cmath>
+
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-
-#include <cmath>
 
 namespace cepgen {
   namespace formfac {
     /// \cite Arrington:2007ux
-    class ArringtonEtAl : public Parameterisation {
+    class ArringtonEtAl final : public Parameterisation {
     public:
       explicit ArringtonEtAl(const ParametersList&);
 

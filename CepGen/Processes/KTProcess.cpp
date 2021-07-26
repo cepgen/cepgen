@@ -1,13 +1,11 @@
 #include "CepGen/Processes/KTProcess.h"
 
 #include "CepGen/Core/Exception.h"
-
 #include "CepGen/Event/Event.h"
-
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/HeavyIon.h"
 
 namespace cepgen {
   namespace proc {

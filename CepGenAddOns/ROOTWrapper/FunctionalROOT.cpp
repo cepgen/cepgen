@@ -5,7 +5,7 @@
 
 namespace cepgen {
   namespace utils {
-    class FunctionalROOT : public Functional {
+    class FunctionalROOT final : public Functional {
     public:
       FunctionalROOT(const ParametersList& params) : Functional(params) {
         for (size_t i = 0; i < vars_.size(); ++i)

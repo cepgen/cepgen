@@ -6,7 +6,7 @@
 namespace cepgen {
   namespace strfun {
     /// \f$F_{1,2,E,M}\f$ modelling by Suri and Yennie \cite Suri:1971yx
-    class SuriYennie : public Parameterisation {
+    class SuriYennie final : public Parameterisation {
     public:
       /// User-steered Suri-Yennie continuum structure functions calculator
       explicit SuriYennie(const ParametersList& params = ParametersList());

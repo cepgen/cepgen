@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <cassert>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
@@ -11,7 +11,7 @@ namespace cepgen {
   namespace proc {
     /// \brief Compute the matrix element for a CE \f$\gamma\gamma\rightarrow W^+W^-\f$ process using \f$k_{\rm T}\f$-factorization approach
     /// \note The full theoretical description of this process definition may be found in \cite Luszczak:2018ntp.
-    class PPtoWW : public Process2to4 {
+    class PPtoWW final : public Process2to4 {
     public:
       PPtoWW(const ParametersList& params = ParametersList());
       ProcessPtr clone() const override { return ProcessPtr(new PPtoWW(*this)); }

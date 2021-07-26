@@ -1,7 +1,6 @@
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 
 namespace {
   extern "C" {
@@ -12,7 +11,7 @@ namespace {
 namespace cepgen {
   namespace strfun {
     /// Szczurek and Uleshchenko modelling of \f$F_2\f$ based on GRV parton content \cite Szczurek:1999wp
-    class SzczurekUleshchenko : public Parameterisation {
+    class SzczurekUleshchenko final : public Parameterisation {
     public:
       explicit SzczurekUleshchenko(const ParametersList& params = ParametersList());
       SzczurekUleshchenko& eval(double xbj, double q2) override;

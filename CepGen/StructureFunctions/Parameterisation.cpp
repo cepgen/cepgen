@@ -1,12 +1,10 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/StructureFunctions/SigmaRatio.h"
 
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-
-#include "CepGen/Physics/PDG.h"
-
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
 
 namespace cepgen {
   namespace strfun {

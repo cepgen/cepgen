@@ -1,13 +1,13 @@
-#include "CepGen/FormFactors/Parameterisation.h"
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-
 #include <cmath>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/FormFactors/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 namespace cepgen {
   namespace formfac {
     /// \cite Brash:2001qq
-    class BrashEtAl : public Parameterisation {
+    class BrashEtAl final : public Parameterisation {
     public:
       using Parameterisation::Parameterisation;
       static std::string description() { return "Brash et al."; }

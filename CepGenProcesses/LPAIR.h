@@ -1,8 +1,9 @@
 #ifndef CepGenProcesses_LPAIR_h
 #define CepGenProcesses_LPAIR_h
 
-#include "CepGen/Processes/Process.h"
 #include <random>
+
+#include "CepGen/Processes/Process.h"
 
 namespace cepgen {
   namespace proc {
@@ -29,7 +30,7 @@ namespace cepgen {
      * \brief Compute the matrix element for a CE \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
      *  process
      */
-    class LPAIR : public Process {
+    class LPAIR final : public Process {
     public:
       /// \brief Class constructor: set the mandatory parameters before integration and events generation
       /// \param[in] params General process parameters (nopt = Optimisation, legacy from LPAIR)

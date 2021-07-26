@@ -1,19 +1,17 @@
+#include <cmath>
+#include <fstream>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/GridHandler.h"
 #include "CepGen/Utils/String.h"
-
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/Exception.h"
-
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-
-#include <fstream>
-#include <cmath>
 
 /// Martin-Stirling-Thorne-Watt PDFs structure functions
 namespace mstw {
   /// A \f$F_{2,L}\f$ grid interpolator
-  class Grid : public cepgen::strfun::Parameterisation, private cepgen::GridHandler<2, 2> {
+  class Grid final : public cepgen::strfun::Parameterisation, private cepgen::GridHandler<2, 2> {
   public:
     /// Grid MSTW structure functions evaluator
     explicit Grid(const cepgen::ParametersList& params = cepgen::ParametersList());

@@ -1,12 +1,12 @@
+#include <cmath>
+
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-
-#include <cmath>
 
 namespace cepgen {
   namespace formfac {
     /// \cite Mergell:1995bf
-    class MergellEtAl : public Parameterisation {
+    class MergellEtAl final : public Parameterisation {
     public:
       explicit MergellEtAl(const ParametersList&);
       static std::string description() { return "Mergell et al."; }

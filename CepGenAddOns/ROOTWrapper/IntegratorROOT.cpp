@@ -1,14 +1,13 @@
-#include "CepGen/Integration/Integrator.h"
-#include "CepGen/Integration/Integrand.h"
-#include "CepGen/Modules/IntegratorFactory.h"
+#include <Math/IntegratorMultiDim.h>
 
 #include "CepGen/Core/Exception.h"
-
-#include <Math/IntegratorMultiDim.h>
+#include "CepGen/Integration/Integrand.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 
 namespace cepgen {
   /// FOAM general-purpose integration algorithm
-  class IntegratorROOT : public Integrator {
+  class IntegratorROOT final : public Integrator {
   public:
     explicit IntegratorROOT(const ParametersList&);
     static std::string description() { return "ROOT general purpose MC integrator"; }

@@ -1,12 +1,13 @@
-#include "CepGen/Utils/Functional.h"
-#include "CepGen/Modules/FunctionalFactory.h"
-#include "CepGen/Core/Exception.h"
-
 #include <exprtk.hpp>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/FunctionalFactory.h"
+#include "CepGen/Utils/Functional.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace utils {
-    class FunctionalExprTk : public Functional {
+    class FunctionalExprTk final : public Functional {
     public:
       explicit FunctionalExprTk(const ParametersList&);
       double eval(const std::vector<double>&) const override;
@@ -22,10 +23,12 @@ namespace cepgen {
         symbols_.add_variable(vars_[i], values_[i]);
       symbols_.add_constants();
       expr_.register_symbol_table(symbols_);
-      parser_.compile(expression_, expr_);
+      replace_all(expression_, "**", "^");
+      if (!parser_.compile(expression_, expr_))
+        throw CG_WARNING("FunctionalExprTk") << "Failed to compile expression \"" << expression() << "\".";
     }
 
-    double FunctionalExprTk::eval(const std::vector<double>& x) const { return expr_.value(); }
+    double FunctionalExprTk::eval(const std::vector<double>&) const { return expr_.value(); }
   }  // namespace utils
 }  // namespace cepgen
 

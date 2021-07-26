@@ -1,14 +1,13 @@
 #include "CepGen/Processes/Process.h"
 
-#include "CepGen/Event/Event.h"
-#include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/HeavyIon.h"
+#include <iomanip>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/HeavyIon.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/String.h"
-
-#include <iomanip>
 
 namespace cepgen {
   namespace proc {

@@ -1,12 +1,12 @@
-#include "CepGen/Utils/Functional.h"
-#include "CepGen/Modules/FunctionalFactory.h"
-#include "CepGen/Core/Exception.h"
-
 #include <muParser.h>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/FunctionalFactory.h"
+#include "CepGen/Utils/Functional.h"
 
 namespace cepgen {
   namespace utils {
-    class FunctionalMuParser : public Functional {
+    class FunctionalMuParser final : public Functional {
     public:
       explicit FunctionalMuParser(const ParametersList&);
       static std::string description() { return "MuParser-based functional evaluator"; }

@@ -97,7 +97,8 @@ namespace cepgen {
       form_factors_ = formfac::FormFactorsFactory::get().build(
           params.get<std::string>("formFactors", formfac::gFFStandardDipoleHandler));
 
-    setMode((mode::Kinematics)params.get<int>("mode", (int)mode::Kinematics::ElasticElastic));
+    if (params.has<int>("mode"))
+      setMode((mode::Kinematics)params.get<int>("mode"));
     //--- structure functions
     auto strfun = params.get<ParametersList>("structureFunctions");
     if (!strfun.empty() || !str_fun_) {

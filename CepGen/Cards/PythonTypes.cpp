@@ -104,16 +104,7 @@ namespace cepgen {
       if (!is<std::string>(obj))
         throw CG_ERROR("PythonHandler:get")
             << "Object has invalid type: string != \"" << obj->ob_type->tp_name << "\".";
-#ifdef PYTHON2
-      const std::string out = PyString_AsString(obj);  // deprecated in python v3+
-#else
-      PyObject* pstr = PyUnicode_AsEncodedString(obj, "utf-8", "strict");  // new
-      if (!pstr)
-        throwPythonError("Failed to decode a Python object!");
-      const std::string out = PyBytes_AS_STRING(pstr);
-      Py_CLEAR(pstr);
-#endif
-      return out;
+      return decode(obj);
     }
 
     template <>

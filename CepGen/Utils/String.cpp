@@ -3,34 +3,12 @@
 #include <unistd.h>
 
 #include <cmath>
-#include <cstdarg>  // For va_start, etc.
 #include <iterator>
 #include <sstream>
 #include <vector>
 
 namespace cepgen {
   namespace utils {
-    std::string format(const std::string fmt, ...) {
-      static const size_t min_size = 50;
-      size_t size = fmt.size() * 2 + min_size;
-      std::string str;
-      va_list ap;
-      while (true) {
-        //--- maximum two passes on a POSIX system...
-        str.resize(size);
-        va_start(ap, fmt);
-        ssize_t n = vsnprintf((char*)str.data(), size, fmt.c_str(), ap);
-        va_end(ap);
-        //--- check if everything worked
-        if (n > -1 && n < (ssize_t)size) {
-          str.resize(n);
-          return str;
-        }
-        size = (n > -1) ? n + 1 : size * 2;
-      }
-      return str;
-    }
-
     std::string yesno(bool test) { return test ? colourise("yes", Colour::green) : colourise("no", Colour::red); }
 
     /// String implementation of the boldification procedure

@@ -1,15 +1,15 @@
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Core/Exception.h"
-
-#include <cmath>
 #include <cassert>
+#include <cmath>
 #include <vector>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 
 namespace cepgen {
   namespace strfun {
     /// \f$F_2\f$ parameterisation from Block, Durand, and Ha \cite Block:2014kza
-    class BlockDurandHa : public Parameterisation {
+    class BlockDurandHa final : public Parameterisation {
     public:
       explicit BlockDurandHa(const ParametersList& params = ParametersList());
       BlockDurandHa& eval(double xbj, double q2) override;

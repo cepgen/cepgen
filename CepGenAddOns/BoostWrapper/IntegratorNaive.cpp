@@ -1,15 +1,14 @@
-#include "CepGen/Integration/Integrator.h"
-#include "CepGen/Integration/Integrand.h"
-#include "CepGen/Modules/IntegratorFactory.h"
+#include <boost/math/quadrature/naive_monte_carlo.hpp>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Integration/Integrand.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Parameters.h"
-
-#include <boost/math/quadrature/naive_monte_carlo.hpp>
 
 namespace cepgen {
   /// Boost's Naive integration algorithm
-  class IntegratorNaive : public Integrator {
+  class IntegratorNaive final : public Integrator {
   public:
     explicit IntegratorNaive(const ParametersList&);
     static std::string description() { return "\"Naive\" Boost integrator"; }

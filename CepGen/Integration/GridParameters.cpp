@@ -1,8 +1,9 @@
 #include "CepGen/Integration/GridParameters.h"
-#include "CepGen/Integration/Integrator.h"
-#include "CepGen/Core/Exception.h"
 
 #include <cmath>  // pow
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Integration/Integrator.h"
 
 namespace cepgen {
   GridParameters::GridParameters(size_t ndim)
