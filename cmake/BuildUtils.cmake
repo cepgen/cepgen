@@ -43,4 +43,3 @@ macro(cepgen_build mod_name)
     endif()
     set(CEPGEN_ADDONS_EXT ${CEPGEN_ADDONS_EXT} PARENT_SCOPE)
 endmacro()
-

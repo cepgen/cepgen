@@ -9,7 +9,6 @@ endforeach()
 
 #-- specify the utils requiring ROOT
 
-find_package(ROOT QUIET)
 if(ROOT_FOUND)
   file(GLOB utils_root RELATIVE ${PROJECT_SOURCE_DIR}/src/utils *.cxx)
   foreach(exec_src ${utils_root})
