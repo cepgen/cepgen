@@ -34,6 +34,8 @@ namespace Pythia8 {
   void CepGenEvent::addComments(const std::string& comments) {
 #if PYTHIA_VERSION_INTEGER >= 8200
     osLHEF << comments;
+#else
+    CG_WARNING("CepGenEvent:addComments") << "Pythia 8 is too outdated... Unused comments: " << comments;
 #endif
   }
 
