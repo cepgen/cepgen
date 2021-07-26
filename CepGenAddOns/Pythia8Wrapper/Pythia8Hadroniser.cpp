@@ -83,7 +83,7 @@ namespace cepgen {
       pythia_->settings.parm("Beams:idB", (long)rt_params_->kinematics.incomingBeams().negative().pdg);
       // specify we will be using a LHA input
       pythia_->settings.mode("Beams:frameType", 5);
-      pythia_->settings.parm("Beams:eCM", rt_params_->kinematics.sqrtS());
+      pythia_->settings.parm("Beams:eCM", rt_params_->kinematics.incomingBeams().sqrtS());
       min_ids_ = rt_params_->kinematics.minimum_final_state;
       if (debug_lhef_)
         cg_evt_->openLHEF("debug.lhe");

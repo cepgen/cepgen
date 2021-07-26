@@ -81,7 +81,7 @@ namespace cepgen {
       hdr.set_pdf2(0);
       hdr.set_x1(0);
       hdr.set_x2(0);
-      hdr.set_ecm(params.kinematics.sqrtS());
+      hdr.set_ecm(params.kinematics.incomingBeams().sqrtS());
       file_->setHeader(hdr);
     }
 
