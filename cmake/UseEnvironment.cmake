@@ -19,11 +19,7 @@ else()
 endif()
 #--- set the default paths for external dependencies
 if(IS_LXPLUS)
-  list(APPEND CMAKE_PREFIX_PATH "$ENV{CVMFS_DIR}/external/CMake/2.8.9/Linux-i386/share/cmake-2.8/Modules")
   list(APPEND CMAKE_PREFIX_PATH "$ENV{JSONMCPP_DIR}/lib64/cmake")
-  set(PYTHON_LIBRARY "$ENV{PYTHONHOME}/lib/libpython3.9.so")
-  set(PYTHON_EXECUTABLE "$ENV{PYTHONHOME}/bin/python")
-  set(PYTHON_INCLUDE_DIR "$ENV{PYTHONHOME}/include/python3.9")
 endif()
 #--- searching for GSL
 find_library(GSL_LIB gsl HINTS $ENV{GSL_DIR} PATH_SUFFIXES lib)
