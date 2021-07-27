@@ -196,8 +196,7 @@ namespace cepgen {
         }
       }
       default:
-        throw CG_FATAL("Kinematics:IncomingBeams:mode") << "Unsupported kinematics mode for beams with modes:\n\t"
-                                                        << positive().mode << " / " << negative().mode << "!";
+        return mode::Kinematics::invalid;
     }
   }
 

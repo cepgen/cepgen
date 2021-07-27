@@ -13,8 +13,14 @@
 namespace cepgen {
   Integrand::Integrand(const Parameters* params)
       : params_(params), tmr_(new utils::Timer), event_(nullptr), storage_(false) {
-    if (!params_ || !params_->hasProcess())
-      throw CG_FATAL("Integrand") << "Invalid runtime parameters specified!";
+    if (!params_) {
+      CG_WARNING("Integrand") << "Invalid runtime parameters specified.";
+      return;
+    }
+    if (!params_->hasProcess()) {
+      CG_WARNING("Integrand") << "No process defined in runtime parameters.";
+      return;
+    }
     //--- each integrand object has its own clone of the process
     process_ = params_->process().clone();
     //--- prepare the event content
