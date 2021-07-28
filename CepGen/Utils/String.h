@@ -57,6 +57,9 @@ namespace cepgen {
     bool contains(const std::set<T>& coll, const T& item) {
       return std::find(coll.begin(), coll.end(), item) != coll.end();
     }
+    /// Remove duplicates and sort a collection
+    template <typename T>
+    void normalise(std::vector<T>& coll);
     /// Capitalise a string
     std::string toupper(const std::string&);
     /// Lowercase version of a string

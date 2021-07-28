@@ -29,6 +29,7 @@
 #if PY_MAJOR_VERSION < 3
 #define PYTHON2
 #endif
+#define Py_DEBUG
 
 namespace cepgen {
   namespace card {
@@ -37,11 +38,7 @@ namespace cepgen {
     Parameters* PythonHandler::parse(const std::string& file, Parameters* params) {
       if (!utils::fileExists(file))
         throw CG_FATAL("PythonHandler") << "Unable to locate steering card \"" << file << "\".";
-      setenv("PYTHONPATH",
-             (utils::environ("CEPGEN_PATH", ".") + ":.:Cards:../Cards:../../Cards:/usr/share/CepGen/Cards").c_str(),
-             1);
       setenv("PYTHONDONTWRITEBYTECODE", "1", 1);
-      CG_DEBUG("PythonHandler") << "Python PATH: \"" << utils::environ("PYTHONPATH") << "\".";
 
       rt_params_ = params;
       std::string filename = pythonPath(file);
@@ -65,16 +62,28 @@ namespace cepgen {
       }
 
       Py_InitializeEx(1);
-
       if (!Py_IsInitialized())
         throw CG_FATAL("PythonHandler") << "Failed to initialise the Python cards parser!";
+
+      std::vector<std::string> python_paths = {utils::environ("CEPGEN_PATH", "."),
+                                               fs::current_path(),
+                                               fs::current_path() / "Cards",
+                                               fs::current_path().parent_path() / "Cards",
+                                               fs::current_path().parent_path().parent_path() / "Cards",
+                                               "/usr/share/CepGen/Cards"};
+      auto pythonpath = utils::split(utils::environ("PYTHONPATH"), PATH_DELIM[0]);
+      python_paths.insert(python_paths.end(), pythonpath.begin(), pythonpath.end());
+      utils::normalise(python_paths);
+      setenv("PYTHONPATH", utils::merge(python_paths, PATH_DELIM).c_str(), 1);
 
       CG_DEBUG("PythonHandler").log([](auto& log) {
         std::string version = Py_GetVersion();
         utils::replace_all(version, "\n", " ");
         log << "Initialised the Python cards parser\n\t"
             << "Python version: " << version << "\n\t"
-            << "Platform: " << Py_GetPlatform() << ".";
+            << "Platform: " << Py_GetPlatform() << "\n\t"
+            << "PYTHONPATH: \"" << utils::environ("PYTHONPATH") << "\"\n\t"
+            << "Parsed path: " << std::wstring(Py_GetPath()) << ".";
       });
 
       PyObject* cfg = PyImport_ImportModule(filename.c_str());  // new

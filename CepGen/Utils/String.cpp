@@ -5,7 +5,10 @@
 #include <cmath>
 #include <iterator>
 #include <sstream>
+#include <unordered_set>
 #include <vector>
+
+#include "CepGen/Core/Exception.h"
 
 namespace cepgen {
   namespace utils {
@@ -81,6 +84,16 @@ namespace cepgen {
       std::transform(str.begin(), str.end(), out.begin(), ::tolower);
       return out;
     }
+
+    template <typename T>
+    void normalise(std::vector<T>& coll) {
+      std::unordered_set<T> set;
+      for (const auto& it : coll)
+        set.insert(it);
+      coll.assign(set.begin(), set.end());
+      std::sort(coll.begin(), coll.end());
+    }
+    template void normalise(std::vector<std::string>&);
 
     void ltrim(std::string& s) {
       s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) { return !std::isspace(ch); }));
