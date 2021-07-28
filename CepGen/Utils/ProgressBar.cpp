@@ -1,13 +1,12 @@
-#include "CepGen/Utils/ProgressBar.h"
-
 #include <cmath>
 
+#include "CepGen/Utils/ProgressBar.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace utils {
     ProgressBar::ProgressBar(size_t tot, size_t freq)
-        : bar_length_(std::stoi(environ("COLUMNS", "60")) - 10),
+        : bar_length_(std::stoi(env::get("COLUMNS", "60")) - 10),
           bar_pattern_(bar_length_, '='),
           total_(tot),
           frequency_(freq) {}

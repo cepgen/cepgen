@@ -111,13 +111,6 @@ namespace cepgen {
       return out;
     }
 
-    std::string environ(const std::string& env, const std::string& def) {
-      const auto out = std::getenv(env.c_str());
-      if (!out)
-        return def;
-      return std::string(out);
-    }
-
     std::string tostring(const std::wstring& str) {
       typedef std::codecvt_utf8_utf16<wchar_t> convert_type;
       std::wstring_convert<convert_type, wchar_t> converter;
@@ -128,5 +121,20 @@ namespace cepgen {
       std::wstring_convert<convert_type, wchar_t> converter;
       return converter.from_bytes(str);
     }
-  }  // namespace utils
+
+    namespace env {
+      std::string get(const std::string& var, const std::string& def) {
+        const auto out = std::getenv(var.c_str());
+        if (!out)
+          return def;
+        return std::string(out);
+      }
+
+      void set(const std::string& var, const std::string& value) { setenv(var.c_str(), value.c_str(), 1); }
+
+      void append(const std::string& var, const std::string& value) { setenv(var.c_str(), value.c_str(), 0); }
+
+      void unset(const std::string& var) { unsetenv(var.c_str()); }
+    }  // namespace env
+  }    // namespace utils
 }  // namespace cepgen

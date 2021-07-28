@@ -94,9 +94,18 @@ namespace cepgen {
     }
     /// Strip all special characters from string
     std::string strip(const std::string&);
-    /// Get an environment variable
-    std::string environ(const std::string&, const std::string& def = "");
-  }  // namespace utils
+    /// All environment variable-related utilities
+    namespace env {
+      /// Get an environment variable
+      std::string get(const std::string& var, const std::string& def = "");
+      /// Set an environment variable
+      void set(const std::string& var, const std::string& value);
+      /// Add a value to an environment variable
+      void append(const std::string& var, const std::string& value);
+      /// Clear an environment variable
+      void unset(const std::string& var);
+    }  // namespace env
+  }    // namespace utils
 }  // namespace cepgen
 
 /// Provide a random number generated along a uniform distribution between 0 and 1

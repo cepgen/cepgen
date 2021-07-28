@@ -28,10 +28,7 @@ namespace cepgen {
         path.pop_back();
         auto dir = utils::merge(path, "/");
         CG_DEBUG("PythonHandler") << "Adding \"" << dir << "\" to the default search paths.";
-        auto python_paths = utils::split(utils::environ("PYTHONPATH", "."), PATH_DELIM[0]);
-        python_paths.emplace_back(dir);
-        utils::normalise(python_paths);
-        setenv("PYTHONPATH", utils::merge(python_paths, PATH_DELIM).c_str(), 1);
+        utils::env::append("PYTHONPATH", dir);
       }
       s_filename = s_filename.substr(0, s_filename.find_last_of("."));  // remove the extension
       utils::replace_all(s_filename, "../", "..");

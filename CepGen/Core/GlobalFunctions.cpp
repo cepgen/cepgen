@@ -58,7 +58,7 @@ namespace cepgen {
     //--- parse all particles properties
     static const std::string pdg_file = "";
     search_paths =
-        std::vector<std::string>{utils::environ("CEPGEN_PATH", "."), fs::path() / "usr" / "share" / "CepGen"};
+        std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."), fs::path() / "usr" / "share" / "CepGen"};
 
     //--- header message
     try {

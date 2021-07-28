@@ -1,7 +1,6 @@
-#include "CepGen/Cards/PythonHandler.h"
-
 #include <algorithm>
 
+#include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"
@@ -38,7 +37,7 @@ namespace cepgen {
     Parameters* PythonHandler::parse(const std::string& file, Parameters* params) {
       if (!utils::fileExists(file))
         throw CG_FATAL("PythonHandler") << "Unable to locate steering card \"" << file << "\".";
-      setenv("PYTHONDONTWRITEBYTECODE", "1", 1);
+      utils::env::set("PYTHONDONTWRITEBYTECODE", "1");
 
       rt_params_ = params;
       std::string filename = pythonPath(file);
@@ -61,20 +60,17 @@ namespace cepgen {
         delete[] sfilename;
       }
 
+      for (const auto& path : std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."),
+                                                       fs::current_path(),
+                                                       fs::current_path() / "Cards",
+                                                       fs::current_path().parent_path() / "Cards",
+                                                       fs::current_path().parent_path().parent_path() / "Cards",
+                                                       "/usr/share/CepGen/Cards"})
+        utils::env::append("PYTHONPATH", path);
+
       Py_InitializeEx(1);
       if (!Py_IsInitialized())
         throw CG_FATAL("PythonHandler") << "Failed to initialise the Python cards parser!";
-
-      std::vector<std::string> python_paths = {utils::environ("CEPGEN_PATH", "."),
-                                               fs::current_path(),
-                                               fs::current_path() / "Cards",
-                                               fs::current_path().parent_path() / "Cards",
-                                               fs::current_path().parent_path().parent_path() / "Cards",
-                                               "/usr/share/CepGen/Cards"};
-      auto pythonpath = utils::split(utils::environ("PYTHONPATH"), PATH_DELIM[0]);
-      python_paths.insert(python_paths.end(), pythonpath.begin(), pythonpath.end());
-      utils::normalise(python_paths);
-      setenv("PYTHONPATH", utils::merge(python_paths, PATH_DELIM).c_str(), 1);
 
       CG_DEBUG("PythonHandler").log([](auto& log) {
         std::string version = Py_GetVersion();
@@ -82,7 +78,7 @@ namespace cepgen {
         log << "Initialised the Python cards parser\n\t"
             << "Python version: " << version << "\n\t"
             << "Platform: " << Py_GetPlatform() << "\n\t"
-            << "PYTHONPATH: \"" << utils::environ("PYTHONPATH") << "\"\n\t"
+            << "PYTHONPATH: \"" << utils::env::get("PYTHONPATH") << "\"\n\t"
             << "Parsed path: " << std::wstring(Py_GetPath()) << ".";
       });
 
