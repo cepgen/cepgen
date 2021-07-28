@@ -1,9 +1,6 @@
-#include "CepGen/Core/Exception.h"
-
-#include <codecvt>
 #include <csignal>
-#include <locale>
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
@@ -29,10 +26,8 @@ namespace cepgen {
   }
 
   const LoggedException& operator<<(const LoggedException& exc, const std::wstring& var) {
-    typedef std::codecvt_utf8<wchar_t> convert_type;
-    std::wstring_convert<convert_type, wchar_t> converter;
     LoggedException& nc_except = const_cast<LoggedException&>(exc);
-    nc_except.message_ << converter.to_bytes(var);
+    nc_except.message_ << utils::tostring(var);
     return exc;
   }
 

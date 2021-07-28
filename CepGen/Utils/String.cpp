@@ -1,14 +1,15 @@
-#include "CepGen/Utils/String.h"
-
 #include <unistd.h>
 
 #include <cmath>
+#include <codecvt>
 #include <iterator>
+#include <locale>
 #include <sstream>
 #include <unordered_set>
 #include <vector>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace utils {
@@ -115,6 +116,17 @@ namespace cepgen {
       if (!out)
         return def;
       return std::string(out);
+    }
+
+    std::string tostring(const std::wstring& str) {
+      typedef std::codecvt_utf8_utf16<wchar_t> convert_type;
+      std::wstring_convert<convert_type, wchar_t> converter;
+      return converter.to_bytes(str);
+    }
+    std::wstring towstring(const std::string& str) {
+      typedef std::codecvt_utf8_utf16<wchar_t> convert_type;
+      std::wstring_convert<convert_type, wchar_t> converter;
+      return converter.from_bytes(str);
     }
   }  // namespace utils
 }  // namespace cepgen

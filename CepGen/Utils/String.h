@@ -71,6 +71,10 @@ namespace cepgen {
       return show_number ? format("%g %s%s", num, word.c_str(), (num > 1.) ? "s" : "")
                          : format("%s%s", word.c_str(), (num > 1.) ? "s" : "");
     }
+    /// Convert a wide characters to a standard characters string
+    std::string tostring(const std::wstring& str);
+    /// Convert a wide characters to a standard characters string
+    std::wstring towstring(const std::string& str);
     /// Helper to print a vector
     template <class T>
     std::string repr(const std::vector<T>& vec, const std::string& sep = ",") {
