@@ -1,13 +1,14 @@
-#include "CepGen/Physics/Kinematics.h"
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/GluonGrid.h"
+#include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
 
 namespace cepgen {
   const double Kinematics::MX_MIN = 1.07;  // mp+mpi+-
 
   Kinematics::Kinematics(const ParametersList& params) : incoming_beams_(params) {
+    CG_DEBUG("Kinematics") << "Building a Kinematics parameters container "
+                           << "with the following parameters:\n\t" << params << ".";
     //----- phase space definition
     setParameters(params);
   }

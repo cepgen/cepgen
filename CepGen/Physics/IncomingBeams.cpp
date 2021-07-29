@@ -93,9 +93,11 @@ namespace cepgen {
     if (sqrts > 0.)
       setSqrtS(sqrts);
     //--- form factors
-    if (params.has<std::string>("formFactors") || !form_factors_)
-      form_factors_ = formfac::FormFactorsFactory::get().build(
-          params.get<std::string>("formFactors", formfac::gFFStandardDipoleHandler));
+    if (params.has<std::string>("formFactors") || !form_factors_) {
+      const auto ff_mode = params.get<std::string>("formFactors");
+      form_factors_ =
+          formfac::FormFactorsFactory::get().build(ff_mode.empty() ? formfac::gFFStandardDipoleHandler : ff_mode);
+    }
 
     if (params.has<int>("mode"))
       setMode((mode::Kinematics)params.get<int>("mode"));
