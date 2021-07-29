@@ -77,11 +77,9 @@ namespace cepgen {
         utils::replace_all(version, "\n", " ");
         auto* py_home = Py_GetPythonHome();
 #ifdef PYTHON2
-        std::string python_path = Py_GetPath();
-        std::string python_home = (py_home ? Py_EncodeLocale(py_home, nullptr) : "(not set)");
+        std::string python_path{Py_GetPath()}, python_home{py_home ? py_home : "(not set)"};
 #else
-        std::wstring python_path = Py_GetPath();
-        std::wstring python_home = (py_home ? py_home : L"(not set)");
+        std::wstring python_path{Py_GetPath()}, python_home{py_home ? py_home : L"(not set)"};
 #endif
         log << "Initialised the Python cards parser\n\t"
             << "Python version: " << version << "\n\t"
