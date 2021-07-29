@@ -22,11 +22,6 @@ namespace cepgen {
       Parameters* parse(const std::string&, Parameters*) override;
 
     private:
-#ifdef _WIN32
-      static constexpr const char* PATH_DELIM = ";";
-#else
-      static constexpr const char* PATH_DELIM = ":";
-#endif
       static constexpr const char* ADDONS_NAME = "addons";
       static constexpr const char* TIMER_NAME = "timer";
       static constexpr const char* PROCESS_NAME = "process";
