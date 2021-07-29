@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
       .parse();
 
   if (debug)
-    utils::Logger::get().level = utils::Logger::Level::information;
+    utils::Logger::get().level = utils::Logger::Level::debug;
   else if (quiet)
     utils::Logger::get().level = utils::Logger::Level::error;
 
