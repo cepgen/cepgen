@@ -93,9 +93,9 @@ namespace cepgen {
                        << mod_params_.reggeon.b.at(2) << "}\n"
                        << "   c = {" << mod_params_.reggeon.c.at(0) << ", " << mod_params_.reggeon.c.at(1) << ", "
                        << mod_params_.reggeon.c.at(2) << "}\n"
-                       << " masses: m₀²=" << mod_params_.m02 << ", mp²=" << mod_params_.mp2
-                       << ", mr²=" << mod_params_.mr2 << " GeV²\n"
-                       << " q₀²=" << mod_params_.q02 << ", Λ²=" << mod_params_.lambda2 << " GeV².";
+                       << L" masses: m₀²=" << mod_params_.m02 << L", mp²=" << mod_params_.mp2 << L", mr²="
+                       << mod_params_.mr2 << L" GeV²\n"
+                       << L" q₀²=" << mod_params_.q02 << L", Λ²=" << mod_params_.lambda2 << L" GeV².";
     }
 
     ALLM& ALLM::eval(double xbj, double q2) {

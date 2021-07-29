@@ -103,9 +103,8 @@ namespace mstw {
     CG_DEBUG("MSTW") << "MSTW@" << header_.order << " grid evaluator built "
                      << "for " << header_.nucleon << " structure functions (" << header_.cl << ")\n\t"
                      << "xBj in range [" << std::pow(10., bounds[0].first) << ":" << std::pow(10., bounds[0].second)
-                     << "]\n\t"
-                     << " Q² in range [" << std::pow(10., bounds[1].first) << ":" << std::pow(10., bounds[1].second)
-                     << "].";
+                     << "]\n\t" << L" Q² in range [" << std::pow(10., bounds[1].first) << ":"
+                     << std::pow(10., bounds[1].second) << "].";
   }
 
   std::string Grid::describe() const {
@@ -125,7 +124,7 @@ namespace mstw {
 
   std::ostream& operator<<(std::ostream& os, const Grid::sfval_t& val) {
     return os << cepgen::utils::format(
-               "xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFₗ = % .6e", val.xbj, val.q2, val.f2, val.fl);
+               L"xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFₗ = % .6e", val.xbj, val.q2, val.f2, val.fl);
   }
 
   std::ostream& operator<<(std::ostream& os, const Grid::header_t::order_t& order) {
