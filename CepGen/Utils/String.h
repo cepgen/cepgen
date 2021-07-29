@@ -9,6 +9,10 @@
 
 namespace cepgen {
   namespace utils {
+    /// Convert a wide characters to a standard characters string
+    std::string tostring(const std::wstring& str);
+    /// Convert a wide characters to a standard characters string
+    std::wstring towstring(const std::string& str);
     /// Format a string using a printf style format descriptor.
     template <typename... Args>
     std::string format(const std::string& fmt, Args... args) {
@@ -19,6 +23,10 @@ namespace cepgen {
       std::vector<char> buffer(size);
       snprintf(buffer.data(), size, fmt.data(), args...);
       return std::string(buffer.data(), buffer.data() + size - 1);  // strip last '\0'
+    }
+    template <typename... Args>
+    std::string format(const std::wstring& fmt, Args... args) {
+      return format(tostring(fmt), args...);
     }
     /// Human-readable boolean printout
     std::string yesno(bool test);
@@ -71,10 +79,6 @@ namespace cepgen {
       return show_number ? format("%g %s%s", num, word.c_str(), (num > 1.) ? "s" : "")
                          : format("%s%s", word.c_str(), (num > 1.) ? "s" : "");
     }
-    /// Convert a wide characters to a standard characters string
-    std::string tostring(const std::wstring& str);
-    /// Convert a wide characters to a standard characters string
-    std::wstring towstring(const std::string& str);
     /// Helper to print a vector
     template <class T>
     std::string repr(const std::vector<T>& vec, const std::string& sep = ",") {
