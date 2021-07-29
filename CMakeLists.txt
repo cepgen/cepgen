@@ -21,6 +21,7 @@ option(CMAKE_BUILD_SCAN "Build cross-section scan utilitary" OFF)
 option(CMAKE_BUILD_CARD_CONV "Build steering cards converter utilitary" OFF)
 option(CMAKE_BUILD_TESTS "Build tests" OFF)
 option(CMAKE_BUILD_FOAM "Build FOAM integrator" OFF)
+option(CMAKE_BUILD_UTILS "Build miscellaneous utilities" ON)
 option(CMAKE_COVERAGE "Generate code coverage" OFF)
 #----- release build by default
 
