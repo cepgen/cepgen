@@ -1,7 +1,6 @@
-#include "CepGen/Cards/LpairHandler.h"
-
 #include <fstream>
 
+#include "CepGen/Cards/LpairHandler.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"
@@ -302,22 +301,22 @@ namespace cepgen {
       // particular case for the double as we cannot rely on casting exceptions
       if (value.find('.') != std::string::npos)
         try {
-          setValue<double>(key.c_str(), std::stod(value));
+          set<double>(key, std::stod(value));
           return;
         } catch (const std::logic_error&) {
           for (const auto& let : value)
             if (isalpha(let) && let != 'E' && let != 'e') {
-              setValue<std::string>(key.c_str(), value);
+              set<std::string>(key, value);
               return;
             }
           throw CG_FATAL("LpairHandler:setParameter")
               << "Failed to parse a floating-point parameter \"" << key << "\" → \"" << value << "\"!";
         }
       try {
-        setValue<int>(key.c_str(), std::stoi(value));
+        set<int>(key, std::stoi(value));
       } catch (const std::logic_error&) {
         try {
-          setValue<std::string>(key.c_str(), value);
+          set<std::string>(key, value);
         } catch (const std::logic_error&) {
           throw CG_FATAL("LpairHandler:setParameter")
               << "Failed to add the parameter \"" << key << "\" → \"" << value << "\"!";
@@ -327,16 +326,16 @@ namespace cepgen {
 
     std::string LpairHandler::parameter(std::string key) const {
       {
-        auto var = getValue<double>(key.c_str());
+        auto var = get<double>(key.c_str());
         if (var != -999.)
           return std::to_string(var);
       }
       {
-        auto var = getValue<int>(key.c_str());
+        auto var = get<int>(key.c_str());
         if (var != -999999)
           return std::to_string(var);
       }
-      return getValue<std::string>(key.c_str());
+      return get<std::string>(key.c_str());
     }
 
     std::string LpairHandler::describe(std::string key) const {
