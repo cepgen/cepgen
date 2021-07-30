@@ -29,7 +29,7 @@ namespace cepgen {
       template <typename T>
       struct Parameter {
         std::string key, description;
-        T* value;
+        T* value{nullptr};
       };
       /// Register a parameter to be steered to a configuration variable
       template <typename T>
@@ -106,21 +106,18 @@ namespace cepgen {
 
     template <>
     inline void LpairHandler::set<std::string>(const std::string& key, const std::string& value) {
-      auto it = p_strings_.find(key);
-      if (it != p_strings_.end())
-        *it->second.value = value;
+      if (p_strings_.count(key))
+        *p_strings_.at(key).value = value;
     }
     template <>
     inline void LpairHandler::set<double>(const std::string& key, const double& value) {
-      auto it = p_doubles_.find(key);
-      if (it != p_doubles_.end())
-        *it->second.value = value;
+      if (p_doubles_.count(key))
+        *p_doubles_.at(key).value = value;
     }
     template <>
     inline void LpairHandler::set<int>(const std::string& key, const int& value) {
-      auto it = p_ints_.find(key);
-      if (it != p_ints_.end())
-        *it->second.value = value;
+      if (p_ints_.count(key))
+        *p_ints_.at(key).value = value;
     }
 
     //----- specialised getters
@@ -128,25 +125,22 @@ namespace cepgen {
     /// Retrieve a string parameter value
     template <>
     inline std::string LpairHandler::get(const std::string& key) const {
-      const auto& it = p_strings_.find(key);
-      if (it != p_strings_.end())
-        return *it->second.value;
+      if (p_strings_.count(key))
+        return *p_strings_.at(key).value;
       return "null";
     }
     /// Retrieve a floating point parameter value
     template <>
     inline double LpairHandler::get(const std::string& key) const {
-      const auto& it = p_doubles_.find(key);
-      if (it != p_doubles_.end())
-        return *it->second.value;
+      if (p_doubles_.count(key))
+        return *p_doubles_.at(key).value;
       return -999.;
     }
     /// Retrieve an integer parameter value
     template <>
     inline int LpairHandler::get(const std::string& key) const {
-      const auto& it = p_ints_.find(key);
-      if (it != p_ints_.end())
-        return *it->second.value;
+      if (p_ints_.count(key))
+        return *p_ints_.at(key).value;
       return -999999;
     }
   }  // namespace card
