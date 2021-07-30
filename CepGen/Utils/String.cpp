@@ -61,14 +61,15 @@ namespace cepgen {
     }
 
     std::string replace_all(const std::string& str, const std::vector<std::pair<std::string, std::string> >& keys) {
-      CG_DEBUG("replace_all").log([&keys](auto& log) {
-        log << "Values to be replaced: ";
-        for (const auto& key : keys)
-          log << "\n\t" << key.first << " -> " << key.second;
-      });
       auto out{str};
       for (const auto& key : keys)
-        out = replace_all(out, key.first, key.second);
+        replace_all(out, key.first, key.second);
+      CG_DEBUG("replace_all").log([&keys, &out](auto& log) {
+        log << "Values to be replaced: ";
+        for (const auto& key : keys)
+          log << "\n\t{\"" << key.first << "\" -> \"" << key.second << "\"}";
+        log << "\n-> output: \"" << out << "\".";
+      });
       return out;
     }
 

@@ -1,17 +1,16 @@
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/String.h"
-
 #include "LHAPDF/LHAPDF.h"
 
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
 #define LHAPDF_GE_6 1
 #endif
 
-#include <array>
 #include <math.h>
+
+#include <array>
 
 namespace cepgen {
   namespace strfun {
@@ -109,7 +108,8 @@ namespace cepgen {
         lha_pdf_set_ = LHAPDF::PDFSet(pdf_set_);
         lha_pdf_set_.mkPDFs<std::unique_ptr<LHAPDF::PDF> >(pdfs_);
         lhapdf_version = LHAPDF::version();
-        pdf_description = lha_pdf_set_.description();
+        pdf_description = utils::replace_all(lha_pdf_set_.description(), ". ", ".\n  ");
+        ;
         pdf_type = pdfs_[pdf_member_]->type();
       } catch (const LHAPDF::Exception& e) {
         throw CG_FATAL("Partonic") << "Caught LHAPDF exception:\n\t" << e.what();
@@ -121,7 +121,6 @@ namespace cepgen {
         LHAPDF::initPDFSet(pdf_set_, LHAPDF::LHGRID, pdf_member_);
       lhapdf_version = LHAPDF::getVersion();
 #endif
-      utils::replace_all(pdf_description, ". ", ".\n  ");
       CG_INFO("Partonic") << "Partonic structure functions evaluator successfully built.\n"
                           << " * LHAPDF version: " << lhapdf_version << "\n"
                           << " * number of flavours: " << num_flavours_ << "\n"

@@ -167,7 +167,7 @@ namespace cepgen {
         while (getline(file, line)) {
           std::istringstream iss(line);
           iss >> key >> value;
-          if (key[0] == '#')  // FIXME need to ensure there is no extra space before!
+          if (utils::ltrim(key)[0] == '#')
             continue;
           setParameter(key, value);
           if (describe(key) != "null")

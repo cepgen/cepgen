@@ -23,14 +23,13 @@ namespace cepgen {
 
     std::string PythonHandler::pythonPath(const std::string& file) const {
       const auto dir = fs::path{file}.remove_filename();
-      CG_DEBUG("PythonHandler") << "Adding \"" << dir << "\" to the default search paths.";
+      CG_DEBUG("PythonHandler") << "Adding {" << dir << "} to the default search paths.";
       utils::env::append("PYTHONPATH", dir);
 
-      auto s_filename = fs::path{file}.replace_extension("").string();  // remove the extension
-      utils::replace_all(s_filename, "../", "..");
-      utils::replace_all(s_filename, "/", ".");
-      CG_DEBUG("PythonHandler") << "Python path: " << s_filename;
-      return s_filename;
+      const auto filename = utils::replace_all(fs::path{file}.replace_extension("").string() /* remove the extension */,
+                                               {{"../", ".."}, {"/", "."}});
+      CG_DEBUG("PythonHandler") << "Python path: " << filename;
+      return filename;
     }
 
     void PythonHandler::throwPythonError(const std::string& message) const {
