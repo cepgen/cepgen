@@ -273,7 +273,7 @@ namespace cepgen {
       *proc_params_ += rt_params_->process().parameters();
       if (proc_params_->has<ParticleProperties>("pair"))
         proc_params_->set<int>("pair", proc_params_->get<ParticleProperties>("pair").pdgid);
-      if (proc_name_ == "pptoff")
+      if (proc_name_ == "pptoff" || proc_name_ == "pptoll" /* legacy */)
         lepton_id_ = (rt_params_->process().parameters().get<int>("pair") - 11) / 2. + 1;
       {
         std::vector<std::string> evt_mod;
