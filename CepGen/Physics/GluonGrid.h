@@ -1,8 +1,8 @@
 #ifndef CepGen_Physics_GluonGrid_h
 #define CepGen_Physics_GluonGrid_h
 
-#include "CepGen/Utils/GridHandler.h"
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Utils/GridHandler.h"
 
 #define DEFAULT_KMR_GRID_PATH "gluon_mmht2014nlo_Watt.dat"
 
@@ -16,6 +16,8 @@ namespace kmr {
 
     /// Retrieve the grid interpolator (singleton)
     static GluonGrid& get(const std::string& path = DEFAULT_KMR_GRID_PATH);
+    /// Retrieve the path to the interpolation grid values
+    const std::string& path() const { return grid_path_; }
 
     /// Compute the gluon flux
     double operator()(double x, double kt2, double mu2) const;
