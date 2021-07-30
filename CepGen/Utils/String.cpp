@@ -53,6 +53,25 @@ namespace cepgen {
       return count;
     }
 
+    std::string replace_all(const std::string& str, const std::string& from, const std::string& to) {
+      auto out{str};
+      if (replace_all(out, from, to) == 0)
+        CG_DEBUG("replace_all") << "No occurences of {" << from << "} found in input string.";
+      return out;
+    }
+
+    std::string replace_all(const std::string& str, const std::vector<std::pair<std::string, std::string> >& keys) {
+      CG_DEBUG("replace_all").log([&keys](auto& log) {
+        log << "Values to be replaced: ";
+        for (const auto& key : keys)
+          log << "\n\t" << key.first << " -> " << key.second;
+      });
+      auto out{str};
+      for (const auto& key : keys)
+        out = replace_all(out, key.first, key.second);
+      return out;
+    }
+
     std::vector<std::string> split(const std::string& str, char delim) {
       std::vector<std::string> out;
       std::string token;
@@ -96,16 +115,21 @@ namespace cepgen {
     }
     template void normalise(std::vector<std::string>&);
 
-    void ltrim(std::string& s) {
-      s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+    std::string ltrim(const std::string& str) {
+      auto out{str};
+      out.erase(out.begin(), std::find_if(out.begin(), out.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+      return out;
     }
 
-    void rtrim(std::string& s) {
-      s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), s.end());
+    std::string rtrim(const std::string& str) {
+      auto out{str};
+      out.erase(std::find_if(out.rbegin(), out.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(),
+                out.end());
+      return out;
     }
 
     std::string strip(const std::string& str) {
-      auto out = str;
+      auto out{str};
       out.resize(std::remove_if(out.begin(), out.end(), [](char x) { return !std::isalnum(x) && !std::isspace(x); }) -
                  out.begin());
       return out;

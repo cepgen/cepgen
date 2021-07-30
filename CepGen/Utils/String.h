@@ -51,6 +51,10 @@ namespace cepgen {
     std::string colourise(const std::string& str, const Colour& col, const Modifier& mod = Modifier::reset);
     /// Replace all occurrences of a text by another
     size_t replace_all(std::string& str, const std::string& from, const std::string& to);
+    /// Replace all occurrences of a text by another
+    std::string replace_all(const std::string& str, const std::string& from, const std::string& to);
+    /// Replace all occurrences of multiple texts by others
+    std::string replace_all(const std::string& str, const std::vector<std::pair<std::string, std::string> >& keys);
     /// Split a string according to a separation character
     std::vector<std::string> split(const std::string&, char);
     /// Merge a collection of strings in a single string
@@ -88,14 +92,11 @@ namespace cepgen {
           });
     }
     /// Trim leading spaces
-    void ltrim(std::string&);
+    std::string ltrim(const std::string& str);
     /// Trim trailing spaces
-    void rtrim(std::string&);
+    std::string rtrim(const std::string& str);
     /// Trim leading and trailing spaces
-    inline void trim(std::string& s) {
-      ltrim(s);
-      rtrim(s);
-    }
+    inline std::string trim(const std::string& str) { return ltrim(rtrim(str)); }
     /// Strip all special characters from string
     std::string strip(const std::string&);
     /// All environment variable-related utilities
