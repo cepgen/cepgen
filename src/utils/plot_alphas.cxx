@@ -1,15 +1,14 @@
-#include "CepGen/Generator.h"
-#include "CepGen/Core/Exception.h"
+#include <TGraph.h>
+#include <TMultiGraph.h>
 
+#include <fstream>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Generator.h"
 #include "CepGen/Physics/AlphaS.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenAddOns/ROOTWrapper/ROOTCanvas.h"
-
-#include <fstream>
-
-#include <TMultiGraph.h>
-#include <TGraph.h>
 
 using namespace std;
 
@@ -17,12 +16,14 @@ int main(int argc, char* argv[]) {
   double qmin, qmax;
   int num_points;
   string output_file;
+  bool logy;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("qmin,m", "minimum virtuality (GeV)", &qmin, 1.)
       .addOptionalArgument("qmax,M", "maximum virtuality (GeV)", &qmax, 101.)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 100)
       .addOptionalArgument("output,o", "output file name", &output_file, "alphas.scan.output.txt")
+      .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
       .parse();
 
   cepgen::initialise();
@@ -87,6 +88,10 @@ int main(int argc, char* argv[]) {
   mg.GetXaxis()->SetRangeUser(*qvals.begin(), *qvals.rbegin());
   c.Prettify(mg.GetHistogram());
   c.SetLogx();
+  if (logy) {
+    c.SetLogy();
+    mg.SetMinimum(1.e-3);
+  }
   c.Save("pdf");
 
   return 0;
