@@ -1,13 +1,13 @@
 #ifndef CepGen_Integration_IntegratorGSL_h
 #define CepGen_Integration_IntegratorGSL_h
 
-#include "CepGen/Integration/Integrator.h"
-
-#include <memory>
-#include <functional>
-
 #include <gsl/gsl_monte.h>
 #include <gsl/gsl_rng.h>
+
+#include <functional>
+#include <memory>
+
+#include "CepGen/Integration/Integrator.h"
 
 namespace cepgen {
   class IntegratorGSL : public Integrator {
