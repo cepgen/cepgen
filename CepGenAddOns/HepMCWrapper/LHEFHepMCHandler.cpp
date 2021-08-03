@@ -1,18 +1,35 @@
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
-
-#include "CepGen/Event/Event.h"
-#include "CepGen/Parameters.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <sstream>
 
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Parameters.h"
+
 #ifdef HEPMC3
 using namespace std;  // account for improper scoping in following includes
-#include "HepMC3/LHEF.h"
+#include <HepMC3/LHEF.h>
 #else
-#include "HepMC/Version.h"
+#include <HepMC/Version.h>
 #ifdef HEPMC_VERSION_CODE  // HepMC v3+
-#include "HepMC/LHEF.h"
+#include <HepMC/LHEF.h>
 #else
 #define NO_LHEF
 #endif
@@ -61,10 +78,10 @@ namespace cepgen {
     void LHEFHepMCHandler::initialise(const Parameters& params) {
       lhe_output_->headerBlock() << "<!--\n" << banner(params) << "\n-->";
       //--- first specify information about the run
-      lhe_output_->heprup.IDBMUP = {(int)params.kinematics.incoming_beams.positive().pdg,
-                                    (int)params.kinematics.incoming_beams.negative().pdg};
-      lhe_output_->heprup.EBMUP = {(double)params.kinematics.incoming_beams.positive().momentum.pz(),
-                                   (double)params.kinematics.incoming_beams.negative().momentum.pz()};
+      lhe_output_->heprup.IDBMUP = {(int)params.kinematics.incomingBeams().positive().pdg,
+                                    (int)params.kinematics.incomingBeams().negative().pdg};
+      lhe_output_->heprup.EBMUP = {(double)params.kinematics.incomingBeams().positive().momentum.pz(),
+                                   (double)params.kinematics.incomingBeams().negative().momentum.pz()};
       //--- ensure everything is properly parsed
       lhe_output_->init();
     }

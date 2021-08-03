@@ -1,10 +1,29 @@
-#include "CepGen/Utils/GridHandler.h"
-#include "CepGen/Utils/String.h"
-#include "CepGen/Core/Exception.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
+
 #include <limits>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/GridHandler.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   template <size_t D, size_t N>
@@ -18,7 +37,7 @@ namespace cepgen {
     if (!init_)
       throw CG_FATAL("GridHandler") << "Grid extrapolator called but not initialised!";
 
-    values_t out;
+    values_t out{};
     coord_t coord = in_coords;
     switch (grid_type_) {
       case GridType::logarithmic: {
@@ -243,7 +262,7 @@ namespace cepgen {
 
   template <size_t D, size_t N>
   std::array<double, D> GridHandler<D, N>::min() const {
-    std::array<double, D> out;
+    std::array<double, D> out{};
     size_t i = 0;
     for (const auto& c : coords_) {  // loop over all dimensions
       const auto& min = std::min_element(c.begin(), c.end());
@@ -254,7 +273,7 @@ namespace cepgen {
 
   template <size_t D, size_t N>
   std::array<double, D> GridHandler<D, N>::max() const {
-    std::array<double, D> out;
+    std::array<double, D> out{};
     size_t i = 0;
     for (const auto& c : coords_) {  // loop over all dimensions
       const auto& max = std::max_element(c.begin(), c.end());

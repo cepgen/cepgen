@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "CepGen/Processes/Process2to4.h"
 
 #include <cmath>
@@ -43,17 +61,17 @@ namespace cepgen {
       ww_ = 0.5 * (1. + sqrt(1. - 4. * sqrt(mA2_ * mB2_) / s_));
 
       defineVariable(
-          y_c1_, Mapping::linear, kin_.cuts.central.rapidity_single(), {-6., 6.}, "First outgoing particle rapidity");
+          y_c1_, Mapping::linear, kin_.cuts().central.rapidity_single(), {-6., 6.}, "First outgoing particle rapidity");
       defineVariable(
-          y_c2_, Mapping::linear, kin_.cuts.central.rapidity_single(), {-6., 6.}, "Second outgoing particle rapidity");
+          y_c2_, Mapping::linear, kin_.cuts().central.rapidity_single(), {-6., 6.}, "Second outgoing particle rapidity");
       defineVariable(pt_diff_,
                      Mapping::linear,
-                     kin_.cuts.central.pt_diff(),
+                     kin_.cuts().central.pt_diff(),
                      {0., 500.},
                      "Final state particles transverse momentum difference");
       defineVariable(phi_pt_diff_,
                      Mapping::linear,
-                     kin_.cuts.central.phi_diff(),
+                     kin_.cuts().central.phi_diff(),
                      {0., 2. * M_PI},
                      "Final state particles azimuthal angle difference");
 
@@ -93,13 +111,13 @@ namespace cepgen {
                                << "p(1/2)t = " << p1t << " / " << p2t;
 
       //--- window in rapidity distance
-      if (!kin_.cuts.central.rapidity_diff().contains(fabs(y_c1_ - y_c2_)))
+      if (!kin_.cuts().central.rapidity_diff().contains(fabs(y_c1_ - y_c2_)))
         return 0.;
 
       //--- apply the pt cut already at this stage (remains unchanged)
-      if (!kin_.cuts.central.pt_single().contains(p1t))
+      if (!kin_.cuts().central.pt_single().contains(p1t))
         return 0.;
-      if (!kin_.cuts.central.pt_single().contains(p2t))
+      if (!kin_.cuts().central.pt_single().contains(p2t))
         return 0.;
       if (!single_limits_.pt_single().contains(p1t))
         return 0.;
@@ -107,7 +125,7 @@ namespace cepgen {
         return 0.;
 
       //--- window in transverse momentum difference
-      if (!kin_.cuts.central.pt_diff().contains(fabs(p1t - p2t)))
+      if (!kin_.cuts().central.pt_diff().contains(fabs(p1t - p2t)))
         return 0.;
 
       //--- transverse mass for the two central particles
@@ -116,7 +134,7 @@ namespace cepgen {
 
       //--- window in central system invariant mass
       const double invm = sqrt(amt1_ * amt1_ + amt2_ * amt2_ + 2. * amt1_ * amt2_ * cosh(y_c1_ - y_c2_) - qt_sum.pt2());
-      if (!kin_.cuts.central.mass_sum().contains(invm))
+      if (!kin_.cuts().central.mass_sum().contains(invm))
         return 0.;
 
       //--- auxiliary quantities
@@ -142,9 +160,9 @@ namespace cepgen {
       CG_DEBUG_LOOP("2to4:central") << "s(1/2)_eff = " << s1_eff << " / " << s2_eff << " GeV^2\n\t"
                                     << "central system invariant mass = " << invm << " GeV";
 
-      if (kin_.incoming_beams.positive().mode == mode::Beam::ProtonInelastic && (sqrt(s2_eff) <= sqrt(mX2_) + invm))
+      if (kin_.incomingBeams().positive().mode == mode::Beam::ProtonInelastic && (sqrt(s2_eff) <= sqrt(mX2_) + invm))
         return 0.;
-      if (kin_.incoming_beams.negative().mode == mode::Beam::ProtonInelastic && (sqrt(s1_eff) <= sqrt(mY2_) + invm))
+      if (kin_.incomingBeams().negative().mode == mode::Beam::ProtonInelastic && (sqrt(s1_eff) <= sqrt(mY2_) + invm))
         return 0.;
 
       //--- four-momenta of the outgoing protons (or remnants)
@@ -199,23 +217,23 @@ namespace cepgen {
 
       //--- compute fluxes according to modelling specified in parameters card
 
-      const HeavyIon hi1(kin_.incoming_beams.positive().pdg);
+      const HeavyIon hi1(kin_.incomingBeams().positive().pdg);
       const double f1 = (hi1)  // check if we are in heavy ion mode
-                            ? ktFlux((KTFlux)kin_.incoming_beams.positive().kt_flux, x1, q1t2, hi1)
-                            : ktFlux((KTFlux)kin_.incoming_beams.positive().kt_flux,
+                            ? ktFlux((KTFlux)kin_.incomingBeams().positive().kt_flux, x1, q1t2, hi1)
+                            : ktFlux((KTFlux)kin_.incomingBeams().positive().kt_flux,
                                      x1,
                                      q1t2,
-                                     *kin_.incoming_beams.formFactors(),
+                                     *kin_.incomingBeams().formFactors(),
                                      mA2_,
                                      mX2_);
 
-      const HeavyIon hi2(kin_.incoming_beams.negative().pdg);
+      const HeavyIon hi2(kin_.incomingBeams().negative().pdg);
       const double f2 = (hi2)  // check if we are in heavy ion mode
-                            ? ktFlux((KTFlux)kin_.incoming_beams.negative().kt_flux, x2, q2t2, hi2)
-                            : ktFlux((KTFlux)kin_.incoming_beams.negative().kt_flux,
+                            ? ktFlux((KTFlux)kin_.incomingBeams().negative().kt_flux, x2, q2t2, hi2)
+                            : ktFlux((KTFlux)kin_.incomingBeams().negative().kt_flux,
                                      x2,
                                      q2t2,
-                                     *kin_.incoming_beams.formFactors(),
+                                     *kin_.incomingBeams().formFactors(),
                                      mB2_,
                                      mY2_);
 

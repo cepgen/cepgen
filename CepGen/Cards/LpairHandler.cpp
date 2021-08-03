@@ -1,7 +1,24 @@
-#include "CepGen/Cards/LpairHandler.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <fstream>
 
+#include "CepGen/Cards/LpairHandler.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"
@@ -37,7 +54,7 @@ namespace cepgen {
           str_fun_(11),
           sr_type_(1),
           lepton_id_(0),
-          pdg_input_path_("mass_width_2020.mcd"),
+          pdg_input_path_("mass_width_2021.mcd"),
           iend_(1) {}
 
     void LpairHandler::init() {
@@ -168,7 +185,7 @@ namespace cepgen {
         while (getline(file, line)) {
           std::istringstream iss(line);
           iss >> key >> value;
-          if (key[0] == '#')  // FIXME need to ensure there is no extra space before!
+          if (utils::ltrim(key)[0] == '#')
             continue;
           setParameter(key, value);
           if (describe(key) != "null")
@@ -211,10 +228,10 @@ namespace cepgen {
 
       //--- parse the structure functions code
       if (str_fun_ == (int)strfun::Type::MSTWgrid && !mstw_grid_path_.empty())
-        rt_params_->kinematics.incoming_beams.setStructureFunctions(strfun::StructureFunctionsFactory::get().build(
+        rt_params_->kinematics.incomingBeams().setStructureFunctions(strfun::StructureFunctionsFactory::get().build(
             str_fun_, ParametersList().set<std::string>("gridPath", mstw_grid_path_)));
       else
-        rt_params_->kinematics.incoming_beams.setStructureFunctions(str_fun_, sr_type_);
+        rt_params_->kinematics.incomingBeams().setStructureFunctions(str_fun_, sr_type_);
 
       //--- parse the hadronisation algorithm name
       if (!evt_mod_name_.empty())
@@ -262,11 +279,11 @@ namespace cepgen {
 
     void LpairHandler::pack(const Parameters* params) {
       rt_params_ = const_cast<Parameters*>(params);
-      str_fun_ = rt_params_->kinematics.incoming_beams.structureFunctions()->name();
-      if (rt_params_->kinematics.incoming_beams.structureFunctions() &&
-          rt_params_->kinematics.incoming_beams.structureFunctions()->sigmaRatio())
-        sr_type_ = rt_params_->kinematics.incoming_beams.structureFunctions()->sigmaRatio()->name();
-      //kmr_grid_path_ =
+      str_fun_ = rt_params_->kinematics.incomingBeams().structureFunctions()->name();
+      if (rt_params_->kinematics.incomingBeams().structureFunctions() &&
+          rt_params_->kinematics.incomingBeams().structureFunctions()->sigmaRatio())
+        sr_type_ = rt_params_->kinematics.incomingBeams().structureFunctions()->sigmaRatio()->name();
+      kmr_grid_path_ = kmr::GluonGrid::get().path();
       //mstw_grid_path_ =
       //pdg_input_path_ =
       iend_ = (int)rt_params_->generation().enabled();
@@ -274,7 +291,7 @@ namespace cepgen {
       *proc_params_ += rt_params_->process().parameters();
       if (proc_params_->has<ParticleProperties>("pair"))
         proc_params_->set<int>("pair", proc_params_->get<ParticleProperties>("pair").pdgid);
-      if (proc_name_ == "pptoff")
+      if (proc_name_ == "pptoff" || proc_name_ == "pptoll" /* legacy */)
         lepton_id_ = (rt_params_->process().parameters().get<int>("pair") - 11) / 2. + 1;
       {
         std::vector<std::string> evt_mod;
@@ -302,22 +319,22 @@ namespace cepgen {
       // particular case for the double as we cannot rely on casting exceptions
       if (value.find('.') != std::string::npos)
         try {
-          setValue<double>(key.c_str(), std::stod(value));
+          set<double>(key, std::stod(value));
           return;
         } catch (const std::logic_error&) {
           for (const auto& let : value)
             if (isalpha(let) && let != 'E' && let != 'e') {
-              setValue<std::string>(key.c_str(), value);
+              set<std::string>(key, value);
               return;
             }
           throw CG_FATAL("LpairHandler:setParameter")
               << "Failed to parse a floating-point parameter \"" << key << "\" → \"" << value << "\"!";
         }
       try {
-        setValue<int>(key.c_str(), std::stoi(value));
+        set<int>(key, std::stoi(value));
       } catch (const std::logic_error&) {
         try {
-          setValue<std::string>(key.c_str(), value);
+          set<std::string>(key, value);
         } catch (const std::logic_error&) {
           throw CG_FATAL("LpairHandler:setParameter")
               << "Failed to add the parameter \"" << key << "\" → \"" << value << "\"!";
@@ -327,16 +344,16 @@ namespace cepgen {
 
     std::string LpairHandler::parameter(std::string key) const {
       {
-        auto var = getValue<double>(key.c_str());
+        auto var = get<double>(key.c_str());
         if (var != -999.)
           return std::to_string(var);
       }
       {
-        auto var = getValue<int>(key.c_str());
+        auto var = get<int>(key.c_str());
         if (var != -999999)
           return std::to_string(var);
       }
-      return getValue<std::string>(key.c_str());
+      return get<std::string>(key.c_str());
     }
 
     std::string LpairHandler::describe(std::string key) const {

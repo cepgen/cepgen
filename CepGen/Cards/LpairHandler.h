@@ -1,10 +1,28 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGen_Cards_LpairReader_h
 #define CepGen_Cards_LpairReader_h
 
-#include "CepGen/Cards/Handler.h"
-
-#include <unordered_map>
 #include <memory>
+#include <unordered_map>
+
+#include "CepGen/Cards/Handler.h"
 
 using std::string;
 
@@ -12,7 +30,7 @@ namespace cepgen {
   class ParametersList;
   namespace card {
     /// LPAIR-like steering cards parser and writer
-    class LpairHandler : public Handler {
+    class LpairHandler final : public Handler {
     public:
       /// Read a LPAIR steering card
       explicit LpairHandler(const ParametersList&);
@@ -29,7 +47,7 @@ namespace cepgen {
       template <typename T>
       struct Parameter {
         std::string key, description;
-        T* value;
+        T* value{nullptr};
       };
       /// Register a parameter to be steered to a configuration variable
       template <typename T>
@@ -55,10 +73,10 @@ namespace cepgen {
       }
       /// Set a parameter value
       template <typename T>
-      void setValue(const std::string& /*key*/, const T& /*value*/) {}
+      void set(const std::string& /*key*/, const T& /*value*/) {}
       /// Retrieve a parameter value
       template <typename T>
-      T getValue(const std::string& /*key*/) const {}
+      T get(const std::string& /*key*/) const {}
 
       void setParameter(const std::string& key, const std::string& value);
       std::string parameter(std::string key) const;
@@ -87,66 +105,60 @@ namespace cepgen {
     inline void LpairHandler::registerParameter<std::string>(const std::string& key,
                                                              const std::string& description,
                                                              std::string* def) {
-      p_strings_.insert(std::make_pair(key, Parameter<std::string>{key, description, def}));
+      p_strings_[key] = Parameter<std::string>{key, description, def};
     }
     /// Register a double floating point parameter
     template <>
     inline void LpairHandler::registerParameter<double>(const std::string& key,
                                                         const std::string& description,
                                                         double* def) {
-      p_doubles_.insert(std::make_pair(key, Parameter<double>{key, description, def}));
+      p_doubles_[key] = Parameter<double>{key, description, def};
     }
     /// Register an integer parameter
     template <>
     inline void LpairHandler::registerParameter<int>(const std::string& key, const std::string& description, int* def) {
-      p_ints_.insert(std::make_pair(key, Parameter<int>{key, description, def}));
+      p_ints_[key] = Parameter<int>{key, description, def};
     }
 
     //----- specialised setters
 
     template <>
-    inline void LpairHandler::setValue<std::string>(const std::string& key, const std::string& value) {
-      auto it = p_strings_.find(key);
-      if (it != p_strings_.end())
-        *it->second.value = value;
+    inline void LpairHandler::set<std::string>(const std::string& key, const std::string& value) {
+      if (p_strings_.count(key))
+        *p_strings_.at(key).value = value;
     }
     template <>
-    inline void LpairHandler::setValue<double>(const std::string& key, const double& value) {
-      auto it = p_doubles_.find(key);
-      if (it != p_doubles_.end())
-        *it->second.value = value;
+    inline void LpairHandler::set<double>(const std::string& key, const double& value) {
+      if (p_doubles_.count(key))
+        *p_doubles_.at(key).value = value;
     }
     template <>
-    inline void LpairHandler::setValue<int>(const std::string& key, const int& value) {
-      auto it = p_ints_.find(key);
-      if (it != p_ints_.end())
-        *it->second.value = value;
+    inline void LpairHandler::set<int>(const std::string& key, const int& value) {
+      if (p_ints_.count(key))
+        *p_ints_.at(key).value = value;
     }
 
     //----- specialised getters
 
     /// Retrieve a string parameter value
     template <>
-    inline std::string LpairHandler::getValue(const std::string& key) const {
-      const auto& it = p_strings_.find(key);
-      if (it != p_strings_.end())
-        return *it->second.value;
+    inline std::string LpairHandler::get(const std::string& key) const {
+      if (p_strings_.count(key))
+        return *p_strings_.at(key).value;
       return "null";
     }
     /// Retrieve a floating point parameter value
     template <>
-    inline double LpairHandler::getValue(const std::string& key) const {
-      const auto& it = p_doubles_.find(key);
-      if (it != p_doubles_.end())
-        return *it->second.value;
+    inline double LpairHandler::get(const std::string& key) const {
+      if (p_doubles_.count(key))
+        return *p_doubles_.at(key).value;
       return -999.;
     }
     /// Retrieve an integer parameter value
     template <>
-    inline int LpairHandler::getValue(const std::string& key) const {
-      const auto& it = p_ints_.find(key);
-      if (it != p_ints_.end())
-        return *it->second.value;
+    inline int LpairHandler::get(const std::string& key) const {
+      if (p_ints_.count(key))
+        return *p_ints_.at(key).value;
       return -999999;
     }
   }  // namespace card

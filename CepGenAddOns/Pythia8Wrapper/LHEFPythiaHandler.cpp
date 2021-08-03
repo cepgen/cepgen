@@ -1,16 +1,30 @@
-#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
-
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
-
-#include "CepGen/Event/Event.h"
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/String.h"
-#include "CepGen/Utils/Filesystem.h"
-
-#include "Pythia8/Pythia.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <sstream>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Utils/Filesystem.h"
+#include "CepGen/Utils/String.h"
+#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
 namespace cepgen {
   namespace io {
@@ -67,8 +81,9 @@ namespace cepgen {
       if (gzip_) {
         std::string cmnd(GZIP_BIN);
         cmnd += " -f " + filename_;
-        system(cmnd.c_str());
-        CG_INFO("") << cmnd;
+        if (system(cmnd.c_str()) != 0)
+          CG_WARNING("LHEFPythiaHandler") << "Failed to zip the output file with command \"" << cmnd << "\".";
+        CG_DEBUG("LHEFPythiaHandler") << cmnd;
       }
 #endif
     }

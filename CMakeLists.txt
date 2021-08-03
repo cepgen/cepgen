@@ -1,3 +1,13 @@
+#--- first check if we are at CERN
+set(LXPLUS_ENV "${CMAKE_SOURCE_DIR}/source-lxplus.sh")
+if($ENV{HOSTNAME} MATCHES "^lxplus[0-9]+.cern.ch")
+  if(NOT DEFINED ENV{CEPGEN_LXPLUS_ENV})
+    message(FATAL_ERROR "LXPLUS environment variables not set!\nPlease source ${LXPLUS_ENV}\nand clean up this build environment, i.e.\nrm -rf CMake*\nand try again...")
+  endif()
+  message(STATUS "Compiling on LXPLUS.")
+  set(IS_LXPLUS "yes")
+endif()
+
 set(CPACK_RPM_COMPONENT_INSTALL ON)
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(CepGen)
@@ -11,6 +21,7 @@ option(CMAKE_BUILD_SCAN "Build cross-section scan utilitary" OFF)
 option(CMAKE_BUILD_CARD_CONV "Build steering cards converter utilitary" OFF)
 option(CMAKE_BUILD_TESTS "Build tests" OFF)
 option(CMAKE_BUILD_FOAM "Build FOAM integrator" OFF)
+option(CMAKE_BUILD_UTILS "Build miscellaneous utilities" ON)
 option(CMAKE_COVERAGE "Generate code coverage" OFF)
 #----- release build by default
 

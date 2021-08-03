@@ -5,6 +5,7 @@ cepgen_build(CepGenAddOns
 #----- check the external dependencies for physics utilities
 
 add_subdirectory(BoostWrapper)
+add_subdirectory(DelphesWrapper)
 add_subdirectory(Pythia6Wrapper)
 add_subdirectory(Pythia8Wrapper)
 add_subdirectory(ROOTWrapper)

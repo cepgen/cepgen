@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGen_Core_Exception_h
 #define CepGen_Core_Exception_h
 
@@ -59,6 +77,8 @@ namespace cepgen {
       nc_except.message_ << var;
       return exc;
     }
+    /// Specialised feeder operator for wide strings
+    friend const LoggedException& operator<<(const LoggedException& exc, const std::wstring& var);
     /// Generic templated pair-variables feeder operator
     template <typename T, typename U>
     inline friend const LoggedException& operator<<(const LoggedException& exc, const std::pair<T, U>& pair_var) {

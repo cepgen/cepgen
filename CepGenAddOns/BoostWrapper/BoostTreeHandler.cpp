@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <boost/property_tree/info_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -313,21 +331,21 @@ namespace cepgen {
     //------------------------------------------------------------------
 
     /// A JSON configuration file parser
-    class JsonHandler : public BoostTreeHandler {
+    class JsonHandler final : public BoostTreeHandler {
       using BoostTreeHandler::BoostTreeHandler;
       void read(const std::string& filename) override { pt::read_json(filename, tree_); }
       void write(const std::string& filename) const override { pt::write_json(filename, tree_); }
     };
 
     /// An INFO configuration file parser
-    class InfoHandler : public BoostTreeHandler {
+    class InfoHandler final : public BoostTreeHandler {
       using BoostTreeHandler::BoostTreeHandler;
       void read(const std::string& filename) override { pt::read_info(filename, tree_); }
       void write(const std::string& filename) const override { pt::write_info(filename, tree_); }
     };
 
     /// An XML configuration file parser
-    class XmlHandler : public BoostTreeHandler {
+    class XmlHandler final : public BoostTreeHandler {
       using BoostTreeHandler::BoostTreeHandler;
       void read(const std::string& filename) override { pt::read_xml(filename, tree_); }
       void write(const std::string& filename) const override {

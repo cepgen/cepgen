@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"
@@ -52,20 +70,19 @@ int main(int argc, char* argv[]) {
   }
 
   //--- no steering card nor additional flags found
-  if (input_card.empty() && parser.extra_config().empty())
-    throw CG_FATAL("main") << "Neither input card nor configuration word provided!\n\n " << parser.help_message();
-  else {
-    //--- parse the steering card
-    if (!input_card.empty())
-      gen.setParameters(cepgen::card::Handler::parse(input_card));
-    //--- parse the additional flags
-    if (!parser.extra_config().empty())
-      gen.setParameters(
-          cepgen::card::CardsHandlerFactory::get()
-              .build(cepgen::card::gCommandLineHandler,
-                     cepgen::ParametersList().set<std::vector<std::string> >("args", parser.extra_config()))
-              ->parse(std::string(), gen.parametersPtr()));
+  if (input_card.empty() && parser.extra_config().empty()) {
+    CG_INFO("main") << "Neither input card nor configuration word provided!\n\n " << parser.help_message();
+    return 0;
   }
+  //--- parse the steering card
+  if (!input_card.empty())
+    gen.setParameters(cepgen::card::Handler::parse(input_card));
+  //--- parse the additional flags
+  if (!parser.extra_config().empty())
+    gen.setParameters(cepgen::card::CardsHandlerFactory::get()
+                          .build(cepgen::card::gCommandLineHandler,
+                                 cepgen::ParametersList().set<std::vector<std::string> >("args", parser.extra_config()))
+                          ->parse(std::string(), gen.parametersPtr()));
 
   cepgen::utils::AbortHandler();
 

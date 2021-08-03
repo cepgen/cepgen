@@ -1,8 +1,27 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGenProcesses_LPAIR_h
 #define CepGenProcesses_LPAIR_h
 
-#include "CepGen/Processes/Process.h"
 #include <random>
+
+#include "CepGen/Processes/Process.h"
 
 namespace cepgen {
   namespace proc {
@@ -29,7 +48,7 @@ namespace cepgen {
      * \brief Compute the matrix element for a CE \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
      *  process
      */
-    class LPAIR : public Process {
+    class LPAIR final : public Process {
     public:
       /// \brief Class constructor: set the mandatory parameters before integration and events generation
       /// \param[in] params General process parameters (nopt = Optimisation, legacy from LPAIR)

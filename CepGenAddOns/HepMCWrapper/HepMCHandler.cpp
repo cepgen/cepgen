@@ -1,21 +1,37 @@
-#include "CepGenAddOns/HepMCWrapper/HepMCEventInterface.h"
-
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Parameters.h"
+#include "CepGenAddOns/HepMCWrapper/HepMCEventInterface.h"
 
 #if defined(HEPMC3) || defined(HEPMC_VERSION_CODE)
-#include "HepMC3/Version.h"
+#include <HepMC3/Version.h>
 #define HEPMC_VERSION HEPMC3_VERSION
 #define HEPMC_VERSION_CODE HEPMC3_VERSION_CODE
 #if !defined(HEPMC3)
 #define HEPMC3
 #endif
 #else
-#include "HepMC/Version.h"
+#include <HepMC/Version.h>
 #endif
 
 #include <memory>
@@ -138,8 +154,8 @@ REGISTER_IO_MODULE("hepmc_root_tree_opal", HepMC3RootTreeOPALHandler)
 #endif
 //--- HepMC version 2 and below
 #else
-#include "HepMC/IO_GenEvent.h"
 #include "HepMC/IO_AsciiParticles.h"
+#include "HepMC/IO_GenEvent.h"
 typedef cepgen::io::HepMCHandler<IO_GenEvent> HepMC2Handler;
 typedef cepgen::io::HepMCHandler<IO_AsciiParticles> HepMC2AsciiHandler;
 REGISTER_IO_MODULE("hepmc", HepMC2Handler)

@@ -1,7 +1,25 @@
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/String.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <csignal>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   LoggedException::LoggedException(const char* module, Type type, short id)
@@ -25,6 +43,12 @@ namespace cepgen {
       exit(0);
   }
 
+  const LoggedException& operator<<(const LoggedException& exc, const std::wstring& var) {
+    LoggedException& nc_except = const_cast<LoggedException&>(exc);
+    nc_except.message_ << utils::tostring(var);
+    return exc;
+  }
+
   const char* LoggedException::what() const noexcept {
     (*utils::Logger::get().output) << "\n" << message_.str() << "\n";
     return from_.c_str();
@@ -46,6 +70,10 @@ namespace cepgen {
       case Type::info:
         return os << type_ << ":\t" << message_.str() << "\n";
       case Type::debug:
+        return os << type_ << " "
+                  << utils::colourise(
+                         from_, utils::Colour::yellow, utils::Modifier::underline | utils::Modifier::dimmed)
+                  << ": " << utils::colourise(message_.str(), utils::Colour::reset, utils::Modifier::dimmed) << "\n";
       case Type::warning:
         return os << type_ << " " << utils::colourise(from_, utils::Colour::reset, utils::Modifier::underline) << "\n\t"
                   << message_.str() << "\n";
@@ -79,11 +107,11 @@ namespace cepgen {
   std::ostream& operator<<(std::ostream& os, const Exception::Type& type) {
     switch (type) {
       case Exception::Type::info:
-        return os << utils::colourise("Info:", utils::Colour::green, utils::Modifier::bold);
+        return os << utils::colourise("Info", utils::Colour::green, utils::Modifier::bold);
       case Exception::Type::debug:
-        return os << utils::colourise("Debug:", utils::Colour::yellow, utils::Modifier::reverse);
+        return os << utils::colourise("Debug", utils::Colour::yellow, utils::Modifier::bold);
       case Exception::Type::warning:
-        return os << utils::colourise("Warning:", utils::Colour::blue, utils::Modifier::bold);
+        return os << utils::colourise("Warning", utils::Colour::blue, utils::Modifier::bold);
       case Exception::Type::verbatim:
         return os << utils::colourise("Verbatim", utils::Colour::reset, utils::Modifier::bold);
       case Exception::Type::undefined:

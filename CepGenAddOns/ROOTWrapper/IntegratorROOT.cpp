@@ -1,14 +1,31 @@
-#include "CepGen/Integration/Integrator.h"
-#include "CepGen/Integration/Integrand.h"
-#include "CepGen/Modules/IntegratorFactory.h"
-
-#include "CepGen/Core/Exception.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <Math/IntegratorMultiDim.h>
 
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Integration/Integrand.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/IntegratorFactory.h"
+
 namespace cepgen {
   /// FOAM general-purpose integration algorithm
-  class IntegratorROOT : public Integrator {
+  class IntegratorROOT final : public Integrator {
   public:
     explicit IntegratorROOT(const ParametersList&);
     static std::string description() { return "ROOT general purpose MC integrator"; }

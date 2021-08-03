@@ -1,7 +1,24 @@
-#include "CepGen/Cards/PythonHandler.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <algorithm>
 
+#include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"
@@ -29,6 +46,7 @@
 #if PY_MAJOR_VERSION < 3
 #define PYTHON2
 #endif
+#define Py_DEBUG
 
 namespace cepgen {
   namespace card {
@@ -37,10 +55,7 @@ namespace cepgen {
     Parameters* PythonHandler::parse(const std::string& file, Parameters* params) {
       if (!utils::fileExists(file))
         throw CG_FATAL("PythonHandler") << "Unable to locate steering card \"" << file << "\".";
-      setenv(
-          "PYTHONPATH", (utils::environ("CEPGEN_PATH", ".") + ":.:Cards:../Cards:/usr/share/CepGen/Cards").c_str(), 1);
-      setenv("PYTHONDONTWRITEBYTECODE", "1", 1);
-      CG_DEBUG("PythonHandler") << "Python PATH: \"" << utils::environ("PYTHONPATH") << "\".";
+      utils::env::set("PYTHONDONTWRITEBYTECODE", "1");
 
       rt_params_ = params;
       std::string filename = pythonPath(file);
@@ -63,14 +78,31 @@ namespace cepgen {
         delete[] sfilename;
       }
 
-      Py_InitializeEx(1);
+      for (const auto& path : std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."),
+                                                       fs::current_path(),
+                                                       fs::current_path() / "Cards",
+                                                       fs::current_path().parent_path() / "Cards",
+                                                       fs::current_path().parent_path().parent_path() / "Cards",
+                                                       "/usr/share/CepGen/Cards"})
+        utils::env::append("PYTHONPATH", path);
 
+      Py_InitializeEx(1);
       if (!Py_IsInitialized())
         throw CG_FATAL("PythonHandler") << "Failed to initialise the Python cards parser!";
 
-      CG_DEBUG("PythonHandler") << "Initialised the Python cards parser\n\t"
-                                << "Python version: " << Py_GetVersion() << "\n\t"
-                                << "Platform: " << Py_GetPlatform() << ".";
+      CG_DEBUG("PythonHandler").log([](auto& log) {
+        auto* py_home = Py_GetPythonHome();
+#ifdef PYTHON2
+        std::string python_path{Py_GetPath()}, python_home{py_home ? py_home : "(not set)"};
+#else
+        std::wstring python_path{Py_GetPath()}, python_home{py_home ? py_home : L"(not set)"};
+#endif
+        log << "Initialised the Python cards parser\n\t"
+            << "Python version: " << utils::replace_all(std::string{Py_GetVersion()}, "\n", " ") << "\n\t"
+            << "Platform: " << Py_GetPlatform() << "\n\t"
+            << "Home directory: " << python_home << "\n\t"
+            << "Parsed path: " << python_path << ".";
+      });
 
       PyObject* cfg = PyImport_ImportModule(filename.c_str());  // new
       if (!cfg)
@@ -140,7 +172,7 @@ namespace cepgen {
 
         rt_params_->kinematics = Kinematics(pkin);
         if (proc_params.has<int>("mode"))
-          rt_params_->kinematics.incoming_beams.setMode((mode::Kinematics)proc_params.get<int>("mode"));
+          rt_params_->kinematics.incomingBeams().setMode((mode::Kinematics)proc_params.get<int>("mode"));
 
         //--- taming functions
         PyObject* ptam = element(process, "tamingFunctions");  // borrowed

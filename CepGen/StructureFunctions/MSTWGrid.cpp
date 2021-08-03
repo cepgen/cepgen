@@ -1,19 +1,35 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include <cmath>
+#include <fstream>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/GridHandler.h"
 #include "CepGen/Utils/String.h"
-
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/Exception.h"
-
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-
-#include <fstream>
-#include <cmath>
 
 /// Martin-Stirling-Thorne-Watt PDFs structure functions
 namespace mstw {
   /// A \f$F_{2,L}\f$ grid interpolator
-  class Grid : public cepgen::strfun::Parameterisation, private cepgen::GridHandler<2, 2> {
+  class Grid final : public cepgen::strfun::Parameterisation, private cepgen::GridHandler<2, 2> {
   public:
     /// Grid MSTW structure functions evaluator
     explicit Grid(const cepgen::ParametersList& params = cepgen::ParametersList());
@@ -105,9 +121,8 @@ namespace mstw {
     CG_DEBUG("MSTW") << "MSTW@" << header_.order << " grid evaluator built "
                      << "for " << header_.nucleon << " structure functions (" << header_.cl << ")\n\t"
                      << "xBj in range [" << std::pow(10., bounds[0].first) << ":" << std::pow(10., bounds[0].second)
-                     << "]\n\t"
-                     << " Q² in range [" << std::pow(10., bounds[1].first) << ":" << std::pow(10., bounds[1].second)
-                     << "].";
+                     << "]\n\t" << L" Q² in range [" << std::pow(10., bounds[1].first) << ":"
+                     << std::pow(10., bounds[1].second) << "].";
   }
 
   std::string Grid::describe() const {
@@ -127,7 +142,7 @@ namespace mstw {
 
   std::ostream& operator<<(std::ostream& os, const Grid::sfval_t& val) {
     return os << cepgen::utils::format(
-               "xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFₗ = % .6e", val.xbj, val.q2, val.f2, val.fl);
+               L"xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFₗ = % .6e", val.xbj, val.q2, val.f2, val.fl);
   }
 
   std::ostream& operator<<(std::ostream& os, const Grid::header_t::order_t& order) {

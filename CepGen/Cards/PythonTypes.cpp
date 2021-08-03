@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
@@ -104,16 +122,7 @@ namespace cepgen {
       if (!is<std::string>(obj))
         throw CG_ERROR("PythonHandler:get")
             << "Object has invalid type: string != \"" << obj->ob_type->tp_name << "\".";
-#ifdef PYTHON2
-      const std::string out = PyString_AsString(obj);  // deprecated in python v3+
-#else
-      PyObject* pstr = PyUnicode_AsEncodedString(obj, "utf-8", "strict");  // new
-      if (!pstr)
-        throwPythonError("Failed to decode a Python object!");
-      const std::string out = PyBytes_AS_STRING(pstr);
-      Py_CLEAR(pstr);
-#endif
-      return out;
+      return decode(obj);
     }
 
     template <>

@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "CepGen/Processes/FortranKTProcess.h"
 
 #include "CepGen/Core/Exception.h"
@@ -48,17 +66,17 @@ namespace cepgen {
       mom_ip2_ = event_->oneWithRole(Particle::IncomingBeam2).momentum();
 
       defineVariable(
-          y1_, Mapping::linear, kin_.cuts.central.rapidity_single(), {-6., 6.}, "First central particle rapidity");
+          y1_, Mapping::linear, kin_.cuts().central.rapidity_single(), {-6., 6.}, "First central particle rapidity");
       defineVariable(
-          y2_, Mapping::linear, kin_.cuts.central.rapidity_single(), {-6., 6.}, "Second central particle rapidity");
+          y2_, Mapping::linear, kin_.cuts().central.rapidity_single(), {-6., 6.}, "Second central particle rapidity");
       defineVariable(pt_diff_,
                      Mapping::linear,
-                     kin_.cuts.central.pt_diff(),
+                     kin_.cuts().central.pt_diff(),
                      {0., 50.},
                      "Transverse momentum difference between central particles");
       defineVariable(phi_pt_diff_,
                      Mapping::linear,
-                     kin_.cuts.central.phi_diff(),
+                     kin_.cuts().central.phi_diff(),
                      {0., 2. * M_PI},
                      "Central particles azimuthal angle difference");
 
@@ -66,29 +84,29 @@ namespace cepgen {
       // feed phase space cuts to the common block
       //===========================================================================================
 
-      kin_.cuts.central.pt_single().save(kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max);
-      kin_.cuts.central.energy_single().save(kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max);
-      kin_.cuts.central.eta_single().save(kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max);
-      kin_.cuts.central.mass_sum().save(kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max);
-      kin_.cuts.central.pt_sum().save(kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max);
-      kin_.cuts.central.rapidity_diff().save(kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max);
+      kin_.cuts().central.pt_single().save(kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max);
+      kin_.cuts().central.energy_single().save(kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max);
+      kin_.cuts().central.eta_single().save(kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max);
+      kin_.cuts().central.mass_sum().save(kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max);
+      kin_.cuts().central.pt_sum().save(kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max);
+      kin_.cuts().central.rapidity_diff().save(kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max);
 
       //===========================================================================================
       // feed run parameters to the common block
       //===========================================================================================
 
-      genparams_.icontri = (int)kin_.incoming_beams.mode();
-      if (kin_.incoming_beams.structureFunctions())
-        genparams_.sfmod = kin_.incoming_beams.structureFunctions()->name();
+      genparams_.icontri = (int)kin_.incomingBeams().mode();
+      if (kin_.incomingBeams().structureFunctions())
+        genparams_.sfmod = kin_.incomingBeams().structureFunctions()->name();
 
       //-------------------------------------------------------------------------------------------
       // incoming beams information
       //-------------------------------------------------------------------------------------------
 
       //--- positive-z incoming beam
-      genparams_.inp1 = kin_.incoming_beams.positive().momentum.pz();
+      genparams_.inp1 = kin_.incomingBeams().positive().momentum.pz();
       //--- check if first incoming beam is a heavy ion
-      const HeavyIon in1 = (HeavyIon)kin_.incoming_beams.positive().pdg;
+      const HeavyIon in1 = (HeavyIon)kin_.incomingBeams().positive().pdg;
       if (in1) {
         genparams_.a_nuc1 = in1.A;
         genparams_.z_nuc1 = (unsigned short)in1.Z;
@@ -100,9 +118,9 @@ namespace cepgen {
         genparams_.a_nuc1 = genparams_.z_nuc1 = 1;
 
       //--- negative-z incoming beam
-      genparams_.inp2 = kin_.incoming_beams.negative().momentum.pz();
+      genparams_.inp2 = kin_.incomingBeams().negative().momentum.pz();
       //--- check if second incoming beam is a heavy ion
-      const HeavyIon in2 = (HeavyIon)kin_.incoming_beams.negative().pdg;
+      const HeavyIon in2 = (HeavyIon)kin_.incomingBeams().negative().pdg;
       if (in2) {
         genparams_.a_nuc2 = in2.A;
         genparams_.z_nuc2 = (unsigned short)in2.Z;
@@ -117,8 +135,8 @@ namespace cepgen {
       // intermediate partons information
       //-------------------------------------------------------------------------------------------
 
-      genparams_.iflux1 = (int)kin_.incoming_beams.positive().kt_flux;
-      genparams_.iflux2 = (int)kin_.incoming_beams.negative().kt_flux;
+      genparams_.iflux1 = (int)kin_.incomingBeams().positive().kt_flux;
+      genparams_.iflux2 = (int)kin_.incomingBeams().negative().kt_flux;
     }
 
     double FortranKTProcess::computeKTFactorisedMatrixElement() {

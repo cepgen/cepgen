@@ -1,20 +1,36 @@
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/Constants.h"
-#include "CepGen/Utils/Physics.h"
-
-#include "CepGen/Core/Exception.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <array>
 #include <utility>
 #include <vector>
 
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/Physics.h"
+
 namespace cepgen {
   namespace strfun {
     /// \f$F_{2,L}\f$ parameterisation by Christy and Bosted \cite Bosted:2007xd
-    class ChristyBosted : public Parameterisation {
+    class ChristyBosted final : public Parameterisation {
     public:
       explicit ChristyBosted(const ParametersList& params = ParametersList());
       static std::string description() { return "Christy-Bosted F2/FL parameterisation of low-mass resonances"; }

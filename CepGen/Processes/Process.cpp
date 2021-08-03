@@ -1,14 +1,31 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "CepGen/Processes/Process.h"
 
-#include "CepGen/Event/Event.h"
-#include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/HeavyIon.h"
+#include <iomanip>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/HeavyIon.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/String.h"
-
-#include <iomanip>
 
 namespace cepgen {
   namespace proc {
@@ -237,19 +254,19 @@ namespace cepgen {
       mp2_ = mp_ * mp_;
       kin_ = kin;
 
-      const auto& p1 = kin_.incoming_beams.positive().momentum;
-      const auto& p2 = kin_.incoming_beams.negative().momentum;
+      const auto& p1 = kin_.incomingBeams().positive().momentum;
+      const auto& p2 = kin_.incomingBeams().negative().momentum;
       //--- define incoming system
       if (event_) {
         auto& ib1 = event_->oneWithRole(Particle::IncomingBeam1);
-        ib1.setPdgId(kin_.incoming_beams.positive().pdg);
+        ib1.setPdgId(kin_.incomingBeams().positive().pdg);
         ib1.setMomentum(p1);
         auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
-        ib2.setPdgId(kin_.incoming_beams.negative().pdg);
+        ib2.setPdgId(kin_.incomingBeams().negative().pdg);
         ib2.setMomentum(p2);
       }
 
-      s_ = kin.incoming_beams.s();
+      s_ = kin.incomingBeams().s();
       sqs_ = std::sqrt(s_);
 
       mA2_ = p1.mass2();

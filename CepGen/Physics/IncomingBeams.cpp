@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
@@ -6,6 +24,7 @@
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Physics/Modes.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
@@ -92,11 +111,14 @@ namespace cepgen {
     if (sqrts > 0.)
       setSqrtS(sqrts);
     //--- form factors
-    if (params.has<std::string>("formFactors") || !form_factors_)
-      form_factors_ = formfac::FormFactorsFactory::get().build(
-          params.get<std::string>("formFactors", formfac::gFFStandardDipoleHandler));
+    if (params.has<std::string>("formFactors") || !form_factors_) {
+      const auto ff_mode = params.get<std::string>("formFactors");
+      form_factors_ =
+          formfac::FormFactorsFactory::get().build(ff_mode.empty() ? formfac::gFFStandardDipoleHandler : ff_mode);
+    }
 
-    setMode((mode::Kinematics)params.get<int>("mode", (int)mode::Kinematics::ElasticElastic));
+    if (params.has<int>("mode"))
+      setMode((mode::Kinematics)params.get<int>("mode"));
     //--- structure functions
     auto strfun = params.get<ParametersList>("structureFunctions");
     if (!strfun.empty() || !str_fun_) {
@@ -194,8 +216,7 @@ namespace cepgen {
         }
       }
       default:
-        throw CG_FATAL("Kinematics:IncomingBeams:mode") << "Unsupported kinematics mode for beams with modes:\n\t"
-                                                        << positive().mode << " / " << negative().mode << "!";
+        return mode::Kinematics::invalid;
     }
   }
 

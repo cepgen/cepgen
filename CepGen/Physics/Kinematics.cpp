@@ -1,46 +1,62 @@
-#include "CepGen/Physics/Kinematics.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/GluonGrid.h"
+#include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
 
 namespace cepgen {
   const double Kinematics::MX_MIN = 1.07;  // mp+mpi+-
 
-  Kinematics::Kinematics(const ParametersList& params) {
-    //----- per-incoming beam kinematics
-    incoming_beams = IncomingBeams(params);
-
+  Kinematics::Kinematics(const ParametersList& params) : incoming_beams_(params) {
+    CG_DEBUG("Kinematics") << "Building a Kinematics parameters container "
+                           << "with the following parameters:\n\t" << params << ".";
     //----- phase space definition
     setParameters(params);
   }
 
   void Kinematics::setParameters(const ParametersList& params) {
     //--- initial partons
-    cuts.initial.setParameters(params);
+    cuts_.initial.setParameters(params);
 
     //--- central system
-    cuts.central.setParameters(params);
+    cuts_.central.setParameters(params);
     if (params.has<Limits>("phiptdiff")) {
       CG_WARNING("Kinematics") << "\"phiptdiff\" parameter is deprecated! "
                                << "Please use \"phidiff\" instead.";
-      params.fill<Limits>("phiptdiff", cuts.central.phi_diff());  //legacy
+      params.fill<Limits>("phiptdiff", cuts_.central.phi_diff());  //legacy
     }
     if (params.has<std::vector<int> >("minFinalState"))
       for (const auto& pdg : params.get<std::vector<int> >("minFinalState"))
-        minimum_final_state.emplace_back((pdgid_t)pdg);
+        minimum_final_state_.emplace_back((pdgid_t)pdg);
     if (params.has<ParametersList>("cuts")) {  // per-particle cuts
       const auto& per_parts = params.get<ParametersList>("cuts");
       for (const auto& part : per_parts.keys())
-        cuts.central_particles[(pdgid_t)stoi(part)].setParameters(per_parts.get<ParametersList>(part));
+        cuts_.central_particles[(pdgid_t)stoi(part)].setParameters(per_parts.get<ParametersList>(part));
     }
 
     //--- outgoing remnants
-    cuts.remnants.setParameters(params);
+    cuts_.remnants.setParameters(params);
     // sanity check
-    if (cuts.remnants.mx().min() < MX_MIN) {
+    if (cuts_.remnants.mx().min() < MX_MIN) {
       CG_WARNING("Kinematics:setParameters") << "Minimum diffractive mass set to " << MX_MIN << " GeV.";
-      cuts.remnants.mx().min() = MX_MIN;
+      cuts_.remnants.mx().min() = MX_MIN;
     }
 
     //--- specify where to look for the grid path for gluon emission
@@ -50,20 +66,20 @@ namespace cepgen {
 
   ParametersList Kinematics::parameters() const {
     ParametersList params;
-    params += incoming_beams.parameters();
-    for (const auto& lim : cuts.initial.list())
+    params += incoming_beams_.parameters();
+    for (const auto& lim : cuts_.initial.list())
       params.set<Limits>(lim.name, lim.limits);
-    for (auto& lim : cuts.central.list())
+    for (auto& lim : cuts_.central.list())
       params.set<Limits>(lim.name, lim.limits);
-    if (!minimum_final_state.empty()) {
+    if (!minimum_final_state_.empty()) {
       std::vector<int> min_pdgs;
-      for (const auto& pdg : minimum_final_state)
+      for (const auto& pdg : minimum_final_state_)
         min_pdgs.emplace_back((int)pdg);
       params.set<std::vector<int> >("minFinalState", min_pdgs);
     }
-    if (!cuts.central_particles.empty()) {
+    if (!cuts_.central_particles.empty()) {
       ParametersList per_part;
-      for (const auto& cuts_vs_part : cuts.central_particles) {
+      for (const auto& cuts_vs_part : cuts_.central_particles) {
         ParametersList cuts_vs_id;
         for (const auto& lim : cuts_vs_part.second.list())
           params.set<Limits>(lim.name, lim.limits);
@@ -71,7 +87,7 @@ namespace cepgen {
       }
       params.set<ParametersList>("cuts", per_part);
     }
-    for (const auto& lim : cuts.remnants.list())
+    for (const auto& lim : cuts_.remnants.list())
       params.set<Limits>(lim.name, lim.limits);
     return params;
   }

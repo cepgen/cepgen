@@ -1,12 +1,29 @@
-#include "CepGen/StructureFunctions/SigmaRatio.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Utils/Physics.h"
-
-#include <cmath>
 #include <cassert>
+#include <cmath>
 #include <iostream>
+
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
+#include "CepGen/Utils/Physics.h"
 
 namespace cepgen {
   namespace sigrat {
@@ -17,7 +34,7 @@ namespace cepgen {
     //---------------------------------------------------------------------------------------------
 
     /// E143 experimental R measurement \cite Abe:1998ym
-    class E143 : public Parameterisation {
+    class E143 final : public Parameterisation {
     public:
       explicit E143(const ParametersList& params = ParametersList());
       static std::string description() { return "E143 experimental R measurement"; }
@@ -64,7 +81,7 @@ namespace cepgen {
 
     /// SLAC experimental R measurement \cite Whitlow:1990gk
     /// \warning valid for \f$Q^2\f$ > 0.3 GeV\f$^2\f$
-    class R1990 : public Parameterisation {
+    class R1990 final : public Parameterisation {
     public:
       explicit R1990(const ParametersList& params = ParametersList());
       static std::string description() { return "SLAC experimental R measurement"; }
@@ -90,7 +107,7 @@ namespace cepgen {
     //---------------------------------------------------------------------------------------------
 
     /// CLAS experimental R measurement
-    class CLAS : public Parameterisation {
+    class CLAS final : public Parameterisation {
     public:
       explicit CLAS(const ParametersList& params = ParametersList());
       static std::string description() { return "CLAS experimental R measurement"; }
@@ -125,7 +142,7 @@ namespace cepgen {
     //---------------------------------------------------------------------------------------------
 
     /// Sibirtsev & Blunden parameterisation of the R ratio \cite Sibirtsev:2013cga
-    class SibirtsevBlunden : public Parameterisation {
+    class SibirtsevBlunden final : public Parameterisation {
     public:
       explicit SibirtsevBlunden(const ParametersList& params = ParametersList());
       static std::string description() { return "Sibirtsev-Blunden theoretical R parameterisation"; }

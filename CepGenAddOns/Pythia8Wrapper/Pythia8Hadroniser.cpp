@@ -1,25 +1,37 @@
-#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
-
-#include "CepGen/Physics/Hadroniser.h"
-#include "CepGen/Modules/EventModifierFactory.h"
-
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/Exception.h"
-
-#include "CepGen/Parameters.h"
-#include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/PDG.h"
-
-#include "CepGen/Event/Event.h"
-#include "CepGen/Event/Particle.h"
-#include "CepGen/Utils/String.h"
-
-#include <Pythia8/Pythia.h>
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <memory>
 #include <unordered_map>
 #include <vector>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Event/Particle.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/Hadroniser.h"
+#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/String.h"
+#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
 namespace cepgen {
   namespace hadr {
@@ -46,7 +58,7 @@ namespace cepgen {
       static constexpr unsigned short PYTHIA_STATUS_IN_BEAM = 12;
       static constexpr unsigned short PYTHIA_STATUS_IN_PARTON_KT = 61;
 
-      std::vector<pdgid_t> min_ids_;
+      Kinematics::pdgids_t min_ids_;
       std::unordered_map<short, short> py_cg_corresp_;
       unsigned short findRole(const Event& ev, const Pythia8::Particle& p) const;
       void updateEvent(Event& ev, double& weight) const;
@@ -83,12 +95,12 @@ namespace cepgen {
 #else
       pythia_->setLHAupPtr(cg_evt_);
 #endif
-      pythia_->settings.parm("Beams:idA", (long)rt_params_->kinematics.incoming_beams.positive().pdg);
-      pythia_->settings.parm("Beams:idB", (long)rt_params_->kinematics.incoming_beams.negative().pdg);
+      pythia_->settings.parm("Beams:idA", (long)rt_params_->kinematics.incomingBeams().positive().pdg);
+      pythia_->settings.parm("Beams:idB", (long)rt_params_->kinematics.incomingBeams().negative().pdg);
       // specify we will be using a LHA input
       pythia_->settings.mode("Beams:frameType", 5);
-      pythia_->settings.parm("Beams:eCM", rt_params_->kinematics.sqrtS());
-      min_ids_ = rt_params_->kinematics.minimum_final_state;
+      pythia_->settings.parm("Beams:eCM", rt_params_->kinematics.incomingBeams().sqrtS());
+      min_ids_ = rt_params_->kinematics.minimumFinalState();
       if (debug_lhef_)
         cg_evt_->openLHEF("debug.lhe");
     }
@@ -118,7 +130,7 @@ namespace cepgen {
       }
 
 #if defined(PYTHIA_VERSION_INTEGER) && PYTHIA_VERSION_INTEGER >= 8226
-      switch (rt_params_->kinematics.incoming_beams.mode()) {
+      switch (rt_params_->kinematics.incomingBeams().mode()) {
         case mode::Kinematics::ElasticElastic: {
           pythia_->settings.mode("BeamRemnants:unresolvedHadron", 3);
           pythia_->settings.flag("PartonLevel:all", false);

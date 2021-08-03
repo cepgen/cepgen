@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGen_Cards_PythonHandler_h
 #define CepGen_Cards_PythonHandler_h
 
@@ -13,7 +31,7 @@ namespace cepgen {
   class ParametersList;
   namespace card {
     /// CepGen Python configuration cards reader/writer
-    class PythonHandler : public Handler {
+    class PythonHandler final : public Handler {
     public:
       /// Read a standard configuration card
       explicit PythonHandler(const ParametersList&);
@@ -39,6 +57,7 @@ namespace cepgen {
       std::string pythonPath(const std::string&) const;
       PyObject* element(PyObject*, const std::string&) const;
       PyObject* encode(const char* str) const;
+      std::string decode(PyObject* obj) const;
 
       template <typename T>
       bool is(PyObject* obj) const;

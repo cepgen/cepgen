@@ -1,3 +1,23 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *                2017-2019  Wolfgang Schaefer
+ *                2019       Marta Luszczak
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <iomanip>
 
 #include "CepGen/Core/Exception.h"
@@ -11,7 +31,7 @@
 namespace cepgen {
   namespace proc {
     /// Compute the matrix element for a CE \f$\gamma\gamma\rightarrow f\bar f\f$ process using \f$k_{\rm T}\f$-factorization approach
-    class PPtoFF : public Process2to4 {
+    class PPtoFF final : public Process2to4 {
     public:
       PPtoFF(const ParametersList& params = ParametersList());
       ProcessPtr clone() const override { return ProcessPtr(new PPtoFF(*this)); }
@@ -84,8 +104,8 @@ namespace cepgen {
                                  << "charge = " << std::setprecision(2) << qf3_ / 3. << " e)\n\t"
                                  << "matrix element computation method: " << (int)method_ << ".";
 
-      if (!kin_.cuts.central.pt_diff().valid())
-        kin_.cuts.central.pt_diff() = {0., 50.};  // tighter cut for fermions
+      if (!kin_.cuts().central.pt_diff().valid())
+        kin_.cuts().central.pt_diff() = {0., 50.};  // tighter cut for fermions
 
       CG_DEBUG("PPtoFF:prepare") << "Incoming state:\n\t"
                                  << "mp(1/2) = " << sqrt(mA2_) << "/" << sqrt(mB2_) << ".";

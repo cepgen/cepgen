@@ -1,4 +1,24 @@
-#include <assert.h>
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *                2017-2019  Wolfgang Schaefer
+ *                2019       Marta Luszczak
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include <cassert>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
@@ -11,7 +31,7 @@ namespace cepgen {
   namespace proc {
     /// \brief Compute the matrix element for a CE \f$\gamma\gamma\rightarrow W^+W^-\f$ process using \f$k_{\rm T}\f$-factorization approach
     /// \note The full theoretical description of this process definition may be found in \cite Luszczak:2018ntp.
-    class PPtoWW : public Process2to4 {
+    class PPtoWW final : public Process2to4 {
     public:
       PPtoWW(const ParametersList& params = ParametersList());
       ProcessPtr clone() const override { return ProcessPtr(new PPtoWW(*this)); }
@@ -67,8 +87,8 @@ namespace cepgen {
 
     void PPtoWW::prepareProcessKinematics() {
       cuts::Central single_w_cuts(cepgen::ParametersList{});
-      if (kin_.cuts.central_particles.count(PDG::W) > 0)
-        single_w_cuts = kin_.cuts.central_particles.at(PDG::W);
+      if (kin_.cuts().central_particles.count(PDG::W) > 0)
+        single_w_cuts = kin_.cuts().central_particles.at(PDG::W);
       setCuts(single_w_cuts);
     }
 

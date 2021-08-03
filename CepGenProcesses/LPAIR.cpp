@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "CepGenProcesses/LPAIR.h"
 
 #include "CepGen/Core/Exception.h"
@@ -85,7 +103,7 @@ namespace cepgen {
       masses_.Ml2 = (*event_)[Particle::CentralSystem][0].mass2();
 
       //--- first define the squared mass range for the diphoton/dilepton system
-      const auto& mll_limits = kin_.cuts.central.mass_sum();
+      const auto& mll_limits = kin_.cuts().central.mass_sum();
       w_limits_ = Limits(mll_limits.hasMin() ? std::pow(mll_limits.min(), 2) : 4. * masses_.Ml2,
                          mll_limits.hasMax() ? std::pow(mll_limits.max(), 2) : s_);
 
@@ -96,11 +114,11 @@ namespace cepgen {
       p2_lab_ = (*event_)[Particle::IncomingBeam2][0].momentum();
 
       const double mx0 = mp_ + PDG::get().mass(PDG::piPlus);  // 1.07
-      const double min_wx = pow(std::max(mx0, kin_.cuts.remnants.mx().min()), 2);
+      const double min_wx = pow(std::max(mx0, kin_.cuts().remnants.mx().min()), 2);
       const Limits wx_lim_ob1(
-          min_wx, pow(std::min(sqs_ - p1_lab_.mass() - 2. * sqrt(masses_.Ml2), kin_.cuts.remnants.mx().max()), 2));
+          min_wx, pow(std::min(sqs_ - p1_lab_.mass() - 2. * sqrt(masses_.Ml2), kin_.cuts().remnants.mx().max()), 2));
       const Limits wx_lim_ob2(
-          min_wx, pow(std::min(sqs_ - p2_lab_.mass() - 2. * sqrt(masses_.Ml2), kin_.cuts.remnants.mx().max()), 2));
+          min_wx, pow(std::min(sqs_ - p2_lab_.mass() - 2. * sqrt(masses_.Ml2), kin_.cuts().remnants.mx().max()), 2));
 
       //--- variables mapping
 
@@ -115,7 +133,7 @@ namespace cepgen {
       defineVariable(x6_, Mapping::linear, {0., 1.}, {0., 1.}, "x6");
 
       //--- first outgoing beam particle or remnant mass
-      switch (kin_.incoming_beams.positive().mode) {
+      switch (kin_.incomingBeams().positive().mode) {
         case mode::Beam::PointLikeFermion:
         case mode::Beam::ProtonElastic:
           event_->oneWithRole(Particle::OutgoingBeam1).setPdgId(event_->oneWithRole(Particle::IncomingBeam1).pdgId());
@@ -126,10 +144,10 @@ namespace cepgen {
           break;
         default:
           throw CG_FATAL("LPAIR:kinematics")
-              << "Invalid mode for beam 1: " << kin_.incoming_beams.positive().mode << " is not supported!";
+              << "Invalid mode for beam 1: " << kin_.incomingBeams().positive().mode << " is not supported!";
       }
       //--- second outgoing beam particle or remnant mass
-      switch (kin_.incoming_beams.negative().mode) {
+      switch (kin_.incomingBeams().negative().mode) {
         case mode::Beam::PointLikeFermion:
         case mode::Beam::ProtonElastic:
           event_->oneWithRole(Particle::OutgoingBeam2).setPdgId(event_->oneWithRole(Particle::IncomingBeam2).pdgId());
@@ -140,7 +158,7 @@ namespace cepgen {
           break;
         default:
           throw CG_FATAL("LPAIR:kinematics")
-              << "Invalid mode for beam 2: " << kin_.incoming_beams.negative().mode << " is not supported!";
+              << "Invalid mode for beam 2: " << kin_.incomingBeams().negative().mode << " is not supported!";
       }
     }
 
@@ -204,18 +222,18 @@ namespace cepgen {
                       t1_max;  // definition from eq. (A.5) in [1]
 
       // FIXME dropped in CDF version
-      if (t1_max > -kin_.cuts.initial.q2().min()) {
-        CG_DEBUG_LOOP("LPAIR") << "t1max = " << t1_max << " > -q2min = " << -kin_.cuts.initial.q2().min();
+      if (t1_max > -kin_.cuts().initial.q2().min()) {
+        CG_DEBUG_LOOP("LPAIR") << "t1max = " << t1_max << " > -q2min = " << -kin_.cuts().initial.q2().min();
         return false;
       }
-      if (t1_min < -kin_.cuts.initial.q2().max() && kin_.cuts.initial.q2().hasMax()) {
-        CG_DEBUG_LOOP("LPAIR") << "t1min = " << t1_min << " < -q2max = " << -kin_.cuts.initial.q2().max();
+      if (t1_min < -kin_.cuts().initial.q2().max() && kin_.cuts().initial.q2().hasMax()) {
+        CG_DEBUG_LOOP("LPAIR") << "t1min = " << t1_min << " < -q2max = " << -kin_.cuts().initial.q2().max();
         return false;
       }
-      if (t1_max < -kin_.cuts.initial.q2().max() && kin_.cuts.initial.q2().hasMax())
-        t1_max = -kin_.cuts.initial.q2().max();
-      if (t1_min > -kin_.cuts.initial.q2().min() && kin_.cuts.initial.q2().hasMin())
-        t1_min = -kin_.cuts.initial.q2().min();
+      if (t1_max < -kin_.cuts().initial.q2().max() && kin_.cuts().initial.q2().hasMax())
+        t1_max = -kin_.cuts().initial.q2().max();
+      if (t1_min > -kin_.cuts().initial.q2().min() && kin_.cuts().initial.q2().hasMin())
+        t1_min = -kin_.cuts().initial.q2().min();
       /////
 
       // t1, the first photon propagator, is defined here
@@ -671,8 +689,8 @@ namespace cepgen {
       jacobian_ /= amap;
       jacobian_ /= bmap;
       jacobian_ *= log(ymap);
-      if ((kin_.incoming_beams.mode() == mode::Kinematics::ElasticInelastic ||
-           kin_.incoming_beams.mode() == mode::Kinematics::InelasticElastic) &&
+      if ((kin_.incomingBeams().mode() == mode::Kinematics::ElasticInelastic ||
+           kin_.incomingBeams().mode() == mode::Kinematics::InelasticElastic) &&
           symmetrise_)
         jacobian_ *= 1.;
       else
@@ -792,34 +810,36 @@ namespace cepgen {
 
       //--- cut on mass of final hadronic system (MX/Y)
 
-      if (kin_.cuts.remnants.mx().valid()) {
-        if (kin_.incoming_beams.positive().mode == mode::Beam::ProtonInelastic && !kin_.cuts.remnants.mx().contains(mx))
+      if (kin_.cuts().remnants.mx().valid()) {
+        if (kin_.incomingBeams().positive().mode == mode::Beam::ProtonInelastic &&
+            !kin_.cuts().remnants.mx().contains(mx))
           return 0.;
-        if (kin_.incoming_beams.negative().mode == mode::Beam::ProtonInelastic && !kin_.cuts.remnants.mx().contains(my))
+        if (kin_.incomingBeams().negative().mode == mode::Beam::ProtonInelastic &&
+            !kin_.cuts().remnants.mx().contains(my))
           return 0.;
       }
 
       //--- cut on the proton's Q2 (first photon propagator T1)
 
-      if (!kin_.cuts.initial.q2().contains(-t1_))
+      if (!kin_.cuts().initial.q2().contains(-t1_))
         return 0.;
 
       //----- cuts on the individual leptons
 
-      if (kin_.cuts.central.pt_single().valid()) {
-        const Limits& pt_limits = kin_.cuts.central.pt_single();
+      if (kin_.cuts().central.pt_single().valid()) {
+        const Limits& pt_limits = kin_.cuts().central.pt_single();
         if (!pt_limits.contains(p6_cm_.pt()) || !pt_limits.contains(p7_cm_.pt()))
           return 0.;
       }
 
-      if (kin_.cuts.central.energy_single().valid()) {
-        const Limits& energy_limits = kin_.cuts.central.energy_single();
+      if (kin_.cuts().central.energy_single().valid()) {
+        const Limits& energy_limits = kin_.cuts().central.energy_single();
         if (!energy_limits.contains(p6_cm_.energy()) || !energy_limits.contains(p7_cm_.energy()))
           return 0.;
       }
 
-      if (kin_.cuts.central.eta_single().valid()) {
-        const Limits& eta_limits = kin_.cuts.central.eta_single();
+      if (kin_.cuts().central.eta_single().valid()) {
+        const Limits& eta_limits = kin_.cuts().central.eta_single();
         if (!eta_limits.contains(p6_cm_.eta()) || !eta_limits.contains(p7_cm_.eta()))
           return 0.;
       }
@@ -890,7 +910,7 @@ namespace cepgen {
 
       p3_lab_.setPz(p3_lab_.pz() * ranz);
       op1.setMomentum(p3_lab_);
-      switch (kin_.incoming_beams.positive().mode) {
+      switch (kin_.incomingBeams().positive().mode) {
         case mode::Beam::ProtonElastic:
         default:
           op1.setStatus(Particle::Status::FinalState);  // stable proton
@@ -906,7 +926,7 @@ namespace cepgen {
 
       p5_lab_.setPz(p5_lab_.pz() * ranz);
       op2.setMomentum(p5_lab_);
-      switch (kin_.incoming_beams.negative().mode) {
+      switch (kin_.incomingBeams().negative().mode) {
         case mode::Beam::ProtonElastic:
         default:
           op2.setStatus(Particle::Status::FinalState);  // stable proton
@@ -952,8 +972,8 @@ namespace cepgen {
     double LPAIR::periPP() const {
       //--- compute the electric/magnetic form factors for the two
       //    considered parton momenta transfers
-      const auto fp1 = (*kin_.incoming_beams.formFactors())(kin_.incoming_beams.positive().mode, -t1_, mX2_);
-      const auto fp2 = (*kin_.incoming_beams.formFactors())(kin_.incoming_beams.negative().mode, -t2_, mY2_);
+      const auto fp1 = (*kin_.incomingBeams().formFactors())(kin_.incomingBeams().positive().mode, -t1_, mX2_);
+      const auto fp2 = (*kin_.incomingBeams().formFactors())(kin_.incomingBeams().negative().mode, -t2_, mY2_);
 
       CG_DEBUG_LOOP("LPAIR:peripp") << "(u1,u2) = " << fp1 << "\n\t"
                                     << "(v1,v2) = " << fp2;

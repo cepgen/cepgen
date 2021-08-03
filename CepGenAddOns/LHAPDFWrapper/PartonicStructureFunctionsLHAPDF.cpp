@@ -1,17 +1,34 @@
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include <LHAPDF/LHAPDF.h>
+
+#include <array>
+#include <cmath>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/String.h"
-
-#include "LHAPDF/LHAPDF.h"
 
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
 #define LHAPDF_GE_6 1
 #endif
-
-#include <array>
-#include <math.h>
 
 namespace cepgen {
   namespace strfun {
@@ -109,7 +126,8 @@ namespace cepgen {
         lha_pdf_set_ = LHAPDF::PDFSet(pdf_set_);
         lha_pdf_set_.mkPDFs<std::unique_ptr<LHAPDF::PDF> >(pdfs_);
         lhapdf_version = LHAPDF::version();
-        pdf_description = lha_pdf_set_.description();
+        pdf_description = utils::replace_all(lha_pdf_set_.description(), ". ", ".\n  ");
+        ;
         pdf_type = pdfs_[pdf_member_]->type();
       } catch (const LHAPDF::Exception& e) {
         throw CG_FATAL("Partonic") << "Caught LHAPDF exception:\n\t" << e.what();
@@ -121,7 +139,6 @@ namespace cepgen {
         LHAPDF::initPDFSet(pdf_set_, LHAPDF::LHGRID, pdf_member_);
       lhapdf_version = LHAPDF::getVersion();
 #endif
-      utils::replace_all(pdf_description, ". ", ".\n  ");
       CG_INFO("Partonic") << "Partonic structure functions evaluator successfully built.\n"
                           << " * LHAPDF version: " << lhapdf_version << "\n"
                           << " * number of flavours: " << num_flavours_ << "\n"

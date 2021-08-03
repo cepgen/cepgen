@@ -1,15 +1,32 @@
-#include "CepGen/Integration/IntegratorGSL.h"
-#include "CepGen/Modules/IntegratorFactory.h"
-
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Parameters.h"
-#include "CepGen/Utils/String.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <gsl/gsl_monte_miser.h>
 
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Integration/IntegratorGSL.h"
+#include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Utils/String.h"
+
 namespace cepgen {
   /// MISER integration algorithm developed by W.H. Press and G.R. Farrar, as documented in \cite Press:1989vk.
-  class IntegratorMISER : public IntegratorGSL {
+  class IntegratorMISER final : public IntegratorGSL {
   public:
     IntegratorMISER(const ParametersList&);
     static std::string description() { return "MISER adaptive importance sampling integrator"; }

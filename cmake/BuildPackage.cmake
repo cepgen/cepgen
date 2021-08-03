@@ -30,6 +30,7 @@ if(RPMBUILD)
     set(CPACK_RPM_DEVEL_PACKAGE_ARCHITECTURE noarch)
     set(CPACK_RPM_ADDONS_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
     set(CPACK_RPM_ROOT_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, root >= 6.0")
+    set(CPACK_RPM_DELPHES_PACKAGE_REQUIRES "${CPACK_RPM_ROOT_PACKAGE_REQUIRES}, cepgen-root")
     set(CPACK_RPM_PYTHIA6_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
     set(CPACK_RPM_PYTHIA8_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, pythia8 >= 8.2.30")
     set(CPACK_RPM_BOOST_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, boost >= 1.33")
@@ -54,7 +55,8 @@ else()
     set(CPACK_DEB_DEVEL_PACKAGE_DEPENDS ${CEPGEN_MIN_REQ})
     set(CPACK_DEB_DEVEL_PACKAGE_ARCHITECTURE noarch)
     set(CPACK_DEB_ROOT_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, root >= 6.0")
-    set(CPACK_DEB_PYTHIA6_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
+    set(CPACK_DEB_DELPHES_PACKAGE_DEPENDS "${CPACK_DEB_ROOT_PACKAGE_REQUIRES}, cepgen-root")
+    set(CPACK_DEB_PYTHIA6_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}")
     set(CPACK_DEB_PYTHIA8_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, pythia8 >= 8.2.30")
     set(CPACK_DEB_BOOST_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, boost >= 1.33")
     set(CPACK_DEB_LHAPDF_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, lhapdf")
@@ -77,6 +79,10 @@ cpack_add_component(devel
 cpack_add_component(root
     DISPLAY_NAME "CepGen ROOT wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the ROOT library"
+    DEPENDS lib)
+cpack_add_component(delphes
+    DISPLAY_NAME "CepGen Delphes wrappers library"
+    DESCRIPTION "A CepGen wrapper to the Delphes utility"
     DEPENDS lib)
 cpack_add_component(pythia6
     DISPLAY_NAME "CepGen Pythia 6 wrappers library"

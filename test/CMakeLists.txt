@@ -11,7 +11,7 @@ set(tests_libraries ${CEPGEN_LIBRARIES})
 
 #-- skip functionals tests if no parsing library is found
 
-if(NOT CEPGEN_HAS_FUNCTIONALS)
+if(NOT CEPGEN_HAS_FUNCTIONAL)
   message(STATUS "No functionals parser found on this system. Disabling the corresponding tests.")
   file(GLOB tests_functionals
       RELATIVE ${PROJECT_SOURCE_DIR}/test

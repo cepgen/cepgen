@@ -1,17 +1,32 @@
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
-
-#include "CepGen/Core/Exception.h"
-
-#include "CepGen/Event/Event.h"
-#include "CepGen/Event/EventBrowser.h"
-#include "CepGen/Parameters.h"
-
-#include "CepGen/Utils/String.h"
-#include "CepGen/Utils/Plotter.h"
-#include "CepGen/Version.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <fstream>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Event/EventBrowser.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Utils/Plotter.h"
+#include "CepGen/Utils/String.h"
+#include "CepGen/Version.h"
 
 namespace cepgen {
   namespace io {
@@ -162,7 +177,7 @@ namespace cepgen {
     }
 
     void TextHandler::initialise(const Parameters& params) {
-      sqrts_ = params.kinematics.sqrtS();
+      sqrts_ = params.kinematics.incomingBeams().sqrtS();
       num_evts_ = 0ul;
       if (save_banner_)
         file_ << banner(params, "#") << "\n";

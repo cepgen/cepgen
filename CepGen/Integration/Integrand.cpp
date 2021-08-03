@@ -1,24 +1,43 @@
-#include "CepGen/Integration/Integrand.h"
-
-#include "CepGen/Event/Event.h"
-#include "CepGen/Event/EventBrowser.h"
-
-#include "CepGen/Processes/Process.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "CepGen/Core/EventModifier.h"
-#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/Exception.h"
-
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Event/EventBrowser.h"
+#include "CepGen/Integration/Integrand.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Processes/Process.h"
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/TimeKeeper.h"
-
-#include "CepGen/Parameters.h"
 
 namespace cepgen {
   Integrand::Integrand(const Parameters* params)
       : params_(params), tmr_(new utils::Timer), event_(nullptr), storage_(false) {
-    if (!params_ || !params_->hasProcess())
-      throw CG_FATAL("Integrand") << "Invalid runtime parameters specified!";
+    if (!params_) {
+      CG_WARNING("Integrand") << "Invalid runtime parameters specified.";
+      return;
+    }
+    if (!params_->hasProcess()) {
+      CG_WARNING("Integrand") << "No process defined in runtime parameters.";
+      return;
+    }
     //--- each integrand object has its own clone of the process
     process_ = params_->process().clone();
     //--- prepare the event content
@@ -55,7 +74,7 @@ namespace cepgen {
     if (!event_)
       return weight;
     if (!storage_ && !params_->eventModifiersSequence().empty() && !params_->tamingFunctions().empty() &&
-        params_->kinematics.cuts.central_particles.empty())
+        params_->kinematics.cuts().central_particles.empty())
       return weight;
 
     //--- fill in the process' Event object
@@ -91,13 +110,13 @@ namespace cepgen {
     //--- apply cuts on final state system (after hadronisation!)
     //    (polish your cuts, as this might be very time-consuming...)
 
-    if (!params_->kinematics.cuts.central_particles.empty())
+    if (!params_->kinematics.cuts().central_particles.empty())
       for (const auto& part : (*event_)[Particle::CentralSystem]) {
         // retrieve all cuts associated to this final state particle in the
         // central system
-        if (params_->kinematics.cuts.central_particles.count(part.pdgId()) == 0)
+        if (params_->kinematics.cuts().central_particles.count(part.pdgId()) == 0)
           continue;
-        const auto& cuts_pdgid = params_->kinematics.cuts.central_particles.at(part.pdgId());
+        const auto& cuts_pdgid = params_->kinematics.cuts().central_particles.at(part.pdgId());
         // apply these cuts on the given particle
         if (!cuts_pdgid.pt_single().contains(part.momentum().pt()))
           return 0.;
@@ -108,7 +127,7 @@ namespace cepgen {
         if (!cuts_pdgid.rapidity_single().contains(part.momentum().rapidity()))
           return 0.;
       }
-    const auto& remn_cut = params_->kinematics.cuts.remnants;
+    const auto& remn_cut = params_->kinematics.cuts().remnants;
     for (const auto& system : {Particle::OutgoingBeam1, Particle::OutgoingBeam2})
       for (const auto& part : (*event_)[system]) {
         if (part.status() != Particle::Status::FinalState)

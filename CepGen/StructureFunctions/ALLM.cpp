@@ -1,18 +1,35 @@
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#include "CepGen/Utils/Physics.h"
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/Exception.h"
-
-#include <math.h>
-#include <assert.h>
+#include <cassert>
+#include <cmath>
 #include <vector>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/Physics.h"
 
 namespace cepgen {
   namespace strfun {
     /// \f$F_{2,L}\f$ parameterisation by Abramowicz, Levin, Levy, and Maor \cite Abramowicz:1991xz\cite Abramowicz:1997ms
-    class ALLM : public Parameterisation {
+    class ALLM final : public Parameterisation {
     public:
       class Parameters {
       private:
@@ -94,9 +111,9 @@ namespace cepgen {
                        << mod_params_.reggeon.b.at(2) << "}\n"
                        << "   c = {" << mod_params_.reggeon.c.at(0) << ", " << mod_params_.reggeon.c.at(1) << ", "
                        << mod_params_.reggeon.c.at(2) << "}\n"
-                       << " masses: m₀²=" << mod_params_.m02 << ", mp²=" << mod_params_.mp2
-                       << ", mr²=" << mod_params_.mr2 << " GeV²\n"
-                       << " q₀²=" << mod_params_.q02 << ", Λ²=" << mod_params_.lambda2 << " GeV².";
+                       << L" masses: m₀²=" << mod_params_.m02 << L", mp²=" << mod_params_.mp2 << L", mr²="
+                       << mod_params_.mr2 << L" GeV²\n"
+                       << L" q₀²=" << mod_params_.q02 << L", Λ²=" << mod_params_.lambda2 << L" GeV².";
     }
 
     ALLM& ALLM::eval(double xbj, double q2) {

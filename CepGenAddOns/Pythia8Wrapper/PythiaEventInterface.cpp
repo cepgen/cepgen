@@ -1,14 +1,28 @@
-#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "CepGen/Core/Exception.h"
-
-#include "CepGen/Parameters.h"
-
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/Constants.h"
-
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
 namespace Pythia8 {
   /// Convert a CepGen particle momentum into its Pythia8 counterpart
@@ -24,19 +38,21 @@ namespace Pythia8 {
 
   void CepGenEvent::initialise(const cepgen::Parameters& params) {
     params_ = &params;
-    inel1_ = params_->kinematics.incoming_beams.positive().mode == cepgen::mode::Beam::ProtonInelastic;
-    inel2_ = params_->kinematics.incoming_beams.negative().mode == cepgen::mode::Beam::ProtonInelastic;
+    inel1_ = params_->kinematics.incomingBeams().positive().mode == cepgen::mode::Beam::ProtonInelastic;
+    inel2_ = params_->kinematics.incomingBeams().negative().mode == cepgen::mode::Beam::ProtonInelastic;
 
-    setBeamA((short)params_->kinematics.incoming_beams.positive().pdg,
-             params_->kinematics.incoming_beams.positive().momentum.pz());
-    setBeamB((short)params_->kinematics.incoming_beams.negative().pdg,
-             params_->kinematics.incoming_beams.negative().momentum.pz());
+    setBeamA((short)params_->kinematics.incomingBeams().positive().pdg,
+             params_->kinematics.incomingBeams().positive().momentum.pz());
+    setBeamB((short)params_->kinematics.incomingBeams().negative().pdg,
+             params_->kinematics.incomingBeams().negative().momentum.pz());
     //addProcess( 0, params_->integration().result, params_->integration().err_result, 100. );
   }
 
   void CepGenEvent::addComments(const std::string& comments) {
 #if PYTHIA_VERSION_INTEGER >= 8200
     osLHEF << comments;
+#else
+    CG_WARNING("CepGenEvent:addComments") << "Pythia 8 is too outdated... Unused comments: " << comments;
 #endif
   }
 

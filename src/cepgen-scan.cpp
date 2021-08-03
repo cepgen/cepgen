@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <fstream>
 
 #include "CepGen/Cards/Handler.h"
@@ -64,11 +82,11 @@ int main(int argc, char* argv[]) {
   double cross_section, err_cross_section;
   for (const auto& value : points) {
     if (scan == "abseta") {
-      par.kinematics.cuts.central.eta_single().min() = -value;
-      par.kinematics.cuts.central.eta_single().max() = +value;
+      par.kinematics.cuts().central.eta_single().min() = -value;
+      par.kinematics.cuts().central.eta_single().max() = +value;
     } else if (scan == "absrap") {
-      par.kinematics.cuts.central.rapidity_single().min() = -value;
-      par.kinematics.cuts.central.rapidity_single().max() = +value;
+      par.kinematics.cuts().central.rapidity_single().min() = -value;
+      par.kinematics.cuts().central.rapidity_single().max() = +value;
     } else if (scan == "mpart") {
       auto prop = cepgen::PDG::get()(par.process().event()[cepgen::Particle::CentralSystem][0].pdgId());
       prop.mass = value;
@@ -77,7 +95,7 @@ int main(int argc, char* argv[]) {
     } else {
       auto modif = cepgen::ParametersList().set<double>(scan, value);
       par.kinematics.setParameters(modif);
-      CG_LOG << modif << "\n\n" << par.kinematics.cuts;
+      CG_LOG << modif << "\n\n" << par.kinematics.cuts();
     }
     CG_LOG << "Scan of \"" << scan << "\". Value = " << value << ".";
     mg.computeXsection(cross_section, err_cross_section);

@@ -1,18 +1,37 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGenAddOns_ROOTWrapper_ROOTCanvas_h
 #define CepGenAddOns_ROOTWrapper_ROOTCanvas_h
 
+#include <TCanvas.h>
+#include <TGraphErrors.h>
+#include <TH1.h>
+#include <THStack.h>
+#include <TLegend.h>
+#include <TLine.h>
+#include <TObjArray.h>
+#include <TObjString.h>
+#include <TPaveText.h>
+#include <TStyle.h>
+
 #include <cstring>
 #include <vector>
-
-#include "TCanvas.h"
-#include "TGraphErrors.h"
-#include "TH1.h"
-#include "THStack.h"
-#include "TLegend.h"
-#include "TObjArray.h"
-#include "TObjString.h"
-#include "TPaveText.h"
-#include "TStyle.h"
 
 namespace cepgen {
   /// A "prettified" text box object

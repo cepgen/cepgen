@@ -1,12 +1,33 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <algorithm>
 #include <string>
 
 #include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
 
+// clang-format off
 #include <frameobject.h>
+// clang-format on
 
 #if PY_MAJOR_VERSION < 3
 #define PYTHON2
@@ -19,63 +40,60 @@ namespace cepgen {
     //------------------------------------------------------------------
 
     std::string PythonHandler::pythonPath(const std::string& file) const {
-      std::string s_filename = file;
-      auto path = utils::split(s_filename, '/');
-      if (path.size() > 1) {
-        s_filename = *path.rbegin();
-        path.pop_back();
-        auto dir = utils::merge(path, "/");
-        CG_DEBUG("PythonHandler") << "Adding \"" << dir << "\" to the default search paths.";
-        setenv("PYTHONPATH", dir.c_str(), 1);
-      }
-      s_filename = s_filename.substr(0, s_filename.find_last_of("."));  // remove the extension
-      utils::replace_all(s_filename, "../", "..");
-      utils::replace_all(s_filename, "/", ".");
-      CG_DEBUG("PythonHandler") << "Python path: " << s_filename;
-      return s_filename;
+      const auto dir = fs::path{file}.remove_filename();
+      CG_DEBUG("PythonHandler") << "Adding {" << dir << "} to the default search paths.";
+      utils::env::append("PYTHONPATH", dir);
+
+      const auto filename = utils::replace_all(fs::path{file}.replace_extension("").string() /* remove the extension */,
+                                               {{"../", ".."}, {"/", "."}});
+      CG_DEBUG("PythonHandler") << "Python path: " << filename;
+      return filename;
     }
 
     void PythonHandler::throwPythonError(const std::string& message) const {
-      PyObject *ptype = nullptr, *pvalue = nullptr, *ptraceback_obj = nullptr;
-      // retrieve error indicator and clear it to handle ourself the error
-      PyErr_Fetch(&ptype, &pvalue, &ptraceback_obj);
-      PyErr_Clear();
-      // ensure the objects retrieved are properly normalised and point to compatible objects
-      PyErr_NormalizeException(&ptype, &pvalue, &ptraceback_obj);
-      std::ostringstream oss;
-      oss << message;
-      if (ptype != nullptr) {  // we can start the traceback
-        oss << "\n\tError: "
-#ifdef PYTHON2
-            << PyString_AsString(PyObject_Str(pvalue));  // deprecated in python v3+
-#else
-            << PyUnicode_AsUTF8(PyObject_Str(pvalue));
-#endif
-        PyTracebackObject* ptraceback = (PyTracebackObject*)ptraceback_obj;
-        std::string tabul = "↪ ";
-        if (ptraceback != nullptr) {
-          while (ptraceback->tb_next != nullptr) {
-            PyFrameObject* pframe = ptraceback->tb_frame;
-            if (pframe != nullptr) {
-              int line = PyCode_Addr2Line(pframe->f_code, pframe->f_lasti);
-#ifdef PYTHON2
-              const std::string filename = PyString_AsString(pframe->f_code->co_filename);
-              const std::string = PyString_AsString(pframe->f_code->co_name);
-#else
-              const std::string filename = PyUnicode_AsUTF8(pframe->f_code->co_filename);
-              const std::string funcname = PyUnicode_AsUTF8(pframe->f_code->co_name);
-#endif
-              oss << utils::format(
-                  "\n\t%s%s on %s (line %d)", tabul.c_str(), utils::boldify(funcname).c_str(), filename, line);
-            } else
-              oss << utils::format("\n\t%s issue in line %d", tabul.c_str(), ptraceback->tb_lineno);
-            tabul = std::string("  ") + tabul;
-            ptraceback = ptraceback->tb_next;
+      throw CG_FATAL("PythonHandler:error").log([this, &message](auto& err) {
+        PyObject *ptype = nullptr, *pvalue = nullptr, *ptraceback_obj = nullptr;
+        // retrieve error indicator and clear it to handle ourself the error
+        PyErr_Fetch(&ptype, &pvalue, &ptraceback_obj);
+        PyErr_Clear();
+        // ensure the objects retrieved are properly normalised and point to compatible objects
+        PyErr_NormalizeException(&ptype, &pvalue, &ptraceback_obj);
+        err << message;
+        if (ptype != nullptr) {  // we can start the traceback
+          err << "\n\tError: " << decode(PyObject_Str(pvalue));
+          PyTracebackObject* ptraceback = (PyTracebackObject*)ptraceback_obj;
+          std::string tabul = "↪ ";
+          if (ptraceback != nullptr) {
+            while (ptraceback->tb_next != nullptr) {
+              PyFrameObject* pframe = ptraceback->tb_frame;
+              if (pframe != nullptr) {
+                int line = PyCode_Addr2Line(pframe->f_code, pframe->f_lasti);
+                const auto filename = decode(pframe->f_code->co_filename), funcname = decode(pframe->f_code->co_name);
+                err << utils::format(
+                    "\n\t%s%s on %s (line %d)", tabul.c_str(), utils::boldify(funcname).c_str(), filename.c_str(), line);
+              } else
+                err << utils::format("\n\t%s issue in line %d", tabul.c_str(), ptraceback->tb_lineno);
+              tabul = std::string("  ") + tabul;
+              ptraceback = ptraceback->tb_next;
+            }
           }
         }
-      }
-      Py_Finalize();
-      throw CG_FATAL("PythonHandler:error") << oss.str();
+        Py_Finalize();
+      });
+    }
+
+    std::string PythonHandler::decode(PyObject* obj) const {
+      if (!obj)
+        return "(none)";
+#ifdef PYTHON2
+      return PyString_AsString(obj);
+#else
+      if (PyUnicode_Check(obj))
+        return PyUnicode_AsUTF8(obj);
+      if (PyBytes_Check(obj))
+        return strdup(PyBytes_AS_STRING(obj));
+      return "(none)";
+#endif
     }
 
     PyObject* PythonHandler::encode(const char* str) const {
@@ -93,8 +111,8 @@ namespace cepgen {
       Py_CLEAR(nink);
       if (pout)
         CG_DEBUG("PythonHandler:element") << "retrieved " << pout->ob_type->tp_name << " element \"" << key << "\" "
-                                          << "from " << obj->ob_type->tp_name << " object\n\t"
-                                          << "new reference count: " << pout->ob_refcnt;
+                                          << "from " << obj->ob_type->tp_name << " object. "
+                                          << "New reference count: " << pout->ob_refcnt;
       else
         CG_DEBUG("PythonHandler:element") << "did not retrieve a valid element \"" << key << "\"";
       return pout;

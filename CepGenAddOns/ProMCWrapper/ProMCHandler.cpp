@@ -1,3 +1,26 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#include <ProMCBook.h>
+#pragma GCC diagnostic pop
+
 #include <cstdio>
 
 #include "CepGen/Core/ExportModule.h"
@@ -6,7 +29,6 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Version.h"
-#include "ProMCBook.h"
 
 namespace cepgen {
   namespace io {
@@ -75,13 +97,13 @@ namespace cepgen {
         data->set_width(desc.width);
         data->set_charge(desc.charge * 1. / 3.);
       }
-      hdr.set_id1(params.kinematics.incoming_beams.positive().pdg);
-      hdr.set_id2(params.kinematics.incoming_beams.negative().pdg);
+      hdr.set_id1(params.kinematics.incomingBeams().positive().pdg);
+      hdr.set_id2(params.kinematics.incomingBeams().negative().pdg);
       hdr.set_pdf1(0);
       hdr.set_pdf2(0);
       hdr.set_x1(0);
       hdr.set_x2(0);
-      hdr.set_ecm(params.kinematics.sqrtS());
+      hdr.set_ecm(params.kinematics.incomingBeams().sqrtS());
       file_->setHeader(hdr);
     }
 

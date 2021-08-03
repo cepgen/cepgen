@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGen_Physics_Kinematics_h
 #define CepGen_Physics_Kinematics_h
 
@@ -32,18 +50,14 @@ namespace cepgen {
     /// List containing all parameters handled
     ParametersList parameters() const;
 
-    /// Set the incoming particles' momenta (if the collision is symmetric)
-    Kinematics& setSqrtS(double sqrts) {
-      incoming_beams.setSqrtS(sqrts);
-      return *this;
-    }
-    /// Process centre of mass energy
-    double sqrtS() const { return incoming_beams.sqrtS(); }
     /// Beam/primary particle's kinematics
-    IncomingBeams incoming_beams;
+    IncomingBeams& incomingBeams() { return incoming_beams_; }
+    /// Const-qualified beam/primary particle's kinematics
+    const IncomingBeams& incomingBeams() const { return incoming_beams_; }
 
+    typedef std::vector<pdgid_t> pdgids_t;
     /// Minimum list of central particles required
-    std::vector<pdgid_t> minimum_final_state;
+    const pdgids_t& minimumFinalState() const { return minimum_final_state_; }
 
     /// A collection of cuts to apply on the physical phase space
     struct CutsList {
@@ -52,9 +66,20 @@ namespace cepgen {
       cuts::Central central;        ///< Cuts on the central system produced
       PerIdCuts central_particles;  ///< Cuts on the central individual particles
       cuts::Remnants remnants;      ///< Cuts on the beam remnants system
-    } cuts;                         ///< Phase space cuts
+    };
+    /// Phase space cuts
+    CutsList& cuts() { return cuts_; }
+    /// Const-qualified phase space cuts
+    const CutsList& cuts() const { return cuts_; }
+
     /// Human-readable description of a full kinematics cuts definition
     friend std::ostream& operator<<(std::ostream&, const CutsList&);
+
+  private:
+    /// Beam/primary particle's kinematics
+    IncomingBeams incoming_beams_;
+    CutsList cuts_;  ///< Phase space cuts
+    pdgids_t minimum_final_state_;
   };
 }  // namespace cepgen
 
