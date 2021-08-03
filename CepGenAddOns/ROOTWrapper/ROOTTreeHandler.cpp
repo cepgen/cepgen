@@ -16,17 +16,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <TFile.h>
+
+#include <sstream>
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGenAddOns/ROOTWrapper/ROOTTreeInfo.h"
-
-// ROOT includes
-#include <TFile.h>
-
-#include <sstream>
 
 namespace cepgen {
   namespace io {
