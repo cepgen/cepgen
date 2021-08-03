@@ -78,6 +78,7 @@ namespace cepgen {
           out_stab_parts_(nullptr),
           out_partons_(nullptr),
           cross_section_(-1.) {
+      CG_DEBUG("DelphesHandler") << "Initialising Delphes with configuration card at \"" << input_card_ << "\".";
       try {
         conf_reader_->ReadFile(input_card_.c_str());
       } catch (const std::runtime_error& err) {
