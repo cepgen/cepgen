@@ -70,6 +70,10 @@ namespace cepgen {
       case Type::info:
         return os << type_ << ":\t" << message_.str() << "\n";
       case Type::debug:
+        return os << type_ << " "
+                  << utils::colourise(
+                         from_, utils::Colour::yellow, utils::Modifier::underline | utils::Modifier::dimmed)
+                  << ": " << utils::colourise(message_.str(), utils::Colour::reset, utils::Modifier::dimmed) << "\n";
       case Type::warning:
         return os << type_ << " " << utils::colourise(from_, utils::Colour::reset, utils::Modifier::underline) << "\n\t"
                   << message_.str() << "\n";
@@ -105,7 +109,7 @@ namespace cepgen {
       case Exception::Type::info:
         return os << utils::colourise("Info", utils::Colour::green, utils::Modifier::bold);
       case Exception::Type::debug:
-        return os << utils::colourise("Debug", utils::Colour::yellow, utils::Modifier::reverse);
+        return os << utils::colourise("Debug", utils::Colour::yellow, utils::Modifier::bold);
       case Exception::Type::warning:
         return os << utils::colourise("Warning", utils::Colour::blue, utils::Modifier::bold);
       case Exception::Type::verbatim:

@@ -64,7 +64,16 @@ namespace cepgen {
       cyan = 36,
       white = 37
     };
-    enum class Modifier { reset = -1, bold = 1, dimmed = 2, italic = 3, underline = 4, blink = 5, reverse = 7 };
+    enum struct Modifier : uint16_t {
+      reset = 0,
+      bold = 1,
+      dimmed = 1 << 1,
+      italic = 1 << 2,
+      underline = 1 << 3,
+      blink = 1 << 4,
+      reverse = 1 << 6
+    };
+    Modifier operator|(const Modifier&, const Modifier&);
     /// Colourise a string for TTY-type output streams
     std::string colourise(const std::string& str, const Colour& col, const Modifier& mod = Modifier::reset);
     /// Replace all occurrences of a text by another

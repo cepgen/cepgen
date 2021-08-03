@@ -51,14 +51,20 @@ namespace cepgen {
       return boldify(std::to_string(ui));
     }
 
+    Modifier operator|(const Modifier& lhs, const Modifier& rhs) { return Modifier((uint16_t)lhs + (uint16_t)rhs); }
+
     std::string colourise(const std::string& str, const Colour& col, const Modifier& mod) {
       if (!isatty(fileno(stdout)))
         return str;
       if (mod == Modifier::reset)
         return format("\033[%dm%s\033[0m", (int)col, str.c_str());
+      std::string mod_str, delim;
+      for (size_t i = 0; i < 7; ++i)
+        if ((uint16_t)mod & (1 << i))
+          mod_str += delim + std::to_string(i + 1), delim = ";";
       if (col == Colour::reset)
-        return format("\033[%dm%s\033[0m", (int)mod, str.c_str());
-      return format("\033[%d;%dm%s\033[0m", (int)col, (int)mod, str.c_str());
+        return format("\033[%sm%s\033[0m", mod_str.c_str(), str.c_str());
+      return format("\033[%d;%sm%s\033[0m", (int)col, mod_str.c_str(), str.c_str());
     }
 
     size_t replace_all(std::string& str, const std::string& from, const std::string& to) {
