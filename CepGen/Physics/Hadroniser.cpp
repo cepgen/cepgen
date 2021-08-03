@@ -16,9 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Physics/Hadroniser.h"
-
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Physics/Hadroniser.h"
 
 namespace cepgen {
   namespace hadr {
