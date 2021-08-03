@@ -93,8 +93,8 @@ namespace cepgen {
       Py_CLEAR(nink);
       if (pout)
         CG_DEBUG("PythonHandler:element") << "retrieved " << pout->ob_type->tp_name << " element \"" << key << "\" "
-                                          << "from " << obj->ob_type->tp_name << " object\n\t"
-                                          << "new reference count: " << pout->ob_refcnt;
+                                          << "from " << obj->ob_type->tp_name << " object. "
+                                          << "New reference count: " << pout->ob_refcnt;
       else
         CG_DEBUG("PythonHandler:element") << "did not retrieve a valid element \"" << key << "\"";
       return pout;
