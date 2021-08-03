@@ -1,9 +1,8 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
-from Config.Integration.vegas_cff import integrator
 from Config.PDG_cfi import PDG
 
-process = kt.process.clone('patoff',
+process = kt.process.clone('pptoff_f77',
     processParameters = cepgen.Parameters(
         pair = PDG.muon,
     ),
@@ -32,4 +31,3 @@ process = kt.process.clone('patoff',
 #--- events generation
 from Config.generator_cff import generator
 generator.numEvents = 100000
-

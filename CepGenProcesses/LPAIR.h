@@ -1,12 +1,30 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGenProcesses_LPAIR_h
 #define CepGenProcesses_LPAIR_h
 
+#include <random>
+
 #include "CepGen/Processes/Process.h"
 
-namespace cepgen
-{
-  namespace proc
-  {
+namespace cepgen {
+  namespace proc {
     /**
      * Full class of methods and objects to compute the full analytic matrix element
      * \cite Vermaseren:1982cz for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$ process
@@ -30,23 +48,21 @@ namespace cepgen
      * \brief Compute the matrix element for a CE \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
      *  process
      */
-    class LPAIR : public Process
-    {
-      public:
-        /// \brief Class constructor: set the mandatory parameters before integration and events generation
-        /// \param[in] params General process parameters (nopt = Optimisation, legacy from LPAIR)
-        explicit LPAIR( const ParametersList& params = ParametersList() );
-        ProcessPtr clone( const ParametersList& params ) const override {
-          return ProcessPtr( new LPAIR( *this ) );
-        }
+    class LPAIR final : public Process {
+    public:
+      /// \brief Class constructor: set the mandatory parameters before integration and events generation
+      /// \param[in] params General process parameters (nopt = Optimisation, legacy from LPAIR)
+      explicit LPAIR(const ParametersList& params = ParametersList());
+      ProcessPtr clone() const override { return ProcessPtr(new LPAIR(*this)); }
 
-        void addEventContent() override;
-        double computeWeight() override;
-        void prepareKinematics() override;
-        void fillKinematics( bool ) override;
+      void addEventContent() override;
+      double computeWeight() override;
+      void prepareKinematics() override;
+      void fillKinematics(bool) override;
+      static std::string description() { return "ɣɣ → l⁺l¯ (LPAIR)"; }
 
-      private:
-        /**
+    private:
+      /**
          * Calculate energies and momenta of the
          *  1st, 2nd (resp. the "proton-like" and the "electron-like" incoming particles),
          *  3rd (the "proton-like" outgoing particle),
@@ -55,8 +71,8 @@ namespace cepgen
          * \brief Energies/momenta computation for the various particles, in the CM system
          * \return Success state of the operation
          */
-        bool orient();
-        /**
+      bool orient();
+      /**
          * Compute the expression of the matrix element squared for the \f$\gamma\gamma\rightarrow\ell^{+}\ell^{-}\f$ process.
          * It returns the value of the convolution of the form factor or structure functions with the central two-photons matrix element squared.
          * \brief Computes the matrix element squared for the requested process
@@ -67,118 +83,118 @@ namespace cepgen
          *  b = t_1 t_2+\left(w_{\gamma\gamma}\sin^2{\theta^{\rm CM}_6}+4m_\ell\cos^2{\theta^{\rm CM}_6}\right) p_g^2
          * \f]
          */
-        double periPP() const;
-        /**
+      double periPP() const;
+      /**
          * Describe the kinematics of the process \f$p_1+p_2\to p_3+p_4+p_5\f$ in terms of Lorentz-invariant variables.
          * These variables (along with others) will then be fed into the \a PeriPP method (thus are essential for the evaluation of the full matrix element).
          * \return Success state of the operation
          */
-        bool pickin();
+      bool pickin();
 
-        /// Internal switch for the optimised code version (LPAIR legacy ; unimplemented here)
-        int n_opt_;
-        pdgid_t pair_;
+      /// Internal switch for the optimised code version (LPAIR legacy ; unimplemented here)
+      const int n_opt_;
+      pdgid_t pair_;
+      const bool symmetrise_;
 
-        std::vector<double> x_tmp_;
-        double theta4_;
-        double phi6_cm_;
-        double x6_;
+      std::vector<double> x_tmp_;
+      double theta4_;
+      double phi6_cm_;
+      double x6_;
 
-        Limits w_limits_;
-        struct Masses
-        {
-          /// squared mass of the outgoing leptons
-          double Ml2 = 0.;
-          /// \f$\delta_2=m_1^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
-          double w12 = 0.;
-          /// \f$\delta_1=m_3^2-m_1^2\f$ as defined in \cite Vermaseren:1982cz
-          double w31 = 0.;
-          /// \f$\delta_4=m_5^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
-          double w52 = 0.;
-        } masses_;
+      Limits w_limits_;
+      struct Masses {
+        /// squared mass of the outgoing leptons
+        double Ml2 = 0.;
+        /// \f$\delta_2=m_1^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
+        double w12 = 0.;
+        /// \f$\delta_1=m_3^2-m_1^2\f$ as defined in \cite Vermaseren:1982cz
+        double w31 = 0.;
+        /// \f$\delta_4=m_5^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
+        double w52 = 0.;
+      } masses_;
 
-        /// energy of the first proton-like incoming particle
-        double ep1_;
-        /// energy of the second proton-like incoming particle
-        double ep2_;
-        double p_cm_;
+      /// energy of the first proton-like incoming particle
+      double ep1_;
+      /// energy of the second proton-like incoming particle
+      double ep2_;
+      double p_cm_;
 
-        /// energy of the two-photon central system
-        double ec4_;
-        /// 3-momentum norm of the two-photon central system
-        double pc4_;
-        /// mass of the two-photon central system
-        double mc4_;
-        /// squared mass of the two-photon central system
-        double w4_;
+      /// energy of the two-photon central system
+      double ec4_;
+      /// 3-momentum norm of the two-photon central system
+      double pc4_;
+      /// mass of the two-photon central system
+      double mc4_;
+      /// squared mass of the two-photon central system
+      double w4_;
 
-        /// \f$p_{12} = \frac{1}{2}\left(s-m_{p_1}^2-m_{p_2}^2\right)\f$
-        double p12_;
-        double p1k2_, p2k1_;
-        /// \f$p_{13} = -\frac{1}{2}\left(t_1-m_{p_1}^2-m_{p_3}^2\right)\f$
-        double p13_;
-        double p14_, p25_;
+      /// \f$p_{12} = \frac{1}{2}\left(s-m_{p_1}^2-m_{p_2}^2\right)\f$
+      double p12_;
+      double p1k2_, p2k1_;
+      /// \f$p_{13} = -\frac{1}{2}\left(t_1-m_{p_1}^2-m_{p_3}^2\right)\f$
+      double p13_;
+      double p14_, p25_;
 
-        double q1dq_, q1dq2_;
+      double q1dq_, q1dq2_;
 
-        double s1_, s2_;
+      double s1_, s2_;
 
-        double epsi_;
-        double g5_, g6_;
-        double a5_, a6_;
-        double bb_;
+      double epsi_;
+      double g5_, g6_;
+      double a5_, a6_;
+      double bb_;
 
-        double gram_;
-        double dd1_, dd2_, dd3_;
-        /// \f$\delta_5=m_4^2-t_1\f$ as defined in Vermaseren's paper
-        /// \cite Vermaseren:1982cz for the full definition of this quantity
-        double dd4_;
-        double dd5_;
-        /**
+      double gram_;
+      double dd1_, dd2_, dd3_;
+      /// \f$\delta_5=m_4^2-t_1\f$ as defined in Vermaseren's paper
+      /// \cite Vermaseren:1982cz for the full definition of this quantity
+      double dd4_;
+      double dd5_;
+      /**
          * Invariant used to tame divergences in the matrix element computation. It is defined as
          * \f[\Delta = \left(p_1\cdot p_2\right)\left(q_1\cdot q_2\right)-\left(p_1\cdot q_2\right)\left(p_2\cdot q_1\right)\f]
          * with \f$p_i, q_i\f$ the 4-momenta associated to the incoming proton-like particle and to the photon emitted from it.
          */
-        double delta_;
-        double g4_;
-        double sa1_, sa2_;
+      double delta_;
+      double g4_;
+      double sa1_, sa2_;
 
-        double sl1_;
+      double sl1_;
 
-        /// cosine of the polar angle for the two-photons centre-of-mass system
-        double cos_theta4_;
-        /// sine of the polar angle for the two-photons centre-of-mass system
-        double sin_theta4_;
+      /// cosine of the polar angle for the two-photons centre-of-mass system
+      double cos_theta4_;
+      /// sine of the polar angle for the two-photons centre-of-mass system
+      double sin_theta4_;
 
-        double al4_;
-        double be4_;
-        double de3_, de5_;
-        double pt4_;
+      double al4_;
+      double be4_;
+      double de3_, de5_;
+      double pt4_;
 
-        /// Kinematics of the first incoming proton
-        Momentum p1_lab_;
-        /// Kinematics of the second incoming proton
-        Momentum p2_lab_;
-        /// Kinematics of the first outgoing proton
-        Momentum p3_lab_;
-        /// Kinematics of the two-photon system (in the two-proton CM)
-        Momentum p4_lab_;
-        /// Kinematics of the second outgoing proton
-        Momentum p5_lab_;
-        /// Kinematics of the first outgoing lepton (in the two-proton CM)
-        Momentum p6_cm_;
-        /// Kinematics of the second outgoing lepton (in the two-proton CM)
-        Momentum p7_cm_;
-        double jacobian_;
+      /// Kinematics of the first incoming proton
+      Momentum p1_lab_;
+      /// Kinematics of the second incoming proton
+      Momentum p2_lab_;
+      /// Kinematics of the first outgoing proton
+      Momentum p3_lab_;
+      /// Kinematics of the two-photon system (in the two-proton CM)
+      Momentum p4_lab_;
+      /// Kinematics of the second outgoing proton
+      Momentum p5_lab_;
+      /// Kinematics of the first outgoing lepton (in the two-proton CM)
+      Momentum p6_cm_;
+      /// Kinematics of the second outgoing lepton (in the two-proton CM)
+      Momentum p7_cm_;
+      double jacobian_;
 
-      private:
-        /**
+    private:
+      /**
          * Define modified variables of integration to avoid peaks integrations (see \cite Vermaseren:1982cz for details)
-         * Return a set of two modified variables of integration to maintain the stability of the integrant. These two new variables are :
+         * Return a set of two modified variables of integration to maintain the stability of the integrand. These two new variables are :
          * - \f$y_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\f$ the new variable
          * - \f$\mathrm dy_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\log\frac{x_{min}}{x_{max}}\f$, the new variable's differential form
-         * \brief Redefine the variables of integration in order to avoid the strong peaking of the integrant
-         * \param[in] expo Exponant
+         * \brief Redefine the variables of integration in order to avoid the strong peaking of the integrand
+         * \param[in] expo Exponent
          * \param[in] lim Min/maximal value of the variable
          * \param[in] var_name The variable name
          * \return A pair containing the value and the bin width the new variable definition
@@ -189,10 +205,13 @@ namespace cepgen
          *  - opposite sign :
          * > `mapt1`, `mapt2`
          */
-        std::pair<double,double> map( double expo, const Limits& lim, const std::string& var_name = "" );
-        std::pair<double,double> mapla( double y, double z, int u, const Limits& lim );
+      std::pair<double, double> map(double expo, const Limits& lim, const std::string& var_name = "");
+      std::pair<double, double> mapla(double y, double z, int u, const Limits& lim);
+      std::default_random_engine rnd_gen_;
+      std::uniform_real_distribution<double> rnd_phi_;
+      std::uniform_int_distribution<short> rnd_side_;
     };
-  }
-}
+  }  // namespace proc
+}  // namespace cepgen
 
 #endif

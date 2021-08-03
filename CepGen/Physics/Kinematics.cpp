@@ -1,87 +1,111 @@
-#include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/HeavyIon.h"
-#include "CepGen/Physics/KTFlux.h"
-#include "CepGen/Physics/Momentum.h"
-
-#include "CepGen/StructureFunctions/Parameterisation.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/String.h"
+#include "CepGen/Physics/GluonGrid.h"
+#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Physics/PDG.h"
 
-#include <cmath>
+namespace cepgen {
+  const double Kinematics::MX_MIN = 1.07;  // mp+mpi+-
 
-namespace cepgen
-{
-  Kinematics::Kinematics() :
-    incoming_beams( { { 6500., PDG::proton, KTFlux::invalid }, { 6500., PDG::proton, KTFlux::invalid } } ),
-    mode( KinematicsMode::invalid )
-  {}
-
-  void
-  Kinematics::setSqrtS( double sqrts )
-  {
-    if ( incoming_beams.first.pdg != incoming_beams.second.pdg )
-      throw CG_FATAL( "Kinematics" )
-        << "Trying to set √s with asymmetric beams.\n"
-        << "Please fill incoming beams objects manually!";
-    incoming_beams.first.pz = incoming_beams.second.pz = 0.5 * sqrts;
+  Kinematics::Kinematics(const ParametersList& params) : incoming_beams_(params) {
+    CG_DEBUG("Kinematics") << "Building a Kinematics parameters container "
+                           << "with the following parameters:\n\t" << params << ".";
+    //----- phase space definition
+    setParameters(params);
   }
 
-  double
-  Kinematics::sqrtS() const
-  {
-    const HeavyIon hi1( incoming_beams.first.pdg ), hi2( incoming_beams.second.pdg );
-    const double m1 = hi1 ? HeavyIon::mass( hi1 ) : PDG::get().mass( incoming_beams.first .pdg );
-    const double m2 = hi2 ? HeavyIon::mass( hi2 ) : PDG::get().mass( incoming_beams.second.pdg );
-    const auto p1 = Momentum::fromPxPyPzM( 0., 0., +incoming_beams.first .pz, m1 );
-    const auto p2 = Momentum::fromPxPyPzM( 0., 0., -incoming_beams.second.pz, m2 );
-    return ( p1+p2 ).mass();
-  }
+  void Kinematics::setParameters(const ParametersList& params) {
+    //--- initial partons
+    cuts_.initial.setParameters(params);
 
-  //--------------------------------------------------------------------
-  // User-friendly display of the kinematics mode
-  //--------------------------------------------------------------------
-
-  std::ostream&
-  operator<<( std::ostream& os, const KinematicsMode& pm )
-  {
-    switch ( pm ) {
-      case KinematicsMode::invalid:
-        return os << "invalid";
-      case KinematicsMode::ElectronElectron:
-        return os << "electron/electron";
-      case KinematicsMode::ElectronProton:
-        return os << "electron/proton";
-      case KinematicsMode::ProtonElectron:
-        return os << "proton/electron";
-      case KinematicsMode::ElasticElastic:
-        return os << "elastic/elastic";
-      case KinematicsMode::InelasticElastic:
-        return os << "inelastic/elastic";
-      case KinematicsMode::ElasticInelastic:
-        return os << "elastic/inelastic";
-      case KinematicsMode::InelasticInelastic:
-        return os << "inelastic/inelastic";
+    //--- central system
+    cuts_.central.setParameters(params);
+    if (params.has<Limits>("phiptdiff")) {
+      CG_WARNING("Kinematics") << "\"phiptdiff\" parameter is deprecated! "
+                               << "Please use \"phidiff\" instead.";
+      params.fill<Limits>("phiptdiff", cuts_.central.phi_diff());  //legacy
     }
-    return os;
+    if (params.has<std::vector<int> >("minFinalState"))
+      for (const auto& pdg : params.get<std::vector<int> >("minFinalState"))
+        minimum_final_state_.emplace_back((pdgid_t)pdg);
+    if (params.has<ParametersList>("cuts")) {  // per-particle cuts
+      const auto& per_parts = params.get<ParametersList>("cuts");
+      for (const auto& part : per_parts.keys())
+        cuts_.central_particles[(pdgid_t)stoi(part)].setParameters(per_parts.get<ParametersList>(part));
+    }
+
+    //--- outgoing remnants
+    cuts_.remnants.setParameters(params);
+    // sanity check
+    if (cuts_.remnants.mx().min() < MX_MIN) {
+      CG_WARNING("Kinematics:setParameters") << "Minimum diffractive mass set to " << MX_MIN << " GeV.";
+      cuts_.remnants.mx().min() = MX_MIN;
+    }
+
+    //--- specify where to look for the grid path for gluon emission
+    if (params.has<std::string>("kmrGridPath"))
+      kmr::GluonGrid::get(params.get<std::string>("kmrGridPath"));
   }
 
-  //--------------------------------------------------------------------
-  // User-friendly display of incoming particles
-  //--------------------------------------------------------------------
+  ParametersList Kinematics::parameters() const {
+    ParametersList params;
+    params += incoming_beams_.parameters();
+    for (const auto& lim : cuts_.initial.list())
+      params.set<Limits>(lim.name, lim.limits);
+    for (auto& lim : cuts_.central.list())
+      params.set<Limits>(lim.name, lim.limits);
+    if (!minimum_final_state_.empty()) {
+      std::vector<int> min_pdgs;
+      for (const auto& pdg : minimum_final_state_)
+        min_pdgs.emplace_back((int)pdg);
+      params.set<std::vector<int> >("minFinalState", min_pdgs);
+    }
+    if (!cuts_.central_particles.empty()) {
+      ParametersList per_part;
+      for (const auto& cuts_vs_part : cuts_.central_particles) {
+        ParametersList cuts_vs_id;
+        for (const auto& lim : cuts_vs_part.second.list())
+          params.set<Limits>(lim.name, lim.limits);
+        per_part.set<ParametersList>(std::to_string(cuts_vs_part.first), cuts_vs_id);
+      }
+      params.set<ParametersList>("cuts", per_part);
+    }
+    for (const auto& lim : cuts_.remnants.list())
+      params.set<Limits>(lim.name, lim.limits);
+    return params;
+  }
 
-  std::ostream&
-  operator<<( std::ostream& os, const Kinematics::Beam& beam )
-  {
-    if ( (HeavyIon)beam.pdg )
-      os << (HeavyIon)beam.pdg;
-    else
-      os << PDG::get().name( beam.pdg );
-    os << " (" << beam.pz << " GeV/c)";
-    if ( beam.kt_flux != KTFlux::invalid )
-      os << " [unint.flux: " << beam.kt_flux << "]";
-    return os;
+  std::ostream& operator<<(std::ostream& os, const Kinematics::CutsList& kin) {
+    std::string sep;
+    os << "initial: {";
+    for (const auto& cut : kin.initial.list())
+      os << sep << cut, sep = ", ";
+    os << "}, central: {";
+    sep.clear();
+    for (const auto& cut : kin.central.list())
+      os << sep << cut, sep = ", ";
+    os << "}, remnants: {";
+    sep.clear();
+    for (const auto& cut : kin.remnants.list())
+      os << sep << cut, sep = ", ";
+    return os << "}";
   }
 
   //--------------------------------------------------------------------
@@ -89,9 +113,7 @@ namespace cepgen
   //--------------------------------------------------------------------
 
   Kinematics::CutsList::CutsList()
-  {
-    initial.q2 = { 0., 1.e5 };
-    central.pt_single.min() = 0.;
-    remnants.mass_single = { 1.07, 320. };
-  }
-}
+      : initial(ParametersList().set<Limits>("q2", {0., 1.e5})),
+        central(ParametersList().set<double>("ptmin", 0.)),
+        remnants(ParametersList().set<Limits>("mx", {MX_MIN, 1000.})) {}
+}  // namespace cepgen
