@@ -49,7 +49,6 @@ namespace cepgen {
       const enum class Mode { onShell = 0, offShell = 1, offShellLegacy = 2 } method_;
 
       ParametersList alphas_params_;
-      std::shared_ptr<Coupling> alphaem_, alphas_;
 
       bool gluon1_, gluon2_;
       double prefactor_;
@@ -67,8 +66,6 @@ namespace cepgen {
         : Process2to4(params, {PDG::photon, PDG::photon}, params.get<ParticleProperties>("pair").pdgid),
           method_((Mode)params.get<int>("method", (int)Mode::offShell)),
           alphas_params_(params.get<ParametersList>("alphaS", ParametersList().setName<std::string>("pegasus"))),
-          alphaem_(AlphaEMFactory::get().build(
-              params.get<ParametersList>("alphaEM", ParametersList().setName<std::string>("fixed")))),
           gluon1_(false),
           gluon2_(false),
           prefactor_(1.),
