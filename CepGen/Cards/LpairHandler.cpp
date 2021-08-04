@@ -285,7 +285,7 @@ namespace cepgen {
       if (rt_params_->kinematics.incomingBeams().structureFunctions() &&
           rt_params_->kinematics.incomingBeams().structureFunctions()->sigmaRatio())
         sr_type_ = rt_params_->kinematics.incomingBeams().structureFunctions()->sigmaRatio()->name();
-      kmr_grid_path_ = kmr::GluonGrid::get().path();
+      //kmr_grid_path_ = kmr::GluonGrid::get().path();
       //mstw_grid_path_ =
       //pdg_input_path_ =
       iend_ = (int)rt_params_->generation().enabled();
