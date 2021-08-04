@@ -153,7 +153,9 @@ namespace cepgen {
           "NTREAT", "Smoothen the integrand", (int*)&rt_params_->integrator->operator[]<bool>("treat"));
       registerParameter<int>(
           "ITMX", "Number of integration iterations", (int*)&rt_params_->integrator->operator[]<int>("iterations"));
-      registerGenerationParameter<int>("NCVG", "Number of points to probe", "numPoints");
+      registerParameter<int>("NCVG",
+                             "Number of function calls to perform",
+                             (int*)&rt_params_->integrator->operator[]<int>("numFunctionCalls"));
       registerProcessParameter<int>("METHOD", "Computation method (kT-factorisation)", "method");
       registerParameter<int>("LEPTON", "Outgoing leptons' flavour", &lepton_id_);
       registerKinematicsParameter<double>(
