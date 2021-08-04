@@ -22,9 +22,10 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Physics/AlphaS.h"
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/Process2to4.h"
 
@@ -48,7 +49,7 @@ namespace cepgen {
       const enum class Mode { onShell = 0, offShell = 1, offShellLegacy = 2 } method_;
 
       ParametersList alphas_params_;
-      std::shared_ptr<AlphaS> alphas_;
+      std::shared_ptr<Coupling> alphaem_, alphas_;
 
       bool gluon1_, gluon2_;
       double prefactor_;
@@ -66,6 +67,8 @@ namespace cepgen {
         : Process2to4(params, {PDG::photon, PDG::photon}, params.get<ParticleProperties>("pair").pdgid),
           method_((Mode)params.get<int>("method", (int)Mode::offShell)),
           alphas_params_(params.get<ParametersList>("alphaS", ParametersList().setName<std::string>("pegasus"))),
+          alphaem_(AlphaEMFactory::get().build(
+              params.get<ParametersList>("alphaEM", ParametersList().setName<std::string>("fixed")))),
           gluon1_(false),
           gluon2_(false),
           prefactor_(1.),
@@ -116,7 +119,7 @@ namespace cepgen {
           prefactor_ *= 4. * M_PI;
           break;
         case PDG::photon:
-          prefactor_ *= constants::G_EM_SQ * pow(qf3_, 2) / 9.;
+          prefactor_ *= 4. * M_PI * pow(qf3_, 2) / 9.;
           break;
         default:
           throw CG_FATAL("PPtoFF:prepare") << "Only photon & gluon partons are supported!";
@@ -127,7 +130,7 @@ namespace cepgen {
           prefactor_ *= 4. * M_PI;
           break;
         case PDG::photon:
-          prefactor_ *= constants::G_EM_SQ * pow(qf3_, 2) / 9.;
+          prefactor_ *= 4. * M_PI * pow(qf3_, 2) / 9.;
           break;
         default:
           throw CG_FATAL("PPtoFF:prepare") << "Only photon & gluon partons are supported!";
@@ -255,10 +258,15 @@ namespace cepgen {
       double amat2 = 0.5 * prefactor_ * pow(x1 * x2 * s_, 2) * (p_mat1_ * amat2_1 + p_mat2_ * amat2_2);
 
       const double tmax = pow(std::max(amt1_, amt2_), 2);
+      const double q1 = std::sqrt(std::max(eps12, tmax)), q2 = std::sqrt(std::max(eps22, tmax));
       if (gluon1_)
-        amat2 *= 0.5 * (*alphas_)(sqrt(std::max(eps12, tmax)));
+        amat2 *= 0.5 * (*alphas_)(q1);
+      else
+        amat2 *= (*alphaem_)(q1);
       if (gluon2_)
-        amat2 *= 0.5 * (*alphas_)(sqrt(std::max(eps22, tmax)));
+        amat2 *= 0.5 * (*alphas_)(q2);
+      else
+        amat2 *= (*alphaem_)(q2);
 
       CG_DEBUG_LOOP("PPtoFF:offShell") << "aux2(1/2) = " << aux2_1 << " / " << aux2_2 << "\n\t"
                                        << "z(1/2) = " << z1 << " / " << z2 << "\n\t"
