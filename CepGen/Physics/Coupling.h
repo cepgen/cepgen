@@ -16,14 +16,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Physics_AlphaS_h
-#define CepGen_Physics_AlphaS_h
+#ifndef CepGen_Physics_Coupling_h
+#define CepGen_Physics_Coupling_h
 
 #include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen {
   /// A generic \f$\alpha_S(Q^2)\f$ evaluation algorithm
-  class Coupling : public NamedModule<> {
+  class Coupling : public NamedModule<std::string> {
   public:
     /// Build an \f$\alpha_{S,EM}\f$ interpolator object
     Coupling(const ParametersList& params) : NamedModule(params) {}
