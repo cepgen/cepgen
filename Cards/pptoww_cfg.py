@@ -1,9 +1,8 @@
 import Config.Core as cepgen
-from Config.Integration.vegas_cff import integrator
 #--------------------------------------------------------------------
 # Logging/debugging example
 #--------------------------------------------------------------------
-#from Config.logger_cfi import logger
+#from Config.Logger_cfi import logger
 #logger.enabledModules += ('Hadroniser.configure', 'Generator.*',)
 #--------------------------------------------------------------------
 # Pythia 6 example (with fully leptonic WW decay)
@@ -32,8 +31,10 @@ from Config.Integration.vegas_cff import integrator
 import Config.ktProcess_cfi as kt
 process = kt.process.clone('pptoww',
     processParameters = cepgen.Parameters(
-        mode = cepgen.ProcessMode.InelasticInelastic,
-        polarisationStates = 0, # full
+        mode = cepgen.ProcessMode.ElasticElastic,
+        #mode = cepgen.ProcessMode.InelasticInelastic,
+        method = 1,  # on-shell (0) or off-shell (1) formula
+        polarisationStates = 0,  # full
     ),
     inKinematics = cepgen.Parameters(
         cmEnergy = 13.e3,
@@ -50,6 +51,7 @@ process = kt.process.clone('pptoww',
         invmass = (0.,),
         ptsum = (0.,),
         #--- cuts on single particles' level
+        #minFinalState = [11, 13],
         cuts = {
             # cuts on the single W level
             #24: cepgen.Parameters(pt = (0.,)), # no pt cut on Ws

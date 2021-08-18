@@ -1,52 +1,65 @@
-#----- list all test executables
+#-- list all test executables
 
-file(GLOB executables_noroot RELATIVE ${PROJECT_SOURCE_DIR}/test *.cpp)
-file(GLOB executables_root RELATIVE ${PROJECT_SOURCE_DIR}/test *.cxx)
-file(GLOB executables_fortran RELATIVE ${PROJECT_SOURCE_DIR}/test *.f)
+file(GLOB tests_standalone RELATIVE ${PROJECT_SOURCE_DIR}/test *.cc)
+file(GLOB tests_root RELATIVE ${PROJECT_SOURCE_DIR}/test *.cxx)
+file(GLOB tests_fortran RELATIVE ${PROJECT_SOURCE_DIR}/test *.f)
 
-#----- include the utilitaries
+#-- include the utilitaries
 
-set(tests "")
+set(tests)
+set(tests_libraries ${CEPGEN_LIBRARIES})
 
-#----- build all tests and link them to the core library
+#-- skip functionals tests if no parsing library is found
 
-foreach(exec_src ${executables_noroot})
-  string(REPLACE ".cpp" "" exec_bin ${exec_src})
-  add_executable(${exec_bin} ${exec_src})
-  set_target_properties(${exec_bin} PROPERTIES EXCLUDE_FROM_ALL true)
-  target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES})
-  list(APPEND tests ${exec_bin})
-endforeach()
-
-foreach(exec_src ${executables_fortran})
-  string(REPLACE ".f" "" exec_bin ${exec_src})
-  add_executable(${exec_bin} ${exec_src})
-  set_target_properties(${exec_bin} PROPERTIES EXCLUDE_FROM_ALL true)
-  target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES})
-  list(APPEND tests ${exec_bin})
-endforeach()
-
-#----- specify the tests requiring ROOT
-
-if(ROOT_FOUND)
-  include_directories(${ROOT_INCLUDE_DIRS})
-  link_directories(${ROOT_LIBRARY_DIR})
-
-  foreach(exec_src ${executables_root})
-    string(REPLACE ".cxx" "" exec_bin ${exec_src})
-    add_executable(${exec_bin} ${exec_src})
-    set_target_properties(${exec_bin} PROPERTIES EXCLUDE_FROM_ALL true)
-    target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES} ${ROOT_LIBRARIES})
-    list(APPEND tests ${exec_bin})
-  endforeach()
-else()
-  message(STATUS "ROOT not found! skipping these tests!")
+if(NOT CEPGEN_HAS_FUNCTIONAL)
+  message(STATUS "No functionals parser found on this system. Disabling the corresponding tests.")
+  file(GLOB tests_functionals
+      RELATIVE ${PROJECT_SOURCE_DIR}/test
+      test_integrator.cc test_function_parser*.*)
+#list(REMOVE_ITEM tests_standalone ${tests_functionals})
+  list(REMOVE_ITEM tests_root ${tests_functionals})
 endif()
 
-message(STATUS "The following tests/executables are available:\n${tests}")
+#-- build all tests and link them to the core library
+
+foreach(exec_src ${tests_standalone})
+  string(REPLACE ".cc" "" exec_bin ${exec_src})
+  add_executable(${exec_bin} ${exec_src})
+  target_link_libraries(${exec_bin} ${tests_libraries})
+  if(CEPGEN_ROOT_FUNCTIONALS)
+    set_property(TARGET ${exec_bin} PROPERTY CXX_STANDARD ${ROOT_CXX_STANDARD})
+  endif()
+  list(APPEND tests ${exec_bin})
+endforeach()
+
+foreach(exec_src ${tests_fortran})
+  string(REPLACE ".f" "" exec_bin ${exec_src})
+  add_executable(${exec_bin} ${exec_src})
+  target_link_libraries(${exec_bin} ${tests_libraries} stdc++)
+#list(APPEND tests ${exec_bin}) #for the moment, excluding F77 tests
+endforeach()
+
+#-- specify the tests requiring ROOT
+
+find_package(ROOT QUIET)
+if(ROOT_FOUND)
+  foreach(exec_src ${tests_root})
+    string(REPLACE ".cxx" "" exec_bin ${exec_src})
+    add_executable(${exec_bin} ${exec_src})
+    set_property(TARGET ${exec_bin} PROPERTY CXX_STANDARD ${ROOT_CXX_STANDARD})
+    target_include_directories(${exec_bin} PUBLIC ${ROOT_INCLUDE_DIRS})
+    target_link_libraries(${exec_bin} PUBLIC ${tests_libraries} ${ROOT_LIBRARIES})
+    list(APPEND tests ${exec_bin})
+  endforeach()
+endif()
 
 file(GLOB_RECURSE test_input_cards RELATIVE ${PROJECT_SOURCE_DIR}/test test_processes/* __init__.py)
 foreach(_files ${test_input_cards})
   configure_file(${_files} ${_files} COPYONLY)
 endforeach()
 configure_file(${PROJECT_SOURCE_DIR}/test/test_processes.cfg test_processes.cfg COPYONLY)
+
+foreach(test ${tests})
+  message(STATUS "Added test ${test}")
+  add_test(NAME ${test} COMMAND ${test} -h)
+endforeach()

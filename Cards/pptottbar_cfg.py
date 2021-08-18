@@ -1,10 +1,13 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
-from Config.Integration.vegas_cff import integrator
-#from Config.Hadronisation.pythia6_cff import pythia6 as hadroniser
-#from Config.Hadronisation.pythia8_cff import pythia8 as hadroniser
+#from Config.Hadronisation.pythia6_cff import pythia6
+#from Config.Hadronisation.pythia8_cff import pythia8
 from Config.PDG_cfi import PDG
 
+#--- redefinition of top to modify its bare mass
+#registerParticle(6, 'top', mass=174., charge=2./3., fermion=True)
+
+#--- process definition
 process = kt.process.clone('pptoff',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
@@ -12,11 +15,9 @@ process = kt.process.clone('pptoff',
     ),
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
-        #structureFunctions = cepgen.StructureFunctions.SuriYennie,
         structureFunctions = cepgen.StructureFunctions.LUXlike,
     ),
     outKinematics = kt.process.outKinematics.clone(
-        pair = 6,
         #eta = (-2.5, 2.5),
         qt = (0., 2000.),
         mx = (1.07, 2000.),
@@ -27,7 +28,11 @@ process = kt.process.clone('pptoff',
     ),
 )
 
+#--- events modification sequence
+eventSequence = cepgen.Sequence(
+    #pythia6,
+)
+
 #--- events generation
 from Config.generator_cff import generator
 generator.numEvents = 25000
-

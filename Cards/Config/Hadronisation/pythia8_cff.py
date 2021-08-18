@@ -1,4 +1,5 @@
-from Config.containers_cfi import Module, Parameters
+from Config.containers_cfi import Module
+
 from pythia8Defaults_cfi import pythia8Defaults
 from pythia8Tunes_cfi import pythia8CUEP8M1Settings
 
