@@ -37,7 +37,7 @@ namespace cepgen {
     /// Modify a few parameters values
     void setParameters(const ParametersList&);
     /// Retrieve the cuts list into a steering parameters list
-    ParametersList parameters() const;
+    ParametersList parameters(bool full = false) const;
 
     /// A set of properties for a given cut
     struct Property {

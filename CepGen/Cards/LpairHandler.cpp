@@ -50,6 +50,7 @@ namespace cepgen {
           proc_params_(new ParametersList),
           kin_params_(new ParametersList),
           gen_params_(new ParametersList),
+          int_params_(new ParametersList),
           timer_(false),
           str_fun_(11),
           sr_type_(1),
@@ -63,9 +64,7 @@ namespace cepgen {
       //-------------------------------------------------------------------------------------------
 
       registerParameter<std::string>("PROC", "Process name to simulate", &proc_name_);
-      registerParameter<std::string>("ITYP",
-                                     "Integration algorithm",
-                                     &rt_params_->integrator->operator[]<std::string>(ParametersList::MODULE_NAME));
+      registerIntegratorParameter<std::string>("ITYP", "Integration algorithm", ParametersList::MODULE_NAME);
       registerParameter<std::string>("HADR", "Hadronisation algorithm", &evt_mod_name_);
       registerParameter<std::string>("EVMD", "Events modification algorithms", &evt_mod_name_);
       registerParameter<std::string>("OUTP", "Output module", &out_mod_name_);
@@ -76,16 +75,13 @@ namespace cepgen {
       // General parameters
       //-------------------------------------------------------------------------------------------
 
-      registerParameter<int>(
-          "NTRT", "Smoothen the integrand", (int*)&rt_params_->integrator->operator[]<bool>("treat"));
+      registerIntegratorParameter<int>("NTRT", "Smoothen the integrand", "treat");
       registerParameter<int>("TIMR", "Enable the time ticker", &timer_);
       registerParameter<int>("IEND", "Generation type", &iend_);
       registerParameter<int>("DEBG", "Debugging verbosity", (int*)&utils::Logger::get().level);
-      registerParameter<int>(
-          "NCVG", "Number of function calls", (int*)&rt_params_->integrator->operator[]<int>("numFunctionCalls"));
-      registerParameter<int>(
-          "ITVG", "Number of integration iterations", (int*)&rt_params_->integrator->operator[]<int>("iterations"));
-      registerParameter<int>("SEED", "Random generator seed", (int*)&rt_params_->integrator->operator[]<int>("seed"));
+      registerIntegratorParameter<int>("NCVG", "Number of function calls", "numFunctionCalls");
+      registerIntegratorParameter<int>("ITVG", "Number of integration iterations", "iterations");
+      registerIntegratorParameter<int>("SEED", "Random generator seed", "seed");
       registerKinematicsParameter<int>("MODE", "Subprocess' mode", "mode");
       registerGenerationParameter<int>("NTHR", "Number of threads to use for events generation", "numThreads");
       registerGenerationParameter<int>("NCSG", "Number of points to probe", "numPoints");
@@ -149,13 +145,9 @@ namespace cepgen {
       // PPtoLL cards backward compatibility
       //-------------------------------------------------------------------------------------------
 
-      registerParameter<int>(
-          "NTREAT", "Smoothen the integrand", (int*)&rt_params_->integrator->operator[]<bool>("treat"));
-      registerParameter<int>(
-          "ITMX", "Number of integration iterations", (int*)&rt_params_->integrator->operator[]<int>("iterations"));
-      registerParameter<int>("NCVG",
-                             "Number of function calls to perform",
-                             (int*)&rt_params_->integrator->operator[]<int>("numFunctionCalls"));
+      registerIntegratorParameter<int>("NTREAT", "Smoothen the integrand", "treat");
+      registerIntegratorParameter<int>("ITMX", "Number of integration iterations", "iterations");
+      registerIntegratorParameter<int>("NCVG", "Number of function calls to perform", "numFunctionCalls");
       registerProcessParameter<int>("METHOD", "Computation method (kT-factorisation)", "method");
       registerParameter<int>("LEPTON", "Outgoing leptons' flavour", &lepton_id_);
       registerKinematicsParameter<double>(
@@ -227,6 +219,7 @@ namespace cepgen {
 
       rt_params_->kinematics = Kinematics(*kin_params_);
       rt_params_->generation() = Parameters::Generation(*gen_params_);
+      *rt_params_->integrator = *int_params_;
 
       //--- parse the structure functions code
       if (str_fun_ == (int)strfun::Type::MSTWgrid && !mstw_grid_path_.empty())
@@ -312,8 +305,9 @@ namespace cepgen {
       }
       timer_ = (rt_params_->timeKeeper() != nullptr);
 
-      *kin_params_ += rt_params_->kinematics.parameters();
+      *kin_params_ += rt_params_->kinematics.parameters(true);
       *gen_params_ += rt_params_->generation().parameters();
+      *int_params_ += *rt_params_->integrator;
       init();
     }
 

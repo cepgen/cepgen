@@ -71,6 +71,12 @@ namespace cepgen {
                                        const std::string& gen_key) {
         registerParameter<T>(key, description, &gen_params_->operator[]<T>(gen_key));
       }
+      template <typename T>
+      void registerIntegratorParameter(const std::string& key,
+                                       const std::string& description,
+                                       const std::string& int_key) {
+        registerParameter<T>(key, description, &int_params_->operator[]<T>(int_key));
+      }
       /// Set a parameter value
       template <typename T>
       void set(const std::string& /*key*/, const T& /*value*/) {}
@@ -89,7 +95,7 @@ namespace cepgen {
       std::unordered_map<std::string, Parameter<int> > p_ints_;
 
       void init();
-      std::shared_ptr<ParametersList> proc_params_, kin_params_, gen_params_;
+      std::shared_ptr<ParametersList> proc_params_, kin_params_, gen_params_, int_params_;
       int timer_;
       int str_fun_, sr_type_, lepton_id_;
       std::string proc_name_, evt_mod_name_, out_mod_name_;

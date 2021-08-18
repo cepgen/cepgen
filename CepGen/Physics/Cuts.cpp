@@ -30,10 +30,13 @@ namespace cepgen {
       params.fill<Limits>(cut.name, cut.limits);
   }
 
-  ParametersList Cuts::parameters() const {
+  ParametersList Cuts::parameters(bool full) const {
     ParametersList params;
-    for (const auto& lim : list())
+    for (const auto& lim : list()) {
       params.set<Limits>(lim.name, lim.limits);
+      if (full)
+        params.set<double>(lim.name + "min", lim.limits.min()).set<double>(lim.name + "max", lim.limits.max());
+    }
     return params;
   }
 
