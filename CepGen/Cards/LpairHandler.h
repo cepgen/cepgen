@@ -88,7 +88,9 @@ namespace cepgen {
       std::string parameter(std::string key) const;
       std::string describe(std::string key) const;
 
-      static const int kInvalid;
+      static constexpr int kInvalidInt = -999999;
+      static constexpr double kInvalidDbl = 999.999;
+      static constexpr const char* kInvalidStr = "(null)";
 
       std::unordered_map<std::string, Parameter<std::string> > p_strings_;
       std::unordered_map<std::string, Parameter<double> > p_doubles_;
@@ -151,21 +153,21 @@ namespace cepgen {
     inline std::string LpairHandler::get(const std::string& key) const {
       if (p_strings_.count(key))
         return *p_strings_.at(key).value;
-      return "null";
+      return kInvalidStr;
     }
     /// Retrieve a floating point parameter value
     template <>
     inline double LpairHandler::get(const std::string& key) const {
       if (p_doubles_.count(key))
         return *p_doubles_.at(key).value;
-      return -999.;
+      return -kInvalidDbl;
     }
     /// Retrieve an integer parameter value
     template <>
     inline int LpairHandler::get(const std::string& key) const {
       if (p_ints_.count(key))
         return *p_ints_.at(key).value;
-      return -999999;
+      return -kInvalidInt;
     }
   }  // namespace card
 }  // namespace cepgen

@@ -41,10 +41,6 @@
 
 namespace cepgen {
   namespace card {
-    const int LpairHandler::kInvalid = 99999;
-
-    //----- specialization for LPAIR input cards
-
     LpairHandler::LpairHandler(const ParametersList& params)
         : Handler(params),
           proc_params_(new ParametersList),
@@ -182,7 +178,7 @@ namespace cepgen {
           if (utils::ltrim(key)[0] == '#')
             continue;
           setParameter(key, value);
-          if (describe(key) != "null")
+          if (describe(key) != kInvalidStr)
             os << utils::format("\n>> %-8s %-25s (%s)", key.c_str(), parameter(key).c_str(), describe(key).c_str());
         }
         file.close();
@@ -198,7 +194,7 @@ namespace cepgen {
 
       //--- parse the PDG library
       if (!pdg_input_path_.empty())
-        pdg::MCDFileParser::parse(pdg_input_path_.c_str());
+        pdg::MCDFileParser::parse(pdg_input_path_);
       if (!kmr_grid_path_.empty())
         kmr::GluonGrid::get(kmr_grid_path_);
 
@@ -256,7 +252,7 @@ namespace cepgen {
           out_map[it.first] = utils::format(
               "%-8s %-20s ! %s\n", it.first.data(), it.second.value->data(), it.second.description.data());
       for (const auto& it : p_ints_)
-        if (it.second.value && *it.second.value != kInvalid)
+        if (it.second.value && *it.second.value != kInvalidInt)
           out_map[it.first] =
               utils::format("%-8s %-20d ! %s\n", it.first.data(), *it.second.value, it.second.description.data());
       for (const auto& it : p_doubles_)
@@ -340,16 +336,16 @@ namespace cepgen {
 
     std::string LpairHandler::parameter(std::string key) const {
       {
-        auto var = get<double>(key.c_str());
-        if (var != -999.)
+        auto var = get<double>(key);
+        if (var != -kInvalidDbl)
           return std::to_string(var);
       }
       {
-        auto var = get<int>(key.c_str());
-        if (var != -999999)
+        auto var = get<int>(key);
+        if (var != -kInvalidInt)
           return std::to_string(var);
       }
-      return get<std::string>(key.c_str());
+      return get<std::string>(key);
     }
 
     std::string LpairHandler::describe(std::string key) const {
@@ -359,7 +355,7 @@ namespace cepgen {
         return p_ints_.find(key)->second.description;
       if (p_doubles_.count(key))
         return p_doubles_.find(key)->second.description;
-      return "null";
+      return kInvalidStr;
     }
   }  // namespace card
 }  // namespace cepgen
