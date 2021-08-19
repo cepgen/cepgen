@@ -64,9 +64,8 @@ namespace cepgen {
         Tauola::setRadiationCutOff(rad_cutoff);
       //--- default parameters
       //Tauola::setDecayingParticle( 15 );
-      //Tauola::setSameParticleDecayMode( 0 );
-      //Tauola::setOppositeParticleDecayMode( 0 );
-      Tauola::initialize();
+      Tauola::setSameParticleDecayMode(params_.get<int>("sameParticleDecayMode", 0));
+      Tauola::setOppositeParticleDecayMode(params_.get<int>("oppositeParticleDecayMode", 0));
     }
 
     bool TauolaFilter::run(Event& ev, double& weight, bool /* full */) {
@@ -77,6 +76,7 @@ namespace cepgen {
       //evt.undecayTaus();
       evt.decayTaus();
       evt.dump();
+      throw CG_FATAL("") << "fini";
       //const auto& pairs = evt[Particle::CentralSystem][0];
       //CG_WARNING("")<<pairs;
 
