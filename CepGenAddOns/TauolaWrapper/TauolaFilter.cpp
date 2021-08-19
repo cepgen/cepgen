@@ -45,27 +45,43 @@ namespace cepgen {
 
     void TauolaFilter::init() {
       Tauola::setUnits(Tauola::GEV, Tauola::MM);
-      //Tauola::setSeed( seed_ );
+      Tauola::initialize();
+      //Tauola::setSeed(seed_);
+
       //--- spin correlations
-      Tauola::spin_correlation.setAll(pol_states_.get<bool>("full", true));
-      Tauola::spin_correlation.GAMMA = pol_states_.get<bool>("GAMMA", true);
-      Tauola::spin_correlation.Z0 = pol_states_.get<bool>("Z0", true);
-      Tauola::spin_correlation.HIGGS = pol_states_.get<bool>("HIGGS", true);
-      Tauola::spin_correlation.HIGGS_H = pol_states_.get<bool>("HIGGS_H", true);
-      Tauola::spin_correlation.HIGGS_A = pol_states_.get<bool>("HIGGS_A", true);
-      Tauola::spin_correlation.HIGGS_PLUS = pol_states_.get<bool>("HIGGS_PLUS", true);
-      Tauola::spin_correlation.HIGGS_MINUS = pol_states_.get<bool>("HIGGS_MINUS", true);
-      Tauola::spin_correlation.W_PLUS = pol_states_.get<bool>("W_PLUS", true);
-      Tauola::spin_correlation.W_MINUS = pol_states_.get<bool>("W_MINUS", true);
+      if (pol_states_.has<bool>("full"))
+        Tauola::spin_correlation.setAll(pol_states_.get<bool>("full"));
+      pol_states_.fill<bool>("GAMMA", Tauola::spin_correlation.GAMMA);
+      pol_states_.fill<bool>("Z0", Tauola::spin_correlation.Z0);
+      pol_states_.fill<bool>("HIGGS", Tauola::spin_correlation.HIGGS);
+      pol_states_.fill<bool>("HIGGS_H", Tauola::spin_correlation.HIGGS_H);
+      pol_states_.fill<bool>("HIGGS_A", Tauola::spin_correlation.HIGGS_A);
+      pol_states_.fill<bool>("HIGGS_PLUS", Tauola::spin_correlation.HIGGS_PLUS);
+      pol_states_.fill<bool>("HIGGS_MINUS", Tauola::spin_correlation.HIGGS_MINUS);
+      pol_states_.fill<bool>("W_PLUS", Tauola::spin_correlation.W_PLUS);
+      pol_states_.fill<bool>("W_MINUS", Tauola::spin_correlation.W_MINUS);
+
       //--- radiation states
-      Tauola::setRadiation(rad_states_.get<bool>("enable", true));
+      if (rad_states_.has<bool>("enable"))
+        Tauola::setRadiation(rad_states_.get<bool>("enable"));
       const auto rad_cutoff = rad_states_.get<double>("cutoff", -1.);
       if (rad_cutoff > 0.)
-        Tauola::setRadiationCutOff(rad_cutoff);
+        Tauola::setRadiationCutOff(rad_cutoff);  // default energy is 0.01 (in units of half the decaying particle mass)
+
       //--- default parameters
       //Tauola::setDecayingParticle( 15 );
-      Tauola::setSameParticleDecayMode(params_.get<int>("sameParticleDecayMode", 0));
-      Tauola::setOppositeParticleDecayMode(params_.get<int>("oppositeParticleDecayMode", 0));
+      if (params_.has<int>("sameParticleDecayMode"))
+        Tauola::setSameParticleDecayMode(params_.get<int>("sameParticleDecayMode"));
+      if (params_.has<int>("oppositeParticleDecayMode"))
+        Tauola::setOppositeParticleDecayMode(params_.get<int>("oppositeParticleDecayMode"));
+
+      //--- list of tau decay branching fractions
+      for (const auto& br_per_mode : params_.get<std::vector<ParametersList> >("branchingRatios", {})) {
+        const auto mode = br_per_mode.get<int>("mode");
+        const auto br = br_per_mode.get<double>("branchingRatio");
+        Tauola::setTauBr(mode, br);
+        CG_DEBUG("TauolaFilter:init") << "Branching ratio for mode " << mode << " set to " << br << ".";
+      }
     }
 
     bool TauolaFilter::run(Event& ev, double& weight, bool /* full */) {
