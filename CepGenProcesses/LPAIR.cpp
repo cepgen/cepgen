@@ -16,8 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGenProcesses/LPAIR.h"
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/FormFactors/Parameterisation.h"
@@ -26,6 +24,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/String.h"
+#include "CepGenProcesses/LPAIR.h"
 
 namespace cepgen {
   namespace proc {
@@ -594,23 +593,20 @@ namespace cepgen {
     double LPAIR::computeWeight() {
       ep1_ = (*event_)[Particle::IncomingBeam1][0].energy();
       ep2_ = (*event_)[Particle::IncomingBeam2][0].energy();
-      // Mass difference between the first outgoing particle
-      // and the first incoming particle
+      // Mass difference between the first outgoing particle and the first incoming particle
       masses_.w31 = mX2_ - mA2_;
-      // Mass difference between the second outgoing particle
-      // and the second incoming particle
+      // Mass difference between the second outgoing particle and the second incoming particle
       masses_.w52 = mY2_ - mB2_;
       // Mass difference between the two incoming particles
       masses_.w12 = mA2_ - mB2_;
-      // Mass difference between the central two-photons system
-      // and the second outgoing particle
+      // Mass difference between the central two-photons system and the second outgoing particle
 
       const double mx = sqrt(mX2_), my = sqrt(mY2_);
       CG_DEBUG_LOOP("LPAIR") << "sqrt(s) = " << sqs_ << " GeV\n\t"
                              << "m(X1) = " << mx << " GeV\t"
                              << "m(X2) = " << my << " GeV";
 
-      // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy subtracted (or wmax if specified)
+      // Maximal energy for the central system is beam-beam CM energy with the outgoing particles' mass energy subtracted (or wmax if specified)
       w_limits_.max() = std::min(pow(sqs_ - mx - my, 2), w_limits_.max());
 
       // compute the two-photon energy for this point
@@ -634,7 +630,7 @@ namespace cepgen {
 
       const double ecm6 = w4_ / (2. * mc4_), pp6cm = sqrt(ecm6 * ecm6 - masses_.Ml2);
 
-      jacobian_ *= pp6cm / (mc4_ * constants::SCONSTB * s_);
+      jacobian_ *= pp6cm / (mc4_ * SCONSTB * s_);
 
       // Let the most obscure part of this code begin...
 
