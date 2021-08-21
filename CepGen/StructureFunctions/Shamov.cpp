@@ -177,7 +177,7 @@ namespace cepgen {
           W1(0.),
           W2(0.),
           resonant(false),
-          mode_((Mode)params.get<int>("mode", (int)Mode::RealResAndNonRes)),
+          mode_(params.getAs<int, Mode>("mode", Mode::RealResAndNonRes)),
           fit_model_(params.get<int>("fitModel", 2)),
           gm0_(params.get<double>("gm0", 1.)),
           gmb_(params.get<double>("gmb", 0.984)),

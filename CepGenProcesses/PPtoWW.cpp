@@ -60,7 +60,7 @@ namespace cepgen {
           mW_(PDG::get().mass(PDG::W)),
           mW2_(mW_ * mW_),
           method_(params.get<int>("method", 1)) {
-      switch ((Polarisation)params.get<int>("polarisationStates", 0)) {
+      switch (params.getAs<int, Polarisation>("polarisationStates", Polarisation::full)) {
         case Polarisation::LL:
           pol_w1_ = {0};
           pol_w2_ = {0};

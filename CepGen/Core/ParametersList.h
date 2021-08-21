@@ -69,6 +69,11 @@ namespace cepgen {
     /// Get a parameter value
     template <typename T>
     T get(std::string key, const T& def = default_arg<T>::get()) const;
+    /// Get a recasted parameter value
+    template <typename T, typename U>
+    inline U getAs(std::string key, const U& def = default_arg<U>::get()) const {
+      return static_cast<U>(get<T>(key, static_cast<T>(def)));
+    }
     /// Reference to a parameter value
     template <typename T>
     T& operator[](std::string key);

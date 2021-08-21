@@ -63,7 +63,7 @@ namespace cepgen {
 
     PPtoFF::PPtoFF(const ParametersList& params)
         : Process2to4(params, {PDG::photon, PDG::photon}, params.get<ParticleProperties>("pair").pdgid),
-          method_((Mode)params.get<int>("method", (int)Mode::offShell)),
+          method_(params.getAs<int, Mode>("method", Mode::offShell)),
           alphas_params_(params.get<ParametersList>("alphaS", ParametersList().setName<std::string>("pegasus"))),
           prefactor_(1.),
           p_mat1_(0),

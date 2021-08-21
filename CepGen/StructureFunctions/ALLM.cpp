@@ -159,7 +159,7 @@ namespace cepgen {
           mr2(params.get<double>("mr2")),
           q02(params.get<double>("q02")),
           lambda2(params.get<double>("lambda2")),
-          type((Type)params.get<int>("type", (int)Type::Invalid)) {}
+          type(params.getAs<int, Type>("type", Type::Invalid)) {}
 
     ALLM::Parameters ALLM::Parameters::allm91() {
       static Parameters p(ParametersList()
