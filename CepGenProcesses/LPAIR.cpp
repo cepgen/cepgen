@@ -16,8 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGenProcesses/LPAIR.h"
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/FormFactors/Parameterisation.h"
@@ -26,6 +24,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/String.h"
+#include "CepGenProcesses/LPAIR.h"
 
 namespace cepgen {
   namespace proc {
@@ -169,12 +168,12 @@ namespace cepgen {
 
       jacobian_ = 0.;
 
-      // sig1 = sigma and sig2 = sigma' in [1]
+      // min(s2) = sigma and sig2 = sigma' in [1]
       const double sig = mc4_ + sqrt(mY2_);
-      double sig1 = sig * sig;
+      Limits s2_range(sig * sig, s_ + mX2_ - 2 * sqrt(mX2_) * sqs_);
 
       CG_DEBUG_LOOP("LPAIR") << "mc4 = " << mc4_ << "\n\t"
-                             << "sig1 = " << sig1 << ".";
+                             << "s2 in range " << s2_range << ".";
 
       const double d6 = w4_ - mY2_;
 
@@ -200,16 +199,14 @@ namespace cepgen {
       s2_ = 0.;
       double ds2 = 0.;
       if (n_opt_ == 0) {
-        const double smax = s_ + mX2_ - 2. * sqrt(mX2_) * sqs_;
-        const auto s2 = map(x(2), Limits(sig1, smax), "s2");
-        s2_ = s2.first;
+        const auto s2 = map(x(2), s2_range, "s2");
+        s2_range.min() = s2_ = s2.first;  // why lower s2 range update?
         ds2 = s2.second;
-        sig1 = s2_;  //FIXME!!!!!!!!!!!!!!!!!!!!
       }
 
       CG_DEBUG_LOOP("LPAIR") << "s2 = " << s2_;
 
-      const double sp = s_ + mX2_ - sig1, d3 = sig1 - mB2_;
+      const double sp = s_ + mX2_ - s2_range.min(), d3 = s2_range.min() - mB2_;
       const double rl2 = sp * sp - 4. * s_ * mX2_;  // lambda(s, m3**2, sigma)
       if (rl2 <= 0.) {
         CG_DEBUG_LOOP("LPAIR") << "rl2 = " << rl2 << " <= 0";
@@ -237,12 +234,12 @@ namespace cepgen {
       /////
 
       // t1, the first photon propagator, is defined here
-      const auto t1 = map(x(0), Limits(t1_min, t1_max), "t1");
+      const Limits t1_range(t1_min, t1_max);
+      const auto t1 = map(x(0), t1_range, "t1");
       t1_ = t1.first;
       const double dt1 = -t1.second;  // changes wrt mapt1 : dx->-dx
 
-      CG_DEBUG_LOOP("LPAIR") << "Definition of t1 = " << t1_ << " according to\n\t"
-                             << "(t1min, t1max) = (" << t1_min << ", " << t1_max << ")";
+      CG_DEBUG_LOOP("LPAIR") << "Definition of t1 = " << t1_ << " in range " << t1_range << ".";
 
       dd4_ = w4_ - t1_;
 
@@ -257,8 +254,7 @@ namespace cepgen {
 
       const double sl3 = sqrt(-sa1_);
 
-      Limits s2_lim;
-      s2_lim.min() = sig * sig;
+      s2_range.min() = sig * sig;
       // one computes splus and (s2x=s2max)
       double splus;
       if (mA2_ != 0.) {
@@ -270,26 +266,26 @@ namespace cepgen {
 
         if (fabs((sb - sd) / sd) >= 1.) {
           splus = sb - sd;
-          s2_lim.max() = se / splus;
+          s2_range.max() = se / splus;
         } else {
-          s2_lim.max() = sb + sd;
-          splus = se / s2_lim.max();
+          s2_range.max() = sb + sd;
+          splus = se / s2_range.max();
         }
       } else {  // 3
-        s2_lim.max() = (s_ * (t1_ * (s_ + d8 - mX2_) - mB2_ * mX2_) + mB2_ * mX2_ * (mB2_ + mX2_ - t1_)) / (ss * t13);
-        splus = s2_lim.min();
+        s2_range.max() = (s_ * (t1_ * (s_ + d8 - mX2_) - mB2_ * mX2_) + mB2_ * mX2_ * (mB2_ + mX2_ - t1_)) / (ss * t13);
+        splus = s2_range.min();
       }
       // 4
-      double s2x = s2_lim.max();
+      double s2x = s2_range.max();
 
       CG_DEBUG_LOOP("LPAIR") << "s2x = s2max = " << s2x;
 
       if (n_opt_ < 0) {  // 5
-        if (splus > s2_lim.min()) {
-          s2_lim.min() = splus;
-          CG_DEBUG_LOOP("LPAIR") << "min(sig2) truncated to splus = " << splus;
+        if (splus > s2_range.min()) {
+          s2_range.min() = splus;
+          CG_DEBUG_LOOP("LPAIR") << "min(s2) truncated to splus = " << splus;
         }
-        const auto s2 = n_opt_ < -1 ? map(x(2), s2_lim, "s2") : mapla(t1_, mB2_, x(2), s2_lim);  // n_opt_==-1
+        const auto s2 = n_opt_ < -1 ? map(x(2), s2_range, "s2") : mapla(t1_, mB2_, x(2), s2_range);  // n_opt_==-1
         s2_ = s2.first;
         ds2 = s2.second;
         s2x = s2_;
@@ -349,28 +345,28 @@ namespace cepgen {
       double s2p;
       if (fabs((sl5 - b) / sl5) >= 1.) {
         s2p = 0.5 * (sl5 - b) / t2_;
-        s2_lim.min() = c / (t2_ * s2p);
+        s2_range.min() = c / (t2_ * s2p);
       } else {  // 8
-        s2_lim.min() = 0.5 * (-sl5 - b) / t2_;
-        s2p = c / (t2_ * s2_lim.min());
+        s2_range.min() = 0.5 * (-sl5 - b) / t2_;
+        s2p = c / (t2_ * s2_range.min());
       }
       // 9
       if (n_opt_ >= 1) {
-        const auto s2 = n_opt_ > 1 ? map(x(2), s2_lim, "s2") : mapla(t1_, mB2_, x(2), s2_lim);
+        const auto s2 = n_opt_ > 1 ? map(x(2), s2_range, "s2") : mapla(t1_, mB2_, x(2), s2_range);
         s2_ = s2.first;
         ds2 = s2.second;
       }
 
       const double ap = -0.25 * pow(s2_ + d8, 2) + s2_ * t1_;
 
-      dd1_ = 0.25 * (s2_ - s2_lim.max()) * (mA2_ != 0. ? (splus - s2_) * mA2_ : ss * t13);
-      dd2_ = 0.25 * (s2_ - s2_lim.min()) * (s2p - s2_) * t2_;
+      dd1_ = 0.25 * (s2_ - s2_range.max()) * (mA2_ != 0. ? (splus - s2_) * mA2_ : ss * t13);
+      dd2_ = 0.25 * (s2_ - s2_range.min()) * (s2p - s2_) * t2_;
 
       CG_DEBUG_LOOP("LPAIR") << "t2      = " << t2_ << "\n\t"
                              << "s2      = " << s2_ << "\n\t"
                              << "s2p     = " << s2p << "\n\t"
                              << "splus   = " << splus << "\n\t"
-                             << "s2 range= " << s2_lim;
+                             << "s2 range= " << s2_range;
 
       const double yy4 = cos(theta4_);
       const double dd = dd1_ * dd2_;
@@ -594,23 +590,20 @@ namespace cepgen {
     double LPAIR::computeWeight() {
       ep1_ = (*event_)[Particle::IncomingBeam1][0].energy();
       ep2_ = (*event_)[Particle::IncomingBeam2][0].energy();
-      // Mass difference between the first outgoing particle
-      // and the first incoming particle
+      // Mass difference between the first outgoing particle and the first incoming particle
       masses_.w31 = mX2_ - mA2_;
-      // Mass difference between the second outgoing particle
-      // and the second incoming particle
+      // Mass difference between the second outgoing particle and the second incoming particle
       masses_.w52 = mY2_ - mB2_;
       // Mass difference between the two incoming particles
       masses_.w12 = mA2_ - mB2_;
-      // Mass difference between the central two-photons system
-      // and the second outgoing particle
+      // Mass difference between the central two-photons system and the second outgoing particle
 
       const double mx = sqrt(mX2_), my = sqrt(mY2_);
       CG_DEBUG_LOOP("LPAIR") << "sqrt(s) = " << sqs_ << " GeV\n\t"
                              << "m(X1) = " << mx << " GeV\t"
                              << "m(X2) = " << my << " GeV";
 
-      // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy subtracted (or wmax if specified)
+      // Maximal energy for the central system is beam-beam CM energy with the outgoing particles' mass energy subtracted (or wmax if specified)
       w_limits_.max() = std::min(pow(sqs_ - mx - my, 2), w_limits_.max());
 
       // compute the two-photon energy for this point
@@ -634,7 +627,7 @@ namespace cepgen {
 
       const double ecm6 = w4_ / (2. * mc4_), pp6cm = sqrt(ecm6 * ecm6 - masses_.Ml2);
 
-      jacobian_ *= pp6cm / (mc4_ * constants::SCONSTB * s_);
+      jacobian_ *= pp6cm / (mc4_ * SCONSTB * s_);
 
       // Let the most obscure part of this code begin...
 

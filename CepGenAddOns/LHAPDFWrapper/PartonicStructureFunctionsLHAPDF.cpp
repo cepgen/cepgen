@@ -90,7 +90,7 @@ namespace cepgen {
           num_flavours_(params.get<int>("numFlavours", 4)),
           pdf_code_(params.get<int>("pdfCode", 0)),
           pdf_member_(params.get<int>("pdfMember", 0)),
-          mode_((Mode)params.get<int>("mode", (int)Mode::full)),
+          mode_(params.getAs<int, Mode>("mode", Mode::full)),
           initialised_(false) {}
 
     Partonic::Partonic(const char* set, unsigned short member, const Mode& mode)

@@ -16,15 +16,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Processes/Process.h"
-
 #include <iomanip>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
-#include "CepGen/Physics/Constants.h"
+#include "CepGen/Modules/CouplingFactory.h"
+#include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Processes/Process.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
@@ -32,6 +32,8 @@ namespace cepgen {
     Process::Process(const ParametersList& params, bool has_event)
         : NamedModule(params),
           first_run(true),
+          alphaem_(AlphaEMFactory::get().build(
+              params.get<ParametersList>("alphaEM", ParametersList().setName<std::string>("fixed")))),
           base_jacobian_(1.),
           s_(-1.),
           sqs_(-1.),
@@ -49,6 +51,8 @@ namespace cepgen {
     Process::Process(const Process& proc)
         : NamedModule<>(proc.parameters()),
           first_run(proc.first_run),
+          alphaem_(proc.alphaem_),
+          alphas_(proc.alphas_),
           base_jacobian_(proc.base_jacobian_),
           s_(proc.s_),
           sqs_(proc.sqs_),

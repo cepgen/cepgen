@@ -18,7 +18,8 @@
 
 #include <LHAPDF/LHAPDF.h>
 
-#include "CepGen/Physics/AlphaS.h"
+#include "CepGen/Modules/CouplingFactory.h"
+#include "CepGen/Physics/Coupling.h"
 
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
 #define LHAPDF_GE_6 1
@@ -26,10 +27,10 @@
 
 namespace cepgen {
   /// A perturbative PDF-oriented \f$\alpha_S(Q^2)\f$ evaluator
-  class AlphaSLHAPDF : public AlphaS {
+  class AlphaSLHAPDF : public Coupling {
   public:
     explicit AlphaSLHAPDF(const ParametersList& params)
-        : AlphaS(params)
+        : Coupling(params)
 #ifdef LHAPDF_GE_6
           ,
           lhapdf_(LHAPDF::mkPDF(params.get<std::string>("pdfSet", "cteq6"), params.get<int>("pdfMember", 0))) {

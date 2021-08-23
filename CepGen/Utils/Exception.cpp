@@ -75,8 +75,9 @@ namespace cepgen {
                          from_, utils::Colour::yellow, utils::Modifier::underline | utils::Modifier::dimmed)
                   << ": " << utils::colourise(message_.str(), utils::Colour::reset, utils::Modifier::dimmed) << "\n";
       case Type::warning:
-        return os << type_ << " " << utils::colourise(from_, utils::Colour::reset, utils::Modifier::underline) << "\n\t"
-                  << message_.str() << "\n";
+        return os << type_ << " "
+                  << utils::colourise(from_, utils::Colour::reset, utils::Modifier::underline | utils::Modifier::dimmed)
+                  << "\n\t" << message_.str() << "\n";
       case Type::verbatim:
         return os << message_.str() << "\n";
       case Type::undefined:

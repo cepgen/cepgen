@@ -30,6 +30,7 @@
 
 namespace cepgen {
   class Event;
+  class Coupling;
   /// Location for all physics processes to be generated
   namespace proc {
     /// \brief Class template to define any process to compute using this MC integrator/events generator
@@ -158,6 +159,10 @@ namespace cepgen {
     protected:
       /// Numerical limits for sanity comparisons
       static constexpr double NUM_LIMITS = 1.e-3;  // MeV/mm-level
+      /// Electromagnetic running coupling algorithm
+      std::shared_ptr<Coupling> alphaem_;
+      /// Strong running coupling algorithm
+      std::shared_ptr<Coupling> alphas_;
       /// Handler to a variable mapped by this process
       struct MappingVariable {
         std::string description;  ///< Human-readable description of the variable

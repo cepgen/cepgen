@@ -17,7 +17,8 @@
  */
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Physics/AlphaS.h"
+#include "CepGen/Modules/CouplingFactory.h"
+#include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/PDG.h"
 
 namespace {
@@ -28,10 +29,10 @@ namespace {
 }  // namespace
 
 namespace cepgen {
-  class AlphaSPEGASUS : public AlphaS {
+  class AlphaSPEGASUS : public Coupling {
   public:
     explicit AlphaSPEGASUS(const ParametersList& params)
-        : AlphaS(params),
+        : Coupling(params),
           iord_(params.get<int>("iord", 2)),
           fr2_(params.get<double>("fr2", 1.)),
           mur_(params.get<double>("mur", 1.)),

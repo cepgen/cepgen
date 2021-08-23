@@ -22,9 +22,10 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Physics/AlphaS.h"
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/Process2to4.h"
 
@@ -48,9 +49,7 @@ namespace cepgen {
       const enum class Mode { onShell = 0, offShell = 1, offShellLegacy = 2 } method_;
 
       ParametersList alphas_params_;
-      std::shared_ptr<AlphaS> alphas_;
 
-      bool gluon1_, gluon2_;
       double prefactor_;
 
       //--- parameters for off-shell matrix element
@@ -64,10 +63,8 @@ namespace cepgen {
 
     PPtoFF::PPtoFF(const ParametersList& params)
         : Process2to4(params, {PDG::photon, PDG::photon}, params.get<ParticleProperties>("pair").pdgid),
-          method_((Mode)params.get<int>("method", (int)Mode::offShell)),
+          method_(params.getAs<int, Mode>("method", Mode::offShell)),
           alphas_params_(params.get<ParametersList>("alphaS", ParametersList().setName<std::string>("pegasus"))),
-          gluon1_(false),
-          gluon2_(false),
           prefactor_(1.),
           p_mat1_(0),
           p_mat2_(0),
@@ -110,29 +107,20 @@ namespace cepgen {
       CG_DEBUG("PPtoFF:prepare") << "Incoming state:\n\t"
                                  << "mp(1/2) = " << sqrt(mA2_) << "/" << sqrt(mB2_) << ".";
 
-      switch (event_->oneWithRole(Particle::Parton1).pdgId()) {
-        case PDG::gluon:
-          gluon1_ = true;
-          prefactor_ *= 4. * M_PI;
-          break;
-        case PDG::photon:
-          prefactor_ *= constants::G_EM_SQ * pow(qf3_, 2) / 9.;
-          break;
-        default:
-          throw CG_FATAL("PPtoFF:prepare") << "Only photon & gluon partons are supported!";
-      }
-      switch (event_->oneWithRole(Particle::Parton2).pdgId()) {
-        case PDG::gluon:
-          gluon2_ = true;
-          prefactor_ *= 4. * M_PI;
-          break;
-        case PDG::photon:
-          prefactor_ *= constants::G_EM_SQ * pow(qf3_, 2) / 9.;
-          break;
-        default:
-          throw CG_FATAL("PPtoFF:prepare") << "Only photon & gluon partons are supported!";
-      }
-      if (gluon1_ || gluon2_)
+      bool has_gluon = false;
+      for (const auto& role : {Particle::Parton1, Particle::Parton2})
+        switch (event_->oneWithRole(role).pdgId()) {
+          case PDG::gluon:
+            has_gluon = true;
+            prefactor_ *= 4. * M_PI;
+            break;
+          case PDG::photon:
+            prefactor_ *= 4. * M_PI * pow(qf3_, 2) / 9.;
+            break;
+          default:
+            throw CG_FATAL("PPtoFF:prepare") << "Only photon & gluon partons are supported!";
+        }
+      if (has_gluon)
         // at least one gluon; need to initialise the alpha(s) evolution algorithm
         alphas_ = AlphaSFactory::get().build(alphas_params_);
     }
@@ -157,9 +145,6 @@ namespace cepgen {
     }
 
     double PPtoFF::onShellME() const {
-      if (gluon1_ || gluon2_)
-        throw CG_FATAL("PPtoFF:onShell") << "On-shell matrix element only compatible with photon-photon mode!";
-
       const double s_hat = shat(), t_hat = that(), u_hat = uhat();
       CG_DEBUG_LOOP("PPtoFF:onShell") << "shat: " << s_hat << ", that: " << t_hat << ", uhat: " << u_hat << ".";
 
@@ -255,10 +240,15 @@ namespace cepgen {
       double amat2 = 0.5 * prefactor_ * pow(x1 * x2 * s_, 2) * (p_mat1_ * amat2_1 + p_mat2_ * amat2_2);
 
       const double tmax = pow(std::max(amt1_, amt2_), 2);
-      if (gluon1_)
-        amat2 *= 0.5 * (*alphas_)(sqrt(std::max(eps12, tmax)));
-      if (gluon2_)
-        amat2 *= 0.5 * (*alphas_)(sqrt(std::max(eps22, tmax)));
+      const double q1 = std::sqrt(std::max(eps12, tmax)), q2 = std::sqrt(std::max(eps22, tmax));
+      if (event_->oneWithRole(Particle::Parton1).pdgId() == PDG::gluon)
+        amat2 *= 0.5 * (*alphas_)(q1);
+      else
+        amat2 *= (*alphaem_)(q1);
+      if (event_->oneWithRole(Particle::Parton2).pdgId() == PDG::gluon)
+        amat2 *= 0.5 * (*alphas_)(q2);
+      else
+        amat2 *= (*alphaem_)(q2);
 
       CG_DEBUG_LOOP("PPtoFF:offShell") << "aux2(1/2) = " << aux2_1 << " / " << aux2_2 << "\n\t"
                                        << "z(1/2) = " << z1 << " / " << z2 << "\n\t"

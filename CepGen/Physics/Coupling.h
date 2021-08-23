@@ -16,31 +16,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Physics_AlphaS_h
-#define CepGen_Physics_AlphaS_h
+#ifndef CepGen_Physics_Coupling_h
+#define CepGen_Physics_Coupling_h
 
-#include "CepGen/Modules/ModuleFactory.h"
 #include "CepGen/Modules/NamedModule.h"
-
-#define REGISTER_ALPHAS_MODULE(name, obj)                                  \
-  namespace cepgen {                                                       \
-    struct BUILDERNM(obj) {                                                \
-      BUILDERNM(obj)() { AlphaSFactory::get().registerModule<obj>(name); } \
-    };                                                                     \
-    static const BUILDERNM(obj) g##obj;                                    \
-  }
 
 namespace cepgen {
   /// A generic \f$\alpha_S(Q^2)\f$ evaluation algorithm
-  class AlphaS : public NamedModule<> {
+  class Coupling : public NamedModule<std::string> {
   public:
-    /// Build an \f$\alpha_S\f$ interpolator object
-    AlphaS(const ParametersList& params) : NamedModule(params) {}
-    /// Compute \f$\alpha_S\f$ for a given \f$Q^2\f$
+    /// Build an \f$\alpha_{S,EM}\f$ interpolator object
+    Coupling(const ParametersList& params) : NamedModule(params) {}
+    /// Compute \f$\alpha_{S,EM}\f$ for a given \f$Q\f$
     virtual double operator()(double q) const = 0;
   };
-  /// An alpha(S) evolution algorithms factory
-  typedef ModuleFactory<AlphaS> AlphaSFactory;
 }  // namespace cepgen
 
 #endif
