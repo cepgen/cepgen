@@ -159,7 +159,8 @@ namespace cepgen {
     //--- incoming parton-like particles
     auto prim_parts = utils::split(parts[0], ' ');
     for (auto& p : prim_parts)
-      utils::trim(p);
+      p = utils::trim(p);
+    CG_DEBUG("MadGraphInterface:unpackProcessParticles") << "Primary particles: " << prim_parts;
     if (prim_parts.size() != 2)
       throw CG_FATAL("MadGraphInterface:unpackProcessParticles")
           << "Unable to unpack particles from process name: \"" << proc_name << "\"";
@@ -170,9 +171,10 @@ namespace cepgen {
       out.first.emplace_back(mg5_parts_.at(p));
     }
     //---- outgoing system
-    auto dec_parts = utils::split(parts[1], ' ');
+    auto dec_parts = utils::split(utils::trim(parts[1]), ' ');
+    CG_DEBUG("MadGraphInterface:unpackProcessParticles") << "Outgoing system: " << dec_parts << ": " << parts;
     for (auto& p : dec_parts) {
-      utils::trim(p);
+      p = utils::trim(p);
       if (mg5_parts_.count(p) == 0)
         throw CG_FATAL("MadGraphInterface:unpackProcessParticles")
             << "Particle with mg5_aMC name '" << p << "' was not recognised!";
