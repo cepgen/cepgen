@@ -60,8 +60,8 @@ double MadGraphProcess::eval() {
   if (me[0] <= 0)
     return 0.;
 
-  CG_INFO("") << std::vector<double>(mom_[0], mom_[0] + 4) << " :: " << std::vector<double>(mom_[1], mom_[1] + 4)
-              << " :: " << me[0];
+  CG_DEBUG_LOOP("MadGraphProcess:eval") << std::vector<double>(mom_[0], mom_[0] + 4)
+                                        << " :: " << std::vector<double>(mom_[1], mom_[1] + 4) << " :: " << me[0];
   //return me[0]*constants::GEVM2_TO_PB;
   return me[0];
 }

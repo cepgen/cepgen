@@ -68,11 +68,9 @@ MadGraphProcessBuilder::prepareProcessKinematics() {
   mg5_proc_->initialise(params_.get<std::string>("parametersCard", "param_card.dat"));
 }
 
-/*void
-MadGraphProcessBuilder::fillCentralParticlesKinematics()
-{
-  if ( !mg5_proc_ )
-    CG_FATAL( "MadGraphProcessBuilder" ) << "Process not properly linked!";
+/*void MadGraphProcessBuilder::fillCentralParticlesKinematics() {
+  if (!mg5_proc_)
+    CG_FATAL("MadGraphProcessBuilder") << "Process not properly linked!";
 
   const auto& parts = mg5_proc_->momenta();
 }*/
@@ -83,20 +81,10 @@ MadGraphProcessBuilder::computeCentralMatrixElement() const {
   if (!mg5_proc_)
     CG_FATAL("MadGraphProcessBuilder") << "Process not properly linked!";
 
-  //CG_INFO("")<<qt1_*qt1_<<"::"<<t1_<<"\t"<<qt2_*qt2_<<"::"<<t2_;
-
-  // first incoming parton
-  /*auto q1 = Momentum::fromPtEtaPhi( qt1_, 0., phi_qt1_ );
-  q1.setPz( std::sqrt( t1_-qt1_*qt1_ ) );
-  q1.setMass( mg5_proc_->masses()[0] );*/
-  //auto q1 = Momentum::fromPtEtaPhiM( qt1_, 0., phi_qt1_, mg5_proc_->masses()[0] );
-  mg5_proc_->setMomentum(0, q1_);
-  // second incoming parton
-  /*auto q2 = Momentum::fromPtEtaPhi( qt2_, 0., phi_qt2_ );
-  q2.setPz( std::sqrt( t2_-qt2_*qt2_ ) );
-  q2.setMass( mg5_proc_->masses()[1] );*/
-  //auto q2 = Momentum::fromPtEtaPhiM( qt2_, 0., phi_qt2_, mg5_proc_->masses()[1] );
-  mg5_proc_->setMomentum(1, q2_);
+  mg5_proc_->setMomentum(0, q1_);  // first incoming parton
+  mg5_proc_->setMomentum(1, q2_);  // second incoming parton
+  mg5_proc_->setMomentum(2, p_c1_);
+  mg5_proc_->setMomentum(3, p_c2_);
 
   return mg5_proc_->eval();
 }
