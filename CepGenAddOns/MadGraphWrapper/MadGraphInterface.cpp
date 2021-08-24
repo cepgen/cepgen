@@ -68,9 +68,12 @@ namespace cepgen {
     } else {
       CG_INFO("MadGraphInterface:run") << "Running the mg5_aMC process generation.";
       prepareCard();
+      cpp_path = tmp_dir_;
+      const auto num_removed_files = fs::remove_all(cpp_path);
+      CG_DEBUG("MadGraphInterface:run") << "Removed " << utils::s("file", num_removed_files, true)
+                                        << " from process directory " << cpp_path << ".";
       log << "\n\n*** mg5_aMC process generation ***\n\n";
       log << generateProcess(card_path_);
-      cpp_path = tmp_dir_;
     }
 
 #ifdef _WIN32
