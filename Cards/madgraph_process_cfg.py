@@ -10,7 +10,7 @@ process = kt.process.clone('mg5_aMC',
         #lib = 'libCepGenMadGraphProcess.so',
         # alternatively, if standalone_cpp directory is already generated
         #standaloneCppPath = '/tmp/cepgen_mg5_aMC',
-        mode = cepgen.ProcessMode.ElasticElastic,
+        mode = cepgen.ProcessMode.InelasticElastic,
     ),
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
@@ -29,5 +29,14 @@ print(process)
 
 #--- events generation
 from Config.generator_cff import generator
-generator.numEvents = 5000
+generator.numEvents = 10000
 
+text = cepgen.Module('text',  # histogramming/ASCII output capability
+    #variables = ['nev', 'm(4)', 'tgen'],
+    histVariables={
+        'm(4)': cepgen.Parameters(xrange=(0., 250.), nbins=10, log=True),
+        'pt(4)': cepgen.Parameters(xrange=(0., 25.), nbins=10, log=True),
+        'pt(7):pt(8)': cepgen.Parameters(xrange=(0., 250.), yrange=(0., 250.), log=True)
+    }
+)
+output = cepgen.Sequence(text)
