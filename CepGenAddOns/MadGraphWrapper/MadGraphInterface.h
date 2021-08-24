@@ -24,6 +24,7 @@
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Utils/Filesystem.h"
 
 // forward-declaration of base MadGraph standalone_cpp process
 class CPPProcess;
@@ -40,8 +41,8 @@ namespace cepgen {
     static const std::unordered_map<std::string, pdgid_t> mg5_parts_;
 
     static std::string runCommand(const std::string&);
-    static std::string generateLibrary(const std::string&, const std::string&, const std::string&);
-    static std::string generateProcess(const std::string&);
+    static std::string generateLibrary(const fs::path&, const fs::path&, const std::string&);
+    static std::string generateProcess(const fs::path&);
 
     using ProcessParticles = std::pair<std::vector<pdgid_t>, std::vector<pdgid_t> >;
     static ProcessParticles unpackProcessParticles(const std::string&);
@@ -52,9 +53,9 @@ namespace cepgen {
 
     const std::string proc_;
     const std::string model_;
-    const std::string card_path_;
-    const std::string standalone_cpp_path_;
-    const std::string tmp_dir_;
+    const fs::path card_path_;
+    const fs::path standalone_cpp_path_;
+    const fs::path tmp_dir_;
     const std::string log_filename_;
   };
 }  // namespace cepgen
