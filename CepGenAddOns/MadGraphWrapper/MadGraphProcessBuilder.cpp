@@ -28,63 +28,44 @@ using namespace cepgen;
 
 class MadGraphProcessBuilder : public proc::Process2to4 {
 public:
-  MadGraphProcessBuilder(const ParametersList& params);
+  MadGraphProcessBuilder(const ParametersList&);
   proc::ProcessPtr clone() const override { return proc::ProcessPtr(new MadGraphProcessBuilder(*this)); }
   static std::string description() { return "MadGraph_aMC process builder"; }
 
   void prepareProcessKinematics() override;
   double computeCentralMatrixElement() const override;
 
-  /*void preparePhaseSpace() override;
-    double computeKTFactorisedMatrixElement() override;
-    void fillCentralParticlesKinematics() override;*/
-
 private:
   std::shared_ptr<MadGraphProcess> mg5_proc_;
 };
 
-extern std::string madgraph_process_name();
-
 MadGraphProcessBuilder::MadGraphProcessBuilder(const ParametersList& params)
-    :  //KTProcess( params, std::array<pdgid_t,2>{}, std::vector<pdgid_t>{} )
-      Process2to4(params, std::array<pdgid_t, 2>{}, 0) {
+    : Process2to4(params, std::array<pdgid_t, 2>{}, 0) {
   if (params.has<std::string>("lib"))
     loadLibrary(params.get<std::string>("lib"));
   else {
     const MadGraphInterface interf(params);
     loadLibrary(interf.run());
   }
-  //--- once MadGraph process library is loaded into runtime environment
-  //    can define its wrapper object
+  // once MadGraph process library is loaded into runtime environment, can define its wrapper object
   mg5_proc_.reset(new MadGraphProcess);
 }
 
-void
-//MadGraphProcessBuilder::preparePhaseSpace()
-MadGraphProcessBuilder::prepareProcessKinematics() {
+void MadGraphProcessBuilder::prepareProcessKinematics() {
   if (!mg5_proc_)
     CG_FATAL("MadGraphProcessBuilder") << "Process not properly linked!";
 
   mg5_proc_->initialise(params_.get<std::string>("parametersCard", "param_card.dat"));
 }
 
-/*void MadGraphProcessBuilder::fillCentralParticlesKinematics() {
+double MadGraphProcessBuilder::computeCentralMatrixElement() const {
   if (!mg5_proc_)
     CG_FATAL("MadGraphProcessBuilder") << "Process not properly linked!";
 
-  const auto& parts = mg5_proc_->momenta();
-}*/
-
-double
-//MadGraphProcessBuilder::computeKTFactorisedMatrixElement()
-MadGraphProcessBuilder::computeCentralMatrixElement() const {
-  if (!mg5_proc_)
-    CG_FATAL("MadGraphProcessBuilder") << "Process not properly linked!";
-
-  mg5_proc_->setMomentum(0, q1_);  // first incoming parton
-  mg5_proc_->setMomentum(1, q2_);  // second incoming parton
-  mg5_proc_->setMomentum(2, p_c1_);
-  mg5_proc_->setMomentum(3, p_c2_);
+  mg5_proc_->setMomentum(0, q1_);    // first incoming parton
+  mg5_proc_->setMomentum(1, q2_);    // second incoming parton
+  mg5_proc_->setMomentum(2, p_c1_);  // first outgoing central particle
+  mg5_proc_->setMomentum(3, p_c2_);  // second outgoing central particle
 
   return mg5_proc_->eval();
 }

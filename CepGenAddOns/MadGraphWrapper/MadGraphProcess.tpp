@@ -30,13 +30,14 @@ MadGraphProcess::MadGraphProcess()
       descr_("XXX_PROC_DESCRIPTION_XXX"),
       incoming_pdgids_({XXX_PART1_XXX, XXX_PART2_XXX}),
       central_pdgids_({XXX_OUT_PART_XXX}) {
-  CG_INFO("MadGraphProcess") << "Process considered: " << proc_->name();
+  CG_INFO("MadGraphProcess") << "Process considered: " << proc_->name() << ". "
+                             << "Incoming particles: " << incoming_pdgids_ << ", outgoing system: " << central_pdgids_
+                             << ".";
 }
 
 MadGraphProcess::~MadGraphProcess() = default;
 
 void MadGraphProcess::initialise(const std::string& param_card) {
-  //--- initialise the process
   try {
     proc_->initProc(param_card);
   } catch (const char* chr) {
@@ -60,20 +61,17 @@ double MadGraphProcess::eval() {
   if (me[0] <= 0)
     return 0.;
 
-  CG_DEBUG_LOOP("MadGraphProcess:eval") << std::vector<double>(mom_[0], mom_[0] + 4)
-                                        << " :: " << std::vector<double>(mom_[1], mom_[1] + 4) << " :: " << me[0];
+  CG_DEBUG_LOOP("MadGraphProcess:eval").log([&](auto& log) {
+    log << "Incoming partons 4-momenta:   " << std::vector<double>(mom_[0], mom_[0] + 4) << ", "
+        << std::vector<double>(mom_[1], mom_[1] + 4) << "\n\t"
+        << "Outgoing particles 4-momenta: ";
+    std::string sep;
+    for (size_t i = 0; i < proc_->nexternal - 2; ++i)
+      log << sep << std::vector<double>(mom_[i + 2], mom_[i + 2] + 4), sep = ", ";
+    log << "Resulting matrix element: " << me[0] << ".";
+  });
   //return me[0]*constants::GEVM2_TO_PB;
   return me[0];
-}
-
-MadGraphProcess& MadGraphProcess::setMomentum(size_t i, const Momentum& mom) {
-  if (i > mom_.size())
-    throw CG_FATAL("MadGraphProcess") << "Invalid index for momentum: " << i << "!";
-  mom_[i][0] = mom.energy();
-  mom_[i][1] = mom.px();
-  mom_[i][2] = mom.py();
-  mom_[i][3] = mom.pz();
-  return *this;
 }
 
 const std::vector<Momentum>& MadGraphProcess::momenta() {

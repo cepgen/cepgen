@@ -40,7 +40,15 @@ namespace cepgen {
     void initialise(const std::string&);
     double eval();
 
-    MadGraphProcess& setMomentum(size_t, const Momentum&);
+    inline MadGraphProcess& setMomentum(size_t i, const Momentum& mom) {
+      if (i > mom_.size())
+        throw CG_FATAL("MadGraphProcess") << "Invalid index for momentum: " << i << "!";
+      mom_[i][0] = mom.energy();
+      mom_[i][1] = mom.px();
+      mom_[i][2] = mom.py();
+      mom_[i][3] = mom.pz();
+      return *this;
+    }
     const std::vector<Momentum>& momenta();
     const std::vector<double>& masses() const;
 

@@ -16,8 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Processes/Process2to4.h"
-
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
@@ -25,6 +23,7 @@
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Processes/Process2to4.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
@@ -45,12 +44,12 @@ namespace cepgen {
 
     void Process2to4::preparePhaseSpace() {
       {
-        auto beamA = event_->oneWithRole(Particle::IncomingBeam1);
+        const auto& beamA = event_->oneWithRole(Particle::IncomingBeam1);
         pA_ = beamA.momentum();
         mA2_ = beamA.mass2();
       }
       {
-        auto beamB = event_->oneWithRole(Particle::IncomingBeam2);
+        const auto& beamB = event_->oneWithRole(Particle::IncomingBeam2);
         pB_ = beamB.momentum();
         mB2_ = beamB.mass2();
       }
