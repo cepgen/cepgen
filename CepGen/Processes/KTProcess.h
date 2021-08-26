@@ -65,6 +65,8 @@ namespace cepgen {
       void fillPrimaryParticlesKinematics();
       /// Set the kinematics of the outgoing central system
       virtual void fillCentralParticlesKinematics() = 0;
+      /// Set the list of intermediate partons in the process
+      void setIntermediatePartons(const std::array<pdgid_t, 2>& part) { kIntermediateParts = part; }
       /// Set the list of central particles produced
       void setProducedParticles(const std::vector<pdgid_t>& prod) { kProducedParts = prod; }
 

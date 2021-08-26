@@ -49,6 +49,10 @@ MadGraphProcessBuilder::MadGraphProcessBuilder(const ParametersList& params)
   }
   // once MadGraph process library is loaded into runtime environment, can define its wrapper object
   mg5_proc_.reset(new MadGraphProcess);
+  const auto& interm_part = mg5_proc_->intermediatePartons();
+  const auto& cent_sys = mg5_proc_->centralSystem();
+  setIntermediatePartons({(pdgid_t)interm_part[0], (pdgid_t)interm_part[1]});
+  setProducedParticles(std::vector<pdgid_t>(cent_sys.begin(), cent_sys.end()));
 }
 
 void MadGraphProcessBuilder::prepareProcessKinematics() {

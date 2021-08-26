@@ -38,6 +38,8 @@ namespace cepgen {
     const std::string& description() const { return descr_; }
 
     void initialise(const std::string&);
+    inline const std::array<int, 2>& intermediatePartons() const { return incoming_pdgids_; }
+    inline const std::vector<int>& centralSystem() const { return central_pdgids_; }
     double eval();
 
     inline MadGraphProcess& setMomentum(size_t i, const Momentum& mom) {
