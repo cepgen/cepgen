@@ -41,7 +41,7 @@ namespace cepgen {
     static const std::unordered_map<std::string, pdgid_t> mg5_parts_;
 
     static std::string runCommand(const std::string&);
-    static std::string generateLibrary(const fs::path&, const fs::path&, const std::string&);
+    static std::string generateLibrary(const fs::path&, const fs::path&, const fs::path&);
     static std::string generateProcess(const fs::path&);
 
     using ProcessParticles = std::pair<std::vector<pdgid_t>, std::vector<pdgid_t> >;

@@ -77,9 +77,9 @@ namespace cepgen {
     }
 
 #ifdef _WIN32
-    std::string lib_path = "CepGenMadGraphProcess.dll";
+    fs::path lib_path = "CepGenMadGraphProcess.dll";
 #else
-    std::string lib_path = "libCepGenMadGraphProcess.so";
+    fs::path lib_path = "libCepGenMadGraphProcess.so";
 #endif
 
     CG_INFO("MadGraphInterface:run") << "Preparing the mg5_aMC process library.";
@@ -193,7 +193,7 @@ namespace cepgen {
 
   std::string MadGraphInterface::generateLibrary(const fs::path& proc_path,
                                                  const fs::path& in_path,
-                                                 const std::string& out_lib) {
+                                                 const fs::path& out_lib) {
     std::vector<std::string> src_files;
     src_files.emplace_back(proc_path.string());
 
@@ -229,7 +229,7 @@ namespace cepgen {
     cmd += " -I" + (in_path / "src").string();
     cmd += " -I" + processes.at(0);
     cmd += " " + utils::merge(src_files, " ");
-    cmd += " -o " + out_lib;
+    cmd += " -o " + out_lib.string();
     return runCommand(cmd);
   }
 
