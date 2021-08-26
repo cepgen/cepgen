@@ -16,14 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Processes/KTProcess.h"
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Processes/KTProcess.h"
 
 namespace cepgen {
   namespace proc {
@@ -50,6 +49,9 @@ namespace cepgen {
            {Particle::OutgoingBeam2, {PDG::proton}},
            {Particle::CentralSystem, kProducedParts}});
       setExtraContent();
+      CG_DEBUG("KTProcess:addEventContent") << "Addition of:\n\t"
+                                            << "Intermediate partons: " << kIntermediateParts << "\n\t"
+                                            << "Produced system: " << kProducedParts << ".\n\t" << *event_;
     }
 
     void KTProcess::prepareKinematics() {

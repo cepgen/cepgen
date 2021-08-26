@@ -62,13 +62,14 @@ double MadGraphProcess::eval() {
     return 0.;
 
   CG_DEBUG_LOOP("MadGraphProcess:eval").log([&](auto& log) {
-    log << "Incoming partons 4-momenta:   " << std::vector<double>(mom_[0], mom_[0] + 4) << ", "
+    log << "Dump of event kinematics\n\t"
+        << "Incoming partons 4-momenta:   " << std::vector<double>(mom_[0], mom_[0] + 4) << ", "
         << std::vector<double>(mom_[1], mom_[1] + 4) << "\n\t"
         << "Outgoing particles 4-momenta: ";
     std::string sep;
     for (size_t i = 0; i < proc_->nexternal - 2; ++i)
       log << sep << std::vector<double>(mom_[i + 2], mom_[i + 2] + 4), sep = ", ";
-    log << "Resulting matrix element: " << me[0] << ".";
+    log << "\n\tResulting matrix element: " << me[0] << ".";
   });
   //return me[0]*constants::GEVM2_TO_PB;
   return me[0];

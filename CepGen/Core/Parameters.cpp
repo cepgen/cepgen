@@ -97,7 +97,7 @@ namespace cepgen {
           << "  positive-z beam: " << kinematics.incomingBeams().positive() << "\n\t"
           << "  negative-z beam: " << kinematics.incomingBeams().negative();
       if (kinematics.incomingBeams().structureFunctions())
-        dbg << "  structure functions: " << kinematics.incomingBeams().structureFunctions();
+        dbg << "\n\t  structure functions: " << kinematics.incomingBeams().structureFunctions();
     });
     if (process_->hasEvent())
       process_->clearEvent();
