@@ -34,8 +34,8 @@ namespace cepgen {
           phi_qt1_(0.),
           qt2_(0.),
           phi_qt2_(0.),
-          kIntermediateParts(partons),
-          kProducedParts(central) {}
+          intermediate_parts_(partons),
+          produced_parts_(central) {}
 
     void KTProcess::addEventContent() {
       Process::setEventContent(
