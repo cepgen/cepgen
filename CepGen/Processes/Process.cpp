@@ -53,19 +53,26 @@ namespace cepgen {
           first_run(proc.first_run),
           alphaem_(proc.alphaem_),
           alphas_(proc.alphas_),
+          mapped_variables_(proc.mapped_variables_),
+          point_coord_(proc.point_coord_),
           base_jacobian_(proc.base_jacobian_),
           s_(proc.s_),
           sqs_(proc.sqs_),
           mA2_(proc.mA2_),
           mB2_(proc.mB2_),
-          mX2_(proc.mX2_),
-          mY2_(proc.mY2_),
-          t1_(-1.),
-          t2_(-1.),
           kin_(proc.kin_),
           is_point_set_(false) {
       if (proc.event_)
         event_.reset(new Event(*proc.event_));
+      CG_DEBUG("Process").log([&](auto& log) {
+        log << "Process " << *this << " cloned.\n\t"
+            << "List of " << utils::s("integration variable", mapped_variables_.size(), true) << ":";
+        for (const auto& var : mapped_variables_)
+          log << "\n\t" << var.index << ") " << var.description << " (type: " << var.type << ", limits: " << var.limits
+              << ").";
+        if (event_)
+          log << "\n\t" << *event_;
+      });
     }
 
     std::unique_ptr<Process> Process::clone() const {
@@ -78,6 +85,7 @@ namespace cepgen {
       //--- initialise the "constant" (wrt x) part of the Jacobian
       base_jacobian_ = 1.;
       mapped_variables_.clear();
+      CG_DEBUG("Process:clear") << "Process event content, and integration variables cleared.";
     }
 
     void Process::dumpVariables() const {
@@ -277,13 +285,19 @@ namespace cepgen {
       mB2_ = p2.mass2();
 
       if (event_)
-        CG_DEBUG("Process") << "Kinematics successfully set!\n"
-                            << "  √s = " << sqs_ * 1.e-3 << " TeV,\n"
-                            << "  p1=" << p1 << ",\tmass=" << p1.mass() << " GeV\n"
-                            << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.";
+        CG_DEBUG("Process:setKinematics") << "Kinematics successfully set!\n"
+                                          << "  √s = " << sqs_ * 1.e-3 << " TeV,\n"
+                                          << "  p1=" << p1 << ",\tmass=" << p1.mass() << " GeV\n"
+                                          << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.";
 
       //--- process-specific phase space definition
       prepareKinematics();
+      CG_DEBUG("Process:setKinematics").log([&](auto& log) {
+        log << "List of " << utils::s("integration variable", mapped_variables_.size(), true) << ":";
+        for (const auto& var : mapped_variables_)
+          log << "\n\t" << var.index << ") " << var.description << " (type: " << var.type << ", limits: " << var.limits
+              << ").";
+      });
     }
 
     void Process::dumpPoint() const {

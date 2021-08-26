@@ -98,9 +98,9 @@ namespace cepgen {
       const bool symmetrise_;
 
       std::vector<double> x_tmp_;
-      double theta4_;
-      double phi6_cm_;
-      double x6_;
+      double theta4_{0.};
+      double phi6_cm_{0.};
+      double x6_{0.};
 
       Limits w_limits_;
       struct Masses {
@@ -115,62 +115,62 @@ namespace cepgen {
       } masses_;
 
       /// energy of the first proton-like incoming particle
-      double ep1_;
+      double ep1_{0.};
       /// energy of the second proton-like incoming particle
-      double ep2_;
-      double p_cm_;
+      double ep2_{0.};
+      double p_cm_{0.};
 
       /// energy of the two-photon central system
-      double ec4_;
+      double ec4_{0.};
       /// 3-momentum norm of the two-photon central system
-      double pc4_;
+      double pc4_{0.};
       /// mass of the two-photon central system
-      double mc4_;
+      double mc4_{0.};
       /// squared mass of the two-photon central system
-      double w4_;
+      double w4_{0.};
 
       /// \f$p_{12} = \frac{1}{2}\left(s-m_{p_1}^2-m_{p_2}^2\right)\f$
-      double p12_;
-      double p1k2_, p2k1_;
+      double p12_{0.};
+      double p1k2_{0.}, p2k1_{0.};
       /// \f$p_{13} = -\frac{1}{2}\left(t_1-m_{p_1}^2-m_{p_3}^2\right)\f$
-      double p13_;
-      double p14_, p25_;
+      double p13_{0.};
+      double p14_{0.}, p25_{0.};
 
-      double q1dq_, q1dq2_;
+      double q1dq_{0.}, q1dq2_{0.};
 
-      double s1_, s2_;
+      double s1_{0.}, s2_{0.};
 
-      double epsi_;
-      double g5_, g6_;
-      double a5_, a6_;
-      double bb_;
+      double epsi_{0.};
+      double g5_{0.}, g6_{0.};
+      double a5_{0.}, a6_{0.};
+      double bb_{0.};
 
-      double gram_;
-      double dd1_, dd2_, dd3_;
+      double gram_{0.};
+      double dd1_{0.}, dd2_{0.}, dd3_{0.};
       /// \f$\delta_5=m_4^2-t_1\f$ as defined in Vermaseren's paper
       /// \cite Vermaseren:1982cz for the full definition of this quantity
-      double dd4_;
-      double dd5_;
+      double dd4_{0.};
+      double dd5_{0.};
       /**
          * Invariant used to tame divergences in the matrix element computation. It is defined as
          * \f[\Delta = \left(p_1\cdot p_2\right)\left(q_1\cdot q_2\right)-\left(p_1\cdot q_2\right)\left(p_2\cdot q_1\right)\f]
          * with \f$p_i, q_i\f$ the 4-momenta associated to the incoming proton-like particle and to the photon emitted from it.
          */
-      double delta_;
-      double g4_;
-      double sa1_, sa2_;
+      double delta_{0.};
+      double g4_{0.};
+      double sa1_{0.}, sa2_{0.};
 
-      double sl1_;
+      double sl1_{0.};
 
       /// cosine of the polar angle for the two-photons centre-of-mass system
-      double cos_theta4_;
+      double cos_theta4_{0.};
       /// sine of the polar angle for the two-photons centre-of-mass system
-      double sin_theta4_;
+      double sin_theta4_{0.};
 
-      double al4_;
-      double be4_;
-      double de3_, de5_;
-      double pt4_;
+      double al4_{0.};
+      double be4_{0.};
+      double de3_{0.}, de5_{0.};
+      double pt4_{0.};
 
       /// Kinematics of the first incoming proton
       Momentum p1_lab_;
@@ -186,7 +186,7 @@ namespace cepgen {
       Momentum p6_cm_;
       /// Kinematics of the second outgoing lepton (in the two-proton CM)
       Momentum p7_cm_;
-      double jacobian_;
+      double jacobian_{0.};
 
     private:
       /**

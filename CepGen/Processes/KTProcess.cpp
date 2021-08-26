@@ -42,16 +42,16 @@ namespace cepgen {
           {// incoming state
            {Particle::IncomingBeam1, PDG::proton},
            {Particle::IncomingBeam2, PDG::proton},
-           {Particle::Parton1, kIntermediateParts[0]},
-           {Particle::Parton2, kIntermediateParts[1]}},
+           {Particle::Parton1, intermediate_parts_[0]},
+           {Particle::Parton2, intermediate_parts_[1]}},
           {// outgoing state
            {Particle::OutgoingBeam1, {PDG::proton}},
            {Particle::OutgoingBeam2, {PDG::proton}},
-           {Particle::CentralSystem, kProducedParts}});
+           {Particle::CentralSystem, produced_parts_}});
       setExtraContent();
       CG_DEBUG("KTProcess:addEventContent") << "Addition of:\n\t"
-                                            << "Intermediate partons: " << kIntermediateParts << "\n\t"
-                                            << "Produced system: " << kProducedParts << ".\n\t" << *event_;
+                                            << "Intermediate partons: " << intermediate_parts_ << "\n\t"
+                                            << "Produced system: " << produced_parts_ << ".\n\t" << *event_;
     }
 
     void KTProcess::prepareKinematics() {

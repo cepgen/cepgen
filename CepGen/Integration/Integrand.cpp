@@ -40,6 +40,8 @@ namespace cepgen {
     }
     //--- each integrand object has its own clone of the process
     process_ = params_->process().clone();
+    CG_DEBUG("Integrand") << "Process " << process_->name() << " successfully cloned from base process "
+                          << params_->process().name() << ".";
     //--- prepare the event content
     process_->addEventContent();
     process_->setKinematics(params_->kinematics);

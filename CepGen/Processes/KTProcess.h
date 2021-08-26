@@ -66,9 +66,9 @@ namespace cepgen {
       /// Set the kinematics of the outgoing central system
       virtual void fillCentralParticlesKinematics() = 0;
       /// Set the list of intermediate partons in the process
-      void setIntermediatePartons(const std::array<pdgid_t, 2>& part) { kIntermediateParts = part; }
+      void setIntermediatePartons(const std::array<pdgid_t, 2>& part) { intermediate_parts_ = part; }
       /// Set the list of central particles produced
-      void setProducedParticles(const std::vector<pdgid_t>& prod) { kProducedParts = prod; }
+      void setProducedParticles(const std::vector<pdgid_t>& prod) { produced_parts_ = prod; }
 
       /// Log-virtuality range of the intermediate parton
       Limits log_qt_limits_;
@@ -93,9 +93,9 @@ namespace cepgen {
 
     private:
       /// First and second intermediate parton (photon, pomeron, ...)
-      std::array<pdgid_t, 2> kIntermediateParts;
+      std::array<pdgid_t, 2> intermediate_parts_;
       /// Type of particles produced in the final state
-      std::vector<pdgid_t> kProducedParts;
+      std::vector<pdgid_t> produced_parts_;
     };
   }  // namespace proc
 }  // namespace cepgen
