@@ -39,6 +39,14 @@ namespace cepgen {
         pair_ = params_.get<ParticleProperties>("pair").pdgid;
     }
 
+    LPAIR::LPAIR(const LPAIR& proc)
+        : Process(proc),
+          n_opt_(proc.n_opt_),
+          pair_(proc.pair_),
+          symmetrise_(proc.symmetrise_),
+          rnd_phi_(proc.rnd_phi_),
+          rnd_side_(proc.rnd_side_) {}
+
     //---------------------------------------------------------------------------------------------
 
     void LPAIR::addEventContent() {

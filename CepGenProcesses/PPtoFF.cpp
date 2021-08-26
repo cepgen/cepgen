@@ -34,7 +34,7 @@ namespace cepgen {
     /// Compute the matrix element for a CE \f$\gamma\gamma\rightarrow f\bar f\f$ process using \f$k_{\rm T}\f$-factorization approach
     class PPtoFF final : public Process2to4 {
     public:
-      PPtoFF(const ParametersList& params = ParametersList());
+      explicit PPtoFF(const ParametersList& params = ParametersList());
       ProcessPtr clone() const override { return ProcessPtr(new PPtoFF(*this)); }
       static std::string description() { return "ɣɣ → f⁺f¯ (kt-factor.)"; }
 
@@ -50,31 +50,21 @@ namespace cepgen {
 
       ParametersList alphas_params_;
 
-      double prefactor_;
+      double prefactor_{1.};
 
       //--- parameters for off-shell matrix element
-      unsigned short p_mat1_, p_mat2_;
-      unsigned short p_term_ll_, p_term_lt_, p_term_tt1_, p_term_tt2_;
+      unsigned short p_mat1_{0}, p_mat2_{0};
+      unsigned short p_term_ll_{0}, p_term_lt_{0}, p_term_tt1_{0}, p_term_tt2_{0};
 
-      double mf2_;
-      short qf3_;
-      unsigned short colf_;
+      double mf2_{0.};
+      short qf3_{0};
+      unsigned short colf_{0};
     };
 
     PPtoFF::PPtoFF(const ParametersList& params)
         : Process2to4(params, {PDG::photon, PDG::photon}, params.get<ParticleProperties>("pair").pdgid),
           method_(params.getAs<int, Mode>("method", Mode::offShell)),
-          alphas_params_(params.get<ParametersList>("alphaS", ParametersList().setName<std::string>("pegasus"))),
-          prefactor_(1.),
-          p_mat1_(0),
-          p_mat2_(0),
-          p_term_ll_(0),
-          p_term_lt_(0),
-          p_term_tt1_(0),
-          p_term_tt2_(0),
-          mf2_(0.),
-          qf3_(0),
-          colf_(0) {
+          alphas_params_(params.get<ParametersList>("alphaS", ParametersList().setName<std::string>("pegasus"))) {
       if (method_ == Mode::offShell || method_ == Mode::offShellLegacy) {  // off-shell matrix element
         const auto& ofp = params.get<ParametersList>("offShellParameters");
         p_mat1_ = ofp.get<int>("mat1", method_ == Mode::offShell ? 1 : 2);

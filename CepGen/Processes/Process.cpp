@@ -33,17 +33,7 @@ namespace cepgen {
         : NamedModule(params),
           first_run(true),
           alphaem_(AlphaEMFactory::get().build(
-              params.get<ParametersList>("alphaEM", ParametersList().setName<std::string>("fixed")))),
-          base_jacobian_(1.),
-          s_(-1.),
-          sqs_(-1.),
-          mA2_(-1.),
-          mB2_(-1.),
-          mX2_(-1.),
-          mY2_(-1.),
-          t1_(-1.),
-          t2_(-1.),
-          is_point_set_(false) {
+              params.get<ParametersList>("alphaEM", ParametersList().setName<std::string>("fixed")))) {
       if (has_event)
         event_.reset(new Event);
     }

@@ -30,7 +30,9 @@ namespace cepgen {
       /// \param[in] params Collection of user-defined steering parameters
       /// \param[in] partons Incoming hard scattering particles
       /// \param[in] cs_id Central particles PDG id
-      Process2to4(const ParametersList& params, std::array<pdgid_t, 2> partons, pdgid_t cs_id);
+      explicit Process2to4(const ParametersList& params, std::array<pdgid_t, 2> partons, pdgid_t cs_id);
+      /// Copy constructor
+      Process2to4(const Process2to4&);
 
     protected:
       /// Set all cuts for the single outgoing particle phase space definition

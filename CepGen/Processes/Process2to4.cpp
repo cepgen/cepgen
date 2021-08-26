@@ -40,6 +40,9 @@ namespace cepgen {
           phi_pt_diff_(0.),
           ww_(0.) {}
 
+    Process2to4::Process2to4(const Process2to4& proc)
+        : KTProcess(proc), cs_prop_(proc.cs_prop_), single_limits_(proc.single_limits_) {}
+
     void Process2to4::setCuts(const cuts::Central& single) { single_limits_ = single; }
 
     void Process2to4::preparePhaseSpace() {
