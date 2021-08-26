@@ -198,5 +198,10 @@ namespace cepgen {
 
       void unset(const std::string& var) { unsetenv(var.c_str()); }
     }  // namespace env
-  }    // namespace utils
+
+    std::string describeError(int errnum) {
+      std::array<char, 50> buff;
+      return std::to_string(errnum) + " (" + std::string(strerror_r(errnum, buff.data(), buff.size())) + ")";
+    }
+  }  // namespace utils
 }  // namespace cepgen

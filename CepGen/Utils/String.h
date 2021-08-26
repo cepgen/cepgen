@@ -137,7 +137,9 @@ namespace cepgen {
       /// Clear an environment variable
       void unset(const std::string& var);
     }  // namespace env
-  }    // namespace utils
+    /// Describe an error code
+    std::string describeError(int errnum);
+  }  // namespace utils
 }  // namespace cepgen
 
 /// Provide a random number generated along a uniform distribution between 0 and 1

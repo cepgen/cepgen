@@ -242,6 +242,9 @@ namespace cepgen {
     std::string result;
     while (fgets(buffer.data(), buffer.size(), pipe.get()))
       result += buffer.data();
+
+    CG_DEBUG("MadGraphInterface:runCommand") << "Output value: " << utils::describeError(errno) << ".";
+
     return result;
   }
 }  // namespace cepgen
