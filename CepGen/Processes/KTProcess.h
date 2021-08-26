@@ -78,13 +78,13 @@ namespace cepgen {
       Limits mx_limits_;
 
       /// Virtuality of the first intermediate parton (photon, pomeron, ...)
-      double qt1_;
+      double qt1_{0.};
       /// Azimuthal rotation of the first intermediate parton's transverse virtuality
-      double phi_qt1_;
+      double phi_qt1_{0.};
       /// Virtuality of the second intermediate parton (photon, pomeron, ...)
-      double qt2_;
+      double qt2_{0.};
       /// Azimuthal rotation of the second intermediate parton's transverse virtuality
-      double phi_qt2_;
+      double phi_qt2_{0.};
 
       /// First outgoing proton
       Momentum pX_;
