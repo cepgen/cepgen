@@ -43,7 +43,6 @@ namespace cepgen {
     CG_DEBUG("Integrand") << "Process " << process_->name() << " successfully cloned from base process "
                           << params_->process().name() << ".";
     //--- prepare the event content
-    process_->addEventContent();
     process_->setKinematics(params_->kinematics);
     if (process_->hasEvent())
       event_ = &process_->event();
