@@ -55,8 +55,8 @@ namespace cepgen {
       if (proc.event_)
         event_.reset(new Event(*proc.event_));
       CG_DEBUG("Process").log([&](auto& log) {
-        log << "Process " << *this << " cloned.\n\t"
-            << "List of " << utils::s("integration variable", mapped_variables_.size(), true) << ":";
+        log << "Process " << *this << " cloned with "
+            << utils::s("integration variable", mapped_variables_.size(), true) << ":";
         for (const auto& var : mapped_variables_)
           log << "\n\t" << var.index << ") " << var.description << " (type: " << var.type << ", limits: " << var.limits
               << ").";
