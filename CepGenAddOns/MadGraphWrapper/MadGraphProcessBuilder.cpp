@@ -21,6 +21,7 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Processes/Process2to4.h"
+#include "CepGen/Utils/AbortHandler.h"
 #include "CepGenAddOns/MadGraphWrapper/MadGraphInterface.h"
 #include "CepGenAddOns/MadGraphWrapper/MadGraphProcess.h"
 
@@ -41,11 +42,16 @@ private:
 
 MadGraphProcessBuilder::MadGraphProcessBuilder(const ParametersList& params)
     : Process2to4(params, std::array<pdgid_t, 2>{}, 0) {
-  if (params.has<std::string>("lib"))
-    loadLibrary(params.get<std::string>("lib"));
-  else {
-    const MadGraphInterface interf(params);
-    loadLibrary(interf.run());
+  utils::AbortHandler();
+  try {
+    if (params.has<std::string>("lib"))
+      loadLibrary(params.get<std::string>("lib"));
+    else {
+      const MadGraphInterface interf(params);
+      loadLibrary(interf.run());
+    }
+  } catch (const utils::RunAbortedException&) {
+    CG_FATAL("MadGraphProcessBuilder") << "MadGraph_aMC process generation aborted.";
   }
   // once MadGraph process library is loaded into runtime environment, can define its wrapper object
   mg5_proc_.reset(new MadGraphProcess);
