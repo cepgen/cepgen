@@ -91,8 +91,6 @@ namespace cepgen {
 
       ///Get the number of dimensions on which the integration is performed
       inline size_t ndim() const { return mapped_variables_.size(); }
-      /// Get the value of a component of the d-dimensional point considered
-      double x(unsigned int idx) const;
 
       /// Does the process contain (and hold) an event?
       bool hasEvent() const { return (bool)event_; }

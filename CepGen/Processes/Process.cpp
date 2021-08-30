@@ -143,7 +143,10 @@ namespace cepgen {
       for (const auto& var : mapped_variables_) {
         if (!var.limits.valid())
           continue;
-        const double xv = x(var.index);  // between 0 and 1
+        if (var.index >= point_coord_.size())
+          throw CG_FATAL("Process:x") << "Failed to retrieve coordinate " << var.index << " from "
+                                      << "a dimension-" << ndim() << " process!";
+        const double xv = point_coord_.at(var.index);  // between 0 and 1
         switch (var.type) {
           case Mapping::linear: {
             var.value = var.limits.x(xv);
@@ -176,8 +179,8 @@ namespace cepgen {
           }
           dbg << "\n\tvariable " << var.index << std::left << std::setw(60)
               << (!var.description.empty() ? " (" + var.description + ")" : "") << " in range " << std::setw(20)
-              << var.limits << " has value " << std::setw(20) << value << " (x=" << this->x(var.index) << std::right
-              << ")";
+              << var.limits << " has value " << std::setw(20) << value << " (x=" << point_coord_.at(var.index)
+              << std::right << ")";
         }
       });
     }
@@ -200,15 +203,6 @@ namespace cepgen {
         }
       }
       return jac;
-    }
-
-    double Process::x(unsigned int idx) const {
-      try {
-        return point_coord_.at(idx);
-      } catch (const std::out_of_range&) {
-        throw CG_FATAL("Process:x") << "Failed to retrieve coordinate " << idx << " from "
-                                    << "a dimension-" << ndim() << " process!";
-      }
     }
 
     double Process::weight(const std::vector<double>& x) {
