@@ -35,7 +35,7 @@ include_directories(${GSL_INCLUDE})
 #--- searching for ROOT
 find_package(ROOT QUIET)
 if(ROOT_FOUND)
-  if(${ROOT_CXX_FLAGS} MATCHES "-std=c\\+\\+([0-9]\+)")
+  if(${ROOT_CXX_FLAGS} MATCHES "-std=c\\+\\+([0-9]{2}).?")
     if(${CMAKE_MATCH_1} VERSION_LESS 14)
       set(ROOT_CXX_STANDARD 14)
     else()
