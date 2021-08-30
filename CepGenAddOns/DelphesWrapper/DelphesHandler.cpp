@@ -58,10 +58,10 @@ namespace cepgen {
       ExRootConfReader* conf_reader_;  // deleted at destructor
       ExRootTreeWriter* tree_writer_;  // deleted at destructor
       //--- non-owning
-      DelphesFactory* factory_;
-      ExRootTreeBranch* evt_branch_;
-      TObjArray *out_all_parts_, *out_stab_parts_, *out_partons_;
-      double cross_section_;
+      DelphesFactory* factory_{nullptr};
+      ExRootTreeBranch* evt_branch_{nullptr};
+      TObjArray *out_all_parts_{nullptr}, *out_stab_parts_{nullptr}, *out_partons_{nullptr};
+      double cross_section_{-1.};
     };
 
     DelphesHandler::DelphesHandler(const ParametersList& params)
@@ -71,13 +71,7 @@ namespace cepgen {
           compress_(params.get<bool>("compress", false)),
           delphes_(new Delphes),
           conf_reader_(new ExRootConfReader),
-          tree_writer_(new ExRootTreeWriter(output_.get(), "Delphes")),
-          factory_(nullptr),
-          evt_branch_(nullptr),
-          out_all_parts_(nullptr),
-          out_stab_parts_(nullptr),
-          out_partons_(nullptr),
-          cross_section_(-1.) {
+          tree_writer_(new ExRootTreeWriter(output_.get(), "Delphes")) {
       CG_DEBUG("DelphesHandler") << "Initialising Delphes with configuration card at \"" << input_card_ << "\".";
       try {
         conf_reader_->ReadFile(input_card_.c_str());

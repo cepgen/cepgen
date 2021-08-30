@@ -58,7 +58,7 @@ namespace cepgen {
       int pdf_member_;
       /// Quarks types considered in the SF building
       Mode mode_;
-      bool initialised_;
+      bool initialised_{false};
 
 #ifdef LHAPDF_GE_6
       LHAPDF::PDFSet lha_pdf_set_;
@@ -90,8 +90,7 @@ namespace cepgen {
           num_flavours_(params.get<int>("numFlavours", 4)),
           pdf_code_(params.get<int>("pdfCode", 0)),
           pdf_member_(params.get<int>("pdfMember", 0)),
-          mode_(params.getAs<int, Mode>("mode", Mode::full)),
-          initialised_(false) {}
+          mode_(params.getAs<int, Mode>("mode", Mode::full)) {}
 
     Partonic::Partonic(const char* set, unsigned short member, const Mode& mode)
         : Parameterisation(ParametersList().setName<int>((int)Type::Partonic)),

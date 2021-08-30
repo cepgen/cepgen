@@ -35,11 +35,11 @@ namespace ROOT {
   class CepGenRun {
   public:
     static constexpr const char* TREE_NAME = "run";  ///< Output tree name
-    double sqrt_s;                                   ///< Centre of mass energy for beam particles
-    double xsect;                                    ///< Process cross section, in pb
-    double errxsect;                                 ///< Uncertainty on process cross section, in pb
-    unsigned int num_events;                         ///< Number of events generated in run
-    unsigned int litigious_events;                   ///< Number of litigious events in run
+    double sqrt_s{-1.};                              ///< Centre of mass energy for beam particles
+    double xsect{-1.};                               ///< Process cross section, in pb
+    double errxsect{-1.};                            ///< Uncertainty on process cross section, in pb
+    unsigned int num_events{0};                      ///< Number of events generated in run
+    unsigned int litigious_events{0};                ///< Number of litigious events in run
 
     explicit CepGenRun();
     /// Reinitialise the run tree
@@ -81,10 +81,10 @@ namespace ROOT {
     static constexpr size_t MAX_PART = 5000;            ///< Maximal number of particles in event
     static constexpr const char* TREE_NAME = "events";  ///< Output tree name
 
-    float gen_time;             ///< Event generation time
-    float tot_time;             ///< Total event generation time
-    float weight;               ///< Event weight
-    int np;                     ///< Number of particles in the event
+    float gen_time{-1.};        ///< Event generation time
+    float tot_time{-1.};        ///< Total event generation time
+    float weight{-1.};          ///< Event weight
+    int np{0};                  ///< Number of particles in the event
     double pt[MAX_PART];        ///< Particles transverse momentum
     double eta[MAX_PART];       ///< Particles pseudo-rapidity
     double phi[MAX_PART];       ///< Particles azimuthal angle
@@ -99,7 +99,7 @@ namespace ROOT {
     int role[MAX_PART];         ///< Particles role in the event
     int status[MAX_PART];       ///< Integer status code
 
-    CepGenEvent() : tree_attached_(false), num_read_events_(0ull) { clear(); }
+    CepGenEvent() { clear(); }
     /// Reinitialise the event content
     void clear();
     /// Retrieve the ROOT tree
@@ -152,8 +152,8 @@ namespace ROOT {
     /// Tree for which the event is booked
     std::shared_ptr<TTree> tree_;
     std::unique_ptr<TFile> file_;
-    bool tree_attached_;
-    unsigned long long num_read_events_;
+    bool tree_attached_{false};
+    unsigned long long num_read_events_{0ull};
   };
 }  // namespace ROOT
 

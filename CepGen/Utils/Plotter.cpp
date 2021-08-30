@@ -28,7 +28,7 @@
 namespace cepgen {
   namespace utils {
     Drawable::Drawable(const Drawable& oth)
-        : width_(50ul), xlabel_(oth.xlabel_), ylabel_(oth.ylabel_), log_(oth.log_) {}
+        : width_(oth.width_), xlabel_(oth.xlabel_), ylabel_(oth.ylabel_), log_(oth.log_) {}
 
     Hist::Hist(const Hist& oth) : name_(oth.name_) {}
     Hist::~Hist() {}
@@ -176,7 +176,7 @@ namespace cepgen {
       os << ")\n";
     }
 
-    Hist1D::Hist1D(size_t num_bins_x, const Limits& xrange) : underflow_(0ull), overflow_(0ull) {
+    Hist1D::Hist1D(size_t num_bins_x, const Limits& xrange) {
       auto hist = gsl_histogram_alloc(num_bins_x);
       auto ret = gsl_histogram_set_ranges_uniform(hist, xrange.min(), xrange.max());
       if (ret != GSL_SUCCESS)
@@ -187,7 +187,7 @@ namespace cepgen {
                                 << xrange << ".";
     }
 
-    Hist1D::Hist1D(const std::vector<double>& xbins) : underflow_(0ull), overflow_(0ull) {
+    Hist1D::Hist1D(const std::vector<double>& xbins) {
       auto hist = gsl_histogram_alloc(xbins.size() - 1);
       auto ret = gsl_histogram_set_ranges(hist, xbins.data(), xbins.size());
       if (ret != GSL_SUCCESS)

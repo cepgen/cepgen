@@ -28,13 +28,7 @@ namespace Pythia8 {
   /// Convert a CepGen particle momentum into its Pythia8 counterpart
   Vec4 momToVec4(const cepgen::Momentum& mom) { return Vec4(mom.px(), mom.py(), mom.pz(), mom.energy()); }
 
-  CepGenEvent::CepGenEvent()
-      : LHAup(3),
-        mp_(cepgen::PDG::get().mass(cepgen::PDG::proton)),
-        mp2_(mp_ * mp_),
-        inel1_(false),
-        inel2_(false),
-        params_(nullptr) {}
+  CepGenEvent::CepGenEvent() : LHAup(3), mp_(cepgen::PDG::get().mass(cepgen::PDG::proton)), mp2_(mp_ * mp_) {}
 
   void CepGenEvent::initialise(const cepgen::Parameters& params) {
     params_ = &params;

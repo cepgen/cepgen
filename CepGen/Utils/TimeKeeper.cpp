@@ -26,8 +26,6 @@
 
 namespace cepgen {
   namespace utils {
-    TimeKeeper::TimeKeeper() {}
-
     void TimeKeeper::clear() {
       monitors_.clear();
       tmr_.reset();

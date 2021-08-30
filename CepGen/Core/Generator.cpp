@@ -33,7 +33,7 @@
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  Generator::Generator(bool safe_mode) : parameters_(new Parameters), result_(-1.), result_error_(-1.) {
+  Generator::Generator(bool safe_mode) : parameters_(new Parameters) {
     CG_DEBUG("Generator:init") << "Generator initialized";
     static bool init = false;
     if (!init) {
@@ -45,7 +45,7 @@ namespace cepgen {
     srandom(time.time_since_epoch().count());
   }
 
-  Generator::Generator(Parameters* ip) : parameters_(ip), result_(-1.), result_error_(-1.) {}
+  Generator::Generator(Parameters* ip) : parameters_(ip) {}
 
   Generator::~Generator() {
     if (parameters_->timeKeeper())

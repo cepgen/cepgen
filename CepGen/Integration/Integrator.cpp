@@ -28,9 +28,6 @@ namespace cepgen {
       : NamedModule(params),
         seed_(params.get<int>("seed", time(nullptr))),
         verbosity_(params.get<int>("verbose", 1)),
-        result_(0.),
-        err_result_(0.),
-        initialised_(false),
         rnd_(0., 1.) {}
 
   void Integrator::setIntegrand(Integrand& integr) {

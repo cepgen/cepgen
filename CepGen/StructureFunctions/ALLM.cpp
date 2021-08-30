@@ -39,7 +39,7 @@ namespace cepgen {
         };
 
       public:
-        explicit Parameters(const ParametersList& params = ParametersList());
+        explicit Parameters(const ParametersList&);
         /// Pre-HERA data fit (694 data points)
         static Parameters allm91();
         /// Fixed target and HERA photoproduction total cross sections (1356 points)

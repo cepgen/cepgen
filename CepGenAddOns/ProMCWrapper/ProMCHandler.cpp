@@ -23,11 +23,14 @@
 
 #include <cstdio>
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Filesystem.h"
+#include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
 
 namespace cepgen {
@@ -56,17 +59,17 @@ namespace cepgen {
 
       std::unique_ptr<ProMCBook> file_;
       const bool compress_evt_;
+      const std::string log_file_path_;
       std::ofstream log_file_;
-      double cross_section_, cross_section_err_;
+      double cross_section_{-1.}, cross_section_err_{-1.};
     };
 
     ProMCHandler::ProMCHandler(const ParametersList& params)
         : ExportModule(params),
           file_(new ProMCBook(params.get<std::string>("filename", "output.promc").c_str(), "w")),
           compress_evt_(params.get<bool>("compress", false)),
-          log_file_("logfile.txt"),
-          cross_section_(-1.),
-          cross_section_err_(-1.) {}
+          log_file_path_(params.get<std::string>("logFile", "logfile.txt")),
+          log_file_(log_file_path_) {}
 
     ProMCHandler::~ProMCHandler() {
       ProMCStat stat;
@@ -79,7 +82,8 @@ namespace cepgen {
       file_->setStatistics(stat);
       file_->close();
       //--- delete the log file once attached
-      remove("logfile.txt");
+      const auto num_removed_files = fs::remove_all(log_file_path_);
+      CG_DEBUG("ProMCHandler") << utils::s("file", num_removed_files, true) << " removed.";
     }
 
     void ProMCHandler::initialise(const Parameters& params) {

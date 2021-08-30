@@ -26,8 +26,7 @@
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
-  Event::Event(bool compressed)
-      : num_hadronisation_trials(0), time_generation(-1.), time_total(-1.), weight(0.), compressed_(compressed) {}
+  Event::Event(bool compressed) : compressed_(compressed) {}
 
   void Event::clear() {
     particles_.clear();

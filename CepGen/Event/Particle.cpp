@@ -24,17 +24,7 @@
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
-  Particle::Particle()
-      : id_(-1),
-        charge_sign_(1),
-        mass_(-1.),
-        helicity_(0.),
-        role_(UnknownRole),
-        status_((int)Status::Undefined),
-        pdg_id_(PDG::invalid) {}
-
-  Particle::Particle(Role role, pdgid_t pdgId, Status st)
-      : id_(-1), charge_sign_(1), mass_(-1.), helicity_(0.), role_(role), status_((int)st), pdg_id_(pdgId) {
+  Particle::Particle(Role role, pdgid_t pdgId, Status st) : role_(role), status_((int)st), pdg_id_(pdgId) {
     if (PDG::get().has(pdg_id_))
       phys_prop_ = PDG::get()(pdg_id_);
     if (pdg_id_ != PDG::invalid)

@@ -55,7 +55,7 @@ namespace cepgen {
       /// Print a banner containing all runtime parameters information
       static std::string banner(const Parameters&, const std::string& prep = "");
       /// Event index
-      unsigned long long event_num_;
+      unsigned long long event_num_{0ull};
     };
   }  // namespace io
 }  // namespace cepgen

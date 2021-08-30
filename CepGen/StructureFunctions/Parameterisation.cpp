@@ -32,7 +32,6 @@ namespace cepgen {
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
           mx_min_(mp_ + PDG::get().mass(PDG::piZero)),
-          old_vals_({0., 0.}),
           r_ratio_(sigrat::SigmaRatiosFactory::get().build((int)sigrat::Type::E143)) {}
 
     Parameterisation::Parameterisation(const Parameterisation& sf)
@@ -47,12 +46,9 @@ namespace cepgen {
 
     Parameterisation::Parameterisation(const ParametersList& params)
         : NamedModule<int>(params),
-          F2(0.),
-          FL(0.),
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
           mx_min_(mp_ + PDG::get().mass(PDG::piZero)),
-          old_vals_({0., 0.}),
           r_ratio_(sigrat::SigmaRatiosFactory::get().build(params.get<ParametersList>(
               "sigmaRatio", ParametersList().setName<int>((int)sigrat::Type::SibirtsevBlunden)))) {}
 

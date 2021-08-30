@@ -152,7 +152,7 @@ namespace cepgen {
 
     public:
       /// Is it the first time the process is computed?
-      bool first_run;
+      bool first_run{true};
 
     protected:
       /// Numerical limits for sanity comparisons

@@ -35,11 +35,7 @@
 
 namespace cepgen {
   Parameters::Parameters()
-      : general(new ParametersList),
-        integrator(new ParametersList),
-        total_gen_time_(0.),
-        num_gen_events_(0ul),
-        generation_(ParametersList()) {}
+      : general(new ParametersList), integrator(new ParametersList), generation_(ParametersList()) {}
 
   Parameters::Parameters(Parameters& param)
       : general(param.general),

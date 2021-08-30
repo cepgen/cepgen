@@ -25,7 +25,7 @@
 
 namespace cepgen {
   namespace strfun {
-    SuriYennie::SuriYennie(const ParametersList &params) : Parameterisation(params), W1(0.), W2(0.), FE(0.), FM(0.) {
+    SuriYennie::SuriYennie(const ParametersList &params) : Parameterisation(params) {
       const auto &model = params.get<std::string>("model", "standard");
       if (model == "standard") {
         sy_params_.C1 = 0.86926;

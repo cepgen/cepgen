@@ -138,9 +138,9 @@ namespace cepgen {
     /// Integration algorithm
     std::unique_ptr<Integrator> integrator_;
     /// Cross section value computed at the last integration
-    double result_;
+    double result_{-1.};
     /// Error on the cross section as computed in the last integration
-    double result_error_;
+    double result_error_{-1.};
   };
 }  // namespace cepgen
 

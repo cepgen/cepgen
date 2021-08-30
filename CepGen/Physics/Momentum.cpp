@@ -23,7 +23,7 @@
 #include "CepGen/Physics/Momentum.h"
 
 namespace cepgen {
-  Momentum::Momentum() : std::array<double, 4>{{0., 0., 0., 0.}}, p_(0.) {}
+  Momentum::Momentum() : std::array<double, 4>{{0., 0., 0., 0.}} {}
 
   Momentum::Momentum(double x, double y, double z, double t) : std::array<double, 4>{{x, y, z, t}} { computeP(); }
 

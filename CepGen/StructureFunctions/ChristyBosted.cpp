@@ -32,7 +32,7 @@ namespace cepgen {
     /// \f$F_{2,L}\f$ parameterisation by Christy and Bosted \cite Bosted:2007xd
     class ChristyBosted final : public Parameterisation {
     public:
-      explicit ChristyBosted(const ParametersList& params = ParametersList());
+      explicit ChristyBosted(const ParametersList&);
       static std::string description() { return "Christy-Bosted F2/FL parameterisation of low-mass resonances"; }
 
       ChristyBosted& eval(double xbj, double q2) override;

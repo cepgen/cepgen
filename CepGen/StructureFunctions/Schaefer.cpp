@@ -30,7 +30,7 @@ namespace cepgen {
     class Schaefer final : public Parameterisation {
     public:
       /// User-steered Schäfer hybrid structure functions calculator
-      explicit Schaefer(const ParametersList& params = ParametersList());
+      explicit Schaefer(const ParametersList&);
       static std::string description() { return "LUXlike structure functions"; }
 
       Schaefer& eval(double xbj, double q2) override;
@@ -54,8 +54,8 @@ namespace cepgen {
       std::shared_ptr<Parameterisation> perturbative_model_;
       /// Continuum regions modelling
       std::shared_ptr<Parameterisation> continuum_model_;
-      bool initialised_;
-      double inv_omega_range_;
+      bool initialised_{false};
+      double inv_omega_range_{-1.};
     };
 
     Schaefer::Schaefer(const ParametersList& params)
@@ -68,9 +68,7 @@ namespace cepgen {
           perturbative_model_(StructureFunctionsFactory::get().build(
               params.get<ParametersList>("perturbativeSF", ParametersList().setName<int>((int)Type::MSTWgrid)))),
           continuum_model_(StructureFunctionsFactory::get().build(
-              params.get<ParametersList>("continuumSF", ParametersList().setName<int>((int)Type::GD11p)))),
-          initialised_(false),
-          inv_omega_range_(-1.) {}
+              params.get<ParametersList>("continuumSF", ParametersList().setName<int>((int)Type::GD11p)))) {}
 
     std::string Schaefer::describe() const {
       std::ostringstream os;

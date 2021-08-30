@@ -62,7 +62,7 @@ namespace cepgen {
       YODA::Counter weight_cnt_;
       const ParametersList variables_;
 
-      double cross_section_;
+      double cross_section_{1.};
       const utils::EventBrowser browser_;
     };
 
@@ -70,8 +70,7 @@ namespace cepgen {
     YODAHistsHandler<T>::YODAHistsHandler(const ParametersList& params)
         : ExportModule(params),
           file_(params.get<std::string>("filename", "output.yoda")),
-          variables_(params.get<ParametersList>("variables")),
-          cross_section_(1.) {
+          variables_(params.get<ParametersList>("variables")) {
       //--- extract list of variables/correlations to be plotted in histograms
       for (const auto& key : variables_.keys()) {
         const auto& vars = utils::split(key, ':');

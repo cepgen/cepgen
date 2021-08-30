@@ -31,7 +31,7 @@ namespace cepgen {
     /// Szczurek and Uleshchenko modelling of \f$F_2\f$ based on GRV parton content \cite Szczurek:1999wp
     class SzczurekUleshchenko final : public Parameterisation {
     public:
-      explicit SzczurekUleshchenko(const ParametersList& params = ParametersList());
+      explicit SzczurekUleshchenko(const ParametersList&);
       SzczurekUleshchenko& eval(double xbj, double q2) override;
       static std::string description() { return "Szczurek-Uleshchenko modelling of F2 based on GRV parton content"; }
 
