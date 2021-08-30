@@ -31,6 +31,14 @@ namespace cepgen {
                          const std::vector<pdgid_t>& central)
         : Process(params, true), intermediate_parts_(partons), produced_parts_(central) {}
 
+    KTProcess::KTProcess(const KTProcess& proc)
+        : Process(proc),
+          log_qt_limits_(proc.log_qt_limits_),
+          phi_qt_limits_(proc.phi_qt_limits_),
+          mx_limits_(proc.mx_limits_),
+          intermediate_parts_(proc.intermediate_parts_),
+          produced_parts_(proc.produced_parts_) {}
+
     void KTProcess::addEventContent() {
       Process::setEventContent(
           {// incoming state

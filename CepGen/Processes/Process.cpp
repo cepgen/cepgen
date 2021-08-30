@@ -161,7 +161,7 @@ namespace cepgen {
         }
       }
       CG_DEBUG_LOOP("Process:vars").log([&](auto& dbg) {
-        std::string sep;
+        dbg << "Dump of all variables values:";
         for (const auto& var : mapped_variables_) {
           double value = 0.;
           switch (var.type) {
@@ -174,11 +174,10 @@ namespace cepgen {
               value = sqrt(var.value);
               break;
           }
-          dbg << sep << "variable " << var.index << std::left << std::setw(60)
+          dbg << "\n\tvariable " << var.index << std::left << std::setw(60)
               << (!var.description.empty() ? " (" + var.description + ")" : "") << " in range " << std::setw(20)
               << var.limits << " has value " << std::setw(20) << value << " (x=" << this->x(var.index) << std::right
-              << ")",
-              sep = "\n\t";
+              << ")";
         }
       });
     }
@@ -276,7 +275,7 @@ namespace cepgen {
 
       if (event_)
         CG_DEBUG("Process:setKinematics") << "Kinematics successfully set!\n"
-                                          << "  √s = " << sqs_ * 1.e-3 << " TeV,\n"
+                                          << "  sqrt(s) = " << sqs_ * 1.e-3 << " TeV,\n"
                                           << "  p1=" << p1 << ",\tmass=" << p1.mass() << " GeV\n"
                                           << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.";
 

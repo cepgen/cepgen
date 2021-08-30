@@ -43,6 +43,8 @@ namespace cepgen {
       KTProcess(const ParametersList& params,
                 const std::array<pdgid_t, 2>& partons,
                 const std::vector<pdgid_t>& output);
+      /// Copy constructor
+      KTProcess(const KTProcess&);
 
       /// Populate the event content with the generated process' topology
       void addEventContent() override;

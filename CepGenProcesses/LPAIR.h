@@ -52,7 +52,7 @@ namespace cepgen {
     public:
       /// \brief Class constructor: set the mandatory parameters before integration and events generation
       /// \param[in] params General process parameters (nopt = Optimisation, legacy from LPAIR)
-      explicit LPAIR(const ParametersList& params = ParametersList());
+      explicit LPAIR(const ParametersList& params);
       /// Copy constructor
       explicit LPAIR(const LPAIR&);
       ProcessPtr clone() const override { return ProcessPtr(new LPAIR(*this)); }
@@ -94,48 +94,39 @@ namespace cepgen {
       bool pickin();
 
       static constexpr double SCONSTB = 2. * pow(M_PI, 3) / pow(constants::ALPHA_EM, 4);
-      /// Internal switch for the optimised code version (LPAIR legacy ; unimplemented here)
+      /// Internal switch for the optimised code version (LPAIR legacy)
       const int n_opt_;
       pdgid_t pair_;
       const bool symmetrise_;
 
-      std::vector<double> x_tmp_;
-      double theta4_{0.};
-      double phi6_cm_{0.};
+      // mapped variables
+      double u_t1_{0.};
+      double u_t2_{0.};
+      double u_s2_{0.};
+      double w4_{0.};       ///< squared mass of the two-photon system
+      double theta4_{0.};   ///< polar angle of the two-photon system
+      double phi6_cm_{0.};  ///< azimutal angle of the first outgoing lepton
       double x6_{0.};
 
       Limits w_limits_;
       struct Masses {
-        /// squared mass of the outgoing leptons
-        double Ml2 = 0.;
-        /// \f$\delta_2=m_1^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
-        double w12 = 0.;
-        /// \f$\delta_1=m_3^2-m_1^2\f$ as defined in \cite Vermaseren:1982cz
-        double w31 = 0.;
-        /// \f$\delta_4=m_5^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
-        double w52 = 0.;
+        double Ml2 = 0.;  ///< squared mass of the outgoing leptons
+        double w12 = 0.;  ///< \f$\delta_2=m_1^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
+        double w31 = 0.;  ///< \f$\delta_1=m_3^2-m_1^2\f$ as defined in \cite Vermaseren:1982cz
+        double w52 = 0.;  ///< \f$\delta_4=m_5^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
       } masses_;
 
-      /// energy of the first proton-like incoming particle
-      double ep1_{0.};
-      /// energy of the second proton-like incoming particle
-      double ep2_{0.};
+      double ep1_{0.};  ///< energy of the first proton-like incoming particle
+      double ep2_{0.};  ///< energy of the second proton-like incoming particle
       double p_cm_{0.};
 
-      /// energy of the two-photon central system
-      double ec4_{0.};
-      /// 3-momentum norm of the two-photon central system
-      double pc4_{0.};
-      /// mass of the two-photon central system
-      double mc4_{0.};
-      /// squared mass of the two-photon central system
-      double w4_{0.};
+      double ec4_{0.};  ///< energy of the two-photon system
+      double pc4_{0.};  ///< 3-momentum norm of the two-photon system
+      double mc4_{0.};  ///< mass of the two-photon system
 
-      /// \f$p_{12} = \frac{1}{2}\left(s-m_{p_1}^2-m_{p_2}^2\right)\f$
-      double p12_{0.};
+      double p12_{0.};  ///< \f$p_{12} = \frac{1}{2}\left(s-m_{p_1}^2-m_{p_2}^2\right)\f$
       double p1k2_{0.}, p2k1_{0.};
-      /// \f$p_{13} = -\frac{1}{2}\left(t_1-m_{p_1}^2-m_{p_3}^2\right)\f$
-      double p13_{0.};
+      double p13_{0.};  ///< \f$p_{13} = -\frac{1}{2}\left(t_1-m_{p_1}^2-m_{p_3}^2\right)\f$
       double p14_{0.}, p25_{0.};
 
       double q1dq_{0.}, q1dq2_{0.};
@@ -148,11 +139,9 @@ namespace cepgen {
       double bb_{0.};
 
       double gram_{0.};
-      double dd1_{0.}, dd2_{0.}, dd3_{0.};
-      /// \f$\delta_5=m_4^2-t_1\f$ as defined in Vermaseren's paper
-      /// \cite Vermaseren:1982cz for the full definition of this quantity
-      double dd4_{0.};
-      double dd5_{0.};
+      /// Deltas such as \f$\delta_5=m_4^2-t_1\f$ as defined in Vermaseren's paper
+      /// \cite Vermaseren:1982cz for the full definition of these quantities
+      std::array<double, 5> deltas_;
       /**
          * Invariant used to tame divergences in the matrix element computation. It is defined as
          * \f[\Delta = \left(p_1\cdot p_2\right)\left(q_1\cdot q_2\right)-\left(p_1\cdot q_2\right)\left(p_2\cdot q_1\right)\f]
@@ -164,9 +153,9 @@ namespace cepgen {
 
       double sl1_{0.};
 
-      /// cosine of the polar angle for the two-photons centre-of-mass system
+      /// cosine of the polar angle for the two-photon system
       double cos_theta4_{0.};
-      /// sine of the polar angle for the two-photons centre-of-mass system
+      /// sine of the polar angle for the two-photon system
       double sin_theta4_{0.};
 
       double al4_{0.};
