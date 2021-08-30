@@ -82,8 +82,14 @@ namespace cepgen {
         rt_params_->setTimeKeeper(new utils::TimeKeeper);
 
       //----- logging definition
-      if (pars.get<int>("logging", -1) != -1)
-        utils::Logger::get().level = (cepgen::utils::Logger::Level)pars.get<int>("logging");
+      if (pars.has<int>("logging"))
+        utils::Logger::get().level = pars.getAs<int, cepgen::utils::Logger::Level>("logging");
+      else if (pars.has<ParametersList>("logging")) {
+        const auto& log = pars.get<ParametersList>("logging");
+        if (log.has<int>("level"))
+          utils::Logger::get().level = log.getAs<int, cepgen::utils::Logger::Level>("level");
+        utils::Logger::get().setExtended(log.get<bool>("extended", false));
+      }
 
       //----- process definition
       auto proc = pars.get<ParametersList>("process");

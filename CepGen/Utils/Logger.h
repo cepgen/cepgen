@@ -38,6 +38,7 @@ namespace cepgen {
       Logger(std::ostream* os) : level(Level::information), output(os) {}
 
       std::vector<std::regex> allowed_exc_;
+      bool extended_{false};
 
     public:
       /// Retrieve the running instance of the logger
@@ -69,6 +70,10 @@ namespace cepgen {
           }
         return false;
       }
+      /// Also show extended information?
+      bool extended() const { return extended_; }
+      /// Set the extended information flag
+      void setExtended(bool ext = true) { extended_ = ext; }
 
       /// Redirect the logger to a given output stream
       friend std::ostream& operator<<(std::ostream& os, const Logger::Level& lvl) {

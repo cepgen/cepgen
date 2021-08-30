@@ -162,10 +162,8 @@ namespace cepgen {
 
   Particle& Particle::setPdgId(long pdg) {
     pdg_id_ = labs(pdg);
-    try {
+    if (PDG::get().has(pdg_id_))
       phys_prop_ = PDG::get()(pdg_id_);
-    } catch (const Exception&) {
-    }
     switch (pdg_id_) {
       case PDG::electron:
       case PDG::muon:
@@ -181,6 +179,8 @@ namespace cepgen {
 
   Particle& Particle::setPdgId(pdgid_t pdg, short ch) {
     pdg_id_ = pdg;
+    if (PDG::get().has(pdg_id_))
+      phys_prop_ = PDG::get()(pdg_id_);
     switch (pdg_id_) {
       case PDG::electron:
       case PDG::muon:

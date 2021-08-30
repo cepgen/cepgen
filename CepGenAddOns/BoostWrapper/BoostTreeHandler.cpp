@@ -136,6 +136,7 @@ namespace cepgen {
           log_ = unpack(tree_.get_child(LOGGER_NAME));
           utils::Logger::get().level =
               log_.getAs<int, utils::Logger::Level>("level", utils::Logger::Level::information);
+          utils::Logger::get().setExtended(log_.get<bool>("extended", utils::Logger::get().extended()));
           for (const auto& mod : log_.get<std::vector<std::string> >("enabledModules"))
             utils::Logger::get().addExceptionRule(mod);
         }

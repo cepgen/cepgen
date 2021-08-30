@@ -47,12 +47,7 @@ namespace cepgen {
           kin_params_(new ParametersList),
           gen_params_(new ParametersList),
           int_params_(new ParametersList),
-          timer_(false),
-          str_fun_(11),
-          sr_type_(1),
-          lepton_id_(0),
-          pdg_input_path_("mass_width_2021.mcd"),
-          iend_(1) {}
+          pdg_input_path_("mass_width_2021.mcd") {}
 
     void LpairHandler::init() {
       //-------------------------------------------------------------------------------------------
@@ -75,6 +70,7 @@ namespace cepgen {
       registerParameter<int>("TIMR", "Enable the time ticker", &timer_);
       registerParameter<int>("IEND", "Generation type", &iend_);
       registerParameter<int>("DEBG", "Debugging verbosity", (int*)&utils::Logger::get().level);
+      registerParameter<int>("LOGE", "Extended logging", &ext_log_);
       registerIntegratorParameter<int>("NCVG", "Number of function calls", "numFunctionCalls");
       registerIntegratorParameter<int>("ITVG", "Number of integration iterations", "iterations");
       registerIntegratorParameter<int>("SEED", "Random generator seed", "seed");
@@ -201,6 +197,7 @@ namespace cepgen {
       //--- build the ticker if required
       if (timer_)
         rt_params_->setTimeKeeper(new utils::TimeKeeper);
+      utils::Logger::get().setExtended(ext_log_);
 
       //--- parse the process name
       if (!proc_name_.empty() || !proc_params_->empty()) {
@@ -278,6 +275,7 @@ namespace cepgen {
       //mstw_grid_path_ =
       //pdg_input_path_ =
       iend_ = (int)rt_params_->generation().enabled();
+      ext_log_ = utils::Logger::get().extended();
       proc_name_ = rt_params_->processName();
       *proc_params_ += rt_params_->process().parameters();
       if (proc_params_->has<ParticleProperties>("pair"))
