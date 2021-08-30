@@ -35,10 +35,8 @@ namespace cepgen {
 
   Particle::Particle(Role role, pdgid_t pdgId, Status st)
       : id_(-1), charge_sign_(1), mass_(-1.), helicity_(0.), role_(role), status_((int)st), pdg_id_(pdgId) {
-    try {
+    if (PDG::get().has(pdg_id_))
       phys_prop_ = PDG::get()(pdg_id_);
-    } catch (const Exception&) {
-    }
     if (pdg_id_ != PDG::invalid)
       computeMass();
   }
@@ -54,10 +52,8 @@ namespace cepgen {
         mothers_(part.mothers_),
         daughters_(part.daughters_),
         pdg_id_(part.pdg_id_) {
-    try {
+    if (PDG::get().has(pdg_id_))
       phys_prop_ = PDG::get()(pdg_id_);
-    } catch (const Exception&) {
-    }
   }
 
   bool Particle::operator<(const Particle& rhs) const { return id_ >= 0 && rhs.id_ > 0 && id_ < rhs.id_; }
