@@ -1,8 +1,8 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
+from Config.generator_cff import generator
 
 #--- process definition
-#process = cepgen.Module('mg5_aMC',
 process = kt.process.clone('mg5_aMC',
     processParameters = cepgen.Parameters(
         process = 'a a > mu+ mu-',
@@ -16,7 +16,6 @@ process = kt.process.clone('mg5_aMC',
         pz = (6500., 6500.),
         structureFunctions = cepgen.StructureFunctions.LUXlike,
     ),
-    #outKinematics = cepgen.Parameters(
     outKinematics = kt.process.outKinematics.clone(
         #eta = (-2.5, 2.5),
         qt = (0., 10.),
@@ -25,10 +24,7 @@ process = kt.process.clone('mg5_aMC',
     ),
 )
 
-print(process)
-
 #--- events generation
-from Config.generator_cff import generator
 generator.numEvents = 10000
 
 text = cepgen.Module('text',  # histogramming/ASCII output capability
@@ -39,5 +35,5 @@ text = cepgen.Module('text',  # histogramming/ASCII output capability
         'pt(7):pt(8)': cepgen.Parameters(xrange=(0., 250.), yrange=(0., 250.), log=True)
     }
 )
-dump = cepgen.Module('dump')
+dump = cepgen.Module('dump', printEvery = generator.printEvery)
 output = cepgen.Sequence(text, dump)
