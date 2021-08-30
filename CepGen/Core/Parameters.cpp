@@ -99,6 +99,7 @@ namespace cepgen {
       if (kinematics.incomingBeams().structureFunctions())
         dbg << "\n\t  structure functions: " << kinematics.incomingBeams().structureFunctions();
     });
+    process_->setKinematics(kinematics);
     if (process_->hasEvent())
       process_->clearEvent();
     //--- clear the run statistics

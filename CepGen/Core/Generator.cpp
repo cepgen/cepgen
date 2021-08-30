@@ -60,11 +60,7 @@ namespace cepgen {
 
   Parameters& Generator::parametersRef() { return *parameters_; }
 
-  void Generator::setParameters(Parameters* ip) {
-    parameters_.reset(ip);
-    if (parameters_->hasProcess())
-      parameters_->process().setKinematics(parameters_->kinematics);
-  }
+  void Generator::setParameters(Parameters* ip) { parameters_.reset(ip); }
 
   double Generator::computePoint(const std::vector<double>& coord) {
     if (!generator_)

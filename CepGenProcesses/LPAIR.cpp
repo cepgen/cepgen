@@ -138,12 +138,6 @@ namespace cepgen {
 
       const double d6 = w4_ - mY2_;
 
-      CG_DEBUG_LOOP("LPAIR") << "w1 = " << mA2_ << "\n\t"
-                             << "w2 = " << mB2_ << "\n\t"
-                             << "w3 = " << mX2_ << "\n\t"
-                             << "w4 = " << w4_ << "\n\t"
-                             << "w5 = " << mY2_;
-
       CG_DEBUG_LOOP("LPAIR") << "w1 = " << mA2_ << ", w2 = " << mB2_ << ", w3 = " << mX2_ << ", w4 = " << w4_
                              << ", w5 = " << mY2_ << ". w31 = " << masses_.w31 << ", w52 = " << masses_.w52
                              << ", w12 = " << masses_.w12 << ".";
