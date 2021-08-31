@@ -16,9 +16,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// clang-format off
+#include "CepGen/Cards/PythonHandler.h" // ensuring include arrives first
+// clang-format on
+
 #include <algorithm>
 
-#include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"
