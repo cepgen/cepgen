@@ -181,7 +181,7 @@ namespace cepgen {
     /// Compute the 3-momentum's norm
     Momentum& computeP();
     /// 3-momentum's norm (in GeV/c)
-    double p_;
+    double p_{0.};
   };
   /// Compute the centre of mass energy of two particles momenta
   double CMEnergy(const Momentum& m1, const Momentum& m2);

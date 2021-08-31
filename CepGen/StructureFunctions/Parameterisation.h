@@ -93,8 +93,8 @@ namespace cepgen {
       double tau(double xbj, double q2) const;
 
     public:
-      double F2;  ///< Last computed transverse structure function value
-      double FL;  ///< Last computed longitudinal structure function value
+      double F2{0.};  ///< Last computed transverse structure function value
+      double FL{0.};  ///< Last computed longitudinal structure function value
 
     protected:
       /// Local structure functions evaluation method
@@ -105,7 +105,7 @@ namespace cepgen {
       const double mp2_;     ///< Squared proton mass, in GeV^2/c^4
       const double mx_min_;  ///< Minimum diffractive mass, in GeV/c^2
 
-      std::pair<double, double> old_vals_;  ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed
+      std::pair<double, double> old_vals_{0., 0.};  ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed
 
       /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
       std::shared_ptr<sigrat::Parameterisation> r_ratio_;

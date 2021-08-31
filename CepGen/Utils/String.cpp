@@ -99,6 +99,8 @@ namespace cepgen {
 
     std::vector<std::string> split(const std::string& str, char delim) {
       std::vector<std::string> out;
+      if (str.empty())
+        return out;
       std::string token;
       std::istringstream iss(str);
       while (std::getline(iss, token, delim))
@@ -182,19 +184,24 @@ namespace cepgen {
       void set(const std::string& var, const std::string& value) { setenv(var.c_str(), value.c_str(), 1); }
 
 #ifdef _WIN32
-      static constexpr const char* PATH_DELIM = ";";
+      static constexpr char PATH_DELIM = ';';
 #else
-      static constexpr const char* PATH_DELIM = ":";
+      static constexpr char PATH_DELIM = ':';
 #endif
 
       void append(const std::string& var, const std::string& value) {
-        auto env = split(get(var), PATH_DELIM[0]);
+        auto env = split(get(var), PATH_DELIM);
         env.emplace_back(value);
         normalise(env);
-        setenv(var.c_str(), merge(env, PATH_DELIM).c_str(), 1);
+        setenv(var.c_str(), merge(env, std::string(1, PATH_DELIM)).c_str(), 1);
       }
 
       void unset(const std::string& var) { unsetenv(var.c_str()); }
     }  // namespace env
-  }    // namespace utils
+
+    std::string describeError(int errnum) {
+      std::array<char, 50> buff;
+      return std::to_string(errnum) + " (" + std::string(strerror_r(errnum, buff.data(), buff.size())) + ")";
+    }
+  }  // namespace utils
 }  // namespace cepgen

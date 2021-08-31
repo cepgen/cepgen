@@ -31,7 +31,7 @@
 
 namespace cepgen {
   namespace io {
-    ExportModule::ExportModule(const ParametersList& params) : NamedModule(params), event_num_(0ull) {}
+    ExportModule::ExportModule(const ParametersList& params) : NamedModule(params) {}
 
     ExportModule::~ExportModule() {
       CG_DEBUG("ExportModule") << "Destructor called for output module \"" << name_ << "\".";

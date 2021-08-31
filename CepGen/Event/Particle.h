@@ -72,7 +72,7 @@ namespace cepgen {
     /// Convert a pseudo-rapidity to a rapidity
     static double etaToY(double eta_, double m_, double pt_);
 
-    Particle();
+    Particle() = default;
     /// Build using the role of the particle in the process and its PDG id
     /// \param[in] role Role of the particle in the process
     /// \param[in] id PDG identifier
@@ -218,25 +218,25 @@ namespace cepgen {
 
   protected:
     /// Unique identifier in an event
-    int id_;
+    int id_{-1};
     /// Electric charge (+-1 or 0)
-    short charge_sign_;
+    short charge_sign_{1};
     /// Momentum properties handler
     Momentum momentum_;
     /// Mass, in GeV/c\f$^2\f$
-    double mass_;
+    double mass_{-1.};
     /// Helicity
-    float helicity_;
+    float helicity_{0.};
     /// Role in the process
-    Role role_;
+    Role role_{UnknownRole};
     /// Decay/stability status
-    int status_;
+    int status_{(int)Status::Undefined};
     /// List of mother particles
     ParticlesIds mothers_;
     /// List of daughter particles
     ParticlesIds daughters_;
     /// PDG id
-    pdgid_t pdg_id_;
+    pdgid_t pdg_id_{(pdgid_t)0};
     /// Collection of standard, bare-level physical properties
     ParticleProperties phys_prop_;
   };

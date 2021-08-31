@@ -108,13 +108,13 @@ namespace cepgen {
     ParticleRoles roles() const;
 
     /// Number of trials before the event was "correctly" hadronised
-    unsigned short num_hadronisation_trials;
+    unsigned short num_hadronisation_trials{0};
     /// Time needed to generate the event at parton level (in seconds)
-    float time_generation;
+    float time_generation{-1.};
     /// Time needed to generate the hadronised (if needed) event (in seconds)
-    float time_total;
+    float time_total{-1.};
     /// Event weight
-    float weight;
+    float weight{0.};
 
   private:
     static constexpr double MIN_PRECISION = 1.e-10;

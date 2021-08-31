@@ -30,6 +30,7 @@
 
 namespace cepgen {
   class Event;
+  class Coupling;
   /// Location for all physics processes to be generated
   namespace proc {
     /// \brief Class template to define any process to compute using this MC integrator/events generator
@@ -90,8 +91,6 @@ namespace cepgen {
 
       ///Get the number of dimensions on which the integration is performed
       inline size_t ndim() const { return mapped_variables_.size(); }
-      /// Get the value of a component of the d-dimensional point considered
-      double x(unsigned int idx) const;
 
       /// Does the process contain (and hold) an event?
       bool hasEvent() const { return (bool)event_; }
@@ -153,11 +152,15 @@ namespace cepgen {
 
     public:
       /// Is it the first time the process is computed?
-      bool first_run;
+      bool first_run{true};
 
     protected:
       /// Numerical limits for sanity comparisons
       static constexpr double NUM_LIMITS = 1.e-3;  // MeV/mm-level
+      /// Electromagnetic running coupling algorithm
+      std::shared_ptr<Coupling> alphaem_;
+      /// Strong running coupling algorithm
+      std::shared_ptr<Coupling> alphas_;
       /// Handler to a variable mapped by this process
       struct MappingVariable {
         std::string description;  ///< Human-readable description of the variable
@@ -171,30 +174,29 @@ namespace cepgen {
       /// Point coordinate for matrix element computation
       std::vector<double> point_coord_;
       /// Phase space point-independent component of the Jacobian weight of the point in the phase space for integration
-      double base_jacobian_;
+      double base_jacobian_{1.};
       /// \f$s\f$, squared centre of mass energy of the incoming particles' system, in \f$\mathrm{GeV}^2\f$
-      double s_;
+      double s_{-1.};
       /// \f$\sqrt s\f$, centre of mass energy of the incoming particles' system (in GeV)
-      double sqs_;
+      double sqs_{-1.};
       /// first incoming beam particle squared mass
-      double mA2_;
+      double mA2_{-1.};
       /// second incoming beam particle squared mass
-      double mB2_;
+      double mB2_{-1.};
       /// First diffractive state squared mass
-      double mX2_;
+      double mX2_{-1.};
       /// Second diffractive state squared mass
-      double mY2_;
+      double mY2_{-1.};
       /// First parton virtuality
-      double t1_;
+      double t1_{-1.};
       /// Second parton virtuality
-      double t2_;
-
+      double t2_{-1.};
       /// Set of cuts to apply on the final phase space
       Kinematics kin_;
       /// Event object containing all the information on all particles in the system
       std::unique_ptr<Event> event_;
       /// Is the phase space point set?
-      bool is_point_set_;
+      bool is_point_set_{false};
 
     private:
       /**

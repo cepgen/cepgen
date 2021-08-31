@@ -16,12 +16,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Physics/Cuts.h"
-
 #include <algorithm>
 #include <iostream>
 
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Physics/Cuts.h"
 
 namespace cepgen {
   Cuts::Cuts(const ParametersList& params) { setParameters(params); }
@@ -29,6 +28,25 @@ namespace cepgen {
   void Cuts::setParameters(const ParametersList& params) {
     for (auto& cut : rawList())
       params.fill<Limits>(cut.name, cut.limits);
+  }
+
+  ParametersList Cuts::parameters(bool full) const {
+    ParametersList params;
+    for (const auto& lim : list()) {
+      params.set<Limits>(lim.name, lim.limits);
+      if (full)
+        params.set<double>(lim.name + "min", lim.limits.min()).set<double>(lim.name + "max", lim.limits.max());
+    }
+    return params;
+  }
+
+  std::vector<Cuts::Property> Cuts::list() const {
+    std::vector<Property> out;
+    // filtered list of valid limits/cuts
+    std::copy_if(limits_.begin(), limits_.end(), std::back_inserter(out), [](const Property& lim) {
+      return lim.limits.valid();
+    });
+    return out;
   }
 
   namespace cuts {
@@ -77,14 +95,6 @@ namespace cepgen {
       : name(name), description(descr) {
     if (params.has<Limits>(name))
       limits = params.get<Limits>(name);
-  }
-
-  std::vector<Cuts::Property> Cuts::list() const {
-    std::vector<Property> out;
-    std::copy_if(limits_.begin(), limits_.end(), std::back_inserter(out), [](const Property& lim) {
-      return lim.limits.valid();
-    });
-    return out;
   }
 
   std::ostream& operator<<(std::ostream& os, const Cuts::Property& prop) {

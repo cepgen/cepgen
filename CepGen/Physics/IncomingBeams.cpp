@@ -118,7 +118,7 @@ namespace cepgen {
     }
 
     if (params.has<int>("mode"))
-      setMode((mode::Kinematics)params.get<int>("mode"));
+      setMode(params.getAs<int, mode::Kinematics>("mode"));
     //--- structure functions
     auto strfun = params.get<ParametersList>("structureFunctions");
     if (!strfun.empty() || !str_fun_) {

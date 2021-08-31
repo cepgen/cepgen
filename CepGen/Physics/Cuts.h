@@ -36,6 +36,8 @@ namespace cepgen {
 
     /// Modify a few parameters values
     void setParameters(const ParametersList&);
+    /// Retrieve the cuts list into a steering parameters list
+    ParametersList parameters(bool full = false) const;
 
     /// A set of properties for a given cut
     struct Property {
@@ -59,7 +61,7 @@ namespace cepgen {
   /// A namespace for all kinematic cuts
   namespace cuts {
     /// Centrally produced particles phase space cuts
-    class Central : public Cuts {
+    class Central final : public Cuts {
     public:
       Central();
       explicit Central(const ParametersList&);
@@ -132,7 +134,7 @@ namespace cepgen {
     };
 
     /// Initial parton-like particles phase space cuts
-    class Initial : public Cuts {
+    class Initial final : public Cuts {
     public:
       explicit Initial(const ParametersList&);
 
@@ -154,7 +156,7 @@ namespace cepgen {
     };
 
     /// Outgoing beam remnant-like particles phase space cuts
-    class Remnants : public Cuts {
+    class Remnants final : public Cuts {
     public:
       explicit Remnants(const ParametersList&);
 

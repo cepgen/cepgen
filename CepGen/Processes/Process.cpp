@@ -16,32 +16,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Processes/Process.h"
-
 #include <iomanip>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
-#include "CepGen/Physics/Constants.h"
+#include "CepGen/Modules/CouplingFactory.h"
+#include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Processes/Process.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace proc {
     Process::Process(const ParametersList& params, bool has_event)
         : NamedModule(params),
-          first_run(true),
-          base_jacobian_(1.),
-          s_(-1.),
-          sqs_(-1.),
-          mA2_(-1.),
-          mB2_(-1.),
-          mX2_(-1.),
-          mY2_(-1.),
-          t1_(-1.),
-          t2_(-1.),
-          is_point_set_(false) {
+          alphaem_(AlphaEMFactory::get().build(
+              params.get<ParametersList>("alphaEM", ParametersList().setName<std::string>("fixed")))) {
       if (has_event)
         event_.reset(new Event);
     }
@@ -49,19 +40,28 @@ namespace cepgen {
     Process::Process(const Process& proc)
         : NamedModule<>(proc.parameters()),
           first_run(proc.first_run),
+          alphaem_(proc.alphaem_),
+          alphas_(proc.alphas_),
+          mapped_variables_(proc.mapped_variables_),
+          point_coord_(proc.point_coord_),
           base_jacobian_(proc.base_jacobian_),
           s_(proc.s_),
           sqs_(proc.sqs_),
           mA2_(proc.mA2_),
           mB2_(proc.mB2_),
-          mX2_(proc.mX2_),
-          mY2_(proc.mY2_),
-          t1_(-1.),
-          t2_(-1.),
           kin_(proc.kin_),
           is_point_set_(false) {
       if (proc.event_)
         event_.reset(new Event(*proc.event_));
+      CG_DEBUG("Process").log([&](auto& log) {
+        log << "Process " << *this << " cloned with "
+            << utils::s("integration variable", mapped_variables_.size(), true) << ":";
+        for (const auto& var : mapped_variables_)
+          log << "\n\t" << var.index << ") " << var.description << " (type: " << var.type << ", limits: " << var.limits
+              << ").";
+        if (event_)
+          log << "\n\t" << *event_;
+      });
     }
 
     std::unique_ptr<Process> Process::clone() const {
@@ -74,6 +74,7 @@ namespace cepgen {
       //--- initialise the "constant" (wrt x) part of the Jacobian
       base_jacobian_ = 1.;
       mapped_variables_.clear();
+      CG_DEBUG("Process:clear") << "Process event content, and integration variables cleared.";
     }
 
     void Process::dumpVariables() const {
@@ -141,7 +142,10 @@ namespace cepgen {
       for (const auto& var : mapped_variables_) {
         if (!var.limits.valid())
           continue;
-        const double xv = x(var.index);  // between 0 and 1
+        if (var.index >= point_coord_.size())
+          throw CG_FATAL("Process:x") << "Failed to retrieve coordinate " << var.index << " from "
+                                      << "a dimension-" << ndim() << " process!";
+        const double xv = point_coord_.at(var.index);  // between 0 and 1
         switch (var.type) {
           case Mapping::linear: {
             var.value = var.limits.x(xv);
@@ -159,7 +163,7 @@ namespace cepgen {
         }
       }
       CG_DEBUG_LOOP("Process:vars").log([&](auto& dbg) {
-        std::string sep;
+        dbg << "Dump of all variables values:";
         for (const auto& var : mapped_variables_) {
           double value = 0.;
           switch (var.type) {
@@ -172,11 +176,10 @@ namespace cepgen {
               value = sqrt(var.value);
               break;
           }
-          dbg << sep << "variable " << var.index << std::left << std::setw(60)
+          dbg << "\n\tvariable " << var.index << std::left << std::setw(60)
               << (!var.description.empty() ? " (" + var.description + ")" : "") << " in range " << std::setw(20)
-              << var.limits << " has value " << std::setw(20) << value << " (x=" << this->x(var.index) << std::right
-              << ")",
-              sep = "\n\t";
+              << var.limits << " has value " << std::setw(20) << value << " (x=" << point_coord_.at(var.index)
+              << std::right << ")";
         }
       });
     }
@@ -199,15 +202,6 @@ namespace cepgen {
         }
       }
       return jac;
-    }
-
-    double Process::x(unsigned int idx) const {
-      try {
-        return point_coord_.at(idx);
-      } catch (const std::out_of_range&) {
-        throw CG_FATAL("Process:x") << "Failed to retrieve coordinate " << idx << " from "
-                                    << "a dimension-" << ndim() << " process!";
-      }
     }
 
     double Process::weight(const std::vector<double>& x) {
@@ -273,13 +267,19 @@ namespace cepgen {
       mB2_ = p2.mass2();
 
       if (event_)
-        CG_DEBUG("Process") << "Kinematics successfully set!\n"
-                            << "  √s = " << sqs_ * 1.e-3 << " TeV,\n"
-                            << "  p1=" << p1 << ",\tmass=" << p1.mass() << " GeV\n"
-                            << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.";
+        CG_DEBUG("Process:setKinematics") << "Kinematics successfully set!\n"
+                                          << "  sqrt(s) = " << sqs_ * 1.e-3 << " TeV,\n"
+                                          << "  p1=" << p1 << ",\tmass=" << p1.mass() << " GeV\n"
+                                          << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.";
 
       //--- process-specific phase space definition
       prepareKinematics();
+      CG_DEBUG("Process:setKinematics").log([&](auto& log) {
+        log << "List of " << utils::s("integration variable", mapped_variables_.size(), true) << ":";
+        for (const auto& var : mapped_variables_)
+          log << "\n\t" << var.index << ") " << var.description << " (type: " << var.type << ", limits: " << var.limits
+              << ").";
+      });
     }
 
     void Process::dumpPoint() const {

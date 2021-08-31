@@ -33,7 +33,7 @@ namespace cepgen {
     /// \note The full theoretical description of this process definition may be found in \cite Luszczak:2018ntp.
     class PPtoWW final : public Process2to4 {
     public:
-      PPtoWW(const ParametersList& params = ParametersList());
+      explicit PPtoWW(const ParametersList&);
       ProcessPtr clone() const override { return ProcessPtr(new PPtoWW(*this)); }
       enum class Polarisation { full = 0, LL = 1, LT = 2, TL = 3, TT = 4 };
       static std::string description() { return "ɣɣ → W⁺W¯ (kt-factor.)"; }
@@ -62,7 +62,7 @@ namespace cepgen {
           mW2_(mW_ * mW_),
           method_(params.get<int>("method", 1)),
           eft_ext_(params.get<ParametersList>("eftExtension")) {
-      switch ((Polarisation)params.get<int>("polarisationStates", 0)) {
+      switch (params.getAs<int, Polarisation>("polarisationStates", Polarisation::full)) {
         case Polarisation::LL:
           pol_w1_ = {0};
           pol_w2_ = {0};

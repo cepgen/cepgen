@@ -35,11 +35,7 @@
 
 namespace cepgen {
   Parameters::Parameters()
-      : general(new ParametersList),
-        integrator(new ParametersList),
-        total_gen_time_(0.),
-        num_gen_events_(0ul),
-        generation_(ParametersList()) {}
+      : general(new ParametersList), integrator(new ParametersList), generation_(ParametersList()) {}
 
   Parameters::Parameters(Parameters& param)
       : general(param.general),
@@ -97,8 +93,9 @@ namespace cepgen {
           << "  positive-z beam: " << kinematics.incomingBeams().positive() << "\n\t"
           << "  negative-z beam: " << kinematics.incomingBeams().negative();
       if (kinematics.incomingBeams().structureFunctions())
-        dbg << "  structure functions: " << kinematics.incomingBeams().structureFunctions();
+        dbg << "\n\t  structure functions: " << kinematics.incomingBeams().structureFunctions();
     });
+    process_->setKinematics(kinematics);
     if (process_->hasEvent())
       process_->clearEvent();
     //--- clear the run statistics

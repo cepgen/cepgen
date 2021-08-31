@@ -19,13 +19,14 @@
 #include <APFEL/APFEL.h>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Physics/AlphaS.h"
+#include "CepGen/Modules/CouplingFactory.h"
+#include "CepGen/Physics/Coupling.h"
 
 namespace cepgen {
-  class AlphaSAPFEL : public AlphaS {
+  class AlphaSAPFEL : public Coupling {
   public:
     explicit AlphaSAPFEL(const ParametersList& params)
-        : AlphaS(params),
+        : Coupling(params),
           order_(params.get<int>("order", 2)),
           q0_(params.get<double>("q0", 1.)),
           qmax_(params.get<double>("qmax", 10000.)) {

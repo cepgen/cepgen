@@ -25,9 +25,11 @@
 #include "CepGen/Utils/GridHandler.h"
 #include "CepGen/Utils/String.h"
 
+//#define GRID_HANDLER_DEBUG 1
+
 namespace cepgen {
   template <size_t D, size_t N>
-  GridHandler<D, N>::GridHandler(const GridType& grid_type) : grid_type_(grid_type), accel_{}, init_(false) {
+  GridHandler<D, N>::GridHandler(const GridType& grid_type) : grid_type_(grid_type), accel_{} {
     for (size_t i = 0; i < D; ++i)
       accel_.emplace_back(gsl_interp_accel_alloc(), gsl_interp_accel_free);
   }
@@ -165,6 +167,7 @@ namespace cepgen {
     }
     for (auto& c : coords_)
       std::sort(c.begin(), c.end());
+#ifdef GRID_HANDLER_DEBUG
     CG_DEBUG("GridHandler").log([&](auto& dbg) {
       dbg << "Grid dump:";
       // debugging of the grid coordinates
@@ -176,6 +179,7 @@ namespace cepgen {
           dbg << (j++ % 20 == 0 ? "\n  " : " ") << val;
       }
     });
+#endif
     //--- particularise by dimension
     switch (D) {
       case 1: {  //--- x |-> (f1,...)
@@ -246,9 +250,11 @@ namespace cepgen {
         break;
     }
     init_ = true;
+#ifdef GRID_HANDLER_DEBUG
     CG_DEBUG("GridHandler") << "Grid evaluator initialised with boundaries: " << boundaries() << "\n"
                             << "Values handled:\n"
                             << values_raw_;
+#endif
   }
 
   template <size_t D, size_t N>

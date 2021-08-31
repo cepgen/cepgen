@@ -59,17 +59,17 @@ namespace cepgen {
     static constexpr double INV_M_BIN = 1. / M_BIN;
 
     /// Has the grid been already prepared?
-    bool gen_prepared;
+    bool gen_prepared{false};
     /// Correction to apply on the next phase space point generation
-    double correc;
-    double correc2;
-    double f_max2;
-    double f_max_diff;
-    double f_max_old;
+    double correc{0.};
+    double correc2{0.};
+    double f_max2{0.};
+    double f_max_diff{0.};
+    double f_max_old{0.};
 
   private:
     /// Phase space multiplicity
-    size_t ndim_;
+    size_t ndim_{0};
     /// Point coordinates in grid
     std::vector<coord_t> coords_;
     /// Number of functions values evaluated for this point
@@ -77,7 +77,7 @@ namespace cepgen {
     /// Maximal value of the function at one given point
     std::vector<double> f_max_;
     /// Maximal value of the function in the considered integration range
-    double f_max_global_;
+    double f_max_global_{0.};
   };
 }  // namespace cepgen
 

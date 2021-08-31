@@ -70,7 +70,7 @@ namespace cepgen {
     /// Maximal number of trials for the algorithm
     unsigned short max_trials_;
     /// List of runtime parameters steering this module
-    const Parameters* rt_params_;  // not owning
+    const Parameters* rt_params_{nullptr};  // not owning
   };
 }  // namespace cepgen
 

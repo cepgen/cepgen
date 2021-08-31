@@ -16,40 +16,44 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Processes/KTProcess.h"
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Processes/KTProcess.h"
 
 namespace cepgen {
   namespace proc {
     KTProcess::KTProcess(const ParametersList& params,
                          const std::array<pdgid_t, 2>& partons,
                          const std::vector<pdgid_t>& central)
-        : Process(params, true),
-          qt1_(0.),
-          phi_qt1_(0.),
-          qt2_(0.),
-          phi_qt2_(0.),
-          kIntermediateParts(partons),
-          kProducedParts(central) {}
+        : Process(params, true), intermediate_parts_(partons), produced_parts_(central) {}
+
+    KTProcess::KTProcess(const KTProcess& proc)
+        : Process(proc),
+          log_qt_limits_(proc.log_qt_limits_),
+          phi_qt_limits_(proc.phi_qt_limits_),
+          mx_limits_(proc.mx_limits_),
+          intermediate_parts_(proc.intermediate_parts_),
+          produced_parts_(proc.produced_parts_) {}
 
     void KTProcess::addEventContent() {
       Process::setEventContent(
           {// incoming state
            {Particle::IncomingBeam1, PDG::proton},
            {Particle::IncomingBeam2, PDG::proton},
-           {Particle::Parton1, kIntermediateParts[0]},
-           {Particle::Parton2, kIntermediateParts[1]}},
+           {Particle::Parton1, intermediate_parts_[0]},
+           {Particle::Parton2, intermediate_parts_[1]}},
           {// outgoing state
            {Particle::OutgoingBeam1, {PDG::proton}},
            {Particle::OutgoingBeam2, {PDG::proton}},
-           {Particle::CentralSystem, kProducedParts}});
+           {Particle::CentralSystem, produced_parts_}});
       setExtraContent();
+      CG_DEBUG("KTProcess:addEventContent") << "Addition of:\n\t"
+                                            << "Intermediate partons: " << intermediate_parts_ << "\n\t"
+                                            << "Produced system: " << produced_parts_ << ".\n\t" << *event_;
     }
 
     void KTProcess::prepareKinematics() {

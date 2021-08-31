@@ -31,8 +31,7 @@
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  GeneratorWorker::GeneratorWorker(Parameters* params)
-      : integrand_(new Integrand(params)), integrator_(nullptr), params_(params), ps_bin_(UNASSIGNED_BIN) {
+  GeneratorWorker::GeneratorWorker(Parameters* params) : integrand_(new Integrand(params)), params_(params) {
     CG_DEBUG("GeneratorWorker") << "New generator worker initialised for integration/event generation.\n\t"
                                 << "Parameters at " << (void*)params_ << ".";
   }

@@ -69,10 +69,10 @@ namespace cepgen {
       const bool correct_central_;
       const bool debug_lhef_;
       const std::string output_config_;
-      bool res_decay_;
-      bool enable_hadr_;
-      unsigned short offset_;
-      bool first_evt_;
+      bool res_decay_{true};
+      bool enable_hadr_{false};
+      unsigned short offset_{0};
+      bool first_evt_{true};
     };
 
     Pythia8Hadroniser::Pythia8Hadroniser(const ParametersList& plist)
@@ -81,11 +81,7 @@ namespace cepgen {
           cg_evt_(new Pythia8::CepGenEvent),
           correct_central_(plist.get<bool>("correctCentralSystem", false)),
           debug_lhef_(plist.get<bool>("debugLHEF", false)),
-          output_config_(plist.get<std::string>("outputConfig", "last_pythia_config.cmd")),
-          res_decay_(true),
-          enable_hadr_(false),
-          offset_(0),
-          first_evt_(true) {}
+          output_config_(plist.get<std::string>("outputConfig", "last_pythia_config.cmd")) {}
 
     void Pythia8Hadroniser::setRuntimeParameters(const Parameters& params) {
       rt_params_ = &params;

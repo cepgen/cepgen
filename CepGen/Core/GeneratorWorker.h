@@ -63,14 +63,14 @@ namespace cepgen {
     std::unique_ptr<Integrand> integrand_;
     /// Pointer to the mother-handled integrator instance
     /// \note NOT owning
-    const Integrator* integrator_;
+    const Integrator* integrator_{nullptr};
     /// Steering parameters for the event generation
     /// \note NOT owning
-    const Parameters* params_;
+    const Parameters* params_{nullptr};
     /// Set of parameters for the integration/event generation grid
     std::unique_ptr<GridParameters> grid_;
     /// Selected bin at which the function will be evaluated
-    int ps_bin_;                  ///< Last bin to be corrected
+    int ps_bin_{UNASSIGNED_BIN};  ///< Last bin to be corrected
     std::vector<double> coords_;  ///< Phase space coordinates being evaluated
   };
 }  // namespace cepgen

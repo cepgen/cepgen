@@ -57,9 +57,9 @@ namespace kmr {
     init();
 
     CG_INFO("GluonGrid") << "KMR grid evaluator built in " << tmr.elapsed() << " s.\n\t"
-                         << " kt² in range [" << *kt2_vals.begin() << ":" << *kt2_vals.rbegin() << "]\n\t"
-                         << " x in range [" << *x_vals.begin() << ":" << *x_vals.rbegin() << "]\n\t"
-                         << " µ² in range [" << *mu2_vals.begin() << ":" << *mu2_vals.rbegin() << "].";
+                         << " kt^2 in range [" << *kt2_vals.begin() << ":" << *kt2_vals.rbegin() << "]\n\t"
+                         << "    x in range [" << *x_vals.begin() << ":" << *x_vals.rbegin() << "]\n\t"
+                         << " mu^2 in range [" << *mu2_vals.begin() << ":" << *mu2_vals.rbegin() << "].";
   }
 
   double GluonGrid::operator()(double x, double kt2, double mu2) const {

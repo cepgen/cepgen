@@ -63,7 +63,7 @@ namespace cepgen {
     /// A generic object which can be drawn in the standard output
     class Drawable {
     public:
-      Drawable() : width_(50ul), log_(false) {}
+      Drawable() = default;
       Drawable(const Drawable&);  ///< Copy constructor
 
       /// Main drawing method and its standard output
@@ -103,10 +103,10 @@ namespace cepgen {
           return lhs.second.value < rhs.second.value;
         }
       };
-      size_t width_;        ///< Plot width, in TTY characters
+      size_t width_{50ul};  ///< Plot width, in TTY characters
       std::string xlabel_;  ///< x-axis title
       std::string ylabel_;  ///< y-axis title
-      bool log_;            ///< Switch on/off the logarithmic z-axis
+      bool log_{false};     ///< Switch on/off the logarithmic z-axis
     };
 
     /// Any drawable with one axis
@@ -180,7 +180,7 @@ namespace cepgen {
       };
       typedef std::unique_ptr<gsl_histogram, gsl_histogram_deleter> gsl_histogram_ptr;
       gsl_histogram_ptr hist_, hist_w2_;
-      size_t underflow_, overflow_;
+      size_t underflow_{0ull}, overflow_{0ull};
     };
 
     /// 2D histogram container
@@ -239,9 +239,9 @@ namespace cepgen {
       struct contents_t {
         inline size_t total() const { return LT_GT + IN_GT + GT_GT + LT_IN + GT_IN + LT_LT + IN_LT + GT_LT; }
         std::string summary() const;
-        size_t LT_GT = 0ull, IN_GT = 0ull, GT_GT = 0ull;
-        size_t LT_IN = 0ull, /* INSIDE  */ GT_IN = 0ull;
-        size_t LT_LT = 0ull, IN_LT = 0ull, GT_LT = 0ull;
+        size_t LT_GT{0ull}, IN_GT{0ull}, GT_GT{0ull};
+        size_t LT_IN{0ull}, /* INSIDE */ GT_IN{0ull};
+        size_t LT_LT{0ull}, IN_LT{0ull}, GT_LT{0ull};
       } values_;
     };
 

@@ -23,7 +23,8 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
-#include "CepGen/Physics/AlphaS.h"
+#include "CepGen/Modules/CouplingFactory.h"
+#include "CepGen/Physics/Coupling.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenAddOns/ROOTWrapper/ROOTCanvas.h"
@@ -46,12 +47,12 @@ int main(int argc, char* argv[]) {
 
   cepgen::initialise();
 
-  struct alphas_t {
+  struct alpha_t {
     string name;
     vector<double> vals;
     TGraph graph;
   };
-  vector<alphas_t> alphas;
+  vector<alpha_t> alphas, alphaem;
 
   vector<double> qvals(num_points);
   for (int i = 0; i < num_points; ++i)
@@ -64,12 +65,26 @@ int main(int argc, char* argv[]) {
         mod /*, cepgen::ParametersList().set<double>("asmur", 0.35).set<double>("mur", 1.4142)*/);
     TGraph graph;
     graph.SetName(mod.c_str());
-    alphas.emplace_back(alphas_t{mod, vector<double>(num_points), graph});
+    alphas.emplace_back(alpha_t{mod, vector<double>(num_points), graph});
     auto& as = alphas[i++];
     for (size_t j = 0; j < qvals.size(); ++j) {
       const auto val = (*algo)(qvals[j]);
       as.vals[j] = val;
       as.graph.SetPoint(j, qvals[j], val);
+    }
+  }
+  // alphaEM(Q) modellings part
+  i = 0;
+  for (const auto& mod : cepgen::AlphaEMFactory::get().modules()) {
+    const auto& algo = cepgen::AlphaEMFactory::get().build(mod);
+    TGraph graph;
+    graph.SetName(mod.c_str());
+    alphaem.emplace_back(alpha_t{mod, vector<double>(num_points), graph});
+    auto& aem = alphaem[i++];
+    for (size_t j = 0; j < qvals.size(); ++j) {
+      const auto val = (*algo)(qvals[j]);
+      aem.vals[j] = val;
+      aem.graph.SetPoint(j, qvals[j], val);
     }
   }
 
@@ -78,31 +93,43 @@ int main(int argc, char* argv[]) {
   out << "#";
   for (const auto& smp : alphas)
     out << "\t" << smp.name;
+  for (const auto& smp : alphaem)
+    out << "\t" << smp.name;
   for (size_t i = 0; i < qvals.size(); ++i) {
     out << "\n" << qvals[i];
     for (const auto& smp : alphas)
       out << "\t" << smp.vals[i];
+    for (const auto& smp : alphaem)
+      out << "\t" << smp.vals[i];
   }
 
   // drawing part
-  const auto top_label = cepgen::utils::s("CepGen #alpha_{S} modelling", alphas.size(), false);
-  cepgen::ROOTCanvas c("test_alphas", top_label.c_str(), alphas.size() > 1);
+  const auto top_label = cepgen::utils::s("CepGen #alpha_{S,EM} modelling", alphas.size() + alphaem.size(), false);
+  cepgen::ROOTCanvas c("comp_alphas_alphaem", top_label.c_str());
   c.SetLegendX1(0.15);
   TMultiGraph mg;
-  vector<TH1*> numers(alphas.size());
+  vector<TH1*> numers(alphas.size() + alphaem.size());
   for (size_t i = 0; i < alphas.size(); ++i) {
     auto& graph = alphas[i].graph;
     graph.SetLineColor(cepgen::ROOTCanvas::colours[i]);
     mg.Add(&graph);
     numers[i] = graph.GetHistogram();
-    auto descr = cepgen::AlphaSFactory::get().describe(alphas[i].name);
-    cepgen::utils::replace_all(descr, " alphaS", "");
-    cepgen::utils::replace_all(descr, " evolution algorithm", "");
+    const auto descr = cepgen::utils::replace_all(cepgen::AlphaSFactory::get().describe(alphas[i].name),
+                                                  {{" alphaS", ""}, {" evolution algorithm", ""}});
     c.AddLegendEntry(&graph, descr.c_str(), "l");
   }
-  c.RatioPlot(alphas[0].graph.GetHistogram(), numers);
+  for (size_t i = 0; i < alphaem.size(); ++i) {
+    auto& graph = alphaem[i].graph;
+    graph.SetLineColor(cepgen::ROOTCanvas::colours[i]);
+    graph.SetLineStyle(2);
+    mg.Add(&graph);
+    numers[i] = graph.GetHistogram();
+    const auto descr = cepgen::utils::replace_all(cepgen::AlphaEMFactory::get().describe(alphaem[i].name),
+                                                  {{" alphaS", ""}, {" evolution algorithm", ""}});
+    c.AddLegendEntry(&graph, descr.c_str(), "l");
+  }
   mg.Draw("al");
-  mg.GetHistogram()->SetTitle(";Q (GeV);#alpha_{S}(Q)");
+  mg.GetHistogram()->SetTitle(";Q (GeV);#alpha_{S,EM}(Q)");
   mg.GetXaxis()->SetRangeUser(*qvals.begin(), *qvals.rbegin());
   c.Prettify(mg.GetHistogram());
   c.SetLogx();

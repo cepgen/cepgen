@@ -16,20 +16,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Physics/AlphaS.h"
+#include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/Coupling.h"
 
 namespace cepgen {
-  class AlphaEMSuperCHIC final : public AlphaS {
+  /// Electromagnetic alpha running calculator
+  /// \note Shamelessly stolen from JETSET/PYTHIA
+  class AlphaEMBurkhardt final : public Coupling {
   public:
-    explicit AlphaEMSuperCHIC(const ParametersList& params) : AlphaS(params) {}
-    static std::string description() { return "SuperCHIC alphaEM evolution algorithm"; }
+    explicit AlphaEMBurkhardt(const ParametersList& params) : Coupling(params) {}
+    static std::string description() { return "Burkhardt et al. alpha(EM) evolution algorithm"; }
 
     double operator()(double q) const override {
       const double q2 = q * q;
       if (q2 < 2.e-6)
         return constants::ALPHA_EM;
       const double log_q2 = log(q2), log_1_pl_q2 = log(1. + q2);
+      // Calculate real part of photon vacuum polarization.
+      // - for leptons simplify by using asymptotic (Q^2 >> m^2) expressions.
+      // - for hadrons use parametrization of H. Burkhardt et al.
+      // See R. Kleiss et al, CERN 89-08, vol. 3, pp. 129-131.
       double rpigg;
       if (q2 < 9.e-2)
         rpigg = AEM_3PI * (13.4916 + log_q2) + 0.00835 * log_1_pl_q2;
@@ -47,4 +54,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_ALPHAS_MODULE("superchic", AlphaEMSuperCHIC)
+REGISTER_ALPHAEM_MODULE("burkhardt", AlphaEMBurkhardt)

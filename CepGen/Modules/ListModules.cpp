@@ -19,13 +19,13 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Physics/AlphaS.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/String.h"
 
@@ -110,6 +110,14 @@ namespace cepgen {
         for (const auto& mod : utils::FunctionalFactory::get().modules())
           info << "\n> " << utils::colourise(mod, utils::Colour::green, utils::Modifier::bold) << ": "
                << utils::FunctionalFactory::get().describe(mod);
+      }
+      {
+        info << "\n" << sep_mid << "\n" << utils::boldify("alpha(EM) evolution algorithms");
+        if (AlphaEMFactory::get().modules().empty())
+          info << "\n>>> " << utils::colourise("none found", utils::Colour::red) << " <<<";
+        for (const auto& mod : AlphaEMFactory::get().modules())
+          info << "\n> " << utils::colourise(mod, utils::Colour::green, utils::Modifier::bold) << ": "
+               << AlphaEMFactory::get().describe(mod);
       }
       {
         info << "\n" << sep_mid << "\n" << utils::boldify("alpha(s) evolution algorithms");

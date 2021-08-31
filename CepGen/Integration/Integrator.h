@@ -53,9 +53,9 @@ namespace cepgen {
     const unsigned long seed_;  ///< Random number generator seed
     int verbosity_;             ///< Integrator verbosity
     Integrand* integrand_;      ///< Integrand to be evaluated
-    double result_;             ///< Result of the last integration
-    double err_result_;         ///< Standard deviation for the last integration
-    bool initialised_;          ///< Has the algorithm alreay been initialised?
+    double result_{0.};         ///< Result of the last integration
+    double err_result_{0.};     ///< Standard deviation for the last integration
+    bool initialised_{false};   ///< Has the algorithm alreay been initialised?
     mutable std::default_random_engine rnd_gen_;
     mutable std::uniform_real_distribution<double> rnd_;
   };

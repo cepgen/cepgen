@@ -64,31 +64,26 @@ namespace cepgen {
       kmr::GluonGrid::get(params.get<std::string>("kmrGridPath"));
   }
 
-  ParametersList Kinematics::parameters() const {
+  ParametersList Kinematics::parameters(bool extended) const {
     ParametersList params;
-    params += incoming_beams_.parameters();
-    for (const auto& lim : cuts_.initial.list())
-      params.set<Limits>(lim.name, lim.limits);
-    for (auto& lim : cuts_.central.list())
-      params.set<Limits>(lim.name, lim.limits);
+    params += incoming_beams_.parameters();         // beam particles
+    params += cuts_.initial.parameters(extended);   // incoming partons
+    params += cuts_.central.parameters(extended);   // central particles
+    params += cuts_.remnants.parameters(extended);  // beam remnants
+    // minimum final state content
     if (!minimum_final_state_.empty()) {
       std::vector<int> min_pdgs;
       for (const auto& pdg : minimum_final_state_)
         min_pdgs.emplace_back((int)pdg);
       params.set<std::vector<int> >("minFinalState", min_pdgs);
     }
+    // per-PDGid selection
     if (!cuts_.central_particles.empty()) {
       ParametersList per_part;
-      for (const auto& cuts_vs_part : cuts_.central_particles) {
-        ParametersList cuts_vs_id;
-        for (const auto& lim : cuts_vs_part.second.list())
-          params.set<Limits>(lim.name, lim.limits);
-        per_part.set<ParametersList>(std::to_string(cuts_vs_part.first), cuts_vs_id);
-      }
+      for (const auto& cuts_vs_part : cuts_.central_particles)
+        per_part.set<ParametersList>(std::to_string(cuts_vs_part.first), cuts_vs_part.second.parameters(extended));
       params.set<ParametersList>("cuts", per_part);
     }
-    for (const auto& lim : cuts_.remnants.list())
-      params.set<Limits>(lim.name, lim.limits);
     return params;
   }
 

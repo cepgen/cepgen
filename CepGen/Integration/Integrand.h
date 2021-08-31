@@ -60,8 +60,8 @@ namespace cepgen {
     const Parameters* params_;                 ///< Generator-owned runtime parameters
     const std::unique_ptr<utils::Timer> tmr_;  ///< A precious timekeeper for event timing
     std::unique_ptr<proc::Process> process_;   ///< Local instance of the physics process
-    Event* event_;                             ///< Process-owned event
-    bool storage_;                             ///< Is the next event to be generated to be stored?
+    Event* event_{nullptr};                    ///< Process-owned event
+    bool storage_{false};                      ///< Is the next event to be generated to be stored?
   };
 }  // namespace cepgen
 

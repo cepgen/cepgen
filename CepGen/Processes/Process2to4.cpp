@@ -16,8 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Processes/Process2to4.h"
-
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
@@ -25,6 +23,7 @@
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Processes/Process2to4.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
@@ -32,25 +31,21 @@ namespace cepgen {
     const Limits Process2to4::x_limits_{0., 1.};
 
     Process2to4::Process2to4(const ParametersList& params, std::array<pdgid_t, 2> partons, pdgid_t cs_id)
-        : KTProcess(params, partons, {cs_id, cs_id}),
-          cs_prop_(PDG::get()(cs_id)),
-          single_limits_(params),
-          y_c1_(0.),
-          y_c2_(0.),
-          pt_diff_(0.),
-          phi_pt_diff_(0.),
-          ww_(0.) {}
+        : KTProcess(params, partons, {cs_id, cs_id}), cs_prop_(PDG::get()(cs_id)), single_limits_(params) {}
+
+    Process2to4::Process2to4(const Process2to4& proc)
+        : KTProcess(proc), cs_prop_(proc.cs_prop_), single_limits_(proc.single_limits_) {}
 
     void Process2to4::setCuts(const cuts::Central& single) { single_limits_ = single; }
 
     void Process2to4::preparePhaseSpace() {
       {
-        auto beamA = event_->oneWithRole(Particle::IncomingBeam1);
+        const auto& beamA = event_->oneWithRole(Particle::IncomingBeam1);
         pA_ = beamA.momentum();
         mA2_ = beamA.mass2();
       }
       {
-        auto beamB = event_->oneWithRole(Particle::IncomingBeam2);
+        const auto& beamB = event_->oneWithRole(Particle::IncomingBeam2);
         pB_ = beamB.momentum();
         mB2_ = beamB.mass2();
       }

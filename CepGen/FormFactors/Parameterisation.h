@@ -68,15 +68,15 @@ namespace cepgen {
       const double mp2_;  ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
 
     private:
-      strfun::Parameterisation* str_fun_;
-      double last_q2_;
+      strfun::Parameterisation* str_fun_{nullptr};
+      double last_q2_{-1.};
 
     public:
-      double FE;  ///< Electric form factor
-      double FM;  ///< Magnetic form factor
+      double FE{0.};  ///< Electric form factor
+      double FM{0.};  ///< Magnetic form factor
 
-      double GE;  ///< Sachs electric form factor
-      double GM;  ///< Sachs magnetic form factor
+      double GE{0.};  ///< Sachs electric form factor
+      double GM{0.};  ///< Sachs magnetic form factor
     };
   }  // namespace formfac
 }  // namespace cepgen

@@ -22,18 +22,18 @@
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
-  LoggedException::LoggedException(const char* module, Type type, short id)
-      : module_(module), type_(type), error_num_(id) {}
+  LoggedException::LoggedException(const char* module, Type type, const char* file, short lineno)
+      : module_(module), type_(type), file_(file), line_num_(lineno) {}
 
-  LoggedException::LoggedException(const char* from, const char* module, Type type, short id)
-      : from_(from), module_(module), type_(type), error_num_(id) {}
+  LoggedException::LoggedException(const char* from, const char* module, Type type, const char* file, short lineno)
+      : from_(from), module_(module), type_(type), file_(file), line_num_(lineno) {}
 
   LoggedException::LoggedException(const LoggedException& rhs) noexcept
       : from_(rhs.from_),
         module_(rhs.module_),
         message_(rhs.message_.str()),
         type_(rhs.type_),
-        error_num_(rhs.error_num_) {}
+        line_num_(rhs.line_num_) {}
 
   LoggedException::~LoggedException() noexcept {
     if (type_ != Type::undefined)
@@ -54,14 +54,6 @@ namespace cepgen {
     return from_.c_str();
   }
 
-  std::string LoggedException::message() const { return message_.str(); }
-
-  std::string LoggedException::from() const { return from_; }
-
-  int LoggedException::errorNumber() const { return error_num_; }
-
-  Exception::Type LoggedException::type() const { return type_; }
-
   std::ostream& LoggedException::dump(std::ostream& os) const {
     if (!utils::Logger::get().output)
       return os;
@@ -73,10 +65,34 @@ namespace cepgen {
         return os << type_ << " "
                   << utils::colourise(
                          from_, utils::Colour::yellow, utils::Modifier::underline | utils::Modifier::dimmed)
-                  << ": " << utils::colourise(message_.str(), utils::Colour::reset, utils::Modifier::dimmed) << "\n";
+                  << (utils::Logger::get().extended()
+                          ? " " +
+                                utils::colourise(
+                                    file_,
+                                    utils::Colour::reset,
+                                    utils::Modifier::bold | utils::Modifier::italic | utils::Modifier::dimmed) +
+                                " @" +
+                                utils::colourise(std::to_string(line_num_),
+                                                 utils::Colour::reset,
+                                                 utils::Modifier::italic | utils::Modifier::dimmed) +
+                                "\n"
+                          : ": ")
+                  << utils::colourise(message_.str(), utils::Colour::reset, utils::Modifier::dimmed) << "\n";
       case Type::warning:
-        return os << type_ << " " << utils::colourise(from_, utils::Colour::reset, utils::Modifier::underline) << "\n\t"
-                  << message_.str() << "\n";
+        return os << type_ << " "
+                  << utils::colourise(from_, utils::Colour::reset, utils::Modifier::underline | utils::Modifier::dimmed)
+                  << (utils::Logger::get().extended()
+                          ? " " +
+                                utils::colourise(
+                                    file_,
+                                    utils::Colour::reset,
+                                    utils::Modifier::bold | utils::Modifier::italic | utils::Modifier::dimmed) +
+                                " @" +
+                                utils::colourise(std::to_string(line_num_),
+                                                 utils::Colour::reset,
+                                                 utils::Modifier::italic | utils::Modifier::dimmed)
+                          : "")
+                  << "\n\t" << message_.str() << "\n";
       case Type::verbatim:
         return os << message_.str() << "\n";
       case Type::undefined:
@@ -86,8 +102,11 @@ namespace cepgen {
         os << sep << "\n" << type_ << " occured at " << now() << "\n";
         if (!from_.empty())
           os << "  raised by: " << utils::colourise(from_, utils::Colour::reset, utils::Modifier::underline) << "\n";
-        if (errorNumber() != 0)
-          os << "  error #" << error_num_ << "\n";
+        if (utils::Logger::get().extended()) {
+          os << "  file: " << utils::colourise(file_, utils::Colour::reset, utils::Modifier::dimmed) << "\n";
+          if (line_num_ != 0)
+            os << "  line #" << line_num_ << "\n";
+        }
         os << "\n" << message_.str() << "\n";
         return os << sep << "\n";
       }

@@ -58,11 +58,11 @@ namespace cepgen {
 
       std::ostringstream oss_vars_;
 
-      double cross_section_;
+      double cross_section_{1.};
 
       //--- kinematic variables
-      double sqrts_;
-      unsigned long num_evts_;
+      double sqrts_{0.};
+      unsigned long num_evts_{0ul};
       struct Hist1DInfo {
         std::string var;
         utils::Hist1D hist;
@@ -84,10 +84,7 @@ namespace cepgen {
           save_variables_(params.get<bool>("saveVariables", true)),
           show_hists_(params.get<bool>("showHistograms", true)),
           save_hists_(params.get<bool>("saveHistograms", false)),
-          separator_(params.get<std::string>("separator", "\t")),
-          cross_section_(1.),
-          sqrts_(0.),
-          num_evts_(0ul) {
+          separator_(params.get<std::string>("separator", "\t")) {
       //--- first extract list of variables to store in output file
       oss_vars_.clear();
       std::string sep;

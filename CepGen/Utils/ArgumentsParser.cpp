@@ -27,12 +27,10 @@
 
 namespace cepgen {
   ArgumentsParser::ArgumentsParser(int argc, char* argv[])
-      : help_str_({{"help,h"}}),
+      : command_name_(argc > 0 ? argv[0] : ""),
+        help_str_({{"help,h"}}),
         version_str_({{"version,v"}}),
-        config_str_({{"cmd,c"}}),
-        help_req_(false),
-        version_req_(false) {
-    command_name_ = argv[0];
+        config_str_({{"cmd,c"}}) {
     //--- first remove the program name
     std::vector<std::string> args_tmp;
     if (argc > 1) {
