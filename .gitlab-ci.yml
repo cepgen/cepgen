@@ -65,9 +65,9 @@ stages:
     - ./cepgen -l
     - echo "Python card test"
     - ./cepgen Cards/lpair_cfg.py -n 10000
-    - echo "LPAIR card test"
-    - ./cepgen-cards-converter Cards/lpair_cfg.py lpair.card
-    - ./cepgen lpair.card -n 10000
+    #- echo "LPAIR card test"
+    #- ./cepgen-cards-converter Cards/lpair_cfg.py lpair.card
+    #- ./cepgen lpair.card -n 10000
   when: on_success
   allow_failure: false
 
