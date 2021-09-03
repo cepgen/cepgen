@@ -233,10 +233,7 @@ namespace cepgen {
       if (PyObject_HasAttrString(cfg, OUTPUT_NAME) == 1) {
         PyObject* pout = PyObject_GetAttrString(cfg, OUTPUT_NAME);  // new
         if (pout) {
-          //if (isVector<ParametersList>(pout))
           parseOutputModules(pout);
-          //else
-          //parseOutputModule(pout);
           Py_CLEAR(pout);
         }
       }
