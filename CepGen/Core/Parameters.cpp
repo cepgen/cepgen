@@ -84,7 +84,7 @@ namespace cepgen {
     CG_TICKER(tmr_.get());
 
     //--- first-run preparation
-    if (!process_ || !process_->first_run)
+    if (!process_ || !process_->firstRun())
       return;
     CG_DEBUG("Parameters").log([&](auto& dbg) {
       dbg << "Run started for " << process_->name() << " process " << std::hex << (void*)process_.get() << std::dec
@@ -101,7 +101,6 @@ namespace cepgen {
     //--- clear the run statistics
     total_gen_time_ = 0.;
     num_gen_events_ = 0ul;
-    process_->first_run = false;
   }
 
   void Parameters::setTimeKeeper(utils::TimeKeeper* kpr) { tmr_.reset(kpr); }

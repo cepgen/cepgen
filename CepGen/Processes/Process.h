@@ -48,6 +48,8 @@ namespace cepgen {
 
       /// Reset process prior to the phase space and variables definition
       void clear();
+      /// Is it the first time the process is computed?
+      inline bool firstRun() const { return first_run_; }
 
       /// Assignment operator
       Process& operator=(const Process&);
@@ -150,10 +152,6 @@ namespace cepgen {
 
       // ---
 
-    public:
-      /// Is it the first time the process is computed?
-      bool first_run{true};
-
     protected:
       /// Numerical limits for sanity comparisons
       static constexpr double NUM_LIMITS = 1.e-3;  // MeV/mm-level
@@ -206,6 +204,8 @@ namespace cepgen {
          * \return A boolean stating if the input kinematics and the final states are well-defined
          */
       bool isKinematicsDefined();
+      /// Is it the first time the process is computed?
+      bool first_run_{true};
     };
     /// Helper typedef for a Process unique pointer
     typedef std::unique_ptr<Process> ProcessPtr;
