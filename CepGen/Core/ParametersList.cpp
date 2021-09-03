@@ -123,36 +123,39 @@ namespace cepgen {
   bool ParametersList::empty() const { return keys(false).empty(); }
 
   std::ostream& operator<<(std::ostream& os, const ParametersList& params) {
-    const auto beg = os.tellp();
+    std::string sep;
+    const auto key_name = [&](const auto& key) -> std::string {
+      return key == ParametersList::MODULE_NAME ? "name=" : key + "=";
+    };
     for (const auto& kv : params.int_values_)
-      os << (os.tellp() > beg ? ", " : "") << kv.first << "=int(" << kv.second << ")";
+      os << sep << key_name(kv.first) << "int(" << kv.second << ")", sep = ", ";
     for (const auto& kv : params.dbl_values_)
-      os << (os.tellp() > beg ? ", " : "") << kv.first << "=double(" << kv.second << ")";
+      os << sep << key_name(kv.first) << "double(" << kv.second << ")", sep = ", ";
     for (const auto& kv : params.str_values_)
-      os << (os.tellp() > beg ? ", " : "") << kv.first << "=string(" << kv.second << ")";
+      os << sep << key_name(kv.first) << "string(" << kv.second << ")", sep = ", ";
     for (const auto& kv : params.param_values_)
-      os << (os.tellp() > beg ? ", " : "") << kv.first << "=param{" << kv.second << "}";
+      os << sep << key_name(kv.first) << "param{" << kv.second << "}", sep = ", ";
     for (const auto& kv : params.lim_values_)
-      os << (os.tellp() > beg ? ", " : "") << kv.first << "=limits(" << kv.second << ")";
+      os << sep << key_name(kv.first) << "limits(" << kv.second << ")", sep = ", ";
     for (const auto& kv : params.vec_int_values_) {
-      os << (os.tellp() > beg ? ", " : "") << kv.first << "=vint(";
-      bool first = true;
-      for (const auto& v : kv.second)
-        os << (first ? "" : ", ") << v, first = false;
+      os << sep << key_name(kv.first) << "vint(", sep = ", ";
+      std::string sep1;
+      for (const auto& val : kv.second)
+        os << sep1 << val, sep1 = ", ";
       os << ")";
     }
     for (const auto& kv : params.vec_dbl_values_) {
-      os << (os.tellp() > beg ? ", " : "") << kv.first << "=vdouble(";
-      bool first = true;
-      for (const auto& v : kv.second)
-        os << (first ? "" : ", ") << v, first = false;
+      os << sep << key_name(kv.first) << "vdouble(", sep = ", ";
+      std::string sep1;
+      for (const auto& val : kv.second)
+        os << sep1 << val, sep1 = ", ";
       os << ")";
     }
     for (const auto& kv : params.vec_str_values_) {
-      os << (os.tellp() > beg ? ", " : "") << kv.first << "=vstring(";
-      bool first = true;
-      for (const auto& v : kv.second)
-        os << (first ? "" : ", ") << v, first = false;
+      os << sep << key_name(kv.first) << "vstring(", sep = ", ";
+      std::string sep1;
+      for (const auto& val : kv.second)
+        os << sep1 << val, sep1 = ", ";
       os << ")";
     }
     return os;
