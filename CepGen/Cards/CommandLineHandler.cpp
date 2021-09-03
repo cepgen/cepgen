@@ -97,6 +97,8 @@ namespace cepgen {
         if (rt_params_->hasProcess())
           proc = ParametersList(rt_params_->process().parameters()) + proc;
         rt_params_->setProcess(proc::ProcessFactory::get().build(proc));
+        if (proc.has<int>("mode"))
+          rt_params_->kinematics.incomingBeams().setMode(proc.getAs<int, mode::Kinematics>("mode"));
       }
 
       //----- phase space definition
