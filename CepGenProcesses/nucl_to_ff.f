@@ -79,8 +79,8 @@ c       polarisation terms to consider in the matrix element
         iterm11 = CepGen_param_int('term11', 1) ! LL
         iterm22 = CepGen_param_int('term22', 1) ! TT
         iterm12 = CepGen_param_int('term12', 1) ! LT
-        itermtt = CepGen_param_int('termtt', 1) ! TT'
-c       two terms in the Wolfgang's formula for off-shell gamma gamma --> l^+ l^-
+        itermtt = CepGen_param_int('termtt', 1) ! TTprime
+c       two terms in Wolfgang formula for off-shell gamma gamma --> l^+ l^-
         imat1 = CepGen_param_int('mat1', 1)
         imat2 = CepGen_param_int('mat2', 1)
 c       central particles properties
@@ -152,7 +152,7 @@ c     =================================================================
       p2_minus = (ak20-ak2z)/dsqrt(2.d0)
 
 c     =================================================================
-c     Outgoing proton final state's mass
+c     Outgoing proton final state mass
 c     =================================================================
       if((icontri.eq.1).or.(icontri.eq.2)) am_x = am_A
       if((icontri.eq.1).or.(icontri.eq.3)) am_y = am_B
@@ -323,7 +323,7 @@ c     =================================================================
 c     matrix element squared
 c     averaged over initial spin polarizations
 c     and summed over final spin polarizations
-c     (--> see Wolfgang's notes
+c     (--> see Wolfgang notes
 c     =================================================================
 
 c     =================================================================
@@ -370,7 +370,7 @@ c     =================================================================
 
       elseif(imethod.eq.1)then
 c     =================================================================
-c     Wolfgang's formulae
+c     Wolfgang formulae
 c     =================================================================
 
       ak1_x = z1m*pt1x-z1p*pt2x
