@@ -106,7 +106,9 @@ namespace cepgen {
 
     //--- centre-of-mass energy
     if (params.has<double>("sqrtS"))
-      setSqrtS(params.get<double>("sqrtS", params.get<double>("cmEnergy")));
+      setSqrtS(params.get<double>("sqrtS"));
+    if (params.has<double>("cmEnergy"))
+      setSqrtS(params.get<double>("cmEnergy"));
     //--- form factors
     if (params.has<std::string>("formFactors") || !form_factors_) {
       const auto ff_mode = params.get<std::string>("formFactors");
