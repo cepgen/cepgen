@@ -146,7 +146,7 @@ namespace cepgen {
 
       const double rl1 = ss * ss - 4. * mA2_ * s_;  // lambda(s, m1**2, m2**2)
       if (rl1 <= 0.) {
-        CG_WARNING("LPAIR") << "rl1 = " << rl1 << " <= 0";
+        CG_DEBUG_LOOP("LPAIR") << "rl1 = " << rl1 << " <= 0";
         return false;
       }
       sl1_ = sqrt(rl1);

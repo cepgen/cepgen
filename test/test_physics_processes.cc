@@ -74,12 +74,15 @@ int main(int argc, char* argv[]) {
     string line;
     while (!cfg.eof()) {
       getline(cfg, line);
-      if (line[0] == '#' || line.empty())
+      // skip the commented out lines
+      line = cepgen::utils::ltrim(line);
+      if (line.empty() || line[0] == '#')
         continue;
       stringstream os(line);
       Test test;
       os >> test.filename >> test.ref_cs >> test.err_ref_cs;
       tests.emplace_back(test);
+      CG_DEBUG("main") << "Added test \"" << line << "\".";
     }
   }
 
@@ -95,7 +98,11 @@ int main(int argc, char* argv[]) {
       gen.parametersRef().clearProcess();
 
       const std::string filename = "test/test_processes/" + test.filename + "_cfg.py";
+
       gen.setParameters(cepgen::card::Handler::parse(filename));
+
+      CG_DEBUG("main") << gen.parameters();
+
       gen.parameters()->integrator->setName<std::string>(integrator);
       CG_INFO("main") << "Process: " << gen.parameters()->processName() << "\n\t"
                       << "File: " << filename << "\n\t"
