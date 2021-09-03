@@ -31,7 +31,7 @@ namespace cepgen {
     LPAIR::LPAIR(const ParametersList& params)
         : Process(params, true),
           n_opt_(params.get<int>("nopt", 0)),
-          pair_(params.get<int>("pair")),
+          pair_(params.get<int>("pair", (int)PDG::muon)),
           symmetrise_(params.get<bool>("symmetrise", false)),
           rnd_phi_(0., 2. * M_PI),
           rnd_side_(0, 1) {
