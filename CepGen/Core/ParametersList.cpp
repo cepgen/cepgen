@@ -369,6 +369,11 @@ namespace cepgen {
 
   template <>
   const ParametersList& ParametersList::fill<Limits>(std::string key, Limits& value) const {
+    if (has<double>(key + "min") || has<double>(key + "max")) {
+      fill<double>(key + "min", value.min());
+      fill<double>(key + "max", value.max());
+      return *this;
+    }
     if (has<Limits>(key)) {
       const auto& lim = get<Limits>(key);
       if (lim.hasMin())
@@ -377,10 +382,6 @@ namespace cepgen {
         value.max() = lim.max();
       return *this;
     }
-    if (has<double>(key + "min"))
-      value.min() = get<double>(key + "min");
-    if (has<double>(key + "max"))
-      value.max() = get<double>(key + "max");
     return *this;
   }
 
