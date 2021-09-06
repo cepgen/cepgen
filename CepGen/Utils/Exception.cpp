@@ -60,7 +60,13 @@ namespace cepgen {
 
     switch (type_) {
       case Type::info:
-        return os << type_ << ":\t" << message_.str() << "\n";
+        return os << type_
+                  << (utils::Logger::get().extended()
+                          ? utils::colourise(" {" + from_ + "}\n\t",
+                                             utils::Colour::reset,
+                                             utils::Modifier::dimmed | utils::Modifier::italic)
+                          : ":\t")
+                  << message_.str() << "\n";
       case Type::debug:
         return os << type_ << " "
                   << utils::colourise(
