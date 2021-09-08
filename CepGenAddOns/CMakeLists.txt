@@ -4,17 +4,17 @@ cepgen_build(CepGenAddOns
 
 #----- check the external dependencies for physics utilities
 
+add_subdirectory(APFELWrapper)
 add_subdirectory(BoostWrapper)
 add_subdirectory(DelphesWrapper)
+add_subdirectory(HepMCWrapper)
+add_subdirectory(LHAPDFWrapper)
+add_subdirectory(MadGraphWrapper)
+add_subdirectory(ProMCWrapper)
 add_subdirectory(Pythia6Wrapper)
 add_subdirectory(Pythia8Wrapper)
-add_subdirectory(ROOTWrapper)
-add_subdirectory(HepMCWrapper)
-add_subdirectory(ProMCWrapper)
-add_subdirectory(LHAPDFWrapper)
 add_subdirectory(RivetWrapper)
-add_subdirectory(APFELWrapper)
-add_subdirectory(MadGraphWrapper)
+add_subdirectory(ROOTWrapper)
 
 #----- propagate global variables to parent scope
 
