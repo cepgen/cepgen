@@ -1,6 +1,6 @@
 from Config.containers_cfi import Module
 
-from .pythia6Tunes_cfi import *
+from Config.Hadronisation.pythia6Tunes_cfi import *
 
 pythia6 = Module('pythia6',
     seed = 1000,

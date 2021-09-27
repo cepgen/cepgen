@@ -15,8 +15,8 @@ import Config.Core as cepgen
 #--------------------------------------------------------------------
 # Pythia 8 example (with fully leptonic WW decay)
 #--------------------------------------------------------------------
-#from Config.Hadronisation.pythia8_cff import pythia8
-#hadroniser = pythia8.clone('pythia8',
+from Config.Hadronisation.pythia8_cff import pythia8
+hadroniser = pythia8.clone('pythia8',
 #    pythiaConfiguration = (
 #        # process-specific
 #        '13:onMode = off', # disable muon decays
@@ -26,12 +26,13 @@ import Config.Core as cepgen
 #        '24:onNegIfAny = 13', # enable W+ -> mu+ + nu_mu decay
 #    ),
 #    processConfiguration = pythia8.processConfiguration+('pythiaConfiguration',),
-#)
+)
 
 import Config.ktProcess_cfi as kt
 process = kt.process.clone('pptoww',
     processParameters = cepgen.Parameters(
-        mode = cepgen.ProcessMode.ElasticElastic,
+        #mode = cepgen.ProcessMode.ElasticElastic,
+        mode = cepgen.ProcessMode.ElasticInelastic,
         #mode = cepgen.ProcessMode.InelasticInelastic,
         method = 1,  # on-shell (0) or off-shell (1) formula
         polarisationStates = 0,  # full
@@ -63,6 +64,8 @@ process = kt.process.clone('pptoww',
         #xi = (0.02, 0.15),
     )
 )
+
+#output = cepgen.Sequence(hadroniser)
 
 #--- generation parameters
 from Config.generator_cff import generator
