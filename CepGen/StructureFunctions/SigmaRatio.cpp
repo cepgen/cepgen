@@ -22,8 +22,8 @@
 
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
-#include "CepGen/Utils/Physics.h"
 
 namespace cepgen {
   namespace sigrat {

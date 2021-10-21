@@ -23,8 +23,8 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Utils/Physics.h"
 
 namespace cepgen {
   namespace strfun {

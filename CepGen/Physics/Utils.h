@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Utils_Physics_h
-#define CepGen_Utils_Physics_h
+#ifndef CepGen_Physics_Utils_h
+#define CepGen_Physics_Utils_h
 
 namespace cepgen {
   namespace utils {

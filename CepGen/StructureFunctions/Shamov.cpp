@@ -19,10 +19,10 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SuriYennie.h"
 #include "CepGen/Utils/GridHandler.h"
-#include "CepGen/Utils/Physics.h"
 
 namespace cepgen {
   namespace strfun {
