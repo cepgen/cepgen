@@ -16,8 +16,9 @@ add_subdirectory(Pythia8Wrapper)
 add_subdirectory(RivetWrapper)
 add_subdirectory(ROOTWrapper)
 
+add_subdirectory(Functionals)
+
 #----- propagate global variables to parent scope
 
 set(CEPGEN_ADDONS_EXT ${CEPGEN_ADDONS_EXT} PARENT_SCOPE)
-set(CEPGEN_HAS_FUNCTIONAL ${CEPGEN_HAS_FUNCTIONAL} PARENT_SCOPE)
 

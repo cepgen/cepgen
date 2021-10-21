@@ -25,6 +25,3 @@ cepgen_build(CepGenRoot SOURCES ${sources}
     INSTALL_COMPONENT root)
 message(STATUS "... ROOT v${ROOT_VERSION} standard is c++${ROOT_CXX_STANDARD}")
 
-message(STATUS "Formulas parsing will use ROOT found in ${ROOT_INCLUDE_DIRS}")
-set(CEPGEN_HAS_FUNCTIONAL ON PARENT_SCOPE)
-
