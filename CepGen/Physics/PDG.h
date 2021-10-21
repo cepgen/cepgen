@@ -32,7 +32,7 @@ namespace cepgen {
     /// PDG ids of all known particles
     /// \note From \cite Beringer:1900zz :
     /// > The Monte Carlo particle numbering scheme [...] is intended to facilitate interfacing between event generators, detector simulators, and analysis packages used in particle physics.
-    enum PdgId : pdgid_t {
+    enum PdgIdEnum : pdgid_t {
       invalid = 0,
       down = 1,
       up = 2,
@@ -50,6 +50,20 @@ namespace cepgen {
       phi1680 = 100333,
       proton = 2212,
       diffractiveProton = 9902210
+    };
+
+    /// A class-in-the-middle PDG identifier for printout operations
+    class Id {
+    public:
+      /// Construct an object from a PDG identifier
+      Id(pdgid_t pdgid) : pdgid_(pdgid) {}
+      /// Recasting operator to get back the pdgid_t number
+      operator pdgid_t() const { return pdgid_; }
+      /// Human-readable PDG name
+      friend std::ostream& operator<<(std::ostream&, const Id&);
+
+    private:
+      pdgid_t pdgid_;
     };
 
     /// Retrieve a unique instance of this particles info collection

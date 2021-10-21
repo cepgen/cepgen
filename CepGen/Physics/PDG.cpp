@@ -22,6 +22,8 @@
 #include "CepGen/Physics/PDG.h"
 
 namespace cepgen {
+  std::ostream& operator<<(std::ostream& os, const PDG::Id& pdg) { return os << PDG::get().name(pdg); }
+
   PDG::PDG() {
     define({invalid, "[...]", "", 0, -1, -1., 0, false});
     define({diffractiveProton, "diff_proton", "p\u002A", 0, 0., 0., 3, false});
