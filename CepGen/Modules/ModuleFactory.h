@@ -109,6 +109,10 @@ namespace cepgen {
     const std::string& description() { return description_; }
     /// Describe one named module
     const std::string& describe(const I& name) const { return descr_map_.at(name); }
+    /// Is the database empty?
+    bool empty() const { return map_.empty(); }
+    /// Number of modules registered in the database
+    size_t size() const { return map_.size(); }
     /// List of modules registred in the database
     std::vector<I> modules() const {
       std::vector<I> out;
