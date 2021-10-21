@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
 
   //--- no steering card nor additional flags found
   if (input_card.empty() && parser.extra_config().empty()) {
-    CG_INFO("main") << "Neither input card nor configuration word provided!\n\n " << parser.help_message();
+    CG_WARNING("main") << "Neither input card nor configuration word provided!\n\n " << parser.help_message();
     return 0;
   }
   //--- parse the steering card

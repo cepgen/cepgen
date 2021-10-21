@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
         //<< "\t" << cepgen::ktFlux( cepgen::KTFlux::P_Gluon_KMR_alt, x, kt2, *ff, mi2, mx2 )
         << "\n";
   }
-  CG_INFO("main") << "Scan written in \"" << output_file << "\".";
+  CG_LOG << "Scan written in \"" << output_file << "\".";
   out.close();
 
   return 0;

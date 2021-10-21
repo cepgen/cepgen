@@ -102,8 +102,7 @@ int main(int argc, char* argv[]) {
     // will perform the test with all integrators
     integrators = cepgen::IntegratorFactory::get().modules();
 
-  CG_INFO("main") << "Will test with " << cepgen::utils::s("integrator", integrators.size(), true) << ": "
-                  << integrators;
+  CG_LOG << "Will test with " << cepgen::utils::s("integrator", integrators.size(), true) << ": " << integrators;
 
   cepgen::Parameters params;
 
@@ -121,8 +120,7 @@ int main(int argc, char* argv[]) {
       integr->integrate(result, error);
       test.success = error / result < 1.e-6 || (fabs(test.result - result) <= num_sigma * error);
       if (debug)
-        CG_INFO("main") << "Test " << i << ": ref.: " << test.result << ", result: " << result << " +/- " << error
-                        << ".";
+        CG_LOG << "Test " << i << ": ref.: " << test.result << ", result: " << result << " +/- " << error << ".";
       ++i;
     }
 

@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
     }
     out << "\n";
   }
-  CG_INFO("main") << "Scan written in \"" << output_file << "\".";
+  CG_LOG << "Scan written in \"" << output_file << "\".";
   out.close();
 
   for (auto& plt : map<const char*, vector<TGraph*> >{{"FE", g_form_factors_fe}, {"FM", g_form_factors_fm}}) {

@@ -30,9 +30,11 @@ using namespace std;
 int main() {
   const double epsilon = 1.e-9;  // tolerance
   cepgen::initialise();
-  CG_LOG << "Found " << cepgen::utils::s("module", cepgen::utils::FunctionalFactory::get().modules().size(), true)
-         << ".";
-  for (const auto& func : cepgen::utils::FunctionalFactory::get().modules()) {
+
+  const auto funcs = cepgen::utils::FunctionalFactory::get().modules();
+  CG_LOG << "Will test with " << cepgen::utils::s("module", funcs.size(), true) << ": " << funcs;
+
+  for (const auto& func : funcs) {
     CG_LOG << "Testing with \"" << func << "\" functional parser.";
     {  // test with a 1-variable function
       const double exp_result_test1 = 6.795704571;

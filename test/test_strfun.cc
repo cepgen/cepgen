@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
       out << "\n";
     }
 
-  CG_INFO("main") << "Scan written in \"" << output_file << "\".";
+  CG_LOG << "Scan written in \"" << output_file << "\".";
   out.close();
 
   return 0;
