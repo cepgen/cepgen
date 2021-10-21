@@ -245,7 +245,7 @@ namespace cepgen {
     if ((HeavyIon)beam.pdg)
       os << (HeavyIon)beam.pdg;
     else
-      os << PDG::get().name(beam.pdg);
+      os << (PDG::Id)beam.pdg;
     os << " (" << beam.momentum.pz() << " GeV/c), " << beam.mode;
     if (beam.kt_flux != KTFlux::invalid)
       os << " [unint.flux: " << beam.kt_flux << "]";

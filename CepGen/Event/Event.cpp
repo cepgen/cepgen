@@ -287,7 +287,7 @@ namespace cepgen {
           std::string delim;
           for (size_t i = 0; i < mothers.size(); ++i)
             try {
-              oss_pdg << delim << PDG::get().name(ev[*std::next(mothers.begin(), i)].pdgId()), delim = "/";
+              oss_pdg << delim << (PDG::Id)ev[*std::next(mothers.begin(), i)].pdgId(), delim = "/";
             } catch (const Exception&) {
               oss_pdg << delim << ev[*std::next(mothers.begin(), i)].pdgId(), delim = "/";
             }
@@ -298,7 +298,7 @@ namespace cepgen {
             oss_pdg << (HeavyIon)part.pdgId();
           else
             try {
-              oss_pdg << PDG::get().name(part.pdgId());
+              oss_pdg << (PDG::Id)part.pdgId();
             } catch (const Exception&) {
               oss_pdg << "?";
             }
