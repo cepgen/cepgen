@@ -1,5 +1,5 @@
 #--- searching for ROOT
-find_package(ROOT COMPONENTS Hist MathCore Foam)
+find_package(ROOT COMPONENTS Hist MathCore)
 if(NOT ROOT_FOUND)
   return()
 endif()
@@ -8,6 +8,7 @@ set(sources IntegratorROOT.cpp ROOTTree*.cpp ROOTHistsHandler.cpp FunctionalROOT
 
 #--- FOAM integrator
 if(CMAKE_BUILD_FOAM)
+  find_package(ROOT COMPONENTS Hist MathCore Foam)
   list(FIND ROOT_LIBRARIES "/usr/lib64/root/libFoam.so" _idx)
   if(${_idx} GREATER -1)
     list(APPEND sources IntegratorFoam.cpp)
