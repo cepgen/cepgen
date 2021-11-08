@@ -1,6 +1,8 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
 from Config.generator_cff import generator
+from Config.Logger_cfi import logger
+#logger.enabledModules += ('MadGraphProcess.eval',)
 
 #--- process definition
 process = kt.process.clone('mg5_aMC',
