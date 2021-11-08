@@ -18,8 +18,8 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
-#include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/ProcessIntegrand.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Parameters.h"
@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
     double result, error;
     for (auto& test : tests) {
       params.setProcess(test.process.clone());
-      cepgen::Integrand integrand(&params);
+      cepgen::ProcessIntegrand integrand(&params);
       integr->setIntegrand(integrand);
       integr->integrate(result, error);
       test.success = error / result < 1.e-6 || (fabs(test.result - result) <= num_sigma * error);
