@@ -175,7 +175,7 @@ namespace cepgen {
 
         rt_params_->kinematics = Kinematics(pkin);
         if (proc_params.has<int>("mode"))
-          rt_params_->kinematics.incomingBeams().setMode((mode::Kinematics)proc_params.get<int>("mode"));
+          rt_params_->kinematics.incomingBeams().setMode(proc_params.getAs<int, mode::Kinematics>("mode"));
 
         //--- taming functions
         PyObject* ptam = element(process, "tamingFunctions");  // borrowed
@@ -233,10 +233,7 @@ namespace cepgen {
       if (PyObject_HasAttrString(cfg, OUTPUT_NAME) == 1) {
         PyObject* pout = PyObject_GetAttrString(cfg, OUTPUT_NAME);  // new
         if (pout) {
-          //if (isVector<ParametersList>(pout))
           parseOutputModules(pout);
-          //else
-          //parseOutputModule(pout);
           Py_CLEAR(pout);
         }
       }

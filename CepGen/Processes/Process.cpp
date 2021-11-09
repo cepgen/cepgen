@@ -39,7 +39,6 @@ namespace cepgen {
 
     Process::Process(const Process& proc)
         : NamedModule<>(proc.parameters()),
-          first_run(proc.first_run),
           alphaem_(proc.alphaem_),
           alphas_(proc.alphas_),
           mapped_variables_(proc.mapped_variables_),
@@ -50,7 +49,8 @@ namespace cepgen {
           mA2_(proc.mA2_),
           mB2_(proc.mB2_),
           kin_(proc.kin_),
-          is_point_set_(false) {
+          is_point_set_(false),
+          first_run_(proc.first_run_) {
       if (proc.event_)
         event_.reset(new Event(*proc.event_));
       CG_DEBUG("Process").log([&](auto& log) {
@@ -69,7 +69,7 @@ namespace cepgen {
     }
 
     void Process::clear() {
-      first_run = true;
+      first_run_ = true;
       addEventContent();
       //--- initialise the "constant" (wrt x) part of the Jacobian
       base_jacobian_ = 1.;
@@ -205,6 +205,8 @@ namespace cepgen {
     }
 
     double Process::weight(const std::vector<double>& x) {
+      if (first_run_)
+        first_run_ = false;
       point_coord_ = x;
       if (CG_LOG_MATCH("Process:dumpPoint", debugInsideLoop))
         dumpPoint();

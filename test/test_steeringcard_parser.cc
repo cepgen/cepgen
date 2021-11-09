@@ -42,9 +42,9 @@ int main(int argc, char* argv[]) {
   cepgen::initialise();
 
   try {
-    CG_INFO("main") << "Parsing configuration from '" << card << ".";
+    CG_LOG << "Parsing configuration from '" << card << ".";
     const auto* params = cepgen::card::Handler::parse(card);
-    CG_INFO("main") << "Configuration parsed from '" << card << "':\n" << params;
+    CG_LOG << "Configuration parsed from '" << card << "':\n" << params;
   } catch (const cepgen::Exception& e) {
     e.dump();
     return -1;

@@ -85,10 +85,8 @@ namespace cepgen {
 
     //--- beams longitudinal momentum
     double p1z = 0., p2z = 0;
-    if (params.has<double>("beam1pz"))
-      params.fill<double>("beam1pz", p1z);
-    if (params.has<double>("beam2pz"))
-      params.fill<double>("beam2pz", p2z);
+    params.fill<double>("beam1pz", p1z);
+    params.fill<double>("beam2pz", p2z);
     if (params.has<std::vector<double> >("pz")) {
       const auto& beams_pz = params.get<std::vector<double> >("pz");
       if (beams_pz.size() != 2)
@@ -107,9 +105,10 @@ namespace cepgen {
     negative().momentum = Momentum::fromPxPyPzM(0., 0., -fabs(p2z), m2);
 
     //--- centre-of-mass energy
-    const double sqrts = params.get<double>("sqrtS", params.get<double>("cmEnergy", -1.));
-    if (sqrts > 0.)
-      setSqrtS(sqrts);
+    if (params.has<double>("sqrtS"))
+      setSqrtS(params.get<double>("sqrtS"));
+    if (params.has<double>("cmEnergy"))
+      setSqrtS(params.get<double>("cmEnergy"));
     //--- form factors
     if (params.has<std::string>("formFactors") || !form_factors_) {
       const auto ff_mode = params.get<std::string>("formFactors");
@@ -246,7 +245,7 @@ namespace cepgen {
     if ((HeavyIon)beam.pdg)
       os << (HeavyIon)beam.pdg;
     else
-      os << PDG::get().name(beam.pdg);
+      os << (PDG::Id)beam.pdg;
     os << " (" << beam.momentum.pz() << " GeV/c), " << beam.mode;
     if (beam.kt_flux != KTFlux::invalid)
       os << " [unint.flux: " << beam.kt_flux << "]";

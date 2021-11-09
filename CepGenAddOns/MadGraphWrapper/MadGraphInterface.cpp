@@ -118,6 +118,10 @@ namespace cepgen {
     std::string tmpl = std::string(std::istreambuf_iterator<char>(tmpl_file), std::istreambuf_iterator<char>());
 
     const auto& parts = unpackProcessParticles(proc_);
+    CG_INFO("MadGraphInterface.prepareMadGraphProcess")
+        << "Unpacked process particles: "
+        << "incoming=" << std::vector<PDG::Id>(parts.first.begin(), parts.first.end()) << ", "
+        << "outgoing=" << std::vector<PDG::Id>(parts.second.begin(), parts.second.end()) << ".";
 
     const auto& in_parts = parts.first;
     utils::replace_all(tmpl, "XXX_PART1_XXX", std::to_string(in_parts[0]));

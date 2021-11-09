@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
                                 cepgen::ParametersList().set<std::vector<std::string> >("args", parser.extra_config()))
                          ->parse("", mg.parametersPtr()));
 
-  CG_INFO("main") << mg.parameters();
+  CG_LOG << mg.parameters();
 
   ofstream xsect_file(output_file);
   if (!xsect_file.is_open())

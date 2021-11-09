@@ -26,8 +26,8 @@
 
 namespace cepgen {
   class Integrator;
-  class Integrand;
   class Parameters;
+  class ProcessIntegrand;
   class GridParameters;
   /// Monte-Carlo generator instance
   class GeneratorWorker {
@@ -41,7 +41,7 @@ namespace cepgen {
     /// \param[in] callback The callback function applied on every event generated
     void generate(size_t num_events = 0, Event::callback callback = nullptr);
     /// Function evaluator
-    Integrand& integrand() { return *integrand_; }
+    ProcessIntegrand& integrand() { return *integrand_; }
 
   private:
     /// Placeholder for invalid bin indexing
@@ -60,7 +60,7 @@ namespace cepgen {
     void computeGenerationParameters();
 
     /// Local event weight evaluator
-    std::unique_ptr<Integrand> integrand_;
+    std::unique_ptr<ProcessIntegrand> integrand_;
     /// Pointer to the mother-handled integrator instance
     /// \note NOT owning
     const Integrator* integrator_{nullptr};

@@ -31,7 +31,7 @@ namespace cepgen {
     LPAIR::LPAIR(const ParametersList& params)
         : Process(params, true),
           n_opt_(params.get<int>("nopt", 0)),
-          pair_(params.get<int>("pair")),
+          pair_(params.get<int>("pair", (int)PDG::muon)),
           symmetrise_(params.get<bool>("symmetrise", false)),
           rnd_phi_(0., 2. * M_PI),
           rnd_side_(0, 1) {
@@ -146,7 +146,7 @@ namespace cepgen {
 
       const double rl1 = ss * ss - 4. * mA2_ * s_;  // lambda(s, m1**2, m2**2)
       if (rl1 <= 0.) {
-        CG_WARNING("LPAIR") << "rl1 = " << rl1 << " <= 0";
+        CG_DEBUG_LOOP("LPAIR") << "rl1 = " << rl1 << " <= 0";
         return false;
       }
       sl1_ = sqrt(rl1);

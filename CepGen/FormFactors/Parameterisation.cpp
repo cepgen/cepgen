@@ -19,8 +19,8 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/SuriYennie.h"
-#include "CepGen/Utils/Physics.h"
 
 namespace cepgen {
   namespace formfac {

@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <iostream>
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Physics/Cuts.h"
 

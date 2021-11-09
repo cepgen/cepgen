@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 
   vector<string> failed_tests, passed_tests;
 
-  CG_INFO("main") << "Initial configuration time: " << tmr.elapsed() * 1.e3 << " ms.";
+  CG_LOG << "Initial configuration time: " << tmr.elapsed() * 1.e3 << " ms.";
   tmr.reset();
 
   new utils::AbortHandler;
@@ -74,16 +74,19 @@ int main(int argc, char* argv[]) {
     string line;
     while (!cfg.eof()) {
       getline(cfg, line);
-      if (line[0] == '#' || line.empty())
+      // skip the commented out lines
+      line = cepgen::utils::ltrim(line);
+      if (line.empty() || line[0] == '#')
         continue;
       stringstream os(line);
       Test test;
       os >> test.filename >> test.ref_cs >> test.err_ref_cs;
       tests.emplace_back(test);
+      CG_DEBUG("main") << "Added test \"" << line << "\".";
     }
   }
 
-  CG_INFO("main") << "Will run " << utils::s("test", tests.size()) << ".";
+  CG_LOG << "Will run " << utils::s("test", tests.size()) << ".";
 
   std::unique_ptr<utils::ProgressBar> progress;
   if (debug)
@@ -95,11 +98,15 @@ int main(int argc, char* argv[]) {
       gen.parametersRef().clearProcess();
 
       const std::string filename = "test/test_processes/" + test.filename + "_cfg.py";
+
       gen.setParameters(cepgen::card::Handler::parse(filename));
+
+      CG_DEBUG("main") << gen.parameters();
+
       gen.parameters()->integrator->setName<std::string>(integrator);
-      CG_INFO("main") << "Process: " << gen.parameters()->processName() << "\n\t"
-                      << "File: " << filename << "\n\t"
-                      << "Configuration time: " << tmr.elapsed() * 1.e3 << " ms.";
+      CG_LOG << "Process: " << gen.parameters()->processName() << "\n\t"
+             << "File: " << filename << "\n\t"
+             << "Configuration time: " << tmr.elapsed() * 1.e3 << " ms.";
 
       tmr.reset();
 
@@ -112,13 +119,12 @@ int main(int argc, char* argv[]) {
 
       const bool success = fabs(pull) < num_sigma;
 
-      CG_INFO("main") << "Computed cross section:\n\t"
-                      << "Ref.   = " << test.ref_cs << " +/- " << test.err_ref_cs << "\n\t"
-                      << "CepGen = " << new_cs << " +/- " << err_new_cs << "\n\t"
-                      << "Ratio: " << ratio << " +/- " << err_ratio << "\n\t"
-                      << "Pull: " << pull << " (abs(pull) " << (success ? "<" : ">") << " " << num_sigma << ").";
-
-      CG_INFO("main") << "Computation time: " << tmr.elapsed() * 1.e3 << " ms.";
+      CG_LOG << "Computed cross section:\n\t"
+             << "Ref.   = " << test.ref_cs << " +/- " << test.err_ref_cs << "\n\t"
+             << "CepGen = " << new_cs << " +/- " << err_new_cs << "\n\t"
+             << "Ratio: " << ratio << " +/- " << err_ratio << "\n\t"
+             << "Pull: " << pull << " (abs(pull) " << (success ? "<" : ">") << " " << num_sigma << ").\n\t"
+             << "Computation time: " << tmr.elapsed() * 1.e3 << " ms.";
       tmr.reset();
 
       const string test_res = utils::format(
@@ -147,7 +153,7 @@ int main(int argc, char* argv[]) {
                            << os_passed.str() << ".";
   }
 
-  CG_INFO("main") << "ALL TESTS PASSED!";
+  CG_LOG << "ALL TESTS PASSED!";
 
   return 0;
 }
