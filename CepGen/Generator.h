@@ -134,7 +134,7 @@ namespace cepgen {
     /// Physical Parameters used in the events generation and cross-section computation
     std::unique_ptr<Parameters> parameters_;
     /// Generator worker instance
-    std::unique_ptr<GeneratorWorker> generator_;
+    std::unique_ptr<GeneratorWorker> worker_;
     /// Integration algorithm
     std::unique_ptr<Integrator> integrator_;
     /// Cross section value computed at the last integration
