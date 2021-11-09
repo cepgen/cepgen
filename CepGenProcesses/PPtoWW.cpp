@@ -46,12 +46,21 @@ namespace cepgen {
       double offShellME(double phi_sum, double phi_diff) const;
 
       double amplitudeWW(double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4) const;
+      enum class AmplitudesMode { SM, W, Wbar, phiW, WB };
 
       static constexpr double prefactor_ = constants::G_EM_SQ * constants::G_EM_SQ;
 
       const double mW_, mW2_;
       const int method_;
-      const ParametersList eft_ext_;
+      struct EftParameters {
+        explicit EftParameters(const ParametersList& params)
+            : mode(params.getAs<int, AmplitudesMode>("mode", AmplitudesMode::SM)),
+              s1(params.get<double>("s1")),
+              mH(params.get<double>("mH")) {}
+        AmplitudesMode mode;
+        double s1, mH;
+        double c1() const { return sqrt(1. - s1 * s1); }
+      } eft_ext_;
 
       std::vector<short> pol_w1_, pol_w2_;
     };
@@ -86,8 +95,8 @@ namespace cepgen {
       }
       CG_DEBUG("PPtoWW:mode") << "matrix element computation method: " << method_ << ".";
 
-      if (!eft_ext_.keys().empty())
-        CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << eft_ext_;
+      if (eft_ext_.mode != AmplitudesMode::SM)
+        CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << params.get<ParametersList>("eftExtension") << ".";
     }
 
     void PPtoWW::prepareProcessKinematics() {
@@ -157,24 +166,87 @@ namespace cepgen {
       const double cos_theta = (that - uhat) / shat / beta, cos_theta2 = cos_theta * cos_theta;
       const double sin_theta2 = 1. - cos_theta2, sin_theta = sqrt(sin_theta2);
       const double invA = 1. / (1. - beta2 * cos_theta2);
+      const double invB = 1. / (shat - eft_ext_.mH * eft_ext_.mH);
 
       //--- per-helicity amplitude
 
-      if (lam3 == 0 && lam4 == 0)  // longitudinal-longitudinal
-        return invA * inv_gamma2 * ((gamma2 + 1.) * (1. - lam1 * lam2) * sin_theta2 - (1. + lam1 * lam2));
+      switch (eft_ext_.mode) {
+        case AmplitudesMode::SM: {
+          if (lam3 == 0 && lam4 == 0)  // longitudinal-longitudinal
+            return invA * inv_gamma2 * ((gamma2 + 1.) * (1. - lam1 * lam2) * sin_theta2 - (1. + lam1 * lam2));
 
-      if (lam4 == 0)  // transverse-longitudinal
-        return invA * (-M_SQRT2 * inv_gamma * (lam1 - lam2) * (1. + lam1 * lam3 * cos_theta) * sin_theta);
+          if (lam4 == 0)  // transverse-longitudinal
+            return invA * (-M_SQRT2 * inv_gamma * (lam1 - lam2) * (1. + lam1 * lam3 * cos_theta) * sin_theta);
 
-      if (lam3 == 0)  // longitudinal-transverse
-        return invA * (-M_SQRT2 * inv_gamma * (lam2 - lam1) * (1. + lam2 * lam4 * cos_theta) * sin_theta);
+          if (lam3 == 0)  // longitudinal-transverse
+            return invA * (-M_SQRT2 * inv_gamma * (lam2 - lam1) * (1. + lam2 * lam4 * cos_theta) * sin_theta);
 
-      else  // transverse-transverse
-        return -0.5 * invA *
-               (2. * beta * (lam1 + lam2) * (lam3 + lam4) -
-                inv_gamma2 * (1. + lam3 * lam4) * (2. * lam1 * lam2 + (1. - lam1 * lam2) * cos_theta2) +
-                (1. + lam1 * lam2 * lam3 * lam4) * (3. + lam1 * lam2) + 2. * (lam1 - lam2) * (lam3 - lam4) * cos_theta +
-                (1. - lam1 * lam2) * (1. - lam3 * lam4) * cos_theta2);
+          else  // transverse-transverse
+            return -0.5 * invA *
+                   (2. * beta * (lam1 + lam2) * (lam3 + lam4) -
+                    inv_gamma2 * (1. + lam3 * lam4) * (2. * lam1 * lam2 + (1. - lam1 * lam2) * cos_theta2) +
+                    (1. + lam1 * lam2 * lam3 * lam4) * (3. + lam1 * lam2) +
+                    2. * (lam1 - lam2) * (lam3 - lam4) * cos_theta +
+                    (1. - lam1 * lam2) * (1. - lam3 * lam4) * cos_theta2);
+        }
+        case AmplitudesMode::W: {
+          if (lam3 == 0 && lam4 == 0)  // L-L
+            return 3. * shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * invA * inv_gamma2 * sin_theta2 *
+                   (1. + lam1 * lam2);
+          if (lam4 == 0)  // T-L
+            return 1.5 * shat * eft_ext_.s1 * constants::G_F * invA * inv_gamma * sin_theta *
+                   ((lam1 - lam2) * beta2 - beta * cos_theta * (lam1 + lam2) -
+                    2 * lam3 * cos_theta * (lam1 * lam2 + inv_gamma2));
+          else
+            return 0.75 * shat * eft_ext_.s1 * M_SQRT2 * constants::G_F *
+                   (-inv_gamma2 * beta * (1 + cos_theta2) * (lam1 + lam2) * (lam3 + lam4) +
+                    2 * sin_theta2 *
+                        (3. + lam3 * lam4 + lam1 * lam2 * (1 - lam3 * lam4) - beta * (lam1 + lam2) * (lam3 + lam4)) -
+                    2 * inv_gamma2 *
+                        (2 + (1 - lam1 * lam2) * lam3 * lam4 - cos_theta2 * (3 + lam1 * lam2 + 2 * lam3 * lam4)));
+        }
+        case AmplitudesMode::Wbar: {
+          if (lam3 == 0 && lam4 == 0)  // L-L
+            return -3 * shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * inv_gamma2 * invA * sin_theta2 * (lam1 + lam2);
+          if (lam4 == 0)  // T-L
+            return 1.5 * shat * eft_ext_.s1 * constants::G_F * inv_gamma * invA * sin_theta *
+                   (beta * (lam1 - lam2) * lam3 + cos_theta * (2 * beta + (2. - beta2) * (lam1 + lam2) * lam3));
+          else
+            return -1.5 * shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * invA *
+                   (2 * sin_theta2 * (lam1 + lam2 - beta * (lam3 + lam4)) +
+                    inv_gamma2 * ((lam1 + lam2) * (cos_theta2 * (2 + lam3 * lam4) - 1) -
+                                  beta * (cos_theta2 + lam1 * lam2) * (lam3 + lam4)));
+        }
+        case AmplitudesMode::phiW: {
+          if (lam3 == 0 && lam4 == 0)  // L-L
+            return -0.25 * shat * shat * eft_ext_.s1 * eft_ext_.s1 * M_SQRT2 * constants::G_F * invB * (1 + beta2) *
+                   (1 + lam1 * lam2);
+          if (lam4 == 0)  // T-L
+            return 0.;
+          else
+            return -0.125 * shat * shat * eft_ext_.s1 * eft_ext_.s1 * M_SQRT2 * constants::G_F * inv_gamma2 * invB *
+                   (1 + lam1 * lam2) * (1 + lam3 * lam4);
+        }
+        case AmplitudesMode::WB: {
+          if (lam3 == 0 && lam4 == 0)  // L-L
+            return 2 * invA * eft_ext_.c1() / eft_ext_.s1 *
+                       (1 - lam1 * lam2 - 2 * cos_theta2 - gamma2 * (1 + lam1 * lam2) * sin_theta2) +
+                   0.5 * shat * shat * constants::G_F * M_SQRT2 * invB * eft_ext_.s1 * eft_ext_.c1() * (1 + beta2) *
+                       (1 + lam1 * lam2);
+          if (lam4 == 0)  // T-L
+            return 0.5 * gamma * M_SQRT2 * invB * eft_ext_.c1() / eft_ext_.s1 * sin_theta *
+                   ((lam2 - lam1) * (1 + inv_gamma2) +
+                    (beta * (lam1 + lam2) + 2 * lam3 * (lam1 * lam2 - inv_gamma2)) * cos_theta);
+          else
+            return -05 * invA * eft_ext_.c1() / eft_ext_.s1 *
+                       (beta * (lam1 + lam2) * (lam3 + lam4) * (1 + cos_theta2) +
+                        2 * (2 + (lam1 - lam2) * (lam3 - lam4) * cos_theta +
+                             ((lam1 * lam2 - 1) * cos_theta2 + 1 + lam1 * lam2) * lam3 * lam4)) +
+                   0.25 * shat * shat * M_SQRT2 * constants::G_F * inv_gamma2 * invB * eft_ext_.s1 * eft_ext_.c1() *
+                       (1 + lam1 * lam2) * (1 + lam3 * lam4);
+        }
+      }
+      throw CG_FATAL("PPtoWW:WWamplitudes") << "Invalid mode: " << (int)eft_ext_.mode << "!";
     }
   }  // namespace proc
 }  // namespace cepgen
