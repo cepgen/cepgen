@@ -121,11 +121,9 @@ namespace ROOT {
     ev.weight = weight;
     //--- first loop to populate the particles content
     for (unsigned short i = 0; i < np; ++i) {
-      auto& part = ev[i];
-      part.setPdgId((long)pdg_id[i]);
+      cepgen::Particle part((cepgen::Particle::Role)role[i], (long)pdg_id[i], (cepgen::Particle::Status)status[i]);
       part.setMomentum(cepgen::Momentum::fromPtEtaPhiE(pt[i], eta[i], phi[i], E[i]));
-      part.setRole((cepgen::Particle::Role)role[i]);
-      part.setStatus((cepgen::Particle::Status)status[i]);
+      ev.addParticle(part);
     }
     //--- second loop to associate the parentage
     for (unsigned short i = 0; i < np; ++i) {
