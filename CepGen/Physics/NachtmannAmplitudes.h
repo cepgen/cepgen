@@ -22,10 +22,13 @@ namespace cepgen {
   class ParametersList;
   class NachtmannAmplitudes {
   public:
-    enum class Mode { SM, W, Wbar, phiW, WB };
     NachtmannAmplitudes(const ParametersList&);
-    double operator()(double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4) const;
+
+    enum class Mode { SM, W, Wbar, phiW, WB };
+    friend std::ostream& operator<<(std::ostream&, const Mode&);
     const Mode& mode() const { return mode_; }
+
+    double operator()(double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4) const;
 
   private:
     Mode mode_;

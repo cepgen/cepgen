@@ -146,6 +146,22 @@ namespace cepgen {
                    (1 + lam1 * lam2) * (1 + lam3 * lam4);
       }
     }
-    throw CG_FATAL("PPtoWW:WWamplitudes") << "Invalid mode: " << (int)mode_ << "!";
+    throw CG_FATAL("PPtoWW:WWamplitudes") << "Invalid mode: " << mode_ << "!";
+  }
+
+  std::ostream& operator<<(std::ostream& os, const NachtmannAmplitudes::Mode& mode) {
+    switch (mode) {
+      case NachtmannAmplitudes::Mode::SM:
+        return os << "Standard model";
+      case NachtmannAmplitudes::Mode::W:
+        return os << "W";
+      case NachtmannAmplitudes::Mode::Wbar:
+        return os << "W-bar";
+      case NachtmannAmplitudes::Mode::phiW:
+        return os << "phiW";
+      case NachtmannAmplitudes::Mode::WB:
+        return os << "WB";
+    }
+    return os << (int)mode;
   }
 }  // namespace cepgen
