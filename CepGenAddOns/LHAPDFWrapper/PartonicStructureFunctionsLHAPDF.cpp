@@ -144,10 +144,8 @@ namespace cepgen {
                           << " * quarks mode: " << mode_ << "\n"
                           << " * PDF set: " << pdf_set_ << "\n"
                           << " * PDF member: " << pdf_member_ << (pdf_type.empty() ? "" : " (" + pdf_type + ")") << "\n"
-#ifdef LHAPDF_GE_6
                           << (pdf_description.empty() ? "" : "  " + pdf_description);
-#else
-          ;
+#ifndef LHAPDF_GE_6
       LHAPDF::getDescription();
 #endif
       initialised_ = true;

@@ -135,14 +135,11 @@ namespace cepgen {
     YODAHistsHandler<T>::~YODAHistsHandler() {
       std::vector<const YODA::AnalysisObject*> obj;
       //--- finalisation of the output file
-      for (const auto& hist : hists1d_)
-        obj.emplace_back(&hist.second);
-      for (const auto& hist : hists2d_)
-        obj.emplace_back(&hist.second);
-      for (const auto& hist : profiles1d_)
-        obj.emplace_back(&hist.second);
-      for (const auto& hist : profiles2d_)
-        obj.emplace_back(&hist.second);
+      auto histptr = [](const auto& hist) { return &hist.second; };
+      std::transform(hists1d_.begin(), hists1d_.end(), std::back_inserter(obj), histptr);
+      std::transform(hists2d_.begin(), hists2d_.end(), std::back_inserter(obj), histptr);
+      std::transform(profiles1d_.begin(), profiles1d_.end(), std::back_inserter(obj), histptr);
+      std::transform(profiles2d_.begin(), profiles2d_.end(), std::back_inserter(obj), histptr);
       obj.emplace_back(&weight_cnt_);
       T::write(file_, obj);
     }

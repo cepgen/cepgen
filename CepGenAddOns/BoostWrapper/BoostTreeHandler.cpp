@@ -150,8 +150,9 @@ namespace cepgen {
     template <>
     pt::ptree BoostTreeHandler::pack<ParametersList>(const std::vector<ParametersList>& vec) {
       pt::ptree out;
-      for (const auto& elem : vec)
-        out.push_back(std::make_pair("", pack(elem)));
+      std::transform(vec.begin(), vec.end(), std::back_inserter(out), [](const auto& elem) {
+        return std::make_pair("", pack(elem));
+      });
       return out;
     }
 

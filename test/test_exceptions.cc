@@ -25,7 +25,7 @@ using namespace cepgen;
 
 int main() {
   utils::Logger::get().level = utils::Logger::Level::nothing;
-  //utils::Logger::get().output = new std::ofstream( "test.log" );
+  //utils::Logger::get().output = new std::ofstream("test.log");
   utils::Logger::get().output = nullptr;
 
   //--- try with a bit of unicode too
