@@ -220,9 +220,10 @@ namespace Pythia8 {
   }
 
   unsigned short CepGenEvent::pythiaId(unsigned short cg_id) const {
-    for (const auto& py_cg : py_cg_corresp_)
-      if (py_cg.second == cg_id)
-        return py_cg.first;
+    auto it = std::find_if(
+        py_cg_corresp_.begin(), py_cg_corresp_.end(), [&cg_id](const auto& py_cg) { return py_cg.second == cg_id; });
+    if (it != py_cg_corresp_.end())
+      return it->first;
     return INVALID_ID;
   }
 

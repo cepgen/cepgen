@@ -30,7 +30,7 @@ using namespace std;
 
 unique_ptr<TH1D> h_mass, h_ptpair, h_ptsingle, h_etasingle;
 void process_event(const cepgen::Event& ev, unsigned long event_id) {
-  cout << event_id << endl;
+  CG_LOG << event_id;
   const auto& central_system = ev[cepgen::Particle::CentralSystem];
   const auto &pl1 = central_system[0].momentum(), pl2 = central_system[1].momentum();
   h_mass->Fill((pl1 + pl2).mass());

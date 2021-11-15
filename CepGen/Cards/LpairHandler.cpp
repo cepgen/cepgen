@@ -284,8 +284,10 @@ namespace cepgen {
         lepton_id_ = (rt_params_->process().parameters().get<int>("pair") - 11) / 2. + 1;
       {
         std::vector<std::string> evt_mod;
-        for (const auto& mod : rt_params_->eventModifiersSequence())
-          evt_mod.emplace_back(mod->name());
+        std::transform(rt_params_->eventModifiersSequence().begin(),
+                       rt_params_->eventModifiersSequence().end(),
+                       std::back_inserter(evt_mod),
+                       [](const auto& mod) { return mod->name(); });
         evt_mod_name_ = utils::merge(evt_mod, ",");
       }
       {

@@ -20,8 +20,6 @@
 #include <TGraph.h>
 #include <TMultiGraph.h>
 
-#include <iostream>
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
@@ -77,7 +75,7 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  cout << "Test passed!" << endl;
+  CG_LOG << "Test passed!";
 
   cepgen::ROOTCanvas c("test_graph", "CepGen validation", true);
   TMultiGraph mg;

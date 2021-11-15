@@ -73,8 +73,10 @@ namespace cepgen {
     // minimum final state content
     if (!minimum_final_state_.empty()) {
       std::vector<int> min_pdgs;
-      for (const auto& pdg : minimum_final_state_)
-        min_pdgs.emplace_back((int)pdg);
+      std::transform(
+          minimum_final_state_.begin(), minimum_final_state_.end(), std::back_inserter(min_pdgs), [](const auto& pdg) {
+            return (int)pdg;
+          });
       params.set<std::vector<int> >("minFinalState", min_pdgs);
     }
     // per-PDGid selection

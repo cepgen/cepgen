@@ -17,6 +17,7 @@
  */
 
 #include <fstream>
+#include <iostream>  // for cout
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"

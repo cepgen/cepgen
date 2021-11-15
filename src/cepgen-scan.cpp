@@ -26,6 +26,7 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/Process.h"
+#include "CepGen/Utils/AbortHandler.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Logger.h"
 #include "CepGen/Utils/String.h"
@@ -79,30 +80,37 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i <= npoints; ++i)
       points.emplace_back(min_value + (max_value - min_value) * i / npoints);
 
+  cepgen::utils::AbortHandler();
+
   double cross_section, err_cross_section;
   for (const auto& value : points) {
-    if (scan == "abseta") {
-      par.kinematics.cuts().central.eta_single().min() = -value;
-      par.kinematics.cuts().central.eta_single().max() = +value;
-    } else if (scan == "absrap") {
-      par.kinematics.cuts().central.rapidity_single().min() = -value;
-      par.kinematics.cuts().central.rapidity_single().max() = +value;
-    } else if (scan == "mpart") {
-      auto prop = cepgen::PDG::get()(par.process().event()[cepgen::Particle::CentralSystem][0].pdgId());
-      prop.mass = value;
-      cepgen::PDG::get().define(prop);
-      par.process().clear();
-    } else {
-      auto modif = cepgen::ParametersList().set<double>(scan, value);
-      par.kinematics.setParameters(modif);
-      CG_LOG << modif << "\n\n" << par.kinematics.cuts();
+    try {
+      if (scan == "abseta") {
+        par.kinematics.cuts().central.eta_single().min() = -value;
+        par.kinematics.cuts().central.eta_single().max() = +value;
+      } else if (scan == "absrap") {
+        par.kinematics.cuts().central.rapidity_single().min() = -value;
+        par.kinematics.cuts().central.rapidity_single().max() = +value;
+      } else if (scan == "mpart") {
+        auto prop = cepgen::PDG::get()(par.process().event()[cepgen::Particle::CentralSystem][0].pdgId());
+        prop.mass = value;
+        cepgen::PDG::get().define(prop);
+        par.process().clear();
+      } else {
+        auto modif = cepgen::ParametersList().set<double>(scan, value);
+        par.kinematics.setParameters(modif);
+        CG_LOG << modif << "\n\n" << par.kinematics.cuts();
+      }
+      CG_LOG << "Scan of \"" << scan << "\". Value = " << value << ".";
+      mg.computeXsection(cross_section, err_cross_section);
+      string out_line = cepgen::utils::format("%.2f\t%.8e\t%.8e\n", value, cross_section, err_cross_section);
+      xsect_file << out_line;
+      CG_LOG << out_line;
+      xsect_file.flush();
+    } catch (const cepgen::utils::RunAbortedException&) {
+      CG_LOG << "Run aborted!";
+      break;
     }
-    CG_LOG << "Scan of \"" << scan << "\". Value = " << value << ".";
-    mg.computeXsection(cross_section, err_cross_section);
-    string out_line = cepgen::utils::format("%.2f\t%.8e\t%.8e\n", value, cross_section, err_cross_section);
-    xsect_file << out_line;
-    cout << out_line;
-    xsect_file.flush();
   }
 
   return 0;

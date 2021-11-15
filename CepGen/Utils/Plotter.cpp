@@ -156,8 +156,9 @@ namespace cepgen {
         ++idx;
       }
       std::vector<std::string> ylabels;
-      for (const auto& ybin : y_axis)
-        ylabels.emplace_back(ybin.first.label.empty() ? utils::format("%+g", ybin.first.value) : ybin.first.label);
+      std::transform(y_axis.begin(), y_axis.end(), std::back_inserter(ylabels), [](auto& bin) {
+        return bin.first.label.empty() ? utils::format("%+g", bin.first.value) : bin.first.label;
+      });
       struct stringlen {
         bool operator()(const std::string& a, const std::string& b) { return a.size() < b.size(); }
       };
