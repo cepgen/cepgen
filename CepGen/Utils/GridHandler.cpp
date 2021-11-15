@@ -43,12 +43,10 @@ namespace cepgen {
     coord_t coord = in_coords;
     switch (grid_type_) {
       case GridType::logarithmic: {
-        for (auto& c : coord)
-          c = log10(c);
+        std::transform(coord.begin(), coord.end(), coord.begin(), [](const auto& c) { return log10(c); });
       } break;
       case GridType::square: {
-        for (auto& c : coord)
-          c *= c;
+        std::transform(coord.begin(), coord.end(), coord.begin(), [](const auto& c) { return c * c; });
       } break;
       default:
         break;
@@ -317,8 +315,7 @@ namespace cepgen {
   template <size_t D, size_t N>
   typename GridHandler<D, N>::gridpoint_t GridHandler<D, N>::gridpoint_t::operator*(double c) const {
     gridpoint_t out = *this;
-    for (auto& a : out)
-      a *= c;
+    std::transform(out.begin(), out.end(), out.begin(), [&c](const auto& a) { return a * c; });
     return out;
   }
 

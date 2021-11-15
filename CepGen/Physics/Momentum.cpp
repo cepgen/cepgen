@@ -131,9 +131,8 @@ namespace cepgen {
   }
 
   Momentum& Momentum::truncate(double tolerance) {
-    for (auto& p : *this)
-      if (p <= tolerance)
-        p = 0.;
+    std::replace_if(
+        begin(), end(), [&tolerance](const auto& p) { return p <= tolerance; }, 0.);
     return computeP();
   }
 

@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <numeric>
+
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"
@@ -84,8 +86,12 @@ namespace cepgen {
     //    collection of taming functions
     try {
       utils::EventBrowser bws;
-      for (const auto& tam : params_->tamingFunctions())
-        weight *= (*tam)(bws.get(*event_, tam->variables().at(0)));
+      weight = std::accumulate(params_->tamingFunctions().begin(),
+                               params_->tamingFunctions().end(),
+                               weight,
+                               [&bws, this](double init, const auto& tam) {
+                                 return init * (*tam)(bws.get(*event_, tam->variables().at(0)));
+                               });
     } catch (const Exception&) {
       throw CG_FATAL("ProcessIntegrand") << "Failed to apply taming function(s) taming!";
     }

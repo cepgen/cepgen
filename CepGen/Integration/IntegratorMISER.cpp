@@ -28,7 +28,7 @@ namespace cepgen {
   /// MISER integration algorithm developed by W.H. Press and G.R. Farrar, as documented in \cite Press:1989vk.
   class IntegratorMISER final : public IntegratorGSL {
   public:
-    IntegratorMISER(const ParametersList&);
+    explicit IntegratorMISER(const ParametersList&);
     static std::string description() { return "MISER adaptive importance sampling integrator"; }
 
     void integrate(double&, double&) override;
