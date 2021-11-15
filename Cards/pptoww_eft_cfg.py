@@ -1,21 +1,16 @@
 import Config.Core as cepgen
 from Config.Integration.vegas_cff import integrator
-from Config.logger_cfi import logger
+from Config.Logger_cfi import logger
 
-logger.enabledModules += ('Generator.*',)
+#logger.enabledModules += ('Generator.*',)
 
 import Config.ktProcess_cfi as kt
 process = kt.process.clone('pptoww',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.InelasticElastic,
         polarisationStates = 0, # full
-        eftExtension = cepgen.Parameters(
-            a0w = 1.e-5,
-            acw = 0.,
-            formFactor = cepgen.Parameters(
-                order = -2,
-                scale = 500., # GeV
-            ),
+        eftParameters = cepgen.Parameters(
+            mH = 125.
         ),
     ),
     inKinematics = cepgen.Parameters(
