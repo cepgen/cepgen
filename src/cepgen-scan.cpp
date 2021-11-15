@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
     mg.computeXsection(cross_section, err_cross_section);
     string out_line = cepgen::utils::format("%.2f\t%.8e\t%.8e\n", value, cross_section, err_cross_section);
     xsect_file << out_line;
-    cout << out_line;
+    CG_LOG << out_line;
     xsect_file.flush();
   }
 
