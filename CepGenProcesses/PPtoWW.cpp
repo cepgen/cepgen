@@ -52,7 +52,7 @@ namespace cepgen {
       const int method_;
       NachtmannAmplitudes ampl_;
 
-      std::vector<short> pol_w1_, pol_w2_;
+      std::vector<int> pol_w1_, pol_w2_;
     };
 
     PPtoWW::PPtoWW(const ParametersList& params)
@@ -61,29 +61,36 @@ namespace cepgen {
           mW2_(mW_ * mW_),
           method_(params.get<int>("method", 1)),
           ampl_(params) {
-      switch (params.getAs<int, Polarisation>("polarisationStates", Polarisation::full)) {
-        case Polarisation::LL:
-          pol_w1_ = {0};
-          pol_w2_ = {0};
-          break;
-        case Polarisation::LT:
-          pol_w1_ = {0};
-          pol_w2_ = {-1, 1};
-          break;
-        case Polarisation::TL:
-          pol_w1_ = {-1, 1};
-          pol_w2_ = {0};
-          break;
-        case Polarisation::TT:
-          pol_w1_ = {-1, 1};
-          pol_w2_ = {-1, 1};
-          break;
-        case Polarisation::full:
-          pol_w1_ = {-1, 0, 1};
-          pol_w2_ = {-1, 0, 1};
-          break;
+      if (params.has<int>("polarisationStates"))
+        switch (params.getAs<int, Polarisation>("polarisationStates", Polarisation::full)) {
+          case Polarisation::LL:
+            pol_w1_ = {0};
+            pol_w2_ = {0};
+            break;
+          case Polarisation::LT:
+            pol_w1_ = {0};
+            pol_w2_ = {-1, 1};
+            break;
+          case Polarisation::TL:
+            pol_w1_ = {-1, 1};
+            pol_w2_ = {0};
+            break;
+          case Polarisation::TT:
+            pol_w1_ = {-1, 1};
+            pol_w2_ = {-1, 1};
+            break;
+          case Polarisation::full:
+            pol_w1_ = {-1, 0, 1};
+            pol_w2_ = {-1, 0, 1};
+            break;
+        }
+      else if (params.has<ParametersList>("polarisationStates")) {
+        const auto& states = params.get<ParametersList>("polarisationStates");
+        pol_w1_ = states.get<std::vector<int> >("W1");
+        pol_w2_ = states.get<std::vector<int> >("W2");
       }
-      CG_DEBUG("PPtoWW:mode") << "matrix element computation method: " << method_ << ".";
+      CG_DEBUG("PPtoWW:mode") << "matrix element computation method: " << method_ << ", "
+                              << "polarisation states: W1=" << pol_w1_ << ", W2=" << pol_w2_ << ".";
 
       if (ampl_.mode() != NachtmannAmplitudes::Mode::SM)
         CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << params.get<ParametersList>("eftExtension") << ".";
