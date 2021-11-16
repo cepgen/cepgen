@@ -24,19 +24,45 @@ namespace cepgen {
   public:
     NachtmannAmplitudes(const ParametersList&);
 
-    enum class Mode { SM, W, Wbar, phiW, WB };
+    /// Model giving an amplitude for the two-photon WW production
+    enum class Mode { SM, W, Wbar, phiW, WB, WbarB };
     friend std::ostream& operator<<(std::ostream&, const Mode&);
     const Mode& mode() const { return mode_; }
 
+    /// Compute the amplitude for a given kinematics and a given set of helicity components
     double operator()(double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4) const;
 
   private:
-    Mode mode_;
-    struct EFTParameters {
+    const Mode mode_;
+    /// Collection of parameters for the EFT extension
+    const struct EFTParameters {
       explicit EFTParameters(const ParametersList& params);
       const double s1, mH;
       double c1() const { return sqrt(1. - s1 * s1); }
     } eft_ext_;
+    /// Helper container to handle all kinematics variables computation once
+    struct Kinematics {
+      Kinematics(double mw2, double shat, double that, double uhat);
+      const double shat, that, uhat;
+      const double beta2, beta;
+      const double inv_gamma2, gamma2, gamma, inv_gamma;
+      const double cos_theta, cos_theta2, sin_theta2, sin_theta;
+      const double invA;
+    };
+    /// Simple container for helicity components
+    struct Helicities {
+      short lam1, lam2, lam3, lam4;
+    };
+
+    /// Compute the amplitude for the Standard model
+    double amplitudeSM(const Kinematics&, const Helicities&) const;
+    double amplitudeW(const Kinematics&, const Helicities&) const;
+    double amplitudeWbar(const Kinematics&, const Helicities&) const;
+    double amplitudephiW(const Kinematics&, const Helicities&) const;
+    double amplitudeWB(const Kinematics&, const Helicities&) const;
+    double amplitudeWbarB(const Kinematics&, const Helicities&) const;
+
+    /// W squared mass, in GeV^2
     const double mw2_;
   };
 }  // namespace cepgen
