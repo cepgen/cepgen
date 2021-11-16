@@ -40,29 +40,45 @@ namespace cepgen {
       const double s1, mH;
       double c1() const { return sqrt(1. - s1 * s1); }
     } eft_ext_;
+
     /// Helper container to handle all kinematics variables computation once
-    struct Kinematics {
+    class Kinematics {
+    public:
       Kinematics(double mw2, double shat, double that, double uhat);
-      const double shat, that, uhat;
-      const double beta2, beta;
-      const double inv_gamma2, gamma2, gamma, inv_gamma;
-      const double cos_theta, cos_theta2, sin_theta2, sin_theta;
-      const double invA;
+      bool isEqual(double shat, double that, double uhat) const;
+
+      // base variables
+      double shat, that, uhat;
+
+    private:
+      double mw2_;
+
+    public:
+      // all derived variables
+      double beta2, beta;
+      double inv_gamma2, gamma2, gamma, inv_gamma;
+      double cos_theta, cos_theta2, sin_theta2, sin_theta;
+      double invA;
     };
+
     /// Simple container for helicity components
     struct Helicities {
-      short lam1, lam2, lam3, lam4;
+      short lam1;  ///< first incoming photon
+      short lam2;  ///< second incoming photon
+      short lam3;  ///< first outgoing W
+      short lam4;  ///< second outgoing W
     };
 
     /// Compute the amplitude for the Standard model
-    double amplitudeSM(const Kinematics&, const Helicities&) const;
-    double amplitudeW(const Kinematics&, const Helicities&) const;
-    double amplitudeWbar(const Kinematics&, const Helicities&) const;
-    double amplitudephiW(const Kinematics&, const Helicities&) const;
-    double amplitudeWB(const Kinematics&, const Helicities&) const;
-    double amplitudeWbarB(const Kinematics&, const Helicities&) const;
+    double amplitudeSM(const Helicities&) const;
+    double amplitudeW(const Helicities&) const;
+    double amplitudeWbar(const Helicities&) const;
+    double amplitudephiW(const Helicities&) const;
+    double amplitudeWB(const Helicities&) const;
+    double amplitudeWbarB(const Helicities&) const;
 
     /// W squared mass, in GeV^2
     const double mw2_;
+    mutable Kinematics kin_{mw2_, 0., 0., 0.};
   };
 }  // namespace cepgen
