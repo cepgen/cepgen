@@ -4,13 +4,19 @@ from Config.Logger_cfi import logger
 
 #logger.enabledModules += ('Generator.*',)
 
+class EFTModel:
+    SM = 0
+    W = 1
+    Wbar = 2
+
 import Config.ktProcess_cfi as kt
 process = kt.process.clone('pptoww',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.InelasticElastic,
         polarisationStates = 0, # full
+        model = EFTModel.W,
         eftParameters = cepgen.Parameters(
-            mH = 125.
+            s1 = 0.5
         ),
     ),
     inKinematics = cepgen.Parameters(

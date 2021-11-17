@@ -142,18 +142,18 @@ namespace cepgen {
 
     if (hel.lam4 == 0)  // transverse-longitudinal
       return 1.5 * kin.shat * eft_ext_.s1 * constants::G_F * kin.inv_gamma * kin.invA * kin.sin_theta *
-             (kin.beta * float(hel.lam1 - hel.lam2) * hel.lam3 +
-              kin.cos_theta * (2 * kin.beta + (2. - kin.beta2) * float(hel.lam1 + hel.lam2) * hel.lam3));
+             (kin.beta * (hel.lam1 - hel.lam2) * hel.lam3 +
+              kin.cos_theta * (2 * kin.beta + (2. - kin.beta2) * (hel.lam1 + hel.lam2) * hel.lam3));
 
     if (hel.lam3 == 0)  // longitudinal-transverse
       return 1.5 * kin.shat * eft_ext_.s1 * constants::G_F * kin.inv_gamma * kin.invA * kin.sin_theta *
-             (kin.beta * float(hel.lam2 - hel.lam1) * hel.lam4 +
-              kin.cos_theta * (2 * kin.beta + (2. - kin.beta2) * float(hel.lam2 + hel.lam1) * hel.lam4));
+             (kin.beta * (hel.lam2 - hel.lam1) * hel.lam4 +
+              kin.cos_theta * (2 * kin.beta + (2. - kin.beta2) * (hel.lam2 + hel.lam1) * hel.lam4));
 
     // transverse-transverse
     return -1.5 * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.invA *
            (2 * kin.sin_theta2 * (hel.lam1 + hel.lam2 - kin.beta * (hel.lam3 + hel.lam4)) +
-            kin.inv_gamma2 * (float(hel.lam1 + hel.lam2) * (kin.cos_theta2 * (2 + hel.lam3 * hel.lam4) - 1) -
+            kin.inv_gamma2 * ((hel.lam1 + hel.lam2) * (kin.cos_theta2 * (2 + hel.lam3 * hel.lam4) - 1) -
                               kin.beta * (kin.cos_theta2 + hel.lam1 * hel.lam2) * (hel.lam3 + hel.lam4)));
   }
 

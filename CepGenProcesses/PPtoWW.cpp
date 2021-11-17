@@ -93,9 +93,10 @@ namespace cepgen {
                          << "polarisation states: W1=" << pol_w1_ << ", W2=" << pol_w2_ << ".";
 
       if (ampl_.mode() != NachtmannAmplitudes::Mode::SM) {
-        if (ampl_.mode() != NachtmannAmplitudes::Mode::W || ampl_.mode() != NachtmannAmplitudes::Mode::Wbar)
-          throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for gamma-gamma -> W+ W-! "
-                                   << "Only supported extensions are W and Wbar.";
+        if (ampl_.mode() != NachtmannAmplitudes::Mode::W && ampl_.mode() != NachtmannAmplitudes::Mode::Wbar)
+          throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for ɣɣ → W⁺W¯! "
+                                   << "Only supported extensions are W and Wbar. Specified model: " << ampl_.mode()
+                                   << ".";
         CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << params.get<ParametersList>("eftExtension") << ".";
       }
     }
