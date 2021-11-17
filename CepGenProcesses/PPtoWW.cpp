@@ -141,14 +141,14 @@ namespace cepgen {
     }
 
     double PPtoWW::offShellME(double phi_sum, double phi_diff) const {
-      const double s_hat = shat(), t_hat = that(), u_hat = uhat();
+      const NachtmannAmplitudes::Kinematics kin(mW2_, shat(), that(), uhat());
       double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
       for (const auto lam3 : pol_w1_)
         for (const auto lam4 : pol_w2_) {
-          const auto ampli_pp = ampl_(s_hat, t_hat, u_hat, +1, +1, lam3, lam4);
-          const auto ampli_mm = ampl_(s_hat, t_hat, u_hat, -1, -1, lam3, lam4);
-          const auto ampli_pm = ampl_(s_hat, t_hat, u_hat, +1, -1, lam3, lam4);
-          const auto ampli_mp = ampl_(s_hat, t_hat, u_hat, -1, +1, lam3, lam4);
+          const auto ampli_pp = ampl_(kin, +1, +1, lam3, lam4);
+          const auto ampli_mm = ampl_(kin, -1, -1, lam3, lam4);
+          const auto ampli_pm = ampl_(kin, +1, -1, lam3, lam4);
+          const auto ampli_mp = ampl_(kin, -1, +1, lam3, lam4);
 
           amat2_0 -= (ampli_pp * ampli_pp + ampli_mm * ampli_mm + 2. * cos(2. * phi_diff) * ampli_pp * ampli_mm).real();
           amat2_1 -= (ampli_pm * ampli_pm + ampli_mp * ampli_mp + 2. * cos(2. * phi_sum) * ampli_pm * ampli_mp).real();

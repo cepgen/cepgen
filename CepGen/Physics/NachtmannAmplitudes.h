@@ -31,9 +31,29 @@ namespace cepgen {
     friend std::ostream& operator<<(std::ostream&, const Mode&);
     const Mode& mode() const { return mode_; }
 
+    /// Helper container to handle all kinematics variables computation once
+    class Kinematics {
+    public:
+      Kinematics(double mw2, double shat, double that, double uhat);
+      bool operator!=(const Kinematics&) const;
+
+      // base variables
+      const double shat, that, uhat;
+
+    private:
+      /// W squared mass, in GeV^2
+      const double mw2_;
+
+    public:
+      // all derived variables
+      const double beta2, beta;
+      const double inv_gamma2, gamma2, gamma, inv_gamma;
+      const double cos_theta, cos_theta2, sin_theta2, sin_theta;
+      const double invA;
+    };
+
     /// Compute the amplitude for a given kinematics and a given set of helicity components
-    std::complex<double> operator()(
-        double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4) const;
+    std::complex<double> operator()(const Kinematics&, short lam1, short lam2, short lam3, short lam4) const;
 
   private:
     const Mode mode_;
@@ -44,26 +64,6 @@ namespace cepgen {
       double c1() const { return sqrt(1. - s1 * s1); }
     } eft_ext_;
 
-    /// Helper container to handle all kinematics variables computation once
-    class Kinematics {
-    public:
-      Kinematics(double mw2, double shat, double that, double uhat);
-      bool isEqual(double shat, double that, double uhat) const;
-
-      // base variables
-      double shat, that, uhat;
-
-    private:
-      double mw2_;
-
-    public:
-      // all derived variables
-      double beta2, beta;
-      double inv_gamma2, gamma2, gamma, inv_gamma;
-      double cos_theta, cos_theta2, sin_theta2, sin_theta;
-      double invA;
-    };
-
     /// Simple container for helicity components
     struct Helicities {
       short lam1;  ///< first incoming photon
@@ -73,15 +73,11 @@ namespace cepgen {
     };
 
     /// Compute the amplitude for the Standard model
-    std::complex<double> amplitudeSM(const Helicities&) const;
-    std::complex<double> amplitudeW(const Helicities&) const;
-    std::complex<double> amplitudeWbar(const Helicities&) const;
-    std::complex<double> amplitudephiW(const Helicities&) const;
-    std::complex<double> amplitudeWB(const Helicities&) const;
-    std::complex<double> amplitudeWbarB(const Helicities&) const;
-
-    /// W squared mass, in GeV^2
-    const double mw2_;
-    mutable Kinematics kin_{mw2_, 0., 0., 0.};
+    std::complex<double> amplitudeSM(const Kinematics&, const Helicities&) const;
+    std::complex<double> amplitudeW(const Kinematics&, const Helicities&) const;
+    std::complex<double> amplitudeWbar(const Kinematics&, const Helicities&) const;
+    std::complex<double> amplitudephiW(const Kinematics&, const Helicities&) const;
+    std::complex<double> amplitudeWB(const Kinematics&, const Helicities&) const;
+    std::complex<double> amplitudeWbarB(const Kinematics&, const Helicities&) const;
   };
 }  // namespace cepgen
