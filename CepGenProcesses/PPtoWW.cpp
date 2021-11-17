@@ -89,11 +89,15 @@ namespace cepgen {
         pol_w1_ = states.get<std::vector<int> >("W1");
         pol_w2_ = states.get<std::vector<int> >("W2");
       }
-      CG_DEBUG("PPtoWW:mode") << "matrix element computation method: " << method_ << ", "
-                              << "polarisation states: W1=" << pol_w1_ << ", W2=" << pol_w2_ << ".";
+      CG_DEBUG("PPtoWW") << "matrix element computation method: " << method_ << ", "
+                         << "polarisation states: W1=" << pol_w1_ << ", W2=" << pol_w2_ << ".";
 
-      if (ampl_.mode() != NachtmannAmplitudes::Mode::SM)
+      if (ampl_.mode() != NachtmannAmplitudes::Mode::SM) {
+        if (ampl_.mode() != NachtmannAmplitudes::Mode::W || ampl_.mode() != NachtmannAmplitudes::Mode::Wbar)
+          throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for gamma-gamma -> W+ W-! "
+                                   << "Only supported extensions are W and Wbar.";
         CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << params.get<ParametersList>("eftExtension") << ".";
+      }
     }
 
     void PPtoWW::prepareProcessKinematics() {
