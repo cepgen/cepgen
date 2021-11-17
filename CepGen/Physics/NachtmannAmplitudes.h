@@ -27,7 +27,7 @@ namespace cepgen {
     NachtmannAmplitudes(const ParametersList&);
 
     /// Model giving an amplitude for the two-photon WW production
-    enum class Mode { SM, W, Wbar, phiW, WB, WbarB };
+    enum class Mode { SM, W, Wbar, phiW, phiWbar, phiB, phiBbar, WB, WbarB };
     friend std::ostream& operator<<(std::ostream&, const Mode&);
     const Mode& mode() const { return mode_; }
 

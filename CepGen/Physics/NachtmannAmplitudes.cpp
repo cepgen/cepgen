@@ -77,6 +77,12 @@ namespace cepgen {
         return amplitudeWbar(hel);
       case Mode::phiW:
         return amplitudephiW(hel);
+      case Mode::phiWbar:
+        return 2.i * double(lam1) * amplitudephiW(hel);
+      case Mode::phiB:
+        return std::pow(eft_ext_.c1() / eft_ext_.s1, 2) * amplitudephiW(hel);
+      case Mode::phiBbar:
+        return 2.i * double(lam1) * std::pow(eft_ext_.c1() / eft_ext_.s1, 2) * amplitudephiW(hel);
       case Mode::WB:
         return amplitudeWB(hel);
       case Mode::WbarB:
@@ -233,13 +239,19 @@ namespace cepgen {
       case NachtmannAmplitudes::Mode::W:
         return os << "W";
       case NachtmannAmplitudes::Mode::Wbar:
-        return os << "W-bar";
+        return os << "Wbar";
       case NachtmannAmplitudes::Mode::phiW:
-        return os << "phiW";
+        return os << "phi-W";
+      case NachtmannAmplitudes::Mode::phiWbar:
+        return os << "phi-Wbar";
+      case NachtmannAmplitudes::Mode::phiB:
+        return os << "phi-B";
+      case NachtmannAmplitudes::Mode::phiBbar:
+        return os << "phi-Bbar";
       case NachtmannAmplitudes::Mode::WB:
-        return os << "WB";
+        return os << "W-B";
       case NachtmannAmplitudes::Mode::WbarB:
-        return os << "W-bar B";
+        return os << "Wbar-B";
     }
     return os << (int)mode;
   }
