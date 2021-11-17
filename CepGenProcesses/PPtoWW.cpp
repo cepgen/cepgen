@@ -141,15 +141,15 @@ namespace cepgen {
       double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
       for (const auto lam3 : pol_w1_)
         for (const auto lam4 : pol_w2_) {
-          const double ampli_pp = ampl_(s_hat, t_hat, u_hat, +1, +1, lam3, lam4);
-          const double ampli_mm = ampl_(s_hat, t_hat, u_hat, -1, -1, lam3, lam4);
-          const double ampli_pm = ampl_(s_hat, t_hat, u_hat, +1, -1, lam3, lam4);
-          const double ampli_mp = ampl_(s_hat, t_hat, u_hat, -1, +1, lam3, lam4);
+          const auto ampli_pp = ampl_(s_hat, t_hat, u_hat, +1, +1, lam3, lam4);
+          const auto ampli_mm = ampl_(s_hat, t_hat, u_hat, -1, -1, lam3, lam4);
+          const auto ampli_pm = ampl_(s_hat, t_hat, u_hat, +1, -1, lam3, lam4);
+          const auto ampli_mp = ampl_(s_hat, t_hat, u_hat, -1, +1, lam3, lam4);
 
-          amat2_0 += ampli_pp * ampli_pp + ampli_mm * ampli_mm + 2. * cos(2. * phi_diff) * ampli_pp * ampli_mm;
-          amat2_1 += ampli_pm * ampli_pm + ampli_mp * ampli_mp + 2. * cos(2. * phi_sum) * ampli_pm * ampli_mp;
-          amat2_interf -= 2. * (cos(phi_sum + phi_diff) * (ampli_pp * ampli_pm + ampli_mm * ampli_mp) +
-                                cos(phi_sum - phi_diff) * (ampli_pp * ampli_mp + ampli_mm * ampli_pm));
+          amat2_0 -= (ampli_pp * ampli_pp + ampli_mm * ampli_mm + 2. * cos(2. * phi_diff) * ampli_pp * ampli_mm).real();
+          amat2_1 -= (ampli_pm * ampli_pm + ampli_mp * ampli_mp + 2. * cos(2. * phi_sum) * ampli_pm * ampli_mp).real();
+          amat2_interf += 2. * (cos(phi_sum + phi_diff) * (ampli_pp * ampli_pm + ampli_mm * ampli_mp).real() +
+                                cos(phi_sum - phi_diff) * (ampli_pp * ampli_mp + ampli_mm * ampli_pm).real());
         }
       return amat2_0 + amat2_1 + amat2_interf;
     }

@@ -18,6 +18,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <complex>
+
 namespace cepgen {
   class ParametersList;
   class NachtmannAmplitudes {
@@ -30,7 +32,8 @@ namespace cepgen {
     const Mode& mode() const { return mode_; }
 
     /// Compute the amplitude for a given kinematics and a given set of helicity components
-    double operator()(double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4) const;
+    std::complex<double> operator()(
+        double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4) const;
 
   private:
     const Mode mode_;
@@ -70,12 +73,12 @@ namespace cepgen {
     };
 
     /// Compute the amplitude for the Standard model
-    double amplitudeSM(const Helicities&) const;
-    double amplitudeW(const Helicities&) const;
-    double amplitudeWbar(const Helicities&) const;
-    double amplitudephiW(const Helicities&) const;
-    double amplitudeWB(const Helicities&) const;
-    double amplitudeWbarB(const Helicities&) const;
+    std::complex<double> amplitudeSM(const Helicities&) const;
+    std::complex<double> amplitudeW(const Helicities&) const;
+    std::complex<double> amplitudeWbar(const Helicities&) const;
+    std::complex<double> amplitudephiW(const Helicities&) const;
+    std::complex<double> amplitudeWB(const Helicities&) const;
+    std::complex<double> amplitudeWbarB(const Helicities&) const;
 
     /// W squared mass, in GeV^2
     const double mw2_;
