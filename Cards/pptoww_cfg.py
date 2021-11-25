@@ -68,8 +68,8 @@ process = kt.process.clone('pptoww',
 #--- generation parameters
 from Config.generator_cff import generator
 generator = generator.clone(
-    numEvents = 10000,
-    printEvery = 1000,
+    numEvents = 50000,
+    printEvery = 5000,
 )
 text = cepgen.Module('text',  # histogramming/ASCII output capability
     #variables = ['nev', 'm(4)', 'tgen'],

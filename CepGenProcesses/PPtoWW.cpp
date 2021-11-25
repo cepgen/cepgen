@@ -46,7 +46,7 @@ namespace cepgen {
       double computeCentralMatrixElement() const override;
 
       double onShellME() const;
-      double offShellME(double phi_sum, double phi_diff) const;
+      double offShellME() const;
 
       const double mW_, mW2_;
       const int method_;
@@ -92,12 +92,16 @@ namespace cepgen {
       CG_DEBUG("PPtoWW") << "matrix element computation method: " << method_ << ", "
                          << "polarisation states: W1=" << pol_w1_ << ", W2=" << pol_w2_ << ".";
 
-      if (ampl_.mode() != NachtmannAmplitudes::Mode::SM) {
-        if (ampl_.mode() != NachtmannAmplitudes::Mode::W && ampl_.mode() != NachtmannAmplitudes::Mode::Wbar)
-          throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for ɣɣ → W⁺W¯! "
-                                   << "Only supported extensions are W and Wbar. Specified model: " << ampl_.mode()
-                                   << ".";
-        CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << params.get<ParametersList>("eftExtension") << ".";
+      if (method_ == 1) {
+        CG_INFO("PPtoWW") << "Nachtmann amplitudes (model: " << ampl_.mode() << ") initialised.";
+        if (ampl_.mode() != NachtmannAmplitudes::Mode::SM) {
+          if (ampl_.mode() != NachtmannAmplitudes::Mode::W && ampl_.mode() != NachtmannAmplitudes::Mode::Wbar)
+            throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for ɣɣ → W⁺W¯! "
+                                     << "Only supported extensions are W and Wbar. Specified model: " << ampl_.mode()
+                                     << ".";
+          CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << params.get<ParametersList>("eftExtension")
+                            << ".";
+        }
       }
     }
 
@@ -121,7 +125,7 @@ namespace cepgen {
           mat_el = onShellME();
         } break;
         case 1: {
-          mat_el = offShellME(phi_qt1_ + phi_qt2_, phi_qt1_ - phi_qt2_);
+          mat_el = onShellME();
         } break;
         default:
           throw CG_FATAL("PPtoWW:ME") << "Invalid ME calculation method (" << method_ << ")!";
@@ -140,9 +144,9 @@ namespace cepgen {
       return 6. * (1. - term1 + term2);
     }
 
-    double PPtoWW::offShellME(double phi_sum, double phi_diff) const {
+    double PPtoWW::offShellME() const {
       const NachtmannAmplitudes::Kinematics kin(mW2_, shat(), that(), uhat());
-      double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
+      double hel_mat_elem{0.};
       for (const auto& lam3 : pol_w1_)
         for (const auto& lam4 : pol_w2_) {
           const auto ampli_pp = ampl_(kin, +1, +1, lam3, lam4);
@@ -150,12 +154,13 @@ namespace cepgen {
           const auto ampli_pm = ampl_(kin, +1, -1, lam3, lam4);
           const auto ampli_mp = ampl_(kin, -1, +1, lam3, lam4);
 
-          amat2_0 -= (ampli_pp * ampli_pp + ampli_mm * ampli_mm + 2. * cos(2. * phi_diff) * ampli_pp * ampli_mm).real();
-          amat2_1 -= (ampli_pm * ampli_pm + ampli_mp * ampli_mp + 2. * cos(2. * phi_sum) * ampli_pm * ampli_mp).real();
-          amat2_interf += 2. * (cos(phi_sum + phi_diff) * (ampli_pp * ampli_pm + ampli_mm * ampli_mp).real() +
-                                cos(phi_sum - phi_diff) * (ampli_pp * ampli_mp + ampli_mm * ampli_pm).real());
+          hel_mat_elem += norm(((q1_.px() * q2_.px() + q1_.py() * q2_.py()) * (ampli_pp + ampli_mm) -
+                                1.i * (q1_.px() * q2_.py() - q1_.py() * q2_.px()) * (ampli_pp - ampli_mm) -
+                                (q1_.px() * q2_.px() - q1_.py() * q2_.py()) * (ampli_pm + ampli_mp) -
+                                1.i * (q1_.px() * q2_.py() + q1_.py() * q2_.px()) * (ampli_pm - ampli_mp)) *
+                               0.5 / qt1_ / qt2_);
         }
-      return amat2_0 + amat2_1 + amat2_interf;
+      return hel_mat_elem;
     }
   }  // namespace proc
 }  // namespace cepgen
