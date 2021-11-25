@@ -141,7 +141,7 @@ namespace cepgen {
       const double term2 =
           2. * s_hat * s_hat * (s_hat * s_hat + 3. * mW2_ * mW2_) / (3. * pow(mW2_ - t_hat, 2) * pow(mW2_ - u_hat, 2));
 
-      return 6. * (1. - term1 + term2);
+      return 6. * constants::G_EM_SQ * constants::G_EM_SQ * (1. - term1 + term2);
     }
 
     double PPtoWW::offShellME() const {

@@ -100,7 +100,7 @@ namespace cepgen {
              (1. + hel.lam2 * hel.lam4 * kin.cos_theta) * kin.sin_theta;
 
     // transverse-transverse
-    return -0.5i * kin.invA *
+    return -0.5i * G_EM_SQ * kin.invA *
            (2. * kin.beta * float(hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) -
             kin.inv_gamma2 * (1. + hel.lam3 * hel.lam4) *
                 (2. * hel.lam1 * hel.lam2 + (1. - hel.lam1 * hel.lam2) * kin.cos_theta2) +
