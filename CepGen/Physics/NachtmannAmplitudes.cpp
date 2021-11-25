@@ -88,15 +88,15 @@ namespace cepgen {
 
   std::complex<double> NachtmannAmplitudes::amplitudeSM(const Kinematics& kin, const Helicities& hel) const {
     if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-      return 1i * kin.invA * kin.inv_gamma2 *
+      return 1i * G_EM_SQ * kin.invA * kin.inv_gamma2 *
              ((kin.gamma2 + 1.) * (1. - hel.lam1 * hel.lam2) * kin.sin_theta2 - (1. + hel.lam1 * hel.lam2));
 
     if (hel.lam4 == 0)  // transverse-longitudinal
-      return -1i * kin.invA * M_SQRT2 * kin.inv_gamma * double(hel.lam1 - hel.lam2) *
+      return -1i * G_EM_SQ * kin.invA * M_SQRT2 * kin.inv_gamma * double(hel.lam1 - hel.lam2) *
              (1. + hel.lam1 * hel.lam3 * kin.cos_theta) * kin.sin_theta;
 
     if (hel.lam3 == 0)  // longitudinal-transverse
-      return -1i * kin.invA * M_SQRT2 * kin.inv_gamma * double(hel.lam2 - hel.lam1) *
+      return -1i * G_EM_SQ * kin.invA * M_SQRT2 * kin.inv_gamma * double(hel.lam2 - hel.lam1) *
              (1. + hel.lam2 * hel.lam4 * kin.cos_theta) * kin.sin_theta;
 
     // transverse-transverse
@@ -111,21 +111,21 @@ namespace cepgen {
 
   std::complex<double> NachtmannAmplitudes::amplitudeW(const Kinematics& kin, const Helicities& hel) const {
     if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-      return 3.i * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.invA * kin.inv_gamma2 * kin.sin_theta2 *
-             (1. + hel.lam1 * hel.lam2);
+      return 3.i * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.invA * kin.inv_gamma2 *
+             kin.sin_theta2 * (1. + hel.lam1 * hel.lam2);
 
     if (hel.lam4 == 0)  // transverse-longitudinal
-      return 1.5i * kin.shat * eft_ext_.s1 * constants::G_F * kin.invA * kin.inv_gamma * kin.sin_theta *
+      return 1.5i * G_EM * kin.shat * eft_ext_.s1 * constants::G_F * kin.invA * kin.inv_gamma * kin.sin_theta *
              ((hel.lam1 - hel.lam2) * kin.beta2 - kin.beta * kin.cos_theta * (hel.lam1 + hel.lam2) -
               2 * hel.lam3 * kin.cos_theta * (hel.lam1 * hel.lam2 + kin.inv_gamma2));
 
     if (hel.lam3 == 0)  // longitudinal-transverse
-      return 1.5i * kin.shat * eft_ext_.s1 * constants::G_F * kin.invA * kin.inv_gamma * kin.sin_theta *
+      return 1.5i * G_EM * kin.shat * eft_ext_.s1 * constants::G_F * kin.invA * kin.inv_gamma * kin.sin_theta *
              ((hel.lam2 - hel.lam1) * kin.beta2 - kin.beta * kin.cos_theta * (hel.lam2 + hel.lam1) -
               2 * hel.lam4 * kin.cos_theta * (hel.lam2 * hel.lam1 + kin.inv_gamma2));
 
     // transverse-transverse
-    return 0.75i * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F *
+    return 0.75i * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F *
            (-kin.inv_gamma2 * kin.beta * (1. + kin.cos_theta2) * (hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) +
             2 * kin.sin_theta2 *
                 (3. + hel.lam3 * hel.lam4 + hel.lam1 * hel.lam2 * (1 - hel.lam3 * hel.lam4) -
@@ -137,21 +137,21 @@ namespace cepgen {
 
   std::complex<double> NachtmannAmplitudes::amplitudeWbar(const Kinematics& kin, const Helicities& hel) const {
     if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-      return -3 * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.inv_gamma2 * kin.invA * kin.sin_theta2 *
-             (hel.lam1 + hel.lam2);
+      return -3 * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.inv_gamma2 * kin.invA *
+             kin.sin_theta2 * (hel.lam1 + hel.lam2);
 
     if (hel.lam4 == 0)  // transverse-longitudinal
-      return 1.5 * kin.shat * eft_ext_.s1 * constants::G_F * kin.inv_gamma * kin.invA * kin.sin_theta *
+      return 1.5 * G_EM * kin.shat * eft_ext_.s1 * constants::G_F * kin.inv_gamma * kin.invA * kin.sin_theta *
              (kin.beta * (hel.lam1 - hel.lam2) * hel.lam3 +
               kin.cos_theta * (2 * kin.beta + (2. - kin.beta2) * (hel.lam1 + hel.lam2) * hel.lam3));
 
     if (hel.lam3 == 0)  // longitudinal-transverse
-      return 1.5 * kin.shat * eft_ext_.s1 * constants::G_F * kin.inv_gamma * kin.invA * kin.sin_theta *
+      return 1.5 * G_EM * kin.shat * eft_ext_.s1 * constants::G_F * kin.inv_gamma * kin.invA * kin.sin_theta *
              (kin.beta * (hel.lam2 - hel.lam1) * hel.lam4 +
               kin.cos_theta * (2 * kin.beta + (2. - kin.beta2) * (hel.lam2 + hel.lam1) * hel.lam4));
 
     // transverse-transverse
-    return -1.5 * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.invA *
+    return -1.5 * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.invA *
            (2 * kin.sin_theta2 * (hel.lam1 + hel.lam2 - kin.beta * (hel.lam3 + hel.lam4)) +
             kin.inv_gamma2 * ((hel.lam1 + hel.lam2) * (kin.cos_theta2 * (2 + hel.lam3 * hel.lam4) - 1) -
                               kin.beta * (kin.cos_theta2 + hel.lam1 * hel.lam2) * (hel.lam3 + hel.lam4)));
@@ -174,26 +174,26 @@ namespace cepgen {
   std::complex<double> NachtmannAmplitudes::amplitudeWB(const Kinematics& kin, const Helicities& hel) const {
     const double invB = 1. / (kin.shat - eft_ext_.mH * eft_ext_.mH);
     if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-      return 2.i * kin.invA * eft_ext_.c1() / eft_ext_.s1 *
+      return 2.i * G_EM_SQ * kin.invA * eft_ext_.c1() / eft_ext_.s1 *
                  (1 - hel.lam1 * hel.lam2 - 2 * kin.cos_theta2 -
                   kin.gamma2 * (1. + hel.lam1 * hel.lam2) * kin.sin_theta2) +
              0.5 * kin.shat * kin.shat * constants::G_F * M_SQRT2 * invB * eft_ext_.s1 * eft_ext_.c1() *
                  (1. + kin.beta2) * (1. + hel.lam1 * hel.lam2);
 
     if (hel.lam4 == 0)  // transverse-longitudinal
-      return 0.5i * kin.gamma * M_SQRT2 * invB * eft_ext_.c1() / eft_ext_.s1 * kin.sin_theta *
+      return 0.5i * G_EM_SQ * kin.gamma * M_SQRT2 * invB * eft_ext_.c1() / eft_ext_.s1 * kin.sin_theta *
              ((hel.lam2 - hel.lam1) * (1. + kin.inv_gamma2) +
               (kin.beta * float(hel.lam1 + hel.lam2) + 2 * hel.lam3 * (hel.lam1 * hel.lam2 - kin.inv_gamma2)) *
                   kin.cos_theta);
 
     if (hel.lam3 == 0)  // longitudinal-transverse
-      return 0.5i * kin.gamma * M_SQRT2 * invB * eft_ext_.c1() / eft_ext_.s1 * kin.sin_theta *
+      return 0.5i * G_EM_SQ * kin.gamma * M_SQRT2 * invB * eft_ext_.c1() / eft_ext_.s1 * kin.sin_theta *
              ((hel.lam1 - hel.lam2) * (1. + kin.inv_gamma2) +
               (kin.beta * float(hel.lam2 + hel.lam1) + 2 * hel.lam4 * (hel.lam2 * hel.lam1 - kin.inv_gamma2)) *
                   kin.cos_theta);
 
     // transverse-transverse
-    return -0.5i * kin.invA * eft_ext_.c1() / eft_ext_.s1 *
+    return -0.5i * G_EM_SQ * kin.invA * eft_ext_.c1() / eft_ext_.s1 *
                (kin.beta * float(hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) * (1. + kin.cos_theta2) +
                 2 * (2 + (hel.lam1 - hel.lam2) * (hel.lam3 - hel.lam4) * kin.cos_theta +
                      ((hel.lam1 * hel.lam2 - 1) * kin.cos_theta2 + 1. + hel.lam1 * hel.lam2) * hel.lam3 * hel.lam4)) +
@@ -205,22 +205,22 @@ namespace cepgen {
     CG_WARNING("NachtmannAmplitudes") << "Mode " << mode_ << " is not yet properly handled!";
     const double invB = 1. / (kin.shat - eft_ext_.mH * eft_ext_.mH);
     if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-      return 2 * eft_ext_.c1() / eft_ext_.s1 * kin.gamma2 * float(hel.lam1 + hel.lam2) -
+      return 2. * G_EM_SQ * eft_ext_.c1() / eft_ext_.s1 * kin.gamma2 * float(hel.lam1 + hel.lam2) -
              0.5 * kin.shat * kin.shat * M_SQRT2 * constants::G_F /* /e^2 */ * eft_ext_.s1 * eft_ext_.c1() *
                  (1. + kin.beta2) * float(hel.lam1 + hel.lam2);
 
     if (hel.lam4 == 0)  // transverse-longitudinal
-      return 0.5 * kin.invA * kin.gamma * M_SQRT2 * eft_ext_.c1() / eft_ext_.s1 * kin.sin_theta *
+      return 0.5 * G_EM_SQ * kin.invA * kin.gamma * M_SQRT2 * eft_ext_.c1() / eft_ext_.s1 * kin.sin_theta *
              (kin.beta * (hel.lam2 - hel.lam1) * hel.lam3 -
               kin.cos_theta * (2. * kin.beta + kin.beta2 * float(hel.lam1 + hel.lam2) * hel.lam3));
 
     if (hel.lam3 == 0)  // longitudinal-transverse
-      return 0.5 * kin.invA * kin.gamma * M_SQRT2 * eft_ext_.c1() / eft_ext_.s1 * kin.sin_theta *
+      return 0.5 * G_EM_SQ * kin.invA * kin.gamma * M_SQRT2 * eft_ext_.c1() / eft_ext_.s1 * kin.sin_theta *
              (kin.beta * (hel.lam1 - hel.lam2) * hel.lam4 -
               kin.cos_theta * (2. * kin.beta + kin.beta2 * (hel.lam2 + hel.lam1) * hel.lam4));
 
     // transverse-transverse
-    return kin.invA * eft_ext_.c1() * eft_ext_.c1() / eft_ext_.s1 *
+    return kin.invA * G_EM_SQ * eft_ext_.c1() * eft_ext_.c1() / eft_ext_.s1 *
                (hel.lam3 * float(hel.lam1 + hel.lam2) + kin.beta * (hel.lam1 * hel.lam2 + kin.cos_theta2)) *
                (hel.lam3 + hel.lam4) -
            0.25 * kin.shat * kin.shat * M_SQRT2 * constants::G_F /* /e^2 */ * kin.inv_gamma2 * invB * eft_ext_.s1 *

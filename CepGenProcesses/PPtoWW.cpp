@@ -28,6 +28,8 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/Process2to4.h"
 
+using namespace std::complex_literals;
+
 namespace cepgen {
   namespace proc {
     /// \brief Compute the matrix element for a CE \f$\gamma\gamma\rightarrow W^+W^-\f$ process using \f$k_{\rm T}\f$-factorization approach
@@ -45,8 +47,6 @@ namespace cepgen {
 
       double onShellME() const;
       double offShellME(double phi_sum, double phi_diff) const;
-
-      static constexpr double prefactor_ = constants::G_EM_SQ * constants::G_EM_SQ;
 
       const double mW_, mW2_;
       const int method_;
@@ -111,23 +111,22 @@ namespace cepgen {
     double PPtoWW::computeCentralMatrixElement() const {
       CG_DEBUG_LOOP("PPtoWW:ME") << "matrix element mode: " << method_ << ".";
 
-      double mat_el = prefactor_;
+      double mat_el = 1.;
       switch (method_) {
         case 0: {
           // On-shell matrix element
           // references:
           //  Phys.Rev.D 51 (1995) 4738
           //  JHEP 02 (2015) 098
-          mat_el *= onShellME();
+          mat_el = onShellME();
         } break;
         case 1: {
-          mat_el *= offShellME(phi_qt1_ + phi_qt2_, phi_qt1_ - phi_qt2_);
+          mat_el = offShellME(phi_qt1_ + phi_qt2_, phi_qt1_ - phi_qt2_);
         } break;
         default:
           throw CG_FATAL("PPtoWW:ME") << "Invalid ME calculation method (" << method_ << ")!";
       }
-      CG_DEBUG_LOOP("PPtoWW:ME") << "prefactor: " << prefactor_ << "\n\t"
-                                 << "matrix element: " << mat_el << ".";
+      CG_DEBUG_LOOP("PPtoWW:ME") << "matrix element: " << mat_el << ".";
       return mat_el;
     }
 
@@ -144,8 +143,8 @@ namespace cepgen {
     double PPtoWW::offShellME(double phi_sum, double phi_diff) const {
       const NachtmannAmplitudes::Kinematics kin(mW2_, shat(), that(), uhat());
       double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
-      for (const auto lam3 : pol_w1_)
-        for (const auto lam4 : pol_w2_) {
+      for (const auto& lam3 : pol_w1_)
+        for (const auto& lam4 : pol_w2_) {
           const auto ampli_pp = ampl_(kin, +1, +1, lam3, lam4);
           const auto ampli_mm = ampl_(kin, -1, -1, lam3, lam4);
           const auto ampli_pm = ampl_(kin, +1, -1, lam3, lam4);
