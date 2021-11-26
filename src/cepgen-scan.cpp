@@ -53,8 +53,6 @@ int main(int argc, char* argv[]) {
 
   if (debug)
     cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
-  else
-    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::nothing;
 
   cepgen::Generator mg;
   mg.setParameters(cepgen::card::Handler::parse(input_config));
@@ -85,7 +83,9 @@ int main(int argc, char* argv[]) {
   double cross_section, err_cross_section;
   for (const auto& value : points) {
     try {
-      if (scan == "abseta") {
+      if (scan == "sqrtS") {
+        par.kinematics.incomingBeams().setSqrtS(value);
+      } else if (scan == "abseta") {
         par.kinematics.cuts().central.eta_single().min() = -value;
         par.kinematics.cuts().central.eta_single().max() = +value;
       } else if (scan == "absrap") {
