@@ -99,7 +99,7 @@ namespace cepgen {
             throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for ɣɣ → W⁺W¯! "
                                      << "Only supported extensions are W and Wbar. Specified model: " << ampl_.mode()
                                      << ".";
-          CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << params.get<ParametersList>("eftExtension")
+          CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << params.get<ParametersList>("eftParameters")
                             << ".";
         }
       }

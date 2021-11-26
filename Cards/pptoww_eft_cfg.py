@@ -8,15 +8,21 @@ class EFTModel:
     SM = 0
     W = 1
     Wbar = 2
+    phiW = 3
+    phiWbar = 4
+    phiB = 5
+    phiBbar = 6
+    WB = 7
+    WbarB = 8
 
 import Config.ktProcess_cfi as kt
 process = kt.process.clone('pptoww',
     processParameters = cepgen.Parameters(
-        mode = cepgen.ProcessMode.InelasticElastic,
+        mode = cepgen.ProcessMode.ElasticElastic,
         polarisationStates = 0, # full
         model = EFTModel.W,
         eftParameters = cepgen.Parameters(
-            s1 = 0.5
+            s1 = 1.e-2
         ),
     ),
     inKinematics = cepgen.Parameters(
