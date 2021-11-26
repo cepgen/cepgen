@@ -36,20 +36,24 @@ namespace cepgen {
     public:
       Kinematics(double mw2, double shat, double that, double uhat);
       bool operator!=(const Kinematics&) const;
+      friend std::ostream& operator<<(std::ostream&, const Kinematics&);
+      static Kinematics fromScosTheta(double shat, double cos_theta, double mw2);
 
       // base variables
-      const double shat, that, uhat;
+      const double shat{0.}, that{0.}, uhat{0.};
 
     private:
+      void setCosTheta(double cos_theta);
       /// W squared mass, in GeV^2
-      const double mw2_;
+      const double mw2_{0.};
 
     public:
       // all derived variables
-      const double beta2, beta;
-      const double inv_gamma2, gamma2, gamma, inv_gamma;
-      const double cos_theta, cos_theta2, sin_theta2, sin_theta;
-      const double invA;
+      const double shat2{0.};
+      const double beta2{0.}, beta{0.};
+      const double inv_gamma2{0.}, gamma2{0.}, gamma{0.}, inv_gamma{0.};
+      double cos_theta{0.}, cos_theta2{0.}, sin_theta2{0.}, sin_theta{0.};
+      double invA{0.};
     };
 
     /// Compute the amplitude for a given kinematics and a given set of helicity components

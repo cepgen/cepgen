@@ -43,21 +43,40 @@ namespace cepgen {
         that(that),
         uhat(uhat),
         mw2_(mw2),
+        shat2(shat * shat),
         beta2(1. - 4. * mw2_ / shat),
         beta(sqrt(beta2)),
         inv_gamma2(1. - beta2),
         gamma2(1. / inv_gamma2),
         gamma(sqrt(gamma2)),
-        inv_gamma(1. / gamma),
-        cos_theta((that - uhat) / shat / beta),
-        cos_theta2(cos_theta * cos_theta),
-        sin_theta2(1. - cos_theta2),
-        sin_theta(sqrt(sin_theta2)),
-        invA(1. / (1. - beta2 * cos_theta2)) {}
+        inv_gamma(1. / gamma) {
+    setCosTheta((that - uhat) / shat / beta);
+  }
 
   bool NachtmannAmplitudes::Kinematics::operator!=(const Kinematics& oth) const {
     // checking only the base variables as all others are computed from these three
     return shat != oth.shat || that != oth.that || uhat != oth.uhat;
+  }
+
+  std::ostream& operator<<(std::ostream& os, const NachtmannAmplitudes::Kinematics& kin) {
+    return os << "Kin{mW2=" << kin.mw2_ << ",shat=" << kin.shat << ",that=" << kin.that << ",uhat=" << kin.uhat
+              << ",beta=" << kin.beta << ",gamma=" << kin.gamma << ",cos(theta)=" << kin.cos_theta << "}";
+  }
+
+  NachtmannAmplitudes::Kinematics NachtmannAmplitudes::Kinematics::fromScosTheta(double shat,
+                                                                                 double cos_theta,
+                                                                                 double mw2) {
+    Kinematics kin(mw2, shat, 0., 0.);
+    kin.setCosTheta(cos_theta);
+    return kin;
+  }
+
+  void NachtmannAmplitudes::Kinematics::setCosTheta(double cos_theta) {
+    cos_theta = cos_theta;
+    cos_theta2 = cos_theta * cos_theta;
+    sin_theta2 = 1. - cos_theta2;
+    sin_theta = sqrt(sin_theta2);
+    invA = 1. / (1. - beta2 * cos_theta2);
   }
 
   std::complex<double> NachtmannAmplitudes::operator()(
