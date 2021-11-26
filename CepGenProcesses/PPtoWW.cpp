@@ -157,7 +157,7 @@ namespace cepgen {
 
           hel_mat_elem += norm(p1 * (pp + mm) - 1.i * p2 * (pp - mm) - p3 * (pm + mp) - 1.i * p4 * (pm - mp));
         }
-      return hel_mat_elem * 0.5 / qt1_ / qt2_;
+      return hel_mat_elem * std::pow(0.5 / qt1_ / qt2_, 2);
     }
   }  // namespace proc
 }  // namespace cepgen
