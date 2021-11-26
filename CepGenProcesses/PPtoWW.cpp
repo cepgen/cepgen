@@ -146,21 +146,18 @@ namespace cepgen {
 
     double PPtoWW::offShellME() const {
       const NachtmannAmplitudes::Kinematics kin(mW2_, shat(), that(), uhat());
+      const double p1 = q1_.px() * q2_.px() + q1_.py() * q2_.py(), p2 = q1_.px() * q2_.py() - q1_.py() * q2_.px(),
+                   p3 = q1_.px() * q2_.px() - q1_.py() * q2_.py(), p4 = q1_.px() * q2_.py() + q1_.py() * q2_.px();
+
       double hel_mat_elem{0.};
       for (const auto& lam3 : pol_w1_)
         for (const auto& lam4 : pol_w2_) {
-          const auto ampli_pp = ampl_(kin, +1, +1, lam3, lam4);
-          const auto ampli_mm = ampl_(kin, -1, -1, lam3, lam4);
-          const auto ampli_pm = ampl_(kin, +1, -1, lam3, lam4);
-          const auto ampli_mp = ampl_(kin, -1, +1, lam3, lam4);
+          const auto pp = ampl_(kin, +1, +1, lam3, lam4), mm = ampl_(kin, -1, -1, lam3, lam4),
+                     pm = ampl_(kin, +1, -1, lam3, lam4), mp = ampl_(kin, -1, +1, lam3, lam4);
 
-          hel_mat_elem += norm(((q1_.px() * q2_.px() + q1_.py() * q2_.py()) * (ampli_pp + ampli_mm) -
-                                1.i * (q1_.px() * q2_.py() - q1_.py() * q2_.px()) * (ampli_pp - ampli_mm) -
-                                (q1_.px() * q2_.px() - q1_.py() * q2_.py()) * (ampli_pm + ampli_mp) -
-                                1.i * (q1_.px() * q2_.py() + q1_.py() * q2_.px()) * (ampli_pm - ampli_mp)) *
-                               0.5 / qt1_ / qt2_);
+          hel_mat_elem += norm(p1 * (pp + mm) - 1.i * p2 * (pp - mm) - p3 * (pm + mp) - 1.i * p4 * (pm - mp));
         }
-      return hel_mat_elem;
+      return hel_mat_elem * 0.5 / qt1_ / qt2_;
     }
   }  // namespace proc
 }  // namespace cepgen
