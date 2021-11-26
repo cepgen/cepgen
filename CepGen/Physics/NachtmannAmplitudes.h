@@ -71,8 +71,8 @@ namespace cepgen {
       short lam3;  ///< first outgoing W
       short lam4;  ///< second outgoing W
     };
-    static constexpr double G_EM_SQ = constants::G_EM_SQ;
-    static constexpr double G_EM = sqrt(G_EM_SQ);
+    const double G_EM_SQ;
+    const double G_EM;
 
     /// Compute the amplitude for the Standard model
     std::complex<double> amplitudeSM(const Kinematics&, const Helicities&) const;

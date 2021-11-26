@@ -29,8 +29,10 @@ using namespace std::complex_literals;
 namespace cepgen {
   NachtmannAmplitudes::NachtmannAmplitudes(const ParametersList& params)
       : mode_(params.getAs<int, NachtmannAmplitudes::Mode>("model", NachtmannAmplitudes::Mode::SM)),
-        eft_ext_(params.get<ParametersList>("eftParameters")) {
-    CG_DEBUG("NachtmannAmplitudes") << "Nachtmann amplitudes evaluation framework built for mode=" << (int)mode_ << ".";
+        eft_ext_(params.get<ParametersList>("eftParameters")),
+        G_EM_SQ(constants::G_EM_SQ),
+        G_EM(sqrt(G_EM_SQ)) {
+    CG_DEBUG("NachtmannAmplitudes") << "Nachtmann amplitudes evaluation framework built for mode=" << mode_ << ".";
   }
 
   NachtmannAmplitudes::EFTParameters::EFTParameters(const ParametersList& params)
