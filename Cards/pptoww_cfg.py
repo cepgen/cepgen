@@ -74,7 +74,7 @@ generator = generator.clone(
 text = cepgen.Module('text',  # histogramming/ASCII output capability
     #variables = ['nev', 'm(4)', 'tgen'],
     histVariables={
-        'm(4)': cepgen.Parameters(xrange=(50., 500.), nbins=18),
+        'm(4)': cepgen.Parameters(xrange=(50., 1000.), nbins=19),
         'm(ob2)': cepgen.Parameters(xrange=(0., 250.), nbins=10, log=True),
     }
 )

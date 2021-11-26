@@ -114,27 +114,21 @@ namespace cepgen {
 
     double PPtoWW::computeCentralMatrixElement() const {
       CG_DEBUG_LOOP("PPtoWW:ME") << "matrix element mode: " << method_ << ".";
-
-      double mat_el = 1.;
       switch (method_) {
-        case 0: {
-          // On-shell matrix element
-          // references:
-          //  Phys.Rev.D 51 (1995) 4738
-          //  JHEP 02 (2015) 098
-          mat_el = onShellME();
-        } break;
-        case 1: {
-          mat_el = onShellME();
-        } break;
+        case 0:
+          return onShellME();
+        case 1:
+          return offShellME();
         default:
           throw CG_FATAL("PPtoWW:ME") << "Invalid ME calculation method (" << method_ << ")!";
       }
-      CG_DEBUG_LOOP("PPtoWW:ME") << "matrix element: " << mat_el << ".";
-      return mat_el;
     }
 
     double PPtoWW::onShellME() const {
+      // On-shell matrix element
+      // references:
+      //  Phys.Rev.D 51 (1995) 4738
+      //  JHEP 02 (2015) 098
       const double s_hat = shat(), t_hat = that(), u_hat = uhat();
 
       const double term1 = 2. * s_hat * (2. * s_hat + 3. * mW2_) / (3. * (mW2_ - t_hat) * (mW2_ - u_hat));
@@ -150,14 +144,16 @@ namespace cepgen {
                    p3 = q1_.px() * q2_.px() - q1_.py() * q2_.py(), p4 = q1_.px() * q2_.py() + q1_.py() * q2_.px();
 
       double hel_mat_elem{0.};
+      // compute ME for each W helicity
       for (const auto& lam3 : pol_w1_)
         for (const auto& lam4 : pol_w2_) {
+          // compute all photon helicity amplitudes
           const auto pp = ampl_(kin, +1, +1, lam3, lam4), mm = ampl_(kin, -1, -1, lam3, lam4),
                      pm = ampl_(kin, +1, -1, lam3, lam4), mp = ampl_(kin, -1, +1, lam3, lam4);
-
+          // add ME for this W helicity to total ME
           hel_mat_elem += norm(p1 * (pp + mm) - 1.i * p2 * (pp - mm) - p3 * (pm + mp) - 1.i * p4 * (pm - mp));
         }
-      return hel_mat_elem * std::pow(0.5 / qt1_ / qt2_, 2);
+      return hel_mat_elem * std::pow(1. / qt1_ / qt2_, 2);
     }
   }  // namespace proc
 }  // namespace cepgen
