@@ -135,7 +135,8 @@ namespace cepgen {
         if (tree_.count(LOGGER_NAME)) {
           log_ = unpack(tree_.get_child(LOGGER_NAME));
           utils::Logger::get().level =
-              (utils::Logger::Level)log_.get<int>("level", (int)utils::Logger::Level::information);
+              log_.getAs<int, utils::Logger::Level>("level", utils::Logger::Level::information);
+          utils::Logger::get().setExtended(log_.get<bool>("extended", utils::Logger::get().extended()));
           for (const auto& mod : log_.get<std::vector<std::string> >("enabledModules"))
             utils::Logger::get().addExceptionRule(mod);
         }
@@ -149,8 +150,9 @@ namespace cepgen {
     template <>
     pt::ptree BoostTreeHandler::pack<ParametersList>(const std::vector<ParametersList>& vec) {
       pt::ptree out;
-      for (const auto& elem : vec)
-        out.push_back(std::make_pair("", pack(elem)));
+      std::transform(vec.begin(), vec.end(), std::back_inserter(out), [](const auto& elem) {
+        return std::make_pair("", pack(elem));
+      });
       return out;
     }
 

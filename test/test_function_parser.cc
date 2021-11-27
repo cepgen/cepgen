@@ -20,14 +20,21 @@
 #include <string>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Generator.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Utils/Functional.h"
+#include "CepGen/Utils/String.h"
 
 using namespace std;
 
 int main() {
   const double epsilon = 1.e-9;  // tolerance
-  for (const auto& func : cepgen::utils::FunctionalFactory::get().modules()) {
+  cepgen::initialise();
+
+  const auto funcs = cepgen::utils::FunctionalFactory::get().modules();
+  CG_LOG << "Will test with " << cepgen::utils::s("module", funcs.size(), true) << ": " << funcs;
+
+  for (const auto& func : funcs) {
     CG_LOG << "Testing with \"" << func << "\" functional parser.";
     {  // test with a 1-variable function
       const double exp_result_test1 = 6.795704571;

@@ -205,9 +205,9 @@ namespace cepgen {
     /// Functions to be used to account for rescattering corrections
     TamingFunctionsSequence taming_functions_;
     /// Total generation time (in seconds)
-    double total_gen_time_;
+    double total_gen_time_{0.};
     /// Number of events already generated
-    unsigned long num_gen_events_;
+    unsigned long num_gen_events_{0ul};
     /// Events generation parameters
     Generation generation_;
     /// A collection of stopwatches for timing

@@ -33,7 +33,7 @@ namespace cepgen {
     /// \note The full theoretical description of this process definition may be found in \cite Luszczak:2018ntp.
     class PPtoWW final : public Process2to4 {
     public:
-      PPtoWW(const ParametersList& params = ParametersList());
+      explicit PPtoWW(const ParametersList&);
       ProcessPtr clone() const override { return ProcessPtr(new PPtoWW(*this)); }
       enum class Polarisation { full = 0, LL = 1, LT = 2, TL = 3, TT = 4 };
       static std::string description() { return "ɣɣ → W⁺W¯ (kt-factor.)"; }
@@ -60,7 +60,7 @@ namespace cepgen {
           mW_(PDG::get().mass(PDG::W)),
           mW2_(mW_ * mW_),
           method_(params.get<int>("method", 1)) {
-      switch ((Polarisation)params.get<int>("polarisationStates", 0)) {
+      switch (params.getAs<int, Polarisation>("polarisationStates", Polarisation::full)) {
         case Polarisation::LL:
           pol_w1_ = {0};
           pol_w2_ = {0};
@@ -146,17 +146,17 @@ namespace cepgen {
     double PPtoWW::amplitudeWW(
         double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4) const {
       //--- first compute some kinematic variables
-      const double cos_theta = (that - uhat) / shat / sqrt(1. + 1.e-10 - 4. * mW2_ / shat),
-                   cos_theta2 = cos_theta * cos_theta;
+      const double beta2 = 1. - 4. * mW2_ / shat, beta = sqrt(beta2);
+      const double inv_gamma2 = 1. - beta2, gamma2 = 1. / inv_gamma2;
+      const double gamma = sqrt(gamma2), inv_gamma = 1. / gamma;
+      const double cos_theta = (that - uhat) / shat / beta, cos_theta2 = cos_theta * cos_theta;
       const double sin_theta2 = 1. - cos_theta2, sin_theta = sqrt(sin_theta2);
-      const double beta = sqrt(1. - 4. * mW2_ / shat), beta2 = beta * beta;
-      const double inv_gamma = sqrt(1. - beta2), gamma = 1. / inv_gamma, inv_gamma2 = inv_gamma * inv_gamma;
       const double invA = 1. / (1. - beta2 * cos_theta2);
 
       //--- per-helicity amplitude
 
       if (lam3 == 0 && lam4 == 0)  // longitudinal-longitudinal
-        return invA * inv_gamma2 * ((gamma * gamma + 1.) * (1. - lam1 * lam2) * sin_theta2 - (1. + lam1 * lam2));
+        return invA * inv_gamma2 * ((gamma2 + 1.) * (1. - lam1 * lam2) * sin_theta2 - (1. + lam1 * lam2));
 
       if (lam4 == 0)  // transverse-longitudinal
         return invA * (-M_SQRT2 * inv_gamma * (lam1 - lam2) * (1. + lam1 * lam3 * cos_theta) * sin_theta);

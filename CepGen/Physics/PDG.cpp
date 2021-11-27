@@ -22,6 +22,8 @@
 #include "CepGen/Physics/PDG.h"
 
 namespace cepgen {
+  std::ostream& operator<<(std::ostream& os, const PDG::Id& pdg) { return os << PDG::get().name(pdg); }
+
   PDG::PDG() {
     define({invalid, "[...]", "", 0, -1, -1., 0, false});
     define({diffractiveProton, "diff_proton", "p\u002A", 0, 0., 0., 3, false});
@@ -62,8 +64,8 @@ namespace cepgen {
 
   const std::vector<pdgid_t> PDG::particles() const {
     std::vector<pdgid_t> out;
-    for (const auto& pt : particles_)
-      out.emplace_back(pt.first);
+    std::transform(
+        particles_.begin(), particles_.end(), std::back_inserter(out), [](const auto& pt) { return pt.first; });
     return out;
   }
 
@@ -82,8 +84,9 @@ namespace cepgen {
   void PDG::dump() const {
     //--- first build a sorted vector out of the (unsorted) map
     std::vector<std::pair<pdgid_t, ParticleProperties> > tmp;
-    for (const auto& prt : particles_)
-      tmp.emplace_back(prt.first, prt.second);
+    std::transform(particles_.begin(), particles_.end(), std::back_inserter(tmp), [](const auto& prt) {
+      return std::pair<pdgid_t, ParticleProperties>{prt.first, prt.second};
+    });
     std::sort(tmp.begin(),
               tmp.end(),
               [](const std::pair<pdgid_t, ParticleProperties>& a, const std::pair<pdgid_t, ParticleProperties>& b) {

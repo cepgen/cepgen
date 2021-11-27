@@ -32,7 +32,7 @@ namespace cepgen {
       const double q2 = q * q;
       if (q2 < 2.e-6)
         return constants::ALPHA_EM;
-      const double log_q2 = log(q2), log_1_pl_q2 = log(1. + q2);
+      const double log_q2 = log(q2), log_1_pl_q2 = log1p(q2);
       // Calculate real part of photon vacuum polarization.
       // - for leptons simplify by using asymptotic (Q^2 >> m^2) expressions.
       // - for hadrons use parametrization of H. Burkhardt et al.
@@ -41,7 +41,7 @@ namespace cepgen {
       if (q2 < 9.e-2)
         rpigg = AEM_3PI * (13.4916 + log_q2) + 0.00835 * log_1_pl_q2;
       else if (q2 < 9.)
-        rpigg = AEM_3PI * (16.32 + 2. * log_q2) + 0.00238 * log(1. + 3.927 * q2);
+        rpigg = AEM_3PI * (16.32 + 2. * log_q2) + 0.00238 * log1p(3.927 * q2);
       else if (q2 < 1.e4)
         rpigg = AEM_3PI * (13.4955 + 3. * log_q2) + 0.00165 + 0.00299 * log_1_pl_q2;
       else

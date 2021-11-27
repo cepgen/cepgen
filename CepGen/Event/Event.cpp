@@ -26,8 +26,7 @@
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
-  Event::Event(bool compressed)
-      : num_hadronisation_trials(0), time_generation(-1.), time_total(-1.), weight(0.), compressed_(compressed) {}
+  Event::Event(bool compressed) : compressed_(compressed) {}
 
   void Event::clear() {
     particles_.clear();
@@ -160,19 +159,20 @@ namespace cepgen {
   }
 
   const Particle& Event::operator[](int id) const {
-    for (const auto& role_part : particles_)
-      for (const auto& part : role_part.second)
-        if (part.id() == id)
-          return part;
+    for (const auto& role_part : particles_) {
+      auto it = std::find_if(
+          role_part.second.begin(), role_part.second.end(), [&id](const auto& part) { return part.id() == id; });
+      if (it != role_part.second.end())
+        return *it;
+    }
 
     throw CG_FATAL("Event") << "Failed to retrieve the particle with id=" << id << ".";
   }
 
   Particles Event::operator[](const ParticlesIds& ids) const {
     Particles out;
-    for (const auto& id : ids)
-      out.emplace_back(operator[](id));
-
+    std::transform(
+        ids.begin(), ids.end(), std::back_inserter(out), [this](const auto& id) { return this->operator[](id); });
     return out;
   }
 
@@ -182,8 +182,8 @@ namespace cepgen {
 
   ParticleRoles Event::roles() const {
     ParticleRoles out;
-    for (const auto& pr : particles_)
-      out.emplace_back(pr.first);
+    std::transform(
+        particles_.begin(), particles_.end(), std::back_inserter(out), [](const auto& pr) { return pr.first; });
     return out;
   }
 
@@ -220,10 +220,9 @@ namespace cepgen {
   }
 
   size_t Event::size() const {
-    size_t out = 0;
-    for (const auto& role_part : particles_)
-      out += role_part.second.size();
-    return out;
+    return std::accumulate(particles_.begin(), particles_.end(), 0, [](size_t size, const auto& role_part) {
+      return size + role_part.second.size();
+    });
   }
 
   Particles Event::particles() const {
@@ -238,9 +237,9 @@ namespace cepgen {
   Particles Event::stableParticles() const {
     Particles out;
     for (const auto& role_part : particles_)
-      for (const auto& part : role_part.second)
-        if ((short)part.status() > 0)
-          out.emplace_back(part);
+      std::copy_if(role_part.second.begin(), role_part.second.end(), std::back_inserter(out), [](const auto& part) {
+        return (short)part.status() > 0;
+      });
 
     std::sort(out.begin(), out.end());
     return out;
@@ -288,7 +287,7 @@ namespace cepgen {
           std::string delim;
           for (size_t i = 0; i < mothers.size(); ++i)
             try {
-              oss_pdg << delim << PDG::get().name(ev[*std::next(mothers.begin(), i)].pdgId()), delim = "/";
+              oss_pdg << delim << (PDG::Id)ev[*std::next(mothers.begin(), i)].pdgId(), delim = "/";
             } catch (const Exception&) {
               oss_pdg << delim << ev[*std::next(mothers.begin(), i)].pdgId(), delim = "/";
             }
@@ -299,7 +298,7 @@ namespace cepgen {
             oss_pdg << (HeavyIon)part.pdgId();
           else
             try {
-              oss_pdg << PDG::get().name(part.pdgId());
+              oss_pdg << (PDG::Id)part.pdgId();
             } catch (const Exception&) {
               oss_pdg << "?";
             }
@@ -347,12 +346,14 @@ namespace cepgen {
     //
     return out << utils::format(
                "Event content:\n"
-               " Id\tPDG id\t   Name\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E     "
+               " Id\tPDG id\t   Name\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E   "
+               "  "
                " \t M         \n"
                " --\t------\t   ----\t\t------\t----\t ------\t------\t----GeV/c---  ----GeV/c---  ----GeV/c---  "
                "----GeV/c---\t --GeV/c²--"
                "%s\n"
-               " ------------------------------------------------------------------------------------------------------"
+               " ----------------------------------------------------------------------------------------------------"
+               "--"
                "----------------------------\n"
                "\t\t\t\t\t\t\tBalance% 9.6e % 9.6e % 9.6e % 9.6e",
                os.str().c_str(),

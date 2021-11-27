@@ -28,13 +28,7 @@ namespace Pythia8 {
   /// Convert a CepGen particle momentum into its Pythia8 counterpart
   Vec4 momToVec4(const cepgen::Momentum& mom) { return Vec4(mom.px(), mom.py(), mom.pz(), mom.energy()); }
 
-  CepGenEvent::CepGenEvent()
-      : LHAup(3),
-        mp_(cepgen::PDG::get().mass(cepgen::PDG::proton)),
-        mp2_(mp_ * mp_),
-        inel1_(false),
-        inel2_(false),
-        params_(nullptr) {}
+  CepGenEvent::CepGenEvent() : LHAup(3), mp_(cepgen::PDG::get().mass(cepgen::PDG::proton)), mp2_(mp_ * mp_) {}
 
   void CepGenEvent::initialise(const cepgen::Parameters& params) {
     params_ = &params;
@@ -226,9 +220,10 @@ namespace Pythia8 {
   }
 
   unsigned short CepGenEvent::pythiaId(unsigned short cg_id) const {
-    for (const auto& py_cg : py_cg_corresp_)
-      if (py_cg.second == cg_id)
-        return py_cg.first;
+    auto it = std::find_if(
+        py_cg_corresp_.begin(), py_cg_corresp_.end(), [&cg_id](const auto& py_cg) { return py_cg.second == cg_id; });
+    if (it != py_cg_corresp_.end())
+      return it->first;
     return INVALID_ID;
   }
 

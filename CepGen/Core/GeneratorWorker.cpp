@@ -22,8 +22,8 @@
 #include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Integration/GridParameters.h"
-#include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/ProcessIntegrand.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Processes/Process.h"
 #include "CepGen/Utils/ProgressBar.h"
@@ -31,8 +31,7 @@
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  GeneratorWorker::GeneratorWorker(Parameters* params)
-      : integrand_(new Integrand(params)), integrator_(nullptr), params_(params), ps_bin_(UNASSIGNED_BIN) {
+  GeneratorWorker::GeneratorWorker(Parameters* params) : integrand_(new ProcessIntegrand(params)), params_(params) {
     CG_DEBUG("GeneratorWorker") << "New generator worker initialised for integration/event generation.\n\t"
                                 << "Parameters at " << (void*)params_ << ".";
   }

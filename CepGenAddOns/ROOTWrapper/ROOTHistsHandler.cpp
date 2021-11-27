@@ -60,15 +60,14 @@ namespace cepgen {
 
       const ParametersList variables_;
 
-      double cross_section_;
+      double cross_section_{1.};
       const utils::EventBrowser browser_;
     };
 
     ROOTHistsHandler::ROOTHistsHandler(const ParametersList& params)
         : ExportModule(params),
           file_(params.get<std::string>("filename", "output.root").c_str(), "recreate"),
-          variables_(params.get<ParametersList>("variables")),
-          cross_section_(1.) {
+          variables_(params.get<ParametersList>("variables")) {
       //--- extract list of variables/correlations to be plotted in histograms
       for (const auto& key : variables_.keys()) {
         const auto& vars = utils::split(key, ':');

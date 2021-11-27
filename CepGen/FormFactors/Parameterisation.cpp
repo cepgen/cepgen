@@ -19,30 +19,16 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/SuriYennie.h"
-#include "CepGen/Utils/Physics.h"
 
 namespace cepgen {
   namespace formfac {
     Parameterisation::Parameterisation()
-        : NamedModule<std::string>(ParametersList()),
-          mp_(PDG::get().mass(PDG::proton)),
-          mp2_(mp_ * mp_),
-          last_q2_(-1.),
-          FE(0.),
-          FM(0.),
-          GE(0.),
-          GM(0.) {}
+        : NamedModule<std::string>(ParametersList()), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {}
 
     Parameterisation::Parameterisation(const ParametersList& params)
-        : NamedModule<std::string>(params),
-          mp_(PDG::get().mass(PDG::proton)),
-          mp2_(mp_ * mp_),
-          last_q2_(-1.),
-          FE(0.),
-          FM(0.),
-          GE(0.),
-          GM(0.) {}
+        : NamedModule<std::string>(params), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {}
 
     Parameterisation::Parameterisation(const Parameterisation& param)
         : NamedModule<std::string>(param.parameters()),

@@ -16,9 +16,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// clang-format off
+#include "CepGen/Cards/PythonHandler.h" // ensuring include arrives first
+// clang-format on
+
 #include <algorithm>
 
-#include "CepGen/Cards/PythonHandler.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"
@@ -172,7 +175,7 @@ namespace cepgen {
 
         rt_params_->kinematics = Kinematics(pkin);
         if (proc_params.has<int>("mode"))
-          rt_params_->kinematics.incomingBeams().setMode((mode::Kinematics)proc_params.get<int>("mode"));
+          rt_params_->kinematics.incomingBeams().setMode(proc_params.getAs<int, mode::Kinematics>("mode"));
 
         //--- taming functions
         PyObject* ptam = element(process, "tamingFunctions");  // borrowed
@@ -230,10 +233,7 @@ namespace cepgen {
       if (PyObject_HasAttrString(cfg, OUTPUT_NAME) == 1) {
         PyObject* pout = PyObject_GetAttrString(cfg, OUTPUT_NAME);  // new
         if (pout) {
-          //if (isVector<ParametersList>(pout))
           parseOutputModules(pout);
-          //else
-          //parseOutputModule(pout);
           Py_CLEAR(pout);
         }
       }
@@ -248,9 +248,12 @@ namespace cepgen {
     }
 
     void PythonHandler::parseLogging(PyObject* log) {
-      int log_level = 0;
+      int log_level{(int)utils::Logger::get().level};
       fillParameter(log, "level", log_level);
       utils::Logger::get().level = (utils::Logger::Level)log_level;
+      bool extended{utils::Logger::get().extended()};
+      fillParameter(log, "extended", extended);
+      utils::Logger::get().setExtended(extended);
       std::vector<std::string> enabled_modules;
       fillParameter(log, "enabledModules", enabled_modules);
       for (const auto& mod : enabled_modules)

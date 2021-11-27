@@ -55,14 +55,18 @@ namespace cepgen {
     /// Generic constructor
     /// \param[in] module exception classifier
     /// \param[in] type exception type
-    /// \param[in] id exception code (useful for logging)
-    explicit LoggedException(const char* module = "", Type type = Type::undefined, short id = 0);
+    /// \param[in] lineno Line number where exception occured
+    explicit LoggedException(const char* module = "",
+                             Type type = Type::undefined,
+                             const char* file = "",
+                             short lineno = 0);
     /// Generic constructor
     /// \param[in] from method invoking the exception
     /// \param[in] module exception classifier
     /// \param[in] type exception type
-    /// \param[in] id exception code (useful for logging)
-    explicit LoggedException(const char* from, const char* module, Type type = Type::undefined, short id = 0);
+    /// \param[in] lineno Line number where exception occured
+    explicit LoggedException(
+        const char* from, const char* module, Type type = Type::undefined, const char* file = "", short lineno = 0);
     /// Copy constructor
     LoggedException(const LoggedException& rhs) noexcept;
     /// Default destructor (potentially killing the process)
@@ -129,29 +133,27 @@ namespace cepgen {
     }
 
     const char* what() const noexcept override;
-    std::string message() const override;
+    std::string message() const override { return message_.str(); }
 
     /// Origin of the exception
-    std::string from() const;
-    /// Exception code
-    int errorNumber() const;
+    const std::string& from() const { return from_; }
+    /// File where the exception occured
+    const std::string& file() const { return file_; }
+    /// Line number where the exception occured
+    short lineNumber() const { return line_num_; }
     /// Exception type
-    Type type() const;
+    const Type& type() const { return type_; }
     /// Human-readable dump of the exception message
     std::ostream& dump(std::ostream& os = *utils::Logger::get().output) const override;
 
   private:
     static char* now();
-    /// Origin of the exception
-    std::string from_;
-    /// Exception classification
-    std::string module_;
-    /// Message to throw
-    std::ostringstream message_;
-    /// Exception type
-    Type type_;
-    /// Integer exception number
-    short error_num_;
+    std::string from_;            ///< Origin of the exception
+    std::string module_;          ///< Exception classification
+    std::ostringstream message_;  ///< Message to throw
+    Type type_;                   ///< Exception type
+    std::string file_;            ///< File
+    short line_num_;              ///< Line number
   };
 
   /// Placeholder for debugging messages if logging threshold is not reached
@@ -183,20 +185,24 @@ namespace cepgen {
 #define __FUNC__ __PRETTY_FUNCTION__
 #endif
 
-#define CG_LOG cepgen::LoggedException(__FUNC__, "Logging", cepgen::Exception::Type::verbatim)
-#define CG_INFO(mod)                                       \
-  (!CG_LOG_MATCH(mod, information)) ? cepgen::NullStream() \
-                                    : cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::info)
-#define CG_DEBUG(mod)                                \
-  (!CG_LOG_MATCH(mod, debug)) ? cepgen::NullStream() \
-                              : cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::debug)
-#define CG_DEBUG_LOOP(mod)                                     \
-  (!CG_LOG_MATCH(mod, debugInsideLoop)) ? cepgen::NullStream() \
-                                        : cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::debug)
-#define CG_WARNING(mod)                                \
-  (!CG_LOG_MATCH(mod, warning)) ? cepgen::NullStream() \
-                                : cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::warning)
-#define CG_ERROR(mod) cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::error)
-#define CG_FATAL(mod) cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::fatal)
+#define CG_LOG cepgen::LoggedException(__FUNC__, "Logging", cepgen::Exception::Type::verbatim, __FILE__, __LINE__)
+#define CG_INFO(mod)                \
+  (!CG_LOG_MATCH(mod, information)) \
+      ? cepgen::NullStream()        \
+      : cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::info, __FILE__, __LINE__)
+#define CG_DEBUG(mod)         \
+  (!CG_LOG_MATCH(mod, debug)) \
+      ? cepgen::NullStream()  \
+      : cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::debug, __FILE__, __LINE__)
+#define CG_DEBUG_LOOP(mod)              \
+  (!CG_LOG_MATCH(mod, debugInsideLoop)) \
+      ? cepgen::NullStream()            \
+      : cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::debug, __FILE__, __LINE__)
+#define CG_WARNING(mod)         \
+  (!CG_LOG_MATCH(mod, warning)) \
+      ? cepgen::NullStream()    \
+      : cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::warning, __FILE__, __LINE__)
+#define CG_ERROR(mod) cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::error, __FILE__, __LINE__)
+#define CG_FATAL(mod) cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::fatal, __FILE__, __LINE__)
 
 #endif

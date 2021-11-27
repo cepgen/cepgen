@@ -29,7 +29,7 @@ namespace cepgen {
     /// \f$F_2\f$ parameterisation from Block, Durand, and Ha \cite Block:2014kza
     class BlockDurandHa final : public Parameterisation {
     public:
-      explicit BlockDurandHa(const ParametersList& params = ParametersList());
+      explicit BlockDurandHa(const ParametersList&);
       BlockDurandHa& eval(double xbj, double q2) override;
 
     private:

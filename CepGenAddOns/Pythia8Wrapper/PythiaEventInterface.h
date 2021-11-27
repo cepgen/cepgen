@@ -95,9 +95,9 @@ namespace Pythia8 {
   private:
     std::pair<int, int> findMothers(const cepgen::Event& ev, const cepgen::Particle& p) const;
     const double mp_, mp2_;
-    bool inel1_, inel2_;
+    bool inel1_{false}, inel2_{false};
     std::unordered_map<unsigned short, unsigned short> py_cg_corresp_;
-    const cepgen::Parameters* params_;  // borrowed
+    const cepgen::Parameters* params_{nullptr};  // borrowed
   };
 }  // namespace Pythia8
 #endif

@@ -66,11 +66,11 @@ namespace cepgen {
 
   protected:
     /// Random numbers generator seed fed to the algorithm
-    long long seed_;
+    long long seed_{0ll};
     /// Maximal number of trials for the algorithm
-    unsigned short max_trials_;
+    unsigned short max_trials_{1};
     /// List of runtime parameters steering this module
-    const Parameters* rt_params_;  // not owning
+    const Parameters* rt_params_{nullptr};  // not owning
   };
 }  // namespace cepgen
 

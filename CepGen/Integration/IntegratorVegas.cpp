@@ -56,7 +56,7 @@ namespace cepgen {
     /// A Vegas integrator state for integration (optional) and/or
     /// "treated" event generation
     std::unique_ptr<gsl_monte_vegas_state, gsl_monte_vegas_deleter> vegas_state_;
-    mutable unsigned long long r_boxes_;
+    mutable unsigned long long r_boxes_{0ull};
     mutable std::vector<double> x_new_;
   };
 
@@ -66,8 +66,7 @@ namespace cepgen {
       : IntegratorGSL(params),
         ncvg_(params.get<int>("numFunctionCalls", 50000)),
         chisq_cut_(params.get<double>("chiSqCut", 1.5)),
-        treat_(params.get<bool>("treat", true)),
-        r_boxes_(0) {
+        treat_(params.get<bool>("treat", true)) {
     verbosity_ = params.get<int>("verbose", -1);  // supersede the parent default verbosity level
   }
 

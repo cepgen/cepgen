@@ -20,12 +20,12 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/SuriYennie.h"
-#include "CepGen/Utils/Physics.h"
 
 namespace cepgen {
   namespace strfun {
-    SuriYennie::SuriYennie(const ParametersList &params) : Parameterisation(params), W1(0.), W2(0.), FE(0.), FM(0.) {
+    SuriYennie::SuriYennie(const ParametersList &params) : Parameterisation(params) {
       const auto &model = params.get<std::string>("model", "standard");
       if (model == "standard") {
         sy_params_.C1 = 0.86926;

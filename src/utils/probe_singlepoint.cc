@@ -54,11 +54,10 @@ int main(int argc, char* argv[]) {
     gen.parametersPtr()->clearOutputModulesSequence();
   }
 
-  CG_INFO("main") << gen.parameters();
-
-  CG_INFO("main") << "point: " << point;
+  CG_LOG << gen.parameters() << "\n\t"
+         << "point: " << point;
   const double weight = gen.computePoint(point);
-  CG_INFO("main") << "weight: " << weight;
+  CG_LOG << "weight: " << weight;
 
   return 0;
 }

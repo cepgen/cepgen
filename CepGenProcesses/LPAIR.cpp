@@ -16,8 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGenProcesses/LPAIR.h"
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/FormFactors/Parameterisation.h"
@@ -26,64 +24,28 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/String.h"
+#include "CepGenProcesses/LPAIR.h"
 
 namespace cepgen {
   namespace proc {
     LPAIR::LPAIR(const ParametersList& params)
         : Process(params, true),
           n_opt_(params.get<int>("nopt", 0)),
-          pair_(params.get<int>("pair")),
+          pair_(params.get<int>("pair", (int)PDG::muon)),
           symmetrise_(params.get<bool>("symmetrise", false)),
-          theta4_(0.),
-          phi6_cm_(0.),
-          x6_(0.),
-          ep1_(0.),
-          ep2_(0.),
-          p_cm_(0.),
-          ec4_(0.),
-          pc4_(0.),
-          mc4_(0.),
-          w4_(0.),
-          p12_(0.),
-          p1k2_(0.),
-          p2k1_(0.),
-          p13_(0.),
-          p14_(0.),
-          p25_(0.),
-          q1dq_(0.),
-          q1dq2_(0.),
-          s1_(0.),
-          s2_(0.),
-          epsi_(0.),
-          g5_(0.),
-          g6_(0.),
-          a5_(0.),
-          a6_(0.),
-          bb_(0.),
-          gram_(0.),
-          dd1_(0.),
-          dd2_(0.),
-          dd3_(0.),
-          dd4_(0.),
-          dd5_(0.),
-          delta_(0.),
-          g4_(0.),
-          sa1_(0.),
-          sa2_(0.),
-          sl1_(0.),
-          cos_theta4_(0.),
-          sin_theta4_(0.),
-          al4_(0.),
-          be4_(0.),
-          de3_(0.),
-          de5_(0.),
-          pt4_(0.),
-          jacobian_(0.),
           rnd_phi_(0., 2. * M_PI),
           rnd_side_(0, 1) {
       if (params_.has<ParticleProperties>("pair"))
         pair_ = params_.get<ParticleProperties>("pair").pdgid;
     }
+
+    LPAIR::LPAIR(const LPAIR& proc)
+        : Process(proc),
+          n_opt_(proc.n_opt_),
+          pair_(proc.pair_),
+          symmetrise_(proc.symmetrise_),
+          rnd_phi_(proc.rnd_phi_),
+          rnd_side_(proc.rnd_side_) {}
 
     //---------------------------------------------------------------------------------------------
 
@@ -122,11 +84,9 @@ namespace cepgen {
 
       //--- variables mapping
 
-      std::vector<std::string> var_names = {"u_t1", "u_t2", "u_s2"};
-      x_tmp_.resize(var_names.size());
-      for (size_t i = 0; i < x_tmp_.size(); ++i)
-        defineVariable(x_tmp_[i], Mapping::linear, {0., 1.}, {0., 1.}, var_names[i]);
-
+      defineVariable(u_t1_, Mapping::linear, {0., 1.}, {0., 1.}, "u_t1");
+      defineVariable(u_t2_, Mapping::linear, {0., 1.}, {0., 1.}, "u_t2");
+      defineVariable(u_s2_, Mapping::linear, {0., 1.}, {0., 1.}, "u_s2");
       defineVariable(w4_, Mapping::power_law, w_limits_, w_limits_, "w4");
       defineVariable(theta4_, Mapping::linear, {0., M_PI}, {0., M_PI}, "theta4");
       defineVariable(phi6_cm_, Mapping::linear, {0., 2. * M_PI}, {0., 2. * M_PI}, "phi6cm");
@@ -169,30 +129,24 @@ namespace cepgen {
 
       jacobian_ = 0.;
 
-      // sig1 = sigma and sig2 = sigma' in [1]
+      // min(s2) = sigma and sig2 = sigma' in [1]
       const double sig = mc4_ + sqrt(mY2_);
-      double sig1 = sig * sig;
+      Limits s2_range(sig * sig, s_ + mX2_ - 2 * sqrt(mX2_) * sqs_);
 
       CG_DEBUG_LOOP("LPAIR") << "mc4 = " << mc4_ << "\n\t"
-                             << "sig1 = " << sig1 << ".";
+                             << "s2 in range " << s2_range << ".";
 
       const double d6 = w4_ - mY2_;
 
-      CG_DEBUG_LOOP("LPAIR") << "w1 = " << mA2_ << "\n\t"
-                             << "w2 = " << mB2_ << "\n\t"
-                             << "w3 = " << mX2_ << "\n\t"
-                             << "w4 = " << w4_ << "\n\t"
-                             << "w5 = " << mY2_;
-
-      CG_DEBUG_LOOP("LPAIR") << "w31 = " << masses_.w31 << "\n\t"
-                             << "w52 = " << masses_.w52 << "\n\t"
-                             << "w12 = " << masses_.w12;
+      CG_DEBUG_LOOP("LPAIR") << "w1 = " << mA2_ << ", w2 = " << mB2_ << ", w3 = " << mX2_ << ", w4 = " << w4_
+                             << ", w5 = " << mY2_ << ". w31 = " << masses_.w31 << ", w52 = " << masses_.w52
+                             << ", w12 = " << masses_.w12 << ".";
 
       const double ss = s_ + masses_.w12;
 
       const double rl1 = ss * ss - 4. * mA2_ * s_;  // lambda(s, m1**2, m2**2)
       if (rl1 <= 0.) {
-        CG_WARNING("LPAIR") << "rl1 = " << rl1 << " <= 0";
+        CG_DEBUG_LOOP("LPAIR") << "rl1 = " << rl1 << " <= 0";
         return false;
       }
       sl1_ = sqrt(rl1);
@@ -200,16 +154,14 @@ namespace cepgen {
       s2_ = 0.;
       double ds2 = 0.;
       if (n_opt_ == 0) {
-        const double smax = s_ + mX2_ - 2. * sqrt(mX2_) * sqs_;
-        const auto s2 = map(x(2), Limits(sig1, smax), "s2");
-        s2_ = s2.first;
+        const auto s2 = map(u_s2_, s2_range, "s2");
+        s2_range.min() = s2_ = s2.first;  // why lower s2 range update?
         ds2 = s2.second;
-        sig1 = s2_;  //FIXME!!!!!!!!!!!!!!!!!!!!
       }
 
       CG_DEBUG_LOOP("LPAIR") << "s2 = " << s2_;
 
-      const double sp = s_ + mX2_ - sig1, d3 = sig1 - mB2_;
+      const double sp = s_ + mX2_ - s2_range.min(), d3 = s2_range.min() - mB2_;
       const double rl2 = sp * sp - 4. * s_ * mX2_;  // lambda(s, m3**2, sigma)
       if (rl2 <= 0.) {
         CG_DEBUG_LOOP("LPAIR") << "rl2 = " << rl2 << " <= 0";
@@ -237,14 +189,14 @@ namespace cepgen {
       /////
 
       // t1, the first photon propagator, is defined here
-      const auto t1 = map(x(0), Limits(t1_min, t1_max), "t1");
+      const Limits t1_range(t1_min, t1_max);
+      const auto t1 = map(u_t1_, t1_range, "t1");
       t1_ = t1.first;
       const double dt1 = -t1.second;  // changes wrt mapt1 : dx->-dx
 
-      CG_DEBUG_LOOP("LPAIR") << "Definition of t1 = " << t1_ << " according to\n\t"
-                             << "(t1min, t1max) = (" << t1_min << ", " << t1_max << ")";
+      CG_DEBUG_LOOP("LPAIR") << "Definition of t1 = " << t1_ << " in range " << t1_range << ".";
 
-      dd4_ = w4_ - t1_;
+      deltas_[3] = w4_ - t1_;
 
       const double d8 = t1_ - mB2_;
       const double t13 = t1_ - mA2_ - mX2_;
@@ -257,8 +209,7 @@ namespace cepgen {
 
       const double sl3 = sqrt(-sa1_);
 
-      Limits s2_lim;
-      s2_lim.min() = sig * sig;
+      s2_range.min() = sig * sig;
       // one computes splus and (s2x=s2max)
       double splus;
       if (mA2_ != 0.) {
@@ -270,26 +221,26 @@ namespace cepgen {
 
         if (fabs((sb - sd) / sd) >= 1.) {
           splus = sb - sd;
-          s2_lim.max() = se / splus;
+          s2_range.max() = se / splus;
         } else {
-          s2_lim.max() = sb + sd;
-          splus = se / s2_lim.max();
+          s2_range.max() = sb + sd;
+          splus = se / s2_range.max();
         }
       } else {  // 3
-        s2_lim.max() = (s_ * (t1_ * (s_ + d8 - mX2_) - mB2_ * mX2_) + mB2_ * mX2_ * (mB2_ + mX2_ - t1_)) / (ss * t13);
-        splus = s2_lim.min();
+        s2_range.max() = (s_ * (t1_ * (s_ + d8 - mX2_) - mB2_ * mX2_) + mB2_ * mX2_ * (mB2_ + mX2_ - t1_)) / (ss * t13);
+        splus = s2_range.min();
       }
       // 4
-      double s2x = s2_lim.max();
+      double s2x = s2_range.max();
 
       CG_DEBUG_LOOP("LPAIR") << "s2x = s2max = " << s2x;
 
       if (n_opt_ < 0) {  // 5
-        if (splus > s2_lim.min()) {
-          s2_lim.min() = splus;
-          CG_DEBUG_LOOP("LPAIR") << "min(sig2) truncated to splus = " << splus;
+        if (splus > s2_range.min()) {
+          s2_range.min() = splus;
+          CG_DEBUG_LOOP("LPAIR") << "min(s2) truncated to splus = " << splus;
         }
-        const auto s2 = n_opt_ < -1 ? map(x(2), s2_lim, "s2") : mapla(t1_, mB2_, x(2), s2_lim);  // n_opt_==-1
+        const auto s2 = n_opt_ < -1 ? map(u_s2_, s2_range, "s2") : mapla(t1_, mB2_, u_s2_, s2_range);  // n_opt_==-1
         s2_ = s2.first;
         ds2 = s2.second;
         s2x = s2_;
@@ -310,19 +261,19 @@ namespace cepgen {
 
       // t2max, t2min definitions from eq. (A.12) and (A.13) in [1]
       const double t2_max = mB2_ + mY2_ - (r1 * r2 + sl4) / s2x * 0.5,
-                   t2_min =
-                       (masses_.w52 * dd4_ + (dd4_ - masses_.w52) * (dd4_ * mB2_ - masses_.w52 * t1_) / s2x) / t2_max;
+                   t2_min = (masses_.w52 * deltas_[3] +
+                             (deltas_[3] - masses_.w52) * (deltas_[3] * mB2_ - masses_.w52 * t1_) / s2x) /
+                            t2_max;
 
       // t2, the second photon propagator, is defined here
-      const auto t2 = map(x(1), Limits(t2_min, t2_max), "t2");
+      const auto t2 = map(u_t2_, Limits(t2_min, t2_max), "t2");
       t2_ = t2.first;
       const double dt2 = -t2.second;  // changes wrt mapt2 : dx->-dx
 
       // \f$\delta_6=m_4^2-m_5^2\f$ as defined in Vermaseren's paper
-      const double tau = t1_ - t2_, r3 = dd4_ - t2_, r4 = masses_.w52 - t2_;
+      const double tau = t1_ - t2_, r3 = deltas_[3] - t2_, r4 = masses_.w52 - t2_;
 
-      CG_DEBUG_LOOP("LPAIR") << "tau= " << tau << "\n\t"
-                             << "r1-4 = " << r1 << ", " << r2 << "," << r3 << ", " << r4;
+      CG_DEBUG_LOOP("LPAIR") << "tau = " << tau << ", r1-4 = " << r1 << ", " << r2 << ", " << r3 << ", " << r4;
 
       const double b = r3 * r4 - 2. * (t1_ + mB2_) * t2_;
       const double c = t2_ * d6 * d8 + (d6 - d8) * (d6 * mB2_ - d8 * mY2_);
@@ -349,38 +300,39 @@ namespace cepgen {
       double s2p;
       if (fabs((sl5 - b) / sl5) >= 1.) {
         s2p = 0.5 * (sl5 - b) / t2_;
-        s2_lim.min() = c / (t2_ * s2p);
+        s2_range.min() = c / (t2_ * s2p);
       } else {  // 8
-        s2_lim.min() = 0.5 * (-sl5 - b) / t2_;
-        s2p = c / (t2_ * s2_lim.min());
+        s2_range.min() = 0.5 * (-sl5 - b) / t2_;
+        s2p = c / (t2_ * s2_range.min());
       }
       // 9
       if (n_opt_ >= 1) {
-        const auto s2 = n_opt_ > 1 ? map(x(2), s2_lim, "s2") : mapla(t1_, mB2_, x(2), s2_lim);
+        const auto s2 = n_opt_ > 1 ? map(u_s2_, s2_range, "s2") : mapla(t1_, mB2_, u_s2_, s2_range);
         s2_ = s2.first;
         ds2 = s2.second;
       }
 
       const double ap = -0.25 * pow(s2_ + d8, 2) + s2_ * t1_;
 
-      dd1_ = 0.25 * (s2_ - s2_lim.max()) * (mA2_ != 0. ? (splus - s2_) * mA2_ : ss * t13);
-      dd2_ = 0.25 * (s2_ - s2_lim.min()) * (s2p - s2_) * t2_;
+      deltas_[0] = 0.25 * (s2_ - s2_range.max()) * (mA2_ != 0. ? (splus - s2_) * mA2_ : ss * t13);
+      deltas_[1] = 0.25 * (s2_ - s2_range.min()) * (s2p - s2_) * t2_;
 
-      CG_DEBUG_LOOP("LPAIR") << "t2      = " << t2_ << "\n\t"
-                             << "s2      = " << s2_ << "\n\t"
-                             << "s2p     = " << s2p << "\n\t"
-                             << "splus   = " << splus << "\n\t"
-                             << "s2 range= " << s2_lim;
+      CG_DEBUG_LOOP("LPAIR") << "\n\t"
+                             << "t2       = " << t2_ << "\n\t"
+                             << "s2       = " << s2_ << "\n\t"
+                             << "s2p      = " << s2p << "\n\t"
+                             << "splus    = " << splus << "\n\t"
+                             << "s2 range = " << s2_range;
 
       const double yy4 = cos(theta4_);
-      const double dd = dd1_ * dd2_;
+      const double dd = deltas_[0] * deltas_[1];
       p12_ = 0.5 * (s_ - mA2_ - mB2_);
       const double st = s2_ - t1_ - mB2_;
       const double delb = (2. * mB2_ * r3 + r4 * st) * (4. * p12_ * t1_ - (t1_ - masses_.w31) * st) / (16. * ap);
 
       CG_DEBUG_LOOP("LPAIR") << std::scientific << "dd = " << dd << ", "
-                             << "dd1 = " << dd1_ << ", "
-                             << "dd2 = " << dd2_ << std::fixed;
+                             << "dd1 = " << deltas_[0] << ", "
+                             << "dd2 = " << deltas_[1] << std::fixed;
 
       if (dd <= 0.) {
         CG_WARNING("LPAIR:pickin") << "dd = " << dd << " <= 0.";
@@ -428,12 +380,12 @@ namespace cepgen {
         } else {
           s1m = sbb - sdd;
           s1p = see / s1m;
-        }                                                 // 12
-        dd3_ = -0.25 * mB2_ * (s1p - s1_) * (s1m - s1_);  // 13
-      } else {                                            // 14
+        }                                                       // 12
+        deltas_[2] = -0.25 * mB2_ * (s1p - s1_) * (s1m - s1_);  // 13
+      } else {                                                  // 14
         const double s1p = (s_ * (t2_ * (s_ - mY2_ + t2_ - mA2_) - mA2_ * mY2_) + mA2_ * mY2_ * (mA2_ + mY2_ - t2_)) /
                            (t25 * (s_ - masses_.w12));
-        dd3_ = -0.25 * t25 * (s_ - masses_.w12) * (s1p - s1_);
+        deltas_[2] = -0.25 * t25 * (s_ - masses_.w12) * (s1p - s1_);
       }
       // 15
       //const double acc3 = (s1p-s1_)/(s1p+s1_);
@@ -451,14 +403,14 @@ namespace cepgen {
         s1pp = sse / s1pm;
       }
       // 17
-      dd4_ = -0.25 * t1_ * (s1_ - s1pp) * (s1_ - s1pm);
+      deltas_[3] = -0.25 * t1_ * (s1_ - s1pp) * (s1_ - s1pm);
       //const double acc4 = ( s1_-s1pm )/( s1_+s1pm );
-      dd5_ = dd1_ + dd3_ +
-             ((p12_ * (t1_ - masses_.w31) * 0.5 - mA2_ * p2k1_) * (p2k1_ * (t2_ - masses_.w52) - mB2_ * r3) -
-              delta_ * (2. * p12_ * p2k1_ - mB2_ * (t1_ - masses_.w31))) /
-                 p2k1_;
-      if (dd5_ < 0.) {
-        CG_WARNING("LPAIR") << "dd5 = " << dd5_ << " < 0";
+      deltas_[4] = deltas_[0] + deltas_[2] +
+                   ((p12_ * (t1_ - masses_.w31) * 0.5 - mA2_ * p2k1_) * (p2k1_ * (t2_ - masses_.w52) - mB2_ * r3) -
+                    delta_ * (2. * p12_ * p2k1_ - mB2_ * (t1_ - masses_.w31))) /
+                       p2k1_;
+      if (deltas_[4] < 0.) {
+        CG_WARNING("LPAIR") << "dd5 = " << deltas_[4] << " < 0";
         return false;
       }
 
@@ -506,7 +458,7 @@ namespace cepgen {
                              << "               momentum: p4 = " << pc4_ << "\n\t"
                              << "         invariant mass: m4 = " << mc4_ << ".";
 
-      pt4_ = sqrt(dd5_ / s_) / p_cm_;
+      pt4_ = sqrt(deltas_[4] / s_) / p_cm_;
       sin_theta4_ = pt4_ / pc4_;
 
       if (sin_theta4_ > 1.) {
@@ -536,7 +488,7 @@ namespace cepgen {
 
       //--- beam 1 -> 3
       const double ep3 = ep1_ - de3_, pp3 = sqrt(ep3 * ep3 - mX2_);
-      const double pt3 = sqrt(dd1_ / s_) / p_cm_;
+      const double pt3 = sqrt(deltas_[0] / s_) / p_cm_;
 
       if (pt3 > pp3) {
         CG_WARNING("LPAIR") << "Invalid momentum for outgoing beam 1.";
@@ -555,7 +507,7 @@ namespace cepgen {
 
       //--- beam 2 -> 5
       const double ep5 = ep2_ - de5_, pp5 = sqrt(ep5 * ep5 - mY2_);
-      const double pt5 = sqrt(dd3_ / s_) / p_cm_;
+      const double pt5 = sqrt(deltas_[2] / s_) / p_cm_;
 
       if (pt5 > pp5) {
         CG_WARNING("LPAIR") << "Invalid momentum for outgoing beam 2.";
@@ -594,29 +546,26 @@ namespace cepgen {
     double LPAIR::computeWeight() {
       ep1_ = (*event_)[Particle::IncomingBeam1][0].energy();
       ep2_ = (*event_)[Particle::IncomingBeam2][0].energy();
-      // Mass difference between the first outgoing particle
-      // and the first incoming particle
+      // Mass difference between the first outgoing particle and the first incoming particle
       masses_.w31 = mX2_ - mA2_;
-      // Mass difference between the second outgoing particle
-      // and the second incoming particle
+      // Mass difference between the second outgoing particle and the second incoming particle
       masses_.w52 = mY2_ - mB2_;
       // Mass difference between the two incoming particles
       masses_.w12 = mA2_ - mB2_;
-      // Mass difference between the central two-photons system
-      // and the second outgoing particle
+      // Mass difference between the central two-photons system and the second outgoing particle
 
       const double mx = sqrt(mX2_), my = sqrt(mY2_);
       CG_DEBUG_LOOP("LPAIR") << "sqrt(s) = " << sqs_ << " GeV\n\t"
-                             << "m(X1) = " << mx << " GeV\t"
-                             << "m(X2) = " << my << " GeV";
+                             << "m^2(X) = " << mX2_ << " GeV^2, m(X) = " << mx << " GeV\n\t"
+                             << "m^2(Y) = " << mY2_ << " GeV^2, m(Y) = " << my << " GeV";
 
-      // The maximal energy for the central system is its CM energy with the outgoing particles' mass energy subtracted (or wmax if specified)
+      // Maximal energy for the central system is beam-beam CM energy with the outgoing particles' mass energy subtracted (or wmax if specified)
       w_limits_.max() = std::min(pow(sqs_ - mx - my, 2), w_limits_.max());
 
       // compute the two-photon energy for this point
       mc4_ = sqrt(w4_);
 
-      CG_DEBUG_LOOP("LPAIR") << "Computed value for w4 = " << w4_ << " → mc4 = " << mc4_;
+      CG_DEBUG_LOOP("LPAIR") << "Computed value for w4 = " << w4_ << " -> mc4 = " << mc4_;
 
       if (!orient()) {
         CG_DEBUG_LOOP("LPAIR") << "Orient failed.";
@@ -634,7 +583,7 @@ namespace cepgen {
 
       const double ecm6 = w4_ / (2. * mc4_), pp6cm = sqrt(ecm6 * ecm6 - masses_.Ml2);
 
-      jacobian_ *= pp6cm / (mc4_ * constants::SCONSTB * s_);
+      jacobian_ *= pp6cm / (mc4_ * SCONSTB * s_);
 
       // Let the most obscure part of this code begin...
 
@@ -983,9 +932,9 @@ namespace cepgen {
                          (bb_ * (qqq - g4_ - qdq * (t1_ + t2_ + 2. * masses_.Ml2)) -
                           2. * (t1_ + 2. * masses_.Ml2) * (t2_ + 2. * masses_.Ml2) * qqq) *
                          t1_ * t2_;  // magnetic-magnetic
-      const double t12 = 128. * (-bb_ * (dd2_ + g6_) - 2. * (t1_ + 2. * masses_.Ml2) * (sa2_ * qqq + a6_ * a6_)) *
+      const double t12 = 128. * (-bb_ * (deltas_[1] + g6_) - 2. * (t1_ + 2. * masses_.Ml2) * (sa2_ * qqq + a6_ * a6_)) *
                          t1_;  // electric-magnetic
-      const double t21 = 128. * (-bb_ * (dd4_ + g5_) - 2. * (t2_ + 2. * masses_.Ml2) * (sa1_ * qqq + a5_ * a5_)) *
+      const double t21 = 128. * (-bb_ * (deltas_[3] + g5_) - 2. * (t2_ + 2. * masses_.Ml2) * (sa1_ * qqq + a5_ * a5_)) *
                          t2_;  // magnetic-electric
       const double t22 = 512. * (bb_ * (delta_ * delta_ - gram_) - pow(epsi_ - delta_ * (qdq + q1dq2_), 2) -
                                  sa1_ * a6_ * a6_ - sa2_ * a5_ * a5_ - sa1_ * sa2_ * qqq);  // electric-electric

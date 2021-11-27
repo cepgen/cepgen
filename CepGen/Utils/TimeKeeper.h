@@ -35,7 +35,7 @@ namespace cepgen {
     class TimeKeeper {
     public:
       /// Object constructor
-      explicit TimeKeeper();
+      explicit TimeKeeper() = default;
 
       /// Reset all counters and the timer
       void clear();

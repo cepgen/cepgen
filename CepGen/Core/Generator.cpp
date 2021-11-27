@@ -24,8 +24,8 @@
 #include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Integration/GridParameters.h"
-#include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/ProcessIntegrand.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Processes/Process.h"
@@ -33,7 +33,7 @@
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  Generator::Generator(bool safe_mode) : parameters_(new Parameters), result_(-1.), result_error_(-1.) {
+  Generator::Generator(bool safe_mode) : parameters_(new Parameters) {
     CG_DEBUG("Generator:init") << "Generator initialized";
     static bool init = false;
     if (!init) {
@@ -45,7 +45,7 @@ namespace cepgen {
     srandom(time.time_since_epoch().count());
   }
 
-  Generator::Generator(Parameters* ip) : parameters_(ip), result_(-1.), result_error_(-1.) {}
+  Generator::Generator(Parameters* ip) : parameters_(ip) {}
 
   Generator::~Generator() {
     if (parameters_->timeKeeper())
@@ -53,28 +53,24 @@ namespace cepgen {
   }
 
   void Generator::clearRun() {
-    generator_.reset(new GeneratorWorker(parameters_.get()));
+    worker_.reset(new GeneratorWorker(parameters_.get()));
     result_ = result_error_ = -1.;
     parameters_->prepareRun();
   }
 
   Parameters& Generator::parametersRef() { return *parameters_; }
 
-  void Generator::setParameters(Parameters* ip) {
-    parameters_.reset(ip);
-    if (parameters_->hasProcess())
-      parameters_->process().setKinematics(parameters_->kinematics);
-  }
+  void Generator::setParameters(Parameters* ip) { parameters_.reset(ip); }
 
   double Generator::computePoint(const std::vector<double>& coord) {
-    if (!generator_)
+    if (!worker_)
       clearRun();
     if (!parameters_->hasProcess())
       throw CG_FATAL("Generator:computePoint") << "Trying to compute a point with no process specified!";
     const size_t ndim = parameters_->process().ndim();
     if (coord.size() != ndim)
       throw CG_FATAL("Generator:computePoint") << "Invalid phase space dimension (ndim=" << ndim << ")!";
-    double res = generator_->integrand().eval(coord);
+    double res = worker_->integrand().eval(coord);
     CG_DEBUG("Generator:computePoint") << "Result for x[" << ndim << "] = " << coord << ":\n\t" << res << ".";
     return res;
   }
@@ -110,10 +106,10 @@ namespace cepgen {
       integ = IntegratorFactory::get().build(*parameters_->integrator);
     }
     integrator_ = std::move(integ);
-    if (!generator_)
+    if (!worker_)
       clearRun();
-    integrator_->setIntegrand(generator_->integrand());
-    generator_->setIntegrator(integrator_.get());
+    integrator_->setIntegrand(worker_->integrand());
+    worker_->setIntegrator(integrator_.get());
     CG_INFO("Generator:integrator") << "Generator will use a " << integrator_->name() << "-type integrator.";
   }
 
@@ -169,7 +165,7 @@ namespace cepgen {
 
     //--- launch the event generation
 
-    generator_->generate(num_events, callback);
+    worker_->generate(num_events, callback);
 
     const double gen_time_s = tmr.elapsed();
     const double rate_ms =

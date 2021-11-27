@@ -32,7 +32,7 @@ namespace mstw {
   class Grid final : public cepgen::strfun::Parameterisation, private cepgen::GridHandler<2, 2> {
   public:
     /// Grid MSTW structure functions evaluator
-    explicit Grid(const cepgen::ParametersList& params = cepgen::ParametersList());
+    explicit Grid(const cepgen::ParametersList&);
     static std::string description() { return "MSTW(grid)"; }
 
     /// Grid header information as parsed from the file
@@ -50,10 +50,10 @@ namespace mstw {
     };
     /// Structure functions value at a given \f$Q^2/x_{\rm Bj}\f$ coordinate
     struct sfval_t {
-      float q2;   ///< four-momentum transfer, in GeV\f$^2\f$
-      float xbj;  ///< Bjorken's scaling variable
-      double f2;  ///< Transverse structure function value
-      double fl;  ///< Longitudinal structure function value
+      float q2{0.};   ///< four-momentum transfer, in GeV\f$^2\f$
+      float xbj{0.};  ///< Bjorken's scaling variable
+      double f2{0.};  ///< Transverse structure function value
+      double fl{0.};  ///< Longitudinal structure function value
     };
 
     /// Compute the structure functions at a given \f$Q^2/x_{\rm Bj}\f$
@@ -121,8 +121,8 @@ namespace mstw {
     CG_DEBUG("MSTW") << "MSTW@" << header_.order << " grid evaluator built "
                      << "for " << header_.nucleon << " structure functions (" << header_.cl << ")\n\t"
                      << "xBj in range [" << std::pow(10., bounds[0].first) << ":" << std::pow(10., bounds[0].second)
-                     << "]\n\t" << L" Q² in range [" << std::pow(10., bounds[1].first) << ":"
-                     << std::pow(10., bounds[1].second) << "].";
+                     << "], Q² in range [" << std::pow(10., bounds[1].first) << ":" << std::pow(10., bounds[1].second)
+                     << "].";
   }
 
   std::string Grid::describe() const {
@@ -142,7 +142,7 @@ namespace mstw {
 
   std::ostream& operator<<(std::ostream& os, const Grid::sfval_t& val) {
     return os << cepgen::utils::format(
-               L"xbj = %.4f\tQ² = %.5e GeV²\tF₂ = % .6e\tFₗ = % .6e", val.xbj, val.q2, val.f2, val.fl);
+               "xbj = %.4f\tQ² = %.5e GeV²\tF_2 = % .6e\tF_1 = % .6e", val.xbj, val.q2, val.f2, val.fl);
   }
 
   std::ostream& operator<<(std::ostream& os, const Grid::header_t::order_t& order) {

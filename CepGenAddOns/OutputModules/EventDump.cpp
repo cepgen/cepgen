@@ -17,6 +17,7 @@
  */
 
 #include <fstream>
+#include <iostream>  // for cout
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"
@@ -42,14 +43,13 @@ namespace cepgen {
     private:
       bool save_banner_;
       int print_every_;
-      std::ostream* out_;
+      std::ostream* out_{nullptr};
     };
 
     EventDump::EventDump(const ParametersList& params)
         : ExportModule(params),
           save_banner_(params.get<bool>("saveBanner", true)),
-          print_every_(params.get<int>("printEvery", 10)),
-          out_(nullptr) {
+          print_every_(params.get<int>("printEvery", 10)) {
       if (params.has<std::string>("filename"))
         out_ = new std::ofstream(params.get<std::string>("filename"));
       else

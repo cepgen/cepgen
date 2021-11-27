@@ -23,8 +23,8 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Utils/Physics.h"
 
 namespace cepgen {
   namespace strfun {
@@ -32,7 +32,7 @@ namespace cepgen {
     class FioreBrasse final : public Parameterisation {
     public:
       /// Fiore \cite Fiore:2002re and Brasse \cite Brasse:1976bf proton structure functions
-      explicit FioreBrasse(const ParametersList& params = ParametersList());
+      explicit FioreBrasse(const ParametersList&);
       static std::string description() { return "Fiore-Brasse F2 parameterisation of low-mass resonances"; }
 
       FioreBrasse& eval(double xbj, double q2) override;

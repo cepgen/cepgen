@@ -123,36 +123,39 @@ namespace cepgen {
   bool ParametersList::empty() const { return keys(false).empty(); }
 
   std::ostream& operator<<(std::ostream& os, const ParametersList& params) {
-    const auto beg = os.tellp();
+    std::string sep;
+    const auto key_name = [&](const auto& key) -> std::string {
+      return key == ParametersList::MODULE_NAME ? "name=" : key + "=";
+    };
     for (const auto& kv : params.int_values_)
-      os << (os.tellp() > beg ? ", " : "") << kv.first << "=int(" << kv.second << ")";
+      os << sep << key_name(kv.first) << "int(" << kv.second << ")", sep = ", ";
     for (const auto& kv : params.dbl_values_)
-      os << (os.tellp() > beg ? ", " : "") << kv.first << "=double(" << kv.second << ")";
+      os << sep << key_name(kv.first) << "double(" << kv.second << ")", sep = ", ";
     for (const auto& kv : params.str_values_)
-      os << (os.tellp() > beg ? ", " : "") << kv.first << "=string(" << kv.second << ")";
+      os << sep << key_name(kv.first) << "string(" << kv.second << ")", sep = ", ";
     for (const auto& kv : params.param_values_)
-      os << (os.tellp() > beg ? ", " : "") << kv.first << "=param{" << kv.second << "}";
+      os << sep << key_name(kv.first) << "param{" << kv.second << "}", sep = ", ";
     for (const auto& kv : params.lim_values_)
-      os << (os.tellp() > beg ? ", " : "") << kv.first << "=limits(" << kv.second << ")";
+      os << sep << key_name(kv.first) << "limits(" << kv.second << ")", sep = ", ";
     for (const auto& kv : params.vec_int_values_) {
-      os << (os.tellp() > beg ? ", " : "") << kv.first << "=vint(";
-      bool first = true;
-      for (const auto& v : kv.second)
-        os << (first ? "" : ", ") << v, first = false;
+      os << sep << key_name(kv.first) << "vint(", sep = ", ";
+      std::string sep1;
+      for (const auto& val : kv.second)
+        os << sep1 << val, sep1 = ", ";
       os << ")";
     }
     for (const auto& kv : params.vec_dbl_values_) {
-      os << (os.tellp() > beg ? ", " : "") << kv.first << "=vdouble(";
-      bool first = true;
-      for (const auto& v : kv.second)
-        os << (first ? "" : ", ") << v, first = false;
+      os << sep << key_name(kv.first) << "vdouble(", sep = ", ";
+      std::string sep1;
+      for (const auto& val : kv.second)
+        os << sep1 << val, sep1 = ", ";
       os << ")";
     }
     for (const auto& kv : params.vec_str_values_) {
-      os << (os.tellp() > beg ? ", " : "") << kv.first << "=vstring(";
-      bool first = true;
-      for (const auto& v : kv.second)
-        os << (first ? "" : ", ") << v, first = false;
+      os << sep << key_name(kv.first) << "vstring(", sep = ", ";
+      std::string sep1;
+      for (const auto& val : kv.second)
+        os << sep1 << val, sep1 = ", ";
       os << ")";
     }
     return os;
@@ -160,24 +163,16 @@ namespace cepgen {
 
   std::vector<std::string> ParametersList::keys(bool name_key) const {
     std::vector<std::string> out;
-    for (const auto& p : param_values_)
-      out.emplace_back(p.first);
-    for (const auto& p : vec_param_values_)
-      out.emplace_back(p.first);
-    for (const auto& p : int_values_)
-      out.emplace_back(p.first);
-    for (const auto& p : vec_int_values_)
-      out.emplace_back(p.first);
-    for (const auto& p : dbl_values_)
-      out.emplace_back(p.first);
-    for (const auto& p : vec_dbl_values_)
-      out.emplace_back(p.first);
-    for (const auto& p : str_values_)
-      out.emplace_back(p.first);
-    for (const auto& p : vec_str_values_)
-      out.emplace_back(p.first);
-    for (const auto& p : lim_values_)
-      out.emplace_back(p.first);
+    auto key = [](const auto& p) { return p.first; };
+    std::transform(param_values_.begin(), param_values_.end(), std::back_inserter(out), key);
+    std::transform(vec_param_values_.begin(), vec_param_values_.end(), std::back_inserter(out), key);
+    std::transform(int_values_.begin(), int_values_.end(), std::back_inserter(out), key);
+    std::transform(vec_int_values_.begin(), vec_int_values_.end(), std::back_inserter(out), key);
+    std::transform(dbl_values_.begin(), dbl_values_.end(), std::back_inserter(out), key);
+    std::transform(vec_dbl_values_.begin(), vec_dbl_values_.end(), std::back_inserter(out), key);
+    std::transform(str_values_.begin(), str_values_.end(), std::back_inserter(out), key);
+    std::transform(vec_str_values_.begin(), vec_str_values_.end(), std::back_inserter(out), key);
+    std::transform(lim_values_.begin(), lim_values_.end(), std::back_inserter(out), key);
     if (!name_key) {
       const auto it_name = std::find(out.begin(), out.end(), MODULE_NAME);
       if (it_name != out.end())
@@ -248,9 +243,10 @@ namespace cepgen {
 
   template <>
   ParametersList ParametersList::get<ParametersList>(std::string key, const ParametersList& def) const {
-    for (const auto& kv : param_values_)
-      if (kv.first == key)
-        return kv.second;
+    auto val =
+        std::find_if(param_values_.begin(), param_values_.end(), [&key](const auto& kv) { return kv.first == key; });
+    if (val != param_values_.end())
+      return val->second;
     CG_DEBUG("ParametersList") << "Failed to retrieve parameters with key=" << key << ". "
                                << "Default value: " << def << ".";
     return def;
@@ -259,9 +255,10 @@ namespace cepgen {
   template <>
   std::vector<ParametersList> ParametersList::get<std::vector<ParametersList> >(
       std::string key, const std::vector<ParametersList>& def) const {
-    for (const auto& kv : vec_param_values_)
-      if (kv.first == key)
-        return kv.second;
+    auto val = std::find_if(
+        vec_param_values_.begin(), vec_param_values_.end(), [&key](const auto& kv) { return kv.first == key; });
+    if (val != vec_param_values_.end())
+      return val->second;
     CG_DEBUG("ParametersList") << "Failed to retrieve parameters collection with key=" << key << ". "
                                << "Default value: " << def << ".";
     return def;
@@ -273,9 +270,9 @@ namespace cepgen {
 
   template <>
   int ParametersList::get<int>(std::string key, const int& def) const {
-    for (const auto& kv : int_values_)
-      if (kv.first == key)
-        return kv.second;
+    auto val = std::find_if(int_values_.begin(), int_values_.end(), [&key](const auto& kv) { return kv.first == key; });
+    if (val != int_values_.end())
+      return val->second;
     CG_DEBUG("ParametersList") << "Failed to retrieve integer parameter with key=" << key << ". "
                                << "Default value: " << def << ".";
     return def;
@@ -283,9 +280,10 @@ namespace cepgen {
 
   template <>
   std::vector<int> ParametersList::get<std::vector<int> >(std::string key, const std::vector<int>& def) const {
-    for (const auto& kv : vec_int_values_)
-      if (kv.first == key)
-        return kv.second;
+    auto val = std::find_if(
+        vec_int_values_.begin(), vec_int_values_.end(), [&key](const auto& kv) { return kv.first == key; });
+    if (val != vec_int_values_.end())
+      return val->second;
     CG_DEBUG("ParametersList") << "Failed to retrieve integer collection with key=" << key << ". "
                                << "Default value: " << def << ".";
     return def;
@@ -297,9 +295,9 @@ namespace cepgen {
 
   template <>
   double ParametersList::get<double>(std::string key, const double& def) const {
-    for (const auto& kv : dbl_values_)
-      if (kv.first == key)
-        return kv.second;
+    auto val = std::find_if(dbl_values_.begin(), dbl_values_.end(), [&key](const auto& kv) { return kv.first == key; });
+    if (val != dbl_values_.end())
+      return val->second;
     CG_DEBUG("ParametersList") << "Failed to retrieve double parameter with key=" << key << ". "
                                << "Default value: " << def << ".";
     return def;
@@ -307,9 +305,10 @@ namespace cepgen {
 
   template <>
   std::vector<double> ParametersList::get<std::vector<double> >(std::string key, const std::vector<double>& def) const {
-    for (const auto& kv : vec_dbl_values_)
-      if (kv.first == key)
-        return kv.second;
+    auto val = std::find_if(
+        vec_dbl_values_.begin(), vec_dbl_values_.end(), [&key](const auto& kv) { return kv.first == key; });
+    if (val != vec_dbl_values_.end())
+      return val->second;
     CG_DEBUG("ParametersList") << "Failed to retrieve double collection with key=" << key << ". "
                                << "Default value: " << def << ".";
     return def;
@@ -321,9 +320,9 @@ namespace cepgen {
 
   template <>
   std::string ParametersList::get<std::string>(std::string key, const std::string& def) const {
-    for (const auto& kv : str_values_)
-      if (kv.first == key)
-        return kv.second;
+    auto val = std::find_if(str_values_.begin(), str_values_.end(), [&key](const auto& kv) { return kv.first == key; });
+    if (val != str_values_.end())
+      return val->second;
     CG_DEBUG("ParametersList") << "Failed to retrieve string parameter with key=" << key << ". "
                                << "Default value: " << def << ".";
     return def;
@@ -332,9 +331,10 @@ namespace cepgen {
   template <>
   std::vector<std::string> ParametersList::get<std::vector<std::string> >(std::string key,
                                                                           const std::vector<std::string>& def) const {
-    for (const auto& kv : vec_str_values_)
-      if (kv.first == key)
-        return kv.second;
+    auto val = std::find_if(
+        vec_str_values_.begin(), vec_str_values_.end(), [&key](const auto& kv) { return kv.first == key; });
+    if (val != vec_str_values_.end())
+      return val->second;
     CG_DEBUG("ParametersList") << "Failed to retrieve string collection with key=" << key << ". "
                                << "Default value: " << def << ".";
     return def;
@@ -347,9 +347,9 @@ namespace cepgen {
   template <>
   Limits ParametersList::get<Limits>(std::string key, const Limits& def) const {
     // first try to find Limits object in collections
-    for (const auto& kv : lim_values_)
-      if (kv.first == key)
-        return kv.second;
+    auto val = std::find_if(lim_values_.begin(), lim_values_.end(), [&key](const auto& kv) { return kv.first == key; });
+    if (val != lim_values_.end())
+      return val->second;
     // Limits object not found ; still trying to build it from (min/max) attributes
     Limits buf;
     if (has<double>(key + "min"))
@@ -366,6 +366,11 @@ namespace cepgen {
 
   template <>
   const ParametersList& ParametersList::fill<Limits>(std::string key, Limits& value) const {
+    if (has<double>(key + "min") || has<double>(key + "max")) {
+      fill<double>(key + "min", value.min());
+      fill<double>(key + "max", value.max());
+      return *this;
+    }
     if (has<Limits>(key)) {
       const auto& lim = get<Limits>(key);
       if (lim.hasMin())
@@ -374,10 +379,6 @@ namespace cepgen {
         value.max() = lim.max();
       return *this;
     }
-    if (has<double>(key + "min"))
-      value.min() = get<double>(key + "min");
-    if (has<double>(key + "max"))
-      value.max() = get<double>(key + "max");
     return *this;
   }
 

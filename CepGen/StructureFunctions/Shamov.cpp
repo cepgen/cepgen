@@ -19,22 +19,22 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SuriYennie.h"
 #include "CepGen/Utils/GridHandler.h"
-#include "CepGen/Utils/Physics.h"
 
 namespace cepgen {
   namespace strfun {
     class Shamov final : public Parameterisation {
     public:
-      explicit Shamov(const ParametersList& params = ParametersList());
+      explicit Shamov(const ParametersList&);
       static std::string description() { return "Shamov composite soft structure functions"; }
 
       Shamov& eval(double xbj, double q2) override;
 
-      double W1, W2;
-      bool resonant;
+      double W1{0.}, W2{0.};
+      bool resonant{false};
 
     private:
       static constexpr std::array<float, 19> gmq_ = {{0.000,
@@ -163,8 +163,8 @@ namespace cepgen {
       const double gmb_;
       const double lowq2_;
 
-      GridHandler<1, 2> sigma_grid_;
-      GridHandler<1, 1> gm_grid_;
+      GridHandler<1, 2> sigma_grid_{GridType::linear};
+      GridHandler<1, 1> gm_grid_{GridType::linear};
       SuriYennie sy_sf_;
     };
 
@@ -174,16 +174,11 @@ namespace cepgen {
 
     Shamov::Shamov(const ParametersList& params)
         : Parameterisation(params),
-          W1(0.),
-          W2(0.),
-          resonant(false),
-          mode_((Mode)params.get<int>("mode", (int)Mode::RealResAndNonRes)),
+          mode_(params.getAs<int, Mode>("mode", Mode::RealResAndNonRes)),
           fit_model_(params.get<int>("fitModel", 2)),
           gm0_(params.get<double>("gm0", 1.)),
           gmb_(params.get<double>("gmb", 0.984)),
-          lowq2_(params.get<double>("lowQ2", 1.e-7)),
-          sigma_grid_(GridType::linear),
-          gm_grid_(GridType::linear) {
+          lowq2_(params.get<double>("lowQ2", 1.e-7)) {
       if (fit_model_ > q20_.size())
         throw CG_FATAL("Shamov") << "Invalid fit modelling requested!";
 

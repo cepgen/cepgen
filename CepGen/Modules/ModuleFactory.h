@@ -56,8 +56,16 @@ namespace cepgen {
       static ModuleFactory<T, I> instance;
       return instance;
     }
+    /// Disabled copy constructor
+    ModuleFactory(const ModuleFactory&) = delete;
     /// Default destructor
     virtual ~ModuleFactory() = default;
+    /// Disabled assignment operator
+    void operator=(const ModuleFactory&) = delete;
+
+    /// Describe the modules factory
+    const std::string& description() { return description_; }
+
     /// Register a named module in the database
     /// \tparam U Class to register (inherited from T base class)
     template <typename U>
@@ -105,10 +113,24 @@ namespace cepgen {
         throw std::invalid_argument("\n\n  *** " + description_ +
                                     " failed to retrieve an indexing key from parameters to build the module! ***\n");
     }
-    /// Describe the modules factory
-    const std::string& description() { return description_; }
+
+    /// Constructor type for a module
+    typedef std::unique_ptr<T> (*Builder)(const ParametersList&);
+
+    /// Get the list of builders registered in the factory
+    std::vector<Builder> builders() const {
+      std::vector<Builder> builders;
+      for (const auto& bld_vs_name : map_)
+        builders.emplace_back(bld_vs_name.second);
+      return builders;
+    }
+
     /// Describe one named module
     const std::string& describe(const I& name) const { return descr_map_.at(name); }
+    /// Is the database empty?
+    bool empty() const { return map_.empty(); }
+    /// Number of modules registered in the database
+    size_t size() const { return map_.size(); }
     /// List of modules registred in the database
     std::vector<I> modules() const {
       std::vector<I> out;
@@ -125,21 +147,16 @@ namespace cepgen {
     }
     /// Factory name
     const std::string description_;
-    /// Constructor type for a module
-    typedef std::unique_ptr<T> (*ModCreate)(const ParametersList&);
     /// Database of modules handled by this instance
-    std::unordered_map<I, ModCreate> map_;
+    std::unordered_map<I, Builder> map_;
     /// Database of default-constructed objects
     std::unordered_map<I, std::string> descr_map_;
     /// Database of default parameters associated to modules
     std::unordered_map<I, ParametersList> params_map_;
 
   protected:
+    /// Hidden default constructor for singleton operations
     explicit ModuleFactory(const std::string& descr = "Unnamed factory") : description_(descr) {}
-
-  public:
-    ModuleFactory(const ModuleFactory&) = delete;
-    void operator=(const ModuleFactory&) = delete;
   };
 }  // namespace cepgen
 

@@ -65,9 +65,9 @@ stages:
     - ./cepgen -l
     - echo "Python card test"
     - ./cepgen Cards/lpair_cfg.py -n 10000
-    - echo "LPAIR card test"
-    - ./cepgen-cards-converter Cards/lpair_cfg.py lpair.card
-    - ./cepgen lpair.card -n 10000
+    #- echo "LPAIR card test"
+    #- ./cepgen-cards-converter Cards/lpair_cfg.py lpair.card
+    #- ./cepgen lpair.card -n 10000
   when: on_success
   allow_failure: false
 
@@ -166,6 +166,7 @@ test_function_parser:cc7:
 
 compile:cc7-cvmfs:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
+  allow_failure: true
   <<: *build_cvmfs_definition
 
 run_cepgen:cc7-cvmfs:

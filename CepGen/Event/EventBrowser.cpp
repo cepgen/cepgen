@@ -79,11 +79,9 @@ namespace cepgen {
       //if ( var == "nev" )
       //  return (double)num_evts_+1;
       if (var == "nob1" || var == "nob2") {
-        unsigned short out = 0.;
-        for (const auto& part : ev[var == "nob1" ? Particle::Role::OutgoingBeam1 : Particle::Role::OutgoingBeam2])
-          if ((int)part.status() > 0)
-            out++;
-        return (double)out;
+        const auto& bparts = ev[var == "nob1" ? Particle::Role::OutgoingBeam1 : Particle::Role::OutgoingBeam2];
+        return (double)std::count_if(
+            bparts.begin(), bparts.end(), [](const auto& part) { return (int)part.status() > 0; });
       }
       if (var == "tgen")
         return ev.time_generation;

@@ -23,8 +23,8 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Utils/Physics.h"
 
 namespace cepgen {
   namespace strfun {
@@ -39,7 +39,7 @@ namespace cepgen {
         };
 
       public:
-        explicit Parameters(const ParametersList& params = ParametersList());
+        explicit Parameters(const ParametersList&);
         /// Pre-HERA data fit (694 data points)
         static Parameters allm91();
         /// Fixed target and HERA photoproduction total cross sections (1356 points)
@@ -111,9 +111,9 @@ namespace cepgen {
                        << mod_params_.reggeon.b.at(2) << "}\n"
                        << "   c = {" << mod_params_.reggeon.c.at(0) << ", " << mod_params_.reggeon.c.at(1) << ", "
                        << mod_params_.reggeon.c.at(2) << "}\n"
-                       << L" masses: m₀²=" << mod_params_.m02 << L", mp²=" << mod_params_.mp2 << L", mr²="
-                       << mod_params_.mr2 << L" GeV²\n"
-                       << L" q₀²=" << mod_params_.q02 << L", Λ²=" << mod_params_.lambda2 << L" GeV².";
+                       << " masses: m_0^2=" << mod_params_.m02 << ", m_p^2=" << mod_params_.mp2
+                       << ", m_r^2=" << mod_params_.mr2 << " GeV^2\n"
+                       << " q_0^2=" << mod_params_.q02 << ", Lambda^2=" << mod_params_.lambda2 << " GeV^2.";
     }
 
     ALLM& ALLM::eval(double xbj, double q2) {
@@ -159,7 +159,7 @@ namespace cepgen {
           mr2(params.get<double>("mr2")),
           q02(params.get<double>("q02")),
           lambda2(params.get<double>("lambda2")),
-          type((Type)params.get<int>("type", (int)Type::Invalid)) {}
+          type(params.getAs<int, Type>("type", Type::Invalid)) {}
 
     ALLM::Parameters ALLM::Parameters::allm91() {
       static Parameters p(ParametersList()

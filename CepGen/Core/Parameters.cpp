@@ -35,11 +35,7 @@
 
 namespace cepgen {
   Parameters::Parameters()
-      : general(new ParametersList),
-        integrator(new ParametersList),
-        total_gen_time_(0.),
-        num_gen_events_(0ul),
-        generation_(ParametersList()) {}
+      : general(new ParametersList), integrator(new ParametersList), generation_(ParametersList()) {}
 
   Parameters::Parameters(Parameters& param)
       : general(param.general),
@@ -88,8 +84,9 @@ namespace cepgen {
     CG_TICKER(tmr_.get());
 
     //--- first-run preparation
-    if (!process_ || !process_->first_run)
+    if (!process_ || !process_->firstRun())
       return;
+    process_->setKinematics(kinematics);
     CG_DEBUG("Parameters").log([&](auto& dbg) {
       dbg << "Run started for " << process_->name() << " process " << std::hex << (void*)process_.get() << std::dec
           << ".\n\t"
@@ -97,14 +94,13 @@ namespace cepgen {
           << "  positive-z beam: " << kinematics.incomingBeams().positive() << "\n\t"
           << "  negative-z beam: " << kinematics.incomingBeams().negative();
       if (kinematics.incomingBeams().structureFunctions())
-        dbg << "  structure functions: " << kinematics.incomingBeams().structureFunctions();
+        dbg << "\n\t  structure functions: " << kinematics.incomingBeams().structureFunctions();
     });
     if (process_->hasEvent())
       process_->clearEvent();
     //--- clear the run statistics
     total_gen_time_ = 0.;
     num_gen_events_ = 0ul;
-    process_->first_run = false;
   }
 
   void Parameters::setTimeKeeper(utils::TimeKeeper* kpr) { tmr_.reset(kpr); }
@@ -238,7 +234,7 @@ namespace cepgen {
       os << std::setw(wt) << "Minimum final state";
       std::string sep;
       for (const auto& part : param->kinematics.minimumFinalState())
-        os << sep << PDG::get().name(part), sep = ", ";
+        os << sep << (PDG::Id)part, sep = ", ";
       os << "\n";
     }
     for (const auto& lim : cuts.central.list())
@@ -247,7 +243,7 @@ namespace cepgen {
     if (cuts.central_particles.size() > 0) {
       os << std::setw(wt) << utils::boldify(">>> per-particle cuts:") << "\n";
       for (const auto& part_per_lim : cuts.central_particles) {
-        os << " * all single " << std::setw(wt - 3) << PDG::get().name(part_per_lim.first) << "\n";
+        os << " * all single " << std::setw(wt - 3) << (PDG::Id)part_per_lim.first << "\n";
         for (const auto& lim : const_cast<cuts::Central&>(part_per_lim.second).list())
           if (lim.limits.valid())
             os << "   - " << std::setw(wt - 5) << lim.description << lim.limits << "\n";

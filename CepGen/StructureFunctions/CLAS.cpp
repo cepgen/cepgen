@@ -25,8 +25,8 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Utils/Physics.h"
 
 namespace cepgen {
   namespace strfun {
@@ -34,6 +34,12 @@ namespace cepgen {
     /// \note This code was provided on 2016-04-13 by Silvano Simula and reflects the parameterisation used in \cite Osipenko:2003bu (CLAS) and described in \cite Ricco:1998yr.
     class CLAS : public Parameterisation {
     public:
+      explicit CLAS(const ParametersList&);
+
+      static std::string description() {
+        return "CLAS parameterisation for nucleon data at Q2 > 0.5 GeV2 / xBj > 0.15";
+      }
+
       /// List of steering parameters for a physics case
       struct Parameters {
         /// Standard parameterisation of a parton-from-neutron emission
@@ -58,12 +64,6 @@ namespace cepgen {
         std::array<double, 4> b = {};
         std::vector<Resonance> resonances;
       };
-
-      /// Standard parameterisation interpolator constructor (photon from proton)
-      explicit CLAS(const ParametersList& params = ParametersList());
-      static std::string description() {
-        return "CLAS parameterisation for nucleon data at Q2 > 0.5 GeV2 / xBj > 0.15";
-      }
 
       CLAS& eval(double xbj, double q2) override;
 

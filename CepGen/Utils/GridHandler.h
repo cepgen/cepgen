@@ -97,7 +97,7 @@ namespace cepgen {
       gridpoint_t operator+(const gridpoint_t& rhs) const;
     };
     /// Has the extrapolator been initialised?
-    bool init_;
+    bool init_{false};
   };
 }  // namespace cepgen
 
