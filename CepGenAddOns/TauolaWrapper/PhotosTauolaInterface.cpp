@@ -7,6 +7,9 @@
 
 namespace cepgen {
   namespace io {
+
+    //----- Particle interface
+
     template <typename E, typename P>
     PhotosTauolaParticle<E, P>::PhotosTauolaParticle(PhotosTauolaEvent<E, P>* event, const Particle& part)
         : Particle(part), event_(event) {}
@@ -33,7 +36,7 @@ namespace cepgen {
 
     template <typename E, typename P>
     void PhotosTauolaParticle<E, P>::print() {
-      throw CG_FATAL("PhotosTauolaParticle") << *this;
+      CG_INFO("PhotosTauolaParticle:print") << *this;
     }
 
     template <typename E, typename P>
@@ -52,6 +55,11 @@ namespace cepgen {
       for (const auto& moth : mothers())
         if (moth >= 0)
           mothers_.emplace_back(new PhotosTauolaParticle(event_, event_->operator[](moth)));
+      CG_DEBUG("PhotosTauolaParticle:getMothers").log([this](auto& log) {
+        log << "List of mothers:";
+        for (const auto* moth : mothers_)
+          log << "\n" << *dynamic_cast<const Particle*>(moth);
+      });
       return mothers_;
     }
 
@@ -74,6 +82,8 @@ namespace cepgen {
       return daughters_;
     }
 
+    //----- Event interface
+
     template <typename E, typename P>
     PhotosTauolaEvent<E, P>::PhotosTauolaEvent(const Event& evt, const pdgid_t pdg)
         : Event(evt.compress()), spec_pdg_id_(pdg) {}
@@ -91,6 +101,11 @@ namespace cepgen {
         for (auto& part : particles())
           if (abs(part.integerPdgId()) == pdg)
             decay_particles_.emplace_back(new PhotosTauolaParticle<E, P>(this, part));
+      CG_DEBUG("PhotosTauolaEvent:findParticles").log([this](auto& log) {
+        log << "Particles in event:";
+        for (const auto* part : decay_particles_)
+          log << "\n" << *dynamic_cast<const Particle*>(part);
+      });
       return decay_particles_;
     }
 
@@ -111,6 +126,11 @@ namespace cepgen {
                                           << utils::s("daughter", daugh.size(), true) << ".";
         }
       }
+      CG_DEBUG("PhotosTauolaEvent:findStableParticles").log([&out](auto& log) {
+        log << "Stable particles in event:";
+        for (const auto* part : out)
+          log << "\n" << *dynamic_cast<const Particle*>(part);
+      });
       return out;
     }
 
