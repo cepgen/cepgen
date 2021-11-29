@@ -29,9 +29,9 @@ namespace cepgen {
       part.setChargeSign(pdg / abs(pdg));
       part.setMomentum(Momentum::fromPxPyPzE(px, py, pz, e));
       part.setMass(mass);
-      auto out = new PhotosTauolaParticle<E, P>(event_, part);
-      secondary_parts_.emplace_back(out);
-      return out;
+      secondary_parts_.emplace_back(new PhotosTauolaParticle<E, P>(event_, part));
+      CG_DEBUG("PhotosTauolaParticle:createNewParticle") << "New particle built: " << part << ".";
+      return dynamic_cast<PhotosTauolaParticle<E, P>*>(*secondary_parts_.rbegin());
     }
 
     template <typename E, typename P>
@@ -40,12 +40,29 @@ namespace cepgen {
     }
 
     template <typename E, typename P>
+    void PhotosTauolaParticle<E, P>::undecay() {
+      CG_WARNING("");
+    }
+
+    template <typename E, typename P>
+    void PhotosTauolaParticle<E, P>::checkMomentumConservation() {
+      CG_WARNING("");
+    }
+
+    template <typename E, typename P>
+    void PhotosTauolaParticle<E, P>::decayEndgame() {
+      CG_WARNING("");
+    }
+
+    template <typename E, typename P>
     void PhotosTauolaParticle<E, P>::setMothers(std::vector<P*> mothers) {
+      CG_WARNING("");
       for (const auto& moth : mothers) {
         auto&& part = dynamic_cast<PhotosTauolaParticle*>(moth);
         part->setStatus((int)Particle::Status::Propagator);
         Particle::addMother(*part);
       }
+      CG_DEBUG("PhotosTauolaParticle:setMothers") << "New list of mothers: " << mothers_ << ".";
     }
 
     template <typename E, typename P>
@@ -56,7 +73,11 @@ namespace cepgen {
         if (moth >= 0)
           mothers_.emplace_back(new PhotosTauolaParticle(event_, event_->operator[](moth)));
       CG_DEBUG("PhotosTauolaParticle:getMothers").log([this](auto& log) {
-        log << "List of mothers:";
+        if (mothers_.empty()) {
+          log << "No mothers for " << *this << ".";
+          return;
+        }
+        log << "Mothers for " << *this << ":";
         for (const auto* moth : mothers_)
           log << "\n" << *dynamic_cast<const Particle*>(moth);
       });
@@ -70,6 +91,7 @@ namespace cepgen {
         part->setRole(role());  // child inherits its mother's role
         Particle::addDaughter(*part);
       }
+      CG_DEBUG("PhotosTauolaParticle:setDaughters") << "New list of daughters:" << daughters_ << ".";
     }
 
     template <typename E, typename P>
@@ -78,7 +100,15 @@ namespace cepgen {
         for (const auto& daugh : daughters())
           if (daugh >= 0)
             daughters_.emplace_back(new PhotosTauolaParticle(event_, event_->operator[](daugh)));
-      //CG_INFO("")<<getBarcode();for(const auto& p : daughters_)p->print();
+      CG_DEBUG("PhotosTauolaParticle:getDaughters").log([this](auto& log) {
+        if (daughters_.empty()) {
+          log << "No daughters for " << *this << ".";
+          return;
+        }
+        log << "Daughters for " << *this << ":";
+        for (const auto* daugh : daughters_)
+          log << "\n" << *dynamic_cast<const Particle*>(daugh);
+      });
       return daughters_;
     }
 
@@ -89,24 +119,26 @@ namespace cepgen {
         : Event(evt.compress()), spec_pdg_id_(pdg) {}
 
     template <typename E, typename P>
-    PhotosTauolaEvent<E, P>::~PhotosTauolaEvent() {
-      for (size_t i = 0; i < decay_particles_.size(); ++i)
-        delete decay_particles_[i];
+    PhotosTauolaEvent<E, P>::~PhotosTauolaEvent() {}
+
+    template <typename E, typename P>
+    void PhotosTauolaEvent<E, P>::eventEndgame() {
+      CG_WARNING("");
     }
 
     template <typename E, typename P>
     std::vector<P*> PhotosTauolaEvent<E, P>::findParticles(int pdg) {
+      std::vector<P*> out;
       //--- fill list of particles of interest if not already done
-      if (decay_particles_.empty())
-        for (auto& part : particles())
-          if (abs(part.integerPdgId()) == pdg)
-            decay_particles_.emplace_back(new PhotosTauolaParticle<E, P>(this, part));
-      CG_DEBUG("PhotosTauolaEvent:findParticles").log([this](auto& log) {
+      for (auto& part : particles())
+        if (abs(part.integerPdgId()) == pdg)
+          out.emplace_back(new PhotosTauolaParticle<E, P>(this, part));
+      CG_DEBUG("PhotosTauolaEvent:findParticles").log([&out](auto& log) {
         log << "Particles in event:";
-        for (const auto* part : decay_particles_)
+        for (const auto* part : out)
           log << "\n" << *dynamic_cast<const Particle*>(part);
       });
-      return decay_particles_;
+      return out;
     }
 
     template <typename E, typename P>

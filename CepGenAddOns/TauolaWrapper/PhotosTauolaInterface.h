@@ -26,6 +26,12 @@ namespace cepgen {
       /// Dump the particle attributes
       void print() override;
 
+      /// Remove the ougoing branch from this particles and reset its status to stable
+      void undecay() override;
+      /// Check that the 4 momentum in conserved at the vertices producing and ending this particle
+      void checkMomentumConservation() override;
+      /// Optional. Modify particle or decay tree if needed.
+      void decayEndgame() override;
       /// Specify the particle unique identifier
       void setBarcode(int id) { id_ = id; }
       /// Particle unique identifier in the event
@@ -74,11 +80,14 @@ namespace cepgen {
       PhotosTauolaEvent(const Event& evt, const pdgid_t pdg = PDG::invalid);
       ~PhotosTauolaEvent();
 
+      /// Final touches to event record after all decays are finished.
+      void eventEndgame() override;
+      /// Return a list of all particles with pdg_id = absolute value of pdg_id.
       std::vector<P*> findParticles(int pdg) override;
+      /// Return a list of all particles with pdg_id = absolute value of pdg_id and stable status code.
       std::vector<P*> findStableParticles(int pdg) override;
 
     private:
-      std::vector<P*> decay_particles_;
       pdgid_t spec_pdg_id_;
     };
   }  // namespace io

@@ -46,7 +46,9 @@ namespace cepgen {
     void TauolaFilter::init() {
       Tauola::setUnits(Tauola::GEV, Tauola::MM);
       Tauola::initialize();
-      //Tauola::setSeed(seed_);
+      Tauola::setSeed(seed_, 2. * seed_, 4. * seed_);
+      if (!Tauola::getIsTauolaIni())
+        throw CG_FATAL("TauolaFilter:init") << "Tauola was not properly initialised!";
 
       //--- spin correlations
       if (pol_states_.has<bool>("full"))
@@ -90,8 +92,10 @@ namespace cepgen {
       CepGenTauolaEvent evt(ev, PDG::tau);
       evt.dump();
       //evt.undecayTaus();
-      evt.decayTaus();
-      evt.dump();
+      //evt.decayTaus();
+      //evt.dump();
+      for (auto* tau : evt.findParticles(PDG::tau))
+        Tauola::decayOne(tau);
       throw CG_FATAL("") << "fini";
       //const auto& pairs = evt[Particle::CentralSystem][0];
       //CG_WARNING("")<<pairs;
