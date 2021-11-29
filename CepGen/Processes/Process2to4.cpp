@@ -178,10 +178,14 @@ namespace cepgen {
       CG_DEBUG_LOOP("2to4:remnants") << "First remnant:  " << pX_ << ", mass = " << pX_.mass() << "\n\t"
                                      << "Second remnant: " << pY_ << ", mass = " << pY_.mass() << ".";
 
-      if (fabs(pX_.mass2() - mX2_) > NUM_LIMITS)
-        throw CG_FATAL("PPtoFF") << "Invalid X system squared mass: " << pX_.mass2() << "/" << mX2_ << ".";
-      if (fabs(pY_.mass2() - mY2_) > NUM_LIMITS)
-        throw CG_FATAL("PPtoFF") << "Invalid Y system squared mass: " << pY_.mass2() << "/" << mY2_ << ".";
+      if (fabs(pX_.mass2() - mX2_) > NUM_LIMITS) {
+        CG_WARNING("2to4:px") << "Invalid X system squared mass: " << pX_.mass2() << "/" << mX2_ << ".";
+        return 0.;
+      }
+      if (fabs(pY_.mass2() - mY2_) > NUM_LIMITS) {
+        CG_WARNING("2to4:py") << "Invalid Y system squared mass: " << pY_.mass2() << "/" << mY2_ << ".";
+        return 0.;
+      }
 
       //--- four-momenta of the intermediate partons
 
