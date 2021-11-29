@@ -28,8 +28,6 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/Process2to4.h"
 
-using namespace std::complex_literals;
-
 namespace cepgen {
   namespace proc {
     /// \brief Compute the matrix element for a CE \f$\gamma\gamma\rightarrow W^+W^-\f$ process using \f$k_{\rm T}\f$-factorization approach
@@ -151,7 +149,8 @@ namespace cepgen {
           const auto pp = ampl_(kin, +1, +1, lam3, lam4), mm = ampl_(kin, -1, -1, lam3, lam4),
                      pm = ampl_(kin, +1, -1, lam3, lam4), mp = ampl_(kin, -1, +1, lam3, lam4);
           // add ME for this W helicity to total ME
-          hel_mat_elem += norm(p1 * (pp + mm) - 1.i * p2 * (pp - mm) - p3 * (pm + mp) - 1.i * p4 * (pm - mp));
+          hel_mat_elem += norm(p1 * (pp + mm) - std::complex<double>(0, 1) * p2 * (pp - mm) - p3 * (pm + mp) -
+                               std::complex<double>(0, 1) * p4 * (pm - mp));
         }
       return hel_mat_elem * std::pow(1. / qt1_ / qt2_, 2);
     }
