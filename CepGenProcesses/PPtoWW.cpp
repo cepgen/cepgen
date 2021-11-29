@@ -24,8 +24,11 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/NachtmannAmplitudes.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/Process2to4.h"
+
+using namespace std::complex_literals;
 
 namespace cepgen {
   namespace proc {
@@ -43,46 +46,63 @@ namespace cepgen {
       double computeCentralMatrixElement() const override;
 
       double onShellME() const;
-      double offShellME(double phi_sum, double phi_diff) const;
-
-      double amplitudeWW(double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4) const;
-
-      static constexpr double prefactor_ = constants::G_EM_SQ * constants::G_EM_SQ;
+      double offShellME() const;
 
       const double mW_, mW2_;
       const int method_;
+      NachtmannAmplitudes ampl_;
 
-      std::vector<short> pol_w1_, pol_w2_;
+      std::vector<int> pol_w1_, pol_w2_;
     };
 
     PPtoWW::PPtoWW(const ParametersList& params)
         : Process2to4(params, {PDG::photon, PDG::photon}, PDG::W),
           mW_(PDG::get().mass(PDG::W)),
           mW2_(mW_ * mW_),
-          method_(params.get<int>("method", 1)) {
-      switch (params.getAs<int, Polarisation>("polarisationStates", Polarisation::full)) {
-        case Polarisation::LL:
-          pol_w1_ = {0};
-          pol_w2_ = {0};
-          break;
-        case Polarisation::LT:
-          pol_w1_ = {0};
-          pol_w2_ = {-1, 1};
-          break;
-        case Polarisation::TL:
-          pol_w1_ = {-1, 1};
-          pol_w2_ = {0};
-          break;
-        case Polarisation::TT:
-          pol_w1_ = {-1, 1};
-          pol_w2_ = {-1, 1};
-          break;
-        case Polarisation::full:
-          pol_w1_ = {-1, 0, 1};
-          pol_w2_ = {-1, 0, 1};
-          break;
+          method_(params.get<int>("method", 1)),
+          ampl_(params) {
+      if (params.has<int>("polarisationStates"))
+        switch (params.getAs<int, Polarisation>("polarisationStates", Polarisation::full)) {
+          case Polarisation::LL:
+            pol_w1_ = {0};
+            pol_w2_ = {0};
+            break;
+          case Polarisation::LT:
+            pol_w1_ = {0};
+            pol_w2_ = {-1, 1};
+            break;
+          case Polarisation::TL:
+            pol_w1_ = {-1, 1};
+            pol_w2_ = {0};
+            break;
+          case Polarisation::TT:
+            pol_w1_ = {-1, 1};
+            pol_w2_ = {-1, 1};
+            break;
+          case Polarisation::full:
+            pol_w1_ = {-1, 0, 1};
+            pol_w2_ = {-1, 0, 1};
+            break;
+        }
+      else if (params.has<ParametersList>("polarisationStates")) {
+        const auto& states = params.get<ParametersList>("polarisationStates");
+        pol_w1_ = states.get<std::vector<int> >("W1");
+        pol_w2_ = states.get<std::vector<int> >("W2");
       }
-      CG_DEBUG("PPtoWW:mode") << "matrix element computation method: " << method_ << ".";
+      CG_DEBUG("PPtoWW") << "matrix element computation method: " << method_ << ", "
+                         << "polarisation states: W1=" << pol_w1_ << ", W2=" << pol_w2_ << ".";
+
+      if (method_ == 1) {
+        CG_INFO("PPtoWW") << "Nachtmann amplitudes (model: " << ampl_.mode() << ") initialised.";
+        if (ampl_.mode() != NachtmannAmplitudes::Mode::SM) {
+          if (ampl_.mode() != NachtmannAmplitudes::Mode::W && ampl_.mode() != NachtmannAmplitudes::Mode::Wbar)
+            throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for ɣɣ → W⁺W¯! "
+                                     << "Only supported extensions are W and Wbar. Specified model: " << ampl_.mode()
+                                     << ".";
+          CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << params.get<ParametersList>("eftParameters")
+                            << ".";
+        }
+      }
     }
 
     void PPtoWW::prepareProcessKinematics() {
@@ -94,82 +114,46 @@ namespace cepgen {
 
     double PPtoWW::computeCentralMatrixElement() const {
       CG_DEBUG_LOOP("PPtoWW:ME") << "matrix element mode: " << method_ << ".";
-
-      double mat_el = prefactor_;
       switch (method_) {
-        case 0: {
-          // On-shell matrix element
-          // references:
-          //  Phys.Rev.D 51 (1995) 4738
-          //  JHEP 02 (2015) 098
-          mat_el *= onShellME();
-        } break;
-        case 1: {
-          mat_el *= offShellME(phi_qt1_ + phi_qt2_, phi_qt1_ - phi_qt2_);
-        } break;
+        case 0:
+          return onShellME();
+        case 1:
+          return offShellME();
         default:
           throw CG_FATAL("PPtoWW:ME") << "Invalid ME calculation method (" << method_ << ")!";
       }
-      CG_DEBUG_LOOP("PPtoWW:ME") << "prefactor: " << prefactor_ << "\n\t"
-                                 << "matrix element: " << mat_el << ".";
-      return mat_el;
     }
 
     double PPtoWW::onShellME() const {
+      // On-shell matrix element
+      // references:
+      //  Phys.Rev.D 51 (1995) 4738
+      //  JHEP 02 (2015) 098
       const double s_hat = shat(), t_hat = that(), u_hat = uhat();
 
       const double term1 = 2. * s_hat * (2. * s_hat + 3. * mW2_) / (3. * (mW2_ - t_hat) * (mW2_ - u_hat));
       const double term2 =
           2. * s_hat * s_hat * (s_hat * s_hat + 3. * mW2_ * mW2_) / (3. * pow(mW2_ - t_hat, 2) * pow(mW2_ - u_hat, 2));
 
-      return 6. * (1. - term1 + term2);
+      return 6. * constants::G_EM_SQ * constants::G_EM_SQ * (1. - term1 + term2);
     }
 
-    double PPtoWW::offShellME(double phi_sum, double phi_diff) const {
-      const double s_hat = shat(), t_hat = that(), u_hat = uhat();
-      double amat2_0 = 0., amat2_1 = 0., amat2_interf = 0.;
-      for (const auto lam3 : pol_w1_)
-        for (const auto lam4 : pol_w2_) {
-          double ampli_pp = amplitudeWW(s_hat, t_hat, u_hat, +1, +1, lam3, lam4);
-          double ampli_mm = amplitudeWW(s_hat, t_hat, u_hat, -1, -1, lam3, lam4);
-          double ampli_pm = amplitudeWW(s_hat, t_hat, u_hat, +1, -1, lam3, lam4);
-          double ampli_mp = amplitudeWW(s_hat, t_hat, u_hat, -1, +1, lam3, lam4);
+    double PPtoWW::offShellME() const {
+      const NachtmannAmplitudes::Kinematics kin(mW2_, shat(), that(), uhat());
+      const double p1 = q1_.px() * q2_.px() + q1_.py() * q2_.py(), p2 = q1_.px() * q2_.py() - q1_.py() * q2_.px(),
+                   p3 = q1_.px() * q2_.px() - q1_.py() * q2_.py(), p4 = q1_.px() * q2_.py() + q1_.py() * q2_.px();
 
-          amat2_0 += ampli_pp * ampli_pp + ampli_mm * ampli_mm + 2. * cos(2. * phi_diff) * ampli_pp * ampli_mm;
-          amat2_1 += ampli_pm * ampli_pm + ampli_mp * ampli_mp + 2. * cos(2. * phi_sum) * ampli_pm * ampli_mp;
-          amat2_interf -= 2. * (cos(phi_sum + phi_diff) * (ampli_pp * ampli_pm + ampli_mm * ampli_mp) +
-                                cos(phi_sum - phi_diff) * (ampli_pp * ampli_mp + ampli_mm * ampli_pm));
+      double hel_mat_elem{0.};
+      // compute ME for each W helicity
+      for (const auto& lam3 : pol_w1_)
+        for (const auto& lam4 : pol_w2_) {
+          // compute all photon helicity amplitudes
+          const auto pp = ampl_(kin, +1, +1, lam3, lam4), mm = ampl_(kin, -1, -1, lam3, lam4),
+                     pm = ampl_(kin, +1, -1, lam3, lam4), mp = ampl_(kin, -1, +1, lam3, lam4);
+          // add ME for this W helicity to total ME
+          hel_mat_elem += norm(p1 * (pp + mm) - 1.i * p2 * (pp - mm) - p3 * (pm + mp) - 1.i * p4 * (pm - mp));
         }
-      return amat2_0 + amat2_1 + amat2_interf;
-    }
-
-    double PPtoWW::amplitudeWW(
-        double shat, double that, double uhat, short lam1, short lam2, short lam3, short lam4) const {
-      //--- first compute some kinematic variables
-      const double beta2 = 1. - 4. * mW2_ / shat, beta = sqrt(beta2);
-      const double inv_gamma2 = 1. - beta2, gamma2 = 1. / inv_gamma2;
-      const double gamma = sqrt(gamma2), inv_gamma = 1. / gamma;
-      const double cos_theta = (that - uhat) / shat / beta, cos_theta2 = cos_theta * cos_theta;
-      const double sin_theta2 = 1. - cos_theta2, sin_theta = sqrt(sin_theta2);
-      const double invA = 1. / (1. - beta2 * cos_theta2);
-
-      //--- per-helicity amplitude
-
-      if (lam3 == 0 && lam4 == 0)  // longitudinal-longitudinal
-        return invA * inv_gamma2 * ((gamma2 + 1.) * (1. - lam1 * lam2) * sin_theta2 - (1. + lam1 * lam2));
-
-      if (lam4 == 0)  // transverse-longitudinal
-        return invA * (-M_SQRT2 * inv_gamma * (lam1 - lam2) * (1. + lam1 * lam3 * cos_theta) * sin_theta);
-
-      if (lam3 == 0)  // longitudinal-transverse
-        return invA * (-M_SQRT2 * inv_gamma * (lam2 - lam1) * (1. + lam2 * lam4 * cos_theta) * sin_theta);
-
-      else  // transverse-transverse
-        return -0.5 * invA *
-               (2. * beta * (lam1 + lam2) * (lam3 + lam4) -
-                inv_gamma2 * (1. + lam3 * lam4) * (2. * lam1 * lam2 + (1. - lam1 * lam2) * cos_theta2) +
-                (1. + lam1 * lam2 * lam3 * lam4) * (3. + lam1 * lam2) + 2. * (lam1 - lam2) * (lam3 - lam4) * cos_theta +
-                (1. - lam1 * lam2) * (1. - lam3 * lam4) * cos_theta2);
+      return hel_mat_elem * std::pow(1. / qt1_ / qt2_, 2);
     }
   }  // namespace proc
 }  // namespace cepgen
