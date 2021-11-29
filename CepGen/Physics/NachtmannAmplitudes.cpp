@@ -71,8 +71,8 @@ namespace cepgen {
     return kin;
   }
 
-  void NachtmannAmplitudes::Kinematics::setCosTheta(double cos_theta) {
-    cos_theta = cos_theta;
+  void NachtmannAmplitudes::Kinematics::setCosTheta(double cth) {
+    cos_theta = cth;
     cos_theta2 = cos_theta * cos_theta;
     sin_theta2 = 1. - cos_theta2;
     sin_theta = sqrt(sin_theta2);
