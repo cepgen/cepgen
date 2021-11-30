@@ -10,6 +10,11 @@ namespace cepgen {
       setName(mod_name);
   }
 
+  ParametersDescription::ParametersDescription(const ParametersList& params) : ParametersList(params) {
+    for (const auto& key : ParametersList::keys())
+      obj_descr_[key] = ParametersDescription();
+  }
+
   std::string ParametersDescription::describe(size_t offset) const {
     std::ostringstream os;
     static auto sep = [](size_t offset) -> std::string { return std::string(offset, '\t'); };

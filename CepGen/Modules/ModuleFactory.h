@@ -80,7 +80,10 @@ namespace cepgen {
       }
       map_[name] = &build<U>;
       descr_map_[name] = U::description();
-      params_map_[name] = def_params;
+      if (!def_params.empty())
+        params_map_[name] = ParametersDescription(def_params);
+      else
+        params_map_[name] = U::parametersDescription();
     }
     /// Build one instance of a named module
     /// \param[in] name Module name to retrieve
@@ -93,7 +96,7 @@ namespace cepgen {
       }
       params.setName<I>(name);
       if (params_map_.count(name) > 0)
-        params += params_map_.at(name);
+        params += params_map_.at(name).parameters();
       return map_.at(name)(params);
     }
     /// Build one instance of a named module
@@ -107,7 +110,7 @@ namespace cepgen {
           throw std::invalid_argument(oss.str());
         }
         if (params_map_.count(idx) > 0)
-          params += params_map_.at(idx);
+          params += params_map_.at(idx).parameters();
         return map_.at(idx)(params);
       } else
         throw std::invalid_argument("\n\n  *** " + description_ +
@@ -127,6 +130,8 @@ namespace cepgen {
 
     /// Describe one named module
     const std::string& describe(const I& name) const { return descr_map_.at(name); }
+    /// Describe the parameters of one named module
+    const ParametersDescription& describeParameters(const I& name) const { return params_map_.at(name); }
     /// Is the database empty?
     bool empty() const { return map_.empty(); }
     /// Number of modules registered in the database
@@ -152,7 +157,7 @@ namespace cepgen {
     /// Database of default-constructed objects
     std::unordered_map<I, std::string> descr_map_;
     /// Database of default parameters associated to modules
-    std::unordered_map<I, ParametersList> params_map_;
+    std::unordered_map<I, ParametersDescription> params_map_;
 
   protected:
     /// Hidden default constructor for singleton operations
