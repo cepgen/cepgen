@@ -86,6 +86,8 @@ namespace cepgen {
     std::vector<std::string> split(const std::string&, char);
     /// Merge a collection of strings in a single string
     std::string merge(const std::vector<std::string>&, const std::string&);
+    /// Check if a string is also a number
+    bool isNumber(const std::string&);
     /// Check if a collection contains an item
     template <typename T>
     bool contains(const std::vector<T>& coll, const T& item) {

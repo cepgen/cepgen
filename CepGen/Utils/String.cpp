@@ -118,6 +118,11 @@ namespace cepgen {
       return oss.str() + *vec.rbegin();  // treat last one separately to drop the last delimiter
     }
 
+    bool isNumber(const std::string& str) {
+      return !str.empty() &&
+             std::find_if(str.begin(), str.end(), [](unsigned char c) { return !std::isdigit(c); }) == str.end();
+    }
+
     std::string toupper(const std::string& str) {
       std::string out;
       out.resize(str.size());
