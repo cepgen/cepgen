@@ -37,6 +37,7 @@ namespace cepgen {
       explicit PPtoFF(const ParametersList&);
       ProcessPtr clone() const override { return ProcessPtr(new PPtoFF(*this)); }
       static std::string description() { return "ɣɣ → f⁺f¯ (kt-factor.)"; }
+      static ParametersDescription parametersDescription();
 
     private:
       void prepareProcessKinematics() override;
@@ -247,6 +248,13 @@ namespace cepgen {
                                        << "amat2 = " << amat2 << ".";
 
       return amat2;
+    }
+
+    ParametersDescription PPtoFF::parametersDescription() {
+      auto desc = Process2to4::parametersDescription();
+      desc.add<int>("method", (int)Mode::offShell)
+          .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell)");
+      return desc;
     }
   }  // namespace proc
 }  // namespace cepgen

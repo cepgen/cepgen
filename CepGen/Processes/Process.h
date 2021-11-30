@@ -46,6 +46,8 @@ namespace cepgen {
       Process(const Process&);
       virtual ~Process() = default;
 
+      static ParametersDescription parametersDescription();
+
       /// Reset process prior to the phase space and variables definition
       void clear();
       /// Is it the first time the process is computed?

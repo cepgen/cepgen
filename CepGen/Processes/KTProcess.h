@@ -53,6 +53,8 @@ namespace cepgen {
       /// Populate the event content with the generated process' kinematics
       void fillKinematics(bool) override;
 
+      static ParametersDescription parametersDescription();
+
     protected:
       /// Set the kinematics associated to the phase space definition
       void prepareKinematics() override;

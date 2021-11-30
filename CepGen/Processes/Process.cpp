@@ -376,6 +376,11 @@ namespace cepgen {
       return is_incoming_state_set && is_outgoing_state_set;
     }
 
+    ParametersDescription Process::parametersDescription() {
+      auto desc = ParametersDescription();
+      return desc;
+    }
+
     std::ostream& operator<<(std::ostream& os, const Process& proc) { return os << proc.name().c_str(); }
 
     std::ostream& operator<<(std::ostream& os, const Process* proc) { return os << proc->name().c_str(); }

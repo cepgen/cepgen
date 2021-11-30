@@ -157,7 +157,7 @@ namespace cepgen {
     }
 
     ParametersDescription PPtoWW::parametersDescription() {
-      ParametersDescription params("pptoww");
+      auto params = Process2to4::parametersDescription();
       params.setDescription("kT-factorised gamma gamma -> W+ W- process");
       params.add<int>("method", 1)
           .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell by Nachtmann et al.)");

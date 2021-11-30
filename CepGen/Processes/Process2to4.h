@@ -34,6 +34,8 @@ namespace cepgen {
       /// Copy constructor
       Process2to4(const Process2to4&);
 
+      static ParametersDescription parametersDescription();
+
     protected:
       /// Set all cuts for the single outgoing particle phase space definition
       void setCuts(const cuts::Central& single);
