@@ -38,6 +38,7 @@ namespace cepgen {
       ProcessPtr clone() const override { return ProcessPtr(new PPtoWW(*this)); }
       enum class Polarisation { full = 0, LL = 1, LT = 2, TL = 3, TT = 4 };
       static std::string description() { return "ɣɣ → W⁺W¯ (kt-factor.)"; }
+      static ParametersDescription parametersDescription();
 
     private:
       void prepareProcessKinematics() override;
@@ -153,6 +154,22 @@ namespace cepgen {
                                std::complex<double>(0, 1) * p4 * (pm - mp));
         }
       return hel_mat_elem * std::pow(1. / qt1_ / qt2_, 2);
+    }
+
+    ParametersDescription PPtoWW::parametersDescription() {
+      ParametersDescription params("pptoww");
+      params.setDescription("kT-factorised gamma gamma -> W+ W- process");
+      params.add<int>("method", 1)
+          .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell by Nachtmann et al.)");
+      ParametersDescription pol_states;
+      pol_states.add<std::vector<int> >("W1", {-1, 0, 1}).setDescription("First W+- polarisation states");
+      pol_states.add<std::vector<int> >("W2", {-1, 0, 1}).setDescription("Second W+- polarisation states");
+      params.add<ParametersDescription>("polarisationStates", pol_states);
+      ParametersDescription eft_params;
+      eft_params.add<double>("s1", 0.);
+      eft_params.add<double>("mH", 0.).setDescription("Higgs mass (in GeV/c2)");
+      params.add<ParametersDescription>("eftParameters", eft_params);
+      return params;
     }
   }  // namespace proc
 }  // namespace cepgen
