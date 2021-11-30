@@ -33,7 +33,7 @@ namespace cepgen {
         if (!obj.description().empty())
           os << sep(offset + 2) << utils::colourise(obj.description(), utils::Colour::reset, utils::Modifier::italic)
              << "\n";
-        os << obj.describe(offset + 2);
+        os << obj.describe(offset + 1);
       }
     }
     return os.str();

@@ -199,15 +199,15 @@ namespace cepgen {
         os << sep << p, sep = ", ";
     } else if (has<std::vector<int> >(key)) {
       std::string sep;
-      for (const auto& p : get<std::vector<ParametersList> >(key))
+      for (const auto& p : get<std::vector<int> >(key))
         os << sep << p, sep = ", ";
     } else if (has<std::vector<double> >(key)) {
       std::string sep;
-      for (const auto& p : get<std::vector<ParametersList> >(key))
+      for (const auto& p : get<std::vector<double> >(key))
         os << sep << p, sep = ", ";
     } else if (has<std::vector<std::string> >(key)) {
       std::string sep;
-      for (const auto& p : get<std::vector<ParametersList> >(key))
+      for (const auto& p : get<std::vector<std::string> >(key))
         os << sep << p, sep = ", ";
     }
     return os.str();
