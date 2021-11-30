@@ -30,6 +30,7 @@ namespace cepgen {
     static std::string description() { return "Burkhardt et al. alpha(EM) evolution algorithm"; }
     static ParametersDescription parametersDescription() {
       auto desc = ParametersDescription();
+      desc.setDescription("Burkhardt et al. alpha(EM) evolution algorithm");
       return desc;
     }
 
