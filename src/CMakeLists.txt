@@ -1,5 +1,5 @@
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
-set(exec_sources cepgen.cpp)
+set(exec_sources cepgen.cpp cepgen-describe.cpp)
 if(CMAKE_BUILD_SCAN)
   list(APPEND exec_sources cepgen-scan.cpp)
 endif()
