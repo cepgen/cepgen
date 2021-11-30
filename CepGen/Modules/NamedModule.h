@@ -19,7 +19,7 @@
 #ifndef CepGen_Modules_NamedModule_h
 #define CepGen_Modules_NamedModule_h
 
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Utils/ParametersDescription.h"
 
 namespace cepgen {
   /// Base runtime module object
@@ -34,6 +34,8 @@ namespace cepgen {
     const T& name() const { return name_; }
     /// Module description
     static inline std::string description() { return "No description"; }
+    /// Description of all module parameters
+    static inline ParametersDescription parametersDescription() { return ParametersDescription(); }
     /// Collection of default parameters steering the module initialisation
     static inline ParametersList defaultParameters() { return ParametersList(); }
     /// Module user-defined parameters
