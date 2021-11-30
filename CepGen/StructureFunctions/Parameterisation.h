@@ -69,6 +69,7 @@ namespace cepgen {
 
       /// Generic description for the structure functions
       static std::string description() { return "Unnamed structure functions"; }
+      static ParametersDescription parametersDescription();
 
       /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
       friend std::ostream& operator<<(std::ostream&, const Parameterisation*);

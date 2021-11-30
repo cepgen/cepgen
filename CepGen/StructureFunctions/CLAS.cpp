@@ -39,6 +39,7 @@ namespace cepgen {
       static std::string description() {
         return "CLAS parameterisation for nucleon data at Q2 > 0.5 GeV2 / xBj > 0.15";
       }
+      static ParametersDescription parametersDescription();
 
       /// List of steering parameters for a physics case
       struct Parameters {
@@ -273,6 +274,13 @@ namespace cepgen {
       f2resn *= 0.5 * (1. - mod_params_.b[0]) * bkg2 / mp_ * M_1_PI;
 
       return std::make_pair(f2bkg, f2resn);
+    }
+
+    ParametersDescription CLAS::parametersDescription() {
+      auto desc = Parameterisation::parametersDescription();
+      desc.add<std::string>("model", "proton")
+          .setDescription("Nucleon modelling ('proton', 'deuteron', or 'neutron' handled)");
+      return desc;
     }
   }  // namespace strfun
 }  // namespace cepgen

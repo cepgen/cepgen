@@ -28,7 +28,9 @@ namespace cepgen {
     public:
       /// User-steered Suri-Yennie continuum structure functions calculator
       explicit SuriYennie(const ParametersList& config = ParametersList());
+
       static std::string description() { return "Suri-Yennie FE/FM"; }
+      static ParametersDescription parametersDescription();
 
       SuriYennie& eval(double xbj, double q2) override;
 

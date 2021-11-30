@@ -32,6 +32,8 @@ namespace cepgen {
       explicit BlockDurandHa(const ParametersList&);
       BlockDurandHa& eval(double xbj, double q2) override;
 
+      static ParametersDescription parametersDescription();
+
     private:
       std::vector<double> a_, b_, c_;
       double n_;
@@ -75,6 +77,18 @@ namespace cepgen {
       F2 = D * pow(1. - xbj, n_) * (C + A * xlx + B * xlx * xlx);
 
       return *this;
+    }
+
+    ParametersDescription BlockDurandHa::parametersDescription() {
+      auto desc = Parameterisation::parametersDescription();
+      desc.add<std::vector<double> >("a", {8.205e-4, -5.148e-2, -4.725e-3});
+      desc.add<std::vector<double> >("b", {2.217e-3, 1.244e-2, 5.958e-4});
+      desc.add<std::vector<double> >("c", {0.255e0, 1.475e-1});
+      desc.add<double>("n", 11.49);
+      desc.add<double>("lambda", 2.430);
+      desc.add<double>("mu2", 2.82);
+      desc.add<double>("m2", 0.753);
+      return desc;
     }
   }  // namespace strfun
 }  // namespace cepgen

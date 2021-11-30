@@ -70,6 +70,14 @@ namespace cepgen {
       F2 = 2. * nu * FE;
       return *this;
     }
+
+    ParametersDescription SuriYennie::parametersDescription() {
+      auto desc = Parameterisation::parametersDescription();
+      desc.setDescription("Suri-Yennie FE/FM");
+      desc.add<std::string>("model", "standard")
+          .setDescription("Parameterisation model ('standard', 'alternative' handled, or custom model)");
+      return desc;
+    }
   }  // namespace strfun
 }  // namespace cepgen
 

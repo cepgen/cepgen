@@ -33,7 +33,9 @@ namespace mstw {
   public:
     /// Grid MSTW structure functions evaluator
     explicit Grid(const cepgen::ParametersList&);
+
     static std::string description() { return "MSTW(grid)"; }
+    static cepgen::ParametersDescription parametersDescription();
 
     /// Grid header information as parsed from the file
     struct header_t {
@@ -138,6 +140,13 @@ namespace mstw {
     F2 = val[0];
     FL = val[1];
     return *this;
+  }
+
+  cepgen::ParametersDescription Grid::parametersDescription() {
+    auto desc = Parameterisation::parametersDescription();
+    desc.setDescription("MSTW(grid)");
+    desc.add<std::string>("gridPath", DEFAULT_MSTW_GRID_PATH).setDescription("Path to the MSTW grid content");
+    return desc;
   }
 
   std::ostream& operator<<(std::ostream& os, const Grid::sfval_t& val) {

@@ -29,7 +29,9 @@ namespace cepgen {
     class Shamov final : public Parameterisation {
     public:
       explicit Shamov(const ParametersList&);
+
       static std::string description() { return "Shamov composite soft structure functions"; }
+      static ParametersDescription parametersDescription();
 
       Shamov& eval(double xbj, double q2) override;
 
@@ -256,6 +258,17 @@ namespace cepgen {
       const double nu = 0.5 * (q2 + mx2 - mp2_) / mp_;
       F2 = W2 * nu / mp_;
       return *this;
+    }
+
+    ParametersDescription Shamov::parametersDescription() {
+      auto desc = Parameterisation::parametersDescription();
+      desc.setDescription("Shamov composite soft structure functions");
+      desc.add<int>("mode", (int)Mode::RealResAndNonRes);
+      desc.add<int>("fitModel", 2);
+      desc.add<double>("gm0", 1.);
+      desc.add<double>("gmb", 0.984);
+      desc.add<double>("lowQ2", 1.e-7);
+      return desc;
     }
   }  // namespace strfun
 }  // namespace cepgen

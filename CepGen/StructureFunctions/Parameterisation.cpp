@@ -110,6 +110,12 @@ namespace cepgen {
       return os;
     }
 
+    ParametersDescription Parameterisation::parametersDescription() {
+      auto desc = ParametersDescription();
+      desc.add<int>("sigmaRatio", (int)sigrat::Type::SibirtsevBlunden);
+      return desc;
+    }
+
     std::ostream& operator<<(std::ostream& os, const Parameterisation& sf) { return os << &sf; }
 
     /// Human-readable format of a structure function type
