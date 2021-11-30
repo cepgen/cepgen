@@ -20,6 +20,8 @@
 
 #include <complex>
 
+#include "CepGen/Utils/ParametersDescription.h"
+
 namespace cepgen {
   class ParametersList;
   class NachtmannAmplitudes {
@@ -59,6 +61,8 @@ namespace cepgen {
     /// Compute the amplitude for a given kinematics and a given set of helicity components
     std::complex<double> operator()(const Kinematics&, short lam1, short lam2, short lam3, short lam4) const;
 
+    static ParametersDescription parametersDescription();
+
   private:
     const Mode mode_;
     /// Collection of parameters for the EFT extension
@@ -66,8 +70,8 @@ namespace cepgen {
       explicit EFTParameters(const ParametersList& params);
       const double s1, mH;
       double c1() const { return sqrt(1. - s1 * s1); }
+      static ParametersDescription parametersDescription();
     } eft_ext_;
-
     /// Simple container for helicity components
     struct Helicities {
       short lam1;  ///< first incoming photon

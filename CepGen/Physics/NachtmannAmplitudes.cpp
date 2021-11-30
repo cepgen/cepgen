@@ -36,6 +36,13 @@ namespace cepgen {
   NachtmannAmplitudes::EFTParameters::EFTParameters(const ParametersList& params)
       : s1(params.get<double>("s1")), mH(params.get<double>("mH")) {}
 
+  ParametersDescription NachtmannAmplitudes::EFTParameters::parametersDescription() {
+    auto desc = ParametersDescription();
+    desc.add<double>("s1", 0.);
+    desc.add<double>("mH", 0.).setDescription("Higgs mass (in GeV/c2)");
+    return desc;
+  }
+
   NachtmannAmplitudes::Kinematics::Kinematics(double mw2, double shat, double that, double uhat)
       : shat(shat),
         that(that),
@@ -237,6 +244,13 @@ namespace cepgen {
                (hel.lam3 + hel.lam4) -
            0.25 * kin.shat2 * M_SQRT2 * constants::G_F /* /e^2 */ * kin.inv_gamma2 * invB * eft_ext_.s1 *
                eft_ext_.c1() * eft_ext_.c1() * float(hel.lam1 + hel.lam2) * (1. + hel.lam3 * hel.lam4);
+  }
+
+  ParametersDescription NachtmannAmplitudes::parametersDescription() {
+    auto desc = ParametersDescription();
+    desc.add<int>("model", (int)Mode::SM).setDescription("SM/anomalous model to consider");
+    desc.add<ParametersDescription>("eftParameters", EFTParameters::parametersDescription());
+    return desc;
   }
 
   std::ostream& operator<<(std::ostream& os, const NachtmannAmplitudes::Mode& mode) {
