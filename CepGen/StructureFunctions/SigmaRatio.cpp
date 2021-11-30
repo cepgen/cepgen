@@ -37,7 +37,9 @@ namespace cepgen {
     class E143 final : public Parameterisation {
     public:
       explicit E143(const ParametersList& params = ParametersList());
+
       static std::string description() { return "E143 experimental R measurement"; }
+      static ParametersDescription parametersDescription();
 
       double operator()(double xbj, double q2, double& err) const override;
 
@@ -77,6 +79,17 @@ namespace cepgen {
       return r * 0.5 * (3. * u - u * u * u);
     }
 
+    ParametersDescription E143::parametersDescription() {
+      auto desc = ParametersDescription();
+      desc.setDescription("E143 experimental R measurement");
+      desc.add<double>("q2_b", 0.34);
+      desc.add<double>("lambda2", 0.2 * 0.2);
+      desc.add<std::vector<double> >("a", {0.0485, 0.5470, 2.0621, -0.3804, 0.5090, -0.0285});
+      desc.add<std::vector<double> >("b", {0.0481, 0.6114, -0.3509, -0.4611, 0.7172, -0.0317});
+      desc.add<std::vector<double> >("c", {0.0577, 0.4644, 1.8288, 12.3708, -43.1043, 41.7415});
+      return desc;
+    }
+
     //---------------------------------------------------------------------------------------------
 
     /// SLAC experimental R measurement \cite Whitlow:1990gk
@@ -84,7 +97,9 @@ namespace cepgen {
     class R1990 final : public Parameterisation {
     public:
       explicit R1990(const ParametersList& params = ParametersList());
+
       static std::string description() { return "SLAC experimental R measurement"; }
+      static ParametersDescription parametersDescription();
 
       double operator()(double xbj, double q2, double& err) const override;
 
@@ -104,13 +119,22 @@ namespace cepgen {
       return b_.at(0) + theta(xbj, q2) / log(q2 / lambda2_) + b_.at(1) / q2 + b_.at(2) / (q2 * q2 + 0.09);
     }
 
+    ParametersDescription R1990::parametersDescription() {
+      auto desc = ParametersDescription();
+      desc.add<double>("lambda2", 0.04);
+      desc.add<std::vector<double> >("b", {0.0635, 0.5747, -0.3534});
+      return desc;
+    }
+
     //---------------------------------------------------------------------------------------------
 
     /// CLAS experimental R measurement
     class CLAS final : public Parameterisation {
     public:
       explicit CLAS(const ParametersList& params = ParametersList());
+
       static std::string description() { return "CLAS experimental R measurement"; }
+      static ParametersDescription parametersDescription();
 
       double operator()(double xbj, double q2, double& err) const override;
 
@@ -139,13 +163,23 @@ namespace cepgen {
       return tmp * pow((1. - xbj) / (1. - xth), 3);
     }
 
+    ParametersDescription CLAS::parametersDescription() {
+      auto desc = ParametersDescription();
+      desc.add<std::vector<double> >("p", {0.041, 0.592, 0.331});
+      desc.add<double>("wth", 2.5);
+      desc.add<double>("q20", 0.3);
+      return desc;
+    }
+
     //---------------------------------------------------------------------------------------------
 
     /// Sibirtsev & Blunden parameterisation of the R ratio \cite Sibirtsev:2013cga
     class SibirtsevBlunden final : public Parameterisation {
     public:
       explicit SibirtsevBlunden(const ParametersList& params = ParametersList());
+
       static std::string description() { return "Sibirtsev-Blunden theoretical R parameterisation"; }
+      static ParametersDescription parametersDescription();
 
       double operator()(double xbj, double q2, double& err) const override;
 
@@ -165,6 +199,15 @@ namespace cepgen {
       err = 0.;
       //--- equation (10) of reference paper
       return a_ * q2 * (exp(b1_ * q2) + c_ * exp(b2_ * q2));
+    }
+
+    ParametersDescription SibirtsevBlunden::parametersDescription() {
+      auto desc = ParametersDescription();
+      desc.add<double>("a", 0.014);
+      desc.add<double>("b1", -0.07);
+      desc.add<double>("b2", -0.8);
+      desc.add<double>("c", 41.);
+      return desc;
     }
   }  // namespace sigrat
 

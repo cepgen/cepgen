@@ -112,7 +112,8 @@ namespace cepgen {
 
     ParametersDescription Parameterisation::parametersDescription() {
       auto desc = ParametersDescription();
-      desc.add<int>("sigmaRatio", (int)sigrat::Type::SibirtsevBlunden);
+      desc.add<ParametersDescription>(
+          "sigmaRatio", sigrat::SigmaRatiosFactory::get().describeParameters((int)sigrat::Type::SibirtsevBlunden));
       return desc;
     }
 
