@@ -12,6 +12,8 @@ namespace cepgen {
     explicit ParametersDescription(const std::string& mod_name = "");
     /// Build the (empty) description of a parameters collection object from its definition
     explicit ParametersDescription(const ParametersList& params);
+    /// Does a description of this parameter (or parameters collection) exist?
+    bool empty() const;
     /// Set the description of this parameter (or parameters collection)
     ParametersDescription& setDescription(const std::string& descr);
     /// Description of this parameter (or parameters collection)

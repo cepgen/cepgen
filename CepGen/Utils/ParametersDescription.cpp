@@ -15,6 +15,8 @@ namespace cepgen {
       obj_descr_[key] = ParametersDescription();
   }
 
+  bool ParametersDescription::empty() const { return obj_descr_.empty(); }
+
   std::string ParametersDescription::describe(size_t offset) const {
     std::ostringstream os;
     static auto sep = [](size_t offset) -> std::string { return std::string(offset, '\t'); };
