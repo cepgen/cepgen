@@ -14,6 +14,8 @@ namespace cepgen {
     explicit ParametersDescription(const ParametersList& params);
     /// Does a description of this parameter (or parameters collection) exist?
     bool empty() const;
+    /// Concatenate another description to this one
+    ParametersDescription& operator+=(const ParametersDescription&);
     /// Set the description of this parameter (or parameters collection)
     ParametersDescription& setDescription(const std::string& descr);
     /// Description of this parameter (or parameters collection)

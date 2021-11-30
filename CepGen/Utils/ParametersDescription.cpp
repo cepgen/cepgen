@@ -17,6 +17,12 @@ namespace cepgen {
 
   bool ParametersDescription::empty() const { return obj_descr_.empty(); }
 
+  ParametersDescription& ParametersDescription::operator+=(const ParametersDescription& oth) {
+    obj_descr_.insert(oth.obj_descr_.begin(), oth.obj_descr_.end());
+    ParametersList::operator+=(oth);
+    return *this;
+  }
+
   std::string ParametersDescription::describe(size_t offset) const {
     std::ostringstream os;
     static auto sep = [](size_t offset) -> std::string { return std::string(offset, '\t'); };

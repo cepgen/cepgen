@@ -165,10 +165,7 @@ namespace cepgen {
       pol_states.add<std::vector<int> >("W1", {-1, 0, 1}).setDescription("First W+- polarisation states");
       pol_states.add<std::vector<int> >("W2", {-1, 0, 1}).setDescription("Second W+- polarisation states");
       params.add<ParametersDescription>("polarisationStates", pol_states);
-      ParametersDescription eft_params;
-      eft_params.add<double>("s1", 0.);
-      eft_params.add<double>("mH", 0.).setDescription("Higgs mass (in GeV/c2)");
-      params.add<ParametersDescription>("eftParameters", eft_params);
+      params += NachtmannAmplitudes::parametersDescription();
       return params;
     }
   }  // namespace proc
