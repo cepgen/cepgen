@@ -23,5 +23,13 @@ namespace cepgen {
   namespace hadr {
     Hadroniser::Hadroniser(const ParametersList& plist)
         : EventModifier(plist), remn_fragm_(plist.get<bool>("remnantsFragmentation", true)) {}
+
+    ParametersDescription Hadroniser::parametersDescription() {
+      auto desc = EventModifier::parametersDescription();
+      desc.add<bool>("remnantsFragmentation", true)
+          .setDescription("Apply the fragmentation algorithm to proton remnants");
+      return desc;
+    }
+
   }  // namespace hadr
 }  // namespace cepgen

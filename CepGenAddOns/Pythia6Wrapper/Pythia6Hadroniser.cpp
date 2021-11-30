@@ -74,6 +74,7 @@ namespace cepgen {
       static std::string description() {
         return "Interface to the Pythia 6 string hadronisation/fragmentation algorithm";
       }
+      static ParametersDescription parametersDescription();
 
       void setRuntimeParameters(const Parameters&) override {}
       inline void readString(const char* param) override { pygive(param); }
@@ -124,6 +125,12 @@ namespace cepgen {
         {Particle::Status::Propagator, 11},
         {Particle::Status::Incoming, 11},
     };
+
+    ParametersDescription Pythia6Hadroniser::parametersDescription() {
+      auto desc = Hadroniser::parametersDescription();
+      desc.setDescription("Interface to the Pythia 6 string hadronisation/fragmentation algorithm");
+      return desc;
+    }
 
     void Pythia6Hadroniser::init() {
       CG_WARNING("Pythia6Hadroniser") << "Branching fraction not yet implemented in this hadroniser.\n\t"

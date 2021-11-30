@@ -43,9 +43,11 @@ namespace cepgen {
     public:
       explicit Pythia8Hadroniser(const ParametersList&);
       ~Pythia8Hadroniser();
+
       static std::string description() {
         return "Interface to the Pythia 8 string hadronisation/fragmentation algorithm";
       }
+      static ParametersDescription parametersDescription();
 
       void setRuntimeParameters(const Parameters&) override;
       void readString(const char* param) override;
@@ -359,6 +361,17 @@ namespace cepgen {
         return findRole(ev, pythia_->event[par_id]);
       }
       return (unsigned short)Particle::UnknownRole;
+    }
+
+    ParametersDescription Pythia8Hadroniser::parametersDescription() {
+      auto desc = Hadroniser::parametersDescription();
+      desc.setDescription("Interface to the Pythia 8 string hadronisation/fragmentation algorithm");
+      desc.add<bool>("correctCentralSystem", false)
+          .setDescription("Correct the kinematics of the central system whenever required");
+      desc.add<bool>("debugLHEF", false).setDescription("Switch on the dump of each event into a debugging LHEF file");
+      desc.add<std::string>("outputConfig", "last_pythia_config.cmd")
+          .setDescription("Output filename for a backup of the last Pythia configuration snapshot");
+      return desc;
     }
   }  // namespace hadr
 }  // namespace cepgen

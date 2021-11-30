@@ -39,6 +39,8 @@ namespace cepgen {
     /// Virtual destructor
     virtual ~EventModifier() = default;
 
+    static ParametersDescription parametersDescription();
+
     /// Set all runtime parameters steering this module
     virtual void setRuntimeParameters(const Parameters& params) { rt_params_ = &params; }
     /// \brief Specify a random numbers generator seed for the external module

@@ -40,4 +40,14 @@ namespace cepgen {
     }
     CG_DEBUG("EventModifier:configure") << "Feeding \"" << name_ << "\" event modifier algorithm with:" << os.str();
   }
+
+  ParametersDescription EventModifier::parametersDescription() {
+    auto desc = ParametersDescription();
+    desc.add<int>("seed", -1).setDescription("Random number generator seed");
+    desc.add<int>("maxTrials", 1)
+        .setDescription(
+            "Maximum number of attempts to modify the event"
+            " before giving up and returning a zero-weight");
+    return desc;
+  }
 }  // namespace cepgen
