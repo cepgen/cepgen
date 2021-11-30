@@ -72,7 +72,7 @@ namespace cepgen {
     void registerModule(const I& name, const ParametersList& def_params = ParametersList()) {
       static_assert(std::is_base_of<T, U>::value,
                     "\n\n  *** Failed to register an object with improper inheritance into the factory. ***\n");
-      if (map_.count(name) > 0 || params_map_.count(name) > 0) {
+      if (has(name)) {
         std::ostringstream oss;
         oss << "\n\n  *** " << description_ << " detected a duplicate module registration for index/name \"" << name
             << "\"! ***\n";
@@ -89,13 +89,13 @@ namespace cepgen {
     /// \param[in] name Module name to retrieve
     /// \param[in] params List of parameters to be invoked by the constructor
     std::unique_ptr<T> build(const I& name, ParametersList params = ParametersList()) const {
-      if (name == I() || map_.count(name) == 0) {
+      if (name == I() || !has(name)) {
         std::ostringstream oss;
         oss << "\n\n  *** " << description_ << " failed to build a module with index/name \"" << name << "\"! ***\n";
         throw std::invalid_argument(oss.str());
       }
       params.setName<I>(name);
-      if (params_map_.count(name) > 0)
+      if (has(name))
         params += params_map_.at(name).parameters();
       return map_.at(name)(params);
     }
@@ -127,7 +127,8 @@ namespace cepgen {
         builders.emplace_back(bld_vs_name.second);
       return builders;
     }
-
+    /// Check if a named module is registered
+    bool has(const I& name) const { return map_.count(name) > 0; }
     /// Describe one named module
     const std::string& describe(const I& name) const { return descr_map_.at(name); }
     /// Describe the parameters of one named module
