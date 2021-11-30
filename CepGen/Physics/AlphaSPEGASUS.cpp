@@ -46,7 +46,16 @@ namespace cepgen {
                                     << "quark masses (GeV): charm: " << mc << ", bottom: " << mb << ", top: " << mt
                                     << ".";
     }
+
     static std::string description() { return "PEGASUS alphaS evolution algorithm"; }
+    static ParametersDescription parametersDescription() {
+      auto desc = ParametersDescription();
+      desc.add<int>("iord", 2).setDescription("Evolution order");
+      desc.add<double>("fr2", 1.);
+      desc.add<double>("mur", 1.);
+      desc.add<double>("asmur", 0.68183);
+      return desc;
+    }
 
     double operator()(double q) const override { return alphas_(q); }
 

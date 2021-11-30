@@ -26,7 +26,12 @@ namespace cepgen {
   class AlphaEMBurkhardt final : public Coupling {
   public:
     explicit AlphaEMBurkhardt(const ParametersList& params) : Coupling(params) {}
+
     static std::string description() { return "Burkhardt et al. alpha(EM) evolution algorithm"; }
+    static ParametersDescription parametersDescription() {
+      auto desc = ParametersDescription();
+      return desc;
+    }
 
     double operator()(double q) const override {
       const double q2 = q * q;

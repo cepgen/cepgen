@@ -41,6 +41,12 @@ namespace cepgen {
     }
 #endif
     static std::string description() { return "Perturbative PDF-oriented evolution algorithm"; }
+    static ParametersDescription parametersDescription() {
+      auto desc = ParametersDescription();
+      desc.add<std::string>("pdfSet", "cteq6");
+      desc.add<int>("pdfMember", 0);
+      return desc;
+    }
 
     double operator()(double q) const override {
 #ifdef LHAPDF_GE_6

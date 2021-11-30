@@ -378,6 +378,7 @@ namespace cepgen {
 
     ParametersDescription Process::parametersDescription() {
       auto desc = ParametersDescription();
+      desc.add<std::string>("alphaEM", "fixed");
       return desc;
     }
 
