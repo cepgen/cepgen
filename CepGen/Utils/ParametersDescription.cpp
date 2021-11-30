@@ -15,7 +15,7 @@ namespace cepgen {
       obj_descr_[key] = ParametersDescription();
   }
 
-  bool ParametersDescription::empty() const { return obj_descr_.empty(); }
+  bool ParametersDescription::empty() const { return obj_descr_.empty() && mod_descr_.empty(); }
 
   ParametersDescription& ParametersDescription::operator+=(const ParametersDescription& oth) {
     obj_descr_.insert(oth.obj_descr_.begin(), oth.obj_descr_.end());
