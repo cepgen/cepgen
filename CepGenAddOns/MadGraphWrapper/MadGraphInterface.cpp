@@ -251,4 +251,18 @@ namespace cepgen {
 
     return result;
   }
+
+  ParametersDescription MadGraphInterface::parametersDescription() {
+    auto desc = ParametersDescription();
+    desc.add<std::string>("process", "").setDescription("MadGraph_aMC process definition");
+    desc.add<std::string>("model", "").setDescription("MadGraph_aMC model name");
+    desc.add<std::string>("cardPath", "/tmp/cepgen_mg5_input.dat")
+        .setDescription("Temporary file where to store the input card for MadGraph_aMC");
+    desc.add<std::string>("standaloneCppPath", "");
+    desc.add<std::string>("tmpDir", "/tmp/cepgen_mg5_aMC")
+        .setDescription("Temporary path where to store the MadGraph_aMC process definition files");
+    desc.add<std::string>("logFile", "/tmp/cepgen_mg5_aMC.log")
+        .setDescription("Temporary path where to store the log for this run");
+    return desc;
+  }
 }  // namespace cepgen

@@ -87,6 +87,7 @@ ParametersDescription MadGraphProcessBuilder::parametersDescription() {
   desc.setDescription("MadGraph_aMC process builder");
   desc.add<std::string>("lib", "").setDescription("Precompiled library for this process definition");
   desc.add<std::string>("parametersCard", "param_card.dat").setDescription("Runtime MadGraph parameters card");
+  desc += MadGraphInterface::parametersDescription();
   return desc;
 }
 

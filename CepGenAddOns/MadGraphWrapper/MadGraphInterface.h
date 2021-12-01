@@ -22,9 +22,9 @@
 #include <memory>
 #include <string>
 
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Utils/Filesystem.h"
+#include "CepGen/Utils/ParametersDescription.h"
 
 // forward-declaration of base MadGraph standalone_cpp process
 class CPPProcess;
@@ -33,6 +33,8 @@ namespace cepgen {
   class MadGraphInterface {
   public:
     MadGraphInterface(const ParametersList&);
+
+    static ParametersDescription parametersDescription();
 
     std::string run() const;
 
