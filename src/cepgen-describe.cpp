@@ -32,11 +32,36 @@
 
 using namespace std;
 
+#define LOOP_FACTORY(desc, obj)                                                                                     \
+  if (all)                                                                                                          \
+    os << "\n"                                                                                                      \
+       << cepgen::utils::boldify(string(80, '=') + "\n" + string(desc) + " modules\n" + string(80, '=')) << "\n\n"; \
+  for (const auto& mod_name : obj::get().modules()) {                                                               \
+    if (all)                                                                                                        \
+      os << describe_one(desc, mod_name, false, obj::get().describeParameters(mod_name));                           \
+    else                                                                                                            \
+      for (const auto& mod : modules)                                                                               \
+        if (mod == mod_name)                                                                                        \
+          os << describe_one(desc, mod_name, true, obj::get().describeParameters(mod_name));                        \
+  }
+#define LOOP_FACTORY_INT(desc, obj)                                                                                 \
+  if (all)                                                                                                          \
+    os << "\n"                                                                                                      \
+       << cepgen::utils::boldify(string(80, '=') + "\n" + string(desc) + " modules\n" + string(80, '=')) << "\n\n"; \
+  for (const auto& mod_name : obj::get().modules()) {                                                               \
+    if (all)                                                                                                        \
+      os << describe_one(desc, to_string(mod_name), false, obj::get().describeParameters(mod_name));                \
+    else                                                                                                            \
+      for (const auto& mod : modules)                                                                               \
+        if (cepgen::utils::isNumber(mod) && stod(mod) == mod_name)                                                  \
+          os << describe_one(desc, to_string(mod_name), true, obj::get().describeParameters(mod_name));             \
+  }
+
 /** Listing module for CepGen
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  */
 int main(int argc, char* argv[]) {
-  bool list_mods, debug, safe_mode, dump_params;
+  bool list_mods, debug, safe_mode, dump_params, all;
   vector<string> addons, modules;
 
   cepgen::ArgumentsParser parser(argc, argv);
@@ -46,6 +71,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("debug,d", "debugging mode", &debug, false)
       .addOptionalArgument("safe-mode,s", "safe mode", &safe_mode, false)
       .addOptionalArgument("dump-params,p", "dump the ParametersList object", &dump_params, false)
+      .addOptionalArgument("all,a", "dump all modules descriptions", &all, false)
       .parse();
 
   //--- handle any debugging flag
@@ -66,43 +92,34 @@ int main(int argc, char* argv[]) {
     cepgen::dumpModules();
     return 0;
   }
-  if (!modules.empty()) {
-    for (const auto& mod : modules) {
-      auto describe = [&mod, &dump_params](const string& type, const cepgen::ParametersDescription& desc) {
-        CG_LOG.log([&type, &desc, &mod, &dump_params](auto& log) {
-          log << type << " module '" << mod << "'"
-              << (desc.empty() ? " has no standard description" : ":\n" + desc.describe());
-          if (dump_params)
-            log << "\n\tParametersList object:\n\t\t" << desc.parameters();
-        });
-      };
-      if (cepgen::card::CardsHandlerFactory::get().has(mod))
-        describe("Cards steering", cepgen::card::CardsHandlerFactory::get().describeParameters(mod));
-      if (cepgen::IntegratorFactory::get().has(mod))
-        describe("Integrator", cepgen::IntegratorFactory::get().describeParameters(mod));
-      if (cepgen::proc::ProcessFactory::get().has(mod))
-        describe("Process", cepgen::proc::ProcessFactory::get().describeParameters(mod));
-      if (cepgen::formfac::FormFactorsFactory::get().has(mod))
-        describe("Beam form factors modelling", cepgen::formfac::FormFactorsFactory::get().describeParameters(mod));
-      if (cepgen::utils::isNumber(mod)) {
-        if (cepgen::strfun::StructureFunctionsFactory::get().has(stod(mod)))
-          describe("Structure functions modelling",
-                   cepgen::strfun::StructureFunctionsFactory::get().describeParameters(stod(mod)));
-        if (cepgen::sigrat::SigmaRatiosFactory::get().has(stod(mod)))
-          describe("Cross sections ratio modelling",
-                   cepgen::sigrat::SigmaRatiosFactory::get().describeParameters(stod(mod)));
-      }
-      if (cepgen::EventModifierFactory::get().has(mod))
-        describe("Event modification", cepgen::EventModifierFactory::get().describeParameters(mod));
-      if (cepgen::io::ExportModuleFactory::get().has(mod))
-        describe("Export", cepgen::io::ExportModuleFactory::get().describeParameters(mod));
-      if (cepgen::utils::FunctionalFactory::get().has(mod))
-        describe("Functional evaluator", cepgen::utils::FunctionalFactory::get().describeParameters(mod));
-      if (cepgen::AlphaEMFactory::get().has(mod))
-        describe("alpha(EM)", cepgen::AlphaEMFactory::get().describeParameters(mod));
-      if (cepgen::AlphaSFactory::get().has(mod))
-        describe("alpha(S)", cepgen::AlphaSFactory::get().describeParameters(mod));
-    }
+  if (all or !modules.empty()) {
+    auto describe_one = [&dump_params](const string& type,
+                                       const string& name,
+                                       bool dump_mod_name,
+                                       const cepgen::ParametersDescription& desc) -> string {
+      ostringstream os;
+      if (dump_mod_name)
+        os << type << " module '" << name << "'\n";
+      os << desc.describe();
+      if (dump_params)
+        os << "\n\tParametersList object:\n\t\t" << desc.parameters();
+      return os.str();
+    };
+
+    ostringstream os;
+    LOOP_FACTORY("Cards steering", cepgen::card::CardsHandlerFactory)
+    LOOP_FACTORY("Integrator", cepgen::IntegratorFactory)
+    LOOP_FACTORY("Process", cepgen::proc::ProcessFactory)
+    LOOP_FACTORY("Integrator", cepgen::IntegratorFactory)
+    LOOP_FACTORY("Beam form factors modelling", cepgen::formfac::FormFactorsFactory)
+    LOOP_FACTORY_INT("Structure functions modelling", cepgen::strfun::StructureFunctionsFactory)
+    LOOP_FACTORY_INT("Cross sections ratio modelling", cepgen::sigrat::SigmaRatiosFactory)
+    LOOP_FACTORY("Event modification", cepgen::EventModifierFactory)
+    LOOP_FACTORY("Export", cepgen::io::ExportModuleFactory)
+    LOOP_FACTORY("Functional evaluator", cepgen::utils::FunctionalFactory)
+    LOOP_FACTORY("alpha(EM)", cepgen::AlphaEMFactory)
+    LOOP_FACTORY("alpha(S)", cepgen::AlphaSFactory)
+    CG_LOG << os.str();
     return 0;
   }
 
