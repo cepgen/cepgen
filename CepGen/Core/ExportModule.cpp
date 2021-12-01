@@ -70,5 +70,10 @@ namespace cepgen {
       os << prep << std::string(45 + version::tag.size(), '*');
       return os.str();
     }
+
+    ParametersDescription ExportModule::parametersDescription() {
+      auto desc = ParametersDescription();
+      return desc;
+    }
   }  // namespace io
 }  // namespace cepgen

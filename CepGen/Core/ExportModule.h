@@ -41,6 +41,8 @@ namespace cepgen {
       explicit ExportModule(const ParametersList& params);
       virtual ~ExportModule();
 
+      static ParametersDescription parametersDescription();
+
       /// Set the process cross section and its associated error
       virtual void setCrossSection(double /*cross_section*/, double /*err_cross_section*/) {}
       /// Set the event number

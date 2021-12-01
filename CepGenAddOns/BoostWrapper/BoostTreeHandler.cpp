@@ -47,7 +47,9 @@ namespace cepgen {
     public:
       /// Boost tree parser from a configuration card
       explicit BoostTreeHandler(const ParametersList&);
+
       static std::string description() { return "Boost tree parser/writer"; }
+      static ParametersDescription parametersDescription();
 
       Parameters* parse(const std::string&, Parameters*) override;
       void pack(const Parameters* params) override;
@@ -326,6 +328,12 @@ namespace cepgen {
       //for ( const auto& mod :  utils::Logger::get().exceptionRules() )
       //  log_.operator[]<std::vector<std::string> >( "enabledModules" ).emplace_back( mod );
       tree_.add_child(LOGGER_NAME, pack(log_));
+    }
+
+    ParametersDescription BoostTreeHandler::parametersDescription() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Boost tree parser/writer");
+      return desc;
     }
 
     //------------------------------------------------------------------
