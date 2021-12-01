@@ -39,7 +39,9 @@ namespace cepgen {
       /// Class constructor
       explicit ROOTTreeHandler(const ParametersList&);
       ~ROOTTreeHandler();
+
       static std::string description() { return "ROOT TTree storage module"; }
+      static ParametersDescription parametersDescription();
 
       void initialise(const Parameters&) override;
       /// Writer operator
@@ -55,8 +57,8 @@ namespace cepgen {
 
     ROOTTreeHandler::ROOTTreeHandler(const ParametersList& params)
         : ExportModule(params),
-          file_(params.get<std::string>("filename", "output.root").c_str(), "recreate"),
-          compress_(params.get<bool>("compress", false)) {
+          file_(params.get<std::string>("filename").c_str(), "recreate"),
+          compress_(params.get<bool>("compress")) {
       if (!file_.IsOpen())
         throw CG_FATAL("ROOTTreeHandler") << "Failed to create the output file!";
       run_tree_.create();
@@ -81,6 +83,14 @@ namespace cepgen {
     void ROOTTreeHandler::setCrossSection(double cross_section, double cross_section_err) {
       run_tree_.xsect = cross_section;
       run_tree_.errxsect = cross_section_err;
+    }
+
+    ParametersDescription ROOTTreeHandler::parametersDescription() {
+      auto desc = ExportModule::parametersDescription();
+      desc.setDescription("ROOT TTree storage module");
+      desc.add<std::string>("filename", "output.root").setDescription("Output filename");
+      desc.add<bool>("compress", false).setDescription("Compress the event content? (merge down two-parton system)");
+      return desc;
     }
   }  // namespace io
 }  // namespace cepgen
