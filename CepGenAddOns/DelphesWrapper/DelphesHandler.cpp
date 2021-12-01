@@ -41,7 +41,9 @@ namespace cepgen {
     public:
       explicit DelphesHandler(const ParametersList&);
       ~DelphesHandler();
+
       static std::string description() { return "Delphes interfacing module"; }
+      static ParametersDescription parametersDescription();
 
       void initialise(const Parameters&) override;
       void setCrossSection(double cross_section, double /*err_cross_section*/) override {
@@ -139,6 +141,15 @@ namespace cepgen {
       delphes_->ProcessTask();
       evt_aux->ProcTime = tmr.elapsed();
       tree_writer_->Fill();
+    }
+
+    ParametersDescription DelphesHandler::parametersDescription() {
+      auto desc = ExportModule::parametersDescription();
+      desc.setDescription("Delphes interfacing module");
+      desc.add<std::string>("filename", "output.delphes.root");
+      desc.add<std::string>("inputCard", "input.tcl");
+      desc.add<bool>("compress", false);
+      return desc;
     }
   }  // namespace io
 }  // namespace cepgen
