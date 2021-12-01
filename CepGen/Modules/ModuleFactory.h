@@ -80,10 +80,8 @@ namespace cepgen {
       }
       map_[name] = &build<U>;
       descr_map_[name] = U::description();
-      if (!def_params.empty())
-        params_map_[name] = ParametersDescription(def_params);
-      else
-        params_map_[name] = U::parametersDescription();
+      params_map_[name] = !def_params.empty() ? ParametersDescription(def_params) : U::parametersDescription();
+      params_map_[name].setName(name);
     }
     /// Build one instance of a named module
     /// \param[in] name Module name to retrieve

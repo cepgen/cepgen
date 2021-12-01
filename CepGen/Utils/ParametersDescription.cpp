@@ -24,19 +24,23 @@ namespace cepgen {
   }
 
   std::string ParametersDescription::describe(size_t offset) const {
-    std::ostringstream os;
     static auto sep = [](size_t offset) -> std::string { return std::string(offset, '\t'); };
-    const auto& mod_name = ParametersList::name<std::string>();
+    const auto& mod_name = ParametersList::getString(ParametersList::MODULE_NAME);
+    //if (mod_name.empty() && mod_descr_.empty() && ParametersList::empty())
+    //  return utils::colourise(
+    //      "(empty module)", utils::Colour::reset, utils::Modifier::dimmed | utils::Modifier::italic);
+    std::ostringstream os;
     if (!mod_name.empty())
       os << sep(offset) << "Name: " << utils::boldify(mod_name) << "\n";
     if (!mod_descr_.empty())
-      os << sep(offset + 1) << utils::colourise(mod_descr_, utils::Colour::reset, utils::Modifier::italic) << "\n";
+      os << sep(offset) << utils::colourise(mod_descr_, utils::Colour::reset, utils::Modifier::italic) << "\n";
+
     for (const auto& key : ParametersList::keys(false)) {
       os << sep(offset + 1) << utils::colourise(key, utils::Colour::reset, utils::Modifier::underline);
       if (obj_descr_.count(key) > 0) {
         const auto& obj = obj_descr_.at(key);
         if (!ParametersList::has<ParametersList>(key))
-          os << " (default value: " << ParametersList::getString(key) << ")";
+          os << " (default value: \"" << ParametersList::getString(key) << "\")";
         os << "\n" << obj.describe(offset + 1);
       }
     }

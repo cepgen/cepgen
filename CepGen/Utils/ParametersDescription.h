@@ -16,6 +16,12 @@ namespace cepgen {
     bool empty() const;
     /// Concatenate another description to this one
     ParametersDescription& operator+=(const ParametersDescription&);
+    /// Set the module name for this parameter (or parameters collection)
+    template <typename T>
+    ParametersDescription& setName(const T& name) {
+      add<T>(ParametersList::MODULE_NAME, name);
+      return *this;
+    }
     /// Set the description of this parameter (or parameters collection)
     ParametersDescription& setDescription(const std::string& descr);
     /// Description of this parameter (or parameters collection)
