@@ -132,7 +132,11 @@ namespace cepgen {
     /// Describe one named module
     const std::string& describe(const I& name) const { return descr_map_.at(name); }
     /// Describe the parameters of one named module
-    const ParametersDescription& describeParameters(const I& name) const { return params_map_.at(name); }
+    const ParametersDescription& describeParameters(const I& name) const {
+      if (params_map_.count(name) == 0)
+        return empty_params_desc_;
+      return params_map_.at(name);
+    }
     /// Is the database empty?
     bool empty() const { return map_.empty(); }
     /// Number of modules registered in the database
@@ -159,6 +163,8 @@ namespace cepgen {
     std::unordered_map<I, std::string> descr_map_;
     /// Database of default parameters associated to modules
     std::unordered_map<I, ParametersDescription> params_map_;
+    /// An empty parameters description
+    const ParametersDescription empty_params_desc_;
 
   protected:
     /// Hidden default constructor for singleton operations
