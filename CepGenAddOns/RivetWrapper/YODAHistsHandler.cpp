@@ -43,11 +43,13 @@ namespace cepgen {
      * \tparam T YODA writer type
      */
     template <typename T>
-    class YODAHistsHandler : public ExportModule {
+    class YODAHistsHandler final : public ExportModule {
     public:
       explicit YODAHistsHandler(const ParametersList&);
       ~YODAHistsHandler();
+
       static std::string description() { return "YODA histograms/profiles file output module"; }
+      static ParametersDescription parametersDescription();
 
       void initialise(const Parameters&) override {}
       void setCrossSection(double cross_section, double) override { cross_section_ = cross_section; }
@@ -159,6 +161,22 @@ namespace cepgen {
                           browser_.get(ev, h_var.first[2]),
                           cross_section_);
       weight_cnt_.fill(ev.weight);
+    }
+
+    template <typename T>
+    ParametersDescription YODAHistsHandler<T>::parametersDescription() {
+      auto desc = ExportModule::parametersDescription();
+      desc.setDescription("YODA histograms/profiles file output module");
+      desc.add<std::string>("filename", "output.yoda").setDescription("Output filename");
+      auto var_desc = ParametersDescription();
+      var_desc.add<int>("nbins", 0);
+      var_desc.add<int>("nbinsX", 10).setDescription("Bins multiplicity for x-axis");
+      var_desc.add<Limits>("xrange", Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
+      var_desc.add<int>("nbinsY", 10).setDescription("Bins multiplicity for y-axis");
+      var_desc.add<Limits>("yrange", Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
+      var_desc.add<bool>("profile", false);
+      desc.add<ParametersDescription>("variables", var_desc);
+      return desc;
     }
   }  // namespace io
 }  // namespace cepgen

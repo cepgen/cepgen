@@ -38,7 +38,9 @@ namespace cepgen {
       /// Class constructor
       explicit LHEFPythiaHandler(const ParametersList&);
       ~LHEFPythiaHandler();
+
       static std::string description() { return "Pythia 8-based LHEF output module"; }
+      static ParametersDescription parametersDescription();
 
       void initialise(const Parameters&) override;
       /// Writer operator
@@ -117,6 +119,14 @@ namespace cepgen {
 
     void LHEFPythiaHandler::setCrossSection(double cross_section, double cross_section_err) {
       lhaevt_->setCrossSection(0, cross_section, cross_section_err);
+    }
+
+    ParametersDescription LHEFPythiaHandler::parametersDescription() {
+      auto desc = ExportModule::parametersDescription();
+      desc.setDescription("Pythia 8-based LHEF output module");
+      desc.add<bool>("compress", true);
+      desc.add<std::string>("filename", "output.lhe").setDescription("Output filename");
+      return desc;
     }
   }  // namespace io
 }  // namespace cepgen

@@ -126,12 +126,6 @@ namespace cepgen {
         {Particle::Status::Incoming, 11},
     };
 
-    ParametersDescription Pythia6Hadroniser::parametersDescription() {
-      auto desc = Hadroniser::parametersDescription();
-      desc.setDescription("Interface to the Pythia 6 string hadronisation/fragmentation algorithm");
-      return desc;
-    }
-
     void Pythia6Hadroniser::init() {
       CG_WARNING("Pythia6Hadroniser") << "Branching fraction not yet implemented in this hadroniser.\n\t"
                                       << "You will have to specify manually the multiplication factor according\n\t"
@@ -326,6 +320,12 @@ namespace cepgen {
       if (ranudq < 5. / 9.)
         return {PDG::up, 2101};  // (u,ud0)
       return {PDG::up, 2103};    // (u,ud1)
+    }
+
+    ParametersDescription Pythia6Hadroniser::parametersDescription() {
+      auto desc = Hadroniser::parametersDescription();
+      desc.setDescription("Interface to the Pythia 6 string hadronisation/fragmentation algorithm");
+      return desc;
     }
   }  // namespace hadr
 }  // namespace cepgen
