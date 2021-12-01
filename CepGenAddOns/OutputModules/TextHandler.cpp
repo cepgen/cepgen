@@ -39,7 +39,9 @@ namespace cepgen {
     public:
       explicit TextHandler(const ParametersList&);
       ~TextHandler();
+
       static std::string description() { return "Text-based histogramming tool"; }
+      static ParametersDescription parametersDescription();
 
       void initialise(const Parameters&) override;
       void setCrossSection(double cross_section, double) override { cross_section_ = cross_section; }
@@ -198,6 +200,31 @@ namespace cepgen {
       for (auto& h_var : hists2d_)
         h_var.hist.fill(browser_.get(ev, h_var.var1), browser_.get(ev, h_var.var2));
       ++num_evts_;
+    }
+
+    ParametersDescription TextHandler::parametersDescription() {
+      auto desc = ExportModule::parametersDescription();
+      desc.setDescription("Text-based histogramming tool");
+      desc.add<std::string>("filename", "output.txt").setDescription("Output filename for variables dump");
+      desc.add<std::string>("histFilename", "output.hists.txt").setDescription("Output filename for histogram dump");
+      desc.add<std::vector<std::string>>("variables", {}).setDescription("List of variables to dump");
+      desc.add<bool>("saveBanner", true).setDescription("Also save the boilerplate in output files?");
+      desc.add<bool>("saveVariables", true).setDescription("Save the variable(s) into an output file?");
+      desc.add<bool>("showHistograms", true).setDescription("Show the histogram(s) at the end of the run?");
+      desc.add<bool>("saveHistograms", false).setDescription("Save the histogram(s) at the end of the run?");
+      desc.add<std::string>("separator", "\t").setDescription("Base separator in output file");
+      ParametersDescription hist_desc;
+      hist_desc.add<int>("nbins", 25);
+      hist_desc.add<std::vector<double>>("xbins", {}).setDescription("x-axis bins definition");
+      hist_desc.add<int>("nbinsX", 0).setDescription("Bins multiplicity for x-axis");
+      hist_desc.add<Limits>("xrange", Limits{}).setDescription("Minimum-maximum range for x-axis");
+      hist_desc.add<std::vector<double>>("ybins", {}).setDescription("y-axis bins definition");
+      hist_desc.add<int>("nbinsY", 50).setDescription("Bins multiplicity for y-axis");
+      hist_desc.add<Limits>("yrange", Limits{}).setDescription("Minimum-maximum range for y-axis");
+      hist_desc.add<bool>("log", false).setDescription("Plot logarithmic axis?");
+      desc.add<ParametersDescription>("histVariables", hist_desc)
+          .setDescription("Histogram definition for 1/2 variable(s)");
+      return desc;
     }
   }  // namespace io
 }  // namespace cepgen

@@ -34,7 +34,9 @@ namespace cepgen {
     public:
       explicit EventDump(const ParametersList&);
       ~EventDump();
+
       static std::string description() { return "Simple text-based event dumper"; }
+      static ParametersDescription parametersDescription();
 
       void initialise(const Parameters&) override;
       void setCrossSection(double, double) override;
@@ -74,6 +76,15 @@ namespace cepgen {
     void EventDump::operator<<(const Event& ev) {
       if (print_every_ < 0 || event_num_++ % print_every_ == 0)
         *out_ << ev << "\n";
+    }
+
+    ParametersDescription EventDump::parametersDescription() {
+      auto desc = ExportModule::parametersDescription();
+      desc.setDescription("Simple text-based event dumper");
+      desc.add<bool>("saveBanner", true).setDescription("Save boilerplate in output file?");
+      desc.add<int>("printEvery", 10).setDescription("Period at which events are dumped");
+      desc.add<std::string>("filename", "").setDescription("Output filename");
+      return desc;
     }
   }  // namespace io
 }  // namespace cepgen
