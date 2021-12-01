@@ -74,4 +74,11 @@ namespace cepgen {
       throw CG_FATAL("Integrator:uniform") << "Random number generator has not been initialised!";
     return gsl_rng_uniform(gsl_rng_.get());
   }
+
+  ParametersDescription IntegratorGSL::parametersDescription() {
+    auto desc = Integrator::parametersDescription();
+    desc.add<int>("rngEngine", 0)
+        .setDescription("Random number generator engine (0 = MT19937, 1 = Taus2, 2 = Gfsr4, 3 = RanLXS0)");
+    return desc;
+  }
 }  // namespace cepgen

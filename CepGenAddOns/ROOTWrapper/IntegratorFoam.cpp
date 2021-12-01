@@ -34,7 +34,9 @@ namespace cepgen {
   class IntegratorFoam final : public Integrator, public TFoamIntegrand {
   public:
     explicit IntegratorFoam(const ParametersList&);
+
     static std::string description() { return "FOAM general purpose MC integrator"; }
+    static ParametersDescription parametersDescription();
 
     void integrate(double&, double&) override;
     inline double uniform() const override { return rnd_->Rndm(); }
@@ -52,7 +54,7 @@ namespace cepgen {
   };
 
   IntegratorFoam::IntegratorFoam(const ParametersList& params) : Integrator(params), foam_(new TFoam("Foam")) {
-    const auto& rnd_mode = params.get<std::string>("rngEngine", "MersenneTwister");
+    cost auto& rnd_mode = params.get<std::string>("rngEngine", "MersenneTwister");
     if (rnd_mode == "Ranlux")
       rnd_.reset(new TRandom1);
     else if (rnd_mode == "generic")
@@ -103,6 +105,14 @@ namespace cepgen {
           << " for epsilon = " << eps << "\n\t"
           << " nCalls (initialisation only)= " << ncalls << ".";
     });
+  }
+
+  ParametersDescription IntegratorFoam::parametersDescription() {
+    auto desc = Integrator::parametersDescription();
+    desc.setDescription("FOAM general purpose MC integrator");
+    desc.add<std::string>("rngEngine", "MersenneTwister")
+        .setDescription("Set random number generator engine ('Ranlux', 'generic', 'MersenneTwister' handled)");
+    return desc;
   }
 }  // namespace cepgen
 

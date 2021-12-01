@@ -55,4 +55,12 @@ namespace cepgen {
   }
 
   double Integrator::uniform() const { return rnd_(rnd_gen_); }
+
+  ParametersDescription Integrator::parametersDescription() {
+    auto desc = ParametersDescription();
+    desc.setDescription("Unnamed integrator");
+    desc.add<int>("seed", time(nullptr)).setDescription("Random number generator seed");
+    desc.add<int>("verbose", 1).setDescription("Verbosity level");
+    return desc;
+  }
 }  // namespace cepgen

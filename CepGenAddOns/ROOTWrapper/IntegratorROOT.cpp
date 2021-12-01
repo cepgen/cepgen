@@ -28,7 +28,9 @@ namespace cepgen {
   class IntegratorROOT final : public Integrator {
   public:
     explicit IntegratorROOT(const ParametersList&);
+
     static std::string description() { return "ROOT general purpose MC integrator"; }
+    static ParametersDescription parametersDescription();
 
     void integrate(double&, double&) override;
 
@@ -88,6 +90,16 @@ namespace cepgen {
 
     result_ = result = integr_->Integral(min_.data(), max_.data());
     err_result_ = abserr = integr_->Error();
+  }
+
+  ParametersDescription IntegratorROOT::parametersDescription() {
+    auto desc = Integrator::parametersDescription();
+    desc.setDescription("ROOT general purpose MC integrator");
+    desc.add<std::string>("type", "default");
+    desc.add<double>("absTol", -1.);
+    desc.add<double>("relTol", -1.);
+    desc.add<int>("size", 0);
+    return desc;
   }
 }  // namespace cepgen
 

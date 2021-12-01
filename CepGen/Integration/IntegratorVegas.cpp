@@ -33,6 +33,7 @@ namespace cepgen {
     explicit IntegratorVegas(const ParametersList&);
 
     static std::string description() { return "Vegas stratified sampling integrator"; }
+    static ParametersDescription parametersDescription();
 
     void integrate(double&, double&) override;
 
@@ -204,6 +205,19 @@ namespace cepgen {
         return os << "stratified";
     }
     return os;
+  }
+
+  ParametersDescription IntegratorVegas::parametersDescription() {
+    auto desc = IntegratorGSL::parametersDescription();
+    desc.setDescription("Vegas stratified sampling integrator");
+    desc.add<int>("numFunctionCalls", 50000);
+    desc.add<double>("chiSqCut", 1.5);
+    desc.add<bool>("treat", true).setDescription("Phase space treatment");
+    desc.add<int>("iterations", 10);
+    desc.add<double>("alpha", 1.5);
+    desc.add<int>("mode", (int)Mode::importance);
+    desc.add<std::string>("loggingOutput", "cerr");
+    return desc;
   }
 }  // namespace cepgen
 
