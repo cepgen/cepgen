@@ -2,7 +2,7 @@
 #include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Utils/ParametersDescription.h"
 
-int main(int argc, char* argv[]) {
+int main() {
   class TestModule : public cepgen::NamedModule<std::string> {
   public:
     explicit TestModule(const cepgen::ParametersList& params) : cepgen::NamedModule<std::string>(params) {}
