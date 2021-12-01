@@ -41,7 +41,9 @@ namespace cepgen {
     public:
       /// Cast command line arguments into a configuration word
       explicit CommandLineHandler(const ParametersList&);
+
       static std::string description() { return "Command line configuration parser"; }
+      static ParametersDescription parametersDescription();
 
       Parameters* parse(const std::string&, Parameters*) override;
 
@@ -132,6 +134,13 @@ namespace cepgen {
       if (!out.keys(true).empty())
         rt_params_->addOutputModule(io::ExportModuleFactory::get().build(out));
       return rt_params_;
+    }
+
+    ParametersDescription CommandLineHandler::parametersDescription() {
+      auto desc = Handler::parametersDescription();
+      desc.setDescription("Command line configuration parser");
+      desc.add<std::vector<std::string> >("args", {}).setDescription("Collection of arguments to be parsed");
+      return desc;
     }
   }  // namespace card
 }  // namespace cepgen

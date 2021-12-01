@@ -344,6 +344,12 @@ namespace cepgen {
         PDG::get().define(part);
       }
     }
+
+    ParametersDescription PythonHandler::parametersDescription() {
+      auto desc = Handler::parametersDescription();
+      desc.setDescription("Python 2/3 cards parser");
+      return desc;
+    }
   }  // namespace card
 }  // namespace cepgen
 

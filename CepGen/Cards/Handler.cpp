@@ -51,5 +51,11 @@ namespace cepgen {
                                         << err.what();
       }
     }
+
+    ParametersDescription Handler::parametersDescription() {
+      auto desc = ParametersDescription();
+      //FIXME desc.add<std::string>("filename").setDescription("Steering card to parse");
+      return desc;
+    }
   }  // namespace card
 }  // namespace cepgen

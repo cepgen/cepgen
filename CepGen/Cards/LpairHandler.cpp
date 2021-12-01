@@ -357,6 +357,12 @@ namespace cepgen {
         return p_doubles_.find(key)->second.description;
       return kInvalidStr;
     }
+
+    ParametersDescription LpairHandler::parametersDescription() {
+      auto desc = Handler::parametersDescription();
+      desc.setDescription("LPAIR-like cards parser");
+      return desc;
+    }
   }  // namespace card
 }  // namespace cepgen
 
