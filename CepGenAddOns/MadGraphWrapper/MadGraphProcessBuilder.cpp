@@ -31,7 +31,9 @@ class MadGraphProcessBuilder : public proc::Process2to4 {
 public:
   MadGraphProcessBuilder(const ParametersList&);
   proc::ProcessPtr clone() const override { return proc::ProcessPtr(new MadGraphProcessBuilder(*this)); }
+
   static std::string description() { return "MadGraph_aMC process builder"; }
+  static ParametersDescription parametersDescription();
 
   void prepareProcessKinematics() override;
   double computeCentralMatrixElement() const override;
@@ -78,6 +80,14 @@ double MadGraphProcessBuilder::computeCentralMatrixElement() const {
   mg5_proc_->setMomentum(3, p_c2_);  // second outgoing central particle
 
   return mg5_proc_->eval();
+}
+
+ParametersDescription MadGraphProcessBuilder::parametersDescription() {
+  auto desc = Process2to4::parametersDescription();
+  desc.setDescription("MadGraph_aMC process builder");
+  desc.add<std::string>("lib", "").setDescription("Precompiled library for this process definition");
+  desc.add<std::string>("parametersCard", "param_card.dat").setDescription("Runtime MadGraph parameters card");
+  return desc;
 }
 
 REGISTER_PROCESS("mg5_aMC", MadGraphProcessBuilder)
