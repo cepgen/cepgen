@@ -12,8 +12,12 @@ namespace cepgen {
     explicit ParametersDescription(const std::string& mod_name = "");
     /// Build the (empty) description of a parameters collection object from its definition
     explicit ParametersDescription(const ParametersList& params);
+    /// Copy constructor
+    ParametersDescription(const ParametersDescription&);
     /// Does a description of this parameter (or parameters collection) exist?
     bool empty() const;
+    /// Assignment operator
+    ParametersDescription& operator=(const ParametersDescription&);
     /// Concatenate another description to this one
     ParametersDescription& operator+=(const ParametersDescription&);
     /// Set the module name for this parameter (or parameters collection)

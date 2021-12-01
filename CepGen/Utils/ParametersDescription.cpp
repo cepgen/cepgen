@@ -15,7 +15,17 @@ namespace cepgen {
       obj_descr_[key] = ParametersDescription();
   }
 
+  ParametersDescription::ParametersDescription(const ParametersDescription& oth)
+      : ParametersList(oth), mod_descr_(oth.mod_descr_), obj_descr_(oth.obj_descr_) {}
+
   bool ParametersDescription::empty() const { return obj_descr_.empty() && mod_descr_.empty(); }
+
+  ParametersDescription& ParametersDescription::operator=(const ParametersDescription& oth) {
+    ParametersList::operator=(oth);
+    mod_descr_ = oth.mod_descr_;
+    obj_descr_ = oth.obj_descr_;
+    return *this;
+  }
 
   ParametersDescription& ParametersDescription::operator+=(const ParametersDescription& oth) {
     obj_descr_.insert(oth.obj_descr_.begin(), oth.obj_descr_.end());
@@ -26,22 +36,27 @@ namespace cepgen {
   std::string ParametersDescription::describe(size_t offset) const {
     static auto sep = [](size_t offset) -> std::string { return std::string(offset, '\t'); };
     const auto& mod_name = ParametersList::getString(ParametersList::MODULE_NAME);
-    //if (mod_name.empty() && mod_descr_.empty() && ParametersList::empty())
-    //  return utils::colourise(
-    //      "(empty module)", utils::Colour::reset, utils::Modifier::dimmed | utils::Modifier::italic);
+    const auto& keys = ParametersList::keys(false);
     std::ostringstream os;
-    if (!mod_name.empty())
-      os << sep(offset) << "Name: " << utils::boldify(mod_name) << "\n";
+    os << sep(offset);
+    if (mod_name.empty() && !keys.empty())
+      os << "Parameters collection";
+    else if (!mod_name.empty())
+      os << "Module " << utils::boldify(mod_name);
     if (!mod_descr_.empty())
-      os << sep(offset) << utils::colourise(mod_descr_, utils::Colour::reset, utils::Modifier::italic) << "\n";
-
-    for (const auto& key : ParametersList::keys(false)) {
-      os << sep(offset + 1) << utils::colourise(key, utils::Colour::reset, utils::Modifier::underline);
-      if (obj_descr_.count(key) > 0) {
-        const auto& obj = obj_descr_.at(key);
-        if (!ParametersList::has<ParametersList>(key))
-          os << " (default value: \"" << ParametersList::getString(key) << "\")";
-        os << "\n" << obj.describe(offset + 1);
+      os << " (" << utils::colourise(mod_descr_, utils::Colour::reset, utils::Modifier::italic) << ")";
+    if (keys.empty())
+      os << "\n";
+    else {
+      os << ", parameters:\n";
+      for (const auto& key : keys) {
+        os << sep(offset + 1) << utils::colourise(key, utils::Colour::reset, utils::Modifier::underline);
+        if (obj_descr_.count(key) > 0) {
+          const auto& obj = obj_descr_.at(key);
+          if (!ParametersList::has<ParametersList>(key))
+            os << " (default value: \"" << ParametersList::getString(key) << "\")";
+          os << "\n" << obj.describe(offset + 2);
+        }
       }
     }
     return os.str();

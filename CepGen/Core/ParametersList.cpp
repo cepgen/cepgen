@@ -127,14 +127,26 @@ namespace cepgen {
     const auto key_name = [&](const auto& key) -> std::string {
       return key == ParametersList::MODULE_NAME ? "name=" : key + "=";
     };
+    const auto mod_or_param = [&](const auto& plist) {
+      const auto& pkeys = plist.keys();
+      auto name = std::find(pkeys.begin(), pkeys.end(), ParametersList::MODULE_NAME);
+      std::ostringstream os;
+      if (name != pkeys.end()) {
+        auto plist_copy = plist;
+        plist_copy.erase(ParametersList::MODULE_NAME);
+        os << "Module(" << plist.getString(ParametersList::MODULE_NAME) << ", " << plist_copy << ")";
+      } else
+        os << "Parameters(" << plist << ")";
+      return os.str();
+    };
     for (const auto& kv : params.int_values_)
       os << sep << key_name(kv.first) << "int(" << kv.second << ")", sep = ", ";
     for (const auto& kv : params.dbl_values_)
-      os << sep << key_name(kv.first) << "double(" << kv.second << ")", sep = ", ";
+      os << sep << key_name(kv.first) << "float(" << kv.second << ")", sep = ", ";
     for (const auto& kv : params.str_values_)
-      os << sep << key_name(kv.first) << "string(" << kv.second << ")", sep = ", ";
+      os << sep << key_name(kv.first) << "str(" << kv.second << ")", sep = ", ";
     for (const auto& kv : params.param_values_)
-      os << sep << key_name(kv.first) << "param{" << kv.second << "}", sep = ", ";
+      os << sep << key_name(kv.first) << mod_or_param(kv.second), sep = ", ";
     for (const auto& kv : params.lim_values_)
       os << sep << key_name(kv.first) << "limits(" << kv.second << ")", sep = ", ";
     for (const auto& kv : params.vec_int_values_) {
@@ -145,14 +157,14 @@ namespace cepgen {
       os << ")";
     }
     for (const auto& kv : params.vec_dbl_values_) {
-      os << sep << key_name(kv.first) << "vdouble(", sep = ", ";
+      os << sep << key_name(kv.first) << "vfloat(", sep = ", ";
       std::string sep1;
       for (const auto& val : kv.second)
         os << sep1 << val, sep1 = ", ";
       os << ")";
     }
     for (const auto& kv : params.vec_str_values_) {
-      os << sep << key_name(kv.first) << "vstring(", sep = ", ";
+      os << sep << key_name(kv.first) << "vstr(", sep = ", ";
       std::string sep1;
       for (const auto& val : kv.second)
         os << sep1 << val, sep1 = ", ";
