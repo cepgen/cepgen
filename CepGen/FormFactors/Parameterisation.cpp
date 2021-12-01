@@ -90,6 +90,12 @@ namespace cepgen {
       return *this;
     }
 
+    ParametersDescription Parameterisation::parametersDescription() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Unnamed form factors parameterisation");
+      return desc;
+    }
+
     //------------------------------------------------------------------
 
     std::ostream& operator<<(std::ostream& os, const Parameterisation* ff) {

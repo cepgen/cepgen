@@ -28,7 +28,9 @@ namespace cepgen {
     class BrashEtAl final : public Parameterisation {
     public:
       using Parameterisation::Parameterisation;
+
       static std::string description() { return "Brash et al."; }
+      static ParametersDescription parametersDescription();
 
     private:
       static const float MAX_Q2;
@@ -50,6 +52,12 @@ namespace cepgen {
     };
 
     const float BrashEtAl::MAX_Q2 = 7.7;
+
+    ParametersDescription BrashEtAl::parametersDescription() {
+      auto desc = Parameterisation::parametersDescription();
+      desc.setDescription("Brash et al.");
+      return desc;
+    }
   }  // namespace formfac
 }  // namespace cepgen
 

@@ -27,7 +27,9 @@ namespace cepgen {
     class MergellEtAl final : public Parameterisation {
     public:
       explicit MergellEtAl(const ParametersList&);
+
       static std::string description() { return "Mergell et al."; }
+      static ParametersDescription parametersDescription();
 
     private:
       void compute(double q2) override;
@@ -75,6 +77,23 @@ namespace cepgen {
 
       GE = F1 - tau(q2) * F2;
       GM = F1 + F2;
+    }
+
+    ParametersDescription MergellEtAl::parametersDescription() {
+      auto desc = Parameterisation::parametersDescription();
+      desc.setDescription("Mergell et al.");
+      desc.add<double>("a1rho", 1.0317);
+      desc.add<double>("a2rho", 5.7824);
+      desc.add<double>("b1rho", 0.0875);
+      desc.add<double>("b2rho", 0.3907);
+      desc.add<double>("c1rho", 0.3176);
+      desc.add<double>("c2rho", 0.1422);
+      desc.add<double>("d1rho", 0.5496);
+      desc.add<double>("d2rho", 0.5362);
+      desc.add<double>("q20inv", 1. / 0.35);
+      desc.add<double>("lambdaSq", 9.733);
+      desc.add<double>("gamma", 2.148);
+      return desc;
     }
   }  // namespace formfac
 }  // namespace cepgen
