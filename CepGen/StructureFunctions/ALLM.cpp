@@ -172,7 +172,7 @@ namespace cepgen {
           mr2(params.get<double>("mr2")),
           q02(params.get<double>("q02")),
           lambda2(params.get<double>("lambda2")),
-          type(params.getAs<int, Type>("type", Type::Invalid)) {}
+          type(params.getAs<int, Type>("type")) {}
 
     ALLM::Parameters ALLM::Parameters::allm91() {
       static Parameters p(ParametersList()
@@ -312,9 +312,9 @@ namespace cepgen {
     }
 
     ALLM::Parameters::Trajectory::Trajectory(const ParametersList& params)
-        : a(params.get<std::vector<double> >("a", {0., 0., 0.})),
-          b(params.get<std::vector<double> >("b", {0., 0., 0.})),
-          c(params.get<std::vector<double> >("c", {0., 0., 0.})) {
+        : a(params.get<std::vector<double> >("a")),
+          b(params.get<std::vector<double> >("b")),
+          c(params.get<std::vector<double> >("c")) {
       assert(a.size() == 3);
       assert(b.size() == 3);
       assert(c.size() == 3);

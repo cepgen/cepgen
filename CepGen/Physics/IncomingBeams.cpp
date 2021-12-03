@@ -33,31 +33,35 @@
 namespace cepgen {
   IncomingBeams::IncomingBeams(const ParametersList& params) {
     // positive-z incoming beam
-    positive().pdg = params.get<int>("beam1id", positive().pdg);
-    const int hi_A1 = params.get<int>("beam1A", 1);
-    const int hi_Z1 = params.get<int>("beam1Z", 0);
+    if (params.has<int>("beam1id"))
+      positive().pdg = params.get<int>("beam1id");
+    const int hi_A1 = params.get<int>("beam1A");
+    const int hi_Z1 = params.get<int>("beam1Z");
     if (hi_Z1 != 0)
       positive().pdg = HeavyIon(hi_A1, (Element)hi_Z1);
     if (params.has<std::vector<int> >("heavyIonA")) {
       const auto& hi_beam = params.get<std::vector<int> >("heavyIonA");
-      if (hi_beam.size() != 2)
+      if (hi_beam.size() == 2)
+        positive().pdg = HeavyIon{(unsigned short)hi_beam.at(0), (Element)hi_beam.at(1)};
+      else if (!hi_beam.empty())
         throw CG_FATAL("Kinematics") << "Invalid format for first incoming beam's HI specification!\n\t"
                                      << "A pair of (A,Z) is required, got " << hi_beam << ".";
-      positive().pdg = HeavyIon{(unsigned short)hi_beam.at(0), (Element)hi_beam.at(1)};
     }
 
     // negative-z incoming beam
-    negative().pdg = params.get<int>("beam2id", negative().pdg);
-    const int hi_A2 = params.get<int>("beam2A", 1);
-    const int hi_Z2 = params.get<int>("beam2Z", 0);
+    if (params.has<int>("beam2id"))
+      negative().pdg = params.get<int>("beam2id");
+    const int hi_A2 = params.get<int>("beam2A");
+    const int hi_Z2 = params.get<int>("beam2Z");
     if (hi_Z2 != 0)
       negative().pdg = HeavyIon(hi_A2, (Element)hi_Z2);
     if (params.has<std::vector<int> >("heavyIonB")) {
       const auto& hi_beam = params.get<std::vector<int> >("heavyIonB");
-      if (hi_beam.size() != 2)
+      if (hi_beam.size() == 2)
+        negative().pdg = HeavyIon{(unsigned short)hi_beam.at(0), (Element)hi_beam.at(1)};
+      else if (!hi_beam.empty())
         throw CG_FATAL("Kinematics") << "Invalid format for second incoming beam's HI specification!\n\t"
                                      << "A pair of (A,Z) is required, got " << hi_beam << ".";
-      negative().pdg = HeavyIon{(unsigned short)hi_beam.at(0), (Element)hi_beam.at(1)};
     }
 
     //----- combined two-beam system
@@ -65,18 +69,20 @@ namespace cepgen {
     //--- beams PDG ids
     if (params.has<std::vector<ParametersList> >("pdgIds")) {
       const auto& beams_pdg = params.get<std::vector<ParametersList> >("pdgIds");
-      if (beams_pdg.size() != 2)
+      if (beams_pdg.size() == 2) {
+        positive().pdg = abs(beams_pdg.at(0).get<int>("pdgid"));
+        negative().pdg = abs(beams_pdg.at(1).get<int>("pdgid"));
+      } else if (!beams_pdg.empty())
         throw CG_FATAL("Kinematics") << "Invalid list of PDG ids retrieved for incoming beams:\n\t"
                                      << "2 PDG ids are expected, " << beams_pdg << " provided.";
-      positive().pdg = abs(beams_pdg.at(0).get<int>("pdgid"));
-      negative().pdg = abs(beams_pdg.at(1).get<int>("pdgid"));
     } else if (params.has<std::vector<int> >("pdgIds")) {
       const auto& beams_pdg = params.get<std::vector<int> >("pdgIds");
-      if (beams_pdg.size() != 2)
+      if (beams_pdg.size() == 2) {
+        positive().pdg = abs(beams_pdg.at(0));
+        negative().pdg = abs(beams_pdg.at(1));
+      } else if (!beams_pdg.empty())
         throw CG_FATAL("Kinematics") << "Invalid list of PDG ids retrieved for incoming beams:\n\t"
                                      << "2 PDG ids are expected, " << beams_pdg << " provided.";
-      positive().pdg = abs(beams_pdg.at(0));
-      negative().pdg = abs(beams_pdg.at(1));
     }
     if (positive().pdg == PDG::electron)
       positive().mode = mode::Beam::PointLikeFermion;
@@ -89,11 +95,12 @@ namespace cepgen {
     params.fill<double>("beam2pz", p2z);
     if (params.has<std::vector<double> >("pz")) {
       const auto& beams_pz = params.get<std::vector<double> >("pz");
-      if (beams_pz.size() != 2)
+      if (beams_pz.size() == 2) {
+        p1z = beams_pz.at(0);
+        p2z = beams_pz.at(1);
+      } else if (!beams_pz.empty())
         throw CG_FATAL("Kinematics") << "Invalid format for beams pz specification!\n\t"
                                      << "A vector of two pz's is required.";
-      p1z = beams_pz.at(0);
-      p2z = beams_pz.at(1);
     }
     const HeavyIon hi1(positive().pdg), hi2(negative().pdg);
     const double m1 = hi1 ? HeavyIon::mass(hi1) : PDG::get().mass(positive().pdg);
@@ -237,6 +244,31 @@ namespace cepgen {
   void IncomingBeams::setStructureFunctions(std::unique_ptr<strfun::Parameterisation> param) {
     str_fun_ = std::move(param);
     form_factors_->setStructureFunctions(str_fun_.get());
+  }
+
+  ParametersDescription IncomingBeams::parametersDescription() {
+    auto desc = ParametersDescription();
+    desc.add<int>("beam1id", 2212).setDescription("PDG id of the positive-z beam particle");
+    desc.add<int>("beam1A", 1).setDescription("Atomic weight of the positive-z ion beam");
+    desc.add<int>("beam1Z", 0).setDescription("Atomic number of the positive-z ion beam");
+    desc.add<std::vector<int> >("heavyIonA", {}).setDescription("{A, Z} of the positive-z ion beam");
+    desc.add<int>("beam2id", 2212).setDescription("PDG id of the negative-z beam particle");
+    desc.add<int>("beam2A", 1).setDescription("Atomic weight of the negative-z ion beam");
+    desc.add<int>("beam2Z", 0).setDescription("Atomic number of the negative-z ion beam");
+    desc.add<std::vector<int> >("heavyIonB", {}).setDescription("{A, Z} of the negative-z ion beam");
+    desc.add<std::vector<ParametersList> >("pdgIds", {}).setDescription("PDG description of incoming beam particles");
+    desc.add<std::vector<int> >("pdgIds", {}).setDescription("PDG ids of incoming beam particles");
+    desc.add<std::vector<double> >("pz", {}).setDescription("Beam momenta (in GeV/c)");
+    desc.add<double>("sqrtS", -1.).setDescription("Two-beam centre of mass energy (in GeV)");
+    desc.add<double>("cmEnergy", -1.).setDescription("Two-beam centre of mass energy (in GeV)");
+    desc.add<std::string>("formFactors", "").setDescription("Beam form factors modelling");
+    desc.add<int>("mode", 0).setDescription(
+        "Process kinematics mode (1 = elastic, (2-3) = single-dissociative, 4 = double-dissociative)");
+    auto sf_desc = strfun::Parameterisation::parametersDescription();
+    desc.add<ParametersDescription>("structureFunctions", sf_desc)
+        .setDescription("Beam inelastic structure functions modelling");
+    desc.add<int>("ktFluxes", 0).setDescription("kT-factorised fluxes modelling");
+    return desc;
   }
 
   Beam::Beam() : pdg(PDG::proton), mode(mode::Beam::invalid), kt_flux(KTFlux::invalid) {}

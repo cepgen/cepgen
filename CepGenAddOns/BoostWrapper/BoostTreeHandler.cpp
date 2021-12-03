@@ -109,11 +109,11 @@ namespace cepgen {
       try {
         //----- phase space definition
         if (tree_.count(KIN_NAME))
-          rt_params_->kinematics = Kinematics(unpack(tree_.get_child(KIN_NAME)));
+          rt_params_->par_kinematics += unpack(tree_.get_child(KIN_NAME));
         if (tree_.count(INTEGR_NAME))
-          *rt_params_->integrator += unpack(tree_.get_child(INTEGR_NAME));
+          rt_params_->par_integrator += unpack(tree_.get_child(INTEGR_NAME));
         if (tree_.count(GENERAL_NAME))
-          *rt_params_->general += unpack(tree_.get_child(GENERAL_NAME));
+          rt_params_->par_general += unpack(tree_.get_child(GENERAL_NAME));
         if (tree_.count(GENERATOR_NAME))
           rt_params_->generation() = Parameters::Generation(unpack(tree_.get_child(GENERATOR_NAME)));
         if (tree_.count(EVT_MOD_SEQ_NAME)) {
@@ -295,13 +295,13 @@ namespace cepgen {
     void BoostTreeHandler::pack(const Parameters* params) {
       rt_params_ = const_cast<Parameters*>(params);
       tree_.add_child(PROCESS_NAME, pack(rt_params_->process().parameters()));
-      if (rt_params_->integrator && !rt_params_->integrator->keys().empty())
-        tree_.add_child(INTEGR_NAME, pack(*rt_params_->integrator));
-      if (rt_params_->general && !rt_params_->general->keys().empty())
-        tree_.add_child(GENERAL_NAME, pack(*rt_params_->general));
+      if (!rt_params_->par_integrator.empty())
+        tree_.add_child(INTEGR_NAME, pack(rt_params_->par_integrator));
+      if (!rt_params_->par_general.empty())
+        tree_.add_child(GENERAL_NAME, pack(rt_params_->par_general));
 
       //----- kinematics block
-      tree_.add_child(KIN_NAME, pack(rt_params_->kinematics.parameters()));
+      tree_.add_child(KIN_NAME, pack(rt_params_->kinematics().parameters()));
 
       //----- generation block
       tree_.add_child(GENERATOR_NAME, pack(rt_params_->generation().parameters()));
@@ -325,8 +325,8 @@ namespace cepgen {
         tree_.add_child(TIMER_NAME, pack(ParametersList()));
       log_.set<int>("level", (int)utils::Logger::get().level);
       //FIXME not yet implemented
-      //for ( const auto& mod :  utils::Logger::get().exceptionRules() )
-      //  log_.operator[]<std::vector<std::string> >( "enabledModules" ).emplace_back( mod );
+      //for (const auto& mod : utils::Logger::get().exceptionRules())
+      //  log_.operator[]<std::vector<std::string> >("enabledModules").emplace_back(mod);
       tree_.add_child(LOGGER_NAME, pack(log_));
     }
 

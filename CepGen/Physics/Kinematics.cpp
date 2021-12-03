@@ -61,7 +61,7 @@ namespace cepgen {
 
     //--- specify where to look for the grid path for gluon emission
     if (params.has<std::string>("kmrGridPath"))
-      kmr::GluonGrid::get(params.get<std::string>("kmrGridPath"));
+      kmr::GluonGrid::get(ParametersList(params).set<std::string>("path", params.get<std::string>("kmrGridPath")));
   }
 
   ParametersList Kinematics::parameters(bool extended) const {
@@ -87,6 +87,12 @@ namespace cepgen {
       params.set<ParametersList>("cuts", per_part);
     }
     return params;
+  }
+
+  ParametersDescription Kinematics::parametersDescription() {
+    auto desc = ParametersDescription();
+    desc += IncomingBeams::parametersDescription();
+    return desc;
   }
 
   std::ostream& operator<<(std::ostream& os, const Kinematics::CutsList& kin) {

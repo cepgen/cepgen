@@ -72,7 +72,7 @@ namespace cepgen {
 
     void ROOTTreeHandler::initialise(const Parameters& params) {
       run_tree_.litigious_events = 0;
-      run_tree_.sqrt_s = params.kinematics.incomingBeams().sqrtS();
+      run_tree_.sqrt_s = params.kinematics().incomingBeams().sqrtS();
     }
 
     void ROOTTreeHandler::operator<<(const Event& ev) {

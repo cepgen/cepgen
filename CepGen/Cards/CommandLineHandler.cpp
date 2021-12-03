@@ -22,7 +22,6 @@
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
@@ -32,6 +31,7 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Processes/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/ParametersDescription.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
@@ -100,17 +100,17 @@ namespace cepgen {
           proc = ParametersList(rt_params_->process().parameters()) + proc;
         rt_params_->setProcess(proc::ProcessFactory::get().build(proc));
         if (proc.has<int>("mode"))
-          rt_params_->kinematics.incomingBeams().setMode(proc.getAs<int, mode::Kinematics>("mode"));
+          rt_params_->par_kinematics.set<int>("mode", proc.get<int>("mode"));
       }
 
       //----- phase space definition
       auto kin = pars.get<ParametersList>("kinematics")
                      .set<ParametersList>("structureFunctions", pars.get<ParametersList>("strfun"))
                      .set<std::string>("formFactors", pars.get<std::string>("formfac"));
-      rt_params_->kinematics = Kinematics(rt_params_->kinematics.parameters() + kin);
+      rt_params_->par_kinematics += kin;
 
       //----- integration
-      pars.fill<ParametersList>("integrator", *rt_params_->integrator);
+      pars.fill<ParametersList>("integrator", rt_params_->par_integrator);
 
       //----- events generation
       const auto& gen = pars.get<ParametersList>("generation");
@@ -120,7 +120,7 @@ namespace cepgen {
       if (gen.has<int>("nprn"))
         rt_params_->generation().setPrintEvery(gen.get<int>("nprn"));
       if (gen.has<int>("seed"))
-        rt_params_->integrator->set<int>("seed", gen.get<int>("seed"));
+        rt_params_->par_integrator.set<int>("seed", gen.get<int>("seed"));
 
       //----- event modification modules
       const auto& mod = pars.get<ParametersList>("eventmod");

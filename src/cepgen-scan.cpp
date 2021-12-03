@@ -84,13 +84,13 @@ int main(int argc, char* argv[]) {
   for (const auto& value : points) {
     try {
       if (scan == "sqrtS") {
-        par.kinematics.incomingBeams().setSqrtS(value);
+        par.kinematics().incomingBeams().setSqrtS(value);
       } else if (scan == "abseta") {
-        par.kinematics.cuts().central.eta_single().min() = -value;
-        par.kinematics.cuts().central.eta_single().max() = +value;
+        par.kinematics().cuts().central.eta_single().min() = -value;
+        par.kinematics().cuts().central.eta_single().max() = +value;
       } else if (scan == "absrap") {
-        par.kinematics.cuts().central.rapidity_single().min() = -value;
-        par.kinematics.cuts().central.rapidity_single().max() = +value;
+        par.kinematics().cuts().central.rapidity_single().min() = -value;
+        par.kinematics().cuts().central.rapidity_single().max() = +value;
       } else if (scan == "mpart") {
         auto prop = cepgen::PDG::get()(par.process().event()[cepgen::Particle::CentralSystem][0].pdgId());
         prop.mass = value;
@@ -98,8 +98,8 @@ int main(int argc, char* argv[]) {
         par.process().clear();
       } else {
         auto modif = cepgen::ParametersList().set<double>(scan, value);
-        par.kinematics.setParameters(modif);
-        CG_LOG << modif << "\n\n" << par.kinematics.cuts();
+        par.kinematics().setParameters(modif);
+        CG_LOG << modif << "\n\n" << par.kinematics().cuts();
       }
       CG_LOG << "Scan of \"" << scan << "\". Value = " << value << ".";
       mg.computeXsection(cross_section, err_cross_section);

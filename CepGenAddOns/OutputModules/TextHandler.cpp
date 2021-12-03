@@ -79,14 +79,14 @@ namespace cepgen {
 
     TextHandler::TextHandler(const ParametersList& params)
         : ExportModule(params),
-          file_(params.get<std::string>("filename", "output.txt")),
-          hist_filename_(params.get<std::string>("histFilename", "output.hists.txt")),
+          file_(params.get<std::string>("filename")),
+          hist_filename_(params.get<std::string>("histFilename")),
           variables_(params.get<std::vector<std::string>>("variables")),
-          save_banner_(params.get<bool>("saveBanner", true)),
-          save_variables_(params.get<bool>("saveVariables", true)),
-          show_hists_(params.get<bool>("showHistograms", true)),
-          save_hists_(params.get<bool>("saveHistograms", false)),
-          separator_(params.get<std::string>("separator", "\t")) {
+          save_banner_(params.get<bool>("saveBanner")),
+          save_variables_(params.get<bool>("saveVariables")),
+          show_hists_(params.get<bool>("showHistograms")),
+          save_hists_(params.get<bool>("saveHistograms")),
+          separator_(params.get<std::string>("separator")) {
       //--- first extract list of variables to store in output file
       oss_vars_.clear();
       std::string sep;
@@ -104,16 +104,16 @@ namespace cepgen {
           if (hvar.has<std::vector<double>>("xbins"))
             hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(hvar.get<std::vector<double>>("xbins"))});
           else if (hvar.has<Limits>("xrange"))
-            hists_.emplace_back(Hist1DInfo{vars.at(0),
-                                           utils::Hist1D(hvar.get<int>("nbinsX", hvar.get<int>("nbins", 25)),
-                                                         hvar.get<Limits>("xrange", Limits(0., 1.)))});
+            hists_.emplace_back(
+                Hist1DInfo{vars.at(0),
+                           utils::Hist1D(hvar.get<int>("nbinsX", hvar.get<int>("nbins")), hvar.get<Limits>("xrange"))});
           else {
             CG_WARNING("TextHandler") << "Neither xrange nor xbins found in parameters for 1D plot of variable \""
                                       << vars.at(0) << "\".";
             continue;
           }
           auto& hist = hists_.rbegin()->hist;
-          hist.setLog(hvar.get<bool>("log", false));
+          hist.setLog(hvar.get<bool>("log"));
           hist.setName(key);
           hist.setXlabel(vars.at(0));
           hist.setYlabel("d(sig)/d" + vars.at(0) + " (pb/bin)");
@@ -126,10 +126,10 @@ namespace cepgen {
           else if (hvar.has<Limits>("xrange"))
             hists2d_.emplace_back(Hist2DInfo{vars.at(0),
                                              vars.at(1),
-                                             utils::Hist2D(hvar.get<int>("nbinsX", hvar.get<int>("nbins", 25)),
-                                                           hvar.get<Limits>("xrange", Limits(0., 1.)),
-                                                           hvar.get<int>("nbinsY", 50),
-                                                           hvar.get<Limits>("yrange", Limits(0., 1.)))});
+                                             utils::Hist2D(hvar.get<int>("nbinsX", hvar.get<int>("nbins")),
+                                                           hvar.get<Limits>("xrange"),
+                                                           hvar.get<int>("nbinsY"),
+                                                           hvar.get<Limits>("yrange"))});
           else {
             CG_WARNING("TextHandler")
                 << "Neither (x/y)range nor (x/y)bins found in parameters for 1D plot of variables \"" << vars << "\".";
@@ -140,7 +140,7 @@ namespace cepgen {
           hist.setXlabel(vars.at(0));
           hist.setYlabel(vars.at(1));
           hist.setName("d^2(sig)/d" + vars.at(0) + "/d" + vars.at(1) + " (pb/bin)");
-          hist.setLog(hvar.get<bool>("log", false));
+          hist.setLog(hvar.get<bool>("log"));
         }
       }
       if (save_hists_ && !hists_.empty())
@@ -176,7 +176,7 @@ namespace cepgen {
     }
 
     void TextHandler::initialise(const Parameters& params) {
-      sqrts_ = params.kinematics.incomingBeams().sqrtS();
+      sqrts_ = params.kinematics().incomingBeams().sqrtS();
       num_evts_ = 0ul;
       if (save_banner_)
         file_ << banner(params, "#") << "\n";
@@ -222,7 +222,7 @@ namespace cepgen {
       hist_desc.add<int>("nbinsY", 50).setDescription("Bins multiplicity for y-axis");
       hist_desc.add<Limits>("yrange", Limits{}).setDescription("Minimum-maximum range for y-axis");
       hist_desc.add<bool>("log", false).setDescription("Plot logarithmic axis?");
-      desc.add<ParametersDescription>("histVariables", hist_desc)
+      desc.addParametersDescriptionVector("histVariables", hist_desc)
           .setDescription("Histogram definition for 1/2 variable(s)");
       return desc;
     }

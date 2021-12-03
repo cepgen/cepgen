@@ -178,7 +178,7 @@ namespace cepgen {
     }
 
     CLAS::CLAS(const ParametersList& params) : Parameterisation(params), mpi0_(PDG::get().mass(PDG::piZero)) {
-      const auto& model = params.get<std::string>("model", "proton");
+      const auto& model = params.get<std::string>("model");
       if (model == "proton")
         mod_params_ = Parameters::standard_proton();
       else if (model == "neutron")

@@ -35,13 +35,14 @@
 
 namespace cepgen {
   Parameters::Parameters()
-      : general(new ParametersList), integrator(new ParametersList), generation_(ParametersList()) {}
+      : par_kinematics(Kinematics::parametersDescription().parameters()), generation_(ParametersList()) {}
 
   Parameters::Parameters(Parameters& param)
-      : general(param.general),
-        integrator(param.integrator),
-        kinematics(param.kinematics),
+      : par_general(param.par_general),
+        par_kinematics(param.par_kinematics),
+        par_integrator(param.par_integrator),
         process_(std::move(param.process_)),
+        kin_(std::move(param.kin_)),
         evt_modifiers_(std::move(param.evt_modifiers_)),
         out_modules_(std::move(param.out_modules_)),
         taming_functions_(std::move(param.taming_functions_)),
@@ -51,9 +52,10 @@ namespace cepgen {
         tmr_(std::move(param.tmr_)) {}
 
   Parameters::Parameters(const Parameters& param)
-      : general(param.general),
-        integrator(param.integrator),
-        kinematics(param.kinematics),
+      : par_general(param.par_general),
+        par_kinematics(param.par_kinematics),
+        par_integrator(param.par_integrator),
+        kin_(param.kin_),
         total_gen_time_(param.total_gen_time_),
         num_gen_events_(param.num_gen_events_),
         generation_(param.generation_) {}
@@ -64,10 +66,11 @@ namespace cepgen {
   }
 
   Parameters& Parameters::operator=(Parameters param) {
-    general = param.general;
-    integrator = param.integrator;
-    kinematics = param.kinematics;
+    par_general = param.par_general;
+    par_kinematics = param.par_kinematics;
+    par_integrator = param.par_integrator;
     process_ = std::move(param.process_);
+    kin_ = std::move(param.kin_);
     evt_modifiers_ = std::move(param.evt_modifiers_);
     out_modules_ = std::move(param.out_modules_);
     taming_functions_ = std::move(param.taming_functions_);
@@ -86,15 +89,17 @@ namespace cepgen {
     //--- first-run preparation
     if (!process_ || !process_->firstRun())
       return;
-    process_->setKinematics(kinematics);
+    kin_ = Kinematics(par_kinematics);
+    generation_ = Generation(par_general);
+    process_->setKinematics(kin_);
     CG_DEBUG("Parameters").log([&](auto& dbg) {
       dbg << "Run started for " << process_->name() << " process " << std::hex << (void*)process_.get() << std::dec
           << ".\n\t"
-          << "Process mode considered: " << kinematics.incomingBeams().mode() << "\n\t"
-          << "  positive-z beam: " << kinematics.incomingBeams().positive() << "\n\t"
-          << "  negative-z beam: " << kinematics.incomingBeams().negative();
-      if (kinematics.incomingBeams().structureFunctions())
-        dbg << "\n\t  structure functions: " << kinematics.incomingBeams().structureFunctions();
+          << "Process mode considered: " << kin_.incomingBeams().mode() << "\n\t"
+          << "  positive-z beam: " << kin_.incomingBeams().positive() << "\n\t"
+          << "  negative-z beam: " << kin_.incomingBeams().negative();
+      if (kin_.incomingBeams().structureFunctions())
+        dbg << "\n\t  structure functions: " << kin_.incomingBeams().structureFunctions();
     });
     if (process_->hasEvent())
       process_->clearEvent();
@@ -170,8 +175,8 @@ namespace cepgen {
         if (par != "mode")
           os << "\n" << std::setw(wt) << "" << par << ": " << param->process_->parameters().getString(par);
       std::ostringstream proc_mode;
-      proc_mode << param->kinematics.incomingBeams().mode();
-      if (param->kinematics.incomingBeams().mode() != mode::Kinematics::invalid)
+      proc_mode << param->kinematics().incomingBeams().mode();
+      if (param->kinematics().incomingBeams().mode() != mode::Kinematics::invalid)
         os << "\n" << std::setw(wt) << "Subprocess mode" << utils::boldify(proc_mode.str()) << "\n";
     }
     os << "\n"
@@ -209,31 +214,31 @@ namespace cepgen {
     os << "\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Integration parameters ") << std::setfill(' ')
        << "\n\n"
-       << std::setw(wt) << "Integration" << utils::boldify(param->integrator->name<std::string>("N/A")) << "\n";
-    for (const auto& key : param->integrator->keys(false))
-      os << std::setw(wt) << "" << key << ": " << param->integrator->getString(key) << "\n";
+       << std::setw(wt) << "Integration" << utils::boldify(param->par_integrator.name<std::string>("N/A")) << "\n";
+    for (const auto& key : param->par_integrator.keys(false))
+      os << std::setw(wt) << "" << key << ": " << param->par_integrator.getString(key) << "\n";
     os << "\n"
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill(' ') << "\n\n"
-       << std::setw(wt) << "Incoming particles" << param->kinematics.incomingBeams().positive() << ",\n"
-       << std::setw(wt) << "" << param->kinematics.incomingBeams().negative() << "\n"
-       << std::setw(wt) << "C.m. energy (GeV)" << param->kinematics.incomingBeams().sqrtS() << "\n"
-       << std::setw(wt) << "Form factors" << param->kinematics.incomingBeams().formFactors() << "\n";
-    if (param->kinematics.incomingBeams().mode() != mode::Kinematics::ElasticElastic &&
-        param->kinematics.incomingBeams().structureFunctions())
-      os << std::setw(wt) << "Structure functions" << param->kinematics.incomingBeams().structureFunctions() << "\n";
+       << std::setw(wt) << "Incoming particles" << param->kinematics().incomingBeams().positive() << ",\n"
+       << std::setw(wt) << "" << param->kinematics().incomingBeams().negative() << "\n"
+       << std::setw(wt) << "C.m. energy (GeV)" << param->kinematics().incomingBeams().sqrtS() << "\n"
+       << std::setw(wt) << "Form factors" << param->kinematics().incomingBeams().formFactors() << "\n";
+    if (param->kinematics().incomingBeams().mode() != mode::Kinematics::ElasticElastic &&
+        param->kinematics().incomingBeams().structureFunctions())
+      os << std::setw(wt) << "Structure functions" << param->kinematics().incomingBeams().structureFunctions() << "\n";
     os << "\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Incoming partons ") << std::setfill(' ') << "\n\n";
-    const auto& cuts = param->kinematics.cuts();
+    const auto& cuts = param->kinematics().cuts();
     for (const auto& lim : cuts.initial.list())  // map(particles class, limits)
       if (lim.limits.valid())
         os << std::setw(wt) << lim.description << lim.limits << "\n";
     os << "\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Outgoing central system ") << std::setfill(' ')
        << "\n\n";
-    if (!param->kinematics.minimumFinalState().empty()) {
+    if (!param->kinematics().minimumFinalState().empty()) {
       os << std::setw(wt) << "Minimum final state";
       std::string sep;
-      for (const auto& part : param->kinematics.minimumFinalState())
+      for (const auto& part : param->kinematics().minimumFinalState())
         os << sep << (PDG::Id)part, sep = ", ";
       os << "\n";
     }

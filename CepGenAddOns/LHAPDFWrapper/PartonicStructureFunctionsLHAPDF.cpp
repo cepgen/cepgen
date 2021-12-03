@@ -88,11 +88,11 @@ namespace cepgen {
 
     Partonic::Partonic(const ParametersList& params)
         : Parameterisation(params),
-          pdf_set_(params.get<std::string>("pdfSet", "cteq6")),
-          num_flavours_(params.get<int>("numFlavours", 4)),
-          pdf_code_(params.get<int>("pdfCode", 0)),
-          pdf_member_(params.get<int>("pdfMember", 0)),
-          mode_(params.getAs<int, Mode>("mode", Mode::full)) {}
+          pdf_set_(params.get<std::string>("pdfSet")),
+          num_flavours_(params.get<int>("numFlavours")),
+          pdf_code_(params.get<int>("pdfCode")),
+          pdf_member_(params.get<int>("pdfMember")),
+          mode_(params.getAs<int, Mode>("mode")) {}
 
     Partonic::Partonic(const char* set, unsigned short member, const Mode& mode)
         : Parameterisation(ParametersList().setName<int>((int)Type::Partonic)),

@@ -226,7 +226,7 @@ namespace cepgen {
       var_desc.add<int>("nbinsZ", 10).setDescription("Bins multiplicity for z-axis");
       var_desc.add<Limits>("zrange", Limits{0., 1.}).setDescription("Minimum-maximum range for z-axis");
       var_desc.add<bool>("profile", false);
-      desc.add<ParametersDescription>("variables", var_desc);
+      desc.addParametersDescriptionVector("variables", var_desc);
       return desc;
     }
   }  // namespace io

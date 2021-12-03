@@ -62,15 +62,12 @@ namespace cepgen {
 
     Schaefer::Schaefer(const ParametersList& params)
         : Parameterisation(params),
-          q2_cut_(params.get<double>("Q2cut", 9.)),
-          w2_lim_(params.get<std::vector<double> >("W2limits", {3., 4.})),
-          higher_twist_(params.get<bool>("higherTwist", true)),
-          resonances_model_(StructureFunctionsFactory::get().build(
-              params.get<ParametersList>("resonancesSF", ParametersList().setName<int>((int)Type::ChristyBosted)))),
-          perturbative_model_(StructureFunctionsFactory::get().build(
-              params.get<ParametersList>("perturbativeSF", ParametersList().setName<int>((int)Type::MSTWgrid)))),
-          continuum_model_(StructureFunctionsFactory::get().build(
-              params.get<ParametersList>("continuumSF", ParametersList().setName<int>((int)Type::GD11p)))) {}
+          q2_cut_(params.get<double>("Q2cut")),
+          w2_lim_(params.get<std::vector<double> >("W2limits")),
+          higher_twist_(params.get<bool>("higherTwist")),
+          resonances_model_(StructureFunctionsFactory::get().build(params.get<ParametersList>("resonancesSF"))),
+          perturbative_model_(StructureFunctionsFactory::get().build(params.get<ParametersList>("perturbativeSF"))),
+          continuum_model_(StructureFunctionsFactory::get().build(params.get<ParametersList>("continuumSF"))) {}
 
     std::string Schaefer::describe() const {
       std::ostringstream os;
@@ -164,6 +161,7 @@ namespace cepgen {
                                       StructureFunctionsFactory::get().describeParameters((int)Type::MSTWgrid));
       desc.add<ParametersDescription>("continuumSF",
                                       StructureFunctionsFactory::get().describeParameters((int)Type::GD11p));
+      CG_WARNING("") << desc.describe();
       return desc;
     }
   }  // namespace strfun

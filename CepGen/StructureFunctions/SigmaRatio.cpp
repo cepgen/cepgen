@@ -27,6 +27,9 @@
 
 namespace cepgen {
   namespace sigrat {
+    Parameterisation::Parameterisation(const ParametersList& params)
+        : NamedModule<int>(params), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {}
+
     double Parameterisation::theta(double xbj, double q2) {
       return 1. + 12. * (q2 / (q2 + 1.)) * (0.125 * 0.125 / (0.125 * 0.125 + xbj * xbj));
     }
@@ -49,11 +52,11 @@ namespace cepgen {
     };
 
     E143::E143(const ParametersList& params)
-        : q2_b_(params.get<double>("q2_b", 0.34)),
-          lambda2_(params.get<double>("lambda2", 0.2 * 0.2)),
-          a_(params.get<std::vector<double> >("a", {0.0485, 0.5470, 2.0621, -0.3804, 0.5090, -0.0285})),
-          b_(params.get<std::vector<double> >("b", {0.0481, 0.6114, -0.3509, -0.4611, 0.7172, -0.0317})),
-          c_(params.get<std::vector<double> >("c", {0.0577, 0.4644, 1.8288, 12.3708, -43.1043, 41.7415})) {
+        : q2_b_(params.get<double>("q2_b")),
+          lambda2_(params.get<double>("lambda2")),
+          a_(params.get<std::vector<double> >("a")),
+          b_(params.get<std::vector<double> >("b")),
+          c_(params.get<std::vector<double> >("c")) {
       assert(a_.size() == 6);
       assert(b_.size() == 6);
       assert(c_.size() == 6);
@@ -109,8 +112,7 @@ namespace cepgen {
     };
 
     R1990::R1990(const ParametersList& params)
-        : lambda2_(params.get<double>("lambda2", 0.04)),
-          b_(params.get<std::vector<double> >("b", {0.0635, 0.5747, -0.3534})) {
+        : lambda2_(params.get<double>("lambda2")), b_(params.get<std::vector<double> >("b")) {
       assert(b_.size() == 3);
     }
 
@@ -121,6 +123,7 @@ namespace cepgen {
 
     ParametersDescription R1990::parametersDescription() {
       auto desc = ParametersDescription();
+      desc.setDescription("SLAC experimental R measurement");
       desc.add<double>("lambda2", 0.04);
       desc.add<std::vector<double> >("b", {0.0635, 0.5747, -0.3534});
       return desc;
@@ -144,9 +147,7 @@ namespace cepgen {
     };
 
     CLAS::CLAS(const ParametersList& params)
-        : p_(params.get<std::vector<double> >("p", {0.041, 0.592, 0.331})),
-          wth_(params.get<double>("wth", 2.5)),
-          q20_(params.get<double>("q20", 0.3)) {
+        : p_(params.get<std::vector<double> >("p")), wth_(params.get<double>("wth")), q20_(params.get<double>("q20")) {
       assert(p_.size() == 3);
     }
 
@@ -165,6 +166,7 @@ namespace cepgen {
 
     ParametersDescription CLAS::parametersDescription() {
       auto desc = ParametersDescription();
+      desc.setDescription("CLAS experimental R measurement");
       desc.add<std::vector<double> >("p", {0.041, 0.592, 0.331});
       desc.add<double>("wth", 2.5);
       desc.add<double>("q20", 0.3);
@@ -186,14 +188,12 @@ namespace cepgen {
     private:
       double a_, b1_, b2_, c_;
     };
-    Parameterisation::Parameterisation(const ParametersList& params)
-        : NamedModule<int>(params), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {}
 
     SibirtsevBlunden::SibirtsevBlunden(const ParametersList& params)
-        : a_(params.get<double>("a", 0.014)),
-          b1_(params.get<double>("b1", -0.07)),
-          b2_(params.get<double>("b2", -0.8)),
-          c_(params.get<double>("c", 41.)) {}
+        : a_(params.get<double>("a")),
+          b1_(params.get<double>("b1")),
+          b2_(params.get<double>("b2")),
+          c_(params.get<double>("c")) {}
 
     double SibirtsevBlunden::operator()(double, double q2, double& err) const {
       err = 0.;
@@ -203,6 +203,7 @@ namespace cepgen {
 
     ParametersDescription SibirtsevBlunden::parametersDescription() {
       auto desc = ParametersDescription();
+      desc.setDescription("Sibirtsev and Blunden theoretical R parameterisation");
       desc.add<double>("a", 0.014);
       desc.add<double>("b1", -0.07);
       desc.add<double>("b2", -0.8);

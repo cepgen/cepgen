@@ -33,11 +33,11 @@ namespace cepgen {
         : Coupling(params)
 #ifdef LHAPDF_GE_6
           ,
-          lhapdf_(LHAPDF::mkPDF(params.get<std::string>("pdfSet", "cteq6"), params.get<int>("pdfMember", 0))) {
+          lhapdf_(LHAPDF::mkPDF(params.get<std::string>("pdfSet"), params.get<int>("pdfMember"))) {
     }
 #else
     {
-      LHAPDF::initPDFSet(params.get<std::string>("pdfSet"), LHAPDF::LHGRID, params.get<int>("pdfMember", 0));
+      LHAPDF::initPDFSet(params.get<std::string>("pdfSet"), LHAPDF::LHGRID, params.get<int>("pdfMember"));
     }
 #endif
     static std::string description() { return "Perturbative PDF-oriented evolution algorithm"; }

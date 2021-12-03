@@ -25,8 +25,8 @@
 
 namespace cepgen {
   namespace strfun {
-    SuriYennie::SuriYennie(const ParametersList &params) : Parameterisation(params) {
-      const auto &model = params.get<std::string>("model", "standard");
+    SuriYennie::SuriYennie(const ParametersList& params) : Parameterisation(params) {
+      const auto& model = params.get<std::string>("model");
       if (model == "standard") {
         sy_params_.C1 = 0.86926;
         sy_params_.C2 = 2.23422;
@@ -51,7 +51,7 @@ namespace cepgen {
       }
     }
 
-    SuriYennie &SuriYennie::eval(double xbj, double q2) {
+    SuriYennie& SuriYennie::eval(double xbj, double q2) {
       const double mx2 = utils::mX2(xbj, q2, mp2_), dm2 = mx2 - mp2_;  // [GeV^2]
       const double en = q2 + dm2;                                      // [GeV^2]
       const double nu = 0.5 * en / mp_, x_pr = q2 / (q2 + mx2), tau = 0.25 * q2 / mp2_;
@@ -76,6 +76,13 @@ namespace cepgen {
       desc.setDescription("Suri-Yennie FE/FM");
       desc.add<std::string>("model", "standard")
           .setDescription("Parameterisation model ('standard', 'alternative' handled, or custom model)");
+      // custom model
+      desc.add<double>("C1", 0.);
+      desc.add<double>("C2", 0.);
+      desc.add<double>("D1", 0.);
+      desc.add<double>("rho2", 0.);
+      desc.add<double>("Cp", 0.);
+      desc.add<double>("Bp", 0.);
       return desc;
     }
   }  // namespace strfun

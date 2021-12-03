@@ -67,7 +67,7 @@ void MadGraphProcessBuilder::prepareProcessKinematics() {
   if (!mg5_proc_)
     CG_FATAL("MadGraphProcessBuilder") << "Process not properly linked!";
 
-  mg5_proc_->initialise(params_.get<std::string>("parametersCard", "param_card.dat"));
+  mg5_proc_->initialise(params_.get<std::string>("parametersCard"));
 }
 
 double MadGraphProcessBuilder::computeCentralMatrixElement() const {

@@ -37,10 +37,18 @@ namespace cepgen {
         vec_dbl_values_(oth.vec_dbl_values_),
         vec_str_values_(oth.vec_str_values_) {}
 
+  bool ParametersList::operator==(const ParametersList& oth) const {
+    if (keys() != oth.keys())
+      return false;
+    return true;
+  }
+
   ParametersList& ParametersList::operator+=(const ParametersList& oth) {
     //--- first ensure no key is not already present in the list
-    for (const auto& key : oth.keys())
-      erase(key);
+    for (const auto& key : oth.keys()) {
+      if (!has<ParametersList>(key))
+        erase(key);
+    }
     //--- concatenate all typed lists
     int_values_.insert(oth.int_values_.begin(), oth.int_values_.end());
     dbl_values_.insert(oth.dbl_values_.begin(), oth.dbl_values_.end());
@@ -107,16 +115,16 @@ namespace cepgen {
       out += str_values_.erase(key);
     if (lim_values_.count(key) != 0)
       out += lim_values_.erase(key);
-    if (vec_param_values_.count(key) != 0)
-      out += vec_param_values_.erase(key);
+    if (param_values_.count(key) != 0)
+      out += param_values_.erase(key);
     if (vec_int_values_.count(key) != 0)
       out += vec_int_values_.erase(key);
     if (vec_dbl_values_.count(key) != 0)
       out += vec_dbl_values_.erase(key);
     if (vec_str_values_.count(key) != 0)
       out += vec_str_values_.erase(key);
-    if (param_values_.count(key) != 0)
-      out += param_values_.erase(key);
+    if (vec_param_values_.count(key) != 0)
+      out += vec_param_values_.erase(key);
     return out;
   }
 
@@ -157,6 +165,8 @@ namespace cepgen {
       os << ")";
     }
     for (const auto& kv : params.vec_dbl_values_) {
+      if (params.has<Limits>(kv.first))
+        continue;
       os << sep << key_name(kv.first) << "vfloat(", sep = ", ";
       std::string sep1;
       for (const auto& val : kv.second)
@@ -196,7 +206,7 @@ namespace cepgen {
   std::string ParametersList::getString(const std::string& key) const {
     std::ostringstream os;
     if (has<ParametersList>(key))
-      os << "params{" << get<ParametersList>(key) << "}";
+      os << "Parameters(" << get<ParametersList>(key) << ")";
     else if (has<int>(key))
       os << get<int>(key);
     else if (has<double>(key))

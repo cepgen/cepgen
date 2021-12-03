@@ -43,7 +43,7 @@ namespace cepgen {
     };
 
     SzczurekUleshchenko::SzczurekUleshchenko(const ParametersList& params)
-        : Parameterisation(params), q2_shift_(params.getAs<double, float>("q2shift", 0.8)) {}
+        : Parameterisation(params), q2_shift_(params.getAs<double, float>("q2shift")) {}
 
     SzczurekUleshchenko& SzczurekUleshchenko::eval(double xbj, double q2) {
       auto amu2 = (float)q2 + q2_shift_;  // shift the overall scale

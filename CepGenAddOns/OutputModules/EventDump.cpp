@@ -50,10 +50,11 @@ namespace cepgen {
 
     EventDump::EventDump(const ParametersList& params)
         : ExportModule(params),
-          save_banner_(params.get<bool>("saveBanner", true)),
-          print_every_(params.get<int>("printEvery", 10)) {
-      if (params.has<std::string>("filename"))
-        out_ = new std::ofstream(params.get<std::string>("filename"));
+          save_banner_(params.get<bool>("saveBanner")),
+          print_every_(params.get<int>("printEvery")) {
+      const auto& filename = params.get<std::string>("filename");
+      if (!filename.empty())
+        out_ = new std::ofstream(filename);
       else
         out_ = &std::cout;
     }

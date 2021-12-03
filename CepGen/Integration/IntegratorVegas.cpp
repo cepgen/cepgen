@@ -65,10 +65,10 @@ namespace cepgen {
 
   IntegratorVegas::IntegratorVegas(const ParametersList& params)
       : IntegratorGSL(params),
-        ncvg_(params.get<int>("numFunctionCalls", 50000)),
-        chisq_cut_(params.get<double>("chiSqCut", 1.5)),
-        treat_(params.get<bool>("treat", true)) {
-    verbosity_ = params.get<int>("verbose", -1);  // supersede the parent default verbosity level
+        ncvg_(params.get<int>("numFunctionCalls")),
+        chisq_cut_(params.get<double>("chiSqCut")),
+        treat_(params.get<bool>("treat")) {
+    verbosity_ = params.get<int>("verbose");  // supersede the parent default verbosity level
   }
 
   void IntegratorVegas::integrate(double& result, double& abserr) {
@@ -76,12 +76,12 @@ namespace cepgen {
       //--- start by preparing the grid/state
       vegas_state_.reset(gsl_monte_vegas_alloc(function_->dim));
       gsl_monte_vegas_params_get(vegas_state_.get(), &vegas_params_);
-      vegas_params_.iterations = params_.get<int>("iterations", 10);
-      vegas_params_.alpha = params_.get<double>("alpha", 1.5);
+      vegas_params_.iterations = params_.get<int>("iterations");
+      vegas_params_.alpha = params_.get<double>("alpha");
       vegas_params_.verbose = verbosity_;
-      vegas_params_.mode = params_.get<int>("mode", (int)Mode::importance);
+      vegas_params_.mode = params_.get<int>("mode");
       //--- output logging
-      const auto& log = params_.get<std::string>("loggingOutput", "cerr");
+      const auto& log = params_.get<std::string>("loggingOutput");
       if (log == "cerr")
         // redirect all debugging information to the error stream
         vegas_params_.ostream = stderr;

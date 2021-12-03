@@ -23,9 +23,9 @@
 #include <memory>
 #include <vector>
 
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Physics/Modes.h"
 #include "CepGen/Physics/Momentum.h"
+#include "CepGen/Utils/ParametersDescription.h"
 
 namespace cepgen {
   enum class KTFlux;
@@ -53,6 +53,7 @@ namespace cepgen {
     IncomingBeams() = default;
     explicit IncomingBeams(const ParametersList&);
 
+    static ParametersDescription parametersDescription();
     /// List containing all parameters handled
     ParametersList parameters() const;
 

@@ -20,7 +20,6 @@
 #include <iostream>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Physics/Cuts.h"
 
 namespace cepgen {
@@ -48,6 +47,11 @@ namespace cepgen {
       return lim.limits.valid();
     });
     return out;
+  }
+
+  ParametersDescription Cuts::parametersDescription() {
+    auto desc = ParametersDescription();
+    return desc;
   }
 
   namespace cuts {

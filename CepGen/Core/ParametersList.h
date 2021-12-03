@@ -44,6 +44,8 @@ namespace cepgen {
     ParametersList(const ParametersList&);
     ~ParametersList() {}  // required for unique_ptr initialisation! avoids cleaning all individual objects
     ParametersList& operator=(const ParametersList&) = default;  ///< Assignment operator
+    /// Equality operator
+    bool operator==(const ParametersList&) const;
     /// Feed a control string to the list of parameters
     ParametersList& feed(const std::string&);
     /// Check if a given parameter is handled in this list

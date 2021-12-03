@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
 
       CG_DEBUG("main") << gen.parameters();
 
-      gen.parameters()->integrator->setName<std::string>(integrator);
+      gen.parametersRef().par_integrator.setName<std::string>(integrator);
       CG_LOG << "Process: " << gen.parameters()->processName() << "\n\t"
              << "File: " << filename << "\n\t"
              << "Configuration time: " << tmr.elapsed() * 1.e3 << " ms.";

@@ -81,9 +81,9 @@ namespace cepgen {
         : Hadroniser(plist),
           pythia_(new Pythia8::Pythia),
           cg_evt_(new Pythia8::CepGenEvent),
-          correct_central_(plist.get<bool>("correctCentralSystem", false)),
-          debug_lhef_(plist.get<bool>("debugLHEF", false)),
-          output_config_(plist.get<std::string>("outputConfig", "last_pythia_config.cmd")) {}
+          correct_central_(plist.get<bool>("correctCentralSystem")),
+          debug_lhef_(plist.get<bool>("debugLHEF")),
+          output_config_(plist.get<std::string>("outputConfig")) {}
 
     void Pythia8Hadroniser::setRuntimeParameters(const Parameters& params) {
       rt_params_ = &params;
@@ -93,12 +93,12 @@ namespace cepgen {
 #else
       pythia_->setLHAupPtr(cg_evt_);
 #endif
-      pythia_->settings.parm("Beams:idA", (long)rt_params_->kinematics.incomingBeams().positive().pdg);
-      pythia_->settings.parm("Beams:idB", (long)rt_params_->kinematics.incomingBeams().negative().pdg);
+      pythia_->settings.parm("Beams:idA", (long)rt_params_->kinematics().incomingBeams().positive().pdg);
+      pythia_->settings.parm("Beams:idB", (long)rt_params_->kinematics().incomingBeams().negative().pdg);
       // specify we will be using a LHA input
       pythia_->settings.mode("Beams:frameType", 5);
-      pythia_->settings.parm("Beams:eCM", rt_params_->kinematics.incomingBeams().sqrtS());
-      min_ids_ = rt_params_->kinematics.minimumFinalState();
+      pythia_->settings.parm("Beams:eCM", rt_params_->kinematics().incomingBeams().sqrtS());
+      min_ids_ = rt_params_->kinematics().minimumFinalState();
       if (debug_lhef_)
         cg_evt_->openLHEF("debug.lhe");
     }
@@ -128,7 +128,7 @@ namespace cepgen {
       }
 
 #if defined(PYTHIA_VERSION_INTEGER) && PYTHIA_VERSION_INTEGER >= 8226
-      switch (rt_params_->kinematics.incomingBeams().mode()) {
+      switch (rt_params_->kinematics().incomingBeams().mode()) {
         case mode::Kinematics::ElasticElastic: {
           pythia_->settings.mode("BeamRemnants:unresolvedHadron", 3);
           pythia_->settings.flag("PartonLevel:all", false);

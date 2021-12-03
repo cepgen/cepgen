@@ -24,6 +24,7 @@
 
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Utils/Limits.h"
+#include "CepGen/Utils/ParametersDescription.h"
 
 namespace cepgen {
   class ParametersList;
@@ -33,6 +34,8 @@ namespace cepgen {
   public:
     /// Define a cut from parameters list
     explicit Cuts(const ParametersList&);
+
+    static ParametersDescription parametersDescription();
 
     /// Modify a few parameters values
     void setParameters(const ParametersList&);

@@ -159,9 +159,9 @@ namespace cepgen {
         if (pout_kinematics)
           pkin += get<ParametersList>(pout_kinematics);
 
-        rt_params_->kinematics = Kinematics(pkin);
+        rt_params_->par_kinematics += pkin;
         if (proc_params.has<int>("mode"))
-          rt_params_->kinematics.incomingBeams().setMode(proc_params.getAs<int, mode::Kinematics>("mode"));
+          rt_params_->par_kinematics.set<int>("mode", proc_params.get<int>("mode"));
 
         //--- taming functions
         PyObject* ptam = element(process, "tamingFunctions");  // borrowed
@@ -206,7 +206,7 @@ namespace cepgen {
     void PythonHandler::parseIntegrator(PyObject* integr) {
       if (!PyDict_Check(integr))
         throwPythonError("Integrator object should be a dictionary!");
-      *rt_params_->integrator = get<ParametersList>(integr);
+      rt_params_->par_integrator += get<ParametersList>(integr);
     }
 
     void PythonHandler::parseGenerator(PyObject* gen) {

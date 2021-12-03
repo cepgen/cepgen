@@ -81,4 +81,20 @@ namespace cepgen {
         << "Using a ParametersList object for the description of a collection of parameters is not allowed.\n"
         << "Please use a ParametersDescription object instead for the description of the '" << name << "' collection.";
   }
+
+  ParametersDescription& ParametersDescription::addParametersDescriptionVector(const std::string& name,
+                                                                               const ParametersDescription& desc) {
+    obj_descr_[name] = desc;
+    ParametersList::set<std::vector<ParametersList> >(name, {});
+    return obj_descr_[name];
+  }
+
+  const ParametersList& ParametersDescription::parameters() const {
+    CG_DEBUG("") << describe();
+    return *this;
+  }
+
+  void ParametersDescription::validate(const ParametersList&) const {
+    throw CG_FATAL("ParametersDescription:validate") << "Not yet implemented!";
+  }
 }  // namespace cepgen

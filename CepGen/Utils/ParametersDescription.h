@@ -37,10 +37,14 @@ namespace cepgen {
       ParametersList::set<T>(name, def);
       return obj_descr_[name];
     }
+    /// Add the description to a collection of ParametersList objects
+    ParametersDescription& addParametersDescriptionVector(const std::string&, const ParametersDescription&);
     /// Human-readable description of all parameters and their default value
     std::string describe(size_t offset = 0) const;
     /// List of parameters associated to this description object
-    const ParametersList& parameters() const { return *this; }
+    const ParametersList& parameters() const;
+    /// Validate a set of used-steered parameters
+    void validate(const ParametersList&) const;
 
   private:
     std::string mod_descr_;

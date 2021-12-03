@@ -41,9 +41,10 @@ namespace cepgen {
       const size_t len = 45 + version::tag.size();
       std::ostringstream os;
       os << prep << "******* Sample generated with CepGen " << version::tag << " *******\n"
-         << prep << " Process: " << params.processName() << " (" << params.kinematics.incomingBeams().mode() << ")\n";
-      if (params.kinematics.incomingBeams().mode() != mode::Kinematics::ElasticElastic)
-        os << prep << " Structure functions: " << params.kinematics.incomingBeams().structureFunctions()->description()
+         << prep << " Process: " << params.processName() << " (" << params.kinematics().incomingBeams().mode() << ")\n";
+      if (params.kinematics().incomingBeams().mode() != mode::Kinematics::ElasticElastic)
+        os << prep
+           << " Structure functions: " << params.kinematics().incomingBeams().structureFunctions()->description()
            << "\n";
       if (!params.eventModifiersSequence().empty()) {
         os << prep << " " << utils::s("Event modifier", params.eventModifiersSequence().size()) << ": ";
@@ -52,7 +53,7 @@ namespace cepgen {
           os << sep << mod->name(), sep = ", ";
         os << "\n";
       }
-      const auto& cuts = params.kinematics.cuts();
+      const auto& cuts = params.kinematics().cuts();
       os << prep << std::left << std::setw(len) << std::setfill('*') << "*** Incoming state "
          << "\n";
       for (const auto& cut : cuts.initial.list())
@@ -61,7 +62,7 @@ namespace cepgen {
          << "\n";
       for (const auto& cut : cuts.central.list())
         os << prep << " " << cut.description << ": " << cut.limits << "\n";
-      if (params.kinematics.incomingBeams().mode() != mode::Kinematics::ElasticElastic) {
+      if (params.kinematics().incomingBeams().mode() != mode::Kinematics::ElasticElastic) {
         os << prep << std::setw(len) << std::setfill('*') << "*** Remnants states "
            << "\n";
         for (const auto& cut : cuts.remnants.list())

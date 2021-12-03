@@ -59,8 +59,8 @@ namespace cepgen {
         : ExportModule(params),
           pythia_(new Pythia8::Pythia),
           lhaevt_(new Pythia8::CepGenEvent),
-          compress_event_(params.get<bool>("compress", true)),
-          filename_(params.get<std::string>("filename", "output.lhe")),
+          compress_event_(params.get<bool>("compress")),
+          filename_(params.get<std::string>("filename")),
           gzip_(false) {
 #ifdef GZIP_BIN
       if (utils::fileExtension(filename_) == ".gz") {

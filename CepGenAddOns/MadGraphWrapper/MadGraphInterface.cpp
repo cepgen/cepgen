@@ -48,10 +48,10 @@ namespace cepgen {
   MadGraphInterface::MadGraphInterface(const ParametersList& params)
       : proc_(params.get<std::string>("process")),
         model_(params.get<std::string>("model")),
-        card_path_(params.getAs<std::string, fs::path>("cardPath", fs::path() / "/tmp/cepgen_mg5_input.dat")),
+        card_path_(params.getAs<std::string, fs::path>("cardPath")),
         standalone_cpp_path_(params.getAs<std::string, fs::path>("standaloneCppPath")),
-        tmp_dir_(params.getAs<std::string, fs::path>("tmpDir", fs::path() / "/tmp/cepgen_mg5_aMC")),
-        log_filename_(params.get<std::string>("logFile", fs::path() / "/tmp/cepgen_mg5_aMC.log")) {
+        tmp_dir_(params.getAs<std::string, fs::path>("tmpDir")),
+        log_filename_(params.get<std::string>("logFile")) {
     if (proc_.empty())
       throw CG_FATAL("MadGraphInterface") << "'process' keyword not set to the parameters!\n" << params;
     std::ofstream log(log_filename_, std::ios::trunc);  // clearing the log

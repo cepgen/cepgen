@@ -109,7 +109,7 @@ namespace cepgen {
           mpi2_(mpi_ * mpi_),
           meta_(PDG::get().mass(PDG::eta)),
           meta2_(meta_ * meta_) {
-      const auto& model = params.get<std::string>("model", "standard");
+      const auto& model = params.get<std::string>("model");
       if (model == "standard")
         mod_params_ = Parameters::standard();
       else

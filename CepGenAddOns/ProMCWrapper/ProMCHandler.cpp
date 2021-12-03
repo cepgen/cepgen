@@ -68,9 +68,9 @@ namespace cepgen {
 
     ProMCHandler::ProMCHandler(const ParametersList& params)
         : ExportModule(params),
-          file_(new ProMCBook(params.get<std::string>("filename", "output.promc").c_str(), "w")),
-          compress_evt_(params.get<bool>("compress", false)),
-          log_file_path_(params.get<std::string>("logFile", "logfile.txt")),
+          file_(new ProMCBook(params.get<std::string>("filename").c_str(), "w")),
+          compress_evt_(params.get<bool>("compress")),
+          log_file_path_(params.get<std::string>("logFile")),
           log_file_(log_file_path_) {}
 
     ProMCHandler::~ProMCHandler() {

@@ -23,7 +23,6 @@
 #include <memory>
 #include <vector>
 
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Physics/Cuts.h"
 #include "CepGen/Physics/IncomingBeams.h"
 
@@ -44,6 +43,8 @@ namespace cepgen {
 
     /// Minimal diffractive mass for dissociative proton treatment
     static const double MX_MIN;
+
+    static ParametersDescription parametersDescription();
 
     /// Set a collection of kinematics parameters
     void setParameters(const ParametersList&);

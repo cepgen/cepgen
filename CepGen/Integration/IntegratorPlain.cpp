@@ -38,7 +38,7 @@ namespace cepgen {
   };
 
   IntegratorPlain::IntegratorPlain(const ParametersList& params)
-      : IntegratorGSL(params), ncvg_(params.get<int>("numFunctionCalls", 50000)) {}
+      : IntegratorGSL(params), ncvg_(params.get<int>("numFunctionCalls")) {}
 
   void IntegratorPlain::integrate(double& result, double& abserr) {
     //--- integration bounds
