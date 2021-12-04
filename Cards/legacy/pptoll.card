@@ -1,4 +1,4 @@
-PROC pptoll
+PROC pptoff
 MODE 2
 #HADR pythia6
 DEBG 3

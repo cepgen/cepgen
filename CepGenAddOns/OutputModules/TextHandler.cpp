@@ -103,11 +103,10 @@ namespace cepgen {
         if (vars.size() == 1) {  // 1D histogram
           if (hvar.has<std::vector<double>>("xbins"))
             hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(hvar.get<std::vector<double>>("xbins"))});
-          else if (hvar.has<Limits>("xrange"))
-            hists_.emplace_back(
-                Hist1DInfo{vars.at(0),
-                           utils::Hist1D(hvar.get<int>("nbinsX", hvar.get<int>("nbins")), hvar.get<Limits>("xrange"))});
-          else {
+          else if (hvar.has<Limits>("xrange")) {
+            const auto& nbins = (hvar.get<int>("nbins") > 0 ? hvar.get<int>("nbins") : hvar.get<int>("nbinsX"));
+            hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(nbins, hvar.get<Limits>("xrange"))});
+          } else {
             CG_WARNING("TextHandler") << "Neither xrange nor xbins found in parameters for 1D plot of variable \""
                                       << vars.at(0) << "\".";
             continue;
@@ -123,14 +122,14 @@ namespace cepgen {
                 vars.at(0),
                 vars.at(1),
                 utils::Hist2D(hvar.get<std::vector<double>>("xbins"), hvar.get<std::vector<double>>("ybins"))});
-          else if (hvar.has<Limits>("xrange"))
-            hists2d_.emplace_back(Hist2DInfo{vars.at(0),
-                                             vars.at(1),
-                                             utils::Hist2D(hvar.get<int>("nbinsX", hvar.get<int>("nbins")),
-                                                           hvar.get<Limits>("xrange"),
-                                                           hvar.get<int>("nbinsY"),
-                                                           hvar.get<Limits>("yrange"))});
-          else {
+          else if (hvar.has<Limits>("xrange")) {
+            const auto& nbinsx = (hvar.get<int>("nbins") > 0 ? hvar.get<int>("nbins") : hvar.get<int>("nbinsX"));
+            hists2d_.emplace_back(Hist2DInfo{
+                vars.at(0),
+                vars.at(1),
+                utils::Hist2D(
+                    nbinsx, hvar.get<Limits>("xrange"), hvar.get<int>("nbinsY"), hvar.get<Limits>("yrange"))});
+          } else {
             CG_WARNING("TextHandler")
                 << "Neither (x/y)range nor (x/y)bins found in parameters for 1D plot of variables \"" << vars << "\".";
             continue;
@@ -215,12 +214,12 @@ namespace cepgen {
       desc.add<std::string>("separator", "\t").setDescription("Base separator in output file");
       ParametersDescription hist_desc;
       hist_desc.add<int>("nbins", 25);
-      hist_desc.add<std::vector<double>>("xbins", {}).setDescription("x-axis bins definition");
-      hist_desc.add<int>("nbinsX", 0).setDescription("Bins multiplicity for x-axis");
+      hist_desc.add<std::vector<double>>("xbins", {0., 1.}).setDescription("x-axis bins definition");
+      hist_desc.add<int>("nbinsX", -1).setDescription("Bins multiplicity for x-axis");
       hist_desc.add<Limits>("xrange", Limits{}).setDescription("Minimum-maximum range for x-axis");
-      hist_desc.add<std::vector<double>>("ybins", {}).setDescription("y-axis bins definition");
+      hist_desc.add<std::vector<double>>("ybins", {0., 1.}).setDescription("y-axis bins definition");
       hist_desc.add<int>("nbinsY", 50).setDescription("Bins multiplicity for y-axis");
-      hist_desc.add<Limits>("yrange", Limits{}).setDescription("Minimum-maximum range for y-axis");
+      hist_desc.add<Limits>("yrange", Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
       hist_desc.add<bool>("log", false).setDescription("Plot logarithmic axis?");
       desc.addParametersDescriptionVector("histVariables", hist_desc)
           .setDescription("Histogram definition for 1/2 variable(s)");
