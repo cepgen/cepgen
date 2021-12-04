@@ -34,8 +34,7 @@
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  Parameters::Parameters()
-      : par_kinematics(Kinematics::parametersDescription().parameters()), generation_(ParametersList()) {}
+  Parameters::Parameters() : par_kinematics(Kinematics::description().parameters()), generation_(ParametersList()) {}
 
   Parameters::Parameters(Parameters& param)
       : par_general(param.par_general),

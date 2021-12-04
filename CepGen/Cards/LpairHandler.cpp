@@ -359,8 +359,8 @@ namespace cepgen {
       return kInvalidStr;
     }
 
-    ParametersDescription LpairHandler::parametersDescription() {
-      auto desc = Handler::parametersDescription();
+    ParametersDescription LpairHandler::description() {
+      auto desc = Handler::description();
       desc.setDescription("LPAIR-like cards parser");
       return desc;
     }

@@ -34,7 +34,7 @@ namespace mstw {
     /// Grid MSTW structure functions evaluator
     explicit Grid(const cepgen::ParametersList&);
 
-    static cepgen::ParametersDescription parametersDescription();
+    static cepgen::ParametersDescription description();
 
     /// Grid header information as parsed from the file
     struct header_t {
@@ -141,8 +141,8 @@ namespace mstw {
     return *this;
   }
 
-  cepgen::ParametersDescription Grid::parametersDescription() {
-    auto desc = Parameterisation::parametersDescription();
+  cepgen::ParametersDescription Grid::description() {
+    auto desc = Parameterisation::description();
     desc.setDescription("MSTW grid");
     desc.add<std::string>("gridPath", DEFAULT_MSTW_GRID_PATH).setDescription("Path to the MSTW grid content");
     return desc;

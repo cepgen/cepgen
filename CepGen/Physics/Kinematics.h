@@ -44,7 +44,7 @@ namespace cepgen {
     /// Minimal diffractive mass for dissociative proton treatment
     static const double MX_MIN;
 
-    static ParametersDescription parametersDescription();
+    static ParametersDescription description();
 
     /// Set a collection of kinematics parameters
     void setParameters(const ParametersList&);

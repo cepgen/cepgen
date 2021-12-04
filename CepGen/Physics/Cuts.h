@@ -35,7 +35,7 @@ namespace cepgen {
     /// Define a cut from parameters list
     explicit Cuts(const ParametersList&);
 
-    static ParametersDescription parametersDescription();
+    static ParametersDescription description();
 
     /// Modify a few parameters values
     void setParameters(const ParametersList&);

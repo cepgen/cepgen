@@ -252,7 +252,7 @@ namespace cepgen {
     return result;
   }
 
-  ParametersDescription MadGraphInterface::parametersDescription() {
+  ParametersDescription MadGraphInterface::description() {
     auto desc = ParametersDescription();
     desc.add<std::string>("process", "").setDescription("MadGraph_aMC process definition");
     desc.add<std::string>("model", "").setDescription("MadGraph_aMC model name");

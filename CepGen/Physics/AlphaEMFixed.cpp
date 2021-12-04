@@ -25,7 +25,7 @@ namespace cepgen {
   public:
     explicit AlphaEMFixed(const ParametersList& params) : Coupling(params), value_(params.get<double>("value")) {}
 
-    static ParametersDescription parametersDescription() {
+    static ParametersDescription description() {
       auto desc = ParametersDescription();
       desc.setDescription("Constant alpha(EM)");
       desc.add<double>("value", constants::ALPHA_EM).setDescription("Constant value for alpha(EM)");

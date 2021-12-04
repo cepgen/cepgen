@@ -45,7 +45,7 @@ namespace cepgen {
       explicit ProMCHandler(const ParametersList&);
       ~ProMCHandler();
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override;
       void setCrossSection(double cross_section, double err) override {
@@ -151,8 +151,8 @@ namespace cepgen {
       file_->write(event);
     }
 
-    ParametersDescription ProMCHandler::parametersDescription() {
-      auto desc = ExportModule::parametersDescription();
+    ParametersDescription ProMCHandler::description() {
+      auto desc = ExportModule::description();
       desc.setDescription("ProMC file output module");
       desc.add<std::string>("filename", "output.promc");
       desc.add<bool>("compress", false);

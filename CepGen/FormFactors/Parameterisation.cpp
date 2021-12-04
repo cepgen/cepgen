@@ -90,7 +90,7 @@ namespace cepgen {
       return *this;
     }
 
-    ParametersDescription Parameterisation::parametersDescription() {
+    ParametersDescription Parameterisation::description() {
       auto desc = ParametersDescription();
       desc.setDescription("Unnamed form factors parameterisation");
       return desc;

@@ -34,7 +34,7 @@ namespace cepgen {
   public:
     MadGraphInterface(const ParametersList&);
 
-    static ParametersDescription parametersDescription();
+    static ParametersDescription description();
 
     std::string run() const;
 

@@ -48,7 +48,7 @@ namespace cepgen {
       /// Class constructor
       explicit LHEFHepMCHandler(const ParametersList&);
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override;
       /// Writer operator
@@ -116,8 +116,8 @@ namespace cepgen {
       lhe_output_->writeEvent();
     }
 
-    ParametersDescription LHEFHepMCHandler::parametersDescription() {
-      auto desc = ExportModule::parametersDescription();
+    ParametersDescription LHEFHepMCHandler::description() {
+      auto desc = ExportModule::description();
       desc.setDescription("HepMC 3-based LHEF output module");
       desc.add<std::string>("filename", "output.lhe").setDescription("Output filename");
       desc.add<bool>("compress", true);

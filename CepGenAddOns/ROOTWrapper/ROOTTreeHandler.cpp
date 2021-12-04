@@ -40,7 +40,7 @@ namespace cepgen {
       explicit ROOTTreeHandler(const ParametersList&);
       ~ROOTTreeHandler();
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override;
       /// Writer operator
@@ -84,8 +84,8 @@ namespace cepgen {
       run_tree_.errxsect = cross_section_err;
     }
 
-    ParametersDescription ROOTTreeHandler::parametersDescription() {
-      auto desc = ExportModule::parametersDescription();
+    ParametersDescription ROOTTreeHandler::description() {
+      auto desc = ExportModule::description();
       desc.setDescription("ROOT TTree storage module");
       desc.add<std::string>("filename", "output.root").setDescription("Output filename");
       desc.add<bool>("compress", false).setDescription("Compress the event content? (merge down two-parton system)");

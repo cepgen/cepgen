@@ -62,7 +62,7 @@ namespace cepgen {
       void prepareKinematics() override;
       void fillKinematics(bool) override;
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
     private:
       /**

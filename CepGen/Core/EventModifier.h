@@ -39,7 +39,7 @@ namespace cepgen {
     /// Virtual destructor
     virtual ~EventModifier() = default;
 
-    static ParametersDescription parametersDescription();
+    static ParametersDescription description();
 
     /// Set all runtime parameters steering this module
     virtual void setRuntimeParameters(const Parameters& params) { rt_params_ = &params; }

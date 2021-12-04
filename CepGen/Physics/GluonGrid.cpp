@@ -26,7 +26,7 @@
 
 namespace kmr {
   GluonGrid& GluonGrid::get(const cepgen::ParametersList& params) {
-    static GluonGrid instance(!params.empty() ? params : parametersDescription().parameters());
+    static GluonGrid instance(!params.empty() ? params : description().parameters());
     return instance;
   }
 
@@ -66,7 +66,7 @@ namespace kmr {
     return cepgen::GridHandler<3, 1>::eval({log10(x), log10(kt2), log10(mu2)}).at(0);
   }
 
-  cepgen::ParametersDescription GluonGrid::parametersDescription() {
+  cepgen::ParametersDescription GluonGrid::description() {
     auto desc = cepgen::ParametersDescription();
     desc.add<std::string>("path", DEFAULT_KMR_GRID_PATH);
     return desc;

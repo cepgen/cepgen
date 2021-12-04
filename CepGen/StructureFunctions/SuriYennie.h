@@ -29,7 +29,7 @@ namespace cepgen {
       /// User-steered Suri-Yennie continuum structure functions calculator
       explicit SuriYennie(const ParametersList& config = ParametersList());
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       SuriYennie& eval(double xbj, double q2) override;
 

@@ -34,7 +34,7 @@ namespace cepgen {
       /// Extract the longitudinal/transverse cross section ratio and associated error for a given \f$(x_{\rm Bj},Q^2)\f$ couple.
       virtual double operator()(double xbj, double q2, double& err) const = 0;
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
     protected:
       /// \f$x_{\rm Bj}\f$ dependence for QCD-matching of R at high-\f$Q^2\f$

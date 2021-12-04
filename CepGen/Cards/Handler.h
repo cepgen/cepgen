@@ -33,7 +33,7 @@ namespace cepgen {
       explicit Handler(const ParametersList&);
       virtual ~Handler() = default;
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       /// Get the list of runtime parameters as parsed
       const Parameters* runtimeParameters() const { return rt_params_; }

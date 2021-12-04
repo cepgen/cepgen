@@ -32,7 +32,7 @@ namespace cepgen {
       /// User-steered Schäfer hybrid structure functions calculator
       explicit Schaefer(const ParametersList&);
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       Schaefer& eval(double xbj, double q2) override;
       std::string describe() const override;
@@ -148,8 +148,8 @@ namespace cepgen {
       return 2. * omega2 - omega * omega;
     }
 
-    ParametersDescription Schaefer::parametersDescription() {
-      auto desc = Parameterisation::parametersDescription();
+    ParametersDescription Schaefer::description() {
+      auto desc = Parameterisation::description();
       desc.setDescription("LUXlike structure functions");
       desc.add<double>("Q2cut", 9.);
       desc.add<std::vector<double> >("W2limits", {3., 4.});

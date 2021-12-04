@@ -288,8 +288,8 @@ namespace cepgen {
       }
     }
 
-    ParametersDescription PythonHandler::parametersDescription() {
-      auto desc = Handler::parametersDescription();
+    ParametersDescription PythonHandler::description() {
+      auto desc = Handler::description();
       desc.setDescription("Python 2/3 cards parser");
       return desc;
     }

@@ -42,7 +42,7 @@ namespace cepgen {
       explicit DelphesHandler(const ParametersList&);
       ~DelphesHandler();
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override;
       void setCrossSection(double cross_section, double /*err_cross_section*/) override {
@@ -142,8 +142,8 @@ namespace cepgen {
       tree_writer_->Fill();
     }
 
-    ParametersDescription DelphesHandler::parametersDescription() {
-      auto desc = ExportModule::parametersDescription();
+    ParametersDescription DelphesHandler::description() {
+      auto desc = ExportModule::description();
       desc.setDescription("Delphes interfacing module");
       desc.add<std::string>("filename", "output.delphes.root");
       desc.add<std::string>("inputCard", "input.tcl");

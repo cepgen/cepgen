@@ -374,7 +374,7 @@ namespace cepgen {
       return is_incoming_state_set && is_outgoing_state_set;
     }
 
-    ParametersDescription Process::parametersDescription() {
+    ParametersDescription Process::description() {
       auto desc = ParametersDescription();
       desc.add<ParametersDescription>("alphaEM", AlphaEMFactory::get().describeParameters("fixed"));
       return desc;

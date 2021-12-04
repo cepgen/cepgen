@@ -76,7 +76,7 @@ namespace cepgen {
         throw std::invalid_argument(oss.str());
       }
       map_[name] = &build<U>;
-      params_map_[name] = U::parametersDescription();
+      params_map_[name] = U::description();
       if (!def_params.empty())
         params_map_[name].parameters() += def_params;
       params_map_[name].setName(name);

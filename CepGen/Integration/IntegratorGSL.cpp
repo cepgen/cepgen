@@ -75,8 +75,8 @@ namespace cepgen {
     return gsl_rng_uniform(gsl_rng_.get());
   }
 
-  ParametersDescription IntegratorGSL::parametersDescription() {
-    auto desc = Integrator::parametersDescription();
+  ParametersDescription IntegratorGSL::description() {
+    auto desc = Integrator::description();
     desc.add<int>("rngEngine", 0)
         .setDescription("Random number generator engine (0 = MT19937, 1 = Taus2, 2 = Gfsr4, 3 = RanLXS0)");
     return desc;

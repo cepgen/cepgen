@@ -30,7 +30,7 @@ namespace cepgen {
   public:
     explicit IntegratorNaive(const ParametersList&);
 
-    static ParametersDescription parametersDescription();
+    static ParametersDescription description();
 
     void integrate(double&, double&) override;
 
@@ -60,8 +60,8 @@ namespace cepgen {
     err_result_ = abserr = mc_->current_error_estimate();
   }
 
-  ParametersDescription IntegratorNaive::parametersDescription() {
-    auto desc = Integrator::parametersDescription();
+  ParametersDescription IntegratorNaive::description() {
+    auto desc = Integrator::description();
     desc.setDescription("\"Naive\" Boost integrator");
     return desc;
   }

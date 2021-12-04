@@ -236,8 +236,8 @@ namespace cepgen {
       event_->oneWithRole(Particle::Intermediate).setMomentum(g1.momentum() + g2.momentum());
     }
 
-    ParametersDescription KTProcess::parametersDescription() {
-      auto desc = Process::parametersDescription();
+    ParametersDescription KTProcess::description() {
+      auto desc = Process::description();
       return desc;
     }
   }  // namespace proc

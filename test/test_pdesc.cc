@@ -6,7 +6,7 @@ int main() {
   class TestModule : public cepgen::NamedModule<std::string> {
   public:
     explicit TestModule(const cepgen::ParametersList& params) : cepgen::NamedModule<std::string>(params) {}
-    static cepgen::ParametersDescription parametersDescription() {
+    static cepgen::ParametersDescription description() {
       cepgen::ParametersDescription desc("test_module");
       desc.add<int>("foo", 42);
       // description of a sub-collection of parameters
@@ -23,8 +23,8 @@ int main() {
   };
 
   CG_LOG << "Description of the test module:\n\n"
-         << TestModule::parametersDescription().describe()
-         << "\nEquivalent parameters list: " << TestModule::parametersDescription().parameters();
+         << TestModule::description().describe()
+         << "\nEquivalent parameters list: " << TestModule::description().parameters();
 
   return 0;
 }

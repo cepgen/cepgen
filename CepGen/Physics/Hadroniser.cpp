@@ -24,8 +24,8 @@ namespace cepgen {
     Hadroniser::Hadroniser(const ParametersList& plist)
         : EventModifier(plist), remn_fragm_(plist.get<bool>("remnantsFragmentation")) {}
 
-    ParametersDescription Hadroniser::parametersDescription() {
-      auto desc = EventModifier::parametersDescription();
+    ParametersDescription Hadroniser::description() {
+      auto desc = EventModifier::description();
       desc.add<bool>("remnantsFragmentation", true)
           .setDescription("Apply the fragmentation algorithm to proton remnants");
       return desc;

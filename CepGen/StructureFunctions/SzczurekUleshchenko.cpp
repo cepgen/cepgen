@@ -34,7 +34,7 @@ namespace cepgen {
       explicit SzczurekUleshchenko(const ParametersList&);
       SzczurekUleshchenko& eval(double xbj, double q2) override;
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
     private:
       /// \f$Q^2\f$ scale shift
@@ -65,8 +65,8 @@ namespace cepgen {
       return *this;
     }
 
-    ParametersDescription SzczurekUleshchenko::parametersDescription() {
-      auto desc = Parameterisation::parametersDescription();
+    ParametersDescription SzczurekUleshchenko::description() {
+      auto desc = Parameterisation::description();
       desc.setDescription("Szczurek-Uleshchenko modelling of F2 based on GRV parton content");
       desc.add<double>("q2shift", 0.8);
       return desc;

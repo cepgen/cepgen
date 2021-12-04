@@ -35,7 +35,7 @@ namespace cepgen {
   public:
     explicit IntegratorFoam(const ParametersList&);
 
-    static ParametersDescription parametersDescription();
+    static ParametersDescription description();
 
     void integrate(double&, double&) override;
     inline double uniform() const override { return rnd_->Rndm(); }
@@ -106,8 +106,8 @@ namespace cepgen {
     });
   }
 
-  ParametersDescription IntegratorFoam::parametersDescription() {
-    auto desc = Integrator::parametersDescription();
+  ParametersDescription IntegratorFoam::description() {
+    auto desc = Integrator::description();
     desc.setDescription("FOAM general purpose MC integrator");
     desc.add<std::string>("rngEngine", "MersenneTwister")
         .setDescription("Set random number generator engine ('Ranlux', 'generic', 'MersenneTwister' handled)");

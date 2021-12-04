@@ -39,7 +39,7 @@ namespace cepgen {
       explicit LHEFPythiaHandler(const ParametersList&);
       ~LHEFPythiaHandler();
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override;
       /// Writer operator
@@ -120,8 +120,8 @@ namespace cepgen {
       lhaevt_->setCrossSection(0, cross_section, cross_section_err);
     }
 
-    ParametersDescription LHEFPythiaHandler::parametersDescription() {
-      auto desc = ExportModule::parametersDescription();
+    ParametersDescription LHEFPythiaHandler::description() {
+      auto desc = ExportModule::description();
       desc.setDescription("Pythia 8-based LHEF output module");
       desc.add<bool>("compress", true);
       desc.add<std::string>("filename", "output.lhe").setDescription("Output filename");

@@ -47,7 +47,7 @@ namespace cepgen {
                                     << ".";
     }
 
-    static ParametersDescription parametersDescription() {
+    static ParametersDescription description() {
       auto desc = ParametersDescription();
       desc.setDescription("PEGASUS alphaS evolution algorithm");
       desc.add<int>("iord", 2).setDescription("Evolution order");

@@ -42,7 +42,7 @@ namespace cepgen {
       /// Cast command line arguments into a configuration word
       explicit CommandLineHandler(const ParametersList&);
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       Parameters* parse(const std::string&, Parameters*) override;
 
@@ -135,8 +135,8 @@ namespace cepgen {
       return rt_params_;
     }
 
-    ParametersDescription CommandLineHandler::parametersDescription() {
-      auto desc = Handler::parametersDescription();
+    ParametersDescription CommandLineHandler::description() {
+      auto desc = Handler::description();
       desc.setDescription("Command line configuration parser");
       desc.add<std::vector<std::string> >("args", {}).setDescription("Collection of arguments to be parsed");
       return desc;

@@ -48,7 +48,7 @@ namespace cepgen {
       explicit YODAHistsHandler(const ParametersList&);
       ~YODAHistsHandler();
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override {}
       void setCrossSection(double cross_section, double) override { cross_section_ = cross_section; }
@@ -164,8 +164,8 @@ namespace cepgen {
     }
 
     template <typename T>
-    ParametersDescription YODAHistsHandler<T>::parametersDescription() {
-      auto desc = ExportModule::parametersDescription();
+    ParametersDescription YODAHistsHandler<T>::description() {
+      auto desc = ExportModule::description();
       desc.setDescription("YODA histograms/profiles file output module");
       desc.add<std::string>("filename", "output.yoda").setDescription("Output filename");
       auto var_desc = ParametersDescription();

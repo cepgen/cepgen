@@ -52,7 +52,7 @@ namespace cepgen {
       }
     }
 
-    ParametersDescription Handler::parametersDescription() {
+    ParametersDescription Handler::description() {
       auto desc = ParametersDescription();
       //FIXME desc.add<std::string>("filename").setDescription("Steering card to parse");
       return desc;

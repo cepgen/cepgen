@@ -35,7 +35,7 @@ namespace kmr {
     GluonGrid(const GluonGrid&) = delete;
     void operator=(const GridHandler&) = delete;
 
-    static cepgen::ParametersDescription parametersDescription();
+    static cepgen::ParametersDescription description();
 
     /// Retrieve the path to the interpolation grid values
     const std::string& path() const { return grid_path_; }

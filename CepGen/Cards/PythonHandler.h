@@ -36,7 +36,7 @@ namespace cepgen {
       /// Read a standard configuration card
       explicit PythonHandler(const ParametersList&);
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       Parameters* parse(const std::string&, Parameters*) override;
 

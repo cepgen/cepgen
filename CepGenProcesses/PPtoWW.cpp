@@ -37,7 +37,7 @@ namespace cepgen {
       explicit PPtoWW(const ParametersList&);
       ProcessPtr clone() const override { return ProcessPtr(new PPtoWW(*this)); }
       enum class Polarisation { full = 0, LL = 1, LT = 2, TL = 3, TT = 4 };
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
     private:
       void prepareProcessKinematics() override;
@@ -155,8 +155,8 @@ namespace cepgen {
       return hel_mat_elem * std::pow(1. / qt1_ / qt2_, 2);
     }
 
-    ParametersDescription PPtoWW::parametersDescription() {
-      auto params = Process2to4::parametersDescription();
+    ParametersDescription PPtoWW::description() {
+      auto params = Process2to4::description();
       params.setDescription("ɣɣ → W⁺W¯ (kt-factor.)");
       params.add<int>("method", 1)
           .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell by Nachtmann et al.)");
@@ -164,7 +164,7 @@ namespace cepgen {
       pol_states.add<std::vector<int> >("W1", {-1, 0, 1}).setDescription("First W+- polarisation states");
       pol_states.add<std::vector<int> >("W2", {-1, 0, 1}).setDescription("Second W+- polarisation states");
       params.add<ParametersDescription>("polarisationStates", pol_states);
-      params += NachtmannAmplitudes::parametersDescription();
+      params += NachtmannAmplitudes::description();
       return params;
     }
   }  // namespace proc

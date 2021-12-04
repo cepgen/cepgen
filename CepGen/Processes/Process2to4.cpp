@@ -283,8 +283,8 @@ namespace cepgen {
       return 0.5 * (uhat1 + uhat2);
     }
 
-    ParametersDescription Process2to4::parametersDescription() {
-      auto desc = KTProcess::parametersDescription();
+    ParametersDescription Process2to4::description() {
+      auto desc = KTProcess::description();
       return desc;
     }
   }  // namespace proc

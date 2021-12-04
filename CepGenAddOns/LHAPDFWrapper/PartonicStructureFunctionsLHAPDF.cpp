@@ -42,7 +42,7 @@ namespace cepgen {
       /// Build a calculator from a set, its member, and the contributing quarks
       explicit Partonic(const char* set, unsigned short member = 0, const Mode& mode = Mode::full);
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       Partonic& eval(double xbj, double q2) override;
       std::string describe() const override;
@@ -210,8 +210,8 @@ namespace cepgen {
       return *this;
     }
 
-    ParametersDescription Partonic::parametersDescription() {
-      auto desc = Parameterisation::parametersDescription();
+    ParametersDescription Partonic::description() {
+      auto desc = Parameterisation::description();
       desc.setDescription("Partonic structure functions");
       desc.add<std::string>("pdfSet", "cteq6").setDescription("PDF modelling to be considered");
       desc.add<int>("numFlavours", 4).setDescription("Number of parton flavours to consider in summation");

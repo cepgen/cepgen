@@ -35,7 +35,7 @@ namespace cepgen {
       explicit EventDump(const ParametersList&);
       ~EventDump();
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override;
       void setCrossSection(double, double) override;
@@ -78,8 +78,8 @@ namespace cepgen {
         *out_ << ev << "\n";
     }
 
-    ParametersDescription EventDump::parametersDescription() {
-      auto desc = ExportModule::parametersDescription();
+    ParametersDescription EventDump::description() {
+      auto desc = ExportModule::description();
       desc.setDescription("Simple text-based event dumper");
       desc.add<bool>("saveBanner", true).setDescription("Save boilerplate in output file?");
       desc.add<int>("printEvery", 10).setDescription("Period at which events are dumped");

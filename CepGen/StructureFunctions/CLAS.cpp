@@ -36,7 +36,7 @@ namespace cepgen {
     public:
       explicit CLAS(const ParametersList&);
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       /// List of steering parameters for a physics case
       struct Parameters {
@@ -273,8 +273,8 @@ namespace cepgen {
       return std::make_pair(f2bkg, f2resn);
     }
 
-    ParametersDescription CLAS::parametersDescription() {
-      auto desc = Parameterisation::parametersDescription();
+    ParametersDescription CLAS::description() {
+      auto desc = Parameterisation::description();
       desc.setDescription("CLAS parameterisation for nucleon data at Q2 > 0.5 GeV2 / xBj > 0.15");
       desc.add<std::string>("model", "proton")
           .setDescription("Nucleon modelling ('proton', 'deuteron', or 'neutron' handled)");

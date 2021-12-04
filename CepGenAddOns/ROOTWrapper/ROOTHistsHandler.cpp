@@ -45,7 +45,7 @@ namespace cepgen {
       explicit ROOTHistsHandler(const ParametersList&);
       ~ROOTHistsHandler();
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override {}
       void setCrossSection(double cross_section, double) override { cross_section_ = cross_section; }
@@ -211,8 +211,8 @@ namespace cepgen {
                            cross_section_);
     }
 
-    ParametersDescription ROOTHistsHandler::parametersDescription() {
-      auto desc = ExportModule::parametersDescription();
+    ParametersDescription ROOTHistsHandler::description() {
+      auto desc = ExportModule::description();
       desc.setDescription("ROOT histograming/profiling module");
       desc.add<std::string>("filename", "output.root").setDescription("Output filename");
       auto var_desc = ParametersDescription();

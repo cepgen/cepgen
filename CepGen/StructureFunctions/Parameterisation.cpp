@@ -111,7 +111,7 @@ namespace cepgen {
       return os;
     }
 
-    ParametersDescription Parameterisation::parametersDescription() {
+    ParametersDescription Parameterisation::description() {
       auto desc = ParametersDescription();
       desc.setDescription("Unnamed structure functions parameterisation");
       desc.add<ParametersDescription>(

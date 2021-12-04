@@ -50,7 +50,7 @@ namespace cepgen {
       /// Boost tree parser from a configuration card
       explicit BoostTreeHandler(const ParametersList&);
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       Parameters* parse(const std::string&, Parameters*) override;
       void pack(const Parameters* params) override;
@@ -203,7 +203,7 @@ namespace cepgen {
       tree_.add_child(LOGGER_NAME, bc::pack(log_));
     }
 
-    ParametersDescription BoostTreeHandler::parametersDescription() {
+    ParametersDescription BoostTreeHandler::description() {
       auto desc = ParametersDescription();
       desc.setDescription("Boost tree parser/writer");
       return desc;

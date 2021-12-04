@@ -30,7 +30,7 @@ namespace cepgen {
     public:
       explicit Shamov(const ParametersList&);
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       Shamov& eval(double xbj, double q2) override;
 
@@ -259,8 +259,8 @@ namespace cepgen {
       return *this;
     }
 
-    ParametersDescription Shamov::parametersDescription() {
-      auto desc = Parameterisation::parametersDescription();
+    ParametersDescription Shamov::description() {
+      auto desc = Parameterisation::description();
       desc.setDescription("Shamov composite soft structure functions");
       desc.add<int>("mode", (int)Mode::RealResAndNonRes);
       desc.add<int>("fitModel", 2);

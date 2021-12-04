@@ -39,7 +39,7 @@ namespace cepgen {
       /// Copy constructor
       Parameterisation(const Parameterisation&);
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       /// Dumping operator for standard output streams
       friend std::ostream& operator<<(std::ostream&, const Parameterisation*);

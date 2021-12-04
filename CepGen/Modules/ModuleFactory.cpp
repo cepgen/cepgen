@@ -49,7 +49,7 @@ namespace cepgen {
                                       << name << "\"!";
     map_[name] = &build<U>;
     descr_map_[name] = U::description();
-    params_map_[name] = !def_params.empty() ? ParametersDescription(def_params) : U::parametersDescription();
+    params_map_[name] = !def_params.empty() ? ParametersDescription(def_params) : U::description();
     params_map_[name].setName(name);
   }*/
 

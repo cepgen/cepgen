@@ -28,7 +28,7 @@ namespace cepgen {
     public:
       explicit MergellEtAl(const ParametersList&);
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
     private:
       void compute(double q2) override;
@@ -78,8 +78,8 @@ namespace cepgen {
       GM = F1 + F2;
     }
 
-    ParametersDescription MergellEtAl::parametersDescription() {
-      auto desc = Parameterisation::parametersDescription();
+    ParametersDescription MergellEtAl::description() {
+      auto desc = Parameterisation::description();
       desc.setDescription("Mergell et al.");
       desc.add<double>("a1rho", 1.0317);
       desc.add<double>("a2rho", 5.7824);

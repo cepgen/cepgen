@@ -89,9 +89,9 @@ namespace cepgen {
     return params;
   }
 
-  ParametersDescription Kinematics::parametersDescription() {
+  ParametersDescription Kinematics::description() {
     auto desc = ParametersDescription();
-    desc += IncomingBeams::parametersDescription();
+    desc += IncomingBeams::description();
     return desc;
   }
 

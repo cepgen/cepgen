@@ -34,7 +34,7 @@ namespace cepgen {
       APFEL::InitializeAPFEL();
       APFEL::EvolveAPFEL(q0_, qmax_);
     }
-    static ParametersDescription parametersDescription() {
+    static ParametersDescription description() {
       auto desc = ParametersDescription();
       desc.setDescription("APFEL alphaS evolution algorithm");
       desc.add<int>("order", 2);

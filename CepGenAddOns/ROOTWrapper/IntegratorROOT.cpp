@@ -29,7 +29,7 @@ namespace cepgen {
   public:
     explicit IntegratorROOT(const ParametersList&);
 
-    static ParametersDescription parametersDescription();
+    static ParametersDescription description();
 
     void integrate(double&, double&) override;
 
@@ -91,8 +91,8 @@ namespace cepgen {
     err_result_ = abserr = integr_->Error();
   }
 
-  ParametersDescription IntegratorROOT::parametersDescription() {
-    auto desc = Integrator::parametersDescription();
+  ParametersDescription IntegratorROOT::description() {
+    auto desc = Integrator::description();
     desc.setDescription("ROOT general purpose MC integrator");
     desc.add<std::string>("type", "default");
     desc.add<double>("absTol", -1.);

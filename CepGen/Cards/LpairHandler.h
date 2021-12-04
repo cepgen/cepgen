@@ -35,7 +35,7 @@ namespace cepgen {
       /// Read a LPAIR steering card
       explicit LpairHandler(const ParametersList&);
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       void pack(const Parameters*) override;
       Parameters* parse(const std::string&, Parameters*) override;

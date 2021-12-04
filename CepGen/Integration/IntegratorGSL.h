@@ -34,7 +34,7 @@ namespace cepgen {
     double uniform() const override;
     void setIntegrand(Integrand& integr) override;
 
-    static ParametersDescription parametersDescription();
+    static ParametersDescription description();
 
   protected:
     /// A functor wrapping GSL's function footprint

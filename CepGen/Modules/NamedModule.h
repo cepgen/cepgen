@@ -33,7 +33,7 @@ namespace cepgen {
     /// Module unique name
     const T& name() const { return name_; }
     /// Description of all module parameters
-    static inline ParametersDescription parametersDescription() {
+    static inline ParametersDescription description() {
       auto desc = ParametersDescription();
       desc.setDescription("Unnamed module");
       return desc;

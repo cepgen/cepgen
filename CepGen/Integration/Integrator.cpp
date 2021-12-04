@@ -56,7 +56,7 @@ namespace cepgen {
 
   double Integrator::uniform() const { return rnd_(rnd_gen_); }
 
-  ParametersDescription Integrator::parametersDescription() {
+  ParametersDescription Integrator::description() {
     auto desc = ParametersDescription();
     desc.setDescription("Unnamed integrator");
     desc.add<int>("seed", time(nullptr)).setDescription("Random number generator seed");

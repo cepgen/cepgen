@@ -34,7 +34,7 @@ namespace cepgen {
       /// Default constructor for an undefined hadroniser
       explicit Hadroniser(const ParametersList&);
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       /// Specify whether the beam remnants are to be fragmented
       bool fragmentRemnants() const { return remn_fragm_; }

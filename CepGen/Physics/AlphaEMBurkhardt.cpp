@@ -27,8 +27,7 @@ namespace cepgen {
   public:
     explicit AlphaEMBurkhardt(const ParametersList& params) : Coupling(params) {}
 
-    static std::string description() { return "Burkhardt et al. alpha(EM) evolution algorithm"; }
-    static ParametersDescription parametersDescription() {
+    static ParametersDescription description() {
       auto desc = ParametersDescription();
       desc.setDescription("Burkhardt et al. alpha(EM) evolution algorithm");
       return desc;

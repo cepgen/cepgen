@@ -68,7 +68,7 @@ namespace cepgen {
       Parameterisation& operator=(const Parameterisation& sf);
 
       /// Generic description for the structure functions
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
       friend std::ostream& operator<<(std::ostream&, const Parameterisation*);

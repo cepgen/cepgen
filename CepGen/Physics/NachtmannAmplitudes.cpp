@@ -36,7 +36,7 @@ namespace cepgen {
   NachtmannAmplitudes::EFTParameters::EFTParameters(const ParametersList& params)
       : s1(params.get<double>("s1")), mH(params.get<double>("mH")) {}
 
-  ParametersDescription NachtmannAmplitudes::EFTParameters::parametersDescription() {
+  ParametersDescription NachtmannAmplitudes::EFTParameters::description() {
     auto desc = ParametersDescription();
     desc.add<double>("s1", 0.);
     desc.add<double>("mH", 0.).setDescription("Higgs mass (in GeV/c2)");
@@ -246,10 +246,10 @@ namespace cepgen {
                eft_ext_.c1() * eft_ext_.c1() * float(hel.lam1 + hel.lam2) * (1. + hel.lam3 * hel.lam4);
   }
 
-  ParametersDescription NachtmannAmplitudes::parametersDescription() {
+  ParametersDescription NachtmannAmplitudes::description() {
     auto desc = ParametersDescription();
     desc.add<int>("model", (int)Mode::SM).setDescription("SM/anomalous model to consider");
-    desc.add<ParametersDescription>("eftParameters", EFTParameters::parametersDescription());
+    desc.add<ParametersDescription>("eftParameters", EFTParameters::description());
     return desc;
   }
 

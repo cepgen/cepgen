@@ -44,7 +44,7 @@ namespace cepgen {
          << prep << " Process: " << params.processName() << " (" << params.kinematics().incomingBeams().mode() << ")\n";
       if (params.kinematics().incomingBeams().mode() != mode::Kinematics::ElasticElastic)
         os << prep << " Structure functions: "
-           << params.kinematics().incomingBeams().structureFunctions()->parametersDescription().description() << "\n";
+           << params.kinematics().incomingBeams().structureFunctions()->description().description() << "\n";
       if (!params.eventModifiersSequence().empty()) {
         os << prep << " " << utils::s("Event modifier", params.eventModifiersSequence().size()) << ": ";
         std::string sep;
@@ -71,7 +71,7 @@ namespace cepgen {
       return os.str();
     }
 
-    ParametersDescription ExportModule::parametersDescription() {
+    ParametersDescription ExportModule::description() {
       auto desc = ParametersDescription();
       return desc;
     }

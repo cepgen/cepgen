@@ -48,7 +48,7 @@ namespace cepgen {
       return eval(x);
     }
 
-    ParametersDescription Functional::parametersDescription() {
+    ParametersDescription Functional::description() {
       auto desc = ParametersDescription();
       desc.setDescription("Unnamed functional evaluator");
       desc.add<std::vector<std::string> >("variables", {}).setDescription("List of variables to evaluate");

@@ -36,7 +36,7 @@ namespace cepgen {
     public:
       explicit PPtoFF(const ParametersList&);
       ProcessPtr clone() const override { return ProcessPtr(new PPtoFF(*this)); }
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
     private:
       void prepareProcessKinematics() override;
@@ -249,8 +249,8 @@ namespace cepgen {
       return amat2;
     }
 
-    ParametersDescription PPtoFF::parametersDescription() {
-      auto desc = Process2to4::parametersDescription();
+    ParametersDescription PPtoFF::description() {
+      auto desc = Process2to4::description();
       desc.setDescription("ɣɣ → f⁺f¯ (kt-factor.)");
       desc.add<int>("method", (int)Mode::offShell)
           .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell)");

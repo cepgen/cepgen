@@ -28,7 +28,7 @@ namespace cepgen {
     public:
       explicit FunctionalMuParser(const ParametersList&);
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       double eval(const std::vector<double>&) const override;
 
@@ -59,8 +59,8 @@ namespace cepgen {
       }
     }
 
-    ParametersDescription FunctionalMuParser::parametersDescription() {
-      auto desc = Functional::parametersDescription();
+    ParametersDescription FunctionalMuParser::description() {
+      auto desc = Functional::description();
       desc.setDescription("MuParser functional evaluator");
       return desc;
     }

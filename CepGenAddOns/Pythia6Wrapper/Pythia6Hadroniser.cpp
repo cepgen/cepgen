@@ -72,7 +72,7 @@ namespace cepgen {
     public:
       using Hadroniser::Hadroniser;
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       void setRuntimeParameters(const Parameters&) override {}
       inline void readString(const char* param) override { pygive(param); }
@@ -320,8 +320,8 @@ namespace cepgen {
       return {PDG::up, 2103};    // (u,ud1)
     }
 
-    ParametersDescription Pythia6Hadroniser::parametersDescription() {
-      auto desc = Hadroniser::parametersDescription();
+    ParametersDescription Pythia6Hadroniser::description() {
+      auto desc = Hadroniser::description();
       desc.setDescription("Interface to the Pythia 6 string hadronisation/fragmentation algorithm");
       return desc;
     }

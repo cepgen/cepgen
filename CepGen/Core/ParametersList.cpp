@@ -46,20 +46,21 @@ namespace cepgen {
   ParametersList& ParametersList::operator+=(const ParametersList& oth) {
     //--- first ensure no key is not already present in the list
     for (const auto& key : oth.keys()) {
-      if (!has<ParametersList>(key))
-        erase(key);
+      if (has<ParametersList>(key) && get<ParametersList>(key) == oth.get<ParametersList>(key))
+        continue;
+      erase(key);
     }
     //--- concatenate all typed lists
     int_values_.insert(oth.int_values_.begin(), oth.int_values_.end());
     dbl_values_.insert(oth.dbl_values_.begin(), oth.dbl_values_.end());
     str_values_.insert(oth.str_values_.begin(), oth.str_values_.end());
     lim_values_.insert(oth.lim_values_.begin(), oth.lim_values_.end());
-    vec_param_values_.insert(oth.vec_param_values_.begin(), oth.vec_param_values_.end());
+    for (const auto& par : oth.param_values_)
+      param_values_[par.first] += par.second;
     vec_int_values_.insert(oth.vec_int_values_.begin(), oth.vec_int_values_.end());
     vec_dbl_values_.insert(oth.vec_dbl_values_.begin(), oth.vec_dbl_values_.end());
     vec_str_values_.insert(oth.vec_str_values_.begin(), oth.vec_str_values_.end());
-    for (const auto& par : oth.param_values_)
-      param_values_[par.first] += par.second;
+    vec_param_values_.insert(oth.vec_param_values_.begin(), oth.vec_param_values_.end());
     return *this;
   }
 

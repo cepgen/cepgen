@@ -44,7 +44,7 @@ namespace cepgen {
       explicit Pythia8Hadroniser(const ParametersList&);
       ~Pythia8Hadroniser();
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       void setRuntimeParameters(const Parameters&) override;
       void readString(const char* param) override;
@@ -360,8 +360,8 @@ namespace cepgen {
       return (unsigned short)Particle::UnknownRole;
     }
 
-    ParametersDescription Pythia8Hadroniser::parametersDescription() {
-      auto desc = Hadroniser::parametersDescription();
+    ParametersDescription Pythia8Hadroniser::description() {
+      auto desc = Hadroniser::description();
       desc.setDescription("Interface to the Pythia 8 string hadronisation/fragmentation algorithm");
       desc.add<bool>("correctCentralSystem", false)
           .setDescription("Correct the kinematics of the central system whenever required");

@@ -36,7 +36,7 @@ namespace cepgen {
         struct Trajectory {
           explicit Trajectory(const ParametersList& params = ParametersList());
           std::vector<double> a, b, c;
-          static ParametersDescription parametersDescription();
+          static ParametersDescription description();
         };
 
       public:
@@ -50,7 +50,7 @@ namespace cepgen {
         static Parameters gd07p();
         static Parameters gd11p();
 
-        static ParametersDescription parametersDescription();
+        static ParametersDescription description();
 
         Trajectory pomeron, reggeon;
         /// Effective photon squared mass
@@ -67,7 +67,7 @@ namespace cepgen {
 
       explicit ALLM(const ParametersList& params = ParametersList());
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       ALLM& eval(double xbj, double q2) override;
       std::string describe() const override { return descr_; }
@@ -151,10 +151,10 @@ namespace cepgen {
       return *this;
     }
 
-    ParametersDescription ALLM::parametersDescription() {
-      auto desc = Parameterisation::parametersDescription();
+    ParametersDescription ALLM::description() {
+      auto desc = Parameterisation::description();
       desc.setDescription("Abramowicz, Levin, Levy, and Maor parametrisation of F2/FL");
-      desc.add<ParametersDescription>("parameterisation", Parameters::parametersDescription());
+      desc.add<ParametersDescription>("parameterisation", Parameters::description());
       desc.add<std::string>("model", "");
       return desc;
     }
@@ -297,10 +297,10 @@ namespace cepgen {
       return p;
     }
 
-    ParametersDescription ALLM::Parameters::parametersDescription() {
+    ParametersDescription ALLM::Parameters::description() {
       auto desc = ParametersDescription();
-      desc.add<ParametersDescription>("pomeronTrajectory", Trajectory::parametersDescription());
-      desc.add<ParametersDescription>("reggeonTrajectory", Trajectory::parametersDescription());
+      desc.add<ParametersDescription>("pomeronTrajectory", Trajectory::description());
+      desc.add<ParametersDescription>("reggeonTrajectory", Trajectory::description());
       desc.add<double>("m02", 0.);
       desc.add<double>("mp2", 0.);
       desc.add<double>("mr2", 0.);
@@ -319,7 +319,7 @@ namespace cepgen {
       assert(c.size() == 3);
     }
 
-    ParametersDescription ALLM::Parameters::Trajectory::parametersDescription() {
+    ParametersDescription ALLM::Parameters::Trajectory::description() {
       auto desc = ParametersDescription();
       desc.add<std::vector<double> >("a", {0., 0., 0.});
       desc.add<std::vector<double> >("b", {0., 0., 0.});

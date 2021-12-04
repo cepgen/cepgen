@@ -28,7 +28,7 @@ namespace cepgen {
     public:
       explicit ArringtonEtAl(const ParametersList&);
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
     private:
       void compute(double q2) override;
@@ -86,8 +86,8 @@ namespace cepgen {
       GM = MU * num_m / den_m;
     }
 
-    ParametersDescription ArringtonEtAl::parametersDescription() {
-      auto desc = Parameterisation::parametersDescription();
+    ParametersDescription ArringtonEtAl::description() {
+      auto desc = Parameterisation::description();
       desc.setDescription("Arrington et al.");
       desc.add<int>("mode", 0).setDescription(
           "Parameterisation mode "

@@ -32,7 +32,7 @@ namespace cepgen {
       explicit BlockDurandHa(const ParametersList&);
       BlockDurandHa& eval(double xbj, double q2) override;
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
     private:
       std::vector<double> a_, b_, c_;
@@ -79,8 +79,8 @@ namespace cepgen {
       return *this;
     }
 
-    ParametersDescription BlockDurandHa::parametersDescription() {
-      auto desc = Parameterisation::parametersDescription();
+    ParametersDescription BlockDurandHa::description() {
+      auto desc = Parameterisation::description();
       desc.add<std::vector<double> >("a", {8.205e-4, -5.148e-2, -4.725e-3});
       desc.add<std::vector<double> >("b", {2.217e-3, 1.244e-2, 5.958e-4});
       desc.add<std::vector<double> >("c", {0.255e0, 1.475e-1});

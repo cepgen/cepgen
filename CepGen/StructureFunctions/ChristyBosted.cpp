@@ -34,7 +34,7 @@ namespace cepgen {
     public:
       explicit ChristyBosted(const ParametersList&);
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       ChristyBosted& eval(double xbj, double q2) override;
 
@@ -378,8 +378,8 @@ namespace cepgen {
       return *this;
     }
 
-    ParametersDescription ChristyBosted::parametersDescription() {
-      auto desc = Parameterisation::parametersDescription();
+    ParametersDescription ChristyBosted::description() {
+      auto desc = Parameterisation::description();
       desc.setDescription("Christy-Bosted F2/FL parameterisation of low-mass resonances");
       desc.add<std::string>("model", "standard").setDescription("Parameterisation set (only 'standard' handled)");
       CG_WARNING("") << desc.parameters();

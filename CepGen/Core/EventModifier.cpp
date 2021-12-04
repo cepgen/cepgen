@@ -39,7 +39,7 @@ namespace cepgen {
     CG_DEBUG("EventModifier:configure") << "Feeding \"" << name_ << "\" event modifier algorithm with:" << os.str();
   }
 
-  ParametersDescription EventModifier::parametersDescription() {
+  ParametersDescription EventModifier::description() {
     auto desc = ParametersDescription();
     desc.add<int>("seed", -1).setDescription("Random number generator seed");
     desc.add<int>("maxTrials", 1)

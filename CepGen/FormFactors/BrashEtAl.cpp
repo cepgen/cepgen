@@ -29,7 +29,7 @@ namespace cepgen {
     public:
       using Parameterisation::Parameterisation;
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
     private:
       static const float MAX_Q2;
@@ -52,8 +52,8 @@ namespace cepgen {
 
     const float BrashEtAl::MAX_Q2 = 7.7;
 
-    ParametersDescription BrashEtAl::parametersDescription() {
-      auto desc = Parameterisation::parametersDescription();
+    ParametersDescription BrashEtAl::description() {
+      auto desc = Parameterisation::description();
       desc.setDescription("Brash et al.");
       return desc;
     }

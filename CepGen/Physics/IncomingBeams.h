@@ -53,7 +53,7 @@ namespace cepgen {
     IncomingBeams() = default;
     explicit IncomingBeams(const ParametersList&);
 
-    static ParametersDescription parametersDescription();
+    static ParametersDescription description();
     /// List containing all parameters handled
     ParametersList parameters() const;
 

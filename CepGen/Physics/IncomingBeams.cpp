@@ -246,7 +246,7 @@ namespace cepgen {
     form_factors_->setStructureFunctions(str_fun_.get());
   }
 
-  ParametersDescription IncomingBeams::parametersDescription() {
+  ParametersDescription IncomingBeams::description() {
     auto desc = ParametersDescription();
     desc.add<int>("beam1id", 2212).setDescription("PDG id of the positive-z beam particle");
     desc.add<int>("beam1A", 1).setDescription("Atomic weight of the positive-z ion beam");
@@ -264,7 +264,7 @@ namespace cepgen {
     desc.add<std::string>("formFactors", "").setDescription("Beam form factors modelling");
     desc.add<int>("mode", 0).setDescription(
         "Process kinematics mode (1 = elastic, (2-3) = single-dissociative, 4 = double-dissociative)");
-    auto sf_desc = strfun::Parameterisation::parametersDescription();
+    auto sf_desc = strfun::Parameterisation::description();
     desc.add<ParametersDescription>("structureFunctions", sf_desc)
         .setDescription("Beam inelastic structure functions modelling");
     desc.add<int>("ktFluxes", 0).setDescription("kT-factorised fluxes modelling");

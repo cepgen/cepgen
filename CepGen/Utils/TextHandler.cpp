@@ -40,7 +40,7 @@ namespace cepgen {
       explicit TextHandler(const ParametersList&);
       ~TextHandler();
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override;
       void setCrossSection(double cross_section, double) override { cross_section_ = cross_section; }
@@ -200,8 +200,8 @@ namespace cepgen {
       ++num_evts_;
     }
 
-    ParametersDescription TextHandler::parametersDescription() {
-      auto desc = ExportModule::parametersDescription();
+    ParametersDescription TextHandler::description() {
+      auto desc = ExportModule::description();
       desc.setDescription("Text-based histogramming tool");
       desc.add<std::string>("filename", "output.txt").setDescription("Output filename for variables dump");
       desc.add<std::string>("histFilename", "output.hists.txt").setDescription("Output filename for histogram dump");

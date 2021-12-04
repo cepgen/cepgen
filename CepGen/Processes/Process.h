@@ -46,7 +46,7 @@ namespace cepgen {
       Process(const Process&);
       virtual ~Process() = default;
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       /// Reset process prior to the phase space and variables definition
       void clear();

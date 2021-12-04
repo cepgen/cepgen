@@ -27,8 +27,8 @@ namespace cepgen {
     public:
       using Parameterisation::Parameterisation;
 
-      static ParametersDescription parametersDescription() {
-        auto desc = Parameterisation::parametersDescription();
+      static ParametersDescription description() {
+        auto desc = Parameterisation::description();
         desc.setDescription("Standard dipole");
         return desc;
       }

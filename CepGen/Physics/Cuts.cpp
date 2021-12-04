@@ -49,7 +49,7 @@ namespace cepgen {
     return out;
   }
 
-  ParametersDescription Cuts::parametersDescription() {
+  ParametersDescription Cuts::description() {
     auto desc = ParametersDescription();
     return desc;
   }

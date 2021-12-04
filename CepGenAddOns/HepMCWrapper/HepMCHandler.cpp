@@ -51,7 +51,7 @@ namespace cepgen {
       explicit HepMCHandler(const ParametersList&);
       ~HepMCHandler();
 
-      static ParametersDescription parametersDescription();
+      static ParametersDescription description();
 
       void initialise(const Parameters& /*params*/) override {}
       /// Writer operator
@@ -118,8 +118,8 @@ namespace cepgen {
     }
 
     template <typename T>
-    ParametersDescription HepMCHandler<T>::parametersDescription() {
-      auto desc = ExportModule::parametersDescription();
+    ParametersDescription HepMCHandler<T>::description() {
+      auto desc = ExportModule::description();
       desc.setDescription("HepMC 2/3 ASCII file output module");
       desc.add<std::string>("filename", "output.hepmc").setDescription("Output filename");
       return desc;

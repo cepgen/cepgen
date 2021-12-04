@@ -71,8 +71,8 @@ namespace cepgen {
       return *this;
     }
 
-    ParametersDescription SuriYennie::parametersDescription() {
-      auto desc = Parameterisation::parametersDescription();
+    ParametersDescription SuriYennie::description() {
+      auto desc = Parameterisation::description();
       desc.setDescription("Suri-Yennie FE/FM");
       desc.add<std::string>("model", "standard")
           .setDescription("Parameterisation model ('standard', 'alternative' handled, or custom model)");

@@ -30,7 +30,7 @@ namespace cepgen {
   public:
     explicit IntegratorMISER(const ParametersList&);
 
-    static ParametersDescription parametersDescription();
+    static ParametersDescription description();
 
     void integrate(double&, double&) override;
 
@@ -90,8 +90,8 @@ namespace cepgen {
     err_result_ = abserr;
   }
 
-  ParametersDescription IntegratorMISER::parametersDescription() {
-    auto desc = IntegratorGSL::parametersDescription();
+  ParametersDescription IntegratorMISER::description() {
+    auto desc = IntegratorGSL::description();
     desc.setDescription("MISER adaptive importance sampling integrator");
     desc.add<int>("numFunctionCalls", 50000)
         .setDescription("Number of function calls per phase space point evaluation");
