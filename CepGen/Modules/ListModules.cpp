@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iomanip>
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
@@ -33,111 +35,42 @@ namespace cepgen {
   void dumpModules() {
     CG_LOG.log([](auto& info) {
       const std::string sep_mid(80, '-');
-      info << "List of modules registered in the runtime database:\n";
-      {
-        info << sep_mid << "\n" << utils::boldify("Steering cards parsers");
-        if (card::CardsHandlerFactory::get().empty())
+      info << "List of modules registered in the runtime database:";
+      auto list_modules = [&info, &sep_mid](const auto& fact, const std::string& name) {
+        info << "\n" << sep_mid << "\n" << utils::boldify(name);
+        if (fact.empty())
           info << "\n>>> " << utils::colourise("none found", utils::Colour::red) << " <<<";
-        for (const auto& mod : card::CardsHandlerFactory::get().modules())
-          info << "\n> " << utils::colourise(mod, utils::Colour::green, utils::Modifier::bold)
-               << " extension: " << card::CardsHandlerFactory::get().describe(mod)
-               << (card::CardsHandlerFactory::get().describeParameters(mod).empty() ? "" : " (*)");
-      }
-      {
-        info << "\n" << sep_mid << "\n" << utils::boldify("Integration algorithms");
-        if (IntegratorFactory::get().empty())
-          info << "\n>>> " << utils::colourise("none found", utils::Colour::red) << " <<<";
-        for (const auto& mod : IntegratorFactory::get().modules())
+        for (const auto& mod : fact.modules())
           info << "\n> " << utils::colourise(mod, utils::Colour::green, utils::Modifier::bold) << ": "
-               << IntegratorFactory::get().describe(mod)
-               << (IntegratorFactory::get().describeParameters(mod).empty() ? "" : " (*)");
-      }
-      {
-        info << "\n" << sep_mid << "\n" << utils::boldify("Physics processes");
-        if (proc::ProcessFactory::get().empty())
+               << fact.describe(mod) << (fact.describeParameters(mod).empty() ? " (*)" : "");
+      };
+      auto list_int_modules = [&info, &sep_mid](const auto& fact,
+                                                const std::string& name,
+                                                std::function<std::string(int)> translator = nullptr) {
+        info << "\n" << sep_mid << "\n" << utils::boldify(name);
+        if (!translator)
+          translator = [](int val) -> std::string { return std::to_string(val); };
+        if (fact.empty())
           info << "\n>>> " << utils::colourise("none found", utils::Colour::red) << " <<<";
-        for (const auto& mod : proc::ProcessFactory::get().modules())
-          info << "\n> " << utils::colourise(mod, utils::Colour::green, utils::Modifier::bold) << ": "
-               << proc::ProcessFactory::get().describe(mod)
-               << (proc::ProcessFactory::get().describeParameters(mod).empty() ? "" : " (*)");
-      }
-      {
-        info << "\n" << sep_mid << "\n" << utils::boldify("Beam form factors modellings");
-        if (formfac::FormFactorsFactory::get().empty())
-          info << "\n>>> " << utils::colourise("none found", utils::Colour::red) << " <<<";
-        for (const auto& mod : formfac::FormFactorsFactory::get().modules()) {
-          info << "\n> " << utils::colourise(mod, utils::Colour::green, utils::Modifier::bold) << ": "
-               << formfac::FormFactorsFactory::get().describe(mod)
-               << (formfac::FormFactorsFactory::get().describeParameters(mod).empty() ? "" : " (*)");
-        }
-      }
-      {
-        info << "\n" << sep_mid << "\n" << utils::boldify("Structure functions modellings");
-        if (strfun::StructureFunctionsFactory::get().empty())
-          info << "\n>>> " << utils::colourise("none found", utils::Colour::red) << " <<<";
-        for (const auto& mod : strfun::StructureFunctionsFactory::get().modules()) {
-          std::ostringstream os;
-          os << (strfun::Type)mod;
-          info << "\n> " << utils::colourise(std::to_string(mod), utils::Colour::green, utils::Modifier::bold) << "|"
-               << utils::colourise(os.str(), utils::Colour::green, utils::Modifier::bold) << ": "
-               << strfun::StructureFunctionsFactory::get().describe(mod)
-               << (strfun::StructureFunctionsFactory::get().describeParameters(mod).empty() ? "" : " (*)");
-        }
-      }
-      {
-        info << "\n" << sep_mid << "\n" << utils::boldify("Cross section ratios modellings");
-        if (sigrat::SigmaRatiosFactory::get().empty())
-          info << "\n>>> " << utils::colourise("none found", utils::Colour::red) << " <<<";
-        for (const auto& mod : sigrat::SigmaRatiosFactory::get().modules())
-          info << "\n> " << utils::colourise(std::to_string(mod), utils::Colour::green, utils::Modifier::bold) << ": "
-               << sigrat::SigmaRatiosFactory::get().describe(mod)
-               << (sigrat::SigmaRatiosFactory::get().describeParameters(mod).empty() ? "" : " (*)");
-      }
-      {
-        info << "\n" << sep_mid << "\n" << utils::boldify("Event modification modules");
-        if (EventModifierFactory::get().empty())
-          info << "\n>>> " << utils::colourise("none found", utils::Colour::red) << " <<<";
-        for (const auto& mod : EventModifierFactory::get().modules())
-          info << "\n> " << utils::colourise(mod, utils::Colour::green, utils::Modifier::bold) << ": "
-               << EventModifierFactory::get().describe(mod)
-               << (EventModifierFactory::get().describeParameters(mod).empty() ? "" : " (*)");
-      }
-      {
-        info << "\n" << sep_mid << "\n" << utils::boldify("Export modules");
-        if (io::ExportModuleFactory::get().empty())
-          info << "\n>>> " << utils::colourise("none found", utils::Colour::red) << " <<<";
-        for (const auto& mod : io::ExportModuleFactory::get().modules())
-          info << "\n> " << utils::colourise(mod, utils::Colour::green, utils::Modifier::bold) << ": "
-               << io::ExportModuleFactory::get().describe(mod)
-               << (io::ExportModuleFactory::get().describeParameters(mod).empty() ? "" : " (*)");
-      }
-      {
-        info << "\n" << sep_mid << "\n" << utils::boldify("Functional evaluators");
-        if (utils::FunctionalFactory::get().empty())
-          info << "\n>>> " << utils::colourise("none found", utils::Colour::red) << " <<<";
-        for (const auto& mod : utils::FunctionalFactory::get().modules())
-          info << "\n> " << utils::colourise(mod, utils::Colour::green, utils::Modifier::bold) << ": "
-               << utils::FunctionalFactory::get().describe(mod)
-               << (utils::FunctionalFactory::get().describeParameters(mod).empty() ? "" : " (*)");
-      }
-      {
-        info << "\n" << sep_mid << "\n" << utils::boldify("alpha(EM) evolution algorithms");
-        if (AlphaEMFactory::get().empty())
-          info << "\n>>> " << utils::colourise("none found", utils::Colour::red) << " <<<";
-        for (const auto& mod : AlphaEMFactory::get().modules())
-          info << "\n> " << utils::colourise(mod, utils::Colour::green, utils::Modifier::bold) << ": "
-               << AlphaEMFactory::get().describe(mod)
-               << (AlphaEMFactory::get().describeParameters(mod).empty() ? "" : " (*)");
-      }
-      {
-        info << "\n" << sep_mid << "\n" << utils::boldify("alpha(s) evolution algorithms");
-        if (AlphaSFactory::get().empty())
-          info << "\n>>> " << utils::colourise("none found", utils::Colour::red) << " <<<";
-        for (const auto& mod : AlphaSFactory::get().modules())
-          info << "\n> " << utils::colourise(mod, utils::Colour::green, utils::Modifier::bold) << ": "
-               << AlphaSFactory::get().describe(mod)
-               << (AlphaSFactory::get().describeParameters(mod).empty() ? "" : " (*)");
-      }
+        for (const auto& mod : fact.modules())
+          info << "\n> " << utils::colourise(translator(mod), utils::Colour::green, utils::Modifier::bold) << ": "
+               << fact.describe(mod) << (fact.describeParameters(mod).empty() ? " (*)" : "");
+      };
+      list_modules(card::CardsHandlerFactory::get(), "Steering cards parsers");
+      list_modules(IntegratorFactory::get(), "Integration algorithms");
+      list_modules(proc::ProcessFactory::get(), "Physics processes");
+      list_modules(formfac::FormFactorsFactory::get(), "Beam form factors modellings");
+      list_int_modules(strfun::StructureFunctionsFactory::get(), "Structure functions modellings", [](int mod) {
+        std::ostringstream os;
+        os << std::setw(3) << mod << "|" << (strfun::Type)mod;
+        return os.str();
+      });
+      list_int_modules(sigrat::SigmaRatiosFactory::get(), "Cross section ratios modellings");
+      list_modules(EventModifierFactory::get(), "Event modification modules");
+      list_modules(io::ExportModuleFactory::get(), "Export modules");
+      list_modules(utils::FunctionalFactory::get(), "Functional evaluators");
+      list_modules(AlphaEMFactory::get(), "alpha(EM) evolution algorithms");
+      list_modules(AlphaSFactory::get(), "alpha(s) evolution algorithms");
     });
   }
 }  // namespace cepgen
