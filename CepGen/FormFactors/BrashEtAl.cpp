@@ -29,7 +29,6 @@ namespace cepgen {
     public:
       using Parameterisation::Parameterisation;
 
-      static std::string description() { return "Brash et al."; }
       static ParametersDescription parametersDescription();
 
     private:

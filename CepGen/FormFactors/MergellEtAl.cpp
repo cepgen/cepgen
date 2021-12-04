@@ -28,7 +28,6 @@ namespace cepgen {
     public:
       explicit MergellEtAl(const ParametersList&);
 
-      static std::string description() { return "Mergell et al."; }
       static ParametersDescription parametersDescription();
 
     private:

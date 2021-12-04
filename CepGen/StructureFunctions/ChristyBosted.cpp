@@ -34,7 +34,6 @@ namespace cepgen {
     public:
       explicit ChristyBosted(const ParametersList&);
 
-      static std::string description() { return "Christy-Bosted F2/FL parameterisation of low-mass resonances"; }
       static ParametersDescription parametersDescription();
 
       ChristyBosted& eval(double xbj, double q2) override;

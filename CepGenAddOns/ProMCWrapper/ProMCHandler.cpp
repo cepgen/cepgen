@@ -45,7 +45,6 @@ namespace cepgen {
       explicit ProMCHandler(const ParametersList&);
       ~ProMCHandler();
 
-      static std::string description() { return "ProMC file output module"; }
       static ParametersDescription parametersDescription();
 
       void initialise(const Parameters&) override;

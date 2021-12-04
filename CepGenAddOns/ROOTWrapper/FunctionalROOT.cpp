@@ -28,7 +28,6 @@ namespace cepgen {
     public:
       explicit FunctionalROOT(const ParametersList&);
 
-      static std::string description() { return "Plain old TFormula evaluator from ROOT"; }
       static ParametersDescription parametersDescription();
 
       double eval(const std::vector<double>&) const;

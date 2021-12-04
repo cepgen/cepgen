@@ -40,7 +40,6 @@ namespace cepgen {
       explicit ROOTTreeHandler(const ParametersList&);
       ~ROOTTreeHandler();
 
-      static std::string description() { return "ROOT TTree storage module"; }
       static ParametersDescription parametersDescription();
 
       void initialise(const Parameters&) override;

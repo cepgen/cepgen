@@ -39,7 +39,6 @@ namespace cepgen {
       explicit LHEFPythiaHandler(const ParametersList&);
       ~LHEFPythiaHandler();
 
-      static std::string description() { return "Pythia 8-based LHEF output module"; }
       static ParametersDescription parametersDescription();
 
       void initialise(const Parameters&) override;

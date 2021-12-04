@@ -35,7 +35,6 @@ namespace cepgen {
       explicit EventDump(const ParametersList&);
       ~EventDump();
 
-      static std::string description() { return "Simple text-based event dumper"; }
       static ParametersDescription parametersDescription();
 
       void initialise(const Parameters&) override;

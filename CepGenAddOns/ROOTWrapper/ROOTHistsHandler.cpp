@@ -45,7 +45,6 @@ namespace cepgen {
       explicit ROOTHistsHandler(const ParametersList&);
       ~ROOTHistsHandler();
 
-      static std::string description() { return "ROOT histograming/profiling module"; }
       static ParametersDescription parametersDescription();
 
       void initialise(const Parameters&) override {}

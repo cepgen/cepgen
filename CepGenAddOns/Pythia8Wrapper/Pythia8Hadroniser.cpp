@@ -44,9 +44,6 @@ namespace cepgen {
       explicit Pythia8Hadroniser(const ParametersList&);
       ~Pythia8Hadroniser();
 
-      static std::string description() {
-        return "Interface to the Pythia 8 string hadronisation/fragmentation algorithm";
-      }
       static ParametersDescription parametersDescription();
 
       void setRuntimeParameters(const Parameters&) override;

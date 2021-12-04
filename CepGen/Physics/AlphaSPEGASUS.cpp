@@ -47,9 +47,9 @@ namespace cepgen {
                                     << ".";
     }
 
-    static std::string description() { return "PEGASUS alphaS evolution algorithm"; }
     static ParametersDescription parametersDescription() {
       auto desc = ParametersDescription();
+      desc.setDescription("PEGASUS alphaS evolution algorithm");
       desc.add<int>("iord", 2).setDescription("Evolution order");
       desc.add<double>("fr2", 1.);
       desc.add<double>("mur", 1.);

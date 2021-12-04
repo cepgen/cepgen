@@ -40,7 +40,6 @@ namespace cepgen {
       explicit TextHandler(const ParametersList&);
       ~TextHandler();
 
-      static std::string description() { return "Text-based histogramming tool"; }
       static ParametersDescription parametersDescription();
 
       void initialise(const Parameters&) override;

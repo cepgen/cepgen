@@ -91,7 +91,7 @@ namespace cepgen {
 
   template <typename T, typename I>
   const std::string& ModuleFactory<T, I>::describe(const I& name) const {
-    return descr_map_.at(name);
+    return describeParameters(name).description();
   }
 
   template <typename T, typename I>

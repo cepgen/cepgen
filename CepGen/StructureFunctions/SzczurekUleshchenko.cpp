@@ -34,7 +34,6 @@ namespace cepgen {
       explicit SzczurekUleshchenko(const ParametersList&);
       SzczurekUleshchenko& eval(double xbj, double q2) override;
 
-      static std::string description() { return "Szczurek-Uleshchenko modelling of F2 based on GRV parton content"; }
       static ParametersDescription parametersDescription();
 
     private:

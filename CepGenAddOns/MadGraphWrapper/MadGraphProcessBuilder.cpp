@@ -32,7 +32,6 @@ public:
   MadGraphProcessBuilder(const ParametersList&);
   proc::ProcessPtr clone() const override { return proc::ProcessPtr(new MadGraphProcessBuilder(*this)); }
 
-  static std::string description() { return "MadGraph_aMC process builder"; }
   static ParametersDescription parametersDescription();
 
   void prepareProcessKinematics() override;

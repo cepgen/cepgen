@@ -61,7 +61,7 @@ namespace cepgen {
       double computeWeight() override;
       void prepareKinematics() override;
       void fillKinematics(bool) override;
-      static std::string description() { return "ɣɣ → l⁺l¯ (LPAIR)"; }
+
       static ParametersDescription parametersDescription();
 
     private:

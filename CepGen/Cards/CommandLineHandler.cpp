@@ -42,7 +42,6 @@ namespace cepgen {
       /// Cast command line arguments into a configuration word
       explicit CommandLineHandler(const ParametersList&);
 
-      static std::string description() { return "Command line configuration parser"; }
       static ParametersDescription parametersDescription();
 
       Parameters* parse(const std::string&, Parameters*) override;

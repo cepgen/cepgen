@@ -28,7 +28,6 @@ namespace cepgen {
   public:
     explicit IntegratorPlain(const ParametersList& params);
 
-    static std::string description() { return "Plain (trial/error) integrator"; }
     static ParametersDescription parametersDescription();
 
     void integrate(double& result, double& abserr) override;

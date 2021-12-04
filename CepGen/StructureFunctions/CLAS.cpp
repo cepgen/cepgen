@@ -36,9 +36,6 @@ namespace cepgen {
     public:
       explicit CLAS(const ParametersList&);
 
-      static std::string description() {
-        return "CLAS parameterisation for nucleon data at Q2 > 0.5 GeV2 / xBj > 0.15";
-      }
       static ParametersDescription parametersDescription();
 
       /// List of steering parameters for a physics case

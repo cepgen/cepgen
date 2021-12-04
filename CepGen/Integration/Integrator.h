@@ -31,7 +31,6 @@ namespace cepgen {
     /// Integrator algorithm constructor
     Integrator(const ParametersList& params);
 
-    static std::string description() { return "Unnamed integrator"; }
     static ParametersDescription parametersDescription();
 
     /// Specify the function to be integrated

@@ -40,9 +40,9 @@ namespace cepgen {
       LHAPDF::initPDFSet(params.get<std::string>("pdfSet"), LHAPDF::LHGRID, params.get<int>("pdfMember"));
     }
 #endif
-    static std::string description() { return "Perturbative PDF-oriented evolution algorithm"; }
     static ParametersDescription parametersDescription() {
       auto desc = ParametersDescription();
+      desc.setDescription("Perturbative PDF-oriented evolution algorithm");
       desc.add<std::string>("pdfSet", "cteq6");
       desc.add<int>("pdfMember", 0);
       return desc;

@@ -27,7 +27,6 @@ namespace cepgen {
     public:
       using Parameterisation::Parameterisation;
 
-      static std::string description() { return "Standard dipole"; }
       static ParametersDescription parametersDescription() {
         auto desc = Parameterisation::parametersDescription();
         desc.setDescription("Standard dipole");

@@ -30,7 +30,6 @@ namespace cepgen {
     public:
       explicit Shamov(const ParametersList&);
 
-      static std::string description() { return "Shamov composite soft structure functions"; }
       static ParametersDescription parametersDescription();
 
       Shamov& eval(double xbj, double q2) override;

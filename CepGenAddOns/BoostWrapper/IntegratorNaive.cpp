@@ -30,7 +30,6 @@ namespace cepgen {
   public:
     explicit IntegratorNaive(const ParametersList&);
 
-    static std::string description() { return "\"Naive\" Boost integrator"; }
     static ParametersDescription parametersDescription();
 
     void integrate(double&, double&) override;

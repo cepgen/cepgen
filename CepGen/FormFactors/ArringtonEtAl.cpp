@@ -28,7 +28,6 @@ namespace cepgen {
     public:
       explicit ArringtonEtAl(const ParametersList&);
 
-      static std::string description() { return "Arrington et al."; }
       static ParametersDescription parametersDescription();
 
     private:

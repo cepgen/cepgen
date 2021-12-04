@@ -42,7 +42,6 @@ namespace cepgen {
       explicit DelphesHandler(const ParametersList&);
       ~DelphesHandler();
 
-      static std::string description() { return "Delphes interfacing module"; }
       static ParametersDescription parametersDescription();
 
       void initialise(const Parameters&) override;

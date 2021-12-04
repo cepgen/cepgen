@@ -43,9 +43,8 @@ namespace cepgen {
       os << prep << "******* Sample generated with CepGen " << version::tag << " *******\n"
          << prep << " Process: " << params.processName() << " (" << params.kinematics().incomingBeams().mode() << ")\n";
       if (params.kinematics().incomingBeams().mode() != mode::Kinematics::ElasticElastic)
-        os << prep
-           << " Structure functions: " << params.kinematics().incomingBeams().structureFunctions()->description()
-           << "\n";
+        os << prep << " Structure functions: "
+           << params.kinematics().incomingBeams().structureFunctions()->parametersDescription().description() << "\n";
       if (!params.eventModifiersSequence().empty()) {
         os << prep << " " << utils::s("Event modifier", params.eventModifiersSequence().size()) << ": ";
         std::string sep;

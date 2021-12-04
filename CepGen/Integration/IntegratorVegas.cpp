@@ -32,7 +32,6 @@ namespace cepgen {
   public:
     explicit IntegratorVegas(const ParametersList&);
 
-    static std::string description() { return "Vegas stratified sampling integrator"; }
     static ParametersDescription parametersDescription();
 
     void integrate(double&, double&) override;

@@ -37,7 +37,6 @@ namespace cepgen {
       explicit PPtoWW(const ParametersList&);
       ProcessPtr clone() const override { return ProcessPtr(new PPtoWW(*this)); }
       enum class Polarisation { full = 0, LL = 1, LT = 2, TL = 3, TT = 4 };
-      static std::string description() { return "ɣɣ → W⁺W¯ (kt-factor.)"; }
       static ParametersDescription parametersDescription();
 
     private:
@@ -158,7 +157,7 @@ namespace cepgen {
 
     ParametersDescription PPtoWW::parametersDescription() {
       auto params = Process2to4::parametersDescription();
-      params.setDescription("kT-factorised gamma gamma -> W+ W- process");
+      params.setDescription("ɣɣ → W⁺W¯ (kt-factor.)");
       params.add<int>("method", 1)
           .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell by Nachtmann et al.)");
       ParametersDescription pol_states;

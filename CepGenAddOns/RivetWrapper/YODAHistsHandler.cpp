@@ -48,7 +48,6 @@ namespace cepgen {
       explicit YODAHistsHandler(const ParametersList&);
       ~YODAHistsHandler();
 
-      static std::string description() { return "YODA histograms/profiles file output module"; }
       static ParametersDescription parametersDescription();
 
       void initialise(const Parameters&) override {}

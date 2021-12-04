@@ -39,7 +39,6 @@ namespace cepgen {
       /// Copy constructor
       Parameterisation(const Parameterisation&);
 
-      static std::string description() { return "Unnamed form factors parameterisation"; }
       static ParametersDescription parametersDescription();
 
       /// Dumping operator for standard output streams

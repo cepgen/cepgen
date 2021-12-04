@@ -68,7 +68,6 @@ namespace cepgen {
       Parameterisation& operator=(const Parameterisation& sf);
 
       /// Generic description for the structure functions
-      static std::string description() { return "Unnamed structure functions"; }
       static ParametersDescription parametersDescription();
 
       /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value

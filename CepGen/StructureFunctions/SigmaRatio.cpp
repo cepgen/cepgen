@@ -47,7 +47,6 @@ namespace cepgen {
     public:
       explicit E143(const ParametersList& params = ParametersList());
 
-      static std::string description() { return "E143 experimental R measurement"; }
       static ParametersDescription parametersDescription();
 
       double operator()(double xbj, double q2, double& err) const override;
@@ -107,7 +106,6 @@ namespace cepgen {
     public:
       explicit R1990(const ParametersList& params = ParametersList());
 
-      static std::string description() { return "SLAC experimental R measurement"; }
       static ParametersDescription parametersDescription();
 
       double operator()(double xbj, double q2, double& err) const override;
@@ -142,7 +140,6 @@ namespace cepgen {
     public:
       explicit CLAS(const ParametersList& params = ParametersList());
 
-      static std::string description() { return "CLAS experimental R measurement"; }
       static ParametersDescription parametersDescription();
 
       double operator()(double xbj, double q2, double& err) const override;
@@ -186,7 +183,6 @@ namespace cepgen {
     public:
       explicit SibirtsevBlunden(const ParametersList& params = ParametersList());
 
-      static std::string description() { return "Sibirtsev-Blunden theoretical R parameterisation"; }
       static ParametersDescription parametersDescription();
 
       double operator()(double xbj, double q2, double& err) const override;

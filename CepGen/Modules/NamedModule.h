@@ -32,8 +32,6 @@ namespace cepgen {
 
     /// Module unique name
     const T& name() const { return name_; }
-    /// Module description
-    static inline std::string description() { return "No description"; }
     /// Description of all module parameters
     static inline ParametersDescription parametersDescription() {
       auto desc = ParametersDescription();

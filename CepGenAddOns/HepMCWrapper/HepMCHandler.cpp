@@ -51,7 +51,6 @@ namespace cepgen {
       explicit HepMCHandler(const ParametersList&);
       ~HepMCHandler();
 
-      static std::string description() { return "HepMC 2/3 ASCII file output module"; }
       static ParametersDescription parametersDescription();
 
       void initialise(const Parameters& /*params*/) override {}

@@ -76,7 +76,6 @@ namespace cepgen {
         throw std::invalid_argument(oss.str());
       }
       map_[name] = &build<U>;
-      descr_map_[name] = U::description();
       params_map_[name] = U::parametersDescription();
       if (!def_params.empty())
         params_map_[name].parameters() += def_params;
@@ -117,8 +116,6 @@ namespace cepgen {
     const std::string description_;
     /// Database of modules handled by this instance
     std::unordered_map<I, Builder> map_;
-    /// Database of default-constructed objects
-    std::unordered_map<I, std::string> descr_map_;
     /// Database of default parameters associated to modules
     std::unordered_map<I, ParametersDescription> params_map_;
     /// An empty parameters description

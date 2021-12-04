@@ -41,15 +41,19 @@
 #define PROCESS_F77_NAME(name) F77_##name
 #define STRINGIFY(name) #name
 /// Add the Fortran process definition to the list of handled processes
-#define REGISTER_FORTRAN_PROCESS(name, descr, f77_func)                   \
-  struct PROCESS_F77_NAME(name) : public cepgen::proc::FortranKTProcess { \
-    PROCESS_F77_NAME(name)                                                \
-    (const cepgen::ParametersList& params = cepgen::ParametersList())     \
-        : cepgen::proc::FortranKTProcess(params, f77_func##_) {           \
-      cepgen::proc::FortranKTProcess::kProcParameters = params;           \
-    }                                                                     \
-    static std::string description() { return descr; }                    \
-  };                                                                      \
+#define REGISTER_FORTRAN_PROCESS(name, descr, f77_func)                    \
+  struct PROCESS_F77_NAME(name) : public cepgen::proc::FortranKTProcess {  \
+    PROCESS_F77_NAME(name)                                                 \
+    (const cepgen::ParametersList& params = cepgen::ParametersList())      \
+        : cepgen::proc::FortranKTProcess(params, f77_func##_) {            \
+      cepgen::proc::FortranKTProcess::kProcParameters = params;            \
+    }                                                                      \
+    static cepgen::ParametersDescription parametersDescription() {         \
+      auto desc = cepgen::proc::FortranKTProcess::parametersDescription(); \
+      desc.setDescription(descr);                                          \
+      return desc;                                                         \
+    }                                                                      \
+  };                                                                       \
   REGISTER_PROCESS(STRINGIFY(name), F77_##name)
 
 namespace cepgen {
