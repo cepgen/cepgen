@@ -131,54 +131,16 @@ namespace cepgen {
   bool ParametersList::empty() const { return keys(false).empty(); }
 
   std::ostream& operator<<(std::ostream& os, const ParametersList& params) {
+    if (params.empty())
+      return os << "{}";
     std::string sep;
-    const auto key_name = [&](const auto& key) -> std::string {
-      return key == ParametersList::MODULE_NAME ? "name=" : key + "=";
-    };
-    const auto mod_or_param = [&](const auto& plist) {
-      const auto& pkeys = plist.keys();
-      auto name = std::find(pkeys.begin(), pkeys.end(), ParametersList::MODULE_NAME);
-      std::ostringstream os;
-      if (name != pkeys.end()) {
-        auto plist_copy = plist;
-        plist_copy.erase(ParametersList::MODULE_NAME);
-        os << "Module(" << plist.getString(ParametersList::MODULE_NAME) << ", " << plist_copy << ")";
-      } else
-        os << "Parameters(" << plist << ")";
-      return os.str();
-    };
-    for (const auto& kv : params.int_values_)
-      os << sep << key_name(kv.first) << "int(" << kv.second << ")", sep = ", ";
-    for (const auto& kv : params.dbl_values_)
-      os << sep << key_name(kv.first) << "float(" << kv.second << ")", sep = ", ";
-    for (const auto& kv : params.str_values_)
-      os << sep << key_name(kv.first) << "str(" << kv.second << ")", sep = ", ";
-    for (const auto& kv : params.param_values_)
-      os << sep << key_name(kv.first) << mod_or_param(kv.second), sep = ", ";
-    for (const auto& kv : params.lim_values_)
-      os << sep << key_name(kv.first) << "limits(" << kv.second << ")", sep = ", ";
-    for (const auto& kv : params.vec_int_values_) {
-      os << sep << key_name(kv.first) << "vint(", sep = ", ";
-      std::string sep1;
-      for (const auto& val : kv.second)
-        os << sep1 << val, sep1 = ", ";
-      os << ")";
-    }
-    for (const auto& kv : params.vec_dbl_values_) {
-      if (params.has<Limits>(kv.first))
-        continue;
-      os << sep << key_name(kv.first) << "vfloat(", sep = ", ";
-      std::string sep1;
-      for (const auto& val : kv.second)
-        os << sep1 << val, sep1 = ", ";
-      os << ")";
-    }
-    for (const auto& kv : params.vec_str_values_) {
-      os << sep << key_name(kv.first) << "vstr(", sep = ", ";
-      std::string sep1;
-      for (const auto& val : kv.second)
-        os << sep1 << val, sep1 = ", ";
-      os << ")";
+    for (const auto& key : params.keys()) {
+      os << sep;
+      if (key == ParametersList::MODULE_NAME)
+        os << params.getString(key, false);
+      else
+        os << key << "=" << params.getString(key);
+      sep = ", ";
     }
     return os;
   }
@@ -203,42 +165,53 @@ namespace cepgen {
     return out;
   }
 
-  std::string ParametersList::getString(const std::string& key) const {
+  std::string ParametersList::getString(const std::string& key, bool wrap) const {
     std::ostringstream os;
+    auto wrap_val = [&wrap](const auto& val, const std::string& type, bool escape = false) -> std::string {
+      std::ostringstream os;
+      if (wrap)
+        os << type << "(";
+      os << (escape ? "\"" : "") << val << (escape ? "\"" : "");
+      if (wrap)
+        os << ")";
+      return os.str();
+    };
+    auto wrap_coll = [&wrap, &wrap_val](const auto& coll, const std::string& type, bool escape = false) -> std::string {
+      std::ostringstream os;
+      std::string sep;
+      for (const auto& val : coll)
+        os << sep << (escape ? "\"" : "") << val << (escape ? "\"" : ""), sep = ", ";
+      return wrap_val(os.str(), type);
+    };
     if (has<ParametersList>(key)) {
       auto plist = get<ParametersList>(key);
-      const auto& plist_name = plist.getString(MODULE_NAME);
-      if (plist_name.empty())
-        os << "Parameters(" << plist << ")";
+      if (!wrap)
+        os << plist;
       else {
-        plist.erase(MODULE_NAME);
-        os << "Module(" << plist_name << ", " << plist << ")";
+        const auto& plist_name = plist.getString(MODULE_NAME, false);
+        if (plist_name.empty())
+          os << "Parameters(" << plist << ")";
+        else {
+          plist.erase(MODULE_NAME);
+          os << "Module(" << plist_name << ", " << plist << ")";
+        }
       }
     } else if (has<int>(key))
-      os << get<int>(key);
+      os << wrap_val(get<int>(key), "int");
     else if (has<double>(key))
-      os << get<double>(key);
+      os << wrap_val(get<double>(key), "float");
     else if (has<std::string>(key))
-      os << get<std::string>(key);
+      os << wrap_val(get<std::string>(key), "str", true);
     else if (has<Limits>(key))
-      os << get<Limits>(key);
-    else if (has<std::vector<ParametersList> >(key)) {
-      std::string sep;
-      for (const auto& p : get<std::vector<ParametersList> >(key))
-        os << sep << p, sep = ", ";
-    } else if (has<std::vector<int> >(key)) {
-      std::string sep;
-      for (const auto& p : get<std::vector<int> >(key))
-        os << sep << p, sep = ", ";
-    } else if (has<std::vector<double> >(key)) {
-      std::string sep;
-      for (const auto& p : get<std::vector<double> >(key))
-        os << sep << p, sep = ", ";
-    } else if (has<std::vector<std::string> >(key)) {
-      std::string sep;
-      for (const auto& p : get<std::vector<std::string> >(key))
-        os << sep << p, sep = ", ";
-    }
+      os << wrap_val(get<Limits>(key), "Limits");
+    else if (has<std::vector<ParametersList> >(key))
+      os << wrap_coll(get<std::vector<ParametersList> >(key), "VParams");
+    else if (has<std::vector<int> >(key))
+      os << wrap_coll(get<std::vector<int> >(key), "vint");
+    else if (has<std::vector<double> >(key))
+      os << wrap_coll(get<std::vector<double> >(key), "vfloat");
+    else if (has<std::vector<std::string> >(key))
+      os << wrap_coll(get<std::vector<std::string> >(key), "vstr", true);
     return os.str();
   }
 
@@ -381,10 +354,8 @@ namespace cepgen {
       return val->second;
     // Limits object not found ; still trying to build it from (min/max) attributes
     Limits buf;
-    if (has<double>(key + "min"))
-      fill<double>(key + "min", buf.min());
-    if (has<double>(key + "max"))
-      fill<double>(key + "max", buf.max());
+    fill<double>(key + "min", buf.min());
+    fill<double>(key + "max", buf.max());
     if (buf.valid())
       return buf.validate();
     // nothing found ; returning default

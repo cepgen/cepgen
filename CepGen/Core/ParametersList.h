@@ -98,7 +98,8 @@ namespace cepgen {
     /// \param[in] name_key Include the name variable?
     std::vector<std::string> keys(bool name_key = true) const;
     /// Get a string-converted version of a value
-    std::string getString(const std::string& key) const;
+    /// \param[in] wrap Encapsulate the value with type()
+    std::string getString(const std::string& key, bool wrap = true) const;
 
     /// Human-readable version of a parameters container
     friend std::ostream& operator<<(std::ostream& os, const ParametersList&);

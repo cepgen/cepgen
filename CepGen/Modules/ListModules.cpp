@@ -56,6 +56,7 @@ namespace cepgen {
           info << "\n> " << utils::colourise(translator(mod), utils::Colour::green, utils::Modifier::bold) << ": "
                << fact.describe(mod) << (fact.describeParameters(mod).empty() ? " (*)" : "");
       };
+
       list_modules(card::CardsHandlerFactory::get(), "Steering cards parsers");
       list_modules(IntegratorFactory::get(), "Integration algorithms");
       list_modules(proc::ProcessFactory::get(), "Physics processes");

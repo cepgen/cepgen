@@ -61,7 +61,7 @@ namespace cepgen {
     void operator=(const ModuleFactory&) = delete;
 
     /// Describe the modules factory
-    const std::string& description() { return description_; }
+    const std::string& description() const { return description_; }
 
     /// Register a named module in the database
     /// \tparam U Class to register (inherited from T base class)
@@ -91,25 +91,19 @@ namespace cepgen {
     /// Constructor type for a module
     typedef std::unique_ptr<T> (*Builder)(const ParametersList&);
 
-    /// Get the list of builders registered in the factory
-    std::vector<Builder> builders() const {
-      std::vector<Builder> builders;
-      for (const auto& bld_vs_name : map_)
-        builders.emplace_back(bld_vs_name.second);
-      return builders;
-    }
-    /// Check if a named module is registered
-    bool has(const I& name) const { return map_.count(name) > 0; }
     /// Describe one named module
-    const std::string& describe(const I& name) const { return descr_map_.at(name); }
+    const std::string& describe(const I& name) const;
     /// Describe the parameters of one named module
     const ParametersDescription& describeParameters(const I& name) const;
+
+    /// List of modules registred in the database
+    std::vector<I> modules() const;
     /// Is the database empty?
     bool empty() const { return map_.empty(); }
     /// Number of modules registered in the database
     size_t size() const { return map_.size(); }
-    /// List of modules registred in the database
-    std::vector<I> modules() const;
+    /// Check if a named module is registered
+    bool has(const I& name) const { return map_.count(name) > 0; }
 
   private:
     /// Construct a module with its parameters set

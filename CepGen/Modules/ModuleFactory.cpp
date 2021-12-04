@@ -16,14 +16,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/ModuleFactory.h"
+
+// collection of handled objects
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/EventModifier.h"
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Integration/Integrator.h"
-#include "CepGen/Modules/ModuleFactory.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Processes/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
@@ -67,9 +69,10 @@ namespace cepgen {
   template <typename T, typename I>
   std::unique_ptr<T> ModuleFactory<T, I>::build(ParametersList params) const {
     if (!params.has<I>(ParametersList::MODULE_NAME))
-      throw CG_FATAL("ModuleFactory") << description_
-                                      << " failed to retrieve an indexing key from parameters to build the module!\n"
-                                      << "Parameters: \"" << params << "\".";
+      throw CG_FATAL("ModuleFactory") << description_ << " failed to retrieve an indexing key "
+                                      << "from parameters to build the module!\n"
+                                      << "Parameters: " << params << ".\n"
+                                      << "Registered modules: " << modules() << ".";
     const I& idx = params.get<I>(ParametersList::MODULE_NAME);
     if (map_.count(idx) == 0)
       throw CG_FATAL("ModuleFactory") << description_ << " failed to build a module with index/name \"" << idx
@@ -82,6 +85,11 @@ namespace cepgen {
   }
 
   template <typename T, typename I>
+  const std::string& ModuleFactory<T, I>::describe(const I& name) const {
+    return descr_map_.at(name);
+  }
+
+  template <typename T, typename I>
   const ParametersDescription& ModuleFactory<T, I>::describeParameters(const I& name) const {
     if (params_map_.count(name) == 0)
       return empty_params_desc_;
@@ -91,8 +99,8 @@ namespace cepgen {
   template <typename T, typename I>
   std::vector<I> ModuleFactory<T, I>::modules() const {
     std::vector<I> out;
-    for (const auto& p : map_)
-      out.emplace_back(p.first);
+    std::transform(map_.begin(), map_.end(), std::back_inserter(out), [](auto& val) { return val.first; });
+    std::sort(out.begin(), out.end());
     return out;
   }
 
