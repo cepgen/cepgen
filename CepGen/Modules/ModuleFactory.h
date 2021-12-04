@@ -77,16 +77,18 @@ namespace cepgen {
       }
       map_[name] = &build<U>;
       descr_map_[name] = U::description();
-      params_map_[name] = !def_params.empty() ? ParametersDescription(def_params) : U::parametersDescription();
+      params_map_[name] = U::parametersDescription();
+      if (!def_params.empty())
+        params_map_[name].parameters() += def_params;
       params_map_[name].setName(name);
     }
     /// Build one instance of a named module
     /// \param[in] name Module name to retrieve
     /// \param[in] params List of parameters to be invoked by the constructor
-    std::unique_ptr<T> build(const I& name, ParametersList params = ParametersList()) const;
+    std::unique_ptr<T> build(const I& name, const ParametersList& params = ParametersList()) const;
     /// Build one instance of a named module
     /// \param[in] params List of parameters to be invoked by the constructor
-    std::unique_ptr<T> build(ParametersList params = ParametersList()) const;
+    std::unique_ptr<T> build(const ParametersList& params = ParametersList()) const;
 
     /// Constructor type for a module
     typedef std::unique_ptr<T> (*Builder)(const ParametersList&);

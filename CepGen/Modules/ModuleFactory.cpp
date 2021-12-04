@@ -54,26 +54,20 @@ namespace cepgen {
   }*/
 
   template <typename T, typename I>
-  std::unique_ptr<T> ModuleFactory<T, I>::build(const I& name, ParametersList params) const {
+  std::unique_ptr<T> ModuleFactory<T, I>::build(const I& name, const ParametersList& params) const {
     if (name == I())
       throw CG_FATAL("ModuleFactory") << description_ << " cannot build a module with empty index/name!";
-    if (!has(name))
-      throw CG_FATAL("ModuleFactory") << description_ << " failed to build a module with index/name \"" << name
-                                      << "\"!\nRegistered modules: " << modules() << ".";
-    params.setName<I>(name);
-    if (has(name))
-      params += params_map_.at(name).parameters();
-    return map_.at(name)(params);
+    return build(ParametersList(params).setName<I>(name));
   }
 
   template <typename T, typename I>
-  std::unique_ptr<T> ModuleFactory<T, I>::build(ParametersList params) const {
+  std::unique_ptr<T> ModuleFactory<T, I>::build(const ParametersList& params) const {
     if (!params.has<I>(ParametersList::MODULE_NAME))
       throw CG_FATAL("ModuleFactory") << description_ << " failed to retrieve an indexing key "
                                       << "from parameters to build the module!\n"
                                       << "Parameters: " << params << ".\n"
                                       << "Registered modules: " << modules() << ".";
-    const I& idx = params.get<I>(ParametersList::MODULE_NAME);
+    const auto& idx = params.name<I>();
     if (map_.count(idx) == 0)
       throw CG_FATAL("ModuleFactory") << description_ << " failed to build a module with index/name \"" << idx
                                       << "\"!\nRegistered modules: " << modules() << ".";
@@ -81,6 +75,17 @@ namespace cepgen {
     if (params_map_.count(idx) > 0)
       plist += params_map_.at(idx).parameters();
     plist += params;
+    CG_DEBUG("ModuleFactory").log([&](auto& log) {
+      log << description_ << " will build a module ";
+      if (plist.empty()) {
+        log << "without parameters.";
+        return;
+      }
+      log << "with parameters:\n" << plist << ".";
+      if (params_map_.count(idx) > 0)
+        log << "\nBase parameters:\n" << params_map_.at(idx).parameters();
+      log << "\nUser-defined parameters:\n" << params;
+    });
     return map_.at(idx)(plist);
   }
 

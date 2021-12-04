@@ -35,7 +35,11 @@ namespace cepgen {
     /// Module description
     static inline std::string description() { return "No description"; }
     /// Description of all module parameters
-    static inline ParametersDescription parametersDescription() { return ParametersDescription(); }
+    static inline ParametersDescription parametersDescription() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Unnamed module");
+      return desc;
+    }
     /// Collection of default parameters steering the module initialisation
     static inline ParametersList defaultParameters() { return ParametersList(); }
     /// Module user-defined parameters
