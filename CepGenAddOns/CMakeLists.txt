@@ -1,7 +1,3 @@
-cepgen_build(CepGenAddOns
-    SOURCES OutputModules/EventDump.cpp OutputModules/TextHandler.cpp
-    INSTALL_COMPONENT addons)
-
 #----- check the external dependencies for physics utilities
 
 add_subdirectory(APFELWrapper)
