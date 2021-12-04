@@ -205,9 +205,16 @@ namespace cepgen {
 
   std::string ParametersList::getString(const std::string& key) const {
     std::ostringstream os;
-    if (has<ParametersList>(key))
-      os << "Parameters(" << get<ParametersList>(key) << ")";
-    else if (has<int>(key))
+    if (has<ParametersList>(key)) {
+      auto plist = get<ParametersList>(key);
+      const auto& plist_name = plist.getString(MODULE_NAME);
+      if (plist_name.empty())
+        os << "Parameters(" << plist << ")";
+      else {
+        plist.erase(MODULE_NAME);
+        os << "Module(" << plist_name << ", " << plist << ")";
+      }
+    } else if (has<int>(key))
       os << get<int>(key);
     else if (has<double>(key))
       os << get<double>(key);
