@@ -42,6 +42,8 @@ namespace cepgen {
     /// Human-readable description of all parameters and their default value
     std::string describe(size_t offset = 0) const;
     /// List of parameters associated to this description object
+    ParametersList& parameters();
+    /// List of parameters associated to this description object
     const ParametersList& parameters() const;
     /// Validate a set of used-steered parameters
     void validate(const ParametersList&) const;

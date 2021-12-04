@@ -53,7 +53,7 @@ namespace cepgen {
     bool has(std::string key) const;
     /// Erase a parameter with key
     /// \return Number of key-indexed values erased
-    size_t erase(std::string key);
+    size_t erase(const std::string&);
     /// Retrieve the module name if any
     template <typename T>
     T name(const T& def = default_arg<T>::get()) const {
@@ -99,7 +99,7 @@ namespace cepgen {
     std::vector<std::string> keys(bool name_key = true) const;
     /// Get a string-converted version of a value
     /// \param[in] wrap Encapsulate the value with type()
-    std::string getString(const std::string& key, bool wrap = true) const;
+    std::string getString(const std::string& key, bool wrap = false) const;
 
     /// Human-readable version of a parameters container
     friend std::ostream& operator<<(std::ostream& os, const ParametersList&);

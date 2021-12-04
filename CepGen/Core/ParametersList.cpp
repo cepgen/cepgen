@@ -105,7 +105,7 @@ namespace cepgen {
     return *this;
   }
 
-  size_t ParametersList::erase(std::string key) {
+  size_t ParametersList::erase(const std::string& key) {
     size_t out = 0ull;
     if (int_values_.count(key) != 0)
       out += int_values_.erase(key);
@@ -134,15 +134,14 @@ namespace cepgen {
     if (params.empty())
       return os << "{}";
     std::string sep;
-    for (const auto& key : params.keys()) {
-      os << sep;
-      if (key == ParametersList::MODULE_NAME)
-        os << params.getString(key, false);
-      else
-        os << key << "=" << params.getString(key);
-      sep = ", ";
-    }
-    return os;
+    const auto& mod_name = params.getString(ParametersList::MODULE_NAME);
+    if (!mod_name.empty())
+      os << "Module(" << mod_name, sep = ", ";
+    else
+      os << "Parameters(";
+    for (const auto& key : params.keys(false))
+      os << sep << key << "=" << params.getString(key, true), sep = ", ";
+    return os << ")";
   }
 
   std::vector<std::string> ParametersList::keys(bool name_key) const {
@@ -162,6 +161,7 @@ namespace cepgen {
       if (it_name != out.end())
         out.erase(it_name);
     }
+    std::sort(out.begin(), out.end());
     return out;
   }
 
@@ -169,11 +169,7 @@ namespace cepgen {
     std::ostringstream os;
     auto wrap_val = [&wrap](const auto& val, const std::string& type, bool escape = false) -> std::string {
       std::ostringstream os;
-      if (wrap)
-        os << type << "(";
-      os << (escape ? "\"" : "") << val << (escape ? "\"" : "");
-      if (wrap)
-        os << ")";
+      os << (wrap ? type + "(" : "") << (escape ? "\"" : "") << val << (escape ? "\"" : "") << (wrap ? ")" : "");
       return os.str();
     };
     auto wrap_coll = [&wrap, &wrap_val](const auto& coll, const std::string& type, bool escape = false) -> std::string {

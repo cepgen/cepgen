@@ -38,25 +38,24 @@ namespace cepgen {
     const auto& mod_name = ParametersList::getString(ParametersList::MODULE_NAME);
     const auto& keys = ParametersList::keys(false);
     std::ostringstream os;
-    os << sep(offset);
     if (mod_name.empty() && !keys.empty())
-      os << "Parameters collection";
+      os << utils::colourise("Parameters", utils::Colour::cyan, utils::Modifier::bold) << " collection ";
     else if (!mod_name.empty())
-      os << "Module " << utils::boldify(mod_name);
+      os << utils::colourise("Module", utils::Colour::cyan, utils::Modifier::bold) << " " << utils::boldify(mod_name)
+         << " ";
     if (!mod_descr_.empty())
-      os << " (" << utils::colourise(mod_descr_, utils::Colour::reset, utils::Modifier::italic) << ")";
-    if (keys.empty())
-      os << "\n";
-    else {
-      os << ", parameters:\n";
-      for (const auto& key : keys) {
-        os << sep(offset + 1) << utils::colourise(key, utils::Colour::reset, utils::Modifier::underline);
-        if (obj_descr_.count(key) > 0) {
-          const auto& obj = obj_descr_.at(key);
-          if (!ParametersList::has<ParametersList>(key))
-            os << " (default value: \"" << ParametersList::getString(key) << "\")";
-          os << "\n" << obj.describe(offset + 2);
-        }
+      os << utils::colourise(mod_descr_, utils::Colour::reset, utils::Modifier::italic);
+    if (!keys.empty())
+      os << "\n" << sep(offset + 1) << "List of parameters:";
+    for (const auto& key : keys) {
+      os << "\n" << sep(offset + 1) << "- " << utils::colourise(key, utils::Colour::reset, utils::Modifier::underline);
+      if (obj_descr_.count(key) > 0) {
+        const auto& obj = obj_descr_.at(key);
+        if (!ParametersList::has<ParametersList>(key))
+          os << " (default value: " << ParametersList::getString(key) << ")";
+        const auto& descr = obj.describe(offset + 1);
+        if (!utils::trim(descr).empty())
+          os << " " << descr;
       }
     }
     return os.str();
@@ -72,6 +71,9 @@ namespace cepgen {
                                                                            const ParametersDescription& desc) {
     obj_descr_[name] = desc;
     ParametersList::set<ParametersList>(name, desc.parameters());
+    CG_DEBUG("ParametersDescription:add")
+        << "Added a new parameters collection \"" << name << "\" with default value:\n"
+        << desc.parameters() << ".";
     return obj_descr_[name];
   }
 
@@ -89,10 +91,9 @@ namespace cepgen {
     return obj_descr_[name];
   }
 
-  const ParametersList& ParametersDescription::parameters() const {
-    CG_DEBUG("") << describe();
-    return *this;
-  }
+  ParametersList& ParametersDescription::parameters() { return *this; }
+
+  const ParametersList& ParametersDescription::parameters() const { return *this; }
 
   void ParametersDescription::validate(const ParametersList&) const {
     throw CG_FATAL("ParametersDescription:validate") << "Not yet implemented!";

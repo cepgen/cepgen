@@ -32,29 +32,35 @@
 
 using namespace std;
 
-#define LOOP_FACTORY(desc, obj)                                                                                     \
-  if (all)                                                                                                          \
-    os << "\n"                                                                                                      \
-       << cepgen::utils::boldify(string(80, '=') + "\n" + string(desc) + " modules\n" + string(80, '=')) << "\n\n"; \
-  for (const auto& mod_name : obj::get().modules()) {                                                               \
-    if (all)                                                                                                        \
-      os << describe_one(desc, mod_name, false, obj::get().describeParameters(mod_name));                           \
-    else                                                                                                            \
-      for (const auto& mod : modules)                                                                               \
-        if (mod == mod_name)                                                                                        \
-          os << describe_one(desc, mod_name, true, obj::get().describeParameters(mod_name));                        \
+#define LOOP_FACTORY(desc, obj)                                                                                 \
+  if (all)                                                                                                      \
+    os << "\n"                                                                                                  \
+       << cepgen::utils::colourise(string(80, '=') + "\n" + string(desc) + " modules" + "\n" + string(80, '='), \
+                                   cepgen::utils::Colour::green,                                                \
+                                   cepgen::utils::Modifier::bold)                                               \
+       << "\n";                                                                                                 \
+  for (const auto& mod_name : obj::get().modules()) {                                                           \
+    if (all)                                                                                                    \
+      os << describe_one(desc, mod_name, false, obj::get().describeParameters(mod_name));                       \
+    else                                                                                                        \
+      for (const auto& mod : modules)                                                                           \
+        if (mod == mod_name)                                                                                    \
+          os << describe_one(desc, mod_name, true, obj::get().describeParameters(mod_name));                    \
   }
-#define LOOP_FACTORY_INT(desc, obj)                                                                                 \
-  if (all)                                                                                                          \
-    os << "\n"                                                                                                      \
-       << cepgen::utils::boldify(string(80, '=') + "\n" + string(desc) + " modules\n" + string(80, '=')) << "\n\n"; \
-  for (const auto& mod_name : obj::get().modules()) {                                                               \
-    if (all)                                                                                                        \
-      os << describe_one(desc, to_string(mod_name), false, obj::get().describeParameters(mod_name));                \
-    else                                                                                                            \
-      for (const auto& mod : modules)                                                                               \
-        if (cepgen::utils::isNumber(mod) && stod(mod) == mod_name)                                                  \
-          os << describe_one(desc, to_string(mod_name), true, obj::get().describeParameters(mod_name));             \
+#define LOOP_FACTORY_INT(desc, obj)                                                                             \
+  if (all)                                                                                                      \
+    os << "\n"                                                                                                  \
+       << cepgen::utils::colourise(string(80, '=') + "\n" + string(desc) + " modules" + "\n" + string(80, '='), \
+                                   cepgen::utils::Colour::green,                                                \
+                                   cepgen::utils::Modifier::bold)                                               \
+       << "\n";                                                                                                 \
+  for (const auto& mod_name : obj::get().modules()) {                                                           \
+    if (all)                                                                                                    \
+      os << describe_one(desc, to_string(mod_name), false, obj::get().describeParameters(mod_name));            \
+    else                                                                                                        \
+      for (const auto& mod : modules)                                                                           \
+        if (cepgen::utils::isNumber(mod) && stod(mod) == mod_name)                                              \
+          os << describe_one(desc, to_string(mod_name), true, obj::get().describeParameters(mod_name));         \
   }
 
 /** Listing module for CepGen
@@ -98,11 +104,13 @@ int main(int argc, char* argv[]) {
                                        bool dump_mod_name,
                                        const cepgen::ParametersDescription& desc) -> string {
       ostringstream os;
+      os << "\n";
       if (dump_mod_name)
         os << type << " module '" << name << "'\n";
       os << desc.describe();
       if (dump_params)
         os << "\n\tParametersList object:\n\t\t" << desc.parameters();
+      os << "\n";
       return os.str();
     };
 
@@ -110,7 +118,6 @@ int main(int argc, char* argv[]) {
     LOOP_FACTORY("Cards steering", cepgen::card::CardsHandlerFactory)
     LOOP_FACTORY("Integrator", cepgen::IntegratorFactory)
     LOOP_FACTORY("Process", cepgen::proc::ProcessFactory)
-    LOOP_FACTORY("Integrator", cepgen::IntegratorFactory)
     LOOP_FACTORY("Beam form factors modelling", cepgen::formfac::FormFactorsFactory)
     LOOP_FACTORY_INT("Structure functions modelling", cepgen::strfun::StructureFunctionsFactory)
     LOOP_FACTORY_INT("Cross sections ratio modelling", cepgen::sigrat::SigmaRatiosFactory)
