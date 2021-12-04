@@ -48,7 +48,7 @@ endif()
 include(FindVersion)
 add_version_definition(${core_sources})
 
-cepgen_build(CepGenCore
+cepgen_build(CepGen
         SOURCES ${core_sources} ${phys_sources} ${proc_sources}
         EXT_LIBS ${CEPGEN_CORE_EXT} stdc++fs
         EXT_HEADERS ${core_includes}
