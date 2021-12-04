@@ -34,6 +34,12 @@ namespace cepgen {
       return 1. + 12. * (q2 / (q2 + 1.)) * (0.125 * 0.125 / (0.125 * 0.125 + xbj * xbj));
     }
 
+    ParametersDescription Parameterisation::parametersDescription() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Unnamed sigma ratio parameterisation");
+      return desc;
+    }
+
     //---------------------------------------------------------------------------------------------
 
     /// E143 experimental R measurement \cite Abe:1998ym
@@ -83,7 +89,7 @@ namespace cepgen {
     }
 
     ParametersDescription E143::parametersDescription() {
-      auto desc = ParametersDescription();
+      auto desc = Parameterisation::parametersDescription();
       desc.setDescription("E143 experimental R measurement");
       desc.add<double>("q2_b", 0.34);
       desc.add<double>("lambda2", 0.2 * 0.2);
@@ -122,7 +128,7 @@ namespace cepgen {
     }
 
     ParametersDescription R1990::parametersDescription() {
-      auto desc = ParametersDescription();
+      auto desc = Parameterisation::parametersDescription();
       desc.setDescription("SLAC experimental R measurement");
       desc.add<double>("lambda2", 0.04);
       desc.add<std::vector<double> >("b", {0.0635, 0.5747, -0.3534});
@@ -165,7 +171,7 @@ namespace cepgen {
     }
 
     ParametersDescription CLAS::parametersDescription() {
-      auto desc = ParametersDescription();
+      auto desc = Parameterisation::parametersDescription();
       desc.setDescription("CLAS experimental R measurement");
       desc.add<std::vector<double> >("p", {0.041, 0.592, 0.331});
       desc.add<double>("wth", 2.5);
@@ -202,7 +208,7 @@ namespace cepgen {
     }
 
     ParametersDescription SibirtsevBlunden::parametersDescription() {
-      auto desc = ParametersDescription();
+      auto desc = Parameterisation::parametersDescription();
       desc.setDescription("Sibirtsev and Blunden theoretical R parameterisation");
       desc.add<double>("a", 0.014);
       desc.add<double>("b1", -0.07);
@@ -230,7 +236,7 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_SIGRAT(E143, sigrat::E143)
-REGISTER_SIGRAT(R1990, sigrat::R1990)
-REGISTER_SIGRAT(CLAS, sigrat::CLAS)
-REGISTER_SIGRAT(SibirtsevBlunden, sigrat::SibirtsevBlunden)
+REGISTER_SIGRAT(sigrat::Type::E143, E143, sigrat::E143)
+REGISTER_SIGRAT(sigrat::Type::R1990, R1990, sigrat::R1990)
+REGISTER_SIGRAT(sigrat::Type::CLAS, CLAS, sigrat::CLAS)
+REGISTER_SIGRAT(sigrat::Type::SibirtsevBlunden, SibirtsevBlunden, sigrat::SibirtsevBlunden)

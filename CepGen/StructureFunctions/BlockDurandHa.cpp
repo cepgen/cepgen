@@ -93,4 +93,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(BlockDurandHa, strfun::BlockDurandHa)
+REGISTER_STRFUN(strfun::Type::BlockDurandHa, BlockDurandHa, strfun::BlockDurandHa)

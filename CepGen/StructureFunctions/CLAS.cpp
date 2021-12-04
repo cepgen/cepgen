@@ -278,6 +278,7 @@ namespace cepgen {
 
     ParametersDescription CLAS::parametersDescription() {
       auto desc = Parameterisation::parametersDescription();
+      desc.setDescription("CLAS parameterisation for nucleon data at Q2 > 0.5 GeV2 / xBj > 0.15");
       desc.add<std::string>("model", "proton")
           .setDescription("Nucleon modelling ('proton', 'deuteron', or 'neutron' handled)");
       return desc;
@@ -285,4 +286,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(CLAS, strfun::CLAS)
+REGISTER_STRFUN(strfun::Type::CLAS, CLAS, strfun::CLAS)

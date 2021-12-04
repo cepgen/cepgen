@@ -136,6 +136,7 @@ namespace cepgen {
 
     ParametersDescription FioreBrasse::parametersDescription() {
       auto desc = Parameterisation::parametersDescription();
+      desc.setDescription("Fiore-Brasse F2 parameterisation of low-mass resonances");
       desc.add<std::string>("model", "standard")
           .setDescription("Parameterisation modelling ('standard' or 'alternative' handled)");
       return desc;
@@ -143,4 +144,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(FioreBrasse, strfun::FioreBrasse)
+REGISTER_STRFUN(strfun::Type::FioreBrasse, FioreBrasse, strfun::FioreBrasse)

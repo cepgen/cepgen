@@ -153,7 +153,7 @@ namespace cepgen {
     }
 
     ParametersDescription ALLM::parametersDescription() {
-      auto desc = ParametersDescription();
+      auto desc = Parameterisation::parametersDescription();
       desc.setDescription("Abramowicz, Levin, Levy, and Maor parametrisation of F2/FL");
       desc.add<ParametersDescription>("parameterisation", Parameters::parametersDescription());
       desc.add<std::string>("model", "");
@@ -330,7 +330,7 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN_PARAMS(ALLM91, strfun::ALLM, ParametersList().set<std::string>("model", "ALLM91"))
-REGISTER_STRFUN_PARAMS(ALLM97, strfun::ALLM, ParametersList().set<std::string>("model", "ALLM97"))
-REGISTER_STRFUN_PARAMS(GD07p, strfun::ALLM, ParametersList().set<std::string>("model", "GD07p"))
-REGISTER_STRFUN_PARAMS(GD11p, strfun::ALLM, ParametersList().set<std::string>("model", "GD11p"))
+REGISTER_STRFUN_PARAMS(strfun::Type::ALLM91, ALLM91, strfun::ALLM, ParametersList().set<std::string>("model", "ALLM91"))
+REGISTER_STRFUN_PARAMS(strfun::Type::ALLM97, ALLM97, strfun::ALLM, ParametersList().set<std::string>("model", "ALLM97"))
+REGISTER_STRFUN_PARAMS(strfun::Type::GD07p, GD07p, strfun::ALLM, ParametersList().set<std::string>("model", "GD07p"))
+REGISTER_STRFUN_PARAMS(strfun::Type::GD11p, GD11p, strfun::ALLM, ParametersList().set<std::string>("model", "GD11p"))

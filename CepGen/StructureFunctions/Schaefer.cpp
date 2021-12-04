@@ -161,10 +161,9 @@ namespace cepgen {
                                       StructureFunctionsFactory::get().describeParameters((int)Type::MSTWgrid));
       desc.add<ParametersDescription>("continuumSF",
                                       StructureFunctionsFactory::get().describeParameters((int)Type::GD11p));
-      CG_WARNING("") << desc.describe();
       return desc;
     }
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(Schaefer, strfun::Schaefer)
+REGISTER_STRFUN(strfun::Type::Schaefer, Schaefer, strfun::Schaefer)

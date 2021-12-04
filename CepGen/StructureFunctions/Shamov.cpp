@@ -273,4 +273,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(Shamov, strfun::Shamov)
+REGISTER_STRFUN(strfun::Type::Shamov, Shamov, strfun::Shamov)

@@ -187,4 +187,4 @@ namespace mstw {
   }
 }  // namespace mstw
 
-REGISTER_STRFUN(MSTWgrid, mstw::Grid)
+REGISTER_STRFUN(strfun::Type::MSTWgrid, MSTWgrid, mstw::Grid)

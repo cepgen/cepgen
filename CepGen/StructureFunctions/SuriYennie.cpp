@@ -88,4 +88,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(SuriYennie, strfun::SuriYennie)
+REGISTER_STRFUN(strfun::Type::SuriYennie, SuriYennie, strfun::SuriYennie)
