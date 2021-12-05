@@ -66,10 +66,15 @@ namespace cepgen {
     size_t erase(const std::string&);
     /// Retrieve the module name if any
     template <typename T>
-    T name(const T& def = default_arg<T>::get()) const {
+    inline T name(const T& def = default_arg<T>::get()) const {
       if (!has<T>(MODULE_NAME))
         return def;
       return get<T>(MODULE_NAME);
+    }
+    /// Set the module name
+    template <typename T>
+    inline ParametersList& setName(const T& value) {
+      return set<T>(MODULE_NAME, value);
     }
     /// Fill a variable with the key content if exists
     template <typename T>
@@ -92,11 +97,6 @@ namespace cepgen {
     /// Set a parameter value
     template <typename T>
     ParametersList& set(const std::string& key, const T& value);
-    /// Set the module name
-    template <typename T>
-    ParametersList& setName(const T& value) {
-      return set<T>(MODULE_NAME, value);
-    }
     /// Concatenate two parameters containers
     ParametersList& operator+=(const ParametersList& oth);
     /// Concatenation of two parameters containers
@@ -139,19 +139,8 @@ namespace cepgen {
   DEFINE_TYPE(Limits)
   DEFINE_TYPE(ParametersList)
   DEFINE_TYPE(std::vector<ParametersList>)
-
-  /// Check if a particle properties object is handled
-  template <>
-  inline bool ParametersList::has<ParticleProperties>(const std::string& key) const {
-    return param_values_.count(key) != 0;
-  }
-  /// Get a particle properties object
-  template <>
-  ParticleProperties ParametersList::get<ParticleProperties>(const std::string& key,
-                                                             const ParticleProperties& def) const;
-  /// Set a particle properties object value
-  template <>
-  ParametersList& ParametersList::set<ParticleProperties>(const std::string& key, const ParticleProperties& value);
+  DEFINE_TYPE(ParticleProperties)
 }  // namespace cepgen
 
+#undef DEFINE_TYPE
 #endif

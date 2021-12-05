@@ -44,11 +44,11 @@ namespace cepgen {
       os << utils::colourise("Module", utils::Colour::cyan, utils::Modifier::bold) << " " << utils::boldify(mod_name)
          << " ";
     if (!mod_descr_.empty())
-      os << utils::colourise(mod_descr_, utils::Colour::reset, utils::Modifier::italic);
+      os << utils::colourise(mod_descr_, utils::Colour::none, utils::Modifier::italic);
     if (!keys.empty())
       os << "\n" << sep(offset + 1) << "List of parameters:";
     for (const auto& key : keys) {
-      os << "\n" << sep(offset + 1) << "- " << utils::colourise(key, utils::Colour::reset, utils::Modifier::underline);
+      os << "\n" << sep(offset + 1) << "- " << utils::colourise(key, utils::Colour::none, utils::Modifier::underline);
       if (obj_descr_.count(key) > 0) {
         const auto& obj = obj_descr_.at(key);
         if (!ParametersList::has<ParametersList>(key))
@@ -71,9 +71,13 @@ namespace cepgen {
                                                                            const ParametersDescription& desc) {
     obj_descr_[name] = desc;
     ParametersList::set<ParametersList>(name, desc.parameters());
-    CG_DEBUG("ParametersDescription:add")
-        << "Added a new parameters collection \"" << name << "\" with default value:\n"
-        << desc.parameters() << ".";
+    CG_DEBUG("ParametersDescription:add").log([this, &name, &desc](auto& log) {
+      log << "Added a new parameters collection \"" << name << "\" as: " << desc.describe();
+      const auto& mod_name = this->getString(ParametersList::MODULE_NAME);
+      if (!mod_name.empty())
+        log << "\nto the object with name: " << mod_name;
+      log << ".";
+    });
     return obj_descr_[name];
   }
 

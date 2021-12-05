@@ -203,15 +203,16 @@ namespace cepgen {
     std::ostringstream os;
     auto wrap_val = [&wrap](const auto& val, const std::string& type, bool escape = false) -> std::string {
       std::ostringstream os;
-      os << (wrap ? type + "(" : "") << (escape ? "\"" : "") << val << (escape ? "\"" : "") << (wrap ? ")" : "");
-      return os.str();
+      os << val;
+      return (wrap ? type + "(" : "") + (escape ? "\"" : "") +
+             (type == "bool" ? utils::yesno(std::stoi(os.str())) : os.str()) + (escape ? "\"" : "") + (wrap ? ")" : "");
     };
     auto wrap_coll = [&wrap, &wrap_val](const auto& coll, const std::string& type, bool escape = false) -> std::string {
       std::ostringstream os;
       std::string sep;
       for (const auto& val : coll)
         os << sep << (escape ? "\"" : "") << val << (escape ? "\"" : ""), sep = ", ";
-      return wrap_val(os.str(), type);
+      return wrap_val(os.str(), type, false);
     };
     if (has<ParametersList>(key)) {
       auto plist = get<ParametersList>(key);
@@ -226,7 +227,9 @@ namespace cepgen {
           os << "Module(" << plist_name << ", " << plist << ")";
         }
       }
-    } else if (has<int>(key))
+    } else if (has<bool>(key))
+      os << wrap_val(get<bool>(key), "bool");
+    else if (has<int>(key))
       os << wrap_val(get<int>(key), "int");
     else if (has<double>(key))
       os << wrap_val(get<double>(key), "float");
