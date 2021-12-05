@@ -350,6 +350,13 @@ namespace cepgen {
   // particle properties-type attributes
   //------------------------------------------------------------------
 
+  /// Check if a particle properties object is handled
+  template <>
+  bool ParametersList::has<ParticleProperties>(const std::string& key) const {
+    return param_values_.count(key) != 0;
+  }
+
+  /// Get a particle properties object
   template <>
   ParticleProperties ParametersList::get<ParticleProperties>(const std::string& key,
                                                              const ParticleProperties& def) const {
@@ -387,6 +394,7 @@ namespace cepgen {
     }
   }
 
+  /// Set a particle properties object value
   template <>
   ParametersList& ParametersList::set<ParticleProperties>(const std::string& key, const ParticleProperties& value) {
     return set<ParametersList>(key,
@@ -401,3 +409,5 @@ namespace cepgen {
                                    .set<bool>("fermion", value.fermion));
   }
 }  // namespace cepgen
+
+#undef IMPL_TYPE
