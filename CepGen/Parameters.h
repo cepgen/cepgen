@@ -66,8 +66,8 @@ namespace cepgen {
     /// Pointer to a timekeeper instance
     utils::TimeKeeper* timeKeeper() { return tmr_.get(); }
 
-    /// Common user-defined parameters
-    ParametersList par_general;
+    /// Event generation parameters
+    ParametersList par_generation;
     /// Phase space definition parameters
     ParametersList par_kinematics;
     /// Integrator specific user-defined parameters

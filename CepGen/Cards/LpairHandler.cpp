@@ -211,7 +211,7 @@ namespace cepgen {
       }
 
       rt_params_->par_kinematics += *kin_params_;
-      rt_params_->par_general += *gen_params_;
+      rt_params_->par_generation += *gen_params_;
       rt_params_->par_integrator += *int_params_;
 
       //--- parse the structure functions code

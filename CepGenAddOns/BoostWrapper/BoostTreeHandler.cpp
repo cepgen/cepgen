@@ -71,7 +71,6 @@ namespace cepgen {
       static constexpr const char* PROCESS_NAME = "process";
       static constexpr const char* KIN_NAME = "kinematics";
       static constexpr const char* INTEGR_NAME = "integrator";
-      static constexpr const char* GENERAL_NAME = "general";
       static constexpr const char* GENERATOR_NAME = "generator";
       static constexpr const char* EVT_MOD_SEQ_NAME = "eventSequence";
       static constexpr const char* OUTPUT_NAME = "output";
@@ -107,10 +106,8 @@ namespace cepgen {
           rt_params_->par_kinematics += bc::unpack(tree_.get_child(KIN_NAME));
         if (tree_.count(INTEGR_NAME))
           rt_params_->par_integrator += bc::unpack(tree_.get_child(INTEGR_NAME));
-        if (tree_.count(GENERAL_NAME))
-          rt_params_->par_general += bc::unpack(tree_.get_child(GENERAL_NAME));
         if (tree_.count(GENERATOR_NAME))
-          rt_params_->generation() = Parameters::Generation(bc::unpack(tree_.get_child(GENERATOR_NAME)));
+          rt_params_->par_generation += bc::unpack(tree_.get_child(GENERATOR_NAME));
         if (tree_.count(EVT_MOD_SEQ_NAME)) {
           evt_mod_ = bc::unpack(tree_.get_child(EVT_MOD_SEQ_NAME));
           for (const auto& name : evt_mod_.keys()) {
@@ -170,8 +167,6 @@ namespace cepgen {
       tree_.add_child(PROCESS_NAME, bc::pack(rt_params_->process().parameters()));
       if (!rt_params_->par_integrator.empty())
         tree_.add_child(INTEGR_NAME, bc::pack(rt_params_->par_integrator));
-      if (!rt_params_->par_general.empty())
-        tree_.add_child(GENERAL_NAME, bc::pack(rt_params_->par_general));
 
       //----- kinematics block
       tree_.add_child(KIN_NAME, bc::pack(rt_params_->kinematics().parameters()));

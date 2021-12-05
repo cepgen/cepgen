@@ -37,7 +37,7 @@ namespace cepgen {
   Parameters::Parameters() : par_kinematics(Kinematics::description().parameters()), generation_(ParametersList()) {}
 
   Parameters::Parameters(Parameters& param)
-      : par_general(param.par_general),
+      : par_generation(param.par_generation),
         par_kinematics(param.par_kinematics),
         par_integrator(param.par_integrator),
         process_(std::move(param.process_)),
@@ -51,7 +51,7 @@ namespace cepgen {
         tmr_(std::move(param.tmr_)) {}
 
   Parameters::Parameters(const Parameters& param)
-      : par_general(param.par_general),
+      : par_generation(param.par_generation),
         par_kinematics(param.par_kinematics),
         par_integrator(param.par_integrator),
         kin_(param.kin_),
@@ -65,7 +65,7 @@ namespace cepgen {
   }
 
   Parameters& Parameters::operator=(Parameters param) {
-    par_general = param.par_general;
+    par_generation = param.par_generation;
     par_kinematics = param.par_kinematics;
     par_integrator = param.par_integrator;
     process_ = std::move(param.process_);
@@ -89,7 +89,7 @@ namespace cepgen {
     if (!process_ || !process_->firstRun())
       return;
     kin_ = Kinematics(par_kinematics);
-    generation_ = Generation(par_general);
+    generation_ = Generation(par_generation);
     process_->setKinematics(kin_);
     CG_DEBUG("Parameters").log([&](auto& dbg) {
       dbg << "Run started for " << process_->name() << " process " << std::hex << (void*)process_.get() << std::dec
