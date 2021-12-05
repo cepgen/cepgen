@@ -52,6 +52,7 @@ namespace cepgen {
 
   ParametersList::ParametersList(const ParametersList& oth)
       : param_values_(oth.param_values_),
+        bool_values_(oth.bool_values_),
         int_values_(oth.int_values_),
         dbl_values_(oth.dbl_values_),
         str_values_(oth.str_values_),
@@ -78,6 +79,7 @@ namespace cepgen {
         erase(key);
     }
     //--- concatenate all typed lists
+    bool_values_.insert(oth.bool_values_.begin(), oth.bool_values_.end());
     int_values_.insert(oth.int_values_.begin(), oth.int_values_.end());
     dbl_values_.insert(oth.dbl_values_.begin(), oth.dbl_values_.end());
     str_values_.insert(oth.str_values_.begin(), oth.str_values_.end());
@@ -136,6 +138,8 @@ namespace cepgen {
 
   size_t ParametersList::erase(const std::string& key) {
     size_t out = 0ull;
+    if (bool_values_.count(key) != 0)
+      out += bool_values_.erase(key);
     if (int_values_.count(key) != 0)
       out += int_values_.erase(key);
     if (dbl_values_.count(key) != 0)
@@ -178,6 +182,7 @@ namespace cepgen {
     auto key = [](const auto& p) { return p.first; };
     std::transform(param_values_.begin(), param_values_.end(), std::back_inserter(out), key);
     std::transform(vec_param_values_.begin(), vec_param_values_.end(), std::back_inserter(out), key);
+    std::transform(bool_values_.begin(), bool_values_.end(), std::back_inserter(out), key);
     std::transform(int_values_.begin(), int_values_.end(), std::back_inserter(out), key);
     std::transform(vec_int_values_.begin(), vec_int_values_.end(), std::back_inserter(out), key);
     std::transform(dbl_values_.begin(), dbl_values_.end(), std::back_inserter(out), key);
@@ -268,6 +273,7 @@ namespace cepgen {
   // sub-parameters-type attributes
   //------------------------------------------------------------------
 
+  IMPL_TYPE(bool, bool_values_, "boolean")
   IMPL_TYPE(int, int_values_, "integer")
   IMPL_TYPE(std::vector<int>, vec_int_values_, "vector of integers")
   IMPL_TYPE(double, dbl_values_, "floating number")

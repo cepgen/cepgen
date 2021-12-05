@@ -118,6 +118,7 @@ namespace cepgen {
 
   private:
     std::map<std::string, ParametersList> param_values_;
+    std::unordered_map<std::string, bool> bool_values_;
     std::unordered_map<std::string, int> int_values_;
     std::unordered_map<std::string, double> dbl_values_;
     std::unordered_map<std::string, std::string> str_values_;
@@ -128,6 +129,7 @@ namespace cepgen {
     std::unordered_map<std::string, std::vector<std::string> > vec_str_values_;
   };
 
+  DEFINE_TYPE(bool)
   DEFINE_TYPE(int)
   DEFINE_TYPE(std::vector<int>)
   DEFINE_TYPE(double)
@@ -138,37 +140,16 @@ namespace cepgen {
   DEFINE_TYPE(ParametersList)
   DEFINE_TYPE(std::vector<ParametersList>)
 
-  /// Check if a boolean parameter is handled
-  template <>
-  inline bool ParametersList::has<bool>(const std::string& key) const {
-    return has<int>(key);
-  }
-  /// Get a boolean parameter value
-  template <>
-  inline bool ParametersList::get<bool>(const std::string& key, const bool& def) const {
-    return static_cast<bool>(get<int>(key, def));
-  }
-  /// Reference to a boolean parameter value
-  template <>
-  inline bool& ParametersList::operator[]<bool>(const std::string& key) {
-    return (bool&)operator[]<int>(key);
-  }
-  /// Set a boolean parameter value
-  template <>
-  inline ParametersList& ParametersList::set<bool>(const std::string& key, const bool& value) {
-    return set<int>(key, static_cast<bool>(value));
-  }
-
-  /// Check if a boolean parameter is handled
+  /// Check if a particle properties object is handled
   template <>
   inline bool ParametersList::has<ParticleProperties>(const std::string& key) const {
     return param_values_.count(key) != 0;
   }
-  /// Get a boolean parameter value
+  /// Get a particle properties object
   template <>
   ParticleProperties ParametersList::get<ParticleProperties>(const std::string& key,
                                                              const ParticleProperties& def) const;
-  /// Set a boolean parameter value
+  /// Set a particle properties object value
   template <>
   ParametersList& ParametersList::set<ParticleProperties>(const std::string& key, const ParticleProperties& value);
 }  // namespace cepgen
