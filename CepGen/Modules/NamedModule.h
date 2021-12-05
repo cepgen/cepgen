@@ -38,8 +38,6 @@ namespace cepgen {
       desc.setDescription("Unnamed module");
       return desc;
     }
-    /// Collection of default parameters steering the module initialisation
-    static inline ParametersList defaultParameters() { return ParametersList(); }
     /// Module user-defined parameters
     inline const ParametersList& parameters() const { return params_; }
 

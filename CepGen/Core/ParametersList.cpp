@@ -46,9 +46,12 @@ namespace cepgen {
   ParametersList& ParametersList::operator+=(const ParametersList& oth) {
     //--- first ensure no key is not already present in the list
     for (const auto& key : oth.keys()) {
-      if (has<ParametersList>(key) && get<ParametersList>(key) == oth.get<ParametersList>(key))
-        continue;
-      erase(key);
+      if (has<ParametersList>(key)) {
+        if (get<ParametersList>(key) == oth.get<ParametersList>(key))
+          continue;
+        //operator[]<ParametersList>(key) += oth.get<ParametersList>(key);
+      } else
+        erase(key);
     }
     //--- concatenate all typed lists
     int_values_.insert(oth.int_values_.begin(), oth.int_values_.end());
@@ -91,11 +94,12 @@ namespace cepgen {
             // double if contains a '.'/'e'
             plist.set<double>(key, std::stod(value));
           else
-            plist.set<int>(key, std::stod(value));
+            plist.set<int>(key, std::stoi(value));
         } catch (const std::invalid_argument&) {
-          if (value == "off" || value == "no" || value == "false")
+          const auto value_lc = utils::tolower(value);
+          if (value_lc == "off" || value_lc == "no" || value_lc == "false")
             plist.set<bool>(key, false);
-          else if (value == "on" || value == "yes" || value == "true")
+          else if (value_lc == "on" || value_lc == "yes" || value_lc == "true")
             plist.set<bool>(key, true);
           else
             plist.set<std::string>(key, value);
@@ -217,22 +221,22 @@ namespace cepgen {
   //------------------------------------------------------------------
 
   template <typename T>
-  bool ParametersList::has(std::string key) const {
+  bool ParametersList::has(const std::string& key) const {
     throw CG_FATAL("ParametersList") << "Invalid type for key=" << key << "!";
   }
 
   template <typename T>
-  T ParametersList::get(std::string key, const T& def) const {
+  T ParametersList::get(const std::string& key, const T& def) const {
     throw CG_FATAL("ParametersList") << "Invalid type retrieved for key=" << key << "!";
   }
 
   template <typename T>
-  T& ParametersList::operator[](std::string key) {
+  T& ParametersList::operator[](const std::string& key) {
     throw CG_FATAL("ParametersList") << "Invalid type retrieved for key=" << key << "!";
   }
 
   template <typename T>
-  ParametersList& ParametersList::set(std::string key, const T& value) {
+  ParametersList& ParametersList::set(const std::string& key, const T& value) {
     throw CG_FATAL("ParametersList") << "Invalid type to be set for key=" << key << "!";
   }
 
@@ -241,7 +245,7 @@ namespace cepgen {
   //------------------------------------------------------------------
 
   template <>
-  ParametersList ParametersList::get<ParametersList>(std::string key, const ParametersList& def) const {
+  ParametersList ParametersList::get<ParametersList>(const std::string& key, const ParametersList& def) const {
     auto val =
         std::find_if(param_values_.begin(), param_values_.end(), [&key](const auto& kv) { return kv.first == key; });
     if (val != param_values_.end())
@@ -253,7 +257,7 @@ namespace cepgen {
 
   template <>
   std::vector<ParametersList> ParametersList::get<std::vector<ParametersList> >(
-      std::string key, const std::vector<ParametersList>& def) const {
+      const std::string& key, const std::vector<ParametersList>& def) const {
     auto val = std::find_if(
         vec_param_values_.begin(), vec_param_values_.end(), [&key](const auto& kv) { return kv.first == key; });
     if (val != vec_param_values_.end())
@@ -268,7 +272,7 @@ namespace cepgen {
   //------------------------------------------------------------------
 
   template <>
-  int ParametersList::get<int>(std::string key, const int& def) const {
+  int ParametersList::get<int>(const std::string& key, const int& def) const {
     auto val = std::find_if(int_values_.begin(), int_values_.end(), [&key](const auto& kv) { return kv.first == key; });
     if (val != int_values_.end())
       return val->second;
@@ -278,7 +282,7 @@ namespace cepgen {
   }
 
   template <>
-  std::vector<int> ParametersList::get<std::vector<int> >(std::string key, const std::vector<int>& def) const {
+  std::vector<int> ParametersList::get<std::vector<int> >(const std::string& key, const std::vector<int>& def) const {
     auto val = std::find_if(
         vec_int_values_.begin(), vec_int_values_.end(), [&key](const auto& kv) { return kv.first == key; });
     if (val != vec_int_values_.end())
@@ -293,7 +297,7 @@ namespace cepgen {
   //------------------------------------------------------------------
 
   template <>
-  double ParametersList::get<double>(std::string key, const double& def) const {
+  double ParametersList::get<double>(const std::string& key, const double& def) const {
     auto val = std::find_if(dbl_values_.begin(), dbl_values_.end(), [&key](const auto& kv) { return kv.first == key; });
     if (val != dbl_values_.end())
       return val->second;
@@ -303,7 +307,8 @@ namespace cepgen {
   }
 
   template <>
-  std::vector<double> ParametersList::get<std::vector<double> >(std::string key, const std::vector<double>& def) const {
+  std::vector<double> ParametersList::get<std::vector<double> >(const std::string& key,
+                                                                const std::vector<double>& def) const {
     auto val = std::find_if(
         vec_dbl_values_.begin(), vec_dbl_values_.end(), [&key](const auto& kv) { return kv.first == key; });
     if (val != vec_dbl_values_.end())
@@ -318,7 +323,7 @@ namespace cepgen {
   //------------------------------------------------------------------
 
   template <>
-  std::string ParametersList::get<std::string>(std::string key, const std::string& def) const {
+  std::string ParametersList::get<std::string>(const std::string& key, const std::string& def) const {
     auto val = std::find_if(str_values_.begin(), str_values_.end(), [&key](const auto& kv) { return kv.first == key; });
     if (val != str_values_.end())
       return val->second;
@@ -328,7 +333,7 @@ namespace cepgen {
   }
 
   template <>
-  std::vector<std::string> ParametersList::get<std::vector<std::string> >(std::string key,
+  std::vector<std::string> ParametersList::get<std::vector<std::string> >(const std::string& key,
                                                                           const std::vector<std::string>& def) const {
     auto val = std::find_if(
         vec_str_values_.begin(), vec_str_values_.end(), [&key](const auto& kv) { return kv.first == key; });
@@ -344,7 +349,16 @@ namespace cepgen {
   //------------------------------------------------------------------
 
   template <>
-  Limits ParametersList::get<Limits>(std::string key, const Limits& def) const {
+  bool ParametersList::has<Limits>(const std::string& key) const {
+    if (lim_values_.count(key) != 0)
+      return true;
+    if (dbl_values_.count(key + "min") || dbl_values_.count(key + "max"))
+      return true;
+    return false;
+  }
+
+  template <>
+  Limits ParametersList::get<Limits>(const std::string& key, const Limits& def) const {
     // first try to find Limits object in collections
     auto val = std::find_if(lim_values_.begin(), lim_values_.end(), [&key](const auto& kv) { return kv.first == key; });
     if (val != lim_values_.end())
@@ -362,7 +376,7 @@ namespace cepgen {
   }
 
   template <>
-  const ParametersList& ParametersList::fill<Limits>(std::string key, Limits& value) const {
+  const ParametersList& ParametersList::fill<Limits>(const std::string& key, Limits& value) const {
     if (has<double>(key + "min") || has<double>(key + "max")) {
       fill<double>(key + "min", value.min());
       fill<double>(key + "max", value.max());
@@ -384,7 +398,8 @@ namespace cepgen {
   //------------------------------------------------------------------
 
   template <>
-  ParticleProperties ParametersList::get<ParticleProperties>(std::string key, const ParticleProperties& def) const {
+  ParticleProperties ParametersList::get<ParticleProperties>(const std::string& key,
+                                                             const ParticleProperties& def) const {
     if (has<ParametersList>(key)) {
       const auto& plist = get<ParametersList>(key);
       ParticleProperties out;
@@ -420,7 +435,7 @@ namespace cepgen {
   }
 
   template <>
-  ParametersList& ParametersList::set<ParticleProperties>(std::string key, const ParticleProperties& value) {
+  ParametersList& ParametersList::set<ParticleProperties>(const std::string& key, const ParticleProperties& value) {
     return set<ParametersList>(key,
                                ParametersList()
                                    .set<int>("pdgid", value.pdgid)

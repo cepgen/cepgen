@@ -123,6 +123,7 @@ namespace cepgen {
                 utils::Hist2D(hvar.get<std::vector<double>>("xbins"), hvar.get<std::vector<double>>("ybins"))});
           else if (hvar.has<Limits>("xrange")) {
             const auto& nbinsx = (hvar.get<int>("nbins") > 0 ? hvar.get<int>("nbins") : hvar.get<int>("nbinsX"));
+            CG_WARNING("") << nbinsx << ": " << hvar;
             hists2d_.emplace_back(Hist2DInfo{
                 vars.at(0),
                 vars.at(1),
