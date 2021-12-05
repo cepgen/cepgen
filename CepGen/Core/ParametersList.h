@@ -27,6 +27,16 @@
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Utils/Limits.h"
 
+#define DEFINE_TYPE(type)                                                        \
+  template <>                                                                    \
+  bool ParametersList::has<type>(const std::string& key) const;                  \
+  template <>                                                                    \
+  type ParametersList::get<type>(const std::string& key, const type& def) const; \
+  template <>                                                                    \
+  type& ParametersList::operator[]<type>(const std::string& key);                \
+  template <>                                                                    \
+  ParametersList& ParametersList::set<type>(const std::string& key, const type&);
+
 namespace cepgen {
   /// Parameters container
   class ParametersList {
@@ -117,44 +127,16 @@ namespace cepgen {
     std::unordered_map<std::string, std::vector<double> > vec_dbl_values_;
     std::unordered_map<std::string, std::vector<std::string> > vec_str_values_;
   };
-  /// Check if an integer parameter is handled
-  template <>
-  inline bool ParametersList::has<int>(const std::string& key) const {
-    return int_values_.count(key) != 0;
-  }
-  /// Get an integer parameter value
-  template <>
-  int ParametersList::get<int>(const std::string& key, const int& def) const;
-  /// Reference to an integer parameter value
-  template <>
-  inline int& ParametersList::operator[]<int>(const std::string& key) {
-    return int_values_[key];
-  }
-  /// Set an integer parameter value
-  template <>
-  inline ParametersList& ParametersList::set<int>(const std::string& key, const int& value) {
-    int_values_[key] = value;
-    return *this;
-  }
-  /// Check if a vector of integers parameter is handled
-  template <>
-  inline bool ParametersList::has<std::vector<int> >(const std::string& key) const {
-    return vec_int_values_.count(key) != 0;
-  }
-  /// Get a vector of integers parameter value
-  template <>
-  std::vector<int> ParametersList::get<std::vector<int> >(const std::string& key, const std::vector<int>& def) const;
-  /// Reference to a vector of integers parameter value
-  template <>
-  inline std::vector<int>& ParametersList::operator[]<std::vector<int> >(const std::string& key) {
-    return vec_int_values_[key];
-  }
-  /// Set a vector of integers parameter value
-  template <>
-  inline ParametersList& ParametersList::set<std::vector<int> >(const std::string& key, const std::vector<int>& value) {
-    vec_int_values_[key] = value;
-    return *this;
-  }
+
+  DEFINE_TYPE(int)
+  DEFINE_TYPE(std::vector<int>)
+  DEFINE_TYPE(double)
+  DEFINE_TYPE(std::vector<double>)
+  DEFINE_TYPE(std::string)
+  DEFINE_TYPE(std::vector<std::string>)
+  DEFINE_TYPE(Limits)
+  DEFINE_TYPE(ParametersList)
+  DEFINE_TYPE(std::vector<ParametersList>)
 
   /// Check if a boolean parameter is handled
   template <>
@@ -189,150 +171,6 @@ namespace cepgen {
   /// Set a boolean parameter value
   template <>
   ParametersList& ParametersList::set<ParticleProperties>(const std::string& key, const ParticleProperties& value);
-
-  /// Check if a double floating point parameter is handled
-  template <>
-  inline bool ParametersList::has<double>(const std::string& key) const {
-    return dbl_values_.count(key) != 0;
-  }
-  /// Get a double floating point parameter value
-  template <>
-  double ParametersList::get<double>(const std::string& key, const double& def) const;
-  /// Reference to a double floating point parameter value
-  template <>
-  inline double& ParametersList::operator[]<double>(const std::string& key) {
-    return dbl_values_[key];
-  }
-  /// Set a double floating point parameter value
-  template <>
-  inline ParametersList& ParametersList::set<double>(const std::string& key, const double& value) {
-    dbl_values_[key] = value;
-    return *this;
-  }
-  /// Check if a vector of double floating point parameter is handled
-  template <>
-  inline bool ParametersList::has<std::vector<double> >(const std::string& key) const {
-    return vec_dbl_values_.count(key) != 0;
-  }
-  /// Get a vector of double floating point parameter value
-  template <>
-  std::vector<double> ParametersList::get<std::vector<double> >(const std::string& key,
-                                                                const std::vector<double>& def) const;
-  /// Reference to a vector of double floating point parameter value
-  template <>
-  inline std::vector<double>& ParametersList::operator[]<std::vector<double> >(const std::string& key) {
-    return vec_dbl_values_[key];
-  }
-  /// Set a vector of double floating point parameter value
-  template <>
-  inline ParametersList& ParametersList::set<std::vector<double> >(const std::string& key,
-                                                                   const std::vector<double>& value) {
-    vec_dbl_values_[key] = value;
-    return *this;
-  }
-
-  /// Check if a string parameter is handled
-  template <>
-  inline bool ParametersList::has<std::string>(const std::string& key) const {
-    return str_values_.count(key) != 0;
-  }
-  /// Get a string parameter value
-  template <>
-  std::string ParametersList::get<std::string>(const std::string& key, const std::string& def) const;
-  /// Reference to a string parameter value
-  template <>
-  inline std::string& ParametersList::operator[]<std::string>(const std::string& key) {
-    return str_values_[key];
-  }
-  /// Set a string parameter value
-  template <>
-  inline ParametersList& ParametersList::set<std::string>(const std::string& key, const std::string& value) {
-    str_values_[key] = value;
-    return *this;
-  }
-  /// Check if a vector of strings parameter is handled
-  template <>
-  inline bool ParametersList::has<std::vector<std::string> >(const std::string& key) const {
-    return vec_str_values_.count(key) != 0;
-  }
-  /// Get a vector of strings parameter value
-  template <>
-  std::vector<std::string> ParametersList::get<std::vector<std::string> >(const std::string& key,
-                                                                          const std::vector<std::string>& def) const;
-  /// Reference to a vector of strings parameter value
-  template <>
-  inline std::vector<std::string>& ParametersList::operator[]<std::vector<std::string> >(const std::string& key) {
-    return vec_str_values_[key];
-  }
-  /// Set a vector of strings parameter value
-  template <>
-  inline ParametersList& ParametersList::set<std::vector<std::string> >(const std::string& key,
-                                                                        const std::vector<std::string>& value) {
-    vec_str_values_[key] = value;
-    return *this;
-  }
-
-  /// Check if a limits parameter is handled
-  template <>
-  bool ParametersList::has<Limits>(const std::string& key) const;
-  /// Get a boundary limits parameter value
-  template <>
-  Limits ParametersList::get<Limits>(const std::string& key, const Limits& def) const;
-  /// Fill a limits definition with a valid object if the key content exists
-  template <>
-  const ParametersList& ParametersList::fill<Limits>(const std::string& key, Limits&) const;
-  /// Reference to a boundary limits parameter value
-  template <>
-  inline Limits& ParametersList::operator[]<Limits>(const std::string& key) {
-    return lim_values_[key];
-  }
-  /// Set a boundary limits parameter value
-  template <>
-  inline ParametersList& ParametersList::set<Limits>(const std::string& key, const Limits& value) {
-    lim_values_[key] = value;
-    return *this;
-  }
-
-  /// Check if a parameters list parameter is handled
-  template <>
-  inline bool ParametersList::has<ParametersList>(const std::string& key) const {
-    return param_values_.count(key) != 0;
-  }
-  /// Get a parameters list parameter value
-  template <>
-  ParametersList ParametersList::get<ParametersList>(const std::string& key, const ParametersList& def) const;
-  /// Reference to a parameters list parameter value
-  template <>
-  inline ParametersList& ParametersList::operator[]<ParametersList>(const std::string& key) {
-    return param_values_[key];
-  }
-  /// Set a parameters list parameter value
-  template <>
-  inline ParametersList& ParametersList::set<ParametersList>(const std::string& key, const ParametersList& value) {
-    param_values_[key] = value;
-    return *this;
-  }
-  /// Check if a vector of parameters lists is handled
-  template <>
-  inline bool ParametersList::has<std::vector<ParametersList> >(const std::string& key) const {
-    return vec_param_values_.count(key) != 0;
-  }
-  /// Get a vector of parameters list parameter value
-  template <>
-  std::vector<ParametersList> ParametersList::get<std::vector<ParametersList> >(
-      const std::string& key, const std::vector<ParametersList>& def) const;
-  /// Reference to a vector of parameters list parameter value
-  template <>
-  inline std::vector<ParametersList>& ParametersList::operator[]<std::vector<ParametersList> >(const std::string& key) {
-    return vec_param_values_[key];
-  }
-  /// Set a vector of parameters list parameter value
-  template <>
-  inline ParametersList& ParametersList::set<std::vector<ParametersList> >(const std::string& key,
-                                                                           const std::vector<ParametersList>& value) {
-    vec_param_values_[key] = value;
-    return *this;
-  }
 }  // namespace cepgen
 
 #endif

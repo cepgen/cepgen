@@ -23,6 +23,30 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/String.h"
 
+#define IMPL_TYPE(type, coll, name)                                                                        \
+  template <>                                                                                              \
+  bool ParametersList::has<type>(const std::string& key) const {                                           \
+    return coll.count(key) != 0;                                                                           \
+  }                                                                                                        \
+  template <>                                                                                              \
+  ParametersList& ParametersList::set<type>(const std::string& key, const type& value) {                   \
+    coll[key] = value;                                                                                     \
+    return *this;                                                                                          \
+  }                                                                                                        \
+  template <>                                                                                              \
+  type& ParametersList::operator[]<type>(const std::string& key) {                                         \
+    return coll[key];                                                                                      \
+  }                                                                                                        \
+  template <>                                                                                              \
+  type ParametersList::get<type>(const std::string& key, const type& def) const {                          \
+    auto val = std::find_if(coll.begin(), coll.end(), [&key](const auto& kv) { return kv.first == key; }); \
+    if (val != coll.end())                                                                                 \
+      return val->second;                                                                                  \
+    CG_DEBUG("ParametersList") << "Failed to retrieve " << name << " parameter with key=" << key << ". "   \
+                               << "Default value: " << def << ".";                                         \
+    return def;                                                                                            \
+  }
+
 namespace cepgen {
   const std::string ParametersList::MODULE_NAME = "mod_name";
 
@@ -244,105 +268,14 @@ namespace cepgen {
   // sub-parameters-type attributes
   //------------------------------------------------------------------
 
-  template <>
-  ParametersList ParametersList::get<ParametersList>(const std::string& key, const ParametersList& def) const {
-    auto val =
-        std::find_if(param_values_.begin(), param_values_.end(), [&key](const auto& kv) { return kv.first == key; });
-    if (val != param_values_.end())
-      return val->second;
-    CG_DEBUG("ParametersList") << "Failed to retrieve parameters with key=" << key << ". "
-                               << "Default value: " << def << ".";
-    return def;
-  }
-
-  template <>
-  std::vector<ParametersList> ParametersList::get<std::vector<ParametersList> >(
-      const std::string& key, const std::vector<ParametersList>& def) const {
-    auto val = std::find_if(
-        vec_param_values_.begin(), vec_param_values_.end(), [&key](const auto& kv) { return kv.first == key; });
-    if (val != vec_param_values_.end())
-      return val->second;
-    CG_DEBUG("ParametersList") << "Failed to retrieve parameters collection with key=" << key << ". "
-                               << "Default value: " << def << ".";
-    return def;
-  }
-
-  //------------------------------------------------------------------
-  // integer-type attributes
-  //------------------------------------------------------------------
-
-  template <>
-  int ParametersList::get<int>(const std::string& key, const int& def) const {
-    auto val = std::find_if(int_values_.begin(), int_values_.end(), [&key](const auto& kv) { return kv.first == key; });
-    if (val != int_values_.end())
-      return val->second;
-    CG_DEBUG("ParametersList") << "Failed to retrieve integer parameter with key=" << key << ". "
-                               << "Default value: " << def << ".";
-    return def;
-  }
-
-  template <>
-  std::vector<int> ParametersList::get<std::vector<int> >(const std::string& key, const std::vector<int>& def) const {
-    auto val = std::find_if(
-        vec_int_values_.begin(), vec_int_values_.end(), [&key](const auto& kv) { return kv.first == key; });
-    if (val != vec_int_values_.end())
-      return val->second;
-    CG_DEBUG("ParametersList") << "Failed to retrieve integer collection with key=" << key << ". "
-                               << "Default value: " << def << ".";
-    return def;
-  }
-
-  //------------------------------------------------------------------
-  // floating point-type attributes
-  //------------------------------------------------------------------
-
-  template <>
-  double ParametersList::get<double>(const std::string& key, const double& def) const {
-    auto val = std::find_if(dbl_values_.begin(), dbl_values_.end(), [&key](const auto& kv) { return kv.first == key; });
-    if (val != dbl_values_.end())
-      return val->second;
-    CG_DEBUG("ParametersList") << "Failed to retrieve double parameter with key=" << key << ". "
-                               << "Default value: " << def << ".";
-    return def;
-  }
-
-  template <>
-  std::vector<double> ParametersList::get<std::vector<double> >(const std::string& key,
-                                                                const std::vector<double>& def) const {
-    auto val = std::find_if(
-        vec_dbl_values_.begin(), vec_dbl_values_.end(), [&key](const auto& kv) { return kv.first == key; });
-    if (val != vec_dbl_values_.end())
-      return val->second;
-    CG_DEBUG("ParametersList") << "Failed to retrieve double collection with key=" << key << ". "
-                               << "Default value: " << def << ".";
-    return def;
-  }
-
-  //------------------------------------------------------------------
-  // string-type attributes
-  //------------------------------------------------------------------
-
-  template <>
-  std::string ParametersList::get<std::string>(const std::string& key, const std::string& def) const {
-    auto val = std::find_if(str_values_.begin(), str_values_.end(), [&key](const auto& kv) { return kv.first == key; });
-    if (val != str_values_.end())
-      return val->second;
-    CG_DEBUG("ParametersList") << "Failed to retrieve string parameter with key=" << key << ". "
-                               << "Default value: " << def << ".";
-    return def;
-  }
-
-  template <>
-  std::vector<std::string> ParametersList::get<std::vector<std::string> >(const std::string& key,
-                                                                          const std::vector<std::string>& def) const {
-    auto val = std::find_if(
-        vec_str_values_.begin(), vec_str_values_.end(), [&key](const auto& kv) { return kv.first == key; });
-    if (val != vec_str_values_.end())
-      return val->second;
-    CG_DEBUG("ParametersList") << "Failed to retrieve string collection with key=" << key << ". "
-                               << "Default value: " << def << ".";
-    return def;
-  }
+  IMPL_TYPE(int, int_values_, "integer")
+  IMPL_TYPE(std::vector<int>, vec_int_values_, "vector of integers")
+  IMPL_TYPE(double, dbl_values_, "floating number")
+  IMPL_TYPE(std::vector<double>, vec_dbl_values_, "vector of floating numbers")
+  IMPL_TYPE(std::string, str_values_, "string")
+  IMPL_TYPE(std::vector<std::string>, vec_str_values_, "vector of strings")
+  IMPL_TYPE(ParametersList, param_values_, "parameters")
+  IMPL_TYPE(std::vector<ParametersList>, vec_param_values_, "vector of parameters")
 
   //------------------------------------------------------------------
   // limits-type attributes
@@ -355,6 +288,17 @@ namespace cepgen {
     if (dbl_values_.count(key + "min") || dbl_values_.count(key + "max"))
       return true;
     return false;
+  }
+
+  template <>
+  ParametersList& ParametersList::set<Limits>(const std::string& key, const Limits& value) {
+    lim_values_[key] = value;
+    return *this;
+  }
+
+  template <>
+  inline Limits& ParametersList::operator[]<Limits>(const std::string& key) {
+    return lim_values_[key];
   }
 
   template <>
