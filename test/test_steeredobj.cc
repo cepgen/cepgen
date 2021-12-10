@@ -1,8 +1,8 @@
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/SteeredObject.h"
 
 int main(int argc, char* argv[]) {
   bool debug;

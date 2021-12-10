@@ -23,9 +23,9 @@
 #include <memory>
 #include <vector>
 
+#include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Physics/Cuts.h"
 #include "CepGen/Physics/IncomingBeams.h"
-#include "CepGen/Utils/SteeredObject.h"
 
 namespace cepgen {
   enum class KTFlux;

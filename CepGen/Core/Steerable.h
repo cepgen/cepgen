@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Utils_Steerable_h
-#define CepGen_Utils_Steerable_h
+#ifndef CepGen_Core_Steerable_h
+#define CepGen_Core_Steerable_h
 
 #include "CepGen/Utils/ParametersDescription.h"
 

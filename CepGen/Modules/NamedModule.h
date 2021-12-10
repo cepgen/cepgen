@@ -19,7 +19,7 @@
 #ifndef CepGen_Modules_NamedModule_h
 #define CepGen_Modules_NamedModule_h
 
-#include "CepGen/Utils/Steerable.h"
+#include "CepGen/Core/Steerable.h"
 
 namespace cepgen {
   /// Base runtime module object

@@ -16,10 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Utils_SteeredObject_h
-#define CepGen_Utils_SteeredObject_h
+#ifndef CepGen_Core_SteeredObject_h
+#define CepGen_Core_SteeredObject_h
 
-#include "CepGen/Utils/Steerable.h"
+#include "CepGen/Core/Steerable.h"
 
 #define REGISTER_TYPE(type, coll)                                \
 public:                                                          \
