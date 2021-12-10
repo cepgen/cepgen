@@ -20,6 +20,8 @@ namespace cepgen {
     ParametersDescription& operator=(const ParametersDescription&);
     /// Concatenate another description to this one
     ParametersDescription& operator+=(const ParametersDescription&);
+    /// Human-readable description
+    friend std::ostream& operator<<(std::ostream&, const ParametersDescription&);
     /// Set the module name for this parameter (or parameters collection)
     template <typename T>
     ParametersDescription& setName(const T& name) {

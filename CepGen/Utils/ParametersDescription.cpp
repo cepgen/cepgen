@@ -102,4 +102,6 @@ namespace cepgen {
   void ParametersDescription::validate(const ParametersList&) const {
     throw CG_FATAL("ParametersDescription:validate") << "Not yet implemented!";
   }
+
+  std::ostream& operator<<(std::ostream& os, const ParametersDescription& desc) { return os << desc.describe(); }
 }  // namespace cepgen
