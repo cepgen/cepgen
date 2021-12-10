@@ -47,6 +47,13 @@ namespace cepgen {
     ParametersList& parameters();
     /// List of parameters associated to this description object
     const ParametersList& parameters() const;
+    /// Get the description of a sub-object
+    const ParametersDescription& get(const std::string&) const;
+
+    /// Parameter type
+    enum struct Type { Value, Parameters, Module };
+    /// Get the type of parameter considered
+    Type type() const;
     /// Validate a set of used-steered parameters
     void validate(const ParametersList&) const;
 

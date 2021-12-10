@@ -33,14 +33,31 @@ namespace cepgen {
     return *this;
   }
 
+  const ParametersDescription& ParametersDescription::get(const std::string& key) const {
+    if (obj_descr_.count(key) == 0)
+      throw CG_FATAL("ParametersDescription:get")
+          << "Failed to retrieve a parameters description member named \'" << key << "\'!";
+    return obj_descr_.at(key);
+  }
+
+  ParametersDescription::Type ParametersDescription::type() const {
+    if (empty())
+      return Type::Value;
+    const auto& mod_name = ParametersList::getString(ParametersList::MODULE_NAME);
+    if (mod_name.empty())
+      return Type::Parameters;
+    return Type::Module;
+  }
+
   std::string ParametersDescription::describe(size_t offset) const {
     static auto sep = [](size_t offset) -> std::string { return std::string(offset, '\t'); };
     const auto& mod_name = ParametersList::getString(ParametersList::MODULE_NAME);
+    const auto& pdtype = type();
     const auto& keys = ParametersList::keys(false);
     std::ostringstream os;
-    if (mod_name.empty() && !keys.empty())
+    if (pdtype == Type::Parameters)
       os << utils::colourise("Parameters", utils::Colour::cyan, utils::Modifier::bold) << " collection ";
-    else if (!mod_name.empty())
+    else if (pdtype == Type::Module)
       os << utils::colourise("Module", utils::Colour::cyan, utils::Modifier::bold) << " " << utils::boldify(mod_name)
          << " ";
     if (!mod_descr_.empty())
