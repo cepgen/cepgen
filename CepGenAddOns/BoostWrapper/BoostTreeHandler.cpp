@@ -107,7 +107,7 @@ namespace cepgen {
         if (tree_.count(INTEGR_NAME))
           rt_params_->par_integrator += bc::unpack(tree_.get_child(INTEGR_NAME));
         if (tree_.count(GENERATOR_NAME))
-          rt_params_->par_generation += bc::unpack(tree_.get_child(GENERATOR_NAME));
+          rt_params_->generation().setParameters(bc::unpack(tree_.get_child(GENERATOR_NAME)));
         if (tree_.count(EVT_MOD_SEQ_NAME)) {
           evt_mod_ = bc::unpack(tree_.get_child(EVT_MOD_SEQ_NAME));
           for (const auto& name : evt_mod_.keys()) {

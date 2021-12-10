@@ -66,8 +66,6 @@ namespace cepgen {
     /// Pointer to a timekeeper instance
     utils::TimeKeeper* timeKeeper() { return tmr_.get(); }
 
-    /// Event generation parameters
-    ParametersList par_generation;
     /// Phase space definition parameters
     ParametersList par_kinematics;
     /// Integrator specific user-defined parameters
@@ -105,7 +103,7 @@ namespace cepgen {
     class Generation : public SteeredObject<Generation> {
     public:
       /// Build a generation parameters collection from a user input
-      explicit Generation(const ParametersList&);
+      explicit Generation(const ParametersList& = ParametersList());
 
       static ParametersDescription description();
 

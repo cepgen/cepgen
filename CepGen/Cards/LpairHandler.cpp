@@ -210,8 +210,9 @@ namespace cepgen {
         rt_params_->setProcess(proc::ProcessFactory::get().build(proc_name_, *proc_params_));
       }
 
+      rt_params_->generation().setParameters(*gen_params_);
+
       rt_params_->par_kinematics += *kin_params_;
-      rt_params_->par_generation += *gen_params_;
       rt_params_->par_integrator += *int_params_;
 
       //--- parse the structure functions code

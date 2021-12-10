@@ -34,11 +34,10 @@
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  Parameters::Parameters() : par_kinematics(Kinematics::description().parameters()), generation_(ParametersList()) {}
+  Parameters::Parameters() {}
 
   Parameters::Parameters(Parameters& param)
-      : par_generation(param.par_generation),
-        par_kinematics(param.par_kinematics),
+      : par_kinematics(param.par_kinematics),
         par_integrator(param.par_integrator),
         process_(std::move(param.process_)),
         kin_(std::move(param.kin_)),
@@ -51,8 +50,7 @@ namespace cepgen {
         tmr_(std::move(param.tmr_)) {}
 
   Parameters::Parameters(const Parameters& param)
-      : par_generation(param.par_generation),
-        par_kinematics(param.par_kinematics),
+      : par_kinematics(param.par_kinematics),
         par_integrator(param.par_integrator),
         kin_(param.kin_),
         total_gen_time_(param.total_gen_time_),
@@ -65,7 +63,6 @@ namespace cepgen {
   }
 
   Parameters& Parameters::operator=(Parameters param) {
-    par_generation = param.par_generation;
     par_kinematics = param.par_kinematics;
     par_integrator = param.par_integrator;
     process_ = std::move(param.process_);
@@ -91,7 +88,6 @@ namespace cepgen {
 
     CG_DEBUG("Parameters") << "Preparing all variables for a new run.";
     kin_ = Kinematics(par_kinematics);
-    generation_ = Generation(par_generation);
     process_->setKinematics(kin_);
     CG_DEBUG("Parameters").log([&](auto& dbg) {
       dbg << "Run started for " << process_->name() << " process " << std::hex << (void*)process_.get() << std::dec

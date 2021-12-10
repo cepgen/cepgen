@@ -214,7 +214,7 @@ namespace cepgen {
         throwPythonError("Generation information object should be a dictionary!");
       auto plist = get<ParametersList>(gen);
       plist.set<int>("maxgen", plist.get<int>("numEvents"));
-      rt_params_->generation() = Parameters::Generation(plist);
+      rt_params_->generation().setParameters(plist);
     }
 
     void PythonHandler::parseEventModifiers(PyObject* mod) {
