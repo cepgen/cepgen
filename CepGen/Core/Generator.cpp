@@ -34,11 +34,11 @@
 
 namespace cepgen {
   Generator::Generator(bool safe_mode) : parameters_(new Parameters) {
-    CG_DEBUG("Generator:init") << "Generator initialized";
     static bool init = false;
     if (!init) {
       initialise(safe_mode);
       init = true;
+      CG_DEBUG("Generator:init") << "Generator initialised";
     }
     //--- random number initialization
     std::chrono::system_clock::time_point time = std::chrono::system_clock::now();

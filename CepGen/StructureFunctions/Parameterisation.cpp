@@ -49,7 +49,8 @@ namespace cepgen {
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
           mx_min_(mp_ + PDG::get().mass(PDG::piZero)) {
-      CG_INFO("") << params;
+      CG_DEBUG("Parameterisation") << "Structure functions parameterisation to be built using following parameters:\n"
+                                   << ParametersDescription(params).describe(true);
       r_ratio_ = sigrat::SigmaRatiosFactory::get().build(params.get<ParametersList>("sigmaRatio"));
     }
 

@@ -243,6 +243,8 @@ namespace cepgen {
     }
 
     void Process::setKinematics(const Kinematics& kin) {
+      CG_DEBUG("Process:setKinematics") << "Preparing to set the kinematics parameters. Input parameters: "
+                                        << kin.parameters() << ".";
       clear();
       mp_ = PDG::get().mass(PDG::proton);
       mp2_ = mp_ * mp_;
