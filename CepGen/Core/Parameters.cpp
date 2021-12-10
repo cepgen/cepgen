@@ -88,6 +88,8 @@ namespace cepgen {
     //--- first-run preparation
     if (!process_ || !process_->firstRun())
       return;
+
+    CG_DEBUG("Parameters") << "Preparing all variables for a new run.";
     kin_ = Kinematics(par_kinematics);
     generation_ = Generation(par_generation);
     process_->setKinematics(kin_);
@@ -264,29 +266,24 @@ namespace cepgen {
 
   //-----------------------------------------------------------------------------------------------
 
-  Parameters::Generation::Generation(const ParametersList& params)
-      : max_gen_(params.get<int>("maxgen", 0)),
-        gen_print_every_(params.get<int>("printEvery", 10000)),
-        target_lumi_(params.get<double>("targetLumi", -1.)),
-        symmetrise_(params.get<bool>("symmetrise", false)),
-        num_threads_(params.get<int>("numThreads", 2)),
-        num_points_(params.get<int>("numPoints", 100)) {}
+  Parameters::Generation::Generation(const ParametersList& params) : SteeredObject(params) {
+    (*this)
+        .add("maxgen", max_gen_)
+        .add("printEvery", gen_print_every_)
+        .add("targetLumi", target_lumi_)
+        .add("symmetrise", symmetrise_)
+        .add("numThreads", num_threads_)
+        .add("numPoints", num_points_);
+  }
 
-  Parameters::Generation::Generation(const Generation& rhs)
-      : max_gen_(rhs.max_gen_),
-        gen_print_every_(rhs.gen_print_every_),
-        target_lumi_(rhs.target_lumi_),
-        symmetrise_(rhs.symmetrise_),
-        num_threads_(rhs.num_threads_),
-        num_points_(rhs.num_points_) {}
-
-  ParametersList Parameters::Generation::parameters() const {
-    return ParametersList()
-        .set<int>("maxgen", max_gen_)
-        .set<int>("printEvery", gen_print_every_)
-        .set<double>("targetLumi", target_lumi_)
-        .set<bool>("symmetrise", symmetrise_)
-        .set<int>("numThreads", num_threads_)
-        .set<int>("numPoints", num_points_);
+  ParametersDescription Parameters::Generation::description() {
+    auto desc = ParametersDescription();
+    desc.add<int>("maxgen", 0).setDescription("Number of events to generate");
+    desc.add<int>("printEvery", 10000).setDescription("Printing frequency for the events content");
+    desc.add<double>("targetLumi", -1.).setDescription("Target luminosity (in pb-1) to reach for this run");
+    desc.add<bool>("symmetrise", false).setDescription("Are events to be symmetrised wrt beam collinear axis");
+    desc.add<int>("numThreads", 2).setDescription("Number of threads to use for event generation");
+    desc.add<int>("numPoints", 100);
+    return desc;
   }
 }  // namespace cepgen
