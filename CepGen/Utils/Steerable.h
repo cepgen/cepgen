@@ -16,26 +16,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Modules_NamedModule_h
-#define CepGen_Modules_NamedModule_h
+#ifndef CepGen_Utils_Steerable_h
+#define CepGen_Utils_Steerable_h
 
-#include "CepGen/Utils/Steerable.h"
+#include "CepGen/Utils/ParametersDescription.h"
 
 namespace cepgen {
   /// Base runtime module object
-  template <typename T = std::string>
-  class NamedModule : public Steerable {
+  class Steerable {
   public:
     /// Build a module from its steering parameters
-    explicit NamedModule(const ParametersList& params) : Steerable(params), name_(params.name<T>()) {}
-    virtual ~NamedModule() = default;
+    explicit Steerable(const ParametersList& params) : params_(params) {}
+    virtual ~Steerable() = default;
 
-    /// Module unique name
-    const T& name() const { return name_; }
+    /// Describe all steering parameters for this module
+    static ParametersDescription description() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Unnamed user-steerable object");
+      return desc;
+    }
+
+    /// Set all module parameters
+    virtual void setParameters(const ParametersList& params) { params_ += params; }
+    /// Module parameters
+    virtual const ParametersList& parameters() const { return params_; }
 
   protected:
-    /// Module unique name
-    const T name_;
+    /// Module parameters
+    mutable ParametersList params_;
   };
 }  // namespace cepgen
 

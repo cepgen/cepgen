@@ -24,7 +24,7 @@
 namespace cepgen {
   const double Kinematics::MX_MIN = 1.07;  // mp+mpi+-
 
-  Kinematics::Kinematics(const ParametersList& params) : incoming_beams_(params) {
+  Kinematics::Kinematics(const ParametersList& params) : SteeredObject(params), incoming_beams_(params) {
     CG_DEBUG("Kinematics") << "Building a Kinematics parameters container "
                            << "with the following parameters:\n\t" << params << ".";
     //----- phase space definition

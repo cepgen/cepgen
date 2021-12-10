@@ -102,17 +102,12 @@ namespace cepgen {
     //----- events generation
 
     /// Collection of events generation parameters
-    class Generation {
+    class Generation : public SteeredObject<Generation> {
     public:
       /// Build a generation parameters collection from a user input
       explicit Generation(const ParametersList&);
-      /// Copy constructor
-      explicit Generation(const Generation&);
-      /// Assignment operator
-      Generation& operator=(const Generation&) = default;
 
-      /// List containing all parameters handled
-      ParametersList parameters() const;
+      static ParametersDescription description();
 
       /// Set the target luminosity to reach (in pb^-1)
       void setTargetLuminosity(double lumi_invpb) { target_lumi_ = lumi_invpb; }
@@ -123,7 +118,7 @@ namespace cepgen {
       /// Maximal number of events to generate
       size_t maxGen() const { return max_gen_; }
       /// Are we generating events? (true) or only computing the cross-section? (false)
-      bool enabled() const { return max_gen_ > 0ull; }
+      bool enabled() const { return max_gen_ > 0; }
       /// Set the frequency at which events are displayed to the end-user
       void setPrintEvery(size_t print_every) { gen_print_every_ = print_every; }
       /// Frequency at which events are displayed to the end-user
@@ -142,10 +137,10 @@ namespace cepgen {
       size_t numPoints() const { return num_points_; }
 
     private:
-      size_t max_gen_, gen_print_every_;
+      int max_gen_, gen_print_every_;
       double target_lumi_;
       bool symmetrise_;
-      size_t num_threads_, num_points_;
+      int num_threads_, num_points_;
     };
     /// Get the events generation parameters
     Generation& generation() { return generation_; }

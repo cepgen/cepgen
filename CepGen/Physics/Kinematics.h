@@ -25,6 +25,7 @@
 
 #include "CepGen/Physics/Cuts.h"
 #include "CepGen/Physics/IncomingBeams.h"
+#include "CepGen/Utils/SteeredObject.h"
 
 namespace cepgen {
   enum class KTFlux;
@@ -35,7 +36,7 @@ namespace cepgen {
     class Parameterisation;
   }
   /// List of kinematic constraints to apply on the process phase space.
-  class Kinematics {
+  class Kinematics : public SteeredObject<Kinematics> {
   public:
     Kinematics() = default;
     explicit Kinematics(const ParametersList&);
