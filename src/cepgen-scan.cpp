@@ -38,7 +38,6 @@ int main(int argc, char* argv[]) {
   int npoints;
   double min_value, max_value;
   vector<double> points;
-  bool debug;
 
   cepgen::ArgumentsParser parser(argc, argv);
   parser.addArgument("config,i", "base configuration", &input_config)
@@ -48,11 +47,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("num-points,n", "number of points to consider", &npoints, 10)
       .addOptionalArgument("points,p", "list of points to consider", &points, vector<double>{})
       .addOptionalArgument("output,o", "output file", &output_file, "xsect.dat")
-      .addOptionalArgument("debug,d", "debugging mode", &debug, false)
       .parse();
-
-  if (debug)
-    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
 
   cepgen::Generator mg;
   mg.setParameters(cepgen::card::Handler::parse(input_config));

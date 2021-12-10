@@ -67,22 +67,17 @@ using namespace std;
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  */
 int main(int argc, char* argv[]) {
-  bool list_mods, debug, safe_mode, dump_params, all;
+  bool list_mods, safe_mode, dump_params, all;
   vector<string> addons, modules;
 
   cepgen::ArgumentsParser parser(argc, argv);
   parser.addOptionalArgument("list-modules,l", "list all runtime modules", &list_mods, false)
       .addOptionalArgument("modules,m", "list of runtime modules to be described", &modules)
       .addOptionalArgument("add-ons,a", "external runtime plugin", &addons)
-      .addOptionalArgument("debug,d", "debugging mode", &debug, false)
       .addOptionalArgument("safe-mode,s", "safe mode", &safe_mode, false)
       .addOptionalArgument("dump-params,p", "dump the ParametersList object", &dump_params, false)
       .addOptionalArgument("all,a", "dump all modules descriptions", &all, false)
       .parse();
-
-  //--- handle any debugging flag
-  if (debug)
-    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
 
   //--- first start by defining the generator object
   try {

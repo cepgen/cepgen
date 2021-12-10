@@ -5,11 +5,7 @@
 #include "CepGen/Utils/ArgumentsParser.h"
 
 int main(int argc, char* argv[]) {
-  bool debug;
-  cepgen::ArgumentsParser(argc, argv).addOptionalArgument("debug,d", "debugging mode", &debug, false).parse();
-
-  if (debug)
-    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
+  cepgen::ArgumentsParser(argc, argv).parse();
 
   struct TestContainer : cepgen::SteeredObject<TestContainer> {
     explicit TestContainer() { (*this).add("foo", foo).add("bar", bar).add("baz", baz).add("bat", bat); }

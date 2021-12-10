@@ -7,11 +7,7 @@
 #include "CepGen/Utils/PythonConfigWriter.h"
 
 int main(int argc, char* argv[]) {
-  bool debug;
-  cepgen::ArgumentsParser(argc, argv).addOptionalArgument("debug,d", "debugging mode", &debug, false).parse();
-
-  if (debug)
-    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
+  cepgen::ArgumentsParser(argc, argv).parse();
 
   cepgen::initialise();
   cepgen::utils::PythonConfigWriter py("py_cfg.py");

@@ -29,15 +29,8 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   string card;
-  bool debug;
 
-  cepgen::ArgumentsParser(argc, argv)
-      .addArgument("card,i", "input card", &card)
-      .addOptionalArgument("debug,d", "debugging mode", &debug, false)
-      .parse();
-
-  if (debug)
-    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
+  cepgen::ArgumentsParser(argc, argv).addArgument("card,i", "input card", &card).parse();
 
   cepgen::initialise();
 
