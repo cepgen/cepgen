@@ -38,15 +38,13 @@ namespace cepgen {
     const int hi_A1 = params.get<int>("beam1A");
     const int hi_Z1 = params.get<int>("beam1Z");
     if (hi_Z1 != 0)
-      positive().pdg = HeavyIon(hi_A1, (Element)hi_Z1);
-    if (params.has<std::vector<int> >("heavyIonA")) {
-      const auto& hi_beam = params.get<std::vector<int> >("heavyIonA");
-      if (hi_beam.size() == 2)
-        positive().pdg = HeavyIon{(unsigned short)hi_beam.at(0), (Element)hi_beam.at(1)};
-      else if (!hi_beam.empty())
-        throw CG_FATAL("Kinematics") << "Invalid format for first incoming beam's HI specification!\n\t"
-                                     << "A pair of (A,Z) is required, got " << hi_beam << ".";
-    }
+      positive().pdg = HeavyIon(params.get<int>("beam1A"), (Element)hi_Z1);
+    const auto& hi_beam1 = params.get<std::vector<int> >("heavyIon1");
+    if (hi_beam1.size() == 2)
+      positive().pdg = HeavyIon{(unsigned short)hi_beam1.at(0), (Element)hi_beam1.at(1)};
+    else if (!hi_beam1.empty())
+      throw CG_FATAL("Kinematics") << "Invalid format for first incoming beam's HI specification!\n\t"
+                                   << "A pair of (A,Z) is required, got " << hi_beam1 << ".";
 
     // negative-z incoming beam
     if (params.has<int>("beam2id"))
@@ -55,14 +53,12 @@ namespace cepgen {
     const int hi_Z2 = params.get<int>("beam2Z");
     if (hi_Z2 != 0)
       negative().pdg = HeavyIon(hi_A2, (Element)hi_Z2);
-    if (params.has<std::vector<int> >("heavyIonB")) {
-      const auto& hi_beam = params.get<std::vector<int> >("heavyIonB");
-      if (hi_beam.size() == 2)
-        negative().pdg = HeavyIon{(unsigned short)hi_beam.at(0), (Element)hi_beam.at(1)};
-      else if (!hi_beam.empty())
-        throw CG_FATAL("Kinematics") << "Invalid format for second incoming beam's HI specification!\n\t"
-                                     << "A pair of (A,Z) is required, got " << hi_beam << ".";
-    }
+    const auto& hi_beam2 = params.get<std::vector<int> >("heavyIon2");
+    if (hi_beam2.size() == 2)
+      negative().pdg = HeavyIon{(unsigned short)hi_beam2.at(0), (Element)hi_beam2.at(1)};
+    else if (!hi_beam2.empty())
+      throw CG_FATAL("Kinematics") << "Invalid format for second incoming beam's HI specification!\n\t"
+                                   << "A pair of (A,Z) is required, got " << hi_beam2 << ".";
 
     //----- combined two-beam system
 
@@ -250,11 +246,11 @@ namespace cepgen {
     desc.add<int>("beam1id", 2212).setDescription("PDG id of the positive-z beam particle");
     desc.add<int>("beam1A", 1).setDescription("Atomic weight of the positive-z ion beam");
     desc.add<int>("beam1Z", 1).setDescription("Atomic number of the positive-z ion beam");
-    desc.add<std::vector<int> >("heavyIonA", {}).setDescription("{A, Z} of the positive-z ion beam");
+    desc.add<std::vector<int> >("heavyIon2", {}).setDescription("{A, Z} of the positive-z ion beam");
     desc.add<int>("beam2id", 2212).setDescription("PDG id of the negative-z beam particle");
     desc.add<int>("beam2A", 1).setDescription("Atomic weight of the negative-z ion beam");
     desc.add<int>("beam2Z", 1).setDescription("Atomic number of the negative-z ion beam");
-    desc.add<std::vector<int> >("heavyIonB", {}).setDescription("{A, Z} of the negative-z ion beam");
+    desc.add<std::vector<int> >("heavyIon2", {}).setDescription("{A, Z} of the negative-z ion beam");
     desc.add<std::vector<ParametersList> >("pdgIds", {}).setDescription("PDG description of incoming beam particles");
     desc.add<std::vector<int> >("pdgIds", {}).setDescription("PDG ids of incoming beam particles");
     desc.add<std::vector<double> >("pz", {}).setDescription("Beam momenta (in GeV/c)");
