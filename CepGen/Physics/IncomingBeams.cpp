@@ -249,11 +249,11 @@ namespace cepgen {
     auto desc = ParametersDescription();
     desc.add<int>("beam1id", 2212).setDescription("PDG id of the positive-z beam particle");
     desc.add<int>("beam1A", 1).setDescription("Atomic weight of the positive-z ion beam");
-    desc.add<int>("beam1Z", 0).setDescription("Atomic number of the positive-z ion beam");
+    desc.add<int>("beam1Z", 1).setDescription("Atomic number of the positive-z ion beam");
     desc.add<std::vector<int> >("heavyIonA", {}).setDescription("{A, Z} of the positive-z ion beam");
     desc.add<int>("beam2id", 2212).setDescription("PDG id of the negative-z beam particle");
     desc.add<int>("beam2A", 1).setDescription("Atomic weight of the negative-z ion beam");
-    desc.add<int>("beam2Z", 0).setDescription("Atomic number of the negative-z ion beam");
+    desc.add<int>("beam2Z", 1).setDescription("Atomic number of the negative-z ion beam");
     desc.add<std::vector<int> >("heavyIonB", {}).setDescription("{A, Z} of the negative-z ion beam");
     desc.add<std::vector<ParametersList> >("pdgIds", {}).setDescription("PDG description of incoming beam particles");
     desc.add<std::vector<int> >("pdgIds", {}).setDescription("PDG ids of incoming beam particles");

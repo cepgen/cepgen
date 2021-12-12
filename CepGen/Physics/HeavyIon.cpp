@@ -31,11 +31,13 @@ namespace cepgen {
 
   HeavyIon::operator pdgid_t() const {
     // Pythia8 convention/10-1e10+1e6
+    if (Z == Element::H && A == 1)
+      return 2212;
     return (pdgid_t)(1000000 + 1000 * (unsigned short)Z + A);
   }
 
   HeavyIon::operator bool() const {
-    return Z != Element::invalid;  // skip the proton
+    return Z != Element::invalid && Z != Element::H;  // skip the proton
   }
 
   double HeavyIon::mass(const HeavyIon& hi) {
