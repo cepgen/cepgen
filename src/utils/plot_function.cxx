@@ -36,8 +36,8 @@ int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("function,f", "function to parse", &function, "min(1,exp(-x/10))")
       .addOptionalArgument("num-points,n", "number of points to consider", &num_points, 100)
-      .addOptionalArgument("min-x,l", "minimal range", &min_x, -1.)
-      .addOptionalArgument("max-x,H", "maximal range", &max_x, +1.)
+      .addOptionalArgument("min-x,l", "minimal range", &min_x, -5.)
+      .addOptionalArgument("max-x,H", "maximal range", &max_x, +5.)
       .parse();
 
   TGraph gr_rt;
@@ -77,34 +77,36 @@ int main(int argc, char* argv[]) {
 
   CG_LOG << "Test passed!";
 
-  cepgen::ROOTCanvas c("test_graph", "CepGen validation", true);
-  TMultiGraph mg;
-  mg.Add(&gr_rt);
-  c.AddLegendEntry(&gr_rt, "ROOT", "l");
-  size_t i = 0;
-  for (auto& gr_fb : m_gr_fb) {
-    mg.Add(&gr_fb.second);
-    gr_fb.second.SetLineWidth(3);
-    gr_fb.second.SetLineStyle(2 + (i++));
-    c.AddLegendEntry(&gr_fb.second, Form("Functional (%s)", gr_fb.first.c_str()), "l");
-  }
-  i = 0;
-  for (auto& gr_diff : m_gr_diff) {
-    gr_diff.second.SetLineStyle(2 + i);
-    gr_diff.second.SetLineColor(cepgen::ROOTCanvas::colours[i]);
-    gr_diff.second.Draw("same");
-    ++i;
-  }
-  mg.Draw("al");
-  c.Prettify(mg.GetHistogram());
-  c.Save("pdf");
-  i = 0;
-  for (auto& gr_fb : m_gr_fb) {
-    auto* ratio =
-        c.RatioPlot(gr_fb.second.GetHistogram(), {gr_rt.GetHistogram()}, -1., 1., (i == 0 ? "al" : "l,same"))[0];
-    ratio->SetLineColor(kRed);
-    ratio->SetLineWidth(3);
-    ratio->SetLineStyle(2 + (i++));
+  {
+    cepgen::ROOTCanvas c("test_graph", "CepGen validation", true);
+    TMultiGraph mg;
+    mg.Add(&gr_rt);
+    c.AddLegendEntry(&gr_rt, "ROOT", "l");
+    size_t i = 0;
+    for (auto& gr_fb : m_gr_fb) {
+      mg.Add(&gr_fb.second);
+      gr_fb.second.SetLineWidth(3);
+      gr_fb.second.SetLineStyle(2 + (i++));
+      c.AddLegendEntry(&gr_fb.second, Form("Functional (%s)", gr_fb.first.c_str()), "l");
+    }
+    i = 0;
+    for (auto& gr_diff : m_gr_diff) {
+      gr_diff.second.SetLineStyle(2 + i);
+      gr_diff.second.SetLineColor(cepgen::ROOTCanvas::colours[i]);
+      gr_diff.second.Draw("same");
+      ++i;
+    }
+    mg.Draw("al");
+    c.Prettify(mg.GetHistogram());
+    c.Save("pdf");
+    i = 0;
+    for (auto& gr_fb : m_gr_fb) {
+      auto* ratio =
+          c.RatioPlot(gr_fb.second.GetHistogram(), {gr_rt.GetHistogram()}, -1., 1., (i == 0 ? "al" : "l,same"))[0];
+      ratio->SetLineColor(kRed);
+      ratio->SetLineWidth(3);
+      ratio->SetLineStyle(2 + (i++));
+    }
   }
   return 0;
 }
