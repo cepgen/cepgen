@@ -58,9 +58,7 @@ namespace cepgen {
         generation_(param.generation_) {}
 
   Parameters::~Parameters()  // required for unique_ptr initialisation!
-  {
-    CG_DEBUG("Parameters") << "Destructor called.";
-  }
+  {}
 
   Parameters& Parameters::operator=(Parameters param) {
     par_kinematics = param.par_kinematics;
@@ -214,28 +212,29 @@ namespace cepgen {
        << std::setw(wt) << "Integration" << utils::boldify(param->par_integrator.name<std::string>("N/A")) << "\n";
     for (const auto& key : param->par_integrator.keys(false))
       os << std::setw(wt) << "" << key << ": " << param->par_integrator.getString(key) << "\n";
+    const auto& kin = Kinematics(param->par_kinematics);
+    const auto& beams = kin.incomingBeams();
     os << "\n"
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill(' ') << "\n\n"
-       << std::setw(wt) << "Incoming particles" << param->kinematics().incomingBeams().positive() << ",\n"
-       << std::setw(wt) << "" << param->kinematics().incomingBeams().negative() << "\n"
-       << std::setw(wt) << "C.m. energy (GeV)" << param->kinematics().incomingBeams().sqrtS() << "\n"
-       << std::setw(wt) << "Form factors" << param->kinematics().incomingBeams().formFactors() << "\n";
-    if (param->kinematics().incomingBeams().mode() != mode::Kinematics::ElasticElastic &&
-        param->kinematics().incomingBeams().structureFunctions())
-      os << std::setw(wt) << "Structure functions" << param->kinematics().incomingBeams().structureFunctions() << "\n";
+       << std::setw(wt) << "Incoming particles" << beams.positive() << ",\n"
+       << std::setw(wt) << "" << beams.negative() << "\n"
+       << std::setw(wt) << "C.m. energy (GeV)" << utils::format("%g", beams.sqrtS()) << "\n"
+       << std::setw(wt) << "Form factors" << beams.formFactors() << "\n";
+    if (beams.mode() != mode::Kinematics::ElasticElastic && beams.structureFunctions())
+      os << std::setw(wt) << "Structure functions" << beams.structureFunctions() << "\n";
     os << "\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Incoming partons ") << std::setfill(' ') << "\n\n";
-    const auto& cuts = param->kinematics().cuts();
+    const auto& cuts = kin.cuts();
     for (const auto& lim : cuts.initial.list())  // map(particles class, limits)
       if (lim.limits.valid())
         os << std::setw(wt) << lim.description << lim.limits << "\n";
     os << "\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Outgoing central system ") << std::setfill(' ')
        << "\n\n";
-    if (!param->kinematics().minimumFinalState().empty()) {
+    if (!kin.minimumFinalState().empty()) {
       os << std::setw(wt) << "Minimum final state";
       std::string sep;
-      for (const auto& part : param->kinematics().minimumFinalState())
+      for (const auto& part : kin.minimumFinalState())
         os << sep << (PDG::Id)part, sep = ", ";
       os << "\n";
     }
