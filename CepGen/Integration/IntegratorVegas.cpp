@@ -216,6 +216,7 @@ namespace cepgen {
     desc.add<double>("alpha", 1.5);
     desc.add<int>("mode", (int)Mode::importance);
     desc.add<std::string>("loggingOutput", "cerr");
+    desc.add<int>("verbose", -1);
     return desc;
   }
 }  // namespace cepgen
