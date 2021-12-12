@@ -21,6 +21,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/Cuts.h"
+#include "CepGen/Physics/Kinematics.h"
 
 namespace cepgen {
   Cuts::Cuts(const ParametersList& params) { setParameters(params); }
@@ -104,5 +105,56 @@ namespace cepgen {
 
   std::ostream& operator<<(std::ostream& os, const Cuts::Property& prop) {
     return os << "{" << prop.name << ": " << prop.limits << "}";
+  }
+
+  //--------------------------------------------------------------------
+  // List of kinematics limits
+  //--------------------------------------------------------------------
+
+  CutsList::CutsList(const ParametersList& params)
+      : SteeredObject(params), initial(params_), central(params_), remnants(params_) {
+    if (params.has<Limits>("phiptdiff")) {
+      CG_WARNING("Kinematics") << "\"phiptdiff\" parameter is deprecated! "
+                               << "Please use \"phidiff\" instead.";
+      params.fill<Limits>("phiptdiff", central.phi_diff());  //legacy
+    }
+    if (params.has<ParametersList>("cuts")) {  // per-particle cuts
+      const auto& per_parts = params.get<ParametersList>("cuts");
+      for (const auto& part : per_parts.keys())
+        central_particles[(pdgid_t)stoi(part)].setParameters(per_parts.get<ParametersList>(part));
+    }
+
+    //--- outgoing remnants
+    // sanity check
+    if (remnants.mx().min() < Kinematics::MX_MIN) {
+      CG_WARNING("Kinematics:setParameters") << "Minimum diffractive mass range (" << remnants.mx() << ") is invalid. "
+                                             << "It is now set to " << Kinematics::MX_MIN << " GeV/c^2.";
+      remnants.mx().min() = Kinematics::MX_MIN;
+    }
+  }
+
+  ParametersDescription CutsList::description() {
+    auto desc = ParametersDescription();
+    desc.add<Limits>("q2", {0., 1.e5}).setDescription("Incoming partons virtuality range");
+    desc.add<double>("ptmin", 0.).setDescription("Outgoing central system object minimum transverse momentum (GeV/c)");
+    desc.add<Limits>("mx", {Kinematics::MX_MIN, 1000.})
+        .setDescription("Outgoing diffractive beam particles mass range (GeV/c^2)");
+    return desc;
+  }
+
+  std::ostream& operator<<(std::ostream& os, const CutsList& cuts) {
+    std::string sep;
+    os << "initial: {";
+    for (const auto& cut : cuts.initial.list())
+      os << sep << cut, sep = ", ";
+    os << "}, central: {";
+    sep.clear();
+    for (const auto& cut : cuts.central.list())
+      os << sep << cut, sep = ", ";
+    os << "}, remnants: {";
+    sep.clear();
+    for (const auto& cut : cuts.remnants.list())
+      os << sep << cut, sep = ", ";
+    return os << "}";
   }
 }  // namespace cepgen
