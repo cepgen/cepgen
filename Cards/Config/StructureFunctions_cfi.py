@@ -14,7 +14,7 @@ class PDFMode:
 class StructureFunctions:
     """Types of structure functions supported"""
     generic = Module(0,
-        sigmaRatio = SigmaRatio.E143
+        sigmaRatio = SigmaRatio.SibirtsevBlunden
     )
     Electron            = generic.clone(1)
     ElasticProton       = generic.clone(2)

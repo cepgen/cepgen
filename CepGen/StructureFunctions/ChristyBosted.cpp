@@ -382,7 +382,6 @@ namespace cepgen {
       auto desc = Parameterisation::description();
       desc.setDescription("Christy-Bosted F2/FL parameterisation of low-mass resonances");
       desc.add<std::string>("model", "standard").setDescription("Parameterisation set (only 'standard' handled)");
-      CG_WARNING("") << desc.parameters();
       return desc;
     }
   }  // namespace strfun

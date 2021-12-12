@@ -32,7 +32,7 @@ namespace cepgen {
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
           mx_min_(mp_ + PDG::get().mass(PDG::piZero)),
-          r_ratio_(sigrat::SigmaRatiosFactory::get().build((int)sigrat::Type::E143)) {}
+          r_ratio_(sigrat::SigmaRatiosFactory::get().build((int)sigrat::Type::SibirtsevBlunden)) {}
 
     Parameterisation::Parameterisation(const Parameterisation& sf)
         : NamedModule<int>(sf.parameters()),
@@ -48,10 +48,10 @@ namespace cepgen {
         : NamedModule<int>(params),
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
-          mx_min_(mp_ + PDG::get().mass(PDG::piZero)) {
+          mx_min_(mp_ + PDG::get().mass(PDG::piZero)),
+          r_ratio_(sigrat::SigmaRatiosFactory::get().build(params.get<int>("sigmaRatio"))) {
       CG_DEBUG("Parameterisation") << "Structure functions parameterisation to be built using following parameters:\n"
                                    << ParametersDescription(params).describe(true);
-      r_ratio_ = sigrat::SigmaRatiosFactory::get().build(params.get<ParametersList>("sigmaRatio"));
     }
 
     Parameterisation& Parameterisation::operator=(const Parameterisation& sf) {
@@ -115,8 +115,8 @@ namespace cepgen {
     ParametersDescription Parameterisation::description() {
       auto desc = ParametersDescription();
       desc.setDescription("Unnamed structure functions parameterisation");
-      desc.add<ParametersDescription>(
-          "sigmaRatio", sigrat::SigmaRatiosFactory::get().describeParameters((int)sigrat::Type::SibirtsevBlunden));
+      desc.add<int>("sigmaRatio", (int)sigrat::Type::SibirtsevBlunden)
+          .setDescription("Modelling for the sigma(L/T) ratio used in FL computation from F2");
       return desc;
     }
 

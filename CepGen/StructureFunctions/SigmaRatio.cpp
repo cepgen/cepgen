@@ -16,10 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cassert>
 #include <cmath>
 #include <iostream>
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
@@ -45,7 +45,7 @@ namespace cepgen {
     /// E143 experimental R measurement \cite Abe:1998ym
     class E143 final : public Parameterisation {
     public:
-      explicit E143(const ParametersList& params = ParametersList());
+      explicit E143(const ParametersList&);
 
       static ParametersDescription description();
 
@@ -62,9 +62,12 @@ namespace cepgen {
           a_(params.get<std::vector<double> >("a")),
           b_(params.get<std::vector<double> >("b")),
           c_(params.get<std::vector<double> >("c")) {
-      assert(a_.size() == 6);
-      assert(b_.size() == 6);
-      assert(c_.size() == 6);
+      if (a_.size() != 6)
+        throw CG_FATAL("E143") << "Parameter 'a' should have 6 components! Parsed " << a_ << ".";
+      if (b_.size() != 6)
+        throw CG_FATAL("E143") << "Parameter 'b' should have 6 components! Parsed " << b_ << ".";
+      if (c_.size() != 6)
+        throw CG_FATAL("E143") << "Parameter 'c' should have 6 components! Parsed " << c_ << ".";
     }
 
     double E143::operator()(double xbj, double q2, double& err) const {
@@ -104,7 +107,7 @@ namespace cepgen {
     /// \warning valid for \f$Q^2\f$ > 0.3 GeV\f$^2\f$
     class R1990 final : public Parameterisation {
     public:
-      explicit R1990(const ParametersList& params = ParametersList());
+      explicit R1990(const ParametersList&);
 
       static ParametersDescription description();
 
@@ -117,7 +120,8 @@ namespace cepgen {
 
     R1990::R1990(const ParametersList& params)
         : lambda2_(params.get<double>("lambda2")), b_(params.get<std::vector<double> >("b")) {
-      assert(b_.size() == 3);
+      if (b_.size() != 3)
+        throw CG_FATAL("R1990") << "Parameter 'b' should have 3 components! Parsed " << b_ << ".";
     }
 
     double R1990::operator()(double xbj, double q2, double& err) const {
@@ -138,7 +142,7 @@ namespace cepgen {
     /// CLAS experimental R measurement
     class CLAS final : public Parameterisation {
     public:
-      explicit CLAS(const ParametersList& params = ParametersList());
+      explicit CLAS(const ParametersList&);
 
       static ParametersDescription description();
 
@@ -151,7 +155,8 @@ namespace cepgen {
 
     CLAS::CLAS(const ParametersList& params)
         : p_(params.get<std::vector<double> >("p")), wth_(params.get<double>("wth")), q20_(params.get<double>("q20")) {
-      assert(p_.size() == 3);
+      if (p_.size() != 3)
+        throw CG_FATAL("R1990") << "Parameter 'p' should have 3 components! Parsed " << p_ << ".";
     }
 
     double CLAS::operator()(double xbj, double q2, double& err) const {
@@ -181,7 +186,7 @@ namespace cepgen {
     /// Sibirtsev & Blunden parameterisation of the R ratio \cite Sibirtsev:2013cga
     class SibirtsevBlunden final : public Parameterisation {
     public:
-      explicit SibirtsevBlunden(const ParametersList& params = ParametersList());
+      explicit SibirtsevBlunden(const ParametersList&);
 
       static ParametersDescription description();
 
