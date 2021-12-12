@@ -46,10 +46,8 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    /// Set a collection of kinematics parameters
-    void setParameters(const ParametersList&) override;
     /// List containing all parameters handled
-    ParametersList parameters(bool extended = false) const;
+    ParametersList parameters(bool extended) const;
 
     /// Beam/primary particle's kinematics
     IncomingBeams& incomingBeams() { return incoming_beams_; }

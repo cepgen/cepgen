@@ -24,22 +24,18 @@
 namespace cepgen {
   const double Kinematics::MX_MIN = 1.07;  // mp+mpi+-
 
-  Kinematics::Kinematics(const ParametersList& params) : SteeredObject(params), incoming_beams_(params), cuts_(params) {
+  Kinematics::Kinematics(const ParametersList& params)
+      : SteeredObject(params), incoming_beams_(params_), cuts_(params_) {
     CG_DEBUG("Kinematics") << "Building a Kinematics parameters container "
                            << "with the following parameters:\n\t" << params << ".";
-    //----- phase space definition
-    setParameters(params);
-  }
-
-  void Kinematics::setParameters(const ParametersList& params) {
-    cuts_ = CutsList(params);
-    if (params.has<std::vector<int> >("minFinalState"))
-      for (const auto& pdg : params.get<std::vector<int> >("minFinalState"))
+    //----- outgoing particles definition
+    if (params_.has<std::vector<int> >("minFinalState"))
+      for (const auto& pdg : params_.get<std::vector<int> >("minFinalState"))
         minimum_final_state_.emplace_back((pdgid_t)pdg);
 
     //--- specify where to look for the grid path for gluon emission
     if (params.has<std::string>("kmrGridPath"))
-      kmr::GluonGrid::get(ParametersList(params).set<std::string>("path", params.get<std::string>("kmrGridPath")));
+      kmr::GluonGrid::get(ParametersList(params_).set<std::string>("path", params.get<std::string>("kmrGridPath")));
   }
 
   ParametersList Kinematics::parameters(bool extended) const {
@@ -70,6 +66,7 @@ namespace cepgen {
   ParametersDescription Kinematics::description() {
     auto desc = ParametersDescription();
     desc += IncomingBeams::description();
+    desc += CutsList::description();
     return desc;
   }
 }  // namespace cepgen
