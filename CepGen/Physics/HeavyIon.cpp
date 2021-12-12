@@ -32,7 +32,7 @@ namespace cepgen {
   HeavyIon::operator pdgid_t() const {
     // Pythia8 convention/10-1e10+1e6
     if (Z == Element::H && A == 1)
-      return 2212;
+      return PDG::proton;
     return (pdgid_t)(1000000 + 1000 * (unsigned short)Z + A);
   }
 
