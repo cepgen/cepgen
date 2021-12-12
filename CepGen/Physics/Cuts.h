@@ -22,9 +22,9 @@
 #include <unordered_map>
 #include <vector>
 
+#include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Utils/Limits.h"
-#include "CepGen/Utils/ParametersDescription.h"
 
 namespace cepgen {
   class ParametersList;

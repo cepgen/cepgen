@@ -23,9 +23,9 @@
 #include <memory>
 #include <vector>
 
+#include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Physics/Modes.h"
 #include "CepGen/Physics/Momentum.h"
-#include "CepGen/Utils/ParametersDescription.h"
 
 namespace cepgen {
   enum class KTFlux;

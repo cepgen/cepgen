@@ -1,6 +1,6 @@
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Parameters.h"
-#include "CepGen/Utils/ParametersDescription.h"
 #include "CepGenAddOns/BoostWrapper/BoostTreeUtils.h"
 
 namespace boost {

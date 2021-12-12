@@ -1,5 +1,23 @@
-#ifndef CepGen_Utils_ParametersDescription_h
-#define CepGen_Utils_ParametersDescription_h
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef CepGen_Core_ParametersDescription_h
+#define CepGen_Core_ParametersDescription_h
 
 #include "CepGen/Core/ParametersList.h"
 
@@ -13,11 +31,10 @@ namespace cepgen {
     /// Build the (empty) description of a parameters collection object from its definition
     explicit ParametersDescription(const ParametersList& params);
     /// Copy constructor
-    ParametersDescription(const ParametersDescription&);
+    ParametersDescription(const ParametersDescription&) = default;
+
     /// Does a description of this parameter (or parameters collection) exist?
     bool empty() const;
-    /// Assignment operator
-    ParametersDescription& operator=(const ParametersDescription&);
     /// Concatenate another description to this one
     ParametersDescription& operator+=(const ParametersDescription&);
     /// Human-readable description

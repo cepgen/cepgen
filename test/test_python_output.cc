@@ -1,9 +1,9 @@
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/ParametersDescription.h"
 #include "CepGen/Utils/PythonConfigWriter.h"
 
 int main(int argc, char* argv[]) {

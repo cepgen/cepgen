@@ -20,7 +20,7 @@
 
 #include <complex>
 
-#include "CepGen/Utils/ParametersDescription.h"
+#include "CepGen/Core/ParametersDescription.h"
 
 namespace cepgen {
   class ParametersList;

@@ -31,7 +31,6 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Processes/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Utils/ParametersDescription.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {

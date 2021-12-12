@@ -22,9 +22,9 @@
 #include <memory>
 #include <string>
 
+#include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Utils/Filesystem.h"
-#include "CepGen/Utils/ParametersDescription.h"
 
 // forward-declaration of base MadGraph standalone_cpp process
 class CPPProcess;

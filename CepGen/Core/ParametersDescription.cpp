@@ -1,7 +1,25 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <sstream>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/ParametersDescription.h"
+#include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
@@ -15,17 +33,7 @@ namespace cepgen {
       obj_descr_[key] = ParametersDescription();
   }
 
-  ParametersDescription::ParametersDescription(const ParametersDescription& oth)
-      : ParametersList(oth), mod_descr_(oth.mod_descr_), obj_descr_(oth.obj_descr_) {}
-
   bool ParametersDescription::empty() const { return obj_descr_.empty() && mod_descr_.empty(); }
-
-  ParametersDescription& ParametersDescription::operator=(const ParametersDescription& oth) {
-    ParametersList::operator=(oth);
-    mod_descr_ = oth.mod_descr_;
-    obj_descr_ = oth.obj_descr_;
-    return *this;
-  }
 
   ParametersDescription& ParametersDescription::operator+=(const ParametersDescription& oth) {
     obj_descr_.insert(oth.obj_descr_.begin(), oth.obj_descr_.end());
