@@ -27,15 +27,17 @@
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Utils/Limits.h"
 
-#define DEFINE_TYPE(type)                                                        \
-  template <>                                                                    \
-  bool ParametersList::has<type>(const std::string& key) const;                  \
-  template <>                                                                    \
-  type ParametersList::get<type>(const std::string& key, const type& def) const; \
-  template <>                                                                    \
-  type& ParametersList::operator[]<type>(const std::string& key);                \
-  template <>                                                                    \
-  ParametersList& ParametersList::set<type>(const std::string& key, const type&);
+#define DEFINE_TYPE(type)                                                         \
+  template <>                                                                     \
+  bool ParametersList::has<type>(const std::string& key) const;                   \
+  template <>                                                                     \
+  type ParametersList::get<type>(const std::string& key, const type& def) const;  \
+  template <>                                                                     \
+  type& ParametersList::operator[]<type>(const std::string& key);                 \
+  template <>                                                                     \
+  ParametersList& ParametersList::set<type>(const std::string& key, const type&); \
+  template <>                                                                     \
+  std::vector<std::string> ParametersList::keysOf<type>() const;
 
 namespace cepgen {
   /// Parameters container
@@ -104,6 +106,9 @@ namespace cepgen {
     /// Is the list empty?
     bool empty() const;
 
+    /// List of keys for one type in this list of parameters
+    template <typename T>
+    std::vector<std::string> keysOf() const;
     /// List of keys handled in this list of parameters
     /// \param[in] name_key Include the name variable?
     std::vector<std::string> keys(bool name_key = true) const;

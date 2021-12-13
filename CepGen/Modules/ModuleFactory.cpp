@@ -71,18 +71,13 @@ namespace cepgen {
     if (map_.count(idx) == 0)
       throw CG_FATAL("ModuleFactory") << description_ << " failed to build a module with index/name \"" << idx
                                       << "\"!\nRegistered modules: " << modules() << ".";
-    ParametersList plist(describeParameters(idx).parameters() + params);
+    ParametersList plist(describeParameters(idx).validate(params));
     CG_DEBUG("ModuleFactory").log([&](auto& log) {
       log << description_ << " will build a module ";
       if (plist.empty())
         log << "without parameters.";
       else
-        log << "with parameters:\n"
-            << plist << ".\n"
-            << "Base parameters:\n"
-            << describeParameters(idx).parameters() << ".\n"
-            << "User-defined parameters:\n"
-            << params << ".";
+        log << "with parameters:\n" << plist << ".";
     });
     return map_.at(idx)(plist);
   }

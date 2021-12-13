@@ -66,13 +66,13 @@ namespace cepgen {
     const ParametersList& parameters() const;
     /// Get the description of a sub-object
     const ParametersDescription& get(const std::string&) const;
+    /// Validate a set of used-steered parameters
+    ParametersList validate(const ParametersList&) const;
 
     /// Parameter type
     enum struct Type { Value, Parameters, Module };
     /// Get the type of parameter considered
     Type type() const;
-    /// Validate a set of used-steered parameters
-    void validate(const ParametersList&) const;
 
   private:
     std::string mod_descr_;

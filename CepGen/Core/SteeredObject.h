@@ -39,7 +39,7 @@ namespace cepgen {
   public:
     /// Build a module
     SteeredObject() : Steerable(T::description().parameters()) {}
-    SteeredObject(const ParametersList& params) : Steerable(T::description().parameters() + params) {}
+    SteeredObject(const ParametersList& params) : Steerable(T::description().validate(params)) {}
     virtual ~SteeredObject() = default;
 
     /// Description of all object parameters

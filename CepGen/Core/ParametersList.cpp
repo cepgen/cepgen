@@ -23,28 +23,34 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/String.h"
 
-#define IMPL_TYPE(type, coll, name)                                                                        \
-  template <>                                                                                              \
-  bool ParametersList::has<type>(const std::string& key) const {                                           \
-    return coll.count(key) != 0;                                                                           \
-  }                                                                                                        \
-  template <>                                                                                              \
-  ParametersList& ParametersList::set<type>(const std::string& key, const type& value) {                   \
-    coll[key] = value;                                                                                     \
-    return *this;                                                                                          \
-  }                                                                                                        \
-  template <>                                                                                              \
-  type& ParametersList::operator[]<type>(const std::string& key) {                                         \
-    return coll[key];                                                                                      \
-  }                                                                                                        \
-  template <>                                                                                              \
-  type ParametersList::get<type>(const std::string& key, const type& def) const {                          \
-    auto val = std::find_if(coll.begin(), coll.end(), [&key](const auto& kv) { return kv.first == key; }); \
-    if (val != coll.end())                                                                                 \
-      return val->second;                                                                                  \
-    CG_DEBUG("ParametersList") << "Failed to retrieve " << name << " parameter with key=" << key << ". "   \
-                               << "Default value: " << def << ".";                                         \
-    return def;                                                                                            \
+#define IMPL_TYPE(type, coll, name)                                                                                 \
+  template <>                                                                                                       \
+  bool ParametersList::has<type>(const std::string& key) const {                                                    \
+    return coll.count(key) != 0;                                                                                    \
+  }                                                                                                                 \
+  template <>                                                                                                       \
+  ParametersList& ParametersList::set<type>(const std::string& key, const type& value) {                            \
+    coll[key] = value;                                                                                              \
+    return *this;                                                                                                   \
+  }                                                                                                                 \
+  template <>                                                                                                       \
+  type& ParametersList::operator[]<type>(const std::string& key) {                                                  \
+    return coll[key];                                                                                               \
+  }                                                                                                                 \
+  template <>                                                                                                       \
+  type ParametersList::get<type>(const std::string& key, const type& def) const {                                   \
+    auto val = std::find_if(coll.begin(), coll.end(), [&key](const auto& kv) { return kv.first == key; });          \
+    if (val != coll.end())                                                                                          \
+      return val->second;                                                                                           \
+    CG_DEBUG("ParametersList") << "Failed to retrieve " << name << " parameter with key=" << key << ". "            \
+                               << "Default value: " << def << ".";                                                  \
+    return def;                                                                                                     \
+  }                                                                                                                 \
+  template <>                                                                                                       \
+  std::vector<std::string> ParametersList::keysOf<type>() const {                                                   \
+    std::vector<std::string> out;                                                                                   \
+    std::transform(coll.begin(), coll.end(), std::back_inserter(out), [](const auto& pair) { return pair.first; }); \
+    return out;                                                                                                     \
   }
 
 namespace cepgen {
@@ -73,7 +79,7 @@ namespace cepgen {
     for (const auto& key : oth.keys()) {
       if (has<ParametersList>(key)) {
         if (get<ParametersList>(key) == oth.get<ParametersList>(key))
-          continue;
+          erase(key);
         //operator[]<ParametersList>(key) += oth.get<ParametersList>(key);
       } else
         erase(key);
