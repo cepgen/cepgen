@@ -29,13 +29,6 @@ namespace cepgen {
     explicit Steerable(const ParametersList& params) : params_(params) {}
     virtual ~Steerable() = default;
 
-    /// Describe all steering parameters for this module
-    static ParametersDescription description() {
-      auto desc = ParametersDescription();
-      desc.setDescription("Unnamed user-steerable object");
-      return desc;
-    }
-
     /// Set all module parameters
     virtual void setParameters(const ParametersList& params) { params_ += params; }
     /// Module parameters

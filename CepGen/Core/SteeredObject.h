@@ -44,7 +44,7 @@ namespace cepgen {
 
     /// Description of all object parameters
     static inline ParametersDescription description() {
-      auto desc = Steerable::description();
+      auto desc = ParametersDescription();
       desc.setDescription("Virtual, base steerable object");
       return desc;
     }

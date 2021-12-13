@@ -80,7 +80,7 @@ namespace cepgen {
         : ExportModule(params),
           file_(params.get<std::string>("filename")),
           hist_filename_(params.get<std::string>("histFilename")),
-          variables_(params.get<std::vector<std::string>>("variables")),
+          variables_(params.get<std::vector<std::string> >("variables")),
           save_banner_(params.get<bool>("saveBanner")),
           save_variables_(params.get<bool>("saveVariables")),
           show_hists_(params.get<bool>("showHistograms")),
@@ -100,8 +100,8 @@ namespace cepgen {
 
         const auto& hvar = hist_vars.get<ParametersList>(key);
         if (vars.size() == 1) {  // 1D histogram
-          if (hvar.has<std::vector<double>>("xbins"))
-            hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(hvar.get<std::vector<double>>("xbins"))});
+          if (hvar.has<std::vector<double> >("xbins"))
+            hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(hvar.get<std::vector<double> >("xbins"))});
           else if (hvar.has<Limits>("xrange")) {
             const auto& nbins = (hvar.get<int>("nbins") > 0 ? hvar.get<int>("nbins") : hvar.get<int>("nbinsX"));
             hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(nbins, hvar.get<Limits>("xrange"))});
@@ -116,11 +116,11 @@ namespace cepgen {
           hist.setXlabel(vars.at(0));
           hist.setYlabel("d(sig)/d" + vars.at(0) + " (pb/bin)");
         } else if (vars.size() == 2) {  // 2D histogram
-          if (hvar.has<std::vector<double>>("xbins") && hvar.has<std::vector<double>>("ybins"))
+          if (hvar.has<std::vector<double> >("xbins") && hvar.has<std::vector<double> >("ybins"))
             hists2d_.emplace_back(Hist2DInfo{
                 vars.at(0),
                 vars.at(1),
-                utils::Hist2D(hvar.get<std::vector<double>>("xbins"), hvar.get<std::vector<double>>("ybins"))});
+                utils::Hist2D(hvar.get<std::vector<double> >("xbins"), hvar.get<std::vector<double> >("ybins"))});
           else if (hvar.has<Limits>("xrange")) {
             const auto& nbinsx = (hvar.get<int>("nbins") > 0 ? hvar.get<int>("nbins") : hvar.get<int>("nbinsX"));
             CG_WARNING("") << nbinsx << ": " << hvar;
@@ -206,18 +206,21 @@ namespace cepgen {
       desc.setDescription("Text-based histogramming tool");
       desc.add<std::string>("filename", "output.txt").setDescription("Output filename for variables dump");
       desc.add<std::string>("histFilename", "output.hists.txt").setDescription("Output filename for histogram dump");
-      desc.add<std::vector<std::string>>("variables", {}).setDescription("List of variables to dump");
+      desc.add<std::vector<std::string> >("variables", {}).setDescription("List of variables to dump");
       desc.add<bool>("saveBanner", true).setDescription("Also save the boilerplate in output files?");
       desc.add<bool>("saveVariables", true).setDescription("Save the variable(s) into an output file?");
       desc.add<bool>("showHistograms", true).setDescription("Show the histogram(s) at the end of the run?");
       desc.add<bool>("saveHistograms", false).setDescription("Save the histogram(s) at the end of the run?");
       desc.add<std::string>("separator", "\t").setDescription("Base separator in output file");
+      // per-histogram default parameters
       ParametersDescription hist_desc;
-      hist_desc.add<int>("nbins", 25);
-      hist_desc.add<std::vector<double>>("xbins", {0., 1.}).setDescription("x-axis bins definition");
+      // x-axis attributes
+      hist_desc.add<std::vector<double> >("xbins", {0., 1.}).setDescription("x-axis bins definition");
+      hist_desc.add<int>("nbins", 25).setDescription("Bins multiplicity for x-axis");
       hist_desc.add<int>("nbinsX", -1).setDescription("Bins multiplicity for x-axis");
       hist_desc.add<Limits>("xrange", Limits{}).setDescription("Minimum-maximum range for x-axis");
-      hist_desc.add<std::vector<double>>("ybins", {0., 1.}).setDescription("y-axis bins definition");
+      // y-axis attributes
+      hist_desc.add<std::vector<double> >("ybins", {0., 1.}).setDescription("y-axis bins definition");
       hist_desc.add<int>("nbinsY", 50).setDescription("Bins multiplicity for y-axis");
       hist_desc.add<Limits>("yrange", Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
       hist_desc.add<bool>("log", false).setDescription("Plot logarithmic axis?");

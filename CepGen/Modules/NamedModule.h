@@ -23,19 +23,27 @@
 
 namespace cepgen {
   /// Base runtime module object
-  template <typename T = std::string>
+  /// \tparam I Indexing type for runtime factory builder registration
+  template <typename I = std::string>
   class NamedModule : public Steerable {
   public:
     /// Build a module from its steering parameters
-    explicit NamedModule(const ParametersList& params) : Steerable(params), name_(params.name<T>()) {}
+    explicit NamedModule(const ParametersList& params) : Steerable(params), name_(params.name<I>()) {}
     virtual ~NamedModule() = default;
 
-    /// Module unique name
-    const T& name() const { return name_; }
+    /// Describe all steering parameters for this module
+    static ParametersDescription description() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Named steerable module");
+      return desc;
+    }
+
+    /// Module unique indexing name
+    const I& name() const { return name_; }
 
   protected:
-    /// Module unique name
-    const T name_;
+    /// Module unique indeing name
+    const I name_;
   };
 }  // namespace cepgen
 

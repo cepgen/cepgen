@@ -49,7 +49,7 @@ namespace cepgen {
   }
 
   ParametersDescription::Type ParametersDescription::type() const {
-    if (empty())
+    if (obj_descr_.empty())
       return Type::Value;
     const auto& mod_name = ParametersList::getString(ParametersList::MODULE_NAME);
     if (mod_name.empty())
@@ -64,20 +64,23 @@ namespace cepgen {
     const auto& keys = ParametersList::keys(false);
     std::ostringstream os;
     if (pdtype == Type::Parameters)
-      os << utils::colourise("Parameters", utils::Colour::cyan, utils::Modifier::bold) << " collection ";
+      os << utils::colourise("Parameters", utils::Colour::none, utils::Modifier::italic | utils::Modifier::underline)
+         << " collection ";
     else if (pdtype == Type::Module)
-      os << utils::colourise("Module", utils::Colour::cyan, utils::Modifier::bold) << " " << utils::boldify(mod_name)
-         << " ";
+      os << utils::colourise("Module", utils::Colour::none, utils::Modifier::italic | utils::Modifier::underline) << " "
+         << utils::boldify(mod_name) << " ";
     if (!mod_descr_.empty())
-      os << utils::colourise(mod_descr_, utils::Colour::none, utils::Modifier::italic);
+      os << "(" << utils::colourise(mod_descr_, utils::Colour::none, utils::Modifier::italic) << ")";
     if (!keys.empty())
       os << "\n" << sep(offset + 1) << "List of parameters:";
     for (const auto& key : keys) {
-      os << "\n" << sep(offset + 1) << "- " << utils::colourise(key, utils::Colour::none, utils::Modifier::underline);
+      os << "\n" << sep(offset + 1) << utils::colourise(key, utils::Colour::none, utils::Modifier::underline) << " ";
       if (obj_descr_.count(key) > 0) {
         const auto& obj = obj_descr_.at(key);
         if (!ParametersList::has<ParametersList>(key))
-          os << " (default value: " << ParametersList::getString(key) << ")";
+          os << "= " << ParametersList::getString(key);
+        else
+          os << ParametersDescription(ParametersList::get<ParametersList>(key)).describe(offset + 1);
         const auto& descr = obj.describe(offset + 1);
         if (!utils::trim(descr).empty())
           os << " " << descr;
@@ -97,7 +100,7 @@ namespace cepgen {
     obj_descr_[name] = desc;
     ParametersList::set<ParametersList>(name, desc.parameters());
     CG_DEBUG("ParametersDescription:add").log([this, &name, &desc](auto& log) {
-      log << "Added a new parameters collection \"" << name << "\" as: " << desc.describe();
+      log << "Added a new parameters collection \"" << name << "\" as: " << desc;
       const auto& mod_name = this->getString(ParametersList::MODULE_NAME);
       if (!mod_name.empty())
         log << "\nto the object with name: " << mod_name;
@@ -117,6 +120,13 @@ namespace cepgen {
                                                                                const ParametersDescription& desc) {
     obj_descr_[name] = desc;
     ParametersList::set<std::vector<ParametersList> >(name, {});
+    CG_DEBUG("ParametersDescription:addParametersDescriptionVector").log([this, &name, &desc](auto& log) {
+      log << "Added a new vector of parameters descriptions \"" << name << "\" as: " << desc;
+      const auto& mod_name = this->getString(ParametersList::MODULE_NAME);
+      if (!mod_name.empty())
+        log << "\nto the object with name: " << mod_name;
+      log << ".";
+    });
     return obj_descr_[name];
   }
 
