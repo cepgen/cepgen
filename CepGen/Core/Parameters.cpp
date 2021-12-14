@@ -164,12 +164,12 @@ namespace cepgen {
     if (param->process_) {
       os << std::left << "\n"
          << std::setfill('_') << std::setw(wb + 3) << "_/¯ PROCESS INFORMATION ¯\\_" << std::setfill(' ') << "\n"
-         << std::right << std::setw(wb) << std::left << std::endl
-         << std::setw(wt) << "Process to generate"
-         << "\n\t" << ParametersDescription(param->process().parameters()).describe(1);
+         << std::right << std::setw(wb) << std::left << std::endl;
       std::ostringstream proc_mode;
       proc_mode << param->kinematics().incomingBeams().mode();
-      os << "\n" << std::setw(wt) << "Subprocess mode" << utils::boldify(proc_mode.str()) << "\n";
+      os << std::setw(wt) << "Process mode" << utils::boldify(proc_mode.str()) << "\n"
+         << std::setw(wt) << "Process to generate"
+         << "\n\t" << ParametersDescription(param->process().parameters()).describe(1);
     }
     os << "\n"
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "\n"
