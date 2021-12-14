@@ -134,17 +134,17 @@ namespace cepgen {
 
   const ParametersList& ParametersDescription::parameters() const { return *this; }
 
-  ParametersList ParametersDescription::validate(const ParametersList& params) const {
+  ParametersList ParametersDescription::validate(const ParametersList& user_params) const {
     ParametersList plist = parameters();
-    plist += params;
+    plist += user_params;
     for (const auto& key : keysOf<std::vector<ParametersList> >()) {
-      if (params.has<std::vector<ParametersList> >(key)) {  // vector{ParametersList}
+      if (user_params.has<std::vector<ParametersList> >(key)) {  // vector{ParametersList}
         plist.erase(key);
-        for (const auto& pit : params.get<std::vector<ParametersList> >(key))
+        for (const auto& pit : user_params.get<std::vector<ParametersList> >(key))
           plist.operator[]<std::vector<ParametersList> >(key).emplace_back(obj_descr_.at(key).parameters() + pit);
-      } else if (params.has<ParametersList>(key)) {  // map{key -> ParametersList}
+      } else if (user_params.has<ParametersList>(key)) {  // map{key -> ParametersList}
         plist.erase(key);
-        const auto& pit = params.get<ParametersList>(key);
+        const auto& pit = user_params.get<ParametersList>(key);
         for (const auto& kit : pit.keys()) {
           plist.operator[]<ParametersList>(key).set<ParametersList>(
               kit, obj_descr_.at(key).parameters() + pit.get<ParametersList>(kit));
@@ -152,11 +152,30 @@ namespace cepgen {
       }
     }
     CG_DEBUG("ParametersDescription:validate") << "Validating user-defined parameters:\n"
-                                               << params << ".\nBase parameters:\n"
+                                               << user_params << ".\nBase parameters:\n"
                                                << parameters() << ".\nResult:\n"
                                                << plist << ".";
     return plist;
   }
 
+  template <>
+  ParametersDescription& ParametersDescription::setName<std::string>(const std::string& name) {
+    mod_name_ = name;
+    add<std::string>(ParametersList::MODULE_NAME, name);
+    return *this;
+  }
+
   std::ostream& operator<<(std::ostream& os, const ParametersDescription& desc) { return os << desc.describe(); }
+
+  std::ostream& operator<<(std::ostream& os, const ParametersDescription::Type& type) {
+    switch (type) {
+      case ParametersDescription::Type::Value:
+        return os << "Value";
+      case ParametersDescription::Type::Module:
+        return os << "Module";
+      case ParametersDescription::Type::Parameters:
+        return os << "Parameters";
+    }
+    return os << "{invalid}";
+  }
 }  // namespace cepgen

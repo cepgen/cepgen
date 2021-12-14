@@ -40,11 +40,14 @@ namespace cepgen {
     /// Human-readable description
     friend std::ostream& operator<<(std::ostream&, const ParametersDescription&);
     /// Set the module name for this parameter (or parameters collection)
-    template <typename T>
-    ParametersDescription& setName(const T& name) {
-      add<T>(ParametersList::MODULE_NAME, name);
+    template <typename I>
+    ParametersDescription& setName(const I& name) {
+      mod_name_ = std::to_string(name);
+      add<std::string>(ParametersList::MODULE_NAME, mod_name_);
       return *this;
     }
+    /// Module name for this parameter
+    const std::string& name() const { return mod_name_; }
     /// Set the description of this parameter (or parameters collection)
     ParametersDescription& setDescription(const std::string& descr);
     /// Description of this parameter (or parameters collection)
@@ -71,13 +74,17 @@ namespace cepgen {
 
     /// Parameter type
     enum struct Type { Value, Parameters, Module };
+    /// Human-readable description of a parameter type
+    friend std::ostream& operator<<(std::ostream&, const Type&);
     /// Get the type of parameter considered
     Type type() const;
 
   private:
-    std::string mod_descr_;
+    std::string mod_name_, mod_descr_;
     std::map<std::string, ParametersDescription> obj_descr_;
   };
+  template <>
+  ParametersDescription& ParametersDescription::setName<std::string>(const std::string& name);
   /// Add the description to a new sub-description (aka ParametersList) object
   template <>
   ParametersDescription& ParametersDescription::add(const std::string&, const ParametersDescription&);
