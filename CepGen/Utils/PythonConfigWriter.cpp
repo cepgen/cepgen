@@ -62,7 +62,11 @@ namespace cepgen {
               os << write(pdesc.get(key), key, offset + 1);
               break;
             case ParametersDescription::Type::Value:
-              os << off << std::string(4, ' ') << key << " = " << params.getString(key, true);
+              os << off << std::string(4, ' ') << key << " = ";
+              if (params.has<bool>(key))
+                os << (params.get<bool>(key) ? "True" : "False");
+              else
+                os << params.getString(key, true);
               break;
           }
           sep = ",";
