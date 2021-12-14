@@ -1,19 +1,34 @@
 #include <sstream>
 
+#include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Parameters.h"
+#include "CepGen/Processes/Process.h"
 #include "CepGen/Utils/PythonConfigWriter.h"
 
 namespace cepgen {
   namespace utils {
     PythonConfigWriter::PythonConfigWriter(const std::string& filename) : file_(filename) {
+      file_ << "from sys import path\n"
+            << "path.append('Cards')\n\n";
       file_ << "import Config.Core as cepgen\n\n";
     }
 
     PythonConfigWriter::~PythonConfigWriter() { file_.close(); }
 
-    PythonConfigWriter& PythonConfigWriter::operator<<(const Parameters&) { return *this; }
+    PythonConfigWriter& PythonConfigWriter::operator<<(const Parameters& params) {
+      if (params.timeKeeper())
+        (*this) << ParametersDescription("timer");
+      if (params.hasProcess())
+        (*this) << ParametersDescription(params.process().parameters()).setName<std::string>("process");
+      for (const auto& mod : params.eventModifiersSequence())
+        (*this) << ParametersDescription(mod->parameters());
+      for (const auto& mod : params.outputModulesSequence())
+        (*this) << ParametersDescription(mod->parameters());
+      return *this;
+    }
 
     PythonConfigWriter& PythonConfigWriter::operator<<(const ParametersDescription& pdesc) {
       CG_DEBUG("PythonConfigWriter") << "Adding a parameters description object:\n" << pdesc;
