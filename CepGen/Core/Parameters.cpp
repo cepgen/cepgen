@@ -161,18 +161,15 @@ namespace cepgen {
   std::ostream& operator<<(std::ostream& os, const Parameters* param) {
     const int wb = 90, wt = 33;
 
-    os << std::left << "\n"
-       << std::setfill('_') << std::setw(wb + 3) << "_/¯ PROCESS INFORMATION ¯\\_" << std::setfill(' ') << "\n"
-       << std::right << std::setw(wb) << std::left << std::endl
-       << std::setw(wt) << "Process to generate" << utils::boldify(param->processName());
     if (param->process_) {
-      for (const auto& par : param->process().parameters().keys(false))
-        if (par != "mode")
-          os << "\n" << std::setw(wt) << "" << par << ": " << param->process_->parameters().getString(par);
+      os << std::left << "\n"
+         << std::setfill('_') << std::setw(wb + 3) << "_/¯ PROCESS INFORMATION ¯\\_" << std::setfill(' ') << "\n"
+         << std::right << std::setw(wb) << std::left << std::endl
+         << std::setw(wt) << "Process to generate"
+         << "\n\t" << ParametersDescription(param->process().parameters()).describe(1);
       std::ostringstream proc_mode;
       proc_mode << param->kinematics().incomingBeams().mode();
-      if (param->kinematics().incomingBeams().mode() != mode::Kinematics::invalid)
-        os << "\n" << std::setw(wt) << "Subprocess mode" << utils::boldify(proc_mode.str()) << "\n";
+      os << "\n" << std::setw(wt) << "Subprocess mode" << utils::boldify(proc_mode.str()) << "\n";
     }
     os << "\n"
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "\n"
@@ -194,12 +191,9 @@ namespace cepgen {
       os << "\n";
     }
     if (!param->out_modules_.empty()) {
-      std::string mod_name = utils::s("Output module", param->out_modules_.size(), false);
-      for (const auto& mod : param->out_modules_) {
-        os << std::setw(wt) << mod_name << utils::boldify(mod->name()) << "\n", mod_name.clear();
-        for (const auto& par : mod->parameters().keys(false))
-          os << std::setw(wt) << "" << par << ": " << mod->parameters().getString(par) << "\n";
-      }
+      os << utils::s("Output module", param->out_modules_.size(), false);
+      for (const auto& mod : param->out_modules_)
+        os << "\n\t" << ParametersDescription(mod->parameters()).describe(1);
     }
     if (!param->taming_functions_.empty()) {
       os << std::setw(wt) << utils::s("Taming function", param->taming_functions_.size(), false) << "\n";
