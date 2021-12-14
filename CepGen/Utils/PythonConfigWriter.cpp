@@ -79,6 +79,8 @@ namespace cepgen {
         return os.str();
       };
 
+      if (!pdesc.name().empty())
+        file_ << pdesc.name() << " = ";
       file_ << write(pdesc, "", 0) << "\n";
 
       return *this;
