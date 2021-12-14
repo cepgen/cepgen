@@ -135,7 +135,7 @@ namespace cepgen {
       if (!isVector<double>(obj))
         return false;
       const size_t size = getVector<double>(obj).size();
-      return (size == 1 || size == 2);
+      return size == 1 || size == 2;
     }
 
     template <>
@@ -217,8 +217,7 @@ namespace cepgen {
           else if (isVector<double>(pvalue)) {
             if (is<Limits>(pvalue))
               out.set<Limits>(skey, get<Limits>(pvalue));
-            else
-              out.set<std::vector<double> >(skey, getVector<double>(pvalue));
+            out.set<std::vector<double> >(skey, getVector<double>(pvalue));
           } else if (isVector<std::string>(pvalue))
             out.set<std::vector<std::string> >(skey, getVector<std::string>(pvalue));
           else  //if (isVector<ParametersList>(pvalue))

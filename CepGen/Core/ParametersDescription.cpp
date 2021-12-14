@@ -31,6 +31,11 @@ namespace cepgen {
   ParametersDescription::ParametersDescription(const ParametersList& params) : ParametersList(params) {
     for (const auto& key : ParametersList::keys())
       obj_descr_[key] = ParametersDescription();
+    // avoid doubly-defined Limits/vector<double> situations
+    for (const auto& klim : ParametersList::keysOf<Limits>())
+      if (utils::contains(ParametersList::keysOf<std::vector<double> >(), klim))
+        // hack to ensure vector<double> is dropped by set<Limits>(...)
+        ParametersList::set<Limits>(klim, ParametersList::get<Limits>(klim));
   }
 
   bool ParametersDescription::empty() const { return obj_descr_.empty() && mod_descr_.empty(); }

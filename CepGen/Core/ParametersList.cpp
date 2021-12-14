@@ -247,7 +247,7 @@ namespace cepgen {
       os << wrap_coll(get<std::vector<ParametersList> >(key), "VParams");
     else if (has<std::vector<int> >(key))
       os << wrap_coll(get<std::vector<int> >(key), "vint");
-    else if (has<std::vector<double> >(key))
+    else if (!has<Limits>(key) && has<std::vector<double> >(key))
       os << wrap_coll(get<std::vector<double> >(key), "vfloat");
     else if (has<std::vector<std::string> >(key))
       os << wrap_coll(get<std::vector<std::string> >(key), "vstr", true);
@@ -307,6 +307,8 @@ namespace cepgen {
 
   template <>
   ParametersList& ParametersList::set<Limits>(const std::string& key, const Limits& value) {
+    if (vec_dbl_values_.count(key))
+      vec_dbl_values_.erase(key);
     lim_values_[key] = value;
     return *this;
   }
@@ -350,6 +352,14 @@ namespace cepgen {
       return *this;
     }
     return *this;
+  }
+
+  template <>
+  std::vector<std::string> ParametersList::keysOf<Limits>() const {
+    std::vector<std::string> out;
+    std::transform(
+        lim_values_.begin(), lim_values_.end(), std::back_inserter(out), [](const auto& pair) { return pair.first; });
+    return out;
   }
 
   //------------------------------------------------------------------
