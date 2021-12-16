@@ -131,8 +131,11 @@ namespace cepgen {
         positive().kt_flux = (KTFlux)kt_fluxes.at(0);
         negative().kt_flux = (kt_fluxes.size() > 1) ? (KTFlux)kt_fluxes.at(1) : (KTFlux)kt_fluxes.at(0);
       }
-    } else if (params_.has<int>("ktFluxes"))
-      positive().kt_flux = negative().kt_flux = params_.getAs<int, KTFlux>("ktFluxes");
+    } else if (params_.has<int>("ktFluxes")) {
+      const auto& ktfluxes = params_.getAs<int, KTFlux>("ktFluxes");
+      if (ktfluxes != KTFlux::invalid)
+        positive().kt_flux = negative().kt_flux = ktfluxes;
+    }
   }
 
   const ParametersList& IncomingBeams::parameters() const {
@@ -256,7 +259,7 @@ namespace cepgen {
     auto sf_desc = strfun::Parameterisation::description();
     desc.add<ParametersDescription>("structureFunctions", sf_desc)
         .setDescription("Beam inelastic structure functions modelling");
-    desc.add<int>("ktFluxes", 10).setDescription("kT-factorised fluxes modelling");
+    desc.add<int>("ktFluxes", -1).setDescription("kT-factorised fluxes modelling");
     return desc;
   }
 
