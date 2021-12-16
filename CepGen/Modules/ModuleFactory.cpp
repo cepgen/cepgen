@@ -83,15 +83,15 @@ namespace cepgen {
   }
 
   template <typename T, typename I>
-  const std::string& ModuleFactory<T, I>::describe(const I& name) const {
+  std::string ModuleFactory<T, I>::describe(const I& name) const {
     return describeParameters(name).description();
   }
 
   template <typename T, typename I>
-  const ParametersDescription& ModuleFactory<T, I>::describeParameters(const I& name) const {
+  ParametersDescription ModuleFactory<T, I>::describeParameters(const I& name, const ParametersList& params) const {
     if (params_map_.count(name) == 0)
-      return empty_params_desc_;
-    return params_map_.at(name);
+      return ParametersDescription().setDescription("{module without description}").steer(params);
+    return params_map_.at(name).steer(params);
   }
 
   template <typename T, typename I>

@@ -45,6 +45,13 @@ namespace cepgen {
   bool ParametersDescription::empty() const { return obj_descr_.empty() && mod_descr_.empty(); }
 
   ParametersDescription& ParametersDescription::operator+=(const ParametersDescription& oth) {
+    for (const auto& key : ParametersList::keysOf<std::vector<ParametersList> >())
+      // particular case if one describes a set of key-indexed parameters list as a vector of parameters lists
+      if (oth.has<ParametersList>(key)) {
+        const auto desc = get(key).description();
+        ParametersList::erase(key);
+        add<ParametersDescription>(key, oth.get(key)).setDescription(desc);
+      }
     obj_descr_.insert(oth.obj_descr_.begin(), oth.obj_descr_.end());
     ParametersList::operator+=(oth);
     return *this;
@@ -163,6 +170,12 @@ namespace cepgen {
                                                << parameters() << ".\nResult:\n"
                                                << plist << ".";
     return plist;
+  }
+
+  ParametersDescription ParametersDescription::steer(const ParametersList& params) const {
+    ParametersDescription pdesc(*this);
+    pdesc += ParametersDescription(params);
+    return pdesc;
   }
 
   template <>

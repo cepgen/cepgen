@@ -25,6 +25,8 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/Process.h"
@@ -169,7 +171,10 @@ namespace cepgen {
       proc_mode << param->kinematics().incomingBeams().mode();
       os << std::setw(wt) << "Process mode" << utils::boldify(proc_mode.str()) << "\n"
          << std::setw(wt) << "Process to generate"
-         << "\n\t" << ParametersDescription(param->process().parameters()).describe(1);
+         << "\n\t"
+         << proc::ProcessFactory::get()
+                .describeParameters(param->process().name(), param->process().parameters())
+                .describe(1);
     }
     os << "\n"
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "\n"
@@ -193,7 +198,7 @@ namespace cepgen {
     if (!param->out_modules_.empty()) {
       os << utils::s("Output module", param->out_modules_.size(), false);
       for (const auto& mod : param->out_modules_)
-        os << "\n\t" << ParametersDescription(mod->parameters()).describe(1);
+        os << "\n\t" << io::ExportModuleFactory::get().describeParameters(mod->name(), mod->parameters()).describe(1);
     }
     if (!param->taming_functions_.empty()) {
       os << std::setw(wt) << utils::s("Taming function", param->taming_functions_.size(), false) << "\n";

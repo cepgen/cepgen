@@ -93,9 +93,11 @@ namespace cepgen {
     typedef std::unique_ptr<T> (*Builder)(const ParametersList&);
 
     /// Describe one named module
-    const std::string& describe(const I& name) const;
+    std::string describe(const I& name) const;
     /// Describe the parameters of one named module
-    const ParametersDescription& describeParameters(const I& name) const;
+    /// \params[in] name Name of the module to describe
+    /// \params[in] params Additional parameters to steer the description
+    ParametersDescription describeParameters(const I& name, const ParametersList& params = ParametersList()) const;
 
     /// List of modules registred in the database
     std::vector<I> modules() const;

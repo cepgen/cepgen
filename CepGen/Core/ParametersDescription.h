@@ -71,6 +71,8 @@ namespace cepgen {
     const ParametersDescription& get(const std::string&) const;
     /// Validate a set of used-steered parameters
     ParametersList validate(const ParametersList&) const;
+    /// Set the parameters value for this description object
+    ParametersDescription steer(const ParametersList&) const;
 
     /// Parameter type
     enum struct Type { Value, Parameters, Module };
