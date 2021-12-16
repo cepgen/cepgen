@@ -100,9 +100,10 @@ namespace cepgen {
 
         const auto& hvar = hist_vars.get<ParametersList>(key);
         if (vars.size() == 1) {  // 1D histogram
-          if (hvar.has<std::vector<double> >("xbins"))
-            hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(hvar.get<std::vector<double> >("xbins"))});
-          else if (hvar.has<Limits>("xrange")) {
+          const auto& xbins = hvar.get<std::vector<double> >("xbins");
+          if (xbins.size() > 1)
+            hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(xbins)});
+          else if (hvar.get<Limits>("xrange").valid()) {
             const auto& nbins = (hvar.get<int>("nbins") > 0 ? hvar.get<int>("nbins") : hvar.get<int>("nbinsX"));
             hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(nbins, hvar.get<Limits>("xrange"))});
           } else {
@@ -116,14 +117,11 @@ namespace cepgen {
           hist.setXlabel(vars.at(0));
           hist.setYlabel("d(sig)/d" + vars.at(0) + " (pb/bin)");
         } else if (vars.size() == 2) {  // 2D histogram
-          if (hvar.has<std::vector<double> >("xbins") && hvar.has<std::vector<double> >("ybins"))
-            hists2d_.emplace_back(Hist2DInfo{
-                vars.at(0),
-                vars.at(1),
-                utils::Hist2D(hvar.get<std::vector<double> >("xbins"), hvar.get<std::vector<double> >("ybins"))});
-          else if (hvar.has<Limits>("xrange")) {
+          const auto &xbins = hvar.get<std::vector<double> >("xbins"), &ybins = hvar.get<std::vector<double> >("ybins");
+          if (xbins.size() > 1 && ybins.size() > 1)
+            hists2d_.emplace_back(Hist2DInfo{vars.at(0), vars.at(1), utils::Hist2D(xbins, ybins)});
+          else if (hvar.get<Limits>("xrange").valid()) {
             const auto& nbinsx = (hvar.get<int>("nbins") > 0 ? hvar.get<int>("nbins") : hvar.get<int>("nbinsX"));
-            CG_WARNING("") << nbinsx << ": " << hvar;
             hists2d_.emplace_back(Hist2DInfo{
                 vars.at(0),
                 vars.at(1),
@@ -215,12 +213,12 @@ namespace cepgen {
       // per-histogram default parameters
       ParametersDescription hist_desc;
       // x-axis attributes
-      hist_desc.add<std::vector<double> >("xbins", {0., 1.}).setDescription("x-axis bins definition");
+      hist_desc.add<std::vector<double> >("xbins", {}).setDescription("x-axis bins definition");
       hist_desc.add<int>("nbins", 25).setDescription("Bins multiplicity for x-axis");
       hist_desc.add<int>("nbinsX", -1).setDescription("Bins multiplicity for x-axis");
-      hist_desc.add<Limits>("xrange", Limits{}).setDescription("Minimum-maximum range for x-axis");
+      hist_desc.add<Limits>("xrange", Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
       // y-axis attributes
-      hist_desc.add<std::vector<double> >("ybins", {0., 1.}).setDescription("y-axis bins definition");
+      hist_desc.add<std::vector<double> >("ybins", {}).setDescription("y-axis bins definition");
       hist_desc.add<int>("nbinsY", 50).setDescription("Bins multiplicity for y-axis");
       hist_desc.add<Limits>("yrange", Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
       hist_desc.add<bool>("log", false).setDescription("Plot logarithmic axis?");
