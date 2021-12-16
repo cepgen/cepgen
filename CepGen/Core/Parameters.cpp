@@ -170,11 +170,11 @@ namespace cepgen {
       std::ostringstream proc_mode;
       proc_mode << param->kinematics().incomingBeams().mode();
       os << std::setw(wt) << "Process mode" << utils::boldify(proc_mode.str()) << "\n"
-         << std::setw(wt) << "Process to generate"
-         << "\n\t"
+         << std::setw(wt) << "Process to generate: "
          << proc::ProcessFactory::get()
                 .describeParameters(param->process().name(), param->process().parameters())
-                .describe(1);
+                .describe(4)
+         << "\n";
     }
     os << "\n"
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "\n"
@@ -198,7 +198,8 @@ namespace cepgen {
     if (!param->out_modules_.empty()) {
       os << utils::s("Output module", param->out_modules_.size(), false);
       for (const auto& mod : param->out_modules_)
-        os << "\n\t" << io::ExportModuleFactory::get().describeParameters(mod->name(), mod->parameters()).describe(1);
+        os << "\n\t*) "
+           << io::ExportModuleFactory::get().describeParameters(mod->name(), mod->parameters()).describe(1);
     }
     if (!param->taming_functions_.empty()) {
       os << std::setw(wt) << utils::s("Taming function", param->taming_functions_.size(), false) << "\n";

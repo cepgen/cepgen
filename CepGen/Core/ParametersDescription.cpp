@@ -79,22 +79,24 @@ namespace cepgen {
     const auto& pdtype = type();
     const auto& keys = ParametersList::keys(false);
     std::ostringstream os;
+    // write collection type (if collection)
     if (pdtype == Type::Parameters)
       os << utils::colourise("Parameters", utils::Colour::none, utils::Modifier::italic | utils::Modifier::underline)
-         << " collection ";
+         << " collection";
     else if (pdtype == Type::Module)
-      os << utils::colourise("Module", utils::Colour::none, utils::Modifier::italic | utils::Modifier::underline) << " "
-         << utils::boldify(mod_name) << " ";
+      os << utils::boldify(mod_name + " module");
+    // write human-readable description (if exists)
     if (!mod_descr_.empty())
-      os << "(" << utils::colourise(mod_descr_, utils::Colour::none, utils::Modifier::italic) << ")";
+      os << " (" << utils::colourise(mod_descr_, utils::Colour::none, utils::Modifier::italic) << ")";
     if (!keys.empty())
-      os << "\n" << sep(offset + 1) << "List of parameters:";
+      os << " with parameters:";
+    // write list of parameters (if has some)
     for (const auto& key : keys) {
       os << "\n" << sep(offset + 1) << utils::colourise(key, utils::Colour::none, utils::Modifier::underline) << " ";
       if (obj_descr_.count(key) > 0) {
-        os << "= ";
+        os << "=";
         if (obj_descr_.at(key).type() == Type::Value)
-          os << ParametersList::getString(key);
+          os << " " << ParametersList::getString(key);
         const auto& descr = obj_descr_.at(key).describe(offset + 1);
         if (!utils::trim(descr).empty())
           os << " " << descr;
