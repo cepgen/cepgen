@@ -29,8 +29,12 @@ namespace cepgen {
   }
 
   ParametersDescription::ParametersDescription(const ParametersList& params) : ParametersList(params) {
-    for (const auto& key : ParametersList::keys())
-      obj_descr_[key] = ParametersDescription();
+    for (const auto& key : ParametersList::keys()) {
+      if (ParametersList::has<ParametersList>(key))
+        obj_descr_[key] = ParametersDescription(ParametersList::get<ParametersList>(key));
+      else
+        obj_descr_[key] = ParametersDescription();
+    }
     // avoid doubly-defined Limits/vector<double> situations
     for (const auto& klim : ParametersList::keysOf<Limits>())
       if (utils::contains(ParametersList::keysOf<std::vector<double> >(), klim))
@@ -81,12 +85,10 @@ namespace cepgen {
     for (const auto& key : keys) {
       os << "\n" << sep(offset + 1) << utils::colourise(key, utils::Colour::none, utils::Modifier::underline) << " ";
       if (obj_descr_.count(key) > 0) {
-        const auto& obj = obj_descr_.at(key);
-        if (!ParametersList::has<ParametersList>(key))
-          os << "= " << ParametersList::getString(key);
-        else
-          os << ParametersDescription(ParametersList::get<ParametersList>(key)).describe(offset + 1);
-        const auto& descr = obj.describe(offset + 1);
+        os << "= ";
+        if (obj_descr_.at(key).type() == Type::Value)
+          os << ParametersList::getString(key);
+        const auto& descr = obj_descr_.at(key).describe(offset + 1);
         if (!utils::trim(descr).empty())
           os << " " << descr;
       }
