@@ -170,17 +170,24 @@ namespace cepgen {
   bool ParametersList::empty() const { return keys(false).empty(); }
 
   std::ostream& operator<<(std::ostream& os, const ParametersList& params) {
-    if (params.empty())
-      return os << "{}";
+    params.print(os);
+    return os;
+  }
+
+  const ParametersList& ParametersList::print(std::ostream& os) const {
+    if (empty()) {
+      os << "{}";
+      return *this;
+    }
     std::string sep;
-    const auto& mod_name = params.getString(ParametersList::MODULE_NAME);
+    const auto& mod_name = getString(ParametersList::MODULE_NAME);
     if (!mod_name.empty())
       os << "Module(" << mod_name, sep = ", ";
     else
       os << "Parameters(";
-    for (const auto& key : params.keys(false))
-      os << sep << key << "=" << params.getString(key, true), sep = ", ";
-    return os << ")";
+    for (const auto& key : keys(false))
+      os << sep << key << "=" << getString(key, true), sep = ", ";
+    return *this;
   }
 
   std::vector<std::string> ParametersList::keys(bool name_key) const {
@@ -207,18 +214,14 @@ namespace cepgen {
 
   std::string ParametersList::getString(const std::string& key, bool wrap) const {
     std::ostringstream os;
-    auto wrap_val = [&wrap](const auto& val, const std::string& type, bool escape = false) -> std::string {
+    auto wrap_val = [&wrap](const auto& val, const std::string& type) -> std::string {
       std::ostringstream os;
       os << val;
-      return (wrap ? type + "(" : "") + (escape ? "\"" : "") +
-             (type == "bool" ? utils::yesno(std::stoi(os.str())) : os.str()) + (escape ? "\"" : "") + (wrap ? ")" : "");
+      return (wrap ? type + "(" : "") + (type == "bool" ? utils::yesno(std::stoi(os.str())) : os.str()) +
+             (wrap ? ")" : "");
     };
-    auto wrap_coll = [&wrap, &wrap_val](const auto& coll, const std::string& type, bool escape = false) -> std::string {
-      std::ostringstream os;
-      std::string sep;
-      for (const auto& val : coll)
-        os << sep << (escape ? "\"" : "") << val << (escape ? "\"" : ""), sep = ", ";
-      return wrap_val(os.str(), type, false);
+    auto wrap_coll = [&wrap, &wrap_val](const auto& coll, const std::string& type) -> std::string {
+      return wrap_val(utils::merge(coll, ", "), type);
     };
     if (has<ParametersList>(key)) {
       auto plist = get<ParametersList>(key);
@@ -240,7 +243,7 @@ namespace cepgen {
     else if (has<double>(key))
       os << wrap_val(get<double>(key), "float");
     else if (has<std::string>(key))
-      os << wrap_val(get<std::string>(key), "str", true);
+      os << wrap_val(get<std::string>(key), "str");
     else if (has<Limits>(key))
       os << wrap_val(get<Limits>(key), "Limits");
     else if (has<std::vector<ParametersList> >(key))
@@ -250,7 +253,7 @@ namespace cepgen {
     else if (!has<Limits>(key) && has<std::vector<double> >(key))
       os << wrap_coll(get<std::vector<double> >(key), "vfloat");
     else if (has<std::vector<std::string> >(key))
-      os << wrap_coll(get<std::vector<std::string> >(key), "vstr", true);
+      os << wrap_coll(get<std::vector<std::string> >(key), "vstr");
     return os.str();
   }
 
@@ -423,39 +426,6 @@ namespace cepgen {
                                    .set<double>("width", value.width)
                                    .set<double>("charge", value.charge * 1. / 3)
                                    .set<bool>("fermion", value.fermion));
-  }
-
-  const ParametersList& ParametersList::print(std::ostream& os) const {
-    std::string sep;
-    os << "ParametersList{";
-    for (const auto& it : param_values_) {
-      os << sep << it.first << "=ParametersList{";
-      it.second.print(os);
-      os << "}";
-      sep = ", ";
-    }
-    for (const auto& it : bool_values_)
-      os << sep << it.first << "=bool(" << std::boolalpha << it.second << ")", sep = ", ";
-    for (const auto& it : int_values_)
-      os << sep << it.first << "=int(" << it.second << ")", sep = ", ";
-    for (const auto& it : dbl_values_)
-      os << sep << it.first << "=float(" << it.second << ")", sep = ", ";
-    for (const auto& it : str_values_)
-      os << sep << it.first << "=str(" << it.second << ")", sep = ", ";
-    for (const auto& it : str_values_)
-      os << sep << it.first << "=str(" << it.second << ")", sep = ", ";
-    for (const auto& it : lim_values_)
-      os << sep << it.first << "=" << it.second, sep = ", ";
-    for (const auto& it : vec_int_values_)
-      os << sep << it.first << "=vint{" << utils::merge(it.second, ", ") << "}", sep = ", ";
-    for (const auto& it : vec_dbl_values_)
-      os << sep << it.first << "=vfloat{" << utils::merge(it.second, ", ") << "}", sep = ", ";
-    for (const auto& it : vec_str_values_)
-      os << sep << it.first << "=vstr{" << utils::merge(it.second, ", ") << "}", sep = ", ";
-    for (const auto& it : vec_param_values_)
-      os << sep << it.first << "=vparam{" << utils::merge(it.second, ", ") << "}", sep = ", ";
-    os << "}";
-    return *this;
   }
 }  // namespace cepgen
 
