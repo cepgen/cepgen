@@ -86,8 +86,9 @@ namespace cepgen {
     std::string replace_all(const std::string& str, const std::vector<std::pair<std::string, std::string> >& keys);
     /// Split a string according to a separation character
     std::vector<std::string> split(const std::string&, char);
-    /// Merge a collection of strings in a single string
-    std::string merge(const std::vector<std::string>&, const std::string&);
+    /// Merge a collection of a printable type in a single string
+    template <typename T>
+    std::string merge(const std::vector<T>&, const std::string&);
     /// Check if a string is also a number
     bool isNumber(const std::string&);
     /// Check if a collection contains an item

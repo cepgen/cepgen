@@ -23,17 +23,17 @@
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
-  ParametersDescription::ParametersDescription(const std::string& mod_name) {
-    if (!mod_name.empty())
-      setName(mod_name);
+  ParametersDescription::ParametersDescription(const std::string& mod_key) {
+    if (!mod_key.empty())
+      setKey(mod_key);
   }
 
   ParametersDescription::ParametersDescription(const ParametersList& params) : ParametersList(params) {
     for (const auto& key : ParametersList::keys()) {
-      if (ParametersList::has<ParametersList>(key))
-        obj_descr_[key] = ParametersDescription(ParametersList::get<ParametersList>(key));
-      else
-        obj_descr_[key] = ParametersDescription();
+      if (obj_descr_.count(key) == 0)
+        obj_descr_[key] = ParametersList::has<ParametersList>(key)
+                              ? ParametersDescription(ParametersList::get<ParametersList>(key))
+                              : ParametersDescription();
     }
     // avoid doubly-defined Limits/vector<double> situations
     for (const auto& klim : ParametersList::keysOf<Limits>())
@@ -42,7 +42,12 @@ namespace cepgen {
         ParametersList::set<Limits>(klim, ParametersList::get<Limits>(klim));
   }
 
-  bool ParametersDescription::empty() const { return obj_descr_.empty() && mod_descr_.empty(); }
+  bool ParametersDescription::empty() const {
+    // description is declared empty if
+    // 1) it has no sub-description object, and
+    // 2) it is not itself describing anything
+    return obj_descr_.empty() && mod_descr_.empty();
+  }
 
   ParametersDescription& ParametersDescription::operator+=(const ParametersDescription& oth) {
     for (const auto& key : ParametersList::keysOf<std::vector<ParametersList> >())

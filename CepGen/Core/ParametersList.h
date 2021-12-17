@@ -118,6 +118,8 @@ namespace cepgen {
 
     /// Human-readable version of a parameters container
     friend std::ostream& operator<<(std::ostream& os, const ParametersList&);
+    /// Debugging-like printout of a parameters container
+    const ParametersList& print(std::ostream&) const;
     /// Indexing key for the module name
     static const std::string MODULE_NAME;
 

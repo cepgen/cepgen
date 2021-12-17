@@ -424,6 +424,39 @@ namespace cepgen {
                                    .set<double>("charge", value.charge * 1. / 3)
                                    .set<bool>("fermion", value.fermion));
   }
+
+  const ParametersList& ParametersList::print(std::ostream& os) const {
+    std::string sep;
+    os << "ParametersList{";
+    for (const auto& it : param_values_) {
+      os << sep << it.first << "=ParametersList{";
+      it.second.print(os);
+      os << "}";
+      sep = ", ";
+    }
+    for (const auto& it : bool_values_)
+      os << sep << it.first << "=bool(" << std::boolalpha << it.second << ")", sep = ", ";
+    for (const auto& it : int_values_)
+      os << sep << it.first << "=int(" << it.second << ")", sep = ", ";
+    for (const auto& it : dbl_values_)
+      os << sep << it.first << "=float(" << it.second << ")", sep = ", ";
+    for (const auto& it : str_values_)
+      os << sep << it.first << "=str(" << it.second << ")", sep = ", ";
+    for (const auto& it : str_values_)
+      os << sep << it.first << "=str(" << it.second << ")", sep = ", ";
+    for (const auto& it : lim_values_)
+      os << sep << it.first << "=" << it.second, sep = ", ";
+    for (const auto& it : vec_int_values_)
+      os << sep << it.first << "=vint{" << utils::merge(it.second, ", ") << "}", sep = ", ";
+    for (const auto& it : vec_dbl_values_)
+      os << sep << it.first << "=vfloat{" << utils::merge(it.second, ", ") << "}", sep = ", ";
+    for (const auto& it : vec_str_values_)
+      os << sep << it.first << "=vstr{" << utils::merge(it.second, ", ") << "}", sep = ", ";
+    for (const auto& it : vec_param_values_)
+      os << sep << it.first << "=vparam{" << utils::merge(it.second, ", ") << "}", sep = ", ";
+    os << "}";
+    return *this;
+  }
 }  // namespace cepgen
 
 #undef IMPL_TYPE
