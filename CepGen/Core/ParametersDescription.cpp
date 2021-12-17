@@ -181,9 +181,8 @@ namespace cepgen {
   }
 
   template <>
-  ParametersDescription& ParametersDescription::setName<std::string>(const std::string& name) {
-    mod_name_ = name;
-    add<std::string>(ParametersList::MODULE_NAME, name);
+  ParametersDescription& ParametersDescription::setKey<std::string>(const std::string& key) {
+    mod_key_ = key;
     return *this;
   }
 

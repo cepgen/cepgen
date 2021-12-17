@@ -79,7 +79,7 @@ namespace cepgen {
       params_map_[name] = U::description();
       if (!def_params.empty())
         params_map_[name].parameters() += def_params;
-      params_map_[name].setName(name);
+      params_map_[name].parameters().setName(name);
     }
     /// Build one instance of a named module
     /// \param[in] name Module name to retrieve

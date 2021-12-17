@@ -26,8 +26,8 @@ namespace cepgen {
   class ParametersDescription : private ParametersList {
   public:
     /// Build the description of a parameters collection object
-    /// \param[in] mod_name Module name (where applicable)
-    explicit ParametersDescription(const std::string& mod_name = "");
+    /// \param[in] mod_key Module name (where applicable)
+    explicit ParametersDescription(const std::string& mod_key = "");
     /// Build the (empty) description of a parameters collection object from its definition
     explicit ParametersDescription(const ParametersList& params);
     /// Copy constructor
@@ -41,13 +41,12 @@ namespace cepgen {
     friend std::ostream& operator<<(std::ostream&, const ParametersDescription&);
     /// Set the module name for this parameter (or parameters collection)
     template <typename I>
-    ParametersDescription& setName(const I& name) {
-      mod_name_ = std::to_string(name);
-      add<std::string>(ParametersList::MODULE_NAME, mod_name_);
+    ParametersDescription& setKey(const I& key) {
+      mod_key_ = std::to_string(key);
       return *this;
     }
     /// Module name for this parameter
-    const std::string& name() const { return mod_name_; }
+    const std::string& key() const { return mod_key_; }
     /// Set the description of this parameter (or parameters collection)
     ParametersDescription& setDescription(const std::string& descr);
     /// Description of this parameter (or parameters collection)
@@ -82,11 +81,11 @@ namespace cepgen {
     Type type() const;
 
   private:
-    std::string mod_name_, mod_descr_;
+    std::string mod_key_, mod_descr_;
     std::map<std::string, ParametersDescription> obj_descr_;
   };
   template <>
-  ParametersDescription& ParametersDescription::setName<std::string>(const std::string& name);
+  ParametersDescription& ParametersDescription::setKey<std::string>(const std::string&);
   /// Add the description to a new sub-description (aka ParametersList) object
   template <>
   ParametersDescription& ParametersDescription::add(const std::string&, const ParametersDescription&);

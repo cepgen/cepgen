@@ -22,7 +22,7 @@ namespace cepgen {
       if (params.timeKeeper())
         (*this) << ParametersDescription("timer");
       if (params.hasProcess())
-        (*this) << ParametersDescription(params.process().parameters()).setName<std::string>("process");
+        (*this) << ParametersDescription(params.process().parameters()).setKey<std::string>("process");
       for (const auto& mod : params.eventModifiersSequence())
         (*this) << ParametersDescription(mod->parameters());
       for (const auto& mod : params.outputModulesSequence())
@@ -83,8 +83,8 @@ namespace cepgen {
         return os.str();
       };
 
-      if (!pdesc.name().empty())
-        file_ << pdesc.name() << " = ";
+      if (!pdesc.key().empty())
+        file_ << pdesc.key() << " = ";
       file_ << write(pdesc, "", 0) << "\n";
 
       return *this;

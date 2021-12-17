@@ -110,7 +110,7 @@ namespace cepgen {
       case Mode::WbarB:
         return amplitudeWbarB(kin, hel);
     }
-    throw CG_FATAL("PPtoWW:WWamplitudes") << "Invalid mode: " << mode_ << "!";
+    throw CG_FATAL("NachtmannAmplitudes") << "Invalid mode: " << mode_ << "!";
   }
 
   std::complex<double> NachtmannAmplitudes::amplitudeSM(const Kinematics& kin, const Helicities& hel) const {
