@@ -245,6 +245,19 @@ namespace cepgen {
     return out;
   }
 
+  Momentum Event::missingEnergy() const {
+    Momentum me;
+    for (const auto& cp : operator[](Particle::Role::CentralSystem))
+      if (cp.status() == Particle::Status::FinalState) {
+        const auto pdg = cp.integerPdgId();
+        if (pdg == 12 || pdg == 14 || pdg == 16)  // neutrinos
+          me += cp.momentum();
+        if (pdg == 1000022 || pdg == 1000023 || pdg == 1000025 || 1000035)  // neutralinos
+          me += cp.momentum();
+      }
+    return me;
+  }
+
   void Event::checkKinematics() const {
     // check the kinematics through parentage
     for (const auto& part : particles()) {
