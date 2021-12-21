@@ -161,15 +161,46 @@ namespace cepgen {
 
   double Momentum::eta() const {
     const int sign = (pz() / fabs(pz()));
-    return (pt() != 0.) ? log((p() + fabs(pz())) / pt()) * sign : 9999. * sign;
+    return pt() != 0. ? log((p() + fabs(pz())) / pt()) * sign : 9999. * sign;
   }
 
   double Momentum::rapidity() const {
     const int sign = (pz() / fabs(pz()));
-    return (energy() >= 0.) ? log((energy() + pz()) / (energy() - pz())) * 0.5 : 999. * sign;
+    return energy() >= 0. ? log((energy() + pz()) / (energy() - pz())) * 0.5 : 999. * sign;
   }
 
   //--- boosts/rotations
+
+  double Momentum::beta() const {
+    const auto mom = p(), ene = energy();
+    if (ene == 0.) {
+      if (mom == 0.)
+        return 0.;
+      else {
+        CG_WARNING("Momentum:beta") << "beta computed for t=0 momentum.";
+        return 1. / ene;
+      }
+    }
+    if (mass2() <= 0.)
+      CG_WARNING("Momentum:beta") << "beta computed for an invalid, non-timelike momentum.";
+    return mom / ene;
+  }
+
+  double Momentum::gamma() const {
+    const auto mom2 = p2(), ene2 = energy2();
+    if (ene2 == 0.) {
+      if (mom2 == 0.) {
+        return 1.;
+      } else
+        CG_WARNING("Momentum:gamma") << "gamma computed for t=0 momentum.";
+    }
+    if (ene2 < mom2) {
+      CG_WARNING("Momentum:gamma") << "gamma computed for an invalid spacelike momentum.";
+      return 0.;
+    } else if (ene2 == mom2)
+      CG_WARNING("Momentum:gamma") << "gamma computed for a lightlike momentum.";
+    return 1. / std::sqrt(1. - mom2 / ene2);
+  }
 
   Momentum& Momentum::betaGammaBoost(double gamma, double betagamma) {
     if (gamma == 1. && betagamma == 0.)

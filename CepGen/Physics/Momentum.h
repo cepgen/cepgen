@@ -154,6 +154,12 @@ namespace cepgen {
     double eta() const;
     /// Rapidity
     double rapidity() const;
+
+    /// Beta scalar value
+    double beta() const;
+    /// Gamma scalar value
+    double gamma() const;
+
     /// Apply a threshold to all values with a given tolerance
     Momentum& truncate(double tolerance = 1.e-10);
     /// Rotate the transverse components by an angle phi (and reflect the y coordinate)
