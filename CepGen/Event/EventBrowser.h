@@ -68,7 +68,9 @@ namespace cepgen {
                                                                    {"p", &Momentum::p},
                                                                    {"pt2", &Momentum::pt2},
                                                                    {"th", &Momentum::theta},
-                                                                   {"y", &Momentum::rapidity}};
+                                                                   {"y", &Momentum::rapidity},
+                                                                   {"beta", &Momentum::beta},
+                                                                   {"gamma", &Momentum::gamma}};
     };
   }  // namespace utils
 }  // namespace cepgen
