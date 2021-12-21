@@ -3,6 +3,7 @@ file(GLOB core_sources
         Modules/*.cpp
         Utils/*.cpp
         Integration/*.cpp
+        OutputModules/*.cpp
         *.cpp)
 file(GLOB phys_sources
         Event/*.cpp
@@ -16,6 +17,7 @@ file(GLOB core_includes
         Core
         Modules
         Utils
+        OutputModules
         Physics
         Integration
         Processes

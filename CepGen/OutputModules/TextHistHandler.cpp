@@ -35,10 +35,10 @@ namespace cepgen {
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2019
      */
-    class TextHandler : public ExportModule {
+    class TextHistHandler : public ExportModule {
     public:
-      explicit TextHandler(const ParametersList&);
-      ~TextHandler();
+      explicit TextHistHandler(const ParametersList&);
+      ~TextHistHandler();
 
       static ParametersDescription description();
 
@@ -47,56 +47,46 @@ namespace cepgen {
       void operator<<(const Event&) override;
 
     private:
-      std::ofstream file_, hist_file_;
-      std::string hist_filename_;
+      std::ofstream file_;
       //--- variables definition
-      const std::vector<std::string> variables_;
-      const bool save_banner_, save_variables_;
       const bool show_hists_, save_hists_;
-      const std::string separator_;
+      const std::string filename_;
 
       const utils::EventBrowser browser_;
 
-      std::ostringstream oss_vars_;
-
       double cross_section_{1.};
-
-      //--- kinematic variables
-      double sqrts_{0.};
       unsigned long num_evts_{0ul};
+
+      /// centre-of-mass energy
+      double sqrts_{0.};
+
+      /// 1D histogram definition
       struct Hist1DInfo {
         std::string var;
         utils::Hist1D hist;
       };
+      /// List of 1D histograms
       std::vector<Hist1DInfo> hists_;
+      /// 2D histogram definition
       struct Hist2DInfo {
         std::string var1, var2;
         utils::Hist2D hist;
       };
+      /// List of 2D histograms
       std::vector<Hist2DInfo> hists2d_;
     };
 
-    TextHandler::TextHandler(const ParametersList& params)
+    TextHistHandler::TextHistHandler(const ParametersList& params)
         : ExportModule(params),
-          file_(params.get<std::string>("filename")),
-          hist_filename_(params.get<std::string>("histFilename")),
-          variables_(params.get<std::vector<std::string> >("variables")),
-          save_banner_(params.get<bool>("saveBanner")),
-          save_variables_(params.get<bool>("saveVariables")),
-          show_hists_(params.get<bool>("showHistograms")),
-          save_hists_(params.get<bool>("saveHistograms")),
-          separator_(params.get<std::string>("separator")) {
-      //--- first extract list of variables to store in output file
-      oss_vars_.clear();
-      std::string sep;
-      for (const auto& var : variables_)
-        oss_vars_ << sep << var, sep = separator_;
-      //--- then extract list of variables to be plotted in histogram
+          show_hists_(params_.get<bool>("showHistograms")),
+          save_hists_(params_.get<bool>("saveHistograms")),
+          filename_(params_.get<std::string>("filename")) {
+      //--- extract list of variables to be plotted in histogram
       const auto& hist_vars = params.get<ParametersList>("histVariables");
       for (const auto& key : hist_vars.keys()) {
         const auto& vars = utils::split(key, ':');
         if (vars.size() < 1 || vars.size() > 2)
-          throw CG_FATAL("TextHandler") << "Invalid number of variables to correlate for '" << key << "'!";
+          throw CG_FATAL("TextHistHandler") << "Invalid number of variables to correlate for '" << key << "'!";
 
         const auto& hvar = hist_vars.get<ParametersList>(key);
         if (vars.size() == 1) {  // 1D histogram
@@ -107,7 +97,7 @@ namespace cepgen {
             const auto& nbins = (hvar.get<int>("nbins") > 0 ? hvar.get<int>("nbins") : hvar.get<int>("nbinsX"));
             hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(nbins, hvar.get<Limits>("xrange"))});
           } else {
-            CG_WARNING("TextHandler") << "Neither xrange nor xbins found in parameters for 1D plot of variable \""
+            CG_WARNING("TextHistHandler") << "Neither xrange nor xbins found in parameters for 1D plot of variable \""
                                       << vars.at(0) << "\".";
             continue;
           }
@@ -128,7 +118,7 @@ namespace cepgen {
                 utils::Hist2D(
                     nbinsx, hvar.get<Limits>("xrange"), hvar.get<int>("nbinsY"), hvar.get<Limits>("yrange"))});
           } else {
-            CG_WARNING("TextHandler")
+            CG_WARNING("TextHistHandler")
                 << "Neither (x/y)range nor (x/y)bins found in parameters for 1D plot of variables \"" << vars << "\".";
             continue;
           }
@@ -141,12 +131,10 @@ namespace cepgen {
         }
       }
       if (save_hists_ && !hists_.empty())
-        hist_file_.open(hist_filename_);
+        file_.open(filename_);
     }
 
-    TextHandler::~TextHandler() {
-      //--- finalisation of the output file
-      file_.close();
+    TextHistHandler::~TextHistHandler() {
       //--- histograms printout
       if (!show_hists_ && !save_hists_)
         return;
@@ -155,42 +143,31 @@ namespace cepgen {
         std::ostringstream os;
         h_var.hist.draw(os);
         if (show_hists_)
-          CG_INFO("TextHandler") << os.str();
+          CG_INFO("TextHistHandler") << os.str();
         if (save_hists_)
-          hist_file_ << "\n" << os.str() << "\n";
+          file_ << "\n" << os.str() << "\n";
       }
       for (const auto& h_var : hists2d_) {
         std::ostringstream os;
         h_var.hist.draw(os);
         if (show_hists_)
-          CG_INFO("TextHandler") << os.str();
+          CG_INFO("TextHistHandler") << os.str();
         if (save_hists_)
-          hist_file_ << "\n" << os.str() << "\n";
+          file_ << "\n" << os.str() << "\n";
       }
       if (save_hists_)
-        CG_INFO("TextHandler") << "Saved " << utils::s("histogram", hists_.size()) << " into \"" << hist_filename_
+        CG_INFO("TextHistHandler") << "Saved " << utils::s("histogram", hists_.size(), true) << " into \"" << filename_
                                << "\".";
     }
 
-    void TextHandler::initialise(const Parameters& params) {
+    void TextHistHandler::initialise(const Parameters& params) {
       sqrts_ = params.kinematics().incomingBeams().sqrtS();
       num_evts_ = 0ul;
-      if (save_banner_)
-        file_ << banner(params, "#") << "\n";
-      if (save_variables_)
-        file_ << "# " << oss_vars_.str() << "\n";
       if (save_hists_ && !hists_.empty())
-        hist_file_ << banner(params, "#") << "\n";
+        file_ << banner(params, "#") << "\n";
     }
 
-    void TextHandler::operator<<(const Event& ev) {
-      //--- write down the variables list in the file
-      if (!variables_.empty()) {
-        std::string sep;
-        for (const auto& var : variables_)
-          file_ << sep << browser_.get(ev, var), sep = separator_;
-        file_ << "\n";
-      }
+    void TextHistHandler::operator<<(const Event& ev) {
       //--- increment the corresponding histograms
       for (auto& h_var : hists_)
         h_var.hist.fill(browser_.get(ev, h_var.var));
@@ -199,17 +176,12 @@ namespace cepgen {
       ++num_evts_;
     }
 
-    ParametersDescription TextHandler::description() {
+    ParametersDescription TextHistHandler::description() {
       auto desc = ExportModule::description();
       desc.setDescription("Text-based histogramming tool");
-      desc.add<std::string>("filename", "output.txt").setDescription("Output filename for variables dump");
-      desc.add<std::string>("histFilename", "output.hists.txt").setDescription("Output filename for histogram dump");
-      desc.add<std::vector<std::string> >("variables", {}).setDescription("List of variables to dump");
-      desc.add<bool>("saveBanner", true).setDescription("Also save the boilerplate in output files?");
-      desc.add<bool>("saveVariables", true).setDescription("Save the variable(s) into an output file?");
+      desc.add<std::string>("filename", "output.hists.txt").setDescription("Output filename for histogram dump");
       desc.add<bool>("showHistograms", true).setDescription("Show the histogram(s) at the end of the run?");
       desc.add<bool>("saveHistograms", false).setDescription("Save the histogram(s) at the end of the run?");
-      desc.add<std::string>("separator", "\t").setDescription("Base separator in output file");
       // per-histogram default parameters
       ParametersDescription hist_desc;
       // x-axis attributes
@@ -229,4 +201,4 @@ namespace cepgen {
   }  // namespace io
 }  // namespace cepgen
 
-REGISTER_IO_MODULE("text", TextHandler)
+REGISTER_IO_MODULE("text", TextHistHandler)

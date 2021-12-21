@@ -30,10 +30,10 @@ namespace cepgen {
     /// Simple event dump module
     /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
     /// \date Jan 2020
-    class EventDump : public ExportModule {
+    class TextEventHandler : public ExportModule {
     public:
-      explicit EventDump(const ParametersList&);
-      ~EventDump();
+      explicit TextEventHandler(const ParametersList&);
+      ~TextEventHandler();
 
       static ParametersDescription description();
 
@@ -47,7 +47,7 @@ namespace cepgen {
       std::ostream* out_{nullptr};
     };
 
-    EventDump::EventDump(const ParametersList& params)
+    TextEventHandler::TextEventHandler(const ParametersList& params)
         : ExportModule(params),
           save_banner_(params.get<bool>("saveBanner")),
           print_every_(params.get<int>("printEvery")) {
@@ -58,27 +58,27 @@ namespace cepgen {
         out_ = &std::cout;
     }
 
-    EventDump::~EventDump() {
+    TextEventHandler::~TextEventHandler() {
       if (out_ != &std::cout)
         dynamic_cast<std::ofstream*>(out_)->close();
     }
 
-    void EventDump::initialise(const Parameters& params) {
+    void TextEventHandler::initialise(const Parameters& params) {
       if (save_banner_)
         *out_ << banner(params, "#") << "\n";
     }
 
-    void EventDump::setCrossSection(double cross_section, double cross_section_err) {
+    void TextEventHandler::setCrossSection(double cross_section, double cross_section_err) {
       if (out_ != &std::cout)
         *out_ << "Total cross-section: " << cross_section << " +/- " << cross_section_err << " pb.\n";
     }
 
-    void EventDump::operator<<(const Event& ev) {
+    void TextEventHandler::operator<<(const Event& ev) {
       if (print_every_ < 0 || event_num_++ % print_every_ == 0)
         *out_ << ev << "\n";
     }
 
-    ParametersDescription EventDump::description() {
+    ParametersDescription TextEventHandler::description() {
       auto desc = ExportModule::description();
       desc.setDescription("Simple text-based event dumper");
       desc.add<bool>("saveBanner", true).setDescription("Save boilerplate in output file?");
@@ -89,4 +89,4 @@ namespace cepgen {
   }  // namespace io
 }  // namespace cepgen
 
-REGISTER_IO_MODULE("dump", EventDump)
+REGISTER_IO_MODULE("dump", TextEventHandler)
