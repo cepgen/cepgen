@@ -104,10 +104,26 @@ namespace cepgen {
         return (double)std::count_if(
             bparts.begin(), bparts.end(), [](const auto& part) { return (int)part.status() > 0; });
       }
+      static const auto compute_miss_mom = [](const Event& ev) -> Momentum {
+        Momentum me;
+        for (const auto& cp : ev[Particle::Role::CentralSystem])
+          if (cp.status() == Particle::Status::FinalState) {
+            const auto pdg = cp.integerPdgId();
+            if (pdg == 12 || pdg == 14 || pdg == 16)  // neutrinos
+              me += cp.momentum();
+            if (pdg == 1000022 || pdg == 1000023 || pdg == 1000025 || 1000035)  // neutralinos
+              me += cp.momentum();
+          }
+        return me;
+      };
       if (var == "tgen")
         return ev.time_generation;
       if (var == "ttot")
         return ev.time_total;
+      if (var == "met")
+        return compute_miss_mom(ev).pt();
+      if (var == "mephi")
+        return compute_miss_mom(ev).phi();
       throw CG_ERROR("EventBrowser") << "Failed to retrieve the event-level variable \"" << var << "\".";
     }
   }  // namespace utils
