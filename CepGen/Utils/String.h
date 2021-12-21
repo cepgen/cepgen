@@ -23,6 +23,7 @@
 #include <numeric>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace cepgen {
@@ -100,6 +101,11 @@ namespace cepgen {
     template <typename T>
     bool contains(const std::set<T>& coll, const T& item) {
       return std::find(coll.begin(), coll.end(), item) != coll.end();
+    }
+    template <typename K, typename T>
+    bool contains(const std::unordered_map<K, T>& coll, const T& item) {
+      return std::find_if(coll.begin(), coll.end(), [&item](const auto& kv) { return kv.second == item; }) !=
+             coll.end();
     }
     /// Remove duplicates and sort a collection
     template <typename T>
