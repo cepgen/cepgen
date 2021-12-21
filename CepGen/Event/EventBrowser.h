@@ -40,10 +40,12 @@ namespace cepgen {
     private:
       /// Retrieve a named variable from a particle
       double variable(const Event&, const Particle&, const std::string&) const;
+      /// Retrieve a named variable from a two-particle system
+      double variable(const Event&, const Particle&, const Particle&, const std::string&) const;
       /// Retrieve a named variable from the whole event
       static double variable(const Event&, const std::string&);
 
-      static const std::regex rgx_select_id_, rgx_select_role_;
+      static const std::regex rgx_select_id_, rgx_select_id2_, rgx_select_role_;
       static constexpr double INVALID_OUTPUT = -999.;
 
       //--- auxiliary helper maps
@@ -71,6 +73,11 @@ namespace cepgen {
                                                                    {"y", &Momentum::rapidity},
                                                                    {"beta", &Momentum::beta},
                                                                    {"gamma", &Momentum::gamma}};
+      typedef double (Momentum::*pMethodOth)(const Momentum&) const;
+      const std::unordered_map<std::string, pMethodOth> m_two_mom_str_ = {{"deta", &Momentum::deltaEta},
+                                                                          {"dphi", &Momentum::deltaPhi},
+                                                                          {"dpt", &Momentum::deltaPt},
+                                                                          {"dr", &Momentum::deltaR}};
     };
   }  // namespace utils
 }  // namespace cepgen

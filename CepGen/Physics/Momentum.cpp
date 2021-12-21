@@ -169,6 +169,23 @@ namespace cepgen {
     return energy() >= 0. ? log((energy() + pz()) / (energy() - pz())) * 0.5 : 999. * sign;
   }
 
+  double Momentum::deltaEta(const Momentum& oth) const { return fabs(eta() - oth.eta()); }
+
+  double Momentum::deltaPhi(const Momentum& oth) const {
+    static const double M_2PI = 2. * M_PI;
+    double dphi = phi() - oth.phi();
+    // has to be contained in [-M_PI, M_PI]
+    while (dphi < -M_PI)
+      dphi += M_2PI;
+    while (dphi > +M_PI)
+      dphi -= M_2PI;
+    return dphi;
+  }
+
+  double Momentum::deltaPt(const Momentum& oth) const { return fabs(pt() - oth.pt()); }
+
+  double Momentum::deltaR(const Momentum& oth) const { return std::hypot(rapidity() - oth.rapidity(), deltaPhi(oth)); }
+
   //--- boosts/rotations
 
   double Momentum::beta() const {
