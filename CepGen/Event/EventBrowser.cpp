@@ -23,6 +23,8 @@
 namespace cepgen {
   namespace utils {
     const std::regex EventBrowser::rgx_select_id_("([a-zA-Z]+)\\(([0-9]+)\\)", std::regex_constants::extended);
+    const std::regex EventBrowser::rgx_select_id2_("([a-zA-Z]+)\\(([0-9]+),([0-9]+)\\)",
+                                                   std::regex_constants::extended);
     const std::regex EventBrowser::rgx_select_role_("([a-zA-Z]+)\\(([a-z]+[0-9]?)\\)", std::regex_constants::extended);
 
     double EventBrowser::get(const Event& ev, const std::string& var) const {
@@ -32,6 +34,12 @@ namespace cepgen {
         const auto& var_name = sm[1].str();
         const auto& part = ev[std::stoul(sm[2].str())];
         return variable(ev, part, var_name);
+      }
+      if (std::regex_match(var, sm, rgx_select_id2_)) {
+        const auto& var_name = sm[1].str();
+        const auto& part1 = ev[std::stoul(sm[2].str())];
+        const auto& part2 = ev[std::stoul(sm[3].str())];
+        return variable(ev, part1, part2, var_name);
       }
       //--- particle-level variables (indexed by role)
       if (std::regex_match(var, sm, rgx_select_role_)) {
@@ -51,7 +59,7 @@ namespace cepgen {
 
     double EventBrowser::variable(const Event& ev, const Particle& part, const std::string& var) const {
       if (m_mom_str_.count(var)) {
-        auto meth = m_mom_str_.at(var);
+        const auto& meth = m_mom_str_.at(var);
         return (part.momentum().*meth)();
       }
       if (var == "xi") {
@@ -70,6 +78,19 @@ namespace cepgen {
         return part.charge();
       if (var == "status")
         return (double)part.status();
+      throw CG_ERROR("EventBrowser") << "Failed to retrieve variable \"" << var << "\".";
+    }
+
+    double EventBrowser::variable(const Event&,
+                                  const Particle& part1,
+                                  const Particle& part2,
+                                  const std::string& var) const {
+      if (m_two_mom_str_.count(var)) {
+        const auto& meth = m_two_mom_str_.at(var);
+        return (part1.momentum().*meth)(part2.momentum());
+      }
+      if (var == "acop")
+        return 1. - fabs(part1.momentum().deltaPhi(part2.momentum()) * M_1_PI);
       throw CG_ERROR("EventBrowser") << "Failed to retrieve variable \"" << var << "\".";
     }
 

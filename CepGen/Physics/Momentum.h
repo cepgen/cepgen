@@ -155,6 +155,15 @@ namespace cepgen {
     /// Rapidity
     double rapidity() const;
 
+    /// Pseudorapidity distance between two momenta
+    double deltaEta(const Momentum&) const;
+    /// Azimutal angle opening between two momenta
+    double deltaPhi(const Momentum&) const;
+    /// Transverse momentum distance between two momenta
+    double deltaPt(const Momentum&) const;
+    /// Angular distance between two momenta
+    double deltaR(const Momentum&) const;
+
     /// Beta scalar value
     double beta() const;
     /// Gamma scalar value
