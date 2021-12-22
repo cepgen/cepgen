@@ -145,6 +145,16 @@ namespace cepgen {
     return out;
   }
 
+  double Momentum::energyT2() const {
+    const auto ptsq = pt2();
+    return ptsq > 0. ? energy2() * ptsq / (ptsq + pz() * pz()) : 0.;
+  }
+
+  double Momentum::energyT() const {
+    const auto et2 = energyT2();
+    return et2 > 0. ? std::sqrt(et2) : -std::sqrt(-et2);
+  }
+
   double Momentum::mass() const {
     if (mass2() >= 0.)
       return sqrt(mass2());
