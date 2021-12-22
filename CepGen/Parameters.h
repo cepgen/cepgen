@@ -92,12 +92,8 @@ namespace cepgen {
 
     //----- events kinematics
 
-    /// Set the phase space definition
-    void setKinematics(const Kinematics& kin) { kin_ = kin; }
     /// Events kinematics for phase space definition
-    Kinematics& kinematics() { return kin_; }
-    /// Events kinematics for phase space definition
-    const Kinematics& kinematics() const { return kin_; }
+    const Kinematics& kinematics() const;
 
     //----- events generation
 
@@ -199,8 +195,6 @@ namespace cepgen {
   private:
     /// Physics process held by these parameters
     std::unique_ptr<proc::Process> process_;
-    /// Phase space kinematics
-    Kinematics kin_;
     /// Collection of event modification algorithms to be applied
     EventModifiersSequence evt_modifiers_;
     /// Collection of event output modules to be applied

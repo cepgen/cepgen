@@ -42,7 +42,6 @@ namespace cepgen {
       : par_kinematics(param.par_kinematics),
         par_integrator(param.par_integrator),
         process_(std::move(param.process_)),
-        kin_(std::move(param.kin_)),
         evt_modifiers_(std::move(param.evt_modifiers_)),
         out_modules_(std::move(param.out_modules_)),
         taming_functions_(std::move(param.taming_functions_)),
@@ -54,7 +53,6 @@ namespace cepgen {
   Parameters::Parameters(const Parameters& param)
       : par_kinematics(param.par_kinematics),
         par_integrator(param.par_integrator),
-        kin_(param.kin_),
         total_gen_time_(param.total_gen_time_),
         num_gen_events_(param.num_gen_events_),
         generation_(param.generation_) {}
@@ -66,7 +64,6 @@ namespace cepgen {
     par_kinematics = param.par_kinematics;
     par_integrator = param.par_integrator;
     process_ = std::move(param.process_);
-    kin_ = std::move(param.kin_);
     evt_modifiers_ = std::move(param.evt_modifiers_);
     out_modules_ = std::move(param.out_modules_);
     taming_functions_ = std::move(param.taming_functions_);
@@ -87,16 +84,17 @@ namespace cepgen {
       return;
 
     CG_DEBUG("Parameters") << "Preparing all variables for a new run.";
-    kin_ = Kinematics(par_kinematics);
-    process_->setKinematics(kin_);
+    const Kinematics kin(par_kinematics);
+    process_->setKinematics(kin);
     CG_DEBUG("Parameters").log([&](auto& dbg) {
       dbg << "Run started for " << process_->name() << " process " << std::hex << (void*)process_.get() << std::dec
-          << ".\n\t"
-          << "Process mode considered: " << kin_.incomingBeams().mode() << "\n\t"
-          << "  positive-z beam: " << kin_.incomingBeams().positive() << "\n\t"
-          << "  negative-z beam: " << kin_.incomingBeams().negative();
-      if (kin_.incomingBeams().structureFunctions())
-        dbg << "\n\t  structure functions: " << kin_.incomingBeams().structureFunctions();
+          << ".\n\t";
+      const auto& beams = kin.incomingBeams();
+      dbg << "Process mode considered: " << beams.mode() << "\n\t"
+          << "  positive-z beam: " << beams.positive() << "\n\t"
+          << "  negative-z beam: " << beams.negative();
+      if (beams.structureFunctions())
+        dbg << "\n\t  structure functions: " << beams.structureFunctions();
     });
     if (process_->hasEvent())
       process_->clearEvent();
@@ -130,6 +128,12 @@ namespace cepgen {
     if (!proc)
       throw CG_FATAL("Parameters") << "Trying to clone an invalid process!";
     process_.reset(proc);
+  }
+
+  const Kinematics& Parameters::kinematics() const {
+    if (!process_)
+      throw CG_FATAL("Parameters") << "Process must be defined before its kinematics is retrieved!";
+    return process_->kinematics();
   }
 
   EventModifier& Parameters::eventModifier(size_t i) { return *evt_modifiers_.at(i); }
@@ -212,7 +216,7 @@ namespace cepgen {
        << std::setw(wt) << "Integration" << utils::boldify(param->par_integrator.name<std::string>("N/A")) << "\n";
     for (const auto& key : param->par_integrator.keys(false))
       os << std::setw(wt) << "" << key << ": " << param->par_integrator.getString(key) << "\n";
-    const auto& kin = Kinematics(param->par_kinematics);
+    const Kinematics kin(param->par_kinematics);
     const auto& beams = kin.incomingBeams();
     os << "\n"
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill(' ') << "\n\n"

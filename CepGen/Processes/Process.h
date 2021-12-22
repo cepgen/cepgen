@@ -80,8 +80,12 @@ namespace cepgen {
       virtual void fillKinematics(bool symmetrise = false) = 0;
 
     public:
-      /// Restore the Event object to its initial state
+      /// Restore the event object to its initial state
       void clearEvent();
+      /// Return a constant reference to the process kinematics
+      const Kinematics& kinematics() const { return kin_; }
+      /// Return a reference to the process kinematics
+      Kinematics& kinematics() { return kin_; }
       /// Set the list of kinematic cuts to apply on the outgoing particles' final state
       /// \param[in] kin The Kinematics object containing the kinematic parameters
       void setKinematics(const Kinematics& kin);

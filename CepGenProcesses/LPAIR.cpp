@@ -22,7 +22,6 @@
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenProcesses/LPAIR.h"
 
