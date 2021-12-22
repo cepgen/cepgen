@@ -137,6 +137,10 @@ namespace cepgen {
     inline double energy() const { return (*this)[E]; }
     /// Squared energy (in GeV\f$^2\f$)
     inline double energy2() const { return (*this)[E] * (*this)[E]; }
+    /// Tranverse energy component (in GeV)
+    double energyT() const;
+    /// Squared tranverse energy component (in GeV\f$^2\f$)
+    double energyT2() const;
     /// Compute the energy from the mass
     Momentum& setMass2(double m2);
     /// Squared mass (in GeV\f$^2\f$) as computed from its energy and momentum
