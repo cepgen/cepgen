@@ -151,6 +151,13 @@ namespace cepgen {
     return -sqrt(-mass2());
   }
 
+  double Momentum::massT2() const { return energy2() - pz() * pz(); }
+
+  double Momentum::massT() const {
+    const auto mt2 = massT2();
+    return mt2 > 0. ? std::sqrt(mt2) : -std::sqrt(-mt2);
+  }
+
   double Momentum::theta() const { return atan2(pt(), pz()); }
 
   double Momentum::phi() const { return atan2(py(), px()); }

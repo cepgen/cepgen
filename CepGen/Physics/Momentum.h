@@ -146,6 +146,10 @@ namespace cepgen {
     /// Mass (in GeV) as computed from its energy and momentum
     /// \note Returns \f$-\sqrt{|E^2-\mathbf{p}^2|}<0\f$ if \f$\mathbf{p}^2>E^2\f$
     double mass() const;
+    /// Squared transverse mass (in GeV\f$^2\f$)
+    double massT2() const;
+    /// Transverse mass (in GeV)
+    double massT() const;
     /// Polar angle (angle with respect to the longitudinal direction)
     double theta() const;
     /// Azimuthal angle (angle in the transverse plane)

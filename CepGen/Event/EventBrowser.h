@@ -66,6 +66,7 @@ namespace cepgen {
                                                                    {"eta", &Momentum::eta},
                                                                    {"phi", &Momentum::phi},
                                                                    {"m", &Momentum::mass},
+                                                                   {"mt", &Momentum::massT},
                                                                    {"e", &Momentum::energy},
                                                                    {"p", &Momentum::p},
                                                                    {"pt2", &Momentum::pt2},
