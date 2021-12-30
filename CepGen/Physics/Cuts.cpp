@@ -113,13 +113,21 @@ namespace cepgen {
 
   CutsList::CutsList(const ParametersList& params)
       : SteeredObject(params), initial(params_), central(params_), remnants(params_) {
-    if (params.has<Limits>("phiptdiff")) {
+    setParameters(params);
+  }
+
+  void CutsList::setParameters(const ParametersList& params) {
+    SteeredObject::setParameters(params);
+    initial.setParameters(params_);
+    central.setParameters(params_);
+    remnants.setParameters(params_);
+    if (params_.has<Limits>("phiptdiff")) {
       CG_WARNING("Kinematics") << "\"phiptdiff\" parameter is deprecated! "
                                << "Please use \"phidiff\" instead.";
-      params.fill<Limits>("phiptdiff", central.phi_diff());  //legacy
+      params_.fill<Limits>("phiptdiff", central.phi_diff());  //legacy
     }
-    if (params.has<ParametersList>("cuts")) {  // per-particle cuts
-      const auto& per_parts = params.get<ParametersList>("cuts");
+    if (params_.has<ParametersList>("cuts")) {  // per-particle cuts
+      const auto& per_parts = params_.get<ParametersList>("cuts");
       for (const auto& part : per_parts.keys())
         central_particles[(pdgid_t)stoi(part)].setParameters(per_parts.get<ParametersList>(part));
     }

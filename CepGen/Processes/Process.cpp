@@ -245,7 +245,7 @@ namespace cepgen {
     void Process::setKinematics(const Kinematics& kin) {
       CG_DEBUG("Process:setKinematics") << "Preparing to set the kinematics parameters. Input parameters: "
                                         << kin.parameters(false) << ".";
-      clear();
+      clear();  // also resets the "first run" flag
       mp_ = PDG::get().mass(PDG::proton);
       mp2_ = mp_ * mp_;
       kin_ = kin;

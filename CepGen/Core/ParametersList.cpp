@@ -193,6 +193,7 @@ namespace cepgen {
       os << "Parameters(";
     for (const auto& key : keys(false))
       os << sep << key << "=" << getString(key, true), sep = ", ";
+    os << ")";
     return *this;
   }
 

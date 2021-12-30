@@ -59,9 +59,11 @@ namespace cepgen {
         params_.set<double>(kv.first, *kv.second);
       for (const auto& kv : map_strs_)
         params_.set<std::string>(kv.first, *kv.second);
+      for (const auto& kv : map_lims_)
+        params_.set<Limits>(kv.first, *kv.second);
       return params_;
     }
-    void setParameters(const ParametersList& params) override {
+    virtual void setParameters(const ParametersList& params) override {
       Steerable::setParameters(params);
       for (const auto& kv : map_bools_)
         *kv.second = params_.get<bool>(kv.first);
@@ -71,12 +73,15 @@ namespace cepgen {
         *kv.second = params_.get<double>(kv.first);
       for (const auto& kv : map_strs_)
         *kv.second = params_.get<std::string>(kv.first);
+      for (const auto& kv : map_lims_)
+        *kv.second = params_.get<Limits>(kv.first);
     }
 
     REGISTER_TYPE(bool, map_bools_)
     REGISTER_TYPE(int, map_ints_)
     REGISTER_TYPE(double, map_dbls_)
     REGISTER_TYPE(std::string, map_strs_)
+    REGISTER_TYPE(Limits, map_lims_)
   };
 }  // namespace cepgen
 

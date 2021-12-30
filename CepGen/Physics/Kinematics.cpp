@@ -38,6 +38,12 @@ namespace cepgen {
       kmr::GluonGrid::get(ParametersList(params_).set<std::string>("path", params.get<std::string>("kmrGridPath")));
   }
 
+  void Kinematics::setParameters(const ParametersList& params) {
+    SteeredObject::setParameters(params);
+    incoming_beams_.setParameters(params_);
+    cuts_.setParameters(params_);
+  }
+
   ParametersList Kinematics::parameters(bool extended) const {
     ParametersList params;
     params += incoming_beams_.parameters();         // beam particles

@@ -183,8 +183,9 @@ namespace cepgen {
   /// Collection of cuts to be applied on all particle with a given PDG id
   typedef std::unordered_map<pdgid_t, cuts::Central> PerIdCuts;
   /// A collection of cuts to apply on the physical phase space
-  struct CutsList : SteeredObject<CutsList> {
+  struct CutsList final : SteeredObject<CutsList> {
     CutsList(const ParametersList& params = ParametersList());
+    void setParameters(const ParametersList&) override;
     static ParametersDescription description();
     cuts::Initial initial;        ///< Cuts on the initial particles kinematics
     cuts::Central central;        ///< Cuts on the central system produced
