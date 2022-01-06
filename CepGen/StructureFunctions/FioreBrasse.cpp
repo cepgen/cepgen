@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
@@ -29,61 +30,87 @@
 namespace cepgen {
   namespace strfun {
     ///\f${\cal W}_{1,2}\f$ structure functions parameterisation by Fiore et al \cite Fiore:2002re and Brasse et al \cite Brasse:1976bf
-    class FioreBrasse final : public Parameterisation {
+    class FioreBrasse : public Parameterisation {
     public:
       /// Fiore \cite Fiore:2002re and Brasse \cite Brasse:1976bf proton structure functions
-      explicit FioreBrasse(const ParametersList&);
+      explicit FioreBrasse(const ParametersList& params)
+          : Parameterisation(params), s0_(steer<double>("s0")), norm_(steer<double>("norm")) {
+        for (const auto& res : steer<std::vector<ParametersList> >("resonances"))
+          resonances_.emplace_back(res);
+      }
 
-      static ParametersDescription description();
+      static ParametersDescription description() {
+        auto desc = Parameterisation::description();
+        desc.setDescription("Fiore-Brasse F2 parameterisation of low-mass resonances");
+        desc.add<double>("s0", 1.14);
+        desc.add<double>("norm", 0.021).setDescription("absolute normalisation factor");
+        // add the list of resonances
+        desc.addParametersDescriptionVector("resonances",
+                                            Resonance::description(),
+                                            {ParametersList()  // N*(1520)
+                                                 .set<double>("alpha0", -0.8377)
+                                                 .set<double>("alpha1", 0.95)
+                                                 .set<double>("alpha2", 0.1473)
+                                                 .set<double>("a", 1.0)
+                                                 .set<double>("q02", 2.4617)
+                                                 .set<double>("spin", 3. / 2.),
+                                             ParametersList()  // N*(1680)
+                                                 .set<double>("alpha0", -0.37)
+                                                 .set<double>("alpha1", 0.95)
+                                                 .set<double>("alpha2", 0.1471)
+                                                 .set<double>("a", 0.5399)
+                                                 .set<double>("q02", 2.4617)
+                                                 .set<double>("spin", 5. / 2.),
+                                             ParametersList()  // Δ(1236)
+                                                 .set<double>("alpha0", 0.0038)
+                                                 .set<double>("alpha1", 0.85)
+                                                 .set<double>("alpha2", 0.1969)
+                                                 .set<double>("a", 4.2225)
+                                                 .set<double>("q02", 1.5722)
+                                                 .set<double>("spin", 3. / 2.),
+                                             ParametersList()  // exotic
+                                                 .set<double>("alpha0", 0.5645)
+                                                 .set<double>("alpha1", 0.1126)
+                                                 .set<double>("alpha2", 1.3086)
+                                                 .set<double>("a", 19.2694)
+                                                 .set<double>("q02", 4.5259)
+                                                 .set<double>("spin", 1.)});
+        return desc;
+      }
 
       FioreBrasse& eval(double xbj, double q2) override;
 
+    protected:
+      /// Description of a single resonance in the modelling
+      struct Resonance : SteeredObject<Resonance> {
+        explicit Resonance(const ParametersList& params)
+            : SteeredObject(params),
+              alpha0(steer<double>("alpha0")),
+              alpha1(steer<double>("alpha1")),
+              alpha2(steer<double>("alpha2")),
+              a(steer<double>("a")),
+              q02(steer<double>("q02")),
+              spin(steer<double>("spin")) {}
+
+        static ParametersDescription description() {
+          auto desc = ParametersDescription();
+          desc.add<double>("alpha0", 0.);
+          desc.add<double>("alpha1", 0.);
+          desc.add<double>("alpha2", 0.);
+          desc.add<double>("a", 0.);
+          desc.add<double>("q02", 0.);
+          desc.add<double>("spin", 0.);
+          return desc;
+        }
+
+        double alpha0, alpha1, alpha2, a, q02, spin;
+      };
+
     private:
-      /// General parameters for this modelling
-      struct Parameters {
-        static Parameters standard();
-        static Parameters alternative();
-        /// Description of a single resonance in the modelling
-        struct Resonance {
-          double alpha0, alpha1, alpha2, a, q02;
-          float spin;
-        };
-        /// All resonances considered in this modelling
-        std::vector<Resonance> resonances;
-        double s0 = {0.}, norm = {0.};
-      } fb_params_;
+      /// All resonances considered in this modelling
+      std::vector<Resonance> resonances_;
+      double s0_{0.}, norm_{0.};
     };
-
-    FioreBrasse::Parameters FioreBrasse::Parameters::standard() {
-      Parameters p{};
-      p.s0 = 1.14;
-      p.norm = 0.021;
-      p.resonances.emplace_back(Resonance{-0.8377, 0.95, 0.1473, 1.0, 2.4617, 3. / 2.});    // N*(1520)
-      p.resonances.emplace_back(Resonance{-0.37, 0.95, 0.1471, 0.5399, 2.4617, 5. / 2.});   // N*(1680)
-      p.resonances.emplace_back(Resonance{0.0038, 0.85, 0.1969, 4.2225, 1.5722, 3. / 2.});  // Δ(1236)
-      p.resonances.emplace_back(Resonance{0.5645, 0.1126, 1.3086, 19.2694, 4.5259, 1.});    // exotic
-      return p;
-    }
-    FioreBrasse::Parameters FioreBrasse::Parameters::alternative() {
-      Parameters p{};
-      p.s0 = 1.2871;
-      p.norm = 0.0207;
-      p.resonances.emplace_back(Resonance{-0.8070, 0.9632, 0.1387, 1.0, 2.6066, 3. / 2.});     // N*(1520)
-      p.resonances.emplace_back(Resonance{-0.3640, 0.9531, 0.1239, 0.6086, 2.6066, 5. / 2.});  // N*(1680)
-      p.resonances.emplace_back(Resonance{-0.0065, 0.8355, 0.2320, 4.7279, 1.4828, 3. / 2.});  // Δ(1236)
-      p.resonances.emplace_back(Resonance{0.5484, 0.1373, 1.3139, 14.7267, 4.6041, 1.});       // exotic
-      return p;
-    }
-
-    FioreBrasse::FioreBrasse(const ParametersList& params) : Parameterisation(params) {
-      const auto& model = steer<std::string>("model");
-      if (model == "standard")
-        fb_params_ = Parameters::standard();
-      else if (model == "alternative")
-        fb_params_ = Parameters::alternative();
-      else
-        throw CG_FATAL("FioreBrasse") << "Invalid modelling selected: " << model << "!";
-    }
 
     FioreBrasse& FioreBrasse::eval(double xbj, double q2) {
       const double akin = 1. + 4. * mp2_ * xbj * xbj / q2;
@@ -91,17 +118,15 @@ namespace cepgen {
       const double s = utils::mX2(xbj, q2, mp2_);
 
       double amplitude_res = 0.;
+      const double sqrts0 = sqrt(s0_);
       for (unsigned short i = 0; i < 3; ++i) {  //FIXME 4??
-        const Parameters::Resonance& res = fb_params_.resonances[i];
-        const double sqrts0 = sqrt(fb_params_.s0);
+        const auto& res = resonances_.at(i);
 
         std::complex<double> alpha;
-        if (s > fb_params_.s0)
-          alpha = std::complex<double>(res.alpha0 + res.alpha2 * sqrts0 + res.alpha1 * s,
-                                       res.alpha2 * sqrt(s - fb_params_.s0));
+        if (s > s0_)
+          alpha = std::complex<double>(res.alpha0 + res.alpha2 * sqrts0 + res.alpha1 * s, res.alpha2 * sqrt(s - s0_));
         else
-          alpha =
-              std::complex<double>(res.alpha0 + res.alpha1 * s + res.alpha2 * (sqrts0 - sqrt(fb_params_.s0 - s)), 0.);
+          alpha = std::complex<double>(res.alpha0 + res.alpha1 * s + res.alpha2 * (sqrts0 - sqrt(s0_ - s)), 0.);
 
         double formfactor = 1. / pow(1. + q2 / res.q02, 2);
         double denom = pow(res.spin - std::real(alpha), 2) + pow(std::imag(alpha), 2);
@@ -110,7 +135,7 @@ namespace cepgen {
       }
       double amplitude_bg = 0.;
       {
-        const Parameters::Resonance& res = fb_params_.resonances[3];
+        const auto& res = resonances_.at(3);
         double sE = res.alpha2, sqrtsE = sqrt(sE);
         std::complex<double> alpha;
         if (s > sE)
@@ -122,7 +147,7 @@ namespace cepgen {
         double denom = pow(sp - std::real(alpha), 2) + pow(std::imag(alpha), 2);
         amplitude_bg = res.a * formfactor * formfactor * std::imag(alpha) / denom;
       }
-      const double amplitude_tot = fb_params_.norm * (amplitude_res + amplitude_bg);
+      const double amplitude_tot = norm_ * (amplitude_res + amplitude_bg);
 
       CG_DEBUG_LOOP("FioreBrasse:amplitudes") << "Amplitudes:\n\t"
                                               << " resonance part:  " << amplitude_res << ",\n\t"
@@ -133,14 +158,50 @@ namespace cepgen {
       return *this;
     }
 
-    ParametersDescription FioreBrasse::description() {
-      auto desc = Parameterisation::description();
-      desc.setDescription("Fiore-Brasse F2 parameterisation of low-mass resonances");
-      desc.add<std::string>("model", "standard")
-          .setDescription("Parameterisation modelling ('standard' or 'alternative' handled)");
-      return desc;
-    }
+    class FioreBrasseAlt final : public FioreBrasse {
+    public:
+      explicit FioreBrasseAlt(const ParametersList& params) : FioreBrasse(params) {}
+
+      static ParametersDescription description() {
+        auto desc = FioreBrasse::description();
+        desc.add<double>("s0", 1.2871);
+        desc.add<double>("norm", 0.0207);
+        // add the list of resonances
+        desc.addParametersDescriptionVector("resonances",
+                                            Resonance::description(),
+                                            {ParametersList()  // N*(1520)
+                                                 .set<double>("alpha0", -0.8070)
+                                                 .set<double>("alpha1", 0.9632)
+                                                 .set<double>("alpha2", 0.1387)
+                                                 .set<double>("a", 1.0)
+                                                 .set<double>("q02", 2.6066)
+                                                 .set<double>("spin", 3. / 2.),
+                                             ParametersList()  // N*(1680)
+                                                 .set<double>("alpha0", -0.3640)
+                                                 .set<double>("alpha1", 0.9531)
+                                                 .set<double>("alpha2", 0.1239)
+                                                 .set<double>("a", 0.6086)
+                                                 .set<double>("q02", 2.6066)
+                                                 .set<double>("spin", 5. / 2.),
+                                             ParametersList()  // Δ(1236)
+                                                 .set<double>("alpha0", -0.0065)
+                                                 .set<double>("alpha1", 0.8355)
+                                                 .set<double>("alpha2", 0.2320)
+                                                 .set<double>("a", 4.7279)
+                                                 .set<double>("q02", 1.4828)
+                                                 .set<double>("spin", 3. / 2.),
+                                             ParametersList()  // exotic
+                                                 .set<double>("alpha0", 0.5484)
+                                                 .set<double>("alpha1", 0.1373)
+                                                 .set<double>("alpha2", 1.3139)
+                                                 .set<double>("a", 14.7267)
+                                                 .set<double>("q02", 4.6041)
+                                                 .set<double>("spin", 1.)});
+        return desc;
+      }
+    };
   }  // namespace strfun
 }  // namespace cepgen
 
 REGISTER_STRFUN(strfun::Type::FioreBrasse, FioreBrasse, strfun::FioreBrasse)
+REGISTER_STRFUN(strfun::Type::FioreBrasseAlt, FioreBrasseAlt, strfun::FioreBrasseAlt)

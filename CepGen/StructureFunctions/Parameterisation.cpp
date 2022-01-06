@@ -138,6 +138,8 @@ namespace cepgen {
           return os << "SzczurekUleshchenko";
         case strfun::Type::FioreBrasse:
           return os << "FioreBrasse";
+        case strfun::Type::FioreBrasseAlt:
+          return os << "FioreBrasseAlt";
         case strfun::Type::ChristyBosted:
           return os << "ChristyBosted";
         case strfun::Type::CLAS:

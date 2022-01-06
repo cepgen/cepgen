@@ -43,6 +43,7 @@ namespace cepgen {
       FioreBrasse = 101,
       ChristyBosted = 102,
       CLAS = 103,
+      FioreBrasseAlt = 104,
       ALLM91 = 201,
       ALLM97 = 202,
       GD07p = 203,
