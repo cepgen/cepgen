@@ -35,6 +35,7 @@ int main(int argc, char* argv[]) {
   double q2, xmin, xmax;
   int num_points;
   string output_file;
+  bool logx, logy;
 
   cepgen::ArgumentsParser(argc, argv)
       .addArgument("sf,s", "structure functions modelling", &strfun_types)
@@ -43,7 +44,11 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("xmax,M", "maximal Bjorken x", &xmax, 1.)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
       .addOptionalArgument("output,o", "output file name", &output_file, "strfuns.scan.output.txt")
+      .addOptionalArgument("logx", "logarithmic x-axis", &logx, false)
+      .addOptionalArgument("logy,l", "logarithmic y-axis", &logy, false)
       .parse();
+
+  const double lxmin = log10(xmin), lxmax = log10(xmax);
 
   cepgen::initialise();
 
@@ -59,9 +64,7 @@ int main(int argc, char* argv[]) {
   vector<TGraph*> g_strfuns_f2, g_strfuns_fl;
   for (const auto& sf_type : strfun_types) {
     auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(sf_type);
-    std::ostringstream oss;
-    oss << (cepgen::strfun::Type)sf->name();
-    const auto sf_name = oss.str();
+    const auto sf_name = cepgen::strfun::StructureFunctionsFactory::get().describe(sf_type);
     g_strfuns_f2.emplace_back(new TGraph);
     (*g_strfuns_f2.rbegin())->SetTitle((sf_name + ";x_{Bj};F_{2}").c_str());
     g_strfuns_fl.emplace_back(new TGraph);
@@ -69,7 +72,8 @@ int main(int argc, char* argv[]) {
     strfuns.emplace_back(move(sf));
   }
   for (int i = 0; i < num_points; ++i) {
-    const double x = xmin + i * (xmax - xmin) / (num_points - 1);
+    const double x =
+        (!logx) ? xmin + i * (xmax - xmin) / (num_points - 1) : pow(10, lxmin + i * (lxmax - lxmin) / (num_points - 1));
     out << x << "\t";
     size_t j = 0;
     for (auto& sf : strfuns) {
@@ -86,8 +90,11 @@ int main(int argc, char* argv[]) {
 
   for (auto& plt : map<const char*, vector<TGraph*> >{{"F2", g_strfuns_f2}, {"FL", g_strfuns_fl}}) {
     cepgen::ROOTCanvas c(plt.first, Form("Q^{2} = %g GeV^{2}", q2));
-    c.SetLogy();
     TMultiGraph mg;
+    if (logx)
+      c.SetLogx();
+    if (logy)
+      c.SetLogy();
     size_t i = 0;
     for (auto& gr : plt.second) {
       mg.Add(gr);
@@ -97,7 +104,8 @@ int main(int argc, char* argv[]) {
     }
     mg.Draw("al");
     // ugly fix to propagate first plot axes label onto multigraph
-    mg.GetHistogram()->SetTitle((*plt.second.begin())->GetTitle());
+    mg.GetHistogram()->GetXaxis()->SetTitle((*plt.second.begin())->GetXaxis()->GetTitle());
+    mg.GetHistogram()->GetYaxis()->SetTitle((*plt.second.begin())->GetYaxis()->GetTitle());
     c.Prettify(mg.GetHistogram());
     c.Save("pdf");
   }
