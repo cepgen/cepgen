@@ -38,11 +38,11 @@ namespace cepgen {
         desc.setDescription("Abramowicz, Levin, Levy, and Maor parametrisation of F2/FL");
         desc.add<ParametersDescription>("pomeronTrajectory", Trajectory::description());
         desc.add<ParametersDescription>("reggeonTrajectory", Trajectory::description());
-        desc.add<double>("m02", 0.);
-        desc.add<double>("mp2", 0.);
-        desc.add<double>("mr2", 0.);
+        desc.add<double>("m02", 0.).setDescription("effective photon squared mass (in GeV^2)");
+        desc.add<double>("mp2", 0.).setDescription("effective pomeron squared mass (in GeV^2)");
+        desc.add<double>("mr2", 0.).setDescription("effective reggeon squared mass (in GeV^2)");
         desc.add<double>("q02", 0.);
-        desc.add<double>("lambda2", 0.);
+        desc.add<double>("lambda2", 0.).setDescription("squared QCD scale (in GeV^2");
         return desc;
       }
 
