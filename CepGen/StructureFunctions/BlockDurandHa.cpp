@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -81,6 +81,7 @@ namespace cepgen {
 
     ParametersDescription BlockDurandHa::description() {
       auto desc = Parameterisation::description();
+      desc.setDescription("Block-Durand-Ha");
       desc.add<std::vector<double> >("a", {8.205e-4, -5.148e-2, -4.725e-3});
       desc.add<std::vector<double> >("b", {2.217e-3, 1.244e-2, 5.958e-4});
       desc.add<std::vector<double> >("c", {0.255e0, 1.475e-1});
