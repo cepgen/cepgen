@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -57,11 +57,12 @@ namespace cepgen {
     };
 
     E143::E143(const ParametersList& params)
-        : q2_b_(params.get<double>("q2_b")),
-          lambda2_(params.get<double>("lambda2")),
-          a_(params.get<std::vector<double> >("a")),
-          b_(params.get<std::vector<double> >("b")),
-          c_(params.get<std::vector<double> >("c")) {
+        : Parameterisation(params),
+          q2_b_(params_.get<double>("q2_b")),
+          lambda2_(params_.get<double>("lambda2")),
+          a_(params_.get<std::vector<double> >("a")),
+          b_(params_.get<std::vector<double> >("b")),
+          c_(params_.get<std::vector<double> >("c")) {
       if (a_.size() != 6)
         throw CG_FATAL("E143") << "Parameter 'a' should have 6 components! Parsed " << a_ << ".";
       if (b_.size() != 6)
@@ -119,7 +120,9 @@ namespace cepgen {
     };
 
     R1990::R1990(const ParametersList& params)
-        : lambda2_(params.get<double>("lambda2")), b_(params.get<std::vector<double> >("b")) {
+        : Parameterisation(params),
+          lambda2_(params_.get<double>("lambda2")),
+          b_(params_.get<std::vector<double> >("b")) {
       if (b_.size() != 3)
         throw CG_FATAL("R1990") << "Parameter 'b' should have 3 components! Parsed " << b_ << ".";
     }
@@ -154,7 +157,10 @@ namespace cepgen {
     };
 
     CLAS::CLAS(const ParametersList& params)
-        : p_(params.get<std::vector<double> >("p")), wth_(params.get<double>("wth")), q20_(params.get<double>("q20")) {
+        : Parameterisation(params),
+          p_(params_.get<std::vector<double> >("p")),
+          wth_(params_.get<double>("wth")),
+          q20_(params_.get<double>("q20")) {
       if (p_.size() != 3)
         throw CG_FATAL("R1990") << "Parameter 'p' should have 3 components! Parsed " << p_ << ".";
     }
@@ -197,10 +203,11 @@ namespace cepgen {
     };
 
     SibirtsevBlunden::SibirtsevBlunden(const ParametersList& params)
-        : a_(params.get<double>("a")),
-          b1_(params.get<double>("b1")),
-          b2_(params.get<double>("b2")),
-          c_(params.get<double>("c")) {}
+        : Parameterisation(params),
+          a_(params_.get<double>("a")),
+          b1_(params_.get<double>("b1")),
+          b2_(params_.get<double>("b2")),
+          c_(params_.get<double>("c")) {}
 
     double SibirtsevBlunden::operator()(double, double q2, double& err) const {
       err = 0.;

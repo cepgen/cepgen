@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,10 +48,10 @@ namespace cepgen {
         : NamedModule<int>(params),
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
-          mx_min_(mp_ + PDG::get().mass(PDG::piZero)),
-          r_ratio_(sigrat::SigmaRatiosFactory::get().build(params.get<int>("sigmaRatio"))) {
+          mx_min_(mp_ + PDG::get().mass(PDG::piZero)) {
       CG_DEBUG("Parameterisation") << "Structure functions parameterisation to be built using following parameters:\n"
-                                   << ParametersDescription(params).describe(true);
+                                   << ParametersDescription(params_).describe(true);
+      r_ratio_ = sigrat::SigmaRatiosFactory::get().build(params_.get<int>("sigmaRatio"));
     }
 
     Parameterisation& Parameterisation::operator=(const Parameterisation& sf) {
@@ -61,10 +61,9 @@ namespace cepgen {
     }
 
     Parameterisation& Parameterisation::operator()(double xbj, double q2) {
-      std::pair<double, double> nv = {xbj, q2};
-      if (nv == old_vals_)
+      if (old_vals_.first == xbj && old_vals_.second == q2)
         return *this;
-      old_vals_ = nv;
+      old_vals_ = {xbj, q2};
       return eval(xbj, q2);
     }
 

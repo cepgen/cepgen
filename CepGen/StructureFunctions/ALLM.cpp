@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
@@ -31,10 +31,10 @@ namespace cepgen {
     /// \f$F_{2,L}\f$ parameterisation by Abramowicz, Levin, Levy, and Maor \cite Abramowicz:1991xz\cite Abramowicz:1997ms
     class ALLM final : public Parameterisation {
     public:
-      class Parameters {
+      class Parameters : public SteeredObject<Parameters> {
       private:
-        struct Trajectory {
-          explicit Trajectory(const ParametersList& params = ParametersList());
+        struct Trajectory : SteeredObject<Trajectory> {
+          explicit Trajectory(const ParametersList&);
           std::vector<double> a, b, c;
           static ParametersDescription description();
         };
@@ -78,8 +78,8 @@ namespace cepgen {
     };
 
     ALLM::ALLM(const ParametersList& params)
-        : Parameterisation(params), mod_params_(params.get<ParametersList>("parameterisation")) {
-      const auto& model = params.get<std::string>("model");
+        : Parameterisation(params), mod_params_(params_.get<ParametersList>("parameterisation")) {
+      const auto& model = params_.get<std::string>("model");
       if (model == "GD07p") {
         mod_params_ = Parameters::gd07p();
         descr_ = "ALLM{GD07p}";
@@ -164,14 +164,15 @@ namespace cepgen {
     //---------------------------------------------------------------------------------------------
 
     ALLM::Parameters::Parameters(const ParametersList& params)
-        : pomeron(params.get<ParametersList>("pomeronTrajectory")),
-          reggeon(params.get<ParametersList>("reggeonTrajectory")),
-          m02(params.get<double>("m02")),
-          mp2(params.get<double>("mp2")),
-          mr2(params.get<double>("mr2")),
-          q02(params.get<double>("q02")),
-          lambda2(params.get<double>("lambda2")),
-          type(params.getAs<int, Type>("type")) {}
+        : SteeredObject(params),
+          pomeron(params_.get<ParametersList>("pomeronTrajectory")),
+          reggeon(params_.get<ParametersList>("reggeonTrajectory")),
+          m02(params_.get<double>("m02")),
+          mp2(params_.get<double>("mp2")),
+          mr2(params_.get<double>("mr2")),
+          q02(params_.get<double>("q02")),
+          lambda2(params_.get<double>("lambda2")),
+          type(params_.getAs<int, Type>("type")) {}
 
     ALLM::Parameters ALLM::Parameters::allm91() {
       static Parameters p(ParametersList()
@@ -311,9 +312,10 @@ namespace cepgen {
     }
 
     ALLM::Parameters::Trajectory::Trajectory(const ParametersList& params)
-        : a(params.get<std::vector<double> >("a")),
-          b(params.get<std::vector<double> >("b")),
-          c(params.get<std::vector<double> >("c")) {
+        : SteeredObject(params),
+          a(params_.get<std::vector<double> >("a")),
+          b(params_.get<std::vector<double> >("b")),
+          c(params_.get<std::vector<double> >("c")) {
       assert(a.size() == 3);
       assert(b.size() == 3);
       assert(c.size() == 3);

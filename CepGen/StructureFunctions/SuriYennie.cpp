@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 namespace cepgen {
   namespace strfun {
     SuriYennie::SuriYennie(const ParametersList& params) : Parameterisation(params) {
-      const auto& model = params.get<std::string>("model");
+      const auto& model = params_.get<std::string>("model");
       if (model == "standard") {
         sy_params_.C1 = 0.86926;
         sy_params_.C2 = 2.23422;
@@ -42,12 +42,12 @@ namespace cepgen {
         sy_params_.Cp = 1.23;
         sy_params_.Bp = 0.61;
       } else {  // custom model
-        sy_params_.C1 = params.get<double>("C1");
-        sy_params_.C2 = params.get<double>("C2");
-        sy_params_.D1 = params.get<double>("D1");
-        sy_params_.rho2 = params.get<double>("rho2");
-        sy_params_.Cp = params.get<double>("Cp");
-        sy_params_.Bp = params.get<double>("Bp");
+        sy_params_.C1 = params_.get<double>("C1");
+        sy_params_.C2 = params_.get<double>("C2");
+        sy_params_.D1 = params_.get<double>("D1");
+        sy_params_.rho2 = params_.get<double>("rho2");
+        sy_params_.Cp = params_.get<double>("Cp");
+        sy_params_.Bp = params_.get<double>("Bp");
       }
     }
 
@@ -59,9 +59,9 @@ namespace cepgen {
 
       const double inv_q2 = 1. / q2;
 
-      FM = (sy_params_.C1 * dm2 * pow(sy_params_.rho2 / mq, 2) +
-            (sy_params_.C2 * mp2_ * pow(1. - x_pr, 4)) / (1. + x_pr * (x_pr * sy_params_.Cp - 2. * sy_params_.Bp))) *
-           inv_q2;
+      FM = inv_q2 *
+           (sy_params_.C1 * dm2 * pow(sy_params_.rho2 / mq, 2) +
+            sy_params_.C2 * mp2_ * pow(1. - x_pr, 4) / (1. + x_pr * (x_pr * sy_params_.Cp - 2. * sy_params_.Bp)));
       FE = (tau * FM + sy_params_.D1 * dm2 * q2 * sy_params_.rho2 / mp2_ * pow(dm2 / mq / en, 2)) /
            (1. + nu * nu * inv_q2);
 

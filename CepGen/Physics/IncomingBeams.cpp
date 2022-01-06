@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -120,6 +120,7 @@ namespace cepgen {
     if (!strfun.empty() || !str_fun_) {
       if (strfun.name<int>(-999) == -999)
         strfun.setName<int>(11);  // default is Suri-Yennie
+      CG_DEBUG("IncomingBeams") << "Structure functions modelling to be built: " << strfun << ".";
       str_fun_ = strfun::StructureFunctionsFactory::get().build(strfun);
       if (form_factors_)
         form_factors_->setStructureFunctions(str_fun_.get());
@@ -230,6 +231,8 @@ namespace cepgen {
           .set<int>("pdfId", icode % kLHAPDFPartDec)
           .set<int>("mode", icode / kLHAPDFPartDec);  // 0, 1, 2
     }
+    CG_DEBUG("IncomingBeams:setStructureFunctions")
+        << "Structure functions modelling to be built: " << sf_params << ".";
     setStructureFunctions(strfun::StructureFunctionsFactory::get().build(sf_params));
   }
 

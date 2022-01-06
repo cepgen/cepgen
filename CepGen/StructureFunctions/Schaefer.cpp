@@ -63,10 +63,18 @@ namespace cepgen {
         : Parameterisation(params),
           q2_cut_(params.get<double>("Q2cut")),
           w2_lim_(params.get<std::vector<double> >("W2limits")),
-          higher_twist_(params.get<bool>("higherTwist")),
-          resonances_model_(StructureFunctionsFactory::get().build(params.get<ParametersList>("resonancesSF"))),
-          perturbative_model_(StructureFunctionsFactory::get().build(params.get<ParametersList>("perturbativeSF"))),
-          continuum_model_(StructureFunctionsFactory::get().build(params.get<ParametersList>("continuumSF"))) {}
+          higher_twist_(params.get<bool>("higherTwist")) {
+      const auto& res_params = params_.get<ParametersList>("resonancesSF");
+      const auto& pert_params = params_.get<ParametersList>("perturbativeSF");
+      const auto& cont_params = params_.get<ParametersList>("continuumSF");
+      CG_DEBUG("Schaefer") << "LUXlike structure functions built using:\n"
+                           << " *)   resonances: " << res_params << ",\n"
+                           << " *) perturbative: " << pert_params << ",\n"
+                           << " *)    continuum: " << cont_params << ".";
+      resonances_model_ = StructureFunctionsFactory::get().build(res_params);
+      perturbative_model_ = StructureFunctionsFactory::get().build(pert_params);
+      continuum_model_ = StructureFunctionsFactory::get().build(cont_params);
+    }
 
     std::string Schaefer::describe() const {
       std::ostringstream os;
@@ -84,9 +92,9 @@ namespace cepgen {
       CG_DEBUG("LUXlike") << "LUXlike structure functions evaluator successfully initialised.\n"
                           << " * Q² cut:             " << q2_cut_ << " GeV²\n"
                           << " * W² ranges:          " << w2_lim_.at(0) << " GeV² / " << w2_lim_.at(1) << " GeV²\n"
-                          << " * resonance model:    " << *resonances_model_ << "\n"
+                          << " *   resonances model: " << *resonances_model_ << "\n"
                           << " * perturbative model: " << *perturbative_model_ << "\n"
-                          << " * continuum model:    " << *continuum_model_ << "\n"
+                          << " *    continuum model: " << *continuum_model_ << "\n"
                           << " * higher-twist?       " << std::boolalpha << higher_twist_;
       inv_omega_range_ = 1. / (w2_lim_.at(1) - w2_lim_.at(0));
       initialised_ = true;
