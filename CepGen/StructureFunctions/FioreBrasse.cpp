@@ -53,28 +53,28 @@ namespace cepgen {
                                                  .set<double>("alpha2", 0.1473)
                                                  .set<double>("a", 1.0)
                                                  .set<double>("q02", 2.4617)
-                                                 .set<double>("spin", 3. / 2.),
+                                                 .set<int>("doublespin", 3),
                                              ParametersList()  // N*(1680)
                                                  .set<double>("alpha0", -0.37)
                                                  .set<double>("alpha1", 0.95)
                                                  .set<double>("alpha2", 0.1471)
                                                  .set<double>("a", 0.5399)
                                                  .set<double>("q02", 2.4617)
-                                                 .set<double>("spin", 5. / 2.),
+                                                 .set<int>("doublespin", 5),
                                              ParametersList()  // Δ(1236)
                                                  .set<double>("alpha0", 0.0038)
                                                  .set<double>("alpha1", 0.85)
                                                  .set<double>("alpha2", 0.1969)
                                                  .set<double>("a", 4.2225)
                                                  .set<double>("q02", 1.5722)
-                                                 .set<double>("spin", 3. / 2.),
+                                                 .set<int>("doublespin", 3),
                                              ParametersList()  // exotic
                                                  .set<double>("alpha0", 0.5645)
                                                  .set<double>("alpha1", 0.1126)
                                                  .set<double>("alpha2", 1.3086)
                                                  .set<double>("a", 19.2694)
                                                  .set<double>("q02", 4.5259)
-                                                 .set<double>("spin", 1.)});
+                                                 .set<int>("doublespin", 2)});
         return desc;
       }
 
@@ -90,7 +90,7 @@ namespace cepgen {
               alpha2(steer<double>("alpha2")),
               a(steer<double>("a")),
               q02(steer<double>("q02")),
-              spin(steer<double>("spin")) {}
+              doublespin(steer<int>("doublespin")) {}
 
         static ParametersDescription description() {
           auto desc = ParametersDescription();
@@ -99,11 +99,12 @@ namespace cepgen {
           desc.add<double>("alpha2", 0.);
           desc.add<double>("a", 0.);
           desc.add<double>("q02", 0.);
-          desc.add<double>("spin", 0.);
+          desc.add<int>("doublespin", 0);
           return desc;
         }
 
-        double alpha0, alpha1, alpha2, a, q02, spin;
+        double alpha0, alpha1, alpha2, a, q02;
+        int doublespin;
       };
 
     private:
@@ -129,7 +130,7 @@ namespace cepgen {
           alpha = std::complex<double>(res.alpha0 + res.alpha1 * s + res.alpha2 * (sqrts0 - sqrt(s0_ - s)), 0.);
 
         double formfactor = 1. / pow(1. + q2 / res.q02, 2);
-        double denom = pow(res.spin - std::real(alpha), 2) + pow(std::imag(alpha), 2);
+        double denom = pow(res.doublespin * 0.5 - std::real(alpha), 2) + pow(std::imag(alpha), 2);
         double ampli_imag = res.a * formfactor * formfactor * std::imag(alpha) / denom;
         amplitude_res += ampli_imag;
       }
@@ -143,8 +144,7 @@ namespace cepgen {
         else
           alpha = std::complex<double>(res.alpha0 + res.alpha1 * (sqrtsE - sqrt(sE - s)), 0.);
         double formfactor = 1. / pow(1. + q2 / res.q02, 2);
-        double sp = 1.5 * res.spin;
-        double denom = pow(sp - std::real(alpha), 2) + pow(std::imag(alpha), 2);
+        double denom = pow(0.75 * res.doublespin - std::real(alpha), 2) + pow(std::imag(alpha), 2);
         amplitude_bg = res.a * formfactor * formfactor * std::imag(alpha) / denom;
       }
       const double amplitude_tot = norm_ * (amplitude_res + amplitude_bg);
@@ -175,28 +175,28 @@ namespace cepgen {
                                                  .set<double>("alpha2", 0.1387)
                                                  .set<double>("a", 1.0)
                                                  .set<double>("q02", 2.6066)
-                                                 .set<double>("spin", 3. / 2.),
+                                                 .set<int>("doublespin", 3),
                                              ParametersList()  // N*(1680)
                                                  .set<double>("alpha0", -0.3640)
                                                  .set<double>("alpha1", 0.9531)
                                                  .set<double>("alpha2", 0.1239)
                                                  .set<double>("a", 0.6086)
                                                  .set<double>("q02", 2.6066)
-                                                 .set<double>("spin", 5. / 2.),
+                                                 .set<int>("doublespin", 5),
                                              ParametersList()  // Δ(1236)
                                                  .set<double>("alpha0", -0.0065)
                                                  .set<double>("alpha1", 0.8355)
                                                  .set<double>("alpha2", 0.2320)
                                                  .set<double>("a", 4.7279)
                                                  .set<double>("q02", 1.4828)
-                                                 .set<double>("spin", 3. / 2.),
+                                                 .set<int>("doublespin", 3),
                                              ParametersList()  // exotic
                                                  .set<double>("alpha0", 0.5484)
                                                  .set<double>("alpha1", 0.1373)
                                                  .set<double>("alpha2", 1.3139)
                                                  .set<double>("a", 14.7267)
                                                  .set<double>("q02", 4.6041)
-                                                 .set<double>("spin", 1.)});
+                                                 .set<int>("doublespin", 2)});
         return desc;
       }
     };
