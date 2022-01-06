@@ -54,7 +54,10 @@ namespace cepgen {
     /// Add the description to a new parameter
     template <typename T>
     ParametersDescription& add(const std::string& name, const T& def) {
-      obj_descr_[name] = ParametersDescription();
+      if (obj_descr_.count(name) == 0)
+        // only add a new, empty description if not yet described
+        // (allows to ensure previous descriptions are not discarded)
+        obj_descr_[name] = ParametersDescription();
       ParametersList::set<T>(name, def);
       return obj_descr_[name];
     }
