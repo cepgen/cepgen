@@ -47,6 +47,8 @@ namespace cepgen {
       GD07p = 203,
       GD11p = 204,
       MSTWgrid = 205,
+      HHT_ALLM = 206,
+      HHT_ALLM_FT = 207,
       Schaefer = 301,
       Shamov = 302,
       Partonic = 401,

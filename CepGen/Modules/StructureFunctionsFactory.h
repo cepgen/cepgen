@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,14 +28,6 @@
       BUILDERNM(name)() { strfun::StructureFunctionsFactory::get().registerModule<obj>((int)id); } \
     };                                                                                             \
     static const BUILDERNM(name) gStrFun##name;                                                    \
-  }
-/// Add a structure functions definition (with its associated default parameters) to the list of handled parameterisation
-#define REGISTER_STRFUN_PARAMS(id, name, obj, params)                                                      \
-  namespace cepgen {                                                                                       \
-    struct BUILDERNM(name) {                                                                               \
-      BUILDERNM(name)() { strfun::StructureFunctionsFactory::get().registerModule<obj>((int)id, params); } \
-    };                                                                                                     \
-    static const BUILDERNM(name) gStrFun##name;                                                            \
   }
 
 /// Add a sigma ratio definition to the list of handled parameterisation
