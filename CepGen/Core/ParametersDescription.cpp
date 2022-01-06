@@ -93,7 +93,7 @@ namespace cepgen {
     else if (pdtype == Type::Module)
       os << utils::boldify(mod_name) << " module";
     // write human-readable description (if exists)
-    if (!mod_descr_.empty())
+    if (pdtype != Type::ParametersVector && !mod_descr_.empty())
       os << " (" << utils::colourise(mod_descr_, utils::Colour::none, utils::Modifier::italic) << ")";
     if (!keys.empty()) {
       if (pdtype == Type::Module)
@@ -104,15 +104,17 @@ namespace cepgen {
       for (const auto& key : keys) {
         os << "\n" << sep(offset + 1) << utils::colourise(key, utils::Colour::none, utils::Modifier::underline) << " ";
         if (obj_descr_.count(key) > 0) {
-          os << "=";
+          os << "= ";
           const auto& obj_type = obj_descr_.at(key).type();
           if (obj_type == Type::Value)
-            os << " " << ParametersList::getString(key);
+            os << ParametersList::getString(key);
           if (obj_type == Type::ParametersVector) {
-            os << " "
-               << utils::colourise("Vector of parameters collections",
+            os << utils::colourise("Vector of parameters collections",
                                    utils::Colour::none,
                                    utils::Modifier::italic | utils::Modifier::underline);
+            const auto& par_desc = obj_descr_.at(key).description();
+            if (!par_desc.empty())
+              os << " (" << utils::colourise(par_desc, utils::Colour::none, utils::Modifier::italic) << ")";
             const auto& params = ParametersList::get<std::vector<ParametersList> >(key);
             if (params.empty()) {
               os << " with expected content: " << obj_descr_.at(key).describe(offset + 1);
@@ -125,7 +127,7 @@ namespace cepgen {
           } else {
             const auto& descr = obj_descr_.at(key).describe(offset + 1);
             if (!utils::trim(descr).empty())
-              os << " " << descr;
+              os << descr;
           }
         }
       }

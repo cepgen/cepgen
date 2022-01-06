@@ -49,6 +49,9 @@ namespace cepgen {
           case ParametersDescription::Type::Parameters:
             os << "cepgen.Parameters(";
             break;
+          case ParametersDescription::Type::ParametersVector:
+            os << "list(";
+            break;
           case ParametersDescription::Type::Value:
             break;
         }
@@ -61,6 +64,11 @@ namespace cepgen {
             case ParametersDescription::Type::Parameters:
               os << write(pdesc.get(key), key, offset + 1);
               break;
+            case ParametersDescription::Type::ParametersVector: {
+              std::string sep;
+              for (const auto& it : params.get<std::vector<ParametersList> >(key))
+                os << sep << write(ParametersDescription(it), "", 0), sep = ", ";
+            } break;
             case ParametersDescription::Type::Value:
               os << off << std::string(4, ' ') << key << " = ";
               if (params.has<bool>(key))
@@ -75,6 +83,9 @@ namespace cepgen {
           case ParametersDescription::Type::Module:
           case ParametersDescription::Type::Parameters:
             os << "\n" << off;
+            break;
+          case ParametersDescription::Type::ParametersVector:
+            os << ")" << off;
             break;
           case ParametersDescription::Type::Value:
             break;
