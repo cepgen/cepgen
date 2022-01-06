@@ -41,17 +41,17 @@ namespace cepgen {
 
     MergellEtAl::MergellEtAl(const ParametersList& params)
         : Parameterisation(params),
-          a1rho_(params.get<double>("a1rho")),
-          a2rho_(params.get<double>("a2rho")),
-          b1rho_(params.get<double>("b1rho")),
-          b2rho_(params.get<double>("b2rho")),
-          c1rho_(params.get<double>("c1rho")),
-          c2rho_(params.get<double>("c2rho")),
-          d1rho_(params.get<double>("d1rho")),
-          d2rho_(params.get<double>("d2rho")),
-          inv_q20_(params.get<double>("q20inv")),
-          lambda_sq_(params.get<double>("lambdaSq")),
-          gamma_(params.get<double>("gamma")) {}
+          a1rho_(steer<double>("a1rho")),
+          a2rho_(steer<double>("a2rho")),
+          b1rho_(steer<double>("b1rho")),
+          b2rho_(steer<double>("b2rho")),
+          c1rho_(steer<double>("c1rho")),
+          c2rho_(steer<double>("c2rho")),
+          d1rho_(steer<double>("d1rho")),
+          d2rho_(steer<double>("d2rho")),
+          inv_q20_(steer<double>("q20inv")),
+          lambda_sq_(steer<double>("lambdaSq")),
+          gamma_(steer<double>("gamma")) {}
 
     void MergellEtAl::compute(double q2) {
       const double log1 = std::pow(log((lambda_sq_ + q2) * inv_q20_), -gamma_);  // L(t=-q2) function in ref.

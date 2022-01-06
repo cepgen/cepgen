@@ -64,8 +64,8 @@ namespace cepgen {
 
     LHEFHepMCHandler::LHEFHepMCHandler(const ParametersList& params)
         : ExportModule(params),
-          lhe_output_(new LHEF::Writer(params.get<std::string>("filename"))),
-          compress_(params.get<bool>("compress")) {}
+          lhe_output_(new LHEF::Writer(steer<std::string>("filename"))),
+          compress_(steer<bool>("compress")) {}
 
     void LHEFHepMCHandler::setCrossSection(double cross_section, double err) {
       lhe_output_->heprup.NPRUP = 1;

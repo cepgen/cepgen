@@ -174,13 +174,13 @@ namespace cepgen {
 
     Shamov::Shamov(const ParametersList& params)
         : Parameterisation(params),
-          mode_(params_.getAs<int, Mode>("mode", Mode::RealResAndNonRes)),
-          fit_model_(params_.get<int>("fitModel", 2)),
-          gm0_(params_.get<double>("gm0", 1.)),
-          gmb_(params_.get<double>("gmb", 0.984)),
-          lowq2_(params_.get<double>("lowQ2", 1.e-7)),
+          mode_(steerAs<int, Mode>("mode")),
+          fit_model_(steer<int>("fitModel")),
+          gm0_(steer<double>("gm0")),
+          gmb_(steer<double>("gmb")),
+          lowq2_(steer<double>("lowQ2")),
           sy_sf_(strfun::StructureFunctionsFactory::get().build((int)strfun::Type::SuriYennie,
-                                                                params_.get<ParametersList>("syParams"))) {
+                                                                steer<ParametersList>("syParams"))) {
       if (fit_model_ > q20_.size())
         throw CG_FATAL("Shamov") << "Invalid fit modelling requested!";
 

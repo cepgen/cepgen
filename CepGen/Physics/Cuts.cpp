@@ -127,7 +127,7 @@ namespace cepgen {
       params_.fill<Limits>("phiptdiff", central.phi_diff());  //legacy
     }
     if (params_.has<ParametersList>("cuts")) {  // per-particle cuts
-      const auto& per_parts = params_.get<ParametersList>("cuts");
+      const auto& per_parts = steer<ParametersList>("cuts");
       for (const auto& part : per_parts.keys())
         central_particles[(pdgid_t)stoi(part)].setParameters(per_parts.get<ParametersList>(part));
     }

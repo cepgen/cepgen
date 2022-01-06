@@ -29,9 +29,8 @@ namespace cepgen {
           return integrand_->eval(std::vector<double>(x, x + ndim));
         }) {
     //--- initialise the random number generator
-    const auto& rng_type = params.get<int>("rngEngine");
     gsl_rng_type* rng_engine = nullptr;
-    switch (rng_type) {
+    switch (steer<int>("rngEngine")) {
       case 0:
       default:
         rng_engine = (gsl_rng_type*)gsl_rng_mt19937;

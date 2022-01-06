@@ -25,8 +25,8 @@ namespace cepgen {
   namespace utils {
     Functional::Functional(const ParametersList& params)
         : NamedModule(params),
-          vars_orig_(params.get<std::vector<std::string> >("variables")),
-          expression_orig_(params.get<std::string>("expression")),
+          vars_orig_(steer<std::vector<std::string> >("variables")),
+          expression_orig_(steer<std::string>("expression")),
           vars_(vars_orig_),
           expression_(expression_orig_),
           values_(vars_.size()) {

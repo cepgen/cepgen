@@ -92,7 +92,7 @@ namespace mstw {
   Grid::Grid(const cepgen::ParametersList& params)
       : cepgen::strfun::Parameterisation(params), cepgen::GridHandler<2, 2>(cepgen::GridType::logarithmic) {
     {  // file readout part
-      const std::string grid_path = params_.get<std::string>("gridPath");
+      const std::string grid_path = steer<std::string>("gridPath");
       std::ifstream file(grid_path, std::ios::binary | std::ios::in);
       if (!file.is_open())
         throw CG_FATAL("MSTW") << "Failed to load grid file \"" << grid_path << "\"!";

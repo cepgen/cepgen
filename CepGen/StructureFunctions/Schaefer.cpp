@@ -61,12 +61,12 @@ namespace cepgen {
 
     Schaefer::Schaefer(const ParametersList& params)
         : Parameterisation(params),
-          q2_cut_(params.get<double>("Q2cut")),
-          w2_lim_(params.get<std::vector<double> >("W2limits")),
-          higher_twist_(params.get<bool>("higherTwist")) {
-      const auto& res_params = params_.get<ParametersList>("resonancesSF");
-      const auto& pert_params = params_.get<ParametersList>("perturbativeSF");
-      const auto& cont_params = params_.get<ParametersList>("continuumSF");
+          q2_cut_(steer<double>("Q2cut")),
+          w2_lim_(steer<std::vector<double> >("W2limits")),
+          higher_twist_(steer<bool>("higherTwist")) {
+      const auto& res_params = steer<ParametersList>("resonancesSF");
+      const auto& pert_params = steer<ParametersList>("perturbativeSF");
+      const auto& cont_params = steer<ParametersList>("continuumSF");
       CG_DEBUG("Schaefer") << "LUXlike structure functions built using:\n"
                            << " *)   resonances: " << res_params << ",\n"
                            << " *) perturbative: " << pert_params << ",\n"

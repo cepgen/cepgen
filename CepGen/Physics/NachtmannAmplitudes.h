@@ -20,13 +20,13 @@
 
 #include <complex>
 
-#include "CepGen/Core/ParametersDescription.h"
+#include "CepGen/Core/SteeredObject.h"
 
 namespace cepgen {
   class ParametersList;
-  class NachtmannAmplitudes {
+  class NachtmannAmplitudes : public SteeredObject<NachtmannAmplitudes> {
   public:
-    NachtmannAmplitudes(const ParametersList&);
+    explicit NachtmannAmplitudes(const ParametersList&);
 
     /// Model giving an amplitude for the two-photon WW production
     enum class Mode { SM, W, Wbar, phiW, phiWbar, phiB, phiBbar, WB, WbarB };
@@ -66,8 +66,8 @@ namespace cepgen {
   private:
     const Mode mode_;
     /// Collection of parameters for the EFT extension
-    const struct EFTParameters {
-      explicit EFTParameters(const ParametersList& params);
+    const struct EFTParameters : SteeredObject<EFTParameters> {
+      explicit EFTParameters(const ParametersList&);
       const double s1, mH;
       double c1() const { return sqrt(1. - s1 * s1); }
       static ParametersDescription description();

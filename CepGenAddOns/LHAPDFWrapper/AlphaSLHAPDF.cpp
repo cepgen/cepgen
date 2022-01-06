@@ -33,11 +33,11 @@ namespace cepgen {
         : Coupling(params)
 #ifdef LHAPDF_GE_6
           ,
-          lhapdf_(LHAPDF::mkPDF(params.get<std::string>("pdfSet"), params.get<int>("pdfMember"))) {
+          lhapdf_(LHAPDF::mkPDF(steer<std::string>("pdfSet"), steer<int>("pdfMember"))) {
     }
 #else
     {
-      LHAPDF::initPDFSet(params.get<std::string>("pdfSet"), LHAPDF::LHGRID, params.get<int>("pdfMember"));
+      LHAPDF::initPDFSet(steer<std::string>("pdfSet"), LHAPDF::LHGRID, steer<int>("pdfMember"));
     }
 #endif
     static ParametersDescription description() {

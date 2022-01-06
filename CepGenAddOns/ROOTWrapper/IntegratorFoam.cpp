@@ -53,7 +53,7 @@ namespace cepgen {
   };
 
   IntegratorFoam::IntegratorFoam(const ParametersList& params) : Integrator(params), foam_(new TFoam("Foam")) {
-    const auto& rnd_mode = params.get<std::string>("rngEngine");
+    const auto& rnd_mode = steer<std::string>("rngEngine");
     if (rnd_mode == "Ranlux")
       rnd_.reset(new TRandom1);
     else if (rnd_mode == "generic")
@@ -73,10 +73,10 @@ namespace cepgen {
     if (!initialised_) {
       foam_.reset(new TFoam("Foam"));
       foam_->SetPseRan(rnd_.get());
-      foam_->SetnCells(params_.get<int>("nCells"));
-      foam_->SetnSampl(params_.get<int>("nSampl"));
-      foam_->SetnBin(params_.get<int>("nBin"));
-      foam_->SetEvPerBin(params_.get<int>("EvPerBin"));
+      foam_->SetnCells(steer<int>("nCells"));
+      foam_->SetnSampl(steer<int>("nSampl"));
+      foam_->SetnBin(steer<int>("nBin"));
+      foam_->SetEvPerBin(steer<int>("EvPerBin"));
       foam_->SetChat(std::max(verbosity_, 0));
       foam_->SetRho(this);
       foam_->SetkDim(integrand_->size());

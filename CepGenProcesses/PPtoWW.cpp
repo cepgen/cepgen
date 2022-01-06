@@ -57,15 +57,15 @@ namespace cepgen {
         : Process2to4(params, {PDG::photon, PDG::photon}, PDG::W),
           mW_(PDG::get().mass(PDG::W)),
           mW2_(mW_ * mW_),
-          method_(params_.get<int>("method", 1)),
+          method_(steer<int>("method")),
           ampl_(params_) {
-      const auto& states = params_.get<ParametersList>("polarisationStates");
+      const auto& states = steer<ParametersList>("polarisationStates");
       if (!states.empty()) {
         pol_w1_ = states.get<std::vector<int> >("W1");
         pol_w2_ = states.get<std::vector<int> >("W2");
       }
       if (params_.has<int>("polarisationStates"))
-        switch (params_.getAs<int, Polarisation>("polarisationStates", Polarisation::full)) {
+        switch (steerAs<int, Polarisation>("polarisationStates")) {
           case Polarisation::LL:
             pol_w1_ = {0};
             pol_w2_ = {0};
@@ -97,8 +97,7 @@ namespace cepgen {
             throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for ɣɣ → W⁺W¯! "
                                      << "Only supported extensions are W and Wbar. Specified model: " << ampl_.mode()
                                      << ".";
-          CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << params_.get<ParametersList>("eftParameters")
-                            << ".";
+          CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << steer<ParametersList>("eftParameters") << ".";
         }
       }
     }

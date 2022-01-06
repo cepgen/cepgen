@@ -56,7 +56,7 @@ namespace cepgen {
     const double CommandLineHandler::INVALID = -999.999;
 
     CommandLineHandler::CommandLineHandler(const ParametersList& params)
-        : Handler(params), argv_(params.get<std::vector<std::string> >("args")) {
+        : Handler(params), argv_(steer<std::vector<std::string> >("args")) {
       if (!filename_.empty())
         parse(filename_, rt_params_);
     }

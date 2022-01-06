@@ -56,11 +56,11 @@ namespace cepgen {
 
     TextVariablesHandler::TextVariablesHandler(const ParametersList& params)
         : ExportModule(params),
-          file_(params_.get<std::string>("filename")),
-          variables_(params_.get<std::vector<std::string> >("variables")),
-          save_banner_(params_.get<bool>("saveBanner")),
-          save_variables_(params_.get<bool>("saveVariables")),
-          separator_(params_.get<std::string>("separator")) {
+          file_(steer<std::string>("filename")),
+          variables_(steer<std::vector<std::string> >("variables")),
+          save_banner_(steer<bool>("saveBanner")),
+          save_variables_(steer<bool>("saveVariables")),
+          separator_(steer<std::string>("separator")) {
       //--- extract list of variables to store in output file
       oss_vars_.clear();
       std::string sep;

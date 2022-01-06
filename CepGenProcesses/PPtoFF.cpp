@@ -62,11 +62,11 @@ namespace cepgen {
     };
 
     PPtoFF::PPtoFF(const ParametersList& params)
-        : Process2to4(params, {PDG::photon, PDG::photon}, params.get<ParticleProperties>("pair").pdgid),
-          method_(params_.getAs<int, Mode>("method", Mode::offShell)),
-          alphas_params_(params_.get<ParametersList>("alphaS", ParametersList().setName<std::string>("pegasus"))) {
+        : Process2to4(params, {PDG::photon, PDG::photon}, steer<ParticleProperties>("pair").pdgid),
+          method_(steerAs<int, Mode>("method")),
+          alphas_params_(steer<ParametersList>("alphaS")) {
       if (method_ == Mode::offShell || method_ == Mode::offShellLegacy) {  // off-shell matrix element
-        const auto& ofp = params_.get<ParametersList>("offShellParameters");
+        const auto& ofp = steer<ParametersList>("offShellParameters");
         p_mat1_ = ofp.get<int>("mat1", method_ == Mode::offShell ? 1 : 2);
         p_mat2_ = ofp.get<int>("mat2", method_ == Mode::offShell ? 1 : 0);
         p_term_ll_ = ofp.get<int>("termLL", 1);
@@ -254,6 +254,9 @@ namespace cepgen {
       desc.setDescription("ɣɣ → f⁺f¯ (kt-factor.)");
       desc.add<int>("method", (int)Mode::offShell)
           .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell)");
+      auto alphas_desc = ParametersDescription();
+      alphas_desc.add<std::string>(ParametersList::MODULE_NAME, "pegasus");
+      desc.add("alphaS", alphas_desc);
       return desc;
     }
   }  // namespace proc

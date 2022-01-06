@@ -76,7 +76,7 @@ namespace cepgen {
     }
 
     FioreBrasse::FioreBrasse(const ParametersList& params) : Parameterisation(params) {
-      const auto& model = params.get<std::string>("model");
+      const auto& model = steer<std::string>("model");
       if (model == "standard")
         fb_params_ = Parameters::standard();
       else if (model == "alternative")

@@ -33,10 +33,10 @@ namespace cepgen {
   public:
     explicit AlphaSPEGASUS(const ParametersList& params)
         : Coupling(params),
-          iord_(params.get<int>("iord")),
-          fr2_(params.get<double>("fr2")),
-          mur_(params.get<double>("mur")),
-          asmur_(params.get<double>("asmur")) {
+          iord_(steer<int>("iord")),
+          fr2_(steer<double>("fr2")),
+          mur_(steer<double>("mur")),
+          asmur_(steer<double>("asmur")) {
       double mc = PDG::get().mass(4), mb = PDG::get().mass(5), mt = PDG::get().mass(6);
 
       initalphas_(iord_, fr2_, mur_, asmur_, mc, mb, mt);

@@ -48,10 +48,8 @@ namespace cepgen {
     };
 
     TextEventHandler::TextEventHandler(const ParametersList& params)
-        : ExportModule(params),
-          save_banner_(params.get<bool>("saveBanner")),
-          print_every_(params.get<int>("printEvery")) {
-      const auto& filename = params.get<std::string>("filename");
+        : ExportModule(params), save_banner_(steer<bool>("saveBanner")), print_every_(steer<int>("printEvery")) {
+      const auto& filename = steer<std::string>("filename");
       if (!filename.empty())
         out_ = new std::ofstream(filename);
       else

@@ -69,9 +69,7 @@ namespace cepgen {
 
     template <typename T>
     YODAHistsHandler<T>::YODAHistsHandler(const ParametersList& params)
-        : ExportModule(params),
-          file_(params.get<std::string>("filename")),
-          variables_(params.get<ParametersList>("variables")) {
+        : ExportModule(params), file_(steer<std::string>("filename")), variables_(steer<ParametersList>("variables")) {
       //--- extract list of variables/correlations to be plotted in histograms
       for (const auto& key : variables_.keys()) {
         const auto& vars = utils::split(key, ':');

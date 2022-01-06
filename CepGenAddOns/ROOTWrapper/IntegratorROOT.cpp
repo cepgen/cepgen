@@ -53,10 +53,10 @@ namespace cepgen {
         func_([=](const double* x) -> double {
           return integrand_->eval(std::vector<double>(x, x + integrand_->size()));
         }),
-        type_(params.get<std::string>("type")),
-        absTol_(params.get<double>("absTol")),
-        relTol_(params.get<double>("relTol")),
-        size_(params.get<int>("size")) {
+        type_(steer<std::string>("type")),
+        absTol_(steer<double>("absTol")),
+        relTol_(steer<double>("relTol")),
+        size_(steer<int>("size")) {
     ROOT::Math::IntegratorMultiDim::Type type;
     if (type_ == "default")
       type = ROOT::Math::IntegratorMultiDim::Type::kDEFAULT;

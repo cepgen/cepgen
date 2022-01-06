@@ -26,15 +26,15 @@
 
 namespace cepgen {
   NachtmannAmplitudes::NachtmannAmplitudes(const ParametersList& params)
-      : mode_(params.getAs<int, NachtmannAmplitudes::Mode>("model", NachtmannAmplitudes::Mode::SM)),
-        eft_ext_(params.get<ParametersList>("eftParameters")),
+      : mode_(steerAs<int, NachtmannAmplitudes::Mode>("model")),
+        eft_ext_(steer<ParametersList>("eftParameters")),
         G_EM_SQ(constants::G_EM_SQ),
         G_EM(sqrt(G_EM_SQ)) {
     CG_DEBUG("NachtmannAmplitudes") << "Nachtmann amplitudes evaluation framework built for mode=" << mode_ << ".";
   }
 
   NachtmannAmplitudes::EFTParameters::EFTParameters(const ParametersList& params)
-      : s1(params.get<double>("s1")), mH(params.get<double>("mH")) {}
+      : s1(steer<double>("s1")), mH(steer<double>("mH")) {}
 
   ParametersDescription NachtmannAmplitudes::EFTParameters::description() {
     auto desc = ParametersDescription();

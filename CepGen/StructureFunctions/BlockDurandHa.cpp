@@ -47,13 +47,13 @@ namespace cepgen {
 
     BlockDurandHa::BlockDurandHa(const ParametersList& params)
         : Parameterisation(params),
-          a_(params.get<std::vector<double> >("a")),
-          b_(params.get<std::vector<double> >("b")),
-          c_(params.get<std::vector<double> >("c")),
-          n_(params.get<double>("n")),
-          lambda_(params.get<double>("lambda")),
-          mu2_(params.get<double>("mu2")),
-          m2_(params.get<double>("m2")) {
+          a_(steer<std::vector<double> >("a")),
+          b_(steer<std::vector<double> >("b")),
+          c_(steer<std::vector<double> >("c")),
+          n_(steer<double>("n")),
+          lambda_(steer<double>("lambda")),
+          mu2_(steer<double>("mu2")),
+          m2_(steer<double>("m2")) {
       assert(a_.size() == 3);
       assert(b_.size() == 3);
       assert(c_.size() == 2);

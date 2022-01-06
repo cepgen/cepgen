@@ -56,8 +56,8 @@ namespace cepgen {
 
     ROOTTreeHandler::ROOTTreeHandler(const ParametersList& params)
         : ExportModule(params),
-          file_(params.get<std::string>("filename").c_str(), "recreate"),
-          compress_(params.get<bool>("compress")) {
+          file_(steer<std::string>("filename").c_str(), "recreate"),
+          compress_(steer<bool>("compress")) {
       if (!file_.IsOpen())
         throw CG_FATAL("ROOTTreeHandler") << "Failed to create the output file!";
       run_tree_.create();

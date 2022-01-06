@@ -72,7 +72,7 @@ namespace cepgen {
     template <typename T>
     HepMCHandler<T>::HepMCHandler(const ParametersList& params)
         : ExportModule(params),
-          output_(new T(params.get<std::string>("filename").c_str())),
+          output_(new T(steer<std::string>("filename").c_str())),
           xs_(new GenCrossSection)
 #ifdef HEPMC3
           ,

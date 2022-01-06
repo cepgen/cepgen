@@ -45,18 +45,18 @@ namespace cepgen {
   };
 
   IntegratorMISER::IntegratorMISER(const ParametersList& params)
-      : IntegratorGSL(params), ncvg_(params.get<int>("numFunctionCalls")) {}
+      : IntegratorGSL(params), ncvg_(steer<int>("numFunctionCalls")) {}
 
   void IntegratorMISER::integrate(double& result, double& abserr) {
     if (!initialised_) {
       miser_state_.reset(gsl_monte_miser_alloc(function_->dim));
       miser_state_->verbose = verbosity_;
       gsl_monte_miser_params_get(miser_state_.get(), &miser_params_);
-      miser_params_.estimate_frac = params_.get<double>("estimateFraction");
-      miser_params_.min_calls = params_.get<int>("minCalls");
-      miser_params_.min_calls_per_bisection = params_.get<int>("minCallsPerBisection");
-      miser_params_.alpha = params_.get<double>("alpha");
-      miser_params_.dither = params_.get<double>("dither");
+      miser_params_.estimate_frac = steer<double>("estimateFraction");
+      miser_params_.min_calls = steer<int>("minCalls");
+      miser_params_.min_calls_per_bisection = steer<int>("minCallsPerBisection");
+      miser_params_.alpha = steer<double>("alpha");
+      miser_params_.dither = steer<double>("dither");
       gsl_monte_miser_params_set(miser_state_.get(), &miser_params_);
 
       //--- a bit of printout for debugging

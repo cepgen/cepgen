@@ -34,6 +34,17 @@ namespace cepgen {
     /// Module parameters
     virtual const ParametersList& parameters() const { return params_; }
 
+    /// Retrieve a parameters as previously steered
+    template <typename T>
+    T steer(const std::string& key) const {
+      return params_.get<T>(key);
+    }
+    /// Retrieve a recasted parameters as previously steered
+    template <typename T, typename U>
+    U steerAs(const std::string& key) const {
+      return params_.getAs<T, U>(key);
+    }
+
   protected:
     /// Module parameters
     mutable ParametersList params_;

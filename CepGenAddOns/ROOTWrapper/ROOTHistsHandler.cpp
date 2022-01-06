@@ -67,8 +67,8 @@ namespace cepgen {
 
     ROOTHistsHandler::ROOTHistsHandler(const ParametersList& params)
         : ExportModule(params),
-          file_(params.get<std::string>("filename").c_str(), "recreate"),
-          variables_(params.get<ParametersList>("variables")) {
+          file_(steer<std::string>("filename").c_str(), "recreate"),
+          variables_(steer<ParametersList>("variables")) {
       //--- extract list of variables/correlations to be plotted in histograms
       for (const auto& key : variables_.keys()) {
         const auto& vars = utils::split(key, ':');

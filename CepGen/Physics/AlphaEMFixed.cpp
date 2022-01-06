@@ -23,7 +23,7 @@
 namespace cepgen {
   class AlphaEMFixed final : public Coupling {
   public:
-    explicit AlphaEMFixed(const ParametersList& params) : Coupling(params), value_(params.get<double>("value")) {}
+    explicit AlphaEMFixed(const ParametersList& params) : Coupling(params), value_(steer<double>("value")) {}
 
     static ParametersDescription description() {
       auto desc = ParametersDescription();

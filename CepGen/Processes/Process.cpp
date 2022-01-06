@@ -30,7 +30,7 @@
 namespace cepgen {
   namespace proc {
     Process::Process(const ParametersList& params, bool has_event)
-        : NamedModule(params), alphaem_(AlphaEMFactory::get().build(params.get<ParametersList>("alphaEM"))) {
+        : NamedModule(params), alphaem_(AlphaEMFactory::get().build(steer<ParametersList>("alphaEM"))) {
       if (has_event)
         event_.reset(new Event);
     }

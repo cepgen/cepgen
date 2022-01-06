@@ -58,11 +58,11 @@ namespace cepgen {
 
     E143::E143(const ParametersList& params)
         : Parameterisation(params),
-          q2_b_(params_.get<double>("q2_b")),
-          lambda2_(params_.get<double>("lambda2")),
-          a_(params_.get<std::vector<double> >("a")),
-          b_(params_.get<std::vector<double> >("b")),
-          c_(params_.get<std::vector<double> >("c")) {
+          q2_b_(steer<double>("q2_b")),
+          lambda2_(steer<double>("lambda2")),
+          a_(steer<std::vector<double> >("a")),
+          b_(steer<std::vector<double> >("b")),
+          c_(steer<std::vector<double> >("c")) {
       if (a_.size() != 6)
         throw CG_FATAL("E143") << "Parameter 'a' should have 6 components! Parsed " << a_ << ".";
       if (b_.size() != 6)
@@ -120,9 +120,7 @@ namespace cepgen {
     };
 
     R1990::R1990(const ParametersList& params)
-        : Parameterisation(params),
-          lambda2_(params_.get<double>("lambda2")),
-          b_(params_.get<std::vector<double> >("b")) {
+        : Parameterisation(params), lambda2_(steer<double>("lambda2")), b_(steer<std::vector<double> >("b")) {
       if (b_.size() != 3)
         throw CG_FATAL("R1990") << "Parameter 'b' should have 3 components! Parsed " << b_ << ".";
     }
@@ -158,9 +156,9 @@ namespace cepgen {
 
     CLAS::CLAS(const ParametersList& params)
         : Parameterisation(params),
-          p_(params_.get<std::vector<double> >("p")),
-          wth_(params_.get<double>("wth")),
-          q20_(params_.get<double>("q20")) {
+          p_(steer<std::vector<double> >("p")),
+          wth_(steer<double>("wth")),
+          q20_(steer<double>("q20")) {
       if (p_.size() != 3)
         throw CG_FATAL("R1990") << "Parameter 'p' should have 3 components! Parsed " << p_ << ".";
     }
@@ -204,10 +202,10 @@ namespace cepgen {
 
     SibirtsevBlunden::SibirtsevBlunden(const ParametersList& params)
         : Parameterisation(params),
-          a_(params_.get<double>("a")),
-          b1_(params_.get<double>("b1")),
-          b2_(params_.get<double>("b2")),
-          c_(params_.get<double>("c")) {}
+          a_(steer<double>("a")),
+          b1_(steer<double>("b1")),
+          b2_(steer<double>("b2")),
+          c_(steer<double>("c")) {}
 
     double SibirtsevBlunden::operator()(double, double q2, double& err) const {
       err = 0.;

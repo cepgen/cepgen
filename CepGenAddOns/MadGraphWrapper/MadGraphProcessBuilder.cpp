@@ -45,8 +45,8 @@ MadGraphProcessBuilder::MadGraphProcessBuilder(const ParametersList& params)
     : Process2to4(params, std::array<pdgid_t, 2>{}, 0) {
   utils::AbortHandler();
   try {
-    if (params.has<std::string>("lib"))
-      loadLibrary(params.get<std::string>("lib"));
+    if (params_.has<std::string>("lib"))
+      loadLibrary(steer<std::string>("lib"));
     else {
       const MadGraphInterface interf(params);
       loadLibrary(interf.run());
@@ -66,7 +66,7 @@ void MadGraphProcessBuilder::prepareProcessKinematics() {
   if (!mg5_proc_)
     CG_FATAL("MadGraphProcessBuilder") << "Process not properly linked!";
 
-  mg5_proc_->initialise(params_.get<std::string>("parametersCard"));
+  mg5_proc_->initialise(steer<std::string>("parametersCard"));
 }
 
 double MadGraphProcessBuilder::computeCentralMatrixElement() const {

@@ -30,12 +30,12 @@ namespace cepgen {
                            << "with the following parameters:\n\t" << params << ".";
     //----- outgoing particles definition
     if (params_.has<std::vector<int> >("minFinalState"))
-      for (const auto& pdg : params_.get<std::vector<int> >("minFinalState"))
+      for (const auto& pdg : steer<std::vector<int> >("minFinalState"))
         minimum_final_state_.emplace_back((pdgid_t)pdg);
 
     //--- specify where to look for the grid path for gluon emission
     if (params.has<std::string>("kmrGridPath"))
-      kmr::GluonGrid::get(ParametersList(params_).set<std::string>("path", params.get<std::string>("kmrGridPath")));
+      kmr::GluonGrid::get(ParametersList(params_).set<std::string>("path", steer<std::string>("kmrGridPath")));
   }
 
   void Kinematics::setParameters(const ParametersList& params) {

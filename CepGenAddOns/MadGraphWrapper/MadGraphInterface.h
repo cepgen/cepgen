@@ -22,7 +22,7 @@
 #include <memory>
 #include <string>
 
-#include "CepGen/Core/ParametersDescription.h"
+#include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Utils/Filesystem.h"
 
@@ -30,7 +30,7 @@
 class CPPProcess;
 
 namespace cepgen {
-  class MadGraphInterface {
+  class MadGraphInterface : public SteeredObject<MadGraphInterface> {
   public:
     MadGraphInterface(const ParametersList&);
 

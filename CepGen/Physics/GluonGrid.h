@@ -19,7 +19,7 @@
 #ifndef CepGen_Physics_GluonGrid_h
 #define CepGen_Physics_GluonGrid_h
 
-#include "CepGen/Core/ParametersDescription.h"
+#include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Utils/GridHandler.h"
 
 #define DEFAULT_KMR_GRID_PATH "gluon_mmht2014nlo_Watt.dat"
@@ -27,7 +27,7 @@
 /// Kimber-Martin-Ryskin unintegrated gluon densities
 namespace kmr {
   /// A KMR unintegrated gluon densities grid interpolator
-  class GluonGrid : private cepgen::GridHandler<3, 1> {
+  class GluonGrid : private cepgen::GridHandler<3, 1>, public cepgen::SteeredObject<GluonGrid> {
   public:
     /// Retrieve the grid interpolator (singleton)
     static GluonGrid& get(const cepgen::ParametersList& params = {});

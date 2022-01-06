@@ -33,11 +33,11 @@
 namespace cepgen {
   IncomingBeams::IncomingBeams(const ParametersList& params) : SteeredObject(params) {
     // positive-z incoming beam
-    positive().pdg = params_.get<int>("beam1id");
-    const int hi_Z1 = params_.get<int>("beam1Z");
+    positive().pdg = steer<int>("beam1id");
+    const int hi_Z1 = steer<int>("beam1Z");
     if (hi_Z1 != 0)
-      positive().pdg = HeavyIon(params_.get<int>("beam1A"), (Element)hi_Z1);
-    const auto& hi_beam1 = params_.get<std::vector<int> >("heavyIon1");
+      positive().pdg = HeavyIon(steer<int>("beam1A"), (Element)hi_Z1);
+    const auto& hi_beam1 = steer<std::vector<int> >("heavyIon1");
     if (hi_beam1.size() == 2)
       positive().pdg = HeavyIon{(unsigned short)hi_beam1.at(0), (Element)hi_beam1.at(1)};
     else if (!hi_beam1.empty())
@@ -45,12 +45,12 @@ namespace cepgen {
                                    << "A pair of (A,Z) is required, got " << hi_beam1 << ".";
 
     // negative-z incoming beam
-    negative().pdg = params_.get<int>("beam2id");
-    const int hi_A2 = params_.get<int>("beam2A");
-    const int hi_Z2 = params_.get<int>("beam2Z");
+    negative().pdg = steer<int>("beam2id");
+    const int hi_A2 = steer<int>("beam2A");
+    const int hi_Z2 = steer<int>("beam2Z");
     if (hi_Z2 != 0)
       negative().pdg = HeavyIon(hi_A2, (Element)hi_Z2);
-    const auto& hi_beam2 = params_.get<std::vector<int> >("heavyIon2");
+    const auto& hi_beam2 = steer<std::vector<int> >("heavyIon2");
     if (hi_beam2.size() == 2)
       negative().pdg = HeavyIon{(unsigned short)hi_beam2.at(0), (Element)hi_beam2.at(1)};
     else if (!hi_beam2.empty())
@@ -61,7 +61,7 @@ namespace cepgen {
 
     //--- beams PDG ids
     if (params_.has<std::vector<ParametersList> >("pdgIds")) {
-      const auto& beams_pdg = params_.get<std::vector<ParametersList> >("pdgIds");
+      const auto& beams_pdg = steer<std::vector<ParametersList> >("pdgIds");
       if (beams_pdg.size() == 2) {
         positive().pdg = abs(beams_pdg.at(0).get<int>("pdgid"));
         negative().pdg = abs(beams_pdg.at(1).get<int>("pdgid"));
@@ -69,7 +69,7 @@ namespace cepgen {
         throw CG_FATAL("Kinematics") << "Invalid list of PDG ids retrieved for incoming beams:\n\t"
                                      << "2 PDG ids are expected, " << beams_pdg << " provided.";
     } else if (params_.has<std::vector<int> >("pdgIds")) {
-      const auto& beams_pdg = params_.get<std::vector<int> >("pdgIds");
+      const auto& beams_pdg = steer<std::vector<int> >("pdgIds");
       if (beams_pdg.size() == 2) {
         positive().pdg = abs(beams_pdg.at(0));
         negative().pdg = abs(beams_pdg.at(1));
@@ -86,7 +86,7 @@ namespace cepgen {
     double p1z = 0., p2z = 0;
     params_.fill<double>("beam1pz", p1z);
     params_.fill<double>("beam2pz", p2z);
-    const auto& beams_pz = params_.get<std::vector<double> >("pz");
+    const auto& beams_pz = steer<std::vector<double> >("pz");
     if (beams_pz.size() == 2) {
       p1z = beams_pz.at(0);
       p2z = beams_pz.at(1);
@@ -103,20 +103,20 @@ namespace cepgen {
     negative().momentum = Momentum::fromPxPyPzM(0., 0., -fabs(p2z), m2);
 
     //--- centre-of-mass energy
-    const double sqrts = params_.get<double>("sqrtS"), cme = params_.get<double>("cmEnergy");
+    const double sqrts = steer<double>("sqrtS"), cme = steer<double>("cmEnergy");
     if (sqrts > 0. || cme > 0.)
       setSqrtS(std::max(sqrts, cme));
     //--- form factors
-    const auto ff_mode = params_.get<std::string>("formFactors");
+    const auto ff_mode = steer<std::string>("formFactors");
     if (!ff_mode.empty() || !form_factors_)
       form_factors_ =
           formfac::FormFactorsFactory::get().build(ff_mode.empty() ? formfac::gFFStandardDipoleHandler : ff_mode);
 
-    const auto mode = params_.getAs<int, mode::Kinematics>("mode");
+    const auto mode = steerAs<int, mode::Kinematics>("mode");
     if (mode != mode::Kinematics::invalid)
       setMode(mode);
     //--- structure functions
-    auto strfun = params_.get<ParametersList>("structureFunctions");
+    auto strfun = steer<ParametersList>("structureFunctions");
     if (!strfun.empty() || !str_fun_) {
       if (strfun.name<int>(-999) == -999)
         strfun.setName<int>(11);  // default is Suri-Yennie
@@ -127,13 +127,13 @@ namespace cepgen {
     }
     //--- parton fluxes for kt-factorisation
     if (params_.has<std::vector<int> >("ktFluxes")) {
-      auto kt_fluxes = params_.get<std::vector<int> >("ktFluxes");
+      auto kt_fluxes = steer<std::vector<int> >("ktFluxes");
       if (!kt_fluxes.empty()) {
         positive().kt_flux = (KTFlux)kt_fluxes.at(0);
         negative().kt_flux = (kt_fluxes.size() > 1) ? (KTFlux)kt_fluxes.at(1) : (KTFlux)kt_fluxes.at(0);
       }
     } else if (params_.has<int>("ktFluxes")) {
-      const auto& ktfluxes = params_.getAs<int, KTFlux>("ktFluxes");
+      const auto& ktfluxes = steerAs<int, KTFlux>("ktFluxes");
       if (ktfluxes != KTFlux::invalid)
         positive().kt_flux = negative().kt_flux = ktfluxes;
     }

@@ -53,9 +53,9 @@ namespace cepgen {
       public:
         explicit Trajectory(const ParametersList& params)
             : SteeredObject(params),
-              a_(params_.get<std::vector<double> >("a")),
-              b_(params_.get<std::vector<double> >("b")),
-              c_(params_.get<std::vector<double> >("c")) {
+              a_(steer<std::vector<double> >("a")),
+              b_(steer<std::vector<double> >("b")),
+              c_(steer<std::vector<double> >("c")) {
           assert(a_.size() == 3);
           assert(b_.size() == 3);
           assert(c_.size() == 3);
@@ -119,13 +119,13 @@ namespace cepgen {
 
     ALLM::ALLM(const ParametersList& params)
         : Parameterisation(params),
-          pomeron_(params_.get<ParametersList>("pomeronTrajectory")),
-          reggeon_(params_.get<ParametersList>("reggeonTrajectory")),
-          m02_(params_.get<double>("m02")),
-          mpom2_(params_.get<double>("mp2")),
-          mreg2_(params_.get<double>("mr2")),
-          q02_(params_.get<double>("q02")),
-          lambda2_(params_.get<double>("lambda2")) {
+          pomeron_(steer<ParametersList>("pomeronTrajectory")),
+          reggeon_(steer<ParametersList>("reggeonTrajectory")),
+          m02_(steer<double>("m02")),
+          mpom2_(steer<double>("mp2")),
+          mreg2_(steer<double>("mr2")),
+          q02_(steer<double>("q02")),
+          lambda2_(steer<double>("lambda2")) {
       CG_DEBUG("ALLM") << "ALLM structure functions builder initialised.\n"
                        << " *) Pomeron trajectory: " << pomeron_ << "\n"
                        << " *) Reggeon trajectory: " << reggeon_ << "\n"

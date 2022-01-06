@@ -31,12 +31,12 @@ namespace cepgen {
       /// User-steered Suri-Yennie continuum structure functions calculator
       explicit SuriYennie(const ParametersList& params)
           : Parameterisation(params),
-            C1_(params_.get<double>("C1")),
-            C2_(params_.get<double>("C2")),
-            D1_(params_.get<double>("D1")),
-            rho2_(params_.get<double>("rho2")),
-            Cp_(params_.get<double>("Cp")),
-            Bp_(params_.get<double>("Bp")) {}
+            C1_(steer<double>("C1")),
+            C2_(steer<double>("C2")),
+            D1_(steer<double>("D1")),
+            rho2_(steer<double>("rho2")),
+            Cp_(steer<double>("Cp")),
+            Bp_(steer<double>("Bp")) {}
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();

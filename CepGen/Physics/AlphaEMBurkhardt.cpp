@@ -25,7 +25,7 @@ namespace cepgen {
   /// \note Shamelessly stolen from JETSET/PYTHIA
   class AlphaEMBurkhardt final : public Coupling {
   public:
-    explicit AlphaEMBurkhardt(const ParametersList& params) : Coupling(params), q2min_(params.get<double>("q2min")) {}
+    explicit AlphaEMBurkhardt(const ParametersList& params) : Coupling(params), q2min_(steer<double>("q2min")) {}
 
     static ParametersDescription description() {
       auto desc = ParametersDescription();

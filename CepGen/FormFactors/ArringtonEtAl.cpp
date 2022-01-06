@@ -38,8 +38,7 @@ namespace cepgen {
       std::vector<double> a_m_, b_m_;
     };
 
-    ArringtonEtAl::ArringtonEtAl(const ParametersList& params)
-        : Parameterisation(params), mode_(params.get<int>("mode")) {
+    ArringtonEtAl::ArringtonEtAl(const ParametersList& params) : Parameterisation(params), mode_(steer<int>("mode")) {
       switch (mode_) {
         case 0:  // original
           a_e_ = {3.439, -1.602, 0.068};

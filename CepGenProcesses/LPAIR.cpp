@@ -29,13 +29,13 @@ namespace cepgen {
   namespace proc {
     LPAIR::LPAIR(const ParametersList& params)
         : Process(params, true),
-          n_opt_(params_.get<int>("nopt", 0)),
-          pair_(params_.get<int>("pair", (int)PDG::muon)),
-          symmetrise_(params_.get<bool>("symmetrise", false)),
+          n_opt_(steer<int>("nopt")),
+          pair_(steer<int>("pair")),
+          symmetrise_(steer<bool>("symmetrise")),
           rnd_phi_(0., 2. * M_PI),
           rnd_side_(0, 1) {
       if (params_.has<ParticleProperties>("pair"))
-        pair_ = params_.get<ParticleProperties>("pair").pdgid;
+        pair_ = steer<ParticleProperties>("pair").pdgid;
     }
 
     LPAIR::LPAIR(const LPAIR& proc)

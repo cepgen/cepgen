@@ -78,11 +78,11 @@ namespace cepgen {
 
     TextHistHandler::TextHistHandler(const ParametersList& params)
         : ExportModule(params),
-          show_hists_(params_.get<bool>("showHistograms")),
-          save_hists_(params_.get<bool>("saveHistograms")),
-          filename_(params_.get<std::string>("filename")) {
+          show_hists_(steer<bool>("showHistograms")),
+          save_hists_(steer<bool>("saveHistograms")),
+          filename_(steer<std::string>("filename")) {
       //--- extract list of variables to be plotted in histogram
-      const auto& hist_vars = params.get<ParametersList>("histVariables");
+      const auto& hist_vars = steer<ParametersList>("histVariables");
       for (const auto& key : hist_vars.keys()) {
         const auto& vars = utils::split(key, ':');
         if (vars.size() < 1 || vars.size() > 2)
@@ -97,8 +97,8 @@ namespace cepgen {
             const auto& nbins = (hvar.get<int>("nbins") > 0 ? hvar.get<int>("nbins") : hvar.get<int>("nbinsX"));
             hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(nbins, hvar.get<Limits>("xrange"))});
           } else {
-            CG_WARNING("TextHistHandler") << "Neither xrange nor xbins found in parameters for 1D plot of variable \""
-                                      << vars.at(0) << "\".";
+            CG_WARNING("TextHistHandler")
+                << "Neither xrange nor xbins found in parameters for 1D plot of variable \"" << vars.at(0) << "\".";
             continue;
           }
           auto& hist = hists_.rbegin()->hist;
@@ -157,7 +157,7 @@ namespace cepgen {
       }
       if (save_hists_)
         CG_INFO("TextHistHandler") << "Saved " << utils::s("histogram", hists_.size(), true) << " into \"" << filename_
-                               << "\".";
+                                   << "\".";
     }
 
     void TextHistHandler::initialise(const Parameters& params) {

@@ -67,9 +67,9 @@ namespace cepgen {
 
     DelphesHandler::DelphesHandler(const ParametersList& params)
         : ExportModule(params),
-          output_(new TFile(params.get<std::string>("filename").c_str(), "recreate")),
-          input_card_(params.get<std::string>("inputCard")),
-          compress_(params.get<bool>("compress")),
+          output_(new TFile(steer<std::string>("filename").c_str(), "recreate")),
+          input_card_(steer<std::string>("inputCard")),
+          compress_(steer<bool>("compress")),
           delphes_(new Delphes),
           conf_reader_(new ExRootConfReader),
           tree_writer_(new ExRootTreeWriter(output_.get(), "Delphes")) {
