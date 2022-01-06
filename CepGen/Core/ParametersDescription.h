@@ -62,7 +62,9 @@ namespace cepgen {
       return obj_descr_[name];
     }
     /// Add the description to a collection of ParametersList objects
-    ParametersDescription& addParametersDescriptionVector(const std::string&, const ParametersDescription&);
+    ParametersDescription& addParametersDescriptionVector(const std::string&,
+                                                          const ParametersDescription&,
+                                                          const std::vector<ParametersList>& def = {});
     /// Human-readable description of all parameters and their default value
     std::string describe(size_t offset = 0) const;
     /// List of parameters associated to this description object

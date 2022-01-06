@@ -138,9 +138,12 @@ namespace cepgen {
   }
 
   ParametersDescription& ParametersDescription::addParametersDescriptionVector(const std::string& name,
-                                                                               const ParametersDescription& desc) {
+                                                                               const ParametersDescription& desc,
+                                                                               const std::vector<ParametersList>& def) {
     obj_descr_[name] = desc;
     ParametersList::set<std::vector<ParametersList> >(name, {});
+    for (const auto& val : def)
+      ParametersList::operator[]<std::vector<ParametersList> >(name).emplace_back(val);
     CG_DEBUG("ParametersDescription:addParametersDescriptionVector").log([this, &name, &desc](auto& log) {
       log << "Added a new vector of parameters descriptions \"" << name << "\" as: " << desc;
       const auto& mod_name = this->getString(ParametersList::MODULE_NAME);
