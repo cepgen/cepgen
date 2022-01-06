@@ -132,6 +132,8 @@ namespace cepgen {
           return os << "ElasticProton";
         case strfun::Type::SuriYennie:
           return os << "SuriYennie";
+        case strfun::Type::SuriYennieAlt:
+          return os << "SuriYennieAlt";
         case strfun::Type::SzczurekUleshchenko:
           return os << "SzczurekUleshchenko";
         case strfun::Type::FioreBrasse:
@@ -146,6 +148,10 @@ namespace cepgen {
           return os << "ALLM91";
         case strfun::Type::ALLM97:
           return os << "ALLM97";
+        case strfun::Type::HHT_ALLM:
+          return os << "ALLM{HHT}";
+        case strfun::Type::HHT_ALLM_FT:
+          return os << "ALLM{HHT_FT}";
         case strfun::Type::GD07p:
           return os << "GD07p";
         case strfun::Type::GD11p:
