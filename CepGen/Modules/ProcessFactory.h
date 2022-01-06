@@ -48,7 +48,11 @@
         : cepgen::proc::FortranKTProcess(params, f77_func##_) {           \
       cepgen::proc::FortranKTProcess::kProcParameters = params;           \
     }                                                                     \
-    static std::string description() { return descr; }                    \
+    static cepgen::ParametersDescription description() {                  \
+      auto desc = cepgen::proc::FortranKTProcess::description();          \
+      desc.setDescription(descr);                                         \
+      return desc;                                                        \
+    }                                                                     \
   };                                                                      \
   REGISTER_PROCESS(STRINGIFY(name), F77_##name)
 

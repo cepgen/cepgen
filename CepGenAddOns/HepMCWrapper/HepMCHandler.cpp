@@ -50,7 +50,8 @@ namespace cepgen {
       /// Class constructor
       explicit HepMCHandler(const ParametersList&);
       ~HepMCHandler();
-      static std::string description() { return "HepMC 2/3 ASCII file output module"; }
+
+      static ParametersDescription description();
 
       void initialise(const Parameters& /*params*/) override {}
       /// Writer operator
@@ -71,7 +72,7 @@ namespace cepgen {
     template <typename T>
     HepMCHandler<T>::HepMCHandler(const ParametersList& params)
         : ExportModule(params),
-          output_(new T(params.get<std::string>("filename", "output.hepmc").c_str())),
+          output_(new T(params.get<std::string>("filename").c_str())),
           xs_(new GenCrossSection)
 #ifdef HEPMC3
           ,
@@ -114,6 +115,14 @@ namespace cepgen {
     template <typename T>
     void HepMCHandler<T>::setCrossSection(double cross_section, double cross_section_err) {
       xs_->set_cross_section(cross_section, cross_section_err);
+    }
+
+    template <typename T>
+    ParametersDescription HepMCHandler<T>::description() {
+      auto desc = ExportModule::description();
+      desc.setDescription("HepMC 2/3 ASCII file output module");
+      desc.add<std::string>("filename", "output.hepmc").setDescription("Output filename");
+      return desc;
     }
   }  // namespace io
 }  // namespace cepgen

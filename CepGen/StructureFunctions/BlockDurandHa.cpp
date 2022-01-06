@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,6 +32,8 @@ namespace cepgen {
       explicit BlockDurandHa(const ParametersList&);
       BlockDurandHa& eval(double xbj, double q2) override;
 
+      static ParametersDescription description();
+
     private:
       std::vector<double> a_, b_, c_;
       double n_;
@@ -45,13 +47,13 @@ namespace cepgen {
 
     BlockDurandHa::BlockDurandHa(const ParametersList& params)
         : Parameterisation(params),
-          a_(params.get<std::vector<double> >("a", {8.205e-4, -5.148e-2, -4.725e-3})),
-          b_(params.get<std::vector<double> >("b", {2.217e-3, 1.244e-2, 5.958e-4})),
-          c_(params.get<std::vector<double> >("c", {0.255e0, 1.475e-1})),
-          n_(params.get<double>("n", 11.49)),
-          lambda_(params.get<double>("lambda", 2.430)),
-          mu2_(params.get<double>("mu2", 2.82)),
-          m2_(params.get<double>("m2", 0.753)) {
+          a_(params.get<std::vector<double> >("a")),
+          b_(params.get<std::vector<double> >("b")),
+          c_(params.get<std::vector<double> >("c")),
+          n_(params.get<double>("n")),
+          lambda_(params.get<double>("lambda")),
+          mu2_(params.get<double>("mu2")),
+          m2_(params.get<double>("m2")) {
       assert(a_.size() == 3);
       assert(b_.size() == 3);
       assert(c_.size() == 2);
@@ -76,7 +78,20 @@ namespace cepgen {
 
       return *this;
     }
+
+    ParametersDescription BlockDurandHa::description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("Block-Durand-Ha");
+      desc.add<std::vector<double> >("a", {8.205e-4, -5.148e-2, -4.725e-3});
+      desc.add<std::vector<double> >("b", {2.217e-3, 1.244e-2, 5.958e-4});
+      desc.add<std::vector<double> >("c", {0.255e0, 1.475e-1});
+      desc.add<double>("n", 11.49);
+      desc.add<double>("lambda", 2.430);
+      desc.add<double>("mu2", 2.82);
+      desc.add<double>("m2", 0.753);
+      return desc;
+    }
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(BlockDurandHa, strfun::BlockDurandHa)
+REGISTER_STRFUN(strfun::Type::BlockDurandHa, BlockDurandHa, strfun::BlockDurandHa)

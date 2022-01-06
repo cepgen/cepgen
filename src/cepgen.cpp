@@ -36,7 +36,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
   std::string input_card;
   int num_events;
-  bool list_mods, debug, safe_mode;
+  bool list_mods, safe_mode;
   vector<string> addons, outputs;
 
   cepgen::ArgumentsParser parser(argc, argv);
@@ -45,13 +45,8 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("list-modules,l", "list all runtime modules", &list_mods, false)
       .addOptionalArgument("add-ons,a", "external runtime plugin", &addons)
       .addOptionalArgument("output,o", "additional output module(s)", &outputs)
-      .addOptionalArgument("debug,d", "debugging mode", &debug, false)
       .addOptionalArgument("safe-mode,s", "safe mode", &safe_mode, false)
       .parse();
-
-  //--- handle any debugging flag
-  if (debug)
-    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
 
   //--- first start by defining the generator object
   for (const auto& lib : addons)

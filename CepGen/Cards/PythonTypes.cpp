@@ -135,7 +135,7 @@ namespace cepgen {
       if (!isVector<double>(obj))
         return false;
       const size_t size = getVector<double>(obj).size();
-      return (size == 1 || size == 2);
+      return size == 1 || size == 2;
     }
 
     template <>
@@ -201,7 +201,9 @@ namespace cepgen {
         const std::string skey = is<std::string>(pkey) ? get<std::string>(pkey)
                                  : is<int>(pkey)       ? std::to_string(get<int>(pkey))  // integer-type key
                                                        : "invalid";
-        if (is<int>(pvalue))
+        if (is<bool>(pvalue))
+          out.set<bool>(skey, get<int>(pvalue));
+        else if (is<int>(pvalue))
           out.set<int>(skey, get<int>(pvalue));
         else if (is<double>(pvalue))
           out.set<double>(skey, get<double>(pvalue));
@@ -213,9 +215,9 @@ namespace cepgen {
           if (isVector<int>(pvalue))
             out.set<std::vector<int> >(skey, getVector<int>(pvalue));
           else if (isVector<double>(pvalue)) {
-            out.set<std::vector<double> >(skey, getVector<double>(pvalue));
             if (is<Limits>(pvalue))
               out.set<Limits>(skey, get<Limits>(pvalue));
+            out.set<std::vector<double> >(skey, getVector<double>(pvalue));
           } else if (isVector<std::string>(pvalue))
             out.set<std::vector<std::string> >(skey, getVector<std::string>(pvalue));
           else  //if (isVector<ParametersList>(pvalue))

@@ -81,8 +81,10 @@ namespace cepgen {
       nc_except.message_ << var;
       return exc;
     }
+    /// Specialised feeder operator for booleans
+    friend const LoggedException& operator<<(const LoggedException&, const bool&);
     /// Specialised feeder operator for wide strings
-    friend const LoggedException& operator<<(const LoggedException& exc, const std::wstring& var);
+    friend const LoggedException& operator<<(const LoggedException&, const std::wstring&);
     /// Generic templated pair-variables feeder operator
     template <typename T, typename U>
     inline friend const LoggedException& operator<<(const LoggedException& exc, const std::pair<T, U>& pair_var) {

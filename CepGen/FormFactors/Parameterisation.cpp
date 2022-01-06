@@ -20,7 +20,7 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
-#include "CepGen/StructureFunctions/SuriYennie.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 
 namespace cepgen {
   namespace formfac {
@@ -74,10 +74,9 @@ namespace cepgen {
               throw CG_FATAL("FormFactors") << "Elastic proton form factors requested!\n"
                                             << "Check your process definition!";
             case strfun::Type::SuriYennie: {  // this one requires its own object to deal with FM
-              static strfun::SuriYennie sy;
-              sy = dynamic_cast<strfun::SuriYennie&>((*str_fun_)(xbj, q2));
-              FE = sy.F2 * xbj * mp_ / q2;
-              FM = sy.FM;
+              (*str_fun_)(xbj, q2);
+              FE = str_fun_->F2 * xbj * mp_ / q2;
+              FM = str_fun_->FM;
             } break;
             default: {
               (*str_fun_)(xbj, q2).computeFL(xbj, q2);
@@ -88,6 +87,12 @@ namespace cepgen {
         } break;
       }
       return *this;
+    }
+
+    ParametersDescription Parameterisation::description() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Unnamed form factors parameterisation");
+      return desc;
     }
 
     //------------------------------------------------------------------

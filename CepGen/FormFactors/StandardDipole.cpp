@@ -26,7 +26,12 @@ namespace cepgen {
     class StandardDipole final : public Parameterisation {
     public:
       using Parameterisation::Parameterisation;
-      static std::string description() { return "Standard dipole"; }
+
+      static ParametersDescription description() {
+        auto desc = Parameterisation::description();
+        desc.setDescription("Standard dipole");
+        return desc;
+      }
 
     private:
       void compute(double q2) override {

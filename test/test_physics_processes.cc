@@ -36,19 +36,16 @@ int main(int argc, char* argv[]) {
   double num_sigma;
   string cfg_filename;
   string integrator;
-  bool debug, quiet;
+  bool quiet;
 
-  ArgumentsParser(argc, argv)
-      .addArgument("cfg,c", "configuration file", &cfg_filename)
-      .addOptionalArgument("debug,d", "debugging mode", &debug, false)
+  ArgumentsParser argparse(argc, argv);
+  argparse.addArgument("cfg,c", "configuration file", &cfg_filename)
       .addOptionalArgument("quiet,q", "quiet mode", &quiet, false)
       .addOptionalArgument("num-sigma,n", "max. number of std.dev.", &num_sigma, 3.)
       .addOptionalArgument("integrator,i", "type of integrator used", &integrator, "Vegas")
       .parse();
 
-  if (debug)
-    utils::Logger::get().level = utils::Logger::Level::debug;
-  else if (quiet)
+  if (quiet)
     utils::Logger::get().level = utils::Logger::Level::error;
 
   utils::Timer tmr;
@@ -89,7 +86,7 @@ int main(int argc, char* argv[]) {
   CG_LOG << "Will run " << utils::s("test", tests.size()) << ".";
 
   std::unique_ptr<utils::ProgressBar> progress;
-  if (debug)
+  if (argparse.debugging())
     progress.reset(new utils::ProgressBar(tests.size()));
 
   try {
@@ -103,7 +100,7 @@ int main(int argc, char* argv[]) {
 
       CG_DEBUG("main") << gen.parameters();
 
-      gen.parameters()->integrator->setName<std::string>(integrator);
+      gen.parametersRef().par_integrator.setName<std::string>(integrator);
       CG_LOG << "Process: " << gen.parameters()->processName() << "\n\t"
              << "File: " << filename << "\n\t"
              << "Configuration time: " << tmr.elapsed() * 1.e3 << " ms.";
@@ -134,7 +131,7 @@ int main(int argc, char* argv[]) {
       else
         failed_tests.emplace_back(test_res);
       ++num_tests;
-      if (debug)
+      if (argparse.debugging())
         progress->update(num_tests);
       CG_LOG << "Test " << num_tests << "/" << tests.size() << " finished. "
              << "Success: " << utils::yesno(success) << ".";

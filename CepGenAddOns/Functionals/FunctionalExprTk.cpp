@@ -30,6 +30,8 @@ namespace cepgen {
       explicit FunctionalExprTk(const ParametersList&);
       double eval(const std::vector<double>&) const override;
 
+      static ParametersDescription description();
+
     private:
       exprtk::symbol_table<double> symbols_;
       exprtk::expression<double> expr_;
@@ -47,6 +49,12 @@ namespace cepgen {
     }
 
     double FunctionalExprTk::eval(const std::vector<double>&) const { return expr_.value(); }
+
+    ParametersDescription FunctionalExprTk::description() {
+      auto desc = Functional::description();
+      desc.setDescription("ExprTk functional evaluator");
+      return desc;
+    }
   }  // namespace utils
 }  // namespace cepgen
 

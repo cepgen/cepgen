@@ -33,7 +33,8 @@ namespace cepgen {
     public:
       explicit SzczurekUleshchenko(const ParametersList&);
       SzczurekUleshchenko& eval(double xbj, double q2) override;
-      static std::string description() { return "Szczurek-Uleshchenko modelling of F2 based on GRV parton content"; }
+
+      static ParametersDescription description();
 
     private:
       /// \f$Q^2\f$ scale shift
@@ -41,7 +42,7 @@ namespace cepgen {
     };
 
     SzczurekUleshchenko::SzczurekUleshchenko(const ParametersList& params)
-        : Parameterisation(params), q2_shift_(params.getAs<double, float>("q2shift", 0.8)) {}
+        : Parameterisation(params), q2_shift_(params.getAs<double, float>("q2shift")) {}
 
     SzczurekUleshchenko& SzczurekUleshchenko::eval(double xbj, double q2) {
       auto amu2 = (float)q2 + q2_shift_;  // shift the overall scale
@@ -63,7 +64,14 @@ namespace cepgen {
 
       return *this;
     }
+
+    ParametersDescription SzczurekUleshchenko::description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("Szczurek-Uleshchenko modelling of F2 based on GRV parton content");
+      desc.add<double>("q2shift", 0.8);
+      return desc;
+    }
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(SzczurekUleshchenko, strfun::SzczurekUleshchenko)
+REGISTER_STRFUN(strfun::Type::SzczurekUleshchenko, SzczurekUleshchenko, strfun::SzczurekUleshchenko)

@@ -23,6 +23,7 @@
 #include <numeric>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace cepgen {
@@ -54,7 +55,8 @@ namespace cepgen {
     std::string boldify(T str);
     /// TTY-type enumeration of colours
     enum class Colour {
-      reset = -1,
+      none = -1,
+      reset = 0,
       black = 30,
       red = 31,
       green = 32,
@@ -64,7 +66,8 @@ namespace cepgen {
       cyan = 36,
       white = 37
     };
-    enum struct Modifier : uint16_t {
+    enum struct Modifier : int16_t {
+      none = -1,
       reset = 0,
       bold = 1,
       dimmed = 1 << 1,
@@ -75,7 +78,7 @@ namespace cepgen {
     };
     Modifier operator|(const Modifier&, const Modifier&);
     /// Colourise a string for TTY-type output streams
-    std::string colourise(const std::string& str, const Colour& col, const Modifier& mod = Modifier::reset);
+    std::string colourise(const std::string& str, const Colour& col, const Modifier& mod = Modifier::none);
     /// Replace all occurrences of a text by another
     size_t replace_all(std::string& str, const std::string& from, const std::string& to);
     /// Replace all occurrences of a text by another
@@ -84,8 +87,11 @@ namespace cepgen {
     std::string replace_all(const std::string& str, const std::vector<std::pair<std::string, std::string> >& keys);
     /// Split a string according to a separation character
     std::vector<std::string> split(const std::string&, char);
-    /// Merge a collection of strings in a single string
-    std::string merge(const std::vector<std::string>&, const std::string&);
+    /// Merge a collection of a printable type in a single string
+    template <typename T>
+    std::string merge(const std::vector<T>&, const std::string&);
+    /// Check if a string is also a number
+    bool isNumber(const std::string&);
     /// Check if a collection contains an item
     template <typename T>
     bool contains(const std::vector<T>& coll, const T& item) {
@@ -95,6 +101,11 @@ namespace cepgen {
     template <typename T>
     bool contains(const std::set<T>& coll, const T& item) {
       return std::find(coll.begin(), coll.end(), item) != coll.end();
+    }
+    template <typename K, typename T>
+    bool contains(const std::unordered_map<K, T>& coll, const T& item) {
+      return std::find_if(coll.begin(), coll.end(), [&item](const auto& kv) { return kv.second == item; }) !=
+             coll.end();
     }
     /// Remove duplicates and sort a collection
     template <typename T>
@@ -139,6 +150,8 @@ namespace cepgen {
     }  // namespace env
     /// Describe an error code
     std::string describeError(int errnum);
+    extern Colour gTermColour;
+    extern Modifier gTermModifier;
   }  // namespace utils
 }  // namespace cepgen
 

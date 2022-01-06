@@ -31,7 +31,8 @@ class MadGraphProcessBuilder : public proc::Process2to4 {
 public:
   MadGraphProcessBuilder(const ParametersList&);
   proc::ProcessPtr clone() const override { return proc::ProcessPtr(new MadGraphProcessBuilder(*this)); }
-  static std::string description() { return "MadGraph_aMC process builder"; }
+
+  static ParametersDescription description();
 
   void prepareProcessKinematics() override;
   double computeCentralMatrixElement() const override;
@@ -65,7 +66,7 @@ void MadGraphProcessBuilder::prepareProcessKinematics() {
   if (!mg5_proc_)
     CG_FATAL("MadGraphProcessBuilder") << "Process not properly linked!";
 
-  mg5_proc_->initialise(params_.get<std::string>("parametersCard", "param_card.dat"));
+  mg5_proc_->initialise(params_.get<std::string>("parametersCard"));
 }
 
 double MadGraphProcessBuilder::computeCentralMatrixElement() const {
@@ -78,6 +79,15 @@ double MadGraphProcessBuilder::computeCentralMatrixElement() const {
   mg5_proc_->setMomentum(3, p_c2_);  // second outgoing central particle
 
   return mg5_proc_->eval();
+}
+
+ParametersDescription MadGraphProcessBuilder::description() {
+  auto desc = Process2to4::description();
+  desc.setDescription("MadGraph_aMC process builder");
+  desc.add<std::string>("lib", "").setDescription("Precompiled library for this process definition");
+  desc.add<std::string>("parametersCard", "param_card.dat").setDescription("Runtime MadGraph parameters card");
+  desc += MadGraphInterface::description();
+  return desc;
 }
 
 REGISTER_PROCESS("mg5_aMC", MadGraphProcessBuilder)

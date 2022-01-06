@@ -34,6 +34,8 @@ namespace cepgen {
     double uniform() const override;
     void setIntegrand(Integrand& integr) override;
 
+    static ParametersDescription description();
+
   protected:
     /// A functor wrapping GSL's function footprint
     std::function<double(double*, size_t, void*)> funct_;

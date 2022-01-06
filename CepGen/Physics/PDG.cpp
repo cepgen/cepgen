@@ -53,7 +53,7 @@ namespace cepgen {
     if (particles_.count(id) > 0)
       return particles_.at(id);
     dump();
-    throw CG_WARNING("PDG") << "No particle with PDG id " << id << " in the catalogue.";
+    throw CG_FATAL("PDG") << "No particle with PDG id " << id << " in the catalogue.";
   }
 
   void PDG::define(const ParticleProperties& props) {

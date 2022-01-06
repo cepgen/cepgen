@@ -282,5 +282,10 @@ namespace cepgen {
       const double uhat2 = (q2_ - p_c1_).mass2();
       return 0.5 * (uhat1 + uhat2);
     }
+
+    ParametersDescription Process2to4::description() {
+      auto desc = KTProcess::description();
+      return desc;
+    }
   }  // namespace proc
 }  // namespace cepgen

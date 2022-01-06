@@ -33,7 +33,8 @@ namespace cepgen {
     class ChristyBosted final : public Parameterisation {
     public:
       explicit ChristyBosted(const ParametersList&);
-      static std::string description() { return "Christy-Bosted F2/FL parameterisation of low-mass resonances"; }
+
+      static ParametersDescription description();
 
       ChristyBosted& eval(double xbj, double q2) override;
 
@@ -107,7 +108,7 @@ namespace cepgen {
           mpi2_(mpi_ * mpi_),
           meta_(PDG::get().mass(PDG::eta)),
           meta2_(meta_ * meta_) {
-      const auto& model = params.get<std::string>("model", "standard");
+      const auto& model = params.get<std::string>("model");
       if (model == "standard")
         mod_params_ = Parameters::standard();
       else
@@ -376,7 +377,14 @@ namespace cepgen {
 
       return *this;
     }
+
+    ParametersDescription ChristyBosted::description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("Christy-Bosted F2/FL parameterisation of low-mass resonances");
+      desc.add<std::string>("model", "standard").setDescription("Parameterisation set (only 'standard' handled)");
+      return desc;
+    }
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(ChristyBosted, strfun::ChristyBosted)
+REGISTER_STRFUN(strfun::Type::ChristyBosted, ChristyBosted, strfun::ChristyBosted)

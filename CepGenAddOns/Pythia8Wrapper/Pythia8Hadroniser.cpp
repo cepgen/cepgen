@@ -43,9 +43,8 @@ namespace cepgen {
     public:
       explicit Pythia8Hadroniser(const ParametersList&);
       ~Pythia8Hadroniser();
-      static std::string description() {
-        return "Interface to the Pythia 8 string hadronisation/fragmentation algorithm";
-      }
+
+      static ParametersDescription description();
 
       void setRuntimeParameters(const Parameters&) override;
       void readString(const char* param) override;
@@ -79,9 +78,9 @@ namespace cepgen {
         : Hadroniser(plist),
           pythia_(new Pythia8::Pythia),
           cg_evt_(new Pythia8::CepGenEvent),
-          correct_central_(plist.get<bool>("correctCentralSystem", false)),
-          debug_lhef_(plist.get<bool>("debugLHEF", false)),
-          output_config_(plist.get<std::string>("outputConfig", "last_pythia_config.cmd")) {}
+          correct_central_(plist.get<bool>("correctCentralSystem")),
+          debug_lhef_(plist.get<bool>("debugLHEF")),
+          output_config_(plist.get<std::string>("outputConfig")) {}
 
     void Pythia8Hadroniser::setRuntimeParameters(const Parameters& params) {
       rt_params_ = &params;
@@ -91,12 +90,12 @@ namespace cepgen {
 #else
       pythia_->setLHAupPtr(cg_evt_);
 #endif
-      pythia_->settings.parm("Beams:idA", (long)rt_params_->kinematics.incomingBeams().positive().pdg);
-      pythia_->settings.parm("Beams:idB", (long)rt_params_->kinematics.incomingBeams().negative().pdg);
+      pythia_->settings.parm("Beams:idA", (long)rt_params_->kinematics().incomingBeams().positive().pdg);
+      pythia_->settings.parm("Beams:idB", (long)rt_params_->kinematics().incomingBeams().negative().pdg);
       // specify we will be using a LHA input
       pythia_->settings.mode("Beams:frameType", 5);
-      pythia_->settings.parm("Beams:eCM", rt_params_->kinematics.incomingBeams().sqrtS());
-      min_ids_ = rt_params_->kinematics.minimumFinalState();
+      pythia_->settings.parm("Beams:eCM", rt_params_->kinematics().incomingBeams().sqrtS());
+      min_ids_ = rt_params_->kinematics().minimumFinalState();
       if (debug_lhef_)
         cg_evt_->openLHEF("debug.lhe");
     }
@@ -126,7 +125,7 @@ namespace cepgen {
       }
 
 #if defined(PYTHIA_VERSION_INTEGER) && PYTHIA_VERSION_INTEGER >= 8226
-      switch (rt_params_->kinematics.incomingBeams().mode()) {
+      switch (rt_params_->kinematics().incomingBeams().mode()) {
         case mode::Kinematics::ElasticElastic: {
           pythia_->settings.mode("BeamRemnants:unresolvedHadron", 3);
           pythia_->settings.flag("PartonLevel:all", false);
@@ -359,6 +358,17 @@ namespace cepgen {
         return findRole(ev, pythia_->event[par_id]);
       }
       return (unsigned short)Particle::UnknownRole;
+    }
+
+    ParametersDescription Pythia8Hadroniser::description() {
+      auto desc = Hadroniser::description();
+      desc.setDescription("Interface to the Pythia 8 string hadronisation/fragmentation algorithm");
+      desc.add<bool>("correctCentralSystem", false)
+          .setDescription("Correct the kinematics of the central system whenever required");
+      desc.add<bool>("debugLHEF", false).setDescription("Switch on the dump of each event into a debugging LHEF file");
+      desc.add<std::string>("outputConfig", "last_pythia_config.cmd")
+          .setDescription("Output filename for a backup of the last Pythia configuration snapshot");
+      return desc;
     }
   }  // namespace hadr
 }  // namespace cepgen

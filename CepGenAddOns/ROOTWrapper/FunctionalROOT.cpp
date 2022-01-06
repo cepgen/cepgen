@@ -27,7 +27,8 @@ namespace cepgen {
     class FunctionalROOT final : public Functional {
     public:
       explicit FunctionalROOT(const ParametersList&);
-      static std::string description() { return "Plain old TFormula evaluator from ROOT"; }
+
+      static ParametersDescription description();
 
       double eval(const std::vector<double>&) const;
 
@@ -46,6 +47,12 @@ namespace cepgen {
       if (!func_.IsValid())
         throw CG_WARNING("FunctionalROOT") << "Cannot evaluate the invalid function at " << x << ".";
       return func_.EvalPar(values_.data());
+    }
+
+    ParametersDescription FunctionalROOT::description() {
+      auto desc = Functional::description();
+      desc.setDescription("Plain old TFormula evaluator from ROOT");
+      return desc;
     }
   }  // namespace utils
 }  // namespace cepgen

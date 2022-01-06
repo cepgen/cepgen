@@ -47,5 +47,13 @@ namespace cepgen {
       values_ = x;
       return eval(x);
     }
+
+    ParametersDescription Functional::description() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Unnamed functional evaluator");
+      desc.add<std::vector<std::string> >("variables", {}).setDescription("List of variables to evaluate");
+      desc.add<std::string>("expression", "").setDescription("Functional expression");
+      return desc;
+    }
   }  // namespace utils
 }  // namespace cepgen

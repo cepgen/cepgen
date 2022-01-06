@@ -27,16 +27,20 @@
 #include <vector>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace utils {
-    std::string yesno(bool test) { return test ? colourise("yes", Colour::green) : colourise("no", Colour::red); }
+    Colour gTermColour = Colour::reset;
+    Modifier gTermModifier = Modifier::reset;
+
+    std::string yesno(bool test) { return test ? colourise("true", Colour::green) : colourise("false", Colour::red); }
 
     /// String implementation of the boldification procedure
     template <>
     std::string boldify(std::string str) {
-      return colourise(str, Colour::reset, Modifier::bold);
+      return colourise(str, Colour::none, Modifier::bold);
     }
 
     /// C-style character array implementation of the boldification procedure
@@ -51,20 +55,34 @@ namespace cepgen {
       return boldify(std::to_string(ui));
     }
 
-    Modifier operator|(const Modifier& lhs, const Modifier& rhs) { return Modifier((uint16_t)lhs + (uint16_t)rhs); }
+    Modifier operator|(const Modifier& lhs, const Modifier& rhs) {
+      std::bitset<7> mod1((int)lhs), mod2((int)rhs);
+      return (Modifier)(mod1 | mod2).to_ulong();
+    }
 
     std::string colourise(const std::string& str, const Colour& col, const Modifier& mod) {
       if (!isatty(fileno(stdout)))
         return str;
-      if (mod == Modifier::reset)
-        return format("\033[%dm%s\033[0m", (int)col, str.c_str());
-      std::string mod_str, delim;
-      for (size_t i = 0; i < 7; ++i)
-        if ((uint16_t)mod & (1 << i))
-          mod_str += delim + std::to_string(i + 1), delim = ";";
-      if (col == Colour::reset)
-        return format("\033[%sm%s\033[0m", mod_str.c_str(), str.c_str());
-      return format("\033[%d;%sm%s\033[0m", (int)col, mod_str.c_str(), str.c_str());
+      std::string out;
+      Colour prev_col = gTermColour;
+      Modifier prev_mod = gTermModifier;
+      if (col != Colour::none)
+        gTermColour = col;
+      if (mod != Modifier::none)
+        gTermModifier = gTermModifier | mod;
+
+      auto get_mod_str = [](const Modifier& mod) -> std::string {
+        std::string mod_str, delim;
+        for (size_t i = 0; i < 7; ++i)
+          if ((uint16_t)mod & (1 << i))
+            mod_str += delim + std::to_string(i + 1), delim = ";";
+        return mod_str;
+      };
+      out = format("\033[%d;%sm", (int)gTermColour, get_mod_str(gTermModifier).c_str()) + str;
+      gTermColour = prev_col;
+      gTermModifier = prev_mod;
+      out += format("\033[%d;%dm", gTermColour, gTermModifier);
+      return out;
     }
 
     size_t replace_all(std::string& str, const std::string& from, const std::string& to) {
@@ -108,14 +126,26 @@ namespace cepgen {
       return out;
     }
 
-    std::string merge(const std::vector<std::string>& vec, const std::string& delim) {
+    template <typename T>
+    std::string merge(const std::vector<T>& vec, const std::string& delim) {
       if (vec.empty())
         return std::string();
-      if (vec.size() == 1)
-        return vec.at(0);
       std::ostringstream oss;
-      std::copy(vec.begin(), std::prev(vec.end()), std::ostream_iterator<std::string>(oss, delim.c_str()));
-      return oss.str() + *vec.rbegin();  // treat last one separately to drop the last delimiter
+      std::for_each(vec.begin(), vec.end(), [&oss, &delim, sep = std::string()](const auto& val) mutable {
+        oss << sep << val;
+        sep = delim;
+      });
+      return oss.str();
+    }
+
+    template std::string merge<std::string>(const std::vector<std::string>&, const std::string&);
+    template std::string merge<int>(const std::vector<int>&, const std::string&);
+    template std::string merge<double>(const std::vector<double>&, const std::string&);
+    template std::string merge<ParametersList>(const std::vector<ParametersList>&, const std::string&);
+
+    bool isNumber(const std::string& str) {
+      return !str.empty() &&
+             std::find_if(str.begin(), str.end(), [](unsigned char c) { return !std::isdigit(c); }) == str.end();
     }
 
     std::string toupper(const std::string& str) {

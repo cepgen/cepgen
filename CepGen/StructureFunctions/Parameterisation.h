@@ -39,6 +39,7 @@ namespace cepgen {
       SuriYennie = 11,
       SzczurekUleshchenko = 12,
       BlockDurandHa = 13,
+      SuriYennieAlt = 14,
       FioreBrasse = 101,
       ChristyBosted = 102,
       CLAS = 103,
@@ -47,6 +48,8 @@ namespace cepgen {
       GD07p = 203,
       GD11p = 204,
       MSTWgrid = 205,
+      HHT_ALLM = 206,
+      HHT_ALLM_FT = 207,
       Schaefer = 301,
       Shamov = 302,
       Partonic = 401,
@@ -68,7 +71,7 @@ namespace cepgen {
       Parameterisation& operator=(const Parameterisation& sf);
 
       /// Generic description for the structure functions
-      static std::string description() { return "Unnamed structure functions"; }
+      static ParametersDescription description();
 
       /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
       friend std::ostream& operator<<(std::ostream&, const Parameterisation*);
@@ -95,6 +98,11 @@ namespace cepgen {
     public:
       double F2{0.};  ///< Last computed transverse structure function value
       double FL{0.};  ///< Last computed longitudinal structure function value
+      // alternative quantities
+      double W1{0.};  ///< Longitudinal form factor
+      double W2{0.};
+      double FE{0.};  ///< Electric proton form factor
+      double FM{0.};  ///< Magnetic proton form factor
 
     protected:
       /// Local structure functions evaluation method

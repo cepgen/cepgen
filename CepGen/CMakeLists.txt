@@ -3,6 +3,7 @@ file(GLOB core_sources
         Modules/*.cpp
         Utils/*.cpp
         Integration/*.cpp
+        OutputModules/*.cpp
         *.cpp)
 file(GLOB phys_sources
         Event/*.cpp
@@ -16,6 +17,7 @@ file(GLOB core_includes
         Core
         Modules
         Utils
+        OutputModules
         Physics
         Integration
         Processes
@@ -48,7 +50,7 @@ endif()
 include(FindVersion)
 add_version_definition(${core_sources})
 
-cepgen_build(CepGenCore
+cepgen_build(CepGen
         SOURCES ${core_sources} ${phys_sources} ${proc_sources}
         EXT_LIBS ${CEPGEN_CORE_EXT} stdc++fs
         EXT_HEADERS ${core_includes}

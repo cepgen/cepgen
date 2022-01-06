@@ -29,7 +29,8 @@ namespace cepgen {
   class IntegratorMISER final : public IntegratorGSL {
   public:
     explicit IntegratorMISER(const ParametersList&);
-    static std::string description() { return "MISER adaptive importance sampling integrator"; }
+
+    static ParametersDescription description();
 
     void integrate(double&, double&) override;
 
@@ -44,18 +45,18 @@ namespace cepgen {
   };
 
   IntegratorMISER::IntegratorMISER(const ParametersList& params)
-      : IntegratorGSL(params), ncvg_(params.get<int>("numFunctionCalls", 50000)) {}
+      : IntegratorGSL(params), ncvg_(params.get<int>("numFunctionCalls")) {}
 
   void IntegratorMISER::integrate(double& result, double& abserr) {
     if (!initialised_) {
       miser_state_.reset(gsl_monte_miser_alloc(function_->dim));
       miser_state_->verbose = verbosity_;
       gsl_monte_miser_params_get(miser_state_.get(), &miser_params_);
-      miser_params_.estimate_frac = params_.get<double>("estimateFraction", 0.1);
-      miser_params_.min_calls = params_.get<int>("minCalls", 16 * 10);
-      miser_params_.min_calls_per_bisection = params_.get<int>("minCallsPerBisection", 32 * 16 * 10);
-      miser_params_.alpha = params_.get<double>("alpha", 2.);
-      miser_params_.dither = params_.get<double>("dither", 0.1);
+      miser_params_.estimate_frac = params_.get<double>("estimateFraction");
+      miser_params_.min_calls = params_.get<int>("minCalls");
+      miser_params_.min_calls_per_bisection = params_.get<int>("minCallsPerBisection");
+      miser_params_.alpha = params_.get<double>("alpha");
+      miser_params_.dither = params_.get<double>("dither");
       gsl_monte_miser_params_set(miser_state_.get(), &miser_params_);
 
       //--- a bit of printout for debugging
@@ -87,6 +88,19 @@ namespace cepgen {
 
     result_ = result;
     err_result_ = abserr;
+  }
+
+  ParametersDescription IntegratorMISER::description() {
+    auto desc = IntegratorGSL::description();
+    desc.setDescription("MISER adaptive importance sampling integrator");
+    desc.add<int>("numFunctionCalls", 50000)
+        .setDescription("Number of function calls per phase space point evaluation");
+    desc.add<double>("estimateFraction", 0.1);
+    desc.add<int>("minCalls", 16 * 10);
+    desc.add<int>("minCallsPerBisection", 32 * 16 * 10);
+    desc.add<double>("alpha", 2.);
+    desc.add<double>("dither", 0.1);
+    return desc;
   }
 }  // namespace cepgen
 

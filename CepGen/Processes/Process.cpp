@@ -30,9 +30,7 @@
 namespace cepgen {
   namespace proc {
     Process::Process(const ParametersList& params, bool has_event)
-        : NamedModule(params),
-          alphaem_(AlphaEMFactory::get().build(
-              params.get<ParametersList>("alphaEM", ParametersList().setName<std::string>("fixed")))) {
+        : NamedModule(params), alphaem_(AlphaEMFactory::get().build(params.get<ParametersList>("alphaEM"))) {
       if (has_event)
         event_.reset(new Event);
     }
@@ -245,7 +243,9 @@ namespace cepgen {
     }
 
     void Process::setKinematics(const Kinematics& kin) {
-      clear();
+      CG_DEBUG("Process:setKinematics") << "Preparing to set the kinematics parameters. Input parameters: "
+                                        << kin.parameters(false) << ".";
+      clear();  // also resets the "first run" flag
       mp_ = PDG::get().mass(PDG::proton);
       mp2_ = mp_ * mp_;
       kin_ = kin;
@@ -374,6 +374,12 @@ namespace cepgen {
 
       // combine both states
       return is_incoming_state_set && is_outgoing_state_set;
+    }
+
+    ParametersDescription Process::description() {
+      auto desc = ParametersDescription();
+      desc.add<ParametersDescription>("alphaEM", AlphaEMFactory::get().describeParameters("fixed"));
+      return desc;
     }
 
     std::ostream& operator<<(std::ostream& os, const Process& proc) { return os << proc.name().c_str(); }

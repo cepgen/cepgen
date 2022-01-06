@@ -47,7 +47,8 @@ namespace cepgen {
     public:
       /// Class constructor
       explicit LHEFHepMCHandler(const ParametersList&);
-      static std::string description() { return "HepMC 3-based LHEF output module"; }
+
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override;
       /// Writer operator
@@ -63,8 +64,8 @@ namespace cepgen {
 
     LHEFHepMCHandler::LHEFHepMCHandler(const ParametersList& params)
         : ExportModule(params),
-          lhe_output_(new LHEF::Writer(params.get<std::string>("filename", "output.lhe"))),
-          compress_(params.get<bool>("compress", true)) {}
+          lhe_output_(new LHEF::Writer(params.get<std::string>("filename"))),
+          compress_(params.get<bool>("compress")) {}
 
     void LHEFHepMCHandler::setCrossSection(double cross_section, double err) {
       lhe_output_->heprup.NPRUP = 1;
@@ -78,10 +79,10 @@ namespace cepgen {
     void LHEFHepMCHandler::initialise(const Parameters& params) {
       lhe_output_->headerBlock() << "<!--\n" << banner(params) << "\n-->";
       //--- first specify information about the run
-      lhe_output_->heprup.IDBMUP = {(int)params.kinematics.incomingBeams().positive().pdg,
-                                    (int)params.kinematics.incomingBeams().negative().pdg};
-      lhe_output_->heprup.EBMUP = {(double)params.kinematics.incomingBeams().positive().momentum.pz(),
-                                   (double)params.kinematics.incomingBeams().negative().momentum.pz()};
+      lhe_output_->heprup.IDBMUP = {(int)params.kinematics().incomingBeams().positive().pdg,
+                                    (int)params.kinematics().incomingBeams().negative().pdg};
+      lhe_output_->heprup.EBMUP = {(double)params.kinematics().incomingBeams().positive().momentum.pz(),
+                                   (double)params.kinematics().incomingBeams().negative().momentum.pz()};
       //--- ensure everything is properly parsed
       lhe_output_->init();
     }
@@ -113,6 +114,14 @@ namespace cepgen {
       //lhe_output_->eventComments() << "haha";
       lhe_output_->hepeup = out;
       lhe_output_->writeEvent();
+    }
+
+    ParametersDescription LHEFHepMCHandler::description() {
+      auto desc = ExportModule::description();
+      desc.setDescription("HepMC 3-based LHEF output module");
+      desc.add<std::string>("filename", "output.lhe").setDescription("Output filename");
+      desc.add<bool>("compress", true);
+      return desc;
     }
   }  // namespace io
 }  // namespace cepgen

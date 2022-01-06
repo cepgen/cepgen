@@ -33,7 +33,8 @@ namespace cepgen {
     public:
       /// Fiore \cite Fiore:2002re and Brasse \cite Brasse:1976bf proton structure functions
       explicit FioreBrasse(const ParametersList&);
-      static std::string description() { return "Fiore-Brasse F2 parameterisation of low-mass resonances"; }
+
+      static ParametersDescription description();
 
       FioreBrasse& eval(double xbj, double q2) override;
 
@@ -75,7 +76,7 @@ namespace cepgen {
     }
 
     FioreBrasse::FioreBrasse(const ParametersList& params) : Parameterisation(params) {
-      const auto& model = params.get<std::string>("model", "standard");
+      const auto& model = params.get<std::string>("model");
       if (model == "standard")
         fb_params_ = Parameters::standard();
       else if (model == "alternative")
@@ -131,7 +132,15 @@ namespace cepgen {
       F2 = prefactor * amplitude_tot;
       return *this;
     }
+
+    ParametersDescription FioreBrasse::description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("Fiore-Brasse F2 parameterisation of low-mass resonances");
+      desc.add<std::string>("model", "standard")
+          .setDescription("Parameterisation modelling ('standard' or 'alternative' handled)");
+      return desc;
+    }
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(FioreBrasse, strfun::FioreBrasse)
+REGISTER_STRFUN(strfun::Type::FioreBrasse, FioreBrasse, strfun::FioreBrasse)

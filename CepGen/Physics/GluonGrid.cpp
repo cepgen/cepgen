@@ -25,14 +25,14 @@
 #include "CepGen/Utils/Timer.h"
 
 namespace kmr {
-  GluonGrid& GluonGrid::get(const std::string& filename) {
-    static GluonGrid instance(cepgen::ParametersList().set<std::string>("path", filename));
+  GluonGrid& GluonGrid::get(const cepgen::ParametersList& params) {
+    static GluonGrid instance(!params.empty() ? params : description().parameters());
     return instance;
   }
 
   GluonGrid::GluonGrid(const cepgen::ParametersList& params)
       : cepgen::GridHandler<3, 1>(cepgen::GridType::linear),  // grid is already logarithmic
-        grid_path_(params.get<std::string>("path", DEFAULT_KMR_GRID_PATH)) {
+        grid_path_(params.get<std::string>("path")) {
     CG_INFO("GluonGrid") << "Building the KMR grid evaluator.";
 
     cepgen::utils::Timer tmr;
@@ -64,5 +64,11 @@ namespace kmr {
 
   double GluonGrid::operator()(double x, double kt2, double mu2) const {
     return cepgen::GridHandler<3, 1>::eval({log10(x), log10(kt2), log10(mu2)}).at(0);
+  }
+
+  cepgen::ParametersDescription GluonGrid::description() {
+    auto desc = cepgen::ParametersDescription();
+    desc.add<std::string>("path", DEFAULT_KMR_GRID_PATH);
+    return desc;
   }
 }  // namespace kmr

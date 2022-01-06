@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace cepgen {
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
           mx_min_(mp_ + PDG::get().mass(PDG::piZero)),
-          r_ratio_(sigrat::SigmaRatiosFactory::get().build((int)sigrat::Type::E143)) {}
+          r_ratio_(sigrat::SigmaRatiosFactory::get().build((int)sigrat::Type::SibirtsevBlunden)) {}
 
     Parameterisation::Parameterisation(const Parameterisation& sf)
         : NamedModule<int>(sf.parameters()),
@@ -48,9 +48,11 @@ namespace cepgen {
         : NamedModule<int>(params),
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
-          mx_min_(mp_ + PDG::get().mass(PDG::piZero)),
-          r_ratio_(sigrat::SigmaRatiosFactory::get().build(params.get<ParametersList>(
-              "sigmaRatio", ParametersList().setName<int>((int)sigrat::Type::SibirtsevBlunden)))) {}
+          mx_min_(mp_ + PDG::get().mass(PDG::piZero)) {
+      CG_DEBUG("Parameterisation") << "Structure functions parameterisation to be built using following parameters:\n"
+                                   << ParametersDescription(params_).describe(true);
+      r_ratio_ = sigrat::SigmaRatiosFactory::get().build(params_.get<int>("sigmaRatio"));
+    }
 
     Parameterisation& Parameterisation::operator=(const Parameterisation& sf) {
       F2 = sf.F2, FL = sf.FL;
@@ -59,10 +61,9 @@ namespace cepgen {
     }
 
     Parameterisation& Parameterisation::operator()(double xbj, double q2) {
-      std::pair<double, double> nv = {xbj, q2};
-      if (nv == old_vals_)
+      if (old_vals_.first == xbj && old_vals_.second == q2)
         return *this;
-      old_vals_ = nv;
+      old_vals_ = {xbj, q2};
       return eval(xbj, q2);
     }
 
@@ -110,6 +111,14 @@ namespace cepgen {
       return os;
     }
 
+    ParametersDescription Parameterisation::description() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Unnamed structure functions parameterisation");
+      desc.add<int>("sigmaRatio", (int)sigrat::Type::SibirtsevBlunden)
+          .setDescription("Modelling for the sigma(L/T) ratio used in FL computation from F2");
+      return desc;
+    }
+
     std::ostream& operator<<(std::ostream& os, const Parameterisation& sf) { return os << &sf; }
 
     /// Human-readable format of a structure function type
@@ -123,6 +132,8 @@ namespace cepgen {
           return os << "ElasticProton";
         case strfun::Type::SuriYennie:
           return os << "SuriYennie";
+        case strfun::Type::SuriYennieAlt:
+          return os << "SuriYennieAlt";
         case strfun::Type::SzczurekUleshchenko:
           return os << "SzczurekUleshchenko";
         case strfun::Type::FioreBrasse:
@@ -137,6 +148,10 @@ namespace cepgen {
           return os << "ALLM91";
         case strfun::Type::ALLM97:
           return os << "ALLM97";
+        case strfun::Type::HHT_ALLM:
+          return os << "ALLM{HHT}";
+        case strfun::Type::HHT_ALLM_FT:
+          return os << "ALLM{HHT_FT}";
         case strfun::Type::GD07p:
           return os << "GD07p";
         case strfun::Type::GD11p:

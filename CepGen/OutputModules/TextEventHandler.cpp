@@ -30,11 +30,12 @@ namespace cepgen {
     /// Simple event dump module
     /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
     /// \date Jan 2020
-    class EventDump : public ExportModule {
+    class TextEventHandler : public ExportModule {
     public:
-      explicit EventDump(const ParametersList&);
-      ~EventDump();
-      static std::string description() { return "Simple text-based event dumper"; }
+      explicit TextEventHandler(const ParametersList&);
+      ~TextEventHandler();
+
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override;
       void setCrossSection(double, double) override;
@@ -46,36 +47,46 @@ namespace cepgen {
       std::ostream* out_{nullptr};
     };
 
-    EventDump::EventDump(const ParametersList& params)
+    TextEventHandler::TextEventHandler(const ParametersList& params)
         : ExportModule(params),
-          save_banner_(params.get<bool>("saveBanner", true)),
-          print_every_(params.get<int>("printEvery", 10)) {
-      if (params.has<std::string>("filename"))
-        out_ = new std::ofstream(params.get<std::string>("filename"));
+          save_banner_(params.get<bool>("saveBanner")),
+          print_every_(params.get<int>("printEvery")) {
+      const auto& filename = params.get<std::string>("filename");
+      if (!filename.empty())
+        out_ = new std::ofstream(filename);
       else
         out_ = &std::cout;
     }
 
-    EventDump::~EventDump() {
+    TextEventHandler::~TextEventHandler() {
       if (out_ != &std::cout)
         dynamic_cast<std::ofstream*>(out_)->close();
     }
 
-    void EventDump::initialise(const Parameters& params) {
+    void TextEventHandler::initialise(const Parameters& params) {
       if (save_banner_)
         *out_ << banner(params, "#") << "\n";
     }
 
-    void EventDump::setCrossSection(double cross_section, double cross_section_err) {
+    void TextEventHandler::setCrossSection(double cross_section, double cross_section_err) {
       if (out_ != &std::cout)
         *out_ << "Total cross-section: " << cross_section << " +/- " << cross_section_err << " pb.\n";
     }
 
-    void EventDump::operator<<(const Event& ev) {
+    void TextEventHandler::operator<<(const Event& ev) {
       if (print_every_ < 0 || event_num_++ % print_every_ == 0)
         *out_ << ev << "\n";
+    }
+
+    ParametersDescription TextEventHandler::description() {
+      auto desc = ExportModule::description();
+      desc.setDescription("Simple text-based event dumper");
+      desc.add<bool>("saveBanner", true).setDescription("Save boilerplate in output file?");
+      desc.add<int>("printEvery", 10).setDescription("Period at which events are dumped");
+      desc.add<std::string>("filename", "").setDescription("Output filename");
+      return desc;
     }
   }  // namespace io
 }  // namespace cepgen
 
-REGISTER_IO_MODULE("dump", EventDump)
+REGISTER_IO_MODULE("dump", TextEventHandler)

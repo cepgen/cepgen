@@ -43,6 +43,13 @@ namespace cepgen {
       exit(0);
   }
 
+  const LoggedException& operator<<(const LoggedException& exc, const bool& var) {
+    LoggedException& nc_except = const_cast<LoggedException&>(exc);
+    nc_except.message_ << (var ? utils::colourise("true", utils::Colour::green)
+                               : utils::colourise("false", utils::Colour::red));
+    return exc;
+  }
+
   const LoggedException& operator<<(const LoggedException& exc, const std::wstring& var) {
     LoggedException& nc_except = const_cast<LoggedException&>(exc);
     nc_except.message_ << utils::tostring(var);
@@ -63,7 +70,7 @@ namespace cepgen {
         return os << type_
                   << (utils::Logger::get().extended()
                           ? utils::colourise(" {" + from_ + "}\n\t",
-                                             utils::Colour::reset,
+                                             utils::Colour::none,
                                              utils::Modifier::dimmed | utils::Modifier::italic)
                           : ":\t")
                   << message_.str() << "\n";
@@ -75,27 +82,27 @@ namespace cepgen {
                           ? " " +
                                 utils::colourise(
                                     file_,
-                                    utils::Colour::reset,
+                                    utils::Colour::none,
                                     utils::Modifier::bold | utils::Modifier::italic | utils::Modifier::dimmed) +
                                 " @" +
                                 utils::colourise(std::to_string(line_num_),
-                                                 utils::Colour::reset,
+                                                 utils::Colour::none,
                                                  utils::Modifier::italic | utils::Modifier::dimmed) +
                                 "\n"
                           : ": ")
-                  << utils::colourise(message_.str(), utils::Colour::reset, utils::Modifier::dimmed) << "\n";
+                  << utils::colourise(message_.str(), utils::Colour::none, utils::Modifier::dimmed) << "\n";
       case Type::warning:
         return os << type_ << " "
-                  << utils::colourise(from_, utils::Colour::reset, utils::Modifier::underline | utils::Modifier::dimmed)
+                  << utils::colourise(from_, utils::Colour::none, utils::Modifier::underline | utils::Modifier::dimmed)
                   << (utils::Logger::get().extended()
                           ? " " +
                                 utils::colourise(
                                     file_,
-                                    utils::Colour::reset,
+                                    utils::Colour::none,
                                     utils::Modifier::bold | utils::Modifier::italic | utils::Modifier::dimmed) +
                                 " @" +
                                 utils::colourise(std::to_string(line_num_),
-                                                 utils::Colour::reset,
+                                                 utils::Colour::none,
                                                  utils::Modifier::italic | utils::Modifier::dimmed)
                           : "")
                   << "\n\t" << message_.str() << "\n";
@@ -107,9 +114,9 @@ namespace cepgen {
         const std::string sep(80, '-');
         os << sep << "\n" << type_ << " occured at " << now() << "\n";
         if (!from_.empty())
-          os << "  raised by: " << utils::colourise(from_, utils::Colour::reset, utils::Modifier::underline) << "\n";
+          os << "  raised by: " << utils::colourise(from_, utils::Colour::none, utils::Modifier::underline) << "\n";
         if (utils::Logger::get().extended()) {
-          os << "  file: " << utils::colourise(file_, utils::Colour::reset, utils::Modifier::dimmed) << "\n";
+          os << "  file: " << utils::colourise(file_, utils::Colour::none, utils::Modifier::dimmed) << "\n";
           if (line_num_ != 0)
             os << "  line #" << line_num_ << "\n";
         }
@@ -138,9 +145,9 @@ namespace cepgen {
       case Exception::Type::warning:
         return os << utils::colourise("Warning", utils::Colour::blue, utils::Modifier::bold);
       case Exception::Type::verbatim:
-        return os << utils::colourise("Verbatim", utils::Colour::reset, utils::Modifier::bold);
+        return os << utils::colourise("Verbatim", utils::Colour::none, utils::Modifier::bold);
       case Exception::Type::undefined:
-        return os << utils::colourise("Undef'd exception", utils::Colour::reset, utils::Modifier::reverse);
+        return os << utils::colourise("Undef'd exception", utils::Colour::none, utils::Modifier::reverse);
       case Exception::Type::error:
         return os << utils::colourise("Error", utils::Colour::red, utils::Modifier::bold);
       case Exception::Type::fatal:

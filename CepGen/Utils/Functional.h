@@ -35,6 +35,9 @@ namespace cepgen {
     public:
       /// Default constructor
       Functional(const ParametersList& params);
+
+      static ParametersDescription description();
+
       /// Compute the functional for a given value of the variable (one-dimensional case)
       /// \param[in] x Variable value
       double operator()(double x) const;

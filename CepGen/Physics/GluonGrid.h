@@ -19,7 +19,7 @@
 #ifndef CepGen_Physics_GluonGrid_h
 #define CepGen_Physics_GluonGrid_h
 
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Utils/GridHandler.h"
 
 #define DEFAULT_KMR_GRID_PATH "gluon_mmht2014nlo_Watt.dat"
@@ -29,11 +29,14 @@ namespace kmr {
   /// A KMR unintegrated gluon densities grid interpolator
   class GluonGrid : private cepgen::GridHandler<3, 1> {
   public:
+    /// Retrieve the grid interpolator (singleton)
+    static GluonGrid& get(const cepgen::ParametersList& params = {});
+
     GluonGrid(const GluonGrid&) = delete;
     void operator=(const GridHandler&) = delete;
 
-    /// Retrieve the grid interpolator (singleton)
-    static GluonGrid& get(const std::string& path = DEFAULT_KMR_GRID_PATH);
+    static cepgen::ParametersDescription description();
+
     /// Retrieve the path to the interpolation grid values
     const std::string& path() const { return grid_path_; }
 
@@ -41,7 +44,7 @@ namespace kmr {
     double operator()(double x, double kt2, double mu2) const;
 
   private:
-    explicit GluonGrid(const cepgen::ParametersList& = cepgen::ParametersList());
+    explicit GluonGrid(const cepgen::ParametersList&);
     /// Location of the grid to be interpolated
     const std::string grid_path_;
   };

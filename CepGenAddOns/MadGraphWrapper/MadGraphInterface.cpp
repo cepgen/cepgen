@@ -48,10 +48,10 @@ namespace cepgen {
   MadGraphInterface::MadGraphInterface(const ParametersList& params)
       : proc_(params.get<std::string>("process")),
         model_(params.get<std::string>("model")),
-        card_path_(params.getAs<std::string, fs::path>("cardPath", fs::path() / "/tmp/cepgen_mg5_input.dat")),
+        card_path_(params.getAs<std::string, fs::path>("cardPath")),
         standalone_cpp_path_(params.getAs<std::string, fs::path>("standaloneCppPath")),
-        tmp_dir_(params.getAs<std::string, fs::path>("tmpDir", fs::path() / "/tmp/cepgen_mg5_aMC")),
-        log_filename_(params.get<std::string>("logFile", fs::path() / "/tmp/cepgen_mg5_aMC.log")) {
+        tmp_dir_(params.getAs<std::string, fs::path>("tmpDir")),
+        log_filename_(params.get<std::string>("logFile")) {
     if (proc_.empty())
       throw CG_FATAL("MadGraphInterface") << "'process' keyword not set to the parameters!\n" << params;
     std::ofstream log(log_filename_, std::ios::trunc);  // clearing the log
@@ -250,5 +250,19 @@ namespace cepgen {
     CG_DEBUG("MadGraphInterface:runCommand") << "Output value: " << utils::describeError(errno) << ".";
 
     return result;
+  }
+
+  ParametersDescription MadGraphInterface::description() {
+    auto desc = ParametersDescription();
+    desc.add<std::string>("process", "").setDescription("MadGraph_aMC process definition");
+    desc.add<std::string>("model", "").setDescription("MadGraph_aMC model name");
+    desc.add<std::string>("cardPath", "/tmp/cepgen_mg5_input.dat")
+        .setDescription("Temporary file where to store the input card for MadGraph_aMC");
+    desc.add<std::string>("standaloneCppPath", "");
+    desc.add<std::string>("tmpDir", "/tmp/cepgen_mg5_aMC")
+        .setDescription("Temporary path where to store the MadGraph_aMC process definition files");
+    desc.add<std::string>("logFile", "/tmp/cepgen_mg5_aMC.log")
+        .setDescription("Temporary path where to store the log for this run");
+    return desc;
   }
 }  // namespace cepgen

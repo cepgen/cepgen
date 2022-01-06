@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/StructureFunctions/SuriYennie.h"
 #include "CepGen/Utils/GridHandler.h"
 
 namespace cepgen {
@@ -29,7 +28,8 @@ namespace cepgen {
     class Shamov final : public Parameterisation {
     public:
       explicit Shamov(const ParametersList&);
-      static std::string description() { return "Shamov composite soft structure functions"; }
+
+      static ParametersDescription description();
 
       Shamov& eval(double xbj, double q2) override;
 
@@ -165,7 +165,7 @@ namespace cepgen {
 
       GridHandler<1, 2> sigma_grid_{GridType::linear};
       GridHandler<1, 1> gm_grid_{GridType::linear};
-      SuriYennie sy_sf_;
+      std::unique_ptr<Parameterisation> sy_sf_;
     };
 
     constexpr std::array<float, 19> Shamov::gmq_, Shamov::gmv_;
@@ -174,11 +174,13 @@ namespace cepgen {
 
     Shamov::Shamov(const ParametersList& params)
         : Parameterisation(params),
-          mode_(params.getAs<int, Mode>("mode", Mode::RealResAndNonRes)),
-          fit_model_(params.get<int>("fitModel", 2)),
-          gm0_(params.get<double>("gm0", 1.)),
-          gmb_(params.get<double>("gmb", 0.984)),
-          lowq2_(params.get<double>("lowQ2", 1.e-7)) {
+          mode_(params_.getAs<int, Mode>("mode", Mode::RealResAndNonRes)),
+          fit_model_(params_.get<int>("fitModel", 2)),
+          gm0_(params_.get<double>("gm0", 1.)),
+          gmb_(params_.get<double>("gmb", 0.984)),
+          lowq2_(params_.get<double>("lowQ2", 1.e-7)),
+          sy_sf_(strfun::StructureFunctionsFactory::get().build((int)strfun::Type::SuriYennie,
+                                                                params_.get<ParametersList>("syParams"))) {
       if (fit_model_ > q20_.size())
         throw CG_FATAL("Shamov") << "Invalid fit modelling requested!";
 
@@ -197,7 +199,7 @@ namespace cepgen {
 
     Shamov& Shamov::eval(double xbj, double q2) {
       //--- Suri & Yennie structure functions
-      const auto sy_q2 = sy_sf_.eval(xbj, q2);
+      const auto sy_q2 = (*sy_sf_)(xbj, q2);
 
       if (mode_ == Mode::SuriYennie) {
         W1 = sy_q2.W1;
@@ -226,7 +228,7 @@ namespace cepgen {
           /// Some fit of the know e-p data. Good only for Q^2 < 6 GeV^2
           Gm = pow(1. + pow(q2 / q20_[fit_model_], 2), -r_power_[fit_model_]);
         else {
-          const auto sy_lowq2 = sy_sf_.eval(xbj, lowq2_);
+          const auto sy_lowq2 = (*sy_sf_)(xbj, lowq2_);
           Gm = sy_q2.W1 / sy_lowq2.W1;
         }
       } else {                        // resonant
@@ -257,7 +259,18 @@ namespace cepgen {
       F2 = W2 * nu / mp_;
       return *this;
     }
+
+    ParametersDescription Shamov::description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("Shamov composite soft structure functions");
+      desc.add<int>("mode", (int)Mode::RealResAndNonRes);
+      desc.add<int>("fitModel", 2);
+      desc.add<double>("gm0", 1.);
+      desc.add<double>("gmb", 0.984);
+      desc.add<double>("lowQ2", 1.e-7);
+      return desc;
+    }
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(Shamov, strfun::Shamov)
+REGISTER_STRFUN(strfun::Type::Shamov, Shamov, strfun::Shamov)

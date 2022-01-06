@@ -22,7 +22,6 @@
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenProcesses/LPAIR.h"
 
@@ -30,9 +29,9 @@ namespace cepgen {
   namespace proc {
     LPAIR::LPAIR(const ParametersList& params)
         : Process(params, true),
-          n_opt_(params.get<int>("nopt", 0)),
-          pair_(params.get<int>("pair", (int)PDG::muon)),
-          symmetrise_(params.get<bool>("symmetrise", false)),
+          n_opt_(params_.get<int>("nopt", 0)),
+          pair_(params_.get<int>("pair", (int)PDG::muon)),
+          symmetrise_(params_.get<bool>("symmetrise", false)),
           rnd_phi_(0., 2. * M_PI),
           rnd_side_(0, 1) {
       if (params_.has<ParticleProperties>("pair"))
@@ -972,6 +971,15 @@ namespace cepgen {
       const double out = y + z + 0.5 * (am * zz - c / (am * zz));
       const double ax = sqrt(pow(out - y - z, 2) + c);
       return {out, ax * log(yy)};
+    }
+
+    ParametersDescription LPAIR::description() {
+      auto desc = Process::description();
+      desc.setDescription("ɣɣ → l⁺l¯ (LPAIR)");
+      desc.add<int>("nopt", 0).setDescription("Optimised mode? (inherited from LPAIR, by default disabled = 0)");
+      desc.add<int>("pair", (int)PDG::muon).setDescription("Lepton pair considered");
+      desc.add<bool>("symmetrise", false).setDescription("Symmetrise along z the central system?");
+      return desc;
     }
   }  // namespace proc
 }  // namespace cepgen

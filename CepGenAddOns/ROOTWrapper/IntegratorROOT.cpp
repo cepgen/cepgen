@@ -28,7 +28,8 @@ namespace cepgen {
   class IntegratorROOT final : public Integrator {
   public:
     explicit IntegratorROOT(const ParametersList&);
-    static std::string description() { return "ROOT general purpose MC integrator"; }
+
+    static ParametersDescription description();
 
     void integrate(double&, double&) override;
 
@@ -52,10 +53,10 @@ namespace cepgen {
         func_([=](const double* x) -> double {
           return integrand_->eval(std::vector<double>(x, x + integrand_->size()));
         }),
-        type_(params.get<std::string>("type", "default")),
-        absTol_(params.get<double>("absTol", -1.)),
-        relTol_(params.get<double>("relTol", -1.)),
-        size_(params.get<int>("size", 0)) {
+        type_(params.get<std::string>("type")),
+        absTol_(params.get<double>("absTol")),
+        relTol_(params.get<double>("relTol")),
+        size_(params.get<int>("size")) {
     ROOT::Math::IntegratorMultiDim::Type type;
     if (type_ == "default")
       type = ROOT::Math::IntegratorMultiDim::Type::kDEFAULT;
@@ -88,6 +89,16 @@ namespace cepgen {
 
     result_ = result = integr_->Integral(min_.data(), max_.data());
     err_result_ = abserr = integr_->Error();
+  }
+
+  ParametersDescription IntegratorROOT::description() {
+    auto desc = Integrator::description();
+    desc.setDescription("ROOT general purpose MC integrator");
+    desc.add<std::string>("type", "default");
+    desc.add<double>("absTol", -1.);
+    desc.add<double>("relTol", -1.);
+    desc.add<int>("size", 0);
+    return desc;
   }
 }  // namespace cepgen
 

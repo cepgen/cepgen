@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,11 +34,11 @@
 
 namespace cepgen {
   Generator::Generator(bool safe_mode) : parameters_(new Parameters) {
-    CG_DEBUG("Generator:init") << "Generator initialized";
     static bool init = false;
     if (!init) {
       initialise(safe_mode);
       init = true;
+      CG_DEBUG("Generator:init") << "Generator initialised";
     }
     //--- random number initialization
     std::chrono::system_clock::time_point time = std::chrono::system_clock::now();
@@ -99,11 +99,9 @@ namespace cepgen {
     CG_TICKER(parameters_->timeKeeper());
 
     if (!integ) {
-      if (!parameters_->integrator)
-        throw CG_FATAL("Generator:integrate") << "No integrator parameters found!";
-      if (parameters_->integrator->name<std::string>().empty())
-        parameters_->integrator->setName<std::string>("Vegas");
-      integ = IntegratorFactory::get().build(*parameters_->integrator);
+      if (parameters_->par_integrator.name<std::string>().empty())
+        parameters_->par_integrator.setName<std::string>("Vegas");
+      integ = IntegratorFactory::get().build(parameters_->par_integrator);
     }
     integrator_ = std::move(integ);
     if (!worker_)
@@ -129,6 +127,8 @@ namespace cepgen {
     CG_DEBUG("Generator:integrate") << "New integrator instance created for " << ndim << "-dimensional integration.";
 
     integrator_->integrate(result_, result_error_);
+
+    CG_DEBUG("Generator:integrate") << "Computed cross section: (" << result_ << " +- " << result_error_ << ") pb.";
 
     for (auto& mod : parameters_->eventModifiersSequence())
       mod->setCrossSection(result_, result_error_);

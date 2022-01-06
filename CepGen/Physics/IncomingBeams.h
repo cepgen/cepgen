@@ -23,7 +23,7 @@
 #include <memory>
 #include <vector>
 
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Physics/Modes.h"
 #include "CepGen/Physics/Momentum.h"
 
@@ -48,13 +48,14 @@ namespace cepgen {
   std::ostream& operator<<(std::ostream&, const Beam&);
 
   /// Beam/primary particle's kinematics
-  class IncomingBeams : private std::pair<Beam, Beam> {
+  class IncomingBeams : public SteeredObject<IncomingBeams>, private std::pair<Beam, Beam> {
   public:
     IncomingBeams() = default;
     explicit IncomingBeams(const ParametersList&);
 
+    static ParametersDescription description();
     /// List containing all parameters handled
-    ParametersList parameters() const;
+    const ParametersList& parameters() const override;
 
     const Beam& positive() const { return this->first; }
     Beam& positive() { return this->first; }

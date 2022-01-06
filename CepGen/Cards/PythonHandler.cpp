@@ -34,13 +34,11 @@
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/Process.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/String.h"
@@ -111,46 +109,34 @@ namespace cepgen {
       if (!cfg)
         throwPythonError("Failed to import the configuration card '" + filename + "'\n (parsed from '" + file + "')");
 
-      //--- additional libraries to load
-      if (PyObject_HasAttrString(cfg, ADDONS_NAME) == 1) {
-        PyObject* padd = PyObject_GetAttrString(cfg, ADDONS_NAME);  // new
-        if (padd) {
-          for (const auto& lib : getVector<std::string>(padd))
-            loadLibrary(lib);
-          Py_CLEAR(padd);
+      auto parseAttr = [this](PyObject* cfg, const std::string& name, std::function<void(PyObject*)> callback) {
+        if (PyObject_HasAttrString(cfg, name.c_str()) == 1) {
+          PyObject* pobj = PyObject_GetAttrString(cfg, name.c_str());  // new
+          if (pobj) {
+            callback(pobj);
+            Py_CLEAR(pobj);
+          }
         }
-      }
+      };
+
+      //--- additional libraries to load
+      parseAttr(cfg, ADDONS_NAME, [this](PyObject* padd) {
+        for (const auto& lib : getVector<std::string>(padd))
+          loadLibrary(lib);
+      });
 
       //--- timekeeper definition
-      if (PyObject_HasAttrString(cfg, TIMER_NAME) == 1) {
-        PyObject* ptim = PyObject_GetAttrString(cfg, TIMER_NAME);  // new
-        if (ptim) {
-          rt_params_->setTimeKeeper(new utils::TimeKeeper);
-          Py_CLEAR(ptim);
-        }
-      }
+      // (currently, does not parse the object, just check its presence)
+      parseAttr(cfg, TIMER_NAME, [this](PyObject*) { rt_params_->setTimeKeeper(new utils::TimeKeeper); });
 
       //--- general particles definition
-      if (PyObject_HasAttrString(cfg, MCD_NAME) == 1) {
-        PyObject* ppdg = PyObject_GetAttrString(cfg, MCD_NAME);  // new
-        if (ppdg) {
-          pdg::MCDFileParser::parse(get<std::string>(ppdg).c_str());
-          Py_CLEAR(ppdg);
-        }
-      }
+      parseAttr(cfg, MCD_NAME, [this](PyObject* ppdg) { pdg::MCDFileParser::parse(get<std::string>(ppdg).c_str()); });
 
       //--- additional particles definition
-      if (PyObject_HasAttrString(cfg, PDGLIST_NAME) == 1) {
-        PyObject* pextp = PyObject_GetAttrString(cfg, PDGLIST_NAME);  // new
-        if (pextp) {
-          parseExtraParticles(pextp);
-          Py_CLEAR(pextp);
-        }
-      }
+      parseAttr(cfg, PDGLIST_NAME, [this](PyObject* pextp) { parseExtraParticles(pextp); });
 
       //--- process definition
-      if (PyObject_HasAttrString(cfg, PROCESS_NAME)) {
-        PyObject* process = PyObject_GetAttrString(cfg, PROCESS_NAME);  // new
+      parseAttr(cfg, PROCESS_NAME, [this, &file](PyObject* process) {
         //--- list of process-specific parameters
         ParametersList proc_params;
         fillParameter(process, "processParameters", proc_params);
@@ -173,70 +159,27 @@ namespace cepgen {
         if (pout_kinematics)
           pkin += get<ParametersList>(pout_kinematics);
 
-        rt_params_->kinematics = Kinematics(pkin);
+        rt_params_->par_kinematics += pkin;
         if (proc_params.has<int>("mode"))
-          rt_params_->kinematics.incomingBeams().setMode(proc_params.getAs<int, mode::Kinematics>("mode"));
+          rt_params_->par_kinematics.set<int>("mode", proc_params.get<int>("mode"));
 
         //--- taming functions
         PyObject* ptam = element(process, "tamingFunctions");  // borrowed
         if (ptam)
           for (const auto& p : getVector<ParametersList>(ptam))
             rt_params_->addTamingFunction(utils::FunctionalFactory::get().build("ROOT", p));
+      });
 
-        Py_CLEAR(process);
-      } /*else
-        throwPythonError("Failed to extract a '" + std::string(PROCESS_NAME) +
-                         "' keyword from the configuration card '" + file + "'!");*/
-
-      if (PyObject_HasAttrString(cfg, LOGGER_NAME) == 1) {
-        PyObject* plog = PyObject_GetAttrString(cfg, LOGGER_NAME);  // new
-        if (plog) {
-          parseLogging(plog);
-          Py_CLEAR(plog);
-        }
-      }
+      parseAttr(cfg, LOGGER_NAME, [this](PyObject* plog) { parseLogging(plog); });
 
       //--- hadroniser parameters (legacy)
-      if (PyObject_HasAttrString(cfg, HADR_NAME) == 1) {
-        PyObject* phad = PyObject_GetAttrString(cfg, HADR_NAME);  // new
-        if (phad) {
-          parseHadroniser(phad);
-          Py_CLEAR(phad);
-        }
-      }
-
-      if (PyObject_HasAttrString(cfg, EVT_MOD_SEQ_NAME) == 1) {
-        PyObject* pmod_seq = PyObject_GetAttrString(cfg, EVT_MOD_SEQ_NAME);  // new
-        if (pmod_seq) {
-          parseEventModifiers(pmod_seq);
-          Py_CLEAR(pmod_seq);
-        }
-      }
+      parseAttr(cfg, HADR_NAME, [this](PyObject* phad) { parseHadroniser(phad); });
+      parseAttr(cfg, EVT_MOD_SEQ_NAME, [this](PyObject* pmod_seq) { parseEventModifiers(pmod_seq); });
 
       //--- generation parameters
-      if (PyObject_HasAttrString(cfg, INTEGRATOR_NAME) == 1) {
-        PyObject* pint = PyObject_GetAttrString(cfg, INTEGRATOR_NAME);  // new
-        if (pint) {
-          parseIntegrator(pint);
-          Py_CLEAR(pint);
-        }
-      }
-
-      if (PyObject_HasAttrString(cfg, GENERATOR_NAME) == 1) {
-        PyObject* pgen = PyObject_GetAttrString(cfg, GENERATOR_NAME);  // new
-        if (pgen) {
-          parseGenerator(pgen);
-          Py_CLEAR(pgen);
-        }
-      }
-
-      if (PyObject_HasAttrString(cfg, OUTPUT_NAME) == 1) {
-        PyObject* pout = PyObject_GetAttrString(cfg, OUTPUT_NAME);  // new
-        if (pout) {
-          parseOutputModules(pout);
-          Py_CLEAR(pout);
-        }
-      }
+      parseAttr(cfg, INTEGRATOR_NAME, [this](PyObject* pint) { parseIntegrator(pint); });
+      parseAttr(cfg, GENERATOR_NAME, [this](PyObject* pgen) { parseGenerator(pgen); });
+      parseAttr(cfg, OUTPUT_NAME, [this](PyObject* pout) { parseOutputModules(pout); });
 
       //--- finalisation
       Py_CLEAR(cfg);
@@ -263,7 +206,7 @@ namespace cepgen {
     void PythonHandler::parseIntegrator(PyObject* integr) {
       if (!PyDict_Check(integr))
         throwPythonError("Integrator object should be a dictionary!");
-      *rt_params_->integrator = get<ParametersList>(integr);
+      rt_params_->par_integrator += get<ParametersList>(integr);
     }
 
     void PythonHandler::parseGenerator(PyObject* gen) {
@@ -271,7 +214,7 @@ namespace cepgen {
         throwPythonError("Generation information object should be a dictionary!");
       auto plist = get<ParametersList>(gen);
       plist.set<int>("maxgen", plist.get<int>("numEvents"));
-      rt_params_->generation() = Parameters::Generation(plist);
+      rt_params_->generation().setParameters(plist);
     }
 
     void PythonHandler::parseEventModifiers(PyObject* mod) {
@@ -343,6 +286,12 @@ namespace cepgen {
             << "Adding a new particle with name \"" << part.name << "\" to the PDG dictionary.";
         PDG::get().define(part);
       }
+    }
+
+    ParametersDescription PythonHandler::description() {
+      auto desc = Handler::description();
+      desc.setDescription("Python 2/3 cards parser");
+      return desc;
     }
   }  // namespace card
 }  // namespace cepgen

@@ -33,7 +33,8 @@ namespace mstw {
   public:
     /// Grid MSTW structure functions evaluator
     explicit Grid(const cepgen::ParametersList&);
-    static std::string description() { return "MSTW(grid)"; }
+
+    static cepgen::ParametersDescription description();
 
     /// Grid header information as parsed from the file
     struct header_t {
@@ -91,7 +92,7 @@ namespace mstw {
   Grid::Grid(const cepgen::ParametersList& params)
       : cepgen::strfun::Parameterisation(params), cepgen::GridHandler<2, 2>(cepgen::GridType::logarithmic) {
     {  // file readout part
-      const std::string grid_path = params_.get<std::string>("gridPath", DEFAULT_MSTW_GRID_PATH);
+      const std::string grid_path = params_.get<std::string>("gridPath");
       std::ifstream file(grid_path, std::ios::binary | std::ios::in);
       if (!file.is_open())
         throw CG_FATAL("MSTW") << "Failed to load grid file \"" << grid_path << "\"!";
@@ -140,6 +141,13 @@ namespace mstw {
     return *this;
   }
 
+  cepgen::ParametersDescription Grid::description() {
+    auto desc = Parameterisation::description();
+    desc.setDescription("MSTW grid");
+    desc.add<std::string>("gridPath", DEFAULT_MSTW_GRID_PATH).setDescription("Path to the MSTW grid content");
+    return desc;
+  }
+
   std::ostream& operator<<(std::ostream& os, const Grid::sfval_t& val) {
     return os << cepgen::utils::format(
                "xbj = %.4f\tQ² = %.5e GeV²\tF_2 = % .6e\tF_1 = % .6e", val.xbj, val.q2, val.f2, val.fl);
@@ -178,4 +186,4 @@ namespace mstw {
   }
 }  // namespace mstw
 
-REGISTER_STRFUN(MSTWgrid, mstw::Grid)
+REGISTER_STRFUN(strfun::Type::MSTWgrid, MSTWgrid, mstw::Grid)

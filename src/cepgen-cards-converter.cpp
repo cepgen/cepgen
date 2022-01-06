@@ -27,16 +27,11 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   string input_config, output_config;
-  bool debug;
 
   cepgen::ArgumentsParser parser(argc, argv);
   parser.addArgument("input,i", "input configuration", &input_config)
       .addArgument("output,o", "output output", &output_config)
-      .addOptionalArgument("debug,d", "debugging mode", &debug, false)
       .parse();
-
-  if (debug)
-    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debug;
 
   cepgen::initialise();
 

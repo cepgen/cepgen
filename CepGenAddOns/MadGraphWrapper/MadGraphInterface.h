@@ -22,7 +22,7 @@
 #include <memory>
 #include <string>
 
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Utils/Filesystem.h"
 
@@ -33,6 +33,8 @@ namespace cepgen {
   class MadGraphInterface {
   public:
     MadGraphInterface(const ParametersList&);
+
+    static ParametersDescription description();
 
     std::string run() const;
 

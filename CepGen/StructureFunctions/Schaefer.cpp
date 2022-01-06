@@ -31,7 +31,8 @@ namespace cepgen {
     public:
       /// User-steered Schäfer hybrid structure functions calculator
       explicit Schaefer(const ParametersList&);
-      static std::string description() { return "LUXlike structure functions"; }
+
+      static ParametersDescription description();
 
       Schaefer& eval(double xbj, double q2) override;
       std::string describe() const override;
@@ -60,15 +61,20 @@ namespace cepgen {
 
     Schaefer::Schaefer(const ParametersList& params)
         : Parameterisation(params),
-          q2_cut_(params.get<double>("Q2cut", 9.)),
-          w2_lim_(params.get<std::vector<double> >("W2limits", {3., 4.})),
-          higher_twist_(params.get<bool>("higherTwist", true)),
-          resonances_model_(StructureFunctionsFactory::get().build(
-              params.get<ParametersList>("resonancesSF", ParametersList().setName<int>((int)Type::ChristyBosted)))),
-          perturbative_model_(StructureFunctionsFactory::get().build(
-              params.get<ParametersList>("perturbativeSF", ParametersList().setName<int>((int)Type::MSTWgrid)))),
-          continuum_model_(StructureFunctionsFactory::get().build(
-              params.get<ParametersList>("continuumSF", ParametersList().setName<int>((int)Type::GD11p)))) {}
+          q2_cut_(params.get<double>("Q2cut")),
+          w2_lim_(params.get<std::vector<double> >("W2limits")),
+          higher_twist_(params.get<bool>("higherTwist")) {
+      const auto& res_params = params_.get<ParametersList>("resonancesSF");
+      const auto& pert_params = params_.get<ParametersList>("perturbativeSF");
+      const auto& cont_params = params_.get<ParametersList>("continuumSF");
+      CG_DEBUG("Schaefer") << "LUXlike structure functions built using:\n"
+                           << " *)   resonances: " << res_params << ",\n"
+                           << " *) perturbative: " << pert_params << ",\n"
+                           << " *)    continuum: " << cont_params << ".";
+      resonances_model_ = StructureFunctionsFactory::get().build(res_params);
+      perturbative_model_ = StructureFunctionsFactory::get().build(pert_params);
+      continuum_model_ = StructureFunctionsFactory::get().build(cont_params);
+    }
 
     std::string Schaefer::describe() const {
       std::ostringstream os;
@@ -86,9 +92,9 @@ namespace cepgen {
       CG_DEBUG("LUXlike") << "LUXlike structure functions evaluator successfully initialised.\n"
                           << " * Q² cut:             " << q2_cut_ << " GeV²\n"
                           << " * W² ranges:          " << w2_lim_.at(0) << " GeV² / " << w2_lim_.at(1) << " GeV²\n"
-                          << " * resonance model:    " << *resonances_model_ << "\n"
+                          << " *   resonances model: " << *resonances_model_ << "\n"
                           << " * perturbative model: " << *perturbative_model_ << "\n"
-                          << " * continuum model:    " << *continuum_model_ << "\n"
+                          << " *    continuum model: " << *continuum_model_ << "\n"
                           << " * higher-twist?       " << std::boolalpha << higher_twist_;
       inv_omega_range_ = 1. / (w2_lim_.at(1) - w2_lim_.at(0));
       initialised_ = true;
@@ -149,7 +155,22 @@ namespace cepgen {
       const double omega2 = omega * omega;
       return 2. * omega2 - omega * omega;
     }
+
+    ParametersDescription Schaefer::description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("LUXlike structure functions");
+      desc.add<double>("Q2cut", 9.);
+      desc.add<std::vector<double> >("W2limits", {3., 4.});
+      desc.add<bool>("higherTwist", true);
+      desc.add<ParametersDescription>("resonancesSF",
+                                      StructureFunctionsFactory::get().describeParameters((int)Type::ChristyBosted));
+      desc.add<ParametersDescription>("perturbativeSF",
+                                      StructureFunctionsFactory::get().describeParameters((int)Type::MSTWgrid));
+      desc.add<ParametersDescription>("continuumSF",
+                                      StructureFunctionsFactory::get().describeParameters((int)Type::GD11p));
+      return desc;
+    }
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(Schaefer, strfun::Schaefer)
+REGISTER_STRFUN(strfun::Type::Schaefer, Schaefer, strfun::Schaefer)

@@ -41,7 +41,8 @@ namespace cepgen {
       explicit Partonic(const ParametersList& params = ParametersList());
       /// Build a calculator from a set, its member, and the contributing quarks
       explicit Partonic(const char* set, unsigned short member = 0, const Mode& mode = Mode::full);
-      static std::string description() { return "Partonic structure functions"; }
+
+      static ParametersDescription description();
 
       Partonic& eval(double xbj, double q2) override;
       std::string describe() const override;
@@ -86,11 +87,11 @@ namespace cepgen {
 
     Partonic::Partonic(const ParametersList& params)
         : Parameterisation(params),
-          pdf_set_(params.get<std::string>("pdfSet", "cteq6")),
-          num_flavours_(params.get<int>("numFlavours", 4)),
-          pdf_code_(params.get<int>("pdfCode", 0)),
-          pdf_member_(params.get<int>("pdfMember", 0)),
-          mode_(params.getAs<int, Mode>("mode", Mode::full)) {}
+          pdf_set_(params.get<std::string>("pdfSet")),
+          num_flavours_(params.get<int>("numFlavours")),
+          pdf_code_(params.get<int>("pdfCode")),
+          pdf_member_(params.get<int>("pdfMember")),
+          mode_(params.getAs<int, Mode>("mode")) {}
 
     Partonic::Partonic(const char* set, unsigned short member, const Mode& mode)
         : Parameterisation(ParametersList().setName<int>((int)Type::Partonic)),
@@ -208,6 +209,17 @@ namespace cepgen {
       }
       return *this;
     }
+
+    ParametersDescription Partonic::description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("Partonic structure functions");
+      desc.add<std::string>("pdfSet", "cteq6").setDescription("PDF modelling to be considered");
+      desc.add<int>("numFlavours", 4).setDescription("Number of parton flavours to consider in summation");
+      desc.add<int>("pdfCode", 0);
+      desc.add<int>("pdfMember", 0);
+      desc.add<int>("mode", (int)Mode::full);
+      return desc;
+    }
   }  // namespace strfun
 }  // namespace cepgen
 
@@ -215,4 +227,4 @@ namespace cepgen {
 #undef LHAPDF_GE_6
 #endif
 
-REGISTER_STRFUN(Partonic, strfun::Partonic)
+REGISTER_STRFUN(strfun::Type::Partonic, Partonic, strfun::Partonic)

@@ -44,7 +44,8 @@ namespace cepgen {
     public:
       explicit ProMCHandler(const ParametersList&);
       ~ProMCHandler();
-      static std::string description() { return "ProMC file output module"; }
+
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override;
       void setCrossSection(double cross_section, double err) override {
@@ -66,9 +67,9 @@ namespace cepgen {
 
     ProMCHandler::ProMCHandler(const ParametersList& params)
         : ExportModule(params),
-          file_(new ProMCBook(params.get<std::string>("filename", "output.promc").c_str(), "w")),
-          compress_evt_(params.get<bool>("compress", false)),
-          log_file_path_(params.get<std::string>("logFile", "logfile.txt")),
+          file_(new ProMCBook(params.get<std::string>("filename").c_str(), "w")),
+          compress_evt_(params.get<bool>("compress")),
+          log_file_path_(params.get<std::string>("logFile")),
           log_file_(log_file_path_) {}
 
     ProMCHandler::~ProMCHandler() {
@@ -148,6 +149,15 @@ namespace cepgen {
         part->add_t(0);
       }
       file_->write(event);
+    }
+
+    ParametersDescription ProMCHandler::description() {
+      auto desc = ExportModule::description();
+      desc.setDescription("ProMC file output module");
+      desc.add<std::string>("filename", "output.promc");
+      desc.add<bool>("compress", false);
+      desc.add<std::string>("logFile", "logfile.txt");
+      return desc;
     }
   }  // namespace io
 }  // namespace cepgen
