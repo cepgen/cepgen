@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -51,6 +51,11 @@ namespace cepgen {
     ParametersDescription& setDescription(const std::string& descr);
     /// Description of this parameter (or parameters collection)
     const std::string& description() const { return mod_descr_; }
+    /// This parameters is a collection of sub-parameters
+    ParametersDescription& setParametersVector(bool pv = true) {
+      is_vec_params_ = pv;
+      return *this;
+    }
     /// Add the description to a new parameter
     template <typename T>
     ParametersDescription& add(const std::string& name, const T& def) {
@@ -79,7 +84,7 @@ namespace cepgen {
     ParametersDescription steer(const ParametersList&) const;
 
     /// Parameter type
-    enum struct Type { Value, Parameters, Module };
+    enum struct Type { Value, Parameters, Module, ParametersVector };
     /// Human-readable description of a parameter type
     friend std::ostream& operator<<(std::ostream&, const Type&);
     /// Get the type of parameter considered
@@ -87,6 +92,7 @@ namespace cepgen {
 
   private:
     std::string mod_key_, mod_descr_;
+    bool is_vec_params_{false};
     std::map<std::string, ParametersDescription> obj_descr_;
   };
   template <>

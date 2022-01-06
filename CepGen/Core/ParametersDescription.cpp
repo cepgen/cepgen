@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -72,6 +72,8 @@ namespace cepgen {
   ParametersDescription::Type ParametersDescription::type() const {
     if (obj_descr_.empty())
       return Type::Value;
+    if (is_vec_params_)
+      return Type::ParametersVector;
     const auto& mod_name = ParametersList::getString(ParametersList::MODULE_NAME);
     if (mod_name.empty())
       return Type::Parameters;
@@ -89,22 +91,43 @@ namespace cepgen {
       os << utils::colourise("Parameters", utils::Colour::none, utils::Modifier::italic | utils::Modifier::underline)
          << " collection";
     else if (pdtype == Type::Module)
-      os << utils::boldify(mod_name + " module");
+      os << utils::boldify(mod_name) << " module";
     // write human-readable description (if exists)
     if (!mod_descr_.empty())
       os << " (" << utils::colourise(mod_descr_, utils::Colour::none, utils::Modifier::italic) << ")";
-    if (!keys.empty())
-      os << " with parameters:";
-    // write list of parameters (if has some)
-    for (const auto& key : keys) {
-      os << "\n" << sep(offset + 1) << utils::colourise(key, utils::Colour::none, utils::Modifier::underline) << " ";
-      if (obj_descr_.count(key) > 0) {
-        os << "=";
-        if (obj_descr_.at(key).type() == Type::Value)
-          os << " " << ParametersList::getString(key);
-        const auto& descr = obj_descr_.at(key).describe(offset + 1);
-        if (!utils::trim(descr).empty())
-          os << " " << descr;
+    if (!keys.empty()) {
+      if (pdtype == Type::Module)
+        os << " with parameters";
+      if (pdtype != Type::ParametersVector)
+        os << ":";
+      // write list of parameters (if has some)
+      for (const auto& key : keys) {
+        os << "\n" << sep(offset + 1) << utils::colourise(key, utils::Colour::none, utils::Modifier::underline) << " ";
+        if (obj_descr_.count(key) > 0) {
+          os << "=";
+          const auto& obj_type = obj_descr_.at(key).type();
+          if (obj_type == Type::Value)
+            os << " " << ParametersList::getString(key);
+          if (obj_type == Type::ParametersVector) {
+            os << " "
+               << utils::colourise("Vector of parameters collections",
+                                   utils::Colour::none,
+                                   utils::Modifier::italic | utils::Modifier::underline);
+            const auto& params = ParametersList::get<std::vector<ParametersList> >(key);
+            if (params.empty()) {
+              os << " with expected content: " << obj_descr_.at(key).describe(offset + 1);
+            } else {
+              std::string sepa;
+              for (const auto& param : params)
+                os << sepa << sep(offset + 2) << obj_descr_.at(key).steer(param).describe(offset + 1) << ",",
+                    sepa = "\n";
+            }
+          } else {
+            const auto& descr = obj_descr_.at(key).describe(offset + 1);
+            if (!utils::trim(descr).empty())
+              os << " " << descr;
+          }
+        }
       }
     }
     return os.str();
@@ -143,6 +166,7 @@ namespace cepgen {
                                                                                const std::vector<ParametersList>& def) {
     if (obj_descr_.count(name) == 0)
       obj_descr_[name] = desc;
+    obj_descr_[name].setParametersVector(true);
     ParametersList::set<std::vector<ParametersList> >(name, {});
     for (const auto& val : def)
       ParametersList::operator[]<std::vector<ParametersList> >(name).emplace_back(val);
@@ -208,6 +232,8 @@ namespace cepgen {
         return os << "Module";
       case ParametersDescription::Type::Parameters:
         return os << "Parameters";
+      case ParametersDescription::Type::ParametersVector:
+        return os << "Parameters vector";
     }
     return os << "{invalid}";
   }
