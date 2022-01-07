@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,9 @@ namespace kmr {
   }
 
   GluonGrid::GluonGrid(const cepgen::ParametersList& params)
-      : cepgen::GridHandler<3, 1>(cepgen::GridType::linear),  // grid is already logarithmic
+      : cepgen::GridHandler<3, 1>(cepgen::GridType::linear),
+        // grid is already logarithmic
+        SteeredObject(params),
         grid_path_(steer<std::string>("path")) {
     CG_INFO("GluonGrid") << "Building the KMR grid evaluator.";
 

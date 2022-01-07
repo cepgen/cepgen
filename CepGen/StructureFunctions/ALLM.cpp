@@ -31,7 +31,7 @@ namespace cepgen {
     /// \f$F_{2,L}\f$ parameterisation by Abramowicz, Levin, Levy, and Maor \cite Abramowicz:1991xz\cite Abramowicz:1997ms
     class ALLM : public Parameterisation {
     public:
-      explicit ALLM(const ParametersList& params = ParametersList());
+      explicit ALLM(const ParametersList&);
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
