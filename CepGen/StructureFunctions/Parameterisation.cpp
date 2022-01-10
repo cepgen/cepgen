@@ -56,6 +56,8 @@ namespace cepgen {
 
     Parameterisation& Parameterisation::operator=(const Parameterisation& sf) {
       F2 = sf.F2, FL = sf.FL;
+      W1 = sf.W1, W2 = sf.W2;
+      FE = sf.FE, FM = sf.FM;
       old_vals_ = sf.old_vals_;
       return *this;
     }

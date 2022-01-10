@@ -24,6 +24,8 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGenAddOns/ROOTWrapper/ROOTCanvas.h"
@@ -33,13 +35,14 @@ using namespace std;
 int main(int argc, char* argv[]) {
   vector<int> strfun_types;
   double q2, xmin, xmax;
-  int num_points;
+  int var, num_points;
   string output_file;
   bool logx, logy;
 
   cepgen::ArgumentsParser(argc, argv)
       .addArgument("sf,s", "structure functions modelling", &strfun_types)
       .addOptionalArgument("q2,q", "parton virtuality (GeV^2)", &q2, 10.)
+      .addOptionalArgument("var,t", "variable to study (0=xBj, 1=w)", &var, 0)
       .addOptionalArgument("xmax,m", "minimal Bjorken x", &xmin, 1.e-7)
       .addOptionalArgument("xmax,M", "maximal Bjorken x", &xmax, 1.)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
@@ -52,6 +55,21 @@ int main(int argc, char* argv[]) {
 
   cepgen::initialise();
 
+  string var_name;
+  switch (var) {
+    case 0:
+      var_name = "x_{Bj}";
+      break;
+    case 1:
+      var_name = "w (GeV)";
+      break;
+    case 2:
+      var_name = "w^{2} (GeV^{2})";
+      break;
+    default:
+      throw CG_FATAL("main") << "Unsupported variable to be plotted!";
+  }
+
   ofstream out(output_file);
   out << "# structure functions: ";
   string sep;
@@ -60,15 +78,25 @@ int main(int argc, char* argv[]) {
   out << "\n"
       << "# x in [" << xmin << ", " << xmax << "]\n";
 
+  const float mp = cepgen::PDG::get().mass(2212), mp2 = mp * mp;
+
   vector<unique_ptr<cepgen::strfun::Parameterisation> > strfuns;
-  vector<TGraph*> g_strfuns_f2, g_strfuns_fl;
+  vector<TGraph*> g_strfuns_f2, g_strfuns_fl, g_strfuns_fe, g_strfuns_fm, g_strfuns_w1, g_strfuns_w2;
   for (const auto& sf_type : strfun_types) {
     auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(sf_type);
     const auto sf_name = cepgen::strfun::StructureFunctionsFactory::get().describe(sf_type);
     g_strfuns_f2.emplace_back(new TGraph);
-    (*g_strfuns_f2.rbegin())->SetTitle((sf_name + ";x_{Bj};F_{2}").c_str());
+    (*g_strfuns_f2.rbegin())->SetTitle((sf_name + ";" + var_name + ";F_{2}(" + var_name + ", Q^{2})").c_str());
     g_strfuns_fl.emplace_back(new TGraph);
-    (*g_strfuns_fl.rbegin())->SetTitle((sf_name + ";x_{Bj};F_{L}").c_str());
+    (*g_strfuns_fl.rbegin())->SetTitle((sf_name + ";" + var_name + ";F_{L}(" + var_name + ", Q^{2})").c_str());
+    g_strfuns_fe.emplace_back(new TGraph);
+    (*g_strfuns_fe.rbegin())->SetTitle((sf_name + ";" + var_name + ";F_{E}(" + var_name + ", Q^{2})").c_str());
+    g_strfuns_fm.emplace_back(new TGraph);
+    (*g_strfuns_fm.rbegin())->SetTitle((sf_name + ";" + var_name + ";F_{M}(" + var_name + ", Q^{2})").c_str());
+    g_strfuns_w1.emplace_back(new TGraph);
+    (*g_strfuns_w1.rbegin())->SetTitle((sf_name + ";" + var_name + ";W_{1}(" + var_name + ", Q^{2})").c_str());
+    g_strfuns_w2.emplace_back(new TGraph);
+    (*g_strfuns_w2.rbegin())->SetTitle((sf_name + ";" + var_name + ";W_{2}(" + var_name + ", Q^{2})").c_str());
     strfuns.emplace_back(move(sf));
   }
   for (int i = 0; i < num_points; ++i) {
@@ -77,10 +105,29 @@ int main(int argc, char* argv[]) {
     out << x << "\t";
     size_t j = 0;
     for (auto& sf : strfuns) {
-      const auto strfun = (*sf)(x, q2);
+      double xbj;
+      switch (var) {
+        case 0:
+          xbj = x;
+          break;
+        case 1:
+          xbj = cepgen::utils::xBj(q2, mp2, x * x);
+          break;
+        case 2:
+          xbj = cepgen::utils::xBj(q2, mp2, x);
+          break;
+        default:
+          xbj = 0.;
+          break;
+      }
+      const auto& strfun = (*sf)(xbj, q2);
       out << "\t" << strfun.F2 << "\t" << strfun.FL;
       g_strfuns_f2.at(j)->SetPoint(g_strfuns_f2.at(j)->GetN(), x, strfun.F2);
       g_strfuns_fl.at(j)->SetPoint(g_strfuns_fl.at(j)->GetN(), x, strfun.FL);
+      g_strfuns_fe.at(j)->SetPoint(g_strfuns_fe.at(j)->GetN(), x, strfun.FE);
+      g_strfuns_fm.at(j)->SetPoint(g_strfuns_fm.at(j)->GetN(), x, strfun.FM);
+      g_strfuns_w1.at(j)->SetPoint(g_strfuns_w1.at(j)->GetN(), x, strfun.W1);
+      g_strfuns_w2.at(j)->SetPoint(g_strfuns_w2.at(j)->GetN(), x, strfun.W2);
       ++j;
     }
     out << "\n";
@@ -88,8 +135,13 @@ int main(int argc, char* argv[]) {
   CG_LOG << "Scan written in \"" << output_file << "\".";
   out.close();
 
-  for (auto& plt : map<const char*, vector<TGraph*> >{{"F2", g_strfuns_f2}, {"FL", g_strfuns_fl}}) {
-    cepgen::ROOTCanvas c(plt.first, Form("Q^{2} = %g GeV^{2}", q2));
+  for (auto& plt : map<string, vector<TGraph*> >{{"f2", g_strfuns_f2},
+                                                 {"fl", g_strfuns_fl},
+                                                 {"fe", g_strfuns_fe},
+                                                 {"fm", g_strfuns_fm},
+                                                 {"w1", g_strfuns_w1},
+                                                 {"w2", g_strfuns_w2}}) {
+    cepgen::ROOTCanvas c(("sfcomp_" + plt.first).c_str(), Form("Q^{2} = %g GeV^{2}", q2));
     TMultiGraph mg;
     if (logx)
       c.SetLogx();
