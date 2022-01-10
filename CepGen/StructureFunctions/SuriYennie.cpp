@@ -31,12 +31,12 @@ namespace cepgen {
       /// User-steered Suri-Yennie continuum structure functions calculator
       explicit SuriYennie(const ParametersList& params)
           : Parameterisation(params),
-            C1_(steer<double>("C1")),
-            C2_(steer<double>("C2")),
-            D1_(steer<double>("D1")),
+            c1_(steer<double>("C1")),
+            c2_(steer<double>("C2")),
+            d1_(steer<double>("D1")),
             rho2_(steer<double>("rho2")),
-            Cp_(steer<double>("Cp")),
-            Bp_(steer<double>("Bp")) {}
+            cp_(steer<double>("Cp")),
+            bp_(steer<double>("Bp")) {}
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
@@ -59,8 +59,8 @@ namespace cepgen {
         const double inv_q2 = 1. / q2;
 
         FM = inv_q2 *
-             (C1_ * dm2 * pow(rho2_ / mq, 2) + C2_ * mp2_ * pow(1. - x_pr, 4) / (1. + x_pr * (x_pr * Cp_ - 2. * Bp_)));
-        FE = (tau * FM + D1_ * dm2 * q2 * rho2_ / mp2_ * pow(dm2 / mq / en, 2)) / (1. + nu * nu * inv_q2);
+             (c1_ * dm2 * pow(rho2_ / mq, 2) + c2_ * mp2_ * pow(1. - x_pr, 4) / (1. + x_pr * (x_pr * cp_ - 2. * bp_)));
+        FE = (tau * FM + d1_ * dm2 * q2 * rho2_ / mp2_ * pow(dm2 / mq / en, 2)) / (1. + nu * nu * inv_q2);
 
         W1 = 0.5 * FM * q2 / mp_;
         W2 = 2. * mp_ * FE;
@@ -69,10 +69,10 @@ namespace cepgen {
       }
 
     private:
-      double C1_{0.}, C2_{0.};
-      double D1_{0.};
+      double c1_{0.}, c2_{0.};
+      double d1_{0.};
       double rho2_{0.};
-      double Cp_{0.}, Bp_{0.};
+      double cp_{0.}, bp_{0.};
     };
 
     class SuriYennieAlt final : public SuriYennie {
