@@ -34,9 +34,10 @@ namespace cepgen {
       Shamov& eval(double xbj, double q2) override;
 
       double W1{0.}, W2{0.};
-      bool resonant{false};
 
     private:
+      static constexpr double prefac_ =
+          2. * M_PI * M_PI * constants::ALPHA_EM * constants::GEVM2_TO_PB * 1e-9;  // pb/GeV -> mb/GeV
       static constexpr std::array<float, 19> gmq_ = {{0.000,
                                                       0.200,
                                                       0.300,
@@ -138,8 +139,6 @@ namespace cepgen {
            0.982, 0.983, 0.984, 0.986, 0.987, 0.988, 0.988, 0.989, 0.989, 0.990, 0.991, 0.991, 0.991, 0.992, 0.992,
            0.992, 0.993, 0.993, 0.993, 0.993, 0.994, 0.994, 0.994, 0.994, 0.995, 0.995, 0.995, 0.995, 0.995, 0.996,
            0.996, 0.996, 1.000, 1.000, 1.000, 1.000}};
-      static constexpr std::array<float, 2> q20_ = {{0.36, 0.65}};
-      static constexpr std::array<float, 2> r_power_ = {{0.52, 0.71}};
 
       const enum class Mode {
         SuriYennie = 0,  ///< Suri & Yennie
@@ -161,16 +160,18 @@ namespace cepgen {
       size_t fit_model_;
       const double gm0_;
       const double gmb_;
+      const double q20_;
+      const double r_power_;
       const double lowq2_;
 
       GridHandler<1, 2> sigma_grid_{GridType::linear};
       GridHandler<1, 1> gm_grid_{GridType::linear};
       std::unique_ptr<Parameterisation> sy_sf_;
+      bool non_resonant_{true};
     };
 
     constexpr std::array<float, 19> Shamov::gmq_, Shamov::gmv_;
     constexpr std::array<float, 291> Shamov::gp_en_, Shamov::gp_cs_, Shamov::gp_nr_;
-    constexpr std::array<float, 2> Shamov::q20_, Shamov::r_power_;
 
     Shamov::Shamov(const ParametersList& params)
         : Parameterisation(params),
@@ -178,12 +179,11 @@ namespace cepgen {
           fit_model_(steer<int>("fitModel")),
           gm0_(steer<double>("gm0")),
           gmb_(steer<double>("gmb")),
+          q20_(steer<double>("q20")),
+          r_power_(steer<double>("rPower")),
           lowq2_(steer<double>("lowQ2")),
           sy_sf_(strfun::StructureFunctionsFactory::get().build((int)strfun::Type::SuriYennie,
                                                                 steer<ParametersList>("syParams"))) {
-      if (fit_model_ > q20_.size())
-        throw CG_FATAL("Shamov") << "Invalid fit modelling requested!";
-
       //----- initialise the interpolation grids
 
       //--- grid E -> (cross section, norm)
@@ -195,17 +195,16 @@ namespace cepgen {
       for (size_t i = 0; i < gmv_.size(); ++i)
         gm_grid_.insert({gmq_.at(i)}, {gmv_.at(i)});
       gm_grid_.init();
+      if (mode_ == Mode::SuriYennie || mode_ == Mode::RealAndSuriYennieNonRes || mode_ == Mode::RealResAndNonRes ||
+          mode_ == Mode::RealAndFitNonRes)
+        non_resonant_ = true;
     }
 
     Shamov& Shamov::eval(double xbj, double q2) {
       //--- Suri & Yennie structure functions
-      const auto sy_q2 = (*sy_sf_)(xbj, q2);
-
-      if (mode_ == Mode::SuriYennie) {
-        W1 = sy_q2.W1;
-        W2 = sy_q2.W2;
-        F2 = sy_q2.F2;
-        resonant = false;
+      const auto& sy_q2 = (*sy_sf_)(xbj, q2);
+      if (mode_ == Mode::SuriYennie) {  // trivial composite case
+        Parameterisation::operator=(sy_q2);
         return *this;
       }
 
@@ -214,23 +213,20 @@ namespace cepgen {
       const auto sigma = sigma_grid_.eval({mx});
       double sgp = sigma[0];  // cross section value at MX
 
-      resonant = !((mode_ == Mode::RealAndSuriYennieNonRes || (mode_ == Mode::RealAndFitNonRes && mx > 1.5) ||
-                    (mode_ == Mode::RealResAndNonRes || mode_ == Mode::RealAndFitNonRes))
-                   // && ( mx > sigma_grid_.max()[0] || rand()*1./RAND_MAX < sigma[1] )
-      );
+      if (mode_ == Mode::RealAndFitNonRes && mx > 1.5)
+        non_resonant_ = true;
+      //if (mx > sigma_grid_.max()[0] || rand() * 1. / RAND_MAX < sigma[1])
+      //  non_resonant_ = true;
 
       //--- q^2 dependence of sigma
       double Gm;
-      if (!resonant) {
-        // nonresonant
+      if (non_resonant_) {
         if (mode_ == Mode::RealAndFitNonRes)
           /// q^2 dependence of the non-resonant gamma-p cross section
           /// Some fit of the know e-p data. Good only for Q^2 < 6 GeV^2
-          Gm = pow(1. + pow(q2 / q20_[fit_model_], 2), -r_power_[fit_model_]);
-        else {
-          const auto sy_lowq2 = (*sy_sf_)(xbj, lowq2_);
-          Gm = sy_q2.W1 / sy_lowq2.W1;
-        }
+          Gm = pow(1. + pow(q2 / q20_, 2), -r_power_);
+        else
+          Gm = sy_q2.W1 / (*sy_sf_)(xbj, lowq2_).W1;
       } else {                        // resonant
         if (q2 >= gm_grid_.max()[0])  // above grid range
           Gm = gm0_ * exp(-gmb_ * q2);
@@ -241,10 +237,9 @@ namespace cepgen {
       sgp *= Gm;  // cross section with some q^2 dependence
 
       //--- for W -> cross section
-      const double prefac = 2. * M_PI * M_PI * constants::ALPHA_EM * constants::GEVM2_TO_PB * 1e-9;  // pb/GeV -> mb/GeV
-      const double s1 = prefac * 4. * mp_ / (mx2 - mp2_);                                            // mb/GeV
+      const double s1 = prefac_ * 4. * mp_ / (mx2 - mp2_);  // mb/GeV
       const double s2 =
-          prefac * (pow(mx2 - mp2_, 2) + 2. * (mx2 + mp2_) * q2 + q2 * q2) / mp_ / q2 / (mx2 - mp2_);  // mb/GeV
+          prefac_ * (pow(mx2 - mp2_, 2) + 2. * (mx2 + mp2_) * q2 + q2 * q2) / mp_ / q2 / (mx2 - mp2_);  // mb/GeV
       //---  ratio (\sigma_T+\sigma_L)/\sigma_T according to S & Y
       const double ratio = (s2 * sy_q2.W2) / (s1 * sy_q2.W1);
 
@@ -263,10 +258,14 @@ namespace cepgen {
     ParametersDescription Shamov::description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Shamov composite soft structure functions");
-      desc.add<int>("mode", (int)Mode::RealResAndNonRes);
+      desc.add<int>("mode", (int)Mode::RealResAndNonRes).setDescription("sub-structure functions choice");
       desc.add<int>("fitModel", 2);
-      desc.add<double>("gm0", 1.);
-      desc.add<double>("gmb", 0.984);
+      desc.add<double>("q20", 0.65 /* 0.36 */)
+          .setDescription("first parameter for non-resonant gamma-p cross section q^2 dependence");
+      desc.add<double>("rPower", 0.71 /* 0.52 */)
+          .setDescription("second parameter for non-resonant gamma-p cross section q^2 dependence");
+      desc.add<double>("gm0", 1.).setDescription("scaling factor for the magnetic form factor template fit");
+      desc.add<double>("gmb", 0.984).setDescription("exponential parameter for the magnetic form factor template fit");
       desc.add<double>("lowQ2", 1.e-7);
       return desc;
     }
