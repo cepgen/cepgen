@@ -25,6 +25,7 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/ResonanceObject.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
@@ -49,35 +50,21 @@ namespace cepgen {
 
       double resmod507(const Polarisation& pol, double w2, double q2) const;
 
-      class Resonance : public SteeredObject<Resonance> {
+      class Resonance : public ResonanceObject, public SteeredObject<Resonance> {
       public:
         explicit Resonance(const ParametersList& params)
-            : SteeredObject(params),
-              br_(steer<ParametersList>("branchingRatios")),
-              ang_mom_(steer<double>("angularMomentum")),
-              x02_(std::pow(steer<double>("x0"), 2)),
-              mass_(steer<double>("mass")),
-              width_(steer<double>("width")),
-              a0t_(steer<double>("A0T")),
-              a0l_(steer<double>("A0L")),
-              fit_pars_(steer<std::vector<double> >("fitParameters")),
-              mp_(PDG::get().mass(PDG::proton)),
-              mp2_(mp_ * mp_),
-              mpi2_(std::pow(PDG::get().mass(PDG::piZero), 2)),
-              meta2_(std::pow(PDG::get().mass(PDG::eta), 2)) {
+            : ResonanceObject(params),
+              SteeredObject<Resonance>(params),
+              a0t_(SteeredObject<Resonance>::steer<double>("A0T")),
+              a0l_(SteeredObject<Resonance>::steer<double>("A0L")),
+              fit_pars_(SteeredObject<Resonance>::steer<std::vector<double> >("fitParameters")) {
           if (fit_pars_.size() != 5)
             throw CG_FATAL("ChristyBosted:Resonance")
                 << "Invalid fit parameters multiplicity! " << fit_pars_.size() << " != 5.";
         }
 
         static ParametersDescription description() {
-          auto desc = ParametersDescription();
-          desc.setDescription("Set of physical properties for one resonance");
-          desc.add<ParametersDescription>("branchingRatios", BranchingRatios::description());
-          desc.add<double>("angularMomentum", 0.).setDescription("meson angular momentum");
-          desc.add<double>("x0", 0.).setDescription("damping parameter");
-          desc.add<double>("mass", 0.).setDescription("mass, in GeV/c^2");
-          desc.add<double>("width", 0.).setDescription("full width, in GeV");
+          auto desc = ResonanceObject::description();
           desc.add<double>("A0T", 0.);
           desc.add<double>("A0L", 0.);
           desc.add<std::vector<double> >("fitParameters", std::vector<double>(5, 0.));
@@ -116,9 +103,6 @@ namespace cepgen {
         }
 
       private:
-        double kr() const { return 0.5 * (mass_ * mass_ - mp2_) / mp_; }
-        double ecmr(double m2) const { return mass_ == 0 ? 0. : utils::energyFromW(mass_, mp2_, m2); }
-        double kcmr() const { return ecmr(0.); }
         double pcmr(double m2) const { return KinematicsBlock::mom(ecmr(m2), m2); }
         /// resonance Q^2 dependence
         double height(const Polarisation& pol, double q2) const {
@@ -163,55 +147,9 @@ namespace cepgen {
           return width_ * kcm2 / kcmr2 * (kcmr2 + x02_) / (kcm2 + x02_);
         }
 
-        /// Branching ratios container for resonance decay into single, double pion or eta states
-        const struct BranchingRatios : SteeredObject<BranchingRatios> {
-          explicit BranchingRatios(const ParametersList& params)
-              : SteeredObject(params),
-                singlepi(steer<double>("singlePi")),
-                doublepi(steer<double>("doublePi")),
-                eta(steer<double>("eta")) {
-            if (!valid())
-              CG_WARNING("ChristyBosted:Resonance:BranchingRatios")
-                  << "Invalid branching fractions. Sum = " << (singlepi + doublepi + eta) << " != 1.";
-          }
-
-          static ParametersDescription description() {
-            auto desc = ParametersDescription();
-            desc.add<double>("singlePi", 0.)
-                .setDescription("branching fraction for a resonance decay into a single pion");
-            desc.add<double>("doublePi", 0.)
-                .setDescription("branching fraction for a resonance decay into a pion pair");
-            desc.add<double>("eta", 0.).setDescription("branching fraction for a resonance decay into an eta");
-            return desc;
-          }
-
-          bool valid() const { return singlepi + doublepi + eta == 1.; }
-          /// single pion branching ratio
-          double singlepi;
-          /// double pion branching ratio
-          double doublepi;
-          /// eta meson branching ratio
-          double eta;
-        } br_;
-        /// meson angular momentum
-        const double ang_mom_;
-        /// squared damping parameter
-        const double x02_;
-        /// mass, in GeV/c2
-        const double mass_;
-        /// full width, in GeV
-        const double width_;
         const double a0t_;
         const double a0l_;
         const std::vector<double> fit_pars_;
-        /// proton mass, in GeV/c^2
-        const double mp_;
-        /// proton squared mass, in GeV^2/c^4
-        const double mp2_;
-        /// pion squared mass, in GeV^2/c^4
-        const double mpi2_;
-        /// eta meson squared mass, in GeV^2/c^4
-        const double meta2_;
       };
       /// Continuum parameterisation along one direction
       struct ContinuumDirection : SteeredObject<ContinuumDirection> {
@@ -371,7 +309,7 @@ namespace cepgen {
                    .set<ParametersList>(
                        "branchingRatios",
                        ParametersList().set<double>("singlePi", 1.).set<double>("doublePi", 0.).set<double>("eta", 0.))
-                   .set<double>("angularMomentum", 1.)
+                   .set<int>("angularMomentum", 1)
                    .set<double>("x0", 0.14462 /* 0.15 */)
                    .set<double>("mass", 1.2298)
                    .set<double>("width", 0.13573)
@@ -385,7 +323,7 @@ namespace cepgen {
                                             .set<double>("singlePi", 0.45)
                                             .set<double>("doublePi", 0.1)
                                             .set<double>("eta", 0.45))
-                   .set<double>("angularMomentum", 0.)
+                   .set<int>("angularMomentum", 0)
                    .set<double>("x0", 0.215)
                    .set<double>("mass", 1.5304)
                    .set<double>("width", 0.220)
@@ -399,7 +337,7 @@ namespace cepgen {
                                             .set<double>("singlePi", 0.65)
                                             .set<double>("doublePi", 0.35)
                                             .set<double>("eta", 0.))
-                   .set<double>("angularMomentum", 2.)
+                   .set<int>("angularMomentum", 2)
                    .set<double>("x0", 0.215)
                    .set<double>("mass", 1.5057)
                    .set<double>("width", 0.082956)
@@ -413,7 +351,7 @@ namespace cepgen {
                                             .set<double>("singlePi", 0.65)
                                             .set<double>("doublePi", 0.35)
                                             .set<double>("eta", 0.))
-                   .set<double>("angularMomentum", 3.)
+                   .set<int>("angularMomentum", 3)
                    .set<double>("x0", 0.215)
                    .set<double>("mass", 1.6980)
                    .set<double>("width", 0.095782)
@@ -425,7 +363,7 @@ namespace cepgen {
                    .set<ParametersList>(
                        "branchingRatios",
                        ParametersList().set<double>("singlePi", 0.4).set<double>("doublePi", 0.5).set<double>("eta", 0.1))
-                   .set<double>("angularMomentum", 0.)
+                   .set<int>("angularMomentum", 0)
                    .set<double>("x0", 0.215)
                    .set<double>("mass", 1.6650)
                    .set<double>("width", 0.10936)
@@ -439,7 +377,7 @@ namespace cepgen {
                                             .set<double>("singlePi", 0.65)
                                             .set<double>("doublePi", 0.35)
                                             .set<double>("eta", 0.))
-                   .set<double>("angularMomentum", 1.)
+                   .set<int>("angularMomentum", 1)
                    .set<double>("x0", 0.215)
                    .set<double>("mass", 1.4333)
                    .set<double>("width", 0.37944)
@@ -451,7 +389,7 @@ namespace cepgen {
                    .set<ParametersList>(
                        "branchingRatios",
                        ParametersList().set<double>("singlePi", 0.5).set<double>("doublePi", 0.5).set<double>("eta", 0.))
-                   .set<double>("angularMomentum", 3.)
+                   .set<int>("angularMomentum", 3)
                    .set<double>("x0", 0.215)
                    .set<double>("mass", 1.9341)
                    .set<double>("width", 0.380)
