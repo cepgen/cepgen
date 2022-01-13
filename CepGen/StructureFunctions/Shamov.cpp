@@ -240,19 +240,15 @@ namespace cepgen {
       //---  ratio (\sigma_T+\sigma_L)/\sigma_T according to S & Y
       const double ratio = (s2 * sy_sf_->W2(xbj, q2)) / (s1 * sy_sf_->W1(xbj, q2));
 
-      double w1, w2;
       if (mode_ == Mode::RealAndFitNonRes) {  // transverse sigma only
-        w1 = sgp / s1;
-        w2 = sgp * ratio / s2;
+        setW1(sgp / s1);
+        setW2(sgp * ratio / s2);
       } else {  // longitudinal + transverse component for sigma
-        w1 = sgp / ratio / s1;
-        w2 = sgp / s2;
+        setW1(sgp / ratio / s1);
+        setW2(sgp / s2);
       }
       const double nu = 0.5 * (q2 + mx2 - mp2_) / mp_;
-      const double f2 = W2(xbj, q2) * nu / mp_;
-      setF2(f2);
-      setW1(w1);
-      setW2(w2);
+      setF2(W2(xbj, q2) * nu / mp_);
       return *this;
     }
 
