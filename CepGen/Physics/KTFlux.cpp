@@ -55,14 +55,12 @@ namespace cepgen {
         const double denom = 1. / (q2 + mf2 - mi2);
         const double xbj = denom * q2;
         //--- proton structure functions
-        auto& str_fun = (*ff.structureFunctions())(xbj, q2);
         if (type == KTFlux::P_Photon_Inelastic) {
-          const double f_aux = str_fun.F2 * denom * qnorm * qnorm;
+          const double f_aux = ff.structureFunctions()->F2(xbj, q2) * denom * qnorm * qnorm;
           return constants::ALPHA_EM * M_1_PI * (1. - x) / q2 * f_aux;
         } else {
-          str_fun.computeFL(xbj, q2);
-          const double f_D = str_fun.F2 * denom * (1. - x) * qnorm;
-          const double f_C = str_fun.F1(xbj, q2) * 2. / q2;
+          const double f_D = ff.structureFunctions()->F2(xbj, q2) * denom * (1. - x) * qnorm;
+          const double f_C = ff.structureFunctions()->F1(xbj, q2) * 2. / q2;
           return constants::ALPHA_EM * M_1_PI * (1. - x) / q2 * (f_D + 0.5 * x2 * f_C);
         }
       } break;

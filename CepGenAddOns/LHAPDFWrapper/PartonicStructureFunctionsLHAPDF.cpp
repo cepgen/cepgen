@@ -153,7 +153,6 @@ namespace cepgen {
     }
 
     Partonic& Partonic::eval(double xbj, double q2) {
-      F2 = 0.;
       if (num_flavours_ == 0 || num_flavours_ > QUARK_PDGS.size()) {
         CG_WARNING("Partonic") << "Invalid number of flavours (" << num_flavours_ << " selected.";
         return *this;
@@ -184,6 +183,7 @@ namespace cepgen {
       const double q = sqrt(q2);
 #endif
 
+      double f2 = 0.;
       for (int i = 0; i < num_flavours_; ++i) {
         const double prefactor = 1. / 9. * Q_TIMES_3.at(i) * Q_TIMES_3.at(i);
 #ifdef LHAPDF_GE_6
@@ -197,22 +197,23 @@ namespace cepgen {
 #endif
         switch (mode_) {
           case Mode::full:
-            F2 += prefactor * (xq + xqbar);
+            f2 += prefactor * (xq + xqbar);
             break;
           case Mode::valence:
-            F2 += prefactor * (xq - xqbar);
+            f2 += prefactor * (xq - xqbar);
             break;
           case Mode::sea:
-            F2 += prefactor * (2. * xqbar);
+            f2 += prefactor * (2. * xqbar);
             break;
         }
       }
+      setF2(f2);
       return *this;
     }
 
     ParametersDescription Partonic::description() {
       auto desc = Parameterisation::description();
-      desc.setDescription("Partonic structure functions");
+      desc.setDescription("LHAPDF (partonic)");
       desc.add<std::string>("pdfSet", "cteq6").setDescription("PDF modelling to be considered");
       desc.add<int>("numFlavours", 4).setDescription("Number of parton flavours to consider in summation");
       desc.add<int>("pdfCode", 0);

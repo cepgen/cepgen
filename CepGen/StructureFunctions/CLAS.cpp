@@ -188,16 +188,11 @@ namespace cepgen {
 
     CLAS& CLAS::eval(double xbj, double q2) {
       const double w2 = utils::mX2(xbj, q2, mp2_), w = sqrt(w2);
-
-      if (w < mx_min_) {
-        F2 = 0.;
+      if (w < mx_min_)
         return *this;
-      }
 
-      F2 = f2slac(xbj, q2);
-      std::pair<double, double> rb = resbkg(q2, w);
-
-      F2 *= (rb.first + rb.second);
+      const auto rb = resbkg(q2, w);
+      setF2(f2slac(xbj, q2) * (rb.first + rb.second));
       return *this;
     }
 
@@ -275,7 +270,7 @@ namespace cepgen {
 
     ParametersDescription CLAS::description() {
       auto desc = Parameterisation::description();
-      desc.setDescription("CLAS parameterisation for nucleon data at Q2 > 0.5 GeV2 / xBj > 0.15");
+      desc.setDescription("CLAS (nucleon data, Q^2 > 0.5 GeV2 / xBj > 0.15)");
       desc.add<std::string>("model", "proton")
           .setDescription("Nucleon modelling ('proton', 'deuteron', or 'neutron' handled)");
       return desc;

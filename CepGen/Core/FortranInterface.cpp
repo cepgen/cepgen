@@ -32,9 +32,8 @@ extern "C" {
 void cepgen_structure_functions_(int& sfmode, double& xbj, double& q2, double& f2, double& fl) {
   using namespace cepgen;
   static auto sf = strfun::StructureFunctionsFactory::get().build(sfmode);
-  const auto& val = (*sf)(xbj, q2);
-  f2 = val.F2;
-  fl = val.FL;
+  f2 = sf->F2(xbj, q2);
+  fl = sf->FL(xbj, q2);
 }
 
 /// Compute a \f$k_{\rm T}\f$-dependent flux for single nucleons

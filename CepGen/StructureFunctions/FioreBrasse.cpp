@@ -155,7 +155,7 @@ namespace cepgen {
                                               << " background part: " << amplitude_bg << ",\n\t"
                                               << " total (with norm.): " << amplitude_tot << ".";
 
-      F2 = prefactor * amplitude_tot;
+      setF2(prefactor * amplitude_tot);
       return *this;
     }
 

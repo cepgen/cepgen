@@ -35,7 +35,7 @@ namespace cepgen {
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
-        desc.setDescription("Abramowicz, Levin, Levy, and Maor parametrisation of F2/FL");
+        desc.setDescription("Abramowicz, Levin, Levy, and Maor (continuum)");
         desc.add<ParametersDescription>("pomeronTrajectory", Trajectory::description());
         desc.add<ParametersDescription>("reggeonTrajectory", Trajectory::description());
         desc.add<double>("m02", 0.).setDescription("effective photon squared mass (in GeV^2)");
@@ -146,7 +146,7 @@ namespace cepgen {
       const double F2_Pom = cpom * pow(xp, apom) * pow(1. - xbj, bpom),
                    F2_Reg = creg * pow(xr, areg) * pow(1. - xbj, breg);
 
-      F2 = q2 / (q2 + m02_) * (F2_Pom + F2_Reg);
+      setF2(q2 / (q2 + m02_) * (F2_Pom + F2_Reg));
 
       return *this;
     }
@@ -162,7 +162,7 @@ namespace cepgen {
 
       static ParametersDescription description() {
         auto desc = ALLM::description();
-        desc.setDescription("ALLM{91} pre-HERA data fit with 694 data points");
+        desc.setDescription("ALLM91 (continuum, pre-HERA 694 points fit)");
         ParametersDescription pom_params;
         pom_params.add<std::vector<double> >("a", {-0.04503, -0.36407, 8.17091});
         pom_params.add<std::vector<double> >("b", {0.49222, 0.52116, 3.5515});
@@ -189,7 +189,7 @@ namespace cepgen {
 
       static ParametersDescription description() {
         auto desc = ALLM::description();
-        desc.setDescription("ALLM{97} fixed target and HERA photoproduction total cross sections 1356 data points");
+        desc.setDescription("ALLM97 (continuum, FT/HERA photoprod. tot.x-s 1356 points fit)");
         ParametersDescription pom_params;
         pom_params.add<std::vector<double> >("a", {-0.0808, -0.44812, 1.1709});
         pom_params.add<std::vector<double> >("b", {0.36292, 1.8917, 1.8439});
@@ -215,7 +215,7 @@ namespace cepgen {
 
       static ParametersDescription description() {
         auto desc = ALLM::description();
-        desc.setDescription("ALLM{HHT}");
+        desc.setDescription("HHT (continuum)");
         ParametersDescription pom_params;
         pom_params.add<std::vector<double> >("a", {-0.835, -0.446, 10.6});
         pom_params.add<std::vector<double> >("b", {-45.8, 55.7, -0.031});
@@ -241,7 +241,7 @@ namespace cepgen {
 
       static ParametersDescription description() {
         auto desc = ALLM::description();
-        desc.setDescription("ALLM{HHT_FT}");
+        desc.setDescription("HHT_FT (continuum)");
         ParametersDescription pom_params;
         pom_params.add<std::vector<double> >("a", {-0.075, -0.470, 9.2});
         pom_params.add<std::vector<double> >("b", {-0.477, 54.0, 0.073});
@@ -267,7 +267,7 @@ namespace cepgen {
 
       static ParametersDescription description() {
         auto desc = ALLM::description();
-        desc.setDescription("ALLM{GD07p}");
+        desc.setDescription("GD07p (continuum)");
         ParametersDescription pom_params;
         pom_params.add<std::vector<double> >("a", {-0.105, -0.495, 1.29});
         pom_params.add<std::vector<double> >("b", {-1.42, 4.51, 0.551});
@@ -293,7 +293,7 @@ namespace cepgen {
 
       static ParametersDescription description() {
         auto desc = ALLM::description();
-        desc.setDescription("ALLM{GD11p}");
+        desc.setDescription("GD11p (continuum)");
         ParametersDescription pom_params;
         pom_params.add<std::vector<double> >("a", {-0.11895, -0.4783, 1.353});
         pom_params.add<std::vector<double> >("b", {1.0833, 2.656, 1.771});

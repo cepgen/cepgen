@@ -27,22 +27,26 @@ namespace cepgen {
   namespace strfun {
     Parameterisation::Parameterisation(double f2, double fl)
         : NamedModule<int>(ParametersList()),
-          F2(f2),
-          FL(fl),
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
           mx_min_(mp_ + PDG::get().mass(PDG::piZero)),
-          r_ratio_(sigrat::SigmaRatiosFactory::get().build((int)sigrat::Type::SibirtsevBlunden)) {}
+          r_ratio_(sigrat::SigmaRatiosFactory::get().build((int)sigrat::Type::SibirtsevBlunden)),
+          f2_(f2),
+          fl_(fl) {}
 
     Parameterisation::Parameterisation(const Parameterisation& sf)
         : NamedModule<int>(sf.parameters()),
-          F2(sf.F2),
-          FL(sf.FL),
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
           mx_min_(mp_ + PDG::get().mass(PDG::piPlus)),
           old_vals_(sf.old_vals_),
-          r_ratio_(sf.r_ratio_) {}
+          r_ratio_(sf.r_ratio_),
+          f2_(sf.f2_),
+          fl_(sf.fl_),
+          w1_(sf.w1_),
+          w2_(sf.w2_),
+          fe_(sf.fe_),
+          fm_(sf.fm_) {}
 
     Parameterisation::Parameterisation(const ParametersList& params)
         : NamedModule<int>(params),
@@ -55,18 +59,48 @@ namespace cepgen {
     }
 
     Parameterisation& Parameterisation::operator=(const Parameterisation& sf) {
-      F2 = sf.F2, FL = sf.FL;
-      W1 = sf.W1, W2 = sf.W2;
-      FE = sf.FE, FM = sf.FM;
+      f2_ = sf.f2_, fl_ = sf.fl_;
+      w1_ = sf.w1_, w2_ = sf.w2_;
+      fe_ = sf.fe_, fm_ = sf.fm_;
       old_vals_ = sf.old_vals_;
       return *this;
     }
 
     Parameterisation& Parameterisation::operator()(double xbj, double q2) {
-      if (old_vals_.first == xbj && old_vals_.second == q2)
+      const auto args = Arguments{xbj, q2};
+      if (args == old_vals_)
         return *this;
-      old_vals_ = {xbj, q2};
+      if (!args.valid()) {
+        CG_WARNING("StructureFunctions") << "Invalid range for Q² = " << q2 << " or xBj = " << xbj << ".";
+        return *this;
+      }
+      old_vals_ = args;
+      fl_computed_ = false;
+      (*this).setF2(0.).setFL(0.).setW1(0.).setW2(0.).setFE(0.).setFM(0.);
       return eval(xbj, q2);
+    }
+
+    double Parameterisation::F2(double xbj, double q2) { return operator()(xbj, q2).f2_; }
+
+    double Parameterisation::FL(double xbj, double q2) {
+      if (!fl_computed_)
+        computeFL(xbj, q2);
+      return operator()(xbj, q2).fl_;
+    }
+
+    double Parameterisation::W1(double xbj, double q2) { return operator()(xbj, q2).w1_; }
+
+    double Parameterisation::W2(double xbj, double q2) { return operator()(xbj, q2).w2_; }
+
+    double Parameterisation::FE(double xbj, double q2) { return operator()(xbj, q2).fe_; }
+
+    double Parameterisation::FM(double xbj, double q2) { return operator()(xbj, q2).fm_; }
+
+    double Parameterisation::F1(double xbj, double q2) {
+      const double f1 = 0.5 * ((1 + tau(xbj, q2)) * F2(xbj, q2) - FL(xbj, q2)) / xbj;
+      CG_DEBUG_LOOP("StructureFunctions:F1") << "F1 for Q² = " << q2 << ", xBj = " << xbj << ": " << f1 << "\n\t"
+                                             << "(F2 = " << f2_ << ", FL = " << fl_ << ").";
+      return f1;
     }
 
     Parameterisation& Parameterisation::eval(double, double) {
@@ -74,28 +108,51 @@ namespace cepgen {
       return *this;
     }
 
-    double Parameterisation::tau(double xbj, double q2) const { return 4. * xbj * xbj * mp2_ / q2; }
-
-    double Parameterisation::F1(double xbj, double q2) const {
-      if (xbj == 0. || q2 == 0.) {
-        CG_WARNING("StructureFunctions:F1") << "Invalid range for Q² = " << q2 << " or xBj = " << xbj << ".";
-        return 0.;
-      }
-      const double F1 = 0.5 * ((1 + tau(xbj, q2)) * F2 - FL) / xbj;
-      CG_DEBUG_LOOP("StructureFunctions:F1") << "F1 for Q² = " << q2 << ", xBj = " << xbj << ": " << F1 << "\n\t"
-                                             << "(F2 = " << F2 << ", FL = " << FL << ").";
-      return F1;
+    Parameterisation& Parameterisation::setF2(double f2) {
+      f2_ = f2;
+      return *this;
     }
 
+    Parameterisation& Parameterisation::setFL(double fl) {
+      fl_ = fl;
+      fl_computed_ = true;
+      return *this;
+    }
+
+    Parameterisation& Parameterisation::setW1(double w1) {
+      w1_ = w1;
+      return *this;
+    }
+
+    Parameterisation& Parameterisation::setW2(double w2) {
+      w2_ = w2;
+      return *this;
+    }
+
+    Parameterisation& Parameterisation::setFE(double fe) {
+      fe_ = fe;
+      return *this;
+    }
+
+    Parameterisation& Parameterisation::setFM(double fm) {
+      fm_ = fm;
+      return *this;
+    }
+
+    double Parameterisation::tau(double xbj, double q2) const { return 4. * xbj * xbj * mp2_ / q2; }
+
     Parameterisation& Parameterisation::computeFL(double xbj, double q2) {
-      if (!r_ratio_)
+      if (!fl_computed_ && !r_ratio_)
         throw CG_FATAL("StructureFunctions:FL") << "Failed to retrieve a R-ratio calculator!";
       double r_error;
       return computeFL(xbj, q2, (*r_ratio_)(xbj, q2, r_error));
     }
 
     Parameterisation& Parameterisation::computeFL(double xbj, double q2, double r) {
-      FL = F2 * (1. + tau(xbj, q2)) * (r / (1. + r));
+      if (!fl_computed_) {
+        fl_ = f2_ * (1. + tau(xbj, q2)) * (r / (1. + r));
+        fl_computed_ = true;
+      }
       return *this;
     }
 
@@ -107,10 +164,13 @@ namespace cepgen {
 
     std::ostream& operator<<(std::ostream& os, const Parameterisation* sf) {
       os << sf->describe();
-      if (sf->old_vals_ != std::pair<double, double>{0., 0.})
-        os << " at (" << sf->old_vals_.first << ", " << sf->old_vals_.second << "): "
-           << "F2 = " << sf->F2 << ", FL = " << sf->FL;
+      if (sf->old_vals_.valid())
+        os << " at " << sf->old_vals_ << ": F2 = " << sf->f2_ << ", FL = " << sf->fl_;
       return os;
+    }
+
+    std::ostream& operator<<(std::ostream& os, const Parameterisation::Arguments& args) {
+      return os << "(" << args.xbj << ", " << args.q2 << ")";
     }
 
     ParametersDescription Parameterisation::description() {

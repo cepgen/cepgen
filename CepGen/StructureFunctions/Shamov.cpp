@@ -200,9 +200,8 @@ namespace cepgen {
 
     Shamov& Shamov::eval(double xbj, double q2) {
       //--- Suri & Yennie structure functions
-      const auto& sy_q2 = (*sy_sf_)(xbj, q2);
       if (mode_ == Mode::SuriYennie) {  // trivial composite case
-        Parameterisation::operator=(sy_q2);
+        Parameterisation::operator=((*sy_sf_)(xbj, q2));
         return *this;
       }
 
@@ -222,9 +221,9 @@ namespace cepgen {
         if (mode_ == Mode::RealAndFitNonRes)
           /// q^2 dependence of the non-resonant gamma-p cross section
           /// Some fit of the know e-p data. Good only for Q^2 < 6 GeV^2
-          Gm = pow(1. + pow(q2 / q20_, 2), -r_power_);
+          Gm = std::pow(1. + std::pow(q2 / q20_, 2), -r_power_);
         else
-          Gm = sy_q2.W1 / (*sy_sf_)(xbj, lowq2_).W1;
+          Gm = sy_sf_->W1(xbj, q2) / sy_sf_->W1(xbj, lowq2_);
       } else {                        // resonant
         if (q2 >= gm_grid_.max()[0])  // above grid range
           Gm = gm0_ * exp(-gmb_ * q2);
@@ -237,19 +236,23 @@ namespace cepgen {
       //--- for W -> cross section
       const double s1 = prefac_ * 4. * mp_ / (mx2 - mp2_);  // mb/GeV
       const double s2 =
-          prefac_ * (pow(mx2 - mp2_, 2) + 2. * (mx2 + mp2_) * q2 + q2 * q2) / mp_ / q2 / (mx2 - mp2_);  // mb/GeV
+          prefac_ * (std::pow(mx2 - mp2_, 2) + 2. * (mx2 + mp2_) * q2 + q2 * q2) / mp_ / q2 / (mx2 - mp2_);  // mb/GeV
       //---  ratio (\sigma_T+\sigma_L)/\sigma_T according to S & Y
-      const double ratio = (s2 * sy_q2.W2) / (s1 * sy_q2.W1);
+      const double ratio = (s2 * sy_sf_->W2(xbj, q2)) / (s1 * sy_sf_->W1(xbj, q2));
 
+      double w1, w2;
       if (mode_ == Mode::RealAndFitNonRes) {  // transverse sigma only
-        W1 = sgp / s1;
-        W2 = sgp * ratio / s2;
+        w1 = sgp / s1;
+        w2 = sgp * ratio / s2;
       } else {  // longitudinal + transverse component for sigma
-        W1 = sgp / ratio / s1;
-        W2 = sgp / s2;
+        w1 = sgp / ratio / s1;
+        w2 = sgp / s2;
       }
       const double nu = 0.5 * (q2 + mx2 - mp2_) / mp_;
-      F2 = W2 * nu / mp_;
+      const double f2 = W2(xbj, q2) * nu / mp_;
+      setF2(f2);
+      setW1(w1);
+      setW2(w2);
       return *this;
     }
 

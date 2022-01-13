@@ -40,7 +40,7 @@ namespace cepgen {
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
-        desc.setDescription("Suri-Yennie FE/FM");
+        desc.setDescription("Suri-Yennie");
         desc.add<double>("C1", 0.86926);
         desc.add<double>("C2", 2.23422);
         desc.add<double>("D1", 0.12549);
@@ -58,13 +58,15 @@ namespace cepgen {
 
         const double inv_q2 = 1. / q2;
 
-        FM = inv_q2 *
-             (c1_ * dm2 * pow(rho2_ / mq, 2) + c2_ * mp2_ * pow(1. - x_pr, 4) / (1. + x_pr * (x_pr * cp_ - 2. * bp_)));
-        FE = (tau * FM + d1_ * dm2 * q2 * rho2_ / mp2_ * pow(dm2 / mq / en, 2)) / (1. + nu * nu * inv_q2);
+        const double fm = inv_q2 * (c1_ * dm2 * pow(rho2_ / mq, 2) +
+                                    c2_ * mp2_ * pow(1. - x_pr, 4) / (1. + x_pr * (x_pr * cp_ - 2. * bp_)));
+        const double fe = (tau * fm + d1_ * dm2 * q2 * rho2_ / mp2_ * pow(dm2 / mq / en, 2)) / (1. + nu * nu * inv_q2);
 
-        W1 = 0.5 * FM * q2 / mp_;
-        W2 = 2. * mp_ * FE;
-        F2 = 2. * nu * FE;
+        setFE(fe);
+        setFM(fm);
+        setW1(0.5 * fm * q2 / mp_);
+        setW2(2. * mp_ * fe);
+        setF2(2. * nu * fe);
         return *this;
       }
 
@@ -81,7 +83,7 @@ namespace cepgen {
 
       static ParametersDescription description() {
         auto desc = SuriYennie::description();
-        desc.setDescription("Suri-Yennie alternative FE/FM parameterisation");
+        desc.setDescription("Suri-Yennie (alternative)");
         desc.add<double>("C1", 0.6303);
         desc.add<double>("C2", 2.3049);
         desc.add<double>("D1", 0.04681);

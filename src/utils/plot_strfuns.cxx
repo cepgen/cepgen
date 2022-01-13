@@ -120,14 +120,13 @@ int main(int argc, char* argv[]) {
           xbj = 0.;
           break;
       }
-      const auto& strfun = (*sf)(xbj, q2);
-      out << "\t" << strfun.F2 << "\t" << strfun.FL;
-      g_strfuns_f2.at(j)->SetPoint(g_strfuns_f2.at(j)->GetN(), x, strfun.F2);
-      g_strfuns_fl.at(j)->SetPoint(g_strfuns_fl.at(j)->GetN(), x, strfun.FL);
-      g_strfuns_fe.at(j)->SetPoint(g_strfuns_fe.at(j)->GetN(), x, strfun.FE);
-      g_strfuns_fm.at(j)->SetPoint(g_strfuns_fm.at(j)->GetN(), x, strfun.FM);
-      g_strfuns_w1.at(j)->SetPoint(g_strfuns_w1.at(j)->GetN(), x, strfun.W1);
-      g_strfuns_w2.at(j)->SetPoint(g_strfuns_w2.at(j)->GetN(), x, strfun.W2);
+      out << "\t" << sf->F2(xbj, q2) << "\t" << sf->FL(xbj, q2);
+      g_strfuns_f2.at(j)->SetPoint(g_strfuns_f2.at(j)->GetN(), x, sf->F2(xbj, q2));
+      g_strfuns_fl.at(j)->SetPoint(g_strfuns_fl.at(j)->GetN(), x, sf->FL(xbj, q2));
+      g_strfuns_fe.at(j)->SetPoint(g_strfuns_fe.at(j)->GetN(), x, sf->FE(xbj, q2));
+      g_strfuns_fm.at(j)->SetPoint(g_strfuns_fm.at(j)->GetN(), x, sf->FM(xbj, q2));
+      g_strfuns_w1.at(j)->SetPoint(g_strfuns_w1.at(j)->GetN(), x, sf->W1(xbj, q2));
+      g_strfuns_w2.at(j)->SetPoint(g_strfuns_w2.at(j)->GetN(), x, sf->W2(xbj, q2));
       ++j;
     }
     out << "\n";

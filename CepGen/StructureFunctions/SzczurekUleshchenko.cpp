@@ -60,14 +60,14 @@ namespace cepgen {
       // standard partonic structure function
       const double F2_aux = 4. / 9. * (xuv + 2. * xus) + 1. / 9. * (xdv + 2. * xds) + 1. / 9. * (2. * xss);
 
-      F2 = F2_aux * q2 / amu2;  // F2 corrected for low Q^2 behaviour
+      setF2(F2_aux * q2 / amu2);  // F2 corrected for low Q^2 behaviour
 
       return *this;
     }
 
     ParametersDescription SzczurekUleshchenko::description() {
       auto desc = Parameterisation::description();
-      desc.setDescription("Szczurek-Uleshchenko modelling of F2 based on GRV parton content");
+      desc.setDescription("Szczurek-Uleshchenko (based on GRV parton content)");
       desc.add<double>("q2shift", 0.8);
       return desc;
     }

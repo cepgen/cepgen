@@ -196,11 +196,8 @@ namespace cepgen {
 
     ChristyBosted& ChristyBosted::eval(double xbj, double q2) {
       const double w2 = utils::mX2(xbj, q2, mp2_);
-
-      if (sqrt(w2) < mx_min_) {
-        F2 = 0.;
+      if (sqrt(w2) < mx_min_)
         return *this;
-      }
 
       //-----------------------------
       // modification of Christy-Bosted at large q2 as described in the LUXqed paper
@@ -216,9 +213,11 @@ namespace cepgen {
       const double sigT = resmod507(Polarisation::T, w2_eff, q2_eff);
       const double sigL = resmod507(Polarisation::L, w2_eff, q2_eff);
 
-      F2 = prefactor_ * (1. - xbj) * q2_eff / (1 + tau(xbj, q2_eff)) * (sigT + sigL) / constants::GEVM2_TO_PB * 1.e6;
+      double f2 =
+          prefactor_ * (1. - xbj) * q2_eff / (1 + tau(xbj, q2_eff)) * (sigT + sigL) / constants::GEVM2_TO_PB * 1.e6;
       if (q2 > q20_)
-        F2 *= q21_ / (q21_ + delq2);
+        f2 *= q21_ / (q21_ + delq2);
+      setF2(f2);
 
       if (sigT != 0.)
         Parameterisation::computeFL(q2_eff, xbj, sigL / sigT);
@@ -228,7 +227,7 @@ namespace cepgen {
 
     ParametersDescription ChristyBosted::description() {
       auto desc = Parameterisation::description();
-      desc.setDescription("Christy-Bosted F2/FL parameterisation of low-mass resonances");
+      desc.setDescription("Christy-Bosted (low-mass resonances)");
       desc.add<double>("m0", 4.2802);
       desc.add<double>("q20", 8.).setDescription("Q^2 scale for the modification of the parameterisation");
       desc.add<double>("q21", 30.);

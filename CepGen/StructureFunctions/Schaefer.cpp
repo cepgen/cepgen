@@ -108,41 +108,27 @@ namespace cepgen {
 
       if (q2 < q2_cut_) {
         if (w2 < w2_lim_.at(0)) {
-          auto sf = (*resonances_model_)(xbj, q2);
-          sf.computeFL(xbj, q2);
-          F2 = sf.F2;
-          FL = sf.FL;
+          setF2(resonances_model_->F2(xbj, q2));
+          setFL(resonances_model_->FL(xbj, q2));
           return *this;
         } else if (w2 < w2_lim_.at(1)) {
-          auto sf_r = (*resonances_model_)(xbj, q2);
-          auto sf_c = (*continuum_model_)(xbj, q2);
-          sf_r.computeFL(xbj, q2);
-          sf_c.computeFL(xbj, q2);
           const double r = rho(w2);
-          F2 = r * sf_c.F2 + (1. - r) * sf_r.F2;
-          FL = r * sf_c.FL + (1. - r) * sf_r.FL;
+          setF2(r * continuum_model_->F2(xbj, q2) + (1. - r) * resonances_model_->F2(xbj, q2));
+          setFL(r * continuum_model_->FL(xbj, q2) + (1. - r) * resonances_model_->FL(xbj, q2));
           return *this;
         } else {
-          auto sf = (*continuum_model_)(xbj, q2);
-          sf.computeFL(xbj, q2);
-          F2 = sf.F2;
-          FL = sf.FL;
+          setF2(continuum_model_->F2(xbj, q2));
+          setFL(continuum_model_->FL(xbj, q2));
           return *this;
         }
       } else {
         if (w2 < w2_lim_.at(1)) {
-          auto sf = (*continuum_model_)(xbj, q2);
-          sf.computeFL(xbj, q2);
-          F2 = sf.F2;
-          FL = sf.FL;
+          setF2(continuum_model_->F2(xbj, q2));
+          setFL(continuum_model_->FL(xbj, q2));
           return *this;
         } else {
-          auto sf_p = (*perturbative_model_)(xbj, q2);
-          F2 = sf_p.F2;
-          sf_p.computeFL(xbj, q2);
-          FL = sf_p.FL;
-          if (higher_twist_)
-            F2 *= (1. + 5.5 / q2);
+          setF2(perturbative_model_->F2(xbj, q2) * (higher_twist_ ? 1. + 5.5 / q2 : 1.));
+          setFL(perturbative_model_->FL(xbj, q2));
           return *this;
         }
       }
@@ -158,7 +144,7 @@ namespace cepgen {
 
     ParametersDescription Schaefer::description() {
       auto desc = Parameterisation::description();
-      desc.setDescription("LUXlike structure functions");
+      desc.setDescription("LUXlike (hybrid)");
       desc.add<double>("Q2cut", 9.);
       desc.add<std::vector<double> >("W2limits", {3., 4.});
       desc.add<bool>("higherTwist", true);

@@ -74,13 +74,11 @@ namespace cepgen {
               throw CG_FATAL("FormFactors") << "Elastic proton form factors requested!\n"
                                             << "Check your process definition!";
             case strfun::Type::SuriYennie: {  // this one requires its own object to deal with FM
-              (*str_fun_)(xbj, q2);
-              FE = str_fun_->F2 * xbj * mp_ / q2;
-              FM = str_fun_->FM;
+              FE = str_fun_->F2(xbj, q2) * xbj * mp_ / q2;
+              FM = str_fun_->FM(xbj, q2);
             } break;
             default: {
-              (*str_fun_)(xbj, q2).computeFL(xbj, q2);
-              FE = str_fun_->F2 * xbj / q2;
+              FE = str_fun_->F2(xbj, q2) * xbj / q2;
               FM = -2. * str_fun_->F1(xbj, q2) / q2;
             } break;
           }

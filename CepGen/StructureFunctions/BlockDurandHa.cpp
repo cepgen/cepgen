@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cassert>
 #include <cmath>
 #include <vector>
 
@@ -54,34 +53,32 @@ namespace cepgen {
           lambda_(steer<double>("lambda")),
           mu2_(steer<double>("mu2")),
           m2_(steer<double>("m2")) {
-      assert(a_.size() == 3);
-      assert(b_.size() == 3);
-      assert(c_.size() == 2);
+      if (a_.size() != 3)
+        throw CG_FATAL("BlockDurandHa") << "Parameter 'a' should have 3 components! Parsed " << a_ << ".";
+      if (b_.size() != 3)
+        throw CG_FATAL("BlockDurandHa") << "Parameter 'b' should have 3 components! Parsed " << b_ << ".";
+      if (c_.size() != 2)
+        throw CG_FATAL("BlockDurandHa") << "Parameter 'c' should have 3 components! Parsed " << c_ << ".";
     }
 
     BlockDurandHa& BlockDurandHa::eval(double xbj, double q2) {
-      if (q2 <= 0) {
-        F2 = 0.;
-        return *this;
-      }
-
       const double tau = q2 / (q2 + mu2_);
       const double xl = log1p(q2 / mu2_);
       const double xlx = log(tau / xbj);
 
-      const double A = a_[0] + a_[1] * xl + a_[2] * xl * xl;
-      const double B = b_[0] + b_[1] * xl + b_[2] * xl * xl;
-      const double C = c_[0] + c_[1] * xl;
+      const double A = a_.at(0) + a_.at(1) * xl + a_.at(2) * xl * xl;
+      const double B = b_.at(0) + b_.at(1) * xl + b_.at(2) * xl * xl;
+      const double C = c_.at(0) + c_.at(1) * xl;
       const double D = q2 * (q2 + lambda_ * m2_) / pow(q2 + m2_, 2);
 
-      F2 = D * pow(1. - xbj, n_) * (C + A * xlx + B * xlx * xlx);
+      setF2(D * pow(1. - xbj, n_) * (C + A * xlx + B * xlx * xlx));
 
       return *this;
     }
 
     ParametersDescription BlockDurandHa::description() {
       auto desc = Parameterisation::description();
-      desc.setDescription("Block-Durand-Ha");
+      desc.setDescription("Block-Durand-Ha (continuum)");
       desc.add<std::vector<double> >("a", {8.205e-4, -5.148e-2, -4.725e-3});
       desc.add<std::vector<double> >("b", {2.217e-3, 1.244e-2, 5.958e-4});
       desc.add<std::vector<double> >("c", {0.255e0, 1.475e-1});

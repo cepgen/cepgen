@@ -136,7 +136,8 @@ namespace mstw {
 
   Grid& Grid::eval(double xbj, double q2) {
     const std::array<double, 2> val = cepgen::GridHandler<2, 2>::eval({xbj, q2});
-    setValues(val[0], val[1]);
+    setF2(val[0]);
+    setFL(val[1]);
     return *this;
   }
 

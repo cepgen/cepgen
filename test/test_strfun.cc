@@ -74,11 +74,8 @@ int main(int argc, char* argv[]) {
   for (const auto& xbj : xbjvals)
     for (const auto& q2 : q2vals) {
       out << q2 << "\t" << xbj;
-      for (auto& sf : params) {
-        auto& sfval = (*sf)(xbj, q2);
-        sfval.computeFL(xbj, q2);
-        out << "\t" << sfval.F2 << "\t" << sfval.FL;
-      }
+      for (auto& sf : params)
+        out << "\t" << sf->F2(xbj, q2) << "\t" << sf->FL(xbj, q2);
       out << "\n";
     }
 
