@@ -93,8 +93,6 @@ namespace cepgen {
       /// Compute the \f$F_1\f$ structure function for a given point
       double F1(double xbj, double q2) const;
 
-      /// Compute the dimensionless variable \f$\tau=\frac{4x_{\rm Bj}^2m_p^2}{Q^2}\f$
-      double tau(double xbj, double q2) const;
 
     public:
       double F2{0.};  ///< Last computed transverse structure function value
@@ -110,6 +108,9 @@ namespace cepgen {
       /// \param[in] xbj Bjorken's x variable
       /// \param[in] q2 Squared 4-momentum transfer (in GeV^2)
       virtual Parameterisation& eval(double xbj, double q2);
+      /// Compute the dimensionless variable \f$\tau=\frac{4x_{\rm Bj}^2m_p^2}{Q^2}\f$
+      double tau(double xbj, double q2) const;
+
       const double mp_;      ///< Proton mass, in GeV/c^2
       const double mp2_;     ///< Squared proton mass, in GeV^2/c^4
       const double mx_min_;  ///< Minimum diffractive mass, in GeV/c^2

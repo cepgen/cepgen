@@ -41,7 +41,7 @@ namespace cepgen {
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
-        desc.setDescription("Fiore-Brasse F2 parameterisation of low-mass resonances");
+        desc.setDescription("Fiore-Brasse (low-mass resonances)");
         desc.add<double>("s0", 1.14);
         desc.add<double>("norm", 0.021).setDescription("absolute normalisation factor");
         // add the list of resonances
@@ -145,7 +145,7 @@ namespace cepgen {
         else
           alpha = std::complex<double>(res.alpha0 + res.alpha1 * (sqrtsE - sqrt(sE - s)), 0.);
         double formfactor = 1. / pow(1. + q2 / res.q02, 2);
-        double denom = pow(0.75 * res.spinTimesTwo - std::real(alpha), 2) + pow(std::imag(alpha), 2);
+        double denom = pow(res.spinTimesTwo * 0.75 - std::real(alpha), 2) + pow(std::imag(alpha), 2);
         amplitude_bg = res.a * formfactor * formfactor * std::imag(alpha) / denom;
       }
       const double amplitude_tot = norm_ * (amplitude_res + amplitude_bg);

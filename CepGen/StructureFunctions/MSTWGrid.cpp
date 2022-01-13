@@ -136,14 +136,13 @@ namespace mstw {
 
   Grid& Grid::eval(double xbj, double q2) {
     const std::array<double, 2> val = cepgen::GridHandler<2, 2>::eval({xbj, q2});
-    F2 = val[0];
-    FL = val[1];
+    setValues(val[0], val[1]);
     return *this;
   }
 
   cepgen::ParametersDescription Grid::description() {
     auto desc = Parameterisation::description();
-    desc.setDescription("MSTW grid");
+    desc.setDescription("MSTW grid (perturbative)");
     desc.add<std::string>("gridPath", DEFAULT_MSTW_GRID_PATH).setDescription("Path to the MSTW grid content");
     return desc;
   }

@@ -31,10 +31,31 @@ namespace cepgen {
 
     static ParametersDescription description();
 
+    /// kinematics needed for threshold relativistic B-W
+    struct KinematicsBlock {
+      explicit KinematicsBlock(double w2, double q2, double mp2, double mpi2, double meta2);
+      static double mom(double energy, double mass2) { return std::sqrt(std::max(0., energy * energy - mass2)); }
+      const double w2, w;
+      const double q2;
+      // equivalent photon energy-momentum
+      const double k, kcm;
+      // pion momentum
+      const double ppicm;
+      // two-pion momentum
+      const double ppi2cm;
+      // eta meson momentum
+      const double petacm;
+    };
+
   protected:
     double kr() const { return 0.5 * (mass_ * mass_ - mp2_) / mp_; }
+    double pcmr(double m2) const { return KinematicsBlock::mom(ecmr(m2), m2); }
     double ecmr(double m2) const;
     double kcmr() const { return ecmr(0.); }
+    /// partial widths for all decays
+    double partialWidth(const KinematicsBlock&) const;
+    /// virtual photon width
+    double photonWidth(const KinematicsBlock&) const;
 
     /// Branching ratios container for resonance decay into single, double pion or eta states
     const struct BranchingRatios : SteeredObject<BranchingRatios> {

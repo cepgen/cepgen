@@ -33,8 +33,6 @@ namespace cepgen {
 
       Shamov& eval(double xbj, double q2) override;
 
-      double W1{0.}, W2{0.};
-
     private:
       static constexpr double prefac_ =
           2. * M_PI * M_PI * constants::ALPHA_EM * constants::GEVM2_TO_PB * 1e-9;  // pb/GeV -> mb/GeV
