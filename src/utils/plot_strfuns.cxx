@@ -34,10 +34,12 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   vector<int> strfun_types;
-  double q2, xmin, xmax;
+  double q2, xmin, xmax, ymin, ymax;
   int var, num_points;
   string output_file;
   bool logx, logy;
+
+  const double kInvalid = -999.999;
 
   cepgen::ArgumentsParser(argc, argv)
       .addArgument("sf,s", "structure functions modelling", &strfun_types)
@@ -45,6 +47,8 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("var,t", "variable to study (0=xBj, 1=w)", &var, 0)
       .addOptionalArgument("xmax,m", "minimal Bjorken x", &xmin, 1.e-7)
       .addOptionalArgument("xmax,M", "maximal Bjorken x", &xmax, 1.)
+      .addOptionalArgument("ymin", "minimum plotting range for y", &ymin, kInvalid)
+      .addOptionalArgument("ymax", "maximum plotting range for y", &ymax, kInvalid)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
       .addOptionalArgument("output,o", "output file name", &output_file, "strfuns.scan.output.txt")
       .addOptionalArgument("logx", "logarithmic x-axis", &logx, false)
@@ -55,16 +59,18 @@ int main(int argc, char* argv[]) {
 
   cepgen::initialise();
 
-  string var_name;
+  string var_name, var_unit;
   switch (var) {
     case 0:
       var_name = "x_{Bj}";
       break;
     case 1:
       var_name = "w (GeV)";
+      var_unit = "GeV";
       break;
     case 2:
-      var_name = "w^{2} (GeV^{2})";
+      var_name = "w^{2}";
+      var_unit = "GeV^{2}";
       break;
     default:
       throw CG_FATAL("main") << "Unsupported variable to be plotted!";
@@ -86,17 +92,24 @@ int main(int argc, char* argv[]) {
     auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(sf_type);
     const auto sf_name = cepgen::strfun::StructureFunctionsFactory::get().describe(sf_type);
     g_strfuns_f2.emplace_back(new TGraph);
-    (*g_strfuns_f2.rbegin())->SetTitle((sf_name + ";" + var_name + ";F_{2}(" + var_name + ", Q^{2})").c_str());
+    auto graph_name = [&](const string& func) -> TString {
+      return Form("%s;%s;%s(%s, Q^{2})",
+                  sf_name.c_str(),
+                  (var_name + (!var_unit.empty() ? " (" + var_unit + ")" : "")).c_str(),
+                  func.c_str(),
+                  var_name.c_str());
+    };
+    (*g_strfuns_f2.rbegin())->SetTitle(graph_name("F_{2}"));
     g_strfuns_fl.emplace_back(new TGraph);
-    (*g_strfuns_fl.rbegin())->SetTitle((sf_name + ";" + var_name + ";F_{L}(" + var_name + ", Q^{2})").c_str());
+    (*g_strfuns_fl.rbegin())->SetTitle(graph_name("F_{L}"));
     g_strfuns_fe.emplace_back(new TGraph);
-    (*g_strfuns_fe.rbegin())->SetTitle((sf_name + ";" + var_name + ";F_{E}(" + var_name + ", Q^{2})").c_str());
+    (*g_strfuns_fe.rbegin())->SetTitle(graph_name("F_{E}"));
     g_strfuns_fm.emplace_back(new TGraph);
-    (*g_strfuns_fm.rbegin())->SetTitle((sf_name + ";" + var_name + ";F_{M}(" + var_name + ", Q^{2})").c_str());
+    (*g_strfuns_fm.rbegin())->SetTitle(graph_name("F_{M}"));
     g_strfuns_w1.emplace_back(new TGraph);
-    (*g_strfuns_w1.rbegin())->SetTitle((sf_name + ";" + var_name + ";W_{1}(" + var_name + ", Q^{2})").c_str());
+    (*g_strfuns_w1.rbegin())->SetTitle(graph_name("W_{1}"));
     g_strfuns_w2.emplace_back(new TGraph);
-    (*g_strfuns_w2.rbegin())->SetTitle((sf_name + ";" + var_name + ";W_{2}(" + var_name + ", Q^{2})").c_str());
+    (*g_strfuns_w2.rbegin())->SetTitle(graph_name("W_{2}"));
     strfuns.emplace_back(move(sf));
   }
   for (int i = 0; i < num_points; ++i) {
@@ -146,6 +159,7 @@ int main(int argc, char* argv[]) {
       c.SetLogx();
     if (logy)
       c.SetLogy();
+    c.SetLegendX1(0.2);
     size_t i = 0;
     for (auto& gr : plt.second) {
       mg.Add(gr);
@@ -157,6 +171,10 @@ int main(int argc, char* argv[]) {
     // ugly fix to propagate first plot axes label onto multigraph
     mg.GetHistogram()->GetXaxis()->SetTitle((*plt.second.begin())->GetXaxis()->GetTitle());
     mg.GetHistogram()->GetYaxis()->SetTitle((*plt.second.begin())->GetYaxis()->GetTitle());
+    if (ymin != kInvalid)
+      mg.SetMinimum(ymin);
+    if (ymax != kInvalid)
+      mg.SetMaximum(ymax);
     c.Prettify(mg.GetHistogram());
     c.Save("pdf");
   }
