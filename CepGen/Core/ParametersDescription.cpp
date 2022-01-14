@@ -188,17 +188,24 @@ namespace cepgen {
   ParametersList ParametersDescription::validate(const ParametersList& user_params) const {
     ParametersList plist = parameters();
     plist += user_params;
+    CG_LOG << "BBBBBBBBBB: " << keys() << "/" << keysOf<ParametersList>() << "/"
+           << keysOf<std::vector<ParametersList> >();
     for (const auto& key : keysOf<std::vector<ParametersList> >()) {
       if (user_params.has<std::vector<ParametersList> >(key)) {  // vector{ParametersList}
         plist.erase(key);
         for (const auto& pit : user_params.get<std::vector<ParametersList> >(key))
           plist.operator[]<std::vector<ParametersList> >(key).emplace_back(obj_descr_.at(key).parameters() + pit);
       } else if (user_params.has<ParametersList>(key)) {  // map{key -> ParametersList}
+        CG_LOG << "AAAAAAAAAAA"
+               << "\n\n\n"
+               << user_params;
+        auto base = plist.get<ParametersList>(key);
         plist.erase(key);
         const auto& pit = user_params.get<ParametersList>(key);
+        CG_LOG << ":::::" << plist << "\n\n" << base << "\n\n" << pit;
         for (const auto& kit : pit.keys()) {
           plist.operator[]<ParametersList>(key).set<ParametersList>(
-              kit, obj_descr_.at(key).parameters() + pit.get<ParametersList>(kit));
+              kit, obj_descr_.at(key).parameters() + base + pit.get<ParametersList>(kit));
         }
       }
     }

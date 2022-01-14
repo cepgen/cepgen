@@ -67,6 +67,7 @@ namespace cepgen {
       struct Hist1DInfo {
         std::string var;
         utils::Hist1D hist;
+        bool log;
       };
       /// List of 1D histograms
       std::vector<Hist1DInfo> hists_;
@@ -74,6 +75,7 @@ namespace cepgen {
       struct Hist2DInfo {
         std::string var1, var2;
         utils::Hist2D hist;
+        bool log;
       };
       /// List of 2D histograms
       std::vector<Hist2DInfo> hists2d_;
@@ -93,45 +95,51 @@ namespace cepgen {
           throw CG_FATAL("TextHistHandler") << "Invalid number of variables to correlate for '" << key << "'!";
 
         const auto& hvar = hist_vars.get<ParametersList>(key);
+        const auto& log = hvar.get<bool>("log");
+        auto name = utils::replace_all(utils::replace_all(key, ")", ""), "(", "_");
         if (vars.size() == 1) {  // 1D histogram
           const auto& xbins = hvar.get<std::vector<double> >("xbins");
+          const auto title = "d(sig)/d" + vars.at(0) + " (pb/bin)";
           if (xbins.size() > 1)
-            hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(xbins)});
+            hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(xbins, name, title), log});
           else if (hvar.get<Limits>("xrange").valid()) {
             const auto& nbins = (hvar.get<int>("nbins") > 0 ? hvar.get<int>("nbins") : hvar.get<int>("nbinsX"));
-            hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(nbins, hvar.get<Limits>("xrange"))});
+            hists_.emplace_back(
+                Hist1DInfo{vars.at(0), utils::Hist1D(nbins, hvar.get<Limits>("xrange"), name, title), log});
           } else {
             CG_WARNING("TextHistHandler")
                 << "Neither xrange nor xbins found in parameters for 1D plot of variable \"" << vars.at(0) << "\".";
             continue;
           }
           auto& hist = hists_.rbegin()->hist;
-          hist.setLog(hvar.get<bool>("log"));
-          hist.setName(key);
           hist.setXlabel(vars.at(0));
           hist.setYlabel("d(sig)/d" + vars.at(0) + " (pb/bin)");
         } else if (vars.size() == 2) {  // 2D histogram
           const auto &xbins = hvar.get<std::vector<double> >("xbins"), &ybins = hvar.get<std::vector<double> >("ybins");
+          name = utils::replace_all(name, ":", "_");
+          const auto title = "d^2(sig)/d" + vars.at(0) + "/d" + vars.at(1) + " (pb/bin)";
+          CG_LOG << hvar;
           if (xbins.size() > 1 && ybins.size() > 1)
-            hists2d_.emplace_back(Hist2DInfo{vars.at(0), vars.at(1), utils::Hist2D(xbins, ybins)});
+            hists2d_.emplace_back(Hist2DInfo{vars.at(0), vars.at(1), utils::Hist2D(xbins, ybins, name, title), log});
           else if (hvar.get<Limits>("xrange").valid()) {
             const auto& nbinsx = (hvar.get<int>("nbins") > 0 ? hvar.get<int>("nbins") : hvar.get<int>("nbinsX"));
-            hists2d_.emplace_back(Hist2DInfo{
-                vars.at(0),
-                vars.at(1),
-                utils::Hist2D(
-                    nbinsx, hvar.get<Limits>("xrange"), hvar.get<int>("nbinsY"), hvar.get<Limits>("yrange"))});
+            hists2d_.emplace_back(Hist2DInfo{vars.at(0),
+                                             vars.at(1),
+                                             utils::Hist2D(nbinsx,
+                                                           hvar.get<Limits>("xrange"),
+                                                           hvar.get<int>("nbinsY"),
+                                                           hvar.get<Limits>("yrange"),
+                                                           name,
+                                                           title),
+                                             log});
           } else {
             CG_WARNING("TextHistHandler")
                 << "Neither (x/y)range nor (x/y)bins found in parameters for 1D plot of variables \"" << vars << "\".";
             continue;
           }
           auto& hist = hists2d_.rbegin()->hist;
-          hist.setName(key);
           hist.setXlabel(vars.at(0));
           hist.setYlabel(vars.at(1));
-          hist.setName("d^2(sig)/d" + vars.at(0) + "/d" + vars.at(1) + " (pb/bin)");
-          hist.setLog(hvar.get<bool>("log"));
         }
       }
       if (save_hists_ && !hists_.empty())
@@ -145,7 +153,7 @@ namespace cepgen {
       for (auto& h_var : hists_) {
         h_var.hist.scale(cross_section_ / (num_evts_ + 1));
         std::ostringstream os;
-        drawer_->draw(h_var.hist);
+        drawer_->draw(h_var.hist, h_var.log ? utils::Drawer::Mode::logy : utils::Drawer::Mode::none);
         if (show_hists_)
           CG_INFO("TextHistHandler") << os.str();
         if (save_hists_)
@@ -153,7 +161,7 @@ namespace cepgen {
       }
       for (const auto& h_var : hists2d_) {
         std::ostringstream os;
-        drawer_->draw(h_var.hist);
+        drawer_->draw(h_var.hist, h_var.log ? utils::Drawer::Mode::logy : utils::Drawer::Mode::none);
         if (show_hists_)
           CG_INFO("TextHistHandler") << os.str();
         if (save_hists_)
