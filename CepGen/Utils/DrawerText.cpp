@@ -44,6 +44,8 @@ namespace cepgen {
       const DrawerText& draw(const Hist1D&, const Mode&) const override;
       const DrawerText& draw(const Hist2D&, const Mode&) const override;
 
+      const DrawerText& draw(const std::vector<const Drawable*>&, const Mode&) const override { return *this; }
+
     private:
       friend class Drawable;
 

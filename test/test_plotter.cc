@@ -78,5 +78,12 @@ int main(int argc, char* argv[]) {
       hist2d.fill(gaus1(gen), gaus2(gen));
   plt->draw(hist2d);
 
+  cout << endl << "--------- multiplots ---------" << endl;
+
+  cepgen::utils::Graph1D graph1d_bis("graph1d_bis");
+  for (double x = -M_PI; x <= M_PI; x += 0.25)
+    graph1d_bis.addPoint(x, cos(x));
+  plt->draw({&graph1d, &graph1d_bis});
+
   return 0;
 }

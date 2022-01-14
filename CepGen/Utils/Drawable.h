@@ -76,6 +76,11 @@ namespace cepgen {
       /// Metadata for a two-dimensional axis definition (coordinates and bins values)
       typedef std::map<coord_t, axis_t> dualaxis_t;
 
+      virtual bool isHist1D() const { return false; }   ///< Is this drawable a one-dimensional histogram?
+      virtual bool isHist2D() const { return false; }   ///< Is this drawable a two-dimensional histogram?
+      virtual bool isGraph1D() const { return false; }  ///< Is this drawable a one-dimensional graph?
+      virtual bool isGraph2D() const { return false; }  ///< Is this drawable a two-dimensional graph?
+
     protected:
       std::string name_;    ///< Computer-readable name
       std::string title_;   ///< Human-readable title
@@ -120,6 +125,8 @@ namespace cepgen {
       double integral() const override;
       size_t underflow() const { return underflow_; }
       size_t overflow() const { return overflow_; }
+
+      bool isHist1D() const override { return true; }
 
     private:
       struct gsl_histogram_deleter {
@@ -192,6 +199,8 @@ namespace cepgen {
       };
       const contents_t& content() const { return values_; }
 
+      bool isHist2D() const override { return true; }
+
     private:
       struct gsl_histogram2d_deleter {
         void operator()(gsl_histogram2d* h) { gsl_histogram2d_free(h); }
@@ -211,6 +220,8 @@ namespace cepgen {
       /// Retrieve all values in the graph
       const axis_t& points() const { return values_; }
 
+      bool isGraph1D() const override { return true; }
+
     private:
       axis_t values_;
     };
@@ -226,6 +237,8 @@ namespace cepgen {
       const dualaxis_t& points() const { return values_; }
       /// List all values registered in the graph
       void dumpPoints(std::ostream&) const;
+
+      bool isGraph2D() const override { return true; }
 
     private:
       dualaxis_t values_;

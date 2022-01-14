@@ -34,7 +34,7 @@ namespace cepgen {
       /// Build a drawing utilitary
       explicit Drawer(const ParametersList& params) : NamedModule(params) {}
 
-      enum struct Mode : int16_t { none = 0, logx, logy, logz };
+      enum struct Mode : int16_t { none = 0, logx, logy, logz, nostack };
       friend Mode operator|(const Mode&, const Mode&);
       friend bool operator&(const Mode&, const Mode&);
 
@@ -46,6 +46,10 @@ namespace cepgen {
       virtual const Drawer& draw(const Hist1D&, const Mode& mode = Mode::none) const = 0;
       /// Draw a two-dimensional histogram
       virtual const Drawer& draw(const Hist2D&, const Mode& mode = Mode::none) const = 0;
+
+      /// Draw a collection of drawables
+      virtual const Drawer& draw(const std::vector<const Drawable*>&, const Mode& mode = Mode::none) const = 0;
+
       /// Output operator (when necessary)
       virtual std::ostream& operator<<(std::ostream& os) const { return os; }
 
