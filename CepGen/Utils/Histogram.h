@@ -45,6 +45,8 @@ namespace cepgen {
       /// Retrieve the minimum bin value
       virtual double maximum() const = 0;
 
+      /// Histogram name
+      const std::string& name() const { return name_; }
       /// Set the histogram name
       void setName(const std::string& name) { name_ = name; }
 

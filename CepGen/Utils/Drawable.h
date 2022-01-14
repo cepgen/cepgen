@@ -38,20 +38,19 @@ namespace cepgen {
       Drawable() = default;
       Drawable(const Drawable&);  ///< Copy constructor
 
-      /// Main drawing method and its standard output
-      /// \param[out] os Output stream to use for drawing
-      virtual void draw(std::ostream& os) const = 0;
-
       /// Set the output width
       void setWidth(size_t width) { width_ = width; }
+      /// x-axis label
+      const std::string& xLabel() const { return xlabel_; }
       /// Set the x-axis label
       void setXlabel(const std::string& lab) { xlabel_ = lab; }
+      /// y-axis label
+      const std::string& yLabel() const { return ylabel_; }
       /// Set the y-axis label
       void setYlabel(const std::string& lab) { ylabel_ = lab; }
       /// Switch logarithmic view
       void setLog(bool log = true) { log_ = log; }
 
-    protected:
       /// Generic bin coordinate and its human-readable label
       struct coord_t {
         /// Sorting helper for axis coordinates
@@ -68,49 +67,18 @@ namespace cepgen {
       };
       /// Metadata for an axis (coordinates and bins value)
       typedef std::map<coord_t, value_t> axis_t;
-      /// Sorting helper for the axis metadata container
-      struct map_elements {
-        /// Sort two values in an axis
-        bool operator()(const std::pair<coord_t, value_t>& lhs, const std::pair<coord_t, value_t>& rhs) {
-          return lhs.second.value < rhs.second.value;
-        }
-      };
+      /// Metadata for a two-dimensional axis definition (coordinates and bins values)
+      typedef std::map<coord_t, axis_t> dualaxis_t;
+
+    protected:
       size_t width_{50ul};  ///< Plot width, in TTY characters
       std::string xlabel_;  ///< x-axis title
       std::string ylabel_;  ///< y-axis title
       bool log_{false};     ///< Switch on/off the logarithmic z-axis
     };
 
-    /// Any drawable with one axis
-    class Drawable1D : public Drawable {
-    protected:
-      /// Draw all values for one axis
-      void drawValues(std::ostream&, const axis_t&) const;
-
-    private:
-      static constexpr char CHAR = '*', ERR_CHAR = '-';
-    };
-
-    /// Any drawable with two axes
-    class Drawable2D : public Drawable {
-    protected:
-      /// Metadata for a two-dimensional axis definition (coordinates and bins values)
-      typedef std::map<coord_t, axis_t> dualaxis_t;
-
-      /// Draw all values for two axes
-      void drawValues(std::ostream&, const dualaxis_t&) const;
-
-    private:
-      // greyscale ascii art from http://paulbourke.net/dataformats/asciiart/
-      //static constexpr const char* CHARS = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
-      //static constexpr const char* CHARS = " .:-=+*#%@";
-      static constexpr const char* CHARS = " .:oO0@%#";
-      static const int kColours[];
-      static constexpr const char NEG_CHAR = '-';
-    };
-
     /// 1D histogram container
-    class Hist1D : public Histogram, public Drawable1D {
+    class Hist1D : public Histogram, public Drawable {
     public:
       /// Build a histogram from uniform-width bins
       Hist1D(size_t num_bins_x, const Limits&);
@@ -144,7 +112,8 @@ namespace cepgen {
       double minimum() const override;
       double maximum() const override;
       double integral() const override;
-      void draw(std::ostream&) const override;
+      size_t underflow() const { return underflow_; }
+      size_t overflow() const { return overflow_; }
 
     private:
       struct gsl_histogram_deleter {
@@ -156,7 +125,7 @@ namespace cepgen {
     };
 
     /// 2D histogram container
-    class Hist2D : public Histogram, public Drawable2D {
+    class Hist2D : public Histogram, public Drawable {
     public:
       /// Build a histogram from uniform-width bins
       Hist2D(size_t num_bins_x, const Limits& xlim, size_t num_bins_y, const Limits& ylim);
@@ -200,7 +169,15 @@ namespace cepgen {
       double minimum() const override;
       double maximum() const override;
       double integral() const override;
-      void draw(std::ostream&) const override;
+
+      struct contents_t {
+        inline size_t total() const { return LT_GT + IN_GT + GT_GT + LT_IN + GT_IN + LT_LT + IN_LT + GT_LT; }
+        std::string summary() const;
+        size_t LT_GT{0ull}, IN_GT{0ull}, GT_GT{0ull};
+        size_t LT_IN{0ull}, /* INSIDE */ GT_IN{0ull};
+        size_t LT_LT{0ull}, IN_LT{0ull}, GT_LT{0ull};
+      };
+      const contents_t& content() const { return values_; }
 
     private:
       struct gsl_histogram2d_deleter {
@@ -208,40 +185,34 @@ namespace cepgen {
       };
       typedef std::unique_ptr<gsl_histogram2d, gsl_histogram2d_deleter> gsl_histogram2d_ptr;
       gsl_histogram2d_ptr hist_, hist_w2_;
-      struct contents_t {
-        inline size_t total() const { return LT_GT + IN_GT + GT_GT + LT_IN + GT_IN + LT_LT + IN_LT + GT_LT; }
-        std::string summary() const;
-        size_t LT_GT{0ull}, IN_GT{0ull}, GT_GT{0ull};
-        size_t LT_IN{0ull}, /* INSIDE */ GT_IN{0ull};
-        size_t LT_LT{0ull}, IN_LT{0ull}, GT_LT{0ull};
-      } values_;
+      contents_t values_;
     };
 
     /// A one-dimensional graph object
-    class Graph1D : public Drawable1D {
+    class Graph1D : public Drawable {
     public:
       Graph1D() = default;
 
       /// Add one value to the graph
       void addPoint(double x, double y);
-
-      void draw(std::ostream&) const override;
+      /// Retrieve all values in the graph
+      const axis_t& points() const { return values_; }
 
     private:
       axis_t values_;
     };
 
     /// A two-dimensional graph object
-    class Graph2D : public Drawable2D {
+    class Graph2D : public Drawable {
     public:
       Graph2D() = default;
 
       /// Add one value to the graph
       void addPoint(double x, double y, double z);
+      /// Retrieve all values in the graph
+      const dualaxis_t& points() const { return values_; }
       /// List all values registered in the graph
       void dumpPoints(std::ostream&) const;
-
-      void draw(std::ostream&) const override;
 
     private:
       dualaxis_t values_;

@@ -26,6 +26,7 @@
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Utils/Drawable.h"
+#include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
 
@@ -49,6 +50,7 @@ namespace cepgen {
 
     private:
       std::ofstream file_;
+      const std::unique_ptr<utils::Drawer> drawer_;
       //--- variables definition
       const bool show_hists_, save_hists_;
       const std::string filename_;
@@ -79,6 +81,7 @@ namespace cepgen {
 
     TextHistHandler::TextHistHandler(const ParametersList& params)
         : ExportModule(params),
+          drawer_(utils::DrawerFactory::get().build("text", params)),
           show_hists_(steer<bool>("showHistograms")),
           save_hists_(steer<bool>("saveHistograms")),
           filename_(steer<std::string>("filename")) {
@@ -142,7 +145,7 @@ namespace cepgen {
       for (auto& h_var : hists_) {
         h_var.hist.scale(cross_section_ / (num_evts_ + 1));
         std::ostringstream os;
-        h_var.hist.draw(os);
+        drawer_->draw(h_var.hist);
         if (show_hists_)
           CG_INFO("TextHistHandler") << os.str();
         if (save_hists_)
@@ -150,7 +153,7 @@ namespace cepgen {
       }
       for (const auto& h_var : hists2d_) {
         std::ostringstream os;
-        h_var.hist.draw(os);
+        drawer_->draw(h_var.hist);
         if (show_hists_)
           CG_INFO("TextHistHandler") << os.str();
         if (save_hists_)

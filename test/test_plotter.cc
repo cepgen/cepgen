@@ -20,19 +20,31 @@
 #include <iostream>
 #include <random>
 
+#include "CepGen/Generator.h"
 #include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawable.h"
+#include "CepGen/Utils/Drawer.h"
 
 using namespace std;
 
-int main() {
+int main(int argc, char* argv[]) {
+  string plotter;
+
+  cepgen::ArgumentsParser(argc, argv)
+      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "text")
+      .parse();
+  cepgen::initialise();
+
+  auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+
   cout << "---------- 1D graph ----------" << endl;
 
   // test 1D graph
   cepgen::utils::Graph1D graph1d;
   for (double x = -M_PI; x <= M_PI; x += 0.25)
     graph1d.addPoint(x, sin(x));
-  graph1d.draw(cout);
+  plt->draw(graph1d);
 
   cout << endl << "---------- 2D graph ----------" << endl;
 
@@ -42,7 +54,7 @@ int main() {
     for (double y = -5.; y < 5.; y += 0.2)
       graph2d.addPoint(x, y, (sin(x) / x) * (sin(y) / y));
   graph2d.setLog(true);
-  graph2d.draw(cout);
+  plt->draw(graph2d);
 
   default_random_engine gen;
 
@@ -55,7 +67,7 @@ int main() {
     hist1d.fill(bw(gen));
   hist1d.setXlabel("Random variable");
   hist1d.setYlabel("Occurrences");
-  hist1d.draw(cout);
+  plt->draw(hist1d);
 
   cout << endl << "-------- 2D histogram --------" << endl;
 
@@ -65,7 +77,7 @@ int main() {
   for (size_t i = 0; i < 1000; ++i)
     for (size_t j = 0; j < 1000; ++j)
       hist2d.fill(gaus1(gen), gaus2(gen));
-  hist2d.draw(cout);
+  plt->draw(hist2d);
 
   return 0;
 }
