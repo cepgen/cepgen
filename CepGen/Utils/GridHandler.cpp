@@ -213,7 +213,13 @@ namespace cepgen {
       } break;
       case 2: {  //--- (x,y) |-> (f1,...)
 #ifdef GSL_VERSION_ABOVE_2_1
-        const gsl_interp2d_type* type = gsl_interp2d_bilinear;
+        if (values_raw_.size() < gsl_interp2d_type_min_size(gsl_interp2d_bicubic))
+          CG_WARNING("GridHandler") << "The grid size is too small (" << values_raw_.size() << " < "
+                                    << gsl_interp2d_type_min_size(gsl_interp2d_bicubic)
+                                    << ") for bicubic interpolation. Switching to a bilinear interpolation mode.";
+        const gsl_interp2d_type* type =
+            (values_raw_.size() > gsl_interp2d_type_min_size(gsl_interp2d_bicubic) ? gsl_interp2d_bicubic
+                                                                                   : gsl_interp2d_bilinear);
         splines_2d_.clear();
         for (size_t i = 0; i < N; ++i) {
           values_[i].reset(new double[coords_.at(0).size() * coords_.at(1).size()]);
