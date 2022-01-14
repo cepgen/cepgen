@@ -44,15 +44,17 @@ namespace cepgen {
       const DrawerText& draw(const Hist1D&, const Mode&) const override;
       const DrawerText& draw(const Hist2D&, const Mode&) const override;
 
-      const DrawerText& draw(const std::vector<const Drawable*>&, const Mode&) const override { return *this; }
+      const DrawerText& draw(const std::vector<const Drawable*>&, const Mode&) const override;
 
     private:
       friend class Drawable;
 
-      void drawValues(std::ostream&, const Drawable&, const Drawable::axis_t&, const Mode&) const;
-      void drawValues(std::ostream&, const Drawable&, const Drawable::dualaxis_t&, const Mode&) const;
+      void drawValues(std::ostream&, const Drawable&, const Drawable::axis_t&, const Mode&, bool effects = true) const;
+      void drawValues(
+          std::ostream&, const Drawable&, const Drawable::dualaxis_t&, const Mode&, bool effects = true) const;
 
       static constexpr char CHAR = '*', ERR_CHAR = '-';
+      static constexpr const char* CHAR_ALT = "o.#@";
       // greyscale ascii art from http://paulbourke.net/dataformats/asciiart/
       //static constexpr const char* CHARS = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
       //static constexpr const char* CHARS = " .:-=+*#%@";
@@ -165,10 +167,86 @@ namespace cepgen {
       return *this;
     }
 
-    void DrawerText::drawValues(std::ostream& os,
-                                const Drawable& dr,
-                                const Drawable::axis_t& axis,
-                                const Mode& mode) const {
+    const DrawerText& DrawerText::draw(const std::vector<const Drawable*>& objs, const Mode& mode) const {
+      auto inside_plot = [](const std::string& str) -> std::string {
+        std::istringstream ss(str);
+        std::ostringstream out;
+        for (std::string line; std::getline(ss, line);) {
+          const auto tok = utils::split(line, ':');
+          if (tok.size() == 3)
+            out << tok.at(1) << "\n";
+        }
+        return out.str();
+      };
+      auto replace_plot = [](const std::string& orig, const std::string& new_plot) -> std::string {
+        std::istringstream ss(orig), ssnew(new_plot);
+        std::ostringstream out;
+        for (std::string line; std::getline(ss, line);) {
+          auto tok = utils::split(line, ':');
+          if (tok.size() == 3) {
+            std::getline(ssnew, tok[1]);
+            tok[2].clear();
+            out << utils::merge(tok, ":") << "\n";
+          } else
+            out << line << "\n";
+        }
+        return out.str();
+      };
+      std::stringstream buf, os_base;
+      size_t num_plts = 0;
+      auto add_plot = [&buf, &num_plts](const std::string& plt) {
+        ++num_plts;
+        if (plt.empty())
+          return;
+        std::istringstream ss(plt);
+        std::ostringstream out;
+        for (std::string line; std::getline(ss, line);) {
+          std::string base(line.size(), ' ');
+          if (!buf.str().empty() && !std::getline(buf, base)) {
+            CG_WARNING("DrawerText:draw") << "Invalid plot to be produced... Aborting the multiplot.";
+            return;
+          }
+          for (size_t j = 0; j < line.size(); ++j) {
+            if (line[j] == CHAR)
+              base[j] = (num_plts > 1 ? CHAR_ALT[num_plts - 2] : CHAR);
+            else if (line[j] == ERR_CHAR)
+              base[j] = ERR_CHAR;
+          }
+          out << base << "\n";
+        }
+        buf.str(out.str());
+      };
+      std::vector<std::string> plt_names;
+      for (const auto* obj : objs)
+        if (obj->isHist1D())
+          obj;
+        else if (obj->isGraph1D()) {
+          const auto* gr = dynamic_cast<const Graph1D*>(obj);
+          if (os_base.str().empty()) {
+            drawValues(os_base, *gr, gr->points(), mode, false);
+            add_plot(inside_plot(os_base.str()));
+          } else {
+            std::ostringstream os;
+            drawValues(os, *gr, gr->points(), mode, false);
+            add_plot(inside_plot(os.str()));
+          }
+          plt_names.emplace_back(gr->name());
+        } else {
+          CG_WARNING("DrawerText:draw") << "Cannot add drawable '" << obj->name() << "' to the stack.";
+          continue;
+        }
+      CG_LOG.log([&](auto& log) {
+        log << replace_plot(os_base.str(), buf.str());
+        if (num_plts > 1)
+          log << "\tLegend:\n\t  " << CHAR << ": " << plt_names.at(0);
+        for (size_t i = 1; i < num_plts; ++i)
+          log << "\n\t  " << CHAR_ALT[i - 1] << ": " << plt_names.at(i);
+      });
+      return *this;
+    }
+
+    void DrawerText::drawValues(
+        std::ostream& os, const Drawable& dr, const Drawable::axis_t& axis, const Mode& mode, bool effect) const {
       const std::string sep(17, ' ');
       const double max_val = std::max_element(axis.begin(), axis.end(), map_elements())->second.value *
                              (mode & Mode::logy ? 5. : 1.2),
@@ -214,7 +292,8 @@ namespace cepgen {
           }
           os << "\n"
              << left_label << ":" << (ival > ierr ? std::string(ival - ierr, ' ') : "")
-             << (ierr > 0 ? std::string(ierr, ERR_CHAR) : "") << utils::boldify(std::string(1, CHAR))
+             << (ierr > 0 ? std::string(ierr, ERR_CHAR) : "")
+             << (effect ? utils::boldify(std::string(1, CHAR)) : std::string(1, CHAR))
              << (ierr > 0 ? std::string(std::min(width_ - ival - 1, ierr), ERR_CHAR) : "")
              << (ival + ierr < width_ + 1 ? std::string(width_ - ival - ierr - 1, ' ') : "") << ": "
              << utils::format("%6.2e +/- %6.2e", val, unc);
@@ -234,10 +313,8 @@ namespace cepgen {
                                         (int)Colour::yellow,
                                         (int)Colour::reset};
 
-    void DrawerText::drawValues(std::ostream& os,
-                                const Drawable& dr,
-                                const Drawable::dualaxis_t& axes,
-                                const Mode& mode) const {
+    void DrawerText::drawValues(
+        std::ostream& os, const Drawable& dr, const Drawable::dualaxis_t& axes, const Mode& mode, bool effects) const {
       const std::string sep(17, ' ');
       if (!dr.yLabel().empty())
         os << sep << std::string(std::max(0., 2. + width_ - dr.yLabel().size()), ' ') << dr.yLabel() << "\n";
@@ -275,19 +352,21 @@ namespace cepgen {
             else
               val_norm = val / max_val;
             if (std::isnan(val_norm)) {
-              os << utils::colourise("!", (utils::Colour)kColours[0]);
+              os << (effects ? utils::colourise("!", (utils::Colour)kColours[0]) : "!");
               continue;
             }
             const short sign = (val_norm == 0. ? 0 : val_norm / fabs(val_norm));
             val_norm *= sign;
             if (sign == -1)
-              os << utils::colourise(std::string(1, NEG_CHAR), (utils::Colour)kColours[0]);
+              os << (effects ? utils::colourise(std::string(1, NEG_CHAR), (utils::Colour)kColours[0])
+                             : std::string(1, NEG_CHAR));
             else {
               size_t ch_id = ceil(val_norm * (strlen(CHARS) - 1));
               size_t col_id = 1 + (val_norm * (sizeof(kColours) / (sizeof(int)) - 2));
-              os << utils::colourise(std::string(1, CHARS[ch_id]),
-                                     (utils::Colour)kColours[col_id],
-                                     (val_norm > 0.75 ? utils::Modifier::bold : utils::Modifier::reset));
+              os << (effects ? utils::colourise(std::string(1, CHARS[ch_id]),
+                                                (utils::Colour)kColours[col_id],
+                                                (val_norm > 0.75 ? utils::Modifier::bold : utils::Modifier::reset))
+                             : std::string(1, CHARS[ch_id]));
             }
           }
         }

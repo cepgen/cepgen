@@ -71,7 +71,7 @@ namespace cepgen {
       THStack hs;
       ROOTCanvas canv("multi", "");
       size_t i = 0;
-      for (const auto& obj : objs) {
+      for (const auto* obj : objs) {
         if (obj->isHist1D()) {
           auto* hist = new TH1D(convert(*dynamic_cast<const Hist1D*>(obj)));
           hist->SetLineColor(ROOTCanvas::colours.at(i++));
@@ -83,7 +83,7 @@ namespace cepgen {
           mg.Add(gr);
           canv.AddLegendEntry(gr, obj->title(), "l");
         } else {
-          CG_WARNING("DrawerROOT") << "Cannot add drawable '" << obj->name() << "' to the stack.";
+          CG_WARNING("DrawerROOT:draw") << "Cannot add drawable '" << obj->name() << "' to the stack.";
           continue;
         }
       }
