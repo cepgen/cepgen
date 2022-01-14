@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
 
   cepgen::ArgumentsParser(argc, argv)
       .addArgument("mode,t", "beam modelling", &mode, (int)cepgen::mode::Beam::ProtonElastic)
-      .addOptionalArgument("mx,M", "diffractive mass (GeV/c^2)", &mx, 100.)
+      .addOptionalArgument("mx,x", "diffractive mass (GeV/c^2)", &mx, 100.)
       .addOptionalArgument("sf,s", "structure functions modelling", &strfun_type, 301)
       .addOptionalArgument("q2min,m", "minimal parton virtuality (GeV^2)", &q2min, 1.)
       .addOptionalArgument("q2max,M", "maximal parton virtuality (GeV^2)", &q2max, 10000.)
@@ -101,7 +101,9 @@ int main(int argc, char* argv[]) {
       ++i;
     }
     mg.Draw("al");
-    mg.GetHistogram()->SetTitle(Form(";Q^{2};%s", plt.first));
+    // ugly fix to propagate first plot axes label onto multigraph
+    mg.GetHistogram()->GetXaxis()->SetTitle((*plt.second.begin())->GetXaxis()->GetTitle());
+    mg.GetHistogram()->GetYaxis()->SetTitle((*plt.second.begin())->GetYaxis()->GetTitle());
     c.Prettify(mg.GetHistogram());
     c.Save("pdf");
   }
