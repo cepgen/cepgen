@@ -82,7 +82,8 @@ namespace cepgen {
     void Hist1D::fill(double x, double weight) {
       auto ret = gsl_histogram_accumulate(hist_.get(), x, weight);
       if (ret == GSL_SUCCESS) {
-        gsl_histogram_accumulate(hist_w2_.get(), x, weight * weight);
+        if (auto ret2 = gsl_histogram_accumulate(hist_w2_.get(), x, weight * weight) != GSL_SUCCESS)
+          throw CG_FATAL("Hist1D:fill") << "(w2 histogram): " << gsl_strerror(ret2);
         return;
       }
       if (ret != GSL_EDOM)
