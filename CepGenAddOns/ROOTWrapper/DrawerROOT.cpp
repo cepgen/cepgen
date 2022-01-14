@@ -19,7 +19,9 @@ namespace cepgen {
       const DrawerROOT& draw(const Hist1D&, const Mode&) const override;
       const DrawerROOT& draw(const Hist2D&, const Mode&) const override;
 
-      const DrawerROOT& draw(const std::vector<const Drawable*>&, const Mode& mode = Mode::none) const override;
+      const DrawerROOT& draw(const DrawableColl&,
+                             const std::string& name = "",
+                             const Mode& mode = Mode::none) const override;
 
     private:
       static TGraphErrors convert(const Graph1D&);
@@ -66,10 +68,10 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerROOT& DrawerROOT::draw(const std::vector<const Drawable*>& objs, const Mode& mode) const {
+    const DrawerROOT& DrawerROOT::draw(const DrawableColl& objs, const std::string& name, const Mode& mode) const {
       TMultiGraph mg;
       THStack hs;
-      ROOTCanvas canv("multi", "");
+      ROOTCanvas canv(name.c_str(), "");
       size_t i = 0;
       for (const auto* obj : objs) {
         if (obj->isHist1D()) {

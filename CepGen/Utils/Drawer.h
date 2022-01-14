@@ -47,8 +47,12 @@ namespace cepgen {
       /// Draw a two-dimensional histogram
       virtual const Drawer& draw(const Hist2D&, const Mode& mode = Mode::none) const = 0;
 
+      /// A collection of drawable objects
+      typedef std::vector<const Drawable*> DrawableColl;
       /// Draw a collection of drawables
-      virtual const Drawer& draw(const std::vector<const Drawable*>&, const Mode& mode = Mode::none) const = 0;
+      virtual const Drawer& draw(const DrawableColl&,
+                                 const std::string& name = "",
+                                 const Mode& mode = Mode::none) const = 0;
 
       /// Output operator (when necessary)
       virtual std::ostream& operator<<(std::ostream& os) const { return os; }

@@ -83,9 +83,17 @@ int main(int argc, char* argv[]) {
   cepgen::utils::Graph1D graph1d_bis("graph1d_bis"), graph1d_ter("graph1d_ter");
   for (double x = -M_PI; x <= M_PI; x += 0.25) {
     graph1d_bis.addPoint(x, cos(x));
-    graph1d_ter.addPoint(x, cos(x) / x);
+    graph1d_ter.addPoint(x, cos(x) * x);
   }
-  plt->draw({&graph1d, &graph1d_bis, &graph1d_ter});
+  plt->draw({&graph1d, &graph1d_bis, &graph1d_ter}, "multiplot1");
+
+  cout << endl << "------- graph and hist -------" << endl;
+
+  cepgen::utils::Hist1D hist1d_bis(graph1d.points().size(), {-M_PI, M_PI}, "hist1d_bis");
+  for (size_t i = 0; i < 10000; ++i)
+    hist1d_bis.fill(gaus1(gen));
+  hist1d_bis.normalise(10.);
+  plt->draw({&graph1d, &hist1d_bis}, "multiplot2");
 
   return 0;
 }

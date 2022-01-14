@@ -44,7 +44,9 @@ namespace cepgen {
       const DrawerText& draw(const Hist1D&, const Mode&) const override;
       const DrawerText& draw(const Hist2D&, const Mode&) const override;
 
-      const DrawerText& draw(const std::vector<const Drawable*>&, const Mode&) const override;
+      const DrawerText& draw(const DrawableColl&,
+                             const std::string& name = "",
+                             const Mode& mode = Mode::none) const override;
 
     private:
       friend class Drawable;
@@ -98,13 +100,7 @@ namespace cepgen {
       CG_LOG.log([&](auto& log) {
         if (!hist.name().empty())
           log << "plot of \"" << hist.name() << "\"\n";
-        Drawable::axis_t axis;
-        for (size_t bin = 0; bin < hist.nbins(); ++bin) {
-          const auto& range_i = hist.binRange(bin);
-          axis[Drawable::coord_t{range_i.x(0.5), utils::format("[%7.2f,%7.2f)", range_i.min(), range_i.max())}] =
-              Drawable::value_t{hist.value(bin), hist.valueUnc(bin)};
-        }
-        drawValues(log.stream(), hist, axis, mode);
+        drawValues(log.stream(), hist, hist.axis(), mode);
         const double bin_width = hist.range().range() / hist.nbins();
         log << "\tbin width=" << utils::s("unit", bin_width, true) << ", "
             << "mean=" << hist.mean() << ", "
@@ -167,7 +163,7 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerText& DrawerText::draw(const std::vector<const Drawable*>& objs, const Mode& mode) const {
+    const DrawerText& DrawerText::draw(const DrawableColl& objs, const std::string& name, const Mode& mode) const {
       auto inside_plot = [](const std::string& str) -> std::string {
         std::istringstream ss(str);
         std::ostringstream out;
@@ -218,9 +214,18 @@ namespace cepgen {
       };
       std::vector<std::string> plt_names;
       for (const auto* obj : objs)
-        if (obj->isHist1D())
-          obj;
-        else if (obj->isGraph1D()) {
+        if (obj->isHist1D()) {
+          const auto* hist = dynamic_cast<const Hist1D*>(obj);
+          if (os_base.str().empty()) {
+            drawValues(os_base, *hist, hist->axis(), mode, false);
+            add_plot(inside_plot(os_base.str()));
+          } else {
+            std::ostringstream os;
+            drawValues(os, *hist, hist->axis(), mode, false);
+            add_plot(inside_plot(os.str()));
+          }
+          plt_names.emplace_back(hist->name());
+        } else if (obj->isGraph1D()) {
           const auto* gr = dynamic_cast<const Graph1D*>(obj);
           if (os_base.str().empty()) {
             drawValues(os_base, *gr, gr->points(), mode, false);
@@ -236,6 +241,8 @@ namespace cepgen {
           continue;
         }
       CG_LOG.log([&](auto& log) {
+        if (!name.empty())
+          log << "plot of \"" << name << "\"\n";
         log << replace_plot(os_base.str(), buf.str());
         if (num_plts > 1)
           log << "\tLegend:\n\t  " << CHAR << ": " << plt_names.at(0);
@@ -265,9 +272,11 @@ namespace cepgen {
             coord_set.first.label.empty() ? utils::format("%17g", coord_set.first.value) : coord_set.first.label;
         if (min_val == max_val) {
           os << "\n" << left_label << ":";
-          if (idx == axis.size() / 2)
-            os << std::string((width_ - 10) / 2, ' ') << "E M P T Y " << std::string((width_ - 10) / 2, ' ');
-          else
+          if (idx == axis.size() / 2) {
+            const std::string empty = "E M P T Y ";
+            os << std::string((width_ - empty.size()) / 2, ' ') << empty
+               << std::string((width_ - empty.size()) / 2, ' ');
+          } else
             os << std::string(width_, ' ');
           os << ":";
         } else {
