@@ -72,74 +72,70 @@ namespace cepgen {
     DrawerText::DrawerText(const ParametersList& params) : Drawer(params), width_(steerAs<int, size_t>("width")) {}
 
     const DrawerText& DrawerText::draw(const Graph1D& graph, const std::string&, const Mode& mode) const {
-      std::ostringstream os;
-      drawValues(os, graph, graph.points(), mode);
-      CG_LOG << os.str();
+      CG_LOG.log([&](auto& log) { drawValues(log.stream(), graph, graph.points(), mode); });
       return *this;
     }
 
     const DrawerText& DrawerText::draw(const Graph2D& graph, const std::string&, const Mode& mode) const {
-      std::ostringstream os;
-      drawValues(os, graph, graph.points(), mode);
-      CG_LOG << os.str();
+      CG_LOG.log([&](auto& log) { drawValues(log.stream(), graph, graph.points(), mode); });
       return *this;
     }
 
     const DrawerText& DrawerText::draw(const Hist1D& hist, const std::string&, const Mode& mode) const {
-      std::ostringstream os;
-      if (!hist.name().empty())
-        os << "plot of \"" << hist.name() << "\"\n";
-      Drawable::axis_t axis;
-      for (size_t bin = 0; bin < hist.nbins(); ++bin) {
-        const auto& range_i = hist.binRange(bin);
-        axis[Drawable::coord_t{range_i.x(0.5), utils::format("[%7.2f,%7.2f)", range_i.min(), range_i.max())}] =
-            Drawable::value_t{hist.value(bin), hist.valueUnc(bin)};
-      }
-      drawValues(os, hist, axis, mode);
-      const double bin_width = hist.range().range() / hist.nbins();
-      os << "\tbin width=" << utils::s("unit", bin_width, true) << ", "
-         << "mean=" << hist.mean() << ", "
-         << "st.dev.=" << hist.rms() << "\n\t"
-         << "integr.=" << hist.integral();
-      if (hist.underflow() > 0ull)
-        os << ", underflow: " << hist.underflow();
-      if (hist.overflow() > 0ull)
-        os << ", overflow: " << hist.overflow();
-      CG_LOG << os.str();
+      CG_LOG.log([&](auto& log) {
+        if (!hist.name().empty())
+          log << "plot of \"" << hist.name() << "\"\n";
+        Drawable::axis_t axis;
+        for (size_t bin = 0; bin < hist.nbins(); ++bin) {
+          const auto& range_i = hist.binRange(bin);
+          axis[Drawable::coord_t{range_i.x(0.5), utils::format("[%7.2f,%7.2f)", range_i.min(), range_i.max())}] =
+              Drawable::value_t{hist.value(bin), hist.valueUnc(bin)};
+        }
+        drawValues(log.stream(), hist, axis, mode);
+        const double bin_width = hist.range().range() / hist.nbins();
+        log << "\tbin width=" << utils::s("unit", bin_width, true) << ", "
+            << "mean=" << hist.mean() << ", "
+            << "st.dev.=" << hist.rms() << "\n\t"
+            << "integr.=" << hist.integral();
+        if (hist.underflow() > 0ull)
+          log << ", underflow: " << hist.underflow();
+        if (hist.overflow() > 0ull)
+          log << ", overflow: " << hist.overflow();
+      });
       return *this;
     }
 
     const DrawerText& DrawerText::draw(const Hist2D& hist, const std::string&, const Mode& mode) const {
-      std::ostringstream os;
-      if (!hist.name().empty())
-        os << "plot of \"" << hist.name() << "\"\n";
-      Drawable::dualaxis_t axes;
-      for (size_t binx = 0; binx < hist.nbinsX(); ++binx) {
-        const auto& range_x = hist.binRangeX(binx);
-        auto& axis_x =
-            axes[Drawable::coord_t{range_x.x(0.5), utils::format("[%7.2f,%7.2f)", range_x.min(), range_x.max())}];
-        for (size_t biny = 0; biny < hist.nbinsY(); ++biny) {
-          const auto& range_y = hist.binRangeY(biny);
-          axis_x[Drawable::coord_t{range_y.x(0.5), utils::format("%+g", range_y.min())}] =
-              Drawable::value_t{hist.value(binx, biny), hist.valueUnc(binx, biny)};
+      CG_LOG.log([&](auto& log) {
+        if (!hist.name().empty())
+          log << "plot of \"" << hist.name() << "\"\n";
+        Drawable::dualaxis_t axes;
+        for (size_t binx = 0; binx < hist.nbinsX(); ++binx) {
+          const auto& range_x = hist.binRangeX(binx);
+          auto& axis_x =
+              axes[Drawable::coord_t{range_x.x(0.5), utils::format("[%7.2f,%7.2f)", range_x.min(), range_x.max())}];
+          for (size_t biny = 0; biny < hist.nbinsY(); ++biny) {
+            const auto& range_y = hist.binRangeY(biny);
+            axis_x[Drawable::coord_t{range_y.x(0.5), utils::format("%+g", range_y.min())}] =
+                Drawable::value_t{hist.value(binx, biny), hist.valueUnc(binx, biny)};
+          }
         }
-      }
-      drawValues(os, hist, axes, mode);
-      const auto &x_range = hist.rangeX(), &y_range = hist.rangeY();
-      const double bin_width_x = x_range.range() / hist.nbinsX(), bin_width_y = y_range.range() / hist.nbinsY();
-      os << "\t"
-         << " x-axis: "
-         << "bin width=" << utils::s("unit", bin_width_x, true) << ", "
-         << "mean=" << hist.meanX() << ","
-         << "st.dev.=" << hist.rmsX() << "\n\t"
-         << " y-axis: "
-         << "bin width=" << utils::s("unit", bin_width_y, true) << ", "
-         << "mean=" << hist.meanY() << ","
-         << "st.dev.=" << hist.rmsY() << ",\n\t"
-         << " integral=" << hist.integral();
-      if (hist.content().total() > 0)
-        os << ", outside range (in/overflow):\n" << hist.content().summary();
-      CG_LOG << os.str();
+        drawValues(log.stream(), hist, axes, mode);
+        const auto &x_range = hist.rangeX(), &y_range = hist.rangeY();
+        const double bin_width_x = x_range.range() / hist.nbinsX(), bin_width_y = y_range.range() / hist.nbinsY();
+        log << "\t"
+            << " x-axis: "
+            << "bin width=" << utils::s("unit", bin_width_x, true) << ", "
+            << "mean=" << hist.meanX() << ","
+            << "st.dev.=" << hist.rmsX() << "\n\t"
+            << " y-axis: "
+            << "bin width=" << utils::s("unit", bin_width_y, true) << ", "
+            << "mean=" << hist.meanY() << ","
+            << "st.dev.=" << hist.rmsY() << ",\n\t"
+            << " integral=" << hist.integral();
+        if (hist.content().total() > 0)
+          log << ", outside range (in/overflow):\n" << hist.content().summary();
+      });
       return *this;
     }
 
