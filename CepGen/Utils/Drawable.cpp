@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,16 +22,13 @@
 #include <iomanip>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/Plotter.h"
+#include "CepGen/Utils/Drawable.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace utils {
     Drawable::Drawable(const Drawable& oth)
         : width_(oth.width_), xlabel_(oth.xlabel_), ylabel_(oth.ylabel_), log_(oth.log_) {}
-
-    Hist::Hist(const Hist& oth) : name_(oth.name_) {}
-    Hist::~Hist() {}
 
     void Drawable1D::drawValues(std::ostream& os, const axis_t& axis) const {
       const std::string sep(17, ' ');
@@ -200,7 +197,7 @@ namespace cepgen {
     }
 
     Hist1D::Hist1D(const Hist1D& oth)
-        : Hist(oth),
+        : Histogram(oth),
           hist_(gsl_histogram_clone(oth.hist_.get())),
           hist_w2_(gsl_histogram_clone(oth.hist_w2_.get())),
           underflow_(oth.underflow_),
@@ -310,7 +307,7 @@ namespace cepgen {
     }
 
     Hist2D::Hist2D(const Hist2D& oth)
-        : Hist(oth),
+        : Histogram(oth),
           hist_(gsl_histogram2d_clone(oth.hist_.get())),
           hist_w2_(gsl_histogram2d_clone(oth.hist_w2_.get())),
           values_(oth.values_) {}

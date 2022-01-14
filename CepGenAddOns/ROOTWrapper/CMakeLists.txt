@@ -4,7 +4,7 @@ if(NOT ROOT_FOUND)
   return()
 endif()
 
-set(sources IntegratorROOT.cpp ROOTTree*.cpp ROOTHistsHandler.cpp FunctionalROOT.cpp)
+set(sources IntegratorROOT.cpp DrawerROOT.cpp ROOTTree*.cpp ROOTHistsHandler.cpp FunctionalROOT.cpp)
 
 #--- FOAM integrator
 if(CMAKE_BUILD_FOAM)

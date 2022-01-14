@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,8 @@
 #include <iostream>
 #include <random>
 
-#include "CepGen/Utils/Plotter.h"
+#include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Utils/Drawable.h"
 
 using namespace std;
 

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Utils_Plotter_h
-#define CepGen_Utils_Plotter_h
+#ifndef CepGen_Utils_Drawable_h
+#define CepGen_Utils_Drawable_h
 
 #include <gsl/gsl_histogram.h>
 #include <gsl/gsl_histogram2d.h>
@@ -27,39 +27,11 @@
 #include <string>
 #include <vector>
 
+#include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/Limits.h"
 
 namespace cepgen {
   namespace utils {
-    /**
-     * \brief Generic text-based plotting utility
-     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-     * \date Jul 2019
-     */
-    class Hist {
-    public:
-      Hist() = default;
-      explicit Hist(const Hist&);  ///< Copy constructor
-      virtual ~Hist();
-
-      /// Reset the histogram
-      virtual void clear() = 0;
-      /// Rescale all histogram bins by a constant factor
-      virtual void scale(double) = 0;
-      /// Compute the histogram integral
-      virtual double integral() const = 0;
-      /// Retrieve the maximum bin value
-      virtual double minimum() const = 0;
-      /// Retrieve the minimum bin value
-      virtual double maximum() const = 0;
-
-      /// Set the histogram name
-      void setName(const std::string& name) { name_ = name; }
-
-    protected:
-      std::string name_;  ///< Histogram human-readable name
-    };
-
     /// A generic object which can be drawn in the standard output
     class Drawable {
     public:
@@ -138,7 +110,7 @@ namespace cepgen {
     };
 
     /// 1D histogram container
-    class Hist1D : public Hist, public Drawable1D {
+    class Hist1D : public Histogram, public Drawable1D {
     public:
       /// Build a histogram from uniform-width bins
       Hist1D(size_t num_bins_x, const Limits&);
@@ -184,7 +156,7 @@ namespace cepgen {
     };
 
     /// 2D histogram container
-    class Hist2D : public Hist, public Drawable2D {
+    class Hist2D : public Histogram, public Drawable2D {
     public:
       /// Build a histogram from uniform-width bins
       Hist2D(size_t num_bins_x, const Limits& xlim, size_t num_bins_y, const Limits& ylim);
