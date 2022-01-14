@@ -108,7 +108,7 @@ namespace cepgen {
           const auto& obj_type = obj_descr_.at(key).type();
           if (obj_type == Type::Value)
             os << ParametersList::getString(key);
-          if (obj_type == Type::ParametersVector) {
+          else if (obj_type == Type::ParametersVector) {
             os << utils::colourise("Vector of parameters collections",
                                    utils::Colour::none,
                                    utils::Modifier::italic | utils::Modifier::underline);
@@ -143,8 +143,7 @@ namespace cepgen {
   template <>
   ParametersDescription& ParametersDescription::add<ParametersDescription>(const std::string& name,
                                                                            const ParametersDescription& desc) {
-    if (obj_descr_.count(name) == 0)
-      obj_descr_[name] = desc;
+    obj_descr_[name] += desc;
     ParametersList::set<ParametersList>(name, desc.parameters());
     CG_DEBUG("ParametersDescription:add").log([this, &name, &desc](auto& log) {
       log << "Added a new parameters collection \"" << name << "\" as: " << desc;
@@ -166,12 +165,10 @@ namespace cepgen {
   ParametersDescription& ParametersDescription::addParametersDescriptionVector(const std::string& name,
                                                                                const ParametersDescription& desc,
                                                                                const std::vector<ParametersList>& def) {
-    if (obj_descr_.count(name) == 0)
-      obj_descr_[name] = desc;
+    obj_descr_[name] += desc;
     obj_descr_[name].setParametersVector(true);
-    ParametersList::set<std::vector<ParametersList> >(name, {});
     for (const auto& val : def)
-      ParametersList::operator[]<std::vector<ParametersList> >(name).emplace_back(val);
+      ParametersList::operator[]<std::vector<ParametersList> >(name).emplace_back(desc.validate(val));
     CG_DEBUG("ParametersDescription:addParametersDescriptionVector").log([this, &name, &desc, &def](auto& log) {
       log << "Added a new vector of parameters descriptions \"" << name << "\" as: " << desc;
       const auto& mod_name = this->getString(ParametersList::MODULE_NAME);
