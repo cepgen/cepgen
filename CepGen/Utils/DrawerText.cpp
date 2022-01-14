@@ -34,14 +34,15 @@ namespace cepgen {
 
       static ParametersDescription description() {
         auto desc = Drawer::description();
+        desc.setDescription("Text-based drawing module");
         desc.add<int>("width", 50);
         return desc;
       }
 
-      const DrawerText& draw(const Graph1D&, const std::string&, const Mode&) const override;
-      const DrawerText& draw(const Graph2D&, const std::string&, const Mode&) const override;
-      const DrawerText& draw(const Hist1D&, const std::string&, const Mode&) const override;
-      const DrawerText& draw(const Hist2D&, const std::string&, const Mode&) const override;
+      const DrawerText& draw(const Graph1D&, const Mode&) const override;
+      const DrawerText& draw(const Graph2D&, const Mode&) const override;
+      const DrawerText& draw(const Hist1D&, const Mode&) const override;
+      const DrawerText& draw(const Hist2D&, const Mode&) const override;
 
     private:
       friend class Drawable;
@@ -71,17 +72,25 @@ namespace cepgen {
 
     DrawerText::DrawerText(const ParametersList& params) : Drawer(params), width_(steerAs<int, size_t>("width")) {}
 
-    const DrawerText& DrawerText::draw(const Graph1D& graph, const std::string&, const Mode& mode) const {
-      CG_LOG.log([&](auto& log) { drawValues(log.stream(), graph, graph.points(), mode); });
+    const DrawerText& DrawerText::draw(const Graph1D& graph, const Mode& mode) const {
+      CG_LOG.log([&](auto& log) {
+        if (!graph.name().empty())
+          log << "plot of \"" << graph.name() << "\"\n";
+        drawValues(log.stream(), graph, graph.points(), mode);
+      });
       return *this;
     }
 
-    const DrawerText& DrawerText::draw(const Graph2D& graph, const std::string&, const Mode& mode) const {
-      CG_LOG.log([&](auto& log) { drawValues(log.stream(), graph, graph.points(), mode); });
+    const DrawerText& DrawerText::draw(const Graph2D& graph, const Mode& mode) const {
+      CG_LOG.log([&](auto& log) {
+        if (!graph.name().empty())
+          log << "plot of \"" << graph.name() << "\"\n";
+        drawValues(log.stream(), graph, graph.points(), mode);
+      });
       return *this;
     }
 
-    const DrawerText& DrawerText::draw(const Hist1D& hist, const std::string&, const Mode& mode) const {
+    const DrawerText& DrawerText::draw(const Hist1D& hist, const Mode& mode) const {
       CG_LOG.log([&](auto& log) {
         if (!hist.name().empty())
           log << "plot of \"" << hist.name() << "\"\n";
@@ -105,7 +114,7 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerText& DrawerText::draw(const Hist2D& hist, const std::string&, const Mode& mode) const {
+    const DrawerText& DrawerText::draw(const Hist2D& hist, const Mode& mode) const {
       CG_LOG.log([&](auto& log) {
         if (!hist.name().empty())
           log << "plot of \"" << hist.name() << "\"\n";

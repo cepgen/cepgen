@@ -28,8 +28,9 @@
 
 namespace cepgen {
   namespace utils {
-    Drawable::Drawable(const Drawable& oth)
-        : width_(oth.width_), xlabel_(oth.xlabel_), ylabel_(oth.ylabel_), log_(oth.log_) {}
+    Drawable::Drawable(const std::string& name, const std::string& title) : name_(name), title_(title) {}
+
+    Drawable::Drawable(const Drawable& oth) : xlabel_(oth.xlabel_), ylabel_(oth.ylabel_) {}
 
     Drawer::Mode operator|(const Drawer::Mode& lhs, const Drawer::Mode& rhs) {
       std::bitset<7> mod1((int)lhs), mod2((int)rhs);
@@ -41,7 +42,8 @@ namespace cepgen {
       return (int)lhs & (int)rhs;
     }
 
-    Hist1D::Hist1D(size_t num_bins_x, const Limits& xrange) {
+    Hist1D::Hist1D(size_t num_bins_x, const Limits& xrange, const std::string& name, const std::string& title)
+        : Drawable(name, title) {
       auto hist = gsl_histogram_alloc(num_bins_x);
       auto ret = gsl_histogram_set_ranges_uniform(hist, xrange.min(), xrange.max());
       if (ret != GSL_SUCCESS)
@@ -52,7 +54,8 @@ namespace cepgen {
                         << ".";
     }
 
-    Hist1D::Hist1D(const std::vector<double>& xbins) {
+    Hist1D::Hist1D(const std::vector<double>& xbins, const std::string& name, const std::string& title)
+        : Drawable(name, title) {
       auto hist = gsl_histogram_alloc(xbins.size() - 1);
       auto ret = gsl_histogram_set_ranges(hist, xbins.data(), xbins.size());
       if (ret != GSL_SUCCESS)
@@ -130,7 +133,13 @@ namespace cepgen {
     double Hist1D::maximum() const { return gsl_histogram_max_val(hist_.get()); }
     double Hist1D::integral() const { return gsl_histogram_sum(hist_.get()); }
 
-    Hist2D::Hist2D(size_t num_bins_x, const Limits& xrange, size_t num_bins_y, const Limits& yrange) {
+    Hist2D::Hist2D(size_t num_bins_x,
+                   const Limits& xrange,
+                   size_t num_bins_y,
+                   const Limits& yrange,
+                   const std::string& name,
+                   const std::string& title)
+        : Drawable(name, title) {
       auto hist = gsl_histogram2d_alloc(num_bins_x, num_bins_y);
       auto ret = gsl_histogram2d_set_ranges_uniform(hist, xrange.min(), xrange.max(), yrange.min(), yrange.max());
       if (ret != GSL_SUCCESS)
@@ -141,7 +150,11 @@ namespace cepgen {
                         << " in ranges " << xrange << " and " << yrange << ".";
     }
 
-    Hist2D::Hist2D(const std::vector<double>& xbins, const std::vector<double>& ybins) {
+    Hist2D::Hist2D(const std::vector<double>& xbins,
+                   const std::vector<double>& ybins,
+                   const std::string& name,
+                   const std::string& title)
+        : Drawable(name, title) {
       auto hist = gsl_histogram2d_alloc(xbins.size() - 1, ybins.size() - 1);
       auto ret = gsl_histogram2d_set_ranges(hist, xbins.data(), xbins.size(), ybins.data(), ybins.size());
       if (ret != GSL_SUCCESS)
@@ -253,7 +266,11 @@ namespace cepgen {
     double Hist2D::maximum() const { return gsl_histogram2d_max_val(hist_.get()); }
     double Hist2D::integral() const { return gsl_histogram2d_sum(hist_.get()); }
 
+    Graph1D::Graph1D(const std::string& name, const std::string& title) : Drawable(name, title) {}
+
     void Graph1D::addPoint(double x, double y) { values_[coord_t{x}] = value_t{y}; }
+
+    Graph2D::Graph2D(const std::string& name, const std::string& title) : Drawable(name, title) {}
 
     void Graph2D::addPoint(double x, double y, double z) { values_[coord_t{x}][coord_t{y}] = value_t{z}; }
 

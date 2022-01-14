@@ -39,13 +39,13 @@ namespace cepgen {
       friend bool operator&(const Mode&, const Mode&);
 
       /// Draw a one-dimensional graph
-      virtual const Drawer& draw(const Graph1D&, const std::string& name = "", const Mode& mode = Mode::none) const = 0;
+      virtual const Drawer& draw(const Graph1D&, const Mode& mode = Mode::none) const = 0;
       /// Draw a two-dimensional graph
-      virtual const Drawer& draw(const Graph2D&, const std::string& name = "", const Mode& mode = Mode::none) const = 0;
+      virtual const Drawer& draw(const Graph2D&, const Mode& mode = Mode::none) const = 0;
       /// Draw a one-dimensional histogram
-      virtual const Drawer& draw(const Hist1D&, const std::string& name = "", const Mode& mode = Mode::none) const = 0;
+      virtual const Drawer& draw(const Hist1D&, const Mode& mode = Mode::none) const = 0;
       /// Draw a two-dimensional histogram
-      virtual const Drawer& draw(const Hist2D&, const std::string& name = "", const Mode& mode = Mode::none) const = 0;
+      virtual const Drawer& draw(const Hist2D&, const Mode& mode = Mode::none) const = 0;
       /// Output operator (when necessary)
       virtual std::ostream& operator<<(std::ostream& os) const { return os; }
 

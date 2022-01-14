@@ -11,10 +11,10 @@ namespace cepgen {
     public:
       explicit DrawerROOT(const ParametersList&);
 
-      const DrawerROOT& draw(const Graph1D&, const std::string&, const Mode&) const override;
-      const DrawerROOT& draw(const Graph2D&, const std::string&, const Mode&) const override;
-      const DrawerROOT& draw(const Hist1D&, const std::string&, const Mode&) const override;
-      const DrawerROOT& draw(const Hist2D&, const std::string&, const Mode&) const override;
+      const DrawerROOT& draw(const Graph1D&, const Mode&) const override;
+      const DrawerROOT& draw(const Graph2D&, const Mode&) const override;
+      const DrawerROOT& draw(const Hist1D&, const Mode&) const override;
+      const DrawerROOT& draw(const Hist2D&, const Mode&) const override;
 
     private:
       static TGraphErrors convert(const Graph1D&);
@@ -25,38 +25,36 @@ namespace cepgen {
 
     DrawerROOT::DrawerROOT(const ParametersList& params) : Drawer(params) {}
 
-    const DrawerROOT& DrawerROOT::draw(const Graph1D& graph, const std::string& name, const Mode&) const {
+    const DrawerROOT& DrawerROOT::draw(const Graph1D& graph, const Mode&) const {
       auto gr = convert(graph);
-      cepgen::ROOTCanvas canv(name);
+      cepgen::ROOTCanvas canv(graph.name(), graph.title());
       gr.Draw("al");
       canv.Prettify(gr.GetHistogram());
       canv.Save("pdf");
       return *this;
     }
 
-    const DrawerROOT& DrawerROOT::draw(const Graph2D& graph, const std::string& name, const Mode&) const {
+    const DrawerROOT& DrawerROOT::draw(const Graph2D& graph, const Mode&) const {
       auto gr = convert(graph);
-      cepgen::ROOTCanvas canv(name);
+      cepgen::ROOTCanvas canv(graph.name());
       gr.Draw("colz");
       canv.Prettify(gr.GetHistogram());
       canv.Save("pdf");
       return *this;
     }
 
-    const DrawerROOT& DrawerROOT::draw(const Hist1D& hist, const std::string& name, const Mode&) const {
+    const DrawerROOT& DrawerROOT::draw(const Hist1D& hist, const Mode&) const {
       auto h = convert(hist);
-      h.SetName(name.c_str());
-      cepgen::ROOTCanvas canv(name);
+      cepgen::ROOTCanvas canv(hist.name(), hist.title());
       h.Draw();
       canv.Prettify(&h);
       canv.Save("pdf");
       return *this;
     }
 
-    const DrawerROOT& DrawerROOT::draw(const Hist2D& hist, const std::string& name, const Mode&) const {
+    const DrawerROOT& DrawerROOT::draw(const Hist2D& hist, const Mode&) const {
       auto h = convert(hist);
-      h.SetName(name.c_str());
-      cepgen::ROOTCanvas canv(name);
+      cepgen::ROOTCanvas canv(hist.name(), hist.title());
       h.Draw("colz");
       canv.Prettify(&h);
       canv.Save("pdf");
@@ -65,6 +63,7 @@ namespace cepgen {
 
     TGraphErrors DrawerROOT::convert(const Graph1D& graph) {
       TGraphErrors gr;
+      gr.SetTitle(graph.title().c_str());
       int i = 0;
       for (const auto& it : graph.points()) {
         gr.SetPoint(i, it.first.value, it.second.value);
@@ -76,6 +75,7 @@ namespace cepgen {
 
     TGraph2DErrors DrawerROOT::convert(const Graph2D& graph) {
       TGraph2DErrors gr;
+      gr.SetTitle(graph.title().c_str());
       int i = 0;
       for (const auto& it_x : graph.points()) {
         const auto& ax_x = it_x.first.value;
@@ -90,9 +90,8 @@ namespace cepgen {
     }
 
     TH1D DrawerROOT::convert(const Hist1D& hist) {
-      static int num_hist1 = 0;
       const auto& rng = hist.range();
-      TH1D h(Form("h%d", num_hist1++), hist.name().c_str(), hist.nbins(), rng.min(), rng.max());
+      TH1D h(hist.name().c_str(), hist.title().c_str(), hist.nbins(), rng.min(), rng.max());
       for (size_t i = 0; i < hist.nbins(); ++i) {
         h.SetBinContent(i + 1, hist.value(i));
         h.SetBinError(i + 1, hist.valueUnc(i));
@@ -101,10 +100,9 @@ namespace cepgen {
     }
 
     TH2D DrawerROOT::convert(const Hist2D& hist) {
-      static int num_hist2 = 0;
       const auto &rng_x = hist.rangeX(), &rng_y = hist.rangeY();
-      TH2D h(Form("h2%d", num_hist2++),
-             Form("%s;%s;%s", hist.name().c_str(), "", "" /* FIXME */),
+      TH2D h(hist.name().c_str(),
+             hist.title().c_str(),
              hist.nbinsX(),
              rng_x.min(),
              rng_x.max(),

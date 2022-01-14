@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
   cout << "---------- 1D graph ----------" << endl;
 
   // test 1D graph
-  cepgen::utils::Graph1D graph1d;
+  cepgen::utils::Graph1D graph1d("graph1d");
   for (double x = -M_PI; x <= M_PI; x += 0.25)
     graph1d.addPoint(x, sin(x));
   plt->draw(graph1d);
@@ -49,19 +49,18 @@ int main(int argc, char* argv[]) {
   cout << endl << "---------- 2D graph ----------" << endl;
 
   // test 2D graph
-  cepgen::utils::Graph2D graph2d;
+  cepgen::utils::Graph2D graph2d("graph2d");
   for (double x = -5.; x < 5.; x += 0.5)
     for (double y = -5.; y < 5.; y += 0.2)
       graph2d.addPoint(x, y, (sin(x) / x) * (sin(y) / y));
-  graph2d.setLog(true);
-  plt->draw(graph2d);
+  plt->draw(graph2d, cepgen::utils::Drawer::Mode::logz);
 
   default_random_engine gen;
 
   cout << endl << "-------- 1D histogram --------" << endl;
 
   // test 1D histogram
-  cepgen::utils::Hist1D hist1d(20, {-5., 5.});
+  cepgen::utils::Hist1D hist1d(20, {-5., 5.}, "hist1d");
   cauchy_distribution<double> bw(0., 1.);
   for (size_t i = 0; i < 10000; ++i)
     hist1d.fill(bw(gen));
@@ -72,7 +71,7 @@ int main(int argc, char* argv[]) {
   cout << endl << "-------- 2D histogram --------" << endl;
 
   // test 2d histogram
-  cepgen::utils::Hist2D hist2d(20, {-5., 5.}, 50, {-5., 5.});
+  cepgen::utils::Hist2D hist2d(20, {-5., 5.}, 50, {-5., 5.}, "hist2d");
   normal_distribution<double> gaus1(0., 1.), gaus2(0., 1.);
   for (size_t i = 0; i < 1000; ++i)
     for (size_t j = 0; j < 1000; ++j)

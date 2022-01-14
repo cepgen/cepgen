@@ -35,11 +35,19 @@ namespace cepgen {
     /// A generic object which can be drawn in the standard output
     class Drawable {
     public:
-      Drawable() = default;
+      explicit Drawable(const std::string& name = "", const std::string& title = "");
       Drawable(const Drawable&);  ///< Copy constructor
 
-      /// Set the output width
-      void setWidth(size_t width) { width_ = width; }
+      /// Drawable name
+      const std::string& name() const { return name_; }
+      /// Set the drawable name
+      void setName(const std::string& name) { name_ = name; }
+
+      /// Drawable name
+      const std::string& title() const { return name_; }
+      /// Set the drawable title
+      void setTitle(const std::string& title) { title_ = title; }
+
       /// x-axis label
       const std::string& xLabel() const { return xlabel_; }
       /// Set the x-axis label
@@ -48,8 +56,6 @@ namespace cepgen {
       const std::string& yLabel() const { return ylabel_; }
       /// Set the y-axis label
       void setYlabel(const std::string& lab) { ylabel_ = lab; }
-      /// Switch logarithmic view
-      void setLog(bool log = true) { log_ = log; }
 
       /// Generic bin coordinate and its human-readable label
       struct coord_t {
@@ -71,19 +77,19 @@ namespace cepgen {
       typedef std::map<coord_t, axis_t> dualaxis_t;
 
     protected:
-      size_t width_{50ul};  ///< Plot width, in TTY characters
+      std::string name_;    ///< Computer-readable name
+      std::string title_;   ///< Human-readable title
       std::string xlabel_;  ///< x-axis title
       std::string ylabel_;  ///< y-axis title
-      bool log_{false};     ///< Switch on/off the logarithmic z-axis
     };
 
     /// 1D histogram container
     class Hist1D : public Histogram, public Drawable {
     public:
       /// Build a histogram from uniform-width bins
-      Hist1D(size_t num_bins_x, const Limits&);
+      explicit Hist1D(size_t num_bins_x, const Limits&, const std::string& name = "", const std::string& title = "");
       /// Build a histogram from variable-width bins
-      explicit Hist1D(const std::vector<double>& bins);
+      explicit Hist1D(const std::vector<double>& bins, const std::string& name = "", const std::string& title = "");
       Hist1D(const Hist1D&);  ///< Copy constructor
 
       void clear() override;
@@ -128,9 +134,17 @@ namespace cepgen {
     class Hist2D : public Histogram, public Drawable {
     public:
       /// Build a histogram from uniform-width bins
-      Hist2D(size_t num_bins_x, const Limits& xlim, size_t num_bins_y, const Limits& ylim);
+      explicit Hist2D(size_t num_bins_x,
+                      const Limits& xlim,
+                      size_t num_bins_y,
+                      const Limits& ylim,
+                      const std::string& name = "",
+                      const std::string& title = "");
       /// Build a histogram from variable-width bins
-      Hist2D(const std::vector<double>& xbins, const std::vector<double>& ybins);
+      explicit Hist2D(const std::vector<double>& xbins,
+                      const std::vector<double>& ybins,
+                      const std::string& name = "",
+                      const std::string& title = "");
       Hist2D(const Hist2D&);  ///< Copy constructor
 
       void clear() override;
@@ -190,7 +204,7 @@ namespace cepgen {
     /// A one-dimensional graph object
     class Graph1D : public Drawable {
     public:
-      Graph1D() = default;
+      explicit Graph1D(const std::string& name = "", const std::string& title = "");
 
       /// Add one value to the graph
       void addPoint(double x, double y);
@@ -204,7 +218,7 @@ namespace cepgen {
     /// A two-dimensional graph object
     class Graph2D : public Drawable {
     public:
-      Graph2D() = default;
+      explicit Graph2D(const std::string& name = "", const std::string& title = "");
 
       /// Add one value to the graph
       void addPoint(double x, double y, double z);

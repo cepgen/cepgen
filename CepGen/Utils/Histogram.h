@@ -31,7 +31,6 @@ namespace cepgen {
     class Histogram {
     public:
       Histogram() = default;
-      explicit Histogram(const Histogram& oth) : name_(oth.name_) {}  ///< Copy constructor
       virtual ~Histogram() = default;
 
       /// Reset the histogram
@@ -44,14 +43,6 @@ namespace cepgen {
       virtual double minimum() const = 0;
       /// Retrieve the minimum bin value
       virtual double maximum() const = 0;
-
-      /// Histogram name
-      const std::string& name() const { return name_; }
-      /// Set the histogram name
-      void setName(const std::string& name) { name_ = name; }
-
-    protected:
-      std::string name_;  ///< Histogram human-readable name
     };
   }  // namespace utils
 }  // namespace cepgen
