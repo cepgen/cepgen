@@ -147,6 +147,8 @@ namespace cepgen {
     const Type& type() const { return type_; }
     /// Human-readable dump of the exception message
     std::ostream& dump(std::ostream& os = *utils::Logger::get().output) const override;
+    /// Output stream object
+    std::ostream& stream() { return message_; }
 
   private:
     static char* now();
