@@ -254,7 +254,7 @@ namespace cepgen {
 
     ParametersDescription Shamov::description() {
       auto desc = Parameterisation::description();
-      desc.setDescription("Shamov composite soft structure functions");
+      desc.setDescription("Shamov (hybrid, soft)");
       desc.add<int>("mode", (int)Mode::RealResAndNonRes).setDescription("sub-structure functions choice");
       desc.add<int>("fitModel", 2);
       desc.add<double>("q20", 0.65 /* 0.36 */)
