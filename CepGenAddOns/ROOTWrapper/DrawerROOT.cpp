@@ -94,8 +94,8 @@ namespace cepgen {
       const auto& rng = hist.range();
       TH1D h(Form("h%d", num_hist1++), hist.name().c_str(), hist.nbins(), rng.min(), rng.max());
       for (size_t i = 0; i < hist.nbins(); ++i) {
-        h.SetBinContent(i, hist.value(i));
-        h.SetBinError(i, hist.valueUnc(i));
+        h.SetBinContent(i + 1, hist.value(i));
+        h.SetBinError(i + 1, hist.valueUnc(i));
       }
       return h;
     }
@@ -113,8 +113,8 @@ namespace cepgen {
              rng_y.max());
       for (size_t ix = 0; ix < hist.nbinsX(); ++ix)
         for (size_t iy = 0; iy < hist.nbinsY(); ++iy) {
-          h.SetBinContent(ix, iy, hist.value(ix, iy));
-          h.SetBinError(ix, iy, hist.valueUnc(ix, iy));
+          h.SetBinContent(ix + 1, iy + 1, hist.value(ix, iy));
+          h.SetBinError(ix + 1, iy + 1, hist.valueUnc(ix, iy));
         }
       return h;
     }
