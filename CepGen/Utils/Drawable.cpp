@@ -115,6 +115,16 @@ namespace cepgen {
       gsl_histogram_scale(hist_w2_.get(), scaling * scaling);
     }
 
+    Drawable::axis_t Hist1D::axis() const {
+      axis_t axis;
+      for (size_t bin = 0; bin < nbins(); ++bin) {
+        const auto& range_i = binRange(bin);
+        axis[coord_t{range_i.x(0.5), utils::format("[%7.2f,%7.2f)", range_i.min(), range_i.max())}] =
+            value_t{value(bin), valueUnc(bin)};
+      }
+      return axis;
+    }
+
     size_t Hist1D::nbins() const { return gsl_histogram_bins(hist_.get()); }
     Limits Hist1D::range() const { return Limits{gsl_histogram_min(hist_.get()), gsl_histogram_max(hist_.get())}; }
     Limits Hist1D::binRange(size_t bin) const {
@@ -270,6 +280,14 @@ namespace cepgen {
     Graph1D::Graph1D(const std::string& name, const std::string& title) : Drawable(name, title) {}
 
     void Graph1D::addPoint(double x, double y) { values_[coord_t{x}] = value_t{y}; }
+
+    double Graph1D::minimum() const {
+      return std::min_element(values_.begin(), values_.end(), CompareAxisByValue())->second.value;
+    }
+
+    double Graph1D::maximum() const {
+      return std::max_element(values_.begin(), values_.end(), CompareAxisByValue())->second.value;
+    }
 
     Graph2D::Graph2D(const std::string& name, const std::string& title) : Drawable(name, title) {}
 

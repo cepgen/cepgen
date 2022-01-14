@@ -73,6 +73,12 @@ namespace cepgen {
       };
       /// Metadata for an axis (coordinates and bins value)
       typedef std::map<coord_t, value_t> axis_t;
+      /// Comparator of an axis by the values it holds
+      struct CompareAxisByValue {
+        bool operator()(const std::pair<coord_t, value_t>& lhs, const std::pair<coord_t, value_t>& rhs) {
+          return lhs.second.value < rhs.second.value;
+        }
+      };
       /// Metadata for a two-dimensional axis definition (coordinates and bins values)
       typedef std::map<coord_t, axis_t> dualaxis_t;
 
@@ -109,6 +115,8 @@ namespace cepgen {
       /// Retrieve the absolute uncertainty on one bin value
       double valueUnc(size_t bin) const;
 
+      /// Axis content
+      axis_t axis() const;
       /// Number of histogram bins
       size_t nbins() const;
       /// Axis range
@@ -219,6 +227,10 @@ namespace cepgen {
       void addPoint(double x, double y);
       /// Retrieve all values in the graph
       const axis_t& points() const { return values_; }
+      /// Minimum value registered in this graph
+      double minimum() const;
+      /// Maximum value registered in this graph
+      double maximum() const;
 
       bool isGraph1D() const override { return true; }
 

@@ -43,6 +43,8 @@ namespace cepgen {
       virtual double minimum() const = 0;
       /// Retrieve the minimum bin value
       virtual double maximum() const = 0;
+      /// Normalise the histogram to a given constant
+      void normalise(double integ = 1.) { scale(integ / integral()); }
     };
   }  // namespace utils
 }  // namespace cepgen
