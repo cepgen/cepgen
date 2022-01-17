@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,15 +16,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGenAddOns_HepMCWrapper_HepMCEventInterface_h
-#define CepGenAddOns_HepMCWrapper_HepMCEventInterface_h
+#ifndef CepGenAddOns_HepMC3Wrapper_HepMC3EventInterface_h
+#define CepGenAddOns_HepMC3Wrapper_HepMC3EventInterface_h
 
-#ifdef HEPMC3
 #include <HepMC3/GenEvent.h>
-#define HepMC HepMC3
-#else
-#include <HepMC/GenEvent.h>
-#endif
+
 #include <memory>
 #include <unordered_map>
 
@@ -32,7 +28,7 @@ namespace cepgen {
   class Event;
 }
 
-namespace HepMC {
+namespace HepMC3 {
   /// Interfacing between CepGen and HepMC event definitions
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Jul 2019
@@ -44,5 +40,5 @@ namespace HepMC {
   private:
     std::unordered_map<unsigned short, std::shared_ptr<GenParticle> > assoc_map_;
   };
-}  // namespace HepMC
+}  // namespace HepMC3
 #endif
