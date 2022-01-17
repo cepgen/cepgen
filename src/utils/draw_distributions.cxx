@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,10 +44,12 @@ int main(int argc, char* argv[]) {
 
   string input_card;
   int num_events;
+  bool draw_grid;
 
   cepgen::ArgumentsParser(argc, argv)
       .addArgument("input,i", "input card", &input_card)
       .addOptionalArgument("num-events,n", "number of events to generate", &num_events, 100)
+      .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .parse();
 
   mg.setParameters(cepgen::card::Handler::parse(input_card));
@@ -75,6 +77,8 @@ int main(int argc, char* argv[]) {
   };
   for (auto& plt : plots) {
     cepgen::ROOTCanvas c(plt.first, "CepGen Simulation");
+    if (draw_grid)
+      c.SetGrid(true, true);
     plt.second.Draw("hist");
     c.Prettify(&plt.second);
     c.SetLogy();

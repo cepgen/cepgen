@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,12 +33,14 @@ int main(int argc, char* argv[]) {
   int npoints;
   vector<int> dim;
   double def;
+  bool draw_grid;
 
   cepgen::ArgumentsParser(argc, argv)
       .addArgument("input,i", "input card", &input_card)
       .addOptionalArgument("default,D", "default value for non-varying coordinates", &def, 0.5)
       .addOptionalArgument("dim,d", "dimensions to probe", &dim, vector<int>{})
       .addOptionalArgument("num-points,n", "number of points to probe", &npoints, 100)
+      .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .parse();
 
   TGraph gr_scan_1d;
@@ -75,6 +77,8 @@ int main(int argc, char* argv[]) {
   }
   {
     cepgen::ROOTCanvas c("test_scan");
+    if (draw_grid)
+      c.SetGrid(true, true);
     gStyle->SetPalette(kBeach);
     string xlabel, ylabel;
     switch (dim.size()) {

@@ -164,6 +164,7 @@ namespace cepgen {
     }
 
     const DrawerText& DrawerText::draw(const DrawableColl& objs, const std::string& name, const Mode& mode) const {
+      CG_WARNING("DrawerText:draw") << "Multi-plots is now only partially supported (no axes rescaling).";
       auto inside_plot = [](const std::string& str) -> std::string {
         std::istringstream ss(str);
         std::ostringstream out;

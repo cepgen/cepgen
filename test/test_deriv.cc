@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
   cepgen::utils::Graph1D graph_sin("graph_sin"), graph_der_sin("graph_der_sin"), graph_diff("graph_diff");
   for (double x = -M_PI; x <= M_PI; x += 0.25) {
     graph_sin.addPoint(x, sin(x));
-    const auto der_sin = der.eval([](double x, void*) { return sin(x); }, x);
+    const auto der_sin = der.eval([](double x) { return sin(x); }, x);
     graph_der_sin.addPoint(x, der_sin);
     graph_diff.addPoint(x, cos(x) - der_sin);
   }

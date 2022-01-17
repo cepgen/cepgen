@@ -26,7 +26,8 @@
 
 namespace cepgen {
   NachtmannAmplitudes::NachtmannAmplitudes(const ParametersList& params)
-      : mode_(steerAs<int, NachtmannAmplitudes::Mode>("model")),
+      : SteeredObject(params),
+        mode_(steerAs<int, NachtmannAmplitudes::Mode>("model")),
         eft_ext_(steer<ParametersList>("eftParameters")),
         G_EM_SQ(constants::G_EM_SQ),
         G_EM(sqrt(G_EM_SQ)) {
@@ -34,7 +35,7 @@ namespace cepgen {
   }
 
   NachtmannAmplitudes::EFTParameters::EFTParameters(const ParametersList& params)
-      : s1(steer<double>("s1")), mH(steer<double>("mH")) {}
+      : SteeredObject(params), s1(steer<double>("s1")), mH(steer<double>("mH")) {}
 
   ParametersDescription NachtmannAmplitudes::EFTParameters::description() {
     auto desc = ParametersDescription();

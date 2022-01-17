@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ int main(int argc, char* argv[]) {
   int mode, strfun_type, num_points;
   double mx, q2min, q2max;
   string output_file;
+  bool draw_grid;
 
   cepgen::ArgumentsParser(argc, argv)
       .addArgument("mode,t", "beam modelling", &mode, (int)cepgen::mode::Beam::ProtonElastic)
@@ -46,6 +47,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("q2max,M", "maximal parton virtuality (GeV^2)", &q2max, 10000.)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
       .addOptionalArgument("output,o", "output file name", &output_file, "formfacs.scan.output.txt")
+      .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .parse();
 
   cepgen::initialise();
@@ -92,6 +94,8 @@ int main(int argc, char* argv[]) {
   for (auto& plt : map<const char*, vector<TGraph*> >{{"FE", g_form_factors_fe}, {"FM", g_form_factors_fm}}) {
     cepgen::ROOTCanvas c(plt.first, Form("M_{X} = %g GeV/c^{2}", mx));
     c.SetLogy();
+    if (draw_grid)
+      c.SetGrid(true, true);
     TMultiGraph mg;
     size_t i = 0;
     for (auto& gr : plt.second) {
