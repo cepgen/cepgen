@@ -143,23 +143,19 @@ namespace cepgen {
             return false;
           // off-shell effect on electrocouplings
           double f_gamma = photonWidth(kin);
+          const double mass2 = mass_ * mass_;
 
           // Breit-Wigner factor together with off-shell factor
-          double f_bw = f_gamma * kcmr() * mass_ * mass_ / width_ * width_t /
-                        (std::pow(kin.w2 - mass_ * mass_, 2) + std::pow(mass_ * width_t, 2));
+          double f_bw = f_gamma * kcmr() * mass2 * (width_t / width_) /
+                        (std::pow(kin.w2 - mass2, 2) + mass2 * std::pow(width_t, 2));
 
-          // compute structure functions
-          fl = f_bw * std::pow(s12_3(kin.q2), 2);
-          ft = f_bw * std::pow(at_avr(kin.q2), 2);
+          // compute structure functions using model of resonance helicity amplitudes
+          fl = f_bw * std::pow((c_.at(0) + c_.at(1) * kin.q2) * exp(-c_.at(2) * kin.q2), 2);
+          ft = f_bw * std::pow((a_.at(0) + a_.at(1) * kin.q2) * std::pow(1. + a_.at(2) * kin.q2, -a_.at(3)), 2);
           return true;
         }
 
       private:
-        // Model of resonance helicity amplitudes
-        double at_avr(double q2) const { return (a_.at(0) + a_.at(1) * q2) * std::pow(1. + a_.at(2) * q2, -a_.at(3)); }
-        double s12_3(double q2) const { return (c_.at(0) + c_.at(1) * q2) * exp(-c_.at(2) * q2); }
-        //double a1ov2(double q2) const { return 0.; }
-        //double a3ov2(double q2) const { return 0.25 * std::sqrt((2 * ang_mom_ - 1) * (2 * ang_mom_ + 3)); }
         const std::vector<double> a_;
         const std::vector<double> c_;
       };
