@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,12 +32,14 @@ int main(int argc, char* argv[]) {
   string function;
   int num_points;
   double min_x, max_x;
+  bool draw_grid;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("function,f", "function to parse", &function, "min(1,exp(-x/10))")
       .addOptionalArgument("num-points,n", "number of points to consider", &num_points, 100)
       .addOptionalArgument("min-x,l", "minimal range", &min_x, -5.)
       .addOptionalArgument("max-x,H", "maximal range", &max_x, +5.)
+      .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .parse();
 
   TGraph gr_rt;
@@ -79,6 +81,8 @@ int main(int argc, char* argv[]) {
 
   {
     cepgen::ROOTCanvas c("test_graph", "CepGen validation", true);
+    if (draw_grid)
+      c.SetGrid(true, true);
     TMultiGraph mg;
     mg.Add(&gr_rt);
     c.AddLegendEntry(&gr_rt, "ROOT", "l");

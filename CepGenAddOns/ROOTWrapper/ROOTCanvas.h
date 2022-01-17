@@ -73,6 +73,7 @@ namespace cepgen {
     explicit inline ROOTCanvas(const std::string& name, const std::string& title = "", bool ratio = false)
         : TCanvas(name.c_str(), "", 600, 600), title_(title), ratio_(ratio) {
       gStyle->SetOptStat(0);
+      gStyle->SetGridColor(17);
       Build();
     }
     inline ~ROOTCanvas() {}

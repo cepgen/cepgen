@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
   double q2, xmin, xmax, ymin, ymax;
   int var, num_points;
   string output_file;
-  bool logx, logy;
+  bool logx, logy, draw_grid;
 
   const double kInvalid = -999.999;
 
@@ -53,6 +53,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("output,o", "output file name", &output_file, "strfuns.scan.output.txt")
       .addOptionalArgument("logx", "logarithmic x-axis", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-axis", &logy, false)
+      .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .parse();
 
   const double lxmin = log10(xmin), lxmax = log10(xmax);
@@ -159,6 +160,8 @@ int main(int argc, char* argv[]) {
       c.SetLogx();
     if (logy)
       c.SetLogy();
+    if (draw_grid)
+      c.SetGrid(true, true);
     c.SetLegendX1(0.2);
     size_t i = 0;
     for (auto& gr : plt.second) {

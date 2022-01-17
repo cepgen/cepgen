@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
   double qmin, qmax;
   int num_points;
   string output_file;
-  bool logy;
+  bool logy, draw_grid;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("qmin,m", "minimum virtuality (GeV)", &qmin, 1.)
@@ -43,6 +43,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 100)
       .addOptionalArgument("output,o", "output file name", &output_file, "alphas.scan.output.txt")
       .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
+      .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .parse();
 
   cepgen::initialise();
@@ -107,6 +108,8 @@ int main(int argc, char* argv[]) {
   const auto top_label = cepgen::utils::s("CepGen #alpha_{S,EM} modelling", alphas.size() + alphaem.size(), false);
   cepgen::ROOTCanvas c("comp_alphas_alphaem", top_label.c_str());
   c.SetLegendX1(0.15);
+  if (draw_grid)
+    c.SetGrid(true, true);
   TMultiGraph mg;
   vector<TH1*> numers(alphas.size() + alphaem.size());
   for (size_t i = 0; i < alphas.size(); ++i) {
