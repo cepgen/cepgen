@@ -22,6 +22,7 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/CouplingFactory.h"
+#include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
@@ -70,6 +71,7 @@ namespace cepgen {
       list_modules(EventModifierFactory::get(), "Event modification modules");
       list_modules(io::ExportModuleFactory::get(), "Export modules");
       list_modules(utils::FunctionalFactory::get(), "Functional evaluators");
+      list_modules(utils::DrawerFactory::get(), "Drawer utilities");
       list_modules(AlphaEMFactory::get(), "alpha(EM) evolution algorithms");
       list_modules(AlphaSFactory::get(), "alpha(s) evolution algorithms");
     });
