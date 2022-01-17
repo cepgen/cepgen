@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
       var_name = "x_{Bj}";
       break;
     case 1:
-      var_name = "w (GeV)";
+      var_name = "w";
       var_unit = "GeV";
       break;
     case 2:

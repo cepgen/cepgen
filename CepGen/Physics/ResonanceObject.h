@@ -63,6 +63,7 @@ namespace cepgen {
 
       static ParametersDescription description();
 
+      /// Sanity check to ensure only three decay channels are opened
       bool valid() const { return singlepi + doublepi + eta == 1.; }
       /// single pion branching ratio
       double singlepi;
