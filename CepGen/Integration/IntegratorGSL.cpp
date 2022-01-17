@@ -60,7 +60,7 @@ namespace cepgen {
   void IntegratorGSL::setIntegrand(Integrand& integr) {
     integrand_ = &integr;
     //--- specify the integrand through the GSL wrapper
-    function_.reset(new gsl_monte_function_wrapper<decltype(funct_)>(funct_, integrand_->size()));
+    function_.reset(new utils::GSLMonteFunctionWrapper<decltype(funct_)>(funct_, integrand_->size()));
 
     CG_DEBUG("Integrator:integrand") << "Number of integration dimensions: " << function_->dim << ".";
 
