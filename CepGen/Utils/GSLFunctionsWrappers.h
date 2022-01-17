@@ -22,6 +22,8 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_monte.h>
 
+#include <memory>
+
 namespace cepgen {
   namespace utils {
     /// GSL wrapper to define a functor as a GSL-digestible functional
