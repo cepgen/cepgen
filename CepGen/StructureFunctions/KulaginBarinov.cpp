@@ -217,11 +217,7 @@ namespace cepgen {
 
     KulaginBarinov& KulaginBarinov::eval(double xbj, double q2) {
       const double w2 = utils::mX2(xbj, q2, mp2_), w = std::sqrt(w2);
-      //if (w > 2. && q2 > 1.) {          // DIS region
-      //} else if (w <= 2 && q2 <= 4.) {
-
       double fl{0.}, f2{0.};
-
       {  //--- resonances region
         const auto kin = Resonance::KinematicsBlock(w2, q2, mp2_, mpi2_, meta2_);
         // proton c.m. energy and momentum (needed to compute additional kinematics factor for FL)
@@ -244,7 +240,7 @@ namespace cepgen {
         const double f2_res = (fl_res + ft_res) / (1. + tau(xbj, q2));
         fl += fl_res;
         f2 += f2_res;
-      }
+      }  //--- end of resonances region
       {  //--- perturbative region
         const auto sfs = sfs_grid_.eval({xbj, q2});
         double f2_dis = sfs.at(0), fl_dis = sfs.at(1);
@@ -303,15 +299,9 @@ namespace cepgen {
                      bt = 1. - exp(-dis_params_.bg1t * std::pow(w2 - mx_min_, dis_params_.bg2t));
         fl += fl_dis * bl;
         f2 += f2_dis * bt;
-      }
-
+      }  //--- end of perturbative region
       setFL(fl);
       setF2(f2);
-
-      //xsec = constants::G_EM_SQ*M_PI * sfn / (1. - xb);
-      //sfn *= q2;
-      //} else {  // continuum region
-      //}
       return *this;
     }
   }  // namespace strfun
