@@ -110,7 +110,7 @@ namespace cepgen {
 
         desc.add<double>("eps1", 1.e-6);
         desc.add<double>("t0", 2.);
-        desc.add<std::string>("gridFile", "../External/a08tmc.dat");
+        desc.add<std::string>("gridFile", "a08tmc.dat");
         return desc;
       }
 
@@ -189,6 +189,7 @@ namespace cepgen {
       for (const auto& res : steer<std::vector<ParametersList> >("resonances"))
         resonances_.emplace_back(res);
       {  // build the FT and F2 grid
+        CG_INFO("KulaginBarinov") << "Loading A08 structure function values from '" << sfs_grid_file_ << "' file.";
         std::ifstream grid_file(sfs_grid_file_);
         static const size_t num_xbj = 99, num_q2 = 70, num_sf = 2;
         static const double min_xbj = 1.01e-5, min_q2 = 0.8, max_q2 = 1.e3;
