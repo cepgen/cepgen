@@ -296,7 +296,6 @@ namespace cepgen {
               q2 * (f0t + std::pow(q2, dis_params_.pmt - 1.) / std::pow(t, dis_params_.pmt) *
                               (ft_dis - f0t * t +
                                log(t / q2) * (dis_params_.pmt * ft_dis - t * ddt - (dis_params_.pmt - 1.) * f0t * t)));
-          CG_LOG << std::vector<double>{xbj, q2} << ":" << ft_der << "," << fl_der;
           const auto f2_der = (fl_der + ft_der) / (1. + tau(xbj, q2));
 
           fl_dis = fl_der;
