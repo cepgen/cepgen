@@ -25,8 +25,8 @@
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Parameters.h"
-#include "CepGen/Utils/Drawable.h"
 #include "CepGen/Utils/Drawer.h"
+#include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
 

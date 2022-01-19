@@ -23,8 +23,9 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/Drawable.h"
 #include "CepGen/Utils/Drawer.h"
+#include "CepGen/Utils/Graph.h"
+#include "CepGen/Utils/Histogram.h"
 
 using namespace std;
 
