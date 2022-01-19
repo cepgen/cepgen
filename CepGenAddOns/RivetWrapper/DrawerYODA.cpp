@@ -1,0 +1,141 @@
+#include <YODA/Histo1D.h>
+#include <YODA/Histo2D.h>
+#include <YODA/Scatter2D.h>
+#include <YODA/Scatter3D.h>
+#include <YODA/WriterAIDA.h>
+#include <YODA/WriterFLAT.h>
+#include <YODA/WriterYODA.h>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Utils/Drawer.h"
+#include "CepGen/Utils/Graph.h"
+#include "CepGen/Utils/Histogram.h"
+#include "CepGen/Utils/String.h"
+
+namespace cepgen {
+  namespace utils {
+    template <typename T>
+    class DrawerYODA : public Drawer {
+    public:
+      explicit DrawerYODA(const ParametersList& params) : Drawer(params), file_(steer<std::string>("filename")) {}
+      ~DrawerYODA() { T::write(file_, objs_); }
+
+      static ParametersDescription description() {
+        auto desc = Drawer::description();
+        desc.setDescription("YODA/AIDA plotting utility");
+        desc.add<std::string>("filename", "plots.yoda");
+        return desc;
+      }
+
+      const DrawerYODA& draw(const Graph1D& graph, const Mode&) const override {
+        objs_.emplace_back(convert(graph));
+        return *this;
+      }
+      const DrawerYODA& draw(const Graph2D& graph, const Mode&) const override {
+        objs_.emplace_back(convert(graph));
+        return *this;
+      }
+      const DrawerYODA& draw(const Hist1D& hist, const Mode&) const override {
+        objs_.emplace_back(convert(hist));
+        return *this;
+      }
+      const DrawerYODA& draw(const Hist2D& hist, const Mode&) const override {
+        objs_.emplace_back(convert(hist));
+        return *this;
+      }
+
+      const DrawerYODA& draw(const DrawableColl&,
+                             const std::string& name = "",
+                             const Mode& mode = Mode::none) const override;
+
+    private:
+      static YODA::Scatter2D* convert(const Graph1D&);
+      static YODA::Scatter3D* convert(const Graph2D&);
+      static YODA::Histo1D* convert(const Hist1D&);
+      static YODA::Histo2D* convert(const Hist2D&);
+      static std::string path(const std::string& name) {
+        return "/" + utils::replace_all(utils::replace_all(name, ")", "_"), "(", "_");
+      }
+      std::ofstream file_;
+      mutable std::vector<const YODA::AnalysisObject*> objs_;
+    };
+
+    template <typename T>
+    const DrawerYODA<T>& DrawerYODA<T>::draw(const DrawableColl& objs, const std::string&, const Mode&) const {
+      for (const auto* obj : objs) {
+        if (obj->isHist1D()) {
+          objs_.emplace_back(convert(*dynamic_cast<const Hist1D*>(obj)));
+        } else if (obj->isGraph1D()) {
+          objs_.emplace_back(convert(*dynamic_cast<const Graph1D*>(obj)));
+        } else {
+          CG_WARNING("DrawerYODA:draw") << "Cannot add drawable '" << obj->name() << "' to the stack.";
+          continue;
+        }
+      }
+      return *this;
+    }
+
+    template <typename T>
+    YODA::Scatter2D* DrawerYODA<T>::convert(const Graph1D& graph) {
+      auto gr = new YODA::Scatter2D(path(graph.name()), graph.title());
+      for (const auto& it : graph.points())
+        gr->addPoint(it.first.value, it.second.value, 0. /* FIXME not yet supported */, it.second.value_unc);
+      //gr->setAnnotation("xlabel", graph.xAxis().label());
+      //gr->setAnnotation("ylabel", graph.yAxis().label());
+      return gr;
+    }
+
+    template <typename T>
+    YODA::Scatter3D* DrawerYODA<T>::convert(const Graph2D& graph) {
+      auto gr = new YODA::Scatter3D(path(graph.name()), graph.title());
+      for (const auto& it_x : graph.points()) {
+        const auto& ax_x = it_x.first.value;
+        for (const auto& it_y : it_x.second) {
+          const auto& ax_y = it_y.first.value;
+          gr->addPoint(ax_x, ax_y, it_y.second.value, 0., 0., it_y.second.value_unc);
+        }
+      }
+      //gr->setAnnotation("xlabel", graph.xAxis().label());
+      //gr->setAnnotation("ylabel", graph.yAxis().label());
+      return gr;
+    }
+
+    template <typename T>
+    YODA::Histo1D* DrawerYODA<T>::convert(const Hist1D& hist) {
+      const auto& rng = hist.range();
+      auto h = new YODA::Histo1D(hist.nbins(), rng.min(), rng.max(), path(hist.name()), hist.title());
+      for (size_t i = 0; i < hist.nbins(); ++i)
+        h->fillBin(i, hist.value(i), std::pow(hist.valueUnc(i), 2));
+      //h->setAnnotation("xlabel", hist.xAxis().label());
+      //h->setAnnotation("ylabel", hist.yAxis().label());
+      return h;
+    }
+
+    template <typename T>
+    YODA::Histo2D* DrawerYODA<T>::convert(const Hist2D& hist) {
+      const auto &rng_x = hist.rangeX(), &rng_y = hist.rangeY();
+      auto h = new YODA::Histo2D(hist.nbinsX(),
+                                 rng_x.min(),
+                                 rng_x.max(),
+                                 hist.nbinsY(),
+                                 rng_y.min(),
+                                 rng_y.max(),
+                                 path(hist.name()),
+                                 hist.title());
+      for (size_t ix = 0; ix < hist.nbinsX(); ++ix)
+        for (size_t iy = 0; iy < hist.nbinsY(); ++iy)
+          h->fillBin((ix + 1) * (iy + 1), hist.value(ix, iy), std::pow(hist.valueUnc(ix, iy), 2));
+      //h->setAnnotation("xlabel", hist.xAxis().label());
+      //h->setAnnotation("ylabel", hist.yAxis().label());
+      return h;
+    }
+  }  // namespace utils
+}  // namespace cepgen
+
+typedef cepgen::utils::DrawerYODA<YODA::WriterYODA> DrawerYoda;
+typedef cepgen::utils::DrawerYODA<YODA::WriterAIDA> DrawerYodaAida;
+typedef cepgen::utils::DrawerYODA<YODA::WriterFLAT> DrawerYodaFlat;
+REGISTER_DRAWER("yoda", DrawerYoda)
+REGISTER_DRAWER("yoda_aida", DrawerYodaAida)
+REGISTER_DRAWER("yoda_flat", DrawerYodaFlat)
