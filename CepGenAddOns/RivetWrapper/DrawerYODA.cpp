@@ -22,6 +22,7 @@ namespace cepgen {
           : Drawer(params), file_(steer<std::string>("filename")), writer_(&T::create()) {
         if (steer<bool>("compress"))
           writer_->useCompression(true);
+        writer_->setPrecision(steer<int>("precision"));
       }
 
       static ParametersDescription description() {
@@ -29,6 +30,7 @@ namespace cepgen {
         desc.setDescription("YODA/AIDA plotting utility");
         desc.add<std::string>("filename", "plots.yoda");
         desc.add<bool>("compress", false).setDescription("use libz compression?");
+        desc.add<int>("precision", 6).setDescription("precision of numerical quantities in output");
         return desc;
       }
 
