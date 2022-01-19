@@ -25,6 +25,7 @@ namespace cepgen {
                              const Mode& mode = Mode::none) const override;
 
     private:
+      static void setMode(ROOTCanvas&, const Mode&);
       static TGraphErrors convert(const Graph1D&);
       static TGraph2DErrors convert(const Graph2D&);
       static TH1D convert(const Hist1D&);
@@ -33,36 +34,40 @@ namespace cepgen {
 
     DrawerROOT::DrawerROOT(const ParametersList& params) : Drawer(params) {}
 
-    const DrawerROOT& DrawerROOT::draw(const Graph1D& graph, const Mode&) const {
+    const DrawerROOT& DrawerROOT::draw(const Graph1D& graph, const Mode& mode) const {
       auto gr = convert(graph);
       ROOTCanvas canv(graph.name(), graph.title());
+      setMode(canv, mode);
       gr.Draw("al");
       canv.Prettify(gr.GetHistogram());
       canv.Save("pdf");
       return *this;
     }
 
-    const DrawerROOT& DrawerROOT::draw(const Graph2D& graph, const Mode&) const {
+    const DrawerROOT& DrawerROOT::draw(const Graph2D& graph, const Mode& mode) const {
       auto gr = convert(graph);
       ROOTCanvas canv(graph.name());
+      setMode(canv, mode);
       gr.Draw("colz");
       canv.Prettify(gr.GetHistogram());
       canv.Save("pdf");
       return *this;
     }
 
-    const DrawerROOT& DrawerROOT::draw(const Hist1D& hist, const Mode&) const {
+    const DrawerROOT& DrawerROOT::draw(const Hist1D& hist, const Mode& mode) const {
       auto h = convert(hist);
       ROOTCanvas canv(hist.name(), hist.title());
+      setMode(canv, mode);
       h.Draw();
       canv.Prettify(&h);
       canv.Save("pdf");
       return *this;
     }
 
-    const DrawerROOT& DrawerROOT::draw(const Hist2D& hist, const Mode&) const {
+    const DrawerROOT& DrawerROOT::draw(const Hist2D& hist, const Mode& mode) const {
       auto h = convert(hist);
       ROOTCanvas canv(hist.name(), hist.title());
+      setMode(canv, mode);
       h.Draw("colz");
       canv.Prettify(&h);
       canv.Save("pdf");
@@ -73,6 +78,7 @@ namespace cepgen {
       TMultiGraph mg;
       THStack hs;
       ROOTCanvas canv(name.c_str(), "");
+      setMode(canv, mode);
       size_t i = 0;
       for (const auto* obj : objs) {
         if (obj->isHist1D()) {
@@ -102,6 +108,13 @@ namespace cepgen {
         canv.Prettify(mg.GetHistogram());
       canv.Save("pdf");
       return *this;
+    }
+
+    void DrawerROOT::setMode(ROOTCanvas& canv, const Mode& mode) {
+      if (mode & Mode::logx)
+        canv.SetLogx();
+      if (mode & Mode::logy)
+        canv.SetLogy();
     }
 
     TGraphErrors DrawerROOT::convert(const Graph1D& graph) {
