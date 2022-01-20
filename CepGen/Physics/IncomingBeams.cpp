@@ -148,11 +148,18 @@ namespace cepgen {
       }
     }
     //--- structure functions
-    auto strfun = steer<ParametersList>("structureFunctions");
-    if (!strfun.empty() || !str_fun_) {
-      CG_DEBUG("IncomingBeams") << "Structure functions modelling to be built: " << strfun << ".";
-      addStructureFunctions(strfun::StructureFunctionsFactory::get().build(strfun));
-    }
+    auto build_sf = [this](const ParametersList& plist) {
+      if (!plist.empty() || str_funs_.empty()) {
+        CG_DEBUG("IncomingBeams") << "Structure functions modelling to be built: " << plist << ".";
+        addStructureFunctions(strfun::StructureFunctionsFactory::get().build(plist));
+      }
+    };
+    const auto& vec_strfun = steer<std::vector<ParametersList> >("structureFunctions");
+    if (!vec_strfun.empty())
+      for (const auto& strfun : vec_strfun)
+        build_sf(strfun);
+    else
+      build_sf(steer<ParametersList>("structureFunctions"));
     //--- parton fluxes for kt-factorisation
     if (params_.has<std::vector<int> >("ktFluxes")) {
       auto kt_fluxes = steer<std::vector<int> >("ktFluxes");
