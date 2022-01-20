@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "CepGen/Utils/Limits.h"
+#include "Drawer.h"
 
 namespace cepgen {
   namespace utils {

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,9 +33,6 @@
 #include <vector>
 
 namespace cepgen {
-  namespace strfun {
-    class Parameterisation;
-  }
   /// Interpolation type for the grid coordinates
   enum struct GridType { linear, logarithmic, square };
   /// A generic class for \f$\mathbb{R}^D\mapsto\mathbb{R}^N\f$ grid interpolation

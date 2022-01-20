@@ -15,6 +15,12 @@ namespace cepgen {
     public:
       explicit DrawerROOT(const ParametersList&);
 
+      static ParametersDescription description() {
+        auto desc = Drawer::description();
+        desc.add<int>("palette", kLightTemperature).setDescription("ROOT colour palette to use");
+        return desc;
+      }
+
       const DrawerROOT& draw(const Graph1D&, const Mode&) const override;
       const DrawerROOT& draw(const Graph2D&, const Mode&) const override;
       const DrawerROOT& draw(const Hist1D&, const Mode&) const override;
@@ -32,7 +38,7 @@ namespace cepgen {
       static TH2D convert(const Hist2D&);
     };
 
-    DrawerROOT::DrawerROOT(const ParametersList& params) : Drawer(params) {}
+    DrawerROOT::DrawerROOT(const ParametersList& params) : Drawer(params) { gStyle->SetPalette(steer<int>("palette")); }
 
     const DrawerROOT& DrawerROOT::draw(const Graph1D& graph, const Mode& mode) const {
       auto gr = convert(graph);
@@ -48,7 +54,7 @@ namespace cepgen {
       auto gr = convert(graph);
       ROOTCanvas canv(graph.name());
       setMode(canv, mode);
-      gr.Draw("colz");
+      gr.Draw("surf3");
       canv.Prettify(gr.GetHistogram());
       canv.Save("pdf");
       return *this;
@@ -115,6 +121,8 @@ namespace cepgen {
         canv.SetLogx();
       if (mode & Mode::logy)
         canv.SetLogy();
+      if (mode & Mode::logz)
+        canv.SetLogz();
     }
 
     TGraphErrors DrawerROOT::convert(const Graph1D& graph) {
