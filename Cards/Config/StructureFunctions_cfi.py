@@ -36,7 +36,8 @@ class StructureFunctions:
         #W2limits = (4.,1.),
         #continuumSF = GD11p,
         #resonancesSF = ChristyBosted,
-    )
+    ),
+    KulaginBarinov = generic.clone(303),
     Partonic = generic.clone(401,
         pdfSet = 'LUXqed17_plus_PDF4LHC15_nnlo_100',
         numFlavours = 4,

@@ -53,6 +53,7 @@ namespace cepgen {
       HHT_ALLM_FT = 207,
       Schaefer = 301,
       Shamov = 302,
+      KulaginBarinov = 303,
       Partonic = 401,
     };
     /// Human-readable description of this SF parameterisation type

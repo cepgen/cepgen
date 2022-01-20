@@ -41,6 +41,7 @@ process = kt.process.clone('pptoww',
         cmEnergy = 13.e3,
         #structureFunctions = cepgen.StructureFunctions.SzczurekUleshchenko,
         #structureFunctions = cepgen.StructureFunctions.ALLM97,
+        #structureFunctions = cepgen.StructureFunctions.KulaginBarinov,
         structureFunctions = cepgen.StructureFunctions.LUXlike,
     ),
     outKinematics = kt.process.outKinematics.clone(
