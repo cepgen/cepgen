@@ -29,6 +29,7 @@
 #include "CepGen/Physics/ResonanceObject.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/GSLDerivator.h"
 #include "CepGen/Utils/GridHandler.h"
 
@@ -189,14 +190,17 @@ namespace cepgen {
       for (const auto& res : steer<std::vector<ParametersList> >("resonances"))
         resonances_.emplace_back(res);
       {  // build the FT and F2 grid
+        if (!utils::fileExists(sfs_grid_file_))
+          throw CG_FATAL("KulaginBarinov")
+              << "Failed to load the DIS structure functions interpolation grid from '" << sfs_grid_file_ << "'!";
         CG_INFO("KulaginBarinov") << "Loading A08 structure function values from '" << sfs_grid_file_ << "' file.";
         std::ifstream grid_file(sfs_grid_file_);
         static const size_t num_xbj = 99, num_q2 = 70, num_sf = 2;
         static const double min_xbj = 1.01e-5, min_q2 = 0.8, max_q2 = 1.e3;
         //--- xbj & Q2 binning
         const size_t nxbb = num_xbj / 2;
-        const double x1 = 0.3, xlog1 = log(x1), delx = (xlog1 - log(min_xbj)) / (nxbb - 1.),
-                     delx1 = std::pow(1. - x1, 2) / (nxbb + 1.);
+        const double x1 = 0.3, xlog1 = log(x1), delx = (xlog1 - log(min_xbj)) / (nxbb - 1),
+                     delx1 = std::pow(1. - x1, 2) / (nxbb + 1);
         const double dels = (log(log(max_q2 / 0.04)) - log(log(min_q2 / 0.04))) / (num_q2 - 1);
         for (size_t idx_xbj = 0; idx_xbj < num_xbj; ++idx_xbj) {  // xbj grid
           const double xbj = idx_xbj <= nxbb ? exp(log(min_xbj) + delx * idx_xbj)
@@ -206,18 +210,20 @@ namespace cepgen {
             std::array<double, num_sf> sfs;
             for (size_t idx_sf = 0; idx_sf < num_sf; ++idx_sf)
               grid_file >> sfs[idx_sf];
-            CG_DEBUG_LOOP("KulaginBarinov:grid") << "Inserting new values into grid: " << std::vector<double>{xbj, q2}
-                                                 << "(" << std::vector<size_t>{idx_xbj, idx_q2} << "): " << sfs;
+            CG_DEBUG("KulaginBarinov:grid") << "Inserting new values into grid: " << std::vector<double>{xbj, q2} << "("
+                                            << std::vector<size_t>{idx_xbj, idx_q2} << "): " << sfs;
             sfs_grid_.insert({xbj, q2}, sfs);
           }
         }
         sfs_grid_.init();
+        CG_DEBUG("KulaginBarinov:grid") << "Grid boundaries: " << sfs_grid_.boundaries();
       }
     }
 
     KulaginBarinov& KulaginBarinov::eval(double xbj, double q2) {
       const double w2 = utils::mX2(xbj, q2, mp2_), w = std::sqrt(w2);
       double fl{0.}, f2{0.};
+      const double gamma2 = 1. + tau(xbj, q2);
       {  //--- resonances region
         const auto kin = Resonance::KinematicsBlock(w2, q2, mp2_, mpi2_, meta2_);
         // proton c.m. energy and momentum (needed to compute additional kinematics factor for FL)
@@ -237,7 +243,7 @@ namespace cepgen {
         // finalize calculation of sfn and xsec taking into account normalization factors
         ft_res *= prefactor_ * xbj * mp_;
         fl_res *= 2. * prefactor_ * xbj * mp_ * q2 / q2cm;
-        const double f2_res = (fl_res + ft_res) / (1. + tau(xbj, q2));
+        const double f2_res = (fl_res + ft_res) / gamma2;
         fl += fl_res;
         f2 += f2_res;
       }  //--- end of resonances region
@@ -268,7 +274,7 @@ namespace cepgen {
             ddl = deriv_.eval(
                 [&](double q2) -> double {
                   const auto vals = sfs_grid_.eval({xbj, q2});  // FT, F2
-                  return (1. + tau(xbj, q2)) * vals.at(1) - vals.at(0) + sfnht(xbj, q2);
+                  return gamma2 * (vals.at(1) + sfnht(xbj, q2)) - (vals.at(0) + sfnht(xbj, q2));
                 },  // TM-corrected FL with twist-4 correction
                 q2,
                 q2 * 1.e-2);
@@ -282,14 +288,14 @@ namespace cepgen {
           auto photot = [](double w2) -> double {
             return 0.0598 * std::pow(w2, 0.0933) + 0.1164 * std::pow(w2, -0.357);
           };
-          const double ft_dis = (1. + tau(xbj, q2)) * f2_dis - fl_dis;
+          const double ft_dis = gamma2 * f2_dis - fl_dis;
           // extrapolation in q2 ; note cross section in mb units, and converted to GeV units
           const double f0t = photot(w2) / constants::G_EM_SQ * M_1_PI / (constants::GEVM2_TO_PB * 1.e-9);
           const double ft_der =
               q2 * (f0t + std::pow(q2, dis_params_.pmt - 1.) / std::pow(t, dis_params_.pmt) *
                               (ft_dis - f0t * t +
                                log(t / q2) * (dis_params_.pmt * ft_dis - t * ddt - (dis_params_.pmt - 1.) * f0t * t)));
-          const auto f2_der = (fl_der + ft_der) / (1. + tau(xbj, q2));
+          const auto f2_der = (fl_der + ft_der) / gamma2;
 
           fl_dis = fl_der;
           f2_dis = f2_der;
