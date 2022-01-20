@@ -77,6 +77,8 @@ namespace cepgen {
         friend EventWeights operator*(const EventWeights&, double);
         friend EventWeights operator*(double, const EventWeights&);
         friend std::ostream& operator<<(std::ostream&, const EventWeights&);
+        /// Are all weights null?
+        bool null() const;
       };
 
       /// Compute the phase space point weight

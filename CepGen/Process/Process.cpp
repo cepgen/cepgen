@@ -446,5 +446,9 @@ namespace cepgen {
         os << sep << wgt, sep = ", ";
       return os << "}";
     }
+
+    bool Process::EventWeights::null() const {
+      return std::all_of(begin(), end(), [](double wgt) { return wgt == 0; });
+    }
   }  // namespace proc
 }  // namespace cepgen
