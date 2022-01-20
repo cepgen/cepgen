@@ -16,21 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gsl/gsl_errno.h>
+#include <bitset>
 
-#include <cmath>
-#include <iomanip>
-
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/Drawable.h"
 #include "CepGen/Utils/Drawer.h"
-#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace utils {
-    Drawable::Drawable(const std::string& name, const std::string& title) : name_(name), title_(title) {}
-
-    Drawable::Drawable(const Drawable& oth) : xlabel_(oth.xlabel_), ylabel_(oth.ylabel_) {}
+    Drawer::Drawer(const ParametersList& params) : NamedModule(params) {}
 
     Drawer::Mode operator|(const Drawer::Mode& lhs, const Drawer::Mode& rhs) {
       std::bitset<7> mod1((int)lhs), mod2((int)rhs);

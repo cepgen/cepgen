@@ -30,8 +30,9 @@ namespace cepgen {
     /// A generic object which can be drawn in the standard output
     class Drawable {
     public:
-      explicit Drawable(const std::string& name = "", const std::string& title = "");
-      Drawable(const Drawable&);  ///< Copy constructor
+      explicit Drawable(const std::string& name = "", const std::string& title = "") : name_(name), title_(title) {}
+      ///< Copy constructor
+      Drawable(const Drawable& oth) : xlabel_(oth.xlabel_), ylabel_(oth.ylabel_) {}
 
       /// Drawable name
       const std::string& name() const { return name_; }

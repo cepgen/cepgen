@@ -28,11 +28,11 @@ namespace cepgen {
     class Graph2D;
     class Hist1D;
     class Hist2D;
-    /// A generic drawing utilitary
+    /// A generic drawing utility
     class Drawer : public NamedModule<std::string> {
     public:
-      /// Build a drawing utilitary
-      explicit Drawer(const ParametersList& params) : NamedModule(params) {}
+      /// Build a drawing utility
+      explicit Drawer(const ParametersList& params);
 
       enum struct Mode : int16_t { none = 0, logx, logy, logz, nostack };
       friend Mode operator|(const Mode&, const Mode&);
