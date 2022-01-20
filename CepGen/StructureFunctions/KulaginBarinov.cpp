@@ -33,6 +33,13 @@
 #include "CepGen/Utils/GSLDerivator.h"
 #include "CepGen/Utils/GridHandler.h"
 
+#define DEBUG_GRID
+
+#ifdef DEBUG_GRID
+#include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Utils/Drawer.h"
+#endif
+
 namespace cepgen {
   namespace strfun {
     /// Kulagin and Barinov hybrid parameterisation
@@ -203,8 +210,8 @@ namespace cepgen {
                      delx1 = std::pow(1. - x1, 2) / (nxbb + 1);
         const double dels = (log(log(max_q2 / 0.04)) - log(log(min_q2 / 0.04))) / (num_q2 - 1);
         for (size_t idx_xbj = 0; idx_xbj < num_xbj; ++idx_xbj) {  // xbj grid
-          const double xbj = idx_xbj <= nxbb ? exp(log(min_xbj) + delx * idx_xbj)
-                                             : 1. - std::sqrt(fabs(std::pow(1. - x1, 2) - delx1 * (idx_xbj - nxbb)));
+          const double xbj = idx_xbj < nxbb ? exp(log(min_xbj) + delx * idx_xbj)
+                                            : 1. - std::sqrt(fabs(std::pow(1. - x1, 2) - delx1 * (idx_xbj - nxbb + 1)));
           for (size_t idx_q2 = 0; idx_q2 < num_q2; ++idx_q2) {  // Q^2 grid
             const double q2 = 0.04 * exp(exp(log(log(min_q2 / 0.04)) + dels * idx_q2));
             std::array<double, num_sf> sfs;
@@ -217,6 +224,9 @@ namespace cepgen {
         }
         sfs_grid_.init();
         CG_DEBUG("KulaginBarinov:grid") << "Grid boundaries: " << sfs_grid_.boundaries();
+#ifdef DEBUG_GRID
+        utils::DrawerFactory::get().build("root")->draw(sfs_grid_, utils::Drawer::Mode::logz);
+#endif
       }
     }
 
