@@ -59,11 +59,11 @@ namespace cepgen {
     void setFormFactors(std::unique_ptr<formfac::Parameterisation>);
 
     /// Structure functions evaluator
-    strfun::Parameterisation* structureFunctions() const { return str_fun_.get(); }
+    const std::vector<std::shared_ptr<strfun::Parameterisation> >& structureFunctions() const { return str_funs_; }
     /// Set a structure functions evaluator object
-    void setStructureFunctions(std::unique_ptr<strfun::Parameterisation>);
+    void addStructureFunctions(std::unique_ptr<strfun::Parameterisation>);
     /// Set the integer-type of structure functions evaluator to build
-    void setStructureFunctions(int, int);
+    void addStructureFunctions(int, int);
 
   private:
     Beam pos_beam_;
@@ -71,7 +71,7 @@ namespace cepgen {
     /// Type of form factors to consider
     std::shared_ptr<formfac::Parameterisation> form_factors_;
     /// Type of structure functions to consider
-    std::shared_ptr<strfun::Parameterisation> str_fun_;
+    std::vector<std::shared_ptr<strfun::Parameterisation> > str_funs_;
   };
 }  // namespace cepgen
 

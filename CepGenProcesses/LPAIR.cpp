@@ -916,20 +916,20 @@ namespace cepgen {
       const double t22 = 512. * (bb_ * (delta_ * delta_ - gram_) - pow(epsi_ - delta_ * (qdq + q1dq2_), 2) -
                                  sa1_ * a6_ * a6_ - sa2_ * a5_ * a5_ - sa1_ * sa2_ * qqq);  // electric-electric
 
-      auto* ff = kin_.incomingBeams().formFactors();
-      auto* sf = kin_.incomingBeams().structureFunctions();
-      //--- compute the electric/magnetic form factors for the two
-      //    considered parton momenta transfers
-      const auto fp1 = kin_.incomingBeams().positive().flux(-t1_, mX2_, ff, sf);
-      const auto fp2 = kin_.incomingBeams().negative().flux(-t2_, mY2_, ff, sf);
-
-      CG_DEBUG_LOOP("LPAIR:peripp") << "(u1,u2) = " << fp1 << "\n\t"
-                                    << "(v1,v2) = " << fp2;
-
       EventWeights peripp;
-      peripp.emplace_back(
-          (fp1.FM * fp2.FM * t11 + fp1.FE * fp2.FM * t21 + fp1.FM * fp2.FE * t12 + fp1.FE * fp2.FE * t22) /
-          pow(2. * t1_ * t2_ * bb_, 2));
+      for (const auto& sf : kin_.incomingBeams().structureFunctions()) {
+        //--- compute the electric/magnetic form factors for the two
+        //    considered parton momenta transfers
+        const auto fp1 = kin_.incomingBeams().positive().flux(-t1_, mX2_, ff.get(), sf.get());
+        const auto fp2 = kin_.incomingBeams().negative().flux(-t2_, mY2_, ff.get(), sf.get());
+
+        CG_DEBUG_LOOP("LPAIR:peripp") << "(u1,u2) = " << fp1 << "\n\t"
+                                      << "(v1,v2) = " << fp2;
+
+        peripp.emplace_back(
+            (fp1.FM * fp2.FM * t11 + fp1.FE * fp2.FM * t21 + fp1.FM * fp2.FE * t12 + fp1.FE * fp2.FE * t22) /
+            pow(2. * t1_ * t2_ * bb_, 2));
+      }
 
       CG_DEBUG_LOOP("LPAIR:peripp") << "bb = " << bb_ << ", qqq = " << qqq << ", qdq = " << qdq << "\n\t"
                                     << "t11 = " << t11 << "\t"

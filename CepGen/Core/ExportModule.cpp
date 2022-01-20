@@ -42,9 +42,12 @@ namespace cepgen {
       std::ostringstream os;
       os << prep << "******* Sample generated with CepGen " << version::tag << " *******\n"
          << prep << " Process: " << params.processName() << " (" << params.kinematics().incomingBeams().mode() << ")\n";
-      if (params.kinematics().incomingBeams().mode() != mode::Kinematics::ElasticElastic)
-        os << prep << " Structure functions: "
-           << params.kinematics().incomingBeams().structureFunctions()->description().description() << "\n";
+      if (params.kinematics().incomingBeams().mode() != mode::Kinematics::ElasticElastic) {
+        std::ostringstream os_sf;
+        for (const auto& sf : params.kinematics().incomingBeams().structureFunctions())
+          os_sf << " " << sf->description().description();
+        os << prep << " Structure functions:" << os_sf.str() << "\n";
+      }
       if (!params.eventModifiersSequence().empty()) {
         os << prep << " " << utils::s("Event modifier", params.eventModifiersSequence().size()) << ": ";
         std::string sep;

@@ -121,6 +121,8 @@ namespace cepgen {
       //===========================================================================================
 
       genparams_.icontri = (int)kin_.incomingBeams().mode();
+      if (!kin_.incomingBeams().structureFunctions().empty())
+        genparams_.sfmod = kin_.incomingBeams().structureFunctions().at(0)->name();  //FIXME use multiple SF modellings
 
       //-------------------------------------------------------------------------------------------
       // incoming beams information

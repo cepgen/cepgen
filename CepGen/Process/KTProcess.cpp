@@ -118,17 +118,17 @@ namespace cepgen {
       EventWeights wgts;
 
       const HeavyIon hi1(kin_.incomingBeams().positive().pdg), hi2(kin_.incomingBeams().negative().pdg);
-      const std::vector<formfac::Parameterisation*> form_factors = {kin_.incomingBeams().formFactors()};
+      auto* ff = kin_.incomingBeams().formFactors();
       const double q2_1 = qt1_ * qt1_, q2_2 = qt2_ * qt2_;
 
-      std::vector<double> f1(form_factors.size(), 0.), f2(form_factors.size());
-      for (size_t i = 0; i < form_factors.size(); ++i) {
-        auto* ff = form_factors.at(i);
+      for (const auto& sf : kin_.incomingBeams().structureFunctions()) {
         // check if we are in heavy ion mode
-        const auto f1 = (hi1) ? ktFlux((KTFlux)kin_.incomingBeams().positive().kt_flux, x1_, q2_1, hi1)
-                              : ktFlux((KTFlux)kin_.incomingBeams().positive().kt_flux, x1_, q2_1, *ff, mA2_, mX2_);
-        const auto f2 = (hi2) ? ktFlux((KTFlux)kin_.incomingBeams().negative().kt_flux, x2_, q2_2, hi2)
-                              : ktFlux((KTFlux)kin_.incomingBeams().negative().kt_flux, x2_, q2_2, *ff, mB2_, mY2_);
+        const auto f1 = (hi1)
+                            ? ktFlux((KTFlux)kin_.incomingBeams().positive().kt_flux, x1_, q2_1, hi1)
+                            : ktFlux((KTFlux)kin_.incomingBeams().positive().kt_flux, x1_, q2_1, *ff, *sf, mA2_, mX2_);
+        const auto f2 = (hi2)
+                            ? ktFlux((KTFlux)kin_.incomingBeams().negative().kt_flux, x2_, q2_2, hi2)
+                            : ktFlux((KTFlux)kin_.incomingBeams().negative().kt_flux, x2_, q2_2, *ff, *sf, mB2_, mY2_);
         CG_DEBUG_LOOP("KTProcess:fluxes") << "Incoming fluxes for (x/kt2) = "
                                           << "(" << x1_ << "/" << qt1_ * qt1_ << "), "
                                           << "(" << x2_ << "/" << qt2_ * qt2_ << "):\n\t" << f1 << ", " << f2 << ".";

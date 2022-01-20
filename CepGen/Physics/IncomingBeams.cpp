@@ -151,7 +151,7 @@ namespace cepgen {
     auto strfun = steer<ParametersList>("structureFunctions");
     if (!strfun.empty() || !str_fun_) {
       CG_DEBUG("IncomingBeams") << "Structure functions modelling to be built: " << strfun << ".";
-      str_fun_ = strfun::StructureFunctionsFactory::get().build(strfun);
+      addStructureFunctions(strfun::StructureFunctionsFactory::get().build(strfun));
     }
     //--- parton fluxes for kt-factorisation
     if (params_.has<std::vector<int> >("ktFluxes")) {
@@ -175,8 +175,11 @@ namespace cepgen {
 
   const ParametersList& IncomingBeams::parameters() const {
     params_ = SteeredObject::parameters();
-    if (str_fun_)
-      params_.set<ParametersList>("structureFunctions", str_fun_->parameters());
+    if (str_funs_.size() > 1)
+      for (const auto& sf : str_funs_)
+        params_.operator[]<std::vector<ParametersList> >("structureFunctions").emplace_back(sf->parameters());
+    else
+      params_.set<ParametersList>("structureFunctions", str_funs_.at(0)->parameters());
     params_.setAs<int, mode::Kinematics>("mode", mode())
         .set<int>("beam1id", pos_beam_.pdgId())
         .set<double>("beam1pz", +pos_beam_.momentum().pz())
@@ -250,7 +253,7 @@ namespace cepgen {
     }
   }
 
-  void IncomingBeams::setStructureFunctions(int sf_model, int sr_model) {
+  void IncomingBeams::addStructureFunctions(int sf_model, int sr_model) {
     const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
     sf_model = (sf_model == 0 ? (int)strfun::Type::SuriYennie : sf_model);
     sr_model = (sr_model == 0 ? (int)sigrat::Type::SibirtsevBlunden : sr_model);
@@ -261,13 +264,19 @@ namespace cepgen {
           .set<int>("pdfId", icode % kLHAPDFPartDec)
           .set<int>("mode", icode / kLHAPDFPartDec);  // 0, 1, 2
     }
-    CG_DEBUG("IncomingBeams:setStructureFunctions")
+    CG_DEBUG("IncomingBeams:addStructureFunctions")
         << "Structure functions modelling to be built: " << sf_params << ".";
-    str_fun_ = strfun::StructureFunctionsFactory::get().build(sf_params);
+    addStructureFunctions(strfun::StructureFunctionsFactory::get().build(sf_params));
   }
 
-  void IncomingBeams::setStructureFunctions(std::unique_ptr<strfun::Parameterisation> param) {
-    str_fun_ = std::move(param);
+  void IncomingBeams::addStructureFunctions(std::unique_ptr<strfun::Parameterisation> param) {
+    for (const auto& sf : str_funs_)
+      if (sf->name() == param->name()) {
+        CG_WARNING("IncomingBeams:addStructureFunctions")
+            << "Trying to add for the second time structure functions modelling '" << param->name() << "'.";
+        return;
+      }
+    str_funs_.emplace_back(std::move(param));
   }
 
   ParametersDescription IncomingBeams::description() {
