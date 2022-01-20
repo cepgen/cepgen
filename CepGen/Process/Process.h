@@ -71,8 +71,16 @@ namespace cepgen {
       virtual std::unique_ptr<Process> clone() const;
       /// Set the incoming and outgoing state to be expected in the process
       inline virtual void addEventContent() {}
+
+      struct EventWeights : std::vector<double> {
+        using std::vector<double>::vector;
+        friend EventWeights operator*(const EventWeights&, double);
+        friend EventWeights operator*(double, const EventWeights&);
+        friend std::ostream& operator<<(std::ostream&, const EventWeights&);
+      };
+
       /// Compute the phase space point weight
-      virtual double computeWeight() = 0;
+      virtual EventWeights computeWeights() = 0;
       /// Compute the incoming state kinematics
       virtual void prepareKinematics() {}
       /// Fill the Event object with the particles' kinematics
@@ -108,6 +116,7 @@ namespace cepgen {
       Event* eventPtr();
 
     protected:
+      const EventWeights& zeroWeight() const { return zero_weight_; }
       double mp_;   ///< Proton mass, in GeV/c\f$^2\f$
       double mp2_;  ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
       /**
@@ -210,6 +219,7 @@ namespace cepgen {
       bool isKinematicsDefined();
       /// Is it the first time the process is computed?
       bool first_run_{true};
+      EventWeights zero_weight_;
     };
     /// Helper typedef for a Process unique pointer
     typedef std::unique_ptr<Process> ProcessPtr;

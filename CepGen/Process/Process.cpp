@@ -219,9 +219,9 @@ namespace cepgen {
       generateVariables();
 
       //--- compute the integrand
-      const auto me_integrand = computeWeight();
-      if (me_integrand <= 0.)
-        return 0.;
+      const auto me_integrand = computeWeights();
+      //if ( me_integrand <= 0. )
+      //  return 0.;
 
       //--- generate auxiliary (x-dependent) part of the Jacobian for
       //    this phase space point.
@@ -239,7 +239,7 @@ namespace cepgen {
                                       << (me_integrand * aux_jacobian) << "\n\t"
                                       << "Point weight = " << weight << ".";
 
-      return weight;
+      return weight.at(0);
     }
 
     void Process::clearEvent() {
@@ -270,6 +270,8 @@ namespace cepgen {
                                         << ParametersDescription(kin.allParameters(false)) << ".";
       clear();  // also resets the "first run" flag
       kin_ = kin;
+
+      zero_weight_ = {0.};  //FIXME
 
       const auto& p1 = kin_.incomingBeams().positive().momentum();
       const auto& p2 = kin_.incomingBeams().negative().momentum();
@@ -421,6 +423,28 @@ namespace cepgen {
           return os << "power law";
       }
       return os;
+    }
+
+    Process::EventWeights operator*(const Process::EventWeights& wgts, double fact) {
+      auto out = wgts;
+      for (auto& wgt : out)
+        wgt *= fact;
+      return out;
+    }
+
+    Process::EventWeights operator*(double fact, const Process::EventWeights& wgts) {
+      auto out = wgts;
+      for (auto& wgt : out)
+        wgt *= fact;
+      return out;
+    }
+
+    std::ostream& operator<<(std::ostream& os, const Process::EventWeights& wgts) {
+      os << "Weight{";
+      std::string sep;
+      for (const auto& wgt : wgts)
+        os << sep << wgt, sep = ", ";
+      return os << "}";
     }
   }  // namespace proc
 }  // namespace cepgen

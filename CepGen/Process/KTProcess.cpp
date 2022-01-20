@@ -108,20 +108,34 @@ namespace cepgen {
             mY2_, Mapping::square, kin_.cuts().remnants.mx(), {1.07, 1000.}, "Negative z proton remnant squared mass");
     }
 
-    double KTProcess::computeWeight() {
+    Process::EventWeights KTProcess::computeWeights() {
       const auto cent_me = computeKTFactorisedMatrixElement();
-      if (cent_me <= 0)
-        return 0.;
+      if (cent_me <= 0.)
+        return zeroWeight();
 
       //--- compute fluxes according to modelling specified in parameters card
 
-      auto* ff = kin_.incomingBeams().formFactors();
-      auto* sf = kin_.incomingBeams().structureFunctions();
-      const double q2_1 = qt1_ * qt1_, q2_2 = qt2_ * qt2_;
-      const double f1 = kin_.incomingBeams().positive().ktFlux(x1_, q2_1, mX2_, ff, sf) * M_1_PI,
-                   f2 = kin_.incomingBeams().negative().ktFlux(x2_, q2_2, mY2_, ff, sf) * M_1_PI;
+      EventWeights wgts;
 
-      return f1 * f2 * cent_me;
+      const HeavyIon hi1(kin_.incomingBeams().positive().pdg), hi2(kin_.incomingBeams().negative().pdg);
+      const std::vector<formfac::Parameterisation*> form_factors = {kin_.incomingBeams().formFactors()};
+      const double q2_1 = qt1_ * qt1_, q2_2 = qt2_ * qt2_;
+
+      std::vector<double> f1(form_factors.size(), 0.), f2(form_factors.size());
+      for (size_t i = 0; i < form_factors.size(); ++i) {
+        auto* ff = form_factors.at(i);
+        // check if we are in heavy ion mode
+        const auto f1 = (hi1) ? ktFlux((KTFlux)kin_.incomingBeams().positive().kt_flux, x1_, q2_1, hi1)
+                              : ktFlux((KTFlux)kin_.incomingBeams().positive().kt_flux, x1_, q2_1, *ff, mA2_, mX2_);
+        const auto f2 = (hi2) ? ktFlux((KTFlux)kin_.incomingBeams().negative().kt_flux, x2_, q2_2, hi2)
+                              : ktFlux((KTFlux)kin_.incomingBeams().negative().kt_flux, x2_, q2_2, *ff, mB2_, mY2_);
+        CG_DEBUG_LOOP("KTProcess:fluxes") << "Incoming fluxes for (x/kt2) = "
+                                          << "(" << x1_ << "/" << qt1_ * qt1_ << "), "
+                                          << "(" << x2_ << "/" << qt2_ * qt2_ << "):\n\t" << f1 << ", " << f2 << ".";
+        wgts.emplace_back(f1 * M_1_PI * f2 * M_1_PI);
+      }
+
+      return wgts * cent_me;
     }
 
     void KTProcess::fillKinematics(bool) {
@@ -147,7 +161,6 @@ namespace cepgen {
       // parton systems
       p1.setMomentum(ib1.momentum() - pX_, true);
       p2.setMomentum(ib2.momentum() - pY_, true);
-
 
       // two-parton system
       cm.setMomentum(p1.momentum() + p2.momentum());

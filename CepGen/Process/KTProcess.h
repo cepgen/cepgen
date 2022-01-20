@@ -49,7 +49,7 @@ namespace cepgen {
       /// Populate the event content with the generated process' topology
       void addEventContent() override;
       /// Retrieve the event weight in the phase space
-      double computeWeight() override;
+      EventWeights computeWeights() override;
       /// Populate the event content with the generated process' kinematics
       void fillKinematics(bool) override;
 

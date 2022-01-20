@@ -542,7 +542,7 @@ namespace cepgen {
 
     //---------------------------------------------------------------------------------------------
 
-    double LPAIR::computeWeight() {
+    Process::EventWeights LPAIR::computeWeights() {
       ep1_ = (*event_)(Particle::IncomingBeam1)[0].energy();
       ep2_ = (*event_)(Particle::IncomingBeam2)[0].energy();
       // Mass difference between the first outgoing particle and the first incoming particle
@@ -568,16 +568,16 @@ namespace cepgen {
 
       if (!orient()) {
         CG_DEBUG_LOOP("LPAIR") << "Orient failed.";
-        return 0.;
+        return zeroWeight();
       }
 
       if (t1_ > 0.) {
         CG_WARNING("LPAIR") << "t1 = " << t1_ << " > 0";
-        return 0.;
+        return zeroWeight();
       }
       if (t2_ > 0.) {
         CG_WARNING("LPAIR") << "t2 = " << t2_ << " > 0";
-        return 0.;
+        return zeroWeight();
       }
 
       const double ecm6 = w4_ / (2. * mc4_), pp6cm = sqrt(ecm6 * ecm6 - masses_.Ml2);
@@ -762,46 +762,43 @@ namespace cepgen {
       if (kin_.cuts().remnants.mx().valid()) {
         if (kin_.incomingBeams().positive().mode() == Beam::Mode::ProtonInelastic &&
             !kin_.cuts().remnants.mx().contains(mx))
-          return 0.;
+          return zeroWeight();
         if (kin_.incomingBeams().negative().mode() == Beam::Mode::ProtonInelastic &&
             !kin_.cuts().remnants.mx().contains(my))
-          return 0.;
+          return zeroWeight();
       }
 
       //--- cut on the proton's Q2 (first photon propagator T1)
 
       if (!kin_.cuts().initial.q2().contains(-t1_))
-        return 0.;
+        return zeroWeight();
 
       //----- cuts on the individual leptons
 
       if (kin_.cuts().central.pt_single().valid()) {
         const Limits& pt_limits = kin_.cuts().central.pt_single();
         if (!pt_limits.contains(p6_cm_.pt()) || !pt_limits.contains(p7_cm_.pt()))
-          return 0.;
+          return zeroWeight();
       }
 
       if (kin_.cuts().central.energy_single().valid()) {
         const Limits& energy_limits = kin_.cuts().central.energy_single();
         if (!energy_limits.contains(p6_cm_.energy()) || !energy_limits.contains(p7_cm_.energy()))
-          return 0.;
+          return zeroWeight();
       }
 
       if (kin_.cuts().central.eta_single().valid()) {
         const Limits& eta_limits = kin_.cuts().central.eta_single();
         if (!eta_limits.contains(p6_cm_.eta()) || !eta_limits.contains(p7_cm_.eta()))
-          return 0.;
+          return zeroWeight();
       }
 
       //--- compute the structure functions factors
-
-      jacobian_ *= periPP();
-
-      CG_DEBUG_LOOP("LPAIR:f") << "Jacobian: " << jacobian_;
+      const auto peripp = periPP();
 
       //--- compute the event weight using the Jacobian
-
-      return constants::GEVM2_TO_PB * jacobian_;
+      CG_DEBUG_LOOP("LPAIR:f") << "Jacobian: " << jacobian_;
+      return peripp * constants::GEVM2_TO_PB * jacobian_;
     }
 
     //---------------------------------------------------------------------------------------------
@@ -906,7 +903,7 @@ namespace cepgen {
 
     //---------------------------------------------------------------------------------------------
 
-    double LPAIR::periPP() const {
+    Process::EventWeights LPAIR::periPP() const {
       const double qqq = q1dq_ * q1dq_, qdq = 4. * masses_.Ml2 - w4_;
       const double t11 = 64. *
                          (bb_ * (qqq - g4_ - qdq * (t1_ + t2_ + 2. * masses_.Ml2)) -
@@ -926,9 +923,13 @@ namespace cepgen {
       const auto fp1 = kin_.incomingBeams().positive().flux(-t1_, mX2_, ff, sf);
       const auto fp2 = kin_.incomingBeams().negative().flux(-t2_, mY2_, ff, sf);
 
-      const double peripp =
+      CG_DEBUG_LOOP("LPAIR:peripp") << "(u1,u2) = " << fp1 << "\n\t"
+                                    << "(v1,v2) = " << fp2;
+
+      EventWeights peripp;
+      peripp.emplace_back(
           (fp1.FM * fp2.FM * t11 + fp1.FE * fp2.FM * t21 + fp1.FM * fp2.FE * t12 + fp1.FE * fp2.FE * t22) /
-          pow(2. * t1_ * t2_ * bb_, 2);
+          pow(2. * t1_ * t2_ * bb_, 2));
 
       CG_DEBUG_LOOP("LPAIR:peripp") << "bb = " << bb_ << ", qqq = " << qqq << ", qdq = " << qdq << "\n\t"
                                     << "t11 = " << t11 << "\t"

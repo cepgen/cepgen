@@ -58,7 +58,7 @@ namespace cepgen {
       ProcessPtr clone() const override { return ProcessPtr(new LPAIR(*this)); }
 
       void addEventContent() override;
-      double computeWeight() override;
+      EventWeights computeWeights() override;
       void prepareKinematics() override;
       void fillKinematics(bool) override;
 
@@ -87,7 +87,7 @@ namespace cepgen {
          *  b = t_1 t_2+\left(w_{\gamma\gamma}\sin^2{\theta^{\rm CM}_6}+4m_\ell\cos^2{\theta^{\rm CM}_6}\right) p_g^2
          * \f]
          */
-      double periPP() const;
+      EventWeights periPP() const;
       /**
          * Describe the kinematics of the process \f$p_1+p_2\to p_3+p_4+p_5\f$ in terms of Lorentz-invariant variables.
          * These variables (along with others) will then be fed into the \a PeriPP method (thus are essential for the evaluation of the full matrix element).
