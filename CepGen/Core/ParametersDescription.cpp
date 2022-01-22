@@ -167,8 +167,10 @@ namespace cepgen {
                                                                                const std::vector<ParametersList>& def) {
     obj_descr_[name] += desc;
     obj_descr_[name].setParametersVector(true);
+    std::vector<ParametersList> values;
     for (const auto& val : def)
-      ParametersList::operator[]<std::vector<ParametersList> >(name).emplace_back(desc.validate(val));
+      values.emplace_back(desc.validate(val));
+    ParametersList::set<std::vector<ParametersList> >(name, values);
     CG_DEBUG("ParametersDescription:addParametersDescriptionVector").log([this, &name, &desc, &def](auto& log) {
       log << "Added a new vector of parameters descriptions \"" << name << "\" as: " << desc;
       const auto& mod_name = this->getString(ParametersList::MODULE_NAME);
@@ -198,8 +200,8 @@ namespace cepgen {
         plist.erase(key);
         const auto& pit = user_params.get<ParametersList>(key);
         for (const auto& kit : pit.keys())
-          plist.operator[]<ParametersList>(key).set<ParametersList>(
-              kit, obj_descr_.at(key).parameters() + base + pit.get<ParametersList>(kit));
+          plist.operator[]<ParametersList>(key).operator[]<ParametersList>(kit) =
+              obj_descr_.at(key).validate(pit.get<ParametersList>(kit));
       }
     }
     CG_DEBUG("ParametersDescription:validate") << "Validating user-defined parameters:\n"

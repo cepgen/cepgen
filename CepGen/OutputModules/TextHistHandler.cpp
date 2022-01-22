@@ -118,7 +118,6 @@ namespace cepgen {
           const auto &xbins = hvar.get<std::vector<double> >("xbins"), &ybins = hvar.get<std::vector<double> >("ybins");
           name = utils::replace_all(name, ":", "_");
           const auto title = "d^2(sig)/d" + vars.at(0) + "/d" + vars.at(1) + " (pb/bin)";
-          CG_LOG << hvar;
           if (xbins.size() > 1 && ybins.size() > 1)
             hists2d_.emplace_back(Hist2DInfo{vars.at(0), vars.at(1), utils::Hist2D(xbins, ybins, name, title), log});
           else if (hvar.get<Limits>("xrange").valid()) {
@@ -206,7 +205,7 @@ namespace cepgen {
       hist_desc.add<int>("nbinsY", 50).setDescription("Bins multiplicity for y-axis");
       hist_desc.add<Limits>("yrange", Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
       hist_desc.add<bool>("log", false).setDescription("Plot logarithmic axis?");
-      desc.addParametersDescriptionVector("histVariables", hist_desc)
+      desc.addParametersDescriptionVector("histVariables", hist_desc, {})
           .setDescription("Histogram definition for 1/2 variable(s)");
       return desc;
     }
