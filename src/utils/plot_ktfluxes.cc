@@ -48,7 +48,6 @@ int main(int argc, char* argv[]) {
 
   auto ff = cepgen::formfac::FormFactorsFactory::get().build(formfac_type);
   auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(strfun_type);
-  ff->setStructureFunctions(sf.get());
   std::ofstream out(output_file);
   out << "# form factors: " << ff.get() << "\n"
       << "# structure functions: " << sf.get() << "\n"
@@ -56,10 +55,10 @@ int main(int argc, char* argv[]) {
       << "# mX = " << mx << " GeV\n";
   for (int i = 0; i < num_points; ++i) {
     const double x = i * 1. / num_points;
-    out << x << "\t" << cepgen::ktFlux(cepgen::KTFlux::P_Photon_Elastic, x, kt2, *ff, mi2, mx2) << "\t"
-        << cepgen::ktFlux(cepgen::KTFlux::P_Photon_Inelastic_Budnev, x, kt2, *ff, mi2, mx2)
-        //<< "\t" << cepgen::ktFlux( cepgen::KTFlux::P_Gluon_KMR, x, kt2, *ff, mi2, mx2 )
-        //<< "\t" << cepgen::ktFlux( cepgen::KTFlux::P_Gluon_KMR_alt, x, kt2, *ff, mi2, mx2 )
+    out << x << "\t" << cepgen::ktFlux(cepgen::KTFlux::P_Photon_Elastic, x, kt2, *ff, *sf, mi2, mx2) << "\t"
+        << cepgen::ktFlux(cepgen::KTFlux::P_Photon_Inelastic_Budnev, x, kt2, *ff, *sf, mi2, mx2)
+        //<< "\t" << cepgen::ktFlux( cepgen::KTFlux::P_Gluon_KMR, x, kt2, *ff, *sf, mi2, mx2 )
+        //<< "\t" << cepgen::ktFlux( cepgen::KTFlux::P_Gluon_KMR_alt, x, kt2, *ff, *sf, mi2, mx2 )
         << "\n";
   }
   CG_LOG << "Scan written in \"" << output_file << "\".";

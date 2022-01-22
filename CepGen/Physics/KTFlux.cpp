@@ -28,7 +28,13 @@
 namespace cepgen {
   const double KTFluxParameters::kMinKTFlux = 1.e-20;
 
-  double ktFlux(const KTFlux& type, double x, double kt2, formfac::Parameterisation& ff, double mi2, double mf2) {
+  double ktFlux(const KTFlux& type,
+                double x,
+                double kt2,
+                formfac::Parameterisation& ff,
+                strfun::Parameterisation& sf,
+                double mi2,
+                double mf2) {
     switch (type) {
       case KTFlux::P_Photon_Elastic:
       case KTFlux::P_Photon_Elastic_Budnev: {
@@ -56,11 +62,11 @@ namespace cepgen {
         const double xbj = denom * q2;
         //--- proton structure functions
         if (type == KTFlux::P_Photon_Inelastic) {
-          const double f_aux = ff.structureFunctions()->F2(xbj, q2) * denom * qnorm * qnorm;
+          const double f_aux = sf.F2(xbj, q2) * denom * qnorm * qnorm;
           return constants::ALPHA_EM * M_1_PI * (1. - x) / q2 * f_aux;
         } else {
-          const double f_D = ff.structureFunctions()->F2(xbj, q2) * denom * (1. - x) * qnorm;
-          const double f_C = ff.structureFunctions()->F1(xbj, q2) * 2. / q2;
+          const double f_D = sf.F2(xbj, q2) * denom * (1. - x) * qnorm;
+          const double f_C = sf.F1(xbj, q2) * 2. / q2;
           return constants::ALPHA_EM * M_1_PI * (1. - x) / q2 * (f_D + 0.5 * x2 * f_C);
         }
       } break;

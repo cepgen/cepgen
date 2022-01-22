@@ -46,7 +46,10 @@ namespace cepgen {
       return 0.25 * q2 / mp2_;
     }
 
-    Parameterisation& Parameterisation::operator()(const mode::Beam& type, double q2, double mf2) {
+    Parameterisation& Parameterisation::operator()(const mode::Beam& type,
+                                                   double q2,
+                                                   double mf2,
+                                                   strfun::Parameterisation* sf) {
       last_q2_ = q2;
       switch (type) {
         case mode::Beam::invalid:
@@ -65,21 +68,21 @@ namespace cepgen {
           FM = GM2;
         } break;
         case mode::Beam::ProtonInelastic: {
-          if (!str_fun_)
+          if (!sf)
             throw CG_FATAL("FormFactors")
                 << "Inelastic proton form factors computation requires a structure functions definition!";
           const double xbj = utils::xBj(q2, mp2_, mf2);
-          switch ((strfun::Type)str_fun_->name()) {
+          switch ((strfun::Type)sf->name()) {
             case strfun::Type::ElasticProton:
               throw CG_FATAL("FormFactors") << "Elastic proton form factors requested!\n"
                                             << "Check your process definition!";
             case strfun::Type::SuriYennie: {  // this one requires its own object to deal with FM
-              FE = str_fun_->F2(xbj, q2) * xbj * mp_ / q2;
-              FM = str_fun_->FM(xbj, q2);
+              FE = sf->F2(xbj, q2) * xbj * mp_ / q2;
+              FM = sf->FM(xbj, q2);
             } break;
             default: {
-              FE = str_fun_->F2(xbj, q2) * xbj / q2;
-              FM = -2. * str_fun_->F1(xbj, q2) / q2;
+              FE = sf->F2(xbj, q2) * xbj / q2;
+              FM = -2. * sf->F1(xbj, q2) / q2;
             } break;
           }
         } break;

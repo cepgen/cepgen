@@ -223,6 +223,7 @@ namespace cepgen {
                                      x1,
                                      q1t2,
                                      *kin_.incomingBeams().formFactors(),
+                                     *kin_.incomingBeams().structureFunctions(),
                                      mA2_,
                                      mX2_);
 
@@ -233,6 +234,7 @@ namespace cepgen {
                                      x2,
                                      q2t2,
                                      *kin_.incomingBeams().formFactors(),
+                                     *kin_.incomingBeams().structureFunctions(),
                                      mB2_,
                                      mY2_);
 

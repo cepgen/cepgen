@@ -118,12 +118,8 @@ namespace cepgen {
     //--- structure functions
     auto strfun = steer<ParametersList>("structureFunctions");
     if (!strfun.empty() || !str_fun_) {
-      if (strfun.name<int>(-999) == -999)
-        strfun.setName<int>(11);  // default is Suri-Yennie
       CG_DEBUG("IncomingBeams") << "Structure functions modelling to be built: " << strfun << ".";
       str_fun_ = strfun::StructureFunctionsFactory::get().build(strfun);
-      if (form_factors_)
-        form_factors_->setStructureFunctions(str_fun_.get());
     }
     //--- parton fluxes for kt-factorisation
     if (params_.has<std::vector<int> >("ktFluxes")) {
@@ -233,12 +229,11 @@ namespace cepgen {
     }
     CG_DEBUG("IncomingBeams:setStructureFunctions")
         << "Structure functions modelling to be built: " << sf_params << ".";
-    setStructureFunctions(strfun::StructureFunctionsFactory::get().build(sf_params));
+    str_fun_ = strfun::StructureFunctionsFactory::get().build(sf_params);
   }
 
   void IncomingBeams::setStructureFunctions(std::unique_ptr<strfun::Parameterisation> param) {
     str_fun_ = std::move(param);
-    form_factors_->setStructureFunctions(str_fun_.get());
   }
 
   ParametersDescription IncomingBeams::description() {
@@ -260,6 +255,7 @@ namespace cepgen {
     desc.add<int>("mode", (int)mode::Kinematics::invalid)
         .setDescription("Process kinematics mode (1 = elastic, (2-3) = single-dissociative, 4 = double-dissociative)");
     auto sf_desc = strfun::Parameterisation::description();
+    sf_desc.add<int>(ParametersList::MODULE_NAME, 11);  // default is SY
     desc.add<ParametersDescription>("structureFunctions", sf_desc)
         .setDescription("Beam inelastic structure functions modelling");
     desc.add<int>("ktFluxes", -1).setDescription("kT-factorised fluxes modelling");

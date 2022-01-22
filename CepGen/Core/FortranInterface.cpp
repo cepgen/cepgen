@@ -48,8 +48,7 @@ double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& 
   static auto ff = formfac::FormFactorsFactory::get().build(
       formfac::gFFStandardDipoleHandler);  // use another argument for the modelling?
   static auto sf = strfun::StructureFunctionsFactory::get().build(sfmode);
-  ff->setStructureFunctions(sf.get());
-  return ktFlux((KTFlux)fmode, x, kt2, *ff, min * min, mout * mout);
+  return ktFlux((KTFlux)fmode, x, kt2, *ff, *sf, min * min, mout * mout);
 }
 
 /// Compute a \f$k_{\rm T}\f$-dependent flux for heavy ions

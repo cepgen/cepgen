@@ -69,7 +69,6 @@ int main(int argc, char* argv[]) {
   vector<TGraph*> g_form_factors_fe, g_form_factors_fm;
   for (const auto& ff_type : cepgen::formfac::FormFactorsFactory::get().modules()) {
     form_factors.emplace_back(cepgen::formfac::FormFactorsFactory::get().build(ff_type));
-    (*form_factors.rbegin())->setStructureFunctions(sf.get());
     g_form_factors_fe.emplace_back(new TGraph);
     (*g_form_factors_fe.rbegin())->SetTitle((ff_type + ";Q^{2} (GeV^{2});F_{E}").c_str());
     g_form_factors_fm.emplace_back(new TGraph);
@@ -80,7 +79,7 @@ int main(int argc, char* argv[]) {
     out << q2 << "\t";
     size_t j = 0;
     for (auto& ff : form_factors) {
-      const auto form_factor = (*ff)((cepgen::mode::Beam)mode, q2, mx);
+      const auto form_factor = (*ff)((cepgen::mode::Beam)mode, q2, mx, sf.get());
       out << "\t" << form_factor.FE << "\t" << form_factor.FM;
       g_form_factors_fe.at(j)->SetPoint(g_form_factors_fe.at(j)->GetN(), q2, form_factor.FE);
       g_form_factors_fm.at(j)->SetPoint(g_form_factors_fm.at(j)->GetN(), q2, form_factor.FM);
