@@ -136,21 +136,20 @@ namespace cepgen {
 
       const double alpha1 = amt1_ / sqs_ * exp(y_c1_), beta1 = amt1_ / sqs_ * exp(-y_c1_);
       const double alpha2 = amt2_ / sqs_ * exp(y_c2_), beta2 = amt2_ / sqs_ * exp(-y_c2_);
+      x1_ = alpha1 + alpha2;
+      x2_ = beta1 + beta2;
 
       CG_DEBUG_LOOP("2to4:sudakov") << "Sudakov parameters:\n\t"
                                     << "  alpha(1/2) = " << alpha1 << " / " << alpha2 << "\n\t"
                                     << "   beta(1/2) = " << beta1 << " / " << beta2 << ".";
 
-      const double q1t2 = qt_1.pt2(), q2t2 = qt_2.pt2();
-      const double x1 = alpha1 + alpha2, x2 = beta1 + beta2;
-
       //--- sanity check for x_i values
-      if (!x_limits_.contains(x1) || !x_limits_.contains(x2))
+      if (!x_limits_.contains(x1_) || !x_limits_.contains(x2_))
         return 0.;
 
       //--- additional conditions for energy-momentum conservation
 
-      const double s1_eff = x1 * s_ - q1t2, s2_eff = x2 * s_ - q2t2;
+      const double s1_eff = x1_ * s_ - qt1_ * qt1_, s2_eff = x2_ * s_ - qt2_ * qt2_;
 
       CG_DEBUG_LOOP("2to4:central") << "s(1/2)_eff = " << s1_eff << " / " << s2_eff << " GeV^2\n\t"
                                     << "central system invariant mass = " << invm << " GeV";
@@ -162,10 +161,10 @@ namespace cepgen {
 
       //--- four-momenta of the outgoing protons (or remnants)
 
-      const double px_plus = (1. - x1) * pA_.p() * M_SQRT2;
-      const double py_minus = (1. - x2) * pB_.p() * M_SQRT2;
-      const double px_minus = (mX2_ + q1t2) * 0.5 / px_plus;
-      const double py_plus = (mY2_ + q2t2) * 0.5 / py_minus;
+      const double px_plus = (1. - x1_) * pA_.p() * M_SQRT2;
+      const double py_minus = (1. - x2_) * pB_.p() * M_SQRT2;
+      const double px_minus = (mX2_ + qt1_ * qt1_) * 0.5 / px_plus;
+      const double py_plus = (mY2_ + qt2_ * qt2_) * 0.5 / py_minus;
       // warning! sign of pz??
 
       CG_DEBUG_LOOP("2to4:pxy") << "px± = " << px_plus << " / " << px_minus << "\n\t"
@@ -189,13 +188,14 @@ namespace cepgen {
 
       //--- four-momenta of the intermediate partons
 
-      q1_ = Momentum(qt_1)
-                .setPz(+0.5 * x1 * ww_ * sqs_ * (1. - q1t2 / x1 / x1 / ww_ / ww_ / s_))
-                .setEnergy(+0.5 * x1 * ww_ * sqs_ * (1. + q1t2 / x1 / x1 / ww_ / ww_ / s_));
+      const double norm = 1. / ww_ / ww_ / s_;
+      const double tau1 = norm * qt1_ * qt1_ / x1_ / x1_;
+      q1_ =
+          Momentum(qt_1).setPz(+0.5 * x1_ * ww_ * sqs_ * (1. - tau1)).setEnergy(+0.5 * x1_ * ww_ * sqs_ * (1. + tau1));
 
-      q2_ = Momentum(qt_2)
-                .setPz(-0.5 * x2 * ww_ * sqs_ * (1. - q2t2 / x2 / x2 / ww_ / ww_ / s_))
-                .setEnergy(+0.5 * x2 * ww_ * sqs_ * (1. + q2t2 / x2 / x2 / ww_ / ww_ / s_));
+      const double tau2 = norm * qt2_ * qt2_ / x2_ / x2_;
+      q2_ =
+          Momentum(qt_2).setPz(-0.5 * x2_ * ww_ * sqs_ * (1. - tau2)).setEnergy(+0.5 * x2_ * ww_ * sqs_ * (1. + tau2));
 
       CG_DEBUG_LOOP("2to4:partons") << "First parton:  " << q1_ << ", mass2 = " << q1_.mass2() << "\n\t"
                                     << "Second parton: " << q2_ << ", mass2 = " << q2_.mass2() << ".";
@@ -218,10 +218,10 @@ namespace cepgen {
 
       const HeavyIon hi1(kin_.incomingBeams().positive().pdg);
       const double f1 = (hi1)  // check if we are in heavy ion mode
-                            ? ktFlux((KTFlux)kin_.incomingBeams().positive().kt_flux, x1, q1t2, hi1)
+                            ? ktFlux((KTFlux)kin_.incomingBeams().positive().kt_flux, x1_, qt1_ * qt1_, hi1)
                             : ktFlux((KTFlux)kin_.incomingBeams().positive().kt_flux,
-                                     x1,
-                                     q1t2,
+                                     x1_,
+                                     qt1_ * qt1_,
                                      *kin_.incomingBeams().formFactors(),
                                      *kin_.incomingBeams().structureFunctions(),
                                      mA2_,
@@ -229,18 +229,18 @@ namespace cepgen {
 
       const HeavyIon hi2(kin_.incomingBeams().negative().pdg);
       const double f2 = (hi2)  // check if we are in heavy ion mode
-                            ? ktFlux((KTFlux)kin_.incomingBeams().negative().kt_flux, x2, q2t2, hi2)
+                            ? ktFlux((KTFlux)kin_.incomingBeams().negative().kt_flux, x2_, qt2_ * qt2_, hi2)
                             : ktFlux((KTFlux)kin_.incomingBeams().negative().kt_flux,
-                                     x2,
-                                     q2t2,
+                                     x2_,
+                                     qt2_ * qt2_,
                                      *kin_.incomingBeams().formFactors(),
                                      *kin_.incomingBeams().structureFunctions(),
                                      mB2_,
                                      mY2_);
 
       CG_DEBUG_LOOP("2to4:fluxes") << "Incoming fluxes for (x/kt2) = "
-                                   << "(" << x1 << "/" << q1t2 << "), "
-                                   << "(" << x2 << "/" << q2t2 << "):\n\t" << f1 << ", " << f2 << ".";
+                                   << "(" << x1_ << "/" << qt1_ * qt1_ << "), "
+                                   << "(" << x2_ << "/" << qt2_ * qt2_ << "):\n\t" << f1 << ", " << f2 << ".";
 
       //=================================================================
       // factor 1/4 from jacobian of transformations
@@ -248,7 +248,7 @@ namespace cepgen {
       //     d^2(kappa_1)d^2(kappa_2) instead of d(kappa_1^2)d(kappa_2^2)
       //=================================================================
 
-      return amat2 * pow(4. * x1 * x2 * s_ * M_PI, -2) * f1 * M_1_PI * f2 * M_1_PI * 0.25 * constants::GEVM2_TO_PB *
+      return amat2 * pow(4. * x1_ * x2_ * s_ * M_PI, -2) * f1 * M_1_PI * f2 * M_1_PI * 0.25 * constants::GEVM2_TO_PB *
              pt_diff_ * qt1_ * qt2_;
     }
 

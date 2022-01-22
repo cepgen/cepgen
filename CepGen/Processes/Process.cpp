@@ -30,13 +30,18 @@
 namespace cepgen {
   namespace proc {
     Process::Process(const ParametersList& params, bool has_event)
-        : NamedModule(params), alphaem_(AlphaEMFactory::get().build(steer<ParametersList>("alphaEM"))) {
+        : NamedModule(params),
+          mp_(PDG::get().mass(PDG::proton)),
+          mp2_(mp_ * mp_),
+          alphaem_(AlphaEMFactory::get().build(steer<ParametersList>("alphaEM"))) {
       if (has_event)
         event_.reset(new Event);
     }
 
     Process::Process(const Process& proc)
         : NamedModule<>(proc.parameters()),
+          mp_(PDG::get().mass(PDG::proton)),
+          mp2_(mp_ * mp_),
           alphaem_(proc.alphaem_),
           alphas_(proc.alphas_),
           mapped_variables_(proc.mapped_variables_),
@@ -214,9 +219,9 @@ namespace cepgen {
       generateVariables();
 
       //--- compute the integrand
-      const double me_integrand = computeWeight();
-      //if ( me_integrand <= 0. )
-      //  return 0.;
+      const auto me_integrand = computeWeight();
+      if (me_integrand <= 0.)
+        return 0.;
 
       //--- generate auxiliary (x-dependent) part of the Jacobian for
       //    this phase space point.
@@ -225,7 +230,7 @@ namespace cepgen {
         return 0.;
 
       //--- combine every component into a single weight for this point
-      const double weight = (base_jacobian_ * aux_jacobian) * me_integrand;
+      const auto weight = (base_jacobian_ * aux_jacobian) * me_integrand;
 
       CG_DEBUG_LOOP("Process:weight") << "Jacobian: " << base_jacobian_ << " * " << aux_jacobian << " = "
                                       << (base_jacobian_ * aux_jacobian) << ".\n\t"
@@ -246,8 +251,6 @@ namespace cepgen {
       CG_DEBUG("Process:setKinematics") << "Preparing to set the kinematics parameters. Input parameters: "
                                         << kin.parameters(false) << ".";
       clear();  // also resets the "first run" flag
-      mp_ = PDG::get().mass(PDG::proton);
-      mp2_ = mp_ * mp_;
       kin_ = kin;
 
       const auto& p1 = kin_.incomingBeams().positive().momentum;

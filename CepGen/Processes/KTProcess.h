@@ -81,10 +81,15 @@ namespace cepgen {
       /// Invariant mass range for the scattered excited system
       Limits mx_limits_;
 
+      /// Fractional momentum  for the first intermediate parton
+      double x1_{0.};
       /// Virtuality of the first intermediate parton (photon, pomeron, ...)
       double qt1_{0.};
       /// Azimuthal rotation of the first intermediate parton's transverse virtuality
       double phi_qt1_{0.};
+
+      /// Fractional momentum  for the second intermediate parton
+      double x2_{0.};
       /// Virtuality of the second intermediate parton (photon, pomeron, ...)
       double qt2_{0.};
       /// Azimuthal rotation of the second intermediate parton's transverse virtuality
