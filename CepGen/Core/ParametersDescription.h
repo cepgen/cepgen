@@ -66,6 +66,16 @@ namespace cepgen {
       ParametersList::set<T>(name, def);
       return obj_descr_[name];
     }
+    /// Add a recasted definition to a new parameter
+    template <typename T, typename U>
+    inline ParametersDescription& addAs(const std::string& name, const U& def) {
+      return add<T>(name, static_cast<T>(def));
+    }
+    /// Set the module name
+    template <typename T>
+    inline ParametersDescription& setName(const T& name) {
+      return add<T>(ParametersList::MODULE_NAME, name);
+    }
     /// Add the description to a collection of ParametersList objects
     ParametersDescription& addParametersDescriptionVector(const std::string&,
                                                           const ParametersDescription&,

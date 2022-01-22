@@ -99,6 +99,11 @@ namespace cepgen {
     /// Set a parameter value
     template <typename T>
     ParametersList& set(const std::string& key, const T& value);
+    /// Set a recasted parameter value
+    template <typename T, typename U>
+    inline ParametersList& setAs(const std::string& key, const U& value) {
+      return set<T>(key, static_cast<T>(value));
+    }
     /// Concatenate two parameters containers
     ParametersList& operator+=(const ParametersList& oth);
     /// Concatenation of two parameters containers
