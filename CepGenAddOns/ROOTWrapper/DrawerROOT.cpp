@@ -17,6 +17,8 @@ namespace cepgen {
 
       static ParametersDescription description() {
         auto desc = Drawer::description();
+        desc.add<std::string>("filename", "canvas").setDescription("default filename for the output");
+        desc.add<std::string>("format", "pdf").setDescription("default extension for the output");
         desc.add<int>("palette", kLightTemperature).setDescription("ROOT colour palette to use");
         return desc;
       }
@@ -36,54 +38,62 @@ namespace cepgen {
       static TGraph2DErrors convert(const Graph2D&);
       static TH1D convert(const Hist1D&);
       static TH2D convert(const Hist2D&);
+
+      const std::string def_filename_;
+      const std::string def_extension_;
     };
 
-    DrawerROOT::DrawerROOT(const ParametersList& params) : Drawer(params) { gStyle->SetPalette(steer<int>("palette")); }
+    DrawerROOT::DrawerROOT(const ParametersList& params)
+        : Drawer(params), def_filename_(steer<std::string>("filename")), def_extension_(steer<std::string>("format")) {
+      gStyle->SetPalette(steer<int>("palette"));
+    }
 
     const DrawerROOT& DrawerROOT::draw(const Graph1D& graph, const Mode& mode) const {
       auto gr = convert(graph);
-      ROOTCanvas canv(graph.name(), graph.title());
+      ROOTCanvas canv(graph.name().empty() ? def_filename_ : graph.name(), graph.title());
       setMode(canv, mode);
       gr.Draw("al");
+      gr.GetHistogram()->SetTitle((";" + graph.xLabel() + ";" + graph.yLabel()).c_str());
       canv.Prettify(gr.GetHistogram());
-      canv.Save("pdf");
+      canv.Save(def_extension_);
       return *this;
     }
 
     const DrawerROOT& DrawerROOT::draw(const Graph2D& graph, const Mode& mode) const {
       auto gr = convert(graph);
-      ROOTCanvas canv(graph.name());
+      ROOTCanvas canv(graph.name().empty() ? def_filename_ : graph.name(), graph.title());
       setMode(canv, mode);
       gr.Draw("surf3");
+      gr.GetHistogram()->SetTitle((";" + graph.xLabel() + ";" + graph.yLabel() + ";" + graph.zLabel()).c_str());
       canv.Prettify(gr.GetHistogram());
-      canv.Save("pdf");
+      canv.Save(def_extension_);
       return *this;
     }
 
     const DrawerROOT& DrawerROOT::draw(const Hist1D& hist, const Mode& mode) const {
       auto h = convert(hist);
-      ROOTCanvas canv(hist.name(), hist.title());
+      ROOTCanvas canv(hist.name().empty() ? def_filename_ : hist.name(), hist.title());
       setMode(canv, mode);
       h.Draw();
       canv.Prettify(&h);
-      canv.Save("pdf");
+      canv.Save(def_extension_);
       return *this;
     }
 
     const DrawerROOT& DrawerROOT::draw(const Hist2D& hist, const Mode& mode) const {
       auto h = convert(hist);
-      ROOTCanvas canv(hist.name(), hist.title());
+      ROOTCanvas canv(hist.name().empty() ? def_filename_ : hist.name(), hist.title());
       setMode(canv, mode);
       h.Draw("colz");
       canv.Prettify(&h);
-      canv.Save("pdf");
+      canv.Save(def_extension_);
       return *this;
     }
 
     const DrawerROOT& DrawerROOT::draw(const DrawableColl& objs, const std::string& name, const Mode& mode) const {
       TMultiGraph mg;
       THStack hs;
-      ROOTCanvas canv(name.c_str(), "");
+      ROOTCanvas canv(name.empty() ? def_filename_ : name, "");
       setMode(canv, mode);
       size_t i = 0;
       for (const auto* obj : objs) {
@@ -112,7 +122,7 @@ namespace cepgen {
         canv.Prettify(hs.GetHistogram());
       else if (has_graphs)
         canv.Prettify(mg.GetHistogram());
-      canv.Save("pdf");
+      canv.Save(def_extension_);
       return *this;
     }
 
@@ -160,6 +170,8 @@ namespace cepgen {
         h.SetBinContent(i + 1, hist.value(i));
         h.SetBinError(i + 1, hist.valueUnc(i));
       }
+      h.GetXaxis()->SetTitle(hist.xLabel().c_str());
+      h.GetYaxis()->SetTitle(hist.yLabel().c_str());
       return h;
     }
 
@@ -178,6 +190,9 @@ namespace cepgen {
           h.SetBinContent(ix + 1, iy + 1, hist.value(ix, iy));
           h.SetBinError(ix + 1, iy + 1, hist.valueUnc(ix, iy));
         }
+      h.GetXaxis()->SetTitle(hist.xLabel().c_str());
+      h.GetYaxis()->SetTitle(hist.yLabel().c_str());
+      h.GetZaxis()->SetTitle(hist.zLabel().c_str());
       return h;
     }
   }  // namespace utils
