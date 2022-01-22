@@ -22,7 +22,7 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Physics/KTFlux.h"
+#include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/ArgumentsParser.h"
@@ -55,11 +55,9 @@ int main(int argc, char* argv[]) {
       << "# mX = " << mx << " GeV\n";
   for (int i = 0; i < num_points; ++i) {
     const double x = i * 1. / num_points;
-    out << x << "\t" << cepgen::ktFlux(cepgen::KTFlux::P_Photon_Elastic, x, kt2, *ff, *sf, mi2, mx2) << "\t"
-        << cepgen::ktFlux(cepgen::KTFlux::P_Photon_Inelastic_Budnev, x, kt2, *ff, *sf, mi2, mx2)
-        //<< "\t" << cepgen::ktFlux( cepgen::KTFlux::P_Gluon_KMR, x, kt2, *ff, *sf, mi2, mx2 )
-        //<< "\t" << cepgen::ktFlux( cepgen::KTFlux::P_Gluon_KMR_alt, x, kt2, *ff, *sf, mi2, mx2 )
-        << "\n";
+    out << x << "\t" << cepgen::Beam::ktFluxNucl(cepgen::Beam::KTFlux::P_Photon_Elastic, x, kt2, *ff, *sf, mi2, mx2)
+        << "\t" << cepgen::Beam::ktFluxNucl(cepgen::Beam::KTFlux::P_Photon_Inelastic_Budnev, x, kt2, *ff, *sf, mi2, mx2)
+        << "\t" << cepgen::Beam::ktFluxNucl(cepgen::Beam::KTFlux::P_Gluon_KMR, x, kt2, *ff, *sf, mi2, mx2) << "\n";
   }
   CG_LOG << "Scan written in \"" << output_file << "\".";
   out.close();

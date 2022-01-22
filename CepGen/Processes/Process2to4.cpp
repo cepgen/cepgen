@@ -21,7 +21,6 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/HeavyIon.h"
-#include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/Process2to4.h"
 #include "CepGen/Utils/String.h"

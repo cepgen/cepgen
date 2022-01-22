@@ -22,7 +22,6 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/HeavyIon.h"
-#include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/Modes.h"
 #include "CepGen/Physics/Momentum.h"
@@ -153,8 +152,8 @@ namespace cepgen {
         plist_neg.set<int>("ktFlux", kt_fluxes.size() > 1 ? kt_fluxes.at(1) : kt_fluxes.at(0));
       }
     } else if (params_.has<int>("ktFluxes")) {
-      const auto& ktfluxes = steerAs<int, KTFlux>("ktFluxes");
-      if (ktfluxes != KTFlux::invalid) {
+      const auto& ktfluxes = steerAs<int, Beam::KTFlux>("ktFluxes");
+      if (ktfluxes != Beam::KTFlux::invalid) {
         plist_pos.set<int>("ktFlux", (int)ktfluxes);
         plist_neg.set<int>("ktFlux", (int)ktfluxes);
       }

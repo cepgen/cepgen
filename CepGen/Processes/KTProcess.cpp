@@ -18,9 +18,9 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/HeavyIon.h"
-#include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Processes/KTProcess.h"
 
@@ -80,38 +80,8 @@ namespace cepgen {
       // register the incoming partons
       //============================================================================================
 
-      switch (kin_.incomingBeams().positive().ktFlux()) {
-        case KTFlux::P_Gluon_KMR:
-          event_->oneWithRole(Particle::Parton1).setPdgId((pdgid_t)PDG::gluon);
-          break;
-        case KTFlux::P_Photon_Elastic:
-        case KTFlux::P_Photon_Elastic_Budnev:
-        case KTFlux::P_Photon_Inelastic:
-        case KTFlux::P_Photon_Inelastic_Budnev:
-        case KTFlux::HI_Photon_Elastic:
-          event_->oneWithRole(Particle::Parton1).setPdgId((pdgid_t)PDG::photon);
-          break;
-        case KTFlux::invalid:
-        default:
-          throw CG_FATAL("KTProcess:kinematics")
-              << "Invalid flux for 2nd incoming parton: " << kin_.incomingBeams().positive().ktFlux() << "!";
-      }
-      switch (kin_.incomingBeams().negative().ktFlux()) {
-        case KTFlux::P_Gluon_KMR:
-          event_->oneWithRole(Particle::Parton2).setPdgId((pdgid_t)PDG::gluon);
-          break;
-        case KTFlux::P_Photon_Elastic:
-        case KTFlux::P_Photon_Elastic_Budnev:
-        case KTFlux::P_Photon_Inelastic:
-        case KTFlux::P_Photon_Inelastic_Budnev:
-        case KTFlux::HI_Photon_Elastic:
-          event_->oneWithRole(Particle::Parton2).setPdgId((pdgid_t)PDG::photon);
-          break;
-        case KTFlux::invalid:
-        default:
-          throw CG_FATAL("KTProcess:kinematics")
-              << "Invalid flux for 2nd incoming parton: " << kin_.incomingBeams().negative().ktFlux() << "!";
-      }
+      event_->oneWithRole(Particle::Parton1).setPdgId(kin_.incomingBeams().positive().daughterId());
+      event_->oneWithRole(Particle::Parton2).setPdgId(kin_.incomingBeams().negative().daughterId());
 
       //============================================================================================
       // register all process-dependent variables

@@ -29,7 +29,7 @@
 
 namespace cepgen {
   template <size_t D, size_t N>
-  GridHandler<D, N>::GridHandler(const GridType& grid_type) : grid_type_(grid_type), accel_{} {
+  GridHandler<D, N>::GridHandler(const GridType& grid_type) : grid_type_(grid_type) {
     for (size_t i = 0; i < D; ++i)
       accel_.emplace_back(gsl_interp_accel_alloc(), gsl_interp_accel_free);
   }

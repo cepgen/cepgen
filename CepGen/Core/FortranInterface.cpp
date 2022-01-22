@@ -20,8 +20,8 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/HeavyIon.h"
-#include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
@@ -48,7 +48,7 @@ double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& 
   static auto ff = formfac::FormFactorsFactory::get().build(
       formfac::gFFStandardDipoleHandler);  // use another argument for the modelling?
   static auto sf = strfun::StructureFunctionsFactory::get().build(sfmode);
-  return ktFlux((KTFlux)fmode, x, kt2, *ff, *sf, min * min, mout * mout);
+  return Beam::ktFluxNucl((Beam::KTFlux)fmode, x, kt2, *ff, *sf, min * min, mout * mout);
 }
 
 /// Compute a \f$k_{\rm T}\f$-dependent flux for heavy ions
@@ -59,7 +59,7 @@ double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& 
 /// \param[in] z Atomic number for the heavy ion
 double cepgen_kt_flux_hi_(int& fmode, double& x, double& kt2, int& a, int& z) {
   using namespace cepgen;
-  return ktFlux((KTFlux)fmode, x, kt2, HeavyIon{(unsigned short)a, (Element)z});
+  return Beam::ktFluxHI((Beam::KTFlux)fmode, x, kt2, HeavyIon{(unsigned short)a, (Element)z});
 }
 
 /// Mass of a particle, in GeV/c^2

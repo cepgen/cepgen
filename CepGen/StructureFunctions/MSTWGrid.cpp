@@ -67,12 +67,6 @@ namespace mstw {
     Grid& computeFL(double, double) override { return *this; }
     Grid& computeFL(double, double, double) override { return *this; }
 
-    /// Get the associated grid object
-    const cepgen::GridHandler<2, 2>& grid() const { return *this; }
-
-    /// Default location for the MSTW grid values
-    static constexpr const char* DEFAULT_MSTW_GRID_PATH = "mstw_sf_scan_nnlo.dat";
-
   private:
     static const unsigned int GOOD_MAGIC;
 
@@ -135,16 +129,16 @@ namespace mstw {
   }
 
   Grid& Grid::eval(double xbj, double q2) {
-    const std::array<double, 2> val = cepgen::GridHandler<2, 2>::eval({xbj, q2});
-    setF2(val[0]);
-    setFL(val[1]);
+    const auto& val = cepgen::GridHandler<2, 2>::eval({xbj, q2});
+    setF2(val.at(0));
+    setFL(val.at(1));
     return *this;
   }
 
   cepgen::ParametersDescription Grid::description() {
     auto desc = Parameterisation::description();
     desc.setDescription("MSTW grid (perturbative)");
-    desc.add<std::string>("gridPath", DEFAULT_MSTW_GRID_PATH).setDescription("Path to the MSTW grid content");
+    desc.add<std::string>("gridPath", "mstw_sf_scan_nnlo.dat").setDescription("Path to the MSTW grid content");
     return desc;
   }
 
