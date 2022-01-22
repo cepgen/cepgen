@@ -32,13 +32,13 @@ namespace Pythia8 {
 
   void CepGenEvent::initialise(const cepgen::Parameters& params) {
     params_ = &params;
-    inel1_ = params_->kinematics().incomingBeams().positive().mode == cepgen::mode::Beam::ProtonInelastic;
-    inel2_ = params_->kinematics().incomingBeams().negative().mode == cepgen::mode::Beam::ProtonInelastic;
+    inel1_ = params_->kinematics().incomingBeams().positive().fragmented();
+    inel2_ = params_->kinematics().incomingBeams().negative().fragmented();
 
-    setBeamA((short)params_->kinematics().incomingBeams().positive().pdg,
-             params_->kinematics().incomingBeams().positive().momentum.pz());
-    setBeamB((short)params_->kinematics().incomingBeams().negative().pdg,
-             params_->kinematics().incomingBeams().negative().momentum.pz());
+    setBeamA((short)params_->kinematics().incomingBeams().positive().pdgId(),
+             params_->kinematics().incomingBeams().positive().momentum().pz());
+    setBeamB((short)params_->kinematics().incomingBeams().negative().pdgId(),
+             params_->kinematics().incomingBeams().negative().momentum().pz());
     //addProcess( 0, params_->integration().result, params_->integration().err_result, 100. );
   }
 

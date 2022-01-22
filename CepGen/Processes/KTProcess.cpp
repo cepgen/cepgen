@@ -58,62 +58,6 @@ namespace cepgen {
 
     void KTProcess::prepareKinematics() {
       //============================================================================================
-      // try to extrapolate unintegrated fluxes from kinematics mode
-      //============================================================================================
-
-      //----- ensure the first incoming flux is compatible with the kinematics mode
-      const KTFlux& flux1 = (KTFlux)kin_.incomingBeams().positive().kt_flux;
-      const HeavyIon hi1(kin_.incomingBeams().positive().pdg);
-      switch (kin_.incomingBeams().positive().mode) {
-        case mode::Beam::ProtonElastic:
-          if (flux1 != KTFlux::P_Photon_Elastic && flux1 != KTFlux::P_Photon_Elastic_Budnev &&
-              flux1 != KTFlux::HI_Photon_Elastic && flux1 != KTFlux::P_Gluon_KMR) {
-            kin_.incomingBeams().positive().kt_flux = hi1 ? KTFlux::HI_Photon_Elastic : KTFlux::P_Photon_Elastic_Budnev;
-            CG_DEBUG("KTProcess:kinematics") << "KT flux for positive-z incoming parton set to \""
-                                             << kin_.incomingBeams().positive().kt_flux << "\".";
-          }
-          break;
-        case mode::Beam::ProtonInelastic:
-          if (flux1 != KTFlux::P_Photon_Inelastic && flux1 != KTFlux::P_Photon_Inelastic_Budnev) {
-            if (hi1)
-              throw CG_FATAL("KTProcess:kinematics") << "Inelastic photon emission from HI not yet supported!";
-            kin_.incomingBeams().positive().kt_flux = KTFlux::P_Photon_Inelastic_Budnev;
-            CG_INFO("KTProcess:kinematics") << "KT flux for positive-z incoming parton set to \""
-                                            << kin_.incomingBeams().positive().kt_flux << "\".";
-          }
-          break;
-        default:
-          throw CG_FATAL("KTProcess:kinematics")
-              << "Invalid positive-z beam mode for KT process: " << kin_.incomingBeams().positive().mode << "!";
-      }
-
-      //----- ensure the second incoming flux is compatible with the kinematics mode
-      const KTFlux& flux2 = (KTFlux)kin_.incomingBeams().negative().kt_flux;
-      const HeavyIon hi2(kin_.incomingBeams().negative().pdg);
-      switch (kin_.incomingBeams().negative().mode) {
-        case mode::Beam::ProtonElastic:
-          if (flux2 != KTFlux::P_Photon_Elastic && flux2 != KTFlux::P_Photon_Elastic_Budnev &&
-              flux2 != KTFlux::HI_Photon_Elastic && flux2 != KTFlux::P_Gluon_KMR) {
-            kin_.incomingBeams().negative().kt_flux = hi2 ? KTFlux::HI_Photon_Elastic : KTFlux::P_Photon_Elastic_Budnev;
-            CG_DEBUG("KTProcess:kinematics") << "KT flux for negative-z incoming parton set to \""
-                                             << kin_.incomingBeams().negative().kt_flux << "\".";
-          }
-          break;
-        case mode::Beam::ProtonInelastic:
-          if (flux2 != KTFlux::P_Photon_Inelastic && flux2 != KTFlux::P_Photon_Inelastic_Budnev) {
-            if (hi2)
-              throw CG_FATAL("KTProcess:kinematics") << "Inelastic photon emission from HI not yet supported!";
-            kin_.incomingBeams().negative().kt_flux = KTFlux::P_Photon_Inelastic_Budnev;
-            CG_INFO("KTProcess:kinematics") << "KT flux for negative-z incoming parton set to \""
-                                            << kin_.incomingBeams().negative().kt_flux << "\".";
-          }
-          break;
-        default:
-          throw CG_FATAL("KTProcess:kinematics")
-              << "Invalid negative-z beam mode for KT process: " << kin_.incomingBeams().negative().mode << "!";
-      }
-
-      //============================================================================================
       // register the incoming partons' variables
       //============================================================================================
 
@@ -136,7 +80,7 @@ namespace cepgen {
       // register the incoming partons
       //============================================================================================
 
-      switch (kin_.incomingBeams().positive().kt_flux) {
+      switch (kin_.incomingBeams().positive().ktFlux()) {
         case KTFlux::P_Gluon_KMR:
           event_->oneWithRole(Particle::Parton1).setPdgId((pdgid_t)PDG::gluon);
           break;
@@ -150,9 +94,9 @@ namespace cepgen {
         case KTFlux::invalid:
         default:
           throw CG_FATAL("KTProcess:kinematics")
-              << "Invalid flux for 2nd incoming parton: " << kin_.incomingBeams().positive().kt_flux << "!";
+              << "Invalid flux for 2nd incoming parton: " << kin_.incomingBeams().positive().ktFlux() << "!";
       }
-      switch (kin_.incomingBeams().negative().kt_flux) {
+      switch (kin_.incomingBeams().negative().ktFlux()) {
         case KTFlux::P_Gluon_KMR:
           event_->oneWithRole(Particle::Parton2).setPdgId((pdgid_t)PDG::gluon);
           break;
@@ -166,7 +110,7 @@ namespace cepgen {
         case KTFlux::invalid:
         default:
           throw CG_FATAL("KTProcess:kinematics")
-              << "Invalid flux for 2nd incoming parton: " << kin_.incomingBeams().negative().kt_flux << "!";
+              << "Invalid flux for 2nd incoming parton: " << kin_.incomingBeams().negative().ktFlux() << "!";
       }
 
       //============================================================================================
@@ -181,10 +125,10 @@ namespace cepgen {
 
       mX2_ = event_->oneWithRole(Particle::IncomingBeam1).mass2();
       mY2_ = event_->oneWithRole(Particle::IncomingBeam2).mass2();
-      if (kin_.incomingBeams().positive().mode == mode::Beam::ProtonInelastic)
+      if (kin_.incomingBeams().positive().fragmented())
         defineVariable(
             mX2_, Mapping::square, kin_.cuts().remnants.mx(), {1.07, 1000.}, "Positive z proton remnant squared mass");
-      if (kin_.incomingBeams().negative().mode == mode::Beam::ProtonInelastic)
+      if (kin_.incomingBeams().negative().fragmented())
         defineVariable(
             mY2_, Mapping::square, kin_.cuts().remnants.mx(), {1.07, 1000.}, "Negative z proton remnant squared mass");
     }
@@ -196,21 +140,11 @@ namespace cepgen {
 
       //--- compute fluxes according to modelling specified in parameters card
 
-      const HeavyIon hi1(kin_.incomingBeams().positive().pdg), hi2(kin_.incomingBeams().negative().pdg);
       auto* ff = kin_.incomingBeams().formFactors();
       auto* sf = kin_.incomingBeams().structureFunctions();
       const double q2_1 = qt1_ * qt1_, q2_2 = qt2_ * qt2_;
-      const double f1 = (hi1)  // check if we are in heavy ion mode
-                            ? ktFlux((KTFlux)kin_.incomingBeams().positive().kt_flux, x1_, q2_1, hi1)
-                            : ktFlux((KTFlux)kin_.incomingBeams().positive().kt_flux, x1_, q2_1, *ff, *sf, mA2_, mX2_);
-
-      const double f2 = (hi2)  // check if we are in heavy ion mode
-                            ? ktFlux((KTFlux)kin_.incomingBeams().negative().kt_flux, x2_, q2_2, hi2)
-                            : ktFlux((KTFlux)kin_.incomingBeams().negative().kt_flux, x2_, q2_2, *ff, *sf, mB2_, mY2_);
-
-      CG_DEBUG_LOOP("2to4:fluxes") << "Incoming fluxes for (x/kt2) = "
-                                   << "(" << x1_ << "/" << q2_1 << "), "
-                                   << "(" << x2_ << "/" << q2_2 << "):\n\t" << f1 << ", " << f2 << ".";
+      const double f1 = kin_.incomingBeams().positive().ktFlux(x1_, q2_1, mX2_, ff, sf),
+                   f2 = kin_.incomingBeams().negative().ktFlux(x2_, q2_2, mY2_, ff, sf);
 
       return f1 * M_1_PI * f2 * M_1_PI * cent_me;
     }
@@ -227,21 +161,17 @@ namespace cepgen {
 
       Particle& op1 = event_->oneWithRole(Particle::OutgoingBeam1);
       op1.setMomentum(pX_);
-      if (kin_.incomingBeams().positive().mode == mode::Beam::ProtonElastic)
-        op1.setStatus(Particle::Status::FinalState);
-      else if (kin_.incomingBeams().positive().mode == mode::Beam::ProtonInelastic)
+      if (kin_.incomingBeams().positive().fragmented())
         op1.setStatus(Particle::Status::Unfragmented).setMass(sqrt(mX2_));
       else
-        throw CG_FATAL("KTProcess") << "This kT factorisation process is intended for p-on-p collisions! Aborting.";
+        op1.setStatus(Particle::Status::FinalState);
 
       Particle& op2 = event_->oneWithRole(Particle::OutgoingBeam2);
       op2.setMomentum(pY_);
-      if (kin_.incomingBeams().negative().mode == mode::Beam::ProtonElastic)
-        op2.setStatus(Particle::Status::FinalState);
-      else if (kin_.incomingBeams().negative().mode == mode::Beam::ProtonInelastic)
+      if (kin_.incomingBeams().negative().fragmented())
         op2.setStatus(Particle::Status::Unfragmented).setMass(sqrt(mY2_));
       else
-        throw CG_FATAL("KTProcess") << "This kT factorisation process is intended for p-on-p collisions! Aborting.";
+        op2.setStatus(Particle::Status::FinalState);
 
       //============================================================================================
       //     incoming partons (photons, pomerons, ...)

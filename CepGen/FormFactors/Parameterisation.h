@@ -20,7 +20,7 @@
 #define CepGen_FormFactors_Parameterisation_h
 
 #include "CepGen/Modules/NamedModule.h"
-#include "CepGen/Physics/Modes.h"
+#include "CepGen/Physics/Beam.h"
 
 namespace cepgen {
   class ParametersList;
@@ -50,7 +50,7 @@ namespace cepgen {
       double tau(double q2) const;
 
       /// Compute all relevant form factors functions for a given \f$Q^2\f$ value
-      Parameterisation& operator()(const mode::Beam& /*type*/,
+      Parameterisation& operator()(const Beam::Mode& /*type*/,
                                    double /*q2*/,
                                    double mf2 = 0.,
                                    strfun::Parameterisation* sf = nullptr);

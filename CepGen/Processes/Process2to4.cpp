@@ -154,9 +154,9 @@ namespace cepgen {
       CG_DEBUG_LOOP("2to4:central") << "s(1/2)_eff = " << s1_eff << " / " << s2_eff << " GeV^2\n\t"
                                     << "central system invariant mass = " << invm << " GeV";
 
-      if (kin_.incomingBeams().positive().mode == mode::Beam::ProtonInelastic && (sqrt(s2_eff) <= sqrt(mX2_) + invm))
+      if (kin_.incomingBeams().positive().fragmented() && (sqrt(s2_eff) <= sqrt(mX2_) + invm))
         return 0.;
-      if (kin_.incomingBeams().negative().mode == mode::Beam::ProtonInelastic && (sqrt(s1_eff) <= sqrt(mY2_) + invm))
+      if (kin_.incomingBeams().negative().fragmented() && (sqrt(s1_eff) <= sqrt(mY2_) + invm))
         return 0.;
 
       //--- four-momenta of the outgoing protons (or remnants)

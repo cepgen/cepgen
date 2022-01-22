@@ -46,28 +46,28 @@ namespace cepgen {
       return 0.25 * q2 / mp2_;
     }
 
-    Parameterisation& Parameterisation::operator()(const mode::Beam& type,
+    Parameterisation& Parameterisation::operator()(const Beam::Mode& type,
                                                    double q2,
                                                    double mf2,
                                                    strfun::Parameterisation* sf) {
       last_q2_ = q2;
       switch (type) {
-        case mode::Beam::invalid:
-        case mode::Beam::CompositeScalar:
+        case Beam::Mode::invalid:
+        case Beam::Mode::CompositeScalar:
           throw CG_FATAL("FormFactors") << type << " mode is not yet supported!";
-        case mode::Beam::PointLikeScalar:
+        case Beam::Mode::PointLikeScalar:
           FE = 1., FM = 0.;
           break;
-        case mode::Beam::PointLikeFermion:
+        case Beam::Mode::PointLikeFermion:
           FE = FM = 1.;  // FE=U2, FM=U1 in LPAIR
           break;
-        case mode::Beam::ProtonElastic: {
+        case Beam::Mode::ProtonElastic: {
           compute(q2);
           const double GE2 = GE * GE, GM2 = GM * GM;
           FE = (4. * mp2_ * GE2 + q2 * GM2) / (4. * mp2_ + q2);
           FM = GM2;
         } break;
-        case mode::Beam::ProtonInelastic: {
+        case Beam::Mode::ProtonInelastic: {
           if (!sf)
             throw CG_FATAL("FormFactors")
                 << "Inelastic proton form factors computation requires a structure functions definition!";

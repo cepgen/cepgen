@@ -32,27 +32,29 @@
 
 namespace cepgen {
   IncomingBeams::IncomingBeams(const ParametersList& params) : SteeredObject(params) {
+    ParametersList plist_pos, plist_neg;
+
     // positive-z incoming beam
-    positive().pdg = steer<int>("beam1id");
+    pdgid_t pos_pdg = steer<int>("beam1id");
     const int hi_Z1 = steer<int>("beam1Z");
     if (hi_Z1 != 0)
-      positive().pdg = HeavyIon(steer<int>("beam1A"), (Element)hi_Z1);
+      pos_pdg = HeavyIon(steer<int>("beam1A"), (Element)hi_Z1);
     const auto& hi_beam1 = steer<std::vector<int> >("heavyIon1");
     if (hi_beam1.size() == 2)
-      positive().pdg = HeavyIon{(unsigned short)hi_beam1.at(0), (Element)hi_beam1.at(1)};
+      pos_pdg = HeavyIon{(unsigned short)hi_beam1.at(0), (Element)hi_beam1.at(1)};
     else if (!hi_beam1.empty())
       throw CG_FATAL("Kinematics") << "Invalid format for first incoming beam's HI specification!\n\t"
                                    << "A pair of (A,Z) is required, got " << hi_beam1 << ".";
 
     // negative-z incoming beam
-    negative().pdg = steer<int>("beam2id");
+    pdgid_t neg_pdg = steer<int>("beam2id");
     const int hi_A2 = steer<int>("beam2A");
     const int hi_Z2 = steer<int>("beam2Z");
     if (hi_Z2 != 0)
-      negative().pdg = HeavyIon(hi_A2, (Element)hi_Z2);
+      neg_pdg = HeavyIon(hi_A2, (Element)hi_Z2);
     const auto& hi_beam2 = steer<std::vector<int> >("heavyIon2");
     if (hi_beam2.size() == 2)
-      negative().pdg = HeavyIon{(unsigned short)hi_beam2.at(0), (Element)hi_beam2.at(1)};
+      neg_pdg = HeavyIon{(unsigned short)hi_beam2.at(0), (Element)hi_beam2.at(1)};
     else if (!hi_beam2.empty())
       throw CG_FATAL("Kinematics") << "Invalid format for second incoming beam's HI specification!\n\t"
                                    << "A pair of (A,Z) is required, got " << hi_beam2 << ".";
@@ -63,24 +65,23 @@ namespace cepgen {
     if (params_.has<std::vector<ParametersList> >("pdgIds")) {
       const auto& beams_pdg = steer<std::vector<ParametersList> >("pdgIds");
       if (beams_pdg.size() == 2) {
-        positive().pdg = abs(beams_pdg.at(0).get<int>("pdgid"));
-        negative().pdg = abs(beams_pdg.at(1).get<int>("pdgid"));
+        pos_pdg = abs(beams_pdg.at(0).get<int>("pdgid"));
+        neg_pdg = abs(beams_pdg.at(1).get<int>("pdgid"));
       } else if (!beams_pdg.empty())
         throw CG_FATAL("Kinematics") << "Invalid list of PDG ids retrieved for incoming beams:\n\t"
                                      << "2 PDG ids are expected, " << beams_pdg << " provided.";
     } else if (params_.has<std::vector<int> >("pdgIds")) {
       const auto& beams_pdg = steer<std::vector<int> >("pdgIds");
       if (beams_pdg.size() == 2) {
-        positive().pdg = abs(beams_pdg.at(0));
-        negative().pdg = abs(beams_pdg.at(1));
+        pos_pdg = abs(beams_pdg.at(0));
+        neg_pdg = abs(beams_pdg.at(1));
       } else if (!beams_pdg.empty())
         throw CG_FATAL("Kinematics") << "Invalid list of PDG ids retrieved for incoming beams:\n\t"
                                      << "2 PDG ids are expected, " << beams_pdg << " provided.";
     }
-    if (positive().pdg == PDG::electron)
-      positive().mode = mode::Beam::PointLikeFermion;
-    if (negative().pdg == PDG::electron)
-      negative().mode = mode::Beam::PointLikeFermion;
+
+    plist_pos.set<int>("pdgId", pos_pdg);
+    plist_neg.set<int>("pdgId", neg_pdg);
 
     //--- beams longitudinal momentum
     double p1z = 0., p2z = 0;
@@ -93,19 +94,22 @@ namespace cepgen {
     } else if (!beams_pz.empty())
       throw CG_FATAL("Kinematics") << "Invalid format for beams pz specification!\n\t"
                                    << "A vector of two pz's is required.";
-    const HeavyIon hi1(positive().pdg), hi2(negative().pdg);
-    const double m1 = hi1 ? HeavyIon::mass(hi1) : PDG::get().mass(positive().pdg);
-    const double m2 = hi2 ? HeavyIon::mass(hi2) : PDG::get().mass(negative().pdg);
-
-    if (p1z * p2z < 0. && p1z < 0.)
-      std::swap(p1z, p2z);
-    positive().momentum = Momentum::fromPxPyPzM(0., 0., +fabs(p1z), m1);
-    negative().momentum = Momentum::fromPxPyPzM(0., 0., -fabs(p2z), m2);
-
     //--- centre-of-mass energy
     const double sqrts = steer<double>("sqrtS"), cme = steer<double>("cmEnergy");
-    if (sqrts > 0. || cme > 0.)
-      setSqrtS(std::max(sqrts, cme));
+    if (sqrts > 0. || cme > 0.) {
+      if (pos_pdg != neg_pdg)
+        throw CG_FATAL("Kinematics") << "Trying to set √s with asymmetric beams"
+                                     << " (" << pos_pdg << "/" << neg_pdg << ").\n"
+                                     << "Please fill incoming beams objects manually!";
+      const auto max_sqrts = std::max(sqrts, cme);
+      p1z = +0.5 * max_sqrts;
+      p2z = -0.5 * max_sqrts;
+    }
+    if (p1z * p2z < 0. && p1z < 0.)
+      std::swap(p1z, p2z);
+    plist_pos.set<double>("pz", +fabs(p1z));
+    plist_neg.set<double>("pz", -fabs(p2z));
+
     //--- form factors
     const auto ff_mode = steer<std::string>("formFactors");
     if (!ff_mode.empty() || !form_factors_)
@@ -113,8 +117,28 @@ namespace cepgen {
           formfac::FormFactorsFactory::get().build(ff_mode.empty() ? formfac::gFFStandardDipoleHandler : ff_mode);
 
     const auto mode = steerAs<int, mode::Kinematics>("mode");
-    if (mode != mode::Kinematics::invalid)
-      setMode(mode);
+    if (mode != mode::Kinematics::invalid) {
+      switch (mode) {
+        case mode::Kinematics::ElasticElastic:
+          plist_pos.set<int>("mode", (int)Beam::Mode::ProtonElastic);
+          plist_neg.set<int>("mode", (int)Beam::Mode::ProtonElastic);
+          break;
+        case mode::Kinematics::ElasticInelastic:
+          plist_pos.set<int>("mode", (int)Beam::Mode::ProtonElastic);
+          plist_neg.set<int>("mode", (int)Beam::Mode::ProtonInelastic);
+          break;
+        case mode::Kinematics::InelasticElastic:
+          plist_pos.set<int>("mode", (int)Beam::Mode::ProtonInelastic);
+          plist_neg.set<int>("mode", (int)Beam::Mode::ProtonElastic);
+          break;
+        case mode::Kinematics::InelasticInelastic:
+          plist_pos.set<int>("mode", (int)Beam::Mode::ProtonInelastic);
+          plist_neg.set<int>("mode", (int)Beam::Mode::ProtonInelastic);
+          break;
+        default:
+          throw CG_FATAL("Kinematics:IncomingBeams:mode") << "Unsupported kinematics mode: " << mode << "!";
+      }
+    }
     //--- structure functions
     auto strfun = steer<ParametersList>("structureFunctions");
     if (!strfun.empty() || !str_fun_) {
@@ -125,28 +149,39 @@ namespace cepgen {
     if (params_.has<std::vector<int> >("ktFluxes")) {
       auto kt_fluxes = steer<std::vector<int> >("ktFluxes");
       if (!kt_fluxes.empty()) {
-        positive().kt_flux = (KTFlux)kt_fluxes.at(0);
-        negative().kt_flux = (kt_fluxes.size() > 1) ? (KTFlux)kt_fluxes.at(1) : (KTFlux)kt_fluxes.at(0);
+        plist_pos.set<int>("ktFlux", kt_fluxes.at(0));
+        plist_neg.set<int>("ktFlux", kt_fluxes.size() > 1 ? kt_fluxes.at(1) : kt_fluxes.at(0));
       }
     } else if (params_.has<int>("ktFluxes")) {
       const auto& ktfluxes = steerAs<int, KTFlux>("ktFluxes");
-      if (ktfluxes != KTFlux::invalid)
-        positive().kt_flux = negative().kt_flux = ktfluxes;
+      if (ktfluxes != KTFlux::invalid) {
+        plist_pos.set<int>("ktFlux", (int)ktfluxes);
+        plist_neg.set<int>("ktFlux", (int)ktfluxes);
+      }
     }
+    pos_beam_ = Beam(plist_pos);
+    neg_beam_ = Beam(plist_neg);
   }
+
+  IncomingBeams::IncomingBeams(const IncomingBeams& oth)
+      : SteeredObject(oth),
+        pos_beam_(oth.pos_beam_),
+        neg_beam_(oth.neg_beam_),
+        form_factors_(oth.form_factors_),
+        str_fun_(oth.str_fun_) {}
 
   const ParametersList& IncomingBeams::parameters() const {
     params_ = SteeredObject::parameters();
     if (str_fun_)
       params_.set<ParametersList>("structureFunctions", str_fun_->parameters());
     params_.set<int>("mode", (int)mode())
-        .set<int>("beam1id", positive().pdg)
-        .set<double>("beam1pz", +positive().momentum.pz())
-        .set<int>("beam2id", negative().pdg)
-        .set<double>("beam2pz", -negative().momentum.pz())
-        .set<std::vector<int> >("ktFluxes", {(int)positive().kt_flux, (int)negative().kt_flux})
+        .set<int>("beam1id", positive().pdgId())
+        .set<double>("beam1pz", +positive().momentum().pz())
+        .set<int>("beam2id", negative().pdgId())
+        .set<double>("beam2pz", -negative().momentum().pz())
+        .set<std::vector<int> >("ktFluxes", {(int)positive().ktFlux(), (int)negative().ktFlux()})
         .set<double>("sqrtS", sqrtS());
-    const HeavyIon hi1(positive().pdg), hi2(negative().pdg);
+    const HeavyIon hi1(positive().pdgId()), hi2(negative().pdgId());
     if (hi1)
       params_.set<int>("beam1A", hi1.A).set<int>("beam1Z", (int)hi1.Z);
     if (hi2)
@@ -154,58 +189,28 @@ namespace cepgen {
     return params_;
   }
 
-  void IncomingBeams::setSqrtS(double sqrts) {
-    if (first.pdg != second.pdg)
-      throw CG_FATAL("Kinematics") << "Trying to set √s with asymmetric beams"
-                                   << " (" << first.pdg << "/" << second.pdg << ").\n"
-                                   << "Please fill incoming beams objects manually!";
-    positive().momentum = Momentum::fromPxPyPzM(0., 0., +0.5 * sqrts, PDG::get().mass(positive().pdg));
-    negative().momentum = Momentum::fromPxPyPzM(0., 0., -0.5 * sqrts, PDG::get().mass(negative().pdg));
-  }
-
-  double IncomingBeams::s() const { return (positive().momentum + negative().momentum).mass2(); }
+  double IncomingBeams::s() const { return (positive().momentum() + negative().momentum()).mass2(); }
 
   double IncomingBeams::sqrtS() const { return std::sqrt(s()); }
 
-  void IncomingBeams::setMode(const mode::Kinematics& mode) {
-    switch (mode) {
-      case mode::Kinematics::ElasticElastic:
-        positive().mode = mode::Beam::ProtonElastic;
-        negative().mode = mode::Beam::ProtonElastic;
-        break;
-      case mode::Kinematics::ElasticInelastic:
-        positive().mode = mode::Beam::ProtonElastic;
-        negative().mode = mode::Beam::ProtonInelastic;
-        break;
-      case mode::Kinematics::InelasticElastic:
-        positive().mode = mode::Beam::ProtonInelastic;
-        negative().mode = mode::Beam::ProtonElastic;
-        break;
-      case mode::Kinematics::InelasticInelastic:
-        positive().mode = mode::Beam::ProtonInelastic;
-        negative().mode = mode::Beam::ProtonInelastic;
-        break;
-      default:
-        throw CG_FATAL("Kinematics:IncomingBeams:mode") << "Unsupported kinematics mode: " << mode << "!";
-    }
-  }
-
   mode::Kinematics IncomingBeams::mode() const {
-    switch (positive().mode) {
-      case mode::Beam::PointLikeFermion:
-      case mode::Beam::ProtonElastic: {
-        switch (negative().mode) {
-          case mode::Beam::ProtonElastic:
-          case mode::Beam::PointLikeFermion:
+    const auto& pos_mode = positive().parameters().getAs<int, Beam::Mode>("mode");
+    const auto& neg_mode = negative().parameters().getAs<int, Beam::Mode>("mode");
+    switch (pos_mode) {
+      case Beam::Mode::PointLikeFermion:
+      case Beam::Mode::ProtonElastic: {
+        switch (neg_mode) {
+          case Beam::Mode::ProtonElastic:
+          case Beam::Mode::PointLikeFermion:
             return mode::Kinematics::ElasticElastic;
           default:
             return mode::Kinematics::ElasticInelastic;
         }
       }
-      case mode::Beam::ProtonInelastic: {
-        switch (negative().mode) {
-          case mode::Beam::ProtonElastic:
-          case mode::Beam::PointLikeFermion:
+      case Beam::Mode::ProtonInelastic: {
+        switch (neg_mode) {
+          case Beam::Mode::ProtonElastic:
+          case Beam::Mode::PointLikeFermion:
             return mode::Kinematics::InelasticElastic;
           default:
             return mode::Kinematics::InelasticInelastic;
@@ -260,18 +265,5 @@ namespace cepgen {
         .setDescription("Beam inelastic structure functions modelling");
     desc.add<int>("ktFluxes", -1).setDescription("kT-factorised fluxes modelling");
     return desc;
-  }
-
-  Beam::Beam() : pdg(PDG::proton), mode(mode::Beam::invalid), kt_flux(KTFlux::invalid) {}
-
-  std::ostream& operator<<(std::ostream& os, const Beam& beam) {
-    if ((HeavyIon)beam.pdg)
-      os << (HeavyIon)beam.pdg;
-    else
-      os << (PDG::Id)beam.pdg;
-    os << " (" << beam.momentum.pz() << " GeV/c), " << beam.mode;
-    if (beam.kt_flux != KTFlux::invalid)
-      os << " [unint.flux: " << beam.kt_flux << "]";
-    return os;
   }
 }  // namespace cepgen

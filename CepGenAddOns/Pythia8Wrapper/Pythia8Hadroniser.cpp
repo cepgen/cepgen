@@ -90,8 +90,8 @@ namespace cepgen {
 #else
       pythia_->setLHAupPtr(cg_evt_);
 #endif
-      pythia_->settings.parm("Beams:idA", (long)rt_params_->kinematics().incomingBeams().positive().pdg);
-      pythia_->settings.parm("Beams:idB", (long)rt_params_->kinematics().incomingBeams().negative().pdg);
+      pythia_->settings.parm("Beams:idA", (long)rt_params_->kinematics().incomingBeams().positive().pdgId());
+      pythia_->settings.parm("Beams:idB", (long)rt_params_->kinematics().incomingBeams().negative().pdgId());
       // specify we will be using a LHA input
       pythia_->settings.mode("Beams:frameType", 5);
       pythia_->settings.parm("Beams:eCM", rt_params_->kinematics().incomingBeams().sqrtS());

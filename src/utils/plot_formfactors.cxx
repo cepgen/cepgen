@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
   bool draw_grid;
 
   cepgen::ArgumentsParser(argc, argv)
-      .addArgument("mode,t", "beam modelling", &mode, (int)cepgen::mode::Beam::ProtonElastic)
+      .addArgument("mode,t", "beam modelling", &mode, (int)cepgen::Beam::Mode::ProtonElastic)
       .addOptionalArgument("mx,x", "diffractive mass (GeV/c^2)", &mx, 100.)
       .addOptionalArgument("sf,s", "structure functions modelling", &strfun_type, 301)
       .addOptionalArgument("q2min,m", "minimal parton virtuality (GeV^2)", &q2min, 1.)
@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
     out << q2 << "\t";
     size_t j = 0;
     for (auto& ff : form_factors) {
-      const auto form_factor = (*ff)((cepgen::mode::Beam)mode, q2, mx, sf.get());
+      const auto form_factor = (*ff)((cepgen::Beam::Mode)mode, q2, mx, sf.get());
       out << "\t" << form_factor.FE << "\t" << form_factor.FM;
       g_form_factors_fe.at(j)->SetPoint(g_form_factors_fe.at(j)->GetN(), q2, form_factor.FE);
       g_form_factors_fm.at(j)->SetPoint(g_form_factors_fm.at(j)->GetN(), q2, form_factor.FM);

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,12 +31,10 @@ namespace cepgen {
    */
   class Momentum : private std::array<double, 4> {
   public:
-    /// Build a 4-momentum at rest with an invalid energy (no mass information known)
-    Momentum();
     /// Build a 4-momentum using its 3-momentum coordinates and its energy
-    Momentum(double x, double y, double z, double t = -1.);
+    explicit Momentum(double x = 0., double y = 0., double z = 0., double t = -1.);
     /// Build a 4-momentum using its 3-momentum coordinates and its energy
-    Momentum(double* p);
+    explicit Momentum(double* p);
 
     //--- static definitions
 

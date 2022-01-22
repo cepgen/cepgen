@@ -253,15 +253,15 @@ namespace cepgen {
       clear();  // also resets the "first run" flag
       kin_ = kin;
 
-      const auto& p1 = kin_.incomingBeams().positive().momentum;
-      const auto& p2 = kin_.incomingBeams().negative().momentum;
+      const auto& p1 = kin_.incomingBeams().positive().momentum();
+      const auto& p2 = kin_.incomingBeams().negative().momentum();
       //--- define incoming system
       if (event_) {
         auto& ib1 = event_->oneWithRole(Particle::IncomingBeam1);
-        ib1.setPdgId(kin_.incomingBeams().positive().pdg);
+        ib1.setPdgId(kin_.incomingBeams().positive().pdgId());
         ib1.setMomentum(p1);
         auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
-        ib2.setPdgId(kin_.incomingBeams().negative().pdg);
+        ib2.setPdgId(kin_.incomingBeams().negative().pdgId());
         ib2.setMomentum(p2);
       }
 

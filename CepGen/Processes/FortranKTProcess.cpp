@@ -101,10 +101,10 @@ namespace cepgen {
       //-------------------------------------------------------------------------------------------
 
       //--- positive-z incoming beam
-      genparams_.inp1 = kin_.incomingBeams().positive().momentum.pz();
+      genparams_.inp1 = kin_.incomingBeams().positive().momentum().pz();
       //--- check if first incoming beam is a heavy ion
-      const HeavyIon in1 = (HeavyIon)kin_.incomingBeams().positive().pdg;
-      if (in1) {
+      if (HeavyIon::isHI(kin_.incomingBeams().positive().pdgId())) {
+        const HeavyIon in1(kin_.incomingBeams().positive().pdgId());
         genparams_.a_nuc1 = in1.A;
         genparams_.z_nuc1 = (unsigned short)in1.Z;
         if (genparams_.z_nuc1 > 1) {
@@ -115,10 +115,10 @@ namespace cepgen {
         genparams_.a_nuc1 = genparams_.z_nuc1 = 1;
 
       //--- negative-z incoming beam
-      genparams_.inp2 = kin_.incomingBeams().negative().momentum.pz();
+      genparams_.inp2 = kin_.incomingBeams().negative().momentum().pz();
       //--- check if second incoming beam is a heavy ion
-      const HeavyIon in2 = (HeavyIon)kin_.incomingBeams().negative().pdg;
-      if (in2) {
+      if (HeavyIon::isHI(kin_.incomingBeams().negative().pdgId())) {
+        const HeavyIon in2(kin_.incomingBeams().negative().pdgId());
         genparams_.a_nuc2 = in2.A;
         genparams_.z_nuc2 = (unsigned short)in2.Z;
         if (genparams_.z_nuc2 > 1) {
@@ -132,8 +132,8 @@ namespace cepgen {
       // intermediate partons information
       //-------------------------------------------------------------------------------------------
 
-      genparams_.iflux1 = (int)kin_.incomingBeams().positive().kt_flux;
-      genparams_.iflux2 = (int)kin_.incomingBeams().negative().kt_flux;
+      genparams_.iflux1 = (int)kin_.incomingBeams().positive().ktFlux();
+      genparams_.iflux2 = (int)kin_.incomingBeams().negative().ktFlux();
     }
 
     double FortranKTProcess::computeKTFactorisedMatrixElement() {

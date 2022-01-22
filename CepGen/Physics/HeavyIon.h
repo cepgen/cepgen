@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,6 +34,8 @@ namespace cepgen {
     HeavyIon(unsigned short a, const Element& z) : Z(z), A(a) {}
     /// Build from a custom PDG id
     HeavyIon(pdgid_t pdg);
+    /// Check if the PDG id is compatible with a HI
+    static bool isHI(const pdgid_t&);
     /// Simple proton
     static inline HeavyIon proton() { return HeavyIon(1, Element::H); }
     /// Mass of a heavy ion, in GeV/c\f$^2\f$
