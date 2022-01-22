@@ -30,7 +30,7 @@ namespace cepgen {
 
     ParametersDescription GSLDerivator::description() {
       auto desc = ParametersDescription();
-      desc.add<int>("mode", (int)Mode::central);
+      desc.addAs<int, Mode>("mode", Mode::central);
       desc.add<double>("h", 1.e-2).setDescription("step size");
       return desc;
     }

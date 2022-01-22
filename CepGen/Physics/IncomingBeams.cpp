@@ -259,7 +259,7 @@ namespace cepgen {
     desc.add<int>("mode", (int)mode::Kinematics::invalid)
         .setDescription("Process kinematics mode (1 = elastic, (2-3) = single-dissociative, 4 = double-dissociative)");
     auto sf_desc = strfun::Parameterisation::description();
-    sf_desc.add<int>(ParametersList::MODULE_NAME, 11);  // default is SY
+    sf_desc.setName<int>(11);  // default is SY
     desc.add<ParametersDescription>("structureFunctions", sf_desc)
         .setDescription("Beam inelastic structure functions modelling");
     desc.add<int>("ktFluxes", -1).setDescription("kT-factorised fluxes modelling");

@@ -214,7 +214,7 @@ namespace cepgen {
     desc.add<bool>("treat", true).setDescription("Phase space treatment");
     desc.add<int>("iterations", 10);
     desc.add<double>("alpha", 1.5);
-    desc.add<int>("mode", (int)Mode::importance);
+    desc.addAs<int, Mode>("mode", Mode::importance);
     desc.add<std::string>("loggingOutput", "cerr");
     desc.add<int>("verbose", -1);
     return desc;

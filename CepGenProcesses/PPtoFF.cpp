@@ -255,7 +255,7 @@ namespace cepgen {
       desc.add<int>("method", (int)Mode::offShell)
           .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell)");
       auto alphas_desc = ParametersDescription();
-      alphas_desc.add<std::string>(ParametersList::MODULE_NAME, "pegasus");
+      alphas_desc.setName<std::string>("pegasus");
       desc.add("alphaS", alphas_desc);
       return desc;
     }

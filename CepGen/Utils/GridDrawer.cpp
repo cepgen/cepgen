@@ -80,7 +80,7 @@ namespace cepgen {
 
     ParametersDescription GridDrawer::description() {
       auto desc = ParametersDescription();
-      desc.add<std::string>(ParametersList::MODULE_NAME, "root");
+      desc.setName<std::string>("root");
       return desc;
     }
 
