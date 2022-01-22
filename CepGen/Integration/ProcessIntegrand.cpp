@@ -106,12 +106,15 @@ namespace cepgen {
     //    collection of taming functions
     try {
       utils::EventBrowser bws;
-      weight = std::accumulate(params_->tamingFunctions().begin(),
-                               params_->tamingFunctions().end(),
-                               weight,
-                               [&bws, &event](double init, const auto& tam) {
-                                 return init * (*tam)(bws.get(*event, tam->variables().at(0)));
-                               });
+      const auto tam_weight = std::accumulate(params_->tamingFunctions().begin(),
+                                              params_->tamingFunctions().end(),
+                                              1.,
+                                              [&bws, this](double init, const auto& tam) {
+                                                return init * (*tam)(bws.get(*event_, tam->variables().at(0)));
+                                              });
+      if (tam_weight <= 0.)
+        return 0.;
+      weight *= tam_weight;
     } catch (const Exception&) {
       throw CG_FATAL("ProcessIntegrand") << "Failed to apply taming function(s) taming!";
     }

@@ -16,10 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cmath>
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 
@@ -166,8 +169,10 @@ namespace cepgen {
 
     std::ostream& operator<<(std::ostream& os, const Parameterisation* sf) {
       os << sf->describe();
-      if (sf->old_vals_.valid())
-        os << " at " << sf->old_vals_ << ": F2 = " << sf->f2_ << ", FL = " << sf->fl_;
+      if (sf->old_vals_.valid()) {
+        const double w = std::sqrt(utils::mX2(sf->old_vals_.xbj, sf->old_vals_.q2, sf->mp2_));
+        os << " at " << sf->old_vals_ << ", w=" << w << " GeV: F2 = " << sf->f2_ << ", FL = " << sf->fl_;
+      }
       return os;
     }
 

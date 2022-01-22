@@ -220,8 +220,8 @@ namespace cepgen {
 
       //--- compute the integrand
       const auto me_integrand = computeWeights();
-      //if ( me_integrand <= 0. )
-      //  return 0.;
+      if (me_integrand.null())
+        return 0.;
 
       //--- generate auxiliary (x-dependent) part of the Jacobian for
       //    this phase space point.
