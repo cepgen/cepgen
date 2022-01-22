@@ -162,13 +162,6 @@ namespace cepgen {
     neg_beam_ = Beam(plist_neg);
   }
 
-  IncomingBeams::IncomingBeams(const IncomingBeams& oth)
-      : SteeredObject(oth),
-        pos_beam_(oth.pos_beam_),
-        neg_beam_(oth.neg_beam_),
-        form_factors_(oth.form_factors_),
-        str_fun_(oth.str_fun_) {}
-
   const ParametersList& IncomingBeams::parameters() const {
     params_ = SteeredObject::parameters();
     if (str_fun_)

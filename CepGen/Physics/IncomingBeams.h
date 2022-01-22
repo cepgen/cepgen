@@ -32,7 +32,6 @@ namespace cepgen {
   class IncomingBeams : public SteeredObject<IncomingBeams> {
   public:
     explicit IncomingBeams(const ParametersList& = ParametersList());
-    IncomingBeams(const IncomingBeams&);  ///< Copy constructor
 
     static ParametersDescription description();
     /// List containing all parameters handled
