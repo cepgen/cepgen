@@ -48,11 +48,24 @@ namespace cepgen {
       /// x-axis label
       const std::string& xLabel() const { return xlabel_; }
       /// Set the x-axis label
-      void setXlabel(const std::string& lab) { xlabel_ = lab; }
+      Drawable& setXlabel(const std::string& lab) {
+        xlabel_ = lab;
+        return *this;
+      }
       /// y-axis label
       const std::string& yLabel() const { return ylabel_; }
       /// Set the y-axis label
-      void setYlabel(const std::string& lab) { ylabel_ = lab; }
+      Drawable& setYlabel(const std::string& lab) {
+        ylabel_ = lab;
+        return *this;
+      }
+      /// z-axis label
+      const std::string& zLabel() const { return zlabel_; }
+      /// Set the z-axis label
+      Drawable& setZlabel(const std::string& lab) {
+        zlabel_ = lab;
+        return *this;
+      }
 
       /// Generic bin coordinate and its human-readable label
       struct coord_t {
@@ -89,6 +102,7 @@ namespace cepgen {
       std::string title_;   ///< Human-readable title
       std::string xlabel_;  ///< x-axis title
       std::string ylabel_;  ///< y-axis title
+      std::string zlabel_;  ///< z-axis title
     };
   }  // namespace utils
 }  // namespace cepgen

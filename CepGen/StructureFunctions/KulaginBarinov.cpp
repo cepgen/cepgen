@@ -33,13 +33,6 @@
 #include "CepGen/Utils/GSLDerivator.h"
 #include "CepGen/Utils/GridHandler.h"
 
-#define DEBUG_GRID
-
-#ifdef DEBUG_GRID
-#include "CepGen/Modules/DrawerFactory.h"
-#include "CepGen/Utils/Drawer.h"
-#endif
-
 namespace cepgen {
   namespace strfun {
     /// Kulagin and Barinov hybrid parameterisation
@@ -224,9 +217,6 @@ namespace cepgen {
         }
         sfs_grid_.init();
         CG_DEBUG("KulaginBarinov:grid") << "Grid boundaries: " << sfs_grid_.boundaries();
-#ifdef DEBUG_GRID
-        utils::DrawerFactory::get().build("root")->draw(sfs_grid_, utils::Drawer::Mode::logz);
-#endif
       }
     }
 

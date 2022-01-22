@@ -22,8 +22,6 @@
 #include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen {
-  template <size_t D, size_t N>
-  class GridHandler;
   namespace utils {
     class Drawable;
     class Graph1D;
@@ -55,13 +53,6 @@ namespace cepgen {
       virtual const Drawer& draw(const DrawableColl&,
                                  const std::string& name = "",
                                  const Mode& mode = Mode::none) const = 0;
-
-      /// Debugging drawing routing for single-dimensional grids
-      template <size_t N>
-      const Drawer& draw(const GridHandler<1, N>&, const Mode& mode = Mode::none) const;
-      /// Debugging drawing routing for double-dimensional grids
-      template <size_t N>
-      const Drawer& draw(const GridHandler<2, N>&, const Mode& mode = Mode::none) const;
 
       /// Output operator (when necessary)
       virtual std::ostream& operator<<(std::ostream& os) const { return os; }

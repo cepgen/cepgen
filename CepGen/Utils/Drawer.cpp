@@ -21,7 +21,6 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
-#include "CepGen/Utils/GridHandler.h"
 
 namespace cepgen {
   namespace utils {
@@ -36,32 +35,5 @@ namespace cepgen {
       //return ((int)lhs > (int)rhs) - ((int)lhs < (int)rhs);
       return (int)lhs & (int)rhs;
     }
-
-    template <size_t N>
-    const Drawer& Drawer::draw(const GridHandler<1, N>& grid, const Mode& mode) const {
-      // first prepare the array of plots to generate
-      std::array<Graph1D, N> plots;
-      for (const auto& val : grid.values()) {
-        for (size_t i = 0; i < N; ++i)
-          plots[i].addPoint(val.first[0], val.second[i]);
-      }
-      for (size_t i = 0; i < N; ++i)
-        draw(plots[i], mode);
-      return *this;
-    }
-
-    template <size_t N>
-    const Drawer& Drawer::draw(const GridHandler<2, N>& grid, const Mode& mode) const {
-      // first prepare the array of plots to generate
-      std::array<Graph2D, N> plots;
-      for (const auto& val : grid.values()) {
-        for (size_t i = 0; i < N; ++i)
-          plots[i].addPoint(val.first[0], val.first[1], val.second[i]);
-      }
-      for (size_t i = 0; i < N; ++i)
-        draw(plots[i], mode);
-      return *this;
-    }
-    template const Drawer& Drawer::draw(const GridHandler<2, 2>& grid, const Mode&) const;
   }  // namespace utils
 }  // namespace cepgen
