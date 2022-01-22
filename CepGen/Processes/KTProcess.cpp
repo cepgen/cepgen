@@ -189,7 +189,31 @@ namespace cepgen {
             mY2_, Mapping::square, kin_.cuts().remnants.mx(), {1.07, 1000.}, "Negative z proton remnant squared mass");
     }
 
-    double KTProcess::computeWeight() { return std::max(0., computeKTFactorisedMatrixElement()); }
+    double KTProcess::computeWeight() {
+      const auto cent_me = computeKTFactorisedMatrixElement();
+      if (cent_me <= 0)
+        return 0.;
+
+      //--- compute fluxes according to modelling specified in parameters card
+
+      const HeavyIon hi1(kin_.incomingBeams().positive().pdg), hi2(kin_.incomingBeams().negative().pdg);
+      auto* ff = kin_.incomingBeams().formFactors();
+      auto* sf = kin_.incomingBeams().structureFunctions();
+      const double q2_1 = qt1_ * qt1_, q2_2 = qt2_ * qt2_;
+      const double f1 = (hi1)  // check if we are in heavy ion mode
+                            ? ktFlux((KTFlux)kin_.incomingBeams().positive().kt_flux, x1_, q2_1, hi1)
+                            : ktFlux((KTFlux)kin_.incomingBeams().positive().kt_flux, x1_, q2_1, *ff, *sf, mA2_, mX2_);
+
+      const double f2 = (hi2)  // check if we are in heavy ion mode
+                            ? ktFlux((KTFlux)kin_.incomingBeams().negative().kt_flux, x2_, q2_2, hi2)
+                            : ktFlux((KTFlux)kin_.incomingBeams().negative().kt_flux, x2_, q2_2, *ff, *sf, mB2_, mY2_);
+
+      CG_DEBUG_LOOP("2to4:fluxes") << "Incoming fluxes for (x/kt2) = "
+                                   << "(" << x1_ << "/" << q2_1 << "), "
+                                   << "(" << x2_ << "/" << q2_2 << "):\n\t" << f1 << ", " << f2 << ".";
+
+      return f1 * M_1_PI * f2 * M_1_PI * cent_me;
+    }
 
     void KTProcess::fillKinematics(bool) {
       fillCentralParticlesKinematics();  // process-dependent!

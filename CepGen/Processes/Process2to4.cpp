@@ -214,42 +214,13 @@ namespace cepgen {
       if (amat2 <= 0.)  // skip computing the fluxes if no contribution
         return 0.;
 
-      //--- compute fluxes according to modelling specified in parameters card
-
-      const HeavyIon hi1(kin_.incomingBeams().positive().pdg);
-      const double f1 = (hi1)  // check if we are in heavy ion mode
-                            ? ktFlux((KTFlux)kin_.incomingBeams().positive().kt_flux, x1_, qt1_ * qt1_, hi1)
-                            : ktFlux((KTFlux)kin_.incomingBeams().positive().kt_flux,
-                                     x1_,
-                                     qt1_ * qt1_,
-                                     *kin_.incomingBeams().formFactors(),
-                                     *kin_.incomingBeams().structureFunctions(),
-                                     mA2_,
-                                     mX2_);
-
-      const HeavyIon hi2(kin_.incomingBeams().negative().pdg);
-      const double f2 = (hi2)  // check if we are in heavy ion mode
-                            ? ktFlux((KTFlux)kin_.incomingBeams().negative().kt_flux, x2_, qt2_ * qt2_, hi2)
-                            : ktFlux((KTFlux)kin_.incomingBeams().negative().kt_flux,
-                                     x2_,
-                                     qt2_ * qt2_,
-                                     *kin_.incomingBeams().formFactors(),
-                                     *kin_.incomingBeams().structureFunctions(),
-                                     mB2_,
-                                     mY2_);
-
-      CG_DEBUG_LOOP("2to4:fluxes") << "Incoming fluxes for (x/kt2) = "
-                                   << "(" << x1_ << "/" << qt1_ * qt1_ << "), "
-                                   << "(" << x2_ << "/" << qt2_ * qt2_ << "):\n\t" << f1 << ", " << f2 << ".";
-
       //=================================================================
       // factor 1/4 from jacobian of transformations
       // factors 1/pi and 1/pi due to integration over
       //     d^2(kappa_1)d^2(kappa_2) instead of d(kappa_1^2)d(kappa_2^2)
       //=================================================================
 
-      return amat2 * pow(4. * x1_ * x2_ * s_ * M_PI, -2) * f1 * M_1_PI * f2 * M_1_PI * 0.25 * constants::GEVM2_TO_PB *
-             pt_diff_ * qt1_ * qt2_;
+      return amat2 * pow(4. * x1_ * x2_ * s_ * M_PI, -2) * 0.25 * constants::GEVM2_TO_PB * pt_diff_ * qt1_ * qt2_;
     }
 
     void Process2to4::fillCentralParticlesKinematics() {

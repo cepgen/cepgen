@@ -32,9 +32,9 @@ namespace cepgen {
     /// Generic run parameters
     struct Parameters {
       int icontri{0};   ///< Kinematics mode
+      int idum{0};      ///< Dummy padding variable
       int iflux1{0};    ///< Type of \f$k_{\rm T}\f$-factorised flux for first incoming parton
       int iflux2{0};    ///< Type of \f$k_{\rm T}\f$-factorised flux for second incoming parton
-      int sfmod{0};     ///< Structure functions modelling
       int a_nuc1{0};    ///< First beam mass number
       int z_nuc1{0};    ///< First beam atomic number
       int a_nuc2{0};    ///< Second beam mass number

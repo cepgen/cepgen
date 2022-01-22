@@ -29,7 +29,6 @@
       print *,'Parameter                                  value(s)'
       print *,'--------------------------------------------------------'
       print 101,'Process mode:',icontri
-      print 101,'Structure functions:',sfmod
       print 103,'Beams momenta:',inp1,inp2
       print 102,'Fluxes modes:',iflux1,iflux2
       print 104,'Beams (A,Z):',a_nuc1,z_nuc1,a_nuc2,z_nuc2
