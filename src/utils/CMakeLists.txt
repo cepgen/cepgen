@@ -7,6 +7,10 @@ message(STATUS "Utilities will be built")
 #-- build all utils and link them to the core library
 
 file(GLOB utils_standalone RELATIVE ${PROJECT_SOURCE_DIR}/src/utils *.cc)
+if(NOT CMAKE_BUILD_CARD_CONV)
+  file(GLOB cardconv RELATIVE ${PROJECT_SOURCE_DIR}/src/utils cepgenCardsConverter.cc)
+  list(REMOVE_ITEM utils_standalone ${cardconv})
+endif()
 foreach(exec_src ${utils_standalone})
   string(REPLACE ".cc" "" exec_bin ${exec_src})
   add_executable(${exec_bin} ${exec_src})
