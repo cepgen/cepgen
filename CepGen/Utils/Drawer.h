@@ -36,17 +36,27 @@ namespace cepgen {
       /// Build a drawing utility
       explicit Drawer(const ParametersList& params);
 
-      enum struct Mode : int16_t {
-        none = 0,
-        logx = 1 << 0,
-        logy = 1 << 1,
-        logz = 1 << 2,
-        nostack = 1 << 3,
-        grid = 1 << 4
+      class Mode {
+      public:
+        enum value_t : uint16_t {
+          none = 0,
+          logx = 1 << 0,
+          logy = 1 << 1,
+          logz = 1 << 2,
+          nostack = 1 << 3,
+          grid = 1 << 4
+        };
+        Mode() : value_(none) {}
+        Mode(const value_t& val) : value_(val) {}
+
+        friend Mode operator|(const Mode&, const Mode&);
+        friend Mode& operator|=(Mode&, const Mode&);
+        friend bool operator&(const Mode&, const Mode::value_t&);
+        friend std::ostream& operator<<(std::ostream&, const Mode&);
+
+      private:
+        value_t value_;
       };
-      friend Mode operator|(const Mode&, const Mode&);
-      friend Mode& operator|=(Mode&, const Mode&);
-      friend bool operator&(const Mode&, const Mode&);
 
       /// Draw a one-dimensional graph
       virtual const Drawer& draw(const Graph1D&, const Mode& mode = Mode::none) const = 0;

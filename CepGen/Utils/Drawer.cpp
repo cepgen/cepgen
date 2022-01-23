@@ -27,18 +27,37 @@ namespace cepgen {
     Drawer::Drawer(const ParametersList& params) : NamedModule(params) {}
 
     Drawer::Mode operator|(const Drawer::Mode& lhs, const Drawer::Mode& rhs) {
-      std::bitset<7> mod1((int)lhs), mod2((int)rhs);
-      return (Drawer::Mode)(mod1 | mod2).to_ulong();
+      std::bitset<7> mod1((int)lhs.value_), mod2((int)rhs.value_);
+      Drawer::Mode out;
+      out.value_ = (Drawer::Mode::value_t)(mod1 | mod2).to_ulong();
+      return out;
     }
 
     Drawer::Mode& operator|=(Drawer::Mode& one, const Drawer::Mode& oth) {
-      one = one | oth;
+      one = one | oth.value_;
       return one;
     }
 
-    bool operator&(const Drawer::Mode& lhs, const Drawer::Mode& rhs) {
+    bool operator&(const Drawer::Mode& lhs, const Drawer::Mode::value_t& rhs) {
       //return ((int)lhs > (int)rhs) - ((int)lhs < (int)rhs);
-      return (int)lhs & (int)rhs;
+      return (int)lhs.value_ & (int)rhs;
+    }
+
+    std::ostream& operator<<(std::ostream& os, const Drawer::Mode& mode) {
+      if (mode.value_ == Drawer::Mode::none)
+        return os << "none";
+      std::string sep;
+      if (mode & Drawer::Mode::logx)
+        os << sep << "logx", sep = "|";
+      if (mode & Drawer::Mode::logy)
+        os << sep << "logy", sep = "|";
+      if (mode & Drawer::Mode::logz)
+        os << sep << "logz", sep = "|";
+      if (mode & Drawer::Mode::nostack)
+        os << sep << "nostack", sep = "|";
+      if (mode & Drawer::Mode::grid)
+        os << sep << "grid", sep = "|";
+      return os;
     }
   }  // namespace utils
 }  // namespace cepgen
