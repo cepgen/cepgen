@@ -111,7 +111,7 @@ namespace cepgen {
       if (!sf)
         throw CG_FATAL("Beam") << "Inelastic structure functions should be specified!";
       const auto mi = PDG::get().mass(pdg_), mi2 = mi * mi;
-      flux = ktFluxNucl(kt_flux_, x, q2, *ff, *sf, mi2, mx2);
+      flux = ktFluxNucl(kt_flux_, x, q2, ff, sf, mi2, mx2);
     }
     CG_DEBUG_LOOP("Beam:flux") << "Flux for (x=" << x << ", kT^2=" << q2 << "): " << flux << ".";
     return flux;
@@ -129,17 +129,21 @@ namespace cepgen {
   double Beam::ktFluxNucl(const KTFlux& type,
                           double x,
                           double kt2,
-                          formfac::Parameterisation& ff,
-                          strfun::Parameterisation& sf,
+                          formfac::Parameterisation* ff,
+                          strfun::Parameterisation* sf,
                           double mi2,
                           double mf2) {
+    if (mi2 < 0.)
+      mi2 = PDG::get().mass(PDG::proton);
     switch (type) {
       case KTFlux::P_Photon_Elastic:
       case KTFlux::P_Photon_Elastic_Budnev: {
+        if (!ff)
+          throw CG_FATAL("Beam:ktFlux") << "Elastic kT flux requires a modelling of electromagnetic form factors!";
         const double x2 = x * x;
         const double q2min = x2 * mi2 / (1. - x), q2 = q2min + kt2 / (1. - x);
         const double qnorm = 1. - q2min / q2;
-        const auto& formfac = ff(Beam::Mode::ProtonElastic, q2);
+        const auto& formfac = (*ff)(Beam::Mode::ProtonElastic, q2);
         const auto prefac = constants::ALPHA_EM * M_1_PI / q2;
         if (type == KTFlux::P_Photon_Elastic)
           return prefac * formfac.FE * qnorm * qnorm;
@@ -149,15 +153,17 @@ namespace cepgen {
       }
       case KTFlux::P_Photon_Inelastic:
       case KTFlux::P_Photon_Inelastic_Budnev: {
+        if (!sf)
+          throw CG_FATAL("Beam:ktFlux") << "Inelastic kT flux requires a modelling of structure functions!";
         const double x2 = x * x;
         const double q2min = (x * (mf2 - mi2) + x2 * mi2) / (1. - x), q2 = q2min + kt2 / (1. - x);
         const double qnorm = 1. - q2min / q2;
         const double denom = 1. / (q2 + mf2 - mi2), xbj = denom * q2;
         const auto prefac = constants::ALPHA_EM * M_1_PI * (1. - x) / q2;
         if (type == KTFlux::P_Photon_Inelastic)
-          return prefac * sf.F2(xbj, q2) * denom * qnorm * qnorm;
-        const double f_D = sf.F2(xbj, q2) * denom * (1. - x) * qnorm;
-        const double f_C = sf.F1(xbj, q2) * 2. / q2;
+          return prefac * sf->F2(xbj, q2) * denom * qnorm * qnorm;
+        const double f_D = sf->F2(xbj, q2) * denom * (1. - x) * qnorm;
+        const double f_C = sf->F1(xbj, q2) * 2. / q2;
         return prefac * (f_D + 0.5 * x2 * f_C);
       }
       case KTFlux::P_Gluon_KMR: {
