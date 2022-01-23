@@ -21,17 +21,22 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/Drawer.h"
+#include "CepGen/Utils/Graph.h"
+#include "CepGen/Utils/String.h"
 
 int main(int argc, char* argv[]) {
   std::string formfac_type;
   int strfun_type, num_points;
   double kt2, mx;
-  std::string output_file;
+  bool logy, draw_grid;
+  std::string output_file, plotter;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("ff,f", "form factors modelling", &formfac_type, "StandardDipole")
@@ -40,9 +45,13 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("mx,m", "diffractive state mass (GeV)", &mx, 1.5)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 100)
       .addOptionalArgument("output,o", "output file name", &output_file, "flux.scan.output.txt")
+      .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
+      .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
+      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "root")
       .parse();
 
   cepgen::initialise();
+  auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
   const double mi = cepgen::PDG::get().mass(cepgen::PDG::proton);
   const double mi2 = mi * mi, mx2 = mx * mx;
 
@@ -53,13 +62,38 @@ int main(int argc, char* argv[]) {
       << "# structure functions: " << sf.get() << "\n"
       << "# kt2 = " << kt2 << " GeV^2\n"
       << "# mX = " << mx << " GeV\n";
+  cepgen::utils::Graph1D graph_el("", "Elastic photon"), graph_inel("", "Inelastic photon"),
+      graph_inel_bud("", "Inelastic photon (Budnev)"), graph_glu("", "Gluon (KMR)");
   for (int i = 0; i < num_points; ++i) {
     const double x = i * 1. / num_points;
-    out << x << "\t" << cepgen::Beam::ktFluxNucl(cepgen::Beam::KTFlux::P_Photon_Elastic, x, kt2, *ff, *sf, mi2, mx2)
-        << "\t" << cepgen::Beam::ktFluxNucl(cepgen::Beam::KTFlux::P_Photon_Inelastic_Budnev, x, kt2, *ff, *sf, mi2, mx2)
-        << "\t" << cepgen::Beam::ktFluxNucl(cepgen::Beam::KTFlux::P_Gluon_KMR, x, kt2, *ff, *sf, mi2, mx2) << "\n";
+    const auto f_el = cepgen::Beam::ktFluxNucl(cepgen::Beam::KTFlux::P_Photon_Elastic, x, kt2, ff.get());
+    const auto f_inel =
+        cepgen::Beam::ktFluxNucl(cepgen::Beam::KTFlux::P_Photon_Inelastic, x, kt2, nullptr, sf.get(), mi2, mx2);
+    const auto f_inel_bud =
+        cepgen::Beam::ktFluxNucl(cepgen::Beam::KTFlux::P_Photon_Inelastic_Budnev, x, kt2, nullptr, sf.get(), mi2, mx2);
+    //const auto f_glu = cepgen::Beam::ktFluxNucl(cepgen::Beam::KTFlux::P_Gluon_KMR, x, kt2, nullptr, nullptr, mi2, mx2);
+    out << x << "\t" << f_el << "\t" << f_inel << "\t" << f_inel_bud << /*"\t" << f_glu <<*/ "\n";
+    graph_el.addPoint(x, f_el);
+    graph_inel.addPoint(x, f_inel);
+    graph_inel_bud.addPoint(x, f_inel_bud);
+    //graph_glu.addPoint(x, f_glu);
   }
   CG_LOG << "Scan written in \"" << output_file << "\".";
+
+  cepgen::utils::Drawer::Mode dm;
+  if (logy)
+    dm |= cepgen::utils::Drawer::Mode::logy;
+  if (draw_grid)
+    dm |= cepgen::utils::Drawer::Mode::grid;
+
+  const auto top_label = cepgen::utils::format("k_{T}^{2} = %g GeV^{2}", kt2) + ", " +
+                         cepgen::formfac::FormFactorsFactory::get().describe(formfac_type) + "/" +
+                         cepgen::strfun::StructureFunctionsFactory::get().describe(strfun_type);
+
+  graph_el.xAxis().setLabel("#xi");
+  graph_el.yAxis().setLabel("#varphi_{T}(#xi, k_{T}^{2})");
+  plt->draw({&graph_el, &graph_inel, &graph_inel_bud}, "comp_ktflux", top_label, dm);
+
   out.close();
 
   return 0;
