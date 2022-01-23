@@ -41,7 +41,7 @@ namespace cepgen {
       void setName(const std::string& name) { name_ = name; }
 
       /// Drawable name
-      const std::string& title() const { return name_; }
+      const std::string& title() const { return title_; }
       /// Set the drawable title
       void setTitle(const std::string& title) { title_ = title; }
 
