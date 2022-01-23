@@ -21,6 +21,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Utils/Functional.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace utils {
@@ -39,7 +40,9 @@ namespace cepgen {
     FunctionalROOT::FunctionalROOT(const ParametersList& params) : Functional(params) {
       for (size_t i = 0; i < vars_.size(); ++i)
         func_.AddVariable(vars_[i], 0.);
-      if (func_.Compile(expression_.c_str()) != 0)
+      auto expr = expression_;
+      expr = utils::replace_all(expr, {{"min(", "TMath::Min("}, {"max(", "TMath::Max("}});
+      if (func_.Compile(expr.c_str()) != 0)
         throw CG_ERROR("FunctionalROOT") << "Failed to define the function\n\t" << expression_;
     }
 
