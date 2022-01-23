@@ -20,9 +20,7 @@
 
 #include <cmath>
 #include <codecvt>
-#include <iterator>
 #include <locale>
-#include <sstream>
 #include <unordered_set>
 #include <vector>
 
@@ -59,6 +57,48 @@ namespace cepgen {
       std::bitset<7> mod1((int)lhs), mod2((int)rhs);
       return (Modifier)(mod1 | mod2).to_ulong();
     }
+
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+#define DEF_COLOUR(col) \
+  case Colour::col:     \
+    return os << colourise(TOSTRING(col), Colour::col);
+#define DEF_MODIFIER(mod) \
+  case Modifier::mod:     \
+    return os << colourise(TOSTRING(mod), Colour::none, Modifier::mod);
+
+    std::ostream& operator<<(std::ostream& os, const Colour& col) {
+      switch (col) {
+        DEF_COLOUR(reset)
+        DEF_COLOUR(black)
+        DEF_COLOUR(red)
+        DEF_COLOUR(green)
+        DEF_COLOUR(yellow)
+        DEF_COLOUR(blue)
+        DEF_COLOUR(magenta)
+        DEF_COLOUR(cyan)
+        DEF_COLOUR(white)
+        default:
+          DEF_COLOUR(none)
+      }
+    }
+
+    std::ostream& operator<<(std::ostream& os, const Modifier& mod) {
+      switch (mod) {
+        DEF_MODIFIER(reset)
+        DEF_MODIFIER(bold)
+        DEF_MODIFIER(dimmed)
+        DEF_MODIFIER(italic)
+        DEF_MODIFIER(underline)
+        DEF_MODIFIER(blink)
+        DEF_MODIFIER(reverse)
+        default:
+          DEF_MODIFIER(none)
+      }
+    }
+
+#undef DEF_COLOUR
+#undef DEF_MODIFIER
 
     std::string colourise(const std::string& str, const Colour& col, const Modifier& mod) {
       if (!isatty(fileno(stdout)))

@@ -66,6 +66,7 @@ namespace cepgen {
       cyan = 36,
       white = 37
     };
+    std::ostream& operator<<(std::ostream&, const Colour&);
     enum struct Modifier : int16_t {
       none = -1,
       reset = 0,
@@ -76,6 +77,7 @@ namespace cepgen {
       blink = 1 << 4,
       reverse = 1 << 6
     };
+    std::ostream& operator<<(std::ostream&, const Modifier&);
     Modifier operator|(const Modifier&, const Modifier&);
     /// Colourise a string for TTY-type output streams
     std::string colourise(const std::string& str, const Colour& col, const Modifier& mod = Modifier::none);
