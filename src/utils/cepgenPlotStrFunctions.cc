@@ -16,19 +16,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <TGraph.h>
-#include <TMultiGraph.h>
-
 #include <fstream>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGenAddOns/ROOTWrapper/ROOTCanvas.h"
+#include "CepGen/Utils/Drawer.h"
+#include "CepGen/Utils/Graph.h"
+#include "CepGen/Utils/String.h"
 
 using namespace std;
 
@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
   vector<int> strfun_types;
   double q2, xmin, xmax, ymin, ymax;
   int var, num_points;
-  string output_file;
+  string output_file, plotter;
   bool logx, logy, draw_grid;
 
   const double kInvalid = -999.999;
@@ -54,11 +54,13 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("logx", "logarithmic x-axis", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-axis", &logy, false)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
+      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "root")
       .parse();
 
   const double lxmin = log10(xmin), lxmax = log10(xmax);
 
   cepgen::initialise();
+  auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
 
   string var_name, var_unit;
   switch (var) {
@@ -87,30 +89,25 @@ int main(int argc, char* argv[]) {
 
   const float mp = cepgen::PDG::get().mass(2212), mp2 = mp * mp;
 
+  cepgen::utils::Drawer::Mode dm;
+  if (logx)
+    dm |= cepgen::utils::Drawer::Mode::logx;
+  if (logy)
+    dm |= cepgen::utils::Drawer::Mode::logy;
+  if (draw_grid)
+    dm |= cepgen::utils::Drawer::Mode::grid;
+
   vector<unique_ptr<cepgen::strfun::Parameterisation> > strfuns;
-  vector<TGraph*> g_strfuns_f2, g_strfuns_fl, g_strfuns_fe, g_strfuns_fm, g_strfuns_w1, g_strfuns_w2;
+  vector<cepgen::utils::Graph1D> g_strfuns_f2, g_strfuns_fl, g_strfuns_fe, g_strfuns_fm, g_strfuns_w1, g_strfuns_w2;
   for (const auto& sf_type : strfun_types) {
     auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(sf_type);
     const auto sf_name = cepgen::strfun::StructureFunctionsFactory::get().describe(sf_type);
-    g_strfuns_f2.emplace_back(new TGraph);
-    auto graph_name = [&](const string& func) -> TString {
-      return Form("%s;%s;%s(%s, Q^{2})",
-                  sf_name.c_str(),
-                  (var_name + (!var_unit.empty() ? " (" + var_unit + ")" : "")).c_str(),
-                  func.c_str(),
-                  var_name.c_str());
-    };
-    (*g_strfuns_f2.rbegin())->SetTitle(graph_name("F_{2}"));
-    g_strfuns_fl.emplace_back(new TGraph);
-    (*g_strfuns_fl.rbegin())->SetTitle(graph_name("F_{L}"));
-    g_strfuns_fe.emplace_back(new TGraph);
-    (*g_strfuns_fe.rbegin())->SetTitle(graph_name("F_{E}"));
-    g_strfuns_fm.emplace_back(new TGraph);
-    (*g_strfuns_fm.rbegin())->SetTitle(graph_name("F_{M}"));
-    g_strfuns_w1.emplace_back(new TGraph);
-    (*g_strfuns_w1.rbegin())->SetTitle(graph_name("W_{1}"));
-    g_strfuns_w2.emplace_back(new TGraph);
-    (*g_strfuns_w2.rbegin())->SetTitle(graph_name("W_{2}"));
+    g_strfuns_f2.emplace_back("f2_" + sf_type, sf_name);
+    g_strfuns_fl.emplace_back("fl_" + sf_type, sf_name);
+    g_strfuns_fe.emplace_back("fe_" + sf_type, sf_name);
+    g_strfuns_fm.emplace_back("fm_" + sf_type, sf_name);
+    g_strfuns_w1.emplace_back("w1_" + sf_type, sf_name);
+    g_strfuns_w2.emplace_back("w2_" + sf_type, sf_name);
     strfuns.emplace_back(move(sf));
   }
   for (int i = 0; i < num_points; ++i) {
@@ -135,12 +132,12 @@ int main(int argc, char* argv[]) {
           break;
       }
       out << "\t" << sf->F2(xbj, q2) << "\t" << sf->FL(xbj, q2);
-      g_strfuns_f2.at(j)->SetPoint(g_strfuns_f2.at(j)->GetN(), x, sf->F2(xbj, q2));
-      g_strfuns_fl.at(j)->SetPoint(g_strfuns_fl.at(j)->GetN(), x, sf->FL(xbj, q2));
-      g_strfuns_fe.at(j)->SetPoint(g_strfuns_fe.at(j)->GetN(), x, sf->FE(xbj, q2));
-      g_strfuns_fm.at(j)->SetPoint(g_strfuns_fm.at(j)->GetN(), x, sf->FM(xbj, q2));
-      g_strfuns_w1.at(j)->SetPoint(g_strfuns_w1.at(j)->GetN(), x, sf->W1(xbj, q2));
-      g_strfuns_w2.at(j)->SetPoint(g_strfuns_w2.at(j)->GetN(), x, sf->W2(xbj, q2));
+      g_strfuns_f2.at(j).addPoint(x, sf->F2(xbj, q2));
+      g_strfuns_fl.at(j).addPoint(x, sf->FL(xbj, q2));
+      g_strfuns_fe.at(j).addPoint(x, sf->FE(xbj, q2));
+      g_strfuns_fm.at(j).addPoint(x, sf->FM(xbj, q2));
+      g_strfuns_w1.at(j).addPoint(x, sf->W1(xbj, q2));
+      g_strfuns_w2.at(j).addPoint(x, sf->W2(xbj, q2));
       ++j;
     }
     out << "\n";
@@ -148,38 +145,23 @@ int main(int argc, char* argv[]) {
   CG_LOG << "Scan written in \"" << output_file << "\".";
   out.close();
 
-  for (auto& plt : map<string, vector<TGraph*> >{{"f2", g_strfuns_f2},
-                                                 {"fl", g_strfuns_fl},
-                                                 {"fe", g_strfuns_fe},
-                                                 {"fm", g_strfuns_fm},
-                                                 {"w1", g_strfuns_w1},
-                                                 {"w2", g_strfuns_w2}}) {
-    cepgen::ROOTCanvas c(("sfcomp_" + plt.first).c_str(), Form("Q^{2} = %g GeV^{2}", q2));
-    TMultiGraph mg;
-    if (logx)
-      c.SetLogx();
-    if (logy)
-      c.SetLogy();
-    if (draw_grid)
-      c.SetGrid(true, true);
-    c.SetLegendX1(0.2);
-    size_t i = 0;
-    for (auto& gr : plt.second) {
-      mg.Add(gr);
-      gr->SetLineColor(cepgen::ROOTCanvas::colours[i]);
-      c.AddLegendEntry(gr, gr->GetTitle(), "l");
-      ++i;
+  for (auto& canv : map<pair<string, string>, vector<cepgen::utils::Graph1D> >{{{"f2", "F_{2}"}, g_strfuns_f2},
+                                                                               {{"fl", "F_{L}"}, g_strfuns_fl},
+                                                                               {{"fe", "F_{E}"}, g_strfuns_fe},
+                                                                               {{"fm", "F_{M}"}, g_strfuns_fm},
+                                                                               {{"w1", "W_{1}"}, g_strfuns_w1},
+                                                                               {{"w2", "W_{2}"}, g_strfuns_w2}}) {
+    cepgen::utils::DrawableColl mp;
+    for (auto& p : canv.second) {
+      p.xAxis().setLabel(var_name + (!var_unit.empty() ? " (" + var_unit + ")" : ""));
+      p.yAxis().setLabel(canv.first.second + (!var_name.empty() ? "(" + var_name + ", Q^{2})" : ""));
+      if (ymin != kInvalid)
+        p.yAxis().setMinimum(ymin);
+      if (ymax != kInvalid)
+        p.yAxis().setMaximum(ymax);
+      mp.emplace_back(&p);
     }
-    mg.Draw("al");
-    // ugly fix to propagate first plot axes label onto multigraph
-    mg.GetHistogram()->GetXaxis()->SetTitle((*plt.second.begin())->GetXaxis()->GetTitle());
-    mg.GetHistogram()->GetYaxis()->SetTitle((*plt.second.begin())->GetYaxis()->GetTitle());
-    if (ymin != kInvalid)
-      mg.SetMinimum(ymin);
-    if (ymax != kInvalid)
-      mg.SetMaximum(ymax);
-    c.Prettify(mg.GetHistogram());
-    c.Save("pdf");
+    plt->draw(mp, "sfcomp_" + canv.first.first, cepgen::utils::format("Q^{2} = %g GeV^{2}", q2), dm);
   }
 
   return 0;

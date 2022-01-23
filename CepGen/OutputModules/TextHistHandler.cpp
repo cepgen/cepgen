@@ -112,8 +112,8 @@ namespace cepgen {
             continue;
           }
           auto& hist = hists_.rbegin()->hist;
-          hist.setXlabel(vars.at(0));
-          hist.setYlabel("d(sig)/d" + vars.at(0) + " (pb/bin)");
+          hist.xAxis().setLabel(vars.at(0));
+          hist.yAxis().setLabel("d(sig)/d" + vars.at(0) + " (pb/bin)");
         } else if (vars.size() == 2) {  // 2D histogram
           const auto &xbins = hvar.get<std::vector<double> >("xbins"), &ybins = hvar.get<std::vector<double> >("ybins");
           name = utils::replace_all(name, ":", "_");
@@ -137,8 +137,8 @@ namespace cepgen {
             continue;
           }
           auto& hist = hists2d_.rbegin()->hist;
-          hist.setXlabel(vars.at(0));
-          hist.setYlabel(vars.at(1));
+          hist.xAxis().setLabel(vars.at(0));
+          hist.yAxis().setLabel(vars.at(1));
         }
       }
       if (save_hists_ && !hists_.empty())

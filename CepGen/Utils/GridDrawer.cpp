@@ -32,8 +32,10 @@ namespace cepgen {
       auto gd = GridDrawer(ParametersList());
       // first prepare the array of plots to generate
       std::array<Graph1D, N> plots;
-      for (size_t i = 0; i < N; ++i)
-        plots[i].setXlabel("x").setYlabel(utils::format("var%d", i));
+      for (size_t i = 0; i < N; ++i) {
+        plots[i].xAxis().setLabel("x");
+        plots[i].yAxis().setLabel(utils::format("var%d", i));
+      }
       for (const auto& val : grid.values()) {
         for (size_t i = 0; i < N; ++i)
           plots[i].addPoint(val.first[0], val.second[i]);
@@ -47,8 +49,11 @@ namespace cepgen {
       auto gd = GridDrawer(ParametersList());
       // first prepare the array of plots to generate
       std::array<Graph2D, N> plots;
-      for (size_t i = 0; i < N; ++i)
-        plots[i].setXlabel("x0").setYlabel("x1").setZlabel(utils::format("var%d", i));
+      for (size_t i = 0; i < N; ++i) {
+        plots[i].xAxis().setLabel("x0");
+        plots[i].yAxis().setLabel("x1");
+        plots[i].zAxis().setLabel(utils::format("var%d", i));
+      }
       for (const auto& val : grid.values()) {
         for (size_t i = 0; i < N; ++i)
           plots[i].addPoint(val.first[0], val.first[1], val.second[i]);
@@ -63,9 +68,15 @@ namespace cepgen {
       // first prepare the array of plots to generate
       std::array<std::array<Graph2D, 3>, N> plots;
       for (size_t i = 0; i < N; ++i) {
-        plots[i][0].setXlabel("x0").setYlabel("x1").setZlabel(utils::format("var%d", i));
-        plots[i][1].setXlabel("x0").setYlabel("x2").setZlabel(utils::format("var%d", i));
-        plots[i][2].setXlabel("x1").setYlabel("x2").setZlabel(utils::format("var%d", i));
+        plots[i][0].xAxis().setLabel("x0");
+        plots[i][0].yAxis().setLabel("x1");
+        plots[i][0].zAxis().setLabel(utils::format("var%d", i));
+        plots[i][1].xAxis().setLabel("x0");
+        plots[i][1].yAxis().setLabel("x2");
+        plots[i][1].zAxis().setLabel(utils::format("var%d", i));
+        plots[i][2].xAxis().setLabel("x1");
+        plots[i][2].yAxis().setLabel("x2");
+        plots[i][2].zAxis().setLabel(utils::format("var%d", i));
       }
       for (const auto& val : grid.values())
         for (size_t i = 0; i < N; ++i) {

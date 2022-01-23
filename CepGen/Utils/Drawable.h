@@ -32,8 +32,6 @@ namespace cepgen {
     class Drawable {
     public:
       explicit Drawable(const std::string& name = "", const std::string& title = "") : name_(name), title_(title) {}
-      ///< Copy constructor
-      Drawable(const Drawable& oth) : xlabel_(oth.xlabel_), ylabel_(oth.ylabel_) {}
 
       /// Drawable name
       const std::string& name() const { return name_; }
@@ -45,27 +43,45 @@ namespace cepgen {
       /// Set the drawable title
       void setTitle(const std::string& title) { title_ = title; }
 
-      /// x-axis label
-      const std::string& xLabel() const { return xlabel_; }
-      /// Set the x-axis label
-      Drawable& setXlabel(const std::string& lab) {
-        xlabel_ = lab;
-        return *this;
-      }
-      /// y-axis label
-      const std::string& yLabel() const { return ylabel_; }
-      /// Set the y-axis label
-      Drawable& setYlabel(const std::string& lab) {
-        ylabel_ = lab;
-        return *this;
-      }
-      /// z-axis label
-      const std::string& zLabel() const { return zlabel_; }
-      /// Set the z-axis label
-      Drawable& setZlabel(const std::string& lab) {
-        zlabel_ = lab;
-        return *this;
-      }
+      /// Metadata for an axis
+      class AxisInfo {
+      public:
+        /// Set the axis title
+        AxisInfo& setLabel(const std::string& label) {
+          label_ = label;
+          return *this;
+        }
+        /// Axis title
+        const std::string& label() const { return label_; }
+        /// Set the minimum range
+        AxisInfo& setMinimum(double min) {
+          lim_.min() = min;
+          return *this;
+        }
+        /// Set the maximum range
+        AxisInfo& setMaximum(double max) {
+          lim_.max() = max;
+          return *this;
+        }
+        /// Set the full axis range
+        AxisInfo& setRange(const Limits& lim) {
+          lim_ = lim;
+          return *this;
+        }
+        /// Axis range
+        const Limits& range() const { return lim_; }
+
+      private:
+        std::string label_;  ///< axis title
+        Limits lim_;         ///< axis limits
+      };
+
+      AxisInfo& xAxis() { return xaxis_; }
+      const AxisInfo& xAxis() const { return xaxis_; }
+      AxisInfo& yAxis() { return yaxis_; }
+      const AxisInfo& yAxis() const { return yaxis_; }
+      AxisInfo& zAxis() { return zaxis_; }
+      const AxisInfo& zAxis() const { return zaxis_; }
 
       /// Generic bin coordinate and its human-readable label
       struct coord_t {
@@ -98,11 +114,11 @@ namespace cepgen {
       virtual bool isGraph2D() const { return false; }  ///< Is this drawable a two-dimensional graph?
 
     protected:
-      std::string name_;    ///< Computer-readable name
-      std::string title_;   ///< Human-readable title
-      std::string xlabel_;  ///< x-axis title
-      std::string ylabel_;  ///< y-axis title
-      std::string zlabel_;  ///< z-axis title
+      std::string name_;   ///< Computer-readable name
+      std::string title_;  ///< Human-readable title
+      AxisInfo xaxis_;     ///< x-axis metadata
+      AxisInfo yaxis_;     ///< y-axis metadata
+      AxisInfo zaxis_;     ///< z-axis metadata
     };
   }  // namespace utils
 }  // namespace cepgen

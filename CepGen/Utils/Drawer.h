@@ -23,19 +23,29 @@
 
 namespace cepgen {
   namespace utils {
-    class Drawable;
     class Graph1D;
     class Graph2D;
     class Hist1D;
     class Hist2D;
+    class Drawable;
+    /// A collection of drawable objects
+    typedef std::vector<const Drawable*> DrawableColl;
     /// A generic drawing utility
     class Drawer : public NamedModule<std::string> {
     public:
       /// Build a drawing utility
       explicit Drawer(const ParametersList& params);
 
-      enum struct Mode : int16_t { none = 0, logx = 1 << 0, logy = 1 << 1, logz = 1 << 2, nostack = 1 << 3 };
+      enum struct Mode : int16_t {
+        none = 0,
+        logx = 1 << 0,
+        logy = 1 << 1,
+        logz = 1 << 2,
+        nostack = 1 << 3,
+        grid = 1 << 4
+      };
       friend Mode operator|(const Mode&, const Mode&);
+      friend Mode& operator|=(Mode&, const Mode&);
       friend bool operator&(const Mode&, const Mode&);
 
       /// Draw a one-dimensional graph
@@ -47,11 +57,10 @@ namespace cepgen {
       /// Draw a two-dimensional histogram
       virtual const Drawer& draw(const Hist2D&, const Mode& mode = Mode::none) const = 0;
 
-      /// A collection of drawable objects
-      typedef std::vector<const Drawable*> DrawableColl;
       /// Draw a collection of drawables
       virtual const Drawer& draw(const DrawableColl&,
                                  const std::string& name = "",
+                                 const std::string& title = "",
                                  const Mode& mode = Mode::none) const = 0;
 
       /// Output operator (when necessary)

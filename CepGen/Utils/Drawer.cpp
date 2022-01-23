@@ -31,6 +31,11 @@ namespace cepgen {
       return (Drawer::Mode)(mod1 | mod2).to_ulong();
     }
 
+    Drawer::Mode& operator|=(Drawer::Mode& one, const Drawer::Mode& oth) {
+      one = one | oth;
+      return one;
+    }
+
     bool operator&(const Drawer::Mode& lhs, const Drawer::Mode& rhs) {
       //return ((int)lhs > (int)rhs) - ((int)lhs < (int)rhs);
       return (int)lhs & (int)rhs;

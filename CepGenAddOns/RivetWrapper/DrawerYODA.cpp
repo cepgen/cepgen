@@ -53,6 +53,7 @@ namespace cepgen {
 
       const DrawerYODA& draw(const DrawableColl&,
                              const std::string& name = "",
+                             const std::string& title = "",
                              const Mode& mode = Mode::none) const override;
 
     private:
@@ -68,7 +69,10 @@ namespace cepgen {
     };
 
     template <typename T>
-    const DrawerYODA<T>& DrawerYODA<T>::draw(const DrawableColl& objs, const std::string&, const Mode&) const {
+    const DrawerYODA<T>& DrawerYODA<T>::draw(const DrawableColl& objs,
+                                             const std::string&,
+                                             const std::string&,
+                                             const Mode&) const {
       std::vector<const YODA::AnalysisObject*> objs_coll;
       for (const auto* obj : objs) {
         if (obj->isHist1D()) {

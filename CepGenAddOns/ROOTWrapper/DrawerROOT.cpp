@@ -30,10 +30,12 @@ namespace cepgen {
 
       const DrawerROOT& draw(const DrawableColl&,
                              const std::string& name = "",
+                             const std::string& title = "",
                              const Mode& mode = Mode::none) const override;
 
     private:
       static void setMode(ROOTCanvas&, const Mode&);
+      static void postDraw(TH1*, const Drawable&);
       static TGraphErrors convert(const Graph1D&);
       static TGraph2DErrors convert(const Graph2D&);
       static TH1D convert(const Hist1D&);
@@ -53,8 +55,9 @@ namespace cepgen {
       ROOTCanvas canv(graph.name().empty() ? def_filename_ : graph.name(), graph.title());
       setMode(canv, mode);
       gr.Draw("al");
-      gr.GetHistogram()->SetTitle((";" + graph.xLabel() + ";" + graph.yLabel()).c_str());
+      gr.GetHistogram()->SetTitle((";" + graph.xAxis().label() + ";" + graph.yAxis().label()).c_str());
       canv.Prettify(gr.GetHistogram());
+      postDraw(gr.GetHistogram(), graph);
       canv.Save(def_extension_);
       return *this;
     }
@@ -64,8 +67,10 @@ namespace cepgen {
       ROOTCanvas canv(graph.name().empty() ? def_filename_ : graph.name(), graph.title());
       setMode(canv, mode);
       gr.Draw("surf3");
-      gr.GetHistogram()->SetTitle((";" + graph.xLabel() + ";" + graph.yLabel() + ";" + graph.zLabel()).c_str());
+      gr.GetHistogram()->SetTitle(
+          (";" + graph.xAxis().label() + ";" + graph.yAxis().label() + ";" + graph.zAxis().label()).c_str());
       canv.Prettify(gr.GetHistogram());
+      postDraw(gr.GetHistogram(), graph);
       canv.Save(def_extension_);
       return *this;
     }
@@ -76,6 +81,7 @@ namespace cepgen {
       setMode(canv, mode);
       h.Draw();
       canv.Prettify(&h);
+      postDraw(&h, hist);
       canv.Save(def_extension_);
       return *this;
     }
@@ -86,31 +92,38 @@ namespace cepgen {
       setMode(canv, mode);
       h.Draw("colz");
       canv.Prettify(&h);
+      postDraw(&h, hist);
       canv.Save(def_extension_);
       return *this;
     }
 
-    const DrawerROOT& DrawerROOT::draw(const DrawableColl& objs, const std::string& name, const Mode& mode) const {
+    const DrawerROOT& DrawerROOT::draw(const DrawableColl& objs,
+                                       const std::string& name,
+                                       const std::string& title,
+                                       const Mode& mode) const {
       TMultiGraph mg;
       THStack hs;
-      ROOTCanvas canv(name.empty() ? def_filename_ : name, "");
+      ROOTCanvas canv(name.empty() ? def_filename_ : name, title);
       setMode(canv, mode);
       size_t i = 0;
+      Drawable* first = nullptr;
       for (const auto* obj : objs) {
         if (obj->isHist1D()) {
           auto* hist = new TH1D(convert(*dynamic_cast<const Hist1D*>(obj)));
           hist->SetLineColor(ROOTCanvas::colours.at(i++));
           hs.Add(hist);
-          canv.AddLegendEntry(hist, obj->title(), "l");
+          canv.AddLegendEntry(hist, hist->GetTitle(), "l");
         } else if (obj->isGraph1D()) {
           auto* gr = new TGraphErrors(convert(*dynamic_cast<const Graph1D*>(obj)));
           gr->SetLineColor(ROOTCanvas::colours.at(i++));
           mg.Add(gr);
-          canv.AddLegendEntry(gr, obj->title(), "l");
+          canv.AddLegendEntry(gr, gr->GetTitle(), "l");
         } else {
           CG_WARNING("DrawerROOT:draw") << "Cannot add drawable '" << obj->name() << "' to the stack.";
           continue;
         }
+        if (!first)
+          first = const_cast<Drawable*>(obj);
       }
       const bool has_hists = hs.GetHists() && !hs.GetHists()->IsEmpty();
       const bool has_graphs = mg.GetListOfGraphs() && !mg.GetListOfGraphs()->IsEmpty();
@@ -118,10 +131,13 @@ namespace cepgen {
         hs.Draw(mode & Mode::nostack ? "nostack" : "");
       if (has_graphs)
         mg.Draw((std::string("l") + (!has_hists ? "a" : "")).c_str());
-      if (has_hists)
+      if (has_hists) {
         canv.Prettify(hs.GetHistogram());
-      else if (has_graphs)
+        postDraw(hs.GetHistogram(), *first);
+      } else if (has_graphs) {
         canv.Prettify(mg.GetHistogram());
+        postDraw(mg.GetHistogram(), *first);
+      }
       canv.Save(def_extension_);
       return *this;
     }
@@ -133,6 +149,22 @@ namespace cepgen {
         canv.SetLogy();
       if (mode & Mode::logz)
         canv.SetLogz();
+      if (mode & Mode::grid)
+        canv.SetGrid();
+    }
+
+    void DrawerROOT::postDraw(TH1* obj, const Drawable& dr) {
+      const auto &xrng = dr.xAxis().range(), &yrng = dr.yAxis().range();
+      obj->GetXaxis()->SetTitle(dr.xAxis().label().c_str());
+      obj->GetYaxis()->SetTitle(dr.yAxis().label().c_str());
+      if (xrng.valid())
+        obj->GetXaxis()->SetRangeUser(xrng.min(), xrng.max());
+      if (yrng.valid()) {
+        if (yrng.hasMin())
+          obj->SetMinimum(yrng.min());
+        if (yrng.hasMax())
+          obj->SetMaximum(yrng.max());
+      }
     }
 
     TGraphErrors DrawerROOT::convert(const Graph1D& graph) {
@@ -170,8 +202,8 @@ namespace cepgen {
         h.SetBinContent(i + 1, hist.value(i));
         h.SetBinError(i + 1, hist.valueUnc(i));
       }
-      h.GetXaxis()->SetTitle(hist.xLabel().c_str());
-      h.GetYaxis()->SetTitle(hist.yLabel().c_str());
+      h.GetXaxis()->SetTitle(hist.xAxis().label().c_str());
+      h.GetYaxis()->SetTitle(hist.yAxis().label().c_str());
       return h;
     }
 
@@ -190,9 +222,9 @@ namespace cepgen {
           h.SetBinContent(ix + 1, iy + 1, hist.value(ix, iy));
           h.SetBinError(ix + 1, iy + 1, hist.valueUnc(ix, iy));
         }
-      h.GetXaxis()->SetTitle(hist.xLabel().c_str());
-      h.GetYaxis()->SetTitle(hist.yLabel().c_str());
-      h.GetZaxis()->SetTitle(hist.zLabel().c_str());
+      h.GetXaxis()->SetTitle(hist.xAxis().label().c_str());
+      h.GetYaxis()->SetTitle(hist.yAxis().label().c_str());
+      h.GetZaxis()->SetTitle(hist.zAxis().label().c_str());
       return h;
     }
   }  // namespace utils

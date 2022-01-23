@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
   cout << "---------- 1D graph ----------" << endl;
 
   // test 1D graph
-  cepgen::utils::Graph1D graph1d("graph1d");
+  cepgen::utils::Graph1D graph1d("graph1d", "sin(x)");
   for (double x = -M_PI; x <= M_PI; x += 0.25)
     graph1d.addPoint(x, sin(x));
   plt->draw(graph1d);
@@ -65,8 +65,8 @@ int main(int argc, char* argv[]) {
   cauchy_distribution<double> bw(0., 1.);
   for (size_t i = 0; i < 10000; ++i)
     hist1d.fill(bw(gen));
-  hist1d.setXlabel("Random variable");
-  hist1d.setYlabel("Occurrences");
+  hist1d.xAxis().setLabel("Random variable");
+  hist1d.yAxis().setLabel("Occurrences");
   plt->draw(hist1d);
 
   cout << endl << "-------- 2D histogram --------" << endl;
@@ -81,12 +81,12 @@ int main(int argc, char* argv[]) {
 
   cout << endl << "--------- multiplots ---------" << endl;
 
-  cepgen::utils::Graph1D graph1d_bis("graph1d_bis"), graph1d_ter("graph1d_ter");
+  cepgen::utils::Graph1D graph1d_bis("graph1d_bis", "cos(x)"), graph1d_ter("graph1d_ter", "cos(x)*x");
   for (double x = -M_PI; x <= M_PI; x += 0.25) {
     graph1d_bis.addPoint(x, cos(x));
     graph1d_ter.addPoint(x, cos(x) * x);
   }
-  plt->draw({&graph1d, &graph1d_bis, &graph1d_ter}, "multiplot1");
+  plt->draw({&graph1d, &graph1d_bis, &graph1d_ter}, "multiplot1", "a beautiful multiplot");
 
   cout << endl << "------- graph and hist -------" << endl;
 
