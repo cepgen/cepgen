@@ -30,9 +30,6 @@
 
 namespace cepgen {
   namespace utils {
-    Colour gTermColour = Colour::reset;
-    Modifier gTermModifier = Modifier::reset;
-
     std::string yesno(bool test) { return test ? colourise("true", Colour::green) : colourise("false", Colour::red); }
 
     /// String implementation of the boldification procedure
@@ -62,24 +59,19 @@ namespace cepgen {
       if (!isatty(fileno(stdout)))
         return str;
       std::string out;
-      Colour prev_col = gTermColour;
-      Modifier prev_mod = gTermModifier;
-      if (col != Colour::none)
-        gTermColour = col;
-      if (mod != Modifier::none)
-        gTermModifier = gTermModifier | mod;
-
-      auto get_mod_str = [](const Modifier& mod) -> std::string {
-        std::string mod_str, delim;
-        for (size_t i = 0; i < 7; ++i)
-          if ((uint16_t)mod & (1 << i))
-            mod_str += delim + std::to_string(i + 1), delim = ";";
-        return mod_str;
+      auto get_mod_str = [](const Colour& col, const Modifier& mod) -> std::string {
+        std::string mod_str("\033[");
+        if (col != Colour::reset)
+          mod_str += std::to_string((int)col);
+        if (mod > Modifier::reset)
+          for (size_t i = 0; i < 7; ++i)
+            if ((uint16_t)mod >> i)
+              mod_str += ";" + std::to_string(i + 1);
+        return mod_str + "m";
       };
-      out = format("\033[%d;%sm", (int)gTermColour, get_mod_str(gTermModifier).c_str()) + str;
-      gTermColour = prev_col;
-      gTermModifier = prev_mod;
-      out += format("\033[%d;%dm", gTermColour, gTermModifier);
+      out = get_mod_str(col, mod);
+      out += str;
+      out += get_mod_str(Colour::reset, Modifier::reset);
       return out;
     }
 

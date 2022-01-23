@@ -152,8 +152,6 @@ namespace cepgen {
     }  // namespace env
     /// Describe an error code
     std::string describeError(int errnum);
-    extern Colour gTermColour;
-    extern Modifier gTermModifier;
   }  // namespace utils
 }  // namespace cepgen
 
