@@ -167,13 +167,13 @@ namespace cepgen {
     if (str_fun_)
       params_.set<ParametersList>("structureFunctions", str_fun_->parameters());
     params_.set<int>("mode", (int)mode())
-        .set<int>("beam1id", positive().pdgId())
-        .set<double>("beam1pz", +positive().momentum().pz())
-        .set<int>("beam2id", negative().pdgId())
-        .set<double>("beam2pz", -negative().momentum().pz())
-        .set<std::vector<int> >("ktFluxes", {(int)positive().ktFlux(), (int)negative().ktFlux()})
+        .set<int>("beam1id", pos_beam_.pdgId())
+        .set<double>("beam1pz", +pos_beam_.momentum().pz())
+        .set<int>("beam2id", neg_beam_.pdgId())
+        .set<double>("beam2pz", -neg_beam_.momentum().pz())
+        .set<std::vector<int> >("ktFluxes", {(int)pos_beam_.ktFlux(), (int)neg_beam_.ktFlux()})
         .set<double>("sqrtS", sqrtS());
-    const HeavyIon hi1(positive().pdgId()), hi2(negative().pdgId());
+    const HeavyIon hi1(pos_beam_.pdgId()), hi2(neg_beam_.pdgId());
     if (hi1)
       params_.set<int>("beam1A", hi1.A).set<int>("beam1Z", (int)hi1.Z);
     if (hi2)
@@ -181,13 +181,32 @@ namespace cepgen {
     return params_;
   }
 
-  double IncomingBeams::s() const { return (positive().momentum() + negative().momentum()).mass2(); }
+  void IncomingBeams::setSqrtS(double sqs) {
+    if (pos_beam_.pdgId() != neg_beam_.pdgId())
+      throw CG_FATAL("Kinematics") << "Trying to set √s with asymmetric beams"
+                                   << " (" << pos_beam_.pdgId() << "/" << neg_beam_.pdgId() << ").\n"
+                                   << "Please fill incoming beams objects manually!";
+    pos_beam_.setMomentum(Momentum::fromPxPyPzM(0.,
+                                                0.,
+                                                +0.5 * sqs,
+                                                HeavyIon::isHI(pos_beam_.pdgId())
+                                                    ? HeavyIon::mass(HeavyIon(pos_beam_.pdgId()))
+                                                    : PDG::get().mass(pos_beam_.pdgId())));
+    neg_beam_.setMomentum(Momentum::fromPxPyPzM(0.,
+                                                0.,
+                                                -0.5 * sqs,
+                                                HeavyIon::isHI(neg_beam_.pdgId())
+                                                    ? HeavyIon::mass(HeavyIon(neg_beam_.pdgId()))
+                                                    : PDG::get().mass(neg_beam_.pdgId())));
+  }
+
+  double IncomingBeams::s() const { return (pos_beam_.momentum() + neg_beam_.momentum()).mass2(); }
 
   double IncomingBeams::sqrtS() const { return std::sqrt(s()); }
 
   mode::Kinematics IncomingBeams::mode() const {
-    const auto& pos_mode = positive().parameters().getAs<int, Beam::Mode>("mode");
-    const auto& neg_mode = negative().parameters().getAs<int, Beam::Mode>("mode");
+    const auto& pos_mode = pos_beam_.parameters().getAs<int, Beam::Mode>("mode");
+    const auto& neg_mode = neg_beam_.parameters().getAs<int, Beam::Mode>("mode");
     switch (pos_mode) {
       case Beam::Mode::PointLikeFermion:
       case Beam::Mode::ProtonElastic: {

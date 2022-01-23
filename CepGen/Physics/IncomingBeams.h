@@ -45,6 +45,8 @@ namespace cepgen {
     /// Type of kinematics to consider for the phase space
     mode::Kinematics mode() const;
 
+    /// Set the incoming beams centre of mass energy (in GeV)
+    void setSqrtS(double);
     /// Incoming beams squared centre of mass energy (in GeV^2)
     double s() const;
     /// Incoming beams centre of mass energy (in GeV)

@@ -65,6 +65,11 @@ namespace cepgen {
     pdgid_t daughterId() const;
     /// Beam particle 4-momentum
     const Momentum& momentum() const { return momentum_; }
+    /// Set the beam particle 4-momentum
+    Beam& setMomentum(const Momentum& mom) {
+      momentum_ = mom;
+      return *this;
+    }
 
     /// Type of incoming partons fluxes
     enum class KTFlux {
