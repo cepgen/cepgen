@@ -143,6 +143,7 @@ namespace cepgen {
     }
 
     void DrawerROOT::setMode(ROOTCanvas& canv, const Mode& mode) {
+      canv.SetLegendX1(0.15);
       if (mode & Mode::logx)
         canv.SetLogx();
       if (mode & Mode::logy)
