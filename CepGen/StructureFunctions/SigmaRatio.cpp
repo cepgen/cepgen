@@ -93,7 +93,7 @@ namespace cepgen {
 
     ParametersDescription E143::description() {
       auto desc = Parameterisation::description();
-      desc.setDescription("E143 experimental R measurement");
+      desc.setDescription("E143 (experimental)");
       desc.add<double>("q2_b", 0.34);
       desc.add<double>("lambda2", 0.2 * 0.2);
       desc.add<std::vector<double> >("a", {0.0485, 0.5470, 2.0621, -0.3804, 0.5090, -0.0285});
@@ -132,7 +132,7 @@ namespace cepgen {
 
     ParametersDescription R1990::description() {
       auto desc = Parameterisation::description();
-      desc.setDescription("SLAC experimental R measurement");
+      desc.setDescription("SLAC (experimental)");
       desc.add<double>("lambda2", 0.04);
       desc.add<std::vector<double> >("b", {0.0635, 0.5747, -0.3534});
       return desc;
@@ -170,7 +170,7 @@ namespace cepgen {
       const double xth = q2 / (q2 + wth_ * wth_ - mp2_);  // xth = x( W = wth )
       const double zeta = log(25. * q2);
       const double xitmp = (w < wth_) ? theta(xth, q2) : theta(xbj, q2);
-      const double tmp = p_.at(0) * xitmp / zeta + p_.at(1) / q2 - p_.at(3) / (q20_ * q20_ + q2 * q2);
+      const double tmp = p_.at(0) * xitmp / zeta + p_.at(1) / q2 - p_.at(2) / (q20_ * q20_ + q2 * q2);
       if (w >= wth_)
         return tmp;
       return tmp * pow((1. - xbj) / (1. - xth), 3);
@@ -178,7 +178,7 @@ namespace cepgen {
 
     ParametersDescription CLAS::description() {
       auto desc = Parameterisation::description();
-      desc.setDescription("CLAS experimental R measurement");
+      desc.setDescription("CLAS (experimental)");
       desc.add<std::vector<double> >("p", {0.041, 0.592, 0.331});
       desc.add<double>("wth", 2.5);
       desc.add<double>("q20", 0.3);
@@ -215,7 +215,7 @@ namespace cepgen {
 
     ParametersDescription SibirtsevBlunden::description() {
       auto desc = Parameterisation::description();
-      desc.setDescription("Sibirtsev and Blunden theoretical R parameterisation");
+      desc.setDescription("Sibirtsev-Blunden (theoretical)");
       desc.add<double>("a", 0.014);
       desc.add<double>("b1", -0.07);
       desc.add<double>("b2", -0.8);

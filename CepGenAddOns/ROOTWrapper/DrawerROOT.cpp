@@ -143,7 +143,7 @@ namespace cepgen {
     }
 
     void DrawerROOT::setMode(ROOTCanvas& canv, const Mode& mode) {
-      canv.SetLegendX1(0.15);
+      canv.SetLegendX1(0.175);
       if (mode & Mode::logx)
         canv.SetLogx();
       if (mode & Mode::logy)
@@ -177,6 +177,7 @@ namespace cepgen {
         gr.SetPointError(i, 0. /* FIXME not yet supported */, it.second.value_unc);
         ++i;
       }
+      gr.SetLineWidth(2);
       return gr;
     }
 
