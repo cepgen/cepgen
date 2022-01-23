@@ -61,11 +61,11 @@ namespace cepgen {
       std::string out;
       auto get_mod_str = [](const Colour& col, const Modifier& mod) -> std::string {
         std::string mod_str("\033[");
-        if (col != Colour::reset)
+        if (col != Colour::none)
           mod_str += std::to_string((int)col);
         if (mod > Modifier::reset)
           for (size_t i = 0; i < 7; ++i)
-            if ((uint16_t)mod >> i)
+            if (((uint16_t)mod >> i) & 0x1)
               mod_str += ";" + std::to_string(i + 1);
         return mod_str + "m";
       };
