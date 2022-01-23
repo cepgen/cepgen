@@ -52,24 +52,28 @@ namespace cepgen {
   double ResonanceObject::ecmr(double m2) const { return mass_ == 0 ? 0. : utils::energyFromW(mass_, mp2_, m2); }
 
   double ResonanceObject::partialWidth(const KinematicsBlock& kin) const {
-    //----- 1-pion decay mode
-    const double pcmrpi = pcmr(mpi2_);
-    const double pwidth_singlepi = std::pow(kin.ppicm / pcmrpi, 2. * ang_mom_ + 1.) *
-                                   std::pow((pcmrpi * pcmrpi + x02_) / (kin.ppicm * kin.ppicm + x02_), ang_mom_);
-    //----- 2-pion decay mode
-    const double pcmrpi2 = pcmr(4. * mpi2_);
-    const double pwidth_doublepi =
-        std::pow(kin.ppi2cm / pcmrpi2, 2. * (ang_mom_ + 2.)) *
-        std::pow((pcmrpi2 * pcmrpi2 + x02_) / (kin.ppi2cm * kin.ppi2cm + x02_), ang_mom_ + 2) * kin.w / mass_;
-    //----- eta decay mode (only for S11's)
-    double pwidth_eta = 0.;
-    if (br_.eta != 0.) {
-      const double pcmreta = pcmr(meta2_);
-      pwidth_eta = std::pow(kin.petacm / pcmreta, 2. * ang_mom_ + 1.) *
-                   std::pow((pcmreta * pcmreta + x02_) / (kin.petacm * kin.petacm + x02_), ang_mom_);
+    double par_width = 0.;
+    if (br_.singlepi > 0.) {
+      //----- 1-pion decay mode
+      const double pcmrpi = pcmr(mpi2_);
+      par_width += br_.singlepi * (std::pow(kin.ppicm / pcmrpi, 2. * ang_mom_ + 1.) *
+                                   std::pow((pcmrpi * pcmrpi + x02_) / (kin.ppicm * kin.ppicm + x02_), ang_mom_));
     }
-
-    return width_ * (pwidth_singlepi * br_.singlepi + pwidth_doublepi * br_.doublepi + pwidth_eta * br_.eta);
+    if (br_.doublepi > 0.) {
+      //----- 2-pion decay mode
+      const double pcmrpi2 = pcmr(4. * mpi2_);
+      par_width +=
+          br_.doublepi *
+          (std::pow(kin.ppi2cm / pcmrpi2, 2. * (ang_mom_ + 2.)) *
+           std::pow((pcmrpi2 * pcmrpi2 + x02_) / (kin.ppi2cm * kin.ppi2cm + x02_), ang_mom_ + 2) * kin.w / mass_);
+    }
+    if (br_.eta > 0.) {
+      //----- eta decay mode
+      const double pcmreta = pcmr(meta2_);
+      par_width += br_.eta * (std::pow(kin.petacm / pcmreta, 2. * ang_mom_ + 1.) *
+                              std::pow((pcmreta * pcmreta + x02_) / (kin.petacm * kin.petacm + x02_), ang_mom_));
+    }
+    return width_ * par_width;
   }
 
   double ResonanceObject::photonWidth(const KinematicsBlock& kin) const {

@@ -58,9 +58,9 @@ namespace cepgen {
           int res = gsl_spline_eval_e(splines_1d_.at(i).get(), coord.at(0), accel_.at(0).get(), &out[i]);
           if (res != GSL_SUCCESS) {
             out[i] = 0.;
-            CG_WARNING("GridHandler") << "Failed to evaluate the grid value (N=" << i << ") "
-                                      << "for x = " << in_coords.at(0) << ". "
-                                      << "GSL error: " << gsl_strerror(res);
+            CG_WARNING("GridHandler") << "Failed to evaluate the value (N=" << i << ") "
+                                      << "for x = " << in_coords.at(0) << " in grid with boundaries " << boundaries()
+                                      << ". GSL error: " << gsl_strerror(res);
           }
         }
       } break;
@@ -71,9 +71,9 @@ namespace cepgen {
           int res = gsl_spline2d_eval_e(splines_2d_.at(i).get(), x, y, accel_.at(0).get(), accel_.at(1).get(), &out[i]);
           if (res != GSL_SUCCESS) {
             out[i] = 0.;
-            CG_WARNING("GridHandler") << "Failed to evaluate the grid value (N=" << i << ") "
-                                      << "for x = " << x << " / y = " << y << ". "
-                                      << "GSL error: " << gsl_strerror(res);
+            CG_WARNING("GridHandler") << "Failed to evaluate the value (N=" << i << ") "
+                                      << "for x = " << x << " / y = " << y << " in grid with boundaries "
+                                      << boundaries() << ". GSL error: " << gsl_strerror(res);
           }
         }
 #else
