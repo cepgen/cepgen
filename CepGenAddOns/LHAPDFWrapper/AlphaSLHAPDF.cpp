@@ -43,7 +43,7 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = ParametersDescription();
       desc.setDescription("Perturbative PDF-oriented evolution algorithm");
-      desc.add<std::string>("pdfSet", "cteq6");
+      desc.add<std::string>("pdfSet", "cteq66");
       desc.add<int>("pdfMember", 0);
       return desc;
     }

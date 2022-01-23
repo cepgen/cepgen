@@ -214,7 +214,7 @@ namespace cepgen {
     ParametersDescription Partonic::description() {
       auto desc = Parameterisation::description();
       desc.setDescription("LHAPDF (partonic)");
-      desc.add<std::string>("pdfSet", "cteq6").setDescription("PDF modelling to be considered");
+      desc.add<std::string>("pdfSet", "cteq66").setDescription("PDF modelling to be considered");
       desc.add<int>("numFlavours", 4).setDescription("Number of parton flavours to consider in summation");
       desc.add<int>("pdfCode", 0);
       desc.add<int>("pdfMember", 0);
