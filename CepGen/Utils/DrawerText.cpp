@@ -37,6 +37,7 @@ namespace cepgen {
         auto desc = Drawer::description();
         desc.setDescription("Text-based drawing module");
         desc.add<int>("width", 50);
+        desc.add<bool>("colourise", true).setDescription("colourise the output (for TTY-compatible displays)");
         return desc;
       }
 
@@ -52,9 +53,8 @@ namespace cepgen {
     private:
       friend class Drawable;
 
-      void drawValues(std::ostream&, const Drawable&, const Drawable::axis_t&, const Mode&, bool effects = true) const;
-      void drawValues(
-          std::ostream&, const Drawable&, const Drawable::dualaxis_t&, const Mode&, bool effects = true) const;
+      void drawValues(std::ostream&, const Drawable&, const Drawable::axis_t&, const Mode&, bool effects) const;
+      void drawValues(std::ostream&, const Drawable&, const Drawable::dualaxis_t&, const Mode&, bool effects) const;
 
       static constexpr char CHAR = '*', ERR_CHAR = '-';
       static constexpr const char* CHAR_ALT = "o.#@";
@@ -62,7 +62,7 @@ namespace cepgen {
       //static constexpr const char* CHARS = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
       //static constexpr const char* CHARS = " .:-=+*#%@";
       static constexpr const char* CHARS = " .:oO0@%#";
-      static const int kColours[];
+      static const std::array<Colour, 7> kColours;
       static constexpr const char NEG_CHAR = '-';
 
       /// Sorting helper for the axis metadata container
@@ -75,15 +75,20 @@ namespace cepgen {
       };
 
       const size_t width_{0};
+      const bool colourise_{true};
     };
 
-    DrawerText::DrawerText(const ParametersList& params) : Drawer(params), width_(steerAs<int, size_t>("width")) {}
+    const std::array<Colour, 7> DrawerText::kColours = {
+        Colour::red, Colour::cyan, Colour::blue, Colour::magenta, Colour::green, Colour::yellow, Colour::reset};
+
+    DrawerText::DrawerText(const ParametersList& params)
+        : Drawer(params), width_(steerAs<int, size_t>("width")), colourise_(steer<bool>("colourise")) {}
 
     const DrawerText& DrawerText::draw(const Graph1D& graph, const Mode& mode) const {
       CG_LOG.log([&](auto& log) {
         if (!graph.name().empty())
           log << "plot of \"" << graph.name() << "\"\n";
-        drawValues(log.stream(), graph, graph.points(), mode);
+        drawValues(log.stream(), graph, graph.points(), mode, colourise_);
       });
       return *this;
     }
@@ -92,7 +97,7 @@ namespace cepgen {
       CG_LOG.log([&](auto& log) {
         if (!graph.name().empty())
           log << "plot of \"" << graph.name() << "\"\n";
-        drawValues(log.stream(), graph, graph.points(), mode);
+        drawValues(log.stream(), graph, graph.points(), mode, colourise_);
       });
       return *this;
     }
@@ -101,7 +106,7 @@ namespace cepgen {
       CG_LOG.log([&](auto& log) {
         if (!hist.name().empty())
           log << "plot of \"" << hist.name() << "\"\n";
-        drawValues(log.stream(), hist, hist.axis(), mode);
+        drawValues(log.stream(), hist, hist.axis(), mode, colourise_);
         const double bin_width = hist.range().range() / hist.nbins();
         log << "\tbin width=" << utils::s("unit", bin_width, true) << ", "
             << "mean=" << hist.mean() << ", "
@@ -130,7 +135,7 @@ namespace cepgen {
                 Drawable::value_t{hist.value(binx, biny), hist.valueUnc(binx, biny)};
           }
         }
-        drawValues(log.stream(), hist, axes, mode);
+        drawValues(log.stream(), hist, axes, mode, colourise_);
         const auto &x_range = hist.rangeX(), &y_range = hist.rangeY();
         const double bin_width_x = x_range.range() / hist.nbinsX(), bin_width_y = y_range.range() / hist.nbinsY();
         log << "\t"
@@ -255,7 +260,7 @@ namespace cepgen {
     }
 
     void DrawerText::drawValues(
-        std::ostream& os, const Drawable& dr, const Drawable::axis_t& axis, const Mode& mode, bool effect) const {
+        std::ostream& os, const Drawable& dr, const Drawable::axis_t& axis, const Mode& mode, bool effects) const {
       const std::string sep(17, ' ');
       const double max_val = std::max_element(axis.begin(), axis.end(), map_elements())->second.value *
                              (mode & Mode::logy ? 5. : 1.2),
@@ -304,7 +309,7 @@ namespace cepgen {
           os << "\n"
              << left_label << ":" << (ival > ierr ? std::string(ival - ierr, ' ') : "")
              << (ierr > 0 ? std::string(ierr, ERR_CHAR) : "")
-             << (effect ? utils::boldify(std::string(1, CHAR)) : std::string(1, CHAR))
+             << (effects ? utils::boldify(std::string(1, CHAR)) : std::string(1, CHAR))
              << (ierr > 0 ? std::string(std::min(width_ - ival - 1, ierr), ERR_CHAR) : "")
              << (ival + ierr < width_ + 1 ? std::string(width_ - ival - ierr - 1, ' ') : "") << ": "
              << utils::format("%6.2e +/- %6.2e", val, unc);
@@ -315,14 +320,6 @@ namespace cepgen {
          << utils::format("%17s", dr.xLabel().c_str()) << ":" << std::string(width_, '.')
          << ":\n";  // 2nd abscissa axis
     }
-
-    const int DrawerText::kColours[] = {(int)Colour::red,
-                                        (int)Colour::cyan,
-                                        (int)Colour::blue,
-                                        (int)Colour::magenta,
-                                        (int)Colour::green,
-                                        (int)Colour::yellow,
-                                        (int)Colour::reset};
 
     void DrawerText::drawValues(
         std::ostream& os, const Drawable& dr, const Drawable::dualaxis_t& axes, const Mode& mode, bool effects) const {
@@ -363,19 +360,18 @@ namespace cepgen {
             else
               val_norm = val / max_val;
             if (std::isnan(val_norm)) {
-              os << (effects ? utils::colourise("!", (utils::Colour)kColours[0]) : "!");
+              os << (effects ? utils::colourise("!", kColours.at(0)) : "!");
               continue;
             }
             const short sign = (val_norm == 0. ? 0 : val_norm / fabs(val_norm));
             val_norm *= sign;
             if (sign == -1)
-              os << (effects ? utils::colourise(std::string(1, NEG_CHAR), (utils::Colour)kColours[0])
-                             : std::string(1, NEG_CHAR));
+              os << (effects ? utils::colourise(std::string(1, NEG_CHAR), kColours.at(0)) : std::string(1, NEG_CHAR));
             else {
               size_t ch_id = ceil(val_norm * (strlen(CHARS) - 1));
-              size_t col_id = 1 + (val_norm * (sizeof(kColours) / (sizeof(int)) - 2));
+              size_t col_id = 1 + val_norm * (kColours.size() - 2);
               os << (effects ? utils::colourise(std::string(1, CHARS[ch_id]),
-                                                (utils::Colour)kColours[col_id],
+                                                kColours.at(col_id),
                                                 (val_norm > 0.75 ? utils::Modifier::bold : utils::Modifier::reset))
                              : std::string(1, CHARS[ch_id]));
             }
@@ -401,8 +397,8 @@ namespace cepgen {
          << sep << ":" << std::string(y_axis.size(), '.') << ": "  // 2nd abscissa axis
          << dr.yLabel() << "\n\t"
          << "(scale: \"" << std::string(CHARS) << "\", ";
-      for (size_t i = 0; i < sizeof(kColours) / sizeof(kColours[0]); ++i)
-        os << utils::colourise("*", (utils::Colour)kColours[i]) << (i == 0 ? "|" : "");
+      for (size_t i = 0; i < kColours.size(); ++i)
+        os << (effects ? utils::colourise("*", kColours.at(i)) : "") << (i == 0 ? "|" : "");
       os << ")\n";
     }
   }  // namespace utils

@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
   for (double x = -5.; x < 5.; x += 0.5)
     for (double y = -5.; y < 5.; y += 0.2)
       graph2d.addPoint(x, y, (sin(x) / x) * (sin(y) / y));
-  plt->draw(graph2d, cepgen::utils::Drawer::Mode::logz);
+  plt->draw(graph2d);
 
   default_random_engine gen;
 
@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
   for (size_t i = 0; i < 1000; ++i)
     for (size_t j = 0; j < 1000; ++j)
       hist2d.fill(gaus1(gen), gaus2(gen));
-  plt->draw(hist2d);
+  plt->draw(hist2d, cepgen::utils::Drawer::Mode::logz);
 
   cout << endl << "--------- multiplots ---------" << endl;
 
