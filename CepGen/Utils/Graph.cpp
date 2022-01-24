@@ -26,7 +26,15 @@ namespace cepgen {
   namespace utils {
     Graph1D::Graph1D(const std::string& name, const std::string& title) : Drawable(name, title) {}
 
-    void Graph1D::addPoint(double x, double y) { values_[coord_t{x}] = value_t{y}; }
+    Graph1D& Graph1D::addPoint(double x, double y) {
+      values_[coord_t{x}] = value_t{y};
+      return *this;
+    }
+
+    Graph1D& Graph1D::addPoint(double x, double y, double ex, double ey) {
+      values_[coord_t{x, ex}] = value_t{y, ey};
+      return *this;
+    }
 
     double Graph1D::minimum() const {
       return std::min_element(values_.begin(), values_.end(), CompareAxisByValue())->second.value;
@@ -38,7 +46,15 @@ namespace cepgen {
 
     Graph2D::Graph2D(const std::string& name, const std::string& title) : Drawable(name, title) {}
 
-    void Graph2D::addPoint(double x, double y, double z) { values_[coord_t{x}][coord_t{y}] = value_t{z}; }
+    Graph2D& Graph2D::addPoint(double x, double y, double z) {
+      values_[coord_t{x}][coord_t{y}] = value_t{z};
+      return *this;
+    }
+
+    Graph2D& Graph2D::addPoint(double x, double y, double z, double ex, double ey, double ez) {
+      values_[coord_t{x, ex}][coord_t{y, ey}] = value_t{z, ez};
+      return *this;
+    }
 
     void Graph2D::dumpPoints(std::ostream& os) const {
       os << "Points registered in the 2D graph:";

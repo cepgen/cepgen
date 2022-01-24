@@ -87,14 +87,15 @@ namespace cepgen {
       struct coord_t {
         /// Sorting helper for axis coordinates
         bool operator<(const coord_t& oth) const { return value < oth.value; }
-        double value;            ///< Bin central value
+        double value{0.};        ///< Bin central value
+        double value_unc = 0.;   ///< Bin uncertainty
         std::string label = "";  ///< Human-readable description of the bin
       };
       /// Helper view of a pair of bin value and its uncertainty
       struct value_t {
         /// Sorting helper for bin values
         bool operator<(const value_t& oth) const { return value < oth.value; }
-        double value;           ///< Single bin content
+        double value{0.};       ///< Single bin content
         double value_unc = 0.;  ///< Uncertainty on bin content
       };
       /// Metadata for an axis (coordinates and bins value)

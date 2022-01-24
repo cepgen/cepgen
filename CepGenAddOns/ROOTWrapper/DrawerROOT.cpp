@@ -174,7 +174,7 @@ namespace cepgen {
       int i = 0;
       for (const auto& it : graph.points()) {
         gr.SetPoint(i, it.first.value, it.second.value);
-        gr.SetPointError(i, 0. /* FIXME not yet supported */, it.second.value_unc);
+        gr.SetPointError(i, it.first.value_unc, it.second.value_unc);
         ++i;
       }
       gr.SetLineWidth(2);

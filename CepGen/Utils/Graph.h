@@ -38,7 +38,9 @@ namespace cepgen {
       explicit Graph1D(const std::string& name = "", const std::string& title = "");
 
       /// Add one value to the graph
-      void addPoint(double x, double y);
+      Graph1D& addPoint(double x, double y);
+      /// Add one value and its uncertainties to the graph
+      Graph1D& addPoint(double x, double y, double ex, double ey);
       /// Retrieve all values in the graph
       const axis_t& points() const { return values_; }
       /// Minimum value registered in this graph
@@ -58,7 +60,9 @@ namespace cepgen {
       explicit Graph2D(const std::string& name = "", const std::string& title = "");
 
       /// Add one value to the graph
-      void addPoint(double x, double y, double z);
+      Graph2D& addPoint(double x, double y, double z);
+      /// Add one value and its uncertainties to the graph
+      Graph2D& addPoint(double x, double y, double z, double ex, double ey, double ez);
       /// Retrieve all values in the graph
       const dualaxis_t& points() const { return values_; }
       /// List all values registered in the graph

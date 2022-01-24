@@ -128,11 +128,11 @@ namespace cepgen {
         Drawable::dualaxis_t axes;
         for (size_t binx = 0; binx < hist.nbinsX(); ++binx) {
           const auto& range_x = hist.binRangeX(binx);
-          auto& axis_x =
-              axes[Drawable::coord_t{range_x.x(0.5), utils::format("[%7.2f,%7.2f)", range_x.min(), range_x.max())}];
+          auto& axis_x = axes[Drawable::coord_t{
+              range_x.x(0.5), 0.5 * range_x.range(), utils::format("[%7.2f,%7.2f)", range_x.min(), range_x.max())}];
           for (size_t biny = 0; biny < hist.nbinsY(); ++biny) {
             const auto& range_y = hist.binRangeY(biny);
-            axis_x[Drawable::coord_t{range_y.x(0.5), utils::format("%+g", range_y.min())}] =
+            axis_x[Drawable::coord_t{range_y.x(0.5), 0.5 * range_y.range(), utils::format("%+g", range_y.min())}] =
                 Drawable::value_t{hist.value(binx, biny), hist.valueUnc(binx, biny)};
           }
         }

@@ -104,7 +104,8 @@ namespace cepgen {
       axis_t axis;
       for (size_t bin = 0; bin < nbins(); ++bin) {
         const auto& range_i = binRange(bin);
-        axis[coord_t{range_i.x(0.5), utils::format("[%7.2f,%7.2f)", range_i.min(), range_i.max())}] =
+        axis[coord_t{
+            range_i.x(0.5), 0.5 * range_i.range(), utils::format("[%7.2f,%7.2f)", range_i.min(), range_i.max())}] =
             value_t{value(bin), valueUnc(bin)};
       }
       return axis;
