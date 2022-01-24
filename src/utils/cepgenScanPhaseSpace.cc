@@ -16,42 +16,45 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <TGraph2D.h>
-
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Processes/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGenAddOns/ROOTWrapper/ROOTCanvas.h"
+#include "CepGen/Utils/Drawer.h"
+#include "CepGen/Utils/Graph.h"
+#include "CepGen/Utils/String.h"
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
-  string input_card;
+  string input_card, plotter;
   int npoints;
   vector<int> dim;
   double def;
-  bool draw_grid;
+  bool draw_grid, log;
 
   cepgen::ArgumentsParser(argc, argv)
       .addArgument("input,i", "input card", &input_card)
       .addOptionalArgument("default,D", "default value for non-varying coordinates", &def, 0.5)
-      .addOptionalArgument("dim,d", "dimensions to probe", &dim, vector<int>{})
+      .addOptionalArgument("dim,s", "dimensions to probe", &dim, vector<int>{0, 1})
       .addOptionalArgument("num-points,n", "number of points to probe", &npoints, 100)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
+      .addOptionalArgument("log,l", "logarithmic axis", &log, false)
+      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .parse();
 
-  TGraph gr_scan_1d;
-  TGraph2D gr_scan_2d;
+  cepgen::utils::Graph1D gr_scan_1d("test_scan");
+  cepgen::utils::Graph2D gr_scan_2d("test_scan");
   if (dim.size() > 3)
     throw CG_FATAL("main") << "Number of dimensions to probe (" << dim.size() << ") is too high";
 
   cepgen::Generator gen;
   gen.setParameters(cepgen::card::Handler::parse(input_card));
   CG_LOG << gen.parameters();
-  const size_t ndim = gen.parameters()->process().ndim();
+  const size_t ndim = gen.parametersPtr()->process().ndim();
 
   vector<double> coord(ndim, def);
 
@@ -59,53 +62,54 @@ int main(int argc, char* argv[]) {
     const double x = i * 1. / npoints;
     switch (dim.size()) {
       case 0:
-        gr_scan_1d.SetPoint(gr_scan_1d.GetN(), x, gen.computePoint(vector<double>(ndim, x)));
+        gr_scan_1d.addPoint(x, gen.computePoint(vector<double>(ndim, x)));
         break;
       case 1:
         coord[dim.at(0)] = x;
-        gr_scan_1d.SetPoint(gr_scan_1d.GetN(), x, gen.computePoint(coord));
+        gr_scan_1d.addPoint(x, gen.computePoint(coord));
         break;
       case 2:
         coord[dim.at(0)] = x;
         for (int j = 0; j < npoints; ++j) {
           const double y = j * 1. / npoints;
           coord[dim.at(1)] = y;
-          gr_scan_2d.SetPoint(gr_scan_2d.GetN(), x, y, gen.computePoint(coord));
+          gr_scan_2d.addPoint(x, y, gen.computePoint(coord));
         }
         break;
     }
   }
-  {
-    cepgen::ROOTCanvas c("test_scan");
+  if (!plotter.empty()) {
+    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    cepgen::utils::Drawer::Mode dm;
     if (draw_grid)
-      c.SetGrid(true, true);
-    gStyle->SetPalette(kBeach);
-    string xlabel, ylabel;
+      dm |= cepgen::utils::Drawer::Mode::grid;
     switch (dim.size()) {
       case 0:
       case 1: {
+        if (log)
+          dm |= cepgen::utils::Drawer::Mode::logy;
+        string xlabel;
         if (dim.empty())
-          xlabel = Form("x_{i = 0, ..., %ld}", ndim - 1);
+          xlabel = cepgen::utils::format("x_{i = 0, ..., %ld}", ndim - 1);
         else
-          xlabel = Form("x_{%d}", dim.at(0));
-        gr_scan_1d.SetMarkerStyle(24);
-        c.SetTopLabel(Form("%s variation, all others x_{i} at %g", xlabel.c_str(), def));
-        gr_scan_1d.SetTitle(Form(";%s;d^{%ld}#sigma/d#bf{x}^{%ld}", xlabel.c_str(), ndim, ndim));
-        gr_scan_1d.Draw("ap");
-        c.Prettify(gr_scan_1d.GetHistogram());
-        c.SetLogy();
+          xlabel = cepgen::utils::format("x_{%d}", dim.at(0));
+        gr_scan_1d.setTitle(cepgen::utils::format("%s variation, all others x_{i} at %g", xlabel.c_str(), def));
+        gr_scan_1d.xAxis().setLabel(xlabel);
+        gr_scan_2d.yAxis().setLabel(cepgen::utils::format("d^{%ld}#sigma/d#bf{x}^{%ld}", ndim, ndim));
+        plt->draw(gr_scan_1d, dm);
       } break;
       case 2: {
-        xlabel = Form("x_{%d}", dim.at(0));
-        ylabel = Form("x_{%d}", dim.at(1));
-        c.SetTopLabel(Form("(%s, %s) variation, all others x_{i} at %g", xlabel.c_str(), ylabel.c_str(), def));
-        gr_scan_2d.SetTitle(Form(";%s;%s;d^{%ld}#sigma/d#bf{x}^{%ld}", xlabel.c_str(), ylabel.c_str(), ndim, ndim));
-        gr_scan_2d.Draw("colz");
-        c.Prettify((TH1*)gr_scan_2d.GetHistogram());
-        c.SetLogz();
+        if (log)
+          dm |= cepgen::utils::Drawer::Mode::logz;
+        string xlabel = cepgen::utils::format("x_{%d}", dim.at(0)), ylabel = cepgen::utils::format("x_{%d}", dim.at(1));
+        gr_scan_2d.setTitle(
+            cepgen::utils::format("(%s, %s) variation, all others x_{i} at %g", xlabel.c_str(), ylabel.c_str(), def));
+        gr_scan_2d.xAxis().setLabel(xlabel);
+        gr_scan_2d.yAxis().setLabel(ylabel);
+        gr_scan_2d.zAxis().setLabel(cepgen::utils::format("d^{%ld}#sigma/d#bf{x}^{%ld}", ndim, ndim));
+        plt->draw(gr_scan_2d, dm);
       }
     }
-    c.Save("pdf");
   }
 
   return 0;
