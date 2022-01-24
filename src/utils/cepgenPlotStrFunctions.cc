@@ -64,15 +64,15 @@ int main(int argc, char* argv[]) {
   string var_name, var_unit;
   switch (var) {
     case 0:
-      var_name = "x_{Bj}";
+      var_name = "$x_{Bj}$";
       break;
     case 1:
       var_name = "w";
       var_unit = "GeV";
       break;
     case 2:
-      var_name = "w^{2}";
-      var_unit = "GeV^{2}";
+      var_name = "w$^{2}$";
+      var_unit = "GeV$^{2}$";
       break;
     default:
       throw CG_FATAL("main") << "Unsupported variable to be plotted!";
@@ -146,23 +146,23 @@ int main(int argc, char* argv[]) {
 
   if (!plotter.empty()) {
     auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
-    for (auto& canv : map<pair<string, string>, vector<cepgen::utils::Graph1D> >{{{"f2", "F_{2}"}, g_strfuns_f2},
-                                                                                 {{"fl", "F_{L}"}, g_strfuns_fl},
-                                                                                 {{"fe", "F_{E}"}, g_strfuns_fe},
-                                                                                 {{"fm", "F_{M}"}, g_strfuns_fm},
-                                                                                 {{"w1", "W_{1}"}, g_strfuns_w1},
-                                                                                 {{"w2", "W_{2}"}, g_strfuns_w2}}) {
+    for (auto& canv : map<pair<string, string>, vector<cepgen::utils::Graph1D> >{{{"f2", "$F_{2}$"}, g_strfuns_f2},
+                                                                                 {{"fl", "$F_{L}$"}, g_strfuns_fl},
+                                                                                 {{"fe", "$F_{E}$"}, g_strfuns_fe},
+                                                                                 {{"fm", "$F_{M}$"}, g_strfuns_fm},
+                                                                                 {{"w1", "$W_{1}$"}, g_strfuns_w1},
+                                                                                 {{"w2", "$W_{2}$"}, g_strfuns_w2}}) {
       cepgen::utils::DrawableColl mp;
       for (auto& p : canv.second) {
         p.xAxis().setLabel(var_name + (!var_unit.empty() ? " (" + var_unit + ")" : ""));
-        p.yAxis().setLabel(canv.first.second + (!var_name.empty() ? "(" + var_name + ", Q^{2})" : ""));
+        p.yAxis().setLabel(canv.first.second + (!var_name.empty() ? "(" + var_name + ", $Q^{2}$)" : ""));
         if (ymin != kInvalid)
           p.yAxis().setMinimum(ymin);
         if (ymax != kInvalid)
           p.yAxis().setMaximum(ymax);
         mp.emplace_back(&p);
       }
-      plt->draw(mp, "sfcomp_" + canv.first.first, cepgen::utils::format("Q^{2} = %g GeV^{2}", q2), dm);
+      plt->draw(mp, "sfcomp_" + canv.first.first, cepgen::utils::format("$Q^{2}$ = %g GeV$^{2}$", q2), dm);
     }
   }
 

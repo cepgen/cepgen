@@ -7,6 +7,7 @@
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
 #include "CepGen/Utils/Histogram.h"
+#include "CepGen/Utils/String.h"
 #include "CepGenAddOns/ROOTWrapper/ROOTCanvas.h"
 
 namespace cepgen {
@@ -36,6 +37,7 @@ namespace cepgen {
     private:
       static void setMode(ROOTCanvas&, const Mode&);
       static void postDraw(TH1*, const Drawable&);
+      static TString delatexify(const std::string&);
       static TGraphErrors convert(const Graph1D&);
       static TGraph2DErrors convert(const Graph2D&);
       static TH1D convert(const Hist1D&);
@@ -52,10 +54,10 @@ namespace cepgen {
 
     const DrawerROOT& DrawerROOT::draw(const Graph1D& graph, const Mode& mode) const {
       auto gr = convert(graph);
-      ROOTCanvas canv(graph.name().empty() ? def_filename_ : graph.name(), graph.title());
+      ROOTCanvas canv(graph.name().empty() ? def_filename_ : graph.name(), gr.GetTitle());
       setMode(canv, mode);
       gr.Draw("al");
-      gr.GetHistogram()->SetTitle((";" + graph.xAxis().label() + ";" + graph.yAxis().label()).c_str());
+      gr.GetHistogram()->SetTitle(delatexify(";" + graph.xAxis().label() + ";" + graph.yAxis().label()));
       canv.Prettify(gr.GetHistogram());
       postDraw(gr.GetHistogram(), graph);
       canv.Save(def_extension_);
@@ -64,11 +66,11 @@ namespace cepgen {
 
     const DrawerROOT& DrawerROOT::draw(const Graph2D& graph, const Mode& mode) const {
       auto gr = convert(graph);
-      ROOTCanvas canv(graph.name().empty() ? def_filename_ : graph.name(), graph.title());
+      ROOTCanvas canv(graph.name().empty() ? def_filename_ : graph.name(), gr.GetTitle());
       setMode(canv, mode);
       gr.Draw("surf3");
       gr.GetHistogram()->SetTitle(
-          (";" + graph.xAxis().label() + ";" + graph.yAxis().label() + ";" + graph.zAxis().label()).c_str());
+          delatexify(";" + graph.xAxis().label() + ";" + graph.yAxis().label() + ";" + graph.zAxis().label()));
       canv.Prettify(gr.GetHistogram());
       postDraw(gr.GetHistogram(), graph);
       canv.Save(def_extension_);
@@ -77,7 +79,7 @@ namespace cepgen {
 
     const DrawerROOT& DrawerROOT::draw(const Hist1D& hist, const Mode& mode) const {
       auto h = convert(hist);
-      ROOTCanvas canv(hist.name().empty() ? def_filename_ : hist.name(), hist.title());
+      ROOTCanvas canv(hist.name().empty() ? def_filename_ : hist.name(), h.GetTitle());
       setMode(canv, mode);
       h.Draw();
       canv.Prettify(&h);
@@ -88,7 +90,7 @@ namespace cepgen {
 
     const DrawerROOT& DrawerROOT::draw(const Hist2D& hist, const Mode& mode) const {
       auto h = convert(hist);
-      ROOTCanvas canv(hist.name().empty() ? def_filename_ : hist.name(), hist.title());
+      ROOTCanvas canv(hist.name().empty() ? def_filename_ : hist.name(), h.GetTitle());
       setMode(canv, mode);
       h.Draw("colz");
       canv.Prettify(&h);
@@ -103,7 +105,7 @@ namespace cepgen {
                                        const Mode& mode) const {
       TMultiGraph mg;
       THStack hs;
-      ROOTCanvas canv(name.empty() ? def_filename_ : name, title);
+      ROOTCanvas canv(name.empty() ? def_filename_ : name, delatexify(title).Data());
       setMode(canv, mode);
       size_t i = 0;
       Drawable* first = nullptr;
@@ -156,8 +158,8 @@ namespace cepgen {
 
     void DrawerROOT::postDraw(TH1* obj, const Drawable& dr) {
       const auto &xrng = dr.xAxis().range(), &yrng = dr.yAxis().range();
-      obj->GetXaxis()->SetTitle(dr.xAxis().label().c_str());
-      obj->GetYaxis()->SetTitle(dr.yAxis().label().c_str());
+      obj->GetXaxis()->SetTitle(delatexify(dr.xAxis().label()));
+      obj->GetYaxis()->SetTitle(delatexify(dr.yAxis().label()));
       if (xrng.valid())
         obj->GetXaxis()->SetRangeUser(xrng.min(), xrng.max());
       if (yrng.valid()) {
@@ -168,9 +170,15 @@ namespace cepgen {
       }
     }
 
+    TString DrawerROOT::delatexify(const std::string& tok) {
+      auto out = utils::replace_all(tok, {{"$", ""}});
+      CG_LOG << tok << "::" << out;
+      return TString(out);
+    }
+
     TGraphErrors DrawerROOT::convert(const Graph1D& graph) {
       TGraphErrors gr;
-      gr.SetTitle(graph.title().c_str());
+      gr.SetTitle(delatexify(graph.title()));
       int i = 0;
       for (const auto& it : graph.points()) {
         gr.SetPoint(i, it.first.value, it.second.value);
@@ -183,7 +191,7 @@ namespace cepgen {
 
     TGraph2DErrors DrawerROOT::convert(const Graph2D& graph) {
       TGraph2DErrors gr;
-      gr.SetTitle(graph.title().c_str());
+      gr.SetTitle(delatexify(graph.title()));
       int i = 0;
       for (const auto& it_x : graph.points()) {
         const auto& ax_x = it_x.first.value;
@@ -199,20 +207,20 @@ namespace cepgen {
 
     TH1D DrawerROOT::convert(const Hist1D& hist) {
       const auto& rng = hist.range();
-      TH1D h(hist.name().c_str(), hist.title().c_str(), hist.nbins(), rng.min(), rng.max());
+      TH1D h(hist.name().c_str(), delatexify(hist.title()), hist.nbins(), rng.min(), rng.max());
       for (size_t i = 0; i < hist.nbins(); ++i) {
         h.SetBinContent(i + 1, hist.value(i));
         h.SetBinError(i + 1, hist.valueUnc(i));
       }
-      h.GetXaxis()->SetTitle(hist.xAxis().label().c_str());
-      h.GetYaxis()->SetTitle(hist.yAxis().label().c_str());
+      h.GetXaxis()->SetTitle(delatexify(hist.xAxis().label()));
+      h.GetYaxis()->SetTitle(delatexify(hist.yAxis().label()));
       return h;
     }
 
     TH2D DrawerROOT::convert(const Hist2D& hist) {
       const auto &rng_x = hist.rangeX(), &rng_y = hist.rangeY();
       TH2D h(hist.name().c_str(),
-             hist.title().c_str(),
+             delatexify(hist.title()),
              hist.nbinsX(),
              rng_x.min(),
              rng_x.max(),
@@ -224,9 +232,9 @@ namespace cepgen {
           h.SetBinContent(ix + 1, iy + 1, hist.value(ix, iy));
           h.SetBinError(ix + 1, iy + 1, hist.valueUnc(ix, iy));
         }
-      h.GetXaxis()->SetTitle(hist.xAxis().label().c_str());
-      h.GetYaxis()->SetTitle(hist.yAxis().label().c_str());
-      h.GetZaxis()->SetTitle(hist.zAxis().label().c_str());
+      h.GetXaxis()->SetTitle(delatexify(hist.xAxis().label()));
+      h.GetYaxis()->SetTitle(delatexify(hist.yAxis().label()));
+      h.GetZaxis()->SetTitle(delatexify(hist.zAxis().label()));
       return h;
     }
   }  // namespace utils
