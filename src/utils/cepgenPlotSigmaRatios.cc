@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("logx", "logarithmic x-axis", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-axis", &logy, false)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
-      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "root")
+      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .parse();
 
   if (q2 < 0. && w2 < 0.)
@@ -60,7 +60,6 @@ int main(int argc, char* argv[]) {
   const double lxmin = log10(xmin), lxmax = log10(xmax);
 
   cepgen::initialise();
-  auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
 
   string var_name, var_unit;
   switch (var) {
@@ -137,21 +136,24 @@ int main(int argc, char* argv[]) {
   CG_LOG << "Scan written in \"" << output_file << "\".";
   out.close();
 
-  cepgen::utils::Drawer::Mode dm;
-  if (logx)
-    dm |= cepgen::utils::Drawer::Mode::logx;
-  if (logy)
-    dm |= cepgen::utils::Drawer::Mode::logy;
-  if (draw_grid)
-    dm |= cepgen::utils::Drawer::Mode::grid;
+  if (!plotter.empty()) {
+    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    cepgen::utils::Drawer::Mode dm;
+    if (logx)
+      dm |= cepgen::utils::Drawer::Mode::logx;
+    if (logy)
+      dm |= cepgen::utils::Drawer::Mode::logy;
+    if (draw_grid)
+      dm |= cepgen::utils::Drawer::Mode::grid;
 
-  cepgen::utils::DrawableColl mg;
-  for (auto& gr : g_sigrats) {
-    gr.xAxis().setLabel(var_name + (!var_unit.empty() ? " (" + var_unit + ")" : ""));
-    gr.yAxis().setLabel("#sigma_{L}/#sigma_{T} = R(" + var_name + ", Q^{2})");
-    mg.emplace_back(&gr);
+    cepgen::utils::DrawableColl mg;
+    for (auto& gr : g_sigrats) {
+      gr.xAxis().setLabel(var_name + (!var_unit.empty() ? " (" + var_unit + ")" : ""));
+      gr.yAxis().setLabel("#sigma_{L}/#sigma_{T} = R(" + var_name + ", Q^{2})");
+      mg.emplace_back(&gr);
+    }
+    plt->draw(mg, "comp_sigrat", fixed_var + cepgen::utils::format(" = %g GeV^{2}", q2 > 0. ? q2 : w2), dm);
   }
-  plt->draw(mg, "comp_sigrat", fixed_var + cepgen::utils::format(" = %g GeV^{2}", q2 > 0. ? q2 : w2), dm);
 
   return 0;
 }

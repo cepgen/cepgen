@@ -40,11 +40,10 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("max-x,M", "maximal range", &max_x, +5.)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .addOptionalArgument("logy,l", "logarithmic y-axis", &logy, false)
-      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "root")
+      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .parse();
 
   cepgen::initialise();
-  auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
 
   CG_LOG << "Function to be plotted: " << function;
 
@@ -67,17 +66,21 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  cepgen::utils::Drawer::Mode dm;
-  if (logy)
-    dm |= cepgen::utils::Drawer::Mode::logy;
-  if (draw_grid)
-    dm |= cepgen::utils::Drawer::Mode::grid;
+  if (!plotter.empty()) {
+    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    cepgen::utils::Drawer::Mode dm;
+    if (logy)
+      dm |= cepgen::utils::Drawer::Mode::logy;
+    if (draw_grid)
+      dm |= cepgen::utils::Drawer::Mode::grid;
 
-  cepgen::utils::DrawableColl mg;
-  for (auto& gr_fb : m_gr_fb) {
-    gr_fb.second.setTitle(gr_fb.first);
-    mg.emplace_back(&gr_fb.second);
+    cepgen::utils::DrawableColl mg;
+    for (auto& gr_fb : m_gr_fb) {
+      gr_fb.second.setTitle(gr_fb.first);
+      mg.emplace_back(&gr_fb.second);
+    }
+    plt->draw(mg, "comp_functionals", "", dm);
   }
-  plt->draw(mg, "comp_functionals", "", dm);
+
   return 0;
 }

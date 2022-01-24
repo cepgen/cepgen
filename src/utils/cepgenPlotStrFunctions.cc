@@ -54,13 +54,12 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("logx", "logarithmic x-axis", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-axis", &logy, false)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
-      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "root")
+      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .parse();
 
   const double lxmin = log10(xmin), lxmax = log10(xmax);
 
   cepgen::initialise();
-  auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
 
   string var_name, var_unit;
   switch (var) {
@@ -145,23 +144,26 @@ int main(int argc, char* argv[]) {
   CG_LOG << "Scan written in \"" << output_file << "\".";
   out.close();
 
-  for (auto& canv : map<pair<string, string>, vector<cepgen::utils::Graph1D> >{{{"f2", "F_{2}"}, g_strfuns_f2},
-                                                                               {{"fl", "F_{L}"}, g_strfuns_fl},
-                                                                               {{"fe", "F_{E}"}, g_strfuns_fe},
-                                                                               {{"fm", "F_{M}"}, g_strfuns_fm},
-                                                                               {{"w1", "W_{1}"}, g_strfuns_w1},
-                                                                               {{"w2", "W_{2}"}, g_strfuns_w2}}) {
-    cepgen::utils::DrawableColl mp;
-    for (auto& p : canv.second) {
-      p.xAxis().setLabel(var_name + (!var_unit.empty() ? " (" + var_unit + ")" : ""));
-      p.yAxis().setLabel(canv.first.second + (!var_name.empty() ? "(" + var_name + ", Q^{2})" : ""));
-      if (ymin != kInvalid)
-        p.yAxis().setMinimum(ymin);
-      if (ymax != kInvalid)
-        p.yAxis().setMaximum(ymax);
-      mp.emplace_back(&p);
+  if (!plotter.empty()) {
+    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    for (auto& canv : map<pair<string, string>, vector<cepgen::utils::Graph1D> >{{{"f2", "F_{2}"}, g_strfuns_f2},
+                                                                                 {{"fl", "F_{L}"}, g_strfuns_fl},
+                                                                                 {{"fe", "F_{E}"}, g_strfuns_fe},
+                                                                                 {{"fm", "F_{M}"}, g_strfuns_fm},
+                                                                                 {{"w1", "W_{1}"}, g_strfuns_w1},
+                                                                                 {{"w2", "W_{2}"}, g_strfuns_w2}}) {
+      cepgen::utils::DrawableColl mp;
+      for (auto& p : canv.second) {
+        p.xAxis().setLabel(var_name + (!var_unit.empty() ? " (" + var_unit + ")" : ""));
+        p.yAxis().setLabel(canv.first.second + (!var_name.empty() ? "(" + var_name + ", Q^{2})" : ""));
+        if (ymin != kInvalid)
+          p.yAxis().setMinimum(ymin);
+        if (ymax != kInvalid)
+          p.yAxis().setMaximum(ymax);
+        mp.emplace_back(&p);
+      }
+      plt->draw(mp, "sfcomp_" + canv.first.first, cepgen::utils::format("Q^{2} = %g GeV^{2}", q2), dm);
     }
-    plt->draw(mp, "sfcomp_" + canv.first.first, cepgen::utils::format("Q^{2} = %g GeV^{2}", q2), dm);
   }
 
   return 0;

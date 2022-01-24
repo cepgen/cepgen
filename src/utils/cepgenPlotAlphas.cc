@@ -43,11 +43,10 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("output,o", "output file name", &output_file, "alphas.scan.output.txt")
       .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
-      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "root")
+      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .parse();
 
   cepgen::initialise();
-  auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
 
   struct alpha_t {
     string name;
@@ -105,33 +104,36 @@ int main(int argc, char* argv[]) {
 
   // drawing part
 
-  cepgen::utils::Drawer::Mode dm;
-  if (logy)
-    dm |= cepgen::utils::Drawer::Mode::logy;
-  if (draw_grid)
-    dm |= cepgen::utils::Drawer::Mode::grid;
+  if (!plotter.empty()) {
+    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    cepgen::utils::Drawer::Mode dm;
+    if (logy)
+      dm |= cepgen::utils::Drawer::Mode::logy;
+    if (draw_grid)
+      dm |= cepgen::utils::Drawer::Mode::grid;
 
-  {
-    cepgen::utils::DrawableColl mp;
-    for (size_t i = 0; i < alphas.size(); ++i) {
-      alphas[i].graph.xAxis().setLabel("Q (GeV)");
-      alphas[i].graph.yAxis().setLabel("#alpha_{S}(Q)");
-      mp.emplace_back(&alphas[i].graph);
-      //const auto descr = cepgen::utils::replace_all(cepgen::AlphaSFactory::get().describe(alphas[i].name),
-      //                                              {{" alphaS", ""}, {" evolution algorithm", ""}});
+    {
+      cepgen::utils::DrawableColl mp;
+      for (size_t i = 0; i < alphas.size(); ++i) {
+        alphas[i].graph.xAxis().setLabel("Q (GeV)");
+        alphas[i].graph.yAxis().setLabel("#alpha_{S}(Q)");
+        mp.emplace_back(&alphas[i].graph);
+        //const auto descr = cepgen::utils::replace_all(cepgen::AlphaSFactory::get().describe(alphas[i].name),
+        //                                              {{" alphaS", ""}, {" evolution algorithm", ""}});
+      }
+      plt->draw(mp, "comp_alphas", cepgen::utils::s("CepGen #alpha_{S} modelling", alphas.size(), false), dm);
     }
-    plt->draw(mp, "comp_alphas", cepgen::utils::s("CepGen #alpha_{S} modelling", alphas.size(), false), dm);
-  }
-  {
-    cepgen::utils::DrawableColl mp;
-    for (size_t i = 0; i < alphaem.size(); ++i) {
-      alphaem[i].graph.xAxis().setLabel("Q (GeV)");
-      alphaem[i].graph.yAxis().setLabel("#alpha_{EM}(Q)");
-      mp.emplace_back(&alphaem[i].graph);
-      //const auto descr = cepgen::utils::replace_all(cepgen::AlphaEMFactory::get().describe(alphaem[i].name),
-      //                                              {{" alphaS", ""}, {" evolution algorithm", ""}});
+    {
+      cepgen::utils::DrawableColl mp;
+      for (size_t i = 0; i < alphaem.size(); ++i) {
+        alphaem[i].graph.xAxis().setLabel("Q (GeV)");
+        alphaem[i].graph.yAxis().setLabel("#alpha_{EM}(Q)");
+        mp.emplace_back(&alphaem[i].graph);
+        //const auto descr = cepgen::utils::replace_all(cepgen::AlphaEMFactory::get().describe(alphaem[i].name),
+        //                                              {{" alphaS", ""}, {" evolution algorithm", ""}});
+      }
+      plt->draw(mp, "comp_alphaem", cepgen::utils::s("CepGen #alpha_{EM} modelling", alphaem.size(), false), dm);
     }
-    plt->draw(mp, "comp_alphaem", cepgen::utils::s("CepGen #alpha_{EM} modelling", alphaem.size(), false), dm);
   }
   return 0;
 }

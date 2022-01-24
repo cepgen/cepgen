@@ -47,11 +47,10 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("output,o", "output file name", &output_file, "flux.scan.output.txt")
       .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
-      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "root")
+      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .parse();
 
   cepgen::initialise();
-  auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
   const double mi = cepgen::PDG::get().mass(cepgen::PDG::proton);
   const double mi2 = mi * mi, mx2 = mx * mx;
 
@@ -78,23 +77,25 @@ int main(int argc, char* argv[]) {
     graph_inel_bud.addPoint(x, f_inel_bud);
     //graph_glu.addPoint(x, f_glu);
   }
+  out.close();
   CG_LOG << "Scan written in \"" << output_file << "\".";
 
-  cepgen::utils::Drawer::Mode dm;
-  if (logy)
-    dm |= cepgen::utils::Drawer::Mode::logy;
-  if (draw_grid)
-    dm |= cepgen::utils::Drawer::Mode::grid;
+  if (!plotter.empty()) {
+    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    cepgen::utils::Drawer::Mode dm;
+    if (logy)
+      dm |= cepgen::utils::Drawer::Mode::logy;
+    if (draw_grid)
+      dm |= cepgen::utils::Drawer::Mode::grid;
 
-  const auto top_label = cepgen::utils::format("k_{T}^{2} = %g GeV^{2}", kt2) + ", " +
-                         cepgen::formfac::FormFactorsFactory::get().describe(formfac_type) + "/" +
-                         cepgen::strfun::StructureFunctionsFactory::get().describe(strfun_type);
+    const auto top_label = cepgen::utils::format("k_{T}^{2} = %g GeV^{2}", kt2) + ", " +
+                           cepgen::formfac::FormFactorsFactory::get().describe(formfac_type) + "/" +
+                           cepgen::strfun::StructureFunctionsFactory::get().describe(strfun_type);
 
-  graph_el.xAxis().setLabel("#xi");
-  graph_el.yAxis().setLabel("#varphi_{T}(#xi, k_{T}^{2})");
-  plt->draw({&graph_el, &graph_inel, &graph_inel_bud}, "comp_ktflux", top_label, dm);
-
-  out.close();
+    graph_el.xAxis().setLabel("#xi");
+    graph_el.yAxis().setLabel("#varphi_{T}(#xi, k_{T}^{2})");
+    plt->draw({&graph_el, &graph_inel, &graph_inel_bud}, "comp_ktflux", top_label, dm);
+  }
 
   return 0;
 }
