@@ -34,6 +34,7 @@ namespace cepgen {
     private:
       static void plot(const Graph1D&, const Mode&);
       static void plot(const Graph2D&, const Mode&);
+      static void plot(const Hist1D&, const Mode&);
       void postDraw(const Drawable&, const Mode&) const;
       const bool tight_;
     };
@@ -56,8 +57,11 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerMatplotlib& DrawerMatplotlib::draw(const Hist1D&, const Mode&) const {
-      CG_WARNING("DrawerMatplotlib:draw") << "Not yet implemented.";
+    const DrawerMatplotlib& DrawerMatplotlib::draw(const Hist1D& hist, const Mode& mode) const {
+      plt::figure();
+      plot(hist, mode);
+      postDraw(hist, mode);
+      plt::save(hist.name() + ".pdf");
       return *this;
     }
 
@@ -71,18 +75,24 @@ namespace cepgen {
                                                    const std::string& title,
                                                    const Mode& mode) const {
       plt::figure();
-      const Graph1D* first_gr = nullptr;
+      const Drawable* first_obj = nullptr;
       for (const auto* obj : objs) {
+        if (obj->isHist1D()) {
+          auto* hist = dynamic_cast<const Hist1D*>(obj);
+          plot(*hist, mode);
+          if (!first_obj)
+            first_obj = hist;
+        }
         if (obj->isGraph1D()) {
           auto* gr = dynamic_cast<const Graph1D*>(obj);
           plot(*gr, mode);
-          if (!first_gr)
-            first_gr = gr;
+          if (!first_obj)
+            first_obj = gr;
         }
       }
       plt::legend();
-      if (first_gr)
-        postDraw(*first_gr, mode);
+      if (first_obj)
+        postDraw(*first_obj, mode);
       plt::title(title);
       plt::save(name + ".pdf");
       return *this;
@@ -106,7 +116,7 @@ namespace cepgen {
         plt::plot(x, y, {{"label", gr.title()}});
       plt::title(gr.title());
       plt::xlabel(gr.xAxis().label());
-      plt::ylabel(gr.xAxis().label());
+      plt::ylabel(gr.yAxis().label());
     }
 
     void DrawerMatplotlib::plot(const Graph2D& gr, const Mode&) {
@@ -127,8 +137,22 @@ namespace cepgen {
       //plt::contour(x, y, z, {{"label", gr.title()}});
       plt::title(gr.title());
       plt::xlabel(gr.xAxis().label());
-      plt::ylabel(gr.xAxis().label());
+      plt::ylabel(gr.yAxis().label());
       plt::set_zlabel(gr.zAxis().label());
+    }
+
+    void DrawerMatplotlib::plot(const Hist1D& hist, const Mode&) {
+      std::vector<double> x, y;
+      for (const auto& xv : hist.axis()) {
+        x.emplace_back(xv.first.value);
+        y.emplace_back(xv.second.value);
+      }
+      //plt::bar(x, y, "", "", 1., {{"label", hist.title()}});
+      //plt::bar(x, y);
+      plt::plot(x, y, {{"drawstyle", "steps"}, {"label", hist.title()}});
+      plt::title(hist.title());
+      plt::xlabel(hist.xAxis().label());
+      plt::ylabel(hist.yAxis().label());
     }
 
     void DrawerMatplotlib::postDraw(const Drawable& dr, const Mode& mode) const {

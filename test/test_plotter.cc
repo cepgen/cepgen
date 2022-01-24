@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
 
   cout << endl << "------- graph and hist -------" << endl;
 
-  cepgen::utils::Hist1D hist1d_bis(graph1d.points().size(), {-M_PI, M_PI}, "hist1d_bis");
+  cepgen::utils::Hist1D hist1d_bis(graph1d.points().size(), {-M_PI, M_PI}, "hist1d_bis", "histogram");
   for (size_t i = 0; i < 10000; ++i)
     hist1d_bis.fill(gaus1(gen));
   hist1d_bis.normalise(10.);
