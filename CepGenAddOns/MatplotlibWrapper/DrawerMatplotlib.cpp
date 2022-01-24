@@ -45,6 +45,7 @@ namespace cepgen {
       plt::figure();
       plot(graph, mode);
       postDraw(graph, mode);
+      plt::title(graph.title());
       plt::save(graph.name() + ".pdf");
       return *this;
     }
@@ -53,6 +54,7 @@ namespace cepgen {
       plt::figure();
       plot(graph, mode);
       postDraw(graph, mode);
+      plt::title(graph.title());
       plt::save(graph.name() + ".pdf");
       return *this;
     }
@@ -61,6 +63,7 @@ namespace cepgen {
       plt::figure();
       plot(hist, mode);
       postDraw(hist, mode);
+      plt::title(hist.title());
       plt::save(hist.name() + ".pdf");
       return *this;
     }
@@ -74,27 +77,32 @@ namespace cepgen {
                                                    const std::string& name,
                                                    const std::string& title,
                                                    const Mode& mode) const {
-      plt::figure();
-      const Drawable* first_obj = nullptr;
-      for (const auto* obj : objs) {
-        if (obj->isHist1D()) {
-          auto* hist = dynamic_cast<const Hist1D*>(obj);
-          plot(*hist, mode);
-          if (!first_obj)
-            first_obj = hist;
+      try {
+        plt::figure();
+        const Drawable* first_obj = nullptr;
+        for (const auto* obj : objs) {
+          if (obj->isHist1D()) {
+            auto* hist = dynamic_cast<const Hist1D*>(obj);
+            plot(*hist, mode);
+            if (!first_obj)
+              first_obj = hist;
+          }
+          if (obj->isGraph1D()) {
+            auto* gr = dynamic_cast<const Graph1D*>(obj);
+            plot(*gr, mode);
+            if (!first_obj)
+              first_obj = gr;
+          }
         }
-        if (obj->isGraph1D()) {
-          auto* gr = dynamic_cast<const Graph1D*>(obj);
-          plot(*gr, mode);
-          if (!first_obj)
-            first_obj = gr;
-        }
+        plt::legend();
+        if (first_obj)
+          postDraw(*first_obj, mode);
+        if (!title.empty())
+          plt::title(title);
+        plt::save(name + ".pdf");
+      } catch (const std::runtime_error& err) {
+        CG_WARNING("DrawerMatplotlib:draw") << "Failed to draw a plots collection. Matplotlib error: " << err.what();
       }
-      plt::legend();
-      if (first_obj)
-        postDraw(*first_obj, mode);
-      plt::title(title);
-      plt::save(name + ".pdf");
       return *this;
     }
 
@@ -114,7 +122,6 @@ namespace cepgen {
         plt::semilogy(x, y);
       else
         plt::plot(x, y, {{"label", gr.title()}});
-      plt::title(gr.title());
       plt::xlabel(gr.xAxis().label());
       plt::ylabel(gr.yAxis().label());
     }
@@ -135,7 +142,6 @@ namespace cepgen {
       }
       plt::plot_surface(x, y, z, {{"label", gr.title()}});
       //plt::contour(x, y, z, {{"label", gr.title()}});
-      plt::title(gr.title());
       plt::xlabel(gr.xAxis().label());
       plt::ylabel(gr.yAxis().label());
       plt::set_zlabel(gr.zAxis().label());
@@ -150,7 +156,6 @@ namespace cepgen {
       //plt::bar(x, y, "", "", 1., {{"label", hist.title()}});
       //plt::bar(x, y);
       plt::plot(x, y, {{"drawstyle", "steps"}, {"label", hist.title()}});
-      plt::title(hist.title());
       plt::xlabel(hist.xAxis().label());
       plt::ylabel(hist.yAxis().label());
     }
@@ -167,8 +172,9 @@ namespace cepgen {
           rng[1] = yrange.max();
         try {
           plt::ylim(rng.at(0), rng.at(1));
-        } catch (const std::runtime_error&) {
-          CG_WARNING("DrawerMatplotlib:postDraw") << "Failed to set Y range to " << rng << ".";
+        } catch (const std::runtime_error& err) {
+          CG_WARNING("DrawerMatplotlib:postDraw")
+              << "Failed to set Y range to " << rng << ". Matplotlib error: " << err.what();
         }
       }
       if (tight_)
