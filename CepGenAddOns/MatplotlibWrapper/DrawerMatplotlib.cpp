@@ -121,9 +121,10 @@ namespace cepgen {
         plt::semilogx(x, y);
       else if (mode & Mode::logy)
         plt::semilogy(x, y);
-      else
-        //plt::plot(x, y, {{"label", gr.title()}});
+      else if (yerr != std::vector<double>(yerr.size(), 0.))
         plt::errorbar(x, y, yerr, {{"label", gr.title()}, {"linestyle", ""}});
+      else
+        plt::plot(x, y, {{"label", gr.title()}});
       plt::xlabel(gr.xAxis().label());
       plt::ylabel(gr.yAxis().label());
     }
