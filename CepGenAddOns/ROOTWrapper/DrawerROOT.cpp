@@ -172,7 +172,6 @@ namespace cepgen {
 
     TString DrawerROOT::delatexify(const std::string& tok) {
       auto out = utils::replace_all(tok, {{"$", ""}});
-      CG_LOG << tok << "::" << out;
       return TString(out);
     }
 

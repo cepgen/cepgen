@@ -96,14 +96,14 @@ int main(int argc, char* argv[]) {
       dm |= cepgen::utils::Drawer::Mode::grid;
 
     for (auto& canv : map<pair<string, string>, vector<cepgen::utils::Graph1D> >{
-             {{"fe", "F_{E}"}, g_form_factors_fe}, {{"fm", "F_{M}"}, g_form_factors_fm}}) {
+             {{"fe", "$F_{E}$"}, g_form_factors_fe}, {{"fm", "$F_{M}$"}, g_form_factors_fm}}) {
       cepgen::utils::DrawableColl mp;
       for (auto& gr : canv.second) {
-        gr.xAxis().setLabel("Q^{2} (GeV^{2})");
+        gr.xAxis().setLabel("Q$^{2}$ (GeV$^{2}$)");
         gr.yAxis().setLabel(canv.first.second);
         mp.emplace_back(&gr);
       }
-      plt->draw(mp, "comp_" + canv.first.first, cepgen::utils::format("M_{X} = %g GeV/c^{2}", mx), dm);
+      plt->draw(mp, "comp_" + canv.first.first, cepgen::utils::format("$M_{X}$ = %g GeV/c$^{2}$", mx), dm);
     }
   }
 

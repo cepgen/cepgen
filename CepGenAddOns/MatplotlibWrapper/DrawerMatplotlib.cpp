@@ -17,7 +17,7 @@ namespace cepgen {
       static ParametersDescription description() {
         auto desc = Drawer::description();
         desc.setDescription("Matplotlib plotter");
-        desc.add<bool>("tight", false);
+        desc.add<bool>("tight", true).setDescription("use a compact layout with minimal margins");
         return desc;
       }
 
@@ -94,11 +94,12 @@ namespace cepgen {
               first_obj = gr;
           }
         }
-        plt::legend();
-        if (first_obj)
-          postDraw(*first_obj, mode);
         if (!title.empty())
           plt::title(title);
+        if (first_obj)
+          postDraw(*first_obj, mode);
+        if (objs.size() > 1)
+          plt::legend();
         plt::save(name + ".pdf");
       } catch (const std::runtime_error& err) {
         CG_WARNING("DrawerMatplotlib:draw") << "Failed to draw a plots collection. Matplotlib error: " << err.what();
@@ -121,7 +122,8 @@ namespace cepgen {
       else if (mode & Mode::logy)
         plt::semilogy(x, y);
       else
-        plt::plot(x, y, {{"label", gr.title()}});
+        //plt::plot(x, y, {{"label", gr.title()}});
+        plt::errorbar(x, y, yerr, {{"label", gr.title()}, {"linestyle", ""}});
       plt::xlabel(gr.xAxis().label());
       plt::ylabel(gr.yAxis().label());
     }

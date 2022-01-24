@@ -88,12 +88,12 @@ int main(int argc, char* argv[]) {
     if (draw_grid)
       dm |= cepgen::utils::Drawer::Mode::grid;
 
-    const auto top_label = cepgen::utils::format("k_{T}^{2} = %g GeV^{2}", kt2) + ", " +
+    const auto top_label = cepgen::utils::format("$k_{T}^{2}$ = %g GeV$^{2}$", kt2) + ", " +
                            cepgen::formfac::FormFactorsFactory::get().describe(formfac_type) + "/" +
                            cepgen::strfun::StructureFunctionsFactory::get().describe(strfun_type);
 
-    graph_el.xAxis().setLabel("#xi");
-    graph_el.yAxis().setLabel("#varphi_{T}(#xi, k_{T}^{2})");
+    graph_el.xAxis().setLabel("$\\xi$");
+    graph_el.yAxis().setLabel("$\\varphi_{T}(\\xi, k_{T}^{2})$");
     plt->draw({&graph_el, &graph_inel, &graph_inel_bud}, "comp_ktflux", top_label, dm);
   }
 

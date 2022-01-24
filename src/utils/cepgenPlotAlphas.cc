@@ -116,23 +116,23 @@ int main(int argc, char* argv[]) {
       cepgen::utils::DrawableColl mp;
       for (size_t i = 0; i < alphas.size(); ++i) {
         alphas[i].graph.xAxis().setLabel("Q (GeV)");
-        alphas[i].graph.yAxis().setLabel("#alpha_{S}(Q)");
+        alphas[i].graph.yAxis().setLabel("$\\alpha_{S}(Q)$");
         mp.emplace_back(&alphas[i].graph);
         //const auto descr = cepgen::utils::replace_all(cepgen::AlphaSFactory::get().describe(alphas[i].name),
         //                                              {{" alphaS", ""}, {" evolution algorithm", ""}});
       }
-      plt->draw(mp, "comp_alphas", cepgen::utils::s("CepGen #alpha_{S} modelling", alphas.size(), false), dm);
+      plt->draw(mp, "comp_alphas", cepgen::utils::s("CepGen $\\alpha_{S}$ modelling", alphas.size(), false), dm);
     }
     {
       cepgen::utils::DrawableColl mp;
       for (size_t i = 0; i < alphaem.size(); ++i) {
         alphaem[i].graph.xAxis().setLabel("Q (GeV)");
-        alphaem[i].graph.yAxis().setLabel("#alpha_{EM}(Q)");
+        alphaem[i].graph.yAxis().setLabel("$\\alpha_{EM}$(Q)");
         mp.emplace_back(&alphaem[i].graph);
         //const auto descr = cepgen::utils::replace_all(cepgen::AlphaEMFactory::get().describe(alphaem[i].name),
         //                                              {{" alphaS", ""}, {" evolution algorithm", ""}});
       }
-      plt->draw(mp, "comp_alphaem", cepgen::utils::s("CepGen #alpha_{EM} modelling", alphaem.size(), false), dm);
+      plt->draw(mp, "comp_alphaem", cepgen::utils::s("CepGen $\\alpha_{EM}$ modelling", alphaem.size(), false), dm);
     }
   }
   return 0;

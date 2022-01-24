@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
       break;
     case 2:
       var_name = "w^{2}";
-      var_unit = "GeV^{2}";
+      var_unit = "GeV$^{2}$";
       break;
     default:
       throw CG_FATAL("main") << "Unsupported variable to be plotted!";
@@ -80,9 +80,9 @@ int main(int argc, char* argv[]) {
 
   string fixed_var;
   if (q2 > 0.)
-    fixed_var = "Q^{2}";
+    fixed_var = "$Q^{2}$";
   else if (w2 > 0.)
-    fixed_var = "w^{2}";
+    fixed_var = "$w^{2}$";
 
   ofstream out(output_file);
   out << "# sigma ratios: ";
@@ -148,11 +148,11 @@ int main(int argc, char* argv[]) {
 
     cepgen::utils::DrawableColl mg;
     for (auto& gr : g_sigrats) {
-      gr.xAxis().setLabel(var_name + (!var_unit.empty() ? " (" + var_unit + ")" : ""));
-      gr.yAxis().setLabel("#sigma_{L}/#sigma_{T} = R(" + var_name + ", Q^{2})");
+      gr.xAxis().setLabel("$" + var_name + "$" + (!var_unit.empty() ? " (" + var_unit + ")" : ""));
+      gr.yAxis().setLabel("$\\sigma_{L}/\\sigma_{T} = R(" + var_name + ", Q^{2})$");
       mg.emplace_back(&gr);
     }
-    plt->draw(mg, "comp_sigrat", fixed_var + cepgen::utils::format(" = %g GeV^{2}", q2 > 0. ? q2 : w2), dm);
+    plt->draw(mg, "comp_sigrat", fixed_var + cepgen::utils::format(" = %g GeV$^{2}$", q2 > 0. ? q2 : w2), dm);
   }
 
   return 0;

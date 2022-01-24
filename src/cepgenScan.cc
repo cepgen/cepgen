@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
 
   cepgen::utils::AbortHandler();
 
-  cepgen::utils::Graph1D graph;
+  cepgen::utils::Graph1D graph("comp_sigma_gen");
 
   auto& kin = par.process().kinematics();
   double cross_section, err_cross_section;
@@ -91,21 +91,21 @@ int main(int argc, char* argv[]) {
     try {
       if (scan == "sqrtS") {
         kin.incomingBeams().setSqrtS(value);
-        scan_str = "#sqrt{s} (GeV)";
+        scan_str = "$\\sqrt{s}$ (GeV)";
       } else if (scan == "abseta") {
         kin.cuts().central.eta_single().min() = -value;
         kin.cuts().central.eta_single().max() = +value;
-        scan_str = "|#eta|";
+        scan_str = "$|\\eta|$";
       } else if (scan == "absrap") {
         kin.cuts().central.rapidity_single().min() = -value;
         kin.cuts().central.rapidity_single().max() = +value;
-        scan_str = "|y|";
+        scan_str = "$|y|$";
       } else if (scan == "mpart") {
         auto prop = cepgen::PDG::get()(par.process().event()[cepgen::Particle::CentralSystem][0].pdgId());
         prop.mass = value;
         cepgen::PDG::get().define(prop);
         par.process().clear();
-        scan_str = "m_{central}^{single}";
+        scan_str = "$m_{central}^{single}$";
       } else {
         auto modif = cepgen::ParametersList().set<double>(scan, value);
         kin.setParameters(modif);
@@ -131,7 +131,7 @@ int main(int argc, char* argv[]) {
     if (draw_grid)
       dm |= cepgen::utils::Drawer::Mode::grid;
     graph.xAxis().setLabel(scan_str);
-    graph.yAxis().setLabel("#sigma_{gen} (pb)");
+    graph.yAxis().setLabel("$\\sigma_{gen}$ (pb)");
     auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
     plt->draw(graph, dm);
   }
