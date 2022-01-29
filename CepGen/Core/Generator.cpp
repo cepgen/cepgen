@@ -53,7 +53,10 @@ namespace cepgen {
   }
 
   void Generator::clearRun() {
-    worker_.reset(new GeneratorWorker(parameters_.get()));
+    worker_.reset(new GeneratorWorker(const_cast<const Parameters*>(parameters_.get())));
+    // destroy and recreate the integrator instance
+    setIntegrator(nullptr);
+    worker_->setIntegrator(integrator_.get());
     result_ = result_error_ = -1.;
     parameters_->prepareRun();
   }
@@ -104,10 +107,9 @@ namespace cepgen {
       integ = IntegratorFactory::get().build(parameters_->par_integrator);
     }
     integrator_ = std::move(integ);
-    if (!worker_)
-      clearRun();
     integrator_->setIntegrand(worker_->integrand());
-    worker_->setIntegrator(integrator_.get());
+    if (worker_)
+      worker_->setIntegrator(integrator_.get());
     CG_INFO("Generator:integrator") << "Generator will use a " << integrator_->name() << "-type integrator.";
   }
 
@@ -120,9 +122,6 @@ namespace cepgen {
     const size_t ndim = parameters_->process().ndim();
     if (ndim < 1)
       throw CG_FATAL("Generator:computePoint") << "Invalid phase space dimension (ndim=" << ndim << ")!";
-
-    // first destroy and recreate the integrator instance
-    setIntegrator(nullptr);
 
     CG_DEBUG("Generator:integrate") << "New integrator instance created for " << ndim << "-dimensional integration.";
 
@@ -146,6 +145,8 @@ namespace cepgen {
 
     if (!parameters_)
       throw CG_FATAL("Generator:generate") << "No steering parameters specified!";
+    if (!worker_)
+      integrate();
 
     for (auto& mod : parameters_->outputModulesSequence())
       mod->initialise(*parameters_);

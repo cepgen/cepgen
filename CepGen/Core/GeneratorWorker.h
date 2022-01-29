@@ -33,7 +33,9 @@ namespace cepgen {
   class GeneratorWorker {
   public:
     /// Book the memory slots and structures for the generator
-    explicit GeneratorWorker(Parameters*);
+    explicit GeneratorWorker(const Parameters*);
+    virtual ~GeneratorWorker();
+
     /// Specify the integrator instance handled by the mother generator
     void setIntegrator(const Integrator* integ);
     /// Launch the event generation
