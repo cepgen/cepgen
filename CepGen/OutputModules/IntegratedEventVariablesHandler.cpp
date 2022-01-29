@@ -37,10 +37,10 @@ namespace cepgen {
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2019
      */
-    class TextHistHandler : public ExportModule {
+    class IntegratedEventVariablesHandler : public ExportModule {
     public:
-      explicit TextHistHandler(const ParametersList&);
-      ~TextHistHandler();
+      explicit IntegratedEventVariablesHandler(const ParametersList&);
+      ~IntegratedEventVariablesHandler();
 
       static ParametersDescription description();
 
@@ -81,9 +81,9 @@ namespace cepgen {
       std::vector<Hist2DInfo> hists2d_;
     };
 
-    TextHistHandler::TextHistHandler(const ParametersList& params)
+    IntegratedEventVariablesHandler::IntegratedEventVariablesHandler(const ParametersList& params)
         : ExportModule(params),
-          drawer_(utils::DrawerFactory::get().build("text", params)),
+          drawer_(utils::DrawerFactory::get().build(steer<std::string>("plotter"), params)),
           show_hists_(steer<bool>("showHistograms")),
           save_hists_(steer<bool>("saveHistograms")),
           filename_(steer<std::string>("filename")) {
@@ -92,14 +92,15 @@ namespace cepgen {
       for (const auto& key : hist_vars.keys()) {
         const auto& vars = utils::split(key, ':');
         if (vars.size() < 1 || vars.size() > 2)
-          throw CG_FATAL("TextHistHandler") << "Invalid number of variables to correlate for '" << key << "'!";
+          throw CG_FATAL("IntegratedEventVariablesHandler")
+              << "Invalid number of variables to correlate for '" << key << "'!";
 
         const auto& hvar = hist_vars.get<ParametersList>(key);
         const auto& log = hvar.get<bool>("log");
         auto name = utils::replace_all(utils::replace_all(key, ")", ""), "(", "_");
         if (vars.size() == 1) {  // 1D histogram
           const auto& xbins = hvar.get<std::vector<double> >("xbins");
-          const auto title = "d(sig)/d" + vars.at(0) + " (pb/bin)";
+          const auto title = "d($\\sigma$)/d" + vars.at(0) + " (pb/bin)";
           if (xbins.size() > 1)
             hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(xbins, name, title), log});
           else if (hvar.get<Limits>("xrange").valid()) {
@@ -107,17 +108,17 @@ namespace cepgen {
             hists_.emplace_back(
                 Hist1DInfo{vars.at(0), utils::Hist1D(nbins, hvar.get<Limits>("xrange"), name, title), log});
           } else {
-            CG_WARNING("TextHistHandler")
+            CG_WARNING("IntegratedEventVariablesHandler")
                 << "Neither xrange nor xbins found in parameters for 1D plot of variable \"" << vars.at(0) << "\".";
             continue;
           }
           auto& hist = hists_.rbegin()->hist;
           hist.xAxis().setLabel(vars.at(0));
-          hist.yAxis().setLabel("d(sig)/d" + vars.at(0) + " (pb/bin)");
+          hist.yAxis().setLabel("d($\\sigma$)/d" + vars.at(0) + " (pb/bin)");
         } else if (vars.size() == 2) {  // 2D histogram
           const auto &xbins = hvar.get<std::vector<double> >("xbins"), &ybins = hvar.get<std::vector<double> >("ybins");
           name = utils::replace_all(name, ":", "_");
-          const auto title = "d^2(sig)/d" + vars.at(0) + "/d" + vars.at(1) + " (pb/bin)";
+          const auto title = "d$^2$($\\sigma$)/d" + vars.at(0) + "/d" + vars.at(1) + " (pb/bin)";
           if (xbins.size() > 1 && ybins.size() > 1)
             hists2d_.emplace_back(Hist2DInfo{vars.at(0), vars.at(1), utils::Hist2D(xbins, ybins, name, title), log});
           else if (hvar.get<Limits>("xrange").valid()) {
@@ -132,7 +133,7 @@ namespace cepgen {
                                                            title),
                                              log});
           } else {
-            CG_WARNING("TextHistHandler")
+            CG_WARNING("IntegratedEventVariablesHandler")
                 << "Neither (x/y)range nor (x/y)bins found in parameters for 1D plot of variables \"" << vars << "\".";
             continue;
           }
@@ -145,7 +146,7 @@ namespace cepgen {
         file_.open(filename_);
     }
 
-    TextHistHandler::~TextHistHandler() {
+    IntegratedEventVariablesHandler::~IntegratedEventVariablesHandler() {
       //--- histograms printout
       if (!show_hists_ && !save_hists_)
         return;
@@ -154,7 +155,7 @@ namespace cepgen {
         std::ostringstream os;
         drawer_->draw(h_var.hist, h_var.log ? utils::Drawer::Mode::logy : utils::Drawer::Mode::none);
         if (show_hists_)
-          CG_INFO("TextHistHandler") << os.str();
+          CG_INFO("IntegratedEventVariablesHandler") << os.str();
         if (save_hists_)
           file_ << "\n" << os.str() << "\n";
       }
@@ -162,23 +163,23 @@ namespace cepgen {
         std::ostringstream os;
         drawer_->draw(h_var.hist, h_var.log ? utils::Drawer::Mode::logz : utils::Drawer::Mode::none);
         if (show_hists_)
-          CG_INFO("TextHistHandler") << os.str();
+          CG_INFO("IntegratedEventVariablesHandler") << os.str();
         if (save_hists_)
           file_ << "\n" << os.str() << "\n";
       }
       if (save_hists_)
-        CG_INFO("TextHistHandler") << "Saved " << utils::s("histogram", hists_.size(), true) << " into \"" << filename_
-                                   << "\".";
+        CG_INFO("IntegratedEventVariablesHandler")
+            << "Saved " << utils::s("histogram", hists_.size(), true) << " into \"" << filename_ << "\".";
     }
 
-    void TextHistHandler::initialise(const Parameters& params) {
+    void IntegratedEventVariablesHandler::initialise(const Parameters& params) {
       sqrts_ = params.kinematics().incomingBeams().sqrtS();
       num_evts_ = 0ul;
       if (save_hists_ && !hists_.empty())
         file_ << banner(params, "#") << "\n";
     }
 
-    void TextHistHandler::operator<<(const Event& ev) {
+    void IntegratedEventVariablesHandler::operator<<(const Event& ev) {
       //--- increment the corresponding histograms
       for (auto& h_var : hists_)
         h_var.hist.fill(browser_.get(ev, h_var.var));
@@ -187,9 +188,10 @@ namespace cepgen {
       ++num_evts_;
     }
 
-    ParametersDescription TextHistHandler::description() {
+    ParametersDescription IntegratedEventVariablesHandler::description() {
       auto desc = ExportModule::description();
       desc.setDescription("Text-based histogramming tool");
+      desc.add<std::string>("plotter", "text").setDescription("Plotting algorithm to use");
       desc.add<std::string>("filename", "output.hists.txt").setDescription("Output filename for histogram dump");
       desc.add<bool>("showHistograms", true).setDescription("Show the histogram(s) at the end of the run?");
       desc.add<bool>("saveHistograms", false).setDescription("Save the histogram(s) at the end of the run?");
@@ -212,4 +214,4 @@ namespace cepgen {
   }  // namespace io
 }  // namespace cepgen
 
-REGISTER_IO_MODULE("text", TextHistHandler)
+REGISTER_IO_MODULE("text", IntegratedEventVariablesHandler)
