@@ -16,71 +16,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <fstream>
-
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Event/Event.h"
-#include "CepGen/Event/EventBrowser.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/OutputModules/IntegratedEventVariablesHandler.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Utils/Drawer.h"
-#include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
 
 namespace cepgen {
   namespace io {
-    /**
-     * \brief Handler for the generic text file output
-     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-     * \date Jul 2019
-     */
-    class IntegratedEventVariablesHandler : public ExportModule {
-    public:
-      explicit IntegratedEventVariablesHandler(const ParametersList&);
-      ~IntegratedEventVariablesHandler();
-
-      static ParametersDescription description();
-
-      void initialise(const Parameters&) override;
-      void setCrossSection(double cross_section, double) override { cross_section_ = cross_section; }
-      void operator<<(const Event&) override;
-
-    private:
-      std::ofstream file_;
-      const std::unique_ptr<utils::Drawer> drawer_;
-      //--- variables definition
-      const bool show_hists_, save_hists_;
-      const std::string filename_;
-
-      const utils::EventBrowser browser_;
-
-      double cross_section_{1.};
-      unsigned long num_evts_{0ul};
-
-      /// centre-of-mass energy
-      double sqrts_{0.};
-
-      /// 1D histogram definition
-      struct Hist1DInfo {
-        std::string var;
-        utils::Hist1D hist;
-        bool log;
-      };
-      /// List of 1D histograms
-      std::vector<Hist1DInfo> hists_;
-      /// 2D histogram definition
-      struct Hist2DInfo {
-        std::string var1, var2;
-        utils::Hist2D hist;
-        bool log;
-      };
-      /// List of 2D histograms
-      std::vector<Hist2DInfo> hists2d_;
-    };
-
     IntegratedEventVariablesHandler::IntegratedEventVariablesHandler(const ParametersList& params)
         : ExportModule(params),
           drawer_(utils::DrawerFactory::get().build(steer<std::string>("plotter"), params)),
@@ -100,7 +47,7 @@ namespace cepgen {
         auto name = utils::replace_all(utils::replace_all(key, ")", ""), "(", "_");
         if (vars.size() == 1) {  // 1D histogram
           const auto& xbins = hvar.get<std::vector<double> >("xbins");
-          const auto title = "d($\\sigma$)/d" + vars.at(0) + " (pb/bin)";
+          const auto title = "d$\\sigma$/d" + vars.at(0) + " (pb/bin)";
           if (xbins.size() > 1)
             hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(xbins, name, title), log});
           else if (hvar.get<Limits>("xrange").valid()) {
@@ -114,11 +61,11 @@ namespace cepgen {
           }
           auto& hist = hists_.rbegin()->hist;
           hist.xAxis().setLabel(vars.at(0));
-          hist.yAxis().setLabel("d($\\sigma$)/d" + vars.at(0) + " (pb/bin)");
+          hist.yAxis().setLabel("d$\\sigma$/d" + vars.at(0) + " (pb/bin)");
         } else if (vars.size() == 2) {  // 2D histogram
           const auto &xbins = hvar.get<std::vector<double> >("xbins"), &ybins = hvar.get<std::vector<double> >("ybins");
           name = utils::replace_all(name, ":", "_");
-          const auto title = "d$^2$($\\sigma$)/d" + vars.at(0) + "/d" + vars.at(1) + " (pb/bin)";
+          const auto title = "d$^2$$\\sigma$/d" + vars.at(0) + "/d" + vars.at(1) + " (pb/bin)";
           if (xbins.size() > 1 && ybins.size() > 1)
             hists2d_.emplace_back(Hist2DInfo{vars.at(0), vars.at(1), utils::Hist2D(xbins, ybins, name, title), log});
           else if (hvar.get<Limits>("xrange").valid()) {

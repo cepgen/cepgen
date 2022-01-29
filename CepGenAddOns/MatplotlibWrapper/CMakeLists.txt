@@ -7,7 +7,7 @@ endif()
 
 include_directories(${PROJECT_SOURCE_DIR})
 
-file(GLOB sources DrawerMatplotlib.cpp)
+file(GLOB sources DrawerMatplotlib.cpp MatplotlibHistsHandler.cpp)
 
 #----- build the object
 
