@@ -89,6 +89,10 @@ namespace cepgen {
         const auto& meth = m_two_mom_str_.at(var);
         return (part1.momentum().*meth)(part2.momentum());
       }
+      if (m_mom_str_.count(var)) {
+        const auto& meth = m_mom_str_.at(var);
+        return ((part1.momentum() + part2.momentum()).*meth)();
+      }
       if (var == "acop")
         return 1. - fabs(part1.momentum().deltaPhi(part2.momentum()) * M_1_PI);
       throw CG_ERROR("EventBrowser") << "Failed to retrieve variable \"" << var << "\".";
