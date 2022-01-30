@@ -66,6 +66,8 @@ namespace cepgen {
       static const std::array<Colour, 7> kColours;
       static constexpr const char NEG_CHAR = '-';
 
+      static std::string delatexify(const std::string&);
+
       /// Sorting helper for the axis metadata container
       struct map_elements {
         /// Sort two values in an axis
@@ -271,9 +273,10 @@ namespace cepgen {
                    min_val = std::min_element(axis.begin(), axis.end(), map_elements())->second.value;
       const double min_val_log = std::log(std::max(min_val, 1.e-10));
       const double max_val_log = std::log(std::min(max_val, 1.e+10));
-      if (!dr.yAxis().label().empty())
-        os << sep << std::string(std::max(0., 2. + width_ - dr.yAxis().label().size()), ' ') << dr.yAxis().label()
-           << "\n";
+      if (!dr.yAxis().label().empty()) {
+        const auto ylabel = delatexify(dr.yAxis().label());
+        os << sep << std::string(std::max(0., 2. + width_ - ylabel.size()), ' ') << ylabel << "\n";
+      }
       os << sep << utils::format("%-5.2f ", mode & Mode::logy ? std::exp(min_val_log) : min_val)
          << std::setw(width_ - 11) << std::left << (mode & Mode::logy ? "logarithmic scale" : "linear scale")
          << utils::format("%5.2e", mode & Mode::logy ? std::exp(max_val_log) : max_val) << "\n"
@@ -322,16 +325,17 @@ namespace cepgen {
         ++idx;
       }
       os << "\n"
-         << utils::format("%17s", dr.xAxis().label().c_str()) << ":" << std::string(width_, '.')
+         << utils::format("%17s", delatexify(dr.xAxis().label()).c_str()) << ":" << std::string(width_, '.')
          << ":\n";  // 2nd abscissa axis
     }
 
     void DrawerText::drawValues(
         std::ostream& os, const Drawable& dr, const Drawable::dualaxis_t& axes, const Mode& mode, bool effects) const {
       const std::string sep(17, ' ');
-      if (!dr.yAxis().label().empty())
-        os << sep << std::string(std::max(0., 2. + width_ - dr.yAxis().label().size()), ' ') << dr.yAxis().label()
-           << "\n";
+      if (!dr.yAxis().label().empty()) {
+        const auto ylabel = delatexify(dr.yAxis().label());
+        os << sep << std::string(std::max(0., 2. + width_ - ylabel.size()), ' ') << ylabel << "\n";
+      }
       // find the maximum element of the graph
       double min_val = -Limits::INVALID, max_val = Limits::INVALID;
       double min_logval = -3.;
@@ -348,7 +352,7 @@ namespace cepgen {
       const auto& y_axis = axes.begin()->second;
       os << sep << utils::format("%-5.2f", y_axis.begin()->first.value) << std::string(axes.size() - 11, ' ')
          << utils::format("%5.2e", y_axis.rbegin()->first.value) << "\n"
-         << utils::format("%17s", dr.xAxis().label().c_str())
+         << utils::format("%17s", delatexify(dr.xAxis().label()).c_str())
          << std::string(1 + y_axis.size() + 1, '.');  // abscissa axis
       size_t idx = 0;
       for (const auto& xval : axes) {
@@ -402,12 +406,14 @@ namespace cepgen {
       }
       os << "\n"
          << sep << ":" << std::string(y_axis.size(), '.') << ": "  // 2nd abscissa axis
-         << dr.yAxis().label() << "\n\t"
+         << delatexify(dr.yAxis().label()) << "\n\t"
          << "(scale: \"" << std::string(CHARS) << "\", ";
       for (size_t i = 0; i < kColours.size(); ++i)
         os << (effects ? utils::colourise("*", kColours.at(i)) : "") << (i == 0 ? "|" : "");
       os << ")\n";
     }
+
+    std::string DrawerText::delatexify(const std::string& tok) { return utils::replace_all(tok, {{"$", ""}}); }
   }  // namespace utils
 }  // namespace cepgen
 
