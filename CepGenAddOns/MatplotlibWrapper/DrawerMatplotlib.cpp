@@ -116,11 +116,11 @@ namespace cepgen {
         yerr.emplace_back(pt.second.value_unc);
       }
       if ((mode & Mode::logx) && (mode & Mode::logy))
-        plt::loglog(x, y);
+        plt::named_loglog(gr.title(), x, y);
       else if (mode & Mode::logx)
-        plt::semilogx(x, y);
+        plt::named_semilogx(gr.title(), x, y);
       else if (mode & Mode::logy)
-        plt::semilogy(x, y);
+        plt::named_semilogy(gr.title(), x, y);
       else if (yerr != std::vector<double>(yerr.size(), 0.))
         plt::errorbar(x, y, yerr, {{"label", gr.title()}, {"linestyle", ""}});
       else
