@@ -75,6 +75,10 @@ namespace cepgen {
       return out;
     }
 
+    std::string sanitise(const std::string& str) {
+      return replace_all(str, {{")", ""}, {"(", "_"}, {"{", "_"}, {",", "_"}, {":", "_"}});
+    }
+
     size_t replace_all(std::string& str, const std::string& from, const std::string& to) {
       size_t count = 0, pos = 0;
       while ((pos = str.find(from, pos)) != std::string::npos) {

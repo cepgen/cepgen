@@ -31,8 +31,7 @@ namespace cepgen {
           expression_(expression_orig_),
           values_(vars_.size()) {
       for (size_t i = 0; i < vars_.size(); ++i) {
-        replace_all(vars_.at(i), "(", "_");
-        replace_all(vars_.at(i), ")", "_");
+        vars_.at(i) = sanitise(vars_.at(i));
         replace_all(expression_, vars_orig_.at(i), vars_.at(i));
       }
     }

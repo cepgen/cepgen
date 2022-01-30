@@ -61,9 +61,7 @@ namespace cepgen {
       static YODA::Scatter3D convert(const Graph2D&);
       static YODA::Histo1D convert(const Hist1D&);
       static YODA::Histo2D convert(const Hist2D&);
-      static std::string path(const std::string& name) {
-        return "/" + utils::replace_all(utils::replace_all(name, ")", "_"), "(", "_");
-      }
+      static std::string path(const std::string& name) { return "/" + utils::sanitise(name); }
       mutable std::ofstream file_;
       mutable YODA::Writer* writer_;
     };

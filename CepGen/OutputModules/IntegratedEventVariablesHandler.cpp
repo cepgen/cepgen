@@ -44,7 +44,7 @@ namespace cepgen {
 
         const auto& hvar = hist_vars.get<ParametersList>(key);
         const auto& log = hvar.get<bool>("log");
-        auto name = utils::replace_all(utils::replace_all(key, ")", ""), "(", "_");
+        auto name = utils::sanitise(key);
         if (vars.size() == 1) {  // 1D histogram
           const auto& xbins = hvar.get<std::vector<double> >("xbins");
           const auto title = "d$\\sigma$/d" + vars.at(0) + " (pb/bin)";
@@ -64,7 +64,7 @@ namespace cepgen {
           hist.yAxis().setLabel("d$\\sigma$/d" + vars.at(0) + " (pb/bin)");
         } else if (vars.size() == 2) {  // 2D histogram
           const auto &xbins = hvar.get<std::vector<double> >("xbins"), &ybins = hvar.get<std::vector<double> >("ybins");
-          name = utils::replace_all(name, ":", "_");
+          name = utils::sanitise(name);
           const auto title = "d$^2$$\\sigma$/d" + vars.at(0) + "/d" + vars.at(1) + " (pb/bin)";
           if (xbins.size() > 1 && ybins.size() > 1)
             hists2d_.emplace_back(Hist2DInfo{vars.at(0), vars.at(1), utils::Hist2D(xbins, ybins, name, title), log});
