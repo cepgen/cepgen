@@ -125,8 +125,6 @@ namespace cepgen {
         plt::errorbar(x, y, yerr, {{"label", gr.title()}, {"linestyle", ""}});
       else
         plt::plot(x, y, {{"label", gr.title()}});
-      plt::xlabel(gr.xAxis().label());
-      plt::ylabel(gr.yAxis().label());
     }
 
     void DrawerMatplotlib::plot(const Graph2D& gr, const Mode&) {
@@ -145,22 +143,29 @@ namespace cepgen {
       }
       plt::plot_surface(x, y, z, {{"label", gr.title()}});
       //plt::contour(x, y, z, {{"label", gr.title()}});
-      plt::xlabel(gr.xAxis().label());
-      plt::ylabel(gr.yAxis().label());
       plt::set_zlabel(gr.zAxis().label());
     }
 
-    void DrawerMatplotlib::plot(const Hist1D& hist, const Mode&) {
-      std::vector<double> x, y;
-      for (const auto& xv : hist.axis()) {
-        x.emplace_back(xv.first.value);
-        y.emplace_back(xv.second.value);
+    void DrawerMatplotlib::plot(const Hist1D& hist, const Mode& mode) {
+      std::vector<double> x, y, yerr;
+      for (size_t ibin = 0; ibin < hist.nbins(); ++ibin) {
+        x.emplace_back(hist.binRange(ibin).x(0.5));
+        y.emplace_back(hist.value(ibin));
+        yerr.emplace_back(hist.valueUnc(ibin));
       }
       //plt::bar(x, y, "", "", 1., {{"label", hist.title()}});
       //plt::bar(x, y);
-      plt::plot(x, y, {{"drawstyle", "steps"}, {"label", hist.title()}});
-      plt::xlabel(hist.xAxis().label());
-      plt::ylabel(hist.yAxis().label());
+      std::map<std::string, std::string> plot_style = {{"label", hist.title()}, {"drawstyle", "steps"}};
+      if ((mode & Mode::logx) && (mode & Mode::logy))
+        plt::named_loglog(hist.title(), x, y, "o");
+      else if (mode & Mode::logx)
+        plt::named_semilogx(hist.title(), x, y, "o");
+      else if (mode & Mode::logy)
+        plt::named_semilogy(hist.title(), x, y, "o");
+      else if (yerr != std::vector<double>(yerr.size(), 0.))
+        plt::errorbar(x, y, yerr, plot_style);
+      else
+        plt::plot(x, y, plot_style);
     }
 
     void DrawerMatplotlib::postDraw(const Drawable& dr, const Mode& mode) const {
@@ -180,6 +185,8 @@ namespace cepgen {
               << "Failed to set Y range to " << rng << ". Matplotlib error: " << err.what();
         }
       }
+      plt::xlabel(dr.xAxis().label());
+      plt::ylabel(dr.yAxis().label());
       if (tight_)
         plt::tight_layout();
     }
