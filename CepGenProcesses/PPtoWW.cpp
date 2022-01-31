@@ -94,7 +94,7 @@ namespace cepgen {
         CG_INFO("PPtoWW") << "Nachtmann amplitudes (model: " << ampl_.mode() << ") initialised.";
         if (ampl_.mode() != NachtmannAmplitudes::Mode::SM) {
           if (ampl_.mode() != NachtmannAmplitudes::Mode::W && ampl_.mode() != NachtmannAmplitudes::Mode::Wbar)
-            throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for ɣɣ → W⁺W¯! "
+            throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for γγ → W⁺W¯! "
                                      << "Only supported extensions are W and Wbar. Specified model: " << ampl_.mode()
                                      << ".";
           CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << steer<ParametersList>("eftParameters") << ".";
@@ -156,7 +156,7 @@ namespace cepgen {
 
     ParametersDescription PPtoWW::description() {
       auto params = Process2to4::description();
-      params.setDescription("ɣɣ → W⁺W¯ (kt-factor.)");
+      params.setDescription("γγ → W⁺W¯ (kt-factor.)");
       params.add<int>("method", 1)
           .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell by Nachtmann et al.)");
       ParametersDescription pol_states;

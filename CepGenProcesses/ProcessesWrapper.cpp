@@ -36,4 +36,4 @@ DECLARE_FORTRAN_FUNCTION(nucl_to_ff)
 //  REGISTER_FORTRAN_PROCESS(name, "description", function_name)
 //=============================================================================
 
-REGISTER_FORTRAN_PROCESS(pptoff_f77, "(p/A)(p/A) ↝ (g/ɣ)ɣ → f⁺f¯", nucl_to_ff)
+REGISTER_FORTRAN_PROCESS(pptoff_f77, "(p/A)(p/A) ↝ (g/γ)γ → f⁺f¯", nucl_to_ff)

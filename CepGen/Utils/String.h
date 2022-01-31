@@ -82,7 +82,9 @@ namespace cepgen {
     /// Colourise a string for TTY-type output streams
     std::string colourise(const std::string& str, const Colour& col, const Modifier& mod = Modifier::none);
     /// Replace all unsafe characters to build a computer-readable (and filename-safe) string
-    std::string sanitise(const std::string& str);
+    std::string sanitise(const std::string&);
+    /// Transform all emoji-like special characters into their LaTeX representation
+    std::string parseSpecialChars(const std::string&);
     /// Replace all occurrences of a text by another
     size_t replace_all(std::string& str, const std::string& from, const std::string& to);
     /// Replace all occurrences of a text by another

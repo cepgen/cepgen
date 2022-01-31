@@ -75,6 +75,21 @@ namespace cepgen {
       return out;
     }
 
+    std::string parseSpecialChars(const std::string& str) {
+      return replace_all(
+          str, {{"Α", "\\Alpha"},      {"Β", "\\Beta"},      {"Χ", "\\Chi"},     {"Δ", "\\Delta"},   {"Ε", "\\Epsilon"},
+                {"Φ", "\\Phi"},        {"Γ", "\\Gamma"},     {"Η", "\\Eta"},     {"Ι", "\\Iota"},    {"Κ", "\\Kappa"},
+                {"Λ", "\\Lambda"},     {"Μ", "\\Mu"},        {"Ν", "\\Nu"},      {"Ο", "\\Omicron"}, {"Π", "\\Pi"},
+                {"Θ", "\\Theta"},      {"Ρ", "\\Rho"},       {"Σ", "\\Sigma"},   {"Τ", "\\Tau"},     {"Υ", "\\Upsilon"},
+                {"Ω", "\\Omega"},      {"Ξ", "\\Xi"},        {"Ψ", "\\Psi"},     {"Ζ", "\\Zeta"},    {"α", "\\alpha"},
+                {"β", "\\beta"},       {"χ", "\\Chi"},       {"δ", "\\delta"},   {"ε", "\\epsilon"}, {"ɸ", "\\phi"},
+                {"γ", "\\gamma"},      {"η", "\\eta"},       {"ι", "\\iota"},    {"κ", "\\kappa"},   {"λ", "\\lambda"},
+                {"μ", "\\mu"},         {"ν", "\\nu"},        {"ο", "\\omicron"}, {"π", "\\pi"},      {"θ", "\\theta"},
+                {"ρ", "\\rho"},        {"σ", "\\sigma"},     {"τ", "\\tau"},     {"υ", "\\upsilon"}, {"ω", "\\omega"},
+                {"ξ", "\\xi"},         {"ψ", "\\psi"},       {"ζ", "\\zeta"},    {"⁺", "^{+}"},      {"¯", "^{-}"},
+                {"→", "\\rightarrow"}, {"←", "\\leftarrow"}, {"↝ ", "\\leadsto"}});
+    }
+
     std::string sanitise(const std::string& str) {
       return replace_all(str, {{")", ""}, {"(", "_"}, {"{", "_"}, {",", "_"}, {":", "_"}});
     }
