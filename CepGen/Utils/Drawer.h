@@ -44,7 +44,9 @@ namespace cepgen {
           logy = 1 << 1,
           logz = 1 << 2,
           nostack = 1 << 3,
-          grid = 1 << 4
+          grid = 1 << 4,
+          col = 1 << 5,
+          cont = 1 << 6
         };
         Mode() : value_(none) {}
         Mode(const value_t& val) : value_(val) {}

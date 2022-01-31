@@ -100,7 +100,7 @@ namespace cepgen {
       auto out{str};
       for (const auto& key : keys)
         replace_all(out, key.first, key.second);
-      CG_DEBUG("replace_all").log([&keys, &out](auto& log) {
+      CG_DEBUG_LOOP("replace_all").log([&keys, &out](auto& log) {
         log << "Values to be replaced: ";
         for (const auto& key : keys)
           log << "\n\t{\"" << key.first << "\" -> \"" << key.second << "\"}";

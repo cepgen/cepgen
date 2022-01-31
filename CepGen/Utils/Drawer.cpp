@@ -27,7 +27,7 @@ namespace cepgen {
     Drawer::Drawer(const ParametersList& params) : NamedModule(params) {}
 
     Drawer::Mode operator|(const Drawer::Mode& lhs, const Drawer::Mode& rhs) {
-      std::bitset<7> mod1((int)lhs.value_), mod2((int)rhs.value_);
+      std::bitset<16> mod1((int)lhs.value_), mod2((int)rhs.value_);
       Drawer::Mode out;
       out.value_ = (Drawer::Mode::value_t)(mod1 | mod2).to_ulong();
       return out;
@@ -57,6 +57,10 @@ namespace cepgen {
         os << sep << "nostack", sep = "|";
       if (mode & Drawer::Mode::grid)
         os << sep << "grid", sep = "|";
+      if (mode & Drawer::Mode::col)
+        os << sep << "col", sep = "|";
+      if (mode & Drawer::Mode::cont)
+        os << sep << "cont", sep = "|";
       return os;
     }
   }  // namespace utils
