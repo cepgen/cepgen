@@ -49,12 +49,13 @@ namespace cepgen {
           cont = 1 << 6
         };
         Mode() : value_(none) {}
+        Mode(int val) : value_((value_t)val) {}
         Mode(const value_t& val) : value_(val) {}
 
-        friend Mode operator|(const Mode&, const Mode&);
-        friend Mode& operator|=(Mode&, const Mode&);
-        friend bool operator&(const Mode&, const Mode::value_t&);
         friend std::ostream& operator<<(std::ostream&, const Mode&);
+        friend bool operator&(const Mode&, const Mode::value_t&);
+
+        const value_t& value() const { return value_; }
 
       private:
         value_t value_;
@@ -86,6 +87,9 @@ namespace cepgen {
       friend class Hist2D;
     };
   }  // namespace utils
+  utils::Drawer::Mode operator|(const utils::Drawer::Mode&, const utils::Drawer::Mode::value_t&);
+  utils::Drawer::Mode operator|(const utils::Drawer::Mode::value_t&, const utils::Drawer::Mode::value_t&);
 }  // namespace cepgen
+cepgen::utils::Drawer::Mode& operator|=(cepgen::utils::Drawer::Mode&, const cepgen::utils::Drawer::Mode::value_t&);
 
 #endif

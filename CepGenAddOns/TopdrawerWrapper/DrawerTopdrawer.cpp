@@ -301,7 +301,7 @@ namespace cepgen {
     DrawerTopdrawer::Commands DrawerTopdrawer::stringify(const std::string& label, const std::string& str) {
       bool in_math{false}, in_bs{false};
       std::map<int, std::string> m_spec_char;
-      std::string lab, mod;
+      std::string lab;
       for (size_t i = 0; i < str.size(); ++i) {
         const auto ch = str[i];
         if (ch == '$' && (i == 0 || str[i - 1] != '\\')) {
@@ -315,7 +315,8 @@ namespace cepgen {
           continue;
         }
         if (in_bs) {
-          if (ch == ' ' || ch == '_' || ch == '(' || ch == ')' || ch == '{' || ch == '}' || ch == '[' || ch == ']')
+          if (ch == ' ' || ch == '_' || ch == '/' || ch == '(' || ch == ')' || ch == '{' || ch == '}' || ch == '[' ||
+              ch == ']')
             in_bs = false;
           else if (ch == '\\') {
             m_spec_char[lab.size()] = "";
@@ -329,9 +330,13 @@ namespace cepgen {
         if (ch != '_' && ch != '{' && ch != '}')
           lab.push_back(ch);
       }
-      mod = std::string(lab.size(), ' ');
-      CG_LOG << lab << "\n\n" << m_spec_char;
+      std::string mod(lab.size(), ' ');
       for (const auto& ch : m_spec_char) {
+        if (kSpecChars.count(ch.second) == 0) {
+          CG_WARNING("DrawerTopdrawer:stringify")
+              << "Special character '" << ch.second << "' is not defined. Please either define it or use another one.";
+          continue;
+        }
         const auto& tok = kSpecChars.at(ch.second);
         lab[ch.first] = tok.first;
         mod[ch.first] = tok.second;

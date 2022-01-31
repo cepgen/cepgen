@@ -108,7 +108,8 @@ namespace cepgen {
       }
       for (const auto& h_var : hists2d_) {
         std::ostringstream os;
-        drawer_->draw(h_var.hist, h_var.log ? utils::Drawer::Mode::logz : utils::Drawer::Mode::none);
+        drawer_->draw(h_var.hist,
+                      utils::Drawer::Mode::grid | (h_var.log ? utils::Drawer::Mode::logz : utils::Drawer::Mode::none));
         if (show_hists_)
           CG_INFO("IntegratedEventVariablesHandler") << os.str();
         if (save_hists_)
