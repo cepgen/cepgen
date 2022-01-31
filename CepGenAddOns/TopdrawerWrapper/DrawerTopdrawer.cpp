@@ -317,8 +317,8 @@ namespace cepgen {
     }
 
     DrawerTopdrawer::Commands DrawerTopdrawer::stringify(const std::string& label, const std::string& str) {
-      bool in_math{false}, in_bs{false};
-      std::map<int, std::string> m_spec_char;
+      bool in_math{false}, in_bs{false}, in_sub{false}, in_sup{false};
+      std::map<int, std::string> m_spec_char, m_sub_char;
       std::string lab;
       auto str_parsed = utils::parseSpecialChars(str);
       for (size_t i = 0; i < str_parsed.size(); ++i) {
@@ -327,6 +327,35 @@ namespace cepgen {
           in_math = !in_math;
           continue;
         }
+        // check if we are in superscript/subscript mode
+        if (ch == '_') {
+          in_sub = true;
+          m_sub_char[lab.size()] = "";
+          continue;
+        }
+        if (ch == '^') {
+          in_sup = true;
+          m_sub_char[lab.size()] = "";
+          continue;
+        }
+        if (in_sub || in_sup) {
+          if (ch == '{') {
+            lab.push_back(in_sup ? '0' : '2');
+            continue;
+          }
+          if (ch == '}') {
+            lab.push_back(in_sup ? '1' : '3');
+            if (in_sub)
+              in_sub = false;
+            if (in_sup)
+              in_sup = false;
+            continue;
+          }
+          m_sub_char.rbegin()->second.push_back(ch);
+          lab.push_back(ch);
+          continue;
+        }
+        // check if we have a special character
         if (ch == '\\') {
           in_bs = true;
           m_spec_char[lab.size()] = "";
@@ -335,7 +364,7 @@ namespace cepgen {
         }
         if (in_bs) {
           if (ch == ' ' || ch == '_' || ch == '/' || ch == '(' || ch == ')' || ch == '{' || ch == '}' || ch == '[' ||
-              ch == ']' || !std::isalnum(ch))
+              ch == ']')
             in_bs = false;
           else if (ch == '\\') {
             m_spec_char[lab.size()] = "";
@@ -346,8 +375,8 @@ namespace cepgen {
             continue;
           }
         }
-        if (ch != '_' && ch != '{' && ch != '}' && ch != '^' && ch != '_')  //FIXME disabling sup/subscript
-          lab.push_back(ch);
+        // otherwise assume we are just pushing into the characters buffer
+        lab.push_back(ch);
       }
       std::string mod(lab.size(), ' ');
       for (const auto& ch : m_spec_char) {
@@ -359,6 +388,10 @@ namespace cepgen {
         const auto& tok = kSpecChars.at(ch.second);
         lab[ch.first] = tok.first;
         mod[ch.first] = tok.second;
+      }
+      for (const auto& ch : m_sub_char) {
+        mod[ch.first] = 'C';
+        mod[ch.first + ch.second.size() + 1] = 'C';
       }
       Commands out;
       out += label + " '" + lab + "'";
