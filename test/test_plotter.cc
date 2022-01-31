@@ -67,16 +67,18 @@ int main(int argc, char* argv[]) {
     hist1d.fill(bw(gen));
   hist1d.xAxis().setLabel("Random variable");
   hist1d.yAxis().setLabel("Occurrences");
-  plt->draw(hist1d);
+  plt->draw(hist1d, cepgen::utils::Drawer::Mode::logy);
 
   cout << endl << "-------- 2D histogram --------" << endl;
 
   // test 2d histogram
-  cepgen::utils::Hist2D hist2d(20, {-5., 5.}, 50, {-5., 5.}, "hist2d");
+  cepgen::utils::Hist2D hist2d(20, {-5., 5.}, 50, {-5., 5.}, "hist2d", "$\\sqrt{s} = 14$ TeV");
   normal_distribution<double> gaus1(0., 1.), gaus2(0., 1.);
   for (size_t i = 0; i < 1000; ++i)
     for (size_t j = 0; j < 1000; ++j)
       hist2d.fill(gaus1(gen), gaus2(gen));
+  hist2d.xAxis().setLabel("$4\\pi\\alpha_{EM}$");
+  hist2d.yAxis().setLabel("$\\Sigma(1\\pm\\epsilon)$");
   plt->draw(hist2d, cepgen::utils::Drawer::Mode::logz);
 
   cout << endl << "--------- multiplots ---------" << endl;
@@ -86,7 +88,8 @@ int main(int argc, char* argv[]) {
     graph1d_bis.addPoint(x, cos(x));
     graph1d_ter.addPoint(x, cos(x) * x);
   }
-  plt->draw({&graph1d, &graph1d_bis, &graph1d_ter}, "multiplot1", "a beautiful multiplot");
+  plt->draw(
+      {&graph1d, &graph1d_bis, &graph1d_ter}, "multiplot1", "a beautiful multiplot", cepgen::utils::Drawer::Mode::grid);
 
   cout << endl << "------- graph and hist -------" << endl;
 
