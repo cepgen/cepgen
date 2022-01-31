@@ -302,9 +302,10 @@ namespace cepgen {
       bool in_math{false}, in_bs{false};
       std::map<int, std::string> m_spec_char;
       std::string lab;
-      for (size_t i = 0; i < str.size(); ++i) {
-        const auto ch = str[i];
-        if (ch == '$' && (i == 0 || str[i - 1] != '\\')) {
+      auto str_parsed = utils::parseSpecialChars(str);
+      for (size_t i = 0; i < str_parsed.size(); ++i) {
+        const auto ch = str_parsed[i];
+        if (ch == '$' && (i == 0 || str_parsed[i - 1] != '\\')) {
           in_math = !in_math;
           continue;
         }
@@ -316,7 +317,7 @@ namespace cepgen {
         }
         if (in_bs) {
           if (ch == ' ' || ch == '_' || ch == '/' || ch == '(' || ch == ')' || ch == '{' || ch == '}' || ch == '[' ||
-              ch == ']')
+              ch == ']' || !std::isalnum(ch))
             in_bs = false;
           else if (ch == '\\') {
             m_spec_char[lab.size()] = "";
@@ -327,7 +328,7 @@ namespace cepgen {
             continue;
           }
         }
-        if (ch != '_' && ch != '{' && ch != '}')
+        if (ch != '_' && ch != '{' && ch != '}' && ch != '^' && ch != '_')  //FIXME disabling sup/subscript
           lab.push_back(ch);
       }
       std::string mod(lab.size(), ' ');
