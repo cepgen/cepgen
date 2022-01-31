@@ -6,7 +6,7 @@ if(NOT TOPDRAWER_BIN)
   return()
 endif()
 
-file(GLOB sources DrawerTopdrawer.cpp)
+file(GLOB sources DrawerTopdrawer.cpp TopdrawerHistsHandler.cpp)
 
 #----- build the object
 
