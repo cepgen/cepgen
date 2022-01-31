@@ -20,6 +20,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/OutputModules/IntegratedEventVariablesHandler.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Utils/Drawer.h"
@@ -47,13 +48,11 @@ namespace cepgen {
         auto name = utils::sanitise(key);
         if (vars.size() == 1) {  // 1D histogram
           const auto& xbins = hvar.get<std::vector<double> >("xbins");
-          const auto title = "d$\\sigma$/d" + vars.at(0) + " (pb/bin)";
           if (xbins.size() > 1)
-            hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(xbins, name, title), log});
+            hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(xbins, name), log});
           else if (hvar.get<Limits>("xrange").valid()) {
             const auto& nbins = (hvar.get<int>("nbins") > 0 ? hvar.get<int>("nbins") : hvar.get<int>("nbinsX"));
-            hists_.emplace_back(
-                Hist1DInfo{vars.at(0), utils::Hist1D(nbins, hvar.get<Limits>("xrange"), name, title), log});
+            hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(nbins, hvar.get<Limits>("xrange"), name), log});
           } else {
             CG_WARNING("IntegratedEventVariablesHandler")
                 << "Neither xrange nor xbins found in parameters for 1D plot of variable \"" << vars.at(0) << "\".";
@@ -65,20 +64,16 @@ namespace cepgen {
         } else if (vars.size() == 2) {  // 2D histogram
           const auto &xbins = hvar.get<std::vector<double> >("xbins"), &ybins = hvar.get<std::vector<double> >("ybins");
           name = utils::sanitise(name);
-          const auto title = "d$^2$$\\sigma$/d" + vars.at(0) + "/d" + vars.at(1) + " (pb/bin)";
           if (xbins.size() > 1 && ybins.size() > 1)
-            hists2d_.emplace_back(Hist2DInfo{vars.at(0), vars.at(1), utils::Hist2D(xbins, ybins, name, title), log});
+            hists2d_.emplace_back(Hist2DInfo{vars.at(0), vars.at(1), utils::Hist2D(xbins, ybins, name), log});
           else if (hvar.get<Limits>("xrange").valid()) {
             const auto& nbinsx = (hvar.get<int>("nbins") > 0 ? hvar.get<int>("nbins") : hvar.get<int>("nbinsX"));
-            hists2d_.emplace_back(Hist2DInfo{vars.at(0),
-                                             vars.at(1),
-                                             utils::Hist2D(nbinsx,
-                                                           hvar.get<Limits>("xrange"),
-                                                           hvar.get<int>("nbinsY"),
-                                                           hvar.get<Limits>("yrange"),
-                                                           name,
-                                                           title),
-                                             log});
+            hists2d_.emplace_back(Hist2DInfo{
+                vars.at(0),
+                vars.at(1),
+                utils::Hist2D(
+                    nbinsx, hvar.get<Limits>("xrange"), hvar.get<int>("nbinsY"), hvar.get<Limits>("yrange"), name),
+                log});
           } else {
             CG_WARNING("IntegratedEventVariablesHandler")
                 << "Neither (x/y)range nor (x/y)bins found in parameters for 1D plot of variables \"" << vars << "\".";
@@ -87,6 +82,7 @@ namespace cepgen {
           auto& hist = hists2d_.rbegin()->hist;
           hist.xAxis().setLabel(vars.at(0));
           hist.yAxis().setLabel(vars.at(1));
+          hist.zAxis().setLabel("d$^2$$\\sigma$/d" + vars.at(0) + "/d" + vars.at(1) + " (pb/bin)");
         }
       }
       if (save_hists_ && !hists_.empty())
@@ -99,6 +95,7 @@ namespace cepgen {
         return;
       for (auto& h_var : hists_) {
         h_var.hist.scale(cross_section_ / (num_evts_ + 1));
+        h_var.hist.setTitle(proc_name_);
         std::ostringstream os;
         drawer_->draw(h_var.hist, h_var.log ? utils::Drawer::Mode::logy : utils::Drawer::Mode::none);
         if (show_hists_)
@@ -106,8 +103,9 @@ namespace cepgen {
         if (save_hists_)
           file_ << "\n" << os.str() << "\n";
       }
-      for (const auto& h_var : hists2d_) {
+      for (auto& h_var : hists2d_) {
         std::ostringstream os;
+        h_var.hist.setTitle(proc_name_);
         drawer_->draw(h_var.hist,
                       utils::Drawer::Mode::grid | (h_var.log ? utils::Drawer::Mode::logz : utils::Drawer::Mode::none));
         if (show_hists_)
@@ -123,6 +121,8 @@ namespace cepgen {
     void IntegratedEventVariablesHandler::initialise(const Parameters& params) {
       sqrts_ = params.kinematics().incomingBeams().sqrtS();
       num_evts_ = 0ul;
+      proc_name_ = proc::ProcessFactory::get().describe(params.processName());
+      proc_name_ += ", \\sqrt{s} = " + utils::format("%g", sqrts_ * 1.e-3) + " TeV";
       if (save_hists_ && !hists_.empty())
         file_ << banner(params, "#") << "\n";
     }

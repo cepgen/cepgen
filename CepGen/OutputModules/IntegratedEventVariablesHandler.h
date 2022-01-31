@@ -59,6 +59,8 @@ namespace cepgen {
 
       /// centre-of-mass energy
       double sqrts_{0.};
+      /// Name of the physics process
+      std::string proc_name_;
 
       /// 1D histogram definition
       struct Hist1DInfo {
