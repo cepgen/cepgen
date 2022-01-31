@@ -282,7 +282,7 @@ namespace cepgen {
       return cmds;
     }
 
-    DrawerTopdrawer::Commands DrawerTopdrawer::postDraw(const Drawable& dr, const Mode& mode) {
+    DrawerTopdrawer::Commands DrawerTopdrawer::postDraw(const Drawable& dr, const Mode&) {
       Commands cmds;
       cmds += stringify("TITLE BOTTOM", dr.xAxis().label());
       cmds += stringify("TITLE LEFT", dr.yAxis().label());
