@@ -1,6 +1,9 @@
 #--- searching for MATPLOTLIB
-find_package(matplotlib_cpp)
+find_package(matplotlib_cpp QUIET)
 
+if(NOT ${matplotlib_cpp_FOUND})
+  return()
+endif()
 if(NOT ${matplotlib_cpp_LIBRARIES})
   return()
 endif()
