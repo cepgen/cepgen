@@ -17,7 +17,7 @@
  */
 
 // clang-format off
-#include "CepGen/Cards/PythonHandler.h" // ensuring include arrives first
+#include "CepGenAddOns/PythonWrapper/PythonHandler.h" // ensuring include arrives first
 // clang-format on
 
 #include "CepGen/Core/Exception.h"
