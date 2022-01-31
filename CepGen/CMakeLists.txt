@@ -1,4 +1,5 @@
 file(GLOB core_sources
+        Cards/*.cpp
         Core/*.cpp
         Modules/*.cpp
         Utils/*.cpp
@@ -14,6 +15,7 @@ file(GLOB proc_sources
         Processes/*.cpp
         Processes/Fortran/*.f)
 file(GLOB core_includes
+        Cards
         Core
         Modules
         Utils

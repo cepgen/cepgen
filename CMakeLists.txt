@@ -89,8 +89,6 @@ endif()
 if(CMAKE_BUILD_CORE)
   add_subdirectory(CepGen)
   list(APPEND CEPGEN_LIBRARIES CepGen)
-  add_subdirectory(CepGen/Cards)
-  list(APPEND CEPGEN_LIBRARIES CepGenCards)
 endif()
 
 #----- copy the input cards and other files
