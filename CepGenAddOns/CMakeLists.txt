@@ -13,6 +13,7 @@ add_subdirectory(Pythia6Wrapper)
 add_subdirectory(Pythia8Wrapper)
 add_subdirectory(RivetWrapper)
 add_subdirectory(ROOTWrapper)
+add_subdirectory(TopdrawerWrapper)
 
 add_subdirectory(Functionals)
 
