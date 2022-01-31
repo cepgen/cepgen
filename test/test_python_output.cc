@@ -5,7 +5,7 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Processes/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/PythonConfigWriter.h"
+#include "CepGenAddOns/PythonWrapper/PythonConfigWriter.h"
 
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();

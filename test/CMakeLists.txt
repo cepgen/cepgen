@@ -3,6 +3,7 @@
 file(GLOB tests_standalone RELATIVE ${PROJECT_SOURCE_DIR}/test *.cc)
 file(GLOB tests_root RELATIVE ${PROJECT_SOURCE_DIR}/test *.cxx)
 file(GLOB tests_fortran RELATIVE ${PROJECT_SOURCE_DIR}/test *.f)
+file(GLOB tests_python RELATIVE ${PROJECT_SOURCE_DIR}/test test_python_*.cc)
 
 #-- include the utilitaries
 
@@ -19,6 +20,16 @@ if(NOT CEPGEN_HAS_FUNCTIONAL)
 #list(REMOVE_ITEM tests_standalone ${tests_functionals})
   list(REMOVE_ITEM tests_root ${tests_functionals})
 endif()
+
+#-- build all tests requiring the Python library
+
+foreach(exec_src ${tests_python})
+  string(REPLACE ".cc" "" exec_bin ${exec_src})
+  add_executable(${exec_bin} ${exec_src})
+  target_link_libraries(${exec_bin} ${tests_libraries} CepGenPython)
+  list(APPEND tests ${exec_bin})
+endforeach()
+list(REMOVE_ITEM tests_standalone ${tests_python})
 
 #-- build all tests and link them to the core library
 
