@@ -68,7 +68,12 @@ namespace cepgen {
       auto gr = convert(graph);
       ROOTCanvas canv(graph.name().empty() ? def_filename_ : graph.name(), gr.GetTitle());
       setMode(canv, mode);
-      gr.Draw("surf3");
+      if (mode & Mode::col)
+        gr.Draw("colz");
+      else if (mode & Mode::cont)
+        gr.Draw("cont");
+      else
+        gr.Draw("surf3");
       gr.GetHistogram()->SetTitle(
           delatexify(";" + graph.xAxis().label() + ";" + graph.yAxis().label() + ";" + graph.zAxis().label()));
       canv.Prettify(gr.GetHistogram());
