@@ -42,9 +42,11 @@ int main(int argc, char* argv[]) {
   cout << "---------- 1D graph ----------" << endl;
 
   // test 1D graph
-  cepgen::utils::Graph1D graph1d("graph1d", "sin(x)");
+  cepgen::utils::Graph1D graph1d("graph1d", "A graph of the sin(x) function");
   for (double x = -M_PI; x <= M_PI; x += 0.25)
     graph1d.addPoint(x, sin(x));
+  graph1d.xAxis().setLabel("x (rad)");
+  graph1d.yAxis().setLabel("sin(x)");
   plt->draw(graph1d);
 
   cout << endl << "---------- 2D graph ----------" << endl;

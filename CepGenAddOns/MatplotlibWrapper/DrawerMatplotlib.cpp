@@ -17,7 +17,7 @@ namespace cepgen {
       static ParametersDescription description() {
         auto desc = Drawer::description();
         desc.setDescription("Matplotlib plotter");
-        desc.add<bool>("tight", true).setDescription("use a compact layout with minimal margins");
+        desc.add<bool>("tight", false).setDescription("use a compact layout with minimal margins");
         return desc;
       }
 
