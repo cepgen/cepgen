@@ -16,12 +16,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// clang-format off
-#include "CepGenAddOns/PythonWrapper/PythonHandler.h" // ensuring include arrives first
-// clang-format on
+#include <Python.h>
 
 #include <algorithm>
 
+#include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"
@@ -43,6 +42,7 @@
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
+#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 
 #if PY_MAJOR_VERSION < 3
 #define PYTHON2
@@ -50,7 +50,46 @@
 #define Py_DEBUG
 
 namespace cepgen {
+  namespace strfun {
+    class Parameterisation;
+  }
+  class Limits;
+  class ParametersList;
   namespace card {
+    /// CepGen Python configuration cards reader/writer
+    class PythonHandler final : public Handler {
+    public:
+      /// Read a standard configuration card
+      explicit PythonHandler(const ParametersList&);
+
+      static ParametersDescription description();
+
+      Parameters* parse(const std::string&, Parameters*) override;
+
+    private:
+      static constexpr const char* ADDONS_NAME = "addons";
+      static constexpr const char* TIMER_NAME = "timer";
+      static constexpr const char* PROCESS_NAME = "process";
+      static constexpr const char* HADR_NAME = "hadroniser";
+      static constexpr const char* EVT_MOD_SEQ_NAME = "eventSequence";
+      static constexpr const char* LOGGER_NAME = "logger";
+      static constexpr const char* INTEGRATOR_NAME = "integrator";
+      static constexpr const char* GENERATOR_NAME = "generator";
+      static constexpr const char* OUTPUT_NAME = "output";
+
+      static constexpr const char* PDGLIST_NAME = "PDG";
+      static constexpr const char* MCD_NAME = "mcdFile";
+
+      void parseLogging(PyObject*);
+      void parseIntegrator(PyObject*);
+      void parseGenerator(PyObject*);
+      void parseHadroniser(PyObject*);
+      void parseEventModifiers(PyObject*);
+      void parseOutputModule(PyObject*);
+      void parseOutputModules(PyObject*);
+      void parseExtraParticles(PyObject*);
+    };
+
     PythonHandler::PythonHandler(const ParametersList& params) : Handler(params) {}
 
     Parameters* PythonHandler::parse(const std::string& file, Parameters* params) {
@@ -59,7 +98,7 @@ namespace cepgen {
       utils::env::set("PYTHONDONTWRITEBYTECODE", "1");
 
       rt_params_ = params;
-      std::string filename = pythonPath(file);
+      std::string filename = python::pythonPath(file);
       const size_t fn_len = filename.length() + 1;
 
       //Py_DebugFlag = 1;
@@ -107,7 +146,8 @@ namespace cepgen {
 
       PyObject* cfg = PyImport_ImportModule(filename.c_str());  // new
       if (!cfg)
-        throwPythonError("Failed to import the configuration card '" + filename + "'\n (parsed from '" + file + "')");
+        python::throwPythonError("Failed to import the configuration card '" + filename + "'\n (parsed from '" + file +
+                                 "')");
 
       auto parseAttr = [this](PyObject* cfg, const std::string& name, std::function<void(PyObject*)> callback) {
         if (PyObject_HasAttrString(cfg, name.c_str()) == 1) {
@@ -121,7 +161,7 @@ namespace cepgen {
 
       //--- additional libraries to load
       parseAttr(cfg, ADDONS_NAME, [this](PyObject* padd) {
-        for (const auto& lib : getVector<std::string>(padd))
+        for (const auto& lib : python::getVector<std::string>(padd))
           loadLibrary(lib);
       });
 
@@ -130,7 +170,8 @@ namespace cepgen {
       parseAttr(cfg, TIMER_NAME, [this](PyObject*) { rt_params_->setTimeKeeper(new utils::TimeKeeper); });
 
       //--- general particles definition
-      parseAttr(cfg, MCD_NAME, [this](PyObject* ppdg) { pdg::MCDFileParser::parse(get<std::string>(ppdg).c_str()); });
+      parseAttr(
+          cfg, MCD_NAME, [this](PyObject* ppdg) { pdg::MCDFileParser::parse(python::get<std::string>(ppdg).c_str()); });
 
       //--- additional particles definition
       parseAttr(cfg, PDGLIST_NAME, [this](PyObject* pextp) { parseExtraParticles(pextp); });
@@ -139,34 +180,34 @@ namespace cepgen {
       parseAttr(cfg, PROCESS_NAME, [this, &file](PyObject* process) {
         //--- list of process-specific parameters
         ParametersList proc_params;
-        fillParameter(process, "processParameters", proc_params);
+        python::fillParameter(process, "processParameters", proc_params);
 
         //--- type of process to consider
-        PyObject* pproc_name = element(process, ParametersList::MODULE_NAME);  // borrowed
+        PyObject* pproc_name = python::element(process, ParametersList::MODULE_NAME);  // borrowed
         if (!pproc_name)
-          throwPythonError("Failed to extract the process name from the configuration card '" + file + "'!");
+          python::throwPythonError("Failed to extract the process name from the configuration card '" + file + "'!");
 
         //--- process mode
-        rt_params_->setProcess(proc::ProcessFactory::get().build(get<std::string>(pproc_name), proc_params));
+        rt_params_->setProcess(proc::ProcessFactory::get().build(python::get<std::string>(pproc_name), proc_params));
 
         //--- process kinematics
         ParametersList pkin;
-        PyObject* pin_kinematics = element(process, "inKinematics");  // borrowed
+        PyObject* pin_kinematics = python::element(process, "inKinematics");  // borrowed
         if (pin_kinematics)
-          pkin += get<ParametersList>(pin_kinematics);
+          pkin += python::get<ParametersList>(pin_kinematics);
 
-        PyObject* pout_kinematics = element(process, "outKinematics");  // borrowed
+        PyObject* pout_kinematics = python::element(process, "outKinematics");  // borrowed
         if (pout_kinematics)
-          pkin += get<ParametersList>(pout_kinematics);
+          pkin += python::get<ParametersList>(pout_kinematics);
 
         rt_params_->par_kinematics += pkin;
         if (proc_params.has<int>("mode"))
           rt_params_->par_kinematics.set<int>("mode", proc_params.get<int>("mode"));
 
         //--- taming functions
-        PyObject* ptam = element(process, "tamingFunctions");  // borrowed
+        PyObject* ptam = python::element(process, "tamingFunctions");  // borrowed
         if (ptam)
-          for (const auto& p : getVector<ParametersList>(ptam))
+          for (const auto& p : python::getVector<ParametersList>(ptam))
             rt_params_->addTamingFunction(utils::FunctionalFactory::get().build("ROOT", p));
       });
 
@@ -192,34 +233,34 @@ namespace cepgen {
 
     void PythonHandler::parseLogging(PyObject* log) {
       int log_level{(int)utils::Logger::get().level};
-      fillParameter(log, "level", log_level);
+      python::fillParameter(log, "level", log_level);
       utils::Logger::get().level = (utils::Logger::Level)log_level;
       bool extended{utils::Logger::get().extended()};
-      fillParameter(log, "extended", extended);
+      python::fillParameter(log, "extended", extended);
       utils::Logger::get().setExtended(extended);
       std::vector<std::string> enabled_modules;
-      fillParameter(log, "enabledModules", enabled_modules);
+      python::fillParameter(log, "enabledModules", enabled_modules);
       for (const auto& mod : enabled_modules)
         utils::Logger::get().addExceptionRule(mod);
     }
 
     void PythonHandler::parseIntegrator(PyObject* integr) {
       if (!PyDict_Check(integr))
-        throwPythonError("Integrator object should be a dictionary!");
-      rt_params_->par_integrator += get<ParametersList>(integr);
+        python::throwPythonError("Integrator object should be a dictionary!");
+      rt_params_->par_integrator += python::get<ParametersList>(integr);
     }
 
     void PythonHandler::parseGenerator(PyObject* gen) {
       if (!PyDict_Check(gen))
-        throwPythonError("Generation information object should be a dictionary!");
-      auto plist = get<ParametersList>(gen);
+        python::throwPythonError("Generation information object should be a dictionary!");
+      auto plist = python::get<ParametersList>(gen);
       plist.set<int>("maxgen", plist.get<int>("numEvents"));
       rt_params_->generation().setParameters(plist);
     }
 
     void PythonHandler::parseEventModifiers(PyObject* mod) {
       if (!PyList_Check(mod))
-        throwPythonError("Event modification definition object should be a list/Sequence!");
+        python::throwPythonError("Event modification definition object should be a list/Sequence!");
 
       for (Py_ssize_t i = 0; i < PyList_Size(mod); ++i)
         parseHadroniser(PyList_GetItem(mod, i));
@@ -227,28 +268,28 @@ namespace cepgen {
 
     void PythonHandler::parseHadroniser(PyObject* mod) {
       if (!PyDict_Check(mod))
-        throwPythonError("Event modification definition object should be a dictionary!");
+        python::throwPythonError("Event modification definition object should be a dictionary!");
 
-      PyObject* pname = element(mod, ParametersList::MODULE_NAME);  // borrowed
+      PyObject* pname = python::element(mod, ParametersList::MODULE_NAME);  // borrowed
       if (!pname)
-        throwPythonError("Event modification algorithm name is required!");
-      std::string mod_name = get<std::string>(pname);
+        python::throwPythonError("Event modification algorithm name is required!");
+      std::string mod_name = python::get<std::string>(pname);
 
-      rt_params_->addModifier(EventModifierFactory::get().build(mod_name, get<ParametersList>(mod)));
+      rt_params_->addModifier(EventModifierFactory::get().build(mod_name, python::get<ParametersList>(mod)));
 
       auto h = rt_params_->eventModifiersSequence().rbegin()->get();
       {  //--- before calling the init() method
         std::vector<std::string> config;
-        fillParameter(mod, "preConfiguration", config);
+        python::fillParameter(mod, "preConfiguration", config);
         h->readStrings(config);
       }
       h->init();
       {  //--- after init() has been called
         std::vector<std::string> config;
-        fillParameter(mod, "processConfiguration", config);
+        python::fillParameter(mod, "processConfiguration", config);
         for (const auto& block : config) {
           std::vector<std::string> config_blk;
-          fillParameter(mod, block.c_str(), config_blk);
+          python::fillParameter(mod, block.c_str(), config_blk);
           h->readStrings(config_blk);
         }
       }
@@ -256,28 +297,28 @@ namespace cepgen {
 
     void PythonHandler::parseOutputModules(PyObject* mod) {
       if (!PyList_Check(mod))
-        throwPythonError("Output modules definition object should be a list/Sequence!");
+        python::throwPythonError("Output modules definition object should be a list/Sequence!");
 
       for (Py_ssize_t i = 0; i < PyList_Size(mod); ++i)
         parseOutputModule(PyList_GetItem(mod, i));
     }
 
     void PythonHandler::parseOutputModule(PyObject* pout) {
-      if (!is<ParametersList>(pout))
-        throwPythonError("Invalid type for output parameters list!");
+      if (!python::is<ParametersList>(pout))
+        python::throwPythonError("Invalid type for output parameters list!");
 
-      PyObject* pname = element(pout, ParametersList::MODULE_NAME);  // borrowed
+      PyObject* pname = python::element(pout, ParametersList::MODULE_NAME);  // borrowed
       if (!pname)
-        throwPythonError("Output module name is required!");
+        python::throwPythonError("Output module name is required!");
       rt_params_->addOutputModule(
-          io::ExportModuleFactory::get().build(get<std::string>(pname), get<ParametersList>(pout)));
+          io::ExportModuleFactory::get().build(python::get<std::string>(pname), python::get<ParametersList>(pout)));
     }
 
     void PythonHandler::parseExtraParticles(PyObject* pparts) {
-      if (!is<ParametersList>(pparts))
-        throwPythonError("Extra particles definition object should be a parameters list!");
+      if (!python::is<ParametersList>(pparts))
+        python::throwPythonError("Extra particles definition object should be a parameters list!");
 
-      const auto& parts = get<ParametersList>(pparts);
+      const auto& parts = python::get<ParametersList>(pparts);
       for (const auto& k : parts.keys(true)) {
         const auto& part = parts.get<ParticleProperties>(k);
         if (part.pdgid == 0 || part.mass < 0.)

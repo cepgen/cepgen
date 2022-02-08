@@ -17,14 +17,13 @@
  */
 
 // clang-format off
-#include "CepGenAddOns/PythonWrapper/PythonHandler.h" // ensuring include arrives first
+#include "CepGenAddOns/PythonWrapper/PythonUtils.h" // ensuring include arrives first
 // clang-format on
 
 #include <algorithm>
 #include <string>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
 
@@ -37,12 +36,12 @@
 #endif
 
 namespace cepgen {
-  namespace card {
+  namespace python {
     //------------------------------------------------------------------
     // Python API helpers
     //------------------------------------------------------------------
 
-    std::string PythonHandler::pythonPath(const std::string& file) const {
+    std::string pythonPath(const std::string& file) {
       const auto dir = fs::path{file}.remove_filename();
       CG_DEBUG("PythonHandler") << "Adding {" << dir << "} to the default search paths.";
       utils::env::append("PYTHONPATH", dir);
@@ -53,8 +52,8 @@ namespace cepgen {
       return filename;
     }
 
-    void PythonHandler::throwPythonError(const std::string& message) const {
-      throw CG_FATAL("PythonHandler:error").log([this, &message](auto& err) {
+    void throwPythonError(const std::string& message) {
+      throw CG_FATAL("PythonHandler:error").log([&message](auto& err) {
         PyObject *ptype = nullptr, *pvalue = nullptr, *ptraceback_obj = nullptr;
         // retrieve error indicator and clear it to handle ourself the error
         PyErr_Fetch(&ptype, &pvalue, &ptraceback_obj);
@@ -85,7 +84,7 @@ namespace cepgen {
       });
     }
 
-    std::string PythonHandler::decode(PyObject* obj) const {
+    std::string decode(PyObject* obj) {
       if (!obj)
         return "(none)";
 #ifdef PYTHON2
@@ -99,14 +98,14 @@ namespace cepgen {
 #endif
     }
 
-    PyObject* PythonHandler::encode(const char* str) const {
+    PyObject* encode(const char* str) {
       PyObject* obj = PyUnicode_FromString(str);  // new
       if (!obj)
         throwPythonError(utils::format("Failed to encode the following string:\n\t%s", str));
       return obj;
     }
 
-    PyObject* PythonHandler::element(PyObject* obj, const std::string& key) const {
+    PyObject* element(PyObject* obj, const std::string& key) {
       PyObject *pout = nullptr, *nink = encode(key.c_str());
       if (!nink)
         return pout;
@@ -121,7 +120,7 @@ namespace cepgen {
       return pout;
     }
 
-    void PythonHandler::fillParameter(PyObject* parent, const char* key, bool& out) {
+    void fillParameter(PyObject* parent, const char* key, bool& out) {
       PyObject* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve boolean object \"" << key << "\".";
@@ -134,7 +133,7 @@ namespace cepgen {
       }
     }
 
-    void PythonHandler::fillParameter(PyObject* parent, const char* key, int& out) {
+    void fillParameter(PyObject* parent, const char* key, int& out) {
       PyObject* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve integer object \"" << key << "\".";
@@ -147,7 +146,7 @@ namespace cepgen {
       }
     }
 
-    void PythonHandler::fillParameter(PyObject* parent, const char* key, unsigned long& out) {
+    void fillParameter(PyObject* parent, const char* key, unsigned long& out) {
       PyObject* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve unsigned long integer object \"" << key << "\".";
@@ -161,7 +160,7 @@ namespace cepgen {
       }
     }
 
-    void PythonHandler::fillParameter(PyObject* parent, const char* key, unsigned int& out) {
+    void fillParameter(PyObject* parent, const char* key, unsigned int& out) {
       PyObject* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve unsigned integer object \"" << key << "\".";
@@ -175,7 +174,7 @@ namespace cepgen {
       }
     }
 
-    void PythonHandler::fillParameter(PyObject* parent, const char* key, double& out) {
+    void fillParameter(PyObject* parent, const char* key, double& out) {
       PyObject* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve float object \"" << key << "\".";
@@ -188,7 +187,7 @@ namespace cepgen {
       }
     }
 
-    void PythonHandler::fillParameter(PyObject* parent, const char* key, std::string& out) {
+    void fillParameter(PyObject* parent, const char* key, std::string& out) {
       PyObject* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve string object \"" << key << "\".";
@@ -201,7 +200,7 @@ namespace cepgen {
       }
     }
 
-    void PythonHandler::fillParameter(PyObject* obj, const char* key, Limits& out) {
+    void fillParameter(PyObject* obj, const char* key, Limits& out) {
       PyObject* pobj = element(obj, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve limits object \"" << key << "\".";
@@ -214,7 +213,7 @@ namespace cepgen {
       }
     }
 
-    void PythonHandler::fillParameter(PyObject* parent, const char* key, std::vector<double>& out) {
+    void fillParameter(PyObject* parent, const char* key, std::vector<double>& out) {
       out.clear();
       PyObject* pobj = element(parent, key);  // borrowed
       if (!pobj) {
@@ -229,7 +228,7 @@ namespace cepgen {
       }
     }
 
-    void PythonHandler::fillParameter(PyObject* parent, const char* key, std::vector<std::string>& out) {
+    void fillParameter(PyObject* parent, const char* key, std::vector<std::string>& out) {
       out.clear();
       PyObject* pobj = element(parent, key);  // borrowed
       if (!pobj) {
@@ -244,7 +243,7 @@ namespace cepgen {
       }
     }
 
-    void PythonHandler::fillParameter(PyObject* parent, const char* key, std::vector<int>& out) {
+    void fillParameter(PyObject* parent, const char* key, std::vector<int>& out) {
       out.clear();
       PyObject* pobj = element(parent, key);  // borrowed
       if (!pobj) {
@@ -259,7 +258,7 @@ namespace cepgen {
       }
     }
 
-    void PythonHandler::fillParameter(PyObject* parent, const char* key, ParametersList& out) {
+    void fillParameter(PyObject* parent, const char* key, ParametersList& out) {
       PyObject* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve parameters list object \"" << key << "\".";
@@ -273,7 +272,7 @@ namespace cepgen {
       }
     }
 
-    void PythonHandler::fillParameter(PyObject* parent, const char* key, std::vector<ParametersList>& out) {
+    void fillParameter(PyObject* parent, const char* key, std::vector<ParametersList>& out) {
       out.clear();
       PyObject* pobj = element(parent, key);  // borrowed
       if (!pobj) {
@@ -287,5 +286,5 @@ namespace cepgen {
             "Failed to retrieve parameters list collection object \"%s\":\n\t%s", key, e.message().c_str()));
       }
     }
-  }  // namespace card
+  }  // namespace python
 }  // namespace cepgen
