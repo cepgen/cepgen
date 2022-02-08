@@ -45,7 +45,9 @@ namespace cepgen {
     FunctionalLibmatheval::FunctionalLibmatheval(const ParametersList& params) : Functional(params) {
       eval_.reset(evaluator_create(const_cast<char*>(expression_.c_str())));
       if (!eval_)
-        throw CG_ERROR("FunctionalLibmatheval") << "Evaluator was not properly initialised!";
+        throw CG_ERROR("FunctionalLibmatheval")
+            << "Evaluator was not properly initialised.\nLikely a syntax error was detected in the expression \""
+            << expression_ << "\".";
       int num_vars;
       evaluator_get_variables(eval_.get(), &c_parsed_vars_, &num_vars);
       for (int i = 0; i < num_vars; ++i)
