@@ -17,7 +17,7 @@
  */
 
 // clang-format off
-#include "CepGenAddOns/PythonWrapper/PythonHandler.h" // ensuring include arrives first
+#include "CepGenAddOns/PythonWrapper/PythonUtils.h" // ensuring include arrives first
 // clang-format on
 
 #include "CepGen/Core/Exception.h"
@@ -29,13 +29,13 @@
 #endif
 
 namespace cepgen {
-  namespace card {
+  namespace python {
     //------------------------------------------------------------------
     // typed retrieval helpers
     //------------------------------------------------------------------
 
     template <>
-    bool PythonHandler::is<int>(PyObject* obj) const {
+    bool is<int>(PyObject* obj) {
       if (!obj)
         throwPythonError("Failed to retrieve integer object!");
 #ifdef PYTHON2
@@ -46,14 +46,14 @@ namespace cepgen {
     }
 
     template <>
-    bool PythonHandler::is<bool>(PyObject* obj) const {
+    bool is<bool>(PyObject* obj) {
       if (!obj)
         throwPythonError("Failed to retrieve boolean object!");
       return PyBool_Check(obj);
     }
 
     template <>
-    bool PythonHandler::is<long>(PyObject* obj) const {
+    bool is<long>(PyObject* obj) {
 #ifdef PYTHON2
       return PyInt_Check(obj) || PyLong_Check(obj);
 #else
@@ -62,7 +62,7 @@ namespace cepgen {
     }
 
     template <>
-    int PythonHandler::get<int>(PyObject* obj) const {
+    int get<int>(PyObject* obj) {
       if (!is<int>(obj))
         throw CG_ERROR("PythonHandler:get") << "Object has invalid type: integer \"" << obj->ob_type->tp_name << "\".";
 #ifdef PYTHON2
@@ -73,7 +73,7 @@ namespace cepgen {
     }
 
     template <>
-    unsigned long PythonHandler::get<unsigned long>(PyObject* obj) const {
+    unsigned long get<unsigned long>(PyObject* obj) {
       if (!is<long>(obj))
         throw CG_ERROR("PythonHandler:get")
             << "Object has invalid type: unsigned long \"" << obj->ob_type->tp_name << "\".";
@@ -87,7 +87,7 @@ namespace cepgen {
     }
 
     template <>
-    long long PythonHandler::get<long long>(PyObject* obj) const {
+    long long get<long long>(PyObject* obj) {
       if (!is<long>(obj))
         throw CG_ERROR("PythonHandler:get")
             << "Object has invalid type: long long != \"" << obj->ob_type->tp_name << "\".";
@@ -95,14 +95,14 @@ namespace cepgen {
     }
 
     template <>
-    bool PythonHandler::is<double>(PyObject* obj) const {
+    bool is<double>(PyObject* obj) {
       if (!obj)
         throwPythonError("Failed to retrieve float object!");
       return PyFloat_Check(obj);
     }
 
     template <>
-    double PythonHandler::get<double>(PyObject* obj) const {
+    double get<double>(PyObject* obj) {
       if (!is<double>(obj))
         throw CG_ERROR("PythonHandler:get")
             << "Object has invalid type: double != \"" << obj->ob_type->tp_name << "\".";
@@ -110,7 +110,7 @@ namespace cepgen {
     }
 
     template <>
-    bool PythonHandler::is<std::string>(PyObject* obj) const {
+    bool is<std::string>(PyObject* obj) {
       if (!obj)
         throwPythonError("Failed to retrieve string object!");
 #ifdef PYTHON2
@@ -121,7 +121,7 @@ namespace cepgen {
     }
 
     template <>
-    std::string PythonHandler::get<std::string>(PyObject* obj) const {
+    std::string get<std::string>(PyObject* obj) {
       if (!is<std::string>(obj))
         throw CG_ERROR("PythonHandler:get")
             << "Object has invalid type: string != \"" << obj->ob_type->tp_name << "\".";
@@ -129,7 +129,7 @@ namespace cepgen {
     }
 
     template <>
-    bool PythonHandler::is<Limits>(PyObject* obj) const {
+    bool is<Limits>(PyObject* obj) {
       if (!obj)
         throwPythonError("Failed to retrieve limits object!");
       if (!isVector<double>(obj))
@@ -139,7 +139,7 @@ namespace cepgen {
     }
 
     template <>
-    Limits PythonHandler::get<Limits>(PyObject* obj) const {
+    Limits get<Limits>(PyObject* obj) {
       if (!is<Limits>(obj))
         throw CG_ERROR("PythonHandler:get")
             << "Object has invalid type: limits != \"" << obj->ob_type->tp_name << "\".";
@@ -150,14 +150,14 @@ namespace cepgen {
     }
 
     template <>
-    bool PythonHandler::is<ParametersList>(PyObject* obj) const {
+    bool is<ParametersList>(PyObject* obj) {
       if (!obj)
         throwPythonError("Failed to retrieve parameters list object!");
       return PyDict_Check(obj);
     }
 
     template <typename T>
-    bool PythonHandler::isVector(PyObject* obj) const {
+    bool isVector(PyObject* obj) {
       if (!obj)
         return false;
       if (!PyTuple_Check(obj) && !PyList_Check(obj))
@@ -172,7 +172,7 @@ namespace cepgen {
     }
 
     template <typename T>
-    std::vector<T> PythonHandler::getVector(PyObject* obj) const {
+    std::vector<T> getVector(PyObject* obj) {
       if (!isVector<T>(obj))
         throw CG_ERROR("PythonHandler:get")
             << "Object has invalid type: list/tuple != \"" << obj->ob_type->tp_name << "\".";
@@ -190,7 +190,7 @@ namespace cepgen {
     }
 
     template <>
-    ParametersList PythonHandler::get<ParametersList>(PyObject* obj) const {
+    ParametersList get<ParametersList>(PyObject* obj) {
       if (!is<ParametersList>(obj))
         throw CG_ERROR("PythonHandler:get")
             << "Object has invalid type: parameters list != \"" << obj->ob_type->tp_name << "\".";
@@ -227,5 +227,5 @@ namespace cepgen {
       }
       return out;
     }
-  }  // namespace card
+  }  // namespace python
 }  // namespace cepgen
