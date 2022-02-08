@@ -43,7 +43,7 @@ namespace cepgen {
     FunctionalTinyExpr::FunctionalTinyExpr(const ParametersList& params) : Functional(params) {
       std::vector<te_variable> te_vars;
       for (size_t i = 0; i < vars_.size(); ++i)
-        te_vars.emplace_back(te_variable{vars_.at(i).c_str(), &values_.at(i)});
+        te_vars.emplace_back(te_variable{vars_.at(i).c_str(), &values_.at(i), TE_VARIABLE, nullptr});
       int error;
       eval_.reset(te_compile(expression_.c_str(), te_vars.data(), vars_.size(), &error));
       if (!eval_) {
