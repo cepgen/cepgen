@@ -15,6 +15,7 @@ add_subdirectory(Pythia8Wrapper)
 add_subdirectory(PythonWrapper)
 add_subdirectory(RivetWrapper)
 add_subdirectory(ROOTWrapper)
+add_subdirectory(TinyExprWrapper)
 add_subdirectory(TopdrawerWrapper)
 
 add_subdirectory(Functionals)
