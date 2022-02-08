@@ -16,13 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// clang-format off
-#include "CepGenAddOns/PythonWrapper/PythonUtils.h" // ensuring include arrives first
-// clang-format on
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/String.h"
+#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 
 #if PY_MAJOR_VERSION < 3
 #define PYTHON2
@@ -37,7 +34,7 @@ namespace cepgen {
     template <>
     bool is<int>(PyObject* obj) {
       if (!obj)
-        throwPythonError("Failed to retrieve integer object!");
+        error("Failed to retrieve integer object!");
 #ifdef PYTHON2
       return PyInt_Check(obj);
 #else
@@ -48,7 +45,7 @@ namespace cepgen {
     template <>
     bool is<bool>(PyObject* obj) {
       if (!obj)
-        throwPythonError("Failed to retrieve boolean object!");
+        error("Failed to retrieve boolean object!");
       return PyBool_Check(obj);
     }
 
@@ -81,7 +78,7 @@ namespace cepgen {
       return PyInt_AsUnsignedLongMask(obj);
 #else
       if (!PyLong_Check(obj))
-        throwPythonError(utils::format("Object has invalid type: unsigned long != %s", obj->ob_type->tp_name));
+        error(utils::format("Object has invalid type: unsigned long != %s", obj->ob_type->tp_name));
       return PyLong_AsUnsignedLong(obj);
 #endif
     }
@@ -97,7 +94,7 @@ namespace cepgen {
     template <>
     bool is<double>(PyObject* obj) {
       if (!obj)
-        throwPythonError("Failed to retrieve float object!");
+        error("Failed to retrieve float object!");
       return PyFloat_Check(obj);
     }
 
@@ -112,7 +109,7 @@ namespace cepgen {
     template <>
     bool is<std::string>(PyObject* obj) {
       if (!obj)
-        throwPythonError("Failed to retrieve string object!");
+        error("Failed to retrieve string object!");
 #ifdef PYTHON2
       return PyString_Check(obj);
 #else
@@ -131,7 +128,7 @@ namespace cepgen {
     template <>
     bool is<Limits>(PyObject* obj) {
       if (!obj)
-        throwPythonError("Failed to retrieve limits object!");
+        error("Failed to retrieve limits object!");
       if (!isVector<double>(obj))
         return false;
       const size_t size = getVector<double>(obj).size();
@@ -152,7 +149,7 @@ namespace cepgen {
     template <>
     bool is<ParametersList>(PyObject* obj) {
       if (!obj)
-        throwPythonError("Failed to retrieve parameters list object!");
+        error("Failed to retrieve parameters list object!");
       return PyDict_Check(obj);
     }
 
@@ -165,7 +162,7 @@ namespace cepgen {
       const bool tuple = PyTuple_Check(obj);
       if ((tuple ? PyTuple_Size(obj) : PyList_Size(obj)) == 0)
         return true;
-      PyObject* pfirst = tuple ? PyTuple_GetItem(obj, 0) : PyList_GetItem(obj, 0);
+      auto* pfirst = tuple ? PyTuple_GetItem(obj, 0) : PyList_GetItem(obj, 0);
       if (!is<T>(pfirst))
         return false;
       return true;
@@ -181,9 +178,9 @@ namespace cepgen {
       const Py_ssize_t num_entries = tuple ? PyTuple_Size(obj) : PyList_Size(obj);
       //--- check every single element inside the list/tuple
       for (Py_ssize_t i = 0; i < num_entries; ++i) {
-        PyObject* pit = tuple ? PyTuple_GetItem(obj, i) : PyList_GetItem(obj, i);
+        auto* pit = tuple ? PyTuple_GetItem(obj, i) : PyList_GetItem(obj, i);
         if (!is<T>(pit))
-          throwPythonError("Mixed types detected in vector");
+          error("Mixed types detected in vector");
         vec.emplace_back(get<T>(pit));
       }
       return vec;
@@ -223,7 +220,7 @@ namespace cepgen {
           else  //if (isVector<ParametersList>(pvalue))
             out.set<std::vector<ParametersList> >(skey, getVector<ParametersList>(pvalue));
         } else
-          throwPythonError("Invalid object retrieved as parameters list value!");
+          error("Invalid object retrieved as parameters list value!");
       }
       return out;
     }

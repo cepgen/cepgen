@@ -16,9 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// clang-format off
-#include "CepGenAddOns/PythonWrapper/PythonUtils.h" // ensuring include arrives first
-// clang-format on
 
 #include <algorithm>
 #include <string>
@@ -26,6 +23,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
+#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 
 // clang-format off
 #include <frameobject.h>
@@ -52,7 +50,7 @@ namespace cepgen {
       return filename;
     }
 
-    void throwPythonError(const std::string& message) {
+    void error(const std::string& message) {
       throw CG_FATAL("PythonHandler:error").log([&message](auto& err) {
         PyObject *ptype = nullptr, *pvalue = nullptr, *ptraceback_obj = nullptr;
         // retrieve error indicator and clear it to handle ourself the error
@@ -99,9 +97,9 @@ namespace cepgen {
     }
 
     PyObject* encode(const char* str) {
-      PyObject* obj = PyUnicode_FromString(str);  // new
+      auto* obj = PyUnicode_FromString(str);  // new
       if (!obj)
-        throwPythonError(utils::format("Failed to encode the following string:\n\t%s", str));
+        error(utils::format("Failed to encode the following string:\n\t%s", str));
       return obj;
     }
 
@@ -121,7 +119,7 @@ namespace cepgen {
     }
 
     void fillParameter(PyObject* parent, const char* key, bool& out) {
-      PyObject* pobj = element(parent, key);  // borrowed
+      auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve boolean object \"" << key << "\".";
         return;
@@ -129,12 +127,12 @@ namespace cepgen {
       try {
         out = (bool)get<int>(pobj);
       } catch (const Exception& e) {
-        throwPythonError(utils::format("Failed to retrieve boolean object \"%s\":\n\t%s", key, e.message().c_str()));
+        error(utils::format("Failed to retrieve boolean object \"%s\":\n\t", key) + e.message());
       }
     }
 
     void fillParameter(PyObject* parent, const char* key, int& out) {
-      PyObject* pobj = element(parent, key);  // borrowed
+      auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve integer object \"" << key << "\".";
         return;
@@ -142,12 +140,12 @@ namespace cepgen {
       try {
         out = get<int>(pobj);
       } catch (const Exception& e) {
-        throwPythonError(utils::format("Failed to retrieve integer object \"%s\":\n\t%s", key, e.message().c_str()));
+        error(utils::format("Failed to retrieve integer object \"%s\":\n\t", key) + e.message());
       }
     }
 
     void fillParameter(PyObject* parent, const char* key, unsigned long& out) {
-      PyObject* pobj = element(parent, key);  // borrowed
+      auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve unsigned long integer object \"" << key << "\".";
         return;
@@ -155,13 +153,12 @@ namespace cepgen {
       try {
         out = get<unsigned long>(pobj);
       } catch (const Exception& e) {
-        throwPythonError(
-            utils::format("Failed to retrieve unsigned long integer object \"%s\":\n\t%s", key, e.message().c_str()));
+        error(utils::format("Failed to retrieve unsigned long integer object \"%s\":\n\t", key) + e.message());
       }
     }
 
     void fillParameter(PyObject* parent, const char* key, unsigned int& out) {
-      PyObject* pobj = element(parent, key);  // borrowed
+      auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve unsigned integer object \"" << key << "\".";
         return;
@@ -169,13 +166,12 @@ namespace cepgen {
       try {
         out = get<unsigned long>(pobj);
       } catch (const Exception& e) {
-        throwPythonError(
-            utils::format("Failed to retrieve unsigned integer object \"%s\":\n\t%s", key, e.message().c_str()));
+        error(utils::format("Failed to retrieve unsigned integer object \"%s\":\n\t", key) + e.message());
       }
     }
 
     void fillParameter(PyObject* parent, const char* key, double& out) {
-      PyObject* pobj = element(parent, key);  // borrowed
+      auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve float object \"" << key << "\".";
         return;
@@ -183,12 +179,12 @@ namespace cepgen {
       try {
         out = get<double>(pobj);
       } catch (const Exception& e) {
-        throwPythonError(utils::format("Failed to retrieve float object \"%s\":\n\t%s", key, e.message().c_str()));
+        error(utils::format("Failed to retrieve float object \"%s\":\n\t", key) + e.message());
       }
     }
 
     void fillParameter(PyObject* parent, const char* key, std::string& out) {
-      PyObject* pobj = element(parent, key);  // borrowed
+      auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve string object \"" << key << "\".";
         return;
@@ -196,12 +192,12 @@ namespace cepgen {
       try {
         out = get<std::string>(pobj);
       } catch (const Exception& e) {
-        throwPythonError(utils::format("Failed to retrieve string object \"%s\":\n\t%s", key, e.message().c_str()));
+        error(utils::format("Failed to retrieve string object \"%s\":\n\t", key) + e.message());
       }
     }
 
     void fillParameter(PyObject* obj, const char* key, Limits& out) {
-      PyObject* pobj = element(obj, key);  // borrowed
+      auto* pobj = element(obj, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve limits object \"" << key << "\".";
         return;
@@ -209,13 +205,13 @@ namespace cepgen {
       try {
         out = get<Limits>(pobj);
       } catch (const Exception& e) {
-        throwPythonError(utils::format("Failed to retrieve limits object \"%s\":\n\t%s", key, e.message().c_str()));
+        error(utils::format("Failed to retrieve limits object \"%s\":\n\t", key) + e.message());
       }
     }
 
     void fillParameter(PyObject* parent, const char* key, std::vector<double>& out) {
       out.clear();
-      PyObject* pobj = element(parent, key);  // borrowed
+      auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve floats collection object \"" << key << "\".";
         return;
@@ -223,14 +219,13 @@ namespace cepgen {
       try {
         out = getVector<double>(pobj);
       } catch (const Exception& e) {
-        throwPythonError(
-            utils::format("Failed to retrieve floats collection object \"%s\":\n\t%s", key, e.message().c_str()));
+        error(utils::format("Failed to retrieve floats collection object \"%s\":\n\t", key) + e.message());
       }
     }
 
     void fillParameter(PyObject* parent, const char* key, std::vector<std::string>& out) {
       out.clear();
-      PyObject* pobj = element(parent, key);  // borrowed
+      auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve strings collection object \"" << key << "\".";
         return;
@@ -238,14 +233,13 @@ namespace cepgen {
       try {
         out = getVector<std::string>(pobj);
       } catch (const Exception& e) {
-        throwPythonError(
-            utils::format("Failed to retrieve strings collection object \"%s\":\n\t%s", key, e.message().c_str()));
+        error(utils::format("Failed to retrieve strings collection object \"%s\":\n\t", key) + e.message());
       }
     }
 
     void fillParameter(PyObject* parent, const char* key, std::vector<int>& out) {
       out.clear();
-      PyObject* pobj = element(parent, key);  // borrowed
+      auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve integers collection object \"" << key << "\".";
         return;
@@ -253,13 +247,12 @@ namespace cepgen {
       try {
         out = getVector<int>(pobj);
       } catch (const Exception& e) {
-        throwPythonError(
-            utils::format("Failed to retrieve integers collection object \"%s\":\n\t%s", key, e.message().c_str()));
+        error(utils::format("Failed to retrieve integers collection object \"%s\":\n\t", key) + e.message());
       }
     }
 
     void fillParameter(PyObject* parent, const char* key, ParametersList& out) {
-      PyObject* pobj = element(parent, key);  // borrowed
+      auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve parameters list object \"" << key << "\".";
         return;
@@ -267,14 +260,13 @@ namespace cepgen {
       try {
         out += get<ParametersList>(pobj);
       } catch (const Exception& e) {
-        throwPythonError(
-            utils::format("Failed to retrieve parameters list object \"%s\":\n\t%s", key, e.message().c_str()));
+        error(utils::format("Failed to retrieve parameters list object \"%s\":\n\t", key) + e.message());
       }
     }
 
     void fillParameter(PyObject* parent, const char* key, std::vector<ParametersList>& out) {
       out.clear();
-      PyObject* pobj = element(parent, key);  // borrowed
+      auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
         CG_DEBUG("PythonHandler") << "Failed to retrieve parameters list collection object \"" << key << "\".";
         return;
@@ -282,8 +274,7 @@ namespace cepgen {
       try {
         out = getVector<ParametersList>(pobj);
       } catch (const Exception& e) {
-        throwPythonError(utils::format(
-            "Failed to retrieve parameters list collection object \"%s\":\n\t%s", key, e.message().c_str()));
+        error(utils::format("Failed to retrieve parameters list collection object \"%s\":\n\t", key) + e.message());
       }
     }
   }  // namespace python

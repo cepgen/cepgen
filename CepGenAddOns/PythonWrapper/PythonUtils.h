@@ -29,7 +29,7 @@
 
 namespace cepgen {
   namespace python {
-    void throwPythonError(const std::string&);
+    void error(const std::string&);
     std::string pythonPath(const std::string&);
     PyObject* element(PyObject*, const std::string&);
     PyObject* encode(const char* str);
