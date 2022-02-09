@@ -219,8 +219,11 @@ namespace cepgen {
             out.set<std::vector<std::string> >(skey, getVector<std::string>(pvalue));
           else  //if (isVector<ParametersList>(pvalue))
             out.set<std::vector<ParametersList> >(skey, getVector<ParametersList>(pvalue));
-        } else
-          error("Invalid object retrieved as parameters list value!");
+        } else if (Py_IS_TYPE(pvalue, &_PyNone_Type)) {
+          out.set<std::string>(skey, "None");
+        } else {
+          error(utils::format("Invalid object (%s) retrieved as parameters list value!", pvalue->ob_type->tp_name));
+        }
       }
       return out;
     }
