@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include <algorithm>
 #include <string>
 
@@ -60,7 +59,7 @@ namespace cepgen {
         PyErr_NormalizeException(&ptype, &pvalue, &ptraceback_obj);
         err << message;
         if (ptype != nullptr) {  // we can start the traceback
-          err << "\n\tError: " << decode(PyObject_Str(pvalue));
+          err << "\nError: " << decode(PyObject_Str(pvalue));
           PyTracebackObject* ptraceback = (PyTracebackObject*)ptraceback_obj;
           std::string tabul = "↪ ";
           if (ptraceback != nullptr) {
