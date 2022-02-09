@@ -50,11 +50,6 @@
 #define Py_DEBUG
 
 namespace cepgen {
-  namespace strfun {
-    class Parameterisation;
-  }
-  class Limits;
-  class ParametersList;
   namespace card {
     /// CepGen Python configuration cards reader/writer
     class PythonHandler final : public Handler {
