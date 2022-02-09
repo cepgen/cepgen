@@ -21,6 +21,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Utils/Functional.h"
+#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 
 namespace cepgen {
   namespace utils {
@@ -55,20 +56,12 @@ namespace cepgen {
          << "\treturn " << expression_ << "\n";
       CG_LOG << os.str();
       value_ = PyRun_String(os.str().c_str(), Py_file_input, global, local);
-      if (!value_) {
-        if (PyErr_Occurred()) {
-        }
-        throw CG_ERROR("FunctionalPython")
-            << "Failed to initialise the Python functional with \"" << expression_ << "\".";
-      }
+      if (!value_)
+        python::error("Failed to initialise the Python functional with \"" + expression_ + "\".");
       Py_DECREF(value_);
       func_ = PyObject_GetAttrString(mod_, "custom_functional");
-      if (!func_ || !PyCallable_Check(func_)) {
-        if (PyErr_Occurred()) {
-          PyErr_Print();
-        }
-        throw CG_ERROR("FunctionalPython") << "Failed to retrieve/cast the object to a Python functional.";
-      }
+      if (!func_ || !PyCallable_Check(func_))
+        python::error("Failed to retrieve/cast the object to a Python functional.");
     }
 
     FunctionalPython::~FunctionalPython() {
