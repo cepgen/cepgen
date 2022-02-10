@@ -55,12 +55,13 @@ namespace cepgen {
         os << sep << var << ": float", sep = ", ";
       os << ") -> float:\n"
          << "\treturn " << expression_ << "\n";
-      CG_LOG << os.str();
+      CG_DEBUG("FunctionalPython") << "Will compile Python expression:\n" << os.str();
       {
         auto* value = PyRun_String(os.str().c_str(), Py_file_input, global, local);  // new
         //PyRun_SimpleString(os.str().c_str());
         if (!value)
           python::error("Failed to initialise the Python functional with \"" + expression_ + "\".");
+        CG_DEBUG("FunctionalPython") << "Python expression compilation output: " << python::get<ParametersList>(value);
         Py_DECREF(value);
       }
       func_ = PyObject_GetAttrString(mod_, "custom_functional");
