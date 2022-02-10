@@ -75,16 +75,12 @@ namespace cepgen {
     }
 
     double FunctionalPython::eval(const std::vector<double>& x) const {
-      auto* args = PyTuple_New(x.size());
-      PyObject* value;
-      for (size_t i = 0; i < x.size(); ++i) {
-        value = PyFloat_FromDouble(x.at(i));
-        PyTuple_SetItem(args, i, value);
-      }
-      value = PyObject_CallObject(func_, args);
+      auto* args = python::newTuple(x);
+      auto* value = PyObject_CallObject(func_, args);
       Py_DECREF(args);
       auto ret = python::get<double>(value);
       CG_LOG << "ret:" << ret;
+      Py_DECREF(value);
       return ret;
     }
 

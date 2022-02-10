@@ -37,12 +37,19 @@ namespace cepgen {
 
     template <typename T>
     bool is(PyObject* obj);
+
     template <typename T>
     T get(PyObject* obj);
+    template <typename T>
+    PyObject* set(const T&);
+
     template <typename T>
     bool isVector(PyObject* obj);
     template <typename T>
     std::vector<T> getVector(PyObject* obj);
+
+    template <typename T>
+    PyObject* newTuple(const std::vector<T>&);
 
     void fillParameter(PyObject* parent, const char* key, bool& out);
     void fillParameter(PyObject* parent, const char* key, int& out);
@@ -60,25 +67,41 @@ namespace cepgen {
     template <>
     bool is<bool>(PyObject* obj);
     template <>
+    PyObject* set<bool>(const bool&);
+
+    template <>
     bool is<int>(PyObject* obj);
+
     template <>
     bool is<long>(PyObject* obj);
+
     template <>
     int get<int>(PyObject* obj);
     template <>
+    PyObject* set<int>(const int&);
+
+    template <>
     unsigned long get<unsigned long>(PyObject* obj);
+
     template <>
     bool is<ParametersList>(PyObject* obj);
     template <>
     ParametersList get<ParametersList>(PyObject* obj);
+
     template <>
     bool is<double>(PyObject* obj);
     template <>
     double get<double>(PyObject* obj);
     template <>
+    PyObject* set<double>(const double&);
+
+    template <>
     bool is<std::string>(PyObject* obj);
     template <>
     std::string get<std::string>(PyObject* obj);
+    template <>
+    PyObject* set<std::string>(const std::string&);
+
     template <>
     bool is<Limits>(PyObject* obj);
     template <>
