@@ -52,8 +52,8 @@ namespace cepgen {
           << "def custom_functional(";
       std::string sep;
       for (const auto& var : vars_)
-        os << sep << var, sep = ", ";
-      os << "):\n"
+        os << sep << var << ": float", sep = ", ";
+      os << ") -> float:\n"
          << "\treturn " << expression_ << "\n";
       CG_LOG << os.str();
       {
