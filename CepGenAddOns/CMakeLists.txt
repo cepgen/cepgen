@@ -1,5 +1,9 @@
 #----- check the external dependencies for physics utilities
 
+if(CMAKE_BUILD_TESTS)
+  enable_testing()
+endif()
+
 add_subdirectory(APFELWrapper)
 add_subdirectory(BoostWrapper)
 add_subdirectory(DelphesWrapper)
