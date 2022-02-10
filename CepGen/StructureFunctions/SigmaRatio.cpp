@@ -17,7 +17,6 @@
  */
 
 #include <cmath>
-#include <iostream>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
