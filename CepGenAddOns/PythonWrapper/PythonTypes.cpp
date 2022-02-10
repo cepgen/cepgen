@@ -266,6 +266,41 @@ namespace cepgen {
       }
       return out;
     }
+
+    template <>
+    PyObject* set<ParametersList>(const ParametersList& plist) {
+      auto* obj = PyDict_New();
+      for (const auto& key : plist.keys(true)) {
+        PyObject* val{nullptr};
+        if (plist.has<bool>(key))
+          val = set<bool>(plist.get<bool>(key));
+        else if (plist.has<int>(key))
+          val = set<int>(plist.get<int>(key));
+        else if (plist.has<double>(key))
+          val = set<double>(plist.get<double>(key));
+        else if (plist.has<std::string>(key))
+          val = set<std::string>(plist.get<std::string>(key));
+        else if (plist.has<ParametersList>(key))
+          val = set<ParametersList>(plist.get<ParametersList>(key));
+        else if (plist.has<Limits>(key)) {
+          const auto& lim = plist.get<Limits>(key);
+          val = newTuple<double>({lim.min(), lim.max()});
+        } else if (plist.has<std::vector<int> >(key))
+          val = newTuple<int>(plist.get<std::vector<int> >(key));
+        else if (plist.has<std::vector<double> >(key))
+          val = newTuple<double>(plist.get<std::vector<double> >(key));
+        else if (plist.has<std::vector<std::string> >(key))
+          val = newTuple<std::string>(plist.get<std::vector<std::string> >(key));
+        else
+          error("Parameters list has an untranslatable object for key=" + key);
+        if (val) {
+          PyDict_SetItem(obj, encode(key), set<int>(plist.get<int>(key)));
+          Py_DECREF(val);
+        }
+      }
+      return obj;
+    }
+
     template PyObject* newTuple<bool>(const std::vector<bool>&);
     template PyObject* newTuple<int>(const std::vector<int>&);
     template PyObject* newTuple<double>(const std::vector<double>&);

@@ -87,6 +87,8 @@ namespace cepgen {
     bool is<ParametersList>(PyObject* obj);
     template <>
     ParametersList get<ParametersList>(PyObject* obj);
+    template <>
+    PyObject* set<ParametersList>(const ParametersList&);
 
     template <>
     bool is<double>(PyObject* obj);
