@@ -22,12 +22,15 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/FunctionalFactory.h"
+#include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/String.h"
 
 using namespace std;
 
-int main() {
+int main(int argc, char* argv[]) {
+  cepgen::ArgumentsParser(argc, argv).parse();
+
   const double epsilon = 1.e-9;  // tolerance
   cepgen::initialise();
 
