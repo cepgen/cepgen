@@ -50,8 +50,8 @@ namespace cepgen {
     }
 
     template <>
-    PyObject* set<bool>(const bool& val) {
-      return PyBool_FromLong(val);
+    ObjectPtr set<bool>(const bool& val) {
+      return ObjectPtr(PyBool_FromLong(val));
     }
 
     template <>
@@ -75,11 +75,11 @@ namespace cepgen {
     }
 
     template <>
-    PyObject* set<int>(const int& val) {
+    ObjectPtr set<int>(const int& val) {
 #ifdef PYTHON2
-      return PyInt_FromLong(val);
+      return ObjectPtr(PyInt_FromLong(val));
 #else
-      return PyLong_FromLong(val);
+      return ObjectPtr(PyLong_FromLong(val));
 #endif
     }
 
@@ -121,8 +121,8 @@ namespace cepgen {
     }
 
     template <>
-    PyObject* set<double>(const double& val) {
-      return PyFloat_FromDouble(val);
+    ObjectPtr set<double>(const double& val) {
+      return ObjectPtr(PyFloat_FromDouble(val));
     }
 
     template <>
@@ -145,11 +145,11 @@ namespace cepgen {
     }
 
     template <>
-    PyObject* set<std::string>(const std::string& val) {
+    ObjectPtr set<std::string>(const std::string& val) {
 #ifdef PYTHON2
-      return PyString_FromString(val.c_str());
+      return ObjectPtr(PyString_FromString(val.c_str()));
 #else
-      return PyUnicode_FromString(val.c_str());
+      return ObjectPtr(PyUnicode_FromString(val.c_str()));
 #endif
     }
 
@@ -215,13 +215,10 @@ namespace cepgen {
     }
 
     template <typename T>
-    PyObject* newTuple(const std::vector<T>& vec) {
-      auto* tuple = PyTuple_New(vec.size());
-      for (size_t i = 0; i < vec.size(); ++i) {
-        auto* value = set<T>(vec.at(i));
-        PyTuple_SetItem(tuple, i, value);
-        Py_DECREF(value);
-      }
+    ObjectPtr newTuple(const std::vector<T>& vec) {
+      ObjectPtr tuple(PyTuple_New(vec.size()));
+      for (size_t i = 0; i < vec.size(); ++i)
+        PyTuple_SetItem(tuple.get(), i, set<T>(vec.at(i)).get());
       return tuple;
     }
 
@@ -268,42 +265,39 @@ namespace cepgen {
     }
 
     template <>
-    PyObject* set<ParametersList>(const ParametersList& plist) {
-      auto* obj = PyDict_New();
+    ObjectPtr set<ParametersList>(const ParametersList& plist) {
+      ObjectPtr obj(PyDict_New());
       for (const auto& key : plist.keys(true)) {
         PyObject* val{nullptr};
         if (plist.has<bool>(key))
-          val = set<bool>(plist.get<bool>(key));
+          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<bool>(key)).get());
         else if (plist.has<int>(key))
-          val = set<int>(plist.get<int>(key));
+          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<int>(key)).get());
         else if (plist.has<double>(key))
-          val = set<double>(plist.get<double>(key));
+          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<double>(key)).get());
         else if (plist.has<std::string>(key))
-          val = set<std::string>(plist.get<std::string>(key));
+          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<std::string>(key)).get());
         else if (plist.has<ParametersList>(key))
-          val = set<ParametersList>(plist.get<ParametersList>(key));
+          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<ParametersList>(key)).get());
         else if (plist.has<Limits>(key)) {
           const auto& lim = plist.get<Limits>(key);
-          val = newTuple<double>({lim.min(), lim.max()});
+          PyDict_SetItem(obj.get(), encode(key).get(), newTuple<double>({lim.min(), lim.max()}).get());
         } else if (plist.has<std::vector<int> >(key))
-          val = newTuple<int>(plist.get<std::vector<int> >(key));
+          PyDict_SetItem(obj.get(), encode(key).get(), newTuple<int>(plist.get<std::vector<int> >(key)).get());
         else if (plist.has<std::vector<double> >(key))
-          val = newTuple<double>(plist.get<std::vector<double> >(key));
+          PyDict_SetItem(obj.get(), encode(key).get(), newTuple<double>(plist.get<std::vector<double> >(key)).get());
         else if (plist.has<std::vector<std::string> >(key))
-          val = newTuple<std::string>(plist.get<std::vector<std::string> >(key));
+          PyDict_SetItem(
+              obj.get(), encode(key).get(), newTuple<std::string>(plist.get<std::vector<std::string> >(key)).get());
         else
           error("Parameters list has an untranslatable object for key=" + key);
-        if (val) {
-          PyDict_SetItem(obj, encode(key), set<int>(plist.get<int>(key)));
-          Py_DECREF(val);
-        }
       }
       return obj;
     }
 
-    template PyObject* newTuple<bool>(const std::vector<bool>&);
-    template PyObject* newTuple<int>(const std::vector<int>&);
-    template PyObject* newTuple<double>(const std::vector<double>&);
-    template PyObject* newTuple<std::string>(const std::vector<std::string>&);
+    template ObjectPtr newTuple<bool>(const std::vector<bool>&);
+    template ObjectPtr newTuple<int>(const std::vector<int>&);
+    template ObjectPtr newTuple<double>(const std::vector<double>&);
+    template ObjectPtr newTuple<std::string>(const std::vector<std::string>&);
   }  // namespace python
 }  // namespace cepgen

@@ -29,10 +29,15 @@
 
 namespace cepgen {
   namespace python {
+    struct PyObject_deleter {
+      void operator()(PyObject* obj) { Py_DECREF(obj); }
+    };
+    typedef std::unique_ptr<PyObject, PyObject_deleter> ObjectPtr;
+
     void error(const std::string&);
     std::string pythonPath(const std::string&);
     PyObject* element(PyObject*, const std::string&);
-    PyObject* encode(const std::string&);
+    ObjectPtr encode(const std::string&);
     std::string decode(PyObject* obj);
 
     template <typename T>
@@ -41,7 +46,7 @@ namespace cepgen {
     template <typename T>
     T get(PyObject* obj);
     template <typename T>
-    PyObject* set(const T&);
+    ObjectPtr set(const T&);
 
     template <typename T>
     bool isVector(PyObject* obj);
@@ -49,7 +54,7 @@ namespace cepgen {
     std::vector<T> getVector(PyObject* obj);
 
     template <typename T>
-    PyObject* newTuple(const std::vector<T>&);
+    ObjectPtr newTuple(const std::vector<T>&);
 
     void fillParameter(PyObject* parent, const char* key, bool& out);
     void fillParameter(PyObject* parent, const char* key, int& out);
@@ -67,7 +72,7 @@ namespace cepgen {
     template <>
     bool is<bool>(PyObject* obj);
     template <>
-    PyObject* set<bool>(const bool&);
+    ObjectPtr set<bool>(const bool&);
 
     template <>
     bool is<int>(PyObject* obj);
@@ -78,7 +83,7 @@ namespace cepgen {
     template <>
     int get<int>(PyObject* obj);
     template <>
-    PyObject* set<int>(const int&);
+    ObjectPtr set<int>(const int&);
 
     template <>
     unsigned long get<unsigned long>(PyObject* obj);
@@ -88,21 +93,21 @@ namespace cepgen {
     template <>
     ParametersList get<ParametersList>(PyObject* obj);
     template <>
-    PyObject* set<ParametersList>(const ParametersList&);
+    ObjectPtr set<ParametersList>(const ParametersList&);
 
     template <>
     bool is<double>(PyObject* obj);
     template <>
     double get<double>(PyObject* obj);
     template <>
-    PyObject* set<double>(const double&);
+    ObjectPtr set<double>(const double&);
 
     template <>
     bool is<std::string>(PyObject* obj);
     template <>
     std::string get<std::string>(PyObject* obj);
     template <>
-    PyObject* set<std::string>(const std::string&);
+    ObjectPtr set<std::string>(const std::string&);
 
     template <>
     bool is<Limits>(PyObject* obj);
