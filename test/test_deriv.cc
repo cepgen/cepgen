@@ -17,7 +17,6 @@
  */
 
 #include <cmath>
-#include <iostream>
 #include <random>
 
 #include "CepGen/Core/Exception.h"

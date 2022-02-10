@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ExportModule.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Generator.h"
@@ -40,10 +39,12 @@ int main(int argc, char* argv[]) {
       .parse();
 
   if (list) {
-    cout << "List of export modules available:\n"
-         << "=================================\n";
-    for (const auto& mod : io::ExportModuleFactory::get().modules())
-      cout << mod << std::endl;
+    CG_LOG.log([](auto& log) {
+      log << "List of export modules available:\n"
+          << "=================================";
+      for (const auto& mod : io::ExportModuleFactory::get().modules())
+        log << "\n" << mod;
+    });
     return 0;
   }
 

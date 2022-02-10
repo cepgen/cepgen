@@ -17,9 +17,9 @@
  */
 
 #include <cmath>
-#include <iostream>
 #include <random>
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
 
   auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
 
-  cout << "---------- 1D graph ----------" << endl;
+  CG_LOG << "---------- 1D graph ----------";
 
   // test 1D graph
   cepgen::utils::Graph1D graph1d("graph1d", "A graph of the sin(x) function");
@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
   graph1d.yAxis().setLabel("sin(x)");
   plt->draw(graph1d);
 
-  cout << endl << "---------- 2D graph ----------" << endl;
+  CG_LOG << "\n---------- 2D graph ----------";
 
   // test 2D graph
   cepgen::utils::Graph2D graph2d("graph2d");
@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
 
   default_random_engine gen;
 
-  cout << endl << "-------- 1D histogram --------" << endl;
+  CG_LOG << "\n-------- 1D histogram --------";
 
   // test 1D histogram
   cepgen::utils::Hist1D hist1d(20, {-5., 5.}, "hist1d");
@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
   hist1d.yAxis().setLabel("Occurrences");
   plt->draw(hist1d, cepgen::utils::Drawer::Mode::logy);
 
-  cout << endl << "-------- 2D histogram --------" << endl;
+  CG_LOG << "\n-------- 2D histogram --------";
 
   // test 2d histogram
   cepgen::utils::Hist2D hist2d(20, {-5., 5.}, 50, {-5., 5.}, "hist2d", "$\\sqrt{s} = 14$ TeV");
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
   hist2d.yAxis().setLabel("$\\Sigma(1\\pm\\epsilon)$");
   plt->draw(hist2d, cepgen::utils::Drawer::Mode::logz);
 
-  cout << endl << "--------- multiplots ---------" << endl;
+  CG_LOG << "\n--------- multiplots ---------";
 
   cepgen::utils::Graph1D graph1d_bis("graph1d_bis", "cos(x)"), graph1d_ter("graph1d_ter", "cos(x)*x");
   for (double x = -M_PI; x <= M_PI; x += 0.25) {
@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
   plt->draw(
       {&graph1d, &graph1d_bis, &graph1d_ter}, "multiplot1", "a beautiful multiplot", cepgen::utils::Drawer::Mode::grid);
 
-  cout << endl << "------- graph and hist -------" << endl;
+  CG_LOG << "\n------- graph and hist -------";
 
   cepgen::utils::Hist1D hist1d_bis(graph1d.points().size(), {-M_PI, M_PI}, "hist1d_bis", "histogram");
   for (size_t i = 0; i < 10000; ++i)
