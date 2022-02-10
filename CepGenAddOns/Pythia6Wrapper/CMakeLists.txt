@@ -30,7 +30,9 @@ endif()
 
 #----- build the objects
 
+enable_testing()
 cepgen_build(CepGenPythia6 SOURCES *.cpp
+    TESTS test/test_pythia_decay.cc
     EXT_LIBS ${PYTHIA6LIB}
     PROPERTY CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-misleading-indentation"
     INSTALL_COMPONENT pythia6)
