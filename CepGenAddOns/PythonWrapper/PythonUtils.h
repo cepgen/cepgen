@@ -32,7 +32,7 @@ namespace cepgen {
     void error(const std::string&);
     std::string pythonPath(const std::string&);
     PyObject* element(PyObject*, const std::string&);
-    PyObject* encode(const char* str);
+    PyObject* encode(const std::string&);
     std::string decode(PyObject* obj);
 
     template <typename T>
