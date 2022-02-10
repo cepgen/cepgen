@@ -50,6 +50,11 @@ namespace cepgen {
     }
 
     template <>
+    PyObject* set<bool>(const bool& val) {
+      return PyBool_FromLong(val);
+    }
+
+    template <>
     bool is<long>(PyObject* obj) {
 #ifdef PYTHON2
       return PyInt_Check(obj) || PyLong_Check(obj);
@@ -66,6 +71,15 @@ namespace cepgen {
       return PyInt_AsLong(obj);
 #else
       return PyLong_AsLong(obj);
+#endif
+    }
+
+    template <>
+    PyObject* set<int>(const int& val) {
+#ifdef PYTHON2
+      return PyInt_FromLong(val);
+#else
+      return PyLong_FromLong(val);
 #endif
     }
 
@@ -107,6 +121,11 @@ namespace cepgen {
     }
 
     template <>
+    PyObject* set<double>(const double& val) {
+      return PyFloat_FromDouble(val);
+    }
+
+    template <>
     bool is<std::string>(PyObject* obj) {
       if (!obj)
         error("Failed to retrieve string object!");
@@ -123,6 +142,15 @@ namespace cepgen {
         throw CG_ERROR("PythonHandler:get")
             << "Object has invalid type: string != \"" << obj->ob_type->tp_name << "\".";
       return decode(obj);
+    }
+
+    template <>
+    PyObject* set<std::string>(const std::string& val) {
+#ifdef PYTHON2
+      return PyString_FromString(val.c_str());
+#else
+      return PyUnicode_FromString(val.c_str());
+#endif
     }
 
     template <>
@@ -186,6 +214,17 @@ namespace cepgen {
       return vec;
     }
 
+    template <typename T>
+    PyObject* newTuple(const std::vector<T>& vec) {
+      auto* tuple = PyTuple_New(vec.size());
+      for (size_t i = 0; i < vec.size(); ++i) {
+        auto* value = set<T>(vec.at(i));
+        PyTuple_SetItem(tuple, i, value);
+        Py_DECREF(value);
+      }
+      return tuple;
+    }
+
     template <>
     ParametersList get<ParametersList>(PyObject* obj) {
       if (!is<ParametersList>(obj))
@@ -227,5 +266,9 @@ namespace cepgen {
       }
       return out;
     }
+    template PyObject* newTuple<bool>(const std::vector<bool>&);
+    template PyObject* newTuple<int>(const std::vector<int>&);
+    template PyObject* newTuple<double>(const std::vector<double>&);
+    template PyObject* newTuple<std::string>(const std::vector<std::string>&);
   }  // namespace python
 }  // namespace cepgen
