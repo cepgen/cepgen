@@ -32,10 +32,10 @@ int main() {
   const std::string test_string = "Haha, ceci est un test à géométrie variable! ☺";
   for (int type = (int)Exception::Type::undefined; type < (int)Exception::Type::fatal; ++type) {
     try {
-      throw LoggedException("Test", (Exception::Type)type) << test_string;
+      throw Exception("Test", "", (Exception::Type)type) << test_string;
       CG_LOG << "Test failed for type " << type << "!";
       return -1;
-    } catch (const LoggedMessage& e) {
+    } catch (const Exception& e) {
       if (e.message() == test_string)
         CG_LOG << "Test passed for type " << type << "!";
       else

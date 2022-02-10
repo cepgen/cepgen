@@ -19,201 +19,35 @@
 #ifndef CepGen_Core_Exception_h
 #define CepGen_Core_Exception_h
 
-#include "CepGen/Utils/Logger.h"
+#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
-  /// A generic exception type
-  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
-  /// \date 27 Mar 2015
-  struct Exception {
-    /// Generic exception constructor
-    explicit inline Exception() = default;
-    virtual ~Exception() noexcept = default;
+  class Exception final : public LoggedMessage, public std::exception {
+  public:
     /// Enumeration of exception severities
-    enum class Type {
-      undefined = -1,  ///< Irregular exception
-      debug,           ///< Debugging information to be enabled
-      verbatim,        ///< Raw information
-      info,            ///< Prettified information
-      warning,         ///< Casual non-stopping warning
+    enum Type {
+      undefined = -1,  ///< Irregular message
       error,           ///< General non-stopping error
       fatal            ///< Critical and stopping error
     };
+    explicit Exception(
+        const char* mod, const char* from = "", Type type = Type::undefined, const char* file = "", short lineno = 0);
+    /// Destructor (potentially killing the process)
+    virtual ~Exception() noexcept override;
+
     /// Printout operator for exception type
     friend std::ostream& operator<<(std::ostream&, const Type&);
-    /// Dump the full exception information in a given output stream
-    /// \param[inout] os the output stream where the information is dumped
-    virtual std::ostream& dump(std::ostream& os = *utils::Logger::get().output) const = 0;
-  };
-
-  /// A simple exception handler
-  /// \date 24 Mar 2015
-  class LoggedMessage : public Exception {
-  public:
-    /// Generic constructor
-    /// \param[in] module exception classifier
-    /// \param[in] type exception type
-    /// \param[in] lineno Line number where exception occured
-    explicit LoggedMessage(const char* module = "",
-                           Type type = Type::undefined,
-                           const char* file = "",
-                           short lineno = 0);
-    /// Generic constructor
-    /// \param[in] from method invoking the exception
-    /// \param[in] module exception classifier
-    /// \param[in] type exception type
-    /// \param[in] lineno Line number where exception occured
-    explicit LoggedMessage(
-        const char* from, const char* module, Type type = Type::undefined, const char* file = "", short lineno = 0);
-    /// Copy constructor
-    LoggedMessage(const LoggedMessage&) noexcept;
-    /// Default destructor
-    ~LoggedMessage() noexcept override;
-
-    //----- Overloaded stream operators
-
-    /// Generic templated message feeder operator
-    template <typename T>
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const T& var) {
-      auto& nc_except = const_cast<LoggedMessage&>(exc);
-      nc_except.message_ << var;
-      return exc;
-    }
-    /// Specialised feeder operator for booleans
-    friend const LoggedMessage& operator<<(const LoggedMessage&, const bool&);
-    /// Specialised feeder operator for wide strings
-    friend const LoggedMessage& operator<<(const LoggedMessage&, const std::wstring&);
-    /// Generic templated pair-variables feeder operator
-    template <typename T, typename U>
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::pair<T, U>& pair_var) {
-      return exc << "(" << pair_var.first << ", " << pair_var.second << ")";
-    }
-    /// Generic templated vector-variables feeder operator
-    template <typename T>
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::vector<T>& vec_var) {
-      exc << "{";
-      std::string sep;
-      if (!vec_var.empty())
-        for (const auto& var : vec_var)
-          exc << sep << var, sep = ", ";
-      return exc << "}";
-    }
-    /// Generic templated vector-variables feeder operator
-    template <typename T, std::size_t N>
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::array<T, N>& vec_var) {
-      exc << "{";
-      std::string sep;
-      if (!vec_var.empty())
-        for (const auto& var : vec_var)
-          exc << sep << var, sep = ", ";
-      return exc << "}";
-    }
-    /// Generic templated mapping-variables feeder operator
-    template <typename T, typename U>
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::map<T, U>& map_var) {
-      exc << "{";
-      std::string sep;
-      if (!map_var.empty())
-        for (const auto& var : map_var)
-          exc << sep << "{" << var.first << " -> " << var.second << "}", sep = ", ";
-      return exc << "}";
-    }
-    /// Pipe modifier operator
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, std::ios_base& (*f)(std::ios_base&)) {
-      LoggedMessage& nc_except = const_cast<LoggedMessage&>(exc);
-      f(nc_except.message_);
-      return exc;
-    }
-
-    /// Lambda function handler
-    template <typename T>
-    inline LoggedMessage& log(T&& lam) {
-      lam(*this);
-      return *this;
-    }
-
-    /// Human-readable message
-    std::string message() const { return message_.str(); }
-
-    /// Origin of the exception
-    const std::string& from() const { return from_; }
-    /// File where the exception occured
-    const std::string& file() const { return file_; }
-    /// Line number where the exception occured
-    short lineNumber() const { return line_num_; }
-    /// Message type
-    const Type& type() const { return type_; }
-    /// Human-readable dump of the message
+    /// Human-readable dump of the exception
     std::ostream& dump(std::ostream& os = *utils::Logger::get().output) const override;
-    /// Output stream object
-    std::ostream& stream() { return message_; }
 
-  protected:
-    Type type_;                   ///< Message type
-    std::ostringstream message_;  ///< Message to throw
+    const char* what() const noexcept override;
 
   private:
-    static char* now();
-    std::string from_;    ///< Origin of the exception
-    std::string module_;  ///< Exception classification
-    std::string file_;    ///< File
-    short line_num_;      ///< Line number
-  };
-
-  class LoggedException final : public LoggedMessage, public std::exception {
-  public:
-    using LoggedMessage::LoggedMessage;
-    /// Destructor (potentially killing the process)
-    virtual ~LoggedException() noexcept override;
-    const char* what() const noexcept override;
-  };
-
-  /// Placeholder for debugging messages if logging threshold is not reached
-  /// \date Apr 2018
-  struct NullStream : Exception {
-    using Exception::Exception;
-    /// Empty constructor
-    inline NullStream() = default;
-    /// Empty constructor
-    inline NullStream(const LoggedMessage&) {}
-    std::ostream& dump(std::ostream& os) const override { return os; }
-    /// Stream operator (null and void)
-    template <class T>
-    NullStream& operator<<(const T&) {
-      return *this;
-    }
-    /// Lambda function handler (null and void)
-    template <typename T>
-    NullStream& log(T&&) {
-      return *this;
-    }
+    Type type_;
   };
 }  // namespace cepgen
 
-#ifdef _WIN32
-#define __FUNC__ __FUNCSIG__
-#else
-#define __FUNC__ __PRETTY_FUNCTION__
-#endif
-
-#define CG_LOG cepgen::LoggedMessage(__FUNC__, "Logging", cepgen::Exception::Type::verbatim, __FILE__, __LINE__)
-#define CG_INFO(mod)                \
-  (!CG_LOG_MATCH(mod, information)) \
-      ? cepgen::NullStream()        \
-      : cepgen::LoggedMessage(__FUNC__, mod, cepgen::Exception::Type::info, __FILE__, __LINE__)
-#define CG_DEBUG(mod)         \
-  (!CG_LOG_MATCH(mod, debug)) \
-      ? cepgen::NullStream()  \
-      : cepgen::LoggedMessage(__FUNC__, mod, cepgen::Exception::Type::debug, __FILE__, __LINE__)
-#define CG_DEBUG_LOOP(mod)              \
-  (!CG_LOG_MATCH(mod, debugInsideLoop)) \
-      ? cepgen::NullStream()            \
-      : cepgen::LoggedMessage(__FUNC__, mod, cepgen::Exception::Type::debug, __FILE__, __LINE__)
-#define CG_WARNING(mod)         \
-  (!CG_LOG_MATCH(mod, warning)) \
-      ? cepgen::NullStream()    \
-      : cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::warning, __FILE__, __LINE__)
-#define CG_ERROR(mod) cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::error, __FILE__, __LINE__)
-#define CG_FATAL(mod) cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::fatal, __FILE__, __LINE__)
+#define CG_ERROR(mod) cepgen::Exception(mod, __FUNC__, cepgen::Exception::Type::error, __FILE__, __LINE__)
+#define CG_FATAL(mod) cepgen::Exception(mod, __FUNC__, cepgen::Exception::Type::fatal, __FILE__, __LINE__)
 
 #endif
