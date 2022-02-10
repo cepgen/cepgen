@@ -95,15 +95,15 @@ namespace cepgen {
 #endif
     }
 
-    PyObject* encode(const char* str) {
-      auto* obj = PyUnicode_FromString(str);  // new
+    PyObject* encode(const std::string& str) {
+      auto* obj = PyUnicode_FromString(str.c_str());  // new
       if (!obj)
-        error(utils::format("Failed to encode the following string:\n\t%s", str));
+        error("Failed to encode the following string:\n\t" + str);
       return obj;
     }
 
     PyObject* element(PyObject* obj, const std::string& key) {
-      PyObject *pout = nullptr, *nink = encode(key.c_str());
+      PyObject *pout = nullptr, *nink = encode(key);
       if (!nink)
         return pout;
       pout = PyDict_GetItem(obj, nink);  // borrowed
