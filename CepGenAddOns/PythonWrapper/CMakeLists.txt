@@ -26,6 +26,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 
 #----- build the object
 
+enable_testing()
 cepgen_build(CepGenPython SOURCES *.cpp
     TESTS test/*.cc
     EXT_LIBS ${Python_LIBRARIES}
