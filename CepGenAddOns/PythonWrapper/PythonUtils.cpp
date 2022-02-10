@@ -95,19 +95,21 @@ namespace cepgen {
 #endif
     }
 
-    PyObject* encode(const std::string& str) {
-      auto* obj = PyUnicode_FromString(str.c_str());  // new
+    ObjectPtr encode(const std::string& str) {
+      ObjectPtr obj(PyUnicode_FromString(str.c_str()));  // new
       if (!obj)
         error("Failed to encode the following string:\n\t" + str);
       return obj;
     }
 
     PyObject* element(PyObject* obj, const std::string& key) {
-      PyObject *pout = nullptr, *nink = encode(key);
-      if (!nink)
-        return pout;
-      pout = PyDict_GetItem(obj, nink);  // borrowed
-      Py_CLEAR(nink);
+      PyObject* pout = nullptr;
+      {
+        auto nink = encode(key);
+        if (!nink)
+          return pout;
+        pout = PyDict_GetItem(obj, nink.get());  // borrowed
+      }
       if (pout)
         CG_DEBUG("PythonHandler:element") << "retrieved " << pout->ob_type->tp_name << " element \"" << key << "\" "
                                           << "from " << obj->ob_type->tp_name << " object. "

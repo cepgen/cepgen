@@ -143,14 +143,12 @@ namespace cepgen {
       if (!cfg)
         python::error("Failed to import the configuration card '" + filename + "'\n (parsed from '" + file + "')");
 
-      auto parseAttr = [this](PyObject* cfg, const std::string& name, std::function<void(PyObject*)> callback) {
-        if (PyObject_HasAttrString(cfg, name.c_str()) == 1) {
-          auto* pobj = PyObject_GetAttrString(cfg, name.c_str());  // new
-          if (pobj) {
-            callback(pobj);
-            Py_CLEAR(pobj);
-          }
-        }
+      auto parseAttr = [this](PyObject* cfg, const std::string& name, std::function<void(PyObject*)> callback) -> void {
+        if (PyObject_HasAttrString(cfg, name.c_str()) != 1)
+          return;
+        auto pobj = python::ObjectPtr(PyObject_GetAttrString(cfg, name.c_str()));  // new
+        if (pobj)
+          callback(pobj.get());
       };
 
       //--- additional libraries to load
