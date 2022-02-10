@@ -35,7 +35,7 @@ int main() {
       throw LoggedException("Test", (Exception::Type)type) << test_string;
       CG_LOG << "Test failed for type " << type << "!";
       return -1;
-    } catch (const Exception& e) {
+    } catch (const LoggedMessage& e) {
       if (e.message() == test_string)
         CG_LOG << "Test passed for type " << type << "!";
       else

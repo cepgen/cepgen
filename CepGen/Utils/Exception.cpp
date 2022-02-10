@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,46 +22,38 @@
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
-  LoggedException::LoggedException(const char* module, Type type, const char* file, short lineno)
-      : module_(module), type_(type), file_(file), line_num_(lineno) {}
+  LoggedMessage::LoggedMessage(const char* mod, Type type, const char* file, short lineno)
+      : type_(type), module_(mod), file_(file), line_num_(lineno) {}
 
-  LoggedException::LoggedException(const char* from, const char* module, Type type, const char* file, short lineno)
-      : from_(from), module_(module), type_(type), file_(file), line_num_(lineno) {}
+  LoggedMessage::LoggedMessage(const char* from, const char* mod, Type type, const char* file, short lineno)
+      : type_(type), from_(from), module_(mod), file_(file), line_num_(lineno) {}
 
-  LoggedException::LoggedException(const LoggedException& rhs) noexcept
-      : from_(rhs.from_),
+  LoggedMessage::LoggedMessage(const LoggedMessage& rhs) noexcept
+      : type_(rhs.type_),
+        message_(rhs.message_.str()),  // only reason to customise the copy constructor
+        from_(rhs.from_),
         module_(rhs.module_),
-        message_(rhs.message_.str()),
-        type_(rhs.type_),
         line_num_(rhs.line_num_) {}
 
-  LoggedException::~LoggedException() noexcept {
+  LoggedMessage::~LoggedMessage() noexcept {
     if (type_ != Type::undefined)
       dump();
-    // we stop this process' execution on fatal exception
-    if (type_ == Type::fatal && raise(SIGINT) != 0)
-      exit(0);
   }
 
-  const LoggedException& operator<<(const LoggedException& exc, const bool& var) {
-    LoggedException& nc_except = const_cast<LoggedException&>(exc);
+  const LoggedMessage& operator<<(const LoggedMessage& exc, const bool& var) {
+    LoggedMessage& nc_except = const_cast<LoggedMessage&>(exc);
     nc_except.message_ << (var ? utils::colourise("true", utils::Colour::green)
                                : utils::colourise("false", utils::Colour::red));
     return exc;
   }
 
-  const LoggedException& operator<<(const LoggedException& exc, const std::wstring& var) {
-    LoggedException& nc_except = const_cast<LoggedException&>(exc);
+  const LoggedMessage& operator<<(const LoggedMessage& exc, const std::wstring& var) {
+    LoggedMessage& nc_except = const_cast<LoggedMessage&>(exc);
     nc_except.message_ << utils::tostring(var);
     return exc;
   }
 
-  const char* LoggedException::what() const noexcept {
-    (*utils::Logger::get().output) << "\n" << message_.str() << "\n";
-    return from_.c_str();
-  }
-
-  std::ostream& LoggedException::dump(std::ostream& os) const {
+  std::ostream& LoggedMessage::dump(std::ostream& os) const {
     if (!utils::Logger::get().output)
       return os;
 
@@ -127,13 +119,24 @@ namespace cepgen {
     return os;
   }
 
-  char* LoggedException::now() {
+  char* LoggedMessage::now() {
     static char buffer[10];
     time_t rawtime;
     time(&rawtime);
     struct tm* timeinfo = localtime(&rawtime);
     strftime(buffer, 10, "%H:%M:%S", timeinfo);
     return buffer;
+  }
+
+  LoggedException::~LoggedException() {
+    // we stop this process' execution on fatal exception
+    if (type_ == Type::fatal && raise(SIGINT) != 0)
+      exit(0);
+  }
+
+  const char* LoggedException::what() const noexcept {
+    (*utils::Logger::get().output) << "\n" << message_.str() << "\n";
+    return message_.str().c_str();
   }
 
   std::ostream& operator<<(std::ostream& os, const Exception::Type& type) {

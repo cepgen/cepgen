@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,55 +44,53 @@ namespace cepgen {
     /// Dump the full exception information in a given output stream
     /// \param[inout] os the output stream where the information is dumped
     virtual std::ostream& dump(std::ostream& os = *utils::Logger::get().output) const = 0;
-    /// Exception message
-    virtual std::string message() const = 0;
   };
 
   /// A simple exception handler
   /// \date 24 Mar 2015
-  class LoggedException final : public Exception, public std::exception {
+  class LoggedMessage : public Exception {
   public:
     /// Generic constructor
     /// \param[in] module exception classifier
     /// \param[in] type exception type
     /// \param[in] lineno Line number where exception occured
-    explicit LoggedException(const char* module = "",
-                             Type type = Type::undefined,
-                             const char* file = "",
-                             short lineno = 0);
+    explicit LoggedMessage(const char* module = "",
+                           Type type = Type::undefined,
+                           const char* file = "",
+                           short lineno = 0);
     /// Generic constructor
     /// \param[in] from method invoking the exception
     /// \param[in] module exception classifier
     /// \param[in] type exception type
     /// \param[in] lineno Line number where exception occured
-    explicit LoggedException(
+    explicit LoggedMessage(
         const char* from, const char* module, Type type = Type::undefined, const char* file = "", short lineno = 0);
     /// Copy constructor
-    LoggedException(const LoggedException& rhs) noexcept;
-    /// Default destructor (potentially killing the process)
-    ~LoggedException() noexcept override;
+    LoggedMessage(const LoggedMessage&) noexcept;
+    /// Default destructor
+    ~LoggedMessage() noexcept override;
 
     //----- Overloaded stream operators
 
     /// Generic templated message feeder operator
     template <typename T>
-    inline friend const LoggedException& operator<<(const LoggedException& exc, const T& var) {
-      LoggedException& nc_except = const_cast<LoggedException&>(exc);
+    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const T& var) {
+      auto& nc_except = const_cast<LoggedMessage&>(exc);
       nc_except.message_ << var;
       return exc;
     }
     /// Specialised feeder operator for booleans
-    friend const LoggedException& operator<<(const LoggedException&, const bool&);
+    friend const LoggedMessage& operator<<(const LoggedMessage&, const bool&);
     /// Specialised feeder operator for wide strings
-    friend const LoggedException& operator<<(const LoggedException&, const std::wstring&);
+    friend const LoggedMessage& operator<<(const LoggedMessage&, const std::wstring&);
     /// Generic templated pair-variables feeder operator
     template <typename T, typename U>
-    inline friend const LoggedException& operator<<(const LoggedException& exc, const std::pair<T, U>& pair_var) {
+    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::pair<T, U>& pair_var) {
       return exc << "(" << pair_var.first << ", " << pair_var.second << ")";
     }
     /// Generic templated vector-variables feeder operator
     template <typename T>
-    inline friend const LoggedException& operator<<(const LoggedException& exc, const std::vector<T>& vec_var) {
+    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::vector<T>& vec_var) {
       exc << "{";
       std::string sep;
       if (!vec_var.empty())
@@ -102,7 +100,7 @@ namespace cepgen {
     }
     /// Generic templated vector-variables feeder operator
     template <typename T, std::size_t N>
-    inline friend const LoggedException& operator<<(const LoggedException& exc, const std::array<T, N>& vec_var) {
+    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::array<T, N>& vec_var) {
       exc << "{";
       std::string sep;
       if (!vec_var.empty())
@@ -112,7 +110,7 @@ namespace cepgen {
     }
     /// Generic templated mapping-variables feeder operator
     template <typename T, typename U>
-    inline friend const LoggedException& operator<<(const LoggedException& exc, const std::map<T, U>& map_var) {
+    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::map<T, U>& map_var) {
       exc << "{";
       std::string sep;
       if (!map_var.empty())
@@ -121,21 +119,21 @@ namespace cepgen {
       return exc << "}";
     }
     /// Pipe modifier operator
-    inline friend const LoggedException& operator<<(const LoggedException& exc, std::ios_base& (*f)(std::ios_base&)) {
-      LoggedException& nc_except = const_cast<LoggedException&>(exc);
+    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, std::ios_base& (*f)(std::ios_base&)) {
+      LoggedMessage& nc_except = const_cast<LoggedMessage&>(exc);
       f(nc_except.message_);
       return exc;
     }
 
     /// Lambda function handler
     template <typename T>
-    inline LoggedException& log(T&& lam) {
+    inline LoggedMessage& log(T&& lam) {
       lam(*this);
       return *this;
     }
 
-    const char* what() const noexcept override;
-    std::string message() const override { return message_.str(); }
+    /// Human-readable message
+    std::string message() const { return message_.str(); }
 
     /// Origin of the exception
     const std::string& from() const { return from_; }
@@ -143,21 +141,31 @@ namespace cepgen {
     const std::string& file() const { return file_; }
     /// Line number where the exception occured
     short lineNumber() const { return line_num_; }
-    /// Exception type
+    /// Message type
     const Type& type() const { return type_; }
-    /// Human-readable dump of the exception message
+    /// Human-readable dump of the message
     std::ostream& dump(std::ostream& os = *utils::Logger::get().output) const override;
     /// Output stream object
     std::ostream& stream() { return message_; }
 
+  protected:
+    Type type_;                   ///< Message type
+    std::ostringstream message_;  ///< Message to throw
+
   private:
     static char* now();
-    std::string from_;            ///< Origin of the exception
-    std::string module_;          ///< Exception classification
-    std::ostringstream message_;  ///< Message to throw
-    Type type_;                   ///< Exception type
-    std::string file_;            ///< File
-    short line_num_;              ///< Line number
+    std::string from_;    ///< Origin of the exception
+    std::string module_;  ///< Exception classification
+    std::string file_;    ///< File
+    short line_num_;      ///< Line number
+  };
+
+  class LoggedException final : public LoggedMessage, public std::exception {
+  public:
+    using LoggedMessage::LoggedMessage;
+    /// Destructor (potentially killing the process)
+    virtual ~LoggedException() noexcept override;
+    const char* what() const noexcept override;
   };
 
   /// Placeholder for debugging messages if logging threshold is not reached
@@ -165,9 +173,9 @@ namespace cepgen {
   struct NullStream : Exception {
     using Exception::Exception;
     /// Empty constructor
-    inline NullStream() {}
+    inline NullStream() = default;
     /// Empty constructor
-    inline NullStream(const LoggedException&) {}
+    inline NullStream(const LoggedMessage&) {}
     std::ostream& dump(std::ostream& os) const override { return os; }
     /// Stream operator (null and void)
     template <class T>
@@ -179,7 +187,6 @@ namespace cepgen {
     NullStream& log(T&&) {
       return *this;
     }
-    std::string message() const override { return ""; }
   };
 }  // namespace cepgen
 
@@ -189,19 +196,19 @@ namespace cepgen {
 #define __FUNC__ __PRETTY_FUNCTION__
 #endif
 
-#define CG_LOG cepgen::LoggedException(__FUNC__, "Logging", cepgen::Exception::Type::verbatim, __FILE__, __LINE__)
+#define CG_LOG cepgen::LoggedMessage(__FUNC__, "Logging", cepgen::Exception::Type::verbatim, __FILE__, __LINE__)
 #define CG_INFO(mod)                \
   (!CG_LOG_MATCH(mod, information)) \
       ? cepgen::NullStream()        \
-      : cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::info, __FILE__, __LINE__)
+      : cepgen::LoggedMessage(__FUNC__, mod, cepgen::Exception::Type::info, __FILE__, __LINE__)
 #define CG_DEBUG(mod)         \
   (!CG_LOG_MATCH(mod, debug)) \
       ? cepgen::NullStream()  \
-      : cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::debug, __FILE__, __LINE__)
+      : cepgen::LoggedMessage(__FUNC__, mod, cepgen::Exception::Type::debug, __FILE__, __LINE__)
 #define CG_DEBUG_LOOP(mod)              \
   (!CG_LOG_MATCH(mod, debugInsideLoop)) \
       ? cepgen::NullStream()            \
-      : cepgen::LoggedException(__FUNC__, mod, cepgen::Exception::Type::debug, __FILE__, __LINE__)
+      : cepgen::LoggedMessage(__FUNC__, mod, cepgen::Exception::Type::debug, __FILE__, __LINE__)
 #define CG_WARNING(mod)         \
   (!CG_LOG_MATCH(mod, warning)) \
       ? cepgen::NullStream()    \
