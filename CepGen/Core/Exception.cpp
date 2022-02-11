@@ -38,7 +38,7 @@ namespace cepgen {
     return message_.str().c_str();
   }
 
-  std::ostream& Exception::dump(std::ostream& os) const {
+  std::ostream& Exception::dump(std::ostream& os) const noexcept {
     if (!utils::Logger::get().output)
       return os;
 

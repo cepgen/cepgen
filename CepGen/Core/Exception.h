@@ -38,7 +38,7 @@ namespace cepgen {
     /// Printout operator for exception type
     friend std::ostream& operator<<(std::ostream&, const Type&);
     /// Human-readable dump of the exception
-    std::ostream& dump(std::ostream& os = *utils::Logger::get().output) const override;
+    std::ostream& dump(std::ostream& os = *utils::Logger::get().output) const noexcept override;
 
     const char* what() const noexcept override;
 
