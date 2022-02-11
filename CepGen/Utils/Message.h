@@ -28,7 +28,7 @@ namespace cepgen {
   struct Message {
     /// Generic message constructor
     explicit inline Message() = default;
-    virtual ~Message() noexcept = default;
+    virtual ~Message() = default;
     /// Dump the full exception information in a given output stream
     /// \param[inout] os the output stream where the information is dumped
     virtual std::ostream& dump(std::ostream& os = *utils::Logger::get().output) const = 0;

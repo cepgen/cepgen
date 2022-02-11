@@ -268,7 +268,6 @@ namespace cepgen {
     ObjectPtr set<ParametersList>(const ParametersList& plist) {
       ObjectPtr obj(PyDict_New());
       for (const auto& key : plist.keys(true)) {
-        PyObject* val{nullptr};
         if (plist.has<bool>(key))
           PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<bool>(key)).get());
         else if (plist.has<int>(key))
