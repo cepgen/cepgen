@@ -22,7 +22,7 @@
 #include "CepGen/Utils/Message.h"
 
 namespace cepgen {
-  class Exception final : public LoggedMessage, public std::exception {
+  class Exception final : public LoggedMessage, public std::runtime_error {
   public:
     /// Enumeration of exception severities
     enum Type {
@@ -32,13 +32,14 @@ namespace cepgen {
     };
     explicit Exception(
         const char* mod, const char* from = "", Type type = Type::undefined, const char* file = "", short lineno = 0);
+    Exception(Exception&&);
     /// Destructor (potentially killing the process)
-    virtual ~Exception() noexcept override;
+    virtual ~Exception() override;
 
     /// Printout operator for exception type
     friend std::ostream& operator<<(std::ostream&, const Type&);
     /// Human-readable dump of the exception
-    std::ostream& dump(std::ostream& os = *utils::Logger::get().output) const noexcept override;
+    std::ostream& dump(std::ostream& os = *utils::Logger::get().output) const override;
 
     const char* what() const noexcept override;
 

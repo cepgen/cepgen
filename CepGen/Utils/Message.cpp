@@ -29,7 +29,8 @@ namespace cepgen {
     return buffer;
   }
 
-  LoggedMessage::LoggedMessage(const char* mod, const char* from, MessageType type, const char* file, short lineno)
+  LoggedMessage::LoggedMessage(
+      const char* mod, const char* from, MessageType type, const char* file, short lineno) noexcept
       : from_(from), file_(file), line_num_(lineno), type_(type), module_(mod) {}
 
   LoggedMessage::LoggedMessage(const LoggedMessage& rhs) noexcept

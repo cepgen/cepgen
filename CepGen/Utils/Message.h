@@ -57,7 +57,7 @@ namespace cepgen {
                            const char* from = "",
                            MessageType type = MessageType::undefined,
                            const char* file = "",
-                           short lineno = 0);
+                           short lineno = 0) noexcept;
     /// Copy constructor
     LoggedMessage(const LoggedMessage&) noexcept;
     /// Default destructor

@@ -23,7 +23,9 @@
 
 namespace cepgen {
   Exception::Exception(const char* mod, const char* from, Type type, const char* file, short lineno)
-      : LoggedMessage(mod, from, MessageType::undefined, file, lineno), type_(type) {}
+      : LoggedMessage(mod, from, MessageType::undefined, file, lineno),
+        std::runtime_error("cepgen::Exception"),
+        type_(type) {}
 
   Exception::~Exception() {
     if (type_ != Type::undefined)
@@ -33,33 +35,27 @@ namespace cepgen {
       exit(0);
   }
 
+  Exception::Exception(Exception&& oth) : LoggedMessage(oth), std::runtime_error(oth.what()), type_(oth.type_) {}
+
   const char* Exception::what() const noexcept {
     (*utils::Logger::get().output) << "\n" << message_.str() << "\n";
     return message_.str().c_str();
   }
 
-  std::ostream& Exception::dump(std::ostream& os) const noexcept {
+  std::ostream& Exception::dump(std::ostream& os) const {
     if (!utils::Logger::get().output)
       return os;
 
-    switch (type_) {
-      case Type::undefined:
-      case Type::error:
-      case Type::fatal: {
-        const std::string sep(80, '-');
-        os << sep << "\n" << type_ << " occured at " << now() << "\n";
-        if (!from_.empty())
-          os << "  raised by: " << utils::colourise(from_, utils::Colour::none, utils::Modifier::underline) << "\n";
-        if (utils::Logger::get().extended()) {
-          os << "  file: " << utils::colourise(file_, utils::Colour::none, utils::Modifier::dimmed) << "\n";
-          if (line_num_ != 0)
-            os << "  line #" << line_num_ << "\n";
-        }
-        os << "\n" << message_.str() << "\n";
-        return os << sep << "\n";
-      }
+    const std::string sep(80, '-');
+    os << sep << "\n" << type_ << " occured at " << now() << "\n";
+    if (!from_.empty())
+      os << "  raised by: " << utils::colourise(from_, utils::Colour::none, utils::Modifier::underline) << "\n";
+    if (utils::Logger::get().extended()) {
+      os << "  file: " << utils::colourise(file_, utils::Colour::none, utils::Modifier::dimmed) << "\n";
+      if (line_num_ != 0)
+        os << "  line #" << line_num_ << "\n";
     }
-    return os;
+    return os << "\n" << message_.str() << "\n" << sep << "\n";
   }
 
   std::ostream& operator<<(std::ostream& os, const Exception::Type& type) {
