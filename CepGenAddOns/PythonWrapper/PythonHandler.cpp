@@ -237,13 +237,13 @@ namespace cepgen {
     }
 
     void PythonHandler::parseIntegrator(PyObject* integr) {
-      if (!PyDict_Check(integr))
+      if (!python::is<ParametersList>(integr))
         PY_ERROR << "Integrator object should be a dictionary.";
       rt_params_->par_integrator += python::get<ParametersList>(integr);
     }
 
     void PythonHandler::parseGenerator(PyObject* gen) {
-      if (!PyDict_Check(gen))
+      if (!python::is<ParametersList>(gen))
         PY_ERROR << "Generation information object should be a dictionary.";
       auto plist = python::get<ParametersList>(gen);
       plist.set<int>("maxgen", plist.get<int>("numEvents"));
@@ -251,7 +251,7 @@ namespace cepgen {
     }
 
     void PythonHandler::parseEventModifiers(PyObject* mod) {
-      if (!PyList_Check(mod))
+      if (!python::isVector<ParametersList>(mod))
         PY_ERROR << "Event modification definition object should be a list/Sequence.";
 
       for (Py_ssize_t i = 0; i < PyList_Size(mod); ++i)
@@ -259,7 +259,7 @@ namespace cepgen {
     }
 
     void PythonHandler::parseHadroniser(PyObject* mod) {
-      if (!PyDict_Check(mod))
+      if (!python::is<ParametersList>(mod))
         PY_ERROR << "Event modification definition object should be a dictionary.";
 
       auto* pname = python::element(mod, ParametersList::MODULE_NAME);  // borrowed
@@ -288,7 +288,7 @@ namespace cepgen {
     }
 
     void PythonHandler::parseOutputModules(PyObject* mod) {
-      if (!PyList_Check(mod))
+      if (!python::isVector<ParametersList>(mod))
         PY_ERROR << "Output modules definition object should be a list/Sequence.";
 
       for (Py_ssize_t i = 0; i < PyList_Size(mod); ++i)
