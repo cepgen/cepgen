@@ -37,20 +37,22 @@ namespace cepgen {
 
     private:
       python::ObjectPtr func_;
+      python::ObjectPtr math_;
       python::ObjectPtr mod_;
     };
 
     FunctionalPython::FunctionalPython(const ParametersList& params) : Functional(params) {
       Py_Initialize();
-      auto* global = PyEval_GetGlobals();  // borrowed
-      //auto* math = PyImport_ImportModule("math");
-      //PyDict_Merge(global, PyModule_GetDict(math), true);
+      //auto* global = PyEval_GetGlobals();  // borrowed
+      auto* global = PyDict_New();  // new
+      //math_.reset(PyImport_ImportModule("math"));
+      //PyDict_Merge(global, PyModule_GetDict(math_.get()), true);
       mod_.reset(PyModule_New("functional"));  // new
       PyModule_AddStringConstant(mod_.get(), "__file__", "");
       auto* local = PyModule_GetDict(mod_.get());  // borrowed
+      math_.reset(PyRun_String("from math import *", Py_file_input, local, local));
       std::ostringstream os;
-      os  //<< "from math import *\n"
-          << "def custom_functional(";
+      os << "def custom_functional(";
       std::string sep;
       for (const auto& var : vars_)
         os << sep << var << ": float", sep = ", ";
@@ -62,12 +64,13 @@ namespace cepgen {
         //PyRun_SimpleString(os.str().c_str());
         if (!value)
           PY_ERROR << "Failed to initialise the Python functional with \"" << expression_ << "\".";
-        CG_DEBUG("FunctionalPython") << "Python expression compilation output: "
-                                     << python::get<ParametersList>(value.get());
+        //CG_DEBUG("FunctionalPython") << "Python expression compilation output: "
+        //                             << python::get<ParametersList>(value.get());
       }
       func_.reset(PyObject_GetAttrString(mod_.get(), "custom_functional"));
       if (!func_ || !PyCallable_Check(func_.get()))
         PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";
+      CG_LOG << python::get<ParametersList>(func_.get());
     }
 
     FunctionalPython::~FunctionalPython() { Py_Finalize(); }
@@ -75,6 +78,8 @@ namespace cepgen {
     double FunctionalPython::eval(const std::vector<double>& x) const {
       auto args = python::newTuple(x);
       python::ObjectPtr value(PyObject_CallObject(func_.get(), args.get()));
+      if (!value)
+        return 0.;
       auto ret = python::get<double>(value.get());
       CG_LOG << "ret:" << ret;
       return ret;
