@@ -22,10 +22,6 @@
 #include "CepGenAddOns/PythonWrapper/PythonError.h"
 #include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 
-#if PY_MAJOR_VERSION < 3
-#define PYTHON2
-#endif
-
 namespace cepgen {
   namespace python {
     //------------------------------------------------------------------

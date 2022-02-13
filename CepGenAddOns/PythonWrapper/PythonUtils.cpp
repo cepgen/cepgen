@@ -17,21 +17,12 @@
  */
 
 #include <algorithm>
-#include <string>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenAddOns/PythonWrapper/PythonError.h"
 #include "CepGenAddOns/PythonWrapper/PythonUtils.h"
-
-// clang-format off
-#include <frameobject.h>
-// clang-format on
-
-#if PY_MAJOR_VERSION < 3
-#define PYTHON2
-#endif
 
 namespace cepgen {
   namespace python {

@@ -22,7 +22,7 @@
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Utils/Functional.h"
 #include "CepGenAddOns/PythonWrapper/PythonError.h"
-#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
+#include "CepGenAddOns/PythonWrapper/PythonTypes.h"
 
 namespace cepgen {
   namespace utils {

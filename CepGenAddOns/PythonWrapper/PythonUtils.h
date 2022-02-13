@@ -19,41 +19,14 @@
 #ifndef CepGenAddOns_PythonWrapper_PythonUtils_h
 #define CepGenAddOns_PythonWrapper_PythonUtils_h
 
-#include <Python.h>
-
-#include <string>
-#include <vector>
-
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Utils/Limits.h"
+#include "CepGenAddOns/PythonWrapper/PythonTypes.h"
 
 namespace cepgen {
   namespace python {
-    struct PyObject_deleter {
-      void operator()(PyObject* obj) { Py_DECREF(obj); }
-    };
-    typedef std::unique_ptr<PyObject, PyObject_deleter> ObjectPtr;
-
     std::string pythonPath(const std::string&);
     PyObject* element(PyObject*, const std::string&);
     ObjectPtr encode(const std::string&);
     std::string decode(PyObject* obj);
-
-    template <typename T>
-    bool is(PyObject* obj);
-
-    template <typename T>
-    T get(PyObject* obj);
-    template <typename T>
-    ObjectPtr set(const T&);
-
-    template <typename T>
-    bool isVector(PyObject* obj);
-    template <typename T>
-    std::vector<T> getVector(PyObject* obj);
-
-    template <typename T>
-    ObjectPtr newTuple(const std::vector<T>&);
 
     void fillParameter(PyObject* parent, const char* key, bool& out);
     void fillParameter(PyObject* parent, const char* key, int& out);
@@ -67,51 +40,6 @@ namespace cepgen {
     void fillParameter(PyObject* parent, const char* key, std::vector<std::string>& out);
     void fillParameter(PyObject* parent, const char* key, ParametersList& out);
     void fillParameter(PyObject* parent, const char* key, std::vector<ParametersList>& out);
-
-    template <>
-    bool is<bool>(PyObject* obj);
-    template <>
-    ObjectPtr set<bool>(const bool&);
-
-    template <>
-    bool is<int>(PyObject* obj);
-
-    template <>
-    bool is<long>(PyObject* obj);
-
-    template <>
-    int get<int>(PyObject* obj);
-    template <>
-    ObjectPtr set<int>(const int&);
-
-    template <>
-    unsigned long get<unsigned long>(PyObject* obj);
-
-    template <>
-    bool is<ParametersList>(PyObject* obj);
-    template <>
-    ParametersList get<ParametersList>(PyObject* obj);
-    template <>
-    ObjectPtr set<ParametersList>(const ParametersList&);
-
-    template <>
-    bool is<double>(PyObject* obj);
-    template <>
-    double get<double>(PyObject* obj);
-    template <>
-    ObjectPtr set<double>(const double&);
-
-    template <>
-    bool is<std::string>(PyObject* obj);
-    template <>
-    std::string get<std::string>(PyObject* obj);
-    template <>
-    ObjectPtr set<std::string>(const std::string&);
-
-    template <>
-    bool is<Limits>(PyObject* obj);
-    template <>
-    Limits get<Limits>(PyObject* obj);
   }  // namespace python
 }  // namespace cepgen
 
