@@ -42,6 +42,7 @@
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
+#include "CepGenAddOns/PythonWrapper/PythonError.h"
 #include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 
 #if PY_MAJOR_VERSION < 3
