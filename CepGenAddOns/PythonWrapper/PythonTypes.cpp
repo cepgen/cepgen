@@ -34,7 +34,7 @@ namespace cepgen {
     template <>
     bool is<int>(PyObject* obj) {
       if (!obj)
-        error("Failed to retrieve integer object!");
+        PY_ERROR("Failed to retrieve integer object!");
 #ifdef PYTHON2
       return PyInt_Check(obj);
 #else
@@ -45,7 +45,7 @@ namespace cepgen {
     template <>
     bool is<bool>(PyObject* obj) {
       if (!obj)
-        error("Failed to retrieve boolean object!");
+        PY_ERROR("Failed to retrieve boolean object!");
       return PyBool_Check(obj);
     }
 
@@ -92,7 +92,7 @@ namespace cepgen {
       return PyInt_AsUnsignedLongMask(obj);
 #else
       if (!PyLong_Check(obj))
-        error(utils::format("Object has invalid type: unsigned long != %s", obj->ob_type->tp_name));
+        PY_ERROR(utils::format("Object has invalid type: unsigned long != %s", obj->ob_type->tp_name));
       return PyLong_AsUnsignedLong(obj);
 #endif
     }
@@ -108,7 +108,7 @@ namespace cepgen {
     template <>
     bool is<double>(PyObject* obj) {
       if (!obj)
-        error("Failed to retrieve float object!");
+        PY_ERROR("Failed to retrieve float object!");
       return PyFloat_Check(obj);
     }
 
@@ -128,7 +128,7 @@ namespace cepgen {
     template <>
     bool is<std::string>(PyObject* obj) {
       if (!obj)
-        error("Failed to retrieve string object!");
+        PY_ERROR("Failed to retrieve string object!");
 #ifdef PYTHON2
       return PyString_Check(obj);
 #else
@@ -156,7 +156,7 @@ namespace cepgen {
     template <>
     bool is<Limits>(PyObject* obj) {
       if (!obj)
-        error("Failed to retrieve limits object!");
+        PY_ERROR("Failed to retrieve limits object!");
       if (!isVector<double>(obj))
         return false;
       const size_t size = getVector<double>(obj).size();
@@ -177,7 +177,7 @@ namespace cepgen {
     template <>
     bool is<ParametersList>(PyObject* obj) {
       if (!obj)
-        error("Failed to retrieve parameters list object!");
+        PY_ERROR("Failed to retrieve parameters list object!");
       return PyDict_Check(obj);
     }
 
@@ -208,7 +208,7 @@ namespace cepgen {
       for (Py_ssize_t i = 0; i < num_entries; ++i) {
         auto* pit = tuple ? PyTuple_GetItem(obj, i) : PyList_GetItem(obj, i);
         if (!is<T>(pit))
-          error("Mixed types detected in vector");
+          PY_ERROR("Mixed types detected in vector");
         vec.emplace_back(get<T>(pit));
       }
       return vec;
@@ -258,7 +258,8 @@ namespace cepgen {
         } else if (Py_IS_TYPE(pvalue, &_PyNone_Type)) {
           out.set<std::string>(skey, "None");
         } else {
-          error(utils::format("Invalid object (%s) retrieved as parameters list value!", pvalue->ob_type->tp_name));
+          CG_WARNING("PythonTypes") << "Invalid object (" << pvalue->ob_type->tp_name << ") retrieved for key=" << skey
+                                    << " when unpacking a dictionary/parameters list.";
         }
       }
       return out;
@@ -289,7 +290,7 @@ namespace cepgen {
           PyDict_SetItem(
               obj.get(), encode(key).get(), newTuple<std::string>(plist.get<std::vector<std::string> >(key)).get());
         else
-          error("Parameters list has an untranslatable object for key=" + key);
+          PY_ERROR("Parameters list has an untranslatable object for key=" + key);
       }
       return obj;
     }

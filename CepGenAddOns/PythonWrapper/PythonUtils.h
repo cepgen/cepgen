@@ -27,6 +27,8 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/Limits.h"
 
+#define PY_ERROR(msg) cepgen::python::error(msg, __FUNC__)
+
 namespace cepgen {
   namespace python {
     struct PyObject_deleter {
@@ -34,7 +36,7 @@ namespace cepgen {
     };
     typedef std::unique_ptr<PyObject, PyObject_deleter> ObjectPtr;
 
-    void error(const std::string&);
+    LoggedException error(const std::string&, const std::string& origin = "");
     std::string pythonPath(const std::string&);
     PyObject* element(PyObject*, const std::string&);
     ObjectPtr encode(const std::string&);

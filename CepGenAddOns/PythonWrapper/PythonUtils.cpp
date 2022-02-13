@@ -49,8 +49,8 @@ namespace cepgen {
       return filename;
     }
 
-    void error(const std::string& message) {
-      throw CG_FATAL("PythonHandler:error").log([&message](auto& err) {
+    LoggedException error(const std::string& message, const std::string& origin) {
+      return LoggedException(origin.c_str(), "PythonHandler:error", Exception::Type::fatal).log([&message](auto& err) {
         PyObject *ptype = nullptr, *pvalue = nullptr, *ptraceback_obj = nullptr;
         // retrieve error indicator and clear it to handle ourself the error
         PyErr_Fetch(&ptype, &pvalue, &ptraceback_obj);
@@ -98,7 +98,7 @@ namespace cepgen {
     ObjectPtr encode(const std::string& str) {
       ObjectPtr obj(PyUnicode_FromString(str.c_str()));  // new
       if (!obj)
-        error("Failed to encode the following string:\n\t" + str);
+        PY_ERROR("Failed to encode the following string:\n\t" + str);
       return obj;
     }
 
@@ -128,7 +128,7 @@ namespace cepgen {
       try {
         out = (bool)get<int>(pobj);
       } catch (const Exception& e) {
-        error(utils::format("Failed to retrieve boolean object \"%s\":\n\t", key) + e.message());
+        PY_ERROR(utils::format("Failed to retrieve boolean object \"%s\":\n\t", key) + e.message());
       }
     }
 
@@ -141,7 +141,7 @@ namespace cepgen {
       try {
         out = get<int>(pobj);
       } catch (const Exception& e) {
-        error(utils::format("Failed to retrieve integer object \"%s\":\n\t", key) + e.message());
+        PY_ERROR(utils::format("Failed to retrieve integer object \"%s\":\n\t", key) + e.message());
       }
     }
 
@@ -154,7 +154,7 @@ namespace cepgen {
       try {
         out = get<unsigned long>(pobj);
       } catch (const Exception& e) {
-        error(utils::format("Failed to retrieve unsigned long integer object \"%s\":\n\t", key) + e.message());
+        PY_ERROR(utils::format("Failed to retrieve unsigned long integer object \"%s\":\n\t", key) + e.message());
       }
     }
 
@@ -167,7 +167,7 @@ namespace cepgen {
       try {
         out = get<unsigned long>(pobj);
       } catch (const Exception& e) {
-        error(utils::format("Failed to retrieve unsigned integer object \"%s\":\n\t", key) + e.message());
+        PY_ERROR(utils::format("Failed to retrieve unsigned integer object \"%s\":\n\t", key) + e.message());
       }
     }
 
@@ -180,7 +180,7 @@ namespace cepgen {
       try {
         out = get<double>(pobj);
       } catch (const Exception& e) {
-        error(utils::format("Failed to retrieve float object \"%s\":\n\t", key) + e.message());
+        PY_ERROR(utils::format("Failed to retrieve float object \"%s\":\n\t", key) + e.message());
       }
     }
 
@@ -193,7 +193,7 @@ namespace cepgen {
       try {
         out = get<std::string>(pobj);
       } catch (const Exception& e) {
-        error(utils::format("Failed to retrieve string object \"%s\":\n\t", key) + e.message());
+        PY_ERROR(utils::format("Failed to retrieve string object \"%s\":\n\t", key) + e.message());
       }
     }
 
@@ -206,7 +206,7 @@ namespace cepgen {
       try {
         out = get<Limits>(pobj);
       } catch (const Exception& e) {
-        error(utils::format("Failed to retrieve limits object \"%s\":\n\t", key) + e.message());
+        PY_ERROR(utils::format("Failed to retrieve limits object \"%s\":\n\t", key) + e.message());
       }
     }
 
@@ -220,7 +220,7 @@ namespace cepgen {
       try {
         out = getVector<double>(pobj);
       } catch (const Exception& e) {
-        error(utils::format("Failed to retrieve floats collection object \"%s\":\n\t", key) + e.message());
+        PY_ERROR(utils::format("Failed to retrieve floats collection object \"%s\":\n\t", key) + e.message());
       }
     }
 
@@ -234,7 +234,7 @@ namespace cepgen {
       try {
         out = getVector<std::string>(pobj);
       } catch (const Exception& e) {
-        error(utils::format("Failed to retrieve strings collection object \"%s\":\n\t", key) + e.message());
+        PY_ERROR(utils::format("Failed to retrieve strings collection object \"%s\":\n\t", key) + e.message());
       }
     }
 
@@ -248,7 +248,7 @@ namespace cepgen {
       try {
         out = getVector<int>(pobj);
       } catch (const Exception& e) {
-        error(utils::format("Failed to retrieve integers collection object \"%s\":\n\t", key) + e.message());
+        PY_ERROR(utils::format("Failed to retrieve integers collection object \"%s\":\n\t", key) + e.message());
       }
     }
 
@@ -261,7 +261,7 @@ namespace cepgen {
       try {
         out += get<ParametersList>(pobj);
       } catch (const Exception& e) {
-        error(utils::format("Failed to retrieve parameters list object \"%s\":\n\t", key) + e.message());
+        PY_ERROR(utils::format("Failed to retrieve parameters list object \"%s\":\n\t", key) + e.message());
       }
     }
 
@@ -275,7 +275,7 @@ namespace cepgen {
       try {
         out = getVector<ParametersList>(pobj);
       } catch (const Exception& e) {
-        error(utils::format("Failed to retrieve parameters list collection object \"%s\":\n\t", key) + e.message());
+        PY_ERROR(utils::format("Failed to retrieve parameters list collection object \"%s\":\n\t", key) + e.message());
       }
     }
   }  // namespace python
