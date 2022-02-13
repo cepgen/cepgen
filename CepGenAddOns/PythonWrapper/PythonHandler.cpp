@@ -141,7 +141,7 @@ namespace cepgen {
 
       auto* cfg = PyImport_ImportModule(filename.c_str());  // new
       if (!cfg)
-        python::error("Failed to import the configuration card '" + filename + "'\n (parsed from '" + file + "')");
+        PY_ERROR("Failed to import the configuration card '" + filename + "'\n (parsed from '" + file + "')");
 
       auto parseAttr = [this](PyObject* cfg, const std::string& name, std::function<void(PyObject*)> callback) -> void {
         if (PyObject_HasAttrString(cfg, name.c_str()) != 1)
@@ -177,7 +177,7 @@ namespace cepgen {
         //--- type of process to consider
         auto* pproc_name = python::element(process, ParametersList::MODULE_NAME);  // borrowed
         if (!pproc_name)
-          python::error("Failed to extract the process name from the configuration card '" + file + "'!");
+          PY_ERROR("Failed to extract the process name from the configuration card '" + file + "'!");
 
         //--- process mode
         rt_params_->setProcess(proc::ProcessFactory::get().build(python::get<std::string>(pproc_name), proc_params));
@@ -238,13 +238,13 @@ namespace cepgen {
 
     void PythonHandler::parseIntegrator(PyObject* integr) {
       if (!PyDict_Check(integr))
-        python::error("Integrator object should be a dictionary!");
+        PY_ERROR("Integrator object should be a dictionary!");
       rt_params_->par_integrator += python::get<ParametersList>(integr);
     }
 
     void PythonHandler::parseGenerator(PyObject* gen) {
       if (!PyDict_Check(gen))
-        python::error("Generation information object should be a dictionary!");
+        PY_ERROR("Generation information object should be a dictionary!");
       auto plist = python::get<ParametersList>(gen);
       plist.set<int>("maxgen", plist.get<int>("numEvents"));
       rt_params_->generation().setParameters(plist);
@@ -252,7 +252,7 @@ namespace cepgen {
 
     void PythonHandler::parseEventModifiers(PyObject* mod) {
       if (!PyList_Check(mod))
-        python::error("Event modification definition object should be a list/Sequence!");
+        PY_ERROR("Event modification definition object should be a list/Sequence!");
 
       for (Py_ssize_t i = 0; i < PyList_Size(mod); ++i)
         parseHadroniser(PyList_GetItem(mod, i));
@@ -260,11 +260,11 @@ namespace cepgen {
 
     void PythonHandler::parseHadroniser(PyObject* mod) {
       if (!PyDict_Check(mod))
-        python::error("Event modification definition object should be a dictionary!");
+        PY_ERROR("Event modification definition object should be a dictionary!");
 
       auto* pname = python::element(mod, ParametersList::MODULE_NAME);  // borrowed
       if (!pname)
-        python::error("Event modification algorithm name is required!");
+        PY_ERROR("Event modification algorithm name is required!");
       std::string mod_name = python::get<std::string>(pname);
 
       rt_params_->addModifier(EventModifierFactory::get().build(mod_name, python::get<ParametersList>(mod)));
@@ -289,7 +289,7 @@ namespace cepgen {
 
     void PythonHandler::parseOutputModules(PyObject* mod) {
       if (!PyList_Check(mod))
-        python::error("Output modules definition object should be a list/Sequence!");
+        PY_ERROR("Output modules definition object should be a list/Sequence!");
 
       for (Py_ssize_t i = 0; i < PyList_Size(mod); ++i)
         parseOutputModule(PyList_GetItem(mod, i));
@@ -297,18 +297,18 @@ namespace cepgen {
 
     void PythonHandler::parseOutputModule(PyObject* pout) {
       if (!python::is<ParametersList>(pout))
-        python::error("Invalid type for output parameters list!");
+        PY_ERROR("Invalid type for output parameters list!");
 
       auto* pname = python::element(pout, ParametersList::MODULE_NAME);  // borrowed
       if (!pname)
-        python::error("Output module name is required!");
+        PY_ERROR("Output module name is required!");
       rt_params_->addOutputModule(
           io::ExportModuleFactory::get().build(python::get<std::string>(pname), python::get<ParametersList>(pout)));
     }
 
     void PythonHandler::parseExtraParticles(PyObject* pparts) {
       if (!python::is<ParametersList>(pparts))
-        python::error("Extra particles definition object should be a parameters list!");
+        PY_ERROR("Extra particles definition object should be a parameters list!");
 
       const auto& parts = python::get<ParametersList>(pparts);
       for (const auto& k : parts.keys(true)) {

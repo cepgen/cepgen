@@ -60,13 +60,13 @@ namespace cepgen {
         python::ObjectPtr value(PyRun_String(os.str().c_str(), Py_file_input, global, local));  // new
         //PyRun_SimpleString(os.str().c_str());
         if (!value)
-          python::error("Failed to initialise the Python functional with \"" + expression_ + "\".");
+          PY_ERROR("Failed to initialise the Python functional with \"" + expression_ + "\".");
         CG_DEBUG("FunctionalPython") << "Python expression compilation output: "
                                      << python::get<ParametersList>(value.get());
       }
       func_.reset(PyObject_GetAttrString(mod_.get(), "custom_functional"));
       if (!func_ || !PyCallable_Check(func_.get()))
-        python::error("Failed to retrieve/cast the object to a Python functional.");
+        PY_ERROR("Failed to retrieve/cast the object to a Python functional.");
     }
 
     FunctionalPython::~FunctionalPython() { Py_Finalize(); }
