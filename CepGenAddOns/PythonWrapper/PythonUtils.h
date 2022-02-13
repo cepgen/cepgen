@@ -27,13 +27,13 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/Limits.h"
 
-#define PY_ERROR cepgen::python::Error(__FUNC__)
+#define PY_ERROR cepgen::python::Error(__FUNC__, __FILE__, __LINE__)
 
 namespace cepgen {
   namespace python {
     class Error final : public LoggedException {
     public:
-      explicit Error(const std::string&);
+      explicit Error(const std::string&, const std::string&, short);
       ~Error();
 
     private:
