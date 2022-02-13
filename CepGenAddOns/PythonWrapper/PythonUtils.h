@@ -27,16 +27,25 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/Limits.h"
 
-#define PY_ERROR(msg) cepgen::python::error(msg, __FUNC__)
+#define PY_ERROR cepgen::python::Error(__FUNC__)
 
 namespace cepgen {
   namespace python {
+    class Error final : public LoggedException {
+    public:
+      explicit Error(const std::string&);
+      ~Error();
+
+    private:
+      PyObject* ptype_{nullptr};
+      PyObject* pvalue_{nullptr};
+      PyObject* ptraceback_obj_{nullptr};
+    };
     struct PyObject_deleter {
       void operator()(PyObject* obj) { Py_DECREF(obj); }
     };
     typedef std::unique_ptr<PyObject, PyObject_deleter> ObjectPtr;
 
-    LoggedException error(const std::string&, const std::string& origin = "");
     std::string pythonPath(const std::string&);
     PyObject* element(PyObject*, const std::string&);
     ObjectPtr encode(const std::string&);

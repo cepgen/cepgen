@@ -50,7 +50,7 @@ namespace cepgen {
 
   /// A simple exception handler
   /// \date 24 Mar 2015
-  class LoggedException final : public Exception, public std::exception {
+  class LoggedException : public Exception, public std::exception {
   public:
     /// Generic constructor
     /// \param[in] module exception classifier

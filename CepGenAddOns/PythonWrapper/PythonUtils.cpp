@@ -49,36 +49,35 @@ namespace cepgen {
       return filename;
     }
 
-    LoggedException error(const std::string& message, const std::string& origin) {
-      return LoggedException(origin.c_str(), "PythonHandler:error", Exception::Type::fatal).log([&message](auto& err) {
-        PyObject *ptype = nullptr, *pvalue = nullptr, *ptraceback_obj = nullptr;
-        // retrieve error indicator and clear it to handle ourself the error
-        PyErr_Fetch(&ptype, &pvalue, &ptraceback_obj);
-        PyErr_Clear();
-        // ensure the objects retrieved are properly normalised and point to compatible objects
-        PyErr_NormalizeException(&ptype, &pvalue, &ptraceback_obj);
-        err << message;
-        if (ptype != nullptr) {  // we can start the traceback
-          err << "\nError: " << decode(PyObject_Str(pvalue));
-          PyTracebackObject* ptraceback = (PyTracebackObject*)ptraceback_obj;
-          std::string tabul = "↪ ";
-          if (ptraceback != nullptr) {
-            while (ptraceback->tb_next != nullptr) {
-              PyFrameObject* pframe = ptraceback->tb_frame;
-              if (pframe != nullptr) {
-                int line = PyCode_Addr2Line(pframe->f_code, pframe->f_lasti);
-                const auto filename = decode(pframe->f_code->co_filename), funcname = decode(pframe->f_code->co_name);
-                err << utils::format(
-                    "\n\t%s%s on %s (line %d)", tabul.c_str(), utils::boldify(funcname).c_str(), filename.c_str(), line);
-              } else
-                err << utils::format("\n\t%s issue in line %d", tabul.c_str(), ptraceback->tb_lineno);
-              tabul = std::string("  ") + tabul;
-              ptraceback = ptraceback->tb_next;
-            }
+    Error::Error(const std::string& origin) : LoggedException(origin.c_str(), "Python::error", Exception::Type::fatal) {
+      // retrieve error indicator and clear it to handle ourself the error
+      PyErr_Fetch(&ptype_, &pvalue_, &ptraceback_obj_);
+      PyErr_Clear();
+      // ensure the objects retrieved are properly normalised and point to compatible objects
+      PyErr_NormalizeException(&ptype_, &pvalue_, &ptraceback_obj_);
+    }
+
+    Error::~Error() {
+      if (ptype_) {  // we can start the traceback
+        (*this) << "\nError: " << decode(PyObject_Str(pvalue_));
+        auto* ptraceback = (PyTracebackObject*)ptraceback_obj_;
+        std::string tabul = "↪ ";
+        if (ptraceback) {
+          while (ptraceback->tb_next) {
+            auto* pframe = ptraceback->tb_frame;
+            if (pframe) {
+              int line = PyCode_Addr2Line(pframe->f_code, pframe->f_lasti);
+              const auto filename = decode(pframe->f_code->co_filename), funcname = decode(pframe->f_code->co_name);
+              (*this) << utils::format(
+                  "\n\t%s%s on %s (line %d)", tabul.c_str(), utils::boldify(funcname).c_str(), filename.c_str(), line);
+            } else
+              (*this) << utils::format("\n\t%s issue in line %d", tabul.c_str(), ptraceback->tb_lineno);
+            tabul = std::string("  ") + tabul;
+            ptraceback = ptraceback->tb_next;
           }
         }
-        Py_Finalize();
-      });
+      }
+      Py_Finalize();
     }
 
     std::string decode(PyObject* obj) {
@@ -98,7 +97,7 @@ namespace cepgen {
     ObjectPtr encode(const std::string& str) {
       ObjectPtr obj(PyUnicode_FromString(str.c_str()));  // new
       if (!obj)
-        PY_ERROR("Failed to encode the following string:\n\t" + str);
+        PY_ERROR << "Failed to encode the following string:\n\t" << str;
       return obj;
     }
 
@@ -128,7 +127,7 @@ namespace cepgen {
       try {
         out = (bool)get<int>(pobj);
       } catch (const Exception& e) {
-        PY_ERROR(utils::format("Failed to retrieve boolean object \"%s\":\n\t", key) + e.message());
+        PY_ERROR << "Failed to retrieve boolean object \"" << key << "\":\n\t" << e.message();
       }
     }
 
@@ -141,7 +140,7 @@ namespace cepgen {
       try {
         out = get<int>(pobj);
       } catch (const Exception& e) {
-        PY_ERROR(utils::format("Failed to retrieve integer object \"%s\":\n\t", key) + e.message());
+        PY_ERROR << "Failed to retrieve integer object \"" << key << "\":\n\t" << e.message();
       }
     }
 
@@ -154,7 +153,7 @@ namespace cepgen {
       try {
         out = get<unsigned long>(pobj);
       } catch (const Exception& e) {
-        PY_ERROR(utils::format("Failed to retrieve unsigned long integer object \"%s\":\n\t", key) + e.message());
+        PY_ERROR << "Failed to retrieve unsigned long integer object \"" << key << "\":\n\t" << e.message();
       }
     }
 
@@ -167,7 +166,7 @@ namespace cepgen {
       try {
         out = get<unsigned long>(pobj);
       } catch (const Exception& e) {
-        PY_ERROR(utils::format("Failed to retrieve unsigned integer object \"%s\":\n\t", key) + e.message());
+        PY_ERROR << "Failed to retrieve unsigned integer object \"" << key << "\":\n\t" << e.message();
       }
     }
 
@@ -180,7 +179,7 @@ namespace cepgen {
       try {
         out = get<double>(pobj);
       } catch (const Exception& e) {
-        PY_ERROR(utils::format("Failed to retrieve float object \"%s\":\n\t", key) + e.message());
+        PY_ERROR << "Failed to retrieve float object \"" << key << "\":\n\t" << e.message();
       }
     }
 
@@ -193,7 +192,7 @@ namespace cepgen {
       try {
         out = get<std::string>(pobj);
       } catch (const Exception& e) {
-        PY_ERROR(utils::format("Failed to retrieve string object \"%s\":\n\t", key) + e.message());
+        PY_ERROR << "Failed to retrieve string object \"" << key << "\":\n\t" << e.message();
       }
     }
 
@@ -206,7 +205,7 @@ namespace cepgen {
       try {
         out = get<Limits>(pobj);
       } catch (const Exception& e) {
-        PY_ERROR(utils::format("Failed to retrieve limits object \"%s\":\n\t", key) + e.message());
+        PY_ERROR << "Failed to retrieve limits object \"" << key << "\":\n\t" << e.message();
       }
     }
 
@@ -220,7 +219,7 @@ namespace cepgen {
       try {
         out = getVector<double>(pobj);
       } catch (const Exception& e) {
-        PY_ERROR(utils::format("Failed to retrieve floats collection object \"%s\":\n\t", key) + e.message());
+        PY_ERROR << "Failed to retrieve floats collection object \"" << key << "\":\n\t" << e.message();
       }
     }
 
@@ -234,7 +233,7 @@ namespace cepgen {
       try {
         out = getVector<std::string>(pobj);
       } catch (const Exception& e) {
-        PY_ERROR(utils::format("Failed to retrieve strings collection object \"%s\":\n\t", key) + e.message());
+        PY_ERROR << "Failed to retrieve strings collection object \"" << key << "\":\n\t" << e.message();
       }
     }
 
@@ -248,7 +247,7 @@ namespace cepgen {
       try {
         out = getVector<int>(pobj);
       } catch (const Exception& e) {
-        PY_ERROR(utils::format("Failed to retrieve integers collection object \"%s\":\n\t", key) + e.message());
+        PY_ERROR << "Failed to retrieve integers collection object \"" << key << "\":\n\t" << e.message();
       }
     }
 
@@ -261,7 +260,7 @@ namespace cepgen {
       try {
         out += get<ParametersList>(pobj);
       } catch (const Exception& e) {
-        PY_ERROR(utils::format("Failed to retrieve parameters list object \"%s\":\n\t", key) + e.message());
+        PY_ERROR << "Failed to retrieve parameters list object \"" << key << "\":\n\t" << e.message();
       }
     }
 
@@ -275,7 +274,7 @@ namespace cepgen {
       try {
         out = getVector<ParametersList>(pobj);
       } catch (const Exception& e) {
-        PY_ERROR(utils::format("Failed to retrieve parameters list collection object \"%s\":\n\t", key) + e.message());
+        PY_ERROR << "Failed to retrieve parameters list collection object \"" << key << "\":\n\t" << e.message();
       }
     }
   }  // namespace python
