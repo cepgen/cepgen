@@ -59,56 +59,63 @@ namespace cepgen {
     return exc;
   }
 
-  std::ostream& LoggedMessage::dump(std::ostream& os) const {
-    if (!utils::Logger::get().output)
-      return os;
+  void LoggedMessage::dump(std::ostream* os) const {
+    if (!os)
+      os = utils::Logger::get().output;
+    if (!os)
+      return;
 
     switch (type_) {
-      case MessageType::info:
-        return os << type_
-                  << (utils::Logger::get().extended()
-                          ? utils::colourise(" {" + from_ + "}\n\t",
+      case MessageType::info: {
+        (*os) << type_
+              << (utils::Logger::get().extended() ? utils::colourise(" {" + from_ + "}\n\t",
+                                                                     utils::Colour::none,
+                                                                     utils::Modifier::dimmed | utils::Modifier::italic)
+                                                  : ":\t")
+              << message_.str() << "\n";
+        return;
+      };
+      case MessageType::debug: {
+        (*os) << type_ << " "
+              << utils::colourise(from_, utils::Colour::yellow, utils::Modifier::underline | utils::Modifier::dimmed)
+              << (utils::Logger::get().extended()
+                      ? " " +
+                            utils::colourise(
+                                file_,
+                                utils::Colour::none,
+                                utils::Modifier::bold | utils::Modifier::italic | utils::Modifier::dimmed) +
+                            " @" +
+                            utils::colourise(std::to_string(line_num_),
                                              utils::Colour::none,
-                                             utils::Modifier::dimmed | utils::Modifier::italic)
-                          : ":\t")
-                  << message_.str() << "\n";
-      case MessageType::debug:
-        return os << type_ << " "
-                  << utils::colourise(
-                         from_, utils::Colour::yellow, utils::Modifier::underline | utils::Modifier::dimmed)
-                  << (utils::Logger::get().extended()
-                          ? " " +
-                                utils::colourise(
-                                    file_,
-                                    utils::Colour::none,
-                                    utils::Modifier::bold | utils::Modifier::italic | utils::Modifier::dimmed) +
-                                " @" +
-                                utils::colourise(std::to_string(line_num_),
-                                                 utils::Colour::none,
-                                                 utils::Modifier::italic | utils::Modifier::dimmed) +
-                                "\n"
-                          : ": ")
-                  << utils::colourise(message_.str(), utils::Colour::none, utils::Modifier::dimmed) << "\n";
-      case MessageType::warning:
-        return os << type_ << " "
-                  << utils::colourise(from_, utils::Colour::none, utils::Modifier::underline | utils::Modifier::dimmed)
-                  << (utils::Logger::get().extended()
-                          ? " " +
-                                utils::colourise(
-                                    file_,
-                                    utils::Colour::none,
-                                    utils::Modifier::bold | utils::Modifier::italic | utils::Modifier::dimmed) +
-                                " @" +
-                                utils::colourise(std::to_string(line_num_),
-                                                 utils::Colour::none,
-                                                 utils::Modifier::italic | utils::Modifier::dimmed)
-                          : "")
-                  << "\n\t" << message_.str() << "\n";
+                                             utils::Modifier::italic | utils::Modifier::dimmed) +
+                            "\n"
+                      : ": ")
+              << utils::colourise(message_.str(), utils::Colour::none, utils::Modifier::dimmed) << "\n";
+        return;
+      }
+      case MessageType::warning: {
+        (*os) << type_ << " "
+              << utils::colourise(from_, utils::Colour::none, utils::Modifier::underline | utils::Modifier::dimmed)
+              << (utils::Logger::get().extended()
+                      ? " " +
+                            utils::colourise(
+                                file_,
+                                utils::Colour::none,
+                                utils::Modifier::bold | utils::Modifier::italic | utils::Modifier::dimmed) +
+                            " @" +
+                            utils::colourise(std::to_string(line_num_),
+                                             utils::Colour::none,
+                                             utils::Modifier::italic | utils::Modifier::dimmed)
+                      : "")
+              << "\n\t" << message_.str() << "\n";
+        return;
+      }
       case MessageType::verbatim:
-      case MessageType::undefined:
-        return os << message_.str() << "\n";
+      case MessageType::undefined: {
+        (*os) << message_.str() << "\n";
+        return;
+      }
     }
-    return os;
   }
 
   std::ostream& operator<<(std::ostream& os, const LoggedMessage::MessageType& type) {

@@ -42,20 +42,22 @@ namespace cepgen {
     return message_.str().c_str();
   }
 
-  std::ostream& Exception::dump(std::ostream& os) const {
-    if (!utils::Logger::get().output)
-      return os;
+  void Exception::dump(std::ostream* os) const {
+    if (!os)
+      os = utils::Logger::get().output;
+    if (!os)
+      return;
 
     const std::string sep(80, '-');
-    os << sep << "\n" << type_ << " occured at " << now() << "\n";
+    (*os) << sep << "\n" << type_ << " occured at " << now() << "\n";
     if (!from_.empty())
-      os << "  raised by: " << utils::colourise(from_, utils::Colour::none, utils::Modifier::underline) << "\n";
+      (*os) << "  raised by: " << utils::colourise(from_, utils::Colour::none, utils::Modifier::underline) << "\n";
     if (utils::Logger::get().extended()) {
-      os << "  file: " << utils::colourise(file_, utils::Colour::none, utils::Modifier::dimmed) << "\n";
+      (*os) << "  file: " << utils::colourise(file_, utils::Colour::none, utils::Modifier::dimmed) << "\n";
       if (line_num_ != 0)
-        os << "  line #" << line_num_ << "\n";
+        (*os) << "  line #" << line_num_ << "\n";
     }
-    return os << "\n" << message_.str() << "\n" << sep << "\n";
+    (*os) << "\n" << message_.str() << "\n" << sep << "\n";
   }
 
   std::ostream& operator<<(std::ostream& os, const Exception::Type& type) {
