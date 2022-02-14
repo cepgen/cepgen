@@ -28,7 +28,7 @@
 namespace cepgen {
   namespace python {
     Error::Error(const std::string& origin, const std::string& file, short lineno)
-        : LoggedException(origin.c_str(), "Python::error", Exception::Type::error, file.c_str(), lineno) {
+        : Exception(origin.c_str(), "Python::error", Exception::Type::error, file.c_str(), lineno) {
       // retrieve error indicator and clear it to handle ourself the error
       PyErr_Fetch(&ptype_, &pvalue_, &ptraceback_obj_);
       PyErr_Clear();
