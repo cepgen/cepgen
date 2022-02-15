@@ -19,13 +19,13 @@
 #include <cmath>
 #include <random>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/GSLDerivator.h"
 #include "CepGen/Utils/Graph.h"
+#include "CepGen/Utils/Message.h"
 
 using namespace std;
 
@@ -49,6 +49,7 @@ int main(int argc, char* argv[]) {
     graph_diff.addPoint(x, cos(x) - der_sin);
   }
   plt->draw({&graph_sin, &graph_der_sin, &graph_diff}, "test_deriv");
+  //FIXME add a chi2 test between expected and derivated values
 
   return 0;
 }

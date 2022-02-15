@@ -44,7 +44,6 @@ namespace cepgen {
   LoggedMessage::~LoggedMessage() noexcept {
     if (type_ != MessageType::undefined)
       dump();
-    printf("hahaaaaa\n");
   }
 
   const LoggedMessage& operator<<(const LoggedMessage& exc, const bool& var) noexcept {

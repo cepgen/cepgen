@@ -1,8 +1,8 @@
 #include <cmath>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/Message.h"
 
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
@@ -48,6 +48,7 @@ int main(int argc, char* argv[]) {
     CG_LOG << "Test with parameters object-set int failed";
     return -1;
   }
+  CG_LOG << "All tests passed.";
 
   return 0;
 }

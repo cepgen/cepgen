@@ -18,7 +18,7 @@
 
 #include <vector>
 
-#include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
 using namespace std;
