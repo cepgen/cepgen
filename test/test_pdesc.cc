@@ -1,6 +1,6 @@
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Modules/NamedModule.h"
+#include "CepGen/Utils/Message.h"
 
 int main() {
   class TestModule : public cepgen::NamedModule<std::string> {

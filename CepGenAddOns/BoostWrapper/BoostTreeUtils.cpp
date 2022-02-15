@@ -99,7 +99,7 @@ namespace boost {
     ::cepgen::ParametersList unpack(const pt::ptree& tree) {
       ::cepgen::ParametersList out;
       if (tree.empty())
-        throw NullStream();
+        return out;
       for (const auto& it : tree) {
         try {
           if (it.first.empty())  // this might be a vector

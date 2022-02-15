@@ -133,6 +133,6 @@ namespace cepgen {
         return;
       }
     }
-    throw CG_WARNING("printHeader") << "Failed to open README file.";
+    CG_WARNING("printHeader") << "Failed to open README file.";
   }
 }  // namespace cepgen

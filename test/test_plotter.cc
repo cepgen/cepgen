@@ -19,13 +19,13 @@
 #include <cmath>
 #include <random>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
 #include "CepGen/Utils/Histogram.h"
+#include "CepGen/Utils/Message.h"
 
 using namespace std;
 

@@ -27,7 +27,7 @@
 
 namespace cepgen {
   namespace python {
-    class Error final : public LoggedException {
+    class Error final : public Exception {
     public:
       explicit Error(const std::string&, const std::string&, short);
       ~Error();
