@@ -61,7 +61,7 @@ namespace cepgen {
     /// Copy constructor
     LoggedMessage(const LoggedMessage&) noexcept;
     /// Default destructor
-    ~LoggedMessage() noexcept override;
+    virtual ~LoggedMessage() noexcept override;
 
     /// Printout operator for message type
     friend std::ostream& operator<<(std::ostream&, const MessageType&);
@@ -70,23 +70,23 @@ namespace cepgen {
 
     /// Generic templated message feeder operator
     template <typename T>
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const T& var) {
+    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const T& var) noexcept {
       auto& nc_except = const_cast<LoggedMessage&>(exc);
       nc_except.message_ << var;
       return exc;
     }
     /// Specialised feeder operator for booleans
-    friend const LoggedMessage& operator<<(const LoggedMessage&, const bool&);
+    friend const LoggedMessage& operator<<(const LoggedMessage&, const bool&) noexcept;
     /// Specialised feeder operator for wide strings
-    friend const LoggedMessage& operator<<(const LoggedMessage&, const std::wstring&);
+    friend const LoggedMessage& operator<<(const LoggedMessage&, const std::wstring&) noexcept;
     /// Generic templated pair-variables feeder operator
     template <typename T, typename U>
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::pair<T, U>& pair_var) {
+    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::pair<T, U>& pair_var) noexcept {
       return exc << "(" << pair_var.first << ", " << pair_var.second << ")";
     }
     /// Generic templated vector-variables feeder operator
     template <typename T>
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::vector<T>& vec_var) {
+    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::vector<T>& vec_var) noexcept {
       exc << "{";
       std::string sep;
       if (!vec_var.empty())
@@ -96,7 +96,7 @@ namespace cepgen {
     }
     /// Generic templated vector-variables feeder operator
     template <typename T, std::size_t N>
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::array<T, N>& vec_var) {
+    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::array<T, N>& vec_var) noexcept {
       exc << "{";
       std::string sep;
       if (!vec_var.empty())
@@ -106,7 +106,7 @@ namespace cepgen {
     }
     /// Generic templated mapping-variables feeder operator
     template <typename T, typename U>
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::map<T, U>& map_var) {
+    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::map<T, U>& map_var) noexcept {
       exc << "{";
       std::string sep;
       if (!map_var.empty())
@@ -115,7 +115,8 @@ namespace cepgen {
       return exc << "}";
     }
     /// Pipe modifier operator
-    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, std::ios_base& (*f)(std::ios_base&)) {
+    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc,
+                                                  std::ios_base& (*f)(std::ios_base&)) noexcept {
       LoggedMessage& nc_except = const_cast<LoggedMessage&>(exc);
       f(nc_except.message_);
       return exc;
@@ -123,7 +124,7 @@ namespace cepgen {
 
     /// Lambda function handler
     template <typename T>
-    inline LoggedMessage& log(T&& lam) {
+    inline const LoggedMessage& log(T&& lam) noexcept {
       lam(*this);
       return *this;
     }
@@ -140,7 +141,7 @@ namespace cepgen {
     /// Message type
     const MessageType& type() const { return type_; }
     /// Human-readable dump of the message
-    void dump(std::ostream* os = nullptr) const override;
+    void dump(std::ostream* os = nullptr) const noexcept override;
     /// Output stream object
     std::ostream& stream() { return message_; }
 

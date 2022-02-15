@@ -44,22 +44,23 @@ namespace cepgen {
   LoggedMessage::~LoggedMessage() noexcept {
     if (type_ != MessageType::undefined)
       dump();
+    printf("hahaaaaa\n");
   }
 
-  const LoggedMessage& operator<<(const LoggedMessage& exc, const bool& var) {
+  const LoggedMessage& operator<<(const LoggedMessage& exc, const bool& var) noexcept {
     LoggedMessage& nc_except = const_cast<LoggedMessage&>(exc);
     nc_except.message_ << (var ? utils::colourise("true", utils::Colour::green)
                                : utils::colourise("false", utils::Colour::red));
     return exc;
   }
 
-  const LoggedMessage& operator<<(const LoggedMessage& exc, const std::wstring& var) {
+  const LoggedMessage& operator<<(const LoggedMessage& exc, const std::wstring& var) noexcept {
     LoggedMessage& nc_except = const_cast<LoggedMessage&>(exc);
     nc_except.message_ << utils::tostring(var);
     return exc;
   }
 
-  void LoggedMessage::dump(std::ostream* os) const {
+  void LoggedMessage::dump(std::ostream* os) const noexcept {
     if (!os)
       os = utils::Logger::get().output;
     if (!os)

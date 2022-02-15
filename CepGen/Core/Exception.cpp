@@ -22,27 +22,27 @@
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
-  Exception::Exception(const char* mod, const char* from, Type type, const char* file, short lineno)
+  Exception::Exception(const char* mod, const char* from, Type type, const char* file, short lineno) noexcept
       : LoggedMessage(mod, from, MessageType::undefined, file, lineno),
         std::runtime_error("cepgen::Exception"),
         type_(type) {}
 
-  Exception::~Exception() {
-    if (type_ != Type::undefined)
-      dump();
+  Exception::Exception(const Exception& oth) noexcept
+      : LoggedMessage(oth), std::runtime_error(oth.what()), type_(oth.type_) {}
+
+  Exception::~Exception() noexcept {
+    dump();
     // we stop this process' execution on fatal exception
     if (type_ == Type::fatal && raise(SIGINT) != 0)
       exit(0);
   }
-
-  Exception::Exception(Exception&& oth) : LoggedMessage(oth), std::runtime_error(oth.what()), type_(oth.type_) {}
 
   const char* Exception::what() const noexcept {
     (*utils::Logger::get().output) << "\n" << message_.str() << "\n";
     return message_.str().c_str();
   }
 
-  void Exception::dump(std::ostream* os) const {
+  void Exception::dump(std::ostream* os) const noexcept {
     if (!os)
       os = utils::Logger::get().output;
     if (!os)
@@ -52,7 +52,7 @@ namespace cepgen {
     (*os) << sep << "\n" << type_ << " occured at " << now() << "\n";
     if (!from_.empty())
       (*os) << "  raised by: " << utils::colourise(from_, utils::Colour::none, utils::Modifier::underline) << "\n";
-    if (utils::Logger::get().extended()) {
+    if (utils::Logger::get().extended() && !file_.empty()) {
       (*os) << "  file: " << utils::colourise(file_, utils::Colour::none, utils::Modifier::dimmed) << "\n";
       if (line_num_ != 0)
         (*os) << "  line #" << line_num_ << "\n";

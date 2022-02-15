@@ -30,16 +30,20 @@ namespace cepgen {
       error,           ///< General non-stopping error
       fatal            ///< Critical and stopping error
     };
-    explicit Exception(
-        const char* mod, const char* from = "", Type type = Type::undefined, const char* file = "", short lineno = 0);
-    Exception(Exception&&);
+    explicit Exception(const char* mod,
+                       const char* from = "",
+                       Type type = Type::undefined,
+                       const char* file = "",
+                       short lineno = 0) noexcept;
+    /// Copy constructor
+    Exception(const Exception&) noexcept;
     /// Destructor (potentially killing the process)
-    virtual ~Exception() override;
+    virtual ~Exception() noexcept override;
 
     /// Printout operator for exception type
     friend std::ostream& operator<<(std::ostream&, const Type&);
     /// Human-readable dump of the exception
-    void dump(std::ostream* os = nullptr) const override;
+    void dump(std::ostream* os = nullptr) const noexcept override;
 
     const char* what() const noexcept override;
 
