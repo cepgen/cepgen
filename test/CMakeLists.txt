@@ -1,9 +1,7 @@
 #-- list all test executables
 
 file(GLOB tests_standalone RELATIVE ${PROJECT_SOURCE_DIR}/test *.cc)
-file(GLOB tests_root RELATIVE ${PROJECT_SOURCE_DIR}/test *.cxx)
 file(GLOB tests_fortran RELATIVE ${PROJECT_SOURCE_DIR}/test *.f)
-file(GLOB tests_python RELATIVE ${PROJECT_SOURCE_DIR}/test test_python_*.cc)
 
 #-- include the utilitaries
 
@@ -18,23 +16,12 @@ if(NOT CEPGEN_HAS_FUNCTIONAL)
       RELATIVE ${PROJECT_SOURCE_DIR}/test
       test_integrator.cc test_function_parser*.*)
 #list(REMOVE_ITEM tests_standalone ${tests_functionals})
-  list(REMOVE_ITEM tests_root ${tests_functionals})
 endif()
-
-#-- build all tests requiring the Python library
-
-foreach(exec_src ${tests_python})
-  string(REPLACE ".cc" "" exec_bin ${exec_src})
-  add_executable(${exec_bin} ${exec_src})
-  target_link_libraries(${exec_bin} ${tests_libraries} CepGenPython)
-  list(APPEND tests ${exec_bin})
-endforeach()
-list(REMOVE_ITEM tests_standalone ${tests_python})
 
 #-- build all tests and link them to the core library
 
 foreach(exec_src ${tests_standalone})
-  string(REPLACE ".cc" "" exec_bin ${exec_src})
+  get_filename_component(exec_bin ${exec_src} NAME_WE)
   add_executable(${exec_bin} ${exec_src})
   target_link_libraries(${exec_bin} ${tests_libraries})
   if(CEPGEN_ROOT_FUNCTIONALS)
@@ -44,25 +31,11 @@ foreach(exec_src ${tests_standalone})
 endforeach()
 
 foreach(exec_src ${tests_fortran})
-  string(REPLACE ".f" "" exec_bin ${exec_src})
+  get_filename_component(exec_bin ${exec_src} NAME_WE)
   add_executable(${exec_bin} ${exec_src})
   target_link_libraries(${exec_bin} ${tests_libraries} stdc++)
 #list(APPEND tests ${exec_bin}) #for the moment, excluding F77 tests
 endforeach()
-
-#-- specify the tests requiring ROOT
-
-find_package(ROOT QUIET)
-if(ROOT_FOUND)
-  foreach(exec_src ${tests_root})
-    string(REPLACE ".cxx" "" exec_bin ${exec_src})
-    add_executable(${exec_bin} ${exec_src})
-    set_property(TARGET ${exec_bin} PROPERTY CXX_STANDARD ${ROOT_CXX_STANDARD})
-    target_include_directories(${exec_bin} PUBLIC ${ROOT_INCLUDE_DIRS})
-    target_link_libraries(${exec_bin} PUBLIC ${tests_libraries} ${ROOT_LIBRARIES})
-    list(APPEND tests ${exec_bin})
-  endforeach()
-endif()
 
 file(GLOB_RECURSE test_input_cards RELATIVE ${PROJECT_SOURCE_DIR}/test test_processes/* __init__.py)
 foreach(_files ${test_input_cards})
