@@ -176,23 +176,23 @@ test:cc7-cvmfs:
 #######################################
 
 compile:f33:
-  image: laufor/ci-images:cepgen-fedora33
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f33
   <<: *build_definition
 
 package:f33:
-  image: laufor/ci-images:cepgen-fedora33
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f33
   dependencies: ["compile:f33"]
   needs: ["compile:f33"]
   <<: *package_definition
 
 run_cepgen:f33:
-  image: laufor/ci-images:cepgen-fedora33
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f33
   dependencies: ["compile:f33"]
   needs: ["compile:f33"]
   <<: *run_cepgen_definition
 
 test:f33:
-  image: laufor/ci-images:cepgen-fedora33
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f33
   dependencies: ["compile:f33"]
   needs: ["compile:f33"]
   <<: *test_definition
