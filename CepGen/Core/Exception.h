@@ -42,6 +42,12 @@ namespace cepgen {
 
     /// Printout operator for exception type
     friend std::ostream& operator<<(std::ostream&, const Type&);
+
+    template <typename T>
+    inline friend const Exception& operator<<(const Exception& exc, const T& var) noexcept {
+      (const LoggedMessage&)exc << var;
+      return exc;
+    }
     /// Human-readable dump of the exception
     void dump(std::ostream* os = nullptr) const noexcept override;
 

@@ -30,7 +30,7 @@ int main() {
 
   //--- try with a bit of unicode too
   const std::string test_string = "Haha, ceci est un test à géométrie variable! ☺";
-  for (int type = (int)Exception::Type::undefined; type <= (int)Exception::Type::fatal; ++type) {
+  for (int type = (int)Exception::Type::undefined; type < (int)Exception::Type::fatal; ++type) {
     try {
       throw Exception("Test", "", (Exception::Type)type) << test_string;
       CG_LOG << "Test failed for type " << type << "!";

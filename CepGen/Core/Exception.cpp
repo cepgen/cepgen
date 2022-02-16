@@ -31,14 +31,13 @@ namespace cepgen {
       : LoggedMessage(oth), std::runtime_error(oth.what()), type_(oth.type_) {}
 
   Exception::~Exception() noexcept {
-    dump();
     // we stop this process' execution on fatal exception
     if (type_ == Type::fatal && raise(SIGINT) != 0)
       exit(0);
   }
 
   const char* Exception::what() const noexcept {
-    (*utils::Logger::get().output) << "\n" << message_.str() << "\n";
+    dump();
     return message_.str().c_str();
   }
 
