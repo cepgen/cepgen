@@ -252,7 +252,7 @@ namespace cepgen {
             out.set<std::vector<std::string> >(skey, getVector<std::string>(pvalue));
           else  //if (isVector<ParametersList>(pvalue))
             out.set<std::vector<ParametersList> >(skey, getVector<ParametersList>(pvalue));
-        } else if (pvalue->ob_type == &_PyNone_Type) {
+        } else if (pvalue == Py_None) {
           out.set<std::string>(skey, "None");
         } else {
           CG_WARNING("PythonTypes") << "Invalid object (" << pvalue->ob_type->tp_name << ") retrieved for key=" << skey
