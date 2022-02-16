@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,32 +24,30 @@
 #include <vector>
 
 namespace cepgen {
-  class Parameters;
-  namespace utils {
-    class Timer;
-  }
-  /// Wrapper to the function to be integrated
+  /// An integrand wrapper placeholder
   class Integrand {
   public:
-    explicit Integrand(const Parameters*);
+    Integrand() = default;
     virtual ~Integrand();
 
-    void setFunction(size_t ndim, const std::function<double(const std::vector<double>&)>& func);
-
-    /// Compute the integrand for a given phase space point
-    virtual double eval(const std::vector<double>& x);
+    /// Compute the integrand for a given coordinates set
+    virtual double eval(const std::vector<double>&) = 0;
     /// Phase space dimension
-    virtual size_t size() const { return gen_integr_.ndim; }
+    virtual size_t size() const = 0;
+  };
 
-  protected:
-    const Parameters* params_;                 ///< Generator-owned runtime parameters
-    const std::unique_ptr<utils::Timer> tmr_;  ///< A precious timekeeper for event timing
+  /// Wrapper to the function to be integrated
+  class FunctionIntegrand : public Integrand {
+  public:
+    explicit FunctionIntegrand(size_t ndim, const std::function<double(const std::vector<double>&)>& func)
+        : function_(func), ndim_(ndim) {}
+
+    double eval(const std::vector<double>&) override;
+    size_t size() const override { return ndim_; }
 
   private:
-    struct GenericIntegrand {
-      std::function<double(const std::vector<double>&)> function;
-      size_t ndim;
-    } gen_integr_;
+    std::function<double(const std::vector<double>&)> function_;
+    size_t ndim_;
   };
 }  // namespace cepgen
 

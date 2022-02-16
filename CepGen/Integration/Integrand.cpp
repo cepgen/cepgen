@@ -22,27 +22,15 @@
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  Integrand::Integrand(const Parameters* params) : params_(params), tmr_(new utils::Timer) {}
-
   Integrand::~Integrand() { CG_DEBUG("Integrand") << "Destructor called"; }
 
-  void Integrand::setFunction(size_t ndim, const std::function<double(const std::vector<double>&)>& func) {
-    gen_integr_.ndim = ndim;
-    gen_integr_.function = func;
-  }
-
-  double Integrand::eval(const std::vector<double>& x) {
-    CG_TICKER(const_cast<Parameters*>(params_)->timeKeeper());
-
+  double FunctionIntegrand::eval(const std::vector<double>& x) {
     if (x.size() != size())
       throw CG_FATAL("Integrand:eval") << "Invalid coordinates multiplicity: expected(" << size() << ") != received("
                                        << x.size() << ")!";
 
-    //--- start the timer
-    tmr_->reset();
-
-    //--- specify the phase space point to probe and calculate weight
-    double weight = gen_integr_.function(x);
+    //--- calculate weight for the phase space point to probe
+    double weight = function_(x);
 
     //--- a bit of useful debugging
     CG_DEBUG_LOOP("Integrand") << "f value for dim-" << x.size() << " point " << x << ": " << weight << ".";
