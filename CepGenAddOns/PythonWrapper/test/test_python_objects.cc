@@ -1,6 +1,7 @@
+#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
+// important to import Python includes first
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
