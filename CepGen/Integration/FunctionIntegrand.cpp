@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,23 +17,23 @@
  */
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Integration/Integrand.h"
-#include "CepGen/Parameters.h"
-#include "CepGen/Utils/TimeKeeper.h"
+#include "CepGen/Integration/FunctionIntegrand.h"
 
 namespace cepgen {
-  Integrand::~Integrand() { CG_DEBUG("Integrand") << "Destructor called"; }
+  FunctionIntegrand::FunctionIntegrand(size_t ndim, const std::function<double(const std::vector<double>&)>& func)
+      : function_(func), ndim_(ndim) {}
 
   double FunctionIntegrand::eval(const std::vector<double>& x) {
     if (x.size() != size())
-      throw CG_FATAL("Integrand:eval") << "Invalid coordinates multiplicity: expected(" << size() << ") != received("
-                                       << x.size() << ")!";
+      throw CG_FATAL("FunctionIntegrand:eval")
+          << "Invalid coordinates multiplicity: expected(" << size() << ") != received(" << x.size() << ")!";
 
     //--- calculate weight for the phase space point to probe
     double weight = function_(x);
 
     //--- a bit of useful debugging
-    CG_DEBUG_LOOP("Integrand") << "f value for dim-" << x.size() << " point " << x << ": " << weight << ".";
+    CG_DEBUG_LOOP("FunctionIntegrand:eval")
+        << "f value for dim-" << x.size() << " point " << x << ": " << weight << ".";
 
     return weight;
   }

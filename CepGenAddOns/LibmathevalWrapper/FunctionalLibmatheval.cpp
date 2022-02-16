@@ -31,7 +31,7 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      double eval(const std::vector<double>&) const;
+      double eval() const;
 
     private:
       struct eval_deleter {
@@ -58,10 +58,8 @@ namespace cepgen {
             << utils::s("variable", vars_.size(), true) << " is/are expected: " << vars_ << "!";
     }
 
-    double FunctionalLibmatheval::eval(const std::vector<double>& x) const {
-      if (parsed_vars_.size() != x.size())
-        throw CG_FATAL("FunctionalLibmatheval") << "Invalid number of variables fed to the evaluator!";
-      return evaluator_evaluate(eval_.get(), parsed_vars_.size(), c_parsed_vars_, const_cast<double*>(x.data()));
+    double FunctionalLibmatheval::eval() const {
+      return evaluator_evaluate(eval_.get(), parsed_vars_.size(), c_parsed_vars_, const_cast<double*>(values_.data()));
     }
 
     ParametersDescription FunctionalLibmatheval::description() {

@@ -28,27 +28,28 @@ namespace cepgen {
     class FunctionalROOT final : public Functional {
     public:
       explicit FunctionalROOT(const ParametersList&);
+      double eval() const override;
 
       static ParametersDescription description();
-
-      double eval(const std::vector<double>&) const;
 
     private:
       TFormula func_;
     };
 
     FunctionalROOT::FunctionalROOT(const ParametersList& params) : Functional(params) {
-      for (size_t i = 0; i < vars_.size(); ++i)
-        func_.AddVariable(vars_[i], 0.);
+      for (auto& var : vars_)
+        func_.AddVariable(var, 0.);
       auto expr = expression_;
       expr = utils::replace_all(expr, {{"min(", "TMath::Min("}, {"max(", "TMath::Max("}});
       if (func_.Compile(expr.c_str()) != 0)
         throw CG_ERROR("FunctionalROOT") << "Failed to define the function\n\t" << expression_;
+      CG_DEBUG("FunctionalROOT") << "Successfully defined a dimension-" << vars_.size() << " function with arguments "
+                                 << vars_ << ": " << expr << ".";
     }
 
-    double FunctionalROOT::eval(const std::vector<double>& x) const {
+    double FunctionalROOT::eval() const {
       if (!func_.IsValid())
-        throw CG_WARNING("FunctionalROOT") << "Cannot evaluate the invalid function at " << x << ".";
+        throw CG_WARNING("FunctionalROOT") << "Cannot evaluate the invalid function at " << values_ << ".";
       return func_.EvalPar(values_.data());
     }
 

@@ -21,17 +21,15 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Utils/Functional.h"
-#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace utils {
     class FunctionalTinyExpr final : public Functional {
     public:
       explicit FunctionalTinyExpr(const ParametersList&);
+      double eval() const override;
 
       static ParametersDescription description();
-
-      double eval(const std::vector<double>&) const;
 
     private:
       struct te_deleter {
@@ -54,10 +52,7 @@ namespace cepgen {
       }
     }
 
-    double FunctionalTinyExpr::eval(const std::vector<double>& x) const {
-      values_ = x;
-      return te_eval(eval_.get());
-    }
+    double FunctionalTinyExpr::eval() const { return te_eval(eval_.get()); }
 
     ParametersDescription FunctionalTinyExpr::description() {
       auto desc = Functional::description();
