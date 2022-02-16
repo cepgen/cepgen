@@ -32,8 +32,6 @@ int main(int argc, char* argv[]) {
   vector<string> integrators;
   string func_mod;
 
-  cepgen::initialise();
-
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("num-sigma,n", "max. number of std.dev.", &num_sigma, 5.)
       .addOptionalArgument("integrator,i", "type of integrator used", &integrators, vector<string>{"Vegas"})
@@ -44,6 +42,8 @@ int main(int argc, char* argv[]) {
 
   if (quiet)
     cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::nothing;
+
+  cepgen::initialise();
 
   //--- tests definition
   struct test_t {
@@ -68,7 +68,6 @@ int main(int argc, char* argv[]) {
   CG_LOG << "Will test with " << cepgen::utils::s("integrator", integrators.size(), true) << ": " << integrators;
 
   for (const auto& integrator : integrators) {
-    CG_LOG << "Running with " << integrator << " integrator.";
     auto integr = cepgen::IntegratorFactory::get().build(integrator);
 
     //--- integration part
@@ -86,11 +85,12 @@ int main(int argc, char* argv[]) {
     bool success = true;
     i = 0;
     for (const auto& test : tests) {
-      CG_DEBUG("main") << "Test " << i++ << " passed: " << cepgen::utils::yesno(test.success);
+      CG_INFO("main") << "Test " << i++ << " passed: " << cepgen::utils::yesno(test.success);
       success &= test.success;
     }
     if (!success)
       throw CG_FATAL("main") << integrator << " integrator tests failed!";
+    CG_LOG << integrator << " integrator tests passed.";
   }
   return 0;
 }

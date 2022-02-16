@@ -99,7 +99,7 @@ stages:
   script:
     - cd build
     - export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
-    - test/test_integrator -a # test all integrators
+    - test/test_integrator -q -a # quietly test all integrators
   when: on_success
   allow_failure: true
 
