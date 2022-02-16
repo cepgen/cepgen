@@ -81,18 +81,6 @@ stages:
   when: on_success
   allow_failure: false
 
-.test_cross_sections_template: &test_cross_sections_definition
-  stage: test
-  script:
-    - cd build
-    - export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
-    - echo "VEGAS test"
-    - test/test_physics_processes -i Vegas -q --cfg test/test_processes.cfg
-    - echo "MISER test"
-    - test/test_physics_processes -i MISER -q --cfg test/test_processes.cfg
-  when: on_success
-  allow_failure: true
-
 #######################################
 # CS8 jobs
 #######################################
@@ -119,12 +107,6 @@ test:centos8:
   needs: ["compile:centos8"]
   <<: *test_definition
 
-test_cross_sections:centos8:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:centos8
-  dependencies: ["compile:centos8"]
-  needs: ["compile:centos8"]
-  <<: *test_cross_sections_definition
-
 #######################################
 # CC7 jobs
 #######################################
@@ -150,12 +132,6 @@ test:cc7:
   dependencies: ["compile:cc7"]
   needs: ["compile:cc7"]
   <<: *test_definition
-
-test_cross_sections:cc7:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
-  dependencies: ["compile:cc7"]
-  needs: ["compile:cc7"]
-  <<: *test_cross_sections_definition
 
 #######################################
 # CC7 jobs (with CVMFS support)
@@ -195,15 +171,6 @@ test:cc7-cvmfs:
   allow_failure: true
   <<: *test_definition
 
-test_cross_sections:cc7-cvmfs:
-  tags:
-    - cvmfs
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
-  dependencies: ["compile:cc7-cvmfs"]
-  needs: ["compile:cc7-cvmfs"]
-  allow_failure: true
-  <<: *test_cross_sections_definition
-
 #######################################
 # Fedora 33 jobs
 #######################################
@@ -229,12 +196,6 @@ test:f33:
   dependencies: ["compile:f33"]
   needs: ["compile:f33"]
   <<: *test_definition
-
-test_cross_sections:f33:
-  image: laufor/ci-images:cepgen-fedora33
-  dependencies: ["compile:f33"]
-  needs: ["compile:f33"]
-  <<: *test_cross_sections_definition
 
 #######################################
 # Fedora 34 jobs
@@ -262,12 +223,6 @@ test:f34:
   needs: ["compile:f34"]
   <<: *test_definition
 
-test_cross_sections:f34:
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f34
-  dependencies: ["compile:f34"]
-  needs: ["compile:f34"]
-  <<: *test_cross_sections_definition
-
 #######################################
 # Ubuntu Bionic (18.04) jobs
 #######################################
@@ -294,12 +249,6 @@ test:ubuntu_bionic:
   needs: ["compile:ubuntu_bionic"]
   <<: *test_definition
 
-test_cross_sections:ubuntu_bionic:
-  image: laufor/ci-images:cepgen-ubuntu18
-  dependencies: ["compile:ubuntu_bionic"]
-  needs: ["compile:ubuntu_bionic"]
-  <<: *test_cross_sections_definition
-
 #######################################
 # Ubuntu Focal (20.04) jobs
 #######################################
@@ -325,10 +274,4 @@ test:ubuntu_focal:
   dependencies: ["compile:ubuntu_focal"]
   needs: ["compile:ubuntu_focal"]
   <<: *test_definition
-
-test_cross_sections:ubuntu_focal:
-  image: laufor/ci-images:cepgen-ubuntu20
-  dependencies: ["compile:ubuntu_focal"]
-  needs: ["compile:ubuntu_focal"]
-  <<: *test_cross_sections_definition
 
