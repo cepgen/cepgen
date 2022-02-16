@@ -28,15 +28,18 @@ namespace cepgen {
   namespace utils {
     extern std::atomic<int> gSignal;
     /// Exception raised when the user terminates the process
-    struct RunAbortedException {
-      RunAbortedException() { CG_INFO("RunAbortedException") << "User abort through C-c."; }
+    struct RunAbortedException : std::runtime_error {
+      RunAbortedException() : std::runtime_error("CepGen run aborted") {}
+      ~RunAbortedException() noexcept { CG_INFO("RunAbortedException") << what(); }
+
+      const char* what() const noexcept override { return "User abort through C-c."; }
     };
 
     /// Object handling an user-driven process abortion
     class AbortHandler {
     public:
       /// Define a process abortion procedure
-      AbortHandler(int flags = SA_SIGINFO) {
+      explicit AbortHandler(int flags = SA_SIGINFO) {
         action_.sa_sigaction = handle_ctrl_c;
         sigemptyset(&action_.sa_mask);
         action_.sa_flags = flags;
