@@ -19,6 +19,8 @@
 #ifndef CepGen_Utils_Message_h
 #define CepGen_Utils_Message_h
 
+#include <map>
+
 #include "CepGen/Utils/Logger.h"
 
 namespace cepgen {
