@@ -5,6 +5,13 @@ else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11")
 endif()
+if(CMAKE_VERSION VERSION_GREATER 2.8)
+  find_program(CCACHE_FOUND ccache)
+  if(CCACHE_FOUND)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache) # Less useful to do it for linking, see edit2
+  endif(CCACHE_FOUND)
+endif()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O")
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wall -cpp")
 #--- ensure a proper version of the compiler is found
