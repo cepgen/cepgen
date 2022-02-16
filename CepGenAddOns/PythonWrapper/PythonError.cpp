@@ -16,14 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// clang-format off
+#include "CepGen/Utils/String.h"
 #include "CepGenAddOns/PythonWrapper/PythonError.h"
 #include "CepGenAddOns/PythonWrapper/PythonUtils.h"
+
+// clang-format off
 #include <frameobject.h>
 // clang-format on
-
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace python {
