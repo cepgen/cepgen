@@ -119,20 +119,20 @@ namespace cepgen {
     if (mode != mode::Kinematics::invalid) {
       switch (mode) {
         case mode::Kinematics::ElasticElastic:
-          plist_pos.set<int>("mode", (int)Beam::Mode::ProtonElastic);
-          plist_neg.set<int>("mode", (int)Beam::Mode::ProtonElastic);
+          plist_pos.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonElastic);
+          plist_neg.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonElastic);
           break;
         case mode::Kinematics::ElasticInelastic:
-          plist_pos.set<int>("mode", (int)Beam::Mode::ProtonElastic);
-          plist_neg.set<int>("mode", (int)Beam::Mode::ProtonInelastic);
+          plist_pos.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonElastic);
+          plist_neg.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonInelastic);
           break;
         case mode::Kinematics::InelasticElastic:
-          plist_pos.set<int>("mode", (int)Beam::Mode::ProtonInelastic);
-          plist_neg.set<int>("mode", (int)Beam::Mode::ProtonElastic);
+          plist_pos.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonInelastic);
+          plist_neg.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonElastic);
           break;
         case mode::Kinematics::InelasticInelastic:
-          plist_pos.set<int>("mode", (int)Beam::Mode::ProtonInelastic);
-          plist_neg.set<int>("mode", (int)Beam::Mode::ProtonInelastic);
+          plist_pos.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonInelastic);
+          plist_neg.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonInelastic);
           break;
         default:
           throw CG_FATAL("Kinematics:IncomingBeams:mode") << "Unsupported kinematics mode: " << mode << "!";
@@ -158,6 +158,8 @@ namespace cepgen {
         plist_neg.set<int>("ktFlux", (int)ktfluxes);
       }
     }
+    CG_DEBUG("IncomingBeams") << "Will build the following incoming beams:\n* " << plist_pos << "\n* " << plist_neg
+                              << ".";
     pos_beam_ = Beam(plist_pos);
     neg_beam_ = Beam(plist_neg);
   }
