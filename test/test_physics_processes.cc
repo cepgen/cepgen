@@ -29,7 +29,6 @@
 #include "CepGen/Utils/Timer.h"
 
 using namespace std;
-using namespace cepgen;
 
 int main(int argc, char* argv[]) {
   double num_sigma;
@@ -37,7 +36,7 @@ int main(int argc, char* argv[]) {
   string integrator;
   bool quiet;
 
-  ArgumentsParser argparse(argc, argv);
+  cepgen::ArgumentsParser argparse(argc, argv);
   argparse.addArgument("cfg,c", "configuration file", &cfg_filename)
       .addOptionalArgument("quiet,q", "quiet mode", &quiet, false)
       .addOptionalArgument("num-sigma,n", "max. number of std.dev.", &num_sigma, 3.)
@@ -45,10 +44,10 @@ int main(int argc, char* argv[]) {
       .parse();
 
   if (quiet)
-    utils::Logger::get().level = utils::Logger::Level::error;
+    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::error;
 
-  utils::Timer tmr;
-  Generator gen;
+  cepgen::utils::Timer tmr;
+  cepgen::Generator gen;
 
   CG_LOG << "Testing with " << integrator << " integrator.";
 
@@ -57,7 +56,7 @@ int main(int argc, char* argv[]) {
   CG_LOG << "Initial configuration time: " << tmr.elapsed() * 1.e3 << " ms.";
   tmr.reset();
 
-  new utils::AbortHandler;
+  new cepgen::utils::AbortHandler;
 
   struct Test {
     string filename;
@@ -82,18 +81,18 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  CG_LOG << "Will run " << utils::s("test", tests.size()) << ".";
+  CG_LOG << "Will run " << cepgen::utils::s("test", tests.size()) << ".";
 
-  std::unique_ptr<utils::ProgressBar> progress;
+  std::unique_ptr<cepgen::utils::ProgressBar> progress;
   if (argparse.debugging())
-    progress.reset(new utils::ProgressBar(tests.size()));
+    progress.reset(new cepgen::utils::ProgressBar(tests.size()));
 
   try {
     unsigned short num_tests = 0;
     for (const auto& test : tests) {
       gen.parametersRef().clearProcess();
 
-      const std::string filename = "test/test_processes/" + test.filename + "_cfg.py";
+      const std::string filename = "test_processes/" + test.filename + "_cfg.py";
 
       gen.setParameters(cepgen::card::Handler::parse(filename));
 
@@ -123,7 +122,7 @@ int main(int argc, char* argv[]) {
              << "Computation time: " << tmr.elapsed() * 1.e3 << " ms.";
       tmr.reset();
 
-      const string test_res = utils::format(
+      const string test_res = cepgen::utils::format(
           "%-40s\tref=%g\tgot=%g\tratio=%g\tpull=%+10.5f", test.filename.c_str(), test.ref_cs, new_cs, ratio, pull);
       if (success)
         passed_tests.emplace_back(test_res);
@@ -133,9 +132,9 @@ int main(int argc, char* argv[]) {
       if (argparse.debugging())
         progress->update(num_tests);
       CG_LOG << "Test " << num_tests << "/" << tests.size() << " finished. "
-             << "Success: " << utils::yesno(success) << ".";
+             << "Success: " << cepgen::utils::yesno(success) << ".";
     }
-  } catch (const Exception& e) {
+  } catch (const cepgen::Exception& e) {
   }
   if (failed_tests.size() != 0) {
     ostringstream os_failed, os_passed;
