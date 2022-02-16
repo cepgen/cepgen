@@ -21,6 +21,7 @@
 
 #include <Python.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 

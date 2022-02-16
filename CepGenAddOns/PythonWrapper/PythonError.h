@@ -23,6 +23,8 @@
 
 #include <string>
 
+#include "CepGen/Core/Exception.h"
+
 #define PY_ERROR cepgen::python::Error(__FUNC__, __FILE__, __LINE__)
 
 namespace cepgen {
