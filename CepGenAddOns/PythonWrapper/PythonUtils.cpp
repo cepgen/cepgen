@@ -33,14 +33,31 @@ namespace cepgen {
     // Python API helpers
     //------------------------------------------------------------------
 
+    void initialise() {
+      if (initialised())
+        return;
+      Py_InitializeEx(1);
+      if (!initialised())
+        throw CG_FATAL("Python") << "Failed to initialise the Python cards parser!";
+    }
+
+    bool initialised() { return Py_IsInitialized(); }
+
+    void finalise() {
+      if (!initialised())
+        throw CG_FATAL("Python")
+            << "Python environment is set to be finalised while it was not initialised in the first place.";
+      Py_Finalize();
+    }
+
     std::string pythonPath(const std::string& file) {
       const auto dir = fs::path{file}.remove_filename();
-      CG_DEBUG("PythonHandler") << "Adding {" << dir << "} to the default search paths.";
+      CG_DEBUG("Python") << "Adding {" << dir << "} to the default search paths.";
       utils::env::append("PYTHONPATH", dir);
 
       const auto filename = utils::replace_all(fs::path{file}.replace_extension("").string() /* remove the extension */,
                                                {{"../", ".."}, {"/", "."}});
-      CG_DEBUG("PythonHandler") << "Python path: " << filename;
+      CG_DEBUG("Python") << "Python path: " << filename;
       return filename;
     }
 
@@ -74,18 +91,18 @@ namespace cepgen {
         pout = PyDict_GetItem(obj, nink.get());  // borrowed
       }
       if (pout)
-        CG_DEBUG("PythonHandler:element") << "retrieved " << pout->ob_type->tp_name << " element \"" << key << "\" "
-                                          << "from " << obj->ob_type->tp_name << " object. "
-                                          << "New reference count: " << pout->ob_refcnt;
+        CG_DEBUG("Python:element") << "retrieved " << pout->ob_type->tp_name << " element \"" << key << "\" "
+                                   << "from " << obj->ob_type->tp_name << " object. "
+                                   << "New reference count: " << pout->ob_refcnt;
       else
-        CG_DEBUG("PythonHandler:element") << "did not retrieve a valid element \"" << key << "\"";
+        CG_DEBUG("Python:element") << "did not retrieve a valid element \"" << key << "\"";
       return pout;
     }
 
     void fillParameter(PyObject* parent, const char* key, bool& out) {
       auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
-        CG_DEBUG("PythonHandler") << "Failed to retrieve boolean object \"" << key << "\".";
+        CG_DEBUG("Python") << "Failed to retrieve boolean object \"" << key << "\".";
         return;
       }
       try {
@@ -98,7 +115,7 @@ namespace cepgen {
     void fillParameter(PyObject* parent, const char* key, int& out) {
       auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
-        CG_DEBUG("PythonHandler") << "Failed to retrieve integer object \"" << key << "\".";
+        CG_DEBUG("Python") << "Failed to retrieve integer object \"" << key << "\".";
         return;
       }
       try {
@@ -111,7 +128,7 @@ namespace cepgen {
     void fillParameter(PyObject* parent, const char* key, unsigned long& out) {
       auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
-        CG_DEBUG("PythonHandler") << "Failed to retrieve unsigned long integer object \"" << key << "\".";
+        CG_DEBUG("Python") << "Failed to retrieve unsigned long integer object \"" << key << "\".";
         return;
       }
       try {
@@ -124,7 +141,7 @@ namespace cepgen {
     void fillParameter(PyObject* parent, const char* key, unsigned int& out) {
       auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
-        CG_DEBUG("PythonHandler") << "Failed to retrieve unsigned integer object \"" << key << "\".";
+        CG_DEBUG("Python") << "Failed to retrieve unsigned integer object \"" << key << "\".";
         return;
       }
       try {
@@ -137,7 +154,7 @@ namespace cepgen {
     void fillParameter(PyObject* parent, const char* key, double& out) {
       auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
-        CG_DEBUG("PythonHandler") << "Failed to retrieve float object \"" << key << "\".";
+        CG_DEBUG("Python") << "Failed to retrieve float object \"" << key << "\".";
         return;
       }
       try {
@@ -150,7 +167,7 @@ namespace cepgen {
     void fillParameter(PyObject* parent, const char* key, std::string& out) {
       auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
-        CG_DEBUG("PythonHandler") << "Failed to retrieve string object \"" << key << "\".";
+        CG_DEBUG("Python") << "Failed to retrieve string object \"" << key << "\".";
         return;
       }
       try {
@@ -163,7 +180,7 @@ namespace cepgen {
     void fillParameter(PyObject* obj, const char* key, Limits& out) {
       auto* pobj = element(obj, key);  // borrowed
       if (!pobj) {
-        CG_DEBUG("PythonHandler") << "Failed to retrieve limits object \"" << key << "\".";
+        CG_DEBUG("Python") << "Failed to retrieve limits object \"" << key << "\".";
         return;
       }
       try {
@@ -177,7 +194,7 @@ namespace cepgen {
       out.clear();
       auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
-        CG_DEBUG("PythonHandler") << "Failed to retrieve floats collection object \"" << key << "\".";
+        CG_DEBUG("Python") << "Failed to retrieve floats collection object \"" << key << "\".";
         return;
       }
       try {
@@ -191,7 +208,7 @@ namespace cepgen {
       out.clear();
       auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
-        CG_DEBUG("PythonHandler") << "Failed to retrieve strings collection object \"" << key << "\".";
+        CG_DEBUG("Python") << "Failed to retrieve strings collection object \"" << key << "\".";
         return;
       }
       try {
@@ -205,7 +222,7 @@ namespace cepgen {
       out.clear();
       auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
-        CG_DEBUG("PythonHandler") << "Failed to retrieve integers collection object \"" << key << "\".";
+        CG_DEBUG("Python") << "Failed to retrieve integers collection object \"" << key << "\".";
         return;
       }
       try {
@@ -218,7 +235,7 @@ namespace cepgen {
     void fillParameter(PyObject* parent, const char* key, ParametersList& out) {
       auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
-        CG_DEBUG("PythonHandler") << "Failed to retrieve parameters list object \"" << key << "\".";
+        CG_DEBUG("Python") << "Failed to retrieve parameters list object \"" << key << "\".";
         return;
       }
       try {
@@ -232,7 +249,7 @@ namespace cepgen {
       out.clear();
       auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {
-        CG_DEBUG("PythonHandler") << "Failed to retrieve parameters list collection object \"" << key << "\".";
+        CG_DEBUG("Python") << "Failed to retrieve parameters list collection object \"" << key << "\".";
         return;
       }
       try {

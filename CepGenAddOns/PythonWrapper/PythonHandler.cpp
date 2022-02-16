@@ -120,9 +120,7 @@ namespace cepgen {
                                                        "/usr/share/CepGen/Cards"})
         utils::env::append("PYTHONPATH", path);
 
-      Py_InitializeEx(1);
-      if (!Py_IsInitialized())
-        throw CG_FATAL("PythonHandler") << "Failed to initialise the Python cards parser!";
+      python::initialise();
 
       CG_DEBUG("PythonHandler").log([](auto& log) {
         auto* py_home = Py_GetPythonHome();
@@ -216,8 +214,7 @@ namespace cepgen {
       //--- finalisation
       Py_CLEAR(cfg);
 
-      if (Py_IsInitialized())
-        Py_Finalize();
+      python::finalise();
 
       return rt_params_;
     }
