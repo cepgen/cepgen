@@ -16,7 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Python.h>
+// clang-format off
+#include "CepGenAddOns/PythonWrapper/PythonError.h"
+#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
+// clang-format on
 
 #include <algorithm>
 
@@ -42,8 +45,6 @@
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
-#include "CepGenAddOns/PythonWrapper/PythonError.h"
-#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 
 #define Py_DEBUG
 

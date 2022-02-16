@@ -19,7 +19,9 @@
 #ifndef CepGenAddOns_PythonWrapper_PythonError_h
 #define CepGenAddOns_PythonWrapper_PythonError_h
 
-#include <Python.h>
+// clang-format off
+#include "CepGenAddOns/PythonWrapper/PythonTypes.h"
+// clang-format on
 
 #include <string>
 
