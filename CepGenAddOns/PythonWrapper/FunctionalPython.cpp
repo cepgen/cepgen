@@ -54,11 +54,12 @@ namespace cepgen {
       {
         python::ObjectPtr value(PyRun_String(os.str().c_str(), Py_file_input, local, local));  // new
         if (!value)
-          throw PY_ERROR << "Failed to initialise the Python functional with \"" << expression_ << "\".";
+          throw CG_ERROR("FunctionalPython")
+              << "Failed to initialise the Python functional with \"" << expression_ << "\".";
       }
       func_ = python::getAttribute(mod_.get(), "custom_functional");
       if (!func_ || !PyCallable_Check(func_.get()))
-        throw PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";
+        throw CG_ERROR("FunctionalPython") << "Failed to retrieve/cast the object to a Python functional.";
     }
 
     double FunctionalPython::eval() const {
