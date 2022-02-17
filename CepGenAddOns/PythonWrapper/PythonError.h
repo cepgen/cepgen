@@ -34,7 +34,6 @@ namespace cepgen {
     class Error final : public Exception {
     public:
       explicit Error(const char*, const char*, short) noexcept;
-      ~Error() noexcept;
 
     private:
       PyObject* ptype_{nullptr};

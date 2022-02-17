@@ -41,7 +41,7 @@ namespace cepgen {
 
     Environment::~Environment() {
       if (!initialised())
-        throw CG_FATAL("Python:Environment")
+        CG_FATAL("Python:Environment")
             << "Python environment is set to be finalised while it was not initialised in the first place.";
       Py_Finalize();
     }
