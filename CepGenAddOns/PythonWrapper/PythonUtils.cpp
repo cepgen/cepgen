@@ -103,6 +103,21 @@ namespace cepgen {
       return ObjectPtr(PyObject_GetAttrString(obj, attr.c_str()));  // new
     }
 
+    std::vector<std::wstring> info() {
+      auto* py_home = Py_GetPythonHome();
+#ifdef PYTHON2
+      std::wstring path{utils::towstring(std::string(Py_GetPath()))},
+          home{utils::towstring(std::string(py_home ? py_home : "(not set)"))};
+#else
+      std::wstring path{Py_GetPath()}, home{py_home ? py_home : L"(not set)"};
+#endif
+      return std::vector<std::wstring>{
+          utils::towstring("Python version: " + utils::replace_all(std::string{Py_GetVersion()}, "\n", " ")),
+          utils::towstring("Platform: " + std::string(Py_GetPlatform())),
+          utils::towstring("Home directory: ") + home,
+          utils::towstring("Parsed path: ") + path};
+    }
+
     void fillParameter(PyObject* parent, const char* key, bool& out) {
       auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {

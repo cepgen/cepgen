@@ -98,17 +98,9 @@ namespace cepgen {
       python::setProgramName(filename);
 
       CG_DEBUG("PythonHandler").log([](auto& log) {
-        auto* py_home = Py_GetPythonHome();
-#ifdef PYTHON2
-        std::string python_path{Py_GetPath()}, python_home{py_home ? py_home : "(not set)"};
-#else
-        std::wstring python_path{Py_GetPath()}, python_home{py_home ? py_home : L"(not set)"};
-#endif
-        log << "Initialised the Python cards parser\n\t"
-            << "Python version: " << utils::replace_all(std::string{Py_GetVersion()}, "\n", " ") << "\n\t"
-            << "Platform: " << Py_GetPlatform() << "\n\t"
-            << "Home directory: " << python_home << "\n\t"
-            << "Parsed path: " << python_path << ".";
+        log << "Initialised the Python cards parser.";
+        for (const auto& ln : python::info())
+          log << "\n\t" << ln;
       });
 
       auto cfg = python::importModule(filename);  // new
