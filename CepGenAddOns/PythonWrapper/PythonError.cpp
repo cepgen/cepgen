@@ -51,13 +51,7 @@ namespace cepgen {
             ptraceback = ptraceback->tb_next;
           }
         }
-        (*this) << "\n";
       }
-    }
-
-    Error::~Error() noexcept {
-      if (Py_IsInitialized())
-        Py_Finalize();
     }
   }  // namespace python
 }  // namespace cepgen
