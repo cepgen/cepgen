@@ -31,15 +31,13 @@ namespace cepgen {
       : LoggedMessage(oth), std::runtime_error(oth.what()), type_(oth.type_) {}
 
   Exception::~Exception() noexcept {
+    dump();
     // we stop this process' execution on fatal exception
     if (type_ == Type::fatal && raise(SIGINT) != 0)
       exit(0);
   }
 
-  const char* Exception::what() const noexcept {
-    dump();
-    return "cepgen::Exception";
-  }
+  const char* Exception::what() const noexcept { return "cepgen::Exception"; }
 
   void Exception::dump(std::ostream* os) const noexcept {
     if (!os)
