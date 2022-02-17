@@ -35,15 +35,15 @@ namespace cepgen {
       PyErr_NormalizeException(&ptype_, &pvalue_, &ptraceback_obj_);
       if (ptype_) {
         // we can start the traceback
-        (*this) << "Error: " << decode(PyObject_Str(pvalue_));
+        (*this) << "Error: " << get<std::string>(PyObject_Str(pvalue_));
         if (auto* ptraceback = (PyTracebackObject*)ptraceback_obj_) {
           const std::string arr = "↪ ";
           std::string tabul;
           while (ptraceback->tb_next) {
             (*this) << "\n\t" << tabul << arr;
             if (auto* pframe = ptraceback->tb_frame)
-              (*this) << utils::boldify(decode(pframe->f_code->co_name)) << " on "
-                      << decode(pframe->f_code->co_filename) << " (line "
+              (*this) << utils::boldify(get<std::string>(pframe->f_code->co_name)) << " on "
+                      << get<std::string>(pframe->f_code->co_filename) << " (line "
                       << PyCode_Addr2Line(pframe->f_code, pframe->f_lasti) << ")";
             else
               (*this) << " issue on line " << ptraceback->tb_lineno;

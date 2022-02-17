@@ -115,8 +115,10 @@ namespace cepgen {
     //--- strings
     template <>
     bool is<std::string>(PyObject* obj);
+    /// Decode a python (possibly unicode) string
     template <>
     std::string get<std::string>(PyObject* obj);
+    /// Encode a string onto a python (possibly unicode) string
     template <>
     ObjectPtr set<std::string>(const std::string&);
 

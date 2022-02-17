@@ -59,35 +59,8 @@ namespace cepgen {
       return filename;
     }
 
-    std::string decode(PyObject* obj) {
-      if (!obj)
-        return "(none)";
-#ifdef PYTHON2
-      return PyString_AsString(obj);
-#else
-      if (PyUnicode_Check(obj))
-        return PyUnicode_AsUTF8(obj);
-      if (PyBytes_Check(obj))
-        return strdup(PyBytes_AS_STRING(obj));
-      return "(none)";
-#endif
-    }
-
-    ObjectPtr encode(const std::string& str) {
-      ObjectPtr obj(PyUnicode_FromString(str.c_str()));  // new
-      if (!obj)
-        PY_ERROR << "Failed to encode the following string:\n\t" << str;
-      return obj;
-    }
-
     PyObject* element(PyObject* obj, const std::string& key) {
-      PyObject* pout = nullptr;
-      {
-        auto nink = encode(key);
-        if (!nink)
-          return pout;
-        pout = PyDict_GetItem(obj, nink.get());  // borrowed
-      }
+      auto* pout = PyDict_GetItem(obj, set(key).release());  // borrowed
       if (pout)
         CG_DEBUG("Python:element") << "retrieved " << pout->ob_type->tp_name << " element \"" << key << "\" "
                                    << "from " << obj->ob_type->tp_name << " object. "

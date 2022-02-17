@@ -35,10 +35,6 @@ namespace cepgen {
     std::string pythonPath(const std::string&);
     /// Retrieve the element from a python dictionary
     PyObject* element(PyObject*, const std::string&);
-    /// Encode a string onto a python (possibly unicode) string
-    ObjectPtr encode(const std::string&);
-    /// Decode a python (possibly unicode) string
-    std::string decode(PyObject* obj);
     ObjectPtr getAttribute(PyObject*, const std::string&);
 
     void fillParameter(PyObject* parent, const char* key, bool& out);

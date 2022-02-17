@@ -140,7 +140,7 @@ namespace cepgen {
 #ifdef PYTHON2
       return PyString_Check(obj);
 #else
-      return PyUnicode_Check(obj);
+      return PyUnicode_Check(obj) || PyBytes_Check(obj);
 #endif
     }
 
@@ -148,7 +148,14 @@ namespace cepgen {
     std::string get<std::string>(PyObject* obj) {
       if (!is<std::string>(obj))
         throw CG_ERROR("Python:get") << "Object has invalid type: string != \"" << obj->ob_type->tp_name << "\".";
-      return decode(obj);
+#ifdef PYTHON2
+      return PyString_AsString(obj);
+#else
+      if (PyUnicode_Check(obj))
+        return PyUnicode_AsUTF8(obj);
+      else  // if (PyBytes_Check(obj))
+        return strdup(PyBytes_AS_STRING(obj));
+#endif
     }
 
     template <>
@@ -275,26 +282,27 @@ namespace cepgen {
       ObjectPtr obj(PyDict_New());
       for (const auto& key : plist.keys(true)) {
         if (plist.has<bool>(key))
-          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<bool>(key)).release());
+          PyDict_SetItem(obj.get(), set(key).release(), set(plist.get<bool>(key)).release());
         else if (plist.has<int>(key))
-          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<int>(key)).release());
+          PyDict_SetItem(obj.get(), set(key).release(), set(plist.get<int>(key)).release());
         else if (plist.has<double>(key))
-          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<double>(key)).release());
+          PyDict_SetItem(obj.get(), set(key).release(), set(plist.get<double>(key)).release());
         else if (plist.has<std::string>(key))
-          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<std::string>(key)).release());
+          PyDict_SetItem(obj.get(), set(key).release(), set(plist.get<std::string>(key)).release());
         else if (plist.has<ParametersList>(key))
-          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<ParametersList>(key)).release());
+          PyDict_SetItem(obj.get(), set(key).release(), set(plist.get<ParametersList>(key)).release());
         else if (plist.has<Limits>(key)) {
           const auto& lim = plist.get<Limits>(key);
-          PyDict_SetItem(obj.get(), encode(key).get(), newTuple<double>({lim.min(), lim.max()}).release());
+          PyDict_SetItem(obj.get(), set(key).release(), newTuple<double>({lim.min(), lim.max()}).release());
         } else if (plist.has<std::vector<int> >(key))
-          PyDict_SetItem(obj.get(), encode(key).get(), newTuple<int>(plist.get<std::vector<int> >(key)).release());
+          PyDict_SetItem(obj.get(), set(key).release(), newTuple<int>(plist.get<std::vector<int> >(key)).release());
         else if (plist.has<std::vector<double> >(key))
           PyDict_SetItem(
-              obj.get(), encode(key).get(), newTuple<double>(plist.get<std::vector<double> >(key)).release());
+              obj.get(), set(key).release(), newTuple<double>(plist.get<std::vector<double> >(key)).release());
         else if (plist.has<std::vector<std::string> >(key))
-          PyDict_SetItem(
-              obj.get(), encode(key).get(), newTuple<std::string>(plist.get<std::vector<std::string> >(key)).release());
+          PyDict_SetItem(obj.get(),
+                         set(key).release(),
+                         newTuple<std::string>(plist.get<std::vector<std::string> >(key)).release());
         else
           PY_ERROR << "Parameters list has an untranslatable object for key=" << key;
       }
