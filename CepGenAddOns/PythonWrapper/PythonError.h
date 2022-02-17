@@ -35,11 +35,6 @@ namespace cepgen {
     public:
       explicit Error(const std::string&, const std::string&, short);
       ~Error();
-
-    private:
-      PyObject* ptype_{nullptr};
-      PyObject* pvalue_{nullptr};
-      PyObject* ptraceback_obj_{nullptr};
     };
   }  // namespace python
 }  // namespace cepgen
