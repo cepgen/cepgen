@@ -68,6 +68,24 @@ namespace cepgen {
       return filename;
     }
 
+    void setProgramName(const std::string& filename) {
+      const size_t fn_len = filename.length() + 1;
+#ifdef PYTHON2
+      char* sfilename = new char[fn_len];
+      snprintf(sfilename, fn_len, "%s", filename.c_str());
+      const std::string readable_s_filename(sfilename);
+#else
+      wchar_t* sfilename = new wchar_t[fn_len];
+      swprintf(sfilename, fn_len, L"%s", filename.c_str());
+      const std::wstring readable_s_filename(sfilename);
+#endif
+      if (!sfilename)
+        throw CG_FATAL("PythonHandler") << "Invalid filename provided to the Python cards parser!";
+      Py_SetProgramName(sfilename);
+      delete[] sfilename;
+      CG_DEBUG("Python:setProgramName") << "Programme name set to \"" << readable_s_filename << "\".";
+    }
+
     PyObject* element(PyObject* obj, const std::string& key) {
       auto* pout = PyDict_GetItem(obj, set(key).release());  // borrowed
       if (pout)

@@ -33,6 +33,8 @@ namespace cepgen {
     };
     /// Translate a filename into a python-compatible path
     std::string pythonPath(const std::string&);
+    /// Set the name of the Python program
+    void setProgramName(const std::string& filename);
     /// Retrieve the element from a python dictionary
     PyObject* element(PyObject*, const std::string&);
     ObjectPtr getAttribute(PyObject*, const std::string&);

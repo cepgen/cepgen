@@ -95,21 +95,7 @@ namespace cepgen {
 
       rt_params_ = params;
       std::string filename = python::pythonPath(file);
-      const size_t fn_len = filename.length() + 1;
-
-      {  // scope of the filename definition
-#ifdef PYTHON2
-        char* sfilename = new char[fn_len];
-        snprintf(sfilename, fn_len, "%s", filename.c_str());
-#else
-        wchar_t* sfilename = new wchar_t[fn_len];
-        swprintf(sfilename, fn_len, L"%s", filename.c_str());
-#endif
-        if (!sfilename)
-          throw CG_FATAL("PythonHandler") << "Invalid filename provided to the Python cards parser!";
-        Py_SetProgramName(sfilename);
-        delete[] sfilename;
-      }
+      python::setProgramName(filename);
 
       CG_DEBUG("PythonHandler").log([](auto& log) {
         auto* py_home = Py_GetPythonHome();
