@@ -105,10 +105,11 @@ namespace cepgen {
 
       auto cfg = python::importModule(filename);  // new
       if (!cfg)
-        PY_ERROR << "Failed to import the configuration card '" << filename << "'\n (parsed from '" << file << "').";
+        throw PY_ERROR << "Failed to import the configuration card '" << filename << "'\n (parsed from '" << file
+                       << "').";
 
       auto parseAttr = [this, &cfg](const std::string& name, std::function<void(PyObject*)> callback) -> void {
-        auto pobj = python::getAttribute(cfg.get(), name);
+        auto pobj = python::getAttribute(cfg, name);
         if (pobj)
           callback(pobj.get());
       };

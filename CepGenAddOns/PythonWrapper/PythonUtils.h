@@ -38,6 +38,9 @@ namespace cepgen {
     /// Retrieve the element from a python dictionary
     PyObject* element(PyObject*, const std::string&);
     ObjectPtr getAttribute(PyObject*, const std::string&);
+    inline ObjectPtr getAttribute(const ObjectPtr& obj, const std::string& attr) {
+      return getAttribute(obj.get(), attr);
+    }
     std::vector<std::wstring> info();
 
     void fillParameter(PyObject* parent, const char* key, bool& out);
