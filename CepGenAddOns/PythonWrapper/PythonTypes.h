@@ -34,8 +34,10 @@
 
 namespace cepgen {
   namespace python {
-    typedef std::unique_ptr<PyObject, void (*)(PyObject* obj)> ObjectPtr;
-    static auto ObjectPtrDeleter = [](PyObject* obj) { Py_DECREF(obj); };
+    struct ObjectPtrDeleter {
+      void operator()(PyObject* obj) { Py_DECREF(obj); }
+    };
+    typedef std::unique_ptr<PyObject, ObjectPtrDeleter> ObjectPtr;
 
     ObjectPtr importModule(const std::string&);
 

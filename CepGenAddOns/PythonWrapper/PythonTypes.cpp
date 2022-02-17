@@ -29,7 +29,7 @@
 namespace cepgen {
   namespace python {
     ObjectPtr importModule(const std::string& mod_name) {
-      return ObjectPtr(PyImport_ImportModule(mod_name.c_str()), [](PyObject* obj) { Py_CLEAR(obj); });  // new
+      return ObjectPtr(PyImport_ImportModule(mod_name.c_str()));  // new
     }
 
     //------------------------------------------------------------------
@@ -56,7 +56,7 @@ namespace cepgen {
 
     template <>
     ObjectPtr set<bool>(const bool& val) {
-      return ObjectPtr(PyBool_FromLong(val), ObjectPtrDeleter);
+      return ObjectPtr(PyBool_FromLong(val));
     }
 
     template <>
@@ -82,9 +82,9 @@ namespace cepgen {
     template <>
     ObjectPtr set<int>(const int& val) {
 #ifdef PYTHON2
-      return ObjectPtr(PyInt_FromLong(val), ObjectPtrDeleter);
+      return ObjectPtr(PyInt_FromLong(val));
 #else
-      return ObjectPtr(PyLong_FromLong(val), ObjectPtrDeleter);
+      return ObjectPtr(PyLong_FromLong(val));
 #endif
     }
 
@@ -124,7 +124,7 @@ namespace cepgen {
 
     template <>
     ObjectPtr set<double>(const double& val) {
-      return ObjectPtr(PyFloat_FromDouble(val), ObjectPtrDeleter);
+      return ObjectPtr(PyFloat_FromDouble(val));
     }
 
     template <>
@@ -148,9 +148,9 @@ namespace cepgen {
     template <>
     ObjectPtr set<std::string>(const std::string& val) {
 #ifdef PYTHON2
-      return ObjectPtr(PyString_FromString(val.c_str()), ObjectPtrDeleter);
+      return ObjectPtr(PyString_FromString(val.c_str()));
 #else
-      return ObjectPtr(PyUnicode_FromString(val.c_str()), ObjectPtrDeleter);
+      return ObjectPtr(PyUnicode_FromString(val.c_str()));
 #endif
     }
 
@@ -215,7 +215,7 @@ namespace cepgen {
 
     template <typename T>
     ObjectPtr newTuple(const std::vector<T>& vec) {
-      ObjectPtr tuple(PyTuple_New(vec.size()), ObjectPtrDeleter);
+      ObjectPtr tuple(PyTuple_New(vec.size()));
       for (size_t i = 0; i < vec.size(); ++i)
         PyTuple_SetItem(tuple.get(), i, set<T>(vec.at(i)).get());
       return tuple;
@@ -266,7 +266,7 @@ namespace cepgen {
 
     template <>
     ObjectPtr set<ParametersList>(const ParametersList& plist) {
-      ObjectPtr obj(PyDict_New(), ObjectPtrDeleter);
+      ObjectPtr obj(PyDict_New());
       for (const auto& key : plist.keys(true)) {
         if (plist.has<bool>(key))
           PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<bool>(key)).get());

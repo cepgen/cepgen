@@ -76,7 +76,7 @@ namespace cepgen {
     }
 
     ObjectPtr encode(const std::string& str) {
-      ObjectPtr obj(PyUnicode_FromString(str.c_str()), ObjectPtrDeleter);  // new
+      ObjectPtr obj(PyUnicode_FromString(str.c_str()));  // new
       if (!obj)
         PY_ERROR << "Failed to encode the following string:\n\t" << str;
       return obj;
@@ -101,8 +101,8 @@ namespace cepgen {
 
     ObjectPtr getAttribute(PyObject* obj, const std::string& attr) {
       if (PyObject_HasAttrString(obj, attr.c_str()) != 1)
-        return ObjectPtr(nullptr, [](PyObject*) {});
-      return ObjectPtr(PyObject_GetAttrString(obj, attr.c_str()), ObjectPtrDeleter);  // new
+        return ObjectPtr(nullptr);
+      return ObjectPtr(PyObject_GetAttrString(obj, attr.c_str()));  // new
     }
 
     void fillParameter(PyObject* parent, const char* key, bool& out) {

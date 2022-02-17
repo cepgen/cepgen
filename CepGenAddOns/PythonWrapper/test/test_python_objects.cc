@@ -35,6 +35,6 @@ int main(int argc, char* argv[]) {
     CG_LOG << "Parameters list/dictionary test passed.";
   }
 
-  //cepgen::python::finalise();
+  cepgen::python::finalise();
   return 0;
 }
