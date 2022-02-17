@@ -28,34 +28,37 @@ namespace cepgen {
   namespace python {
     Error::Error(const std::string& origin, const std::string& file, short lineno)
         : Exception(origin.c_str(), "Python::error", Exception::Type::error, file.c_str(), lineno) {
+      PyObject* ptype{nullptr};
+      PyObject* pvalue{nullptr};
+      PyObject* ptraceback_obj{nullptr};
       // retrieve error indicator and clear it to handle ourself the error
-      PyErr_Fetch(&ptype_, &pvalue_, &ptraceback_obj_);
+      PyErr_Fetch(&ptype, &pvalue, &ptraceback_obj);
       PyErr_Clear();
       // ensure the objects retrieved are properly normalised and point to compatible objects
-      PyErr_NormalizeException(&ptype_, &pvalue_, &ptraceback_obj_);
+      PyErr_NormalizeException(&ptype, &pvalue, &ptraceback_obj);
+      if (!ptype)
+        return;
+      // we can start the traceback
+      (*this) << "\nError: " << decode(PyObject_Str(pvalue));
+      auto* ptraceback = (PyTracebackObject*)ptraceback_obj;
+      if (!ptraceback)
+        return;
+      const std::string arr = "↪ ";
+      std::string tabul;
+      while (ptraceback->tb_next) {
+        (*this) << "\n\t" << tabul << arr;
+        if (auto* pframe = ptraceback->tb_frame)
+          (*this) << utils::boldify(decode(pframe->f_code->co_name)) << " on " << decode(pframe->f_code->co_filename)
+                  << " (line " << PyCode_Addr2Line(pframe->f_code, pframe->f_lasti) << ")";
+        else
+          (*this) << " issue on line " << ptraceback->tb_lineno;
+        tabul += "  ";
+        ptraceback = ptraceback->tb_next;
+      }
     }
 
     Error::~Error() {
-      if (ptype_) {  // we can start the traceback
-        (*this) << "\nError: " << decode(PyObject_Str(pvalue_));
-        auto* ptraceback = (PyTracebackObject*)ptraceback_obj_;
-        std::string tabul = "↪ ";
-        if (ptraceback) {
-          while (ptraceback->tb_next) {
-            auto* pframe = ptraceback->tb_frame;
-            if (pframe) {
-              int line = PyCode_Addr2Line(pframe->f_code, pframe->f_lasti);
-              const auto filename = decode(pframe->f_code->co_filename), funcname = decode(pframe->f_code->co_name);
-              (*this) << utils::format(
-                  "\n\t%s%s on %s (line %d)", tabul.c_str(), utils::boldify(funcname).c_str(), filename.c_str(), line);
-            } else
-              (*this) << utils::format("\n\t%s issue in line %d", tabul.c_str(), ptraceback->tb_lineno);
-            tabul = std::string("  ") + tabul;
-            ptraceback = ptraceback->tb_next;
-          }
-        }
-      }
-      Py_Finalize();
+      finalise();
       CG_LOG << "hahah";
     }
   }  // namespace python
