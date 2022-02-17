@@ -59,8 +59,10 @@ namespace cepgen {
 
     std::string pythonPath(const std::string& file) {
       const auto dir = fs::path{file}.remove_filename();
-      CG_DEBUG("Python") << "Adding {" << dir << "} to the default search paths.";
-      utils::env::append("PYTHONPATH", dir);
+      if (!dir.empty()) {
+        CG_DEBUG("Python") << "Adding {" << dir << "} to the default search paths.";
+        utils::env::append("PYTHONPATH", dir);
+      }
 
       const auto filename = utils::replace_all(fs::path{file}.replace_extension("").string() /* remove the extension */,
                                                {{"../", ".."}, {"/", "."}});
