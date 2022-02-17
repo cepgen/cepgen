@@ -16,13 +16,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Python.h>
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Utils/Functional.h"
 #include "CepGenAddOns/PythonWrapper/PythonError.h"
 #include "CepGenAddOns/PythonWrapper/PythonTypes.h"
+#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 
 namespace cepgen {
   namespace utils {
@@ -30,10 +29,9 @@ namespace cepgen {
     public:
       explicit FunctionalPython(const ParametersList&);
       ~FunctionalPython();
+      double eval() const;
 
       static ParametersDescription description();
-
-      double eval(const std::vector<double>&) const;
 
     private:
       python::ObjectPtr func_;
@@ -42,7 +40,7 @@ namespace cepgen {
     };
 
     FunctionalPython::FunctionalPython(const ParametersList& params) : Functional(params) {
-      Py_Initialize();
+      python::initialise();
       //auto* global = PyEval_GetGlobals();  // borrowed
       auto* global = PyDict_New();  // new
       //math_.reset(PyImport_ImportModule("math"));
@@ -67,20 +65,25 @@ namespace cepgen {
         //CG_DEBUG("FunctionalPython") << "Python expression compilation output: "
         //                             << python::get<ParametersList>(value.get());
       }
-      func_.reset(PyObject_GetAttrString(mod_.get(), "custom_functional"));
+      func_ = python::getAttribute(mod_.get(), "custom_functional");
       if (!func_ || !PyCallable_Check(func_.get()))
         PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";
-      CG_LOG << python::get<ParametersList>(func_.get());
+      //CG_LOG << python::get<ParametersList>(func_.get());
     }
 
-    FunctionalPython::~FunctionalPython() { Py_Finalize(); }
+    FunctionalPython::~FunctionalPython() { python::finalise(); }
 
-    double FunctionalPython::eval(const std::vector<double>& x) const {
-      auto args = python::newTuple(x);
-      python::ObjectPtr value(PyObject_CallObject(func_.get(), args.get()));
-      if (!value)
-        return 0.;
-      auto ret = python::get<double>(value.get());
+    double FunctionalPython::eval() const {
+      auto args = python::newTuple(values_);
+      double ret;
+      try {
+        python::ObjectPtr value(PyObject_CallObject(func_.get(), args.get()));  // new
+        if (!value)
+          throw CG_ERROR("FunctionalPython:eval") << "Failed to call the function with arguments=" << values_ << ".";
+        ret = python::get<double>(value.get());
+      } catch (const python::Error&) {
+        CG_LOG << "prout";
+      }
       CG_LOG << "ret:" << ret;
       return ret;
     }
