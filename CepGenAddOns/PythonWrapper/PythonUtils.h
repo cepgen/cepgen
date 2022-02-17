@@ -23,12 +23,14 @@
 
 namespace cepgen {
   namespace python {
-    /// Initialise the python environment
-    void initialise();
-    /// Is the python environment already initialised?
-    bool initialised();
-    /// Finalise the python environment
-    void finalise();
+    struct Environment {
+      /// Initialise the python environment
+      Environment();
+      /// Finalise the python environment
+      ~Environment();
+      /// Is the python environment already initialised?
+      bool initialised();
+    };
     /// Translate a filename into a python-compatible path
     std::string pythonPath(const std::string&);
     /// Retrieve the element from a python dictionary

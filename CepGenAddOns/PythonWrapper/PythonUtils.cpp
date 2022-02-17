@@ -33,22 +33,20 @@ namespace cepgen {
     // Python API helpers
     //------------------------------------------------------------------
 
-    void initialise() {
-      if (initialised())
-        return;
+    Environment::Environment() {
       Py_InitializeEx(1);
       if (!initialised())
-        throw CG_FATAL("Python") << "Failed to initialise the Python cards parser!";
+        throw CG_FATAL("Python:Environment") << "Failed to initialise the Python environment!";
     }
 
-    bool initialised() { return Py_IsInitialized(); }
-
-    void finalise() {
+    Environment::~Environment() {
       if (!initialised())
-        throw CG_FATAL("Python")
+        throw CG_FATAL("Python:Environment")
             << "Python environment is set to be finalised while it was not initialised in the first place.";
       Py_Finalize();
     }
+
+    bool Environment::initialised() { return Py_IsInitialized(); }
 
     std::string pythonPath(const std::string& file) {
       const auto dir = fs::path{file}.remove_filename();

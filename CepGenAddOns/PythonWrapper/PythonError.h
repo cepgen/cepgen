@@ -33,8 +33,13 @@ namespace cepgen {
   namespace python {
     class Error final : public Exception {
     public:
-      explicit Error(const std::string&, const std::string&, short);
-      ~Error();
+      explicit Error(const char*, const char*, short) noexcept;
+      ~Error() noexcept;
+
+    private:
+      PyObject* ptype_{nullptr};
+      PyObject* pvalue_{nullptr};
+      PyObject* ptraceback_obj_{nullptr};
     };
   }  // namespace python
 }  // namespace cepgen
