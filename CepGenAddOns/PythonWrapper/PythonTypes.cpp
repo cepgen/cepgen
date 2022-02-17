@@ -28,7 +28,12 @@
 
 namespace cepgen {
   namespace python {
-    void ObjectPtrDeleter::operator()(PyObject* obj) { Py_DECREF(obj); }
+    void ObjectPtrDeleter::operator()(PyObject* obj) {
+      CG_DEBUG("Python:ObjectPtrDeleter")
+          << "Destroying object at addr 0x" << obj << " (reference count: " << obj->ob_refcnt
+          << ", type: " << obj->ob_type->tp_name << ")";
+      Py_DECREF(obj);
+    }
 
     ObjectPtr importModule(const std::string& mod_name) {
       return ObjectPtr(PyImport_ImportModule(mod_name.c_str()));  // new
