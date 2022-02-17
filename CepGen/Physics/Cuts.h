@@ -1,18 +1,51 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGen_Physics_Cuts_h
 #define CepGen_Physics_Cuts_h
 
-#include "CepGen/Utils/Limits.h"
-#include "CepGen/Physics/ParticleProperties.h"
-
-#include <vector>
 #include <unordered_map>
+#include <vector>
+
+#include "CepGen/Core/SteeredObject.h"
+#include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Utils/Limits.h"
 
 namespace cepgen {
+  class ParametersList;
+
   /// Constraints to be applied on the events kinematics
   class Cuts {
   public:
+    /// Define a cut from parameters list
+    explicit Cuts(const ParametersList&);
+
+    static ParametersDescription description();
+
+    /// Modify a few parameters values
+    void setParameters(const ParametersList&);
+    /// Retrieve the cuts list into a steering parameters list
+    ParametersList parameters(bool full = false) const;
+
     /// A set of properties for a given cut
     struct Property {
+      Property() = default;
+      explicit Property(const std::string& name, const std::string& descr, const ParametersList&);
       std::string name, description;
       Limits limits;
     };
@@ -31,9 +64,10 @@ namespace cepgen {
   /// A namespace for all kinematic cuts
   namespace cuts {
     /// Centrally produced particles phase space cuts
-    class Central : public Cuts {
+    class Central final : public Cuts {
     public:
-      explicit Central();
+      Central();
+      explicit Central(const ParametersList&);
 
       /// single particle transverse momentum
       Limits& pt_single() { return limits_.at(e_pt_single).limits; }
@@ -103,9 +137,9 @@ namespace cepgen {
     };
 
     /// Initial parton-like particles phase space cuts
-    class Initial : public Cuts {
+    class Initial final : public Cuts {
     public:
-      explicit Initial();
+      explicit Initial(const ParametersList&);
 
       /// parton virtuality
       Limits& q2() { return limits_.at(e_q2).limits; }
@@ -125,9 +159,9 @@ namespace cepgen {
     };
 
     /// Outgoing beam remnant-like particles phase space cuts
-    class Remnants : public Cuts {
+    class Remnants final : public Cuts {
     public:
-      explicit Remnants();
+      explicit Remnants(const ParametersList&);
 
       /// diffractive mass
       Limits& mx() { return limits_.at(e_mx).limits; }
@@ -148,6 +182,18 @@ namespace cepgen {
   }  // namespace cuts
   /// Collection of cuts to be applied on all particle with a given PDG id
   typedef std::unordered_map<pdgid_t, cuts::Central> PerIdCuts;
+  /// A collection of cuts to apply on the physical phase space
+  struct CutsList final : SteeredObject<CutsList> {
+    CutsList(const ParametersList& params = ParametersList());
+    void setParameters(const ParametersList&) override;
+    static ParametersDescription description();
+    cuts::Initial initial;        ///< Cuts on the initial particles kinematics
+    cuts::Central central;        ///< Cuts on the central system produced
+    PerIdCuts central_particles;  ///< Cuts on the central individual particles
+    cuts::Remnants remnants;      ///< Cuts on the beam remnants system
+  };
+  /// Human-readable description of a full kinematics cuts definition
+  std::ostream& operator<<(std::ostream&, const CutsList&);
 }  // namespace cepgen
 
 #endif

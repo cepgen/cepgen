@@ -32,6 +32,7 @@ import Config.ktProcess_cfi as kt
 process = kt.process.clone('pptoww',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
+        #mode = cepgen.ProcessMode.ElasticInelastic,
         #mode = cepgen.ProcessMode.InelasticInelastic,
         method = 1,  # on-shell (0) or off-shell (1) formula
         polarisationStates = 0,  # full
@@ -40,6 +41,7 @@ process = kt.process.clone('pptoww',
         cmEnergy = 13.e3,
         #structureFunctions = cepgen.StructureFunctions.SzczurekUleshchenko,
         #structureFunctions = cepgen.StructureFunctions.ALLM97,
+        #structureFunctions = cepgen.StructureFunctions.KulaginBarinov,
         structureFunctions = cepgen.StructureFunctions.LUXlike,
     ),
     outKinematics = kt.process.outKinematics.clone(
@@ -67,6 +69,15 @@ process = kt.process.clone('pptoww',
 #--- generation parameters
 from Config.generator_cff import generator
 generator = generator.clone(
-    numEvents = 10000,
-    printEvery = 1000,
+    numEvents = 50000,
+    printEvery = 5000,
 )
+text = cepgen.Module('text',  # histogramming/ASCII output capability
+    #variables = ['nev', 'm(4)', 'tgen'],
+    histVariables={
+        'm(4)': cepgen.Parameters(xrange=(50., 1000.), nbins=19),
+        'm(ob2)': cepgen.Parameters(xrange=(0., 250.), nbins=10, log=True),
+        'acop(7,8)': cepgen.Parameters(nbins=10, log=True),
+    }
+)
+output = cepgen.Sequence(text)

@@ -1,8 +1,26 @@
-#ifndef CepGen_Core_GridParameters_h
-#define CepGen_Core_GridParameters_h
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#include <vector>
+#ifndef CepGen_Integration_GridParameters_h
+#define CepGen_Integration_GridParameters_h
+
 #include <cstddef>
+#include <vector>
 
 namespace cepgen {
   class Integrator;
@@ -10,7 +28,7 @@ namespace cepgen {
   class GridParameters {
   public:
     /// Build a generation grid for a ndim-dimensional phase space
-    GridParameters(size_t ndim);
+    explicit GridParameters(size_t ndim);
 
     /// Coordinates definition
     typedef std::vector<unsigned short> coord_t;
@@ -41,17 +59,17 @@ namespace cepgen {
     static constexpr double INV_M_BIN = 1. / M_BIN;
 
     /// Has the grid been already prepared?
-    bool gen_prepared;
+    bool gen_prepared{false};
     /// Correction to apply on the next phase space point generation
-    double correc;
-    double correc2;
-    double f_max2;
-    double f_max_diff;
-    double f_max_old;
+    double correc{0.};
+    double correc2{0.};
+    double f_max2{0.};
+    double f_max_diff{0.};
+    double f_max_old{0.};
 
   private:
     /// Phase space multiplicity
-    size_t ndim_;
+    size_t ndim_{0};
     /// Point coordinates in grid
     std::vector<coord_t> coords_;
     /// Number of functions values evaluated for this point
@@ -59,7 +77,7 @@ namespace cepgen {
     /// Maximal value of the function at one given point
     std::vector<double> f_max_;
     /// Maximal value of the function in the considered integration range
-    double f_max_global_;
+    double f_max_global_{0.};
   };
 }  // namespace cepgen
 

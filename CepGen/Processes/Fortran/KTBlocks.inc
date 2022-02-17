@@ -17,9 +17,9 @@ c       inp1 = proton energy in lab frame
 c       inp2 = nucleus energy **per nucleon** in LAB frame
 c       Collision is along z-axis
 c     =================================================================
-      common/genparams/icontri,iflux1,iflux2,sfmod,
+      common/genparams/icontri,idum1,iflux1,iflux2,
      &     a_nuc1,z_nuc1,a_nuc2,z_nuc2,inp1,inp2
-      integer icontri,iflux1,iflux2,sfmod,
+      integer icontri,idum1,iflux1,iflux2,
      &     a_nuc1,z_nuc1,a_nuc2,z_nuc2
       double precision inp1,inp2
 
@@ -46,8 +46,8 @@ c     =================================================================
 c     =================================================================
 c     generated event kinematics
 c     =================================================================
-      common/evtkin/nout,ipdg,idum,pc,px,py
-      integer nout,idum,ipdg(10)
+      common/evtkin/nout,ipdg,idum2,pc,px,py
+      integer nout,idum2,ipdg(10)
       double precision pc(4,10),px(4),py(4)
 
 c     =================================================================

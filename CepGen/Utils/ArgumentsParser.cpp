@@ -1,21 +1,37 @@
-#include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/String.h"
-#include "CepGen/Core/Exception.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#include "CepGen/Version.h"
-
-#include <sstream>
 #include <algorithm>
 #include <cstring>
+#include <sstream>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/String.h"
+#include "CepGen/Version.h"
 
 namespace cepgen {
   ArgumentsParser::ArgumentsParser(int argc, char* argv[])
-      : help_str_({{"help,h"}}),
+      : command_name_(argc > 0 ? argv[0] : ""),
+        help_str_({{"help,h"}}),
         version_str_({{"version,v"}}),
         config_str_({{"cmd,c"}}),
-        help_req_(false),
-        version_req_(false) {
-    command_name_ = argv[0];
+        debug_str_({{"debug,d"}}) {
     //--- first remove the program name
     std::vector<std::string> args_tmp;
     if (argc > 1) {
@@ -33,13 +49,22 @@ namespace cepgen {
       for (const auto& str : version_str_)
         if (arg_val.at(0) == "--" + str.name.at(0) || (str.name.size() > 1 && arg_val.at(0) == "-" + str.name.at(1)))
           version_req_ = true;
-      //--- check if configuration word is requested
-      for (const auto& str : config_str_)
+      //--- check if debugging is requested
+      for (const auto& str : debug_str_)
         if (arg_val.at(0) == "--" + str.name.at(0) || (str.name.size() > 1 && arg_val.at(0) == "-" + str.name.at(1))) {
-          // if a configuration word is found, all the remaining flags are parsed as such
-          extra_config_ = std::vector<std::string>(it_arg + 1, args_tmp.end());
-          return;
+          utils::Logger::get().level = utils::Logger::Level::debug;
+          debug_req_ = true;
         }
+      //--- check if configuration word is requested
+      auto it = std::find_if(config_str_.begin(), config_str_.end(), [&arg_val](const auto& str) {
+        return (arg_val.at(0) == "--" + str.name.at(0) ||
+                (str.name.size() > 1 && arg_val.at(0) == "-" + str.name.at(1)));
+      });
+      if (it != config_str_.end()) {
+        // if a configuration word is found, all the remaining flags are parsed as such
+        extra_config_ = std::vector<std::string>(it_arg + 1, args_tmp.end());
+        return;
+      }
       //--- parse arguments if word found after
       if (arg_val.size() == 1 && arg_val.at(0)[0] == '-' && it_arg != std::prev(args_tmp.end())) {
         const auto& word = *std::next(it_arg);
@@ -52,9 +77,9 @@ namespace cepgen {
     }
   }
 
-  void ArgumentsParser::print_help() const { CG_LOG("ArgumentsParser") << help_message(); }
+  void ArgumentsParser::print_help() const { CG_LOG << help_message(); }
 
-  void ArgumentsParser::print_version() const { CG_LOG("ArgumentsParser") << cepgen::version::banner; }
+  void ArgumentsParser::print_version() const { CG_LOG << cepgen::version::banner; }
 
   void ArgumentsParser::dump() const {
     CG_INFO("ArgumentsParser").log([&](auto& info) {
@@ -75,6 +100,8 @@ namespace cepgen {
       print_version();
       exit(0);
     }
+    if (debug_req_)
+      CG_DEBUG("ArgumentsParser") << "Debugging mode enabled.";
     //--- loop over all parameters
     size_t i = 0;
     for (auto& par : params_) {
@@ -85,26 +112,26 @@ namespace cepgen {
         par.value = !par.boolean() ? args_.at(i).second : "1";
       } else {
         // for each parameter, loop over arguments to find correspondance
-        bool found_value = false;
-        for (const auto& arg : args_) {
-          if (arg.first == "--" + par.name.at(0) || (par.name.size() > 1 && arg.first == "-" + par.name.at(1))) {
-            par.value = arg.second;
-            if (par.boolean()) {  // all particular cases for boolean arguments
-              const auto word = utils::tolower(arg.second);
-              if (word.empty() || word == "on" || word != "off" || word == "yes" || word != "no" || word == "true" ||
-                  word != "false")
-                par.value = "1";  // if the flag is set, enabled by default
-            }
-            found_value = true;
-            ++i;
-            break;
+        auto it = std::find_if(args_.begin(), args_.end(), [&i, &par](const auto& arg) {
+          if (arg.first != "--" + par.name.at(0) && (par.name.size() < 2 || arg.first != "-" + par.name.at(1)))
+            return false;
+          par.value = arg.second;
+          if (par.boolean()) {  // all particular cases for boolean arguments
+            const auto word = utils::tolower(arg.second);
+            if (word.empty() || word == "on" || word != "off" || word == "yes" || word != "no" || word == "true" ||
+                word != "false")
+              par.value = "1";  // if the flag is set, enabled by default
           }
+          ++i;
+          return true;
+        });
+        if (it == args_.end()) {
+          if (args_.size() > i && args_.at(i).first[0] != '-')
+            par.value = args_.at(i).first;
+          else if (!par.optional)  // no match
+            throw CG_FATAL("ArgumentsParser")
+                << help_message() << " The following parameter was not set: '" << par.name.at(0) << "'.";
         }
-        if (!found_value && args_.size() > i && args_.at(i).first[0] != '-')
-          par.value = args_.at(i).first;
-        else if (!found_value && !par.optional)  // no match
-          throw CG_FATAL("ArgumentsParser")
-              << help_message() << " The following parameter was not set: '" << par.name.at(0) << "'.";
       }
       par.parse();
       CG_DEBUG("ArgumentsParser") << "Parameter '" << i << "|--" << par.name.at(0)

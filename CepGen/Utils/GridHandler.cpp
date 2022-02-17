@@ -1,14 +1,35 @@
-#include "CepGen/Utils/GridHandler.h"
-#include "CepGen/Utils/String.h"
-#include "CepGen/Core/Exception.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
+
 #include <limits>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/GridHandler.h"
+#include "CepGen/Utils/String.h"
+
+//#define GRID_HANDLER_DEBUG 1
 
 namespace cepgen {
   template <size_t D, size_t N>
-  GridHandler<D, N>::GridHandler(const GridType& grid_type) : grid_type_(grid_type), accel_{}, init_(false) {
+  GridHandler<D, N>::GridHandler(const GridType& grid_type) : grid_type_(grid_type) {
     for (size_t i = 0; i < D; ++i)
       accel_.emplace_back(gsl_interp_accel_alloc(), gsl_interp_accel_free);
   }
@@ -18,16 +39,14 @@ namespace cepgen {
     if (!init_)
       throw CG_FATAL("GridHandler") << "Grid extrapolator called but not initialised!";
 
-    values_t out;
+    values_t out{};
     coord_t coord = in_coords;
     switch (grid_type_) {
       case GridType::logarithmic: {
-        for (auto& c : coord)
-          c = log10(c);
+        std::transform(coord.begin(), coord.end(), coord.begin(), [](const auto& c) { return log10(c); });
       } break;
       case GridType::square: {
-        for (auto& c : coord)
-          c *= c;
+        std::transform(coord.begin(), coord.end(), coord.begin(), [](const auto& c) { return c * c; });
       } break;
       default:
         break;
@@ -39,9 +58,9 @@ namespace cepgen {
           int res = gsl_spline_eval_e(splines_1d_.at(i).get(), coord.at(0), accel_.at(0).get(), &out[i]);
           if (res != GSL_SUCCESS) {
             out[i] = 0.;
-            CG_WARNING("GridHandler") << "Failed to evaluate the grid value (N=" << i << ") "
-                                      << "for x = " << in_coords.at(0) << ". "
-                                      << "GSL error: " << gsl_strerror(res);
+            CG_WARNING("GridHandler") << "Failed to evaluate the value (N=" << i << ") "
+                                      << "for x = " << in_coords.at(0) << " in grid with boundaries " << boundaries()
+                                      << ". GSL error: " << gsl_strerror(res);
           }
         }
       } break;
@@ -52,9 +71,9 @@ namespace cepgen {
           int res = gsl_spline2d_eval_e(splines_2d_.at(i).get(), x, y, accel_.at(0).get(), accel_.at(1).get(), &out[i]);
           if (res != GSL_SUCCESS) {
             out[i] = 0.;
-            CG_WARNING("GridHandler") << "Failed to evaluate the grid value (N=" << i << ") "
-                                      << "for x = " << x << " / y = " << y << ". "
-                                      << "GSL error: " << gsl_strerror(res);
+            CG_WARNING("GridHandler") << "Failed to evaluate the value (N=" << i << ") "
+                                      << "for x = " << x << " / y = " << y << " in grid with boundaries "
+                                      << boundaries() << ". GSL error: " << gsl_strerror(res);
           }
         }
 #else
@@ -146,6 +165,7 @@ namespace cepgen {
     }
     for (auto& c : coords_)
       std::sort(c.begin(), c.end());
+#ifdef GRID_HANDLER_DEBUG
     CG_DEBUG("GridHandler").log([&](auto& dbg) {
       dbg << "Grid dump:";
       // debugging of the grid coordinates
@@ -157,6 +177,7 @@ namespace cepgen {
           dbg << (j++ % 20 == 0 ? "\n  " : " ") << val;
       }
     });
+#endif
     //--- particularise by dimension
     switch (D) {
       case 1: {  //--- x |-> (f1,...)
@@ -192,6 +213,13 @@ namespace cepgen {
       } break;
       case 2: {  //--- (x,y) |-> (f1,...)
 #ifdef GSL_VERSION_ABOVE_2_1
+        if (values_raw_.size() < gsl_interp2d_type_min_size(gsl_interp2d_bicubic))
+          CG_WARNING("GridHandler") << "The grid size is too small (" << values_raw_.size() << " < "
+                                    << gsl_interp2d_type_min_size(gsl_interp2d_bicubic)
+                                    << ") for bicubic interpolation. Switching to a bilinear interpolation mode.";
+        //const gsl_interp2d_type* type =
+        //    (values_raw_.size() > gsl_interp2d_type_min_size(gsl_interp2d_bicubic) ? gsl_interp2d_bicubic
+        //                                                                           : gsl_interp2d_bilinear);
         const gsl_interp2d_type* type = gsl_interp2d_bilinear;
         splines_2d_.clear();
         for (size_t i = 0; i < N; ++i) {
@@ -223,11 +251,15 @@ namespace cepgen {
                                   << "Will use a simple bilinear approximation instead.";
 #endif
       } break;
+      default:
+        break;
     }
     init_ = true;
+#ifdef GRID_HANDLER_DEBUG
     CG_DEBUG("GridHandler") << "Grid evaluator initialised with boundaries: " << boundaries() << "\n"
                             << "Values handled:\n"
                             << values_raw_;
+#endif
   }
 
   template <size_t D, size_t N>
@@ -241,7 +273,7 @@ namespace cepgen {
 
   template <size_t D, size_t N>
   std::array<double, D> GridHandler<D, N>::min() const {
-    std::array<double, D> out;
+    std::array<double, D> out{};
     size_t i = 0;
     for (const auto& c : coords_) {  // loop over all dimensions
       const auto& min = std::min_element(c.begin(), c.end());
@@ -252,7 +284,7 @@ namespace cepgen {
 
   template <size_t D, size_t N>
   std::array<double, D> GridHandler<D, N>::max() const {
-    std::array<double, D> out;
+    std::array<double, D> out{};
     size_t i = 0;
     for (const auto& c : coords_) {  // loop over all dimensions
       const auto& max = std::max_element(c.begin(), c.end());
@@ -290,8 +322,7 @@ namespace cepgen {
   template <size_t D, size_t N>
   typename GridHandler<D, N>::gridpoint_t GridHandler<D, N>::gridpoint_t::operator*(double c) const {
     gridpoint_t out = *this;
-    for (auto& a : out)
-      a *= c;
+    std::transform(out.begin(), out.end(), out.begin(), [&c](const auto& a) { return a * c; });
     return out;
   }
 
@@ -302,4 +333,9 @@ namespace cepgen {
       out[i] += rhs[i];
     return out;
   }
+
+  template class GridHandler<1, 1>;
+  template class GridHandler<1, 2>;
+  template class GridHandler<2, 2>;
+  template class GridHandler<3, 1>;
 }  // namespace cepgen

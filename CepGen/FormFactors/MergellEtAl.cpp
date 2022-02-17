@@ -1,16 +1,34 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include <cmath>
+
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-
-#include <cassert>
-#include <cmath>
 
 namespace cepgen {
   namespace formfac {
     /// \cite Mergell:1995bf
-    class MergellEtAl : public Parameterisation {
+    class MergellEtAl final : public Parameterisation {
     public:
-      MergellEtAl(const ParametersList&);
-      static std::string description() { return "Mergell et al."; }
+      explicit MergellEtAl(const ParametersList&);
+
+      static ParametersDescription description();
 
     private:
       void compute(double q2) override;
@@ -23,17 +41,17 @@ namespace cepgen {
 
     MergellEtAl::MergellEtAl(const ParametersList& params)
         : Parameterisation(params),
-          a1rho_(params.get<double>("a1rho", 1.0317)),
-          a2rho_(params.get<double>("a2rho", 5.7824)),
-          b1rho_(params.get<double>("b1rho", 0.0875)),
-          b2rho_(params.get<double>("b2rho", 0.3907)),
-          c1rho_(params.get<double>("c1rho", 0.3176)),
-          c2rho_(params.get<double>("c2rho", 0.1422)),
-          d1rho_(params.get<double>("d1rho", 0.5496)),
-          d2rho_(params.get<double>("d2rho", 0.5362)),
-          inv_q20_(params.get<double>("q20inv", 1. / 0.35)),
-          lambda_sq_(params.get<double>("lambdaSq", 9.733)),
-          gamma_(params.get<double>("gamma", 2.148)) {}
+          a1rho_(steer<double>("a1rho")),
+          a2rho_(steer<double>("a2rho")),
+          b1rho_(steer<double>("b1rho")),
+          b2rho_(steer<double>("b2rho")),
+          c1rho_(steer<double>("c1rho")),
+          c2rho_(steer<double>("c2rho")),
+          d1rho_(steer<double>("d1rho")),
+          d2rho_(steer<double>("d2rho")),
+          inv_q20_(steer<double>("q20inv")),
+          lambda_sq_(steer<double>("lambdaSq")),
+          gamma_(steer<double>("gamma")) {}
 
     void MergellEtAl::compute(double q2) {
       const double log1 = std::pow(log((lambda_sq_ + q2) * inv_q20_), -gamma_);  // L(t=-q2) function in ref.
@@ -58,6 +76,23 @@ namespace cepgen {
 
       GE = F1 - tau(q2) * F2;
       GM = F1 + F2;
+    }
+
+    ParametersDescription MergellEtAl::description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("Mergell et al.");
+      desc.add<double>("a1rho", 1.0317);
+      desc.add<double>("a2rho", 5.7824);
+      desc.add<double>("b1rho", 0.0875);
+      desc.add<double>("b2rho", 0.3907);
+      desc.add<double>("c1rho", 0.3176);
+      desc.add<double>("c2rho", 0.1422);
+      desc.add<double>("d1rho", 0.5496);
+      desc.add<double>("d2rho", 0.5362);
+      desc.add<double>("q20inv", 1. / 0.35);
+      desc.add<double>("lambdaSq", 9.733);
+      desc.add<double>("gamma", 2.148);
+      return desc;
     }
   }  // namespace formfac
 }  // namespace cepgen

@@ -1,10 +1,28 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGen_Core_EventModifier_h
 #define CepGen_Core_EventModifier_h
 
-#include "CepGen/Modules/NamedModule.h"
-
 #include <string>
 #include <vector>
+
+#include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen {
   class Event;
@@ -21,13 +39,13 @@ namespace cepgen {
     /// Virtual destructor
     virtual ~EventModifier() = default;
 
+    static ParametersDescription description();
+
     /// Set all runtime parameters steering this module
-    virtual void setParameters(const Parameters& params) { params_ = &params; }
+    virtual void setRuntimeParameters(const Parameters& params) { rt_params_ = &params; }
     /// \brief Specify a random numbers generator seed for the external module
     /// \param[in] seed A RNG seed
     void setSeed(long long seed) { seed_ = seed; }
-    /// Return a human-readable name for this modifier
-    const std::string& name() const { return name_; }
 
     /// Parse a configuration string
     virtual void readString(const char*) {}
@@ -50,11 +68,11 @@ namespace cepgen {
 
   protected:
     /// Random numbers generator seed fed to the algorithm
-    long long seed_;
+    long long seed_{0ll};
     /// Maximal number of trials for the algorithm
-    unsigned short max_trials_;
+    unsigned short max_trials_{1};
     /// List of runtime parameters steering this module
-    const Parameters* params_;  // not owning
+    const Parameters* rt_params_{nullptr};  // not owning
   };
 }  // namespace cepgen
 

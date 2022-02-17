@@ -8,11 +8,11 @@ endif()
 
 include_directories(${PROJECT_SOURCE_DIR})
 
-file(GLOB sources YODAHistsHandler.cpp)
+file(GLOB sources YODAHistsHandler.cpp DrawerYODA.cpp)
 
 #----- build the object
 
-cepgen_build(CepGenRivet SOURCES YODAHistsHandler.cpp
+cepgen_build(CepGenRivet SOURCES ${sources}
     EXT_LIBS ${YODA}
     EXT_HEADERS ${YODA_INCLUDE}
     INSTALL_COMPONENT rivet)

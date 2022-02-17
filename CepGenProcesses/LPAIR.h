@@ -1,5 +1,25 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGenProcesses_LPAIR_h
 #define CepGenProcesses_LPAIR_h
+
+#include <random>
 
 #include "CepGen/Processes/Process.h"
 
@@ -28,18 +48,21 @@ namespace cepgen {
      * \brief Compute the matrix element for a CE \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
      *  process
      */
-    class LPAIR : public Process {
+    class LPAIR final : public Process {
     public:
       /// \brief Class constructor: set the mandatory parameters before integration and events generation
       /// \param[in] params General process parameters (nopt = Optimisation, legacy from LPAIR)
-      explicit LPAIR(const ParametersList& params = ParametersList());
+      explicit LPAIR(const ParametersList& params);
+      /// Copy constructor
+      explicit LPAIR(const LPAIR&);
       ProcessPtr clone() const override { return ProcessPtr(new LPAIR(*this)); }
 
       void addEventContent() override;
       double computeWeight() override;
       void prepareKinematics() override;
       void fillKinematics(bool) override;
-      static std::string description() { return "ɣɣ → l⁺l¯ (LPAIR)"; }
+
+      static ParametersDescription description();
 
     private:
       /**
@@ -71,85 +94,75 @@ namespace cepgen {
          */
       bool pickin();
 
-      /// Internal switch for the optimised code version (LPAIR legacy ; unimplemented here)
+      static constexpr double SCONSTB = 2. * pow(M_PI, 3) / pow(constants::ALPHA_EM, 4);
+      /// Internal switch for the optimised code version (LPAIR legacy)
       const int n_opt_;
       pdgid_t pair_;
       const bool symmetrise_;
 
-      std::vector<double> x_tmp_;
-      double theta4_;
-      double phi6_cm_;
-      double x6_;
+      // mapped variables
+      double u_t1_{0.};
+      double u_t2_{0.};
+      double u_s2_{0.};
+      double w4_{0.};       ///< squared mass of the two-photon system
+      double theta4_{0.};   ///< polar angle of the two-photon system
+      double phi6_cm_{0.};  ///< azimutal angle of the first outgoing lepton
+      double x6_{0.};
 
       Limits w_limits_;
       struct Masses {
-        /// squared mass of the outgoing leptons
-        double Ml2 = 0.;
-        /// \f$\delta_2=m_1^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
-        double w12 = 0.;
-        /// \f$\delta_1=m_3^2-m_1^2\f$ as defined in \cite Vermaseren:1982cz
-        double w31 = 0.;
-        /// \f$\delta_4=m_5^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
-        double w52 = 0.;
+        double Ml2 = 0.;  ///< squared mass of the outgoing leptons
+        double w12 = 0.;  ///< \f$\delta_2=m_1^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
+        double w31 = 0.;  ///< \f$\delta_1=m_3^2-m_1^2\f$ as defined in \cite Vermaseren:1982cz
+        double w52 = 0.;  ///< \f$\delta_4=m_5^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
       } masses_;
 
-      /// energy of the first proton-like incoming particle
-      double ep1_;
-      /// energy of the second proton-like incoming particle
-      double ep2_;
-      double p_cm_;
+      double ep1_{0.};  ///< energy of the first proton-like incoming particle
+      double ep2_{0.};  ///< energy of the second proton-like incoming particle
+      double p_cm_{0.};
 
-      /// energy of the two-photon central system
-      double ec4_;
-      /// 3-momentum norm of the two-photon central system
-      double pc4_;
-      /// mass of the two-photon central system
-      double mc4_;
-      /// squared mass of the two-photon central system
-      double w4_;
+      double ec4_{0.};  ///< energy of the two-photon system
+      double pc4_{0.};  ///< 3-momentum norm of the two-photon system
+      double mc4_{0.};  ///< mass of the two-photon system
 
-      /// \f$p_{12} = \frac{1}{2}\left(s-m_{p_1}^2-m_{p_2}^2\right)\f$
-      double p12_;
-      double p1k2_, p2k1_;
-      /// \f$p_{13} = -\frac{1}{2}\left(t_1-m_{p_1}^2-m_{p_3}^2\right)\f$
-      double p13_;
-      double p14_, p25_;
+      double p12_{0.};  ///< \f$p_{12} = \frac{1}{2}\left(s-m_{p_1}^2-m_{p_2}^2\right)\f$
+      double p1k2_{0.}, p2k1_{0.};
+      double p13_{0.};  ///< \f$p_{13} = -\frac{1}{2}\left(t_1-m_{p_1}^2-m_{p_3}^2\right)\f$
+      double p14_{0.}, p25_{0.};
 
-      double q1dq_, q1dq2_;
+      double q1dq_{0.}, q1dq2_{0.};
 
-      double s1_, s2_;
+      double s1_{0.}, s2_{0.};
 
-      double epsi_;
-      double g5_, g6_;
-      double a5_, a6_;
-      double bb_;
+      double epsi_{0.};
+      double g5_{0.}, g6_{0.};
+      double a5_{0.}, a6_{0.};
+      double bb_{0.};
 
-      double gram_;
-      double dd1_, dd2_, dd3_;
-      /// \f$\delta_5=m_4^2-t_1\f$ as defined in Vermaseren's paper
-      /// \cite Vermaseren:1982cz for the full definition of this quantity
-      double dd4_;
-      double dd5_;
+      double gram_{0.};
+      /// Deltas such as \f$\delta_5=m_4^2-t_1\f$ as defined in Vermaseren's paper
+      /// \cite Vermaseren:1982cz for the full definition of these quantities
+      std::array<double, 5> deltas_;
       /**
          * Invariant used to tame divergences in the matrix element computation. It is defined as
          * \f[\Delta = \left(p_1\cdot p_2\right)\left(q_1\cdot q_2\right)-\left(p_1\cdot q_2\right)\left(p_2\cdot q_1\right)\f]
          * with \f$p_i, q_i\f$ the 4-momenta associated to the incoming proton-like particle and to the photon emitted from it.
          */
-      double delta_;
-      double g4_;
-      double sa1_, sa2_;
+      double delta_{0.};
+      double g4_{0.};
+      double sa1_{0.}, sa2_{0.};
 
-      double sl1_;
+      double sl1_{0.};
 
-      /// cosine of the polar angle for the two-photons centre-of-mass system
-      double cos_theta4_;
-      /// sine of the polar angle for the two-photons centre-of-mass system
-      double sin_theta4_;
+      /// cosine of the polar angle for the two-photon system
+      double cos_theta4_{0.};
+      /// sine of the polar angle for the two-photon system
+      double sin_theta4_{0.};
 
-      double al4_;
-      double be4_;
-      double de3_, de5_;
-      double pt4_;
+      double al4_{0.};
+      double be4_{0.};
+      double de3_{0.}, de5_{0.};
+      double pt4_{0.};
 
       /// Kinematics of the first incoming proton
       Momentum p1_lab_;
@@ -165,7 +178,7 @@ namespace cepgen {
       Momentum p6_cm_;
       /// Kinematics of the second outgoing lepton (in the two-proton CM)
       Momentum p7_cm_;
-      double jacobian_;
+      double jacobian_{0.};
 
     private:
       /**
@@ -187,6 +200,9 @@ namespace cepgen {
          */
       std::pair<double, double> map(double expo, const Limits& lim, const std::string& var_name = "");
       std::pair<double, double> mapla(double y, double z, int u, const Limits& lim);
+      std::default_random_engine rnd_gen_;
+      std::uniform_real_distribution<double> rnd_phi_;
+      std::uniform_int_distribution<short> rnd_side_;
     };
   }  // namespace proc
 }  // namespace cepgen

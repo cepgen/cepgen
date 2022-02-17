@@ -1,20 +1,40 @@
-#include "CepGen/Physics/GluonGrid.h"
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/Timer.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2022  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
+#include <cmath>
 #include <fstream>
 #include <set>
-#include <cmath>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Physics/GluonGrid.h"
+#include "CepGen/Utils/Timer.h"
 
 namespace kmr {
-  GluonGrid& GluonGrid::get(const std::string& filename) {
-    static GluonGrid instance(cepgen::ParametersList().set<std::string>("path", filename));
+  GluonGrid& GluonGrid::get(const cepgen::ParametersList& params) {
+    static GluonGrid instance(!params.empty() ? params : description().parameters());
     return instance;
   }
 
   GluonGrid::GluonGrid(const cepgen::ParametersList& params)
-      : cepgen::GridHandler<3, 1>(cepgen::GridType::linear),  // grid is already logarithmic
-        grid_path_(params.get<std::string>("path", DEFAULT_KMR_GRID_PATH)) {
+      : cepgen::GridHandler<3, 1>(cepgen::GridType::linear),
+        // grid is already logarithmic
+        SteeredObject(params),
+        grid_path_(steer<std::string>("path")) {
     CG_INFO("GluonGrid") << "Building the KMR grid evaluator.";
 
     cepgen::utils::Timer tmr;
@@ -39,12 +59,18 @@ namespace kmr {
     init();
 
     CG_INFO("GluonGrid") << "KMR grid evaluator built in " << tmr.elapsed() << " s.\n\t"
-                         << " kt² in range [" << *kt2_vals.begin() << ":" << *kt2_vals.rbegin() << "]\n\t"
-                         << " x in range [" << *x_vals.begin() << ":" << *x_vals.rbegin() << "]\n\t"
-                         << " µ² in range [" << *mu2_vals.begin() << ":" << *mu2_vals.rbegin() << "].";
+                         << " kt^2 in range [" << *kt2_vals.begin() << ":" << *kt2_vals.rbegin() << "]\n\t"
+                         << "    x in range [" << *x_vals.begin() << ":" << *x_vals.rbegin() << "]\n\t"
+                         << " mu^2 in range [" << *mu2_vals.begin() << ":" << *mu2_vals.rbegin() << "].";
   }
 
   double GluonGrid::operator()(double x, double kt2, double mu2) const {
     return cepgen::GridHandler<3, 1>::eval({log10(x), log10(kt2), log10(mu2)}).at(0);
+  }
+
+  cepgen::ParametersDescription GluonGrid::description() {
+    auto desc = cepgen::ParametersDescription();
+    desc.add<std::string>("path", DEFAULT_KMR_GRID_PATH);
+    return desc;
   }
 }  // namespace kmr

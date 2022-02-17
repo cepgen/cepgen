@@ -1,42 +1,52 @@
-#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "CepGen/Core/Exception.h"
-
-#include "CepGen/Parameters.h"
-
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/Constants.h"
-
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
 namespace Pythia8 {
   /// Convert a CepGen particle momentum into its Pythia8 counterpart
   Vec4 momToVec4(const cepgen::Momentum& mom) { return Vec4(mom.px(), mom.py(), mom.pz(), mom.energy()); }
 
-  CepGenEvent::CepGenEvent()
-      : LHAup(3),
-        mp_(cepgen::PDG::get().mass(cepgen::PDG::proton)),
-        mp2_(mp_ * mp_),
-        inel1_(false),
-        inel2_(false),
-        params_(nullptr) {}
+  CepGenEvent::CepGenEvent() : LHAup(3), mp_(cepgen::PDG::get().mass(cepgen::PDG::proton)), mp2_(mp_ * mp_) {}
 
   void CepGenEvent::initialise(const cepgen::Parameters& params) {
     params_ = &params;
-    inel1_ = params_->kinematics.incoming_beams.positive().mode == cepgen::mode::Beam::ProtonInelastic;
-    inel2_ = params_->kinematics.incoming_beams.negative().mode == cepgen::mode::Beam::ProtonInelastic;
+    inel1_ = params_->kinematics().incomingBeams().positive().fragmented();
+    inel2_ = params_->kinematics().incomingBeams().negative().fragmented();
 
-    setBeamA((short)params_->kinematics.incoming_beams.positive().pdg,
-             params_->kinematics.incoming_beams.positive().momentum.pz());
-    setBeamB((short)params_->kinematics.incoming_beams.negative().pdg,
-             params_->kinematics.incoming_beams.negative().momentum.pz());
+    setBeamA((short)params_->kinematics().incomingBeams().positive().pdgId(),
+             params_->kinematics().incomingBeams().positive().momentum().pz());
+    setBeamB((short)params_->kinematics().incomingBeams().negative().pdgId(),
+             params_->kinematics().incomingBeams().negative().momentum().pz());
     //addProcess( 0, params_->integration().result, params_->integration().err_result, 100. );
   }
 
   void CepGenEvent::addComments(const std::string& comments) {
 #if PYTHIA_VERSION_INTEGER >= 8200
     osLHEF << comments;
+#else
+    CG_WARNING("CepGenEvent:addComments") << "Pythia 8 is too outdated... Unused comments: " << comments;
 #endif
   }
 
@@ -210,9 +220,10 @@ namespace Pythia8 {
   }
 
   unsigned short CepGenEvent::pythiaId(unsigned short cg_id) const {
-    for (const auto& py_cg : py_cg_corresp_)
-      if (py_cg.second == cg_id)
-        return py_cg.first;
+    auto it = std::find_if(
+        py_cg_corresp_.begin(), py_cg_corresp_.end(), [&cg_id](const auto& py_cg) { return py_cg.second == cg_id; });
+    if (it != py_cg_corresp_.end())
+      return it->first;
     return INVALID_ID;
   }
 

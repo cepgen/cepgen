@@ -1,17 +1,35 @@
-#include "CepGen/Integration/Integrator.h"
-#include "CepGen/Integration/Integrand.h"
-#include "CepGen/Modules/IntegratorFactory.h"
-
-#include "CepGen/Core/Exception.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <Math/IntegratorMultiDim.h>
 
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Integration/Integrand.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/IntegratorFactory.h"
+
 namespace cepgen {
   /// FOAM general-purpose integration algorithm
-  class IntegratorROOT : public Integrator {
+  class IntegratorROOT final : public Integrator {
   public:
     explicit IntegratorROOT(const ParametersList&);
-    static std::string description() { return "ROOT general purpose MC integrator"; }
+
+    static ParametersDescription description();
 
     void integrate(double&, double&) override;
 
@@ -35,10 +53,10 @@ namespace cepgen {
         func_([=](const double* x) -> double {
           return integrand_->eval(std::vector<double>(x, x + integrand_->size()));
         }),
-        type_(params.get<std::string>("type", "default")),
-        absTol_(params.get<double>("absTol", -1.)),
-        relTol_(params.get<double>("relTol", -1.)),
-        size_(params.get<int>("size", 0)) {
+        type_(steer<std::string>("type")),
+        absTol_(steer<double>("absTol")),
+        relTol_(steer<double>("relTol")),
+        size_(steer<int>("size")) {
     ROOT::Math::IntegratorMultiDim::Type type;
     if (type_ == "default")
       type = ROOT::Math::IntegratorMultiDim::Type::kDEFAULT;
@@ -71,6 +89,16 @@ namespace cepgen {
 
     result_ = result = integr_->Integral(min_.data(), max_.data());
     err_result_ = abserr = integr_->Error();
+  }
+
+  ParametersDescription IntegratorROOT::description() {
+    auto desc = Integrator::description();
+    desc.setDescription("ROOT general purpose MC integrator");
+    desc.add<std::string>("type", "default");
+    desc.add<double>("absTol", -1.);
+    desc.add<double>("relTol", -1.);
+    desc.add<int>("size", 0);
+    return desc;
   }
 }  // namespace cepgen
 

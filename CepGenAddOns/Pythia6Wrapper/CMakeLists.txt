@@ -1,12 +1,12 @@
 #--- searching for Pythia 6
 set(PYTHIA6_DIRS $ENV{PYTHIA6_DIR} /usr /usr/local /opt/pythia6)
 find_library(PYTHIA6 pythia6 HINTS ${PYTHIA6_DIRS} PATH_SUFFIXES lib)
-find_library(PYTHIA6DUMMY pythia6_dummy HINTS ${PYTHIA6_DIRS} PATH_SUFFIXES lib)
 
 set(PYTHIA6LIB)
 if(PYTHIA6)
   message(STATUS "Pythia 6 found in ${PYTHIA6}")
   list(APPEND PYTHIA6LIB ${PYTHIA6})
+  find_library(PYTHIA6DUMMY pythia6_dummy HINTS ${PYTHIA6_DIRS} PATH_SUFFIXES lib)
   if(PYTHIA6DUMMY)
     message(STATUS "Pythia 6 dummy library found in ${PYTHIA6DUMMY}")
     list(APPEND PYTHIA6LIB ${PYTHIA6DUMMY})
@@ -30,7 +30,9 @@ endif()
 
 #----- build the objects
 
+enable_testing()
 cepgen_build(CepGenPythia6 SOURCES *.cpp
+    TESTS test/test_pythia_decay.cc
+    EXT_LIBS ${PYTHIA6LIB}
     PROPERTY CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-misleading-indentation"
     INSTALL_COMPONENT pythia6)
-

@@ -1,13 +1,29 @@
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/FormFactors/Parameterisation.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
-
-#include "CepGen/Physics/KTFlux.h"
-#include "CepGen/Physics/HeavyIon.h"
-#include "CepGen/Physics/PDG.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/Beam.h"
+#include "CepGen/Physics/HeavyIon.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,9 +32,8 @@ extern "C" {
 void cepgen_structure_functions_(int& sfmode, double& xbj, double& q2, double& f2, double& fl) {
   using namespace cepgen;
   static auto sf = strfun::StructureFunctionsFactory::get().build(sfmode);
-  const auto& val = (*sf)(xbj, q2);
-  f2 = val.F2;
-  fl = val.FL;
+  f2 = sf->F2(xbj, q2);
+  fl = sf->FL(xbj, q2);
 }
 
 /// Compute a \f$k_{\rm T}\f$-dependent flux for single nucleons
@@ -30,11 +45,10 @@ void cepgen_structure_functions_(int& sfmode, double& xbj, double& q2, double& f
 /// \param[in] mout Diffractive state mass for dissociative emission
 double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& min, double& mout) {
   using namespace cepgen;
-  static auto ff =
-      formfac::FormFactorsFactory::get().build("StandardDipole");  // use another argument for the modelling?
+  static auto ff = formfac::FormFactorsFactory::get().build(
+      formfac::gFFStandardDipoleHandler);  // use another argument for the modelling?
   static auto sf = strfun::StructureFunctionsFactory::get().build(sfmode);
-  ff->setStructureFunctions(sf.get());
-  return ktFlux((KTFlux)fmode, x, kt2, *ff, min * min, mout * mout);
+  return Beam::ktFluxNucl((Beam::KTFlux)fmode, x, kt2, ff.get(), sf.get(), min * min, mout * mout);
 }
 
 /// Compute a \f$k_{\rm T}\f$-dependent flux for heavy ions
@@ -45,7 +59,7 @@ double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& 
 /// \param[in] z Atomic number for the heavy ion
 double cepgen_kt_flux_hi_(int& fmode, double& x, double& kt2, int& a, int& z) {
   using namespace cepgen;
-  return ktFlux((KTFlux)fmode, x, kt2, HeavyIon{(unsigned short)a, (Element)z});
+  return Beam::ktFluxHI((Beam::KTFlux)fmode, x, kt2, HeavyIon{(unsigned short)a, (Element)z});
 }
 
 /// Mass of a particle, in GeV/c^2

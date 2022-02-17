@@ -1,26 +1,41 @@
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/StructureFunctions/SuriYennie.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2022  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "CepGen/Core/Exception.h"
-
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/Utils.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/GridHandler.h"
-#include "CepGen/Utils/Physics.h"
 
 namespace cepgen {
   namespace strfun {
-    class Shamov : public Parameterisation {
+    class Shamov final : public Parameterisation {
     public:
-      explicit Shamov(const ParametersList& params = ParametersList());
-      static std::string description() { return "Shamov composite soft structure functions"; }
+      explicit Shamov(const ParametersList&);
+
+      static ParametersDescription description();
 
       Shamov& eval(double xbj, double q2) override;
 
-      double W1, W2;
-      bool resonant;
-
     private:
+      static constexpr double prefac_ =
+          2. * M_PI * M_PI * constants::ALPHA_EM * constants::GEVM2_TO_PB * 1e-9;  // pb/GeV -> mb/GeV
       static constexpr std::array<float, 19> gmq_ = {{0.000,
                                                       0.200,
                                                       0.300,
@@ -122,8 +137,6 @@ namespace cepgen {
            0.982, 0.983, 0.984, 0.986, 0.987, 0.988, 0.988, 0.989, 0.989, 0.990, 0.991, 0.991, 0.991, 0.992, 0.992,
            0.992, 0.993, 0.993, 0.993, 0.993, 0.994, 0.994, 0.994, 0.994, 0.995, 0.995, 0.995, 0.995, 0.995, 0.996,
            0.996, 0.996, 1.000, 1.000, 1.000, 1.000}};
-      static constexpr std::array<float, 2> q20_ = {{0.36, 0.65}};
-      static constexpr std::array<float, 2> r_power_ = {{0.52, 0.71}};
 
       const enum class Mode {
         SuriYennie = 0,  ///< Suri & Yennie
@@ -145,32 +158,30 @@ namespace cepgen {
       size_t fit_model_;
       const double gm0_;
       const double gmb_;
+      const double q20_;
+      const double r_power_;
       const double lowq2_;
 
-      GridHandler<1, 2> sigma_grid_;
-      GridHandler<1, 1> gm_grid_;
-      SuriYennie sy_sf_;
+      GridHandler<1, 2> sigma_grid_{GridType::linear};
+      GridHandler<1, 1> gm_grid_{GridType::linear};
+      std::unique_ptr<Parameterisation> sy_sf_;
+      bool non_resonant_{true};
     };
 
     constexpr std::array<float, 19> Shamov::gmq_, Shamov::gmv_;
     constexpr std::array<float, 291> Shamov::gp_en_, Shamov::gp_cs_, Shamov::gp_nr_;
-    constexpr std::array<float, 2> Shamov::q20_, Shamov::r_power_;
 
     Shamov::Shamov(const ParametersList& params)
         : Parameterisation(params),
-          W1(0.),
-          W2(0.),
-          resonant(false),
-          mode_((Mode)params.get<int>("mode", (int)Mode::RealResAndNonRes)),
-          fit_model_(params.get<int>("fitModel", 2)),
-          gm0_(params.get<double>("gm0", 1.)),
-          gmb_(params.get<double>("gmb", 0.984)),
-          lowq2_(params.get<double>("lowQ2", 1.e-7)),
-          sigma_grid_(GridType::linear),
-          gm_grid_(GridType::linear) {
-      if (fit_model_ > q20_.size())
-        throw CG_FATAL("Shamov") << "Invalid fit modelling requested!";
-
+          mode_(steerAs<int, Mode>("mode")),
+          fit_model_(steer<int>("fitModel")),
+          gm0_(steer<double>("gm0")),
+          gmb_(steer<double>("gmb")),
+          q20_(steer<double>("q20")),
+          r_power_(steer<double>("rPower")),
+          lowq2_(steer<double>("lowQ2")),
+          sy_sf_(strfun::StructureFunctionsFactory::get().build((int)strfun::Type::SuriYennie,
+                                                                steer<ParametersList>("syParams"))) {
       //----- initialise the interpolation grids
 
       //--- grid E -> (cross section, norm)
@@ -182,42 +193,37 @@ namespace cepgen {
       for (size_t i = 0; i < gmv_.size(); ++i)
         gm_grid_.insert({gmq_.at(i)}, {gmv_.at(i)});
       gm_grid_.init();
+      if (mode_ == Mode::SuriYennie || mode_ == Mode::RealAndSuriYennieNonRes || mode_ == Mode::RealResAndNonRes ||
+          mode_ == Mode::RealAndFitNonRes)
+        non_resonant_ = true;
     }
 
     Shamov& Shamov::eval(double xbj, double q2) {
       //--- Suri & Yennie structure functions
-      const auto sy_q2 = sy_sf_.eval(xbj, q2);
-
-      if (mode_ == Mode::SuriYennie) {
-        W1 = sy_q2.W1;
-        W2 = sy_q2.W2;
-        F2 = sy_q2.F2;
-        resonant = false;
+      if (mode_ == Mode::SuriYennie) {  // trivial composite case
+        Parameterisation::operator=((*sy_sf_)(xbj, q2));
         return *this;
       }
 
       const double mx2 = utils::mX2(xbj, q2, mp2_), mx = sqrt(mx2);
 
-      double Gm = 0.;
       const auto sigma = sigma_grid_.eval({mx});
       double sgp = sigma[0];  // cross section value at MX
 
-      resonant = !((mode_ == Mode::RealAndSuriYennieNonRes || (mode_ == Mode::RealAndFitNonRes && mx > 1.5) ||
-                    (mode_ == Mode::RealResAndNonRes || mode_ == Mode::RealAndFitNonRes))
-                   // && ( mx > sigma_grid_.max()[0] || rand()*1./RAND_MAX < sigma[1] )
-      );
+      if (mode_ == Mode::RealAndFitNonRes && mx > 1.5)
+        non_resonant_ = true;
+      //if (mx > sigma_grid_.max()[0] || rand() * 1. / RAND_MAX < sigma[1])
+      //  non_resonant_ = true;
 
       //--- q^2 dependence of sigma
-      if (!resonant) {
-        // nonresonant
+      double Gm;
+      if (non_resonant_) {
         if (mode_ == Mode::RealAndFitNonRes)
           /// q^2 dependence of the non-resonant gamma-p cross section
           /// Some fit of the know e-p data. Good only for Q^2 < 6 GeV^2
-          Gm = pow(1. + pow(q2 / q20_[fit_model_], 2), -r_power_[fit_model_]);
-        else {
-          const auto sy_lowq2 = sy_sf_.eval(xbj, lowq2_);
-          Gm = sy_q2.W1 / sy_lowq2.W1;
-        }
+          Gm = std::pow(1. + std::pow(q2 / q20_, 2), -r_power_);
+        else
+          Gm = sy_sf_->W1(xbj, q2) / sy_sf_->W1(xbj, lowq2_);
       } else {                        // resonant
         if (q2 >= gm_grid_.max()[0])  // above grid range
           Gm = gm0_ * exp(-gmb_ * q2);
@@ -228,25 +234,39 @@ namespace cepgen {
       sgp *= Gm;  // cross section with some q^2 dependence
 
       //--- for W -> cross section
-      const double prefac = 2. * M_PI * M_PI * constants::ALPHA_EM * constants::GEVM2_TO_PB * 1e-9;  // pb/GeV -> mb/GeV
-      const double s1 = prefac * 4. * mp_ / (mx2 - mp2_);                                            // mb/GeV
+      const double s1 = prefac_ * 4. * mp_ / (mx2 - mp2_);  // mb/GeV
       const double s2 =
-          prefac * (pow(mx2 - mp2_, 2) + 2. * (mx2 + mp2_) * q2 + q2 * q2) / mp_ / q2 / (mx2 - mp2_);  // mb/GeV
+          prefac_ * (std::pow(mx2 - mp2_, 2) + 2. * (mx2 + mp2_) * q2 + q2 * q2) / mp_ / q2 / (mx2 - mp2_);  // mb/GeV
       //---  ratio (\sigma_T+\sigma_L)/\sigma_T according to S & Y
-      const double ratio = (s2 * sy_q2.W2) / (s1 * sy_q2.W1);
+      const double ratio = (s2 * sy_sf_->W2(xbj, q2)) / (s1 * sy_sf_->W1(xbj, q2));
 
       if (mode_ == Mode::RealAndFitNonRes) {  // transverse sigma only
-        W1 = sgp / s1;
-        W2 = sgp * ratio / s2;
+        setW1(sgp / s1);
+        setW2(sgp * ratio / s2);
       } else {  // longitudinal + transverse component for sigma
-        W1 = sgp / ratio / s1;
-        W2 = sgp / s2;
+        setW1(sgp / ratio / s1);
+        setW2(sgp / s2);
       }
       const double nu = 0.5 * (q2 + mx2 - mp2_) / mp_;
-      F2 = W2 * nu / mp_;
+      setF2(W2(xbj, q2) * nu / mp_);
       return *this;
+    }
+
+    ParametersDescription Shamov::description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("Shamov (hybrid, soft)");
+      desc.addAs<int, Mode>("mode", Mode::RealResAndNonRes).setDescription("sub-structure functions choice");
+      desc.add<int>("fitModel", 2);
+      desc.add<double>("q20", 0.65 /* 0.36 */)
+          .setDescription("first parameter for non-resonant gamma-p cross section q^2 dependence");
+      desc.add<double>("rPower", 0.71 /* 0.52 */)
+          .setDescription("second parameter for non-resonant gamma-p cross section q^2 dependence");
+      desc.add<double>("gm0", 1.).setDescription("scaling factor for the magnetic form factor template fit");
+      desc.add<double>("gmb", 0.984).setDescription("exponential parameter for the magnetic form factor template fit");
+      desc.add<double>("lowQ2", 1.e-7);
+      return desc;
     }
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(Shamov, strfun::Shamov)
+REGISTER_STRFUN(strfun::Type::Shamov, Shamov, strfun::Shamov)

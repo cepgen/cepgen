@@ -1,38 +1,51 @@
-#include "CepGen/Generator.h"
-#include "CepGen/Parameters.h"
-
-#include "CepGen/Processes/Process.h"
-
-#include "CepGen/Core/GeneratorWorker.h"
-#include "CepGen/Core/EventModifier.h"
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Core/Exception.h"
-
-#include "CepGen/Utils/String.h"
-#include "CepGen/Utils/TimeKeeper.h"
-
-#include "CepGen/Integration/Integrator.h"
-#include "CepGen/Integration/Integrand.h"
-#include "CepGen/Integration/GridParameters.h"
-
-#include "CepGen/Modules/IntegratorFactory.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2022  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <chrono>
 
+#include "CepGen/Core/EventModifier.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Core/GeneratorWorker.h"
+#include "CepGen/Generator.h"
+#include "CepGen/Integration/GridParameters.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/ProcessIntegrand.h"
+#include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Processes/Process.h"
+#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/TimeKeeper.h"
+
 namespace cepgen {
-  Generator::Generator(bool safe_mode) : parameters_(new Parameters), result_(-1.), result_error_(-1.) {
-    CG_DEBUG("Generator:init") << "Generator initialized";
+  Generator::Generator(bool safe_mode) : parameters_(new Parameters) {
     static bool init = false;
     if (!init) {
       initialise(safe_mode);
       init = true;
+      CG_DEBUG("Generator:init") << "Generator initialised";
     }
     //--- random number initialization
     std::chrono::system_clock::time_point time = std::chrono::system_clock::now();
     srandom(time.time_since_epoch().count());
   }
 
-  Generator::Generator(Parameters* ip) : parameters_(ip), result_(-1.), result_error_(-1.) {}
+  Generator::Generator(Parameters* ip) : parameters_(ip) {}
 
   Generator::~Generator() {
     if (parameters_->timeKeeper())
@@ -40,28 +53,27 @@ namespace cepgen {
   }
 
   void Generator::clearRun() {
-    generator_.reset(new GeneratorWorker(parameters_.get()));
+    worker_.reset(new GeneratorWorker(const_cast<const Parameters*>(parameters_.get())));
+    // destroy and recreate the integrator instance
+    setIntegrator(nullptr);
+    worker_->setIntegrator(integrator_.get());
     result_ = result_error_ = -1.;
     parameters_->prepareRun();
   }
 
   Parameters& Generator::parametersRef() { return *parameters_; }
 
-  void Generator::setParameters(Parameters* ip) {
-    parameters_.reset(ip);
-    if (parameters_->hasProcess())
-      parameters_->process().setKinematics(parameters_->kinematics);
-  }
+  void Generator::setParameters(Parameters* ip) { parameters_.reset(ip); }
 
   double Generator::computePoint(const std::vector<double>& coord) {
-    if (!generator_)
+    if (!worker_)
       clearRun();
     if (!parameters_->hasProcess())
       throw CG_FATAL("Generator:computePoint") << "Trying to compute a point with no process specified!";
     const size_t ndim = parameters_->process().ndim();
     if (coord.size() != ndim)
       throw CG_FATAL("Generator:computePoint") << "Invalid phase space dimension (ndim=" << ndim << ")!";
-    double res = generator_->integrand().eval(coord);
+    double res = worker_->integrand().eval(coord);
     CG_DEBUG("Generator:computePoint") << "Result for x[" << ndim << "] = " << coord << ":\n\t" << res << ".";
     return res;
   }
@@ -90,17 +102,14 @@ namespace cepgen {
     CG_TICKER(parameters_->timeKeeper());
 
     if (!integ) {
-      if (!parameters_->integrator)
-        throw CG_FATAL("Generator:integrate") << "No integrator parameters found!";
-      if (parameters_->integrator->name<std::string>().empty())
-        parameters_->integrator->setName<std::string>("Vegas");
-      integ = IntegratorFactory::get().build(*parameters_->integrator);
+      if (parameters_->par_integrator.name<std::string>().empty())
+        parameters_->par_integrator.setName<std::string>("Vegas");
+      integ = IntegratorFactory::get().build(parameters_->par_integrator);
     }
     integrator_ = std::move(integ);
-    if (!generator_)
-      clearRun();
-    integrator_->setIntegrand(generator_->integrand());
-    generator_->setIntegrator(integrator_.get());
+    integrator_->setIntegrand(worker_->integrand());
+    if (worker_)
+      worker_->setIntegrator(integrator_.get());
     CG_INFO("Generator:integrator") << "Generator will use a " << integrator_->name() << "-type integrator.";
   }
 
@@ -114,12 +123,11 @@ namespace cepgen {
     if (ndim < 1)
       throw CG_FATAL("Generator:computePoint") << "Invalid phase space dimension (ndim=" << ndim << ")!";
 
-    // first destroy and recreate the integrator instance
-    setIntegrator(nullptr);
-
     CG_DEBUG("Generator:integrate") << "New integrator instance created for " << ndim << "-dimensional integration.";
 
     integrator_->integrate(result_, result_error_);
+
+    CG_DEBUG("Generator:integrate") << "Computed cross section: (" << result_ << " +- " << result_error_ << ") pb.";
 
     for (auto& mod : parameters_->eventModifiersSequence())
       mod->setCrossSection(result_, result_error_);
@@ -137,6 +145,8 @@ namespace cepgen {
 
     if (!parameters_)
       throw CG_FATAL("Generator:generate") << "No steering parameters specified!";
+    if (!worker_)
+      integrate();
 
     for (auto& mod : parameters_->outputModulesSequence())
       mod->initialise(*parameters_);
@@ -156,7 +166,7 @@ namespace cepgen {
 
     //--- launch the event generation
 
-    generator_->generate(num_events, callback);
+    worker_->generate(num_events, callback);
 
     const double gen_time_s = tmr.elapsed();
     const double rate_ms =

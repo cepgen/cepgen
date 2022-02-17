@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2022  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGen_Physics_Momentum_h
 #define CepGen_Physics_Momentum_h
 
@@ -13,12 +31,10 @@ namespace cepgen {
    */
   class Momentum : private std::array<double, 4> {
   public:
-    /// Build a 4-momentum at rest with an invalid energy (no mass information known)
-    Momentum();
     /// Build a 4-momentum using its 3-momentum coordinates and its energy
-    Momentum(double x, double y, double z, double t = -1.);
+    explicit Momentum(double x = 0., double y = 0., double z = 0., double t = -1.);
     /// Build a 4-momentum using its 3-momentum coordinates and its energy
-    Momentum(double* p);
+    explicit Momentum(double* p);
 
     //--- static definitions
 
@@ -119,6 +135,10 @@ namespace cepgen {
     inline double energy() const { return (*this)[E]; }
     /// Squared energy (in GeV\f$^2\f$)
     inline double energy2() const { return (*this)[E] * (*this)[E]; }
+    /// Tranverse energy component (in GeV)
+    double energyT() const;
+    /// Squared tranverse energy component (in GeV\f$^2\f$)
+    double energyT2() const;
     /// Compute the energy from the mass
     Momentum& setMass2(double m2);
     /// Squared mass (in GeV\f$^2\f$) as computed from its energy and momentum
@@ -128,6 +148,10 @@ namespace cepgen {
     /// Mass (in GeV) as computed from its energy and momentum
     /// \note Returns \f$-\sqrt{|E^2-\mathbf{p}^2|}<0\f$ if \f$\mathbf{p}^2>E^2\f$
     double mass() const;
+    /// Squared transverse mass (in GeV\f$^2\f$)
+    double massT2() const;
+    /// Transverse mass (in GeV)
+    double massT() const;
     /// Polar angle (angle with respect to the longitudinal direction)
     double theta() const;
     /// Azimuthal angle (angle in the transverse plane)
@@ -136,6 +160,21 @@ namespace cepgen {
     double eta() const;
     /// Rapidity
     double rapidity() const;
+
+    /// Pseudorapidity distance between two momenta
+    double deltaEta(const Momentum&) const;
+    /// Azimutal angle opening between two momenta
+    double deltaPhi(const Momentum&) const;
+    /// Transverse momentum distance between two momenta
+    double deltaPt(const Momentum&) const;
+    /// Angular distance between two momenta
+    double deltaR(const Momentum&) const;
+
+    /// Beta scalar value
+    double beta() const;
+    /// Gamma scalar value
+    double gamma() const;
+
     /// Apply a threshold to all values with a given tolerance
     Momentum& truncate(double tolerance = 1.e-10);
     /// Rotate the transverse components by an angle phi (and reflect the y coordinate)
@@ -163,7 +202,7 @@ namespace cepgen {
     /// Compute the 3-momentum's norm
     Momentum& computeP();
     /// 3-momentum's norm (in GeV/c)
-    double p_;
+    double p_{0.};
   };
   /// Compute the centre of mass energy of two particles momenta
   double CMEnergy(const Momentum& m1, const Momentum& m2);

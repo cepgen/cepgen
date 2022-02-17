@@ -1,28 +1,32 @@
-#include "CepGen/Event/Particle.h"
-
-#include "CepGen/Physics/PDG.h"
-
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/String.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <iomanip>
 
-namespace cepgen {
-  Particle::Particle()
-      : id_(-1),
-        charge_sign_(1),
-        mass_(-1.),
-        helicity_(0.),
-        role_(UnknownRole),
-        status_((int)Status::Undefined),
-        pdg_id_(PDG::invalid) {}
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Event/Particle.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/String.h"
 
-  Particle::Particle(Role role, pdgid_t pdgId, Status st)
-      : id_(-1), charge_sign_(1), mass_(-1.), helicity_(0.), role_(role), status_((int)st), pdg_id_(pdgId) {
-    try {
+namespace cepgen {
+  Particle::Particle(Role role, pdgid_t pdgId, Status st) : role_(role), status_((int)st), pdg_id_(pdgId) {
+    if (PDG::get().has(pdg_id_))
       phys_prop_ = PDG::get()(pdg_id_);
-    } catch (const Exception&) {
-    }
     if (pdg_id_ != PDG::invalid)
       computeMass();
   }
@@ -38,10 +42,8 @@ namespace cepgen {
         mothers_(part.mothers_),
         daughters_(part.daughters_),
         pdg_id_(part.pdg_id_) {
-    try {
+    if (PDG::get().has(pdg_id_))
       phys_prop_ = PDG::get()(pdg_id_);
-    } catch (const Exception&) {
-    }
   }
 
   bool Particle::operator<(const Particle& rhs) const { return id_ >= 0 && rhs.id_ > 0 && id_ < rhs.id_; }
@@ -113,7 +115,7 @@ namespace cepgen {
       CG_DEBUG_LOOP("Particle") << "Particle " << part.role() << " (pdgId=" << part.integerPdgId() << ") "
                                 << "is a new daughter of " << role_ << " (pdgId=" << pdg_id_ << ").";
 
-      if (part.mothers().find(id_) == part.mothers().end())
+      if (!utils::contains(part.mothers(), id_))
         part.addMother(*this);
     }
     return *this;
@@ -150,10 +152,8 @@ namespace cepgen {
 
   Particle& Particle::setPdgId(long pdg) {
     pdg_id_ = labs(pdg);
-    try {
+    if (PDG::get().has(pdg_id_))
       phys_prop_ = PDG::get()(pdg_id_);
-    } catch (const Exception&) {
-    }
     switch (pdg_id_) {
       case PDG::electron:
       case PDG::muon:
@@ -169,6 +169,8 @@ namespace cepgen {
 
   Particle& Particle::setPdgId(pdgid_t pdg, short ch) {
     pdg_id_ = pdg;
+    if (PDG::get().has(pdg_id_))
+      phys_prop_ = PDG::get()(pdg_id_);
     switch (pdg_id_) {
       case PDG::electron:
       case PDG::muon:

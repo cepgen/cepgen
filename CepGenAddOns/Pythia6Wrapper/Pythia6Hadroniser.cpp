@@ -1,15 +1,31 @@
-#include "CepGen/Physics/Hadroniser.h"
-#include "CepGen/Modules/EventModifierFactory.h"
-
-#include "CepGen/Event/Event.h"
-#include "CepGen/Event/Particle.h"
-#include "CepGen/Physics/PDG.h"
-
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/String.h"
-#include "CepGen/Utils/Hasher.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <algorithm>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Event/Particle.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Physics/Hadroniser.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Hasher.h"
+#include "CepGen/Utils/String.h"
 
 extern "C" {
 /// Get the particle's mass in GeV from Pythia
@@ -55,11 +71,10 @@ namespace cepgen {
     class Pythia6Hadroniser : public Hadroniser {
     public:
       using Hadroniser::Hadroniser;
-      static std::string description() {
-        return "Interface to the Pythia 6 string hadronisation/fragmentation algorithm";
-      }
 
-      void setParameters(const Parameters&) override {}
+      static ParametersDescription description();
+
+      void setRuntimeParameters(const Parameters&) override {}
       inline void readString(const char* param) override { pygive(param); }
       void init() override;
       bool run(Event& ev, double& weight, bool full) override;
@@ -67,8 +82,6 @@ namespace cepgen {
       void setCrossSection(double, double) override {}
 
     private:
-      static constexpr unsigned short MAX_PART_STRING = 3;
-      static constexpr unsigned short MAX_STRING_EVENT = 2;
       /// Maximal number of characters to fetch for the particle's name
       static constexpr unsigned short NAME_CHR = 16;
 
@@ -92,10 +105,13 @@ namespace cepgen {
       /// Connect entries with colour flow information
       /// \param[in] njoin Number of particles to join in the colour flow
       /// \param[in] ijoin List of particles unique identifier to join in the colour flow
-      inline static void pyjoin(int njoin, int ijoin[2]) { return pyjoin_(njoin, *ijoin); }
+      inline static void pyjoin(std::vector<int> join) {
+        int njoin = join.size();
+        return pyjoin_(njoin, *join.data());
+      }
       bool prepareHadronisation(Event&);
       std::pair<short, short> pickPartonsContent() const;
-      unsigned int fillParticles(const Event&) const;
+      size_t fillParticles(const Event&) const;
     };
 
     const Pythia6Hadroniser::ParticlesStatusMap Pythia6Hadroniser::kStatusMatchMap = {
@@ -227,17 +243,15 @@ namespace cepgen {
       return true;
     }
 
-    unsigned int Pythia6Hadroniser::fillParticles(const Event& ev) const {
+    size_t Pythia6Hadroniser::fillParticles(const Event& ev) const {
       //--- initialising the string fragmentation variables
-      unsigned int str_in_evt = 0;
-      unsigned int num_part_in_str[MAX_STRING_EVENT] = {0};
-      int jlpsf[MAX_STRING_EVENT][MAX_PART_STRING] = {{0}};
+      using string_t = std::vector<int>;
+      std::vector<string_t> evt_strings;
 
       pyjets_.n = 0;  // reinitialise the event content
 
       for (const auto& role : ev.roles()) {  // loop on roles
-        unsigned int part_in_str = 0;
-        bool role_has_string = false;
+        string_t evt_string;
         for (const auto& part : ev[role]) {
           const unsigned short i = part.id();
           pyjets_.p[0][i] = part.momentum().px();
@@ -268,33 +282,33 @@ namespace cepgen {
 
           if (part.status() == Particle::Status::Unfragmented) {
             pyjets_.k[0][i] = 1;  // PYTHIA/JETSET workaround
-            jlpsf[str_in_evt][part_in_str++] = part.id() + 1;
-            num_part_in_str[str_in_evt]++;
-            role_has_string = true;
+            evt_string.emplace_back(part.id() + 1);
           } else if (part.status() == Particle::Status::Undecayed)
             pyjets_.k[0][i] = 2;  // intermediate resonance
           pyjets_.n++;
         }
         //--- at most one string per role
-        if (role_has_string)
-          str_in_evt++;
+        if (!evt_string.empty())
+          evt_strings.emplace_back(evt_string);
       }
 
       //--- loop over the strings to bind everything together
-      for (unsigned short i = 0; i < str_in_evt; ++i) {
-        if (num_part_in_str[i] < 2)
+      for (const auto& evt_string : evt_strings) {
+        if (evt_string.size() < 2)
           continue;
 
         CG_DEBUG_LOOP("Pythia6Hadroniser").log([&](auto& dbg) {
-          dbg << "Joining " << utils::s("particle", num_part_in_str[i]) << " with " << ev[jlpsf[i][0]].role() << " role"
-              << " in a same string (id=" << i << ")";
-          for (unsigned short j = 0; j < num_part_in_str[i]; ++j)
-            if (jlpsf[i][j] != -1)
-              dbg << utils::format("\n\t * %2d (pdgId=%4d)", jlpsf[i][j], pyjets_.k[1][jlpsf[i][j] - 1]);
+          dbg << "Joining " << utils::s("particle", evt_string.size()) << " with " << ev[evt_string[0]].role()
+              << " role"
+              << " in a same string";
+          for (const auto& part_id : evt_string) {
+            if (part_id != -1)
+              dbg << utils::format("\n\t * %2d (pdgId=%4d)", part_id, pyjets_.k[1][part_id - 1]);
+          }
         });
-        pyjoin(num_part_in_str[i], jlpsf[i]);
+        pyjoin(evt_string);
       }
-      return str_in_evt;
+      return evt_strings.size();
     }
 
     std::pair<short, short> Pythia6Hadroniser::pickPartonsContent() const {
@@ -304,6 +318,12 @@ namespace cepgen {
       if (ranudq < 5. / 9.)
         return {PDG::up, 2101};  // (u,ud0)
       return {PDG::up, 2103};    // (u,ud1)
+    }
+
+    ParametersDescription Pythia6Hadroniser::description() {
+      auto desc = Hadroniser::description();
+      desc.setDescription("Interface to the Pythia 6 string hadronisation/fragmentation algorithm");
+      return desc;
     }
   }  // namespace hadr
 }  // namespace cepgen

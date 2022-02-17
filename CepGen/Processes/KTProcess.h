@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGen_Processes_KTProcess_h
 #define CepGen_Processes_KTProcess_h
 
@@ -25,6 +43,8 @@ namespace cepgen {
       KTProcess(const ParametersList& params,
                 const std::array<pdgid_t, 2>& partons,
                 const std::vector<pdgid_t>& output);
+      /// Copy constructor
+      KTProcess(const KTProcess&);
 
       /// Populate the event content with the generated process' topology
       void addEventContent() override;
@@ -32,6 +52,8 @@ namespace cepgen {
       double computeWeight() override;
       /// Populate the event content with the generated process' kinematics
       void fillKinematics(bool) override;
+
+      static ParametersDescription description();
 
     protected:
       /// Set the kinematics associated to the phase space definition
@@ -47,8 +69,10 @@ namespace cepgen {
       void fillPrimaryParticlesKinematics();
       /// Set the kinematics of the outgoing central system
       virtual void fillCentralParticlesKinematics() = 0;
+      /// Set the list of intermediate partons in the process
+      void setIntermediatePartons(const std::array<pdgid_t, 2>& part) { intermediate_parts_ = part; }
       /// Set the list of central particles produced
-      void setProducedParticles(const std::vector<pdgid_t>& prod) { kProducedParts = prod; }
+      void setProducedParticles(const std::vector<pdgid_t>& prod) { produced_parts_ = prod; }
 
       /// Log-virtuality range of the intermediate parton
       Limits log_qt_limits_;
@@ -57,14 +81,19 @@ namespace cepgen {
       /// Invariant mass range for the scattered excited system
       Limits mx_limits_;
 
+      /// Fractional momentum  for the first intermediate parton
+      double x1_{0.};
       /// Virtuality of the first intermediate parton (photon, pomeron, ...)
-      double qt1_;
+      double qt1_{0.};
       /// Azimuthal rotation of the first intermediate parton's transverse virtuality
-      double phi_qt1_;
+      double phi_qt1_{0.};
+
+      /// Fractional momentum  for the second intermediate parton
+      double x2_{0.};
       /// Virtuality of the second intermediate parton (photon, pomeron, ...)
-      double qt2_;
+      double qt2_{0.};
       /// Azimuthal rotation of the second intermediate parton's transverse virtuality
-      double phi_qt2_;
+      double phi_qt2_{0.};
 
       /// First outgoing proton
       Momentum pX_;
@@ -73,9 +102,9 @@ namespace cepgen {
 
     private:
       /// First and second intermediate parton (photon, pomeron, ...)
-      std::array<pdgid_t, 2> kIntermediateParts;
+      std::array<pdgid_t, 2> intermediate_parts_;
       /// Type of particles produced in the final state
-      std::vector<pdgid_t> kProducedParts;
+      std::vector<pdgid_t> produced_parts_;
     };
   }  // namespace proc
 }  // namespace cepgen

@@ -1,11 +1,24 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ */
+
 #ifndef CepGen_Generator_h
 #define CepGen_Generator_h
 
-#include "CepGen/Event/Event.h"
-
-#include <iosfwd>
 #include <memory>
-#include <functional>
+
+#include "CepGen/Event/Event.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -74,10 +87,10 @@ namespace cepgen {
   public:
     /// Core of the Monte Carlo integrator and events generator
     /// \param[in] safe_mode Load the generator without external libraries?
-    Generator(bool safe_mode = false);
+    explicit Generator(bool safe_mode = false);
     /// Core of the Monte Carlo integrator and events generator
     /// \param[in] ip List of input parameters defining the phase space on which to perform the integration
-    Generator(Parameters* ip);
+    explicit Generator(Parameters* ip);
     ~Generator();
 
     /// Pointer to the parameters block
@@ -121,13 +134,13 @@ namespace cepgen {
     /// Physical Parameters used in the events generation and cross-section computation
     std::unique_ptr<Parameters> parameters_;
     /// Generator worker instance
-    std::unique_ptr<GeneratorWorker> generator_;
+    std::unique_ptr<GeneratorWorker> worker_;
     /// Integration algorithm
     std::unique_ptr<Integrator> integrator_;
     /// Cross section value computed at the last integration
-    double result_;
+    double result_{-1.};
     /// Error on the cross section as computed in the last integration
-    double result_error_;
+    double result_error_{-1.};
   };
 }  // namespace cepgen
 

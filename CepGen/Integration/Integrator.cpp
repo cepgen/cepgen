@@ -1,20 +1,34 @@
-#include "CepGen/Integration/Integrator.h"
-#include "CepGen/Integration/Integrand.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/Exception.h"
-
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Integration/Integrand.h"
+#include "CepGen/Integration/Integrator.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Processes/Process.h"
-
-#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   Integrator::Integrator(const ParametersList& params)
       : NamedModule(params),
-        seed_(params.get<int>("seed", time(nullptr))),
-        verbosity_(params.get<int>("verbose", 1)),
-        initialised_(false) {}
+        seed_(params_.get<int>("seed", time(nullptr))),
+        verbosity_(steer<int>("verbose")),
+        rnd_(0., 1.) {}
 
   void Integrator::setIntegrand(Integrand& integr) {
     integrand_ = &integr;
@@ -40,5 +54,13 @@ namespace cepgen {
     return integrand_->eval(x);
   }
 
-  double Integrator::uniform() const { return rand() * 1. / RAND_MAX; }
+  double Integrator::uniform() const { return rnd_(rnd_gen_); }
+
+  ParametersDescription Integrator::description() {
+    auto desc = ParametersDescription();
+    desc.setDescription("Unnamed integrator");
+    desc.add<int>("seed", time(nullptr)).setDescription("Random number generator seed");
+    desc.add<int>("verbose", 1).setDescription("Verbosity level");
+    return desc;
+  }
 }  // namespace cepgen

@@ -1,12 +1,30 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGen_Parameters_h
 #define CepGen_Parameters_h
 
-#include "CepGen/Physics/Kinematics.h"
+#include <gsl/gsl_monte_miser.h>
+#include <gsl/gsl_monte_vegas.h>
 
 #include <memory>
 
-#include <gsl/gsl_monte_vegas.h>
-#include <gsl/gsl_monte_miser.h>
+#include "CepGen/Physics/Kinematics.h"
 
 namespace cepgen {
   class EventModifier;
@@ -47,11 +65,13 @@ namespace cepgen {
     void setTimeKeeper(utils::TimeKeeper*);
     /// Pointer to a timekeeper instance
     utils::TimeKeeper* timeKeeper() { return tmr_.get(); }
+    /// Pointer to a timekeeper instance
+    const utils::TimeKeeper* timeKeeper() const { return tmr_.get(); }
 
-    /// Common user-defined parameters
-    std::shared_ptr<ParametersList> general;
+    /// Phase space definition parameters
+    ParametersList par_kinematics;
     /// Integrator specific user-defined parameters
-    std::shared_ptr<ParametersList> integrator;
+    ParametersList par_integrator;
 
     //----- process to compute
 
@@ -73,22 +93,17 @@ namespace cepgen {
     //----- events kinematics
 
     /// Events kinematics for phase space definition
-    Kinematics kinematics;
+    const Kinematics& kinematics() const;
 
     //----- events generation
 
     /// Collection of events generation parameters
-    class Generation {
+    class Generation : public SteeredObject<Generation> {
     public:
       /// Build a generation parameters collection from a user input
-      Generation(const ParametersList&);
-      /// Copy constructor
-      Generation(const Generation&);
-      /// Assignment operator
-      Generation& operator=(const Generation&) = default;
+      explicit Generation(const ParametersList& = ParametersList());
 
-      /// List containing all parameters handled
-      ParametersList parameters() const;
+      static ParametersDescription description();
 
       /// Set the target luminosity to reach (in pb^-1)
       void setTargetLuminosity(double lumi_invpb) { target_lumi_ = lumi_invpb; }
@@ -99,7 +114,7 @@ namespace cepgen {
       /// Maximal number of events to generate
       size_t maxGen() const { return max_gen_; }
       /// Are we generating events? (true) or only computing the cross-section? (false)
-      bool enabled() const { return max_gen_ > 0ull; }
+      bool enabled() const { return max_gen_ > 0; }
       /// Set the frequency at which events are displayed to the end-user
       void setPrintEvery(size_t print_every) { gen_print_every_ = print_every; }
       /// Frequency at which events are displayed to the end-user
@@ -118,10 +133,10 @@ namespace cepgen {
       size_t numPoints() const { return num_points_; }
 
     private:
-      size_t max_gen_, gen_print_every_;
+      int max_gen_, gen_print_every_;
       double target_lumi_;
       bool symmetrise_;
-      size_t num_threads_, num_points_;
+      int num_threads_, num_points_;
     };
     /// Get the events generation parameters
     Generation& generation() { return generation_; }
@@ -136,6 +151,8 @@ namespace cepgen {
     EventModifiersSequence& eventModifiersSequence() { return evt_modifiers_; }
     /// Retrieve the list of event modification algorithms to run
     const EventModifiersSequence& eventModifiersSequence() const { return evt_modifiers_; }
+    /// Remove all event modifiers from sequence
+    void clearEventModifiersSequence();
     /// Add a new event modification algorithm to the sequence
     void addModifier(std::unique_ptr<EventModifier>);
     /// Add a new event modification algorithm to the sequence
@@ -149,6 +166,8 @@ namespace cepgen {
     ExportModulesSequence& outputModulesSequence() { return out_modules_; }
     /// Retrieve the list of output modules to run
     const ExportModulesSequence& outputModulesSequence() const { return out_modules_; }
+    /// Remove all output modules from sequence
+    void clearOutputModulesSequence();
     /// Set a new output module definition
     void addOutputModule(std::unique_ptr<io::ExportModule> mod);
     /// Set the pointer to a output module
@@ -183,9 +202,9 @@ namespace cepgen {
     /// Functions to be used to account for rescattering corrections
     TamingFunctionsSequence taming_functions_;
     /// Total generation time (in seconds)
-    double total_gen_time_;
+    double total_gen_time_{0.};
     /// Number of events already generated
-    unsigned long num_gen_events_;
+    unsigned long num_gen_events_{0ul};
     /// Events generation parameters
     Generation generation_;
     /// A collection of stopwatches for timing

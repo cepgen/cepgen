@@ -1,9 +1,29 @@
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Core/Exception.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <iomanip>
 
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Physics/PDG.h"
+
 namespace cepgen {
+  std::ostream& operator<<(std::ostream& os, const PDG::Id& pdg) { return os << PDG::get().name(pdg); }
+
   PDG::PDG() {
     define({invalid, "[...]", "", 0, -1, -1., 0, false});
     define({diffractiveProton, "diff_proton", "p\u002A", 0, 0., 0., 3, false});
@@ -30,10 +50,11 @@ namespace cepgen {
   bool PDG::has(pdgid_t id) const { return particles_.count(id) > 0; }
 
   const ParticleProperties& PDG::operator()(pdgid_t id) const {
-    if (particles_.count(id) > 0)
-      return particles_.at(id);
+    auto it = particles_.find(id);
+    if (it != particles_.end())
+      return it->second;
     dump();
-    throw CG_WARNING("PDG") << "No particle with PDG id " << id << " in the catalogue.";
+    throw CG_FATAL("PDG") << "No particle with PDG id " << id << " in the catalogue.";
   }
 
   void PDG::define(const ParticleProperties& props) {
@@ -44,8 +65,8 @@ namespace cepgen {
 
   const std::vector<pdgid_t> PDG::particles() const {
     std::vector<pdgid_t> out;
-    for (const auto& pt : particles_)
-      out.emplace_back(pt.first);
+    std::transform(
+        particles_.begin(), particles_.end(), std::back_inserter(out), [](const auto& pt) { return pt.first; });
     return out;
   }
 
@@ -64,8 +85,9 @@ namespace cepgen {
   void PDG::dump() const {
     //--- first build a sorted vector out of the (unsorted) map
     std::vector<std::pair<pdgid_t, ParticleProperties> > tmp;
-    for (const auto& prt : particles_)
-      tmp.emplace_back(prt.first, prt.second);
+    std::transform(particles_.begin(), particles_.end(), std::back_inserter(tmp), [](const auto& prt) {
+      return std::pair<pdgid_t, ParticleProperties>{prt.first, prt.second};
+    });
     std::sort(tmp.begin(),
               tmp.end(),
               [](const std::pair<pdgid_t, ParticleProperties>& a, const std::pair<pdgid_t, ParticleProperties>& b) {

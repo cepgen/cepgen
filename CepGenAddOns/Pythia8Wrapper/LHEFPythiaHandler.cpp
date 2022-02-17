@@ -1,14 +1,30 @@
-#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
-
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
-
-#include "CepGen/Event/Event.h"
-#include "CepGen/Core/Exception.h"
-
-#include "Pythia8/Pythia.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <sstream>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Utils/Filesystem.h"
+#include "CepGen/Utils/String.h"
+#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
 namespace cepgen {
   namespace io {
@@ -22,7 +38,8 @@ namespace cepgen {
       /// Class constructor
       explicit LHEFPythiaHandler(const ParametersList&);
       ~LHEFPythiaHandler();
-      static std::string description() { return "Pythia 8-based LHEF output module"; }
+
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override;
       /// Writer operator
@@ -32,26 +49,44 @@ namespace cepgen {
     private:
       std::unique_ptr<Pythia8::Pythia> pythia_;
       std::shared_ptr<Pythia8::CepGenEvent> lhaevt_;
-      bool compress_;
+      const bool compress_event_;
+      std::string filename_;
+      bool gzip_;
     };
 
     LHEFPythiaHandler::LHEFPythiaHandler(const ParametersList& params)
         : ExportModule(params),
           pythia_(new Pythia8::Pythia),
           lhaevt_(new Pythia8::CepGenEvent),
-          compress_(params.get<bool>("compress", true)) {
-      const auto filename = params.get<std::string>("filename", "output.lhe");
-      {
-        auto file_tmp = std::ofstream(filename);
-        if (!file_tmp.is_open())
-          throw CG_FATAL("LHEFPythiaHandler") << "Failed to open output filename \"" << filename << "\" for writing!";
+          compress_event_(steer<bool>("compress")),
+          filename_(steer<std::string>("filename")),
+          gzip_(false) {
+#ifdef GZIP_BIN
+      if (utils::fileExtension(filename_) == ".gz") {
+        utils::replace_all(filename_, ".gz", "");
+        gzip_ = true;
       }
-      lhaevt_->openLHEF(filename);
-    }
+#endif
+      {
+        auto file_tmp = std::ofstream(filename_);
+        if (!file_tmp.is_open())
+          throw CG_FATAL("LHEFPythiaHandler") << "Failed to open output filename \"" << filename_ << "\" for writing!";
+      }
+      lhaevt_->openLHEF(filename_);
+    }  // namespace io
 
     LHEFPythiaHandler::~LHEFPythiaHandler() {
       if (lhaevt_)
         lhaevt_->closeLHEF(false);  // we do not want to rewrite the init block
+#ifdef GZIP_BIN
+      if (gzip_) {
+        std::string cmnd(GZIP_BIN);
+        cmnd += " -f " + filename_;
+        if (system(cmnd.c_str()) != 0)
+          CG_WARNING("LHEFPythiaHandler") << "Failed to zip the output file with command \"" << cmnd << "\".";
+        CG_DEBUG("LHEFPythiaHandler") << cmnd;
+      }
+#endif
     }
 
     void LHEFPythiaHandler::initialise(const Parameters& params) {
@@ -76,13 +111,21 @@ namespace cepgen {
     }
 
     void LHEFPythiaHandler::operator<<(const Event& ev) {
-      lhaevt_->feedEvent(compress_ ? ev : ev.compress(), Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants);
+      lhaevt_->feedEvent(compress_event_ ? ev : ev.compress(), Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants);
       pythia_->next();
       lhaevt_->eventLHEF();
     }
 
     void LHEFPythiaHandler::setCrossSection(double cross_section, double cross_section_err) {
       lhaevt_->setCrossSection(0, cross_section, cross_section_err);
+    }
+
+    ParametersDescription LHEFPythiaHandler::description() {
+      auto desc = ExportModule::description();
+      desc.setDescription("Pythia 8-based LHEF output module");
+      desc.add<bool>("compress", true);
+      desc.add<std::string>("filename", "output.lhe").setDescription("Output filename");
+      return desc;
     }
   }  // namespace io
 }  // namespace cepgen

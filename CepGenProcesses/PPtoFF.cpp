@@ -1,24 +1,42 @@
-#include "CepGen/Processes/Process2to4.h"
-#include "CepGen/Modules/ProcessesFactory.h"
-
-#include "CepGen/Core/Exception.h"
-
-#include "CepGen/Event/Event.h"
-
-#include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/AlphaS.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *                2017-2019  Wolfgang Schaefer
+ *                2019       Marta Luszczak
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <iomanip>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Modules/CouplingFactory.h"
+#include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/Coupling.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Processes/Process2to4.h"
 
 namespace cepgen {
   namespace proc {
     /// Compute the matrix element for a CE \f$\gamma\gamma\rightarrow f\bar f\f$ process using \f$k_{\rm T}\f$-factorization approach
-    class PPtoFF : public Process2to4 {
+    class PPtoFF final : public Process2to4 {
     public:
-      PPtoFF(const ParametersList& params = ParametersList());
+      explicit PPtoFF(const ParametersList&);
       ProcessPtr clone() const override { return ProcessPtr(new PPtoFF(*this)); }
-      static std::string description() { return "ɣɣ → f⁺f¯ (kt-factor.)"; }
+      static ParametersDescription description();
 
     private:
       void prepareProcessKinematics() override;
@@ -31,38 +49,24 @@ namespace cepgen {
       const enum class Mode { onShell = 0, offShell = 1, offShellLegacy = 2 } method_;
 
       ParametersList alphas_params_;
-      std::shared_ptr<AlphaS> alphas_;
 
-      bool gluon1_, gluon2_;
-      double prefactor_;
+      double prefactor_{1.};
 
       //--- parameters for off-shell matrix element
-      unsigned short p_mat1_, p_mat2_;
-      unsigned short p_term_ll_, p_term_lt_, p_term_tt1_, p_term_tt2_;
+      unsigned short p_mat1_{0}, p_mat2_{0};
+      unsigned short p_term_ll_{0}, p_term_lt_{0}, p_term_tt1_{0}, p_term_tt2_{0};
 
-      double mf2_;
-      short qf3_;
-      unsigned short colf_;
+      double mf2_{0.};
+      short qf3_{0};
+      unsigned short colf_{0};
     };
 
     PPtoFF::PPtoFF(const ParametersList& params)
-        : Process2to4(params, {PDG::photon, PDG::photon}, params.get<ParticleProperties>("pair").pdgid),
-          method_((Mode)params.get<int>("method", (int)Mode::offShell)),
-          alphas_params_(params.get<ParametersList>("alphaS", ParametersList().setName<std::string>("pegasus"))),
-          gluon1_(false),
-          gluon2_(false),
-          prefactor_(1.),
-          p_mat1_(0),
-          p_mat2_(0),
-          p_term_ll_(0),
-          p_term_lt_(0),
-          p_term_tt1_(0),
-          p_term_tt2_(0),
-          mf2_(0.),
-          qf3_(0),
-          colf_(0) {
+        : Process2to4(params, {PDG::photon, PDG::photon}, steer<ParticleProperties>("pair").pdgid),
+          method_(steerAs<int, Mode>("method")),
+          alphas_params_(steer<ParametersList>("alphaS")) {
       if (method_ == Mode::offShell || method_ == Mode::offShellLegacy) {  // off-shell matrix element
-        const auto& ofp = params.get<ParametersList>("offShellParameters");
+        const auto& ofp = steer<ParametersList>("offShellParameters");
         p_mat1_ = ofp.get<int>("mat1", method_ == Mode::offShell ? 1 : 2);
         p_mat2_ = ofp.get<int>("mat2", method_ == Mode::offShell ? 1 : 0);
         p_term_ll_ = ofp.get<int>("termLL", 1);
@@ -87,35 +91,26 @@ namespace cepgen {
                                  << "charge = " << std::setprecision(2) << qf3_ / 3. << " e)\n\t"
                                  << "matrix element computation method: " << (int)method_ << ".";
 
-      if (!kin_.cuts.central.pt_diff().valid())
-        kin_.cuts.central.pt_diff() = {0., 50.};  // tighter cut for fermions
+      if (!kin_.cuts().central.pt_diff().valid())
+        kin_.cuts().central.pt_diff() = {0., 50.};  // tighter cut for fermions
 
       CG_DEBUG("PPtoFF:prepare") << "Incoming state:\n\t"
                                  << "mp(1/2) = " << sqrt(mA2_) << "/" << sqrt(mB2_) << ".";
 
-      switch (event_->oneWithRole(Particle::Parton1).pdgId()) {
-        case PDG::gluon:
-          gluon1_ = true;
-          prefactor_ *= 4. * M_PI;
-          break;
-        case PDG::photon:
-          prefactor_ *= pow(constants::G_EM * qf3_, 2) / 9.;
-          break;
-        default:
-          throw CG_FATAL("PPtoFF:prepare") << "Only photon & gluon partons are supported!";
-      }
-      switch (event_->oneWithRole(Particle::Parton2).pdgId()) {
-        case PDG::gluon:
-          gluon2_ = true;
-          prefactor_ *= 4. * M_PI;
-          break;
-        case PDG::photon:
-          prefactor_ *= pow(constants::G_EM * qf3_, 2) / 9.;
-          break;
-        default:
-          throw CG_FATAL("PPtoFF:prepare") << "Only photon & gluon partons are supported!";
-      }
-      if (gluon1_ || gluon2_)
+      bool has_gluon = false;
+      for (const auto& role : {Particle::Parton1, Particle::Parton2})
+        switch (event_->oneWithRole(role).pdgId()) {
+          case PDG::gluon:
+            has_gluon = true;
+            prefactor_ *= 4. * M_PI;
+            break;
+          case PDG::photon:
+            prefactor_ *= 4. * M_PI * pow(qf3_, 2) / 9.;
+            break;
+          default:
+            throw CG_FATAL("PPtoFF:prepare") << "Only photon & gluon partons are supported!";
+        }
+      if (has_gluon)
         // at least one gluon; need to initialise the alpha(s) evolution algorithm
         alphas_ = AlphaSFactory::get().build(alphas_params_);
     }
@@ -140,9 +135,6 @@ namespace cepgen {
     }
 
     double PPtoFF::onShellME() const {
-      if (gluon1_ || gluon2_)
-        throw CG_FATAL("PPtoFF:onShell") << "On-shell matrix element only compatible with photon-photon mode!";
-
       const double s_hat = shat(), t_hat = that(), u_hat = uhat();
       CG_DEBUG_LOOP("PPtoFF:onShell") << "shat: " << s_hat << ", that: " << t_hat << ", uhat: " << u_hat << ".";
 
@@ -238,10 +230,15 @@ namespace cepgen {
       double amat2 = 0.5 * prefactor_ * pow(x1 * x2 * s_, 2) * (p_mat1_ * amat2_1 + p_mat2_ * amat2_2);
 
       const double tmax = pow(std::max(amt1_, amt2_), 2);
-      if (gluon1_)
-        amat2 *= 0.5 * (*alphas_)(sqrt(std::max(eps12, tmax)));
-      if (gluon2_)
-        amat2 *= 0.5 * (*alphas_)(sqrt(std::max(eps22, tmax)));
+      const double q1 = std::sqrt(std::max(eps12, tmax)), q2 = std::sqrt(std::max(eps22, tmax));
+      if (event_->oneWithRole(Particle::Parton1).pdgId() == PDG::gluon)
+        amat2 *= 0.5 * (*alphas_)(q1);
+      else
+        amat2 *= (*alphaem_)(q1);
+      if (event_->oneWithRole(Particle::Parton2).pdgId() == PDG::gluon)
+        amat2 *= 0.5 * (*alphas_)(q2);
+      else
+        amat2 *= (*alphaem_)(q2);
 
       CG_DEBUG_LOOP("PPtoFF:offShell") << "aux2(1/2) = " << aux2_1 << " / " << aux2_2 << "\n\t"
                                        << "z(1/2) = " << z1 << " / " << z2 << "\n\t"
@@ -250,6 +247,17 @@ namespace cepgen {
                                        << "amat2 = " << amat2 << ".";
 
       return amat2;
+    }
+
+    ParametersDescription PPtoFF::description() {
+      auto desc = Process2to4::description();
+      desc.setDescription("γγ → f⁺f¯ (kt-factor.)");
+      desc.add<int>("method", (int)Mode::offShell)
+          .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell)");
+      auto alphas_desc = ParametersDescription();
+      alphas_desc.setName<std::string>("pegasus");
+      desc.add("alphaS", alphas_desc);
+      return desc;
     }
   }  // namespace proc
 }  // namespace cepgen

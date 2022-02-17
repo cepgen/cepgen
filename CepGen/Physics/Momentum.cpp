@@ -1,13 +1,31 @@
-#include "CepGen/Physics/Momentum.h"
-#include "CepGen/Core/Exception.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <cmath>
 #include <iomanip>
 
-namespace cepgen {
-  Momentum::Momentum() : std::array<double, 4>{{0., 0., 0., 0.}}, p_(0.) {}
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Physics/Momentum.h"
 
-  Momentum::Momentum(double x, double y, double z, double t) : std::array<double, 4>{{x, y, z, t}} { computeP(); }
+namespace cepgen {
+  Momentum::Momentum(double x, double y, double z, double t) : std::array<double, 4>{{x, y, z, t == -1. ? 0. : t}} {
+    computeP();
+  }
 
   Momentum::Momentum(double* p) {
     std::copy(p, p + 4, begin());
@@ -113,9 +131,8 @@ namespace cepgen {
   }
 
   Momentum& Momentum::truncate(double tolerance) {
-    for (auto& p : *this)
-      if (p <= tolerance)
-        p = 0.;
+    std::replace_if(
+        begin(), end(), [&tolerance](const auto& p) { return p <= tolerance; }, 0.);
     return computeP();
   }
 
@@ -128,10 +145,27 @@ namespace cepgen {
     return out;
   }
 
+  double Momentum::energyT2() const {
+    const auto ptsq = pt2();
+    return ptsq > 0. ? energy2() * ptsq / (ptsq + pz() * pz()) : 0.;
+  }
+
+  double Momentum::energyT() const {
+    const auto et2 = energyT2();
+    return et2 > 0. ? std::sqrt(et2) : -std::sqrt(-et2);
+  }
+
   double Momentum::mass() const {
     if (mass2() >= 0.)
       return sqrt(mass2());
     return -sqrt(-mass2());
+  }
+
+  double Momentum::massT2() const { return energy2() - pz() * pz(); }
+
+  double Momentum::massT() const {
+    const auto mt2 = massT2();
+    return mt2 > 0. ? std::sqrt(mt2) : -std::sqrt(-mt2);
   }
 
   double Momentum::theta() const { return atan2(pt(), pz()); }
@@ -144,15 +178,63 @@ namespace cepgen {
 
   double Momentum::eta() const {
     const int sign = (pz() / fabs(pz()));
-    return (pt() != 0.) ? log((p() + fabs(pz())) / pt()) * sign : 9999. * sign;
+    return pt() != 0. ? log((p() + fabs(pz())) / pt()) * sign : 9999. * sign;
   }
 
   double Momentum::rapidity() const {
     const int sign = (pz() / fabs(pz()));
-    return (energy() >= 0.) ? log((energy() + pz()) / (energy() - pz())) * 0.5 : 999. * sign;
+    return energy() >= 0. ? log((energy() + pz()) / (energy() - pz())) * 0.5 : 999. * sign;
   }
 
+  double Momentum::deltaEta(const Momentum& oth) const { return fabs(eta() - oth.eta()); }
+
+  double Momentum::deltaPhi(const Momentum& oth) const {
+    static const double M_2PI = 2. * M_PI;
+    double dphi = phi() - oth.phi();
+    // has to be contained in [-M_PI, M_PI]
+    while (dphi < -M_PI)
+      dphi += M_2PI;
+    while (dphi > +M_PI)
+      dphi -= M_2PI;
+    return dphi;
+  }
+
+  double Momentum::deltaPt(const Momentum& oth) const { return fabs(pt() - oth.pt()); }
+
+  double Momentum::deltaR(const Momentum& oth) const { return std::hypot(rapidity() - oth.rapidity(), deltaPhi(oth)); }
+
   //--- boosts/rotations
+
+  double Momentum::beta() const {
+    const auto mom = p(), ene = energy();
+    if (ene == 0.) {
+      if (mom == 0.)
+        return 0.;
+      else {
+        CG_WARNING("Momentum:beta") << "beta computed for t=0 momentum.";
+        return 1. / ene;
+      }
+    }
+    if (mass2() <= 0.)
+      CG_WARNING("Momentum:beta") << "beta computed for an invalid, non-timelike momentum.";
+    return mom / ene;
+  }
+
+  double Momentum::gamma() const {
+    const auto mom2 = p2(), ene2 = energy2();
+    if (ene2 == 0.) {
+      if (mom2 == 0.) {
+        return 1.;
+      } else
+        CG_WARNING("Momentum:gamma") << "gamma computed for t=0 momentum.";
+    }
+    if (ene2 < mom2) {
+      CG_WARNING("Momentum:gamma") << "gamma computed for an invalid spacelike momentum.";
+      return 0.;
+    } else if (ene2 == mom2)
+      CG_WARNING("Momentum:gamma") << "gamma computed for a lightlike momentum.";
+    return 1. / std::sqrt(1. - mom2 / ene2);
+  }
 
   Momentum& Momentum::betaGammaBoost(double gamma, double betagamma) {
     if (gamma == 1. && betagamma == 0.)

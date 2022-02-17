@@ -1,16 +1,31 @@
-#include "CepGenAddOns/ROOTWrapper/ROOTTreeInfo.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
-#include "CepGen/Core/Exception.h"
-
-#include "CepGen/Event/Event.h"
-#include "CepGen/Parameters.h"
-
-// ROOT includes
-#include "TFile.h"
+#include <TFile.h>
 
 #include <sstream>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Parameters.h"
+#include "CepGenAddOns/ROOTWrapper/ROOTTreeInfo.h"
 
 namespace cepgen {
   namespace io {
@@ -24,7 +39,8 @@ namespace cepgen {
       /// Class constructor
       explicit ROOTTreeHandler(const ParametersList&);
       ~ROOTTreeHandler();
-      static std::string description() { return "ROOT TTree storage module"; }
+
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override;
       /// Writer operator
@@ -40,8 +56,8 @@ namespace cepgen {
 
     ROOTTreeHandler::ROOTTreeHandler(const ParametersList& params)
         : ExportModule(params),
-          file_(params.get<std::string>("filename", "output.root").c_str(), "recreate"),
-          compress_(params.get<bool>("compress", false)) {
+          file_(steer<std::string>("filename").c_str(), "recreate"),
+          compress_(steer<bool>("compress")) {
       if (!file_.IsOpen())
         throw CG_FATAL("ROOTTreeHandler") << "Failed to create the output file!";
       run_tree_.create();
@@ -55,7 +71,7 @@ namespace cepgen {
 
     void ROOTTreeHandler::initialise(const Parameters& params) {
       run_tree_.litigious_events = 0;
-      run_tree_.sqrt_s = params.kinematics.sqrtS();
+      run_tree_.sqrt_s = params.kinematics().incomingBeams().sqrtS();
     }
 
     void ROOTTreeHandler::operator<<(const Event& ev) {
@@ -66,6 +82,14 @@ namespace cepgen {
     void ROOTTreeHandler::setCrossSection(double cross_section, double cross_section_err) {
       run_tree_.xsect = cross_section;
       run_tree_.errxsect = cross_section_err;
+    }
+
+    ParametersDescription ROOTTreeHandler::description() {
+      auto desc = ExportModule::description();
+      desc.setDescription("ROOT TTree storage module");
+      desc.add<std::string>("filename", "output.root").setDescription("Output filename");
+      desc.add<bool>("compress", false).setDescription("Compress the event content? (merge down two-parton system)");
+      return desc;
     }
   }  // namespace io
 }  // namespace cepgen
