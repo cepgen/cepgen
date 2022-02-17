@@ -26,40 +26,38 @@
 
 namespace cepgen {
   namespace python {
-    Error::Error(const std::string& origin, const std::string& file, short lineno)
-        : Exception(origin.c_str(), "Python::error", Exception::Type::error, file.c_str(), lineno) {
-      PyObject* ptype{nullptr};
-      PyObject* pvalue{nullptr};
-      PyObject* ptraceback_obj{nullptr};
+    Error::Error(const char* origin, const char* file, short lineno) noexcept
+        : Exception("", origin, Exception::Type::error, file, lineno) {
       // retrieve error indicator and clear it to handle ourself the error
-      PyErr_Fetch(&ptype, &pvalue, &ptraceback_obj);
+      PyErr_Fetch(&ptype_, &pvalue_, &ptraceback_obj_);
       PyErr_Clear();
       // ensure the objects retrieved are properly normalised and point to compatible objects
-      PyErr_NormalizeException(&ptype, &pvalue, &ptraceback_obj);
-      if (!ptype)
-        return;
-      // we can start the traceback
-      (*this) << "\nError: " << decode(PyObject_Str(pvalue));
-      auto* ptraceback = (PyTracebackObject*)ptraceback_obj;
-      if (!ptraceback)
-        return;
-      const std::string arr = "↪ ";
-      std::string tabul;
-      while (ptraceback->tb_next) {
-        (*this) << "\n\t" << tabul << arr;
-        if (auto* pframe = ptraceback->tb_frame)
-          (*this) << utils::boldify(decode(pframe->f_code->co_name)) << " on " << decode(pframe->f_code->co_filename)
-                  << " (line " << PyCode_Addr2Line(pframe->f_code, pframe->f_lasti) << ")";
-        else
-          (*this) << " issue on line " << ptraceback->tb_lineno;
-        tabul += "  ";
-        ptraceback = ptraceback->tb_next;
+      PyErr_NormalizeException(&ptype_, &pvalue_, &ptraceback_obj_);
+      if (ptype_) {
+        // we can start the traceback
+        (*this) << "Error: " << decode(PyObject_Str(pvalue_));
+        if (auto* ptraceback = (PyTracebackObject*)ptraceback_obj_) {
+          const std::string arr = "↪ ";
+          std::string tabul;
+          while (ptraceback->tb_next) {
+            (*this) << "\n\t" << tabul << arr;
+            if (auto* pframe = ptraceback->tb_frame)
+              (*this) << utils::boldify(decode(pframe->f_code->co_name)) << " on "
+                      << decode(pframe->f_code->co_filename) << " (line "
+                      << PyCode_Addr2Line(pframe->f_code, pframe->f_lasti) << ")";
+            else
+              (*this) << " issue on line " << ptraceback->tb_lineno;
+            tabul += "  ";
+            ptraceback = ptraceback->tb_next;
+          }
+        }
+        (*this) << "\n";
       }
     }
 
-    Error::~Error() {
-      finalise();
-      CG_LOG << "hahah";
+    Error::~Error() noexcept {
+      if (Py_IsInitialized())
+        Py_Finalize();
     }
   }  // namespace python
 }  // namespace cepgen

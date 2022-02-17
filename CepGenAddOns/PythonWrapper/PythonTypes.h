@@ -34,55 +34,77 @@
 
 namespace cepgen {
   namespace python {
+    /// Common deleter for a PyObject
     struct ObjectPtrDeleter {
-      void operator()(PyObject* obj) { Py_DECREF(obj); }
+      void operator()(PyObject*);
     };
+    /// Smart pointer to a Python object and its dereferencing operator
     typedef std::unique_ptr<PyObject, ObjectPtrDeleter> ObjectPtr;
 
+    /// Import a Python module in a new reference-counted Python object
     ObjectPtr importModule(const std::string&);
 
+    /// Check if a Python object holds a given C++ type
     template <typename T>
     bool is(PyObject* obj);
-
+    /// Cast a Python object into a C++ type
     template <typename T>
     T get(PyObject* obj);
+    /// Cast a Python object into a C++ type
+    template <typename T>
+    inline T get(const ObjectPtr& obj) {
+      return get<T>(obj.get());
+    }
+    /// Build a new Python object from a C++ one
     template <typename T>
     ObjectPtr set(const T&);
 
+    /// Check if a Python object is compatible with a vector of uniform objects
     template <typename T>
     bool isVector(PyObject* obj);
+    /// Check if a Python object is compatible with a vector of uniform objects
+    template <typename T>
+    inline bool isVector(const ObjectPtr& obj) {
+      return isVector<T>(obj.get());
+    }
+    /// Retrieve a vector of objects, either from a Python list or tuple
     template <typename T>
     std::vector<T> getVector(PyObject* obj);
+    /// Retrieve a vector of objects, either from a Python list or tuple
+    template <typename T>
+    inline std::vector<T> getVector(const ObjectPtr& obj) {
+      return getVector<T>(obj.get());
+    }
 
+    /// Build a Python tuple from a (uniform) vector of objects
     template <typename T>
     ObjectPtr newTuple(const std::vector<T>&);
 
+    // type-specialised functions
+
+    //--- booleans
     template <>
     bool is<bool>(PyObject* obj);
     template <>
     ObjectPtr set<bool>(const bool&);
 
+    //--- integers
     template <>
     bool is<int>(PyObject* obj);
-
-    template <>
-    bool is<long>(PyObject* obj);
-
     template <>
     int get<int>(PyObject* obj);
     template <>
     ObjectPtr set<int>(const int&);
 
+    //--- long integers
+    template <>
+    bool is<long>(PyObject* obj);
+
+    //--- unsigned long integers
     template <>
     unsigned long get<unsigned long>(PyObject* obj);
 
-    template <>
-    bool is<ParametersList>(PyObject* obj);
-    template <>
-    ParametersList get<ParametersList>(PyObject* obj);
-    template <>
-    ObjectPtr set<ParametersList>(const ParametersList&);
-
+    //--- floating points
     template <>
     bool is<double>(PyObject* obj);
     template <>
@@ -90,6 +112,7 @@ namespace cepgen {
     template <>
     ObjectPtr set<double>(const double&);
 
+    //--- strings
     template <>
     bool is<std::string>(PyObject* obj);
     template <>
@@ -97,10 +120,20 @@ namespace cepgen {
     template <>
     ObjectPtr set<std::string>(const std::string&);
 
+    //--- limits/ranges (= pair(float, float))
     template <>
     bool is<Limits>(PyObject* obj);
     template <>
     Limits get<Limits>(PyObject* obj);
+
+    //--- parameters list (= dict)
+    template <>
+    bool is<ParametersList>(PyObject* obj);
+    template <>
+    ParametersList get<ParametersList>(PyObject* obj);
+    template <>
+    ObjectPtr set<ParametersList>(const ParametersList&);
+
   }  // namespace python
 }  // namespace cepgen
 

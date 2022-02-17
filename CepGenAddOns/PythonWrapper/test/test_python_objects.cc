@@ -8,7 +8,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
 
-  cepgen::python::initialise();
+  cepgen::python::Environment env;
 
   {
     string str = "Héhéhé, test @ ünıc0d€";
@@ -35,6 +35,5 @@ int main(int argc, char* argv[]) {
     CG_LOG << "Parameters list/dictionary test passed.";
   }
 
-  cepgen::python::finalise();
   return 0;
 }

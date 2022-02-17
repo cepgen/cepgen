@@ -28,6 +28,8 @@
 
 namespace cepgen {
   namespace python {
+    void ObjectPtrDeleter::operator()(PyObject* obj) { Py_DECREF(obj); }
+
     ObjectPtr importModule(const std::string& mod_name) {
       return ObjectPtr(PyImport_ImportModule(mod_name.c_str()));  // new
     }
@@ -71,7 +73,7 @@ namespace cepgen {
     template <>
     int get<int>(PyObject* obj) {
       if (!is<int>(obj))
-        throw CG_ERROR("Python:get") << "Object has invalid type: integer \"" << obj->ob_type->tp_name << "\".";
+        throw CG_ERROR("Python:get") << "Object has invalid type: integer != \"" << obj->ob_type->tp_name << "\".";
 #ifdef PYTHON2
       return PyInt_AsLong(obj);
 #else
@@ -91,12 +93,11 @@ namespace cepgen {
     template <>
     unsigned long get<unsigned long>(PyObject* obj) {
       if (!is<long>(obj))
-        throw CG_ERROR("Python:get") << "Object has invalid type: unsigned long \"" << obj->ob_type->tp_name << "\".";
+        throw CG_ERROR("Python:get") << "Object has invalid type: unsigned long != \"" << obj->ob_type->tp_name
+                                     << "\".";
 #ifdef PYTHON2
       return PyInt_AsUnsignedLongMask(obj);
 #else
-      if (!PyLong_Check(obj))
-        PY_ERROR << "Object has invalid type: unsigned long != " << obj->ob_type->tp_name << ".";
       return PyLong_AsUnsignedLong(obj);
 #endif
     }

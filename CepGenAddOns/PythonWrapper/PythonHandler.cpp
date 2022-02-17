@@ -55,11 +55,9 @@ namespace cepgen {
     public:
       /// Read a standard configuration card
       explicit PythonHandler(const ParametersList&);
-      ~PythonHandler();
+      Parameters* parse(const std::string&, Parameters*) override;
 
       static ParametersDescription description();
-
-      Parameters* parse(const std::string&, Parameters*) override;
 
     private:
       static constexpr const char* ADDONS_NAME = "addons";
@@ -83,6 +81,7 @@ namespace cepgen {
       void parseOutputModule(PyObject*);
       void parseOutputModules(PyObject*);
       void parseExtraParticles(PyObject*);
+      std::unique_ptr<python::Environment> env_;
     };
 
     PythonHandler::PythonHandler(const ParametersList& params) : Handler(params) {
@@ -97,12 +96,7 @@ namespace cepgen {
                                                        "/usr/share/CepGen/Cards"})
         utils::env::append("PYTHONPATH", path);
 
-      python::initialise();
-    }
-
-    PythonHandler::~PythonHandler() {
-      //--- finalisation
-      python::finalise();
+      env_.reset(new python::Environment);
     }
 
     Parameters* PythonHandler::parse(const std::string& file, Parameters* params) {
