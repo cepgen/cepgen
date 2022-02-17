@@ -83,7 +83,6 @@ namespace cepgen {
                                             fs::current_path().parent_path(),
                                             fs::path() / "/usr" / "share" / "CepGen"};
 
-
     //--- particles table parsing
     std::string mcd_file, addons_file;
     for (const auto& path : search_paths) {

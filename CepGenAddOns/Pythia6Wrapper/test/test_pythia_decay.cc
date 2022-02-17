@@ -20,6 +20,10 @@ int main() {
   pythia->run(evt, weight, true);
 
   CG_LOG << evt;
+  if (evt[0].status() != cepgen::Particle::Status::Resonance) {
+    CG_LOG << "Failed to decay tau.";
+    return -1;
+  }
 
   return 0;
 }
