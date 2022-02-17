@@ -34,9 +34,18 @@ namespace cepgen {
     //------------------------------------------------------------------
 
     Environment::Environment() {
+      for (const auto& path : std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."),
+                                                       fs::current_path(),
+                                                       fs::current_path() / "Cards",
+                                                       fs::current_path().parent_path() / "Cards",
+                                                       fs::current_path().parent_path().parent_path() / "Cards",
+                                                       "/usr/share/CepGen/Cards"})
+        utils::env::append("PYTHONPATH", path);
+
       Py_InitializeEx(1);
       if (!initialised())
         throw CG_FATAL("Python:Environment") << "Failed to initialise the Python environment!";
+      utils::env::set("PYTHONDONTWRITEBYTECODE", "1");
     }
 
     Environment::~Environment() {

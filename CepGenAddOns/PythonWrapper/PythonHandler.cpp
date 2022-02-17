@@ -81,28 +81,17 @@ namespace cepgen {
       void parseOutputModule(PyObject*);
       void parseOutputModules(PyObject*);
       void parseExtraParticles(PyObject*);
-      std::unique_ptr<python::Environment> env_;
+      python::Environment env_;
     };
 
     PythonHandler::PythonHandler(const ParametersList& params) : Handler(params) {
       //Py_DebugFlag = 1;
       //Py_VerboseFlag = 1;
-
-      for (const auto& path : std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."),
-                                                       fs::current_path(),
-                                                       fs::current_path() / "Cards",
-                                                       fs::current_path().parent_path() / "Cards",
-                                                       fs::current_path().parent_path().parent_path() / "Cards",
-                                                       "/usr/share/CepGen/Cards"})
-        utils::env::append("PYTHONPATH", path);
-
-      env_.reset(new python::Environment);
     }
 
     Parameters* PythonHandler::parse(const std::string& file, Parameters* params) {
       if (!utils::fileExists(file))
         throw CG_FATAL("PythonHandler") << "Unable to locate steering card \"" << file << "\".";
-      utils::env::set("PYTHONDONTWRITEBYTECODE", "1");
 
       rt_params_ = params;
       std::string filename = python::pythonPath(file);
