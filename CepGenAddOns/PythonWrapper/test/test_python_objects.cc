@@ -1,5 +1,6 @@
+// clang-format off
 #include "CepGenAddOns/PythonWrapper/PythonUtils.h"
-// important to import Python includes first
+// clang-format on
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 

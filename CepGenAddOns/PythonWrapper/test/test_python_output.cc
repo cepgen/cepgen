@@ -1,3 +1,7 @@
+// clang-format off
+#include "CepGenAddOns/PythonWrapper/PythonError.h"
+#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
+// clang-format on
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Generator.h"
