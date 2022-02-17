@@ -21,6 +21,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Utils/Functional.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace utils {
@@ -42,12 +43,15 @@ namespace cepgen {
       std::vector<te_variable> te_vars;
       for (size_t i = 0; i < vars_.size(); ++i)
         te_vars.emplace_back(te_variable{vars_.at(i).c_str(), &values_.at(i), TE_VARIABLE, nullptr});
+      auto expr = expression_;
+      expr = utils::replace_all(expr, {{"**", "^"}});
       int error;
-      eval_.reset(te_compile(expression_.c_str(), te_vars.data(), vars_.size(), &error));
+      eval_.reset(te_compile(expr.c_str(), te_vars.data(), vars_.size(), &error));
       if (!eval_) {
         const std::string pre_syntax_err = "A syntax error was detected in the expression \"";
+        const std::string postfix = (expr != expression_) ? " (adapted from \"" + expression_ + "\")" : "";
         throw CG_ERROR("FunctionalTinyExpr") << "Evaluator was not properly initialised.\n"
-                                             << pre_syntax_err << expression_ << "\"\n"
+                                             << pre_syntax_err << expr << "\"" << postfix << "\n"
                                              << std::string(pre_syntax_err.size() + error - 1, ' ') + "^";
       }
     }
