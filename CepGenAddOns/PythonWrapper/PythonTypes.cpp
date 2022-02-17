@@ -275,25 +275,26 @@ namespace cepgen {
       ObjectPtr obj(PyDict_New());
       for (const auto& key : plist.keys(true)) {
         if (plist.has<bool>(key))
-          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<bool>(key)).get());
+          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<bool>(key)).release());
         else if (plist.has<int>(key))
-          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<int>(key)).get());
+          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<int>(key)).release());
         else if (plist.has<double>(key))
-          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<double>(key)).get());
+          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<double>(key)).release());
         else if (plist.has<std::string>(key))
-          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<std::string>(key)).get());
+          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<std::string>(key)).release());
         else if (plist.has<ParametersList>(key))
-          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<ParametersList>(key)).get());
+          PyDict_SetItem(obj.get(), encode(key).get(), set(plist.get<ParametersList>(key)).release());
         else if (plist.has<Limits>(key)) {
           const auto& lim = plist.get<Limits>(key);
-          PyDict_SetItem(obj.get(), encode(key).get(), newTuple<double>({lim.min(), lim.max()}).get());
+          PyDict_SetItem(obj.get(), encode(key).get(), newTuple<double>({lim.min(), lim.max()}).release());
         } else if (plist.has<std::vector<int> >(key))
-          PyDict_SetItem(obj.get(), encode(key).get(), newTuple<int>(plist.get<std::vector<int> >(key)).get());
+          PyDict_SetItem(obj.get(), encode(key).get(), newTuple<int>(plist.get<std::vector<int> >(key)).release());
         else if (plist.has<std::vector<double> >(key))
-          PyDict_SetItem(obj.get(), encode(key).get(), newTuple<double>(plist.get<std::vector<double> >(key)).get());
+          PyDict_SetItem(
+              obj.get(), encode(key).get(), newTuple<double>(plist.get<std::vector<double> >(key)).release());
         else if (plist.has<std::vector<std::string> >(key))
           PyDict_SetItem(
-              obj.get(), encode(key).get(), newTuple<std::string>(plist.get<std::vector<std::string> >(key)).get());
+              obj.get(), encode(key).get(), newTuple<std::string>(plist.get<std::vector<std::string> >(key)).release());
         else
           PY_ERROR << "Parameters list has an untranslatable object for key=" << key;
       }
