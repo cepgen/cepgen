@@ -43,8 +43,8 @@ namespace cepgen {
         symbols_.add_variable(vars_[i], values_[i]);
       symbols_.add_constants();
       expr_.register_symbol_table(symbols_);
-      replace_all(expression_, "**", "^");
-      if (!parser_.compile(expression_, expr_))
+      auto expr = replace_all(expression_, {{"**", "^"}});
+      if (!parser_.compile(expr, expr_))
         throw CG_WARNING("FunctionalExprTk") << "Failed to compile expression \"" << expression() << "\".";
     }
 

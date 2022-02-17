@@ -28,10 +28,9 @@ namespace cepgen {
     class FunctionalLibmatheval final : public Functional {
     public:
       explicit FunctionalLibmatheval(const ParametersList&);
+      double eval() const;
 
       static ParametersDescription description();
-
-      double eval() const;
 
     private:
       struct eval_deleter {
@@ -42,12 +41,12 @@ namespace cepgen {
       char** c_parsed_vars_;
     };
 
-    FunctionalLibmatheval::FunctionalLibmatheval(const ParametersList& params) : Functional(params) {
-      eval_.reset(evaluator_create(const_cast<char*>(expression_.c_str())));
+    FunctionalLibmatheval::FunctionalLibmatheval(const ParametersList& params)
+        : Functional(params), eval_(evaluator_create(const_cast<char*>(expression_.c_str()))) {
       if (!eval_)
         throw CG_ERROR("FunctionalLibmatheval")
-            << "Evaluator was not properly initialised.\nLikely a syntax error was detected in the expression \""
-            << expression_ << "\".";
+            << "Evaluator was not properly initialised.\n"
+            << "Likely a syntax error was detected in the expression \"" << expression_ << "\".";
       int num_vars;
       evaluator_get_variables(eval_.get(), &c_parsed_vars_, &num_vars);
       for (int i = 0; i < num_vars; ++i)
