@@ -28,27 +28,21 @@ namespace cepgen {
     class FunctionalPython final : public Functional {
     public:
       explicit FunctionalPython(const ParametersList&);
-      ~FunctionalPython();
       double eval() const;
 
       static ParametersDescription description();
 
     private:
-      python::ObjectPtr func_;
-      python::ObjectPtr math_;
+      python::Environment env_;
       python::ObjectPtr mod_;
+      python::ObjectPtr func_;
     };
 
-    FunctionalPython::FunctionalPython(const ParametersList& params) : Functional(params) {
-      python::initialise();
-      //auto* global = PyEval_GetGlobals();  // borrowed
-      auto* global = PyDict_New();  // new
-      //math_.reset(PyImport_ImportModule("math"));
-      //PyDict_Merge(global, PyModule_GetDict(math_.get()), true);
-      mod_.reset(PyModule_New("functional"));  // new
+    FunctionalPython::FunctionalPython(const ParametersList& params)
+        : Functional(params), mod_(PyModule_New("functional")) {
       PyModule_AddStringConstant(mod_.get(), "__file__", "");
       auto* local = PyModule_GetDict(mod_.get());  // borrowed
-      math_.reset(PyRun_String("from math import *", Py_file_input, local, local));
+      python::ObjectPtr math(PyRun_String("from math import *", Py_file_input, local, local));
       std::ostringstream os;
       os << "def custom_functional(";
       std::string sep;
@@ -58,34 +52,22 @@ namespace cepgen {
          << "\treturn " << expression_ << "\n";
       CG_DEBUG("FunctionalPython") << "Will compile Python expression:\n" << os.str();
       {
-        python::ObjectPtr value(PyRun_String(os.str().c_str(), Py_file_input, global, local));  // new
-        //PyRun_SimpleString(os.str().c_str());
+        python::ObjectPtr value(PyRun_String(os.str().c_str(), Py_file_input, local, local));  // new
         if (!value)
-          PY_ERROR << "Failed to initialise the Python functional with \"" << expression_ << "\".";
-        //CG_DEBUG("FunctionalPython") << "Python expression compilation output: "
-        //                             << python::get<ParametersList>(value.get());
+          throw PY_ERROR << "Failed to initialise the Python functional with \"" << expression_ << "\".";
       }
       func_ = python::getAttribute(mod_.get(), "custom_functional");
       if (!func_ || !PyCallable_Check(func_.get()))
-        PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";
-      //CG_LOG << python::get<ParametersList>(func_.get());
+        throw PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";
     }
-
-    FunctionalPython::~FunctionalPython() { python::finalise(); }
 
     double FunctionalPython::eval() const {
       auto args = python::newTuple(values_);
-      double ret;
-      try {
-        python::ObjectPtr value(PyObject_CallObject(func_.get(), args.get()));  // new
-        if (!value)
-          throw CG_ERROR("FunctionalPython:eval") << "Failed to call the function with arguments=" << values_ << ".";
-        ret = python::get<double>(value.get());
-      } catch (const python::Error&) {
-        CG_LOG << "prout";
-      }
-      CG_LOG << "ret:" << ret;
-      return ret;
+      python::ObjectPtr value(PyObject_CallObject(func_.get(), args.get()));  // new
+      if (!value)
+        throw CG_ERROR("FunctionalPython:eval")
+            << "Failed to call the function with arguments=" << python::getVector<double>(args) << ".";
+      return python::get<double>(value.get());
     }
 
     ParametersDescription FunctionalPython::description() {
