@@ -80,8 +80,9 @@ namespace cepgen {
     //--- parse all particles properties
     static const std::string pdg_file = "";
     search_paths = std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."),
+                                            fs::path() / "/usr" / "share" / "CepGen",
                                             fs::current_path().parent_path(),
-                                            fs::path() / "/usr" / "share" / "CepGen"};
+                                            fs::current_path().parent_path().parent_path()};
 
     //--- particles table parsing
     std::string mcd_file, addons_file;
