@@ -223,7 +223,7 @@ namespace cepgen {
     ObjectPtr newTuple(const std::vector<T>& vec) {
       ObjectPtr tuple(PyTuple_New(vec.size()));
       for (size_t i = 0; i < vec.size(); ++i)
-        PyTuple_SetItem(tuple.get(), i, set<T>(vec.at(i)).get());
+        PyTuple_SetItem(tuple.get(), i, set<T>(vec.at(i)).release());
       return tuple;
     }
 
