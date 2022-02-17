@@ -46,44 +46,42 @@ namespace cepgen {
 #else
     const auto fullpath = match ? "lib" + path + ".so" : path;
 #endif
-    if (!utils::fileExists(fullpath)) {
-      CG_DEBUG("loadLibrary") << "Library \"" << path << "\" does not exist.";
-      return false;
-    }
+    for (const auto& search_path : search_paths) {
+      fs::path the_path{search_path};
+      the_path /= fullpath;
+      if (!utils::fileExists(the_path))
+        continue;
 
 #ifdef _WIN32
-    if (LoadLibraryA(fullpath.c_str()) == nullptr) {
-      CG_DEBUG("loadLibrary") << "Failed to load library \"" << path << "\".\n\t"
-                              << "Error code #" << GetLastError() << ".";
-      invalid_libraries.emplace_back(path);
-      return false;
-    }
+      if (LoadLibraryA(the_path.c_str()) == nullptr) {
+        CG_DEBUG("loadLibrary") << "Failed to load library \"" << the_path << "\".\n\t"
+                                << "Error code #" << GetLastError() << ".";
+        invalid_libraries.emplace_back(path);
+        return false;
+      }
 #else
-    if (dlopen(fullpath.c_str(), RTLD_LAZY | RTLD_GLOBAL) == nullptr) {
-      const char* err = dlerror();
-      CG_WARNING("loadLibrary") << "Failed to load library \"" << path << "\"."
-                                << (err != nullptr ? utils::format("\n\t%s", err) : "");
-      invalid_libraries.emplace_back(path);
-      return false;
-    }
+      if (dlopen(the_path.c_str(), RTLD_LAZY | RTLD_GLOBAL) == nullptr) {
+        const char* err = dlerror();
+        CG_WARNING("loadLibrary") << "Failed to load library \"" << the_path << "\"."
+                                  << (err != nullptr ? utils::format("\n\t%s", err) : "");
+        invalid_libraries.emplace_back(path);
+        return false;
+      }
 #endif
-    CG_DEBUG("loadLibrary") << "Loaded library \"" << path << "\".";
-    loaded_libraries.emplace_back(path);
-    return true;
+      CG_DEBUG("loadLibrary") << "Loaded library \"" << path << "\".";
+      loaded_libraries.emplace_back(path);
+      return true;
+    }
+    CG_DEBUG("loadLibrary") << "Library \"" << path << "\" does not exist.";
+    return false;
   }
 
   void initialise(bool safe_mode) {
     //--- parse all particles properties
     static const std::string pdg_file = "";
-    search_paths =
-        std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."), fs::path() / "usr" / "share" / "CepGen"};
-
-    //--- header message
-    try {
-      printHeader();
-    } catch (const Exception& e) {
-      e.dump();
-    }
+    search_paths = std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."),
+                                            fs::current_path().parent_path(),
+                                            fs::path() / "/usr" / "share" / "CepGen"};
 
     //--- particles table parsing
     std::string mcd_file, addons_file;
@@ -92,6 +90,7 @@ namespace cepgen {
         mcd_file = path + "/mass_width_2021.mcd";
       if (addons_file.empty() && utils::fileExists(path + "/CepGenAddOns.txt"))
         addons_file = path + "/CepGenAddOns.txt";
+      utils::env::append("LD_LIBRARY_PATH", path);
     }
     if (mcd_file.empty())
       CG_WARNING("init") << "No particles definition file found.";
@@ -101,6 +100,13 @@ namespace cepgen {
       CG_WARNING("init") << "Only " << utils::s("particle", PDG::get().size(), true)
                          << " are defined in the runtime environment.\n\t"
                          << "Make sure the path to the MCD file is correct.";
+
+    //--- header message
+    try {
+      printHeader();
+    } catch (const Exception& e) {
+      e.dump();
+    }
 
     //--- load all necessary modules
     if (!safe_mode && !addons_file.empty()) {

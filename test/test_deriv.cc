@@ -41,15 +41,23 @@ int main(int argc, char* argv[]) {
   auto der = cepgen::utils::GSLDerivator(cepgen::ParametersList().set<double>("h", 0.05));
 
   // test 1D graph
-  cepgen::utils::Graph1D graph_sin("graph_sin"), graph_der_sin("graph_der_sin"), graph_diff("graph_diff");
+  cepgen::utils::Graph1D graph_sin("graph_sin", "sin(x)"), graph_cos("graph_cos", "cos(x)"),
+      graph_der_sin("graph_der_sin", "(sin(x))'"), graph_diff("graph_diff", "cos(x)-(sin(x))'");
   for (double x = -M_PI; x <= M_PI; x += 0.25) {
     graph_sin.addPoint(x, sin(x));
+    graph_cos.addPoint(x, cos(x));
     const auto der_sin = der.eval([](double x) { return sin(x); }, x);
     graph_der_sin.addPoint(x, der_sin);
     graph_diff.addPoint(x, cos(x) - der_sin);
   }
   plt->draw({&graph_sin, &graph_der_sin, &graph_diff}, "test_deriv");
-  //FIXME add a chi2 test between expected and derivated values
+
+  const auto chi2 = graph_cos.chi2(graph_der_sin);
+  if (chi2 > 1.e-6) {
+    CG_LOG << "Test failed with chi^2=" << chi2 << ".";
+    return -1;
+  }
+  CG_LOG << "Test passed with chi^2=" << chi2 << ".";
 
   return 0;
 }

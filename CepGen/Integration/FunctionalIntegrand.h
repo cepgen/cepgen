@@ -16,22 +16,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Integration_Integrand_h
-#define CepGen_Integration_Integrand_h
+#ifndef CepGen_Integration_FunctionalIntegrand_h
+#define CepGen_Integration_FunctionalIntegrand_h
 
-#include <vector>
+#include <memory>
+
+#include "CepGen/Integration/Integrand.h"
+#include "CepGen/Utils/Functional.h"
 
 namespace cepgen {
-  /// An integrand wrapper placeholder
-  class Integrand {
+  /// Wrapper to a string-built functional to be integrated
+  class FunctionalIntegrand : public Integrand {
   public:
-    Integrand() = default;
-    virtual ~Integrand() {}
+    explicit FunctionalIntegrand(const std::string&, const std::vector<std::string>&, const std::string& func_eval);
 
-    /// Compute the integrand for a given coordinates set
-    virtual double eval(const std::vector<double>&) = 0;
-    /// Phase space dimension
-    virtual size_t size() const = 0;
+    double eval(const std::vector<double>&) override;
+    size_t size() const override;
+
+  private:
+    std::unique_ptr<utils::Functional> func_;
   };
 }  // namespace cepgen
 

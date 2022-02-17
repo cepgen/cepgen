@@ -19,9 +19,13 @@
 #ifndef CepGenAddOns_PythonWrapper_PythonError_h
 #define CepGenAddOns_PythonWrapper_PythonError_h
 
-#include <Python.h>
+// clang-format off
+#include "CepGenAddOns/PythonWrapper/PythonTypes.h"
+// clang-format on
 
 #include <string>
+
+#include "CepGen/Core/Exception.h"
 
 #define PY_ERROR cepgen::python::Error(__FUNC__, __FILE__, __LINE__)
 

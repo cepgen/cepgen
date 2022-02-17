@@ -30,7 +30,7 @@
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  ProcessIntegrand::ProcessIntegrand(const Parameters* params) : Integrand(params) {
+  ProcessIntegrand::ProcessIntegrand(const Parameters* params) : params_(params), tmr_(new utils::Timer) {
     if (!params_) {
       CG_WARNING("ProcessIntegrand") << "Invalid runtime parameters specified.";
       return;

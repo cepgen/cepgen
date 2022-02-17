@@ -28,7 +28,7 @@ namespace cepgen {
     class FunctionalExprTk final : public Functional {
     public:
       explicit FunctionalExprTk(const ParametersList&);
-      double eval(const std::vector<double>&) const override;
+      double eval() const override;
 
       static ParametersDescription description();
 
@@ -48,7 +48,7 @@ namespace cepgen {
         throw CG_WARNING("FunctionalExprTk") << "Failed to compile expression \"" << expression() << "\".";
     }
 
-    double FunctionalExprTk::eval(const std::vector<double>&) const { return expr_.value(); }
+    double FunctionalExprTk::eval() const { return expr_.value(); }
 
     ParametersDescription FunctionalExprTk::description() {
       auto desc = Functional::description();

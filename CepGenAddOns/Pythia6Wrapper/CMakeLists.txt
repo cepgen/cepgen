@@ -36,4 +36,3 @@ cepgen_build(CepGenPythia6 SOURCES *.cpp
     EXT_LIBS ${PYTHIA6LIB}
     PROPERTY CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-misleading-indentation"
     INSTALL_COMPONENT pythia6)
-

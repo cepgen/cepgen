@@ -120,7 +120,7 @@ namespace cepgen {
   ParametersDescription Beam::description() {
     auto desc = ParametersDescription();
     desc.add<int>("pdgId", (int)PDG::proton);
-    desc.add<int>("pz", 6500.);
+    desc.add<double>("pz", 6500.);
     desc.add<int>("mode", (int)Beam::Mode::invalid);
     desc.add<int>("ktFlux", (int)KTFlux::invalid);
     return desc;

@@ -37,10 +37,7 @@ namespace cepgen {
       exit(0);
   }
 
-  const char* Exception::what() const noexcept {
-    (*utils::Logger::get().output) << "\n" << message_.str() << "\n";
-    return message_.str().c_str();
-  }
+  const char* Exception::what() const noexcept { return message_.str().c_str(); }
 
   void Exception::dump(std::ostream* os) const noexcept {
     if (!os)

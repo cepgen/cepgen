@@ -23,10 +23,21 @@
 
 namespace cepgen {
   namespace python {
+    /// Initialise the python environment
+    void initialise();
+    /// Is the python environment already initialised?
+    bool initialised();
+    /// Finalise the python environment
+    void finalise();
+    /// Translate a filename into a python-compatible path
     std::string pythonPath(const std::string&);
+    /// Retrieve the element from a python dictionary
     PyObject* element(PyObject*, const std::string&);
+    /// Encode a string onto a python (possibly unicode) string
     ObjectPtr encode(const std::string&);
+    /// Decode a python (possibly unicode) string
     std::string decode(PyObject* obj);
+    ObjectPtr getAttribute(PyObject*, const std::string&);
 
     void fillParameter(PyObject* parent, const char* key, bool& out);
     void fillParameter(PyObject* parent, const char* key, int& out);

@@ -43,8 +43,11 @@ namespace cepgen {
     }
 
     double Functional::operator()(const std::vector<double>& x) const {
+      if (vars_.size() != x.size())
+        throw CG_FATAL("Functional") << "Invalid number of variables fed to the evaluator! Expecting " << vars_.size()
+                                     << ", got " << x.size() << ".";
       values_ = x;
-      return eval(x);
+      return eval();
     }
 
     ParametersDescription Functional::description() {

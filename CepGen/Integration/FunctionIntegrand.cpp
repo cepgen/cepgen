@@ -16,23 +16,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Integration_Integrand_h
-#define CepGen_Integration_Integrand_h
-
-#include <vector>
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Integration/FunctionIntegrand.h"
 
 namespace cepgen {
-  /// An integrand wrapper placeholder
-  class Integrand {
-  public:
-    Integrand() = default;
-    virtual ~Integrand() {}
+  FunctionIntegrand::FunctionIntegrand(size_t ndim, const std::function<double(const std::vector<double>&)>& func)
+      : function_(func), ndim_(ndim) {}
 
-    /// Compute the integrand for a given coordinates set
-    virtual double eval(const std::vector<double>&) = 0;
-    /// Phase space dimension
-    virtual size_t size() const = 0;
-  };
+  double FunctionIntegrand::eval(const std::vector<double>& x) {
+    if (x.size() != size())
+      throw CG_FATAL("FunctionIntegrand:eval")
+          << "Invalid coordinates multiplicity: expected(" << size() << ") != received(" << x.size() << ")!";
+
+    //--- calculate weight for the phase space point to probe
+    double weight = function_(x);
+
+    //--- a bit of useful debugging
+    CG_DEBUG_LOOP("FunctionIntegrand:eval")
+        << "f value for dim-" << x.size() << " point " << x << ": " << weight << ".";
+
+    return weight;
+  }
 }  // namespace cepgen
-
-#endif

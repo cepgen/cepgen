@@ -16,14 +16,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// clang-format off
+#include "CepGenAddOns/PythonWrapper/PythonTypes.h"
+#include "CepGenAddOns/PythonWrapper/PythonError.h"
+#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
+// clang-format on
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/String.h"
-#include "CepGenAddOns/PythonWrapper/PythonError.h"
-#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 
 namespace cepgen {
   namespace python {
+    ObjectPtr importModule(const std::string& mod_name) {
+      return ObjectPtr(PyImport_ImportModule(mod_name.c_str()));  // new
+    }
+
     //------------------------------------------------------------------
     // typed retrieval helpers
     //------------------------------------------------------------------
@@ -63,7 +71,7 @@ namespace cepgen {
     template <>
     int get<int>(PyObject* obj) {
       if (!is<int>(obj))
-        throw CG_ERROR("PythonHandler:get") << "Object has invalid type: integer \"" << obj->ob_type->tp_name << "\".";
+        throw CG_ERROR("Python:get") << "Object has invalid type: integer \"" << obj->ob_type->tp_name << "\".";
 #ifdef PYTHON2
       return PyInt_AsLong(obj);
 #else
@@ -83,8 +91,7 @@ namespace cepgen {
     template <>
     unsigned long get<unsigned long>(PyObject* obj) {
       if (!is<long>(obj))
-        throw CG_ERROR("PythonHandler:get")
-            << "Object has invalid type: unsigned long \"" << obj->ob_type->tp_name << "\".";
+        throw CG_ERROR("Python:get") << "Object has invalid type: unsigned long \"" << obj->ob_type->tp_name << "\".";
 #ifdef PYTHON2
       return PyInt_AsUnsignedLongMask(obj);
 #else
@@ -97,8 +104,7 @@ namespace cepgen {
     template <>
     long long get<long long>(PyObject* obj) {
       if (!is<long>(obj))
-        throw CG_ERROR("PythonHandler:get")
-            << "Object has invalid type: long long != \"" << obj->ob_type->tp_name << "\".";
+        throw CG_ERROR("Python:get") << "Object has invalid type: long long != \"" << obj->ob_type->tp_name << "\".";
       return PyLong_AsLongLong(obj);
     }
 
@@ -112,8 +118,7 @@ namespace cepgen {
     template <>
     double get<double>(PyObject* obj) {
       if (!is<double>(obj))
-        throw CG_ERROR("PythonHandler:get")
-            << "Object has invalid type: double != \"" << obj->ob_type->tp_name << "\".";
+        throw CG_ERROR("Python:get") << "Object has invalid type: double != \"" << obj->ob_type->tp_name << "\".";
       return PyFloat_AsDouble(obj);
     }
 
@@ -136,8 +141,7 @@ namespace cepgen {
     template <>
     std::string get<std::string>(PyObject* obj) {
       if (!is<std::string>(obj))
-        throw CG_ERROR("PythonHandler:get")
-            << "Object has invalid type: string != \"" << obj->ob_type->tp_name << "\".";
+        throw CG_ERROR("Python:get") << "Object has invalid type: string != \"" << obj->ob_type->tp_name << "\".";
       return decode(obj);
     }
 
@@ -163,8 +167,7 @@ namespace cepgen {
     template <>
     Limits get<Limits>(PyObject* obj) {
       if (!is<Limits>(obj))
-        throw CG_ERROR("PythonHandler:get")
-            << "Object has invalid type: limits != \"" << obj->ob_type->tp_name << "\".";
+        throw CG_ERROR("Python:get") << "Object has invalid type: limits != \"" << obj->ob_type->tp_name << "\".";
       const auto vec = getVector<double>(obj);
       if (vec.size() == 1)
         return Limits{vec.at(0)};
@@ -196,8 +199,7 @@ namespace cepgen {
     template <typename T>
     std::vector<T> getVector(PyObject* obj) {
       if (!isVector<T>(obj))
-        throw CG_ERROR("PythonHandler:get")
-            << "Object has invalid type: list/tuple != \"" << obj->ob_type->tp_name << "\".";
+        throw CG_ERROR("Python:get") << "Object has invalid type: list/tuple != \"" << obj->ob_type->tp_name << "\".";
       std::vector<T> vec;
       const bool tuple = PyTuple_Check(obj);
       const Py_ssize_t num_entries = tuple ? PyTuple_Size(obj) : PyList_Size(obj);
@@ -222,8 +224,8 @@ namespace cepgen {
     template <>
     ParametersList get<ParametersList>(PyObject* obj) {
       if (!is<ParametersList>(obj))
-        throw CG_ERROR("PythonHandler:get")
-            << "Object has invalid type: parameters list != \"" << obj->ob_type->tp_name << "\".";
+        throw CG_ERROR("Python:get") << "Object has invalid type: parameters list != \"" << obj->ob_type->tp_name
+                                     << "\".";
       ParametersList out;
       PyObject *pkey = nullptr, *pvalue = nullptr;
       Py_ssize_t pos = 0;
@@ -252,7 +254,7 @@ namespace cepgen {
             out.set<std::vector<std::string> >(skey, getVector<std::string>(pvalue));
           else  //if (isVector<ParametersList>(pvalue))
             out.set<std::vector<ParametersList> >(skey, getVector<ParametersList>(pvalue));
-        } else if (Py_IS_TYPE(pvalue, &_PyNone_Type)) {
+        } else if (pvalue == Py_None) {
           out.set<std::string>(skey, "None");
         } else {
           CG_WARNING("PythonTypes") << "Invalid object (" << pvalue->ob_type->tp_name << ") retrieved for key=" << skey

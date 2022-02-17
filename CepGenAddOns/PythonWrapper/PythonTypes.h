@@ -21,6 +21,7 @@
 
 #include <Python.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -33,10 +34,12 @@
 
 namespace cepgen {
   namespace python {
-    struct PyObject_deleter {
+    struct ObjectPtrDeleter {
       void operator()(PyObject* obj) { Py_DECREF(obj); }
     };
-    typedef std::unique_ptr<PyObject, PyObject_deleter> ObjectPtr;
+    typedef std::unique_ptr<PyObject, ObjectPtrDeleter> ObjectPtr;
+
+    ObjectPtr importModule(const std::string&);
 
     template <typename T>
     bool is(PyObject* obj);

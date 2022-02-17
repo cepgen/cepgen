@@ -16,7 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <Python.h>
+// clang-format off
+#include "CepGenAddOns/PythonWrapper/PythonError.h"
+#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
+// clang-format on
 
 #include <algorithm>
 
@@ -42,8 +45,6 @@
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
-#include "CepGenAddOns/PythonWrapper/PythonError.h"
-#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 
 #define Py_DEBUG
 
@@ -54,6 +55,7 @@ namespace cepgen {
     public:
       /// Read a standard configuration card
       explicit PythonHandler(const ParametersList&);
+      ~PythonHandler();
 
       static ParametersDescription description();
 
@@ -83,7 +85,25 @@ namespace cepgen {
       void parseExtraParticles(PyObject*);
     };
 
-    PythonHandler::PythonHandler(const ParametersList& params) : Handler(params) {}
+    PythonHandler::PythonHandler(const ParametersList& params) : Handler(params) {
+      //Py_DebugFlag = 1;
+      //Py_VerboseFlag = 1;
+
+      for (const auto& path : std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."),
+                                                       fs::current_path(),
+                                                       fs::current_path() / "Cards",
+                                                       fs::current_path().parent_path() / "Cards",
+                                                       fs::current_path().parent_path().parent_path() / "Cards",
+                                                       "/usr/share/CepGen/Cards"})
+        utils::env::append("PYTHONPATH", path);
+
+      python::initialise();
+    }
+
+    PythonHandler::~PythonHandler() {
+      //--- finalisation
+      python::finalise();
+    }
 
     Parameters* PythonHandler::parse(const std::string& file, Parameters* params) {
       if (!utils::fileExists(file))
@@ -93,9 +113,6 @@ namespace cepgen {
       rt_params_ = params;
       std::string filename = python::pythonPath(file);
       const size_t fn_len = filename.length() + 1;
-
-      //Py_DebugFlag = 1;
-      //Py_VerboseFlag = 1;
 
       {  // scope of the filename definition
 #ifdef PYTHON2
@@ -111,18 +128,6 @@ namespace cepgen {
         delete[] sfilename;
       }
 
-      for (const auto& path : std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."),
-                                                       fs::current_path(),
-                                                       fs::current_path() / "Cards",
-                                                       fs::current_path().parent_path() / "Cards",
-                                                       fs::current_path().parent_path().parent_path() / "Cards",
-                                                       "/usr/share/CepGen/Cards"})
-        utils::env::append("PYTHONPATH", path);
-
-      Py_InitializeEx(1);
-      if (!Py_IsInitialized())
-        throw CG_FATAL("PythonHandler") << "Failed to initialise the Python cards parser!";
-
       CG_DEBUG("PythonHandler").log([](auto& log) {
         auto* py_home = Py_GetPythonHome();
 #ifdef PYTHON2
@@ -137,37 +142,35 @@ namespace cepgen {
             << "Parsed path: " << python_path << ".";
       });
 
-      auto* cfg = PyImport_ImportModule(filename.c_str());  // new
+      auto cfg = python::importModule(filename);  // new
       if (!cfg)
         PY_ERROR << "Failed to import the configuration card '" << filename << "'\n (parsed from '" << file << "').";
 
-      auto parseAttr = [this](PyObject* cfg, const std::string& name, std::function<void(PyObject*)> callback) -> void {
-        if (PyObject_HasAttrString(cfg, name.c_str()) != 1)
-          return;
-        auto pobj = python::ObjectPtr(PyObject_GetAttrString(cfg, name.c_str()));  // new
+      auto parseAttr = [this, &cfg](const std::string& name, std::function<void(PyObject*)> callback) -> void {
+        auto pobj = python::getAttribute(cfg.get(), name);
         if (pobj)
           callback(pobj.get());
       };
 
       //--- additional libraries to load
-      parseAttr(cfg, ADDONS_NAME, [this](PyObject* padd) {
+      parseAttr(ADDONS_NAME, [this](PyObject* padd) {
         for (const auto& lib : python::getVector<std::string>(padd))
           loadLibrary(lib);
       });
 
       //--- timekeeper definition
       // (currently, does not parse the object, just check its presence)
-      parseAttr(cfg, TIMER_NAME, [this](PyObject*) { rt_params_->setTimeKeeper(new utils::TimeKeeper); });
+      parseAttr(TIMER_NAME, [this](PyObject*) { rt_params_->setTimeKeeper(new utils::TimeKeeper); });
 
       //--- general particles definition
-      parseAttr(
-          cfg, MCD_NAME, [this](PyObject* ppdg) { pdg::MCDFileParser::parse(python::get<std::string>(ppdg).c_str()); });
+      parseAttr(MCD_NAME,
+                [this](PyObject* ppdg) { pdg::MCDFileParser::parse(python::get<std::string>(ppdg).c_str()); });
 
       //--- additional particles definition
-      parseAttr(cfg, PDGLIST_NAME, [this](PyObject* pextp) { parseExtraParticles(pextp); });
+      parseAttr(PDGLIST_NAME, [this](PyObject* pextp) { parseExtraParticles(pextp); });
 
       //--- process definition
-      parseAttr(cfg, PROCESS_NAME, [this, &file](PyObject* process) {
+      parseAttr(PROCESS_NAME, [this, &file](PyObject* process) {
         //--- list of process-specific parameters
         ParametersList proc_params;
         python::fillParameter(process, "processParameters", proc_params);
@@ -201,22 +204,16 @@ namespace cepgen {
             rt_params_->addTamingFunction(utils::FunctionalFactory::get().build("ROOT", p));
       });
 
-      parseAttr(cfg, LOGGER_NAME, [this](PyObject* plog) { parseLogging(plog); });
+      parseAttr(LOGGER_NAME, [this](PyObject* plog) { parseLogging(plog); });
 
       //--- hadroniser parameters (legacy)
-      parseAttr(cfg, HADR_NAME, [this](PyObject* phad) { parseHadroniser(phad); });
-      parseAttr(cfg, EVT_MOD_SEQ_NAME, [this](PyObject* pmod_seq) { parseEventModifiers(pmod_seq); });
+      parseAttr(HADR_NAME, [this](PyObject* phad) { parseHadroniser(phad); });
+      parseAttr(EVT_MOD_SEQ_NAME, [this](PyObject* pmod_seq) { parseEventModifiers(pmod_seq); });
 
       //--- generation parameters
-      parseAttr(cfg, INTEGRATOR_NAME, [this](PyObject* pint) { parseIntegrator(pint); });
-      parseAttr(cfg, GENERATOR_NAME, [this](PyObject* pgen) { parseGenerator(pgen); });
-      parseAttr(cfg, OUTPUT_NAME, [this](PyObject* pout) { parseOutputModules(pout); });
-
-      //--- finalisation
-      Py_CLEAR(cfg);
-
-      if (Py_IsInitialized())
-        Py_Finalize();
+      parseAttr(INTEGRATOR_NAME, [this](PyObject* pint) { parseIntegrator(pint); });
+      parseAttr(GENERATOR_NAME, [this](PyObject* pgen) { parseGenerator(pgen); });
+      parseAttr(OUTPUT_NAME, [this](PyObject* pout) { parseOutputModules(pout); });
 
       return rt_params_;
     }

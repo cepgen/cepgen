@@ -47,6 +47,8 @@ namespace cepgen {
       double minimum() const;
       /// Maximum value registered in this graph
       double maximum() const;
+      /// Compute the \f$\chi^{2}\f$ between this graph and another
+      double chi2(const Graph1D&) const;
 
       bool isGraph1D() const override { return true; }
 
