@@ -37,6 +37,7 @@ namespace cepgen {
     ObjectPtr encode(const std::string&);
     /// Decode a python (possibly unicode) string
     std::string decode(PyObject* obj);
+    ObjectPtr getAttribute(PyObject*, const std::string&);
 
     void fillParameter(PyObject* parent, const char* key, bool& out);
     void fillParameter(PyObject* parent, const char* key, int& out);
