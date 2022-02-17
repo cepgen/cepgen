@@ -19,6 +19,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Utils/Functional.h"
+#include "CepGen/Utils/String.h"
 #include "CepGenAddOns/PythonWrapper/PythonError.h"
 #include "CepGenAddOns/PythonWrapper/PythonTypes.h"
 #include "CepGenAddOns/PythonWrapper/PythonUtils.h"
@@ -43,32 +44,41 @@ namespace cepgen {
       PyModule_AddStringConstant(mod_.get(), "__file__", "");
       auto* local = PyModule_GetDict(mod_.get());  // borrowed
       python::ObjectPtr math(PyRun_String("from math import *", Py_file_input, local, local));
+      auto expr = utils::replace_all(expression_, {{"^", "**"}});
       std::ostringstream os;
       os << "def custom_functional(";
       std::string sep;
       for (const auto& var : vars_)
         os << sep << var << ": float", sep = ", ";
       os << ") -> float:\n"
-         << "\treturn " << expression_ << "\n";
+         << "\treturn " << expr << "\n";
       CG_DEBUG("FunctionalPython") << "Will compile Python expression:\n" << os.str();
-      {
+      try {
         python::ObjectPtr value(PyRun_String(os.str().c_str(), Py_file_input, local, local));  // new
         if (!value)
-          throw CG_ERROR("FunctionalPython")
-              << "Failed to initialise the Python functional with \"" << expression_ << "\".";
+          throw PY_ERROR;
+        func_ = python::getAttribute(mod_.get(), "custom_functional");
+        if (!func_ || !PyCallable_Check(func_.get()))
+          throw CG_ERROR("FunctionalPython") << "Failed to retrieve/cast the object to a Python functional.";
+      } catch (const python::Error& err) {
+        throw CG_ERROR("FunctionalPython")
+            << "Failed to initialise the Python functional with \"" << expression_ << "\".\n"
+            << err.message();
       }
-      func_ = python::getAttribute(mod_.get(), "custom_functional");
-      if (!func_ || !PyCallable_Check(func_.get()))
-        throw CG_ERROR("FunctionalPython") << "Failed to retrieve/cast the object to a Python functional.";
     }
 
     double FunctionalPython::eval() const {
       auto args = python::newTuple(values_);
-      python::ObjectPtr value(PyObject_CallObject(func_.get(), args.get()));  // new
-      if (!value)
+      try {
+        python::ObjectPtr value(PyObject_CallObject(func_.get(), args.get()));  // new
+        if (!value)
+          throw PY_ERROR;
+        return python::get<double>(value.get());
+      } catch (const python::Error& err) {
         throw CG_ERROR("FunctionalPython:eval")
-            << "Failed to call the function with arguments=" << python::getVector<double>(args) << ".";
-      return python::get<double>(value.get());
+            << "Failed to call the function with arguments=" << python::getVector<double>(args) << ".\n"
+            << err.message();
+      }
     }
 
     ParametersDescription FunctionalPython::description() {
