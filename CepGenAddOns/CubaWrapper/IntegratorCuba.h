@@ -10,16 +10,22 @@ namespace cepgen {
   public:
     explicit IntegratorCuba(const ParametersList& params)
         : Integrator(params),
-          nvec_(params.get<int>("NVEC", 1)),
-          epsrel_(params.get<double>("EPSREL", 1.e-3)),
-          epsabs_(params.get<double>("EPSABS", 1.e-12)),
-          mineval_(params.get<int>("MINEVAL", 0)),
-          maxeval_(params.get<int>("MAXEVAL", 50000)),
-          verbose_(params.get<int>("verbose", 1)) {}
+          nvec_(steer<int>("NVEC")),
+          epsrel_(steer<double>("EPSREL")),
+          epsabs_(steer<double>("EPSABS")),
+          mineval_(steer<int>("MINEVAL")),
+          maxeval_(steer<int>("MAXEVAL")),
+          verbose_(steer<int>("verbose")) {}
 
     static ParametersDescription description() {
       auto desc = Integrator::description();
       desc.setDescription("Cuba generic integration algorithm");
+      desc.add<int>("NVEC", 1);
+      desc.add<double>("EPSREL", 1.e-3);
+      desc.add<double>("EPSABS", 1.e-12);
+      desc.add<int>("MINEVAL", 0);
+      desc.add<int>("MAXEVAL", 50000);
+      desc.add<int>("verbose", 1);
       return desc;
     }
 

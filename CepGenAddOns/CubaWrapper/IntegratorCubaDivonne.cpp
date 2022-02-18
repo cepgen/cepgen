@@ -22,16 +22,16 @@ namespace cepgen {
 
   IntegratorCubaDivonne::IntegratorCubaDivonne(const ParametersList &params)
       : IntegratorCuba(params),
-        key1_(params.get<int>("KEY1", 47)),
-        key2_(params.get<int>("KEY2", 1)),
-        key3_(params.get<int>("KEY3", 1)),
-        maxpass_(params.get<int>("MAXPASS", 5)),
-        border_(params.get<double>("BORDER", 0.)),
-        maxchisq_(params.get<double>("MAXCHISQ", 10.)),
-        mindeviation_(params.get<double>("MINDEVIATION", 0.25)),
-        ngiven_(params.get<int>("NGIVEN", 0)),
-        ldxgiven_(params.get<int>("LDXGIVEN", 0)),
-        nextra_(params.get<int>("NEXTRA", 0)) {
+        key1_(steer<int>("KEY1")),
+        key2_(steer<int>("KEY2")),
+        key3_(steer<int>("KEY3")),
+        maxpass_(steer<int>("MAXPASS")),
+        border_(steer<double>("BORDER")),
+        maxchisq_(steer<double>("MAXCHISQ")),
+        mindeviation_(steer<double>("MINDEVIATION")),
+        ngiven_(steer<int>("NGIVEN")),
+        ldxgiven_(steer<int>("LDXGIVEN")),
+        nextra_(steer<int>("NEXTRA")) {
     //--- a bit of printout for debugging
     CG_DEBUG("Integrator:build") << "Cuba-Divonne integrator built.";
   }
@@ -81,6 +81,16 @@ namespace cepgen {
   ParametersDescription IntegratorCubaDivonne::description() {
     auto desc = IntegratorCuba::description();
     desc.setDescription("Cuba implementation of the Divonne algorithm");
+    desc.add<int>("KEY1", 47);
+    desc.add<int>("KEY2", 1);
+    desc.add<int>("KEY3", 1);
+    desc.add<int>("MAXPASS", 5);
+    desc.add<double>("BORDER", 0.);
+    desc.add<double>("MAXCHISQ", 10.);
+    desc.add<double>("MINDEVIATION", 0.25);
+    desc.add<int>("NGIVEN", 0);
+    desc.add<int>("LDXGIVEN", 0);
+    desc.add<int>("NEXTRA", 0);
     return desc;
   }
 }  // namespace cepgen

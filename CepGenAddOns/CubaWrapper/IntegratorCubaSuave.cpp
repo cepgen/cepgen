@@ -20,9 +20,9 @@ namespace cepgen {
 
   IntegratorCubaSuave::IntegratorCubaSuave(const ParametersList& params)
       : IntegratorCuba(params),
-        nnew_(params.get<int>("NNEW", 1000)),
-        nmin_(params.get<int>("NMIN", 2)),
-        flatness_(params.get<double>("FLATNESS", 25.)) {
+        nnew_(steer<int>("NNEW")),
+        nmin_(steer<int>("NMIN")),
+        flatness_(steer<double>("FLATNESS")) {
     //--- a bit of printout for debugging
     CG_DEBUG("Integrator:build") << "Cuba-Suave integrator built.";
   }
@@ -63,6 +63,9 @@ namespace cepgen {
   ParametersDescription IntegratorCubaSuave::description() {
     auto desc = IntegratorCuba::description();
     desc.setDescription("Cuba implementation of the Suave algorithm");
+    desc.add<int>("NNEW", 1000);
+    desc.add<int>("NMIN", 2);
+    desc.add<double>("FLATNESS", 25.);
     return desc;
   }
 }  // namespace cepgen

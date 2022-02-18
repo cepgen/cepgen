@@ -19,10 +19,10 @@ namespace cepgen {
 
   IntegratorCubaVegas::IntegratorCubaVegas(const ParametersList& params)
       : IntegratorCuba(params),
-        nstart_(params.get<int>("NSTART", 1000)),
-        nincrease_(params.get<int>("NINCREASE", 500)),
-        nbatch_(params.get<int>("NBATCH", 1000)),
-        gridno_(params.get<int>("GRIDNO", 0)) {
+        nstart_(steer<int>("NSTART")),
+        nincrease_(steer<int>("NINCREASE")),
+        nbatch_(steer<int>("NBATCH")),
+        gridno_(steer<int>("GRIDNO")) {
     //--- a bit of printout for debugging
     CG_DEBUG("Integrator:build") << "Cuba-VEGAS integrator built.";
   }
@@ -68,6 +68,10 @@ namespace cepgen {
   ParametersDescription IntegratorCubaVegas::description() {
     auto desc = IntegratorCuba::description();
     desc.setDescription("Cuba implementation of the VEGAS algorithm");
+    desc.add<int>("NSTART", 1000);
+    desc.add<int>("NINCREASE", 500);
+    desc.add<int>("NBATCH", 1000);
+    desc.add<int>("GRIDNO", 0);
     return desc;
   }
 }  // namespace cepgen
