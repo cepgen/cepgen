@@ -19,7 +19,7 @@
 #ifndef CepGen_Core_Steerable_h
 #define CepGen_Core_Steerable_h
 
-#include "CepGen/Core/ParametersDescription.h"
+#include "CepGen/Core/ParametersList.h"
 
 namespace cepgen {
   /// Base runtime module object
