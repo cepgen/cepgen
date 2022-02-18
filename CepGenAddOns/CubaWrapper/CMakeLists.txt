@@ -1,6 +1,8 @@
 #--- searching for Cuba
 find_path(CUBA_INCLUDE tools HINTS $ENV{CUBA_DIR})
 find_library(CUBA cuba HINTS $ENV{CUBA_DIR})
+# Cuba must be compiled with fPIC, i.e.
+# ./configure CFLAGS=-fPIC CXXFLAGS=-fPIC
 
 if(NOT CUBA)
   return()
