@@ -379,7 +379,7 @@ namespace cepgen {
   /// Check if a particle properties object is handled
   template <>
   bool ParametersList::has<ParticleProperties>(const std::string& key) const {
-    return param_values_.count(key) != 0;
+    return has<ParametersList>(key) || has<int>(key);
   }
 
   /// Get a particle properties object
@@ -394,7 +394,8 @@ namespace cepgen {
         out = PDG::get()(pdgid);
       else
         out.pdgid = pdgid;
-      bool modified = false;
+      bool modified = false;  // keep track of any change in a particle definition
+                              // (to register it in the PDG catalogue right after filling its attributes)
       if (plist.has<std::string>("name"))
         out.name = plist.get<std::string>("name"), modified = true;
       if (plist.has<std::string>("description"))
@@ -415,7 +416,7 @@ namespace cepgen {
     } else if (has<int>(key))
       return PDG::get()(get<int>(key));
     else {
-      CG_DEBUG("ParametersList") << "Failed to retrieve parameter with key=" << key << ".";
+      CG_DEBUG("ParametersList") << "Failed to retrieve particle properties parameter with key=" << key << ".";
       return def;
     }
   }
