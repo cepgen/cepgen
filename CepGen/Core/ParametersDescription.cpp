@@ -95,41 +95,50 @@ namespace cepgen {
     // write human-readable description (if exists)
     if (pdtype != Type::ParametersVector && !mod_descr_.empty())
       os << " (" << utils::colourise(mod_descr_, utils::Colour::none, utils::Modifier::italic) << ")";
-    if (!keys.empty()) {
-      if (pdtype == Type::Module)
-        os << " with parameters";
-      if (pdtype != Type::ParametersVector)
-        os << ":";
-      // write list of parameters (if has some)
-      for (const auto& key : keys) {
-        os << "\n" << sep(offset + 1) << utils::colourise(key, utils::Colour::none, utils::Modifier::underline) << " ";
-        if (obj_descr_.count(key) > 0) {
-          os << "= ";
-          const auto& obj_type = obj_descr_.at(key).type();
-          if (obj_type == Type::Value)
+    if (keys.empty())  // no keys to this module ; can return
+      return os.str();
+    if (pdtype == Type::Module)
+      os << " with parameters";
+    if (pdtype != Type::ParametersVector)
+      os << ":";
+    // write list of parameters (if has some)
+    for (const auto& key : keys) {
+      os << "\n" << sep(offset + 1) << utils::colourise(key, utils::Colour::none, utils::Modifier::underline) << " ";
+      if (obj_descr_.count(key) == 0)
+        continue;
+      os << "= ";
+      const auto& obj = obj_descr_.at(key);
+      switch (obj.type()) {
+        case Type::Value: {
+          if (ParametersList::has<std::string>(key))
+            os << "\"" << ParametersList::getString(key) << "\"";
+          else
             os << ParametersList::getString(key);
-          else if (obj_type == Type::ParametersVector) {
-            os << utils::colourise("Vector of parameters collections",
-                                   utils::Colour::none,
-                                   utils::Modifier::italic | utils::Modifier::underline);
-            const auto& par_desc = obj_descr_.at(key).description();
-            if (!par_desc.empty())
-              os << " (" << utils::colourise(par_desc, utils::Colour::none, utils::Modifier::italic) << ")";
-            const auto& params = ParametersList::get<std::vector<ParametersList> >(key);
-            if (params.empty()) {
-              os << " with expected content: " << obj_descr_.at(key).describe(offset + 1);
-            } else {
-              std::string sepa;
-              for (const auto& param : params)
-                os << sepa << sep(offset + 2) << obj_descr_.at(key).steer(param).describe(offset + 1) << ",",
-                    sepa = "\n";
-            }
+          const auto& par_desc = obj.description();
+          if (!par_desc.empty())
+            os << " (" << utils::colourise(par_desc, utils::Colour::none, utils::Modifier::italic) << ")";
+        } break;
+        case Type::ParametersVector: {
+          os << utils::colourise("Vector of parameters collections",
+                                 utils::Colour::none,
+                                 utils::Modifier::italic | utils::Modifier::underline);
+          const auto& par_desc = obj.description();
+          if (!par_desc.empty())
+            os << " (" << utils::colourise(par_desc, utils::Colour::none, utils::Modifier::italic) << ")";
+          const auto& params = ParametersList::get<std::vector<ParametersList> >(key);
+          if (params.empty()) {
+            os << " with expected content: " << obj.describe(offset + 1);
           } else {
-            const auto& descr = obj_descr_.at(key).describe(offset + 1);
-            if (!utils::trim(descr).empty())
-              os << descr;
+            std::string sepa;
+            for (const auto& param : params)
+              os << sepa << sep(offset + 2) << obj.steer(param).describe(offset + 1) << ",", sepa = "\n";
           }
-        }
+        } break;
+        default: {
+          const auto& descr = obj.describe(offset + 1);
+          if (!utils::trim(descr).empty())
+            os << descr;
+        } break;
       }
     }
     return os.str();
