@@ -1,8 +1,6 @@
-#include "CepGenAddOns/CubaWrapper/IntegratorCuba.h"
-#include "CepGen/Modules/IntegratorFactory.h"
-
 #include "CepGen/Core/Exception.h"
-
+#include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGenAddOns/CubaWrapper/IntegratorCuba.h"
 #include "cuba.h"
 
 namespace cepgen {
@@ -10,9 +8,9 @@ namespace cepgen {
   class IntegratorCubaVegas : public IntegratorCuba {
   public:
     explicit IntegratorCubaVegas(const ParametersList&);
-    static std::string description() { return "Cuba implementation of the VEGAS algorithm"; }
-
     void integrate(double&, double&) override;
+
+    static ParametersDescription description();
 
   private:
     int nstart_, nincrease_, nbatch_;
@@ -65,6 +63,12 @@ namespace cepgen {
 
     result_ = result = integral;
     err_result_ = abserr = error;
+  }
+
+  ParametersDescription IntegratorCubaVegas::description() {
+    auto desc = IntegratorCuba::description();
+    desc.setDescription("Cuba implementation of the VEGAS algorithm");
+    return desc;
   }
 }  // namespace cepgen
 

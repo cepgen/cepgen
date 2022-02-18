@@ -1,8 +1,6 @@
-#include "CepGenAddOns/CubaWrapper/IntegratorCuba.h"
-#include "CepGen/Modules/IntegratorFactory.h"
-
 #include "CepGen/Core/Exception.h"
-
+#include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGenAddOns/CubaWrapper/IntegratorCuba.h"
 #include "cuba.h"
 
 namespace cepgen {
@@ -10,9 +8,9 @@ namespace cepgen {
   class IntegratorCubaDivonne : public IntegratorCuba {
   public:
     explicit IntegratorCubaDivonne(const ParametersList &);
-    static std::string description() { return "Cuba implementation of the Divonne algorithm"; }
-
     void integrate(double &, double &) override;
+
+    static ParametersDescription description();
 
   private:
     int key1_, key2_, key3_;
@@ -78,6 +76,12 @@ namespace cepgen {
 
     result_ = result = integral;
     err_result_ = abserr = error;
+  }
+
+  ParametersDescription IntegratorCubaDivonne::description() {
+    auto desc = IntegratorCuba::description();
+    desc.setDescription("Cuba implementation of the Divonne algorithm");
+    return desc;
   }
 }  // namespace cepgen
 

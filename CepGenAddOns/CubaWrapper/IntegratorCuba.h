@@ -1,8 +1,8 @@
 #ifndef CepGenAddOns_CubaWrapper_IntegratorCuba_h
 #define CepGenAddOns_CubaWrapper_IntegratorCuba_h
 
-#include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/Integrand.h"
+#include "CepGen/Integration/Integrator.h"
 
 namespace cepgen {
   /// Cuba integration algorithm
@@ -16,7 +16,12 @@ namespace cepgen {
           mineval_(params.get<int>("MINEVAL", 0)),
           maxeval_(params.get<int>("MAXEVAL", 50000)),
           verbose_(params.get<int>("verbose", 1)) {}
-    static std::string description() { return "Cuba generic integration algorithm"; }
+
+    static ParametersDescription description() {
+      auto desc = Integrator::description();
+      desc.setDescription("Cuba generic integration algorithm");
+      return desc;
+    }
 
   protected:
     int nvec_;
