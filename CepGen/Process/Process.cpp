@@ -432,12 +432,7 @@ namespace cepgen {
       return out;
     }
 
-    Process::EventWeights operator*(double fact, const Process::EventWeights& wgts) {
-      auto out = wgts;
-      for (auto& wgt : out)
-        wgt *= fact;
-      return out;
-    }
+    Process::EventWeights operator*(double fact, const Process::EventWeights& wgts) { return operator*(wgts, fact); }
 
     std::ostream& operator<<(std::ostream& os, const Process::EventWeights& wgts) {
       os << "Weight{";
