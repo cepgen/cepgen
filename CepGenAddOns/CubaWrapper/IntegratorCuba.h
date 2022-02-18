@@ -10,21 +10,21 @@ namespace cepgen {
   public:
     explicit IntegratorCuba(const ParametersList& params)
         : Integrator(params),
-          nvec_(steer<int>("NVEC")),
-          epsrel_(steer<double>("EPSREL")),
-          epsabs_(steer<double>("EPSABS")),
-          mineval_(steer<int>("MINEVAL")),
-          maxeval_(steer<int>("MAXEVAL")),
+          nvec_(steer<int>("nvec")),
+          epsrel_(steer<double>("epsrel")),
+          epsabs_(steer<double>("epsabs")),
+          mineval_(steer<int>("mineval")),
+          maxeval_(steer<int>("maxeval")),
           verbose_(steer<int>("verbose")) {}
 
     static ParametersDescription description() {
       auto desc = Integrator::description();
       desc.setDescription("Cuba generic integration algorithm");
-      desc.add<int>("NVEC", 1);
-      desc.add<double>("EPSREL", 1.e-3);
-      desc.add<double>("EPSABS", 1.e-12);
-      desc.add<int>("MINEVAL", 0);
-      desc.add<int>("MAXEVAL", 50000);
+      desc.add<int>("nvec", 1).setDescription("number of samples received by the integrand");
+      desc.add<double>("epsrel", 1.e-3).setDescription("requested relative accuracy");
+      desc.add<double>("epsabs", 1.e-12).setDescription("requested absolute accuracy");
+      desc.add<int>("mineval", 0).setDescription("minimum number of integrand evaluations required");
+      desc.add<int>("maxeval", 50000).setDescription("(approximate) maximum number of integrand evaluations allowed");
       desc.add<int>("verbose", 1);
       return desc;
     }

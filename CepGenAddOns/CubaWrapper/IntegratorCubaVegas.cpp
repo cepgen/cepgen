@@ -19,10 +19,10 @@ namespace cepgen {
 
   IntegratorCubaVegas::IntegratorCubaVegas(const ParametersList& params)
       : IntegratorCuba(params),
-        nstart_(steer<int>("NSTART")),
-        nincrease_(steer<int>("NINCREASE")),
-        nbatch_(steer<int>("NBATCH")),
-        gridno_(steer<int>("GRIDNO")) {
+        nstart_(steer<int>("NStart")),
+        nincrease_(steer<int>("NIncrease")),
+        nbatch_(steer<int>("NBatch")),
+        gridno_(steer<int>("GridNo")) {
     //--- a bit of printout for debugging
     CG_DEBUG("Integrator:build") << "Cuba-VEGAS integrator built.";
   }
@@ -68,10 +68,11 @@ namespace cepgen {
   ParametersDescription IntegratorCubaVegas::description() {
     auto desc = IntegratorCuba::description();
     desc.setDescription("Cuba implementation of the VEGAS algorithm");
-    desc.add<int>("NSTART", 1000);
-    desc.add<int>("NINCREASE", 500);
-    desc.add<int>("NBATCH", 1000);
-    desc.add<int>("GRIDNO", 0);
+    desc.add<int>("NStart", 1000).setDescription("number of integrand evaluations per iteration to start with");
+    desc.add<int>("NIncrease", 500).setDescription("increase in the number of integrand evaluations per iteration");
+    desc.add<int>("NBatch", 1000)
+        .setDescription("number of points sent in one MathLink packet to be sampled by Mathematica");
+    desc.add<int>("GridNo", 0).setDescription("slot in the internal grid table");
     return desc;
   }
 }  // namespace cepgen

@@ -20,9 +20,9 @@ namespace cepgen {
 
   IntegratorCubaSuave::IntegratorCubaSuave(const ParametersList& params)
       : IntegratorCuba(params),
-        nnew_(steer<int>("NNEW")),
-        nmin_(steer<int>("NMIN")),
-        flatness_(steer<double>("FLATNESS")) {
+        nnew_(steer<int>("NNew")),
+        nmin_(steer<int>("NMin")),
+        flatness_(steer<double>("Flatness")) {
     //--- a bit of printout for debugging
     CG_DEBUG("Integrator:build") << "Cuba-Suave integrator built.";
   }
@@ -63,9 +63,11 @@ namespace cepgen {
   ParametersDescription IntegratorCubaSuave::description() {
     auto desc = IntegratorCuba::description();
     desc.setDescription("Cuba implementation of the Suave algorithm");
-    desc.add<int>("NNEW", 1000);
-    desc.add<int>("NMIN", 2);
-    desc.add<double>("FLATNESS", 25.);
+    desc.add<int>("NNew", 1000).setDescription("number of new integrand evaluations in each subdivision");
+    desc.add<int>("NMin", 2).setDescription(
+        "minimum number of samples a former pass must contribute to a subregion to be considered in that region’s "
+        "compound integral value");
+    desc.add<double>("Flatness", 50.).setDescription("type of norm used to compute the fluctuation of a sample");
     return desc;
   }
 }  // namespace cepgen

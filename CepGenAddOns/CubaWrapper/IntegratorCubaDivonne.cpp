@@ -7,8 +7,8 @@ namespace cepgen {
   /// Cuba implementation of the Divonne integration algorithm
   class IntegratorCubaDivonne : public IntegratorCuba {
   public:
-    explicit IntegratorCubaDivonne(const ParametersList &);
-    void integrate(double &, double &) override;
+    explicit IntegratorCubaDivonne(const ParametersList&);
+    void integrate(double&, double&) override;
 
     static ParametersDescription description();
 
@@ -20,23 +20,23 @@ namespace cepgen {
     int nextra_;
   };
 
-  IntegratorCubaDivonne::IntegratorCubaDivonne(const ParametersList &params)
+  IntegratorCubaDivonne::IntegratorCubaDivonne(const ParametersList& params)
       : IntegratorCuba(params),
-        key1_(steer<int>("KEY1")),
-        key2_(steer<int>("KEY2")),
-        key3_(steer<int>("KEY3")),
-        maxpass_(steer<int>("MAXPASS")),
-        border_(steer<double>("BORDER")),
-        maxchisq_(steer<double>("MAXCHISQ")),
-        mindeviation_(steer<double>("MINDEVIATION")),
-        ngiven_(steer<int>("NGIVEN")),
-        ldxgiven_(steer<int>("LDXGIVEN")),
-        nextra_(steer<int>("NEXTRA")) {
+        key1_(steer<int>("Key1")),
+        key2_(steer<int>("Key2")),
+        key3_(steer<int>("Key3")),
+        maxpass_(steer<int>("MaxPass")),
+        border_(steer<double>("Border")),
+        maxchisq_(steer<double>("MaxChisq")),
+        mindeviation_(steer<double>("MinDeviation")),
+        ngiven_(steer<int>("NGiven")),
+        ldxgiven_(steer<int>("LDXGiven")),
+        nextra_(steer<int>("NExtra")) {
     //--- a bit of printout for debugging
     CG_DEBUG("Integrator:build") << "Cuba-Divonne integrator built.";
   }
 
-  void IntegratorCubaDivonne::integrate(double &result, double &abserr) {
+  void IntegratorCubaDivonne::integrate(double& result, double& abserr) {
     gIntegrand = integrand_;
 
     int nregions, neval, fail;
@@ -81,16 +81,24 @@ namespace cepgen {
   ParametersDescription IntegratorCubaDivonne::description() {
     auto desc = IntegratorCuba::description();
     desc.setDescription("Cuba implementation of the Divonne algorithm");
-    desc.add<int>("KEY1", 47);
-    desc.add<int>("KEY2", 1);
-    desc.add<int>("KEY3", 1);
-    desc.add<int>("MAXPASS", 5);
-    desc.add<double>("BORDER", 0.);
-    desc.add<double>("MAXCHISQ", 10.);
-    desc.add<double>("MINDEVIATION", 0.25);
-    desc.add<int>("NGIVEN", 0);
-    desc.add<int>("LDXGIVEN", 0);
-    desc.add<int>("NEXTRA", 0);
+    desc.add<int>("Key1", 47).setDescription("sampling rule in the partitioning phase");
+    desc.add<int>("Key2", 1).setDescription("sampling rule in the final integration phase");
+    desc.add<int>("Key3", 1).setDescription(
+        "strategy for the refinement phase"
+        "(0 = do not treat the subregion any further, 1 = split the subregion up once more)");
+    desc.add<int>("MaxPass", 5).setDescription("thoroughness parameter of the partitioning phase");
+    desc.add<double>("Border", 0.).setDescription("border width of the integration region");
+    desc.add<double>("MaxChisq", 10.)
+        .setDescription(
+            "maximum chi-square value a single subregion is allowed to have in the final integration phase");
+    desc.add<double>("MinDeviation", 0.25)
+        .setDescription(
+            "fraction of the requested error of the entire integral, which determines whether it is worthwhile further "
+            "examining a region that failed the chi-square test");
+    desc.add<int>("Given", 0).setDescription("number of points where the integrand might have peaks");
+    desc.add<int>("LDXGiven", 0)
+        .setDescription("leading dimension of xgiven, i.e. the offset between one point and the next in memory");
+    desc.add<int>("NExtra", 0).setDescription("maximum number of extra points the peak-finder subroutine will return");
     return desc;
   }
 }  // namespace cepgen
