@@ -94,8 +94,8 @@ namespace cepgen {
       registerParameter<std::string>("KMRG", "KMR grid interpolation path", &kmr_grid_path_);
       registerParameter<std::string>("MGRD", "MSTW grid interpolation path", &mstw_grid_path_);
       registerParameter<std::string>("PDGI", "Input file for PDG information", &pdg_input_path_);
-      registerParameter<int>("PMOD", "Outgoing primary particles' mode", &str_fun_);
-      registerParameter<int>("EMOD", "Outgoing primary particles' mode", &str_fun_);
+      registerParameter<std::vector<int> >("PMOD", "Outgoing primary particles' mode", &str_fun_);
+      registerParameter<std::vector<int> >("EMOD", "Outgoing primary particles' mode", &str_fun_);
       registerParameter<int>("RTYP", "R-ratio computation type", &sr_type_);
       registerProcessParameter<int>("PAIR", "Outgoing particles' PDG id", "pair");
       registerKinematicsParameter<std::string>("FFAC", "Form factors for the incoming beams", "formFactors");
@@ -215,12 +215,16 @@ namespace cepgen {
       rt_params_->par_integrator += *int_params_;
 
       //--- parse the structure functions code
-      auto sf_params = strfun::StructureFunctionsFactory::get().describeParameters(str_fun_).parameters();
-      sf_params.set<ParametersList>("sigmaRatio",
+      std::vector<ParametersList> sf_params;
+      for (const auto& sf : str_fun_) {
+        auto sf_pars = strfun::StructureFunctionsFactory::get().describeParameters(sf).parameters();
+        sf_pars.set<ParametersList>("sigmaRatio",
                                     sigrat::SigmaRatiosFactory::get().describeParameters(sr_type_).parameters());
-      if (str_fun_ == (int)strfun::Type::MSTWgrid && !mstw_grid_path_.empty())
-        sf_params.set<std::string>("gridPath", mstw_grid_path_);
-      kin_params_->set<ParametersList>("structureFunctions", sf_params);
+        if (sf == (int)strfun::Type::MSTWgrid && !mstw_grid_path_.empty())
+          sf_pars.set<std::string>("gridPath", mstw_grid_path_);
+        sf_params.emplace_back(sf_pars);
+      }
+      rt_params_->par_kinematics.set<std::vector<ParametersList> >("structureFunctions", sf_params);
       rt_params_->process().setKinematics(Kinematics(*kin_params_));
 
       //--- parse the hadronisation algorithm name
@@ -269,7 +273,9 @@ namespace cepgen {
 
     void LpairHandler::pack(const Parameters* params) {
       rt_params_ = const_cast<Parameters*>(params);
-      str_fun_ = rt_params_->kinematics().incomingBeams().structureFunctions()[0]->name();
+      str_fun_.clear();
+      for (const auto& sf : rt_params_->kinematics().incomingBeams().structureFunctions())
+        str_fun_.emplace_back(sf->name());
       //FIXME handle multiple SFs
       if (rt_params_->kinematics().incomingBeams().structureFunctions()[0] &&
           rt_params_->kinematics().incomingBeams().structureFunctions()[0]->sigmaRatio())

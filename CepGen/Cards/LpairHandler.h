@@ -100,7 +100,8 @@ namespace cepgen {
       void init();
       std::shared_ptr<ParametersList> proc_params_, kin_params_, gen_params_, int_params_;
       int timer_{0}, iend_{1}, ext_log_{0};
-      int str_fun_{11}, sr_type_{1}, lepton_id_{0};
+      std::vector<int> str_fun_{11};
+      int sr_type_{1}, lepton_id_{0};
       std::string proc_name_, evt_mod_name_, out_mod_name_;
       std::string out_file_name_, addons_list_;
       std::string kmr_grid_path_, mstw_grid_path_, pdg_input_path_;
