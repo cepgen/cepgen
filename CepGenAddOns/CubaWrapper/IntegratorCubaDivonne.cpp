@@ -16,7 +16,8 @@ namespace cepgen {
     int key1_, key2_, key3_;
     int maxpass_;
     double border_, maxchisq_, mindeviation_;
-    int ngiven_, ldxgiven_;
+    std::vector<std::vector<double> > given_;
+    int ldxgiven_;
     int nextra_;
   };
 
@@ -29,7 +30,7 @@ namespace cepgen {
         border_(steer<double>("Border")),
         maxchisq_(steer<double>("MaxChisq")),
         mindeviation_(steer<double>("MinDeviation")),
-        ngiven_(steer<int>("NGiven")),
+        given_(steer<std::vector<std::vector<double> > >("Given")),
         ldxgiven_(steer<int>("LDXGiven")),
         nextra_(steer<int>("NExtra")) {
     //--- a bit of printout for debugging
@@ -41,6 +42,10 @@ namespace cepgen {
 
     int nregions, neval, fail;
     double integral, error, prob;
+    int ngiven = given_.size();
+    std::vector<double*> given_arr;
+    for (auto& point : given_)
+      given_arr.emplace_back(point.data());
 
     Divonne(integrand_->size(),
             1,
@@ -60,9 +65,9 @@ namespace cepgen {
             border_,
             maxchisq_,
             mindeviation_,
-            ngiven_,
+            ngiven,
             ldxgiven_,
-            nullptr,  // cubareal xgiven[]
+            *given_arr.data(),  // cubareal xgiven[]
             nextra_,
             nullptr,  // peakfinder_t peakfinder
             nullptr,  // const char *statefile
@@ -95,7 +100,8 @@ namespace cepgen {
         .setDescription(
             "fraction of the requested error of the entire integral, which determines whether it is worthwhile further "
             "examining a region that failed the chi-square test");
-    desc.add<int>("Given", 0).setDescription("number of points where the integrand might have peaks");
+    desc.add<std::vector<std::vector<double> > >("Given", {})
+        .setDescription("list of points where the integrand might have peaks");
     desc.add<int>("LDXGiven", 0)
         .setDescription("leading dimension of xgiven, i.e. the offset between one point and the next in memory");
     desc.add<int>("NExtra", 0).setDescription("maximum number of extra points the peak-finder subroutine will return");
