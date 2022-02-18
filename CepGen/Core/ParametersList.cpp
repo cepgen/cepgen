@@ -66,7 +66,8 @@ namespace cepgen {
         vec_param_values_(oth.vec_param_values_),
         vec_int_values_(oth.vec_int_values_),
         vec_dbl_values_(oth.vec_dbl_values_),
-        vec_str_values_(oth.vec_str_values_) {}
+        vec_str_values_(oth.vec_str_values_),
+        vec_vec_dbl_values_(oth.vec_vec_dbl_values_) {}
 
   bool ParametersList::operator==(const ParametersList& oth) const {
     if (keys() != oth.keys())
@@ -102,6 +103,7 @@ namespace cepgen {
         if (!utils::contains(vec_param_values_[vpar.first], par))
           vec_param_values_[vpar.first].emplace_back(par);*/
     vec_param_values_.insert(oth.vec_param_values_.begin(), oth.vec_param_values_.end());
+    vec_vec_dbl_values_.insert(oth.vec_vec_dbl_values_.begin(), oth.vec_vec_dbl_values_.end());
     return *this;
   }
 
@@ -170,6 +172,8 @@ namespace cepgen {
       out += vec_str_values_.erase(key);
     if (vec_param_values_.count(key) != 0)
       out += vec_param_values_.erase(key);
+    if (vec_vec_dbl_values_.count(key) != 0)
+      out += vec_vec_dbl_values_.erase(key);
     return out;
   }
 
@@ -210,6 +214,7 @@ namespace cepgen {
     std::transform(str_values_.begin(), str_values_.end(), std::back_inserter(out), key);
     std::transform(vec_str_values_.begin(), vec_str_values_.end(), std::back_inserter(out), key);
     std::transform(lim_values_.begin(), lim_values_.end(), std::back_inserter(out), key);
+    std::transform(vec_vec_dbl_values_.begin(), vec_vec_dbl_values_.end(), std::back_inserter(out), key);
     if (!name_key) {
       const auto it_name = std::find(out.begin(), out.end(), MODULE_NAME);
       if (it_name != out.end())
@@ -261,6 +266,8 @@ namespace cepgen {
       os << wrap_coll(get<std::vector<double> >(key), "vfloat");
     else if (has<std::vector<std::string> >(key))
       os << wrap_coll(get<std::vector<std::string> >(key), "vstr");
+    else if (has<std::vector<std::vector<double> > >(key))
+      os << wrap_coll(get<std::vector<std::vector<double> > >(key), "vvfloat");
     return os.str();
   }
 
@@ -301,6 +308,7 @@ namespace cepgen {
   IMPL_TYPE(std::vector<std::string>, vec_str_values_, "vector of strings")
   IMPL_TYPE(ParametersList, param_values_, "parameters")
   IMPL_TYPE(std::vector<ParametersList>, vec_param_values_, "vector of parameters")
+  IMPL_TYPE(std::vector<std::vector<double> >, vec_vec_dbl_values_, "vector of vectors of floating numbers")
 
   //------------------------------------------------------------------
   // limits-type attributes

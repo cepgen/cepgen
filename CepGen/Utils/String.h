@@ -96,6 +96,9 @@ namespace cepgen {
     /// Merge a collection of a printable type in a single string
     template <typename T>
     std::string merge(const std::vector<T>&, const std::string&);
+    /// Merge a collection of collections of a printable type in a single string
+    template <typename T>
+    std::string merge(const std::vector<std::vector<T> >&, const std::string&);
     /// Check if a string is also a number
     bool isNumber(const std::string&);
     /// Check if a collection contains an item

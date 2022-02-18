@@ -139,6 +139,7 @@ namespace cepgen {
     std::unordered_map<std::string, std::vector<int> > vec_int_values_;
     std::unordered_map<std::string, std::vector<double> > vec_dbl_values_;
     std::unordered_map<std::string, std::vector<std::string> > vec_str_values_;
+    std::unordered_map<std::string, std::vector<std::vector<double> > > vec_vec_dbl_values_;
   };
 
   DEFINE_TYPE(bool)
@@ -152,6 +153,7 @@ namespace cepgen {
   DEFINE_TYPE(ParametersList)
   DEFINE_TYPE(std::vector<ParametersList>)
   DEFINE_TYPE(ParticleProperties)
+  DEFINE_TYPE(std::vector<std::vector<double> >)
 }  // namespace cepgen
 
 #undef DEFINE_TYPE
