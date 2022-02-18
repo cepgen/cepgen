@@ -19,6 +19,7 @@
 #ifndef CepGen_Core_SteeredObject_h
 #define CepGen_Core_SteeredObject_h
 
+#include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Core/Steerable.h"
 
 #define REGISTER_TYPE(type, coll)                                \

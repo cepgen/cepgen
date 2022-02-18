@@ -19,6 +19,7 @@
 #ifndef CepGen_Modules_NamedModule_h
 #define CepGen_Modules_NamedModule_h
 
+#include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Core/Steerable.h"
 
 namespace cepgen {
