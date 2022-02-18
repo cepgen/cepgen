@@ -186,10 +186,11 @@ namespace cepgen {
       return *this;
     }
     std::string sep;
-    const auto& mod_name = getString(ParametersList::MODULE_NAME);
-    if (!mod_name.empty())
+    const auto& plist_name = getString(ParametersList::MODULE_NAME);
+    if (!plist_name.empty()) {
+      auto mod_name = has<std::string>(MODULE_NAME) ? "\"" + plist_name + "\"" : plist_name;
       os << "Module(" << mod_name, sep = ", ";
-    else
+    } else
       os << "Parameters(";
     for (const auto& key : keys(false))
       os << sep << key << "=" << getString(key, true), sep = ", ";
