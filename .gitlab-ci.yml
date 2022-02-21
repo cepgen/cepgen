@@ -4,6 +4,10 @@ stages:
   - run
   - test
 
+default:
+  tags:
+    - cvmfs
+
 #######################################
 # define all build, tests, and
 # executables recipes as templates
