@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
     auto plist = cepgen::ParametersList().set<int>("foo", 42).set<double>("bar", M_PI).set<std::string>("baz", "héhé");
     auto py_dict = cepgen::python::set(plist);
     auto plist_ret = cepgen::python::get<cepgen::ParametersList>(py_dict.get());
-    if (!(plist_ret == plist)) {
+    if (plist_ret != plist) {
       CG_LOG << "Object recasted from python is not identical to original object:\n"
              << "Original: " << plist << ",\n"
              << "Recasted: " << plist_ret << ".";

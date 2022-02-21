@@ -58,6 +58,8 @@ namespace cepgen {
     ParametersList& operator=(const ParametersList&) = default;  ///< Assignment operator
     /// Equality operator
     bool operator==(const ParametersList&) const;
+    /// Inequality operator
+    bool operator!=(const ParametersList& oth) const { return !operator==(oth); }
     /// Feed a control string to the list of parameters
     ParametersList& feed(const std::string&);
     /// Check if a given parameter is handled in this list
