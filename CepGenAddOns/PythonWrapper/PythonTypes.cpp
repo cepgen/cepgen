@@ -188,6 +188,11 @@ namespace cepgen {
     }
 
     template <>
+    ObjectPtr set<Limits>(const Limits& val) {
+      return newTuple(std::vector<double>{val.min(), val.max()});
+    }
+
+    template <>
     bool is<ParametersList>(PyObject* obj) {
       if (!obj)
         throw CG_ERROR("Python:is") << "Failed to retrieve parameters list object.";

@@ -127,6 +127,8 @@ namespace cepgen {
     bool is<Limits>(PyObject* obj);
     template <>
     Limits get<Limits>(PyObject* obj);
+    template <>
+    ObjectPtr set<Limits>(const Limits&);
 
     //--- parameters list (= dict)
     template <>

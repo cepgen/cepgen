@@ -34,7 +34,7 @@ using namespace std;
              << "Recasted: " << ret << ".";                                          \
       return -1;                                                                     \
     }                                                                                \
-    CG_LOG << "type test passed.";                                                   \
+    CG_LOG << #type << " test passed.";                                              \
   }
 
 int main(int argc, char* argv[]) {
@@ -42,8 +42,17 @@ int main(int argc, char* argv[]) {
 
   cepgen::python::Environment env;
   TEST_TYPE(string, string("Héhéhé, test @ ünıc0d€"))
-  TEST_TYPE(cepgen::ParametersList,
-            cepgen::ParametersList().set<int>("foo", 42).set<double>("bar", M_PI).set<std::string>("baz", "héhé"))
+  TEST_TYPE(cepgen::Limits, cepgen::Limits(-2., 3.1))
+  TEST_TYPE(
+      cepgen::ParametersList,
+      cepgen::ParametersList()
+          .set<int>("foo", 42)
+          .set<double>("bar", M_PI)
+          .set<std::string>("baz", "héhé")
+          .set<bool>("flag", true)
+          .set<cepgen::ParametersList>(
+              "plist",
+              cepgen::ParametersList().set<int>("foo", 10).set<double>("bar", 42.42).set<std::string>("baz", "hîhî")))
 
   return 0;
 }

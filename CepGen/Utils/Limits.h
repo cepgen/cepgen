@@ -31,8 +31,12 @@ namespace cepgen {
     /// Copy constructor
     Limits(const Limits&);
 
-    Limits operator-() const;                       ///< Invert this limit
-    Limits& operator=(const Limits&) = default;     ///< Assignment operator
+    Limits operator-() const;                    ///< Invert this limit
+    Limits& operator=(const Limits&) = default;  ///< Assignment operator
+    /// Equality operator
+    bool operator==(const Limits& oth) const { return *this == (std::pair<double, double>)oth; }
+    /// Inequality operator
+    bool operator!=(const Limits& oth) const { return !operator==(oth); }
     Limits& operator+=(double c);                   ///< Add a constant to this limit
     Limits& operator-=(double c);                   ///< Subtract a constant to this limit
     Limits& operator*=(double c);                   ///< Multiply this limit by a constant
