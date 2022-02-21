@@ -32,6 +32,14 @@
 #define PYTHON2
 #endif
 
+#define DEFINE_TYPE(type)         \
+  template <>                     \
+  bool is<type>(PyObject * obj);  \
+  template <>                     \
+  type get<type>(PyObject * obj); \
+  template <>                     \
+  ObjectPtr set<type>(const type&);
+
 namespace cepgen {
   namespace python {
     /// Common deleter for a PyObject
@@ -82,62 +90,19 @@ namespace cepgen {
 
     // type-specialised functions
 
-    //--- booleans
-    template <>
-    bool is<bool>(PyObject* obj);
-    template <>
-    ObjectPtr set<bool>(const bool&);
-
-    //--- integers
-    template <>
-    bool is<int>(PyObject* obj);
-    template <>
-    int get<int>(PyObject* obj);
-    template <>
-    ObjectPtr set<int>(const int&);
-
     //--- long integers
     template <>
     bool is<long>(PyObject* obj);
-
     //--- unsigned long integers
     template <>
     unsigned long get<unsigned long>(PyObject* obj);
-
-    //--- floating points
-    template <>
-    bool is<double>(PyObject* obj);
-    template <>
-    double get<double>(PyObject* obj);
-    template <>
-    ObjectPtr set<double>(const double&);
-
-    //--- strings
-    template <>
-    bool is<std::string>(PyObject* obj);
-    /// Decode a python (possibly unicode) string
-    template <>
-    std::string get<std::string>(PyObject* obj);
-    /// Encode a string onto a python (possibly unicode) string
-    template <>
-    ObjectPtr set<std::string>(const std::string&);
-
-    //--- limits/ranges (= pair(float, float))
-    template <>
-    bool is<Limits>(PyObject* obj);
-    template <>
-    Limits get<Limits>(PyObject* obj);
-    template <>
-    ObjectPtr set<Limits>(const Limits&);
-
-    //--- parameters list (= dict)
-    template <>
-    bool is<ParametersList>(PyObject* obj);
-    template <>
-    ParametersList get<ParametersList>(PyObject* obj);
-    template <>
-    ObjectPtr set<ParametersList>(const ParametersList&);
-
+    //--- others
+    DEFINE_TYPE(bool)
+    DEFINE_TYPE(int)
+    DEFINE_TYPE(double)
+    DEFINE_TYPE(std::string)
+    DEFINE_TYPE(Limits)
+    DEFINE_TYPE(ParametersList)
   }  // namespace python
 }  // namespace cepgen
 

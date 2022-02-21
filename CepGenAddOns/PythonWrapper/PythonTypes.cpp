@@ -62,6 +62,11 @@ namespace cepgen {
     }
 
     template <>
+    bool get<bool>(PyObject* obj) {
+      return PyObject_IsTrue(obj);
+    }
+
+    template <>
     ObjectPtr set<bool>(const bool& val) {
       return ObjectPtr(PyBool_FromLong(val));
     }

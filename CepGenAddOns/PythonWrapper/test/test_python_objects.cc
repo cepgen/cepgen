@@ -41,6 +41,8 @@ int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
 
   cepgen::python::Environment env;
+  TEST_TYPE(bool, bool(true))
+  TEST_TYPE(bool, bool(false))
   TEST_TYPE(string, string("Héhéhé, test @ ünıc0d€"))
   TEST_TYPE(cepgen::Limits, cepgen::Limits(-2., 3.1))
   TEST_TYPE(
