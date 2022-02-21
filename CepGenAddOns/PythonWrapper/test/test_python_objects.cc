@@ -24,35 +24,26 @@
 
 using namespace std;
 
+#define TEST_TYPE(type, object)                                                      \
+  {                                                                                  \
+    auto py_obj = cepgen::python::set(object);                                       \
+    auto ret = cepgen::python::get<type>(py_obj.get());                              \
+    if (ret != object) {                                                             \
+      CG_LOG << "Object recasted from python is not identical to original object:\n" \
+             << "Original: " << object << ",\n"                                      \
+             << "Recasted: " << ret << ".";                                          \
+      return -1;                                                                     \
+    }                                                                                \
+    CG_LOG << "type test passed.";                                                   \
+  }
+
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
 
   cepgen::python::Environment env;
-
-  {
-    string str = "Héhéhé, test @ ünıc0d€";
-    auto py_str = cepgen::python::set(str);
-    auto str_ret = cepgen::python::get<string>(py_str.get());
-    if (str_ret != str) {
-      CG_LOG << "Object recasted from python is not identical to original object:\n"
-             << "Original: " << str << ",\n"
-             << "Recasted: " << str_ret << ".";
-      return -1;
-    }
-    CG_LOG << "String test passed.";
-  }
-  {
-    auto plist = cepgen::ParametersList().set<int>("foo", 42).set<double>("bar", M_PI).set<std::string>("baz", "héhé");
-    auto py_dict = cepgen::python::set(plist);
-    auto plist_ret = cepgen::python::get<cepgen::ParametersList>(py_dict.get());
-    if (plist_ret != plist) {
-      CG_LOG << "Object recasted from python is not identical to original object:\n"
-             << "Original: " << plist << ",\n"
-             << "Recasted: " << plist_ret << ".";
-      return -1;
-    }
-    CG_LOG << "Parameters list/dictionary test passed.";
-  }
+  TEST_TYPE(string, string("Héhéhé, test @ ünıc0d€"))
+  TEST_TYPE(cepgen::ParametersList,
+            cepgen::ParametersList().set<int>("foo", 42).set<double>("bar", M_PI).set<std::string>("baz", "héhé"))
 
   return 0;
 }
