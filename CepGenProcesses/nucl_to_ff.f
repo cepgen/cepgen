@@ -4,7 +4,7 @@
 c     =================================================================
 c     CepGen common blocks for kinematics definition
 c     =================================================================
-      include 'CepGen/Processes/Fortran/KTBlocks.inc'
+      include 'CepGen/Process/Fortran/KTBlocks.inc'
       data iflux1,iflux2,pdg_l/10,100,13/
       data a_nuc1,z_nuc1,a_nuc2,z_nuc2/1,1,208,82/
 

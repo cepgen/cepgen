@@ -1,5 +1,5 @@
       ! CepGen: a central exclusive processes event generator
-      ! Copyright (C) 2013-2021  Laurent Forthomme
+      ! Copyright (C) 2013-2022  Laurent Forthomme
       !
       ! This program is free software: you can redistribute it and/or modify
       ! it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
       subroutine cepgen_print
       !> Print useful run information in standard stream
       implicit none
-      include 'CepGen/Processes/Fortran/KTBlocks.inc'
+      include 'CepGen/Process/Fortran/KTBlocks.inc'
       logical params_shown
       data params_shown/.false./
       save params_shown

@@ -40,7 +40,7 @@
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Processes/Process.h"
+#include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/String.h"

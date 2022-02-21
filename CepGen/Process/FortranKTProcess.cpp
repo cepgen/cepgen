@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Processes/Fortran/KTStructures.h"
-#include "CepGen/Processes/FortranKTProcess.h"
+#include "CepGen/Process/Fortran/KTStructures.h"
+#include "CepGen/Process/FortranKTProcess.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
 extern "C" {

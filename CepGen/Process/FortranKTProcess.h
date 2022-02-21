@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,12 +16,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Processes_FortranKTProcess_h
-#define CepGen_Processes_FortranKTProcess_h
+#ifndef CepGen_Process_FortranKTProcess_h
+#define CepGen_Process_FortranKTProcess_h
 
 #include <functional>
 
-#include "CepGen/Processes/KTProcess.h"
+#include "CepGen/Process/KTProcess.h"
 
 namespace cepgen {
   namespace proc {

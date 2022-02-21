@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *                2017-2019  Wolfgang Schaefer
  *                2019       Marta Luszczak
  *
@@ -27,7 +27,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Processes/Process2to4.h"
+#include "CepGen/Process/Process2to4.h"
 
 namespace cepgen {
   namespace proc {

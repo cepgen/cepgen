@@ -19,7 +19,7 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Processes/Process.h"
+#include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
