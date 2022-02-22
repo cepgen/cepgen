@@ -9,6 +9,7 @@ endif()
 #----- build the object
 
 cepgen_build(CepGenTauola SOURCES TauolaFilter.cpp PhotosTauolaInterface.cpp
+    TESTS test/*.cc
     EXT_LIBS ${TAUOLA}
     EXT_HEADERS ${TAUOLA_INCLUDE}
     INSTALL_COMPONENT tauola)
