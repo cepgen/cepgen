@@ -27,14 +27,21 @@ namespace cepgen {
   public:
     explicit AlphaSAPFEL(const ParametersList& params)
         : Coupling(params),
-          order_(params.get<int>("order", 2)),
-          q0_(params.get<double>("q0", 1.)),
-          qmax_(params.get<double>("qmax", 10000.)) {
+          order_(steer<int>("order", 2)),
+          q0_(steer<double>("q0", 1.)),
+          qmax_(steer<double>("qmax", 10000.)) {
       APFEL::SetPerturbativeOrder(order_);
       APFEL::InitializeAPFEL();
       APFEL::EvolveAPFEL(q0_, qmax_);
     }
-    static std::string description() { return "APFEL alphaS evolution algorithm"; }
+    static ParametersDescription description() {
+      auto desc = ParametersDescription();
+      desc.setDescription("APFEL alphaS evolution algorithm");
+      desc.add<int>("order", 2);
+      desc.add<double>("q0", 1.);
+      desc.add<double>("qmax", 10000.);
+      return desc;
+    }
 
     double operator()(double q) const override {
       if (q < q0_ || q > qmax_)

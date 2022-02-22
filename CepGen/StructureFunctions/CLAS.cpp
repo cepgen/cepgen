@@ -36,9 +36,7 @@ namespace cepgen {
     public:
       explicit CLAS(const ParametersList&);
 
-      static std::string description() {
-        return "CLAS parameterisation for nucleon data at Q2 > 0.5 GeV2 / xBj > 0.15";
-      }
+      static ParametersDescription description();
 
       /// List of steering parameters for a physics case
       struct Parameters {
@@ -177,7 +175,7 @@ namespace cepgen {
     }
 
     CLAS::CLAS(const ParametersList& params) : Parameterisation(params), mpi0_(PDG::get().mass(PDG::piZero)) {
-      const auto& model = params.get<std::string>("model", "proton");
+      const auto& model = steer<std::string>("model");
       if (model == "proton")
         mod_params_ = Parameters::standard_proton();
       else if (model == "neutron")
@@ -190,16 +188,11 @@ namespace cepgen {
 
     CLAS& CLAS::eval(double xbj, double q2) {
       const double w2 = utils::mX2(xbj, q2, mp2_), w = sqrt(w2);
-
-      if (w < mx_min_) {
-        F2 = 0.;
+      if (w < mx_min_)
         return *this;
-      }
 
-      F2 = f2slac(xbj, q2);
-      std::pair<double, double> rb = resbkg(q2, w);
-
-      F2 *= (rb.first + rb.second);
+      const auto rb = resbkg(q2, w);
+      setF2(f2slac(xbj, q2) * (rb.first + rb.second));
       return *this;
     }
 
@@ -274,7 +267,15 @@ namespace cepgen {
 
       return std::make_pair(f2bkg, f2resn);
     }
+
+    ParametersDescription CLAS::description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("CLAS (nucleon data, Q^2 > 0.5 GeV2 / xBj > 0.15)");
+      desc.add<std::string>("model", "proton")
+          .setDescription("Nucleon modelling ('proton', 'deuteron', or 'neutron' handled)");
+      return desc;
+    }
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(CLAS, strfun::CLAS)
+REGISTER_STRFUN(strfun::Type::CLAS, CLAS, strfun::CLAS)

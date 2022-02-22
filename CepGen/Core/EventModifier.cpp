@@ -22,9 +22,7 @@
 
 namespace cepgen {
   EventModifier::EventModifier(const ParametersList& plist)
-      : NamedModule(plist),
-        seed_(plist.getAs<int, long long>("seed", -1)),
-        max_trials_(plist.get<int>("maxTrials", 1)) {
+      : NamedModule(plist), seed_(plist.getAs<int, long long>("seed")), max_trials_(plist.get<int>("maxTrials")) {
     CG_DEBUG("EventModifier:init") << "\"" << name_ << "\"-type event modifier built with:\n\t"
                                    << "* seed = " << seed_ << "\n\t"
                                    << "* maximum trials: " << max_trials_;
@@ -39,5 +37,15 @@ namespace cepgen {
       os << "\n\t  '" << p << "'";
     }
     CG_DEBUG("EventModifier:configure") << "Feeding \"" << name_ << "\" event modifier algorithm with:" << os.str();
+  }
+
+  ParametersDescription EventModifier::description() {
+    auto desc = ParametersDescription();
+    desc.add<int>("seed", -1).setDescription("Random number generator seed");
+    desc.add<int>("maxTrials", 1)
+        .setDescription(
+            "Maximum number of attempts to modify the event"
+            " before giving up and returning a zero-weight");
+    return desc;
   }
 }  // namespace cepgen

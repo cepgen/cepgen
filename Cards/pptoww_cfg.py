@@ -41,6 +41,7 @@ process = kt.process.clone('pptoww',
         cmEnergy = 13.e3,
         #structureFunctions = cepgen.StructureFunctions.SzczurekUleshchenko,
         #structureFunctions = cepgen.StructureFunctions.ALLM97,
+        #structureFunctions = cepgen.StructureFunctions.KulaginBarinov,
         structureFunctions = cepgen.StructureFunctions.LUXlike,
     ),
     outKinematics = kt.process.outKinematics.clone(
@@ -76,6 +77,7 @@ text = cepgen.Module('text',  # histogramming/ASCII output capability
     histVariables={
         'm(4)': cepgen.Parameters(xrange=(50., 1000.), nbins=19),
         'm(ob2)': cepgen.Parameters(xrange=(0., 250.), nbins=10, log=True),
+        'acop(7,8)': cepgen.Parameters(nbins=10, log=True),
     }
 )
 output = cepgen.Sequence(text)

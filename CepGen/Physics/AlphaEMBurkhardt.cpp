@@ -25,12 +25,18 @@ namespace cepgen {
   /// \note Shamelessly stolen from JETSET/PYTHIA
   class AlphaEMBurkhardt final : public Coupling {
   public:
-    explicit AlphaEMBurkhardt(const ParametersList& params) : Coupling(params) {}
-    static std::string description() { return "Burkhardt et al. alpha(EM) evolution algorithm"; }
+    explicit AlphaEMBurkhardt(const ParametersList& params) : Coupling(params), q2min_(steer<double>("q2min")) {}
+
+    static ParametersDescription description() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Burkhardt et al. alpha(EM) evolution algorithm");
+      desc.add<double>("q2min", 2.e-6).setDescription("Minimum Q^2 to start alpha(EM) evolution");
+      return desc;
+    }
 
     double operator()(double q) const override {
       const double q2 = q * q;
-      if (q2 < 2.e-6)
+      if (q2 < q2min_)
         return constants::ALPHA_EM;
       const double log_q2 = log(q2), log_1_pl_q2 = log1p(q2);
       // Calculate real part of photon vacuum polarization.
@@ -51,6 +57,7 @@ namespace cepgen {
 
   private:
     static constexpr double AEM_3PI = constants::ALPHA_EM / 3. * M_1_PI;
+    const double q2min_;
   };
 }  // namespace cepgen
 

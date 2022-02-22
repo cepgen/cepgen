@@ -41,7 +41,8 @@ namespace cepgen {
       explicit Partonic(const ParametersList& params = ParametersList());
       /// Build a calculator from a set, its member, and the contributing quarks
       explicit Partonic(const char* set, unsigned short member = 0, const Mode& mode = Mode::full);
-      static std::string description() { return "Partonic structure functions"; }
+
+      static ParametersDescription description();
 
       Partonic& eval(double xbj, double q2) override;
       std::string describe() const override;
@@ -86,11 +87,11 @@ namespace cepgen {
 
     Partonic::Partonic(const ParametersList& params)
         : Parameterisation(params),
-          pdf_set_(params.get<std::string>("pdfSet", "cteq6")),
-          num_flavours_(params.get<int>("numFlavours", 4)),
-          pdf_code_(params.get<int>("pdfCode", 0)),
-          pdf_member_(params.get<int>("pdfMember", 0)),
-          mode_(params.getAs<int, Mode>("mode", Mode::full)) {}
+          pdf_set_(steer<std::string>("pdfSet")),
+          num_flavours_(steer<int>("numFlavours")),
+          pdf_code_(steer<int>("pdfCode")),
+          pdf_member_(steer<int>("pdfMember")),
+          mode_(steerAs<int, Mode>("mode")) {}
 
     Partonic::Partonic(const char* set, unsigned short member, const Mode& mode)
         : Parameterisation(ParametersList().setName<int>((int)Type::Partonic)),
@@ -152,7 +153,6 @@ namespace cepgen {
     }
 
     Partonic& Partonic::eval(double xbj, double q2) {
-      F2 = 0.;
       if (num_flavours_ == 0 || num_flavours_ > QUARK_PDGS.size()) {
         CG_WARNING("Partonic") << "Invalid number of flavours (" << num_flavours_ << " selected.";
         return *this;
@@ -183,6 +183,7 @@ namespace cepgen {
       const double q = sqrt(q2);
 #endif
 
+      double f2 = 0.;
       for (int i = 0; i < num_flavours_; ++i) {
         const double prefactor = 1. / 9. * Q_TIMES_3.at(i) * Q_TIMES_3.at(i);
 #ifdef LHAPDF_GE_6
@@ -196,17 +197,29 @@ namespace cepgen {
 #endif
         switch (mode_) {
           case Mode::full:
-            F2 += prefactor * (xq + xqbar);
+            f2 += prefactor * (xq + xqbar);
             break;
           case Mode::valence:
-            F2 += prefactor * (xq - xqbar);
+            f2 += prefactor * (xq - xqbar);
             break;
           case Mode::sea:
-            F2 += prefactor * (2. * xqbar);
+            f2 += prefactor * (2. * xqbar);
             break;
         }
       }
+      setF2(f2);
       return *this;
+    }
+
+    ParametersDescription Partonic::description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("LHAPDF (partonic)");
+      desc.add<std::string>("pdfSet", "cteq66").setDescription("PDF modelling to be considered");
+      desc.add<int>("numFlavours", 4).setDescription("Number of parton flavours to consider in summation");
+      desc.add<int>("pdfCode", 0);
+      desc.add<int>("pdfMember", 0);
+      desc.add<int>("mode", (int)Mode::full);
+      return desc;
     }
   }  // namespace strfun
 }  // namespace cepgen
@@ -215,4 +228,4 @@ namespace cepgen {
 #undef LHAPDF_GE_6
 #endif
 
-REGISTER_STRFUN(Partonic, strfun::Partonic)
+REGISTER_STRFUN(strfun::Type::Partonic, Partonic, strfun::Partonic)

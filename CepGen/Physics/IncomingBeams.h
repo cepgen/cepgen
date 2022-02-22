@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,51 +23,30 @@
 #include <memory>
 #include <vector>
 
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/ParametersDescription.h"
+#include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/Modes.h"
-#include "CepGen/Physics/Momentum.h"
 
 namespace cepgen {
-  enum class KTFlux;
-  namespace strfun {
-    class Parameterisation;
-  }
-  namespace formfac {
-    class Parameterisation;
-  }
-
-  /// Incoming beams characteristics
-  struct Beam {
-    Beam();             ///< Default constructor
-    Momentum momentum;  ///< Incoming particle momentum
-    pdgid_t pdg;        ///< PDG identifier for the beam
-    mode::Beam mode;    ///< Beam treatment mode
-    KTFlux kt_flux;     ///< Type of \f$k_{\rm T}\f$-factorised flux to be considered (if any)
-  };
-  /// Human-readable description of a beam particle/system
-  std::ostream& operator<<(std::ostream&, const Beam&);
-
   /// Beam/primary particle's kinematics
-  class IncomingBeams : private std::pair<Beam, Beam> {
+  class IncomingBeams : public SteeredObject<IncomingBeams> {
   public:
-    IncomingBeams() = default;
-    explicit IncomingBeams(const ParametersList&);
+    explicit IncomingBeams(const ParametersList& = ParametersList());
 
+    static ParametersDescription description();
     /// List containing all parameters handled
-    ParametersList parameters() const;
+    const ParametersList& parameters() const override;
 
-    const Beam& positive() const { return this->first; }
-    Beam& positive() { return this->first; }
-    const Beam& negative() const { return this->second; }
-    Beam& negative() { return this->second; }
+    const Beam& positive() const { return pos_beam_; }
+    Beam& positive() { return pos_beam_; }
+    const Beam& negative() const { return neg_beam_; }
+    Beam& negative() { return neg_beam_; }
 
-    /// Set the beams for the type of kinematics to consider
-    void setMode(const mode::Kinematics&);
     /// Type of kinematics to consider for the phase space
     mode::Kinematics mode() const;
 
-    /// Set the beams momenta according to the centre of mass energy
-    void setSqrtS(double sqrts);
+    /// Set the incoming beams centre of mass energy (in GeV)
+    void setSqrtS(double);
     /// Incoming beams squared centre of mass energy (in GeV^2)
     double s() const;
     /// Incoming beams centre of mass energy (in GeV)
@@ -86,6 +65,8 @@ namespace cepgen {
     void setStructureFunctions(int, int);
 
   private:
+    Beam pos_beam_;
+    Beam neg_beam_;
     /// Type of form factors to consider
     std::shared_ptr<formfac::Parameterisation> form_factors_;
     /// Type of structure functions to consider

@@ -4,8 +4,8 @@
 c     =================================================================
 c     CepGen common blocks for kinematics definition
 c     =================================================================
-      include 'CepGen/Processes/Fortran/KTBlocks.inc'
-      data iflux1,iflux2,sfmod,pdg_l/10,100,11,13/
+      include 'CepGen/Process/Fortran/KTBlocks.inc'
+      data iflux1,iflux2,pdg_l/10,100,13/
       data a_nuc1,z_nuc1,a_nuc2,z_nuc2/1,1,208,82/
 
 c     =================================================================
@@ -34,7 +34,7 @@ c     =================================================================
       double precision term8,term9,term10,amat2
       double precision ak1_x,ak1_y,ak2_x,ak2_y
       double precision eps12,eps22
-      double precision aux2_1,aux2_2,f1,f2
+      double precision aux2_1,aux2_2
       double precision Phi10,Phi102,Phi11_x,Phi11_y,Phi112
       double precision Phi20,Phi202,Phi21_x,Phi21_y,Phi212
       double precision Phi11_dot_e,Phi11_cross_e
@@ -472,21 +472,6 @@ c     second parton coupling
 c     =================================================================
       coupling = coupling * 4.d0*pi*alpha_em*q_l**2 ! photon exchange
 
-c     ============================================
-c     unintegrated parton distributions
-c     ============================================
-
-      if(a_nuc1.le.1) then
-        f1 = CepGen_kT_flux(iflux1,x1,q1t2,sfmod,am_p,am_x)
-      else
-        f1 = CepGen_kT_flux_HI(iflux1,x1,q1t2,a_nuc1,z_nuc1)
-      endif
-      if(a_nuc2.le.1) then
-        f2 = CepGen_kT_flux(iflux2,x2,q2t2,sfmod,am_p,am_y)
-      else
-        f2 = CepGen_kT_flux_HI(iflux2,x2,q2t2,a_nuc2,z_nuc2)
-      endif
-
 c     =================================================================
 c     factor 2.*pi below from integration over phi_sum
 c     factor 1/4 below from jacobian of transformations
@@ -496,7 +481,7 @@ c     =================================================================
 
       aintegral = (2.d0*pi)*1.d0/(16.d0*pi**2*(x1*x2*s)**2) * amat2
      &          * coupling
-     &          * f1/pi * f2/pi * (1.d0/4.d0) * units
+     &          * (1.d0/4.d0) * units
      &          * 0.5d0 * 4.0d0 / (4.d0*pi)
 
 c     *****************************************************************

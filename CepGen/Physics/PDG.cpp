@@ -50,10 +50,11 @@ namespace cepgen {
   bool PDG::has(pdgid_t id) const { return particles_.count(id) > 0; }
 
   const ParticleProperties& PDG::operator()(pdgid_t id) const {
-    if (particles_.count(id) > 0)
-      return particles_.at(id);
+    auto it = particles_.find(id);
+    if (it != particles_.end())
+      return it->second;
     dump();
-    throw CG_WARNING("PDG") << "No particle with PDG id " << id << " in the catalogue.";
+    throw CG_FATAL("PDG") << "No particle with PDG id " << id << " in the catalogue.";
   }
 
   void PDG::define(const ParticleProperties& props) {

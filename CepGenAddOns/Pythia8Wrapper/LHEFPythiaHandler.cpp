@@ -38,7 +38,8 @@ namespace cepgen {
       /// Class constructor
       explicit LHEFPythiaHandler(const ParametersList&);
       ~LHEFPythiaHandler();
-      static std::string description() { return "Pythia 8-based LHEF output module"; }
+
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override;
       /// Writer operator
@@ -57,8 +58,8 @@ namespace cepgen {
         : ExportModule(params),
           pythia_(new Pythia8::Pythia),
           lhaevt_(new Pythia8::CepGenEvent),
-          compress_event_(params.get<bool>("compress", true)),
-          filename_(params.get<std::string>("filename", "output.lhe")),
+          compress_event_(steer<bool>("compress")),
+          filename_(steer<std::string>("filename")),
           gzip_(false) {
 #ifdef GZIP_BIN
       if (utils::fileExtension(filename_) == ".gz") {
@@ -117,6 +118,14 @@ namespace cepgen {
 
     void LHEFPythiaHandler::setCrossSection(double cross_section, double cross_section_err) {
       lhaevt_->setCrossSection(0, cross_section, cross_section_err);
+    }
+
+    ParametersDescription LHEFPythiaHandler::description() {
+      auto desc = ExportModule::description();
+      desc.setDescription("Pythia 8-based LHEF output module");
+      desc.add<bool>("compress", true);
+      desc.add<std::string>("filename", "output.lhe").setDescription("Output filename");
+      return desc;
     }
   }  // namespace io
 }  // namespace cepgen

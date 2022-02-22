@@ -24,44 +24,24 @@
 namespace cepgen {
   const double Kinematics::MX_MIN = 1.07;  // mp+mpi+-
 
-  Kinematics::Kinematics(const ParametersList& params) : incoming_beams_(params) {
+  Kinematics::Kinematics(const ParametersList& params)
+      : SteeredObject(params), incoming_beams_(params_), cuts_(params_) {
     CG_DEBUG("Kinematics") << "Building a Kinematics parameters container "
                            << "with the following parameters:\n\t" << params << ".";
-    //----- phase space definition
-    setParameters(params);
-  }
-
-  void Kinematics::setParameters(const ParametersList& params) {
-    //--- initial partons
-    cuts_.initial.setParameters(params);
-
-    //--- central system
-    cuts_.central.setParameters(params);
-    if (params.has<Limits>("phiptdiff")) {
-      CG_WARNING("Kinematics") << "\"phiptdiff\" parameter is deprecated! "
-                               << "Please use \"phidiff\" instead.";
-      params.fill<Limits>("phiptdiff", cuts_.central.phi_diff());  //legacy
-    }
-    if (params.has<std::vector<int> >("minFinalState"))
-      for (const auto& pdg : params.get<std::vector<int> >("minFinalState"))
+    //----- outgoing particles definition
+    if (params_.has<std::vector<int> >("minFinalState"))
+      for (const auto& pdg : steer<std::vector<int> >("minFinalState"))
         minimum_final_state_.emplace_back((pdgid_t)pdg);
-    if (params.has<ParametersList>("cuts")) {  // per-particle cuts
-      const auto& per_parts = params.get<ParametersList>("cuts");
-      for (const auto& part : per_parts.keys())
-        cuts_.central_particles[(pdgid_t)stoi(part)].setParameters(per_parts.get<ParametersList>(part));
-    }
-
-    //--- outgoing remnants
-    cuts_.remnants.setParameters(params);
-    // sanity check
-    if (cuts_.remnants.mx().min() < MX_MIN) {
-      CG_WARNING("Kinematics:setParameters") << "Minimum diffractive mass set to " << MX_MIN << " GeV.";
-      cuts_.remnants.mx().min() = MX_MIN;
-    }
 
     //--- specify where to look for the grid path for gluon emission
     if (params.has<std::string>("kmrGridPath"))
-      kmr::GluonGrid::get(params.get<std::string>("kmrGridPath"));
+      kmr::GluonGrid::get(ParametersList(params_).set<std::string>("path", steer<std::string>("kmrGridPath")));
+  }
+
+  void Kinematics::setParameters(const ParametersList& params) {
+    SteeredObject::setParameters(params);
+    incoming_beams_.setParameters(params_);
+    cuts_.setParameters(params_);
   }
 
   ParametersList Kinematics::parameters(bool extended) const {
@@ -89,28 +69,10 @@ namespace cepgen {
     return params;
   }
 
-  std::ostream& operator<<(std::ostream& os, const Kinematics::CutsList& kin) {
-    std::string sep;
-    os << "initial: {";
-    for (const auto& cut : kin.initial.list())
-      os << sep << cut, sep = ", ";
-    os << "}, central: {";
-    sep.clear();
-    for (const auto& cut : kin.central.list())
-      os << sep << cut, sep = ", ";
-    os << "}, remnants: {";
-    sep.clear();
-    for (const auto& cut : kin.remnants.list())
-      os << sep << cut, sep = ", ";
-    return os << "}";
+  ParametersDescription Kinematics::description() {
+    auto desc = ParametersDescription();
+    desc += IncomingBeams::description();
+    desc += CutsList::description();
+    return desc;
   }
-
-  //--------------------------------------------------------------------
-  // List of kinematics limits
-  //--------------------------------------------------------------------
-
-  Kinematics::CutsList::CutsList()
-      : initial(ParametersList().set<Limits>("q2", {0., 1.e5})),
-        central(ParametersList().set<double>("ptmin", 0.)),
-        remnants(ParametersList().set<Limits>("mx", {MX_MIN, 1000.})) {}
 }  // namespace cepgen

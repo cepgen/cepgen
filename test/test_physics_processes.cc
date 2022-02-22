@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
 
 #include <cmath>
 #include <fstream>
-#include <iostream>
 
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Generator.h"
@@ -30,29 +29,25 @@
 #include "CepGen/Utils/Timer.h"
 
 using namespace std;
-using namespace cepgen;
 
 int main(int argc, char* argv[]) {
   double num_sigma;
   string cfg_filename;
   string integrator;
-  bool debug, quiet;
+  bool quiet;
 
-  ArgumentsParser(argc, argv)
-      .addArgument("cfg,c", "configuration file", &cfg_filename)
-      .addOptionalArgument("debug,d", "debugging mode", &debug, false)
+  cepgen::ArgumentsParser argparse(argc, argv);
+  argparse.addArgument("cfg,c", "configuration file", &cfg_filename)
       .addOptionalArgument("quiet,q", "quiet mode", &quiet, false)
       .addOptionalArgument("num-sigma,n", "max. number of std.dev.", &num_sigma, 3.)
       .addOptionalArgument("integrator,i", "type of integrator used", &integrator, "Vegas")
       .parse();
 
-  if (debug)
-    utils::Logger::get().level = utils::Logger::Level::debug;
-  else if (quiet)
-    utils::Logger::get().level = utils::Logger::Level::error;
+  if (quiet)
+    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::error;
 
-  utils::Timer tmr;
-  Generator gen;
+  cepgen::utils::Timer tmr;
+  cepgen::Generator gen;
 
   CG_LOG << "Testing with " << integrator << " integrator.";
 
@@ -61,7 +56,7 @@ int main(int argc, char* argv[]) {
   CG_LOG << "Initial configuration time: " << tmr.elapsed() * 1.e3 << " ms.";
   tmr.reset();
 
-  new utils::AbortHandler;
+  new cepgen::utils::AbortHandler;
 
   struct Test {
     string filename;
@@ -86,24 +81,24 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  CG_LOG << "Will run " << utils::s("test", tests.size()) << ".";
+  CG_LOG << "Will run " << cepgen::utils::s("test", tests.size()) << ".";
 
-  std::unique_ptr<utils::ProgressBar> progress;
-  if (debug)
-    progress.reset(new utils::ProgressBar(tests.size()));
+  std::unique_ptr<cepgen::utils::ProgressBar> progress;
+  if (argparse.debugging())
+    progress.reset(new cepgen::utils::ProgressBar(tests.size()));
 
   try {
     unsigned short num_tests = 0;
     for (const auto& test : tests) {
       gen.parametersRef().clearProcess();
 
-      const std::string filename = "test/test_processes/" + test.filename + "_cfg.py";
+      const std::string filename = "test_processes/" + test.filename + "_cfg.py";
 
       gen.setParameters(cepgen::card::Handler::parse(filename));
 
       CG_DEBUG("main") << gen.parameters();
 
-      gen.parameters()->integrator->setName<std::string>(integrator);
+      gen.parametersRef().par_integrator.setName<std::string>(integrator);
       CG_LOG << "Process: " << gen.parameters()->processName() << "\n\t"
              << "File: " << filename << "\n\t"
              << "Configuration time: " << tmr.elapsed() * 1.e3 << " ms.";
@@ -127,19 +122,19 @@ int main(int argc, char* argv[]) {
              << "Computation time: " << tmr.elapsed() * 1.e3 << " ms.";
       tmr.reset();
 
-      const string test_res = utils::format(
+      const string test_res = cepgen::utils::format(
           "%-40s\tref=%g\tgot=%g\tratio=%g\tpull=%+10.5f", test.filename.c_str(), test.ref_cs, new_cs, ratio, pull);
       if (success)
         passed_tests.emplace_back(test_res);
       else
         failed_tests.emplace_back(test_res);
       ++num_tests;
-      if (debug)
+      if (argparse.debugging())
         progress->update(num_tests);
       CG_LOG << "Test " << num_tests << "/" << tests.size() << " finished. "
-             << "Success: " << utils::yesno(success) << ".";
+             << "Success: " << cepgen::utils::yesno(success) << ".";
     }
-  } catch (const Exception& e) {
+  } catch (const cepgen::Exception& e) {
   }
   if (failed_tests.size() != 0) {
     ostringstream os_failed, os_passed;

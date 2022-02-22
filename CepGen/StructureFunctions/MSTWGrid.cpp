@@ -33,7 +33,8 @@ namespace mstw {
   public:
     /// Grid MSTW structure functions evaluator
     explicit Grid(const cepgen::ParametersList&);
-    static std::string description() { return "MSTW(grid)"; }
+
+    static cepgen::ParametersDescription description();
 
     /// Grid header information as parsed from the file
     struct header_t {
@@ -66,12 +67,6 @@ namespace mstw {
     Grid& computeFL(double, double) override { return *this; }
     Grid& computeFL(double, double, double) override { return *this; }
 
-    /// Get the associated grid object
-    const cepgen::GridHandler<2, 2>& grid() const { return *this; }
-
-    /// Default location for the MSTW grid values
-    static constexpr const char* DEFAULT_MSTW_GRID_PATH = "mstw_sf_scan_nnlo.dat";
-
   private:
     static const unsigned int GOOD_MAGIC;
 
@@ -91,7 +86,7 @@ namespace mstw {
   Grid::Grid(const cepgen::ParametersList& params)
       : cepgen::strfun::Parameterisation(params), cepgen::GridHandler<2, 2>(cepgen::GridType::logarithmic) {
     {  // file readout part
-      const std::string grid_path = params_.get<std::string>("gridPath", DEFAULT_MSTW_GRID_PATH);
+      const std::string grid_path = steer<std::string>("gridPath");
       std::ifstream file(grid_path, std::ios::binary | std::ios::in);
       if (!file.is_open())
         throw CG_FATAL("MSTW") << "Failed to load grid file \"" << grid_path << "\"!";
@@ -134,10 +129,17 @@ namespace mstw {
   }
 
   Grid& Grid::eval(double xbj, double q2) {
-    const std::array<double, 2> val = cepgen::GridHandler<2, 2>::eval({xbj, q2});
-    F2 = val[0];
-    FL = val[1];
+    const auto& val = cepgen::GridHandler<2, 2>::eval({xbj, q2});
+    setF2(val.at(0));
+    setFL(val.at(1));
     return *this;
+  }
+
+  cepgen::ParametersDescription Grid::description() {
+    auto desc = Parameterisation::description();
+    desc.setDescription("MSTW grid (perturbative)");
+    desc.add<std::string>("gridPath", "mstw_sf_scan_nnlo.dat").setDescription("Path to the MSTW grid content");
+    return desc;
   }
 
   std::ostream& operator<<(std::ostream& os, const Grid::sfval_t& val) {
@@ -178,4 +180,4 @@ namespace mstw {
   }
 }  // namespace mstw
 
-REGISTER_STRFUN(MSTWgrid, mstw::Grid)
+REGISTER_STRFUN(strfun::Type::MSTWgrid, MSTWgrid, mstw::Grid)

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cmath>
+
 #include "CepGen/Physics/Utils.h"
 
 namespace cepgen {
@@ -23,5 +25,7 @@ namespace cepgen {
     double mX2(double xbj, double q2, double mp2) { return mp2 + q2 * (1. - xbj) / xbj; }
 
     double xBj(double q2, double mp2, double mx2) { return q2 / (q2 - mp2 + mx2); }
+
+    double energyFromW(double w, double mp2, double m2) { return 0.5 * (w * w - mp2 + m2) / w; }
   }  // namespace utils
 }  // namespace cepgen

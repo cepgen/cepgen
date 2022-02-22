@@ -28,7 +28,9 @@ namespace cepgen {
     class FunctionalExprTk final : public Functional {
     public:
       explicit FunctionalExprTk(const ParametersList&);
-      double eval(const std::vector<double>&) const override;
+      double eval() const override;
+
+      static ParametersDescription description();
 
     private:
       exprtk::symbol_table<double> symbols_;
@@ -41,12 +43,18 @@ namespace cepgen {
         symbols_.add_variable(vars_[i], values_[i]);
       symbols_.add_constants();
       expr_.register_symbol_table(symbols_);
-      replace_all(expression_, "**", "^");
-      if (!parser_.compile(expression_, expr_))
+      auto expr = replace_all(expression_, {{"**", "^"}});
+      if (!parser_.compile(expr, expr_))
         throw CG_WARNING("FunctionalExprTk") << "Failed to compile expression \"" << expression() << "\".";
     }
 
-    double FunctionalExprTk::eval(const std::vector<double>&) const { return expr_.value(); }
+    double FunctionalExprTk::eval() const { return expr_.value(); }
+
+    ParametersDescription FunctionalExprTk::description() {
+      auto desc = Functional::description();
+      desc.setDescription("ExprTk functional evaluator");
+      return desc;
+    }
   }  // namespace utils
 }  // namespace cepgen
 

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,12 +25,12 @@
 #include "CepGen/Event/EventBrowser.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
 #include "CepGen/Parameters.h"
-#include "CepGen/Processes/Process.h"
+#include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  ProcessIntegrand::ProcessIntegrand(const Parameters* params) : Integrand(params) {
+  ProcessIntegrand::ProcessIntegrand(const Parameters* params) : params_(params), tmr_(new utils::Timer) {
     if (!params_) {
       CG_WARNING("ProcessIntegrand") << "Invalid runtime parameters specified.";
       return;
@@ -44,7 +44,7 @@ namespace cepgen {
     CG_DEBUG("ProcessIntegrand") << "Process " << process_->name() << " successfully cloned from base process "
                                  << params_->process().name() << ".";
     //--- prepare the event content
-    process_->setKinematics(params_->kinematics);
+    process_->setKinematics(Kinematics(params_->par_kinematics));
     if (process_->hasEvent())
       event_ = &process_->event();
 
@@ -76,7 +76,7 @@ namespace cepgen {
     if (!event_)
       return weight;
     if (!storage_ && !params_->eventModifiersSequence().empty() && !params_->tamingFunctions().empty() &&
-        params_->kinematics.cuts().central_particles.empty())
+        params_->kinematics().cuts().central_particles.empty())
       return weight;
 
     //--- fill in the process' Event object
@@ -116,13 +116,13 @@ namespace cepgen {
     //--- apply cuts on final state system (after hadronisation!)
     //    (polish your cuts, as this might be very time-consuming...)
 
-    if (!params_->kinematics.cuts().central_particles.empty())
+    if (!params_->kinematics().cuts().central_particles.empty())
       for (const auto& part : (*event_)[Particle::CentralSystem]) {
         // retrieve all cuts associated to this final state particle in the
         // central system
-        if (params_->kinematics.cuts().central_particles.count(part.pdgId()) == 0)
+        if (params_->kinematics().cuts().central_particles.count(part.pdgId()) == 0)
           continue;
-        const auto& cuts_pdgid = params_->kinematics.cuts().central_particles.at(part.pdgId());
+        const auto& cuts_pdgid = params_->kinematics().cuts().central_particles.at(part.pdgId());
         // apply these cuts on the given particle
         if (!cuts_pdgid.pt_single().contains(part.momentum().pt()))
           return 0.;
@@ -133,7 +133,7 @@ namespace cepgen {
         if (!cuts_pdgid.rapidity_single().contains(part.momentum().rapidity()))
           return 0.;
       }
-    const auto& remn_cut = params_->kinematics.cuts().remnants;
+    const auto& remn_cut = params_->kinematics().cuts().remnants;
     for (const auto& system : {Particle::OutgoingBeam1, Particle::OutgoingBeam2})
       for (const auto& part : (*event_)[system]) {
         if (part.status() != Particle::Status::FinalState)

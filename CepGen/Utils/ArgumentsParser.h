@@ -59,6 +59,8 @@ namespace cepgen {
     void print_version() const;
     /// Return usage message
     std::string help_message() const;
+    /// Is the debugging flag set?
+    bool debugging() const { return debug_req_; }
     /// Are extra configuration flags found in arguments list?
     const std::vector<std::string>& extra_config() const { return extra_config_; }
 
@@ -134,7 +136,8 @@ namespace cepgen {
     const ParametersCollection help_str_;
     const ParametersCollection version_str_;
     const ParametersCollection config_str_;
-    bool help_req_{false}, version_req_{false};
+    const ParametersCollection debug_str_;
+    bool help_req_{false}, version_req_{false}, debug_req_{false};
     ParametersCollection params_;
     std::vector<std::pair<std::string, std::string> > args_;
     std::vector<std::string> extra_config_;

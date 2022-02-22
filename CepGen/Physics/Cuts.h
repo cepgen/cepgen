@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Utils/Limits.h"
 
@@ -33,6 +34,8 @@ namespace cepgen {
   public:
     /// Define a cut from parameters list
     explicit Cuts(const ParametersList&);
+
+    static ParametersDescription description();
 
     /// Modify a few parameters values
     void setParameters(const ParametersList&);
@@ -179,6 +182,18 @@ namespace cepgen {
   }  // namespace cuts
   /// Collection of cuts to be applied on all particle with a given PDG id
   typedef std::unordered_map<pdgid_t, cuts::Central> PerIdCuts;
+  /// A collection of cuts to apply on the physical phase space
+  struct CutsList final : SteeredObject<CutsList> {
+    CutsList(const ParametersList& params = ParametersList());
+    void setParameters(const ParametersList&) override;
+    static ParametersDescription description();
+    cuts::Initial initial;        ///< Cuts on the initial particles kinematics
+    cuts::Central central;        ///< Cuts on the central system produced
+    PerIdCuts central_particles;  ///< Cuts on the central individual particles
+    cuts::Remnants remnants;      ///< Cuts on the beam remnants system
+  };
+  /// Human-readable description of a full kinematics cuts definition
+  std::ostream& operator<<(std::ostream&, const CutsList&);
 }  // namespace cepgen
 
 #endif

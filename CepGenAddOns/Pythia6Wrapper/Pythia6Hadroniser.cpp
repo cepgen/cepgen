@@ -71,9 +71,8 @@ namespace cepgen {
     class Pythia6Hadroniser : public Hadroniser {
     public:
       using Hadroniser::Hadroniser;
-      static std::string description() {
-        return "Interface to the Pythia 6 string hadronisation/fragmentation algorithm";
-      }
+
+      static ParametersDescription description();
 
       void setRuntimeParameters(const Parameters&) override {}
       inline void readString(const char* param) override { pygive(param); }
@@ -319,6 +318,12 @@ namespace cepgen {
       if (ranudq < 5. / 9.)
         return {PDG::up, 2101};  // (u,ud0)
       return {PDG::up, 2103};    // (u,ud1)
+    }
+
+    ParametersDescription Pythia6Hadroniser::description() {
+      auto desc = Hadroniser::description();
+      desc.setDescription("Interface to the Pythia 6 string hadronisation/fragmentation algorithm");
+      return desc;
     }
   }  // namespace hadr
 }  // namespace cepgen

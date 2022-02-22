@@ -32,7 +32,7 @@ namespace cepgen {
   public:
     explicit IntegratorVegas(const ParametersList&);
 
-    static std::string description() { return "Vegas stratified sampling integrator"; }
+    static ParametersDescription description();
 
     void integrate(double&, double&) override;
 
@@ -64,10 +64,10 @@ namespace cepgen {
 
   IntegratorVegas::IntegratorVegas(const ParametersList& params)
       : IntegratorGSL(params),
-        ncvg_(params.get<int>("numFunctionCalls", 50000)),
-        chisq_cut_(params.get<double>("chiSqCut", 1.5)),
-        treat_(params.get<bool>("treat", true)) {
-    verbosity_ = params.get<int>("verbose", -1);  // supersede the parent default verbosity level
+        ncvg_(steer<int>("numFunctionCalls")),
+        chisq_cut_(steer<double>("chiSqCut")),
+        treat_(steer<bool>("treat")) {
+    verbosity_ = steer<int>("verbose");  // supersede the parent default verbosity level
   }
 
   void IntegratorVegas::integrate(double& result, double& abserr) {
@@ -75,12 +75,12 @@ namespace cepgen {
       //--- start by preparing the grid/state
       vegas_state_.reset(gsl_monte_vegas_alloc(function_->dim));
       gsl_monte_vegas_params_get(vegas_state_.get(), &vegas_params_);
-      vegas_params_.iterations = params_.get<int>("iterations", 10);
-      vegas_params_.alpha = params_.get<double>("alpha", 1.5);
+      vegas_params_.iterations = steer<int>("iterations");
+      vegas_params_.alpha = steer<double>("alpha");
       vegas_params_.verbose = verbosity_;
-      vegas_params_.mode = params_.get<int>("mode", (int)Mode::importance);
+      vegas_params_.mode = steer<int>("mode");
       //--- output logging
-      const auto& log = params_.get<std::string>("loggingOutput", "cerr");
+      const auto& log = steer<std::string>("loggingOutput");
       if (log == "cerr")
         // redirect all debugging information to the error stream
         vegas_params_.ostream = stderr;
@@ -204,6 +204,20 @@ namespace cepgen {
         return os << "stratified";
     }
     return os;
+  }
+
+  ParametersDescription IntegratorVegas::description() {
+    auto desc = IntegratorGSL::description();
+    desc.setDescription("Vegas stratified sampling integrator");
+    desc.add<int>("numFunctionCalls", 50000);
+    desc.add<double>("chiSqCut", 1.5);
+    desc.add<bool>("treat", true).setDescription("Phase space treatment");
+    desc.add<int>("iterations", 10);
+    desc.add<double>("alpha", 1.5);
+    desc.addAs<int, Mode>("mode", Mode::importance);
+    desc.add<std::string>("loggingOutput", "cerr");
+    desc.add<int>("verbose", -1);
+    return desc;
   }
 }  // namespace cepgen
 

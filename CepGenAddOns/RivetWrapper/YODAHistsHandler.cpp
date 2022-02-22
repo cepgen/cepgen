@@ -43,11 +43,12 @@ namespace cepgen {
      * \tparam T YODA writer type
      */
     template <typename T>
-    class YODAHistsHandler : public ExportModule {
+    class YODAHistsHandler final : public ExportModule {
     public:
       explicit YODAHistsHandler(const ParametersList&);
       ~YODAHistsHandler();
-      static std::string description() { return "YODA histograms/profiles file output module"; }
+
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override {}
       void setCrossSection(double cross_section, double) override { cross_section_ = cross_section; }
@@ -68,9 +69,7 @@ namespace cepgen {
 
     template <typename T>
     YODAHistsHandler<T>::YODAHistsHandler(const ParametersList& params)
-        : ExportModule(params),
-          file_(params.get<std::string>("filename", "output.yoda")),
-          variables_(params.get<ParametersList>("variables")) {
+        : ExportModule(params), file_(steer<std::string>("filename")), variables_(steer<ParametersList>("variables")) {
       //--- extract list of variables/correlations to be plotted in histograms
       for (const auto& key : variables_.keys()) {
         const auto& vars = utils::split(key, ':');
@@ -78,10 +77,11 @@ namespace cepgen {
           throw CG_FATAL("YODAHistsHandler") << "Invalid number of variables to correlate for '" << key << "'!";
 
         const auto& hvars = variables_.get<ParametersList>(key);
-        int nbins_x = hvars.get<int>("nbinsX", 10);
-        nbins_x = hvars.get<int>("nbins", nbins_x);
-        const auto& xrange = hvars.get<Limits>("xrange", Limits{0., 1.});
-        const bool profile = hvars.get<bool>("profile", false);
+        int nbins_x = hvars.get<int>("nbinsX");
+        if (hvars.has<int>("nbins"))
+          nbins_x = hvars.get<int>("nbins");
+        const auto& xrange = hvars.get<Limits>("xrange");
+        const bool profile = hvars.get<bool>("profile");
         if (vars.size() == 1) {  // 1D histogram
           const auto title = utils::format("d(sigma)/d(%s) (pb/bin)", key.c_str());
           hists1d_.emplace_back(std::make_pair(key, YODA::Histo1D(nbins_x, xrange.min(), xrange.max(), key, title)));
@@ -89,8 +89,8 @@ namespace cepgen {
                                       << xrange << " for \"" << vars[0] << "\".";
           continue;
         }
-        const int nbins_y = hvars.get<int>("nbinsY", 10);
-        const auto& yrange = hvars.get<Limits>("yrange", Limits{0., 1.});
+        const int nbins_y = hvars.get<int>("nbinsY");
+        const auto& yrange = hvars.get<Limits>("yrange");
         if (vars.size() == 2) {  // 2D histogram
           const auto title = utils::format("d^2(sigma)/d(%s)/d(%s) (pb/bin)", vars[0].c_str(), vars[1].c_str());
           if (profile) {
@@ -159,6 +159,22 @@ namespace cepgen {
                           browser_.get(ev, h_var.first[2]),
                           cross_section_);
       weight_cnt_.fill(ev.weight);
+    }
+
+    template <typename T>
+    ParametersDescription YODAHistsHandler<T>::description() {
+      auto desc = ExportModule::description();
+      desc.setDescription("YODA histograms/profiles file output module");
+      desc.add<std::string>("filename", "output.yoda").setDescription("Output filename");
+      auto var_desc = ParametersDescription();
+      var_desc.add<int>("nbins", 0);
+      var_desc.add<int>("nbinsX", 10).setDescription("Bins multiplicity for x-axis");
+      var_desc.add<Limits>("xrange", Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
+      var_desc.add<int>("nbinsY", 10).setDescription("Bins multiplicity for y-axis");
+      var_desc.add<Limits>("yrange", Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
+      var_desc.add<bool>("profile", false);
+      desc.addParametersDescriptionVector("variables", var_desc);
+      return desc;
     }
   }  // namespace io
 }  // namespace cepgen

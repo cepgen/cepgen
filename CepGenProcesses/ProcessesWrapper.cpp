@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Processes/FortranKTProcess.h"
+#include "CepGen/Process/FortranKTProcess.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
 //=============================================================================
@@ -36,4 +36,4 @@ DECLARE_FORTRAN_FUNCTION(nucl_to_ff)
 //  REGISTER_FORTRAN_PROCESS(name, "description", function_name)
 //=============================================================================
 
-REGISTER_FORTRAN_PROCESS(pptoff_f77, "(p/A)(p/A) ↝ (g/ɣ)ɣ → f⁺f¯", nucl_to_ff)
+REGISTER_FORTRAN_PROCESS(pptoff_f77, "(p/A)(p/A) ↝ (g/γ)γ → f⁺f¯", nucl_to_ff)

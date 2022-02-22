@@ -14,7 +14,7 @@ class PDFMode:
 class StructureFunctions:
     """Types of structure functions supported"""
     generic = Module(0,
-        sigmaRatio = SigmaRatio.E143
+        sigmaRatio = SigmaRatio.SibirtsevBlunden
     )
     Electron            = generic.clone(1)
     ElasticProton       = generic.clone(2)
@@ -37,6 +37,7 @@ class StructureFunctions:
         #continuumSF = GD11p,
         #resonancesSF = ChristyBosted,
     )
+    KulaginBarinov = generic.clone(303)
     Partonic = generic.clone(401,
         pdfSet = 'LUXqed17_plus_PDF4LHC15_nnlo_100',
         numFlavours = 4,

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *                2017-2019  Wolfgang Schaefer
  *                2019       Marta Luszczak
  *
@@ -26,9 +26,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/NachtmannAmplitudes.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Processes/Process2to4.h"
-
-using namespace std::complex_literals;
+#include "CepGen/Process/Process2to4.h"
 
 namespace cepgen {
   namespace proc {
@@ -39,7 +37,7 @@ namespace cepgen {
       explicit PPtoWW(const ParametersList&);
       ProcessPtr clone() const override { return ProcessPtr(new PPtoWW(*this)); }
       enum class Polarisation { full = 0, LL = 1, LT = 2, TL = 3, TT = 4 };
-      static std::string description() { return "ɣɣ → W⁺W¯ (kt-factor.)"; }
+      static ParametersDescription description();
 
     private:
       void prepareProcessKinematics() override;
@@ -59,10 +57,15 @@ namespace cepgen {
         : Process2to4(params, {PDG::photon, PDG::photon}, PDG::W),
           mW_(PDG::get().mass(PDG::W)),
           mW2_(mW_ * mW_),
-          method_(params.get<int>("method", 1)),
-          ampl_(params) {
-      if (params.has<int>("polarisationStates"))
-        switch (params.getAs<int, Polarisation>("polarisationStates", Polarisation::full)) {
+          method_(steer<int>("method")),
+          ampl_(params_) {
+      const auto& states = steer<ParametersList>("polarisationStates");
+      if (!states.empty()) {
+        pol_w1_ = states.get<std::vector<int> >("W1");
+        pol_w2_ = states.get<std::vector<int> >("W2");
+      }
+      if (params_.has<int>("polarisationStates"))
+        switch (steerAs<int, Polarisation>("polarisationStates")) {
           case Polarisation::LL:
             pol_w1_ = {0};
             pol_w2_ = {0};
@@ -84,11 +87,6 @@ namespace cepgen {
             pol_w2_ = {-1, 0, 1};
             break;
         }
-      else if (params.has<ParametersList>("polarisationStates")) {
-        const auto& states = params.get<ParametersList>("polarisationStates");
-        pol_w1_ = states.get<std::vector<int> >("W1");
-        pol_w2_ = states.get<std::vector<int> >("W2");
-      }
       CG_DEBUG("PPtoWW") << "matrix element computation method: " << method_ << ", "
                          << "polarisation states: W1=" << pol_w1_ << ", W2=" << pol_w2_ << ".";
 
@@ -96,11 +94,10 @@ namespace cepgen {
         CG_INFO("PPtoWW") << "Nachtmann amplitudes (model: " << ampl_.mode() << ") initialised.";
         if (ampl_.mode() != NachtmannAmplitudes::Mode::SM) {
           if (ampl_.mode() != NachtmannAmplitudes::Mode::W && ampl_.mode() != NachtmannAmplitudes::Mode::Wbar)
-            throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for ɣɣ → W⁺W¯! "
+            throw CG_FATAL("PPtoWW") << "Invalid EFT extension enabled for γγ → W⁺W¯! "
                                      << "Only supported extensions are W and Wbar. Specified model: " << ampl_.mode()
                                      << ".";
-          CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << params.get<ParametersList>("eftParameters")
-                            << ".";
+          CG_INFO("PPtoWW") << "EFT extension enabled. Parameters: " << steer<ParametersList>("eftParameters") << ".";
         }
       }
     }
@@ -151,9 +148,23 @@ namespace cepgen {
           const auto pp = ampl_(kin, +1, +1, lam3, lam4), mm = ampl_(kin, -1, -1, lam3, lam4),
                      pm = ampl_(kin, +1, -1, lam3, lam4), mp = ampl_(kin, -1, +1, lam3, lam4);
           // add ME for this W helicity to total ME
-          hel_mat_elem += norm(p1 * (pp + mm) - 1.i * p2 * (pp - mm) - p3 * (pm + mp) - 1.i * p4 * (pm - mp));
+          hel_mat_elem += norm(p1 * (pp + mm) - std::complex<double>(0, 1) * p2 * (pp - mm) - p3 * (pm + mp) -
+                               std::complex<double>(0, 1) * p4 * (pm - mp));
         }
       return hel_mat_elem * std::pow(1. / qt1_ / qt2_, 2);
+    }
+
+    ParametersDescription PPtoWW::description() {
+      auto params = Process2to4::description();
+      params.setDescription("γγ → W⁺W¯ (kt-factor.)");
+      params.add<int>("method", 1)
+          .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell by Nachtmann et al.)");
+      ParametersDescription pol_states;
+      pol_states.add<std::vector<int> >("W1", {-1, 0, 1}).setDescription("First W+- polarisation states");
+      pol_states.add<std::vector<int> >("W2", {-1, 0, 1}).setDescription("Second W+- polarisation states");
+      params.add<ParametersDescription>("polarisationStates", pol_states);
+      params += NachtmannAmplitudes::description();
+      return params;
     }
   }  // namespace proc
 }  // namespace cepgen

@@ -20,7 +20,7 @@
 #define CepGen_FormFactors_Parameterisation_h
 
 #include "CepGen/Modules/NamedModule.h"
-#include "CepGen/Physics/Modes.h"
+#include "CepGen/Physics/Beam.h"
 
 namespace cepgen {
   class ParametersList;
@@ -39,23 +39,21 @@ namespace cepgen {
       /// Copy constructor
       Parameterisation(const Parameterisation&);
 
-      static std::string description() { return "Unnamed form factors parameterisation"; }
+      static ParametersDescription description();
 
       /// Dumping operator for standard output streams
       friend std::ostream& operator<<(std::ostream&, const Parameterisation*);
       /// Dumping operator for standard output streams
       friend std::ostream& operator<<(std::ostream&, const Parameterisation&);
 
-      /// Specify the structure functions modelling where applicable
-      void setStructureFunctions(strfun::Parameterisation* sfmod) { str_fun_ = sfmod; }
-      /// Retrieve the structure function interpolation object used here
-      strfun::Parameterisation* structureFunctions() const { return str_fun_; }
-
       /// \f$\tau=Q^2/4m_p^2\f$ variable definition
       double tau(double q2) const;
 
       /// Compute all relevant form factors functions for a given \f$Q^2\f$ value
-      Parameterisation& operator()(const mode::Beam& /*type*/, double /*q2*/, double mf2 = 0.);
+      Parameterisation& operator()(const Beam::Mode& /*type*/,
+                                   double /*q2*/,
+                                   double mf2 = 0.,
+                                   strfun::Parameterisation* sf = nullptr);
 
     protected:
       /// Proton magnetic moment
@@ -68,7 +66,6 @@ namespace cepgen {
       const double mp2_;  ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
 
     private:
-      strfun::Parameterisation* str_fun_{nullptr};
       double last_q2_{-1.};
 
     public:

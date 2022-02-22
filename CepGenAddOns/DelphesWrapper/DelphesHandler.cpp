@@ -41,7 +41,8 @@ namespace cepgen {
     public:
       explicit DelphesHandler(const ParametersList&);
       ~DelphesHandler();
-      static std::string description() { return "Delphes interfacing module"; }
+
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override;
       void setCrossSection(double cross_section, double /*err_cross_section*/) override {
@@ -66,9 +67,9 @@ namespace cepgen {
 
     DelphesHandler::DelphesHandler(const ParametersList& params)
         : ExportModule(params),
-          output_(new TFile(params.get<std::string>("filename", "output.delphes.root").c_str(), "recreate")),
-          input_card_(params.get<std::string>("inputCard", "input.tcl")),
-          compress_(params.get<bool>("compress", false)),
+          output_(new TFile(steer<std::string>("filename").c_str(), "recreate")),
+          input_card_(steer<std::string>("inputCard")),
+          compress_(steer<bool>("compress")),
           delphes_(new Delphes),
           conf_reader_(new ExRootConfReader),
           tree_writer_(new ExRootTreeWriter(output_.get(), "Delphes")) {
@@ -139,6 +140,15 @@ namespace cepgen {
       delphes_->ProcessTask();
       evt_aux->ProcTime = tmr.elapsed();
       tree_writer_->Fill();
+    }
+
+    ParametersDescription DelphesHandler::description() {
+      auto desc = ExportModule::description();
+      desc.setDescription("Delphes interfacing module");
+      desc.add<std::string>("filename", "output.delphes.root");
+      desc.add<std::string>("inputCard", "input.tcl");
+      desc.add<bool>("compress", false);
+      return desc;
     }
   }  // namespace io
 }  // namespace cepgen

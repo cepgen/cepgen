@@ -29,7 +29,7 @@
 
 namespace cepgen {
   template <size_t D, size_t N>
-  GridHandler<D, N>::GridHandler(const GridType& grid_type) : grid_type_(grid_type), accel_{} {
+  GridHandler<D, N>::GridHandler(const GridType& grid_type) : grid_type_(grid_type) {
     for (size_t i = 0; i < D; ++i)
       accel_.emplace_back(gsl_interp_accel_alloc(), gsl_interp_accel_free);
   }
@@ -58,9 +58,9 @@ namespace cepgen {
           int res = gsl_spline_eval_e(splines_1d_.at(i).get(), coord.at(0), accel_.at(0).get(), &out[i]);
           if (res != GSL_SUCCESS) {
             out[i] = 0.;
-            CG_WARNING("GridHandler") << "Failed to evaluate the grid value (N=" << i << ") "
-                                      << "for x = " << in_coords.at(0) << ". "
-                                      << "GSL error: " << gsl_strerror(res);
+            CG_WARNING("GridHandler") << "Failed to evaluate the value (N=" << i << ") "
+                                      << "for x = " << in_coords.at(0) << " in grid with boundaries " << boundaries()
+                                      << ". GSL error: " << gsl_strerror(res);
           }
         }
       } break;
@@ -71,9 +71,9 @@ namespace cepgen {
           int res = gsl_spline2d_eval_e(splines_2d_.at(i).get(), x, y, accel_.at(0).get(), accel_.at(1).get(), &out[i]);
           if (res != GSL_SUCCESS) {
             out[i] = 0.;
-            CG_WARNING("GridHandler") << "Failed to evaluate the grid value (N=" << i << ") "
-                                      << "for x = " << x << " / y = " << y << ". "
-                                      << "GSL error: " << gsl_strerror(res);
+            CG_WARNING("GridHandler") << "Failed to evaluate the value (N=" << i << ") "
+                                      << "for x = " << x << " / y = " << y << " in grid with boundaries "
+                                      << boundaries() << ". GSL error: " << gsl_strerror(res);
           }
         }
 #else
@@ -213,6 +213,13 @@ namespace cepgen {
       } break;
       case 2: {  //--- (x,y) |-> (f1,...)
 #ifdef GSL_VERSION_ABOVE_2_1
+        if (values_raw_.size() < gsl_interp2d_type_min_size(gsl_interp2d_bicubic))
+          CG_WARNING("GridHandler") << "The grid size is too small (" << values_raw_.size() << " < "
+                                    << gsl_interp2d_type_min_size(gsl_interp2d_bicubic)
+                                    << ") for bicubic interpolation. Switching to a bilinear interpolation mode.";
+        //const gsl_interp2d_type* type =
+        //    (values_raw_.size() > gsl_interp2d_type_min_size(gsl_interp2d_bicubic) ? gsl_interp2d_bicubic
+        //                                                                           : gsl_interp2d_bilinear);
         const gsl_interp2d_type* type = gsl_interp2d_bilinear;
         splines_2d_.clear();
         for (size_t i = 0; i < N; ++i) {

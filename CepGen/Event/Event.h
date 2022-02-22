@@ -96,6 +96,9 @@ namespace cepgen {
     /// \param[in] ids_ The unique identifiers to the particles to be selected in the event
     Particles operator[](const ParticlesIds& ids_) const;
 
+    /// Compute the missing momentum for central particles in this event
+    Momentum missingEnergy() const;
+
     //----- general particles information retriever
 
     /// List of all parent Particle object for this given particle

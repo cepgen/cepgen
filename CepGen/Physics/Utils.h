@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@ namespace cepgen {
     double mX2(double xbj, double q2, double mp2);
     /// Compute Bjorken x from virtuality/diffractive mass
     double xBj(double q2, double mp2, double mx2);
+    /// Compute energy from mass and emitted mass
+    double energyFromW(double w, double mp2, double m2);
   }  // namespace utils
 }  // namespace cepgen
 

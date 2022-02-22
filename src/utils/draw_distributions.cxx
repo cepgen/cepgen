@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,69 +16,77 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <TH1.h>
-
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/Event/EventBrowser.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGenAddOns/ROOTWrapper/ROOTCanvas.h"
+#include "CepGen/Utils/Drawer.h"
+#include "CepGen/Utils/Histogram.h"
+#include "CepGen/Utils/String.h"
 
 using namespace std;
-
-unique_ptr<TH1D> h_mass, h_ptpair, h_ptsingle, h_etasingle;
-void process_event(const cepgen::Event& ev, unsigned long event_id) {
-  CG_LOG << event_id;
-  const auto& central_system = ev[cepgen::Particle::CentralSystem];
-  const auto &pl1 = central_system[0].momentum(), pl2 = central_system[1].momentum();
-  h_mass->Fill((pl1 + pl2).mass());
-  h_ptpair->Fill((pl1 + pl2).pt());
-  h_ptsingle->Fill(pl1.pt());
-  h_etasingle->Fill(pl1.eta());
-}
 
 int main(int argc, char* argv[]) {
   cepgen::Generator mg;
 
-  string input_card;
+  vector<string> vars;
+  string input_card, plotter;
   int num_events;
+  bool draw_grid, log;
 
   cepgen::ArgumentsParser(argc, argv)
       .addArgument("input,i", "input card", &input_card)
+      .addArgument("vars", "variables to plot", &vars)
       .addOptionalArgument("num-events,n", "number of events to generate", &num_events, 100)
+      .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
+      .addOptionalArgument("log,l", "logarithmic axis", &log, false)
+      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .parse();
 
   mg.setParameters(cepgen::card::Handler::parse(input_card));
+  mg.parametersRef().clearOutputModulesSequence();
 
-  h_mass.reset(new TH1D("invm", ";Dilepton invariant mass;d#sigma/dM (pb/GeV)", 500, 0., 500.));
-  h_ptpair.reset(new TH1D("ptpair", ";Dilepton p_{T};d#sigma/dp_{T} (pb/GeV)", 500, 0., 50.));
-  h_ptsingle.reset(new TH1D("pt_single", ";Single lepton p_{T};d#sigma/dp_{T} (pb/GeV)", 100, 0., 100.));
-  h_etasingle.reset(new TH1D("eta_single", ";Single lepton #eta;d#sigma/d#eta (pb)\\?.2f", 60, -3., 3.));
+  // book all histograms
+  map<string, unique_ptr<cepgen::utils::Hist1D> > h_var_hist;
+  for (const auto& var : vars) {
+    cepgen::Limits lim{0., 250.};
+    if (var == "eta")
+      lim = {-3., 3.};
+    const auto parsed_var = cepgen::utils::replace_all(var, ":", ",");
+    h_var_hist[parsed_var].reset(new cepgen::utils::Hist1D(100, lim, cepgen::utils::sanitise(var)));
+    h_var_hist[parsed_var]->xAxis().setLabel(parsed_var);
+    h_var_hist[parsed_var]->yAxis().setLabel("d$\\sigma$/d" + parsed_var);
+  }
 
   CG_LOG << "Process name: " << mg.parameters()->processName() << ".";
 
-  mg.generate(num_events, process_event);
+  cepgen::utils::EventBrowser browser;
 
-  const double weight = mg.crossSection() / num_events;
-  h_mass->Scale(weight, "width");
-  h_ptpair->Scale(weight, "width");
-  h_ptsingle->Scale(weight, "width");
-  h_etasingle->Scale(weight, "width");
+  // generate the events and feed to the histogram(s)
+  mg.generate(num_events, [&browser, &h_var_hist](const cepgen::Event& ev, unsigned long) {
+    for (auto& var : h_var_hist)
+      var.second->fill(browser.get(ev, var.first));
+  });
 
-  const unordered_map<const char*, TH1D&> plots = {
-      {"dilepton_invm", *h_mass},
-      {"dilepton_ptpair", *h_ptpair},
-      {"singlelepton_pt", *h_ptsingle},
-      {"singlelepton_eta", *h_etasingle},
-  };
-  for (auto& plt : plots) {
-    cepgen::ROOTCanvas c(plt.first, "CepGen Simulation");
-    plt.second.Draw("hist");
-    c.Prettify(&plt.second);
-    c.SetLogy();
-    c.Save("pdf");
+  // normalise to cross section
+  for (auto& var : h_var_hist)
+    var.second->normalise(mg.crossSection() / num_events);
+
+  // if a plotter is specified, draw histograms
+  if (!plotter.empty()) {
+    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    cepgen::utils::Drawer::Mode dm;
+    if (log)
+      dm |= cepgen::utils::Drawer::Mode::logy;
+    if (draw_grid)
+      dm |= cepgen::utils::Drawer::Mode::grid;
+
+    for (const auto& var : h_var_hist)
+      plt->draw(*var.second, dm);
   }
 
   return 0;

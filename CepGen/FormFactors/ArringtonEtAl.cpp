@@ -28,7 +28,7 @@ namespace cepgen {
     public:
       explicit ArringtonEtAl(const ParametersList&);
 
-      static std::string description() { return "Arrington et al."; }
+      static ParametersDescription description();
 
     private:
       void compute(double q2) override;
@@ -38,8 +38,7 @@ namespace cepgen {
       std::vector<double> a_m_, b_m_;
     };
 
-    ArringtonEtAl::ArringtonEtAl(const ParametersList& params)
-        : Parameterisation(params), mode_(params.get<int>("mode")) {
+    ArringtonEtAl::ArringtonEtAl(const ParametersList& params) : Parameterisation(params), mode_(steer<int>("mode")) {
       switch (mode_) {
         case 0:  // original
           a_e_ = {3.439, -1.602, 0.068};
@@ -84,6 +83,16 @@ namespace cepgen {
       for (size_t i = 0; i < b_m_.size(); ++i)
         den_m += b_m_.at(i) * pow(tau_val, 1. + i);
       GM = MU * num_m / den_m;
+    }
+
+    ParametersDescription ArringtonEtAl::description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("Arrington et al.");
+      desc.add<int>("mode", 0).setDescription(
+          "Parameterisation mode "
+          "(0 = original, 1 = fit of quoted Ge+dGe values, "
+          "2 = fit of quoted Ge-dGe values, 3 = fit of quoted Ge values");
+      return desc;
     }
   }  // namespace formfac
 }  // namespace cepgen

@@ -1,5 +1,6 @@
 #!/bin/sh
 
+source /afs/atlas.umich.edu/home/rkwang/public/sw/setup_TopDrawer.sh
 #--- proper gcc/gfortran/cmake version
 export CVMFS_DIR=/cvmfs/sft.cern.ch/lcg/releases
 source ${CVMFS_DIR}/clang/9.0.0-a1c77/x86_64-centos7-gcc9-opt/setup.sh

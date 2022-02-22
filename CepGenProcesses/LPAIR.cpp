@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenProcesses/LPAIR.h"
 
@@ -30,13 +29,13 @@ namespace cepgen {
   namespace proc {
     LPAIR::LPAIR(const ParametersList& params)
         : Process(params, true),
-          n_opt_(params.get<int>("nopt", 0)),
-          pair_(params.get<int>("pair", (int)PDG::muon)),
-          symmetrise_(params.get<bool>("symmetrise", false)),
+          n_opt_(steer<int>("nopt")),
+          pair_(steer<int>("pair")),
+          symmetrise_(steer<bool>("symmetrise")),
           rnd_phi_(0., 2. * M_PI),
           rnd_side_(0, 1) {
       if (params_.has<ParticleProperties>("pair"))
-        pair_ = params_.get<ParticleProperties>("pair").pdgid;
+        pair_ = steer<ParticleProperties>("pair").pdgid;
     }
 
     LPAIR::LPAIR(const LPAIR& proc)
@@ -93,32 +92,32 @@ namespace cepgen {
       defineVariable(x6_, Mapping::linear, {0., 1.}, {0., 1.}, "x6");
 
       //--- first outgoing beam particle or remnant mass
-      switch (kin_.incomingBeams().positive().mode) {
-        case mode::Beam::PointLikeFermion:
-        case mode::Beam::ProtonElastic:
+      switch (kin_.incomingBeams().positive().mode()) {
+        case Beam::Mode::PointLikeFermion:
+        case Beam::Mode::ProtonElastic:
           event_->oneWithRole(Particle::OutgoingBeam1).setPdgId(event_->oneWithRole(Particle::IncomingBeam1).pdgId());
           mX2_ = p1_lab_.mass2();
           break;
-        case mode::Beam::ProtonInelastic:
+        case Beam::Mode::ProtonInelastic:
           defineVariable(mX2_, Mapping::power_law, wx_lim_ob1, wx_lim_ob1, "MX2");
           break;
         default:
           throw CG_FATAL("LPAIR:kinematics")
-              << "Invalid mode for beam 1: " << kin_.incomingBeams().positive().mode << " is not supported!";
+              << "Invalid mode for beam 1: " << kin_.incomingBeams().positive().mode() << " is not supported!";
       }
       //--- second outgoing beam particle or remnant mass
-      switch (kin_.incomingBeams().negative().mode) {
-        case mode::Beam::PointLikeFermion:
-        case mode::Beam::ProtonElastic:
+      switch (kin_.incomingBeams().negative().mode()) {
+        case Beam::Mode::PointLikeFermion:
+        case Beam::Mode::ProtonElastic:
           event_->oneWithRole(Particle::OutgoingBeam2).setPdgId(event_->oneWithRole(Particle::IncomingBeam2).pdgId());
           mY2_ = p2_lab_.mass2();
           break;
-        case mode::Beam::ProtonInelastic:
+        case Beam::Mode::ProtonInelastic:
           defineVariable(mY2_, Mapping::power_law, wx_lim_ob2, wx_lim_ob2, "MY2");
           break;
         default:
           throw CG_FATAL("LPAIR:kinematics")
-              << "Invalid mode for beam 2: " << kin_.incomingBeams().negative().mode << " is not supported!";
+              << "Invalid mode for beam 2: " << kin_.incomingBeams().negative().mode() << " is not supported!";
       }
     }
 
@@ -760,10 +759,10 @@ namespace cepgen {
       //--- cut on mass of final hadronic system (MX/Y)
 
       if (kin_.cuts().remnants.mx().valid()) {
-        if (kin_.incomingBeams().positive().mode == mode::Beam::ProtonInelastic &&
+        if (kin_.incomingBeams().positive().mode() == Beam::Mode::ProtonInelastic &&
             !kin_.cuts().remnants.mx().contains(mx))
           return 0.;
-        if (kin_.incomingBeams().negative().mode == mode::Beam::ProtonInelastic &&
+        if (kin_.incomingBeams().negative().mode() == Beam::Mode::ProtonInelastic &&
             !kin_.cuts().remnants.mx().contains(my))
           return 0.;
       }
@@ -856,35 +855,23 @@ namespace cepgen {
 
       //----- first outgoing proton
       auto& op1 = event_->oneWithRole(Particle::OutgoingBeam1);
-
       p3_lab_.setPz(p3_lab_.pz() * ranz);
       op1.setMomentum(p3_lab_);
-      switch (kin_.incomingBeams().positive().mode) {
-        case mode::Beam::ProtonElastic:
-        default:
-          op1.setStatus(Particle::Status::FinalState);  // stable proton
-          break;
-        case mode::Beam::ProtonInelastic:
-          op1.setStatus(Particle::Status::Unfragmented);  // fragmenting remnants
-          op1.setMass(sqrt(mX2_));
-          break;
-      }
+      if (kin_.incomingBeams().positive().fragmented()) {
+        op1.setStatus(Particle::Status::Unfragmented);  // fragmenting remnants
+        op1.setMass(sqrt(mX2_));
+      } else
+        op1.setStatus(Particle::Status::FinalState);  // stable proton
 
       //----- second outgoing proton
       auto& op2 = event_->oneWithRole(Particle::OutgoingBeam2);
-
       p5_lab_.setPz(p5_lab_.pz() * ranz);
       op2.setMomentum(p5_lab_);
-      switch (kin_.incomingBeams().negative().mode) {
-        case mode::Beam::ProtonElastic:
-        default:
-          op2.setStatus(Particle::Status::FinalState);  // stable proton
-          break;
-        case mode::Beam::ProtonInelastic:
-          op2.setStatus(Particle::Status::Unfragmented);  // fragmenting remnants
-          op2.setMass(sqrt(mY2_));
-          break;
-      }
+      if (kin_.incomingBeams().negative().fragmented()) {
+        op2.setStatus(Particle::Status::Unfragmented);  // fragmenting remnants
+        op2.setMass(sqrt(mY2_));
+      } else
+        op2.setStatus(Particle::Status::FinalState);  // stable proton
 
       //----- first incoming photon
       auto& ph1 = event_->oneWithRole(Particle::Parton1);
@@ -919,14 +906,6 @@ namespace cepgen {
     //---------------------------------------------------------------------------------------------
 
     double LPAIR::periPP() const {
-      //--- compute the electric/magnetic form factors for the two
-      //    considered parton momenta transfers
-      const auto fp1 = (*kin_.incomingBeams().formFactors())(kin_.incomingBeams().positive().mode, -t1_, mX2_);
-      const auto fp2 = (*kin_.incomingBeams().formFactors())(kin_.incomingBeams().negative().mode, -t2_, mY2_);
-
-      CG_DEBUG_LOOP("LPAIR:peripp") << "(u1,u2) = " << fp1 << "\n\t"
-                                    << "(v1,v2) = " << fp2;
-
       const double qqq = q1dq_ * q1dq_, qdq = 4. * masses_.Ml2 - w4_;
       const double t11 = 64. *
                          (bb_ * (qqq - g4_ - qdq * (t1_ + t2_ + 2. * masses_.Ml2)) -
@@ -938,6 +917,13 @@ namespace cepgen {
                          t2_;  // magnetic-electric
       const double t22 = 512. * (bb_ * (delta_ * delta_ - gram_) - pow(epsi_ - delta_ * (qdq + q1dq2_), 2) -
                                  sa1_ * a6_ * a6_ - sa2_ * a5_ * a5_ - sa1_ * sa2_ * qqq);  // electric-electric
+
+      auto* ff = kin_.incomingBeams().formFactors();
+      auto* sf = kin_.incomingBeams().structureFunctions();
+      //--- compute the electric/magnetic form factors for the two
+      //    considered parton momenta transfers
+      const auto fp1 = kin_.incomingBeams().positive().flux(-t1_, mX2_, ff, sf);
+      const auto fp2 = kin_.incomingBeams().negative().flux(-t2_, mY2_, ff, sf);
 
       const double peripp =
           (fp1.FM * fp2.FM * t11 + fp1.FE * fp2.FM * t21 + fp1.FM * fp2.FE * t12 + fp1.FE * fp2.FE * t22) /
@@ -972,6 +958,15 @@ namespace cepgen {
       const double out = y + z + 0.5 * (am * zz - c / (am * zz));
       const double ax = sqrt(pow(out - y - z, 2) + c);
       return {out, ax * log(yy)};
+    }
+
+    ParametersDescription LPAIR::description() {
+      auto desc = Process::description();
+      desc.setDescription("γγ → l⁺l¯ (LPAIR)");
+      desc.add<int>("nopt", 0).setDescription("Optimised mode? (inherited from LPAIR, by default disabled = 0)");
+      desc.add<int>("pair", (int)PDG::muon).setDescription("Lepton pair considered");
+      desc.add<bool>("symmetrise", false).setDescription("Symmetrise along z the central system?");
+      return desc;
     }
   }  // namespace proc
 }  // namespace cepgen

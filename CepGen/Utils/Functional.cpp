@@ -25,14 +25,13 @@ namespace cepgen {
   namespace utils {
     Functional::Functional(const ParametersList& params)
         : NamedModule(params),
-          vars_orig_(params.get<std::vector<std::string> >("variables")),
-          expression_orig_(params.get<std::string>("expression")),
+          vars_orig_(steer<std::vector<std::string> >("variables")),
+          expression_orig_(steer<std::string>("expression")),
           vars_(vars_orig_),
           expression_(expression_orig_),
           values_(vars_.size()) {
       for (size_t i = 0; i < vars_.size(); ++i) {
-        replace_all(vars_.at(i), "(", "_");
-        replace_all(vars_.at(i), ")", "_");
+        vars_.at(i) = sanitise(vars_.at(i));
         replace_all(expression_, vars_orig_.at(i), vars_.at(i));
       }
     }
@@ -44,8 +43,19 @@ namespace cepgen {
     }
 
     double Functional::operator()(const std::vector<double>& x) const {
+      if (vars_.size() != x.size())
+        throw CG_FATAL("Functional") << "Invalid number of variables fed to the evaluator! Expecting " << vars_.size()
+                                     << ", got " << x.size() << ".";
       values_ = x;
-      return eval(x);
+      return eval();
+    }
+
+    ParametersDescription Functional::description() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Unnamed functional evaluator");
+      desc.add<std::vector<std::string> >("variables", {}).setDescription("List of variables to evaluate");
+      desc.add<std::string>("expression", "").setDescription("Functional expression");
+      return desc;
     }
   }  // namespace utils
 }  // namespace cepgen

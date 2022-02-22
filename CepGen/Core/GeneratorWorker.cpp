@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,15 +25,20 @@
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
 #include "CepGen/Parameters.h"
-#include "CepGen/Processes/Process.h"
+#include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ProgressBar.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  GeneratorWorker::GeneratorWorker(Parameters* params) : integrand_(new ProcessIntegrand(params)), params_(params) {
+  GeneratorWorker::GeneratorWorker(const Parameters* params)
+      : integrand_(new ProcessIntegrand(params)), params_(params) {
     CG_DEBUG("GeneratorWorker") << "New generator worker initialised for integration/event generation.\n\t"
                                 << "Parameters at " << (void*)params_ << ".";
+  }
+
+  GeneratorWorker::~GeneratorWorker() {
+    CG_DEBUG("GeneratorWorker") << "Generator worker destructed. Releasing the parameters at " << (void*)params_ << ".";
   }
 
   void GeneratorWorker::setIntegrator(const Integrator* integr) {
@@ -176,17 +181,18 @@ namespace cepgen {
     if (integrator_->eval(coords_) <= 0.)
       return false;
 
+    if (!integrand_->process().hasEvent())
+      return true;
+
+    const auto& event = integrand_->process().event();
     const auto ngen = params_->numGeneratedEvents();
-    if (integrand_->process().hasEvent()) {
-      auto& event = integrand_->process().event();
-      if ((ngen + 1) % params_->generation().printEvery() == 0)
-        CG_INFO("GeneratorWorker:store") << utils::s("event", ngen + 1, true) << " generated.";
-      if (callback)
-        callback(event, ngen);
-      for (auto& mod : params_->outputModulesSequence())
-        *mod << event;
-      const_cast<Parameters*>(params_)->addGenerationTime(event.time_total);
-    }
+    if ((ngen + 1) % params_->generation().printEvery() == 0)
+      CG_INFO("GeneratorWorker:store") << utils::s("event", ngen + 1, true) << " generated.";
+    if (callback)
+      callback(event, ngen);
+    for (auto& mod : params_->outputModulesSequence())
+      *mod << event;
+    const_cast<Parameters*>(params_)->addGenerationTime(event.time_total);
     return true;
   }
 

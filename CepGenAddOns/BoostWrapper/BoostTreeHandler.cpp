@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,11 +34,13 @@
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Parameters.h"
-#include "CepGen/Processes/Process.h"
+#include "CepGen/Process/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/TimeKeeper.h"
+#include "CepGenAddOns/BoostWrapper/BoostTreeUtils.h"
 
 namespace pt = boost::property_tree;
+namespace bc = boost::cepgen;
 
 namespace cepgen {
   namespace card {
@@ -47,7 +49,8 @@ namespace cepgen {
     public:
       /// Boost tree parser from a configuration card
       explicit BoostTreeHandler(const ParametersList&);
-      static std::string description() { return "Boost tree parser/writer"; }
+
+      static ParametersDescription description();
 
       Parameters* parse(const std::string&, Parameters*) override;
       void pack(const Parameters* params) override;
@@ -68,18 +71,11 @@ namespace cepgen {
       static constexpr const char* PROCESS_NAME = "process";
       static constexpr const char* KIN_NAME = "kinematics";
       static constexpr const char* INTEGR_NAME = "integrator";
-      static constexpr const char* GENERAL_NAME = "general";
       static constexpr const char* GENERATOR_NAME = "generator";
       static constexpr const char* EVT_MOD_SEQ_NAME = "eventSequence";
       static constexpr const char* OUTPUT_NAME = "output";
       static constexpr const char* TIMER_NAME = "timer";
       static constexpr const char* LOGGER_NAME = "logger";
-
-      template <typename T>
-      static pt::ptree pack(const std::vector<T>&);
-      static pt::ptree pack(const ParametersList&);
-      static pt::ptree pack(const Limits&);
-      static ParametersList unpack(const pt::ptree&);
 
       static void add(ParametersList&, const std::string&, const pt::ptree&);
 
@@ -94,11 +90,11 @@ namespace cepgen {
       read(filename);
 
       if (tree_.count(ADDONS_NAME))
-        for (const auto& lib : unpack(tree_.get_child(ADDONS_NAME)).keys())
+        for (const auto& lib : bc::unpack(tree_.get_child(ADDONS_NAME)).keys())
           loadLibrary(lib);
 
       try {
-        proc_ = unpack(tree_.get_child(PROCESS_NAME));
+        proc_ = bc::unpack(tree_.get_child(PROCESS_NAME));
         rt_params_->setProcess(proc::ProcessFactory::get().build(proc_));
       } catch (const boost::exception&) {
         throw CG_FATAL("BoostTreeHandler") << "Failed to retrieve a valid \"" << PROCESS_NAME << "\" block"
@@ -107,15 +103,13 @@ namespace cepgen {
       try {
         //----- phase space definition
         if (tree_.count(KIN_NAME))
-          rt_params_->kinematics = Kinematics(unpack(tree_.get_child(KIN_NAME)));
+          rt_params_->par_kinematics += bc::unpack(tree_.get_child(KIN_NAME));
         if (tree_.count(INTEGR_NAME))
-          *rt_params_->integrator += unpack(tree_.get_child(INTEGR_NAME));
-        if (tree_.count(GENERAL_NAME))
-          *rt_params_->general += unpack(tree_.get_child(GENERAL_NAME));
+          rt_params_->par_integrator += bc::unpack(tree_.get_child(INTEGR_NAME));
         if (tree_.count(GENERATOR_NAME))
-          rt_params_->generation() = Parameters::Generation(unpack(tree_.get_child(GENERATOR_NAME)));
+          rt_params_->generation().setParameters(bc::unpack(tree_.get_child(GENERATOR_NAME)));
         if (tree_.count(EVT_MOD_SEQ_NAME)) {
-          evt_mod_ = unpack(tree_.get_child(EVT_MOD_SEQ_NAME));
+          evt_mod_ = bc::unpack(tree_.get_child(EVT_MOD_SEQ_NAME));
           for (const auto& name : evt_mod_.keys()) {
             const auto& mod = evt_mod_.get<ParametersList>(name);
             if (!mod.empty())
@@ -123,7 +117,7 @@ namespace cepgen {
           }
         }
         if (tree_.count(OUTPUT_NAME)) {
-          evt_out_ = unpack(tree_.get_child(OUTPUT_NAME));
+          evt_out_ = bc::unpack(tree_.get_child(OUTPUT_NAME));
           for (const auto& name : evt_out_.keys()) {
             const auto& mod = evt_out_.get<ParametersList>(name);
             if (!mod.empty())
@@ -133,7 +127,7 @@ namespace cepgen {
         if (tree_.count(TIMER_NAME))
           rt_params_->setTimeKeeper(new utils::TimeKeeper);
         if (tree_.count(LOGGER_NAME)) {
-          log_ = unpack(tree_.get_child(LOGGER_NAME));
+          log_ = bc::unpack(tree_.get_child(LOGGER_NAME));
           utils::Logger::get().level =
               log_.getAs<int, utils::Logger::Level>("level", utils::Logger::Level::information);
           utils::Logger::get().setExtended(log_.get<bool>("extended", utils::Logger::get().extended()));
@@ -147,130 +141,8 @@ namespace cepgen {
       return rt_params_;
     }
 
-    template <>
-    pt::ptree BoostTreeHandler::pack<ParametersList>(const std::vector<ParametersList>& vec) {
-      pt::ptree out;
-      std::transform(vec.begin(), vec.end(), std::back_inserter(out), [](const auto& elem) {
-        return std::make_pair("", pack(elem));
-      });
-      return out;
-    }
-
-    template <typename T>
-    pt::ptree BoostTreeHandler::pack(const std::vector<T>& vec) {
-      pt::ptree out;
-      for (const auto& elem : vec) {
-        pt::ptree elem_tree;
-        elem_tree.put("", elem);
-        out.push_back(std::make_pair("", elem_tree));
-      }
-      return out;
-    }
-
-    template <>
-    pt::ptree BoostTreeHandler::pack<double>(const std::vector<double>& vec) {
-      pt::ptree out;
-      for (const auto& elem : vec) {
-        pt::ptree elem_tree;
-        std::ostringstream os;  // ensure floating point storage
-        os << std::scientific << elem;
-        elem_tree.put("", elem);
-        out.push_back(std::make_pair("", elem_tree));
-      }
-      return out;
-    }
-
-    pt::ptree BoostTreeHandler::pack(const ParametersList& params) {
-      pt::ptree out;
-      for (const auto& key : params.keys()) {
-        if (params.has<ParametersList>(key))
-          out.add_child(key, pack(params.get<ParametersList>(key)));
-        else if (params.has<int>(key))
-          out.put(key, params.get<int>(key));
-        else if (params.has<double>(key)) {
-          std::ostringstream os;  // ensure floating point storage
-          os << std::scientific << params.get<double>(key);
-          out.put(key, os.str());
-        } else if (params.has<std::string>(key))
-          out.put(key, params.get<std::string>(key));
-        else if (params.has<Limits>(key))
-          out.add_child(key, pack(params.get<Limits>(key)));
-        else if (params.has<std::vector<ParametersList> >(key))
-          out.add_child(key, pack(params.get<std::vector<ParametersList> >(key)));
-        else if (params.has<std::vector<int> >(key))
-          out.add_child(key, pack(params.get<std::vector<int> >(key)));
-        else if (params.has<std::vector<double> >(key))
-          out.add_child(key, pack(params.get<std::vector<double> >(key)));
-        else if (params.has<std::vector<std::string> >(key))
-          out.add_child(key, pack(params.get<std::vector<std::string> >(key)));
-        else
-          throw CG_FATAL("BoostTreeHandler") << "Failed to recast the key \"" << key << "\" "
-                                             << "with value \"" << params.getString(key) << "\"!";
-      }
-      return out;
-    }
-
-    pt::ptree BoostTreeHandler::pack(const Limits& lim) {
-      pt::ptree out;
-      if (lim.hasMin()) {
-        pt::ptree min;
-        std::ostringstream os;  // ensure floating point storage
-        os << std::scientific << lim.min();
-        min.put("", os.str());
-        out.push_back(std::make_pair(MIN_KEY, min));
-      }
-      if (lim.hasMax()) {
-        pt::ptree max;
-        std::ostringstream os;  // ensure floating point storage
-        os << std::scientific << lim.max();
-        max.put("", os.str());
-        out.push_back(std::make_pair(MAX_KEY, max));
-      }
-      return out;
-    }
-
-    ParametersList BoostTreeHandler::unpack(const pt::ptree& tree) {
-      ParametersList out;
-      if (tree.empty())
-        throw NullStream();
-      for (const auto& it : tree) {
-        try {
-          if (it.first.empty())  // this might be a vector
-            try {
-              out.operator[]<std::vector<ParametersList> >(DAUGH_KEY).emplace_back(unpack(it.second));
-            } catch (const boost::exception&) {
-              try {
-                out.operator[]<std::vector<double> >(DAUGH_KEY).emplace_back(it.second.get_value<double>());
-              } catch (const boost::exception&) {
-                try {
-                  out.operator[]<std::vector<int> >(DAUGH_KEY).emplace_back(it.second.get_value<int>());
-                } catch (const boost::exception&) {
-                  out.operator[]<std::vector<std::string> >(DAUGH_KEY).emplace_back(it.second.get_value<std::string>());
-                }
-              }
-            }
-          else
-            add(out, it.first, it.second);
-        } catch (const Exception&) {
-          if (it.second.get_value<std::string>().find('.') != std::string::npos)
-            try {
-              out.set<double>(it.first, it.second.get_value<double>());
-            } catch (const boost::exception&) {
-              out.set<std::string>(it.first, it.second.get_value<std::string>());
-            }
-          else
-            try {
-              out.set<int>(it.first, it.second.get_value<int>());
-            } catch (const boost::exception&) {
-              out.set<std::string>(it.first, it.second.get_value<std::string>());
-            }
-        }
-      }
-      return out;
-    }
-
     void BoostTreeHandler::add(ParametersList& base, const std::string& name, const pt::ptree& tree) {
-      auto plist = unpack(tree);
+      auto plist = bc::unpack(tree);
       //--- first check if we have a limits set
       if (plist.keys().size() <= 2 && (plist.has<double>(MIN_KEY) || plist.has<double>(MAX_KEY))) {
         Limits lim;
@@ -292,40 +164,44 @@ namespace cepgen {
 
     void BoostTreeHandler::pack(const Parameters* params) {
       rt_params_ = const_cast<Parameters*>(params);
-      tree_.add_child(PROCESS_NAME, pack(rt_params_->process().parameters()));
-      if (rt_params_->integrator && !rt_params_->integrator->keys().empty())
-        tree_.add_child(INTEGR_NAME, pack(*rt_params_->integrator));
-      if (rt_params_->general && !rt_params_->general->keys().empty())
-        tree_.add_child(GENERAL_NAME, pack(*rt_params_->general));
+      tree_.add_child(PROCESS_NAME, bc::pack(rt_params_->process().parameters()));
+      if (!rt_params_->par_integrator.empty())
+        tree_.add_child(INTEGR_NAME, bc::pack(rt_params_->par_integrator));
 
       //----- kinematics block
-      tree_.add_child(KIN_NAME, pack(rt_params_->kinematics.parameters()));
+      tree_.add_child(KIN_NAME, bc::pack(rt_params_->kinematics().parameters(false)));
 
       //----- generation block
-      tree_.add_child(GENERATOR_NAME, pack(rt_params_->generation().parameters()));
+      tree_.add_child(GENERATOR_NAME, bc::pack(rt_params_->generation().parameters()));
 
       //----- event modification and output
       if (!rt_params_->eventModifiersSequence().empty()) {
-        auto evt_mod_tree = pack(evt_mod_);
+        auto evt_mod_tree = bc::pack(evt_mod_);
         for (const auto& mod : rt_params_->eventModifiersSequence())
           evt_mod_tree.put("", mod->name());
         tree_.add_child(EVT_MOD_SEQ_NAME, evt_mod_tree);
       }
       if (!rt_params_->outputModulesSequence().empty()) {
-        auto out_mod_tree = pack(evt_out_);
+        auto out_mod_tree = bc::pack(evt_out_);
         for (const auto& mod : rt_params_->outputModulesSequence())
-          out_mod_tree.add_child(mod->name(), pack(mod->parameters()));
+          out_mod_tree.add_child(mod->name(), bc::pack(mod->parameters()));
         tree_.add_child(OUTPUT_NAME, out_mod_tree);
       }
 
       //----- timing and logging
       if (rt_params_->timeKeeper())
-        tree_.add_child(TIMER_NAME, pack(ParametersList()));
+        tree_.add_child(TIMER_NAME, bc::pack(ParametersList()));
       log_.set<int>("level", (int)utils::Logger::get().level);
       //FIXME not yet implemented
-      //for ( const auto& mod :  utils::Logger::get().exceptionRules() )
-      //  log_.operator[]<std::vector<std::string> >( "enabledModules" ).emplace_back( mod );
-      tree_.add_child(LOGGER_NAME, pack(log_));
+      //for (const auto& mod : utils::Logger::get().exceptionRules())
+      //  log_.operator[]<std::vector<std::string> >("enabledModules").emplace_back(mod);
+      tree_.add_child(LOGGER_NAME, bc::pack(log_));
+    }
+
+    ParametersDescription BoostTreeHandler::description() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Boost tree parser/writer");
+      return desc;
     }
 
     //------------------------------------------------------------------

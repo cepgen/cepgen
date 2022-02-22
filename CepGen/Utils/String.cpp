@@ -20,23 +20,22 @@
 
 #include <cmath>
 #include <codecvt>
-#include <iterator>
 #include <locale>
-#include <sstream>
 #include <unordered_set>
 #include <vector>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace utils {
-    std::string yesno(bool test) { return test ? colourise("yes", Colour::green) : colourise("no", Colour::red); }
+    std::string yesno(bool test) { return test ? colourise("true", Colour::green) : colourise("false", Colour::red); }
 
     /// String implementation of the boldification procedure
     template <>
     std::string boldify(std::string str) {
-      return colourise(str, Colour::reset, Modifier::bold);
+      return colourise(str, Colour::none, Modifier::bold);
     }
 
     /// C-style character array implementation of the boldification procedure
@@ -51,20 +50,48 @@ namespace cepgen {
       return boldify(std::to_string(ui));
     }
 
-    Modifier operator|(const Modifier& lhs, const Modifier& rhs) { return Modifier((uint16_t)lhs + (uint16_t)rhs); }
+    Modifier operator|(const Modifier& lhs, const Modifier& rhs) {
+      std::bitset<7> mod1((int)lhs), mod2((int)rhs);
+      return (Modifier)(mod1 | mod2).to_ulong();
+    }
 
     std::string colourise(const std::string& str, const Colour& col, const Modifier& mod) {
       if (!isatty(fileno(stdout)))
         return str;
-      if (mod == Modifier::reset)
-        return format("\033[%dm%s\033[0m", (int)col, str.c_str());
-      std::string mod_str, delim;
-      for (size_t i = 0; i < 7; ++i)
-        if ((uint16_t)mod & (1 << i))
-          mod_str += delim + std::to_string(i + 1), delim = ";";
-      if (col == Colour::reset)
-        return format("\033[%sm%s\033[0m", mod_str.c_str(), str.c_str());
-      return format("\033[%d;%sm%s\033[0m", (int)col, mod_str.c_str(), str.c_str());
+      std::string out;
+      auto get_mod_str = [](const Colour& col, const Modifier& mod) -> std::string {
+        std::string mod_str("\033[");
+        if (col != Colour::none)
+          mod_str += std::to_string((int)col);
+        if (mod > Modifier::reset)
+          for (size_t i = 0; i < 7; ++i)
+            if (((uint16_t)mod >> i) & 0x1)
+              mod_str += ";" + std::to_string(i + 1);
+        return mod_str + "m";
+      };
+      out = get_mod_str(col, mod);
+      out += str;
+      out += get_mod_str(Colour::reset, Modifier::reset);
+      return out;
+    }
+
+    std::string parseSpecialChars(const std::string& str) {
+      return replace_all(
+          str, {{"Α", "\\Alpha"},      {"Β", "\\Beta"},      {"Χ", "\\Chi"},     {"Δ", "\\Delta"},   {"Ε", "\\Epsilon"},
+                {"Φ", "\\Phi"},        {"Γ", "\\Gamma"},     {"Η", "\\Eta"},     {"Ι", "\\Iota"},    {"Κ", "\\Kappa"},
+                {"Λ", "\\Lambda"},     {"Μ", "\\Mu"},        {"Ν", "\\Nu"},      {"Ο", "\\Omicron"}, {"Π", "\\Pi"},
+                {"Θ", "\\Theta"},      {"Ρ", "\\Rho"},       {"Σ", "\\Sigma"},   {"Τ", "\\Tau"},     {"Υ", "\\Upsilon"},
+                {"Ω", "\\Omega"},      {"Ξ", "\\Xi"},        {"Ψ", "\\Psi"},     {"Ζ", "\\Zeta"},    {"α", "\\alpha"},
+                {"β", "\\beta"},       {"χ", "\\Chi"},       {"δ", "\\delta"},   {"ε", "\\epsilon"}, {"ɸ", "\\phi"},
+                {"γ", "\\gamma"},      {"η", "\\eta"},       {"ι", "\\iota"},    {"κ", "\\kappa"},   {"λ", "\\lambda"},
+                {"μ", "\\mu"},         {"ν", "\\nu"},        {"ο", "\\omicron"}, {"π", "\\pi"},      {"θ", "\\theta"},
+                {"ρ", "\\rho"},        {"σ", "\\sigma"},     {"τ", "\\tau"},     {"υ", "\\upsilon"}, {"ω", "\\omega"},
+                {"ξ", "\\xi"},         {"ψ", "\\psi"},       {"ζ", "\\zeta"},    {"⁺", "^{+}"},      {"¯", "^{-}"},
+                {"→", "\\rightarrow"}, {"←", "\\leftarrow"}, {"↝ ", "\\leadsto"}});
+    }
+
+    std::string sanitise(const std::string& str) {
+      return replace_all(str, {{")", ""}, {"(", "_"}, {"{", "_"}, {",", "_"}, {":", "_"}});
     }
 
     size_t replace_all(std::string& str, const std::string& from, const std::string& to) {
@@ -88,7 +115,7 @@ namespace cepgen {
       auto out{str};
       for (const auto& key : keys)
         replace_all(out, key.first, key.second);
-      CG_DEBUG("replace_all").log([&keys, &out](auto& log) {
+      CG_DEBUG_LOOP("replace_all").log([&keys, &out](auto& log) {
         log << "Values to be replaced: ";
         for (const auto& key : keys)
           log << "\n\t{\"" << key.first << "\" -> \"" << key.second << "\"}";
@@ -108,14 +135,26 @@ namespace cepgen {
       return out;
     }
 
-    std::string merge(const std::vector<std::string>& vec, const std::string& delim) {
+    template <typename T>
+    std::string merge(const std::vector<T>& vec, const std::string& delim) {
       if (vec.empty())
         return std::string();
-      if (vec.size() == 1)
-        return vec.at(0);
       std::ostringstream oss;
-      std::copy(vec.begin(), std::prev(vec.end()), std::ostream_iterator<std::string>(oss, delim.c_str()));
-      return oss.str() + *vec.rbegin();  // treat last one separately to drop the last delimiter
+      std::for_each(vec.begin(), vec.end(), [&oss, &delim, sep = std::string()](const auto& val) mutable {
+        oss << sep << val;
+        sep = delim;
+      });
+      return oss.str();
+    }
+
+    template std::string merge<std::string>(const std::vector<std::string>&, const std::string&);
+    template std::string merge<int>(const std::vector<int>&, const std::string&);
+    template std::string merge<double>(const std::vector<double>&, const std::string&);
+    template std::string merge<ParametersList>(const std::vector<ParametersList>&, const std::string&);
+
+    bool isNumber(const std::string& str) {
+      return !str.empty() &&
+             std::find_if(str.begin(), str.end(), [](unsigned char c) { return !std::isdigit(c); }) == str.end();
     }
 
     std::string toupper(const std::string& str) {
@@ -203,5 +242,47 @@ namespace cepgen {
       std::array<char, 50> buff;
       return std::to_string(errnum) + " (" + std::string(strerror_r(errnum, buff.data(), buff.size())) + ")";
     }
+
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+#define DEF_COLOUR(col) \
+  case Colour::col:     \
+    return os << colourise(TOSTRING(col), Colour::col);
+#define DEF_MODIFIER(mod) \
+  case Modifier::mod:     \
+    return os << colourise(TOSTRING(mod), Colour::none, Modifier::mod);
+
+    std::ostream& operator<<(std::ostream& os, const Colour& col) {
+      switch (col) {
+        DEF_COLOUR(reset)
+        DEF_COLOUR(black)
+        DEF_COLOUR(red)
+        DEF_COLOUR(green)
+        DEF_COLOUR(yellow)
+        DEF_COLOUR(blue)
+        DEF_COLOUR(magenta)
+        DEF_COLOUR(cyan)
+        DEF_COLOUR(white)
+        default:
+          DEF_COLOUR(none)
+      }
+    }
+
+    std::ostream& operator<<(std::ostream& os, const Modifier& mod) {
+      switch (mod) {
+        DEF_MODIFIER(reset)
+        DEF_MODIFIER(bold)
+        DEF_MODIFIER(dimmed)
+        DEF_MODIFIER(italic)
+        DEF_MODIFIER(underline)
+        DEF_MODIFIER(blink)
+        DEF_MODIFIER(reverse)
+        default:
+          DEF_MODIFIER(none)
+      }
+    }
+
+#undef DEF_COLOUR
+#undef DEF_MODIFIER
   }  // namespace utils
 }  // namespace cepgen

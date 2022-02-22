@@ -30,7 +30,8 @@ namespace cepgen {
       : command_name_(argc > 0 ? argv[0] : ""),
         help_str_({{"help,h"}}),
         version_str_({{"version,v"}}),
-        config_str_({{"cmd,c"}}) {
+        config_str_({{"cmd,c"}}),
+        debug_str_({{"debug,d"}}) {
     //--- first remove the program name
     std::vector<std::string> args_tmp;
     if (argc > 1) {
@@ -48,6 +49,12 @@ namespace cepgen {
       for (const auto& str : version_str_)
         if (arg_val.at(0) == "--" + str.name.at(0) || (str.name.size() > 1 && arg_val.at(0) == "-" + str.name.at(1)))
           version_req_ = true;
+      //--- check if debugging is requested
+      for (const auto& str : debug_str_)
+        if (arg_val.at(0) == "--" + str.name.at(0) || (str.name.size() > 1 && arg_val.at(0) == "-" + str.name.at(1))) {
+          utils::Logger::get().level = utils::Logger::Level::debug;
+          debug_req_ = true;
+        }
       //--- check if configuration word is requested
       auto it = std::find_if(config_str_.begin(), config_str_.end(), [&arg_val](const auto& str) {
         return (arg_val.at(0) == "--" + str.name.at(0) ||
@@ -93,6 +100,8 @@ namespace cepgen {
       print_version();
       exit(0);
     }
+    if (debug_req_)
+      CG_DEBUG("ArgumentsParser") << "Debugging mode enabled.";
     //--- loop over all parameters
     size_t i = 0;
     for (auto& par : params_) {

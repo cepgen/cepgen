@@ -19,31 +19,32 @@
 #ifndef CepGen_Modules_NamedModule_h
 #define CepGen_Modules_NamedModule_h
 
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/ParametersDescription.h"
+#include "CepGen/Core/Steerable.h"
 
 namespace cepgen {
   /// Base runtime module object
-  template <typename T = std::string>
-  class NamedModule {
+  /// \tparam I Indexing type for runtime factory builder registration
+  template <typename I = std::string>
+  class NamedModule : public Steerable {
   public:
     /// Build a module from its steering parameters
-    explicit NamedModule(const ParametersList& params) : params_(params), name_(params.name<T>()) {}
+    explicit NamedModule(const ParametersList& params) : Steerable(params), name_(params.name<I>()) {}
     virtual ~NamedModule() = default;
 
-    /// Module unique name
-    const T& name() const { return name_; }
-    /// Module description
-    static inline std::string description() { return "No description"; }
-    /// Collection of default parameters steering the module initialisation
-    static inline ParametersList defaultParameters() { return ParametersList(); }
-    /// Module user-defined parameters
-    inline const ParametersList& parameters() const { return params_; }
+    /// Describe all steering parameters for this module
+    static ParametersDescription description() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Named steerable module");
+      return desc;
+    }
+
+    /// Module unique indexing name
+    const I& name() const { return name_; }
 
   protected:
-    /// Set of parameters to steer this output module
-    const ParametersList params_;
-    /// Module unique name
-    const T name_;
+    /// Module unique indeing name
+    const I name_;
   };
 }  // namespace cepgen
 

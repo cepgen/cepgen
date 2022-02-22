@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/MCDFileParser.h"
-#include "CepGen/Processes/Process.h"
+#include "CepGen/Process/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 #include "CepGen/Utils/Filesystem.h"
@@ -192,7 +192,7 @@ namespace cepgen {
       if (!pdg_input_path_.empty())
         pdg::MCDFileParser::parse(pdg_input_path_);
       if (!kmr_grid_path_.empty())
-        kmr::GluonGrid::get(kmr_grid_path_);
+        kmr::GluonGrid::get(ParametersList().set<std::string>("path", kmr_grid_path_));
 
       //--- build the ticker if required
       if (timer_)
@@ -210,16 +210,18 @@ namespace cepgen {
         rt_params_->setProcess(proc::ProcessFactory::get().build(proc_name_, *proc_params_));
       }
 
-      rt_params_->kinematics = Kinematics(*kin_params_);
-      rt_params_->generation() = Parameters::Generation(*gen_params_);
-      *rt_params_->integrator = *int_params_;
+      rt_params_->generation().setParameters(*gen_params_);
+
+      rt_params_->par_kinematics += *kin_params_;
+      rt_params_->par_integrator += *int_params_;
 
       //--- parse the structure functions code
+      auto sf_params = strfun::StructureFunctionsFactory::get().describeParameters(str_fun_).parameters();
+      sf_params.set<ParametersList>("sigmaRatio",
+                                    sigrat::SigmaRatiosFactory::get().describeParameters(sr_type_).parameters());
       if (str_fun_ == (int)strfun::Type::MSTWgrid && !mstw_grid_path_.empty())
-        rt_params_->kinematics.incomingBeams().setStructureFunctions(strfun::StructureFunctionsFactory::get().build(
-            str_fun_, ParametersList().set<std::string>("gridPath", mstw_grid_path_)));
-      else
-        rt_params_->kinematics.incomingBeams().setStructureFunctions(str_fun_, sr_type_);
+        sf_params.set<std::string>("gridPath", mstw_grid_path_);
+      rt_params_->par_kinematics.set<ParametersList>("structureFunctions", sf_params);
 
       //--- parse the hadronisation algorithm name
       if (!evt_mod_name_.empty())
@@ -267,10 +269,10 @@ namespace cepgen {
 
     void LpairHandler::pack(const Parameters* params) {
       rt_params_ = const_cast<Parameters*>(params);
-      str_fun_ = rt_params_->kinematics.incomingBeams().structureFunctions()->name();
-      if (rt_params_->kinematics.incomingBeams().structureFunctions() &&
-          rt_params_->kinematics.incomingBeams().structureFunctions()->sigmaRatio())
-        sr_type_ = rt_params_->kinematics.incomingBeams().structureFunctions()->sigmaRatio()->name();
+      str_fun_ = rt_params_->kinematics().incomingBeams().structureFunctions()->name();
+      if (rt_params_->kinematics().incomingBeams().structureFunctions() &&
+          rt_params_->kinematics().incomingBeams().structureFunctions()->sigmaRatio())
+        sr_type_ = rt_params_->kinematics().incomingBeams().structureFunctions()->sigmaRatio()->name();
       //kmr_grid_path_ = kmr::GluonGrid::get().path();
       //mstw_grid_path_ =
       //pdg_input_path_ =
@@ -301,9 +303,9 @@ namespace cepgen {
       }
       timer_ = (rt_params_->timeKeeper() != nullptr);
 
-      *kin_params_ += rt_params_->kinematics.parameters(true);
+      *kin_params_ += rt_params_->kinematics().parameters(true);
       *gen_params_ += rt_params_->generation().parameters();
-      *int_params_ += *rt_params_->integrator;
+      *int_params_ += rt_params_->par_integrator;
       init();
     }
 
@@ -356,6 +358,12 @@ namespace cepgen {
       if (p_doubles_.count(key))
         return p_doubles_.find(key)->second.description;
       return kInvalidStr;
+    }
+
+    ParametersDescription LpairHandler::description() {
+      auto desc = Handler::description();
+      desc.setDescription("LPAIR-like cards parser");
+      return desc;
     }
   }  // namespace card
 }  // namespace cepgen

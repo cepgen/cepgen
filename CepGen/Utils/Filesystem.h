@@ -18,7 +18,8 @@
 
 #ifndef CepGen_Utils_Filesystem_h
 #define CepGen_Utils_Filesystem_h
-#if __cplusplus >= 201703L
+
+#if __cplusplus >= 201703L && (!defined __GNUC__ || __GNUC__ >= 8)
 #include <filesystem>
 namespace fs = std::filesystem;
 #elif __cplusplus >= 201103L

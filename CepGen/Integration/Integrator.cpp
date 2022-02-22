@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,13 +21,13 @@
 #include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Parameters.h"
-#include "CepGen/Processes/Process.h"
+#include "CepGen/Process/Process.h"
 
 namespace cepgen {
   Integrator::Integrator(const ParametersList& params)
       : NamedModule(params),
-        seed_(params.get<int>("seed", time(nullptr))),
-        verbosity_(params.get<int>("verbose", 1)),
+        seed_(params_.get<int>("seed", time(nullptr))),
+        verbosity_(steer<int>("verbose")),
         rnd_(0., 1.) {}
 
   void Integrator::setIntegrand(Integrand& integr) {
@@ -55,4 +55,12 @@ namespace cepgen {
   }
 
   double Integrator::uniform() const { return rnd_(rnd_gen_); }
+
+  ParametersDescription Integrator::description() {
+    auto desc = ParametersDescription();
+    desc.setDescription("Unnamed integrator");
+    desc.add<int>("seed", time(nullptr)).setDescription("Random number generator seed");
+    desc.add<int>("verbose", 1).setDescription("Verbosity level");
+    return desc;
+  }
 }  // namespace cepgen

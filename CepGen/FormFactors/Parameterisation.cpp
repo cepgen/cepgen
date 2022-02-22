@@ -20,7 +20,7 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
-#include "CepGen/StructureFunctions/SuriYennie.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 
 namespace cepgen {
   namespace formfac {
@@ -46,48 +46,54 @@ namespace cepgen {
       return 0.25 * q2 / mp2_;
     }
 
-    Parameterisation& Parameterisation::operator()(const mode::Beam& type, double q2, double mf2) {
+    Parameterisation& Parameterisation::operator()(const Beam::Mode& type,
+                                                   double q2,
+                                                   double mf2,
+                                                   strfun::Parameterisation* sf) {
       last_q2_ = q2;
       switch (type) {
-        case mode::Beam::invalid:
-        case mode::Beam::CompositeScalar:
+        case Beam::Mode::invalid:
+        case Beam::Mode::CompositeScalar:
           throw CG_FATAL("FormFactors") << type << " mode is not yet supported!";
-        case mode::Beam::PointLikeScalar:
+        case Beam::Mode::PointLikeScalar:
           FE = 1., FM = 0.;
           break;
-        case mode::Beam::PointLikeFermion:
+        case Beam::Mode::PointLikeFermion:
           FE = FM = 1.;  // FE=U2, FM=U1 in LPAIR
           break;
-        case mode::Beam::ProtonElastic: {
+        case Beam::Mode::ProtonElastic: {
           compute(q2);
           const double GE2 = GE * GE, GM2 = GM * GM;
           FE = (4. * mp2_ * GE2 + q2 * GM2) / (4. * mp2_ + q2);
           FM = GM2;
         } break;
-        case mode::Beam::ProtonInelastic: {
-          if (!str_fun_)
+        case Beam::Mode::ProtonInelastic: {
+          if (!sf)
             throw CG_FATAL("FormFactors")
                 << "Inelastic proton form factors computation requires a structure functions definition!";
           const double xbj = utils::xBj(q2, mp2_, mf2);
-          switch ((strfun::Type)str_fun_->name()) {
+          switch ((strfun::Type)sf->name()) {
             case strfun::Type::ElasticProton:
               throw CG_FATAL("FormFactors") << "Elastic proton form factors requested!\n"
                                             << "Check your process definition!";
             case strfun::Type::SuriYennie: {  // this one requires its own object to deal with FM
-              static strfun::SuriYennie sy;
-              sy = dynamic_cast<strfun::SuriYennie&>((*str_fun_)(xbj, q2));
-              FE = sy.F2 * xbj * mp_ / q2;
-              FM = sy.FM;
+              FE = sf->F2(xbj, q2) * xbj * mp_ / q2;
+              FM = sf->FM(xbj, q2);
             } break;
             default: {
-              (*str_fun_)(xbj, q2).computeFL(xbj, q2);
-              FE = str_fun_->F2 * xbj / q2;
-              FM = -2. * str_fun_->F1(xbj, q2) / q2;
+              FE = sf->F2(xbj, q2) * xbj / q2;
+              FM = -2. * sf->F1(xbj, q2) / q2;
             } break;
           }
         } break;
       }
       return *this;
+    }
+
+    ParametersDescription Parameterisation::description() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Unnamed form factors parameterisation");
+      return desc;
     }
 
     //------------------------------------------------------------------

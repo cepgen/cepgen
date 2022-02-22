@@ -27,7 +27,8 @@ namespace cepgen {
   class IntegratorPlain final : public IntegratorGSL {
   public:
     explicit IntegratorPlain(const ParametersList& params);
-    static std::string description() { return "Plain (trial/error) integrator"; }
+
+    static ParametersDescription description();
 
     void integrate(double& result, double& abserr) override;
 
@@ -36,7 +37,7 @@ namespace cepgen {
   };
 
   IntegratorPlain::IntegratorPlain(const ParametersList& params)
-      : IntegratorGSL(params), ncvg_(params.get<int>("numFunctionCalls", 50000)) {}
+      : IntegratorGSL(params), ncvg_(steer<int>("numFunctionCalls")) {}
 
   void IntegratorPlain::integrate(double& result, double& abserr) {
     //--- integration bounds
@@ -54,6 +55,13 @@ namespace cepgen {
 
     result_ = result;
     err_result_ = abserr;
+  }
+
+  ParametersDescription IntegratorPlain::description() {
+    auto desc = IntegratorGSL::description();
+    desc.setDescription("Plain (trial/error) integrator");
+    desc.add<int>("numFunctionCalls", 50000);
+    return desc;
   }
 }  // namespace cepgen
 

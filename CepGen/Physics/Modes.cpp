@@ -37,23 +37,5 @@ namespace cepgen {
       }
       return os;
     }
-
-    std::ostream& operator<<(std::ostream& os, const Beam& type) {
-      switch (type) {
-        case Beam::invalid:
-          return os << "{invalid}";
-        case Beam::ProtonElastic:
-          return os << "el.proton";
-        case Beam::PointLikeScalar:
-          return os << "gen.scalar";
-        case Beam::PointLikeFermion:
-          return os << "gen.fermion";
-        case Beam::CompositeScalar:
-          return os << "comp.scalar";
-        case Beam::ProtonInelastic:
-          return os << "inel.proton";
-      }
-      return os;
-    }
   }  // namespace mode
 }  // namespace cepgen

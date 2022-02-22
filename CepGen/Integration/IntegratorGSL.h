@@ -19,13 +19,13 @@
 #ifndef CepGen_Integration_IntegratorGSL_h
 #define CepGen_Integration_IntegratorGSL_h
 
-#include <gsl/gsl_monte.h>
 #include <gsl/gsl_rng.h>
 
 #include <functional>
 #include <memory>
 
 #include "CepGen/Integration/Integrator.h"
+#include "CepGen/Utils/GSLFunctionsWrappers.h"
 
 namespace cepgen {
   class IntegratorGSL : public Integrator {
@@ -33,6 +33,8 @@ namespace cepgen {
     explicit IntegratorGSL(const ParametersList&);
     double uniform() const override;
     void setIntegrand(Integrand& integr) override;
+
+    static ParametersDescription description();
 
   protected:
     /// A functor wrapping GSL's function footprint
@@ -47,29 +49,6 @@ namespace cepgen {
     };
     /// Instance of random number generator service
     std::unique_ptr<gsl_rng, gsl_rng_deleter> gsl_rng_;
-
-  private:
-    /**
-       * \brief A GSL wrapper to define a functor as an integrable functional
-       * \tparam F Class member signature
-       */
-    template <typename F>
-    class gsl_monte_function_wrapper : public gsl_monte_function {
-    public:
-      gsl_monte_function_wrapper(const F& func, size_t ndim) : func_(func) {
-        f = &gsl_monte_function_wrapper::eval;
-        dim = ndim;
-        params = this;
-      }
-
-    private:
-      /// Static integrable functional
-      static double eval(double* x, size_t ndim, void* params) {
-        return static_cast<gsl_monte_function_wrapper*>(params)->func_(x, ndim, params);
-      }
-      /// Reference to the functor
-      const F& func_;
-    };
   };
 }  // namespace cepgen
 

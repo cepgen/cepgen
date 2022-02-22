@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,37 +19,19 @@
 #ifndef CepGen_Integration_Integrand_h
 #define CepGen_Integration_Integrand_h
 
-#include <functional>
-#include <memory>
 #include <vector>
 
 namespace cepgen {
-  class Parameters;
-  namespace utils {
-    class Timer;
-  }
-  /// Wrapper to the function to be integrated
+  /// An integrand wrapper placeholder
   class Integrand {
   public:
-    explicit Integrand(const Parameters*);
-    virtual ~Integrand();
+    Integrand() = default;
+    virtual ~Integrand() {}
 
-    void setFunction(size_t ndim, const std::function<double(const std::vector<double>&)>& func);
-
-    /// Compute the integrand for a given phase space point
-    virtual double eval(const std::vector<double>& x);
+    /// Compute the integrand for a given coordinates set
+    virtual double eval(const std::vector<double>&) = 0;
     /// Phase space dimension
-    virtual size_t size() const { return gen_integr_.ndim; }
-
-  protected:
-    const Parameters* params_;                 ///< Generator-owned runtime parameters
-    const std::unique_ptr<utils::Timer> tmr_;  ///< A precious timekeeper for event timing
-
-  private:
-    struct GenericIntegrand {
-      std::function<double(const std::vector<double>&)> function;
-      size_t ndim;
-    } gen_integr_;
+    virtual size_t size() const = 0;
   };
 }  // namespace cepgen
 

@@ -35,6 +35,9 @@ namespace cepgen {
     public:
       /// Default constructor
       Functional(const ParametersList& params);
+
+      static ParametersDescription description();
+
       /// Compute the functional for a given value of the variable (one-dimensional case)
       /// \param[in] x Variable value
       double operator()(double x) const;
@@ -49,8 +52,7 @@ namespace cepgen {
 
     protected:
       /// Compute the functional for a given value of the variables
-      /// \param[in] x Variables values
-      virtual double eval(const std::vector<double>& x) const = 0;
+      virtual double eval() const = 0;
 
     private:
       std::vector<std::string> vars_orig_;  ///< User-defined variables to be reached

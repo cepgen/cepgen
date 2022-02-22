@@ -23,9 +23,14 @@
 namespace cepgen {
   class AlphaEMFixed final : public Coupling {
   public:
-    explicit AlphaEMFixed(const ParametersList& params)
-        : Coupling(params), value_(params.get<double>("value", constants::ALPHA_EM)) {}
-    static std::string description() { return "Constant alpha(EM)"; }
+    explicit AlphaEMFixed(const ParametersList& params) : Coupling(params), value_(steer<double>("value")) {}
+
+    static ParametersDescription description() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Constant alpha(EM)");
+      desc.add<double>("value", constants::ALPHA_EM).setDescription("Constant value for alpha(EM)");
+      return desc;
+    }
 
     double operator()(double /* q */) const override { return value_; }
 

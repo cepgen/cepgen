@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *                2017-2019  Wolfgang Schaefer
  *                2019       Marta Luszczak
  *
@@ -27,7 +27,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Processes/Process2to4.h"
+#include "CepGen/Process/Process2to4.h"
 
 namespace cepgen {
   namespace proc {
@@ -36,7 +36,7 @@ namespace cepgen {
     public:
       explicit PPtoFF(const ParametersList&);
       ProcessPtr clone() const override { return ProcessPtr(new PPtoFF(*this)); }
-      static std::string description() { return "ɣɣ → f⁺f¯ (kt-factor.)"; }
+      static ParametersDescription description();
 
     private:
       void prepareProcessKinematics() override;
@@ -62,11 +62,11 @@ namespace cepgen {
     };
 
     PPtoFF::PPtoFF(const ParametersList& params)
-        : Process2to4(params, {PDG::photon, PDG::photon}, params.get<ParticleProperties>("pair").pdgid),
-          method_(params.getAs<int, Mode>("method", Mode::offShell)),
-          alphas_params_(params.get<ParametersList>("alphaS", ParametersList().setName<std::string>("pegasus"))) {
+        : Process2to4(params, {PDG::photon, PDG::photon}, steer<ParticleProperties>("pair").pdgid),
+          method_(steerAs<int, Mode>("method")),
+          alphas_params_(steer<ParametersList>("alphaS")) {
       if (method_ == Mode::offShell || method_ == Mode::offShellLegacy) {  // off-shell matrix element
-        const auto& ofp = params.get<ParametersList>("offShellParameters");
+        const auto& ofp = steer<ParametersList>("offShellParameters");
         p_mat1_ = ofp.get<int>("mat1", method_ == Mode::offShell ? 1 : 2);
         p_mat2_ = ofp.get<int>("mat2", method_ == Mode::offShell ? 1 : 0);
         p_term_ll_ = ofp.get<int>("termLL", 1);
@@ -247,6 +247,17 @@ namespace cepgen {
                                        << "amat2 = " << amat2 << ".";
 
       return amat2;
+    }
+
+    ParametersDescription PPtoFF::description() {
+      auto desc = Process2to4::description();
+      desc.setDescription("γγ → f⁺f¯ (kt-factor.)");
+      desc.add<int>("method", (int)Mode::offShell)
+          .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell)");
+      auto alphas_desc = ParametersDescription();
+      alphas_desc.setName<std::string>("pegasus");
+      desc.add("alphaS", alphas_desc);
+      return desc;
     }
   }  // namespace proc
 }  // namespace cepgen

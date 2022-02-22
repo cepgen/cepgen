@@ -34,7 +34,8 @@ namespace cepgen {
   class IntegratorFoam final : public Integrator, public TFoamIntegrand {
   public:
     explicit IntegratorFoam(const ParametersList&);
-    static std::string description() { return "FOAM general purpose MC integrator"; }
+
+    static ParametersDescription description();
 
     void integrate(double&, double&) override;
     inline double uniform() const override { return rnd_->Rndm(); }
@@ -52,7 +53,7 @@ namespace cepgen {
   };
 
   IntegratorFoam::IntegratorFoam(const ParametersList& params) : Integrator(params), foam_(new TFoam("Foam")) {
-    const auto& rnd_mode = params.get<std::string>("rngEngine", "MersenneTwister");
+    const auto& rnd_mode = steer<std::string>("rngEngine");
     if (rnd_mode == "Ranlux")
       rnd_.reset(new TRandom1);
     else if (rnd_mode == "generic")
@@ -72,10 +73,10 @@ namespace cepgen {
     if (!initialised_) {
       foam_.reset(new TFoam("Foam"));
       foam_->SetPseRan(rnd_.get());
-      foam_->SetnCells(params_.get<int>("nCells", 1000));
-      foam_->SetnSampl(params_.get<int>("nSampl", 200));
-      foam_->SetnBin(params_.get<int>("nBin", 8));
-      foam_->SetEvPerBin(params_.get<int>("EvPerBin", 25));
+      foam_->SetnCells(steer<int>("nCells"));
+      foam_->SetnSampl(steer<int>("nSampl"));
+      foam_->SetnBin(steer<int>("nBin"));
+      foam_->SetEvPerBin(steer<int>("EvPerBin"));
       foam_->SetChat(std::max(verbosity_, 0));
       foam_->SetRho(this);
       foam_->SetkDim(integrand_->size());
@@ -103,6 +104,18 @@ namespace cepgen {
           << " for epsilon = " << eps << "\n\t"
           << " nCalls (initialisation only)= " << ncalls << ".";
     });
+  }
+
+  ParametersDescription IntegratorFoam::description() {
+    auto desc = Integrator::description();
+    desc.setDescription("FOAM general purpose MC integrator");
+    desc.add<std::string>("rngEngine", "MersenneTwister")
+        .setDescription("Set random number generator engine ('Ranlux', 'generic', 'MersenneTwister' handled)");
+    desc.add<int>("nCells", 1000);
+    desc.add<int>("nSampl", 200);
+    desc.add<int>("nBin", 8);
+    desc.add<int>("EvPerBin", 25);
+    return desc;
   }
 }  // namespace cepgen
 

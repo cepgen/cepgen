@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,11 +31,15 @@ namespace cepgen {
 
   HeavyIon::operator pdgid_t() const {
     // Pythia8 convention/10-1e10+1e6
+    if (Z == Element::H && A == 1)
+      return PDG::proton;
     return (pdgid_t)(1000000 + 1000 * (unsigned short)Z + A);
   }
 
+  bool HeavyIon::isHI(const pdgid_t& pdgid) { return pdgid / 1000000 != 0; }
+
   HeavyIon::operator bool() const {
-    return Z != Element::invalid;  // skip the proton
+    return Z != Element::invalid && Z != Element::H;  // skip the proton
   }
 
   double HeavyIon::mass(const HeavyIon& hi) {

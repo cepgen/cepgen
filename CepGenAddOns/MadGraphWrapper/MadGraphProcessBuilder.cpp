@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Processes/Process2to4.h"
+#include "CepGen/Process/Process2to4.h"
 #include "CepGen/Utils/AbortHandler.h"
 #include "CepGenAddOns/MadGraphWrapper/MadGraphInterface.h"
 #include "CepGenAddOns/MadGraphWrapper/MadGraphProcess.h"
@@ -31,7 +31,8 @@ class MadGraphProcessBuilder : public proc::Process2to4 {
 public:
   MadGraphProcessBuilder(const ParametersList&);
   proc::ProcessPtr clone() const override { return proc::ProcessPtr(new MadGraphProcessBuilder(*this)); }
-  static std::string description() { return "MadGraph_aMC process builder"; }
+
+  static ParametersDescription description();
 
   void prepareProcessKinematics() override;
   double computeCentralMatrixElement() const override;
@@ -44,8 +45,8 @@ MadGraphProcessBuilder::MadGraphProcessBuilder(const ParametersList& params)
     : Process2to4(params, std::array<pdgid_t, 2>{}, 0) {
   utils::AbortHandler();
   try {
-    if (params.has<std::string>("lib"))
-      loadLibrary(params.get<std::string>("lib"));
+    if (params_.has<std::string>("lib"))
+      loadLibrary(steer<std::string>("lib"));
     else {
       const MadGraphInterface interf(params);
       loadLibrary(interf.run());
@@ -65,7 +66,7 @@ void MadGraphProcessBuilder::prepareProcessKinematics() {
   if (!mg5_proc_)
     CG_FATAL("MadGraphProcessBuilder") << "Process not properly linked!";
 
-  mg5_proc_->initialise(params_.get<std::string>("parametersCard", "param_card.dat"));
+  mg5_proc_->initialise(steer<std::string>("parametersCard"));
 }
 
 double MadGraphProcessBuilder::computeCentralMatrixElement() const {
@@ -78,6 +79,15 @@ double MadGraphProcessBuilder::computeCentralMatrixElement() const {
   mg5_proc_->setMomentum(3, p_c2_);  // second outgoing central particle
 
   return mg5_proc_->eval();
+}
+
+ParametersDescription MadGraphProcessBuilder::description() {
+  auto desc = Process2to4::description();
+  desc.setDescription("MadGraph_aMC process builder");
+  desc.add<std::string>("lib", "").setDescription("Precompiled library for this process definition");
+  desc.add<std::string>("parametersCard", "param_card.dat").setDescription("Runtime MadGraph parameters card");
+  desc += MadGraphInterface::description();
+  return desc;
 }
 
 REGISTER_PROCESS("mg5_aMC", MadGraphProcessBuilder)
