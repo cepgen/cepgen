@@ -18,6 +18,7 @@
 
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/Generator.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/ArgumentsParser.h"
@@ -26,6 +27,7 @@
 
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
+  cepgen::initialise();
 
   auto tauola = cepgen::EventModifierFactory::get().build("tauola");
   if (!tauola) {
@@ -36,7 +38,9 @@ int main(int argc, char* argv[]) {
 
   cepgen::Event ev;
   cepgen::Particle tau(cepgen::Particle::Role::CentralSystem, cepgen::PDG::tau, cepgen::Particle::Status::FinalState);
+  tau.setMomentum(0., 0., 100.);
   ev.addParticle(tau);
+  CG_LOG << ev;
 
   double weight = 1.;
   tauola->run(ev, weight);
