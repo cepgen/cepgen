@@ -62,7 +62,7 @@ namespace cepgen {
        * \param[in] full Perform the full state modification
        * \return Boolean stating whether or not the modification occurred successfully
        */
-    virtual bool run(Event& ev, double& weight, bool full) = 0;
+    virtual bool run(Event& ev, double& weight, bool full = true) = 0;
     /// Specify the process cross section and uncertainty, in pb
     virtual void setCrossSection(double, double) {}
 
