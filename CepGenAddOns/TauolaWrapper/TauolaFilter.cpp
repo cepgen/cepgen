@@ -29,6 +29,8 @@ namespace cepgen {
 
       void setCrossSection(double /* xsec */, double /* xsec_err */) override {}
 
+      static ParametersDescription description();
+
     private:
       const ParametersList pol_states_, rad_states_;
       typedef io::PhotosTauolaEvent<TauolaEvent, TauolaParticle> CepGenTauolaEvent;
@@ -36,8 +38,8 @@ namespace cepgen {
 
     TauolaFilter::TauolaFilter(const ParametersList& params)
         : EventModifier(params),
-          pol_states_(params.get<ParametersList>("polarisations")),
-          rad_states_(params.get<ParametersList>("radiations")) {
+          pol_states_(steer<ParametersList>("polarisations")),
+          rad_states_(steer<ParametersList>("radiations")) {
       Log::LogAll(true);
     }
 
@@ -72,13 +74,11 @@ namespace cepgen {
 
       //--- default parameters
       //Tauola::setDecayingParticle( 15 );
-      if (params_.has<int>("sameParticleDecayMode"))
-        Tauola::setSameParticleDecayMode(params_.get<int>("sameParticleDecayMode"));
-      if (params_.has<int>("oppositeParticleDecayMode"))
-        Tauola::setOppositeParticleDecayMode(params_.get<int>("oppositeParticleDecayMode"));
+      Tauola::setSameParticleDecayMode(steer<int>("sameParticleDecayMode"));
+      Tauola::setOppositeParticleDecayMode(steer<int>("oppositeParticleDecayMode"));
 
       //--- list of tau decay branching fractions
-      for (const auto& br_per_mode : params_.get<std::vector<ParametersList> >("branchingRatios", {})) {
+      for (const auto& br_per_mode : steer<std::vector<ParametersList> >("branchingRatios")) {
         const auto mode = br_per_mode.get<int>("mode");
         const auto br = br_per_mode.get<double>("branchingRatio");
         Tauola::setTauBr(mode, br);
@@ -101,6 +101,38 @@ namespace cepgen {
       //CG_WARNING("")<<pairs;
 
       return true;
+    }
+
+    ParametersDescription TauolaFilter::description() {
+      auto desc = EventModifier::description();
+      desc.setDescription("Tauola interface");
+
+      auto pol_desc = ParametersDescription();
+      pol_desc.add<bool>("full", true);
+      pol_desc.add<bool>("GAMMA", Tauola::spin_correlation.GAMMA);
+      pol_desc.add<bool>("Z0", Tauola::spin_correlation.Z0);
+      pol_desc.add<bool>("HIGGS", Tauola::spin_correlation.HIGGS);
+      pol_desc.add<bool>("HIGGS_H", Tauola::spin_correlation.HIGGS_H);
+      pol_desc.add<bool>("HIGGS_A", Tauola::spin_correlation.HIGGS_A);
+      pol_desc.add<bool>("HIGGS_PLUS", Tauola::spin_correlation.HIGGS_PLUS);
+      pol_desc.add<bool>("HIGGS_MINUS", Tauola::spin_correlation.HIGGS_MINUS);
+      pol_desc.add<bool>("W_PLUS", Tauola::spin_correlation.W_PLUS);
+      pol_desc.add<bool>("W_MINUS", Tauola::spin_correlation.W_MINUS);
+      desc.add<ParametersDescription>("polarisations", pol_desc);
+
+      auto rad_desc = ParametersDescription();
+      rad_desc.add<bool>("enable", false);
+      rad_desc.add<double>("cutoff", -1.);
+      desc.add<ParametersDescription>("radiations", rad_desc);
+
+      desc.add<int>("sameParticleDecayMode", -1);
+      desc.add<int>("oppositeParticleDecayMode", -1);
+
+      auto br_desc = ParametersDescription();
+      br_desc.add<int>("mode", -1).setDescription("decay mode");
+      br_desc.add<double>("branchingRatio", 0.).setDescription("branching fraction");
+      desc.addParametersDescriptionVector("branchingRatios", br_desc, {});
+      return desc;
     }
   }  // namespace hadr
 }  // namespace cepgen
