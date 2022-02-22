@@ -55,7 +55,7 @@ namespace cepgen {
     virtual void readStrings(const std::vector<std::string>& params);
 
     /// Initialise the event modifier before its running
-    virtual void init() = 0;
+    virtual void init() {}
     /** \brief Modify a full event
        * \param[inout] ev Input/output event
        * \param[inout] weight Event weight after modification
