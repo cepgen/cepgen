@@ -57,8 +57,9 @@ namespace cepgen {
       /// Set the particle ID
       void setPdgID(int pdg) override { Particle::setPdgId((long)pdg); }
       /// Particle ID
-      int getPdgID() override { return Particle::integerPdgId(); }
-      void setStatus(int status) override { status_ = status; }
+      int getPdgID() override;
+      /// Set the particle status
+      void setStatus(int) override;
       /// Particle status
       int getStatus() override { return status_; }
       void setPx(double px) override { momentum_.setPx(px); }

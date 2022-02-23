@@ -37,9 +37,18 @@ int main(int argc, char* argv[]) {
   tauola->init();
 
   cepgen::Event ev;
-  cepgen::Particle tau(cepgen::Particle::Role::CentralSystem, cepgen::PDG::tau, cepgen::Particle::Status::FinalState);
-  tau.setMomentum(0., 0., 100.);
-  ev.addParticle(tau);
+  cepgen::Particle pho(cepgen::Particle::Role::CentralSystem, cepgen::PDG::photon, cepgen::Particle::Status::Resonance);
+  ev.addParticle(pho);
+  cepgen::Particle tau1(cepgen::Particle::Role::CentralSystem, cepgen::PDG::tau, cepgen::Particle::Status::FinalState);
+  tau1.setMomentum(0., 0., 100.);
+  tau1.setChargeSign(-1);
+  tau1.addMother(pho);
+  ev.addParticle(tau1);
+  cepgen::Particle tau2(cepgen::Particle::Role::CentralSystem, cepgen::PDG::tau, cepgen::Particle::Status::FinalState);
+  tau2.setMomentum(0., 0., -100.);
+  tau2.setChargeSign(+1);
+  tau2.addMother(pho);
+  ev.addParticle(tau2);
   CG_LOG << ev;
 
   double weight = 1.;

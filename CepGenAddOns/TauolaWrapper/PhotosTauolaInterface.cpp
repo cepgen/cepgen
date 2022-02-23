@@ -53,6 +53,17 @@ namespace cepgen {
     }
 
     template <typename E, typename P>
+    int PhotosTauolaParticle<E, P>::getPdgID() {
+      CG_WARNING("") << integerPdgId();
+      return Particle::integerPdgId();
+    }
+
+    template <typename E, typename P>
+    void PhotosTauolaParticle<E, P>::setStatus(int status) {
+      status_ = status;
+    }
+
+    template <typename E, typename P>
     void PhotosTauolaParticle<E, P>::print() {
       CG_INFO("PhotosTauolaParticle:print") << *this;
     }
@@ -78,6 +89,7 @@ namespace cepgen {
       for (const auto& moth : mothers) {
         auto&& part = dynamic_cast<PhotosTauolaParticle*>(moth);
         part->setStatus((int)Particle::Status::Propagator);
+        mothers_.emplace_back(moth);
         Particle::addMother(*part);
       }
       CG_DEBUG("PhotosTauolaParticle:setMothers") << "New list of mothers: " << mothers_ << ".";
@@ -107,6 +119,7 @@ namespace cepgen {
       for (const auto& daugh : daughters) {
         auto&& part = dynamic_cast<PhotosTauolaParticle*>(daugh);
         part->setRole(role());  // child inherits its mother's role
+        daughters_.emplace_back(daugh);
         Particle::addDaughter(*part);
       }
       CG_DEBUG("PhotosTauolaParticle:setDaughters") << "New list of daughters:" << daughters_ << ".";
