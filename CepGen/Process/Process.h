@@ -95,7 +95,7 @@ namespace cepgen {
       /// Dump the evaluated point's coordinates in the standard output stream
       void dumpPoint() const;
       /// List all variables handled by this generic process
-      void dumpVariables() const;
+      void dumpVariables(std::ostream* os = nullptr) const;
 
       ///Get the number of dimensions on which the integration is performed
       inline size_t ndim() const { return mapped_variables_.size(); }

@@ -80,13 +80,13 @@ namespace cepgen {
       CG_DEBUG("Process:clear") << "Process event content, and integration variables cleared.";
     }
 
-    void Process::dumpVariables() const {
-      CG_INFO("Process:dumpVariables").log([&](auto& info) {
-        info << "List of variables handled by this process:";
-        for (const auto& var : mapped_variables_)
-          info << "\n\t(" << var.index << ") " << var.type << " mapping (" << var.description << ")"
-               << " in range " << var.limits;
-      });
+    void Process::dumpVariables(std::ostream* os) const {
+      if (!os)
+        os = &CG_LOG.stream();
+      (*os) << "List of variables handled by this process:";
+      for (const auto& var : mapped_variables_)
+        (*os) << "\n\t(" << var.index << ") " << var.type << " mapping (" << var.description << ")"
+              << " in range " << var.limits;
     }
 
     Process& Process::defineVariable(
