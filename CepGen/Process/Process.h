@@ -74,7 +74,7 @@ namespace cepgen {
       /// Compute the phase space point weight
       virtual double computeWeight() = 0;
       /// Compute the incoming state kinematics
-      virtual void prepareKinematics() = 0;
+      virtual void prepareKinematics() {}
       /// Fill the Event object with the particles' kinematics
       /// \param[in] symmetrise Symmetrise the event? (randomise the production of positively- and negatively-charged outgoing central particles)
       virtual void fillKinematics(bool symmetrise = false) = 0;
