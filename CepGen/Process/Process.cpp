@@ -51,7 +51,6 @@ namespace cepgen {
           sqs_(proc.sqs_),
           mA2_(proc.mA2_),
           mB2_(proc.mB2_),
-          kin_(proc.kin_),
           is_point_set_(false),
           first_run_(proc.first_run_) {
       if (proc.event_)
@@ -65,6 +64,7 @@ namespace cepgen {
         if (event_)
           log << "\n\t" << *event_;
       });
+      setKinematics(proc.kin_);
     }
 
     std::unique_ptr<Process> Process::clone() const {
@@ -276,15 +276,6 @@ namespace cepgen {
                                           << "  sqrt(s) = " << sqs_ * 1.e-3 << " TeV,\n"
                                           << "  p1=" << p1 << ",\tmass=" << p1.mass() << " GeV\n"
                                           << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.";
-
-      //--- process-specific phase space definition
-      prepareKinematics();
-      CG_DEBUG("Process:setKinematics").log([&](auto& log) {
-        log << "List of " << utils::s("integration variable", mapped_variables_.size(), true) << ":";
-        for (const auto& var : mapped_variables_)
-          log << "\n\t" << var.index << ") " << var.description << " (type: " << var.type << ", limits: " << var.limits
-              << ").";
-      });
     }
 
     void Process::dumpPoint() const {

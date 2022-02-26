@@ -155,9 +155,9 @@ namespace cepgen {
         if (pout_kinematics)
           pkin += python::get<ParametersList>(pout_kinematics);
 
-        rt_params_->par_kinematics += pkin;
         if (proc_params.has<int>("mode"))
-          rt_params_->par_kinematics.set<int>("mode", proc_params.get<int>("mode"));
+          pkin.set<int>("mode", proc_params.get<int>("mode"));
+        rt_params_->process().setKinematics(Kinematics(pkin));
 
         //--- taming functions
         auto* ptam = python::element(process, "tamingFunctions");  // borrowed

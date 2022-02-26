@@ -100,10 +100,11 @@ namespace cepgen {
         throw CG_FATAL("BoostTreeHandler") << "Failed to retrieve a valid \"" << PROCESS_NAME << "\" block"
                                            << " in the steering card!";
       }
+      ParametersList par_kinematics;
       try {
         //----- phase space definition
         if (tree_.count(KIN_NAME))
-          rt_params_->par_kinematics += bc::unpack(tree_.get_child(KIN_NAME));
+          par_kinematics += bc::unpack(tree_.get_child(KIN_NAME));
         if (tree_.count(INTEGR_NAME))
           rt_params_->par_integrator += bc::unpack(tree_.get_child(INTEGR_NAME));
         if (tree_.count(GENERATOR_NAME))
@@ -134,6 +135,7 @@ namespace cepgen {
           for (const auto& mod : log_.get<std::vector<std::string> >("enabledModules"))
             utils::Logger::get().addExceptionRule(mod);
         }
+        rt_params_->process().setKinematics(Kinematics(par_kinematics));
       } catch (const boost::exception&) {
       } catch (const Exception&) {
       }

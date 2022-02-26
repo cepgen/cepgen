@@ -39,8 +39,7 @@ namespace cepgen {
   Parameters::Parameters() {}
 
   Parameters::Parameters(Parameters& param)
-      : par_kinematics(param.par_kinematics),
-        par_integrator(param.par_integrator),
+      : par_integrator(param.par_integrator),
         process_(std::move(param.process_)),
         evt_modifiers_(std::move(param.evt_modifiers_)),
         out_modules_(std::move(param.out_modules_)),
@@ -51,8 +50,7 @@ namespace cepgen {
         tmr_(std::move(param.tmr_)) {}
 
   Parameters::Parameters(const Parameters& param)
-      : par_kinematics(param.par_kinematics),
-        par_integrator(param.par_integrator),
+      : par_integrator(param.par_integrator),
         total_gen_time_(param.total_gen_time_),
         num_gen_events_(param.num_gen_events_),
         generation_(param.generation_) {}
@@ -61,7 +59,6 @@ namespace cepgen {
   {}
 
   Parameters& Parameters::operator=(Parameters param) {
-    par_kinematics = param.par_kinematics;
     par_integrator = param.par_integrator;
     process_ = std::move(param.process_);
     evt_modifiers_ = std::move(param.evt_modifiers_);
@@ -79,25 +76,6 @@ namespace cepgen {
       tmr_->clear();
     CG_TICKER(tmr_.get());
 
-    //--- first-run preparation
-    if (!process_ || !process_->firstRun())
-      return;
-
-    CG_DEBUG("Parameters") << "Preparing all variables for a new run.";
-    const Kinematics kin(par_kinematics);
-    process_->setKinematics(kin);
-    CG_DEBUG("Parameters").log([&](auto& dbg) {
-      dbg << "Run started for " << process_->name() << " process " << std::hex << (void*)process_.get() << std::dec
-          << ".\n\t";
-      const auto& beams = kin.incomingBeams();
-      dbg << "Process mode considered: " << beams.mode() << "\n\t"
-          << "  positive-z beam: " << beams.positive() << "\n\t"
-          << "  negative-z beam: " << beams.negative();
-      if (beams.structureFunctions())
-        dbg << "\n\t  structure functions: " << beams.structureFunctions();
-    });
-    if (process_->hasEvent())
-      process_->clearEvent();
     //--- clear the run statistics
     total_gen_time_ = 0.;
     num_gen_events_ = 0ul;
@@ -217,7 +195,7 @@ namespace cepgen {
        << std::setw(wt) << "Integration" << utils::boldify(param->par_integrator.name<std::string>("N/A")) << "\n";
     for (const auto& key : param->par_integrator.keys(false))
       os << std::setw(wt) << "" << key << ": " << param->par_integrator.getString(key) << "\n";
-    const Kinematics kin(param->par_kinematics);
+    const auto& kin = param->process().kinematics();
     const auto& beams = kin.incomingBeams();
     os << "\n"
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill(' ') << "\n\n"

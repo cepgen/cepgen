@@ -43,10 +43,30 @@ namespace cepgen {
     process_ = params_->process().clone();
     CG_DEBUG("ProcessIntegrand") << "Process " << process_->name() << " successfully cloned from base process "
                                  << params_->process().name() << ".";
+
+    //--- process-specific phase space definition
+    process_->prepareKinematics();
+    CG_DEBUG("ProcessIntegrand").log([this](auto& log) { process_->dumpVariables(&log.stream()); });
+
     //--- prepare the event content
-    process_->setKinematics(Kinematics(params_->par_kinematics));
     if (process_->hasEvent())
       event_ = &process_->event();
+
+    //--- first-run preparation
+    CG_DEBUG("ProcessIntegrand") << "Preparing all variables for a new run.";
+    const auto& kin = process_->kinematics();
+    CG_DEBUG("ProcessIntegrand").log([&](auto& dbg) {
+      dbg << "Run started for " << process_->name() << " process " << std::hex << (void*)process_.get() << std::dec
+          << ".\n\t";
+      const auto& beams = kin.incomingBeams();
+      dbg << "Process mode considered: " << beams.mode() << "\n\t"
+          << "  positive-z beam: " << beams.positive() << "\n\t"
+          << "  negative-z beam: " << beams.negative();
+      if (beams.structureFunctions())
+        dbg << "\n\t  structure functions: " << beams.structureFunctions();
+    });
+    if (process_->hasEvent())
+      process_->clearEvent();
 
     CG_DEBUG("ProcessIntegrand") << "New integrand object defined for process \"" << process_->name() << "\".";
   }
