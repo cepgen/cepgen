@@ -50,12 +50,12 @@ namespace cepgen {
     virtual void integrate(double& result_, double& abserr_) = 0;
 
   protected:
-    const unsigned long seed_;  ///< Random number generator seed
-    int verbosity_;             ///< Integrator verbosity
-    Integrand* integrand_;      ///< Integrand to be evaluated
-    double result_{0.};         ///< Result of the last integration
-    double err_result_{0.};     ///< Standard deviation for the last integration
-    bool initialised_{false};   ///< Has the algorithm alreay been initialised?
+    const unsigned long seed_;       ///< Random number generator seed
+    int verbosity_;                  ///< Integrator verbosity
+    Integrand* integrand_{nullptr};  ///< Integrand to be evaluated
+    double result_{0.};              ///< Result of the last integration
+    double err_result_{0.};          ///< Standard deviation for the last integration
+    bool initialised_{false};        ///< Has the algorithm alreay been initialised?
     mutable std::default_random_engine rnd_gen_;
     mutable std::uniform_real_distribution<double> rnd_;
   };
