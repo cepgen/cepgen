@@ -48,6 +48,8 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("safe-mode,s", "safe mode", &safe_mode, false)
       .parse();
 
+  cepgen::Generator gen(safe_mode);
+
   //--- first start by defining the generator object
   for (const auto& lib : addons)
     try {
@@ -55,8 +57,6 @@ int main(int argc, char* argv[]) {
     } catch (const cepgen::Exception& e) {
       e.dump();
     }
-
-  cepgen::Generator gen(safe_mode);
 
   //--- if modules listing is requested
   if (list_mods) {
