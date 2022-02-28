@@ -260,7 +260,7 @@ namespace cepgen {
     desc.add<int>("printEvery", 10000).setDescription("Printing frequency for the events content");
     desc.add<double>("targetLumi", -1.).setDescription("Target luminosity (in pb-1) to reach for this run");
     desc.add<bool>("symmetrise", false).setDescription("Are events to be symmetrised wrt beam collinear axis");
-    desc.add<int>("numThreads", 2).setDescription("Number of threads to use for event generation");
+    desc.add<int>("numThreads", 1).setDescription("Number of threads to use for event generation");
     desc.add<int>("numPoints", 100);
     return desc;
   }
