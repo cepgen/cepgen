@@ -45,8 +45,9 @@ MadGraphProcessBuilder::MadGraphProcessBuilder(const ParametersList& params)
     : Process2to4(params, std::array<pdgid_t, 2>{}, 0) {
   utils::AbortHandler();
   try {
-    if (params_.has<std::string>("lib"))
-      loadLibrary(steer<std::string>("lib"));
+    const auto& lib_file = steer<std::string>("lib");
+    if (!lib_file.empty())
+      loadLibrary(lib_file);
     else {
       const MadGraphInterface interf(params);
       loadLibrary(interf.run());

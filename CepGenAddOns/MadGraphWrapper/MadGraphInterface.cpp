@@ -46,7 +46,8 @@ namespace cepgen {
   };
 
   MadGraphInterface::MadGraphInterface(const ParametersList& params)
-      : proc_(steer<std::string>("process")),
+      : SteeredObject(params),
+        proc_(steer<std::string>("process")),
         model_(steer<std::string>("model")),
         card_path_(steerAs<std::string, fs::path>("cardPath")),
         standalone_cpp_path_(steerAs<std::string, fs::path>("standaloneCppPath")),
