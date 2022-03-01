@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2020-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,9 +48,11 @@ void MadGraphProcess::initialise(const std::string& param_card) {
   if (proc_->ninitial != 2)
     throw CG_FATAL("MadGraphProcess") << "Currently only 2->N processes are supported!";
 
+  CG_DEBUG("MadGraphProcess") << "External particles masses (partons + central system): " << proc_->getMasses() << ".";
+
   mom_.clear();
   for (size_t i = 0; i < proc_->nexternal; ++i)
-    mom_.emplace_back(new double[4]{masses().at(i), 0., 0., 0.});
+    mom_.emplace_back(new double[4]{proc_->getMasses().at(i), 0., 0., 0.});
   momenta_.reserve(proc_->nexternal);
 }
 
