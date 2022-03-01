@@ -54,6 +54,8 @@
   }
 
 namespace cepgen {
+  const std::string ParametersList::MODULE_NAME = "mod_name";
+
   ParametersList::ParametersList(const ParametersList& oth)
       : param_values_(oth.param_values_),
         bool_values_(oth.bool_values_),
