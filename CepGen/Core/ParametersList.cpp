@@ -63,10 +63,10 @@ namespace cepgen {
         dbl_values_(oth.dbl_values_),
         str_values_(oth.str_values_),
         lim_values_(oth.lim_values_),
-        vec_param_values_(oth.vec_param_values_),
         vec_int_values_(oth.vec_int_values_),
         vec_dbl_values_(oth.vec_dbl_values_),
-        vec_str_values_(oth.vec_str_values_) {}
+        vec_str_values_(oth.vec_str_values_),
+        vec_param_values_(oth.vec_param_values_) {}
 
   bool ParametersList::operator==(const ParametersList& oth) const {
     if (keys() != oth.keys())
@@ -75,13 +75,18 @@ namespace cepgen {
   }
 
   ParametersList& ParametersList::operator+=(const ParametersList& oth) {
-    //--- first ensure no key is not already present in the list
+    // ensure the two collections are not identical
+    if (*this == oth)
+      return *this;
+    // then check if any key of the other collection is lready present in the list
     std::vector<std::string> keys_erased;
     for (const auto& key : oth.keys()) {
       if (has<ParametersList>(key)) {
+        // do not remove a duplicate parameters collection ; will concatenate its values with the other object's
         if (get<ParametersList>(key) == oth.get<ParametersList>(key) && erase(key) > 0)
           keys_erased.emplace_back(key);
       } else if (erase(key) > 0)
+        // any other duplicate key is just replaced
         keys_erased.emplace_back(key);
     }
     if (!keys_erased.empty())
@@ -94,14 +99,11 @@ namespace cepgen {
     vec_dbl_values_.insert(oth.vec_dbl_values_.begin(), oth.vec_dbl_values_.end());
     str_values_.insert(oth.str_values_.begin(), oth.str_values_.end());
     vec_str_values_.insert(oth.vec_str_values_.begin(), oth.vec_str_values_.end());
+    vec_param_values_.insert(oth.vec_param_values_.begin(), oth.vec_param_values_.end());
     lim_values_.insert(oth.lim_values_.begin(), oth.lim_values_.end());
+    // special case for parameters collection: concatenate values instead of full containers
     for (const auto& par : oth.param_values_)
       param_values_[par.first] += par.second;
-    /*for (const auto& vpar : oth.vec_param_values_)
-      for (const auto& par : vpar.second)
-        if (!utils::contains(vec_param_values_[vpar.first], par))
-          vec_param_values_[vpar.first].emplace_back(par);*/
-    vec_param_values_.insert(oth.vec_param_values_.begin(), oth.vec_param_values_.end());
     return *this;
   }
 
@@ -201,16 +203,16 @@ namespace cepgen {
   std::vector<std::string> ParametersList::keys(bool name_key) const {
     std::vector<std::string> out;
     auto key = [](const auto& p) { return p.first; };
-    std::transform(param_values_.begin(), param_values_.end(), std::back_inserter(out), key);
-    std::transform(vec_param_values_.begin(), vec_param_values_.end(), std::back_inserter(out), key);
     std::transform(bool_values_.begin(), bool_values_.end(), std::back_inserter(out), key);
     std::transform(int_values_.begin(), int_values_.end(), std::back_inserter(out), key);
     std::transform(vec_int_values_.begin(), vec_int_values_.end(), std::back_inserter(out), key);
     std::transform(dbl_values_.begin(), dbl_values_.end(), std::back_inserter(out), key);
+    std::transform(param_values_.begin(), param_values_.end(), std::back_inserter(out), key);
     std::transform(vec_dbl_values_.begin(), vec_dbl_values_.end(), std::back_inserter(out), key);
     std::transform(str_values_.begin(), str_values_.end(), std::back_inserter(out), key);
-    std::transform(vec_str_values_.begin(), vec_str_values_.end(), std::back_inserter(out), key);
     std::transform(lim_values_.begin(), lim_values_.end(), std::back_inserter(out), key);
+    std::transform(vec_str_values_.begin(), vec_str_values_.end(), std::back_inserter(out), key);
+    std::transform(vec_param_values_.begin(), vec_param_values_.end(), std::back_inserter(out), key);
     if (!name_key) {
       const auto it_name = std::find(out.begin(), out.end(), MODULE_NAME);
       if (it_name != out.end())

@@ -137,10 +137,10 @@ namespace cepgen {
     std::unordered_map<std::string, double> dbl_values_;
     std::unordered_map<std::string, std::string> str_values_;
     std::unordered_map<std::string, Limits> lim_values_;
-    std::unordered_map<std::string, std::vector<ParametersList> > vec_param_values_;
     std::unordered_map<std::string, std::vector<int> > vec_int_values_;
     std::unordered_map<std::string, std::vector<double> > vec_dbl_values_;
     std::unordered_map<std::string, std::vector<std::string> > vec_str_values_;
+    std::unordered_map<std::string, std::vector<ParametersList> > vec_param_values_;
   };
 
   DEFINE_TYPE(bool)
