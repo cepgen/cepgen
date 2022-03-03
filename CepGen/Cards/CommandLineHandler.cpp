@@ -92,7 +92,7 @@ namespace cepgen {
       }
 
       //----- phase space definition
-      auto kin = pars.get<ParametersList>("kinematics");
+      auto pars_kin = pars.get<ParametersList>("kinematics");
 
       //----- process definition
       auto proc = pars.get<ParametersList>("process");
@@ -101,13 +101,16 @@ namespace cepgen {
           proc = ParametersList(rt_params_->process().parameters()) + proc;
         rt_params_->setProcess(proc::ProcessFactory::get().build(proc));
         if (proc.has<int>("mode"))
-          kin.set<int>("mode", proc.get<int>("mode"));
+          pars_kin.set<int>("mode", proc.get<int>("mode"));
       }
 
       //----- set auxiliary information for phase space definition
-      kin.set<ParametersList>("structureFunctions", pars.get<ParametersList>("strfun"))
+      pars_kin.set<ParametersList>("structureFunctions", pars.get<ParametersList>("strfun"))
           .set<std::string>("formFactors", pars.get<std::string>("formfac"));
-      rt_params_->process().setKinematics(Kinematics(kin));
+
+      //----- get the kinematics as already defined in the process object and modify it accordingly
+      pars_kin = ParametersList(rt_params_->process().kinematics().parameters(true)) + pars_kin;
+      rt_params_->process().setKinematics(Kinematics(pars_kin));
 
       //----- integration
       pars.fill<ParametersList>("integrator", rt_params_->par_integrator);
