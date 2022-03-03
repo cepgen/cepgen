@@ -71,6 +71,8 @@ namespace cepgen {
         vec_param_values_(oth.vec_param_values_) {}
 
   bool ParametersList::operator==(const ParametersList& oth) const {
+    // only ensure the keys are identical
+    /// \note this might be a bit too loose for more advanced usages
     if (keys() != oth.keys())
       return false;
     return true;
