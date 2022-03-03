@@ -17,6 +17,7 @@
  */
 
 #include <iomanip>
+#include <regex>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
@@ -55,6 +56,7 @@
 
 namespace cepgen {
   const std::string ParametersList::MODULE_NAME = "mod_name";
+  const std::regex kFloatRegex("[+-]?([0-9]+)([.][0-9]*)?|[.][0-9]+");
 
   ParametersList::ParametersList(const ParametersList& oth)
       : param_values_(oth.param_values_),
@@ -129,9 +131,7 @@ namespace cepgen {
       else if (words.size() == 2) {  // basic key=value
         const auto value = words.at(1);
         try {
-          if (value.find('.') != std::string::npos || value.find('e') != std::string::npos ||
-              value.find('E') != std::string::npos)
-            // double if contains a '.'/'e'
+          if (std::regex_match(value, kFloatRegex))
             plist.set<double>(key, std::stod(value));
           else
             plist.set<int>(key, std::stoi(value));
@@ -152,25 +152,25 @@ namespace cepgen {
 
   size_t ParametersList::erase(const std::string& key) {
     size_t out = 0ull;
-    if (bool_values_.count(key) != 0)
+    if (bool_values_.count(key) > 0)
       out += bool_values_.erase(key);
-    if (int_values_.count(key) != 0)
+    if (int_values_.count(key) > 0)
       out += int_values_.erase(key);
-    if (dbl_values_.count(key) != 0)
+    if (dbl_values_.count(key) > 0)
       out += dbl_values_.erase(key);
-    if (str_values_.count(key) != 0)
+    if (str_values_.count(key) > 0)
       out += str_values_.erase(key);
-    if (lim_values_.count(key) != 0)
+    if (lim_values_.count(key) > 0)
       out += lim_values_.erase(key);
-    if (param_values_.count(key) != 0)
+    if (param_values_.count(key) > 0)
       out += param_values_.erase(key);
-    if (vec_int_values_.count(key) != 0)
+    if (vec_int_values_.count(key) > 0)
       out += vec_int_values_.erase(key);
-    if (vec_dbl_values_.count(key) != 0)
+    if (vec_dbl_values_.count(key) > 0)
       out += vec_dbl_values_.erase(key);
-    if (vec_str_values_.count(key) != 0)
+    if (vec_str_values_.count(key) > 0)
       out += vec_str_values_.erase(key);
-    if (vec_param_values_.count(key) != 0)
+    if (vec_param_values_.count(key) > 0)
       out += vec_param_values_.erase(key);
     return out;
   }
