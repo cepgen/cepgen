@@ -272,6 +272,30 @@ namespace cepgen {
     return os.str();
   }
 
+  ParametersList& ParametersList::rename(const std::string& old_key, const std::string& new_key) {
+    if (has<bool>(old_key))
+      set<bool>(new_key, get<bool>(old_key)).erase(old_key);
+    if (has<int>(old_key))
+      set<int>(new_key, get<int>(old_key)).erase(old_key);
+    if (has<double>(old_key))
+      set<double>(new_key, get<double>(old_key)).erase(old_key);
+    if (has<std::string>(old_key))
+      set<std::string>(new_key, get<std::string>(old_key)).erase(old_key);
+    if (has<Limits>(old_key))
+      set<Limits>(new_key, get<Limits>(old_key)).erase(old_key);
+    if (has<ParametersList>(old_key))
+      set<ParametersList>(new_key, get<ParametersList>(old_key)).erase(old_key);
+    if (has<std::vector<int> >(old_key))
+      set<std::vector<int> >(new_key, get<std::vector<int> >(old_key)).erase(old_key);
+    if (has<std::vector<double> >(old_key))
+      set<std::vector<double> >(new_key, get<std::vector<double> >(old_key)).erase(old_key);
+    if (has<std::vector<std::string> >(old_key))
+      set<std::vector<std::string> >(new_key, get<std::vector<std::string> >(old_key)).erase(old_key);
+    if (has<std::vector<ParametersList> >(old_key))
+      set<std::vector<ParametersList> >(new_key, get<std::vector<ParametersList> >(old_key)).erase(old_key);
+    return *this;
+  }
+
   //------------------------------------------------------------------
   // default template (placeholders)
   //------------------------------------------------------------------

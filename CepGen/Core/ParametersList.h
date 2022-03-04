@@ -106,6 +106,8 @@ namespace cepgen {
     inline ParametersList& setAs(const std::string& key, const U& value) {
       return set<T>(key, static_cast<T>(value));
     }
+    /// Rename the key to a parameter value
+    ParametersList& rename(const std::string& old_key, const std::string& new_key);
     /// Concatenate two parameters containers
     ParametersList& operator+=(const ParametersList& oth);
     /// Concatenation of two parameters containers
