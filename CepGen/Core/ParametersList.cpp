@@ -118,37 +118,40 @@ namespace cepgen {
   }
 
   ParametersList& ParametersList::feed(const std::string& arg) {
+    // browse through the parameters hierarchy
     auto cmd = utils::split(arg, '/');
-    auto& plist = cmd.size() > 1 ? operator[]<ParametersList>(cmd.at(0)) : *this;
     if (cmd.size() > 1)  // sub-parameters word found
-      plist.feed(utils::merge(std::vector<std::string>(cmd.begin() + 1, cmd.end()), "/"));
-    else {
-      const auto word = cmd.at(0);
-      auto words = utils::split(word, '=');
-      auto key = words.at(0);
-      if (key == "name")
-        key = ParametersList::MODULE_NAME;
-      if (words.size() == 1)  // basic key=true
-        plist.set<bool>(key, true);
-      else if (words.size() == 2) {  // basic key=value
-        const auto value = words.at(1);
-        try {
-          if (std::regex_match(value, kFloatRegex))
-            plist.set<double>(key, std::stod(value));
-          else
-            plist.set<int>(key, std::stoi(value));
-        } catch (const std::invalid_argument&) {
-          const auto value_lc = utils::tolower(value);
-          if (value_lc == "off" || value_lc == "no" || value_lc == "false")
-            plist.set<bool>(key, false);
-          else if (value_lc == "on" || value_lc == "yes" || value_lc == "true")
-            plist.set<bool>(key, true);
-          else
-            plist.set<std::string>(key, value);
-        }
-      } else
-        throw CG_FATAL("ParametersList:feed") << "Invalid key=value unpacking: " << word << "!";
-    }
+      return operator[]<ParametersList>(cmd.at(0)).feed(
+          utils::merge(std::vector<std::string>(cmd.begin() + 1, cmd.end()), "/"));
+
+    // from this moment on, a "key=value" or "key(=true)" was found
+    const auto& word = cmd.at(0);
+    auto words = utils::split(word, '=');
+    auto key = words.at(0);
+    if (erase(key) > 0)
+      CG_DEBUG("ParametersList:feed") << "Replacing key='" << key << "' with a new value.";
+    if (key == "name")
+      key = ParametersList::MODULE_NAME;
+    if (words.size() == 1)  // basic key=true
+      set<bool>(key, true);
+    else if (words.size() == 2) {  // basic key=value
+      const auto value = words.at(1);
+      try {
+        if (std::regex_match(value, kFloatRegex))
+          set<double>(key, std::stod(value));
+        else
+          set<int>(key, std::stoi(value));
+      } catch (const std::invalid_argument&) {
+        const auto value_lc = utils::tolower(value);
+        if (value_lc == "off" || value_lc == "no" || value_lc == "false")
+          set<bool>(key, false);
+        else if (value_lc == "on" || value_lc == "yes" || value_lc == "true")
+          set<bool>(key, true);
+        else
+          set<std::string>(key, value);
+      }
+    } else
+      throw CG_FATAL("ParametersList:feed") << "Invalid key=value unpacking: " << word << "!";
     return *this;
   }
 
