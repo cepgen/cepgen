@@ -105,8 +105,11 @@ namespace cepgen {
       }
 
       //----- set auxiliary information for phase space definition
-      pars_kin.set<ParametersList>("structureFunctions", pars.get<ParametersList>("strfun"))
-          .set<std::string>("formFactors", pars.get<std::string>("formfac"));
+      if (pars_kin.has<int>("strfun"))
+        pars_kin.set<ParametersList>("structureFunctions", ParametersList().setName<int>(pars_kin.get<int>("strfun")));
+      else if (pars_kin.has<ParametersList>("strfun"))
+        pars_kin.set<ParametersList>("structureFunctions", pars_kin.get<ParametersList>("strfun"));
+      pars_kin.set<std::string>("formFactors", pars.get<std::string>("formfac"));
 
       //----- get the kinematics as already defined in the process object and modify it accordingly
       pars_kin = ParametersList(rt_params_->process().kinematics().parameters(true)) + pars_kin;
