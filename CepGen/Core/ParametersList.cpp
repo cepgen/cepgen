@@ -56,7 +56,7 @@
 
 namespace cepgen {
   const std::string ParametersList::MODULE_NAME = "mod_name";
-  const std::regex kFloatRegex("[+-]?([0-9]+)([.][0-9]*)?|[.][0-9]+", std::regex_constants::extended);
+  const std::regex kFloatRegex("[+-]?([0-9]+)[.EeDd][+-]?([0-9]*)?|[.][0-9]+", std::regex_constants::extended);
 
   ParametersList::ParametersList(const ParametersList& oth)
       : param_values_(oth.param_values_),
