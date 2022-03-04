@@ -238,20 +238,9 @@ namespace cepgen {
     auto wrap_coll = [&wrap, &wrap_val](const auto& coll, const std::string& type) -> std::string {
       return wrap_val(utils::merge(coll, ", "), type);
     };
-    if (has<ParametersList>(key)) {
-      auto plist = get<ParametersList>(key);
-      if (!wrap)
-        os << plist;
-      else {
-        const auto& plist_name = plist.getString(MODULE_NAME, false);
-        if (plist_name.empty())
-          os << "Parameters(" << plist << ")";
-        else {
-          plist.erase(MODULE_NAME);
-          os << "Module(" << plist_name << ", " << plist << ")";
-        }
-      }
-    } else if (has<bool>(key))
+    if (has<ParametersList>(key))
+      os << get<ParametersList>(key);
+    else if (has<bool>(key))
       os << wrap_val(get<bool>(key), "bool");
     else if (has<int>(key))
       os << wrap_val(get<int>(key), "int");
