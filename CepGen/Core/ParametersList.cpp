@@ -86,7 +86,8 @@ namespace cepgen {
     std::vector<std::string> keys_erased;
     for (const auto& key : oth.keys()) {
       if (has<ParametersList>(key)) {
-        // do not remove a duplicate parameters collection ; will concatenate its values with the other object's
+        // do not remove a duplicate parameters collection if they are not strictly identical ;
+        // will concatenate its values with the other object's
         if (get<ParametersList>(key) == oth.get<ParametersList>(key) && erase(key) > 0)
           keys_erased.emplace_back(key);
       } else if (erase(key) > 0)
@@ -107,7 +108,13 @@ namespace cepgen {
     lim_values_.insert(oth.lim_values_.begin(), oth.lim_values_.end());
     // special case for parameters collection: concatenate values instead of full containers
     for (const auto& par : oth.param_values_)
-      param_values_[par.first] += par.second;
+      // if the two parameters list are modules, and do not have the same name,
+      // simply replace the old one with the new parameters list
+      if (param_values_[par.first].getString(ParametersList::MODULE_NAME) ==
+          par.second.getString(ParametersList::MODULE_NAME))
+        param_values_[par.first] += par.second;
+      else
+        param_values_[par.first] = par.second;
     return *this;
   }
 
