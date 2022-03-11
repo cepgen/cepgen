@@ -53,6 +53,7 @@ namespace cepgen {
   }
 
   void Generator::clearRun() {
+    CG_DEBUG("Generator:clearRun") << "Run is set to be cleared.";
     worker_.reset(new GeneratorWorker(const_cast<const Parameters*>(parameters_.get())));
     // destroy and recreate the integrator instance
     setIntegrator(nullptr);

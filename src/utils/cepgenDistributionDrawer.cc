@@ -61,6 +61,7 @@ int main(int argc, char* argv[]) {
     h_var_hist[parsed_var]->xAxis().setLabel(parsed_var);
     h_var_hist[parsed_var]->yAxis().setLabel("d$\\sigma$/d" + parsed_var);
   }
+  CG_DEBUG("main") << "Variables to be plotted: " << vars << ".";
 
   CG_LOG << "Process name: " << mg.parameters()->processName() << ".";
 
