@@ -315,9 +315,9 @@ namespace cepgen {
         return *this;
       } catch (const std::invalid_argument&) {
         *bool_variable_ = (strcasecmp("true", value.c_str()) == 0 || strcasecmp("yes", value.c_str()) == 0 ||
-                           strcasecmp("on", value.c_str()) == 0) &&
+                           strcasecmp("on", value.c_str()) == 0 || strcasecmp("1", value.c_str()) == 0) &&
                           strcasecmp("false", value.c_str()) != 0 && strcasecmp("no", value.c_str()) != 0 &&
-                          strcasecmp("off", value.c_str()) != 0;
+                          strcasecmp("off", value.c_str()) != 0 && strcasecmp("0", value.c_str()) != 0;
       }
     }
     if (vec_str_variable_) {
