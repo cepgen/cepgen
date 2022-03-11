@@ -208,42 +208,21 @@ namespace cepgen {
         description(description),
         value(default_value),
         optional(true),
-        str_variable_(var),
-        float_variable_(nullptr),
-        int_variable_(nullptr),
-        uint_variable_(nullptr),
-        bool_variable_(nullptr),
-        vec_str_variable_(nullptr),
-        vec_int_variable_(nullptr),
-        vec_float_variable_(nullptr) {}
+        str_variable_(var) {}
 
   ArgumentsParser::Parameter::Parameter(std::string name, std::string description, double* var, double default_value)
       : name(utils::split(name, ',')),
         description(description),
         value(utils::format("%g", default_value)),
         optional(true),
-        str_variable_(nullptr),
-        float_variable_(var),
-        int_variable_(nullptr),
-        uint_variable_(nullptr),
-        bool_variable_(nullptr),
-        vec_str_variable_(nullptr),
-        vec_int_variable_(nullptr),
-        vec_float_variable_(nullptr) {}
+        float_variable_(var) {}
 
   ArgumentsParser::Parameter::Parameter(std::string name, std::string description, int* var, int default_value)
       : name(utils::split(name, ',')),
         description(description),
         value(utils::format("%+i", default_value)),
         optional(true),
-        str_variable_(nullptr),
-        float_variable_(nullptr),
-        int_variable_(var),
-        uint_variable_(nullptr),
-        bool_variable_(nullptr),
-        vec_str_variable_(nullptr),
-        vec_int_variable_(nullptr),
-        vec_float_variable_(nullptr) {}
+        int_variable_(var) {}
 
   ArgumentsParser::Parameter::Parameter(std::string name,
                                         std::string description,
@@ -253,28 +232,14 @@ namespace cepgen {
         description(description),
         value(std::to_string(default_value)),
         optional(true),
-        str_variable_(nullptr),
-        float_variable_(nullptr),
-        int_variable_(nullptr),
-        uint_variable_(var),
-        bool_variable_(nullptr),
-        vec_str_variable_(nullptr),
-        vec_int_variable_(nullptr),
-        vec_float_variable_(nullptr) {}
+        uint_variable_(var) {}
 
   ArgumentsParser::Parameter::Parameter(std::string name, std::string description, bool* var, bool default_value)
       : name(utils::split(name, ',')),
         description(description),
         value(utils::format("%d", default_value)),
         optional(true),
-        str_variable_(nullptr),
-        float_variable_(nullptr),
-        int_variable_(nullptr),
-        uint_variable_(nullptr),
-        bool_variable_(var),
-        vec_str_variable_(nullptr),
-        vec_int_variable_(nullptr),
-        vec_float_variable_(nullptr) {}
+        bool_variable_(var) {}
 
   //----- vector of parameters
 
@@ -286,31 +251,13 @@ namespace cepgen {
         description(description),
         value(utils::merge(default_value, ",")),
         optional(true),
-        str_variable_(nullptr),
-        float_variable_(nullptr),
-        int_variable_(nullptr),
-        uint_variable_(nullptr),
-        bool_variable_(nullptr),
-        vec_str_variable_(var),
-        vec_int_variable_(nullptr),
-        vec_float_variable_(nullptr) {}
+        vec_str_variable_(var) {}
 
   ArgumentsParser::Parameter::Parameter(std::string name,
                                         std::string description,
                                         std::vector<int>* var,
                                         std::vector<int> default_value)
-      : name(utils::split(name, ',')),
-        description(description),
-        value(""),
-        optional(true),
-        str_variable_(nullptr),
-        float_variable_(nullptr),
-        int_variable_(nullptr),
-        uint_variable_(nullptr),
-        bool_variable_(nullptr),
-        vec_str_variable_(nullptr),
-        vec_int_variable_(var),
-        vec_float_variable_(nullptr) {
+      : name(utils::split(name, ',')), description(description), value(""), optional(true), vec_int_variable_(var) {
     std::string sep;
     for (const auto& val : default_value)
       value += sep + utils::format("%d", val), sep = ",";
@@ -320,44 +267,41 @@ namespace cepgen {
                                         std::string description,
                                         std::vector<double>* var,
                                         std::vector<double> default_value)
-      : name(utils::split(name, ',')),
-        description(description),
-        value(""),
-        optional(true),
-        str_variable_(nullptr),
-        float_variable_(nullptr),
-        int_variable_(nullptr),
-        uint_variable_(nullptr),
-        bool_variable_(nullptr),
-        vec_str_variable_(nullptr),
-        vec_int_variable_(nullptr),
-        vec_float_variable_(var) {
+      : name(utils::split(name, ',')), description(description), value(""), optional(true), vec_float_variable_(var) {
     std::string sep;
     for (const auto& val : default_value)
       value += sep + utils::format("%e", val), sep = ",";
   }
 
+  bool ArgumentsParser::Parameter::matches(const std::string& key) const {
+    if (key == "--" + name.at(0))
+      return true;
+    if (name.size() > 1 && key == "-" + name.at(1))
+      return true;
+    return false;
+  }
+
   ArgumentsParser::Parameter& ArgumentsParser::Parameter::parse() {
     CG_DEBUG("ArgumentsParser:Parameter:parse") << "Parsing argument " << name << ".";
-    if (str_variable_ != nullptr) {
+    if (str_variable_) {
       *str_variable_ = value;
       return *this;
     }
-    if (float_variable_ != nullptr)
+    if (float_variable_)
       try {
         *float_variable_ = std::stod(value);
         return *this;
       } catch (const std::invalid_argument&) {
         throw CG_FATAL("ArgumentsParser:Parameter:parse") << "Failed to parse variable '" << name << "' as float!";
       }
-    if (int_variable_ != nullptr)
+    if (int_variable_)
       try {
         *int_variable_ = std::stoi(value);
         return *this;
       } catch (const std::invalid_argument&) {
         throw CG_FATAL("ArgumentsParser:Parameter:parse") << "Failed to parse variable '" << name << "' as integer!";
       }
-    if (uint_variable_ != nullptr)
+    if (uint_variable_)
       try {
         *uint_variable_ = std::stoi(value);
         return *this;
@@ -365,7 +309,7 @@ namespace cepgen {
         throw CG_FATAL("ArgumentsParser:Parameter:parse")
             << "Failed to parse variable '" << name << "' as unsigned integer!";
       }
-    if (bool_variable_ != nullptr) {
+    if (bool_variable_) {
       try {
         *bool_variable_ = (std::stoi(value) != 0);
         return *this;
@@ -376,11 +320,11 @@ namespace cepgen {
                           strcasecmp("off", value.c_str()) != 0;
       }
     }
-    if (vec_str_variable_ != nullptr) {
+    if (vec_str_variable_) {
       *vec_str_variable_ = utils::split(value, ',');
       return *this;
     }
-    if (vec_int_variable_ != nullptr) {
+    if (vec_int_variable_) {
       vec_int_variable_->clear();
       const auto buf = utils::split(value, ',');
       std::transform(buf.begin(), buf.end(), std::back_inserter(*vec_int_variable_), [](const std::string& str) {
@@ -388,7 +332,7 @@ namespace cepgen {
       });
       return *this;
     }
-    if (vec_float_variable_ != nullptr) {
+    if (vec_float_variable_) {
       vec_float_variable_->clear();
       const auto buf = utils::split(value, ',');
       std::transform(buf.begin(), buf.end(), std::back_inserter(*vec_float_variable_), [](const std::string& str) {

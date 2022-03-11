@@ -101,33 +101,35 @@ namespace cepgen {
       Parameter& parse();
       /// Is the parameter a simple boolean?
       inline bool boolean() const { return bool_variable_ != nullptr; }
+      /// Does the parameter name matches a user-given argument?
+      bool matches(const std::string&) const;
 
       //----- parameters attributes
 
       std::vector<std::string> name;  ///< Computer-readable name
       std::string description;        ///< User-friendly parameter description
       std::string value;              ///< Value (or default value)
-      bool optional;                  ///< Flag to specify of the argument can be skipped from user input
+      bool optional{false};           ///< Flag to specify of the argument can be skipped from user input
 
     private:
       //----- parameters containers
 
       /// Pointer to a string variable possibly handled by this parameter
-      std::string* str_variable_;
+      std::string* str_variable_{nullptr};
       /// Pointer to a double-precision floating point variable possibly handled by this parameter
-      double* float_variable_;
+      double* float_variable_{nullptr};
       /// Pointer to an integer variable possibly handled by this parameter
-      int* int_variable_;
+      int* int_variable_{nullptr};
       /// Pointer to an unsigned integer variable possibly handled by this parameter
-      unsigned int* uint_variable_;
+      unsigned int* uint_variable_{nullptr};
       /// Pointer to a boolean variable possibly handled by this parameter
-      bool* bool_variable_;
+      bool* bool_variable_{nullptr};
       /// Pointer to a vector of string variables possibly handled by this parameter
-      std::vector<std::string>* vec_str_variable_;
+      std::vector<std::string>* vec_str_variable_{nullptr};
       /// Pointer to a vector of integer variables possibly handled by this parameter
-      std::vector<int>* vec_int_variable_;
+      std::vector<int>* vec_int_variable_{nullptr};
       /// Pointer to a vector of floating point variables possibly handled by this parameter
-      std::vector<double>* vec_float_variable_;
+      std::vector<double>* vec_float_variable_{nullptr};
     };
     /// A collection of parameters
     typedef std::vector<Parameter> ParametersCollection;
