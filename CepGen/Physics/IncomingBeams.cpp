@@ -168,7 +168,7 @@ namespace cepgen {
     params_ = SteeredObject::parameters();
     if (str_fun_)
       params_.set<ParametersList>("structureFunctions", str_fun_->parameters());
-    params_.set<int>("mode", (int)mode())
+    params_.setAs<int, mode::Kinematics>("mode", mode())
         .set<int>("beam1id", pos_beam_.pdgId())
         .set<double>("beam1pz", +pos_beam_.momentum().pz())
         .set<int>("beam2id", neg_beam_.pdgId())
