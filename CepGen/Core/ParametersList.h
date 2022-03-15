@@ -24,7 +24,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Utils/Limits.h"
 
 #define DEFINE_TYPE(type)                                                         \
@@ -136,6 +135,7 @@ namespace cepgen {
     std::map<std::string, ParametersList> param_values_;
     std::unordered_map<std::string, bool> bool_values_;
     std::unordered_map<std::string, int> int_values_;
+    std::unordered_map<std::string, unsigned long long> ulong_values_;
     std::unordered_map<std::string, double> dbl_values_;
     std::unordered_map<std::string, std::string> str_values_;
     std::unordered_map<std::string, Limits> lim_values_;
@@ -145,17 +145,17 @@ namespace cepgen {
     std::unordered_map<std::string, std::vector<ParametersList> > vec_param_values_;
   };
 
+  DEFINE_TYPE(ParametersList)
   DEFINE_TYPE(bool)
   DEFINE_TYPE(int)
-  DEFINE_TYPE(std::vector<int>)
+  DEFINE_TYPE(unsigned long long)
   DEFINE_TYPE(double)
-  DEFINE_TYPE(std::vector<double>)
   DEFINE_TYPE(std::string)
-  DEFINE_TYPE(std::vector<std::string>)
   DEFINE_TYPE(Limits)
-  DEFINE_TYPE(ParametersList)
+  DEFINE_TYPE(std::vector<int>)
+  DEFINE_TYPE(std::vector<double>)
+  DEFINE_TYPE(std::vector<std::string>)
   DEFINE_TYPE(std::vector<ParametersList>)
-  DEFINE_TYPE(ParticleProperties)
 }  // namespace cepgen
 
 #undef DEFINE_TYPE

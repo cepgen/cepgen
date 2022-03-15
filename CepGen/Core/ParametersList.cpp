@@ -62,6 +62,7 @@ namespace cepgen {
       : param_values_(oth.param_values_),
         bool_values_(oth.bool_values_),
         int_values_(oth.int_values_),
+        ulong_values_(oth.ulong_values_),
         dbl_values_(oth.dbl_values_),
         str_values_(oth.str_values_),
         lim_values_(oth.lim_values_),
@@ -168,6 +169,8 @@ namespace cepgen {
       out += bool_values_.erase(key);
     if (int_values_.count(key) > 0)
       out += int_values_.erase(key);
+    if (ulong_values_.count(key) > 0)
+      out += ulong_values_.erase(key);
     if (dbl_values_.count(key) > 0)
       out += dbl_values_.erase(key);
     if (str_values_.count(key) > 0)
@@ -217,6 +220,7 @@ namespace cepgen {
     auto key = [](const auto& p) { return p.first; };
     std::transform(bool_values_.begin(), bool_values_.end(), std::back_inserter(out), key);
     std::transform(int_values_.begin(), int_values_.end(), std::back_inserter(out), key);
+    std::transform(ulong_values_.begin(), ulong_values_.end(), std::back_inserter(out), key);
     std::transform(vec_int_values_.begin(), vec_int_values_.end(), std::back_inserter(out), key);
     std::transform(dbl_values_.begin(), dbl_values_.end(), std::back_inserter(out), key);
     std::transform(param_values_.begin(), param_values_.end(), std::back_inserter(out), key);
@@ -320,14 +324,15 @@ namespace cepgen {
   // sub-parameters-type attributes
   //------------------------------------------------------------------
 
+  IMPL_TYPE(ParametersList, param_values_, "parameters")
   IMPL_TYPE(bool, bool_values_, "boolean")
   IMPL_TYPE(int, int_values_, "integer")
-  IMPL_TYPE(std::vector<int>, vec_int_values_, "vector of integers")
+  IMPL_TYPE(unsigned long long, ulong_values_, "unsigned long integer")
   IMPL_TYPE(double, dbl_values_, "floating number")
-  IMPL_TYPE(std::vector<double>, vec_dbl_values_, "vector of floating numbers")
   IMPL_TYPE(std::string, str_values_, "string")
+  IMPL_TYPE(std::vector<int>, vec_int_values_, "vector of integers")
+  IMPL_TYPE(std::vector<double>, vec_dbl_values_, "vector of floating numbers")
   IMPL_TYPE(std::vector<std::string>, vec_str_values_, "vector of strings")
-  IMPL_TYPE(ParametersList, param_values_, "parameters")
   IMPL_TYPE(std::vector<ParametersList>, vec_param_values_, "vector of parameters")
 
   //------------------------------------------------------------------
@@ -427,7 +432,7 @@ namespace cepgen {
       if (plist.has<std::string>("name"))
         out.name = plist.get<std::string>("name"), modified = true;
       if (plist.has<std::string>("description"))
-        out.description = plist.get<std::string>("description"), modified = true;
+        out.descr = plist.get<std::string>("description"), modified = true;
       if (plist.has<int>("colours"))
         out.colours = plist.get<int>("colours"), modified = true;
       if (plist.has<double>("mass"))
@@ -452,16 +457,7 @@ namespace cepgen {
   /// Set a particle properties object value
   template <>
   ParametersList& ParametersList::set<ParticleProperties>(const std::string& key, const ParticleProperties& value) {
-    return set<ParametersList>(key,
-                               ParametersList()
-                                   .set<int>("pdgid", value.pdgid)
-                                   .set<std::string>("name", value.name)
-                                   .set<std::string>("description", value.description)
-                                   .set<int>("colours", value.colours)
-                                   .set<double>("mass", value.mass)
-                                   .set<double>("width", value.width)
-                                   .set<double>("charge", value.charge * 1. / 3)
-                                   .set<bool>("fermion", value.fermion));
+    return set<ParametersList>(key, value.parameters());
   }
 }  // namespace cepgen
 

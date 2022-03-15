@@ -23,6 +23,7 @@
 
 #include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Physics/Momentum.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 namespace cepgen {
   enum class KTFlux;

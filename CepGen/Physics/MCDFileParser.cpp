@@ -74,39 +74,46 @@ namespace pdg {
         throw CG_FATAL("MCDFileParser") << "Error while parsing the MCD file \"" << path << "\".\n\t"
                                         << "Invalid PDG ids / charges vectors sizes: " << pdg_ids.size()
                                         << " != " << charges.size() << ".";
+      cepgen::ParticleProperties prop;
+      prop.name = part_name;
+      prop.descr = part_name;
+      prop.colours = 1;
+      prop.mass = mass;
+      prop.width = width;
+      prop.fermion = false;
       for (size_t i = 0; i < pdg_ids.size(); ++i) {
-        bool is_fermion;
-        short colour_factor;
+        prop.pdgid = (cepgen::pdgid_t)pdg_ids.at(i);
+        prop.charge = charges.at(i);
         switch (pdg_ids.at(i)) {
+          // start with quarks
           case 1:
           case 2:
           case 3:
           case 4:
           case 5:
           case 6:
-            colour_factor = 3;
-            is_fermion = true;
+            prop.colours = 3;
+            prop.fermion = true;
             break;
+          // then move to leptons/neutrinos
           case 11:
           case 12:
           case 13:
           case 14:
           case 15:
           case 16:
-            colour_factor = 1;
-            is_fermion = true;
+            prop.colours = 1;
+            prop.fermion = true;
             break;
+          // then gluons
           case 21:
-            colour_factor = 9;
-            is_fermion = false;
+            prop.colours = 9;
+            prop.fermion = false;
             break;
+          // and finally the rest
           default:
-            colour_factor = 1;
-            is_fermion = false;
             break;
         }
-        cepgen::ParticleProperties prop{
-            (cepgen::pdgid_t)pdg_ids.at(i), part_name, part_name, colour_factor, mass, width, charges.at(i), is_fermion};
         cepgen::PDG::get().define(prop);
       }
     }

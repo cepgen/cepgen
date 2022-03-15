@@ -242,14 +242,14 @@ namespace cepgen {
       try {
         prop = PDG::get()(pdg_id);
       } catch (const Exception&) {
-        prop = ParticleProperties{pdg_id,
-                                  py_part.name(),
-                                  py_part.name(),
-                                  (short)py_part.col(),  // colour factor
-                                  py_part.m0(),
-                                  py_part.mWidth(),
-                                  (short)py_part.charge(),  // charge
-                                  py_part.isLepton()};
+        prop.pdgid = pdg_id;
+        prop.name = py_part.name();
+        prop.descr = py_part.name();
+        prop.colours = py_part.col();  // colour factor
+        prop.mass = py_part.m0();
+        prop.width = py_part.mWidth();
+        prop.charge = py_part.charge();  // charge
+        prop.fermion = py_part.isLepton();
         PDG::get().define(prop);
       }
       //--- add the particle to the event content

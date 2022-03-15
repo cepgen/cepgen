@@ -78,7 +78,7 @@ namespace cepgen {
 
     void PPtoFF::prepareProcessKinematics() {
       if (!cs_prop_.fermion || cs_prop_.charge == 0.)
-        throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop_.description << " ("
+        throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop_.descr << " ("
                                          << (int)cs_prop_.pdgid << ")!";
 
       mf2_ = cs_prop_.mass * cs_prop_.mass;
@@ -86,7 +86,7 @@ namespace cepgen {
       colf_ = cs_prop_.colours;
       prefactor_ = 1.;
 
-      CG_DEBUG("PPtoFF:prepare") << "Produced particles: " << cs_prop_.description << " ("
+      CG_DEBUG("PPtoFF:prepare") << "Produced particles: " << cs_prop_.descr << " ("
                                  << "mass = " << cs_prop_.mass << " GeV, "
                                  << "charge = " << std::setprecision(2) << qf3_ / 3. << " e)\n\t"
                                  << "matrix element computation method: " << (int)method_ << ".";
