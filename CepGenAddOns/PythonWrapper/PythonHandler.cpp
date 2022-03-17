@@ -272,9 +272,11 @@ namespace cepgen {
         const auto& part = parts.get<ParticleProperties>(k);
         if (part.pdgid == 0 || part.mass < 0.)
           continue;
-        CG_DEBUG("PythonHandler:particles")
-            << "Adding a new particle with name \"" << part.name << "\" to the PDG dictionary.";
-        PDG::get().define(part);
+        if (!PDG::get().has(part.pdgid) || PDG::get()(part.pdgid) != part) {
+          CG_DEBUG("PythonHandler:particles")
+              << "Adding a new particle with name \"" << part.name << "\" to the PDG dictionary.";
+          PDG::get().define(part);
+        }
       }
     }
 

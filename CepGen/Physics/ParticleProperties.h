@@ -29,23 +29,23 @@ namespace cepgen {
   typedef unsigned long long pdgid_t;
   /// A collection of physics constants associated to a single particle
   struct ParticleProperties : SteeredObject<ParticleProperties> {
-    explicit ParticleProperties(const pdgid_t& pdgid = 0,  // PDG::invalid
-                                const std::string& name = "",
-                                const std::string& descr = "",
-                                int colours = -1,
-                                double mass = -1.,
-                                double width = -1.,
-                                int charge = 0.,
-                                bool fermion = false)
+    explicit ParticleProperties(pdgid_t ppdgid = 0ull,  // PDG::invalid
+                                const std::string& pname = "",
+                                const std::string& pdescr = "",
+                                int pcolours = -1,
+                                double pmass = -1.,
+                                double pwidth = -1.,
+                                int pcharge = 0.,
+                                bool pfermion = false)
         : ParticleProperties(ParametersList()
-                                 .set("pdgid", pdgid)
-                                 .set("name", name)
-                                 .set("description", descr)
-                                 .set("colours", colours)
-                                 .set("mass", mass)
-                                 .set("width", width)
-                                 .set("charge", charge)
-                                 .set("fermion", fermion)) {}
+                                 .set("pdgid", ppdgid)
+                                 .set("name", pname)
+                                 .set("description", pdescr)
+                                 .set("colours", pcolours)
+                                 .set("mass", pmass)
+                                 .set("width", pwidth)
+                                 .set("charge", pcharge)
+                                 .set("fermion", pfermion)) {}
     explicit ParticleProperties(const ParametersList& params) : SteeredObject(params) {
       (*this)
           .add("pdgid", pdgid)
@@ -59,7 +59,7 @@ namespace cepgen {
     }
     static ParametersDescription description() {
       auto pdesc = ParametersDescription();
-      pdesc.add<pdgid_t>("pdgid", -1).setDescription("PDG unique identifier");
+      pdesc.add<pdgid_t>("pdgid", 0).setDescription("PDG unique identifier");
       pdesc.add<std::string>("name", "").setDescription("particle computer-readable name");
       pdesc.add<std::string>("description", "").setDescription("particle human-readable name");
       pdesc.add<int>("colours", 0).setDescription("colour factor");
@@ -70,14 +70,14 @@ namespace cepgen {
       return pdesc;
     }
 
-    pdgid_t pdgid;      ///< PDG identifier
-    std::string name;   ///< Particle name
-    std::string descr;  ///< Human-readable name
-    int colours;        ///< Colour factor
-    double mass;        ///< Mass, in GeV/c\f$^2\f$
-    double width;       ///< Decay width, in GeV/c\f$^2\f$
-    int charge;         ///< Electric charge, in \f$e\f$/3
-    bool fermion;       ///< Is the particle a fermion?
+    pdgid_t pdgid{0ull};  ///< PDG identifier
+    std::string name;     ///< Particle name
+    std::string descr;    ///< Human-readable name
+    int colours{0};       ///< Colour factor
+    double mass{0.};      ///< Mass, in GeV/c\f$^2\f$
+    double width{0.};     ///< Decay width, in GeV/c\f$^2\f$
+    int charge{0};        ///< Electric charge, in \f$e\f$/3
+    bool fermion{false};  ///< Is the particle a fermion?
     friend std::ostream& operator<<(std::ostream&, const ParticleProperties&);
   };
 }  // namespace cepgen

@@ -216,7 +216,7 @@ namespace cepgen {
   }
 
   std::vector<std::string> ParametersList::keys(bool name_key) const {
-    std::vector<std::string> out;
+    std::vector<std::string> out{};
     auto key = [](const auto& p) { return p.first; };
     std::transform(bool_values_.begin(), bool_values_.end(), std::back_inserter(out), key);
     std::transform(int_values_.begin(), int_values_.end(), std::back_inserter(out), key);
