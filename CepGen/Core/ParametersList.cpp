@@ -255,6 +255,8 @@ namespace cepgen {
       os << wrap_val(get<bool>(key), "bool");
     else if (has<int>(key))
       os << wrap_val(get<int>(key), "int");
+    else if (has<unsigned long long>(key))
+      os << wrap_val(get<unsigned long long>(key), "ulong");
     else if (has<double>(key))
       os << wrap_val(get<double>(key), "float");
     else if (has<std::string>(key))
@@ -274,25 +276,27 @@ namespace cepgen {
 
   ParametersList& ParametersList::rename(const std::string& old_key, const std::string& new_key) {
     if (has<bool>(old_key))
-      set<bool>(new_key, get<bool>(old_key)).erase(old_key);
+      set(new_key, get<bool>(old_key)).erase(old_key);
     if (has<int>(old_key))
-      set<int>(new_key, get<int>(old_key)).erase(old_key);
+      set(new_key, get<int>(old_key)).erase(old_key);
+    if (has<unsigned long long>(old_key))
+      set(new_key, get<unsigned long long>(old_key)).erase(old_key);
     if (has<double>(old_key))
-      set<double>(new_key, get<double>(old_key)).erase(old_key);
+      set(new_key, get<double>(old_key)).erase(old_key);
     if (has<std::string>(old_key))
-      set<std::string>(new_key, get<std::string>(old_key)).erase(old_key);
+      set(new_key, get<std::string>(old_key)).erase(old_key);
     if (has<Limits>(old_key))
-      set<Limits>(new_key, get<Limits>(old_key)).erase(old_key);
+      set(new_key, get<Limits>(old_key)).erase(old_key);
     if (has<ParametersList>(old_key))
-      set<ParametersList>(new_key, get<ParametersList>(old_key)).erase(old_key);
+      set(new_key, get<ParametersList>(old_key)).erase(old_key);
     if (has<std::vector<int> >(old_key))
-      set<std::vector<int> >(new_key, get<std::vector<int> >(old_key)).erase(old_key);
+      set(new_key, get<std::vector<int> >(old_key)).erase(old_key);
     if (has<std::vector<double> >(old_key))
-      set<std::vector<double> >(new_key, get<std::vector<double> >(old_key)).erase(old_key);
+      set(new_key, get<std::vector<double> >(old_key)).erase(old_key);
     if (has<std::vector<std::string> >(old_key))
-      set<std::vector<std::string> >(new_key, get<std::vector<std::string> >(old_key)).erase(old_key);
+      set(new_key, get<std::vector<std::string> >(old_key)).erase(old_key);
     if (has<std::vector<ParametersList> >(old_key))
-      set<std::vector<ParametersList> >(new_key, get<std::vector<ParametersList> >(old_key)).erase(old_key);
+      set(new_key, get<std::vector<ParametersList> >(old_key)).erase(old_key);
     return *this;
   }
 
