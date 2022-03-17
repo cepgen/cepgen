@@ -269,7 +269,7 @@ namespace cepgen {
 
       const auto& parts = python::get<ParametersList>(pparts);
       for (const auto& k : parts.keys(true)) {
-        const auto& part = parts.get<ParticleProperties>(k);
+        const ParticleProperties part(parts.get<ParametersList>(k).set<std::string>("name", k));
         if (part.pdgid == 0 || part.mass < 0.)
           continue;
         if (!PDG::get().has(part.pdgid) || PDG::get()(part.pdgid) != part) {
