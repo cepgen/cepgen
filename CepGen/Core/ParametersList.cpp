@@ -461,31 +461,9 @@ namespace cepgen {
                                                              const ParticleProperties& def) const {
     if (has<ParametersList>(key)) {
       const auto& plist = get<ParametersList>(key);
-      ParticleProperties out;
-      const auto& pdgid = plist.get<int>("pdgid", 0);
-      if (PDG::get().has(pdgid))
-        out = PDG::get()(pdgid);
-      else
-        out.pdgid = pdgid;
-      bool modified = false;  // keep track of any change in a particle definition
-                              // (to register it in the PDG catalogue right after filling its attributes)
-      if (plist.has<std::string>("name"))
-        out.name = plist.get<std::string>("name"), modified = true;
-      if (plist.has<std::string>("description"))
-        out.descr = plist.get<std::string>("description"), modified = true;
-      if (plist.has<int>("colours"))
-        out.colours = plist.get<int>("colours"), modified = true;
-      if (plist.has<double>("mass"))
-        out.mass = plist.get<double>("mass"), modified = true;
-      if (plist.has<double>("width"))
-        out.width = plist.get<double>("width"), modified = true;
-      if (plist.has<double>("charge"))
-        out.charge = short(plist.get<double>("charge") * 3), modified = true;
-      if (plist.has<bool>("fermion"))
-        out.fermion = plist.get<bool>("fermion"), modified = true;
-      if (modified)
-        PDG::get().define(out);
-      return out;
+      if (plist.has<pdgid_t>("pdgid") || plist.has<int>("pdgid"))
+        return PDG::get()(plist.get<pdgid_t>("pdgid"));
+      return ParticleProperties(plist);
     } else if (has<int>(key))
       return PDG::get()(get<int>(key));
     else {
