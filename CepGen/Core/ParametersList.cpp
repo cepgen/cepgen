@@ -16,6 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <climits>
 #include <iomanip>
 #include <regex>
 
@@ -24,7 +25,17 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/String.h"
 
-#define IMPL_TYPE(type, coll, name)                                                                                 \
+#define IMPL_TYPE_GET(type, coll, name)                                                                  \
+  template <>                                                                                            \
+  type ParametersList::get<type>(const std::string& key, const type& def) const {                        \
+    if (coll.count(key) > 0)                                                                             \
+      return coll.at(key);                                                                               \
+    CG_DEBUG("ParametersList") << "Failed to retrieve " << name << " parameter with key=" << key << ". " \
+                               << "Default value: " << def << ".";                                       \
+    return def;                                                                                          \
+  }
+
+#define IMPL_TYPE_SET(type, coll, name)                                                                             \
   template <>                                                                                                       \
   bool ParametersList::has<type>(const std::string& key) const {                                                    \
     return coll.count(key) != 0;                                                                                    \
@@ -39,20 +50,15 @@
     return coll[key];                                                                                               \
   }                                                                                                                 \
   template <>                                                                                                       \
-  type ParametersList::get<type>(const std::string& key, const type& def) const {                                   \
-    auto val = std::find_if(coll.begin(), coll.end(), [&key](const auto& kv) { return kv.first == key; });          \
-    if (val != coll.end())                                                                                          \
-      return val->second;                                                                                           \
-    CG_DEBUG("ParametersList") << "Failed to retrieve " << name << " parameter with key=" << key << ". "            \
-                               << "Default value: " << def << ".";                                                  \
-    return def;                                                                                                     \
-  }                                                                                                                 \
-  template <>                                                                                                       \
   std::vector<std::string> ParametersList::keysOf<type>() const {                                                   \
     std::vector<std::string> out;                                                                                   \
     std::transform(coll.begin(), coll.end(), std::back_inserter(out), [](const auto& pair) { return pair.first; }); \
     return out;                                                                                                     \
   }
+
+#define IMPL_TYPE_ALL(type, coll, name) \
+  IMPL_TYPE_GET(type, coll, #name)      \
+  IMPL_TYPE_SET(type, coll, #name)
 
 namespace cepgen {
   const std::string ParametersList::MODULE_NAME = "mod_name";
@@ -328,16 +334,46 @@ namespace cepgen {
   // sub-parameters-type attributes
   //------------------------------------------------------------------
 
-  IMPL_TYPE(ParametersList, param_values_, "parameters")
-  IMPL_TYPE(bool, bool_values_, "boolean")
-  IMPL_TYPE(int, int_values_, "integer")
-  IMPL_TYPE(unsigned long long, ulong_values_, "unsigned long integer")
-  IMPL_TYPE(double, dbl_values_, "floating number")
-  IMPL_TYPE(std::string, str_values_, "string")
-  IMPL_TYPE(std::vector<int>, vec_int_values_, "vector of integers")
-  IMPL_TYPE(std::vector<double>, vec_dbl_values_, "vector of floating numbers")
-  IMPL_TYPE(std::vector<std::string>, vec_str_values_, "vector of strings")
-  IMPL_TYPE(std::vector<ParametersList>, vec_param_values_, "vector of parameters")
+  IMPL_TYPE_ALL(ParametersList, param_values_, "parameters")
+  IMPL_TYPE_ALL(bool, bool_values_, "boolean")
+
+  IMPL_TYPE_SET(int, int_values_, "integer")
+  template <>
+  int ParametersList::get<int>(const std::string& key, const int& def) const {
+    if (has<int>(key))
+      return int_values_.at(key);
+    if (has<unsigned long long>(key)) {
+      const auto ulong_val = ulong_values_.at(key);
+      if (ulong_val >= INT_MAX)
+        CG_WARNING("ParametersList:get")
+            << "Trying to retrieve a (too) long unsigned integer with an integer getter. Please fix your code.";
+      return (int)ulong_val;
+    }
+    return def;
+  }
+
+  IMPL_TYPE_SET(unsigned long long, ulong_values_, "unsigned long integer")
+  template <>
+  unsigned long long ParametersList::get<unsigned long long>(const std::string& key,
+                                                             const unsigned long long& def) const {
+    if (has<unsigned long long>(key))
+      return ulong_values_.at(key);
+    if (has<int>(key)) {
+      const auto& int_val = int_values_.at(key);
+      if (int_val < 0)
+        CG_WARNING("ParametersList:get")
+            << "Trying to retrieve a negative-value integer with an unsigned long getter. Please fix your code.";
+      return int_val;
+    }
+    return def;
+  }
+
+  IMPL_TYPE_ALL(double, dbl_values_, "floating number")
+  IMPL_TYPE_ALL(std::string, str_values_, "string")
+  IMPL_TYPE_ALL(std::vector<int>, vec_int_values_, "vector of integers")
+  IMPL_TYPE_ALL(std::vector<double>, vec_dbl_values_, "vector of floating numbers")
+  IMPL_TYPE_ALL(std::vector<std::string>, vec_str_values_, "vector of strings")
+  IMPL_TYPE_ALL(std::vector<ParametersList>, vec_param_values_, "vector of parameters")
 
   //------------------------------------------------------------------
   // limits-type attributes
