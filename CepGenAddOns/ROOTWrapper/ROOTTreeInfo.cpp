@@ -27,6 +27,7 @@ namespace ROOT {
     sqrt_s = -1.;
     xsect = errxsect = -1.;
     num_events = litigious_events = 0;
+    process_name.clear();
   }
 
   void CepGenRun::create() {
@@ -38,6 +39,7 @@ namespace ROOT {
     tree_->Branch("num_events", &num_events, "num_events/i");
     tree_->Branch("litigious_events", &litigious_events, "litigious_events/i");
     tree_->Branch("sqrt_s", &sqrt_s, "sqrt_s/D");
+    tree_->Branch("process_name", &process_name);
   }
 
   void CepGenEvent::clear() {

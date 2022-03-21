@@ -40,6 +40,7 @@ namespace ROOT {
     double errxsect{-1.};                            ///< Uncertainty on process cross section, in pb
     unsigned int num_events{0};                      ///< Number of events generated in run
     unsigned int litigious_events{0};                ///< Number of litigious events in run
+    std::string process_name;                        ///< Unique name of the process generated in this run
 
     explicit CepGenRun();
     /// Reinitialise the run tree
@@ -63,9 +64,12 @@ namespace ROOT {
       tree_->SetBranchAddress("num_events", &num_events);
       tree_->SetBranchAddress("litigious_events", &litigious_events);
       tree_->SetBranchAddress("sqrt_s", &sqrt_s);
+      auto* process_name_view = new std::string();
+      tree_->SetBranchAddress("process_name", &process_name_view);
       if (tree_->GetEntriesFast() > 1)
         std::cerr << "The run tree has more than one entry." << std::endl;
       tree_->GetEntry(0);
+      process_name = *process_name_view;
     }
 
   private:
