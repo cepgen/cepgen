@@ -92,7 +92,7 @@ namespace cepgen {
     Process& Process::defineVariable(
         double& out, const Mapping& type, Limits in, const Limits& default_limits, const std::string& descr) {
       if (!in.valid()) {
-        CG_DEBUG("Process:defineVariable") << descr << " could not be retrieved from the user configuration!\n\t"
+        CG_DEBUG("Process:defineVariable") << descr << " could not be retrieved from the user configuration. "
                                            << "Setting it to the default value: " << default_limits << ".";
         in = default_limits;
       }
@@ -126,8 +126,8 @@ namespace cepgen {
                           (unsigned short)mapped_variables_.size()});
       point_coord_.emplace_back(0.);
       base_jacobian_ *= jacob_weight;
-      CG_DEBUG("Process:defineVariable") << descr << " has been mapped to variable " << mapped_variables_.size()
-                                         << ".\n\t"
+      CG_DEBUG("Process:defineVariable") << "\n\t" << descr << " has been mapped to variable "
+                                         << mapped_variables_.size() << ".\n\t"
                                          << "Allowed range for integration: " << in << " (" << lim << ").\n\t"
                                          << "Variable integration mode: " << type << ".\n\t"
                                          << "Weight in the Jacobian: " << jacob_weight << ".";
