@@ -131,41 +131,64 @@ namespace cepgen {
     return out;
   }
 
-  ParametersList& ParametersList::feed(const std::string& arg) {
-    // browse through the parameters hierarchy
-    auto cmd = utils::split(arg, '/');
-    if (cmd.size() > 1)  // sub-parameters word found
-      return operator[]<ParametersList>(cmd.at(0)).feed(
-          utils::merge(std::vector<std::string>(cmd.begin() + 1, cmd.end()), "/"));
-
-    // from this moment on, a "key=value" or "key(=true)" was found
-    const auto& word = cmd.at(0);
-    auto words = utils::split(word, '=');
-    auto key = words.at(0);
-    if (erase(key) > 0)
-      CG_DEBUG("ParametersList:feed") << "Replacing key='" << key << "' with a new value.";
-    if (key == "name")
-      key = ParametersList::MODULE_NAME;
-    if (words.size() == 1)  // basic key=true
-      set<bool>(key, true);
-    else if (words.size() == 2) {  // basic key=value
-      const auto value = words.at(1);
-      try {
-        if (std::regex_match(value, kFloatRegex))
-          set<double>(key, std::stod(value));
-        else
-          set<int>(key, std::stoi(value));
-      } catch (const std::invalid_argument&) {
-        const auto value_lc = utils::tolower(value);
-        if (value_lc == "off" || value_lc == "no" || value_lc == "false")
-          set<bool>(key, false);
-        else if (value_lc == "on" || value_lc == "yes" || value_lc == "true")
-          set<bool>(key, true);
-        else
-          set<std::string>(key, value);
+  ParametersList& ParametersList::feed(const std::string& args) {
+    // first preprocess the arguments list to isolate all comma-separated arguments
+    auto list_raw = utils::split(args, ',');
+    std::vector<std::string> list;
+    auto it_list = list_raw.begin();
+    while (it_list != list_raw.end()) {
+      if (it_list->find("{") != std::string::npos && it_list != list_raw.end()) {
+        list.emplace_back(*it_list + "," + *(it_list + 1));
+        list_raw.erase(std::next(it_list));
+      } else
+        list.emplace_back(*it_list);
+      ++it_list;
+    }
+    // now loop through all unpacked arguments
+    for (const auto& arg : list) {
+      // browse through the parameters hierarchy
+      auto cmd = utils::split(arg, '/');
+      if (cmd.size() > 1) {  // sub-parameters word found
+        operator[]<ParametersList>(cmd.at(0)).feed(
+            utils::merge(std::vector<std::string>(cmd.begin() + 1, cmd.end()), "/"));
+        continue;
       }
-    } else
-      throw CG_FATAL("ParametersList:feed") << "Invalid key=value unpacking: " << word << "!";
+
+      // from this moment on, a "key=value" or "key(=true)" was found
+      const auto& subplist = utils::between(arg, "{", "}");
+      if (!subplist.empty()) {
+        for (const auto& subp : subplist)
+          feed(subp);
+        return *this;
+      }
+      const auto& word = cmd.at(0);
+      auto words = utils::split(arg, '=');
+      auto key = words.at(0);
+      if (erase(key) > 0)
+        CG_DEBUG("ParametersList:feed") << "Replacing key='" << key << "' with a new value.";
+      if (key == "name")
+        key = ParametersList::MODULE_NAME;
+      if (words.size() == 1)  // basic key=true
+        set<bool>(key, true);
+      else if (words.size() == 2) {  // basic key=value
+        const auto value = words.at(1);
+        try {
+          if (std::regex_match(value, kFloatRegex))
+            set<double>(key, std::stod(value));
+          else
+            set<int>(key, std::stoi(value));
+        } catch (const std::invalid_argument&) {
+          const auto value_lc = utils::tolower(value);
+          if (value_lc == "off" || value_lc == "no" || value_lc == "false")
+            set<bool>(key, false);
+          else if (value_lc == "on" || value_lc == "yes" || value_lc == "true")
+            set<bool>(key, true);
+          else
+            set<std::string>(key, value);
+        }
+      } else
+        throw CG_FATAL("ParametersList:feed") << "Invalid key=value unpacking: " << word << "!";
+    }
     return *this;
   }
 
@@ -255,6 +278,7 @@ namespace cepgen {
     auto wrap_coll = [&wrap, &wrap_val](const auto& coll, const std::string& type) -> std::string {
       return wrap_val(utils::merge(coll, ", "), type);
     };
+    std::ostringstream os;
     if (has<ParametersList>(key))
       os << get<ParametersList>(key);
     else if (has<bool>(key))
@@ -304,6 +328,26 @@ namespace cepgen {
     if (has<std::vector<ParametersList> >(old_key))
       set(new_key, get<std::vector<ParametersList> >(old_key)).erase(old_key);
     return *this;
+  }
+
+  std::string ParametersList::serialise() const {
+    std::ostringstream out;
+    std::string sep;
+    for (const auto& key : keys(true)) {
+      out << sep << key;
+      if (has<ParametersList>(key)) {
+        const auto& plist = get<ParametersList>(key);
+        out << "/";
+        if (plist.keys().size() > 1)
+          out << "{";
+        out << plist.serialise();
+        if (plist.keys().size() > 1)
+          out << "}";
+      } else
+        out << "=" << getString(key, false);
+      sep = ",";
+    }
+    return out.str();
   }
 
   //------------------------------------------------------------------
