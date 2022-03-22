@@ -35,12 +35,14 @@ namespace ROOT {
   class CepGenRun {
   public:
     static constexpr const char* TREE_NAME = "run";  ///< Output tree name
-    double sqrt_s{-1.};                              ///< Centre of mass energy for beam particles
-    double xsect{-1.};                               ///< Process cross section, in pb
-    double errxsect{-1.};                            ///< Uncertainty on process cross section, in pb
-    unsigned int num_events{0};                      ///< Number of events generated in run
-    unsigned int litigious_events{0};                ///< Number of litigious events in run
-    std::string process_name;                        ///< Unique name of the process generated in this run
+
+    double sqrt_s{-1.};                ///< Centre of mass energy for beam particles
+    double xsect{-1.};                 ///< Process cross section, in pb
+    double errxsect{-1.};              ///< Uncertainty on process cross section, in pb
+    unsigned int num_events{0};        ///< Number of events generated in run
+    unsigned int litigious_events{0};  ///< Number of litigious events in run
+    std::string process_name;          ///< Unique name of the process generated in this run
+    std::string process_parameters;    ///< Serialised process parameters
 
     explicit CepGenRun();
     /// Reinitialise the run tree
@@ -54,23 +56,7 @@ namespace ROOT {
     /// Attach the run tree reader to a given file
     void attach(const char* filename, const char* run_tree = TREE_NAME) { attach(TFile::Open(filename), run_tree); }
     /// Attach the run tree reader to a given tree
-    void attach(TFile* file, const char* run_tree = TREE_NAME) {
-      //--- special constructor to avoid the memory to be cleared at destruction time
-      tree_ = std::shared_ptr<TTree>(dynamic_cast<TTree*>(file->Get(run_tree)), [=](TTree*) {});
-      if (!tree_)
-        throw std::runtime_error("Failed to attach to the run TTree!");
-      tree_->SetBranchAddress("xsect", &xsect);
-      tree_->SetBranchAddress("errxsect", &errxsect);
-      tree_->SetBranchAddress("num_events", &num_events);
-      tree_->SetBranchAddress("litigious_events", &litigious_events);
-      tree_->SetBranchAddress("sqrt_s", &sqrt_s);
-      auto* process_name_view = new std::string();
-      tree_->SetBranchAddress("process_name", &process_name_view);
-      if (tree_->GetEntriesFast() > 1)
-        std::cerr << "The run tree has more than one entry." << std::endl;
-      tree_->GetEntry(0);
-      process_name = *process_name_view;
-    }
+    void attach(TFile* file, const char* run_tree = TREE_NAME);
 
   private:
     /// ROOT tree used for storage/retrieval of this run information

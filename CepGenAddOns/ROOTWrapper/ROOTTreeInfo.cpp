@@ -28,6 +28,7 @@ namespace ROOT {
     xsect = errxsect = -1.;
     num_events = litigious_events = 0;
     process_name.clear();
+    process_parameters.clear();
   }
 
   void CepGenRun::create() {
@@ -40,6 +41,27 @@ namespace ROOT {
     tree_->Branch("litigious_events", &litigious_events, "litigious_events/i");
     tree_->Branch("sqrt_s", &sqrt_s, "sqrt_s/D");
     tree_->Branch("process_name", &process_name);
+    tree_->Branch("process_parameters", &process_parameters);
+  }
+
+  void CepGenRun::attach(TFile* file, const char* run_tree) {
+    //--- special constructor to avoid the memory to be cleared at destruction time
+    tree_ = std::shared_ptr<TTree>(dynamic_cast<TTree*>(file->Get(run_tree)), [=](TTree*) {});
+    if (!tree_)
+      throw std::runtime_error("Failed to attach to the run TTree!");
+    tree_->SetBranchAddress("xsect", &xsect);
+    tree_->SetBranchAddress("errxsect", &errxsect);
+    tree_->SetBranchAddress("num_events", &num_events);
+    tree_->SetBranchAddress("litigious_events", &litigious_events);
+    tree_->SetBranchAddress("sqrt_s", &sqrt_s);
+    auto *process_name_view = new std::string(), *process_params_view = new std::string();
+    tree_->SetBranchAddress("process_name", &process_name_view);
+    tree_->SetBranchAddress("process_parameters", &process_params_view);
+    if (tree_->GetEntriesFast() > 1)
+      std::cerr << "The run tree has more than one entry." << std::endl;
+    tree_->GetEntry(0);
+    process_name = *process_name_view;
+    process_parameters = *process_params_view;
   }
 
   void CepGenEvent::clear() {

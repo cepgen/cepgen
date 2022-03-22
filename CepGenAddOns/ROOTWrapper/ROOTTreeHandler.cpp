@@ -25,6 +25,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Parameters.h"
+#include "CepGen/Process/Process.h"
 #include "CepGenAddOns/ROOTWrapper/ROOTTreeInfo.h"
 
 namespace cepgen {
@@ -73,6 +74,7 @@ namespace cepgen {
       run_tree_.litigious_events = 0;
       run_tree_.sqrt_s = params.kinematics().incomingBeams().sqrtS();
       run_tree_.process_name = params.processName();
+      run_tree_.process_parameters = params.process().parameters().serialise();
     }
 
     void ROOTTreeHandler::operator<<(const Event& ev) {
