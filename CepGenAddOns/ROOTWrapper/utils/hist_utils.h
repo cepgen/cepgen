@@ -14,7 +14,7 @@ hists_t fill_histograms(const string& filename) {
   auto file = TFile::Open(filename.c_str(), "r");
   ROOT::CepGenRun run;
   run.attach(file);
-  cout << ">>> " << run.process_name << endl;
+  cout << ">>> " << run.process_name << ": " << run.process_parameters << endl;
 
   ROOT::CepGenEvent evt_tree;
   evt_tree.attach(file);
