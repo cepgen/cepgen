@@ -1,3 +1,4 @@
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/ArgumentsParser.h"
@@ -41,12 +42,24 @@ int main(int argc, char* argv[]) {
     auto feeded = "this/is/a=test,this/works=true,that/{one=42,other=3.141592}";
     cepgen::ParametersList plist;
     plist.feed(feeded);
-    CG_DEBUG("main").log([&feeded, &plist](auto& log) {
-      log << feeded << "\n" << cepgen::ParametersDescription(plist) << "\n" << plist.serialise();
-    });
+    CG_DEBUG("main") << "\n\t"
+                     << "Feeded string: " << feeded << "\n\t"
+                     << "Fed parameters list: " << cepgen::ParametersDescription(plist) << "\n\t"
+                     << "Re-serialised string: " << plist.serialise();
     if (cepgen::ParametersList().feed(plist.serialise()) != plist) {
       CG_LOG << "Failed to parse a serialised parameters list. Result=" << plist.serialise() << ".";
       return -1;
+    }
+  }
+  {  // test with an invalid string feeded
+    auto feeded = "invalid/string/{{feeded=true}";
+    cepgen::ParametersList plist;
+    try {
+      plist.feed(feeded);
+      CG_LOG << "Failed test of parsing an invalid string: " << feeded << ".";
+      return -1;
+    } catch (const cepgen::Exception&) {
+      CG_DEBUG("main") << "Passed invalid string feeder test.";
     }
   }
 

@@ -131,19 +131,31 @@ namespace cepgen {
     return out;
   }
 
-  ParametersList& ParametersList::feed(const std::string& args) {
+  ParametersList& ParametersList::feed(const std::string& raw_args) {
+    auto raw_list = raw_args;
+    const auto raw_list_stripped = utils::between(raw_list, "{", "}");
+    if (raw_list_stripped.size() == 1 && raw_list == "{" + raw_list_stripped[0] + "}")
+      raw_list = raw_list_stripped[0];
     // first preprocess the arguments list to isolate all comma-separated arguments
-    auto list_raw = utils::split(args, ',');
     std::vector<std::string> list;
-    auto it_list = list_raw.begin();
-    while (it_list != list_raw.end()) {
-      if (it_list->find("{") != std::string::npos && it_list != list_raw.end()) {
-        list.emplace_back(*it_list + "," + *(it_list + 1));
-        list_raw.erase(std::next(it_list));
-      } else
-        list.emplace_back(*it_list);
-      ++it_list;
+    std::vector<std::string> buf;
+    short num_open_braces = 0;
+    for (const auto& item : utils::split(raw_list, ',')) {
+      buf.emplace_back(item);
+      num_open_braces += std::count(item.begin(), item.end(), '{') - std::count(item.begin(), item.end(), '}');
+      if (num_open_braces <= 0) {
+        list.emplace_back(utils::merge(buf, ","));
+        buf.clear();
+      }
     }
+    CG_DEBUG("ParametersList:feed") << "Parsed arguments: " << list << ", raw list: " << raw_list
+                                    << " (splitted: " << utils::split(raw_list, ',') << "), "
+                                    << "{-} imbalance: " << num_open_braces << ".";
+    if (num_open_braces != 0)
+      throw CG_ERROR("ParametersList:feed") << "Invalid string to be parsed as a parameters list!\n\t"
+                                            << "Open-closed braces imbalance: " << num_open_braces << "\n\t"
+                                            << "Raw list: " << raw_list << "\n\t"
+                                            << "Resulting list: " << list << ", buffer: " << buf << ".";
     // now loop through all unpacked arguments
     for (const auto& arg : list) {
       // browse through the parameters hierarchy
