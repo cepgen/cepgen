@@ -280,9 +280,10 @@ namespace cepgen {
   }
 
   std::string ParametersList::getString(const std::string& key, bool wrap) const {
-    std::ostringstream os;
     auto wrap_val = [&wrap](const auto& val, const std::string& type) -> std::string {
       std::ostringstream os;
+      if (type == "float" || type == "vfloat")
+        os << std::fixed;
       os << val;
       return (wrap ? type + "(" : "") + (type == "bool" ? utils::yesno(std::stoi(os.str())) : os.str()) +
              (wrap ? ")" : "");
