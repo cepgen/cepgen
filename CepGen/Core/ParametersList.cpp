@@ -64,18 +64,7 @@ namespace cepgen {
   const std::string ParametersList::MODULE_NAME = "mod_name";
   const std::regex kFloatRegex("[+-]?([0-9]+)[.EeDd][+-]?([0-9]*)?|[.][0-9]+", std::regex_constants::extended);
 
-  ParametersList::ParametersList(const ParametersList& oth)
-      : param_values_(oth.param_values_),
-        bool_values_(oth.bool_values_),
-        int_values_(oth.int_values_),
-        ulong_values_(oth.ulong_values_),
-        dbl_values_(oth.dbl_values_),
-        str_values_(oth.str_values_),
-        lim_values_(oth.lim_values_),
-        vec_int_values_(oth.vec_int_values_),
-        vec_dbl_values_(oth.vec_dbl_values_),
-        vec_str_values_(oth.vec_str_values_),
-        vec_param_values_(oth.vec_param_values_) {}
+  ParametersList::ParametersList(const ParametersList& oth) { operator+=(oth); }
 
   bool ParametersList::operator==(const ParametersList& oth) const {
     // only ensure the keys are identical
