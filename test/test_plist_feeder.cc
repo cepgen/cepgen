@@ -58,8 +58,8 @@ int main(int argc, char* argv[]) {
       plist.feed(feeded);
       CG_LOG << "Failed test of parsing an invalid string: " << feeded << ".";
       return -1;
-    } catch (const cepgen::Exception&) {
-      CG_DEBUG("main") << "Passed invalid string feeder test.";
+    } catch (const cepgen::Exception& exc) {
+      CG_DEBUG("main") << "Passed invalid string feeder test. Error:\n\t" << exc.message();
     }
   }
 
