@@ -34,8 +34,12 @@ namespace cepgen {
     class Functional : public NamedModule<std::string> {
     public:
       /// Default constructor
-      Functional(const ParametersList& params);
+      explicit Functional(const ParametersList&);
 
+      /// Build a collection of parameters to define a functional from its mathematical expression
+      /// \params[in] expr Mathematical expression to evaluate
+      /// \params[in] vars List of expression variables
+      static ParametersList fromExpression(const std::string& expr, const std::vector<std::string>& vars);
       static ParametersDescription description();
 
       /// Compute the functional for a given value of the variable (one-dimensional case)

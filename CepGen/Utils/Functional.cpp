@@ -50,6 +50,10 @@ namespace cepgen {
       return eval();
     }
 
+    ParametersList Functional::fromExpression(const std::string& expr, const std::vector<std::string>& vars) {
+      return ParametersList().set<std::string>("expression", expr).set<std::vector<std::string> >("variables", vars);
+    }
+
     ParametersDescription Functional::description() {
       auto desc = ParametersDescription();
       desc.setDescription("Unnamed functional evaluator");
