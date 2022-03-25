@@ -67,9 +67,27 @@ namespace cepgen {
   ParametersList::ParametersList(const ParametersList& oth) { operator+=(oth); }
 
   bool ParametersList::operator==(const ParametersList& oth) const {
-    // only ensure the keys are identical
-    /// \note this might be a bit too loose for more advanced usages
-    if (keys() != oth.keys())
+    if (bool_values_ != oth.bool_values_)
+      return false;
+    if (int_values_ != oth.int_values_)
+      return false;
+    if (ulong_values_ != oth.ulong_values_)
+      return false;
+    if (dbl_values_ != oth.dbl_values_)
+      return false;
+    if (str_values_ != oth.str_values_)
+      return false;
+    if (lim_values_ != oth.lim_values_)
+      return false;
+    if (param_values_ != oth.param_values_)
+      return false;
+    if (vec_int_values_ != oth.vec_int_values_)
+      return false;
+    if (vec_dbl_values_ != oth.vec_dbl_values_)
+      return false;
+    if (vec_str_values_ != oth.vec_str_values_)
+      return false;
+    if (vec_param_values_ != oth.vec_param_values_)
       return false;
     return true;
   }
@@ -95,13 +113,8 @@ namespace cepgen {
     //--- concatenate all typed lists
     bool_values_.insert(oth.bool_values_.begin(), oth.bool_values_.end());
     int_values_.insert(oth.int_values_.begin(), oth.int_values_.end());
-    vec_int_values_.insert(oth.vec_int_values_.begin(), oth.vec_int_values_.end());
     dbl_values_.insert(oth.dbl_values_.begin(), oth.dbl_values_.end());
-    vec_dbl_values_.insert(oth.vec_dbl_values_.begin(), oth.vec_dbl_values_.end());
     str_values_.insert(oth.str_values_.begin(), oth.str_values_.end());
-    vec_str_values_.insert(oth.vec_str_values_.begin(), oth.vec_str_values_.end());
-    vec_param_values_.insert(oth.vec_param_values_.begin(), oth.vec_param_values_.end());
-    lim_values_.insert(oth.lim_values_.begin(), oth.lim_values_.end());
     // special case for parameters collection: concatenate values instead of full containers
     for (const auto& par : oth.param_values_)
       // if the two parameters list are modules, and do not have the same name,
@@ -111,6 +124,11 @@ namespace cepgen {
         param_values_[par.first] += par.second;
       else
         param_values_[par.first] = par.second;
+    lim_values_.insert(oth.lim_values_.begin(), oth.lim_values_.end());
+    vec_int_values_.insert(oth.vec_int_values_.begin(), oth.vec_int_values_.end());
+    vec_dbl_values_.insert(oth.vec_dbl_values_.begin(), oth.vec_dbl_values_.end());
+    vec_str_values_.insert(oth.vec_str_values_.begin(), oth.vec_str_values_.end());
+    vec_param_values_.insert(oth.vec_param_values_.begin(), oth.vec_param_values_.end());
     return *this;
   }
 
@@ -251,12 +269,12 @@ namespace cepgen {
     std::transform(bool_values_.begin(), bool_values_.end(), std::back_inserter(out), key);
     std::transform(int_values_.begin(), int_values_.end(), std::back_inserter(out), key);
     std::transform(ulong_values_.begin(), ulong_values_.end(), std::back_inserter(out), key);
-    std::transform(vec_int_values_.begin(), vec_int_values_.end(), std::back_inserter(out), key);
     std::transform(dbl_values_.begin(), dbl_values_.end(), std::back_inserter(out), key);
-    std::transform(param_values_.begin(), param_values_.end(), std::back_inserter(out), key);
-    std::transform(vec_dbl_values_.begin(), vec_dbl_values_.end(), std::back_inserter(out), key);
     std::transform(str_values_.begin(), str_values_.end(), std::back_inserter(out), key);
+    std::transform(param_values_.begin(), param_values_.end(), std::back_inserter(out), key);
     std::transform(lim_values_.begin(), lim_values_.end(), std::back_inserter(out), key);
+    std::transform(vec_int_values_.begin(), vec_int_values_.end(), std::back_inserter(out), key);
+    std::transform(vec_dbl_values_.begin(), vec_dbl_values_.end(), std::back_inserter(out), key);
     std::transform(vec_str_values_.begin(), vec_str_values_.end(), std::back_inserter(out), key);
     std::transform(vec_param_values_.begin(), vec_param_values_.end(), std::back_inserter(out), key);
     if (!name_key) {
