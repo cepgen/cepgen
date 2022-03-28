@@ -26,27 +26,31 @@
 #include "CepGen/Process/FortranKTProcess.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
-extern "C" {
-extern cepgen::ktblock::Constants constants_;
-extern cepgen::ktblock::Parameters genparams_;
-extern cepgen::ktblock::KTKinematics ktkin_;
-extern cepgen::ktblock::Cuts kincuts_;
-extern cepgen::ktblock::Event evtkin_;
+namespace {
+  extern "C" {
+  extern cepgen::ktblock::Constants constants_;
+  extern cepgen::ktblock::Parameters genparams_;
+  extern cepgen::ktblock::KTKinematics ktkin_;
+  extern cepgen::ktblock::Cuts kincuts_;
+  extern cepgen::ktblock::Event evtkin_;
 
-void cepgen_list_params_() { CG_LOG << "\t" << cepgen::proc::FortranKTProcess::kProcParameters; }
+  void cepgen_list_params_() {
+    CG_LOG << "\t" << cepgen::ParametersDescription(cepgen::proc::FortranKTProcess::kProcParameters).describe(1);
+  }
 
-int cepgen_param_int_(char* pname, int& def) {
-  //--- first check if the "integer" is a particle id
-  if (cepgen::proc::FortranKTProcess::kProcParameters.has<cepgen::ParticleProperties>(pname))
-    return cepgen::proc::FortranKTProcess::kProcParameters.get<cepgen::ParticleProperties>(pname).pdgid;
-  //--- if not, proceed with retrieving the integer value
-  return cepgen::proc::FortranKTProcess::kProcParameters.get<int>(pname, def);
-}
+  int cepgen_param_int_(char* pname, int& def) {
+    //--- first check if the "integer" is a particle id
+    if (cepgen::proc::FortranKTProcess::kProcParameters.has<cepgen::ParticleProperties>(pname))
+      return cepgen::proc::FortranKTProcess::kProcParameters.get<cepgen::ParticleProperties>(pname).pdgid;
+    //--- if not, proceed with retrieving the integer value
+    return cepgen::proc::FortranKTProcess::kProcParameters.get<int>(pname, def);
+  }
 
-double cepgen_param_real_(char* pname, double& def) {
-  return cepgen::proc::FortranKTProcess::kProcParameters.get<double>(pname, def);
-}
-}
+  double cepgen_param_real_(char* pname, double& def) {
+    return cepgen::proc::FortranKTProcess::kProcParameters.get<double>(pname, def);
+  }
+  }
+}  // namespace
 
 namespace cepgen {
   namespace proc {

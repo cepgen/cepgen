@@ -35,12 +35,12 @@
       print *,'========================================================'
       print *,'Cut                        enabled   minimum     maximum'
       print *,'--------------------------------------------------------'
-      print 100,'pt(single)',ipt,pt_min,pt_max
-      print 100,'energy(single)',iene,ene_min,ene_max
-      print 100,'eta(single)',ieta,eta_min,eta_max
-      print 100,'m(sum)',iinvm,invm_min,invm_max
-      print 100,'pt(sum)',iptsum,ptsum_min,ptsum_max
-      print 100,'delta(y)',idely,dely_min,dely_max
+      print 105,'pt(single)',ipt,pt_min,pt_max
+      print 105,'energy(single)',iene,ene_min,ene_max
+      print 105,'eta(single)',ieta,eta_min,eta_max
+      print 105,'m(sum)',iinvm,invm_min,invm_max
+      print 105,'pt(sum)',iptsum,ptsum_min,ptsum_max
+      print 105,'delta(y)',idely,dely_min,dely_max
       print *,'========================================================'
       print *,'Process-specific parameters'
       call cepgen_list_params
@@ -48,11 +48,11 @@
 
       params_shown=.true.
 
-100   format(A26,'     ',L2,f12.4,f12.4)
 101   format(A33,I12)
 102   format(A33,I12,I12)
 103   format(A33,f12.2,f12.2)
 104   format(A33,'   (',I3,',',I3,'),  (',I3,',',I3,')')
+105   format(A26,'     ',L2,f12.4,f12.4)
 
       end
 

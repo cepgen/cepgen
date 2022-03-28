@@ -78,12 +78,13 @@ namespace cepgen {
     };
     /// Single event kinematics
     struct Event {
-      int nout{0};       ///< Number of particles in central system
-      int pdg[10];       ///< PDG ids of all particles in central system
-      int idum{0};       ///< Padding
-      double pc[10][4];  ///< 4-momenta of all particles in central system
-      double px[4];      ///< 4-momentum of first outgoing proton state
-      double py[4];      ///< 4-momentum of second outgoing proton state
+      static constexpr size_t MAX_PART = 10;
+      int nout{0};             ///< Number of particles in central system
+      int pdg[MAX_PART];       ///< PDG ids of all particles in central system
+      int idum{0};             ///< Padding
+      double pc[MAX_PART][4];  ///< 4-momenta of all particles in central system
+      double px[4];            ///< 4-momentum of first outgoing proton state
+      double py[4];            ///< 4-momentum of second outgoing proton state
     };
   }  // namespace ktblock
 }  // namespace cepgen
