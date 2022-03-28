@@ -258,7 +258,7 @@ namespace cepgen {
   ParametersDescription MadGraphInterface::description() {
     auto desc = ParametersDescription();
     desc.add<std::string>("process", "").setDescription("MadGraph_aMC process definition");
-    desc.add<std::string>("model", "").setDescription("MadGraph_aMC model name");
+    desc.add<std::string>("model", "sm-full").setDescription("MadGraph_aMC model name");
     desc.add<std::string>("cardPath", "/tmp/cepgen_mg5_input.dat")
         .setDescription("Temporary file where to store the input card for MadGraph_aMC");
     desc.add<std::string>("standaloneCppPath", "");
