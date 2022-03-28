@@ -84,8 +84,6 @@ namespace cepgen {
     }
 
     void PPtoFF::prepareProcessKinematics() {
-      if (cs_prop_.pdgid == PDG::invalid)  // ensure the central particles properties are correctly initialised
-        cs_prop_ = PDG::get()(steer<ParticleProperties>("pair").pdgid);
       if (!cs_prop_.fermion || cs_prop_.charge == 0.)
         throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop_.descr << " ("
                                          << (int)cs_prop_.pdgid << ")!";

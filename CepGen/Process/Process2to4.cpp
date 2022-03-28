@@ -38,6 +38,8 @@ namespace cepgen {
     void Process2to4::setCuts(const cuts::Central& single) { single_limits_ = single; }
 
     void Process2to4::preparePhaseSpace() {
+      if (cs_prop_.pdgid == PDG::invalid)  // ensure the central particles properties are correctly initialised
+        cs_prop_ = PDG::get()(steer<ParticleProperties>("pair").pdgid);
       {
         const auto& beamA = event_->oneWithRole(Particle::IncomingBeam1);
         pA_ = beamA.momentum();
