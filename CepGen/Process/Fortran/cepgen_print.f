@@ -26,6 +26,13 @@
       if(params_shown) return
 
       print *,'========================================================'
+      print *,'Constant                                   value(s)'
+      print *,'--------------------------------------------------------'
+      print 100,'Proton mass (GeV/c^2)',am_p
+      print 100,'GeV^2 -> pb conversion',units
+      print 100,'pi',pi
+      print 100,'alpha(EM)',alpha_em
+      print *,'========================================================'
       print *,'Parameter                                  value(s)'
       print *,'--------------------------------------------------------'
       print 101,'Process mode:',icontri
@@ -43,11 +50,13 @@
       print 105,'delta(y)',idely,dely_min,dely_max
       print *,'========================================================'
       print *,'Process-specific parameters'
+      print *,'--------------------------------------------------------'
       call cepgen_list_params
       print *,'========================================================'
 
       params_shown=.true.
 
+100   format(A33,f24.6)
 101   format(A33,I12)
 102   format(A33,I12,I12)
 103   format(A33,f12.2,f12.2)

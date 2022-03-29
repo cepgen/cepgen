@@ -29,10 +29,10 @@
 namespace {
   extern "C" {
   extern cepgen::ktblock::Constants constants_;
-  extern cepgen::ktblock::Parameters genparams_;
+  extern cepgen::ktblock::GenParameters genparams_;
   extern cepgen::ktblock::KTKinematics ktkin_;
-  extern cepgen::ktblock::Cuts kincuts_;
-  extern cepgen::ktblock::Event evtkin_;
+  extern cepgen::ktblock::KinCuts kincuts_;
+  extern cepgen::ktblock::EventKinematics evtkin_;
 
   void cepgen_list_params_() {
     CG_LOG << "\t" << cepgen::ParametersDescription(cepgen::proc::FortranKTProcess::kProcParameters).describe(1);
