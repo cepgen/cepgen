@@ -92,7 +92,7 @@ namespace cepgen {
       //===========================================================================================
 
       // export the limits into external variables
-      auto save_lim = [](const Limits& lim, bool& on, double& min, double& max) {
+      auto save_lim = [](const Limits& lim, int& on, double& min, double& max) {
         on = lim.valid();
         min = max = 0.;
         if (lim.hasMin())
