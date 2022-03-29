@@ -53,6 +53,7 @@ namespace cepgen {
       PointLikeScalar = 3,   ///< Trivial, spin-0 emission
       PointLikeFermion = 4,  ///< Trivial, spin-1/2 emission
       CompositeScalar = 5,   ///< Composite pion emission
+      Other = 6,             ///< Other beam type
     };
     /// Human-readable format of a beam mode (elastic/dissociative parts)
     friend std::ostream& operator<<(std::ostream&, const Mode&);

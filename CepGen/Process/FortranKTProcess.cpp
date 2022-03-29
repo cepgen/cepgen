@@ -97,8 +97,7 @@ namespace cepgen {
         min = max = 0.;
         if (lim.hasMin())
           min = lim.min();
-        if (lim.hasMax())
-          max = lim.max();
+        max = lim.hasMax() ? lim.max() : 9999.999;
       };
 
       save_lim(kin_.cuts().central.pt_single(), kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max);
