@@ -42,6 +42,10 @@ namespace {
     //--- first check if the "integer" is a particle id
     if (cepgen::proc::FortranKTProcess::kProcParameters.has<cepgen::ParticleProperties>(pname))
       return cepgen::proc::FortranKTProcess::kProcParameters.get<cepgen::ParticleProperties>(pname).pdgid;
+    if (cepgen::proc::FortranKTProcess::kProcParameters.has<unsigned long long>(pname)) {
+      unsigned long long ulong_def = def;
+      return cepgen::proc::FortranKTProcess::kProcParameters.get<unsigned long long>(pname, ulong_def);
+    }
     //--- if not, proceed with retrieving the integer value
     return cepgen::proc::FortranKTProcess::kProcParameters.get<int>(pname, def);
   }
