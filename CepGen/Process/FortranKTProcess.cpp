@@ -91,12 +91,22 @@ namespace cepgen {
       // feed phase space cuts to the common block
       //===========================================================================================
 
-      kin_.cuts().central.pt_single().save(kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max);
-      kin_.cuts().central.energy_single().save(kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max);
-      kin_.cuts().central.eta_single().save(kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max);
-      kin_.cuts().central.mass_sum().save(kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max);
-      kin_.cuts().central.pt_sum().save(kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max);
-      kin_.cuts().central.rapidity_diff().save(kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max);
+      // export the limits into external variables
+      auto save_lim = [](const Limits& lim, bool& on, double& min, double& max) {
+        on = lim.valid();
+        min = max = 0.;
+        if (lim.hasMin())
+          min = lim.min();
+        if (lim.hasMax())
+          max = lim.max();
+      };
+
+      save_lim(kin_.cuts().central.pt_single(), kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max);
+      save_lim(kin_.cuts().central.energy_single(), kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max);
+      save_lim(kin_.cuts().central.eta_single(), kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max);
+      save_lim(kin_.cuts().central.mass_sum(), kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max);
+      save_lim(kin_.cuts().central.pt_sum(), kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max);
+      save_lim(kin_.cuts().central.rapidity_diff(), kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max);
 
       //===========================================================================================
       // feed run parameters to the common block
