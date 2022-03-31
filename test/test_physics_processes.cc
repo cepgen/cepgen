@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
   bool quiet;
 
   cepgen::ArgumentsParser argparse(argc, argv);
-  argparse.addArgument("cfg,c", "configuration file", &cfg_filename)
+  argparse.addArgument("cfg,f", "configuration file", &cfg_filename)
       .addOptionalArgument("quiet,q", "quiet mode", &quiet, false)
       .addOptionalArgument("num-sigma,n", "max. number of std.dev.", &num_sigma, 3.)
       .addOptionalArgument("integrator,i", "type of integrator used", &integrator, "Vegas")

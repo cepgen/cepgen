@@ -63,7 +63,7 @@ namespace cepgen {
       if (it != config_str_.end()) {
         // if a configuration word is found, all the remaining flags are parsed as such
         extra_config_ = std::vector<std::string>(it_arg + 1, args_tmp.end());
-        return;
+        break;
       }
       //--- parse arguments if word found after
       if (arg_val.size() == 1 && arg_val.at(0)[0] == '-' && it_arg != std::prev(args_tmp.end())) {
