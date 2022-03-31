@@ -67,7 +67,7 @@ namespace cepgen {
             mindeviation_,
             ngiven,
             ldxgiven_,
-            *given_arr.data(),  // cubareal xgiven[]
+            !given_arr.empty() ? *given_arr.data() : nullptr,  // cubareal xgiven[]
             nextra_,
             nullptr,  // peakfinder_t peakfinder
             nullptr,  // const char *statefile
