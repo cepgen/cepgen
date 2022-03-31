@@ -226,6 +226,32 @@ test:f34:
   needs: ["compile:f34"]
 
 #######################################
+# Fedora 35 jobs
+#######################################
+
+compile:f35:
+  extends: .build_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f35
+
+package:f35:
+  extends: .package_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f35
+  dependencies: ["compile:f35"]
+  needs: ["compile:f35"]
+
+run_cepgen:f35:
+  extends: .run_cepgen_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f35
+  dependencies: ["compile:f35"]
+  needs: ["compile:f35"]
+
+test:f35:
+  extends: .test_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f35
+  dependencies: ["compile:f35"]
+  needs: ["compile:f35"]
+
+#######################################
 # Ubuntu Bionic (18.04) jobs
 #######################################
 
