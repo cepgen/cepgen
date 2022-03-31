@@ -67,7 +67,10 @@ namespace cepgen {
             break;
           case KTFlux::HI_Photon_Elastic:
           default:
-            mode_ = Mode::Other;
+            if (pdg_ == PDG::electron)
+              mode_ = Mode::PointLikeFermion;
+            else
+              mode_ = Mode::Other;
             break;
         }
         break;
