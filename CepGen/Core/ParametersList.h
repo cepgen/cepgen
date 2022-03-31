@@ -145,6 +145,7 @@ namespace cepgen {
     std::unordered_map<std::string, std::vector<double> > vec_dbl_values_;
     std::unordered_map<std::string, std::vector<std::string> > vec_str_values_;
     std::unordered_map<std::string, std::vector<ParametersList> > vec_param_values_;
+    std::unordered_map<std::string, std::vector<std::vector<double> > > vec_vec_dbl_values_;
   };
 
   DEFINE_TYPE(ParametersList)
@@ -158,6 +159,7 @@ namespace cepgen {
   DEFINE_TYPE(std::vector<double>)
   DEFINE_TYPE(std::vector<std::string>)
   DEFINE_TYPE(std::vector<ParametersList>)
+  DEFINE_TYPE(std::vector<std::vector<double> >)
 }  // namespace cepgen
 
 #undef DEFINE_TYPE
