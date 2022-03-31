@@ -4,6 +4,8 @@ if(NOT ROOT_FOUND)
   return()
 endif()
 
+message(STATUS "... ROOT v${ROOT_VERSION} standard is c++${ROOT_CXX_STANDARD}")
+
 set(sources IntegratorROOT.cpp DrawerROOT.cpp ROOTTree*.cpp ROOTHistsHandler.cpp FunctionalROOT.cpp)
 
 #--- FOAM integrator
@@ -25,5 +27,3 @@ cepgen_build(CepGenRoot SOURCES ${sources}
     PROPERTY CXX_STANDARD ${ROOT_CXX_STANDARD}
     CFLAGS ${ROOT_CXX_FLAGS}
     INSTALL_COMPONENT root)
-message(STATUS "... ROOT v${ROOT_VERSION} standard is c++${ROOT_CXX_STANDARD}")
-
