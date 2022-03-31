@@ -3,6 +3,8 @@
 #include "CepGenAddOns/CubaWrapper/IntegratorCuba.h"
 
 namespace cepgen {
+  static Integrand* gIntegrand{nullptr};
+
   IntegratorCuba::IntegratorCuba(const ParametersList& params)
       : Integrator(params),
         ncomp_(steer<int>("ncomp")),

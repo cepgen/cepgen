@@ -1,4 +1,5 @@
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Integration/Integrand.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGenAddOns/CubaWrapper/IntegratorCuba.h"
 #include "cuba.h"
@@ -28,8 +29,6 @@ namespace cepgen {
   }
 
   void IntegratorCubaSuave::integrate(double& result, double& abserr) {
-    gIntegrand = integrand_;
-
     int neval, fail, nregions;
     double integral, error, prob;
 

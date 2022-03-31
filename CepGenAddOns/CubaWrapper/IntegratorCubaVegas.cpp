@@ -1,4 +1,5 @@
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Integration/Integrand.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGenAddOns/CubaWrapper/IntegratorCuba.h"
 #include "cuba.h"
@@ -28,13 +29,6 @@ namespace cepgen {
   }
 
   void IntegratorCubaVegas::integrate(double& result, double& abserr) {
-    gIntegrand = integrand_;
-    /*auto integr = [&]( const int* ndim, const double xx[], const int* ncomp, double ff[], void* userdata ) -> int {
-      //ff[0] = function_->f( (double*)xx, function_->dim, (void*)function_->params );
-      ff[0] = integrand_->eval( std::vector<double>( xx, xx+*ndim ) );
-      return 0;
-    };*/
-
     int neval, fail;
     double integral, error, prob;
 

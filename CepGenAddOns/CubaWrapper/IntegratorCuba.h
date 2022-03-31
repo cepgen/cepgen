@@ -1,7 +1,6 @@
 #ifndef CepGenAddOns_CubaWrapper_IntegratorCuba_h
 #define CepGenAddOns_CubaWrapper_IntegratorCuba_h
 
-#include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/Integrator.h"
 
 namespace cepgen {
@@ -21,7 +20,6 @@ namespace cepgen {
     int verbose_;
   };
 
-  static Integrand* gIntegrand;
   int cuba_integrand(const int* ndim, const double xx[], const int* /*ncomp*/, double ff[], void* /*userdata*/);
 }  // namespace cepgen
 
