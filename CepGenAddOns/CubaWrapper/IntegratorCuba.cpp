@@ -25,7 +25,7 @@ namespace cepgen {
     desc.add<double>("epsabs", 1.e-12).setDescription("requested absolute accuracy");
     desc.add<int>("mineval", 0).setDescription("minimum number of integrand evaluations required");
     desc.add<int>("maxeval", 50000).setDescription("(approximate) maximum number of integrand evaluations allowed");
-    desc.add<int>("verbose", 1);
+    desc.add<int>("verbose", 0);
     return desc;
   }
 
