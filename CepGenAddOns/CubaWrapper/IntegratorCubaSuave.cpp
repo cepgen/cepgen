@@ -34,7 +34,7 @@ namespace cepgen {
     double integral, error, prob;
 
     Suave(integrand_->size(),
-          1,
+          ncomp_,
           cuba_integrand,
           nullptr,
           nvec_,

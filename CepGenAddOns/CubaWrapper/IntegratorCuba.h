@@ -15,7 +15,7 @@ namespace cepgen {
     void setIntegrand(Integrand&) override;
 
   protected:
-    int nvec_;
+    int ncomp_, nvec_;
     double epsrel_, epsabs_;
     int mineval_, maxeval_;
     int verbose_;

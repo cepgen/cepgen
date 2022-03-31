@@ -5,6 +5,7 @@
 namespace cepgen {
   IntegratorCuba::IntegratorCuba(const ParametersList& params)
       : Integrator(params),
+        ncomp_(steer<int>("ncomp")),
         nvec_(steer<int>("nvec")),
         epsrel_(steer<double>("epsrel")),
         epsabs_(steer<double>("epsabs")),
@@ -20,6 +21,7 @@ namespace cepgen {
   ParametersDescription IntegratorCuba::description() {
     auto desc = Integrator::description();
     desc.setDescription("Cuba generic integration algorithm");
+    desc.add<int>("ncomp", 1).setDescription("number of components of the integrand");
     desc.add<int>("nvec", 1).setDescription("number of samples received by the integrand");
     desc.add<double>("epsrel", 1.e-3).setDescription("requested relative accuracy");
     desc.add<double>("epsabs", 1.e-12).setDescription("requested absolute accuracy");

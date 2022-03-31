@@ -39,7 +39,7 @@ namespace cepgen {
     double integral, error, prob;
 
     Vegas(integrand_->size(),
-          1,
+          ncomp_,
           cuba_integrand,
           nullptr,
           nvec_,
