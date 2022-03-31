@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2019-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -200,76 +200,46 @@ namespace cepgen {
 
   //----- simple parameters
 
-  ArgumentsParser::Parameter::Parameter(std::string name,
-                                        std::string description,
-                                        std::string* var,
-                                        std::string default_value)
-      : name(utils::split(name, ',')),
-        description(description),
-        value(default_value),
-        optional(true),
-        str_variable_(var) {}
+  ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, std::string* var, std::string def)
+      : name(utils::split(pname, ',')), description(pdesc), value(def), str_variable_(var) {}
 
-  ArgumentsParser::Parameter::Parameter(std::string name, std::string description, double* var, double default_value)
-      : name(utils::split(name, ',')),
-        description(description),
-        value(utils::format("%g", default_value)),
-        optional(true),
-        float_variable_(var) {}
+  ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, double* var, double def)
+      : name(utils::split(pname, ',')), description(pdesc), value(utils::format("%g", def)), float_variable_(var) {}
 
-  ArgumentsParser::Parameter::Parameter(std::string name, std::string description, int* var, int default_value)
-      : name(utils::split(name, ',')),
-        description(description),
-        value(utils::format("%+i", default_value)),
-        optional(true),
-        int_variable_(var) {}
+  ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, int* var, int def)
+      : name(utils::split(pname, ',')), description(pdesc), value(utils::format("%+i", def)), int_variable_(var) {}
 
-  ArgumentsParser::Parameter::Parameter(std::string name,
-                                        std::string description,
-                                        unsigned int* var,
-                                        unsigned int default_value)
-      : name(utils::split(name, ',')),
-        description(description),
-        value(std::to_string(default_value)),
-        optional(true),
-        uint_variable_(var) {}
+  ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, unsigned int* var, unsigned int def)
+      : name(utils::split(pname, ',')), description(pdesc), value(std::to_string(def)), uint_variable_(var) {}
 
-  ArgumentsParser::Parameter::Parameter(std::string name, std::string description, bool* var, bool default_value)
-      : name(utils::split(name, ',')),
-        description(description),
-        value(utils::format("%d", default_value)),
-        optional(true),
-        bool_variable_(var) {}
+  ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, bool* var, bool def)
+      : name(utils::split(pname, ',')), description(pdesc), value(utils::format("%d", def)), bool_variable_(var) {}
 
   //----- vector of parameters
 
-  ArgumentsParser::Parameter::Parameter(std::string name,
-                                        std::string description,
+  ArgumentsParser::Parameter::Parameter(std::string pname,
+                                        std::string pdesc,
                                         std::vector<std::string>* var,
-                                        std::vector<std::string> default_value)
-      : name(utils::split(name, ',')),
-        description(description),
-        value(utils::merge(default_value, ",")),
-        optional(true),
-        vec_str_variable_(var) {}
+                                        std::vector<std::string> def)
+      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ",")), vec_str_variable_(var) {}
 
-  ArgumentsParser::Parameter::Parameter(std::string name,
-                                        std::string description,
+  ArgumentsParser::Parameter::Parameter(std::string pname,
+                                        std::string pdesc,
                                         std::vector<int>* var,
-                                        std::vector<int> default_value)
-      : name(utils::split(name, ',')), description(description), value(""), optional(true), vec_int_variable_(var) {
+                                        std::vector<int> def)
+      : name(utils::split(pname, ',')), description(pdesc), value(""), vec_int_variable_(var) {
     std::string sep;
-    for (const auto& val : default_value)
+    for (const auto& val : def)
       value += sep + utils::format("%d", val), sep = ",";
   }
 
-  ArgumentsParser::Parameter::Parameter(std::string name,
-                                        std::string description,
+  ArgumentsParser::Parameter::Parameter(std::string pname,
+                                        std::string pdesc,
                                         std::vector<double>* var,
-                                        std::vector<double> default_value)
-      : name(utils::split(name, ',')), description(description), value(""), optional(true), vec_float_variable_(var) {
+                                        std::vector<double> def)
+      : name(utils::split(pname, ',')), description(pdesc), value(""), vec_float_variable_(var) {
     std::string sep;
-    for (const auto& val : default_value)
+    for (const auto& val : def)
       value += sep + utils::format("%e", val), sep = ",";
   }
 
