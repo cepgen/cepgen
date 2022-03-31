@@ -5,8 +5,7 @@ stages:
   - test
 
 default:
-  tags:
-    - cvmfs
+  tags: [ cvmfs,docker ]
 
 #######################################
 # define all build, tests, and
@@ -16,7 +15,7 @@ default:
 .build_common:
   stage: compile
   before_script:
-    - source scl_source enable devtoolset-7 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
+    - source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
     - gcc --version
     - cmake3 --version || cmake --version
     - mkdir build
@@ -63,8 +62,8 @@ default:
   stage: run
   script:
     - cd build
-    - source scl_source enable devtoolset-7 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
-    - export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+    - source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
+    - export LD_LIBRARY_PATH=.:$ROOTSYS:$LD_LIBRARY_PATH
     - ls
     - echo "Modules dump"
     - ./cepgen -l
@@ -80,7 +79,7 @@ default:
   stage: test
   script:
     - cd build
-    - source scl_source enable devtoolset-7 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
+    - source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
     - export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
     - ctest --output-on-failure --timeout 60
   when: on_success
@@ -144,13 +143,13 @@ test:cc7:
 
 compile:cc7-cvmfs:
   extends: .build_cvmfs_common
-  tags: [ cvmfs ]
+  tags: [ cvmfs,docker ]
   image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
   allow_failure: true
 
 run_cepgen:cc7-cvmfs:
   extends: .run_cepgen_common
-  tags: [ cvmfs ]
+  tags: [ cvmfs,docker ]
   image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
   #source /cvmfs/grid.cern.ch/etc/profile.d/setup-cvmfs-ui.sh
   dependencies: ["compile:cc7-cvmfs"]
@@ -159,7 +158,7 @@ run_cepgen:cc7-cvmfs:
 
 package:cc7-cvmfs:
   extends: .package_common
-  tags: [ cvmfs ]
+  tags: [ cvmfs,docker ]
   image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
   dependencies: ["compile:cc7-cvmfs"]
   needs: ["compile:cc7-cvmfs"]
@@ -167,7 +166,7 @@ package:cc7-cvmfs:
 
 test:cc7-cvmfs:
   extends: .test_common
-  tags: [ cvmfs ]
+  tags: [ cvmfs,docker ]
   image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
   dependencies: ["compile:cc7-cvmfs"]
   needs: ["compile:cc7-cvmfs"]
@@ -224,6 +223,32 @@ test:f34:
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f34
   dependencies: ["compile:f34"]
   needs: ["compile:f34"]
+
+#######################################
+# Fedora 35 jobs
+#######################################
+
+compile:f35:
+  extends: .build_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f35
+
+package:f35:
+  extends: .package_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f35
+  dependencies: ["compile:f35"]
+  needs: ["compile:f35"]
+
+run_cepgen:f35:
+  extends: .run_cepgen_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f35
+  dependencies: ["compile:f35"]
+  needs: ["compile:f35"]
+
+test:f35:
+  extends: .test_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f35
+  dependencies: ["compile:f35"]
+  needs: ["compile:f35"]
 
 #######################################
 # Ubuntu Bionic (18.04) jobs

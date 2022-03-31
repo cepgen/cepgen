@@ -85,7 +85,7 @@ namespace cepgen {
             << utils::colourise(file_,
                                 utils::Colour::none,
                                 utils::Modifier::bold | utils::Modifier::italic | utils::Modifier::dimmed)
-            << " @"
+            << ":"
             << utils::colourise(
                    std::to_string(line_num_), utils::Colour::none, utils::Modifier::italic | utils::Modifier::dimmed)
             << "\n";

@@ -53,6 +53,7 @@ namespace cepgen {
   }
 
   void Generator::clearRun() {
+    CG_DEBUG("Generator:clearRun") << "Run is set to be cleared.";
     worker_.reset(new GeneratorWorker(const_cast<const Parameters*>(parameters_.get())));
     // destroy and recreate the integrator instance
     setIntegrator(nullptr);
@@ -70,7 +71,7 @@ namespace cepgen {
       clearRun();
     if (!parameters_->hasProcess())
       throw CG_FATAL("Generator:computePoint") << "Trying to compute a point with no process specified!";
-    const size_t ndim = parameters_->process().ndim();
+    const size_t ndim = worker_->integrand().process().ndim();
     if (coord.size() != ndim)
       throw CG_FATAL("Generator:computePoint") << "Invalid phase space dimension (ndim=" << ndim << ")!";
     double res = worker_->integrand().eval(coord);
@@ -119,7 +120,7 @@ namespace cepgen {
     clearRun();
     if (!parameters_->hasProcess())
       throw CG_FATAL("Generator:integrate") << "Trying to integrate while no process is specified!";
-    const size_t ndim = parameters_->process().ndim();
+    const size_t ndim = worker_->integrand().process().ndim();
     if (ndim < 1)
       throw CG_FATAL("Generator:computePoint") << "Invalid phase space dimension (ndim=" << ndim << ")!";
 
@@ -137,7 +138,7 @@ namespace cepgen {
 
   const Event& Generator::generateOneEvent(Event::callback callback) {
     generate(1, callback);
-    return parameters_->process().event();
+    return worker_->integrand().process().event();
   }
 
   void Generator::generate(size_t num_events, Event::callback callback) {

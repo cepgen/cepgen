@@ -74,7 +74,7 @@ namespace cepgen {
       /// Compute the phase space point weight
       virtual double computeWeight() = 0;
       /// Compute the incoming state kinematics
-      virtual void prepareKinematics() = 0;
+      virtual void prepareKinematics() {}
       /// Fill the Event object with the particles' kinematics
       /// \param[in] symmetrise Symmetrise the event? (randomise the production of positively- and negatively-charged outgoing central particles)
       virtual void fillKinematics(bool symmetrise = false) = 0;
@@ -95,7 +95,7 @@ namespace cepgen {
       /// Dump the evaluated point's coordinates in the standard output stream
       void dumpPoint() const;
       /// List all variables handled by this generic process
-      void dumpVariables() const;
+      void dumpVariables(std::ostream* os = nullptr) const;
 
       ///Get the number of dimensions on which the integration is performed
       inline size_t ndim() const { return mapped_variables_.size(); }

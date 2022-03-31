@@ -152,6 +152,21 @@ namespace cepgen {
     template std::string merge<double>(const std::vector<double>&, const std::string&);
     template std::string merge<ParametersList>(const std::vector<ParametersList>&, const std::string&);
 
+    template <typename T>
+    std::string merge(const std::vector<std::vector<T> >& vec, const std::string& delim) {
+      if (vec.empty())
+        return std::string();
+      std::ostringstream oss;
+      std::for_each(vec.begin(), vec.end(), [&oss, &delim, sep = std::string()](const auto& val) mutable {
+        const auto mrg = merge(val, delim);
+        oss << sep << mrg;
+        sep = delim;
+      });
+      return oss.str();
+    }
+
+    template std::string merge<double>(const std::vector<std::vector<double> >&, const std::string&);
+
     bool isNumber(const std::string& str) {
       return !str.empty() &&
              std::find_if(str.begin(), str.end(), [](unsigned char c) { return !std::isdigit(c); }) == str.end();
@@ -210,6 +225,20 @@ namespace cepgen {
       typedef std::codecvt_utf8_utf16<wchar_t> convert_type;
       std::wstring_convert<convert_type, wchar_t> converter;
       return converter.from_bytes(str);
+    }
+
+    std::vector<std::string> between(const std::string& str, const std::string& beg, const std::string& end) {
+      size_t ptr = 0;
+      std::vector<std::string> out;
+      while (ptr < str.size()) {
+        const auto beg_delim_pos = str.find_first_of(beg, ptr);
+        if (beg_delim_pos == std::string::npos)
+          break;
+        const auto beg_pos = beg_delim_pos + beg.size(), end_delim_pos = str.find_first_of(end, beg_pos);
+        out.emplace_back(str.substr(beg_pos, end_delim_pos - beg_pos));
+        ptr = end_delim_pos;
+      }
+      return out;
     }
 
     namespace env {

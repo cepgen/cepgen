@@ -42,8 +42,10 @@ generator = generator.clone(
 #eventSequence = cepgen.Sequence(pythia8)
 
 #--- example of an output module(s) procedure
-#from Config.OutputModule.ROOTTree_cfi import rootTree # dump everything into a flat tree
-text = cepgen.Module('text',  # histogramming/ASCII output capability
+#... dump everything into a flat ROOT tree (if CepGenRoot was built and loaded)
+#from Config.OutputModule.ROOTTree_cfi import rootTree
+#... accumulate and dump everything into an ASCII text output
+text = cepgen.Module('text',
     #variables = ['nev', 'm(4)', 'tgen'],
     histVariables={
         'm(4)': cepgen.Parameters(xbins=[float(bin) for bin in range(0, 250, 10)]),
@@ -51,7 +53,7 @@ text = cepgen.Module('text',  # histogramming/ASCII output capability
         'pt(7):pt(8)': cepgen.Parameters(xrange=(0., 250.), yrange=(0., 250.), log=True)
     }
 )
-#... or standard event formats
+#... or write onto one of various event formats handled
 #lhef = cepgen.Module('lhef', filename='test.lhe')
 #hepmc = cepgen.Module('hepmc', filename='test.hepmc')
 dump = cepgen.Module('dump', printEvery = generator.printEvery)

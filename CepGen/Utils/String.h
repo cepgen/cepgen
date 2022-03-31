@@ -96,6 +96,9 @@ namespace cepgen {
     /// Merge a collection of a printable type in a single string
     template <typename T>
     std::string merge(const std::vector<T>&, const std::string&);
+    /// Merge a collection of collections of a printable type in a single string
+    template <typename T>
+    std::string merge(const std::vector<std::vector<T> >&, const std::string&);
     /// Check if a string is also a number
     bool isNumber(const std::string&);
     /// Check if a collection contains an item
@@ -120,6 +123,10 @@ namespace cepgen {
     std::string toupper(const std::string&);
     /// Lowercase version of a string
     std::string tolower(const std::string&);
+    /// Get a (list of) substring(s) between two characters chains
+    /// \param[in] beg Start delimiter of the substring(s)
+    /// \param[in] end End delimiter of the substring(s)
+    std::vector<std::string> between(const std::string& str, const std::string& beg, const std::string& end);
     /// Add a trailing "s" when needed
     inline const char* s(size_t num) { return (num > 1) ? "s" : ""; }
     /// Add a trailing "s" when needed

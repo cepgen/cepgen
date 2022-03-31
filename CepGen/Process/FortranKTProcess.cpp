@@ -26,27 +26,35 @@
 #include "CepGen/Process/FortranKTProcess.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
-extern "C" {
-extern cepgen::ktblock::Constants constants_;
-extern cepgen::ktblock::Parameters genparams_;
-extern cepgen::ktblock::KTKinematics ktkin_;
-extern cepgen::ktblock::Cuts kincuts_;
-extern cepgen::ktblock::Event evtkin_;
+namespace {
+  extern "C" {
+  extern cepgen::ktblock::Constants constants_;
+  extern cepgen::ktblock::GenParameters genparams_;
+  extern cepgen::ktblock::KTKinematics ktkin_;
+  extern cepgen::ktblock::KinCuts kincuts_;
+  extern cepgen::ktblock::EventKinematics evtkin_;
 
-void cepgen_list_params_() { CG_LOG << "\t" << cepgen::proc::FortranKTProcess::kProcParameters; }
+  void cepgen_list_params_() {
+    CG_LOG << "\t" << cepgen::ParametersDescription(cepgen::proc::FortranKTProcess::kProcParameters).describe(1);
+  }
 
-int cepgen_param_int_(char* pname, int& def) {
-  //--- first check if the "integer" is a particle id
-  if (cepgen::proc::FortranKTProcess::kProcParameters.has<cepgen::ParticleProperties>(pname))
-    return cepgen::proc::FortranKTProcess::kProcParameters.get<cepgen::ParticleProperties>(pname).pdgid;
-  //--- if not, proceed with retrieving the integer value
-  return cepgen::proc::FortranKTProcess::kProcParameters.get<int>(pname, def);
-}
+  int cepgen_param_int_(char* pname, int& def) {
+    //--- first check if the "integer" is a particle id
+    if (cepgen::proc::FortranKTProcess::kProcParameters.has<cepgen::ParticleProperties>(pname))
+      return cepgen::proc::FortranKTProcess::kProcParameters.get<cepgen::ParticleProperties>(pname).pdgid;
+    if (cepgen::proc::FortranKTProcess::kProcParameters.has<unsigned long long>(pname)) {
+      unsigned long long ulong_def = def;
+      return cepgen::proc::FortranKTProcess::kProcParameters.get<unsigned long long>(pname, ulong_def);
+    }
+    //--- if not, proceed with retrieving the integer value
+    return cepgen::proc::FortranKTProcess::kProcParameters.get<int>(pname, def);
+  }
 
-double cepgen_param_real_(char* pname, double& def) {
-  return cepgen::proc::FortranKTProcess::kProcParameters.get<double>(pname, def);
-}
-}
+  double cepgen_param_real_(char* pname, double& def) {
+    return cepgen::proc::FortranKTProcess::kProcParameters.get<double>(pname, def);
+  }
+  }
+}  // namespace
 
 namespace cepgen {
   namespace proc {
@@ -83,12 +91,21 @@ namespace cepgen {
       // feed phase space cuts to the common block
       //===========================================================================================
 
-      kin_.cuts().central.pt_single().save(kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max);
-      kin_.cuts().central.energy_single().save(kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max);
-      kin_.cuts().central.eta_single().save(kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max);
-      kin_.cuts().central.mass_sum().save(kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max);
-      kin_.cuts().central.pt_sum().save(kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max);
-      kin_.cuts().central.rapidity_diff().save(kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max);
+      // export the limits into external variables
+      auto save_lim = [](const Limits& lim, int& on, double& min, double& max) {
+        on = lim.valid();
+        min = max = 0.;
+        if (lim.hasMin())
+          min = lim.min();
+        max = lim.hasMax() ? lim.max() : 9999.999;
+      };
+
+      save_lim(kin_.cuts().central.pt_single(), kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max);
+      save_lim(kin_.cuts().central.energy_single(), kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max);
+      save_lim(kin_.cuts().central.eta_single(), kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max);
+      save_lim(kin_.cuts().central.mass_sum(), kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max);
+      save_lim(kin_.cuts().central.pt_sum(), kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max);
+      save_lim(kin_.cuts().central.rapidity_diff(), kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max);
 
       //===========================================================================================
       // feed run parameters to the common block

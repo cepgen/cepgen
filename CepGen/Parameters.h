@@ -68,8 +68,6 @@ namespace cepgen {
     /// Pointer to a timekeeper instance
     const utils::TimeKeeper* timeKeeper() const { return tmr_.get(); }
 
-    /// Phase space definition parameters
-    ParametersList par_kinematics;
     /// Integrator specific user-defined parameters
     ParametersList par_integrator;
 

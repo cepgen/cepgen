@@ -54,6 +54,7 @@ namespace cepgen {
       switch (type) {
         case Beam::Mode::invalid:
         case Beam::Mode::CompositeScalar:
+        case Beam::Mode::Other:
           throw CG_FATAL("FormFactors") << type << " mode is not yet supported!";
         case Beam::Mode::PointLikeScalar:
           FE = 1., FM = 0.;

@@ -73,7 +73,7 @@ namespace cepgen {
           throw CG_FATAL("LHEFPythiaHandler") << "Failed to open output filename \"" << filename_ << "\" for writing!";
       }
       lhaevt_->openLHEF(filename_);
-    }  // namespace io
+    }
 
     LHEFPythiaHandler::~LHEFPythiaHandler() {
       if (lhaevt_)

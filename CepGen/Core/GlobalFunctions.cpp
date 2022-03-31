@@ -62,7 +62,7 @@ namespace cepgen {
 #else
       if (dlopen(the_path.c_str(), RTLD_LAZY | RTLD_GLOBAL) == nullptr) {
         const char* err = dlerror();
-        CG_WARNING("loadLibrary") << "Failed to load library \"" << the_path << "\"."
+        CG_WARNING("loadLibrary") << "Failed to load library " << the_path << "."
                                   << (err != nullptr ? utils::format("\n\t%s", err) : "");
         invalid_libraries.emplace_back(path);
         return false;

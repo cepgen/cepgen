@@ -28,7 +28,7 @@ namespace cepgen {
     /// Compute the matrix element for a generic \f$k_{\rm T}\f$-factorised process defined in a Fortran weighting function
     class FortranKTProcess : public KTProcess {
     public:
-      FortranKTProcess(const ParametersList& params, std::function<double(void)> func);
+      explicit FortranKTProcess(const ParametersList& params, std::function<double(void)> func);
       ProcessPtr clone() const override { return ProcessPtr(new FortranKTProcess(*this)); }
 
       static ParametersList kProcParameters;

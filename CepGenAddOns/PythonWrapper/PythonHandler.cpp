@@ -155,9 +155,9 @@ namespace cepgen {
         if (pout_kinematics)
           pkin += python::get<ParametersList>(pout_kinematics);
 
-        rt_params_->par_kinematics += pkin;
         if (proc_params.has<int>("mode"))
-          rt_params_->par_kinematics.set<int>("mode", proc_params.get<int>("mode"));
+          pkin.set<int>("mode", proc_params.get<int>("mode"));
+        rt_params_->process().setKinematics(Kinematics(pkin));
 
         //--- taming functions
         auto* ptam = python::element(process, "tamingFunctions");  // borrowed
@@ -269,12 +269,14 @@ namespace cepgen {
 
       const auto& parts = python::get<ParametersList>(pparts);
       for (const auto& k : parts.keys(true)) {
-        const auto& part = parts.get<ParticleProperties>(k);
+        const ParticleProperties part(parts.get<ParametersList>(k).set<std::string>("name", k));
         if (part.pdgid == 0 || part.mass < 0.)
           continue;
-        CG_DEBUG("PythonHandler:particles")
-            << "Adding a new particle with name \"" << part.name << "\" to the PDG dictionary.";
-        PDG::get().define(part);
+        if (!PDG::get().has(part.pdgid) || PDG::get()(part.pdgid) != part) {
+          CG_DEBUG("PythonHandler:particles")
+              << "Adding a new particle with name \"" << part.name << "\" to the PDG dictionary.";
+          PDG::get().define(part);
+        }
       }
     }
 

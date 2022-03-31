@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
   bool quiet;
 
   cepgen::ArgumentsParser argparse(argc, argv);
-  argparse.addArgument("cfg,c", "configuration file", &cfg_filename)
+  argparse.addArgument("cfg,f", "configuration file", &cfg_filename)
       .addOptionalArgument("quiet,q", "quiet mode", &quiet, false)
       .addOptionalArgument("num-sigma,n", "max. number of std.dev.", &num_sigma, 3.)
       .addOptionalArgument("integrator,i", "type of integrator used", &integrator, "Vegas")
@@ -87,13 +87,11 @@ int main(int argc, char* argv[]) {
   if (argparse.debugging())
     progress.reset(new cepgen::utils::ProgressBar(tests.size()));
 
-  try {
-    unsigned short num_tests = 0;
-    for (const auto& test : tests) {
+  unsigned short num_tests = 0;
+  for (const auto& test : tests) {
+    const std::string filename = "test/test_processes/" + test.filename + "_cfg.py";
+    try {
       gen.parametersRef().clearProcess();
-
-      const std::string filename = "test_processes/" + test.filename + "_cfg.py";
-
       gen.setParameters(cepgen::card::Handler::parse(filename));
 
       CG_DEBUG("main") << gen.parameters();
@@ -133,8 +131,10 @@ int main(int argc, char* argv[]) {
         progress->update(num_tests);
       CG_LOG << "Test " << num_tests << "/" << tests.size() << " finished. "
              << "Success: " << cepgen::utils::yesno(success) << ".";
+    } catch (const cepgen::Exception& e) {
+      CG_LOG << "Test \"" << test.filename << "\" (located at " << filename << ") failed.";
+      cepgen::Exception(e).dump();
     }
-  } catch (const cepgen::Exception& e) {
   }
   if (failed_tests.size() != 0) {
     ostringstream os_failed, os_passed;

@@ -45,11 +45,10 @@ int main(int argc, char* argv[]) {
     CG_LOG << "Testing with \"" << func << "\" functional parser.";
     {  // test with a 1-variable function
       const double exp_result_test1 = 6.795704571;
-      auto params = cepgen::ParametersList()
-                        .set<std::string>("expression", "2.5*exp(0.1*x)")
-                        .set<std::vector<std::string> >("variables", {"x"});
-      auto test = cepgen::utils::FunctionalFactory::get().build(func, params);
+      CG_LOG << cepgen::utils::Functional::fromExpression("2.5*exp(0.1*x)", {"x"});
       try {
+        auto test = cepgen::utils::FunctionalFactory::get().build(
+            func, cepgen::utils::Functional::fromExpression("2.5*exp(0.1*x)", {"x"}));
         if (fabs((*test)(10.) - exp_result_test1) > epsilon) {
           CG_LOG << "Test 1.1 failed.";
           return -1;
@@ -65,11 +64,9 @@ int main(int argc, char* argv[]) {
       CG_LOG << "Test 1 passed.";
     }
     {  // test with an invalid function
-      auto params = cepgen::ParametersList()
-                        .set<std::string>("expression", "sqrt(x+x**3-log(10)")
-                        .set<std::vector<std::string> >("variables", {"x"});
       try {
-        auto test = cepgen::utils::FunctionalFactory::get().build(func, params);
+        auto test = cepgen::utils::FunctionalFactory::get().build(
+            func, cepgen::utils::Functional::fromExpression("sqrt(x+x**3-log(10)", {"x"}));
         (*test)(10);
         CG_LOG << "Test 2 failed.";
         return -1;
@@ -78,11 +75,9 @@ int main(int argc, char* argv[]) {
       }
     }
     {  // test with a 2-variables function
-      auto params = cepgen::ParametersList()
-                        .set<std::string>("expression", "sqrt(a^2+b^2)")
-                        .set<std::vector<std::string> >("variables", {"a", "b"});
       try {
-        auto test = cepgen::utils::FunctionalFactory::get().build(func, params);
+        auto test = cepgen::utils::FunctionalFactory::get().build(
+            func, cepgen::utils::Functional::fromExpression("sqrt(a^2+b^2)", {"a", "b"}));
         if (fabs((*test)({3, 4}) - 5.0) > epsilon) {
           throw CG_ERROR("main") << "Exceeded the numerical limit.";
           return -1;
@@ -94,11 +89,9 @@ int main(int argc, char* argv[]) {
       }
     }
     {  // test with an invalid function
-      auto params = cepgen::ParametersList()
-                        .set<std::string>("expression", "a***2")
-                        .set<std::vector<std::string> >("variables", {"a"});
       try {
-        auto test = cepgen::utils::FunctionalFactory::get().build(func, params);
+        auto test = cepgen::utils::FunctionalFactory::get().build(
+            func, cepgen::utils::Functional::fromExpression("a***2", {"a"}));
         (*test)(10);
         (*test)({10});
         CG_LOG << "Test 4 failed";

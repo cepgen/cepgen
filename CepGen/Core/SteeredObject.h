@@ -43,6 +43,11 @@ namespace cepgen {
     SteeredObject(const ParametersList& params) : Steerable(T::description().validate(params)) {}
     virtual ~SteeredObject() = default;
 
+    /// Equality operator
+    bool operator==(const SteeredObject& oth) const { return parameters() == oth.parameters(); }
+    /// Inequality operator
+    bool operator!=(const SteeredObject& oth) const { return !operator==(oth); }
+
     /// Description of all object parameters
     static inline ParametersDescription description() {
       auto desc = ParametersDescription();
@@ -56,6 +61,8 @@ namespace cepgen {
         params_.set<bool>(kv.first, *kv.second);
       for (const auto& kv : map_ints_)
         params_.set<int>(kv.first, *kv.second);
+      for (const auto& kv : map_ulongs_)
+        params_.set<unsigned long long>(kv.first, *kv.second);
       for (const auto& kv : map_dbls_)
         params_.set<double>(kv.first, *kv.second);
       for (const auto& kv : map_strs_)
@@ -70,6 +77,8 @@ namespace cepgen {
         *kv.second = params_.get<bool>(kv.first);
       for (const auto& kv : map_ints_)
         *kv.second = params_.get<int>(kv.first);
+      for (const auto& kv : map_ulongs_)
+        *kv.second = params_.get<unsigned long long>(kv.first);
       for (const auto& kv : map_dbls_)
         *kv.second = params_.get<double>(kv.first);
       for (const auto& kv : map_strs_)
@@ -80,6 +89,7 @@ namespace cepgen {
 
     REGISTER_TYPE(bool, map_bools_)
     REGISTER_TYPE(int, map_ints_)
+    REGISTER_TYPE(unsigned long long, map_ulongs_)
     REGISTER_TYPE(double, map_dbls_)
     REGISTER_TYPE(std::string, map_strs_)
     REGISTER_TYPE(Limits, map_lims_)

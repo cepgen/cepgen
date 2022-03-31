@@ -67,3 +67,6 @@ c     =================================================================
       integer CepGen_param_int
       double precision CepGen_param_real
 
+      external CepGen_alphaS
+      double precision CepGen_alphaS
+
