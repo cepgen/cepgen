@@ -5,8 +5,7 @@ stages:
   - test
 
 default:
-  tags:
-    - cvmfs
+  tags: [ cvmfs,docker ]
 
 #######################################
 # define all build, tests, and
@@ -144,13 +143,13 @@ test:cc7:
 
 compile:cc7-cvmfs:
   extends: .build_cvmfs_common
-  tags: [ cvmfs ]
+  tags: [ cvmfs,docker ]
   image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
   allow_failure: true
 
 run_cepgen:cc7-cvmfs:
   extends: .run_cepgen_common
-  tags: [ cvmfs ]
+  tags: [ cvmfs,docker ]
   image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
   #source /cvmfs/grid.cern.ch/etc/profile.d/setup-cvmfs-ui.sh
   dependencies: ["compile:cc7-cvmfs"]
@@ -159,7 +158,7 @@ run_cepgen:cc7-cvmfs:
 
 package:cc7-cvmfs:
   extends: .package_common
-  tags: [ cvmfs ]
+  tags: [ cvmfs,docker ]
   image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
   dependencies: ["compile:cc7-cvmfs"]
   needs: ["compile:cc7-cvmfs"]
@@ -167,7 +166,7 @@ package:cc7-cvmfs:
 
 test:cc7-cvmfs:
   extends: .test_common
-  tags: [ cvmfs ]
+  tags: [ cvmfs,docker ]
   image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
   dependencies: ["compile:cc7-cvmfs"]
   needs: ["compile:cc7-cvmfs"]
