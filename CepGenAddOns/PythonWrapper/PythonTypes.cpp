@@ -62,6 +62,11 @@ namespace cepgen {
     }
 
     template <>
+    bool get<bool>(PyObject* obj) {
+      return PyObject_IsTrue(obj);
+    }
+
+    template <>
     ObjectPtr set<bool>(const bool& val) {
       return ObjectPtr(PyBool_FromLong(val));
     }
@@ -185,6 +190,11 @@ namespace cepgen {
       if (vec.size() == 1)
         return Limits{vec.at(0)};
       return Limits{vec.at(0), vec.at(1)};
+    }
+
+    template <>
+    ObjectPtr set<Limits>(const Limits& val) {
+      return newTuple(std::vector<double>{val.min(), val.max()});
     }
 
     template <>

@@ -55,14 +55,14 @@ namespace cepgen {
     virtual void readStrings(const std::vector<std::string>& params);
 
     /// Initialise the event modifier before its running
-    virtual void init() = 0;
+    virtual void init() {}
     /** \brief Modify a full event
        * \param[inout] ev Input/output event
        * \param[inout] weight Event weight after modification
        * \param[in] full Perform the full state modification
        * \return Boolean stating whether or not the modification occurred successfully
        */
-    virtual bool run(Event& ev, double& weight, bool full) = 0;
+    virtual bool run(Event& ev, double& weight, bool full = true) = 0;
     /// Specify the process cross section and uncertainty, in pb
     virtual void setCrossSection(double, double) {}
 

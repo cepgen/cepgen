@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2018-2021  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Utils/Limits.h"
 
 #define DEFINE_TYPE(type)                                                         \
@@ -58,6 +57,8 @@ namespace cepgen {
     ParametersList& operator=(const ParametersList&) = default;  ///< Assignment operator
     /// Equality operator
     bool operator==(const ParametersList&) const;
+    /// Inequality operator
+    bool operator!=(const ParametersList& oth) const { return !operator==(oth); }
     /// Feed a control string to the list of parameters
     ParametersList& feed(const std::string&);
     /// Check if a given parameter is handled in this list
@@ -104,6 +105,8 @@ namespace cepgen {
     inline ParametersList& setAs(const std::string& key, const U& value) {
       return set<T>(key, static_cast<T>(value));
     }
+    /// Rename the key to a parameter value
+    ParametersList& rename(const std::string& old_key, const std::string& new_key);
     /// Concatenate two parameters containers
     ParametersList& operator+=(const ParametersList& oth);
     /// Concatenation of two parameters containers
@@ -120,6 +123,8 @@ namespace cepgen {
     /// Get a string-converted version of a value
     /// \param[in] wrap Encapsulate the value with type()
     std::string getString(const std::string& key, bool wrap = false) const;
+    /// Serialise a parameters collection into a parseable string
+    std::string serialise() const;
 
     /// Human-readable version of a parameters container
     friend std::ostream& operator<<(std::ostream& os, const ParametersList&);
@@ -132,27 +137,28 @@ namespace cepgen {
     std::map<std::string, ParametersList> param_values_;
     std::unordered_map<std::string, bool> bool_values_;
     std::unordered_map<std::string, int> int_values_;
+    std::unordered_map<std::string, unsigned long long> ulong_values_;
     std::unordered_map<std::string, double> dbl_values_;
     std::unordered_map<std::string, std::string> str_values_;
     std::unordered_map<std::string, Limits> lim_values_;
-    std::unordered_map<std::string, std::vector<ParametersList> > vec_param_values_;
     std::unordered_map<std::string, std::vector<int> > vec_int_values_;
     std::unordered_map<std::string, std::vector<double> > vec_dbl_values_;
     std::unordered_map<std::string, std::vector<std::string> > vec_str_values_;
+    std::unordered_map<std::string, std::vector<ParametersList> > vec_param_values_;
     std::unordered_map<std::string, std::vector<std::vector<double> > > vec_vec_dbl_values_;
   };
 
+  DEFINE_TYPE(ParametersList)
   DEFINE_TYPE(bool)
   DEFINE_TYPE(int)
-  DEFINE_TYPE(std::vector<int>)
+  DEFINE_TYPE(unsigned long long)
   DEFINE_TYPE(double)
-  DEFINE_TYPE(std::vector<double>)
   DEFINE_TYPE(std::string)
-  DEFINE_TYPE(std::vector<std::string>)
   DEFINE_TYPE(Limits)
-  DEFINE_TYPE(ParametersList)
+  DEFINE_TYPE(std::vector<int>)
+  DEFINE_TYPE(std::vector<double>)
+  DEFINE_TYPE(std::vector<std::string>)
   DEFINE_TYPE(std::vector<ParametersList>)
-  DEFINE_TYPE(ParticleProperties)
   DEFINE_TYPE(std::vector<std::vector<double> >)
 }  // namespace cepgen
 

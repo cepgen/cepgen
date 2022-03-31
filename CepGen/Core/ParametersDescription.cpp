@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2021-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -103,6 +103,8 @@ namespace cepgen {
       os << ":";
     // write list of parameters (if has some)
     for (const auto& key : keys) {
+      if (pdtype == Type::ParametersVector && !ParametersList::has<ParametersList>(key))
+        continue;
       os << "\n" << sep(offset + 1) << utils::colourise(key, utils::Colour::none, utils::Modifier::underline) << " ";
       if (obj_descr_.count(key) == 0)
         continue;
@@ -125,14 +127,11 @@ namespace cepgen {
           const auto& par_desc = obj.description();
           if (!par_desc.empty())
             os << " (" << utils::colourise(par_desc, utils::Colour::none, utils::Modifier::italic) << ")";
-          const auto& params = ParametersList::get<std::vector<ParametersList> >(key);
-          if (params.empty()) {
+          const auto& params = ParametersList::get<ParametersList>(key);
+          if (params.empty())
             os << " with expected content: " << obj.describe(offset + 1);
-          } else {
-            std::string sepa;
-            for (const auto& param : params)
-              os << sepa << sep(offset + 2) << obj.steer(param).describe(offset + 1) << ",", sepa = "\n";
-          }
+          else
+            os << " with user-steered content: " << obj.steer(params).describe(offset + 1);
         } break;
         default: {
           const auto& descr = obj.describe(offset + 1);

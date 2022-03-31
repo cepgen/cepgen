@@ -84,20 +84,6 @@ namespace cepgen {
     return *this;
   }
 
-  void Limits::save(bool& on, double& lmin, double& lmax) const {
-    on = false;
-    lmin = lmax = 0.;
-    if (!valid())
-      return;
-    on = true;
-    if (hasMin())
-      lmin = min();
-    if (hasMax())
-      lmax = max();
-    if (lmin == lmax)
-      on = false;
-  }
-
   double Limits::x(double v) const {
     if (v < 0. || v > 1.)
       throw CG_ERROR("Limits:shoot") << "x must be comprised between 0 and 1; x value = " << v << ".";

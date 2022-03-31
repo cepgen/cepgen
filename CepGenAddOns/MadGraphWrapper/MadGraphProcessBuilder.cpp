@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2020-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Processes/Process2to4.h"
+#include "CepGen/Process/Process2to4.h"
 #include "CepGen/Utils/AbortHandler.h"
 #include "CepGenAddOns/MadGraphWrapper/MadGraphInterface.h"
 #include "CepGenAddOns/MadGraphWrapper/MadGraphProcess.h"
@@ -45,8 +45,9 @@ MadGraphProcessBuilder::MadGraphProcessBuilder(const ParametersList& params)
     : Process2to4(params, std::array<pdgid_t, 2>{}, 0) {
   utils::AbortHandler();
   try {
-    if (params_.has<std::string>("lib"))
-      loadLibrary(steer<std::string>("lib"));
+    const auto& lib_file = steer<std::string>("lib");
+    if (!lib_file.empty())
+      loadLibrary(lib_file);
     else {
       const MadGraphInterface interf(params);
       loadLibrary(interf.run());

@@ -25,19 +25,18 @@ namespace cepgen {
   std::ostream& operator<<(std::ostream& os, const PDG::Id& pdg) { return os << PDG::get().name(pdg); }
 
   PDG::PDG() {
-    define({invalid, "[...]", "", 0, -1, -1., 0, false});
-    define({diffractiveProton, "diff_proton", "p\u002A", 0, 0., 0., 3, false});
-    define({pomeron, "pomeron", "\u2119", 0, 0., 0., 0, false});
-    define({reggeon, "reggeon", "\u211D", 0, 0., 0., 0, false});
+    define(ParticleProperties(invalid, "[...]", "", 0, -1, -1., 0, false));
+    define(ParticleProperties(diffractiveProton, "diff_proton", "p\u002A", 0, 0., 0., 3, false));
+    define(ParticleProperties(pomeron, "pomeron", "\u2119", 0, 0., 0., 0, false));
+    define(ParticleProperties(reggeon, "reggeon", "\u211D", 0, 0., 0., 0, false));
   }
 
   //--------------------------------------------------------------------
 
   std::ostream& operator<<(std::ostream& os, const ParticleProperties& prop) {
     return os << prop.name << "{"
-              << "id=" << prop.pdgid << ",desc=" << prop.description << ",colours=" << prop.colours
-              << ",mass=" << prop.mass << ",width=" << prop.width << ",charge=" << prop.charge
-              << (prop.fermion ? ",fermion" : "") << "}";
+              << "id=" << prop.pdgid << ",desc=" << prop.descr << ",colours=" << prop.colours << ",mass=" << prop.mass
+              << ",width=" << prop.width << ",charge=" << prop.charge << (prop.fermion ? ",fermion" : "") << "}";
   }
 
   //--------------------------------------------------------------------
@@ -70,7 +69,12 @@ namespace cepgen {
     return out;
   }
 
-  const std::string& PDG::name(pdgid_t id) const { return operator()(id).description; }
+  const std::string& PDG::name(pdgid_t id) const {
+    const auto& descr = operator()(id).descr;
+    if (!descr.empty())
+      return descr;
+    return operator()(id).name;
+  }
 
   double PDG::colours(pdgid_t id) const { return operator()(id).colours; }
 

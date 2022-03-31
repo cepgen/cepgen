@@ -31,8 +31,12 @@ namespace cepgen {
     /// Copy constructor
     Limits(const Limits&);
 
-    Limits operator-() const;                       ///< Invert this limit
-    Limits& operator=(const Limits&) = default;     ///< Assignment operator
+    Limits operator-() const;                    ///< Invert this limit
+    Limits& operator=(const Limits&) = default;  ///< Assignment operator
+    /// Equality operator
+    bool operator==(const Limits& oth) const { return *this == (std::pair<double, double>)oth; }
+    /// Inequality operator
+    bool operator!=(const Limits& oth) const { return !operator==(oth); }
     Limits& operator+=(double c);                   ///< Add a constant to this limit
     Limits& operator-=(double c);                   ///< Subtract a constant to this limit
     Limits& operator*=(double c);                   ///< Multiply this limit by a constant
@@ -51,8 +55,6 @@ namespace cepgen {
     double max() const { return second; }
     /// Upper limit to apply on the variable
     double& max() { return second; }
-    /// Export the limits into external variables
-    void save(bool& on, double& lmin, double& lmax) const;
     /// Find the [0,1] value scaled between minimum and maximum
     double x(double v) const;
     /// Specify the lower and upper limits on the variable

@@ -25,7 +25,7 @@
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
 #include "CepGen/Parameters.h"
-#include "CepGen/Processes/Process.h"
+#include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ProgressBar.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Processes/Process.h"
+#include "CepGen/Process/Process.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
@@ -51,7 +51,6 @@ namespace cepgen {
           sqs_(proc.sqs_),
           mA2_(proc.mA2_),
           mB2_(proc.mB2_),
-          kin_(proc.kin_),
           is_point_set_(false),
           first_run_(proc.first_run_) {
       if (proc.event_)
@@ -65,6 +64,7 @@ namespace cepgen {
         if (event_)
           log << "\n\t" << *event_;
       });
+      setKinematics(proc.kin_);
     }
 
     std::unique_ptr<Process> Process::clone() const {
@@ -80,19 +80,19 @@ namespace cepgen {
       CG_DEBUG("Process:clear") << "Process event content, and integration variables cleared.";
     }
 
-    void Process::dumpVariables() const {
-      CG_INFO("Process:dumpVariables").log([&](auto& info) {
-        info << "List of variables handled by this process:";
-        for (const auto& var : mapped_variables_)
-          info << "\n\t(" << var.index << ") " << var.type << " mapping (" << var.description << ")"
-               << " in range " << var.limits;
-      });
+    void Process::dumpVariables(std::ostream* os) const {
+      if (!os)
+        os = &CG_LOG.stream();
+      (*os) << "List of variables handled by this process:";
+      for (const auto& var : mapped_variables_)
+        (*os) << "\n\t(" << var.index << ") " << var.type << " mapping (" << var.description << ")"
+              << " in range " << var.limits;
     }
 
     Process& Process::defineVariable(
         double& out, const Mapping& type, Limits in, const Limits& default_limits, const std::string& descr) {
       if (!in.valid()) {
-        CG_DEBUG("Process:defineVariable") << descr << " could not be retrieved from the user configuration!\n\t"
+        CG_DEBUG("Process:defineVariable") << descr << " could not be retrieved from the user configuration. "
                                            << "Setting it to the default value: " << default_limits << ".";
         in = default_limits;
       }
@@ -126,8 +126,8 @@ namespace cepgen {
                           (unsigned short)mapped_variables_.size()});
       point_coord_.emplace_back(0.);
       base_jacobian_ *= jacob_weight;
-      CG_DEBUG("Process:defineVariable") << descr << " has been mapped to variable " << mapped_variables_.size()
-                                         << ".\n\t"
+      CG_DEBUG("Process:defineVariable") << "\n\t" << descr << " has been mapped to variable "
+                                         << mapped_variables_.size() << ".\n\t"
                                          << "Allowed range for integration: " << in << " (" << lim << ").\n\t"
                                          << "Variable integration mode: " << type << ".\n\t"
                                          << "Weight in the Jacobian: " << jacob_weight << ".";
@@ -249,7 +249,7 @@ namespace cepgen {
 
     void Process::setKinematics(const Kinematics& kin) {
       CG_DEBUG("Process:setKinematics") << "Preparing to set the kinematics parameters. Input parameters: "
-                                        << kin.parameters(false) << ".";
+                                        << ParametersDescription(kin.parameters(false)) << ".";
       clear();  // also resets the "first run" flag
       kin_ = kin;
 
@@ -276,15 +276,6 @@ namespace cepgen {
                                           << "  sqrt(s) = " << sqs_ * 1.e-3 << " TeV,\n"
                                           << "  p1=" << p1 << ",\tmass=" << p1.mass() << " GeV\n"
                                           << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.";
-
-      //--- process-specific phase space definition
-      prepareKinematics();
-      CG_DEBUG("Process:setKinematics").log([&](auto& log) {
-        log << "List of " << utils::s("integration variable", mapped_variables_.size(), true) << ":";
-        for (const auto& var : mapped_variables_)
-          log << "\n\t" << var.index << ") " << var.description << " (type: " << var.type << ", limits: " << var.limits
-              << ").";
-      });
     }
 
     void Process::dumpPoint() const {

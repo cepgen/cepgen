@@ -12,8 +12,8 @@ file(GLOB phys_sources
         StructureFunctions/*.cpp
         FormFactors/*.cpp)
 file(GLOB proc_sources
-        Processes/*.cpp
-        Processes/Fortran/*.f)
+        Process/*.cpp
+        Process/Fortran/*.f)
 file(GLOB core_includes
         Cards
         Core
@@ -22,7 +22,7 @@ file(GLOB core_includes
         OutputModules
         Physics
         Integration
-        Processes
+        Process
         StructureFunctions
         FormFactors)
 

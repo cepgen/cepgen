@@ -70,6 +70,8 @@ namespace cepgen {
                              Particle::Parton1,
                              Particle::Parton2,
                              Particle::CentralSystem}) {
+      if (particles_.count(role) == 0)
+        continue;
       for (const auto& old_part : operator[](role)) {
         auto& new_part = out.addParticle(role);
         new_part = old_part;  // copy all attributes
@@ -82,20 +84,25 @@ namespace cepgen {
     if (out[Particle::OutgoingBeam1].size() > 1 || out[Particle::OutgoingBeam2].size() > 1)
       CG_WARNING("Event:compress") << "Event compression not designed for already fragmented beam remnants!\n\t"
                                    << "Particles parentage is not guaranteed to be conserved.";
-    for (auto& part : out[Particle::OutgoingBeam1])
-      part.addMother(out[Particle::IncomingBeam1][0]);
-    for (auto& part : out[Particle::OutgoingBeam2])
-      part.addMother(out[Particle::IncomingBeam2][0]);
+    if (particles_.count(Particle::OutgoingBeam1) > 0)
+      for (auto& part : out[Particle::OutgoingBeam1])
+        part.addMother(out[Particle::IncomingBeam1][0]);
+    if (particles_.count(Particle::OutgoingBeam2) > 0)
+      for (auto& part : out[Particle::OutgoingBeam2])
+        part.addMother(out[Particle::IncomingBeam2][0]);
     //--- fix parentage for incoming partons
     for (auto& part : out[Particle::Parton1])
-      part.addMother(out[Particle::IncomingBeam1][0]);
-    for (auto& part : out[Particle::Parton2])
-      part.addMother(out[Particle::IncomingBeam2][0]);
+      if (particles_.count(Particle::IncomingBeam1) > 0)
+        part.addMother(out[Particle::IncomingBeam1][0]);
+    if (particles_.count(Particle::IncomingBeam2) > 0)
+      for (auto& part : out[Particle::Parton2])
+        part.addMother(out[Particle::IncomingBeam2][0]);
     //--- fix parentage for central system
-    for (auto& part : out[Particle::CentralSystem]) {
-      part.addMother(out[Particle::Parton1][0]);
-      part.addMother(out[Particle::Parton2][0]);
-    }
+    if (particles_.count(Particle::Parton1) > 0 && particles_.count(Particle::Parton2) > 0)
+      for (auto& part : out[Particle::CentralSystem]) {
+        part.addMother(out[Particle::Parton1][0]);
+        part.addMother(out[Particle::Parton2][0]);
+      }
     return out;
   }
 

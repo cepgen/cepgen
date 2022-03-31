@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/MCDFileParser.h"
-#include "CepGen/Processes/Process.h"
+#include "CepGen/Process/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 #include "CepGen/Utils/Filesystem.h"
@@ -212,7 +212,6 @@ namespace cepgen {
 
       rt_params_->generation().setParameters(*gen_params_);
 
-      rt_params_->par_kinematics += *kin_params_;
       rt_params_->par_integrator += *int_params_;
 
       //--- parse the structure functions code
@@ -221,7 +220,8 @@ namespace cepgen {
                                     sigrat::SigmaRatiosFactory::get().describeParameters(sr_type_).parameters());
       if (str_fun_ == (int)strfun::Type::MSTWgrid && !mstw_grid_path_.empty())
         sf_params.set<std::string>("gridPath", mstw_grid_path_);
-      rt_params_->par_kinematics.set<ParametersList>("structureFunctions", sf_params);
+      kin_params_->set<ParametersList>("structureFunctions", sf_params);
+      rt_params_->process().setKinematics(Kinematics(*kin_params_));
 
       //--- parse the hadronisation algorithm name
       if (!evt_mod_name_.empty())

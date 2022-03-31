@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *                2017-2019  Wolfgang Schaefer
  *                2019       Marta Luszczak
  *
@@ -27,7 +27,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Processes/Process2to4.h"
+#include "CepGen/Process/Process2to4.h"
 
 namespace cepgen {
   namespace proc {
@@ -53,8 +53,19 @@ namespace cepgen {
       double prefactor_{1.};
 
       //--- parameters for off-shell matrix element
-      unsigned short p_mat1_{0}, p_mat2_{0};
-      unsigned short p_term_ll_{0}, p_term_lt_{0}, p_term_tt1_{0}, p_term_tt2_{0};
+      struct OffShellParameters : SteeredObject<OffShellParameters> {
+        explicit OffShellParameters(const ParametersList& params) : SteeredObject(params) {
+          (*this)
+              .add("mat1", mat1)
+              .add("mat2", mat2)
+              .add("termLL", term_ll)
+              .add("termLT", term_lt)
+              .add("termTT", term_tt1)
+              .add("termtt", term_tt2);
+        }
+        int mat1{0}, mat2{0};
+        int term_ll{0}, term_lt{0}, term_tt1{0}, term_tt2{0};
+      } osp_;
 
       double mf2_{0.};
       short qf3_{0};
@@ -64,21 +75,17 @@ namespace cepgen {
     PPtoFF::PPtoFF(const ParametersList& params)
         : Process2to4(params, {PDG::photon, PDG::photon}, steer<ParticleProperties>("pair").pdgid),
           method_(steerAs<int, Mode>("method")),
-          alphas_params_(steer<ParametersList>("alphaS")) {
-      if (method_ == Mode::offShell || method_ == Mode::offShellLegacy) {  // off-shell matrix element
-        const auto& ofp = steer<ParametersList>("offShellParameters");
-        p_mat1_ = ofp.get<int>("mat1", method_ == Mode::offShell ? 1 : 2);
-        p_mat2_ = ofp.get<int>("mat2", method_ == Mode::offShell ? 1 : 0);
-        p_term_ll_ = ofp.get<int>("termLL", 1);
-        p_term_lt_ = ofp.get<int>("termLT", 1);
-        p_term_tt1_ = ofp.get<int>("termTT", 1);
-        p_term_tt2_ = ofp.get<int>("termtt", 1);
+          alphas_params_(steer<ParametersList>("alphaS")),
+          osp_(steer<ParametersList>("offShellParameters")) {
+      if (method_ == Mode::offShell) {  // off-shell matrix element
+        osp_.mat1 = 2;
+        osp_.mat2 = 0;
       }
     }
 
     void PPtoFF::prepareProcessKinematics() {
       if (!cs_prop_.fermion || cs_prop_.charge == 0.)
-        throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop_.description << " ("
+        throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop_.descr << " ("
                                          << (int)cs_prop_.pdgid << ")!";
 
       mf2_ = cs_prop_.mass * cs_prop_.mass;
@@ -86,7 +93,7 @@ namespace cepgen {
       colf_ = cs_prop_.colours;
       prefactor_ = 1.;
 
-      CG_DEBUG("PPtoFF:prepare") << "Produced particles: " << cs_prop_.description << " ("
+      CG_DEBUG("PPtoFF:prepare") << "Produced particles: " << cs_prop_.descr << " ("
                                  << "mass = " << cs_prop_.mass << " GeV, "
                                  << "charge = " << std::setprecision(2) << qf3_ / 3. << " e)\n\t"
                                  << "matrix element computation method: " << (int)method_ << ".";
@@ -197,15 +204,15 @@ namespace cepgen {
                                        << "(dot):   " << dot1 << " / " << dot2 << "\n\t"
                                        << "(cross): " << cross1 << " / " << cross2 << ".";
 
-      const double aux2_1 = p_term_ll_ * (mf2_ + 4. * z1 * z1 * t1abs) * phi1.energy2() +
-                            p_term_tt1_ * ((z1p * z1p + z1m * z1m) * (dot1 * dot1 + cross1 * cross1)) +
-                            p_term_tt2_ * (cross1 * cross1 - dot1 * dot1) -
-                            p_term_lt_ * 4. * z1 * (z1p - z1m) * phi1.energy() * qt1_ * dot1;
+      const double aux2_1 = osp_.term_ll * (mf2_ + 4. * z1 * z1 * t1abs) * phi1.energy2() +
+                            osp_.term_tt1 * ((z1p * z1p + z1m * z1m) * (dot1 * dot1 + cross1 * cross1)) +
+                            osp_.term_tt2 * (cross1 * cross1 - dot1 * dot1) -
+                            osp_.term_lt * 4. * z1 * (z1p - z1m) * phi1.energy() * qt1_ * dot1;
 
-      const double aux2_2 = p_term_ll_ * (mf2_ + 4. * z2 * z2 * t2abs) * phi2.energy2() +
-                            p_term_tt1_ * ((z2p * z2p + z2m * z2m) * (dot2 * dot2 + cross2 * cross2)) +
-                            p_term_tt2_ * (cross2 * cross2 - dot2 * dot2) -
-                            p_term_lt_ * 4. * z2 * (z2p - z2m) * phi2.energy() * qt2_ * dot2;
+      const double aux2_2 = osp_.term_ll * (mf2_ + 4. * z2 * z2 * t2abs) * phi2.energy2() +
+                            osp_.term_tt1 * ((z2p * z2p + z2m * z2m) * (dot2 * dot2 + cross2 * cross2)) +
+                            osp_.term_tt2 * (cross2 * cross2 - dot2 * dot2) -
+                            osp_.term_lt * 4. * z2 * (z2p - z2m) * phi2.energy() * qt2_ * dot2;
 
       //=================================================================
       //     convention of matrix element as in our kt-factorization
@@ -227,7 +234,7 @@ namespace cepgen {
       //     symmetrization
       //=================================================================
 
-      double amat2 = 0.5 * prefactor_ * pow(x1 * x2 * s_, 2) * (p_mat1_ * amat2_1 + p_mat2_ * amat2_2);
+      double amat2 = 0.5 * prefactor_ * pow(x1 * x2 * s_, 2) * (osp_.mat1 * amat2_1 + osp_.mat2 * amat2_2);
 
       const double tmax = pow(std::max(amt1_, amt2_), 2);
       const double q1 = std::sqrt(std::max(eps12, tmax)), q2 = std::sqrt(std::max(eps22, tmax));
@@ -257,6 +264,14 @@ namespace cepgen {
       auto alphas_desc = ParametersDescription();
       alphas_desc.setName<std::string>("pegasus");
       desc.add("alphaS", alphas_desc);
+      auto osp_desc = ParametersDescription();
+      osp_desc.add("mat1", 1);
+      osp_desc.add("mat2", 1);
+      osp_desc.add("termLL", 1);
+      osp_desc.add("termLT", 1);
+      osp_desc.add("termTT", 1);
+      osp_desc.add("termtt", 1);
+      desc.add("offShellParameters", osp_desc);
       return desc;
     }
   }  // namespace proc

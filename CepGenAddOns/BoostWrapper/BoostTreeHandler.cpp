@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Parameters.h"
-#include "CepGen/Processes/Process.h"
+#include "CepGen/Process/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/TimeKeeper.h"
 #include "CepGenAddOns/BoostWrapper/BoostTreeUtils.h"
@@ -100,10 +100,11 @@ namespace cepgen {
         throw CG_FATAL("BoostTreeHandler") << "Failed to retrieve a valid \"" << PROCESS_NAME << "\" block"
                                            << " in the steering card!";
       }
+      ParametersList par_kinematics;
       try {
         //----- phase space definition
         if (tree_.count(KIN_NAME))
-          rt_params_->par_kinematics += bc::unpack(tree_.get_child(KIN_NAME));
+          par_kinematics += bc::unpack(tree_.get_child(KIN_NAME));
         if (tree_.count(INTEGR_NAME))
           rt_params_->par_integrator += bc::unpack(tree_.get_child(INTEGR_NAME));
         if (tree_.count(GENERATOR_NAME))
@@ -134,6 +135,7 @@ namespace cepgen {
           for (const auto& mod : log_.get<std::vector<std::string> >("enabledModules"))
             utils::Logger::get().addExceptionRule(mod);
         }
+        rt_params_->process().setKinematics(Kinematics(par_kinematics));
       } catch (const boost::exception&) {
       } catch (const Exception&) {
       }

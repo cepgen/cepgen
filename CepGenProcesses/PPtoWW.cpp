@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *                2017-2019  Wolfgang Schaefer
  *                2019       Marta Luszczak
  *
@@ -26,7 +26,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/NachtmannAmplitudes.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Processes/Process2to4.h"
+#include "CepGen/Process/Process2to4.h"
 
 namespace cepgen {
   namespace proc {
@@ -151,7 +151,7 @@ namespace cepgen {
           hel_mat_elem += norm(p1 * (pp + mm) - std::complex<double>(0, 1) * p2 * (pp - mm) - p3 * (pm + mp) -
                                std::complex<double>(0, 1) * p4 * (pm - mp));
         }
-      return hel_mat_elem * std::pow(1. / qt1_ / qt2_, 2);
+      return 0.25 * hel_mat_elem * std::pow(1. / qt1_ / qt2_, 2);
     }
 
     ParametersDescription PPtoWW::description() {

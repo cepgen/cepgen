@@ -19,8 +19,10 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Beam.h"
+#include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
@@ -101,6 +103,15 @@ void cepgen_warning_(char* str, int size) { CG_WARNING("fortran_process") << std
 void cepgen_error_(char* str, int size) { CG_ERROR("fortran_process") << std::string(str, size); }
 
 void cepgen_fatal_(char* str, int size) { throw CG_FATAL("fortran_process") << std::string(str, size); }
+
+double cepgen_alphas_(double& q) {
+  static std::unique_ptr<cepgen::Coupling> kAlphaSPtr;
+  if (!kAlphaSPtr) {
+    CG_INFO("fortran_process") << "Initialisation of the alpha(S) evolution algorithm.";
+    kAlphaSPtr = cepgen::AlphaSFactory::get().build("pegasus");
+  }
+  return (*kAlphaSPtr)(q);
+}
 
 #ifdef __cplusplus
 }

@@ -23,7 +23,7 @@
 #include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Parameters.h"
-#include "CepGen/Processes/Process.h"
+#include "CepGen/Process/Process.h"
 #include "CepGenAddOns/PythonWrapper/PythonConfigWriter.h"
 
 namespace cepgen {

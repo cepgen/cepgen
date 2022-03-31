@@ -56,9 +56,10 @@ namespace cepgen {
 
     private:
       static void handle_ctrl_c_mt(int signal, siginfo_t*, void*) { gSignal = signal; }
-      static void handle_ctrl_c(int signal, siginfo_t*, void*) {
+      static void handle_ctrl_c(int signal, siginfo_t* si, void*) {
         gSignal = signal;
-        throw RunAbortedException();
+        if (abs(si->si_code) != SIGABRT)
+          throw RunAbortedException();
       }
       void init() {
         if (sigaction(SIGINT, &action_, nullptr) != 0 || sigaction(SIGTERM, &action_, nullptr) != 0)

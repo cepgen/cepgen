@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Processes/Process2to4.h"
+#include "CepGen/Process/Process2to4.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
@@ -38,6 +38,8 @@ namespace cepgen {
     void Process2to4::setCuts(const cuts::Central& single) { single_limits_ = single; }
 
     void Process2to4::preparePhaseSpace() {
+      if (cs_prop_.pdgid == PDG::invalid)  // ensure the central particles properties are correctly initialised
+        cs_prop_ = PDG::get()(steer<ParticleProperties>("pair").pdgid);
       {
         const auto& beamA = event_->oneWithRole(Particle::IncomingBeam1);
         pA_ = beamA.momentum();

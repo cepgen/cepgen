@@ -55,7 +55,24 @@ namespace cepgen {
           CG_DEBUG("Beam") << "KT flux for incoming parton set to \"" << kt_flux_ << "\".";
         }
         break;
-      default:
+      default:  // mode is invalid; try to infer it from KT flux
+        switch (kt_flux_) {
+          case KTFlux::P_Photon_Elastic:
+          case KTFlux::P_Photon_Elastic_Budnev:
+            mode_ = Mode::ProtonElastic;
+            break;
+          case KTFlux::P_Photon_Inelastic:
+          case KTFlux::P_Photon_Inelastic_Budnev:
+            mode_ = Mode::ProtonInelastic;
+            break;
+          case KTFlux::HI_Photon_Elastic:
+          default:
+            if (pdg_ == PDG::electron)
+              mode_ = Mode::PointLikeFermion;
+            else
+              mode_ = Mode::Other;
+            break;
+        }
         break;
     }
   }
@@ -223,6 +240,8 @@ namespace cepgen {
         return os << "comp.scalar";
       case Beam::Mode::ProtonInelastic:
         return os << "inel.proton";
+      case Beam::Mode::Other:
+        return os << "other";
     }
     return os;
   }

@@ -4,7 +4,7 @@
 c     =================================================================
 c     CepGen common blocks for kinematics definition
 c     =================================================================
-      include 'CepGen/Processes/Fortran/KTBlocks.inc'
+      include 'CepGen/Process/Fortran/KTBlocks.inc'
       data iflux1,iflux2,pdg_l/10,100,13/
       data a_nuc1,z_nuc1,a_nuc2,z_nuc2/1,1,208,82/
 
@@ -62,9 +62,7 @@ c     =================================================================
 c     =================================================================
 c     quarks production
 c     =================================================================
-#ifdef ALPHA_S
-      double precision t_max,amu2,alphas
-#endif
+      double precision t_max,amu2
 
 c     =================================================================
 c     at initialisation, retrieve a few user-defined parameters
@@ -91,16 +89,6 @@ c       central particles properties
             print *,'Invalid process mode for gluon emission!'
             stop
           endif
-#ifdef ALPHA_S
-          print *,'Initialisation of the alpha(S) evolution algorithm..'
-          call initAlphaS(0,1.d0,1.d0,0.5d0,
-     &       CepGen_particle_mass(4), ! charm
-     &       CepGen_particle_mass(5), ! bottom
-     &       CepGen_particle_mass(6)) ! top
-#else
-          print *,'alpha(S) evolution algorithm not linked!'
-          stop
-#endif
         endif
         first_init = .false.
       endif
@@ -456,14 +444,9 @@ c     =================================================================
 c     first parton coupling
 c     =================================================================
       if(iflux1.ge.20.and.iflux1.lt.40) then ! at least one gluon exchanged
-#ifdef ALPHA_S
         t_max = max(amt1,amt2)**2
         amu2 = max(eps12,t_max)
-        coupling = coupling * 4.d0*pi*alphaS(dsqrt(amu2))/2.d0
-#else
-        print *,'alphaS not linked to this instance!'
-        stop
-#endif
+        coupling = coupling * 4.d0*pi*CepGen_alphaS(dsqrt(amu2))/2.d0
       else ! photon exchange
         coupling = coupling * 4.d0*pi*alpha_em*q_l**2
       endif

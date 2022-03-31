@@ -227,6 +227,20 @@ namespace cepgen {
       return converter.from_bytes(str);
     }
 
+    std::vector<std::string> between(const std::string& str, const std::string& beg, const std::string& end) {
+      size_t ptr = 0;
+      std::vector<std::string> out;
+      while (ptr < str.size()) {
+        const auto beg_delim_pos = str.find_first_of(beg, ptr);
+        if (beg_delim_pos == std::string::npos)
+          break;
+        const auto beg_pos = beg_delim_pos + beg.size(), end_delim_pos = str.find_first_of(end, beg_pos);
+        out.emplace_back(str.substr(beg_pos, end_delim_pos - beg_pos));
+        ptr = end_delim_pos;
+      }
+      return out;
+    }
+
     namespace env {
       std::string get(const std::string& var, const std::string& def) {
         const auto out = std::getenv(var.c_str());

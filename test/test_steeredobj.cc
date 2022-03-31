@@ -48,6 +48,13 @@ int main(int argc, char* argv[]) {
     CG_LOG << "Test with parameters object-set int failed";
     return -1;
   }
+
+  test.foo = 45;
+  if (test.parameters().get<int>("foo") != 45) {
+    CG_LOG << "Test with object-set int failed";
+    return -1;
+  }
+
   CG_LOG << "All tests passed.";
 
   return 0;

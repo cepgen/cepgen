@@ -164,14 +164,14 @@ namespace cepgen {
         ParticleProperties prop;
         if (full)
           if (!PDG::get().has(pdg_id)) {
-            prop = ParticleProperties{pdg_id,
-                                      pyname(pdg_id),
-                                      pyname(pdg_id),
-                                      (short)pyk(p + 1, 12),  // colour factor
-                                      pymass(pdg_id),
-                                      -1.,                   //pmas( pdg_id, 2 ),
-                                      (short)pyk(p + 1, 6),  // charge
-                                      false};
+            prop.pdgid = pdg_id;
+            prop.name = pyname(pdg_id);
+            prop.descr = pyname(pdg_id);
+            prop.colours = pyk(p + 1, 12);  // colour factor
+            prop.mass = pymass(pdg_id);
+            prop.width = -1.;             //pmas( pdg_id, 2 ),
+            prop.charge = pyk(p + 1, 6);  // charge
+            prop.fermion = false;
             PDG::get().define(prop);
           }
 
