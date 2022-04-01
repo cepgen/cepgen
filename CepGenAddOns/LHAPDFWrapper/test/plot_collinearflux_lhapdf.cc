@@ -17,24 +17,25 @@
  */
 
 #include <LHAPDF/LHAPDF.h>
-#include <TGraph.h>
-#include <TMultiGraph.h>
 
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/CollinearFlux.h"
-#include "CepGen/Physics/KTFlux.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGenAddOns/ROOTWrapper/ROOTCanvas.h"
+#include "CepGen/Utils/Drawer.h"
+#include "CepGen/Utils/Graph.h"
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
   double q2, xmin, xmax;
-  string ffmode, set, output;
+  string ffmode, set, output, plotter;
   int strfun_type, member, num_points;
+  bool logx, logy, draw_grid;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("q2", "Virtuality", &q2, 100.)
       .addOptionalArgument("xmin,x", "minimal fractional loss", &xmin, 1.e-5)
@@ -45,7 +46,13 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("output,o", "Output filename", &output, argv[0])
       .addOptionalArgument("member,m", "PDF member", &member, 0)
       .addOptionalArgument("num-points,n", "Number of points to probe", &num_points, 100)
+      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
+      .addOptionalArgument("logx", "logarithmic x-axis", &logx, false)
+      .addOptionalArgument("logy,l", "logarithmic y-axis", &logy, false)
+      .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .parse();
+
+  const double lxmin = log10(xmin), lxmax = log10(xmax);
 
   cepgen::initialise();
 
@@ -55,34 +62,38 @@ int main(int argc, char* argv[]) {
   auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(
       401, cepgen::ParametersList().set<std::string>("pdfSet", set).set<int>("pdfMember", member));
   auto ff = cepgen::formfac::FormFactorsFactory::get().build(ffmode);
-  ff->setStructureFunctions(sf.get());
 
   const cepgen::Limits kt2_limits(0., 1000.);
+  const cepgen::CollinearFlux flux(ff.get(), sf.get(), kt2_limits);
 
-  const cepgen::CollinearFlux flux(ff.get(), kt2_limits);
-
-  TGraph g_ref, g_cg, g_ratio;
+  cepgen::utils::Graph1D g_ref, g_cg, g_ratio;
   for (int i = 0; i < num_points; ++i) {
-    const double x = xmin + i * (xmax - xmin) / (num_points + 1);
+    const double x =
+        (!logx) ? xmin + i * (xmax - xmin) / (num_points - 1) : pow(10, lxmin + i * (lxmax - lxmin) / (num_points - 1));
     const double xfx = pdf->xfxQ2(22, x, q2);
-    const double pdf = flux(x, 0.938, cepgen::KTFlux::P_Photon_Elastic_Budnev);
+    const double pdf = flux(x, 0.938, cepgen::Beam::KTFlux::P_Photon_Elastic_Budnev);
     cout << x << "\t" << xfx << "\t" << pdf << "\t" << pdf / xfx << endl;
-    g_ref.SetPoint(g_ref.GetN(), x, xfx);
-    g_cg.SetPoint(g_cg.GetN(), x, pdf);
-    g_ratio.SetPoint(g_ratio.GetN(), x, pdf / xfx);
+    g_ref.addPoint(x, xfx);
+    g_cg.addPoint(x, pdf);
+    g_ratio.addPoint(x, pdf / xfx);
   }
 
-  cepgen::ROOTCanvas c(output.c_str());
-  TMultiGraph mg;
-  g_ref.SetLineColor(kRed + 1);
-  g_cg.SetLineColor(kBlue + 2);
-  //mg.Add(&g_ref);
-  //mg.Add(&g_cg);
-  mg.Add(&g_ratio);
-  mg.SetMinimum(1.e-10);
-  mg.Draw("al");
-  c.Prettify(mg.GetHistogram());
-  c.SetLogy();
-  c.Save("pdf");
+  if (!plotter.empty()) {
+    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    cepgen::utils::Drawer::Mode dm;
+    if (logx)
+      dm |= cepgen::utils::Drawer::Mode::logx;
+    if (logy)
+      dm |= cepgen::utils::Drawer::Mode::logy;
+    if (draw_grid)
+      dm |= cepgen::utils::Drawer::Mode::grid;
+    cepgen::utils::DrawableColl mg;
+    for (auto* gr : {&g_ref, &g_cg, &g_ratio}) {
+      gr->xAxis().setLabel("$x$");
+      gr->yAxis().setLabel("$f_{\\gamma}(x)$");
+      mg.emplace_back(gr);
+    }
+    plt->draw(mg, output);
+  }
   return 0;
 }

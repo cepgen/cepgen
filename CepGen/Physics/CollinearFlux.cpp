@@ -23,32 +23,38 @@
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/KTFlux.h"
 #include "CepGen/Physics/Limits.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
 namespace cepgen {
   double unintegrated_flux(double kt2, void* params) {
     const auto args = static_cast<FluxArguments*>(params);
-    if (args->flux_type == KTFlux::HI_Photon_Elastic) {
+    if (args->flux_type == Beam::KTFlux::HI_Photon_Elastic) {
       if (!args->heavy_ion)
         throw CG_FATAL("CollinearFlux") << "Heavy ion not specified!";
-      return ktFlux(args->flux_type, args->x, kt2, *args->heavy_ion) / kt2;
+      return Beam::ktFluxHI(args->flux_type, args->x, kt2, *args->heavy_ion) / kt2;
     }
-    return ktFlux(args->flux_type, args->x, kt2, *args->form_factors, args->mi2, args->mf2) / kt2;
+    return Beam::ktFluxNucl(
+               args->flux_type, args->x, kt2, args->form_factors, args->structure_functions, args->mi2, args->mf2) /
+           kt2;
   }
 
-  CollinearFlux::CollinearFlux(formfac::Parameterisation* form_fac, const Limits& kt2_range)
+  CollinearFlux::CollinearFlux(formfac::Parameterisation* form_fac,
+                               strfun::Parameterisation* str_fun,
+                               const Limits& kt2_range)
       : workspace_(
             gsl_integration_fixed_alloc(gsl_integration_fixed_jacobi, 50, kt2_range.min(), kt2_range.max(), 0., 0.)),
-        params_(
-            new FluxArguments{0., std::pow(PDG::get().mass(PDG::proton), 2), 0., KTFlux::invalid, form_fac, nullptr}),
+        params_(new FluxArguments{
+            0., std::pow(PDG::get().mass(PDG::proton), 2), 0., Beam::KTFlux::invalid, form_fac, str_fun, nullptr}),
         function_({&unintegrated_flux, (void*)params_.get()}) {}
 
   CollinearFlux::CollinearFlux(HeavyIon* hi, const Limits& range)
       : workspace_(gsl_integration_fixed_alloc(gsl_integration_fixed_jacobi, 50, range.min(), range.max(), 0., 0.)),
-        params_(new FluxArguments{0., std::pow(PDG::get().mass(PDG::proton), 2), 0., KTFlux::invalid, nullptr, hi}),
+        params_(new FluxArguments{
+            0., std::pow(PDG::get().mass(PDG::proton), 2), 0., Beam::KTFlux::invalid, nullptr, nullptr, hi}),
         function_({&unintegrated_flux, (void*)params_.get()}) {}
 
-  double CollinearFlux::operator()(double x, double mx, const KTFlux& flux) const {
+  double CollinearFlux::operator()(double x, double mx, const Beam::KTFlux& flux) const {
     double result = 0.;
     params_->x = x;
     params_->mf2 = mx * mx;

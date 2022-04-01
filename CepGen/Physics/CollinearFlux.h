@@ -23,24 +23,30 @@
 
 #include <memory>
 
+#include "CepGen/Physics/Beam.h"
+
 namespace cepgen {
   class Limits;
   namespace formfac {
     class Parameterisation;
   }
+  namespace strfun {
+    class Parameterisation;
+  }
   class HeavyIon;
-  enum class KTFlux;
   struct FluxArguments {
     double x, mi2, mf2;
-    KTFlux flux_type;
+    Beam::KTFlux flux_type;
     formfac::Parameterisation* form_factors;
+    strfun::Parameterisation* structure_functions;
     HeavyIon* heavy_ion;
   };
   class CollinearFlux {
   public:
-    CollinearFlux(formfac::Parameterisation* form_fac, const Limits& kt2_range);
-    CollinearFlux(HeavyIon* hi, const Limits& kt2_range);
-    double operator()(double x, double mx, const KTFlux& flux_type) const;
+    explicit CollinearFlux(formfac::Parameterisation*, strfun::Parameterisation*, const Limits&);
+    explicit CollinearFlux(HeavyIon* hi, const Limits& kt2_range);
+
+    double operator()(double x, double mx, const Beam::KTFlux& flux_type) const;
 
   private:
     struct gsl_integration_fixed_workspace_del {
