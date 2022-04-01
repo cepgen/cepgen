@@ -10,7 +10,6 @@ stages:
 #######################################
 
 .build_common:
-  tags: [ cvmfs,docker ]
   stage: compile
   before_script:
     - source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
@@ -29,13 +28,14 @@ stages:
 .build_cvmfs_common:
   tags: [ cvmfs,docker ]
   stage: compile
-  script:
-    - ls /cvmfs/cms.cern.ch/
-    - source source-lxplus.sh
+  before_script:
+    - shopt -s expand_aliases
+    - set +u && source source-lxplus.sh; set -u
     - gcc --version
     - cmake3 --version || cmake --version
     - mkdir build
     - cd build
+  script:
     - cmake3 -DCMAKE_BUILD_TESTS=1 -DCMAKE_BUILD_CARD_CONV=1 .. || cmake -DCMAKE_BUILD_TESTS=1 -DCMAKE_BUILD_CARD_CONV=1 ..
     - make -j 8
   artifacts:
@@ -57,7 +57,6 @@ stages:
       - build/*.deb
 
 .run_cepgen_common:
-  tags: [ cvmfs,docker ]
   stage: run
   script:
     - cd build
@@ -76,7 +75,6 @@ stages:
 
 .test_common:
   stage: test
-  tags: [ cvmfs,docker ]
   script:
     - cd build
     - source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
@@ -112,65 +110,34 @@ test:centos8:
   needs: ["compile:centos8"]
 
 #######################################
-# CC7 jobs
+# LXPLUS7 jobs (CC7 with CVMFS support)
 #######################################
 
-compile:cc7:
-  extends: .build_common
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
-
-run_cepgen:cc7:
-  extends: .run_cepgen_common
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
-  dependencies: ["compile:cc7"]
-  needs: ["compile:cc7"]
-
-package:cc7:
-  extends: .package_common
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
-  dependencies: ["compile:cc7"]
-  needs: ["compile:cc7"]
-
-test:cc7:
-  extends: .test_common
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
-  dependencies: ["compile:cc7"]
-  needs: ["compile:cc7"]
-
-#######################################
-# CC7 jobs (with CVMFS support)
-#######################################
-
-compile:cc7-cvmfs:
+compile:lxplus7:
   extends: .build_cvmfs_common
   tags: [ cvmfs,docker ]
   image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
-  allow_failure: true
 
-run_cepgen:cc7-cvmfs:
+run_cepgen:lxplus7:
   extends: .run_cepgen_common
   tags: [ cvmfs,docker ]
   image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
-  #source /cvmfs/grid.cern.ch/etc/profile.d/setup-cvmfs-ui.sh
-  dependencies: ["compile:cc7-cvmfs"]
-  needs: ["compile:cc7-cvmfs"]
-  allow_failure: true
+  dependencies: ["compile:lxplus7"]
+  needs: ["compile:lxplus7"]
 
-package:cc7-cvmfs:
+package:lxplus7:
   extends: .package_common
   tags: [ cvmfs,docker ]
   image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
-  dependencies: ["compile:cc7-cvmfs"]
-  needs: ["compile:cc7-cvmfs"]
-  allow_failure: true
+  dependencies: ["compile:lxplus7"]
+  needs: ["compile:lxplus7"]
 
-test:cc7-cvmfs:
+test:lxplus7:
   extends: .test_common
   tags: [ cvmfs,docker ]
   image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
-  dependencies: ["compile:cc7-cvmfs"]
-  needs: ["compile:cc7-cvmfs"]
-  allow_failure: true
+  dependencies: ["compile:lxplus7"]
+  needs: ["compile:lxplus7"]
 
 #######################################
 # Fedora 33 jobs
