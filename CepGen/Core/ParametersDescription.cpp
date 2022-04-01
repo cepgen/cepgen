@@ -212,10 +212,10 @@ namespace cepgen {
               obj_descr_.at(key).validate(pit.get<ParametersList>(kit));
       }
     }
-    CG_DEBUG("ParametersDescription:validate") << "Validating user-defined parameters:\n"
-                                               << user_params << ".\nBase parameters:\n"
-                                               << parameters() << ".\nResult:\n"
-                                               << plist << ".";
+    CG_DEBUG("ParametersDescription:validate") << "Validating user parameters:\n"
+                                               << "User-steered: " << user_params << ".\n"
+                                               << "Base/default: " << parameters() << ".\n"
+                                               << "-> Resulting: " << plist << ".\n";
     return plist;
   }
 
