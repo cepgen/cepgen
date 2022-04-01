@@ -78,7 +78,7 @@ stages:
   script:
     - cd build
     - source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
-    - export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+    - export LD_LIBRARY_PATH=.:$ROOTSYS:$LD_LIBRARY_PATH
     - ctest --output-on-failure --timeout 60
   when: on_success
   allow_failure: false
@@ -137,6 +137,7 @@ package:lxplus7:
   image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
   dependencies: ["compile:lxplus7"]
   needs: ["compile:lxplus7"]
+  allow_failure: true
 
 test:lxplus7:
   extends: .test_common
