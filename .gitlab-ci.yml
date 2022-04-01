@@ -30,6 +30,7 @@ stages:
   tags: [ cvmfs,docker ]
   stage: compile
   script:
+    - ls /cvmfs/cms.cern.ch/
     - source source-lxplus.sh
     - gcc --version
     - cmake3 --version || cmake --version
