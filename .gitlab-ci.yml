@@ -121,6 +121,9 @@ compile:lxplus7:
 run_cepgen:lxplus7:
   extends: .run_cepgen_common
   tags: [ cvmfs,docker ]
+  before_script:
+    - shopt -s expand_aliases
+    - set +u && source source-lxplus.sh; set -u
   image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
   dependencies: ["compile:lxplus7"]
   needs: ["compile:lxplus7"]
@@ -128,6 +131,9 @@ run_cepgen:lxplus7:
 package:lxplus7:
   extends: .package_common
   tags: [ cvmfs,docker ]
+  before_script:
+    - shopt -s expand_aliases
+    - set +u && source source-lxplus.sh; set -u
   image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
   dependencies: ["compile:lxplus7"]
   needs: ["compile:lxplus7"]
@@ -135,6 +141,9 @@ package:lxplus7:
 test:lxplus7:
   extends: .test_common
   tags: [ cvmfs,docker ]
+  before_script:
+    - shopt -s expand_aliases
+    - set +u && source source-lxplus.sh; set -u
   image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
   dependencies: ["compile:lxplus7"]
   needs: ["compile:lxplus7"]
