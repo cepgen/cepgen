@@ -27,15 +27,14 @@ stages:
       - build/
 
 .build_cvmfs_common:
-  stage: compile
   tags: [ cvmfs,docker ]
-  before_script:
+  stage: compile
+  script:
     - source source-lxplus.sh
     - gcc --version
     - cmake3 --version || cmake --version
     - mkdir build
     - cd build
-  script:
     - cmake3 -DCMAKE_BUILD_TESTS=1 -DCMAKE_BUILD_CARD_CONV=1 .. || cmake -DCMAKE_BUILD_TESTS=1 -DCMAKE_BUILD_CARD_CONV=1 ..
     - make -j 8
   artifacts:
@@ -57,8 +56,8 @@ stages:
       - build/*.deb
 
 .run_cepgen_common:
-  stage: run
   tags: [ cvmfs,docker ]
+  stage: run
   script:
     - cd build
     - source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
