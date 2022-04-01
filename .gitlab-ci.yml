@@ -4,15 +4,13 @@ stages:
   - run
   - test
 
-default:
-  tags: [ cvmfs,docker ]
-
 #######################################
 # define all build, tests, and
 # executables recipes as templates
 #######################################
 
 .build_common:
+  tags: [ cvmfs,docker ]
   stage: compile
   before_script:
     - source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
@@ -30,7 +28,7 @@ default:
 
 .build_cvmfs_common:
   stage: compile
-  tags: [ cvmfs ]
+  tags: [ cvmfs,docker ]
   before_script:
     - source source-lxplus.sh
     - gcc --version
@@ -60,6 +58,7 @@ default:
 
 .run_cepgen_common:
   stage: run
+  tags: [ cvmfs,docker ]
   script:
     - cd build
     - source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
@@ -77,6 +76,7 @@ default:
 
 .test_common:
   stage: test
+  tags: [ cvmfs,docker ]
   script:
     - cd build
     - source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
