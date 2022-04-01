@@ -11,7 +11,6 @@ export PATH=${CMAKE_DIR}/bin:${PATH}
 source ${CVMFS_DIR}/ROOT/v6.24.00-f4a14/x86_64-centos7-gcc9-opt/bin/thisroot.sh
 export DELPHES_DIR=${CVMFS_DIR}/delphes/3.4.3pre09-604d4/x86_64-centos7-gcc9-opt
 export ROOT_INCLUDE_PATH=$ROOT_INCLUDE_PATH:${DELPHES_DIR}/include
-ls ${CVMFS_DIR}
 #--- Pythia linking
 export PYTHIA6_DIR=${CVMFS_DIR}/MCGenerators/pythia6/429.2-5d3d1/x86_64-centos7-gcc9-opt
 export PYTHIA8_DIR=${CVMFS_DIR}/MCGenerators/pythia8/306-8153f/x86_64-centos7-gcc8-opt
