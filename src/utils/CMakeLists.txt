@@ -4,9 +4,7 @@ endif()
 
 message(STATUS "Utilities will be built")
 
-#--- searching for LHAPDF
-find_library(LHAPDF LHAPDF HINTS $ENV{LHAPDF_PATH} PATH_SUFFIXES lib)
-find_path(LHAPDF_INCLUDE LHAPDF HINTS $ENV{LHAPDF_PATH} PATH_SUFFIXES include)
+#-- build all utils and link them to the core library
 
 file(GLOB utils_standalone RELATIVE ${PROJECT_SOURCE_DIR}/src/utils *.cc)
 if(NOT CMAKE_BUILD_CARD_CONV)
@@ -19,9 +17,10 @@ foreach(exec_src ${utils_standalone})
   target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES})
 endforeach()
 
-#-- build the utils requiring ROOT
+#-- specify the utils requiring ROOT
 
 if(ROOT_FOUND)
+  file(GLOB utils_root RELATIVE ${PROJECT_SOURCE_DIR}/src/utils *.cxx)
   foreach(exec_src ${utils_root})
     get_filename_component(exec_bin ${exec_src} NAME_WE)
     add_executable(${exec_bin} ${exec_src})
