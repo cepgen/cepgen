@@ -26,13 +26,30 @@
 namespace cepgen {
   namespace utils {
     DocumentationGenerator::DocumentationGenerator(const ParametersList& params)
-        : SteeredObject(params), output_filename_(steer<std::string>("output")) {
+        : SteeredObject(params),
+          output_filename_(steer<std::string>("output")),
+          container_(CTML::Node("div.container-fluid")) {
       doc_.AppendNodeToHead(CTML::Node("title", "CepGen v" + version::tag + " modules documentation"));
-      doc_.AppendNodeToBody(CTML::Node("h1", "Modules documentation"));
-      doc_.AppendNodeToBody(CTML::Node("div", "CepGen version " + version::tag));
+      doc_.AppendNodeToHead(
+          CTML::Node("link")
+              .SetAttribute("rel", "stylesheet")
+              .SetAttribute("href", "https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css")
+              .SetAttribute("integrity", "sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T")
+              .SetAttribute("crossorigin", "anonymous"));
+      doc_.AppendNodeToHead(CTML::Node("meta")
+                                .SetAttribute("name", "viewport")
+                                .SetAttribute("content", "width=device-width, initial-scale=1"));
+      container_.AppendChild(CTML::Node("h1", "Modules documentation"));
+      container_.AppendChild(CTML::Node("div")
+                                 .AppendText("CepGen version ")
+                                 .AppendChild(CTML::Node("mark", version::tag))
+                                 .AppendChild(CTML::Node("br").UseClosingTag(false))
+                                 .AppendText("Git hash/branch: ")
+                                 .AppendChild(CTML::Node("code", version::extended)));
     }
 
     DocumentationGenerator::~DocumentationGenerator() {
+      doc_.AppendNodeToBody(container_);
       if (!output_filename_.empty()) {
         std::ofstream out(output_filename_);
         out << doc_.ToString();
@@ -42,15 +59,31 @@ namespace cepgen {
     }
 
     CTML::Node DocumentationGenerator::moduleDescription(const ParametersDescription& desc) {
-      CTML::Node out("div");
+      CTML::Node out("div.module");
       if (desc.empty())
         return out;
       out.AppendChild(CTML::Node("b", desc.parameters().getString(ParametersList::MODULE_NAME)))
           .AppendText(" " + desc.description());
       try {
         CTML::Node items("ul");
-        for (const auto& key : desc.parameters().keys(false))
-          items.AppendChild(CTML::Node("li", key).AppendChild(moduleDescription(desc.get(key))));
+        for (const auto& key : desc.parameters().keys(false)) {
+          const auto& subdesc = desc.get(key);
+          const auto type = subdesc.type();
+          CTML::Node item("li.key");
+          item.AppendChild(CTML::Node("u.key", key));
+          if (type == ParametersDescription::Type::Value) {
+            if (!subdesc.description().empty())
+              item.AppendChild(CTML::Node("i", " " + subdesc.description()));
+            if (!desc.parameters().getString(key).empty())
+              item.AppendText(" ").AppendChild(
+                  CTML::Node("span.text-muted")
+                      .AppendText("(default value: ")
+                      .AppendChild(CTML::Node("code", desc.parameters().getString(key, false)))
+                      .AppendText(")"));
+          } else
+            item.AppendChild(moduleDescription(subdesc));
+          items.AppendChild(item);
+        }
         if (!items.GetChildren().empty())
           out.AppendChild(items);
       } catch (const Exception& exc) {

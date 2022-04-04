@@ -41,11 +41,11 @@ namespace cepgen {
 
       template <typename T, typename I>
       DocumentationGenerator& document(const std::string& type, const ModuleFactory<T, I>& factory) {
-        doc_.AppendNodeToBody(CTML::Node("h2", type));
+        container_.AppendChild(CTML::Node("h2", type));
         CTML::Node mods("ul");
         for (const auto& mod : factory.modules())
           mods.AppendChild(CTML::Node("li").AppendChild(moduleDescription(factory.describeParameters(mod))));
-        doc_.AppendNodeToBody(mods);
+        container_.AppendChild(mods);
         return *this;
       }
 
@@ -54,6 +54,7 @@ namespace cepgen {
 
       const std::string output_filename_;
       CTML::Document doc_;
+      CTML::Node container_;
     };
   }  // namespace utils
 }  // namespace cepgen
