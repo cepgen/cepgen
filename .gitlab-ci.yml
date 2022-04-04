@@ -36,8 +36,7 @@ stages:
     - cmake3 --version || cmake --version
     - mkdir build
     - cd build
-    - curl https://raw.githubusercontent.com/tinfoilboy/CTML/master/include/ctml.hpp -o CTML/ctml.hpp --create-dirs && export CTML_DIR=$CI_PROJECT_DIR
-    - ls $CTML_DIR
+    - curl https://raw.githubusercontent.com/tinfoilboy/CTML/master/include/ctml.hpp -o CTML/ctml.hpp --create-dirs && export CTML_DIR=$CI_PROJECT_DIR/build
   script:
     - cmake3 -DCMAKE_BUILD_TESTS=1 -DCMAKE_BUILD_CARD_CONV=1 .. || cmake -DCMAKE_BUILD_TESTS=1 -DCMAKE_BUILD_CARD_CONV=1 ..
     - make -j 8
