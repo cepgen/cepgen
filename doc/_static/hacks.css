@@ -22,11 +22,11 @@ div.documentwrapper {
 }
 
 .toggle .header:after {
-    content: " ▶";
+    content: "show ▶";
 }
 
 .toggle .header.open:after {
-    content: " ▼";
+    content: "hide ▼";
 }
 
 /* HEPforge hacks */
