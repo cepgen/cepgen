@@ -34,10 +34,16 @@ namespace cepgen {
 }  // namespace cepgen
 
 int main(int argc, char* argv[]) {
-  cepgen::ArgumentsParser(argc, argv).parse();
+  std::string output_file;
+  bool use_bs;
+  cepgen::ArgumentsParser(argc, argv)
+      .addOptionalArgument("output,o", "output HTML file", &output_file, "index.html")
+      .addOptionalArgument("bootstrap,b", "use Bootstrap CDN to prettify the output?", &use_bs, true)
+      .parse();
 
   cepgen::initialise();
-  cepgen::utils::DocumentationGenerator gen{cepgen::ParametersList()};
+  cepgen::utils::DocumentationGenerator gen{
+      cepgen::ParametersList().set<std::string>("output", output_file).set<bool>("useBS", use_bs)};
 
   gen.document("Processes", cepgen::proc::ProcessFactory::get());
   //gen.document("Cards handler", cepgen::card::CardsHandlerFactory::get());

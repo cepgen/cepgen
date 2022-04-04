@@ -30,15 +30,17 @@ namespace cepgen {
           output_filename_(steer<std::string>("output")),
           container_(CTML::Node("div.container-fluid")) {
       doc_.AppendNodeToHead(CTML::Node("title", "CepGen v" + version::tag + " modules documentation"));
-      doc_.AppendNodeToHead(
-          CTML::Node("link")
-              .SetAttribute("rel", "stylesheet")
-              .SetAttribute("href", "https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css")
-              .SetAttribute("integrity", "sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T")
-              .SetAttribute("crossorigin", "anonymous"));
-      doc_.AppendNodeToHead(CTML::Node("meta")
-                                .SetAttribute("name", "viewport")
-                                .SetAttribute("content", "width=device-width, initial-scale=1"));
+      if (steer<bool>("useBS")) {
+        doc_.AppendNodeToHead(
+            CTML::Node("link")
+                .SetAttribute("rel", "stylesheet")
+                .SetAttribute("href", "https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css")
+                .SetAttribute("integrity", "sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T")
+                .SetAttribute("crossorigin", "anonymous"));
+        doc_.AppendNodeToHead(CTML::Node("meta")
+                                  .SetAttribute("name", "viewport")
+                                  .SetAttribute("content", "width=device-width, initial-scale=1"));
+      }
       container_.AppendChild(CTML::Node("h1", "Modules documentation"));
       container_.AppendChild(CTML::Node("div")
                                  .AppendText("CepGen version ")
@@ -95,7 +97,8 @@ namespace cepgen {
     ParametersDescription DocumentationGenerator::description() {
       auto desc = ParametersDescription();
       desc.setDescription("CTML HTML document generator helper");
-      desc.add<std::string>("output", "index.html");
+      desc.add<std::string>("output", "index.html").setDescription("output path for the generated HTML file");
+      desc.add<bool>("useBS", true).setDescription("use the Bootstrap CDN to prettify this output?");
       return desc;
     }
   }  // namespace utils
