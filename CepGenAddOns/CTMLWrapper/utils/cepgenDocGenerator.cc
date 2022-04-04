@@ -31,13 +31,13 @@ namespace cepgen {
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
 
-  CG_LOG << "haha";
-
   cepgen::utils::DocumentationGenerator gen{cepgen::ParametersList()};
 
   //gen.document("Cards handler", cepgen::card::CardsHandlerFactory::get());
   gen.document("Form factors", cepgen::formfac::FormFactorsFactory::get());
   gen.document("Structure functions", cepgen::strfun::StructureFunctionsFactory::get());
+  gen.document("Longitudinal/transverse cross section ratio parameterisations",
+               cepgen::sigrat::SigmaRatiosFactory::get());
 
   return 0;
 }
