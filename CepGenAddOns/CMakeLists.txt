@@ -6,6 +6,7 @@ endif()
 
 add_subdirectory(APFELWrapper)
 add_subdirectory(BoostWrapper)
+add_subdirectory(CTMLWrapper)
 add_subdirectory(CubaWrapper)
 add_subdirectory(DelphesWrapper)
 add_subdirectory(HepMC2Wrapper)
