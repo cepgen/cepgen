@@ -3,6 +3,7 @@ stages:
   - package
   - run
   - test
+  - doc
 
 default:
   tags: [ cvmfs,docker ]
@@ -85,6 +86,18 @@ default:
   when: on_success
   allow_failure: false
 
+.doc_common:
+  stage: doc
+  script:
+    - cd build
+    - source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
+    - export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+    - ./cepgenDocGenerator
+  artifacts:
+    paths:
+      - build/index.html
+  allow_failure: true
+
 #######################################
 # CS8 jobs
 #######################################
@@ -107,6 +120,12 @@ package:centos8:
 
 test:centos8:
   extends: .test_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:centos8
+  dependencies: ["compile:centos8"]
+  needs: ["compile:centos8"]
+
+doc:centos8:
+  extends: .doc_common
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:centos8
   dependencies: ["compile:centos8"]
   needs: ["compile:centos8"]
