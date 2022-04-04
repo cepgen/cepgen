@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = u'CepGen'
-copyright = u'2019, the CepGen Collaboration'
+copyright = u'2013-2022, the CepGen Collaboration'
 author = u'Laurent Forthomme'
 
 # The short X.Y version
@@ -46,6 +46,8 @@ extensions = [
     #'hachibee_sphinx_theme',
     'sphinx.ext.mathjax',
 ]
+
+bibtex_bibfiles = ['_static/bibliography.bib']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -167,14 +169,11 @@ latex_documents = [
      u'Laurent Forthomme', 'manual'),
 ]
 
-mathjax_config = {
-  'tex2jax': {
+mathjax3_config = {
+  'tex': {
     'inlineMath': [ ['$','$'], ["\\(","\\)"] ],
     'processEscapes': True,
-    'scale': 80,
-  },
-  'TeX': {
-    'Macros': {
+    'macros': {
       'Pom': "{\\rm I\\!P}",
       'Reg': "{\\rm I\\!R}",
       'gg': ["{\\gamma\\gamma\\rightarrow #1}", 1],
