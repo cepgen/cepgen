@@ -24,6 +24,14 @@ All handlers are defined as modules derivating from the following abstract base 
 In this page you will find a list of all currently supported output formats, covering a broad spectrum of usages, both in the phenomenological and experimental communities.
 Please note that this list is under constant evolution, you may contact us with requests for additional interfacing capabilities.
 
+``dump``
+--------
+
+A simple text-based event dumper, useful for debugging the process and its kinematics, is steered using the :cpp:class:`cepgen::io::TextEventHandler` module.
+
+  .. doxygenclass:: cepgen::io::TextEventHandler
+     :outline:
+
 ``lhef``
 --------
 
@@ -35,18 +43,26 @@ Currently, two implementations of this export module exist:
   .. doxygenclass:: cepgen::io::LHEFPythiaHandler
      :outline:
 
-- a ``HepMC (v≥3)`` implementation, if the earlier is not found in the standard libraries path: :cpp:class:`cepgen::io::LHEFHepMCHandler`.
+- a ``HepMC (v≥3)`` implementation, if the earlier is not found in the standard libraries path: :cpp:class:`cepgen::io::LHEFHepMC3Handler`.
+
+``hepmc2``, ``hepmc2_ascii``, ...
+---------------------------------
+
+.. doxygenclass:: cepgen::io::HepMC2Handler
+   :outline:
+
+This handler allows to translate the CepGen event record into one (or multiple) implementation(s) of the version 2 of the `HepMC <http://hepmc.web.cern.ch/hepmc>`_ :cite:`Dobbs:2001ck` ASCII output format.
+By default, this version is used in older releases. It allows a ``hepmc2`` output format to be supported.
 
 ``hepmc``, ``hepmc_root``, ``hepevt``, ...
 ------------------------------------------
 
-.. doxygenclass:: cepgen::io::HepMCHandler
+.. doxygenclass:: cepgen::io::HepMC3Handler
    :outline:
 
-This handler allows to translate the CepGen event record into one (or multiple) implementation(s) of the `HepMC <http://hepmc.web.cern.ch/hepmc>`_ :cite:`Dobbs:2001ck` ASCII output format, as the ``hepmc2`` and/or ``hepmc3`` derivatives may be used according to the version installed on the system.
+This handler allows to translate the CepGen event record into one (or multiple) implementation(s) of the version 3 of the  `HepMC <http://hepmc.web.cern.ch/hepmc>`_ :cite:`Dobbs:2001ck` ASCII output format.
 
-By default, the version 3 of the file format is chosen for versions of ``HepMC`` starting from ``v3.1.0``, and the version 2 is used in older releases.
-For the earlier, a ``hepmc2`` output format is however also supported.
+By default, the version 3 of the file format is chosen for versions of ``HepMC`` starting from ``v3.1.0``.
 It may be updated with future derivatives of `the HepMC writer base class <http://hepmc.web.cern.ch/hepmc/classHepMC3_1_1Writer.html>`_.
 
 Alternatively, as from this version ``3.1.0`` of ``HepMC``, the following output formats are also handled:
@@ -65,24 +81,18 @@ Alternatively, as from this version ``3.1.0`` of ``HepMC``, the following output
 
 The support has been added for the `ProMC <http://jwork.org/wiki/PROMC>`_ highly compressed output format.
 
-``text``
+``vars``
 --------
 
-.. versionadded:: 0.9.7
+.. versionadded:: 1.0.0
 
-.. doxygenclass:: cepgen::io::TextHandler
+.. doxygenclass:: cepgen::io::TextVariablesHandler
    :outline:
 
 This simplest case of an output module allows to generate a **generic (ASCII) output format** along with **raw text histograms** of kinematic variables, fully configurable by the user.
 Using the Python steering cards definition, a list of variables to be stored is defined through the ``variables`` list/array of string-typed definition.
 
-For **histograms definition**, a dictionary ``histVariables`` of variable-indexed ``cepgen.Parameters`` objects is fed to the ``output`` module.
-A valid implementation of such objects may handle the following attributes for each variable:
-
-- a number of bins ``nbins``, and
-- a range (``low`` and ``high``) of interest for the variable.
-
-For the **text output format**, the default behaviour is storing one event per line with variables separated with an user-parameterisable separator (``separator`` string parameter, default is the standard tabulation ``\t``).
+For this **text output format**, the default behaviour is storing one event per line with variables separated with an user-parameterisable separator (``separator`` string parameter, default is the standard tabulation ``\t``).
 
 The variable (here, ``var`` is used as an example) may be defined using the three following conventions:
 
@@ -114,15 +124,54 @@ As an example, the following ``output`` block may be used for the ``lpair`` proc
        variables = [
            'm(4)', 'pt(cs)', 'pt(6)'
        ],
-       histVariables = {
-          'pt(4)': cepgen.Parameters(nbins=10, low=0., high=20.),
-          'm(5)': cepgen.Parameters(nbins=10, low=0., high=100.),
-          'y(cs)': cepgen.Parameters(nbins=10, low=-10., high=10.),
-          'tgen': cepgen.Parameters(nbins=100, low=0., high=1.e-5),
-       },
        saveBanner = False,
        saveVariables = True,
        separator = ' ', # single space
+   )
+
+``text``
+--------
+
+.. versionadded:: 1.0.0
+
+.. doxygenclass:: cepgen::io::IntegratedEventVariablesHandler
+   :outline:
+
+This simplest case of an output module allows to generate **raw text histograms** of kinematic variables, fully configurable by the user.
+Using the Python steering cards definition, a dictionary ``histVariables`` of variable-indexed ``cepgen.Parameters`` objects is fed to the ``output`` module.
+
+A valid implementation of such objects requires a set of attributes depending on the type of distribution requested by the user.
+If the variable string contains one ``:``, a 2D distribution is automatically booked for the two variables around it.
+Otherwise, a 1D distribution is assumed.
+
+These attributes are, namely for 1-dimensional histograms:
+
+- a number of bins ``nbins``, or ``nbinsX``, and
+- a range (``low`` and ``high``) of interest for the variable, or a set of bins in a ``xbins`` Python list
+
+and for 2-dimensional distributions:
+
+- the two ``nbinsX`` and ``nbinsY`` number of bins, and
+- the two ranges (``lowX`` and ``highX``, and ``lowY`` and ``highY``) of interest for the variables, or equivalently one or two sets of bins in ``xbins``/``ybins`` lists.
+
+As an example, equivalently to ``vars`` output defined above, the following ``output`` block may be used for the ``lpair`` process:
+
+.. code:: python
+
+   output = cepgen.Module('text',
+       histVariables = {
+          # 1D histogram (pt of central system)
+          'pt(4)': cepgen.Parameters(nbins=10, low=0., high=20.),
+          # 1D histogram (outgoing proton mass)
+          'm(5)': cepgen.Parameters(xbins=[float(bin) for bin in range(0, 20, 1)]),
+          # 2D histogram (central system rapidity vs. mass)
+          'y(cs):m(cs)': cepgen.Parameters(nbinsX=10, lowX=-10., highX=10.,
+                                           nbinxY=10, lowY=0., highY=400.),
+          # 1D histogram (event generation time)
+          'tgen': cepgen.Parameters(nbins=100, low=0., high=1.e-5),
+       },
+       save = False,
+       show = True
    )
 
 ``root``, ``root_tree``
