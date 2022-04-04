@@ -9,8 +9,9 @@ export CMAKE_DIR=${CVMFS_DIR}/CMake/3.17.3-75516/x86_64-centos7-gcc9-opt
 export PATH=${CMAKE_DIR}/bin:${PATH}
 export Boost_DIR=${CVMFS_DIR}/Boost/1.78.0-e410e/x86_64-centos7-gcc9-opt
 #--- Delphes linking
-source ${CVMFS_DIR}/ROOT/v6.24.00-f4a14/x86_64-centos7-gcc9-opt/bin/thisroot.sh
-export DELPHES_DIR=${CVMFS_DIR}/delphes/3.4.3pre09-604d4/x86_64-centos7-gcc9-opt
+source ${CVMFS_DIR}/ROOT/6.26.00-165a8/x86_64-centos7-gcc9-opt/bin/thisroot.sh
+export nlohmann_json_DIR=${CVMFS_DIR}/jsonmcpp/3.9.1-72770/x86_64-centos7-gcc9-opt
+export DELPHES_DIR=${CVMFS_DIR}/delphes/3.5.0-2f649/x86_64-centos7-gcc8-opt
 export ROOT_INCLUDE_PATH=$ROOT_INCLUDE_PATH:${DELPHES_DIR}/include
 #--- Pythia linking
 export PYTHIA6_DIR=${CVMFS_DIR}/MCGenerators/pythia6/429.2-5d3d1/x86_64-centos7-gcc9-opt
