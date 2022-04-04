@@ -22,6 +22,7 @@ export PYTHONHOME=${CVMFS_DIR}/Python/3.9.5-82945/x86_64-centos7-gcc9-opt
 export PATH=${PYTHONHOME}/bin:${PATH}
 export GSL_DIR=${CVMFS_DIR}/GSL/2.7-30ba4/x86_64-centos7-gcc9-opt
 export HEPMC_DIR=${CVMFS_DIR}/HepMC/2.06.11-d5a39/x86_64-centos7-gcc9-opt
+export HEPMC3_DIR=${CVMFS_DIR}/hepmc3/3.0.0-b2eef/x86_64-centos7-gcc8-opt
 export LHAPDF_PATH=${CVMFS_DIR}/MCGenerators/lhapdf/6.4.0-0fdec/x86_64-centos7-gcc8-opt
 export TBB_DIR=${CVMFS_DIR}/tbb/2020_U2-daa7e/x86_64-centos7-gcc9-opt
 export VDT_DIR=${CVMFS_DIR}/vdt/0.4.3-992df/x86_64-centos7-gcc9-opt
