@@ -7,6 +7,7 @@ export CVMFS_DIR=/cvmfs/sft.cern.ch/lcg/releases
 source ${CVMFS_DIR}/gcc/9.3.0-467e1/x86_64-centos7/setup.sh
 export CMAKE_DIR=${CVMFS_DIR}/CMake/3.17.3-75516/x86_64-centos7-gcc9-opt
 export PATH=${CMAKE_DIR}/bin:${PATH}
+export Boost_DIR=${CVMFS_DIR}/Boost/1.78.0-e410e/x86_64-centos7-gcc9-opt
 #--- Delphes linking
 source ${CVMFS_DIR}/ROOT/v6.24.00-f4a14/x86_64-centos7-gcc9-opt/bin/thisroot.sh
 export DELPHES_DIR=${CVMFS_DIR}/delphes/3.4.3pre09-604d4/x86_64-centos7-gcc9-opt
