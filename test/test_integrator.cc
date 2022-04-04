@@ -67,6 +67,7 @@ int main(int argc, char* argv[]) {
 
   CG_LOG << "Will test with " << cepgen::utils::s("integrator", integrators.size(), true) << ": " << integrators;
 
+  vector<string> failing_integrators;
   for (const auto& integrator : integrators) {
     auto integr = cepgen::IntegratorFactory::get().build(integrator);
 
@@ -88,9 +89,14 @@ int main(int argc, char* argv[]) {
       CG_INFO("main") << "Test " << i++ << " passed: " << cepgen::utils::yesno(test.success);
       success &= test.success;
     }
-    if (!success)
-      throw CG_FATAL("main") << integrator << " integrator tests failed!";
-    CG_LOG << integrator << " integrator tests passed.";
+    if (!success) {
+      CG_LOG << integrator << " integrator tests failed!";
+      failing_integrators.emplace_back(integrator);
+    } else
+      CG_LOG << integrator << " integrator tests passed.";
   }
+  if (!failing_integrators.empty())
+    throw CG_FATAL("main") << cepgen::utils::s("integrator test", failing_integrators.size())
+                           << " failed: " << failing_integrators << ".";
   return 0;
 }

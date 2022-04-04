@@ -21,4 +21,5 @@ endif()
 cepgen_build(CepGenBoost SOURCES ${sources}
     EXT_LIBS ${Boost_LIBRARIES}
     EXT_HEADERS ${Boost_INCLUDE_DIRS}
+    CFLAGS -pthread
     INSTALL_COMPONENT boost)
