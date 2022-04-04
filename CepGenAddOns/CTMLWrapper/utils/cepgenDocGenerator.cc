@@ -16,12 +16,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/CouplingFactory.h"
+#include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/FunctionalFactory.h"
+#include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Version.h"
 #include "CepGenAddOns/CTMLWrapper/DocumentationGenerator.h"
 
 namespace cepgen {
@@ -31,13 +36,22 @@ namespace cepgen {
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
 
+  cepgen::initialise();
   cepgen::utils::DocumentationGenerator gen{cepgen::ParametersList()};
 
+  gen.document("Processes", cepgen::proc::ProcessFactory::get());
   //gen.document("Cards handler", cepgen::card::CardsHandlerFactory::get());
   gen.document("Form factors", cepgen::formfac::FormFactorsFactory::get());
   gen.document("Structure functions", cepgen::strfun::StructureFunctionsFactory::get());
   gen.document("Longitudinal/transverse cross section ratio parameterisations",
                cepgen::sigrat::SigmaRatiosFactory::get());
+  gen.document("Electromagnetic coupling evolution", cepgen::AlphaEMFactory::get());
+  gen.document("Strong coupling evolution", cepgen::AlphaSFactory::get());
+  gen.document("Integrator algorithms", cepgen::IntegratorFactory::get());
+  gen.document("Functional parsers", cepgen::utils::FunctionalFactory::get());
+  gen.document("Drawing tools", cepgen::utils::DrawerFactory::get());
+  gen.document("Event modification algorithms", cepgen::EventModifierFactory::get());
+  gen.document("Event export modules", cepgen::io::ExportModuleFactory::get());
 
   return 0;
 }
