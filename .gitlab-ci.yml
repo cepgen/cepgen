@@ -124,12 +124,6 @@ test:centos8:
   dependencies: ["compile:centos8"]
   needs: ["compile:centos8"]
 
-doc:centos8:
-  extends: .doc_common
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:centos8
-  dependencies: ["compile:centos8"]
-  needs: ["compile:centos8"]
-
 #######################################
 # CC7 jobs
 #######################################
@@ -265,6 +259,12 @@ run_cepgen:f35:
 
 test:f35:
   extends: .test_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f35
+  dependencies: ["compile:f35"]
+  needs: ["compile:f35"]
+
+doc:f35:
+  extends: .doc_common
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f35
   dependencies: ["compile:f35"]
   needs: ["compile:f35"]
