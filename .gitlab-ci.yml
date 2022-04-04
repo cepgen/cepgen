@@ -165,7 +165,11 @@ test:lxplus7:
 
 doc:lxplus7:
   extends: .doc_common
-  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:lxplus7
+  tags: [ cvmfs,docker ]
+  before_script:
+    - shopt -s expand_aliases
+    - set +u && source source-lxplus.sh; set -u
+  image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
   dependencies: ["compile:lxplus7"]
   needs: ["compile:lxplus7"]
 
