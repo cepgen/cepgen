@@ -92,15 +92,11 @@ pygments_style = None
 #html_theme_path = [sphinx_redactor_theme.get_html_theme_path()]
 
 #html_theme = 'classic'
-html_theme = 'sphinx_rtd_theme'
-#html_theme = 'agogo'
-
-#html_theme = 'pyramid'
+#html_theme = 'sphinx_rtd_theme'
+html_theme = 'pyramid'
 #html_theme = 'haiku'
 #html_theme = 'traditional'
 #html_theme = 'alabaster'
-#html_theme = 'kotti_docs_theme'
-#html_theme = 'rex'
 
 #import guzzle_sphinx_theme
 #html_theme_path = guzzle_sphinx_theme.html_theme_path()
@@ -234,8 +230,10 @@ breathe_default_project = "CepGen"
 breathe_implementation_filename_extensions = ['.cxx', '.C', '.f']
 
 # Changelog configuration
-changelog_render_changeset = "https://phab.hepforge.org/rCEPGEN%s"
-changelog_render_pullreq = "https://phab.hepforge.org/D%s"
+#changelog_render_changeset = "https://phab.hepforge.org/rCEPGEN%s"
+#changelog_render_pullreq = "https://phab.hepforge.org/D%s"
+changelog_render_changeset = "https://github.com/cepgen/cepgen/commit/%s"
+changelog_render_pullreq = "https://gitlab.cern.ch/lforthom/cepgen/-/merge_requests/%s"
 
 def setup(app):
     app.add_css_file('hacks.css')
