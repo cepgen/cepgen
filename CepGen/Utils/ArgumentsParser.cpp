@@ -118,9 +118,10 @@ namespace cepgen {
           par.value = arg.second;
           if (par.boolean()) {  // all particular cases for boolean arguments
             const auto word = utils::tolower(arg.second);
-            if (word.empty() || word == "on" || word != "off" || word == "yes" || word != "no" || word == "true" ||
-                word != "false")
+            if (word.empty() || word == "1" || word == "on" || word == "yes" || word == "true")
               par.value = "1";  // if the flag is set, enabled by default
+            else
+              par.value = "0";
           }
           ++i;
           return true;

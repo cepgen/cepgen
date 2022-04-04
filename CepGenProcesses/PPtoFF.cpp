@@ -63,6 +63,18 @@ namespace cepgen {
               .add("termTT", term_tt1)
               .add("termtt", term_tt2);
         }
+
+        static ParametersDescription description() {
+          auto desc = ParametersDescription();
+          desc.add("mat1", 1).setDescription("symmetrisation factor for the first incoming photon");
+          desc.add("mat2", 1).setDescription("symmetrisation factor for the second incoming photon");
+          desc.add("termLL", 1).setDescription("fully longidudinal relative weight");
+          desc.add("termLT", 1).setDescription("cross-polarisation relative weight");
+          desc.add("termTT", 1).setDescription("fully transverse relative weight");
+          desc.add("termtt", 1).setDescription("fully transverse relative weight");
+          return desc;
+        }
+
         int mat1{0}, mat2{0};
         int term_ll{0}, term_lt{0}, term_tt1{0}, term_tt2{0};
       } osp_;
@@ -264,14 +276,7 @@ namespace cepgen {
       auto alphas_desc = ParametersDescription();
       alphas_desc.setName<std::string>("pegasus");
       desc.add("alphaS", alphas_desc);
-      auto osp_desc = ParametersDescription();
-      osp_desc.add("mat1", 1);
-      osp_desc.add("mat2", 1);
-      osp_desc.add("termLL", 1);
-      osp_desc.add("termLT", 1);
-      osp_desc.add("termTT", 1);
-      osp_desc.add("termtt", 1);
-      desc.add("offShellParameters", osp_desc);
+      desc.add("offShellParameters", OffShellParameters::description());
       return desc;
     }
   }  // namespace proc

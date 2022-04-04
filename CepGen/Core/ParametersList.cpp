@@ -295,9 +295,11 @@ namespace cepgen {
       std::ostringstream os;
       if (type == "float" || type == "vfloat")
         os << std::fixed;
+      else if (type == "bool")
+        os << std::boolalpha;
       os << val;
-      return (wrap ? type + "(" : "") + (type == "bool" ? utils::yesno(std::stoi(os.str())) : os.str()) +
-             (wrap ? ")" : "");
+      return (wrap ? type + "(" : "")  //+ (type == "bool" ? utils::yesno(std::stoi(os.str())) : os.str()) +
+             + os.str() + (wrap ? ")" : "");
     };
     auto wrap_coll = [&wrap, &wrap_val](const auto& coll, const std::string& type) -> std::string {
       return wrap_val(utils::merge(coll, ", "), type);

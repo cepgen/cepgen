@@ -3,6 +3,7 @@ stages:
   - package
   - run
   - test
+  - doc
 
 #######################################
 # define all build, tests, and
@@ -82,6 +83,18 @@ stages:
     - ctest --output-on-failure --timeout 60
   when: on_success
   allow_failure: false
+
+.doc_common:
+  stage: doc
+  script:
+    - cd build
+    - source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
+    - export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+    - ./cepgenDocGenerator
+  artifacts:
+    paths:
+      - build/index.html
+  allow_failure: true
 
 #######################################
 # CS8 jobs
@@ -223,6 +236,12 @@ run_cepgen:f35:
 
 test:f35:
   extends: .test_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f35
+  dependencies: ["compile:f35"]
+  needs: ["compile:f35"]
+
+doc:f35:
+  extends: .doc_common
   image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f35
   dependencies: ["compile:f35"]
   needs: ["compile:f35"]
