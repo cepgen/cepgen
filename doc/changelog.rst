@@ -1,9 +1,16 @@
 Changelog
 =========
 
+Latest revisions
+^^^^^^^^^^^^^^^^
+
 .. changelog::
     :version: 1.0.0alpha2
     :released: Fri Apr 23 2021
+
+.. changelog::
+    :version: 0.9.9
+    :released: Tue Dec 31 2019
 
 .. changelog::
     :version: 0.9.8
@@ -74,4 +81,13 @@ Changelog
         :tags: output
 
         New output modes handled for HepMC interfacing module
+
+Latest developments
+^^^^^^^^^^^^^^^^^^^
+
+.. collapse:: Show
+
+   .. git_changelog::
+      :rev-list: 1.0.0alpha2..HEAD
+      :filename_filter: CepGen*
 

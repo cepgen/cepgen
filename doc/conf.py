@@ -41,10 +41,12 @@ release = u'1.0.0alpha2'
 extensions = [
     'breathe',
     'changelog',
+    'sphinx_git',
     #'sphinxemoji.sphinxemoji',
     'sphinxcontrib.bibtex',
     #'hachibee_sphinx_theme',
     'sphinx.ext.mathjax',
+    'sphinx_toolbox.collapse',
 ]
 
 bibtex_bibfiles = ['_static/bibliography.bib']
