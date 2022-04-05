@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser parser(argc, argv);
   parser.addOptionalArgument("list-modules,l", "list all runtime modules", &list_mods, false)
       .addOptionalArgument("modules,m", "list of runtime modules to be described", &modules)
-      .addOptionalArgument("add-ons,a", "external runtime plugin", &addons)
+      .addOptionalArgument("add-ons,e", "external runtime plugin", &addons)
       .addOptionalArgument("safe-mode,s", "safe mode", &safe_mode, false)
       .addOptionalArgument("dump-params,p", "dump the ParametersList object", &dump_params, false)
       .addOptionalArgument("all,a", "dump all modules descriptions", &all, false)
