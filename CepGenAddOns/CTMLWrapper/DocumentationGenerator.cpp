@@ -73,16 +73,18 @@ namespace cepgen {
       CTML::Node out("div.module");
       if (desc.empty())
         return out;
-      out.AppendChild(CTML::Node("b", desc.parameters().getString(ParametersList::MODULE_NAME)))
-          .AppendText(" " + desc.description());
+      out.AppendChild(CTML::Node("b", desc.parameters().getString(ParametersList::MODULE_NAME)));
+      const auto desc_type = desc.type();
+      if (desc_type != ParametersDescription::Type::Value && desc_type != ParametersDescription::Type::ParametersVector)
+        out.AppendText(" " + desc.description());
       try {
         CTML::Node items("ul");
         for (const auto& key : desc.parameters().keys(false)) {
           const auto& subdesc = desc.get(key);
-          const auto type = subdesc.type();
+          const auto subdesc_type = subdesc.type();
           CTML::Node item("li.key");
           item.AppendChild(CTML::Node("u.key", key));
-          if (type == ParametersDescription::Type::Value) {
+          if (subdesc_type == ParametersDescription::Type::Value) {
             if (!subdesc.description().empty())
               item.AppendChild(CTML::Node("i", " " + subdesc.description()));
             if (!desc.parameters().getString(key).empty())
@@ -91,6 +93,11 @@ namespace cepgen {
                       .AppendText("(default value: ")
                       .AppendChild(CTML::Node("code", desc.parameters().getString(key, false)))
                       .AppendText(")"));
+          } else if (subdesc_type == ParametersDescription::Type::ParametersVector) {
+            item.AppendText(" vector of parameters");
+            if (!subdesc.description().empty())
+              item.AppendText(" defining a ").AppendChild(CTML::Node("i", subdesc.description()));
+            item.AppendChild(moduleDescription(subdesc));
           } else
             item.AppendChild(moduleDescription(subdesc));
           items.AppendChild(item);

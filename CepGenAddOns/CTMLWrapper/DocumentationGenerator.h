@@ -43,14 +43,13 @@ namespace cepgen {
       inline DocumentationGenerator& document(const std::string& type,
                                               const std::string& title,
                                               const ModuleFactory<T, I>& factory) {
-        container_.AppendChild(CTML::Node("h2", title).SetAttribute("name", type));
+        container_.AppendChild(CTML::Node("a").SetAttribute("name", type)).AppendChild(CTML::Node("h2", title));
         CTML::Node mods("ul");
         for (const auto& mod : factory.modules()) {
           std::ostringstream os;
           os << type << "-" << mod;
-          mods.AppendChild(CTML::Node("li")
-                               .SetAttribute("name", os.str())
-                               .AppendChild(moduleDescription(factory.describeParameters(mod))));
+          mods.AppendChild(CTML::Node("a").SetAttribute("name", os.str()))
+              .AppendChild(CTML::Node("li").AppendChild(moduleDescription(factory.describeParameters(mod))));
         }
         container_.AppendChild(mods);
         return *this;
