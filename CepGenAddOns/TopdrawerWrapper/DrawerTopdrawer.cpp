@@ -40,11 +40,7 @@ namespace cepgen {
     public:
       explicit DrawerTopdrawer(const ParametersList&);
 
-      static ParametersDescription description() {
-        auto desc = Drawer::description();
-        desc.setDescription("Topdrawer plotter");
-        return desc;
-      }
+      static ParametersDescription description();
 
       const DrawerTopdrawer& draw(const Graph1D&, const Mode&) const override;
       const DrawerTopdrawer& draw(const Graph2D&, const Mode&) const override;
@@ -75,7 +71,6 @@ namespace cepgen {
         }
       };
       static void execute(const Commands&, const std::string&);
-      static Commands preDraw(const Drawable&, const Mode&);
       static Commands plot(const Graph1D&);
       static Commands plot(const Graph2D&, const Mode&);
       static Commands plot(const Hist1D&);
@@ -83,6 +78,11 @@ namespace cepgen {
       static Commands postDraw(const Drawable&, const Mode&);
       static Commands stringify(const std::string&, const std::string&);
       static const std::map<std::string, std::pair<char, char> > kSpecChars;
+
+      Commands preDraw(const Drawable&, const Mode&) const;
+
+      const std::string font_;
+      const bool filling_;
     };
 
     const std::map<std::string, std::pair<char, char> > DrawerTopdrawer::kSpecChars = {
@@ -124,7 +124,8 @@ namespace cepgen {
         {"langle", {'B', 'S'}},     {"rangle", {'E', 'S'}},
         {"hbar", {'H', 'K'}},       {"lambdabar", {'L', 'K'}}};
 
-    DrawerTopdrawer::DrawerTopdrawer(const ParametersList& params) : Drawer(params) {}
+    DrawerTopdrawer::DrawerTopdrawer(const ParametersList& params)
+        : Drawer(params), font_(toupper(steer<std::string>("font"))), filling_(steer<bool>("filling")) {}
 
     const DrawerTopdrawer& DrawerTopdrawer::draw(const Graph1D& graph, const Mode& mode) const {
       Commands cmds;
@@ -275,11 +276,12 @@ namespace cepgen {
       return cmds;
     }
 
-    DrawerTopdrawer::Commands DrawerTopdrawer::preDraw(const Drawable& dr, const Mode& mode) {
+    DrawerTopdrawer::Commands DrawerTopdrawer::preDraw(const Drawable& dr, const Mode& mode) const {
       Commands cmds;
       cmds += "SET DEVICE POSTSCR ORIENTATION 3";
-      cmds += "SET FONT DUPLEX";
-      cmds += "SET FILL FULL";
+      cmds += "SET FONT " + font_;
+      if (filling_)
+        cmds += "SET FILL FULL";
       if (mode & Mode::grid)
         cmds += "SET GRID ON WIDTH=1 DOTS";
       if (mode & Mode::logx)
@@ -397,6 +399,14 @@ namespace cepgen {
       out += label + " '" + lab + "'";
       out += "CASE" + std::string(label.size() - 4, ' ') + " '" + mod + "'";
       return out;
+    }
+
+    ParametersDescription DrawerTopdrawer::description() {
+      auto desc = Drawer::description();
+      desc.setDescription("Topdrawer plotter");
+      desc.add<std::string>("font", "duplex").setDescription("Topdrawer font to use");
+      desc.add<bool>("filling", true).setDescription("allow to fill the whole available space?");
+      return desc;
     }
   }  // namespace utils
 }  // namespace cepgen
