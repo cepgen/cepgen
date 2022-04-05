@@ -3,7 +3,7 @@ Installation procedure
 ======================
 
 The recipe detailed below is intended for “regular users”, who downloaded a version of the code from a current stable release.
-You may check in parallel the latest upstream version from `the CepGen git repository <https://phab.hepforge.org/source/cepgen/>`_.
+You may check in parallel the latest upstream version from `the CepGen repository on GitHub <https://github.com/cepgen/cepgen>`_.
 
 .. note::
    For developers, please find a collection of useful procedures in `this page <install-dev>`_.
@@ -11,14 +11,14 @@ You may check in parallel the latest upstream version from `the CepGen git repos
 General and usage-specific dependencies
 ---------------------------------------
 
-CepGen was designed to require only a limited set of external dependencies.
+CepGen was designed to require only a limited set of external dependencies for its core features.
 
 Among the mandatory dependencies,
 
 * `CMake <https://cmake.org/>`_ for the management of the build process,
 * `GSL <https://www.gnu.org/software/gsl/>`_, for the integrators definition and general utilitaries.
   A version greater than or equal to ``2.1`` is recommended for the bilinear spline interpolation capability.
-  This latter is used in e.g. the MSTW structure functions and KMR $\\kt$-factorised gluon flux definitions.
+  This latter is used in e.g. the MSTW structure functions and KMR :math:`\kt`-factorised gluon flux definitions.
 
 Depending on your system architecture and distribution, these dependencies may be installed the following way:
 
@@ -38,21 +38,24 @@ Depending on your system architecture and distribution, these dependencies may b
       sudo dnf install gcc-c++ gcc-gfortran
       sudo dnf install gsl gsl-devel
 
-A set of facultative libraries may also be linked against CepGen to extend its capabilities:
+It can further be extended through a set of add-ons loaded through shared libraries into the runtime environment.
 
-* python version 2 or 3, with its development headers, for the advanced input cards parsing,
-* `Pythia <http://home.thep.lu.se/Pythia/>`_ version 8.1 or above, for the various particles decays and excited proton fragmentation,
-* `LHAPDF <https://lhapdf.hepforge.org/>`_ version 5 or above, for the “exotic” structure functions definition.
+For instance, it is highly recommended to install the following dependencies to ease your first steps:
 
-Events generation and storage for further processing can be coupled to several (also facultative) tools, for instance:
+* ``CepGenPython``: complex Python version 2 or 3 steering cards parsing ; it requires the ``python-devel`` or ``libpython-dev`` development headers to be built,
+* ``CepGenLHAPDF`` with `LHAPDF <https://lhapdf.hepforge.org/>`_ version 5 or above, for definition of partonic-level nucleon structure functions, and its :math:`\alpha_S(Q)` strong coupling constant evolution algorithm.
 
-* `HepMC <https://hepmc.web.cern.ch/hepmc/>`_ version ≥ 2, for the HepMC ASCII output format handling,
+A set of add-ons specifically designed to ease your workflow when generating and storing events is also provided, given the following libraries are available on your system:
+
+* ``CepGenPythia8``: `Pythia <https://pythia.org>`_ version 8.1 or above, for the various particles decays and excited proton fragmentation, but also the LHEF event format generation,
+* ``CepGenPythia6``: `Pythia <https://pythia.org/pythia6>`_ version 6, for the legacy steering of particles decays and excited proton fragmentation,
+* ``CepGenHepMC2`` and ``CepGenHepMC3`` for the `HepMC <https://hepmc.web.cern.ch/hepmc/>`_ version ≥ 2, to handle its various ASCII output formats,
 
   .. note::
      From version 3 on, a LHEF output is also supported.
      If not present, this latter format can be handled through the Pythia 8 interface instead.
 
-* `ROOT <https://root.cern.ch/>`_ for the ntuples/histogramming/plotting capabilities widely used in HEP.
+* ``CepGenROOT``: for the `ROOT <https://root.cern.ch/>`_ ntuples building/histogramming/plotting capabilities widely used in HEP.
 
 CepGen installation
 -------------------

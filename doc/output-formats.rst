@@ -19,6 +19,8 @@ All handlers are defined as modules derivating from the following abstract base 
       :members:
       :no-link:
 
+A full list of the output modules currently supported in CepGen addons, along with their user-steerable parameters, can be found `here <raw-modules#evtout>`_.
+
 ----
 
 In this page you will find a list of all currently supported output formats, covering a broad spectrum of usages, both in the phenomenological and experimental communities.
@@ -228,7 +230,7 @@ The tree handler may be used in parallel to the two :cpp:class:`ROOT::CepGenRun`
 .. doxygenclass:: cepgen::io::DelphesHandler
    :outline:
 
-An interface to the `Delphes <https://cp3.irmp.ucl.ac.be/projects/delphes>`_ :cite:`deFavereau:2013fsa` fast simulation framework is provided if the library is installed on the system.
+An interface to the `Delphes <https://cp3.irmp.ucl.ac.be/projects/delphes>`_ :cite:`deFavereau:2013fsa` fast simulation framework is provided through the ``CepGenDelphes`` add-on implemented `here <https://github.com/cepgen/cepgen/blob/master/CepGenAddOns/ROOTWrapper/DelphesHandler.cpp>`_.
 
 Beside the usual ``filename`` flag specifying the file name Delphes will use for its output, a path to the `Tcl <https://www.tcl.tk/>`_ configuration card is also required to steer the output module through the ``inputCard`` string parameter.
 

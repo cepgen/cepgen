@@ -37,7 +37,8 @@ All modules are derived from a common :cpp:class:`cepgen::hadr::Hadroniser` clas
 
 ----
 
-A list of algorithms currently supported may be found below.
+A full list of the algorithms and their parameters can be found `here <raw-modules#evtmod>`_.
+In particular, a sub-collection of algorithms currently supported is:
 
 
 ``pythia6``
