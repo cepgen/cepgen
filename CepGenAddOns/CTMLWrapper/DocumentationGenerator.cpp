@@ -17,6 +17,7 @@
  */
 
 #include <fstream>
+#include <iostream>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Message.h"
@@ -52,10 +53,14 @@ namespace cepgen {
 
     DocumentationGenerator::~DocumentationGenerator() {
       doc_.AppendNodeToBody(container_);
+      std::ostream* out{nullptr};
+      if (!output_filename_.empty())
+        out = new std::ofstream(output_filename_);
+      else
+        out = &std::cout;
+      (*out) << doc_.ToString();
       if (!output_filename_.empty()) {
-        std::ofstream out(output_filename_);
-        out << doc_.ToString();
-        out.close();
+        delete out;
         CG_INFO("DocumentationGenerator") << "Documentation written in \"" << output_filename_ << "\".";
       }
     }
