@@ -45,6 +45,7 @@ extensions = [
     #'sphinxemoji.sphinxemoji',
     'sphinxcontrib.bibtex',
     #'hachibee_sphinx_theme',
+    'sphinx.ext.viewcode',
     'sphinx.ext.mathjax',
     'sphinx_toolbox.collapse',
 ]
@@ -85,6 +86,8 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
+html_logo = 'small-cepgen-logo.png'
+
 #import pietroalbini_sphinx_themes
 #html_theme_path = [pietroalbini_sphinx_themes.themes_path()]
 #html_theme = "pietroalbini"
@@ -112,8 +115,10 @@ html_extra_path = ['.htaccess']
 # documentation.
 #
 html_theme_options = {
-    #'display_version': True,
+    'display_version': False,
     'sidebarwidth': '300px',
+    'style_external_links': True,
+    'logo_only': True,
 }
 #html_use_index = True
 
