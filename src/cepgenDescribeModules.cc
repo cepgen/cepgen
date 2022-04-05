@@ -21,6 +21,7 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/CouplingFactory.h"
+#include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
@@ -73,7 +74,7 @@ int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser parser(argc, argv);
   parser.addOptionalArgument("list-modules,l", "list all runtime modules", &list_mods, false)
       .addOptionalArgument("modules,m", "list of runtime modules to be described", &modules)
-      .addOptionalArgument("add-ons,a", "external runtime plugin", &addons)
+      .addOptionalArgument("add-ons,e", "external runtime plugin", &addons)
       .addOptionalArgument("safe-mode,s", "safe mode", &safe_mode, false)
       .addOptionalArgument("dump-params,p", "dump the ParametersList object", &dump_params, false)
       .addOptionalArgument("all,a", "dump all modules descriptions", &all, false)
@@ -118,9 +119,10 @@ int main(int argc, char* argv[]) {
     LOOP_FACTORY_INT("Cross sections ratio modelling", cepgen::sigrat::SigmaRatiosFactory)
     LOOP_FACTORY("Event modification", cepgen::EventModifierFactory)
     LOOP_FACTORY("Export", cepgen::io::ExportModuleFactory)
-    LOOP_FACTORY("Functional evaluator", cepgen::utils::FunctionalFactory)
     LOOP_FACTORY("alpha(EM)", cepgen::AlphaEMFactory)
     LOOP_FACTORY("alpha(S)", cepgen::AlphaSFactory)
+    LOOP_FACTORY("Functional evaluator", cepgen::utils::FunctionalFactory)
+    LOOP_FACTORY("Drawer", cepgen::utils::DrawerFactory)
     CG_LOG << os.str();
     return 0;
   }

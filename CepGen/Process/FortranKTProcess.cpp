@@ -33,28 +33,37 @@ namespace {
   extern cepgen::ktblock::KTKinematics ktkin_;
   extern cepgen::ktblock::KinCuts kincuts_;
   extern cepgen::ktblock::EventKinematics evtkin_;
-
-  void cepgen_list_params_() {
-    CG_LOG << "\t" << cepgen::ParametersDescription(cepgen::proc::FortranKTProcess::kProcParameters).describe(1);
-  }
-
-  int cepgen_param_int_(char* pname, int& def) {
-    //--- first check if the "integer" is a particle id
-    if (cepgen::proc::FortranKTProcess::kProcParameters.has<cepgen::ParticleProperties>(pname))
-      return cepgen::proc::FortranKTProcess::kProcParameters.get<cepgen::ParticleProperties>(pname).pdgid;
-    if (cepgen::proc::FortranKTProcess::kProcParameters.has<unsigned long long>(pname)) {
-      unsigned long long ulong_def = def;
-      return cepgen::proc::FortranKTProcess::kProcParameters.get<unsigned long long>(pname, ulong_def);
-    }
-    //--- if not, proceed with retrieving the integer value
-    return cepgen::proc::FortranKTProcess::kProcParameters.get<int>(pname, def);
-  }
-
-  double cepgen_param_real_(char* pname, double& def) {
-    return cepgen::proc::FortranKTProcess::kProcParameters.get<double>(pname, def);
-  }
   }
 }  // namespace
+
+extern "C" {
+/// Print the full list of parameters in the runtime process parameters collection
+void cepgen_list_params_() {
+  CG_LOG << "\t" << cepgen::ParametersDescription(cepgen::proc::FortranKTProcess::kProcParameters).describe(1);
+}
+
+/// Retrieve an integer process parameter from runtime parameters collection
+/// \param[in] pname Parameter name string
+/// \param[in] def Default parameter value if not found in collection
+int cepgen_param_int_(char* pname, int& def) {
+  //--- first check if the "integer" is a particle id
+  if (cepgen::proc::FortranKTProcess::kProcParameters.has<cepgen::ParticleProperties>(pname))
+    return cepgen::proc::FortranKTProcess::kProcParameters.get<cepgen::ParticleProperties>(pname).pdgid;
+  if (cepgen::proc::FortranKTProcess::kProcParameters.has<unsigned long long>(pname)) {
+    unsigned long long ulong_def = def;
+    return cepgen::proc::FortranKTProcess::kProcParameters.get<unsigned long long>(pname, ulong_def);
+  }
+  //--- if not, proceed with retrieving the integer value
+  return cepgen::proc::FortranKTProcess::kProcParameters.get<int>(pname, def);
+}
+
+/// Retrieve a double precision floating point process parameter from runtime parameters collection
+/// \param[in] pname Parameter name string
+/// \param[in] def Default parameter value if not found in collection
+double cepgen_param_real_(char* pname, double& def) {
+  return cepgen::proc::FortranKTProcess::kProcParameters.get<double>(pname, def);
+}
+}
 
 namespace cepgen {
   namespace proc {

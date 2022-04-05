@@ -141,8 +141,8 @@ namespace cepgen {
       desc.setDescription("Text-based histogramming tool");
       desc.add<std::string>("plotter", "text").setDescription("Plotting algorithm to use");
       desc.add<std::string>("filename", "output.hists.txt").setDescription("Output filename for histogram dump");
-      desc.add<bool>("showHistograms", true).setDescription("Show the histogram(s) at the end of the run?");
-      desc.add<bool>("saveHistograms", false).setDescription("Save the histogram(s) at the end of the run?");
+      desc.add<bool>("show", true).setDescription("Show the histogram(s) at the end of the run?");
+      desc.add<bool>("save", false).setDescription("Save the histogram(s) at the end of the run?");
       // per-histogram default parameters
       ParametersDescription hist_desc;
       // x-axis attributes
