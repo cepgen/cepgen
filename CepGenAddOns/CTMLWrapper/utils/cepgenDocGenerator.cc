@@ -35,29 +35,33 @@ namespace cepgen {
 
 int main(int argc, char* argv[]) {
   std::string output_file;
-  bool use_bs;
+  bool use_bs, bare;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("output,o", "output HTML file", &output_file, "index.html")
       .addOptionalArgument("bootstrap,b", "use Bootstrap CDN to prettify the output?", &use_bs, true)
+      .addOptionalArgument("bare,e", "generate a bare version (without document tags) of the output?", &bare, false)
       .parse();
 
   cepgen::initialise();
-  cepgen::utils::DocumentationGenerator gen{
-      cepgen::ParametersList().set<std::string>("output", output_file).set<bool>("useBS", use_bs)};
+  cepgen::utils::DocumentationGenerator gen{cepgen::ParametersList()
+                                                .set<std::string>("output", output_file)
+                                                .set<bool>("useBS", use_bs)
+                                                .set<bool>("bare", bare)};
 
-  gen.document("Processes", cepgen::proc::ProcessFactory::get());
-  //gen.document("Cards handler", cepgen::card::CardsHandlerFactory::get());
-  gen.document("Form factors", cepgen::formfac::FormFactorsFactory::get());
-  gen.document("Structure functions", cepgen::strfun::StructureFunctionsFactory::get());
-  gen.document("Longitudinal/transverse cross section ratio parameterisations",
-               cepgen::sigrat::SigmaRatiosFactory::get());
-  gen.document("Electromagnetic coupling evolution", cepgen::AlphaEMFactory::get());
-  gen.document("Strong coupling evolution", cepgen::AlphaSFactory::get());
-  gen.document("Integrator algorithms", cepgen::IntegratorFactory::get());
-  gen.document("Functional parsers", cepgen::utils::FunctionalFactory::get());
-  gen.document("Drawing tools", cepgen::utils::DrawerFactory::get());
-  gen.document("Event modification algorithms", cepgen::EventModifierFactory::get());
-  gen.document("Event export modules", cepgen::io::ExportModuleFactory::get());
+  gen.document("proc", "Processes", cepgen::proc::ProcessFactory::get())
+      //.document("cards", "Cards handler", cepgen::card::CardsHandlerFactory::get())
+      .document("formfac", "Form factors", cepgen::formfac::FormFactorsFactory::get())
+      .document("strfun", "Structure functions", cepgen::strfun::StructureFunctionsFactory::get())
+      .document("sigrat",
+                "Longitudinal/transverse cross section ratio parameterisations",
+                cepgen::sigrat::SigmaRatiosFactory::get())
+      .document("alphaem", "Electromagnetic coupling evolution", cepgen::AlphaEMFactory::get())
+      .document("alphas", "Strong coupling evolution", cepgen::AlphaSFactory::get())
+      .document("integr", "Integrator algorithms", cepgen::IntegratorFactory::get())
+      .document("func", "Functional parsers", cepgen::utils::FunctionalFactory::get())
+      .document("drawer", "Drawing tools", cepgen::utils::DrawerFactory::get())
+      .document("evtmod", "Event modification algorithms", cepgen::EventModifierFactory::get())
+      .document("evtout", "Event export modules", cepgen::io::ExportModuleFactory::get());
 
   return 0;
 }

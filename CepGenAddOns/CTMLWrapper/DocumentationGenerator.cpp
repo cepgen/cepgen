@@ -29,9 +29,10 @@ namespace cepgen {
     DocumentationGenerator::DocumentationGenerator(const ParametersList& params)
         : SteeredObject(params),
           output_filename_(steer<std::string>("output")),
+          bare_(steer<bool>("bare")),
           container_(CTML::Node("div.container-fluid")) {
       doc_.AppendNodeToHead(CTML::Node("title", "CepGen v" + version::tag + " modules documentation"));
-      if (steer<bool>("useBS")) {
+      if (!bare_ && steer<bool>("useBS")) {
         doc_.AppendNodeToHead(
             CTML::Node("link")
                 .SetAttribute("rel", "stylesheet")
@@ -58,7 +59,10 @@ namespace cepgen {
         out = new std::ofstream(output_filename_);
       else
         out = &std::cout;
-      (*out) << doc_.ToString();
+      if (bare_)
+        (*out) << container_.ToString();
+      else
+        (*out) << doc_.ToString();
       if (!output_filename_.empty()) {
         delete out;
         CG_INFO("DocumentationGenerator") << "Documentation written in \"" << output_filename_ << "\".";
@@ -104,6 +108,7 @@ namespace cepgen {
       desc.setDescription("CTML HTML document generator helper");
       desc.add<std::string>("output", "index.html").setDescription("output path for the generated HTML file");
       desc.add<bool>("useBS", true).setDescription("use the Bootstrap CDN to prettify this output?");
+      desc.add<bool>("bare", false).setDescription("generate a bare version (without <html>/<head>/<body> attributes)");
       return desc;
     }
   }  // namespace utils
