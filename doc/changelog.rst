@@ -2,6 +2,14 @@ Changelog
 =========
 
 .. changelog::
+    :version: 1.0.0alpha2
+    :released: Fri Apr 23 2021
+
+.. changelog::
+    :version: 0.9.8
+    :released: Wed Oct 16 2019
+
+.. changelog::
     :version: 0.9.7
     :released: Thu Jul 25 2019
 

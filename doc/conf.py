@@ -24,9 +24,9 @@ copyright = u'2013-2022, the CepGen Collaboration'
 author = u'Laurent Forthomme'
 
 # The short X.Y version
-version = u'0.9'
+version = u'1.0'
 # The full version, including alpha/beta/rc tags
-release = u'0.9.7'
+release = u'1.0.0alpha2'
 
 
 # -- General configuration ---------------------------------------------------
@@ -92,8 +92,8 @@ pygments_style = None
 #html_theme_path = [sphinx_redactor_theme.get_html_theme_path()]
 
 #html_theme = 'classic'
-#html_theme = 'sphinx_rtd_theme'
-html_theme = 'pyramid'
+html_theme = 'sphinx_rtd_theme'
+#html_theme = 'pyramid'
 #html_theme = 'haiku'
 #html_theme = 'traditional'
 #html_theme = 'alabaster'
