@@ -100,8 +100,8 @@ Additionally, for heavy ions initial states, the following parameters are used:
 For increased modularity, a set of process parameters directly parsed from the input cards (see e.g. `the processParameters block </cards-python#process-processparameters-parameters-block>`_) may also be introduced.
 At the Fortran process definition level, all parameters may be accessed through a set of interfacing functions:
 
-.. doxygenfunction:: anonymous_namespace{FortranKTProcess.cpp}::cepgen_param_int_
-.. doxygenfunction:: anonymous_namespace{FortranKTProcess.cpp}::cepgen_param_real_
+.. doxygenfunction:: cepgen_param_int_
+.. doxygenfunction:: cepgen_param_real_
 
 .. note:: These latter may be translated into the following Fortran signature:
 
