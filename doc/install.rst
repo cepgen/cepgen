@@ -89,23 +89,19 @@ This compilation will build a collection of required sub-libraries to be linked 
 * ``libCepGenCards`` for the input cards definition and handling part.
 
 .. note::
-   If your usage requires the import of CepGen libraries and includes in your standard ``PATH``, e.g. for the purpose of interfacing library development, run (as root)
+   If your usage requires the import of CepGen libraries and includes in your standard ``PATH``, e.g. for the purpose of interfacing library development, run either
 
-   .. code:: sh
+   * ``make install`` (as root), or
+   * ``CMAKE_INSTALL_PREFIX=/path/to/your/writeable/area make install`` (to install locally ; do not forget to add this path to your ``PATH`` environment to be able to discover/run ``cepgen`` directly).
 
-      make install
-
-   This will copy all required headers into the local includes directory (e.g. ``/usr/local/include``), and copy the shared objects into the library path (e.g. ``/usr/local/lib64`` or ``/usr/local/lib``).
+   This will install all required headers into the includes directory (e.g. ``/usr/include``), and copy the shared objects into the library path (e.g. ``/usr/lib64`` or ``/usr/lib``).
 
 As described `here </usage>`_, several test executables can be linked against the CepGen libraries.
 
 .. note::
-   You may build these executables using the ``make`` command.
-   For instance, ``make cepgen``. The test executable will then be located in the ``test/`` directory.
-   You may run it using, for instance (in ``cepgen-dev/build/``):
+   You may build these executables using the ``CMAKE_BUILD_TESTS=1`` configuration flag when running your CMake generation command.
+   All compiled executable will then be located either in the ``test/`` directory of your build environment, for the general-purpose tests, or directly in the ``CepGenXXX/`` folder in your build environment for the add-ons-specific tests.
 
-   .. code:: sh
-
-      ./test/cepgen <path to your steering card>
+   These tests can all be triggered using e.g. the `CTest <https://cmake.org/cmake/help/latest/manual/ctest.1.html>`_ suite of CMake, running ``ctest``
 
 .. .. doxygengroup:: Executables
