@@ -40,11 +40,18 @@ namespace cepgen {
       static ParametersDescription description();
 
       template <typename T, typename I>
-      DocumentationGenerator& document(const std::string& type, const ModuleFactory<T, I>& factory) {
-        container_.AppendChild(CTML::Node("h2", type));
+      inline DocumentationGenerator& document(const std::string& type,
+                                              const std::string& title,
+                                              const ModuleFactory<T, I>& factory) {
+        container_.AppendChild(CTML::Node("h2", title).SetAttribute("name", type));
         CTML::Node mods("ul");
-        for (const auto& mod : factory.modules())
-          mods.AppendChild(CTML::Node("li").AppendChild(moduleDescription(factory.describeParameters(mod))));
+        for (const auto& mod : factory.modules()) {
+          std::ostringstream os;
+          os << type << "-" << mod;
+          mods.AppendChild(CTML::Node("li")
+                               .SetAttribute("name", os.str())
+                               .AppendChild(moduleDescription(factory.describeParameters(mod))));
+        }
         container_.AppendChild(mods);
         return *this;
       }
