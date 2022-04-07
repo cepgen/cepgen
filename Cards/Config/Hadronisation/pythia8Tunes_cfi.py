@@ -1,5 +1,5 @@
 pythia8CUEP8M1Settings = (
-    'Tune:pp 14', # Monash 2013 tune by Peter Skands (January 2014)
+    'Tune:pp 14',  # Monash 2013 tune by Peter Skands (January 2014)
     'Tune:ee 7',
     'MultipartonInteractions:pT0Ref = 2.4024',
     'MultipartonInteractions:ecmPow = 0.25208',

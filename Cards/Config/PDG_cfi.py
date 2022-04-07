@@ -1,5 +1,5 @@
 """\file
-\brief Utilitaries for the PDG identifiers manipulation
+\brief Utilities for the PDG identifiers manipulation
 """
 
 from Config.Core import Parameters

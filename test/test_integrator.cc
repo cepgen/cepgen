@@ -1,113 +1,102 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
-#include "CepGen/Parameters.h"
-
-#include "CepGen/Core/Integrator.h"
-
-#include "CepGen/Processes/Process.h"
-
-#include "CepGen/Utils/Functional.h"
+#include "CepGen/Integration/FunctionalIntegrand.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-
-#include <iostream>
+#include "CepGen/Utils/String.h"
 
 using namespace std;
 
-/// Generic process to test the integrator instance
-template<size_t N=3> class TestProcess : public cepgen::proc::Process
-{
-  public:
-    TestProcess( const cepgen::ParametersList& params = cepgen::ParametersList() ) :
-      cepgen::proc::Process( params, false ),
-      funct_( "1./(1.-cos(x*_pi)*cos(y*_pi)*cos(z*_pi))", { "x", "y", "z" } ) {}
-    TestProcess( const char* formula, const std::vector<std::string>& args ) :
-      cepgen::proc::Process( cepgen::ParametersList(), false ),
-      funct_( formula, args ) {}
-
-    cepgen::proc::ProcessPtr clone( const cepgen::ParametersList& params ) const override {
-      return cepgen::proc::ProcessPtr( new TestProcess<N>( *this ) );
-    }
-
-    void prepareKinematics() override {
-      for ( auto& var : variables_ )
-        defineVariable( var, cepgen::proc::Process::Mapping::linear );
-    }
-    /// Generic formula to compute a weight out of a point in the phase space
-    double computeWeight() override {
-      std::array<double,N> args;
-      std::copy_n( variables_.begin(), N, args.begin() );
-      return funct_.eval( args );
-    }
-    /// Dummy function to be called on events generation
-    void fillKinematics( bool ) override {}
-
-  private:
-    std::array<double,N> variables_;
-    cepgen::utils::Functional<N> funct_;
-};
-
-int
-main( int argc, char* argv[] )
-{
-  bool debug;
+int main(int argc, char* argv[]) {
+  bool quiet, run_all;
   double num_sigma;
-  string integrator;
+  vector<string> integrators;
+  string func_mod;
 
-  cepgen::ArgumentsParser( argc, argv )
-    .addOptionalArgument( "num-sigma", "max. number of std.dev.", 3., &num_sigma, 'n' )
-    .addOptionalArgument( "debug", "debugging mode", false, &debug, 'd' )
-    .addOptionalArgument( "integrator", "type of integrator used", "vegas", &integrator, 'i' )
-    .parse();
+  cepgen::ArgumentsParser(argc, argv)
+      .addOptionalArgument("num-sigma,n", "max. number of std.dev.", &num_sigma, 5.)
+      .addOptionalArgument("integrator,i", "type of integrator used", &integrators, vector<string>{"Vegas"})
+      .addOptionalArgument("functional,f", "type of functional parser user", &func_mod, "ROOT")
+      .addOptionalArgument("all,a", "run tests for all integrators", &run_all, false)
+      .addOptionalArgument("quiet,q", "quiet mode", &quiet, false)
+      .parse();
 
-  if ( !debug )
+  if (quiet)
     cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::nothing;
 
-  cepgen::Generator mg;
-  auto& params = mg.parameters();
-  auto& integ = params.integration();
-  if ( integrator == "plain" )
-    integ.type = cepgen::IntegratorType::plain;
-  else if ( integrator == "vegas" )
-    integ.type = cepgen::IntegratorType::Vegas;
-  else if ( integrator == "miser" )
-    integ.type = cepgen::IntegratorType::MISER;
+  cepgen::initialise();
 
-  { // test 1
-    const char* test = "Test 1";
-    const double exact = 1.3932039296856768591842462603255;
-    params.setProcess( new TestProcess<3> );
-    mg.integrate();
-    const double result = mg.crossSection(), error = mg.crossSectionError();
-    if ( fabs( exact - result ) > num_sigma * error )
-      throw CG_FATAL( "main" ) << test << ": pull = " << fabs( exact-result )/error << ".";
-    cout << test << " passed!" << endl;
-    if ( debug )
-      CG_INFO( "main" ) << test << ": ref.: " << exact << ", result: " << result << " +/- " << error << ".";
-  }
-  { // test 2
-    const char* test = "Test 2";
-    const double exact = 2./3.;
-    params.setProcess( new TestProcess<2>( "x^2+y^2", { "x", "y" } ) );
-    mg.integrate();
-    const double result = mg.crossSection(), error = mg.crossSectionError();
-    if ( fabs( exact - result ) > num_sigma * error )
-      throw CG_FATAL( "main" ) << test << ": pull = " << fabs( exact-result )/error << ".";
-    cout << test << " passed!" << endl;
-    if ( debug )
-      CG_INFO( "main" ) << test << ": ref.: " << exact << ", result: " << result << " +/- " << error << ".";
-  }
-  { // test 3
-    const char* test = "Test 3";
-    const double exact = 13./12.;
-    params.setProcess( new TestProcess<3>( "x+y^2+z^3", { "x", "y", "z" } ) );
-    mg.integrate();
-    const double result = mg.crossSection(), error = mg.crossSectionError();
-    if ( fabs( exact - result ) > num_sigma * error )
-      throw CG_FATAL( "main" ) << test << ": pull = " << fabs( exact-result )/error << ".";
-    cout << test << " passed!" << endl;
-    if ( debug )
-      CG_INFO( "main" ) << test << ": ref.: " << exact << ", result: " << result << " +/- " << error << ".";
-  }
+  //--- tests definition
+  struct test_t {
+    cepgen::FunctionalIntegrand integrand;
+    double result;
+    bool success{false};
+  };
 
+  vector<test_t> tests;
+  tests.emplace_back(test_t{cepgen::FunctionalIntegrand("x^2+y^2", {"x", "y"}, func_mod), 2. / 3});
+  tests.emplace_back(test_t{cepgen::FunctionalIntegrand("x+y^2+z^3", {"x", "y", "z"}, func_mod), 13. / 12.});
+  tests.emplace_back(
+      test_t{cepgen::FunctionalIntegrand(
+                 "1./(1.-cos(x*3.141592654)*cos(y*3.141592654)*cos(z*3.141592654))", {"x", "y", "z"}, func_mod),
+             1.3932039296856768591842462603255});
+
+  //--- integrator definition
+  if (run_all)
+    // will perform the test with all integrators
+    integrators = cepgen::IntegratorFactory::get().modules();
+
+  CG_LOG << "Will test with " << cepgen::utils::s("integrator", integrators.size(), true) << ": " << integrators;
+
+  vector<string> failing_integrators;
+  for (const auto& integrator : integrators) {
+    auto integr = cepgen::IntegratorFactory::get().build(integrator);
+
+    //--- integration part
+    size_t i = 0;
+    double result, error;
+    for (auto& test : tests) {
+      integr->setIntegrand(test.integrand);
+      integr->integrate(result, error);
+      test.success = error / result < 1.e-6 || (fabs(test.result - result) <= num_sigma * error);
+      CG_DEBUG("main") << "Test " << i << ": ref.: " << test.result << ", result: " << result << " +/- " << error
+                       << ".";
+      ++i;
+    }
+
+    bool success = true;
+    i = 0;
+    for (const auto& test : tests) {
+      CG_INFO("main") << "Test " << i++ << " passed: " << cepgen::utils::yesno(test.success);
+      success &= test.success;
+    }
+    if (!success) {
+      CG_LOG << integrator << " integrator tests failed!";
+      failing_integrators.emplace_back(integrator);
+    } else
+      CG_LOG << integrator << " integrator tests passed.";
+  }
+  if (!failing_integrators.empty())
+    throw CG_FATAL("main") << cepgen::utils::s("integrator test", failing_integrators.size())
+                           << " failed: " << failing_integrators << ".";
   return 0;
 }
-

@@ -1,19 +1,18 @@
-body, table, div, p, dl { font: 400 12px/18px serif; }
-p.reference, p.definition { font: 400 12px/18px serif; }
-.title { font: 800 125% serif; }
-a { font: 200 100% serif; }
+body, table, div, p, dl { font: 400 12px/18px sans-serif; }
+p.reference, p.definition { font: 400 12px/18px sans-serif; }
+.title { font: 800 125% sans-serif; }
+h2 { font: 600 150% sans-serif; }
+a { font: 400 100% sans-serif; }
 a:hover { text-decoration: underline; }
-.icon { font: bold 90% serif; }
-table.directory { font: 400 120% serif; }
-.navpath li.navelem a { font-family: serif; }
-#projectname
-{
-	font: 500 300% serif;
-  font-variant: small-caps;
-}
-#projectbrief { font: 110% serif; }
-#projectnumber { font: 50% serif; }
-div.toc li { font: 100% serif; }
-div.toc h3 { font: serif; }
-#powerTip div { font: 110% serif; }
+a.el { font: 600 100% sans-serif; }
+.icon { font: bold 90% sans-serif; }
+table.directory { font: 400 120% sans-serif; }
+.navpath li.navelem a { font-family: sans-serif; }
+#projectname { font: 100 250% sans-serif; }
+#projectbrief { font: 110% sans-serif; }
+#projectnumber { font: 50% sans-serif; }
+div.toc li { font: 100% sans-serif; }
+div.toc h3 { font: sans-serif; }
+.memItemLeft { font: italic 100 100% sans-serif; }
+#powerTip div { font: 110% sans-serif; }
 
