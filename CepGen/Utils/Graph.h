@@ -24,6 +24,7 @@
 
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -50,6 +51,11 @@ namespace cepgen {
       /// Compute the \f$\chi^{2}\f$ between this graph and another
       double chi2(const Graph1D&) const;
 
+      /// List of horizontal axis coordinates
+      std::set<double> xCoords() const;
+      /// Retrieve the value of the graph at a given coordinate
+      const value_t valueAt(double) const;
+
       bool isGraph1D() const override { return true; }
 
     private:
@@ -69,6 +75,13 @@ namespace cepgen {
       const dualaxis_t& points() const { return values_; }
       /// List all values registered in the graph
       void dumpPoints(std::ostream&) const;
+
+      /// List of horizontal axis coordinates
+      std::set<double> xCoords() const;
+      /// List of vertical axis coordinates
+      std::set<double> yCoords() const;
+      /// Retrieve the value of the graph at the given coordinates
+      const value_t valueAt(double, double) const;
 
       bool isGraph2D() const override { return true; }
 

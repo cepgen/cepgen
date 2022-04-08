@@ -20,6 +20,7 @@
 #define CepGen_Utils_Message_h
 
 #include <map>
+#include <set>
 
 #include "CepGen/Utils/Logger.h"
 
@@ -85,6 +86,16 @@ namespace cepgen {
     template <typename T, typename U>
     inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::pair<T, U>& pair_var) noexcept {
       return exc << "(" << pair_var.first << ", " << pair_var.second << ")";
+    }
+    /// Generic templated vector-variables feeder operator
+    template <typename T>
+    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::set<T>& set_var) noexcept {
+      exc << "[";
+      std::string sep;
+      if (!set_var.empty())
+        for (const auto& var : set_var)
+          exc << sep << var, sep = ", ";
+      return exc << "]";
     }
     /// Generic templated vector-variables feeder operator
     template <typename T>
