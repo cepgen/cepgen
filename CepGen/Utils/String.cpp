@@ -124,6 +124,13 @@ namespace cepgen {
       return out;
     }
 
+    std::string randomString(size_t size) {
+      std::stringstream out;
+      for (size_t i = 0; i < size; ++i)
+        out << (char)('a' + rand() % (('z' - 'a') + 1));
+      return out.str();
+    }
+
     std::vector<std::string> split(const std::string& str, char delim) {
       std::vector<std::string> out;
       if (str.empty())

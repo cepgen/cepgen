@@ -24,6 +24,7 @@
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
 #include "CepGen/Utils/Histogram.h"
+#include "CepGen/Utils/Piper.h"
 #include "CepGen/Utils/String.h"
 
 #ifndef TD_BIN
@@ -53,33 +54,16 @@ namespace cepgen {
                                   const Mode& mode = Mode::none) const override;
 
     private:
-      struct Commands : std::vector<std::string> {
-        Commands& operator+=(const Commands& oth) {
-          std::copy(oth.begin(), oth.end(), std::back_inserter(*this));
-          return *this;
-        }
-        Commands& operator+=(const std::string& str) {
-          emplace_back(str);
-          return *this;
-        }
-        friend std::ostream& operator<<(std::ostream& os, const Commands& cmds) {
-          std::string sep;
-          os << "{";
-          for (const auto& cmd : cmds)
-            os << sep << cmd, sep = "\n";
-          return os << "}";
-        }
-      };
-      static void execute(const Commands&, const std::string&);
-      static Commands plot(const Graph1D&);
-      static Commands plot(const Graph2D&, const Mode&);
-      static Commands plot(const Hist1D&);
-      static Commands plot(const Hist2D&, const Mode&);
-      static Commands postDraw(const Drawable&, const Mode&);
-      static Commands stringify(const std::string&, const std::string&);
+      static void execute(const Piper::Commands&, const std::string&);
+      static Piper::Commands plot(const Graph1D&);
+      static Piper::Commands plot(const Graph2D&, const Mode&);
+      static Piper::Commands plot(const Hist1D&);
+      static Piper::Commands plot(const Hist2D&, const Mode&);
+      static Piper::Commands postDraw(const Drawable&, const Mode&);
+      static Piper::Commands stringify(const std::string&, const std::string&);
       static const std::map<std::string, std::pair<char, char> > kSpecChars;
 
-      Commands preDraw(const Drawable&, const Mode&) const;
+      Piper::Commands preDraw(const Drawable&, const Mode&) const;
 
       const std::string font_;
       const bool filling_;
@@ -128,7 +112,7 @@ namespace cepgen {
         : Drawer(params), font_(toupper(steer<std::string>("font"))), filling_(steer<bool>("filling")) {}
 
     const DrawerTopdrawer& DrawerTopdrawer::draw(const Graph1D& graph, const Mode& mode) const {
-      Commands cmds;
+      Piper::Commands cmds;
       cmds += preDraw(graph, mode);
       cmds += plot(graph);
       cmds += stringify("TITLE TOP", graph.title());
@@ -138,7 +122,7 @@ namespace cepgen {
     }
 
     const DrawerTopdrawer& DrawerTopdrawer::draw(const Graph2D& graph, const Mode& mode) const {
-      Commands cmds;
+      Piper::Commands cmds;
       cmds += preDraw(graph, mode);
       cmds += plot(graph, mode);
       cmds += stringify("TITLE TOP", graph.title());
@@ -148,7 +132,7 @@ namespace cepgen {
     }
 
     const DrawerTopdrawer& DrawerTopdrawer::draw(const Hist1D& hist, const Mode& mode) const {
-      Commands cmds;
+      Piper::Commands cmds;
       cmds += preDraw(hist, mode);
       cmds += plot(hist);
       cmds += stringify("TITLE TOP", hist.title());
@@ -158,7 +142,7 @@ namespace cepgen {
     }
 
     const DrawerTopdrawer& DrawerTopdrawer::draw(const Hist2D& hist, const Mode& mode) const {
-      Commands cmds;
+      Piper::Commands cmds;
       cmds += preDraw(hist, mode);
       cmds += plot(hist, mode);
       cmds += stringify("TITLE TOP", hist.title());
@@ -174,9 +158,9 @@ namespace cepgen {
       std::vector<std::string> line_styles = {
           "SOLID", "DOTS", "DASHES", "DAASHES", "DOTDASH", "SPACE", "PATTERNED", "FUNNY", "PERMANENT"};
       size_t plot_id = 0;
-      Commands cmds;
+      Piper::Commands cmds;
       const Drawable* first{nullptr};
-      Commands cmds_plots;
+      Piper::Commands cmds_plots;
       for (const auto* obj : objs) {
         if (obj->isGraph1D()) {
           const auto* gr = dynamic_cast<const Graph1D*>(obj);
@@ -200,8 +184,8 @@ namespace cepgen {
       return *this;
     }
 
-    DrawerTopdrawer::Commands DrawerTopdrawer::plot(const Graph1D& graph) {
-      Commands cmds;
+    Piper::Commands DrawerTopdrawer::plot(const Graph1D& graph) {
+      Piper::Commands cmds;
       for (const auto& pt : graph.points())
         cmds += std::to_string(pt.first.value) + "," + std::to_string(pt.second.value) + "," +
                 std::to_string(pt.first.value_unc) + "," + std::to_string(pt.second.value_unc);
@@ -209,15 +193,15 @@ namespace cepgen {
       return cmds;
     }
 
-    DrawerTopdrawer::Commands DrawerTopdrawer::plot(const Graph2D& graph, const Mode& mode) {
-      Commands cmds;
+    Piper::Commands DrawerTopdrawer::plot(const Graph2D& graph, const Mode& mode) {
+      Piper::Commands cmds;
       auto to_fortran_float = [](double val) -> std::string {
         return utils::replace_all(utils::format("%g", val), {{"e", "D"}});
       };
       cmds += "READ MESH";
       std::ostringstream osl;
-      for (const auto& yval : graph.points().begin()->second)
-        osl << " " << to_fortran_float(fabs(yval.first.value) < 1.e-14 ? 0. : yval.first.value);
+      for (const auto& yval : graph.yCoords())
+        osl << " " << to_fortran_float(fabs(yval) < 1.e-14 ? 0. : yval);
       cmds += "Y" + osl.str();
       for (const auto& xval : graph.points()) {
         osl.str("");
@@ -237,8 +221,8 @@ namespace cepgen {
       return cmds;
     }
 
-    DrawerTopdrawer::Commands DrawerTopdrawer::plot(const Hist1D& hist) {
-      Commands cmds;
+    Piper::Commands DrawerTopdrawer::plot(const Hist1D& hist) {
+      Piper::Commands cmds;
       for (size_t i = 0; i < hist.nbins(); ++i) {
         const auto& bin = hist.binRange(i);
         cmds += std::to_string(bin.x(0.5)) + "," + std::to_string(hist.value(i)) + "," +
@@ -248,8 +232,8 @@ namespace cepgen {
       return cmds;
     }
 
-    DrawerTopdrawer::Commands DrawerTopdrawer::plot(const Hist2D& hist, const Mode& mode) {
-      Commands cmds;
+    Piper::Commands DrawerTopdrawer::plot(const Hist2D& hist, const Mode& mode) {
+      Piper::Commands cmds;
       cmds += "READ MESH BINS";
       std::ostringstream osl;
       std::string sep;
@@ -276,8 +260,8 @@ namespace cepgen {
       return cmds;
     }
 
-    DrawerTopdrawer::Commands DrawerTopdrawer::preDraw(const Drawable& dr, const Mode& mode) const {
-      Commands cmds;
+    Piper::Commands DrawerTopdrawer::preDraw(const Drawable& dr, const Mode& mode) const {
+      Piper::Commands cmds;
       cmds += "SET DEVICE POSTSCR ORIENTATION 3";
       cmds += "SET FONT " + font_;
       if (filling_)
@@ -302,23 +286,19 @@ namespace cepgen {
       return cmds;
     }
 
-    DrawerTopdrawer::Commands DrawerTopdrawer::postDraw(const Drawable& dr, const Mode&) {
-      Commands cmds;
+    Piper::Commands DrawerTopdrawer::postDraw(const Drawable& dr, const Mode&) {
+      Piper::Commands cmds;
       cmds += stringify("TITLE BOTTOM", dr.xAxis().label());
       cmds += stringify("TITLE LEFT", dr.yAxis().label());
       return cmds;
     }
 
-    void DrawerTopdrawer::execute(const Commands& cmds, const std::string& name) {
-      const auto cmd = std::string("TOPDRAWER_OUTPUT=") + name + ".ps " + TD;
-      std::unique_ptr<FILE, decltype(&pclose)> file(popen(cmd.c_str(), "w"), pclose);
-      for (const auto& cmd : cmds)
-        fputs((cmd + "\n").c_str(), file.get());
-      fputs("EXIT", file.get());
+    void DrawerTopdrawer::execute(const Piper::Commands& cmds, const std::string& name) {
+      Piper("TOPDRAWER_OUTPUT=" + name + ".ps " + TD).execute(cmds).execute({"EXIT"});
       CG_DEBUG("DrawerTopdrawer:execute") << "Topdrawer just plotted:\n" << cmds;
     }
 
-    DrawerTopdrawer::Commands DrawerTopdrawer::stringify(const std::string& label, const std::string& str) {
+    Piper::Commands DrawerTopdrawer::stringify(const std::string& label, const std::string& str) {
       bool in_math{false}, in_bs{false}, in_sub{false}, in_sup{false};
       std::map<int, std::string> m_spec_char, m_sub_char;
       std::string lab;
@@ -395,7 +375,7 @@ namespace cepgen {
         mod[ch.first] = 'C';
         mod[ch.first + ch.second.size() + 1] = 'C';
       }
-      Commands out;
+      Piper::Commands out;
       out += label + " '" + lab + "'";
       out += "CASE" + std::string(label.size() - 4, ' ') + " '" + mod + "'";
       return out;

@@ -142,6 +142,7 @@ namespace cepgen {
             return std::move(str) + sep + std::to_string(xv);
           });
     }
+    std::string randomString(size_t size);
     /// Trim leading spaces
     std::string ltrim(const std::string& str);
     /// Trim trailing spaces

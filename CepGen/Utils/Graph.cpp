@@ -63,6 +63,20 @@ namespace cepgen {
       return chi2;
     }
 
+    std::set<double> Graph1D::xCoords() const {
+      std::set<double> coords;
+      for (const auto& val : values_)
+        coords.insert(val.first.value);
+      return coords;
+    }
+
+    const Drawable::value_t Graph1D::valueAt(double val) const {
+      for (const auto& xv : values_)
+        if (xv.first.value == val)
+          return xv.second;
+      throw CG_ERROR("Graph1D:valueAt") << "Failed to retrieve a point a the coordinate x=" << val << ".";
+    }
+
     Graph2D::Graph2D(const std::string& name, const std::string& title) : Drawable(name, title) {}
 
     Graph2D& Graph2D::addPoint(double x, double y, double z) {
@@ -82,6 +96,31 @@ namespace cepgen {
         for (const auto& yaxis : xaxis.second)
           os << utils::format(
               "\n%6zu: (%5g, %5g) = %5g", np++, xaxis.first.value, yaxis.first.value, yaxis.second.value);
+    }
+
+    std::set<double> Graph2D::xCoords() const {
+      std::set<double> coords;
+      for (const auto& xval : values_)
+        coords.insert(xval.first.value);
+      return coords;
+    }
+
+    std::set<double> Graph2D::yCoords() const {
+      std::set<double> coords;
+      for (const auto& xval : values_)
+        for (const auto& yval : xval.second)
+          coords.insert(yval.first.value);
+      return coords;
+    }
+
+    const Drawable::value_t Graph2D::valueAt(double xval, double yval) const {
+      for (const auto& xv : values_)
+        if (xv.first.value == xval)
+          for (const auto& yv : xv.second)
+            if (yv.first.value == yval)
+              return yv.second;
+      throw CG_ERROR("Graph2D:valueAt") << "Failed to retrieve a point a the coordinate (x=" << xval << ", y=" << yval
+                                        << ").";
     }
   }  // namespace utils
 }  // namespace cepgen
