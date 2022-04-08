@@ -31,6 +31,7 @@ if(RPMBUILD)
     set(CPACK_RPM_ADDONS_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
     set(CPACK_RPM_APFEL_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
     set(CPACK_RPM_BOOST_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, boost >= 1.33")
+    set(CPACK_RPM_GNUPLOT_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, gnuplot")
     set(CPACK_RPM_HEPMC_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, HepMC >= 2.01")
     set(CPACK_RPM_HEPMC3_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, HepMC3 >= 3.0")
     set(CPACK_RPM_LHAPDF_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, lhapdf")
@@ -62,6 +63,7 @@ else()
     set(CPACK_DEB_DEVEL_PACKAGE_ARCHITECTURE noarch)
     set(CPACK_DEB_APFEL_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}")
     set(CPACK_DEB_BOOST_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, boost >= 1.33")
+    set(CPACK_DEB_GNUPLOT_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, gnuplot")
     set(CPACK_DEB_HEPMC_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, HepMC >= 2.01")
     set(CPACK_DEB_HEPMC3_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, HepMC3 >= 3.0")
     set(CPACK_DEB_LHAPDF_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, lhapdf")
@@ -99,6 +101,10 @@ cpack_add_component(boost
 cpack_add_component(delphes
     DISPLAY_NAME "CepGen Delphes wrappers library"
     DESCRIPTION "A CepGen wrapper to the Delphes utility"
+    DEPENDS lib)
+cpack_add_component(gnuplot
+    DISPLAY_NAME "CepGen Gnuplot wrappers library"
+    DESCRIPTION "A CepGen wrapper to the Gnuplot plotter"
     DEPENDS lib)
 cpack_add_component(hepmc
     DISPLAY_NAME "CepGen HepMC wrappers library"

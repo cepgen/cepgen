@@ -38,7 +38,7 @@ namespace cepgen {
         desc.add<std::string>("extension", "png");
         desc.add<bool>("persist", false);
         desc.add<std::vector<int> >("size", {640, 480});
-        desc.add<std::string>("font", "Helvetica,15");
+        desc.add<std::string>("font", "Helvetica,15pt");
         return desc;
       }
 
@@ -93,7 +93,7 @@ namespace cepgen {
         for (const auto& ai : std::unordered_map<std::string, const Drawable::AxisInfo&>{
                  {"x", dr.xAxis()}, {"y", dr.yAxis()}, {"z", dr.zAxis()}}) {
           if (!ai.second.label().empty())
-            cmds += "set " + ai.first + "label '" + ai.second.label() + "'";
+            cmds += "set " + ai.first + "label \"" + ai.second.label() + "\"";
           const auto& rng = ai.second.range();
           if (rng.valid())
             cmds += "set " + ai.first + "range [" + std::to_string(rng.min()) + ":" + std::to_string(rng.max()) + "]";
@@ -133,9 +133,10 @@ namespace cepgen {
       cmds += "set autoscale xfix";
       cmds += "set autoscale yfix";
       cmds += "set autoscale cbfix";
-      if (mode & Mode::col)
+      if (mode & Mode::col) {
+        cmds += "set hidden3d";
         cmds += "plot '$DATA' matrix nonuniform with image notitle";
-      else if (mode & Mode::cont) {
+      } else if (mode & Mode::cont) {
         cmds += "set view map";
         cmds += "set contour";
         cmds += "unset surface";
@@ -143,6 +144,7 @@ namespace cepgen {
         cmds += "set cntrlabel start 25 interval -1 font \",7\"";
         cmds += "splot '$DATA' matrix nonuniform with lines notitle";
       } else {
+        cmds += "set hidden3d";
         cmds += "set style data lines";
         cmds += "unset contour";
         cmds += "splot '$DATA' matrix nonuniform notitle";
@@ -153,12 +155,45 @@ namespace cepgen {
 
     const GnuplotDrawer& GnuplotDrawer::draw(const Hist1D& hist, const Mode& mode) const {
       auto cmds = preDraw(hist, mode);
+      cmds += drawHist1D(hist, mode);
       execute(cmds, hist.name());
       return *this;
     }
 
-    const GnuplotDrawer& GnuplotDrawer::draw(const Hist2D&, const Mode&) const {
-      CG_WARNING("GnuplotDrawer:draw") << "Not yet implemented";
+    const GnuplotDrawer& GnuplotDrawer::draw(const Hist2D& hist, const Mode& mode) const {
+      auto cmds = preDraw(hist, mode);
+      cmds += "$DATA << EOD";
+      {
+        std::ostringstream os;
+        os << hist.nbinsX();
+        for (size_t ix = 0; ix < hist.nbinsX(); ++ix)
+          os << "\t" << hist.binRangeX(ix).x(0.5);
+        cmds += os.str();
+      }
+      for (size_t iy = 0; iy < hist.nbinsY(); ++iy) {
+        std::ostringstream os;
+        os << hist.binRangeY(iy).x(0.5);
+        for (size_t ix = 0; ix < hist.nbinsX(); ++ix)
+          os << "\t" << hist.value(ix, iy);
+        cmds += os.str();
+      }
+      cmds += "EOD";
+      if (mode & Mode::col) {
+        cmds += "set hidden3d";
+        cmds += "plot '$DATA' matrix nonuniform with image notitle";
+      } else if (mode & Mode::cont) {
+        cmds += "set view map";
+        cmds += "set contour";
+        cmds += "unset surface";
+        cmds += "set isosamples 500,100";
+        cmds += "splot '$DATA' matrix nonuniform with lines notitle";
+      } else {
+        cmds += "set hidden3d";
+        cmds += "set style data lines";
+        cmds += "unset contour";
+        cmds += "splot '$DATA' matrix nonuniform notitle";
+      }
+      execute(cmds, hist.name());
       return *this;
     }
 
