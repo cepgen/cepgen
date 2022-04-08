@@ -200,8 +200,8 @@ namespace cepgen {
       };
       cmds += "READ MESH";
       std::ostringstream osl;
-      for (const auto& yval : graph.points().begin()->second)
-        osl << " " << to_fortran_float(fabs(yval.first.value) < 1.e-14 ? 0. : yval.first.value);
+      for (const auto& yval : graph.yCoords())
+        osl << " " << to_fortran_float(fabs(yval) < 1.e-14 ? 0. : yval);
       cmds += "Y" + osl.str();
       for (const auto& xval : graph.points()) {
         osl.str("");
