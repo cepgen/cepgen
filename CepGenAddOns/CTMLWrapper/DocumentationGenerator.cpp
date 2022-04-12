@@ -81,9 +81,10 @@ namespace cepgen {
       CTML::Node mod_details("details");
       const auto desc_type = desc.type();
       if (desc_type == ParametersDescription::Type::ParametersVector) {
-        //} else if (desc_type == ParametersDescription::Type::Value) {
-      } else
+      } else if (desc_type == ParametersDescription::Type::Value) {
+      } else {
         mod_summary.AppendText(" " + desc.description());
+      }
       mod_details.AppendChild(mod_summary);
       try {
         CTML::Node items("ul");
@@ -116,7 +117,7 @@ namespace cepgen {
                                    .AppendChild(CTML::Node("p").AppendChild(itparams)));
             }
           } else
-            item.AppendChild(moduleDescription(subdesc));
+            item.AppendChild(CTML::Node("i", " " + subdesc.description())).AppendChild(moduleDescription(subdesc));
           items.AppendChild(item);
         }
         if (!items.GetChildren().empty())
