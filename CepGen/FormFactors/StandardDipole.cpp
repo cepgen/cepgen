@@ -25,11 +25,14 @@ namespace cepgen {
   namespace formfac {
     class StandardDipole final : public Parameterisation {
     public:
-      using Parameterisation::Parameterisation;
+      explicit StandardDipole(const ParametersList& params)
+          : Parameterisation(params), inv_sq_scale_param_(1. / steer<double>("scale")) {}
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Standard dipole");
+        desc.add<double>("scale", 0.71)
+            .setDescription("scaling (in GeV^2) (0.71 for r_p = 0.81 fm, 0.66 for r_p = 0.84 fm)");
         return desc;
       }
 
@@ -38,9 +41,7 @@ namespace cepgen {
         GE = pow(1. + q2 * inv_sq_scale_param_, -2.);
         GM = MU * GE;
       }
-
-      static constexpr double inv_sq_scale_param_ = 1. / 0.71;  // for r_p = 0.81 fm
-      //static constexpr double inv_sq_scale_param_ = 1. / 0.66; // for r_p = 0.84 fm
+      const double inv_sq_scale_param_;
     };
   }  // namespace formfac
 }  // namespace cepgen
