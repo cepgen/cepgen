@@ -28,7 +28,7 @@ namespace cepgen {
     explicit AlphaEMBurkhardt(const ParametersList& params) : Coupling(params), q2min_(steer<double>("q2min")) {}
 
     static ParametersDescription description() {
-      auto desc = ParametersDescription();
+      auto desc = Coupling::description();
       desc.setDescription("Burkhardt et al. alpha(EM) evolution algorithm");
       desc.add<double>("q2min", 2.e-6).setDescription("Minimum Q^2 to start alpha(EM) evolution");
       return desc;

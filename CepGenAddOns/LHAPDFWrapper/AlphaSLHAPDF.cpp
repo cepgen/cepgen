@@ -27,7 +27,7 @@
 
 namespace cepgen {
   /// A perturbative PDF-oriented \f$\alpha_S(Q^2)\f$ evaluator
-  class AlphaSLHAPDF : public Coupling {
+  class AlphaSLHAPDF final : public Coupling {
   public:
     explicit AlphaSLHAPDF(const ParametersList& params)
         : Coupling(params)
@@ -41,7 +41,7 @@ namespace cepgen {
     }
 #endif
     static ParametersDescription description() {
-      auto desc = ParametersDescription();
+      auto desc = Coupling::description();
       desc.setDescription("Perturbative PDF-oriented evolution algorithm");
       desc.add<std::string>("pdfSet", "cteq66");
       desc.add<int>("pdfMember", 0);

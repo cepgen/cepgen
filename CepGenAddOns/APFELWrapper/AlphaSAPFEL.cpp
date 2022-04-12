@@ -23,7 +23,7 @@
 #include "CepGen/Physics/Coupling.h"
 
 namespace cepgen {
-  class AlphaSAPFEL : public Coupling {
+  class AlphaSAPFEL final : public Coupling {
   public:
     explicit AlphaSAPFEL(const ParametersList& params)
         : Coupling(params),
@@ -35,11 +35,11 @@ namespace cepgen {
       APFEL::EvolveAPFEL(q0_, qmax_);
     }
     static ParametersDescription description() {
-      auto desc = ParametersDescription();
+      auto desc = Coupling::description();
       desc.setDescription("APFEL alphaS evolution algorithm");
-      desc.add<int>("order", 2);
-      desc.add<double>("q0", 1.);
-      desc.add<double>("qmax", 10000.);
+      desc.add<int>("order", 2).setDescription("perturbative evolution order");
+      desc.add<double>("q0", 1.).setDescription("minimal Q reachable for evolution (in GeV)");
+      desc.add<double>("qmax", 10000.).setDescription("maximal Q reachable (in GeV)");
       return desc;
     }
 
