@@ -76,10 +76,15 @@ namespace cepgen {
       CTML::Node out("div.module");
       if (desc.empty())
         return out;
-      out.AppendChild(CTML::Node("b", desc.parameters().getString(ParametersList::MODULE_NAME)));
+      CTML::Node mod_summary(
+          CTML::Node("summary").AppendChild(CTML::Node("b", desc.parameters().getString(ParametersList::MODULE_NAME))));
+      CTML::Node mod_details("details");
       const auto desc_type = desc.type();
-      if (desc_type != ParametersDescription::Type::Value && desc_type != ParametersDescription::Type::ParametersVector)
-        out.AppendText(" " + desc.description());
+      if (desc_type == ParametersDescription::Type::ParametersVector) {
+        //} else if (desc_type == ParametersDescription::Type::Value) {
+      } else
+        mod_summary.AppendText(" " + desc.description());
+      mod_details.AppendChild(mod_summary);
       try {
         CTML::Node items("ul");
         for (const auto& key : desc.parameters().keys(false)) {
@@ -101,12 +106,22 @@ namespace cepgen {
             if (!subdesc.description().empty())
               item.AppendText(" defining a ").AppendChild(CTML::Node("i", subdesc.description()));
             item.AppendChild(moduleDescription(subdesc));
+            const auto& vparams = desc.parameters().get<std::vector<ParametersList> >(key);
+            if (!vparams.empty()) {
+              CTML::Node itparams("ol");
+              for (const auto& it : vparams)
+                itparams.AppendChild(CTML::Node("li").AppendChild(moduleDescription(ParametersDescription(it))));
+              item.AppendChild(CTML::Node("details")
+                                   .AppendChild(CTML::Node("summary").AppendChild(CTML::Node("b", "Default content")))
+                                   .AppendChild(CTML::Node("p").AppendChild(itparams)));
+            }
           } else
             item.AppendChild(moduleDescription(subdesc));
           items.AppendChild(item);
         }
         if (!items.GetChildren().empty())
-          out.AppendChild(items);
+          mod_details.AppendChild(CTML::Node("p").AppendText("List of parameters:").AppendChild(items));
+        out.AppendChild(mod_details);
       } catch (const Exception& exc) {
         exc.dump();
       }
