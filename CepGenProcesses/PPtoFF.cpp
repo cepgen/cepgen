@@ -275,7 +275,7 @@ namespace cepgen {
           .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell)");
       auto alphas_desc = ParametersDescription();
       alphas_desc.setName<std::string>("pegasus");
-      desc.add("alphaS", alphas_desc);
+      desc.add("alphaS", alphas_desc).setDescription("strong coupling evolution algorithm");
       desc.add("offShellParameters", OffShellParameters::description());
       return desc;
     }
