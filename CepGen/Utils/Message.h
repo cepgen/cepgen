@@ -35,7 +35,7 @@ namespace cepgen {
     /// Dump the full exception information in a given output stream
     /// \param[inout] os the output stream where the information is dumped
     virtual void dump(std::ostream* os = nullptr) const = 0;
-    static char* now();  ///< Human-readable date/time
+    static const char* now();  ///< Human-readable date/time
   };
 
   /// A simple exception handler

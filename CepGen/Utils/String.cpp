@@ -94,6 +94,14 @@ namespace cepgen {
       return replace_all(str, {{")", ""}, {"(", "_"}, {"{", "_"}, {",", "_"}, {":", "_"}});
     }
 
+    std::string timeAs(const std::string& fmt) {
+      auto now = std::time(nullptr);
+      auto tm = *std::localtime(&now);
+      char out_str[50];
+      strftime(out_str, 50, fmt.c_str(), &tm);
+      return std::string(out_str);
+    }
+
     size_t replace_all(std::string& str, const std::string& from, const std::string& to) {
       size_t count = 0, pos = 0;
       while ((pos = str.find(from, pos)) != std::string::npos) {

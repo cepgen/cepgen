@@ -20,14 +20,7 @@
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
-  char* Message::now() {
-    static char buffer[10];
-    time_t rawtime;
-    time(&rawtime);
-    struct tm* timeinfo = localtime(&rawtime);
-    strftime(buffer, 10, "%H:%M:%S", timeinfo);
-    return buffer;
-  }
+  const char* Message::now() { return utils::timeAs("%H:%M:%S").data(); }
 
   LoggedMessage::LoggedMessage(
       const char* mod, const char* from, MessageType type, const char* file, short lineno) noexcept

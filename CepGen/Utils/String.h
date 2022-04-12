@@ -47,6 +47,8 @@ namespace cepgen {
     std::string format(const std::wstring& fmt, Args... args) {
       return format(tostring(fmt), args...);
     }
+    /// Return the formatted date/time now
+    std::string timeAs(const std::string& fmt);
     /// Human-readable boolean printout
     std::string yesno(bool test);
     /// Boldify a string for TTY-type output streams
