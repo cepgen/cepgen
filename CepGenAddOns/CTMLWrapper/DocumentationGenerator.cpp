@@ -21,6 +21,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
 #include "CepGenAddOns/CTMLWrapper/DocumentationGenerator.h"
 
@@ -49,7 +50,9 @@ namespace cepgen {
                                  .AppendChild(CTML::Node("mark", version::tag))
                                  .AppendChild(CTML::Node("br").UseClosingTag(false))
                                  .AppendText("Git hash/branch: ")
-                                 .AppendChild(CTML::Node("code", version::extended)));
+                                 .AppendChild(CTML::Node("code", version::extended))
+                                 .AppendChild(CTML::Node("br").UseClosingTag(false))
+                                 .AppendText("Last generated: " + timeAs("%B %d, %Y")));
     }
 
     DocumentationGenerator::~DocumentationGenerator() {
