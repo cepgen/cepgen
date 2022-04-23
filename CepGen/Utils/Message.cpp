@@ -20,7 +20,7 @@
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
-  const char* Message::now() { return utils::timeAs("%H:%M:%S").data(); }
+  std::string Message::now() { return utils::timeAs("%H:%M:%S"); }
 
   LoggedMessage::LoggedMessage(
       const char* mod, const char* from, MessageType type, const char* file, short lineno) noexcept
