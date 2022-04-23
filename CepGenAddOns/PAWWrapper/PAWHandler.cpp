@@ -1,31 +1,36 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2019-2022  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Parameters.h"
+#include "CepGenAddOns/PAWWrapper/PAWCommons.h"
 #include "CepGenAddOns/PAWWrapper/PAWTreeInfo.h"
 
 extern "C" {
-#include <cfortran/cfortran.h>
-#include <cfortran/hbook.h>
-//#include <cfortran/packlib.h>
+//#include <cfortran/hbook.h>
+#include <cfortran/packlib.h>
 }
 
-#define PAWC_SIZE 50000
-#define PAWC_ALIGNMENT 64
-
-typedef struct {
-  float PAW[PAWC_SIZE] __attribute__((aligned(PAWC_ALIGNMENT)));
-} PAWC_DEF;
-#define PAWC COMMON_BLOCK(PAWC, pawc)
 COMMON_BLOCK_DEF(PAWC_DEF, PAWC);
-//PAWC_DEF PAWC;
-
-typedef struct {
-  int iquest[100] __attribute__((aligned(PAWC_ALIGNMENT)));
-} QUEST_DEF;
-#define QUEST COMMON_BLOCK(QUEST, quest)
 COMMON_BLOCK_DEF(QUEST_DEF, QUEST);
 //QUEST_DEF QUEST;
 

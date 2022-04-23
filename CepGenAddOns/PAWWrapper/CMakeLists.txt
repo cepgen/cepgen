@@ -11,7 +11,7 @@ endif()
 #----- build the object
 
 cepgen_build(CepGenPAW SOURCES *.cpp
-    EXT_LIBS ${CERNLIB_pawlib} ${CERNLIB_packlib} shift
+    EXT_LIBS ${CERNLIB_pawlib} ${CERNLIB_packlib} gfortran shift
     EXT_HEADERS ${CERNLIB_INCLUDE}
     DEFINITIONS -Df2cFortran
     CFLAGS "-Wall -W -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wwrite-strings"
