@@ -23,7 +23,7 @@ export PATH=${PYTHONHOME}/bin:${PATH}
 #--- extra utilities
 export APFEL_DIR=${CVMFS_DIR}/MCGenerators/apfel/3.0.4-53ae4/x86_64-centos7-gcc9-opt
 export HEPMC_DIR=${CVMFS_DIR}/HepMC/2.06.11-d5a39/x86_64-centos7-gcc9-opt
-export HEPMC3_DIR=${CVMFS_DIR}/hepmc3/3.0.0-b2eef/x86_64-centos7-gcc8-opt
+export HEPMC3_DIR=${CVMFS_DIR}/hepmc3/3.2.4-cd2f4/x86_64-centos7-gcc8-opt
 export LHAPDF_PATH=${CVMFS_DIR}/MCGenerators/lhapdf/6.4.0-0fdec/x86_64-centos7-gcc8-opt
 export TBB_DIR=${CVMFS_DIR}/tbb/2020_U2-daa7e/x86_64-centos7-gcc9-opt
 export VDT_DIR=${CVMFS_DIR}/vdt/0.4.3-992df/x86_64-centos7-gcc9-opt
