@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2022  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <TGraph2DErrors.h>
 #include <TH2D.h>
 #include <TMultiGraph.h>
@@ -12,9 +30,9 @@
 
 namespace cepgen {
   namespace utils {
-    class DrawerROOT : public Drawer {
+    class ROOTDrawer : public Drawer {
     public:
-      explicit DrawerROOT(const ParametersList&);
+      explicit ROOTDrawer(const ParametersList&);
 
       static ParametersDescription description() {
         auto desc = Drawer::description();
@@ -24,12 +42,12 @@ namespace cepgen {
         return desc;
       }
 
-      const DrawerROOT& draw(const Graph1D&, const Mode&) const override;
-      const DrawerROOT& draw(const Graph2D&, const Mode&) const override;
-      const DrawerROOT& draw(const Hist1D&, const Mode&) const override;
-      const DrawerROOT& draw(const Hist2D&, const Mode&) const override;
+      const ROOTDrawer& draw(const Graph1D&, const Mode&) const override;
+      const ROOTDrawer& draw(const Graph2D&, const Mode&) const override;
+      const ROOTDrawer& draw(const Hist1D&, const Mode&) const override;
+      const ROOTDrawer& draw(const Hist2D&, const Mode&) const override;
 
-      const DrawerROOT& draw(const DrawableColl&,
+      const ROOTDrawer& draw(const DrawableColl&,
                              const std::string& name = "",
                              const std::string& title = "",
                              const Mode& mode = Mode::none) const override;
@@ -47,12 +65,12 @@ namespace cepgen {
       const std::string def_extension_;
     };
 
-    DrawerROOT::DrawerROOT(const ParametersList& params)
+    ROOTDrawer::ROOTDrawer(const ParametersList& params)
         : Drawer(params), def_filename_(steer<std::string>("filename")), def_extension_(steer<std::string>("format")) {
       gStyle->SetPalette(steer<int>("palette"));
     }
 
-    const DrawerROOT& DrawerROOT::draw(const Graph1D& graph, const Mode& mode) const {
+    const ROOTDrawer& ROOTDrawer::draw(const Graph1D& graph, const Mode& mode) const {
       auto gr = convert(graph);
       ROOTCanvas canv(graph.name().empty() ? def_filename_ : graph.name(), gr.GetTitle());
       setMode(canv, mode);
@@ -64,7 +82,7 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerROOT& DrawerROOT::draw(const Graph2D& graph, const Mode& mode) const {
+    const ROOTDrawer& ROOTDrawer::draw(const Graph2D& graph, const Mode& mode) const {
       auto gr = convert(graph);
       ROOTCanvas canv(graph.name().empty() ? def_filename_ : graph.name(), gr.GetTitle());
       setMode(canv, mode);
@@ -82,7 +100,7 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerROOT& DrawerROOT::draw(const Hist1D& hist, const Mode& mode) const {
+    const ROOTDrawer& ROOTDrawer::draw(const Hist1D& hist, const Mode& mode) const {
       auto h = convert(hist);
       ROOTCanvas canv(hist.name().empty() ? def_filename_ : hist.name(), h.GetTitle());
       setMode(canv, mode);
@@ -93,7 +111,7 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerROOT& DrawerROOT::draw(const Hist2D& hist, const Mode& mode) const {
+    const ROOTDrawer& ROOTDrawer::draw(const Hist2D& hist, const Mode& mode) const {
       auto h = convert(hist);
       ROOTCanvas canv(hist.name().empty() ? def_filename_ : hist.name(), h.GetTitle());
       setMode(canv, mode);
@@ -104,7 +122,7 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerROOT& DrawerROOT::draw(const DrawableColl& objs,
+    const ROOTDrawer& ROOTDrawer::draw(const DrawableColl& objs,
                                        const std::string& name,
                                        const std::string& title,
                                        const Mode& mode) const {
@@ -126,7 +144,7 @@ namespace cepgen {
           mg.Add(gr);
           canv.AddLegendEntry(gr, gr->GetTitle(), "l");
         } else {
-          CG_WARNING("DrawerROOT:draw") << "Cannot add drawable '" << obj->name() << "' to the stack.";
+          CG_WARNING("ROOTDrawer:draw") << "Cannot add drawable '" << obj->name() << "' to the stack.";
           continue;
         }
         if (!first)
@@ -149,7 +167,7 @@ namespace cepgen {
       return *this;
     }
 
-    void DrawerROOT::setMode(ROOTCanvas& canv, const Mode& mode) {
+    void ROOTDrawer::setMode(ROOTCanvas& canv, const Mode& mode) {
       canv.SetLegendX1(0.175);
       if (mode & Mode::logx)
         canv.SetLogx();
@@ -161,7 +179,7 @@ namespace cepgen {
         canv.SetGrid();
     }
 
-    void DrawerROOT::postDraw(TH1* obj, const Drawable& dr) {
+    void ROOTDrawer::postDraw(TH1* obj, const Drawable& dr) {
       const auto &xrng = dr.xAxis().range(), &yrng = dr.yAxis().range();
       obj->GetXaxis()->SetTitle(delatexify(dr.xAxis().label()));
       obj->GetYaxis()->SetTitle(delatexify(dr.yAxis().label()));
@@ -175,12 +193,12 @@ namespace cepgen {
       }
     }
 
-    TString DrawerROOT::delatexify(const std::string& tok) {
+    TString ROOTDrawer::delatexify(const std::string& tok) {
       auto out = utils::replace_all(tok, {{"$", ""}});
       return TString(out);
     }
 
-    TGraphErrors DrawerROOT::convert(const Graph1D& graph) {
+    TGraphErrors ROOTDrawer::convert(const Graph1D& graph) {
       TGraphErrors gr;
       gr.SetTitle(delatexify(graph.title()));
       int i = 0;
@@ -193,7 +211,7 @@ namespace cepgen {
       return gr;
     }
 
-    TGraph2DErrors DrawerROOT::convert(const Graph2D& graph) {
+    TGraph2DErrors ROOTDrawer::convert(const Graph2D& graph) {
       TGraph2DErrors gr;
       gr.SetTitle(delatexify(graph.title()));
       int i = 0;
@@ -209,7 +227,7 @@ namespace cepgen {
       return gr;
     }
 
-    TH1D DrawerROOT::convert(const Hist1D& hist) {
+    TH1D ROOTDrawer::convert(const Hist1D& hist) {
       const auto& rng = hist.range();
       TH1D h(hist.name().c_str(), delatexify(hist.title()), hist.nbins(), rng.min(), rng.max());
       for (size_t i = 0; i < hist.nbins(); ++i) {
@@ -221,7 +239,7 @@ namespace cepgen {
       return h;
     }
 
-    TH2D DrawerROOT::convert(const Hist2D& hist) {
+    TH2D ROOTDrawer::convert(const Hist2D& hist) {
       const auto &rng_x = hist.rangeX(), &rng_y = hist.rangeY();
       TH2D h(hist.name().c_str(),
              delatexify(hist.title()),
@@ -244,4 +262,4 @@ namespace cepgen {
   }  // namespace utils
 }  // namespace cepgen
 
-REGISTER_DRAWER("root", DrawerROOT)
+REGISTER_DRAWER("root", ROOTDrawer)

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,9 +25,9 @@
 
 namespace cepgen {
   namespace utils {
-    class FunctionalROOT final : public Functional {
+    class ROOTFunctional final : public Functional {
     public:
-      explicit FunctionalROOT(const ParametersList&);
+      explicit ROOTFunctional(const ParametersList&);
       double eval() const override;
 
       static ParametersDescription description();
@@ -36,24 +36,24 @@ namespace cepgen {
       TFormula func_;
     };
 
-    FunctionalROOT::FunctionalROOT(const ParametersList& params) : Functional(params) {
+    ROOTFunctional::ROOTFunctional(const ParametersList& params) : Functional(params) {
       for (auto& var : vars_)
         func_.AddVariable(var, 0.);
       auto expr = expression_;
       expr = utils::replace_all(expr, {{"min(", "TMath::Min("}, {"max(", "TMath::Max("}});
       if (func_.Compile(expr.c_str()) != 0)
-        throw CG_ERROR("FunctionalROOT") << "Failed to define the function\n\t" << expression_;
-      CG_DEBUG("FunctionalROOT") << "Successfully defined a dimension-" << vars_.size() << " function with arguments "
+        throw CG_ERROR("ROOTFunctional") << "Failed to define the function\n\t" << expression_;
+      CG_DEBUG("ROOTFunctional") << "Successfully defined a dimension-" << vars_.size() << " function with arguments "
                                  << vars_ << ": " << expr << ".";
     }
 
-    double FunctionalROOT::eval() const {
+    double ROOTFunctional::eval() const {
       if (!func_.IsValid())
-        throw CG_WARNING("FunctionalROOT") << "Cannot evaluate the invalid function at " << values_ << ".";
+        throw CG_WARNING("ROOTFunctional") << "Cannot evaluate the invalid function at " << values_ << ".";
       return func_.EvalPar(values_.data());
     }
 
-    ParametersDescription FunctionalROOT::description() {
+    ParametersDescription ROOTFunctional::description() {
       auto desc = Functional::description();
       desc.setDescription("Plain old TFormula evaluator from ROOT");
       return desc;
@@ -61,4 +61,4 @@ namespace cepgen {
   }  // namespace utils
 }  // namespace cepgen
 
-REGISTER_FUNCTIONAL("ROOT", FunctionalROOT)
+REGISTER_FUNCTIONAL("ROOT", ROOTFunctional)
