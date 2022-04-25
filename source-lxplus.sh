@@ -29,6 +29,7 @@ export TBB_DIR=${CVMFS_DIR}/tbb/2020_U2-daa7e/x86_64-centos7-gcc9-opt
 export VDT_DIR=${CVMFS_DIR}/vdt/0.4.3-992df/x86_64-centos7-gcc9-opt
 export LD_LIBRARY_PATH=${TBB_DIR}/lib:${VDT_DIR}/lib:${LD_LIBRARY_PATH}
 export nlohmann_json_DIR=${CVMFS_DIR}/jsonmcpp/3.9.1-72770/x86_64-centos7-gcc9-opt
+export YODA_DIR=${CVMFS_DIR}/MCGenerators/yoda/1.9.0-97783/x86_64-centos7-gcc9-opt
 
 echo "Environment prepared for LXPLUS"
 export CEPGEN_LXPLUS_ENV=1
