@@ -20,9 +20,11 @@
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 
+#define ELEM_STR(x) #x
+#define ELEM_EVAL(x) ELEM_STR(x)
 #define DEF_ELEM(x) \
   case Element::x:  \
-    return os << "x"
+    return os << ELEM_EVAL(x)
 
 namespace cepgen {
   HeavyIon::HeavyIon(pdgid_t pdg)
@@ -74,3 +76,5 @@ namespace cepgen {
 }  // namespace cepgen
 
 #undef DEF_ELEM
+#undef ELEM_STR
+#undef ELEM_EVAL
