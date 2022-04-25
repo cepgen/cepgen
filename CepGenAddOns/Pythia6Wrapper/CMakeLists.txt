@@ -25,7 +25,7 @@ else()
   message(STATUS "Pythia 6 source found in ${pythia6_src}")
   add_library(pythia6 SHARED ${pythia6_src})
   install(TARGETS pythia6 DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT pythia6)
-  set_property(TARGET pythia6 PROPERTY Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wno-tabs -Wno-maybe-uninitialized -Wno-integer-division -Wno-unused-variable -Wno-unused-dummy-argument")
+  target_compile_options(pythia6 PRIVATE "-Wno-tabs -Wno-maybe-uninitialized -Wno-integer-division -Wno-unused-variable -Wno-unused-dummy-argument")
   list(APPEND PYTHIA6LIB pythia6)
 endif()
 
@@ -35,5 +35,5 @@ enable_testing()
 cepgen_build(CepGenPythia6 SOURCES *.cpp
     TESTS test/test_pythia_decay.cc
     EXT_LIBS ${PYTHIA6LIB}
-    PROPERTY CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-misleading-indentation"
+    OPTIONS "-Wno-misleading-indentation"
     INSTALL_COMPONENT pythia6)

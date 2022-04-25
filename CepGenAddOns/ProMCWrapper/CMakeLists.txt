@@ -14,5 +14,5 @@ endif()
 cepgen_build(CepGenProMC SOURCES *.cpp
     EXT_LIBS ${PROMC_LIB}
     EXT_HEADERS ${PROMC_INCLUDE} ${PROMC_EXT_INCLUDE}
-    PROPERTY CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations"
+    OPTIONS "-Wno-deprecated-declarations"
     INSTALL_COMPONENT promc)

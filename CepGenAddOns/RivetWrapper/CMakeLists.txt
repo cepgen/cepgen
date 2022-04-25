@@ -15,4 +15,5 @@ file(GLOB sources YODAHistsHandler.cpp DrawerYODA.cpp)
 cepgen_build(CepGenRivet SOURCES ${sources}
     EXT_LIBS ${YODA}
     EXT_HEADERS ${YODA_INCLUDE}
+    OPTIONS "-Wno-deprecated-copy"
     INSTALL_COMPONENT rivet)

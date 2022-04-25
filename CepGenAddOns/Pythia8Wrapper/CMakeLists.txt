@@ -20,6 +20,6 @@ cepgen_build(CepGenPythia8 SOURCES *.cpp
     EXT_LIBS ${PYTHIA8} dl
     EXT_HEADERS ${PYTHIA8_INCLUDE}
     DEFINITIONS ${PYTHIA_DEFS}
-    PROPERTY CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-misleading-indentation"
+    OPTIONS "-Wno-misleading-indentation"
     INSTALL_COMPONENT pythia8)
 
