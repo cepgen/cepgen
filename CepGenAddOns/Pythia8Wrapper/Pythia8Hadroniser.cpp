@@ -78,9 +78,9 @@ namespace cepgen {
         : Hadroniser(plist),
           pythia_(new Pythia8::Pythia),
           cg_evt_(new Pythia8::CepGenEvent),
-          correct_central_(plist.get<bool>("correctCentralSystem")),
-          debug_lhef_(plist.get<bool>("debugLHEF")),
-          output_config_(plist.get<std::string>("outputConfig")) {}
+          correct_central_(steer<bool>("correctCentralSystem")),
+          debug_lhef_(steer<bool>("debugLHEF")),
+          output_config_(steer<std::string>("outputConfig")) {}
 
     void Pythia8Hadroniser::setRuntimeParameters(const Parameters& params) {
       rt_params_ = &params;

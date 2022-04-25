@@ -22,7 +22,7 @@
 
 namespace cepgen {
   EventModifier::EventModifier(const ParametersList& plist)
-      : NamedModule(plist), seed_(plist.getAs<int, long long>("seed")), max_trials_(plist.get<int>("maxTrials")) {
+      : NamedModule(plist), seed_(steerAs<int, long long>("seed")), max_trials_(steer<int>("maxTrials")) {
     CG_DEBUG("EventModifier:init") << "\"" << name_ << "\"-type event modifier built with:\n\t"
                                    << "* seed = " << seed_ << "\n\t"
                                    << "* maximum trials: " << max_trials_;
