@@ -1,98 +1,80 @@
-#include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/HeavyIon.h"
-#include "CepGen/Physics/KTFlux.h"
-#include "CepGen/Physics/Momentum.h"
-
-#include "CepGen/StructureFunctions/StructureFunctions.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/utils.h"
+#include "CepGen/Physics/GluonGrid.h"
+#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Physics/PDG.h"
 
-#include <cmath>
+namespace cepgen {
+  const double Kinematics::MX_MIN = 1.07;  // mp+mpi+-
 
-namespace cepgen
-{
-  Kinematics::Kinematics() :
-    incoming_beams( { { 6500., PDG::proton, KTFlux::invalid }, { 6500., PDG::proton, KTFlux::invalid } } ),
-    mode( KinematicsMode::invalid ),
-    structure_functions( strfun::StructureFunctionsHandler::get().build( (int)strfun::Type::SuriYennie ) )
-  {}
+  Kinematics::Kinematics(const ParametersList& params)
+      : SteeredObject(params), incoming_beams_(params_), cuts_(params_) {
+    CG_DEBUG("Kinematics") << "Building a Kinematics parameters container "
+                           << "with the following parameters:\n\t" << params << ".";
+    //----- outgoing particles definition
+    if (params_.has<std::vector<int> >("minFinalState"))
+      for (const auto& pdg : steer<std::vector<int> >("minFinalState"))
+        minimum_final_state_.emplace_back((pdgid_t)pdg);
 
-  void
-  Kinematics::setSqrtS( double sqrts )
-  {
-    if ( incoming_beams.first.pdg != incoming_beams.second.pdg )
-      throw CG_FATAL( "Kinematics" )
-        << "Trying to set √s with asymmetric beams.\n"
-        << "Please fill incoming beams objects manually!";
-    incoming_beams.first.pz = incoming_beams.second.pz = 0.5 * sqrts;
+    //--- specify where to look for the grid path for gluon emission
+    if (params.has<std::string>("kmrGridPath"))
+      kmr::GluonGrid::get(ParametersList(params_).set<std::string>("path", steer<std::string>("kmrGridPath")));
   }
 
-  double
-  Kinematics::sqrtS() const
-  {
-    const HeavyIon hi1( incoming_beams.first.pdg ), hi2( incoming_beams.second.pdg );
-    const double m1 = hi1 ? HeavyIon::mass( hi1 ) : PDG::get().mass( incoming_beams.first .pdg );
-    const double m2 = hi2 ? HeavyIon::mass( hi2 ) : PDG::get().mass( incoming_beams.second.pdg );
-    const auto p1 = Momentum::fromPxPyPzM( 0., 0., +incoming_beams.first .pz, m1 );
-    const auto p2 = Momentum::fromPxPyPzM( 0., 0., -incoming_beams.second.pz, m2 );
-    return ( p1+p2 ).mass();
+  void Kinematics::setParameters(const ParametersList& params) {
+    SteeredObject::setParameters(params);
+    incoming_beams_.setParameters(params_);
+    cuts_.setParameters(params_);
   }
 
-  //--------------------------------------------------------------------
-  // User-friendly display of the kinematics mode
-  //--------------------------------------------------------------------
-
-  std::ostream&
-  operator<<( std::ostream& os, const KinematicsMode& pm )
-  {
-    switch ( pm ) {
-      case KinematicsMode::invalid:
-        return os << "invalid";
-      case KinematicsMode::ElectronElectron:
-        return os << "electron/electron";
-      case KinematicsMode::ElectronProton:
-        return os << "electron/proton";
-      case KinematicsMode::ProtonElectron:
-        return os << "proton/electron";
-      case KinematicsMode::ElasticElastic:
-        return os << "elastic/elastic";
-      case KinematicsMode::InelasticElastic:
-        return os << "inelastic/elastic";
-      case KinematicsMode::ElasticInelastic:
-        return os << "elastic/inelastic";
-      case KinematicsMode::InelasticInelastic:
-        return os << "inelastic/inelastic";
+  ParametersList Kinematics::parameters(bool extended) const {
+    ParametersList params;
+    params += incoming_beams_.parameters();         // beam particles
+    params += cuts_.initial.parameters(extended);   // incoming partons
+    params += cuts_.central.parameters(extended);   // central particles
+    params += cuts_.remnants.parameters(extended);  // beam remnants
+    // minimum final state content
+    if (!minimum_final_state_.empty()) {
+      std::vector<int> min_pdgs;
+      std::transform(
+          minimum_final_state_.begin(), minimum_final_state_.end(), std::back_inserter(min_pdgs), [](const auto& pdg) {
+            return (int)pdg;
+          });
+      params.set<std::vector<int> >("minFinalState", min_pdgs);
     }
-    return os;
+    // per-PDGid selection
+    if (!cuts_.central_particles.empty()) {
+      ParametersList per_part;
+      for (const auto& cuts_vs_part : cuts_.central_particles)
+        per_part.set<ParametersList>(std::to_string(cuts_vs_part.first), cuts_vs_part.second.parameters(extended));
+      params.set<ParametersList>("cuts", per_part);
+    }
+    CG_DEBUG("Kinematics:parameters") << "Kinematics parameters values retrieved:\n"
+                                      << ParametersDescription(params) << ".";
+    return params;
   }
 
-  //--------------------------------------------------------------------
-  // User-friendly display of incoming particles
-  //--------------------------------------------------------------------
-
-  std::ostream&
-  operator<<( std::ostream& os, const Kinematics::Beam& beam )
-  {
-    if ( (HeavyIon)beam.pdg )
-      os << (HeavyIon)beam.pdg;
-    else
-      os << PDG::get().name( beam.pdg );
-    os << " (" << beam.pz << " GeV/c)";
-    if ( beam.kt_flux != KTFlux::invalid )
-      os << " [unint.flux: " << beam.kt_flux << "]";
-    return os;
+  ParametersDescription Kinematics::description() {
+    auto desc = ParametersDescription();
+    desc += IncomingBeams::description();
+    desc += CutsList::description();
+    return desc;
   }
-
-  //--------------------------------------------------------------------
-  // List of kinematics limits
-  //--------------------------------------------------------------------
-
-  Kinematics::CutsList::CutsList()
-  {
-    initial.q2 = { 0., 1.e5 };
-    central.pt_single.min() = 0.;
-    remnants.mass_single = { 1.07, 320. };
-  }
-}
+}  // namespace cepgen

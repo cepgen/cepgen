@@ -1,41 +1,53 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGen_Physics_GluonGrid_h
 #define CepGen_Physics_GluonGrid_h
 
-#include "CepGen/IO/GridHandler.h"
+#include "CepGen/Core/SteeredObject.h"
+#include "CepGen/Utils/GridHandler.h"
 
 #define DEFAULT_KMR_GRID_PATH "gluon_mmht2014nlo_Watt.dat"
 
 /// Kimber-Martin-Ryskin unintegrated gluon densities
-namespace kmr
-{
+namespace kmr {
   /// A KMR unintegrated gluon densities grid interpolator
-  class GluonGrid : private cepgen::GridHandler<3,1>
-  {
-    public:
-      struct Parameters {
-        Parameters() : grid_path( DEFAULT_KMR_GRID_PATH ) {}
-        /// Location of the grid to be interpolated
-        std::string grid_path;
-      };
+  class GluonGrid : private cepgen::GridHandler<3, 1>, public cepgen::SteeredObject<GluonGrid> {
+  public:
+    /// Retrieve the grid interpolator (singleton)
+    static GluonGrid& get(const cepgen::ParametersList& params = {});
 
-    public:
-      /// Retrieve the grid interpolator (singleton)
-      static GluonGrid& get( const char* path = DEFAULT_KMR_GRID_PATH );
+    GluonGrid(const GluonGrid&) = delete;
+    void operator=(const GridHandler&) = delete;
 
-      /// Compute the gluon flux
-      double operator()( double x, double kt2, double mu2 ) const;
-      /// Grid parameterisation object
-      Parameters params;
+    static cepgen::ParametersDescription description();
 
-    public:
-      GluonGrid( const GluonGrid& ) = delete;
-      void operator=( const GridHandler& ) = delete;
+    /// Retrieve the path to the interpolation grid values
+    const std::string& path() const { return grid_path_; }
 
-    private:
-      explicit GluonGrid( const Parameters& = Parameters() );
+    /// Compute the gluon flux
+    double operator()(double x, double kt2, double mu2) const;
+
+  private:
+    explicit GluonGrid(const cepgen::ParametersList&);
+    /// Location of the grid to be interpolated
+    const std::string grid_path_;
   };
-}
-
-#undef DEFAULT_KMR_GRID_PATH
+}  // namespace kmr
 
 #endif

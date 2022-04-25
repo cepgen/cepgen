@@ -1,22 +1,27 @@
 class PrintHelper(object):
-    '''Helper class for the pretty-printing of configuration parameters'''
+    """Helper class for the pretty-printing of configuration parameters"""
     _indent = 0
     _indent_size = 4
+
     def indent(self):
-        '''Move to the next indentation block'''
+        """Move to the next indentation block"""
         self._indent += self._indent_size
+
     def unindent(self):
-        '''Go up to the previous indentation block'''
+        """Go up to the previous indentation block"""
         self._indent -= self._indent_size
+
     def indentation(self):
-        '''Current indentation level'''
+        """Current indentation level"""
         return ' '*self._indent
 
+
 class Parameters(dict):
-    '''A raw list of steering parameters'''
+    """A raw list of steering parameters"""
     __getattr__ = dict.get
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
+
     def __init__(self, *args, **kwargs):
         """Construct a parameters set from dictionary arguments
 
@@ -27,17 +32,19 @@ class Parameters(dict):
             kwargs: list of named (keyworded) arguments
 
         Examples:
-            >>> print dict(Parameters(foo = 'bar', foo2 = 42))
+            >>> print(dict(Parameters(foo = 'bar', foo2 = 42)))
             {'foo': 'bar', 'foo2': 42}
         """
         self.update(*args, **kwargs)
         super(Parameters, self).__init__(*args, **kwargs)
+
     def __deepcopy__(self, memo):
-        '''Override the default dict deep copy operator'''
+        """Override the default dict deep copy operator"""
         from copy import deepcopy
         return Parameters([(deepcopy(k, memo), deepcopy(v, memo)) for k, v in self.items()])
+
     def dump(self, printer=PrintHelper()):
-        '''Human-readable dump of this object'''
+        """Human-readable dump of this object"""
         out = self.__class__.__name__+'(\n'
         for k, v in self.items():
             printer.indent()
@@ -50,21 +57,26 @@ class Parameters(dict):
             printer.unindent()
         out += printer.indentation()+')'
         return out
+
     def __repr__(self):
-        '''Human-readable version of this object'''
+        """Human-readable version of this object"""
         return self.dump()
+
     def clone(self, *args, **kwargs):
-        '''Return a deep copy of this object'''
+        """Return a deep copy of this object"""
         from copy import deepcopy
         out = deepcopy(self)
         for k in kwargs:
             out[k] = kwargs.get(k)
         return type(self)(out)
+
     def load(self, mod):
-        '''Extend this object by an include'''
+        """Extend this object by an include"""
+        from sys import modules
         mod = mod.replace('/', '.')
-        module = __import__(mod)
-        self.extend(sys.modules[mod])
+        __import__(mod)
+        self.extend(modules[mod])
+
 
 class Module(Parameters):
     """A named parameters set to steer a generic module
@@ -84,17 +96,19 @@ class Module(Parameters):
             kwargs: list of named (keyworded) arguments
 
         Examples:
-            >>> print dict(Module('module1', foo = 'bar', foo2 = 42))
+            >>> print(dict(Module('module1', foo = 'bar', foo2 = 42)))
             {'foo': 'bar', 'foo2': 42, 'mod_name': 'module1'}
         """
         super(Module, self).__init__(*args, **kwargs)
         self.mod_name = name
+
     def __len__(self):
-        '''Number of keys handled'''
-        return dict.__len__(self)-1 # discard the name key
+        """Number of keys handled"""
+        return dict.__len__(self)-1  # discard the name key
+
     def dump(self, printer=PrintHelper()):
-        '''Human-readable dump of this object'''
-        out = self.__class__.__name__+'('+self.mod_name.__repr__()+'\n'
+        """Human-readable dump of this object"""
+        out = self.__class__.__name__+'('+self.mod_name.__repr__()+',\n'
         mod_repr = self.clone('')
         mod_repr.pop('mod_name', None)
         for k, v in mod_repr.items():
@@ -108,36 +122,70 @@ class Module(Parameters):
             printer.unindent()
         out += printer.indentation()+')'
         return out
+
     def __repr__(self):
-        '''Human-readable version of this object'''
+        """Human-readable version of this object"""
         return self.dump()
+
+    def name(self):
+        return self.mod_name
+
     def clone(self, name, **kwargs):
-        '''Return a deep copy of this object'''
+        """Return a deep copy of this object"""
         out = Parameters(self).clone(**kwargs)
         out.mod_name = name
         return out
 
+
 class Sequence(list):
+    """An ordered modules sequence"""
     MODULE = object()
+
     def __init__(self, *args):
+        """Construct an ordered sequence of modules from a list
+
+        Args:
+            args: list of modules
+
+        Examples:
+            >>> module1 = Module('test1', foo = 'bar')
+            >>> module2 = Module('test2', foo2 = 42)
+            >>> print(Sequence(module1, module2))
+            Sequence([Module('test1',
+                foo = 'bar',
+            ), Module('test2',
+                foo2 = 42,
+            )])
+        """
         super(Sequence, self).__init__(args)
+
     def __delitem__(self, index):
+        """Remove an element from the sequence"""
         self[index] = self.MODULE
+
     def __iter__(self):
+        """Iterator definition for the sequence"""
         return (item for item in super().__iter__() if item is not self.MODULE)
+
     def __eq__(self, other):
+        """Equality operator"""
         if isinstance(other, Sequence):
             return all(x == y for x, y in zip(self, other))
         return super().__eq__(other)
+
     def __repr__(self):
+        """Human-readable representation of this sequence"""
         return type(self).__name__+'('+super(Sequence, self).__repr__()+')'
+
 
 if __name__ == '__main__':
     import unittest
+
     class TestTypes(unittest.TestCase):
-        '''A small collection of tests for our new types'''
+        """Small collection of tests for our new types"""
+
         def testModules(self):
-            '''Test the Module object'''
+            """Test the Module object"""
             mod = Module('empty')
             self.assertEqual(len(mod), 0)
             mod.param1 = 'foo'
@@ -148,8 +196,9 @@ if __name__ == '__main__':
             self.assertEqual(mod_copy.param1, 'boo')
             self.assertEqual(mod_copy.param2, 'bar')
             self.assertEqual(mod.param1+mod_copy.param2, 'foobar')
+
         def testParameters(self):
-            '''Test the Parameters object'''
+            """Test the Parameters object"""
             params = Parameters(
                 first = 'foo',
                 second = 'bar',
@@ -173,5 +222,24 @@ if __name__ == '__main__':
             self.assertEqual(params.third, 43)
             self.assertEqual(params_copy.third, 42)
 
-    unittest.main()
+        def testSequences(self):
+            """Test the Sequence object"""
+            mod1 = Module('module1',
+                foo = 'bar',
+                foo2 = 42
+            )
+            mod2 = Module('module2',
+                foo = [i for i in range(4)]
+            )
+            seq = Sequence(mod1, mod2)
+            self.assertEqual(len(seq), 2)
+            # check that all sequence modules have their attributes
+            # conserved in the sequence construction
+            self.assertEqual(len(seq[0]), 2)
+            self.assertEqual(seq[0].foo, 'bar')
+            self.assertEqual(seq[0].name(), 'module1')
+            self.assertEqual(len(seq[1]), 1)
+            self.assertEqual(seq[1].name(), 'module2')
+            self.assertEqual(len(seq[1].foo), 4)
 
+    unittest.main()

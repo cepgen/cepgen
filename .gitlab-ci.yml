@@ -1,60 +1,305 @@
 stages:
   - compile
+  - package
+  - run
   - test
+  - doc
 
-image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:cc7
+#######################################
+# define all build, tests, and
+# executables recipes as templates
+#######################################
 
-compile:
+.build_common:
   stage: compile
   before_script:
-    #- yum install -y -q gsl gsl-devel libgfortran gcc-gfortran
+    - source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
+    - gcc --version
+    - cmake3 --version || cmake --version
     - mkdir build
     - cd build
   script:
-    - cmake ..
-    - make -j 4
+    - cmake3 -DCMAKE_BUILD_TESTS=1 -DCMAKE_BUILD_CARD_CONV=1 .. || cmake -DCMAKE_BUILD_TESTS=1 -DCMAKE_BUILD_CARD_CONV=1 ..
+    - make -j 10
   artifacts:
+    expire_in: 2 hrs
     paths:
       - build/
 
-# define all the tests
-
-test_integrator:
-  stage: test
-  dependencies:
-    - compile
+.build_cvmfs_common:
+  tags: [ cvmfs,docker ]
+  stage: compile
   before_script:
+    - shopt -s expand_aliases
+    - set +u && source source-lxplus.sh; set -u
+    - gcc --version
+    - cmake3 --version || cmake --version
+    - mkdir build
     - cd build
+    - curl https://raw.githubusercontent.com/tinfoilboy/CTML/master/include/ctml.hpp -o CTML/ctml.hpp --create-dirs && export CTML_DIR=$CI_PROJECT_DIR/build
   script:
-    - make test_integrator
-    - test/test_integrator vegas
-    - test/test_integrator miser
+    - cmake3 -DCMAKE_BUILD_TESTS=1 -DCMAKE_BUILD_CARD_CONV=1 .. || cmake -DCMAKE_BUILD_TESTS=1 -DCMAKE_BUILD_CARD_CONV=1 ..
+    - make -j 10
+  artifacts:
+    expire_in: 2 hrs
+    paths:
+      - build/
+
+.package_common:
+  stage: package
+  script:
+    - cd build
+    - echo "Starting the packaging"
+    - make package -j 10
+  when: on_success
+  allow_failure: false
+  artifacts:
+    paths:
+      - build/*.rpm
+      - build/*.deb
+
+.run_cepgen_common:
+  stage: run
+  script:
+    - cd build
+    - source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
+    - export LD_LIBRARY_PATH=.:$ROOTSYS/lib:$LD_LIBRARY_PATH
+    - ls
+    - echo "Modules dump"
+    - ./cepgen -l
+    - echo "Python card test"
+    - ./cepgen Cards/lpair_cfg.py -n 10000
+    #- echo "LPAIR card test"
+    #- ./cepgen-cards-converter Cards/lpair_cfg.py lpair.card
+    #- ./cepgen lpair.card -n 10000
   when: on_success
   allow_failure: false
 
-test_cross_sections:
+.test_common:
   stage: test
-  dependencies:
-    - compile
-  before_script:
-    - cd build
   script:
-    - make test_physics_processes
-    - test/test_physics_processes vegas
-    - test/test_physics_processes miser
+    - cd build
+    - source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
+    - export LD_LIBRARY_PATH=.:$ROOTSYS/lib:$LD_LIBRARY_PATH
+    - ctest --output-on-failure --timeout 60
   when: on_success
+  allow_failure: false
+
+.doc_common:
+  stage: doc
+  script:
+    - cd build
+    - source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
+    - export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+    - ./cepgenDocGenerator
+  artifacts:
+    paths:
+      - build/index.html
   allow_failure: true
 
-test_function_parser:
-  stage: test
-  dependencies:
-    - compile
+#######################################
+# CS8 jobs
+#######################################
+
+compile:centos8:
+  extends: .build_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:centos8
+
+run_cepgen:centos8:
+  extends: .run_cepgen_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:centos8
+  dependencies: ["compile:centos8"]
+  needs: ["compile:centos8"]
+
+package:centos8:
+  extends: .package_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:centos8
+  dependencies: ["compile:centos8"]
+  needs: ["compile:centos8"]
+
+test:centos8:
+  extends: .test_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:centos8
+  dependencies: ["compile:centos8"]
+  needs: ["compile:centos8"]
+
+#######################################
+# LXPLUS7 jobs (CC7 with CVMFS support)
+#######################################
+
+compile:lxplus7:
+  extends: .build_cvmfs_common
+  tags: [ cvmfs,docker ]
+  image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
+
+run_cepgen:lxplus7:
+  extends: .run_cepgen_common
+  tags: [ cvmfs,docker ]
   before_script:
-    - cd build
-  script:
-    - make test_function_parser test_function_parser_rootcomp
-    - test/test_function_parser
-    - test/test_function_parser_rootcomp
-  when: on_success
-  allow_failure: false
+    - shopt -s expand_aliases
+    - set +u && source source-lxplus.sh; set -u
+  image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
+  dependencies: ["compile:lxplus7"]
+  needs: ["compile:lxplus7"]
+
+package:lxplus7:
+  extends: .package_common
+  tags: [ cvmfs,docker ]
+  before_script:
+    - shopt -s expand_aliases
+    - set +u && source source-lxplus.sh; set -u
+  image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
+  dependencies: ["compile:lxplus7"]
+  needs: ["compile:lxplus7"]
+  allow_failure: true
+
+test:lxplus7:
+  extends: .test_common
+  tags: [ cvmfs,docker ]
+  before_script:
+    - shopt -s expand_aliases
+    - set +u && source source-lxplus.sh; set -u
+  image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
+  dependencies: ["compile:lxplus7"]
+  needs: ["compile:lxplus7"]
+
+doc:lxplus7:
+  extends: .doc_common
+  tags: [ cvmfs,docker ]
+  before_script:
+    - shopt -s expand_aliases
+    - set +u && source source-lxplus.sh; set -u
+  image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
+  dependencies: ["compile:lxplus7"]
+  needs: ["compile:lxplus7"]
+
+#######################################
+# Fedora 33 jobs
+#######################################
+
+compile:f33:
+  extends: .build_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f33
+
+package:f33:
+  extends: .package_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f33
+  dependencies: ["compile:f33"]
+  needs: ["compile:f33"]
+
+run_cepgen:f33:
+  extends: .run_cepgen_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f33
+  dependencies: ["compile:f33"]
+  needs: ["compile:f33"]
+
+test:f33:
+  extends: .test_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f33
+  dependencies: ["compile:f33"]
+  needs: ["compile:f33"]
+
+#######################################
+# Fedora 34 jobs
+#######################################
+
+compile:f34:
+  extends: .build_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f34
+
+package:f34:
+  extends: .package_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f34
+  dependencies: ["compile:f34"]
+  needs: ["compile:f34"]
+
+run_cepgen:f34:
+  extends: .run_cepgen_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f34
+  dependencies: ["compile:f34"]
+  needs: ["compile:f34"]
+
+test:f34:
+  extends: .test_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f34
+  dependencies: ["compile:f34"]
+  needs: ["compile:f34"]
+
+#######################################
+# Fedora 35 jobs
+#######################################
+
+compile:f35:
+  extends: .build_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f35
+
+package:f35:
+  extends: .package_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f35
+  dependencies: ["compile:f35"]
+  needs: ["compile:f35"]
+
+run_cepgen:f35:
+  extends: .run_cepgen_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f35
+  dependencies: ["compile:f35"]
+  needs: ["compile:f35"]
+
+test:f35:
+  extends: .test_common
+  image: gitlab-registry.cern.ch/lforthom/custom_ci_worker:f35
+  dependencies: ["compile:f35"]
+  needs: ["compile:f35"]
+
+#######################################
+# Ubuntu Bionic (18.04) jobs
+#######################################
+
+compile:ubuntu_bionic:
+  extends: .build_common
+  image: laufor/ci-images:cepgen-ubuntu18
+
+package:ubuntu_bionic:
+  extends: .package_common
+  image: laufor/ci-images:cepgen-ubuntu18
+  dependencies: ["compile:ubuntu_bionic"]
+  needs: ["compile:ubuntu_bionic"]
+
+run_cepgen:ubuntu_bionic:
+  extends: .run_cepgen_common
+  image: laufor/ci-images:cepgen-ubuntu18
+  dependencies: ["compile:ubuntu_bionic"]
+  needs: ["compile:ubuntu_bionic"]
+
+test:ubuntu_bionic:
+  extends: .test_common
+  image: laufor/ci-images:cepgen-ubuntu18
+  dependencies: ["compile:ubuntu_bionic"]
+  needs: ["compile:ubuntu_bionic"]
+
+#######################################
+# Ubuntu Focal (20.04) jobs
+#######################################
+
+compile:ubuntu_focal:
+  extends: .build_common
+  image: laufor/ci-images:cepgen-ubuntu20
+
+package:ubuntu_focal:
+  extends: .package_common
+  image: laufor/ci-images:cepgen-ubuntu20
+  dependencies: ["compile:ubuntu_focal"]
+  needs: ["compile:ubuntu_focal"]
+
+run_cepgen:ubuntu_focal:
+  extends: .run_cepgen_common
+  image: laufor/ci-images:cepgen-ubuntu20
+  dependencies: ["compile:ubuntu_focal"]
+  needs: ["compile:ubuntu_focal"]
+
+test:ubuntu_focal:
+  extends: .test_common
+  image: laufor/ci-images:cepgen-ubuntu20
+  dependencies: ["compile:ubuntu_focal"]
+  needs: ["compile:ubuntu_focal"]
 

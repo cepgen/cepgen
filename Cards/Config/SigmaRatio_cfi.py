@@ -1,9 +1,9 @@
-from containers_cfi import Parameters
+from .containers_cfi import Module
+
 
 class SigmaRatio:
-    '''R-ratio computation method'''
-    E143             = Parameters(id=1)
-    R1990            = Parameters(id=2)
-    CLAS             = Parameters(id=3)
-    SibirtsevBlunden = Parameters(id=4)
-
+    """R-ratio computation method"""
+    E143             = 1
+    R1990            = 2
+    CLAS             = 3
+    SibirtsevBlunden = 4

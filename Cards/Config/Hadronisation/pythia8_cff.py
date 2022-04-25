@@ -1,6 +1,7 @@
-from Config.containers_cfi import Module, Parameters
-from pythia8Defaults_cfi import pythia8Defaults
-from pythia8Tunes_cfi import pythia8CUEP8M1Settings
+from Config.containers_cfi import Module
+
+from Config.Hadronisation.pythia8Defaults_cfi import pythia8Defaults
+from Config.Hadronisation.pythia8Tunes_cfi import pythia8CUEP8M1Settings
 
 pythia8 = Module('pythia8',
     seed = 1000,

@@ -1,9 +1,8 @@
 import Config.Core as cepgen
-from Config.Integration.vegas_cff import integrator
 #--------------------------------------------------------------------
 # Logging/debugging example
 #--------------------------------------------------------------------
-#from Config.logger_cfi import logger
+#from Config.Logger_cfi import logger
 #logger.enabledModules += ('Hadroniser.configure', 'Generator.*',)
 #--------------------------------------------------------------------
 # Pythia 6 example (with fully leptonic WW decay)
@@ -32,13 +31,17 @@ from Config.Integration.vegas_cff import integrator
 import Config.ktProcess_cfi as kt
 process = kt.process.clone('pptoww',
     processParameters = cepgen.Parameters(
-        mode = cepgen.ProcessMode.InelasticInelastic,
-        polarisationStates = 0, # full
+        mode = cepgen.ProcessMode.ElasticElastic,
+        #mode = cepgen.ProcessMode.ElasticInelastic,
+        #mode = cepgen.ProcessMode.InelasticInelastic,
+        method = 1,  # on-shell (0) or off-shell (1) formula
+        polarisationStates = 0,  # full
     ),
     inKinematics = cepgen.Parameters(
         cmEnergy = 13.e3,
         #structureFunctions = cepgen.StructureFunctions.SzczurekUleshchenko,
         #structureFunctions = cepgen.StructureFunctions.ALLM97,
+        #structureFunctions = cepgen.StructureFunctions.KulaginBarinov,
         structureFunctions = cepgen.StructureFunctions.LUXlike,
     ),
     outKinematics = kt.process.outKinematics.clone(
@@ -50,6 +53,7 @@ process = kt.process.clone('pptoww',
         invmass = (0.,),
         ptsum = (0.,),
         #--- cuts on single particles' level
+        #minFinalState = [11, 13],
         cuts = {
             # cuts on the single W level
             #24: cepgen.Parameters(pt = (0.,)), # no pt cut on Ws
@@ -65,6 +69,15 @@ process = kt.process.clone('pptoww',
 #--- generation parameters
 from Config.generator_cff import generator
 generator = generator.clone(
-    numEvents = 10000,
-    printEvery = 1000,
+    numEvents = 50000,
+    printEvery = 5000,
 )
+text = cepgen.Module('text',  # histogramming/ASCII output capability
+    #variables = ['nev', 'm(4)', 'tgen'],
+    histVariables={
+        'm(4)': cepgen.Parameters(xrange=(50., 1000.), nbins=19),
+        'm(ob2)': cepgen.Parameters(xrange=(0., 250.), nbins=10, log=True),
+        'acop(7,8)': cepgen.Parameters(nbins=10, log=True),
+    }
+)
+output = cepgen.Sequence(text)

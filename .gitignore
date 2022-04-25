@@ -4,4 +4,8 @@
 *~
 *.swp
 *.pdf
-
+*.sh
+.idea/
+build/
+cmake-build*/
+docs/

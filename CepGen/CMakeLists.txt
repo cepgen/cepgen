@@ -1,145 +1,59 @@
-file(GLOB core_sources Core/*.cpp *.cpp)
-file(GLOB phys_sources Physics/*.cpp)
-file(GLOB sf_sources StructureFunctions/*.cpp)
-file(GLOB io_sources IO/GenericExportHandler.cpp IO/TextHandler.cpp)
-file(GLOB hadr_sources Hadronisers/GenericHadroniser.cpp)
+file(GLOB core_sources
+        Cards/*.cpp
+        Core/*.cpp
+        Modules/*.cpp
+        Utils/*.cpp
+        Integration/*.cpp
+        OutputModules/*.cpp
+        *.cpp)
+file(GLOB phys_sources
+        Event/*.cpp
+        Physics/*.cpp
+        StructureFunctions/*.cpp
+        FormFactors/*.cpp)
+file(GLOB proc_sources
+        Process/*.cpp
+        Process/Fortran/*.f)
+file(GLOB core_includes
+        Cards
+        Core
+        Modules
+        Utils
+        OutputModules
+        Physics
+        Integration
+        Process
+        StructureFunctions
+        FormFactors)
 
-include_directories(${PROJECT_SOURCE_DIR})
+#----- check the external dependencies for SFs/alphaS
 
-#----- check the external dependencies for SFs
-
-set(GRV_PATH ${PROJECT_SOURCE_DIR}/External)
-file(GLOB grv_sources ${GRV_PATH}/grv_*.f)
-if(grv_sources)
-  message(STATUS "GRV PDFset found in ${grv_sources}!")
-  add_definitions(-DGRVPDF)
-  list(APPEND sf_sources ${grv_sources})
+file(GLOB GRV_SRC ${PROJECT_SOURCE_DIR}/External/grv_*.f)
+if(GRV_SRC)
+  message(STATUS "GRV PDFset found in ${GRV_SRC}!")
+  list(APPEND phys_sources ${GRV_SRC})
 else()
-  message(STATUS "GRV PDFset not found. Will proceed without it")
+  message(STATUS "GRV PDFset not found. Will not build Szczurek-Uleshchenko SFs")
+  file(GLOB su_sf StructureFunctions/SzczurekUleshchenko.cpp)
+  list(REMOVE_ITEM phys_sources ${su_sf})
 endif()
 
-#----- check the external dependencies for physics utilities
-
-if(alphas_sources)
-  list(APPEND phys_sources ${alphas_sources})
-endif()
-
-set(addons_libraries "")
-set(strf_libraries ${GSL_LIB} ${GSL_CBLAS_LIB})
-
-#--- linking with LHAPDF
-
-if(LHAPDF)
-  message(STATUS "LHAPDF found in ${LHAPDF}")
-  list(APPEND strf_libraries ${LHAPDF})
-  include_directories(${LHAPDF_INCLUDE})
+file(GLOB ALPHAS_SRC ${PROJECT_SOURCE_DIR}/External/alphaS.f)
+if(ALPHAS_SRC)
+  message(STATUS "alphaS evolution algorithm found in ${ALPHAS_SRC}")
+  list(APPEND phys_sources ${ALPHAS_SRC})
 else()
-  file(GLOB partonic_sf StructureFunctions/Partonic.cpp)
-  list(REMOVE_ITEM sf_sources ${partonic_sf})
-endif()
-
-#--- linking with Pythia 6
-
-if(PYTHIA6)
-  message(STATUS "Pythia 6 found in ${PYTHIA6}")
-  list(APPEND hadr_sources "Hadronisers/Pythia6Hadroniser.cpp")
-  list(APPEND addons_libraries ${PYTHIA6})
-  if(PYTHIA6DUMMY)
-    message(STATUS "Pythia 6 addons found in ${PYTHIA6DUMMY}")
-    list(APPEND addons_libraries ${PYTHIA6DUMMY})
-  endif()
-elseif(EXISTS $ENV{PYTHIA6_SRC})
-  file(GLOB pythia6_src $ENV{PYTHIA6_SRC})
-  message(STATUS "Pythia 6 source found in ${pythia6_src}")
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wno-tabs -Wno-maybe-uninitialized -Wno-integer-division -Wno-unused-variable -Wno-unused-dummy-argument")
-  add_library(pythia6 SHARED ${pythia6_src})
-  list(APPEND hadr_sources "Hadronisers/Pythia6Hadroniser.cpp")
-  list(APPEND addons_libraries pythia6)
-endif()
-
-#--- linking with Pythia 8
-
-if(PYTHIA8)
-  message(STATUS "Pythia 8 found in ${PYTHIA8}")
-  message(STATUS "Pythia 8 will be used for LHEF output")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-misleading-indentation")
-  include_directories(${PYTHIA8_INCLUDE})
-  add_definitions(-DPYTHIA8)
-  list(APPEND hadr_sources "Hadronisers/Pythia8Hadroniser.cpp")
-  list(APPEND io_sources "IO/PythiaEventInterface.cpp")
-  list(APPEND io_sources "IO/LHEFPythiaHandler.cpp")
-  list(APPEND addons_libraries ${PYTHIA8} dl)
-endif()
-
-#--- linking with Photos++
-
-if(PHOTOSPP)
-  message(STATUS "Photos++ found in ${PHOTOSPP}")
-  include_directories(${PHOTOSPP_INCLUDE})
-  list(APPEND hadr_sources "Hadronisers/PhotosFilter.cpp")
-  list(APPEND addons_libraries ${PHOTOSPP})
-endif()
-
-#--- linking with HepMC
-
-if(HEPMC_LIB)
-  message(STATUS "HepMC found in ${HEPMC_LIB}")
-  if(HEPMC_LIB MATCHES ".*HepMC3.?.so")
-    message(STATUS "HepMC version 3 found")
-    if(HEPMC_ROOT_LIB)
-      message(STATUS "HepMC ROOT I/O library found")
-      add_definitions(-DHEPMC3_ROOTIO)
-      list(APPEND addons_libraries ${HEPMC_ROOT_LIB})
-    endif()
-    add_definitions(-DHEPMC3)
-  endif()
-  list(APPEND io_sources "IO/HepMCHandler.cpp")
-  list(APPEND io_sources "IO/HepMCEventInterface.cpp")
-  if(NOT PYTHIA8)
-    message(STATUS "HepMC will be used for LHEF output")
-    list(APPEND io_sources "IO/LHEFHepMCHandler.cpp")
-  endif()
-  list(APPEND addons_libraries ${HEPMC_LIB})
-  include_directories(${HEPMC_INCLUDE})
-endif()
-
-#--- linking with ProMC
-
-if(PROMC_LIB)
-  message(STATUS "ProMC found in ${PROMC_LIB}")
-  list(APPEND addons_libraries ${PROMC_LIB})
-  list(APPEND io_sources "IO/ProMCHandler.cpp")
-  include_directories(${PROMC_INCLUDE} ${PROMC_EXT_INCLUDE})
-endif()
-
-#--- linking with ROOT/Delphes
-
-if(ROOT_FOUND)
-  message(STATUS "ROOT found in ${ROOT_LIBRARY_DIR}")
-  list(APPEND addons_libraries ${ROOT_LIBRARIES})
-  list(APPEND io_sources "IO/ROOTHandler.cpp" "IO/ROOTTreeHandler.cpp")
-  include_directories(${ROOT_INCLUDE_DIRS})
-  link_directories(${ROOT_LIBRARY_DIR})
-  if(DELPHES)
-    message(STATUS "Delphes found in ${DELPHES}")
-    list(APPEND addons_libraries ${DELPHES})
-    list(APPEND io_sources "IO/DelphesHandler.cpp")
-    include_directories(${DELPHES_INCLUDE} ${DELPHES_INCLUDE}/external)
-  endif()
+  file(GLOB pegasus_alphas Physics/AlphaSPEGASUS.cpp)
+  file(REMOVE_ITEM phys_sources ${pegasus_alphas})
 endif()
 
 #----- build the objects
 
-add_library(CepGenCore SHARED ${core_sources} ${phys_sources} ${sf_sources})
-target_link_libraries(CepGenCore ${CEPGEN_EXTERNAL_CORE_REQS})
-target_link_libraries(CepGenCore ${strf_libraries})
+include(FindVersion)
+add_version_definition(${core_sources})
 
-add_library(CepGenAddOns SHARED ${io_sources} ${hadr_sources})
-target_link_libraries(CepGenAddOns ${addons_libraries})
-target_link_libraries(CepGenAddOns CepGenEvent)
-
-#----- installation rules
-
-install(TARGETS CepGenCore DESTINATION lib)
-install(TARGETS CepGenAddOns DESTINATION lib)
-
+cepgen_build(CepGen
+        SOURCES ${core_sources} ${phys_sources} ${proc_sources}
+        EXT_LIBS ${CEPGEN_CORE_EXT} stdc++fs
+        EXT_HEADERS ${core_includes}
+        INSTALL_COMPONENT lib)
