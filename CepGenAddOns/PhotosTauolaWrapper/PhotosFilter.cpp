@@ -34,7 +34,8 @@ namespace cepgen {
     };
 
     PhotosFilter::PhotosFilter(const ParametersList& params) : EventModifier(params) {
-      Log::LogAll(true);
+      if (steer<bool>("debug"))
+        Log::LogAll(true);
       Photos::maxWtInterference(steer<double>("maxWtInterference"));
       Photos::setInfraredCutOff(steer<double>("infraredCutOff"));
       Photos::setInterference(steer<bool>("interference"));
@@ -59,7 +60,7 @@ namespace cepgen {
       Photos::initialize();
     }
 
-    bool PhotosFilter::run(Event& ev, double& weight, bool full) {
+    bool PhotosFilter::run(Event& ev, double& weight, bool) {
       weight = 1.;
 
       CepGenPhotosEvent evt(ev, PDG::tau);
@@ -76,24 +77,25 @@ namespace cepgen {
 
     ParametersDescription PhotosFilter::description() {
       auto desc = EventModifier::description();
-      desc.add<double>("maxWtInterference", 0.).setDescription("maximum interference weight");
-      desc.add<double>("infraredCutOff", 0.01 / 91.187)
+      desc.add<bool>("debug", false).setDescription("log all debugging information?");
+      desc.add<double>("maxWtInterference", 1.).setDescription("maximum interference weight");
+      desc.add<double>("infraredCutOff", 0.01)
           .setDescription("minimal energy (in units of decaying particle mass) for photons to be explicitly generated");
-      desc.add<bool>("interference", false).setDescription("key for interference, matrix element weight");
-      desc.add<bool>("doubleBrem", false).setDescription("set double bremsstrahlung generation");
+      desc.add<bool>("interference", true).setDescription("key for interference, matrix element weight");
+      desc.add<bool>("doubleBrem", true).setDescription("set double bremsstrahlung generation");
       desc.add<bool>("quatroBrem", false).setDescription("set bremsstrahlung generation up to multiplicity of 4");
-      desc.add<bool>("correctionWtForW", false)
+      desc.add<bool>("correctionWtForW", true)
           .setDescription("key for partial effects of matrix element (in leptonic W decays)");
       desc.add<bool>("exponentiation", true).setDescription("set exponentiation mode");
       desc.add<bool>("pairEmission", false).setDescription("set pair emission");
-      desc.add<bool>("photonEmission", false).setDescription("set photon emission");
+      desc.add<bool>("photonEmission", true).setDescription("set photon emission");
       desc.add<bool>("meCorrectionWtForScalar", false)
           .setDescription("switch for complete effects of the matrix element (in scalar to two scalar decays)");
       desc.add<bool>("meCorrectionWtForW", false)
           .setDescription("switch for complete effects of matrix element (in leptonic W decays)");
       desc.add<bool>("meCorrectionWtForZ", false)
           .setDescription("switch for complete effects of matrix element (in leptonic Z decays)");
-      desc.add<bool>("topProcessRadiation", false)
+      desc.add<bool>("topProcessRadiation", true)
           .setDescription("set photon emission in top pair production in quark (gluon) pair annihilation");
       return desc;
     }
