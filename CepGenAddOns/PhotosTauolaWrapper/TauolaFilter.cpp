@@ -63,6 +63,7 @@ namespace cepgen {
       Tauola::setUnits(Tauola::GEV, Tauola::MM);
       Tauola::initialize();
       Tauola::setSeed(seed_, 2. * seed_, 4. * seed_);
+      Tauola::momentum_conservation_threshold = 1.e-8;
       if (!Tauola::getIsTauolaIni())
         throw CG_FATAL("TauolaFilter:init") << "Tauola was not properly initialised!";
 
@@ -107,6 +108,7 @@ namespace cepgen {
       TauolaHepMC3Event evt(&hepmc_evt);
       evt.decayTaus();
       hepmc_evt.dump();
+      hepmc_evt.merge(ev);
 
       return true;
     }
