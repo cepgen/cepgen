@@ -11,7 +11,6 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenAddOns/HepMC3Wrapper/HepMC3EventInterface.h"
-#include "CepGenAddOns/PhotosTauolaWrapper/PhotosTauolaInterface.h"
 
 using namespace Photospp;
 
@@ -28,9 +27,6 @@ namespace cepgen {
       void setRuntimeParameters(const Parameters&) override {}
       void init() override;
       bool run(Event& ev, double& weight, bool full) override;
-
-    private:
-      typedef io::PhotosTauolaEvent<PhotosEvent, PhotosParticle> CepGenPhotosEvent;
     };
 
     PhotosFilter::PhotosFilter(const ParametersList& params) : EventModifier(params) {
@@ -65,17 +61,11 @@ namespace cepgen {
       weight = 1.;
 
       HepMC3::CepGenEvent hepmc_evt(ev);
-      //hepmc_evt.dump();
-      //CepGenPhotosEvent evt(ev, PDG::tau);
       PhotosHepMC3Event evt(&hepmc_evt);
       //evt.dump();
       evt.process();
-      hepmc_evt.dump();
-      //evt.undecayTaus();
-      //evt.decayTaus();
-      //evt.dump();
-      //const auto& pairs = evt[Particle::CentralSystem][0];
-      //CG_WARNING("")<<pairs;
+      hepmc_evt.merge(ev);
+      ev.dump();
 
       return true;
     }
