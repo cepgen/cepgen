@@ -61,7 +61,7 @@ namespace cepgen {
     //---------------------------------------------------------------------------------------------
 
     void LPAIR::prepareKinematics() {
-      masses_.Ml2 = (*event_)[Particle::CentralSystem][0].mass2();
+      masses_.Ml2 = (*event_)(Particle::CentralSystem)[0].mass2();
 
       //--- first define the squared mass range for the diphoton/dilepton system
       const auto& mll_limits = kin_.cuts().central.mass_sum();
@@ -71,8 +71,8 @@ namespace cepgen {
       CG_DEBUG_LOOP("LPAIR:setKinematics") << "w limits = " << w_limits_ << "\n\t"
                                            << "wmax/wmin = " << w_limits_.max() / w_limits_.min();
 
-      p1_lab_ = (*event_)[Particle::IncomingBeam1][0].momentum();
-      p2_lab_ = (*event_)[Particle::IncomingBeam2][0].momentum();
+      p1_lab_ = (*event_)(Particle::IncomingBeam1)[0].momentum();
+      p2_lab_ = (*event_)(Particle::IncomingBeam2)[0].momentum();
 
       const double mx0 = mp_ + PDG::get().mass(PDG::piPlus);  // 1.07
       const double min_wx = pow(std::max(mx0, kin_.cuts().remnants.mx().min()), 2);
@@ -543,8 +543,8 @@ namespace cepgen {
     //---------------------------------------------------------------------------------------------
 
     double LPAIR::computeWeight() {
-      ep1_ = (*event_)[Particle::IncomingBeam1][0].energy();
-      ep2_ = (*event_)[Particle::IncomingBeam2][0].energy();
+      ep1_ = (*event_)(Particle::IncomingBeam1)[0].energy();
+      ep2_ = (*event_)(Particle::IncomingBeam2)[0].energy();
       // Mass difference between the first outgoing particle and the first incoming particle
       masses_.w31 = mX2_ - mA2_;
       // Mass difference between the second outgoing particle and the second incoming particle
@@ -806,8 +806,8 @@ namespace cepgen {
     //---------------------------------------------------------------------------------------------
 
     void LPAIR::fillKinematics(bool) {
-      const Momentum cm =
-          (*event_)[Particle::IncomingBeam1][0].momentum() + (*event_)[Particle::IncomingBeam2][0].momentum();
+      const Momentum cm = event_->oneWithRole(Particle::IncomingBeam1).momentum() +
+                          event_->oneWithRole(Particle::IncomingBeam2).momentum();
 
       const double gamma = cm.energy() / sqs_, betgam = cm.pz() / sqs_;
 
@@ -883,17 +883,17 @@ namespace cepgen {
       plab_ph2.setPz(plab_ph2.pz() * ranz);
       ph2.setMomentum(plab_ph2);
 
-      auto& central_system = (*event_)[Particle::CentralSystem];
+      auto central_system = (*event_)[Particle::CentralSystem];
 
       //----- first outgoing lepton
-      auto& ol1 = central_system[0];
+      auto& ol1 = central_system[0].get();
       ol1.setPdgId(ol1.pdgId(), ransign);
       p6_cm_.setPz(p6_cm_.pz() * ranz);
       ol1.setMomentum(p6_cm_);
       ol1.setStatus(Particle::Status::FinalState);
 
       //----- second outgoing lepton
-      auto& ol2 = central_system[1];
+      auto& ol2 = central_system[1].get();
       ol2.setPdgId(ol2.pdgId(), -ransign);
       p7_cm_.setPz(p7_cm_.pz() * ranz);
       ol2.setMomentum(p7_cm_);

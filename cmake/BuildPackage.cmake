@@ -38,6 +38,7 @@ if(RPMBUILD)
     set(CPACK_RPM_LIBMATHEVAL_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, libmatheval")
     set(CPACK_RPM_MADGRAPH_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
     set(CPACK_RPM_MATPLOTLIB_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, python3, python3-matplotlib")
+    set(CPACK_RPM_PHOTOSTAUOLA_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, cepgen-hepmc3")
     set(CPACK_RPM_PROMC_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
     set(CPACK_RPM_PYTHIA6_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
     set(CPACK_RPM_PYTHIA8_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, pythia8 >= 8.2.30")
@@ -70,6 +71,7 @@ else()
     set(CPACK_DEB_LIBMATHEVAL_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, libmatheval")
     set(CPACK_DEB_MADGRAPH_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
     set(CPACK_DEB_MATPLOTLIB_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, python, python-matplotlib")
+    set(CPACK_DEB_PHOTOSTAUOLA_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, cepgen-hepmc3")
     set(CPACK_DEB_PROMC_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}")
     set(CPACK_DEB_PYTHIA6_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}")
     set(CPACK_DEB_PYTHIA8_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, pythia8 >= 8.2.30")
@@ -113,6 +115,10 @@ cpack_add_component(hepmc
 cpack_add_component(lhapdf
     DISPLAY_NAME "CepGen LHAPDF wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the LHAPDF library"
+    DEPENDS lib)
+cpack_add_component(photostauola
+    DISPLAY_NAME "CepGen Photos++/Tauola++ wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the Photos and Tauola libraries"
     DEPENDS lib)
 cpack_add_component(promc
     DISPLAY_NAME "CepGen ProMC wrappers library"

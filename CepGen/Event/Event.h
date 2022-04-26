@@ -60,11 +60,11 @@ namespace cepgen {
     /// \brief Set the information on one particle in the process
     /// \param[in] part The Particle object to insert or modify in the event
     /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
-    Particle& addParticle(Particle& part, bool replace = false);
+    ParticleRef addParticle(Particle& part, bool replace = false);
     /// \brief Create a new particle in the event, with no kinematic information but the role it has to play in the process
     /// \param[in] role The role the particle will play in the process
     /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
-    Particle& addParticle(Particle::Role role, bool replace = false);
+    ParticleRef addParticle(Particle::Role role, bool replace = false);
 
     //----- particles retrievers
 
@@ -76,9 +76,9 @@ namespace cepgen {
     Particles stableParticles() const;
     /// List of references to Particle objects corresponding to a certain role in the process kinematics
     /// \param[in] role The role the particles have to play in the process
-    Particles& operator[](Particle::Role role);
+    ParticlesRefs operator[](Particle::Role role);
     /// Get a list of constant Particle objects corresponding to a certain role in the process kinematics
-    const Particles& operator[](Particle::Role role) const;
+    const Particles& operator()(Particle::Role role) const;
     /// Get a list of particle identifiers in Event corresponding to a certain role in the process kinematics
     ParticlesIds ids(Particle::Role role) const;
     /// First Particle object with a given role in the event

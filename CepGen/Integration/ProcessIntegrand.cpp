@@ -137,7 +137,7 @@ namespace cepgen {
     //    (polish your cuts, as this might be very time-consuming...)
 
     if (!params_->kinematics().cuts().central_particles.empty())
-      for (const auto& part : (*event_)[Particle::CentralSystem]) {
+      for (const auto& part : (*event_)(Particle::CentralSystem)) {
         // retrieve all cuts associated to this final state particle in the
         // central system
         if (params_->kinematics().cuts().central_particles.count(part.pdgId()) == 0)
@@ -155,7 +155,7 @@ namespace cepgen {
       }
     const auto& remn_cut = params_->kinematics().cuts().remnants;
     for (const auto& system : {Particle::OutgoingBeam1, Particle::OutgoingBeam2})
-      for (const auto& part : (*event_)[system]) {
+      for (const auto& part : (*event_)(system)) {
         if (part.status() != Particle::Status::FinalState)
           continue;
         if (!remn_cut.xi().contains(1. - part.momentum().pz() / (*event_)[*part.mothers().begin()].momentum().pz()))

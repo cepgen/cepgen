@@ -296,7 +296,7 @@ namespace cepgen {
 
       //--- incoming state
       for (const auto& ip : ini) {
-        Particle& p = event_->addParticle(ip.first);
+        auto& p = event_->addParticle(ip.first).get();
         const auto& part_info = PDG::get()(ip.second);
         p.setPdgId(ip.second, part_info.charge / 3.);
         p.setMass(part_info.mass);
@@ -308,14 +308,14 @@ namespace cepgen {
       //--- central system (if not already there)
       const auto& central_system = ini.find(Particle::CentralSystem);
       if (central_system == ini.end()) {
-        Particle& p = event_->addParticle(Particle::Intermediate);
+        auto& p = event_->addParticle(Particle::Intermediate).get();
         p.setPdgId((pdgid_t)PDG::invalid);
         p.setStatus(Particle::Status::Propagator);
       }
       //--- outgoing state
       for (const auto& opl : fin) {  // pair(role, list of PDGids)
         for (const auto& pdg : opl.second) {
-          Particle& p = event_->addParticle(opl.first);
+          auto& p = event_->addParticle(opl.first).get();
           const auto& part_info = PDG::get()(pdg);
           p.setPdgId(pdg, part_info.charge / 3.);
           p.setMass(part_info.mass);
@@ -359,12 +359,12 @@ namespace cepgen {
 
       // check the incoming state
       bool is_incoming_state_set =
-          (!(*event_)[Particle::IncomingBeam1].empty() && !(*event_)[Particle::IncomingBeam2].empty());
+          (!(*event_)(Particle::IncomingBeam1).empty() && !(*event_)(Particle::IncomingBeam2).empty());
 
       // check the outgoing state
       bool is_outgoing_state_set =
-          (!(*event_)[Particle::OutgoingBeam1].empty() && !(*event_)[Particle::OutgoingBeam2].empty() &&
-           !(*event_)[Particle::CentralSystem].empty());
+          (!(*event_)(Particle::OutgoingBeam1).empty() && !(*event_)(Particle::OutgoingBeam2).empty() &&
+           !(*event_)(Particle::CentralSystem).empty());
 
       // combine both states
       return is_incoming_state_set && is_outgoing_state_set;

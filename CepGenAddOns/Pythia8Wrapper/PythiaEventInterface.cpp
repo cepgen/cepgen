@@ -58,11 +58,11 @@ namespace Pythia8 {
   }
 
   void CepGenEvent::feedEvent(const cepgen::Event& ev, const Type& type) {
-    const double scale = ev[cepgen::Particle::Intermediate][0].mass();
+    const double scale = ev(cepgen::Particle::Intermediate)[0].mass();
     setProcess(0, 1., scale, cepgen::constants::ALPHA_EM, cepgen::constants::ALPHA_QCD);
 
-    const auto &part1 = ev[cepgen::Particle::Parton1][0], &part2 = ev[cepgen::Particle::Parton2][0];
-    const auto &op1 = ev[cepgen::Particle::OutgoingBeam1][0], &op2 = ev[cepgen::Particle::OutgoingBeam2][0];
+    const auto &part1 = ev(cepgen::Particle::Parton1)[0], &part2 = ev(cepgen::Particle::Parton2)[0];
+    const auto &op1 = ev(cepgen::Particle::OutgoingBeam1)[0], &op2 = ev(cepgen::Particle::OutgoingBeam2)[0];
     const double q2_1 = -part1.momentum().mass2(), q2_2 = -part2.momentum().mass2();
     const double x1 = q2_1 / (q2_1 + op1.mass2() - mp2_), x2 = q2_2 / (q2_2 + op2.mass2() - mp2_);
 
@@ -79,12 +79,12 @@ namespace Pythia8 {
       if (inel1_) {
         parton1_pdgid = 2;
         parton1_colour = colour_index++;
-        mom_iq1 = momToVec4(x1 * ev[cepgen::Particle::IncomingBeam1][0].momentum());
+        mom_iq1 = momToVec4(x1 * ev(cepgen::Particle::IncomingBeam1)[0].momentum());
       }
       if (inel2_) {
         parton2_pdgid = 2;
         parton2_colour = colour_index++;
-        mom_iq2 = momToVec4(x2 * ev[cepgen::Particle::IncomingBeam2][0].momentum());
+        mom_iq2 = momToVec4(x2 * ev(cepgen::Particle::IncomingBeam2)[0].momentum());
       }
 
       //--- flavour / x value of hard-process initiators
@@ -177,7 +177,7 @@ namespace Pythia8 {
         //=========================================================================================
 
         for (const auto& syst : {cepgen::Particle::OutgoingBeam1, cepgen::Particle::OutgoingBeam2}) {
-          for (const auto& p : ev[syst])
+          for (const auto& p : ev(syst))
             addCepGenParticle(p, INVALID_ID, findMothers(ev, p));
         }
       }
@@ -188,7 +188,7 @@ namespace Pythia8 {
     //=============================================================================================
 
     const unsigned short central_colour = colour_index++;
-    for (const auto& p : ev[cepgen::Particle::CentralSystem]) {
+    for (const auto& p : ev(cepgen::Particle::CentralSystem)) {
       std::pair<int, int> colours = {0, 0}, mothers = {1, 2};
       if (type != Type::centralAndBeamRemnants)
         mothers = findMothers(ev, p);
