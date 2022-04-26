@@ -161,19 +161,19 @@ namespace HepMC3 {
     const auto cs_size = cs.size();
 
     // helper function to browse particles decay products and store them into the CepGen event content
-    std::function<void(const ConstGenParticlePtr& hp, cepgen::Particle& cp)> browse_children =
-        [&](const ConstGenParticlePtr& hp, cepgen::Particle& cp) {
+    std::function<void(const ConstGenParticlePtr& hp, cepgen::ParticleRef cp)> browse_children =
+        [&](const ConstGenParticlePtr& hp, cepgen::ParticleRef cp) {
           if (hp->children().empty())
             return;
-          cp.setStatus(cepgen::Particle::Status::Propagator);
+          cp.get().setStatus(cepgen::Particle::Status::Propagator);
           for (const auto& h_child : hp->children()) {
-            cepgen::Particle cg_child(cp.role(), 0);
+            cepgen::Particle cg_child(cp.get().role(), 0);
             cg_child.setPdgId((long)h_child->pdg_id());
             const auto& c_mom = h_child->momentum();
+            cg_child.setStatus(cepgen::Particle::Status::FinalState);
             cg_child.setMomentum(cepgen::Momentum::fromPxPyPzE(c_mom.x(), c_mom.y(), c_mom.z(), c_mom.t()));
             cg_child.addMother(cp);
-            cg_child = evt.addParticle(cg_child);
-            browse_children(h_child, cg_child);
+            browse_children(h_child, evt.addParticle(cg_child));
           }
         };
 
@@ -183,12 +183,10 @@ namespace HepMC3 {
         if (fabs(cg_cp_mom3 - h_cp->momentum().length()) > 1.e-10)
           continue;
         // found the association between the HepMC and CepGen particles kinematics
-        browse_children(h_cp, cs[icg].get());
+        browse_children(h_cp, cs[icg]);
         break;
       }
     }
-
-    evt.dump();
   }
 
   void CepGenEvent::dump() const {

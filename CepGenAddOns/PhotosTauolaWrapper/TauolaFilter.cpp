@@ -63,7 +63,7 @@ namespace cepgen {
       Tauola::setUnits(Tauola::GEV, Tauola::MM);
       Tauola::initialize();
       Tauola::setSeed(seed_, 2. * seed_, 4. * seed_);
-      Tauola::momentum_conservation_threshold = 1.e-8;
+      Tauola::momentum_conservation_threshold = 1.e-6;
       if (!Tauola::getIsTauolaIni())
         throw CG_FATAL("TauolaFilter:init") << "Tauola was not properly initialised!";
 
@@ -83,12 +83,11 @@ namespace cepgen {
       //--- radiation states
       if (rad_states_.has<bool>("enable"))
         Tauola::setRadiation(rad_states_.get<bool>("enable"));
-      const auto rad_cutoff = rad_states_.get<double>("cutoff", -1.);
+      const auto rad_cutoff = rad_states_.get<double>("cutoff", 0.01);
       if (rad_cutoff > 0.)
         Tauola::setRadiationCutOff(rad_cutoff);  // default energy is 0.01 (in units of half the decaying particle mass)
 
       //--- default parameters
-      //Tauola::setDecayingParticle( 15 );
       Tauola::setSameParticleDecayMode(steer<int>("sameParticleDecayMode"));
       Tauola::setOppositeParticleDecayMode(steer<int>("oppositeParticleDecayMode"));
 
@@ -107,7 +106,7 @@ namespace cepgen {
       HepMC3::CepGenEvent hepmc_evt(ev);
       TauolaHepMC3Event evt(&hepmc_evt);
       evt.decayTaus();
-      hepmc_evt.dump();
+      //hepmc_evt.dump();
       hepmc_evt.merge(ev);
 
       return true;
