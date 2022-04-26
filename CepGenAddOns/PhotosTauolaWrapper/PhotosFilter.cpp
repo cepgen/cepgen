@@ -1,3 +1,8 @@
+#include <Photos/Log.h>
+#include <Photos/Photos.h>
+#include <Photos/PhotosEvent.h>
+#include <Photos/PhotosHepMC3Event.h>
+
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
@@ -5,13 +10,8 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/String.h"
+#include "CepGenAddOns/HepMC3Wrapper/HepMC3EventInterface.h"
 #include "CepGenAddOns/PhotosTauolaWrapper/PhotosTauolaInterface.h"
-
-//#define _LOG_DEBUG_MODE_
-
-#include <Photos/Log.h>
-#include <Photos/Photos.h>
-#include <Photos/PhotosEvent.h>
 
 using namespace Photospp;
 
@@ -36,6 +36,7 @@ namespace cepgen {
     PhotosFilter::PhotosFilter(const ParametersList& params) : EventModifier(params) {
       if (steer<bool>("debug"))
         Log::LogAll(true);
+      Photos::setMomentumConservationThreshold(1.e-10);
       Photos::maxWtInterference(steer<double>("maxWtInterference"));
       Photos::setInfraredCutOff(steer<double>("infraredCutOff"));
       Photos::setInterference(steer<bool>("interference"));
@@ -63,12 +64,16 @@ namespace cepgen {
     bool PhotosFilter::run(Event& ev, double& weight, bool) {
       weight = 1.;
 
-      CepGenPhotosEvent evt(ev, PDG::tau);
-      evt.dump();
+      HepMC3::CepGenEvent hepmc_evt(ev);
+      //hepmc_evt.dump();
+      //CepGenPhotosEvent evt(ev, PDG::tau);
+      PhotosHepMC3Event evt(&hepmc_evt);
+      //evt.dump();
       evt.process();
+      hepmc_evt.dump();
       //evt.undecayTaus();
       //evt.decayTaus();
-      evt.dump();
+      //evt.dump();
       //const auto& pairs = evt[Particle::CentralSystem][0];
       //CG_WARNING("")<<pairs;
 
