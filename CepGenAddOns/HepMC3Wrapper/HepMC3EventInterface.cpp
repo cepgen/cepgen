@@ -122,19 +122,19 @@ namespace HepMC3 {
 
   void CepGenEvent::merge(cepgen::Event& evt) const {
     // set of sanity checks to perform on the HepMC event content
-    if (vertices_size() < 3) {
+    if (vertices().size() < 3) {
       CG_ERROR("HepMC3:CepGenEvent:merge") << "Failed to retrieve the three primordial vertices in event.";
       return;
     }
     const auto v1 = vertices().at(0), v2 = vertices().at(1), vcm = vertices().at(2);
-    if (v1->particles_in_size() != 1) {
+    if (v1->particles_in().size() != 1) {
       CG_ERROR("HepMC3:CepGenEvent:merge") << "Invalid first incoming beam particles multiplicity: found "
-                                           << v1->particles_in_size() << ", expecting one.";
+                                           << v1->particles_in().size() << ", expecting one.";
       return;
     }
-    if (v2->particles_in_size() != 1) {
+    if (v2->particles_in().size() != 1) {
       CG_ERROR("HepMC3:CepGenEvent:merge") << "Invalid second incoming beam particles multiplicity: found "
-                                           << v2->particles_in_size() << ", expecting one.";
+                                           << v2->particles_in().size() << ", expecting one.";
       return;
     }
     // set of sanity checks to ensure the compatibility between the HepMC and CepGen event records
@@ -152,7 +152,7 @@ namespace HepMC3 {
       return;
     }
     auto cs = evt[cepgen::Particle::Role::CentralSystem];
-    if (cs.size() != (size_t)vcm->particles_out_size()) {
+    if (cs.size() != (size_t)vcm->particles_out().size()) {
       CG_ERROR("HepMC3:CepGenEvent:merge")
           << "Central system particles multiplicities differ between CepGen and HepMC3 event records.";
       return;
