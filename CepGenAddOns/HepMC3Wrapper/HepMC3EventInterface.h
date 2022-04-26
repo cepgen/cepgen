@@ -35,7 +35,13 @@ namespace HepMC3 {
   class CepGenEvent : public GenEvent {
   public:
     /// Construct an event interface from a CepGen Event object
-    CepGenEvent(const cepgen::Event& ev);
+    CepGenEvent(const cepgen::Event&);
+
+    /// Write the event content in the standard stream
+    void dump() const;
+
+    /// Merge this event with another CepGen event record
+    void merge(cepgen::Event&) const;
 
   private:
     std::unordered_map<unsigned short, std::shared_ptr<GenParticle> > assoc_map_;
