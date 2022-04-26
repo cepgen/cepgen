@@ -87,12 +87,14 @@ namespace cepgen {
   }
 
   Particle& Particle::addMother(Particle& part) {
-    const auto ret = mothers_.insert(part.id());
+    const auto ret = mothers_.insert(part.id_);
+    if (part.status_ > 0)
+      part.status_ = (int)Status::Propagator;
 
     if (ret.second) {
-      CG_DEBUG_LOOP("Particle") << "Particle " << id() << " (pdgId=" << part.integerPdgId() << ") "
-                                << "is a new mother of " << id_ << " (pdgId=" << (int)pdg_id_ << ").";
-      if (!utils::contains(part.daughters(), id_))
+      CG_DEBUG_LOOP("Particle") << "Particle " << id() << " (pdgId=" << part.pdg_id_ << ") "
+                                << "is a new mother of " << id_ << " (pdgId=" << pdg_id_ << ").";
+      if (!utils::contains(part.daughters_, id_))
         part.addDaughter(*this);
     }
     return *this;
@@ -104,7 +106,9 @@ namespace cepgen {
   }
 
   Particle& Particle::addDaughter(Particle& part) {
-    const auto ret = daughters_.insert(part.id());
+    const auto ret = daughters_.insert(part.id_);
+    if (status_ > 0)
+      status_ = (int)Status::Propagator;
 
     CG_DEBUG_LOOP("Particle").log([&](auto& dbg) {
       dbg << "Particle " << role_ << " (pdgId=" << (int)pdg_id_ << ")"
@@ -114,9 +118,9 @@ namespace cepgen {
     });
 
     if (ret.second) {
-      CG_DEBUG_LOOP("Particle") << "Particle " << part.role() << " (pdgId=" << part.integerPdgId() << ") "
+      CG_DEBUG_LOOP("Particle") << "Particle " << part.role_ << " (pdgId=" << part.pdg_id_ << ") "
                                 << "is a new daughter of " << role_ << " (pdgId=" << pdg_id_ << ").";
-      if (!utils::contains(part.mothers(), id_))
+      if (!utils::contains(part.mothers_, id_))
         part.addMother(*this);
     }
     return *this;

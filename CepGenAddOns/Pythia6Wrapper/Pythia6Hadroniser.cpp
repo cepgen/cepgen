@@ -180,7 +180,7 @@ namespace cepgen {
                                         ? ev[moth_id].role()  // child particle inherits its mother's role
                                         : Particle::Role::UnknownRole;
 
-        auto& pa = ev.addParticle(role);
+        auto& pa = ev.addParticle(role).get();
         pa.setId(p);
         pa.setStatus(pyjets_.k[0][p]);
         pa.setPdgId((long)pyjets_.k[1][p]);
@@ -225,14 +225,14 @@ namespace cepgen {
         pq.setEnergy(std::hypot(px, mq));
 
         //--- singlet
-        auto& quark = ev.addParticle(part.role());
+        auto& quark = ev.addParticle(part.role()).get();
         quark.addMother(ev[part.id()]);
         quark.setPdgId(partons.first, +1);
         quark.setStatus(Particle::Status::Unfragmented);
         quark.setMomentum(pq.lorentzBoost(part.momentum()));
 
         //--- doublet
-        auto& diquark = ev.addParticle(part.role());
+        auto& diquark = ev.addParticle(part.role()).get();
         diquark.addMother(ev[part.id()]);
         diquark.setPdgId(partons.second, +1);
         diquark.setStatus(Particle::Status::Unfragmented);

@@ -248,10 +248,12 @@ namespace cepgen {
 
   // --- particle containers
 
+  /// Reference to a Particle object
+  typedef std::reference_wrapper<Particle> ParticleRef;
   /// List of Particle objects
   typedef std::vector<Particle> Particles;
   /// List of references to Particle objects
-  typedef std::vector<std::reference_wrapper<Particle> > ParticlesRefs;
+  typedef std::vector<ParticleRef> ParticlesRefs;
   /// List of particles' roles
   typedef std::vector<Particle::Role> ParticleRoles;
   /// Map between a particle's role and its associated Particle object

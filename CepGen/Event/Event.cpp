@@ -73,7 +73,7 @@ namespace cepgen {
       if (particles_.count(role) == 0)
         continue;
       for (const auto& old_part : operator()(role)) {
-        auto& new_part = out.addParticle(role);
+        auto& new_part = out.addParticle(role).get();
         new_part = old_part;  // copy all attributes
         new_part.setId(i++);
         new_part.clearMothers();
@@ -197,7 +197,7 @@ namespace cepgen {
     return out;
   }
 
-  Particle& Event::addParticle(Particle& part, bool replace) {
+  ParticleRef Event::addParticle(Particle& part, bool replace) {
     CG_DEBUG_LOOP("Event") << "Particle with PDGid = " << part.integerPdgId() << " has role " << part.role();
     if (part.role() <= 0)
       throw CG_FATAL("Event") << "Trying to add a particle with role=" << (int)part.role() << ".";
@@ -221,10 +221,10 @@ namespace cepgen {
     else
       part_with_same_role.emplace_back(part);
 
-    return operator[](part.role()).back().get();
+    return std::ref(part_with_same_role.back());
   }
 
-  Particle& Event::addParticle(Particle::Role role, bool replace) {
+  ParticleRef Event::addParticle(Particle::Role role, bool replace) {
     Particle np(role, PDG::invalid);
     return addParticle(np, replace);
   }
