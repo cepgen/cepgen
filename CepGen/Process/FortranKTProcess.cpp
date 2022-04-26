@@ -203,10 +203,10 @@ namespace cepgen {
       // central system
       //===========================================================================================
 
-      auto& oc = (*event_)[Particle::CentralSystem];  // retrieve all references
-                                                      // to central system particles
+      auto oc = (*event_)[Particle::CentralSystem];  // retrieve all references
+                                                     // to central system particles
       for (int i = 0; i < evtkin_.nout; ++i) {
-        auto& p = oc[i];  // retrieve a reference to the specific particle
+        auto& p = oc[i].get();  // retrieve a reference to the specific particle
         p.setPdgId((long)evtkin_.pdg[i]);
         p.setStatus(Particle::Status::FinalState);
         p.setMomentum(Momentum(evtkin_.pc[i]));

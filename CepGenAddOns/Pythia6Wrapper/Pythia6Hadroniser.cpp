@@ -252,7 +252,7 @@ namespace cepgen {
 
       for (const auto& role : ev.roles()) {  // loop on roles
         string_t evt_string;
-        for (const auto& part : ev[role]) {
+        for (const auto& part : ev(role)) {
           const unsigned short i = part.id();
           pyjets_.p[0][i] = part.momentum().px();
           pyjets_.p[1][i] = part.momentum().py();

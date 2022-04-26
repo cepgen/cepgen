@@ -76,9 +76,9 @@ namespace cepgen {
     Particles stableParticles() const;
     /// List of references to Particle objects corresponding to a certain role in the process kinematics
     /// \param[in] role The role the particles have to play in the process
-    Particles& operator[](Particle::Role role);
+    ParticlesRefs operator[](Particle::Role role);
     /// Get a list of constant Particle objects corresponding to a certain role in the process kinematics
-    const Particles& operator[](Particle::Role role) const;
+    const Particles& operator()(Particle::Role role) const;
     /// Get a list of particle identifiers in Event corresponding to a certain role in the process kinematics
     ParticlesIds ids(Particle::Role role) const;
     /// First Particle object with a given role in the event

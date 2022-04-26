@@ -50,7 +50,7 @@ namespace cepgen {
                                     << "Skipping the variable \"" << var << "\" in the output module.";
           return INVALID_OUTPUT;
         }
-        const auto& part = ev[role_str_.at(str_role)][0];
+        const auto& part = ev(role_str_.at(str_role))[0];
         return variable(ev, part, var_name);
       }
       //--- event-level variables
@@ -104,7 +104,7 @@ namespace cepgen {
       //if ( var == "nev" )
       //  return (double)num_evts_+1;
       if (var == "nob1" || var == "nob2") {
-        const auto& bparts = ev[var == "nob1" ? Particle::Role::OutgoingBeam1 : Particle::Role::OutgoingBeam2];
+        const auto& bparts = ev(var == "nob1" ? Particle::Role::OutgoingBeam1 : Particle::Role::OutgoingBeam2);
         return (double)std::count_if(
             bparts.begin(), bparts.end(), [](const auto& part) { return (int)part.status() > 0; });
       }

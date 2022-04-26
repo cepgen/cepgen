@@ -87,12 +87,14 @@ namespace cepgen {
   }
 
   Particle& Particle::addMother(Particle& part) {
-    mothers_.insert(part.id());
+    const auto ret = mothers_.insert(part.id());
 
-    CG_DEBUG_LOOP("Particle") << "Particle " << id() << " (pdgId=" << part.integerPdgId() << ") "
-                              << "is the new mother of " << id_ << " (pdgId=" << (int)pdg_id_ << ").";
-
-    part.addDaughter(*this);
+    if (ret.second) {
+      CG_DEBUG_LOOP("Particle") << "Particle " << id() << " (pdgId=" << part.integerPdgId() << ") "
+                                << "is a new mother of " << id_ << " (pdgId=" << (int)pdg_id_ << ").";
+      if (!utils::contains(part.daughters(), id_))
+        part.addDaughter(*this);
+    }
     return *this;
   }
 
@@ -114,7 +116,6 @@ namespace cepgen {
     if (ret.second) {
       CG_DEBUG_LOOP("Particle") << "Particle " << part.role() << " (pdgId=" << part.integerPdgId() << ") "
                                 << "is a new daughter of " << role_ << " (pdgId=" << pdg_id_ << ").";
-
       if (!utils::contains(part.mothers(), id_))
         part.addMother(*this);
     }
@@ -167,22 +168,7 @@ namespace cepgen {
     return *this;
   }
 
-  Particle& Particle::setPdgId(pdgid_t pdg, short ch) {
-    pdg_id_ = pdg;
-    if (PDG::get().has(pdg_id_))
-      phys_prop_ = PDG::get()(pdg_id_);
-    switch (pdg_id_) {
-      case PDG::electron:
-      case PDG::muon:
-      case PDG::tau:
-        charge_sign_ = -ch;
-        break;
-      default:
-        charge_sign_ = ch;
-        break;
-    }
-    return *this;
-  }
+  Particle& Particle::setPdgId(pdgid_t pdg, short ch) { return setPdgId(long(pdg * (ch == 0 ? 1 : ch / abs(ch)))); }
 
   int Particle::integerPdgId() const {
     const float ch = phys_prop_.charge / 3.;

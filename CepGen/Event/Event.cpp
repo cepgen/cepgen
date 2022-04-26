@@ -72,7 +72,7 @@ namespace cepgen {
                              Particle::CentralSystem}) {
       if (particles_.count(role) == 0)
         continue;
-      for (const auto& old_part : operator[](role)) {
+      for (const auto& old_part : operator()(role)) {
         auto& new_part = out.addParticle(role);
         new_part = old_part;  // copy all attributes
         new_part.setId(i++);
@@ -86,22 +86,22 @@ namespace cepgen {
                                    << "Particles parentage is not guaranteed to be conserved.";
     if (particles_.count(Particle::OutgoingBeam1) > 0)
       for (auto& part : out[Particle::OutgoingBeam1])
-        part.addMother(out[Particle::IncomingBeam1][0]);
+        part.get().addMother(out[Particle::IncomingBeam1][0].get());
     if (particles_.count(Particle::OutgoingBeam2) > 0)
       for (auto& part : out[Particle::OutgoingBeam2])
-        part.addMother(out[Particle::IncomingBeam2][0]);
+        part.get().addMother(out[Particle::IncomingBeam2][0].get());
     //--- fix parentage for incoming partons
     for (auto& part : out[Particle::Parton1])
       if (particles_.count(Particle::IncomingBeam1) > 0)
-        part.addMother(out[Particle::IncomingBeam1][0]);
+        part.get().addMother(out[Particle::IncomingBeam1][0].get());
     if (particles_.count(Particle::IncomingBeam2) > 0)
       for (auto& part : out[Particle::Parton2])
-        part.addMother(out[Particle::IncomingBeam2][0]);
+        part.get().addMother(out[Particle::IncomingBeam2][0].get());
     //--- fix parentage for central system
     if (particles_.count(Particle::Parton1) > 0 && particles_.count(Particle::Parton2) > 0)
       for (auto& part : out[Particle::CentralSystem]) {
-        part.addMother(out[Particle::Parton1][0]);
-        part.addMother(out[Particle::Parton2][0]);
+        part.get().addMother(out[Particle::Parton1][0]);
+        part.get().addMother(out[Particle::Parton2][0]);
       }
     return out;
   }
@@ -110,12 +110,15 @@ namespace cepgen {
     return CMEnergy(oneWithRole(Particle::IncomingBeam1), oneWithRole(Particle::IncomingBeam2));
   }
 
-  Particles& Event::operator[](Particle::Role role) {
+  ParticlesRefs Event::operator[](Particle::Role role) {
+    ParticlesRefs out;
     //--- retrieve all particles with a given role
-    return particles_[role];
+    for (auto& part : particles_[role])
+      out.emplace_back(std::ref(part));
+    return out;
   }
 
-  const Particles& Event::operator[](Particle::Role role) const {
+  const Particles& Event::operator()(Particle::Role role) const {
     if (particles_.count(role) == 0)
       throw CG_FATAL("Event") << "Failed to retrieve a particle with " << role << " role.";
     //--- retrieve all particles with a given role
@@ -136,18 +139,18 @@ namespace cepgen {
 
   Particle& Event::oneWithRole(Particle::Role role) {
     //--- retrieve the first particle of a given role
-    Particles& parts_by_role = operator[](role);
+    auto parts_by_role = operator[](role);
     if (parts_by_role.empty())
       throw CG_FATAL("Event") << "No particle retrieved with " << role << " role.";
     if (parts_by_role.size() > 1)
       throw CG_FATAL("Event") << "More than one particle with " << role << " role: " << parts_by_role.size()
                               << " particles.";
-    return *parts_by_role.begin();
+    return parts_by_role.front().get();
   }
 
   const Particle& Event::oneWithRole(Particle::Role role) const {
     //--- retrieve the first particle of a given role
-    const Particles& parts_by_role = operator[](role);
+    const Particles& parts_by_role = operator()(role);
     if (parts_by_role.empty())
       throw CG_FATAL("Event") << "No particle retrieved with " << role << " role.";
     if (parts_by_role.size() > 1)
@@ -200,7 +203,7 @@ namespace cepgen {
       throw CG_FATAL("Event") << "Trying to add a particle with role=" << (int)part.role() << ".";
 
     //--- retrieve the list of particles with the same role
-    Particles& part_with_same_role = operator[](part.role());
+    auto& part_with_same_role = particles_[part.role()];
 
     //--- specify the id
     if (part_with_same_role.empty() && part.id() < 0)
@@ -213,12 +216,12 @@ namespace cepgen {
     }
 
     //--- add the particle to the collection
-    if (replace)
-      part_with_same_role = Particles(1, part);  // generate a vector containing only this particle
+    if (replace && !part_with_same_role.empty())
+      part_with_same_role = Particles(1, part);
     else
       part_with_same_role.emplace_back(part);
 
-    return part_with_same_role.back();
+    return operator[](part.role()).back().get();
   }
 
   Particle& Event::addParticle(Particle::Role role, bool replace) {
@@ -254,7 +257,7 @@ namespace cepgen {
 
   Momentum Event::missingEnergy() const {
     Momentum me;
-    for (const auto& cp : operator[](Particle::Role::CentralSystem))
+    for (const auto& cp : operator()(Particle::Role::CentralSystem))
       if (cp.status() == Particle::Status::FinalState) {
         const auto pdg = cp.integerPdgId();
         if (pdg == 12 || pdg == 14 || pdg == 16)  // neutrinos

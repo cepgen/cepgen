@@ -312,10 +312,10 @@ namespace cepgen {
           const unsigned short role = findRole(ev, p);
           switch ((Particle::Role)role) {
             case Particle::OutgoingBeam1:
-              ev[Particle::OutgoingBeam1][0].setStatus(Particle::Status::Fragmented);
+              ev[Particle::OutgoingBeam1][0].get().setStatus(Particle::Status::Fragmented);
               break;
             case Particle::OutgoingBeam2:
-              ev[Particle::OutgoingBeam2][0].setStatus(Particle::Status::Fragmented);
+              ev[Particle::OutgoingBeam2][0].get().setStatus(Particle::Status::Fragmented);
               break;
             default:
               break;

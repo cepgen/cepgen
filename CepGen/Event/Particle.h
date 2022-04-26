@@ -206,7 +206,7 @@ namespace cepgen {
        */
     Particle& addDaughter(Particle& part);
     /// Gets the number of daughter particles
-    inline unsigned int numDaughters() const { return daughters_.size(); };
+    inline size_t numDaughters() const { return daughters_.size(); };
     /// Get an identifiers list all daughter particles
     /// \return An integer vector containing all the daughters' unique identifier in the event
     inline ParticlesIds daughters() const { return daughters_; }
@@ -250,6 +250,8 @@ namespace cepgen {
 
   /// List of Particle objects
   typedef std::vector<Particle> Particles;
+  /// List of references to Particle objects
+  typedef std::vector<std::reference_wrapper<Particle> > ParticlesRefs;
   /// List of particles' roles
   typedef std::vector<Particle::Role> ParticleRoles;
   /// Map between a particle's role and its associated Particle object
