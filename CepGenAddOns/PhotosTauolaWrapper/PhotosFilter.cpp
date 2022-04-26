@@ -64,6 +64,7 @@ namespace cepgen {
 
       CepGenPhotosEvent evt(ev, PDG::tau);
       evt.dump();
+      evt.process();
       //evt.undecayTaus();
       //evt.decayTaus();
       evt.dump();
@@ -76,7 +77,7 @@ namespace cepgen {
     ParametersDescription PhotosFilter::description() {
       auto desc = EventModifier::description();
       desc.add<double>("maxWtInterference", 0.).setDescription("maximum interference weight");
-      desc.add<double>("infraredCutOff", 0.)
+      desc.add<double>("infraredCutOff", 0.01 / 91.187)
           .setDescription("minimal energy (in units of decaying particle mass) for photons to be explicitly generated");
       desc.add<bool>("interference", false).setDescription("key for interference, matrix element weight");
       desc.add<bool>("doubleBrem", false).setDescription("set double bremsstrahlung generation");
