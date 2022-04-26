@@ -54,7 +54,6 @@ namespace cepgen {
 
     template <typename E, typename P>
     int PhotosTauolaParticle<E, P>::getPdgID() {
-      CG_WARNING("") << integerPdgId();
       return Particle::integerPdgId();
     }
 
