@@ -201,10 +201,12 @@ namespace HepMC3 {
         log << "\n  * vertex#" << (-vtxPtr->id()) << " (status: " << vtxPtr->status() << ")"
             << "\n     in: ";
         for (const auto& ipPtr : vtxPtr->particles_in())
-          log << "\n      * " << ipPtr->pdg_id() << ": " << ipPtr->momentum(), in_sys += ipPtr->momentum();
+          log << "\n      * " << ipPtr->pdg_id() << " (status: " << ipPtr->status() << "): " << ipPtr->momentum(),
+              in_sys += ipPtr->momentum();
         log << "\n     total: " << in_sys << "\n     out:";
         for (const auto& opPtr : vtxPtr->particles_out())
-          log << "\n      * " << opPtr->pdg_id() << ": " << opPtr->momentum(), out_sys += opPtr->momentum();
+          log << "\n      * " << opPtr->pdg_id() << " (status: " << opPtr->status() << "): " << opPtr->momentum(),
+              out_sys += opPtr->momentum();
         const auto imbal = in_sys - out_sys;
         log << "\n     total: " << out_sys << "\n    (im)balance: " << imbal << " (norm: " << imbal.length() << ").";
       }

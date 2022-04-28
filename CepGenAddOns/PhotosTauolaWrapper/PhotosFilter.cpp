@@ -71,7 +71,6 @@ namespace cepgen {
     void PhotosFilter::init() {
       Photos::setMomentumUnit(Photos::GEV);
       Photos::setAlphaQED(constants::ALPHA_EM);
-      //Photos::setSeed( seed_ );
       Photos::initialize();
     }
 
