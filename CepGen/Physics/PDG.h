@@ -83,6 +83,7 @@ namespace cepgen {
 
     bool has(pdgid_t) const;                              ///< Is the particle defined for a given PDG id
     const ParticleProperties& operator()(pdgid_t) const;  ///< All physical properties for one particle
+    ParticleProperties& operator[](pdgid_t id);           /// Accessor for particle properties
     const std::string& name(pdgid_t) const;               ///< Human-readable name for this particle
     double colours(pdgid_t) const;                        ///< Colour factor for this particle
     double mass(pdgid_t) const;                           ///< Particle mass (in GeV)

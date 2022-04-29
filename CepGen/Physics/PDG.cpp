@@ -56,6 +56,8 @@ namespace cepgen {
     throw CG_FATAL("PDG") << "No particle with PDG id " << id << " in the catalogue.";
   }
 
+  ParticleProperties& PDG::operator[](pdgid_t id) { return particles_[id]; }
+
   void PDG::define(const ParticleProperties& props) {
     CG_DEBUG("PDG:define") << "Adding a new particle with "
                            << "PDG id=" << std::setw(8) << props.pdgid << ", " << props;
