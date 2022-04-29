@@ -265,7 +265,7 @@ namespace cepgen {
         ib2.setMomentum(p2);
       }
 
-      s_ = kin.incomingBeams().s();
+      s_ = kin_.incomingBeams().s();
       sqs_ = std::sqrt(s_);
 
       mA2_ = p1.mass2();

@@ -82,7 +82,7 @@ namespace cepgen {
   void Generator::computeXsection(double& cross_section, double& err) {
     CG_INFO("Generator") << "Starting the computation of the process cross-section.";
 
-    integrate();
+    integrate();  // run is cleared here
 
     cross_section = result_;
     err = result_error_;
@@ -121,8 +121,9 @@ namespace cepgen {
     if (!parameters_->hasProcess())
       throw CG_FATAL("Generator:integrate") << "Trying to integrate while no process is specified!";
     const size_t ndim = worker_->integrand().process().ndim();
-    if (ndim < 1)
-      throw CG_FATAL("Generator:computePoint") << "Invalid phase space dimension (ndim=" << ndim << ")!";
+    if (ndim == 0)
+      throw CG_FATAL("Generator:computePoint") << "Invalid phase space dimension. "
+                                               << "At least one integration variable is required!";
 
     CG_DEBUG("Generator:integrate") << "New integrator instance created for " << ndim << "-dimensional integration.";
 
@@ -130,8 +131,10 @@ namespace cepgen {
 
     CG_DEBUG("Generator:integrate") << "Computed cross section: (" << result_ << " +- " << result_error_ << ") pb.";
 
+    // now that the cross section has been computed, feed it to the event modification algorithms...
     for (auto& mod : parameters_->eventModifiersSequence())
       mod->setCrossSection(result_, result_error_);
+    // ...and to the event storage algorithms
     for (auto& mod : parameters_->outputModulesSequence())
       mod->setCrossSection(result_, result_error_);
   }

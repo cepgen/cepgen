@@ -19,6 +19,7 @@
 #include <algorithm>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Cuts.h"
 #include "CepGen/Physics/Kinematics.h"
 
@@ -77,6 +78,42 @@ namespace cepgen {
       limits_.at(e_rapidity_diff) = Property("rapiditydiff", "System D(Y)", params);
     }
 
+    bool Central::contain(const Particles& parts, const Event*) const {
+      Momentum mom_sum;
+      for (const auto& part : parts) {
+        const auto& mom = part.momentum();
+        if (!pt_single().contains(mom.pt()))
+          return false;
+        if (!eta_single().contains(mom.eta()))
+          return false;
+        if (!rapidity_single().contains(mom.rapidity()))
+          return false;
+        if (!energy_single().contains(mom.energy()))
+          return false;
+        if (!mass_single().contains(mom.mass()))
+          return false;
+        mom_sum += mom;
+      }
+      if (!pt_sum().contains(mom_sum.pt()))
+        return false;
+      if (!eta_sum().contains(mom_sum.eta()))
+        return false;
+      if (!energy_sum().contains(mom_sum.energy()))
+        return false;
+      if (!mass_sum().contains(mom_sum.mass()))
+        return false;
+      if (parts.size() > 1) {  // look at correlations
+        const auto &mom1 = parts.at(0).momentum(), &mom2 = parts.at(1).momentum();
+        if (!pt_diff().contains(fabs(mom1.pt() - mom2.pt())))
+          return false;
+        if (!phi_diff().contains(mom1.deltaPhi(mom2)))
+          return false;
+        if (!rapidity_diff().contains(fabs(mom1.rapidity() - mom2.rapidity())))
+          return false;
+      }
+      return true;
+    }
+
     Initial::Initial(const ParametersList& params) : Cuts(params) {
       limits_.resize(InitialProperties::num_properties);
       limits_.at(e_q2) = Property("q2", "Virtuality (GeV^2)", params);
@@ -84,11 +121,28 @@ namespace cepgen {
       limits_.at(e_phi_qt) = Property("phiqt", "Partons D(phi) (rad)", params);
     }
 
+    bool Initial::contain(const Particles&, const Event*) const {
+      //if (!q2().contains(
+      return true;
+    }
+
     Remnants::Remnants(const ParametersList& params) : Cuts(params) {
       limits_.resize(RemnantsProperties::num_properties);
       limits_.at(e_mx) = Property("mx", "Diffractive mass (GeV/c^2)", params);
       limits_.at(e_yj) = Property("yj", "Diffractive jet rapidity", params);
       limits_.at(e_xi) = Property("xi", "Longit. fractional momentum loss", params);
+    }
+
+    bool Remnants::contain(const Particles& parts, const Event* evt) const {
+      for (const auto& part : parts) {
+        if (part.status() != Particle::Status::FinalState)
+          return true;
+        if (evt && !xi().contains(1. - part.momentum().pz() / (*evt)[*part.mothers().begin()].momentum().pz()))
+          return false;
+        if (!yj().contains(fabs(part.momentum().rapidity())))
+          return false;
+      }
+      return true;
     }
   }  // namespace cuts
 

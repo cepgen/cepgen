@@ -68,8 +68,8 @@ namespace cepgen {
       w_limits_ = Limits(mll_limits.hasMin() ? std::pow(mll_limits.min(), 2) : 4. * masses_.Ml2,
                          mll_limits.hasMax() ? std::pow(mll_limits.max(), 2) : s_);
 
-      CG_DEBUG_LOOP("LPAIR:setKinematics") << "w limits = " << w_limits_ << "\n\t"
-                                           << "wmax/wmin = " << w_limits_.max() / w_limits_.min();
+      CG_DEBUG_LOOP("LPAIR:prepareKinematics") << "w limits = " << w_limits_ << "\n\t"
+                                               << "wmax/wmin = " << w_limits_.max() / w_limits_.min();
 
       p1_lab_ = (*event_)(Particle::IncomingBeam1)[0].momentum();
       p2_lab_ = (*event_)(Particle::IncomingBeam2)[0].momentum();

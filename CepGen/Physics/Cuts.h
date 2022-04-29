@@ -23,10 +23,12 @@
 #include <vector>
 
 #include "CepGen/Core/SteeredObject.h"
+#include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Utils/Limits.h"
 
 namespace cepgen {
+  class Event;
   class ParametersList;
 
   /// Constraints to be applied on the events kinematics
@@ -41,6 +43,9 @@ namespace cepgen {
     void setParameters(const ParametersList&);
     /// Retrieve the cuts list into a steering parameters list
     ParametersList parameters(bool full = false) const;
+
+    /// Check if a particle/system pass(es) the list of kinematic cuts
+    virtual bool contain(const Particles&, const Event* = nullptr) const { return true; }
 
     /// A set of properties for a given cut
     struct Property {
@@ -68,6 +73,8 @@ namespace cepgen {
     public:
       Central();
       explicit Central(const ParametersList&);
+
+      bool contain(const Particles&, const Event* evt = nullptr) const override;
 
       /// single particle transverse momentum
       Limits& pt_single() { return limits_.at(e_pt_single).limits; }
@@ -141,6 +148,8 @@ namespace cepgen {
     public:
       explicit Initial(const ParametersList&);
 
+      bool contain(const Particles&, const Event* evt = nullptr) const override;
+
       /// parton virtuality
       Limits& q2() { return limits_.at(e_q2).limits; }
       /// parton virtuality
@@ -162,6 +171,8 @@ namespace cepgen {
     class Remnants final : public Cuts {
     public:
       explicit Remnants(const ParametersList&);
+
+      bool contain(const Particles&, const Event* evt = nullptr) const override;
 
       /// diffractive mass
       Limits& mx() { return limits_.at(e_mx).limits; }

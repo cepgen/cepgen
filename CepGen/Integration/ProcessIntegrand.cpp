@@ -136,33 +136,19 @@ namespace cepgen {
     //--- apply cuts on final state system (after hadronisation!)
     //    (polish your cuts, as this might be very time-consuming...)
 
+    if (!params_->kinematics().cuts().central.contain((*event_)(Particle::CentralSystem)))
+      return 0.;
     if (!params_->kinematics().cuts().central_particles.empty())
       for (const auto& part : (*event_)(Particle::CentralSystem)) {
-        // retrieve all cuts associated to this final state particle in the
-        // central system
-        if (params_->kinematics().cuts().central_particles.count(part.pdgId()) == 0)
-          continue;
-        const auto& cuts_pdgid = params_->kinematics().cuts().central_particles.at(part.pdgId());
-        // apply these cuts on the given particle
-        if (!cuts_pdgid.pt_single().contains(part.momentum().pt()))
-          return 0.;
-        if (!cuts_pdgid.energy_single().contains(part.momentum().energy()))
-          return 0.;
-        if (!cuts_pdgid.eta_single().contains(part.momentum().eta()))
-          return 0.;
-        if (!cuts_pdgid.rapidity_single().contains(part.momentum().rapidity()))
+        // retrieve all cuts associated to this final state particle in the central system
+        if (params_->kinematics().cuts().central_particles.count(part.pdgId()) > 0 &&
+            !params_->kinematics().cuts().central_particles.at(part.pdgId()).contain({part}))
           return 0.;
       }
-    const auto& remn_cut = params_->kinematics().cuts().remnants;
-    for (const auto& system : {Particle::OutgoingBeam1, Particle::OutgoingBeam2})
-      for (const auto& part : (*event_)(system)) {
-        if (part.status() != Particle::Status::FinalState)
-          continue;
-        if (!remn_cut.xi().contains(1. - part.momentum().pz() / (*event_)[*part.mothers().begin()].momentum().pz()))
-          return 0.;
-        if (!remn_cut.yj().contains(fabs(part.momentum().rapidity())))
-          return 0.;
-      }
+    if (!params_->kinematics().cuts().remnants.contain((*event_)(Particle::OutgoingBeam1), event_))
+      return 0.;
+    if (!params_->kinematics().cuts().remnants.contain((*event_)(Particle::OutgoingBeam2), event_))
+      return 0.;
 
     //--- store the last event in parameters block for a later usage
     if (storage_) {
