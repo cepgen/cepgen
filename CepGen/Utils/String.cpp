@@ -256,6 +256,8 @@ namespace cepgen {
       return out;
     }
 
+    bool startsWith(const std::string& str, const std::string& beg) { return ltrim(str).rfind(beg, 0) == 0; }
+
     namespace env {
       std::string get(const std::string& var, const std::string& def) {
         const auto out = std::getenv(var.c_str());

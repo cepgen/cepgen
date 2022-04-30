@@ -211,10 +211,10 @@ namespace cepgen {
           auto gr_cmds = drawGraph1D(*dynamic_cast<const Graph1D*>(obj), mode);
           auto it = gr_cmds.begin();
           while (it != gr_cmds.end())
-            if (it->rfind("plot", 0) == 0) {
+            if (startsWith(*it, "plot")) {
               plot_cmds.emplace_back(replace_all(it->substr(5), " notitle", " title '" + obj->title() + "'"));
               it = gr_cmds.erase(it);
-            } else if (it->rfind("splot", 0) == 0) {
+            } else if (startsWith(*it, "splot")) {
               splot_cmds.emplace_back(replace_all(it->substr(6), " notitle", " title '" + obj->title() + "'"));
               it = gr_cmds.erase(it);
             } else
@@ -227,10 +227,10 @@ namespace cepgen {
           auto h_cmds = drawHist1D(*dynamic_cast<const Hist1D*>(obj), mode);
           auto it = h_cmds.begin();
           while (it != h_cmds.end())
-            if (it->rfind("plot", 0) == 0) {
+            if (startsWith(*it, "plot")) {
               plot_cmds.emplace_back(replace_all(it->substr(5), " notitle", " title '" + obj->title() + "'"));
               it = h_cmds.erase(it);
-            } else if (it->rfind("splot", 0) == 0) {
+            } else if (startsWith(*it, "splot")) {
               splot_cmds.emplace_back(replace_all(it->substr(6), " notitle", " title '" + obj->title() + "'"));
               it = h_cmds.erase(it);
             } else

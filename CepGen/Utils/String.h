@@ -153,6 +153,8 @@ namespace cepgen {
     inline std::string trim(const std::string& str) { return ltrim(rtrim(str)); }
     /// Strip all special characters from string
     std::string strip(const std::string&);
+    /// Check if a string starts with a given token
+    bool startsWith(const std::string&, const std::string&);
     /// All environment variable-related utilities
     namespace env {
       /// Get an environment variable
