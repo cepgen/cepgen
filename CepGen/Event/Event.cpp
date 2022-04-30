@@ -28,6 +28,9 @@
 namespace cepgen {
   Event::Event(bool compressed) : compressed_(compressed) {}
 
+  Event::Event(const Event& oth)
+      : particles_(oth.particles_), evtcontent_(oth.evtcontent_), compressed_(oth.compressed_) {}
+
   void Event::clear() {
     particles_.clear();
     time_generation = -1.;

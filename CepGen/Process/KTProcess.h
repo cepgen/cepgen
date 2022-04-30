@@ -100,7 +100,6 @@ namespace cepgen {
       /// Second outgoing proton
       Momentum pY_;
 
-    private:
       /// First and second intermediate parton (photon, pomeron, ...)
       std::array<pdgid_t, 2> intermediate_parts_;
       /// Type of particles produced in the final state

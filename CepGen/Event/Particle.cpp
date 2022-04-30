@@ -238,4 +238,11 @@ namespace cepgen {
       return 0.;
     return sqrt(p1.mass2() + p2.mass2() + 2. * p1.energy() * p2.energy() - 2. * (p1.momentum() * p2.momentum()));
   }
+
+  ParticlesMap::ParticlesMap(const ParticlesMap& oth)
+      : std::unordered_map<Particle::Role, Particles, utils::EnumHash<Particle::Role> >() {
+    for (const auto& parts_vs_role : oth)
+      for (const auto& part : parts_vs_role.second)
+        (*this)[parts_vs_role.first].emplace_back(Particle(part));
+  }
 }  // namespace cepgen

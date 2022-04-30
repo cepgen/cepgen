@@ -257,7 +257,11 @@ namespace cepgen {
   /// List of particles' roles
   typedef std::vector<Particle::Role> ParticleRoles;
   /// Map between a particle's role and its associated Particle object
-  typedef std::unordered_map<Particle::Role, Particles, utils::EnumHash<Particle::Role> > ParticlesMap;
+  class ParticlesMap : public std::unordered_map<Particle::Role, Particles, utils::EnumHash<Particle::Role> > {
+  public:
+    ParticlesMap() = default;
+    ParticlesMap(const ParticlesMap&);
+  };
 }  // namespace cepgen
 
 #endif
