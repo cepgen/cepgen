@@ -100,16 +100,17 @@ int main(int argc, char* argv[]) {
         kin.cuts().central.rapidity_single().min() = -value;
         kin.cuts().central.rapidity_single().max() = +value;
         scan_str = "$|y|$";
-      } else if (scan == "mpart") {
-        auto prop = cepgen::PDG::get()(par.process().event()[cepgen::Particle::CentralSystem][0].pdgId());
-        prop.mass = value;
-        cepgen::PDG::get().define(prop);
+      } else if (cepgen::utils::startsWith(scan, "m:")) {
+        const auto tok = cepgen::utils::split(scan, ':');
+        if (tok.size() > 2)
+          throw CG_FATAL("main") << "Invalid mass scan defined: should follow the \"m:<pdgid int>\" convention!";
+        const cepgen::pdgid_t pdg = stod(tok.at(1));
+        cepgen::PDG::get()[pdg].mass = value;
         par.process().clear();
-        scan_str = "$m_{central}^{single}$";
+        scan_str = "$m_{" + cepgen::PDG::get()(pdg).name + "}$ (GeV)";
       } else {
         auto modif = cepgen::ParametersList().set<double>(scan, value);
         kin.setParameters(modif);
-        CG_LOG << modif << "\n\n" << kin.cuts();
       }
       CG_LOG << "Scan of \"" << scan << "\". Value = " << value << ".";
       mg.computeXsection(cross_section, err_cross_section);
