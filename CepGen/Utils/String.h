@@ -121,6 +121,11 @@ namespace cepgen {
     /// Remove duplicates and sort a collection
     template <typename T>
     void normalise(std::vector<T>& coll);
+    /// Check if all elements of a collection are uniform
+    template <typename T>
+    inline bool uniform(const std::vector<T>& coll) {
+      return coll.size() > 1 ? coll == std::vector<T>(coll.size(), coll.at(0)) : true;
+    }
     /// Capitalise a string
     std::string toupper(const std::string&);
     /// Lowercase version of a string
