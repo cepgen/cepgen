@@ -32,8 +32,8 @@ namespace cepgen {
     IntegratedEventVariablesHandler::IntegratedEventVariablesHandler(const ParametersList& params)
         : ExportModule(params),
           drawer_(utils::DrawerFactory::get().build(steer<std::string>("plotter"), params)),
-          show_hists_(steer<bool>("showHistograms")),
-          save_hists_(steer<bool>("saveHistograms")),
+          show_hists_(steer<bool>("show")),
+          save_hists_(steer<bool>("save")),
           filename_(steer<std::string>("filename")) {
       //--- extract list of variables to be plotted in histogram
       const auto& hist_vars = steer<ParametersList>("histVariables");
