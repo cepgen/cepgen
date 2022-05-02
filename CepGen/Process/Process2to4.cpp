@@ -230,13 +230,13 @@ namespace cepgen {
 
       //--- first outgoing central particle
       auto& oc1 = (*event_)[Particle::CentralSystem][0].get();
-      oc1.setPdgId(cs_prop_.pdgid, +sign);
+      oc1.setChargeSign(+sign);
       oc1.setStatus(Particle::Status::Undecayed);
       oc1.setMomentum(p_c1_);
 
       //--- second outgoing central particle
       auto& oc2 = (*event_)[Particle::CentralSystem][1].get();
-      oc2.setPdgId(cs_prop_.pdgid, -sign);
+      oc2.setChargeSign(-sign);
       oc2.setStatus(Particle::Status::Undecayed);
       oc2.setMomentum(p_c2_);
     }

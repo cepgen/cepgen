@@ -106,7 +106,6 @@ int main(int argc, char* argv[]) {
           throw CG_FATAL("main") << "Invalid mass scan defined: should follow the \"m:<pdgid int>\" convention!";
         const cepgen::pdgid_t pdg = stod(tok.at(1));
         cepgen::PDG::get()[pdg].mass = value;
-        par.process().clear();
         scan_str = "$m_{" + cepgen::PDG::get()(pdg).name + "}$ (GeV)";
       } else {
         auto modif = cepgen::ParametersList().set<double>(scan, value);

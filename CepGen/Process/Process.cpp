@@ -263,6 +263,8 @@ namespace cepgen {
         auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
         ib2.setPdgId(kin_.incomingBeams().negative().pdgId());
         ib2.setMomentum(p2);
+        for (auto& cp : (*event_)[Particle::CentralSystem])
+          cp.get().setPdgId(cp.get().pdgId());
       }
 
       s_ = kin_.incomingBeams().s();
