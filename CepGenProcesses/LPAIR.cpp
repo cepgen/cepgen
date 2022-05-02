@@ -887,14 +887,14 @@ namespace cepgen {
 
       //----- first outgoing lepton
       auto& ol1 = central_system[0].get();
-      ol1.setPdgId(ol1.pdgId(), ransign);
+      ol1.setChargeSign(+ransign);
       p6_cm_.setPz(p6_cm_.pz() * ranz);
       ol1.setMomentum(p6_cm_);
       ol1.setStatus(Particle::Status::FinalState);
 
       //----- second outgoing lepton
       auto& ol2 = central_system[1].get();
-      ol2.setPdgId(ol2.pdgId(), -ransign);
+      ol2.setChargeSign(-ransign);
       p7_cm_.setPz(p7_cm_.pz() * ranz);
       ol2.setMomentum(p7_cm_);
       ol2.setStatus(Particle::Status::FinalState);
