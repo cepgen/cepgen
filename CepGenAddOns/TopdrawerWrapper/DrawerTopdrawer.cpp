@@ -26,6 +26,7 @@
 #include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/Piper.h"
 #include "CepGen/Utils/String.h"
+#include "CepGen/Version.h"
 
 #ifndef TD_BIN
 #error "Topdrawer executable must be specified using TD_BIN!"
@@ -290,6 +291,7 @@ namespace cepgen {
       Piper::Commands cmds;
       cmds += stringify("TITLE BOTTOM", dr.xAxis().label());
       cmds += stringify("TITLE LEFT", dr.yAxis().label());
+      cmds += stringify("TITLE CENTER 10.8 9.25", "CepGen v" + version::tag);
       return cmds;
     }
 
