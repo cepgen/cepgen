@@ -160,6 +160,8 @@ namespace cepgen {
     if (PDG::get().has(pdg_id_)) {
       phys_prop_ = PDG::get()(pdg_id_);
       mass_ = phys_prop_.mass;
+      CG_DEBUG("Particle:setPdgId") << "Particle PDG id set to " << pdg_id_ << ", "
+                                    << "on-shell mass set to " << mass_ << " GeV/c^2.";
     }
     switch (pdg_id_) {
       case PDG::electron:
