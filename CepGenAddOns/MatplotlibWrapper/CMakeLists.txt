@@ -27,11 +27,9 @@ endif()
 
 include_directories(${PROJECT_SOURCE_DIR})
 
-file(GLOB sources DrawerMatplotlib.cpp MatplotlibHistsHandler.cpp)
-
 #----- build the object
 
-cepgen_build(CepGenMatplotlib SOURCES ${sources}
+cepgen_build(CepGenMatplotlib SOURCES *.cpp
     EXT_LIBS ${matplotlib_cpp_LIBRARIES} ${Python_LIBRARIES}
     EXT_HEADERS ${matplotlib_cpp_INCLUDE_DIRS} ${Python_INCLUDE_DIRS}
     INSTALL_COMPONENT matplotlib)

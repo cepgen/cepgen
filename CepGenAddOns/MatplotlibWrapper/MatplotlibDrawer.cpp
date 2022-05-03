@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2022  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <matplotlibcpp.h>
 
 #include "CepGen/Core/Exception.h"
@@ -5,14 +23,15 @@
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
 #include "CepGen/Utils/Histogram.h"
+#include "CepGen/Version.h"
 
 namespace plt = matplotlibcpp;
 
 namespace cepgen {
   namespace utils {
-    class DrawerMatplotlib : public Drawer {
+    class MatplotlibDrawer : public Drawer {
     public:
-      explicit DrawerMatplotlib(const ParametersList&);
+      explicit MatplotlibDrawer(const ParametersList&);
 
       static ParametersDescription description() {
         auto desc = Drawer::description();
@@ -21,12 +40,12 @@ namespace cepgen {
         return desc;
       }
 
-      const DrawerMatplotlib& draw(const Graph1D&, const Mode&) const override;
-      const DrawerMatplotlib& draw(const Graph2D&, const Mode&) const override;
-      const DrawerMatplotlib& draw(const Hist1D&, const Mode&) const override;
-      const DrawerMatplotlib& draw(const Hist2D&, const Mode&) const override;
+      const MatplotlibDrawer& draw(const Graph1D&, const Mode&) const override;
+      const MatplotlibDrawer& draw(const Graph2D&, const Mode&) const override;
+      const MatplotlibDrawer& draw(const Hist1D&, const Mode&) const override;
+      const MatplotlibDrawer& draw(const Hist2D&, const Mode&) const override;
 
-      const DrawerMatplotlib& draw(const DrawableColl&,
+      const MatplotlibDrawer& draw(const DrawableColl&,
                                    const std::string& name = "",
                                    const std::string& title = "",
                                    const Mode& mode = Mode::none) const override;
@@ -39,9 +58,9 @@ namespace cepgen {
       const bool tight_;
     };
 
-    DrawerMatplotlib::DrawerMatplotlib(const ParametersList& params) : Drawer(params), tight_(steer<bool>("tight")) {}
+    MatplotlibDrawer::MatplotlibDrawer(const ParametersList& params) : Drawer(params), tight_(steer<bool>("tight")) {}
 
-    const DrawerMatplotlib& DrawerMatplotlib::draw(const Graph1D& graph, const Mode& mode) const {
+    const MatplotlibDrawer& MatplotlibDrawer::draw(const Graph1D& graph, const Mode& mode) const {
       plt::figure();
       plot(graph, mode);
       postDraw(graph, mode);
@@ -50,7 +69,7 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerMatplotlib& DrawerMatplotlib::draw(const Graph2D& graph, const Mode& mode) const {
+    const MatplotlibDrawer& MatplotlibDrawer::draw(const Graph2D& graph, const Mode& mode) const {
       plt::figure();
       plot(graph, mode);
       postDraw(graph, mode);
@@ -59,7 +78,7 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerMatplotlib& DrawerMatplotlib::draw(const Hist1D& hist, const Mode& mode) const {
+    const MatplotlibDrawer& MatplotlibDrawer::draw(const Hist1D& hist, const Mode& mode) const {
       plt::figure();
       plot(hist, mode);
       postDraw(hist, mode);
@@ -68,32 +87,30 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerMatplotlib& DrawerMatplotlib::draw(const Hist2D&, const Mode&) const {
-      CG_WARNING("DrawerMatplotlib:draw") << "Not yet implemented.";
+    const MatplotlibDrawer& MatplotlibDrawer::draw(const Hist2D&, const Mode&) const {
+      CG_WARNING("MatplotlibDrawer:draw") << "Not yet implemented.";
       return *this;
     }
 
-    const DrawerMatplotlib& DrawerMatplotlib::draw(const DrawableColl& objs,
+    const MatplotlibDrawer& MatplotlibDrawer::draw(const DrawableColl& objs,
                                                    const std::string& name,
                                                    const std::string& title,
                                                    const Mode& mode) const {
       try {
         plt::figure();
         const Drawable* first_obj = nullptr;
-        for (const auto* obj : objs) {
+        for (const auto* obj : objs)
           if (obj->isHist1D()) {
             auto* hist = dynamic_cast<const Hist1D*>(obj);
             plot(*hist, mode);
             if (!first_obj)
               first_obj = hist;
-          }
-          if (obj->isGraph1D()) {
+          } else if (obj->isGraph1D()) {
             auto* gr = dynamic_cast<const Graph1D*>(obj);
             plot(*gr, mode);
             if (!first_obj)
               first_obj = gr;
           }
-        }
         if (!title.empty())
           plt::title(title);
         if (first_obj)
@@ -102,12 +119,12 @@ namespace cepgen {
           plt::legend();
         plt::save(name + ".pdf");
       } catch (const std::runtime_error& err) {
-        CG_WARNING("DrawerMatplotlib:draw") << "Failed to draw a plots collection. Matplotlib error: " << err.what();
+        CG_WARNING("MatplotlibDrawer:draw") << "Failed to draw a plots collection. Matplotlib error: " << err.what();
       }
       return *this;
     }
 
-    void DrawerMatplotlib::plot(const Graph1D& gr, const Mode& mode) {
+    void MatplotlibDrawer::plot(const Graph1D& gr, const Mode& mode) {
       std::vector<double> x, y, xerr, yerr;
       for (const auto& pt : gr.points()) {
         x.emplace_back(pt.first.value);
@@ -127,7 +144,7 @@ namespace cepgen {
         plt::plot(x, y, {{"label", gr.title()}});
     }
 
-    void DrawerMatplotlib::plot(const Graph2D& gr, const Mode&) {
+    void MatplotlibDrawer::plot(const Graph2D& gr, const Mode&) {
       std::vector<std::vector<double> > x, y, z;
       for (const auto& xv : gr.points()) {
         const auto xval = xv.first.value;
@@ -146,7 +163,7 @@ namespace cepgen {
       plt::set_zlabel(gr.zAxis().label());
     }
 
-    void DrawerMatplotlib::plot(const Hist1D& hist, const Mode& mode) {
+    void MatplotlibDrawer::plot(const Hist1D& hist, const Mode& mode) {
       std::vector<double> x, y, yerr;
       for (size_t ibin = 0; ibin < hist.nbins(); ++ibin) {
         x.emplace_back(hist.binRange(ibin).x(0.5));
@@ -168,7 +185,7 @@ namespace cepgen {
         plt::plot(x, y, plot_style);
     }
 
-    void DrawerMatplotlib::postDraw(const Drawable& dr, const Mode& mode) const {
+    void MatplotlibDrawer::postDraw(const Drawable& dr, const Mode& mode) const {
       if (mode & Mode::grid)
         plt::grid(true);
       const auto& yrange = dr.yAxis().range();
@@ -181,16 +198,17 @@ namespace cepgen {
         try {
           plt::ylim(rng.at(0), rng.at(1));
         } catch (const std::runtime_error& err) {
-          CG_WARNING("DrawerMatplotlib:postDraw")
+          CG_WARNING("MatplotlibDrawer:postDraw")
               << "Failed to set Y range to " << rng << ". Matplotlib error: " << err.what();
         }
       }
       plt::xlabel(dr.xAxis().label());
       plt::ylabel(dr.yAxis().label());
+      plt::suptitle("CepGen v" + version::tag);
       if (tight_)
         plt::tight_layout();
     }
   }  // namespace utils
 }  // namespace cepgen
 
-REGISTER_DRAWER("matplotlib", DrawerMatplotlib)
+REGISTER_DRAWER("matplotlib", MatplotlibDrawer)
