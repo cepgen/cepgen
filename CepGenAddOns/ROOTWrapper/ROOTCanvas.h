@@ -33,6 +33,8 @@
 #include <cstring>
 #include <vector>
 
+#include "CepGen/Version.h"
+
 namespace cepgen {
   /// A "prettified" text box object
   class ROOTPaveText : public TPaveText {
@@ -259,13 +261,14 @@ namespace cepgen {
     /// Specify the text to show on top of the canvas
     inline void SetTopLabel(const std::string& lab) {
       TCanvas::cd();
+      title_ = "CepGen v" + version::tag;
       if (!lab.empty())
-        title_ = lab;
+        title_ += " - " + lab;
       if (!top_label_)
         BuildTopLabel();
       else
         top_label_->Clear();
-      top_label_->AddText(title_);
+      top_label_->AddText(title_.data());
       //top_label_->Draw();
     }
 
@@ -381,7 +384,7 @@ namespace cepgen {
       return dynamic_cast<T*>(grb_obj_.rbegin()->get());
     }
 
-    TString title_;
+    std::string title_;
     bool ratio_;
     double leg_x1_{0.5}, leg_y1_{0.75};
     std::unique_ptr<TLegend> leg_;

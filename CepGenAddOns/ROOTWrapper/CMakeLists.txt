@@ -6,7 +6,7 @@ endif()
 
 message(STATUS "... ROOT v${ROOT_VERSION} standard is c++${ROOT_CXX_STANDARD}")
 
-set(sources IntegratorROOT.cpp DrawerROOT.cpp ROOTTree*.cpp ROOTHistsHandler.cpp FunctionalROOT.cpp)
+set(sources IntegratorROOT.cpp ROOTDrawer.cpp ROOTTree*.cpp ROOTHistsHandler.cpp ROOTFunctional.cpp)
 
 #--- FOAM integrator
 if(CMAKE_BUILD_FOAM)
