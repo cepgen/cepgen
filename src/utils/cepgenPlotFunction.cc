@@ -29,6 +29,7 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   string function, plotter;
+  vector<string> functionals;
   int num_points;
   double min_x, max_x, min_y, max_y;
   bool log, draw_grid, func_2d;
@@ -37,6 +38,7 @@ int main(int argc, char* argv[]) {
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("function,f", "function to parse", &function, "min(1.,exp(-x/10))")
+      .addOptionalArgument("functional-eval,F", "functional evaluators", &functionals, vector<string>{})
       .addOptionalArgument("num-points,n", "number of points to consider", &num_points, 100)
       .addOptionalArgument("min-x,m", "minimal range", &min_x, -5.)
       .addOptionalArgument("max-x,M", "maximal range", &max_x, +5.)
@@ -50,11 +52,14 @@ int main(int argc, char* argv[]) {
 
   cepgen::initialise();
 
-  CG_LOG << "Function to be plotted: " << function;
+  if (functionals.empty())
+    functionals = cepgen::utils::FunctionalFactory::get().modules();
+  CG_LOG << "Function to be plotted: " << function << ", functional evaluators: " << functionals << ".";
 
+  // maps functional evaluators -> graphs
   map<string, cepgen::utils::Graph1D> m_gr_fb;
   map<string, cepgen::utils::Graph2D> m_gr2d_fb;
-  for (const auto& func : cepgen::utils::FunctionalFactory::get().modules()) {
+  for (const auto& func : functionals) {
     CG_LOG << "Building \"" << func << "\" functional.";
     try {
       vector<string> vars{"x"};
