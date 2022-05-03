@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2020-2022  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <YODA/Histo1D.h>
 #include <YODA/Histo2D.h>
 #include <YODA/Scatter2D.h>
@@ -16,9 +34,9 @@
 namespace cepgen {
   namespace utils {
     template <typename T>
-    class DrawerYODA : public Drawer {
+    class YODADrawer : public Drawer {
     public:
-      explicit DrawerYODA(const ParametersList& params)
+      explicit YODADrawer(const ParametersList& params)
           : Drawer(params), file_(steer<std::string>("filename")), writer_(&T::create()) {
         if (steer<bool>("compress"))
           writer_->useCompression(true);
@@ -34,24 +52,24 @@ namespace cepgen {
         return desc;
       }
 
-      const DrawerYODA& draw(const Graph1D& graph, const Mode&) const override {
+      const YODADrawer& draw(const Graph1D& graph, const Mode&) const override {
         writer_->write(file_, convert(graph));
         return *this;
       }
-      const DrawerYODA& draw(const Graph2D& graph, const Mode&) const override {
+      const YODADrawer& draw(const Graph2D& graph, const Mode&) const override {
         writer_->write(file_, convert(graph));
         return *this;
       }
-      const DrawerYODA& draw(const Hist1D& hist, const Mode&) const override {
+      const YODADrawer& draw(const Hist1D& hist, const Mode&) const override {
         writer_->write(file_, convert(hist));
         return *this;
       }
-      const DrawerYODA& draw(const Hist2D& hist, const Mode&) const override {
+      const YODADrawer& draw(const Hist2D& hist, const Mode&) const override {
         writer_->write(file_, convert(hist));
         return *this;
       }
 
-      const DrawerYODA& draw(const DrawableColl&,
+      const YODADrawer& draw(const DrawableColl&,
                              const std::string& name = "",
                              const std::string& title = "",
                              const Mode& mode = Mode::none) const override;
@@ -67,7 +85,7 @@ namespace cepgen {
     };
 
     template <typename T>
-    const DrawerYODA<T>& DrawerYODA<T>::draw(const DrawableColl& objs,
+    const YODADrawer<T>& YODADrawer<T>::draw(const DrawableColl& objs,
                                              const std::string&,
                                              const std::string&,
                                              const Mode&) const {
@@ -78,7 +96,7 @@ namespace cepgen {
         } else if (obj->isGraph1D()) {
           objs_coll.emplace_back(convert(*dynamic_cast<const Graph1D*>(obj)).newclone());
         } else {
-          CG_WARNING("DrawerYODA:draw") << "Cannot add drawable '" << obj->name() << "' to the stack.";
+          CG_WARNING("YODADrawer:draw") << "Cannot add drawable '" << obj->name() << "' to the stack.";
           continue;
         }
       }
@@ -87,7 +105,7 @@ namespace cepgen {
     }
 
     template <typename T>
-    YODA::Scatter2D DrawerYODA<T>::convert(const Graph1D& graph) {
+    YODA::Scatter2D YODADrawer<T>::convert(const Graph1D& graph) {
       YODA::Scatter2D gr(path(graph.name()), graph.title());
       for (const auto& it : graph.points())
         gr.addPoint(it.first.value, it.second.value, 0. /* FIXME not yet supported */, it.second.value_unc);
@@ -97,7 +115,7 @@ namespace cepgen {
     }
 
     template <typename T>
-    YODA::Scatter3D DrawerYODA<T>::convert(const Graph2D& graph) {
+    YODA::Scatter3D YODADrawer<T>::convert(const Graph2D& graph) {
       YODA::Scatter3D gr(path(graph.name()), graph.title());
       for (const auto& it_x : graph.points()) {
         const auto& ax_x = it_x.first.value;
@@ -112,7 +130,7 @@ namespace cepgen {
     }
 
     template <typename T>
-    YODA::Histo1D DrawerYODA<T>::convert(const Hist1D& hist) {
+    YODA::Histo1D YODADrawer<T>::convert(const Hist1D& hist) {
       const auto& rng = hist.range();
       YODA::Histo1D h(hist.nbins(), rng.min(), rng.max(), path(hist.name()), hist.title());
       for (size_t i = 0; i < hist.nbins(); ++i)
@@ -123,7 +141,7 @@ namespace cepgen {
     }
 
     template <typename T>
-    YODA::Histo2D DrawerYODA<T>::convert(const Hist2D& hist) {
+    YODA::Histo2D YODADrawer<T>::convert(const Hist2D& hist) {
       const auto &rng_x = hist.rangeX(), &rng_y = hist.rangeY();
       YODA::Histo2D h(hist.nbinsX(),
                       rng_x.min(),
@@ -143,9 +161,9 @@ namespace cepgen {
   }  // namespace utils
 }  // namespace cepgen
 
-typedef cepgen::utils::DrawerYODA<YODA::WriterYODA> DrawerYoda;
-typedef cepgen::utils::DrawerYODA<YODA::WriterAIDA> DrawerYodaAida;
-typedef cepgen::utils::DrawerYODA<YODA::WriterFLAT> DrawerYodaFlat;
+typedef cepgen::utils::YODADrawer<YODA::WriterYODA> DrawerYoda;
+typedef cepgen::utils::YODADrawer<YODA::WriterAIDA> DrawerYodaAida;
+typedef cepgen::utils::YODADrawer<YODA::WriterFLAT> DrawerYodaFlat;
 REGISTER_DRAWER("yoda", DrawerYoda)
 REGISTER_DRAWER("yoda_aida", DrawerYodaAida)
 REGISTER_DRAWER("yoda_flat", DrawerYodaFlat)
