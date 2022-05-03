@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2022  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <fstream>
 
 #include "CepGen/Core/Exception.h"
@@ -7,6 +25,7 @@
 #include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/Piper.h"
 #include "CepGen/Utils/String.h"
+#include "CepGen/Version.h"
 
 #ifndef GNUPLOT_BIN
 #error "Gnuplot executable must be specified using GNUPLOT_BIN!"
@@ -98,6 +117,7 @@ namespace cepgen {
           if (rng.valid())
             cmds += "set " + ai.first + "range [" + std::to_string(rng.min()) + ":" + std::to_string(rng.max()) + "]";
         }
+        cmds += "set label 'CepGen v" + version::tag + "' at graph 1,1.025 right";
         return cmds;
       }
       static Piper::Commands drawGraph1D(const Graph1D&, const Mode&);
