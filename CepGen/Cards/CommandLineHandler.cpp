@@ -88,6 +88,11 @@ namespace cepgen {
         const auto& log = pars.get<ParametersList>("logging");
         if (log.has<int>("level"))
           utils::Logger::get().level = log.getAs<int, cepgen::utils::Logger::Level>("level");
+        if (log.has<std::string>("modules"))
+          utils::Logger::get().addExceptionRule(log.get<std::string>("modules"));
+        else if (log.has<std::vector<std::string> >("modules"))
+          for (const auto& mod : log.get<std::vector<std::string> >("modules"))
+            utils::Logger::get().addExceptionRule(mod);
         utils::Logger::get().setExtended(log.get<bool>("extended", false));
       }
 
@@ -104,17 +109,19 @@ namespace cepgen {
           pars_kin.set<int>("mode", proc.get<int>("mode"));
       }
 
-      //----- set auxiliary information for phase space definition
-      if (pars_kin.has<int>("strfun"))
-        pars_kin.set<ParametersList>("structureFunctions", ParametersList().setName<int>(pars_kin.get<int>("strfun")))
-            .erase("strfun");
-      else if (pars_kin.has<ParametersList>("strfun"))
-        pars_kin.rename("strfun", "structureFunctions");
-      pars_kin.rename("formfac", "formFactors");
+      if (!pars_kin.empty()) {
+        //----- set auxiliary information for phase space definition
+        if (pars_kin.has<int>("strfun"))
+          pars_kin.set<ParametersList>("structureFunctions", ParametersList().setName<int>(pars_kin.get<int>("strfun")))
+              .erase("strfun");
+        else if (pars_kin.has<ParametersList>("strfun"))
+          pars_kin.rename("strfun", "structureFunctions");
+        pars_kin.rename("formfac", "formFactors");
 
-      //----- get the kinematics as already defined in the process object and modify it accordingly
-      pars_kin = rt_params_->process().kinematics().parameters(true) + pars_kin;
-      rt_params_->process().setKinematics(Kinematics(pars_kin));
+        //----- get the kinematics as already defined in the process object and modify it accordingly
+        pars_kin = rt_params_->process().kinematics().parameters(true) + pars_kin;
+        rt_params_->process().setKinematics(Kinematics(pars_kin));
+      }
 
       //----- integration
       pars.fill<ParametersList>("integrator", rt_params_->par_integrator);
