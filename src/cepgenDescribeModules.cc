@@ -60,7 +60,7 @@ using namespace std;
       os << describe_one(desc, to_string(mod_name), false, obj::get().describeParameters(mod_name));            \
     else                                                                                                        \
       for (const auto& mod : modules)                                                                           \
-        if (cepgen::utils::isNumber(mod) && stod(mod) == mod_name)                                              \
+        if (cepgen::utils::isInt(mod) && stod(mod) == mod_name)                                                 \
           os << describe_one(desc, to_string(mod_name), true, obj::get().describeParameters(mod_name));         \
   }
 

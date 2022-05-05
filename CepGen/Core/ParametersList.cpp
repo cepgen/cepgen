@@ -62,7 +62,6 @@
 
 namespace cepgen {
   const std::string ParametersList::MODULE_NAME = "mod_name";
-  const std::regex kFloatRegex("[+-]?([0-9]+)[.EeDd][+-]?([0-9]*)?|[.][0-9]+", std::regex_constants::extended);
 
   ParametersList::ParametersList(const ParametersList& oth) { operator+=(oth); }
 
@@ -192,12 +191,11 @@ namespace cepgen {
         set<bool>(key, true);
       else if (words.size() == 2) {  // basic key=value
         const auto value = words.at(1);
-        try {
-          if (std::regex_match(value, kFloatRegex))
-            set<double>(key, std::stod(value));
-          else
-            set<int>(key, std::stoi(value));
-        } catch (const std::invalid_argument&) {
+        if (utils::isFloat(value))
+          set<double>(key, std::stod(value));
+        else if (utils::isInt(value))
+          set<int>(key, std::stoi(value));
+        else {
           const auto value_lc = utils::tolower(value);
           if (value_lc == "off" || value_lc == "no" || value_lc == "false")
             set<bool>(key, false);

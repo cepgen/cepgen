@@ -30,6 +30,8 @@
 
 namespace cepgen {
   namespace utils {
+    std::regex kFloatRegex("[+-]?[0-9]*\\.?[0-9]+([eEdD][+-]?[0-9]+)?", std::regex_constants::extended);
+
     std::string yesno(bool test) { return test ? colourise("true", Colour::green) : colourise("false", Colour::red); }
 
     /// String implementation of the boldification procedure
@@ -182,10 +184,12 @@ namespace cepgen {
 
     template std::string merge<double>(const std::vector<std::vector<double> >&, const std::string&);
 
-    bool isNumber(const std::string& str) {
+    bool isInt(const std::string& str) {
       return !str.empty() &&
              std::find_if(str.begin(), str.end(), [](unsigned char c) { return !std::isdigit(c); }) == str.end();
     }
+
+    bool isFloat(const std::string& str) { return std::regex_match(str, kFloatRegex); }
 
     std::string toupper(const std::string& str) {
       std::string out;
