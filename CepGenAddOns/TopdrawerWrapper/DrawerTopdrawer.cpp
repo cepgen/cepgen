@@ -188,8 +188,7 @@ namespace cepgen {
     Piper::Commands DrawerTopdrawer::plot(const Graph1D& graph) {
       Piper::Commands cmds;
       for (const auto& pt : graph.points())
-        cmds += std::to_string(pt.first.value) + "," + std::to_string(pt.second.value) + "," +
-                std::to_string(pt.first.value_unc) + "," + std::to_string(pt.second.value_unc);
+        cmds += format("%g,%g,%g,%g", pt.first.value, pt.second.value, pt.first.value_unc, pt.second.value_unc);
       cmds += "JOIN";
       return cmds;
     }
@@ -226,8 +225,7 @@ namespace cepgen {
       Piper::Commands cmds;
       for (size_t i = 0; i < hist.nbins(); ++i) {
         const auto& bin = hist.binRange(i);
-        cmds += std::to_string(bin.x(0.5)) + "," + std::to_string(hist.value(i)) + "," +
-                std::to_string(0.5 * bin.range()) + "," + std::to_string(hist.valueUnc(i));
+        cmds += format("%g,%g,%g,%g", bin.x(0.5), hist.value(i), 0.5 * bin.range(), hist.valueUnc(i));
       }
       cmds += "HIST";
       return cmds;
@@ -277,13 +275,13 @@ namespace cepgen {
         cmds += "SET SCALE Z LOG";
       const auto& xrng = dr.xAxis().range();
       if (xrng.valid())
-        cmds += "SET LIMITS X " + std::to_string(xrng.min()) + " TO " + std::to_string(xrng.max());
+        cmds += format("SET LIMITS X %g TO %g", xrng.min(), xrng.max());
       const auto& yrng = dr.yAxis().range();
       if (yrng.valid())
-        cmds += "SET LIMITS Y " + std::to_string(yrng.min()) + " TO " + std::to_string(yrng.max());
+        cmds += format("SET LIMITS Y %g TO %g", yrng.min(), yrng.max());
       const auto& zrng = dr.zAxis().range();
       if (zrng.valid())
-        cmds += "SET LIMITS Z " + std::to_string(zrng.min()) + " TO " + std::to_string(zrng.max());
+        cmds += format("SET LIMITS Z %g TO %g", zrng.min(), zrng.max());
       return cmds;
     }
 
