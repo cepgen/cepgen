@@ -81,7 +81,7 @@ namespace cepgen {
         return desc;
       }
 
-      double operator()(double x, double mx) override {
+      double operator()(double x, double mx) const override {
         double result = 0.;
         params_->x = x;
         params_->mf2 = mx * mx;

@@ -56,7 +56,7 @@ namespace cepgen {
       virtual std::string describe() const;  ///< Human-readable description of this collinear flux
 
       /// Compute the collinear flux for this x value
-      virtual double operator()(double /*x*/, double /*mx*/ = 0.) { return 0.; }
+      virtual double operator()(double /*x*/, double /*mx*/ = 0.) const { return 0.; }
 
     protected:
       const double mp_{0.};   ///< Proton mass, in GeV/c^2
