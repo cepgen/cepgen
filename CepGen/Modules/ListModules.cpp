@@ -18,10 +18,12 @@
 
 #include <iomanip>
 
+#include "CepGen/CollinearFluxes/Parameterisation.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/CollinearFluxFactory.h"
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
@@ -64,6 +66,7 @@ namespace cepgen {
       list_modules(AnalyticIntegratorFactory::get(), "Analytic integration algorithms");
       list_modules(proc::ProcessFactory::get(), "Physics processes");
       list_modules(formfac::FormFactorsFactory::get(), "Beam form factors modellings");
+      list_int_modules(collflux::CollinearFluxFactory::get(), "Collinear flux modellings");
       list_int_modules(sigrat::SigmaRatiosFactory::get(), "Cross section ratios modellings");
       list_int_modules(strfun::StructureFunctionsFactory::get(), "Structure functions modellings", [](int mod) {
         std::ostringstream os;

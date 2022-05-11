@@ -7,6 +7,7 @@ file(GLOB core_sources
         OutputModules/*.cpp
         *.cpp)
 file(GLOB phys_sources
+        CollinearFluxes/*.cpp
         Event/*.cpp
         Physics/*.cpp
         StructureFunctions/*.cpp
@@ -16,6 +17,7 @@ file(GLOB proc_sources
         Process/Fortran/*.f)
 file(GLOB core_includes
         Cards
+        CollinearFluxes
         Core
         Modules
         Utils

@@ -18,12 +18,13 @@
 
 #include <LHAPDF/LHAPDF.h>
 
+#include "CepGen/CollinearFluxes/Parameterisation.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Modules/CollinearFluxFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Beam.h"
-#include "CepGen/Physics/CollinearFlux.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
@@ -58,20 +59,23 @@ int main(int argc, char* argv[]) {
 
   unique_ptr<LHAPDF::PDF> pdf(LHAPDF::mkPDF(set, member));
 
-  //auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(strfun_type);
-  auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(
-      401, cepgen::ParametersList().set<std::string>("pdfSet", set).set<int>("pdfMember", member));
-  auto ff = cepgen::formfac::FormFactorsFactory::get().build(ffmode);
-
-  const cepgen::Limits kt2_limits(0., 1000.);
-  const cepgen::CollinearFlux flux(ff.get(), sf.get(), kt2_limits);
+  auto flux = cepgen::collflux::CollinearFluxFactory::get().build(
+      1,
+      cepgen::ParametersList()
+          .set("trange", cepgen::Limits{0., 1000.})
+          .setAs<int, cepgen::Beam::KTFlux>("flux", cepgen::Beam::KTFlux::P_Photon_Elastic_Budnev)
+          .set("formFactors", cepgen::ParametersList().setName(ffmode))
+          .set(
+              "structureFunctions",
+              //cepgen::ParametersList().setName<int>(strfun_type)
+              cepgen::ParametersList().setName<int>(401).set<std::string>("pdfSet", set).set<int>("pdfMember", member)));
 
   cepgen::utils::Graph1D g_ref, g_cg, g_ratio;
   for (int i = 0; i < num_points; ++i) {
     const double x =
         (!logx) ? xmin + i * (xmax - xmin) / (num_points - 1) : pow(10, lxmin + i * (lxmax - lxmin) / (num_points - 1));
     const double xfx = pdf->xfxQ2(22, x, q2);
-    const double pdf = flux(x, 0.938, cepgen::Beam::KTFlux::P_Photon_Elastic_Budnev);
+    const double pdf = (*flux)(x);
     cout << x << "\t" << xfx << "\t" << pdf << "\t" << pdf / xfx << endl;
     g_ref.addPoint(x, xfx);
     g_cg.addPoint(x, pdf);
