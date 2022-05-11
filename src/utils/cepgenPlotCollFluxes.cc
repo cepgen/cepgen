@@ -66,43 +66,39 @@ int main(int argc, char* argv[]) {
       << "# form factors: " << ffmode << "\n"
       << "# diffractive mass: " << mx << " GeV/c2\n"
       << "# fractional momentum loss: " << cepgen::Limits(xmin, xmax) << "\n"
-      << "# fluxes modes:";
-  auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(strfun_type);
-  vector<unique_ptr<cepgen::collflux::Parameterisation> > ktfluxes;
-  map<int, vector<cepgen::utils::Graph1D> > m_v_gr_fluxes;
+      << "# fluxes modes: " << cepgen::utils::merge(modes, ",") << "\n";
+  map<int, vector<cepgen::utils::Graph1D> > m_v_gr_fluxes;  // {collinear flux -> {mode, mode, ...}}
   for (const auto& cflux : cfluxes) {
+    vector<unique_ptr<cepgen::collflux::Parameterisation> > coll_fluxes;
     for (const auto& mode : modes) {
-      cepgen::Beam::KTFlux kt_flux;
+      cepgen::ParametersList flux_params;
+      flux_params.set("trange", cepgen::Limits{0., 1000.})
+          .set("formFactors", cepgen::ParametersList().setName(ffmode))
+          .set("structureFunctions", cepgen::ParametersList().setName(strfun_type));
       switch ((cepgen::Beam::Mode)mode) {
         case cepgen::Beam::Mode::ProtonElastic:
-          kt_flux = cepgen::Beam::KTFlux::P_Photon_Elastic;
+          flux_params.setAs<int, cepgen::Beam::KTFlux>("ktFlux", cepgen::Beam::KTFlux::P_Photon_Elastic);
           break;
         case cepgen::Beam::Mode::ProtonInelastic:
-          kt_flux = cepgen::Beam::KTFlux::P_Photon_Inelastic;
+          flux_params.setAs<int, cepgen::Beam::KTFlux>("ktFlux", cepgen::Beam::KTFlux::P_Photon_Inelastic);
           break;
         default:
           throw CG_FATAL("main") << "Invalid beam mode: " << mode << "!";
       }
-      ktfluxes.emplace_back(cepgen::collflux::CollinearFluxFactory::get().build(
-          cflux,
-          cepgen::ParametersList()
-              .set("trange", cepgen::Limits{0., 1000.})
-              .setAs<int, cepgen::Beam::KTFlux>("flux", kt_flux)
-              .set("formFactors", cepgen::ParametersList().setName(ffmode))
-              .set("structureFunctions", cepgen::ParametersList().setName<int>(strfun_type))));
+      coll_fluxes.emplace_back(cepgen::collflux::CollinearFluxFactory::get().build(cflux, flux_params));
       m_v_gr_fluxes[cflux].emplace_back();
       ostringstream oss;
       oss << (cepgen::Beam::Mode)mode;
       m_v_gr_fluxes[cflux].back().setTitle(oss.str());
-      out << "\t" << (cepgen::Beam::Mode)mode;
     }
-    out << "\n";
 
     for (int i = 0; i < num_points; ++i) {
       const double x = xmin + i * (xmax - xmin) / num_points;
       out << x;
-      for (size_t j = 0; j < ktfluxes.size(); ++j) {
-        const auto fx = (*ktfluxes.at(j))(x, mx);
+      for (size_t j = 0; j < coll_fluxes.size(); ++j) {
+        auto fx = (*coll_fluxes.at(j))(x, mx);
+        if (isnan(fx))
+          fx = -1.;
         out << "\t" << fx;
         m_v_gr_fluxes[cflux].at(j).addPoint(x, fx);
       }
