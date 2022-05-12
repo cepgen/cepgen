@@ -1,21 +1,37 @@
-#include "CepGen/Core/ExportModule.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include <TFile.h>
+#include <TH1.h>
+#include <TH2.h>
+#include <TH3.h>
+#include <TProfile.h>
+#include <TProfile2D.h>
 
 #include "CepGen/Core/Exception.h"
-
+#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/EventBrowser.h"
+#include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Parameters.h"
-
+#include "CepGen/Utils/Limits.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
-
-#include "TFile.h"
-#include "TH1.h"
-#include "TH2.h"
-#include "TH3.h"
-#include "TProfile.h"
-#include "TProfile2D.h"
 
 namespace cepgen {
   namespace io {
@@ -24,11 +40,12 @@ namespace cepgen {
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2019
      */
-    class ROOTHistsHandler : public ExportModule {
+    class ROOTHistsHandler final : public ExportModule {
     public:
       explicit ROOTHistsHandler(const ParametersList&);
       ~ROOTHistsHandler();
-      static std::string description() { return "ROOT histograming/profiling module"; }
+
+      static ParametersDescription description();
 
       void initialise(const Parameters&) override {}
       void setCrossSection(double cross_section, double) override { cross_section_ = cross_section; }
@@ -44,15 +61,14 @@ namespace cepgen {
 
       const ParametersList variables_;
 
-      double cross_section_;
+      double cross_section_{1.};
       const utils::EventBrowser browser_;
     };
 
     ROOTHistsHandler::ROOTHistsHandler(const ParametersList& params)
         : ExportModule(params),
-          file_(params.get<std::string>("filename", "output.root").c_str(), "recreate"),
-          variables_(params.get<ParametersList>("variables")),
-          cross_section_(1.) {
+          file_(steer<std::string>("filename").c_str(), "recreate"),
+          variables_(steer<ParametersList>("variables")) {
       //--- extract list of variables/correlations to be plotted in histograms
       for (const auto& key : variables_.keys()) {
         const auto& vars = utils::split(key, ':');
@@ -60,71 +76,100 @@ namespace cepgen {
           throw CG_FATAL("ROOTHistsHandler") << "Invalid number of variables to correlate for '" << key << "'!";
 
         const auto& hvars = variables_.get<ParametersList>(key);
-        int nbins_x = hvars.get<int>("nbinsX", 10);
-        nbins_x = hvars.get<int>("nbins", nbins_x);
-        double min_x = hvars.get<double>("lowX", 0.), max_x = hvars.get<double>("highX", 1.);
-        min_x = hvars.get<double>("low", min_x), max_x = hvars.get<double>("high", max_x);
-        const bool profile = hvars.get<bool>("profile", false);
+        int nbins_x = hvars.get<int>("nbinsX");
+        if (hvars.get<int>("nbins") > 0)
+          nbins_x = hvars.get<int>("nbins");
+        const auto& xrange = hvars.get<Limits>("xrange");
+        const bool profile = hvars.get<bool>("profile");
         if (vars.size() == 1) {  // 1D histogram
-          const auto title = hvars.get<std::string>(
-              "title", utils::format("%s;%s;d#sigma/d(%s) (pb/bin)", key.c_str(), key.c_str(), key.c_str()));
-          hists1d_.emplace_back(std::make_pair(key, new TH1D(key.c_str(), title.c_str(), nbins_x, min_x, max_x)));
-          CG_INFO("ROOTHistsHandler") << "Booking a 1D histogram with " << utils::s("bin", nbins_x) << " between "
-                                      << min_x << " and " << max_x << " for \"" << key << "\".";
+          auto title = hvars.get<std::string>("title");
+          if (title.empty())
+            title = utils::format("%s;%s;d#sigma/d(%s) (pb/bin)", key.c_str(), key.c_str(), key.c_str());
+          hists1d_.emplace_back(
+              std::make_pair(key, new TH1D(key.c_str(), title.c_str(), nbins_x, xrange.min(), xrange.max())));
+          CG_INFO("ROOTHistsHandler") << "Booking a 1D histogram with " << utils::s("bin", nbins_x) << " in range "
+                                      << xrange << " for \"" << key << "\".";
           continue;
         }
-        const int nbins_y = hvars.get<int>("nbinsY", 10);
-        const double min_y = hvars.get<double>("lowY", 0.), max_y = hvars.get<double>("highY", 1.);
+        const int nbins_y = hvars.get<int>("nbinsY");
+        const auto& yrange = hvars.get<Limits>("yrange");
         if (vars.size() == 2) {  // 2D histogram / 1D profile
-          const auto title =
-              hvars.get<std::string>("title",
-                                     utils::format("(%s / %s) correlation;%s;%s;d^{2}#sigma/d(%s)/d(%s) (pb/bin)",
-                                                   vars[0].c_str(),
-                                                   vars[1].c_str(),
-                                                   vars[0].c_str(),
-                                                   vars[1].c_str(),
-                                                   vars[0].c_str(),
-                                                   vars[1].c_str()));
-          if (profile)
+          auto title = hvars.get<std::string>("title");
+          if (title.empty())
+            title = utils::format("(%s / %s) correlation;%s;%s;d^{2}#sigma/d(%s)/d(%s) (pb/bin)",
+                                  vars[0].c_str(),
+                                  vars[1].c_str(),
+                                  vars[0].c_str(),
+                                  vars[1].c_str(),
+                                  vars[0].c_str(),
+                                  vars[1].c_str());
+          if (profile) {
             profiles1d_.emplace_back(
-                std::make_pair(vars, new TProfile(key.c_str(), title.c_str(), nbins_x, min_x, max_x)));
-          else
-            hists2d_.emplace_back(std::make_pair(
-                vars, new TH2D(key.c_str(), title.c_str(), nbins_x, min_x, max_x, nbins_y, min_y, max_y)));
-          CG_INFO("ROOTHistsHandler") << "Booking a " << (profile ? "1D profile" : "2D correlation plot") << " with "
-                                      << utils::s("bin", nbins_x + nbins_y) << " between (" << min_x << ", " << min_y
-                                      << ") and (" << max_x << ", " << max_y << ")"
-                                      << " for \"" << utils::merge(vars, " / ") << "\".";
+                std::make_pair(vars, new TProfile(key.c_str(), title.c_str(), nbins_x, xrange.min(), xrange.max())));
+            CG_INFO("ROOTHistsHandler") << "Booking a 1D profile with " << utils::s("bin", nbins_x, true)
+                                        << " in range " << xrange << " for \"" << utils::merge(vars, " / ") << "\".";
+          } else {
+            hists2d_.emplace_back(std::make_pair(vars,
+                                                 new TH2D(key.c_str(),
+                                                          title.c_str(),
+                                                          nbins_x,
+                                                          xrange.min(),
+                                                          xrange.max(),
+                                                          nbins_y,
+                                                          yrange.min(),
+                                                          yrange.max())));
+            CG_INFO("ROOTHistsHandler") << "Booking a " << (profile ? "1D profile" : "2D correlation plot") << " with "
+                                        << utils::s("bin", nbins_x + nbins_y, true) << " in range x=" << xrange
+                                        << " and y=" << yrange << " for \"" << utils::merge(vars, " / ") << "\".";
+          }
           continue;
         }
-        const int nbins_z = hvars.get<int>("nbinsZ", 10);
-        const double min_z = hvars.get<double>("lowZ", 0.), max_z = hvars.get<double>("highZ", 1.);
+        const int nbins_z = hvars.get<int>("nbinsZ");
+        const auto& zrange = hvars.get<Limits>("zrange");
         if (vars.size() == 3) {  // 3D histogram
-          const auto title = hvars.get<std::string>(
-              "title",
-              utils::format("(%s / %s / %s) correlation;%s;%s;%s;d^{3}#sigma/d(%s)/d(%s)/d(%s) (pb/bin)",
-                            vars[0].c_str(),
-                            vars[1].c_str(),
-                            vars[2].c_str(),
-                            vars[0].c_str(),
-                            vars[1].c_str(),
-                            vars[2].c_str(),
-                            vars[0].c_str(),
-                            vars[1].c_str(),
-                            vars[2].c_str()));
-          if (profile)
-            profiles2d_.emplace_back(std::make_pair(
-                vars, new TProfile2D(key.c_str(), title.c_str(), nbins_x, min_x, max_x, nbins_y, min_y, max_y)));
-          else
-            hists3d_.emplace_back(std::make_pair(
-                vars,
-                new TH3D(
-                    key.c_str(), title.c_str(), nbins_x, min_x, max_x, nbins_y, min_y, max_y, nbins_z, min_z, max_z)));
-          CG_INFO("ROOTHistsHandler") << "Booking a " << (profile ? "2D profile" : "3D correlation plot") << " with "
-                                      << utils::s("bin", nbins_x + nbins_y + nbins_z) << " between (" << min_x << ", "
-                                      << min_y << ", " << min_z << ")"
-                                      << " and (" << max_x << ", " << max_y << ", " << max_z << ")"
-                                      << " for \"" << utils::merge(vars, " / ") << "\".";
+          auto title = hvars.get<std::string>("title");
+          if (title.empty())
+            title = utils::format("(%s / %s / %s) correlation;%s;%s;%s;d^{3}#sigma/d(%s)/d(%s)/d(%s) (pb/bin)",
+                                  vars[0].c_str(),
+                                  vars[1].c_str(),
+                                  vars[2].c_str(),
+                                  vars[0].c_str(),
+                                  vars[1].c_str(),
+                                  vars[2].c_str(),
+                                  vars[0].c_str(),
+                                  vars[1].c_str(),
+                                  vars[2].c_str());
+          if (profile) {
+            profiles2d_.emplace_back(std::make_pair(vars,
+                                                    new TProfile2D(key.c_str(),
+                                                                   title.c_str(),
+                                                                   nbins_x,
+                                                                   xrange.min(),
+                                                                   xrange.max(),
+                                                                   nbins_y,
+                                                                   yrange.min(),
+                                                                   yrange.max())));
+            CG_INFO("ROOTHistsHandler") << "Booking a 2D profile with " << utils::s("bin", nbins_x + nbins_y, true)
+                                        << " in range x=" << xrange << " and y=" << yrange << " for \""
+                                        << utils::merge(vars, " / ") << "\".";
+          } else {
+            hists3d_.emplace_back(std::make_pair(vars,
+                                                 new TH3D(key.c_str(),
+                                                          title.c_str(),
+                                                          nbins_x,
+                                                          xrange.min(),
+                                                          xrange.max(),
+                                                          nbins_y,
+                                                          yrange.min(),
+                                                          yrange.max(),
+                                                          nbins_z,
+                                                          zrange.min(),
+                                                          zrange.max())));
+            CG_INFO("ROOTHistsHandler") << "Booking a 3D correlation plot with "
+                                        << utils::s("bin", nbins_x + nbins_y + nbins_z, true)
+                                        << " in range x=" << xrange << ", y=" << yrange << ", and z=" << zrange
+                                        << " for \"" << utils::merge(vars, " / ") << "\".";
+          }
           continue;
         }
       }
@@ -164,6 +209,24 @@ namespace cepgen {
                            browser_.get(ev, h_var.first[1]),
                            browser_.get(ev, h_var.first[2]),
                            cross_section_);
+    }
+
+    ParametersDescription ROOTHistsHandler::description() {
+      auto desc = ExportModule::description();
+      desc.setDescription("ROOT histograming/profiling module");
+      desc.add<std::string>("filename", "output.root").setDescription("Output filename");
+      auto var_desc = ParametersDescription();
+      var_desc.add<std::string>("title", "").setDescription("Variable description");
+      var_desc.add<int>("nbins", -1);
+      var_desc.add<int>("nbinsX", 10).setDescription("Bins multiplicity for x-axis");
+      var_desc.add<Limits>("xrange", Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
+      var_desc.add<int>("nbinsY", 10).setDescription("Bins multiplicity for y-axis");
+      var_desc.add<Limits>("yrange", Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
+      var_desc.add<int>("nbinsZ", 10).setDescription("Bins multiplicity for z-axis");
+      var_desc.add<Limits>("zrange", Limits{0., 1.}).setDescription("Minimum-maximum range for z-axis");
+      var_desc.add<bool>("profile", false);
+      desc.addParametersDescriptionVector("variables", var_desc);
+      return desc;
     }
   }  // namespace io
 }  // namespace cepgen

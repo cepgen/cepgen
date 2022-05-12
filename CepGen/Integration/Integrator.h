@@ -1,13 +1,27 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGen_Integration_Integrator_h
 #define CepGen_Integration_Integrator_h
 
-#include "CepGen/Modules/NamedModule.h"
-#include "CepGen/Event/Event.h"
-
-#include <vector>
 #include <random>
 
-#include <string.h>
+#include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen {
   class Integrand;
@@ -17,7 +31,7 @@ namespace cepgen {
     /// Integrator algorithm constructor
     Integrator(const ParametersList& params);
 
-    static std::string description() { return "Unnamed integrator"; }
+    static ParametersDescription description();
 
     /// Specify the function to be integrated
     /// \param[in] integr Integrand object to be evaluated
@@ -36,12 +50,14 @@ namespace cepgen {
     virtual void integrate(double& result_, double& abserr_) = 0;
 
   protected:
-    const unsigned long seed_;  ///< Random number generator seed
-    int verbosity_;             ///< Integrator verbosity
-    Integrand* integrand_;      ///< Integrand to be evaluated
-    double result_;             ///< Result of the last integration
-    double err_result_;         ///< Standard deviation for the last integration
-    bool initialised_;          ///< Has the algorithm alreay been initialised?
+    const unsigned long seed_;       ///< Random number generator seed
+    int verbosity_;                  ///< Integrator verbosity
+    Integrand* integrand_{nullptr};  ///< Integrand to be evaluated
+    double result_{0.};              ///< Result of the last integration
+    double err_result_{0.};          ///< Standard deviation for the last integration
+    bool initialised_{false};        ///< Has the algorithm alreay been initialised?
+    mutable std::default_random_engine rnd_gen_;
+    mutable std::uniform_real_distribution<double> rnd_;
   };
 }  // namespace cepgen
 

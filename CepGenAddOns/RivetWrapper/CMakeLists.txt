@@ -6,13 +6,10 @@ if(NOT YODA)
   return()
 endif()
 
-include_directories(${PROJECT_SOURCE_DIR})
-
-file(GLOB sources YODAHistsHandler.cpp)
-
 #----- build the object
 
-cepgen_build(CepGenRivet SOURCES YODAHistsHandler.cpp
+cepgen_build(CepGenRivet SOURCES *.cpp
     EXT_LIBS ${YODA}
     EXT_HEADERS ${YODA_INCLUDE}
+    OPTIONS "-Wno-deprecated-copy"
     INSTALL_COMPONENT rivet)

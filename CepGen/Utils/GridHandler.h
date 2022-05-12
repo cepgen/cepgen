@@ -1,23 +1,38 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2022  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGen_Utils_GridHandler_h
 #define CepGen_Utils_GridHandler_h
 
-#include <gsl/gsl_version.h>
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
+#include <gsl/gsl_version.h>
 #if defined(GSL_MAJOR_VERSION) && (GSL_MAJOR_VERSION > 2 || (GSL_MAJOR_VERSION == 2 && GSL_MINOR_VERSION >= 1))
 #include <gsl/gsl_interp2d.h>
 #include <gsl/gsl_spline2d.h>
 #define GSL_VERSION_ABOVE_2_1 1
 #endif
 
+#include <map>
 #include <memory>
 #include <vector>
-#include <map>
 
 namespace cepgen {
-  namespace strfun {
-    class Parameterisation;
-  }
   /// Interpolation type for the grid coordinates
   enum struct GridType { linear, logarithmic, square };
   /// A generic class for \f$\mathbb{R}^D\mapsto\mathbb{R}^N\f$ grid interpolation
@@ -40,7 +55,7 @@ namespace cepgen {
     /// Insert a new value in the grid
     void insert(coord_t coord, values_t value);
     /// Return the list of values handled in the grid
-    std::map<coord_t, values_t> values() const { return values_raw_; }
+    inline std::map<coord_t, values_t> values() const { return values_raw_; }
 
     /// Initialise the grid and all useful interpolators/accelerators
     void init();
@@ -79,12 +94,8 @@ namespace cepgen {
       gridpoint_t operator+(const gridpoint_t& rhs) const;
     };
     /// Has the extrapolator been initialised?
-    bool init_;
+    bool init_{false};
   };
-  template class GridHandler<1, 1>;
-  template class GridHandler<1, 2>;
-  template class GridHandler<2, 2>;
-  template class GridHandler<3, 1>;
 }  // namespace cepgen
 
 #endif

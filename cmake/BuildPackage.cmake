@@ -4,9 +4,9 @@ set(CPACK_PACKAGE_NAME "CepGen")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A generic central exclusive processes event generator")
 set(CPACK_PACKAGE_RELOCATABLE FALSE)
 set(CPACK_PACKAGE_RELEASE 1)
-set(CPACK_PACKAGE_CONTACT "Laurent Forthomme <cepgen@projects.hepforge.org>")
+set(CPACK_PACKAGE_CONTACT "Laurent Forthomme <laurent.forthomme@cern.ch>")
 set(CPACK_PACKAGE_LICENSE GPL3+)
-set(CPACK_PACKAGE_VENDOR "Helsinki Institute of Physics")
+set(CPACK_PACKAGE_VENDOR "CERN")
 set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/doc/small-cepgen-logo.png")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/CepGen/README")
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_PACKAGE_RELEASE}.${CMAKE_SYSTEM_PROCESSOR}")
@@ -29,15 +29,24 @@ if(RPMBUILD)
     set(CPACK_RPM_DEVEL_PACKAGE_REQUIRES ${CEPGEN_MIN_REQ})
     set(CPACK_RPM_DEVEL_PACKAGE_ARCHITECTURE noarch)
     set(CPACK_RPM_ADDONS_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
-    set(CPACK_RPM_ROOT_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, root >= 6.0")
+    set(CPACK_RPM_APFEL_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
+    set(CPACK_RPM_BOOST_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, boost >= 1.33")
+    set(CPACK_RPM_GNUPLOT_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, gnuplot")
+    set(CPACK_RPM_HEPMC_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, HepMC >= 2.01")
+    set(CPACK_RPM_HEPMC3_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, HepMC3 >= 3.0")
+    set(CPACK_RPM_LHAPDF_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, lhapdf")
+    set(CPACK_RPM_LIBMATHEVAL_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, libmatheval")
+    set(CPACK_RPM_MADGRAPH_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
+    set(CPACK_RPM_MATPLOTLIB_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, python3, python3-matplotlib")
+    set(CPACK_RPM_PHOTOSTAUOLA_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, cepgen-hepmc3")
+    set(CPACK_RPM_PROMC_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
     set(CPACK_RPM_PYTHIA6_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
     set(CPACK_RPM_PYTHIA8_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, pythia8 >= 8.2.30")
-    set(CPACK_RPM_BOOST_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, boost >= 1.33")
-    set(CPACK_RPM_LHAPDF_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, lhapdf")
-    set(CPACK_RPM_HEPMC_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, HepMC >= 2.01")
-    set(CPACK_RPM_PROMC_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
+    set(CPACK_RPM_PYTHON_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, python")
     set(CPACK_RPM_RIVET_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
-    set(CPACK_RPM_APFEL_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
+    set(CPACK_RPM_ROOT_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, root >= 6.0")
+    set(CPACK_RPM_DELPHES_PACKAGE_REQUIRES "${CPACK_RPM_ROOT_PACKAGE_REQUIRES}, cepgen-root")
+    set(CPACK_RPM_TINYEXPR_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
     set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
       /usr /usr/bin /usr/lib /usr/lib64 /usr/include)
 else()
@@ -53,15 +62,24 @@ else()
     set(CEPGEN_MIN_REQ "cepgen == ${VERSION}")
     set(CPACK_DEB_DEVEL_PACKAGE_DEPENDS ${CEPGEN_MIN_REQ})
     set(CPACK_DEB_DEVEL_PACKAGE_ARCHITECTURE noarch)
-    set(CPACK_DEB_ROOT_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, root >= 6.0")
-    set(CPACK_DEB_PYTHIA6_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
-    set(CPACK_DEB_PYTHIA8_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, pythia8 >= 8.2.30")
-    set(CPACK_DEB_BOOST_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, boost >= 1.33")
-    set(CPACK_DEB_LHAPDF_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, lhapdf")
-    set(CPACK_DEB_HEPMC_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, HepMC >= 2.01")
-    set(CPACK_DEB_PROMC_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}")
-    set(CPACK_DEB_RIVET_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}")
     set(CPACK_DEB_APFEL_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}")
+    set(CPACK_DEB_BOOST_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, boost >= 1.33")
+    set(CPACK_DEB_GNUPLOT_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, gnuplot")
+    set(CPACK_DEB_HEPMC_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, HepMC >= 2.01")
+    set(CPACK_DEB_HEPMC3_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, HepMC3 >= 3.0")
+    set(CPACK_DEB_LHAPDF_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, lhapdf")
+    set(CPACK_DEB_LIBMATHEVAL_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, libmatheval")
+    set(CPACK_DEB_MADGRAPH_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
+    set(CPACK_DEB_MATPLOTLIB_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}, python, python-matplotlib")
+    set(CPACK_DEB_PHOTOSTAUOLA_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, cepgen-hepmc3")
+    set(CPACK_DEB_PROMC_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}")
+    set(CPACK_DEB_PYTHIA6_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}")
+    set(CPACK_DEB_PYTHIA8_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, pythia8 >= 8.2.30")
+    set(CPACK_DEB_PYTHON_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, python")
+    set(CPACK_DEB_RIVET_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}")
+    set(CPACK_DEB_ROOT_PACKAGE_DEPENDS "${CEPGEN_MIN_REQ}, root >= 6.0")
+    set(CPACK_DEB_DELPHES_PACKAGE_DEPENDS "${CPACK_DEB_ROOT_PACKAGE_REQUIRES}, cepgen-root")
+    set(CPACK_DEB_TINYEXPR_PACKAGE_REQUIRES "${CEPGEN_MIN_REQ}")
 endif()
 include(CPack)
 #--- register packages
@@ -74,9 +92,37 @@ cpack_add_component(devel
     DISPLAY_NAME "CepGen development headers"
     DESCRIPTION "Collection of C and C++ includes for the development of CepGen-dependent libraries"
     DEPENDS lib)
-cpack_add_component(root
-    DISPLAY_NAME "CepGen ROOT wrappers library"
-    DESCRIPTION "Collection of CepGen wrappers to the ROOT library"
+cpack_add_component(apfel
+    DISPLAY_NAME "CepGen APFEL wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the APFEL library"
+    DEPENDS lib)
+cpack_add_component(boost
+    DISPLAY_NAME "CepGen Boost wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the Boost library"
+    DEPENDS lib)
+cpack_add_component(delphes
+    DISPLAY_NAME "CepGen Delphes wrappers library"
+    DESCRIPTION "A CepGen wrapper to the Delphes utility"
+    DEPENDS lib)
+cpack_add_component(gnuplot
+    DISPLAY_NAME "CepGen Gnuplot wrappers library"
+    DESCRIPTION "A CepGen wrapper to the Gnuplot plotter"
+    DEPENDS lib)
+cpack_add_component(hepmc
+    DISPLAY_NAME "CepGen HepMC wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the HepMC library"
+    DEPENDS lib)
+cpack_add_component(lhapdf
+    DISPLAY_NAME "CepGen LHAPDF wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the LHAPDF library"
+    DEPENDS lib)
+cpack_add_component(photostauola
+    DISPLAY_NAME "CepGen Photos++/Tauola++ wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the Photos and Tauola libraries"
+    DEPENDS lib)
+cpack_add_component(promc
+    DISPLAY_NAME "CepGen ProMC wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the ProMC library"
     DEPENDS lib)
 cpack_add_component(pythia6
     DISPLAY_NAME "CepGen Pythia 6 wrappers library"
@@ -86,28 +132,12 @@ cpack_add_component(pythia8
     DISPLAY_NAME "CepGen Pythia 8 wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to Pythia 8"
     DEPENDS lib)
-cpack_add_component(boost
-    DISPLAY_NAME "CepGen Boost wrappers library"
-    DESCRIPTION "Collection of CepGen wrappers to the Boost library"
-    DEPENDS lib)
-cpack_add_component(hepmc
-    DISPLAY_NAME "CepGen HepMC wrappers library"
-    DESCRIPTION "Collection of CepGen wrappers to the HepMC library"
-    DEPENDS lib)
-cpack_add_component(promc
-    DISPLAY_NAME "CepGen ProMC wrappers library"
-    DESCRIPTION "Collection of CepGen wrappers to the ProMC library"
-    DEPENDS lib)
-cpack_add_component(lhapdf
-    DISPLAY_NAME "CepGen LHAPDF wrappers library"
-    DESCRIPTION "Collection of CepGen wrappers to the LHAPDF library"
-    DEPENDS lib)
 cpack_add_component(rivet
     DISPLAY_NAME "CepGen Rivet wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the Rivet library"
     DEPENDS lib)
-cpack_add_component(apfel
-    DISPLAY_NAME "CepGen APFEL wrappers library"
-    DESCRIPTION "Collection of CepGen wrappers to the APFEL library"
+cpack_add_component(root
+    DISPLAY_NAME "CepGen ROOT wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the ROOT library"
     DEPENDS lib)
 #message(STATUS ">>> ${CPACK_COMPONENTS_ALL}")

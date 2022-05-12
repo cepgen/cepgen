@@ -1,25 +1,35 @@
-#include "CepGen/Event/Event.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/HeavyIon.h"
-
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/String.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <algorithm>
 #include <cmath>
 
-namespace cepgen {
-  Event::Event(bool compressed)
-      : num_hadronisation_trials(0), time_generation(-1.), time_total(-1.), weight(0.), compressed_(compressed) {}
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Physics/HeavyIon.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/String.h"
 
-  Event::Event(const Event& rhs)
-      : num_hadronisation_trials(rhs.num_hadronisation_trials),
-        time_generation(rhs.time_generation),
-        time_total(rhs.time_total),
-        weight(rhs.weight),
-        particles_(rhs.particles_),
-        evtcontent_(rhs.evtcontent_),
-        compressed_(rhs.compressed_) {}
+namespace cepgen {
+  Event::Event(bool compressed) : compressed_(compressed) {}
+
+  Event::Event(const Event& oth)
+      : particles_(oth.particles_), evtcontent_(oth.evtcontent_), compressed_(oth.compressed_) {}
 
   void Event::clear() {
     particles_.clear();
@@ -54,7 +64,7 @@ namespace cepgen {
     if (compressed_)
       return *this;
     Event out(/*compressed=*/true);
-    size_t i = 0;
+    int i = 0;
     //--- add all necessary particles
     for (const auto& role : {Particle::IncomingBeam1,
                              Particle::IncomingBeam2,
@@ -63,8 +73,10 @@ namespace cepgen {
                              Particle::Parton1,
                              Particle::Parton2,
                              Particle::CentralSystem}) {
-      for (const auto& old_part : operator[](role)) {
-        auto& new_part = out.addParticle(role);
+      if (particles_.count(role) == 0)
+        continue;
+      for (const auto& old_part : operator()(role)) {
+        auto& new_part = out.addParticle(role).get();
         new_part = old_part;  // copy all attributes
         new_part.setId(i++);
         new_part.clearMothers();
@@ -75,20 +87,25 @@ namespace cepgen {
     if (out[Particle::OutgoingBeam1].size() > 1 || out[Particle::OutgoingBeam2].size() > 1)
       CG_WARNING("Event:compress") << "Event compression not designed for already fragmented beam remnants!\n\t"
                                    << "Particles parentage is not guaranteed to be conserved.";
-    for (auto& part : out[Particle::OutgoingBeam1])
-      part.addMother(out[Particle::IncomingBeam1][0]);
-    for (auto& part : out[Particle::OutgoingBeam2])
-      part.addMother(out[Particle::IncomingBeam2][0]);
+    if (particles_.count(Particle::OutgoingBeam1) > 0)
+      for (auto& part : out[Particle::OutgoingBeam1])
+        part.get().addMother(out[Particle::IncomingBeam1][0].get());
+    if (particles_.count(Particle::OutgoingBeam2) > 0)
+      for (auto& part : out[Particle::OutgoingBeam2])
+        part.get().addMother(out[Particle::IncomingBeam2][0].get());
     //--- fix parentage for incoming partons
     for (auto& part : out[Particle::Parton1])
-      part.addMother(out[Particle::IncomingBeam1][0]);
-    for (auto& part : out[Particle::Parton2])
-      part.addMother(out[Particle::IncomingBeam2][0]);
+      if (particles_.count(Particle::IncomingBeam1) > 0)
+        part.get().addMother(out[Particle::IncomingBeam1][0].get());
+    if (particles_.count(Particle::IncomingBeam2) > 0)
+      for (auto& part : out[Particle::Parton2])
+        part.get().addMother(out[Particle::IncomingBeam2][0].get());
     //--- fix parentage for central system
-    for (auto& part : out[Particle::CentralSystem]) {
-      part.addMother(out[Particle::Parton1][0]);
-      part.addMother(out[Particle::Parton2][0]);
-    }
+    if (particles_.count(Particle::Parton1) > 0 && particles_.count(Particle::Parton2) > 0)
+      for (auto& part : out[Particle::CentralSystem]) {
+        part.get().addMother(out[Particle::Parton1][0]);
+        part.get().addMother(out[Particle::Parton2][0]);
+      }
     return out;
   }
 
@@ -96,12 +113,15 @@ namespace cepgen {
     return CMEnergy(oneWithRole(Particle::IncomingBeam1), oneWithRole(Particle::IncomingBeam2));
   }
 
-  Particles& Event::operator[](Particle::Role role) {
+  ParticlesRefs Event::operator[](Particle::Role role) {
+    ParticlesRefs out;
     //--- retrieve all particles with a given role
-    return particles_[role];
+    for (auto& part : particles_[role])
+      out.emplace_back(std::ref(part));
+    return out;
   }
 
-  const Particles& Event::operator[](Particle::Role role) const {
+  const Particles& Event::operator()(Particle::Role role) const {
     if (particles_.count(role) == 0)
       throw CG_FATAL("Event") << "Failed to retrieve a particle with " << role << " role.";
     //--- retrieve all particles with a given role
@@ -122,18 +142,18 @@ namespace cepgen {
 
   Particle& Event::oneWithRole(Particle::Role role) {
     //--- retrieve the first particle of a given role
-    Particles& parts_by_role = operator[](role);
+    auto parts_by_role = operator[](role);
     if (parts_by_role.empty())
       throw CG_FATAL("Event") << "No particle retrieved with " << role << " role.";
     if (parts_by_role.size() > 1)
       throw CG_FATAL("Event") << "More than one particle with " << role << " role: " << parts_by_role.size()
                               << " particles.";
-    return *parts_by_role.begin();
+    return parts_by_role.front().get();
   }
 
   const Particle& Event::oneWithRole(Particle::Role role) const {
     //--- retrieve the first particle of a given role
-    const Particles& parts_by_role = operator[](role);
+    const Particles& parts_by_role = operator()(role);
     if (parts_by_role.empty())
       throw CG_FATAL("Event") << "No particle retrieved with " << role << " role.";
     if (parts_by_role.size() > 1)
@@ -152,19 +172,20 @@ namespace cepgen {
   }
 
   const Particle& Event::operator[](int id) const {
-    for (const auto& role_part : particles_)
-      for (const auto& part : role_part.second)
-        if (part.id() == id)
-          return part;
+    for (const auto& role_part : particles_) {
+      auto it = std::find_if(
+          role_part.second.begin(), role_part.second.end(), [&id](const auto& part) { return part.id() == id; });
+      if (it != role_part.second.end())
+        return *it;
+    }
 
     throw CG_FATAL("Event") << "Failed to retrieve the particle with id=" << id << ".";
   }
 
   Particles Event::operator[](const ParticlesIds& ids) const {
     Particles out;
-    for (const auto& id : ids)
-      out.emplace_back(operator[](id));
-
+    std::transform(
+        ids.begin(), ids.end(), std::back_inserter(out), [this](const auto& id) { return this->operator[](id); });
     return out;
   }
 
@@ -174,18 +195,18 @@ namespace cepgen {
 
   ParticleRoles Event::roles() const {
     ParticleRoles out;
-    for (const auto& pr : particles_)
-      out.emplace_back(pr.first);
+    std::transform(
+        particles_.begin(), particles_.end(), std::back_inserter(out), [](const auto& pr) { return pr.first; });
     return out;
   }
 
-  Particle& Event::addParticle(Particle& part, bool replace) {
+  ParticleRef Event::addParticle(Particle& part, bool replace) {
     CG_DEBUG_LOOP("Event") << "Particle with PDGid = " << part.integerPdgId() << " has role " << part.role();
     if (part.role() <= 0)
       throw CG_FATAL("Event") << "Trying to add a particle with role=" << (int)part.role() << ".";
 
     //--- retrieve the list of particles with the same role
-    Particles& part_with_same_role = operator[](part.role());
+    auto& part_with_same_role = particles_[part.role()];
 
     //--- specify the id
     if (part_with_same_role.empty() && part.id() < 0)
@@ -198,27 +219,26 @@ namespace cepgen {
     }
 
     //--- add the particle to the collection
-    if (replace)
-      part_with_same_role = Particles(1, part);  // generate a vector containing only this particle
+    if (replace && !part_with_same_role.empty())
+      part_with_same_role = Particles(1, part);
     else
       part_with_same_role.emplace_back(part);
 
-    return part_with_same_role.back();
+    return std::ref(part_with_same_role.back());
   }
 
-  Particle& Event::addParticle(Particle::Role role, bool replace) {
+  ParticleRef Event::addParticle(Particle::Role role, bool replace) {
     Particle np(role, PDG::invalid);
     return addParticle(np, replace);
   }
 
   size_t Event::size() const {
-    size_t out = 0;
-    for (const auto& role_part : particles_)
-      out += role_part.second.size();
-    return out;
+    return std::accumulate(particles_.begin(), particles_.end(), 0, [](size_t size, const auto& role_part) {
+      return size + role_part.second.size();
+    });
   }
 
-  const Particles Event::particles() const {
+  Particles Event::particles() const {
     Particles out;
     for (const auto& role_part : particles_)
       out.insert(out.end(), role_part.second.begin(), role_part.second.end());
@@ -227,15 +247,28 @@ namespace cepgen {
     return out;
   }
 
-  const Particles Event::stableParticles() const {
+  Particles Event::stableParticles() const {
     Particles out;
     for (const auto& role_part : particles_)
-      for (const auto& part : role_part.second)
-        if ((short)part.status() > 0)
-          out.emplace_back(part);
+      std::copy_if(role_part.second.begin(), role_part.second.end(), std::back_inserter(out), [](const auto& part) {
+        return (short)part.status() > 0;
+      });
 
     std::sort(out.begin(), out.end());
     return out;
+  }
+
+  Momentum Event::missingEnergy() const {
+    Momentum me;
+    for (const auto& cp : operator()(Particle::Role::CentralSystem))
+      if (cp.status() == Particle::Status::FinalState) {
+        const auto pdg = cp.integerPdgId();
+        if (pdg == 12 || pdg == 14 || pdg == 16)  // neutrinos
+          me += cp.momentum();
+        if (pdg == 1000022 || pdg == 1000023 || pdg == 1000025 || 1000035)  // neutralinos
+          me += cp.momentum();
+      }
+    return me;
   }
 
   void Event::checkKinematics() const {
@@ -278,9 +311,9 @@ namespace cepgen {
         if (part.pdgId() == PDG::invalid && !mothers.empty()) {
           //--- if particles compound
           std::string delim;
-          for (unsigned short i = 0; i < mothers.size(); ++i)
+          for (size_t i = 0; i < mothers.size(); ++i)
             try {
-              oss_pdg << delim << PDG::get().name(ev[*std::next(mothers.begin(), i)].pdgId()), delim = "/";
+              oss_pdg << delim << (PDG::Id)ev[*std::next(mothers.begin(), i)].pdgId(), delim = "/";
             } catch (const Exception&) {
               oss_pdg << delim << ev[*std::next(mothers.begin(), i)].pdgId(), delim = "/";
             }
@@ -291,7 +324,7 @@ namespace cepgen {
             oss_pdg << (HeavyIon)part.pdgId();
           else
             try {
-              oss_pdg << PDG::get().name(part.pdgId());
+              oss_pdg << (PDG::Id)part.pdgId();
             } catch (const Exception&) {
               oss_pdg << "?";
             }
@@ -339,12 +372,14 @@ namespace cepgen {
     //
     return out << utils::format(
                "Event content:\n"
-               " Id\tPDG id\t   Name\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E     "
+               " Id\tPDG id\t   Name\t\tCharge\tRole\t Status\tMother\tpx            py            pz            E   "
+               "  "
                " \t M         \n"
                " --\t------\t   ----\t\t------\t----\t ------\t------\t----GeV/c---  ----GeV/c---  ----GeV/c---  "
                "----GeV/c---\t --GeV/c²--"
                "%s\n"
-               " ------------------------------------------------------------------------------------------------------"
+               " ----------------------------------------------------------------------------------------------------"
+               "--"
                "----------------------------\n"
                "\t\t\t\t\t\t\tBalance% 9.6e % 9.6e % 9.6e % 9.6e",
                os.str().c_str(),

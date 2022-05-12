@@ -1,24 +1,37 @@
-#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
-
-#include "CepGen/Physics/Hadroniser.h"
-#include "CepGen/Modules/EventModifierFactory.h"
-
-#include "CepGen/Core/ParametersList.h"
-#include "CepGen/Core/Exception.h"
-
-#include "CepGen/Parameters.h"
-#include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/PDG.h"
-
-#include "CepGen/Event/Event.h"
-#include "CepGen/Event/Particle.h"
-
-#include <Pythia8/Pythia.h>
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <memory>
 #include <unordered_map>
 #include <vector>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Event/Event.h"
+#include "CepGen/Event/Particle.h"
+#include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/Hadroniser.h"
+#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/String.h"
+#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
 namespace cepgen {
   namespace hadr {
@@ -30,11 +43,10 @@ namespace cepgen {
     public:
       explicit Pythia8Hadroniser(const ParametersList&);
       ~Pythia8Hadroniser();
-      static std::string description() {
-        return "Interface to the Pythia 8 string hadronisation/fragmentation algorithm";
-      }
 
-      void setParameters(const Parameters&) override;
+      static ParametersDescription description();
+
+      void setRuntimeParameters(const Parameters&) override;
       void readString(const char* param) override;
       void init() override;
       bool run(Event& ev, double& weight, bool full) override;
@@ -45,7 +57,7 @@ namespace cepgen {
       static constexpr unsigned short PYTHIA_STATUS_IN_BEAM = 12;
       static constexpr unsigned short PYTHIA_STATUS_IN_PARTON_KT = 61;
 
-      std::vector<pdgid_t> min_ids_;
+      Kinematics::pdgids_t min_ids_;
       std::unordered_map<short, short> py_cg_corresp_;
       unsigned short findRole(const Event& ev, const Pythia8::Particle& p) const;
       void updateEvent(Event& ev, double& weight) const;
@@ -56,38 +68,34 @@ namespace cepgen {
       const bool correct_central_;
       const bool debug_lhef_;
       const std::string output_config_;
-      bool res_decay_;
-      bool enable_hadr_;
-      unsigned short offset_;
-      bool first_evt_;
+      bool res_decay_{true};
+      bool enable_hadr_{false};
+      unsigned short offset_{0};
+      bool first_evt_{true};
     };
 
     Pythia8Hadroniser::Pythia8Hadroniser(const ParametersList& plist)
         : Hadroniser(plist),
           pythia_(new Pythia8::Pythia),
           cg_evt_(new Pythia8::CepGenEvent),
-          correct_central_(plist.get<bool>("correctCentralSystem", false)),
-          debug_lhef_(plist.get<bool>("debugLHEF", false)),
-          output_config_(plist.get<std::string>("outputConfig", "last_pythia_config.cmd")),
-          res_decay_(true),
-          enable_hadr_(false),
-          offset_(0),
-          first_evt_(true) {}
+          correct_central_(steer<bool>("correctCentralSystem")),
+          debug_lhef_(steer<bool>("debugLHEF")),
+          output_config_(steer<std::string>("outputConfig")) {}
 
-    void Pythia8Hadroniser::setParameters(const Parameters& params) {
-      params_ = &params;
+    void Pythia8Hadroniser::setRuntimeParameters(const Parameters& params) {
+      rt_params_ = &params;
       cg_evt_->initialise(params);
 #if PYTHIA_VERSION_INTEGER < 8300
       pythia_->setLHAupPtr(cg_evt_.get());
 #else
       pythia_->setLHAupPtr(cg_evt_);
 #endif
-      pythia_->settings.parm("Beams:idA", (long)params_->kinematics.incoming_beams.first.pdg);
-      pythia_->settings.parm("Beams:idB", (long)params_->kinematics.incoming_beams.second.pdg);
+      pythia_->settings.parm("Beams:idA", (long)rt_params_->kinematics().incomingBeams().positive().pdgId());
+      pythia_->settings.parm("Beams:idB", (long)rt_params_->kinematics().incomingBeams().negative().pdgId());
       // specify we will be using a LHA input
       pythia_->settings.mode("Beams:frameType", 5);
-      pythia_->settings.parm("Beams:eCM", params_->kinematics.sqrtS());
-      min_ids_ = params_->kinematics.minimum_final_state;
+      pythia_->settings.parm("Beams:eCM", rt_params_->kinematics().incomingBeams().sqrtS());
+      min_ids_ = rt_params_->kinematics().minimumFinalState();
       if (debug_lhef_)
         cg_evt_->openLHEF("debug.lhe");
     }
@@ -117,7 +125,7 @@ namespace cepgen {
       }
 
 #if defined(PYTHIA_VERSION_INTEGER) && PYTHIA_VERSION_INTEGER >= 8226
-      switch (params_->kinematics.mode()) {
+      switch (rt_params_->kinematics().incomingBeams().mode()) {
         case mode::Kinematics::ElasticElastic: {
           pythia_->settings.mode("BeamRemnants:unresolvedHadron", 3);
           pythia_->settings.flag("PartonLevel:all", false);
@@ -234,14 +242,14 @@ namespace cepgen {
       try {
         prop = PDG::get()(pdg_id);
       } catch (const Exception&) {
-        prop = ParticleProperties{pdg_id,
-                                  py_part.name(),
-                                  py_part.name(),
-                                  (short)py_part.col(),  // colour factor
-                                  py_part.m0(),
-                                  py_part.mWidth(),
-                                  (short)py_part.charge(),  // charge
-                                  py_part.isLepton()};
+        prop.pdgid = pdg_id;
+        prop.name = py_part.name();
+        prop.descr = py_part.name();
+        prop.colours = py_part.col();  // colour factor
+        prop.mass = py_part.m0();
+        prop.width = py_part.mWidth();
+        prop.charge = py_part.charge();  // charge
+        prop.fermion = py_part.isLepton();
         PDG::get().define(prop);
       }
       //--- add the particle to the event content
@@ -304,10 +312,10 @@ namespace cepgen {
           const unsigned short role = findRole(ev, p);
           switch ((Particle::Role)role) {
             case Particle::OutgoingBeam1:
-              ev[Particle::OutgoingBeam1][0].setStatus(Particle::Status::Fragmented);
+              ev[Particle::OutgoingBeam1][0].get().setStatus(Particle::Status::Fragmented);
               break;
             case Particle::OutgoingBeam2:
-              ev[Particle::OutgoingBeam2][0].setStatus(Particle::Status::Fragmented);
+              ev[Particle::OutgoingBeam2][0].get().setStatus(Particle::Status::Fragmented);
               break;
             default:
               break;
@@ -350,6 +358,17 @@ namespace cepgen {
         return findRole(ev, pythia_->event[par_id]);
       }
       return (unsigned short)Particle::UnknownRole;
+    }
+
+    ParametersDescription Pythia8Hadroniser::description() {
+      auto desc = Hadroniser::description();
+      desc.setDescription("Interface to the Pythia 8 string hadronisation/fragmentation algorithm");
+      desc.add<bool>("correctCentralSystem", false)
+          .setDescription("Correct the kinematics of the central system whenever required");
+      desc.add<bool>("debugLHEF", false).setDescription("Switch on the dump of each event into a debugging LHEF file");
+      desc.add<std::string>("outputConfig", "last_pythia_config.cmd")
+          .setDescription("Output filename for a backup of the last Pythia configuration snapshot");
+      return desc;
     }
   }  // namespace hadr
 }  // namespace cepgen

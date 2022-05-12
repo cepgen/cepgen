@@ -1,25 +1,44 @@
-#include "CepGen/FormFactors/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <cmath>
+
+#include "CepGen/FormFactors/Parameterisation.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 
 namespace cepgen {
   namespace formfac {
     /// \cite Arrington:2007ux
-    class ArringtonEtAl : public Parameterisation {
+    class ArringtonEtAl final : public Parameterisation {
     public:
-      ArringtonEtAl(const ParametersList&);
-      static std::string description() { return "Arrington et al."; }
+      explicit ArringtonEtAl(const ParametersList&);
+
+      static ParametersDescription description();
 
     private:
       void compute(double q2) override;
+
       const int mode_;
       std::vector<double> a_e_, b_e_;
       std::vector<double> a_m_, b_m_;
     };
 
-    ArringtonEtAl::ArringtonEtAl(const ParametersList& params)
-        : Parameterisation(params), mode_(params.get<int>("mode")) {
+    ArringtonEtAl::ArringtonEtAl(const ParametersList& params) : Parameterisation(params), mode_(steer<int>("mode")) {
       switch (mode_) {
         case 0:  // original
           a_e_ = {3.439, -1.602, 0.068};
@@ -52,18 +71,28 @@ namespace cepgen {
       const double tau_val = tau(q2);
 
       double num_e = 1., den_e = 1.;
-      for (unsigned short i = 0; i < a_e_.size(); ++i)
-        num_e += a_e_.at(i) * pow(tau_val, i + 1);
-      for (unsigned short i = 0; i < b_e_.size(); ++i)
-        den_e += b_e_.at(i) * pow(tau_val, i + 1);
+      for (size_t i = 0; i < a_e_.size(); ++i)
+        num_e += a_e_.at(i) * pow(tau_val, 1. + i);
+      for (size_t i = 0; i < b_e_.size(); ++i)
+        den_e += b_e_.at(i) * pow(tau_val, 1. + i);
       GE = num_e / den_e;
 
       double num_m = 1., den_m = 1.;
-      for (unsigned short i = 0; i < a_m_.size(); ++i)
-        num_m += a_m_.at(i) * pow(tau_val, i + 1);
-      for (unsigned short i = 0; i < b_m_.size(); ++i)
-        den_m += b_m_.at(i) * pow(tau_val, i + 1);
+      for (size_t i = 0; i < a_m_.size(); ++i)
+        num_m += a_m_.at(i) * pow(tau_val, 1. + i);
+      for (size_t i = 0; i < b_m_.size(); ++i)
+        den_m += b_m_.at(i) * pow(tau_val, 1. + i);
       GM = MU * num_m / den_m;
+    }
+
+    ParametersDescription ArringtonEtAl::description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("Arrington et al.");
+      desc.add<int>("mode", 0).setDescription(
+          "Parameterisation mode "
+          "(0 = original, 1 = fit of quoted Ge+dGe values, "
+          "2 = fit of quoted Ge-dGe values, 3 = fit of quoted Ge values");
+      return desc;
     }
   }  // namespace formfac
 }  // namespace cepgen

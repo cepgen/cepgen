@@ -1,11 +1,29 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGen_Utils_Functional_h
 #define CepGen_Utils_Functional_h
 
-#include "CepGen/Modules/NamedModule.h"
-
-#include <vector>
 #include <array>
 #include <string>
+#include <vector>
+
+#include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen {
   class ParametersList;
@@ -16,7 +34,14 @@ namespace cepgen {
     class Functional : public NamedModule<std::string> {
     public:
       /// Default constructor
-      Functional(const ParametersList& params);
+      explicit Functional(const ParametersList&);
+
+      /// Build a collection of parameters to define a functional from its mathematical expression
+      /// \params[in] expr Mathematical expression to evaluate
+      /// \params[in] vars List of expression variables
+      static ParametersList fromExpression(const std::string& expr, const std::vector<std::string>& vars);
+      static ParametersDescription description();
+
       /// Compute the functional for a given value of the variable (one-dimensional case)
       /// \param[in] x Variable value
       double operator()(double x) const;
@@ -31,8 +56,7 @@ namespace cepgen {
 
     protected:
       /// Compute the functional for a given value of the variables
-      /// \param[in] x Variables values
-      virtual double eval(const std::vector<double>& x) const = 0;
+      virtual double eval() const = 0;
 
     private:
       std::vector<std::string> vars_orig_;  ///< User-defined variables to be reached

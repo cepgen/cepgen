@@ -1,5 +1,15 @@
+#--- first check if we are at CERN
+set(LXPLUS_ENV "${CMAKE_SOURCE_DIR}/source-lxplus.sh")
+if($ENV{HOSTNAME} MATCHES "^lxplus[0-9]+.cern.ch")
+  if(NOT DEFINED ENV{CEPGEN_LXPLUS_ENV})
+    message(FATAL_ERROR "LXPLUS environment variables not set!\nPlease source ${LXPLUS_ENV}\nand clean up this build environment, i.e.\nrm -rf CMake*\nand try again...")
+  endif()
+  message(STATUS "Compiling on LXPLUS.")
+  set(IS_LXPLUS "yes")
+endif()
+
 set(CPACK_RPM_COMPONENT_INSTALL ON)
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(CepGen)
 set(PROJECT_VERSION 1)
 set(VERSION 1.0.alpha2)
@@ -11,6 +21,7 @@ option(CMAKE_BUILD_SCAN "Build cross-section scan utilitary" OFF)
 option(CMAKE_BUILD_CARD_CONV "Build steering cards converter utilitary" OFF)
 option(CMAKE_BUILD_TESTS "Build tests" OFF)
 option(CMAKE_BUILD_FOAM "Build FOAM integrator" OFF)
+option(CMAKE_BUILD_UTILS "Build miscellaneous utilities" ON)
 option(CMAKE_COVERAGE "Generate code coverage" OFF)
 #----- release build by default
 
@@ -24,16 +35,20 @@ if(NOT CMAKE_BUILD_CORE AND NOT CMAKE_BUILD_PROCESSES AND NOT CMAKE_BUILD_ADDONS
   message(FATAL_ERROR "Nothing to be built!")
 endif()
 
-if(CMAKE_COVERAGE AND CMAKE_BUILD_TESTS)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
-  set(LINK_FLAGS "${LINK_FLAGS} -fprofile-arcs -ftest-coverage")
-  add_custom_command(OUTPUT run_coverage
-    COMMAND ctest
-    #COMMAND cepgen Cards/lpair_cfg.py -n 1000
-    COMMAND lcov --capture --directory CepGen --output-file coverage.info
-    COMMAND genhtml -q coverage.info --output-directory coverage
-    COMMENT Collecting and creating coverage information)
-  add_custom_target(coverage DEPENDS run_coverage)
+if(CMAKE_BUILD_TESTS)
+  enable_testing()
+  include(CTest)
+  if(CMAKE_COVERAGE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+    set(LINK_FLAGS "${LINK_FLAGS} -fprofile-arcs -ftest-coverage")
+    add_custom_command(OUTPUT run_coverage
+      COMMAND ctest
+      #COMMAND cepgen Cards/lpair_cfg.py -n 1000
+      COMMAND lcov --capture --directory CepGen --output-file coverage.info
+      COMMAND genhtml -q coverage.info --output-directory coverage
+      COMMENT Collecting and creating coverage information)
+    add_custom_target(coverage DEPENDS run_coverage)
+  endif()
 endif()
 
 #set(CMAKE_INSTALL_RPATH "$ORIGIN")
@@ -46,6 +61,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-pg") # for gprof
 #set(CMAKE_CXX_FLAGS_DEBUG "-fprofile-arcs -ftest-coverage") # for gcov
 set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -O2")
 set(CMAKE_C_FLAGS_RELEASE "-O2")
+set(ROOT_CXX_STANDARD 17)
 
 #----- include external paths
 
@@ -55,7 +71,8 @@ include(UseEnvironment)
 set(CEPGEN_LIBRARIES)
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 set(CEPGEN_CORE_EXT ${GSL_LIB} ${GSL_CBLAS_LIB} dl)
-set(CEPGEN_HAS_FUNCTIONALS OFF)
+set(CEPGEN_HAS_FUNCTIONAL OFF)
+set(CEPGEN_ADDONS_FILE "${CMAKE_CURRENT_BINARY_DIR}/CepGenAddOns.txt")
 
 include(BuildUtils)
 
@@ -70,13 +87,12 @@ if(CMAKE_BUILD_PROCESSES)
   add_subdirectory(CepGenProcesses)
 endif()
 if(CMAKE_BUILD_ADDONS)
+  file(REMOVE ${CEPGEN_ADDONS_FILE})
   add_subdirectory(CepGenAddOns)
 endif()
 if(CMAKE_BUILD_CORE)
   add_subdirectory(CepGen)
-  list(APPEND CEPGEN_LIBRARIES CepGenCore)
-  add_subdirectory(CepGen/Cards)
-  list(APPEND CEPGEN_LIBRARIES CepGenCards)
+  list(APPEND CEPGEN_LIBRARIES CepGen)
 endif()
 
 #----- copy the input cards and other files
@@ -85,7 +101,7 @@ file(GLOB_RECURSE input_cards RELATIVE ${PROJECT_SOURCE_DIR} Cards/*)
 foreach(_files ${input_cards})
   configure_file(${_files} ${_files} COPYONLY)
 endforeach()
-file(GLOB external_files ${PROJECT_SOURCE_DIR}/External/mstw_sf_scan_nnlo.dat ${PROJECT_SOURCE_DIR}/External/*.mcd)
+file(GLOB external_files ${PROJECT_SOURCE_DIR}/External/*.dat ${PROJECT_SOURCE_DIR}/External/*.mcd)
 file(COPY ${external_files} DESTINATION ${PROJECT_BINARY_DIR})
 file(GLOB readme_file ${PROJECT_SOURCE_DIR}/CepGen/README)
 file(COPY ${readme_file} DESTINATION ${PROJECT_BINARY_DIR})
@@ -97,8 +113,6 @@ if(CMAKE_BUILD_CORE)
   add_subdirectory(src)
   #--- build the tests
   if(CMAKE_BUILD_TESTS)
-    enable_testing()
-    include(CTest)
     add_subdirectory(test)
   endif()
 endif()
@@ -111,7 +125,7 @@ install(DIRECTORY CepGen
 install(DIRECTORY Cards
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
   COMPONENT lib FILES_MATCHING PATTERN "*.py")
-install(FILES ${external_files} ${readme_file}
+install(FILES ${external_files} ${readme_file} ${CEPGEN_ADDONS_FILE}
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
   COMPONENT lib)
 export(PACKAGE CepGen)

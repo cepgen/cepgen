@@ -1,22 +1,38 @@
-#include "CepGen/Integration/IntegratorGSL.h"
-#include "CepGen/Integration/Integrand.h"
-#include "CepGen/Integration/GridParameters.h"
-#include "CepGen/Modules/IntegratorFactory.h"
-
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Parameters.h"
-#include "CepGen/Utils/String.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <gsl/gsl_monte_vegas.h>
 
-#define COORD(s, i, j) ((s)->xi[(i) * (s)->dim + (j)])
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Integration/GridParameters.h"
+#include "CepGen/Integration/Integrand.h"
+#include "CepGen/Integration/IntegratorGSL.h"
+#include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   /// Vegas integration algorithm developed by P. Lepage, as documented in \cite Lepage:1977sw
-  class IntegratorVegas : public IntegratorGSL {
+  class IntegratorVegas final : public IntegratorGSL {
   public:
-    IntegratorVegas(const ParametersList&);
-    static std::string description() { return "Vegas stratified sampling integrator"; }
+    explicit IntegratorVegas(const ParametersList&);
+
+    static ParametersDescription description();
 
     void integrate(double&, double&) override;
 
@@ -24,31 +40,34 @@ namespace cepgen {
 
   private:
     void warmup(std::vector<double>&, std::vector<double>&, unsigned int);
+
     double eval(const std::vector<double>&) const override;
 
     const int ncvg_;
     const double chisq_cut_;
     const bool treat_;  ///< Is the integrand to be smoothed for events generation?
     gsl_monte_vegas_params vegas_params_;
+
     /// A trivial deleter for the Vegas integrator
     struct gsl_monte_vegas_deleter {
       inline void operator()(gsl_monte_vegas_state* state) { gsl_monte_vegas_free(state); }
     };
+
     /// A Vegas integrator state for integration (optional) and/or
     /// "treated" event generation
     std::unique_ptr<gsl_monte_vegas_state, gsl_monte_vegas_deleter> vegas_state_;
-    mutable unsigned long long r_boxes_;
+    mutable unsigned long long r_boxes_{0ull};
     mutable std::vector<double> x_new_;
   };
+
   std::ostream& operator<<(std::ostream&, const IntegratorVegas::Mode&);
 
   IntegratorVegas::IntegratorVegas(const ParametersList& params)
       : IntegratorGSL(params),
-        ncvg_(params.get<int>("numFunctionCalls", 50000)),
-        chisq_cut_(params.get<double>("chiSqCut", 1.5)),
-        treat_(params.get<bool>("treat", true)),
-        r_boxes_(0ull) {
-    verbosity_ = params.get<int>("verbose", -1);  // supersede the parent default verbosity level
+        ncvg_(steer<int>("numFunctionCalls")),
+        chisq_cut_(steer<double>("chiSqCut")),
+        treat_(steer<bool>("treat")) {
+    verbosity_ = steer<int>("verbose");  // supersede the parent default verbosity level
   }
 
   void IntegratorVegas::integrate(double& result, double& abserr) {
@@ -56,12 +75,12 @@ namespace cepgen {
       //--- start by preparing the grid/state
       vegas_state_.reset(gsl_monte_vegas_alloc(function_->dim));
       gsl_monte_vegas_params_get(vegas_state_.get(), &vegas_params_);
-      vegas_params_.iterations = params_.get<int>("iterations", 10);
-      vegas_params_.alpha = params_.get<double>("alpha", 1.5);
+      vegas_params_.iterations = steer<int>("iterations");
+      vegas_params_.alpha = steer<double>("alpha");
       vegas_params_.verbose = verbosity_;
-      vegas_params_.mode = params_.get<int>("mode", (int)Mode::importance);
+      vegas_params_.mode = steer<int>("mode");
       //--- output logging
-      const auto& log = params_.get<std::string>("loggingOutput", "cerr");
+      const auto& log = steer<std::string>("loggingOutput");
       if (log == "cerr")
         // redirect all debugging information to the error stream
         vegas_params_.ostream = stderr;
@@ -99,17 +118,17 @@ namespace cepgen {
                                           &x_up[0],
                                           function_->dim,
                                           0.2 * ncvg_,
-                                          rng_.get(),
+                                          gsl_rng_.get(),
                                           vegas_state_.get(),
                                           &result,
                                           &abserr);
-      CG_LOG("Integrator:integrate") << "\t>> at call " << (++it_chisq) << ": "
-                                     << utils::format(
-                                            "average = %10.6f   "
-                                            "sigma = %10.6f   chi2 = %4.3f.",
-                                            result,
-                                            abserr,
-                                            gsl_monte_vegas_chisq(vegas_state_.get()));
+      CG_LOG << "\t>> at call " << (++it_chisq) << ": "
+             << utils::format(
+                    "average = %10.6f   "
+                    "sigma = %10.6f   chi2 = %4.3f.",
+                    result,
+                    abserr,
+                    gsl_monte_vegas_chisq(vegas_state_.get()));
       if (res != GSL_SUCCESS)
         throw CG_FATAL("Integrator:integrate")
             << "Error at iteration #" << it_chisq << " while performing the integration!\n\t"
@@ -130,8 +149,15 @@ namespace cepgen {
 
     // perform a first integration to warm up the grid
     double result = 0., abserr = 0.;
-    int res = gsl_monte_vegas_integrate(
-        function_.get(), &x_low[0], &x_up[0], function_->dim, ncall, rng_.get(), vegas_state_.get(), &result, &abserr);
+    int res = gsl_monte_vegas_integrate(function_.get(),
+                                        &x_low[0],
+                                        &x_up[0],
+                                        function_->dim,
+                                        ncall,
+                                        gsl_rng_.get(),
+                                        vegas_state_.get(),
+                                        &result,
+                                        &abserr);
 
     // ensure the operation was successful
     if (res != GSL_SUCCESS)
@@ -148,20 +174,21 @@ namespace cepgen {
     if (!treat_)
       return integrand_->eval(x);
     //--- treatment of the integration grid
-    if (r_boxes_ == 0ull) {
-      r_boxes_ = std::pow(vegas_state_->bins, integrand_->size());
+    if (r_boxes_ == 0) {
+      r_boxes_ = (size_t)std::pow(vegas_state_->bins, integrand_->size());
       x_new_.resize(integrand_->size());
     }
+    auto COORD = [](gsl_monte_vegas_state* s, size_t i, size_t j) { return s->xi[i * s->dim + j]; };
     double w = r_boxes_;
     for (size_t j = 0; j < integrand_->size(); ++j) {
       //--- find surrounding coordinates and interpolate
       const double z = x.at(j) * vegas_state_->bins;
-      const unsigned int id = z;      // coordinate of point before
+      const auto id = (size_t)z;      // coordinate of point before
       const double rel_pos = z - id;  // position between coordinates (norm.)
-      const double bin_width =
-          (id == 0) ? COORD(vegas_state_, 1, j) : COORD(vegas_state_, id + 1, j) - COORD(vegas_state_, id, j);
+      const double bin_width = (id == 0) ? COORD(vegas_state_.get(), 1, j)
+                                         : COORD(vegas_state_.get(), id + 1, j) - COORD(vegas_state_.get(), id, j);
       //--- build new coordinate from linear interpolation
-      x_new_[j] = COORD(vegas_state_, id + 1, j) - bin_width * (1. - rel_pos);
+      x_new_[j] = COORD(vegas_state_.get(), id + 1, j) - bin_width * (1. - rel_pos);
       w *= bin_width;
     }
     return w * integrand_->eval(x_new_);
@@ -177,6 +204,20 @@ namespace cepgen {
         return os << "stratified";
     }
     return os;
+  }
+
+  ParametersDescription IntegratorVegas::description() {
+    auto desc = IntegratorGSL::description();
+    desc.setDescription("Vegas stratified sampling integrator");
+    desc.add<int>("numFunctionCalls", 50000);
+    desc.add<double>("chiSqCut", 1.5);
+    desc.add<bool>("treat", true).setDescription("Phase space treatment");
+    desc.add<int>("iterations", 10);
+    desc.add<double>("alpha", 1.5);
+    desc.addAs<int, Mode>("mode", Mode::importance);
+    desc.add<std::string>("loggingOutput", "cerr");
+    desc.add<int>("verbose", -1);
+    return desc;
   }
 }  // namespace cepgen
 

@@ -1,12 +1,30 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGen_EventInterfaces_ROOTTreeInfo_h
 #define CepGen_EventInterfaces_ROOTTreeInfo_h
 
-#include "TFile.h"
-#include "TTree.h"
+#include <TFile.h>
+#include <TTree.h>
 
 #include <exception>
-#include <string>
 #include <iostream>
+#include <string>
 
 namespace cepgen {
   class Event;
@@ -17,30 +35,20 @@ namespace ROOT {
   class CepGenRun {
   public:
     static constexpr const char* TREE_NAME = "run";  ///< Output tree name
-    double sqrt_s;                                   ///< Centre of mass energy for beam particles
-    double xsect;                                    ///< Process cross section, in pb
-    double errxsect;                                 ///< Uncertainty on process cross section, in pb
-    unsigned int num_events;                         ///< Number of events generated in run
-    unsigned int litigious_events;                   ///< Number of litigious events in run
 
-    CepGenRun() { clear(); }
+    double sqrt_s{-1.};                ///< Centre of mass energy for beam particles
+    double xsect{-1.};                 ///< Process cross section, in pb
+    double errxsect{-1.};              ///< Uncertainty on process cross section, in pb
+    unsigned int num_events{0};        ///< Number of events generated in run
+    unsigned int litigious_events{0};  ///< Number of litigious events in run
+    std::string process_name;          ///< Unique name of the process generated in this run
+    std::string process_parameters;    ///< Serialised process parameters
+
+    explicit CepGenRun();
     /// Reinitialise the run tree
-    void clear() {
-      sqrt_s = -1.;
-      xsect = errxsect = -1.;
-      num_events = litigious_events = 0;
-    }
+    void clear();
     /// Populate the run tree
-    void create() {
-      tree_ = std::make_shared<TTree>(TREE_NAME, "a tree containing information on the previous run");
-      if (!tree_)
-        throw std::runtime_error("Failed to create the run TTree!");
-      tree_->Branch("xsect", &xsect, "xsect/D");
-      tree_->Branch("errxsect", &errxsect, "errxsect/D");
-      tree_->Branch("num_events", &num_events, "num_events/i");
-      tree_->Branch("litigious_events", &litigious_events, "litigious_events/i");
-      tree_->Branch("sqrt_s", &sqrt_s, "sqrt_s/D");
-    }
+    void create();
     /// Retrieve the ROOT tree
     TTree* tree() { return tree_.get(); }
     /// Fill the run tree
@@ -48,20 +56,7 @@ namespace ROOT {
     /// Attach the run tree reader to a given file
     void attach(const char* filename, const char* run_tree = TREE_NAME) { attach(TFile::Open(filename), run_tree); }
     /// Attach the run tree reader to a given tree
-    void attach(TFile* file, const char* run_tree = TREE_NAME) {
-      //--- special constructor to avoid the memory to be cleared at destruction time
-      tree_ = std::shared_ptr<TTree>(dynamic_cast<TTree*>(file->Get(run_tree)), [=](TTree*) {});
-      if (!tree_)
-        throw std::runtime_error("Failed to attach to the run TTree!");
-      tree_->SetBranchAddress("xsect", &xsect);
-      tree_->SetBranchAddress("errxsect", &errxsect);
-      tree_->SetBranchAddress("num_events", &num_events);
-      tree_->SetBranchAddress("litigious_events", &litigious_events);
-      tree_->SetBranchAddress("sqrt_s", &sqrt_s);
-      if (tree_->GetEntriesFast() > 1)
-        std::cerr << "The run tree has more than one entry." << std::endl;
-      tree_->GetEntry(0);
-    }
+    void attach(TFile* file, const char* run_tree = TREE_NAME);
 
   private:
     /// ROOT tree used for storage/retrieval of this run information
@@ -76,10 +71,10 @@ namespace ROOT {
     static constexpr size_t MAX_PART = 5000;            ///< Maximal number of particles in event
     static constexpr const char* TREE_NAME = "events";  ///< Output tree name
 
-    float gen_time;             ///< Event generation time
-    float tot_time;             ///< Total event generation time
-    float weight;               ///< Event weight
-    int np;                     ///< Number of particles in the event
+    float gen_time{-1.};        ///< Event generation time
+    float tot_time{-1.};        ///< Total event generation time
+    float weight{-1.};          ///< Event weight
+    int np{0};                  ///< Number of particles in the event
     double pt[MAX_PART];        ///< Particles transverse momentum
     double eta[MAX_PART];       ///< Particles pseudo-rapidity
     double phi[MAX_PART];       ///< Particles azimuthal angle
@@ -94,49 +89,13 @@ namespace ROOT {
     int role[MAX_PART];         ///< Particles role in the event
     int status[MAX_PART];       ///< Integer status code
 
-    CepGenEvent() : tree_attached_(false), num_read_events_(0ull) { clear(); }
+    CepGenEvent() { clear(); }
     /// Reinitialise the event content
-    void clear() {
-      gen_time = tot_time = 0.;
-      np = 0;
-      for (size_t i = 0; i < MAX_PART; ++i) {
-        pt[i] = eta[i] = phi[i] = rapidity[i] = E[i] = m[i] = charge[i] = 0.;
-        pdg_id[i] = parent1[i] = parent2[i] = stable[i] = role[i] = status[i] = 0;
-      }
-    }
+    void clear();
     /// Retrieve the ROOT tree
     TTree* tree() { return tree_.get(); }
-    /// Fill the tree with a new event
-    void fill() {
-      if (!tree_)
-        throw std::runtime_error("CepGenEvent: Trying to fill a non-existent tree!");
-
-      tree_->Fill();
-      clear();
-    }
     /// Populate the tree and all associated branches
-    void create() {
-      tree_ = std::make_shared<TTree>(TREE_NAME, "a tree containing information on events generated in previous run");
-      if (!tree_)
-        throw std::runtime_error("Failed to create the events TTree!");
-      tree_->Branch("npart", &np, "npart/I");
-      tree_->Branch("role", role, "role[npart]/I");
-      tree_->Branch("pt", pt, "pt[npart]/D");
-      tree_->Branch("eta", eta, "eta[npart]/D");
-      tree_->Branch("phi", phi, "phi[npart]/D");
-      tree_->Branch("rapidity", rapidity, "rapidity[npart]/D");
-      tree_->Branch("E", E, "E[npart]/D");
-      tree_->Branch("m", m, "m[npart]/D");
-      tree_->Branch("charge", charge, "charge[npart]/D");
-      tree_->Branch("pdg_id", pdg_id, "pdg_id[npart]/I");
-      tree_->Branch("parent1", parent1, "parent1[npart]/I");
-      tree_->Branch("parent2", parent2, "parent2[npart]/I");
-      tree_->Branch("stable", stable, "stable[npart]/I");
-      tree_->Branch("status", status, "status[npart]/I");
-      tree_->Branch("weight", &weight, "weight/F");
-      tree_->Branch("generation_time", &gen_time, "generation_time/F");
-      tree_->Branch("total_time", &tot_time, "total_time/F");
-    }
+    void create();
     /// Attach the event tree reader to a given file
     void attach(const char* filename, const char* events_tree = TREE_NAME) {
       file_.reset(TFile::Open(filename));
@@ -183,8 +142,8 @@ namespace ROOT {
     /// Tree for which the event is booked
     std::shared_ptr<TTree> tree_;
     std::unique_ptr<TFile> file_;
-    bool tree_attached_;
-    unsigned long long num_read_events_;
+    bool tree_attached_{false};
+    unsigned long long num_read_events_{0ull};
   };
 }  // namespace ROOT
 

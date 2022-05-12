@@ -1,26 +1,44 @@
-#include "CepGen/Core/GeneratorWorker.h"
-
-#include "CepGen/Integration/Integrator.h"
-#include "CepGen/Integration/Integrand.h"
-#include "CepGen/Integration/GridParameters.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2022  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "CepGen/Core/EventModifier.h"
-#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/Exception.h"
-
-#include "CepGen/Parameters.h"
-#include "CepGen/Processes/Process.h"
+#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Event/Event.h"
-
-#include "CepGen/Utils/String.h"
+#include "CepGen/Integration/GridParameters.h"
+#include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/ProcessIntegrand.h"
+#include "CepGen/Parameters.h"
+#include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ProgressBar.h"
+#include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  GeneratorWorker::GeneratorWorker(Parameters* params)
-      : integrand_(new Integrand(params)), integrator_(nullptr), params_(params), ps_bin_(UNASSIGNED_BIN) {
+  GeneratorWorker::GeneratorWorker(const Parameters* params)
+      : integrand_(new ProcessIntegrand(params)), params_(params) {
     CG_DEBUG("GeneratorWorker") << "New generator worker initialised for integration/event generation.\n\t"
                                 << "Parameters at " << (void*)params_ << ".";
+  }
+
+  GeneratorWorker::~GeneratorWorker() {
+    CG_DEBUG("GeneratorWorker") << "Generator worker destructed. Releasing the parameters at " << (void*)params_ << ".";
   }
 
   void GeneratorWorker::setIntegrator(const Integrator* integr) {
@@ -42,7 +60,7 @@ namespace cepgen {
       throw CG_FATAL("GeneratorWorker:generate") << "No steering parameters specified!";
 
     if (num_events < 1)
-      num_events = params_->generation().maxgen;
+      num_events = params_->generation().maxGen();
 
     while (params_->numGeneratedEvents() < num_events)
       next(callback);
@@ -163,17 +181,18 @@ namespace cepgen {
     if (integrator_->eval(coords_) <= 0.)
       return false;
 
+    if (!integrand_->process().hasEvent())
+      return true;
+
+    const auto& event = integrand_->process().event();
     const auto ngen = params_->numGeneratedEvents();
-    if (integrand_->process().hasEvent()) {
-      auto& event = integrand_->process().event();
-      if ((ngen + 1) % params_->generation().gen_print_every == 0)
-        CG_INFO("GeneratorWorker:store") << utils::s("event", ngen + 1, true) << " generated.";
-      if (callback)
-        callback(event, ngen);
-      for (auto& mod : params_->outputModulesSequence())
-        *mod << event;
-      const_cast<Parameters*>(params_)->addGenerationTime(event.time_total);
-    }
+    if ((ngen + 1) % params_->generation().printEvery() == 0)
+      CG_INFO("GeneratorWorker:store") << utils::s("event", ngen + 1, true) << " generated.";
+    if (callback)
+      callback(event, ngen);
+    for (auto& mod : params_->outputModulesSequence())
+      *mod << event;
+    const_cast<Parameters*>(params_)->addGenerationTime(event.time_total);
     return true;
   }
 
@@ -187,10 +206,11 @@ namespace cepgen {
 
     integrand_->setStorage(false);
 
-    CG_INFO("GeneratorWorker:setGen") << "Preparing the grid (" << params_->generation().num_points << " points/bin) "
+    CG_INFO("GeneratorWorker:setGen") << "Preparing the grid ("
+                                      << utils::s("point", params_->generation().numPoints(), true) << "/bin) "
                                       << "for the generation of unweighted events.";
 
-    const double inv_num_points = 1. / params_->generation().num_points;
+    const double inv_num_points = 1. / params_->generation().numPoints();
     std::vector<double> point_coord(integrator_->size(), 0.);
     if (point_coord.size() < grid_->n(0).size())
       throw CG_FATAL("GridParameters:shoot") << "Coordinates vector multiplicity is insufficient!";
@@ -203,7 +223,7 @@ namespace cepgen {
     //--- main loop
     for (unsigned int i = 0; i < grid_->size(); ++i) {
       double fsum = 0., fsum2 = 0.;
-      for (unsigned int j = 0; j < params_->generation().num_points; ++j) {
+      for (size_t j = 0; j < params_->generation().numPoints(); ++j) {
         grid_->shoot(integrator_, i, point_coord);
         const double weight = integrator_->eval(point_coord);
         grid_->setValue(i, weight);

@@ -1,21 +1,37 @@
-#include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/String.h"
-#include "CepGen/Core/Exception.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2019-2022  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#include "CepGen/Version.h"
-
-#include <sstream>
 #include <algorithm>
 #include <cstring>
+#include <sstream>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/String.h"
+#include "CepGen/Version.h"
 
 namespace cepgen {
   ArgumentsParser::ArgumentsParser(int argc, char* argv[])
-      : help_str_({{"help,h"}}),
+      : command_name_(argc > 0 ? argv[0] : ""),
+        help_str_({{"help,h"}}),
         version_str_({{"version,v"}}),
         config_str_({{"cmd,c"}}),
-        help_req_(false),
-        version_req_(false) {
-    command_name_ = argv[0];
+        debug_str_({{"debug,d"}}) {
     //--- first remove the program name
     std::vector<std::string> args_tmp;
     if (argc > 1) {
@@ -33,13 +49,22 @@ namespace cepgen {
       for (const auto& str : version_str_)
         if (arg_val.at(0) == "--" + str.name.at(0) || (str.name.size() > 1 && arg_val.at(0) == "-" + str.name.at(1)))
           version_req_ = true;
-      //--- check if configuration word is requested
-      for (const auto& str : config_str_)
+      //--- check if debugging is requested
+      for (const auto& str : debug_str_)
         if (arg_val.at(0) == "--" + str.name.at(0) || (str.name.size() > 1 && arg_val.at(0) == "-" + str.name.at(1))) {
-          // if a configuration word is found, all the remaining flags are parsed as such
-          extra_config_ = std::vector<std::string>(it_arg + 1, args_tmp.end());
-          return;
+          utils::Logger::get().level = utils::Logger::Level::debug;
+          debug_req_ = true;
         }
+      //--- check if configuration word is requested
+      auto it = std::find_if(config_str_.begin(), config_str_.end(), [&arg_val](const auto& str) {
+        return (arg_val.at(0) == "--" + str.name.at(0) ||
+                (str.name.size() > 1 && arg_val.at(0) == "-" + str.name.at(1)));
+      });
+      if (it != config_str_.end()) {
+        // if a configuration word is found, all the remaining flags are parsed as such
+        extra_config_ = std::vector<std::string>(it_arg + 1, args_tmp.end());
+        break;
+      }
       //--- parse arguments if word found after
       if (arg_val.size() == 1 && arg_val.at(0)[0] == '-' && it_arg != std::prev(args_tmp.end())) {
         const auto& word = *std::next(it_arg);
@@ -52,9 +77,9 @@ namespace cepgen {
     }
   }
 
-  void ArgumentsParser::print_help() const { CG_LOG("ArgumentsParser") << help_message(); }
+  void ArgumentsParser::print_help() const { CG_LOG << help_message(); }
 
-  void ArgumentsParser::print_version() const { CG_LOG("ArgumentsParser") << cepgen::version::banner; }
+  void ArgumentsParser::print_version() const { CG_LOG << cepgen::version::banner; }
 
   void ArgumentsParser::dump() const {
     CG_INFO("ArgumentsParser").log([&](auto& info) {
@@ -75,6 +100,8 @@ namespace cepgen {
       print_version();
       exit(0);
     }
+    if (debug_req_)
+      CG_DEBUG("ArgumentsParser") << "Debugging mode enabled.";
     //--- loop over all parameters
     size_t i = 0;
     for (auto& par : params_) {
@@ -85,26 +112,27 @@ namespace cepgen {
         par.value = !par.boolean() ? args_.at(i).second : "1";
       } else {
         // for each parameter, loop over arguments to find correspondance
-        bool found_value = false;
-        for (const auto& arg : args_) {
-          if (arg.first == "--" + par.name.at(0) || (par.name.size() > 1 && arg.first == "-" + par.name.at(1))) {
-            par.value = arg.second;
-            if (par.boolean()) {  // all particular cases for boolean arguments
-              const auto word = utils::tolower(arg.second);
-              if (word.empty() || word == "on" || word != "off" || word == "yes" || word != "no" || word == "true" ||
-                  word != "false")
-                par.value = "1";  // if the flag is set, enabled by default
-            }
-            found_value = true;
-            ++i;
-            break;
+        auto it = std::find_if(args_.begin(), args_.end(), [&i, &par](const auto& arg) {
+          if (arg.first != "--" + par.name.at(0) && (par.name.size() < 2 || arg.first != "-" + par.name.at(1)))
+            return false;
+          par.value = arg.second;
+          if (par.boolean()) {  // all particular cases for boolean arguments
+            const auto word = utils::tolower(arg.second);
+            if (word.empty() || word == "1" || word == "on" || word == "yes" || word == "true")
+              par.value = "1";  // if the flag is set, enabled by default
+            else
+              par.value = "0";
           }
+          ++i;
+          return true;
+        });
+        if (it == args_.end()) {
+          if (args_.size() > i && args_.at(i).first[0] != '-')
+            par.value = args_.at(i).first;
+          else if (!par.optional)  // no match
+            throw CG_FATAL("ArgumentsParser")
+                << help_message() << " The following parameter was not set: '" << par.name.at(0) << "'.";
         }
-        if (!found_value && args_.size() > i && args_.at(i).first[0] != '-')
-          par.value = args_.at(i).first;
-        else if (!found_value && !par.optional)  // no match
-          throw CG_FATAL("ArgumentsParser")
-              << help_message() << " The following parameter was not set: '" << par.name.at(0) << "'.";
       }
       par.parse();
       CG_DEBUG("ArgumentsParser") << "Parameter '" << i << "|--" << par.name.at(0)
@@ -173,164 +201,78 @@ namespace cepgen {
 
   //----- simple parameters
 
-  ArgumentsParser::Parameter::Parameter(std::string name,
-                                        std::string description,
-                                        std::string* var,
-                                        std::string default_value)
-      : name(utils::split(name, ',')),
-        description(description),
-        value(default_value),
-        optional(true),
-        str_variable_(var),
-        float_variable_(nullptr),
-        int_variable_(nullptr),
-        uint_variable_(nullptr),
-        bool_variable_(nullptr),
-        vec_str_variable_(nullptr),
-        vec_int_variable_(nullptr),
-        vec_float_variable_(nullptr) {}
+  ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, std::string* var, std::string def)
+      : name(utils::split(pname, ',')), description(pdesc), value(def), str_variable_(var) {}
 
-  ArgumentsParser::Parameter::Parameter(std::string name, std::string description, double* var, double default_value)
-      : name(utils::split(name, ',')),
-        description(description),
-        value(utils::format("%g", default_value)),
-        optional(true),
-        str_variable_(nullptr),
-        float_variable_(var),
-        int_variable_(nullptr),
-        uint_variable_(nullptr),
-        bool_variable_(nullptr),
-        vec_str_variable_(nullptr),
-        vec_int_variable_(nullptr),
-        vec_float_variable_(nullptr) {}
+  ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, double* var, double def)
+      : name(utils::split(pname, ',')), description(pdesc), value(utils::format("%g", def)), float_variable_(var) {}
 
-  ArgumentsParser::Parameter::Parameter(std::string name, std::string description, int* var, int default_value)
-      : name(utils::split(name, ',')),
-        description(description),
-        value(utils::format("%+i", default_value)),
-        optional(true),
-        str_variable_(nullptr),
-        float_variable_(nullptr),
-        int_variable_(var),
-        uint_variable_(nullptr),
-        bool_variable_(nullptr),
-        vec_str_variable_(nullptr),
-        vec_int_variable_(nullptr),
-        vec_float_variable_(nullptr) {}
+  ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, int* var, int def)
+      : name(utils::split(pname, ',')), description(pdesc), value(utils::format("%+i", def)), int_variable_(var) {}
 
-  ArgumentsParser::Parameter::Parameter(std::string name,
-                                        std::string description,
-                                        unsigned int* var,
-                                        unsigned int default_value)
-      : name(utils::split(name, ',')),
-        description(description),
-        value(std::to_string(default_value)),
-        optional(true),
-        str_variable_(nullptr),
-        float_variable_(nullptr),
-        int_variable_(nullptr),
-        uint_variable_(var),
-        bool_variable_(nullptr),
-        vec_str_variable_(nullptr),
-        vec_int_variable_(nullptr),
-        vec_float_variable_(nullptr) {}
+  ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, unsigned int* var, unsigned int def)
+      : name(utils::split(pname, ',')), description(pdesc), value(std::to_string(def)), uint_variable_(var) {}
 
-  ArgumentsParser::Parameter::Parameter(std::string name, std::string description, bool* var, bool default_value)
-      : name(utils::split(name, ',')),
-        description(description),
-        value(utils::format("%d", default_value)),
-        optional(true),
-        str_variable_(nullptr),
-        float_variable_(nullptr),
-        int_variable_(nullptr),
-        uint_variable_(nullptr),
-        bool_variable_(var),
-        vec_str_variable_(nullptr),
-        vec_int_variable_(nullptr),
-        vec_float_variable_(nullptr) {}
+  ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, bool* var, bool def)
+      : name(utils::split(pname, ',')), description(pdesc), value(utils::format("%d", def)), bool_variable_(var) {}
 
   //----- vector of parameters
 
-  ArgumentsParser::Parameter::Parameter(std::string name,
-                                        std::string description,
+  ArgumentsParser::Parameter::Parameter(std::string pname,
+                                        std::string pdesc,
                                         std::vector<std::string>* var,
-                                        std::vector<std::string> default_value)
-      : name(utils::split(name, ',')),
-        description(description),
-        value(utils::merge(default_value, ",")),
-        optional(true),
-        str_variable_(nullptr),
-        float_variable_(nullptr),
-        int_variable_(nullptr),
-        uint_variable_(nullptr),
-        bool_variable_(nullptr),
-        vec_str_variable_(var),
-        vec_int_variable_(nullptr),
-        vec_float_variable_(nullptr) {}
+                                        std::vector<std::string> def)
+      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ",")), vec_str_variable_(var) {}
 
-  ArgumentsParser::Parameter::Parameter(std::string name,
-                                        std::string description,
+  ArgumentsParser::Parameter::Parameter(std::string pname,
+                                        std::string pdesc,
                                         std::vector<int>* var,
-                                        std::vector<int> default_value)
-      : name(utils::split(name, ',')),
-        description(description),
-        value(""),
-        optional(true),
-        str_variable_(nullptr),
-        float_variable_(nullptr),
-        int_variable_(nullptr),
-        uint_variable_(nullptr),
-        bool_variable_(nullptr),
-        vec_str_variable_(nullptr),
-        vec_int_variable_(var),
-        vec_float_variable_(nullptr) {
+                                        std::vector<int> def)
+      : name(utils::split(pname, ',')), description(pdesc), value(""), vec_int_variable_(var) {
     std::string sep;
-    for (const auto& val : default_value)
+    for (const auto& val : def)
       value += sep + utils::format("%d", val), sep = ",";
   }
 
-  ArgumentsParser::Parameter::Parameter(std::string name,
-                                        std::string description,
+  ArgumentsParser::Parameter::Parameter(std::string pname,
+                                        std::string pdesc,
                                         std::vector<double>* var,
-                                        std::vector<double> default_value)
-      : name(utils::split(name, ',')),
-        description(description),
-        value(""),
-        optional(true),
-        str_variable_(nullptr),
-        float_variable_(nullptr),
-        int_variable_(nullptr),
-        uint_variable_(nullptr),
-        bool_variable_(nullptr),
-        vec_str_variable_(nullptr),
-        vec_int_variable_(nullptr),
-        vec_float_variable_(var) {
+                                        std::vector<double> def)
+      : name(utils::split(pname, ',')), description(pdesc), value(""), vec_float_variable_(var) {
     std::string sep;
-    for (const auto& val : default_value)
+    for (const auto& val : def)
       value += sep + utils::format("%e", val), sep = ",";
+  }
+
+  bool ArgumentsParser::Parameter::matches(const std::string& key) const {
+    if (key == "--" + name.at(0))
+      return true;
+    if (name.size() > 1 && key == "-" + name.at(1))
+      return true;
+    return false;
   }
 
   ArgumentsParser::Parameter& ArgumentsParser::Parameter::parse() {
     CG_DEBUG("ArgumentsParser:Parameter:parse") << "Parsing argument " << name << ".";
-    if (str_variable_ != nullptr) {
+    if (str_variable_) {
       *str_variable_ = value;
       return *this;
     }
-    if (float_variable_ != nullptr)
+    if (float_variable_)
       try {
         *float_variable_ = std::stod(value);
         return *this;
       } catch (const std::invalid_argument&) {
         throw CG_FATAL("ArgumentsParser:Parameter:parse") << "Failed to parse variable '" << name << "' as float!";
       }
-    if (int_variable_ != nullptr)
+    if (int_variable_)
       try {
         *int_variable_ = std::stoi(value);
         return *this;
       } catch (const std::invalid_argument&) {
         throw CG_FATAL("ArgumentsParser:Parameter:parse") << "Failed to parse variable '" << name << "' as integer!";
       }
-    if (uint_variable_ != nullptr)
+    if (uint_variable_)
       try {
         *uint_variable_ = std::stoi(value);
         return *this;
@@ -338,22 +280,22 @@ namespace cepgen {
         throw CG_FATAL("ArgumentsParser:Parameter:parse")
             << "Failed to parse variable '" << name << "' as unsigned integer!";
       }
-    if (bool_variable_ != nullptr) {
+    if (bool_variable_) {
       try {
         *bool_variable_ = (std::stoi(value) != 0);
         return *this;
       } catch (const std::invalid_argument&) {
         *bool_variable_ = (strcasecmp("true", value.c_str()) == 0 || strcasecmp("yes", value.c_str()) == 0 ||
-                           strcasecmp("on", value.c_str()) == 0) &&
+                           strcasecmp("on", value.c_str()) == 0 || strcasecmp("1", value.c_str()) == 0) &&
                           strcasecmp("false", value.c_str()) != 0 && strcasecmp("no", value.c_str()) != 0 &&
-                          strcasecmp("off", value.c_str()) != 0;
+                          strcasecmp("off", value.c_str()) != 0 && strcasecmp("0", value.c_str()) != 0;
       }
     }
-    if (vec_str_variable_ != nullptr) {
+    if (vec_str_variable_) {
       *vec_str_variable_ = utils::split(value, ',');
       return *this;
     }
-    if (vec_int_variable_ != nullptr) {
+    if (vec_int_variable_) {
       vec_int_variable_->clear();
       const auto buf = utils::split(value, ',');
       std::transform(buf.begin(), buf.end(), std::back_inserter(*vec_int_variable_), [](const std::string& str) {
@@ -361,7 +303,7 @@ namespace cepgen {
       });
       return *this;
     }
-    if (vec_float_variable_ != nullptr) {
+    if (vec_float_variable_) {
       vec_float_variable_->clear();
       const auto buf = utils::split(value, ',');
       std::transform(buf.begin(), buf.end(), std::back_inserter(*vec_float_variable_), [](const std::string& str) {

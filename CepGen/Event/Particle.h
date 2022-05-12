@@ -1,15 +1,32 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGen_Event_Particle_h
 #define CepGen_Event_Particle_h
-
-#include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/Momentum.h"
-#include "CepGen/Physics/ParticleProperties.h"
-
-#include "CepGen/Utils/Hasher.h"
 
 #include <set>
 #include <unordered_map>
 #include <vector>
+
+#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/Momentum.h"
+#include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Utils/Hasher.h"
 
 namespace cepgen {
   /// A set of integer-type particle identifiers
@@ -55,7 +72,7 @@ namespace cepgen {
     /// Convert a pseudo-rapidity to a rapidity
     static double etaToY(double eta_, double m_, double pt_);
 
-    Particle();
+    Particle() = default;
     /// Build using the role of the particle in the process and its PDG id
     /// \param[in] role Role of the particle in the process
     /// \param[in] id PDG identifier
@@ -63,7 +80,7 @@ namespace cepgen {
     Particle(Role role, pdgid_t id, Status st = Status::Undefined);
     /// Copy constructor
     Particle(const Particle&);
-    inline ~Particle() {}
+    inline ~Particle() = default;
     Particle& operator=(const Particle&) = default;  ///< Assignment operator
     /// Comparison operator (from unique identifier)
     bool operator<(const Particle& rhs) const;
@@ -189,7 +206,7 @@ namespace cepgen {
        */
     Particle& addDaughter(Particle& part);
     /// Gets the number of daughter particles
-    inline unsigned int numDaughters() const { return daughters_.size(); };
+    inline size_t numDaughters() const { return daughters_.size(); };
     /// Get an identifiers list all daughter particles
     /// \return An integer vector containing all the daughters' unique identifier in the event
     inline ParticlesIds daughters() const { return daughters_; }
@@ -201,25 +218,25 @@ namespace cepgen {
 
   protected:
     /// Unique identifier in an event
-    int id_;
+    int id_{-1};
     /// Electric charge (+-1 or 0)
-    short charge_sign_;
+    short charge_sign_{1};
     /// Momentum properties handler
     Momentum momentum_;
     /// Mass, in GeV/c\f$^2\f$
-    double mass_;
+    double mass_{-1.};
     /// Helicity
-    float helicity_;
+    float helicity_{0.};
     /// Role in the process
-    Role role_;
+    Role role_{UnknownRole};
     /// Decay/stability status
-    int status_;
+    int status_{(int)Status::Undefined};
     /// List of mother particles
     ParticlesIds mothers_;
     /// List of daughter particles
     ParticlesIds daughters_;
     /// PDG id
-    pdgid_t pdg_id_;
+    pdgid_t pdg_id_{(pdgid_t)0};
     /// Collection of standard, bare-level physical properties
     ParticleProperties phys_prop_;
   };
@@ -231,12 +248,20 @@ namespace cepgen {
 
   // --- particle containers
 
+  /// Reference to a Particle object
+  typedef std::reference_wrapper<Particle> ParticleRef;
   /// List of Particle objects
   typedef std::vector<Particle> Particles;
+  /// List of references to Particle objects
+  typedef std::vector<ParticleRef> ParticlesRefs;
   /// List of particles' roles
   typedef std::vector<Particle::Role> ParticleRoles;
   /// Map between a particle's role and its associated Particle object
-  typedef std::unordered_map<Particle::Role, Particles, utils::EnumHash<Particle::Role> > ParticlesMap;
+  class ParticlesMap : public std::unordered_map<Particle::Role, Particles, utils::EnumHash<Particle::Role> > {
+  public:
+    ParticlesMap() = default;
+    ParticlesMap(const ParticlesMap&);
+  };
 }  // namespace cepgen
 
 #endif

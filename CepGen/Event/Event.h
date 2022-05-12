@@ -1,8 +1,27 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGen_Event_Event_h
 #define CepGen_Event_Event_h
 
-#include "CepGen/Event/Particle.h"
 #include <memory>
+
+#include "CepGen/Event/Particle.h"
 
 namespace cepgen {
   /**
@@ -12,7 +31,7 @@ namespace cepgen {
   class Event {
   public:
     /// Build an empty event
-    Event(bool compressed = false);
+    explicit Event(bool compressed = false);
     /// Copy constructor
     Event(const Event&);
     /// Empty the whole event content
@@ -41,25 +60,25 @@ namespace cepgen {
     /// \brief Set the information on one particle in the process
     /// \param[in] part The Particle object to insert or modify in the event
     /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
-    Particle& addParticle(Particle& part, bool replace = false);
+    ParticleRef addParticle(Particle& part, bool replace = false);
     /// \brief Create a new particle in the event, with no kinematic information but the role it has to play in the process
     /// \param[in] role The role the particle will play in the process
     /// \param[in] replace Do we replace the particle if already present in the event or do we append another particle with the same role ?
-    Particle& addParticle(Particle::Role role, bool replace = false);
+    ParticleRef addParticle(Particle::Role role, bool replace = false);
 
     //----- particles retrievers
 
     /// Number of particles in the event
     size_t size() const;
     /// Vector of all particles in the event
-    const Particles particles() const;
+    Particles particles() const;
     /// Vector of all stable particles in the event
-    const Particles stableParticles() const;
+    Particles stableParticles() const;
     /// List of references to Particle objects corresponding to a certain role in the process kinematics
     /// \param[in] role The role the particles have to play in the process
-    Particles& operator[](Particle::Role role);
+    ParticlesRefs operator[](Particle::Role role);
     /// Get a list of constant Particle objects corresponding to a certain role in the process kinematics
-    const Particles& operator[](Particle::Role role) const;
+    const Particles& operator()(Particle::Role role) const;
     /// Get a list of particle identifiers in Event corresponding to a certain role in the process kinematics
     ParticlesIds ids(Particle::Role role) const;
     /// First Particle object with a given role in the event
@@ -77,6 +96,9 @@ namespace cepgen {
     /// \param[in] ids_ The unique identifiers to the particles to be selected in the event
     Particles operator[](const ParticlesIds& ids_) const;
 
+    /// Compute the missing momentum for central particles in this event
+    Momentum missingEnergy() const;
+
     //----- general particles information retriever
 
     /// List of all parent Particle object for this given particle
@@ -89,13 +111,13 @@ namespace cepgen {
     ParticleRoles roles() const;
 
     /// Number of trials before the event was "correctly" hadronised
-    unsigned short num_hadronisation_trials;
+    unsigned short num_hadronisation_trials{0};
     /// Time needed to generate the event at parton level (in seconds)
-    float time_generation;
+    float time_generation{-1.};
     /// Time needed to generate the hadronised (if needed) event (in seconds)
-    float time_total;
+    float time_total{-1.};
     /// Event weight
-    float weight;
+    float weight{0.};
 
   private:
     static constexpr double MIN_PRECISION = 1.e-10;
@@ -105,10 +127,10 @@ namespace cepgen {
     ParticlesMap particles_;
     /// Typical event indices structure
     struct NumParticles {
-      size_t cs;   ///< Index of the first central system particle
-      size_t op1;  ///< Index of the first positive-z outgoing beam state
-      size_t op2;  ///< Index of the first negative-z outgoing beam state
-    } evtcontent_;
+      size_t cs{0};   ///< Index of the first central system particle
+      size_t op1{0};  ///< Index of the first positive-z outgoing beam state
+      size_t op2{0};  ///< Index of the first negative-z outgoing beam state
+    } evtcontent_{};
     /// Is the event "compressed"?
     bool compressed_;
   };

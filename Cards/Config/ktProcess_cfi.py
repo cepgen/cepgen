@@ -8,7 +8,6 @@ from math import pi
 
 from .containers_cfi import Module, Parameters
 
-
 class ProtonFlux:
     """Type of parton (from proton) flux modelling"""
     PhotonElastic         = 0

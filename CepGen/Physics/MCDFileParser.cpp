@@ -1,11 +1,28 @@
-#include "CepGen/Physics/MCDFileParser.h"
-#include "CepGen/Physics/PDG.h"
-
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/String.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <fstream>
 #include <string>
+
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Physics/MCDFileParser.h"
+#include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/String.h"
 
 namespace pdg {
   const std::unordered_map<std::string, short> MCDFileParser::MAP_CHARGE_STR = {
@@ -57,41 +74,47 @@ namespace pdg {
         throw CG_FATAL("MCDFileParser") << "Error while parsing the MCD file \"" << path << "\".\n\t"
                                         << "Invalid PDG ids / charges vectors sizes: " << pdg_ids.size()
                                         << " != " << charges.size() << ".";
+      cepgen::ParticleProperties prop;
+      prop.name = part_name;
+      prop.descr = part_name;
+      prop.colours = 1;
+      prop.mass = mass;
+      prop.width = width;
+      prop.fermion = false;
       for (size_t i = 0; i < pdg_ids.size(); ++i) {
-        bool is_fermion;
-        short colour_factor;
+        prop.pdgid = (cepgen::pdgid_t)pdg_ids.at(i);
+        prop.charge = charges.at(i);
         switch (pdg_ids.at(i)) {
+          // start with quarks
           case 1:
           case 2:
           case 3:
           case 4:
           case 5:
           case 6:
-            colour_factor = 3;
-            is_fermion = true;
+            prop.colours = 3;
+            prop.fermion = true;
             break;
+          // then move to leptons/neutrinos
           case 11:
           case 12:
           case 13:
           case 14:
           case 15:
           case 16:
-            colour_factor = 1;
-            is_fermion = true;
+            prop.colours = 1;
+            prop.fermion = true;
             break;
+          // then gluons
           case 21:
-            colour_factor = 9;
-            is_fermion = false;
+            prop.colours = 9;
+            prop.fermion = false;
             break;
+          // and finally the rest
           default:
-            colour_factor = 1;
-            is_fermion = false;
             break;
         }
-        cepgen::ParticleProperties prop{
-            (cepgen::pdgid_t)pdg_ids.at(i), part_name, part_name, colour_factor, mass, width, charges.at(i), is_fermion};
         cepgen::PDG::get().define(prop);
-        ++i;
       }
     }
     CG_INFO("MCDFileParser") << cepgen::utils::s("particle", cepgen::PDG::get().size()) << " defined from \"" << path

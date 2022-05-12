@@ -1,39 +1,41 @@
-#include "CepGen/Physics/Modes.h"
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <iostream>
 
-namespace cepgen {
-  std::ostream& operator<<(std::ostream& os, const mode::Kinematics& pm) {
-    switch (pm) {
-      case mode::Kinematics::invalid:
-        return os << "{invalid}";
-      case mode::Kinematics::ElasticElastic:
-        return os << "elastic/elastic";
-      case mode::Kinematics::InelasticElastic:
-        return os << "inelastic/elastic";
-      case mode::Kinematics::ElasticInelastic:
-        return os << "elastic/inelastic";
-      case mode::Kinematics::InelasticInelastic:
-        return os << "inelastic/inelastic";
-    }
-    return os;
-  }
+#include "CepGen/Physics/Modes.h"
 
-  std::ostream& operator<<(std::ostream& os, const mode::Beam& type) {
-    switch (type) {
-      case mode::Beam::invalid:
-        return os << "{invalid}";
-      case mode::Beam::ProtonElastic:
-        return os << "el.proton";
-      case mode::Beam::PointLikeScalar:
-        return os << "gen.scalar";
-      case mode::Beam::PointLikeFermion:
-        return os << "gen.fermion";
-      case mode::Beam::CompositeScalar:
-        return os << "comp.scalar";
-      case mode::Beam::ProtonInelastic:
-        return os << "inel.proton";
+namespace cepgen {
+  namespace mode {
+    std::ostream& operator<<(std::ostream& os, const Kinematics& pm) {
+      switch (pm) {
+        case Kinematics::invalid:
+          return os << "{invalid}";
+        case Kinematics::ElasticElastic:
+          return os << "elastic/elastic";
+        case Kinematics::InelasticElastic:
+          return os << "inelastic/elastic";
+        case Kinematics::ElasticInelastic:
+          return os << "elastic/inelastic";
+        case Kinematics::InelasticInelastic:
+          return os << "inelastic/inelastic";
+      }
+      return os;
     }
-    return os;
-  }
+  }  // namespace mode
 }  // namespace cepgen

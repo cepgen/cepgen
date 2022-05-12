@@ -1,7 +1,26 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2013-2021  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CepGenAddOns_EventInterfaces_PythiaEventInterface_h
 #define CepGenAddOns_EventInterfaces_PythiaEventInterface_h
 
 #include <Pythia8/Pythia.h>
+
 #include <unordered_map>
 
 namespace cepgen {
@@ -76,9 +95,9 @@ namespace Pythia8 {
   private:
     std::pair<int, int> findMothers(const cepgen::Event& ev, const cepgen::Particle& p) const;
     const double mp_, mp2_;
-    bool inel1_, inel2_;
+    bool inel1_{false}, inel2_{false};
     std::unordered_map<unsigned short, unsigned short> py_cg_corresp_;
-    const cepgen::Parameters* params_;  // borrowed
+    const cepgen::Parameters* params_{nullptr};  // borrowed
   };
 }  // namespace Pythia8
 #endif

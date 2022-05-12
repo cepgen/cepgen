@@ -15,7 +15,7 @@ process = kt.process.clone('pptoff_f77',
         #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
         ktFluxes = (kt.ProtonFlux.GluonKMR, kt.HeavyIonFlux.PhotonElastic),
         #ktFluxes = (kt.ProtonFlux.PhotonElastic, kt.HeavyIonFlux.PhotonElastic),
-        heavyIonB = (208, 82),
+        heavyIon2 = (208, 82),
         kmrGridPath = 'gluon_mmht2014nlo_Watt.dat',
     ),
     outKinematics = kt.process.outKinematics.clone(
