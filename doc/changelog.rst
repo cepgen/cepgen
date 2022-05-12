@@ -5,6 +5,46 @@ Latest revisions
 ^^^^^^^^^^^^^^^^
 
 .. changelog::
+    :version: 1.0.0
+    :released: Thu May 12 2022
+
+    .. change::
+        :tags: core
+
+        Several utilities are now converted into the post-0.9.X modules schema.
+        This allows to delegate a few definitions in the runtime loading of all libraries compiled against CepGen, thus reducing the overhead of dependencies for the CepGen core library.
+
+        A new parameters documentation system was introduced to list all possible keys and their default/expected values and ease the user-interaction with all module parameters.
+
+    .. change::
+        :tags: processes
+
+        ``PPtoWW`` now includes more (incl. anomalous) matrix element implementations listed in `Eur.Phys.J.C45:679-691,2006 <https://doi.org/10.1140/epjc/s2005-02450-3>`_.
+
+    .. change::
+        :tags: strfun
+
+        New hybrid Kulagin-Barinov structure functions, as implemented in `Phys. Rev. C 105 (2022) 045204 <https://doi.org/10.1103/PhysRevC.105.045204>`_.
+
+    .. change::
+        :tags: utils
+
+        Added a set of utilities to ease the drawing of 1- and 2-dimensional graphs and histograms.
+        In addition to the "standard" text-based renderer, several libraries are interfaced to generate their output (ROOT, YODA, Gnuplot, Matplotlib, Topdrawer).
+
+    .. change::
+        :tags: external
+
+        Python cards steering et al. interface is now stripped off the core ``CepGen`` library into a dedicated ``CepGenPython`` library.
+        It now includes a functional parser and output configuration producer.
+
+        HepMC inteface is now further splitted between its pre3 and 3+ versions.
+        This allows to ease the interfacing between CepGen event content and several libraries accepting a HepMC2 or HepMC3 event content.
+
+        Added a Photos++ and a Tauola++ algorithms interface for event modification.
+        Included a testing suite for e.g. Pythia 6 steering through its CepGen interface.
+
+.. changelog::
     :version: 1.0.0alpha2
     :released: Fri Apr 23 2021
 
