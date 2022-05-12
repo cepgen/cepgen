@@ -12,7 +12,7 @@ set(CPACK_RPM_COMPONENT_INSTALL ON)
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(CepGen)
 set(PROJECT_VERSION 1)
-set(VERSION 1.0.alpha2)
+set(VERSION 1.0.0)
 
 option(CMAKE_BUILD_CORE "Build Core library" ON)
 option(CMAKE_BUILD_PROCESSES "Build physics processes" ON)
@@ -43,7 +43,6 @@ if(CMAKE_BUILD_TESTS)
     set(LINK_FLAGS "${LINK_FLAGS} -fprofile-arcs -ftest-coverage")
     add_custom_command(OUTPUT run_coverage
       COMMAND ctest
-      #COMMAND cepgen Cards/lpair_cfg.py -n 1000
       COMMAND lcov --capture --directory CepGen --output-file coverage.info
       COMMAND genhtml -q coverage.info --output-directory coverage
       COMMENT Collecting and creating coverage information)
