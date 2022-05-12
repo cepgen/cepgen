@@ -119,7 +119,13 @@ int main(int argc, char* argv[]) {
     cepgen::utils::DrawableColl coll;
     for (auto& cf_gr : m_v_gr_fluxes)
       for (auto& gr : cf_gr.second) {
-        gr.setTitle(cepgen::utils::format("%d - %s", cf_gr.first, gr.title().data()));
+        if (cf_gr.second.size() > 1)
+          gr.setTitle(cepgen::utils::format("%s - %s",
+                                            cepgen::collflux::CollinearFluxFactory::get().describe(cf_gr.first).data(),
+                                            gr.title().data()));
+        else
+          gr.setTitle(
+              cepgen::utils::format("%s", cepgen::collflux::CollinearFluxFactory::get().describe(cf_gr.first).data()));
         coll.emplace_back(&gr);
       }
     plt->draw(coll, "comp_collfluxes", oss.str(), dm);
