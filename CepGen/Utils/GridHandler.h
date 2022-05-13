@@ -28,6 +28,7 @@
 #define GSL_VERSION_ABOVE_2_1 1
 #endif
 
+#include <array>
 #include <map>
 #include <memory>
 #include <vector>
