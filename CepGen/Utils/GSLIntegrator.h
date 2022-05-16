@@ -19,9 +19,8 @@
 #ifndef CepGen_Utils_GSLIntegrator_h
 #define CepGen_Utils_GSLIntegrator_h
 
-#include <functional>
-
 #include "CepGen/Core/SteeredObject.h"
+#include "CepGen/Utils/FunctionsWrappers.h"
 
 namespace cepgen {
   namespace utils {
@@ -32,14 +31,17 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      //using Function1D = double (*)(double, void*);
-      using Function1D = std::function<double(double)>;
-
+      /// Evaluate the derivative of a function at a given value
+      /// \param[in] func function to derive
+      /// \param[in] x coordinate
+      /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
+      double eval(const std::function<double(double)>& func, double xmin = INVALID, double xmax = INVALID) const {
+        return eval(Function1D(func), xmin, xmax);
+      }
       /// Evaluate the integral of a function at a given value
       /// \param[in] func function to integrate
       /// \param[in] xmin (optional) lower integration range
       /// \param[in] xmax (optional) upper integration range
-      //double eval(const Functional& func) const;
       double eval(const Function1D& func, double xmin = INVALID, double xmax = INVALID) const;
 
     private:

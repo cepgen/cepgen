@@ -24,29 +24,10 @@
 
 #include <memory>
 
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Utils/FunctionsWrappers.h"
 
 namespace cepgen {
   namespace utils {
-    /// Wrapper to a 1-dimensional function with optional parameters
-    class Function1D {
-    public:
-      Function1D(const std::function<double(double)>& func) : func_(func), func_params_(nullptr) {}
-      Function1D(const std::function<double(double, const ParametersList&)>& func)
-          : func_(nullptr), func_params_(func) {}
-      double operator()(double x, const ParametersList& params = ParametersList()) const {
-        if (func_params_)
-          return func_params_(x, params);
-        return func_(x);
-      }
-
-    private:
-      /// Reference to the parameters-less functor
-      std::function<double(double)> func_;
-      /// Reference to the functor
-      std::function<double(double, const ParametersList&)> func_params_;
-    };
-
     /// GSL wrapper to define a functor as a GSL-digestible functional
     class GSLFunctionWrapper : public gsl_function {
     public:
