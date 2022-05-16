@@ -58,17 +58,24 @@ namespace cepgen {
           : Parameterisation(params),
             flux_(steerAs<int, Beam::KTFlux>("ktFlux")),
             hi_(steerAs<pdgid_t, HeavyIon>("heavyIon")),
-            form_fac_(formfac::FormFactorsFactory::get().build(steer<ParametersList>("formFactors"))),
-            str_fun_(strfun::StructureFunctionsFactory::get().build(steer<ParametersList>("structureFunctions"))),
+            form_fac_(formfac::FormFactorsFactory::get().build(steer<std::string>("formFactors"))),
             workspace_(
                 gsl_integration_fixed_alloc(gsl_integration_fixed_jacobi, 50, t_range_.min(), t_range_.max(), 0., 0.)),
-            params_(new FluxArguments{0., mp2_, 0., flux_, form_fac_.get(), str_fun_.get(), nullptr}),
+            params_(new FluxArguments{0., mp2_, 0., flux_, form_fac_.get(), nullptr, nullptr}),
             function_({&unintegrated_flux, (void*)params_.get()}) {
-        CG_INFO("GammaIntegrated") << "kt flux-integrated collinear flux evaluator initialised.\n\t"
-                                   << "Q^2 integration range: " << t_range_ << " GeV^2\n\t"
-                                   << "Nucleon/HI: " << hi_ << "\n\t"
-                                   << "Structure functions modelling: " << *str_fun_ << "\n\t"
-                                   << "Form factors modelling: " << *form_fac_ << ".";
+        const auto& plist_strfun = steer<ParametersList>("structureFunctions");
+        if (!plist_strfun.empty()) {
+          str_fun_ = strfun::StructureFunctionsFactory::get().build(plist_strfun);
+          params_->structure_functions = str_fun_.get();
+        }
+        CG_INFO("GammaIntegrated").log([&](auto& log) {
+          log << "kt flux-integrated collinear flux evaluator initialised.\n\t"
+              << "Q^2 integration range: " << t_range_ << " GeV^2\n\t"
+              << "Nucleon/HI: " << hi_ << "\n\t";
+          if (str_fun_)
+            log << "Structure functions modelling: " << *str_fun_ << "\n\t";
+          log << "Form factors modelling: " << *form_fac_ << ".";
+        });
       }
 
       static ParametersDescription description() {
@@ -76,8 +83,9 @@ namespace cepgen {
         desc.setDescription("kt-integrated photon flux");
         desc.addAs<int, Beam::KTFlux>("ktFlux", Beam::KTFlux::P_Photon_Elastic);
         desc.add<pdgid_t>("heavyIon", HeavyIon::proton());
-        desc.add<ParametersDescription>("formFactors", ParametersDescription());
-        desc.add<ParametersDescription>("structureFunctions", ParametersDescription());
+        desc.add<std::string>("formFactors", formfac::gFFStandardDipoleHandler);
+        desc.add<ParametersDescription>("structureFunctions",
+                                        strfun::StructureFunctionsFactory::get().describeParameters(11));
         return desc;
       }
 
