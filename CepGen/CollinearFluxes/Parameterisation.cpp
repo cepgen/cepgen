@@ -49,24 +49,7 @@ namespace cepgen {
 
     /// Human-readable format of a collinear flux type
     std::ostream& operator<<(std::ostream& os, const collflux::Type& flux) {
-      switch (flux) {
-        case collflux::Type::GluonBialas:
-          return os << "Bialas model";
-        case collflux::Type::GammaHIall:
-          return os << "heavy ion-gamgam (all Z/A)";
-        case collflux::Type::GammaHIheavy:
-          return os << "heavy ion-gamgam (HI only)";
-        case collflux::Type::GammaPapageorgiu:
-          return os << "Photon flux (E.Papageorgiu)";
-        case collflux::Type::GammaBudnev:
-          return os << "Budnev photon flux (K.Piotrzkowski)";
-        case collflux::Type::GluonKMR:
-          return os << "KMR-like flux (L.Lonnblad)";
-        case collflux::Type::Reggeon:
-          return os << "Reggeon";
-        case collflux::Type::Pomeron:
-          return os << "Pomeron";
-      }
+      switch (flux) {}
       return os << "<invalid>";
     }
   }  // namespace collflux

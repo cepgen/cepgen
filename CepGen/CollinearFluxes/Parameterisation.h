@@ -30,14 +30,7 @@ namespace cepgen {
     /// Type of collinear fluxes
     enum struct Type {
       GammaIntegrated = 1,
-      GluonBialas = 11,
-      GammaHIall = 12,
-      GammaHIheavy = 13,
-      GammaPapageorgiu = 14,
-      GammaBudnev = 15,
-      GluonKMR = 16,
-      Pomeron = 18,
-      Reggeon = 19
+      BudnevEPA = 2,
     };
     /// Human-readable description of this flux type
     std::ostream& operator<<(std::ostream&, const collflux::Type&);
