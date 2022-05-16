@@ -44,6 +44,7 @@ namespace cepgen {
 
     private:
       const Limits range_;
+      const ParametersList func_params_;
       static constexpr double INVALID = -999.999;
     };
   }  // namespace utils

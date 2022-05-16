@@ -24,25 +24,50 @@
 
 #include <memory>
 
+#include "CepGen/Core/ParametersList.h"
+
 namespace cepgen {
   namespace utils {
-    /// GSL wrapper to define a functor as a GSL-digestible functional
-    class GSLFunctionWrapper : public gsl_function {
+    /// Wrapper to a 1-dimensional function with optional parameters
+    class Function1D {
     public:
-      explicit GSLFunctionWrapper(const std::function<double(double)>& func) : func_(func) {
-        function = &GSLFunctionWrapper::eval;
-        params = this;
-      }
-      /// Utility to build a gsl_function pointer from a functional
-      static std::unique_ptr<gsl_function> build(const std::function<double(double)>& func) {
-        return std::unique_ptr<gsl_function>(new utils::GSLFunctionWrapper(func));
+      Function1D(const std::function<double(double)>& func) : func_(func), func_params_(nullptr) {}
+      Function1D(const std::function<double(double, const ParametersList&)>& func)
+          : func_(nullptr), func_params_(func) {}
+      double operator()(double x, const ParametersList& params = ParametersList()) const {
+        if (func_params_)
+          return func_params_(x, params);
+        return func_(x);
       }
 
     private:
-      /// Static integrable functional
-      static double eval(double x, void* params) { return static_cast<GSLFunctionWrapper*>(params)->func_(x); }
+      /// Reference to the parameters-less functor
+      std::function<double(double)> func_;
       /// Reference to the functor
-      const std::function<double(double)>& func_;
+      std::function<double(double, const ParametersList&)> func_params_;
+    };
+
+    /// GSL wrapper to define a functor as a GSL-digestible functional
+    class GSLFunctionWrapper : public gsl_function {
+    public:
+      /// Utility to build a gsl_function pointer from a functional
+      static std::unique_ptr<gsl_function> build(const Function1D& func,
+                                                 const ParametersList& params = ParametersList()) {
+        return std::unique_ptr<gsl_function>(new utils::GSLFunctionWrapper(func, params));
+      }
+
+    private:
+      explicit GSLFunctionWrapper(const Function1D& func, const ParametersList& plist) : func_(func), params_(plist) {
+        function = &GSLFunctionWrapper::eval;
+        params = this;
+      }
+      /// Static integrable functional
+      static double eval(double x, void* params) {
+        auto* wrp = static_cast<GSLFunctionWrapper*>(params);
+        return wrp->func_(x, wrp->params_);
+      }
+      const Function1D func_;
+      const ParametersList& params_;
     };
 
     /// GSL wrapper to define a functor as an integrable functional

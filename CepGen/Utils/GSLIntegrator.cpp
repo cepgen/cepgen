@@ -28,11 +28,13 @@
 namespace cepgen {
   namespace utils {
     GSLIntegrator::GSLIntegrator(const ParametersList& params)
-        : SteeredObject(params), range_(steer<Limits>("range")) {}
+        : SteeredObject(params), range_(steer<Limits>("range")), func_params_(steer<ParametersList>("params")) {}
 
     ParametersDescription GSLIntegrator::description() {
       auto desc = ParametersDescription();
-      desc.add<Limits>("range", Limits{0., 1.});
+      desc.add<Limits>("range", Limits{0., 1.}).setDescription("integration range");
+      desc.add<ParametersDescription>("params", ParametersDescription())
+          .setDescription("parameters for the function to be integrated");
       return desc;
     }
 
@@ -41,9 +43,8 @@ namespace cepgen {
         xmin = range_.min();
       if (xmax == INVALID)
         xmax = range_.max();
-      CG_LOG << xmin << ":" << xmax;
       double result{0.};
-      auto gfunc = GSLFunctionWrapper::build(func);
+      auto gfunc = GSLFunctionWrapper::build(func, func_params_);
       std::unique_ptr<gsl_integration_fixed_workspace, void (*)(gsl_integration_fixed_workspace*)> workspace(
           gsl_integration_fixed_alloc(gsl_integration_fixed_jacobi, 50, xmin, xmax, 0., 0.),
           gsl_integration_fixed_free);
