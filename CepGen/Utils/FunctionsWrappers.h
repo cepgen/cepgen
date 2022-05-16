@@ -28,20 +28,26 @@ namespace cepgen {
     /// Wrapper to a 1-dimensional function with optional parameters
     class Function1D {
     public:
-      Function1D(const std::function<double(double)>& func) : func_(func), func_params_(nullptr) {}
+      Function1D(const std::function<double(double)>& func) : func_(func), func_params_(nullptr), func_obj_(nullptr) {}
       Function1D(const std::function<double(double, const ParametersList&)>& func)
-          : func_(nullptr), func_params_(func) {}
+          : func_(nullptr), func_params_(func), func_obj_(nullptr) {}
+      Function1D(const std::function<double(double, void*)>& func)
+          : func_(nullptr), func_params_(nullptr), func_obj_(func) {}
+
       double operator()(double x, const ParametersList& params = ParametersList()) const {
         if (func_params_)
           return func_params_(x, params);
         return func_(x);
       }
+      double operator()(double x, void* obj) const { return func_obj_(x, obj); }
 
     private:
       /// Reference to the parameters-less functor
       std::function<double(double)> func_;
       /// Reference to the functor
       std::function<double(double, const ParametersList&)> func_params_;
+      /// Reference to the functor
+      std::function<double(double, void*)> func_obj_;
     };
   }  // namespace utils
 }  // namespace cepgen

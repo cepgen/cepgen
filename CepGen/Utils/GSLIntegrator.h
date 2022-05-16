@@ -43,6 +43,12 @@ namespace cepgen {
       /// \param[in] xmin (optional) lower integration range
       /// \param[in] xmax (optional) upper integration range
       double eval(const Function1D& func, double xmin = INVALID, double xmax = INVALID) const;
+      /// Evaluate the integral of a function at a given value
+      /// \param[in] func function to integrate
+      /// \param[in] obj parameters object
+      /// \param[in] xmin (optional) lower integration range
+      /// \param[in] xmax (optional) upper integration range
+      double eval(const Function1D& func, void* obj, double xmin, double xmax) const;
 
     private:
       const Limits range_;

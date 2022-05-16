@@ -32,23 +32,31 @@ namespace cepgen {
     class GSLFunctionWrapper : public gsl_function {
     public:
       /// Utility to build a gsl_function pointer from a functional
+      static std::unique_ptr<gsl_function> build(const Function1D& func, void* obj) {
+        return std::unique_ptr<gsl_function>(new utils::GSLFunctionWrapper(func, ParametersList(), obj));
+      }
+      /// Utility to build a gsl_function pointer from a functional
       static std::unique_ptr<gsl_function> build(const Function1D& func,
                                                  const ParametersList& params = ParametersList()) {
-        return std::unique_ptr<gsl_function>(new utils::GSLFunctionWrapper(func, params));
+        return std::unique_ptr<gsl_function>(new utils::GSLFunctionWrapper(func, params, nullptr));
       }
 
     private:
-      explicit GSLFunctionWrapper(const Function1D& func, const ParametersList& plist) : func_(func), params_(plist) {
+      explicit GSLFunctionWrapper(const Function1D& func, const ParametersList& plist, void* obj = nullptr)
+          : func_(func), params_(plist), obj_(obj) {
         function = &GSLFunctionWrapper::eval;
         params = this;
       }
       /// Static integrable functional
       static double eval(double x, void* params) {
         auto* wrp = static_cast<GSLFunctionWrapper*>(params);
+        if (wrp->obj_)
+          return wrp->func_(x, wrp->obj_);
         return wrp->func_(x, wrp->params_);
       }
       const Function1D func_;
       const ParametersList& params_;
+      void* obj_{nullptr};
     };
 
     /// GSL wrapper to define a functor as an integrable functional
