@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
   int strfun_type, num_points;
   double mx, xmin, xmax;
   string ffmode, output_file, plotter;
-  bool logy, draw_grid;
+  bool logx, logy, draw_grid;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("collflux,i", "collinear flux modelling(s)", &cfluxes, vector<int>{1})
@@ -53,6 +53,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
       .addOptionalArgument("output,o", "output file name", &output_file, "collflux.scan.output.txt")
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
+      .addOptionalArgument("logx", "logarithmic x-scale", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .parse();
@@ -60,6 +61,8 @@ int main(int argc, char* argv[]) {
   cepgen::initialise();
 
   ofstream out(output_file);
+  if (logx && xmin == 0.)
+    xmin = 1.e-3;
 
   out << "# coll. fluxes: " << cepgen::utils::merge(cfluxes, ",") << "\n"
       << "# struct. functions: " << strfun_type << "\n"
@@ -93,7 +96,8 @@ int main(int argc, char* argv[]) {
     }
 
     for (int i = 0; i < num_points; ++i) {
-      const double x = xmin + i * (xmax - xmin) / num_points;
+      const double x = (!logx) ? xmin + i * (xmax - xmin) / (num_points - 1)
+                               : pow(10, log10(xmin) + i * (log10(xmax) - log10(xmin)) / (num_points - 1));
       out << x;
       for (size_t j = 0; j < coll_fluxes.size(); ++j) {
         auto fx = (*coll_fluxes.at(j))(x, mx);
@@ -112,6 +116,8 @@ int main(int argc, char* argv[]) {
     oss << "M_{X} = " << mx << " GeV/c^{2} (" << ffmode << ", " << (cepgen::strfun::Type)strfun_type << ")";
     auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
     cepgen::utils::Drawer::Mode dm;
+    if (logx)
+      dm |= cepgen::utils::Drawer::Mode::logx;
     if (logy)
       dm |= cepgen::utils::Drawer::Mode::logy;
     if (draw_grid)
