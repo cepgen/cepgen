@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
     for (const auto& mode : modes) {
       cepgen::ParametersList flux_params;
       flux_params.set("trange", cepgen::Limits{0., 1000.})
-          .set("formFactors", cepgen::ParametersList().setName(ffmode))
+          .set("formFactors", ffmode)
           .set("structureFunctions", cepgen::ParametersList().setName(strfun_type));
       switch ((cepgen::Beam::Mode)mode) {
         case cepgen::Beam::Mode::ProtonElastic:
@@ -119,6 +119,8 @@ int main(int argc, char* argv[]) {
     cepgen::utils::DrawableColl coll;
     for (auto& cf_gr : m_v_gr_fluxes)
       for (auto& gr : cf_gr.second) {
+        gr.xAxis().setLabel("x");
+        gr.yAxis().setLabel("dN/dx");
         if (cf_gr.second.size() > 1)
           gr.setTitle(cepgen::utils::format("%s - %s",
                                             cepgen::collflux::CollinearFluxFactory::get().describe(cf_gr.first).data(),

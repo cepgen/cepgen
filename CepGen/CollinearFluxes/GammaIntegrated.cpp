@@ -28,6 +28,7 @@
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/GSLIntegrator.h"
 #include "CepGen/Utils/Limits.h"
 
 namespace cepgen {
@@ -49,7 +50,7 @@ namespace cepgen {
       }
       return Beam::ktFluxNucl(
                  args->flux_type, args->x, kt2, args->form_factors, args->structure_functions, args->mi2, args->mf2) /
-             kt2;
+             kt2 / args->x;
     }
 
     class GammaIntegrated : public Parameterisation {
@@ -59,15 +60,13 @@ namespace cepgen {
             flux_(steerAs<int, Beam::KTFlux>("ktFlux")),
             hi_(steerAs<pdgid_t, HeavyIon>("heavyIon")),
             form_fac_(formfac::FormFactorsFactory::get().build(steer<std::string>("formFactors"))),
-            workspace_(
-                gsl_integration_fixed_alloc(gsl_integration_fixed_jacobi, 50, t_range_.min(), t_range_.max(), 0., 0.)),
-            params_(new FluxArguments{0., mp2_, 0., flux_, form_fac_.get(), nullptr, nullptr}),
-            function_({&unintegrated_flux, (void*)params_.get()}) {
+            params_(new FluxArguments{0., mp2_, 0., flux_, form_fac_.get(), nullptr, nullptr}) {
         const auto& plist_strfun = steer<ParametersList>("structureFunctions");
         if (!plist_strfun.empty()) {
           str_fun_ = strfun::StructureFunctionsFactory::get().build(plist_strfun);
           params_->structure_functions = str_fun_.get();
         }
+        func_.reset(new utils::Function1D(unintegrated_flux));
         CG_INFO("GammaIntegrated").log([&](auto& log) {
           log << "kt flux-integrated collinear flux evaluator initialised.\n\t"
               << "Q^2 integration range: " << t_range_ << " GeV^2\n\t"
@@ -90,14 +89,9 @@ namespace cepgen {
       }
 
       double operator()(double x, double mx) const override {
-        double result = 0.;
         params_->x = x;
         params_->mf2 = mx * mx;
-        const int res = gsl_integration_fixed(&function_, &result, workspace_.get());
-        if (res != GSL_SUCCESS)
-          CG_ERROR("CollinearFlux") << gsl_strerror(res);
-        result *= M_1_PI;
-        return result;
+        return integr_.eval(*func_, params_.get(), t_range_.min(), t_range_.max()) * M_1_PI;
       }
 
     private:
@@ -105,10 +99,8 @@ namespace cepgen {
       const HeavyIon hi_{HeavyIon::proton()};
       std::unique_ptr<formfac::Parameterisation> form_fac_;
       std::unique_ptr<strfun::Parameterisation> str_fun_;
-      struct gsl_integration_fixed_workspace_del {
-        void operator()(gsl_integration_fixed_workspace* int_wsp) { gsl_integration_fixed_free(int_wsp); }
-      };
-      std::unique_ptr<gsl_integration_fixed_workspace, gsl_integration_fixed_workspace_del> workspace_;
+      std::unique_ptr<utils::Function1D> func_;
+      utils::GSLIntegrator integr_;
       std::unique_ptr<FluxArguments> params_;
       mutable gsl_function function_;
     };
