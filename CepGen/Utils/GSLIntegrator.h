@@ -20,11 +20,10 @@
 #define CepGen_Utils_GSLIntegrator_h
 
 #include "CepGen/Core/SteeredObject.h"
-#include "CepGen/Utils/FunctionsWrappers.h"
+#include "CepGen/Utils/GSLFunctionsWrappers.h"
 
 namespace cepgen {
   namespace utils {
-    class Functional;
     class GSLIntegrator : public SteeredObject<GSLIntegrator> {
     public:
       explicit GSLIntegrator(const ParametersList& = ParametersList());
@@ -48,9 +47,10 @@ namespace cepgen {
       /// \param[in] obj parameters object
       /// \param[in] xmin (optional) lower integration range
       /// \param[in] xmax (optional) upper integration range
-      double eval(const Function1D& func, void* obj, double xmin, double xmax) const;
+      double eval(const Function1D& func, void* obj, double xmin = INVALID, double xmax = INVALID) const;
 
     private:
+      double eval(const gsl_function*, double xmin = INVALID, double xmax = INVALID) const;
       const Limits range_;
       const ParametersList func_params_;
       static constexpr double INVALID = -999.999;

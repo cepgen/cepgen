@@ -22,7 +22,6 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Functional.h"
-#include "CepGen/Utils/GSLFunctionsWrappers.h"
 #include "CepGen/Utils/GSLIntegrator.h"
 
 namespace cepgen {
@@ -39,22 +38,14 @@ namespace cepgen {
     }
 
     double GSLIntegrator::eval(const Function1D& func, double xmin, double xmax) const {
-      if (xmin == INVALID)
-        xmin = range_.min();
-      if (xmax == INVALID)
-        xmax = range_.max();
-      double result{0.};
-      std::unique_ptr<gsl_integration_fixed_workspace, void (*)(gsl_integration_fixed_workspace*)> workspace(
-          gsl_integration_fixed_alloc(gsl_integration_fixed_jacobi, 50, xmin, xmax, 0., 0.),
-          gsl_integration_fixed_free);
-      auto gfunc = GSLFunctionWrapper::build(func, func_params_);
-      int res = gsl_integration_fixed(gfunc.get(), &result, workspace.get());
-      if (res != GSL_SUCCESS)
-        CG_WARNING("GSLIntegrator") << "Failed to evaluate the integral. GSL error: " << gsl_strerror(res) << ".";
-      return result;
+      return eval(GSLFunctionWrapper::build(func, func_params_).get(), xmin, xmax);
     }
 
     double GSLIntegrator::eval(const Function1D& func, void* obj, double xmin, double xmax) const {
+      return eval(GSLFunctionWrapper::build(func, obj).get(), xmin, xmax);
+    }
+
+    double GSLIntegrator::eval(const gsl_function* wrp, double xmin, double xmax) const {
       if (xmin == INVALID)
         xmin = range_.min();
       if (xmax == INVALID)
@@ -63,8 +54,7 @@ namespace cepgen {
       std::unique_ptr<gsl_integration_fixed_workspace, void (*)(gsl_integration_fixed_workspace*)> workspace(
           gsl_integration_fixed_alloc(gsl_integration_fixed_jacobi, 50, xmin, xmax, 0., 0.),
           gsl_integration_fixed_free);
-      auto gfunc = GSLFunctionWrapper::build(func, obj);
-      int res = gsl_integration_fixed(gfunc.get(), &result, workspace.get());
+      int res = gsl_integration_fixed(wrp, &result, workspace.get());
       if (res != GSL_SUCCESS)
         CG_WARNING("GSLIntegrator") << "Failed to evaluate the integral. GSL error: " << gsl_strerror(res) << ".";
       return result;
