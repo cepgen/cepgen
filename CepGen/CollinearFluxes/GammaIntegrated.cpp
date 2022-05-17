@@ -50,7 +50,7 @@ namespace cepgen {
       }
       return Beam::ktFluxNucl(
                  args->flux_type, args->x, kt2, args->form_factors, args->structure_functions, args->mi2, args->mf2) /
-             kt2 / args->x;
+             kt2;
     }
 
     class GammaIntegrated : public Parameterisation {
@@ -91,7 +91,7 @@ namespace cepgen {
       double operator()(double x, double mx) const override {
         params_->x = x;
         params_->mf2 = mx * mx;
-        return integr_.eval(*func_, params_.get(), t_range_.min(), t_range_.max()) * M_1_PI;
+        return 2. * M_PI * integr_.eval(*func_, params_.get(), t_range_.min(), t_range_.max()) / x;
       }
 
     private:
