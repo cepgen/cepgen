@@ -77,7 +77,8 @@ int main(int argc, char* argv[]) {
       cepgen::ParametersList flux_params;
       flux_params.set("q2range", cepgen::Limits{0., 1000.})
           .set("formFactors", ffmode)
-          .set("structureFunctions", cepgen::ParametersList().setName(strfun_type));
+          .set("structureFunctions",
+               cepgen::strfun::StructureFunctionsFactory::get().describeParameters(strfun_type).parameters());
       switch ((cepgen::Beam::Mode)mode) {
         case cepgen::Beam::Mode::ProtonElastic:
           flux_params.setAs<int, cepgen::Beam::KTFlux>("ktFlux", cepgen::Beam::KTFlux::P_Photon_Elastic);
