@@ -28,7 +28,7 @@ namespace cepgen {
         : NamedModule<int>(params),
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
-          t_range_(steer<Limits>("trange")),
+          t_range_(steer<Limits>("q2range")),
           qscale_(steer<double>("qscale")) {}
 
     std::string Parameterisation::describe() const {
@@ -40,7 +40,7 @@ namespace cepgen {
     ParametersDescription Parameterisation::description() {
       auto desc = ParametersDescription();
       desc.setDescription("Unnamed collinear flux");
-      desc.add<Limits>("trange", {0., 1.e4});
+      desc.add<Limits>("q2range", {0., 1.e4});
       desc.add<double>("qscale", 0.71);
       return desc;
     }

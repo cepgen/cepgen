@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
     vector<unique_ptr<cepgen::collflux::Parameterisation> > coll_fluxes;
     for (const auto& mode : modes) {
       cepgen::ParametersList flux_params;
-      flux_params.set("trange", cepgen::Limits{0., 1000.})
+      flux_params.set("q2range", cepgen::Limits{0., 1000.})
           .set("formFactors", ffmode)
           .set("structureFunctions", cepgen::ParametersList().setName(strfun_type));
       switch ((cepgen::Beam::Mode)mode) {

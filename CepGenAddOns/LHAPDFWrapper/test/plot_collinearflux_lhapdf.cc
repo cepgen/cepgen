@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
   auto flux = cepgen::collflux::CollinearFluxFactory::get().build(
       1,
       cepgen::ParametersList()
-          .set("trange", cepgen::Limits{0., 1000.})
+          .set("q2range", cepgen::Limits{0., 1000.})
           .setAs<int, cepgen::Beam::KTFlux>("flux", cepgen::Beam::KTFlux::P_Photon_Elastic_Budnev)
           .set("formFactors", cepgen::ParametersList().setName(ffmode))
           .set(
