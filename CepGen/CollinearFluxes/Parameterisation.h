@@ -32,6 +32,7 @@ namespace cepgen {
       GammaIntegrated = 1,
       BudnevEPAProton = 2,
       LHAPDFCollinearFlux = 3,
+      BudnevEPALepton = 4,
     };
     /// Human-readable description of this flux type
     std::ostream& operator<<(std::ostream&, const collflux::Type&);
