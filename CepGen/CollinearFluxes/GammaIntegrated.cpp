@@ -34,11 +34,11 @@
 namespace cepgen {
   namespace collflux {
     struct FluxArguments {
-      double x, mi2, mf2;
-      Beam::KTFlux flux_type;
-      formfac::Parameterisation* form_factors;
-      strfun::Parameterisation* structure_functions;
-      HeavyIon* heavy_ion;
+      double x{0.}, mi2{0.}, mf2{0.};
+      Beam::KTFlux flux_type{Beam::KTFlux::P_Photon_Elastic};
+      formfac::Parameterisation* form_factors{nullptr};
+      strfun::Parameterisation* structure_functions{nullptr};
+      HeavyIon* heavy_ion{nullptr};
     };
 
     double unintegrated_flux(double kt2, void* params) {
