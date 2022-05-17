@@ -27,11 +27,11 @@
 
 namespace cepgen {
   namespace collflux {
-    class BudnevEPA : public Parameterisation {
+    class BudnevEPAProton : public Parameterisation {
     public:
-      explicit BudnevEPA(const ParametersList& params) : Parameterisation(params) {
-        CG_INFO("BudnevEPA") << "Budnev EPA for photon-from-proton elastic limit.\n\t"
-                             << "See V.M.Budnev, et al., Phys.Rep. 15C (1975) 181.";
+      explicit BudnevEPAProton(const ParametersList& params) : Parameterisation(params) {
+        CG_INFO("BudnevEPAProton") << "Budnev EPA for photon-from-proton elastic limit.\n\t"
+                                   << "See V.M.Budnev, et al., Phys.Rep. 15C (1975) 181.";
       }
 
       static ParametersDescription description() {
@@ -65,4 +65,4 @@ namespace cepgen {
   }  // namespace collflux
 }  // namespace cepgen
 
-REGISTER_COLLFLUX(BudnevEPA, collflux::BudnevEPA);
+REGISTER_COLLFLUX(BudnevEPAProton, collflux::BudnevEPAProton);

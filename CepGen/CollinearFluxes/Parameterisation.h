@@ -30,7 +30,7 @@ namespace cepgen {
     /// Type of collinear fluxes
     enum struct Type {
       GammaIntegrated = 1,
-      BudnevEPA = 2,
+      BudnevEPAProton = 2,
       LHAPDFCollinearFlux = 3,
     };
     /// Human-readable description of this flux type
