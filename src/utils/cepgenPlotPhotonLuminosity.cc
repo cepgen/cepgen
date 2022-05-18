@@ -30,7 +30,6 @@
 #include "CepGen/Utils/String.h"
 
 using namespace std;
-using namespace cepgen;
 
 int main(int argc, char* argv[]) {
   vector<int> cfluxes;
@@ -39,7 +38,7 @@ int main(int argc, char* argv[]) {
   string output_file, plotter;
   bool logx, logy, draw_grid;
   vector<double> xi_range_vec;
-  Limits y_range, xi_range;
+  cepgen::Limits y_range, xi_range;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("collflux,i", "collinear flux modelling(s)", &cfluxes, vector<int>{1})
@@ -52,8 +51,8 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .addOptionalArgument("logx", "logarithmic x-scale", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
-      .addOptionalArgument("xi-range,x", "acceptance range for proton momentum loss", &xi_range, Limits{})
-      .addOptionalArgument("y-range,y", "y plot range", &y_range, Limits{})
+      .addOptionalArgument("xi-range,x", "acceptance range for proton momentum loss", &xi_range)
+      .addOptionalArgument("yrange,y", "y plot range", &y_range)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .parse();
 
@@ -64,8 +63,13 @@ int main(int argc, char* argv[]) {
     mxmin = 1.e-3;
 
   out << "# coll. fluxes: " << cepgen::utils::merge(cfluxes, ",") << "\n"
-      << "# two-photon mass range: " << cepgen::Limits(mxmin, mxmax) << "\n";
+      << "# two-photon mass range: " << cepgen::Limits(mxmin, mxmax);
   map<int, cepgen::utils::Graph1D> m_gr_fluxes;  // {collinear flux -> graph}
+  vector<double> mxvals;
+  for (int j = 0; j < num_points; ++j)
+    mxvals.emplace_back((!logx) ? mxmin + j * (mxmax - mxmin) / (num_points - 1)
+                                : pow(10, log10(mxmin) + j * (log10(mxmax) - log10(mxmin)) / (num_points - 1)));
+  vector<vector<double> > values(num_points);
   auto integr = cepgen::utils::GSLIntegrator();
   const auto s = sqrts * sqrts;
   for (const auto& cflux : cfluxes) {
@@ -75,8 +79,7 @@ int main(int argc, char* argv[]) {
     m_gr_fluxes[cflux].setTitle(oss.str());
 
     for (int j = 0; j < num_points; ++j) {
-      const double mx = (!logx) ? mxmin + j * (mxmax - mxmin) / (num_points - 1)
-                                : pow(10, log10(mxmin) + j * (log10(mxmax) - log10(mxmin)) / (num_points - 1));
+      const auto& mx = mxvals.at(j);
       auto lumi_wgg = integr.eval(
           [&xi_range, &mx, &s, &coll_flux](double x) {
             if (xi_range.valid() && !xi_range.contains(x))
@@ -85,10 +88,12 @@ int main(int argc, char* argv[]) {
           },
           mx * mx / s,
           1.);
-      out << mx << "\t" << lumi_wgg << "\n";
+      values.at(j).emplace_back(lumi_wgg);
       m_gr_fluxes[cflux].addPoint(mx, lumi_wgg);
     }
   }
+  for (int i = 0; i < num_points; ++i)
+    out << "\n" << mxvals.at(i) << "\t" << cepgen::utils::merge(values.at(i), "\t");
   out.close();
 
   if (!plotter.empty()) {

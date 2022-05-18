@@ -72,8 +72,13 @@ int main(int argc, char* argv[]) {
       << "# form factors: " << ffmode << "\n"
       << "# diffractive mass: " << mx << " GeV/c2\n"
       << "# fractional momentum loss: " << cepgen::Limits(xmin, xmax) << "\n"
-      << "# fluxes modes: " << cepgen::utils::merge(modes, ",") << "\n";
+      << "# fluxes modes: " << cepgen::utils::merge(modes, ",");
   map<int, vector<cepgen::utils::Graph1D> > m_v_gr_fluxes;  // {collinear flux -> {mode, mode, ...}}
+  vector<vector<double> > values(num_points);
+  vector<double> xvals;
+  for (int i = 0; i < num_points; ++i)
+    xvals.emplace_back((!logx) ? xmin + i * (xmax - xmin) / (num_points - 1)
+                               : pow(10, log10(xmin) + i * (log10(xmax) - log10(xmin)) / (num_points - 1)));
   for (const auto& cflux : cfluxes) {
     vector<unique_ptr<cepgen::collflux::Parameterisation> > coll_fluxes;
     for (const auto& mode : modes) {
@@ -99,20 +104,19 @@ int main(int argc, char* argv[]) {
       m_v_gr_fluxes[cflux].back().setTitle(oss.str());
     }
 
-    for (int i = 0; i < num_points; ++i) {
-      const double x = (!logx) ? xmin + i * (xmax - xmin) / (num_points - 1)
-                               : pow(10, log10(xmin) + i * (log10(xmax) - log10(xmin)) / (num_points - 1));
-      out << x;
+    for (size_t i = 0; i < num_points; ++i) {
+      const auto& x = xvals.at(i);
       for (size_t j = 0; j < coll_fluxes.size(); ++j) {
         auto fx = (*coll_fluxes.at(j))(x, mx);
         if (isnan(fx))
           fx = -1.;
-        out << "\t" << fx;
+        values.at(i).emplace_back(fx);
         m_v_gr_fluxes[cflux].at(j).addPoint(x, fx);
       }
-      out << "\n";
     }
   }
+  for (size_t i = 0; i < num_points; ++i)
+    out << "\n" << xvals.at(i) << "\t" << cepgen::utils::merge(values.at(i), "\t");
   out.close();
 
   if (!plotter.empty()) {
