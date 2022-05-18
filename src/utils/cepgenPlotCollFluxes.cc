@@ -41,6 +41,7 @@ int main(int argc, char* argv[]) {
   double mx, xmin, xmax, q2max;
   string ffmode, output_file, plotter;
   bool logx, logy, draw_grid;
+  cepgen::Limits y_range;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("collflux,i", "collinear flux modelling(s)", &cfluxes, vector<int>{1})
@@ -50,6 +51,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("sf,s", "structure functions modelling", &strfun_type, 301)
       .addOptionalArgument("xmin,x", "minimal fractional loss", &xmin, 0.)
       .addOptionalArgument("xmax,X", "maximal fractional loss", &xmax, 1.)
+      .addOptionalArgument("yrange,y", "y range", &y_range)
       .addOptionalArgument("q2max,q", "maximal parton virtuality (GeV^2)", &q2max, 1000.)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
       .addOptionalArgument("output,o", "output file name", &output_file, "collflux.scan.output.txt")
@@ -114,8 +116,6 @@ int main(int argc, char* argv[]) {
   out.close();
 
   if (!plotter.empty()) {
-    ostringstream oss;
-    oss << "M_{X} = " << mx << " GeV/c^{2} (" << ffmode << ", " << (cepgen::strfun::Type)strfun_type << ")";
     auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
     cepgen::utils::Drawer::Mode dm;
     if (logx)
@@ -129,6 +129,8 @@ int main(int argc, char* argv[]) {
       for (auto& gr : cf_gr.second) {
         gr.xAxis().setLabel("x");
         gr.yAxis().setLabel("dN/dx");
+        if (y_range.valid())
+          gr.yAxis().setRange(y_range);
         if (cf_gr.second.size() > 1)
           gr.setTitle(cepgen::utils::format("%s - %s",
                                             cepgen::collflux::CollinearFluxFactory::get().describe(cf_gr.first).data(),
@@ -138,7 +140,7 @@ int main(int argc, char* argv[]) {
               cepgen::utils::format("%s", cepgen::collflux::CollinearFluxFactory::get().describe(cf_gr.first).data()));
         coll.emplace_back(&gr);
       }
-    plt->draw(coll, "comp_collfluxes", oss.str(), dm);
+    plt->draw(coll, "comp_collfluxes", "", dm);
   }
 
   return 0;
