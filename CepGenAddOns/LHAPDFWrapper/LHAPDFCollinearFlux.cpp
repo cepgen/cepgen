@@ -43,7 +43,7 @@ namespace cepgen {
         auto desc = Parameterisation::description();
         desc.setDescription("LHAPDF collinear photon flux");
         //desc.add<std::string>("set", "LUXqed_plus_PDF4LHC15_nnlo_100").setDescription("PDFset to use");
-        desc.add<std::string>("set", "MMHT2015qed_nlo").setDescription("PDFset to use");
+        desc.add<std::string>("set", "LUXlep-NNPDF31_nlo_as_0118_luxqed").setDescription("PDFset to use");
         desc.add<int>("member", 0).setDescription("PDF member");
         return desc;
       }
