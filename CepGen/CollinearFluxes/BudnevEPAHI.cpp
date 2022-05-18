@@ -32,6 +32,10 @@ namespace cepgen {
           : Parameterisation(params), hi_(steerAs<pdgid_t, HeavyIon>("heavyIon")) {
         CG_INFO("BudnevEPAHI") << "Budnev EPA for photon-from-heavy ion elastic limit (HI: " << hi_ << ").\n\t"
                                << "See V.M.Budnev, et al., Phys.Rep. 15C (1975) 181.";
+        if (t_range_.max() < q2max_min_) {
+          t_range_.max() = q2max_min_;
+          CG_INFO("BudnevEPAHI") << "Increased maximal Q^2 value to " << t_range_.max() << ".";
+        }
       }
 
       static ParametersDescription description() {
@@ -64,6 +68,7 @@ namespace cepgen {
       const HeavyIon hi_;
       const double a_{7.16}, b_{-3.96}, c_{0.28};
       const double qz_{0.71};
+      const double q2max_min_{1.e4};
     };
   }  // namespace collflux
 }  // namespace cepgen
