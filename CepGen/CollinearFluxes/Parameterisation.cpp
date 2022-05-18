@@ -49,7 +49,18 @@ namespace cepgen {
 
     /// Human-readable format of a collinear flux type
     std::ostream& operator<<(std::ostream& os, const collflux::Type& flux) {
-      switch (flux) {}
+      switch (flux) {
+        case collflux::Type::GammaIntegrated:
+          return os << "Integrated kt-dependent";
+        case collflux::Type::BudnevEPAProton:
+          return os << "Budnev EPA (proton)";
+        case collflux::Type::BudnevEPALepton:
+          return os << "Budnev EPA (lepton)";
+        case collflux::Type::BudnevEPAHI:
+          return os << "Budnev EPA (HI)";
+        case collflux::Type::LHAPDFCollinearFlux:
+          return os << "LHAPDF";
+      }
       return os << "<invalid>";
     }
   }  // namespace collflux

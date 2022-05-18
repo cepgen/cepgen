@@ -31,9 +31,9 @@ namespace cepgen {
     enum struct Type {
       GammaIntegrated = 1,
       BudnevEPAProton = 2,
-      LHAPDFCollinearFlux = 3,
-      BudnevEPALepton = 4,
-      BudnevEPAHI = 5,
+      BudnevEPALepton = 3,
+      BudnevEPAHI = 4,
+      LHAPDFCollinearFlux = 5,
     };
     /// Human-readable description of this flux type
     std::ostream& operator<<(std::ostream&, const collflux::Type&);
