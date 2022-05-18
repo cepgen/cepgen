@@ -33,6 +33,7 @@ namespace cepgen {
       BudnevEPAProton = 2,
       LHAPDFCollinearFlux = 3,
       BudnevEPALepton = 4,
+      BudnevEPAHI = 5,
     };
     /// Human-readable description of this flux type
     std::ostream& operator<<(std::ostream&, const collflux::Type&);
