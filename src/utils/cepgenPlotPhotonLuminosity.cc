@@ -38,6 +38,8 @@ int main(int argc, char* argv[]) {
   double q2max, sqrts, mxmin, mxmax;
   string output_file, plotter;
   bool logx, logy, draw_grid;
+  vector<double> xi_range_vec;
+  Limits y_range, xi_range;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("collflux,i", "collinear flux modelling(s)", &cfluxes, vector<int>{1})
@@ -50,6 +52,8 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .addOptionalArgument("logx", "logarithmic x-scale", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
+      .addOptionalArgument("xi-range,x", "acceptance range for proton momentum loss", &xi_range, Limits{})
+      .addOptionalArgument("y-range,y", "y plot range", &y_range, Limits{})
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .parse();
 
@@ -74,7 +78,11 @@ int main(int argc, char* argv[]) {
       const double mx = (!logx) ? mxmin + j * (mxmax - mxmin) / (num_points - 1)
                                 : pow(10, log10(mxmin) + j * (log10(mxmax) - log10(mxmin)) / (num_points - 1));
       auto lumi_wgg = integr.eval(
-          [&mx, &s, &coll_flux](double x) { return 2. * mx / x / s * (*coll_flux)(x) * (*coll_flux)(mx * mx / x / s); },
+          [&xi_range, &mx, &s, &coll_flux](double x) {
+            if (xi_range.valid() && !xi_range.contains(x))
+              return 0.;
+            return 2. * mx / x / s * (*coll_flux)(x) * (*coll_flux)(mx * mx / x / s);
+          },
           mx * mx / s,
           1.);
       out << mx << "\t" << lumi_wgg << "\n";
@@ -95,7 +103,10 @@ int main(int argc, char* argv[]) {
       dm |= cepgen::utils::Drawer::Mode::grid;
     cepgen::utils::DrawableColl coll;
     for (auto& cf_gr : m_gr_fluxes) {
+      cf_gr.second.xAxis().setLabel("$\\omega_{\\gamma\\gamma}$ (GeV$^{-1}$)");
       cf_gr.second.yAxis().setLabel("d$L_{\\gamma\\gamma}$/d$\\omega_{\\gamma\\gamma}$ (GeV$^{-1}$)");
+      if (y_range.valid())
+        cf_gr.second.yAxis().setRange(y_range);
       cf_gr.second.setTitle(
           cepgen::utils::format("%s", cepgen::collflux::CollinearFluxFactory::get().describe(cf_gr.first).data()));
       coll.emplace_back(&cf_gr.second);
