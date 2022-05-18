@@ -112,6 +112,7 @@ namespace cepgen {
     //--- concatenate all typed lists
     bool_values_.insert(oth.bool_values_.begin(), oth.bool_values_.end());
     int_values_.insert(oth.int_values_.begin(), oth.int_values_.end());
+    ulong_values_.insert(oth.ulong_values_.begin(), oth.ulong_values_.end());
     dbl_values_.insert(oth.dbl_values_.begin(), oth.dbl_values_.end());
     str_values_.insert(oth.str_values_.begin(), oth.str_values_.end());
     // special case for parameters collection: concatenate values instead of full containers
