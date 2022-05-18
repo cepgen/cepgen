@@ -28,7 +28,7 @@ namespace cepgen {
         : NamedModule<int>(params),
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
-          t_range_(steer<Limits>("q2range")),
+          q2_range_(steer<Limits>("q2range")),
           qscale_(steer<double>("qscale")) {}
 
     std::string Parameterisation::describe() const {
