@@ -10,6 +10,5 @@ endif()
 
 cepgen_build(CepGenLHAPDF SOURCES *.cpp
     EXT_LIBS ${LHAPDF}
-    TESTS test/*.cc
     EXT_HEADERS ${LHAPDF_INCLUDE}
     INSTALL_COMPONENT lhapdf)
