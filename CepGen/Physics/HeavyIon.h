@@ -31,22 +31,33 @@ namespace cepgen {
   /// Heavy ion container (Z+A)
   struct HeavyIon {
     /// General constructor from mass and atomic number
-    HeavyIon(unsigned short a, const Element& z) : Z(z), A(a) {}
+    explicit HeavyIon(unsigned short a, const Element& z) : Z(z), A(a) {}
     /// Build from a custom PDG id
-    HeavyIon(pdgid_t pdg);
+    HeavyIon(pdgid_t pdg = 2212);
+
+    /// Heavy ion mass, in GeV/c2
+    double mass() const { return mass(*this); }
+
     /// Check if the PDG id is compatible with a HI
     static bool isHI(const pdgid_t&);
-    /// Simple proton
-    static inline HeavyIon proton() { return HeavyIon(1, Element::H); }
     /// Mass of a heavy ion, in GeV/c\f$^2\f$
     /// \param hi Heavy ion type
     static double mass(const HeavyIon& hi);
+
+    /// Simple proton
+    static inline HeavyIon proton() { return HeavyIon(1, Element::H); }
+    /// Standard gold
+    static inline HeavyIon Au() { return HeavyIon(197, Element::Au); }
+    /// Standard lead
+    static inline HeavyIon Pb() { return HeavyIon(207, Element::Pb); }
+
     /// Convert the HI into a custom PDG id
     operator pdgid_t() const;
     /// Check the validity of the heavy ion
     operator bool() const;
     /// Human-readable expression of the ion
     friend std::ostream& operator<<(std::ostream& os, const HeavyIon& hi);
+
     /// Atomic number
     Element Z;
     /// Mass number

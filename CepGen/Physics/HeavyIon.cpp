@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <math.h>
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
@@ -47,7 +49,7 @@ namespace cepgen {
   double HeavyIon::mass(const HeavyIon& hi) {
     if (!hi)
       throw CG_FATAL("mass") << "Invalid heavy ion: " << hi << "!";
-    return (short)hi.Z * PDG::get().mass(PDG::proton);
+    return (short)hi.Z * PDG::get().mass(PDG::proton) + (hi.A - (short)hi.Z) * PDG::get().mass(2112);
   }
 
   std::ostream& operator<<(std::ostream& os, const HeavyIon& hi) {
