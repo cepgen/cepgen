@@ -69,7 +69,7 @@ namespace cepgen {
         func_.reset(new utils::Function1D(unintegrated_flux));
         CG_INFO("GammaIntegrated").log([&](auto& log) {
           log << "kt flux-integrated collinear flux evaluator initialised.\n\t"
-              << "Q^2 integration range: " << t_range_ << " GeV^2\n\t"
+              << "Q^2 integration range: " << q2_range_ << " GeV^2\n\t"
               << "Nucleon/HI: " << hi_ << "\n\t";
           if (str_fun_)
             log << "Structure functions modelling: " << *str_fun_ << "\n\t";
@@ -81,7 +81,7 @@ namespace cepgen {
         auto desc = Parameterisation::description();
         desc.setDescription("kt-integrated photon flux");
         desc.addAs<int, Beam::KTFlux>("ktFlux", Beam::KTFlux::P_Photon_Elastic);
-        desc.add<pdgid_t>("heavyIon", HeavyIon::proton());
+        desc.addAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon::proton());
         desc.add<std::string>("formFactors", formfac::gFFStandardDipoleHandler);
         desc.add<ParametersDescription>("structureFunctions",
                                         strfun::StructureFunctionsFactory::get().describeParameters(11));
@@ -91,12 +91,12 @@ namespace cepgen {
       double operator()(double x, double mx) const override {
         params_->x = x;
         params_->mf2 = mx * mx;
-        return 2. * M_PI * integr_.eval(*func_, params_.get(), t_range_.min(), t_range_.max()) / x;
+        return 2. * M_PI * integr_.eval(*func_, params_.get(), q2_range_.min(), q2_range_.max()) / x;
       }
 
     private:
       const Beam::KTFlux flux_;
-      const HeavyIon hi_{HeavyIon::proton()};
+      const HeavyIon hi_;
       std::unique_ptr<formfac::Parameterisation> form_fac_;
       std::unique_ptr<strfun::Parameterisation> str_fun_;
       std::unique_ptr<utils::Function1D> func_;

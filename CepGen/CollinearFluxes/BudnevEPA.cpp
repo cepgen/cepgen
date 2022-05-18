@@ -48,12 +48,12 @@ namespace cepgen {
         if (x >= 1.)
           return 0.;
         double q2min = ml2_ * x * x / (1. - x);
-        if (!t_range_.contains(q2min))
+        if (!q2_range_.contains(q2min))
           return 0.;
         return std::max(0.,
                         0.5 * constants::ALPHA_EM * M_1_PI *
-                            (2. * ml2_ * x * (-1. / q2min + 1. / t_range_.max()) +
-                             (2. - 2. * x + x * x) / x * log(t_range_.max() / q2min)));
+                            (2. * ml2_ * x * (-1. / q2min + 1. / q2_range_.max()) +
+                             (2. - 2. * x + x * x) / x * log(q2_range_.max() / q2min)));
       }
 
     private:
@@ -105,10 +105,10 @@ namespace cepgen {
         if (x >= 1.)
           return 0.;
         double qmi = mp2_ * x * x / (1. - x);
-        if (!t_range_.contains(qmi))
+        if (!q2_range_.contains(qmi))
           return 0.;
         return std::max(0.,
-                        constants::ALPHA_EM * M_1_PI * (phi_f(x, t_range_.max() / qscale_) - phi_f(x, qmi / qscale_)) *
+                        constants::ALPHA_EM * M_1_PI * (phi_f(x, q2_range_.max() / qscale_) - phi_f(x, qmi / qscale_)) *
                             (1 - x) / x);
       }
     };
@@ -119,9 +119,9 @@ namespace cepgen {
           : BudnevEPANucleon(params), hi_(steerAs<pdgid_t, HeavyIon>("heavyIon")) {
         CG_INFO("BudnevEPAHI") << "Budnev EPA for photon-from-heavy ion elastic limit (HI: " << hi_ << ").\n\t"
                                << "See V.M.Budnev, et al., Phys.Rep. 15C (1975) 181.";
-        if (t_range_.max() < q2max_min_) {
-          t_range_.max() = q2max_min_;
-          CG_INFO("BudnevEPAHI") << "Increased maximal Q^2 value to " << t_range_.max() << ".";
+        if (q2_range_.max() < q2max_min_) {
+          q2_range_.max() = q2max_min_;
+          CG_INFO("BudnevEPAHI") << "Increased maximal Q^2 value to " << q2_range_.max() << ".";
         }
       }
 
@@ -136,11 +136,11 @@ namespace cepgen {
         if (x >= 1.)
           return 0.;
         double qmi = hi_.mass() * hi_.mass() * x * x / (1. - x);
-        if (!t_range_.contains(qmi))
+        if (!q2_range_.contains(qmi))
           return 0.;
         return std::max(0.,
                         constants::ALPHA_EM * (unsigned short)hi_.Z * M_1_PI *
-                            (phi_f(x, t_range_.max() / qscale_) - phi_f(x, qmi / qscale_)) * (1 - x) / x);
+                            (phi_f(x, q2_range_.max() / qscale_) - phi_f(x, qmi / qscale_)) * (1 - x) / x);
       }
 
     protected:
