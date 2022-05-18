@@ -57,7 +57,7 @@ namespace cepgen {
     protected:
       const double mp_{0.};   ///< Proton mass, in GeV/c^2
       const double mp2_{0.};  ///< Squared proton mass, in GeV^2/c^4
-      const Limits t_range_;
+      Limits t_range_;
       const double qscale_{0.};
     };
   }  // namespace collflux

@@ -38,7 +38,7 @@ using namespace cepgen;
 int main(int argc, char* argv[]) {
   vector<int> cfluxes, modes;
   int strfun_type, num_points;
-  double mx, xmin, xmax;
+  double mx, xmin, xmax, q2max;
   string ffmode, output_file, plotter;
   bool logx, logy, draw_grid;
 
@@ -50,6 +50,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("sf,s", "structure functions modelling", &strfun_type, 301)
       .addOptionalArgument("xmin,x", "minimal fractional loss", &xmin, 0.)
       .addOptionalArgument("xmax,X", "maximal fractional loss", &xmax, 1.)
+      .addOptionalArgument("q2max,q", "maximal parton virtuality (GeV^2)", &q2max, 1000.)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
       .addOptionalArgument("output,o", "output file name", &output_file, "collflux.scan.output.txt")
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
@@ -75,7 +76,7 @@ int main(int argc, char* argv[]) {
     vector<unique_ptr<cepgen::collflux::Parameterisation> > coll_fluxes;
     for (const auto& mode : modes) {
       cepgen::ParametersList flux_params;
-      flux_params.set("q2range", cepgen::Limits{0., 1000.})
+      flux_params.set("q2range", cepgen::Limits{0., q2max})
           .set("formFactors", ffmode)
           .set("structureFunctions",
                cepgen::strfun::StructureFunctionsFactory::get().describeParameters(strfun_type).parameters());
