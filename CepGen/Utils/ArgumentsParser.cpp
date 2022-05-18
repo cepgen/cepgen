@@ -216,6 +216,12 @@ namespace cepgen {
   ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, bool* var, bool def)
       : name(utils::split(pname, ',')), description(pdesc), value(utils::format("%d", def)), bool_variable_(var) {}
 
+  ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, Limits* var, Limits def)
+      : name(utils::split(pname, ',')),
+        description(pdesc),
+        value(utils::format("%g,%g", def.min(), def.max())),
+        lim_variable_(var) {}
+
   //----- vector of parameters
 
   ArgumentsParser::Parameter::Parameter(std::string pname,
@@ -228,21 +234,13 @@ namespace cepgen {
                                         std::string pdesc,
                                         std::vector<int>* var,
                                         std::vector<int> def)
-      : name(utils::split(pname, ',')), description(pdesc), value(""), vec_int_variable_(var) {
-    std::string sep;
-    for (const auto& val : def)
-      value += sep + utils::format("%d", val), sep = ",";
-  }
+      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ",")), vec_int_variable_(var) {}
 
   ArgumentsParser::Parameter::Parameter(std::string pname,
                                         std::string pdesc,
                                         std::vector<double>* var,
                                         std::vector<double> def)
-      : name(utils::split(pname, ',')), description(pdesc), value(""), vec_float_variable_(var) {
-    std::string sep;
-    for (const auto& val : def)
-      value += sep + utils::format("%e", val), sep = ",";
-  }
+      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ",")), vec_float_variable_(var) {}
 
   bool ArgumentsParser::Parameter::matches(const std::string& key) const {
     if (key == "--" + name.at(0))
@@ -303,12 +301,17 @@ namespace cepgen {
       });
       return *this;
     }
-    if (vec_float_variable_) {
-      vec_float_variable_->clear();
+    if (vec_float_variable_ || lim_variable_) {
+      std::vector<double> vec_flt;
       const auto buf = utils::split(value, ',');
-      std::transform(buf.begin(), buf.end(), std::back_inserter(*vec_float_variable_), [](const std::string& str) {
-        return std::stod(str);
-      });
+      std::transform(
+          buf.begin(), buf.end(), std::back_inserter(vec_flt), [](const std::string& str) { return std::stod(str); });
+      if (vec_float_variable_)
+        *vec_float_variable_ = vec_flt;
+      else if (vec_flt.size() == 2) {
+        lim_variable_->min() = vec_flt.at(0);
+        lim_variable_->max() = vec_flt.at(1);
+      }
       return *this;
     }
     throw CG_FATAL("Parameter") << "Failed to parse parameter \"" << name.at(0) << "\"!";
