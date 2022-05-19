@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
       const auto& mx = mxvals.at(j);
       auto lumi_wgg = integr.eval(
           [&xi_range, &mx, &s, &coll_flux](double x) {
-            if (xi_range.valid() && !xi_range.contains(x))
+            if (xi_range.valid() && (!xi_range.contains(x) || !xi_range.contains(mx * mx / x / s)))
               return 0.;
             return 2. * mx / x / s * (*coll_flux)(x) * (*coll_flux)(mx * mx / x / s);
           },
