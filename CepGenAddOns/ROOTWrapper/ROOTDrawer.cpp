@@ -135,7 +135,8 @@ namespace cepgen {
       for (const auto* obj : objs) {
         if (obj->isHist1D()) {
           auto* hist = new TH1D(convert(*dynamic_cast<const Hist1D*>(obj)));
-          hist->SetLineColor(ROOTCanvas::colours.at(i));
+          auto colour = (i >= ROOTCanvas::colours.size()) ? i + 1 : ROOTCanvas::colours.at(i);
+          hist->SetLineColor(colour);
           hist->SetLineStyle(i + 1);
           hs.Add(hist);
           canv.AddLegendEntry(hist, hist->GetTitle(), "l");
