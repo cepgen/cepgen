@@ -50,8 +50,24 @@ namespace cepgen {
       double eval(const Function1D& func, void* obj, double xmin = INVALID, double xmax = INVALID) const;
 
     private:
+      enum struct Mode { Fixed = 0, QNG = 1, QAG = 2, QAGS = 3, QAWC = 4 };
+      enum struct FixedType {
+        Legendre = 0,
+        Chebyshev = 1,
+        Gegenbauer = 2,
+        Jacobi = 3,
+        Laguerre = 4,
+        Hermite = 5,
+        Exponential = 6,
+        Rational = 7,
+        Chebyshev2 = 8
+      };
       double eval(const gsl_function*, double xmin = INVALID, double xmax = INVALID) const;
       const Limits range_;
+      const Mode mode_;
+      const FixedType fixed_type_;
+      const size_t limit_;
+      const double epsabs_, epsrel_;
       const ParametersList func_params_;
       static constexpr double INVALID = -999.999;
     };
