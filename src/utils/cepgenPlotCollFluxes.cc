@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
   map<int, vector<cepgen::utils::Graph1D> > m_v_gr_fluxes;  // {collinear flux -> {mode, mode, ...}}
   vector<vector<double> > values(num_points);
   vector<double> xvals;
-  for (int i = 0; i < num_points; ++i)
+  for (auto i = 0; i < num_points; ++i)
     xvals.emplace_back((!logx) ? xmin + i * (xmax - xmin) / (num_points - 1)
                                : pow(10, log10(xmin) + i * (log10(xmax) - log10(xmin)) / (num_points - 1)));
   for (const auto& cflux : cfluxes) {
@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
       m_v_gr_fluxes[cflux].back().setTitle(oss.str());
     }
 
-    for (size_t i = 0; i < num_points; ++i) {
+    for (auto i = 0; i < num_points; ++i) {
       const auto& x = xvals.at(i);
       for (size_t j = 0; j < coll_fluxes.size(); ++j) {
         auto fx = (*coll_fluxes.at(j))(x, mx);
@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
       }
     }
   }
-  for (size_t i = 0; i < num_points; ++i)
+  for (auto i = 0; i < num_points; ++i)
     out << "\n" << xvals.at(i) << "\t" << cepgen::utils::merge(values.at(i), "\t");
   out.close();
 
