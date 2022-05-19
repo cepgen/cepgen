@@ -34,16 +34,17 @@ using namespace std;
 int main(int argc, char* argv[]) {
   vector<int> cfluxes;
   int num_points;
-  double q2max, sqrts, mxmin, mxmax;
+  double q2max, mxmin, mxmax;
   string output_file, plotter;
   bool logx, logy, draw_grid;
-  vector<double> xi_range_vec;
+  vector<double> rescl, sqrts;
   cepgen::Limits y_range, xi_range;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("collflux,i", "collinear flux modelling(s)", &cfluxes, vector<int>{1})
+      .addOptionalArgument("rescaling,r", "luminosity rescaling", &rescl, vector<double>{1.})
       .addOptionalArgument("q2max,q", "maximum Q^2", &q2max, 1000.)
-      .addOptionalArgument("sqrts,s", "two-proton centre of mass energy (GeV)", &sqrts, 13.e3)
+      .addOptionalArgument("sqrts,s", "two-proton centre of mass energy (GeV)", &sqrts, vector<double>{13.e3})
       .addOptionalArgument("mxmin,m", "minimal two-photon mass", &mxmin, 0.)
       .addOptionalArgument("mxmax,M", "maximal two-photon mass", &mxmax, 100.)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
@@ -61,6 +62,10 @@ int main(int argc, char* argv[]) {
   ofstream out(output_file);
   if (logx && mxmin == 0.)
     mxmin = 1.e-3;
+  if (sqrts.size() != cfluxes.size())
+    sqrts = vector<double>(cfluxes.size(), sqrts.at(0));
+  if (rescl.size() != cfluxes.size())
+    rescl = vector<double>(cfluxes.size(), rescl.at(0));
 
   out << "# coll. fluxes: " << cepgen::utils::merge(cfluxes, ",") << "\n"
       << "# two-photon mass range: " << cepgen::Limits(mxmin, mxmax);
@@ -71,8 +76,9 @@ int main(int argc, char* argv[]) {
                                 : pow(10, log10(mxmin) + j * (log10(mxmax) - log10(mxmin)) / (num_points - 1)));
   vector<vector<double> > values(num_points);
   auto integr = cepgen::utils::GSLIntegrator();
-  const auto s = sqrts * sqrts;
-  for (const auto& cflux : cfluxes) {
+  for (size_t i = 0; i < cfluxes.size(); ++i) {
+    const auto& cflux = cfluxes.at(i);
+    const auto s = sqrts.at(i) * sqrts.at(i);
     auto coll_flux = cepgen::collflux::CollinearFluxFactory::get().build(cflux);
     ostringstream oss;
     oss << cflux;
@@ -88,6 +94,7 @@ int main(int argc, char* argv[]) {
           },
           mx * mx / s,
           1.);
+      lumi_wgg *= rescl.at(i);
       values.at(j).emplace_back(lumi_wgg);
       m_gr_fluxes[cflux].addPoint(mx, lumi_wgg);
     }
