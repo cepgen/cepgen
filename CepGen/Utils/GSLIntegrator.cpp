@@ -31,6 +31,9 @@ namespace cepgen {
           range_(steer<Limits>("range")),
           mode_(steerAs<int, Mode>("mode")),
           fixed_type_(steerAs<int, FixedType>("fixedType")),
+          nodes_(steer<int>("nodes")),
+          alpha_(steer<double>("alpha")),
+          beta_(steer<double>("beta")),
           limit_(steerAs<int, size_t>("limit")),
           epsabs_(steer<double>("epsabs")),
           epsrel_(steer<double>("epsrel")),
@@ -43,6 +46,9 @@ namespace cepgen {
           .setDescription("parameters for the function to be integrated");
       desc.addAs<int, Mode>("mode", Mode::Fixed).setDescription("integrator algorithm to use");
       desc.addAs<int, FixedType>("fixedType", FixedType::Jacobi).setDescription("type of quadrature");
+      desc.add<int>("nodes", 100).setDescription("number of quadrature nodes for the fixed type integration");
+      desc.add<double>("alpha", 0.).setDescription("alpha parameter for the fixed type integration");
+      desc.add<double>("beta", 0.).setDescription("alpha parameter for the fixed type integration");
       desc.add<int>("limit", 1000).setDescription("maximum number of subintervals to build");
       desc.add<double>("epsabs", 0.).setDescription("desired absolute error limit");
       desc.add<double>("epsrel", 0.1).setDescription("desired relative error limit");
@@ -98,7 +104,7 @@ namespace cepgen {
             throw CG_FATAL("GSLIntegrator") << "Invalid fixed quadrature type: " << (int)fixed_type_ << ".";
         }
         std::unique_ptr<gsl_integration_fixed_workspace, void (*)(gsl_integration_fixed_workspace*)> workspace(
-            gsl_integration_fixed_alloc(type, 50, xmin, xmax, 0., 0.), gsl_integration_fixed_free);
+            gsl_integration_fixed_alloc(type, nodes_, xmin, xmax, alpha_, beta_), gsl_integration_fixed_free);
         res = gsl_integration_fixed(wrp, &result, workspace.get());
       } else if (mode_ == Mode::QNG) {
         size_t neval;
