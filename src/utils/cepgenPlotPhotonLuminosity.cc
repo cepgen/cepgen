@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
     mxvals.emplace_back((!logx) ? mxmin + j * (mxmax - mxmin) / (num_points - 1)
                                 : pow(10, log10(mxmin) + j * (log10(mxmax) - log10(mxmin)) / (num_points - 1)));
   vector<vector<double> > values(num_points);
-  auto integr = cepgen::utils::GSLIntegrator(cepgen::ParametersList().set<int>("mode", 1));
+  auto integr = cepgen::utils::GSLIntegrator(cepgen::ParametersList().set<int>("mode", 0).set<int>("nodes", 2000));
   for (size_t i = 0; i < cfluxes.size(); ++i) {
     const auto& cflux = cfluxes.at(i);
     const auto s = sqrts.at(i) * sqrts.at(i);
@@ -137,16 +137,21 @@ int main(int argc, char* argv[]) {
     if (draw_grid)
       dm |= cepgen::utils::Drawer::Mode::grid;
     cepgen::utils::DrawableColl coll;
+    size_t i = 0;
     for (auto& cf_gr : m_gr_fluxes) {
       for (auto& gr_xi : cf_gr.second) {
-        gr_xi.xAxis().setLabel("$\\omega_{\\gamma\\gamma}$ (GeV$^{-1}$)");
-        gr_xi.yAxis().setLabel("d$L_{\\gamma\\gamma}$/d$\\omega_{\\gamma\\gamma}$ (GeV$^{-1}$)");
+        string units;
+        if (rescl.at(i) != 1.)
+          units = "cm$^{-2}$ s$^{-1}$ ";
+        gr_xi.xAxis().setLabel("$\\omega_{\\gamma\\gamma}$ (GeV)");
+        gr_xi.yAxis().setLabel("d$L_{\\gamma\\gamma}$/d$\\omega_{\\gamma\\gamma}$ (" + units + "GeV$^{-1}$)");
         if (y_range.valid())
           gr_xi.yAxis().setRange(y_range);
         //gr_xi.setTitle(
         //    cepgen::utils::format("%s", cepgen::collflux::CollinearFluxFactory::get().describe(cf_gr.first).data()));
         coll.emplace_back(&gr_xi);
       }
+      ++i;
     }
     plt->draw(coll, "comp_photonlumi", "", dm);
   }
