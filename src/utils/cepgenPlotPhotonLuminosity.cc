@@ -37,8 +37,9 @@ int main(int argc, char* argv[]) {
   double q2max, mxmin, mxmax;
   string output_file, plotter;
   bool logx, logy, draw_grid;
-  vector<double> rescl, sqrts;
-  cepgen::Limits y_range, xi_range;
+  vector<double> rescl, sqrts, accept;
+  cepgen::Limits y_range;
+  vector<cepgen::Limits> xi_ranges(1);
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("collflux,i", "collinear flux modelling(s)", &cfluxes, vector<int>{1})
@@ -52,7 +53,8 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .addOptionalArgument("logx", "logarithmic x-scale", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
-      .addOptionalArgument("xi-range,x", "acceptance range for proton momentum loss", &xi_range)
+      .addOptionalArgument("xi-range,x", "acceptance range for proton momentum loss", &xi_ranges[0])
+      .addOptionalArgument("accept", "pairs of min/max acceptance ranges for proton momentum loss", &accept)
       .addOptionalArgument("yrange,y", "y plot range", &y_range)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .parse();
@@ -66,37 +68,59 @@ int main(int argc, char* argv[]) {
     sqrts = vector<double>(cfluxes.size(), sqrts.at(0));
   if (rescl.size() != cfluxes.size())
     rescl = vector<double>(cfluxes.size(), rescl.at(0));
+  if (!accept.empty()) {
+    xi_ranges.clear();
+    if (accept.size() % 2 != 0)
+      throw CG_FATAL("main")
+          << "Invalid acceptance(s) list specified! Supported format is an array of (min1, max2, min2, max2, ...)";
+    for (size_t i = 0; i < accept.size() / 2; ++i) {
+      cepgen::Limits rng{accept.at(2 * i), accept.at(2 * i + 1)};
+      if (rng == cepgen::Limits{0., 1.})
+        rng = cepgen::Limits();
+      xi_ranges.emplace_back(rng);
+    }
+    if (!xi_ranges.empty())
+      CG_LOG << "x (xi) acceptance cuts defined: " << xi_ranges << ".";
+  }
 
   out << "# coll. fluxes: " << cepgen::utils::merge(cfluxes, ",") << "\n"
       << "# two-photon mass range: " << cepgen::Limits(mxmin, mxmax);
-  map<int, cepgen::utils::Graph1D> m_gr_fluxes;  // {collinear flux -> graph}
+  map<int, vector<cepgen::utils::Graph1D> > m_gr_fluxes;  // {collinear flux -> graph}
   vector<double> mxvals;
   for (int j = 0; j < num_points; ++j)
     mxvals.emplace_back((!logx) ? mxmin + j * (mxmax - mxmin) / (num_points - 1)
                                 : pow(10, log10(mxmin) + j * (log10(mxmax) - log10(mxmin)) / (num_points - 1)));
   vector<vector<double> > values(num_points);
-  auto integr = cepgen::utils::GSLIntegrator();
+  auto integr = cepgen::utils::GSLIntegrator(cepgen::ParametersList().set<int>("mode", 1));
   for (size_t i = 0; i < cfluxes.size(); ++i) {
     const auto& cflux = cfluxes.at(i);
     const auto s = sqrts.at(i) * sqrts.at(i);
     auto coll_flux = cepgen::collflux::CollinearFluxFactory::get().build(cflux);
-    ostringstream oss;
-    oss << cflux;
-    m_gr_fluxes[cflux].setTitle(oss.str());
+    for (const auto& xi_range : xi_ranges) {
+      ostringstream oss;
+      oss << (cepgen::collflux::Type)cflux;
+      if (xi_range.valid())
+        oss << " (" << xi_range.min() << " < \\xi < " << xi_range.max() << ")";
+      m_gr_fluxes[cflux].emplace_back();
+      m_gr_fluxes[cflux].back().setTitle(oss.str());
+    }
 
     for (int j = 0; j < num_points; ++j) {
       const auto& mx = mxvals.at(j);
-      auto lumi_wgg = integr.eval(
-          [&xi_range, &mx, &s, &coll_flux](double x) {
-            if (xi_range.valid() && (!xi_range.contains(x) || !xi_range.contains(mx * mx / x / s)))
-              return 0.;
-            return 2. * mx / x / s * (*coll_flux)(x) * (*coll_flux)(mx * mx / x / s);
-          },
-          mx * mx / s,
-          1.);
-      lumi_wgg *= rescl.at(i);
-      values.at(j).emplace_back(lumi_wgg);
-      m_gr_fluxes[cflux].addPoint(mx, lumi_wgg);
+      for (size_t k = 0; k < xi_ranges.size(); ++k) {
+        const auto& xi_range = xi_ranges.at(k);
+        auto lumi_wgg = integr.eval(
+            [&xi_range, &mx, &s, &coll_flux](double x) {
+              if (xi_range.valid() && (!xi_range.contains(x) || !xi_range.contains(mx * mx / x / s)))
+                return 0.;
+              return 2. * mx / x / s * (*coll_flux)(x) * (*coll_flux)(mx * mx / x / s);
+            },
+            mx * mx / s,
+            1.);
+        lumi_wgg *= rescl.at(i);
+        values.at(j).emplace_back(lumi_wgg);
+        m_gr_fluxes[cflux][k].addPoint(mx, lumi_wgg);
+      }
     }
   }
   for (int i = 0; i < num_points; ++i)
@@ -104,7 +128,6 @@ int main(int argc, char* argv[]) {
   out.close();
 
   if (!plotter.empty()) {
-    ostringstream oss;
     auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
     cepgen::utils::Drawer::Mode dm;
     if (logx)
@@ -115,16 +138,17 @@ int main(int argc, char* argv[]) {
       dm |= cepgen::utils::Drawer::Mode::grid;
     cepgen::utils::DrawableColl coll;
     for (auto& cf_gr : m_gr_fluxes) {
-      cf_gr.second.xAxis().setLabel("$\\omega_{\\gamma\\gamma}$ (GeV$^{-1}$)");
-      cf_gr.second.yAxis().setLabel("d$L_{\\gamma\\gamma}$/d$\\omega_{\\gamma\\gamma}$ (GeV$^{-1}$)");
-      if (y_range.valid())
-        cf_gr.second.yAxis().setRange(y_range);
-      cf_gr.second.setTitle(
-          cepgen::utils::format("%s", cepgen::collflux::CollinearFluxFactory::get().describe(cf_gr.first).data()));
-      coll.emplace_back(&cf_gr.second);
+      for (auto& gr_xi : cf_gr.second) {
+        gr_xi.xAxis().setLabel("$\\omega_{\\gamma\\gamma}$ (GeV$^{-1}$)");
+        gr_xi.yAxis().setLabel("d$L_{\\gamma\\gamma}$/d$\\omega_{\\gamma\\gamma}$ (GeV$^{-1}$)");
+        if (y_range.valid())
+          gr_xi.yAxis().setRange(y_range);
+        //gr_xi.setTitle(
+        //    cepgen::utils::format("%s", cepgen::collflux::CollinearFluxFactory::get().describe(cf_gr.first).data()));
+        coll.emplace_back(&gr_xi);
+      }
     }
-    plt->draw(coll, "comp_photonlumi", oss.str(), dm);
+    plt->draw(coll, "comp_photonlumi", "", dm);
   }
-
   return 0;
 }
