@@ -133,16 +133,16 @@ namespace cepgen {
       size_t i = 0;
       Drawable* first = nullptr;
       for (const auto* obj : objs) {
+        auto colour = (i >= ROOTCanvas::colours.size()) ? i + 1 : ROOTCanvas::colours.at(i);
         if (obj->isHist1D()) {
           auto* hist = new TH1D(convert(*dynamic_cast<const Hist1D*>(obj)));
-          auto colour = (i >= ROOTCanvas::colours.size()) ? i + 1 : ROOTCanvas::colours.at(i);
           hist->SetLineColor(colour);
           hist->SetLineStyle(i + 1);
           hs.Add(hist);
           canv.AddLegendEntry(hist, hist->GetTitle(), "l");
         } else if (obj->isGraph1D()) {
           auto* gr = new TGraphErrors(convert(*dynamic_cast<const Graph1D*>(obj)));
-          gr->SetLineColor(ROOTCanvas::colours.at(i));
+          gr->SetLineColor(colour);
           gr->SetLineStyle(i + 1);
           mg.Add(gr);
           canv.AddLegendEntry(gr, gr->GetTitle(), "l");
