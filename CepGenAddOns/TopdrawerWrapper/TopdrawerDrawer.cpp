@@ -38,18 +38,18 @@
 
 namespace cepgen {
   namespace utils {
-    class DrawerTopdrawer : public Drawer {
+    class TopdrawerDrawer : public Drawer {
     public:
-      explicit DrawerTopdrawer(const ParametersList&);
+      explicit TopdrawerDrawer(const ParametersList&);
 
       static ParametersDescription description();
 
-      const DrawerTopdrawer& draw(const Graph1D&, const Mode&) const override;
-      const DrawerTopdrawer& draw(const Graph2D&, const Mode&) const override;
-      const DrawerTopdrawer& draw(const Hist1D&, const Mode&) const override;
-      const DrawerTopdrawer& draw(const Hist2D&, const Mode&) const override;
+      const TopdrawerDrawer& draw(const Graph1D&, const Mode&) const override;
+      const TopdrawerDrawer& draw(const Graph2D&, const Mode&) const override;
+      const TopdrawerDrawer& draw(const Hist1D&, const Mode&) const override;
+      const TopdrawerDrawer& draw(const Hist2D&, const Mode&) const override;
 
-      const DrawerTopdrawer& draw(const DrawableColl&,
+      const TopdrawerDrawer& draw(const DrawableColl&,
                                   const std::string& name = "",
                                   const std::string& title = "",
                                   const Mode& mode = Mode::none) const override;
@@ -70,7 +70,7 @@ namespace cepgen {
       const bool filling_;
     };
 
-    const std::map<std::string, std::pair<char, char> > DrawerTopdrawer::kSpecChars = {
+    const std::map<std::string, std::pair<char, char> > TopdrawerDrawer::kSpecChars = {
         {"Alpha", {'A', 'F'}},      {"Beta", {'B', 'F'}},
         {"Chi", {'C', 'F'}},        {"Delta", {'D', 'F'}},
         {"Epsilon", {'E', 'F'}},    {"Phi", {'F', 'F'}},
@@ -109,10 +109,10 @@ namespace cepgen {
         {"langle", {'B', 'S'}},     {"rangle", {'E', 'S'}},
         {"hbar", {'H', 'K'}},       {"lambdabar", {'L', 'K'}}};
 
-    DrawerTopdrawer::DrawerTopdrawer(const ParametersList& params)
+    TopdrawerDrawer::TopdrawerDrawer(const ParametersList& params)
         : Drawer(params), font_(toupper(steer<std::string>("font"))), filling_(steer<bool>("filling")) {}
 
-    const DrawerTopdrawer& DrawerTopdrawer::draw(const Graph1D& graph, const Mode& mode) const {
+    const TopdrawerDrawer& TopdrawerDrawer::draw(const Graph1D& graph, const Mode& mode) const {
       Piper::Commands cmds;
       cmds += preDraw(graph, mode);
       cmds += plot(graph);
@@ -122,7 +122,7 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerTopdrawer& DrawerTopdrawer::draw(const Graph2D& graph, const Mode& mode) const {
+    const TopdrawerDrawer& TopdrawerDrawer::draw(const Graph2D& graph, const Mode& mode) const {
       Piper::Commands cmds;
       cmds += preDraw(graph, mode);
       cmds += plot(graph, mode);
@@ -132,7 +132,7 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerTopdrawer& DrawerTopdrawer::draw(const Hist1D& hist, const Mode& mode) const {
+    const TopdrawerDrawer& TopdrawerDrawer::draw(const Hist1D& hist, const Mode& mode) const {
       Piper::Commands cmds;
       cmds += preDraw(hist, mode);
       cmds += plot(hist);
@@ -142,7 +142,7 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerTopdrawer& DrawerTopdrawer::draw(const Hist2D& hist, const Mode& mode) const {
+    const TopdrawerDrawer& TopdrawerDrawer::draw(const Hist2D& hist, const Mode& mode) const {
       Piper::Commands cmds;
       cmds += preDraw(hist, mode);
       cmds += plot(hist, mode);
@@ -152,7 +152,7 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerTopdrawer& DrawerTopdrawer::draw(const DrawableColl& objs,
+    const TopdrawerDrawer& TopdrawerDrawer::draw(const DrawableColl& objs,
                                                  const std::string& name,
                                                  const std::string& title,
                                                  const Mode& mode) const {
@@ -163,19 +163,22 @@ namespace cepgen {
       const Drawable* first{nullptr};
       Piper::Commands cmds_plots;
       for (const auto* obj : objs) {
+        auto line_style = plot_id % line_styles.size();
         if (obj->isGraph1D()) {
           const auto* gr = dynamic_cast<const Graph1D*>(obj);
-          cmds_plots.emplace_back("SET TEXTURE " + line_styles.at(plot_id++));
+          cmds_plots.emplace_back("SET TEXTURE " + line_style);
           cmds_plots += plot(*gr);
           if (!first)
             first = gr;
         } else if (obj->isHist1D()) {
           const auto* hist = dynamic_cast<const Hist1D*>(obj);
-          cmds_plots.emplace_back("SET TEXTURE " + line_styles.at(plot_id++));
+          cmds_plots.emplace_back("SET TEXTURE " + line_style);
           cmds_plots += plot(*hist);
           if (!first)
             first = hist;
-        }
+        } else
+          throw CG_FATAL("TopdrawerDrawer:draw") << "Invalid object type to be plotted in multigraph!";
+        ++plot_id;
       }
       cmds += preDraw(*first, mode);
       cmds += cmds_plots;
@@ -185,7 +188,7 @@ namespace cepgen {
       return *this;
     }
 
-    Piper::Commands DrawerTopdrawer::plot(const Graph1D& graph) {
+    Piper::Commands TopdrawerDrawer::plot(const Graph1D& graph) {
       Piper::Commands cmds;
       for (const auto& pt : graph.points())
         cmds += format("%g,%g,%g,%g", pt.first.value, pt.second.value, pt.first.value_unc, pt.second.value_unc);
@@ -193,7 +196,7 @@ namespace cepgen {
       return cmds;
     }
 
-    Piper::Commands DrawerTopdrawer::plot(const Graph2D& graph, const Mode& mode) {
+    Piper::Commands TopdrawerDrawer::plot(const Graph2D& graph, const Mode& mode) {
       Piper::Commands cmds;
       auto to_fortran_float = [](double val) -> std::string {
         return utils::replace_all(utils::format("%g", val), {{"e", "D"}});
@@ -221,7 +224,7 @@ namespace cepgen {
       return cmds;
     }
 
-    Piper::Commands DrawerTopdrawer::plot(const Hist1D& hist) {
+    Piper::Commands TopdrawerDrawer::plot(const Hist1D& hist) {
       Piper::Commands cmds;
       for (size_t i = 0; i < hist.nbins(); ++i) {
         const auto& bin = hist.binRange(i);
@@ -231,7 +234,7 @@ namespace cepgen {
       return cmds;
     }
 
-    Piper::Commands DrawerTopdrawer::plot(const Hist2D& hist, const Mode& mode) {
+    Piper::Commands TopdrawerDrawer::plot(const Hist2D& hist, const Mode& mode) {
       Piper::Commands cmds;
       cmds += "READ MESH BINS";
       std::ostringstream osl;
@@ -259,7 +262,7 @@ namespace cepgen {
       return cmds;
     }
 
-    Piper::Commands DrawerTopdrawer::preDraw(const Drawable& dr, const Mode& mode) const {
+    Piper::Commands TopdrawerDrawer::preDraw(const Drawable& dr, const Mode& mode) const {
       Piper::Commands cmds;
       cmds += "SET DEVICE POSTSCR ORIENTATION 3";
       cmds += "SET FONT " + font_;
@@ -285,7 +288,7 @@ namespace cepgen {
       return cmds;
     }
 
-    Piper::Commands DrawerTopdrawer::postDraw(const Drawable& dr, const Mode&) {
+    Piper::Commands TopdrawerDrawer::postDraw(const Drawable& dr, const Mode&) {
       Piper::Commands cmds;
       cmds += stringify("TITLE BOTTOM", dr.xAxis().label());
       cmds += stringify("TITLE LEFT", dr.yAxis().label());
@@ -293,12 +296,12 @@ namespace cepgen {
       return cmds;
     }
 
-    void DrawerTopdrawer::execute(const Piper::Commands& cmds, const std::string& name) {
+    void TopdrawerDrawer::execute(const Piper::Commands& cmds, const std::string& name) {
       Piper("TOPDRAWER_OUTPUT=" + name + ".ps " + TD).execute(cmds).execute({"EXIT"});
-      CG_DEBUG("DrawerTopdrawer:execute") << "Topdrawer just plotted:\n" << cmds;
+      CG_DEBUG("TopdrawerDrawer:execute") << "Topdrawer just plotted:\n" << cmds;
     }
 
-    Piper::Commands DrawerTopdrawer::stringify(const std::string& label, const std::string& str) {
+    Piper::Commands TopdrawerDrawer::stringify(const std::string& label, const std::string& str) {
       bool in_math{false}, in_bs{false}, in_sub{false}, in_sup{false};
       std::map<int, std::string> m_spec_char, m_sub_char;
       std::string lab;
@@ -363,7 +366,7 @@ namespace cepgen {
       std::string mod(lab.size(), ' ');
       for (const auto& ch : m_spec_char) {
         if (kSpecChars.count(ch.second) == 0) {
-          CG_WARNING("DrawerTopdrawer:stringify")
+          CG_WARNING("TopdrawerDrawer:stringify")
               << "Special character '" << ch.second << "' is not defined. Please either define it or use another one.";
           continue;
         }
@@ -381,7 +384,7 @@ namespace cepgen {
       return out;
     }
 
-    ParametersDescription DrawerTopdrawer::description() {
+    ParametersDescription TopdrawerDrawer::description() {
       auto desc = Drawer::description();
       desc.setDescription("Topdrawer plotter");
       desc.add<std::string>("font", "duplex").setDescription("Topdrawer font to use");
@@ -391,4 +394,4 @@ namespace cepgen {
   }  // namespace utils
 }  // namespace cepgen
 
-REGISTER_DRAWER("topdrawer", DrawerTopdrawer)
+REGISTER_DRAWER("topdrawer", TopdrawerDrawer)

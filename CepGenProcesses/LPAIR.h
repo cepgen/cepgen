@@ -94,7 +94,7 @@ namespace cepgen {
          */
       bool pickin();
 
-      static constexpr double SCONSTB = 2. * pow(M_PI, 3) / pow(constants::ALPHA_EM, 4);
+      static const double sconstb_;
       /// Internal switch for the optimised code version (LPAIR legacy)
       const int n_opt_;
       pdgid_t pair_;

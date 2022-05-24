@@ -6,10 +6,8 @@ if(NOT TOPDRAWER_BIN)
   return()
 endif()
 
-file(GLOB sources DrawerTopdrawer.cpp TopdrawerHistsHandler.cpp)
-
 #----- build the object
 
-cepgen_build(CepGenTopdrawer SOURCES ${sources}
+cepgen_build(CepGenTopdrawer SOURCES *.cpp
     DEFINITIONS "-DTD_BIN=${TOPDRAWER_BIN}"
     INSTALL_COMPONENT topdrawer)

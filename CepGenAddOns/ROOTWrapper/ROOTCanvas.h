@@ -391,7 +391,8 @@ namespace cepgen {
     std::unique_ptr<ROOTPaveText> top_label_;
     std::vector<std::unique_ptr<TObject> > grb_obj_;
   };
-  const std::vector<int> ROOTCanvas::colours = {kBlack, kRed + 1, kBlue - 2, kGreen + 1, kOrange + 1};
+  const std::vector<int> ROOTCanvas::colours = {
+      kBlack, kRed + 1, kBlue - 2, kGreen + 1, kOrange + 1, kAzure + 1, kMagenta + 1, kCyan + 3, kPink + 5};
 }  // namespace cepgen
 
 #endif

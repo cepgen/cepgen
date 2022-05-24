@@ -19,9 +19,8 @@
 #ifndef CepGen_Utils_GSLDerivator_h
 #define CepGen_Utils_GSLDerivator_h
 
-#include <functional>
-
 #include "CepGen/Core/SteeredObject.h"
+#include "CepGen/Utils/FunctionsWrappers.h"
 
 namespace cepgen {
   namespace utils {
@@ -31,10 +30,15 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      /// A one-dimensional function to evaluate
-      typedef std::function<double(double)> Function1D;
-
       /// Evaluate the derivative of a function at a given value
+      /// \param[in] func function to derive
+      /// \param[in] x coordinate
+      /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
+      double eval(const std::function<double(double)>& func, double x, double h = -1.) const {
+        return eval(Function1D(func), x, h);
+      }
+      /// Evaluate the derivative of a function at a given value
+      /// \param[in] func function to derive
       /// \param[in] x coordinate
       /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
       double eval(const Function1D& func, double x, double h = -1.) const;
