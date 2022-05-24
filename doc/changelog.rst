@@ -5,6 +5,23 @@ Latest revisions
 ^^^^^^^^^^^^^^^^
 
 .. changelog::
+    :version: 1.0.1
+    :released: Tue May 24 2022
+
+    .. change::
+        :tags: core
+
+        This version fixes a few coding flaws and allows build using Clang versions 12+.
+        Build on LXPLUS/environment capable of accessing LCG releases is made safer through the use of standard LCG v101.
+
+    .. change::
+        :tags: utils
+
+        A wrapper to a good fraction of the GSL one-dimensional integration algorithms is introduced. This paves the ground for the future (integrated) collinear fluxes computation and several underlying utilities.
+        The ROOT drawer is also made safer through the use of standard colours if the number of subplots exceeds the pool of CepGen-themed colours.
+        Additionally, the command lines arguments parser now allows limits to be specified through a min,max couple.
+
+.. changelog::
     :version: 1.0.0
     :released: Thu May 12 2022
 
