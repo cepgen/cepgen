@@ -33,7 +33,7 @@ namespace cepgen {
   namespace formfac {
     class Parameterisation;
   }
-  class HeavyIon;
+  struct HeavyIon;
 
   /// Incoming beams characteristics
   class Beam : public SteeredObject<Beam> {

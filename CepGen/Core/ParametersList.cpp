@@ -300,7 +300,7 @@ namespace cepgen {
       return (wrap ? type + "(" : "")  //+ (type == "bool" ? utils::yesno(std::stoi(os.str())) : os.str()) +
              + os.str() + (wrap ? ")" : "");
     };
-    auto wrap_coll = [&wrap, &wrap_val](const auto& coll, const std::string& type) -> std::string {
+    auto wrap_coll = [&wrap_val](const auto& coll, const std::string& type) -> std::string {
       return wrap_val(utils::merge(coll, ", "), type);
     };
     std::ostringstream os;
@@ -387,7 +387,7 @@ namespace cepgen {
   }
 
   template <typename T>
-  T ParametersList::get(const std::string& key, const T& def) const {
+  T ParametersList::get(const std::string& key, const T&) const {
     throw CG_FATAL("ParametersList") << "Invalid type retrieved for key=" << key << "!";
   }
 
@@ -397,7 +397,7 @@ namespace cepgen {
   }
 
   template <typename T>
-  ParametersList& ParametersList::set(const std::string& key, const T& value) {
+  ParametersList& ParametersList::set(const std::string& key, const T&) {
     throw CG_FATAL("ParametersList") << "Invalid type to be set for key=" << key << "!";
   }
 

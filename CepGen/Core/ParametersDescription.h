@@ -30,8 +30,6 @@ namespace cepgen {
     explicit ParametersDescription(const std::string& mod_key = "");
     /// Build the (empty) description of a parameters collection object from its definition
     explicit ParametersDescription(const ParametersList& params);
-    /// Copy constructor
-    ParametersDescription(const ParametersDescription&) = default;
 
     /// Does a description of this parameter (or parameters collection) exist?
     bool empty() const;
