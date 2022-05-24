@@ -164,6 +164,9 @@ namespace cepgen {
                                     << "on-shell mass set to " << mass_ << " GeV/c^2.";
     }
     switch (pdg_id_) {
+      case 0:
+        charge_sign_ = 0.;
+        break;
       case PDG::electron:
       case PDG::muon:
       case PDG::tau:
