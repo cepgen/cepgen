@@ -25,6 +25,8 @@ namespace cepgen {
     double mX2(double xbj, double q2, double mp2);
     /// Compute Bjorken x from virtuality/diffractive mass
     double xBj(double q2, double mp2, double mx2);
+    /// Compute the virtuality from Bjorken x/diffractive mass
+    double q2(double xbj, double mp2, double mx2);
     /// Compute energy from mass and emitted mass
     double energyFromW(double w, double mp2, double m2);
   }  // namespace utils

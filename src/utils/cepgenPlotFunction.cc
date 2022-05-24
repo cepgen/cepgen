@@ -31,19 +31,15 @@ int main(int argc, char* argv[]) {
   string function, plotter;
   vector<string> functionals;
   int num_points;
-  double min_x, max_x, min_y, max_y;
+  cepgen::Limits xrange, yrange;
   bool log, draw_grid, func_2d;
-
-  static constexpr double INVALID_VALUE = -999.999;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("function,f", "function to parse", &function, "min(1.,exp(-x/10))")
       .addOptionalArgument("functional-eval,F", "functional evaluators", &functionals, vector<string>{})
       .addOptionalArgument("num-points,n", "number of points to consider", &num_points, 100)
-      .addOptionalArgument("min-x,m", "minimal range", &min_x, -5.)
-      .addOptionalArgument("max-x,M", "maximal range", &max_x, +5.)
-      .addOptionalArgument("min-y", "minimal y-range", &min_y, INVALID_VALUE)
-      .addOptionalArgument("max-y", "maximal y-range", &max_y, INVALID_VALUE)
+      .addOptionalArgument("x-range,x", "horizontal axis range", &xrange, cepgen::Limits{-5., +5.})
+      .addOptionalArgument("y-range,y", "vertical axis range", &yrange, cepgen::Limits{})
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .addOptionalArgument("log,l", "logarithmic y-axis", &log, false)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
@@ -68,20 +64,20 @@ int main(int argc, char* argv[]) {
       auto test = cepgen::utils::FunctionalFactory::get().build(
           func, cepgen::ParametersList().set<string>("expression", function).set<vector<string> >("variables", vars));
       if (func_2d) {
-        if (min_y == INVALID_VALUE)
-          min_y = min_x;
-        if (max_y == INVALID_VALUE)
-          max_y = max_x;
+        if (!yrange.hasMin())
+          yrange.min() = xrange.min();
+        if (!yrange.hasMax())
+          yrange.max() = xrange.max();
         for (unsigned short i = 0; i < num_points; ++i) {
-          const double x = min_x + (max_x - min_x) / (num_points - 1) * i;
+          const double x = xrange.min() + (xrange.max() - xrange.min()) / (num_points - 1) * i;
           for (unsigned short j = 0; j < num_points; ++j) {
-            const double y = min_y + (max_y - min_y) / (num_points - 1) * j;
+            const double y = yrange.min() + (yrange.max() - yrange.min()) / (num_points - 1) * j;
             m_gr2d_fb[func].addPoint(x, y, (*test)({x, y}));
           }
         }
       } else
         for (unsigned short i = 0; i < num_points; ++i) {
-          const double x = min_x + (max_x - min_x) / (num_points - 1) * i;
+          const double x = xrange.min() + (xrange.max() - xrange.min()) / (num_points - 1) * i;
           m_gr_fb[func].addPoint(x, (*test)(x));
         }
     } catch (const cepgen::Exception&) {

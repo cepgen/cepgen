@@ -34,12 +34,11 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   vector<int> strfun_types;
-  double q2, xmin, xmax, ymin, ymax;
+  double q2, xmin, xmax;
+  cepgen::Limits yrange;
   int var, num_points;
   string output_file, plotter;
   bool logx, logy, draw_grid;
-
-  const double kInvalid = -999.999;
 
   cepgen::ArgumentsParser(argc, argv)
       .addArgument("sf,s", "structure functions modelling", &strfun_types)
@@ -47,8 +46,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("var,t", "variable to study (0=xBj, 1=w)", &var, 0)
       .addOptionalArgument("xmax,m", "minimal Bjorken x", &xmin, 1.e-7)
       .addOptionalArgument("xmax,M", "maximal Bjorken x", &xmax, 1.)
-      .addOptionalArgument("ymin", "minimum plotting range for y", &ymin, kInvalid)
-      .addOptionalArgument("ymax", "maximum plotting range for y", &ymax, kInvalid)
+      .addOptionalArgument("yrange", "plotting range for y", &yrange, cepgen::Limits())
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
       .addOptionalArgument("output,o", "output file name", &output_file, "strfuns.scan.output.txt")
       .addOptionalArgument("logx", "logarithmic x-axis", &logx, false)
@@ -156,10 +154,8 @@ int main(int argc, char* argv[]) {
       for (auto& p : canv.second) {
         p.xAxis().setLabel(var_name + (!var_unit.empty() ? " (" + var_unit + ")" : ""));
         p.yAxis().setLabel(canv.first.second + (!var_name.empty() ? "(" + var_name + ", $Q^{2}$)" : ""));
-        if (ymin != kInvalid)
-          p.yAxis().setMinimum(ymin);
-        if (ymax != kInvalid)
-          p.yAxis().setMaximum(ymax);
+        if (yrange.valid())
+          p.yAxis().setRange(yrange);
         mp.emplace_back(&p);
       }
       plt->draw(mp, "sfcomp_" + canv.first.first, cepgen::utils::format("$Q^{2}$ = %g GeV$^{2}$", q2), dm);

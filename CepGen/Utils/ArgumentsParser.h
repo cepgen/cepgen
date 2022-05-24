@@ -23,6 +23,8 @@
 #include <string>
 #include <vector>
 
+#include "CepGen/Utils/Limits.h"
+
 namespace cepgen {
   /// A generic command line arguments parser
   /// \author Laurent Forthomme
@@ -84,6 +86,8 @@ namespace cepgen {
       Parameter(std::string, std::string, std::vector<int>* = nullptr, std::vector<int> = {});
       /// A vector of floating point parameter constructor
       Parameter(std::string, std::string, std::vector<double>* = nullptr, std::vector<double> = {});
+      /// A vector of floating point parameter constructor
+      Parameter(std::string, std::string, Limits* = nullptr, Limits = Limits{});
 
       /// Cast the user input into a proper container value
       Parameter& parse();
@@ -112,6 +116,8 @@ namespace cepgen {
       unsigned int* uint_variable_{nullptr};
       /// Pointer to a boolean variable possibly handled by this parameter
       bool* bool_variable_{nullptr};
+      /// Pointer to a limits object possibly handled by this parameter
+      Limits* lim_variable_{nullptr};
       /// Pointer to a vector of string variables possibly handled by this parameter
       std::vector<std::string>* vec_str_variable_{nullptr};
       /// Pointer to a vector of integer variables possibly handled by this parameter
