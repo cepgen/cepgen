@@ -27,6 +27,8 @@
 
 namespace cepgen {
   namespace proc {
+    const double LPAIR::sconstb_ = 2. * pow(M_PI, 3) / pow(constants::ALPHA_EM, 4);
+
     LPAIR::LPAIR(const ParametersList& params)
         : Process(params, true),
           n_opt_(steer<int>("nopt")),
@@ -582,7 +584,7 @@ namespace cepgen {
 
       const double ecm6 = w4_ / (2. * mc4_), pp6cm = sqrt(ecm6 * ecm6 - masses_.Ml2);
 
-      jacobian_ *= pp6cm / (mc4_ * SCONSTB * s_);
+      jacobian_ *= pp6cm / (mc4_ * sconstb_ * s_);
 
       // Let the most obscure part of this code begin...
 
