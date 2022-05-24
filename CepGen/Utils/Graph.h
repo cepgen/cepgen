@@ -34,7 +34,7 @@
 namespace cepgen {
   namespace utils {
     /// A one-dimensional graph object
-    class Graph1D : public Drawable {
+    class Graph1D final : public Drawable {
     public:
       explicit Graph1D(const std::string& name = "", const std::string& title = "");
 
@@ -63,7 +63,7 @@ namespace cepgen {
     };
 
     /// A two-dimensional graph object
-    class Graph2D : public Drawable {
+    class Graph2D final : public Drawable {
     public:
       explicit Graph2D(const std::string& name = "", const std::string& title = "");
 
