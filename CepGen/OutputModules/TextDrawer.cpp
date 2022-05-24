@@ -30,9 +30,9 @@
 
 namespace cepgen {
   namespace utils {
-    class DrawerText : public Drawer {
+    class TextDrawer : public Drawer {
     public:
-      explicit DrawerText(const ParametersList&);
+      explicit TextDrawer(const ParametersList&);
 
       static ParametersDescription description() {
         auto desc = Drawer::description();
@@ -42,12 +42,12 @@ namespace cepgen {
         return desc;
       }
 
-      const DrawerText& draw(const Graph1D&, const Mode&) const override;
-      const DrawerText& draw(const Graph2D&, const Mode&) const override;
-      const DrawerText& draw(const Hist1D&, const Mode&) const override;
-      const DrawerText& draw(const Hist2D&, const Mode&) const override;
+      const TextDrawer& draw(const Graph1D&, const Mode&) const override;
+      const TextDrawer& draw(const Graph2D&, const Mode&) const override;
+      const TextDrawer& draw(const Hist1D&, const Mode&) const override;
+      const TextDrawer& draw(const Hist2D&, const Mode&) const override;
 
-      const DrawerText& draw(const DrawableColl&,
+      const TextDrawer& draw(const DrawableColl&,
                              const std::string& name = "",
                              const std::string& title = "",
                              const Mode& mode = Mode::none) const override;
@@ -58,14 +58,14 @@ namespace cepgen {
       void drawValues(std::ostream&, const Drawable&, const Drawable::axis_t&, const Mode&, bool effects) const;
       void drawValues(std::ostream&, const Drawable&, const Drawable::dualaxis_t&, const Mode&, bool effects) const;
 
-      static constexpr char CHAR = '*', ERR_CHAR = '-';
-      static constexpr const char* CHAR_ALT = "o.#@";
+      const char CHAR, ERR_CHAR;
+      const char* CHAR_ALT;
       // greyscale ascii art from http://paulbourke.net/dataformats/asciiart/
       //static constexpr const char* CHARS = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
       //static constexpr const char* CHARS = " .:-=+*#%@";
-      static constexpr const char* CHARS = " .:oO0@%#";
+      const char* CHARS;
       static const std::array<Colour, 7> kColours;
-      static constexpr const char NEG_CHAR = '-';
+      const char NEG_CHAR = '-';
 
       static std::string delatexify(const std::string&);
 
@@ -82,13 +82,20 @@ namespace cepgen {
       const bool colourise_{true};
     };
 
-    const std::array<Colour, 7> DrawerText::kColours = {
+    const std::array<Colour, 7> TextDrawer::kColours = {
         Colour::red, Colour::cyan, Colour::blue, Colour::magenta, Colour::green, Colour::yellow, Colour::reset};
 
-    DrawerText::DrawerText(const ParametersList& params)
-        : Drawer(params), width_(steerAs<int, size_t>("width")), colourise_(steer<bool>("colourise")) {}
+    TextDrawer::TextDrawer(const ParametersList& params)
+        : Drawer(params),
+          CHAR('*'),
+          ERR_CHAR('-'),
+          CHAR_ALT("o.#@"),
+          CHARS(" .:oO0@%#"),
+          NEG_CHAR('-'),
+          width_(steerAs<int, size_t>("width")),
+          colourise_(steer<bool>("colourise")) {}
 
-    const DrawerText& DrawerText::draw(const Graph1D& graph, const Mode& mode) const {
+    const TextDrawer& TextDrawer::draw(const Graph1D& graph, const Mode& mode) const {
       CG_LOG.log([&](auto& log) {
         if (!graph.name().empty())
           log << "plot of \"" << graph.name() << "\"\n";
@@ -97,7 +104,7 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerText& DrawerText::draw(const Graph2D& graph, const Mode& mode) const {
+    const TextDrawer& TextDrawer::draw(const Graph2D& graph, const Mode& mode) const {
       CG_LOG.log([&](auto& log) {
         if (!graph.name().empty())
           log << "plot of \"" << graph.name() << "\"\n";
@@ -106,7 +113,7 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerText& DrawerText::draw(const Hist1D& hist, const Mode& mode) const {
+    const TextDrawer& TextDrawer::draw(const Hist1D& hist, const Mode& mode) const {
       CG_LOG.log([&](auto& log) {
         if (!hist.name().empty())
           log << "plot of \"" << hist.name() << "\"\n";
@@ -124,7 +131,7 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerText& DrawerText::draw(const Hist2D& hist, const Mode& mode) const {
+    const TextDrawer& TextDrawer::draw(const Hist2D& hist, const Mode& mode) const {
       CG_LOG.log([&](auto& log) {
         if (!hist.name().empty())
           log << "plot of \"" << hist.name() << "\"\n";
@@ -173,11 +180,11 @@ namespace cepgen {
       return *this;
     }
 
-    const DrawerText& DrawerText::draw(const DrawableColl& objs,
+    const TextDrawer& TextDrawer::draw(const DrawableColl& objs,
                                        const std::string& name,
                                        const std::string&,
                                        const Mode& mode) const {
-      CG_WARNING("DrawerText:draw") << "Multi-plots is now only partially supported (no axes rescaling).";
+      CG_WARNING("TextDrawer:draw") << "Multi-plots is now only partially supported (no axes rescaling).";
       auto inside_plot = [](const std::string& str) -> std::string {
         std::istringstream ss(str);
         std::ostringstream out;
@@ -204,7 +211,7 @@ namespace cepgen {
       };
       std::stringstream buf, os_base;
       size_t num_plts = 0;
-      auto add_plot = [&buf, &num_plts](const std::string& plt) {
+      auto add_plot = [this, &buf, &num_plts](const std::string& plt) {
         ++num_plts;
         if (plt.empty())
           return;
@@ -213,7 +220,7 @@ namespace cepgen {
         for (std::string line; std::getline(ss, line);) {
           std::string base(line.size(), ' ');
           if (!buf.str().empty() && !std::getline(buf, base)) {
-            CG_WARNING("DrawerText:draw") << "Invalid plot to be produced... Aborting the multiplot.";
+            CG_WARNING("TextDrawer:draw") << "Invalid plot to be produced... Aborting the multiplot.";
             return;
           }
           for (size_t j = 0; j < line.size(); ++j) {
@@ -251,7 +258,7 @@ namespace cepgen {
           }
           plt_names.emplace_back(gr->name());
         } else {
-          CG_WARNING("DrawerText:draw") << "Cannot add drawable '" << obj->name() << "' to the stack.";
+          CG_WARNING("TextDrawer:draw") << "Cannot add drawable '" << obj->name() << "' to the stack.";
           continue;
         }
       CG_LOG.log([&](auto& log) {
@@ -266,7 +273,7 @@ namespace cepgen {
       return *this;
     }
 
-    void DrawerText::drawValues(
+    void TextDrawer::drawValues(
         std::ostream& os, const Drawable& dr, const Drawable::axis_t& axis, const Mode& mode, bool effects) const {
       const std::string sep(17, ' ');
       const double max_val = std::max_element(axis.begin(), axis.end(), map_elements())->second.value *
@@ -330,7 +337,7 @@ namespace cepgen {
          << ":\n";  // 2nd abscissa axis
     }
 
-    void DrawerText::drawValues(
+    void TextDrawer::drawValues(
         std::ostream& os, const Drawable& dr, const Drawable::dualaxis_t& axes, const Mode& mode, bool effects) const {
       const std::string sep(17, ' ');
       if (!dr.yAxis().label().empty()) {
@@ -414,8 +421,8 @@ namespace cepgen {
       os << ")\n";
     }
 
-    std::string DrawerText::delatexify(const std::string& tok) { return utils::replace_all(tok, {{"$", ""}}); }
+    std::string TextDrawer::delatexify(const std::string& tok) { return utils::replace_all(tok, {{"$", ""}}); }
   }  // namespace utils
 }  // namespace cepgen
 
-REGISTER_DRAWER("text", DrawerText)
+REGISTER_DRAWER("text", TextDrawer)
