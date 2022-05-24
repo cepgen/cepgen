@@ -44,7 +44,7 @@ namespace cepgen {
     cuts_.setParameters(params_);
   }
 
-  ParametersList Kinematics::parameters(bool extended) const {
+  ParametersList Kinematics::allParameters(bool extended) const {
     ParametersList params;
     params += incoming_beams_.parameters();         // beam particles
     params += cuts_.initial.parameters(extended);   // incoming partons
