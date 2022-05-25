@@ -95,7 +95,8 @@ namespace cepgen {
     }
 
     std::string sanitise(const std::string& str) {
-      return replace_all(str, {{")", ""}, {"(", "_"}, {"{", "_"}, {",", "_"}, {":", "_"}});
+      return tolower(
+          replace_all(str, {{")", ""}, {"(", "_"}, {"{", "_"}, {".", ""}, {",", "_"}, {":", "_"}, {"-", ""}}));
     }
 
     std::string timeAs(const std::string& fmt) {
