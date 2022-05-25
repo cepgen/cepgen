@@ -25,8 +25,10 @@
 #include "CepGen/Core/ExportModule.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
 #include "CepGenAddOns/ROOTWrapper/ROOTTreeInfo.h"
@@ -74,7 +76,11 @@ namespace cepgen {
     }
 
     void ROOTTreeHandler::initialise(const Parameters& params) {
-      const auto filename = auto_filename_ ? generateFilename(params) : filename_;
+      auto filename = filename_;
+      if (auto_filename_) {
+        filename = generateFilename(params);
+        CG_INFO("ROOTTreeHandler") << "Output ROOT filename automatically set to '" << filename << "'.";
+      }
       file_.reset(TFile::Open(filename.data(), "recreate"));
       if (!file_->IsOpen())
         throw CG_FATAL("ROOTTreeHandler") << "Failed to create the output file!";
@@ -100,26 +106,31 @@ namespace cepgen {
       std::string evt_mods, proc_mode;
       for (const auto& mod : params.eventModifiersSequence())
         evt_mods += (evt_mods.empty() ? "" : "-") + mod->name();
+      const auto symm = params.process().parameters().get<bool>("symmetrise");
+      const auto sf_info = utils::sanitise(strfun::StructureFunctionsFactory::get().describe(
+          params.process().kinematics().incomingBeams().structureFunctions()->name()));
       switch (params.process().kinematics().incomingBeams().mode()) {
         case mode::Kinematics::ElasticElastic:
           proc_mode = "el";
           break;
         case mode::Kinematics::InelasticElastic:
+          proc_mode = symm ? "sd" : "sdie_" + sf_info;
+          break;
         case mode::Kinematics::ElasticInelastic:
-          proc_mode = "sd";
+          proc_mode = symm ? "sd" : "sdei_" + sf_info;
           break;
         case mode::Kinematics::InelasticInelastic:
-          proc_mode = "dd";
+          proc_mode = "dd_" + sf_info;
           break;
         case mode::Kinematics::invalid:
           break;
       }
-      return utils::format("cepgen%s_%s_%gTeV%s%s.root",
-                           version::tag.data(),
+      return utils::format("cepgen%s_%s_%s_%gTeV%s.root",
+                           utils::sanitise(version::tag).data(),
                            params.processName().data(),
+                           proc_mode.data(),
                            params.kinematics().incomingBeams().sqrtS() / 1000.,
-                           evt_mods.data(),
-                           proc_mode.data());
+                           evt_mods.data());
     }
 
     ParametersDescription ROOTTreeHandler::description() {
