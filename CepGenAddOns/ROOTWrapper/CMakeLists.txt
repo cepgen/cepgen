@@ -25,5 +25,5 @@ cepgen_build(CepGenRoot SOURCES ${sources}
     DEFINITIONS ${ROOT_DEFINITIONS}
     TESTS test/*.cc
     PROPERTY CXX_STANDARD ${ROOT_CXX_STANDARD}
-    CFLAGS ${ROOT_CXX_FLAGS}
+    CFLAGS "${ROOT_CXX_FLAGS} -Wno-bitwise-instead-of-logical -Wno-sizeof-pointer-div -Wno-unused-command-line-argument"
     INSTALL_COMPONENT root)
