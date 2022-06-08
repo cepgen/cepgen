@@ -23,6 +23,7 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
@@ -79,10 +80,7 @@ namespace cepgen {
   void initialise(bool safe_mode) {
     //--- parse all particles properties
     static const std::string pdg_file = "";
-    search_paths = std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."),
-                                            fs::path() / "/usr" / "share" / "CepGen",
-                                            fs::current_path().parent_path(),
-                                            fs::current_path().parent_path().parent_path()};
+    search_paths = utils::env::searchPaths();
 
     //--- particles table parsing
     std::string mcd_file, addons_file;

@@ -18,8 +18,8 @@
 
 #include <cmath>
 
+#include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/ProgressBar.h"
-#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace utils {

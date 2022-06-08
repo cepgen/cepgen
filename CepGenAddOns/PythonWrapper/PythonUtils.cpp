@@ -24,6 +24,7 @@
 #include <algorithm>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
 
