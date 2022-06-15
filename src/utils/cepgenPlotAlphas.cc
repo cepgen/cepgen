@@ -34,13 +34,14 @@ int main(int argc, char* argv[]) {
   double qmin, qmax;
   int num_points;
   string output_file, plotter;
-  bool logy, draw_grid;
+  bool logx, logy, draw_grid;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("qmin,m", "minimum virtuality (GeV)", &qmin, 1.)
       .addOptionalArgument("qmax,M", "maximum virtuality (GeV)", &qmax, 101.)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 100)
       .addOptionalArgument("output,o", "output file name", &output_file, "alphas.scan.output.txt")
+      .addOptionalArgument("logx", "logarithmic x-scale", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
@@ -56,8 +57,10 @@ int main(int argc, char* argv[]) {
   vector<alpha_t> alphas, alphaem;
 
   vector<double> qvals(num_points);
+  const double lqmin = log10(qmin), lqmax = log10(qmax);
   for (int i = 0; i < num_points; ++i)
-    qvals[i] = qmin + (qmax - qmin) * i / num_points;
+    qvals[i] =
+        (!logx) ? qmin + i * (qmax - qmin) / (num_points - 1) : pow(10, lqmin + i * (lqmax - lqmin) / (num_points - 1));
 
   // alphaS(Q) modellings part
   size_t i = 0;
@@ -107,6 +110,8 @@ int main(int argc, char* argv[]) {
   if (!plotter.empty()) {
     auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
     cepgen::utils::Drawer::Mode dm;
+    if (logx)
+      dm |= cepgen::utils::Drawer::Mode::logx;
     if (logy)
       dm |= cepgen::utils::Drawer::Mode::logy;
     if (draw_grid)
