@@ -185,7 +185,7 @@ namespace cepgen {
           t0_(steer<double>("t0")),
           q2min_(steer<double>("q2min")),
           q2max_(steer<double>("q2max")),
-          sfs_grid_file_(steer<std::string>("gridFile")),
+          sfs_grid_file_(steerPath("gridFile")),
           dis_params_(steer<ParametersList>("disParameters")),
           deriv_(steer<ParametersList>("derivator")),
           mpi2_(std::pow(PDG::get().mass(PDG::piZero), 2)),

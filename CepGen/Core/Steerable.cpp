@@ -19,14 +19,18 @@
 #include "CepGen/Core/Steerable.h"
 #include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Filesystem.h"
+#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
   std::string Steerable::steerPath(const std::string& key) const {
     const auto& fn = steer<std::string>(key);
-    for (const auto& path : utils::env::searchPaths()) {
-      if (utils::fileExists(path + fn))
+    if (fn.empty())
+      return fn;
+    for (const auto& path : utils::env::searchPaths())
+      if (utils::fileExists(fs::path(path) / fn)) {
+        CG_DEBUG("Steerable:steerPath") << "Found path for '" << key << "' at '" << fs::path(path) / fn << "'.";
         return fs::path(path) / fn;
-    }
+      }
     return fn;
   }
 }  // namespace cepgen
