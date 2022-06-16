@@ -186,7 +186,7 @@ namespace cepgen {
       auto key = words.at(0);
       if (erase(key) > 0)
         CG_DEBUG("ParametersList:feed") << "Replacing key='" << key << "' with a new value.";
-      if (key == "name")
+      if (key == "name")  // replace any "name" key encountered by the canonical module name key
         key = ParametersList::MODULE_NAME;
       if (words.size() == 1)  // basic key=true
         set<bool>(key, true);
@@ -290,6 +290,7 @@ namespace cepgen {
   }
 
   std::string ParametersList::getString(const std::string& key, bool wrap) const {
+    // wrapper for the printout of a general variable
     auto wrap_val = [&wrap](const auto& val, const std::string& type) -> std::string {
       std::ostringstream os;
       if (type == "float" || type == "vfloat")
@@ -300,6 +301,7 @@ namespace cepgen {
       return (wrap ? type + "(" : "")  //+ (type == "bool" ? utils::yesno(std::stoi(os.str())) : os.str()) +
              + os.str() + (wrap ? ")" : "");
     };
+    // wrapper for the printout of a collection type (vector, array, ...)
     auto wrap_coll = [&wrap_val](const auto& coll, const std::string& type) -> std::string {
       return wrap_val(utils::merge(coll, ", "), type);
     };
