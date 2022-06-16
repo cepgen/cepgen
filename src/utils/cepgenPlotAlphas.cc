@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
         //const auto descr = cepgen::utils::replace_all(cepgen::AlphaSFactory::get().describe(alphas[i].name),
         //                                              {{" alphaS", ""}, {" evolution algorithm", ""}});
       }
-      plt->draw(mp, "comp_alphas", cepgen::utils::s("CepGen $\\alpha_{S}$ modelling", alphas.size(), false), dm);
+      plt->draw(mp, "comp_alphas", cepgen::utils::s("$\\alpha_{S}$ modelling", alphas.size(), false), dm);
     }
     {
       cepgen::utils::DrawableColl mp;
@@ -139,7 +139,7 @@ int main(int argc, char* argv[]) {
         //const auto descr = cepgen::utils::replace_all(cepgen::AlphaEMFactory::get().describe(alphaem[i].name),
         //                                              {{" alphaS", ""}, {" evolution algorithm", ""}});
       }
-      plt->draw(mp, "comp_alphaem", cepgen::utils::s("CepGen $\\alpha_{EM}$ modelling", alphaem.size(), false), dm);
+      plt->draw(mp, "comp_alphaem", cepgen::utils::s("$\\alpha_{EM}$ modelling", alphaem.size(), false), dm);
     }
   }
   return 0;
