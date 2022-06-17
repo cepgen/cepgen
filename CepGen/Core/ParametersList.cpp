@@ -240,7 +240,7 @@ namespace cepgen {
     return out;
   }
 
-  bool ParametersList::empty() const { return keys(false).empty(); }
+  bool ParametersList::empty() const { return keys(true).empty(); }
 
   std::ostream& operator<<(std::ostream& os, const ParametersList& params) {
     params.print(os);
