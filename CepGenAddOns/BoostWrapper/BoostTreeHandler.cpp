@@ -97,7 +97,7 @@ namespace cepgen {
         proc_ = bc::unpack(tree_.get_child(PROCESS_NAME));
         rt_params_->setProcess(proc::ProcessFactory::get().build(proc_));
       } catch (const boost::exception&) {
-        throw CG_FATAL("BoostTreeHandler") << "Failed to retrieve a valid \"" << PROCESS_NAME << "\" block"
+        throw CG_FATAL("BoostTreeHandler") << "Failed to retrieve a valid \"" << std::string(PROCESS_NAME) << "\" block"
                                            << " in the steering card!";
       }
       ParametersList par_kinematics;
