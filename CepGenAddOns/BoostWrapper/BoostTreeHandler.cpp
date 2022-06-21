@@ -40,7 +40,7 @@
 #include "CepGenAddOns/BoostWrapper/BoostTreeUtils.h"
 
 namespace pt = boost::property_tree;
-namespace bc = boost::cepgen;
+namespace bc = cepgen::boost;
 
 namespace cepgen {
   namespace card {
@@ -63,7 +63,6 @@ namespace cepgen {
       pt::ptree tree_;
 
     private:
-      static constexpr const char* DAUGH_KEY = "DAUGHTER";
       static constexpr const char* MIN_KEY = "min";
       static constexpr const char* MAX_KEY = "max";
 
@@ -95,8 +94,9 @@ namespace cepgen {
 
       try {
         proc_ = bc::unpack(tree_.get_child(PROCESS_NAME));
+        CG_DEBUG("BoostTreeHandler") << "Unpacked process: " << proc_ << ".";
         rt_params_->setProcess(proc::ProcessFactory::get().build(proc_));
-      } catch (const boost::exception&) {
+      } catch (const ::boost::exception&) {
         throw CG_FATAL("BoostTreeHandler") << "Failed to retrieve a valid \"" << std::string(PROCESS_NAME) << "\" block"
                                            << " in the steering card!";
       }
@@ -136,7 +136,7 @@ namespace cepgen {
             utils::Logger::get().addExceptionRule(mod);
         }
         rt_params_->process().setKinematics(Kinematics(par_kinematics));
-      } catch (const boost::exception&) {
+      } catch (const ::boost::exception&) {
       } catch (const Exception&) {
       }
 
@@ -153,13 +153,13 @@ namespace cepgen {
         base.set<Limits>(name, lim);
       }
       //--- then check if daughter is a vector; if true, skip one hierarchy level
-      else if (plist.has<std::vector<int> >(DAUGH_KEY))
-        base.set<std::vector<int> >(name, plist.get<std::vector<int> >(DAUGH_KEY));
-      else if (plist.has<std::vector<double> >(DAUGH_KEY)) {
-        auto vec = plist.get<std::vector<double> >(DAUGH_KEY);
+      else if (plist.has<std::vector<int> >(boost::DAUGH_KEY))
+        base.set<std::vector<int> >(name, plist.get<std::vector<int> >(boost::DAUGH_KEY));
+      else if (plist.has<std::vector<double> >(boost::DAUGH_KEY)) {
+        auto vec = plist.get<std::vector<double> >(boost::DAUGH_KEY);
         base.set<std::vector<double> >(name, vec);
-      } else if (plist.has<std::vector<std::string> >(DAUGH_KEY))
-        base.set<std::vector<std::string> >(name, plist.get<std::vector<std::string> >(DAUGH_KEY));
+      } else if (plist.has<std::vector<std::string> >(boost::DAUGH_KEY))
+        base.set<std::vector<std::string> >(name, plist.get<std::vector<std::string> >(boost::DAUGH_KEY));
       else
         base.set<ParametersList>(name, plist);
     }
