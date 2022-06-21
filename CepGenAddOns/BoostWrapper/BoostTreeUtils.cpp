@@ -122,39 +122,35 @@ namespace cepgen {
       if (tree.empty())
         return out;
       for (const auto& it : tree) {
-        try {
-          if (it.first.empty())  // this might be a vector
+        if (it.first.empty())  // this might be a vector
+          try {
+            out.operator[]<std::vector<ParametersList>>(DAUGH_KEY).emplace_back(unpack(it.second));
+          } catch (const ::boost::exception&) {
             try {
-              out.operator[]<std::vector<ParametersList>>(DAUGH_KEY).emplace_back(unpack(it.second));
+              out.operator[]<std::vector<double>>(DAUGH_KEY).emplace_back(it.second.get_value<double>());
             } catch (const ::boost::exception&) {
               try {
-                out.operator[]<std::vector<double>>(DAUGH_KEY).emplace_back(it.second.get_value<double>());
+                out.operator[]<std::vector<int>>(DAUGH_KEY).emplace_back(it.second.get_value<int>());
               } catch (const ::boost::exception&) {
-                try {
-                  out.operator[]<std::vector<int>>(DAUGH_KEY).emplace_back(it.second.get_value<int>());
-                } catch (const ::boost::exception&) {
-                  out.operator[]<std::vector<std::string>>(DAUGH_KEY).emplace_back(it.second.get_value<std::string>());
-                }
+                out.operator[]<std::vector<std::string>>(DAUGH_KEY).emplace_back(it.second.get_value<std::string>());
               }
             }
-          else
-            //add(out, it.first, it.second);
-            continue;
-        } catch (const Exception&) {
-          if (it.second.get_value<std::string>().find('.') != std::string::npos)
-            try {
-              out.set<double>(it.first, it.second.get_value<double>());
-            } catch (const ::boost::exception&) {
-              out.set<std::string>(it.first, it.second.get_value<std::string>());
-            }
-          else
-            try {
-              out.set<int>(it.first, it.second.get_value<int>());
-            } catch (const ::boost::exception&) {
-              out.set<std::string>(it.first, it.second.get_value<std::string>());
-            }
-        }
+          }
+        else if (it.second.get_value<std::string>().find('.') !=
+                 std::string::npos)  // if contains a '.', might be a floating point variable
+          try {
+            out.set<double>(it.first, it.second.get_value<double>());
+          } catch (const ::boost::exception&) {
+            out.set<std::string>(it.first, it.second.get_value<std::string>());
+          }
+        else
+          try {
+            out.set<int>(it.first, it.second.get_value<int>());
+          } catch (const ::boost::exception&) {
+            out.set<std::string>(it.first, it.second.get_value<std::string>());
+          }
       }
+      CG_DEBUG("BoostTreeUtils:unpack") << "Unpacked parameters list:\n" << ParametersDescription(out) << ".";
       return out;
     }
   }  // namespace boost
