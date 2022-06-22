@@ -1,22 +1,12 @@
 #-- list all test executables
 
-file(GLOB tests_standalone RELATIVE ${PROJECT_SOURCE_DIR}/test *.cc)
-file(GLOB tests_fortran RELATIVE ${PROJECT_SOURCE_DIR}/test *.f)
+file(GLOB tests_standalone RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.cc)
+file(GLOB tests_fortran RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.f)
 
 #-- include the utilitaries
 
 set(tests)
 set(tests_libraries ${CEPGEN_LIBRARIES})
-
-#-- skip functionals tests if no parsing library is found
-
-if(NOT CEPGEN_HAS_FUNCTIONAL)
-  message(STATUS "No functionals parser found on this system. Disabling the corresponding tests.")
-  file(GLOB tests_functionals
-      RELATIVE ${PROJECT_SOURCE_DIR}/test
-      test_integrator.cc test_function_parser*.*)
-#list(REMOVE_ITEM tests_standalone ${tests_functionals})
-endif()
 
 #-- build all tests and link them to the core library
 
@@ -37,12 +27,18 @@ foreach(exec_src ${tests_fortran})
 #list(APPEND tests ${exec_bin}) #for the moment, excluding F77 tests
 endforeach()
 
-message(STATUS ">>> Miscellaneous tests <<<")
+file(GLOB_RECURSE test_input_cards RELATIVE ${CMAKE_CURRENT_LIST_DIR} test_processes/* __init__.py)
+foreach(_files ${test_input_cards})
+  configure_file(${_files} ${_files} COPYONLY)
+endforeach()
+configure_file(${CMAKE_CURRENT_LIST_DIR}/test_processes.cfg test_processes.cfg COPYONLY)
+
+message(STATUS ">>> Physics tests <<<")
 foreach(test ${tests})
   message(STATUS "... added test ${test}")
   add_test(NAME ${test} COMMAND ${test} -h)
 endforeach()
 add_test(NAME function_parser COMMAND test_function_parser)
 add_test(NAME integrator COMMAND test_integrator -q -a)
-
-add_subdirectory(physics)
+add_test(NAME cross_section_vegas COMMAND processes_test -i MISER -q --cfg test_processes.cfg)
+add_test(NAME cross_section_miser COMMAND processes_test -i Vegas -q --cfg test_processes.cfg)
