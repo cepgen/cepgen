@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include <ccomplex>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
@@ -55,9 +53,9 @@ int main(int argc, char* argv[]) {
         auto d0 = [](double theta) -> double { return sin(theta); };
         auto dm = [](double theta) -> double { return 0.5 * (1. - cos(theta)) * M_SQRT2; };
         if (lam < 0)
-          return dp(theta) * exp(-1.i * phi);
+          return dp(theta) * exp(std::complex<double>(-1.i * phi));
         if (lam > 0)
-          return dm(theta) * exp(+1.i * phi);
+          return dm(theta) * exp(std::complex<double>(+1.i * phi));
         return -d0(theta);
       };
       auto lbar = [&l](short lam, double theta, double phi) -> std::complex<double> {
