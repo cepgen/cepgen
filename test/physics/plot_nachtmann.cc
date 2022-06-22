@@ -53,9 +53,9 @@ int main(int argc, char* argv[]) {
         auto d0 = [](double theta) -> double { return sin(theta); };
         auto dm = [](double theta) -> double { return 0.5 * (1. - cos(theta)) * M_SQRT2; };
         if (lam < 0)
-          return dp(theta) * exp(std::complex<double>(-1.i * phi));
+          return dp(theta) * exp(std::complex<double>(0., -phi));
         if (lam > 0)
-          return dm(theta) * exp(std::complex<double>(+1.i * phi));
+          return dm(theta) * exp(std::complex<double>(0., +phi));
         return -d0(theta);
       };
       auto lbar = [&l](short lam, double theta, double phi) -> std::complex<double> {
