@@ -42,7 +42,7 @@ foreach(test ${tests})
   message(STATUS "... added test ${test}")
   add_test(NAME ${test} COMMAND ${test} -h)
 endforeach()
-add_test(NAME function_parser COMMAND test_function_parser)
 add_test(NAME integrator COMMAND test_integrator -q -a)
 
+add_subdirectory(utils)
 add_subdirectory(physics)
