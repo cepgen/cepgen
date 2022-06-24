@@ -207,7 +207,14 @@ namespace cepgen {
                                                     : PDG::get().mass(neg_beam_.pdgId())));
   }
 
-  double IncomingBeams::s() const { return (pos_beam_.momentum() + neg_beam_.momentum()).mass2(); }
+  double IncomingBeams::s() const {
+    const auto sval = (pos_beam_.momentum() + neg_beam_.momentum()).mass2();
+    CG_DEBUG("IncomingBeams:s") << "Beams momenta:\n"
+                                << "\t" << pos_beam_.momentum() << "\n"
+                                << "\t" << neg_beam_.momentum() << "\n"
+                                << "\ts = (p1 + p2)^2 = " << sval << ", sqrt(s) = " << sqrt(sval) << ".";
+    return sval;
+  }
 
   double IncomingBeams::sqrtS() const { return std::sqrt(s()); }
 
