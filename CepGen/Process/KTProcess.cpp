@@ -125,39 +125,29 @@ namespace cepgen {
     }
 
     void KTProcess::fillPrimaryParticlesKinematics() {
-      //============================================================================================
-      //     outgoing protons
-      //============================================================================================
+      auto& ib1 = event_->oneWithRole(Particle::IncomingBeam1);
+      auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
+      auto& ob1 = event_->oneWithRole(Particle::OutgoingBeam1);
+      auto& ob2 = event_->oneWithRole(Particle::OutgoingBeam2);
+      auto& p1 = event_->oneWithRole(Particle::Parton1);
+      auto& p2 = event_->oneWithRole(Particle::Parton2);
+      auto& cm = event_->oneWithRole(Particle::Intermediate);
 
-      Particle& op1 = event_->oneWithRole(Particle::OutgoingBeam1);
-      op1.setMomentum(pX_);
+      // beam systems
+      ob1.setMomentum(pX_);
       if (kin_.incomingBeams().positive().fragmented())
-        op1.setStatus(Particle::Status::Unfragmented).setMass(sqrt(mX2_));
-      else
-        op1.setStatus(Particle::Status::FinalState);
-
-      Particle& op2 = event_->oneWithRole(Particle::OutgoingBeam2);
-      op2.setMomentum(pY_);
+        ob1.setMass(sqrt(mX2_));
+      ob2.setMomentum(pY_);
       if (kin_.incomingBeams().negative().fragmented())
-        op2.setStatus(Particle::Status::Unfragmented).setMass(sqrt(mY2_));
-      else
-        op2.setStatus(Particle::Status::FinalState);
+        ob2.setMass(sqrt(mY2_));
 
-      //============================================================================================
-      //     incoming partons (photons, pomerons, ...)
-      //============================================================================================
+      // parton systems
+      p1.setMomentum(ib1.momentum() - pX_, true);
+      p2.setMomentum(ib2.momentum() - pY_, true);
 
-      Particle& g1 = event_->oneWithRole(Particle::Parton1);
-      g1.setMomentum(event_->oneWithRole(Particle::IncomingBeam1).momentum() - pX_, true);
 
-      Particle& g2 = event_->oneWithRole(Particle::Parton2);
-      g2.setMomentum(event_->oneWithRole(Particle::IncomingBeam2).momentum() - pY_, true);
-
-      //============================================================================================
-      //     two-parton system
-      //============================================================================================
-
-      event_->oneWithRole(Particle::Intermediate).setMomentum(g1.momentum() + g2.momentum());
+      // two-parton system
+      cm.setMomentum(p1.momentum() + p2.momentum());
     }
 
     ParametersDescription KTProcess::description() {

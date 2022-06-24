@@ -263,6 +263,14 @@ namespace cepgen {
         auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
         ib2.setPdgId(kin_.incomingBeams().negative().pdgId());
         ib2.setMomentum(p2);
+        auto& ob1 = event_->oneWithRole(Particle::OutgoingBeam1);
+        ob1.setPdgId(kin_.incomingBeams().positive().pdgId());
+        ob1.setStatus(kin_.incomingBeams().positive().fragmented() ? Particle::Status::Unfragmented
+                                                                   : Particle::Status::FinalState);
+        auto& ob2 = event_->oneWithRole(Particle::OutgoingBeam2);
+        ob2.setPdgId(kin_.incomingBeams().negative().pdgId());
+        ob2.setStatus(kin_.incomingBeams().negative().fragmented() ? Particle::Status::Unfragmented
+                                                                   : Particle::Status::FinalState);
         for (auto& cp : (*event_)[Particle::CentralSystem])
           cp.get().setPdgId(cp.get().pdgId());
       }
