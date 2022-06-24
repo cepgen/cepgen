@@ -104,8 +104,13 @@ namespace cepgen {
       p1z = +0.5 * max_sqrts;
       p2z = -0.5 * max_sqrts;
     }
-    if (p1z * p2z < 0. && p1z < 0.)
-      std::swap(p1z, p2z);
+    if (p1z * p2z < 0.) {
+      if (p1z < 0.)
+        std::swap(p1z, p2z);
+      else
+        throw CG_FATAL("Kinematics") << "pz vector should either have momenta specified in absolute value, or a "
+                                        "(positive pz, negative pz) combination.";
+    }
     plist_pos.set<double>("pz", +fabs(p1z));
     plist_neg.set<double>("pz", -fabs(p2z));
 
