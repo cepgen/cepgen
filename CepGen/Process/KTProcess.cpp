@@ -113,10 +113,10 @@ namespace cepgen {
       auto* ff = kin_.incomingBeams().formFactors();
       auto* sf = kin_.incomingBeams().structureFunctions();
       const double q2_1 = qt1_ * qt1_, q2_2 = qt2_ * qt2_;
-      const double f1 = kin_.incomingBeams().positive().ktFlux(x1_, q2_1, mX2_, ff, sf),
-                   f2 = kin_.incomingBeams().negative().ktFlux(x2_, q2_2, mY2_, ff, sf);
+      const double f1 = kin_.incomingBeams().positive().ktFlux(x1_, q2_1, mX2_, ff, sf) * M_1_PI,
+                   f2 = kin_.incomingBeams().negative().ktFlux(x2_, q2_2, mY2_, ff, sf) * M_1_PI;
 
-      return f1 * M_1_PI * f2 * M_1_PI * cent_me;
+      return f1 * f2 * cent_me;
     }
 
     void KTProcess::fillKinematics(bool) {
