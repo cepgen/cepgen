@@ -25,7 +25,19 @@
 
 namespace cepgen {
   /// Enumeration of chemical elements
-  enum class Element { invalid = 0, H = 1, C = 6, O = 8, Al = 13, Cu = 29, Xe = 54, Au = 79, Pb = 82, U = 92 };
+  enum class Element {
+    invalid = -1,
+    neutron = 0,
+    H = 1,
+    C = 6,
+    O = 8,
+    Al = 13,
+    Cu = 29,
+    Xe = 54,
+    Au = 79,
+    Pb = 82,
+    U = 92
+  };
   std::ostream& operator<<(std::ostream& os, const Element& elem);
 
   /// Heavy ion container (Z+A)
@@ -59,9 +71,9 @@ namespace cepgen {
     friend std::ostream& operator<<(std::ostream& os, const HeavyIon& hi);
 
     /// Atomic number
-    Element Z;
+    Element Z{Element::invalid};
     /// Mass number
-    unsigned short A;
+    unsigned short A{0};
   };
 }  // namespace cepgen
 

@@ -48,6 +48,7 @@ namespace cepgen {
       piPlus = 211,
       eta = 221,
       phi1680 = 100333,
+      neutron = 2112,
       proton = 2212,
       diffractiveProton = 9902210
     };

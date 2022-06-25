@@ -29,14 +29,25 @@
     return os << ELEM_EVAL(x)
 
 namespace cepgen {
-  HeavyIon::HeavyIon(pdgid_t pdg)
-      : Z(pdg / 1000000 == 0 ? Element::invalid : (Element)((pdg / 1000) % 1000)),
-        A((Z != Element::invalid) ? pdg % 1000 : 0) {}
+  HeavyIon::HeavyIon(pdgid_t pdg) {
+    if (pdg / 1000000 != 0) {
+      Z = static_cast<Element>((pdg / 1000) % 1000);
+      A = pdg % 1000;
+    } else if (pdg == PDG::neutron) {
+      Z = Element::neutron;
+      A = 1;
+    } else if (pdg == PDG::proton) {
+      Z = Element::H;
+      A = 1;
+    }
+  }
 
   HeavyIon::operator pdgid_t() const {
     // Pythia8 convention/10-1e10+1e6
     if (Z == Element::H && A == 1)
       return PDG::proton;
+    if (Z == Element::neutron && A == 1)
+      return PDG::neutron;
     return (pdgid_t)(1000000 + 1000 * (unsigned short)Z + A);
   }
 
@@ -63,6 +74,7 @@ namespace cepgen {
   std::ostream& operator<<(std::ostream& os, const Element& elem) {
     switch (elem) {
       DEF_ELEM(invalid);
+      DEF_ELEM(neutron);
       DEF_ELEM(H);
       DEF_ELEM(C);
       DEF_ELEM(O);
