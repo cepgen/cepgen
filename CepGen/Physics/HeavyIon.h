@@ -47,14 +47,18 @@ namespace cepgen {
     /// Build from a custom PDG id
     HeavyIon(pdgid_t pdg = 2212);
 
-    /// Heavy ion mass, in GeV/c2
-    double mass() const { return mass(*this); }
+    /// Neutrons mass, in GeV/c2
+    double massN() const;
+    /// Protons mass, in GeV/c2
+    double massP() const;
+    /// Total heavy ion mass, in GeV/c2
+    double mass() const { return massN() + massP(); }
 
     /// Check if the PDG id is compatible with a HI
     static bool isHI(const pdgid_t&);
     /// Mass of a heavy ion, in GeV/c\f$^2\f$
     /// \param hi Heavy ion type
-    static double mass(const HeavyIon& hi);
+    static double mass(const HeavyIon& hi) { return hi.mass(); }
 
     /// Simple proton
     static inline HeavyIon proton() { return HeavyIon(1, Element::H); }
