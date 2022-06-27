@@ -38,7 +38,7 @@ namespace cepgen {
   /// Incoming beams characteristics
   class Beam : public SteeredObject<Beam> {
   public:
-    explicit Beam(const ParametersList& params = ParametersList());  ///< Default constructor
+    explicit Beam(const ParametersList&);  ///< Default constructor
 
     static ParametersDescription description();
 

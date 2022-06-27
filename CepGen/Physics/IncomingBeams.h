@@ -31,9 +31,10 @@ namespace cepgen {
   /// Beam/primary particle's kinematics
   class IncomingBeams : public SteeredObject<IncomingBeams> {
   public:
-    explicit IncomingBeams(const ParametersList& = ParametersList());
+    explicit IncomingBeams(const ParametersList&);
 
     static ParametersDescription description();
+    void setParameters(const ParametersList&) override;
     /// List containing all parameters handled
     const ParametersList& parameters() const override;
 

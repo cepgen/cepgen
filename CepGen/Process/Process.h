@@ -87,15 +87,13 @@ namespace cepgen {
       /// Return a reference to the process kinematics
       Kinematics& kinematics() { return kin_; }
       /// Set the list of kinematic cuts to apply on the outgoing particles' final state
-      /// \param[in] kin The Kinematics object containing the kinematic parameters
-      void setKinematics(const Kinematics& kin);
+      void setKinematics(const Kinematics&);
       /// Compute the weight for a phase-space point
-      /// \param[in] x The phase space point
-      double weight(const std::vector<double>& x);
+      double weight(const std::vector<double>&);
       /// Dump the evaluated point's coordinates in the standard output stream
       void dumpPoint() const;
       /// List all variables handled by this generic process
-      void dumpVariables(std::ostream* os = nullptr) const;
+      void dumpVariables(std::ostream* = nullptr) const;
 
       ///Get the number of dimensions on which the integration is performed
       inline size_t ndim() const { return mapped_variables_.size(); }
@@ -103,11 +101,11 @@ namespace cepgen {
       /// Does the process contain (and hold) an event?
       bool hasEvent() const { return (bool)event_; }
       /// Event object containing all the generated Particle objects and their relationships
-      inline const Event& event() const { return *event_; }
+      const Event& event() const;
       /// Non-const event retrieval method
-      inline Event& event() { return *event_; }
+      Event& event();
       /// Event pointer retrieval method
-      inline Event* eventPtr() { return event_.get(); }
+      Event* eventPtr();
 
     protected:
       double mp_;   ///< Proton mass, in GeV/c\f$^2\f$

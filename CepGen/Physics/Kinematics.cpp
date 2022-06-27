@@ -24,10 +24,14 @@
 namespace cepgen {
   const double Kinematics::MX_MIN = 1.07;  // mp+mpi+-
 
-  Kinematics::Kinematics(const ParametersList& params)
-      : SteeredObject(params), incoming_beams_(params_), cuts_(params_) {
+  Kinematics::Kinematics() : SteeredObject(ParametersList()), incoming_beams_(params_) {
+    CG_DEBUG("Kinematics") << "Initialised an empty kinematics object.";
+  }
+
+  Kinematics::Kinematics(const ParametersList& params) : SteeredObject(params), incoming_beams_(params_) {
     CG_DEBUG("Kinematics") << "Building a Kinematics parameters container "
-                           << "with the following parameters:\n\t" << params << ".";
+                           << "with the following parameters:\n\t" << params_ << ".";
+    setParameters(params_);
     //----- outgoing particles definition
     if (params_.has<std::vector<int> >("minFinalState"))
       for (const auto& pdg : steer<std::vector<int> >("minFinalState"))

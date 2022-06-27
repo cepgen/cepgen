@@ -142,7 +142,10 @@ namespace cepgen {
           PY_ERROR << "Failed to extract the process name from the configuration card '" << file << "'.";
 
         //--- process mode
-        rt_params_->setProcess(proc::ProcessFactory::get().build(python::get<std::string>(pproc_name), proc_params));
+        const auto proc_name = python::get<std::string>(pproc_name);
+        CG_DEBUG("PythonHandler") << "Building a process with name '" << proc_name << "' and parameters:\n\t"
+                                  << proc_params << ".";
+        auto proc_obj = proc::ProcessFactory::get().build(proc_name, proc_params);
 
         //--- process kinematics
         ParametersList pkin;
@@ -156,7 +159,10 @@ namespace cepgen {
 
         if (proc_params.has<int>("mode"))
           pkin.set<int>("mode", proc_params.get<int>("mode"));
-        rt_params_->process().setKinematics(Kinematics(pkin));
+        proc_obj->setKinematics(Kinematics(pkin));
+
+        // feed the runtime parameters with this newly populated process object
+        rt_params_->setProcess(std::move(proc_obj));
 
         //--- taming functions
         auto* ptam = python::element(process, "tamingFunctions");  // borrowed

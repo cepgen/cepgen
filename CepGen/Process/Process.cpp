@@ -247,6 +247,24 @@ namespace cepgen {
         event_->restore();
     }
 
+    const Event& Process::event() const {
+      if (!event_)
+        throw CG_FATAL("Process:event") << "Process does not have an event object!";
+      return *event_;
+    }
+
+    Event& Process::event() {
+      if (!event_)
+        throw CG_FATAL("Process:event") << "Process does not have an event object!";
+      return *event_;
+    }
+
+    Event* Process::eventPtr() {
+      if (!event_)
+        throw CG_FATAL("Process:event") << "Process does not have an event object!";
+      return event_.get();
+    }
+
     void Process::setKinematics(const Kinematics& kin) {
       CG_DEBUG("Process:setKinematics") << "Preparing to set the kinematics parameters. Input parameters: "
                                         << ParametersDescription(kin.allParameters(false)) << ".";

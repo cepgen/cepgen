@@ -30,7 +30,13 @@
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 
 namespace cepgen {
-  IncomingBeams::IncomingBeams(const ParametersList& params) : SteeredObject(params) {
+  IncomingBeams::IncomingBeams(const ParametersList& params)
+      : SteeredObject(params), pos_beam_(params_), neg_beam_(params_) {
+    setParameters(params_);
+  }
+
+  void IncomingBeams::setParameters(const ParametersList& params) {
+    SteeredObject::setParameters(params);
     ParametersList plist_pos, plist_neg;
 
     // positive-z incoming beam
@@ -94,7 +100,7 @@ namespace cepgen {
       throw CG_FATAL("Kinematics") << "Invalid format for beams pz specification!\n\t"
                                    << "A vector of two pz's is required.";
     //--- centre-of-mass energy
-    const double sqrts = steer<double>("sqrtS"), cme = steer<double>("cmEnergy");
+    const auto sqrts = steer<double>("sqrtS"), cme = steer<double>("cmEnergy");
     if (sqrts > 0. || cme > 0.) {
       if (pos_pdg != neg_pdg)
         throw CG_FATAL("Kinematics") << "Trying to set √s with asymmetric beams"
@@ -104,13 +110,11 @@ namespace cepgen {
       p1z = +0.5 * max_sqrts;
       p2z = -0.5 * max_sqrts;
     }
-    if (p1z * p2z < 0.) {
-      if (p1z < 0.)
-        std::swap(p1z, p2z);
-      else
-        throw CG_FATAL("Kinematics") << "pz vector should either have momenta specified in absolute value, or a "
-                                        "(positive pz, negative pz) combination.";
-    }
+    //--- check the sign of both beams' pz
+    if (p1z * p2z < 0. && p1z < 0.)
+      std::swap(p1z, p2z);
+    else if (p1z * p2z > 0. && p2z > 0.)
+      p2z *= -1.;
     plist_pos.set<double>("pz", +fabs(p1z));
     plist_neg.set<double>("pz", -fabs(p2z));
 
@@ -159,8 +163,8 @@ namespace cepgen {
     } else if (params_.has<int>("ktFluxes")) {
       const auto& ktfluxes = steerAs<int, Beam::KTFlux>("ktFluxes");
       if (ktfluxes != Beam::KTFlux::invalid) {
-        plist_pos.set<int>("ktFlux", (int)ktfluxes);
-        plist_neg.set<int>("ktFlux", (int)ktfluxes);
+        plist_pos.setAs<int, Beam::KTFlux>("ktFlux", ktfluxes);
+        plist_neg.setAs<int, Beam::KTFlux>("ktFlux", ktfluxes);
       }
     }
     CG_DEBUG("IncomingBeams") << "Will build the following incoming beams:\n* " << plist_pos << "\n* " << plist_neg
