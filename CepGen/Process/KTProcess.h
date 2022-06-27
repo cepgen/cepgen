@@ -65,8 +65,6 @@ namespace cepgen {
       /// \f$k_{\rm T}\f$-factorised matrix element (event weight)
       /// \return Weight of the point in the phase space to the integral
       virtual double computeKTFactorisedMatrixElement() = 0;
-      /// Set the kinematics of the incoming and outgoing protons (or remnants)
-      void fillPrimaryParticlesKinematics();
       /// Set the kinematics of the outgoing central system
       virtual void fillCentralParticlesKinematics() = 0;
       /// Set the list of intermediate partons in the process

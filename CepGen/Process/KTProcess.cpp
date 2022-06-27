@@ -126,10 +126,8 @@ namespace cepgen {
 
     void KTProcess::fillKinematics(bool) {
       fillCentralParticlesKinematics();  // process-dependent!
-      fillPrimaryParticlesKinematics();
-    }
 
-    void KTProcess::fillPrimaryParticlesKinematics() {
+      // set the kinematics of the incoming and outgoing beams (or remnants)
       const auto& ib1 = event_->oneWithRole(Particle::IncomingBeam1);
       const auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
       auto& ob1 = event_->oneWithRole(Particle::OutgoingBeam1);
