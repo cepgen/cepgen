@@ -149,9 +149,9 @@ namespace cepgen {
     /// \return Particle's mass
     inline double mass() const { return mass_; };
     /// Compute the particle mass
-    /// \param[in] off_shell Allow the particle to be produced off-shell?
+    /// \param[in] offshell Allow the particle to be produced off-shell?
     /// \note This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
-    Particle& computeMass(bool off_shell = false);
+    Particle& computeMass(bool offshell = false);
     /// Set the particle mass, in GeV/c\f$^2\f$
     /// \param m Mass in GeV/c\f$^2\f$
     /// \note This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)

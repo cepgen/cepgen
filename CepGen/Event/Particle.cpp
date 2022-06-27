@@ -62,8 +62,8 @@ namespace cepgen {
 
   float Particle::charge() const { return charge_sign_ * phys_prop_.charge / 3.; }
 
-  Particle& Particle::computeMass(bool off_shell) {
-    if (!off_shell && pdg_id_ != PDG::invalid)  // retrieve the mass from the on-shell particle's properties
+  Particle& Particle::computeMass(bool offshell) {
+    if (!offshell && pdg_id_ != PDG::invalid)  // retrieve the mass from the on-shell particle's properties
       mass_ = phys_prop_.mass;
     else if (momentum_.energy() >= 0.)
       mass_ = sqrt(energy2() - momentum_.p2());
@@ -129,7 +129,7 @@ namespace cepgen {
   Particle& Particle::setMomentum(const Momentum& mom, bool offshell) {
     momentum_ = mom;
     if (offshell || mom.mass() <= 0.)
-      return computeMass();
+      return computeMass(offshell);
     mass_ = momentum_.mass();
     return *this;
   }
