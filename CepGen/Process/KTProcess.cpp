@@ -57,6 +57,11 @@ namespace cepgen {
     }
 
     void KTProcess::prepareKinematics() {
+      const auto& ib1 = event_->oneWithRole(Particle::IncomingBeam1);
+      const auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
+      auto& p1 = event_->oneWithRole(Particle::Parton1);
+      auto& p2 = event_->oneWithRole(Particle::Parton2);
+
       //============================================================================================
       // register the incoming partons' variables
       //============================================================================================
@@ -80,8 +85,8 @@ namespace cepgen {
       // register the incoming partons
       //============================================================================================
 
-      event_->oneWithRole(Particle::Parton1).setPdgId(kin_.incomingBeams().positive().daughterId());
-      event_->oneWithRole(Particle::Parton2).setPdgId(kin_.incomingBeams().negative().daughterId());
+      p1.setPdgId(kin_.incomingBeams().positive().daughterId());
+      p2.setPdgId(kin_.incomingBeams().negative().daughterId());
 
       //============================================================================================
       // register all process-dependent variables
@@ -93,8 +98,8 @@ namespace cepgen {
       // register the outgoing remnants' variables
       //============================================================================================
 
-      mX2_ = event_->oneWithRole(Particle::IncomingBeam1).mass2();
-      mY2_ = event_->oneWithRole(Particle::IncomingBeam2).mass2();
+      mX2_ = ib1.mass2();
+      mY2_ = ib2.mass2();
       if (kin_.incomingBeams().positive().fragmented())
         defineVariable(
             mX2_, Mapping::square, kin_.cuts().remnants.mx(), {1.07, 1000.}, "Positive z proton remnant squared mass");
@@ -125,8 +130,8 @@ namespace cepgen {
     }
 
     void KTProcess::fillPrimaryParticlesKinematics() {
-      auto& ib1 = event_->oneWithRole(Particle::IncomingBeam1);
-      auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
+      const auto& ib1 = event_->oneWithRole(Particle::IncomingBeam1);
+      const auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
       auto& ob1 = event_->oneWithRole(Particle::OutgoingBeam1);
       auto& ob2 = event_->oneWithRole(Particle::OutgoingBeam2);
       auto& p1 = event_->oneWithRole(Particle::Parton1);
