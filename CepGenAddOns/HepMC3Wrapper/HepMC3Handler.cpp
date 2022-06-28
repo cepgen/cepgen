@@ -119,10 +119,18 @@ typedef cepgen::io::HepMC3Handler<WriterAsciiHepMC2> HepMC3HepMC2Handler;
 REGISTER_IO_MODULE("hepmc3_hepmc2", HepMC3HepMC2Handler)
 #if HEPMC3_VERSION_CODE >= 3002005 && HEPMC3_USE_COMPRESSION
 #include <HepMC3/WriterGZ.h>
-typedef cepgen::io::HepMC3Handler<WriterGZ<WriterAscii> > HepMC3AsciiGZHandler;
-typedef cepgen::io::HepMC3Handler<WriterGZ<WriterHEPEVT> > HepMC3HEPEVTGZHandler;
-REGISTER_IO_MODULE("hepmc_gz", HepMC3AsciiGZHandler)
-REGISTER_IO_MODULE("hepevt_gz", HepMC3HEPEVTGZHandler)
+typedef cepgen::io::HepMC3Handler<WriterGZ<WriterAscii, Compression::z> > HepMC3AsciiZHandler;
+typedef cepgen::io::HepMC3Handler<WriterGZ<WriterHEPEVT, Compression::z> > HepMC3HEPEVTZHandler;
+typedef cepgen::io::HepMC3Handler<WriterGZ<WriterAscii, Compression::lzma> > HepMC3AsciiLZMAHandler;
+typedef cepgen::io::HepMC3Handler<WriterGZ<WriterHEPEVT, Compression::lzma> > HepMC3HEPEVTLZMAHandler;
+typedef cepgen::io::HepMC3Handler<WriterGZ<WriterAscii, Compression::bz2> > HepMC3AsciiBZ2Handler;
+typedef cepgen::io::HepMC3Handler<WriterGZ<WriterHEPEVT, Compression::bz2> > HepMC3HEPEVTBZ2Handler;
+REGISTER_IO_MODULE("hepmc_z", HepMC3AsciiZHandler)
+REGISTER_IO_MODULE("hepevt_z", HepMC3HEPEVTZHandler)
+REGISTER_IO_MODULE("hepmc_lzma", HepMC3AsciiLZMAHandler)
+REGISTER_IO_MODULE("hepevt_lzma", HepMC3HEPEVTLZMAHandler)
+REGISTER_IO_MODULE("hepmc_bz2", HepMC3AsciiBZ2Handler)
+REGISTER_IO_MODULE("hepevt_bz2", HepMC3HEPEVTBZ2Handler)
 #endif
 #endif
 
