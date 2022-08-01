@@ -3,6 +3,9 @@ CepGen
 A generic central exclusive processes event generator
 -----------------------------------------------------
 
+[![DOI](https://zenodo.org/badge/360886182.svg)](https://zenodo.org/badge/latestdoi/360886182)
+
+This `git` repository provides the full history on all developments in `CepGen` since the beginning of this project (2014).
 The complete manual (including instructions for installation) may be found at <https://cepgen.hepforge.org>.
 
 You may find a reference paper at: [arXiv:1808.06059 [hep-ph]](https://arxiv.org/abs/1808.06059).
