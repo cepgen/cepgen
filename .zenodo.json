@@ -1,0 +1,17 @@
+{
+    "creators": [
+	{
+	    "affiliation": "CERN",
+	    "name": "Forthomme, Laurent",
+	    "orcid": "0000-0002-3302-336X"
+	}
+    ],
+    "keywords": [
+	"central exclusive processes",
+	"LHC",
+	"two-photon physics",
+	"monte carlo"
+    ],
+    "license": "GPLv3",
+    "upload_type": "software"
+} 
