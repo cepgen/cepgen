@@ -39,8 +39,8 @@ jobs:
         env:
           cache-name: cache-cmake-build
         with:
-          name: build-dir
-          path: ./build
+          path: ${{ github.workspace }}/Package/build
+          key: ${{ runner.os }}-cmake
 
   package:
     needs: compile
@@ -60,7 +60,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: package
-          path: ${GITHUB_WORKSPACE}:/Package/build/*.rpm
+          path: ${{ github.workspace }}/Package/build/*.rpm
 
   test:
     needs: compile
