@@ -23,6 +23,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Integration/AnalyticIntegrator.h"
+#include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/GSLFunctionsWrappers.h"
 
@@ -86,6 +87,7 @@ namespace cepgen {
 
     ParametersDescription GSLIntegrator::description() {
       auto desc = AnalyticIntegrator::description();
+      desc.setDescription("GSL 1D integration algorithms wrapper");
       desc.addAs<int, Mode>("mode", Mode::Fixed).setDescription("integrator algorithm to use");
       desc.addAs<int, FixedType>("fixedType", FixedType::Jacobi).setDescription("type of quadrature");
       desc.add<int>("nodes", 100).setDescription("number of quadrature nodes for the fixed type integration");
@@ -161,3 +163,5 @@ namespace cepgen {
     }
   }  // namespace utils
 }  // namespace cepgen
+
+REGISTER_ANALYTIC_INTEGRATOR("gsl", GSLIntegrator, utils::GSLIntegrator)
