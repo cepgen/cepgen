@@ -27,7 +27,7 @@ namespace cepgen {
         verbosity_(steer<int>("verbosity")) {}
 
   double AnalyticIntegrator::eval(const std::function<double(double)>& func, const Limits& lim) const {
-    return eval(utils::Function1D(func), lim);
+    return eval(utils::Function1D(func), nullptr, lim);
   }
 
   ParametersDescription AnalyticIntegrator::description() {

@@ -29,7 +29,7 @@
     struct BUILDERNM(name) {                                                          \
       BUILDERNM(name)() { AnalyticIntegratorFactory::get().registerModule<obj>(id); } \
     };                                                                                \
-    static const BUILDERNM(name) gFunct##name;                                        \
+    static const BUILDERNM(name) gAnaInteg##name;                                     \
   }
 
 namespace cepgen {

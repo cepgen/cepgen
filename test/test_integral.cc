@@ -20,25 +20,27 @@
 #include <random>
 
 #include "CepGen/Generator.h"
+#include "CepGen/Integration/AnalyticIntegrator.h"
+#include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
-#include "CepGen/Utils/GSLIntegrator.h"
 #include "CepGen/Utils/Graph.h"
 #include "CepGen/Utils/Message.h"
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
-  string plotter;
+  string integrator, plotter;
 
   cepgen::ArgumentsParser(argc, argv)
+      .addOptionalArgument("integrator,i", "analytical integrator to use", &integrator, "gsl")
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "text")
       .parse();
   cepgen::initialise();
 
   auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
-  auto integ = cepgen::utils::GSLIntegrator();
+  auto integ = cepgen::AnalyticIntegratorFactory::get().build(integrator);
 
   // test 1D graph
   cepgen::utils::Graph1D graph_sin("graph_sin", "sin(x)"), graph_cos("graph_cos", "cos(x)"),
@@ -47,7 +49,7 @@ int main(int argc, char* argv[]) {
   for (double x = 0.0001; x <= 2. * M_PI; x += 0.25) {
     graph_sin.addPoint(x, sin(x));
     graph_cos.addPoint(x, cos(x));
-    const auto int_cos = integ.eval([](double x) { return cos(x); }, 0., x);
+    const auto int_cos = integ->eval([](double x) { return cos(x); }, cepgen::Limits{0., x});
     graph_int_cos.addPoint(x, int_cos);
     graph_diff.addPoint(x, sin(x) - int_cos);
   }

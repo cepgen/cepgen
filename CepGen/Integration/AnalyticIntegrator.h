@@ -42,13 +42,9 @@ namespace cepgen {
     double eval(const std::function<double(double)>& func, const Limits& range = {}) const;
     /// Evaluate the integral of a function at a given value
     /// \param[in] func function to integrate
+    /// \param[in] obj (optional) parameters object
     /// \param[in] range (optional) integration range
-    virtual double eval(const utils::Function1D& func, const Limits& range = {}) const = 0;
-    /// Evaluate the integral of a function at a given value
-    /// \param[in] func function to integrate
-    /// \param[in] obj parameters object
-    /// \param[in] range (optional) integration range
-    virtual double eval(const utils::Function1D& func, void* obj, const Limits& range = {}) const = 0;
+    virtual double eval(const utils::Function1D& func, void* obj = nullptr, const Limits& range = {}) const = 0;
 
   protected:
     const Limits range_;

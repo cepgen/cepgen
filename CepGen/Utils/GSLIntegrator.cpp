@@ -35,20 +35,10 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      /// Evaluate the integral of a function at a given value
-      /// \param[in] func function to integrate
-      /// \param[in] xmin (optional) lower integration range
-      /// \param[in] xmax (optional) upper integration range
-      double eval(const Function1D& func, const Limits& lim = {}) const override {
+      double eval(const Function1D& func, void* obj = nullptr, const Limits& lim = {}) const override {
+        if (obj)
+          return eval(GSLFunctionWrapper::build(func, obj).get(), lim);
         return eval(GSLFunctionWrapper::build(func, func_params_).get(), lim);
-      }
-      /// Evaluate the integral of a function at a given value
-      /// \param[in] func function to integrate
-      /// \param[in] obj parameters object
-      /// \param[in] xmin (optional) lower integration range
-      /// \param[in] xmax (optional) upper integration range
-      double eval(const Function1D& func, void* obj, const Limits& lim = {}) const override {
-        return eval(GSLFunctionWrapper::build(func, obj).get(), lim);
       }
 
     private:
