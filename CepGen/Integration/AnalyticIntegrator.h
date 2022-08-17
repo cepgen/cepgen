@@ -1,0 +1,60 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2022  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef CepGen_Integration_AnalyticIntegrator_h
+#define CepGen_Integration_AnalyticIntegrator_h
+
+#include <functional>
+
+#include "CepGen/Modules/NamedModule.h"
+#include "CepGen/Utils/Limits.h"
+
+namespace cepgen {
+  namespace utils {
+    class Function1D;
+  }
+  /// Analytic (functional) integration algorithm
+  class AnalyticIntegrator : public NamedModule<std::string> {
+  public:
+    /// Integrator algorithm constructor
+    explicit AnalyticIntegrator(const ParametersList& params);
+
+    static ParametersDescription description();
+
+    /// Evaluate the integral of a function at a given value
+    /// \param[in] func function to integrate
+    /// \param[in] range (optional) integration range
+    double eval(const std::function<double(double)>& func, const Limits& range = {}) const;
+    /// Evaluate the integral of a function at a given value
+    /// \param[in] func function to integrate
+    /// \param[in] range (optional) integration range
+    virtual double eval(const utils::Function1D& func, const Limits& range = {}) const = 0;
+    /// Evaluate the integral of a function at a given value
+    /// \param[in] func function to integrate
+    /// \param[in] obj parameters object
+    /// \param[in] range (optional) integration range
+    virtual double eval(const utils::Function1D& func, void* obj, const Limits& range = {}) const = 0;
+
+  protected:
+    const Limits range_;
+    const ParametersList func_params_;
+    const int verbosity_;  ///< Integrator verbosity
+  };
+}  // namespace cepgen
+
+#endif
