@@ -319,6 +319,7 @@ namespace cepgen {
       return obj;
     }
 
+    template bool isVector<ParametersList>(PyObject*);
     template ObjectPtr newTuple<bool>(const std::vector<bool>&);
     template ObjectPtr newTuple<int>(const std::vector<int>&);
     template ObjectPtr newTuple<double>(const std::vector<double>&);

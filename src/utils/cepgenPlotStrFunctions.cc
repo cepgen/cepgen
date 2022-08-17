@@ -99,12 +99,14 @@ int main(int argc, char* argv[]) {
   for (const auto& sf_type : strfun_types) {
     auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(sf_type);
     const auto sf_name = cepgen::strfun::StructureFunctionsFactory::get().describe(sf_type);
-    g_strfuns_f2.emplace_back("f2_" + sf_type, sf_name);
-    g_strfuns_fl.emplace_back("fl_" + sf_type, sf_name);
-    g_strfuns_fe.emplace_back("fe_" + sf_type, sf_name);
-    g_strfuns_fm.emplace_back("fm_" + sf_type, sf_name);
-    g_strfuns_w1.emplace_back("w1_" + sf_type, sf_name);
-    g_strfuns_w2.emplace_back("w2_" + sf_type, sf_name);
+    ostringstream os;
+    os << sf_type;
+    g_strfuns_f2.emplace_back("f2_" + os.str(), sf_name);
+    g_strfuns_fl.emplace_back("fl_" + os.str(), sf_name);
+    g_strfuns_fe.emplace_back("fe_" + os.str(), sf_name);
+    g_strfuns_fm.emplace_back("fm_" + os.str(), sf_name);
+    g_strfuns_w1.emplace_back("w1_" + os.str(), sf_name);
+    g_strfuns_w2.emplace_back("w2_" + os.str(), sf_name);
     strfuns.emplace_back(move(sf));
   }
   for (int i = 0; i < num_points; ++i) {

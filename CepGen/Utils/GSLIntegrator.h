@@ -66,6 +66,8 @@ namespace cepgen {
       const Limits range_;
       const Mode mode_;
       const FixedType fixed_type_;
+      const int nodes_;
+      const double alpha_, beta_;
       const size_t limit_;
       const double epsabs_, epsrel_;
       const ParametersList func_params_;
