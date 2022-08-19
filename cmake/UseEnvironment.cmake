@@ -37,7 +37,6 @@ endif()
 #--- searching for GSL
 find_library(GSL_LIB gsl HINTS $ENV{GSL_DIR} PATH_SUFFIXES lib REQUIRED)
 find_path(GSL_INCLUDE gsl HINTS $ENV{GSL_DIR} PATH_SUFFIXES include REQUIRED)
-list(APPEND CEPGEN_CORE_EXT ${GSL_LIB})
 #--- either use GSL's CBLAS or OpenBLAS implementation
 find_library(OPENBLAS_LIB openblas HINTS $ENV{OPENBLAS_DIR} PATH_SUFFIXES lib)
 if(OPENBLAS_LIB)
