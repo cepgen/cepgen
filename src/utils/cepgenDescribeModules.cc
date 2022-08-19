@@ -28,6 +28,7 @@
 #include "CepGen/Modules/DerivatorFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/EventExporterFactory.h"
+#include "CepGen/Modules/EventImporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
@@ -126,6 +127,7 @@ int main(int argc, char* argv[]) {
     LOOP_FACTORY("Cards steering", cepgen::CardsHandlerFactory);
     // event management
     LOOP_FACTORY("Process", cepgen::ProcessFactory);
+    LOOP_FACTORY("Event import", cepgen::EventImporterFactory);
     LOOP_FACTORY("Event generation", cepgen::GeneratorWorkerFactory);
     LOOP_FACTORY("Event modification", cepgen::EventModifierFactory);
     LOOP_FACTORY("Event export", cepgen::EventExporterFactory);

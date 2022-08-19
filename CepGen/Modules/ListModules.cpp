@@ -29,6 +29,7 @@
 #include "CepGen/Modules/DerivatorFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/EventExporterFactory.h"
+#include "CepGen/Modules/EventImporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
@@ -77,6 +78,7 @@ namespace cepgen {
       });
       list_modules(AlphaEMFactory::get(), "alpha(EM) evolution algorithms");
       list_modules(AlphaSFactory::get(), "alpha(s) evolution algorithms");
+      list_modules(EventImporterFactory::get(), "Event import modules");
       list_modules(GeneratorWorkerFactory::get(), "Event generation modules");
       list_modules(EventModifierFactory::get(), "Event modification modules");
       list_modules(EventExporterFactory::get(), "Export modules");
