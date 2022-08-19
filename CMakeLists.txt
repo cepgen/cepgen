@@ -67,14 +67,14 @@ set(ROOT_CXX_STANDARD 17)
 #----- include external paths
 
 include(GNUInstallDirs)
-include(UseEnvironment)
 
+set(CEPGEN_CORE_EXT ${GSL_LIB} dl)
 set(CEPGEN_LIBRARIES)
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
-set(CEPGEN_CORE_EXT ${GSL_LIB} ${GSL_CBLAS_LIB} dl)
 set(CEPGEN_HAS_FUNCTIONAL OFF)
 set(CEPGEN_ADDONS_FILE "${CMAKE_CURRENT_BINARY_DIR}/CepGenAddOns.txt")
 
+include(UseEnvironment)
 include(BuildUtils)
 
 #----- enable fortran for external libraries linking
