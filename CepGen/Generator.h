@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,14 +25,14 @@
 /**
  * \mainpage Foreword
  * This Monte Carlo generator was developed as a modern version of the LPAIR code introduced
- * in the early 1990s by J. Vermaseren *et al*\cite Baranov:1991yq\cite Vermaseren:1982cz. This latter allows to
- * compute the cross-section and to generate events for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$
- * process in the scope of high energy physics.
+ * in the early 1990s by J. Vermaseren *et al*\cite Baranov:1991yq\cite Vermaseren:1982cz. This
+ * latter allows to compute the cross-section and to generate events for the
+ * \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$ process for ee, ep, and pp collisions.
  *
  * Soon after the integration of its matrix element, it was extended as a tool to compute and
  * generate events for any generic 2\f$\rightarrow\f$ 3 central exclusive process.
- * To do so, the main operation performed here is the integration of the matrix element (given as a
- * subset of a Process object) over the full available phase space.
+ * To do so, the main operation performed here is the integration of the matrix element (given
+ * as a subset of a Process object) over the full available phase space.
  *
  */
 
@@ -120,23 +120,30 @@ namespace cepgen {
     /// Last error on the cross section computed by the generator
     double crossSectionError() const { return result_error_; }
 
-    //void terminate();
+    // void terminate();
     /// \deprecated Replaced by the generic method \a generate.
-    [[deprecated("Please use generate instead")]] const Event& generateOneEvent(Event::callback callback = nullptr);
+    [[deprecated("Please use generate or next instead")]] const Event& generateOneEvent(Event::callback = nullptr);
     /// Launch the generation of events
-    void generate(size_t num_events = 0, Event::callback callback = nullptr);
+    void generate(size_t num_events = 0, Event::callback = nullptr);
+    /// Generate one event
+    /// \param[in] callback Callback function where the generated event can be fed
+    const Event& next(Event::callback callback = nullptr);
     /// Compute one single point from the total phase space
     /// \param[in] x the n-dimensional point to compute
     /// \return the function value for the given point
     double computePoint(const std::vector<double>& x);
 
   private:
+    /// Initialise the generation of events
+    void initialise();
     /// Physical Parameters used in the events generation and cross-section computation
     std::unique_ptr<Parameters> parameters_;
     /// Generator worker instance
     std::unique_ptr<GeneratorWorker> worker_;
     /// Integration algorithm
     std::unique_ptr<Integrator> integrator_;
+    /// Has the event generator already been initialised?
+    bool initialised_{false};
     /// Cross section value computed at the last integration
     double result_{-1.};
     /// Error on the cross section as computed in the last integration
