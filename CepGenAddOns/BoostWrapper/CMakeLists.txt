@@ -6,7 +6,11 @@ endif()
 
 include_directories(${PROJECT_SOURCE_DIR})
 
-set(sources BoostTreeHandler.cpp BoostTreeUtils.cpp)
+set(sources BoostTreeHandler.cpp
+            BoostTreeUtils.cpp
+            BoostTrapAnalyticalIntegrator.cpp
+            BoostGaussKronrodAnalyticalIntegrator.cpp
+            BoostGaussLegendreAnalyticalIntegrator.cpp)
 file(GLOB boost_int_include ${Boost_INCLUDE_DIRS}/boost/math/quadrature/naive_monte_carlo.hpp)
 file(GLOB boost_py_include ${Boost_INCLUDE_DIRS}/boost/python.hpp)
 if(boost_int_include)
@@ -21,5 +25,5 @@ endif()
 cepgen_build(CepGenBoost SOURCES ${sources}
     EXT_LIBS ${Boost_LIBRARIES}
     EXT_HEADERS ${Boost_INCLUDE_DIRS}
-    CFLAGS -pthread
+    CFLAGS "-pthread -Wno-pedantic"
     INSTALL_COMPONENT boost)

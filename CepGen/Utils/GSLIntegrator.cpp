@@ -21,14 +21,51 @@
 #include <gsl/gsl_integration.h>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/SteeredObject.h"
+#include "CepGen/Integration/AnalyticIntegrator.h"
+#include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Utils/Functional.h"
-#include "CepGen/Utils/GSLIntegrator.h"
+#include "CepGen/Utils/GSLFunctionsWrappers.h"
 
 namespace cepgen {
   namespace utils {
+    class GSLIntegrator final : public AnalyticIntegrator {
+    public:
+      explicit GSLIntegrator(const ParametersList&);
+
+      static ParametersDescription description();
+
+      double eval(const Function1D& func, void* obj = nullptr, const Limits& lim = {}) const override {
+        if (obj)
+          return eval(GSLFunctionWrapper::build(func, obj).get(), lim);
+        return eval(GSLFunctionWrapper::build(func, func_params_).get(), lim);
+      }
+
+    private:
+      enum struct Mode { Fixed = 0, QNG = 1, QAG = 2, QAGS = 3, QAWC = 4 };
+      enum struct FixedType {
+        Legendre = 0,
+        Chebyshev = 1,
+        Gegenbauer = 2,
+        Jacobi = 3,
+        Laguerre = 4,
+        Hermite = 5,
+        Exponential = 6,
+        Rational = 7,
+        Chebyshev2 = 8
+      };
+      double eval(const gsl_function*, const Limits&) const;
+      const Mode mode_;
+      const FixedType fixed_type_;
+      const int nodes_;
+      const double alpha_, beta_;
+      const size_t limit_;
+      const double epsabs_, epsrel_;
+      static constexpr double INVALID = -999.999;
+    };
+
     GSLIntegrator::GSLIntegrator(const ParametersList& params)
-        : SteeredObject(params),
-          range_(steer<Limits>("range")),
+        : AnalyticIntegrator(params),
           mode_(steerAs<int, Mode>("mode")),
           fixed_type_(steerAs<int, FixedType>("fixedType")),
           nodes_(steer<int>("nodes")),
@@ -36,14 +73,11 @@ namespace cepgen {
           beta_(steer<double>("beta")),
           limit_(steerAs<int, size_t>("limit")),
           epsabs_(steer<double>("epsabs")),
-          epsrel_(steer<double>("epsrel")),
-          func_params_(steer<ParametersList>("params")) {}
+          epsrel_(steer<double>("epsrel")) {}
 
     ParametersDescription GSLIntegrator::description() {
-      auto desc = ParametersDescription();
-      desc.add<Limits>("range", Limits{0., 1.}).setDescription("integration range");
-      desc.add<ParametersDescription>("params", ParametersDescription())
-          .setDescription("parameters for the function to be integrated");
+      auto desc = AnalyticIntegrator::description();
+      desc.setDescription("GSL 1D integration algorithms wrapper");
       desc.addAs<int, Mode>("mode", Mode::Fixed).setDescription("integrator algorithm to use");
       desc.addAs<int, FixedType>("fixedType", FixedType::Jacobi).setDescription("type of quadrature");
       desc.add<int>("nodes", 100).setDescription("number of quadrature nodes for the fixed type integration");
@@ -55,19 +89,9 @@ namespace cepgen {
       return desc;
     }
 
-    double GSLIntegrator::eval(const Function1D& func, double xmin, double xmax) const {
-      return eval(GSLFunctionWrapper::build(func, func_params_).get(), xmin, xmax);
-    }
-
-    double GSLIntegrator::eval(const Function1D& func, void* obj, double xmin, double xmax) const {
-      return eval(GSLFunctionWrapper::build(func, obj).get(), xmin, xmax);
-    }
-
-    double GSLIntegrator::eval(const gsl_function* wrp, double xmin, double xmax) const {
-      if (xmin == INVALID)
-        xmin = range_.min();
-      if (xmax == INVALID)
-        xmax = range_.max();
+    double GSLIntegrator::eval(const gsl_function* wrp, const Limits& lim) const {
+      const double xmin = (lim.hasMin() ? lim.min() : range_.min());
+      const double xmax = (lim.hasMax() ? lim.max() : range_.max());
       double result{0.};
       int res = GSL_SUCCESS;
       if (mode_ == Mode::Fixed) {
@@ -129,3 +153,5 @@ namespace cepgen {
     }
   }  // namespace utils
 }  // namespace cepgen
+
+REGISTER_ANALYTIC_INTEGRATOR("gsl", GSLIntegrator, utils::GSLIntegrator)

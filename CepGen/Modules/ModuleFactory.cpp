@@ -25,6 +25,7 @@
 #include "CepGen/Core/ExportModule.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/FormFactors/Parameterisation.h"
+#include "CepGen/Integration/AnalyticIntegrator.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Process/Process.h"
@@ -109,6 +110,7 @@ namespace cepgen {
   template class ModuleFactory<EventModifier, std::string>;
   template class ModuleFactory<formfac::Parameterisation, std::string>;
   template class ModuleFactory<Integrator, std::string>;
+  template class ModuleFactory<AnalyticIntegrator, std::string>;
   template class ModuleFactory<io::ExportModule, std::string>;
   template class ModuleFactory<proc::Process, std::string>;
   template class ModuleFactory<sigrat::Parameterisation, int>;
