@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -124,19 +124,26 @@ namespace cepgen {
     /// \deprecated Replaced by the generic method \a generate.
     [[deprecated("Please use generate instead")]] const Event& generateOneEvent(Event::callback callback = nullptr);
     /// Launch the generation of events
-    void generate(size_t num_events = 0, Event::callback callback = nullptr);
+    void generate(size_t num_events = 0, Event::callback = nullptr);
+    /// Generate one event
+    /// \param[in] callback Callback function where the generated event can be fed
+    const Event& next(Event::callaback callback = nullptr);
     /// Compute one single point from the total phase space
     /// \param[in] x the n-dimensional point to compute
     /// \return the function value for the given point
     double computePoint(const std::vector<double>& x);
 
   private:
+    /// Initialise the generation of events
+    void initialise();
     /// Physical Parameters used in the events generation and cross-section computation
     std::unique_ptr<Parameters> parameters_;
     /// Generator worker instance
     std::unique_ptr<GeneratorWorker> worker_;
     /// Integration algorithm
     std::unique_ptr<Integrator> integrator_;
+    /// Has the event generator already been initialised?
+    bool initialised_{false};
     /// Cross section value computed at the last integration
     double result_{-1.};
     /// Error on the cross section as computed in the last integration

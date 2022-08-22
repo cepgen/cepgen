@@ -139,12 +139,9 @@ namespace cepgen {
       mod->setCrossSection(result_, result_error_);
   }
 
-  const Event& Generator::generateOneEvent(Event::callback callback) {
-    generate(1, callback);
-    return worker_->integrand().process().event();
-  }
+  const Event& Generator::generateOneEvent(Event::callback callback) { return next(callback); }
 
-  void Generator::generate(size_t num_events, Event::callback callback) {
+  void Generator::initialise() {
     CG_TICKER(parameters_->timeKeeper());
 
     if (!parameters_)
@@ -154,6 +151,21 @@ namespace cepgen {
 
     for (auto& mod : parameters_->outputModulesSequence())
       mod->initialise(*parameters_);
+
+    initialised_ = true;
+  }
+
+  const Event& Generator::next(Event::callback callback) {
+    if (!worker_ || !initialised_)
+      initialise();
+    return worker_->next(callback);
+  }
+
+  void Generator::generate(size_t num_events, Event::callback callback) {
+    CG_TICKER(parameters_->timeKeeper());
+
+    if (!initialised_)
+      initialise();
 
     //--- if invalid argument, retrieve from runtime parameters
     if (num_events < 1) {

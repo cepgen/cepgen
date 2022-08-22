@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,6 +42,9 @@ namespace cepgen {
     /// \param[in] num_events Number of events to generate
     /// \param[in] callback The callback function applied on every event generated
     void generate(size_t num_events = 0, Event::callback callback = nullptr);
+    /// Generate a single event
+    /// \param[in] callback The callback function applied on every event generated
+    bool next(Event::callback callback = nullptr);
     /// Function evaluator
     ProcessIntegrand& integrand() { return *integrand_; }
 
@@ -49,9 +52,6 @@ namespace cepgen {
     /// Placeholder for invalid bin indexing
     static constexpr int UNASSIGNED_BIN = -999;
 
-    /// Generate a single event
-    /// \param[in] callback The callback function applied on every event generated
-    bool next(Event::callback callback = nullptr);
     /// Store the event in the output file
     /// \param[in] callback The callback function for every event generated
     /// \return A boolean stating whether or not the event was successfully saved
