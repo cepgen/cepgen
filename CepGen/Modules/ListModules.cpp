@@ -20,6 +20,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
@@ -60,6 +61,7 @@ namespace cepgen {
 
       list_modules(card::CardsHandlerFactory::get(), "Steering cards parsers");
       list_modules(IntegratorFactory::get(), "Integration algorithms");
+      list_modules(AnalyticIntegratorFactory::get(), "Analytic integration algorithms");
       list_modules(proc::ProcessFactory::get(), "Physics processes");
       list_modules(formfac::FormFactorsFactory::get(), "Beam form factors modellings");
       list_int_modules(sigrat::SigmaRatiosFactory::get(), "Cross section ratios modellings");
