@@ -36,7 +36,7 @@ namespace cepgen {
   Generator::Generator(bool safe_mode) : parameters_(new Parameters) {
     static bool init = false;
     if (!init) {
-      initialise(safe_mode);
+      cepgen::initialise(safe_mode);
       init = true;
       CG_DEBUG("Generator:init") << "Generator initialised";
     }
@@ -157,15 +157,20 @@ namespace cepgen {
 
   const Event& Generator::next(Event::callback callback) {
     if (!worker_ || !initialised_)
-      initialise();
-    return worker_->next(callback);
+      this->initialise();
+    size_t num_try = 0;
+    while (!worker_->next(callback)) {
+      if (num_try++ > 5)
+        throw CG_FATAL("Generator:next") << "Failed to generate the next event!";
+    }
+    return worker_->integrand().process().event();
   }
 
   void Generator::generate(size_t num_events, Event::callback callback) {
     CG_TICKER(parameters_->timeKeeper());
 
     if (!initialised_)
-      initialise();
+      this->initialise();
 
     //--- if invalid argument, retrieve from runtime parameters
     if (num_events < 1) {
