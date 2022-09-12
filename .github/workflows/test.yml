@@ -6,6 +6,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
+  INSTALL_PATH: /Package/install
 jobs:
   compile:
     runs-on: ubuntu-latest
@@ -24,10 +25,11 @@ jobs:
       - name: CMake configuration
         run: |
           cd /Package
+          echo "${{ env.INSTALL_PATH }}" >> $GITHUB_PATH
           source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
           mkdir -p build/ install/
           cd build
-          cmake3 -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always" -GNinja ..
+          cmake3 -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_PATH }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always" -GNinja ..
       - name: Install
         run: |
           cd /Package
