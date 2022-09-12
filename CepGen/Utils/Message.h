@@ -21,6 +21,7 @@
 
 #include <map>
 #include <set>
+#include <sstream>
 
 #include "CepGen/Utils/Logger.h"
 
