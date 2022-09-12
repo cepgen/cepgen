@@ -15,104 +15,49 @@ jobs:
         CI_IMAGE: ['laufor/ci-images:cepgen-cc7']
     container:
       image: ${{ matrix.CI_IMAGE }}
-      volumes:
-        - ${GITHUB_WORKSPACE}:/Package
+      #volumes:
         #- /cvmfs:/cvmfs:shared
+      options: -v ${{ github.workspace }}:/Package
     steps:
       - uses: actions/checkout@v2
       #- uses: cvmfs-contrib/github-action-cvmfs@v2
       - name: CMake configuration
         run: |
-          cd Package
+          cd /Package
           source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
           mkdir -p build/ install/
           cd build
           cmake3 -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always" -GNinja ..
       - name: Install
         run: |
-          cd Package
-          cd build;\
+          cd /Package
+          cd build
           ninja -k0 install
-      - name: Prepare cache
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-cmake-build
-        with:
-          path: ${{ github.workspace }}/Package/build
-          key: ${{ runner.os }}-cmake
-
-  package:
-    needs: compile
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-    container:
-      image: laufor/ci-images:cepgen-cc7
-      volumes:
-        - /cvmfs:/cvmfs:shared
-    steps:
       - name: Generate cepgen package
         run: |
-          cd Package
+          cd /Package
           cd build
           ninja -k0 package
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: package
-          path: ${{ github.workspace }}/Package/build/*.rpm
-
-  test:
-    needs: compile
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-    container:
-      image: laufor/ci-images:cepgen-cc7
-      volumes:
-        - /cvmfs:/cvmfs:shared
-    steps:
+          path: ${{ github.workspace }}/build/*.rpm
       - name: Testing cepgen executable
         run: |
-          cd Package
+          cd /Package
           source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
           cd build
-          ./cepgen Cards/lpair_cfg.py
-
-  test-package:
-    needs: package
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-    container:
-      image: laufor/ci-images:cepgen-cc7
-      volumes:
-        - /cvmfs:/cvmfs:shared
-    steps:
-      - name: Retrieve package
-        uses: actions/download-artifact@v3
-        with:
-          name: package
-      - name: Testing cepgen executable
+          valgrind --show-leak-kinds=all --leak-check=full ./cepgen Cards/lpair_cfg.py
+      - name: Testing cepgen executable (packaged)
         run: |
-          cd Package
+          cd /Package
           source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
           rpm -ivvh *.rpm
           cepgen Cards/lpair_cfg.py
-
-  ctest:
-    needs: compile
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-    container:
-      image: laufor/ci-images:cepgen-cc7
-      volumes:
-        - /cvmfs:/cvmfs:shared
-    steps:
       - name: Testing CI recipes
         run: |
-          cd Package
+          cd /Package
           source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
           cd build
           ninja -k0 && ctest --output-on-failure
