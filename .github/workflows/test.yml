@@ -11,29 +11,28 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      matrix:
+        CI_IMAGE: ['laufor/ci-images:cepgen-cc7']
+    container:
+      image: ${{ matrix.CI_IMAGE }}
+      volumes:
+        - ${GITHUB_WORKSPACE}:/Package
+        #- /cvmfs:/cvmfs:shared
     steps:
       - uses: actions/checkout@v2
       #- uses: cvmfs-contrib/github-action-cvmfs@v2
-      - name: Start container
-        run: |
-          docker run -it --name CI_container -v ${GITHUB_WORKSPACE}:/Package -v shared -d laufor/ci-images:cepgen-cc7 /bin/bash
       - name: CMake configuration
         run: |
-          docker exec CI_container /bin/bash -c 'cd Package;\
-            source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null;\
-            mkdir -p build/ install/;\
-            cd build;\
-            cmake3 -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always" -GNinja ..;'
-      - name: Build
-        run: |
-          docker exec CI_container /bin/bash -c 'cd Package;\
-            cd build;\
-            ninja -k0;'
+          cd Package
+          source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
+          mkdir -p build/ install/
+          cd build
+          cmake3 -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always" -GNinja ..
       - name: Install
         run: |
-          docker exec CI_container /bin/bash -c 'cd Package;\
-            cd build;\
-            ninja -k0 install;'
+          cd Package
+          cd build;\
+          ninja -k0 install
       - name: Prepare cache
         uses: actions/cache@v2
         env:
@@ -47,15 +46,16 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+    container:
+      image: laufor/ci-images:cepgen-cc7
+      volumes:
+        - /cvmfs:/cvmfs:shared
     steps:
-      - name: Start container
-        run: |
-          docker run -it --name CI_container -v ${GITHUB_WORKSPACE}:/Package -v shared -d laufor/ci-images:cepgen-cc7 /bin/bash
       - name: Generate cepgen package
         run: |
-          docker exec CI_container /bin/bash -c 'cd Package;\
-            cd build;\
-            ninja -k0 package;'
+          cd Package
+          cd build
+          ninja -k0 package
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -67,49 +67,52 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+    container:
+      image: laufor/ci-images:cepgen-cc7
+      volumes:
+        - /cvmfs:/cvmfs:shared
     steps:
-      - name: Start container
-        run: |
-          docker run -it --name CI_container -v ${GITHUB_WORKSPACE}:/Package -v shared -d laufor/ci-images:cepgen-cc7 /bin/bash
       - name: Testing cepgen executable
         run: |
-          docker exec CI_container /bin/bash -c 'cd Package;\
-            source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null;\
-            cd build;\
-            ./cepgen Cards/lpair_cfg.py;'
+          cd Package
+          source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
+          cd build
+          ./cepgen Cards/lpair_cfg.py
 
   test-package:
     needs: package
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+    container:
+      image: laufor/ci-images:cepgen-cc7
+      volumes:
+        - /cvmfs:/cvmfs:shared
     steps:
-      - name: Start container
-        run: |
-          docker run -it --name CI_container -v ${GITHUB_WORKSPACE}:/Package -v shared -d laufor/ci-images:cepgen-cc7 /bin/bash
       - name: Retrieve package
         uses: actions/download-artifact@v3
         with:
           name: package
       - name: Testing cepgen executable
         run: |
-          docker exec CI_container /bin/bash -c 'cd Package;\
-            source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null;\
-            rpm -ivvh *.rpm;\
-            cepgen Cards/lpair_cfg.py;'
+          cd Package
+          source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
+          rpm -ivvh *.rpm
+          cepgen Cards/lpair_cfg.py
 
   ctest:
     needs: compile
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+    container:
+      image: laufor/ci-images:cepgen-cc7
+      volumes:
+        - /cvmfs:/cvmfs:shared
     steps:
-      - name: Start container
-        run: |
-          docker run -it --name CI_container -v ${GITHUB_WORKSPACE}:/Package -v shared -d laufor/ci-images:cepgen-cc7 /bin/bash
       - name: Testing CI recipes
         run: |
-          docker exec CI_container /bin/bash -c 'cd Package;\
-            source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null;\
-            cd build;\
-            ninja -k0 && ctest --output-on-failure;'
+          cd Package
+          source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
+          cd build
+          ninja -k0 && ctest --output-on-failure
