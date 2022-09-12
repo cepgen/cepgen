@@ -48,6 +48,9 @@ jobs:
     strategy:
       fail-fast: false
     steps:
+      - name: Start container
+        run: |
+          docker run -it --name CI_container -v ${GITHUB_WORKSPACE}:/Package -v shared -d laufor/ci-images:cepgen-cc7 /bin/bash
       - name: Generate cepgen package
         run: |
           docker exec CI_container /bin/bash -c 'cd Package;\
@@ -65,6 +68,9 @@ jobs:
     strategy:
       fail-fast: false
     steps:
+      - name: Start container
+        run: |
+          docker run -it --name CI_container -v ${GITHUB_WORKSPACE}:/Package -v shared -d laufor/ci-images:cepgen-cc7 /bin/bash
       - name: Testing cepgen executable
         run: |
           docker exec CI_container /bin/bash -c 'cd Package;\
@@ -78,6 +84,9 @@ jobs:
     strategy:
       fail-fast: false
     steps:
+      - name: Start container
+        run: |
+          docker run -it --name CI_container -v ${GITHUB_WORKSPACE}:/Package -v shared -d laufor/ci-images:cepgen-cc7 /bin/bash
       - name: Retrieve package
         uses: actions/download-artifact@v3
         with:
@@ -95,6 +104,9 @@ jobs:
     strategy:
       fail-fast: false
     steps:
+      - name: Start container
+        run: |
+          docker run -it --name CI_container -v ${GITHUB_WORKSPACE}:/Package -v shared -d laufor/ci-images:cepgen-cc7 /bin/bash
       - name: Testing CI recipes
         run: |
           docker exec CI_container /bin/bash -c 'cd Package;\
