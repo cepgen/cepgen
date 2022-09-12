@@ -33,6 +33,8 @@
 
 namespace cepgen {
   namespace card {
+    const std::string gCommandLineHandler = ".cmd";
+
     /// Command line parser
     class CommandLineHandler final : public Handler {
     public:
