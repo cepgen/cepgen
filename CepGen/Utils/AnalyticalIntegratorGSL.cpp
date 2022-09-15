@@ -19,6 +19,7 @@
 #include <gsl/gsl_deriv.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_integration.h>
+#include <gsl/gsl_version.h>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/SteeredObject.h"
@@ -85,10 +86,12 @@ namespace cepgen {
       static constexpr double INVALID = -999.999;
     };
 
-    double AnalyticalIntegratorGSL::eval(const gsl_function* wrp, const Limits& lim) const {
+    double AnalyticalIntegratorGSL::eval([[maybe_unused]] const gsl_function* wrp,
+                                         [[maybe_unused]] const Limits& lim) const {
+      double result{0.};
+#if defined(GSL_MAJOR_VERSION) && (GSL_MAJOR_VERSION > 2 || (GSL_MAJOR_VERSION == 2 && GSL_MINOR_VERSION >= 1))
       const double xmin = (lim.hasMin() ? lim.min() : range_.min());
       const double xmax = (lim.hasMax() ? lim.max() : range_.max());
-      double result{0.};
       int res = GSL_SUCCESS;
       if (mode_ == Mode::Fixed) {
         const gsl_integration_fixed_type* type{nullptr};
@@ -146,6 +149,9 @@ namespace cepgen {
       if (res != GSL_SUCCESS)
         CG_WARNING("AnalyticalIntegratorGSL")
             << "Failed to evaluate the integral. GSL error: " << gsl_strerror(res) << ".";
+#else
+      CG_WARNING("AnalyticalIntegratorGSL") << "GSL version above 2.1 is required for integration.";
+#endif
       return result;
     }
   }  // namespace utils
