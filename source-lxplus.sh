@@ -40,3 +40,7 @@ export YODA_DIR=${LCG_DIR}/MCGenerators/yoda/1.9.0/${ARCH}
 
 echo "Environment prepared for LXPLUS"
 export CEPGEN_LXPLUS_ENV=1
+
+export PATH=$PWD/install/bin:$PATH
+export LD_LIBRARY_PATH=$PWD/install/lib64:$LD_LIBRARY_PATH
+export CEPGEN_PATH=$PWD/install/share/CepGen

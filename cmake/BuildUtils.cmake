@@ -115,13 +115,13 @@ macro(cepgen_build mod_name)
         install(TARGETS ${mod_name}
             DESTINATION ${CMAKE_INSTALL_LIBDIR}
             COMPONENT ${ARG_INSTALL_COMPONENT})
-        install(DIRECTORY
-            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-            COMPONENT ${ARG_INSTALL_COMPONENTS}
+        install(DIRECTORY ./
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${mod_name}
+            COMPONENT ${ARG_INSTALL_COMPONENT}
             FILES_MATCHING PATTERN "*.h")
         foreach(_t ${utils})
             install(TARGETS ${_t}
-                DESTINATION ${CMAKE_INSTALL_BINDIR}
+                DESTINATION ${CMAKE_INSTALL_BINDIR}/${mod_name}
                 COMPONENT ${ARG_INSTALL_COMPONENT})
         endforeach()
         file(APPEND ${CEPGEN_ADDONS_FILE} "${mod_name}\n")

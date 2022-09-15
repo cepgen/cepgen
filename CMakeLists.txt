@@ -50,11 +50,9 @@ if(CMAKE_BUILD_TESTS)
   endif()
 endif()
 
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE CACHE BOOL "RPATH USE LINK PATH")
 #set(CMAKE_INSTALL_RPATH "$ORIGIN")
 #set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "SET DEFAULT INSTALL_PREFIX" FORCE)
-endif()
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake $ENV{ROOTSYS}/cmake)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -64,9 +62,19 @@ set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -O2")
 set(CMAKE_C_FLAGS_RELEASE "-O2")
 set(ROOT_CXX_STANDARD 17)
 
-#----- include external paths
+#----- set a better default for installation directory
+
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_LIST_DIR}/install" CACHE PATH "default install path" FORCE)
+endif()
 
 include(GNUInstallDirs)
+
+# Give user the choice to override installation directories
+set(INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
+set(INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
+set(INSTALL_INCLUDE_DIR include CACHE PATH
+  "Installation directory for header files")
 
 set(CEPGEN_CORE_EXT dl)
 set(CEPGEN_LIBRARIES)
@@ -84,16 +92,16 @@ enable_language(Fortran)
 #----- build all the intermediate objects
 
 include_directories(${PROJECT_SOURCE_DIR})
+if(CMAKE_BUILD_CORE)
+  add_subdirectory(CepGen)
+  list(APPEND CEPGEN_LIBRARIES CepGen)
+endif()
 if(CMAKE_BUILD_PROCESSES)
   add_subdirectory(CepGenProcesses)
 endif()
 if(CMAKE_BUILD_ADDONS)
   file(REMOVE ${CEPGEN_ADDONS_FILE})
   add_subdirectory(CepGenAddOns)
-endif()
-if(CMAKE_BUILD_CORE)
-  add_subdirectory(CepGen)
-  list(APPEND CEPGEN_LIBRARIES CepGen)
 endif()
 
 #----- copy the input cards and other files
@@ -120,9 +128,6 @@ endif()
 
 #----- installation rules
 
-install(DIRECTORY CepGen
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  COMPONENT devel FILES_MATCHING PATTERN "*.h")
 install(DIRECTORY Cards
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
   COMPONENT lib FILES_MATCHING PATTERN "*.py")
