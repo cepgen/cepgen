@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <cstrings>
 #include <sstream>
 
 #include "CepGen/Core/Exception.h"

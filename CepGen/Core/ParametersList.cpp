@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <climits>
 #include <iomanip>
+#include <limits>
 #include <regex>
 
 #include "CepGen/Core/Exception.h"
@@ -417,7 +417,7 @@ namespace cepgen {
       return int_values_.at(key);
     if (has<unsigned long long>(key)) {
       const auto ulong_val = ulong_values_.at(key);
-      if (ulong_val >= INT_MAX)
+      if (ulong_val >= std::numeric_limits<int>::max())
         CG_WARNING("ParametersList:get")
             << "Trying to retrieve a (too) long unsigned integer with an integer getter. Please fix your code.";
       return (int)ulong_val;
