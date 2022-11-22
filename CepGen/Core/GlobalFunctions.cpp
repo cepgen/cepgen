@@ -44,6 +44,8 @@ namespace cepgen {
       return true;
 #ifdef _WIN32
     const auto fullpath = match ? path + ".dll" : path;
+#elif defined(__APPLE__)
+    const auto fullpath = match ? "lib" + path + ".dylib" : path;
 #else
     const auto fullpath = match ? "lib" + path + ".so" : path;
 #endif
