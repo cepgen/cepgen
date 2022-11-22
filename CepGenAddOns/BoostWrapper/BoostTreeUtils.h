@@ -24,16 +24,20 @@
 namespace cepgen {
   class Parameters;
   class ParametersDescription;
+}  // namespace cepgen
 
-  namespace boost {
-    namespace pt = ::boost::property_tree;
+namespace boost {
+  namespace pt = property_tree;
+  namespace cepgen {
+    static constexpr const char* DAUGH_KEY = "DAUGHTER";
     static constexpr const char* MIN_KEY = "min";
     static constexpr const char* MAX_KEY = "max";
-    static constexpr const char* DAUGH_KEY = "DAUGHTER";
 
-    pt::ptree pack(const Parameters&);
-    pt::ptree pack(const ParametersDescription&);
-    pt::ptree pack(const ParametersList&);
+    void add(::cepgen::ParametersList&, const std::string&, const pt::ptree&);
+
+    pt::ptree pack(const ::cepgen::Parameters&);
+    pt::ptree pack(const ::cepgen::ParametersDescription&);
+    pt::ptree pack(const ::cepgen::ParametersList&);
     template <typename T>
     pt::ptree pack(const std::vector<T>&);
     template <>
@@ -43,7 +47,7 @@ namespace cepgen {
     pt::ptree pack(const Limits&);
 
     ParametersList unpack(const pt::ptree&);
-  }  // namespace boost
-}  // namespace cepgen
+  }  // namespace cepgen
+}  // namespace boost
 
 #endif

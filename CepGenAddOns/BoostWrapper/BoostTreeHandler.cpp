@@ -63,9 +63,6 @@ namespace cepgen {
       pt::ptree tree_;
 
     private:
-      static constexpr const char* MIN_KEY = "min";
-      static constexpr const char* MAX_KEY = "max";
-
       static constexpr const char* ADDONS_NAME = "addons";
       static constexpr const char* PROCESS_NAME = "process";
       static constexpr const char* KIN_NAME = "kinematics";
@@ -75,8 +72,6 @@ namespace cepgen {
       static constexpr const char* OUTPUT_NAME = "output";
       static constexpr const char* TIMER_NAME = "timer";
       static constexpr const char* LOGGER_NAME = "logger";
-
-      static void add(ParametersList&, const std::string&, const pt::ptree&);
 
       ParametersList proc_, gen_, log_;
       ParametersList evt_mod_, evt_out_;
@@ -141,27 +136,6 @@ namespace cepgen {
       }
 
       return rt_params_;
-    }
-
-    void BoostTreeHandler::add(ParametersList& base, const std::string& name, const pt::ptree& tree) {
-      auto plist = bc::unpack(tree);
-      //--- first check if we have a limits set
-      if (plist.keys().size() <= 2 && (plist.has<double>(MIN_KEY) || plist.has<double>(MAX_KEY))) {
-        Limits lim;
-        plist.fill<double>(MIN_KEY, lim.min());
-        plist.fill<double>(MAX_KEY, lim.max());
-        base.set<Limits>(name, lim);
-      }
-      //--- then check if daughter is a vector; if true, skip one hierarchy level
-      else if (plist.has<std::vector<int> >(boost::DAUGH_KEY))
-        base.set<std::vector<int> >(name, plist.get<std::vector<int> >(boost::DAUGH_KEY));
-      else if (plist.has<std::vector<double> >(boost::DAUGH_KEY)) {
-        auto vec = plist.get<std::vector<double> >(boost::DAUGH_KEY);
-        base.set<std::vector<double> >(name, vec);
-      } else if (plist.has<std::vector<std::string> >(boost::DAUGH_KEY))
-        base.set<std::vector<std::string> >(name, plist.get<std::vector<std::string> >(boost::DAUGH_KEY));
-      else
-        base.set<ParametersList>(name, plist);
     }
 
     void BoostTreeHandler::pack(const Parameters* params) {

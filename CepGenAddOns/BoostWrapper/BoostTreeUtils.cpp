@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2021  Laurent Forthomme
+ *  Copyright (C) 2020-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -59,8 +59,9 @@ namespace cepgen {
         else if (params.has<std::vector<std::string>>(key))
           out.add_child(key, pack(params.get<std::vector<std::string>>(key)));
         else
-          throw CG_FATAL("BoostConfigWriter") << "Failed to recast the key \"" << key << "\" "
-                                              << "with value \"" << params.getString(key) << "\"!";
+          throw ::cepgen::Exception(__FUNC__, "PythonConfigWriter", ::cepgen::Exception::Type::fatal, __FILE__, __LINE__)
+              << "Failed to recast the key \"" << key << "\" "
+              << "with value \"" << params.getString(key) << "\"!";
       }
       return out;
     }
@@ -135,23 +136,46 @@ namespace cepgen {
                 out.operator[]<std::vector<std::string>>(DAUGH_KEY).emplace_back(it.second.get_value<std::string>());
               }
             }
-          }
-        else if (it.second.get_value<std::string>().find('.') !=
-                 std::string::npos)  // if contains a '.', might be a floating point variable
-          try {
-            out.set<double>(it.first, it.second.get_value<double>());
-          } catch (const ::boost::exception&) {
-            out.set<std::string>(it.first, it.second.get_value<std::string>());
-          }
-        else
-          try {
-            out.set<int>(it.first, it.second.get_value<int>());
-          } catch (const ::boost::exception&) {
-            out.set<std::string>(it.first, it.second.get_value<std::string>());
+            else add(out, it.first, it.second);
+          } catch (const ::cepgen::Exception&) {
+            if (it.second.get_value<std::string>().find('.') != std::string::npos)
+              try {
+                out.set<double>(it.first, it.second.get_value<double>());
+              } catch (const boost::exception&) {
+                out.set<std::string>(it.first, it.second.get_value<std::string>());
+              }
+            else
+              try {
+                out.set<int>(it.first, it.second.get_value<int>());
+              } catch (const boost::exception&) {
+                out.set<std::string>(it.first, it.second.get_value<std::string>());
+              }
           }
       }
       CG_DEBUG("BoostTreeUtils:unpack") << "Unpacked parameters list:\n" << ParametersDescription(out) << ".";
       return out;
     }
+
+    void add(::cepgen::ParametersList& base, const std::string& name, const pt::ptree& tree) {
+      auto plist = unpack(tree);
+      //--- first check if we have a limits set
+      if (plist.keys().size() <= 2 && (plist.has<double>(MIN_KEY) || plist.has<double>(MAX_KEY))) {
+        ::cepgen::Limits lim;
+        plist.fill<double>(MIN_KEY, lim.min());
+        plist.fill<double>(MAX_KEY, lim.max());
+        base.set<::cepgen::Limits>(name, lim);
+      }
+      //--- then check if daughter is a vector; if true, skip one hierarchy level
+      else if (plist.has<std::vector<int>>(DAUGH_KEY))
+        base.set<std::vector<int>>(name, plist.get<std::vector<int>>(DAUGH_KEY));
+      else if (plist.has<std::vector<double>>(DAUGH_KEY)) {
+        auto vec = plist.get<std::vector<double>>(DAUGH_KEY);
+        base.set<std::vector<double>>(name, vec);
+      } else if (plist.has<std::vector<std::string>>(DAUGH_KEY))
+        base.set<std::vector<std::string>>(name, plist.get<std::vector<std::string>>(DAUGH_KEY));
+      else
+        base.set<::cepgen::ParametersList>(name, plist);
+    }
+
   }  // namespace boost
 }  // namespace cepgen
