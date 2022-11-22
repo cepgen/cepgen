@@ -23,23 +23,20 @@
 #include "CepGen/Parameters.h"
 #include "CepGenAddOns/BoostWrapper/BoostTreeUtils.h"
 
-namespace cepgen {
-  namespace boost {
-    pt::ptree pack(const Parameters&) {
+namespace boost {
+  namespace cepgen {
+    pt::ptree pack(const ::cepgen::Parameters&) {
       pt::ptree out;
-      //FIXME implement this
       return out;
     }
 
-    pt::ptree pack(const ParametersDescription& pdesc) { return pack(pdesc.parameters()); }
+    pt::ptree pack(const ::cepgen::ParametersDescription& pdesc) { return pack(pdesc.parameters()); }
 
-    pt::ptree pack(const ParametersList& params) {
+    pt::ptree pack(const ::cepgen::ParametersList& params) {
       pt::ptree out;
       for (const auto& key : params.keys()) {
-        if (params.has<ParametersList>(key))
-          out.add_child(key, pack(params.get<ParametersList>(key)));
-        else if (params.has<bool>(key))
-          out.put(key, params.get<bool>(key));
+        if (params.has<::cepgen::ParametersList>(key))
+          out.add_child(key, pack(params.get<::cepgen::ParametersList>(key)));
         else if (params.has<int>(key))
           out.put(key, params.get<int>(key));
         else if (params.has<double>(key)) {
@@ -48,10 +45,10 @@ namespace cepgen {
           out.put(key, os.str());
         } else if (params.has<std::string>(key))
           out.put(key, params.get<std::string>(key));
-        else if (params.has<Limits>(key))
-          out.add_child(key, pack(params.get<Limits>(key)));
-        else if (params.has<std::vector<ParametersList>>(key))
-          out.add_child(key, pack(params.get<std::vector<ParametersList>>(key)));
+        else if (params.has<::cepgen::Limits>(key))
+          out.add_child(key, pack(params.get<::cepgen::Limits>(key)));
+        else if (params.has<std::vector<::cepgen::ParametersList>>(key))
+          out.add_child(key, pack(params.get<std::vector<::cepgen::ParametersList>>(key)));
         else if (params.has<std::vector<int>>(key))
           out.add_child(key, pack(params.get<std::vector<int>>(key)));
         else if (params.has<std::vector<double>>(key))
@@ -67,7 +64,7 @@ namespace cepgen {
     }
 
     template <>
-    pt::ptree pack<ParametersList>(const std::vector<ParametersList>& vec) {
+    pt::ptree pack<::cepgen::ParametersList>(const std::vector<::cepgen::ParametersList>& vec) {
       pt::ptree out;
       std::transform(vec.begin(), vec.end(), std::back_inserter(out), [](const auto& elem) {
         return std::make_pair("", pack(elem));
@@ -99,7 +96,7 @@ namespace cepgen {
       return out;
     }
 
-    pt::ptree pack(const Limits& lim) {
+    pt::ptree pack(const ::cepgen::Limits& lim) {
       pt::ptree out;
       if (lim.hasMin()) {
         pt::ptree min;
@@ -118,41 +115,43 @@ namespace cepgen {
       return out;
     }
 
-    ParametersList unpack(const pt::ptree& tree) {
-      ParametersList out;
+    ::cepgen::ParametersList unpack(const pt::ptree& tree) {
+      ::cepgen::ParametersList out;
       if (tree.empty())
         return out;
       for (const auto& it : tree) {
-        if (it.first.empty())  // this might be a vector
-          try {
-            out.operator[]<std::vector<ParametersList>>(DAUGH_KEY).emplace_back(unpack(it.second));
-          } catch (const ::boost::exception&) {
+        try {
+          if (it.first.empty())  // this might be a vector
             try {
-              out.operator[]<std::vector<double>>(DAUGH_KEY).emplace_back(it.second.get_value<double>());
-            } catch (const ::boost::exception&) {
+              out.operator[]<std::vector<::cepgen::ParametersList>>(DAUGH_KEY).emplace_back(unpack(it.second));
+            } catch (const boost::exception&) {
               try {
-                out.operator[]<std::vector<int>>(DAUGH_KEY).emplace_back(it.second.get_value<int>());
-              } catch (const ::boost::exception&) {
-                out.operator[]<std::vector<std::string>>(DAUGH_KEY).emplace_back(it.second.get_value<std::string>());
+                out.operator[]<std::vector<double>>(DAUGH_KEY).emplace_back(it.second.get_value<double>());
+              } catch (const boost::exception&) {
+                try {
+                  out.operator[]<std::vector<int>>(DAUGH_KEY).emplace_back(it.second.get_value<int>());
+                } catch (const boost::exception&) {
+                  out.operator[]<std::vector<std::string>>(DAUGH_KEY).emplace_back(it.second.get_value<std::string>());
+                }
               }
             }
-            else add(out, it.first, it.second);
-          } catch (const ::cepgen::Exception&) {
-            if (it.second.get_value<std::string>().find('.') != std::string::npos)
-              try {
-                out.set<double>(it.first, it.second.get_value<double>());
-              } catch (const boost::exception&) {
-                out.set<std::string>(it.first, it.second.get_value<std::string>());
-              }
-            else
-              try {
-                out.set<int>(it.first, it.second.get_value<int>());
-              } catch (const boost::exception&) {
-                out.set<std::string>(it.first, it.second.get_value<std::string>());
-              }
-          }
+          else
+            add(out, it.first, it.second);
+        } catch (const ::cepgen::Exception&) {
+          if (it.second.get_value<std::string>().find('.') != std::string::npos)
+            try {
+              out.set<double>(it.first, it.second.get_value<double>());
+            } catch (const boost::exception&) {
+              out.set<std::string>(it.first, it.second.get_value<std::string>());
+            }
+          else
+            try {
+              out.set<int>(it.first, it.second.get_value<int>());
+            } catch (const boost::exception&) {
+              out.set<std::string>(it.first, it.second.get_value<std::string>());
+            }
+        }
       }
-      CG_DEBUG("BoostTreeUtils:unpack") << "Unpacked parameters list:\n" << ParametersDescription(out) << ".";
       return out;
     }
 
@@ -177,5 +176,5 @@ namespace cepgen {
         base.set<::cepgen::ParametersList>(name, plist);
     }
 
-  }  // namespace boost
-}  // namespace cepgen
+  }  // namespace cepgen
+}  // namespace boost

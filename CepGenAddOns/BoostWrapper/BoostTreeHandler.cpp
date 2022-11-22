@@ -40,7 +40,7 @@
 #include "CepGenAddOns/BoostWrapper/BoostTreeUtils.h"
 
 namespace pt = boost::property_tree;
-namespace bc = cepgen::boost;
+namespace bc = boost::cepgen;
 
 namespace cepgen {
   namespace card {
@@ -89,10 +89,9 @@ namespace cepgen {
 
       try {
         proc_ = bc::unpack(tree_.get_child(PROCESS_NAME));
-        CG_DEBUG("BoostTreeHandler") << "Unpacked process: " << proc_ << ".";
         rt_params_->setProcess(proc::ProcessFactory::get().build(proc_));
-      } catch (const ::boost::exception&) {
-        throw CG_FATAL("BoostTreeHandler") << "Failed to retrieve a valid \"" << std::string(PROCESS_NAME) << "\" block"
+      } catch (const boost::exception&) {
+        throw CG_FATAL("BoostTreeHandler") << "Failed to retrieve a valid \"" << PROCESS_NAME << "\" block"
                                            << " in the steering card!";
       }
       ParametersList par_kinematics;
@@ -131,7 +130,7 @@ namespace cepgen {
             utils::Logger::get().addExceptionRule(mod);
         }
         rt_params_->process().setKinematics(Kinematics(par_kinematics));
-      } catch (const ::boost::exception&) {
+      } catch (const boost::exception&) {
       } catch (const Exception&) {
       }
 

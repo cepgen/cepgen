@@ -41,12 +41,12 @@ namespace boost {
     template <typename T>
     pt::ptree pack(const std::vector<T>&);
     template <>
-    pt::ptree pack(const std::vector<ParametersList>&);
+    pt::ptree pack(const std::vector<::cepgen::ParametersList>&);
     template <>
     pt::ptree pack(const std::vector<double>&);
-    pt::ptree pack(const Limits&);
+    pt::ptree pack(const ::cepgen::Limits&);
 
-    ParametersList unpack(const pt::ptree&);
+    ::cepgen::ParametersList unpack(const pt::ptree&);
   }  // namespace cepgen
 }  // namespace boost
 
