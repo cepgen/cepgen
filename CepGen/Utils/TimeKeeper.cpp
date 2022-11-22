@@ -50,7 +50,7 @@ namespace cepgen {
       };
 
       std::vector<Monitor> mons;
-      double total_time = 0.;  //FIXME to be used in summary
+      double total_time = 0.;
       for (const auto& mon : monitors_) {
         const auto& tm = mon.second;
         const double total = tm.empty() ? -1. : std::accumulate(tm.begin(), tm.end(), 0.);
@@ -77,7 +77,7 @@ namespace cepgen {
                              mon.total * s_to_ms,
                              mon.mean * s_to_ms,
                              mon.rms * s_to_ms);
-
+      oss << "\nTotal time: " << total_time << ".";
       return oss.str();
     }
 

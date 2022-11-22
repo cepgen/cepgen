@@ -76,7 +76,7 @@ set(INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
 set(INSTALL_INCLUDE_DIR include CACHE PATH
   "Installation directory for header files")
 
-set(CEPGEN_CORE_EXT dl)
+set(CEPGEN_CORE_EXT c dl)
 set(CEPGEN_LIBRARIES)
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 set(CEPGEN_HAS_FUNCTIONAL OFF)

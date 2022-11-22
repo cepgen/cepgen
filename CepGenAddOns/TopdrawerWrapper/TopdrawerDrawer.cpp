@@ -166,13 +166,13 @@ namespace cepgen {
         auto line_style = plot_id % line_styles.size();
         if (obj->isGraph1D()) {
           const auto* gr = dynamic_cast<const Graph1D*>(obj);
-          cmds_plots.emplace_back("SET TEXTURE " + line_style);
+          cmds_plots.emplace_back("SET TEXTURE " + line_styles.at(line_style));
           cmds_plots += plot(*gr);
           if (!first)
             first = gr;
         } else if (obj->isHist1D()) {
           const auto* hist = dynamic_cast<const Hist1D*>(obj);
-          cmds_plots.emplace_back("SET TEXTURE " + line_style);
+          cmds_plots.emplace_back("SET TEXTURE " + line_styles.at(line_style));
           cmds_plots += plot(*hist);
           if (!first)
             first = hist;

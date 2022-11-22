@@ -70,6 +70,23 @@ namespace cepgen {
       return pdesc;
     }
 
+    inline bool operator==(const ParticleProperties& oth) const {
+      if (pdgid != oth.pdgid)
+        return false;
+      if (mass != oth.mass)
+        return false;
+      if (charge != oth.charge)
+        return false;
+      if (width != oth.width)
+        return false;
+      if (fermion != oth.fermion)
+        return false;
+      if (colours != oth.colours)
+        return false;
+      return true;
+    }
+    inline bool operator!=(const ParticleProperties& oth) const { return !operator==(oth); }
+
     pdgid_t pdgid{0ull};  ///< PDG identifier
     std::string name;     ///< Particle name
     std::string descr;    ///< Human-readable name

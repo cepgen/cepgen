@@ -162,17 +162,6 @@ namespace cepgen {
     std::string strip(const std::string&);
     /// Check if a string starts with a given token
     bool startsWith(const std::string&, const std::string&);
-    /// All environment variable-related utilities
-    namespace env {
-      /// Get an environment variable
-      std::string get(const std::string& var, const std::string& def = "");
-      /// Set an environment variable
-      void set(const std::string& var, const std::string& value);
-      /// Add a value to an environment variable
-      void append(const std::string& var, const std::string& value);
-      /// Clear an environment variable
-      void unset(const std::string& var);
-    }  // namespace env
     /// Describe an error code
     std::string describeError(int errnum);
   }  // namespace utils

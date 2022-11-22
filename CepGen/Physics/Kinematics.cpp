@@ -24,18 +24,23 @@
 namespace cepgen {
   const double Kinematics::MX_MIN = 1.07;  // mp+mpi+-
 
-  Kinematics::Kinematics(const ParametersList& params)
-      : SteeredObject(params), incoming_beams_(params_), cuts_(params_) {
+  Kinematics::Kinematics() : SteeredObject(ParametersList()), incoming_beams_(params_) {
+    CG_DEBUG("Kinematics") << "Initialised an empty kinematics object.";
+  }
+
+  Kinematics::Kinematics(const ParametersList& params) : SteeredObject(params), incoming_beams_(params_) {
     CG_DEBUG("Kinematics") << "Building a Kinematics parameters container "
-                           << "with the following parameters:\n\t" << params << ".";
+                           << "with the following parameters:\n\t" << params_ << ".";
+    setParameters(params_);
     //----- outgoing particles definition
     if (params_.has<std::vector<int> >("minFinalState"))
       for (const auto& pdg : steer<std::vector<int> >("minFinalState"))
         minimum_final_state_.emplace_back((pdgid_t)pdg);
 
     //--- specify where to look for the grid path for gluon emission
-    if (params.has<std::string>("kmrGridPath"))
-      kmr::GluonGrid::get(ParametersList(params_).set<std::string>("path", steer<std::string>("kmrGridPath")));
+    const auto& kmr_grid_path = steerPath("kmrGridPath");
+    if (!kmr_grid_path.empty())
+      kmr::GluonGrid::get(ParametersList(params_).set<std::string>("path", kmr_grid_path));
   }
 
   void Kinematics::setParameters(const ParametersList& params) {
@@ -75,6 +80,7 @@ namespace cepgen {
     auto desc = ParametersDescription();
     desc += IncomingBeams::description();
     desc += CutsList::description();
+    desc.add<std::string>("kmrGridPath", "").setDescription("path to the KMR interpolation grid");
     return desc;
   }
 }  // namespace cepgen

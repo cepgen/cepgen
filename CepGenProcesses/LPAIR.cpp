@@ -20,15 +20,13 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenProcesses/LPAIR.h"
 
 namespace cepgen {
   namespace proc {
-    const double LPAIR::sconstb_ = 2. * pow(M_PI, 3) / pow(constants::ALPHA_EM, 4);
-
     LPAIR::LPAIR(const ParametersList& params)
         : Process(params, true),
           n_opt_(steer<int>("nopt")),
@@ -583,8 +581,9 @@ namespace cepgen {
       }
 
       const double ecm6 = w4_ / (2. * mc4_), pp6cm = sqrt(ecm6 * ecm6 - masses_.Ml2);
+      const double alpha1 = (*alphaem_)(std::sqrt(-t1_)), alpha2 = (*alphaem_)(std::sqrt(-t2_));
 
-      jacobian_ *= pp6cm / (mc4_ * sconstb_ * s_);
+      jacobian_ *= pp6cm * constb_ * alpha1 * alpha1 * alpha2 * alpha2 / mc4_ / s_;
 
       // Let the most obscure part of this code begin...
 

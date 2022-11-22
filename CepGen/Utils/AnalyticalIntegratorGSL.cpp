@@ -86,8 +86,7 @@ namespace cepgen {
       static constexpr double INVALID = -999.999;
     };
 
-    double AnalyticalIntegratorGSL::eval([[maybe_unused]] const gsl_function* wrp,
-                                         [[maybe_unused]] const Limits& lim) const {
+    double AnalyticalIntegratorGSL::eval(const gsl_function* wrp, const Limits& lim) const {
       double result{0.};
 #if defined(GSL_MAJOR_VERSION) && (GSL_MAJOR_VERSION > 2 || (GSL_MAJOR_VERSION == 2 && GSL_MINOR_VERSION >= 1))
       const double xmin = (lim.hasMin() ? lim.min() : range_.min());
@@ -150,6 +149,7 @@ namespace cepgen {
         CG_WARNING("AnalyticalIntegratorGSL")
             << "Failed to evaluate the integral. GSL error: " << gsl_strerror(res) << ".";
 #else
+      (void)lim;
       CG_WARNING("AnalyticalIntegratorGSL") << "GSL version above 2.1 is required for integration.";
 #endif
       return result;

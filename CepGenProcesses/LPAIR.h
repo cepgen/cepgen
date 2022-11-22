@@ -65,6 +65,7 @@ namespace cepgen {
       static ParametersDescription description();
 
     private:
+      static constexpr double constb_ = 0.5 * M_1_PI * M_1_PI * M_1_PI;
       /**
          * Calculate energies and momenta of the
          *  1st, 2nd (resp. the "proton-like" and the "electron-like" incoming particles),
@@ -94,7 +95,6 @@ namespace cepgen {
          */
       bool pickin();
 
-      static const double sconstb_;
       /// Internal switch for the optimised code version (LPAIR legacy)
       const int n_opt_;
       pdgid_t pair_;

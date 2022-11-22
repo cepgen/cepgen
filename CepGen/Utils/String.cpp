@@ -16,19 +16,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <math.h>
-#include <string.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #include <array>
+#include <cmath>
 #include <codecvt>
 #include <locale>
 #include <unordered_set>
-#include <vector>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
+
+#ifndef __APPLE__
+#include <cstring>
+#endif
 
 namespace cepgen {
   namespace utils {
@@ -95,7 +99,8 @@ namespace cepgen {
     }
 
     std::string sanitise(const std::string& str) {
-      return replace_all(str, {{")", ""}, {"(", "_"}, {"{", "_"}, {",", "_"}, {":", "_"}});
+      return tolower(
+          replace_all(str, {{")", ""}, {"(", "_"}, {"{", "_"}, {".", ""}, {",", "_"}, {":", "_"}, {"-", ""}}));
     }
 
     std::string timeAs(const std::string& fmt) {
@@ -264,35 +269,13 @@ namespace cepgen {
 
     bool startsWith(const std::string& str, const std::string& beg) { return ltrim(str).rfind(beg, 0) == 0; }
 
-    namespace env {
-      std::string get(const std::string& var, const std::string& def) {
-        const auto out = std::getenv(var.c_str());
-        if (!out)
-          return def;
-        return std::string(out);
-      }
-
-      void set(const std::string& var, const std::string& value) { setenv(var.c_str(), value.c_str(), 1); }
-
-#ifdef _WIN32
-      static constexpr char PATH_DELIM = ';';
-#else
-      static constexpr char PATH_DELIM = ':';
-#endif
-
-      void append(const std::string& var, const std::string& value) {
-        auto env = split(get(var), PATH_DELIM);
-        env.emplace_back(value);
-        normalise(env);
-        setenv(var.c_str(), merge(env, std::string(1, PATH_DELIM)).c_str(), 1);
-      }
-
-      void unset(const std::string& var) { unsetenv(var.c_str()); }
-    }  // namespace env
-
     std::string describeError(int errnum) {
-      std::array<char, 50> buff;
-      return std::to_string(errnum) + " (" + std::string(strerror_r(errnum, buff.data(), buff.size())) + ")";
+#ifdef __APPLE__
+      return std::to_string(errnum);
+#else
+      char* error = strerror(errnum);
+      return std::to_string(errnum) + " (" + std::string(error, strlen(error)) + ")";
+#endif
     }
 
 #define STRINGIFY(x) #x

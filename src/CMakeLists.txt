@@ -1,5 +1,10 @@
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
-set(exec_sources cepgen.cc cepgenDescribeModules.cc)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin")
+else()
+  set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
+endif()
+set(exec_sources cepgen.cc
+                 cepgenDescribeModules.cc)
 if(CMAKE_BUILD_SCAN)
   list(APPEND exec_sources cepgenScan.cc)
 endif()

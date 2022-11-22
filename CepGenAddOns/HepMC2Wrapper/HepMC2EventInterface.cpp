@@ -44,7 +44,7 @@ namespace HepMC {
     int cm_id = 0;
 
     auto v1 = new GenVertex(origin), v2 = new GenVertex(origin), vcm = new GenVertex(origin);
-    unsigned short idx = 0;
+    unsigned short idx = 1;
     for (const auto& part_orig : evt.particles()) {
       const auto& mom_orig = part_orig.momentum();
       FourVector pmom(mom_orig.px(), mom_orig.py(), mom_orig.pz(), part_orig.energy());
@@ -116,6 +116,7 @@ namespace HepMC {
     add_vertex(vcm);
 
     set_beam_particles(*v1->particles_in_const_begin(), *v2->particles_in_const_begin());
+    set_event_scale(evt.oneWithRole(cepgen::Particle::Role::Intermediate).mass());
     set_signal_process_vertex(vcm);
   }
 }  // namespace HepMC

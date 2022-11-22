@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
 
   unsigned short num_tests = 0;
   for (const auto& test : tests) {
-    const std::string filename = "test/test_processes/" + test.filename + "_cfg.py";
+    const std::string filename = "test/physics/test_processes/" + test.filename + "_cfg.py";
     try {
       gen.parametersRef().clearProcess();
       gen.setParameters(cepgen::card::Handler::parse(filename));

@@ -105,17 +105,17 @@ namespace cepgen {
 
       auto cfg = python::importModule(filename);  // new
       if (!cfg)
-        throw PY_ERROR << "Failed to import the configuration card '" << filename << "'\n (parsed from '" << file
-                       << "').";
+        throw PY_ERROR << "Failed to import the configuration card '" << filename << "'\n"
+                       << " (parsed from '" << file << "').";
 
-      auto parseAttr = [this, &cfg](const std::string& name, std::function<void(PyObject*)> callback) -> void {
+      auto parseAttr = [&cfg](const std::string& name, std::function<void(PyObject*)> callback) -> void {
         auto pobj = python::getAttribute(cfg, name);
         if (pobj)
           callback(pobj.get());
       };
 
       //--- additional libraries to load
-      parseAttr(ADDONS_NAME, [this](PyObject* padd) {
+      parseAttr(ADDONS_NAME, [](PyObject* padd) {
         for (const auto& lib : python::getVector<std::string>(padd))
           loadLibrary(lib);
       });
@@ -125,8 +125,7 @@ namespace cepgen {
       parseAttr(TIMER_NAME, [this](PyObject*) { rt_params_->setTimeKeeper(new utils::TimeKeeper); });
 
       //--- general particles definition
-      parseAttr(MCD_NAME,
-                [this](PyObject* ppdg) { pdg::MCDFileParser::parse(python::get<std::string>(ppdg).c_str()); });
+      parseAttr(MCD_NAME, [](PyObject* ppdg) { pdg::MCDFileParser::parse(python::get<std::string>(ppdg).c_str()); });
 
       //--- additional particles definition
       parseAttr(PDGLIST_NAME, [this](PyObject* pextp) { parseExtraParticles(pextp); });
@@ -143,7 +142,10 @@ namespace cepgen {
           PY_ERROR << "Failed to extract the process name from the configuration card '" << file << "'.";
 
         //--- process mode
-        rt_params_->setProcess(proc::ProcessFactory::get().build(python::get<std::string>(pproc_name), proc_params));
+        const auto proc_name = python::get<std::string>(pproc_name);
+        CG_DEBUG("PythonHandler") << "Building a process with name '" << proc_name << "' and parameters:\n\t"
+                                  << proc_params << ".";
+        auto proc_obj = proc::ProcessFactory::get().build(proc_name, proc_params);
 
         //--- process kinematics
         ParametersList pkin;
@@ -157,7 +159,10 @@ namespace cepgen {
 
         if (proc_params.has<int>("mode"))
           pkin.set<int>("mode", proc_params.get<int>("mode"));
-        rt_params_->process().setKinematics(Kinematics(pkin));
+        proc_obj->setKinematics(Kinematics(pkin));
+
+        // feed the runtime parameters with this newly populated process object
+        rt_params_->setProcess(std::move(proc_obj));
 
         //--- taming functions
         auto* ptam = python::element(process, "tamingFunctions");  // borrowed
@@ -273,7 +278,7 @@ namespace cepgen {
         if (part.pdgid == 0 || part.mass < 0.)
           continue;
         if (!PDG::get().has(part.pdgid) || PDG::get()(part.pdgid) != part) {
-          CG_DEBUG("PythonHandler:particles")
+          CG_INFO("PythonHandler:particles")
               << "Adding a new particle with name \"" << part.name << "\" to the PDG dictionary.";
           PDG::get().define(part);
         }

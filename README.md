@@ -7,7 +7,6 @@ A generic central exclusive processes event generator
 
 This `git` repository provides the full history on all developments in `CepGen` since the beginning of this project (2014).
 The complete manual (including instructions for installation) may be found at <https://cepgen.hepforge.org>.
-Please use our bug tracker for any discussion to be triggered.
 
 For a complete reference of CepGen, please have a look at the reference paper at [Computer Physics Communications 271 (2022) 108225](https://doi.org/10.1016/j.cpc.2021.108225) ([arXiv:1808.06059 [hep-ph]](https://arxiv.org/abs/1808.06059)).
 

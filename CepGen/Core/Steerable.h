@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2021-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,6 +44,8 @@ namespace cepgen {
     U steerAs(const std::string& key) const {
       return params_.getAs<T, U>(key);
     }
+    /// Retrieve a path from common search paths
+    std::string steerPath(const std::string& key) const;
 
   protected:
     /// Module parameters

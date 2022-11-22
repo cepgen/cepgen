@@ -25,9 +25,9 @@ namespace cepgen {
   FunctionalIntegrand::FunctionalIntegrand(const std::string& expr,
                                            const std::vector<std::string>& vars,
                                            const std::string& func_eval)
-      : func_(std::move(utils::FunctionalFactory::get().build(
+      : func_(utils::FunctionalFactory::get().build(
             func_eval,
-            ParametersList().set<std::string>("expression", expr).set<std::vector<std::string> >("variables", vars)))) {
+            ParametersList().set<std::string>("expression", expr).set<std::vector<std::string> >("variables", vars))) {
     CG_DEBUG("FunctionalIntegrand") << "Built a " << func_eval << " " << size()
                                     << "-dimensional functional with variables " << func_->variables() << ": "
                                     << func_->expression() << ".";

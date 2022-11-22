@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <climits>
 #include <iomanip>
+#include <limits>
 #include <regex>
 
 #include "CepGen/Core/Exception.h"
@@ -108,7 +108,7 @@ namespace cepgen {
         keys_erased.emplace_back(key);
     }
     if (!keys_erased.empty())
-      CG_DEBUG("ParametersList") << utils::s("key", keys_erased.size(), true) << " erased: " << keys_erased << ".";
+      CG_DEBUG_LOOP("ParametersList") << utils::s("key", keys_erased.size(), true) << " erased: " << keys_erased << ".";
     //--- concatenate all typed lists
     bool_values_.insert(oth.bool_values_.begin(), oth.bool_values_.end());
     int_values_.insert(oth.int_values_.begin(), oth.int_values_.end());
@@ -186,7 +186,7 @@ namespace cepgen {
       auto key = words.at(0);
       if (erase(key) > 0)
         CG_DEBUG("ParametersList:feed") << "Replacing key='" << key << "' with a new value.";
-      if (key == "name")
+      if (key == "name")  // replace any "name" key encountered by the canonical module name key
         key = ParametersList::MODULE_NAME;
       if (words.size() == 1)  // basic key=true
         set<bool>(key, true);
@@ -240,7 +240,7 @@ namespace cepgen {
     return out;
   }
 
-  bool ParametersList::empty() const { return keys(false).empty(); }
+  bool ParametersList::empty() const { return keys(true).empty(); }
 
   std::ostream& operator<<(std::ostream& os, const ParametersList& params) {
     params.print(os);
@@ -290,6 +290,7 @@ namespace cepgen {
   }
 
   std::string ParametersList::getString(const std::string& key, bool wrap) const {
+    // wrapper for the printout of a general variable
     auto wrap_val = [&wrap](const auto& val, const std::string& type) -> std::string {
       std::ostringstream os;
       if (type == "float" || type == "vfloat")
@@ -300,6 +301,7 @@ namespace cepgen {
       return (wrap ? type + "(" : "")  //+ (type == "bool" ? utils::yesno(std::stoi(os.str())) : os.str()) +
              + os.str() + (wrap ? ")" : "");
     };
+    // wrapper for the printout of a collection type (vector, array, ...)
     auto wrap_coll = [&wrap_val](const auto& coll, const std::string& type) -> std::string {
       return wrap_val(utils::merge(coll, ", "), type);
     };
@@ -415,7 +417,7 @@ namespace cepgen {
       return int_values_.at(key);
     if (has<unsigned long long>(key)) {
       const auto ulong_val = ulong_values_.at(key);
-      if (ulong_val >= INT_MAX)
+      if (ulong_val >= std::numeric_limits<int>::max())
         CG_WARNING("ParametersList:get")
             << "Trying to retrieve a (too) long unsigned integer with an integer getter. Please fix your code.";
       return (int)ulong_val;

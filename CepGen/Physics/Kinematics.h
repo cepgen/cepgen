@@ -37,7 +37,7 @@ namespace cepgen {
   /// List of kinematic constraints to apply on the process phase space.
   class Kinematics final : public SteeredObject<Kinematics> {
   public:
-    Kinematics() = default;
+    Kinematics();
     explicit Kinematics(const ParametersList&);
     ~Kinematics() = default;
 
