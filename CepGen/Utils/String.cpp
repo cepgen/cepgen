@@ -16,20 +16,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <math.h>
-#include <string.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #include <array>
+#include <cmath>
 #include <codecvt>
 #include <locale>
 #include <unordered_set>
-#include <vector>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
+
+#ifndef __APPLE__
+#include <cstring>
+#endif
 
 namespace cepgen {
   namespace utils {
@@ -267,8 +270,12 @@ namespace cepgen {
     bool startsWith(const std::string& str, const std::string& beg) { return ltrim(str).rfind(beg, 0) == 0; }
 
     std::string describeError(int errnum) {
-      std::array<char, 50> buff;
-      return std::to_string(errnum) + " (" + std::string(strerror_r(errnum, buff.data(), buff.size())) + ")";
+#ifdef __APPLE__
+      return std::to_string(errnum);
+#else
+      char* error = strerror(errnum);
+      return std::to_string(errnum) + " (" + std::string(error, strlen(error)) + ")";
+#endif
     }
 
 #define STRINGIFY(x) #x

@@ -16,9 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <strings.h>
+
 #include <algorithm>
-#include <cstring>
-#include <cstrings>
 #include <sstream>
 
 #include "CepGen/Core/Exception.h"
