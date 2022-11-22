@@ -1,7 +1,18 @@
 macro(cepgen_build mod_name)
     set(options)
     set(one_val)
-    set(multi_vals SOURCES TESTS UTILS EXT_LIBS EXT_HEADERS EXT_BINS DEPENDS DEFINITIONS PROPERTY OPTIONS CFLAGS INSTALL_COMPONENT)
+    set(multi_vals CFLAGS
+                   DEFINITIONS
+                   DEPENDS
+                   EXT_LIBS
+                   EXT_HEADERS
+                   EXT_BINS
+                   INSTALL_COMPONENT
+                   OPTIONS
+                   PROPERTY
+                   SOURCES
+                   TESTS
+                   UTILS)
     cmake_parse_arguments(ARG "${options}" "${one_val}" "${multi_vals}" ${ARGN})
     message(STATUS "Building ${mod_name} add-on")
     if(ARG_SOURCES)
