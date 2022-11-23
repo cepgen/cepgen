@@ -150,6 +150,7 @@ namespace cepgen {
             << "Failed to evaluate the integral. GSL error: " << gsl_strerror(res) << ".";
 #else
       (void)lim;
+      (void)wrp;
       CG_WARNING("AnalyticalIntegratorGSL") << "GSL version above 2.1 is required for integration.";
 #endif
       return result;
