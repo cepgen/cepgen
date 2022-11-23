@@ -39,8 +39,6 @@ namespace cepgen {
     class Handler;
     /// A cards handler factory
     DEFINE_FACTORY_STR(CardsHandlerFactory, Handler, "Cards handlers factory");
-    /// Standard name for the command line steering module handler
-    static constexpr const char* gCommandLineHandler = ".cmd";
   }  // namespace card
 }  // namespace cepgen
 

@@ -66,7 +66,7 @@ namespace cepgen {
     /// Register a named module in the database
     /// \tparam U Class to register (inherited from T base class)
     template <typename U>
-    void registerModule(const I& name, const ParametersList& def_params = ParametersList()) {
+    void registerModule(I name, const ParametersList& def_params = ParametersList()) {
       static_assert(std::is_base_of<T, U>::value,
                     "\n\n  *** Failed to register an object with improper inheritance into the factory. ***\n");
       if (has(name)) {
@@ -75,11 +75,12 @@ namespace cepgen {
             << "\"! ***\n";
         throw std::invalid_argument(oss.str());
       }
-      map_[name] = &build<U>;
-      params_map_[name] = U::description();
+      map_.insert(std::make_pair(name, &build<U>));
+      auto desc = U::description();
       if (!def_params.empty())
-        params_map_[name].parameters() += def_params;
-      params_map_[name].parameters().setName(name);
+        desc.parameters() += def_params;
+      desc.parameters().setName(name);
+      params_map_.insert(std::make_pair(name, desc));
     }
     /// Build one instance of a named module
     /// \param[in] name Module name to retrieve
