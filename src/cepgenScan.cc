@@ -61,8 +61,7 @@ int main(int argc, char* argv[]) {
 
   if (!parser.extra_config().empty())
     mg.setParameters(cepgen::card::CardsHandlerFactory::get()
-                         .build(cepgen::card::gCommandLineHandler,
-                                cepgen::ParametersList().set<vector<string> >("args", parser.extra_config()))
+                         .build(".cmd", cepgen::ParametersList().set<vector<string> >("args", parser.extra_config()))
                          ->parse("", mg.parametersPtr()));
 
   CG_LOG << mg.parameters();

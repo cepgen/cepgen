@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2020-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,10 +27,8 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
@@ -39,27 +37,26 @@ namespace cepgen {
     class CommandLineHandler final : public Handler {
     public:
       /// Cast command line arguments into a configuration word
-      explicit CommandLineHandler(const ParametersList&);
+      explicit CommandLineHandler(const ParametersList& params)
+          : Handler(params), argv_(steer<std::vector<std::string> >("args")) {
+        if (!filename_.empty())
+          parse(filename_, rt_params_);
+      }
 
-      static ParametersDescription description();
+      static ParametersDescription description() {
+        auto desc = Handler::description();
+        desc.setDescription("Command line configuration parser");
+        desc.add<std::vector<std::string> >("args", {}).setDescription("Collection of arguments to be parsed");
+        return desc;
+      }
 
       Parameters* parse(const std::string&, Parameters*) override;
 
     private:
-      typedef std::vector<std::string> Args;
+      static constexpr double INVALID = -999.999;
 
-      static const double INVALID;
-
-      Args argv_;
+      std::vector<std::string> argv_;
     };
-
-    const double CommandLineHandler::INVALID = -999.999;
-
-    CommandLineHandler::CommandLineHandler(const ParametersList& params)
-        : Handler(params), argv_(steer<std::vector<std::string> >("args")) {
-      if (!filename_.empty())
-        parse(filename_, rt_params_);
-    }
 
     Parameters* CommandLineHandler::parse(const std::string& filename, Parameters* params) {
       if (!filename.empty()) {
@@ -149,14 +146,7 @@ namespace cepgen {
         rt_params_->addOutputModule(io::ExportModuleFactory::get().build(out));
       return rt_params_;
     }
-
-    ParametersDescription CommandLineHandler::description() {
-      auto desc = Handler::description();
-      desc.setDescription("Command line configuration parser");
-      desc.add<std::vector<std::string> >("args", {}).setDescription("Collection of arguments to be parsed");
-      return desc;
-    }
   }  // namespace card
 }  // namespace cepgen
 
-REGISTER_CARD_HANDLER(gCommandLineHandler, CommandLineHandler)
+REGISTER_CARD_HANDLER(".cmd", CommandLineHandler)
