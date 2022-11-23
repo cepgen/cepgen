@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2018-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,19 +16,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_integration.h>
+#include <cmath>
 
 #include "CepGen/CollinearFluxes/Parameterisation.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/FormFactors/Parameterisation.h"
+#include "CepGen/Integration/AnalyticIntegrator.h"
+#include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Modules/CollinearFluxFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Utils/GSLIntegrator.h"
+#include "CepGen/Utils/FunctionsWrappers.h"
 #include "CepGen/Utils/Limits.h"
 
 namespace cepgen {
@@ -60,6 +61,7 @@ namespace cepgen {
             flux_(steerAs<int, Beam::KTFlux>("ktFlux")),
             hi_(steerAs<pdgid_t, HeavyIon>("heavyIon")),
             form_fac_(formfac::FormFactorsFactory::get().build(steer<std::string>("formFactors"))),
+            integr_(AnalyticIntegratorFactory::get().build(params.get<ParametersList>("analyticalIntegrator"))),
             params_(new FluxArguments{0., mp2_, 0., flux_, form_fac_.get(), nullptr, nullptr}) {
         const auto& plist_strfun = steer<ParametersList>("structureFunctions");
         if (!plist_strfun.empty()) {
@@ -85,13 +87,15 @@ namespace cepgen {
         desc.add<std::string>("formFactors", formfac::gFFStandardDipoleHandler);
         desc.add<ParametersDescription>("structureFunctions",
                                         strfun::StructureFunctionsFactory::get().describeParameters(11));
+        desc.add<ParametersDescription>("analyticalIntegrator", ParametersDescription().setName<std::string>("gsl"))
+            .setDescription("Steering parameters for the analytical integrator");
         return desc;
       }
 
       double operator()(double x, double mx) const override {
         params_->x = x;
         params_->mf2 = mx * mx;
-        return 2. * M_PI * integr_.eval(*func_, params_.get(), q2_range_.min(), q2_range_.max()) / x;
+        return 2. * M_PI * integr_->eval(*func_, params_.get(), q2_range_) / x;
       }
 
     private:
@@ -100,9 +104,8 @@ namespace cepgen {
       std::unique_ptr<formfac::Parameterisation> form_fac_;
       std::unique_ptr<strfun::Parameterisation> str_fun_;
       std::unique_ptr<utils::Function1D> func_;
-      utils::GSLIntegrator integr_;
+      std::unique_ptr<AnalyticIntegrator> integr_;
       std::unique_ptr<FluxArguments> params_;
-      mutable gsl_function function_;
     };
   }  // namespace collflux
 }  // namespace cepgen

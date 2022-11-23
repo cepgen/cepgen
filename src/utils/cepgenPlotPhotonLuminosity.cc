@@ -21,11 +21,12 @@
 #include "CepGen/CollinearFluxes/Parameterisation.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Integration/AnalyticIntegrator.h"
+#include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Modules/CollinearFluxFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
-#include "CepGen/Utils/GSLIntegrator.h"
 #include "CepGen/Utils/Graph.h"
 #include "CepGen/Utils/String.h"
 
@@ -35,15 +36,16 @@ int main(int argc, char* argv[]) {
   vector<int> cfluxes;
   int num_points;
   double q2max, mxmin, mxmax;
-  string output_file, plotter;
+  string integrator, output_file, plotter;
   bool logx, logy, draw_grid;
   vector<double> rescl, sqrts, accept;
   cepgen::Limits y_range;
   vector<cepgen::Limits> xi_ranges(1);
 
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("collflux,i", "collinear flux modelling(s)", &cfluxes, vector<int>{1})
+      .addOptionalArgument("collflux,f", "collinear flux modelling(s)", &cfluxes, vector<int>{1})
       .addOptionalArgument("rescaling,r", "luminosity rescaling", &rescl, vector<double>{1.})
+      .addOptionalArgument("integrator,i", "type of integration algorithm", &integrator, "gsl")
       .addOptionalArgument("q2max,q", "maximum Q^2", &q2max, 1000.)
       .addOptionalArgument("sqrts,s", "two-proton centre of mass energy (GeV)", &sqrts, vector<double>{13.e3})
       .addOptionalArgument("mxmin,m", "minimal two-photon mass", &mxmin, 0.)
@@ -91,7 +93,8 @@ int main(int argc, char* argv[]) {
     mxvals.emplace_back((!logx) ? mxmin + j * (mxmax - mxmin) / (num_points - 1)
                                 : pow(10, log10(mxmin) + j * (log10(mxmax) - log10(mxmin)) / (num_points - 1)));
   vector<vector<double> > values(num_points);
-  auto integr = cepgen::utils::GSLIntegrator(cepgen::ParametersList().set<int>("mode", 0).set<int>("nodes", 2000));
+  auto integr = cepgen::AnalyticIntegratorFactory::get().build(
+      cepgen::ParametersList().setName<string>(integrator).set<int>("mode", 0).set<int>("nodes", 2000));
   for (size_t i = 0; i < cfluxes.size(); ++i) {
     const auto& cflux = cfluxes.at(i);
     const auto s = sqrts.at(i) * sqrts.at(i);
@@ -109,14 +112,13 @@ int main(int argc, char* argv[]) {
       const auto& mx = mxvals.at(j);
       for (size_t k = 0; k < xi_ranges.size(); ++k) {
         const auto& xi_range = xi_ranges.at(k);
-        auto lumi_wgg = integr.eval(
+        auto lumi_wgg = integr->eval(
             [&xi_range, &mx, &s, &coll_flux](double x) {
               if (xi_range.valid() && (!xi_range.contains(x) || !xi_range.contains(mx * mx / x / s)))
                 return 0.;
               return 2. * mx / x / s * (*coll_flux)(x) * (*coll_flux)(mx * mx / x / s);
             },
-            mx * mx / s,
-            1.);
+            cepgen::Limits(mx * mx / s, 1.));
         lumi_wgg *= rescl.at(i);
         values.at(j).emplace_back(lumi_wgg);
         m_gr_fluxes[cflux][k].addPoint(mx, lumi_wgg);
