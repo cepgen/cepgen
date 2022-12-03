@@ -23,18 +23,24 @@
 
 namespace cepgen {
   namespace python {
-    struct Environment {
+    class Environment {
+    public:
       /// Initialise the python environment
       Environment();
       /// Finalise the python environment
       ~Environment();
+      /// Set the name of the Python program
+      void setProgramName(const std::string&);
       /// Is the python environment already initialised?
       bool initialised();
+
+    private:
+#if PY_VERSION_HEX >= 0x03080000
+      PyConfig config_;
+#endif
     };
     /// Translate a filename into a python-compatible path
     std::string pythonPath(const std::string&);
-    /// Set the name of the Python program
-    void setProgramName(const std::string& filename);
     /// Retrieve the element from a python dictionary
     PyObject* element(PyObject*, const std::string&);
     ObjectPtr getAttribute(PyObject*, const std::string&);

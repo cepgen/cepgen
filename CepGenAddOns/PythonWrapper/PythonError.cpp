@@ -41,11 +41,13 @@ namespace cepgen {
           std::string tabul;
           while (ptraceback->tb_next) {
             (*this) << "\n\t" << tabul << arr;
-            if (auto* pframe = ptraceback->tb_frame)
+#if PY_VERSION_HEX < 0x030b0000
+            if (PyFrameObject* pframe = ptraceback->tb_frame)
               (*this) << utils::boldify(get<std::string>(pframe->f_code->co_name)) << " on "
                       << get<std::string>(pframe->f_code->co_filename) << " (line "
                       << PyCode_Addr2Line(pframe->f_code, pframe->f_lasti) << ")";
             else
+#endif
               (*this) << " issue on line " << ptraceback->tb_lineno;
             tabul += "  ";
             ptraceback = ptraceback->tb_next;

@@ -95,7 +95,7 @@ namespace cepgen {
 
       rt_params_ = params;
       std::string filename = python::pythonPath(file);
-      python::setProgramName(filename);
+      env_.setProgramName(filename);
 
       CG_DEBUG("PythonHandler").log([](auto& log) {
         log << "Initialised the Python cards parser.";
