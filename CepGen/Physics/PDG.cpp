@@ -32,16 +32,6 @@ namespace cepgen {
     define(ParticleProperties(reggeon, "reggeon", "\u211D", 0, 0., 0., 0, false));
   }
 
-  //--------------------------------------------------------------------
-
-  std::ostream& operator<<(std::ostream& os, const ParticleProperties& prop) {
-    return os << prop.name << "{"
-              << "id=" << prop.pdgid << ",desc=" << prop.descr << ",colours=" << prop.colours << ",mass=" << prop.mass
-              << ",width=" << prop.width << ",charge=" << prop.charge << (prop.fermion ? ",fermion" : "") << "}";
-  }
-
-  //--------------------------------------------------------------------
-
   PDG& PDG::get() {
     static PDG instance;
     return instance;
