@@ -67,6 +67,11 @@ namespace cepgen {
     /// Erase a parameter with key
     /// \return Number of key-indexed values erased
     size_t erase(const std::string&);
+    /// Does the parameters list have a name key?
+    template <typename T>
+    bool hasName() const {
+      return has<T>(MODULE_NAME);
+    }
     /// Retrieve the module name if any
     template <typename T>
     inline T name(const T& def = default_arg<T>::get()) const {

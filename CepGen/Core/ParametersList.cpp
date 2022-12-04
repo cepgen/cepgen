@@ -248,19 +248,21 @@ namespace cepgen {
   }
 
   const ParametersList& ParametersList::print(std::ostream& os) const {
-    if (empty()) {
+    const auto& keys_list = keys(true);
+    if (keys_list.empty()) {
       os << "{}";
       return *this;
     }
     std::string sep;
-    const auto& plist_name = getString(ParametersList::MODULE_NAME);
-    if (!plist_name.empty()) {
-      auto mod_name = has<std::string>(MODULE_NAME) ? "\"" + plist_name + "\"" : plist_name;
+    if (std::find(keys_list.begin(), keys_list.end(), ParametersList::MODULE_NAME) != keys_list.end()) {
+      const auto plist_name = getString(ParametersList::MODULE_NAME);
+      auto mod_name = hasName<std::string>() ? "\"" + plist_name + "\"" : plist_name;
       os << "Module(" << mod_name, sep = ", ";
     } else
       os << "Parameters(";
-    for (const auto& key : keys(false))
-      os << sep << key << "=" << getString(key, true), sep = ", ";
+    for (const auto& key : keys_list)
+      if (key != ParametersList::MODULE_NAME)
+        os << sep << key << "=" << getString(key, true), sep = ", ";
     os << ")";
     return *this;
   }
