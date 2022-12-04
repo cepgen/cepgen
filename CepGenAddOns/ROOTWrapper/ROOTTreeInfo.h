@@ -52,7 +52,7 @@ namespace ROOT {
     /// Retrieve the ROOT tree
     TTree* tree() { return tree_.get(); }
     /// Fill the run tree
-    void fill() { tree_->Fill(); }
+    void fill();
     /// Attach the run tree reader to a given file
     void attach(const char* filename, const char* run_tree = TREE_NAME) { attach(TFile::Open(filename), run_tree); }
     /// Attach the run tree reader to a given tree
