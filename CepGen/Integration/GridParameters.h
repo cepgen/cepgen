@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,24 +52,35 @@ namespace cepgen {
     void increment(size_t coord);
     /// Number of points already shot for a given grid coordinate
     size_t numPoints(size_t coord) const;
+    /// Has the grid been prepared
+    bool prepared() const { return gen_prepared_; }
+    /// Mark the grid as prepared
+    void setPrepared(bool prepared = true) { gen_prepared_ = prepared; }
+    /// Correction to apply on the next phase space point generation
+    double correctionValue() const { return correc_; }
+    /// Set the correction to apply on the next phase space point generation
+    void setCorrectionValue(double correc) { correc_ = correc; }
+    /// Apply the correction requested at the previous generation
+    bool correct(size_t);
+    void rescale(size_t, double);
+    void initCorrectionCycle(size_t, double);
+    double maxValueDiff() const { return f_max_diff_; }
+    double maxHistValue() const { return f_max_old_; }
 
     /// Integration grid size parameter
     static constexpr unsigned short M_BIN = 3;
     /// Weight of each grid coordinate
     static constexpr double INV_M_BIN = 1. / M_BIN;
 
-    /// Has the grid been already prepared?
-    bool gen_prepared{false};
-    /// Correction to apply on the next phase space point generation
-    double correc{0.};
-    double correc2{0.};
-    double f_max2{0.};
-    double f_max_diff{0.};
-    double f_max_old{0.};
-
   private:
+    void generateCoordinates(coord_t&, size_t) const;
     /// Phase space multiplicity
     size_t ndim_{0};
+    /// Has the grid been already prepared?
+    bool gen_prepared_{false};
+    /// Correction to apply on the next phase space point generation
+    double correc_{0.};
+    double correc2_{0.};
     /// Point coordinates in grid
     std::vector<coord_t> coords_;
     /// Number of functions values evaluated for this point
@@ -78,6 +89,9 @@ namespace cepgen {
     std::vector<double> f_max_;
     /// Maximal value of the function in the considered integration range
     double f_max_global_{0.};
+    double f_max2_{0.};
+    double f_max_diff_{0.};
+    double f_max_old_{0.};
   };
 }  // namespace cepgen
 

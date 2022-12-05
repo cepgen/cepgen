@@ -21,6 +21,7 @@
 #include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/Generator.h"
 #include "CepGen/Integration/GridParameters.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
@@ -32,7 +33,7 @@
 
 namespace cepgen {
   GeneratorWorker::GeneratorWorker(const Parameters* params)
-      : integrand_(new ProcessIntegrand(params)), params_(params) {
+      : params_(params), integrand_(new ProcessIntegrand(params)) {
     CG_DEBUG("GeneratorWorker") << "New generator worker initialised for integration/event generation.\n\t"
                                 << "Parameters at " << (void*)params_ << ".";
   }
@@ -71,15 +72,13 @@ namespace cepgen {
 
     if (!integrator_)
       throw CG_FATAL("GeneratorWorker:generate") << "No integrator object handled!";
-
-    //--- a few checks on the grid
     if (!grid_)
       throw CG_FATAL("GeneratorWorker:generate") << "No grid object handled!";
-    if (!grid_->gen_prepared)
-      computeGenerationParameters();
 
-    //--- apply correction cycles if required from previous event
+    // initialise grid if not already done
+    computeGenerationParameters();
 
+    // apply correction cycles if required from previous event
     if (ps_bin_ != UNASSIGNED_BIN) {
       bool store = false;
       while (!correctionCycle(store)) {
@@ -93,7 +92,7 @@ namespace cepgen {
     double weight = 0.;
     while (true) {
       double y = -1.;
-      //----- select a function value and reject if fmax is too small
+      // select a function value and reject if fmax is too small
       do {
         // ...
         ps_bin_ = integrator_->uniform(0., grid_->size());
@@ -108,19 +107,11 @@ namespace cepgen {
         break;
     }
 
-    if (weight > grid_->maxValue(ps_bin_)) {
+    if (weight > grid_->maxValue(ps_bin_))
       // if weight is higher than local or global maximum,
       // init correction cycle for the next event
-      grid_->f_max_old = grid_->maxValue(ps_bin_);
-      grid_->f_max_diff = weight - grid_->f_max_old;
-      grid_->setValue(ps_bin_, weight);
-      grid_->correc = (grid_->numPoints(ps_bin_) - 1) * grid_->f_max_diff / grid_->globalMax() - 1.;
-
-      CG_DEBUG("GeneratorWorker:generateOne")
-          << "Correction " << grid_->correc << " will be applied "
-          << "for phase space bin " << ps_bin_ << " (" << utils::s("point", grid_->numPoints(ps_bin_), true) << "). "
-          << "Maxima ratio: " << (grid_->f_max_diff / grid_->globalMax()) << ".";
-    } else  // no grid correction needed for this bin
+      grid_->initCorrectionCycle(ps_bin_, weight);
+    else  // no grid correction needed for this bin
       ps_bin_ = UNASSIGNED_BIN;
 
     // return with an accepted event
@@ -132,25 +123,20 @@ namespace cepgen {
 
     CG_DEBUG_LOOP("GeneratorWorker:correction") << "Correction cycles are started.\n\t"
                                                 << "bin = " << ps_bin_ << "\n\t"
-                                                << "correc = " << grid_->correc << "\n\t"
-                                                << "corre2 = " << grid_->correc2 << ".";
+                                                << "correction value = " << grid_->correctionValue() << ".";
 
-    if (grid_->correc >= 1.)
-      grid_->correc -= 1.;
+    if (grid_->correctionValue() >= 1.)
+      grid_->setCorrectionValue(grid_->correctionValue() - 1.);
 
-    if (integrator_->uniform() < grid_->correc) {
-      grid_->correc = -1.;
+    if (integrator_->uniform() < grid_->correctionValue()) {
+      grid_->setCorrectionValue(-1.);
       // select x values in phase space bin
       grid_->shoot(integrator_, ps_bin_, coords_);
       const double weight = integrator_->eval(coords_);
       // parameter for correction of correction
-      if (weight > grid_->maxValue(ps_bin_)) {
-        grid_->f_max2 = std::max(grid_->f_max2, weight);
-        grid_->correc += 1.;
-        grid_->correc2 -= 1.;
-      }
+      grid_->rescale(ps_bin_, weight);
       // accept event
-      if (weight >= integrator_->uniform(0., grid_->f_max_diff) + grid_->f_max_old) {
+      if (weight >= integrator_->uniform(0., grid_->maxValueDiff()) + grid_->maxHistValue()) {
         store = true;
         return true;
       }
@@ -158,26 +144,13 @@ namespace cepgen {
     }
     // correction if too big weight is found while correction
     // (all your bases are belong to us...)
-    if (grid_->f_max2 > grid_->maxValue(ps_bin_)) {
-      grid_->f_max_old = grid_->maxValue(ps_bin_);
-      grid_->f_max_diff = grid_->f_max2 - grid_->f_max_old;
-      grid_->correc = (grid_->numPoints(ps_bin_) - 1.) * grid_->f_max_diff / grid_->globalMax();
-      if (grid_->f_max2 >= grid_->globalMax())
-        grid_->correc *= grid_->f_max2 / grid_->globalMax();
-      grid_->setValue(ps_bin_, grid_->f_max2);
-      grid_->correc -= grid_->correc2;
-      grid_->correc2 = 0.;
-      grid_->f_max2 = 0.;
-      return false;
-    }
-    return true;
+    return grid_->correct(ps_bin_);
   }
 
   bool GeneratorWorker::storeEvent(Event::callback callback) {
     CG_TICKER(const_cast<Parameters*>(params_)->timeKeeper());
 
-    // start by computing the matrix element for that point
-    // and reject if unphysical
+    // start by computing the matrix element for that point and reject if unphysical
     if (integrator_->eval(coords_) <= 0.)
       return false;
 
@@ -201,6 +174,8 @@ namespace cepgen {
   //-----------------------------------------------------------------------------------------------
 
   void GeneratorWorker::computeGenerationParameters() {
+    if (grid_->prepared())
+      return;  // do not prepare again the grid
     if (!params_)
       throw CG_FATAL("GeneratorWorker:setGen") << "No steering parameters specified!";
 
@@ -268,8 +243,7 @@ namespace cepgen {
                                        << "Maximum function value         = " << grid_->globalMax() << "\n\t"
                                        << "Average inefficiency           = " << eff1 << "\n\t"
                                        << "Overall inefficiency           = " << eff2;
-
-    grid_->gen_prepared = true;
+    grid_->setPrepared(true);
     //--- from now on events will be stored
     integrand_->setStorage(true);
 
