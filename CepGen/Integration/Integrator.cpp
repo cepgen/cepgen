@@ -54,7 +54,7 @@ namespace cepgen {
     return integrand_->eval(x);
   }
 
-  double Integrator::uniform() const { return rnd_(rnd_gen_); }
+  double Integrator::uniform(double min, double max) const { return min + (max - min) * rnd_(rnd_gen_); }
 
   ParametersDescription Integrator::description() {
     auto desc = ParametersDescription();

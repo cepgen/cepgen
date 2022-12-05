@@ -42,7 +42,7 @@ namespace cepgen {
     /// Compute the function value at the given phase space point
     virtual double eval(const std::vector<double>& x) const;
     /// Generate a uniformly distributed (between 0 and 1) random number
-    virtual double uniform() const;
+    virtual double uniform(double min = 0., double max = 1.) const;
 
     /// Perform the multidimensional Monte Carlo integration
     /// \param[out] result_ The cross section as integrated for the given phase space restrictions

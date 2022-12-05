@@ -31,7 +31,7 @@ namespace cepgen {
   class IntegratorGSL : public Integrator {
   public:
     explicit IntegratorGSL(const ParametersList&);
-    double uniform() const override;
+    double uniform(double min, double max) const override;
     void setIntegrand(Integrand& integr) override;
 
     static ParametersDescription description();

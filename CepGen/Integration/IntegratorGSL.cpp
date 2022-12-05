@@ -68,10 +68,10 @@ namespace cepgen {
     initialised_ = false;
   }
 
-  double IntegratorGSL::uniform() const {
+  double IntegratorGSL::uniform(double min, double max) const {
     if (!gsl_rng_)
       throw CG_FATAL("Integrator:uniform") << "Random number generator has not been initialised!";
-    return gsl_rng_uniform(gsl_rng_.get());
+    return min + (max - min) * gsl_rng_uniform(gsl_rng_.get());
   }
 
   ParametersDescription IntegratorGSL::description() {
