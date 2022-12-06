@@ -20,6 +20,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   std::ostream& operator<<(std::ostream& os, const PDG::Id& pdg) { return os << PDG::get().name(pdg); }
@@ -30,16 +31,6 @@ namespace cepgen {
     define(ParticleProperties(pomeron, "pomeron", "\u2119", 0, 0., 0., 0, false));
     define(ParticleProperties(reggeon, "reggeon", "\u211D", 0, 0., 0., 0, false));
   }
-
-  //--------------------------------------------------------------------
-
-  std::ostream& operator<<(std::ostream& os, const ParticleProperties& prop) {
-    return os << prop.name << "{"
-              << "id=" << prop.pdgid << ",desc=" << prop.descr << ",colours=" << prop.colours << ",mass=" << prop.mass
-              << ",width=" << prop.width << ",charge=" << prop.charge << (prop.fermion ? ",fermion" : "") << "}";
-  }
-
-  //--------------------------------------------------------------------
 
   PDG& PDG::get() {
     static PDG instance;
@@ -59,8 +50,8 @@ namespace cepgen {
   ParticleProperties& PDG::operator[](pdgid_t id) { return particles_[id]; }
 
   void PDG::define(const ParticleProperties& props) {
-    CG_DEBUG("PDG:define") << "Adding a new particle with "
-                           << "PDG id=" << std::setw(8) << props.pdgid << ", " << props;
+    CG_DEBUG("PDG:define") << (has(props.pdgid) ? "Updating the properties of a particle" : "Adding a new particle")
+                           << " with PDG id=" << std::setw(8) << props.pdgid << ", " << props;
     particles_[props.pdgid] = props;
   }
 
@@ -104,7 +95,14 @@ namespace cepgen {
       info << "List of particles registered:";
       for (const auto& prt : tmp)
         if (prt.first != PDG::invalid)
-          info << "\n" << prt.second;
+          info << utils::format(
+              "\n%20s %-32s\tcharge: %2de, colour factor: %1d, mass: %8.4f GeV/c^2, width: %6.3f GeV.",
+              utils::colourise(std::to_string(prt.second.pdgid), utils::Colour::none, utils::Modifier::italic).data(),
+              (utils::boldify(prt.second.name) + " " + (prt.second.fermion ? "fermion" : "boson") + ":").data(),
+              prt.second.charge / 3,
+              prt.second.colours,
+              prt.second.mass,
+              prt.second.width);
     });
   }
 }  // namespace cepgen

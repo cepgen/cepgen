@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,32 +16,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Physics_BreitWigner_h
-#define CepGen_Physics_BreitWigner_h
+#include "CepGen/Core/Steerable.h"
+#include "CepGen/Utils/Environment.h"
+#include "CepGen/Utils/Filesystem.h"
+#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
-  /// A Breit-Wigner/Cauchy distribution generator
-  class BreitWigner {
-  public:
-    explicit BreitWigner(double mean = 0., double gamma = 0., double emin = -1., double emax = -1.);
-
-    /// Minimal energy to consider
-    double min() const { return emin_; }
-    /// Maximal energy to consider
-    double max() const { return emax_; }
-    /// Shoot a value according to parameterisation
-    double operator()(double x) const;
-
-  private:
-    /// Mean of distribution
-    double mean_;
-    /// Width of distribution
-    double gamma_;
-    /// Minimal value
-    double emin_;
-    /// Maximal value
-    double emax_;
-  };
+  std::string Steerable::steerPath(const std::string& key) const {
+    const auto& fn = steer<std::string>(key);
+    if (fn.empty())
+      return fn;
+    for (const auto& path : utils::env::searchPaths())
+      if (utils::fileExists(fs::path(path) / fn)) {
+        CG_DEBUG("Steerable:steerPath") << "Found path for '" << key << "' at '" << fs::path(path) / fn << "'.";
+        return fs::path(path) / fn;
+      }
+    return fn;
+  }
 }  // namespace cepgen
-
-#endif

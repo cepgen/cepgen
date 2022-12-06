@@ -66,6 +66,7 @@ namespace cepgen {
 
         static ParametersDescription description() {
           auto desc = ParametersDescription();
+          desc.add("pair", PDG::get()(0)).setDescription("type of central particles emitted");
           desc.add("mat1", 1).setDescription("symmetrisation factor for the first incoming photon");
           desc.add("mat2", 1).setDescription("symmetrisation factor for the second incoming photon");
           desc.add("termLL", 1).setDescription("fully longidudinal relative weight");

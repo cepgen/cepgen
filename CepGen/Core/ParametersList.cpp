@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <climits>
 #include <iomanip>
+#include <limits>
 #include <regex>
 
 #include "CepGen/Core/Exception.h"
@@ -186,7 +186,7 @@ namespace cepgen {
       auto key = words.at(0);
       if (erase(key) > 0)
         CG_DEBUG("ParametersList:feed") << "Replacing key='" << key << "' with a new value.";
-      if (key == "name")
+      if (key == "name")  // replace any "name" key encountered by the canonical module name key
         key = ParametersList::MODULE_NAME;
       if (words.size() == 1)  // basic key=true
         set<bool>(key, true);
@@ -240,7 +240,7 @@ namespace cepgen {
     return out;
   }
 
-  bool ParametersList::empty() const { return keys(false).empty(); }
+  bool ParametersList::empty() const { return keys(true).empty(); }
 
   std::ostream& operator<<(std::ostream& os, const ParametersList& params) {
     params.print(os);
@@ -248,19 +248,21 @@ namespace cepgen {
   }
 
   const ParametersList& ParametersList::print(std::ostream& os) const {
-    if (empty()) {
+    const auto& keys_list = keys(true);
+    if (keys_list.empty()) {
       os << "{}";
       return *this;
     }
     std::string sep;
-    const auto& plist_name = getString(ParametersList::MODULE_NAME);
-    if (!plist_name.empty()) {
-      auto mod_name = has<std::string>(MODULE_NAME) ? "\"" + plist_name + "\"" : plist_name;
+    if (std::find(keys_list.begin(), keys_list.end(), ParametersList::MODULE_NAME) != keys_list.end()) {
+      const auto plist_name = getString(ParametersList::MODULE_NAME);
+      auto mod_name = hasName<std::string>() ? "\"" + plist_name + "\"" : plist_name;
       os << "Module(" << mod_name, sep = ", ";
     } else
       os << "Parameters(";
-    for (const auto& key : keys(false))
-      os << sep << key << "=" << getString(key, true), sep = ", ";
+    for (const auto& key : keys_list)
+      if (key != ParametersList::MODULE_NAME)
+        os << sep << key << "=" << getString(key, true), sep = ", ";
     os << ")";
     return *this;
   }
@@ -290,6 +292,7 @@ namespace cepgen {
   }
 
   std::string ParametersList::getString(const std::string& key, bool wrap) const {
+    // wrapper for the printout of a general variable
     auto wrap_val = [&wrap](const auto& val, const std::string& type) -> std::string {
       std::ostringstream os;
       if (type == "float" || type == "vfloat")
@@ -300,6 +303,7 @@ namespace cepgen {
       return (wrap ? type + "(" : "")  //+ (type == "bool" ? utils::yesno(std::stoi(os.str())) : os.str()) +
              + os.str() + (wrap ? ")" : "");
     };
+    // wrapper for the printout of a collection type (vector, array, ...)
     auto wrap_coll = [&wrap_val](const auto& coll, const std::string& type) -> std::string {
       return wrap_val(utils::merge(coll, ", "), type);
     };
@@ -415,7 +419,7 @@ namespace cepgen {
       return int_values_.at(key);
     if (has<unsigned long long>(key)) {
       const auto ulong_val = ulong_values_.at(key);
-      if (ulong_val >= INT_MAX)
+      if (ulong_val >= std::numeric_limits<int>::max())
         CG_WARNING("ParametersList:get")
             << "Trying to retrieve a (too) long unsigned integer with an integer getter. Please fix your code.";
       return (int)ulong_val;
@@ -519,6 +523,9 @@ namespace cepgen {
 
   //------------------------------------------------------------------
   // particle properties-type attributes
+  //   particular case for this container, as it can either be
+  //   represented by a ParametersList (collection of parameters) or
+  //   an integer PDG identifier
   //------------------------------------------------------------------
 
   /// Check if a particle properties object is handled
@@ -536,9 +543,11 @@ namespace cepgen {
       if (plist.has<pdgid_t>("pdgid") || plist.has<int>("pdgid"))
         return PDG::get()(plist.get<pdgid_t>("pdgid"));
       return ParticleProperties(plist);
-    } else if (has<int>(key))
+    } else if (has<int>(key)) {
+      CG_DEBUG("ParametersList") << "Retrieved physical properties for particle with PDG identifier '" << get<int>(key)
+                                 << "' from PDG database.";
       return PDG::get()(get<int>(key));
-    else {
+    } else {
       CG_DEBUG("ParametersList") << "Failed to retrieve particle properties parameter with key=" << key << ".";
       return def;
     }

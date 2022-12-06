@@ -3,10 +3,21 @@ find_package(ROOT COMPONENTS Hist MathCore)
 if(NOT ROOT_FOUND)
   return()
 endif()
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  message(WARNING "ROOT bindings compilation is not yet supported...")
+  return()
+endif()
 
 message(STATUS "... ROOT v${ROOT_VERSION} standard is c++${ROOT_CXX_STANDARD}")
 
-set(sources IntegratorROOT.cpp ROOTDrawer.cpp ROOTTree*.cpp ROOTHistsHandler.cpp ROOTFunctional.cpp ROOTAnalyticalIntegrator.cpp)
+set(sources IntegratorROOT.cpp
+            ROOTDrawer.cpp
+            ROOTTree*.cpp
+            ROOTHistsHandler.cpp
+            ROOTFunctional.cpp
+            ROOTAnalyticalIntegrator.cpp)
+
+string(REPLACE "-Qunused-arguments" "" ROOT_CXX_FLAGS ${ROOT_CXX_FLAGS})
 
 #--- FOAM integrator
 if(CMAKE_BUILD_FOAM)
@@ -25,5 +36,5 @@ cepgen_build(CepGenRoot SOURCES ${sources}
     DEFINITIONS ${ROOT_DEFINITIONS}
     TESTS test/*.cc
     PROPERTY CXX_STANDARD ${ROOT_CXX_STANDARD}
-    CFLAGS ${ROOT_CXX_FLAGS}
+    CFLAGS "${ROOT_CXX_FLAGS} -Wno-bitwise-instead-of-logical -Wno-sizeof-pointer-div -Wno-unused-command-line-argument"
     INSTALL_COMPONENT root)

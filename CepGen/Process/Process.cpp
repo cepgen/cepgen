@@ -247,6 +247,24 @@ namespace cepgen {
         event_->restore();
     }
 
+    const Event& Process::event() const {
+      if (!event_)
+        throw CG_FATAL("Process:event") << "Process does not have an event object!";
+      return *event_;
+    }
+
+    Event& Process::event() {
+      if (!event_)
+        throw CG_FATAL("Process:event") << "Process does not have an event object!";
+      return *event_;
+    }
+
+    Event* Process::eventPtr() {
+      if (!event_)
+        throw CG_FATAL("Process:event") << "Process does not have an event object!";
+      return event_.get();
+    }
+
     void Process::setKinematics(const Kinematics& kin) {
       CG_DEBUG("Process:setKinematics") << "Preparing to set the kinematics parameters. Input parameters: "
                                         << ParametersDescription(kin.allParameters(false)) << ".";
@@ -263,6 +281,14 @@ namespace cepgen {
         auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
         ib2.setPdgId(kin_.incomingBeams().negative().pdgId());
         ib2.setMomentum(p2);
+        auto& ob1 = event_->oneWithRole(Particle::OutgoingBeam1);
+        ob1.setPdgId(kin_.incomingBeams().positive().pdgId());
+        ob1.setStatus(kin_.incomingBeams().positive().fragmented() ? Particle::Status::Unfragmented
+                                                                   : Particle::Status::FinalState);
+        auto& ob2 = event_->oneWithRole(Particle::OutgoingBeam2);
+        ob2.setPdgId(kin_.incomingBeams().negative().pdgId());
+        ob2.setStatus(kin_.incomingBeams().negative().fragmented() ? Particle::Status::Unfragmented
+                                                                   : Particle::Status::FinalState);
         for (auto& cp : (*event_)[Particle::CentralSystem])
           cp.get().setPdgId(cp.get().pdgId());
       }

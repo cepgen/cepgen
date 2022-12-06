@@ -24,6 +24,7 @@
 #include <algorithm>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
 
@@ -45,6 +46,9 @@ namespace cepgen {
       Py_InitializeEx(1);
       if (!initialised())
         throw CG_FATAL("Python:Environment") << "Failed to initialise the Python environment!";
+#if PY_VERSION_HEX >= 0x03080000
+      PyConfig_InitPythonConfig(&config_);
+#endif
       utils::env::set("PYTHONDONTWRITEBYTECODE", "1");
     }
 
@@ -57,20 +61,7 @@ namespace cepgen {
 
     bool Environment::initialised() { return Py_IsInitialized(); }
 
-    std::string pythonPath(const std::string& file) {
-      const auto dir = fs::path{file}.remove_filename();
-      if (!dir.empty()) {
-        CG_DEBUG("Python") << "Adding {" << dir << "} to the default search paths.";
-        utils::env::append("PYTHONPATH", dir);
-      }
-
-      const auto filename = utils::replace_all(fs::path{file}.replace_extension("").string() /* remove the extension */,
-                                               {{"../", ".."}, {"/", "."}});
-      CG_DEBUG("Python") << "Python path: " << filename;
-      return filename;
-    }
-
-    void setProgramName(const std::string& filename) {
+    void Environment::setProgramName(const std::string& filename) {
       const size_t fn_len = filename.length() + 1;
 #ifdef PYTHON2
       char* sfilename = new char[fn_len];
@@ -83,9 +74,26 @@ namespace cepgen {
 #endif
       if (!sfilename)
         throw CG_FATAL("PythonHandler") << "Invalid filename provided to the Python cards parser!";
+#if PY_VERSION_HEX >= 0x03080000
+      config_.program_name = sfilename;
+#else
       Py_SetProgramName(sfilename);
+#endif
       delete[] sfilename;
       CG_DEBUG("Python:setProgramName") << "Programme name set to \"" << readable_s_filename << "\".";
+    }
+
+    std::string pythonPath(const std::string& file) {
+      const auto dir = fs::path{file}.remove_filename();
+      if (!dir.empty()) {
+        CG_DEBUG("Python") << "Adding {" << dir << "} to the default search paths.";
+        utils::env::append("PYTHONPATH", dir);
+      }
+
+      const auto filename = utils::replace_all(fs::path{file}.replace_extension("").string() /* remove the extension */,
+                                               {{"../", ".."}, {"/", "."}});
+      CG_DEBUG("Python") << "Python path: " << filename;
+      return filename;
     }
 
     PyObject* element(PyObject* obj, const std::string& key) {

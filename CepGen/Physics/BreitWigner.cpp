@@ -16,32 +16,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Physics_BreitWigner_h
-#define CepGen_Physics_BreitWigner_h
+#include <math.h>
+
+#include "CepGen/Physics/BreitWigner.h"
 
 namespace cepgen {
-  /// A Breit-Wigner/Cauchy distribution generator
-  class BreitWigner {
-  public:
-    explicit BreitWigner(double mean = 0., double gamma = 0., double emin = -1., double emax = -1.);
+  BreitWigner::BreitWigner(double mean, double gamma, double emin, double emax)
+      : mean_(mean), gamma_(gamma), emin_(emin), emax_(emax) {}
 
-    /// Minimal energy to consider
-    double min() const { return emin_; }
-    /// Maximal energy to consider
-    double max() const { return emax_; }
-    /// Shoot a value according to parameterisation
-    double operator()(double x) const;
+  double BreitWigner::operator()(double x) const {
+    const double val = mean_ + 0.5 * gamma_ * tan((2. * x - 1.) * M_PI_2);
+    if (emin_ >= 0. && val < emin_)
+      return -1.;
+    if (emax_ >= 0. && val > emax_)
+      return -1.;
+    return val;
+  }
 
-  private:
-    /// Mean of distribution
-    double mean_;
-    /// Width of distribution
-    double gamma_;
-    /// Minimal value
-    double emin_;
-    /// Maximal value
-    double emax_;
-  };
 }  // namespace cepgen
-
-#endif

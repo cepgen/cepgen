@@ -72,7 +72,8 @@ namespace cepgen {
     /// Set the module name
     template <typename T>
     inline ParametersDescription& setName(const T& name) {
-      return add<T>(ParametersList::MODULE_NAME, name);
+      ParametersList::setName<T>(name);
+      return *this;
     }
     /// Add the description to a collection of ParametersList objects
     ParametersDescription& addParametersDescriptionVector(const std::string&,

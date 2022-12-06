@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2017-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,39 +36,13 @@ namespace cepgen {
                                 double pmass = -1.,
                                 double pwidth = -1.,
                                 int pcharge = 0.,
-                                bool pfermion = false)
-        : ParticleProperties(ParametersList()
-                                 .set("pdgid", ppdgid)
-                                 .set("name", pname)
-                                 .set("description", pdescr)
-                                 .set("colours", pcolours)
-                                 .set("mass", pmass)
-                                 .set("width", pwidth)
-                                 .set("charge", pcharge)
-                                 .set("fermion", pfermion)) {}
-    explicit ParticleProperties(const ParametersList& params) : SteeredObject(params) {
-      (*this)
-          .add("pdgid", pdgid)
-          .add("name", name)
-          .add("description", descr)
-          .add("colours", colours)
-          .add("mass", mass)
-          .add("width", width)
-          .add("charge", charge)
-          .add("fermion", fermion);
-    }
-    static ParametersDescription description() {
-      auto pdesc = ParametersDescription();
-      pdesc.add<pdgid_t>("pdgid", 0).setDescription("PDG unique identifier");
-      pdesc.add<std::string>("name", "").setDescription("particle computer-readable name");
-      pdesc.add<std::string>("description", "").setDescription("particle human-readable name");
-      pdesc.add<int>("colours", 0).setDescription("colour factor");
-      pdesc.add<double>("mass", 0.).setDescription("particle mass (in GeV/c^2)");
-      pdesc.add<double>("width", 0.).setDescription("particle width (in GeV)");
-      pdesc.add<int>("charge", 0).setDescription("electric charge (in units of e)");
-      pdesc.add<bool>("fermion", false).setDescription("is the particle following the Fermi-Dirac statistics?");
-      return pdesc;
-    }
+                                bool pfermion = false);
+    explicit ParticleProperties(const ParametersList&);
+
+    static ParametersDescription description();
+
+    bool operator==(const ParticleProperties& oth) const;
+    inline bool operator!=(const ParticleProperties& oth) const { return !operator==(oth); }
 
     pdgid_t pdgid{0ull};  ///< PDG identifier
     std::string name;     ///< Particle name

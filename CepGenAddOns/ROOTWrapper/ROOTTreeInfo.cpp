@@ -44,6 +44,12 @@ namespace ROOT {
     tree_->Branch("process_parameters", &process_parameters);
   }
 
+  void CepGenRun::fill() {
+    if (!tree_)
+      throw CG_FATAL("CepGenRun:fill") << "Trying to fill a non-existent tree!";
+    tree_->Fill();
+  }
+
   void CepGenRun::attach(TFile* file, const char* run_tree) {
     //--- special constructor to avoid the memory to be cleared at destruction time
     tree_ = std::shared_ptr<TTree>(dynamic_cast<TTree*>(file->Get(run_tree)), [=](TTree*) {});

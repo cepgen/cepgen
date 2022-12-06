@@ -48,10 +48,6 @@ namespace cepgen {
     process_->prepareKinematics();
     CG_DEBUG("ProcessIntegrand").log([this](auto& log) { process_->dumpVariables(&log.stream()); });
 
-    //--- prepare the event content
-    if (process_->hasEvent())
-      event_ = &process_->event();
-
     //--- first-run preparation
     CG_DEBUG("ProcessIntegrand") << "Preparing all variables for a new run.";
     const auto& kin = process_->kinematics();
@@ -93,8 +89,12 @@ namespace cepgen {
       return 0.;
 
     //--- speed up the integration process if no event is to be generated
-    if (!event_)
+    if (!process_->hasEvent())
       return weight;
+
+    //--- prepare the event content
+    auto* event = process_->eventPtr();
+
     if (!storage_ && !params_->eventModifiersSequence().empty() && !params_->tamingFunctions().empty() &&
         params_->kinematics().cuts().central_particles.empty())
       return weight;
@@ -109,8 +109,8 @@ namespace cepgen {
       weight = std::accumulate(params_->tamingFunctions().begin(),
                                params_->tamingFunctions().end(),
                                weight,
-                               [&bws, this](double init, const auto& tam) {
-                                 return init * (*tam)(bws.get(*event_, tam->variables().at(0)));
+                               [&bws, &event](double init, const auto& tam) {
+                                 return init * (*tam)(bws.get(*event, tam->variables().at(0)));
                                });
     } catch (const Exception&) {
       throw CG_FATAL("ProcessIntegrand") << "Failed to apply taming function(s) taming!";
@@ -121,13 +121,13 @@ namespace cepgen {
 
     //--- set the CepGen part of the event generation
     if (storage_)
-      event_->time_generation = (float)tmr_->elapsed();
+      event->time_generation = (float)tmr_->elapsed();
 
     //--- trigger all event modification algorithms
     if (!params_->eventModifiersSequence().empty()) {
       double br = -1.;
       for (auto& mod : params_->eventModifiersSequence()) {
-        if (!mod->run(*event_, br, storage_) || br == 0.)
+        if (!mod->run(*event, br, storage_) || br == 0.)
           return 0.;
         weight *= br;  // branching fraction for all decays
       }
@@ -136,28 +136,28 @@ namespace cepgen {
     //--- apply cuts on final state system (after hadronisation!)
     //    (polish your cuts, as this might be very time-consuming...)
 
-    if (!params_->kinematics().cuts().central.contain((*event_)(Particle::CentralSystem)))
+    if (!params_->kinematics().cuts().central.contain((*event)(Particle::CentralSystem)))
       return 0.;
     if (!params_->kinematics().cuts().central_particles.empty())
-      for (const auto& part : (*event_)(Particle::CentralSystem)) {
+      for (const auto& part : (*event)(Particle::CentralSystem)) {
         // retrieve all cuts associated to this final state particle in the central system
         if (params_->kinematics().cuts().central_particles.count(part.pdgId()) > 0 &&
             !params_->kinematics().cuts().central_particles.at(part.pdgId()).contain({part}))
           return 0.;
       }
-    if (!params_->kinematics().cuts().remnants.contain((*event_)(Particle::OutgoingBeam1), event_))
+    if (!params_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam1), event))
       return 0.;
-    if (!params_->kinematics().cuts().remnants.contain((*event_)(Particle::OutgoingBeam2), event_))
+    if (!params_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam2), event))
       return 0.;
 
     //--- store the last event in parameters block for a later usage
     if (storage_) {
-      event_->weight = (float)weight;
-      event_->time_total = (float)tmr_->elapsed();
+      event->weight = (float)weight;
+      event->time_total = (float)tmr_->elapsed();
 
       CG_DEBUG_LOOP("ProcessIntegrand") << "[process " << std::hex << (void*)process_.get() << std::dec << "]\n\t"
-                                        << "Generation time: " << event_->time_generation * 1.e3 << " ms\n\t"
-                                        << "Total time (gen+hadr+cuts): " << event_->time_total * 1.e3 << " ms";
+                                        << "Generation time: " << event->time_generation * 1.e3 << " ms\n\t"
+                                        << "Total time (gen+hadr+cuts): " << event->time_total * 1.e3 << " ms";
     }
 
     //--- a bit of useful debugging

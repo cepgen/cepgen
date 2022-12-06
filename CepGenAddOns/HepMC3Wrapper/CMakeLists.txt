@@ -10,6 +10,7 @@ if(NOT HEPMC3_LIB OR NOT HEPMC3_INCLUDE)
 endif()
 
 set(libs ${HEPMC3_LIB})
+set(headers ${HEPMC3_INCLUDE})
 set(defs)
 if(HEPMC3_ROOT_LIB)
   message(STATUS "HepMC ROOT I/O library found")
@@ -17,10 +18,34 @@ if(HEPMC3_ROOT_LIB)
   list(APPEND defs -DHEPMC3_ROOTIO)
 endif()
 
+find_package(ZLIB)
+if(ZLIB_FOUND)
+  list(APPEND headers ${ZLIB_INCLUDE_DIR})
+  list(APPEND libs ${ZLIB_LIBRARIES})
+  list(APPEND defs HEPMC3_USE_COMPRESSION)
+  list(APPEND defs HEPMC3_Z_SUPPORT=1)
+endif()
+
+find_package(LibLZMA)
+if(LIBLZMA_FOUND)
+  list(APPEND headers ${LIBLZMA_INCLUDE_DIRS})
+  list(APPEND libs ${LIBLZMA_LIBRARIES})
+  list(APPEND defs HEPMC3_USE_COMPRESSION)
+  list(APPEND defs HEPMC3_LZMA_SUPPORT=1)
+endif()
+
+find_package(BZip2)
+if(BZIP2_FOUND)
+  list(APPEND headers ${BZIP2_INCLUDE_DIRS})
+  list(APPEND libs ${BZIP2_LIBRARIES})
+  list(APPEND defs HEPMC3_USE_COMPRESSION)
+  list(APPEND defs HEPMC3_BZ2_SUPPORT=1)
+endif()
+
 #----- build the object
 
 cepgen_build(CepGenHepMC3 SOURCES *.cpp
     EXT_LIBS ${libs}
-    EXT_HEADERS ${HEPMC3_INCLUDE}
+    EXT_HEADERS ${headers}
     DEFINITIONS ${defs}
     INSTALL_COMPONENT hepmc3)

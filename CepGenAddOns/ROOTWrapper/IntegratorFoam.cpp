@@ -38,7 +38,7 @@ namespace cepgen {
     static ParametersDescription description();
 
     void integrate(double&, double&) override;
-    inline double uniform() const override { return rnd_->Rndm(); }
+    inline double uniform(double min, double max) const override { return rnd_->Uniform(min, max); }
 
     /// Compute the weight for a given phase space point
     inline double Density(int ndim, double* x) override {

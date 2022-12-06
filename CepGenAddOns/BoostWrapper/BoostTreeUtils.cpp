@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2021  Laurent Forthomme
+ *  Copyright (C) 2020-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -56,8 +56,7 @@ namespace boost {
         else if (params.has<std::vector<std::string>>(key))
           out.add_child(key, pack(params.get<std::vector<std::string>>(key)));
         else
-          throw ::cepgen::LoggedException(
-              __FUNC__, "PythonConfigWriter", ::cepgen::Exception::Type::fatal, __FILE__, __LINE__)
+          throw ::cepgen::Exception(__FUNC__, "PythonConfigWriter", ::cepgen::Exception::Type::fatal, __FILE__, __LINE__)
               << "Failed to recast the key \"" << key << "\" "
               << "with value \"" << params.getString(key) << "\"!";
       }
@@ -138,7 +137,7 @@ namespace boost {
             }
           else
             add(out, it.first, it.second);
-        } catch (const Exception&) {
+        } catch (const ::cepgen::Exception&) {
           if (it.second.get_value<std::string>().find('.') != std::string::npos)
             try {
               out.set<double>(it.first, it.second.get_value<double>());
@@ -155,5 +154,27 @@ namespace boost {
       }
       return out;
     }
+
+    void add(::cepgen::ParametersList& base, const std::string& name, const pt::ptree& tree) {
+      auto plist = unpack(tree);
+      //--- first check if we have a limits set
+      if (plist.keys().size() <= 2 && (plist.has<double>(MIN_KEY) || plist.has<double>(MAX_KEY))) {
+        ::cepgen::Limits lim;
+        plist.fill<double>(MIN_KEY, lim.min());
+        plist.fill<double>(MAX_KEY, lim.max());
+        base.set<::cepgen::Limits>(name, lim);
+      }
+      //--- then check if daughter is a vector; if true, skip one hierarchy level
+      else if (plist.has<std::vector<int>>(DAUGH_KEY))
+        base.set<std::vector<int>>(name, plist.get<std::vector<int>>(DAUGH_KEY));
+      else if (plist.has<std::vector<double>>(DAUGH_KEY)) {
+        auto vec = plist.get<std::vector<double>>(DAUGH_KEY);
+        base.set<std::vector<double>>(name, vec);
+      } else if (plist.has<std::vector<std::string>>(DAUGH_KEY))
+        base.set<std::vector<std::string>>(name, plist.get<std::vector<std::string>>(DAUGH_KEY));
+      else
+        base.set<::cepgen::ParametersList>(name, plist);
+    }
+
   }  // namespace cepgen
 }  // namespace boost

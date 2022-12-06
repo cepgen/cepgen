@@ -18,7 +18,6 @@
 
 #include <array>
 #include <cmath>
-#include <cstring>
 #include <iomanip>
 
 #include "CepGen/Core/Exception.h"
@@ -61,9 +60,9 @@ namespace cepgen {
       const char CHAR, ERR_CHAR;
       const char* CHAR_ALT;
       // greyscale ascii art from http://paulbourke.net/dataformats/asciiart/
-      //static constexpr const char* CHARS = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
-      //static constexpr const char* CHARS = " .:-=+*#%@";
-      const char* CHARS;
+      //const std::string CHARS = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+      //const std::string CHARS = " .:-=+*#%@";
+      const std::string CHARS;
       static const std::array<Colour, 7> kColours;
       const char NEG_CHAR = '-';
 
@@ -387,12 +386,12 @@ namespace cepgen {
             if (sign == -1)
               os << (effects ? utils::colourise(std::string(1, NEG_CHAR), kColours.at(0)) : std::string(1, NEG_CHAR));
             else {
-              size_t ch_id = ceil(val_norm * (strlen(CHARS) - 1));
+              size_t ch_id = ceil(val_norm * (CHARS.size() - 1));
               size_t col_id = 1 + val_norm * (kColours.size() - 2);
-              os << (effects ? utils::colourise(std::string(1, CHARS[ch_id]),
+              os << (effects ? utils::colourise(std::string(1, CHARS.at(ch_id)),
                                                 kColours.at(col_id),
                                                 (val_norm > 0.75 ? utils::Modifier::bold : utils::Modifier::reset))
-                             : std::string(1, CHARS[ch_id]));
+                             : std::string(1, CHARS.at(ch_id)));
             }
           }
         }
@@ -415,7 +414,7 @@ namespace cepgen {
       os << "\n"
          << sep << ":" << std::string(y_axis.size(), '.') << ": "  // 2nd abscissa axis
          << delatexify(dr.yAxis().label()) << "\n\t"
-         << "(scale: \"" << std::string(CHARS) << "\", ";
+         << "(scale: \"" << CHARS << "\", ";
       for (size_t i = 0; i < kColours.size(); ++i)
         os << (effects ? utils::colourise("*", kColours.at(i)) : "") << (i == 0 ? "|" : "");
       os << ")\n";

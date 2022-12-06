@@ -61,8 +61,6 @@ namespace cepgen {
     /// Prepare the object for event generation
     void computeGenerationParameters();
 
-    /// Local event weight evaluator
-    std::unique_ptr<ProcessIntegrand> integrand_;
     /// Pointer to the mother-handled integrator instance
     /// \note NOT owning
     const Integrator* integrator_{nullptr};
@@ -71,6 +69,8 @@ namespace cepgen {
     const Parameters* params_{nullptr};
     /// Set of parameters for the integration/event generation grid
     std::unique_ptr<GridParameters> grid_;
+    /// Local event weight evaluator
+    std::unique_ptr<ProcessIntegrand> integrand_;
     /// Selected bin at which the function will be evaluated
     int ps_bin_{UNASSIGNED_BIN};  ///< Last bin to be corrected
     std::vector<double> coords_;  ///< Phase space coordinates being evaluated

@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
   try {
     auto env = cepgen::python::Environment();
     const auto path = cepgen::python::pythonPath(output_file);
-    cepgen::python::setProgramName(path);
+    env.setProgramName(path);
     auto obj = cepgen::python::importModule(path);
     if (!obj) {
       CG_LOG << "Failed to import the module.";

@@ -146,23 +146,15 @@ namespace cepgen {
   std::ostream& operator<<(std::ostream& os, const Parameters* param) {
     const int wb = 90, wt = 33;
 
-    if (param->process_) {
-      os << std::left << "\n"
-         << std::setfill('_') << std::setw(wb + 3) << "_/¯ PROCESS INFORMATION ¯\\_" << std::setfill(' ') << "\n"
-         << std::right << std::setw(wb) << std::left << std::endl;
-      std::ostringstream proc_mode;
-      proc_mode << param->kinematics().incomingBeams().mode();
-      os << std::setw(wt) << "Process mode" << utils::boldify(proc_mode.str()) << "\n"
-         << std::setw(wt) << "Process to generate: "
+    os << std::left << "\n"
+       << std::setfill('_') << std::setw(wb + 3) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "\n\n";
+    if (param->process_)
+      os << std::setw(wt) << "Process to generate:\n"
          << proc::ProcessFactory::get()
                 .describeParameters(param->process().name(), param->process().parameters())
-                .describe(4)
-         << "\n";
-    }
-    os << "\n"
-       << std::setfill('_') << std::setw(wb + 3) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "\n"
-       << std::right << std::setw(wb) << std::left << std::endl
-       << std::setw(wt) << "Events generation? " << utils::yesno(param->generation_.enabled()) << "\n"
+                .describe(1)
+         << "\n\n";
+    os << std::setw(wt) << "Events generation? " << utils::yesno(param->generation_.enabled()) << "\n"
        << std::setw(wt) << "Number of events to generate" << utils::boldify(param->generation_.maxGen()) << "\n";
     if (param->generation_.numThreads() > 1)
       os << std::setw(wt) << "Number of threads" << param->generation_.numThreads() << "\n";
@@ -189,7 +181,7 @@ namespace cepgen {
       for (const auto& tf : param->taming_functions_)
         os << std::setw(wt) << "" << tf->variables().at(0) << ": " << tf->expression() << "\n";
     }
-    os << "\n"
+    os << "\n\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Integration parameters ") << std::setfill(' ')
        << "\n\n"
        << std::setw(wt) << "Integration" << utils::boldify(param->par_integrator.name<std::string>("N/A")) << "\n";

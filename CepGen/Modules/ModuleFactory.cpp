@@ -64,7 +64,7 @@ namespace cepgen {
 
   template <typename T, typename I>
   std::unique_ptr<T> ModuleFactory<T, I>::build(const ParametersList& params) const {
-    if (!params.has<I>(ParametersList::MODULE_NAME))
+    if (!params.hasName<I>())
       throw CG_FATAL("ModuleFactory") << description_ << " failed to retrieve an indexing key "
                                       << "from parameters to build the module!\n"
                                       << "Parameters: " << params << ".\n"

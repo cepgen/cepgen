@@ -57,6 +57,11 @@ namespace cepgen {
     }
 
     void KTProcess::prepareKinematics() {
+      const auto& ib1 = event_->oneWithRole(Particle::IncomingBeam1);
+      const auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
+      auto& p1 = event_->oneWithRole(Particle::Parton1);
+      auto& p2 = event_->oneWithRole(Particle::Parton2);
+
       //============================================================================================
       // register the incoming partons' variables
       //============================================================================================
@@ -80,8 +85,8 @@ namespace cepgen {
       // register the incoming partons
       //============================================================================================
 
-      event_->oneWithRole(Particle::Parton1).setPdgId(kin_.incomingBeams().positive().daughterId());
-      event_->oneWithRole(Particle::Parton2).setPdgId(kin_.incomingBeams().negative().daughterId());
+      p1.setPdgId(kin_.incomingBeams().positive().daughterId());
+      p2.setPdgId(kin_.incomingBeams().negative().daughterId());
 
       //============================================================================================
       // register all process-dependent variables
@@ -93,8 +98,8 @@ namespace cepgen {
       // register the outgoing remnants' variables
       //============================================================================================
 
-      mX2_ = event_->oneWithRole(Particle::IncomingBeam1).mass2();
-      mY2_ = event_->oneWithRole(Particle::IncomingBeam2).mass2();
+      mX2_ = ib1.mass2();
+      mY2_ = ib2.mass2();
       if (kin_.incomingBeams().positive().fragmented())
         defineVariable(
             mX2_, Mapping::square, kin_.cuts().remnants.mx(), {1.07, 1000.}, "Positive z proton remnant squared mass");
@@ -113,51 +118,39 @@ namespace cepgen {
       auto* ff = kin_.incomingBeams().formFactors();
       auto* sf = kin_.incomingBeams().structureFunctions();
       const double q2_1 = qt1_ * qt1_, q2_2 = qt2_ * qt2_;
-      const double f1 = kin_.incomingBeams().positive().ktFlux(x1_, q2_1, mX2_, ff, sf),
-                   f2 = kin_.incomingBeams().negative().ktFlux(x2_, q2_2, mY2_, ff, sf);
+      const double f1 = kin_.incomingBeams().positive().ktFlux(x1_, q2_1, mX2_, ff, sf) * M_1_PI,
+                   f2 = kin_.incomingBeams().negative().ktFlux(x2_, q2_2, mY2_, ff, sf) * M_1_PI;
 
-      return f1 * M_1_PI * f2 * M_1_PI * cent_me;
+      return f1 * f2 * cent_me;
     }
 
     void KTProcess::fillKinematics(bool) {
       fillCentralParticlesKinematics();  // process-dependent!
-      fillPrimaryParticlesKinematics();
-    }
 
-    void KTProcess::fillPrimaryParticlesKinematics() {
-      //============================================================================================
-      //     outgoing protons
-      //============================================================================================
+      // set the kinematics of the incoming and outgoing beams (or remnants)
+      const auto& ib1 = event_->oneWithRole(Particle::IncomingBeam1);
+      const auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
+      auto& ob1 = event_->oneWithRole(Particle::OutgoingBeam1);
+      auto& ob2 = event_->oneWithRole(Particle::OutgoingBeam2);
+      auto& p1 = event_->oneWithRole(Particle::Parton1);
+      auto& p2 = event_->oneWithRole(Particle::Parton2);
+      auto& cm = event_->oneWithRole(Particle::Intermediate);
 
-      Particle& op1 = event_->oneWithRole(Particle::OutgoingBeam1);
-      op1.setMomentum(pX_);
+      // beam systems
+      ob1.setMomentum(pX_);
       if (kin_.incomingBeams().positive().fragmented())
-        op1.setStatus(Particle::Status::Unfragmented).setMass(sqrt(mX2_));
-      else
-        op1.setStatus(Particle::Status::FinalState);
-
-      Particle& op2 = event_->oneWithRole(Particle::OutgoingBeam2);
-      op2.setMomentum(pY_);
+        ob1.setMass(sqrt(mX2_));
+      ob2.setMomentum(pY_);
       if (kin_.incomingBeams().negative().fragmented())
-        op2.setStatus(Particle::Status::Unfragmented).setMass(sqrt(mY2_));
-      else
-        op2.setStatus(Particle::Status::FinalState);
+        ob2.setMass(sqrt(mY2_));
 
-      //============================================================================================
-      //     incoming partons (photons, pomerons, ...)
-      //============================================================================================
+      // parton systems
+      p1.setMomentum(ib1.momentum() - pX_, true);
+      p2.setMomentum(ib2.momentum() - pY_, true);
 
-      Particle& g1 = event_->oneWithRole(Particle::Parton1);
-      g1.setMomentum(event_->oneWithRole(Particle::IncomingBeam1).momentum() - pX_, true);
 
-      Particle& g2 = event_->oneWithRole(Particle::Parton2);
-      g2.setMomentum(event_->oneWithRole(Particle::IncomingBeam2).momentum() - pY_, true);
-
-      //============================================================================================
-      //     two-parton system
-      //============================================================================================
-
-      event_->oneWithRole(Particle::Intermediate).setMomentum(g1.momentum() + g2.momentum());
+      // two-parton system
+      cm.setMomentum(p1.momentum() + p2.momentum());
     }
 
     ParametersDescription KTProcess::description() {

@@ -23,6 +23,7 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
@@ -43,6 +44,8 @@ namespace cepgen {
       return true;
 #ifdef _WIN32
     const auto fullpath = match ? path + ".dll" : path;
+#elif defined(__APPLE__)
+    const auto fullpath = match ? "lib" + path + ".dylib" : path;
 #else
     const auto fullpath = match ? "lib" + path + ".so" : path;
 #endif
@@ -79,11 +82,7 @@ namespace cepgen {
   void initialise(bool safe_mode) {
     //--- parse all particles properties
     static const std::string pdg_file = "";
-    search_paths = std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."),
-                                            fs::path() / "/usr" / "share" / "CepGen",
-                                            fs::current_path(),
-                                            fs::current_path().parent_path(),
-                                            fs::current_path().parent_path().parent_path()};
+    search_paths = utils::env::searchPaths();
     CG_DEBUG("initialise") << utils::s("Search path", search_paths.size(), false) << ": " << search_paths << ".";
 
     //--- particles table parsing

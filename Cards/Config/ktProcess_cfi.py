@@ -12,6 +12,7 @@ class ProtonFlux:
     """Type of parton (from proton) flux modelling"""
     PhotonElastic         = 0
     PhotonInelastic       = 1
+    PhotonElasticBudnev   = 10
     PhotonInelasticBudnev = 11
     GluonKMR              = 20
     GluonKMRlegacy        = 21

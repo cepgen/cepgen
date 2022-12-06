@@ -101,7 +101,7 @@ namespace cepgen {
 
   void Generator::setIntegrator(std::unique_ptr<Integrator> integ) {
     CG_TICKER(parameters_->timeKeeper());
-
+    // copy the integrator instance (or create it if unspecified) in the current scope
     if (!integ) {
       if (parameters_->par_integrator.name<std::string>().empty())
         parameters_->par_integrator.setName<std::string>("Vegas");
