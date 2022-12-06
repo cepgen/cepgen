@@ -523,6 +523,9 @@ namespace cepgen {
 
   //------------------------------------------------------------------
   // particle properties-type attributes
+  //   particular case for this container, as it can either be
+  //   represented by a ParametersList (collection of parameters) or
+  //   an integer PDG identifier
   //------------------------------------------------------------------
 
   /// Check if a particle properties object is handled
@@ -540,9 +543,11 @@ namespace cepgen {
       if (plist.has<pdgid_t>("pdgid") || plist.has<int>("pdgid"))
         return PDG::get()(plist.get<pdgid_t>("pdgid"));
       return ParticleProperties(plist);
-    } else if (has<int>(key))
+    } else if (has<int>(key)) {
+      CG_DEBUG("ParametersList") << "Retrieved physical properties for particle with PDG identifier '" << get<int>(key)
+                                 << "' from PDG database.";
       return PDG::get()(get<int>(key));
-    else {
+    } else {
       CG_DEBUG("ParametersList") << "Failed to retrieve particle properties parameter with key=" << key << ".";
       return def;
     }
