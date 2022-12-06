@@ -19,17 +19,9 @@
 #ifndef CepGen_Utils_Graph_h
 #define CepGen_Utils_Graph_h
 
-#include <gsl/gsl_histogram.h>
-#include <gsl/gsl_histogram2d.h>
-
-#include <map>
-#include <memory>
 #include <set>
-#include <string>
-#include <vector>
 
-#include "CepGen/Utils/Histogram.h"
-#include "CepGen/Utils/Limits.h"
+#include "CepGen/Utils/Drawable.h"
 
 namespace cepgen {
   namespace utils {

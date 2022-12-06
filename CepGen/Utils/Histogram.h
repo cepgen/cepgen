@@ -23,11 +23,8 @@
 #include <gsl/gsl_histogram2d.h>
 
 #include <memory>
-#include <string>
-#include <vector>
 
 #include "CepGen/Utils/Drawable.h"
-#include "CepGen/Utils/Limits.h"
 
 namespace cepgen {
   namespace utils {

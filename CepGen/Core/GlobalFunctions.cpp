@@ -72,7 +72,7 @@ namespace cepgen {
       loaded_libraries.emplace_back(path);
       return true;
     }
-    CG_DEBUG("loadLibrary") << "Library \"" << path << "\" does not exist.";
+    CG_DEBUG("loadLibrary") << "Library \"" << path << "\" (" << fullpath << ") does not exist.";
     return false;
   }
 
@@ -81,8 +81,10 @@ namespace cepgen {
     static const std::string pdg_file = "";
     search_paths = std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."),
                                             fs::path() / "/usr" / "share" / "CepGen",
+                                            fs::current_path(),
                                             fs::current_path().parent_path(),
                                             fs::current_path().parent_path().parent_path()};
+    CG_DEBUG("initialise") << utils::s("Search path", search_paths.size(), false) << ": " << search_paths << ".";
 
     //--- particles table parsing
     std::string mcd_file, addons_file;

@@ -20,7 +20,6 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/IntegratorGSL.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 
 namespace cepgen {

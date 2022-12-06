@@ -108,7 +108,7 @@ namespace cepgen {
         keys_erased.emplace_back(key);
     }
     if (!keys_erased.empty())
-      CG_DEBUG("ParametersList") << utils::s("key", keys_erased.size(), true) << " erased: " << keys_erased << ".";
+      CG_DEBUG_LOOP("ParametersList") << utils::s("key", keys_erased.size(), true) << " erased: " << keys_erased << ".";
     //--- concatenate all typed lists
     bool_values_.insert(oth.bool_values_.begin(), oth.bool_values_.end());
     int_values_.insert(oth.int_values_.begin(), oth.int_values_.end());

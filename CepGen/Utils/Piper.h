@@ -25,20 +25,27 @@
 
 namespace cepgen {
   namespace utils {
+    /// External command piping utility
     class Piper {
     public:
+      /// Start a piped command
+      /// \param[in] command Command path for the session
       explicit Piper(const std::string& command) : file_(popen(command.c_str(), "w"), pclose) {}
 
+      /// A collection of commands to pipe to the session
       struct Commands : std::vector<std::string> {
         using std::vector<std::string>::vector;
+        /// Append a set of commands to the end of the commands block
         Commands& operator+=(const std::vector<std::string>& oth) {
           std::copy(oth.begin(), oth.end(), std::back_inserter(*this));
           return *this;
         }
+        /// Append a command at the end of the commands block
         Commands& operator+=(const std::string& str) {
           emplace_back(str);
           return *this;
         }
+        /// Commands printout utility
         friend std::ostream& operator<<(std::ostream& os, const Commands& cmds) {
           std::string sep;
           os << "{";
@@ -47,6 +54,7 @@ namespace cepgen {
           return os << "}";
         }
       };
+      /// Execute a chain of commands
       const Piper& execute(const Commands& cmds) const {
         for (const auto& cmd : cmds)
           fputs((cmd + "\n").c_str(), file_.get());

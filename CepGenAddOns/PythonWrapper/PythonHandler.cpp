@@ -147,16 +147,15 @@ namespace cepgen {
 
         //--- process kinematics
         ParametersList pkin;
-        auto* pin_kinematics = python::element(process, "inKinematics");  // borrowed
-        if (pin_kinematics)
+        if (auto* pin_kinematics = python::element(process, "inKinematics"))  // borrowed
           pkin += python::get<ParametersList>(pin_kinematics);
 
-        auto* pout_kinematics = python::element(process, "outKinematics");  // borrowed
-        if (pout_kinematics)
+        if (auto* pout_kinematics = python::element(process, "outKinematics"))  // borrowed
           pkin += python::get<ParametersList>(pout_kinematics);
 
         if (proc_params.has<int>("mode"))
           pkin.set<int>("mode", proc_params.get<int>("mode"));
+        CG_DEBUG("PythonHandler") << "Setting kinematics to:\n" << pkin << ".";
         rt_params_->process().setKinematics(Kinematics(pkin));
 
         //--- taming functions

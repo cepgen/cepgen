@@ -19,9 +19,6 @@
 #ifndef CepGen_Parameters_h
 #define CepGen_Parameters_h
 
-#include <gsl/gsl_monte_miser.h>
-#include <gsl/gsl_monte_vegas.h>
-
 #include <memory>
 
 #include "CepGen/Physics/Kinematics.h"

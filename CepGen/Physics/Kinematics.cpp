@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,10 +24,14 @@
 namespace cepgen {
   const double Kinematics::MX_MIN = 1.07;  // mp+mpi+-
 
-  Kinematics::Kinematics(const ParametersList& params)
-      : SteeredObject(params), incoming_beams_(params_), cuts_(params_) {
+  Kinematics::Kinematics(const ParametersList& params) : SteeredObject(params) {
     CG_DEBUG("Kinematics") << "Building a Kinematics parameters container "
-                           << "with the following parameters:\n\t" << params << ".";
+                           << "with the following parameters:\n\t" << params_ << ".";
+    setParameters(params_);
+  }
+
+  void Kinematics::setParameters(const ParametersList& params) {
+    SteeredObject::setParameters(params);
     //----- outgoing particles definition
     if (params_.has<std::vector<int> >("minFinalState"))
       for (const auto& pdg : steer<std::vector<int> >("minFinalState"))
@@ -36,10 +40,6 @@ namespace cepgen {
     //--- specify where to look for the grid path for gluon emission
     if (params.has<std::string>("kmrGridPath"))
       kmr::GluonGrid::get(ParametersList(params_).set<std::string>("path", steer<std::string>("kmrGridPath")));
-  }
-
-  void Kinematics::setParameters(const ParametersList& params) {
-    SteeredObject::setParameters(params);
     incoming_beams_.setParameters(params_);
     cuts_.setParameters(params_);
   }
