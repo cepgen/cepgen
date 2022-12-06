@@ -11,8 +11,9 @@ endif()
 #----- build the object
 
 cepgen_build(CepGenPAW SOURCES *.cpp
-    EXT_LIBS ${CERNLIB_pawlib} ${CERNLIB_packlib} gfortran shift
+    EXT_LIBS ${CERNLIB_pawlib} ${CERNLIB_packlib} gfortran
     EXT_HEADERS ${CERNLIB_INCLUDE}
     DEFINITIONS -Df2cFortran
+    TESTS test/*.cc
     CFLAGS "-Wall -W -Wno-unused-function -Wno-unused-label -Wno-unused-parameter -Wwrite-strings"
     INSTALL_COMPONENT paw)
