@@ -40,7 +40,7 @@ namespace cepgen {
 
   private:
     static constexpr size_t cmd_buffer_size_ = 256;
-    static const std::unordered_map<std::string, pdgid_t> mg5_parts_;
+    static std::unordered_map<std::string, pdgid_t> mg5_parts_;
 
     static int runCommand(const std::string&, std::string&);
 
@@ -49,6 +49,7 @@ namespace cepgen {
 
     void generateProcess() const;
     void generateLibrary(const fs::path&, const fs::path&, const fs::path&) const;
+    void parseExtraParticles();
     void prepareCard() const;
     void linkCards() const;
     std::string prepareMadGraphProcess() const;
@@ -59,6 +60,9 @@ namespace cepgen {
     const fs::path card_path_;
     const fs::path log_filename_;
     const fs::path standalone_cpp_path_;
+    const ParametersList extra_particles_;
+
+    std::string extra_part_definitions_;
   };
 }  // namespace cepgen
 

@@ -36,7 +36,7 @@
 #include "CepGenAddOns/MadGraphWrapper/MadGraphProcess.h"
 
 namespace cepgen {
-  const std::unordered_map<std::string, pdgid_t> MadGraphInterface::mg5_parts_ = {
+  std::unordered_map<std::string, pdgid_t> MadGraphInterface::mg5_parts_ = {
       {"d", (pdgid_t)1},     {"d~", (pdgid_t)1},    {"u", (pdgid_t)2},    {"u~", (pdgid_t)2},   {"s", (pdgid_t)3},
       {"s~", (pdgid_t)3},    {"c", (pdgid_t)4},     {"c~", (pdgid_t)4},   {"b", (pdgid_t)5},    {"b~", (pdgid_t)5},
       {"t", (pdgid_t)6},     {"t~", (pdgid_t)6},    {"e+", (pdgid_t)11},  {"e-", (pdgid_t)11},  {"ve", (pdgid_t)12},
@@ -52,12 +52,47 @@ namespace cepgen {
         tmp_dir_(steerAs<std::string, fs::path>("tmpDir")),
         card_path_(steerAs<std::string, fs::path>("cardPath")),
         log_filename_(steer<std::string>("logFile")),
-        standalone_cpp_path_(steerAs<std::string, fs::path>("standaloneCppPath")) {
+        standalone_cpp_path_(steerAs<std::string, fs::path>("standaloneCppPath")),
+        extra_particles_(steer<ParametersList>("extraParticles")) {
     if (proc_.empty() && standalone_cpp_path_.empty())
       throw CG_FATAL("MadGraphInterface") << "Neither a 'process' keyword nor a path to a MadGraph process interface "
                                              "already generated ('standaloneCppPath') was set to the parameters!\n"
                                           << params;
     std::ofstream log(log_filename_, std::ios::trunc);  // clearing the log
+    parseExtraParticles();
+  }
+
+  void MadGraphInterface::parseExtraParticles() {
+    for (const auto& extra_part : extra_particles_.keysOf<ParticleProperties>()) {
+      if (mg5_parts_.count(extra_part) > 0)
+        throw CG_FATAL("MadGraphInterface")
+            << "Particle with name '" << extra_part << "' is already defined in internal LUT.";
+      const auto& extra_part_prop = extra_particles_.get<ParticleProperties>(extra_part);
+      // find the equivalent MadGraph particle to alias
+      std::string found_mg_equiv;
+      for (const auto& part : mg5_parts_)
+        if (part.second == extra_part_prop.pdgid)
+          found_mg_equiv = part.first;
+      if (found_mg_equiv.empty())
+        throw CG_FATAL("MadGraphInterface")
+            << "No equivalent for particle with PDG id=" << extra_part_prop.pdgid << " in MadGraph LUT.";
+      if (found_mg_equiv.at(found_mg_equiv.size() - 1) == '+' || found_mg_equiv.at(found_mg_equiv.size() - 1) == '-')
+        found_mg_equiv.pop_back();
+      if (extra_part_prop.charge != 0) {
+        extra_part_definitions_ += "\ndefine " + extra_part + "+ = " + found_mg_equiv + "+";
+        extra_part_definitions_ += "\ndefine " + extra_part + "- = " + found_mg_equiv + "-";
+        mg5_parts_[extra_part + "+"] = mg5_parts_.at(found_mg_equiv + "+");
+        mg5_parts_[extra_part + "-"] = mg5_parts_.at(found_mg_equiv + "-");
+      } else {
+        extra_part_definitions_ += "\ndefine " + extra_part + " = " + found_mg_equiv;
+        mg5_parts_[extra_part] = mg5_parts_.at(found_mg_equiv);
+      }
+      //FIXME add extra particles properties (masses, ...)
+      CG_DEBUG("MadGraphInterface") << "Defined '" << extra_part
+                                    << "' as MadGraph alias for CepGen particle with properties: " << extra_part_prop
+                                    << ".";
+    }
+    CG_LOG << extra_part_definitions_;
   }
 
   std::string MadGraphInterface::run() const {
@@ -99,10 +134,12 @@ namespace cepgen {
   void MadGraphInterface::prepareCard() const {
     std::ofstream card(card_path_);
     if (!model_.empty())
-      card << "import model " << model_ << "\n";
-    card << "generate " << proc_ << "\n";
-    card << "output standalone_cpp " << tmp_dir_.string() << "\n";
-    card << "exit\n";
+      card << "set auto_convert_model T\n"
+           << "import model " << model_ << "\n";
+    card << extra_part_definitions_ << "\n"
+         << "generate " << proc_ << "\n"
+         << "output standalone_cpp " << tmp_dir_.string() << "\n"
+         << "exit\n";
     card.close();
   }
 
@@ -281,6 +318,9 @@ namespace cepgen {
         .setDescription("Temporary path where to store the MadGraph_aMC process definition files");
     desc.add<std::string>("logFile", "/tmp/cepgen_mg5_aMC.log")
         .setDescription("Temporary path where to store the log for this run");
+    desc.add<ParametersDescription>("extraParticles", ParametersDescription())
+        .setDescription("define internal MadGraph alias for a particle name");
+
     return desc;
   }
 }  // namespace cepgen
