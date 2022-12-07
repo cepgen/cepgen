@@ -558,6 +558,15 @@ namespace cepgen {
   ParametersList& ParametersList::set<ParticleProperties>(const std::string& key, const ParticleProperties& value) {
     return set<ParametersList>(key, value.parameters());
   }
+
+  template <>
+  std::vector<std::string> ParametersList::keysOf<ParticleProperties>() const {
+    std::vector<std::string> pdesc_keys;
+    for (const auto& key : keys())
+      if (get<ParticleProperties>(key, ParticleProperties(-1)) != ParticleProperties(-1))
+        pdesc_keys.emplace_back(key);
+    return pdesc_keys;
+  }
 }  // namespace cepgen
 
 #undef IMPL_TYPE
