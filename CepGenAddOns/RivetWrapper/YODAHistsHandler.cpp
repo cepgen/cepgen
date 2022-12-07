@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2019-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,6 +16,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <YODA/Counter.h>
+#include <YODA/Histo1D.h>
+#include <YODA/Histo2D.h>
+#include <YODA/Profile1D.h>
+#include <YODA/Profile2D.h>
+#include <YODA/WriterAIDA.h>
+#include <YODA/WriterFLAT.h>
+#include <YODA/WriterYODA.h>
+
 #include <limits>
 
 #include "CepGen/Core/Exception.h"
@@ -25,14 +34,6 @@
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Utils/Limits.h"
 #include "CepGen/Utils/String.h"
-#include "YODA/Counter.h"
-#include "YODA/Histo1D.h"
-#include "YODA/Histo2D.h"
-#include "YODA/Profile1D.h"
-#include "YODA/Profile2D.h"
-#include "YODA/WriterAIDA.h"
-#include "YODA/WriterFLAT.h"
-#include "YODA/WriterYODA.h"
 
 namespace cepgen {
   namespace io {
@@ -141,7 +142,7 @@ namespace cepgen {
       std::transform(profiles1d_.begin(), profiles1d_.end(), std::back_inserter(obj), histptr);
       std::transform(profiles2d_.begin(), profiles2d_.end(), std::back_inserter(obj), histptr);
       obj.emplace_back(&weight_cnt_);
-      T::write(file_, obj);
+      T::create().write(file_, obj);
     }
 
     template <typename T>
