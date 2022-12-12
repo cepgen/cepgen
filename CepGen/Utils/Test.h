@@ -1,6 +1,7 @@
 #ifndef CepGen_Utils_Test_h
 #define CepGen_Utils_Test_h
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 

@@ -234,10 +234,12 @@ namespace cepgen {
     TH1D ROOTDrawer::convert(const Hist1D& hist) {
       const auto& rng = hist.range();
       TH1D h(hist.name().c_str(), delatexify(hist.title()), hist.nbins(), rng.min(), rng.max());
+      h.SetBinContent(0, hist.underflow());
       for (size_t i = 0; i < hist.nbins(); ++i) {
         h.SetBinContent(i + 1, hist.value(i));
         h.SetBinError(i + 1, hist.valueUnc(i));
       }
+      h.SetBinContent(hist.nbins() + 1, hist.overflow());
       h.GetXaxis()->SetTitle(delatexify(hist.xAxis().label()));
       h.GetYaxis()->SetTitle(delatexify(hist.yAxis().label()));
       return h;
@@ -258,6 +260,14 @@ namespace cepgen {
           h.SetBinContent(ix + 1, iy + 1, hist.value(ix, iy));
           h.SetBinError(ix + 1, iy + 1, hist.valueUnc(ix, iy));
         }
+      h.SetBinContent(0, 0, hist.outOfRange().at(Hist2D::contents_t::LT_LT));
+      h.SetBinContent(0, 1, hist.outOfRange().at(Hist2D::contents_t::LT_IN));
+      h.SetBinContent(0, hist.nbinsY() + 1, hist.outOfRange().at(Hist2D::contents_t::LT_GT));
+      h.SetBinContent(1, 0, hist.outOfRange().at(Hist2D::contents_t::IN_LT));
+      h.SetBinContent(1, hist.nbinsY() + 1, hist.outOfRange().at(Hist2D::contents_t::IN_GT));
+      h.SetBinContent(hist.nbinsX() + 1, 0, hist.outOfRange().at(Hist2D::contents_t::GT_LT));
+      h.SetBinContent(hist.nbinsX() + 1, 1, hist.outOfRange().at(Hist2D::contents_t::GT_IN));
+      h.SetBinContent(hist.nbinsX() + 1, hist.nbinsY() + 1, hist.outOfRange().at(Hist2D::contents_t::GT_GT));
       h.GetXaxis()->SetTitle(delatexify(hist.xAxis().label()));
       h.GetYaxis()->SetTitle(delatexify(hist.yAxis().label()));
       h.GetZaxis()->SetTitle(delatexify(hist.zAxis().label()));

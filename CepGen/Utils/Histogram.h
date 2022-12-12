@@ -22,7 +22,9 @@
 #include <gsl/gsl_histogram.h>
 #include <gsl/gsl_histogram2d.h>
 
+#include <array>
 #include <memory>
+#include <vector>
 
 #include "CepGen/Utils/Drawable.h"
 
@@ -43,7 +45,7 @@ namespace cepgen {
       /// Rescale all histogram bins by a constant factor
       virtual void scale(double) = 0;
       /// Compute the histogram integral
-      virtual double integral() const = 0;
+      virtual double integral(bool include_out_of_range = false) const = 0;
       /// Retrieve the maximum bin value
       virtual double minimum() const = 0;
       /// Retrieve the minimum bin value
@@ -88,7 +90,7 @@ namespace cepgen {
       double rms() const;
       double minimum() const override;
       double maximum() const override;
-      double integral() const override;
+      double integral(bool = false) const override;
       size_t underflow() const { return underflow_; }
       size_t overflow() const { return overflow_; }
 
@@ -155,15 +157,27 @@ namespace cepgen {
       double rmsY() const;
       double minimum() const override;
       double maximum() const override;
-      double integral() const override;
+      double integral(bool = false) const override;
 
-      struct contents_t {
-        inline size_t total() const { return LT_GT + IN_GT + GT_GT + LT_IN + GT_IN + LT_LT + IN_LT + GT_LT; }
-        size_t LT_GT{0ull}, IN_GT{0ull}, GT_GT{0ull};
-        size_t LT_IN{0ull}, /* INSIDE */ GT_IN{0ull};
-        size_t LT_LT{0ull}, IN_LT{0ull}, GT_LT{0ull};
+      struct contents_t : public std::array<size_t, 8> {
+        contents_t() : std::array<size_t, 8>::array{0, 0, 0, 0, 0, 0, 0, 0} {}
+        size_t total() const;
+        friend std::ostream& operator<<(std::ostream&, const contents_t&);
+        friend contents_t operator*(double, const contents_t&);
+        contents_t& operator+=(const contents_t&);
+        enum {
+          LT_GT,
+          IN_GT,
+          GT_GT,
+          LT_IN,
+          /* INSIDE */ GT_IN,
+          LT_LT,
+          IN_LT,
+          GT_LT,
+          num_content
+        };
       };
-      const contents_t& content() const { return values_; }
+      const contents_t& outOfRange() const { return out_of_range_values_; }
 
       bool isHist2D() const override { return true; }
 
@@ -173,7 +187,7 @@ namespace cepgen {
       };
       typedef std::unique_ptr<gsl_histogram2d, gsl_histogram2d_deleter> gsl_histogram2d_ptr;
       gsl_histogram2d_ptr hist_, hist_w2_;
-      contents_t values_;
+      contents_t out_of_range_values_;
     };
   }  // namespace utils
 }  // namespace cepgen

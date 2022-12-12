@@ -48,10 +48,10 @@ namespace cepgen {
     double Graph1D::chi2(const Graph1D& oth) const {
       double chi2 = 0.;
       if (values_.size() != oth.values_.size())
-        throw CG_FATAL("Graph1D:chi2") << "Graphs must have the same number of elements to compute chi^2!";
+        throw CG_ERROR("Graph1D:chi2") << "Graphs must have the same number of elements to compute chi^2!";
       for (const auto& kv1 : values_) {
         if (oth.values_.count(kv1.first) == 0)
-          throw CG_FATAL("Graph1D:chi2") << "Failed to retrieve the value for coordinate=" << kv1.first.value << "!\n"
+          throw CG_ERROR("Graph1D:chi2") << "Failed to retrieve the value for coordinate=" << kv1.first.value << "!\n"
                                          << "Please ensure the two graphs have the same values definition.";
         const auto& val1 = kv1.second;
         const auto& val2 = oth.values_.at(kv1.first);

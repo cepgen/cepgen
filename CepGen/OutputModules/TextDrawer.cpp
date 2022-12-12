@@ -158,22 +158,9 @@ namespace cepgen {
             << "mean=" << hist.meanY() << ","
             << "st.dev.=" << hist.rmsY() << ",\n\t"
             << " integral=" << hist.integral();
-        const auto& cnt = hist.content();
+        const auto& cnt = hist.outOfRange();
         if (cnt.total() > 0) {
-          log << ", outside range (in/overflow):\n"
-              << utils::format(
-                     "%10zu | %10zu | %10zu\n"
-                     "%10zu | %10s | %10zu\n"
-                     "%10zu | %10zu | %10zu",
-                     cnt.LT_LT,
-                     cnt.LT_IN,
-                     cnt.LT_GT,
-                     cnt.IN_LT,
-                     "-",
-                     cnt.IN_GT,
-                     cnt.GT_LT,
-                     cnt.GT_IN,
-                     cnt.GT_GT);
+          log << ", outside range (in/overflow):\n" << cnt;
         }
       });
       return *this;
