@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
   std::string formfac_type;
   int strfun_type, num_points;
   double kt2, mx;
-  bool logy, draw_grid;
+  bool logx, logy, draw_grid;
   std::string output_file, plotter;
 
   cepgen::ArgumentsParser(argc, argv)
@@ -45,6 +45,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("mx,m", "diffractive state mass (GeV)", &mx, 1.5)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 100)
       .addOptionalArgument("output,o", "output file name", &output_file, "flux.scan.output.txt")
+      .addOptionalArgument("logx", "logarithmic x-scale", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
@@ -83,6 +84,8 @@ int main(int argc, char* argv[]) {
   if (!plotter.empty()) {
     auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
     cepgen::utils::Drawer::Mode dm;
+    if (logx)
+      dm |= cepgen::utils::Drawer::Mode::logx;
     if (logy)
       dm |= cepgen::utils::Drawer::Mode::logy;
     if (draw_grid)
