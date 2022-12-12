@@ -25,7 +25,7 @@
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/GSLDerivator.h"
 #include "CepGen/Utils/Graph.h"
-#include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/Test.h"
 
 using namespace std;
 
@@ -53,11 +53,7 @@ int main(int argc, char* argv[]) {
   plt->draw({&graph_sin, &graph_der_sin, &graph_diff}, "test_deriv");
 
   const auto chi2 = graph_cos.chi2(graph_der_sin);
-  if (chi2 > 1.e-6) {
-    CG_LOG << "Test failed with chi^2=" << chi2 << ".";
-    return -1;
-  }
-  CG_LOG << "Test passed with chi^2=" << chi2 << ".";
+  CG_TEST(chi2 <= 1.e-6, "chi^2 test");
 
-  return 0;
+  CG_TEST_SUMMARY;
 }

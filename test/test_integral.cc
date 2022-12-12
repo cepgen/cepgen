@@ -16,9 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cmath>
-#include <random>
-
 #include "CepGen/Generator.h"
 #include "CepGen/Integration/AnalyticIntegrator.h"
 #include "CepGen/Modules/AnalyticIntegratorFactory.h"
@@ -26,7 +23,7 @@
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
-#include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/Test.h"
 
 using namespace std;
 
@@ -56,11 +53,7 @@ int main(int argc, char* argv[]) {
   plt->draw({&graph_sin, &graph_int_cos, &graph_diff}, "test_deriv");
 
   const auto chi2 = graph_sin.chi2(graph_int_cos);
-  if (chi2 > 1.e-6) {
-    CG_LOG << "Test failed with chi^2=" << chi2 << ".";
-    return -1;
-  }
-  CG_LOG << "Test passed with chi^2=" << chi2 << ".";
+  CG_TEST(chi2 <= 1.e-6, "chi^2 test");
 
-  return 0;
+  CG_TEST_SUMMARY;
 }

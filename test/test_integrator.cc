@@ -22,28 +22,29 @@
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Test.h"
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
-  bool quiet, run_all;
+  bool quiet;
   double num_sigma;
   vector<string> integrators;
   string func_mod;
 
+  cepgen::initialise();
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("num-sigma,n", "max. number of std.dev.", &num_sigma, 5.)
-      .addOptionalArgument("integrator,i", "type of integrator used", &integrators, vector<string>{"Vegas"})
+      .addOptionalArgument("integrator,i",
+                           "type of integrator used",
+                           &integrators,
+                           cepgen::IntegratorFactory::get().modules())  // by default, all integrators are tested
       .addOptionalArgument("functional,f", "type of functional parser user", &func_mod, "ROOT")
-      .addOptionalArgument("all,a", "run tests for all integrators", &run_all, false)
       .addOptionalArgument("quiet,q", "quiet mode", &quiet, false)
       .parse();
 
   if (quiet)
     cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::nothing;
-
-  cepgen::initialise();
 
   //--- tests definition
   struct test_t {
@@ -60,14 +61,8 @@ int main(int argc, char* argv[]) {
                  "1./(1.-cos(x*3.141592654)*cos(y*3.141592654)*cos(z*3.141592654))", {"x", "y", "z"}, func_mod),
              1.3932039296856768591842462603255});
 
-  //--- integrator definition
-  if (run_all)
-    // will perform the test with all integrators
-    integrators = cepgen::IntegratorFactory::get().modules();
-
   CG_LOG << "Will test with " << cepgen::utils::s("integrator", integrators.size(), true) << ": " << integrators;
 
-  vector<string> failing_integrators;
   for (const auto& integrator : integrators) {
     auto integr = cepgen::IntegratorFactory::get().build(integrator);
 
@@ -77,26 +72,12 @@ int main(int argc, char* argv[]) {
     for (auto& test : tests) {
       integr->setIntegrand(test.integrand);
       integr->integrate(result, error);
-      test.success = error / result < 1.e-6 || (fabs(test.result - result) <= num_sigma * error);
       CG_DEBUG("main") << "Test " << i << ": ref.: " << test.result << ", result: " << result << " +/- " << error
                        << ".";
+      CG_TEST(error / result < 1.e-6 || (fabs(test.result - result) <= num_sigma * error),
+              integrator + " test " + std::to_string(i));
       ++i;
     }
-
-    bool success = true;
-    i = 0;
-    for (const auto& test : tests) {
-      CG_INFO("main") << "Test " << i++ << " passed: " << cepgen::utils::yesno(test.success);
-      success &= test.success;
-    }
-    if (!success) {
-      CG_LOG << integrator << " integrator tests failed!";
-      failing_integrators.emplace_back(integrator);
-    } else
-      CG_LOG << integrator << " integrator tests passed.";
   }
-  if (!failing_integrators.empty())
-    throw CG_FATAL("main") << cepgen::utils::s("integrator test", failing_integrators.size())
-                           << " failed: " << failing_integrators << ".";
-  return 0;
+  CG_TEST_SUMMARY;
 }
