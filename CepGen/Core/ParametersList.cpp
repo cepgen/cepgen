@@ -42,7 +42,7 @@
   }                                                                                                                 \
   template <>                                                                                                       \
   ParametersList& ParametersList::set<type>(std::string key, const type& value) {                                   \
-    coll[key] = value;                                                                                              \
+    coll[std::move(key)] = (type)(value);                                                                           \
     return *this;                                                                                                   \
   }                                                                                                                 \
   template <>                                                                                                       \

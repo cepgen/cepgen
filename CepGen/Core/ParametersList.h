@@ -55,6 +55,10 @@ namespace cepgen {
     ParametersList(const ParametersList&);
     ~ParametersList() {}  // required for unique_ptr initialisation! avoids cleaning all individual objects
     ParametersList& operator=(const ParametersList&) = default;  ///< Assignment operator
+
+    /// Indexing key for the module name
+    static constexpr char MODULE_NAME[] = "mod_name";
+
     /// Equality operator
     bool operator==(const ParametersList&) const;
     /// Inequality operator
@@ -135,8 +139,6 @@ namespace cepgen {
     friend std::ostream& operator<<(std::ostream& os, const ParametersList&);
     /// Debugging-like printout of a parameters container
     const ParametersList& print(std::ostream&) const;
-    /// Indexing key for the module name
-    static constexpr char MODULE_NAME[] = "mod_name";
 
   private:
     std::map<std::string, ParametersList> param_values_;
