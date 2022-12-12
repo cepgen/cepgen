@@ -21,8 +21,7 @@
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/Message.h"
-#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Test.h"
 
 using namespace std;
 
@@ -43,25 +42,37 @@ int main(int argc, char* argv[]) {
       for (const auto& mod : cepgen::proc::ProcessFactory::get().modules())
         log << "\n> " << cepgen::utils::boldify(mod);
     });
-    return 0;
+    CG_TEST_SUMMARY;
   }
 
-  if (!proc_name.empty()) {
-    CG_LOG << "Will build a process named \"" << proc_name << "\".";
+  if (proc_name.empty())
+    CG_TEST_SUMMARY;
 
-    auto proc = cepgen::proc::ProcessFactory::get().build(proc_name, cepgen::ParametersList());
-    //--- at this point, the process has been found
-    CG_LOG.log([&proc](auto& log) {
-      log << "Successfully built the process \"" << proc->name() << "\"!\n"
-          << " *) description: " << proc->description().description() << "\n"
-          << " *) has event? " << proc->hasEvent() << "\n";
-      if (proc->hasEvent()) {  //--- dump a typical event content
-        log << "    event content (invalid kinematics, only check the parentage):\n";
-        proc->addEventContent();
-        proc->event().dump();
-      }
-    });
+  CG_LOG << "Will build a process named \"" << proc_name << "\".";
+
+  auto proc = cepgen::proc::ProcessFactory::get().build(proc_name, cepgen::ParametersList());
+  //--- at this point, the process has been found
+  CG_LOG.log([&proc](auto& log) {
+    log << "Successfully built the process \"" << proc->name() << "\"!\n"
+        << " *) description: " << proc->description().description() << "\n"
+        << " *) has event? " << proc->hasEvent() << "\n";
+    if (proc->hasEvent()) {  //--- dump a typical event content
+      log << "    event content (invalid kinematics, only check the parentage):\n";
+      proc->addEventContent();
+      proc->event().dump();
+    }
+  });
+
+  if (proc_name == "lpair") {
+    CG_TEST_EQUAL(proc->hasEvent(), true, "LPAIR has event");
+    if (proc->hasEvent()) {
+      CG_TEST_EQUAL(proc->event().particles().size(), 9, "LPAIR particles content");
+      const auto& cs = proc->event()(cepgen::Particle::Role::CentralSystem);
+      CG_TEST_EQUAL(cs.size(), 2, "LPAIR outgoing state");
+      CG_TEST_EQUAL(cs.at(0).pdgId(), 13, "LPAIR first outgoing particle");
+      CG_TEST_EQUAL(cs.at(1).pdgId(), 13, "LPAIR second outgoing particle");
+    }
   }
 
-  return 0;
+  CG_TEST_SUMMARY;
 }

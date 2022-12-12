@@ -22,7 +22,7 @@
 #include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/Test.h"
 
 using namespace std;
 using namespace cepgen;
@@ -67,5 +67,5 @@ int main(int argc, char* argv[]) {
 
   *writer << ev;
 
-  return 0;
+  CG_TEST_SUMMARY;
 }

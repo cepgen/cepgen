@@ -16,32 +16,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <fstream>
-
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/Logger.h"
+#include "CepGen/Utils/Test.h"
 
-using namespace cepgen;
+using namespace std;
 
 int main() {
-  //utils::Logger::get().level = utils::Logger::Level::nothing;
-  //utils::Logger::get().output = new std::ofstream("test.log");
-  //utils::Logger::get().output = nullptr;
-
-  //--- try with a bit of unicode too
-  const std::string test_string = "Haha, ceci est un test à géométrie variable! ☺";
-  for (int type = (int)Exception::Type::undefined; type < (int)Exception::Type::fatal; ++type) {
-    try {
-      throw Exception("Test", "", (Exception::Type)type) << test_string;
-      CG_LOG << "Test failed for type " << type << "!";
-      return -1;
-    } catch (const Exception& e) {
-      if (e.message() != test_string) {
-        CG_LOG << "Test failed for type " << type << " (unicode)!";
-        return -1;
-      }
-      CG_LOG << "Test passed for type " << type << "!";
-    }
+  const std::string test_string = "Haha, ceci est un test à géométrie variable! ☺";  // try with a bit of unicode too
+  for (int type = (int)cepgen::Exception::Type::undefined; type < (int)cepgen::Exception::Type::fatal; ++type) {
+    ostringstream type_name;
+    type_name << "Type " << (cepgen::Exception::Type)type;
+    auto throw_except = [&type, &test_string]() {
+      throw cepgen::Exception("Test", "", (cepgen::Exception::Type)type) << test_string;
+    };
+    CG_TEST_EXCEPT(throw_except, type_name.str());
   }
-  return 0;
+  CG_TEST_SUMMARY;
 }

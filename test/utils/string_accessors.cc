@@ -1,20 +1,14 @@
-#include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/Message.h"
-#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Test.h"
 
 using namespace std;
 
-int main(int argc, char* argv[]) {
-  cepgen::ArgumentsParser(argc, argv).parse();
-
+int main() {
   {
     auto str = "This {is} a text with {sub-strings}";
     const auto substr = cepgen::utils::between(str, "{", "}");
-    if (substr.size() != 2) {
-      CG_LOG << "Invalid number of substring found: " << substr << ".";
-      return -1;
-    }
+    CG_TEST_EQUAL(substr.size(), 2, "number of substrings");
+    const auto exp_substr = vector<string>{"is", "sub-strings"};
+    CG_TEST_EQUAL(substr, exp_substr, "substrings content");
   }
-
-  return 0;
+  CG_TEST_SUMMARY;
 }

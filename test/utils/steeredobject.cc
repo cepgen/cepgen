@@ -1,8 +1,9 @@
 #include <cmath>
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/Test.h"
 
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
@@ -29,33 +30,17 @@ int main(int argc, char* argv[]) {
   test.bar *= 2.;
   test.baz = "☺";
 
-  if (test.parameters().get<int>("foo") != 42 - 19) {
-    CG_LOG << "Test with int failed";
-    return -1;
-  } else if (test.parameters().get<double>("bar") != 2. * M_PI) {
-    CG_LOG << "Test with float failed";
-    return -1;
-  } else if (test.parameters().get<std::string>("baz") != "☺") {
-    CG_LOG << "Test with string failed";
-    return -1;
-  } else if (!test.parameters().get<bool>("bat")) {
-    CG_LOG << "Test with boolean failed";
-    return -1;
-  }
+  CG_TEST(test.parameters().get<int>("foo") == 42 - 19, "integer retrieval from parameters");
+  CG_TEST(test.parameters().get<double>("bar") == 2. * M_PI, "float retrieval from parameters");
+  CG_TEST(test.parameters().get<std::string>("baz") == "☺", "string retrieval from parameters");
+  CG_TEST(test.parameters().get<bool>("bat") == true, "boolean retrieval from parameters");
 
   test.setParameters(cepgen::ParametersList().set<int>("foo", 41));
-  if (test.parameters().get<int>("foo") != 41) {
-    CG_LOG << "Test with parameters object-set int failed";
-    return -1;
-  }
+  CG_TEST(test.foo == 41, "integer retrieval from parameters-set object");
 
   test.foo = 45;
-  if (test.parameters().get<int>("foo") != 45) {
-    CG_LOG << "Test with object-set int failed";
-    return -1;
-  }
+  CG_TEST(test.parameters().get<int>("foo") == 45, "integer retrieval from object-set parameters");
 
-  CG_LOG << "All tests passed.";
 
-  return 0;
+  CG_TEST_SUMMARY;
 }

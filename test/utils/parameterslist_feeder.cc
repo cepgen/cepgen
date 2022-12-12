@@ -2,7 +2,7 @@
 #include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/Test.h"
 
 using namespace std;
 
@@ -13,30 +13,22 @@ int main(int argc, char* argv[]) {
     const string feeded = "test/of/key=value";
     cepgen::ParametersList plist;
     plist.feed(feeded);
-    if (plist.get<cepgen::ParametersList>("test").get<cepgen::ParametersList>("of").get<std::string>("key") !=
-        "value") {
-      CG_LOG << "Failed to parse a parameters lists chain. Result=" << plist << ".";
-      return -1;
-    }
+    CG_TEST_EQUAL(plist.get<cepgen::ParametersList>("test").get<cepgen::ParametersList>("of").get<std::string>("key"),
+                  "value",
+                  "parameters list chain");
     CG_DEBUG("main") << "Resulting parameters list: " << plist << ".";
-    if (plist.serialise() != feeded) {
-      CG_LOG << "Failed to serialise the parameters list. Result=" << plist.serialise() << ".";
-      return -1;
-    }
+    CG_TEST_EQUAL(plist.serialise(), feeded, "parameters list serialisation");
   }
   {
     cepgen::ParametersList plist;
     plist.feed("foo=3.14").feed("bar=2").feed("baz=2e3");
-    if (plist.get<double>("foo") != 3.14 || plist.get<int>("bar") != 2 || plist.get<double>("baz") != 2000.) {
-      CG_LOG << "Failed to parse an integer/float parameters list. Result=" << plist << ".";
-      return -1;
-    }
-    plist.feed("bat=5E10").feed("foo=42");
-    if (plist.get<double>("bat") != 5.e10 || plist.get<int>("foo") != 42) {
-      CG_LOG << "Failed to re-parse an integer/float parameters list. Result=" << plist << ".";
-      return -1;
-    }
     CG_DEBUG("main") << "Resulting parameters list: " << plist << ".";
+    CG_TEST_EQUAL(plist.get<double>("foo"), 3.14, "float parsing");
+    CG_TEST_EQUAL(plist.get<int>("bar"), 2, "integer parsing");
+    CG_TEST_EQUAL(plist.get<double>("baz"), 2000., "float (from Ee notation");
+    plist.feed("bat=5E10").feed("foo=42");
+    CG_TEST_EQUAL(plist.get<double>("bat"), 5.e10, "float (from re-parsing)");
+    CG_TEST_EQUAL(plist.get<int>("foo"), 42, "integer (from re-parsing)");
   }
   {
     auto feeded = "this/is/a=test,this/works=true,that/{one=42,other=3.141592}";
@@ -46,22 +38,10 @@ int main(int argc, char* argv[]) {
                      << "Feeded string: " << feeded << "\n\t"
                      << "Fed parameters list: " << cepgen::ParametersDescription(plist) << "\n\t"
                      << "Re-serialised string: " << plist.serialise();
-    if (cepgen::ParametersList().feed(plist.serialise()) != plist) {
-      CG_LOG << "Failed to parse a serialised parameters list. Result=" << plist.serialise() << ".";
-      return -1;
-    }
+    CG_TEST_EQUAL(cepgen::ParametersList().feed(plist.serialise()), plist, "serialised parameters list parsing");
   }
-  {  // test with an invalid string feeded
-    auto feeded = "invalid/string/{{feeded=true}";
-    cepgen::ParametersList plist;
-    try {
-      plist.feed(feeded);
-      CG_LOG << "Failed test of parsing an invalid string: " << feeded << ".";
-      return -1;
-    } catch (const cepgen::Exception& exc) {
-      CG_DEBUG("main") << "Passed invalid string feeder test. Error:\n\t" << exc.message();
-    }
-  }
+  CG_TEST_EXCEPT([]() { cepgen::ParametersList().feed("invalid/string/{{feeded=true}"); },
+                 "parsing of an invalid string");
 
   return 0;
 }

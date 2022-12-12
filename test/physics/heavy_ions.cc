@@ -16,35 +16,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/Test.h"
 
 int main() {
   cepgen::initialise();
   const auto mp = cepgen::PDG::get().mass(2212), mn = cepgen::PDG::get().mass(2112);
   {
     const cepgen::HeavyIon proton(2212);
-    if (proton.mass() != mp)
-      throw CG_FATAL("main") << "Test 1.1 failed!";
-    if ((cepgen::pdgid_t)proton != 2212)
-      throw CG_FATAL("main") << "Test 1.2 failed!";
+    CG_TEST_EQUAL(proton.mass(), mp, "single proton mass");
+    CG_TEST_EQUAL((cepgen::pdgid_t)proton, 2212, "single proton PDG id");
   }
   {
     const cepgen::HeavyIon neutron(2112);
-    if (neutron.mass() != mn)
-      throw CG_FATAL("main") << "Test 2.1 failed!";
-    if ((cepgen::pdgid_t)neutron != 2112)
-      throw CG_FATAL("main") << "Test 2.2 failed!";
+    CG_TEST_EQUAL(neutron.mass(), mn, "single neutron mass");
+    CG_TEST_EQUAL((cepgen::pdgid_t)neutron, 2112, "single neutron PDG id");
   }
   {
     const auto hi = cepgen::HeavyIon::Pb();
-    if (hi.massP() != (int)hi.Z * mp)
-      throw CG_FATAL("main") << "Test 3.1 failed!";
-    if (hi.massN() != (hi.A - (int)hi.Z) * mn)
-      throw CG_FATAL("main") << "Test 3.2 failed!";
+    CG_TEST_EQUAL(hi.massP(), (int)hi.Z * mp, "proton masses in lead ion");
+    CG_TEST_EQUAL(hi.massN(), (hi.A - (int)hi.Z) * mn, "neutron masses in lead ion");
   }
-  return 0;
+  CG_TEST_SUMMARY;
 }

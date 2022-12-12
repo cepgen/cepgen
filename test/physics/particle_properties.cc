@@ -1,6 +1,6 @@
 #include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/Test.h"
 
 using namespace std;
 
@@ -11,19 +11,10 @@ int main(int argc, char* argv[]) {
   plist.set<string>("name", "laurenteron");
 
   cepgen::ParticleProperties prop(plist);
-  if (prop.name != plist.get<string>("name")) {
-    CG_LOG << "Failed to specify particle name: " << prop.name << ".";
-    return -1;
-  }
+  CG_TEST_EQUAL(prop.name, plist.get<string>("name"), "custom particle name");
 
   prop.pdgid = 42;
-  if (prop.parameters().get<cepgen::pdgid_t>("pdgid") != prop.pdgid) {
-    CG_LOG << "Failed to retrieve particle id from plist once specified in object: " << prop.parameters() << ".";
-    return -1;
-  }
+  CG_TEST_EQUAL(prop.parameters().get<cepgen::pdgid_t>("pdgid"), prop.pdgid, "post-defined particle id change");
 
-  CG_LOG << prop;
-  CG_LOG << prop.parameters();
-
-  return 0;
+  CG_TEST_SUMMARY;
 }
