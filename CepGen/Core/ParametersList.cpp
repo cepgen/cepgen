@@ -41,7 +41,7 @@
     return coll.count(key) != 0;                                                                                    \
   }                                                                                                                 \
   template <>                                                                                                       \
-  ParametersList& ParametersList::set<type>(const std::string& key, const type& value) {                            \
+  ParametersList& ParametersList::set<type>(std::string key, const type& value) {                                   \
     coll[key] = value;                                                                                              \
     return *this;                                                                                                   \
   }                                                                                                                 \
@@ -401,7 +401,7 @@ namespace cepgen {
   }
 
   template <typename T>
-  ParametersList& ParametersList::set(const std::string& key, const T&) {
+  ParametersList& ParametersList::set(std::string key, const T&) {
     throw CG_FATAL("ParametersList") << "Invalid type to be set for key=" << key << "!";
   }
 
@@ -465,7 +465,7 @@ namespace cepgen {
   }
 
   template <>
-  ParametersList& ParametersList::set<Limits>(const std::string& key, const Limits& value) {
+  ParametersList& ParametersList::set<Limits>(std::string key, const Limits& value) {
     if (vec_dbl_values_.count(key))
       vec_dbl_values_.erase(key);
     lim_values_[key] = value;
@@ -555,8 +555,8 @@ namespace cepgen {
 
   /// Set a particle properties object value
   template <>
-  ParametersList& ParametersList::set<ParticleProperties>(const std::string& key, const ParticleProperties& value) {
-    return set<ParametersList>(key, value.parameters());
+  ParametersList& ParametersList::set<ParticleProperties>(std::string key, const ParticleProperties& value) {
+    return set<ParametersList>(std::move(key), value.parameters());
   }
 
   template <>
