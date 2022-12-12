@@ -71,7 +71,7 @@ namespace cepgen {
     }
     /// Set the module name
     template <typename T>
-    inline ParametersDescription& setName(const T& name) {
+    inline ParametersDescription& setName(T name) {
       ParametersList::setName<T>(name);
       return *this;
     }
