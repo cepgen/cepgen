@@ -109,5 +109,5 @@ namespace cepgen {
     };
   }  // namespace collflux
 }  // namespace cepgen
-
-REGISTER_COLLFLUX(GammaIntegrated, collflux::GammaIntegrated);
+typedef cepgen::collflux::GammaIntegrated CF_GI;
+REGISTER_COLLFLUX("GammaIntegrated", CF_GI)

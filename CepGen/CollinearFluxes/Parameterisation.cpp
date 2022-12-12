@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2018-2022  Laurent Forthomme
  *                     2003  Maarten Boonekamp, Tibor Kucs
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -25,17 +25,13 @@
 namespace cepgen {
   namespace collflux {
     Parameterisation::Parameterisation(const ParametersList& params)
-        : NamedModule<int>(params),
+        : NamedModule(params),
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
           q2_range_(steer<Limits>("q2range")),
           qscale_(steer<double>("qscale")) {}
 
-    std::string Parameterisation::describe() const {
-      std::ostringstream os;
-      os << (Type)name_;
-      return os.str();
-    }
+    std::string Parameterisation::describe() const { return name_; }
 
     ParametersDescription Parameterisation::description() {
       auto desc = ParametersDescription();
@@ -46,22 +42,5 @@ namespace cepgen {
     }
 
     std::ostream& operator<<(std::ostream& os, const Parameterisation& sf) { return os << sf.describe(); }
-
-    /// Human-readable format of a collinear flux type
-    std::ostream& operator<<(std::ostream& os, const collflux::Type& flux) {
-      switch (flux) {
-        case collflux::Type::GammaIntegrated:
-          return os << "Integrated kt-dependent";
-        case collflux::Type::BudnevEPAProton:
-          return os << "Budnev EPA (proton)";
-        case collflux::Type::BudnevEPALepton:
-          return os << "Budnev EPA (lepton)";
-        case collflux::Type::BudnevEPAHI:
-          return os << "Budnev EPA (HI)";
-        case collflux::Type::LHAPDFCollinearFlux:
-          return os << "LHAPDF";
-      }
-      return os << "<invalid>";
-    }
   }  // namespace collflux
 }  // namespace cepgen

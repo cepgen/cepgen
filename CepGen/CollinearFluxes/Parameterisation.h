@@ -27,18 +27,8 @@
 namespace cepgen {
   /// Collinear fluxes modelling scope
   namespace collflux {
-    /// Type of collinear fluxes
-    enum struct Type {
-      GammaIntegrated = 1,
-      BudnevEPAProton = 2,
-      BudnevEPALepton = 3,
-      BudnevEPAHI = 4,
-      LHAPDFCollinearFlux = 5,
-    };
-    /// Human-readable description of this flux type
-    std::ostream& operator<<(std::ostream&, const collflux::Type&);
     /// Generic collinear flux parameterisation
-    class Parameterisation : public NamedModule<int> {
+    class Parameterisation : public NamedModule<std::string> {
     public:
       /// User-steered parameterisation object constructor
       explicit Parameterisation(const ParametersList&);

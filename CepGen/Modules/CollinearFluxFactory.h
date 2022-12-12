@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,14 +22,14 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a collinear flux definition to the list of handled parameterisation
-#define REGISTER_COLLFLUX(id, obj)                                                                              \
-  namespace cepgen {                                                                                            \
-    namespace collflux {                                                                                        \
-      struct BUILDERNM(id) {                                                                                    \
-        BUILDERNM(id)() { collflux::CollinearFluxFactory::get().registerModule<obj>((int)collflux::Type::id); } \
-      };                                                                                                        \
-      static const BUILDERNM(id) gCollFlux##id;                                                                 \
-    }                                                                                                           \
+#define REGISTER_COLLFLUX(name, obj)                                                \
+  namespace cepgen {                                                                \
+    namespace collflux {                                                            \
+      struct BUILDERNM(obj) {                                                       \
+        BUILDERNM(obj)() { CollinearFluxFactory::get().registerModule<obj>(name); } \
+      };                                                                            \
+      static const BUILDERNM(obj) gCollFlux##obj;                                   \
+    }                                                                               \
   }
 
 namespace cepgen {
@@ -37,7 +37,7 @@ namespace cepgen {
     class Parameterisation;
   }
   /// A collinear flux parameterisations factory
-  DEFINE_FACTORY_INT(CollinearFluxFactory, collflux::Parameterisation, "Collinear flux parameterisations factory");
+  DEFINE_FACTORY_STR(CollinearFluxFactory, collflux::Parameterisation, "Collinear flux parameterisations factory");
 }  // namespace cepgen
 
 #endif

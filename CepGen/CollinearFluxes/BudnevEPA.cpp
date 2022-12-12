@@ -150,6 +150,9 @@ namespace cepgen {
   }  // namespace collflux
 }  // namespace cepgen
 
-REGISTER_COLLFLUX(BudnevEPALepton, collflux::BudnevEPALepton);
-REGISTER_COLLFLUX(BudnevEPAHI, collflux::BudnevEPAHI);
-REGISTER_COLLFLUX(BudnevEPAProton, collflux::BudnevEPAProton);
+typedef cepgen::collflux::BudnevEPALepton CF_Lepton;
+typedef cepgen::collflux::BudnevEPAHI CF_HI;
+typedef cepgen::collflux::BudnevEPAProton CF_Proton;
+REGISTER_COLLFLUX("BudnevEPALepton", CF_Lepton)
+REGISTER_COLLFLUX("BudnevEPAHI", CF_HI)
+REGISTER_COLLFLUX("BudnevEPAProton", CF_Proton)

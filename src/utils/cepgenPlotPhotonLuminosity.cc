@@ -33,7 +33,7 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-  vector<int> cfluxes;
+  vector<string> cfluxes;
   int num_points;
   double q2max, mxmin, mxmax;
   string integrator, output_file, plotter;
@@ -42,8 +42,13 @@ int main(int argc, char* argv[]) {
   cepgen::Limits y_range;
   vector<cepgen::Limits> xi_ranges(1);
 
+  cepgen::initialise();
+
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("collflux,f", "collinear flux modelling(s)", &cfluxes, vector<int>{1})
+      .addOptionalArgument("collflux,f",
+                           "collinear flux modelling(s)",
+                           &cfluxes,
+                           cepgen::collflux::CollinearFluxFactory::get().modules())
       .addOptionalArgument("rescaling,r", "luminosity rescaling", &rescl, vector<double>{1.})
       .addOptionalArgument("integrator,i", "type of integration algorithm", &integrator, "gsl")
       .addOptionalArgument("q2max,q", "maximum Q^2", &q2max, 1000.)
@@ -60,8 +65,6 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("yrange,y", "y plot range", &y_range)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .parse();
-
-  cepgen::initialise();
 
   ofstream out(output_file);
   if (logx && mxmin == 0.)
@@ -87,7 +90,7 @@ int main(int argc, char* argv[]) {
 
   out << "# coll. fluxes: " << cepgen::utils::merge(cfluxes, ",") << "\n"
       << "# two-photon mass range: " << cepgen::Limits(mxmin, mxmax);
-  map<int, vector<cepgen::utils::Graph1D> > m_gr_fluxes;  // {collinear flux -> graph}
+  map<string, vector<cepgen::utils::Graph1D> > m_gr_fluxes;  // {collinear flux -> graph}
   vector<double> mxvals;
   for (int j = 0; j < num_points; ++j)
     mxvals.emplace_back((!logx) ? mxmin + j * (mxmax - mxmin) / (num_points - 1)
@@ -101,7 +104,7 @@ int main(int argc, char* argv[]) {
     auto coll_flux = cepgen::collflux::CollinearFluxFactory::get().build(cflux);
     for (const auto& xi_range : xi_ranges) {
       ostringstream oss;
-      oss << (cepgen::collflux::Type)cflux;
+      oss << cflux;
       if (xi_range.valid())
         oss << " (" << xi_range.min() << " < \\xi < " << xi_range.max() << ")";
       m_gr_fluxes[cflux].emplace_back();

@@ -43,7 +43,8 @@ namespace cepgen {
         auto desc = Parameterisation::description();
         desc.setDescription("LHAPDF collinear photon flux");
         //desc.add<std::string>("set", "LUXqed_plus_PDF4LHC15_nnlo_100").setDescription("PDFset to use");
-        desc.add<std::string>("set", "LUXlep-NNPDF31_nlo_as_0118_luxqed").setDescription("PDFset to use");
+        //desc.add<std::string>("set", "LUXlep-NNPDF31_nlo_as_0118_luxqed").setDescription("PDFset to use");
+        desc.add<std::string>("set", "cteq66").setDescription("PDFset to use");
         desc.add<int>("member", 0).setDescription("PDF member");
         return desc;
       }
@@ -61,4 +62,5 @@ namespace cepgen {
   }  // namespace collflux
 }  // namespace cepgen
 
-REGISTER_COLLFLUX(LHAPDFCollinearFlux, collflux::LHAPDFCollinearFlux);
+typedef cepgen::collflux::LHAPDFCollinearFlux CF_LHAPDF;
+REGISTER_COLLFLUX("LHAPDFCollinearFlux", CF_LHAPDF)

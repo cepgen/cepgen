@@ -36,15 +36,21 @@ using namespace std;
 using namespace cepgen;
 
 int main(int argc, char* argv[]) {
-  vector<int> cfluxes, modes;
+  vector<string> cfluxes;
+  vector<int> modes;
   int strfun_type, num_points;
   double mx, xmin, xmax, q2max;
   string ffmode, output_file, plotter;
   bool logx, logy, draw_grid;
   cepgen::Limits y_range;
 
+  cepgen::initialise();
+
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("collflux,i", "collinear flux modelling(s)", &cfluxes, vector<int>{1})
+      .addOptionalArgument("collflux,i",
+                           "collinear flux modelling(s)",
+                           &cfluxes,
+                           cepgen::collflux::CollinearFluxFactory::get().modules())
       .addOptionalArgument("formfac,f", "form factors modelling", &ffmode, "StandardDipole")
       .addOptionalArgument("modes,t", "beam modelling(s)", &modes, vector<int>{(int)cepgen::Beam::Mode::ProtonElastic})
       .addOptionalArgument("mx,M", "diffractive mass (GeV/c^2)", &mx, 100.)
@@ -61,8 +67,6 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .parse();
 
-  cepgen::initialise();
-
   ofstream out(output_file);
   if (logx && xmin == 0.)
     xmin = 1.e-3;
@@ -73,7 +77,7 @@ int main(int argc, char* argv[]) {
       << "# diffractive mass: " << mx << " GeV/c2\n"
       << "# fractional momentum loss: " << cepgen::Limits(xmin, xmax) << "\n"
       << "# fluxes modes: " << cepgen::utils::merge(modes, ",");
-  map<int, vector<cepgen::utils::Graph1D> > m_v_gr_fluxes;  // {collinear flux -> {mode, mode, ...}}
+  map<string, vector<cepgen::utils::Graph1D> > m_v_gr_fluxes;  // {collinear flux -> {mode, mode, ...}}
   vector<vector<double> > values(num_points);
   vector<double> xvals;
   for (auto i = 0; i < num_points; ++i)
