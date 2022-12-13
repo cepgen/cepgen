@@ -29,15 +29,24 @@ namespace cepgen {
                                          double pwidth,
                                          int pcharge,
                                          bool pfermion)
-      : ParticleProperties(ParametersList()
-                               .set("pdgid", ppdgid)
-                               .set("name", pname)
-                               .set("description", pdescr)
-                               .set("colours", pcolours)
-                               .set("mass", pmass)
-                               .set("width", pwidth)
-                               .set("charge", pcharge)
-                               .set("fermion", pfermion)) {}
+      : pdgid(ppdgid),
+        name(pname),
+        descr(pdescr),
+        colours(pcolours),
+        mass(pmass),
+        width(pwidth),
+        charge(pcharge),
+        fermion(pfermion) {
+    (*this)
+        .add("pdgid", pdgid)
+        .add("name", name)
+        .add("description", descr)
+        .add("colours", colours)
+        .add("mass", mass)
+        .add("width", width)
+        .add("charge", charge)
+        .add("fermion", fermion);
+  }
 
   ParticleProperties::ParticleProperties(const ParametersList& params) : SteeredObject(params) {
     (*this)
