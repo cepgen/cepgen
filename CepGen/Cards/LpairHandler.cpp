@@ -55,7 +55,7 @@ namespace cepgen {
       //-------------------------------------------------------------------------------------------
 
       registerParameter<std::string>("PROC", "Process name to simulate", &proc_name_);
-      registerIntegratorParameter<std::string>("ITYP", "Integration algorithm", ParametersList::MODULE_NAME);
+      registerIntegratorParameter<std::string>("ITYP", "Integration algorithm", MODULE_NAME);
       registerParameter<std::string>("HADR", "Hadronisation algorithm", &evt_mod_name_);
       registerParameter<std::string>("EVMD", "Events modification algorithms", &evt_mod_name_);
       registerParameter<std::string>("OUTP", "Output module", &out_mod_name_);

@@ -62,7 +62,7 @@ namespace cepgen {
         const auto& params = pdesc.parameters();
         switch (pdesc.type()) {
           case ParametersDescription::Type::Module:
-            os << "cepgen.Module(\"" << params.getString(ParametersList::MODULE_NAME) << "\",";
+            os << "cepgen.Module(\"" << params.getNameString() << "\",";
             break;
           case ParametersDescription::Type::Parameters:
             os << "cepgen.Parameters(";

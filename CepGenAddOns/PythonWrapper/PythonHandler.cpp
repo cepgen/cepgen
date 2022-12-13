@@ -137,7 +137,7 @@ namespace cepgen {
         python::fillParameter(process, "processParameters", proc_params);
 
         //--- type of process to consider
-        auto* pproc_name = python::element(process, ParametersList::MODULE_NAME);  // borrowed
+        auto* pproc_name = python::element(process, MODULE_NAME);  // borrowed
         if (!pproc_name)
           PY_ERROR << "Failed to extract the process name from the configuration card '" << file << "'.";
 
@@ -223,7 +223,7 @@ namespace cepgen {
       if (!python::is<ParametersList>(mod))
         PY_ERROR << "Event modification definition object should be a dictionary.";
 
-      auto* pname = python::element(mod, ParametersList::MODULE_NAME);  // borrowed
+      auto* pname = python::element(mod, MODULE_NAME);  // borrowed
       if (!pname)
         PY_ERROR << "Event modification algorithm name is required.";
       std::string mod_name = python::get<std::string>(pname);
@@ -260,7 +260,7 @@ namespace cepgen {
       if (!python::is<ParametersList>(pout))
         PY_ERROR << "Invalid type for output parameters list.";
 
-      auto* pname = python::element(pout, ParametersList::MODULE_NAME);  // borrowed
+      auto* pname = python::element(pout, MODULE_NAME);  // borrowed
       if (!pname)
         PY_ERROR << "Output module name is required.";
       rt_params_->addOutputModule(

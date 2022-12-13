@@ -74,7 +74,7 @@ namespace cepgen {
       return Type::Value;
     if (is_vec_params_)
       return Type::ParametersVector;
-    const auto& mod_name = ParametersList::getString(ParametersList::MODULE_NAME);
+    const auto& mod_name = ParametersList::getNameString();
     if (mod_name.empty())
       return Type::Parameters;
     return Type::Module;
@@ -82,7 +82,7 @@ namespace cepgen {
 
   std::string ParametersDescription::describe(size_t offset) const {
     static auto sep = [](size_t offset) -> std::string { return std::string(offset, '\t'); };
-    const auto& mod_name = ParametersList::getString(ParametersList::MODULE_NAME);
+    const auto& mod_name = ParametersList::getNameString();
     const auto& pdtype = type();
     const auto& keys = ParametersList::keys(false);
     std::ostringstream os;
@@ -155,7 +155,7 @@ namespace cepgen {
     ParametersList::set<ParametersList>(name, desc.parameters());
     CG_DEBUG("ParametersDescription:add").log([this, &name, &desc](auto& log) {
       log << "Added a new parameters collection \"" << name << "\" as: " << desc;
-      const auto& mod_name = this->getString(ParametersList::MODULE_NAME);
+      const auto& mod_name = this->getNameString();
       if (!mod_name.empty())
         log << "\nto the object with name: " << mod_name;
       log << ".";
@@ -181,7 +181,7 @@ namespace cepgen {
     ParametersList::set<std::vector<ParametersList> >(name, values);
     CG_DEBUG("ParametersDescription:addParametersDescriptionVector").log([this, &name, &desc, &def](auto& log) {
       log << "Added a new vector of parameters descriptions \"" << name << "\" as: " << desc;
-      const auto& mod_name = this->getString(ParametersList::MODULE_NAME);
+      const auto& mod_name = this->getNameString();
       if (!mod_name.empty())
         log << "\nto the object with name: " << mod_name;
       log << ".\n";

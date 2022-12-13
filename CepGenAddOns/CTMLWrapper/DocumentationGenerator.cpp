@@ -76,8 +76,7 @@ namespace cepgen {
       CTML::Node out("div.module");
       if (desc.empty())
         return out;
-      CTML::Node mod_summary(
-          CTML::Node("summary").AppendChild(CTML::Node("b", desc.parameters().getString(ParametersList::MODULE_NAME))));
+      CTML::Node mod_summary(CTML::Node("summary").AppendChild(CTML::Node("b", desc.parameters().getNameString())));
       CTML::Node mod_details("details");
       const auto desc_type = desc.type();
       if (desc_type == ParametersDescription::Type::ParametersVector) {

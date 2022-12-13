@@ -39,6 +39,8 @@
   std::vector<std::string> ParametersList::keysOf<type>() const;
 
 namespace cepgen {
+  /// Indexing key for the module name
+  const char* const MODULE_NAME = "mod_name";
   /// Parameters container
   class ParametersList {
   private:
@@ -55,9 +57,6 @@ namespace cepgen {
     ParametersList(const ParametersList&);
     ~ParametersList() {}  // required for unique_ptr initialisation! avoids cleaning all individual objects
     ParametersList& operator=(const ParametersList&) = default;  ///< Assignment operator
-
-    /// Indexing key for the module name
-    static const std::string MODULE_NAME;
 
     /// Equality operator
     bool operator==(const ParametersList&) const;
@@ -132,6 +131,9 @@ namespace cepgen {
     /// Get a string-converted version of a value
     /// \param[in] wrap Encapsulate the value with type()
     std::string getString(const std::string& key, bool wrap = false) const;
+    /// Get a string-converted version of the module name if any
+    /// \param[in] wrap Encapsulate the value with type()
+    inline std::string getNameString(bool wrap = false) const { return getString(MODULE_NAME, wrap); }
     /// Serialise a parameters collection into a parseable string
     std::string serialise() const;
 

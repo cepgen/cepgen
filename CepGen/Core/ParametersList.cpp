@@ -61,8 +61,6 @@
   IMPL_TYPE_SET(type, coll, #name)
 
 namespace cepgen {
-  const std::string ParametersList::MODULE_NAME = "mod_name";
-
   ParametersList::ParametersList(const ParametersList& oth) { operator+=(oth); }
 
   bool ParametersList::operator==(const ParametersList& oth) const {
@@ -119,8 +117,7 @@ namespace cepgen {
     for (const auto& par : oth.param_values_)
       // if the two parameters list are modules, and do not have the same name,
       // simply replace the old one with the new parameters list
-      if (param_values_[par.first].getString(ParametersList::MODULE_NAME) ==
-          par.second.getString(ParametersList::MODULE_NAME))
+      if (param_values_[par.first].getString(MODULE_NAME) == par.second.getString(MODULE_NAME))
         param_values_[par.first] += par.second;
       else
         param_values_[par.first] = par.second;
@@ -187,7 +184,7 @@ namespace cepgen {
       if (erase(key) > 0)
         CG_DEBUG("ParametersList:feed") << "Replacing key='" << key << "' with a new value.";
       if (key == "name")  // replace any "name" key encountered by the canonical module name key
-        key = ParametersList::MODULE_NAME;
+        key = MODULE_NAME;
       if (words.size() == 1)  // basic key=true
         set<bool>(key, true);
       else if (words.size() == 2) {  // basic key=value
@@ -254,14 +251,14 @@ namespace cepgen {
       return *this;
     }
     std::string sep;
-    if (std::find(keys_list.begin(), keys_list.end(), ParametersList::MODULE_NAME) != keys_list.end()) {
-      const auto plist_name = getString(ParametersList::MODULE_NAME);
+    if (std::find(keys_list.begin(), keys_list.end(), MODULE_NAME) != keys_list.end()) {
+      const auto plist_name = getNameString();
       auto mod_name = hasName<std::string>() ? "\"" + plist_name + "\"" : plist_name;
       os << "Module(" << mod_name, sep = ", ";
     } else
       os << "Parameters(";
     for (const auto& key : keys_list)
-      if (key != ParametersList::MODULE_NAME)
+      if (key != MODULE_NAME)
         os << sep << key << "=" << getString(key, true), sep = ", ";
     os << ")";
     return *this;
