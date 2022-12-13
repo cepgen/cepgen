@@ -75,7 +75,7 @@ namespace cepgen {
     ~PDG() = default;
 
     /// Add a new particle definition to the library
-    void define(const ParticleProperties& props);
+    void define(ParticleProperties);
     const std::vector<pdgid_t> particles() const;  ///< All particles ids in this library
     void dump() const;                             ///< Dump all particles in this library
     size_t size() const;                           ///< Number of particles defined in this library

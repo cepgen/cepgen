@@ -26,7 +26,8 @@ namespace cepgen {
   std::ostream& operator<<(std::ostream& os, const PDG::Id& pdg) { return os << PDG::get().name(pdg); }
 
   PDG::PDG() {
-    define(ParticleProperties(invalid, "[...]", "", 0, -1, -1., 0, false));
+    // PDG id, name, description, colour, mass, width, charge, is fermion
+    define(ParticleProperties(invalid, "invalid", "invalid", 0, -1., -1., 0, false));
     define(ParticleProperties(diffractiveProton, "diff_proton", "p\u002A", 0, 0., 0., 3, false));
     define(ParticleProperties(pomeron, "pomeron", "\u2119", 0, 0., 0., 0, false));
     define(ParticleProperties(reggeon, "reggeon", "\u211D", 0, 0., 0., 0, false));
@@ -49,7 +50,7 @@ namespace cepgen {
 
   ParticleProperties& PDG::operator[](pdgid_t id) { return particles_[id]; }
 
-  void PDG::define(const ParticleProperties& props) {
+  void PDG::define(ParticleProperties props) {
     CG_DEBUG("PDG:define") << (has(props.pdgid) ? "Updating the properties of a particle" : "Adding a new particle")
                            << " with PDG id=" << std::setw(8) << props.pdgid << ", " << props;
     particles_[props.pdgid] = props;

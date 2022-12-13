@@ -544,10 +544,9 @@ namespace cepgen {
       CG_DEBUG("ParametersList") << "Retrieved physical properties for particle with PDG identifier '" << get<int>(key)
                                  << "' from PDG database.";
       return PDG::get()(get<int>(key));
-    } else {
-      CG_DEBUG("ParametersList") << "Failed to retrieve particle properties parameter with key=" << key << ".";
-      return def;
     }
+    CG_DEBUG("ParametersList") << "Failed to retrieve particle properties parameter with key=" << key << ".";
+    return def;
   }
 
   /// Set a particle properties object value
