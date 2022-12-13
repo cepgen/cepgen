@@ -58,17 +58,23 @@ namespace cepgen {
     /// Module user-defined parameters
     inline const ParametersList& parameters() const override {
       for (const auto& kv : map_bools_)
-        params_.set<bool>(kv.first, *kv.second);
+        if (kv.second)
+          params_.set<bool>(kv.first, *kv.second);
       for (const auto& kv : map_ints_)
-        params_.set<int>(kv.first, *kv.second);
+        if (kv.second)
+          params_.set<int>(kv.first, *kv.second);
       for (const auto& kv : map_ulongs_)
-        params_.set<unsigned long long>(kv.first, *kv.second);
+        if (kv.second)
+          params_.set<unsigned long long>(kv.first, *kv.second);
       for (const auto& kv : map_dbls_)
-        params_.set<double>(kv.first, *kv.second);
+        if (kv.second)
+          params_.set<double>(kv.first, *kv.second);
       for (const auto& kv : map_strs_)
-        params_.set<std::string>(kv.first, *kv.second);
+        if (kv.second)
+          params_.set<std::string>(kv.first, *kv.second);
       for (const auto& kv : map_lims_)
-        params_.set<Limits>(kv.first, *kv.second);
+        if (kv.second)
+          params_.set<Limits>(kv.first, *kv.second);
       return params_;
     }
     virtual void setParameters(const ParametersList& params) override {
