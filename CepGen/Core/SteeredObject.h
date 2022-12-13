@@ -19,19 +19,21 @@
 #ifndef CepGen_Core_SteeredObject_h
 #define CepGen_Core_SteeredObject_h
 
+#include <functional>
+
 #include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Core/Steerable.h"
 
 #define REGISTER_TYPE(type, coll)                                \
 public:                                                          \
   inline SteeredObject& add(const std::string& key, type& var) { \
-    coll[key] = &var;                                            \
+    coll.insert({key, std::ref(var)});                           \
     var = params_.operator[]<type>(key);                         \
     return *this;                                                \
   }                                                              \
                                                                  \
 private:                                                         \
-  std::unordered_map<std::string, type*> coll;
+  std::unordered_map<std::string, std::reference_wrapper<type> > coll;
 
 namespace cepgen {
   /// Base user-steerable object
@@ -58,39 +60,33 @@ namespace cepgen {
     /// Module user-defined parameters
     inline const ParametersList& parameters() const override {
       for (const auto& kv : map_bools_)
-        if (kv.second)
-          params_.set<bool>(kv.first, *kv.second);
+        params_.set<bool>(kv.first, kv.second.get());
       for (const auto& kv : map_ints_)
-        if (kv.second)
-          params_.set<int>(kv.first, *kv.second);
+        params_.set<int>(kv.first, kv.second.get());
       for (const auto& kv : map_ulongs_)
-        if (kv.second)
-          params_.set<unsigned long long>(kv.first, *kv.second);
+        params_.set<unsigned long long>(kv.first, kv.second.get());
       for (const auto& kv : map_dbls_)
-        if (kv.second)
-          params_.set<double>(kv.first, *kv.second);
+        params_.set<double>(kv.first, kv.second.get());
       for (const auto& kv : map_strs_)
-        if (kv.second)
-          params_.set<std::string>(kv.first, *kv.second);
+        params_.set<std::string>(kv.first, kv.second.get());
       for (const auto& kv : map_lims_)
-        if (kv.second)
-          params_.set<Limits>(kv.first, *kv.second);
+        params_.set<Limits>(kv.first, kv.second.get());
       return params_;
     }
     virtual void setParameters(const ParametersList& params) override {
       Steerable::setParameters(params);
       for (const auto& kv : map_bools_)
-        *kv.second = params_.get<bool>(kv.first);
+        kv.second.get() = params_.get<bool>(kv.first);
       for (const auto& kv : map_ints_)
-        *kv.second = params_.get<int>(kv.first);
+        kv.second.get() = params_.get<int>(kv.first);
       for (const auto& kv : map_ulongs_)
-        *kv.second = params_.get<unsigned long long>(kv.first);
+        kv.second.get() = params_.get<unsigned long long>(kv.first);
       for (const auto& kv : map_dbls_)
-        *kv.second = params_.get<double>(kv.first);
+        kv.second.get() = params_.get<double>(kv.first);
       for (const auto& kv : map_strs_)
-        *kv.second = params_.get<std::string>(kv.first);
+        kv.second.get() = params_.get<std::string>(kv.first);
       for (const auto& kv : map_lims_)
-        *kv.second = params_.get<Limits>(kv.first);
+        kv.second.get() = params_.get<Limits>(kv.first);
     }
 
     REGISTER_TYPE(bool, map_bools_)
