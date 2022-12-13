@@ -57,7 +57,7 @@ jobs:
         run: |
           cd /Package
           source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
-          rpm -ivvh build/*.rpm
+          yum install build/*.rpm
           cepgen Cards/lpair_cfg.py
       - name: Testing CI recipes
         run: |
