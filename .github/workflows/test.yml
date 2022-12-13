@@ -9,7 +9,7 @@ env:
   INSTALL_PATH: /Package/install
   LD_LIBRARY_PATH: /Package/install/lib64:$LD_LIBRARY_PATH
 jobs:
-  compile:
+  test-cc7:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -57,7 +57,7 @@ jobs:
         run: |
           cd /Package
           source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
-          rpm -ivvh *.rpm
+          rpm -ivvh build/*.rpm
           cepgen Cards/lpair_cfg.py
       - name: Testing CI recipes
         run: |
