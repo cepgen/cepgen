@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        CI_IMAGE: ['laufor/ci-images:cepgen-cc7']
+        CI_IMAGE: ['laufor/ci-images:cepgen-cc7', 'laufor/ci-images:cepgen-fedora33']
     container:
       image: ${{ matrix.CI_IMAGE }}
       #volumes:
@@ -54,7 +54,7 @@ jobs:
           name: package
           path: ${{ github.workspace }}/build/*.rpm
       - name: Testing cepgen executable (packaged)
-        continue-on-error: ${{ matrix.version == 'nightly' }}
+        continue-on-error: ${{ matrix.CI_IMAGE == 'laufor/ci-images:cepgen-cc7' }}
         run: |
           cd /Package
           source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
