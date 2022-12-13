@@ -57,7 +57,7 @@ namespace cepgen {
     ParametersList& operator=(const ParametersList&) = default;  ///< Assignment operator
 
     /// Indexing key for the module name
-    static constexpr char MODULE_NAME[] = "mod_name";
+    static const std::string MODULE_NAME;
 
     /// Equality operator
     bool operator==(const ParametersList&) const;

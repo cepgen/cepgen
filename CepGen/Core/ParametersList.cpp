@@ -61,7 +61,7 @@
   IMPL_TYPE_SET(type, coll, #name)
 
 namespace cepgen {
-  constexpr char ParametersList::MODULE_NAME[];
+  const std::string ParametersList::MODULE_NAME = "mod_name";
 
   ParametersList::ParametersList(const ParametersList& oth) { operator+=(oth); }
 
