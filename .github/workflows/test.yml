@@ -34,11 +34,11 @@ jobs:
           echo "${{ env.INSTALL_PATH }}/bin" >> $GITHUB_PATH
           mkdir -p build/ install/
           cd build
-          cmake3 -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_PATH }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always" -GNinja ..
+          cmake3 -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_PATH }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always" ..
       - name: Install
         run: |
           cd /Package/build
-          ninja -k0 install
+          make -j install
       - name: Testing cepgen executable
         run: |
           cd /Package/build
@@ -48,7 +48,7 @@ jobs:
         run: |
           cd /Package
           cd build
-          ninja -k0 package
+          make -j package
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -63,4 +63,4 @@ jobs:
       - name: Testing CI recipes
         run: |
           cd /Package/build
-          ninja -k0 && ctest --output-on-failure
+          make -j && ctest --output-on-failure
