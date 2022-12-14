@@ -6,7 +6,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  INSTALL_PATH: /Package/install
+  INSTALL_PATH: /
   LD_LIBRARY_PATH: /Package/install/lib64:$LD_LIBRARY_PATH
   NUM_BUILD_CORES: 8
   CG_CI: 1
