@@ -16,10 +16,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        CI_IMAGE: ['laufor/ci-images:cepgen-cc7', 'laufor/ci-images:cepgen-fedora33', 'laufor/ci-images:cepgen-fedora37']
         include:
-          - CI_IMAGE: 'laufor/ci-images:cepgen-cc7'
+          - id: Fedora 37
+            CI_IMAGE: 'laufor/ci-images:cepgen-fedora37'
+            cmakeExec: cmake3
+            packageInstall: [sudo dnf install -y /Package/build/*.rpm]
+          - id: CC7
+            CI_IMAGE: 'laufor/ci-images:cepgen-cc7'
+            cmakeExec: cmake3
             extraCommands: source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
+          - id: Ubuntu 20.04
+            CI_IMAGE: 'laufor/ci-images:cepgen-ubuntu20'
+            cmakeExec: cmake
+            packageInstall: |
+              sudo apt-get install -y /Package/build/*.deb
     container:
       image: ${{ matrix.CI_IMAGE }}
       #volumes:
@@ -35,7 +45,7 @@ jobs:
           echo "${{ env.INSTALL_PATH }}/bin" >> $GITHUB_PATH
           mkdir -p build/ install/
           cd build
-          cmake3 -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_PATH }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always" ..
+          ${{ matrix.cmakeExec }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_PATH }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always" ..
       - name: Install
         run: |
           ${{ matrix.extraCommands }}
@@ -61,13 +71,9 @@ jobs:
       - name: Testing cepgen executable (packaged)
         continue-on-error: ${{ matrix.CI_IMAGE == 'laufor/ci-images:cepgen-cc7' }}
         run: |
-          yum install -y /Package/build/*.rpm
-          echo -e "Listing of /usr/bin"
-          ls -l /usr/bin
-          echo -e "Listing of /usr/local/bin"
-          ls -l /usr/local/bin
-          echo -e "Now running cepgen"
-          cepgen Cards/lpair_cfg.py
+          ${{ matrix.packageInstall }}
+          echo -e "Now running cepgen installed from rpm"
+          valgrind --show-leak-kinds=all --leak-check=full cepgen Cards/lpair_cfg.py
       - name: Testing CI recipes
         run: |
           ${{ matrix.extraCommands }}
