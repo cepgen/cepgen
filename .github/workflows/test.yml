@@ -62,6 +62,11 @@ jobs:
         continue-on-error: ${{ matrix.CI_IMAGE == 'laufor/ci-images:cepgen-cc7' }}
         run: |
           yum install -y /Package/build/*.rpm
+          echo -e "Listing of /usr/bin"
+          ls -l /usr/bin
+          echo -e "Listing of /usr/local/bin"
+          ls -l /usr/local/bin
+          echo -e "Now running cepgen"
           cepgen Cards/lpair_cfg.py
       - name: Testing CI recipes
         run: |
