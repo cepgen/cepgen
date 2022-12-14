@@ -8,6 +8,7 @@ env:
   BUILD_TYPE: Release
   INSTALL_PATH: /Package/install
   LD_LIBRARY_PATH: /Package/install/lib64:$LD_LIBRARY_PATH
+  NUM_BUILD_CORES: 8
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -38,7 +39,7 @@ jobs:
         run: |
           ${{ matrix.extraCommands }}
           cd /Package/build
-          make -j install
+          make -j ${{ env.NUM_BUILD_CORES }} install
       - name: Testing cepgen executable
         run: |
           ${{ matrix.extraCommands }}
@@ -50,7 +51,7 @@ jobs:
           ${{ matrix.extraCommands }}
           cd /Package
           cd build
-          make -j package
+          make -j ${{ env.NUM_BUILD_CORES }} package
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -66,4 +67,4 @@ jobs:
         run: |
           ${{ matrix.extraCommands }}
           cd /Package/build
-          make -j && ctest --output-on-failure
+          make -j ${{ env.NUM_BUILD_CORES }} && ctest --output-on-failure
