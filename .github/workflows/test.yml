@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        CI_IMAGE: ['laufor/ci-images:cepgen-cc7', 'laufor/ci-images:cepgen-fedora33']
+        CI_IMAGE: ['laufor/ci-images:cepgen-cc7', 'laufor/ci-images:cepgen-fedora33', 'laufor/ci-images:cepgen-fedora37']
         include:
           - CI_IMAGE: 'laufor/ci-images:cepgen-cc7'
             extraCommands: source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
@@ -61,8 +61,7 @@ jobs:
       - name: Testing cepgen executable (packaged)
         continue-on-error: ${{ matrix.CI_IMAGE == 'laufor/ci-images:cepgen-cc7' }}
         run: |
-          cd /Package
-          yum install -y build/*.rpm
+          yum install -y /Package/build/*.rpm
           cepgen Cards/lpair_cfg.py
       - name: Testing CI recipes
         run: |
