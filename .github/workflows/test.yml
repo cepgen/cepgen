@@ -14,13 +14,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        images:
-          - displayTargetName: cc7
-            CI_IMAGE: 'laufor/ci-images:cepgen-cc7'
+        CI_IMAGE: ['laufor/ci-images:cepgen-cc7', 'laufor/ci-images:cepgen-fedora33']
+        include:
+          - CI_IMAGE: 'laufor/ci-images:cepgen-cc7'
             extraCommands: source scl_source enable devtoolset-8 || echo ignoring exit code so CI does not bomb when it should not > /dev/null
-          - displayTargetName: Fedora 33
-            CI_IMAGE: 'laufor/ci-images:cepgen-fedora33'
-            extraCommands:
     container:
       image: ${{ matrix.CI_IMAGE }}
       #volumes:
@@ -29,23 +26,22 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       #- uses: cvmfs-contrib/github-action-cvmfs@v2
+      - if: ${{ matrix.extraCommands }}
+        run: ${{ matrix.extraCommands }}
       - name: CMake configuration
         run: |
           cd /Package
           echo "${{ env.INSTALL_PATH }}/bin" >> $GITHUB_PATH
-          ${{ matrix.extraCommands }}
           mkdir -p build/ install/
           cd build
           cmake3 -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_PATH }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always" -GNinja ..
       - name: Install
         run: |
-          cd /Package
-          cd build
+          cd /Package/build
           ninja -k0 install
       - name: Testing cepgen executable
         run: |
           cd /Package/build
-          ${{ matrix.extraCommands }}
           #valgrind --show-leak-kinds=all --leak-check=full ./cepgen Cards/lpair_cfg.py
           ./cepgen Cards/lpair_cfg.py
       - name: Generate cepgen package
@@ -67,5 +63,4 @@ jobs:
       - name: Testing CI recipes
         run: |
           cd /Package/build
-          ${{ matrix.extraCommands }}
           ninja -k0 && ctest --output-on-failure
