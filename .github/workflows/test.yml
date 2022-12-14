@@ -9,6 +9,7 @@ env:
   INSTALL_PATH: /Package/install
   LD_LIBRARY_PATH: /Package/install/lib64:$LD_LIBRARY_PATH
   NUM_BUILD_CORES: 8
+  CG_CI: 1
 jobs:
   test:
     runs-on: ubuntu-latest

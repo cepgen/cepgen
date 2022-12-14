@@ -37,6 +37,7 @@ namespace cepgen {
     private:
       const size_t bar_length_;
       const std::string bar_pattern_;
+      const bool enabled_;
       size_t total_, frequency_;
     };
   }  // namespace utils

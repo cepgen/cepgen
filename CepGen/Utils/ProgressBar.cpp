@@ -26,10 +26,13 @@ namespace cepgen {
     ProgressBar::ProgressBar(size_t tot, size_t freq)
         : bar_length_(std::stoi(env::get("COLUMNS", "60")) - 10),
           bar_pattern_(bar_length_, '='),
+          enabled_(env::get("CG_CI").empty()),
           total_(tot),
           frequency_(freq) {}
 
     void ProgressBar::update(size_t iter) const {
+      if (!enabled_)
+        return;
       const size_t percent = iter * 100. / total_;
       if (percent % frequency_ == 0 || iter == total_) {
         int lpad = int(percent / 100. * bar_length_);
