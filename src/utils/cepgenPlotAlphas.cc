@@ -31,14 +31,13 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-  double qmin, qmax;
+  cepgen::Limits q_range;
   int num_points;
   string output_file, plotter;
   bool q2mode, logx, logy, draw_grid;
 
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("qmin,m", "minimum virtuality (GeV)", &qmin, 1.)
-      .addOptionalArgument("qmax,M", "maximum virtuality (GeV)", &qmax, 101.)
+      .addOptionalArgument("qrange,q", "virtuality range (GeV)", &q_range, cepgen::Limits{1., 101.})
       .addOptionalArgument("q2mode", "plot as a function of Q^2", &q2mode, false)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 100)
       .addOptionalArgument("output,o", "output file name", &output_file, "alphas.scan.output.txt")
@@ -57,11 +56,7 @@ int main(int argc, char* argv[]) {
   };
   vector<alpha_t> alphas, alphaem;
 
-  vector<double> qvals(num_points);
-  const double lqmin = log10(qmin), lqmax = log10(qmax);
-  for (int i = 0; i < num_points; ++i)
-    qvals[i] =
-        (!logx) ? qmin + i * (qmax - qmin) / (num_points - 1) : pow(10, lqmin + i * (lqmax - lqmin) / (num_points - 1));
+  const auto qvals = q_range.generate(num_points, logx);
 
   // alphaS(Q) modellings part
   size_t i = 0;

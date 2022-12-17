@@ -34,7 +34,8 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   vector<int> sigrat_types;
-  double q2, w2, xmin, xmax;
+  double q2, w2;
+  cepgen::Limits x_range;
   int var, num_points;
   string output_file, plotter;
   bool logx, logy, draw_grid;
@@ -44,8 +45,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("q2,q", "parton virtuality (GeV^2)", &q2, -1.)
       .addOptionalArgument("w2,w", "scattered particle squared mass (GeV^2/c^4)", &w2, -1.)
       .addOptionalArgument("var,t", "variable to study (0=xBj, 1=w)", &var, 0)
-      .addOptionalArgument("xmax,m", "minimal Bjorken x", &xmin, 1.e-7)
-      .addOptionalArgument("xmax,M", "maximal Bjorken x", &xmax, 1.)
+      .addOptionalArgument("xrange,x", "Bjorken x range", &x_range, cepgen::Limits{1.e-7, 1.})
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
       .addOptionalArgument("output,o", "output file name", &output_file, "strfuns.scan.output.txt")
       .addOptionalArgument("logx", "logarithmic x-axis", &logx, false)
@@ -56,8 +56,6 @@ int main(int argc, char* argv[]) {
 
   if (q2 < 0. && w2 < 0.)
     throw CG_FATAL("main") << "Either a Q^2 or a w^2 must be provided!";
-
-  const double lxmin = log10(xmin), lxmax = log10(xmax);
 
   cepgen::initialise();
 
@@ -90,7 +88,7 @@ int main(int argc, char* argv[]) {
   for (const auto& sr_type : sigrat_types)
     out << sep << sr_type, sep = ", ";
   out << "\n"
-      << "# x in [" << xmin << ", " << xmax << "]\n";
+      << "# x in [" << x_range << "]\n";
 
   const float mp = cepgen::PDG::get().mass(2212), mp2 = mp * mp;
 
@@ -104,9 +102,9 @@ int main(int argc, char* argv[]) {
     g_sigrats.emplace_back(to_string(sr_type), sr_name);
     sigrats.emplace_back(move(sr));
   }
+  const auto xvals = x_range.generate(num_points, logx);
   for (int i = 0; i < num_points; ++i) {
-    const double x =
-        (!logx) ? xmin + i * (xmax - xmin) / (num_points - 1) : pow(10, lxmin + i * (lxmax - lxmin) / (num_points - 1));
+    const auto& x = xvals.at(i);
     out << x << "\t";
     size_t j = 0;
     for (auto& sr : sigrats) {

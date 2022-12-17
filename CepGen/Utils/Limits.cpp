@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cmath>
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Limits.h"
 #include "CepGen/Utils/String.h"
@@ -95,6 +97,15 @@ namespace cepgen {
       return INVALID;
 
     return first + (second - first) * v;
+  }
+
+  std::vector<double> Limits::generate(size_t num_bins, bool log_scale) const {
+    std::vector<double> out;
+    const auto min_val = (!log_scale) ? min() : std::log10(min());
+    const auto rng = ((!log_scale) ? max() - min() : std::log10(max()) - std::log10(min())) / (num_bins - 1);
+    for (size_t i = 0; i < num_bins; ++i)
+      out.emplace_back((!log_scale) ? min_val + i * rng : std::pow(10, min_val + i * rng));
+    return out;
   }
 
   std::ostream& operator<<(std::ostream& os, const Limits& lim) {

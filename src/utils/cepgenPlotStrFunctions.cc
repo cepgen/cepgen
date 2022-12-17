@@ -34,8 +34,8 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   vector<int> strfun_types;
-  double q2, xmin, xmax;
-  cepgen::Limits yrange;
+  double q2;
+  cepgen::Limits xrange, yrange;
   int var, num_points;
   string output_file, plotter;
   bool logx, logy, draw_grid;
@@ -44,8 +44,7 @@ int main(int argc, char* argv[]) {
       .addArgument("sf,s", "structure functions modelling", &strfun_types)
       .addOptionalArgument("q2,q", "parton virtuality (GeV^2)", &q2, 10.)
       .addOptionalArgument("var,t", "variable to study (0=xBj, 1=w)", &var, 0)
-      .addOptionalArgument("xmax,m", "minimal Bjorken x", &xmin, 1.e-7)
-      .addOptionalArgument("xmax,M", "maximal Bjorken x", &xmax, 1.)
+      .addOptionalArgument("xrange,x", "Bjorken x range", &xrange, cepgen::Limits{1.e-7, 1.})
       .addOptionalArgument("yrange", "plotting range for y", &yrange, cepgen::Limits())
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
       .addOptionalArgument("output,o", "output file name", &output_file, "strfuns.scan.output.txt")
@@ -54,8 +53,6 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .parse();
-
-  const double lxmin = log10(xmin), lxmax = log10(xmax);
 
   cepgen::initialise();
 
@@ -82,7 +79,7 @@ int main(int argc, char* argv[]) {
   for (const auto& sf_type : strfun_types)
     out << sep << sf_type, sep = ", ";
   out << "\n"
-      << "# x in [" << xmin << ", " << xmax << "]\n";
+      << "# x in [" << xrange << "]\n";
 
   const float mp = cepgen::PDG::get().mass(2212), mp2 = mp * mp;
 
@@ -109,9 +106,9 @@ int main(int argc, char* argv[]) {
     g_strfuns_w2.emplace_back("w2_" + os.str(), sf_name);
     strfuns.emplace_back(move(sf));
   }
+  const auto xvals = xrange.generate(num_points, logx);
   for (int i = 0; i < num_points; ++i) {
-    const double x =
-        (!logx) ? xmin + i * (xmax - xmin) / (num_points - 1) : pow(10, lxmin + i * (lxmax - lxmin) / (num_points - 1));
+    const auto& x = xvals.at(i);
     out << x << "\t";
     size_t j = 0;
     for (auto& sf : strfuns) {
