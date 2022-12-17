@@ -35,11 +35,11 @@ using namespace std;
 int main(int argc, char* argv[]) {
   vector<string> cfluxes;
   int num_points;
-  double q2max, mxmin, mxmax;
+  double q2max;
   string integrator, output_file, plotter;
   bool logx, logy, draw_grid;
   vector<double> rescl, sqrts, accept;
-  cepgen::Limits y_range;
+  cepgen::Limits mx_range, y_range;
   vector<cepgen::Limits> xi_ranges(1);
 
   cepgen::initialise();
@@ -53,8 +53,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("integrator,i", "type of integration algorithm", &integrator, "gsl")
       .addOptionalArgument("q2max,q", "maximum Q^2", &q2max, 1000.)
       .addOptionalArgument("sqrts,s", "two-proton centre of mass energy (GeV)", &sqrts, vector<double>{13.e3})
-      .addOptionalArgument("mxmin,m", "minimal two-photon mass", &mxmin, 0.)
-      .addOptionalArgument("mxmax,M", "maximal two-photon mass", &mxmax, 100.)
+      .addOptionalArgument("mxrange,m", "two-photon mass range", &mx_range, cepgen::Limits{0., 100.})
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
       .addOptionalArgument("output,o", "output file name", &output_file, "collflux.int.scan.output.txt")
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
@@ -67,8 +66,8 @@ int main(int argc, char* argv[]) {
       .parse();
 
   ofstream out(output_file);
-  if (logx && mxmin == 0.)
-    mxmin = 1.e-3;
+  if (logx && mx_range.min() == 0.)
+    mx_range.min() = 1.e-3;
   if (sqrts.size() != cfluxes.size())
     sqrts = vector<double>(cfluxes.size(), sqrts.at(0));
   if (rescl.size() != cfluxes.size())
@@ -89,12 +88,9 @@ int main(int argc, char* argv[]) {
   }
 
   out << "# coll. fluxes: " << cepgen::utils::merge(cfluxes, ",") << "\n"
-      << "# two-photon mass range: " << cepgen::Limits(mxmin, mxmax);
+      << "# two-photon mass range: " << mx_range;
   map<string, vector<cepgen::utils::Graph1D> > m_gr_fluxes;  // {collinear flux -> graph}
-  vector<double> mxvals;
-  for (int j = 0; j < num_points; ++j)
-    mxvals.emplace_back((!logx) ? mxmin + j * (mxmax - mxmin) / (num_points - 1)
-                                : pow(10, log10(mxmin) + j * (log10(mxmax) - log10(mxmin)) / (num_points - 1)));
+  const auto mxvals = mx_range.generate(num_points, logx);
   vector<vector<double> > values(num_points);
   auto integr = cepgen::AnalyticIntegratorFactory::get().build(
       cepgen::ParametersList().setName<string>(integrator).set<int>("mode", 0).set<int>("nodes", 2000));

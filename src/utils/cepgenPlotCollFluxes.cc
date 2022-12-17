@@ -39,10 +39,10 @@ int main(int argc, char* argv[]) {
   vector<string> cfluxes;
   vector<int> modes;
   int strfun_type, num_points;
-  double mx, xmin, xmax, q2max;
+  double mx, q2max;
   string ffmode, output_file, plotter;
   bool logx, logy, draw_grid;
-  cepgen::Limits y_range;
+  cepgen::Limits x_range, y_range;
 
   cepgen::initialise();
 
@@ -55,8 +55,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("modes,t", "beam modelling(s)", &modes, vector<int>{(int)cepgen::Beam::Mode::ProtonElastic})
       .addOptionalArgument("mx,M", "diffractive mass (GeV/c^2)", &mx, 100.)
       .addOptionalArgument("sf,s", "structure functions modelling", &strfun_type, 301)
-      .addOptionalArgument("xmin,x", "minimal fractional loss", &xmin, 0.)
-      .addOptionalArgument("xmax,X", "maximal fractional loss", &xmax, 1.)
+      .addOptionalArgument("xrange,x", "fractional loss range", &x_range, cepgen::Limits{0., 1.})
       .addOptionalArgument("yrange,y", "y range", &y_range)
       .addOptionalArgument("q2max,q", "maximal parton virtuality (GeV^2)", &q2max, 1000.)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
@@ -68,21 +67,18 @@ int main(int argc, char* argv[]) {
       .parse();
 
   ofstream out(output_file);
-  if (logx && xmin == 0.)
-    xmin = 1.e-3;
+  if (logx && x_range.min() == 0.)
+    x_range.min() = 1.e-3;
 
   out << "# coll. fluxes: " << cepgen::utils::merge(cfluxes, ",") << "\n"
       << "# struct. functions: " << strfun_type << "\n"
       << "# form factors: " << ffmode << "\n"
       << "# diffractive mass: " << mx << " GeV/c2\n"
-      << "# fractional momentum loss: " << cepgen::Limits(xmin, xmax) << "\n"
+      << "# fractional momentum loss: " << x_range << "\n"
       << "# fluxes modes: " << cepgen::utils::merge(modes, ",");
   map<string, vector<cepgen::utils::Graph1D> > m_v_gr_fluxes;  // {collinear flux -> {mode, mode, ...}}
   vector<vector<double> > values(num_points);
-  vector<double> xvals;
-  for (auto i = 0; i < num_points; ++i)
-    xvals.emplace_back((!logx) ? xmin + i * (xmax - xmin) / (num_points - 1)
-                               : pow(10, log10(xmin) + i * (log10(xmax) - log10(xmin)) / (num_points - 1)));
+  const auto xvals = x_range.generate(num_points, logx);
   for (const auto& cflux : cfluxes) {
     vector<unique_ptr<cepgen::collflux::Parameterisation> > coll_fluxes;
     for (const auto& mode : modes) {

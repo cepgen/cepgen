@@ -93,6 +93,9 @@ namespace cepgen {
       }
 
       double operator()(double x, double mx) const override {
+        static const Limits x_valid_range{0., 1.};
+        if (x_valid_range.contains(x))
+          return 0.;
         params_->x = x;
         params_->mf2 = mx * mx;
         return 2. * M_PI * integr_->eval(*func_, params_.get(), q2_range_) / x;
