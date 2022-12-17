@@ -305,13 +305,20 @@ namespace cepgen {
     if (vec_float_variable_ || lim_variable_) {
       std::vector<double> vec_flt;
       const auto buf = utils::split(value, ',');
-      std::transform(
-          buf.begin(), buf.end(), std::back_inserter(vec_flt), [](const std::string& str) { return std::stod(str); });
+      std::transform(buf.begin(), buf.end(), std::back_inserter(vec_flt), [](const std::string& str) {
+        try {
+          return std::stod(str);
+        } catch (const std::invalid_argument&) {
+          return Limits::INVALID;
+        }
+      });
       if (vec_float_variable_)
         *vec_float_variable_ = vec_flt;
       else if (vec_flt.size() == 2) {
-        lim_variable_->min() = vec_flt.at(0);
-        lim_variable_->max() = vec_flt.at(1);
+        if (vec_flt.at(0) != Limits::INVALID)
+          lim_variable_->min() = vec_flt.at(0);
+        if (vec_flt.at(1) != Limits::INVALID)
+          lim_variable_->max() = vec_flt.at(1);
       }
       return *this;
     }
