@@ -55,8 +55,8 @@ jobs:
         run: |
           ${{ matrix.extraCommands }}
           cd /Package/build
-          #valgrind --show-leak-kinds=all --leak-check=full ./cepgen Cards/lpair_cfg.py
-          ./cepgen Cards/lpair_cfg.py
+          #valgrind --show-leak-kinds=all --leak-check=full bin/cepgen Cards/lpair_cfg.py
+          bin/cepgen Cards/lpair_cfg.py
       - name: Generate cepgen package
         run: |
           ${{ matrix.extraCommands }}
