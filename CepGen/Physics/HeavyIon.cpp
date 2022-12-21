@@ -30,23 +30,22 @@
 
 namespace cepgen {
   HeavyIon::HeavyIon(pdgid_t pdg) {
-    if (pdg / 1000000 != 0) {
+    if (pdg == PDG::neutron)
+      *this = neutron();
+    else if (pdg == PDG::proton)
+      *this = proton();
+    else if (pdg / 1000000 != 0) {
       Z = static_cast<Element>((pdg / 1000) % 1000);
       A = pdg % 1000;
-    } else if (pdg == PDG::neutron) {
-      Z = Element::neutron;
-      A = 1;
-    } else if (pdg == PDG::proton) {
-      Z = Element::H;
-      A = 1;
-    }
+    } else
+      CG_WARNING("HeavyIon") << "Failed to parse heavy ion from PDG id=" << pdg << ".";
   }
 
   HeavyIon::operator pdgid_t() const {
     // Pythia8 convention/10-1e10+1e6
-    if (Z == Element::H && A == 1)
+    if (*this == proton())
       return PDG::proton;
-    if (Z == Element::neutron && A == 1)
+    if (*this == neutron())
       return PDG::neutron;
     return (pdgid_t)(1000000 + 1000 * (unsigned short)Z + A);
   }

@@ -64,7 +64,7 @@ namespace cepgen {
     static double mass(const HeavyIon& hi) { return hi.mass(); }
 
     /// Simple proton
-    static inline HeavyIon proton() { return HeavyIon(0, Element::H); }
+    static inline HeavyIon proton() { return HeavyIon(1, Element::H); }
     /// Simple neutron
     static inline HeavyIon neutron() { return HeavyIon(1, Element::neutron); }
     /// Standard gold

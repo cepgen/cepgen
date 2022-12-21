@@ -28,11 +28,13 @@ int main() {
     const cepgen::HeavyIon proton(2212);
     CG_TEST_EQUAL(proton.mass(), mp, "single proton mass");
     CG_TEST_EQUAL((cepgen::pdgid_t)proton, 2212, "single proton PDG id");
+    CG_TEST_EQUAL(proton, cepgen::HeavyIon::proton(), "Static proton definition");
   }
   {
     const cepgen::HeavyIon neutron(2112);
     CG_TEST_EQUAL(neutron.mass(), mn, "single neutron mass");
     CG_TEST_EQUAL((cepgen::pdgid_t)neutron, 2112, "single neutron PDG id");
+    CG_TEST_EQUAL(neutron, cepgen::HeavyIon::neutron(), "Static neutron definition");
   }
   {
     const auto hi = cepgen::HeavyIon::Pb();
