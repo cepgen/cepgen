@@ -1,7 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
  *  Copyright (C) 2018-2022  Laurent Forthomme
- *                     2003  Maarten Boonekamp, Tibor Kucs
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,7 +28,9 @@ namespace cepgen {
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
           q2_range_(steer<Limits>("q2range")),
-          qscale_(steer<double>("qscale")) {}
+          qscale_(steer<double>("qscale")) {
+      q2_range_.min() = std::max(q2_range_.min(), 0.);
+    }
 
     std::string Parameterisation::describe() const { return name_; }
 

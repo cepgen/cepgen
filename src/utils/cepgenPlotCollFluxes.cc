@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
   int strfun_type, num_points;
   double mx;
   string ffmode, output_file, plotter;
-  bool logx, logy, draw_grid;
+  bool logx, logy, draw_grid, normalised;
   cepgen::Limits x_range, y_range, q2_range;
 
   cepgen::initialise();
@@ -64,6 +64,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("logx", "logarithmic x-scale", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
+      .addOptionalArgument("normalised", "plot xf(x) instead of f(x)", &normalised, false)
       .parse();
 
   ofstream out(output_file);
@@ -112,7 +113,7 @@ int main(int argc, char* argv[]) {
         if (isnan(fx))
           fx = -1.;
         values.at(i).emplace_back(fx);
-        m_v_gr_fluxes[cflux].at(j).addPoint(x, fx);
+        m_v_gr_fluxes[cflux].at(j).addPoint(x, normalised ? x * fx : fx);
       }
     }
   }
@@ -133,7 +134,7 @@ int main(int argc, char* argv[]) {
     for (auto& cf_gr : m_v_gr_fluxes)
       for (auto& gr : cf_gr.second) {
         gr.xAxis().setLabel("x");
-        gr.yAxis().setLabel("dN/dx");
+        gr.yAxis().setLabel(normalised ? "x dN/dx" : "dN/dx");
         if (y_range.valid())
           gr.yAxis().setRange(y_range);
         if (cf_gr.second.size() > 1)

@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
       const auto& mx = mxvals.at(j);
       for (size_t k = 0; k < xi_ranges.size(); ++k) {
         const auto& xi_range = xi_ranges.at(k);
-        auto lumi_wgg = integr->eval(
+        auto lumi_wgg = integr->integrate(
             [&xi_range, &mx, &s, &coll_flux](double x) {
               if (xi_range.valid() && (!xi_range.contains(x) || !xi_range.contains(mx * mx / x / s)))
                 return 0.;

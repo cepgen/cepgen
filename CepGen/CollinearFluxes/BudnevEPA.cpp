@@ -1,6 +1,7 @@
 /*
  *  CepGen: a central exclusive processes event generator
  *  Copyright (C) 2022  Laurent Forthomme
+ *                2003  Maarten Boonekamp, Tibor Kucs
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
