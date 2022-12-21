@@ -35,7 +35,6 @@ using namespace std;
 int main(int argc, char* argv[]) {
   vector<string> cfluxes;
   int num_points;
-  double q2max;
   string integrator, output_file, plotter;
   bool logx, logy, draw_grid;
   vector<double> rescl, sqrts, accept;
@@ -51,7 +50,6 @@ int main(int argc, char* argv[]) {
                            cepgen::collflux::CollinearFluxFactory::get().modules())
       .addOptionalArgument("rescaling,r", "luminosity rescaling", &rescl, vector<double>{1.})
       .addOptionalArgument("integrator,i", "type of integration algorithm", &integrator, "gsl")
-      .addOptionalArgument("q2max,q", "maximum Q^2", &q2max, 1000.)
       .addOptionalArgument("sqrts,s", "two-proton centre of mass energy (GeV)", &sqrts, vector<double>{13.e3})
       .addOptionalArgument("mxrange,m", "two-photon mass range", &mx_range, cepgen::Limits{0., 100.})
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)

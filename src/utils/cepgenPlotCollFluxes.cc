@@ -39,10 +39,10 @@ int main(int argc, char* argv[]) {
   vector<string> cfluxes;
   vector<int> modes;
   int strfun_type, num_points;
-  double mx, q2max;
+  double mx;
   string ffmode, output_file, plotter;
   bool logx, logy, draw_grid;
-  cepgen::Limits x_range, y_range;
+  cepgen::Limits x_range, y_range, q2_range;
 
   cepgen::initialise();
 
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("sf,s", "structure functions modelling", &strfun_type, 301)
       .addOptionalArgument("xrange,x", "fractional loss range", &x_range, cepgen::Limits{0., 1.})
       .addOptionalArgument("yrange,y", "y range", &y_range)
-      .addOptionalArgument("q2max,q", "maximal parton virtuality (GeV^2)", &q2max, 1000.)
+      .addOptionalArgument("q2range,q", "parton virtuality range (GeV^2)", &q2_range, cepgen::Limits{0., 1000.})
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
       .addOptionalArgument("output,o", "output file name", &output_file, "collflux.scan.output.txt")
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
@@ -73,6 +73,7 @@ int main(int argc, char* argv[]) {
   out << "# coll. fluxes: " << cepgen::utils::merge(cfluxes, ",") << "\n"
       << "# struct. functions: " << strfun_type << "\n"
       << "# form factors: " << ffmode << "\n"
+      << "# virtuality: " << q2_range << " GeV^2\n"
       << "# diffractive mass: " << mx << " GeV/c2\n"
       << "# fractional momentum loss: " << x_range << "\n"
       << "# fluxes modes: " << cepgen::utils::merge(modes, ",");
@@ -83,7 +84,7 @@ int main(int argc, char* argv[]) {
     vector<unique_ptr<cepgen::collflux::Parameterisation> > coll_fluxes;
     for (const auto& mode : modes) {
       cepgen::ParametersList flux_params;
-      flux_params.set("q2range", cepgen::Limits{0., q2max})
+      flux_params.set("q2range", q2_range)
           .set("formFactors", ffmode)
           .set("structureFunctions",
                cepgen::strfun::StructureFunctionsFactory::get().describeParameters(strfun_type).parameters());
