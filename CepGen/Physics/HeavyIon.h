@@ -47,6 +47,9 @@ namespace cepgen {
     /// Build from a custom PDG id
     HeavyIon(pdgid_t pdg = 2212);
 
+    bool operator==(const HeavyIon& oth) const { return Z == oth.Z && A == oth.A; }
+    bool operator!=(const HeavyIon& oth) const { return !(*this == oth); }
+
     /// Neutrons mass, in GeV/c2
     double massN() const;
     /// Protons mass, in GeV/c2
@@ -61,7 +64,9 @@ namespace cepgen {
     static double mass(const HeavyIon& hi) { return hi.mass(); }
 
     /// Simple proton
-    static inline HeavyIon proton() { return HeavyIon(1, Element::H); }
+    static inline HeavyIon proton() { return HeavyIon(0, Element::H); }
+    /// Simple neutron
+    static inline HeavyIon neutron() { return HeavyIon(1, Element::neutron); }
     /// Standard gold
     static inline HeavyIon Au() { return HeavyIon(197, Element::Au); }
     /// Standard lead

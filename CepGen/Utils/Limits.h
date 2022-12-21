@@ -21,6 +21,7 @@
 
 #include <iosfwd>
 #include <utility>
+#include <vector>
 
 namespace cepgen {
   /// Validity interval for a variable
