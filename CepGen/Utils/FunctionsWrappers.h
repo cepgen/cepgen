@@ -28,28 +28,36 @@ namespace cepgen {
     /// Wrapper to a 1-dimensional function with optional parameters
     class Function1D {
     public:
-      Function1D(const std::function<double(double)>& func) : func_(func), func_params_(nullptr), func_obj_(nullptr) {}
-      Function1D(const std::function<double(double, const ParametersList&)>& func)
-          : func_(nullptr), func_params_(func), func_obj_(nullptr) {}
-      Function1D(const std::function<double(double, void*)>& func)
-          : func_(nullptr), func_params_(nullptr), func_obj_(func) {}
+      explicit Function1D(const std::function<double(double)>& func) : func_(func) {}
+      explicit Function1D(const std::function<double(double, const ParametersList&)>& func) : func_params_(func) {}
+      explicit Function1D(const std::function<double(double, void*)>& func) : func_obj_(func) {}
 
       double operator()(double x, const ParametersList& params = ParametersList()) const {
         if (func_params_)
           return func_params_(x, params);
         return func_(x);
       }
-      double operator()(double x, void* obj) const { return func_obj_(x, obj); }
+      /// Call the function with an unspecified object as parameters
+      double operator()(double x, void* obj) const {
+        if (func_obj_)
+          return func_obj_(x, obj);
+        return func_(x);
+      }
+      /// Call the function with a templated object as parameters
+      template <typename T>
+      double operator()(double x, const T& obj) const {
+        return func_obj_(x, (void*)&obj);
+      }
 
       operator const std::function<double(double)>&() { return func_; }
 
     private:
       /// Reference to the parameters-less functor
-      std::function<double(double)> func_;
+      std::function<double(double)> func_{nullptr};
       /// Reference to the functor
-      std::function<double(double, const ParametersList&)> func_params_;
+      std::function<double(double, const ParametersList&)> func_params_{nullptr};
       /// Reference to the functor
-      std::function<double(double, void*)> func_obj_;
+      std::function<double(double, void*)> func_obj_{nullptr};
     };
   }  // namespace utils
 }  // namespace cepgen

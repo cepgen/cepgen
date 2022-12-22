@@ -52,7 +52,9 @@ namespace cepgen {
         auto* wrp = static_cast<GSLFunctionWrapper*>(params);
         if (wrp->obj_)
           return wrp->func_(x, wrp->obj_);
-        return wrp->func_(x, wrp->params_);
+        if (!wrp->params_.empty())
+          return wrp->func_(x, wrp->params_);
+        return wrp->func_(x);
       }
       const Function1D func_;
       const ParametersList& params_;
