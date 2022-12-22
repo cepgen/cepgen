@@ -69,6 +69,10 @@ namespace cepgen {
   }
 
   std::ostream& operator<<(std::ostream& os, const HeavyIon& hi) {
+    if (hi == HeavyIon::proton())
+      return os << "proton";
+    if (hi == HeavyIon::neutron())
+      return os << "neutron";
     std::ostringstream oss;
     oss << hi.Z;
     if (oss.str().empty() || hi.Z == Element::invalid)
