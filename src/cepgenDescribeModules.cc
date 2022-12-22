@@ -19,6 +19,7 @@
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
@@ -113,6 +114,7 @@ int main(int argc, char* argv[]) {
     ostringstream os;
     LOOP_FACTORY("Cards steering", cepgen::card::CardsHandlerFactory)
     LOOP_FACTORY("Integrator", cepgen::IntegratorFactory)
+    LOOP_FACTORY("Analytic integrator", cepgen::AnalyticIntegratorFactory)
     LOOP_FACTORY("Process", cepgen::proc::ProcessFactory)
     LOOP_FACTORY("Beam form factors modelling", cepgen::formfac::FormFactorsFactory)
     LOOP_FACTORY_INT("Structure functions modelling", cepgen::strfun::StructureFunctionsFactory)
