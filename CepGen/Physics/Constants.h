@@ -35,6 +35,9 @@ namespace cepgen {
     /// Conversion factor between GeV\f$^{-2}\f$ and barn
     /// i.e. \f$\hbar^2 c^2\f$ in GeV\f$^{-2}\f$.
     constexpr double GEVM2_TO_PB = 0.389351824e9;
+    /// Conversion factor between GeV\f$^{-1}\f$ and metres
+    /// i.e. \f$\hbar c\f$ in GeV\f$^{-1}\f$.
+    constexpr double GEVM1_TO_M = 0.1973269804e-15;
     /// Fermi coupling constant, in GeV\f$^{-2}\f$
     constexpr double G_F = 1.1663787e-5;
   }  // namespace constants

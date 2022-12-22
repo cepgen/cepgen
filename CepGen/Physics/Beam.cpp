@@ -197,7 +197,8 @@ namespace cepgen {
       case KTFlux::HI_Photon_Elastic: {
         const auto mp = PDG::get().mass(PDG::proton);
         const double r_a = 1.1 * cbrt(hi.A), a0 = 0.7, m_a = hi.A * mp;
-        const double q2_ela = (kt2 + x * x * m_a * m_a) / (1. - x), cons = sqrt(q2_ela) / 0.1973;
+        const double q2_ela = (kt2 + x * x * m_a * m_a) / (1. - x),
+                     cons = sqrt(q2_ela) / (constants::GEVM1_TO_M * 1e15);
         const double tau = cons * r_a, tau1 = cons * a0;
         // "Realistic nuclear form-factor" as used in STARLIGHT
         const double ff1 = 3. * (sin(tau) - tau * cos(tau)) / pow(tau + 1.e-10, 3);
