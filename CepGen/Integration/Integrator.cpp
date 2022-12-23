@@ -18,8 +18,9 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
-#include "CepGen/Integration/Integrand.h"
+#include "CepGen/Integration/FunctionIntegrand.h"
 #include "CepGen/Integration/Integrator.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 
@@ -32,9 +33,7 @@ namespace cepgen {
 
   void Integrator::setIntegrand(Integrand& integr) {
     integrand_ = &integr;
-
-    //--- force the reinitialisation
-    initialised_ = false;
+    initialised_ = false;  // force the reinitialisation
   }
 
   //------------------------------------------------------------------------------------------------
@@ -60,6 +59,15 @@ namespace cepgen {
     double result, tmp;
     integrate(result, tmp);
     return result;
+  }
+
+  double Integrator::integrate(const std::function<double(const std::vector<double>&)>& func,
+                               const ParametersList& params,
+                               size_t num_vars) {
+    auto integr = IntegratorFactory::get().build(params);
+    auto integrand = FunctionIntegrand(num_vars, func);
+    integr->setIntegrand(integrand);
+    return integr->integrate();
   }
 
   ParametersDescription Integrator::description() {

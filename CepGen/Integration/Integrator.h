@@ -51,6 +51,8 @@ namespace cepgen {
     /// Perform an integration with no use of the numerical error
     /// \return the integral computed over the full phase space
     double integrate();
+    /// Perform an integration with a given functional and a given set of parameters
+    static double integrate(const std::function<double(const std::vector<double>&)>&, const ParametersList&, size_t);
 
   protected:
     const unsigned long seed_;       ///< Random number generator seed
