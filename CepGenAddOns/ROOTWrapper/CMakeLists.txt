@@ -11,6 +11,7 @@ endif()
 message(STATUS "... ROOT v${ROOT_VERSION} standard is c++${ROOT_CXX_STANDARD}")
 
 set(sources IntegratorROOT.cpp
+            ROOTDerivator.cpp
             ROOTDrawer.cpp
             ROOTTree*.cpp
             ROOTHistsHandler.cpp

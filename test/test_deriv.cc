@@ -34,12 +34,13 @@ int main(int argc, char* argv[]) {
   string plotter;
   vector<string> derivators;
 
+  cepgen::initialise();
+
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("plotter,p", "type of plotter to use", &plotter, "text")
       .addOptionalArgument(
           "derivators,D", "type of derivators to use", &derivators, cepgen::utils::DerivatorFactory::get().modules())
       .parse();
-  cepgen::initialise();
 
   auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
   for (const auto& deriv_name : derivators) {
