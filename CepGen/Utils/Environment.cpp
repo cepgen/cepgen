@@ -33,6 +33,7 @@ namespace cepgen {
         return std::vector<std::string>{fs::path(env::get("CEPGEN_PATH", ".")),
                                         fs::path(env::get("CEPGEN_PATH", ".")) / "External",
                                         fs::path() / "/usr" / "share" / "CepGen",
+                                        fs::current_path(),
                                         fs::current_path().parent_path(),
                                         fs::current_path().parent_path().parent_path()};
       }

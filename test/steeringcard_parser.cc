@@ -30,9 +30,9 @@ using namespace std;
 int main(int argc, char* argv[]) {
   string card;
 
-  cepgen::ArgumentsParser(argc, argv).addArgument("card,i", "input card", &card).parse();
-
   cepgen::initialise();
+
+  cepgen::ArgumentsParser(argc, argv).addOptionalArgument("card,i", "input card", &card, "Cards/lpair_cfg.py").parse();
 
   try {
     CG_LOG << "Parsing configuration from '" << card << ".";
