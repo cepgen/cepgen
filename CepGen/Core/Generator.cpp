@@ -118,6 +118,7 @@ namespace cepgen {
     CG_TICKER(parameters_->timeKeeper());
 
     clearRun();
+
     if (!parameters_->hasProcess())
       throw CG_FATAL("Generator:integrate") << "Trying to integrate while no process is specified!";
     const size_t ndim = worker_->integrand().process().ndim();
@@ -142,6 +143,9 @@ namespace cepgen {
   const Event& Generator::generateOneEvent(Event::callback callback) { return next(callback); }
 
   void Generator::initialise() {
+    if (initialised_)
+      return;
+
     CG_TICKER(parameters_->timeKeeper());
 
     if (!parameters_)
@@ -157,7 +161,7 @@ namespace cepgen {
 
   const Event& Generator::next(Event::callback callback) {
     if (!worker_ || !initialised_)
-      this->initialise();
+      initialise();
     size_t num_try = 0;
     while (!worker_->next(callback)) {
       if (num_try++ > 5)
@@ -169,8 +173,7 @@ namespace cepgen {
   void Generator::generate(size_t num_events, Event::callback callback) {
     CG_TICKER(parameters_->timeKeeper());
 
-    if (!initialised_)
-      this->initialise();
+    initialise();
 
     //--- if invalid argument, retrieve from runtime parameters
     if (num_events < 1) {

@@ -57,6 +57,7 @@ namespace cepgen {
   }
 
   void IntegratorGSL::setIntegrand(Integrand& integr) {
+    Integrator::setIntegrand(integr);
     integrand_ = &integr;
     //--- specify the integrand through the GSL wrapper
     function_ = utils::GSLMonteFunctionWrapper<decltype(funct_)>::build(funct_, integrand_->size());
