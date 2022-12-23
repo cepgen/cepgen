@@ -1,6 +1,5 @@
 set(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin")
-set(exec_sources cepgen.cc
-                 cepgenDescribeModules.cc)
+set(exec_sources cepgen.cc)
 if(CMAKE_BUILD_SCAN)
   list(APPEND exec_sources cepgenScan.cc)
 endif()

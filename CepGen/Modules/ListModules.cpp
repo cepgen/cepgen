@@ -23,6 +23,7 @@
 #include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/CouplingFactory.h"
+#include "CepGen/Modules/DerivatorFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ExportModuleFactory.h"
@@ -59,9 +60,6 @@ namespace cepgen {
                << fact.describe(mod) << (fact.describeParameters(mod).empty() ? " (*)" : "");
       };
 
-      list_modules(card::CardsHandlerFactory::get(), "Steering cards parsers");
-      list_modules(IntegratorFactory::get(), "Integration algorithms");
-      list_modules(AnalyticIntegratorFactory::get(), "Analytic integration algorithms");
       list_modules(proc::ProcessFactory::get(), "Physics processes");
       list_modules(formfac::FormFactorsFactory::get(), "Beam form factors modellings");
       list_int_modules(sigrat::SigmaRatiosFactory::get(), "Cross section ratios modellings");
@@ -70,12 +68,16 @@ namespace cepgen {
         os << std::setw(3) << mod << "|" << (strfun::Type)mod;
         return os.str();
       });
+      list_modules(AlphaEMFactory::get(), "alpha(EM) evolution algorithms");
+      list_modules(AlphaSFactory::get(), "alpha(s) evolution algorithms");
       list_modules(EventModifierFactory::get(), "Event modification modules");
       list_modules(io::ExportModuleFactory::get(), "Export modules");
       list_modules(utils::FunctionalFactory::get(), "Functional evaluators");
+      list_modules(card::CardsHandlerFactory::get(), "Steering cards parsers");
+      list_modules(IntegratorFactory::get(), "Integration algorithms");
+      list_modules(AnalyticIntegratorFactory::get(), "Analytic integration algorithms");
+      list_modules(utils::DerivatorFactory::get(), "Derivation algorithm");
       list_modules(utils::DrawerFactory::get(), "Drawer utilities");
-      list_modules(AlphaEMFactory::get(), "alpha(EM) evolution algorithms");
-      list_modules(AlphaSFactory::get(), "alpha(s) evolution algorithms");
     });
   }
 }  // namespace cepgen
