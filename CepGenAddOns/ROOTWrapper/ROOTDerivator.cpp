@@ -26,10 +26,12 @@
 namespace cepgen {
   class ROOTDerivator : public utils::Derivator {
   public:
-    explicit ROOTDerivator(const ParametersList& params) : Derivator(params) {}
+    explicit ROOTDerivator(const ParametersList& params) : Derivator(params), order_(steer<int>("order")) {}
 
     static ParametersDescription description() {
       auto desc = Derivator::description();
+      desc.setDescription("ROOT derivation algorithm (Richardson's extrapolation method)");
+      desc.add<int>("order", 1).setDescription("order of the derivation");
       return desc;
     }
 
@@ -41,13 +43,24 @@ namespace cepgen {
       auto rfunc = TF1(
           "cepgen_functional",
           [&func](double vars[1], double* pars) { return func(vars[0], static_cast<void*>(pars)); },
-          0,
-          1,
+          0.,
+          1.,
           0);
-      return rfunc.Derivative(x, nullptr, h < 0. ? h_ : h);
+      const auto epsilon = h < 0. ? h_ : h;
+      switch (order_) {
+        case 1:
+          return rfunc.Derivative(x, nullptr, epsilon);
+        case 2:
+          return rfunc.Derivative2(x, nullptr, epsilon);
+        case 3:
+          return rfunc.Derivative3(x, nullptr, epsilon);
+        default:
+          throw CG_FATAL("ROOTDerivator") << "Invalid derivation order requested: " << order_ << ".";
+      }
     }
 
   private:
+    const int order_;
   };
 }  // namespace cepgen
 
