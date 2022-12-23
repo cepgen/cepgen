@@ -16,6 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <Math/Integrator.h>
 #include <Math/IntegratorMultiDim.h>
 
 #include "CepGen/Core/Exception.h"
@@ -35,6 +36,7 @@ namespace cepgen {
 
   private:
     std::function<double(const double*)> func_;
+    std::function<double(double)> func_1d_;
     std::vector<double> min_, max_;
     /// integration type (adaptive, MC methods, etc..)
     const std::string type_;
@@ -46,6 +48,7 @@ namespace cepgen {
     const unsigned int size_;
 
     std::unique_ptr<ROOT::Math::IntegratorMultiDim> integr_;
+    std::unique_ptr<ROOT::Math::IntegratorOneDim> integr_1d_;
   };
 
   IntegratorROOT::IntegratorROOT(const ParametersList& params)
@@ -53,27 +56,41 @@ namespace cepgen {
         func_([=](const double* x) -> double {
           return integrand_->eval(std::vector<double>(x, x + integrand_->size()));
         }),
+        func_1d_([=](double x) -> double { return integrand_->eval(std::vector<double>{x}); }),
         type_(steer<std::string>("type")),
         absTol_(steer<double>("absTol")),
         relTol_(steer<double>("relTol")),
         size_(steer<int>("size")) {
-    ROOT::Math::IntegratorMultiDim::Type type;
-    if (type_ == "default")
-      type = ROOT::Math::IntegratorMultiDim::Type::kDEFAULT;
-    else if (type_ == "adaptive")
-      type = ROOT::Math::IntegratorMultiDim::Type::kADAPTIVE;
-    else if (type_ == "plain")
-      type = ROOT::Math::IntegratorMultiDim::Type::kPLAIN;
-    else if (type_ == "miser")
-      type = ROOT::Math::IntegratorMultiDim::Type::kMISER;
-    else if (type_ == "vegas")
-      type = ROOT::Math::IntegratorMultiDim::Type::kVEGAS;
-    else
-      throw CG_FATAL("Integrator:build") << "Invalid integrator type specified: \"" << type_ << "\" is not supported!";
-    integr_.reset(new ROOT::Math::IntegratorMultiDim(type, absTol_, relTol_, size_));
+    {
+      auto type = ROOT::Math::IntegratorMultiDim::Type::kDEFAULT;
+      if (type_ == "adaptive")
+        type = ROOT::Math::IntegratorMultiDim::Type::kADAPTIVE;
+      else if (type_ == "plain")
+        type = ROOT::Math::IntegratorMultiDim::Type::kPLAIN;
+      else if (type_ == "miser")
+        type = ROOT::Math::IntegratorMultiDim::Type::kMISER;
+      else if (type_ == "vegas")
+        type = ROOT::Math::IntegratorMultiDim::Type::kVEGAS;
+      integr_.reset(new ROOT::Math::IntegratorMultiDim(type, absTol_, relTol_, size_));
+    }
+    {
+      auto type = ROOT::Math::IntegratorOneDim::Type::kDEFAULT;
+      if (type_ == "gauss")
+        type = ROOT::Math::IntegratorOneDim::Type::kGAUSS;
+      else if (type_ == "legendre")
+        type = ROOT::Math::IntegratorOneDim::Type::kLEGENDRE;
+      else if (type_ == "adaptive")
+        type = ROOT::Math::IntegratorOneDim::Type::kADAPTIVE;
+      else if (type_ == "adaptiveSingular")
+        type = ROOT::Math::IntegratorOneDim::Type::kADAPTIVESINGULAR;
+      else if (type_ == "nonAdaptive")
+        type = ROOT::Math::IntegratorOneDim::Type::kNONADAPTIVE;
+      integr_1d_.reset(new ROOT::Math::IntegratorOneDim(type, absTol_, relTol_, size_));
+    }
     //--- a bit of printout for debugging
     CG_DEBUG("Integrator:build") << "ROOT generic integrator built\n\t"
-                                 << "Type: " << integr_->Name() << ",\n\t"
+                                 << "N-dimensional type: " << integr_->Name() << ",\n\t"
+                                 << "1-dimensional type: " << integr_1d_->Name() << ",\n\t"
                                  << "Absolute tolerance: " << absTol_ << ",\n\t"
                                  << "Relative tolerance: " << relTol_ << ",\n\t"
                                  << "Number of sub-intervals: " << size_ << ".";
@@ -81,7 +98,10 @@ namespace cepgen {
 
   void IntegratorROOT::integrate(double& result, double& abserr) {
     if (!initialised_) {
-      integr_->SetFunction(func_, integrand_->size());
+      if (integrand_->size() == 1)
+        integr_1d_->SetFunction(func_1d_);
+      else
+        integr_->SetFunction(func_, integrand_->size());
       min_.clear();
       max_.clear();
       for (const auto& lim : limits_) {
@@ -91,8 +111,13 @@ namespace cepgen {
       initialised_ = true;
     }
 
-    result_ = result = integr_->Integral(min_.data(), max_.data());
-    err_result_ = abserr = integr_->Error();
+    if (integrand_->size() == 1) {
+      result_ = result = integr_1d_->Integral(limits_.at(0).min(), limits_.at(0).max());
+      err_result_ = abserr = integr_1d_->Error();
+    } else {
+      result_ = result = integr_->Integral(min_.data(), max_.data());
+      err_result_ = abserr = integr_->Error();
+    }
   }
 
   ParametersDescription IntegratorROOT::description() {
