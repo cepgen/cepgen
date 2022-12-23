@@ -20,6 +20,7 @@
 #define CepGen_Integration_Integrator_h
 
 #include <random>
+#include <vector>
 
 #include "CepGen/Modules/NamedModule.h"
 
@@ -36,6 +37,8 @@ namespace cepgen {
     /// Specify the function to be integrated
     /// \param[in] integr Integrand object to be evaluated
     virtual void setIntegrand(Integrand& integr);
+    /// Specify the variables limits on integration
+    void setLimits(const std::vector<Limits>& limits) { limits_ = limits; }
     /// Dimensional size of the phase space
     size_t size() const;
 
@@ -53,11 +56,16 @@ namespace cepgen {
     double integrate();
     /// Perform an integration with a given functional and a given set of parameters
     static double integrate(const std::function<double(const std::vector<double>&)>&, const ParametersList&, size_t);
+    /// Perform an integration with a given functional and a given set of parameters
+    static double integrate(const std::function<double(const std::vector<double>&)>&,
+                            const ParametersList&,
+                            const std::vector<Limits>&);
 
   protected:
     const unsigned long seed_;       ///< Random number generator seed
     int verbosity_;                  ///< Integrator verbosity
     Integrand* integrand_{nullptr};  ///< Integrand to be evaluated
+    std::vector<Limits> limits_;     ///< List of per-variable integration limits
     double result_{0.};              ///< Result of the last integration
     double err_result_{0.};          ///< Standard deviation for the last integration
     bool initialised_{false};        ///< Has the algorithm alreay been initialised?

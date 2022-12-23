@@ -54,6 +54,7 @@ namespace cepgen {
   int cuba_integrand(const int* ndim, const double xx[], const int* /*ncomp*/, double ff[], void* /*userdata*/) {
     if (!gIntegrand)
       throw CG_FATAL("cuba_integrand") << "Integrand not set for the Cuba algorithm!";
+    //FIXME handle the non-[0,1] ranges
     ff[0] = gIntegrand->eval(std::vector<double>(xx, xx + *ndim));
     return 0;
   }

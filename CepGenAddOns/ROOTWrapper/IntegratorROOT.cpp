@@ -82,8 +82,12 @@ namespace cepgen {
   void IntegratorROOT::integrate(double& result, double& abserr) {
     if (!initialised_) {
       integr_->SetFunction(func_, integrand_->size());
-      min_ = std::vector<double>(integrand_->size(), 0.);
-      max_ = std::vector<double>(integrand_->size(), 1.);
+      min_.clear();
+      max_.clear();
+      for (const auto& lim : limits_) {
+        min_.emplace_back(lim.min());
+        max_.emplace_back(lim.max());
+      }
       initialised_ = true;
     }
 

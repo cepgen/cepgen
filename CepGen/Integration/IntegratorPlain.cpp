@@ -41,7 +41,11 @@ namespace cepgen {
 
   void IntegratorPlain::integrate(double& result, double& abserr) {
     //--- integration bounds
-    std::vector<double> x_low(function_->dim, 0.), x_up(function_->dim, 1.);
+    std::vector<double> x_low, x_up;
+    for (size_t i = 0; i < function_->dim; ++i) {
+      x_low.emplace_back(limits_.at(i).min());
+      x_up.emplace_back(limits_.at(i).max());
+    }
 
     //--- launch integration
     std::unique_ptr<gsl_monte_plain_state, void (*)(gsl_monte_plain_state*)> pln_state(

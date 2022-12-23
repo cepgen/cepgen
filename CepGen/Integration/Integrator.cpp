@@ -33,6 +33,8 @@ namespace cepgen {
 
   void Integrator::setIntegrand(Integrand& integr) {
     integrand_ = &integr;
+    if (limits_.size() != integrand_->size())
+      limits_ = std::vector<Limits>(integrand_->size(), Limits{0., 1.});
     initialised_ = false;  // force the reinitialisation
   }
 
@@ -64,8 +66,15 @@ namespace cepgen {
   double Integrator::integrate(const std::function<double(const std::vector<double>&)>& func,
                                const ParametersList& params,
                                size_t num_vars) {
+    return integrate(func, params, std::vector<Limits>(num_vars, Limits{0., 1.}));
+  }
+
+  double Integrator::integrate(const std::function<double(const std::vector<double>&)>& func,
+                               const ParametersList& params,
+                               const std::vector<Limits>& limits) {
     auto integr = IntegratorFactory::get().build(params);
-    auto integrand = FunctionIntegrand(num_vars, func);
+    integr->setLimits(limits);
+    auto integrand = FunctionIntegrand(limits.size(), func);
     integr->setIntegrand(integrand);
     return integr->integrate();
   }

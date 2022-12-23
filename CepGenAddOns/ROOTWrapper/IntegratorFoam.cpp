@@ -89,6 +89,7 @@ namespace cepgen {
     double norm, err;
     foam_->Finalize(norm, err);
 
+    //FIXME handle the non-[0,1] ranges
     foam_->GetIntegMC(result, abs_error);
     result_ = result;
     err_result_ = abs_error;

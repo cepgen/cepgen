@@ -49,7 +49,9 @@ namespace cepgen {
 
   void IntegratorNaive::integrate(double& result, double& abserr) {
     if (!initialised_) {
-      bounds_ = std::vector<std::pair<double, double> >(integrand_->size(), {0., 1.});
+      bounds_.clear();
+      for (const auto& lim : limits_)
+        bounds_.emplace_back(std::make_pair(lim.min(), lim.max()));
       mc_.reset(new nmc_t(funct_, bounds_, 1.e-2, true, 1));
       initialised_ = true;
     }
