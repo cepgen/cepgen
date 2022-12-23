@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
   for (double x = 0.0001; x <= 2. * M_PI; x += 0.25) {
     graph_sin.addPoint(x, sin(x));
     graph_cos.addPoint(x, cos(x));
-    const auto int_cos = integ->eval([](double x) { return cos(x); }, cepgen::Limits{0., x});
+    const auto int_cos = integ->integrate([](double x) { return cos(x); }, cepgen::Limits{0., x});
     graph_int_cos.addPoint(x, int_cos);
     graph_diff.addPoint(x, sin(x) - int_cos);
   }

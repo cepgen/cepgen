@@ -26,8 +26,8 @@ namespace cepgen {
         func_params_(steer<ParametersList>("params")),
         verbosity_(steer<int>("verbosity")) {}
 
-  double AnalyticIntegrator::eval(const std::function<double(double)>& func, const Limits& lim) const {
-    return eval(utils::Function1D(func), nullptr, lim);
+  double AnalyticIntegrator::integrate(const std::function<double(double)>& func, const Limits& lim) const {
+    return integrate(utils::Function1D(func), nullptr, lim);
   }
 
   ParametersDescription AnalyticIntegrator::description() {

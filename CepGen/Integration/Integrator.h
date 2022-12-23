@@ -45,9 +45,12 @@ namespace cepgen {
     virtual double uniform(double min = 0., double max = 1.) const;
 
     /// Perform the multidimensional Monte Carlo integration
-    /// \param[out] result_ The cross section as integrated for the given phase space restrictions
-    /// \param[out] abserr_ The uncertainty associated to the computed cross section
-    virtual void integrate(double& result_, double& abserr_) = 0;
+    /// \param[out] result integral computed over the full phase space
+    /// \param[out] abserr uncertainty associated to the computed integral
+    virtual void integrate(double& result, double& abserr) = 0;
+    /// Perform an integration with no use of the numerical error
+    /// \return the integral computed over the full phase space
+    double integrate();
 
   protected:
     const unsigned long seed_;       ///< Random number generator seed

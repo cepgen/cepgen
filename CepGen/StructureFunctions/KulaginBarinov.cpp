@@ -23,14 +23,15 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/SteeredObject.h"
+#include "CepGen/Modules/DerivatorFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/ResonanceObject.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/Derivator.h"
 #include "CepGen/Utils/Filesystem.h"
-#include "CepGen/Utils/GSLDerivator.h"
 #include "CepGen/Utils/GridHandler.h"
 
 namespace cepgen {
@@ -176,7 +177,7 @@ namespace cepgen {
         double bg1t, bg2t, pmt;
       } dis_params_;
       GridHandler<2, 2> sfs_grid_{GridType::linear};
-      utils::GSLDerivator deriv_;
+      std::unique_ptr<utils::Derivator> deriv_;
       const double mpi2_, meta2_;
     };
 
@@ -187,7 +188,7 @@ namespace cepgen {
           q2max_(steer<double>("q2max")),
           sfs_grid_file_(steerPath("gridFile")),
           dis_params_(steer<ParametersList>("disParameters")),
-          deriv_(steer<ParametersList>("derivator")),
+          deriv_(utils::DerivatorFactory::get().build(steer<ParametersList>("derivator"))),
           mpi2_(std::pow(PDG::get().mass(PDG::piZero), 2)),
           meta2_(std::pow(PDG::get().mass(PDG::eta), 2)) {
       for (const auto& res : steer<std::vector<ParametersList> >("resonances"))
@@ -274,13 +275,13 @@ namespace cepgen {
             double ddt{0.}, ddl{0.};
             if (xbj_t >= 1.e-6) {  // check the range of validity
               // DIS structure function model using the results of A08 analysis arXiv:0710.0124 [hep-ph]
-              ddt = deriv_.eval(
+              ddt = deriv_->derivate(
                   [this, &xbj_t](double qsq) -> double {
                     return sfs_grid_.eval({xbj_t, qsq}).at(0);
                   },  // TM-corrected FT with twist-4 correction
                   t,
                   t * 1.e-2);
-              ddl = deriv_.eval(
+              ddl = deriv_->derivate(
                   [this, &xbj_t](double qsq) -> double {
                     const auto vals = sfs_grid_.eval({xbj_t, qsq});  // FT, F2
                     const auto &ft_l = vals.at(0), &f2_l = vals.at(1);

@@ -31,6 +31,7 @@
 #include "CepGen/Process/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
+#include "CepGen/Utils/Derivator.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Functional.h"
 
@@ -106,6 +107,7 @@ namespace cepgen {
 
   template class ModuleFactory<card::Handler, std::string>;
   template class ModuleFactory<Coupling, std::string>;
+  template class ModuleFactory<utils::Derivator, std::string>;
   template class ModuleFactory<utils::Drawer, std::string>;
   template class ModuleFactory<EventModifier, std::string>;
   template class ModuleFactory<formfac::Parameterisation, std::string>;

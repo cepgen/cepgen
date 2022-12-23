@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2022  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,41 +16,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Utils_GSLDerivator_h
-#define CepGen_Utils_GSLDerivator_h
+#ifndef CepGen_Utils_Derivator_h
+#define CepGen_Utils_Derivator_h
 
 #include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Utils/FunctionsWrappers.h"
 
 namespace cepgen {
   namespace utils {
-    class GSLDerivator : public SteeredObject<GSLDerivator> {
+    class Derivator : public SteeredObject<Derivator> {
     public:
-      explicit GSLDerivator(const ParametersList&);
+      explicit Derivator(const ParametersList& params) : SteeredObject(params), h_(steer<double>("h")) {}
 
-      static ParametersDescription description();
+      static ParametersDescription description() {
+        auto desc = ParametersDescription();
+        desc.add<double>("h", 1.e-2).setDescription("step size");
+        return desc;
+      }
 
       /// Evaluate the derivative of a function at a given value
       /// \param[in] func function to derive
       /// \param[in] x coordinate
       /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
-      double eval(const std::function<double(double)>& func, double x, double h = -1.) const {
-        return eval(Function1D(func), x, h);
+      inline double derivate(const std::function<double(double)>& func, double x, double h = -1.) const {
+        return derivate(Function1D(func), x, h);
       }
       /// Evaluate the derivative of a function at a given value
       /// \param[in] func function to derive
       /// \param[in] x coordinate
       /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
-      double eval(const Function1D& func, double x, double h = -1.) const;
+      virtual double derivate(const Function1D& func, double x, double h = -1.) const = 0;
 
-      enum struct Mode {
-        central,  ///< adaptive central difference algorithm
-        forward,  ///< adaptive forward difference algorithm
-        backward  ///< adaptive backward difference algorithm
-      };
-
-    private:
-      const Mode mode_;
+    protected:
       const double h_;
     };
   }  // namespace utils

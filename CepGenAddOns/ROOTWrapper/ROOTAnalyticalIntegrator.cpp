@@ -42,7 +42,7 @@ namespace cepgen {
       return desc;
     }
 
-    double eval(const utils::Function1D& func, void* = nullptr, const Limits& lim = {}) const override {
+    double integrate(const utils::Function1D& func, void* = nullptr, const Limits& lim = {}) const override {
       std::function<double(double)> func_local = func;
       const double xmin = (lim.hasMin() ? lim.min() : range_.min());
       const double xmax = (lim.hasMax() ? lim.max() : range_.max());
