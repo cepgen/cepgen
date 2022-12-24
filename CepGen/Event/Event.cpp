@@ -28,8 +28,7 @@
 namespace cepgen {
   Event::Event(bool compressed) : compressed_(compressed) {}
 
-  Event::Event(const Event& oth)
-      : particles_(oth.particles_), evtcontent_(oth.evtcontent_), compressed_(oth.compressed_) {}
+  Event::Event(const Event& oth) { *this = oth; }
 
   Event& Event::operator=(const Event& oth) {
     particles_ = oth.particles_;

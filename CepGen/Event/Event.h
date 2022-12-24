@@ -136,7 +136,7 @@ namespace cepgen {
       size_t op2{0};  ///< Index of the first negative-z outgoing beam state
     } evtcontent_{};
     /// Is the event "compressed"?
-    bool compressed_;
+    bool compressed_{false};
   };
 }  // namespace cepgen
 
