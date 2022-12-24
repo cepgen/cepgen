@@ -115,7 +115,8 @@ namespace HepMC {
     add_vertex(v2);
     add_vertex(vcm);
 
-    set_beam_particles(*v1->particles_in_const_begin(), *v2->particles_in_const_begin());
+    if (v1->particles_in_size() > 0 && v2->particles_in_size() > 0)
+      set_beam_particles(*v1->particles_in_const_begin(), *v2->particles_in_const_begin());
     set_event_scale(evt.oneWithRole(cepgen::Particle::Role::Intermediate).mass());
     set_signal_process_vertex(vcm);
   }
