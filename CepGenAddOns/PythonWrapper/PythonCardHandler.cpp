@@ -81,12 +81,14 @@ namespace cepgen {
       void parseOutputModule(PyObject*);
       void parseOutputModules(PyObject*);
       void parseExtraParticles(PyObject*);
-      python::Environment env_;
+
+      std::unique_ptr<python::Environment> env_;
     };
 
     PythonHandler::PythonHandler(const ParametersList& params) : Handler(params) {
-      //Py_DebugFlag = 1;
-      //Py_VerboseFlag = 1;
+      Py_DebugFlag = steer<int>("debugging");
+      Py_VerboseFlag = steer<int>("verbosity");
+      env_.reset(new python::Environment);
     }
 
     Parameters* PythonHandler::parse(const std::string& file, Parameters* params) {
@@ -95,7 +97,7 @@ namespace cepgen {
 
       rt_params_ = params;
       std::string filename = python::pythonPath(file);
-      env_.setProgramName(filename);
+      env_->setProgramName(filename);
 
       CG_DEBUG("PythonHandler").log([](auto& log) {
         log << "Initialised the Python cards parser.";
@@ -287,6 +289,8 @@ namespace cepgen {
     ParametersDescription PythonHandler::description() {
       auto desc = Handler::description();
       desc.setDescription("Python 2/3 cards parser");
+      desc.add<int>("debugging", 0).setDescription("debugging level");
+      desc.add<int>("verbosity", 0).setDescription("verbosity level");
       return desc;
     }
   }  // namespace card
