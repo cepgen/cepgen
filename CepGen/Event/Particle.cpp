@@ -248,8 +248,13 @@ namespace cepgen {
 
   ParticlesMap::ParticlesMap(const ParticlesMap& oth)
       : std::unordered_map<Particle::Role, Particles, utils::EnumHash<Particle::Role> >() {
+    *this = oth;
+  }
+
+  ParticlesMap& ParticlesMap::operator=(const ParticlesMap& oth) {
     for (const auto& parts_vs_role : oth)
       for (const auto& part : parts_vs_role.second)
         (*this)[parts_vs_role.first].emplace_back(Particle(part));
+    return *this;
   }
 }  // namespace cepgen

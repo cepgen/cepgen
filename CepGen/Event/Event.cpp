@@ -31,6 +31,13 @@ namespace cepgen {
   Event::Event(const Event& oth)
       : particles_(oth.particles_), evtcontent_(oth.evtcontent_), compressed_(oth.compressed_) {}
 
+  Event& Event::operator=(const Event& oth) {
+    particles_ = oth.particles_;
+    evtcontent_ = oth.evtcontent_;
+    compressed_ = oth.compressed_;
+    return *this;
+  }
+
   void Event::clear() {
     particles_.clear();
     time_generation = -1.;

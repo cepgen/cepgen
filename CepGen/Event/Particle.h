@@ -260,7 +260,10 @@ namespace cepgen {
   class ParticlesMap : public std::unordered_map<Particle::Role, Particles, utils::EnumHash<Particle::Role> > {
   public:
     ParticlesMap() = default;
+    /// Copy constructor
     ParticlesMap(const ParticlesMap&);
+    /// Assignment operator
+    ParticlesMap& operator=(const ParticlesMap&);
   };
 }  // namespace cepgen
 

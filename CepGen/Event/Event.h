@@ -34,6 +34,10 @@ namespace cepgen {
     explicit Event(bool compressed = false);
     /// Copy constructor
     Event(const Event&);
+
+    /// Assignment operator
+    Event& operator=(const Event&);
+
     /// Empty the whole event content
     void clear();
     /// Initialize an "empty" event collection
