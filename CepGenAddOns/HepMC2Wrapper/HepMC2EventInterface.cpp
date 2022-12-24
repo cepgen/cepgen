@@ -120,4 +120,10 @@ namespace HepMC {
       set_event_scale(evt.oneWithRole(cepgen::Particle::Role::Intermediate).momentum().mass());
     set_signal_process_vertex(vcm);
   }
+
+  CepGenEvent::operator cepgen::Event() const {
+    cepgen::Event evt;
+    print();
+    return evt;
+  }
 }  // namespace HepMC

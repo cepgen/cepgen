@@ -36,6 +36,8 @@ namespace HepMC {
   public:
     /// Construct an event interface from a CepGen Event object
     CepGenEvent(const cepgen::Event& ev);
+    /// Extract a CepGen Event object from a HepMC2 GenEvent object
+    operator cepgen::Event() const;
 
   private:
     std::unordered_map<unsigned short, std::shared_ptr<GenParticle> > assoc_map_;

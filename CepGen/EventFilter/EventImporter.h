@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #ifndef CepGen_EventFilter_EventImporter_h
 #define CepGen_EventFilter_EventImporter_h
 
+#include "CepGen/Event/Event.h"
 #include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen {
@@ -37,6 +38,15 @@ namespace cepgen {
     }
 
     /// Output format-custom extraction operator
+    template <typename T>
+    Event convert(const T& in) const {
+      Event out;
+      convert((void*)&in, out);
+      return out;
+    }
+
+  private:
+    /// Output format-custom conversion algorithm
     virtual void convert(const void*, Event&) const = 0;
   };
 }  // namespace cepgen
