@@ -85,6 +85,8 @@ namespace cepgen {
     const Particles& operator()(Particle::Role role) const;
     /// Get a list of particle identifiers in Event corresponding to a certain role in the process kinematics
     ParticlesIds ids(Particle::Role role) const;
+    /// Check whether a particle role is represented in this event
+    bool hasRole(Particle::Role role) const { return particles_.count(role) != 0; }
     /// First Particle object with a given role in the event
     /// \param[in] role The role the particle has to play in the event
     Particle& oneWithRole(Particle::Role role);
