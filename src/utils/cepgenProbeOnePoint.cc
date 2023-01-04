@@ -28,12 +28,12 @@ using namespace std;
 int main(int argc, char* argv[]) {
   string input_card;
   vector<double> point;
-  bool enable_plugins, debug;
+  bool enable_plugins, verbose;
 
   cepgen::ArgumentsParser(argc, argv)
       .addArgument("input,i", "input card", &input_card)
       .addOptionalArgument("point,p", "point to test", &point, vector<double>(12, 0.3))
-      .addOptionalArgument("debug,d", "debugging mode", &debug, false)
+      .addOptionalArgument("verbose,v", "high verbosity mode", &verbose, false)
       .addOptionalArgument("enable-plugins,m", "enable the external plugins", &enable_plugins, false)
       .parse();
 
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
   else if (point.size() != ndim)
     point.resize(ndim);
 
-  if (debug)
+  if (verbose)
     cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debugInsideLoop;
 
   if (!enable_plugins) {
