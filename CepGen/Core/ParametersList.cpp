@@ -189,10 +189,10 @@ namespace cepgen {
         set<bool>(key, true);
       else if (words.size() == 2) {  // basic key:value
         const auto value = words.at(1);
-        if (utils::isFloat(value))
-          set<double>(key, std::stod(value));
-        else if (utils::isInt(value))
+        if (utils::isInt(value))
           set<int>(key, std::stoi(value));
+        else if (utils::isFloat(value))
+          set<double>(key, std::stod(value));
         else {
           const auto value_lc = utils::tolower(value);
           if (value_lc == "off" || value_lc == "no" || value_lc == "false")
@@ -259,7 +259,7 @@ namespace cepgen {
       os << "Parameters(";
     for (const auto& key : keys_list)
       if (key != MODULE_NAME)
-        os << sep << key << "=" << getString(key, true), sep = ", ";
+        os << sep << key << ":" << getString(key, true), sep = ", ";
     os << ")";
     return *this;
   }
