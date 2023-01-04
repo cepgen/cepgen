@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2021-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,9 @@ namespace cepgen {
 
       static ParametersDescription description() {
         auto desc = Derivator::description();
-        desc.addAs<int, Mode>("mode", Mode::central);
+        desc.setDescription("GSL numerical differentiation algorithm");
+        desc.addAs<int, Mode>("mode", Mode::central)
+            .setDescription("mode used for the adaptive difference algorithm (0=central, 1=forward, 2=backward)");
         return desc;
       }
 
