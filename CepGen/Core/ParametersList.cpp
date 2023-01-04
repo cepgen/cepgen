@@ -171,7 +171,7 @@ namespace cepgen {
         continue;
       }
 
-      // from this moment on, a "key=value" or "key(=true)" was found
+      // from this moment on, a "key:value" or "key(:true)" was found
       const auto& subplist = utils::between(arg, "{", "}");
       if (!subplist.empty()) {
         for (const auto& subp : subplist)
@@ -179,15 +179,15 @@ namespace cepgen {
         return *this;
       }
       const auto& word = cmd.at(0);
-      auto words = utils::split(arg, '=');
+      auto words = utils::split(arg, ':');
       auto key = words.at(0);
       if (erase(key) > 0)
-        CG_DEBUG("ParametersList:feed") << "Replacing key='" << key << "' with a new value.";
+        CG_DEBUG("ParametersList:feed") << "Replacing key:'" << key << "' with a new value.";
       if (key == "name")  // replace any "name" key encountered by the canonical module name key
         key = MODULE_NAME;
-      if (words.size() == 1)  // basic key=true
+      if (words.size() == 1)  // basic key:true
         set<bool>(key, true);
-      else if (words.size() == 2) {  // basic key=value
+      else if (words.size() == 2) {  // basic key:value
         const auto value = words.at(1);
         if (utils::isFloat(value))
           set<double>(key, std::stod(value));
@@ -203,7 +203,7 @@ namespace cepgen {
             set<std::string>(key, value);
         }
       } else
-        throw CG_FATAL("ParametersList:feed") << "Invalid key=value unpacking: " << word << "!";
+        throw CG_FATAL("ParametersList:feed") << "Invalid key:value unpacking: " << word << "!";
     }
     return *this;
   }
@@ -372,7 +372,7 @@ namespace cepgen {
         if (plist.keys().size() > 1)
           out << "}";
       } else
-        out << "=" << getString(key, false);
+        out << ":" << getString(key, false);
       sep = ",";
     }
     return out.str();
