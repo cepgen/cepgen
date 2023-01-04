@@ -44,11 +44,11 @@ using namespace std;
        << "\n";                                                                                                 \
   for (const auto& mod_name : obj::get().modules()) {                                                           \
     if (all)                                                                                                    \
-      os << describe_one(desc, mod_name, false, obj::get().describeParameters(mod_name));                       \
+      os << describe_one(desc, false, obj::get().describeParameters(mod_name));                                 \
     else                                                                                                        \
       for (const auto& mod : modules)                                                                           \
         if (mod == mod_name)                                                                                    \
-          os << describe_one(desc, mod_name, true, obj::get().describeParameters(mod_name));                    \
+          os << describe_one(desc, true, obj::get().describeParameters(mod_name));                              \
   }
 #define LOOP_FACTORY_INT(desc, obj)                                                                             \
   if (all)                                                                                                      \
@@ -59,11 +59,11 @@ using namespace std;
        << "\n";                                                                                                 \
   for (const auto& mod_name : obj::get().modules()) {                                                           \
     if (all)                                                                                                    \
-      os << describe_one(desc, to_string(mod_name), false, obj::get().describeParameters(mod_name));            \
+      os << describe_one(desc, false, obj::get().describeParameters(mod_name));                                 \
     else                                                                                                        \
       for (const auto& mod : modules)                                                                           \
         if (cepgen::utils::isInt(mod) && stod(mod) == mod_name)                                                 \
-          os << describe_one(desc, to_string(mod_name), true, obj::get().describeParameters(mod_name));         \
+          os << describe_one(desc, true, obj::get().describeParameters(mod_name));                              \
   }
 
 /** Listing module for CepGen
@@ -97,10 +97,8 @@ int main(int argc, char* argv[]) {
     return 0;
   }
   if (all or !modules.empty()) {
-    auto describe_one = [&dump_params](const string& type,
-                                       const string& name,
-                                       bool dump_mod_name,
-                                       const cepgen::ParametersDescription& desc) -> string {
+    auto describe_one =
+        [&dump_params](const string& type, bool dump_mod_name, const cepgen::ParametersDescription& desc) -> string {
       ostringstream os;
       os << "\n";
       if (dump_mod_name)
