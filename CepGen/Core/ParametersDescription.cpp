@@ -94,7 +94,7 @@ namespace cepgen {
       os << utils::boldify(mod_name) << " module";
     // write human-readable description (if exists)
     if (pdtype != Type::ParametersVector && !mod_descr_.empty())
-      os << " (" << utils::colourise(mod_descr_, utils::Colour::none, utils::Modifier::italic) << ")";
+      os << " <- " << utils::colourise(mod_descr_, utils::Colour::blue, utils::Modifier::italic);
     if (keys.empty())  // no keys to this module ; can return
       return os.str();
     if (pdtype == Type::Module)
@@ -118,7 +118,7 @@ namespace cepgen {
             os << ParametersList::getString(key);
           const auto& par_desc = obj.description();
           if (!par_desc.empty())
-            os << " (" << utils::colourise(par_desc, utils::Colour::none, utils::Modifier::italic) << ")";
+            os << " <- " << utils::colourise(par_desc, utils::Colour::blue, utils::Modifier::italic);
         } break;
         case Type::ParametersVector: {
           os << utils::colourise("Vector of parameters collections",

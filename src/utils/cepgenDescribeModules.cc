@@ -104,7 +104,9 @@ int main(int argc, char* argv[]) {
       ostringstream os;
       os << "\n";
       if (dump_mod_name)
-        os << type << " module '" << name << "'\n";
+        os << cepgen::utils::colourise(
+                  type, cepgen::utils::Colour::none, cepgen::utils::Modifier::underline | cepgen::utils::Modifier::bold)
+           << " module:\n\n";
       os << desc.describe();
       if (dump_params)
         os << "\n\tParametersList object:\n\t\t" << desc.parameters();
