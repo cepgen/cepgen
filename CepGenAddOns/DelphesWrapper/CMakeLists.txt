@@ -5,7 +5,7 @@ if(NOT ROOT_FOUND)
 endif()
 
 #--- searching for Delphes
-find_library(DELPHES Delphes HINTS $ENV{DELPHES_DIR} PATH_SUFFIXES lib)
+find_library(DELPHES Delphes HINTS $ENV{DELPHES_DIR} PATH_SUFFIXES lib build)
 if(NOT DELPHES)
   return()
 endif()
