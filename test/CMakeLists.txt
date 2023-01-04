@@ -5,3 +5,4 @@ cepgen_test_category(NAME "General"
 add_subdirectory(generator)
 add_subdirectory(physics)
 add_subdirectory(utils)
+add_subdirectory(benchmarks)
