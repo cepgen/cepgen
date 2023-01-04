@@ -4,7 +4,7 @@ if(NOT benchmark_FOUND)
 endif()
 
 cepgen_test_category(NAME "Benchmarks"
-                     SOURCES *.cc
+                     BSOURCES *.cc
                      EXT_LIBS benchmark::benchmark
                      PREPEND benchmark_
                      FSOURCES *.f)
