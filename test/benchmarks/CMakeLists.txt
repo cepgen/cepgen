@@ -1,10 +1,13 @@
-find_package(benchmark QUIET)
-if(NOT benchmark_FOUND)
-  return()
-endif()
+include(FetchContent)
+FetchContent_Declare(
+    nanobench
+    GIT_REPOSITORY https://github.com/martinus/nanobench.git
+    GIT_TAG v4.1.0
+    GIT_SHALLOW TRUE)
+FetchContent_MakeAvailable(nanobench)
 
 cepgen_test_category(NAME "Benchmarks"
                      BSOURCES *.cc
-                     EXT_LIBS benchmark::benchmark
+                     EXT_LIBS nanobench
                      PREPEND benchmark_
                      FSOURCES *.f)
