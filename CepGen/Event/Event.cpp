@@ -326,8 +326,8 @@ namespace cepgen {
           os << utils::format("\n %2d\t\t   %-7s", part.id(), oss_pdg.str().c_str());
         } else {
           //--- if single particle/HI
-          if ((HeavyIon)part.pdgId())
-            oss_pdg << (HeavyIon)part.pdgId();
+          if (HeavyIon::isHI(part.pdgId()))
+            oss_pdg << HeavyIon(part.pdgId());
           else
             try {
               oss_pdg << (PDG::Id)part.pdgId();

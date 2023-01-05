@@ -52,10 +52,6 @@ namespace cepgen {
 
   bool HeavyIon::isHI(const pdgid_t& pdgid) { return pdgid / 1000000 != 0; }
 
-  HeavyIon::operator bool() const {
-    return Z != Element::invalid && Z != Element::H;  // skip the proton
-  }
-
   double HeavyIon::massP() const {
     if (Z == Element::invalid)
       throw CG_FATAL("HeavyIon:massP") << "Invalid heavy ion: " << (*this) << "!";

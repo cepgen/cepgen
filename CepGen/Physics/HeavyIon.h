@@ -74,8 +74,6 @@ namespace cepgen {
 
     /// Convert the HI into a custom PDG id
     operator pdgid_t() const;
-    /// Check the validity of the heavy ion
-    operator bool() const;
     /// Human-readable expression of the ion
     friend std::ostream& operator<<(std::ostream& os, const HeavyIon& hi);
 
