@@ -4,6 +4,7 @@
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/Logger.h"
 #include "CepGen/Version.h"
 #include "nanobench_interface.h"
 
@@ -11,6 +12,7 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   cepgen::initialise();
+  cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::nothing;
 
   int num_epochs;
   vector<string> functional_parsers, integrators, outputs;
@@ -28,13 +30,13 @@ int main(int argc, char* argv[]) {
   ofstream out_file("benchmark.html");
 
   ankerl::nanobench::Bench bench;
-  bench.title(("CepGen v" + cepgen::version::tag + " (" + cepgen::version::extended + ")").data()).epochs(num_epochs);
+  bench.title("CepGen v" + cepgen::version::tag + " (" + cepgen::version::extended + ")").epochs(num_epochs);
 
   for (const auto& functional_parser : functional_parsers) {
-    bench.context("functional", functional_parser.data());
+    bench.context("functional", functional_parser);
     cepgen::FunctionalIntegrand integrand("x+y^2+z^3", {"x", "y", "z"}, functional_parser);
     for (const auto& integrator_name : integrators)
-      bench.context("integrator", integrator_name.data()).run((functional_parser + "+" + integrator_name).data(), [&] {
+      bench.context("integrator", integrator_name).run(functional_parser + "+" + integrator_name, [&] {
         auto integr = cepgen::IntegratorFactory::get().build(integrator_name);
         integr->setIntegrand(integrand);
         double result, unc;

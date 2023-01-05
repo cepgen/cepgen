@@ -25,9 +25,9 @@ int main(int argc, char* argv[]) {
       .parse();
 
   ankerl::nanobench::Bench bench;
-  bench.title(("CepGen v" + cepgen::version::tag + " (" + cepgen::version::extended + ")").data())
+  bench.title("CepGen v" + cepgen::version::tag + " (" + cepgen::version::extended + ")")
       .epochs(num_epochs)
-      .context("process", process.data());
+      .context("process", process);
 
   gen.parametersRef().setProcess(cepgen::proc::ProcessFactory::get().build(process));
   cepgen::Kinematics kin;
@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
   kin.incomingBeams().setSqrtS(13.e3);
   gen.parametersRef().process().setKinematics(kin);
   for (const auto& integrator_name : integrators)
-    bench.context("integrator", integrator_name.data()).run((process + "+" + integrator_name).data(), [&] {
+    bench.context("integrator", integrator_name).run(process + "+" + integrator_name, [&] {
       gen.setIntegrator(cepgen::IntegratorFactory::get().build(integrator_name));
       double xsec, xsec_unc;
       gen.computeXsection(xsec, xsec_unc);

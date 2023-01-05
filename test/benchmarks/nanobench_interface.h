@@ -9,7 +9,7 @@
 namespace {
   inline void render_benchmark(ankerl::nanobench::Bench& bench, const std::vector<std::string>& outputs) {
     for (const auto& output : outputs) {
-      const char* tmpl = "";
+      std::string tmpl;
       if (output == "html")
         tmpl = ankerl::nanobench::templates::htmlBoxplot();
       else if (output == "csv")
