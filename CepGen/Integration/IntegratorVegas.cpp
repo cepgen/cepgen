@@ -72,6 +72,10 @@ namespace cepgen {
 
   void IntegratorVegas::integrate(double& result, double& abserr) {
     if (!initialised_) {
+      if (!function_)
+        throw CG_FATAL("IntegratorVegas:integrate") << "Integrand was not set.";
+      if (function_->dim <= 0)
+        throw CG_FATAL("IntegratorVegas:integrate") << "Invalid phase space dimension: " << function_->dim << ".";
       //--- start by preparing the grid/state
       vegas_state_.reset(gsl_monte_vegas_alloc(function_->dim));
       gsl_monte_vegas_params_get(vegas_state_.get(), &vegas_params_);

@@ -56,7 +56,10 @@ namespace cepgen {
     CG_DEBUG("Generator:clearRun") << "Run is set to be cleared.";
     worker_.reset(new GeneratorWorker(const_cast<const Parameters*>(parameters_.get())));
     // destroy and recreate the integrator instance
-    setIntegrator(nullptr);
+    if (!integrator_)
+      resetIntegrator();
+
+    integrator_->setIntegrand(worker_->integrand());
     worker_->setIntegrator(integrator_.get());
     result_ = result_error_ = -1.;
     parameters_->prepareRun();
@@ -99,18 +102,17 @@ namespace cepgen {
       CG_INFO("Generator") << "Total cross section: " << cross_section * 1.e-9 << " +/- " << err * 1.e-9 << " mb.";
   }
 
+  void Generator::resetIntegrator() {
+    CG_TICKER(parameters_->timeKeeper());
+    // create a spec-defined integrator in the current scope
+    if (parameters_->par_integrator.name<std::string>().empty())
+      parameters_->par_integrator.setName<std::string>("Vegas");
+    setIntegrator(IntegratorFactory::get().build(parameters_->par_integrator));
+  }
+
   void Generator::setIntegrator(std::unique_ptr<Integrator> integ) {
     CG_TICKER(parameters_->timeKeeper());
-    // copy the integrator instance (or create it if unspecified) in the current scope
-    if (!integ) {
-      if (parameters_->par_integrator.name<std::string>().empty())
-        parameters_->par_integrator.setName<std::string>("Vegas");
-      integ = IntegratorFactory::get().build(parameters_->par_integrator);
-    }
     integrator_ = std::move(integ);
-    integrator_->setIntegrand(worker_->integrand());
-    if (worker_)
-      worker_->setIntegrator(integrator_.get());
     CG_INFO("Generator:integrator") << "Generator will use a " << integrator_->name() << "-type integrator.";
   }
 
@@ -123,10 +125,13 @@ namespace cepgen {
       throw CG_FATAL("Generator:integrate") << "Trying to integrate while no process is specified!";
     const size_t ndim = worker_->integrand().process().ndim();
     if (ndim == 0)
-      throw CG_FATAL("Generator:computePoint") << "Invalid phase space dimension. "
-                                               << "At least one integration variable is required!";
+      throw CG_FATAL("Generator:integrate") << "Invalid phase space dimension. "
+                                            << "At least one integration variable is required!";
 
     CG_DEBUG("Generator:integrate") << "New integrator instance created for " << ndim << "-dimensional integration.";
+
+    if (!integrator_)
+      throw CG_FATAL("Generator:integrate") << "No integrator object was declared for the generator!";
 
     integrator_->integrate(result_, result_error_);
 

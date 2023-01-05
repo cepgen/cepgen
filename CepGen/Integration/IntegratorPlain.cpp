@@ -42,6 +42,10 @@ namespace cepgen {
   void IntegratorPlain::integrate(double& result, double& abserr) {
     //--- integration bounds
     std::vector<double> x_low, x_up;
+    if (!function_)
+      throw CG_FATAL("IntegratorPlain:integrate") << "Integrand was not set.";
+    if (function_->dim <= 0)
+      throw CG_FATAL("IntegratorPlain:integrate") << "Invalid phase space dimension: " << function_->dim << ".";
     for (size_t i = 0; i < function_->dim; ++i) {
       x_low.emplace_back(limits_.at(i).min());
       x_up.emplace_back(limits_.at(i).max());

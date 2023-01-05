@@ -102,6 +102,8 @@ namespace cepgen {
     Parameters& parametersRef();
     /// Feed the generator with a Parameters object
     void setParameters(Parameters* ip);
+    /// Reset integrator algorithm from the user-specified configuration
+    void resetIntegrator();
     /// Specify an integrator algorithm configuration
     void setIntegrator(std::unique_ptr<Integrator>);
     /// Remove all references to a previous generation/run

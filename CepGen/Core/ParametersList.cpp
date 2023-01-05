@@ -259,7 +259,7 @@ namespace cepgen {
       os << "Parameters(";
     for (const auto& key : keys_list)
       if (key != MODULE_NAME)
-        os << sep << key << ":" << getString(key, true), sep = ", ";
+        os << sep << key << "=" << getString(key, true), sep = ", ";
     os << ")";
     return *this;
   }

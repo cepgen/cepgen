@@ -49,6 +49,10 @@ namespace cepgen {
 
   void IntegratorMISER::integrate(double& result, double& abserr) {
     if (!initialised_) {
+      if (!function_)
+        throw CG_FATAL("IntegratorMISER:integrate") << "Integrand was not set.";
+      if (function_->dim <= 0)
+        throw CG_FATAL("IntegratorMISER:integrate") << "Invalid phase space dimension: " << function_->dim << ".";
       miser_state_.reset(gsl_monte_miser_alloc(function_->dim));
       miser_state_->verbose = verbosity_;
       gsl_monte_miser_params_get(miser_state_.get(), &miser_params_);
