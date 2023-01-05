@@ -63,6 +63,11 @@ namespace cepgen {
 
     /// Beam particle PDG id
     pdgid_t pdgId() const { return pdg_; }
+    /// Set the beam particle PDG id
+    Beam& setPdgId(pdgid_t pdg) {
+      pdg_ = pdg;
+      return *this;
+    }
     /// Scattered parton PDG id
     pdgid_t daughterId() const;
     /// Beam particle 4-momentum

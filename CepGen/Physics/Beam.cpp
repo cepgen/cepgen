@@ -138,7 +138,7 @@ namespace cepgen {
     auto desc = ParametersDescription();
     desc.add<int>("pdgId", (int)PDG::proton);
     desc.add<double>("pz", 6500.);
-    desc.add<int>("mode", (int)Beam::Mode::invalid);
+    desc.add<int>("mode", (int)Beam::Mode::ProtonElastic);
     desc.add<int>("ktFlux", (int)KTFlux::invalid);
     return desc;
   }
