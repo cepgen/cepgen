@@ -23,9 +23,9 @@
 
 namespace cepgen {
   namespace utils {
-    Logger::Logger(std::ostream* os) : output(os) {
-      if (output != &std::cout)
-        CG_INFO("Logger") << "New logger initialised for output@" << output << ".";
+    Logger::Logger(std::ostream* os) : output_(os) {
+      if (output_ != &std::cout)
+        CG_INFO("Logger") << "New logger initialised for output@" << output_ << ".";
     }
 
     Logger& Logger::get(std::ostream* os) {
@@ -52,6 +52,12 @@ namespace cepgen {
       return false;
     }
 
+    std::ostream* Logger::output() {
+      static std::ostream empty_output(nullptr);
+      if (level_ == Level::nothing)
+        return &empty_output;
+      return output_;
+    }
   }  // namespace utils
 
   std::ostream& operator<<(std::ostream& os, const utils::Logger::Level& lvl) {

@@ -54,7 +54,7 @@ namespace cepgen {
 
   void LoggedMessage::dump(std::ostream* os) const noexcept {
     if (!os)
-      os = utils::Logger::get().output;
+      os = utils::Logger::get().output();
     if (!os)
       return;
 

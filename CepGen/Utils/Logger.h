@@ -29,26 +29,17 @@ namespace cepgen {
     /// \date 15 Oct 2015
     class Logger {
     public:
-      /// Logging threshold for the output stream
-      enum class Level { nothing = 0, error, warning, information, debug, debugInsideLoop };
-
-    private:
-      /// Initialize a logging object
-      explicit Logger(std::ostream* os);
-
-      std::vector<std::regex> allowed_exc_;
-      bool extended_{false};
-      /// Logging threshold for the output stream
-      Level level_{Level::information};
-
-    public:
       /// Retrieve the running instance of the logger
       static Logger& get(std::ostream* os = nullptr);
+
       /// \brief Add a new rule to display exceptions/messages
       /// \param[in] rule Regex rule to handle
       void addExceptionRule(const std::string& rule);
       /// Collection of logging exceptions
       const std::vector<std::regex>& exceptionRules() const { return allowed_exc_; }
+
+      /// Logging threshold for the output stream
+      enum class Level { nothing = 0, error, warning, information, debug, debugInsideLoop };
       /// Is the module set to be displayed/logged?
       /// \param[in] tmpl Module name to probe
       /// \param[in] lev Upper verbosity level
@@ -63,7 +54,22 @@ namespace cepgen {
       void setExtended(bool ext = true) { extended_ = ext; }
 
       /// Output stream to use for all logging operations
-      std::ostream* output{nullptr};
+      std::ostream* output();
+      /// Set the output stream
+      void setOutput(std::ostream* os) { output_ = os; }
+
+    private:
+      /// Initialize a logging object
+      explicit Logger(std::ostream* os);
+
+      /// List of enabled logging modules
+      std::vector<std::regex> allowed_exc_;
+      /// Also print extra attributes?
+      bool extended_{false};
+      /// Logging threshold for the output stream
+      Level level_{Level::information};
+      /// Output stream to use for all logging operations
+      std::ostream* output_{nullptr};
     };
   }  // namespace utils
   std::ostream& operator<<(std::ostream& os, const utils::Logger::Level&);
