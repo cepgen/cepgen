@@ -69,7 +69,7 @@ namespace cepgen {
       registerIntegratorParameter<int>("NTRT", "Smoothen the integrand", "treat");
       registerParameter<int>("TIMR", "Enable the time ticker", &timer_);
       registerParameter<int>("IEND", "Generation type", &iend_);
-      registerParameter<int>("DEBG", "Debugging verbosity", (int*)&utils::Logger::get().level);
+      registerParameter<int>("DEBG", "Debugging verbosity", &log_level_);
       registerParameter<int>("LOGE", "Extended logging", &ext_log_);
       registerIntegratorParameter<int>("NCVG", "Number of function calls", "numFunctionCalls");
       registerIntegratorParameter<int>("ITVG", "Number of integration iterations", "iterations");
@@ -197,6 +197,7 @@ namespace cepgen {
       //--- build the ticker if required
       if (timer_)
         rt_params_->setTimeKeeper(new utils::TimeKeeper);
+      utils::Logger::get().setLevel((utils::Logger::Level)log_level_);
       utils::Logger::get().setExtended(ext_log_);
 
       //--- parse the process name
@@ -277,6 +278,7 @@ namespace cepgen {
       //mstw_grid_path_ =
       //pdg_input_path_ =
       iend_ = (int)rt_params_->generation().enabled();
+      log_level_ = (int)utils::Logger::get().level();
       ext_log_ = utils::Logger::get().extended();
       proc_name_ = rt_params_->processName();
       *proc_params_ += rt_params_->process().parameters();

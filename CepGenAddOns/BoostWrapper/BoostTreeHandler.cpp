@@ -123,8 +123,8 @@ namespace cepgen {
           rt_params_->setTimeKeeper(new utils::TimeKeeper);
         if (tree_.count(LOGGER_NAME)) {
           log_ = bc::unpack(tree_.get_child(LOGGER_NAME));
-          utils::Logger::get().level =
-              log_.getAs<int, utils::Logger::Level>("level", utils::Logger::Level::information);
+          utils::Logger::get().setLevel(
+              log_.getAs<int, utils::Logger::Level>("level", utils::Logger::Level::information));
           utils::Logger::get().setExtended(log_.get<bool>("extended", utils::Logger::get().extended()));
           for (const auto& mod : log_.get<std::vector<std::string> >("enabledModules"))
             utils::Logger::get().addExceptionRule(mod);
@@ -166,7 +166,7 @@ namespace cepgen {
       //----- timing and logging
       if (rt_params_->timeKeeper())
         tree_.add_child(TIMER_NAME, bc::pack(ParametersList()));
-      log_.set<int>("level", (int)utils::Logger::get().level);
+      log_.set<int>("level", (int)utils::Logger::get().level());
       //FIXME not yet implemented
       //for (const auto& mod : utils::Logger::get().exceptionRules())
       //  log_.operator[]<std::vector<std::string> >("enabledModules").emplace_back(mod);

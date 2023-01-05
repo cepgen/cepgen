@@ -53,7 +53,7 @@ namespace cepgen {
       //--- check if debugging is requested
       for (const auto& str : debug_str_)
         if (arg_val.at(0) == "--" + str.name.at(0) || (str.name.size() > 1 && arg_val.at(0) == "-" + str.name.at(1))) {
-          utils::Logger::get().level = utils::Logger::Level::debug;
+          CG_LOG_LEVEL(debug);
           debug_req_ = true;
         }
       //--- check if configuration word is requested

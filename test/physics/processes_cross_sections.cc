@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
       .parse();
 
   if (!verbose)
-    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::warning;
+    CG_LOG_LEVEL(warning);
 
   cepgen::utils::Timer tmr;
   cepgen::Generator gen;

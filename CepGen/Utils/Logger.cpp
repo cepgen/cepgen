@@ -23,7 +23,7 @@
 
 namespace cepgen {
   namespace utils {
-    Logger::Logger(std::ostream* os) : level(Level::information), output(os) {
+    Logger::Logger(std::ostream* os) : output(os) {
       if (output != &std::cout)
         CG_INFO("Logger") << "New logger initialised for output@" << output << ".";
     }
@@ -38,7 +38,7 @@ namespace cepgen {
     }
 
     bool Logger::passExceptionRule(const std::string& tmpl, const Level& lev) const {
-      if (level >= lev)
+      if (level_ >= lev)
         return true;
       if (allowed_exc_.empty())
         return false;

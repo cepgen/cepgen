@@ -187,9 +187,9 @@ namespace cepgen {
     }
 
     void PythonHandler::parseLogging(PyObject* log) {
-      int log_level{(int)utils::Logger::get().level};
+      int log_level{(int)utils::Logger::get().level()};
       python::fillParameter(log, "level", log_level);
-      utils::Logger::get().level = (utils::Logger::Level)log_level;
+      utils::Logger::get().setLevel((utils::Logger::Level)log_level);
       bool extended{utils::Logger::get().extended()};
       python::fillParameter(log, "extended", extended);
       utils::Logger::get().setExtended(extended);

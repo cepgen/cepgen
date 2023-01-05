@@ -38,6 +38,8 @@ namespace cepgen {
 
       std::vector<std::regex> allowed_exc_;
       bool extended_{false};
+      /// Logging threshold for the output stream
+      Level level_{Level::information};
 
     public:
       /// Retrieve the running instance of the logger
@@ -51,21 +53,23 @@ namespace cepgen {
       /// \param[in] tmpl Module name to probe
       /// \param[in] lev Upper verbosity level
       bool passExceptionRule(const std::string& tmpl, const Level& lev) const;
+      /// Logging threshold
+      Level level() const { return level_; }
+      /// Set the logging threshold
+      void setLevel(Level level) { level_ = level; }
       /// Also show extended information?
       bool extended() const { return extended_; }
       /// Set the extended information flag
       void setExtended(bool ext = true) { extended_ = ext; }
 
-      /// Redirect the logger to a given output stream
-      /// Logging threshold for the output stream
-      Level level;
       /// Output stream to use for all logging operations
-      std::ostream* output;
+      std::ostream* output{nullptr};
     };
   }  // namespace utils
   std::ostream& operator<<(std::ostream& os, const utils::Logger::Level&);
 }  // namespace cepgen
 
 #define CG_LOG_MATCH(str, type) cepgen::utils::Logger::get().passExceptionRule(str, cepgen::utils::Logger::Level::type)
+#define CG_LOG_LEVEL(type) cepgen::utils::Logger::get().setLevel(cepgen::utils::Logger::Level::type)
 
 #endif

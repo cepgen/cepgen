@@ -80,11 +80,11 @@ namespace cepgen {
 
       //----- logging definition
       if (pars.has<int>("logging"))
-        utils::Logger::get().level = pars.getAs<int, cepgen::utils::Logger::Level>("logging");
+        utils::Logger::get().setLevel(pars.getAs<int, cepgen::utils::Logger::Level>("logging"));
       else if (pars.has<ParametersList>("logging")) {
         const auto& log = pars.get<ParametersList>("logging");
         if (log.has<int>("level"))
-          utils::Logger::get().level = log.getAs<int, cepgen::utils::Logger::Level>("level");
+          utils::Logger::get().setLevel(log.getAs<int, cepgen::utils::Logger::Level>("level"));
         if (log.has<std::string>("modules"))
           utils::Logger::get().addExceptionRule(log.get<std::string>("modules"));
         else if (log.has<std::vector<std::string> >("modules"))

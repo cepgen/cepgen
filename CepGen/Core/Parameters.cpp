@@ -159,7 +159,7 @@ namespace cepgen {
     if (param->generation_.numThreads() > 1)
       os << std::setw(wt) << "Number of threads" << param->generation_.numThreads() << "\n";
     os << std::setw(wt) << "Number of points to try per bin" << param->generation_.numPoints() << "\n"
-       << std::setw(wt) << "Verbosity level " << utils::Logger::get().level << "\n";
+       << std::setw(wt) << "Verbosity level " << utils::Logger::get().level() << "\n";
     if (!param->evt_modifiers_.empty() || param->out_modules_.empty() || !param->taming_functions_.empty())
       os << "\n"
          << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Event treatment ") << std::setfill(' ')

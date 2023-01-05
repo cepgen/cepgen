@@ -12,7 +12,7 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   cepgen::initialise();
-  cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::nothing;
+  CG_LOG_LEVEL(nothing);
 
   int num_epochs;
   vector<string> functional_parsers, integrators, outputs;

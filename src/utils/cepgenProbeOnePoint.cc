@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
     point.resize(ndim);
 
   if (verbose)
-    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::debugInsideLoop;
+    CG_LOG_LEVEL(debugInsideLoop);
 
   if (!enable_plugins) {
     gen.parametersPtr()->clearEventModifiersSequence();

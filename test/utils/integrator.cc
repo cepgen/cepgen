@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
       .parse();
 
   if (quiet)
-    cepgen::utils::Logger::get().level = cepgen::utils::Logger::Level::nothing;
+    CG_LOG_LEVEL(nothing);
 
   //--- tests definition
   struct test_t {
