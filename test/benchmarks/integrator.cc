@@ -1,7 +1,3 @@
-#include <nanobench.h>
-
-#include <fstream>
-
 #include "CepGen/Generator.h"
 #include "CepGen/Integration/FunctionalIntegrand.h"
 #include "CepGen/Integration/Integrator.h"
@@ -9,6 +5,7 @@
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Version.h"
+#include "nanobench_interface.h"
 
 using namespace std;
 
@@ -16,7 +13,7 @@ int main(int argc, char* argv[]) {
   cepgen::initialise();
 
   int num_epochs;
-  vector<string> functional_parsers, integrators;
+  vector<string> functional_parsers, integrators, outputs;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("epochs,e", "number of epochs to try", &num_epochs, 20)
       .addOptionalArgument("functionals,f",
@@ -25,6 +22,7 @@ int main(int argc, char* argv[]) {
                            cepgen::utils::FunctionalFactory::get().modules())
       .addOptionalArgument(
           "integrators,i", "integrators to benchmark", &integrators, cepgen::IntegratorFactory::get().modules())
+      .addOptionalArgument("outputs,o", "output formats (html, csv, json, pyperf)", &outputs, vector<string>{"html"})
       .parse();
 
   ofstream out_file("benchmark.html");
@@ -42,8 +40,8 @@ int main(int argc, char* argv[]) {
         double result, unc;
         integr->integrate(result, unc);
       });
-    bench.render(ankerl::nanobench::templates::htmlBoxplot(), out_file);
   }
+  render_benchmark(bench, outputs);
 
   return 0;
 }
