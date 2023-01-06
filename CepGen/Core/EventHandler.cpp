@@ -40,7 +40,8 @@ namespace cepgen {
     initialised_ = true;
   }
 
-  void* EventHandler::engine() {
-    throw CG_FATAL("EventHandler") << "No engine declared for event handler with name '" << name_ << "'.";
+  void* EventHandler::engineObject() {
+    throw CG_FATAL("EventHandler:engineObject")
+        << "No engine object declared for event handler with name '" << name_ << "'.";
   }
 }  // namespace cepgen

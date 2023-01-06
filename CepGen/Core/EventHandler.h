@@ -41,11 +41,16 @@ namespace cepgen {
     /// Initialise the handler and its inner parameterisation
     void initialise(const Parameters&);
 
-    /// Engine object
-    virtual void* engine();
+    /// Retrieve the engine object
+    template <typename T>
+    T& engine() {
+      return *dynamic_cast<T*>(engineObject());
+    }
 
   protected:
     virtual void initialise() = 0;
+    /// Engine object
+    virtual void* engineObject();
 
     const Parameters* rt_params_{nullptr};  // NOT owning
     bool initialised_{false};
