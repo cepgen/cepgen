@@ -40,7 +40,7 @@ namespace cepgen {
       explicit TauolaFilter(const ParametersList&);
       ~TauolaFilter();
 
-      void init() override;
+      void initialise() override;
       bool run(Event& ev, double& weight, bool full) override;
 
       static ParametersDescription description();
@@ -59,7 +59,7 @@ namespace cepgen {
 
     TauolaFilter::~TauolaFilter() { Log::SummaryAtExit(); }
 
-    void TauolaFilter::init() {
+    void TauolaFilter::initialise() {
       Tauola::setUnits(Tauola::GEV, Tauola::MM);
       Tauola::initialize();
       Tauola::setSeed(seed_, 2. * seed_, 4. * seed_);

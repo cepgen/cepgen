@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2019-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
 #include "CepGen/Core/ParametersList.h"
 
 namespace cepgen {
-  EventModifier::EventModifier(const ParametersList& plist)
-      : NamedModule(plist), seed_(steerAs<int, long long>("seed")), max_trials_(steer<int>("maxTrials")) {
+  EventModifier::EventModifier(const ParametersList& params)
+      : EventHandler(params), seed_(steerAs<int, long long>("seed")), max_trials_(steer<int>("maxTrials")) {
     CG_DEBUG("EventModifier:init") << "\"" << name_ << "\"-type event modifier built with:\n\t"
                                    << "* seed = " << seed_ << "\n\t"
                                    << "* maximum trials: " << max_trials_;
@@ -40,7 +40,7 @@ namespace cepgen {
   }
 
   ParametersDescription EventModifier::description() {
-    auto desc = ParametersDescription();
+    auto desc = EventHandler::description();
     desc.add<int>("seed", -1).setDescription("Random number generator seed");
     desc.add<int>("maxTrials", 1)
         .setDescription(

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      void initialise(const Parameters&) override;
+      void initialise() override;
       void setCrossSection(double cross_section, double err) override {
         cross_section_ = cross_section, cross_section_err_ = err;
       }
@@ -87,9 +87,9 @@ namespace cepgen {
       CG_DEBUG("ProMCHandler") << utils::s("file", num_removed_files, true) << " removed.";
     }
 
-    void ProMCHandler::initialise(const Parameters& params) {
-      file_->setDescription(params.generation().maxGen(), "Sample generated using CepGen v" + version::tag);
-      log_file_ << banner(params) << "\n";
+    void ProMCHandler::initialise() {
+      file_->setDescription(rt_params_->generation().maxGen(), "Sample generated using CepGen v" + version::tag);
+      log_file_ << banner() << "\n";
       ProMCHeader hdr;
       hdr.set_momentumunit(GEV_UNIT);
       hdr.set_lengthunit(M_UNIT);  // unused as for now
@@ -102,13 +102,13 @@ namespace cepgen {
         data->set_width(desc.width);
         data->set_charge(desc.charge * 1. / 3.);
       }
-      hdr.set_id1(params.kinematics.incomingBeams().positive().pdg);
-      hdr.set_id2(params.kinematics.incomingBeams().negative().pdg);
+      hdr.set_id1(rt_params_->kinematics.incomingBeams().positive().pdg);
+      hdr.set_id2(rt_params_->kinematics.incomingBeams().negative().pdg);
       hdr.set_pdf1(0);
       hdr.set_pdf2(0);
       hdr.set_x1(0);
       hdr.set_x2(0);
-      hdr.set_ecm(params.kinematics.incomingBeams().sqrtS());
+      hdr.set_ecm(rt_params_->kinematics.incomingBeams().sqrtS());
       file_->setHeader(hdr);
     }
 

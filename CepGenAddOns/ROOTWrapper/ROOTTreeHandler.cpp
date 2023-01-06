@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,13 +48,13 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      void initialise(const Parameters&) override;
+      void initialise() override;
       /// Writer operator
       void operator<<(const Event&) override;
       void setCrossSection(double, double) override;
 
     private:
-      std::string generateFilename(const Parameters&) const;
+      std::string generateFilename() const;
 
       const std::string filename_;
       const bool compress_;
@@ -75,10 +75,10 @@ namespace cepgen {
       file_->Write();
     }
 
-    void ROOTTreeHandler::initialise(const Parameters& params) {
+    void ROOTTreeHandler::initialise() {
       auto filename = filename_;
       if (auto_filename_) {
-        filename = generateFilename(params);
+        filename = generateFilename();
         CG_INFO("ROOTTreeHandler") << "Output ROOT filename automatically set to '" << filename << "'.";
       }
       file_.reset(TFile::Open(filename.data(), "recreate"));
@@ -87,9 +87,9 @@ namespace cepgen {
       run_tree_.create();
       evt_tree_.create();
       run_tree_.litigious_events = 0;
-      run_tree_.sqrt_s = params.kinematics().incomingBeams().sqrtS();
-      run_tree_.process_name = params.processName();
-      run_tree_.process_parameters = params.process().parameters().serialise();
+      run_tree_.sqrt_s = rt_params_->kinematics().incomingBeams().sqrtS();
+      run_tree_.process_name = rt_params_->processName();
+      run_tree_.process_parameters = rt_params_->process().parameters().serialise();
     }
 
     void ROOTTreeHandler::operator<<(const Event& ev) {
@@ -102,14 +102,14 @@ namespace cepgen {
       run_tree_.errxsect = cross_section_err;
     }
 
-    std::string ROOTTreeHandler::generateFilename(const Parameters& params) const {
+    std::string ROOTTreeHandler::generateFilename() const {
       std::string evt_mods, proc_mode;
-      for (const auto& mod : params.eventModifiersSequence())
+      for (const auto& mod : rt_params_->eventModifiersSequence())
         evt_mods += (evt_mods.empty() ? "" : "-") + mod->name();
-      const auto symm = params.process().parameters().get<bool>("symmetrise");
+      const auto symm = rt_params_->process().parameters().get<bool>("symmetrise");
       const auto sf_info = utils::sanitise(strfun::StructureFunctionsFactory::get().describe(
-          params.process().kinematics().incomingBeams().structureFunctions()->name()));
-      switch (params.process().kinematics().incomingBeams().mode()) {
+          rt_params_->process().kinematics().incomingBeams().structureFunctions()->name()));
+      switch (rt_params_->process().kinematics().incomingBeams().mode()) {
         case mode::Kinematics::ElasticElastic:
           proc_mode = "el";
           break;
@@ -127,9 +127,9 @@ namespace cepgen {
       }
       return utils::format("cepgen%s_%s_%s_%gTeV%s.root",
                            utils::sanitise(version::tag).data(),
-                           params.processName().data(),
+                           rt_params_->processName().data(),
                            proc_mode.data(),
-                           params.kinematics().incomingBeams().sqrtS() / 1000.,
+                           rt_params_->kinematics().incomingBeams().sqrtS() / 1000.,
                            evt_mods.data());
     }
 

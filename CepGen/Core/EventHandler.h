@@ -1,0 +1,55 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2023  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef CepGen_Core_EventHandler_h
+#define CepGen_Core_EventHandler_h
+
+#include <iosfwd>
+#include <string>
+#include <vector>
+
+#include "CepGen/Modules/NamedModule.h"
+
+namespace cepgen {
+  class Event;
+  class Parameters;
+  /// Class template for modules interacting with events
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date Jan 2023
+  class EventHandler : public NamedModule<std::string> {
+  public:
+    explicit EventHandler(const ParametersList&);
+    virtual ~EventHandler();
+
+    static ParametersDescription description();
+
+    /// Initialise the handler and its inner parameterisation
+    void initialise(const Parameters&);
+
+    /// Engine object
+    virtual void* engine();
+
+  protected:
+    virtual void initialise() = 0;
+
+    const Parameters* rt_params_{nullptr};  // NOT owning
+    bool initialised_{false};
+  };
+}  // namespace cepgen
+
+#endif

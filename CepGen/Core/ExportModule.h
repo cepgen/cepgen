@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2016-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,17 +16,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Modules_ExportModule_h
-#define CepGen_Modules_ExportModule_h
+#ifndef CepGen_Core_ExportModule_h
+#define CepGen_Core_ExportModule_h
 
 #include <iosfwd>
 #include <string>
 
-#include "CepGen/Modules/NamedModule.h"
+#include "CepGen/Core/EventHandler.h"
 
 namespace cepgen {
   class Event;
-  class Parameters;
   /// Location for all output generators
   namespace io {
     /**
@@ -34,28 +33,23 @@ namespace cepgen {
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Sep 2016
      */
-    class ExportModule : public NamedModule<std::string> {
+    class ExportModule : public EventHandler {
     public:
       /// Class constructor
       /// \param[in] params User-controlled steering parameters for this module
-      explicit ExportModule(const ParametersList& params);
-      virtual ~ExportModule();
-
-      static ParametersDescription description();
+      explicit ExportModule(const ParametersList&);
 
       /// Set the process cross section and its associated error
       virtual void setCrossSection(double /*cross_section*/, double /*err_cross_section*/) {}
       /// Set the event number
       void setEventNumber(const unsigned int& ev_id) { event_num_ = ev_id; }
 
-      /// Initialise the handler and its inner parameterisation
-      virtual void initialise(const Parameters&) = 0;
       /// Writer operator
       virtual void operator<<(const Event&) = 0;
 
     protected:
       /// Print a banner containing all runtime parameters information
-      static std::string banner(const Parameters&, const std::string& prep = "");
+      std::string banner(const std::string& prep = "") const;
       /// Event index
       unsigned long long event_num_{0ull};
     };

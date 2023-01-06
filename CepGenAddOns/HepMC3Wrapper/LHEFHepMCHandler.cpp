@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      void initialise(const Parameters&) override;
+      void initialise() override;
       /// Writer operator
       void operator<<(const Event&) override;
       void setCrossSection(double, double) override;
@@ -66,13 +66,13 @@ namespace cepgen {
       lhe_output_->heprup.XERRUP[0] = err;
     }
 
-    void LHEFHepMCHandler::initialise(const Parameters& params) {
-      lhe_output_->headerBlock() << "<!--\n" << banner(params) << "\n-->";
+    void LHEFHepMCHandler::initialise() {
+      lhe_output_->headerBlock() << "<!--\n" << banner() << "\n-->";
       //--- first specify information about the run
-      lhe_output_->heprup.IDBMUP = {(int)params.kinematics().incomingBeams().positive().pdgId(),
-                                    (int)params.kinematics().incomingBeams().negative().pdgId()};
-      lhe_output_->heprup.EBMUP = {(double)params.kinematics().incomingBeams().positive().momentum().pz(),
-                                   (double)params.kinematics().incomingBeams().negative().momentum().pz()};
+      lhe_output_->heprup.IDBMUP = {(int)rt_params_->kinematics().incomingBeams().positive().pdgId(),
+                                    (int)rt_params_->kinematics().incomingBeams().negative().pdgId()};
+      lhe_output_->heprup.EBMUP = {(double)rt_params_->kinematics().incomingBeams().positive().momentum().pz(),
+                                   (double)rt_params_->kinematics().incomingBeams().negative().momentum().pz()};
       //--- ensure everything is properly parsed
       lhe_output_->init();
     }

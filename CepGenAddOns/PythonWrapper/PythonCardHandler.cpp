@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -233,13 +233,14 @@ namespace cepgen {
       rt_params_->addModifier(EventModifierFactory::get().build(mod_name, python::get<ParametersList>(mod)));
 
       auto h = rt_params_->eventModifiersSequence().rbegin()->get();
-      {  //--- before calling the init() method
+      // split the configuration into a pre-initialisation and a post-initialisation of the module parts
+      {
         std::vector<std::string> config;
         python::fillParameter(mod, "preConfiguration", config);
         h->readStrings(config);
       }
-      h->init();
-      {  //--- after init() has been called
+      h->initialise(*rt_params_);
+      {
         std::vector<std::string> config;
         python::fillParameter(mod, "processConfiguration", config);
         for (const auto& block : config) {

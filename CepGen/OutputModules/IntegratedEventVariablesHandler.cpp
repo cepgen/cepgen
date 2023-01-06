@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2019-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -118,13 +118,13 @@ namespace cepgen {
             << "Saved " << utils::s("histogram", hists_.size(), true) << " into \"" << filename_ << "\".";
     }
 
-    void IntegratedEventVariablesHandler::initialise(const Parameters& params) {
-      sqrts_ = params.kinematics().incomingBeams().sqrtS();
+    void IntegratedEventVariablesHandler::initialise() {
+      sqrts_ = rt_params_->kinematics().incomingBeams().sqrtS();
       num_evts_ = 0ul;
-      proc_name_ = proc::ProcessFactory::get().describe(params.processName());
+      proc_name_ = proc::ProcessFactory::get().describe(rt_params_->processName());
       proc_name_ += ", \\sqrt{s} = " + utils::format("%g", sqrts_ * 1.e-3) + " TeV";
       if (save_hists_ && !hists_.empty())
-        file_ << banner(params, "#") << "\n";
+        file_ << banner("#") << "\n";
     }
 
     void IntegratedEventVariablesHandler::operator<<(const Event& ev) {

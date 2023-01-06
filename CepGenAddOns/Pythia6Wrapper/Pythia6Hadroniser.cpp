@@ -76,7 +76,7 @@ namespace cepgen {
 
       void setRuntimeParameters(const Parameters&) override {}
       inline void readString(const char* param) override { pygive(param); }
-      void init() override;
+      void initialise() override;
       bool run(Event& ev, double& weight, bool full) override;
 
       void setCrossSection(double, double) override {}
@@ -124,7 +124,7 @@ namespace cepgen {
         {Particle::Status::Incoming, 11},
     };
 
-    void Pythia6Hadroniser::init() {
+    void Pythia6Hadroniser::initialise() {
       CG_WARNING("Pythia6Hadroniser") << "Branching fraction not yet implemented in this hadroniser.\n\t"
                                       << "You will have to specify manually the multiplication factor according\n\t"
                                       << "to your list of open channels.";

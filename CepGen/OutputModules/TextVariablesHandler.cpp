@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2019-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      void initialise(const Parameters&) override;
+      void initialise() override;
       void setCrossSection(double, double) override {}
       void operator<<(const Event&) override;
 
@@ -73,9 +73,9 @@ namespace cepgen {
       file_.close();
     }
 
-    void TextVariablesHandler::initialise(const Parameters& params) {
+    void TextVariablesHandler::initialise() {
       if (save_banner_)
-        file_ << banner(params, "#") << "\n";
+        file_ << banner("#") << "\n";
       if (save_variables_)
         file_ << "# " << oss_vars_.str() << "\n";
     }

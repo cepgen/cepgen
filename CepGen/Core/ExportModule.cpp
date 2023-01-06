@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2016-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,28 +31,25 @@
 
 namespace cepgen {
   namespace io {
-    ExportModule::ExportModule(const ParametersList& params) : NamedModule(params) {}
+    ExportModule::ExportModule(const ParametersList& params) : EventHandler(params) {}
 
-    ExportModule::~ExportModule() {
-      CG_DEBUG("ExportModule") << "Destructor called for output module \"" << name_ << "\".";
-    }
-
-    std::string ExportModule::banner(const Parameters& params, const std::string& prep) {
+    std::string ExportModule::banner(const std::string& prep) const {
       const size_t len = 45 + version::tag.size();
       std::ostringstream os;
       os << prep << "******* Sample generated with CepGen " << version::tag << " *******\n"
-         << prep << " Process: " << params.processName() << " (" << params.kinematics().incomingBeams().mode() << ")\n";
-      if (params.kinematics().incomingBeams().mode() != mode::Kinematics::ElasticElastic)
+         << prep << " Process: " << rt_params_->processName() << " (" << rt_params_->kinematics().incomingBeams().mode()
+         << ")\n";
+      if (rt_params_->kinematics().incomingBeams().mode() != mode::Kinematics::ElasticElastic)
         os << prep << " Structure functions: "
-           << params.kinematics().incomingBeams().structureFunctions()->description().description() << "\n";
-      if (!params.eventModifiersSequence().empty()) {
-        os << prep << " " << utils::s("Event modifier", params.eventModifiersSequence().size()) << ": ";
+           << rt_params_->kinematics().incomingBeams().structureFunctions()->description().description() << "\n";
+      if (!rt_params_->eventModifiersSequence().empty()) {
+        os << prep << " " << utils::s("Event modifier", rt_params_->eventModifiersSequence().size()) << ": ";
         std::string sep;
-        for (const auto& mod : params.eventModifiersSequence())
+        for (const auto& mod : rt_params_->eventModifiersSequence())
           os << sep << mod->name(), sep = ", ";
         os << "\n";
       }
-      const auto& cuts = params.kinematics().cuts();
+      const auto& cuts = rt_params_->kinematics().cuts();
       os << prep << std::left << std::setw(len) << std::setfill('*') << "*** Incoming state "
          << "\n";
       for (const auto& cut : cuts.initial.list())
@@ -61,7 +58,7 @@ namespace cepgen {
          << "\n";
       for (const auto& cut : cuts.central.list())
         os << prep << " " << cut.description << ": " << cut.limits << "\n";
-      if (params.kinematics().incomingBeams().mode() != mode::Kinematics::ElasticElastic) {
+      if (rt_params_->kinematics().incomingBeams().mode() != mode::Kinematics::ElasticElastic) {
         os << prep << std::setw(len) << std::setfill('*') << "*** Remnants states "
            << "\n";
         for (const auto& cut : cuts.remnants.list())
@@ -69,11 +66,6 @@ namespace cepgen {
       }
       os << prep << std::string(45 + version::tag.size(), '*');
       return os.str();
-    }
-
-    ParametersDescription ExportModule::description() {
-      auto desc = ParametersDescription();
-      return desc;
     }
   }  // namespace io
 }  // namespace cepgen

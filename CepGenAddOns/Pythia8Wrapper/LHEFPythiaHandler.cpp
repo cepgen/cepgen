@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      void initialise(const Parameters&) override;
+      void initialise() override;
       /// Writer operator
       void operator<<(const Event&) override;
       void setCrossSection(double, double) override;
@@ -89,13 +89,13 @@ namespace cepgen {
 #endif
     }
 
-    void LHEFPythiaHandler::initialise(const Parameters& params) {
+    void LHEFPythiaHandler::initialise() {
       std::ostringstream oss_init;
-      oss_init << "<!--\n" << banner(params) << "\n-->";
+      oss_init << "<!--\n" << banner() << "\n-->";
       oss_init << std::endl;  // LHEF is usually not as beautifully parsed as a standard XML...
                               // we're physicists, what do you expect?
       lhaevt_->addComments(oss_init.str());
-      lhaevt_->initialise(params);
+      lhaevt_->initialise(*rt_params_);
 #if PYTHIA_VERSION_INTEGER < 8300
       pythia_->setLHAupPtr(lhaevt_.get());
 #else

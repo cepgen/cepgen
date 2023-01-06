@@ -20,6 +20,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Parameters.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Message.h"
@@ -33,7 +34,7 @@ int main(int argc, char* argv[]) {
     CG_LOG << "Failed to retrieve the Tauola interface!";
     return -1;
   }
-  tauola->init();
+  tauola->initialise(cepgen::Parameters());
 
   cepgen::Event ev;
   cepgen::Particle pho(cepgen::Particle::Role::CentralSystem, cepgen::PDG::photon, cepgen::Particle::Status::Resonance);

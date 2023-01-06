@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -118,15 +118,10 @@ namespace cepgen {
 
   void Parameters::clearEventModifiersSequence() { evt_modifiers_.clear(); }
 
-  void Parameters::addModifier(std::unique_ptr<EventModifier> mod) {
-    evt_modifiers_.emplace_back(std::move(mod));
-    (*evt_modifiers_.rbegin())->setRuntimeParameters(*this);
-  }
+  void Parameters::addModifier(std::unique_ptr<EventModifier> mod) { evt_modifiers_.emplace_back(std::move(mod)); }
 
   void Parameters::addModifier(EventModifier* mod) {
-    std::unique_ptr<EventModifier> modifier(mod);
-    modifier->setRuntimeParameters(*this);
-    evt_modifiers_.emplace_back(std::move(modifier));
+    evt_modifiers_.emplace_back(std::move(std::unique_ptr<EventModifier>(mod)));
   }
 
   io::ExportModule& Parameters::outputModule(size_t i) { return *out_modules_.at(i); }

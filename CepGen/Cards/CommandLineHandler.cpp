@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2022  Laurent Forthomme
+ *  Copyright (C) 2020-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -137,7 +137,7 @@ namespace cepgen {
       const auto& mod = pars.get<ParametersList>("eventmod");
       if (!mod.keys(true).empty()) {
         rt_params_->addModifier(EventModifierFactory::get().build(mod));
-        rt_params_->eventModifiersSequence().rbegin()->get()->init();
+        rt_params_->eventModifiersSequence().rbegin()->get()->initialise(*rt_params_);
       }
 
       //----- output modules definition

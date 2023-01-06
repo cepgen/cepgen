@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2019-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,27 +22,20 @@
 #include <string>
 #include <vector>
 
-#include "CepGen/Modules/NamedModule.h"
+#include "CepGen/Core/EventHandler.h"
 
 namespace cepgen {
-  class Event;
-  class Parameters;
-  class ParametersList;
   /// Class template to interface (external/internal) events modification algorithms
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date July 2019
-  class EventModifier : public NamedModule<std::string> {
+  class EventModifier : public EventHandler {
   public:
     /// Default constructor for an undefined modifier
     /// \param[in] params User-controlled steering parameters for this module
-    explicit EventModifier(const ParametersList& params);
-    /// Virtual destructor
-    virtual ~EventModifier() = default;
+    explicit EventModifier(const ParametersList&);
 
     static ParametersDescription description();
 
-    /// Set all runtime parameters steering this module
-    virtual void setRuntimeParameters(const Parameters& params) { rt_params_ = &params; }
     /// \brief Specify a random numbers generator seed for the external module
     /// \param[in] seed A RNG seed
     void setSeed(long long seed) { seed_ = seed; }
@@ -54,8 +47,6 @@ namespace cepgen {
     /// Parse a list of configuration strings
     virtual void readStrings(const std::vector<std::string>& params);
 
-    /// Initialise the event modifier before its running
-    virtual void init() {}
     /** \brief Modify a full event
        * \param[inout] ev Input/output event
        * \param[inout] weight Event weight after modification
@@ -71,8 +62,6 @@ namespace cepgen {
     long long seed_{0ll};
     /// Maximal number of trials for the algorithm
     unsigned short max_trials_{1};
-    /// List of runtime parameters steering this module
-    const Parameters* rt_params_{nullptr};  // not owning
   };
 }  // namespace cepgen
 

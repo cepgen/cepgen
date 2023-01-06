@@ -43,7 +43,7 @@ namespace cepgen {
       static ParametersDescription description();
 
       void setRuntimeParameters(const Parameters&) override {}
-      void init() override;
+      void initialise() override;
       bool run(Event& ev, double& weight, bool full) override;
     };
 
@@ -68,7 +68,7 @@ namespace cepgen {
 
     PhotosFilter::~PhotosFilter() { Log::SummaryAtExit(); }
 
-    void PhotosFilter::init() {
+    void PhotosFilter::initialise() {
       Photos::setMomentumUnit(Photos::GEV);
       Photos::setAlphaQED(constants::ALPHA_EM);
       Photos::initialize();

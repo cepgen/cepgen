@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -46,9 +46,8 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      void setRuntimeParameters(const Parameters&) override;
       void readString(const char* param) override;
-      void init() override;
+      void initialise() override;
       bool run(Event& ev, double& weight, bool full) override;
 
       void setCrossSection(double cross_section, double cross_section_err) override;
@@ -82,9 +81,20 @@ namespace cepgen {
           debug_lhef_(steer<bool>("debugLHEF")),
           output_config_(steer<std::string>("outputConfig")) {}
 
-    void Pythia8Hadroniser::setRuntimeParameters(const Parameters& params) {
-      rt_params_ = &params;
-      cg_evt_->initialise(params);
+    Pythia8Hadroniser::~Pythia8Hadroniser() {
+      if (!output_config_.empty())
+        pythia_->settings.writeFile(output_config_, false);
+      if (debug_lhef_)
+        cg_evt_->closeLHEF(true);
+    }
+
+    void Pythia8Hadroniser::readString(const char* param) {
+      if (!pythia_->readString(param))
+        throw CG_FATAL("Pythia8Hadroniser") << "The Pythia8 core failed to parse the following setting:\n\t" << param;
+    }
+
+    void Pythia8Hadroniser::initialise() {
+      cg_evt_->initialise(*rt_params_);
 #if PYTHIA_VERSION_INTEGER < 8300
       pythia_->setLHAupPtr(cg_evt_.get());
 #else
@@ -98,21 +108,6 @@ namespace cepgen {
       min_ids_ = rt_params_->kinematics().minimumFinalState();
       if (debug_lhef_)
         cg_evt_->openLHEF("debug.lhe");
-    }
-
-    Pythia8Hadroniser::~Pythia8Hadroniser() {
-      if (!output_config_.empty())
-        pythia_->settings.writeFile(output_config_, false);
-      if (debug_lhef_)
-        cg_evt_->closeLHEF(true);
-    }
-
-    void Pythia8Hadroniser::readString(const char* param) {
-      if (!pythia_->readString(param))
-        throw CG_FATAL("Pythia8Hadroniser") << "The Pythia8 core failed to parse the following setting:\n\t" << param;
-    }
-
-    void Pythia8Hadroniser::init() {
       pythia_->settings.flag("ProcessLevel:resonanceDecays", res_decay_);
       if (pythia_->settings.flag("ProcessLevel:all") != enable_hadr_)
         pythia_->settings.flag("ProcessLevel:all", enable_hadr_);
@@ -181,7 +176,7 @@ namespace cepgen {
       //--- switch full <-> partial event
       if (full != enable_hadr_) {
         enable_hadr_ = full;
-        init();
+        initialise();
       }
 
       //===========================================================================================
