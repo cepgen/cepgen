@@ -43,14 +43,14 @@ namespace cepgen {
 
     /// Retrieve the engine object
     template <typename T>
-    T& engine() {
-      return *dynamic_cast<T*>(engineObject());
+    T* engine() {
+      return static_cast<T*>(enginePtr());
     }
 
   protected:
     virtual void initialise() = 0;
     /// Engine object
-    virtual void* engineObject();
+    virtual void* enginePtr();
 
     const Parameters* rt_params_{nullptr};  // NOT owning
     bool initialised_{false};
