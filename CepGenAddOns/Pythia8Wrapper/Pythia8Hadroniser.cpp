@@ -53,6 +53,8 @@ namespace cepgen {
       void setCrossSection(double cross_section, double cross_section_err) override;
 
     private:
+      void* enginePtr() override { return (void*)pythia_.get(); }
+
       static constexpr unsigned short PYTHIA_STATUS_IN_BEAM = 12;
       static constexpr unsigned short PYTHIA_STATUS_IN_PARTON_KT = 61;
 

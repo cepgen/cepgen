@@ -20,6 +20,7 @@ cepgen_build(CepGenPythia8 SOURCES *.cpp
     EXT_LIBS ${PYTHIA8} dl
     EXT_HEADERS ${PYTHIA8_INCLUDE}
     DEFINITIONS ${PYTHIA_DEFS}
+    TESTS test/*.cc
     OPTIONS "-Wno-misleading-indentation"
     INSTALL_COMPONENT pythia8)
 
