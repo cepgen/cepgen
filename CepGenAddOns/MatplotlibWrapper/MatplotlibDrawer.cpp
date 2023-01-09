@@ -179,7 +179,7 @@ namespace cepgen {
         plt::named_semilogx(hist.title(), x, y, "o");
       else if (mode & Mode::logy)
         plt::named_semilogy(hist.title(), x, y, "o");
-      else if (yerr != std::vector<double>(yerr.size(), 0.))
+      else if (!yerr.empty() && yerr != std::vector<double>(yerr.size(), 0.))
         plt::errorbar(x, y, yerr, plot_style);
       else
         plt::plot(x, y, plot_style);
