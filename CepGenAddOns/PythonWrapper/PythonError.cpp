@@ -53,6 +53,7 @@ namespace cepgen {
             ptraceback = ptraceback->tb_next;
           }
         }
+        (*this) << "\n" << std::string(80, '.') << "\n";
       }
     }
   }  // namespace python
