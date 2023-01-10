@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2022-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,19 +16,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/EventFilter/EventHarvester.h"
 #include "CepGen/Modules/EventExporterFactory.h"
-#include "CepGen/OutputModules/IntegratedEventVariablesHandler.h"
 
 namespace cepgen {
-  struct TopdrawerHistsHandler final : IntegratedEventVariablesHandler {
-    using IntegratedEventVariablesHandler::IntegratedEventVariablesHandler;
+  struct TopdrawerHarvester final : EventHarvester {
+    using EventHarvester::EventHarvester;
     static ParametersDescription description() {
-      auto desc = IntegratedEventVariablesHandler::description();
-      desc.setDescription("Topdrawer event histogramming tool");
+      auto desc = EventHarvester::description();
+      desc.setDescription("Topdrawer event harvester");
       desc.add<std::string>("plotter", "topdrawer");
       return desc;
     }
   };
 }  // namespace cepgen
 
-REGISTER_EXPORTER("topdrawer", TopdrawerHistsHandler)
+REGISTER_EXPORTER("topdrawer", TopdrawerHarvester)

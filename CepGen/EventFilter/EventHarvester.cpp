@@ -18,29 +18,33 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/EventFilter/EventBrowser.h"
+#include "CepGen/EventFilter/EventHarvester.h"
 #include "CepGen/Modules/DrawerFactory.h"
-#include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/OutputModules/IntegratedEventVariablesHandler.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
 
 namespace cepgen {
-  IntegratedEventVariablesHandler::IntegratedEventVariablesHandler(const ParametersList& params)
+  EventHarvester::EventHarvester(const ParametersList& params)
       : EventExporter(params),
-        drawer_(utils::DrawerFactory::get().build(steer<std::string>("plotter"), params)),
+        browser_(new utils::EventBrowser),
         show_hists_(steer<bool>("show")),
         save_hists_(steer<bool>("save")),
         filename_(steer<std::string>("filename")) {
-    //--- extract list of variables to be plotted in histogram
+    // build the plotter object if specified
+    const auto& plotter = steer<std::string>("plotter");
+    if (!plotter.empty())
+      drawer_ = utils::DrawerFactory::get().build(plotter, params);
+
+    // extract list of variables to be plotted in histogram
     const auto& hist_vars = steer<ParametersList>("histVariables");
     for (const auto& key : hist_vars.keys()) {
       const auto& vars = utils::split(key, ':');
       if (vars.size() < 1 || vars.size() > 2)
-        throw CG_FATAL("IntegratedEventVariablesHandler")
-            << "Invalid number of variables to correlate for '" << key << "'!";
+        throw CG_FATAL("EventHarvester") << "Invalid number of variables to correlate for '" << key << "'!";
 
       const auto& hvar = hist_vars.get<ParametersList>(key);
       const auto& log = hvar.get<bool>("log");
@@ -53,8 +57,8 @@ namespace cepgen {
           const auto& nbins = (hvar.get<int>("nbins") > 0 ? hvar.get<int>("nbins") : hvar.get<int>("nbinsX"));
           hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(nbins, hvar.get<Limits>("xrange"), name), log});
         } else {
-          CG_WARNING("IntegratedEventVariablesHandler")
-              << "Neither xrange nor xbins found in parameters for 1D plot of variable \"" << vars.at(0) << "\".";
+          CG_WARNING("EventHarvester") << "Neither xrange nor xbins found in parameters for 1D plot of variable \""
+                                       << vars.at(0) << "\".";
           continue;
         }
         auto& hist = hists_.rbegin()->hist;
@@ -74,7 +78,7 @@ namespace cepgen {
                   nbinsx, hvar.get<Limits>("xrange"), hvar.get<int>("nbinsY"), hvar.get<Limits>("yrange"), name),
               log});
         } else {
-          CG_WARNING("IntegratedEventVariablesHandler")
+          CG_WARNING("EventHarvester")
               << "Neither (x/y)range nor (x/y)bins found in parameters for 1D plot of variables \"" << vars << "\".";
           continue;
         }
@@ -88,7 +92,7 @@ namespace cepgen {
       file_.open(filename_);
   }
 
-  IntegratedEventVariablesHandler::~IntegratedEventVariablesHandler() {
+  EventHarvester::~EventHarvester() {
     //--- histograms printout
     if (!show_hists_ && !save_hists_)
       return;
@@ -96,28 +100,30 @@ namespace cepgen {
       h_var.hist.scale(cross_section_ / (num_evts_ + 1));
       h_var.hist.setTitle(proc_name_);
       std::ostringstream os;
-      drawer_->draw(h_var.hist, h_var.log ? utils::Drawer::Mode::logy : utils::Drawer::Mode::none);
+      if (drawer_)
+        drawer_->draw(h_var.hist, h_var.log ? utils::Drawer::Mode::logy : utils::Drawer::Mode::none);
       if (show_hists_)
-        CG_INFO("IntegratedEventVariablesHandler") << os.str();
+        CG_INFO("EventHarvester") << os.str();
       if (save_hists_)
         file_ << "\n" << os.str() << "\n";
     }
     for (auto& h_var : hists2d_) {
       std::ostringstream os;
       h_var.hist.setTitle(proc_name_);
-      drawer_->draw(h_var.hist,
-                    utils::Drawer::Mode::grid | (h_var.log ? utils::Drawer::Mode::logz : utils::Drawer::Mode::none));
+      if (drawer_)
+        drawer_->draw(h_var.hist,
+                      utils::Drawer::Mode::grid | (h_var.log ? utils::Drawer::Mode::logz : utils::Drawer::Mode::none));
       if (show_hists_)
-        CG_INFO("IntegratedEventVariablesHandler") << os.str();
+        CG_INFO("EventHarvester") << os.str();
       if (save_hists_)
         file_ << "\n" << os.str() << "\n";
     }
     if (save_hists_)
-      CG_INFO("IntegratedEventVariablesHandler")
-          << "Saved " << utils::s("histogram", hists_.size(), true) << " into \"" << filename_ << "\".";
+      CG_INFO("EventHarvester") << "Saved " << utils::s("histogram", hists_.size(), true) << " into \"" << filename_
+                                << "\".";
   }
 
-  void IntegratedEventVariablesHandler::initialise() {
+  void EventHarvester::initialise() {
     sqrts_ = runParameters().kinematics().incomingBeams().sqrtS();
     num_evts_ = 0ul;
     proc_name_ = proc::ProcessFactory::get().describe(runParameters().processName());
@@ -126,19 +132,19 @@ namespace cepgen {
       file_ << banner("#") << "\n";
   }
 
-  void IntegratedEventVariablesHandler::operator<<(const Event& ev) {
+  void EventHarvester::operator<<(const Event& ev) {
     //--- increment the corresponding histograms
     for (auto& h_var : hists_)
-      h_var.hist.fill(browser_.get(ev, h_var.var));
+      h_var.hist.fill(browser_->get(ev, h_var.var));
     for (auto& h_var : hists2d_)
-      h_var.hist.fill(browser_.get(ev, h_var.var1), browser_.get(ev, h_var.var2));
+      h_var.hist.fill(browser_->get(ev, h_var.var1), browser_->get(ev, h_var.var2));
     ++num_evts_;
   }
 
-  ParametersDescription IntegratedEventVariablesHandler::description() {
+  ParametersDescription EventHarvester::description() {
     auto desc = EventExporter::description();
     desc.setDescription("Text-based histogramming tool");
-    desc.add<std::string>("plotter", "text").setDescription("Plotting algorithm to use");
+    desc.add<std::string>("plotter", "").setDescription("Plotting algorithm to use");
     desc.add<std::string>("filename", "output.hists.txt").setDescription("Output filename for histogram dump");
     desc.add<bool>("show", true).setDescription("Show the histogram(s) at the end of the run?");
     desc.add<bool>("save", false).setDescription("Save the histogram(s) at the end of the run?");
@@ -159,5 +165,3 @@ namespace cepgen {
     return desc;
   }
 }  // namespace cepgen
-
-REGISTER_EXPORTER("text", IntegratedEventVariablesHandler)

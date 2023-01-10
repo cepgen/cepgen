@@ -18,25 +18,24 @@
 
 #include <fstream>
 
-#include "CepGen/Event/EventBrowser.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Utils/Histogram.h"
 
 namespace cepgen {
   class Event;
-  class Parameters;
   namespace utils {
     class Drawer;
-  }
+    class EventBrowser;
+  }  // namespace utils
   /**
      * \brief Handler for the generic text file output
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2019
      */
-  class IntegratedEventVariablesHandler : public EventExporter {
+  class EventHarvester : public EventExporter {
   public:
-    explicit IntegratedEventVariablesHandler(const ParametersList&);
-    ~IntegratedEventVariablesHandler();
+    explicit EventHarvester(const ParametersList&);
+    virtual ~EventHarvester();
 
     static ParametersDescription description();
 
@@ -45,13 +44,13 @@ namespace cepgen {
     void operator<<(const Event&) override;
 
   private:
-    std::ofstream file_;
-    const std::unique_ptr<utils::Drawer> drawer_;
+    const std::unique_ptr<utils::EventBrowser> browser_;
     //--- variables definition
     const bool show_hists_, save_hists_;
     const std::string filename_;
 
-    const utils::EventBrowser browser_;
+    std::ofstream file_;
+    std::unique_ptr<utils::Drawer> drawer_;
 
     double cross_section_{1.};
     unsigned long num_evts_{0ul};

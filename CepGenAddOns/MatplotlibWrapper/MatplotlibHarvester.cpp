@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,19 +16,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/EventFilter/EventHarvester.h"
 #include "CepGen/Modules/EventExporterFactory.h"
-#include "CepGen/OutputModules/IntegratedEventVariablesHandler.h"
 
 namespace cepgen {
-  struct GnuplotHistsHandler final : IntegratedEventVariablesHandler {
-    using IntegratedEventVariablesHandler::IntegratedEventVariablesHandler;
+  struct MatplotlibHarvester final : EventHarvester {
+    using EventHarvester::EventHarvester;
     static ParametersDescription description() {
-      auto desc = IntegratedEventVariablesHandler::description();
-      desc.setDescription("Gnuplot event histogramming tool");
-      desc.add<std::string>("plotter", "gnuplot");
+      auto desc = EventHarvester::description();
+      desc.setDescription("Matplotlib event harvester");
+      desc.add<std::string>("plotter", "matplotlib");
       return desc;
     }
   };
 }  // namespace cepgen
 
-REGISTER_EXPORTER("gnuplot", GnuplotHistsHandler)
+REGISTER_EXPORTER("matplotlib", MatplotlibHarvester)
