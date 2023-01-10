@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
  */
 
 #include "CepGen/Cards/Handler.h"
-#include "CepGen/Core/EventExporter.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/EventExporterFactory.h"
@@ -34,7 +34,7 @@ using namespace std;
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
  */
 int main(int argc, char* argv[]) {
-  std::string input_card;
+  string input_card;
   int num_events;
   bool list_mods, safe_mode;
   vector<string> addons, outputs;
@@ -74,10 +74,9 @@ int main(int argc, char* argv[]) {
     gen.setParameters(cepgen::card::Handler::parse(input_card));
   //--- parse the additional flags
   if (!parser.extra_config().empty())
-    gen.setParameters(
-        cepgen::card::CardsHandlerFactory::get()
-            .build(".cmd", cepgen::ParametersList().set<std::vector<std::string> >("args", parser.extra_config()))
-            ->parse(std::string(), gen.parametersPtr()));
+    gen.setParameters(cepgen::card::CardsHandlerFactory::get()
+                          .build(".cmd", cepgen::ParametersList().set<vector<string> >("args", parser.extra_config()))
+                          ->parse(string(), gen.parametersPtr()));
 
   cepgen::utils::AbortHandler();
 
@@ -105,7 +104,7 @@ int main(int argc, char* argv[]) {
     CG_DEBUG("main") << "Run aborted!";
   } catch (const cepgen::Exception& e) {
     e.dump();
-  } catch (const std::exception& e) {
+  } catch (const exception& e) {
     CG_FATAL("main") << "Other exception caught!\n\t" << e.what();
   }
 

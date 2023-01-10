@@ -16,13 +16,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Core_EventExporter_h
-#define CepGen_Core_EventExporter_h
+#ifndef CepGen_EventFilter_EventExporter_h
+#define CepGen_EventFilter_EventExporter_h
 
-#include <iosfwd>
 #include <string>
 
-#include "CepGen/Core/EventHandler.h"
+#include "CepGen/EventFilter/EventHandler.h"
 
 namespace cepgen {
   class Event;
@@ -40,7 +39,7 @@ namespace cepgen {
     /// Set the process cross section and its associated error
     virtual void setCrossSection(double /*cross_section*/, double /*err_cross_section*/) {}
     /// Set the event number
-    void setEventNumber(const unsigned int& ev_id) { event_num_ = ev_id; }
+    void setEventNumber(unsigned long long ev_id) { event_num_ = ev_id; }
 
     /// Writer operator
     virtual void operator<<(const Event&) = 0;

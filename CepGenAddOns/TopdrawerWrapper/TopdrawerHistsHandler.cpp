@@ -31,4 +31,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_IO_MODULE("topdrawer", TopdrawerHistsHandler)
+REGISTER_EXPORTER("topdrawer", TopdrawerHistsHandler)

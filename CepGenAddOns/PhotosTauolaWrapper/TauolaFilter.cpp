@@ -21,10 +21,10 @@
 #include <Tauola/TauolaEvent.h>
 #include <Tauola/TauolaHepMC3Event.h>
 
-#include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/String.h"

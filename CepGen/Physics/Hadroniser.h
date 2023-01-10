@@ -19,7 +19,7 @@
 #ifndef CepGen_Physics_Hadroniser_h
 #define CepGen_Physics_Hadroniser_h
 
-#include "CepGen/Core/EventModifier.h"
+#include "CepGen/EventFilter/EventModifier.h"
 
 namespace cepgen {
   /// Location for all hadronisers to be run downstream to the events generation

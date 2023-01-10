@@ -20,10 +20,10 @@
 
 #include <sstream>
 
-#include "CepGen/Core/EventExporter.h"
-#include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/EventFilter/EventExporter.h"
+#include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Parameters.h"

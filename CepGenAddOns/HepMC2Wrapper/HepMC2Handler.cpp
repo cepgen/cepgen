@@ -20,11 +20,11 @@
 
 #include <memory>
 
-#include "CepGen/Core/EventExporter.h"
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Parameters.h"
+#include "CepGen/Utils/Message.h"
 #include "CepGenAddOns/HepMC2Wrapper/HepMC2EventInterface.h"
 
 using namespace HepMC;

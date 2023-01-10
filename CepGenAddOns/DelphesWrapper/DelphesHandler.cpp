@@ -23,9 +23,9 @@
 #include <classes/DelphesFactory.h>
 #include <modules/Delphes.h>
 
-#include "CepGen/Core/EventOutputter.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Utils/Timer.h"
@@ -151,4 +151,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_IO_MODULE("delphes", DelphesHandler)
+REGISTER_EXPORTER("delphes", DelphesHandler)

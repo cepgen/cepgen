@@ -19,10 +19,10 @@
 #include <iomanip>
 #include <sstream>
 
-#include "CepGen/Core/EventExporter.h"
-#include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/EventFilter/EventExporter.h"
+#include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"

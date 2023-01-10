@@ -1,6 +1,6 @@
 #include <Pythia8/Pythia.h>
 
-#include "CepGen/Core/EventModifier.h"
+#include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Utils/Test.h"

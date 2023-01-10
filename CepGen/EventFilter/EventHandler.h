@@ -16,10 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Core_EventHandler_h
-#define CepGen_Core_EventHandler_h
+#ifndef CepGen_EventFilter_EventHandler_h
+#define CepGen_EventFilter_EventHandler_h
 
-#include <iosfwd>
 #include <string>
 #include <vector>
 

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,10 +18,10 @@
 
 #include <sstream>
 
-#include "CepGen/Core/EventExporter.h"
-#include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersDescription.h"
+#include "CepGen/EventFilter/EventExporter.h"
+#include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 #include "CepGenAddOns/PythonWrapper/PythonConfigWriter.h"

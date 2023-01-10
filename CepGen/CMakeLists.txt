@@ -1,30 +1,32 @@
 file(GLOB core_sources
         Cards/*.cpp
         Core/*.cpp
-        Modules/*.cpp
-        Utils/*.cpp
+        EventFilter/*.cpp
         Integration/*.cpp
+        Modules/*.cpp
         OutputModules/*.cpp
+        Utils/*.cpp
         *.cpp)
 file(GLOB phys_sources
         Event/*.cpp
+        FormFactors/*.cpp
         Physics/*.cpp
-        StructureFunctions/*.cpp
-        FormFactors/*.cpp)
+        StructureFunctions/*.cpp)
 file(GLOB proc_sources
         Process/*.cpp
         Process/Fortran/*.f)
 file(GLOB core_includes
         Cards
         Core
+        EventFilter
+        FormFactors
+        Integration
         Modules
-        Utils
         OutputModules
         Physics
-        Integration
         Process
         StructureFunctions
-        FormFactors)
+        Utils)
 
 #----- check the external dependencies for SFs/alphaS
 

@@ -23,10 +23,10 @@
 #include <TProfile.h>
 #include <TProfile2D.h>
 
-#include "CepGen/Core/EventExporter.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/EventBrowser.h"
+#include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Utils/Limits.h"

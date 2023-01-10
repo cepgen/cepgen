@@ -16,9 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/EventModifier.h"
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/EventFilter/EventModifier.h"
+#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
   EventModifier::EventModifier(const ParametersList& params)

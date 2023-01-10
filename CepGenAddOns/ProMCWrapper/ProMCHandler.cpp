@@ -23,13 +23,13 @@
 
 #include <cstdio>
 
-#include "CepGen/Core/EventExporter.h"
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/Filesystem.h"
+#include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
 
@@ -160,4 +160,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_IO_MODULE("promc", ProMCHandler)
+REGISTER_EXPORTER("promc", ProMCHandler)

@@ -31,4 +31,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_IO_MODULE("gnuplot", GnuplotHistsHandler)
+REGISTER_EXPORTER("gnuplot", GnuplotHistsHandler)

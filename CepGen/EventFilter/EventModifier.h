@@ -16,13 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Core_EventModifier_h
-#define CepGen_Core_EventModifier_h
+#ifndef CepGen_EventFilter_EventModifier_h
+#define CepGen_EventFilter_EventModifier_h
 
 #include <string>
 #include <vector>
 
-#include "CepGen/Core/EventHandler.h"
+#include "CepGen/EventFilter/EventHandler.h"
 
 namespace cepgen {
   /// Class template to interface (external/internal) events modification algorithms

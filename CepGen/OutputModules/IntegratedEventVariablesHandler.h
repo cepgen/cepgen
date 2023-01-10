@@ -18,8 +18,8 @@
 
 #include <fstream>
 
-#include "CepGen/Core/EventExporter.h"
 #include "CepGen/Event/EventBrowser.h"
+#include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Utils/Histogram.h"
 
 namespace cepgen {

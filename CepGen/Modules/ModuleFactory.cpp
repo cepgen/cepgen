@@ -21,9 +21,9 @@
 
 // collection of handled objects
 #include "CepGen/Cards/Handler.h"
-#include "CepGen/Core/EventExporter.h"
-#include "CepGen/Core/EventModifier.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/EventFilter/EventExporter.h"
+#include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Integration/AnalyticIntegrator.h"
 #include "CepGen/Integration/Integrator.h"
