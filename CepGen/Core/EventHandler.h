@@ -40,6 +40,8 @@ namespace cepgen {
 
     /// Initialise the handler and its inner parameterisation
     void initialise(const Parameters&);
+    /// List of run parameters
+    const Parameters& runParameters() const;
 
     /// Retrieve the engine object
     template <typename T>
@@ -52,7 +54,8 @@ namespace cepgen {
     /// Engine object
     virtual void* enginePtr();
 
-    const Parameters* rt_params_{nullptr};  // NOT owning
+  private:
+    const Parameters* run_params_{nullptr};  // NOT owning
     bool initialised_{false};
   };
 }  // namespace cepgen

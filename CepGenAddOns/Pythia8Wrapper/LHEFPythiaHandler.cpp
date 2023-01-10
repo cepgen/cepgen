@@ -95,7 +95,7 @@ namespace cepgen {
       oss_init << std::endl;  // LHEF is usually not as beautifully parsed as a standard XML...
                               // we're physicists, what do you expect?
       lhaevt_->addComments(oss_init.str());
-      lhaevt_->initialise(*rt_params_);
+      lhaevt_->initialise(runParameters());
 #if PYTHIA_VERSION_INTEGER < 8300
       pythia_->setLHAupPtr(lhaevt_.get());
 #else

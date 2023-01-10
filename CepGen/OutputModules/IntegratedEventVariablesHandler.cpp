@@ -119,9 +119,9 @@ namespace cepgen {
     }
 
     void IntegratedEventVariablesHandler::initialise() {
-      sqrts_ = rt_params_->kinematics().incomingBeams().sqrtS();
+      sqrts_ = runParameters().kinematics().incomingBeams().sqrtS();
       num_evts_ = 0ul;
-      proc_name_ = proc::ProcessFactory::get().describe(rt_params_->processName());
+      proc_name_ = proc::ProcessFactory::get().describe(runParameters().processName());
       proc_name_ += ", \\sqrt{s} = " + utils::format("%g", sqrts_ * 1.e-3) + " TeV";
       if (save_hists_ && !hists_.empty())
         file_ << banner("#") << "\n";

@@ -37,19 +37,19 @@ namespace cepgen {
       const size_t len = 45 + version::tag.size();
       std::ostringstream os;
       os << prep << "******* Sample generated with CepGen " << version::tag << " *******\n"
-         << prep << " Process: " << rt_params_->processName() << " (" << rt_params_->kinematics().incomingBeams().mode()
-         << ")\n";
-      if (rt_params_->kinematics().incomingBeams().mode() != mode::Kinematics::ElasticElastic)
+         << prep << " Process: " << runParameters().processName() << " ("
+         << runParameters().kinematics().incomingBeams().mode() << ")\n";
+      if (runParameters().kinematics().incomingBeams().mode() != mode::Kinematics::ElasticElastic)
         os << prep << " Structure functions: "
-           << rt_params_->kinematics().incomingBeams().structureFunctions()->description().description() << "\n";
-      if (!rt_params_->eventModifiersSequence().empty()) {
-        os << prep << " " << utils::s("Event modifier", rt_params_->eventModifiersSequence().size()) << ": ";
+           << runParameters().kinematics().incomingBeams().structureFunctions()->description().description() << "\n";
+      if (!runParameters().eventModifiersSequence().empty()) {
+        os << prep << " " << utils::s("Event modifier", runParameters().eventModifiersSequence().size()) << ": ";
         std::string sep;
-        for (const auto& mod : rt_params_->eventModifiersSequence())
+        for (const auto& mod : runParameters().eventModifiersSequence())
           os << sep << mod->name(), sep = ", ";
         os << "\n";
       }
-      const auto& cuts = rt_params_->kinematics().cuts();
+      const auto& cuts = runParameters().kinematics().cuts();
       os << prep << std::left << std::setw(len) << std::setfill('*') << "*** Incoming state "
          << "\n";
       for (const auto& cut : cuts.initial.list())
@@ -58,7 +58,7 @@ namespace cepgen {
          << "\n";
       for (const auto& cut : cuts.central.list())
         os << prep << " " << cut.description << ": " << cut.limits << "\n";
-      if (rt_params_->kinematics().incomingBeams().mode() != mode::Kinematics::ElasticElastic) {
+      if (runParameters().kinematics().incomingBeams().mode() != mode::Kinematics::ElasticElastic) {
         os << prep << std::setw(len) << std::setfill('*') << "*** Remnants states "
            << "\n";
         for (const auto& cut : cuts.remnants.list())

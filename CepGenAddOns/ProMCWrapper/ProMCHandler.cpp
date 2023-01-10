@@ -88,7 +88,7 @@ namespace cepgen {
     }
 
     void ProMCHandler::initialise() {
-      file_->setDescription(rt_params_->generation().maxGen(), "Sample generated using CepGen v" + version::tag);
+      file_->setDescription(runParameters().generation().maxGen(), "Sample generated using CepGen v" + version::tag);
       log_file_ << banner() << "\n";
       ProMCHeader hdr;
       hdr.set_momentumunit(GEV_UNIT);
@@ -102,13 +102,13 @@ namespace cepgen {
         data->set_width(desc.width);
         data->set_charge(desc.charge * 1. / 3.);
       }
-      hdr.set_id1(rt_params_->kinematics.incomingBeams().positive().pdg);
-      hdr.set_id2(rt_params_->kinematics.incomingBeams().negative().pdg);
+      hdr.set_id1(runParameters().kinematics().incomingBeams().positive().pdg);
+      hdr.set_id2(runParameters().kinematics().incomingBeams().negative().pdg);
       hdr.set_pdf1(0);
       hdr.set_pdf2(0);
       hdr.set_x1(0);
       hdr.set_x2(0);
-      hdr.set_ecm(rt_params_->kinematics.incomingBeams().sqrtS());
+      hdr.set_ecm(runParameters().kinematics().incomingBeams().sqrtS());
       file_->setHeader(hdr);
     }
 

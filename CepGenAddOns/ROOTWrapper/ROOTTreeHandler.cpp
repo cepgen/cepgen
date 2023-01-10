@@ -87,9 +87,9 @@ namespace cepgen {
       run_tree_.create();
       evt_tree_.create();
       run_tree_.litigious_events = 0;
-      run_tree_.sqrt_s = rt_params_->kinematics().incomingBeams().sqrtS();
-      run_tree_.process_name = rt_params_->processName();
-      run_tree_.process_parameters = rt_params_->process().parameters().serialise();
+      run_tree_.sqrt_s = runParameters().kinematics().incomingBeams().sqrtS();
+      run_tree_.process_name = runParameters().processName();
+      run_tree_.process_parameters = runParameters().process().parameters().serialise();
     }
 
     void ROOTTreeHandler::operator<<(const Event& ev) {
@@ -104,12 +104,12 @@ namespace cepgen {
 
     std::string ROOTTreeHandler::generateFilename() const {
       std::string evt_mods, proc_mode;
-      for (const auto& mod : rt_params_->eventModifiersSequence())
+      for (const auto& mod : runParameters().eventModifiersSequence())
         evt_mods += (evt_mods.empty() ? "" : "-") + mod->name();
-      const auto symm = rt_params_->process().parameters().get<bool>("symmetrise");
+      const auto symm = runParameters().process().parameters().get<bool>("symmetrise");
       const auto sf_info = utils::sanitise(strfun::StructureFunctionsFactory::get().describe(
-          rt_params_->process().kinematics().incomingBeams().structureFunctions()->name()));
-      switch (rt_params_->process().kinematics().incomingBeams().mode()) {
+          runParameters().process().kinematics().incomingBeams().structureFunctions()->name()));
+      switch (runParameters().process().kinematics().incomingBeams().mode()) {
         case mode::Kinematics::ElasticElastic:
           proc_mode = "el";
           break;
@@ -127,9 +127,9 @@ namespace cepgen {
       }
       return utils::format("cepgen%s_%s_%s_%gTeV%s.root",
                            utils::sanitise(version::tag).data(),
-                           rt_params_->processName().data(),
+                           runParameters().processName().data(),
                            proc_mode.data(),
-                           rt_params_->kinematics().incomingBeams().sqrtS() / 1000.,
+                           runParameters().kinematics().incomingBeams().sqrtS() / 1000.,
                            evt_mods.data());
     }
 

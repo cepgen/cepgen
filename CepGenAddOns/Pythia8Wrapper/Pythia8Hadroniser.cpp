@@ -96,18 +96,20 @@ namespace cepgen {
     }
 
     void Pythia8Hadroniser::initialise() {
-      cg_evt_->initialise(*rt_params_);
+      cg_evt_->initialise(runParameters());
 #if PYTHIA_VERSION_INTEGER < 8300
       pythia_->setLHAupPtr(cg_evt_.get());
 #else
       pythia_->setLHAupPtr(cg_evt_);
 #endif
-      pythia_->settings.parm("Beams:idA", (long)rt_params_->kinematics().incomingBeams().positive().pdgId());
-      pythia_->settings.parm("Beams:idB", (long)rt_params_->kinematics().incomingBeams().negative().pdgId());
+      const auto& kin = runParameters().kinematics();
+
+      pythia_->settings.parm("Beams:idA", (long)kin.incomingBeams().positive().pdgId());
+      pythia_->settings.parm("Beams:idB", (long)kin.incomingBeams().negative().pdgId());
       // specify we will be using a LHA input
       pythia_->settings.mode("Beams:frameType", 5);
-      pythia_->settings.parm("Beams:eCM", rt_params_->kinematics().incomingBeams().sqrtS());
-      min_ids_ = rt_params_->kinematics().minimumFinalState();
+      pythia_->settings.parm("Beams:eCM", kin.incomingBeams().sqrtS());
+      min_ids_ = kin.minimumFinalState();
       if (debug_lhef_)
         cg_evt_->openLHEF("debug.lhe");
       pythia_->settings.flag("ProcessLevel:resonanceDecays", res_decay_);
@@ -122,7 +124,7 @@ namespace cepgen {
       }
 
 #if defined(PYTHIA_VERSION_INTEGER) && PYTHIA_VERSION_INTEGER >= 8226
-      switch (rt_params_->kinematics().incomingBeams().mode()) {
+      switch (kin.incomingBeams().mode()) {
         case mode::Kinematics::ElasticElastic: {
           pythia_->settings.mode("BeamRemnants:unresolvedHadron", 3);
           pythia_->settings.flag("PartonLevel:all", false);

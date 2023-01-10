@@ -35,9 +35,15 @@ namespace cepgen {
   void EventHandler::initialise(const Parameters& params) {
     if (initialised_)
       CG_WARNING("EventHandler:initialise") << "Event handler '" << name_ << "' was already initialised.";
-    rt_params_ = &params;
+    run_params_ = &params;
     initialise();
     initialised_ = true;
+  }
+
+  const Parameters& EventHandler::runParameters() const {
+    if (!run_params_)
+      throw CG_FATAL("EventHandler:runParameters") << "Run parameters not yet initialised.";
+    return *run_params_;
   }
 
   void* EventHandler::enginePtr() {
