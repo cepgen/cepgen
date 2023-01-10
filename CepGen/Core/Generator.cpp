@@ -150,16 +150,17 @@ namespace cepgen {
   void Generator::initialise() {
     if (initialised_)
       return;
+    if (!parameters_)
+      throw CG_FATAL("Generator:generate") << "No steering parameters specified!";
 
     CG_TICKER(parameters_->timeKeeper());
 
-    if (!parameters_)
-      throw CG_FATAL("Generator:generate") << "No steering parameters specified!";
+    // if no worker is found, launch a new integration/run preparation
     if (!worker_)
       integrate();
 
-    for (auto& mod : parameters_->eventExportersSequence())
-      mod->initialise(*parameters_);
+    // prepare the run parameters for event generation
+    parameters_->initialise();
 
     initialised_ = true;
   }

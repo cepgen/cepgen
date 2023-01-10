@@ -71,6 +71,15 @@ namespace cepgen {
     return *this;
   }
 
+  void Parameters::initialise() {
+    // prepare the event modifications algorithms for event generation
+    for (auto& mod : evt_modifiers_)
+      mod->initialise(*this);
+    // prepare the output modules for event generation
+    for (auto& mod : evt_exporters_)
+      mod->initialise(*this);
+  }
+
   void Parameters::prepareRun() {
     if (tmr_)
       tmr_->clear();
