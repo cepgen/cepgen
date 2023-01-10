@@ -38,15 +38,31 @@ namespace cepgen {
   class HepMC2Handler : public EventExporter {
   public:
     /// Class constructor
-    explicit HepMC2Handler(const ParametersList&);
-    ~HepMC2Handler();
+    explicit HepMC2Handler(const ParametersList& params)
+        : EventExporter(params), output_(new T(steer<std::string>("filename").c_str())), xs_(new GenCrossSection) {
+      CG_INFO("HepMC") << "Interfacing module initialised "
+                       << "for HepMC version " << HEPMC_VERSION << ".";
+    }
 
-    static ParametersDescription description();
+    static ParametersDescription description() {
+      auto desc = EventExporter::description();
+      desc.setDescription("HepMC2 ASCII file output module");
+      desc.add<std::string>("filename", "output.hepmc").setDescription("Output filename");
+      return desc;
+    }
 
     void initialise() override {}
     /// Writer operator
-    void operator<<(const Event&) override;
-    void setCrossSection(double, double) override;
+    void operator<<(const Event& cg_evt) override {
+      CepGenEvent event(cg_evt);
+      // general information
+      event.set_cross_section(*xs_);
+      event.set_event_number(event_num_++);
+      output_->write_event(&event);
+    }
+    void setCrossSection(double cross_section, double cross_section_err) override {
+      xs_->set_cross_section(cross_section, cross_section_err);
+    }
 
   private:
     /// Writer object
@@ -54,38 +70,6 @@ namespace cepgen {
     /// Generator cross section and error
     std::shared_ptr<GenCrossSection> xs_;
   };
-
-  template <typename T>
-  HepMC2Handler<T>::HepMC2Handler(const ParametersList& params)
-      : EventExporter(params), output_(new T(steer<std::string>("filename").c_str())), xs_(new GenCrossSection) {
-    CG_INFO("HepMC") << "Interfacing module initialised "
-                     << "for HepMC version " << HEPMC_VERSION << ".";
-  }
-
-  template <typename T>
-  HepMC2Handler<T>::~HepMC2Handler() {}
-
-  template <typename T>
-  void HepMC2Handler<T>::operator<<(const Event& evt) {
-    CepGenEvent event(evt);
-    // general information
-    event.set_cross_section(*xs_);
-    event.set_event_number(event_num_++);
-    output_->write_event(&event);
-  }
-
-  template <typename T>
-  void HepMC2Handler<T>::setCrossSection(double cross_section, double cross_section_err) {
-    xs_->set_cross_section(cross_section, cross_section_err);
-  }
-
-  template <typename T>
-  ParametersDescription HepMC2Handler<T>::description() {
-    auto desc = EventExporter::description();
-    desc.setDescription("HepMC2 ASCII file output module");
-    desc.add<std::string>("filename", "output.hepmc").setDescription("Output filename");
-    return desc;
-  }
 }  // namespace cepgen
 
 //----------------------------------------------------------------------

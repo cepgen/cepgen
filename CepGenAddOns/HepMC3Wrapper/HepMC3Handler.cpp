@@ -39,15 +39,38 @@ namespace cepgen {
   class HepMC3Handler : public EventExporter {
   public:
     /// Class constructor
-    explicit HepMC3Handler(const ParametersList&);
-    ~HepMC3Handler();
+    explicit HepMC3Handler(const ParametersList& params)
+        : EventExporter(params),
+          output_(new T(steer<std::string>("filename").c_str())),
+          xs_(new GenCrossSection),
+          run_info_(new GenRunInfo) {
+      output_->set_run_info(run_info_);
+      run_info_->set_weight_names({"Default"});
+      CG_INFO("HepMC") << "Interfacing module initialised "
+                       << "for HepMC version " << HEPMC3_VERSION << ".";
+    }
+    virtual ~HepMC3Handler() { output_->close(); }
 
-    static ParametersDescription description();
+    static ParametersDescription description() {
+      auto desc = EventExporter::description();
+      desc.setDescription("HepMC3 ASCII file output module");
+      desc.add<std::string>("filename", "output.hepmc").setDescription("Output filename");
+      return desc;
+    }
 
     void initialise() override {}
     /// Writer operator
-    void operator<<(const Event&) override;
-    void setCrossSection(double, double) override;
+    void operator<<(const Event& cg_event) override {
+      CepGenEvent event(cg_event);
+      // general information
+      event.set_cross_section(xs_);
+      event.set_run_info(run_info_);
+      event.set_event_number(event_num_++);
+      output_->write_event(event);
+    }
+    void setCrossSection(double cross_section, double cross_section_err) override {
+      xs_->set_cross_section(cross_section, cross_section_err);
+    }
 
   private:
     /// Writer object
@@ -57,46 +80,6 @@ namespace cepgen {
     /// Auxiliary information on run
     std::shared_ptr<GenRunInfo> run_info_;
   };
-
-  template <typename T>
-  HepMC3Handler<T>::HepMC3Handler(const ParametersList& params)
-      : EventExporter(params),
-        output_(new T(steer<std::string>("filename").c_str())),
-        xs_(new GenCrossSection),
-        run_info_(new GenRunInfo) {
-    output_->set_run_info(run_info_);
-    run_info_->set_weight_names({"Default"});
-    CG_INFO("HepMC") << "Interfacing module initialised "
-                     << "for HepMC version " << HEPMC3_VERSION << ".";
-  }
-
-  template <typename T>
-  HepMC3Handler<T>::~HepMC3Handler() {
-    output_->close();
-  }
-
-  template <typename T>
-  void HepMC3Handler<T>::operator<<(const Event& evt) {
-    CepGenEvent event(evt);
-    // general information
-    event.set_cross_section(xs_);
-    event.set_run_info(run_info_);
-    event.set_event_number(event_num_++);
-    output_->write_event(event);
-  }
-
-  template <typename T>
-  void HepMC3Handler<T>::setCrossSection(double cross_section, double cross_section_err) {
-    xs_->set_cross_section(cross_section, cross_section_err);
-  }
-
-  template <typename T>
-  ParametersDescription HepMC3Handler<T>::description() {
-    auto desc = EventExporter::description();
-    desc.setDescription("HepMC3 ASCII file output module");
-    desc.add<std::string>("filename", "output.hepmc").setDescription("Output filename");
-    return desc;
-  }
 }  // namespace cepgen
 
 //----------------------------------------------------------------------
