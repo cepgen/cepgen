@@ -9,10 +9,12 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 include(${ROOT_USE_FILE})
-file(GLOB ev_headers classes.h)
-REFLEX_GENERATE_DICTIONARY(CepGenEventDict ${ev_headers} SELECTION classes_def.xml)
+set(CMAKE_ROOTTEST_NOROOTMAP OFF)
+file(GLOB EVENT_HEADERS ${PROJECT_SOURCE_DIR}/CepGen/Event/*.h)
+set(ROOT_DICT_NAME "CepGenEventDict")
+reflex_generate_dictionary(${ROOT_DICT_NAME} classes.h ${EVENT_HEADERS} SELECTION classes_def.xml)
 
-file(GLOB root_sources ROOT*.cpp CepGenEventDict.cxx)
+file(GLOB root_sources ROOT*.cpp ${ROOT_DICT_NAME})
 #add_dependencies(CepGenEvent CepGenEventDict-dictgen)
 
 string(REPLACE "-Qunused-arguments" "" ROOT_CXX_FLAGS ${ROOT_CXX_FLAGS})
@@ -35,9 +37,6 @@ cepgen_build(CepGenRoot SOURCES ${root_sources} ${foam_sources}
     PROPERTY CXX_STANDARD ${ROOT_CXX_STANDARD}
     CFLAGS "${ROOT_CXX_FLAGS}"
     INSTALL_COMPONENT root)
-cpack_add_component(root
-    DISPLAY_NAME "CepGen ROOT wrappers library"
-    DESCRIPTION "Collection of CepGen wrappers to the ROOT library"
-    DEPENDS lib)
 
 message(STATUS "... ROOT v${ROOT_VERSION} standard is c++${ROOT_CXX_STANDARD}")
+#add_dependencies(CepGenRoot ${ROOT_DICT_NAME}-dictgen)
