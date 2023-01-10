@@ -16,10 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Core/EventExporter.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Generator.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Test.h"
@@ -42,13 +42,13 @@ int main(int argc, char* argv[]) {
     CG_LOG.log([](auto& log) {
       log << "List of export modules available:\n"
           << "=================================";
-      for (const auto& mod : io::ExportModuleFactory::get().modules())
+      for (const auto& mod : EventExporterFactory::get().modules())
         log << "\n" << mod;
     });
     return 0;
   }
 
-  auto writer = io::ExportModuleFactory::get().build(type);
+  auto writer = EventExporterFactory::get().build(type);
   writer->setCrossSection(1., 2.);
 
   Event ev;

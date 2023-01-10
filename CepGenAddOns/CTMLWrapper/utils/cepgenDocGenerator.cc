@@ -20,8 +20,8 @@
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
       .document("func", "Functional parsers", cepgen::utils::FunctionalFactory::get())
       .document("drawer", "Drawing tools", cepgen::utils::DrawerFactory::get())
       .document("evtmod", "Event modification algorithms", cepgen::EventModifierFactory::get())
-      .document("evtout", "Event export modules", cepgen::io::ExportModuleFactory::get());
+      .document("evtout", "Event export modules", cepgen::EventExporterFactory::get());
 
   return 0;
 }

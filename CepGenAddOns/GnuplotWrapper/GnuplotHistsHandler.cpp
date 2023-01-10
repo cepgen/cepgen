@@ -16,21 +16,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/OutputModules/IntegratedEventVariablesHandler.h"
 
 namespace cepgen {
-  namespace io {
-    struct GnuplotHistsHandler final : IntegratedEventVariablesHandler {
-      using IntegratedEventVariablesHandler::IntegratedEventVariablesHandler;
-      static ParametersDescription description() {
-        auto desc = IntegratedEventVariablesHandler::description();
-        desc.setDescription("Gnuplot event histogramming tool");
-        desc.add<std::string>("plotter", "gnuplot");
-        return desc;
-      }
-    };
-  }  // namespace io
+  struct GnuplotHistsHandler final : IntegratedEventVariablesHandler {
+    using IntegratedEventVariablesHandler::IntegratedEventVariablesHandler;
+    static ParametersDescription description() {
+      auto desc = IntegratedEventVariablesHandler::description();
+      desc.setDescription("Gnuplot event histogramming tool");
+      desc.add<std::string>("plotter", "gnuplot");
+      return desc;
+    }
+  };
 }  // namespace cepgen
 
 REGISTER_IO_MODULE("gnuplot", GnuplotHistsHandler)

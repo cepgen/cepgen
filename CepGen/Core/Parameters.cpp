@@ -18,14 +18,14 @@
 
 #include <iomanip>
 
+#include "CepGen/Core/EventExporter.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Integration/Integrator.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/PDG.h"
@@ -42,7 +42,7 @@ namespace cepgen {
       : par_integrator(param.par_integrator),
         process_(std::move(param.process_)),
         evt_modifiers_(std::move(param.evt_modifiers_)),
-        out_modules_(std::move(param.out_modules_)),
+        evt_exporters_(std::move(param.evt_exporters_)),
         taming_functions_(std::move(param.taming_functions_)),
         total_gen_time_(param.total_gen_time_),
         num_gen_events_(param.num_gen_events_),
@@ -62,7 +62,7 @@ namespace cepgen {
     par_integrator = param.par_integrator;
     process_ = std::move(param.process_);
     evt_modifiers_ = std::move(param.evt_modifiers_);
-    out_modules_ = std::move(param.out_modules_);
+    evt_exporters_ = std::move(param.evt_exporters_);
     taming_functions_ = std::move(param.taming_functions_);
     total_gen_time_ = param.total_gen_time_;
     num_gen_events_ = param.num_gen_events_;
@@ -124,14 +124,14 @@ namespace cepgen {
     evt_modifiers_.emplace_back(std::move(std::unique_ptr<EventModifier>(mod)));
   }
 
-  io::ExportModule& Parameters::outputModule(size_t i) { return *out_modules_.at(i); }
+  EventExporter& Parameters::eventExporter(size_t i) { return *evt_exporters_.at(i); }
 
-  void Parameters::clearOutputModulesSequence() { out_modules_.clear(); }
+  void Parameters::clearEventExportersSequence() { evt_exporters_.clear(); }
 
-  void Parameters::addOutputModule(std::unique_ptr<io::ExportModule> mod) { out_modules_.emplace_back(std::move(mod)); }
+  void Parameters::addEventExporter(std::unique_ptr<EventExporter> mod) { evt_exporters_.emplace_back(std::move(mod)); }
 
-  void Parameters::addOutputModule(io::ExportModule* mod) {
-    out_modules_.emplace_back(std::unique_ptr<io::ExportModule>(mod));
+  void Parameters::addEventExporter(EventExporter* mod) {
+    evt_exporters_.emplace_back(std::unique_ptr<EventExporter>(mod));
   }
 
   void Parameters::addTamingFunction(std::unique_ptr<utils::Functional> fct) {
@@ -155,7 +155,7 @@ namespace cepgen {
       os << std::setw(wt) << "Number of threads" << param->generation_.numThreads() << "\n";
     os << std::setw(wt) << "Number of points to try per bin" << param->generation_.numPoints() << "\n"
        << std::setw(wt) << "Verbosity level " << utils::Logger::get().level() << "\n";
-    if (!param->evt_modifiers_.empty() || param->out_modules_.empty() || !param->taming_functions_.empty())
+    if (!param->evt_modifiers_.empty() || param->evt_exporters_.empty() || !param->taming_functions_.empty())
       os << "\n"
          << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Event treatment ") << std::setfill(' ')
          << "\n\n";
@@ -165,11 +165,10 @@ namespace cepgen {
         os << std::setw(wt) << mod_name << sep << utils::boldify(mod->name()) << "\n", sep = "+ ", mod_name.clear();
       os << "\n";
     }
-    if (!param->out_modules_.empty()) {
-      os << utils::s("Output module", param->out_modules_.size(), false);
-      for (const auto& mod : param->out_modules_)
-        os << "\n\t*) "
-           << io::ExportModuleFactory::get().describeParameters(mod->name(), mod->parameters()).describe(1);
+    if (!param->evt_exporters_.empty()) {
+      os << utils::s("Output module", param->evt_exporters_.size(), false);
+      for (const auto& mod : param->evt_exporters_)
+        os << "\n\t*) " << EventExporterFactory::get().describeParameters(mod->name(), mod->parameters()).describe(1);
     }
     if (!param->taming_functions_.empty()) {
       os << std::setw(wt) << utils::s("Taming function", param->taming_functions_.size(), false) << "\n";

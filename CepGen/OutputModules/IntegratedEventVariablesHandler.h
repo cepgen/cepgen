@@ -18,7 +18,7 @@
 
 #include <fstream>
 
-#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Core/EventExporter.h"
 #include "CepGen/Event/EventBrowser.h"
 #include "CepGen/Utils/Histogram.h"
 
@@ -28,56 +28,54 @@ namespace cepgen {
   namespace utils {
     class Drawer;
   }
-  namespace io {
-    /**
+  /**
      * \brief Handler for the generic text file output
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2019
      */
-    class IntegratedEventVariablesHandler : public ExportModule {
-    public:
-      explicit IntegratedEventVariablesHandler(const ParametersList&);
-      ~IntegratedEventVariablesHandler();
+  class IntegratedEventVariablesHandler : public EventExporter {
+  public:
+    explicit IntegratedEventVariablesHandler(const ParametersList&);
+    ~IntegratedEventVariablesHandler();
 
-      static ParametersDescription description();
+    static ParametersDescription description();
 
-      void initialise() override;
-      void setCrossSection(double cross_section, double) override { cross_section_ = cross_section; }
-      void operator<<(const Event&) override;
+    void initialise() override;
+    void setCrossSection(double cross_section, double) override { cross_section_ = cross_section; }
+    void operator<<(const Event&) override;
 
-    private:
-      std::ofstream file_;
-      const std::unique_ptr<utils::Drawer> drawer_;
-      //--- variables definition
-      const bool show_hists_, save_hists_;
-      const std::string filename_;
+  private:
+    std::ofstream file_;
+    const std::unique_ptr<utils::Drawer> drawer_;
+    //--- variables definition
+    const bool show_hists_, save_hists_;
+    const std::string filename_;
 
-      const utils::EventBrowser browser_;
+    const utils::EventBrowser browser_;
 
-      double cross_section_{1.};
-      unsigned long num_evts_{0ul};
+    double cross_section_{1.};
+    unsigned long num_evts_{0ul};
 
-      /// centre-of-mass energy
-      double sqrts_{0.};
-      /// Name of the physics process
-      std::string proc_name_;
+    /// centre-of-mass energy
+    double sqrts_{0.};
+    /// Name of the physics process
+    std::string proc_name_;
 
-      /// 1D histogram definition
-      struct Hist1DInfo {
-        std::string var;
-        utils::Hist1D hist;
-        bool log;
-      };
-      /// List of 1D histograms
-      std::vector<Hist1DInfo> hists_;
-      /// 2D histogram definition
-      struct Hist2DInfo {
-        std::string var1, var2;
-        utils::Hist2D hist;
-        bool log;
-      };
-      /// List of 2D histograms
-      std::vector<Hist2DInfo> hists2d_;
+    /// 1D histogram definition
+    struct Hist1DInfo {
+      std::string var;
+      utils::Hist1D hist;
+      bool log;
     };
-  }  // namespace io
+    /// List of 1D histograms
+    std::vector<Hist1DInfo> hists_;
+    /// 2D histogram definition
+    struct Hist2DInfo {
+      std::string var1, var2;
+      utils::Hist2D hist;
+      bool log;
+    };
+    /// List of 2D histograms
+    std::vector<Hist2DInfo> hists2d_;
+  };
 }  // namespace cepgen

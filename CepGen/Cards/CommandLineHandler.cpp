@@ -19,13 +19,13 @@
 #include <fstream>
 
 #include "CepGen/Cards/Handler.h"
+#include "CepGen/Core/EventExporter.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
@@ -143,7 +143,7 @@ namespace cepgen {
       //----- output modules definition
       const auto& out = pars.get<ParametersList>("output");
       if (!out.keys(true).empty())
-        rt_params_->addOutputModule(io::ExportModuleFactory::get().build(out));
+        rt_params_->addEventExporter(EventExporterFactory::get().build(out));
       return rt_params_;
     }
   }  // namespace card

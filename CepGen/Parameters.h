@@ -24,13 +24,11 @@
 #include "CepGen/Physics/Kinematics.h"
 
 namespace cepgen {
+  class EventExporter;
   class EventModifier;
   class ParametersList;
   namespace proc {
     class Process;
-  }
-  namespace io {
-    class ExportModule;
   }
   namespace utils {
     class TimeKeeper;
@@ -40,7 +38,7 @@ namespace cepgen {
   /// An ordered collection of event modification algorithms
   typedef std::vector<std::unique_ptr<EventModifier> > EventModifiersSequence;
   /// An ordered collection of event export modules
-  typedef std::vector<std::unique_ptr<io::ExportModule> > ExportModulesSequence;
+  typedef std::vector<std::unique_ptr<EventExporter> > EventExportersSequence;
   /// An ordered collection of taming functions evaluators
   typedef std::vector<std::unique_ptr<utils::Functional> > TamingFunctionsSequence;
   /// List of parameters used to start and run the simulation job
@@ -156,17 +154,17 @@ namespace cepgen {
     //----- event output algorithms
 
     /// Output module
-    io::ExportModule& outputModule(size_t);
+    EventExporter& eventExporter(size_t);
     /// Retrieve the list of output modules to run
-    ExportModulesSequence& outputModulesSequence() { return out_modules_; }
+    EventExportersSequence& eventExportersSequence() { return evt_exporters_; }
     /// Retrieve the list of output modules to run
-    const ExportModulesSequence& outputModulesSequence() const { return out_modules_; }
+    const EventExportersSequence& eventExportersSequence() const { return evt_exporters_; }
     /// Remove all output modules from sequence
-    void clearOutputModulesSequence();
+    void clearEventExportersSequence();
     /// Set a new output module definition
-    void addOutputModule(std::unique_ptr<io::ExportModule> mod);
+    void addEventExporter(std::unique_ptr<EventExporter> mod);
     /// Set the pointer to a output module
-    void addOutputModule(io::ExportModule* mod);
+    void addEventExporter(EventExporter* mod);
 
     //----- taming functions
 
@@ -193,7 +191,7 @@ namespace cepgen {
     /// Collection of event modification algorithms to be applied
     EventModifiersSequence evt_modifiers_;
     /// Collection of event output modules to be applied
-    ExportModulesSequence out_modules_;
+    EventExportersSequence evt_exporters_;
     /// Functions to be used to account for rescattering corrections
     TamingFunctionsSequence taming_functions_;
     /// Total generation time (in seconds)

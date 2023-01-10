@@ -17,8 +17,8 @@
  */
 
 #include "CepGen/Cards/Handler.h"
+#include "CepGen/Core/EventExporter.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Utils/ArgumentsParser.h"
@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
 
   cepgen::Generator gen;
   gen.setParameters(cepgen::card::Handler::parse(input_card));
-  gen.parametersRef().outputModulesSequence().clear();
+  gen.parametersRef().eventExportersSequence().clear();
   for (auto iev = 0; iev < num_events; ++iev)
     gen.next();
 

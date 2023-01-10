@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,14 +19,14 @@
 #include <fstream>
 
 #include "CepGen/Cards/LpairHandler.h"
+#include "CepGen/Core/EventExporter.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Generator.h"  // for library loading
 #include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Parameters.h"
@@ -237,7 +237,7 @@ namespace cepgen {
           ParametersList outm;
           if (out_files.size() > i && !out_files.at(i).empty())
             outm.set<std::string>("filename", out_files.at(i));
-          rt_params_->addOutputModule(io::ExportModuleFactory::get().build(mod, outm));
+          rt_params_->addEventExporter(EventExporterFactory::get().build(mod, outm));
           ++i;
         }
       }
@@ -296,7 +296,7 @@ namespace cepgen {
       }
       {
         std::vector<std::string> out_mod, out_mod_file;
-        for (const auto& out : rt_params_->outputModulesSequence()) {
+        for (const auto& out : rt_params_->eventExportersSequence()) {
           out_mod.emplace_back(out->name());
           out_mod_file.emplace_back(out->parameters().get<std::string>("filename"));
         }

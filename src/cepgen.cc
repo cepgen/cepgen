@@ -17,11 +17,11 @@
  */
 
 #include "CepGen/Cards/Handler.h"
+#include "CepGen/Core/EventExporter.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Utils/AbortHandler.h"
 #include "CepGen/Utils/ArgumentsParser.h"
@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
 
     if (params.generation().enabled() && !outputs.empty())
       for (const auto& output : outputs)
-        gen.parametersRef().addOutputModule(cepgen::io::ExportModuleFactory::get().build(output));
+        gen.parametersRef().addEventExporter(cepgen::EventExporterFactory::get().build(output));
 
     //--- list all parameters
     CG_LOG << gen.parameters();

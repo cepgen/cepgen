@@ -24,16 +24,16 @@
 #include <algorithm>
 
 #include "CepGen/Cards/Handler.h"
+#include "CepGen/Core/EventExporter.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Generator.h"  // for library loading
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Parameters.h"
@@ -78,8 +78,8 @@ namespace cepgen {
       void parseGenerator(PyObject*);
       void parseHadroniser(PyObject*);
       void parseEventModifiers(PyObject*);
-      void parseOutputModule(PyObject*);
-      void parseOutputModules(PyObject*);
+      void parseEventExporter(PyObject*);
+      void parseEventExporters(PyObject*);
       void parseExtraParticles(PyObject*);
 
       std::unique_ptr<python::Environment> env_;
@@ -181,7 +181,7 @@ namespace cepgen {
       //--- generation parameters
       parseAttr(INTEGRATOR_NAME, [this](PyObject* pint) { parseIntegrator(pint); });
       parseAttr(GENERATOR_NAME, [this](PyObject* pgen) { parseGenerator(pgen); });
-      parseAttr(OUTPUT_NAME, [this](PyObject* pout) { parseOutputModules(pout); });
+      parseAttr(OUTPUT_NAME, [this](PyObject* pout) { parseEventExporters(pout); });
 
       return rt_params_;
     }
@@ -251,23 +251,23 @@ namespace cepgen {
       }
     }
 
-    void PythonHandler::parseOutputModules(PyObject* mod) {
+    void PythonHandler::parseEventExporters(PyObject* mod) {
       if (!python::isVector<ParametersList>(mod))
         PY_ERROR << "Output modules definition object should be a list/Sequence.";
 
       for (Py_ssize_t i = 0; i < PyList_Size(mod); ++i)
-        parseOutputModule(PyList_GetItem(mod, i));
+        parseEventExporter(PyList_GetItem(mod, i));
     }
 
-    void PythonHandler::parseOutputModule(PyObject* pout) {
+    void PythonHandler::parseEventExporter(PyObject* pout) {
       if (!python::is<ParametersList>(pout))
         PY_ERROR << "Invalid type for output parameters list.";
 
       auto* pname = python::element(pout, MODULE_NAME);  // borrowed
       if (!pname)
         PY_ERROR << "Output module name is required.";
-      rt_params_->addOutputModule(
-          io::ExportModuleFactory::get().build(python::get<std::string>(pname), python::get<ParametersList>(pout)));
+      rt_params_->addEventExporter(
+          EventExporterFactory::get().build(python::get<std::string>(pname), python::get<ParametersList>(pout)));
     }
 
     void PythonHandler::parseExtraParticles(PyObject* pparts) {

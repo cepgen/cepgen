@@ -21,8 +21,8 @@
 
 // collection of handled objects
 #include "CepGen/Cards/Handler.h"
+#include "CepGen/Core/EventExporter.h"
 #include "CepGen/Core/EventModifier.h"
-#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Integration/AnalyticIntegrator.h"
@@ -110,10 +110,10 @@ namespace cepgen {
   template class ModuleFactory<utils::Derivator, std::string>;
   template class ModuleFactory<utils::Drawer, std::string>;
   template class ModuleFactory<EventModifier, std::string>;
+  template class ModuleFactory<EventExporter, std::string>;
   template class ModuleFactory<formfac::Parameterisation, std::string>;
   template class ModuleFactory<Integrator, std::string>;
   template class ModuleFactory<AnalyticIntegrator, std::string>;
-  template class ModuleFactory<io::ExportModule, std::string>;
   template class ModuleFactory<proc::Process, std::string>;
   template class ModuleFactory<sigrat::Parameterisation, int>;
   template class ModuleFactory<strfun::Parameterisation, int>;

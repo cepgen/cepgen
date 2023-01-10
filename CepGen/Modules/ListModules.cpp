@@ -25,8 +25,8 @@
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/DerivatorFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
@@ -71,7 +71,7 @@ namespace cepgen {
       list_modules(AlphaEMFactory::get(), "alpha(EM) evolution algorithms");
       list_modules(AlphaSFactory::get(), "alpha(s) evolution algorithms");
       list_modules(EventModifierFactory::get(), "Event modification modules");
-      list_modules(io::ExportModuleFactory::get(), "Export modules");
+      list_modules(EventExporterFactory::get(), "Export modules");
       list_modules(utils::FunctionalFactory::get(), "Functional evaluators");
       list_modules(card::CardsHandlerFactory::get(), "Steering cards parsers");
       list_modules(IntegratorFactory::get(), "Integration algorithms");

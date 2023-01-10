@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
 
   auto& par = mg.parametersRef();
   //--- ensure nothing is written in the output sequence
-  par.outputModulesSequence().clear();
+  par.eventExportersSequence().clear();
 
   if (points.empty())
     for (int i = 0; i <= npoints; ++i)

@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
 
   if (!enable_plugins) {
     gen.parametersPtr()->clearEventModifiersSequence();
-    gen.parametersPtr()->clearOutputModulesSequence();
+    gen.parametersPtr()->clearEventExportersSequence();
   }
 
   CG_LOG << gen.parameters() << "\n\t"

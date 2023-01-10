@@ -18,9 +18,9 @@
 
 #include <sstream>
 
+#include "CepGen/Core/EventExporter.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
@@ -43,7 +43,7 @@ namespace cepgen {
         (*this) << ParametersDescription(params.process().parameters()).setKey<std::string>("process");
       for (const auto& mod : params.eventModifiersSequence())
         (*this) << ParametersDescription(mod->parameters());
-      for (const auto& mod : params.outputModulesSequence())
+      for (const auto& mod : params.eventExportersSequence())
         (*this) << ParametersDescription(mod->parameters());
       return *this;
     }

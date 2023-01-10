@@ -16,9 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/ExportModule.h"
+#include "CepGen/Core/EventExporter.h"
 #include "CepGen/Generator.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
+#include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
                                                         .set<double>("sqrtS", 13.e3)
                                                         .set<int>("mode", 1)
                                                         .set<double>("ptmin", 25.)));
-    pars.addOutputModule(cepgen::io::ExportModuleFactory::get().build(
+    pars.addEventExporter(cepgen::EventExporterFactory::get().build(
         "root_tree", cepgen::ParametersList().set<string>("filename", tmp_filename)));
     CG_LOG << &pars;
     gen.generate(num_gen);

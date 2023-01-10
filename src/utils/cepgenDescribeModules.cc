@@ -24,8 +24,8 @@
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/DerivatorFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
     LOOP_FACTORY_INT("Structure functions modelling", cepgen::strfun::StructureFunctionsFactory)
     LOOP_FACTORY_INT("Cross sections ratio modelling", cepgen::sigrat::SigmaRatiosFactory)
     LOOP_FACTORY("Event modification", cepgen::EventModifierFactory)
-    LOOP_FACTORY("Export", cepgen::io::ExportModuleFactory)
+    LOOP_FACTORY("Export", cepgen::EventExporterFactory)
     LOOP_FACTORY("alpha(EM)", cepgen::AlphaEMFactory)
     LOOP_FACTORY("alpha(S)", cepgen::AlphaSFactory)
     LOOP_FACTORY("Functional evaluator", cepgen::utils::FunctionalFactory)

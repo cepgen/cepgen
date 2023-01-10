@@ -18,9 +18,9 @@
 
 #include <chrono>
 
+#include "CepGen/Core/EventExporter.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Integration/GridParameters.h"
@@ -141,7 +141,7 @@ namespace cepgen {
     for (auto& mod : parameters_->eventModifiersSequence())
       mod->setCrossSection(result_, result_error_);
     // ...and to the event storage algorithms
-    for (auto& mod : parameters_->outputModulesSequence())
+    for (auto& mod : parameters_->eventExportersSequence())
       mod->setCrossSection(result_, result_error_);
   }
 
@@ -158,7 +158,7 @@ namespace cepgen {
     if (!worker_)
       integrate();
 
-    for (auto& mod : parameters_->outputModulesSequence())
+    for (auto& mod : parameters_->eventExportersSequence())
       mod->initialise(*parameters_);
 
     initialised_ = true;

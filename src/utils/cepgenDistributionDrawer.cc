@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
       .parse();
 
   mg.setParameters(cepgen::card::Handler::parse(input_card));
-  mg.parametersRef().clearOutputModulesSequence();
+  mg.parametersRef().clearEventExportersSequence();
 
   // book all histograms
   map<string, unique_ptr<cepgen::utils::Hist1D> > h_var_hist;

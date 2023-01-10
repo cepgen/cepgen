@@ -16,9 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/Core/EventExporter.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Generator.h"
@@ -163,7 +163,7 @@ namespace cepgen {
       CG_INFO("GeneratorWorker:store") << utils::s("event", ngen + 1, true) << " generated.";
     if (callback)
       callback(event, ngen);
-    for (auto& mod : params_->outputModulesSequence())
+    for (auto& mod : params_->eventExportersSequence())
       *mod << event;
     const_cast<Parameters*>(params_)->addGenerationTime(event.time_total);
     return true;

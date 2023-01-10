@@ -22,15 +22,15 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include "CepGen/Cards/Handler.h"
+#include "CepGen/Core/EventExporter.h"
 #include "CepGen/Core/EventModifier.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ExportModule.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Generator.h"  // for library loading
 #include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
-#include "CepGen/Modules/ExportModuleFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Parameters.h"
@@ -116,7 +116,7 @@ namespace cepgen {
           for (const auto& name : evt_out_.keys()) {
             const auto& mod = evt_out_.get<ParametersList>(name);
             if (!mod.empty())
-              rt_params_->addOutputModule(io::ExportModuleFactory::get().build(name, mod));
+              rt_params_->addEventExporter(EventExporterFactory::get().build(name, mod));
           }
         }
         if (tree_.count(TIMER_NAME))
@@ -156,9 +156,9 @@ namespace cepgen {
           evt_mod_tree.put("", mod->name());
         tree_.add_child(EVT_MOD_SEQ_NAME, evt_mod_tree);
       }
-      if (!rt_params_->outputModulesSequence().empty()) {
+      if (!rt_params_->eventExportersSequence().empty()) {
         auto out_mod_tree = bc::pack(evt_out_);
-        for (const auto& mod : rt_params_->outputModulesSequence())
+        for (const auto& mod : rt_params_->eventExportersSequence())
           out_mod_tree.add_child(mod->name(), bc::pack(mod->parameters()));
         tree_.add_child(OUTPUT_NAME, out_mod_tree);
       }
