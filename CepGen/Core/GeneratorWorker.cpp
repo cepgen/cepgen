@@ -151,10 +151,6 @@ namespace cepgen {
   bool GeneratorWorker::storeEvent(Event::callback callback) {
     CG_TICKER(const_cast<Parameters*>(params_)->timeKeeper());
 
-    // start by computing the matrix element for that point and reject if unphysical
-    if (integrator_->eval(*integrand_, coords_) <= 0.)
-      return false;
-
     if (!integrand_->process().hasEvent())
       return true;
 
