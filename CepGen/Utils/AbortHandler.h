@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,17 +45,8 @@ namespace cepgen {
         action_.sa_flags = flags;
         init();
       }
-      /// Switch on/off multithreading capabilities
-      void setMT(bool mt_on = true) {
-        if (mt_on)
-          action_.sa_sigaction = handle_ctrl_c_mt;
-        else
-          action_.sa_sigaction = handle_ctrl_c;
-        init();
-      }
 
     private:
-      static void handle_ctrl_c_mt(int signal, siginfo_t*, void*) { gSignal = signal; }
       static void handle_ctrl_c(int signal, siginfo_t* si, void*) {
         gSignal = signal;
         if (abs(si->si_code) != SIGABRT)
