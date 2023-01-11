@@ -41,11 +41,11 @@ namespace cepgen {
     /// Number of times a phase space point has been randomly selected
     const coord_t& n(size_t coord) const;
     /// Global function maximum
-    double globalMax() const { return f_max_global_; }
+    float globalMax() const { return f_max_global_; }
     /// Maximal function value for a given grid coordinate
-    double maxValue(size_t coord) const;
+    float maxValue(size_t) const;
     /// Set the function value for a given grid coordinate
-    void setValue(size_t coord, double val);
+    void setValue(size_t, float);
     /// Shoot a phase space point for a grid coordinate
     void shoot(const Integrator* integ, size_t coord, std::vector<double>& out) const;
     /// Specify a new trial has been attempted for bin
@@ -57,13 +57,13 @@ namespace cepgen {
     /// Mark the grid as prepared
     void setPrepared(bool prepared = true) { gen_prepared_ = prepared; }
     /// Correction to apply on the next phase space point generation
-    double correctionValue() const { return correc_; }
+    float correctionValue() const { return correc_; }
     /// Set the correction to apply on the next phase space point generation
-    void setCorrectionValue(double correc) { correc_ = correc; }
+    void setCorrectionValue(float correc) { correc_ = correc; }
     /// Apply the correction requested at the previous generation
     bool correct(size_t);
-    void rescale(size_t, double);
-    void initCorrectionCycle(size_t, double);
+    void rescale(size_t, float);
+    void initCorrectionCycle(size_t, float);
     double maxValueDiff() const { return f_max_diff_; }
     double maxHistValue() const { return f_max_old_; }
 
@@ -79,19 +79,19 @@ namespace cepgen {
     /// Has the grid been already prepared?
     bool gen_prepared_{false};
     /// Correction to apply on the next phase space point generation
-    double correc_{0.};
-    double correc2_{0.};
+    float correc_{0.};
+    float correc2_{0.};
     /// Point coordinates in grid
     std::vector<coord_t> coords_;
     /// Number of functions values evaluated for this point
     std::vector<size_t> num_points_;
     /// Maximal value of the function at one given point
-    std::vector<double> f_max_;
+    std::vector<float> f_max_;
     /// Maximal value of the function in the considered integration range
-    double f_max_global_{0.};
-    double f_max2_{0.};
-    double f_max_diff_{0.};
-    double f_max_old_{0.};
+    float f_max_global_{0.};
+    float f_max2_{0.};
+    float f_max_diff_{0.};
+    float f_max_old_{0.};
   };
 }  // namespace cepgen
 

@@ -39,13 +39,13 @@ namespace cepgen {
 
   const GridParameters::coord_t& GridParameters::n(size_t coord) const { return coords_.at(coord); }
 
-  void GridParameters::setValue(size_t coord, double val) {
+  void GridParameters::setValue(size_t coord, float val) {
     //--- update function local and global maxima if needed
     f_max_.at(coord) = std::max(f_max_.at(coord), val);
     f_max_global_ = std::max(f_max_global_, val);
   }
 
-  double GridParameters::maxValue(size_t coord) const { return f_max_.at(coord); }
+  float GridParameters::maxValue(size_t coord) const { return f_max_.at(coord); }
 
   size_t GridParameters::numPoints(size_t coord) const { return num_points_.at(coord); }
 
@@ -91,7 +91,7 @@ namespace cepgen {
     return false;
   }
 
-  void GridParameters::rescale(size_t bin, double weight) {
+  void GridParameters::rescale(size_t bin, float weight) {
     if (weight <= f_max_.at(bin))
       return;
     f_max2_ = std::max(f_max2_, weight);
@@ -99,7 +99,7 @@ namespace cepgen {
     correc2_ -= 1.;
   }
 
-  void GridParameters::initCorrectionCycle(size_t bin, double weight) {
+  void GridParameters::initCorrectionCycle(size_t bin, float weight) {
     f_max_old_ = f_max_.at(bin);
     f_max_diff_ = weight - f_max_old_;
     setValue(bin, weight);
