@@ -23,10 +23,7 @@
 #include "CepGen/Process/Process.h"
 
 namespace cepgen {
-  IntegratorGSL::IntegratorGSL(const ParametersList& params)
-      : Integrator(params), funct_([=](double* x, size_t ndim, void*) -> double {
-          return integrand_->eval(std::vector<double>(x, x + ndim));
-        }) {
+  IntegratorGSL::IntegratorGSL(const ParametersList& params) : Integrator(params) {
     //--- initialise the random number generator
     gsl_rng_type* rng_engine = nullptr;
     switch (steer<int>("rngEngine")) {
@@ -56,16 +53,28 @@ namespace cepgen {
                                  << "Seed: " << seed_ << ".";
   }
 
-  void IntegratorGSL::setIntegrand(Integrand& integr) {
-    Integrator::setIntegrand(integr);
-    integrand_ = &integr;
+  void IntegratorGSL::setIntegrand(Integrand& integrand) {
     //--- specify the integrand through the GSL wrapper
-    function_ = utils::GSLMonteFunctionWrapper<decltype(funct_)>::build(funct_, integrand_->size());
+    funct_ = [&](double* x, size_t ndim, void*) -> double { return integrand.eval(std::vector<double>(x, x + ndim)); };
+    function_ = utils::GSLMonteFunctionWrapper<decltype(funct_)>::build(funct_, integrand.size());
+    if (!function_)
+      throw CG_FATAL("IntegratorGSL:setIntegrand") << "Integrand was not properly set.";
+    if (function_->dim <= 0)
+      throw CG_FATAL("IntegratorGSL:setIntegrand") << "Invalid phase space dimension: " << function_->dim << ".";
 
-    CG_DEBUG("Integrator:integrand") << "Number of integration dimensions: " << function_->dim << ".";
+    CG_DEBUG("IntegratorGSL:setIntegrand") << "Number of integration dimensions: " << function_->dim << ".";
 
-    //--- force the reinitialisation
-    initialised_ = false;
+    checkLimits(integrand);  // check the integration bounds
+  }
+
+  void IntegratorGSL::setLimits(const std::vector<Limits>& lims) {
+    Integrator::setLimits(lims);
+    xlow_.clear();
+    xhigh_.clear();
+    for (const auto& lim : limits_) {
+      xlow_.emplace_back(lim.min());
+      xhigh_.emplace_back(lim.max());
+    }
   }
 
   double IntegratorGSL::uniform(double min, double max) const {

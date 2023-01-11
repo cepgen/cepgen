@@ -40,7 +40,10 @@ namespace cepgen {
       return;
     }
     //--- each integrand object has its own clone of the process
-    process_ = params_->process().clone();
+    process_ = params_->process().clone();  // note: kinematics is already set by the process copy constructor
+    if (process_->kinematics() != params_->process().kinematics())
+      throw CG_FATAL("ProcessIntegrand") << "Discrepancy observed in process kinematics after its cloning.";
+
     CG_DEBUG("ProcessIntegrand") << "Process " << process_->name() << " successfully cloned from base process "
                                  << params_->process().name() << ".";
 
@@ -136,18 +139,18 @@ namespace cepgen {
     //--- apply cuts on final state system (after hadronisation!)
     //    (polish your cuts, as this might be very time-consuming...)
 
-    if (!params_->kinematics().cuts().central.contain((*event)(Particle::CentralSystem)))
+    if (!process_->kinematics().cuts().central.contain((*event)(Particle::CentralSystem)))
       return 0.;
-    if (!params_->kinematics().cuts().central_particles.empty())
+    if (!process_->kinematics().cuts().central_particles.empty())
       for (const auto& part : (*event)(Particle::CentralSystem)) {
         // retrieve all cuts associated to this final state particle in the central system
-        if (params_->kinematics().cuts().central_particles.count(part.pdgId()) > 0 &&
-            !params_->kinematics().cuts().central_particles.at(part.pdgId()).contain({part}))
+        if (process_->kinematics().cuts().central_particles.count(part.pdgId()) > 0 &&
+            !process_->kinematics().cuts().central_particles.at(part.pdgId()).contain({part}))
           return 0.;
       }
-    if (!params_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam1), event))
+    if (!process_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam1), event))
       return 0.;
-    if (!params_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam2), event))
+    if (!process_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam2), event))
       return 0.;
 
     //--- store the last event in parameters block for a later usage

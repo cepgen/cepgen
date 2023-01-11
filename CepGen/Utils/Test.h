@@ -55,6 +55,17 @@ namespace cepgen {
     cepgen::test::num_total++;                                                                                 \
   }
 
+#define CG_TEST_UNCERT(diff, unc, nsigma, name)                                                             \
+  {                                                                                                         \
+    if (diff > nsigma * unc)                                                                                \
+      CG_FAILED(name) << " difference " << diff << " is not within " << nsigma << " sigmas=" << unc << "."; \
+    else {                                                                                                  \
+      CG_PASSED(name);                                                                                      \
+      cepgen::test::num_passed++;                                                                           \
+    }                                                                                                       \
+    cepgen::test::num_total++;                                                                              \
+  }
+
 #define CG_TEST_EXCEPT(sequence, name)                                                                                \
   try {                                                                                                               \
     sequence();                                                                                                       \

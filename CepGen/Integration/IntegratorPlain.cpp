@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,32 +30,30 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    void integrate(double& result, double& abserr) override;
+    void integrate(Integrand&, double& result, double& abserr) override;
 
   private:
-    int ncvg_;
+    const int ncvg_;
   };
 
   IntegratorPlain::IntegratorPlain(const ParametersList& params)
       : IntegratorGSL(params), ncvg_(steer<int>("numFunctionCalls")) {}
 
-  void IntegratorPlain::integrate(double& result, double& abserr) {
-    //--- integration bounds
-    std::vector<double> x_low, x_up;
-    if (!function_)
-      throw CG_FATAL("IntegratorPlain:integrate") << "Integrand was not set.";
-    if (function_->dim <= 0)
-      throw CG_FATAL("IntegratorPlain:integrate") << "Invalid phase space dimension: " << function_->dim << ".";
-    for (size_t i = 0; i < function_->dim; ++i) {
-      x_low.emplace_back(limits_.at(i).min());
-      x_up.emplace_back(limits_.at(i).max());
-    }
+  void IntegratorPlain::integrate(Integrand& integrand, double& result, double& abserr) {
+    setIntegrand(integrand);
 
     //--- launch integration
     std::unique_ptr<gsl_monte_plain_state, void (*)(gsl_monte_plain_state*)> pln_state(
         gsl_monte_plain_alloc(function_->dim), gsl_monte_plain_free);
-    int res = gsl_monte_plain_integrate(
-        function_.get(), &x_low[0], &x_up[0], function_->dim, ncvg_, gsl_rng_.get(), pln_state.get(), &result, &abserr);
+    int res = gsl_monte_plain_integrate(function_.get(),
+                                        &xlow_[0],
+                                        &xhigh_[0],
+                                        function_->dim,
+                                        ncvg_,
+                                        gsl_rng_.get(),
+                                        pln_state.get(),
+                                        &result,
+                                        &abserr);
 
     if (res != GSL_SUCCESS)
       throw CG_FATAL("Integrator:integrate") << "Error while performing the integration!\n\t"

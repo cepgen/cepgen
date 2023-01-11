@@ -70,12 +70,12 @@ int main(int argc, char* argv[]) {
     size_t i = 0;
     double result, error;
     for (auto& test : tests) {
-      integr->setIntegrand(test.integrand);
-      integr->integrate(result, error);
+      integr->integrate(test.integrand, result, error);
+      const auto test_name = integrator + " test " + to_string(i);
       CG_DEBUG("main") << "Test " << i << ": ref.: " << test.result << ", result: " << result << " +/- " << error
                        << ".";
-      CG_TEST(error / result < 1.e-6 || (fabs(test.result - result) <= num_sigma * error),
-              integrator + " test " + std::to_string(i));
+      CG_TEST_EQUIV(error, 1.e-6 * result, test_name + " abs. unc. control");
+      CG_TEST_UNCERT(fabs(test.result - result), error, num_sigma, test_name + " rel. unc. control");
       ++i;
     }
   }

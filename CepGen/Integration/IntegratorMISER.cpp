@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    void integrate(double&, double&) override;
+    void integrate(Integrand&, double&, double&) override;
 
   private:
     int ncvg_;
@@ -47,42 +47,29 @@ namespace cepgen {
   IntegratorMISER::IntegratorMISER(const ParametersList& params)
       : IntegratorGSL(params), ncvg_(steer<int>("numFunctionCalls")) {}
 
-  void IntegratorMISER::integrate(double& result, double& abserr) {
-    if (!initialised_) {
-      if (!function_)
-        throw CG_FATAL("IntegratorMISER:integrate") << "Integrand was not set.";
-      if (function_->dim <= 0)
-        throw CG_FATAL("IntegratorMISER:integrate") << "Invalid phase space dimension: " << function_->dim << ".";
-      miser_state_.reset(gsl_monte_miser_alloc(function_->dim));
-      miser_state_->verbose = verbosity_;
-      gsl_monte_miser_params_get(miser_state_.get(), &miser_params_);
-      miser_params_.estimate_frac = steer<double>("estimateFraction");
-      miser_params_.min_calls = steer<int>("minCalls");
-      miser_params_.min_calls_per_bisection = steer<int>("minCallsPerBisection");
-      miser_params_.alpha = steer<double>("alpha");
-      miser_params_.dither = steer<double>("dither");
-      gsl_monte_miser_params_set(miser_state_.get(), &miser_params_);
+  void IntegratorMISER::integrate(Integrand& integrand, double& result, double& abserr) {
+    setIntegrand(integrand);
+    miser_state_.reset(gsl_monte_miser_alloc(function_->dim));
+    miser_state_->verbose = verbosity_;
+    gsl_monte_miser_params_get(miser_state_.get(), &miser_params_);
+    miser_params_.estimate_frac = steer<double>("estimateFraction");
+    miser_params_.min_calls = steer<int>("minCalls");
+    miser_params_.min_calls_per_bisection = steer<int>("minCallsPerBisection");
+    miser_params_.alpha = steer<double>("alpha");
+    miser_params_.dither = steer<double>("dither");
+    gsl_monte_miser_params_set(miser_state_.get(), &miser_params_);
 
-      //--- a bit of printout for debugging
-      CG_DEBUG("Integrator:build") << "MISER parameters:\n\t"
-                                   << "Number of calls: " << miser_params_.min_calls << ", "
-                                   << "per bisection: " << miser_params_.min_calls_per_bisection << ",\n\t"
-                                   << "Estimate fraction: " << miser_params_.estimate_frac << ",\n\t"
-                                   << "α-value: " << miser_params_.alpha << ",\n\t"
-                                   << "Dither: " << miser_params_.dither << ".";
-      initialised_ = true;
-    }
-    //--- integration bounds
-    std::vector<double> x_low, x_up;
-    for (size_t i = 0; i < function_->dim; ++i) {
-      x_low.emplace_back(limits_.at(i).min());
-      x_up.emplace_back(limits_.at(i).max());
-    }
+    CG_DEBUG("Integrator:build") << "MISER parameters:\n\t"
+                                 << "Number of calls: " << miser_params_.min_calls << ", "
+                                 << "per bisection: " << miser_params_.min_calls_per_bisection << ",\n\t"
+                                 << "Estimate fraction: " << miser_params_.estimate_frac << ",\n\t"
+                                 << "α-value: " << miser_params_.alpha << ",\n\t"
+                                 << "Dither: " << miser_params_.dither << ".";
 
-    //--- launch integration
+    // launch the full integration
     int res = gsl_monte_miser_integrate(function_.get(),
-                                        &x_low[0],
-                                        &x_up[0],
+                                        &xlow_[0],
+                                        &xhigh_[0],
                                         function_->dim,
                                         ncvg_,
                                         gsl_rng_.get(),

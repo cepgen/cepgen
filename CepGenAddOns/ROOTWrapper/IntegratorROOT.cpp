@@ -32,12 +32,10 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    void integrate(double&, double&) override;
+    void setLimits(const std::vector<Limits>&) override;
+    void integrate(Integrand&, double&, double&) override;
 
   private:
-    std::function<double(const double*)> func_;
-    std::function<double(double)> func_1d_;
-    std::vector<double> min_, max_;
     /// integration type (adaptive, MC methods, etc..)
     const std::string type_;
     /// desired absolute Error
@@ -47,16 +45,13 @@ namespace cepgen {
     /// maximum number of sub-intervals
     const unsigned int size_;
 
+    std::vector<double> xlow_, xhigh_;
     std::unique_ptr<ROOT::Math::IntegratorMultiDim> integr_;
     std::unique_ptr<ROOT::Math::IntegratorOneDim> integr_1d_;
   };
 
   IntegratorROOT::IntegratorROOT(const ParametersList& params)
       : Integrator(params),
-        func_([=](const double* x) -> double {
-          return integrand_->eval(std::vector<double>(x, x + integrand_->size()));
-        }),
-        func_1d_([=](double x) -> double { return integrand_->eval(std::vector<double>{x}); }),
         type_(steer<std::string>("type")),
         absTol_(steer<double>("absTol")),
         relTol_(steer<double>("relTol")),
@@ -96,26 +91,30 @@ namespace cepgen {
                                  << "Number of sub-intervals: " << size_ << ".";
   }
 
-  void IntegratorROOT::integrate(double& result, double& abserr) {
-    if (!initialised_) {
-      if (integrand_->size() == 1)
-        integr_1d_->SetFunction(func_1d_);
-      else
-        integr_->SetFunction(func_, integrand_->size());
-      min_.clear();
-      max_.clear();
-      for (const auto& lim : limits_) {
-        min_.emplace_back(lim.min());
-        max_.emplace_back(lim.max());
-      }
-      initialised_ = true;
+  void IntegratorROOT::setLimits(const std::vector<Limits>& lims) {
+    Integrator::setLimits(lims);
+    xlow_.clear();
+    xhigh_.clear();
+    for (const auto& lim : limits_) {
+      xlow_.emplace_back(lim.min());
+      xhigh_.emplace_back(lim.max());
     }
+  }
 
-    if (integrand_->size() == 1) {
+  void IntegratorROOT::integrate(Integrand& integrand, double& result, double& abserr) {
+    checkLimits(integrand);
+
+    if (integrand.size() == 1) {
+      auto funct = [&](double x) -> double { return integrand.eval(std::vector<double>{x}); };
+      integr_1d_->SetFunction(funct);
       result_ = result = integr_1d_->Integral(limits_.at(0).min(), limits_.at(0).max());
       err_result_ = abserr = integr_1d_->Error();
     } else {
-      result_ = result = integr_->Integral(min_.data(), max_.data());
+      auto funct = [&](const double* x) -> double {
+        return integrand.eval(std::vector<double>(x, x + integrand.size()));
+      };
+      integr_->SetFunction(funct, integrand.size());
+      result_ = result = integr_->Integral(xlow_.data(), xhigh_.data());
       err_result_ = abserr = integr_->Error();
     }
   }

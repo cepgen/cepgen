@@ -44,11 +44,11 @@ namespace cepgen {
 
   void GeneratorWorker::setIntegrator(const Integrator* integr) {
     integrator_ = integr;
-    grid_.reset(new GridParameters(integrator_->size()));
-    coords_ = std::vector<double>(integrator_->size());
+    grid_.reset(new GridParameters(integrand_->size()));
+    coords_ = std::vector<double>(integrand_->size());
 
     CG_DEBUG("GeneratorWorker:integrator")
-        << "Dim-" << integrator_->size() << " " << integrator_->name() << " integrator "
+        << "Dim-" << integrand_->size() << " " << integrator_->name() << " integrator "
         << "set for dim-" << grid_->n(0).size() << " grid.";
   }
 
@@ -76,7 +76,8 @@ namespace cepgen {
       throw CG_FATAL("GeneratorWorker:generate") << "No grid object handled!";
 
     // initialise grid if not already done
-    computeGenerationParameters();
+    if (!grid_->prepared())
+      computeGenerationParameters();
 
     // apply correction cycles if required from previous event
     if (ps_bin_ != UNASSIGNED_BIN) {
@@ -102,7 +103,7 @@ namespace cepgen {
       // shoot a point x in this bin
       grid_->shoot(integrator_, ps_bin_, coords_);
       // get weight for selected x value
-      weight = integrator_->eval(coords_);
+      weight = integrator_->eval(*integrand_, coords_);
       if (weight > y)
         break;
     }
@@ -132,7 +133,7 @@ namespace cepgen {
       grid_->setCorrectionValue(-1.);
       // select x values in phase space bin
       grid_->shoot(integrator_, ps_bin_, coords_);
-      const double weight = integrator_->eval(coords_);
+      const double weight = integrator_->eval(*integrand_, coords_);
       // parameter for correction of correction
       grid_->rescale(ps_bin_, weight);
       // accept event
@@ -151,7 +152,7 @@ namespace cepgen {
     CG_TICKER(const_cast<Parameters*>(params_)->timeKeeper());
 
     // start by computing the matrix element for that point and reject if unphysical
-    if (integrator_->eval(coords_) <= 0.)
+    if (integrator_->eval(*integrand_, coords_) <= 0.)
       return false;
 
     if (!integrand_->process().hasEvent())
@@ -186,7 +187,7 @@ namespace cepgen {
                                       << "for the generation of unweighted events.";
 
     const double inv_num_points = 1. / params_->generation().numPoints();
-    std::vector<double> point_coord(integrator_->size(), 0.);
+    std::vector<double> point_coord(integrand_->size(), 0.);
     if (point_coord.size() < grid_->n(0).size())
       throw CG_FATAL("GridParameters:shoot") << "Coordinates vector multiplicity is insufficient!";
 
@@ -200,7 +201,7 @@ namespace cepgen {
       double fsum = 0., fsum2 = 0.;
       for (size_t j = 0; j < params_->generation().numPoints(); ++j) {
         grid_->shoot(integrator_, i, point_coord);
-        const double weight = integrator_->eval(point_coord);
+        const double weight = integrator_->eval(*integrand_, point_coord);
         grid_->setValue(i, weight);
         fsum += weight;
         fsum2 += weight * weight;

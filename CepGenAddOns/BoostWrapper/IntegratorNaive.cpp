@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2020-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,55 +18,42 @@
 
 #include <boost/math/quadrature/naive_monte_carlo.hpp>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Parameters.h"
 
 namespace cepgen {
   /// Boost's Naive integration algorithm
   class IntegratorNaive final : public Integrator {
   public:
-    explicit IntegratorNaive(const ParametersList&);
+    explicit IntegratorNaive(const ParametersList& params) : Integrator(params) {}
 
-    static ParametersDescription description();
-
-    void integrate(double&, double&) override;
-
-  private:
-    std::function<double(const std::vector<double>&)> funct_;
-    typedef boost::math::quadrature::naive_monte_carlo<double, decltype(funct_)> nmc_t;
-    std::vector<std::pair<double, double> > bounds_;
-    std::unique_ptr<nmc_t> mc_;
-  };
-
-  IntegratorNaive::IntegratorNaive(const ParametersList& params)
-      : Integrator(params), funct_([=](const std::vector<double>& x) -> double { return integrand_->eval(x); }) {
-    //--- a bit of printout for debugging
-    CG_DEBUG("Integrator:build") << "Boost's Naive integrator built.";
-  }
-
-  void IntegratorNaive::integrate(double& result, double& abserr) {
-    if (!initialised_) {
-      bounds_.clear();
-      for (const auto& lim : limits_)
-        bounds_.emplace_back(std::make_pair(lim.min(), lim.max()));
-      mc_.reset(new nmc_t(funct_, bounds_, 1.e-2, true, 1));
-      initialised_ = true;
+    static ParametersDescription description() {
+      auto desc = Integrator::description();
+      desc.setDescription("\"Naive\" Boost integrator");
+      return desc;
     }
 
-    auto task = mc_->integrate();
+    void setLimits(const std::vector<Limits>& lims) override {
+      Integrator::setLimits(lims);
+      bounds_.clear();
+      for (const auto& lim : limits_)
+        bounds_.emplace_back(lim.raw());
+    }
+    void integrate(Integrand& integrand, double& result, double& abserr) override {
+      checkLimits(integrand);
 
-    result_ = result = task.get();
-    err_result_ = abserr = mc_->current_error_estimate();
-  }
+      auto funct = [&](const std::vector<double>& coord) -> double { return integrand.eval(coord); };
+      boost::math::quadrature::naive_monte_carlo<double, decltype(funct)> mc(funct, bounds_, 1.e-2, true, 1);
+      auto task = mc.integrate();
 
-  ParametersDescription IntegratorNaive::description() {
-    auto desc = Integrator::description();
-    desc.setDescription("\"Naive\" Boost integrator");
-    return desc;
-  }
+      result_ = result = task.get();
+      err_result_ = abserr = mc.current_error_estimate();
+    }
+
+  private:
+    std::vector<std::pair<double, double> > bounds_;
+  };
 }  // namespace cepgen
 
 REGISTER_INTEGRATOR("Naive", IntegratorNaive)

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,35 +31,35 @@ namespace cepgen {
         verbosity_(steer<int>("verbose")),
         rnd_(0., 1.) {}
 
-  void Integrator::setIntegrand(Integrand& integr) {
-    integrand_ = &integr;
-    if (limits_.size() != integrand_->size())
-      limits_ = std::vector<Limits>(integrand_->size(), Limits{0., 1.});
-    initialised_ = false;  // force the reinitialisation
+  void Integrator::checkLimits(const Integrand& integrand) {
+    const auto ps_size = integrand.size();
+    if (ps_size == 0)
+      throw CG_FATAL("Integrator:checkLimits") << "Invalid phase space dimension for integrand: " << ps_size << ".";
+    else if (limits_.empty())
+      setLimits(std::vector<Limits>(ps_size, Limits{0., 1.}));
+    else if (limits_.size() != ps_size) {
+      CG_DEBUG("Integrator:checkLimits") << "Incompatible phase space size: prepared=" << limits_.size()
+                                         << ", integrand=" << ps_size << ".";
+      auto lims = limits_;
+      const auto booked_size = lims.size();
+      if (booked_size < ps_size)
+        for (size_t i = 0; i < ps_size - booked_size; ++i)
+          lims.emplace_back(0., 1.);
+      else
+        lims.resize(ps_size);
+      setLimits(lims);
+    }
   }
 
-  //------------------------------------------------------------------------------------------------
-  // helper / alias methods
-  //------------------------------------------------------------------------------------------------
-
-  size_t Integrator::size() const {
-    if (!integrand_)
-      throw CG_FATAL("Integrator:size") << "Trying to retrieve phase space size on an unitialised integrand!";
-    return integrand_->size();
-  }
-
-  double Integrator::eval(const std::vector<double>& x) const {
-    if (!integrand_)
-      throw CG_FATAL("Integrator:eval") << "Trying to evaluate the weight on a phase space point "
-                                        << "on an unitialised integrand!";
-    return integrand_->eval(x);
-  }
+  double Integrator::eval(Integrand& integrand, const std::vector<double>& x) const { return integrand.eval(x); }
 
   double Integrator::uniform(double min, double max) const { return min + (max - min) * rnd_(rnd_gen_); }
 
-  double Integrator::integrate() {
+  double Integrator::integrate(Integrand& integrand) {
+    if (limits_.size() != integrand.size())
+      limits_ = std::vector<Limits>(integrand.size(), Limits{0., 1.});
     double result, tmp;
-    integrate(result, tmp);
+    integrate(integrand, result, tmp);
     return result;
   }
 
@@ -75,8 +75,7 @@ namespace cepgen {
     auto integr = IntegratorFactory::get().build(params);
     integr->setLimits(limits);
     auto integrand = FunctionIntegrand(limits.size(), func);
-    integr->setIntegrand(integrand);
-    return integr->integrate();
+    return integr->integrate(integrand);
   }
 
   ParametersDescription Integrator::description() {

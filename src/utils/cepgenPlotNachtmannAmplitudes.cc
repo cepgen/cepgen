@@ -101,8 +101,7 @@ int main(int argc, char* argv[]) {
       return dsig(theta1, phi1, theta2, phi2);
     });
     double val, unc;
-    integrator->setIntegrand(integr);
-    integrator->integrate(val, unc);
+    integrator->integrate(integr, val, unc);
     return 3. * kin.beta * std::pow(2., -13) * std::pow(M_1_PI, -3) / shat * val;
   };
 

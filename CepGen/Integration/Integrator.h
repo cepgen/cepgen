@@ -30,30 +30,27 @@ namespace cepgen {
   class Integrator : public NamedModule<std::string> {
   public:
     /// Integrator algorithm constructor
-    Integrator(const ParametersList& params);
+    explicit Integrator(const ParametersList& params);
 
     static ParametersDescription description();
 
-    /// Specify the function to be integrated
-    /// \param[in] integr Integrand object to be evaluated
-    virtual void setIntegrand(Integrand& integr);
+    /// Ensure the integration bounds are properly set
+    void checkLimits(const Integrand&);
     /// Specify the variables limits on integration
-    void setLimits(const std::vector<Limits>& limits) { limits_ = limits; }
-    /// Dimensional size of the phase space
-    size_t size() const;
+    virtual void setLimits(const std::vector<Limits>& limits) { limits_ = limits; }
 
     /// Compute the function value at the given phase space point
-    virtual double eval(const std::vector<double>& x) const;
+    virtual double eval(Integrand&, const std::vector<double>&) const;
     /// Generate a uniformly distributed (between 0 and 1) random number
     virtual double uniform(double min = 0., double max = 1.) const;
 
     /// Perform the multidimensional Monte Carlo integration
     /// \param[out] result integral computed over the full phase space
     /// \param[out] abserr uncertainty associated to the computed integral
-    virtual void integrate(double& result, double& abserr) = 0;
+    virtual void integrate(Integrand&, double& result, double& abserr) = 0;
     /// Perform an integration with no use of the numerical error
     /// \return the integral computed over the full phase space
-    double integrate();
+    double integrate(Integrand&);
     /// Perform an integration with a given functional and a given set of parameters
     static double integrate(const std::function<double(const std::vector<double>&)>&, const ParametersList&, size_t);
     /// Perform an integration with a given functional and a given set of parameters
@@ -62,13 +59,11 @@ namespace cepgen {
                             const std::vector<Limits>&);
 
   protected:
-    const unsigned long seed_;       ///< Random number generator seed
-    int verbosity_;                  ///< Integrator verbosity
-    Integrand* integrand_{nullptr};  ///< Integrand to be evaluated
-    std::vector<Limits> limits_;     ///< List of per-variable integration limits
-    double result_{0.};              ///< Result of the last integration
-    double err_result_{0.};          ///< Standard deviation for the last integration
-    bool initialised_{false};        ///< Has the algorithm alreay been initialised?
+    const unsigned long seed_;    ///< Random number generator seed
+    int verbosity_;               ///< Integrator verbosity
+    std::vector<Limits> limits_;  ///< List of per-variable integration limits
+    double result_{0.};           ///< Result of the last integration
+    double err_result_{0.};       ///< Standard deviation for the last integration
     mutable std::default_random_engine rnd_gen_;
     mutable std::uniform_real_distribution<double> rnd_;
   };

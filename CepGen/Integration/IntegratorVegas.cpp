@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,14 +34,14 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    void integrate(double&, double&) override;
+    void integrate(Integrand&, double&, double&) override;
 
     enum class Mode { importance = 1, importanceOnly = 0, stratified = -1 };
 
   private:
-    void warmup(std::vector<double>&, std::vector<double>&, unsigned int);
+    void warmup(size_t);
 
-    double eval(const std::vector<double>&) const override;
+    double eval(Integrand&, const std::vector<double>&) const override;
 
     const int ncvg_;
     const double chisq_cut_;
@@ -70,60 +70,48 @@ namespace cepgen {
     verbosity_ = steer<int>("verbose");  // supersede the parent default verbosity level
   }
 
-  void IntegratorVegas::integrate(double& result, double& abserr) {
-    if (!initialised_) {
-      if (!function_)
-        throw CG_FATAL("IntegratorVegas:integrate") << "Integrand was not set.";
-      if (function_->dim <= 0)
-        throw CG_FATAL("IntegratorVegas:integrate") << "Invalid phase space dimension: " << function_->dim << ".";
-      //--- start by preparing the grid/state
-      vegas_state_.reset(gsl_monte_vegas_alloc(function_->dim));
-      gsl_monte_vegas_params_get(vegas_state_.get(), &vegas_params_);
-      vegas_params_.iterations = steer<int>("iterations");
-      vegas_params_.alpha = steer<double>("alpha");
-      vegas_params_.verbose = verbosity_;
-      vegas_params_.mode = steer<int>("mode");
-      //--- output logging
-      const auto& log = steer<std::string>("loggingOutput");
-      if (log == "cerr")
-        // redirect all debugging information to the error stream
-        vegas_params_.ostream = stderr;
-      else if (log == "cout")
-        // redirect all debugging information to the standard stream
-        vegas_params_.ostream = stdout;
-      else
-        vegas_params_.ostream = fopen(log.c_str(), "w");
-      gsl_monte_vegas_params_set(vegas_state_.get(), &vegas_params_);
+  void IntegratorVegas::integrate(Integrand& integrand, double& result, double& abserr) {
+    setIntegrand(integrand);
 
-      //--- a bit of printout for debugging
-      CG_DEBUG("Integrator:build") << "Vegas parameters:\n\t"
-                                   << "Number of iterations in Vegas: " << vegas_params_.iterations << ",\n\t"
-                                   << "α-value: " << vegas_params_.alpha << ",\n\t"
-                                   << "Verbosity: " << vegas_params_.verbose << ",\n\t"
-                                   << "Grid interpolation mode: " << (IntegratorVegas::Mode)vegas_params_.mode << ".";
-      initialised_ = true;
-    }
+    //--- start by preparing the grid/state
+    vegas_state_.reset(gsl_monte_vegas_alloc(function_->dim));
+    gsl_monte_vegas_params_get(vegas_state_.get(), &vegas_params_);
+    vegas_params_.iterations = steer<int>("iterations");
+    vegas_params_.alpha = steer<double>("alpha");
+    vegas_params_.verbose = verbosity_;
+    vegas_params_.mode = steer<int>("mode");
+    //--- output logging
+    const auto& log = steer<std::string>("loggingOutput");
+    if (log == "cerr")
+      // redirect all debugging information to the error stream
+      vegas_params_.ostream = stderr;
+    else if (log == "cout")
+      // redirect all debugging information to the standard stream
+      vegas_params_.ostream = stdout;
+    else
+      vegas_params_.ostream = fopen(log.c_str(), "w");
+    gsl_monte_vegas_params_set(vegas_state_.get(), &vegas_params_);
+
+    //--- a bit of printout for debugging
+    CG_DEBUG("Integrator:build") << "Vegas parameters:\n\t"
+                                 << "Number of iterations in Vegas: " << vegas_params_.iterations << ",\n\t"
+                                 << "α-value: " << vegas_params_.alpha << ",\n\t"
+                                 << "Verbosity: " << vegas_params_.verbose << ",\n\t"
+                                 << "Grid interpolation mode: " << (IntegratorVegas::Mode)vegas_params_.mode << ".";
     if (!vegas_state_)
       throw CG_FATAL("Integrator:integrate") << "Vegas state not initialised!";
 
-    //--- integration bounds
-    std::vector<double> x_low, x_up;
-    for (size_t i = 0; i < function_->dim; ++i) {
-      x_low.emplace_back(limits_.at(i).min());
-      x_up.emplace_back(limits_.at(i).max());
-    }
-
     //--- launch integration
 
-    //----- warmup (prepare the grid)
-    warmup(x_low, x_up, 25000);
+    // warmup (prepare the grid)
+    warmup(25000);
 
-    //----- integration
+    // integration phase
     unsigned short it_chisq = 0;
     do {
       int res = gsl_monte_vegas_integrate(function_.get(),
-                                          &x_low[0],
-                                          &x_up[0],
+                                          &xlow_[0],
+                                          &xhigh_[0],
                                           function_->dim,
                                           0.2 * ncvg_,
                                           gsl_rng_.get(),
@@ -151,15 +139,15 @@ namespace cepgen {
     err_result_ = abserr;
   }
 
-  void IntegratorVegas::warmup(std::vector<double>& x_low, std::vector<double>& x_up, unsigned int ncall) {
+  void IntegratorVegas::warmup(size_t ncall) {
     if (!vegas_state_)
       throw CG_FATAL("Integrator:warmup") << "Vegas state not initialised!";
 
     // perform a first integration to warm up the grid
     double result = 0., abserr = 0.;
     int res = gsl_monte_vegas_integrate(function_.get(),
-                                        &x_low[0],
-                                        &x_up[0],
+                                        &xlow_[0],
+                                        &xhigh_[0],
                                         function_->dim,
                                         ncall,
                                         gsl_rng_.get(),
@@ -175,20 +163,18 @@ namespace cepgen {
     CG_INFO("Integrator:vegas") << "Finished the Vegas warm-up.";
   }
 
-  double IntegratorVegas::eval(const std::vector<double>& x) const {
-    if (!integrand_)
-      throw CG_FATAL("Integrator:vegas") << "Invalid integrand specified!";
+  double IntegratorVegas::eval(Integrand& integrand, const std::vector<double>& x) const {
     //--- by default, no grid treatment
     if (!treat_)
-      return integrand_->eval(x);
+      return integrand.eval(x);
     //--- treatment of the integration grid
     if (r_boxes_ == 0) {
-      r_boxes_ = (size_t)std::pow(vegas_state_->bins, integrand_->size());
-      x_new_.resize(integrand_->size());
+      r_boxes_ = (size_t)std::pow(vegas_state_->bins, integrand.size());
+      x_new_.resize(integrand.size());
     }
     auto COORD = [](gsl_monte_vegas_state* s, size_t i, size_t j) { return s->xi[i * s->dim + j]; };
     double w = r_boxes_;
-    for (size_t j = 0; j < integrand_->size(); ++j) {
+    for (size_t j = 0; j < integrand.size(); ++j) {
       //--- find surrounding coordinates and interpolate
       const double z = x.at(j) * vegas_state_->bins;
       const auto id = (size_t)z;      // coordinate of point before
@@ -199,7 +185,7 @@ namespace cepgen {
       x_new_[j] = COORD(vegas_state_.get(), id + 1, j) - bin_width * (1. - rel_pos);
       w *= bin_width;
     }
-    return w * integrand_->eval(x_new_);
+    return w * integrand.eval(x_new_);
   }
 
   std::ostream& operator<<(std::ostream& os, const IntegratorVegas::Mode& mode) {

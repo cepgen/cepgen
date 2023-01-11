@@ -37,7 +37,7 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    void integrate(double&, double&) override;
+    void integrate(Integrand&, double&, double&) override;
     inline double uniform(double min, double max) const override { return rnd_->Uniform(min, max); }
 
     /// Compute the weight for a given phase space point
@@ -50,6 +50,7 @@ namespace cepgen {
   private:
     std::unique_ptr<TFoam> foam_;
     std::unique_ptr<TRandom> rnd_;
+    Integrand* integrand_{nullptr};
   };
 
   IntegratorFoam::IntegratorFoam(const ParametersList& params) : Integrator(params), foam_(new TFoam("Foam")) {
@@ -69,20 +70,18 @@ namespace cepgen {
                                  << "Version: " << foam_->GetVersion() << ".";
   }
 
-  void IntegratorFoam::integrate(double& result, double& abs_error) {
-    if (!initialised_) {
-      foam_.reset(new TFoam("Foam"));
-      foam_->SetPseRan(rnd_.get());
-      foam_->SetnCells(steer<int>("nCells"));
-      foam_->SetnSampl(steer<int>("nSampl"));
-      foam_->SetnBin(steer<int>("nBin"));
-      foam_->SetEvPerBin(steer<int>("EvPerBin"));
-      foam_->SetChat(std::max(verbosity_, 0));
-      foam_->SetRho(this);
-      foam_->SetkDim(integrand_->size());
-      foam_->Initialize();
-      initialised_ = true;
-    }
+  void IntegratorFoam::integrate(Integrand& integrand, double& result, double& abs_error) {
+    integrand_ = &integrand;
+    foam_.reset(new TFoam("Foam"));
+    foam_->SetPseRan(rnd_.get());
+    foam_->SetnCells(steer<int>("nCells"));
+    foam_->SetnSampl(steer<int>("nSampl"));
+    foam_->SetnBin(steer<int>("nBin"));
+    foam_->SetEvPerBin(steer<int>("EvPerBin"));
+    foam_->SetChat(std::max(verbosity_, 0));
+    foam_->SetRho(this);
+    foam_->SetkDim(integrand_->size());
+    foam_->Initialize();
     for (size_t i = 0; i < 100000; ++i)
       foam_->MakeEvent();
     //--- launch integration

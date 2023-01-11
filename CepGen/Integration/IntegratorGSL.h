@@ -31,12 +31,14 @@ namespace cepgen {
   class IntegratorGSL : public Integrator {
   public:
     explicit IntegratorGSL(const ParametersList&);
-    double uniform(double min, double max) const override;
-    void setIntegrand(Integrand& integr) override;
 
     static ParametersDescription description();
 
+    double uniform(double min, double max) const override;
+    void setLimits(const std::vector<Limits>&) override;
+
   protected:
+    void setIntegrand(Integrand&);
     /// A functor wrapping GSL's function footprint
     std::function<double(double*, size_t, void*)> funct_;
     /// GSL structure storing the function to be integrated by this
@@ -49,6 +51,7 @@ namespace cepgen {
     };
     /// Instance of random number generator service
     std::unique_ptr<gsl_rng, gsl_rng_deleter> gsl_rng_;
+    std::vector<double> xlow_, xhigh_;
   };
 }  // namespace cepgen
 
