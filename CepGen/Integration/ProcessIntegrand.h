@@ -50,8 +50,11 @@ namespace cepgen {
     double eval(const std::vector<double>& x) override;
     /// Phase space dimension
     size_t size() const override;
+
     /// Thread-local physics process
-    const proc::Process& process() const { return *process_; }
+    proc::Process& process();
+    /// Thread-local physics process
+    const proc::Process& process() const;
 
     /// Specify if the generated events are to be stored
     void setStorage(bool store) { storage_ = store; }
@@ -60,7 +63,7 @@ namespace cepgen {
 
   private:
     std::unique_ptr<proc::Process> process_;   ///< Local instance of the physics process
-    const Parameters* params_;                 ///< Generator-owned runtime parameters
+    const Parameters* params_{nullptr};        ///< Generator-owned runtime parameters
     const std::unique_ptr<utils::Timer> tmr_;  ///< A precious timekeeper for event timing
     bool storage_{false};                      ///< Is the next event to be generated to be stored?
   };

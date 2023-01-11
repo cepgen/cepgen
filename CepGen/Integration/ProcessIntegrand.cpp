@@ -72,10 +72,18 @@ namespace cepgen {
 
   ProcessIntegrand::~ProcessIntegrand() { CG_DEBUG("ProcessIntegrand") << "Destructor called"; }
 
-  size_t ProcessIntegrand::size() const {
+  size_t ProcessIntegrand::size() const { return process().ndim(); }
+
+  proc::Process& ProcessIntegrand::process() {
     if (!process_)
-      throw CG_FATAL("ProcessIntegrand:size") << "Process was not properly cloned!";
-    return process_->ndim();
+      throw CG_FATAL("ProcessIntegrand:process") << "Process was not properly cloned!";
+    return *process_;
+  }
+
+  const proc::Process& ProcessIntegrand::process() const {
+    if (!process_)
+      throw CG_FATAL("ProcessIntegrand:process") << "Process was not properly cloned!";
+    return *process_;
   }
 
   double ProcessIntegrand::eval(const std::vector<double>& x) {
@@ -85,7 +93,7 @@ namespace cepgen {
     tmr_->reset();
 
     //--- specify the phase space point to probe and calculate weight
-    double weight = process_->weight(x);
+    double weight = process().weight(x);
 
     //--- invalidate any unphysical behaviour
     if (weight <= 0.)
