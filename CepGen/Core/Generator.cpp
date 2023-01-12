@@ -104,13 +104,14 @@ namespace cepgen {
   void Generator::resetIntegrator() {
     CG_TICKER(parameters_->timeKeeper());
     // create a spec-defined integrator in the current scope
-    if (parameters_->par_integrator.name<std::string>().empty())
-      parameters_->par_integrator.setName<std::string>("Vegas");
     setIntegrator(IntegratorFactory::get().build(parameters_->par_integrator));
   }
 
   void Generator::setIntegrator(std::unique_ptr<Integrator> integ) {
     CG_TICKER(parameters_->timeKeeper());
+    // copy the integrator instance (or create it if unspecified) in the current scope
+    if (!integ)
+      integ = IntegratorFactory::get().build(parameters_->par_integrator);
     integrator_ = std::move(integ);
     CG_INFO("Generator:integrator") << "Generator will use a " << integrator_->name() << "-type integrator.";
   }

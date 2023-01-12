@@ -36,7 +36,7 @@
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  Parameters::Parameters() {}
+  Parameters::Parameters() : par_integrator(ParametersList().setName<std::string>("Vegas")) {}
 
   Parameters::Parameters(Parameters& param)
       : par_integrator(param.par_integrator),
