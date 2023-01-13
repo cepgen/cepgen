@@ -49,19 +49,11 @@ namespace cepgen {
         // initialise the function to integrate
         if (hi_ != HeavyIon::proton() && hi_ != HeavyIon::neutron())
           func_.reset(new utils::Function1D([&](double kt2, void* params) {
-            if (kt2 < 0.)
-              return 0.;
-            if (!params)
-              throw CG_FATAL("CollinearFlux") << "Invalid parameters block fed to the integrand!";
             const auto& args = *static_cast<FluxArguments*>(params);
             return Beam::ktFluxHI(flux_, args.x, kt2, hi_) / kt2;
           }));
         else
           func_.reset(new utils::Function1D([&](double kt2, void* params) {
-            if (kt2 < 0.)
-              return 0.;
-            if (!params)
-              throw CG_FATAL("CollinearFlux") << "Invalid parameters block fed to the integrand!";
             const auto& args = *static_cast<FluxArguments*>(params);
             return Beam::ktFluxNucl(flux_, args.x, kt2, form_fac_.get(), str_fun_.get(), args.mi2, args.mf2) / kt2;
           }));
@@ -82,7 +74,7 @@ namespace cepgen {
         desc.addAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon::proton());
         desc.add<std::string>("formFactors", formfac::gFFStandardDipoleHandler);
         desc.add<ParametersDescription>("structureFunctions",
-                                        strfun::StructureFunctionsFactory::get().describeParameters(11));
+                                        strfun::StructureFunctionsFactory::get().describeParameters(401));
         desc.add<ParametersDescription>("analyticalIntegrator", ParametersDescription().setName<std::string>("gsl"))
             .setDescription("Steering parameters for the analytical integrator");
         return desc;
