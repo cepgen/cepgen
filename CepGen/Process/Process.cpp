@@ -269,7 +269,7 @@ namespace cepgen {
       CG_DEBUG("Process:setKinematics") << "Preparing to set the kinematics parameters. Input parameters: "
                                         << ParametersDescription(kin.allParameters(false)) << ".";
       clear();  // also resets the "first run" flag
-      kin_ = kin;
+      kin_.setParameters(kin.parameters());
 
       const auto& p1 = kin_.incomingBeams().positive().momentum();
       const auto& p2 = kin_.incomingBeams().negative().momentum();

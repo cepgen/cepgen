@@ -46,6 +46,13 @@ namespace cepgen {
     /// Type of kinematics to consider for the phase space
     mode::Kinematics mode() const;
 
+    /// Form factors evaluator parameters
+    ParametersList formFactors() const { return steer<ParametersList>("formFactors"); }
+    /// Structure functions evaluator parameters
+    ParametersList structureFunctions() const { return steer<ParametersList>("structureFunctions"); }
+    /// Set the integer-type of structure functions evaluator to build
+    void setStructureFunctions(int, int);
+
     /// Set the incoming beams centre of mass energy (in GeV)
     void setSqrtS(double);
     /// Incoming beams squared centre of mass energy (in GeV^2)
@@ -53,25 +60,9 @@ namespace cepgen {
     /// Incoming beams centre of mass energy (in GeV)
     double sqrtS() const;
 
-    /// Form factors evaluator
-    formfac::Parameterisation* formFactors() const { return form_factors_.get(); }
-    /// Set a form factors evaluator object
-    void setFormFactors(std::unique_ptr<formfac::Parameterisation>);
-
-    /// Structure functions evaluator
-    strfun::Parameterisation* structureFunctions() const { return str_fun_.get(); }
-    /// Set a structure functions evaluator object
-    void setStructureFunctions(std::unique_ptr<strfun::Parameterisation>);
-    /// Set the integer-type of structure functions evaluator to build
-    void setStructureFunctions(int, int);
-
   private:
     Beam pos_beam_;
     Beam neg_beam_;
-    /// Type of form factors to consider
-    std::shared_ptr<formfac::Parameterisation> form_factors_;
-    /// Type of structure functions to consider
-    std::shared_ptr<strfun::Parameterisation> str_fun_;
   };
 }  // namespace cepgen
 

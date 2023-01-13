@@ -57,6 +57,10 @@ namespace cepgen {
     }
 
     void KTProcess::prepareKinematics() {
+      if (!kin_.incomingBeams().positive().flux().ktFactorised() ||
+          !kin_.incomingBeams().negative().flux().ktFactorised())
+        throw CG_FATAL("KTProcess:prepareKinematics") << "Invalid incoming parton fluxes.";
+
       const auto& ib1 = event_->oneWithRole(Particle::IncomingBeam1);
       const auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
       auto& p1 = event_->oneWithRole(Particle::Parton1);
@@ -111,17 +115,11 @@ namespace cepgen {
     double KTProcess::computeWeight() {
       const auto cent_me = computeKTFactorisedMatrixElement();
       if (cent_me <= 0)
-        return 0.;
+        return 0.;  // avoid computing the fluxes if the matrix element is already null
 
-      //--- compute fluxes according to modelling specified in parameters card
-
-      auto* ff = kin_.incomingBeams().formFactors();
-      auto* sf = kin_.incomingBeams().structureFunctions();
-      const double q2_1 = qt1_ * qt1_, q2_2 = qt2_ * qt2_;
-      const double f1 = kin_.incomingBeams().positive().ktFlux(x1_, q2_1, mX2_, ff, sf) * M_1_PI,
-                   f2 = kin_.incomingBeams().negative().ktFlux(x2_, q2_2, mY2_, ff, sf) * M_1_PI;
-
-      return f1 * f2 * cent_me;
+      // convolute with fluxes according to modelling specified in parameters card
+      return cent_me * kin_.incomingBeams().positive().flux(x1_, qt1_ * qt1_, mX2_) * M_1_PI *
+             kin_.incomingBeams().negative().flux(x2_, qt2_ * qt2_, mY2_) * M_1_PI;
     }
 
     void KTProcess::fillKinematics(bool) {
@@ -147,7 +145,6 @@ namespace cepgen {
       // parton systems
       p1.setMomentum(ib1.momentum() - pX_, true);
       p2.setMomentum(ib2.momentum() - pY_, true);
-
 
       // two-parton system
       cm.setMomentum(p1.momentum() + p2.momentum());

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,14 +20,15 @@
 #define CepGen_Physics_Beam_h
 
 #include <iosfwd>
+#include <memory>
 
 #include "CepGen/Core/SteeredObject.h"
 #include "CepGen/FormFactors/FormFactors.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Physics/PartonFlux.h"
 
 namespace cepgen {
-  enum class KTFlux;
   namespace strfun {
     class Parameterisation;
   }
@@ -79,61 +80,16 @@ namespace cepgen {
       return *this;
     }
 
-    /// Type of incoming partons fluxes
-    enum class KTFlux {
-      invalid = -1,                    ///< Invalid flux
-      P_Photon_Elastic = 0,            ///< Elastic photon emission from proton
-      P_Photon_Elastic_Budnev = 10,    ///< Elastic photon emission from proton (Budnev flux approximation)
-      P_Photon_Inelastic = 1,          ///< Inelastic photon emission from proton
-      P_Photon_Inelastic_Budnev = 11,  ///< Inelastic photon emission from proton (Budnev flux approximation)
-      P_Gluon_KMR = 20,                ///< Inelastic gluon emission from proton (KMR flux modelling)
-      HI_Photon_Elastic = 100          ///< Elastic photon emission from heavy ion (from Starlight \cite Klein:2016yzr)
-    };
-    /// Human version of the flux name
-    friend std::ostream& operator<<(std::ostream&, const KTFlux&);
-    const KTFlux& ktFlux() const { return kt_flux_; }
-
-    /// Compute the electromagnetic form factors for the current beam mode
-    formfac::FormFactors flux(double q2,
-                              double mx2,
-                              formfac::Parameterisation* ff = nullptr,
-                              strfun::Parameterisation* sf = nullptr) const;
-
-    /// Compute the scalar kT-dependent flux
-    double ktFlux(double x,
-                  double q2,
-                  double mx2 = -1.,
-                  formfac::Parameterisation* ff = nullptr,
-                  strfun::Parameterisation* sf = nullptr) const;
-
-    /// Compute the flux for a given parton \f$(x,k_{\rm T})\f$
-    /// \param[in] type Flux modelling
-    /// \param[in] x Parton momentum fraction
-    /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\rm T}^2\f$ of the incoming parton
-    /// \param[in] ff Form factors evaluator
-    /// \param[in] sf Structure functions evaluator
-    /// \param[in] mi2 Incoming particle squared mass
-    /// \param[in] mf2 Outgoing diffractive squared mass
-    static double ktFluxNucl(const KTFlux& type,
-                             double x,
-                             double kt2,
-                             formfac::Parameterisation* ff = nullptr,
-                             strfun::Parameterisation* sf = nullptr,
-                             double mi2 = -1.,
-                             double mf2 = -1.);
-    /// Compute the flux (from heavy ion) for a given parton \f$(x,k_{\rm T})\f$
-    /// \param[in] type Flux modelling
-    /// \param[in] x Parton momentum fraction
-    /// \param[in] kt2 Transverse 2-momentum \f$\mathbf{q}_{\rm T}^2\f$ of the incoming parton
-    /// \param[in] hi Heavy ion properties
-    static double ktFluxHI(const KTFlux& type, double x, double kt2, const HeavyIon& hi);
+    /// Scalar parton flux modelling
+    const PartonFlux& flux() const { return *flux_; }
+    /// Compute the scalar parton flux given its modelling
+    double flux(double x, double q2, double mx2 = -1.) const;
 
   private:
-    static const double kMinKTFlux;  ///< Minimal value taken for a \f$\k_{\rm T}\f$-factorised flux
-    pdgid_t pdg_;                    ///< PDG identifier for the beam
-    Momentum momentum_;              ///< Incoming particle momentum
-    Mode mode_;                      ///< Beam treatment mode
-    KTFlux kt_flux_;                 ///< Type of \f$k_{\rm T}\f$-factorised flux to be considered (if any)
+    pdgid_t pdg_;                       ///< PDG identifier for the beam
+    Momentum momentum_;                 ///< Incoming particle momentum
+    Mode mode_;                         ///< Beam treatment mode
+    std::unique_ptr<PartonFlux> flux_;  ///< Incoming parton flux evaluator
   };
 }  // namespace cepgen
 
