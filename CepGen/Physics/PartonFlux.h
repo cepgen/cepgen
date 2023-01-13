@@ -32,23 +32,10 @@ namespace cepgen {
 
     virtual bool ktFactorised() const { return false; }
     virtual bool fragmenting() const { return true; }
-    virtual int partonPdgId() const { return 2212; }
+    virtual int partonPdgId() const;
 
   protected:
     const double mp_, mp2_;
-  };
-
-  class KTFlux : public PartonFlux {
-  public:
-    explicit KTFlux(const ParametersList&);
-
-    static ParametersDescription description();
-
-    bool ktFactorised() const override final { return true; }
-
-  protected:
-    /// Minimal value taken for a \f$\k_{\rm T}\f$-factorised flux
-    static constexpr double kMinKTFlux = 1.e-20;
   };
 }  // namespace cepgen
 

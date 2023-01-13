@@ -924,8 +924,7 @@ namespace cepgen {
       const double t22 = 512. * (bb_ * (delta_ * delta_ - gram_) - pow(epsi_ - delta_ * (qdq + q1dq2_), 2) -
                                  sa1_ * a6_ * a6_ - sa2_ * a5_ * a5_ - sa1_ * sa2_ * qqq);  // electric-electric
 
-      //--- compute the electric/magnetic form factors for the two
-      //    considered parton momenta transfers
+      //--- compute the electric/magnetic form factors for the two considered parton momenta transfers
       const auto fp1 = (*formfac_)(kin_.incomingBeams().positive().mode(), -t1_, mX2_, strfun_.get()),
                  fp2 = (*formfac_)(kin_.incomingBeams().negative().mode(), -t2_, mY2_, strfun_.get());
 

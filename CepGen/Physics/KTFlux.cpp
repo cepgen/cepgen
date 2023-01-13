@@ -31,28 +31,39 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
 namespace cepgen {
-  KTFlux::KTFlux(const ParametersList& params) : PartonFlux(params) {}
+  class KTFlux : public PartonFlux {
+  public:
+    explicit KTFlux(const ParametersList& params) : PartonFlux(params) {}
 
-  ParametersDescription KTFlux::description() {
-    auto desc = PartonFlux::description();
-    desc.setDescription("kT-factorised flux");
-    return desc;
-  }
+    static ParametersDescription description() {
+      auto desc = PartonFlux::description();
+      desc.setDescription("kT-factorised flux");
+      return desc;
+    }
+
+    bool ktFactorised() const override final { return true; }
+
+  protected:
+    /// Minimal value taken for a \f$\k_{\rm T}\f$-factorised flux
+    static constexpr double kMinKTFlux = 1.e-20;
+  };
 
   class NucleonKTFlux : public KTFlux {
   public:
     explicit NucleonKTFlux(const ParametersList& params)
-        : KTFlux(params), mi_(PDG::get().mass(steer<pdgid_t>("pdgId"))), mi2_(mi_ * mi_) {}
+        : KTFlux(params),
+          mi_(params_.has<double>("mass") ? steer<double>("mass") : PDG::get().mass(steer<pdgid_t>("pdgId"))),
+          mi2_(mi_ * mi_) {}
 
     static ParametersDescription description() {
       auto desc = KTFlux::description();
-      desc.add<pdgid_t>("pdgId", 2212).setDescription("PDG identifier of the incoming nucleon");
+      desc.add<pdgid_t>("pdgId", PDG::proton).setDescription("PDG identifier of the incoming nucleon");
       return desc;
     }
 
   protected:
     struct Q2Values {
-      double min, q2;
+      double min{0.}, q2{0.};
     };
     /// Compute the minimum and kT-dependent Q^2
     Q2Values computeQ2(double x, double kt2, double mx2 = 0.) const {
@@ -78,11 +89,9 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = KTFlux::description();
       desc.setDescription("Elastic photon emission from a nucleon");
-      desc.add<std::string>("formFactors", formfac::gFFStandardDipoleHandler)
-          .setDescription("Beam form factors modelling");
       return desc;
     }
-    bool fragmenting() const override { return false; }
+    bool fragmenting() const override final { return false; }
 
     double operator()(double x, double kt2, double) override {
       const auto q2vals = computeQ2(x, kt2);
@@ -125,10 +134,6 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = KTFlux::description();
       desc.setDescription("Inelastic photon emission from a nucleon");
-      desc.add<ParametersDescription>(
-              "structureFunctions", strfun::Parameterisation::description().setName<int>(11)  // default is SY
-              )
-          .setDescription("Beam inelastic structure functions modelling");
       return desc;
     }
 
@@ -172,7 +177,7 @@ namespace cepgen {
       return desc;
     }
     double operator()(double x, double kt2, double mx2) override { return kmr::GluonGrid::get()(x, kt2, mx2); }
-    int partonPdgId() const override final { return 21; }
+    int partonPdgId() const override final { return PDG::gluon; }
     bool fragmenting() const override { return false; }
   };
 
@@ -189,7 +194,7 @@ namespace cepgen {
       return desc;
     }
 
-    bool fragmenting() const override { return false; }
+    bool fragmenting() const override final { return false; }
 
     double operator()(double x, double kt2, double) override {
       const double r_a = 1.1 * cbrt(hi_.A), a0 = 0.7, m_a = hi_.A * mp_;

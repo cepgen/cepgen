@@ -35,15 +35,17 @@ namespace cepgen {
         momentum_(Momentum::fromPxPyPzM(
             0., 0., steer<double>("pz"), HeavyIon::isHI(pdg_) ? HeavyIon::mass(HeavyIon(pdg_)) : PDG::get().mass(pdg_))),
         mode_(steerAs<int, Mode>("mode")),
-        flux_(PartonFluxFactory::get().build(steer<std::string>("partonFlux"))) {
-    if (pdg_ == PDG::electron)
-      mode_ = Mode::PointLikeFermion;
-    else if (HeavyIon::isHI(pdg_))
-      mode_ = Mode::Other;
-    else if (flux_->fragmenting())
-      mode_ = Mode::ProtonInelastic;
-    else
-      mode_ = Mode::ProtonElastic;
+        flux_(PartonFluxFactory::get().build(steer<ParametersList>("partonFlux") + params_)) {
+    if (mode_ == Mode::invalid) {
+      if (pdg_ == PDG::electron)
+        mode_ = Mode::PointLikeFermion;
+      else if (HeavyIon::isHI(pdg_))
+        mode_ = Mode::Other;
+      else if (flux_->fragmenting())
+        mode_ = Mode::ProtonInelastic;
+      else
+        mode_ = Mode::ProtonElastic;
+    }
   }
 
   bool Beam::fragmented() const { return flux_->fragmenting(); }
@@ -56,8 +58,8 @@ namespace cepgen {
     auto desc = ParametersDescription();
     desc.add<int>("pdgId", (int)PDG::proton);
     desc.add<double>("pz", 6500.);
-    desc.add<int>("mode", (int)Beam::Mode::ProtonElastic);
-    desc.add<std::string>("partonFlux", "BudnevElasticKT");
+    desc.add<int>("mode", (int)Beam::Mode::invalid);
+    desc.add<ParametersDescription>("partonFlux", PartonFluxFactory::get().describeParameters("BudnevElasticKT"));
     return desc;
   }
 

@@ -194,7 +194,7 @@ namespace cepgen {
       /// Second parton virtuality
       double t2_{-1.};
       /// Set of cuts to apply on the final phase space
-      Kinematics kin_;
+      Kinematics kin_{ParametersList()};
       /// Event object containing all the information on all particles in the system
       std::unique_ptr<Event> event_;
       /// Is the phase space point set?

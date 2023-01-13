@@ -170,8 +170,6 @@ namespace cepgen {
 
   const ParametersList& IncomingBeams::parameters() const {
     params_ = SteeredObject::parameters();
-    params_.set<ParametersList>("formFactors", formFactors());
-    params_.set<ParametersList>("structureFunctions", structureFunctions());
     params_.setAs<int, mode::Kinematics>("mode", mode())
         .set<int>("beam1id", pos_beam_.pdgId())
         .set<double>("beam1pz", +pos_beam_.momentum().pz())
@@ -189,9 +187,9 @@ namespace cepgen {
 
   void IncomingBeams::setSqrtS(double sqs) {
     if (pos_beam_.pdgId() != neg_beam_.pdgId())
-      throw CG_FATAL("Kinematics") << "Trying to set √s with asymmetric beams"
-                                   << " (" << pos_beam_.pdgId() << "/" << neg_beam_.pdgId() << ").\n"
-                                   << "Please fill incoming beams objects manually!";
+      throw CG_FATAL("IncomingBeams:setSqrtS") << "Trying to set √s with asymmetric beams"
+                                               << " (" << pos_beam_.pdgId() << "/" << neg_beam_.pdgId() << ").\n"
+                                               << "Please fill incoming beams objects manually!";
     pos_beam_.setMomentum(Momentum::fromPxPyPzM(0.,
                                                 0.,
                                                 +0.5 * sqs,
@@ -263,22 +261,26 @@ namespace cepgen {
 
   ParametersDescription IncomingBeams::description() {
     auto desc = ParametersDescription();
+    desc += Beam::description();
     desc.add<int>("beam1id", 2212).setDescription("PDG id of the positive-z beam particle");
     desc.add<int>("beam1A", 1).setDescription("Atomic weight of the positive-z ion beam");
     desc.add<int>("beam1Z", 1).setDescription("Atomic number of the positive-z ion beam");
-    desc.add<std::vector<int> >("heavyIon2", {}).setDescription("{A, Z} of the positive-z ion beam");
     desc.add<int>("beam2id", 2212).setDescription("PDG id of the negative-z beam particle");
     desc.add<int>("beam2A", 1).setDescription("Atomic weight of the negative-z ion beam");
     desc.add<int>("beam2Z", 1).setDescription("Atomic number of the negative-z ion beam");
-    desc.add<std::vector<int> >("heavyIon2", {}).setDescription("{A, Z} of the negative-z ion beam");
     desc.add<std::vector<ParametersList> >("pdgIds", {}).setDescription("PDG description of incoming beam particles");
     desc.add<std::vector<int> >("pdgIds", {}).setDescription("PDG ids of incoming beam particles");
     desc.add<std::vector<double> >("pz", {}).setDescription("Beam momenta (in GeV/c)");
     desc.add<double>("sqrtS", -1.).setDescription("Two-beam centre of mass energy (in GeV)");
-    desc.add<double>("cmEnergy", -1.).setDescription("Two-beam centre of mass energy (in GeV)");
     desc.add<int>("mode", (int)mode::Kinematics::invalid)
         .setDescription("Process kinematics mode (1 = elastic, (2-3) = single-dissociative, 4 = double-dissociative)");
-    desc.add<int>("ktFluxes", -1).setDescription("kT-factorised fluxes modelling");
+    desc.add<ParametersDescription>(
+            "formFactors", formfac::FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler))
+        .setDescription("Beam form factors modelling");
+    desc.add<ParametersDescription>(
+            "structureFunctions", strfun::Parameterisation::description().setName<int>(11)  // default is SY
+            )
+        .setDescription("Beam inelastic structure functions modelling");
     return desc;
   }
 }  // namespace cepgen

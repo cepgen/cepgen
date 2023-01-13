@@ -52,12 +52,11 @@ double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& 
       ParametersList()
           .set<ParametersList>("structureFunctions",
                                strfun::StructureFunctionsFactory::get().describeParameters(sfmode).parameters())
-          .set<ParametersList>("formFactors",
-                               formfac::FormFactorsFactory::get()
-                                   .describeParameters(formfac::gFFStandardDipoleHandler)
-                                   .parameters())  // use another argument for the modelling?
-      ;
-
+          .set<ParametersList>(
+              "formFactors",
+              formfac::FormFactorsFactory::get()
+                  .describeParameters(formfac::gFFStandardDipoleHandler)  // use another argument for the modelling?
+                  .parameters());
   auto flux_name = [](int mode) -> std::string {
     switch (mode) {
       case 0:

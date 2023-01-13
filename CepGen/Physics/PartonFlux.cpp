@@ -25,6 +25,9 @@ namespace cepgen {
 
   ParametersDescription PartonFlux::description() {
     auto desc = ParametersDescription();
+    desc.setDescription("Unnamed parton flux evaluator");
     return desc;
   }
+
+  int PartonFlux::partonPdgId() const { return PDG::photon; }
 }  // namespace cepgen
