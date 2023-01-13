@@ -52,7 +52,10 @@ namespace cepgen {
   public:
     explicit NucleonKTFlux(const ParametersList& params)
         : KTFlux(params),
-          mi_(params_.has<double>("mass") ? steer<double>("mass") : PDG::get().mass(steer<pdgid_t>("pdgId"))),
+          mi_(params_.has<double>("mass")
+                  ? steer<double>("mass")
+                  : (HeavyIon::isHI(steer<pdgid_t>("pdgId")) ? steerAs<pdgid_t, HeavyIon>("pdgId").mass()
+                                                             : PDG::get().mass(steer<pdgid_t>("pdgId")))),
           mi2_(mi_ * mi_) {}
 
     static ParametersDescription description() {
