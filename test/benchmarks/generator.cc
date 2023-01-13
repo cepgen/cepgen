@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
       .context("process", process);
 
   gen.parametersRef().setProcess(cepgen::proc::ProcessFactory::get().build(process));
-  cepgen::Kinematics kin;
+  cepgen::Kinematics kin(cepgen::ParametersList{});
   kin.incomingBeams().positive().setPdgId(2212);
   kin.incomingBeams().negative().setPdgId(2212);
   kin.incomingBeams().setSqrtS(13.e3);

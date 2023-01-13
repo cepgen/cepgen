@@ -27,19 +27,10 @@
 #include "CepGen/Physics/IncomingBeams.h"
 
 namespace cepgen {
-  enum class KTFlux;
-  namespace strfun {
-    class Parameterisation;
-  }
-  namespace formfac {
-    class Parameterisation;
-  }
   /// List of kinematic constraints to apply on the process phase space.
   class Kinematics final : public SteeredObject<Kinematics> {
   public:
-    Kinematics();
     explicit Kinematics(const ParametersList&);
-    ~Kinematics() = default;
 
     /// Minimal diffractive mass for dissociative proton treatment
     static const double MX_MIN;

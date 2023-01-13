@@ -20,8 +20,10 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenProcesses/LPAIR.h"
 
@@ -62,6 +64,9 @@ namespace cepgen {
 
     void LPAIR::prepareKinematics() {
       masses_.Ml2 = (*event_)(Particle::CentralSystem)[0].mass2();
+
+      formfac_ = formfac::FormFactorsFactory::get().build(kin_.incomingBeams().formFactors());
+      strfun_ = strfun::StructureFunctionsFactory::get().build(kin_.incomingBeams().structureFunctions());
 
       //--- first define the squared mass range for the diphoton/dilepton system
       const auto& mll_limits = kin_.cuts().central.mass_sum();
@@ -919,12 +924,9 @@ namespace cepgen {
       const double t22 = 512. * (bb_ * (delta_ * delta_ - gram_) - pow(epsi_ - delta_ * (qdq + q1dq2_), 2) -
                                  sa1_ * a6_ * a6_ - sa2_ * a5_ * a5_ - sa1_ * sa2_ * qqq);  // electric-electric
 
-      auto* ff = kin_.incomingBeams().formFactors();
-      auto* sf = kin_.incomingBeams().structureFunctions();
-      //--- compute the electric/magnetic form factors for the two
-      //    considered parton momenta transfers
-      const auto fp1 = kin_.incomingBeams().positive().flux(-t1_, mX2_, ff, sf);
-      const auto fp2 = kin_.incomingBeams().negative().flux(-t2_, mY2_, ff, sf);
+      //--- compute the electric/magnetic form factors for the two considered parton momenta transfers
+      const auto fp1 = (*formfac_)(kin_.incomingBeams().positive().mode(), -t1_, mX2_, strfun_.get()),
+                 fp2 = (*formfac_)(kin_.incomingBeams().negative().mode(), -t2_, mY2_, strfun_.get());
 
       const double peripp =
           (fp1.FM * fp2.FM * t11 + fp1.FE * fp2.FM * t21 + fp1.FM * fp2.FE * t12 + fp1.FE * fp2.FE * t22) /

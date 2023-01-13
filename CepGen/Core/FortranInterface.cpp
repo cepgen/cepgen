@@ -20,6 +20,7 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/CouplingFactory.h"
+#include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/Coupling.h"
@@ -39,7 +40,7 @@ void cepgen_structure_functions_(int& sfmode, double& xbj, double& q2, double& f
 }
 
 /// Compute a \f$k_{\rm T}\f$-dependent flux for single nucleons
-/// \param[in] fmode Flux mode (see cepgen::KTFlux)
+/// \param[in] fmode Flux mode
 /// \param[in] x Fractional momentum loss
 /// \param[in] kt2 The \f$k_{\rm T}\f$ transverse momentum norm
 /// \param[in] sfmode Structure functions set for dissociative emission
@@ -47,21 +48,51 @@ void cepgen_structure_functions_(int& sfmode, double& xbj, double& q2, double& f
 /// \param[in] mout Diffractive state mass for dissociative emission
 double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& min, double& mout) {
   using namespace cepgen;
-  static auto ff = formfac::FormFactorsFactory::get().build(
-      formfac::gFFStandardDipoleHandler);  // use another argument for the modelling?
-  static auto sf = strfun::StructureFunctionsFactory::get().build(sfmode);
-  return Beam::ktFluxNucl((Beam::KTFlux)fmode, x, kt2, ff.get(), sf.get(), min * min, mout * mout);
+  const auto params =
+      ParametersList()
+          .set<double>("mass", min)
+          .set<ParametersList>("structureFunctions",
+                               strfun::StructureFunctionsFactory::get().describeParameters(sfmode).parameters())
+          .set<ParametersList>(
+              "formFactors",
+              formfac::FormFactorsFactory::get()
+                  .describeParameters(formfac::gFFStandardDipoleHandler)  // use another argument for the modelling?
+                  .parameters());
+  auto flux_name = [](int mode) -> std::string {
+    switch (mode) {
+      case 0:
+        return "ElasticKT";
+      case 10:
+        return "BudnevElasticKT";
+      case 1:
+        return "InelasticKT";
+      case 11:
+        return "BudnevInelasticKT";
+      case 100:
+        return "ElasticHeavyIonKT";
+      case 20:
+        return "KMRElasticGluonKT";
+      default:
+        throw CG_FATAL("cepgen_kt_flux") << "Invalid flux modelling: " << mode << ".";
+    }
+  };
+  static auto flux = PartonFluxFactory::get().build(flux_name(fmode), params);
+  return (*flux)(x, kt2, mout);
 }
 
 /// Compute a \f$k_{\rm T}\f$-dependent flux for heavy ions
-/// \param[in] fmode Flux mode (see cepgen::KTFlux)
+/// \param[in] fmode Flux mode
 /// \param[in] x Fractional momentum loss
 /// \param[in] kt2 The \f$k_{\rm T}\f$ transverse momentum norm
 /// \param[in] a Mass number for the heavy ion
 /// \param[in] z Atomic number for the heavy ion
 double cepgen_kt_flux_hi_(int& fmode, double& x, double& kt2, int& a, int& z) {
   using namespace cepgen;
-  return Beam::ktFluxHI((Beam::KTFlux)fmode, x, kt2, HeavyIon{(unsigned short)a, (Element)z});
+  (void)fmode;
+  static auto flux = PartonFluxFactory::get().build(
+      "ElasticHeavyIonKT",
+      ParametersList().setAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon{(unsigned short)a, (Element)z}));
+  return (*flux)(x, kt2);
 }
 
 /// Mass of a particle, in GeV/c^2

@@ -24,6 +24,12 @@
 #include "CepGen/Process/Process.h"
 
 namespace cepgen {
+  namespace strfun {
+    class Parameterisation;
+  }
+  namespace formfac {
+    class Parameterisation;
+  }
   namespace proc {
     /**
      * Full class of methods and objects to compute the full analytic matrix element
@@ -203,6 +209,8 @@ namespace cepgen {
       std::default_random_engine rnd_gen_;
       std::uniform_real_distribution<double> rnd_phi_;
       std::uniform_int_distribution<short> rnd_side_;
+      std::unique_ptr<formfac::Parameterisation> formfac_;
+      std::unique_ptr<strfun::Parameterisation> strfun_;
     };
   }  // namespace proc
 }  // namespace cepgen

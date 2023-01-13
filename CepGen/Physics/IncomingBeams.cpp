@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -119,10 +119,8 @@ namespace cepgen {
     plist_neg.set<double>("pz", -fabs(p2z));
 
     //--- form factors
-    const auto ff_mode = steer<std::string>("formFactors");
-    if (!ff_mode.empty() || !form_factors_)
-      form_factors_ =
-          formfac::FormFactorsFactory::get().build(ff_mode.empty() ? formfac::gFFStandardDipoleHandler : ff_mode);
+    plist_pos.set<ParametersList>("formFactors", steer<ParametersList>("formFactors"));
+    plist_neg.set<ParametersList>("formFactors", steer<ParametersList>("formFactors"));
 
     const auto mode = steerAs<int, mode::Kinematics>("mode");
     if (mode != mode::Kinematics::invalid) {
@@ -148,13 +146,10 @@ namespace cepgen {
       }
     }
     //--- structure functions
-    auto strfun = steer<ParametersList>("structureFunctions");
-    if (!strfun.empty() || !str_fun_) {
-      CG_DEBUG("IncomingBeams") << "Structure functions modelling to be built: " << strfun << ".";
-      str_fun_ = strfun::StructureFunctionsFactory::get().build(strfun);
-    }
-    //--- parton fluxes for kt-factorisation
-    if (params_.has<std::vector<int> >("ktFluxes")) {
+    plist_pos.set<ParametersList>("structureFunctions", steer<ParametersList>("structureFunctions"));
+    plist_neg.set<ParametersList>("structureFunctions", steer<ParametersList>("structureFunctions"));
+    //--- parton fluxes
+    /*if (params_.has<std::vector<int> >("ktFluxes")) {
       auto kt_fluxes = steer<std::vector<int> >("ktFluxes");
       if (!kt_fluxes.empty()) {
         plist_pos.set<int>("ktFlux", kt_fluxes.at(0));
@@ -166,7 +161,7 @@ namespace cepgen {
         plist_pos.setAs<int, Beam::KTFlux>("ktFlux", ktfluxes);
         plist_neg.setAs<int, Beam::KTFlux>("ktFlux", ktfluxes);
       }
-    }
+    }*/
     CG_DEBUG("IncomingBeams") << "Will build the following incoming beams:\n* " << plist_pos << "\n* " << plist_neg
                               << ".";
     pos_beam_ = Beam(plist_pos);
@@ -175,14 +170,12 @@ namespace cepgen {
 
   const ParametersList& IncomingBeams::parameters() const {
     params_ = SteeredObject::parameters();
-    if (str_fun_)
-      params_.set<ParametersList>("structureFunctions", str_fun_->parameters());
     params_.setAs<int, mode::Kinematics>("mode", mode())
         .set<int>("beam1id", pos_beam_.pdgId())
         .set<double>("beam1pz", +pos_beam_.momentum().pz())
         .set<int>("beam2id", neg_beam_.pdgId())
         .set<double>("beam2pz", -neg_beam_.momentum().pz())
-        .set<std::vector<int> >("ktFluxes", {(int)pos_beam_.ktFlux(), (int)neg_beam_.ktFlux()})
+        //.set<std::vector<int> >("ktFluxes", {(int)pos_beam_.ktFlux(), (int)neg_beam_.ktFlux()})
         .set<double>("sqrtS", sqrtS());
     const HeavyIon hi1(pos_beam_.pdgId()), hi2(neg_beam_.pdgId());
     if (hi1)
@@ -194,9 +187,9 @@ namespace cepgen {
 
   void IncomingBeams::setSqrtS(double sqs) {
     if (pos_beam_.pdgId() != neg_beam_.pdgId())
-      throw CG_FATAL("Kinematics") << "Trying to set √s with asymmetric beams"
-                                   << " (" << pos_beam_.pdgId() << "/" << neg_beam_.pdgId() << ").\n"
-                                   << "Please fill incoming beams objects manually!";
+      throw CG_FATAL("IncomingBeams:setSqrtS") << "Trying to set √s with asymmetric beams"
+                                               << " (" << pos_beam_.pdgId() << "/" << neg_beam_.pdgId() << ").\n"
+                                               << "Please fill incoming beams objects manually!";
     pos_beam_.setMomentum(Momentum::fromPxPyPzM(0.,
                                                 0.,
                                                 +0.5 * sqs,
@@ -254,7 +247,8 @@ namespace cepgen {
     const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
     sf_model = (sf_model == 0 ? (int)strfun::Type::SuriYennie : sf_model);
     sr_model = (sr_model == 0 ? (int)sigrat::Type::SibirtsevBlunden : sr_model);
-    auto sf_params = ParametersList().setName<int>(sf_model).set<int>("sigmaRatio", sr_model);
+    auto& sf_params = params_.operator[]<ParametersList>("structureFunctions");
+    sf_params.setName<int>(sf_model).set<int>("sigmaRatio", sr_model);
     if (sf_model / kLHAPDFCodeDec == 1) {  // SF from parton
       const unsigned long icode = sf_model % kLHAPDFCodeDec;
       sf_params.setName<int>((int)strfun::Type::Partonic)
@@ -263,36 +257,30 @@ namespace cepgen {
     }
     CG_DEBUG("IncomingBeams:setStructureFunctions")
         << "Structure functions modelling to be built: " << sf_params << ".";
-    str_fun_ = strfun::StructureFunctionsFactory::get().build(sf_params);
-  }
-
-  void IncomingBeams::setStructureFunctions(std::unique_ptr<strfun::Parameterisation> param) {
-    str_fun_ = std::move(param);
   }
 
   ParametersDescription IncomingBeams::description() {
     auto desc = ParametersDescription();
+    desc += Beam::description();
     desc.add<int>("beam1id", 2212).setDescription("PDG id of the positive-z beam particle");
     desc.add<int>("beam1A", 1).setDescription("Atomic weight of the positive-z ion beam");
     desc.add<int>("beam1Z", 1).setDescription("Atomic number of the positive-z ion beam");
-    desc.add<std::vector<int> >("heavyIon2", {}).setDescription("{A, Z} of the positive-z ion beam");
     desc.add<int>("beam2id", 2212).setDescription("PDG id of the negative-z beam particle");
     desc.add<int>("beam2A", 1).setDescription("Atomic weight of the negative-z ion beam");
     desc.add<int>("beam2Z", 1).setDescription("Atomic number of the negative-z ion beam");
-    desc.add<std::vector<int> >("heavyIon2", {}).setDescription("{A, Z} of the negative-z ion beam");
     desc.add<std::vector<ParametersList> >("pdgIds", {}).setDescription("PDG description of incoming beam particles");
     desc.add<std::vector<int> >("pdgIds", {}).setDescription("PDG ids of incoming beam particles");
     desc.add<std::vector<double> >("pz", {}).setDescription("Beam momenta (in GeV/c)");
     desc.add<double>("sqrtS", -1.).setDescription("Two-beam centre of mass energy (in GeV)");
-    desc.add<double>("cmEnergy", -1.).setDescription("Two-beam centre of mass energy (in GeV)");
-    desc.add<std::string>("formFactors", "").setDescription("Beam form factors modelling");
     desc.add<int>("mode", (int)mode::Kinematics::invalid)
         .setDescription("Process kinematics mode (1 = elastic, (2-3) = single-dissociative, 4 = double-dissociative)");
-    auto sf_desc = strfun::Parameterisation::description();
-    sf_desc.setName<int>(11);  // default is SY
-    desc.add<ParametersDescription>("structureFunctions", sf_desc)
+    desc.add<ParametersDescription>(
+            "formFactors", formfac::FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler))
+        .setDescription("Beam form factors modelling");
+    desc.add<ParametersDescription>(
+            "structureFunctions", strfun::Parameterisation::description().setName<int>(11)  // default is SY
+            )
         .setDescription("Beam inelastic structure functions modelling");
-    desc.add<int>("ktFluxes", -1).setDescription("kT-factorised fluxes modelling");
     return desc;
   }
 }  // namespace cepgen

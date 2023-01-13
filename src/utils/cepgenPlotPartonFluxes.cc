@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/PDG.h"
@@ -31,14 +32,19 @@
 #include "CepGen/Utils/Graph.h"
 #include "CepGen/Utils/String.h"
 
+using namespace std;
+
 int main(int argc, char* argv[]) {
-  std::string formfac_type;
+  vector<string> fluxes_names;
+  string formfac_type;
   int strfun_type, num_points;
   double kt2, mx;
   bool logx, logy, draw_grid;
-  std::string output_file, plotter;
+  string output_file, plotter;
 
   cepgen::ArgumentsParser(argc, argv)
+      .addOptionalArgument(
+          "fluxes", "parton fluxe modellings", &fluxes_names, cepgen::PartonFluxFactory::get().modules())
       .addOptionalArgument("ff,f", "form factors modelling", &formfac_type, "StandardDipole")
       .addOptionalArgument("sf,s", "structure functions modelling", &strfun_type, 301)
       .addOptionalArgument("kt2,k", "parton transverse virtuality (GeV^2)", &kt2, 100.)
@@ -52,31 +58,36 @@ int main(int argc, char* argv[]) {
       .parse();
 
   cepgen::initialise();
-  const double mi = cepgen::PDG::get().mass(cepgen::PDG::proton);
-  const double mi2 = mi * mi, mx2 = mx * mx;
+  const double mx2 = mx * mx;
 
-  auto ff = cepgen::formfac::FormFactorsFactory::get().build(formfac_type);
-  auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(strfun_type);
-  std::ofstream out(output_file);
-  out << "# form factors: " << ff.get() << "\n"
-      << "# structure functions: " << sf.get() << "\n"
+  ofstream out(output_file);
+  out << "# parton fluxes: " << cepgen::utils::repr(fluxes_names) << "\n"
+      << "# form factors: " << formfac_type << "\n"
+      << "# structure functions: " << strfun_type << "\n"
       << "# kt2 = " << kt2 << " GeV^2\n"
-      << "# mX = " << mx << " GeV\n";
-  cepgen::utils::Graph1D graph_el("", "Elastic photon"), graph_inel("", "Inelastic photon"),
-      graph_inel_bud("", "Inelastic photon (Budnev)"), graph_glu("", "Gluon (KMR)");
-  for (int i = 0; i < num_points; ++i) {
-    const double x = i * 1. / num_points;
-    const auto f_el = cepgen::Beam::ktFluxNucl(cepgen::Beam::KTFlux::P_Photon_Elastic, x, kt2, ff.get());
-    const auto f_inel =
-        cepgen::Beam::ktFluxNucl(cepgen::Beam::KTFlux::P_Photon_Inelastic, x, kt2, nullptr, sf.get(), mi2, mx2);
-    const auto f_inel_bud =
-        cepgen::Beam::ktFluxNucl(cepgen::Beam::KTFlux::P_Photon_Inelastic_Budnev, x, kt2, nullptr, sf.get(), mi2, mx2);
-    //const auto f_glu = cepgen::Beam::ktFluxNucl(cepgen::Beam::KTFlux::P_Gluon_KMR, x, kt2, nullptr, nullptr, mi2, mx2);
-    out << x << "\t" << f_el << "\t" << f_inel << "\t" << f_inel_bud << /*"\t" << f_glu <<*/ "\n";
-    graph_el.addPoint(x, f_el);
-    graph_inel.addPoint(x, f_inel);
-    graph_inel_bud.addPoint(x, f_inel_bud);
-    //graph_glu.addPoint(x, f_glu);
+      << "# mX = " << mx << " GeV";
+  vector<cepgen::utils::Graph1D> graph_flux;
+  vector<std::unique_ptr<cepgen::PartonFlux> > fluxes;
+  for (const auto& flux : fluxes_names) {
+    auto flux_obj = cepgen::PartonFluxFactory::get().build(
+        flux,
+        cepgen::ParametersList()
+            .set<cepgen::ParametersList>(
+                "structureFunctions",
+                cepgen::strfun::StructureFunctionsFactory::get().describeParameters(strfun_type).parameters())
+            .set<cepgen::ParametersList>(
+                "formFactors",
+                cepgen::formfac::FormFactorsFactory::get().describeParameters(formfac_type).parameters()));
+    graph_flux.emplace_back(flux, flux_obj->name());
+    fluxes.emplace_back(std::move(flux_obj));
+  }
+  for (const auto& x : cepgen::Limits(0., 1. - 1.e-15).generate(num_points)) {
+    out << "\n" << x;
+    for (size_t i = 0; i < fluxes.size(); ++i) {
+      const auto f = (*fluxes.at(i))(x, kt2, mx2);
+      out << "\t" << f;
+      graph_flux.at(i).addPoint(x, f);
+    }
   }
   out.close();
   CG_LOG << "Scan written in \"" << output_file << "\".";
@@ -95,9 +106,13 @@ int main(int argc, char* argv[]) {
                            cepgen::formfac::FormFactorsFactory::get().describe(formfac_type) + "/" +
                            cepgen::strfun::StructureFunctionsFactory::get().describe(strfun_type);
 
-    graph_el.xAxis().setLabel("$\\xi$");
-    graph_el.yAxis().setLabel("$\\varphi_{T}(\\xi, k_{T}^{2})$");
-    plt->draw({&graph_el, &graph_inel, &graph_inel_bud}, "comp_ktflux", top_label, dm);
+    cepgen::utils::DrawableColl plots;
+    for (auto& plt : graph_flux) {
+      plt.xAxis().setLabel("$\\xi$");
+      plt.yAxis().setLabel("$\\varphi_{T}(\\xi, k_{T}^{2})$");
+      plots.emplace_back(&plt);
+    }
+    plt->draw(plots, "comp_partonflux", top_label, dm);
   }
 
   return 0;

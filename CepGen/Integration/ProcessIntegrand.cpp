@@ -61,7 +61,7 @@ namespace cepgen {
       dbg << "Process mode considered: " << beams.mode() << "\n\t"
           << "  positive-z beam: " << beams.positive() << "\n\t"
           << "  negative-z beam: " << beams.negative();
-      if (beams.structureFunctions())
+      if (!beams.structureFunctions().empty())
         dbg << "\n\t  structure functions: " << beams.structureFunctions();
     });
     if (process_->hasEvent())

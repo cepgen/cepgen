@@ -28,6 +28,7 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
@@ -118,6 +119,7 @@ int main(int argc, char* argv[]) {
     LOOP_FACTORY("Analytic integrator", cepgen::AnalyticIntegratorFactory)
     LOOP_FACTORY("Derivator", cepgen::utils::DerivatorFactory)
     LOOP_FACTORY("Process", cepgen::proc::ProcessFactory)
+    LOOP_FACTORY("Parton flux modelling", cepgen::PartonFluxFactory)
     LOOP_FACTORY("Beam form factors modelling", cepgen::formfac::FormFactorsFactory)
     LOOP_FACTORY_INT("Structure functions modelling", cepgen::strfun::StructureFunctionsFactory)
     LOOP_FACTORY_INT("Cross sections ratio modelling", cepgen::sigrat::SigmaRatiosFactory)

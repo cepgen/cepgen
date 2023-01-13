@@ -145,11 +145,17 @@ namespace cepgen {
     }
     /// Helper to print a vector
     template <class T>
-    std::string repr(const std::vector<T>& vec, const std::string& sep = ",") {
+    inline std::string repr(const std::vector<T>& vec, const std::string& sep = ",") {
       return std::accumulate(
           std::next(vec.begin()), vec.end(), std::to_string(*vec.begin()), [&sep](std::string str, T xv) {
             return std::move(str) + sep + std::to_string(xv);
           });
+    }
+    template <>
+    inline std::string repr(const std::vector<std::string>& vec, const std::string& sep) {
+      return std::accumulate(std::next(vec.begin()), vec.end(), *vec.begin(), [&sep](std::string str, std::string xv) {
+        return std::move(str) + sep + xv;
+      });
     }
     std::string randomString(size_t size);
     /// Trim leading spaces

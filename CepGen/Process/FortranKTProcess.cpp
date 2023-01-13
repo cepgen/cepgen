@@ -158,8 +158,9 @@ namespace cepgen {
       // intermediate partons information
       //-------------------------------------------------------------------------------------------
 
-      genparams_.iflux1 = (int)kin_.incomingBeams().positive().ktFlux();
-      genparams_.iflux2 = (int)kin_.incomingBeams().negative().ktFlux();
+      //FIXME
+      //genparams_.iflux1 = (int)kin_.incomingBeams().positive().ktFlux();
+      //genparams_.iflux2 = (int)kin_.incomingBeams().negative().ktFlux();
     }
 
     double FortranKTProcess::computeKTFactorisedMatrixElement() {

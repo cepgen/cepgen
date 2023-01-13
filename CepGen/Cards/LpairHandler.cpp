@@ -270,10 +270,8 @@ namespace cepgen {
 
     void LpairHandler::pack(const Parameters* params) {
       rt_params_ = const_cast<Parameters*>(params);
-      str_fun_ = rt_params_->kinematics().incomingBeams().structureFunctions()->name();
-      if (rt_params_->kinematics().incomingBeams().structureFunctions() &&
-          rt_params_->kinematics().incomingBeams().structureFunctions()->sigmaRatio())
-        sr_type_ = rt_params_->kinematics().incomingBeams().structureFunctions()->sigmaRatio()->name();
+      str_fun_ = rt_params_->kinematics().incomingBeams().structureFunctions().name<int>();
+      sr_type_ = rt_params_->kinematics().incomingBeams().structureFunctions().get<int>("sigmaRatio");
       //kmr_grid_path_ = kmr::GluonGrid::get().path();
       //mstw_grid_path_ =
       //pdg_input_path_ =

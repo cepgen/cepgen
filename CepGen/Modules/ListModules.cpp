@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2020-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
@@ -61,6 +62,7 @@ namespace cepgen {
       };
 
       list_modules(proc::ProcessFactory::get(), "Physics processes");
+      list_modules(PartonFluxFactory::get(), "Parton fluxes modellings");
       list_modules(formfac::FormFactorsFactory::get(), "Beam form factors modellings");
       list_int_modules(sigrat::SigmaRatiosFactory::get(), "Cross section ratios modellings");
       list_int_modules(strfun::StructureFunctionsFactory::get(), "Structure functions modellings", [](int mod) {
