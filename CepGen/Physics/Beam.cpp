@@ -147,6 +147,8 @@ namespace cepgen {
                           strfun::Parameterisation* sf,
                           double mi2,
                           double mf2) {
+    if (kt2 <= 0.)
+      return 0.;
     if (mi2 < 0.)
       mi2 = PDG::get().mass(PDG::proton);
     switch (type) {
@@ -189,6 +191,8 @@ namespace cepgen {
   }
 
   double Beam::ktFluxHI(const KTFlux& type, double x, double kt2, const HeavyIon& hi) {
+    if (kt2 <= 0.)
+      return 0.;
     double flux = 0.;
     switch (type) {
       case KTFlux::HI_Photon_Elastic: {
