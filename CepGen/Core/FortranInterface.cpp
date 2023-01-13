@@ -50,6 +50,7 @@ double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& 
   using namespace cepgen;
   const auto params =
       ParametersList()
+          .set<double>("mass", min)
           .set<ParametersList>("structureFunctions",
                                strfun::StructureFunctionsFactory::get().describeParameters(sfmode).parameters())
           .set<ParametersList>(
