@@ -37,10 +37,6 @@ namespace cepgen {
       /// Generic description for the structure functions
       static ParametersDescription description();
 
-      /// Human-readable dump of the flux this x value
-      friend std::ostream& operator<<(std::ostream&, const Parameterisation&);
-      virtual std::string describe() const;  ///< Human-readable description of this collinear flux
-
       /// Compute the collinear flux for this x value
       virtual double operator()(double /*x*/, double /*mx*/ = 0.) const { return 0.; }
 

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2022  Laurent Forthomme
+ *  Copyright (C) 2018-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,8 +17,6 @@
  */
 
 #include "CepGen/CollinearFluxes/Parameterisation.h"
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Physics/PDG.h"
 
 namespace cepgen {
@@ -32,8 +30,6 @@ namespace cepgen {
       q2_range_.min() = std::max(q2_range_.min(), 0.);
     }
 
-    std::string Parameterisation::describe() const { return name_; }
-
     ParametersDescription Parameterisation::description() {
       auto desc = ParametersDescription();
       desc.setDescription("Unnamed collinear flux");
@@ -41,7 +37,5 @@ namespace cepgen {
       desc.add<double>("qscale", 0.71);
       return desc;
     }
-
-    std::ostream& operator<<(std::ostream& os, const Parameterisation& sf) { return os << sf.describe(); }
   }  // namespace collflux
 }  // namespace cepgen
