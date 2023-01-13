@@ -105,14 +105,11 @@ namespace cepgen {
     }
   }
 
-  Beam::FormFactors Beam::flux(double q2,
-                               double mx2,
-                               formfac::Parameterisation* ff,
-                               strfun::Parameterisation* sf) const {
-    const auto flux = (*ff)(mode_, q2, mx2, sf);
-    CG_DEBUG_LOOP("Beam:flux") << "Flux for (q2=" << q2 << ", mX2=" << mx2 << "): "
-                               << "FE=" << flux.FE << ", FM=" << flux.FM << ".";
-    return FormFactors{flux.FE, flux.FM};
+  formfac::FormFactors Beam::flux(double q2,
+                                  double mx2,
+                                  formfac::Parameterisation* ff,
+                                  strfun::Parameterisation* sf) const {
+    return (*ff)(mode_, q2, mx2, sf);
   }
 
   double Beam::ktFlux(

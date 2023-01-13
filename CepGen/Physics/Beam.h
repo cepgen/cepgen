@@ -22,6 +22,7 @@
 #include <iosfwd>
 
 #include "CepGen/Core/SteeredObject.h"
+#include "CepGen/FormFactors/FormFactors.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/ParticleProperties.h"
 
@@ -92,14 +93,12 @@ namespace cepgen {
     friend std::ostream& operator<<(std::ostream&, const KTFlux&);
     const KTFlux& ktFlux() const { return kt_flux_; }
 
-    struct FormFactors {
-      double FE, FM;
-    };
-    /// Compute the electromagnetic form factors
-    FormFactors flux(double q2,
-                     double mx2,
-                     formfac::Parameterisation* ff = nullptr,
-                     strfun::Parameterisation* sf = nullptr) const;
+    /// Compute the electromagnetic form factors for the current beam mode
+    formfac::FormFactors flux(double q2,
+                              double mx2,
+                              formfac::Parameterisation* ff = nullptr,
+                              strfun::Parameterisation* sf = nullptr) const;
+
     /// Compute the scalar kT-dependent flux
     double ktFlux(double x,
                   double q2,

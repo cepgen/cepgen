@@ -37,9 +37,11 @@ namespace cepgen {
       }
 
     private:
-      void compute(double q2) override {
-        GE = pow(1. + q2 * inv_sq_scale_param_, -2.);
-        GM = MU * GE;
+      FormFactors compute(double q2) override {
+        FormFactors out;
+        out.GE = pow(1. + q2 * inv_sq_scale_param_, -2.);
+        out.GM = MU * out.GE;
+        return out;
       }
       const double inv_sq_scale_param_;
     };

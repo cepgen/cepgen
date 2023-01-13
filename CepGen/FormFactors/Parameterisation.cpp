@@ -34,11 +34,7 @@ namespace cepgen {
         : NamedModule<std::string>(param.parameters()),
           mp_(param.mp_),
           mp2_(param.mp2_),
-          last_q2_(-1.),
-          FE(param.FE),
-          FM(param.FM),
-          GE(param.GE),
-          GM(param.GM) {}
+          last_value_(param.last_value_) {}
 
     double Parameterisation::tau(double q2) const {
       if (mp2_ <= 0.)
@@ -46,27 +42,28 @@ namespace cepgen {
       return 0.25 * q2 / mp2_;
     }
 
-    Parameterisation& Parameterisation::operator()(const Beam::Mode& type,
-                                                   double q2,
-                                                   double mf2,
-                                                   strfun::Parameterisation* sf) {
-      last_q2_ = q2;
+    const FormFactors& Parameterisation::operator()(const Beam::Mode& type,
+                                                    double q2,
+                                                    double mf2,
+                                                    strfun::Parameterisation* sf) {
+      last_value_.first = q2;
+      auto& ff = last_value_.second;
       switch (type) {
         case Beam::Mode::invalid:
         case Beam::Mode::CompositeScalar:
         case Beam::Mode::Other:
           throw CG_FATAL("FormFactors") << type << " mode is not yet supported!";
         case Beam::Mode::PointLikeScalar:
-          FE = 1., FM = 0.;
+          ff.FE = 1., ff.FM = 0.;
           break;
         case Beam::Mode::PointLikeFermion:
-          FE = FM = 1.;  // FE=U2, FM=U1 in LPAIR
+          ff.FE = ff.FM = 1.;  // FE=U2, FM=U1 in LPAIR
           break;
         case Beam::Mode::ProtonElastic: {
-          compute(q2);
-          const double GE2 = GE * GE, GM2 = GM * GM;
-          FE = (4. * mp2_ * GE2 + q2 * GM2) / (4. * mp2_ + q2);
-          FM = GM2;
+          ff = compute(q2);
+          const double GE2 = ff.GE * ff.GE, GM2 = ff.GM * ff.GM;
+          ff.FE = (4. * mp2_ * GE2 + q2 * GM2) / (4. * mp2_ + q2);
+          ff.FM = GM2;
         } break;
         case Beam::Mode::ProtonInelastic: {
           if (!sf)
@@ -78,17 +75,17 @@ namespace cepgen {
               throw CG_FATAL("FormFactors") << "Elastic proton form factors requested!\n"
                                             << "Check your process definition!";
             case strfun::Type::SuriYennie: {  // this one requires its own object to deal with FM
-              FE = sf->F2(xbj, q2) * xbj * mp_ / q2;
-              FM = sf->FM(xbj, q2);
+              ff.FE = sf->F2(xbj, q2) * xbj * mp_ / q2;
+              ff.FM = sf->FM(xbj, q2);
             } break;
             default: {
-              FE = sf->F2(xbj, q2) * xbj / q2;
-              FM = -2. * sf->F1(xbj, q2) / q2;
+              ff.FE = sf->F2(xbj, q2) * xbj / q2;
+              ff.FM = -2. * sf->F1(xbj, q2) / q2;
             } break;
           }
         } break;
       }
-      return *this;
+      return ff;
     }
 
     ParametersDescription Parameterisation::description() {
@@ -103,9 +100,9 @@ namespace cepgen {
       if (!ff)
         return os << "[uninitialised form factors]";
       os << ff->name();
-      if (ff->last_q2_ >= 0.)
-        os << "(Q²=" << ff->last_q2_ << " GeV²): "
-           << "FE=" << ff->FE << ",FM=" << ff->FM;
+      if (ff->last_value_.first >= 0.)
+        os << "(Q²=" << ff->last_value_.first << " GeV²): "
+           << "FE=" << ff->last_value_.second.FE << ",FM=" << ff->last_value_.second.FM;
       return os;
     }
 

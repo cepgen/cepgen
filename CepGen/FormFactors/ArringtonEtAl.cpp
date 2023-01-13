@@ -31,7 +31,7 @@ namespace cepgen {
       static ParametersDescription description();
 
     private:
-      void compute(double q2) override;
+      FormFactors compute(double q2) override;
 
       const int mode_;
       std::vector<double> a_e_, b_e_;
@@ -67,7 +67,8 @@ namespace cepgen {
       }
     }
 
-    void ArringtonEtAl::compute(double q2) {
+    FormFactors ArringtonEtAl::compute(double q2) {
+      FormFactors out;
       const double tau_val = tau(q2);
 
       double num_e = 1., den_e = 1.;
@@ -75,14 +76,15 @@ namespace cepgen {
         num_e += a_e_.at(i) * pow(tau_val, 1. + i);
       for (size_t i = 0; i < b_e_.size(); ++i)
         den_e += b_e_.at(i) * pow(tau_val, 1. + i);
-      GE = num_e / den_e;
+      out.GE = num_e / den_e;
 
       double num_m = 1., den_m = 1.;
       for (size_t i = 0; i < a_m_.size(); ++i)
         num_m += a_m_.at(i) * pow(tau_val, 1. + i);
       for (size_t i = 0; i < b_m_.size(); ++i)
         den_m += b_m_.at(i) * pow(tau_val, 1. + i);
-      GM = MU * num_m / den_m;
+      out.GM = MU * num_m / den_m;
+      return out;
     }
 
     ParametersDescription ArringtonEtAl::description() {

@@ -31,7 +31,7 @@ namespace cepgen {
       static ParametersDescription description();
 
     private:
-      void compute(double q2) override;
+      FormFactors compute(double q2) override;
 
       const double a1rho_, a2rho_, b1rho_, b2rho_, c1rho_, c2rho_, d1rho_, d2rho_;
       const double inv_q20_;
@@ -53,7 +53,7 @@ namespace cepgen {
           lambda_sq_(steer<double>("lambdaSq")),
           gamma_(steer<double>("gamma")) {}
 
-    void MergellEtAl::compute(double q2) {
+    FormFactors MergellEtAl::compute(double q2) {
       const double log1 = std::pow(log((lambda_sq_ + q2) * inv_q20_), -gamma_);  // L(t=-q2) function in ref.
 
       // best fit parameterisation
@@ -74,8 +74,10 @@ namespace cepgen {
 
       const double F1 = Fv1 + Fs1, F2 = Fv2 + Fs2;
 
-      GE = F1 - tau(q2) * F2;
-      GM = F1 + F2;
+      FormFactors out;
+      out.GE = F1 - tau(q2) * F2;
+      out.GM = F1 + F2;
+      return out;
     }
 
     ParametersDescription MergellEtAl::description() {
