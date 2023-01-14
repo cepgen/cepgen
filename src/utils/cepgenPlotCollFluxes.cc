@@ -22,8 +22,8 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
-#include "CepGen/Modules/CollinearFluxFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Modes.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
@@ -33,11 +33,9 @@
 #include "CepGen/Utils/String.h"
 
 using namespace std;
-using namespace cepgen;
 
 int main(int argc, char* argv[]) {
   vector<string> cfluxes;
-  vector<int> modes;
   int strfun_type, num_points;
   double mx;
   string ffmode, output_file, plotter;
@@ -47,12 +45,9 @@ int main(int argc, char* argv[]) {
   cepgen::initialise();
 
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("collflux,i",
-                           "collinear flux modelling(s)",
-                           &cfluxes,
-                           cepgen::collflux::CollinearFluxFactory::get().modules())
+      .addOptionalArgument(
+          "collflux,i", "collinear flux modelling(s)", &cfluxes, cepgen::CollinearFluxFactory::get().modules())
       .addOptionalArgument("formfac,f", "form factors modelling", &ffmode, "StandardDipole")
-      .addOptionalArgument("modes,t", "beam modelling(s)", &modes, vector<int>{(int)cepgen::Beam::Mode::ProtonElastic})
       .addOptionalArgument("mx,M", "diffractive mass (GeV/c^2)", &mx, 100.)
       .addOptionalArgument("sf,s", "structure functions modelling", &strfun_type, 301)
       .addOptionalArgument("xrange,x", "fractional loss range", &x_range, cepgen::Limits{0., 1.})
@@ -70,59 +65,40 @@ int main(int argc, char* argv[]) {
   ofstream out(output_file);
   if (logx && x_range.min() == 0.)
     x_range.min() = 1.e-3;
+  const auto mx2 = mx * mx;
 
   out << "# coll. fluxes: " << cepgen::utils::merge(cfluxes, ",") << "\n"
       << "# struct. functions: " << strfun_type << "\n"
       << "# form factors: " << ffmode << "\n"
       << "# virtuality: " << q2_range << " GeV^2\n"
       << "# diffractive mass: " << mx << " GeV/c2\n"
-      << "# fractional momentum loss: " << x_range << "\n"
-      << "# fluxes modes: " << cepgen::utils::merge(modes, ",");
-  map<string, vector<cepgen::utils::Graph1D> > m_v_gr_fluxes;  // {collinear flux -> {mode, mode, ...}}
-  vector<vector<double> > values(num_points);
-  const auto xvals = x_range.generate(num_points, logx);
-  for (const auto& cflux : cfluxes) {
-    vector<unique_ptr<cepgen::collflux::Parameterisation> > coll_fluxes;
-    for (const auto& mode : modes) {
-      cepgen::ParametersList flux_params;
-      flux_params.set("q2range", q2_range)
-          .set("formFactors", ffmode)
-          .set("structureFunctions",
-               cepgen::strfun::StructureFunctionsFactory::get().describeParameters(strfun_type).parameters());
-      switch ((cepgen::Beam::Mode)mode) {
-        case cepgen::Beam::Mode::ProtonElastic:
-          flux_params.setAs<int, cepgen::Beam::KTFlux>("ktFlux", cepgen::Beam::KTFlux::P_Photon_Elastic);
-          break;
-        case cepgen::Beam::Mode::ProtonInelastic:
-          flux_params.setAs<int, cepgen::Beam::KTFlux>("ktFlux", cepgen::Beam::KTFlux::P_Photon_Inelastic);
-          break;
-        default:
-          throw CG_FATAL("main") << "Invalid beam mode: " << mode << "!";
-      }
-      coll_fluxes.emplace_back(cepgen::collflux::CollinearFluxFactory::get().build(cflux, flux_params));
-      m_v_gr_fluxes[cflux].emplace_back();
-      ostringstream oss;
-      oss << (cepgen::Beam::Mode)mode;
-      m_v_gr_fluxes[cflux].back().setTitle(oss.str());
-    }
+      << "# fractional momentum loss: " << x_range;
+  map<string, cepgen::utils::Graph1D> m_gr_fluxes;  // {collinear flux -> graph}
+  map<string, unique_ptr<cepgen::collflux::Parameterisation> > coll_fluxes;
+  for (const auto& cflux : cfluxes)
+    coll_fluxes[cflux] = move(cepgen::CollinearFluxFactory::get().build(
+        cflux,
+        cepgen::ParametersList()
+            .set("q2range", q2_range)
+            .set("formFactors", ffmode)
+            .set("structureFunctions",
+                 cepgen::StructureFunctionsFactory::get().describeParameters(strfun_type).parameters())));
 
-    for (auto i = 0; i < num_points; ++i) {
-      const auto& x = xvals.at(i);
-      for (size_t j = 0; j < coll_fluxes.size(); ++j) {
-        auto fx = (*coll_fluxes.at(j))(x, mx);
-        if (isnan(fx))
-          fx = -1.;
-        values.at(i).emplace_back(fx);
-        m_v_gr_fluxes[cflux].at(j).addPoint(x, normalised ? x * fx : fx);
-      }
+  for (const auto& x : x_range.generate(num_points, logx)) {
+    vector<double> values;
+    for (const auto& cf : coll_fluxes) {
+      auto fx = (*cf.second)(x, mx2);
+      if (isnan(fx))
+        fx = -1.;
+      values.emplace_back(fx);
+      m_gr_fluxes[cf.first].addPoint(x, normalised ? x * fx : fx);
     }
+    out << "\n" << x << "\t" << cepgen::utils::merge(values, "\t");
   }
-  for (auto i = 0; i < num_points; ++i)
-    out << "\n" << xvals.at(i) << "\t" << cepgen::utils::merge(values.at(i), "\t");
   out.close();
 
   if (!plotter.empty()) {
-    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    auto plt = cepgen::DrawerFactory::get().build(plotter);
     cepgen::utils::Drawer::Mode dm;
     if (logx)
       dm |= cepgen::utils::Drawer::Mode::logx;
@@ -131,21 +107,15 @@ int main(int argc, char* argv[]) {
     if (draw_grid)
       dm |= cepgen::utils::Drawer::Mode::grid;
     cepgen::utils::DrawableColl coll;
-    for (auto& cf_gr : m_v_gr_fluxes)
-      for (auto& gr : cf_gr.second) {
-        gr.xAxis().setLabel("x");
-        gr.yAxis().setLabel(normalised ? "x dN/dx" : "dN/dx");
-        if (y_range.valid())
-          gr.yAxis().setRange(y_range);
-        if (cf_gr.second.size() > 1)
-          gr.setTitle(cepgen::utils::format("%s - %s",
-                                            cepgen::collflux::CollinearFluxFactory::get().describe(cf_gr.first).data(),
-                                            gr.title().data()));
-        else
-          gr.setTitle(
-              cepgen::utils::format("%s", cepgen::collflux::CollinearFluxFactory::get().describe(cf_gr.first).data()));
-        coll.emplace_back(&gr);
-      }
+    for (auto& cf_gr : m_gr_fluxes) {
+      auto& gr = cf_gr.second;
+      gr.xAxis().setLabel("x");
+      gr.yAxis().setLabel(normalised ? "x dN/dx" : "dN/dx");
+      if (y_range.valid())
+        gr.yAxis().setRange(y_range);
+      gr.setTitle(cepgen::utils::format("%s", cepgen::CollinearFluxFactory::get().describe(cf_gr.first).data()));
+      coll.emplace_back(&gr);
+    }
     plt->draw(coll, "comp_collfluxes", "", dm);
   }
 

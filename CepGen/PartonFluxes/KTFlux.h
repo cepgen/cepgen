@@ -29,6 +29,7 @@ namespace cepgen {
       return desc;
     }
 
+    double operator()(double, double = 0.) const override { return 0.; }
     bool ktFactorised() const override final { return true; }
 
   protected:

@@ -20,7 +20,7 @@
 
 #include "CepGen/CollinearFluxes/Parameterisation.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Modules/CollinearFluxFactory.h"
+#include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2018-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,27 +22,25 @@
 #include <iosfwd>
 #include <memory>
 
-#include "CepGen/Modules/NamedModule.h"
+#include "CepGen/PartonFluxes/PartonFlux.h"
 
 namespace cepgen {
   /// Collinear fluxes modelling scope
   namespace collflux {
     /// Generic collinear flux parameterisation
-    class Parameterisation : public NamedModule<std::string> {
+    class Parameterisation : public PartonFlux {
     public:
       /// User-steered parameterisation object constructor
       explicit Parameterisation(const ParametersList&);
-      virtual ~Parameterisation() = default;
 
-      /// Generic description for the structure functions
+      /// Generic description for the collinear flux
       static ParametersDescription description();
 
-      /// Compute the collinear flux for this x value
-      virtual double operator()(double /*x*/, double /*mx*/ = 0.) const { return 0.; }
+      virtual double operator()(double, double = 0.) const = 0;
+      double operator()(double /*x*/, double /*kt2*/, double /*mf2*/) const override final;
+      bool ktFactorised() const final { return false; }
 
     protected:
-      const double mp_{0.};   ///< Proton mass, in GeV/c^2
-      const double mp2_{0.};  ///< Squared proton mass, in GeV^2/c^4
       Limits q2_range_;
       const double qscale_{0.};
     };

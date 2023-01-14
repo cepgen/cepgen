@@ -82,10 +82,16 @@ int main(int argc, char* argv[]) {
   }
   for (const auto& x : x_range.generate(num_points)) {
     out << "\n" << x;
-    for (size_t j = 0; j < fluxes.size(); ++j) {
-      const auto flux = (*fluxes.at(j))(x, kt2, mx2) * (normalised ? x : 1.);
-      out << "\t" << flux;
-      graph_flux.at(j).addPoint(x, flux);
+    double f = 0.;
+    for (const auto& flux_vs_name : fluxes) {
+      if (flux_vs_name.second->ktFactorised())
+        f = (*flux_vs_name.second)(x, kt2, mx2);
+      else
+        f = (*flux_vs_name.second)(x, mx2);
+      if (normalised)
+        f *= x;
+      out << "\t" << f;
+      graph_flux.at(flux_vs_name.first).addPoint(x, f);
     }
   }
   out.close();
@@ -107,6 +113,7 @@ int main(int argc, char* argv[]) {
       gr.yAxis().setLabel(normalised ? "$\\xi\\varphi_{T}(\\xi, k_{T}^{2})" : "$\\varphi_{T}(\\xi, k_{T}^{2})$");
       if (y_range.valid())
         gr.yAxis().setRange(y_range);
+      gr.setTitle(cepgen::utils::format("%s", cepgen::PartonFluxFactory::get().describe(gr.first).data()));
       coll.emplace_back(&gr);
     }
     plt->draw(coll, "comp_partonflux", cepgen::utils::format("$k_{T}^{2}$ = %g GeV$^{2}$", kt2), dm);

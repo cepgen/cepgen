@@ -29,6 +29,8 @@ namespace cepgen {
 
     static ParametersDescription description();
 
+    /// Compute the collinear flux for this x value
+    virtual double operator()(double x, double mf2 = 0.) const = 0;
     /// Compute the kt-dependent flux for this x value
     virtual double operator()(double x, double kt2, double mf2) const = 0;
 

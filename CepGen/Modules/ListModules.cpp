@@ -23,7 +23,6 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
-#include "CepGen/Modules/CollinearFluxFactory.h"
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/DerivatorFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"

@@ -33,10 +33,24 @@
   }                                                                            \
   static_assert(true, "")
 
+/// Add a collinear flux definition to the list of handled parameterisation
+#define REGISTER_COLLFLUX(name, obj)                                              \
+  namespace cepgen {                                                              \
+    struct BUILDERNM(obj) {                                                       \
+      BUILDERNM(obj)() { CollinearFluxFactory::get().registerModule<obj>(name); } \
+    };                                                                            \
+    static const BUILDERNM(obj) gCollFlux##obj;                                   \
+  }
+
 namespace cepgen {
   class PartonFlux;
-  /// A functional objects factory
+  namespace collflux {
+    class Parameterisation;
+  }
+  /// A generic flux parameterisations factory
   DEFINE_FACTORY_STR(PartonFluxFactory, PartonFlux, "Parton flux estimators factory");
+  /// A collinear flux parameterisations factory
+  DEFINE_FACTORY_STR(CollinearFluxFactory, collflux::Parameterisation, "Collinear parton flux estimators factory");
 }  // namespace cepgen
 
 #endif

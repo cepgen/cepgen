@@ -17,25 +17,27 @@
  */
 
 #include "CepGen/CollinearFluxes/Parameterisation.h"
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/PDG.h"
 
 namespace cepgen {
   namespace collflux {
     Parameterisation::Parameterisation(const ParametersList& params)
-        : NamedModule(params),
-          mp_(PDG::get().mass(PDG::proton)),
-          mp2_(mp_ * mp_),
-          q2_range_(steer<Limits>("q2range")),
-          qscale_(steer<double>("qscale")) {
+        : PartonFlux(params), q2_range_(steer<Limits>("q2range")), qscale_(steer<double>("qscale")) {
       q2_range_.min() = std::max(q2_range_.min(), 0.);
     }
 
     ParametersDescription Parameterisation::description() {
-      auto desc = ParametersDescription();
+      auto desc = PartonFlux::description();
       desc.setDescription("Unnamed collinear flux");
       desc.add<Limits>("q2range", {0., 1.e4});
       desc.add<double>("qscale", 0.71);
       return desc;
+    }
+
+    double Parameterisation::operator()(double /*x*/, double /*kt2*/, double /*mf2*/) const {
+      throw CG_FATAL("Parameterisation") << "Calling kt-dependent operator on collinear flux.";
+      //return (*this)(x, mf2);
     }
   }  // namespace collflux
 }  // namespace cepgen

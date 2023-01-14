@@ -23,8 +23,8 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Integration/AnalyticIntegrator.h"
 #include "CepGen/Modules/AnalyticIntegratorFactory.h"
-#include "CepGen/Modules/CollinearFluxFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
@@ -44,10 +44,8 @@ int main(int argc, char* argv[]) {
   cepgen::initialise();
 
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("collflux,f",
-                           "collinear flux modelling(s)",
-                           &cfluxes,
-                           cepgen::collflux::CollinearFluxFactory::get().modules())
+      .addOptionalArgument(
+          "collflux,f", "collinear flux modelling(s)", &cfluxes, cepgen::CollinearFluxFactory::get().modules())
       .addOptionalArgument("rescaling,r", "luminosity rescaling", &rescl, vector<double>{1.})
       .addOptionalArgument("integrator,i", "type of integration algorithm", &integrator, "gsl")
       .addOptionalArgument("sqrts,s", "two-proton centre of mass energy (GeV)", &sqrts, vector<double>{13.e3})
@@ -95,7 +93,7 @@ int main(int argc, char* argv[]) {
   for (size_t i = 0; i < cfluxes.size(); ++i) {
     const auto& cflux = cfluxes.at(i);
     const auto s = sqrts.at(i) * sqrts.at(i);
-    auto coll_flux = cepgen::collflux::CollinearFluxFactory::get().build(cflux);
+    auto coll_flux = cepgen::CollinearFluxFactory::get().build(cflux);
     for (const auto& xi_range : xi_ranges) {
       ostringstream oss;
       oss << cflux;
@@ -127,7 +125,7 @@ int main(int argc, char* argv[]) {
   out.close();
 
   if (!plotter.empty()) {
-    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    auto plt = cepgen::DrawerFactory::get().build(plotter);
     cepgen::utils::Drawer::Mode dm;
     if (logx)
       dm |= cepgen::utils::Drawer::Mode::logx;
@@ -147,7 +145,7 @@ int main(int argc, char* argv[]) {
         if (y_range.valid())
           gr_xi.yAxis().setRange(y_range);
         //gr_xi.setTitle(
-        //    cepgen::utils::format("%s", cepgen::collflux::CollinearFluxFactory::get().describe(cf_gr.first).data()));
+        //    cepgen::utils::format("%s", cepgen::CollinearFluxFactory::get().describe(cf_gr.first).data()));
         coll.emplace_back(&gr_xi);
       }
       ++i;
