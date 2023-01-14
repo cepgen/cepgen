@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ namespace cepgen {
       if (pdg_ == PDG::electron)
         mode_ = Mode::PointLikeFermion;
       else if (HeavyIon::isHI(pdg_))
-        mode_ = Mode::Other;
+        mode_ = Mode::HIElastic;  //FIXME
       else if (flux_->fragmenting())
         mode_ = Mode::ProtonInelastic;
       else
@@ -80,6 +80,8 @@ namespace cepgen {
         return os << "{invalid}";
       case Beam::Mode::ProtonElastic:
         return os << "el.proton";
+      case Beam::Mode::HIElastic:
+        return os << "el.ion";
       case Beam::Mode::PointLikeScalar:
         return os << "gen.scalar";
       case Beam::Mode::PointLikeFermion:

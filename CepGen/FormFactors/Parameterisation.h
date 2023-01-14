@@ -22,6 +22,7 @@
 #include "CepGen/FormFactors/FormFactors.h"
 #include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Physics/Beam.h"
+#include "CepGen/Physics/HeavyIon.h"
 
 namespace cepgen {
   class ParametersList;
@@ -33,12 +34,8 @@ namespace cepgen {
     /// Nucleon electromagnetic form factors parameterisation
     class Parameterisation : public NamedModule<std::string> {
     public:
-      /// Empty parameterisation object constructor
-      explicit Parameterisation();
       /// Steered parameterisation object constructor
       explicit Parameterisation(const ParametersList&);
-      /// Copy constructor
-      Parameterisation(const Parameterisation&);
 
       static ParametersDescription description();
 
@@ -63,8 +60,9 @@ namespace cepgen {
       /// Local form factors evaluation method
       virtual FormFactors compute(double) { return FormFactors{}; }
 
-      const double mp_;   ///< Proton mass, in GeV/c\f$^2\f$
-      const double mp2_;  ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
+      const HeavyIon hi_;  ///< Incoming beam
+      const double mp_;    ///< Proton mass, in GeV/c\f$^2\f$
+      const double mp2_;   ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
 
     private:
       std::pair<double, FormFactors> last_value_{-1., FormFactors{}};

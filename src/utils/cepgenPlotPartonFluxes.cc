@@ -39,37 +39,49 @@ int main(int argc, char* argv[]) {
   string formfac_type;
   int strfun_type, num_points;
   double kt2, mx;
-  bool logx, logy, draw_grid;
   string output_file, plotter;
+  bool logx, logy, draw_grid, normalised;
+  cepgen::Limits x_range, y_range, q2_range;
+
+  cepgen::initialise();
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument(
           "fluxes", "parton fluxe modellings", &fluxes_names, cepgen::PartonFluxFactory::get().modules())
       .addOptionalArgument("ff,f", "form factors modelling", &formfac_type, "StandardDipole")
+      .addOptionalArgument("mx,M", "diffractive mass (GeV)", &mx, 1.5)
       .addOptionalArgument("sf,s", "structure functions modelling", &strfun_type, 301)
+      .addOptionalArgument("xrange,x", "fractional loss range", &x_range, cepgen::Limits{0., 1.})
+      .addOptionalArgument("yrange,y", "y range", &y_range)
+      .addOptionalArgument("q2range,q", "parton virtuality range (GeV^2)", &q2_range, cepgen::Limits{0., 1000.})
       .addOptionalArgument("kt2,k", "parton transverse virtuality (GeV^2)", &kt2, 100.)
-      .addOptionalArgument("mx,m", "diffractive state mass (GeV)", &mx, 1.5)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 100)
       .addOptionalArgument("output,o", "output file name", &output_file, "flux.scan.output.txt")
+      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .addOptionalArgument("logx", "logarithmic x-scale", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
-      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
+      .addOptionalArgument("normalised", "plot xf(x) instead of f(x)", &normalised, false)
       .parse();
 
-  cepgen::initialise();
   const double mx2 = mx * mx;
+  if (logx && x_range.min() == 0.)
+    x_range.min() = 1.e-3;
+  if (x_range.max() == 1.)
+    x_range.max() -= 1.e-15;
 
   ofstream out(output_file);
-  out << "# parton fluxes: " << cepgen::utils::repr(fluxes_names) << "\n"
+  out << "# parton fluxes: " << cepgen::utils::merge(fluxes_names, ",") << "\n"
+      << "# struct. functions: " << strfun_type << "\n"
       << "# form factors: " << formfac_type << "\n"
-      << "# structure functions: " << strfun_type << "\n"
-      << "# kt2 = " << kt2 << " GeV^2\n"
-      << "# mX = " << mx << " GeV";
-  vector<cepgen::utils::Graph1D> graph_flux;
-  vector<std::unique_ptr<cepgen::PartonFlux> > fluxes;
+      << "# virtuality: " << kt2 << " GeV^2\n"
+      << "# diffractive mass: " << mx << " GeV/c2\n"
+      << "# fractional momentum loss: " << x_range;
+
+  unordered_map<string, cepgen::utils::Graph1D> graph_flux;
+  unordered_map<string, std::unique_ptr<cepgen::PartonFlux> > fluxes;
   for (const auto& flux : fluxes_names) {
-    auto flux_obj = cepgen::PartonFluxFactory::get().build(
+    fluxes[flux] = cepgen::PartonFluxFactory::get().build(
         flux,
         cepgen::ParametersList()
             .set<cepgen::ParametersList>(
@@ -78,15 +90,15 @@ int main(int argc, char* argv[]) {
             .set<cepgen::ParametersList>(
                 "formFactors",
                 cepgen::formfac::FormFactorsFactory::get().describeParameters(formfac_type).parameters()));
-    graph_flux.emplace_back(flux, flux_obj->name());
-    fluxes.emplace_back(std::move(flux_obj));
+    graph_flux[flux] = cepgen::utils::Graph1D(flux, cepgen::PartonFluxFactory::get().describe(flux));
   }
-  for (const auto& x : cepgen::Limits(0., 1. - 1.e-15).generate(num_points)) {
+  for (const auto& x : x_range.generate(num_points)) {
     out << "\n" << x;
-    for (size_t i = 0; i < fluxes.size(); ++i) {
-      const auto f = (*fluxes.at(i))(x, kt2, mx2);
+    double f = 0.;
+    for (const auto& flux_vs_name : fluxes) {
+      f = (*flux_vs_name.second)(x, kt2, mx2);
       out << "\t" << f;
-      graph_flux.at(i).addPoint(x, f);
+      graph_flux.at(flux_vs_name.first).addPoint(x, f);
     }
   }
   out.close();
@@ -101,18 +113,21 @@ int main(int argc, char* argv[]) {
       dm |= cepgen::utils::Drawer::Mode::logy;
     if (draw_grid)
       dm |= cepgen::utils::Drawer::Mode::grid;
+    cepgen::utils::DrawableColl coll;
 
     const auto top_label = cepgen::utils::format("$k_{T}^{2}$ = %g GeV$^{2}$", kt2) + ", " +
                            cepgen::formfac::FormFactorsFactory::get().describe(formfac_type) + "/" +
                            cepgen::strfun::StructureFunctionsFactory::get().describe(strfun_type);
 
-    cepgen::utils::DrawableColl plots;
-    for (auto& plt : graph_flux) {
-      plt.xAxis().setLabel("$\\xi$");
-      plt.yAxis().setLabel("$\\varphi_{T}(\\xi, k_{T}^{2})$");
-      plots.emplace_back(&plt);
+    for (auto& gr : graph_flux) {
+      gr.second.xAxis().setLabel("$\\xi$");
+      gr.second.yAxis().setLabel(normalised ? "\\xi $\\varphi_{T}(\\xi, k_{T}^{2})"
+                                            : "$\\varphi_{T}(\\xi, k_{T}^{2})$");
+      if (y_range.valid())
+        gr.second.yAxis().setRange(y_range);
+      coll.emplace_back(&gr.second);
     }
-    plt->draw(plots, "comp_partonflux", top_label, dm);
+    plt->draw(coll, "comp_partonflux", top_label, dm);
   }
 
   return 0;

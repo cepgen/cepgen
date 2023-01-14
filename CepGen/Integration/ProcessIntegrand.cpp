@@ -41,8 +41,6 @@ namespace cepgen {
     }
     //--- each integrand object has its own clone of the process
     process_ = params_->process().clone();  // note: kinematics is already set by the process copy constructor
-    if (process_->kinematics() != params_->process().kinematics())
-      throw CG_FATAL("ProcessIntegrand") << "Discrepancy observed in process kinematics after its cloning.";
 
     CG_DEBUG("ProcessIntegrand") << "Process " << process_->name() << " successfully cloned from base process "
                                  << params_->process().name() << ".";

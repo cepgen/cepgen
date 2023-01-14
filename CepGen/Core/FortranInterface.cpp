@@ -92,7 +92,7 @@ double cepgen_kt_flux_hi_(int& fmode, double& x, double& kt2, int& a, int& z) {
   static auto flux = PartonFluxFactory::get().build(
       "ElasticHeavyIonKT",
       ParametersList().setAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon{(unsigned short)a, (Element)z}));
-  return (*flux)(x, kt2);
+  return (*flux)(x, kt2, 0.);
 }
 
 /// Mass of a particle, in GeV/c^2

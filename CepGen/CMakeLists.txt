@@ -10,6 +10,7 @@ file(GLOB core_sources
 file(GLOB phys_sources
         Event/*.cpp
         FormFactors/*.cpp
+        PartonFluxes/*.cpp
         Physics/*.cpp
         StructureFunctions/*.cpp)
 file(GLOB proc_sources
@@ -23,6 +24,7 @@ file(GLOB core_includes
         Integration
         Modules
         OutputModules
+        PartonFluxes
         Physics
         Process
         StructureFunctions

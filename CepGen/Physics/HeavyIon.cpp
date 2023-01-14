@@ -64,6 +64,29 @@ namespace cepgen {
     return (A - (short)Z) * PDG::get().mass(PDG::neutron);
   }
 
+  double HeavyIon::radius() const {
+    switch (Z) {
+      case Element::H: {
+        if (A == 1)  // simple proton
+          return 0.7;
+        else  // deuteron
+          return 2.1;
+      }
+      case Element::Cu:
+        return 4.214;
+      case Element::Xe:
+        return 5.36;
+      case Element::Au:
+        return 6.38;
+      case Element::Pb:
+        return 6.624;
+      default: {
+        CG_WARNING("HeavyIon:radius") << "Using hard-sphere approximation R ~ 1.2 A^(1/3).";
+        return 1.2 * cbrt(A);
+      }
+    }
+  }
+
   std::ostream& operator<<(std::ostream& os, const HeavyIon& hi) {
     if (hi == HeavyIon::proton())
       return os << "proton";

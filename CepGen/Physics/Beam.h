@@ -24,9 +24,9 @@
 
 #include "CepGen/Core/SteeredObject.h"
 #include "CepGen/FormFactors/FormFactors.h"
+#include "CepGen/PartonFluxes/PartonFlux.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/ParticleProperties.h"
-#include "CepGen/Physics/PartonFlux.h"
 
 namespace cepgen {
   namespace strfun {
@@ -55,6 +55,7 @@ namespace cepgen {
       PointLikeScalar = 3,   ///< Trivial, spin-0 emission
       PointLikeFermion = 4,  ///< Trivial, spin-1/2 emission
       CompositeScalar = 5,   ///< Composite pion emission
+      HIElastic = 10,        ///< Elastic scattering from heavy ion
       Other = 6,             ///< Other beam type
     };
     /// Human-readable format of a beam mode (elastic/dissociative parts)

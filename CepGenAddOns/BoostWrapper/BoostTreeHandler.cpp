@@ -144,7 +144,7 @@ namespace cepgen {
         tree_.add_child(INTEGR_NAME, bc::pack(rt_params_->par_integrator));
 
       //----- kinematics block
-      tree_.add_child(KIN_NAME, bc::pack(rt_params_->kinematics().allParameters(false)));
+      tree_.add_child(KIN_NAME, bc::pack(rt_params_->kinematics().parameters(false)));
 
       //----- generation block
       tree_.add_child(GENERATOR_NAME, bc::pack(rt_params_->generation().parameters()));

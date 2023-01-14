@@ -16,18 +16,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/PartonFlux.h"
+#ifndef CepGen_Physics_PartonFlux_h
+#define CepGen_Physics_PartonFlux_h
+
+#include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen {
-  PartonFlux::PartonFlux(const ParametersList& params)
-      : NamedModule(params), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {}
+  class PartonFlux : public NamedModule<std::string> {
+  public:
+    explicit PartonFlux(const ParametersList&);
 
-  ParametersDescription PartonFlux::description() {
-    auto desc = ParametersDescription();
-    desc.setDescription("Unnamed parton flux evaluator");
-    return desc;
-  }
+    static ParametersDescription description();
 
-  int PartonFlux::partonPdgId() const { return PDG::photon; }
+    /// Compute the kt-dependent flux for this x value
+    virtual double operator()(double x, double kt2, double mf2) const = 0;
+
+    virtual bool ktFactorised() const { return false; }
+    virtual bool fragmenting() const { return true; }
+    virtual int partonPdgId() const;
+
+  protected:
+    const double mp_, mp2_;
+    const Limits x_range_{0., 1.};
+  };
 }  // namespace cepgen
+
+#endif

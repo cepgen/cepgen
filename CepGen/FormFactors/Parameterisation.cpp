@@ -24,17 +24,11 @@
 
 namespace cepgen {
   namespace formfac {
-    Parameterisation::Parameterisation()
-        : NamedModule<std::string>(ParametersList()), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {}
-
     Parameterisation::Parameterisation(const ParametersList& params)
-        : NamedModule<std::string>(params), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {}
-
-    Parameterisation::Parameterisation(const Parameterisation& param)
-        : NamedModule<std::string>(param.parameters()),
-          mp_(param.mp_),
-          mp2_(param.mp2_),
-          last_value_(param.last_value_) {}
+        : NamedModule<std::string>(params),
+          hi_(steerAs<pdgid_t, HeavyIon>("heavyIon")),
+          mp_(PDG::get().mass(PDG::proton)),
+          mp2_(mp_ * mp_) {}
 
     double Parameterisation::tau(double q2) const {
       if (mp2_ <= 0.)
@@ -59,6 +53,13 @@ namespace cepgen {
         case Beam::Mode::PointLikeFermion:
           ff.FE = ff.FM = 1.;  // FE=U2, FM=U1 in LPAIR
           break;
+        case Beam::Mode::HIElastic: {
+          ff = compute(q2);
+          const auto mass = hi_.mass(), mass2 = mass * mass;
+          const double GE2 = ff.GE * ff.GE, GM2 = ff.GM * ff.GM;
+          ff.FE = (4. * mass2 * GE2 + q2 * GM2) / (4. * mass2 + q2);
+          ff.FM = GM2;
+        } break;
         case Beam::Mode::ProtonElastic: {
           ff = compute(q2);
           const double GE2 = ff.GE * ff.GE, GM2 = ff.GM * ff.GM;
@@ -91,6 +92,7 @@ namespace cepgen {
     ParametersDescription Parameterisation::description() {
       auto desc = ParametersDescription();
       desc.setDescription("Unnamed form factors parameterisation");
+      desc.addAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon::proton());
       return desc;
     }
 

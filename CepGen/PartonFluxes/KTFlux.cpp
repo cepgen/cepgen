@@ -22,12 +22,12 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/PartonFluxes/PartonFlux.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/PartonFlux.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
 namespace cepgen {
@@ -91,12 +91,15 @@ namespace cepgen {
 
     static ParametersDescription description() {
       auto desc = KTFlux::description();
-      desc.setDescription("Elastic photon emission from a nucleon");
+      desc.setDescription("Nucleon elastic photon emission");
+      desc.add<ParametersDescription>("formFactors", ParametersDescription().setName<std::string>("StandardDipole"));
       return desc;
     }
     bool fragmenting() const override final { return false; }
 
-    double operator()(double x, double kt2, double) override {
+    double operator()(double x, double kt2, double) const override {
+      if (!x_range_.contains(x))
+        return 0.;
       const auto q2vals = computeQ2(x, kt2);
       const double qnorm = 1. - q2vals.min / q2vals.q2;
       const auto& formfac = (*ff_)(Beam::Mode::ProtonElastic, q2vals.q2);
@@ -108,14 +111,38 @@ namespace cepgen {
     std::unique_ptr<formfac::Parameterisation> ff_;
   };
 
+  class ElasticHeavyIonKTFlux : public ElasticNucleonKTFlux {
+  public:
+    explicit ElasticHeavyIonKTFlux(const ParametersList& params)
+        : ElasticNucleonKTFlux(params), hi_(steerAs<pdgid_t, HeavyIon>("heavyIon")) {}
+
+    static ParametersDescription description() {
+      auto desc = ElasticNucleonKTFlux::description();
+      desc.setDescription("HI elastic photon emission (from Starlight)");
+      desc.addAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon::Pb());
+      desc.add<ParametersDescription>("formFactors", ParametersDescription().setName<std::string>("HeavyIonDipole"));
+      return desc;
+    }
+
+    double operator()(double x, double kt2, double mx2) const override {
+      const auto z = (unsigned short)hi_.Z;
+      return z * z * ElasticNucleonKTFlux::operator()(x, kt2, mx2);
+    }
+
+  private:
+    const HeavyIon hi_;
+  };
+
   struct BudnevElasticNucleonKTFlux final : public ElasticNucleonKTFlux {
     using ElasticNucleonKTFlux::ElasticNucleonKTFlux;
     static ParametersDescription description() {
       auto desc = ElasticNucleonKTFlux::description();
-      desc.setDescription("Elastic photon emission from a nucleon (Budnev flux approximation)");
+      desc.setDescription("Nucleon elastic photon emission (Budnev flux)");
       return desc;
     }
-    double operator()(double x, double kt2, double) override {
+    double operator()(double x, double kt2, double) const override final {
+      if (!x_range_.contains(x))
+        return 0.;
       const auto q2vals = computeQ2(x, kt2);
       const double qnorm = 1. - q2vals.min / q2vals.q2;
       const auto& formfac = (*ff_)(Beam::Mode::ProtonElastic, q2vals.q2);
@@ -136,11 +163,14 @@ namespace cepgen {
 
     static ParametersDescription description() {
       auto desc = KTFlux::description();
-      desc.setDescription("Inelastic photon emission from a nucleon");
+      desc.setDescription("Nucleon inelastic photon emission");
+      desc.add<ParametersDescription>("structureFunctions", ParametersDescription().setName<int>(301));
       return desc;
     }
 
-    double operator()(double x, double kt2, double mx2) override {
+    double operator()(double x, double kt2, double mx2) const override {
+      if (!x_range_.contains(x))
+        return 0.;
       if (mx2 < 0.)
         throw CG_FATAL("InelasticNucleonKTFlux") << "Diffractive mass squared mX^2 should be specified!";
       const auto q2vals = computeQ2(x, kt2, mx2);
@@ -157,10 +187,12 @@ namespace cepgen {
     using InelasticNucleonKTFlux::InelasticNucleonKTFlux;
     static ParametersDescription description() {
       auto desc = InelasticNucleonKTFlux::description();
-      desc.setDescription("Inelastic photon emission from a nucleon (Budnev flux approximation)");
+      desc.setDescription("Nucleon inelastic photon emission (Budnev flux)");
       return desc;
     }
-    double operator()(double x, double kt2, double mx2) override {
+    double operator()(double x, double kt2, double mx2) const override {
+      if (!x_range_.contains(x))
+        return 0.;
       if (mx2 < 0.)
         throw CG_FATAL("InelasticNucleonKTFlux") << "Diffractive mass squared mX^2 should be specified!";
       const auto q2vals = computeQ2(x, kt2, mx2);
@@ -179,41 +211,51 @@ namespace cepgen {
       desc.setDescription("Inelastic gluon emission from proton (KMR flux modelling)");
       return desc;
     }
-    double operator()(double x, double kt2, double mx2) override { return kmr::GluonGrid::get()(x, kt2, mx2); }
+    double operator()(double x, double kt2, double mx2) const override final {
+      if (!x_range_.contains(x))
+        return 0.;
+      return kmr::GluonGrid::get()(x, kt2, mx2);
+    }
     int partonPdgId() const override final { return PDG::gluon; }
     bool fragmenting() const override { return false; }
   };
 
   /// Realistic nuclear form-factor as used in STARLIGHT
   /// See \cite Klein:2016yzr
-  class ElasticHeavyIonKTFlux final : public KTFlux {
+  /*class ElasticHeavyIonKTFlux final : public KTFlux {
   public:
     explicit ElasticHeavyIonKTFlux(const ParametersList& params)
-        : KTFlux(params), hi_(steerAs<pdgid_t, HeavyIon>("heavyIon")) {}
+        : KTFlux(params),
+          ff_(formfac::FormFactorsFactory::get().build(params.get<ParametersList>("formFactors"))) {}
 
     static ParametersDescription description() {
       auto desc = KTFlux::description();
       desc.setDescription("Elastic photon emission from heavy ion (from Starlight)");
+      desc.addAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon::Pb());
+      desc.add<ParametersDescription>("formFactors", ParametersDescription().setName<std::string>("HeavyIonDipole"));
       return desc;
     }
 
     bool fragmenting() const override final { return false; }
 
-    double operator()(double x, double kt2, double) override {
+    double operator()(double x, double kt2, double) const override final {
+      if (!x_range_.contains(x))
+        return 0.;
       const double r_a = 1.1 * cbrt(hi_.A), a0 = 0.7, m_a = hi_.A * mp_;
       const double q2_ela = (kt2 + x * x * m_a * m_a) / (1. - x), cons = sqrt(q2_ela) / (constants::GEVM1_TO_M * 1e15);
       const double tau = cons * r_a, tau1 = cons * a0;
       const double ff1 = 3. * (sin(tau) - tau * cos(tau)) / pow(tau + 1.e-10, 3);
       const double ff2 = 1. / (1. + tau1 * tau1);
       const double ela1 = pow(kt2 / (kt2 + x * x * m_a * m_a), 2);
-      const double ela2 = pow(ff1 * ff2, 2) /*, ela3 = 1.-( q2_ela-kt2 )/q2_ela*/;
-      const unsigned int z = (unsigned short)hi_.Z;
-      return constants::ALPHA_EM * M_1_PI * z * z * ela1 * ela2 / q2_ela;
+      const double ela2 = pow(ff1 * ff2, 2);// ela3 = 1.-( q2_ela-kt2 )/q2_ela;
+      const auto z = (unsigned short)hi_.Z;
+      //return constants::ALPHA_EM * M_1_PI * z * z * ela1 * ela2 / q2_ela;
+      return constants::ALPHA_EM * M_1_PI * z * z * ela1 / q2_ela;
     }
 
   private:
-    const HeavyIon hi_;
-  };
+    std::unique_ptr<formfac::Parameterisation> ff_;
+  };*/
 }  // namespace cepgen
 
 REGISTER_FLUX("ElasticKT", ElasticNucleonKTFlux)

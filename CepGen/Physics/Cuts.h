@@ -197,6 +197,7 @@ namespace cepgen {
   struct CutsList final : SteeredObject<CutsList> {
     CutsList(const ParametersList& params = ParametersList());
     void setParameters(const ParametersList&) override;
+    ParametersList parameters(bool extended) const;
     static ParametersDescription description();
     cuts::Initial initial;        ///< Cuts on the initial particles kinematics
     cuts::Central central;        ///< Cuts on the central system produced

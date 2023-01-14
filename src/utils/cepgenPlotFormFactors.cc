@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,16 +33,17 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   int mode, strfun_type, num_points;
-  double mx, q2min, q2max;
+  double mx;
   string output_file, plotter;
   bool logy, draw_grid;
+  cepgen::Limits q2range, yrange;
 
   cepgen::ArgumentsParser(argc, argv)
       .addArgument("mode,t", "beam modelling", &mode, (int)cepgen::Beam::Mode::ProtonElastic)
       .addOptionalArgument("mx,x", "diffractive mass (GeV/c^2)", &mx, 100.)
       .addOptionalArgument("sf,s", "structure functions modelling", &strfun_type, 11)
-      .addOptionalArgument("q2min,m", "minimal parton virtuality (GeV^2)", &q2min, 1.)
-      .addOptionalArgument("q2max,M", "maximal parton virtuality (GeV^2)", &q2max, 2.5)
+      .addOptionalArgument("q2range,q", "parton virtuality range (GeV^2)", &q2range, cepgen::Limits{1., 2.5})
+      .addOptionalArgument("yrange,y", "y range", &yrange)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
       .addOptionalArgument("output,o", "output file name", &output_file, "formfacs.scan.output.txt")
       .addOptionalArgument("logy,l", "logarithmic y-axis", &logy, false)
@@ -61,7 +62,7 @@ int main(int argc, char* argv[]) {
   auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(strfun_type);
   out << "\n"
       << "# structure functions: " << sf.get() << "\n"
-      << "# q2 in [" << q2min << ", " << q2max << "] GeV^2\n";
+      << "# q2 in [" << q2range << "] GeV^2\n";
 
   vector<unique_ptr<cepgen::formfac::Parameterisation> > form_factors;
   vector<cepgen::utils::Graph1D> g_form_factors_fe, g_form_factors_fm;
@@ -71,8 +72,7 @@ int main(int argc, char* argv[]) {
     g_form_factors_fe.emplace_back("fe_" + ff_type, ff_desc);
     g_form_factors_fm.emplace_back("fm_" + ff_type, ff_desc);
   }
-  for (int i = 0; i < num_points; ++i) {
-    const double q2 = q2min + i * (q2max - q2min) / (num_points - 1);
+  for (const auto& q2 : q2range.generate(num_points)) {
     out << q2 << "\t";
     size_t j = 0;
     for (auto& ff : form_factors) {
@@ -101,6 +101,8 @@ int main(int argc, char* argv[]) {
       for (auto& gr : canv.second) {
         gr.xAxis().setLabel("Q$^{2}$ (GeV$^{2}$)");
         gr.yAxis().setLabel(canv.first.second);
+        if (yrange.valid())
+          gr.yAxis().setRange(yrange);
         mp.emplace_back(&gr);
       }
       plt->draw(mp, "comp_" + canv.first.first, cepgen::utils::format("$M_{X}$ = %g GeV/c$^{2}$", mx), dm);

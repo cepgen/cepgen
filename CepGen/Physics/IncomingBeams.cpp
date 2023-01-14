@@ -119,6 +119,8 @@ namespace cepgen {
     plist_neg.set<double>("pz", -fabs(p2z));
 
     //--- form factors
+    //params_.set<ParametersList>("formFactors",  //FIXME
+    //                            formfac::FormFactorsFactory::get().describeParameters("HeavyIonDipole").parameters());
     plist_pos.set<ParametersList>("formFactors", steer<ParametersList>("formFactors"));
     plist_neg.set<ParametersList>("formFactors", steer<ParametersList>("formFactors"));
 

@@ -16,10 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
   const double Kinematics::MX_MIN = 1.07;  // mp+mpi+-
@@ -45,12 +45,10 @@ namespace cepgen {
     cuts_.setParameters(params_);
   }
 
-  ParametersList Kinematics::allParameters(bool extended) const {
+  ParametersList Kinematics::parameters(bool extended) const {
     ParametersList params;
-    params += incoming_beams_.parameters();         // beam particles
-    params += cuts_.initial.parameters(extended);   // incoming partons
-    params += cuts_.central.parameters(extended);   // central particles
-    params += cuts_.remnants.parameters(extended);  // beam remnants
+    params += incoming_beams_.parameters();  // beam particles
+    params += cuts_.parameters(extended);
     // minimum final state content
     if (!minimum_final_state_.empty()) {
       std::vector<int> min_pdgs;
@@ -59,13 +57,6 @@ namespace cepgen {
             return (int)pdg;
           });
       params.set<std::vector<int> >("minFinalState", min_pdgs);
-    }
-    // per-PDGid selection
-    if (!cuts_.central_particles.empty()) {
-      ParametersList per_part;
-      for (const auto& cuts_vs_part : cuts_.central_particles)
-        per_part.set<ParametersList>(std::to_string(cuts_vs_part.first), cuts_vs_part.second.parameters(extended));
-      params.set<ParametersList>("cuts", per_part);
     }
     CG_DEBUG("Kinematics:parameters") << "Kinematics parameters values retrieved:\n"
                                       << ParametersDescription(params) << ".";

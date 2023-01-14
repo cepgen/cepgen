@@ -169,6 +169,21 @@ namespace cepgen {
     setParameters(params);
   }
 
+  ParametersList CutsList::parameters(bool extended) const {
+    ParametersList params;
+    params += initial.parameters(extended);   // incoming partons
+    params += central.parameters(extended);   // central particles
+    params += remnants.parameters(extended);  // beam remnants
+    // per-PDGid selection
+    if (!central_particles.empty()) {
+      ParametersList per_part;
+      for (const auto& cuts_vs_part : central_particles)
+        per_part.set<ParametersList>(std::to_string(cuts_vs_part.first), cuts_vs_part.second.parameters(extended));
+      params.set<ParametersList>("cuts", per_part);
+    }
+    return params;
+  }
+
   void CutsList::setParameters(const ParametersList& params) {
     SteeredObject::setParameters(params);
     initial.setParameters(params_);
