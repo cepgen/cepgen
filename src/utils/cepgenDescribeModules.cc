@@ -26,6 +26,7 @@
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
@@ -120,7 +121,7 @@ int main(int argc, char* argv[]) {
     LOOP_FACTORY("Derivator", cepgen::utils::DerivatorFactory)
     LOOP_FACTORY("Process", cepgen::proc::ProcessFactory)
     LOOP_FACTORY("Parton flux modelling", cepgen::PartonFluxFactory)
-    LOOP_FACTORY("Beam form factors modelling", cepgen::formfac::FormFactorsFactory)
+    LOOP_FACTORY("Beam form factors modelling", cepgen::FormFactorsFactory)
     LOOP_FACTORY_INT("Structure functions modelling", cepgen::strfun::StructureFunctionsFactory)
     LOOP_FACTORY_INT("Cross sections ratio modelling", cepgen::sigrat::SigmaRatiosFactory)
     LOOP_FACTORY("Event modification", cepgen::EventModifierFactory)

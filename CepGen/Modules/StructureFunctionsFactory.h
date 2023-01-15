@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,17 +40,6 @@
     static const SRBUILDERNM(name) gSigRat##name;                                             \
   }
 
-/// Add a form factors definition to the list of handled parameterisation
-#define REGISTER_FF_MODEL(name, obj)                                              \
-  namespace cepgen {                                                              \
-    namespace formfac {                                                           \
-      struct BUILDERNM(obj) {                                                     \
-        BUILDERNM(obj)() { FormFactorsFactory::get().registerModule<obj>(name); } \
-      };                                                                          \
-      static const BUILDERNM(obj) gFF##obj;                                       \
-    }                                                                             \
-  }
-
 namespace cepgen {
   namespace strfun {
     class Parameterisation;
@@ -64,13 +53,6 @@ namespace cepgen {
     /// A sigma ratio parameterisations factory
     DEFINE_FACTORY_INT(SigmaRatiosFactory, Parameterisation, "Sigma L/T parameterisations factory");
   }  // namespace sigrat
-  namespace formfac {
-    class Parameterisation;
-    /// A form factors parameterisations factory
-    DEFINE_FACTORY_STR(FormFactorsFactory, Parameterisation, "Nucleon form factors factory");
-    /// Standard dipole handler name
-    static constexpr const char* gFFStandardDipoleHandler = "StandardDipole";
-  }  // namespace formfac
 }  // namespace cepgen
 
 #endif

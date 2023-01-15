@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #include <cmath>
 
 #include "CepGen/FormFactors/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Utils/Message.h"
 
@@ -87,5 +87,5 @@ namespace cepgen {
   }  // namespace formfac
 }  // namespace cepgen
 
-REGISTER_FF_MODEL(gFFStandardDipoleHandler, StandardDipole)
-REGISTER_FF_MODEL("HeavyIonDipole", HeavyIonDipole)
+REGISTER_FORMFACTORS(gFFStandardDipoleHandler, StandardDipole)
+REGISTER_FORMFACTORS("HeavyIonDipole", HeavyIonDipole)

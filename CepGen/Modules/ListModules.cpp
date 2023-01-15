@@ -27,6 +27,7 @@
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
@@ -63,7 +64,7 @@ namespace cepgen {
 
       list_modules(proc::ProcessFactory::get(), "Physics processes");
       list_modules(PartonFluxFactory::get(), "Parton fluxes modellings");
-      list_modules(formfac::FormFactorsFactory::get(), "Beam form factors modellings");
+      list_modules(FormFactorsFactory::get(), "Beam form factors modellings");
       list_int_modules(sigrat::SigmaRatiosFactory::get(), "Cross section ratios modellings");
       list_int_modules(strfun::StructureFunctionsFactory::get(), "Structure functions modellings", [](int mod) {
         std::ostringstream os;

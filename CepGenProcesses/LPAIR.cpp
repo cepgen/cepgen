@@ -19,10 +19,12 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/FormFactors/Parameterisation.h"
+#include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenProcesses/LPAIR.h"
@@ -65,7 +67,7 @@ namespace cepgen {
     void LPAIR::prepareKinematics() {
       masses_.Ml2 = (*event_)(Particle::CentralSystem)[0].mass2();
 
-      formfac_ = formfac::FormFactorsFactory::get().build(kin_.incomingBeams().formFactors());
+      formfac_ = FormFactorsFactory::get().build(kin_.incomingBeams().formFactors());
       strfun_ = strfun::StructureFunctionsFactory::get().build(kin_.incomingBeams().structureFunctions());
 
       //--- first define the squared mass range for the diphoton/dilepton system

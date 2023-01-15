@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/CouplingFactory.h"
+#include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Beam.h"
@@ -55,7 +56,7 @@ double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& 
                                strfun::StructureFunctionsFactory::get().describeParameters(sfmode).parameters())
           .set<ParametersList>(
               "formFactors",
-              formfac::FormFactorsFactory::get()
+              FormFactorsFactory::get()
                   .describeParameters(formfac::gFFStandardDipoleHandler)  // use another argument for the modelling?
                   .parameters());
   auto flux_name = [](int mode) -> std::string {

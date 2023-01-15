@@ -22,6 +22,7 @@
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
@@ -50,7 +51,7 @@ int main(int argc, char* argv[]) {
 
   gen.document("proc", "Processes", cepgen::proc::ProcessFactory::get())
       //.document("cards", "Cards handler", cepgen::card::CardsHandlerFactory::get())
-      .document("formfac", "Form factors", cepgen::formfac::FormFactorsFactory::get())
+      .document("formfac", "Form factors", cepgen::FormFactorsFactory::get())
       .document("strfun", "Structure functions", cepgen::strfun::StructureFunctionsFactory::get())
       .document("sigrat",
                 "Longitudinal/transverse cross section ratio parameterisations",

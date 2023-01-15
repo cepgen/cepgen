@@ -20,6 +20,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/FormFactors/Parameterisation.h"
+#include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/Kinematics.h"
@@ -120,7 +121,7 @@ namespace cepgen {
 
     //--- form factors
     //params_.set<ParametersList>("formFactors",  //FIXME
-    //                            formfac::FormFactorsFactory::get().describeParameters("HeavyIonDipole").parameters());
+    //                            FormFactorsFactory::get().describeParameters("HeavyIonDipole").parameters());
     plist_pos.set<ParametersList>("formFactors", steer<ParametersList>("formFactors"));
     plist_neg.set<ParametersList>("formFactors", steer<ParametersList>("formFactors"));
 
@@ -276,8 +277,8 @@ namespace cepgen {
     desc.add<double>("sqrtS", -1.).setDescription("Two-beam centre of mass energy (in GeV)");
     desc.add<int>("mode", (int)mode::Kinematics::invalid)
         .setDescription("Process kinematics mode (1 = elastic, (2-3) = single-dissociative, 4 = double-dissociative)");
-    desc.add<ParametersDescription>(
-            "formFactors", formfac::FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler))
+    desc.add<ParametersDescription>("formFactors",
+                                    FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler))
         .setDescription("Beam form factors modelling");
     desc.add<ParametersDescription>(
             "structureFunctions", strfun::Parameterisation::description().setName<int>(11)  // default is SY

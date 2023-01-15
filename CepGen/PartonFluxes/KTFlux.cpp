@@ -20,6 +20,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/FormFactors/Parameterisation.h"
+#include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/PartonFluxes/KTFlux.h"
@@ -62,8 +63,7 @@ namespace cepgen {
   class ElasticNucleonKTFlux : public NucleonKTFlux {
   public:
     explicit ElasticNucleonKTFlux(const ParametersList& params)
-        : NucleonKTFlux(params),
-          ff_(formfac::FormFactorsFactory::get().build(params.get<ParametersList>("formFactors"))) {
+        : NucleonKTFlux(params), ff_(FormFactorsFactory::get().build(params.get<ParametersList>("formFactors"))) {
       if (!ff_)
         throw CG_FATAL("ElasticNucleonKTFlux")
             << "Elastic kT flux requires a modelling of electromagnetic form factors!";

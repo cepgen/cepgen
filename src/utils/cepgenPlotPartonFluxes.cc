@@ -22,6 +22,7 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Beam.h"
@@ -88,8 +89,7 @@ int main(int argc, char* argv[]) {
                 "structureFunctions",
                 cepgen::strfun::StructureFunctionsFactory::get().describeParameters(strfun_type).parameters())
             .set<cepgen::ParametersList>(
-                "formFactors",
-                cepgen::formfac::FormFactorsFactory::get().describeParameters(formfac_type).parameters()));
+                "formFactors", cepgen::FormFactorsFactory::get().describeParameters(formfac_type).parameters()));
     graph_flux[flux] = cepgen::utils::Graph1D(flux, cepgen::PartonFluxFactory::get().describe(flux));
   }
   for (const auto& x : x_range.generate(num_points)) {
@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
     cepgen::utils::DrawableColl coll;
 
     const auto top_label = cepgen::utils::format("$k_{T}^{2}$ = %g GeV$^{2}$", kt2) + ", " +
-                           cepgen::formfac::FormFactorsFactory::get().describe(formfac_type) + "/" +
+                           cepgen::FormFactorsFactory::get().describe(formfac_type) + "/" +
                            cepgen::strfun::StructureFunctionsFactory::get().describe(strfun_type);
 
     for (auto& gr : graph_flux) {

@@ -19,7 +19,7 @@
 #include <cmath>
 
 #include "CepGen/FormFactors/Parameterisation.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Modules/FormFactorsFactory.h"
 
 namespace cepgen {
   namespace formfac {
@@ -99,4 +99,4 @@ namespace cepgen {
   }  // namespace formfac
 }  // namespace cepgen
 
-REGISTER_FF_MODEL("Arrington", ArringtonEtAl)
+REGISTER_FORMFACTORS("Arrington", ArringtonEtAl)

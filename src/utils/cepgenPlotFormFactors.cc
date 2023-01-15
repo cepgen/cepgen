@@ -22,8 +22,7 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/DrawerFactory.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
@@ -33,15 +32,14 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   int mode, strfun_type, num_points;
-  double mx;
   string output_file, plotter;
   bool logy, draw_grid;
   cepgen::Limits q2range, yrange;
+  vector<string> modules;
 
   cepgen::ArgumentsParser(argc, argv)
       .addArgument("mode,t", "beam modelling", &mode, (int)cepgen::Beam::Mode::ProtonElastic)
-      .addOptionalArgument("mx,x", "diffractive mass (GeV/c^2)", &mx, 100.)
-      .addOptionalArgument("sf,s", "structure functions modelling", &strfun_type, 11)
+      .addOptionalArgument("modules,m", "types of form factors", &modules, cepgen::FormFactorsFactory::get().modules())
       .addOptionalArgument("q2range,q", "parton virtuality range (GeV^2)", &q2range, cepgen::Limits{1., 2.5})
       .addOptionalArgument("yrange,y", "y range", &yrange)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
@@ -54,21 +52,16 @@ int main(int argc, char* argv[]) {
   cepgen::initialise();
 
   ofstream out(output_file);
-  out << "# form factors: ";
-  string sep;
-  for (const auto& ff_type : cepgen::formfac::FormFactorsFactory::get().modules())
-    out << sep << ff_type, sep = ", ";
+  out << "# form factors: " << cepgen::utils::merge(modules, ",");
 
-  auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(strfun_type);
   out << "\n"
-      << "# structure functions: " << sf.get() << "\n"
-      << "# q2 in [" << q2range << "] GeV^2\n";
+      << "# q2 range: " << q2range << " GeV^2\n";
 
   vector<unique_ptr<cepgen::formfac::Parameterisation> > form_factors;
   vector<cepgen::utils::Graph1D> g_form_factors_fe, g_form_factors_fm;
-  for (const auto& ff_type : cepgen::formfac::FormFactorsFactory::get().modules()) {
-    form_factors.emplace_back(cepgen::formfac::FormFactorsFactory::get().build(ff_type));
-    const auto ff_desc = cepgen::formfac::FormFactorsFactory::get().describe(ff_type);
+  for (const auto& ff_type : modules) {
+    form_factors.emplace_back(cepgen::FormFactorsFactory::get().build(ff_type));
+    const auto ff_desc = cepgen::FormFactorsFactory::get().describe(ff_type);
     g_form_factors_fe.emplace_back("fe_" + ff_type, ff_desc);
     g_form_factors_fm.emplace_back("fm_" + ff_type, ff_desc);
   }
@@ -76,7 +69,7 @@ int main(int argc, char* argv[]) {
     out << q2 << "\t";
     size_t j = 0;
     for (auto& ff : form_factors) {
-      const auto form_factor = (*ff)((cepgen::Beam::Mode)mode, q2, mx, sf.get());
+      const auto form_factor = (*ff)((cepgen::Beam::Mode)mode, q2);
       out << "\t" << form_factor.FE << "\t" << form_factor.FM;
       g_form_factors_fe.at(j).addPoint(q2, form_factor.FE);
       g_form_factors_fm.at(j).addPoint(q2, form_factor.FM);
@@ -105,7 +98,7 @@ int main(int argc, char* argv[]) {
           gr.yAxis().setRange(yrange);
         mp.emplace_back(&gr);
       }
-      plt->draw(mp, "comp_" + canv.first.first, cepgen::utils::format("$M_{X}$ = %g GeV/c$^{2}$", mx), dm);
+      plt->draw(mp, "comp_" + canv.first.first, "", dm);
     }
   }
 
