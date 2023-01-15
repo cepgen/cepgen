@@ -929,8 +929,8 @@ namespace cepgen {
                                  sa1_ * a6_ * a6_ - sa2_ * a5_ * a5_ - sa1_ * sa2_ * qqq);  // electric-electric
 
       //--- compute the electric/magnetic form factors for the two considered parton momenta transfers
-      const auto fp1 = (*formfac_)(kin_.incomingBeams().positive().mode(), -t1_, mX2_, strfun_.get()),
-                 fp2 = (*formfac_)(kin_.incomingBeams().negative().mode(), -t2_, mY2_, strfun_.get());
+      const auto fp1 = computeFormFactors(kin_.incomingBeams().positive().mode(), -t1_, mX2_),
+                 fp2 = computeFormFactors(kin_.incomingBeams().negative().mode(), -t2_, mY2_);
 
       const double peripp =
           (fp1.FM * fp2.FM * t11 + fp1.FE * fp2.FM * t21 + fp1.FM * fp2.FE * t12 + fp1.FE * fp2.FE * t22) /
@@ -944,6 +944,34 @@ namespace cepgen {
                                     << "=> PeriPP = " << peripp;
 
       return peripp;
+    }
+
+    formfac::FormFactors LPAIR::computeFormFactors(const Beam::Mode& type, double q2, double mx2) const {
+      if (type == Beam::Mode::ProtonElastic)
+        return (*formfac_)(q2);
+      else if (type == Beam::Mode::ProtonInelastic) {
+        if (!strfun_)
+          throw CG_FATAL("LPAIR:computeFormFactors")
+              << "Inelastic proton form factors computation requires a structure functions definition!";
+        const double xbj = utils::xBj(q2, mp2_, mx2);
+        formfac::FormFactors ff;
+        switch ((strfun::Type)strfun_->name()) {
+          case strfun::Type::ElasticProton:
+            throw CG_FATAL("LPAIR::computeFormFactors") << "Elastic proton form factors requested!\n"
+                                                        << "Check your process definition!";
+          case strfun::Type::SuriYennie: {  // this one requires its own object to deal with FM
+            ff.FE = strfun_->F2(xbj, q2) * xbj * mp_ / q2;
+            ff.FM = strfun_->FM(xbj, q2);
+          } break;
+          default: {
+            ff.FE = strfun_->F2(xbj, q2) * xbj / q2;
+            ff.FM = -2. * strfun_->F1(xbj, q2) / q2;
+          } break;
+        }
+        return ff;
+      }
+      throw CG_FATAL("LPAIR::computeFormFactors")
+          << "Invalid incoming beam requested for LPAIR form factors evaluation: " << type << ".";
     }
 
     std::pair<double, double> LPAIR::map(double expo, const Limits& lim, const std::string& var_name_) {

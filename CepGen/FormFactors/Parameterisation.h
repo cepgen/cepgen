@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 
 #include "CepGen/FormFactors/FormFactors.h"
 #include "CepGen/Modules/NamedModule.h"
-#include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/HeavyIon.h"
 
 namespace cepgen {
@@ -48,10 +47,7 @@ namespace cepgen {
       double tau(double q2) const;
 
       /// Compute all relevant form factors functions for a given \f$Q^2\f$ value
-      const FormFactors& operator()(const Beam::Mode& /*type*/,
-                                    double /*q2*/,
-                                    double mf2 = 0.,
-                                    strfun::Parameterisation* sf = nullptr);
+      const FormFactors& operator()(double /*q2*/);
 
     protected:
       /// Proton magnetic moment
@@ -60,9 +56,10 @@ namespace cepgen {
       /// Local form factors evaluation method
       virtual FormFactors compute(double) { return FormFactors{}; }
 
-      const HeavyIon hi_;  ///< Incoming beam
-      const double mp_;    ///< Proton mass, in GeV/c\f$^2\f$
-      const double mp2_;   ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
+      const HeavyIon hi_;   ///< Incoming beam
+      const double mass2_;  ///< Incoming beam squared mass
+      const double mp_;     ///< Proton mass, in GeV/c\f$^2\f$
+      const double mp2_;    ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
 
     private:
       std::pair<double, FormFactors> last_value_{-1., FormFactors{}};

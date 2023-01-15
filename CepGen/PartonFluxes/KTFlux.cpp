@@ -24,7 +24,6 @@
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/PartonFluxes/KTFlux.h"
-#include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/HeavyIon.h"
@@ -83,7 +82,7 @@ namespace cepgen {
         return 0.;
       const auto q2vals = computeQ2(x, kt2);
       const double qnorm = 1. - q2vals.min / q2vals.q2;
-      const auto& formfac = (*ff_)(Beam::Mode::ProtonElastic, q2vals.q2);
+      const auto& formfac = (*ff_)(q2vals.q2);
       return constants::ALPHA_EM * M_1_PI * formfac.FE * qnorm * qnorm / q2vals.q2;
     }
 
@@ -128,7 +127,7 @@ namespace cepgen {
         return 0.;
       const auto q2vals = computeQ2(x, kt2);
       const double qnorm = 1. - q2vals.min / q2vals.q2;
-      const auto& formfac = (*ff_)(Beam::Mode::ProtonElastic, q2vals.q2);
+      const auto& formfac = (*ff_)(q2vals.q2);
       const double f_D = formfac.FE * (1. - x) * qnorm;
       const double f_C = formfac.FM;
       return constants::ALPHA_EM * M_1_PI * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2vals.q2;

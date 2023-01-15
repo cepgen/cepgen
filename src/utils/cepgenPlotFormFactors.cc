@@ -18,7 +18,6 @@
 
 #include <fstream>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/DrawerFactory.h"
@@ -26,19 +25,19 @@
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
+#include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
-  int mode, strfun_type, num_points;
+  int num_points;
   string output_file, plotter;
   bool logy, draw_grid;
   cepgen::Limits q2range, yrange;
   vector<string> modules;
 
   cepgen::ArgumentsParser(argc, argv)
-      .addArgument("mode,t", "beam modelling", &mode, (int)cepgen::Beam::Mode::ProtonElastic)
       .addOptionalArgument("modules,m", "types of form factors", &modules, cepgen::FormFactorsFactory::get().modules())
       .addOptionalArgument("q2range,q", "parton virtuality range (GeV^2)", &q2range, cepgen::Limits{1., 2.5})
       .addOptionalArgument("yrange,y", "y range", &yrange)
@@ -69,7 +68,7 @@ int main(int argc, char* argv[]) {
     out << q2 << "\t";
     size_t j = 0;
     for (auto& ff : form_factors) {
-      const auto form_factor = (*ff)((cepgen::Beam::Mode)mode, q2);
+      const auto form_factor = (*ff)(q2);
       out << "\t" << form_factor.FE << "\t" << form_factor.FM;
       g_form_factors_fe.at(j).addPoint(q2, form_factor.FE);
       g_form_factors_fm.at(j).addPoint(q2, form_factor.FM);

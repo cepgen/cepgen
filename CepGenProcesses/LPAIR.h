@@ -100,6 +100,7 @@ namespace cepgen {
          * \return Success state of the operation
          */
       bool pickin();
+      formfac::FormFactors computeFormFactors(const Beam::Mode& type, double q2, double mx2) const;
 
       /// Internal switch for the optimised code version (LPAIR legacy)
       const int n_opt_;
