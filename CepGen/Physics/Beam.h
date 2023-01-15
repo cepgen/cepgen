@@ -82,7 +82,7 @@ namespace cepgen {
     }
 
     /// Scalar parton flux modelling
-    const PartonFlux& flux() const { return *flux_; }
+    const PartonFlux& flux() const;
     /// Compute the scalar parton flux given its modelling
     double flux(double x, double q2, double mx2 = -1.) const;
 

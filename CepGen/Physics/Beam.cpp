@@ -34,25 +34,30 @@ namespace cepgen {
         pdg_(steerAs<int, pdgid_t>("pdgId")),
         momentum_(Momentum::fromPxPyPzM(
             0., 0., steer<double>("pz"), HeavyIon::isHI(pdg_) ? HeavyIon::mass(HeavyIon(pdg_)) : PDG::get().mass(pdg_))),
-        mode_(steerAs<int, Mode>("mode")),
-        flux_(PartonFluxFactory::get().build(steer<ParametersList>("partonFlux") + params_)) {
-    if (mode_ == Mode::invalid) {
-      if (pdg_ == PDG::electron)
-        mode_ = Mode::PointLikeFermion;
-      else if (HeavyIon::isHI(pdg_))
-        mode_ = Mode::HIElastic;  //FIXME
-      else if (flux_->fragmenting())
-        mode_ = Mode::ProtonInelastic;
-      else
-        mode_ = Mode::ProtonElastic;
-    }
+        mode_(steerAs<int, Mode>("mode")) {
+    if (pdg_ == PDG::electron || mode_ == Mode::PointLikeFermion) {
+      mode_ = Mode::PointLikeFermion;
+      throw CG_FATAL("Beam") << "Mode '" << mode_ << "' is not (yet) handled.";
+    } else if (HeavyIon::isHI(pdg_) || mode_ == Mode::HIElastic) {
+      mode_ = Mode::HIElastic;
+      flux_ = PartonFluxFactory::get().build("ElasticHeavyIonKT", params_ + steer<ParametersList>("partonFlux"));
+    } else if (mode_ == Mode::ProtonInelastic)
+      flux_ = PartonFluxFactory::get().build("BudnevInelasticKT", params_ + steer<ParametersList>("partonFlux"));
+    else if (mode_ == Mode::ProtonElastic)
+      flux_ = PartonFluxFactory::get().build("BudnevElasticKT", params_ + steer<ParametersList>("partonFlux"));
   }
 
-  bool Beam::fragmented() const { return flux_->fragmenting(); }
+  bool Beam::fragmented() const { return flux().fragmenting(); }
 
-  pdgid_t Beam::daughterId() const { return flux_->partonPdgId(); }
+  pdgid_t Beam::daughterId() const { return flux().partonPdgId(); }
 
-  double Beam::flux(double x, double q2, double mx2) const { return (*flux_)(x, q2, mx2); }
+  const PartonFlux& Beam::flux() const {
+    if (!flux_)
+      throw CG_FATAL("Beam:flux") << "Beam flux requested although it was not yet initialised.";
+    return *flux_;
+  }
+
+  double Beam::flux(double x, double q2, double mx2) const { return flux()(x, q2, mx2); }
 
   ParametersDescription Beam::description() {
     auto desc = ParametersDescription();
