@@ -33,7 +33,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
   int num_points;
   string output_file, plotter;
-  bool logy, draw_grid;
+  bool logx, logy, draw_grid;
   cepgen::Limits q2range, yrange;
   vector<string> modules;
 
@@ -43,6 +43,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("yrange,y", "y range", &yrange)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
       .addOptionalArgument("output,o", "output file name", &output_file, "formfacs.scan.output.txt")
+      .addOptionalArgument("logx", "logarithmic x-axis", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-axis", &logy, false)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
@@ -64,7 +65,7 @@ int main(int argc, char* argv[]) {
     g_form_factors_fe.emplace_back("fe_" + ff_type, ff_desc);
     g_form_factors_fm.emplace_back("fm_" + ff_type, ff_desc);
   }
-  for (const auto& q2 : q2range.generate(num_points)) {
+  for (const auto& q2 : q2range.generate(num_points, logx)) {
     out << q2 << "\t";
     size_t j = 0;
     for (auto& ff : form_factors) {
@@ -82,6 +83,8 @@ int main(int argc, char* argv[]) {
   if (!plotter.empty()) {
     auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
     cepgen::utils::Drawer::Mode dm;
+    if (logx)
+      dm |= cepgen::utils::Drawer::Mode::logx;
     if (logy)
       dm |= cepgen::utils::Drawer::Mode::logy;
     if (draw_grid)
