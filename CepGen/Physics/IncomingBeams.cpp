@@ -31,10 +31,7 @@
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 
 namespace cepgen {
-  IncomingBeams::IncomingBeams(const ParametersList& params)
-      : SteeredObject(params), pos_beam_(params_), neg_beam_(params_) {
-    setParameters(params_);
-  }
+  IncomingBeams::IncomingBeams(const ParametersList& params) : SteeredObject(params) { setParameters(params_); }
 
   void IncomingBeams::setParameters(const ParametersList& params) {
     SteeredObject::setParameters(params);
@@ -101,15 +98,14 @@ namespace cepgen {
       throw CG_FATAL("Kinematics") << "Invalid format for beams pz specification!\n\t"
                                    << "A vector of two pz's is required.";
     //--- centre-of-mass energy
-    const auto sqrts = steer<double>("sqrtS"), cme = steer<double>("cmEnergy");
-    if (sqrts > 0. || cme > 0.) {
-      if (pos_pdg != neg_pdg)
-        throw CG_FATAL("Kinematics") << "Trying to set √s with asymmetric beams"
-                                     << " (" << pos_pdg << "/" << neg_pdg << ").\n"
-                                     << "Please fill incoming beams objects manually!";
-      const auto max_sqrts = std::max(sqrts, cme);
-      p1z = +0.5 * max_sqrts;
-      p2z = -0.5 * max_sqrts;
+    if (pos_pdg == neg_pdg) {
+      const auto sqrts = params_.has<double>("sqrtS") && steer<double>("sqrtS") > 0.         ? steer<double>("sqrtS")
+                         : params_.has<double>("cmEnergy") && steer<double>("cmEnergy") > 0. ? steer<double>("cmEnergy")
+                                                                                             : 0.;
+      if (sqrts > 0.) {
+        p1z = +0.5 * sqrts;
+        p2z = -0.5 * sqrts;
+      }
     }
     //--- check the sign of both beams' pz
     if (p1z * p2z < 0. && p1z < 0.)
@@ -274,7 +270,7 @@ namespace cepgen {
     desc.add<std::vector<ParametersList> >("pdgIds", {}).setDescription("PDG description of incoming beam particles");
     desc.add<std::vector<int> >("pdgIds", {}).setDescription("PDG ids of incoming beam particles");
     desc.add<std::vector<double> >("pz", {}).setDescription("Beam momenta (in GeV/c)");
-    desc.add<double>("sqrtS", -1.).setDescription("Two-beam centre of mass energy (in GeV)");
+    desc.add<double>("sqrtS", 0.).setDescription("Two-beam centre of mass energy (in GeV)");
     desc.add<int>("mode", (int)mode::Kinematics::invalid)
         .setDescription("Process kinematics mode (1 = elastic, (2-3) = single-dissociative, 4 = double-dissociative)");
     desc.add<ParametersDescription>("formFactors",

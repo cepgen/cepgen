@@ -61,8 +61,8 @@ namespace cepgen {
     double sqrtS() const;
 
   private:
-    Beam pos_beam_;
-    Beam neg_beam_;
+    Beam pos_beam_{ParametersList()};
+    Beam neg_beam_{ParametersList()};
   };
 }  // namespace cepgen
 
