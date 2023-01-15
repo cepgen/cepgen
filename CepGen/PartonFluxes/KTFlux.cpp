@@ -22,41 +22,19 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/PartonFluxes/PartonFlux.h"
+#include "CepGen/PartonFluxes/KTFlux.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
 namespace cepgen {
-  class KTFlux : public PartonFlux {
-  public:
-    explicit KTFlux(const ParametersList& params) : PartonFlux(params) {}
-
-    static ParametersDescription description() {
-      auto desc = PartonFlux::description();
-      desc.setDescription("kT-factorised flux");
-      return desc;
-    }
-
-    bool ktFactorised() const override final { return true; }
-
-  protected:
-    /// Minimal value taken for a \f$\k_{\rm T}\f$-factorised flux
-    static constexpr double kMinKTFlux = 1.e-20;
-  };
-
   class NucleonKTFlux : public KTFlux {
   public:
-    explicit NucleonKTFlux(const ParametersList& params)
-        : KTFlux(params),
-          mi_(params_.has<double>("mass")
-                  ? steer<double>("mass")
-                  : (HeavyIon::isHI(steer<pdgid_t>("pdgId")) ? steerAs<pdgid_t, HeavyIon>("pdgId").mass()
-                                                             : PDG::get().mass(steer<pdgid_t>("pdgId")))),
-          mi2_(mi_ * mi_) {}
+    explicit NucleonKTFlux(const ParametersList& params) : KTFlux(params) {}
 
     static ParametersDescription description() {
       auto desc = KTFlux::description();
@@ -65,18 +43,20 @@ namespace cepgen {
     }
 
   protected:
+    virtual double mass2() const = 0;
+
     struct Q2Values {
       double min{0.}, q2{0.};
     };
     /// Compute the minimum and kT-dependent Q^2
     Q2Values computeQ2(double x, double kt2, double mx2 = 0.) const {
       Q2Values out;
-      const auto dm2 = (mx2 == 0.) ? 0. : mx2 - mi2_;
-      out.min = ((x * dm2) + x * x * mi2_) / (1. - x);
+      const auto mi2 = mass2();
+      const auto dm2 = (mx2 == 0.) ? 0. : mx2 - mi2;
+      out.min = ((x * dm2) + x * x * mi2) / (1. - x);
       out.q2 = out.min + kt2 / (1. - x);
       return out;
     }
-    const double mi_, mi2_;
   };
 
   class ElasticNucleonKTFlux : public NucleonKTFlux {
@@ -96,6 +76,7 @@ namespace cepgen {
       return desc;
     }
     bool fragmenting() const override final { return false; }
+    double mass2() const override { return mp2_; }
 
     double operator()(double x, double kt2, double) const override {
       if (!x_range_.contains(x))
@@ -114,7 +95,7 @@ namespace cepgen {
   class ElasticHeavyIonKTFlux : public ElasticNucleonKTFlux {
   public:
     explicit ElasticHeavyIonKTFlux(const ParametersList& params)
-        : ElasticNucleonKTFlux(params), hi_(steerAs<pdgid_t, HeavyIon>("heavyIon")) {}
+        : ElasticNucleonKTFlux(params), hi_(steerAs<pdgid_t, HeavyIon>("heavyIon")), mass2_(hi_.mass() * hi_.mass()) {}
 
     static ParametersDescription description() {
       auto desc = ElasticNucleonKTFlux::description();
@@ -124,6 +105,7 @@ namespace cepgen {
       return desc;
     }
 
+    double mass2() const override { return mass2_; }
     double operator()(double x, double kt2, double mx2) const override {
       const auto z = (unsigned short)hi_.Z;
       return z * z * ElasticNucleonKTFlux::operator()(x, kt2, mx2);
@@ -131,6 +113,7 @@ namespace cepgen {
 
   private:
     const HeavyIon hi_;
+    const double mass2_;
   };
 
   struct BudnevElasticNucleonKTFlux final : public ElasticNucleonKTFlux {
@@ -168,15 +151,16 @@ namespace cepgen {
       return desc;
     }
 
+    double mass2() const override { return mp2_; }
     double operator()(double x, double kt2, double mx2) const override {
       if (!x_range_.contains(x))
         return 0.;
       if (mx2 < 0.)
         throw CG_FATAL("InelasticNucleonKTFlux") << "Diffractive mass squared mX^2 should be specified!";
       const auto q2vals = computeQ2(x, kt2, mx2);
-      const double qnorm = 1. - q2vals.min / q2vals.q2;
-      const double denom = 1. / (q2vals.q2 + mx2 - mi2_), xbj = denom * q2vals.q2;
-      return constants::ALPHA_EM * M_1_PI * sf_->F2(xbj, q2vals.q2) * denom * qnorm * qnorm * (1. - x) / q2vals.q2;
+      const auto xbj = utils::xBj(q2vals.q2, mass2(), mx2), qnorm = 1. - q2vals.min / q2vals.q2;
+      return constants::ALPHA_EM * M_1_PI * sf_->F2(xbj, q2vals.q2) * (xbj / q2vals.q2) * qnorm * qnorm * (1. - x) /
+             q2vals.q2;
     }
 
   protected:
@@ -196,28 +180,11 @@ namespace cepgen {
       if (mx2 < 0.)
         throw CG_FATAL("InelasticNucleonKTFlux") << "Diffractive mass squared mX^2 should be specified!";
       const auto q2vals = computeQ2(x, kt2, mx2);
-      const double qnorm = 1. - q2vals.min / q2vals.q2;
-      const double denom = 1. / (q2vals.q2 + mx2 - mi2_), xbj = denom * q2vals.q2;
-      const double f_D = sf_->F2(xbj, q2vals.q2) * denom * (1. - x) * qnorm;
+      const auto xbj = utils::xBj(q2vals.q2, mass2(), mx2), qnorm = 1. - q2vals.min / q2vals.q2;
+      const double f_D = sf_->F2(xbj, q2vals.q2) * (xbj / q2vals.q2) * (1. - x) * qnorm;
       const double f_C = sf_->F1(xbj, q2vals.q2) * 2. / q2vals.q2;
       return constants::ALPHA_EM * M_1_PI * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2vals.q2;
     }
-  };
-
-  struct KMRGluonKTFlux final : public KTFlux {
-    using KTFlux::KTFlux;
-    static ParametersDescription description() {
-      auto desc = KTFlux::description();
-      desc.setDescription("Inelastic gluon emission from proton (KMR flux modelling)");
-      return desc;
-    }
-    double operator()(double x, double kt2, double mx2) const override final {
-      if (!x_range_.contains(x))
-        return 0.;
-      return kmr::GluonGrid::get()(x, kt2, mx2);
-    }
-    int partonPdgId() const override final { return PDG::gluon; }
-    bool fragmenting() const override { return false; }
   };
 
   /// Realistic nuclear form-factor as used in STARLIGHT
@@ -263,4 +230,3 @@ REGISTER_FLUX("BudnevElasticKT", BudnevElasticNucleonKTFlux)
 REGISTER_FLUX("ElasticHeavyIonKT", ElasticHeavyIonKTFlux)
 REGISTER_FLUX("InelasticKT", InelasticNucleonKTFlux)
 REGISTER_FLUX("BudnevInelasticKT", BudnevInelasticNucleonKTFlux)
-REGISTER_FLUX("KMR", KMRGluonKTFlux)
