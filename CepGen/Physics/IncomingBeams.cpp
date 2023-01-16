@@ -125,16 +125,20 @@ namespace cepgen {
     if (mode != mode::Kinematics::invalid) {
       switch (mode) {
         case mode::Kinematics::ElasticElastic:
-          plist_pos.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonElastic);
-          plist_neg.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonElastic);
+          plist_pos.setAs<int, Beam::Mode>("mode",
+                                           HeavyIon::isHI(pos_pdg) ? Beam::Mode::HIElastic : Beam::Mode::ProtonElastic);
+          plist_neg.setAs<int, Beam::Mode>("mode",
+                                           HeavyIon::isHI(neg_pdg) ? Beam::Mode::HIElastic : Beam::Mode::ProtonElastic);
           break;
         case mode::Kinematics::ElasticInelastic:
-          plist_pos.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonElastic);
+          plist_pos.setAs<int, Beam::Mode>("mode",
+                                           HeavyIon::isHI(pos_pdg) ? Beam::Mode::HIElastic : Beam::Mode::ProtonElastic);
           plist_neg.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonInelastic);
           break;
         case mode::Kinematics::InelasticElastic:
           plist_pos.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonInelastic);
-          plist_neg.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonElastic);
+          plist_neg.setAs<int, Beam::Mode>("mode",
+                                           HeavyIon::isHI(neg_pdg) ? Beam::Mode::HIElastic : Beam::Mode::ProtonElastic);
           break;
         case mode::Kinematics::InelasticInelastic:
           plist_pos.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonInelastic);
