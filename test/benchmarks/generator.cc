@@ -30,11 +30,10 @@ int main(int argc, char* argv[]) {
       .context("process", process);
 
   gen.parametersRef().setProcess(cepgen::proc::ProcessFactory::get().build(process));
-  cepgen::Kinematics kin(cepgen::ParametersList{});
+  auto& kin = gen.parametersRef().process().kinematics();
   kin.incomingBeams().positive().setPdgId(2212);
   kin.incomingBeams().negative().setPdgId(2212);
   kin.incomingBeams().setSqrtS(13.e3);
-  gen.parametersRef().process().setKinematics(kin);
   for (const auto& integrator_name : integrators)
     bench.context("integrator", integrator_name).run(process + "+" + integrator_name, [&] {
       gen.setIntegrator(cepgen::IntegratorFactory::get().build(integrator_name));

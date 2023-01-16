@@ -22,12 +22,15 @@
 #include "CepGen/Utils/Message.h"
 
 namespace cepgen {
-  const double Kinematics::MX_MIN = 1.07;  // mp+mpi+-
+  Kinematics::Kinematics(const ParametersList& params) : SteeredObject(params) {}
 
-  Kinematics::Kinematics(const ParametersList& params) : SteeredObject(params), incoming_beams_(params_) {
+  void Kinematics::setParameters(const ParametersList& params) {
+    SteeredObject::setParameters(params);
     CG_DEBUG("Kinematics") << "Building a Kinematics parameters container "
                            << "with the following parameters:\n\t" << params_ << ".";
-    setParameters(params_);
+
+    incoming_beams_.setParameters(params_);
+    cuts_.setParameters(params_);
     //----- outgoing particles definition
     if (params_.has<std::vector<int> >("minFinalState"))
       for (const auto& pdg : steer<std::vector<int> >("minFinalState"))
@@ -37,12 +40,6 @@ namespace cepgen {
     const auto& kmr_grid_path = steerPath("kmrGridPath");
     if (!kmr_grid_path.empty())
       kmr::GluonGrid::get(ParametersList(params_).set<std::string>("path", kmr_grid_path));
-  }
-
-  void Kinematics::setParameters(const ParametersList& params) {
-    SteeredObject::setParameters(params);
-    incoming_beams_.setParameters(params_);
-    cuts_.setParameters(params_);
   }
 
   ParametersList Kinematics::parameters(bool extended) const {
@@ -58,8 +55,6 @@ namespace cepgen {
           });
       params.set<std::vector<int> >("minFinalState", min_pdgs);
     }
-    CG_DEBUG("Kinematics:parameters") << "Kinematics parameters values retrieved:\n"
-                                      << ParametersDescription(params) << ".";
     return params;
   }
 

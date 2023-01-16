@@ -61,6 +61,8 @@ namespace cepgen {
     /// Human-readable format of a beam mode (elastic/dissociative parts)
     friend std::ostream& operator<<(std::ostream&, const Mode&);
     const Mode& mode() const { return mode_; }
+    /// Initialise the fluxes evaluator object
+    void initialise();
     /// Is the beam particle expected to be fragmented after emission?
     bool fragmented() const;
 

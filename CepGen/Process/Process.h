@@ -26,11 +26,11 @@
 
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Modules/NamedModule.h"
+#include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/Kinematics.h"
 
 namespace cepgen {
   class Event;
-  class Coupling;
   /// Location for all physics processes to be generated
   namespace proc {
     /// \brief Class template to define any process to compute using this MC integrator/events generator
@@ -41,7 +41,7 @@ namespace cepgen {
       /// Default constructor for an undefined process
       /// \param[in] params Process-level parameters
       /// \param[in] has_event Do we generate the associated event structure?
-      explicit Process(const ParametersList& params, bool has_event = true);
+      explicit Process(const ParametersList&);
       /// Copy constructor for a user process
       Process(const Process&);
       virtual ~Process() = default;
@@ -50,16 +50,9 @@ namespace cepgen {
 
       /// Reset process prior to the phase space and variables definition
       void clear();
-      /// Is it the first time the process is computed?
-      inline bool firstRun() const { return first_run_; }
 
       /// Assignment operator
       Process& operator=(const Process&);
-
-      /// Human-readable format dump of a Process object
-      friend std::ostream& operator<<(std::ostream& os, const Process& proc);
-      /// Human-readable format dump of a pointer to a Process object
-      friend std::ostream& operator<<(std::ostream& os, const Process* proc);
 
       /// Map of all incoming state particles in the process
       typedef std::map<Particle::Role, pdgid_t> IncomingState;
@@ -70,7 +63,7 @@ namespace cepgen {
       /// Copy all process attributes into a new object
       virtual std::unique_ptr<Process> clone() const;
       /// Set the incoming and outgoing state to be expected in the process
-      inline virtual void addEventContent() {}
+      inline virtual void addEventContent() = 0;
       /// Compute the phase space point weight
       virtual double computeWeight() = 0;
       /// Compute the incoming state kinematics
@@ -86,8 +79,8 @@ namespace cepgen {
       const Kinematics& kinematics() const { return kin_; }
       /// Return a reference to the process kinematics
       Kinematics& kinematics() { return kin_; }
-      /// Set the list of kinematic cuts to apply on the outgoing particles' final state
-      void setKinematics(const Kinematics&);
+      /// Initialise the process once the kinematics has been set
+      void initialise();
       /// Compute the weight for a phase-space point
       double weight(const std::vector<double>&);
       /// Dump the evaluated point's coordinates in the standard output stream
@@ -160,9 +153,9 @@ namespace cepgen {
       /// Numerical limits for sanity comparisons
       static constexpr double NUM_LIMITS = 1.e-3;  // MeV/mm-level
       /// Electromagnetic running coupling algorithm
-      std::shared_ptr<Coupling> alphaem_;
+      std::unique_ptr<Coupling> alphaem_;
       /// Strong running coupling algorithm
-      std::shared_ptr<Coupling> alphas_;
+      std::unique_ptr<Coupling> alphas_;
       /// Handler to a variable mapped by this process
       struct MappingVariable {
         std::string description;  ///< Human-readable description of the variable
@@ -197,19 +190,6 @@ namespace cepgen {
       Kinematics kin_{ParametersList()};
       /// Event object containing all the information on all particles in the system
       std::unique_ptr<Event> event_;
-      /// Is the phase space point set?
-      bool is_point_set_{false};
-
-    private:
-      /**
-         * Is the system's kinematics well defined and compatible with the process ?
-         * This check is mandatory to perform the d-dimensional point's cross-section computation.
-         * \brief Is the system's kinematics well defined?
-         * \return A boolean stating if the input kinematics and the final states are well-defined
-         */
-      bool isKinematicsDefined();
-      /// Is it the first time the process is computed?
-      bool first_run_{true};
     };
     /// Helper typedef for a Process unique pointer
     typedef std::unique_ptr<Process> ProcessPtr;

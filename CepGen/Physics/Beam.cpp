@@ -35,19 +35,35 @@ namespace cepgen {
         momentum_(Momentum::fromPxPyPzM(
             0., 0., steer<double>("pz"), HeavyIon::isHI(pdg_) ? HeavyIon::mass(HeavyIon(pdg_)) : PDG::get().mass(pdg_))),
         mode_(steerAs<int, Mode>("mode")) {
-    if (pdg_ == PDG::electron || mode_ == Mode::PointLikeFermion) {
+    if (pdg_ == PDG::electron)
       mode_ = Mode::PointLikeFermion;
-      throw CG_FATAL("Beam") << "Mode '" << mode_ << "' is not (yet) handled.";
-    } else if (HeavyIon::isHI(pdg_) || mode_ == Mode::HIElastic) {
+    else if (HeavyIon::isHI(pdg_))
       mode_ = Mode::HIElastic;
-      flux_ = PartonFluxFactory::get().build("ElasticHeavyIonKT", params_ + steer<ParametersList>("partonFlux"));
-    } else if (mode_ == Mode::ProtonInelastic)
-      flux_ = PartonFluxFactory::get().build("BudnevInelasticKT", params_ + steer<ParametersList>("partonFlux"));
-    else if (mode_ == Mode::ProtonElastic)
-      flux_ = PartonFluxFactory::get().build("BudnevElasticKT", params_ + steer<ParametersList>("partonFlux"));
   }
 
-  bool Beam::fragmented() const { return flux().fragmenting(); }
+  void Beam::initialise() {
+    const auto& pflux_params = steer<ParametersList>("partonFlux");
+    switch (mode_) {
+      case Mode::HIElastic:
+        flux_ = PartonFluxFactory::get().build("ElasticHeavyIonKT", params_ + pflux_params);
+        break;
+      case Mode::ProtonInelastic:
+        flux_ = PartonFluxFactory::get().build("BudnevInelasticKT", params_ + pflux_params);
+        break;
+      case Mode::ProtonElastic:
+        flux_ = PartonFluxFactory::get().build("BudnevElasticKT", params_ + pflux_params);
+        break;
+      default:
+        CG_WARNING("Beam:initialise") << "Invalid beam mode retrieved: '" << mode_ << "'.";
+        break;
+    }
+  }
+
+  bool Beam::fragmented() const {
+    if (flux_)
+      return flux().fragmenting();
+    return mode_ != Mode::HIElastic && mode_ != Mode::ProtonElastic;
+  }
 
   pdgid_t Beam::daughterId() const { return flux().partonPdgId(); }
 
@@ -62,7 +78,7 @@ namespace cepgen {
   ParametersDescription Beam::description() {
     auto desc = ParametersDescription();
     desc.add<int>("pdgId", (int)PDG::proton);
-    desc.add<double>("pz", 6500.);
+    desc.add<double>("pz", 0.);
     desc.add<int>("mode", (int)Beam::Mode::invalid);
     desc.add<ParametersDescription>("partonFlux", PartonFluxFactory::get().describeParameters("BudnevElasticKT"));
     return desc;

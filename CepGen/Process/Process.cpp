@@ -29,34 +29,27 @@
 
 namespace cepgen {
   namespace proc {
-    Process::Process(const ParametersList& params, bool has_event)
-        : NamedModule(params),
-          mp_(PDG::get().mass(PDG::proton)),
-          mp2_(mp_ * mp_),
-          alphaem_(AlphaEMFactory::get().build(steer<ParametersList>("alphaEM"))) {
-      if (has_event)
+    Process::Process(const ParametersList& params)
+        : NamedModule(params), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {
+      if (steer<bool>("hasEvent"))
         event_.reset(new Event);
     }
 
     Process::Process(const Process& proc)
-        : NamedModule<>(proc.parameters()),
+        : NamedModule(proc),
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
-          alphaem_(proc.alphaem_),
-          alphas_(proc.alphas_),
           mapped_variables_(proc.mapped_variables_),
           point_coord_(proc.point_coord_),
           base_jacobian_(proc.base_jacobian_),
           s_(proc.s_),
           sqs_(proc.sqs_),
           mA2_(proc.mA2_),
-          mB2_(proc.mB2_),
-          is_point_set_(false),
-          first_run_(proc.first_run_) {
+          mB2_(proc.mB2_) {
       if (proc.event_)
         event_.reset(new Event(*proc.event_));
       CG_DEBUG("Process").log([&](auto& log) {
-        log << "Process " << *this << " cloned with "
+        log << "Process " << name_ << " cloned with "
             << utils::s("integration variable", mapped_variables_.size(), true) << ":";
         for (const auto& var : mapped_variables_)
           log << "\n\t" << var.index << ") " << var.description << " (type: " << var.type << ", limits: " << var.limits
@@ -64,7 +57,6 @@ namespace cepgen {
         if (event_)
           log << "\n\t" << *event_;
       });
-      setKinematics(proc.kin_);
     }
 
     std::unique_ptr<Process> Process::clone() const {
@@ -72,7 +64,6 @@ namespace cepgen {
     }
 
     void Process::clear() {
-      first_run_ = true;
       addEventContent();
       //--- initialise the "constant" (wrt x) part of the Jacobian
       base_jacobian_ = 1.;
@@ -208,12 +199,9 @@ namespace cepgen {
     }
 
     double Process::weight(const std::vector<double>& x) {
-      if (first_run_)
-        first_run_ = false;
       point_coord_ = x;
       if (CG_LOG_MATCH("Process:dumpPoint", debugInsideLoop))
         dumpPoint();
-      clearEvent();
 
       //--- generate and initialise all variables
       generateVariables();
@@ -265,11 +253,21 @@ namespace cepgen {
       return event_.get();
     }
 
-    void Process::setKinematics(const Kinematics& kin) {
-      CG_DEBUG("Process:setKinematics") << "Preparing to set the kinematics parameters. Input parameters: "
-                                        << ParametersDescription(kin.parameters(false)) << ".";
+    void Process::initialise() {
+      CG_DEBUG("Process:initialise") << "Preparing to set the kinematics parameters. Input parameters: "
+                                     << ParametersDescription(kin_.parameters(false)) << ".";
+
       clear();  // also resets the "first run" flag
-      kin_.setParameters(kin.parameters(true));
+
+      kin_.incomingBeams().initialise();
+
+      // build the coupling objects
+      const auto& alpha_em = steer<ParametersList>("alphaEM");
+      if (!alpha_em.empty())
+        alphaem_ = AlphaEMFactory::get().build(alpha_em);
+      const auto& alpha_s = steer<ParametersList>("alphaS");
+      if (!alpha_s.empty())
+        alphas_ = AlphaSFactory::get().build(alpha_s);
 
       const auto& p1 = kin_.incomingBeams().positive().momentum();
       const auto& p2 = kin_.incomingBeams().negative().momentum();
@@ -292,18 +290,21 @@ namespace cepgen {
         for (auto& cp : (*event_)[Particle::CentralSystem])
           cp.get().setPdgId(cp.get().pdgId());
       }
-
       s_ = kin_.incomingBeams().s();
       sqs_ = std::sqrt(s_);
 
       mA2_ = p1.mass2();
       mB2_ = p2.mass2();
 
-      if (event_)
-        CG_DEBUG("Process:setKinematics") << "Kinematics successfully set!\n"
-                                          << "  sqrt(s) = " << sqs_ * 1.e-3 << " TeV,\n"
-                                          << "  p1=" << p1 << ",\tmass=" << p1.mass() << " GeV\n"
-                                          << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.";
+      prepareKinematics();
+
+      if (event_) {
+        CG_DEBUG("Process:initialise") << "Kinematics successfully set!\n"
+                                       << "  sqrt(s) = " << sqs_ * 1.e-3 << " TeV,\n"
+                                       << "  p1=" << p1 << ",\tmass=" << p1.mass() << " GeV\n"
+                                       << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.";
+        clearEvent();
+      }
     }
 
     void Process::dumpPoint() const {
@@ -375,39 +376,16 @@ namespace cepgen {
             break;
         }
       }
-
-      //----- freeze the event as it is
-
-      event_->freeze();
-    }
-
-    bool Process::isKinematicsDefined() {
-      if (!event_)
-        return true;
-
-      // check the incoming state
-      bool is_incoming_state_set =
-          (!(*event_)(Particle::IncomingBeam1).empty() && !(*event_)(Particle::IncomingBeam2).empty());
-
-      // check the outgoing state
-      bool is_outgoing_state_set =
-          (!(*event_)(Particle::OutgoingBeam1).empty() && !(*event_)(Particle::OutgoingBeam2).empty() &&
-           !(*event_)(Particle::CentralSystem).empty());
-
-      // combine both states
-      return is_incoming_state_set && is_outgoing_state_set;
+      event_->freeze();  // freeze the event as it is
     }
 
     ParametersDescription Process::description() {
       auto desc = ParametersDescription();
       desc.add<ParametersDescription>("alphaEM", AlphaEMFactory::get().describeParameters("fixed"))
           .setDescription("electromagnetic coupling evolution algorithm");
+      desc.add<bool>("hasEvent", true).setDescription("does the process carry an event definition");
       return desc;
     }
-
-    std::ostream& operator<<(std::ostream& os, const Process& proc) { return os << proc.name().c_str(); }
-
-    std::ostream& operator<<(std::ostream& os, const Process* proc) { return os << proc->name().c_str(); }
 
     std::ostream& operator<<(std::ostream& os, const Process::Mapping& type) {
       switch (type) {

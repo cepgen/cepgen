@@ -38,18 +38,27 @@ namespace cepgen {
     /// List containing all parameters handled
     const ParametersList& parameters() const override;
 
-    const Beam& positive() const { return pos_beam_; }
-    Beam& positive() { return pos_beam_; }
-    const Beam& negative() const { return neg_beam_; }
-    Beam& negative() { return neg_beam_; }
+    /// Initialise the beam parameterisation objects
+    void initialise();
 
+    /// Find the type of kinematics from the positive/negative beams
+    static mode::Kinematics modeFromBeams(const Beam::Mode&, const Beam::Mode&);
     /// Type of kinematics to consider for the phase space
     mode::Kinematics mode() const;
 
+    /// Constant reference to the positive-z beam information
+    const Beam& positive() const { return pos_beam_; }
+    /// Reference to the positive-z beam information
+    Beam& positive() { return pos_beam_; }
+    /// Constant reference to the negative-z beam information
+    const Beam& negative() const { return neg_beam_; }
+    /// Reference to the negative-z beam information
+    Beam& negative() { return neg_beam_; }
+
     /// Form factors evaluator parameters
-    ParametersList formFactors() const { return steer<ParametersList>("formFactors"); }
+    const ParametersList& formFactors() const { return formfac_; }
     /// Structure functions evaluator parameters
-    ParametersList structureFunctions() const { return steer<ParametersList>("structureFunctions"); }
+    const ParametersList& structureFunctions() const { return strfun_; }
     /// Set the integer-type of structure functions evaluator to build
     void setStructureFunctions(int, int);
 
@@ -61,6 +70,8 @@ namespace cepgen {
     double sqrtS() const;
 
   private:
+    ParametersList formfac_;
+    ParametersList strfun_;
     Beam pos_beam_{ParametersList()};
     Beam neg_beam_{ParametersList()};
   };

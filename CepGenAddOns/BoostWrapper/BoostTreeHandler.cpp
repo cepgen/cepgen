@@ -129,7 +129,7 @@ namespace cepgen {
           for (const auto& mod : log_.get<std::vector<std::string> >("enabledModules"))
             utils::Logger::get().addExceptionRule(mod);
         }
-        rt_params_->process().setKinematics(Kinematics(par_kinematics));
+        rt_params_->process().kinematics().setParameters(par_kinematics);
       } catch (const boost::exception&) {
       } catch (const Exception&) {
       }

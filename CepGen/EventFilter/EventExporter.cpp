@@ -49,19 +49,23 @@ namespace cepgen {
       os << "\n";
     }
     const auto& cuts = runParameters().kinematics().cuts();
+    auto dump_cuts = [&os, &len, &prep](const auto& obj) {
+      for (const auto& lim : obj.parameters().template keysOf<Limits>()) {
+        const auto& limit = obj.parameters().template get<Limits>(lim);
+        if (limit.valid() && obj.description().has(lim))
+          os << prep << " " << obj.description().get(lim).description() << ": " << limit << "\n";
+      }
+    };
     os << prep << std::left << std::setw(len) << std::setfill('*') << "*** Incoming state "
        << "\n";
-    for (const auto& cut : cuts.initial.list())
-      os << prep << " " << cut.description << ": " << cut.limits << "\n";
+    dump_cuts(cuts.initial);
     os << prep << std::setw(len) << std::setfill('*') << "*** Central system "
        << "\n";
-    for (const auto& cut : cuts.central.list())
-      os << prep << " " << cut.description << ": " << cut.limits << "\n";
+    dump_cuts(cuts.central);
     if (runParameters().kinematics().incomingBeams().mode() != mode::Kinematics::ElasticElastic) {
       os << prep << std::setw(len) << std::setfill('*') << "*** Remnants states "
          << "\n";
-      for (const auto& cut : cuts.remnants.list())
-        os << prep << " " << cut.description << ": " << cut.limits << "\n";
+      dump_cuts(cuts.remnants);
     }
     os << prep << std::string(45 + version::tag.size(), '*');
     return os.str();

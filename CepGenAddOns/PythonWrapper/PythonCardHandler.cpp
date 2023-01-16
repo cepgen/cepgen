@@ -150,7 +150,7 @@ namespace cepgen {
         auto proc_obj = proc::ProcessFactory::get().build(proc_name, proc_params);
 
         //--- process kinematics
-        ParametersList pkin;
+        auto pkin = proc_obj->kinematics().parameters(true);
         if (auto* pin_kinematics = python::element(process, "inKinematics"))  // borrowed
           pkin += python::get<ParametersList>(pin_kinematics);
 
@@ -160,7 +160,7 @@ namespace cepgen {
         if (proc_params.has<int>("mode"))
           pkin.set<int>("mode", proc_params.get<int>("mode"));
         CG_DEBUG("PythonHandler") << "Setting kinematics to:\n" << pkin << ".";
-        proc_obj->setKinematics(Kinematics(pkin));
+        proc_obj->kinematics().setParameters(pkin);
 
         // feed the runtime parameters with this newly populated process object
         rt_params_->setProcess(std::move(proc_obj));

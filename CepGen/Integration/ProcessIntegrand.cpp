@@ -44,9 +44,9 @@ namespace cepgen {
 
     CG_DEBUG("ProcessIntegrand") << "Process " << process_->name() << " successfully cloned from base process "
                                  << params_->process().name() << ".";
+    process_->kinematics().setParameters(params_->process().kinematics().parameters(true));
 
     //--- process-specific phase space definition
-    process_->prepareKinematics();
     CG_DEBUG("ProcessIntegrand").log([this](auto& log) { process_->dumpVariables(&log.stream()); });
 
     //--- first-run preparation
@@ -62,8 +62,7 @@ namespace cepgen {
       if (!beams.structureFunctions().empty())
         dbg << "\n\t  structure functions: " << beams.structureFunctions();
     });
-    if (process_->hasEvent())
-      process_->clearEvent();
+    process_->initialise();
 
     CG_DEBUG("ProcessIntegrand") << "New integrand object defined for process \"" << process_->name() << "\".";
   }
@@ -154,9 +153,11 @@ namespace cepgen {
             !process_->kinematics().cuts().central_particles.at(part.pdgId()).contain({part}))
           return 0.;
       }
-    if (!process_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam1), event))
+    if (process_->kinematics().incomingBeams().positive().fragmented() &&
+        !process_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam1), event))
       return 0.;
-    if (!process_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam2), event))
+    if (process_->kinematics().incomingBeams().negative().fragmented() &&
+        !process_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam2), event))
       return 0.;
 
     //--- store the last event in parameters block for a later usage

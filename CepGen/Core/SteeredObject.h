@@ -42,7 +42,7 @@ namespace cepgen {
   public:
     /// Build a module
     SteeredObject() : Steerable(T::description().parameters()) {}
-    SteeredObject(const ParametersList& params) : Steerable(T::description().validate(params)) {}
+    explicit SteeredObject(const ParametersList& params) : Steerable(T::description().validate(params)) {}
     virtual ~SteeredObject() = default;
 
     /// Equality operator
@@ -71,6 +71,8 @@ namespace cepgen {
         params_.set<std::string>(kv.first, kv.second.get());
       for (const auto& kv : map_lims_)
         params_.set<Limits>(kv.first, kv.second.get());
+      for (const auto& kv : map_params_)
+        params_.set<ParametersList>(kv.first, kv.second.get());
       return params_;
     }
     virtual void setParameters(const ParametersList& params) override {
@@ -87,6 +89,8 @@ namespace cepgen {
         kv.second.get() = params_.get<std::string>(kv.first);
       for (const auto& kv : map_lims_)
         kv.second.get() = params_.get<Limits>(kv.first);
+      for (const auto& kv : map_params_)
+        kv.second.get() = params_.get<ParametersList>(kv.first);
     }
 
     REGISTER_TYPE(bool, map_bools_)
@@ -95,6 +99,7 @@ namespace cepgen {
     REGISTER_TYPE(double, map_dbls_)
     REGISTER_TYPE(std::string, map_strs_)
     REGISTER_TYPE(Limits, map_lims_)
+    REGISTER_TYPE(ParametersList, map_params_)
   };
 }  // namespace cepgen
 

@@ -317,15 +317,19 @@ namespace cepgen {
       os << wrap_val(get<double>(key), "float");
     else if (has<std::string>(key))
       os << wrap_val(get<std::string>(key), "str");
-    else if (has<Limits>(key))
-      os << wrap_val(get<Limits>(key), "Limits");
     else if (has<std::vector<ParametersList> >(key))
       os << wrap_coll(get<std::vector<ParametersList> >(key), "VParams");
     else if (has<std::vector<int> >(key))
       os << wrap_coll(get<std::vector<int> >(key), "vint");
-    else if (!has<Limits>(key) && has<std::vector<double> >(key))
-      os << wrap_coll(get<std::vector<double> >(key), "vfloat");
-    else if (has<std::vector<std::string> >(key))
+    else if (has<std::vector<double> >(key) || has<Limits>(key)) {
+      std::string sep;
+      if (has<std::vector<double> >(key)) {
+        os << wrap_coll(get<std::vector<double> >(key), "vfloat");
+        sep = "|";
+      }
+      if (has<Limits>(key))
+        os << sep << wrap_val(get<Limits>(key), "Limits");
+    } else if (has<std::vector<std::string> >(key))
       os << wrap_coll(get<std::vector<std::string> >(key), "vstr");
     else if (has<std::vector<std::vector<double> > >(key))
       os << wrap_coll(get<std::vector<std::vector<double> > >(key), "vvfloat");
@@ -452,40 +456,19 @@ namespace cepgen {
   // limits-type attributes
   //------------------------------------------------------------------
 
-  template <>
-  bool ParametersList::has<Limits>(const std::string& key) const {
-    if (lim_values_.count(key) != 0)
-      return true;
-    if (dbl_values_.count(key + "min") || dbl_values_.count(key + "max"))
-      return true;
-    return false;
-  }
-
-  template <>
-  ParametersList& ParametersList::set<Limits>(std::string key, const Limits& value) {
-    if (vec_dbl_values_.count(key))
-      vec_dbl_values_.erase(key);
-    lim_values_[key] = value;
-    return *this;
-  }
-
-  template <>
-  inline Limits& ParametersList::operator[]<Limits>(const std::string& key) {
-    return lim_values_[key];
-  }
+  IMPL_TYPE_SET(Limits, lim_values_, "limits")
 
   template <>
   Limits ParametersList::get<Limits>(const std::string& key, const Limits& def) const {
     // first try to find Limits object in collections
+    Limits out;
     auto val = std::find_if(lim_values_.begin(), lim_values_.end(), [&key](const auto& kv) { return kv.first == key; });
     if (val != lim_values_.end())
-      return val->second;
-    // Limits object not found ; still trying to build it from (min/max) attributes
-    Limits buf;
-    fill<double>(key + "min", buf.min());
-    fill<double>(key + "max", buf.max());
-    if (buf.valid())
-      return buf.validate();
+      out = val->second;
+    // still trying to build it from (min/max) attributes
+    fill<double>(key + "min", out.min());
+    fill<double>(key + "max", out.max());
+    return out.validate();
     // nothing found ; returning default
     CG_DEBUG("ParametersList") << "Failed to retrieve limits parameter with key=" << key << ". "
                                << "Default value: " << def << ".";
@@ -494,11 +477,8 @@ namespace cepgen {
 
   template <>
   const ParametersList& ParametersList::fill<Limits>(const std::string& key, Limits& value) const {
-    if (has<double>(key + "min") || has<double>(key + "max")) {
-      fill<double>(key + "min", value.min());
-      fill<double>(key + "max", value.max());
-      return *this;
-    }
+    fill<double>(key + "min", value.min());
+    fill<double>(key + "max", value.max());
     if (has<Limits>(key)) {
       const auto& lim = get<Limits>(key);
       if (lim.hasMin())
@@ -508,14 +488,6 @@ namespace cepgen {
       return *this;
     }
     return *this;
-  }
-
-  template <>
-  std::vector<std::string> ParametersList::keysOf<Limits>() const {
-    std::vector<std::string> out;
-    std::transform(
-        lim_values_.begin(), lim_values_.end(), std::back_inserter(out), [](const auto& pair) { return pair.first; });
-    return out;
   }
 
   //------------------------------------------------------------------

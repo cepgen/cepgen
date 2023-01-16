@@ -158,12 +158,6 @@ namespace cepgen {
                 .describeParameters(param->process().name(), param->process().parameters())
                 .describe(1)
          << "\n\n";
-    os << std::setw(wt) << "Events generation? " << utils::yesno(param->generation_.enabled()) << "\n"
-       << std::setw(wt) << "Number of events to generate" << utils::boldify(param->generation_.maxGen()) << "\n";
-    if (param->generation_.numThreads() > 1)
-      os << std::setw(wt) << "Number of threads" << param->generation_.numThreads() << "\n";
-    os << std::setw(wt) << "Number of points to try per bin" << param->generation_.numPoints() << "\n"
-       << std::setw(wt) << "Verbosity level " << utils::Logger::get().level() << "\n";
     if (!param->evt_modifiers_.empty() || param->evt_exporters_.empty() || !param->taming_functions_.empty())
       os << "\n"
          << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Event treatment ") << std::setfill(' ')
@@ -185,11 +179,17 @@ namespace cepgen {
         os << std::setw(wt) << "" << tf->variables().at(0) << ": " << tf->expression() << "\n";
     }
     os << "\n\n"
-       << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Integration parameters ") << std::setfill(' ')
-       << "\n\n"
+       << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Integration/generation parameters ")
+       << std::setfill(' ') << "\n\n"
        << std::setw(wt) << "Integration" << utils::boldify(param->par_integrator.name<std::string>("N/A")) << "\n";
     for (const auto& key : param->par_integrator.keys(false))
       os << std::setw(wt) << "" << key << ": " << param->par_integrator.getString(key) << "\n";
+    os << std::setw(wt) << "Event generation? " << utils::yesno(param->generation_.enabled()) << "\n"
+       << std::setw(wt) << "Number of events to generate" << utils::boldify(param->generation_.maxGen()) << "\n";
+    if (param->generation_.numThreads() > 1)
+      os << std::setw(wt) << "Number of threads" << param->generation_.numThreads() << "\n";
+    os << std::setw(wt) << "Number of points to try per bin" << param->generation_.numPoints() << "\n"
+       << std::setw(wt) << "Verbosity level " << utils::Logger::get().level() << "\n";
     const auto& kin = param->process().kinematics();
     const auto& beams = kin.incomingBeams();
     os << "\n"
@@ -203,9 +203,14 @@ namespace cepgen {
     os << "\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Incoming partons ") << std::setfill(' ') << "\n\n";
     const auto& cuts = kin.cuts();
-    for (const auto& lim : cuts.initial.list())  // map(particles class, limits)
-      if (lim.limits.valid())
-        os << std::setw(wt) << lim.description << lim.limits << "\n";
+    auto dump_cuts = [&os](const auto& obj) {
+      for (const auto& lim : obj.parameters().template keysOf<Limits>()) {
+        const auto& limit = obj.parameters().template get<Limits>(lim);
+        if (limit.valid() && obj.description().has(lim))
+          os << std::setw(wt) << obj.description().get(lim).description() << limit << "\n";
+      }
+    };
+    dump_cuts(cuts.initial);
     os << "\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Outgoing central system ") << std::setfill(' ')
        << "\n\n";
@@ -216,22 +221,22 @@ namespace cepgen {
         os << sep << (PDG::Id)part, sep = ", ";
       os << "\n";
     }
-    for (const auto& lim : cuts.central.list())
-      if (lim.limits.valid())
-        os << std::setw(wt) << lim.description << lim.limits << "\n";
+    dump_cuts(cuts.central);
     if (cuts.central_particles.size() > 0) {
       os << std::setw(wt) << utils::boldify(">>> per-particle cuts:") << "\n";
       for (const auto& part_per_lim : cuts.central_particles) {
         os << " * all single " << std::setw(wt - 3) << (PDG::Id)part_per_lim.first << "\n";
-        for (const auto& lim : const_cast<cuts::Central&>(part_per_lim.second).list())
-          if (lim.limits.valid())
-            os << "   - " << std::setw(wt - 5) << lim.description << lim.limits << "\n";
+        for (const auto& lim : part_per_lim.second.parameters().keysOf<Limits>()) {
+          const auto& limit = part_per_lim.second.parameters().get<Limits>(lim);
+          if (limit.valid())
+            os << "   - " << std::setw(wt - 5) << cuts::Central::description().get(lim).description() << limit << "\n";
+        }
       }
     }
     os << "\n";
-    os << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Proton / remnants ") << std::setfill(' ') << "\n";
-    for (const auto& lim : cuts.remnants.list())
-      os << "\n" << std::setw(wt) << lim.description << lim.limits;
+    os << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Proton / remnants ") << std::setfill(' ')
+       << "\n\n";
+    dump_cuts(cuts.remnants);
     return os << "\n"
               << std::setfill('_') << std::setw(wb) << ""
               << "\n";

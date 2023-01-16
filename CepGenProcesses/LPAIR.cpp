@@ -32,7 +32,7 @@
 namespace cepgen {
   namespace proc {
     LPAIR::LPAIR(const ParametersList& params)
-        : Process(params, true),
+        : Process(params),
           n_opt_(steer<int>("nopt")),
           pair_(steer<int>("pair")),
           symmetrise_(steer<bool>("symmetrise")),
@@ -71,7 +71,7 @@ namespace cepgen {
       strfun_ = strfun::StructureFunctionsFactory::get().build(kin_.incomingBeams().structureFunctions());
 
       //--- first define the squared mass range for the diphoton/dilepton system
-      const auto& mll_limits = kin_.cuts().central.mass_sum();
+      const auto& mll_limits = kin_.cuts().central.mass_sum;
       w_limits_ = Limits(mll_limits.hasMin() ? std::pow(mll_limits.min(), 2) : 4. * masses_.Ml2,
                          mll_limits.hasMax() ? std::pow(mll_limits.max(), 2) : s_);
 
@@ -82,11 +82,11 @@ namespace cepgen {
       p2_lab_ = (*event_)(Particle::IncomingBeam2)[0].momentum();
 
       const double mx0 = mp_ + PDG::get().mass(PDG::piPlus);  // 1.07
-      const double min_wx = pow(std::max(mx0, kin_.cuts().remnants.mx().min()), 2);
+      const double min_wx = pow(std::max(mx0, kin_.cuts().remnants.mx.min()), 2);
       const Limits wx_lim_ob1(
-          min_wx, pow(std::min(sqs_ - p1_lab_.mass() - 2. * sqrt(masses_.Ml2), kin_.cuts().remnants.mx().max()), 2));
+          min_wx, pow(std::min(sqs_ - p1_lab_.mass() - 2. * sqrt(masses_.Ml2), kin_.cuts().remnants.mx.max()), 2));
       const Limits wx_lim_ob2(
-          min_wx, pow(std::min(sqs_ - p2_lab_.mass() - 2. * sqrt(masses_.Ml2), kin_.cuts().remnants.mx().max()), 2));
+          min_wx, pow(std::min(sqs_ - p2_lab_.mass() - 2. * sqrt(masses_.Ml2), kin_.cuts().remnants.mx.max()), 2));
 
       //--- variables mapping
 
@@ -182,18 +182,18 @@ namespace cepgen {
                       t1_max;  // definition from eq. (A.5) in [1]
 
       // FIXME dropped in CDF version
-      if (t1_max > -kin_.cuts().initial.q2().min()) {
-        CG_DEBUG_LOOP("LPAIR") << "t1max = " << t1_max << " > -q2min = " << -kin_.cuts().initial.q2().min();
+      if (t1_max > -kin_.cuts().initial.q2.min()) {
+        CG_DEBUG_LOOP("LPAIR") << "t1max = " << t1_max << " > -q2min = " << -kin_.cuts().initial.q2.min();
         return false;
       }
-      if (t1_min < -kin_.cuts().initial.q2().max() && kin_.cuts().initial.q2().hasMax()) {
-        CG_DEBUG_LOOP("LPAIR") << "t1min = " << t1_min << " < -q2max = " << -kin_.cuts().initial.q2().max();
+      if (t1_min < -kin_.cuts().initial.q2.max() && kin_.cuts().initial.q2.hasMax()) {
+        CG_DEBUG_LOOP("LPAIR") << "t1min = " << t1_min << " < -q2max = " << -kin_.cuts().initial.q2.max();
         return false;
       }
-      if (t1_max < -kin_.cuts().initial.q2().max() && kin_.cuts().initial.q2().hasMax())
-        t1_max = -kin_.cuts().initial.q2().max();
-      if (t1_min > -kin_.cuts().initial.q2().min() && kin_.cuts().initial.q2().hasMin())
-        t1_min = -kin_.cuts().initial.q2().min();
+      if (t1_max < -kin_.cuts().initial.q2.max() && kin_.cuts().initial.q2.hasMax())
+        t1_max = -kin_.cuts().initial.q2.max();
+      if (t1_min > -kin_.cuts().initial.q2.min() && kin_.cuts().initial.q2.hasMin())
+        t1_min = -kin_.cuts().initial.q2.min();
       /////
 
       // t1, the first photon propagator, is defined here
@@ -338,9 +338,7 @@ namespace cepgen {
       const double st = s2_ - t1_ - mB2_;
       const double delb = (2. * mB2_ * r3 + r4 * st) * (4. * p12_ * t1_ - (t1_ - masses_.w31) * st) / (16. * ap);
 
-      CG_DEBUG_LOOP("LPAIR") << std::scientific << "dd = " << dd << ", "
-                             << "dd1 = " << deltas_[0] << ", "
-                             << "dd2 = " << deltas_[1] << std::fixed;
+      CG_DEBUG_LOOP("LPAIR") << std::scientific << "dd = " << dd << ", dd1/2 = " << deltas_ << std::fixed;
 
       if (dd <= 0.) {
         CG_WARNING("LPAIR:pickin") << "dd = " << dd << " <= 0.";
@@ -768,36 +766,36 @@ namespace cepgen {
 
       //--- cut on mass of final hadronic system (MX/Y)
 
-      if (kin_.cuts().remnants.mx().valid()) {
+      if (kin_.cuts().remnants.mx.valid()) {
         if (kin_.incomingBeams().positive().mode() == Beam::Mode::ProtonInelastic &&
-            !kin_.cuts().remnants.mx().contains(mx))
+            !kin_.cuts().remnants.mx.contains(mx))
           return 0.;
         if (kin_.incomingBeams().negative().mode() == Beam::Mode::ProtonInelastic &&
-            !kin_.cuts().remnants.mx().contains(my))
+            !kin_.cuts().remnants.mx.contains(my))
           return 0.;
       }
 
       //--- cut on the proton's Q2 (first photon propagator T1)
 
-      if (!kin_.cuts().initial.q2().contains(-t1_))
+      if (!kin_.cuts().initial.q2.contains(-t1_))
         return 0.;
 
       //----- cuts on the individual leptons
 
-      if (kin_.cuts().central.pt_single().valid()) {
-        const Limits& pt_limits = kin_.cuts().central.pt_single();
+      if (kin_.cuts().central.pt_single.valid()) {
+        const Limits& pt_limits = kin_.cuts().central.pt_single;
         if (!pt_limits.contains(p6_cm_.pt()) || !pt_limits.contains(p7_cm_.pt()))
           return 0.;
       }
 
-      if (kin_.cuts().central.energy_single().valid()) {
-        const Limits& energy_limits = kin_.cuts().central.energy_single();
+      if (kin_.cuts().central.energy_single.valid()) {
+        const Limits& energy_limits = kin_.cuts().central.energy_single;
         if (!energy_limits.contains(p6_cm_.energy()) || !energy_limits.contains(p7_cm_.energy()))
           return 0.;
       }
 
-      if (kin_.cuts().central.eta_single().valid()) {
-        const Limits& eta_limits = kin_.cuts().central.eta_single();
+      if (kin_.cuts().central.eta_single.valid()) {
+        const Limits& eta_limits = kin_.cuts().central.eta_single;
         if (!eta_limits.contains(p6_cm_.eta()) || !eta_limits.contains(p7_cm_.eta()))
           return 0.;
       }
@@ -947,31 +945,35 @@ namespace cepgen {
     }
 
     formfac::FormFactors LPAIR::computeFormFactors(const Beam::Mode& type, double q2, double mx2) const {
-      if (type == Beam::Mode::ProtonElastic)
-        return (*formfac_)(q2);
-      else if (type == Beam::Mode::ProtonInelastic) {
-        if (!strfun_)
-          throw CG_FATAL("LPAIR:computeFormFactors")
-              << "Inelastic proton form factors computation requires a structure functions definition!";
-        const double xbj = utils::xBj(q2, mp2_, mx2);
-        formfac::FormFactors ff;
-        switch ((strfun::Type)strfun_->name()) {
-          case strfun::Type::ElasticProton:
-            throw CG_FATAL("LPAIR::computeFormFactors") << "Elastic proton form factors requested!\n"
-                                                        << "Check your process definition!";
-          case strfun::Type::SuriYennie: {  // this one requires its own object to deal with FM
-            ff.FE = strfun_->F2(xbj, q2) * xbj * mp_ / q2;
-            ff.FM = strfun_->FM(xbj, q2);
-          } break;
-          default: {
-            ff.FE = strfun_->F2(xbj, q2) * xbj / q2;
-            ff.FM = -2. * strfun_->F1(xbj, q2) / q2;
-          } break;
+      switch (type) {
+        case Beam::Mode::ProtonElastic:
+        case Beam::Mode::PointLikeFermion:
+          return (*formfac_)(q2);
+        case Beam::Mode::ProtonInelastic: {
+          if (!strfun_)
+            throw CG_FATAL("LPAIR:computeFormFactors")
+                << "Inelastic proton form factors computation requires a structure functions definition!";
+          const double xbj = utils::xBj(q2, mp2_, mx2);
+          formfac::FormFactors ff;
+          switch ((strfun::Type)strfun_->name()) {
+            case strfun::Type::ElasticProton:
+              throw CG_FATAL("LPAIR::computeFormFactors") << "Elastic proton form factors requested!\n"
+                                                          << "Check your process definition!";
+            case strfun::Type::SuriYennie: {  // this one requires its own object to deal with FM
+              ff.FE = strfun_->F2(xbj, q2) * xbj * mp_ / q2;
+              ff.FM = strfun_->FM(xbj, q2);
+            } break;
+            default: {
+              ff.FE = strfun_->F2(xbj, q2) * xbj / q2;
+              ff.FM = -2. * strfun_->F1(xbj, q2) / q2;
+            } break;
+          }
+          return ff;
         }
-        return ff;
+        default:
+          throw CG_FATAL("LPAIR::computeFormFactors")
+              << "Invalid incoming beam requested for LPAIR form factors evaluation: " << type << ".";
       }
-      throw CG_FATAL("LPAIR::computeFormFactors")
-          << "Invalid incoming beam requested for LPAIR form factors evaluation: " << type << ".";
     }
 
     std::pair<double, double> LPAIR::map(double expo, const Limits& lim, const std::string& var_name_) {

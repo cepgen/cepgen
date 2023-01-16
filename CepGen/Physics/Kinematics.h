@@ -32,9 +32,6 @@ namespace cepgen {
   public:
     explicit Kinematics(const ParametersList&);
 
-    /// Minimal diffractive mass for dissociative proton treatment
-    static const double MX_MIN;
-
     static ParametersDescription description();
 
     void setParameters(const ParametersList&) override;
@@ -57,8 +54,8 @@ namespace cepgen {
 
   private:
     /// Beam/primary particle's kinematics
-    IncomingBeams incoming_beams_;
-    CutsList cuts_;  ///< Phase space cuts
+    IncomingBeams incoming_beams_{ParametersList()};
+    CutsList cuts_{ParametersList()};  ///< Phase space cuts
     pdgids_t minimum_final_state_;
   };
 }  // namespace cepgen

@@ -82,17 +82,17 @@ namespace cepgen {
       mom_ip2_ = event_->oneWithRole(Particle::IncomingBeam2).momentum();
 
       defineVariable(
-          y1_, Mapping::linear, kin_.cuts().central.rapidity_single(), {-6., 6.}, "First central particle rapidity");
+          y1_, Mapping::linear, kin_.cuts().central.rapidity_single, {-6., 6.}, "First central particle rapidity");
       defineVariable(
-          y2_, Mapping::linear, kin_.cuts().central.rapidity_single(), {-6., 6.}, "Second central particle rapidity");
+          y2_, Mapping::linear, kin_.cuts().central.rapidity_single, {-6., 6.}, "Second central particle rapidity");
       defineVariable(pt_diff_,
                      Mapping::linear,
-                     kin_.cuts().central.pt_diff(),
+                     kin_.cuts().central.pt_diff,
                      {0., 50.},
                      "Transverse momentum difference between central particles");
       defineVariable(phi_pt_diff_,
                      Mapping::linear,
-                     kin_.cuts().central.phi_diff(),
+                     kin_.cuts().central.phi_diff,
                      {0., 2. * M_PI},
                      "Central particles azimuthal angle difference");
 
@@ -109,12 +109,12 @@ namespace cepgen {
         max = lim.hasMax() ? lim.max() : 9999.999;
       };
 
-      save_lim(kin_.cuts().central.pt_single(), kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max);
-      save_lim(kin_.cuts().central.energy_single(), kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max);
-      save_lim(kin_.cuts().central.eta_single(), kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max);
-      save_lim(kin_.cuts().central.mass_sum(), kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max);
-      save_lim(kin_.cuts().central.pt_sum(), kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max);
-      save_lim(kin_.cuts().central.rapidity_diff(), kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max);
+      save_lim(kin_.cuts().central.pt_single, kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max);
+      save_lim(kin_.cuts().central.energy_single, kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max);
+      save_lim(kin_.cuts().central.eta_single, kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max);
+      save_lim(kin_.cuts().central.mass_sum, kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max);
+      save_lim(kin_.cuts().central.pt_sum, kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max);
+      save_lim(kin_.cuts().central.rapidity_diff, kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max);
 
       //===========================================================================================
       // feed run parameters to the common block

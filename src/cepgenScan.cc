@@ -92,12 +92,12 @@ int main(int argc, char* argv[]) {
         kin.incomingBeams().setSqrtS(value);
         scan_str = "$\\sqrt{s}$ (GeV)";
       } else if (scan == "abseta") {
-        kin.cuts().central.eta_single().min() = -value;
-        kin.cuts().central.eta_single().max() = +value;
+        kin.cuts().central.eta_single.min() = -value;
+        kin.cuts().central.eta_single.max() = +value;
         scan_str = "$|\\eta|$";
       } else if (scan == "absrap") {
-        kin.cuts().central.rapidity_single().min() = -value;
-        kin.cuts().central.rapidity_single().max() = +value;
+        kin.cuts().central.rapidity_single.min() = -value;
+        kin.cuts().central.rapidity_single.max() = +value;
         scan_str = "$|y|$";
       } else if (cepgen::utils::startsWith(scan, "m:")) {
         const auto tok = cepgen::utils::split(scan, ':');

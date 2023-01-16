@@ -52,7 +52,7 @@ namespace cepgen {
   ParametersDescription& ParametersDescription::operator+=(const ParametersDescription& oth) {
     for (const auto& key : ParametersList::keysOf<std::vector<ParametersList> >())
       // particular case if one describes a set of key-indexed parameters list as a vector of parameters lists
-      if (oth.has<ParametersList>(key)) {
+      if (((ParametersList)oth).has<ParametersList>(key)) {
         const auto desc = get(key).description();
         ParametersList::erase(key);
         add<ParametersDescription>(key, oth.get(key)).setDescription(desc);
@@ -62,10 +62,17 @@ namespace cepgen {
     return *this;
   }
 
+  bool ParametersDescription::has(const std::string& key) const { return obj_descr_.count(key) != 0; }
+
   const ParametersDescription& ParametersDescription::get(const std::string& key) const {
-    if (obj_descr_.count(key) == 0)
-      throw CG_FATAL("ParametersDescription:get")
-          << "Failed to retrieve a parameters description member named \'" << key << "\'!";
+    if (!has(key))
+      throw CG_FATAL("ParametersDescription:get").log([&](auto& log) {
+        log << "Failed to retrieve a parameters description member named \'" << key << "\'.\n"
+            << "List of keys registered: ";
+        std::string sep;
+        for (const auto& k : obj_descr_)
+          log << sep << "'" << k.first << "'", sep = ", ";
+      });
     return obj_descr_.at(key);
   }
 

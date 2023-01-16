@@ -85,6 +85,8 @@ namespace cepgen {
     ParametersList& parameters();
     /// List of parameters associated to this description object
     const ParametersList& parameters() const;
+    /// Ensure the description exists
+    bool has(const std::string&) const;
     /// Get the description of a sub-object
     const ParametersDescription& get(const std::string&) const;
     /// Validate a set of used-steered parameters

@@ -221,8 +221,9 @@ namespace cepgen {
                                     sigrat::SigmaRatiosFactory::get().describeParameters(sr_type_).parameters());
       if (str_fun_ == (int)strfun::Type::MSTWgrid && !mstw_grid_path_.empty())
         sf_params.set<std::string>("gridPath", mstw_grid_path_);
+      kin_params_->operator+=(rt_params_->process().kinematics().parameters(true));
       kin_params_->set<ParametersList>("structureFunctions", sf_params);
-      rt_params_->process().setKinematics(Kinematics(*kin_params_));
+      rt_params_->process().kinematics().setParameters(*kin_params_);
 
       //--- parse the hadronisation algorithm name
       if (!evt_mod_name_.empty())

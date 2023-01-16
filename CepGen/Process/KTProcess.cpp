@@ -29,7 +29,7 @@ namespace cepgen {
     KTProcess::KTProcess(const ParametersList& params,
                          const std::array<pdgid_t, 2>& partons,
                          const std::vector<pdgid_t>& central)
-        : Process(params, true), intermediate_parts_(partons), produced_parts_(central) {}
+        : Process(params), intermediate_parts_(partons), produced_parts_(central) {}
 
     KTProcess::KTProcess(const KTProcess& proc)
         : Process(proc),
@@ -71,17 +71,17 @@ namespace cepgen {
       //============================================================================================
 
       defineVariable(
-          qt1_, Mapping::exponential, kin_.cuts().initial.qt(), {1.e-10, 500.}, "First incoming parton virtuality");
+          qt1_, Mapping::exponential, kin_.cuts().initial.qt, {1.e-10, 500.}, "First incoming parton virtuality");
       defineVariable(
-          qt2_, Mapping::exponential, kin_.cuts().initial.qt(), {1.e-10, 500.}, "Second incoming parton virtuality");
+          qt2_, Mapping::exponential, kin_.cuts().initial.qt, {1.e-10, 500.}, "Second incoming parton virtuality");
       defineVariable(phi_qt1_,
                      Mapping::linear,
-                     kin_.cuts().initial.phi_qt(),
+                     kin_.cuts().initial.phi_qt,
                      {0., 2. * M_PI},
                      "First incoming parton azimuthal angle");
       defineVariable(phi_qt2_,
                      Mapping::linear,
-                     kin_.cuts().initial.phi_qt(),
+                     kin_.cuts().initial.phi_qt,
                      {0., 2. * M_PI},
                      "Second incoming parton azimuthal angle");
 
@@ -106,10 +106,10 @@ namespace cepgen {
       mY2_ = ib2.mass2();
       if (kin_.incomingBeams().positive().fragmented())
         defineVariable(
-            mX2_, Mapping::square, kin_.cuts().remnants.mx(), {1.07, 1000.}, "Positive z proton remnant squared mass");
+            mX2_, Mapping::square, kin_.cuts().remnants.mx, {1.07, 1000.}, "Positive z proton remnant squared mass");
       if (kin_.incomingBeams().negative().fragmented())
         defineVariable(
-            mY2_, Mapping::square, kin_.cuts().remnants.mx(), {1.07, 1000.}, "Negative z proton remnant squared mass");
+            mY2_, Mapping::square, kin_.cuts().remnants.mx, {1.07, 1000.}, "Negative z proton remnant squared mass");
     }
 
     double KTProcess::computeWeight() {

@@ -45,11 +45,11 @@ int main(int argc, char* argv[]) {
     cepgen::Generator gen;
     auto& pars = gen.parametersRef();
     pars.setProcess(cepgen::proc::ProcessFactory::get().build(proc_name));
-    pars.process().setKinematics(cepgen::Kinematics(cepgen::ParametersList()
-                                                        .set<vector<int> >("pdgIds", {2212, 2212})
-                                                        .set<double>("sqrtS", 13.e3)
-                                                        .set<int>("mode", 1)
-                                                        .set<double>("ptmin", 25.)));
+    pars.process().kinematics().setParameters(cepgen::ParametersList()
+                                                  .set<vector<int> >("pdgIds", {2212, 2212})
+                                                  .set<double>("sqrtS", 13.6e3)
+                                                  .set<int>("mode", 1)
+                                                  .set<double>("ptmin", 25.));
     pars.addEventExporter(cepgen::EventExporterFactory::get().build(
         "root_tree", cepgen::ParametersList().set<string>("filename", tmp_filename)));
     CG_LOG << &pars;
