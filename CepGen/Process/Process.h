@@ -174,18 +174,18 @@ namespace cepgen {
       double s_{-1.};
       /// \f$\sqrt s\f$, centre of mass energy of the incoming particles' system (in GeV)
       double sqs_{-1.};
-      /// first incoming beam particle squared mass
-      double mA2_{-1.};
-      /// second incoming beam particle squared mass
-      double mB2_{-1.};
-      /// First diffractive state squared mass
-      double mX2_{-1.};
-      /// Second diffractive state squared mass
-      double mY2_{-1.};
-      /// First parton virtuality
-      double t1_{-1.};
-      /// Second parton virtuality
-      double t2_{-1.};
+      double mA2_{-1.};  ///< first incoming beam particle squared mass
+      double mB2_{-1.};  ///< second incoming beam particle squared mass
+      double mX2_{-1.};  ///< First diffractive state squared mass
+      double mY2_{-1.};  ///< Second diffractive state squared mass
+      double t1_{-1.};   ///< First parton virtuality
+      double t2_{-1.};   ///< Second parton virtuality
+      Momentum pA_;      ///< Momentum of the positive-z incoming beam particle
+      Momentum pB_;      ///< Momentum of the negative-z incoming beam particle
+      Momentum q1_;      ///< Momentum of the first hard scattering particle
+      Momentum q2_;      ///< Momentum of the second hard scattering particle
+      Momentum pX_;      ///< Momentum of the positive-z outgoing beam particle
+      Momentum pY_;      ///< Momentum of the negative-z outgoing beam particle
       /// Set of cuts to apply on the final phase space
       Kinematics kin_{ParametersList()};
       /// Event object containing all the information on all particles in the system

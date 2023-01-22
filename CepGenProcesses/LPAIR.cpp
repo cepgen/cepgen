@@ -78,15 +78,15 @@ namespace cepgen {
       CG_DEBUG_LOOP("LPAIR:prepareKinematics") << "w limits = " << w_limits_ << "\n\t"
                                                << "wmax/wmin = " << w_limits_.max() / w_limits_.min();
 
-      p1_lab_ = (*event_)(Particle::IncomingBeam1)[0].momentum();
-      p2_lab_ = (*event_)(Particle::IncomingBeam2)[0].momentum();
+      pA_ = (*event_)(Particle::IncomingBeam1)[0].momentum();
+      pB_ = (*event_)(Particle::IncomingBeam2)[0].momentum();
 
       const double mx0 = mp_ + PDG::get().mass(PDG::piPlus);  // 1.07
       const double min_wx = pow(std::max(mx0, kin_.cuts().remnants.mx.min()), 2);
       const Limits wx_lim_ob1(
-          min_wx, pow(std::min(sqs_ - p1_lab_.mass() - 2. * sqrt(masses_.Ml2), kin_.cuts().remnants.mx.max()), 2));
+          min_wx, pow(std::min(sqs_ - pA_.mass() - 2. * sqrt(masses_.Ml2), kin_.cuts().remnants.mx.max()), 2));
       const Limits wx_lim_ob2(
-          min_wx, pow(std::min(sqs_ - p2_lab_.mass() - 2. * sqrt(masses_.Ml2), kin_.cuts().remnants.mx.max()), 2));
+          min_wx, pow(std::min(sqs_ - pB_.mass() - 2. * sqrt(masses_.Ml2), kin_.cuts().remnants.mx.max()), 2));
 
       //--- variables mapping
 
@@ -104,7 +104,7 @@ namespace cepgen {
         case Beam::Mode::ProtonElastic:
         case Beam::Mode::HIElastic:
           event_->oneWithRole(Particle::OutgoingBeam1).setPdgId(event_->oneWithRole(Particle::IncomingBeam1).pdgId());
-          mX2_ = p1_lab_.mass2();
+          mX2_ = pA_.mass2();
           break;
         case Beam::Mode::ProtonInelastic:
           defineVariable(mX2_, Mapping::power_law, wx_lim_ob1, wx_lim_ob1, "MX2");
@@ -119,7 +119,7 @@ namespace cepgen {
         case Beam::Mode::ProtonElastic:
         case Beam::Mode::HIElastic:
           event_->oneWithRole(Particle::OutgoingBeam2).setPdgId(event_->oneWithRole(Particle::IncomingBeam2).pdgId());
-          mY2_ = p2_lab_.mass2();
+          mY2_ = pB_.mass2();
           break;
         case Beam::Mode::ProtonInelastic:
           defineVariable(mY2_, Mapping::power_law, wx_lim_ob2, wx_lim_ob2, "MY2");
@@ -505,11 +505,11 @@ namespace cepgen {
         return false;
       }
 
-      p3_lab_ = Momentum::fromPThetaPhiE(pp3, -asin(pt3 / pp3), asin(-rr / pt3), ep3);
+      pX_ = Momentum::fromPThetaPhiE(pp3, -asin(pt3 / pp3), asin(-rr / pt3), ep3);
 
       CG_DEBUG_LOOP("LPAIR") << "Positive-z beam state:\n\t" << std::scientific << "energy: E3 = " << ep3
                              << ", pt3 = " << pt3 << "\n\t"
-                             << "momentum = " << p3_lab_ << ".";
+                             << "momentum = " << pX_ << ".";
 
       //--- beam 2 -> 5
       const double ep5 = ep2_ - de5_, pp5 = sqrt(ep5 * ep5 - mY2_);
@@ -524,26 +524,26 @@ namespace cepgen {
         return false;
       }
 
-      p5_lab_ = Momentum::fromPThetaPhiE(pp5, M_PI + asin(pt5 / pp5), asin(rr / pt5), ep5);
+      pY_ = Momentum::fromPThetaPhiE(pp5, M_PI + asin(pt5 / pp5), asin(rr / pt5), ep5);
 
       CG_DEBUG_LOOP("LPAIR") << "Negative-z beam state:\n\t" << std::scientific << "energy: E5 = " << ep5
                              << ", pt5 = " << pt5 << "\n\t"
-                             << "momentum = " << p5_lab_ << ".";
+                             << "momentum = " << pY_ << ".";
 
       //--- mirroring
-      const double a1 = p3_lab_.px() - p5_lab_.px();
+      const double a1 = pX_.px() - pY_.px();
 
       CG_DEBUG_LOOP("LPAIR") << "a1 = " << a1;
 
-      if (fabs(pt4_ + p3_lab_.px() + p5_lab_.px()) < fabs(fabs(a1) - pt4_)) {
+      if (fabs(pt4_ + pX_.px() + pY_.px()) < fabs(fabs(a1) - pt4_)) {
         CG_DEBUG_LOOP("LPAIR") << "|pt4+pt3*cos(phi3)+pt5*cos(phi5)| < | |a1|-pt4 |\n\t"
                                << "pt4 = " << pt4_ << ".";
         return true;
       }
       if (a1 < 0.)
-        p5_lab_.mirrorX();
+        pY_.mirrorX();
       else
-        p3_lab_.mirrorX();
+        pX_.mirrorX();
       return true;
     }
 
@@ -595,21 +595,18 @@ namespace cepgen {
       // Let the most obscure part of this code begin...
 
       const double e1mp1 = mA2_ / (ep1_ + p_cm_);
-      const double e3mp3 = mX2_ / (p3_lab_.energy() + p3_lab_.p());
+      const double e3mp3 = mX2_ / (pX_.energy() + pX_.p());
 
-      const double al3 = pow(sin(p3_lab_.theta()), 2) / (1. + (p3_lab_.theta()));
+      const double al3 = pow(sin(pX_.theta()), 2) / (1. + (pX_.theta()));
 
       // 2-photon system kinematics ?!
       const double eg = (w4_ + t1_ - t2_) / (2. * mc4_);
       double p_gam = sqrt(eg * eg - t1_);
 
-      /*const double pgx = -p3_lab_.px()*cos_theta4_-sin_theta4_*( de3_-e1mp1 + e3mp3 + p3_lab_.p()*al3 ),
-                   pgy = -p3_lab_.py(),
-                   pgz = mc4_*de3_/( ec4_+pc4_ )-ec4_*de3_*al4_/mc4_-p3_lab_.px()*ec4_*sin_theta4_/mc4_+ec4_*cos_theta4_/mc4_*( p3_lab_.p()*al3+e3mp3-e1mp1 );*/
       const double gam4 = ec4_ / mc4_;
-      const Momentum pg(-p3_lab_.px() * cos_theta4_ - (p3_lab_.p() * al3 + e3mp3 - e1mp1 + de3_) * sin_theta4_,
-                        -p3_lab_.py(),
-                        -gam4 * p3_lab_.px() * sin_theta4_ + (p3_lab_.p() * al3 + e3mp3 - e1mp1) * gam4 * cos_theta4_ +
+      const Momentum pg(-pX_.px() * cos_theta4_ - (pX_.p() * al3 + e3mp3 - e1mp1 + de3_) * sin_theta4_,
+                        -pX_.py(),
+                        -gam4 * pX_.px() * sin_theta4_ + (pX_.p() * al3 + e3mp3 - e1mp1) * gam4 * cos_theta4_ +
                             mc4_ * de3_ / (ec4_ + pc4_) - gam4 * de3_ * al4_);
 
       CG_DEBUG_LOOP("LPAIR") << "pg = " << pg;
@@ -703,22 +700,22 @@ namespace cepgen {
                              << "eg = " << eg << ", pg = " << p_gam << "\n\t"
                              << "q1dq = " << q1dq_ << ", q1dq2 = " << q1dq2_;
 
-      const double phi3 = p3_lab_.phi(), cos_phi3 = cos(phi3), sin_phi3 = sin(phi3);
-      const double phi5 = p5_lab_.phi(), cos_phi5 = cos(phi5), sin_phi5 = sin(phi5);
+      const double phi3 = pX_.phi(), cos_phi3 = cos(phi3), sin_phi3 = sin(phi3);
+      const double phi5 = pY_.phi(), cos_phi5 = cos(phi5), sin_phi5 = sin(phi5);
 
       bb_ = t1_ * t2_ + (w4_ * pow(sin(theta6cm), 2) + 4. * masses_.Ml2 * pow(cos(theta6cm), 2)) * p_gam * p_gam;
 
-      const double c1 = p3_lab_.pt() * (qve.px() * sin_phi3 - qve.py() * cos_phi3),
-                   c2 = p3_lab_.pt() * (qve.pz() * ep1_ - qve.energy() * p_cm_),
+      const double c1 = pX_.pt() * (qve.px() * sin_phi3 - qve.py() * cos_phi3),
+                   c2 = pX_.pt() * (qve.pz() * ep1_ - qve.energy() * p_cm_),
                    c3 = (masses_.w31 * ep1_ * ep1_ + 2. * mA2_ * de3_ * ep1_ - mA2_ * de3_ * de3_ +
-                         p3_lab_.pt2() * ep1_ * ep1_) /
-                        (p3_lab_.energy() * p_cm_ + p3_lab_.pz() * ep1_);
+                         pX_.pt2() * ep1_ * ep1_) /
+                        (pX_.energy() * p_cm_ + pX_.pz() * ep1_);
 
-      const double b1 = p5_lab_.pt() * (qve.px() * sin_phi5 - qve.py() * cos_phi5),
-                   b2 = p5_lab_.pt() * (qve.pz() * ep2_ + qve.energy() * p_cm_),
+      const double b1 = pY_.pt() * (qve.px() * sin_phi5 - qve.py() * cos_phi5),
+                   b2 = pY_.pt() * (qve.pz() * ep2_ + qve.energy() * p_cm_),
                    b3 = (masses_.w52 * ep2_ * ep2_ + 2. * mB2_ * de5_ * ep2_ - mB2_ * de5_ * de5_ +
-                         p5_lab_.pt2() * ep2_ * ep2_) /
-                        (ep2_ * p5_lab_.pz() - p5_lab_.energy() * p_cm_);
+                         pY_.pt2() * ep2_ * ep2_) /
+                        (ep2_ * pY_.pz() - pY_.energy() * p_cm_);
 
       const double r12 = c2 * sin_phi3 + c3 * qve.py(), r13 = -c2 * cos_phi3 - c3 * qve.px();
 
@@ -729,13 +726,13 @@ namespace cepgen {
       g5_ = mA2_ * c1 * c1 + r12 * r12 + r13 * r13;
       g6_ = mB2_ * b1 * b1 + r22 * r22 + r23 * r23;
 
-      const double pt3 = p3_lab_.pt(), pt5 = p5_lab_.pt();
+      const double pt3 = pY_.pt(), pt5 = pY_.pt();
       a5_ = -(qve.px() * cos_phi3 + qve.py() * sin_phi3) * pt3 * p1k2_ -
             (ep1_ * qve.energy() - p_cm_ * qve.pz()) * (cos_phi3 * cos_phi5 + sin_phi3 * sin_phi5) * pt3 * pt5 +
-            (de5_ * qve.pz() + qve.energy() * (p_cm_ + p5_lab_.pz())) * c3;
+            (de5_ * qve.pz() + qve.energy() * (p_cm_ + pY_.pz())) * c3;
       a6_ = -(qve.px() * cos_phi5 + qve.py() * sin_phi5) * pt5 * p2k1_ -
             (ep2_ * qve.energy() + p_cm_ * qve.pz()) * (cos_phi3 * cos_phi5 + sin_phi3 * sin_phi5) * pt3 * pt5 +
-            (de3_ * qve.pz() - qve.energy() * (p_cm_ - p3_lab_.pz())) * b3;
+            (de3_ * qve.pz() - qve.energy() * (p_cm_ - pY_.pz())) * b3;
 
       CG_DEBUG_LOOP("LPAIR") << "a5 = " << a5_ << "\n\t"
                              << "a6 = " << a6_;
@@ -748,7 +745,7 @@ namespace cepgen {
       // INFO from f.f
       ////////////////////////////////////////////////////////////////
 
-      const Momentum cm = p1_lab_ + p2_lab_;
+      const Momentum cm = pA_ + pB_;
       const double gamma = cm.energy() / sqs_, betgam = cm.pz() / sqs_;
 
       //--- kinematics computation for both leptons
@@ -825,14 +822,14 @@ namespace cepgen {
       auto plab_ip1 = Momentum(0., 0., p_cm_, ep1_).betaGammaBoost(gamma, betgam);
       auto plab_ip2 = Momentum(0., 0., -p_cm_, ep2_).betaGammaBoost(gamma, betgam);
 
-      CG_DEBUG_LOOP("LPAIR:gmufil") << "unboosted PX=" << p3_lab_ << "\n\t"
-                                    << "unboosted PY=" << p5_lab_;
+      CG_DEBUG_LOOP("LPAIR:gmufil") << "unboosted PX=" << pX_ << "\n\t"
+                                    << "unboosted PY=" << pY_;
 
-      p3_lab_.betaGammaBoost(gamma, betgam);
-      p5_lab_.betaGammaBoost(gamma, betgam);
+      pX_.betaGammaBoost(gamma, betgam);
+      pY_.betaGammaBoost(gamma, betgam);
 
-      CG_DEBUG_LOOP("LPAIR:gmufil") << "boosted PX=" << p3_lab_ << "\n\t"
-                                    << "boosted PY=" << p5_lab_ << "\n\t"
+      CG_DEBUG_LOOP("LPAIR:gmufil") << "boosted PX=" << pX_ << "\n\t"
+                                    << "boosted PY=" << pY_ << "\n\t"
                                     << "boosted P(l1)=" << p6_cm_ << "\n\t"
                                     << "boosted P(l2)=" << p7_cm_;
 
@@ -841,19 +838,19 @@ namespace cepgen {
       const double ranphi = rnd_phi_(rnd_gen_);
       const short ranz = symmetrise_ ? (rnd_side_(rnd_gen_) == 1 ? 1 : -1) : 1;
 
-      Momentum plab_ph1 = plab_ip1 - p3_lab_;
+      Momentum plab_ph1 = plab_ip1 - pX_;
       plab_ph1.rotatePhi(ranphi, rany);
 
-      Momentum plab_ph2 = plab_ip2 - p5_lab_;
+      Momentum plab_ph2 = plab_ip2 - pY_;
       plab_ph2.rotatePhi(ranphi, rany);
 
-      p3_lab_.rotatePhi(ranphi, rany);
-      p5_lab_.rotatePhi(ranphi, rany);
+      pX_.rotatePhi(ranphi, rany);
+      pY_.rotatePhi(ranphi, rany);
       p6_cm_.rotatePhi(ranphi, rany);
       p7_cm_.rotatePhi(ranphi, rany);
 
-      CG_DEBUG_LOOP("LPAIR:gmufil") << "boosted+rotated PX=" << p3_lab_ << "\n\t"
-                                    << "boosted+rotated PY=" << p5_lab_ << "\n\t"
+      CG_DEBUG_LOOP("LPAIR:gmufil") << "boosted+rotated PX=" << pX_ << "\n\t"
+                                    << "boosted+rotated PY=" << pY_ << "\n\t"
                                     << "boosted+rotated P(l1)=" << p6_cm_ << "\n\t"
                                     << "boosted+rotated P(l2)=" << p7_cm_;
 
@@ -863,8 +860,8 @@ namespace cepgen {
 
       //----- first outgoing proton
       auto& op1 = event_->oneWithRole(Particle::OutgoingBeam1);
-      p3_lab_.setPz(p3_lab_.pz() * ranz);
-      op1.setMomentum(p3_lab_);
+      pX_.setPz(pX_.pz() * ranz);
+      op1.setMomentum(pX_);
       if (kin_.incomingBeams().positive().fragmented()) {
         op1.setStatus(Particle::Status::Unfragmented);  // fragmenting remnants
         op1.setMass(sqrt(mX2_));
@@ -873,8 +870,8 @@ namespace cepgen {
 
       //----- second outgoing proton
       auto& op2 = event_->oneWithRole(Particle::OutgoingBeam2);
-      p5_lab_.setPz(p5_lab_.pz() * ranz);
-      op2.setMomentum(p5_lab_);
+      pY_.setPz(pY_.pz() * ranz);
+      op2.setMomentum(pY_);
       if (kin_.incomingBeams().negative().fragmented()) {
         op2.setStatus(Particle::Status::Unfragmented);  // fragmenting remnants
         op2.setMass(sqrt(mY2_));

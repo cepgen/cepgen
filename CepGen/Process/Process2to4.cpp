@@ -32,27 +32,11 @@ namespace cepgen {
     Process2to4::Process2to4(const ParametersList& params, std::array<pdgid_t, 2> partons, pdgid_t cs_id)
         : KTProcess(params, partons, {cs_id, cs_id}), cs_prop_(PDG::get()(cs_id)), single_limits_(params) {}
 
-    Process2to4::Process2to4(const Process2to4& proc)
-        : KTProcess(proc), cs_prop_(proc.cs_prop_), single_limits_(proc.single_limits_) {}
-
     void Process2to4::setCuts(const cuts::Central& single) { single_limits_ = single; }
 
     void Process2to4::preparePhaseSpace() {
       if (cs_prop_.pdgid == PDG::invalid)  // ensure the central particles properties are correctly initialised
         cs_prop_ = PDG::get()(steer<ParticleProperties>("pair").pdgid);
-      {
-        const auto& beamA = event_->oneWithRole(Particle::IncomingBeam1);
-        pA_ = beamA.momentum();
-        mA2_ = beamA.mass2();
-      }
-      {
-        const auto& beamB = event_->oneWithRole(Particle::IncomingBeam2);
-        pB_ = beamB.momentum();
-        mB2_ = beamB.mass2();
-      }
-      CG_DEBUG_LOOP("2to4:incoming") << "incoming particles:\n"
-                                     << "  pA = " << pA_ << ", mA2 = " << mA2_ << "\n"
-                                     << "  pB = " << pB_ << ", mB2 = " << mB2_ << ".";
 
       ww_ = 0.5 * (1. + sqrt(1. - 4. * sqrt(mA2_ * mB2_) / s_));
 
