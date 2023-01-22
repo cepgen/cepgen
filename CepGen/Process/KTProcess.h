@@ -40,11 +40,9 @@ namespace cepgen {
       /// \param[in] params Parameters list
       /// \param[in] partons First and second incoming parton
       /// \param[in] output Produced final state particles
-      KTProcess(const ParametersList& params,
-                const std::array<pdgid_t, 2>& partons,
-                const std::vector<pdgid_t>& output);
-      /// Copy constructor
-      KTProcess(const KTProcess&);
+      explicit KTProcess(const ParametersList& params,
+                         const std::array<pdgid_t, 2>& partons,
+                         const std::vector<pdgid_t>& output);
 
       /// Populate the event content with the generated process' topology
       void addEventContent() override;
@@ -93,10 +91,6 @@ namespace cepgen {
       /// Azimuthal rotation of the second intermediate parton's transverse virtuality
       double phi_qt2_{0.};
 
-      /// First outgoing proton
-      Momentum pX_;
-      /// Second outgoing proton
-      Momentum pY_;
 
       /// First and second intermediate parton (photon, pomeron, ...)
       std::array<pdgid_t, 2> intermediate_parts_;

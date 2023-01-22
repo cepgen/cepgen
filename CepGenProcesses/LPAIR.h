@@ -171,16 +171,8 @@ namespace cepgen {
       double de3_{0.}, de5_{0.};
       double pt4_{0.};
 
-      /// Kinematics of the first incoming proton
-      Momentum p1_lab_;
-      /// Kinematics of the second incoming proton
-      Momentum p2_lab_;
-      /// Kinematics of the first outgoing proton
-      Momentum p3_lab_;
       /// Kinematics of the two-photon system (in the two-proton CM)
       Momentum p4_lab_;
-      /// Kinematics of the second outgoing proton
-      Momentum p5_lab_;
       /// Kinematics of the first outgoing lepton (in the two-proton CM)
       Momentum p6_cm_;
       /// Kinematics of the second outgoing lepton (in the two-proton CM)
