@@ -137,8 +137,10 @@ namespace cepgen {
 
     double PPtoWW::offShellME() const {
       const NachtmannAmplitudes::Kinematics kin(mW2_, shat(), that(), uhat());
-      const double p1 = q1_.px() * q2_.px() + q1_.py() * q2_.py(), p2 = q1_.px() * q2_.py() - q1_.py() * q2_.px(),
-                   p3 = q1_.px() * q2_.px() - q1_.py() * q2_.py(), p4 = q1_.px() * q2_.py() + q1_.py() * q2_.px();
+      const double p1 = q1().px() * q2().px() + q1().py() * q2().py(),
+                   p2 = q1().px() * q2().py() - q1().py() * q2().px(),
+                   p3 = q1().px() * q2().px() - q1().py() * q2().py(),
+                   p4 = q1().px() * q2().py() + q1().py() * q2().px();
 
       double hel_mat_elem{0.};
       // compute ME for each W helicity

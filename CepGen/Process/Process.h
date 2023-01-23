@@ -59,10 +59,21 @@ namespace cepgen {
       /// Map of all outgoing particles in the process
       typedef std::map<Particle::Role, std::vector<pdgid_t> > OutgoingState;
 
-      /// Positive-z incoming parton's 4-momentum
-      const Momentum& q1() const { return q1_; }
-      /// Negative-z incoming parton's 4-momentum
-      const Momentum& q2() const { return q2_; }
+      Momentum& pA();                    ///< Positive-z incoming beam particle's 4-momentum
+      const Momentum& pA() const;        ///< Positive-z incoming beam particle's 4-momentum
+      Momentum& pB();                    ///< Negative-z incoming beam particle's 4-momentum
+      const Momentum& pB() const;        ///< Negative-z incoming beam particle's 4-momentum
+      Momentum& pX();                    ///< Positive-z outgoing beam particle's 4-momentum
+      const Momentum& pX() const;        ///< Positive-z outgoing beam particle's 4-momentum
+      Momentum& pY();                    ///< Negative-z outgoing beam particle's 4-momentum
+      const Momentum& pY() const;        ///< Negative-z outgoing beam particle's 4-momentum
+      Momentum& q1();                    ///< Positive-z incoming parton's 4-momentum
+      const Momentum& q1() const;        ///< Positive-z incoming parton's 4-momentum
+      Momentum& q2();                    ///< Negative-z incoming parton's 4-momentum
+      const Momentum& q2() const;        ///< Negative-z incoming parton's 4-momentum
+      Momentum& pc(size_t);              ///< Central particle's 4-momentum
+      const Momentum& pc(size_t) const;  ///< Central particle's 4-momentum
+
       //--- Mandelstam variables
       double shat() const;  ///< \f$\hat s=(p_1+p_2)^2=(p_3+...)^2\f$
 
@@ -187,12 +198,6 @@ namespace cepgen {
       double mY2_{-1.};  ///< Second diffractive state squared mass
       double t1_{-1.};   ///< First parton virtuality
       double t2_{-1.};   ///< Second parton virtuality
-      Momentum pA_;      ///< Momentum of the positive-z incoming beam particle
-      Momentum pB_;      ///< Momentum of the negative-z incoming beam particle
-      Momentum q1_;      ///< Momentum of the first hard scattering particle
-      Momentum q2_;      ///< Momentum of the second hard scattering particle
-      Momentum pX_;      ///< Momentum of the positive-z outgoing beam particle
-      Momentum pY_;      ///< Momentum of the negative-z outgoing beam particle
       /// Set of cuts to apply on the final phase space
       Kinematics kin_{ParametersList()};
       /// Event object containing all the information on all particles in the system

@@ -185,32 +185,32 @@ namespace cepgen {
                                  << "z(1/2)m = " << z1m << " / " << z2m << ", z2 = " << z2 << ".";
 
       //--- positive-z photon kinematics
-      const Momentum ak1 = (z1m * pf_[0] - z1p * pf_[1]).setPz(0.);
-      const Momentum ph_p1 = ak1 + z1p * q2_, ph_m1 = ak1 - z1m * q2_;
-      const double t1abs = (q1_.pt2() + x1 * (mX2_ - mA2_) + x1 * x1 * mA2_) / (1. - x1);
+      const Momentum ak1 = (z1m * pc(0) - z1p * pc(1)).setPz(0.);
+      const Momentum ph_p1 = ak1 + z1p * q2(), ph_m1 = ak1 - z1m * q2();
+      const double t1abs = (q1().pt2() + x1 * (mX2_ - mA2_) + x1 * x1 * mA2_) / (1. - x1);
       const double eps12 = mf2_ + z1 * t1abs;
       const double kp1 = 1. / (ph_p1.pt2() + eps12);
       const double km1 = 1. / (ph_m1.pt2() + eps12);
 
       const Momentum phi1 = (kp1 * ph_p1 - km1 * ph_m1).setPz(0.).setEnergy(kp1 - km1);
-      const double dot1 = phi1.threeProduct(q1_) / qt1_;
-      const double cross1 = phi1.crossProduct(q1_) / qt1_;
+      const double dot1 = phi1.threeProduct(q1()) / qt1_;
+      const double cross1 = phi1.crossProduct(q1()) / qt1_;
 
       //--- negative-z photon kinematics
-      const Momentum ak2 = (z2m * pf_[0] - z2p * pf_[1]).setPz(0.);
-      const Momentum ph_p2 = ak2 + z2p * q1_, ph_m2 = ak2 - z2m * q1_;
-      const double t2abs = (q2_.pt2() + x2 * (mY2_ - mB2_) + x2 * x2 * mB2_) / (1. - x2);
+      const Momentum ak2 = (z2m * pc(0) - z2p * pc(1)).setPz(0.);
+      const Momentum ph_p2 = ak2 + z2p * q1(), ph_m2 = ak2 - z2m * q1();
+      const double t2abs = (q2().pt2() + x2 * (mY2_ - mB2_) + x2 * x2 * mB2_) / (1. - x2);
       const double eps22 = mf2_ + z2 * t2abs;
       const double kp2 = 1. / (ph_p2.pt2() + eps22);
       const double km2 = 1. / (ph_m2.pt2() + eps22);
 
       const Momentum phi2 = (kp2 * ph_p2 - km2 * ph_m2).setPz(0.).setEnergy(kp2 - km2);
-      const double dot2 = phi2.threeProduct(q2_) / qt2_;
-      const double cross2 = phi2.crossProduct(q2_) / qt2_;
+      const double dot2 = phi2.threeProduct(q2()) / qt2_;
+      const double cross2 = phi2.crossProduct(q2()) / qt2_;
 
       CG_DEBUG_LOOP("PPtoFF:offShell") << "Photon kinematics:\n\t"
-                                       << "q1 = " << q1_ << ", q1t = " << qt1_ << ", q1t2 = " << q1_.pt2() << "\n\t"
-                                       << "q2 = " << q2_ << ", q2t = " << qt2_ << ", q2t2 = " << q2_.pt2() << "\n\t"
+                                       << "q1 = " << q1() << ", q1t = " << qt1_ << ", q1t2 = " << q1().pt2() << "\n\t"
+                                       << "q2 = " << q2() << ", q2t = " << qt2_ << ", q2t2 = " << q2().pt2() << "\n\t"
                                        << "phi1 = " << phi1 << ", phi2 = " << phi2 << "\n\t"
                                        << "t1abs = " << t1abs << ", t2abs = " << t2abs << "\n\t"
                                        << "x1 = " << x1 << ", x2 = " << x2 << "\n\t"
@@ -234,7 +234,7 @@ namespace cepgen {
 
       // Marta's version
       double amat2_1 = 2. * aux2_1 * z1, amat2_2 = 2. * aux2_2 * z2;
-      const double inv_q1t2 = 1. / q1_.pt2(), inv_q2t2 = 1. / q2_.pt2();
+      const double inv_q1t2 = 1. / q1().pt2(), inv_q2t2 = 1. / q2().pt2();
       if (method_ == Mode::offShell) {
         amat2_1 *= inv_q2t2;
         amat2_2 *= inv_q1t2;
@@ -250,19 +250,19 @@ namespace cepgen {
       double amat2 = 0.5 * prefactor_ * pow(x1 * x2 * s_, 2) * (osp_.mat1 * amat2_1 + osp_.mat2 * amat2_2);
 
       const double tmax = pow(std::max(amt1_, amt2_), 2);
-      const double q1 = std::sqrt(std::max(eps12, tmax)), q2 = std::sqrt(std::max(eps22, tmax));
+      const double q1val = std::sqrt(std::max(eps12, tmax)), q2val = std::sqrt(std::max(eps22, tmax));
       if (event_->oneWithRole(Particle::Parton1).pdgId() == PDG::gluon)
-        amat2 *= 0.5 * (*alphas_)(q1);
+        amat2 *= 0.5 * (*alphas_)(q1val);
       else
-        amat2 *= (*alphaem_)(q1);
+        amat2 *= (*alphaem_)(q1val);
       if (event_->oneWithRole(Particle::Parton2).pdgId() == PDG::gluon)
-        amat2 *= 0.5 * (*alphas_)(q2);
+        amat2 *= 0.5 * (*alphas_)(q2val);
       else
-        amat2 *= (*alphaem_)(q2);
+        amat2 *= (*alphaem_)(q2val);
 
       CG_DEBUG_LOOP("PPtoFF:offShell") << "aux2(1/2) = " << aux2_1 << " / " << aux2_2 << "\n\t"
                                        << "z(1/2) = " << z1 << " / " << z2 << "\n\t"
-                                       << "q(1/2)t2 = " << q1_.pt2() << " / " << q2_.pt2() << "\n\t"
+                                       << "q(1/2)t2 = " << q1().pt2() << " / " << q2().pt2() << "\n\t"
                                        << "amat2(1/2) = " << amat2_1 << " / " << amat2_2 << "\n\t"
                                        << "amat2 = " << amat2 << ".";
 

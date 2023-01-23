@@ -48,7 +48,6 @@ namespace cepgen {
       virtual double computeCentralMatrixElement() const = 0;
 
       //--- Mandelstam variables
-      double shat() const;  ///< \f$\hat s=(p_1+p_2)^2=(p_3+p_4)^2\f$
       double that() const;  ///< \f$\hat t=\frac{1}{2}\left[(p_1-p_3)^2+(p_2-p_4)^2\right]\f$
       double uhat() const;  ///< \f$\hat u=\frac{1}{2}\left[(p_1-p_4)^2+(p_2-p_3)^2\right]\f$
 

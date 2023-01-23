@@ -63,6 +63,36 @@ namespace cepgen {
       throw CG_FATAL("Process:clone") << "Process \"" << name_ << "\" has no cloning method implementation!";
     }
 
+    Momentum& Process::pA() { return event().oneWithRole(Particle::IncomingBeam1).momentum(); }
+
+    const Momentum& Process::pA() const { return event().oneWithRole(Particle::IncomingBeam1).momentum(); }
+
+    Momentum& Process::pB() { return event().oneWithRole(Particle::IncomingBeam2).momentum(); }
+
+    const Momentum& Process::pB() const { return event().oneWithRole(Particle::IncomingBeam2).momentum(); }
+
+    Momentum& Process::pX() { return event().oneWithRole(Particle::OutgoingBeam1).momentum(); }
+
+    const Momentum& Process::pX() const { return event().oneWithRole(Particle::OutgoingBeam1).momentum(); }
+
+    Momentum& Process::pY() { return event().oneWithRole(Particle::OutgoingBeam2).momentum(); }
+
+    const Momentum& Process::pY() const { return event().oneWithRole(Particle::OutgoingBeam2).momentum(); }
+
+    Momentum& Process::q1() { return event().oneWithRole(Particle::Parton1).momentum(); }
+
+    const Momentum& Process::q1() const { return event().oneWithRole(Particle::Parton1).momentum(); }
+
+    Momentum& Process::q2() { return event().oneWithRole(Particle::Parton2).momentum(); }
+
+    const Momentum& Process::q2() const { return event().oneWithRole(Particle::Parton2).momentum(); }
+
+    Momentum& Process::pc(size_t i) { return event()[Particle::CentralSystem].at(i).get().momentum(); }
+
+    const Momentum& Process::pc(size_t i) const { return event()(Particle::CentralSystem).at(i).momentum(); }
+
+    double Process::shat() const { return (q1() + q2()).mass2(); }
+
     void Process::clear() {
       addEventContent();
       //--- initialise the "constant" (wrt x) part of the Jacobian
@@ -70,8 +100,6 @@ namespace cepgen {
       mapped_variables_.clear();
       CG_DEBUG("Process:clear") << "Process event content, and integration variables cleared.";
     }
-
-    double Process::shat() const { return (q1_ + q2_).mass2(); }
 
     void Process::dumpVariables(std::ostream* os) const {
       if (!os)

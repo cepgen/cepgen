@@ -78,6 +78,8 @@ namespace cepgen {
     Particles particles() const;
     /// Vector of all stable particles in the event
     Particles stableParticles() const;
+    /// Internal particles map retrieval operator
+    ParticlesMap& map() { return particles_; }
     /// List of references to Particle objects corresponding to a certain role in the process kinematics
     /// \param[in] role The role the particles have to play in the process
     ParticlesRefs operator[](Particle::Role role);

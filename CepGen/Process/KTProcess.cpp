@@ -29,7 +29,9 @@ namespace cepgen {
     KTProcess::KTProcess(const ParametersList& params,
                          const std::array<pdgid_t, 2>& partons,
                          const std::vector<pdgid_t>& central)
-        : Process(params), intermediate_parts_(partons), produced_parts_(central), pf_(central.size()) {}
+        : Process(params), intermediate_parts_(partons), produced_parts_(central) {
+      event().map()[Particle::CentralSystem].resize(central.size());
+    }
 
     void KTProcess::addEventContent() {
       Process::setEventContent(
@@ -127,16 +129,14 @@ namespace cepgen {
       auto& cm = event_->oneWithRole(Particle::Intermediate);
 
       // beam systems
-      ob1.setMomentum(pX_);
       if (kin_.incomingBeams().positive().fragmented())
         ob1.setMass(sqrt(mX2_));
-      ob2.setMomentum(pY_);
       if (kin_.incomingBeams().negative().fragmented())
         ob2.setMass(sqrt(mY2_));
 
       // parton systems
-      p1.setMomentum(ib1.momentum() - pX_, true);
-      p2.setMomentum(ib2.momentum() - pY_, true);
+      p1.setMomentum(ib1.momentum() - pX(), true);
+      p2.setMomentum(ib2.momentum() - pY(), true);
 
       // two-parton system
       cm.setMomentum(p1.momentum() + p2.momentum());

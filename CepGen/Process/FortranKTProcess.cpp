@@ -185,17 +185,17 @@ namespace cepgen {
       // outgoing beam remnants
       //===========================================================================================
 
-      pX_ = Momentum(evtkin_.px);
-      pY_ = Momentum(evtkin_.py);
+      pX() = Momentum(evtkin_.px);
+      pY() = Momentum(evtkin_.py);
       // express these momenta per nucleon
-      pX_ *= 1. / genparams_.a_nuc1;
-      pY_ *= 1. / genparams_.a_nuc2;
+      pX() *= 1. / genparams_.a_nuc1;
+      pY() *= 1. / genparams_.a_nuc2;
 
       //===========================================================================================
       // intermediate partons
       //===========================================================================================
 
-      const Momentum mom_par1 = mom_ip1_ - pX_, mom_par2 = mom_ip2_ - pY_;
+      const Momentum mom_par1 = mom_ip1_ - pX(), mom_par2 = mom_ip2_ - pY();
       event_->oneWithRole(Particle::Parton1).setMomentum(mom_par1);
       event_->oneWithRole(Particle::Parton2).setMomentum(mom_par2);
       event_->oneWithRole(Particle::Intermediate).setMomentum(mom_par1 + mom_par2);

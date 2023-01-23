@@ -161,7 +161,7 @@ namespace cepgen {
     /// Retrieve the momentum object associated with this particle
     inline Momentum& momentum() { return momentum_; }
     /// Retrieve the momentum object associated with this particle
-    inline Momentum momentum() const { return momentum_; }
+    inline const Momentum& momentum() const { return momentum_; }
     /// Associate a momentum object to this particle
     Particle& setMomentum(const Momentum& mom, bool offshell = false);
     /**

@@ -145,8 +145,8 @@ namespace cepgen {
 
       //--- four-momenta of the outgoing protons (or remnants)
 
-      const double px_plus = (1. - x1_) * pA_.p() * M_SQRT2;
-      const double py_minus = (1. - x2_) * pB_.p() * M_SQRT2;
+      const double px_plus = (1. - x1_) * pA().p() * M_SQRT2;
+      const double py_minus = (1. - x2_) * pB().p() * M_SQRT2;
       const double px_minus = (mX2_ + qt1_ * qt1_) * 0.5 / px_plus;
       const double py_plus = (mY2_ + qt2_ * qt2_) * 0.5 / py_minus;
       // warning! sign of pz??
@@ -154,18 +154,18 @@ namespace cepgen {
       CG_DEBUG_LOOP("2to4:pxy") << "px± = " << px_plus << " / " << px_minus << "\n\t"
                                 << "py± = " << py_plus << " / " << py_minus << ".";
 
-      pX_ = -Momentum(qt_1).setPz((px_plus - px_minus) * M_SQRT1_2).setEnergy((px_plus + px_minus) * M_SQRT1_2);
-      pY_ = -Momentum(qt_2).setPz((py_plus - py_minus) * M_SQRT1_2).setEnergy((py_plus + py_minus) * M_SQRT1_2);
+      pX() = -Momentum(qt_1).setPz((px_plus - px_minus) * M_SQRT1_2).setEnergy((px_plus + px_minus) * M_SQRT1_2);
+      pY() = -Momentum(qt_2).setPz((py_plus - py_minus) * M_SQRT1_2).setEnergy((py_plus + py_minus) * M_SQRT1_2);
 
-      CG_DEBUG_LOOP("2to4:remnants") << "First remnant:  " << pX_ << ", mass = " << pX_.mass() << "\n\t"
-                                     << "Second remnant: " << pY_ << ", mass = " << pY_.mass() << ".";
+      CG_DEBUG_LOOP("2to4:remnants") << "First remnant:  " << pX() << ", mass = " << pX().mass() << "\n\t"
+                                     << "Second remnant: " << pY() << ", mass = " << pY().mass() << ".";
 
-      if (fabs(pX_.mass2() - mX2_) > NUM_LIMITS) {
-        CG_WARNING("2to4:px") << "Invalid X system squared mass: " << pX_.mass2() << "/" << mX2_ << ".";
+      if (fabs(pX().mass2() - mX2_) > NUM_LIMITS) {
+        CG_WARNING("2to4:px") << "Invalid X system squared mass: " << pX().mass2() << "/" << mX2_ << ".";
         return 0.;
       }
-      if (fabs(pY_.mass2() - mY2_) > NUM_LIMITS) {
-        CG_WARNING("2to4:py") << "Invalid Y system squared mass: " << pY_.mass2() << "/" << mY2_ << ".";
+      if (fabs(pY().mass2() - mY2_) > NUM_LIMITS) {
+        CG_WARNING("2to4:py") << "Invalid Y system squared mass: " << pY().mass2() << "/" << mY2_ << ".";
         return 0.;
       }
 
@@ -173,23 +173,23 @@ namespace cepgen {
 
       const double norm = 1. / ww_ / ww_ / s_;
       const double tau1 = norm * qt1_ * qt1_ / x1_ / x1_;
-      q1_ =
+      q1() =
           Momentum(qt_1).setPz(+0.5 * x1_ * ww_ * sqs_ * (1. - tau1)).setEnergy(+0.5 * x1_ * ww_ * sqs_ * (1. + tau1));
 
       const double tau2 = norm * qt2_ * qt2_ / x2_ / x2_;
-      q2_ =
+      q2() =
           Momentum(qt_2).setPz(-0.5 * x2_ * ww_ * sqs_ * (1. - tau2)).setEnergy(+0.5 * x2_ * ww_ * sqs_ * (1. + tau2));
 
-      CG_DEBUG_LOOP("2to4:partons") << "First parton:  " << q1_ << ", mass2 = " << q1_.mass2() << "\n\t"
-                                    << "Second parton: " << q2_ << ", mass2 = " << q2_.mass2() << ".";
+      CG_DEBUG_LOOP("2to4:partons") << "First parton:  " << q1() << ", mass2 = " << q1().mass2() << "\n\t"
+                                    << "Second parton: " << q2() << ", mass2 = " << q2().mass2() << ".";
 
       //--- four-momenta of the outgoing central particles
 
-      pf_[0] = (pt_c1 + alpha1 * pA_ + beta1 * pB_).setEnergy(alpha1 * pA_.energy() + beta1 * pB_.energy());
-      pf_[1] = (pt_c2 + alpha2 * pA_ + beta2 * pB_).setEnergy(alpha2 * pA_.energy() + beta2 * pB_.energy());
+      pc(0) = (pt_c1 + alpha1 * pA() + beta1 * pB()).setEnergy(alpha1 * pA().energy() + beta1 * pB().energy());
+      pc(1) = (pt_c2 + alpha2 * pA() + beta2 * pB()).setEnergy(alpha2 * pA().energy() + beta2 * pB().energy());
 
-      CG_DEBUG_LOOP("2to4:central") << "First central particle:  " << pf_[0] << ", mass = " << pf_[0].mass() << "\n\t"
-                                    << "Second central particle: " << pf_[1] << ", mass = " << pf_[1].mass() << ".";
+      CG_DEBUG_LOOP("2to4:central") << "First central particle:  " << pc(0) << ", mass = " << pc(0).mass() << "\n\t"
+                                    << "Second central particle: " << pc(1) << ", mass = " << pc(1).mass() << ".";
 
       //--- compute the central 2-to-2 matrix element
 
@@ -214,26 +214,24 @@ namespace cepgen {
       auto& oc1 = (*event_)[Particle::CentralSystem][0].get();
       oc1.setChargeSign(+sign);
       oc1.setStatus(Particle::Status::Undecayed);
-      oc1.setMomentum(pf_[0]);
 
       //--- second outgoing central particle
       auto& oc2 = (*event_)[Particle::CentralSystem][1].get();
       oc2.setChargeSign(-sign);
       oc2.setStatus(Particle::Status::Undecayed);
-      oc2.setMomentum(pf_[1]);
     }
 
     //----- utilities
 
     double Process2to4::that() const {
-      const double that1 = (q1_ - pf_[0]).mass2();
-      const double that2 = (q2_ - pf_[1]).mass2();
+      const double that1 = (q1() - pc(0)).mass2();
+      const double that2 = (q2() - pc(1)).mass2();
       return 0.5 * (that1 + that2);
     }
 
     double Process2to4::uhat() const {
-      const double uhat1 = (q1_ - pf_[1]).mass2();
-      const double uhat2 = (q2_ - pf_[0]).mass2();
+      const double uhat1 = (q1() - pc(1)).mass2();
+      const double uhat2 = (q2() - pc(0)).mass2();
       return 0.5 * (uhat1 + uhat2);
     }
 
