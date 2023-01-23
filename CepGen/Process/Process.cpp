@@ -71,6 +71,8 @@ namespace cepgen {
       CG_DEBUG("Process:clear") << "Process event content, and integration variables cleared.";
     }
 
+    double Process::shat() const { return (q1_ + q2_).mass2(); }
+
     void Process::dumpVariables(std::ostream* os) const {
       if (!os)
         os = &CG_LOG.stream();

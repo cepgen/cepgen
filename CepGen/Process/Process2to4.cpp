@@ -185,11 +185,11 @@ namespace cepgen {
 
       //--- four-momenta of the outgoing central particles
 
-      p_c1_ = (pt_c1 + alpha1 * pA_ + beta1 * pB_).setEnergy(alpha1 * pA_.energy() + beta1 * pB_.energy());
-      p_c2_ = (pt_c2 + alpha2 * pA_ + beta2 * pB_).setEnergy(alpha2 * pA_.energy() + beta2 * pB_.energy());
+      pf_[0] = (pt_c1 + alpha1 * pA_ + beta1 * pB_).setEnergy(alpha1 * pA_.energy() + beta1 * pB_.energy());
+      pf_[1] = (pt_c2 + alpha2 * pA_ + beta2 * pB_).setEnergy(alpha2 * pA_.energy() + beta2 * pB_.energy());
 
-      CG_DEBUG_LOOP("2to4:central") << "First central particle:  " << p_c1_ << ", mass = " << p_c1_.mass() << "\n\t"
-                                    << "Second central particle: " << p_c2_ << ", mass = " << p_c2_.mass() << ".";
+      CG_DEBUG_LOOP("2to4:central") << "First central particle:  " << pf_[0] << ", mass = " << pf_[0].mass() << "\n\t"
+                                    << "Second central particle: " << pf_[1] << ", mass = " << pf_[1].mass() << ".";
 
       //--- compute the central 2-to-2 matrix element
 
@@ -214,28 +214,26 @@ namespace cepgen {
       auto& oc1 = (*event_)[Particle::CentralSystem][0].get();
       oc1.setChargeSign(+sign);
       oc1.setStatus(Particle::Status::Undecayed);
-      oc1.setMomentum(p_c1_);
+      oc1.setMomentum(pf_[0]);
 
       //--- second outgoing central particle
       auto& oc2 = (*event_)[Particle::CentralSystem][1].get();
       oc2.setChargeSign(-sign);
       oc2.setStatus(Particle::Status::Undecayed);
-      oc2.setMomentum(p_c2_);
+      oc2.setMomentum(pf_[1]);
     }
 
     //----- utilities
 
-    double Process2to4::shat() const { return (q1_ + q2_).mass2(); }
-
     double Process2to4::that() const {
-      const double that1 = (q1_ - p_c1_).mass2();
-      const double that2 = (q2_ - p_c2_).mass2();
+      const double that1 = (q1_ - pf_[0]).mass2();
+      const double that2 = (q2_ - pf_[1]).mass2();
       return 0.5 * (that1 + that2);
     }
 
     double Process2to4::uhat() const {
-      const double uhat1 = (q1_ - p_c2_).mass2();
-      const double uhat2 = (q2_ - p_c1_).mass2();
+      const double uhat1 = (q1_ - pf_[1]).mass2();
+      const double uhat2 = (q2_ - pf_[0]).mass2();
       return 0.5 * (uhat1 + uhat2);
     }
 

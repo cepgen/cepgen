@@ -59,6 +59,13 @@ namespace cepgen {
       /// Map of all outgoing particles in the process
       typedef std::map<Particle::Role, std::vector<pdgid_t> > OutgoingState;
 
+      /// Positive-z incoming parton's 4-momentum
+      const Momentum& q1() const { return q1_; }
+      /// Negative-z incoming parton's 4-momentum
+      const Momentum& q2() const { return q2_; }
+      //--- Mandelstam variables
+      double shat() const;  ///< \f$\hat s=(p_1+p_2)^2=(p_3+...)^2\f$
+
     public:
       /// Copy all process attributes into a new object
       virtual std::unique_ptr<Process> clone() const;

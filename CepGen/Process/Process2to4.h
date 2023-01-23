@@ -57,9 +57,6 @@ namespace cepgen {
 
       cuts::Central single_limits_;  ///< Limits to be applied on single central system's particles
 
-      Momentum p_c1_;  ///< Momentum of the first central particle
-      Momentum p_c2_;  ///< Momentum of the second central particle
-
       // mapped variables
       double y_c1_{0.};         ///< Rapidity of the first central particle
       double y_c2_{0.};         ///< Rapidity of the second central particle

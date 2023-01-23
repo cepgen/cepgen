@@ -185,7 +185,7 @@ namespace cepgen {
                                  << "z(1/2)m = " << z1m << " / " << z2m << ", z2 = " << z2 << ".";
 
       //--- positive-z photon kinematics
-      const Momentum ak1 = (z1m * p_c1_ - z1p * p_c2_).setPz(0.);
+      const Momentum ak1 = (z1m * pf_[0] - z1p * pf_[1]).setPz(0.);
       const Momentum ph_p1 = ak1 + z1p * q2_, ph_m1 = ak1 - z1m * q2_;
       const double t1abs = (q1_.pt2() + x1 * (mX2_ - mA2_) + x1 * x1 * mA2_) / (1. - x1);
       const double eps12 = mf2_ + z1 * t1abs;
@@ -197,7 +197,7 @@ namespace cepgen {
       const double cross1 = phi1.crossProduct(q1_) / qt1_;
 
       //--- negative-z photon kinematics
-      const Momentum ak2 = (z2m * p_c1_ - z2p * p_c2_).setPz(0.);
+      const Momentum ak2 = (z2m * pf_[0] - z2p * pf_[1]).setPz(0.);
       const Momentum ph_p2 = ak2 + z2p * q1_, ph_m2 = ak2 - z2m * q1_;
       const double t2abs = (q2_.pt2() + x2 * (mY2_ - mB2_) + x2 * x2 * mB2_) / (1. - x2);
       const double eps22 = mf2_ + z2 * t2abs;

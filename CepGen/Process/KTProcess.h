@@ -53,6 +53,9 @@ namespace cepgen {
 
       static ParametersDescription description();
 
+      /// Central particles momenta
+      const std::vector<Momentum>& pf() const { return pf_; }
+
     protected:
       /// Set the kinematics associated to the phase space definition
       void prepareKinematics() override;
@@ -91,11 +94,9 @@ namespace cepgen {
       /// Azimuthal rotation of the second intermediate parton's transverse virtuality
       double phi_qt2_{0.};
 
-
-      /// First and second intermediate parton (photon, pomeron, ...)
-      std::array<pdgid_t, 2> intermediate_parts_;
-      /// Type of particles produced in the final state
-      std::vector<pdgid_t> produced_parts_;
+      std::array<pdgid_t, 2> intermediate_parts_;  ///< First and second intermediate parton (photon, pomeron, ...)
+      std::vector<pdgid_t> produced_parts_;        ///< Type of particles produced in the final state
+      std::vector<Momentum> pf_;                   ///< Momenta of the central particle(s)
     };
   }  // namespace proc
 }  // namespace cepgen
