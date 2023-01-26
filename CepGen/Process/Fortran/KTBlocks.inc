@@ -8,8 +8,8 @@ c     ================================================================
 
 c     =================================================================
       !> collection of fundamental physics constants
-      common/constants/am_p,units,pi,alpha_em
-      double precision am_p,units,pi,alpha_em
+      common/constants/am_p,units,pi
+      double precision am_p,units,pi
 
 c     =================================================================
 c     information on the full process
@@ -67,6 +67,8 @@ c     =================================================================
       integer CepGen_param_int
       double precision CepGen_param_real
 
+      external CepGen_alphaEM
+      double precision CepGen_alphaEM
       external CepGen_alphaS
       double precision CepGen_alphaS
 

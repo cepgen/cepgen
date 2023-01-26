@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2018-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -74,13 +74,9 @@ namespace cepgen {
       constants_.m_p = Process::mp_;
       constants_.units = constants::GEVM2_TO_PB;
       constants_.pi = M_PI;
-      constants_.alpha_em = constants::ALPHA_EM;
     }
 
     void FortranKTProcess::preparePhaseSpace() {
-      mom_ip1_ = event_->oneWithRole(Particle::IncomingBeam1).momentum();
-      mom_ip2_ = event_->oneWithRole(Particle::IncomingBeam2).momentum();
-
       defineVariable(
           y1_, Mapping::linear, kin_.cuts().central.rapidity_single, {-6., 6.}, "First central particle rapidity");
       defineVariable(
@@ -195,10 +191,9 @@ namespace cepgen {
       // intermediate partons
       //===========================================================================================
 
-      const Momentum mom_par1 = mom_ip1_ - pX(), mom_par2 = mom_ip2_ - pY();
-      event_->oneWithRole(Particle::Parton1).setMomentum(mom_par1);
-      event_->oneWithRole(Particle::Parton2).setMomentum(mom_par2);
-      event_->oneWithRole(Particle::Intermediate).setMomentum(mom_par1 + mom_par2);
+      q1() = pA() - pX();
+      q2() = pB() - pY();
+      event_->oneWithRole(Particle::Intermediate).setMomentum(q1() + q2());
 
       //===========================================================================================
       // central system

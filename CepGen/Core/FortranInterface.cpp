@@ -145,6 +145,15 @@ double cepgen_alphas_(double& q) {
   return (*kAlphaSPtr)(q);
 }
 
+double cepgen_alphaem_(double& q) {
+  static std::unique_ptr<cepgen::Coupling> kAlphaEMPtr;
+  if (!kAlphaEMPtr) {
+    CG_INFO("fortran_process") << "Initialisation of the alpha(EM) evolution algorithm.";
+    kAlphaEMPtr = cepgen::AlphaEMFactory::get().build("fixed");
+  }
+  return (*kAlphaEMPtr)(q);
+}
+
 #ifdef __cplusplus
 }
 #endif

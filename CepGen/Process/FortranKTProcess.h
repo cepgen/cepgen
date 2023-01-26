@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2018-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,9 +43,6 @@ namespace cepgen {
       double y2_;                         ///< Second outgoing particle rapidity
       double pt_diff_;                    ///< Transverse momentum balance between outgoing particles
       double phi_pt_diff_;                ///< Azimuthal angle difference between outgoing particles
-
-      Momentum mom_ip1_;  ///< First incoming beam momentum
-      Momentum mom_ip2_;  ///< Second incoming beam momentum
     };
   }  // namespace proc
 }  // namespace cepgen

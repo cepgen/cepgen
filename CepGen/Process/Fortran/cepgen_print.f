@@ -31,7 +31,6 @@
       print 100,'Proton mass (GeV/c^2)',am_p
       print 100,'GeV^2 -> pb conversion',units
       print 100,'pi',pi
-      print 100,'alpha(EM)',alpha_em
       print *,'========================================================'
       print *,'Parameter                                  value(s)'
       print *,'--------------------------------------------------------'
