@@ -413,6 +413,8 @@ namespace cepgen {
       auto desc = ParametersDescription();
       desc.add<ParametersDescription>("alphaEM", AlphaEMFactory::get().describeParameters("fixed"))
           .setDescription("electromagnetic coupling evolution algorithm");
+      desc.add<ParametersDescription>("alphaS", AlphaSFactory::get().describeParameters("pegasus"))
+          .setDescription("strong coupling evolution algorithm");
       desc.add<bool>("hasEvent", true).setDescription("does the process carry an event definition");
       return desc;
     }

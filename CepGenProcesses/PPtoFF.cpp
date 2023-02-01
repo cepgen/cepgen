@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2018-2023  Laurent Forthomme
  *                2017-2019  Wolfgang Schaefer
  *                2019       Marta Luszczak
  *
@@ -48,8 +48,6 @@ namespace cepgen {
 
       const enum class Mode { onShell = 0, offShell = 1, offShellLegacy = 2 } method_;
 
-      ParametersList alphas_params_;
-
       double prefactor_{1.};
 
       //--- parameters for off-shell matrix element
@@ -88,7 +86,6 @@ namespace cepgen {
     PPtoFF::PPtoFF(const ParametersList& params)
         : Process2to4(params, {PDG::photon, PDG::photon}, steer<ParticleProperties>("pair").pdgid),
           method_(steerAs<int, Mode>("method")),
-          alphas_params_(steer<ParametersList>("alphaS")),
           osp_(steer<ParametersList>("offShellParameters")) {
       if (method_ == Mode::offShell) {  // off-shell matrix element
         osp_.mat1 = 2;
@@ -97,14 +94,14 @@ namespace cepgen {
     }
 
     void PPtoFF::prepareProcessKinematics() {
-      if (!cs_prop_.fermion || cs_prop_.charge == 0.)
-        throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop_.descr << " ("
-                                         << (int)cs_prop_.pdgid << ")!";
+      const auto& cs_prop = PDG::get()(produced_parts_.at(0));
+      if (!cs_prop.fermion || cs_prop.charge == 0.)
+        throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop << ".";
 
-      mf2_ = cs_prop_.mass * cs_prop_.mass;
-      qf3_ = cs_prop_.charge;
-      colf_ = cs_prop_.colours;
-      prefactor_ = 1.;
+      mf2_ = cs_prop.mass * cs_prop.mass;
+      qf3_ = cs_prop.charge;
+      colf_ = cs_prop.colours;
+      prefactor_ = 4. * M_PI;
 
       CG_DEBUG("PPtoFF:prepare") << "Produced particles: " << cs_prop_.descr << " ("
                                  << "mass = " << cs_prop_.mass << " GeV, "
@@ -117,22 +114,16 @@ namespace cepgen {
       CG_DEBUG("PPtoFF:prepare") << "Incoming state:\n\t"
                                  << "mp(1/2) = " << sqrt(mA2_) << "/" << sqrt(mB2_) << ".";
 
-      bool has_gluon = false;
       for (const auto& role : {Particle::Parton1, Particle::Parton2})
         switch (event_->oneWithRole(role).pdgId()) {
           case PDG::gluon:
-            has_gluon = true;
-            prefactor_ *= 4. * M_PI;
             break;
           case PDG::photon:
-            prefactor_ *= 4. * M_PI * pow(qf3_, 2) / 9.;
+            prefactor_ *= pow(qf3_, 2) / 9.;  // electromagnetic coupling
             break;
           default:
             throw CG_FATAL("PPtoFF:prepare") << "Only photon & gluon partons are supported!";
         }
-      if (has_gluon)
-        // at least one gluon; need to initialise the alpha(s) evolution algorithm
-        alphas_ = AlphaSFactory::get().build(alphas_params_);
     }
 
     double PPtoFF::computeCentralMatrixElement() const {
@@ -274,9 +265,6 @@ namespace cepgen {
       desc.setDescription("γγ → f⁺f¯ (kt-factor.)");
       desc.add<int>("method", (int)Mode::offShell)
           .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell)");
-      auto alphas_desc = ParametersDescription();
-      alphas_desc.setName<std::string>("pegasus");
-      desc.add("alphaS", alphas_desc).setDescription("strong coupling evolution algorithm");
       desc.add("offShellParameters", OffShellParameters::description());
       return desc;
     }
