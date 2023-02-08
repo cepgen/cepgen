@@ -74,7 +74,6 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      void setRuntimeParameters(const Parameters&) override {}
       inline void readString(const char* param) override { pygive(param); }
       void initialise() override;
       bool run(Event& ev, double& weight, bool full) override;
