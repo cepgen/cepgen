@@ -6,8 +6,6 @@ if(NOT APFEL)
   return()
 endif()
 
-file(GLOB sources AlphaSAPFEL.cpp)
-
 #----- build the object
 
 cepgen_build(CepGenAPFEL SOURCES AlphaSAPFEL.cpp

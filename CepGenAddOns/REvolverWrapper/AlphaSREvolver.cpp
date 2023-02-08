@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ namespace cepgen {
           qc_(steer<double>("qCentral")),
           qevol_(steer<double>("qEvol")),
           order_(steer<int>("order")),
-          central2_(revo::RunPar(5, qc_, qevol_), order_) {}
+          central2_(revo::RunPar(order_, qc_, qevol_), order_) {}
 
     static ParametersDescription description() {
       auto desc = Coupling::description();

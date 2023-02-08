@@ -33,7 +33,7 @@ namespace cepgen {
     }
     static ParametersDescription description() {
       auto desc = Coupling::description();
-      desc.setDescription("APFEL alphaS evolution algorithm");
+      desc.setDescription("APFEL alpha(S) evolution algorithm");
       desc.add<int>("order", 2).setDescription("perturbative evolution order");
       desc.add<double>("q0", 1.).setDescription("minimal Q reachable for evolution (in GeV)");
       desc.add<double>("qmax", 10000.).setDescription("maximal Q reachable (in GeV)");
