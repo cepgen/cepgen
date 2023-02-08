@@ -2,7 +2,8 @@
 
 #source /afs/atlas.umich.edu/home/rkwang/public/sw/setup_TopDrawer.sh
 #--- proper gcc/gfortran/cmake version
-source /cvmfs/sft.cern.ch/lcg/contrib/gcc/9.3.0/x86_64-centos7-gcc9-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/contrib/gcc/12.1.0/x86_64-centos7-gcc12-opt/setup.sh
+export PATH=/cvmfs/sft.cern.ch/lcg/contrib/ninja/1.10.0/Linux-x86_64/:${PATH}
 
 export LCG_DIR=/cvmfs/sft.cern.ch/lcg/releases/LCG_101
 export ARCH=x86_64-centos7-gcc8-opt
