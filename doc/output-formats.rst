@@ -6,7 +6,7 @@ In CepGen, the event (particles, their parentage and kinematics) is handled thro
 To ease the user interaction with this object, a few output writers (defined here as "handlers") are given as examples.
 All handlers are defined as modules derivating from the following abstract base class:
 
-.. doxygenclass:: cepgen::io::ExportModule
+.. doxygenclass:: cepgen::EventExporter
    :outline:
 
 .. container:: toggle
@@ -15,7 +15,7 @@ All handlers are defined as modules derivating from the following abstract base 
 
       Detailed description
 
-   .. doxygenclass:: cepgen::io::ExportModule
+   .. doxygenclass:: cepgen::EventExporter
       :members:
       :no-link:
 
@@ -29,9 +29,9 @@ Please note that this list is under constant evolution, you may contact us with 
 ``dump``
 --------
 
-A simple text-based event dumper, useful for debugging the process and its kinematics, is steered using the :cpp:class:`cepgen::io::TextEventHandler` module.
+A simple text-based event dumper, useful for debugging the process and its kinematics, is steered using the :cpp:class:`cepgen::TextEventHandler` module.
 
-  .. doxygenclass:: cepgen::io::TextEventHandler
+  .. doxygenclass:: cepgen::TextEventHandler
      :outline:
 
 ``lhef``
@@ -40,17 +40,17 @@ A simple text-based event dumper, useful for debugging the process and its kinem
 This output format handles the conversion into the `Les Houches standard definition <https://en.wikipedia.org/wiki/Les_Houches_Accords>`_.
 Currently, two implementations of this export module exist:
 
-- a ``Pythia 8`` LHEF output module (described `here <http://home.thep.lu.se/~torbjorn/pythia82html/LesHouchesAccord.html>`_) as the default handler, :cpp:class:`cepgen::io::LHEFPythiaHandler`,
+- a ``Pythia 8`` LHEF output module (described `here <http://home.thep.lu.se/~torbjorn/pythia82html/LesHouchesAccord.html>`_) as the default handler, :cpp:class:`cepgen::LHEFPythiaHandler`,
 
-  .. doxygenclass:: cepgen::io::LHEFPythiaHandler
+  .. doxygenclass:: cepgen::LHEFPythiaHandler
      :outline:
 
-- a ``HepMC (v≥3)`` implementation, if the earlier is not found in the standard libraries path: :cpp:class:`cepgen::io::LHEFHepMC3Handler`.
+- a ``HepMC (v≥3)`` implementation, if the earlier is not found in the standard libraries path: :cpp:class:`cepgen::LHEFHepMC3Handler`.
 
 ``hepmc2``, ``hepmc2_ascii``, ...
 ---------------------------------
 
-.. doxygenclass:: cepgen::io::HepMC2Handler
+.. doxygenclass:: cepgen::HepMC2Handler
    :outline:
 
 This handler allows to translate the CepGen event record into one (or multiple) implementation(s) of the version 2 of the `HepMC <http://hepmc.web.cern.ch/hepmc>`_ :cite:`Dobbs:2001ck` ASCII output format.
@@ -59,7 +59,7 @@ By default, this version is used in older releases. It allows a ``hepmc2`` outpu
 ``hepmc``, ``hepmc_root``, ``hepevt``, ...
 ------------------------------------------
 
-.. doxygenclass:: cepgen::io::HepMC3Handler
+.. doxygenclass:: cepgen::HepMC3Handler
    :outline:
 
 This handler allows to translate the CepGen event record into one (or multiple) implementation(s) of the version 3 of the  `HepMC <http://hepmc.web.cern.ch/hepmc>`_ :cite:`Dobbs:2001ck` ASCII output format.
@@ -78,7 +78,7 @@ Alternatively, as from this version ``3.1.0`` of ``HepMC``, the following output
 
 .. versionadded:: 0.9.8
 
-.. doxygenclass:: cepgen::io::ProMCHandler
+.. doxygenclass:: cepgen::ProMCHandler
    :outline:
 
 The support has been added for the `ProMC <http://jwork.org/wiki/PROMC>`_ highly compressed output format.
@@ -88,7 +88,7 @@ The support has been added for the `ProMC <http://jwork.org/wiki/PROMC>`_ highly
 
 .. versionadded:: 1.0.0
 
-.. doxygenclass:: cepgen::io::TextVariablesHandler
+.. doxygenclass:: cepgen::TextVariablesHandler
    :outline:
 
 This simplest case of an output module allows to generate a **generic (ASCII) output format** along with **raw text histograms** of kinematic variables, fully configurable by the user.
@@ -131,15 +131,15 @@ As an example, the following ``output`` block may be used for the ``lpair`` proc
        separator = ' ', # single space
    )
 
-``text``
---------
+Event harvester
+---------------
 
 .. versionadded:: 1.0.0
 
-.. doxygenclass:: cepgen::io::IntegratedEventVariablesHandler
+.. doxygenclass:: cepgen::EventHarvester
    :outline:
 
-This simplest case of an output module allows to generate **raw text histograms** of kinematic variables, fully configurable by the user.
+This simplest case of an output module allows to generate **integrated histograms** of kinematic variables, fully configurable by the user.
 Using the Python steering cards definition, a dictionary ``histVariables`` of variable-indexed ``cepgen.Parameters`` objects is fed to the ``output`` module.
 
 A valid implementation of such objects requires a set of attributes depending on the type of distribution requested by the user.
@@ -156,7 +156,7 @@ and for 2-dimensional distributions:
 - the two ``nbinsX`` and ``nbinsY`` number of bins, and
 - the two ranges (``lowX`` and ``highX``, and ``lowY`` and ``highY``) of interest for the variables, or equivalently one or two sets of bins in ``xbins``/``ybins`` lists.
 
-As an example, equivalently to ``vars`` output defined above, the following ``output`` block may be used for the ``lpair`` process:
+As an example, equivalently to ``vars`` output defined above, the following ``output`` block may be used for a ``text`` output histogram with kinematics equivalent to the ``lpair`` process:
 
 .. code:: python
 
@@ -186,15 +186,15 @@ These two modules module allow to produce a **ROOT** :cite:`Brun:1997pa` **file*
 
 - a list of histograms (stored as ROOT :cpp:class:`TH1D` objects) provided as an input for the earlier:
 
-  .. doxygenclass:: cepgen::io::ROOTHistsHandler
+  .. doxygenclass:: cepgen::ROOTHistsHandler
      :outline:
 
 - or a set of **events** and **run information** (stored as ROOT :cpp:class:`TTree` objects) for the latter:
 
-  .. doxygenclass:: cepgen::io::ROOTTreeHandler
+  .. doxygenclass:: cepgen::ROOTTreeHandler
      :outline:
 
-The histogramming utilitary follows the same procedure as introduced for the :cpp:class:`cepgen::io::TextHandler` module above to define the histograms list.
+The histogramming utilitary follows the same procedure as introduced for the :cpp:class:`cepgen::TextHandler` module above to define the histograms list.
 
 As an example, the following ``output`` block may be used:
 
@@ -227,7 +227,7 @@ The tree handler may be used in parallel to the two :cpp:class:`ROOT::CepGenRun`
 -----------
 
 .. versionadded:: 0.9.7
-.. doxygenclass:: cepgen::io::DelphesHandler
+.. doxygenclass:: cepgen::DelphesHandler
    :outline:
 
 An interface to the `Delphes <https://cp3.irmp.ucl.ac.be/projects/delphes>`_ :cite:`deFavereau:2013fsa` fast simulation framework is provided through the ``CepGenDelphes`` add-on implemented `here <https://github.com/cepgen/cepgen/blob/master/CepGenAddOns/ROOTWrapper/DelphesHandler.cpp>`_.
