@@ -49,7 +49,7 @@ namespace cepgen {
 
     static ParametersDescription description() {
       auto desc = Coupling::description();
-      desc.setDescription("PEGASUS alphaS evolution algorithm");
+      desc.setDescription("PEGASUS alpha(S) evolution algorithm");
       desc.add<int>("iord", 2).setDescription("Evolution order");
       desc.add<double>("fr2", 1.);
       desc.add<double>("mur", 1.);
