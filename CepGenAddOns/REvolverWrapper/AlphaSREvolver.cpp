@@ -28,14 +28,13 @@ namespace cepgen {
         : Coupling(params),
           qc_(steer<double>("qCentral")),
           qevol_(steer<double>("qEvol")),
-          central2_(revo::RunPar(5, qc_, qevol_), 2) {
-      const double q_min = qc_ - 0.0031, q_max = qc_ + 0.0034;
-      revo::Core min2(revo::RunPar(5, q_min, qevol_), 2);
-      revo::Core max2(revo::RunPar(5, q_max, qevol_), 2);
-    }
+          order_(steer<int>("order")),
+          central2_(revo::RunPar(5, qc_, qevol_), order_) {}
+
     static ParametersDescription description() {
       auto desc = Coupling::description();
       desc.setDescription("REvolver alpha(S) evolution algorithm");
+      desc.add<int>("order", 5);
       desc.add<double>("qCentral", 0.0822);
       desc.add<double>("qEvol", 1508.04);
       return desc;
@@ -45,6 +44,7 @@ namespace cepgen {
 
   private:
     const double qc_, qevol_;
+    const int order_;
     revo::Core central2_;
   };
 }  // namespace cepgen
