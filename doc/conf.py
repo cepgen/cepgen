@@ -20,13 +20,13 @@
 # -- Project information -----------------------------------------------------
 
 project = u'CepGen'
-copyright = u'2013-2022, the CepGen Collaboration'
+copyright = u'2013-2023, the CepGen Collaboration'
 author = u'Laurent Forthomme'
 
 # The short X.Y version
 version = u'1.0'
 # The full version, including alpha/beta/rc tags
-release = u'1.0.0alpha2'
+release = u'1.0.2'
 
 
 # -- General configuration ---------------------------------------------------
@@ -97,15 +97,29 @@ html_logo = 'small-cepgen-logo.png'
 #html_theme_path = [sphinx_redactor_theme.get_html_theme_path()]
 
 #html_theme = 'classic'
-html_theme = 'sphinx_rtd_theme'
+#html_theme = 'sphinx_rtd_theme'
 #html_theme = 'pyramid'
 #html_theme = 'haiku'
 #html_theme = 'traditional'
 #html_theme = 'alabaster'
+#html_theme = 'karma_sphinx_theme'
+html_theme = 'furo'
+
+#import solar_theme
+#html_theme = 'solar_theme'
+#html_theme_path = [solar_theme.theme_path]
+
+#import hachibee_sphinx_theme
+#html_theme = 'hachibee'
+#html_theme_path = [hachibee_sphinx_theme.get_html_themes_path()]
+
+#import kotti_docs_theme
+#html_theme = 'kotti_docs_theme'
+#html_theme_path = [kotti_docs_theme.get_theme_dir()]
 
 #import guzzle_sphinx_theme
-#html_theme_path = guzzle_sphinx_theme.html_theme_path()
 #html_theme = 'guzzle_sphinx_theme'
+#html_theme_path = guzzle_sphinx_theme.html_theme_path()
 #extensions.append("guzzle_sphinx_theme")
 
 html_extra_path = ['.htaccess']
