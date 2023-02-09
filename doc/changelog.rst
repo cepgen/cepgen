@@ -5,6 +5,15 @@ Latest revisions
 ^^^^^^^^^^^^^^^^
 
 .. changelog::
+    :version: 1.0.2
+    :released: Mon Aug 22 2022
+
+    .. change::
+        :tags: core
+
+        An analytic integrators base class was introduced, including the few GSL-based implementations already present since the earlier version, along with Boost- and ROOT-based integrators.
+
+.. changelog::
     :version: 1.0.1
     :released: Tue May 24 2022
 
@@ -145,6 +154,6 @@ Latest developments
 .. collapse:: Show
 
    .. git_changelog::
-      :rev-list: 1.0.0alpha2..HEAD
+      :rev-list: 1.0.2..HEAD
       :filename_filter: CepGen*
 
