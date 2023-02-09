@@ -38,4 +38,12 @@ jobs:
           make -j 8 cepgenDocGenerator && ./bin/cepgenDocGenerator -o ../doc/.raw_modules.html -e
           make Sphinx
       - name: Upload documentation
-        run: rsync -arvz -e 'ssh -p 222' --delete doc/output_html/ ${{ secrets.SSH_USER }}@login.hepforge.org:~/cepgen/public_html/
+        uses: burnett01/rsync-deployments@5.2.1
+        with:
+          switches: -arvz --delete
+          path: doc/output_html/
+          remote_path: ~/cepgen/public_html/
+          remote_host: login.hepforge.org
+          remote_port: 222
+          remote_user: ${{ secrets.SSH_USER }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
