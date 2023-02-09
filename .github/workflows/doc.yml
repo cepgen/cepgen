@@ -19,6 +19,10 @@ jobs:
           known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
       - name: Add known hosts
         run: mkdir -p ~/.ssh && ssh-keyscan -p 222 -H login.hepforge.org >> ~/.ssh/known_hosts
+      - name: Python requirements
+        run: |
+          cd /Package
+          sudo pip install -r requirements.txt
       - name: CMake configuration
         run: |
           cd /Package
