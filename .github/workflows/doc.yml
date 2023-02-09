@@ -33,7 +33,7 @@ jobs:
       - name: Generate cepgen documentation
         run: |
           cd /Package/build
-          make -j 8 bin/cepgenDocGenerator && ./bin/cepgenDocGenerator -o ../doc/.raw_modules.html -e
+          make -j 8 cepgenDocGenerator && ./bin/cepgenDocGenerator -o ../doc/.raw_modules.html -e
           make Sphinx
       - name: Upload documentation
         run: rsync -arvz -e 'ssh -p 222' --delete doc/output_html/ ${{ secrets.SSH_USER }}@login.hepforge.org:~/cepgen/public_html/
