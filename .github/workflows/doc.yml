@@ -12,6 +12,8 @@ jobs:
       options: -v ${{ github.workspace }}:/Package
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1000
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
         with:
