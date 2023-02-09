@@ -147,13 +147,3 @@ Latest revisions
         :tags: output
 
         New output modes handled for HepMC interfacing module
-
-Latest developments
-^^^^^^^^^^^^^^^^^^^
-
-.. collapse:: Show
-
-   .. git_changelog::
-      :rev-list: 1.0.2..HEAD
-      :filename_filter: CepGen*
-
