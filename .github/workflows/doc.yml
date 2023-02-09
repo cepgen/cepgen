@@ -40,7 +40,7 @@ jobs:
       - name: Upload documentation
         uses: burnett01/rsync-deployments@5.2.1
         with:
-          switches: -arvz --delete -O -q
+          switches: -arvz --no-perms --no-owner --no-group --delete -O -q
           path: build/doc/output_html/
           remote_path: ~/cepgen/public_html/
           remote_host: login.hepforge.org
