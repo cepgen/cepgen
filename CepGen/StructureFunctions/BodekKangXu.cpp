@@ -28,7 +28,6 @@ namespace cepgen {
     /// \f$F_{1,2}\f$ modelling by Bodek, Kang, and Xu \cite Bodek:2021bde
     class BodekKangXu : public Parameterisation {
     public:
-      /// User-steered Suri-Yennie continuum structure functions calculator
       explicit BodekKangXu(const ParametersList& params)
           : Parameterisation(params),
             constants_(steer<std::vector<double> >("constants")),
@@ -91,9 +90,8 @@ namespace cepgen {
         if (eb1 <= 25.) {
           b1 *= (1. - exp(-eb1));
           b2 = 0.;
-          if (w != constants_.at(3))
-            b2 = std::max(0., w - constants_.at(3)) / (w - constants_.at(3)) * (1. - constants_.at(1));
-        } else
+        }
+        if (w != constants_.at(3))
           b2 = std::max(0., w - constants_.at(3)) / (w - constants_.at(3)) * (1. - constants_.at(1));
 
         const auto eb2 = constants_.at(4) * (w2 - std::pow(constants_.at(3), 2.));
