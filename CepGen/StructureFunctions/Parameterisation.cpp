@@ -108,6 +108,12 @@ namespace cepgen {
       return *this;
     }
 
+    Parameterisation& Parameterisation::setF1F2(double f1, double f2) {
+      setF2(f2);
+      fl_ = (1 + tau(old_vals_.xbj, old_vals_.q2)) * f2_ - 2. * f1 * old_vals_.xbj;
+      return *this;
+    }
+
     Parameterisation& Parameterisation::setF2(double f2) {
       f2_ = f2;
       return *this;
@@ -228,6 +234,8 @@ namespace cepgen {
           return os << "Shamov";
         case strfun::Type::KulaginBarinov:
           return os << "KulaginBarinov";
+        case strfun::Type::BodekKangXu:
+          return os << "BodekKangXu";
         case strfun::Type::MSTWgrid:
           return os << "MSTWgrid";
         case strfun::Type::Partonic:
