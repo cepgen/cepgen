@@ -22,10 +22,64 @@ The parameterisation types handled in CepGen are listed in the following enumera
 
 Below, a semi-detailed review of a subset of the modellings handled in CepGen is presented.
 
+.. _shamov:
+
+Shamov
+------
+
+.. note::
+   * Legacy code: ``302``
+   * Structure functions modelled: $W_1$, $W_2$, $F_2$
+
+.. doxygenclass:: cepgen::strfun::Shamov
+   :outline:
+
+.. image:: _static/str-fun/shamov_f2.png
+   :width: 48%
+
+.. _kulaginbarinov:
+
+Kulagin-Barinov
+~~~~~~~~~~~~~~~
+
+.. note::
+   * Legacy code: ``303``
+   * Structure functions modelled: $F_2$, $F_L$
+   * Reference: :cite:`Kulagin:2021mee`
+
+.. doxygenclass:: cepgen::strfun::KulaginBarinov
+   :outline:
+
+.. image:: _static/str-fun/kulaginbarinov_f2.png
+   :width: 48%
+.. image:: _static/str-fun/kulaginbarinov_fl.png
+   :width: 48%
+
+.. _luxlike:
+
+Bodek-Kang-Xu
+~~~~~~~~~~~~~
+
+.. note::
+   * Legacy code: ``304``
+   * Structure functions modelled: $F_1$, $F_2$
+   * Reference: :cite:`Bodek:2021bde`
+
+.. doxygenclass:: cepgen::strfun::BodekKangXu
+   :outline:
+
+.. image:: _static/str-fun/bodek_f2.png
+   :width: 48%
+.. image:: _static/str-fun/bodek_fl.png
+   :width: 48%
+
+Continuum models
+----------------
+
 .. _suriyennie:
 
 Suri-Yennie
------------
+~~~~~~~~~~~
 
 .. note::
    * Legacy code: ``11``
@@ -46,7 +100,7 @@ It provides a reasonable description of SLAC data in the resonance and continuum
 .. _szczurekuleshchenko:
 
 Szczurek-Uleshchenko
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 .. note::
    * Legacy code: ``12``
@@ -61,7 +115,7 @@ This set puts an emphasis on the low-to-intermediate $Q^2$ region and includes a
 .. _bdh:
 
 Block-Durand-Ha
----------------
+~~~~~~~~~~~~~~~
 
 .. note::
    * Legacy code: ``13``
@@ -72,71 +126,6 @@ Block-Durand-Ha
    :outline:
 
 .. This set puts an emphasis on the low-to-intermediate $Q^2$ region and includes a smooth continuation to low-$Q^2$.
-
-Resonance models
-----------------
-
-.. _fiorebrasse:
-
-Fiore-Brasse
-~~~~~~~~~~~~
-
-.. note::
-   * Legacy code: ``101``
-   * Structure function modelled: $F_2$
-   * References: :cite:`Fiore:2002re,Brasse:1976bf`
-
-.. doxygenclass:: cepgen::strfun::FioreBrasse
-   :outline:
-
-This parameterisation gives a very good description of photoabsorption in the resonance region from low to large $Q^2$.
-It is designed to reproduce well JLAB and SLAC data.
-
-.. image:: _static/str-fun/fiorebrasse_f2.png
-   :width: 48%
-.. image:: _static/str-fun/fiorebrasse_fl.png
-   :width: 48%
-
-.. _christybosted:
-
-Christy-Bosted
-~~~~~~~~~~~~~~
-
-.. note::
-   * Legacy code: ``102``
-   * Structure functions modelled: $F_2$, $F_L$
-   * Reference: :cite:`Bosted:2007xd`
-
-.. doxygenclass:: cepgen::strfun::ChristyBosted
-   :outline:
-
-The set developed by M.E. Christy and P.E. Bosted is emphasised on the very-low $Q^2$ regime, with its particular use of JLAB's Hall-C data on:
-
-* inclusive inelastic (up to $Q^2\simeq$ 7.5 GeV²),
-* photoproduction at $Q^2$ = 0, and
-* DIS data at high-$(Q^2,W)$.
-
-.. image:: _static/str-fun/christybosted_f2.png
-   :width: 48%
-.. image:: _static/str-fun/christybosted_fl.png
-   :width: 48%
-
-.. .. doxygennamespace:: cepgen::strfun
-..    :members:
-
-CLAS
-~~~~
-
-.. note::
-   * Legacy code: ``103``
-   * Structure functions modelled: $F_2$
-   * Reference: :cite:`Osipenko:2003bu`
-
-.. doxygenclass:: cepgen::strfun::CLAS
-   :outline:
-
-Continuum models
-----------------
 
 ALLM parameterisation
 ~~~~~~~~~~~~~~~~~~~~~
@@ -276,6 +265,69 @@ The ALLM91 tuning is fitted from all pre-HERA data points available.
    :width: 48%
 .. image:: _static/str-fun/gd11p_fl.png
    :width: 48%
+
+
+Resonance models
+----------------
+
+.. _fiorebrasse:
+
+Fiore-Brasse
+~~~~~~~~~~~~
+
+.. note::
+   * Legacy code: ``101``
+   * Structure function modelled: $F_2$
+   * References: :cite:`Fiore:2002re,Brasse:1976bf`
+
+.. doxygenclass:: cepgen::strfun::FioreBrasse
+   :outline:
+
+This parameterisation gives a very good description of photoabsorption in the resonance region from low to large $Q^2$.
+It is designed to reproduce well JLAB and SLAC data.
+
+.. image:: _static/str-fun/fiorebrasse_f2.png
+   :width: 48%
+.. image:: _static/str-fun/fiorebrasse_fl.png
+   :width: 48%
+
+.. _christybosted:
+
+Christy-Bosted
+~~~~~~~~~~~~~~
+
+.. note::
+   * Legacy code: ``102``
+   * Structure functions modelled: $F_2$, $F_L$
+   * Reference: :cite:`Bosted:2007xd`
+
+.. doxygenclass:: cepgen::strfun::ChristyBosted
+   :outline:
+
+The set developed by M.E. Christy and P.E. Bosted is emphasised on the very-low $Q^2$ regime, with its particular use of JLAB's Hall-C data on:
+
+* inclusive inelastic (up to $Q^2\simeq$ 7.5 GeV²),
+* photoproduction at $Q^2$ = 0, and
+* DIS data at high-$(Q^2,W)$.
+
+.. image:: _static/str-fun/christybosted_f2.png
+   :width: 48%
+.. image:: _static/str-fun/christybosted_fl.png
+   :width: 48%
+
+.. .. doxygennamespace:: cepgen::strfun
+..    :members:
+
+CLAS
+~~~~
+
+.. note::
+   * Legacy code: ``103``
+   * Structure functions modelled: $F_2$
+   * Reference: :cite:`Osipenko:2003bu`
+
+.. doxygenclass:: cepgen::strfun::CLAS
+   :outline:
 
 Perturbative models
 -------------------
