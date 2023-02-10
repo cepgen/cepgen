@@ -104,7 +104,7 @@ namespace cepgen {
 
       struct Arguments {
         bool operator==(const Arguments& oth) const { return xbj == oth.xbj && q2 == oth.q2; }
-        bool valid() const { return q2 >= 0. && xbj >= 0. && xbj <= 1.; }
+        bool valid() const { return q2 >= 0. && xbj >= 0. && xbj < 1.; }
         friend std::ostream& operator<<(std::ostream&, const Arguments&);
         double xbj{-1.}, q2{-1.};
       };
@@ -119,6 +119,8 @@ namespace cepgen {
       /// Compute the longitudinal structure function for a given point
       virtual Parameterisation& computeFL(double xbj, double q2, double r);
 
+      /// Reset the structure functions values
+      Parameterisation& clear();
       //-- fill in the structure functions values
       Parameterisation& setF1F2(double f1, double f2);
       Parameterisation& setF2(double f2);

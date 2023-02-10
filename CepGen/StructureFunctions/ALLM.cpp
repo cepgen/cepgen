@@ -156,10 +156,8 @@ namespace cepgen {
     //---------------------------------------------------------------------------------------------
 
     /// Pre-HERA data fit (694 data points)
-    class ALLM91 final : public ALLM {
-    public:
-      explicit ALLM91(const ParametersList& params) : ALLM(params) {}
-
+    struct ALLM91 final : public ALLM {
+      using ALLM::ALLM;
       static ParametersDescription description() {
         auto desc = ALLM::description();
         desc.setDescription("ALLM91 (continuum, pre-HERA 694 points fit)");
@@ -183,10 +181,8 @@ namespace cepgen {
     };
 
     /// Fixed target and HERA photoproduction total cross sections (1356 points)
-    class ALLM97 final : public ALLM {
-    public:
-      explicit ALLM97(const ParametersList& params) : ALLM(params) {}
-
+    struct ALLM97 final : public ALLM {
+      using ALLM::ALLM;
       static ParametersDescription description() {
         auto desc = ALLM::description();
         desc.setDescription("ALLM97 (continuum, FT/HERA photoprod. tot.x-s 1356 points fit)");
@@ -209,10 +205,8 @@ namespace cepgen {
       }
     };
 
-    class HHTALLM final : public ALLM {
-    public:
-      explicit HHTALLM(const ParametersList& params) : ALLM(params) {}
-
+    struct HHTALLM final : public ALLM {
+      using ALLM::ALLM;
       static ParametersDescription description() {
         auto desc = ALLM::description();
         desc.setDescription("HHT (continuum)");
@@ -235,10 +229,8 @@ namespace cepgen {
       }
     };
 
-    class HHTALLMFT final : public ALLM {
-    public:
-      explicit HHTALLMFT(const ParametersList& params) : ALLM(params) {}
-
+    struct HHTALLMFT final : public ALLM {
+      using ALLM::ALLM;
       static ParametersDescription description() {
         auto desc = ALLM::description();
         desc.setDescription("HHT_FT (continuum)");
@@ -261,10 +253,8 @@ namespace cepgen {
       }
     };
 
-    class GD07p final : public ALLM {
-    public:
-      explicit GD07p(const ParametersList& params) : ALLM(params) {}
-
+    struct GD07p final : public ALLM {
+      using ALLM::ALLM;
       static ParametersDescription description() {
         auto desc = ALLM::description();
         desc.setDescription("GD07p (continuum)");
@@ -287,10 +277,8 @@ namespace cepgen {
       }
     };
 
-    class GD11p final : public ALLM {
-    public:
-      explicit GD11p(const ParametersList& params) : ALLM(params) {}
-
+    struct GD11p final : public ALLM {
+      using ALLM::ALLM;
       static ParametersDescription description() {
         auto desc = ALLM::description();
         desc.setDescription("GD11p (continuum)");

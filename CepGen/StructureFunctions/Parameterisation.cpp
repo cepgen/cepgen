@@ -72,12 +72,19 @@ namespace cepgen {
         return *this;
       if (!args.valid()) {
         CG_WARNING("StructureFunctions") << "Invalid range for Q² = " << q2 << " or xBj = " << xbj << ".";
+        clear();
         return *this;
       }
       old_vals_ = args;
       fl_computed_ = false;
       (*this).setF2(0.).setFL(0.).setW1(0.).setW2(0.).setFE(0.).setFM(0.);
       return eval(xbj, q2);
+    }
+
+    Parameterisation& Parameterisation::clear() {
+      f2_ = fl_ = w1_ = w2_ = fe_ = fm_ = 0.;
+      fl_computed_ = false;
+      return *this;
     }
 
     double Parameterisation::F2(double xbj, double q2) { return operator()(xbj, q2).f2_; }

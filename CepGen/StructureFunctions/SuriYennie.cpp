@@ -77,10 +77,8 @@ namespace cepgen {
       double cp_{0.}, bp_{0.};
     };
 
-    class SuriYennieAlt final : public SuriYennie {
-    public:
-      explicit SuriYennieAlt(const ParametersList& params) : SuriYennie(params) {}
-
+    struct SuriYennieAlt final : public SuriYennie {
+      using SuriYennie::SuriYennie;
       static ParametersDescription description() {
         auto desc = SuriYennie::description();
         desc.setDescription("Suri-Yennie (alternative)");

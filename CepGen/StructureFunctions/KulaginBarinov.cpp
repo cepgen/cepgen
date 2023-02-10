@@ -45,6 +45,7 @@ namespace cepgen {
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Kulagin-Barinov (hybrid)");
+        desc.add<ParametersDescription>("derivator", utils::DerivatorFactory::get().describeParameters("gsl"));
         desc.addParametersDescriptionVector(
             "resonances",
             ResonanceObject::description(),

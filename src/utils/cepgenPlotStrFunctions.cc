@@ -40,8 +40,13 @@ int main(int argc, char* argv[]) {
   string output_file, plotter;
   bool logx, logy, draw_grid;
 
+  cepgen::initialise();
+
   cepgen::ArgumentsParser(argc, argv)
-      .addArgument("sf,s", "structure functions modelling", &strfun_types)
+      .addOptionalArgument("sf,s",
+                           "structure functions modelling",
+                           &strfun_types,
+                           cepgen::strfun::StructureFunctionsFactory::get().modules())
       .addOptionalArgument("q2,q", "parton virtuality (GeV^2)", &q2, 10.)
       .addOptionalArgument("var,t", "variable to study (0=xBj, 1=w)", &var, 0)
       .addOptionalArgument("xrange,x", "Bjorken x range", &xrange, cepgen::Limits{1.e-7, 1.})
@@ -53,8 +58,6 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .parse();
-
-  cepgen::initialise();
 
   string var_name, var_unit;
   switch (var) {
