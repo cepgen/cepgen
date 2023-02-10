@@ -25,7 +25,7 @@
 
 namespace cepgen {
   namespace strfun {
-    /// \f$F_{1,2}\f$ modelling by Bodek, Kang, and Xu \cite Suri:1971yx
+    /// \f$F_{1,2}\f$ modelling by Bodek, Kang, and Xu \cite Bodek:2021bde
     class BodekKangXu : public Parameterisation {
     public:
       /// User-steered Suri-Yennie continuum structure functions calculator
