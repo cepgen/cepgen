@@ -22,23 +22,27 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a structure functions definition to the list of handled parameterisation
-#define REGISTER_STRFUN(id, obj)                                                     \
-  namespace cepgen {                                                                 \
-    struct BUILDERNM(obj) {                                                          \
-      BUILDERNM(obj)() { StructureFunctionsFactory::get().registerModule<obj>(id); } \
-    };                                                                               \
-    static const BUILDERNM(obj) gStrFun##obj;                                        \
-  }                                                                                  \
+#define REGISTER_STRFUN(id, obj)                                                       \
+  namespace cepgen {                                                                   \
+    namespace strfun {                                                                 \
+      struct BUILDERNM(obj) {                                                          \
+        BUILDERNM(obj)() { StructureFunctionsFactory::get().registerModule<obj>(id); } \
+      };                                                                               \
+      static const BUILDERNM(obj) gStrFun##obj;                                        \
+    }                                                                                  \
+  }                                                                                    \
   static_assert(true, "")
 
 /// Add a sigma ratio definition to the list of handled parameterisation
-#define REGISTER_SIGRAT(id, obj)                                              \
-  namespace cepgen {                                                          \
-    struct BUILDERNM(obj) {                                                   \
-      BUILDERNM(obj)() { SigmaRatiosFactory::get().registerModule<obj>(id); } \
-    };                                                                        \
-    static const BUILDERNM(obj) gSigRat##obj;                                 \
-  }                                                                           \
+#define REGISTER_SIGRAT(id, obj)                                                \
+  namespace cepgen {                                                            \
+    namespace sigrat {                                                          \
+      struct BUILDERNM(obj) {                                                   \
+        BUILDERNM(obj)() { SigmaRatiosFactory::get().registerModule<obj>(id); } \
+      };                                                                        \
+      static const BUILDERNM(obj) gSigRat##obj;                                 \
+    }                                                                           \
+  }                                                                             \
   static_assert(true, "")
 
 namespace cepgen {

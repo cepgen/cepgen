@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,13 +24,15 @@
 /** \file */
 
 /// Add a cards handler definition to the list of handled parsers
-#define REGISTER_CARD_HANDLER(name, obj)                                         \
-  namespace cepgen {                                                             \
-    struct BUILDERNM(obj) {                                                      \
-      BUILDERNM(obj)() { CardsHandlerFactory::get().registerModule<obj>(name); } \
-    };                                                                           \
-    static const BUILDERNM(obj) gCard##obj;                                      \
-  }                                                                              \
+#define REGISTER_CARD_HANDLER(name, obj)                                           \
+  namespace cepgen {                                                               \
+    namespace card {                                                               \
+      struct BUILDERNM(obj) {                                                      \
+        BUILDERNM(obj)() { CardsHandlerFactory::get().registerModule<obj>(name); } \
+      };                                                                           \
+      static const BUILDERNM(obj) gCard##obj;                                      \
+    }                                                                              \
+  }                                                                                \
   static_assert(true, "")
 
 namespace cepgen {

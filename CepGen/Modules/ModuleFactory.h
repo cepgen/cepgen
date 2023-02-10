@@ -75,7 +75,7 @@ namespace cepgen {
             << "\"! ***\n";
         throw std::invalid_argument(oss.str());
       }
-      map_.insert(std::make_pair(name, &build<U>));
+      map_.insert(std::make_pair(name, &buildModule<U>));
       auto desc = U::description();
       if (!def_params.empty())
         desc.parameters() += def_params;
@@ -112,7 +112,7 @@ namespace cepgen {
   private:
     /// Construct a module with its parameters set
     template <typename U>
-    static std::unique_ptr<T> build(const ParametersList& params) {
+    static std::unique_ptr<T> buildModule(const ParametersList& params) {
       return std::unique_ptr<T>(new U(params));
     }
     /// Factory name

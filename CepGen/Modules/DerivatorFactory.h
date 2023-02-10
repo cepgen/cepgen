@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,13 +24,15 @@
 /** \file */
 
 /// Add a generic derivator object builder definition
-#define REGISTER_DERIVATOR(name, obj)                                         \
-  namespace cepgen {                                                          \
-    struct BUILDERNM(obj) {                                                   \
-      BUILDERNM(obj)() { DerivatorFactory::get().registerModule<obj>(name); } \
-    };                                                                        \
-    static const BUILDERNM(obj) gDeriv##obj;                                  \
-  }                                                                           \
+#define REGISTER_DERIVATOR(name, obj)                                           \
+  namespace cepgen {                                                            \
+    namespace utils {                                                           \
+      struct BUILDERNM(obj) {                                                   \
+        BUILDERNM(obj)() { DerivatorFactory::get().registerModule<obj>(name); } \
+      };                                                                        \
+      static const BUILDERNM(obj) gDeriv##obj;                                  \
+    }                                                                           \
+  }                                                                             \
   static_assert(true, "")
 
 namespace cepgen {

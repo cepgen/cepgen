@@ -22,13 +22,15 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a form factors definition to the list of handled parameterisation
-#define REGISTER_FORMFACTORS(name, obj)                                         \
-  namespace cepgen {                                                            \
-    struct BUILDERNM(obj) {                                                     \
-      BUILDERNM(obj)() { FormFactorsFactory::get().registerModule<obj>(name); } \
-    };                                                                          \
-    static const BUILDERNM(obj) gFF##obj;                                       \
-  }                                                                             \
+#define REGISTER_FORMFACTORS(name, obj)                                           \
+  namespace cepgen {                                                              \
+    namespace formfac {                                                           \
+      struct BUILDERNM(obj) {                                                     \
+        BUILDERNM(obj)() { FormFactorsFactory::get().registerModule<obj>(name); } \
+      };                                                                          \
+      static const BUILDERNM(obj) gFF##obj;                                       \
+    }                                                                             \
+  }                                                                               \
   static_assert(true, "")
 
 namespace cepgen {

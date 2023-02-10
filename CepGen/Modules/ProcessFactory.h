@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,13 +24,15 @@
 /** \file */
 
 /// Add a generic process definition to the list of handled processes
-#define REGISTER_PROCESS(name, obj)                                                                   \
-  namespace cepgen {                                                                                  \
-    struct BUILDERNM(obj) {                                                                           \
-      BUILDERNM(obj)() { ProcessFactory::get().registerModule<obj>(name, cepgen::ParametersList()); } \
-    };                                                                                                \
-    static const BUILDERNM(obj) gProc##obj;                                                           \
-  }                                                                                                   \
+#define REGISTER_PROCESS(name, obj)                                           \
+  namespace cepgen {                                                          \
+    namespace proc {                                                          \
+      struct BUILDERNM(obj) {                                                 \
+        BUILDERNM(obj)() { ProcessFactory::get().registerModule<obj>(name); } \
+      };                                                                      \
+      static const BUILDERNM(obj) gProc##obj;                                 \
+    }                                                                         \
+  }                                                                           \
   static_assert(true, "")
 /// Declare a Fortran process function name
 #define DECLARE_FORTRAN_FUNCTION(f77_func) \
