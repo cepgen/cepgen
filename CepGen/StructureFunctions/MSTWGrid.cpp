@@ -61,7 +61,6 @@ namespace mstw {
     Grid& eval(double xbj, double q2) override;
     /// Retrieve the grid's header information
     header_t header() const { return header_; }
-    std::string describe() const override;
 
     //--- already retrieved from grid, so no need to recompute it
     Grid& computeFL(double, double) override { return *this; }
@@ -120,14 +119,6 @@ namespace mstw {
                      << "].";
   }
 
-  std::string Grid::describe() const {
-    std::ostringstream os;
-    const auto& bounds = boundaries();
-    os << "MSTW(grid){" << pow(10., bounds[0].first) << "<xbj<" << pow(10., bounds[0].second) << ","
-       << pow(10., bounds[1].first) << "<Q^2/GeV^2<" << pow(10., bounds[1].second) << "}";
-    return os.str();
-  }
-
   Grid& Grid::eval(double xbj, double q2) {
     const auto& val = cepgen::GridHandler<2, 2>::eval({xbj, q2});
     setF2(val.at(0));
@@ -179,5 +170,5 @@ namespace mstw {
     return os;
   }
 }  // namespace mstw
-
-REGISTER_STRFUN(strfun::Type::MSTWgrid, MSTWgrid, mstw::Grid);
+typedef mstw::Grid MSTWgrid;
+REGISTER_STRFUN(205, MSTWgrid);

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,36 +30,7 @@ namespace cepgen {
   }
   /// Structure functions modelling scope
   namespace strfun {
-    /// Proton structure function to be used in the outgoing state description
-    /// \note Values correspond to the LPAIR legacy steering card values
-    enum struct Type {
-      Invalid = 0,
-      Electron = 1,
-      ElasticProton = 2,
-      SuriYennie = 11,
-      SzczurekUleshchenko = 12,
-      BlockDurandHa = 13,
-      SuriYennieAlt = 14,
-      FioreBrasse = 101,
-      ChristyBosted = 102,
-      CLAS = 103,
-      FioreBrasseAlt = 104,
-      ALLM91 = 201,
-      ALLM97 = 202,
-      GD07p = 203,
-      GD11p = 204,
-      MSTWgrid = 205,
-      HHT_ALLM = 206,
-      HHT_ALLM_FT = 207,
-      Schaefer = 301,
-      Shamov = 302,
-      KulaginBarinov = 303,
-      BodekKangXu = 304,
-      Partonic = 401,
-    };
-    /// Human-readable description of this SF parameterisation type
-    std::ostream& operator<<(std::ostream&, const strfun::Type&);
-    /// Generic placeholder for the parameterisation of nucleon structure functions
+    /// Base object for the parameterisation of nucleon structure functions
     class Parameterisation : public NamedModule<int> {
     public:
       /// Standard SF parameterisation constructor
@@ -81,7 +52,6 @@ namespace cepgen {
       /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
       friend std::ostream& operator<<(std::ostream&, const Parameterisation&);
       /// Human-readable description of this SF parameterisation
-      virtual std::string describe() const;  ///< Human-readable description of this SF set
 
       /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
       const sigrat::Parameterisation* sigmaRatio() const { return r_ratio_.get(); }

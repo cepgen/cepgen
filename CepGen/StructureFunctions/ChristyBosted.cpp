@@ -348,4 +348,5 @@ namespace cepgen {
 
   }  // namespace strfun
 }  // namespace cepgen
-REGISTER_STRFUN(strfun::Type::ChristyBosted, ChristyBosted, strfun::ChristyBosted);
+typedef cepgen::strfun::ChristyBosted ChristyBosted;
+REGISTER_STRFUN(102, ChristyBosted);

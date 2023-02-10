@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -171,14 +171,8 @@ namespace cepgen {
       return *this;
     }
 
-    std::string Parameterisation::describe() const {
-      std::ostringstream os;
-      os << (Type)name_;
-      return os.str();
-    }
-
     std::ostream& operator<<(std::ostream& os, const Parameterisation* sf) {
-      os << sf->describe();
+      os << sf->description().description();
       if (sf->old_vals_.valid())
         os << " at " << sf->old_vals_ << ": F2 = " << sf->f2_ << ", FL = " << sf->fl_;
       return os;
@@ -197,58 +191,5 @@ namespace cepgen {
     }
 
     std::ostream& operator<<(std::ostream& os, const Parameterisation& sf) { return os << &sf; }
-
-    /// Human-readable format of a structure function type
-    std::ostream& operator<<(std::ostream& os, const strfun::Type& sf) {
-      switch (sf) {
-        case strfun::Type::Invalid:
-          return os << "<invalid>";
-        case strfun::Type::Electron:
-          return os << "Electron";
-        case strfun::Type::ElasticProton:
-          return os << "ElasticProton";
-        case strfun::Type::SuriYennie:
-          return os << "SuriYennie";
-        case strfun::Type::SuriYennieAlt:
-          return os << "SuriYennieAlt";
-        case strfun::Type::SzczurekUleshchenko:
-          return os << "SzczurekUleshchenko";
-        case strfun::Type::FioreBrasse:
-          return os << "FioreBrasse";
-        case strfun::Type::FioreBrasseAlt:
-          return os << "FioreBrasseAlt";
-        case strfun::Type::ChristyBosted:
-          return os << "ChristyBosted";
-        case strfun::Type::CLAS:
-          return os << "CLAS";
-        case strfun::Type::BlockDurandHa:
-          return os << "BlockDurandHa";
-        case strfun::Type::ALLM91:
-          return os << "ALLM91";
-        case strfun::Type::ALLM97:
-          return os << "ALLM97";
-        case strfun::Type::HHT_ALLM:
-          return os << "ALLM{HHT}";
-        case strfun::Type::HHT_ALLM_FT:
-          return os << "ALLM{HHT_FT}";
-        case strfun::Type::GD07p:
-          return os << "GD07p";
-        case strfun::Type::GD11p:
-          return os << "GD11p";
-        case strfun::Type::Schaefer:
-          return os << "LUXlike";
-        case strfun::Type::Shamov:
-          return os << "Shamov";
-        case strfun::Type::KulaginBarinov:
-          return os << "KulaginBarinov";
-        case strfun::Type::BodekKangXu:
-          return os << "BodekKangXu";
-        case strfun::Type::MSTWgrid:
-          return os << "MSTWgrid";
-        case strfun::Type::Partonic:
-          return os << "Partonic";
-      }
-      return os;
-    }
   }  // namespace strfun
 }  // namespace cepgen

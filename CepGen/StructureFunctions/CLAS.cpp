@@ -277,5 +277,5 @@ namespace cepgen {
     }
   }  // namespace strfun
 }  // namespace cepgen
-
-REGISTER_STRFUN(strfun::Type::CLAS, CLAS, strfun::CLAS);
+typedef cepgen::strfun::CLAS CLAS;
+REGISTER_STRFUN(103, CLAS);

@@ -35,7 +35,6 @@ namespace cepgen {
       static ParametersDescription description();
 
       Schaefer& eval(double xbj, double q2) override;
-      std::string describe() const override;
 
     private:
       double rho(double w2) const;
@@ -74,18 +73,6 @@ namespace cepgen {
       resonances_model_ = StructureFunctionsFactory::get().build(res_params);
       perturbative_model_ = StructureFunctionsFactory::get().build(pert_params);
       continuum_model_ = StructureFunctionsFactory::get().build(cont_params);
-    }
-
-    std::string Schaefer::describe() const {
-      std::ostringstream os;
-      os << "LUXlike{"
-         << "r=" << resonances_model_->describe() << ","
-         << "p=" << perturbative_model_->describe() << ","
-         << "c=" << continuum_model_->describe();
-      if (higher_twist_)
-        os << ",HT";
-      os << "}";
-      return os.str();
     }
 
     void Schaefer::initialise() {
@@ -149,14 +136,14 @@ namespace cepgen {
       desc.add<std::vector<double> >("W2limits", {3., 4.});
       desc.add<bool>("higherTwist", true);
       desc.add<ParametersDescription>("resonancesSF",
-                                      StructureFunctionsFactory::get().describeParameters((int)Type::ChristyBosted));
+                                      StructureFunctionsFactory::get().describeParameters(102 /* ChristyBosted */));
       desc.add<ParametersDescription>("perturbativeSF",
-                                      StructureFunctionsFactory::get().describeParameters((int)Type::MSTWgrid));
+                                      StructureFunctionsFactory::get().describeParameters(205 /* MSTWgrid */));
       desc.add<ParametersDescription>("continuumSF",
-                                      StructureFunctionsFactory::get().describeParameters((int)Type::GD11p));
+                                      StructureFunctionsFactory::get().describeParameters(204 /* GD11p */));
       return desc;
     }
   }  // namespace strfun
 }  // namespace cepgen
-
-REGISTER_STRFUN(strfun::Type::Schaefer, Schaefer, strfun::Schaefer);
+typedef cepgen::strfun::Schaefer Schaefer;
+REGISTER_STRFUN(301, Schaefer);

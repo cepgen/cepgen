@@ -73,5 +73,5 @@ namespace cepgen {
     }
   }  // namespace strfun
 }  // namespace cepgen
-
-REGISTER_STRFUN(strfun::Type::SzczurekUleshchenko, SzczurekUleshchenko, strfun::SzczurekUleshchenko);
+typedef cepgen::strfun::SzczurekUleshchenko SzczurekUleshchenko;
+REGISTER_STRFUN(12, SzczurekUleshchenko);

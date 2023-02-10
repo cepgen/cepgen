@@ -137,4 +137,5 @@ namespace cepgen {
     };
   }  // namespace strfun
 }  // namespace cepgen
-REGISTER_STRFUN(strfun::Type::BodekKangXu, BodekKangXu, strfun::BodekKangXu);
+typedef cepgen::strfun::BodekKangXu BodekKangXu;
+REGISTER_STRFUN(304, BodekKangXu);

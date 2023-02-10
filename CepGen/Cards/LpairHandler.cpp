@@ -218,7 +218,7 @@ namespace cepgen {
       //--- parse the structure functions code
       auto sf_params = StructureFunctionsFactory::get().describeParameters(str_fun_).parameters();
       sf_params.set<ParametersList>("sigmaRatio", SigmaRatiosFactory::get().describeParameters(sr_type_).parameters());
-      if (str_fun_ == (int)strfun::Type::MSTWgrid && !mstw_grid_path_.empty())
+      if (str_fun_ == 205 /* MSTWgrid */ && !mstw_grid_path_.empty())
         sf_params.set<std::string>("gridPath", mstw_grid_path_);
       kin_params_->operator+=(rt_params_->process().kinematics().parameters(true));
       kin_params_->set<ParametersList>("structureFunctions", sf_params);

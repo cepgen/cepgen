@@ -947,11 +947,8 @@ namespace cepgen {
                 << "Inelastic proton form factors computation requires a structure functions definition!";
           const double xbj = utils::xBj(q2, mp2_, mx2);
           formfac::FormFactors ff;
-          switch ((strfun::Type)strfun_->name()) {
-            case strfun::Type::ElasticProton:
-              throw CG_FATAL("LPAIR::computeFormFactors") << "Elastic proton form factors requested!\n"
-                                                          << "Check your process definition!";
-            case strfun::Type::SuriYennie: {  // this one requires its own object to deal with FM
+          switch (strfun_->name()) {
+            case 11 /* SuriYennie */: {  // this one requires its own object to deal with FM
               ff.FE = strfun_->F2(xbj, q2) * xbj * mp_ / q2;
               ff.FM = strfun_->FM(xbj, q2);
             } break;

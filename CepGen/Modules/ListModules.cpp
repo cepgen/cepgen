@@ -68,7 +68,7 @@ namespace cepgen {
       list_int_modules(SigmaRatiosFactory::get(), "Cross section ratios modellings");
       list_int_modules(StructureFunctionsFactory::get(), "Structure functions modellings", [](int mod) {
         std::ostringstream os;
-        os << std::setw(3) << mod << "|" << (strfun::Type)mod;
+        os << std::setw(3) << mod << "|" << StructureFunctionsFactory::get().describe(mod);
         return os.str();
       });
       list_modules(AlphaEMFactory::get(), "alpha(EM) evolution algorithms");

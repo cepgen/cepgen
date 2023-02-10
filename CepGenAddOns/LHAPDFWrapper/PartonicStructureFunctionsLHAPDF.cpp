@@ -45,7 +45,6 @@ namespace cepgen {
       static ParametersDescription description();
 
       Partonic& eval(double xbj, double q2) override;
-      std::string describe() const override;
 
     private:
       void initialise();
@@ -94,19 +93,13 @@ namespace cepgen {
           mode_(steerAs<int, Mode>("mode")) {}
 
     Partonic::Partonic(const char* set, unsigned short member, const Mode& mode)
-        : Parameterisation(ParametersList().setName<int>((int)Type::Partonic)),
+        : Parameterisation(ParametersList().setName<int>(401)),
           pdf_set_(set),
           num_flavours_(4),
           pdf_code_(0),
           pdf_member_(member),
           mode_(mode),
           initialised_(false) {}
-
-    std::string Partonic::describe() const {
-      std::ostringstream os;
-      os << "Partonic{" << pdf_set_ << ",m=" << pdf_member_ << ",mode=" << mode_ << "}";
-      return os.str();
-    }
 
     void Partonic::initialise() {
       if (initialised_)
@@ -228,4 +221,5 @@ namespace cepgen {
 #undef LHAPDF_GE_6
 #endif
 
-REGISTER_STRFUN(strfun::Type::Partonic, Partonic, strfun::Partonic);
+typedef cepgen::strfun::Partonic Partonic;
+REGISTER_STRFUN(401, Partonic);

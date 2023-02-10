@@ -22,13 +22,13 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a structure functions definition to the list of handled parameterisation
-#define REGISTER_STRFUN(id, name, obj)                                                     \
-  namespace cepgen {                                                                       \
-    struct BUILDERNM(name) {                                                               \
-      BUILDERNM(name)() { StructureFunctionsFactory::get().registerModule<obj>((int)id); } \
-    };                                                                                     \
-    static const BUILDERNM(name) gStrFun##name;                                            \
-  }                                                                                        \
+#define REGISTER_STRFUN(id, obj)                                                     \
+  namespace cepgen {                                                                 \
+    struct BUILDERNM(obj) {                                                          \
+      BUILDERNM(obj)() { StructureFunctionsFactory::get().registerModule<obj>(id); } \
+    };                                                                               \
+    static const BUILDERNM(obj) gStrFun##obj;                                        \
+  }                                                                                  \
   static_assert(true, "")
 
 /// Add a sigma ratio definition to the list of handled parameterisation

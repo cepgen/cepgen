@@ -263,13 +263,13 @@ namespace cepgen {
 
   void IncomingBeams::setStructureFunctions(int sf_model, int sr_model) {
     const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
-    sf_model = (sf_model == 0 ? (int)strfun::Type::SuriYennie : sf_model);
+    sf_model = (sf_model == 0 ? 11 /* SuriYennie */ : sf_model);
     sr_model = (sr_model == 0 ? (int)sigrat::Type::SibirtsevBlunden : sr_model);
     auto& sf_params = params_.operator[]<ParametersList>("structureFunctions");
     sf_params.setName<int>(sf_model).set<int>("sigmaRatio", sr_model);
     if (sf_model / kLHAPDFCodeDec == 1) {  // SF from parton
       const unsigned long icode = sf_model % kLHAPDFCodeDec;
-      sf_params.setName<int>((int)strfun::Type::Partonic)
+      sf_params.setName<int>(401 /* Partonic */)
           .set<int>("pdfId", icode % kLHAPDFPartDec)
           .set<int>("mode", icode / kLHAPDFPartDec);  // 0, 1, 2
     }

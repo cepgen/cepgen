@@ -93,6 +93,7 @@ namespace cepgen {
     };
   }  // namespace strfun
 }  // namespace cepgen
-
-REGISTER_STRFUN(strfun::Type::SuriYennie, SuriYennie, strfun::SuriYennie);
-REGISTER_STRFUN(strfun::Type::SuriYennieAlt, SuriYennieAlt, strfun::SuriYennieAlt);
+typedef cepgen::strfun::SuriYennie SuriYennie;
+typedef cepgen::strfun::SuriYennieAlt SuriYennieAlt;
+REGISTER_STRFUN(11, SuriYennie);
+REGISTER_STRFUN(14, SuriYennieAlt);
