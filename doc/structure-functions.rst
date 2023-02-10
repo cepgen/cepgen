@@ -16,9 +16,7 @@ All parameterisations derive from the following base class:
 .. note::
    All of these may be used and linked against any external code.
 
-The parameterisation types handled in CepGen are listed in the following enumeration:
-
-.. doxygenenum:: cepgen::strfun::Type
+The parameterisation types handled in CepGen are listed in the :code:`cepgen::StructureFunctionsFactory`.
 
 Below, a semi-detailed review of a subset of the modellings handled in CepGen is presented.
 

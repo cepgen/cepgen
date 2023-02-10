@@ -45,9 +45,10 @@ extensions = [
     #'sphinxemoji.sphinxemoji',
     'sphinxcontrib.bibtex',
     #'hachibee_sphinx_theme',
+    'sphinx_toolbox.collapse',
+    'sphinx_math_dollar',
     'sphinx.ext.viewcode',
     'sphinx.ext.mathjax',
-    'sphinx_toolbox.collapse',
 ]
 
 bibtex_bibfiles = ['_static/bibliography.bib']
@@ -188,7 +189,8 @@ latex_documents = [
 
 mathjax3_config = {
   'tex': {
-    'inlineMath': [ ['$','$'], ["\\(","\\)"] ],
+    'inlineMath': [["\\(","\\)"]],
+    'displayMath': [["\\[","\\]"]],
     'processEscapes': True,
     'macros': {
       'Pom': "{\\rm I\\!P}",
