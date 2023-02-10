@@ -22,10 +22,15 @@ The parameterisation types handled in CepGen are listed in the following enumera
 
 Below, a semi-detailed review of a subset of the modellings handled in CepGen is presented.
 
+Hybrid models
+-------------
+
+As the name suggests, this class of model combines multiple extrapolation models valid in multiple kinematic ranges into a set of uniform, continuous structure functions.
+
 .. _shamov:
 
 Shamov
-------
+~~~~~~
 
 .. note::
    * Legacy code: ``302``
@@ -33,6 +38,14 @@ Shamov
 
 .. doxygenclass:: cepgen::strfun::Shamov
    :outline:
+
+This model is designed for soft, low-:math:`Q^2` regimes under a broad range of :math:`x_{\rm Bj}`. Several operation modes are proposed, steered by the `mode` parameter:
+
+* `SuriYennie`, the standard, Suri and Yennie continuum (see below) ;
+* `RealRes`, using a linear grid interpolation of the real photon cross section for :math:`Q^2\to 0` with resonances dependance as for :math:`\Delta(1232)` ;
+* `RealResAndNonRes`, like the earlier, and using the Suri and Yennie non-resonant contribution ;
+* `RealAndSuriYennieNonRes`, using the Suri and Yennie non-resonant contribution ;
+* `RealAndFitNonRes`, like the `RealResAndNonRes`, but using a fit for the non-resonant contributions.
 
 .. image:: _static/str-fun/shamov_f2.png
    :width: 48%
@@ -49,6 +62,8 @@ Kulagin-Barinov
 
 .. doxygenclass:: cepgen::strfun::KulaginBarinov
    :outline:
+
+Resonances are modelled through Breit-Wigner contributions from five states. For the DIS part, a higher twist correction is available from a global QCD fit.
 
 .. image:: _static/str-fun/kulaginbarinov_f2.png
    :width: 48%
