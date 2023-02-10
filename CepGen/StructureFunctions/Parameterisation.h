@@ -54,6 +54,7 @@ namespace cepgen {
       Schaefer = 301,
       Shamov = 302,
       KulaginBarinov = 303,
+      Bodek = 304,
       Partonic = 401,
     };
     /// Human-readable description of this SF parameterisation type
@@ -119,6 +120,7 @@ namespace cepgen {
       virtual Parameterisation& computeFL(double xbj, double q2, double r);
 
       //-- fill in the structure functions values
+      Parameterisation& setF1F2(double f1, double f2);
       Parameterisation& setF2(double f2);
       Parameterisation& setFL(double fl);
       Parameterisation& setW1(double w1);
