@@ -32,14 +32,13 @@
   static_assert(true, "")
 
 /// Add a sigma ratio definition to the list of handled parameterisation
-#define SRBUILDERNM(id) Ratio##id##Builder
-#define REGISTER_SIGRAT(id, name, obj)                                                \
-  namespace cepgen {                                                                  \
-    struct SRBUILDERNM(name) {                                                        \
-      SRBUILDERNM(name)() { SigmaRatiosFactory::get().registerModule<obj>((int)id); } \
-    };                                                                                \
-    static const SRBUILDERNM(name) gSigRat##name;                                     \
-  }                                                                                   \
+#define REGISTER_SIGRAT(id, obj)                                              \
+  namespace cepgen {                                                          \
+    struct BUILDERNM(obj) {                                                   \
+      BUILDERNM(obj)() { SigmaRatiosFactory::get().registerModule<obj>(id); } \
+    };                                                                        \
+    static const BUILDERNM(obj) gSigRat##obj;                                 \
+  }                                                                           \
   static_assert(true, "")
 
 namespace cepgen {

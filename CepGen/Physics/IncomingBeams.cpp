@@ -264,7 +264,7 @@ namespace cepgen {
   void IncomingBeams::setStructureFunctions(int sf_model, int sr_model) {
     const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
     sf_model = (sf_model == 0 ? 11 /* SuriYennie */ : sf_model);
-    sr_model = (sr_model == 0 ? (int)sigrat::Type::SibirtsevBlunden : sr_model);
+    sr_model = (sr_model == 0 ? 4 /* SibirtsevBlunden */ : sr_model);
     auto& sf_params = params_.operator[]<ParametersList>("structureFunctions");
     sf_params.setName<int>(sf_model).set<int>("sigmaRatio", sr_model);
     if (sf_model / kLHAPDFCodeDec == 1) {  // SF from parton

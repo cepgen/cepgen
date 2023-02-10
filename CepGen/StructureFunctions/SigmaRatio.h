@@ -24,8 +24,6 @@
 namespace cepgen {
   /// A collector namespace for modellings of the \f$R=\sigma_L/\sigma_T\f$ ratio
   namespace sigrat {
-    /// \f$R=\sigma_L/\sigma_T\f$ ratio modelling type
-    enum struct Type { Invalid = 0, E143 = 1, R1990 = 2, CLAS = 3, SibirtsevBlunden = 4 };
     /// A generic modelling of the \f$R=\sigma_L/\sigma_T\f$ ratio
     class Parameterisation : public NamedModule<int> {
     public:
@@ -43,8 +41,6 @@ namespace cepgen {
       const double mp2_;  ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
     };
   }  // namespace sigrat
-  /// Human-readable description of this R-ratio parameterisation type
-  std::ostream& operator<<(std::ostream&, const sigrat::Type&);
 }  // namespace cepgen
 
 #endif

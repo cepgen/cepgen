@@ -30,7 +30,7 @@ namespace cepgen {
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
           mx_min_(mp_ + PDG::get().mass(PDG::piZero)),
-          r_ratio_(SigmaRatiosFactory::get().build((int)sigrat::Type::SibirtsevBlunden)),
+          r_ratio_(SigmaRatiosFactory::get().build(4 /* SibirtsevBlunden */)),
           f2_(f2),
           fl_(fl) {}
 
@@ -185,7 +185,7 @@ namespace cepgen {
     ParametersDescription Parameterisation::description() {
       auto desc = ParametersDescription();
       desc.setDescription("Unnamed structure functions parameterisation");
-      desc.addAs<int, sigrat::Type>("sigmaRatio", sigrat::Type::SibirtsevBlunden)
+      desc.add<int>("sigmaRatio", 4 /* SibirtsevBlunden */)
           .setDescription("Modelling for the sigma(L/T) ratio used in FL computation from F2");
       return desc;
     }
