@@ -148,4 +148,5 @@ namespace cepgen {
 }  // namespace cepgen
 
 // register event modifier
-REGISTER_MODIFIER("tauola", TauolaFilter)
+typedef cepgen::hadr::TauolaFilter TauolaFilter;
+REGISTER_MODIFIER("tauola", TauolaFilter);

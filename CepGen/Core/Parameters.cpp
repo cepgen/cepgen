@@ -154,9 +154,7 @@ namespace cepgen {
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "\n\n";
     if (param->process_)
       os << std::setw(wt) << "Process to generate:\n"
-         << proc::ProcessFactory::get()
-                .describeParameters(param->process().name(), param->process().parameters())
-                .describe(1)
+         << ProcessFactory::get().describeParameters(param->process().name(), param->process().parameters()).describe(1)
          << "\n\n";
     if (!param->evt_modifiers_.empty() || param->evt_exporters_.empty() || !param->taming_functions_.empty())
       os << "\n"

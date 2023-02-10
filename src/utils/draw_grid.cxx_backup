@@ -48,12 +48,12 @@ int main(int argc, char* argv[]) {
       auto grid = kmr::GluonGrid::get().grid();
     } break;
     case 2: {
-      auto sf_mstw = cepgen::strfun::StructureFunctionsFactory::get().build((int)cepgen::strfun::Type::Partonic);
+      auto sf_mstw = cepgen::StructureFunctionsFactory::get().build((int)cepgen::strfun::Type::Partonic);
       auto grid = sf_mstw.grid();
     } break;
     case 31:
     case 32: {
-      auto sf_shamov = cepgen::strfun::StructureFunctionsFactory::get().build((int)cepgen::strfun::Type::Shamov);
+      auto sf_shamov = cepgen::StructureFunctionsFactory::get().build((int)cepgen::strfun::Type::Shamov);
     } break;
   }
 

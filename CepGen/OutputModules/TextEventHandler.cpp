@@ -84,4 +84,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_EXPORTER("dump", TextEventHandler)
+REGISTER_EXPORTER("dump", TextEventHandler);

@@ -130,4 +130,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_INTEGRATOR("ROOT", IntegratorROOT)
+REGISTER_INTEGRATOR("ROOT", IntegratorROOT);

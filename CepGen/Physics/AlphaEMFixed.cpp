@@ -39,4 +39,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_ALPHAEM_MODULE("fixed", AlphaEMFixed)
+REGISTER_ALPHAEM_MODULE("fixed", AlphaEMFixed);

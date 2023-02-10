@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
   cepgen::initialise();
 
   if (parsers.empty())
-    parsers = cepgen::utils::FunctionalFactory::get().modules();
+    parsers = cepgen::FunctionalFactory::get().modules();
   CG_LOG << "Will test with " << cepgen::utils::s("module", parsers.size(), true) << ": " << parsers;
 
   for (const auto& func : parsers) {
@@ -46,14 +46,14 @@ int main(int argc, char* argv[]) {
     {  // test with a 1-variable function
       const double exp_result_test1 = 6.795704571;
       CG_LOG << cepgen::utils::Functional::fromExpression("2.5*exp(0.1*x)", {"x"});
-      auto test = cepgen::utils::FunctionalFactory::get().build(
+      auto test = cepgen::FunctionalFactory::get().build(
           func, cepgen::utils::Functional::fromExpression("2.5*exp(0.1*x)", {"x"}));
       CG_TEST(fabs((*test)(10.) - exp_result_test1) <= epsilon, "single argument functional");
       CG_TEST(fabs((*test)({10.}) - exp_result_test1) <= epsilon, "multiple-argument functional");
     }
     {  // test with an invalid function
       auto test_invalid = [&func]() {
-        auto test = cepgen::utils::FunctionalFactory::get().build(
+        auto test = cepgen::FunctionalFactory::get().build(
             func, cepgen::utils::Functional::fromExpression("sqrt(x+x**3-log(10)", {"x"}));
         (*test)(10);
       };
@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
     }
     {  // test with a 2-variables function
       try {
-        auto test = cepgen::utils::FunctionalFactory::get().build(
+        auto test = cepgen::FunctionalFactory::get().build(
             func, cepgen::utils::Functional::fromExpression("sqrt(a^2+b^2)", {"a", "b"}));
         CG_TEST(fabs((*test)({3, 4}) - 5.0) <= epsilon, "two-variables function");
       } catch (const cepgen::Exception&) {
@@ -71,8 +71,8 @@ int main(int argc, char* argv[]) {
     }
     {  // test with an invalid function
       try {
-        auto test = cepgen::utils::FunctionalFactory::get().build(
-            func, cepgen::utils::Functional::fromExpression("a***2", {"a"}));
+        auto test =
+            cepgen::FunctionalFactory::get().build(func, cepgen::utils::Functional::fromExpression("a***2", {"a"}));
         (*test)(10);
         (*test)({10});
         CG_LOG << "Test 4 failed";

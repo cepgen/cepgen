@@ -71,4 +71,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_INTEGRATOR("plain", IntegratorPlain)
+REGISTER_INTEGRATOR("plain", IntegratorPlain);

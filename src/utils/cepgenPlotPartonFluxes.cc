@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
         cepgen::ParametersList()
             .set<cepgen::ParametersList>(
                 "structureFunctions",
-                cepgen::strfun::StructureFunctionsFactory::get().describeParameters(strfun_type).parameters())
+                cepgen::StructureFunctionsFactory::get().describeParameters(strfun_type).parameters())
             .set<cepgen::ParametersList>(
                 "formFactors", cepgen::FormFactorsFactory::get().describeParameters(formfac_type).parameters()));
     graph_flux[flux] = cepgen::utils::Graph1D(flux, cepgen::PartonFluxFactory::get().describe(flux));
@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
   CG_LOG << "Scan written in \"" << output_file << "\".";
 
   if (!plotter.empty()) {
-    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    auto plt = cepgen::DrawerFactory::get().build(plotter);
     cepgen::utils::Drawer::Mode dm;
     if (logx)
       dm |= cepgen::utils::Drawer::Mode::logx;
@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
 
     const auto top_label = cepgen::utils::format("$k_{T}^{2}$ = %g GeV$^{2}$", kt2) + ", " +
                            cepgen::FormFactorsFactory::get().describe(formfac_type) + "/" +
-                           cepgen::strfun::StructureFunctionsFactory::get().describe(strfun_type);
+                           cepgen::StructureFunctionsFactory::get().describe(strfun_type);
 
     for (auto& gr : graph_flux) {
       gr.second.xAxis().setLabel("$\\xi$");

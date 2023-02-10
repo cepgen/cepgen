@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
       .epochs(num_epochs)
       .context("process", process);
 
-  gen.parametersRef().setProcess(cepgen::proc::ProcessFactory::get().build(process));
+  gen.parametersRef().setProcess(cepgen::ProcessFactory::get().build(process));
   auto& kin = gen.parametersRef().process().kinematics();
   kin.incomingBeams().positive().setPdgId(2212);
   kin.incomingBeams().negative().setPdgId(2212);

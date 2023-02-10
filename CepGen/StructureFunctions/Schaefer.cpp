@@ -159,4 +159,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(strfun::Type::Schaefer, Schaefer, strfun::Schaefer)
+REGISTER_STRFUN(strfun::Type::Schaefer, Schaefer, strfun::Schaefer);

@@ -75,5 +75,5 @@ namespace cepgen {
     }
   }  // namespace formfac
 }  // namespace cepgen
-
-REGISTER_FORMFACTORS("Brash", BrashEtAl)
+typedef cepgen::formfac::BrashEtAl BrashFF;
+REGISTER_FORMFACTORS("Brash", BrashFF);

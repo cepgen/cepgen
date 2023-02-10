@@ -53,4 +53,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_ALPHAS_MODULE("apfel", AlphaSAPFEL)
+REGISTER_ALPHAS_MODULE("apfel", AlphaSAPFEL);

@@ -52,6 +52,7 @@ namespace cepgen {
     };
   }  // namespace formfac
 }  // namespace cepgen
-
-REGISTER_FORMFACTORS("PointLikeScalar", PointLikeScalar)
-REGISTER_FORMFACTORS("PointLikeFermion", PointLikeFermion)
+typedef cepgen::formfac::PointLikeScalar PointLikeScalar;
+typedef cepgen::formfac::PointLikeFermion PointLikeFermion;
+REGISTER_FORMFACTORS("PointLikeScalar", PointLikeScalar);
+REGISTER_FORMFACTORS("PointLikeFermion", PointLikeFermion);

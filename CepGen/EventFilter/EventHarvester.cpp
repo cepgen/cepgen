@@ -37,7 +37,7 @@ namespace cepgen {
     // build the plotter object if specified
     const auto& plotter = steer<std::string>("plotter");
     if (!plotter.empty())
-      drawer_ = utils::DrawerFactory::get().build(plotter, params);
+      drawer_ = DrawerFactory::get().build(plotter, params);
 
     // extract list of variables to be plotted in histogram
     const auto& hist_vars = steer<ParametersList>("histVariables");
@@ -126,7 +126,7 @@ namespace cepgen {
   void EventHarvester::initialise() {
     sqrts_ = runParameters().kinematics().incomingBeams().sqrtS();
     num_evts_ = 0ul;
-    proc_name_ = proc::ProcessFactory::get().describe(runParameters().processName());
+    proc_name_ = ProcessFactory::get().describe(runParameters().processName());
     proc_name_ += ", \\sqrt{s} = " + utils::format("%g", sqrts_ * 1.e-3) + " TeV";
     if (save_hists_ && !hists_.empty())
       file_ << banner("#") << "\n";

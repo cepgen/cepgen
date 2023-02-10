@@ -372,4 +372,5 @@ namespace cepgen {
   }  // namespace hadr
 }  // namespace cepgen
 // register hadroniser
-REGISTER_MODIFIER("pythia8", Pythia8Hadroniser)
+typedef cepgen::hadr::Pythia8Hadroniser Pythia8Hadroniser;
+REGISTER_MODIFIER("pythia8", Pythia8Hadroniser);

@@ -91,5 +91,5 @@ namespace cepgen {
     }
   }  // namespace utils
 }  // namespace cepgen
-
-REGISTER_FUNCTIONAL("python", FunctionalPython)
+typedef cepgen::utils::FunctionalPython PythonFunctional;
+REGISTER_FUNCTIONAL("python", PythonFunctional);

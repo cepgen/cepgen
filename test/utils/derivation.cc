@@ -39,13 +39,12 @@ int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("plotter,p", "type of plotter to use", &plotter, "text")
       .addOptionalArgument(
-          "derivators,D", "type of derivators to use", &derivators, cepgen::utils::DerivatorFactory::get().modules())
+          "derivators,D", "type of derivators to use", &derivators, cepgen::DerivatorFactory::get().modules())
       .parse();
 
   auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
   for (const auto& deriv_name : derivators) {
-    auto der =
-        cepgen::utils::DerivatorFactory::get().build(deriv_name, cepgen::ParametersList().set<double>("h", 0.05));
+    auto der = cepgen::DerivatorFactory::get().build(deriv_name, cepgen::ParametersList().set<double>("h", 0.05));
 
     // test 1D graph
     cepgen::utils::Graph1D graph_sin("graph_sin", "sin(x)"), graph_cos("graph_cos", "cos(x)"),

@@ -393,5 +393,5 @@ namespace cepgen {
     }
   }  // namespace utils
 }  // namespace cepgen
-
-REGISTER_DRAWER("topdrawer", TopdrawerDrawer)
+typedef cepgen::utils::TopdrawerDrawer TopdrawerDrawer;
+REGISTER_DRAWER("topdrawer", TopdrawerDrawer);

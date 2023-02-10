@@ -22,22 +22,21 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a drawing utilitary
-#define REGISTER_DRAWER(name, obj)                                           \
-  namespace cepgen {                                                         \
-    namespace utils {                                                        \
-      struct BUILDERNM(obj) {                                                \
-        BUILDERNM(obj)() { DrawerFactory::get().registerModule<obj>(name); } \
-      };                                                                     \
-      static const BUILDERNM(obj) gDrawer##obj;                              \
-    }                                                                        \
-  }
+#define REGISTER_DRAWER(name, obj)                                         \
+  namespace cepgen {                                                       \
+    struct BUILDERNM(obj) {                                                \
+      BUILDERNM(obj)() { DrawerFactory::get().registerModule<obj>(name); } \
+    };                                                                     \
+    static const BUILDERNM(obj) gDrawer##obj;                              \
+  }                                                                        \
+  static_assert(true, "")
 
 namespace cepgen {
   namespace utils {
     class Drawer;
-    /// A plotting utilitaries factory
-    DEFINE_FACTORY_STR(DrawerFactory, Drawer, "Drawing utilitary factory");
-  }  // namespace utils
+  }
+  /// A plotting utilitaries factory
+  DEFINE_FACTORY_STR(DrawerFactory, utils::Drawer, "Drawing utilitary factory");
 }  // namespace cepgen
 
 #endif

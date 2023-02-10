@@ -124,7 +124,7 @@ int main(int argc, char* argv[]) {
         gr_sm_cth_2400gev.addPoint(x, dsig_dcosth(ampl, 2400., x));
       }
       if (!plotter.empty()) {
-        auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+        auto plt = cepgen::DrawerFactory::get().build(plotter);
         cepgen::utils::Drawer::Mode dm;
         if (logy)
           dm |= cepgen::utils::Drawer::Mode::logy;

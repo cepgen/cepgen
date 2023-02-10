@@ -114,4 +114,5 @@ namespace cepgen {
 }  // namespace cepgen
 
 // register event modifier
-REGISTER_MODIFIER("photos", PhotosFilter)
+typedef cepgen::hadr::PhotosFilter PhotosFilter;
+REGISTER_MODIFIER("photos", PhotosFilter);

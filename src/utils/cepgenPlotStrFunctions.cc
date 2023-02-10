@@ -43,10 +43,8 @@ int main(int argc, char* argv[]) {
   cepgen::initialise();
 
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("sf,s",
-                           "structure functions modelling",
-                           &strfun_types,
-                           cepgen::strfun::StructureFunctionsFactory::get().modules())
+      .addOptionalArgument(
+          "sf,s", "structure functions modelling", &strfun_types, cepgen::StructureFunctionsFactory::get().modules())
       .addOptionalArgument("q2,q", "parton virtuality (GeV^2)", &q2, 10.)
       .addOptionalArgument("var,t", "variable to study (0=xBj, 1=w)", &var, 0)
       .addOptionalArgument("xrange,x", "Bjorken x range", &xrange, cepgen::Limits{1.e-7, 1.})
@@ -97,8 +95,8 @@ int main(int argc, char* argv[]) {
   vector<unique_ptr<cepgen::strfun::Parameterisation> > strfuns;
   vector<cepgen::utils::Graph1D> g_strfuns_f2, g_strfuns_fl, g_strfuns_fe, g_strfuns_fm, g_strfuns_w1, g_strfuns_w2;
   for (const auto& sf_type : strfun_types) {
-    auto sf = cepgen::strfun::StructureFunctionsFactory::get().build(sf_type);
-    const auto sf_name = cepgen::strfun::StructureFunctionsFactory::get().describe(sf_type);
+    auto sf = cepgen::StructureFunctionsFactory::get().build(sf_type);
+    const auto sf_name = cepgen::StructureFunctionsFactory::get().describe(sf_type);
     ostringstream os;
     os << sf_type;
     g_strfuns_f2.emplace_back("f2_" + os.str(), sf_name);
@@ -145,7 +143,7 @@ int main(int argc, char* argv[]) {
   out.close();
 
   if (!plotter.empty()) {
-    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    auto plt = cepgen::DrawerFactory::get().build(plotter);
     for (auto& canv : map<pair<string, string>, vector<cepgen::utils::Graph1D> >{{{"f2", "$F_{2}$"}, g_strfuns_f2},
                                                                                  {{"fl", "$F_{L}$"}, g_strfuns_fl},
                                                                                  {{"fe", "$F_{E}$"}, g_strfuns_fe},

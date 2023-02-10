@@ -30,7 +30,8 @@
       BUILDERNM(obj)() { IntegratorFactory::get().registerModule<obj>(name); } \
     };                                                                         \
     static const BUILDERNM(obj) gIntegr##obj;                                  \
-  }
+  }                                                                            \
+  static_assert(true, "")
 
 namespace cepgen {
   class Integrator;

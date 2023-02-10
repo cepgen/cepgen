@@ -68,5 +68,5 @@ namespace cepgen {
     }
   }  // namespace utils
 }  // namespace cepgen
-
-REGISTER_FUNCTIONAL("libmatheval", FunctionalLibmatheval)
+typedef cepgen::utils::FunctionalLibmatheval LMEFunctional;
+REGISTER_FUNCTIONAL("libmatheval", LMEFunctional)

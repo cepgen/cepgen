@@ -95,10 +95,10 @@ int main(int argc, char* argv[]) {
   vector<unique_ptr<cepgen::sigrat::Parameterisation> > sigrats;
   vector<cepgen::utils::Graph1D> g_sigrats;
   if (sigrat_types.empty())
-    sigrat_types = cepgen::sigrat::SigmaRatiosFactory::get().modules();
+    sigrat_types = cepgen::SigmaRatiosFactory::get().modules();
   for (const auto& sr_type : sigrat_types) {
-    auto sr = cepgen::sigrat::SigmaRatiosFactory::get().build(sr_type);
-    const auto sr_name = cepgen::sigrat::SigmaRatiosFactory::get().describe(sr_type);
+    auto sr = cepgen::SigmaRatiosFactory::get().build(sr_type);
+    const auto sr_name = cepgen::SigmaRatiosFactory::get().describe(sr_type);
     g_sigrats.emplace_back(to_string(sr_type), sr_name);
     sigrats.emplace_back(move(sr));
   }
@@ -135,7 +135,7 @@ int main(int argc, char* argv[]) {
   out.close();
 
   if (!plotter.empty()) {
-    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    auto plt = cepgen::DrawerFactory::get().build(plotter);
     cepgen::utils::Drawer::Mode dm;
     if (logx)
       dm |= cepgen::utils::Drawer::Mode::logx;

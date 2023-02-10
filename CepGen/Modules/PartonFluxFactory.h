@@ -30,7 +30,8 @@
       BUILDERNM(obj)() { PartonFluxFactory::get().registerModule<obj>(name); } \
     };                                                                         \
     static const BUILDERNM(obj) gPartonFlux##obj;                              \
-  }
+  }                                                                            \
+  static_assert(true, "")
 
 namespace cepgen {
   class PartonFlux;

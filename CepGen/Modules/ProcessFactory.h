@@ -24,20 +24,20 @@
 /** \file */
 
 /// Add a generic process definition to the list of handled processes
-#define REGISTER_PROCESS(name, obj)                                                                     \
-  namespace cepgen {                                                                                    \
-    namespace proc {                                                                                    \
-      struct BUILDERNM(obj) {                                                                           \
-        BUILDERNM(obj)() { ProcessFactory::get().registerModule<obj>(name, cepgen::ParametersList()); } \
-      };                                                                                                \
-      static const BUILDERNM(obj) gProc##obj;                                                           \
-    }                                                                                                   \
-  }
+#define REGISTER_PROCESS(name, obj)                                                                   \
+  namespace cepgen {                                                                                  \
+    struct BUILDERNM(obj) {                                                                           \
+      BUILDERNM(obj)() { ProcessFactory::get().registerModule<obj>(name, cepgen::ParametersList()); } \
+    };                                                                                                \
+    static const BUILDERNM(obj) gProc##obj;                                                           \
+  }                                                                                                   \
+  static_assert(true, "")
 /// Declare a Fortran process function name
 #define DECLARE_FORTRAN_FUNCTION(f77_func) \
   extern "C" {                             \
   extern double f77_func##_();             \
-  }
+  }                                        \
+  static_assert(true, "")
 #define PROCESS_F77_NAME(name) F77_##name
 #define STRINGIFY(name) #name
 /// Add the Fortran process definition to the list of handled processes
@@ -59,9 +59,9 @@
 namespace cepgen {
   namespace proc {
     class Process;
-    /// A processes factory
-    DEFINE_FACTORY_STR(ProcessFactory, Process, "Physics processes factory");
-  }  // namespace proc
+  }
+  /// A processes factory
+  DEFINE_FACTORY_STR(ProcessFactory, proc::Process, "Physics processes factory");
 }  // namespace cepgen
 
 #endif

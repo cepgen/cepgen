@@ -68,7 +68,7 @@ namespace cepgen {
       masses_.Ml2 = (*event_)(Particle::CentralSystem)[0].mass2();
 
       formfac_ = FormFactorsFactory::get().build(kin_.incomingBeams().formFactors());
-      strfun_ = strfun::StructureFunctionsFactory::get().build(kin_.incomingBeams().structureFunctions());
+      strfun_ = StructureFunctionsFactory::get().build(kin_.incomingBeams().structureFunctions());
 
       //--- first define the squared mass range for the diphoton/dilepton system
       const auto& mll_limits = kin_.cuts().central.mass_sum;
@@ -1000,4 +1000,5 @@ namespace cepgen {
   }  // namespace proc
 }  // namespace cepgen
 // register process
-REGISTER_PROCESS("lpair", LPAIR)
+typedef cepgen::proc::LPAIR LPAIRProcess;
+REGISTER_PROCESS("lpair", LPAIRProcess);

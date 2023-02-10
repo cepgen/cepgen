@@ -101,7 +101,7 @@ namespace cepgen {
       if (!proc.empty()) {
         if (rt_params_->hasProcess())
           proc = ParametersList(rt_params_->process().parameters()) + proc;
-        rt_params_->setProcess(proc::ProcessFactory::get().build(proc));
+        rt_params_->setProcess(ProcessFactory::get().build(proc));
         if (proc.has<int>("mode"))
           pars_kin.set<int>("mode", proc.get<int>("mode"));
       }
@@ -148,5 +148,5 @@ namespace cepgen {
     }
   }  // namespace card
 }  // namespace cepgen
-
-REGISTER_CARD_HANDLER(".cmd", CommandLineHandler)
+typedef cepgen::card::CommandLineHandler CmdHandler;
+REGISTER_CARD_HANDLER(".cmd", CmdHandler);

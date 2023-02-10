@@ -101,4 +101,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_EXPORTER("vars", TextVariablesHandler)
+REGISTER_EXPORTER("vars", TextVariablesHandler);

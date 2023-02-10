@@ -142,4 +142,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_EXPORTER("root_tree", ROOTTreeHandler)
+REGISTER_EXPORTER("root_tree", ROOTTreeHandler);

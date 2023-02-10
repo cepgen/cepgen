@@ -31,4 +31,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_EXPORTER("matplotlib", MatplotlibHarvester)
+REGISTER_EXPORTER("matplotlib", MatplotlibHarvester);

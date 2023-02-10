@@ -157,5 +157,5 @@ namespace cepgen {
     }
   }  // namespace utils
 }  // namespace cepgen
-
-REGISTER_ANALYTIC_INTEGRATOR("gsl", AnalyticalIntegratorGSL, utils::AnalyticalIntegratorGSL)
+typedef cepgen::utils::AnalyticalIntegratorGSL GSLIntegrator;
+REGISTER_ANALYTIC_INTEGRATOR("gsl", GSLIntegrator);

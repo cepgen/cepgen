@@ -61,4 +61,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_ALPHAEM_MODULE("burkhardt", AlphaEMBurkhardt)
+REGISTER_ALPHAEM_MODULE("burkhardt", AlphaEMBurkhardt);

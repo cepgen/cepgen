@@ -53,5 +53,4 @@ namespace cepgen {
     mutable ROOT::Math::IntegratorOneDim integr_;
   };
 }  // namespace cepgen
-
-REGISTER_ANALYTIC_INTEGRATOR("root", ROOTAnalyticalIntegrator, ROOTAnalyticalIntegrator)
+REGISTER_ANALYTIC_INTEGRATOR("root", ROOTAnalyticalIntegrator);

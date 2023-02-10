@@ -180,6 +180,6 @@ namespace cepgen {
 typedef cepgen::YODAHistsHandler<YODA::WriterYODA> YodaOutputHandler;
 typedef cepgen::YODAHistsHandler<YODA::WriterAIDA> YodaAidaOutputHandler;
 typedef cepgen::YODAHistsHandler<YODA::WriterFLAT> YodaFlatOutputHandler;
-REGISTER_EXPORTER("yoda", YodaOutputHandler)
-REGISTER_EXPORTER("yoda_aida", YodaAidaOutputHandler)
-REGISTER_EXPORTER("yoda_flat", YodaFlatOutputHandler)
+REGISTER_EXPORTER("yoda", YodaOutputHandler);
+REGISTER_EXPORTER("yoda_aida", YodaAidaOutputHandler);
+REGISTER_EXPORTER("yoda_flat", YodaFlatOutputHandler);

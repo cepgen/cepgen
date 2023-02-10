@@ -119,4 +119,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_INTEGRATOR("Foam", IntegratorFoam)
+REGISTER_INTEGRATOR("Foam", IntegratorFoam);

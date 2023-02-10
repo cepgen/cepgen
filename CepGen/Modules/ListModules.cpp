@@ -62,11 +62,11 @@ namespace cepgen {
                << fact.describe(mod) << (fact.describeParameters(mod).empty() ? " (*)" : "");
       };
 
-      list_modules(proc::ProcessFactory::get(), "Physics processes");
+      list_modules(ProcessFactory::get(), "Physics processes");
       list_modules(PartonFluxFactory::get(), "Parton fluxes modellings");
       list_modules(FormFactorsFactory::get(), "Beam form factors modellings");
-      list_int_modules(sigrat::SigmaRatiosFactory::get(), "Cross section ratios modellings");
-      list_int_modules(strfun::StructureFunctionsFactory::get(), "Structure functions modellings", [](int mod) {
+      list_int_modules(SigmaRatiosFactory::get(), "Cross section ratios modellings");
+      list_int_modules(StructureFunctionsFactory::get(), "Structure functions modellings", [](int mod) {
         std::ostringstream os;
         os << std::setw(3) << mod << "|" << (strfun::Type)mod;
         return os.str();
@@ -75,12 +75,12 @@ namespace cepgen {
       list_modules(AlphaSFactory::get(), "alpha(s) evolution algorithms");
       list_modules(EventModifierFactory::get(), "Event modification modules");
       list_modules(EventExporterFactory::get(), "Export modules");
-      list_modules(utils::FunctionalFactory::get(), "Functional evaluators");
-      list_modules(card::CardsHandlerFactory::get(), "Steering cards parsers");
+      list_modules(FunctionalFactory::get(), "Functional evaluators");
+      list_modules(CardsHandlerFactory::get(), "Steering cards parsers");
       list_modules(IntegratorFactory::get(), "Integration algorithms");
       list_modules(AnalyticIntegratorFactory::get(), "Analytic integration algorithms");
-      list_modules(utils::DerivatorFactory::get(), "Derivation algorithm");
-      list_modules(utils::DrawerFactory::get(), "Drawer utilities");
+      list_modules(DerivatorFactory::get(), "Derivation algorithm");
+      list_modules(DrawerFactory::get(), "Drawer utilities");
     });
   }
 }  // namespace cepgen

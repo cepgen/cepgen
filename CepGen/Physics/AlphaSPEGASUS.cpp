@@ -67,4 +67,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_ALPHAS_MODULE("pegasus", AlphaSPEGASUS)
+REGISTER_ALPHAS_MODULE("pegasus", AlphaSPEGASUS);

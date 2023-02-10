@@ -56,4 +56,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_INTEGRATOR("Naive", IntegratorNaive)
+REGISTER_INTEGRATOR("Naive", IntegratorNaive);

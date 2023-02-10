@@ -50,19 +50,13 @@ namespace cepgen {
     const double tol_;
   };
 }  // namespace cepgen
-
-REGISTER_ANALYTIC_INTEGRATOR("boost-gk15",
-                             BoostGaussKronrodAnalyticalIntegrator15,
-                             BoostGaussKronrodAnalyticalIntegrator<15>)
-REGISTER_ANALYTIC_INTEGRATOR("boost-gk31",
-                             BoostGaussKronrodAnalyticalIntegrator31,
-                             BoostGaussKronrodAnalyticalIntegrator<31>)
-REGISTER_ANALYTIC_INTEGRATOR("boost-gk41",
-                             BoostGaussKronrodAnalyticalIntegrator41,
-                             BoostGaussKronrodAnalyticalIntegrator<41>)
-REGISTER_ANALYTIC_INTEGRATOR("boost-gk51",
-                             BoostGaussKronrodAnalyticalIntegrator51,
-                             BoostGaussKronrodAnalyticalIntegrator<51>)
-REGISTER_ANALYTIC_INTEGRATOR("boost-gk61",
-                             BoostGaussKronrodAnalyticalIntegrator61,
-                             BoostGaussKronrodAnalyticalIntegrator<61>)
+typedef cepgen::BoostGaussKronrodAnalyticalIntegrator<15> BGKIntegrator15;
+typedef cepgen::BoostGaussKronrodAnalyticalIntegrator<31> BGKIntegrator31;
+typedef cepgen::BoostGaussKronrodAnalyticalIntegrator<41> BGKIntegrator41;
+typedef cepgen::BoostGaussKronrodAnalyticalIntegrator<51> BGKIntegrator51;
+typedef cepgen::BoostGaussKronrodAnalyticalIntegrator<61> BGKIntegrator61;
+REGISTER_ANALYTIC_INTEGRATOR("boost-gk15", BGKIntegrator15);
+REGISTER_ANALYTIC_INTEGRATOR("boost-gk31", BGKIntegrator31);
+REGISTER_ANALYTIC_INTEGRATOR("boost-gk41", BGKIntegrator41);
+REGISTER_ANALYTIC_INTEGRATOR("boost-gk51", BGKIntegrator51);
+REGISTER_ANALYTIC_INTEGRATOR("boost-gk61", BGKIntegrator61);

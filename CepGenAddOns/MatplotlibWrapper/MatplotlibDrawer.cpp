@@ -210,5 +210,5 @@ namespace cepgen {
     }
   }  // namespace utils
 }  // namespace cepgen
-
-REGISTER_DRAWER("matplotlib", MatplotlibDrawer)
+typedef cepgen::utils::MatplotlibDrawer MPLDrawer;
+REGISTER_DRAWER("matplotlib", MPLDrawer);

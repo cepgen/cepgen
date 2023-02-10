@@ -31,4 +31,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_EXPORTER("gnuplot", GnuplotHarvester)
+REGISTER_EXPORTER("gnuplot", GnuplotHarvester);

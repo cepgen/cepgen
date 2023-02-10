@@ -410,5 +410,5 @@ namespace cepgen {
     std::string TextDrawer::delatexify(const std::string& tok) { return utils::replace_all(tok, {{"$", ""}}); }
   }  // namespace utils
 }  // namespace cepgen
-
-REGISTER_DRAWER("text", TextDrawer)
+typedef cepgen::utils::TextDrawer TxtDrawer;
+REGISTER_DRAWER("text", TxtDrawer);

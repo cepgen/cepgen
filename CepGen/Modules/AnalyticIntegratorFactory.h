@@ -24,13 +24,14 @@
 /** \file */
 
 /// Add a generic analytical integrator object builder definition
-#define REGISTER_ANALYTIC_INTEGRATOR(id, name, obj)                                   \
-  namespace cepgen {                                                                  \
-    struct BUILDERNM(name) {                                                          \
-      BUILDERNM(name)() { AnalyticIntegratorFactory::get().registerModule<obj>(id); } \
-    };                                                                                \
-    static const BUILDERNM(name) gAnaInteg##name;                                     \
-  }
+#define REGISTER_ANALYTIC_INTEGRATOR(name, obj)                                                \
+  namespace cepgen {                                                                           \
+    struct BUILDERNM(obj) {                                                                    \
+      BUILDERNM(obj)() { cepgen::AnalyticIntegratorFactory::get().registerModule<obj>(name); } \
+    };                                                                                         \
+    static const BUILDERNM(obj) gAnaInteg##obj;                                                \
+  }                                                                                            \
+  static_assert(true, "")
 
 namespace cepgen {
   class AnalyticIntegrator;

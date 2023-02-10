@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
   out.close();
 
   if (!plotter.empty()) {
-    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    auto plt = cepgen::DrawerFactory::get().build(plotter);
     cepgen::utils::Drawer::Mode dm;
     if (logx)
       dm |= cepgen::utils::Drawer::Mode::logx;

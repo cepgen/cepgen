@@ -215,4 +215,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_INTEGRATOR("Vegas", IntegratorVegas)
+REGISTER_INTEGRATOR("Vegas", IntegratorVegas);

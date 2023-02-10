@@ -24,22 +24,21 @@
 /** \file */
 
 /// Add a cards handler definition to the list of handled parsers
-#define REGISTER_CARD_HANDLER(name, obj)                                           \
-  namespace cepgen {                                                               \
-    namespace card {                                                               \
-      struct BUILDERNM(obj) {                                                      \
-        BUILDERNM(obj)() { CardsHandlerFactory::get().registerModule<obj>(name); } \
-      };                                                                           \
-      static const BUILDERNM(obj) gCard##obj;                                      \
-    }                                                                              \
-  }
+#define REGISTER_CARD_HANDLER(name, obj)                                         \
+  namespace cepgen {                                                             \
+    struct BUILDERNM(obj) {                                                      \
+      BUILDERNM(obj)() { CardsHandlerFactory::get().registerModule<obj>(name); } \
+    };                                                                           \
+    static const BUILDERNM(obj) gCard##obj;                                      \
+  }                                                                              \
+  static_assert(true, "")
 
 namespace cepgen {
   namespace card {
     class Handler;
-    /// A cards handler factory
-    DEFINE_FACTORY_STR(CardsHandlerFactory, Handler, "Cards handlers factory");
-  }  // namespace card
+  }
+  /// A cards handler factory
+  DEFINE_FACTORY_STR(CardsHandlerFactory, card::Handler, "Cards handlers factory");
 }  // namespace cepgen
 
 #endif

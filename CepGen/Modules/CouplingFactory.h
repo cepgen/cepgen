@@ -30,7 +30,8 @@
       BUILDERNM(obj)() { AlphaEMFactory::get().registerModule<obj>(name); } \
     };                                                                      \
     static const BUILDERNM(obj) gAlphaEM##obj;                              \
-  }
+  }                                                                         \
+  static_assert(true, "")
 
 /// Add a strong coupling evolution algorithm
 #define REGISTER_ALPHAS_MODULE(name, obj)                                  \
@@ -39,7 +40,8 @@
       BUILDERNM(obj)() { AlphaSFactory::get().registerModule<obj>(name); } \
     };                                                                     \
     static const BUILDERNM(obj) gAlphaS##obj;                              \
-  }
+  }                                                                        \
+  static_assert(true, "")
 
 namespace cepgen {
   class Coupling;

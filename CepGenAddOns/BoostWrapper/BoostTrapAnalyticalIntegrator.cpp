@@ -49,5 +49,5 @@ namespace cepgen {
     const double tol_;
   };
 }  // namespace cepgen
-
-REGISTER_ANALYTIC_INTEGRATOR("boost", BoostAnalyticalIntegrator, BoostAnalyticalIntegrator)
+typedef cepgen::BoostAnalyticalIntegrator BAIntegrator;
+REGISTER_ANALYTIC_INTEGRATOR("boost", BAIntegrator);

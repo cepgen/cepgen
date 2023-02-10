@@ -24,20 +24,21 @@
 /** \file */
 
 /// Add a generic derivator object builder definition
-#define REGISTER_DERIVATOR(name, obj)                                                \
-  namespace cepgen {                                                                 \
-    struct BUILDERNM(obj) {                                                          \
-      BUILDERNM(obj)() { utils::DerivatorFactory::get().registerModule<obj>(name); } \
-    };                                                                               \
-    static const BUILDERNM(obj) gDeriv##obj;                                         \
-  }
+#define REGISTER_DERIVATOR(name, obj)                                         \
+  namespace cepgen {                                                          \
+    struct BUILDERNM(obj) {                                                   \
+      BUILDERNM(obj)() { DerivatorFactory::get().registerModule<obj>(name); } \
+    };                                                                        \
+    static const BUILDERNM(obj) gDeriv##obj;                                  \
+  }                                                                           \
+  static_assert(true, "")
 
 namespace cepgen {
   namespace utils {
     class Derivator;
-    /// An analytical integrator objects factory
-    DEFINE_FACTORY_STR(DerivatorFactory, Derivator, "Derivators factory");
-  }  // namespace utils
+  }
+  /// An analytical integrator objects factory
+  DEFINE_FACTORY_STR(DerivatorFactory, utils::Derivator, "Derivators factory");
 }  // namespace cepgen
 
 #endif

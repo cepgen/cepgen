@@ -129,4 +129,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_ALPHAEM_MODULE("running", AlphaEMRunning)
+REGISTER_ALPHAEM_MODULE("running", AlphaEMRunning);

@@ -91,13 +91,13 @@ namespace cepgen {
 #include <HepMC3/WriterHEPEVT.h>
 typedef cepgen::HepMC3Handler<WriterAscii> HepMC3AsciiHandler;
 typedef cepgen::HepMC3Handler<WriterHEPEVT> HepMC3HEPEVTHandler;
-REGISTER_EXPORTER("hepmc", HepMC3AsciiHandler)
-REGISTER_EXPORTER("hepevt", HepMC3HEPEVTHandler)
+REGISTER_EXPORTER("hepmc", HepMC3AsciiHandler);
+REGISTER_EXPORTER("hepevt", HepMC3HEPEVTHandler);
 
 #if HEPMC3_VERSION_CODE >= 3001000
 #include <HepMC3/WriterAsciiHepMC2.h>
 typedef cepgen::HepMC3Handler<WriterAsciiHepMC2> HepMC3HepMC2Handler;
-REGISTER_EXPORTER("hepmc3_hepmc2", HepMC3HepMC2Handler)
+REGISTER_EXPORTER("hepmc3_hepmc2", HepMC3HepMC2Handler);
 #if HEPMC3_VERSION_CODE >= 3002005 && HEPMC3_USE_COMPRESSION
 #include <HepMC3/WriterGZ.h>
 typedef cepgen::HepMC3Handler<WriterGZ<WriterAscii, Compression::z> > HepMC3AsciiZHandler;
@@ -106,12 +106,12 @@ typedef cepgen::HepMC3Handler<WriterGZ<WriterAscii, Compression::lzma> > HepMC3A
 typedef cepgen::HepMC3Handler<WriterGZ<WriterHEPEVT, Compression::lzma> > HepMC3HEPEVTLZMAHandler;
 typedef cepgen::HepMC3Handler<WriterGZ<WriterAscii, Compression::bz2> > HepMC3AsciiBZ2Handler;
 typedef cepgen::HepMC3Handler<WriterGZ<WriterHEPEVT, Compression::bz2> > HepMC3HEPEVTBZ2Handler;
-REGISTER_EXPORTER("hepmc_z", HepMC3AsciiZHandler)
-REGISTER_EXPORTER("hepevt_z", HepMC3HEPEVTZHandler)
-REGISTER_EXPORTER("hepmc_lzma", HepMC3AsciiLZMAHandler)
-REGISTER_EXPORTER("hepevt_lzma", HepMC3HEPEVTLZMAHandler)
-REGISTER_EXPORTER("hepmc_bz2", HepMC3AsciiBZ2Handler)
-REGISTER_EXPORTER("hepevt_bz2", HepMC3HEPEVTBZ2Handler)
+REGISTER_EXPORTER("hepmc_z", HepMC3AsciiZHandler);
+REGISTER_EXPORTER("hepevt_z", HepMC3HEPEVTZHandler);
+REGISTER_EXPORTER("hepmc_lzma", HepMC3AsciiLZMAHandler);
+REGISTER_EXPORTER("hepevt_lzma", HepMC3HEPEVTLZMAHandler);
+REGISTER_EXPORTER("hepmc_bz2", HepMC3AsciiBZ2Handler);
+REGISTER_EXPORTER("hepevt_bz2", HepMC3HEPEVTBZ2Handler);
 #endif
 #endif
 
@@ -120,8 +120,8 @@ REGISTER_EXPORTER("hepevt_bz2", HepMC3HEPEVTBZ2Handler)
 #include <HepMC3/WriterRootTree.h>
 typedef cepgen::HepMC3Handler<WriterRoot> HepMC3RootHandler;
 typedef cepgen::HepMC3Handler<WriterRootTree> HepMC3RootTreeHandler;
-REGISTER_EXPORTER("hepmc_root", HepMC3RootHandler)
-REGISTER_EXPORTER("hepmc_root_tree", HepMC3RootTreeHandler)
+REGISTER_EXPORTER("hepmc_root", HepMC3RootHandler);
+REGISTER_EXPORTER("hepmc_root_tree", HepMC3RootTreeHandler);
 #endif
 
 #ifdef HEPMC3_EXTRA_PLUGINS
@@ -129,6 +129,6 @@ REGISTER_EXPORTER("hepmc_root_tree", HepMC3RootTreeHandler)
 #include <ConvertExample/include/WriterRootTreeOPAL.h>
 typedef cepgen::HepMC3Handler<WriterDOT> HepMC3DOTHandler;
 typedef cepgen::HepMC3Handler<WriterRootTreeOPAL> HepMC3RootTreeOPALHandler;
-REGISTER_EXPORTER("hepmc_dot", HepMC3DOTHandler)
-REGISTER_EXPORTER("hepmc_root_tree_opal", HepMC3RootTreeOPALHandler)
+REGISTER_EXPORTER("hepmc_dot", HepMC3DOTHandler);
+REGISTER_EXPORTER("hepmc_root_tree_opal", HepMC3RootTreeOPALHandler);
 #endif

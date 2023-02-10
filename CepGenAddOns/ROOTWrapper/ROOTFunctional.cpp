@@ -60,5 +60,5 @@ namespace cepgen {
     }
   }  // namespace utils
 }  // namespace cepgen
-
-REGISTER_FUNCTIONAL("ROOT", ROOTFunctional)
+typedef cepgen::utils::ROOTFunctional FunctionalRoot;
+REGISTER_FUNCTIONAL("ROOT", FunctionalRoot);

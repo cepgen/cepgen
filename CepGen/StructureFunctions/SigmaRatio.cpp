@@ -241,7 +241,7 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_SIGRAT(sigrat::Type::E143, E143, sigrat::E143)
-REGISTER_SIGRAT(sigrat::Type::R1990, R1990, sigrat::R1990)
-REGISTER_SIGRAT(sigrat::Type::CLAS, CLAS, sigrat::CLAS)
-REGISTER_SIGRAT(sigrat::Type::SibirtsevBlunden, SibirtsevBlunden, sigrat::SibirtsevBlunden)
+REGISTER_SIGRAT(sigrat::Type::E143, E143, sigrat::E143);
+REGISTER_SIGRAT(sigrat::Type::R1990, R1990, sigrat::R1990);
+REGISTER_SIGRAT(sigrat::Type::CLAS, CLAS, sigrat::CLAS);
+REGISTER_SIGRAT(sigrat::Type::SibirtsevBlunden, SibirtsevBlunden, sigrat::SibirtsevBlunden);

@@ -49,18 +49,17 @@ int main(int argc, char* argv[]) {
                                                 .set<bool>("useBS", use_bs)
                                                 .set<bool>("bare", bare)};
 
-  gen.document("proc", "Processes", cepgen::proc::ProcessFactory::get())
-      //.document("cards", "Cards handler", cepgen::card::CardsHandlerFactory::get())
+  gen.document("proc", "Processes", cepgen::ProcessFactory::get())
+      //.document("cards", "Cards handler", cepgen::CardsHandlerFactory::get())
       .document("formfac", "Form factors", cepgen::FormFactorsFactory::get())
-      .document("strfun", "Structure functions", cepgen::strfun::StructureFunctionsFactory::get())
-      .document("sigrat",
-                "Longitudinal/transverse cross section ratio parameterisations",
-                cepgen::sigrat::SigmaRatiosFactory::get())
+      .document("strfun", "Structure functions", cepgen::StructureFunctionsFactory::get())
+      .document(
+          "sigrat", "Longitudinal/transverse cross section ratio parameterisations", cepgen::SigmaRatiosFactory::get())
       .document("alphaem", "Electromagnetic coupling evolution", cepgen::AlphaEMFactory::get())
       .document("alphas", "Strong coupling evolution", cepgen::AlphaSFactory::get())
       .document("integr", "Integrator algorithms", cepgen::IntegratorFactory::get())
-      .document("func", "Functional parsers", cepgen::utils::FunctionalFactory::get())
-      .document("drawer", "Drawing tools", cepgen::utils::DrawerFactory::get())
+      .document("func", "Functional parsers", cepgen::FunctionalFactory::get())
+      .document("drawer", "Drawing tools", cepgen::DrawerFactory::get())
       .document("evtmod", "Event modification algorithms", cepgen::EventModifierFactory::get())
       .document("evtout", "Event export modules", cepgen::EventExporterFactory::get());
 

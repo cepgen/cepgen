@@ -307,5 +307,5 @@ namespace cepgen {
     }
   }  // namespace utils
 }  // namespace cepgen
-
-REGISTER_DRAWER("gnuplot", GnuplotDrawer)
+typedef cepgen::utils::GnuplotDrawer GPDrawer;
+REGISTER_DRAWER("gnuplot", GPDrawer);

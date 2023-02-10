@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
   {  // generation + tree building part
     cepgen::Generator gen;
     auto& pars = gen.parametersRef();
-    pars.setProcess(cepgen::proc::ProcessFactory::get().build(proc_name));
+    pars.setProcess(cepgen::ProcessFactory::get().build(proc_name));
     pars.process().kinematics().setParameters(cepgen::ParametersList()
                                                   .set<vector<int> >("pdgIds", {2212, 2212})
                                                   .set<double>("sqrtS", 13.6e3)

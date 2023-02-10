@@ -98,5 +98,5 @@ namespace cepgen {
     }
   }  // namespace formfac
 }  // namespace cepgen
-
-REGISTER_FORMFACTORS("Arrington", ArringtonEtAl)
+typedef cepgen::formfac::ArringtonEtAl ArringtonFF;
+REGISTER_FORMFACTORS("Arrington", ArringtonFF);

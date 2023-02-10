@@ -275,5 +275,5 @@ namespace cepgen {
     }
   }  // namespace utils
 }  // namespace cepgen
-
-REGISTER_DRAWER("root", ROOTDrawer)
+typedef cepgen::utils::ROOTDrawer RootDrawer;
+REGISTER_DRAWER("root", RootDrawer);

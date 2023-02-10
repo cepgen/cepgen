@@ -147,7 +147,7 @@ namespace cepgen {
         const auto proc_name = python::get<std::string>(pproc_name);
         CG_DEBUG("PythonHandler") << "Building a process with name '" << proc_name << "' and parameters:\n\t"
                                   << proc_params << ".";
-        auto proc_obj = proc::ProcessFactory::get().build(proc_name, proc_params);
+        auto proc_obj = ProcessFactory::get().build(proc_name, proc_params);
 
         //--- process kinematics
         auto pkin = proc_obj->kinematics().parameters(true);
@@ -169,7 +169,7 @@ namespace cepgen {
         auto* ptam = python::element(process, "tamingFunctions");  // borrowed
         if (ptam)
           for (const auto& p : python::getVector<ParametersList>(ptam))
-            rt_params_->addTamingFunction(utils::FunctionalFactory::get().build("ROOT", p));
+            rt_params_->addTamingFunction(FunctionalFactory::get().build("ROOT", p));
       });
 
       parseAttr(LOGGER_NAME, [this](PyObject* plog) { parseLogging(plog); });
@@ -296,5 +296,5 @@ namespace cepgen {
     }
   }  // namespace card
 }  // namespace cepgen
-
-REGISTER_CARD_HANDLER(".py", PythonHandler)
+typedef cepgen::card::PythonHandler PythonCardHandler;
+REGISTER_CARD_HANDLER(".py", PythonCardHandler);

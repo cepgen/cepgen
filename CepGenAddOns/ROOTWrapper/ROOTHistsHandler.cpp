@@ -219,4 +219,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_EXPORTER("root_hist", ROOTHistsHandler)
+REGISTER_EXPORTER("root_hist", ROOTHistsHandler);

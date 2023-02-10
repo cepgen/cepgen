@@ -82,5 +82,5 @@ namespace cepgen {
 #include "HepMC/IO_GenEvent.h"
 typedef cepgen::HepMC2Handler<IO_GenEvent> HepMC2GenEventHandler;
 typedef cepgen::HepMC2Handler<IO_AsciiParticles> HepMC2AsciiHandler;
-REGISTER_EXPORTER("hepmc2", HepMC2GenEventHandler)
-REGISTER_EXPORTER("hepmc2_ascii", HepMC2AsciiHandler)
+REGISTER_EXPORTER("hepmc2", HepMC2GenEventHandler);
+REGISTER_EXPORTER("hepmc2_ascii", HepMC2AsciiHandler);

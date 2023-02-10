@@ -57,5 +57,5 @@ namespace cepgen {
     }
   }  // namespace utils
 }  // namespace cepgen
-
-REGISTER_FUNCTIONAL("ExprTk", FunctionalExprTk)
+typedef cepgen::utils::FunctionalExprTk ExprTkFunctional;
+REGISTER_FUNCTIONAL("ExprTk", ExprTkFunctional)

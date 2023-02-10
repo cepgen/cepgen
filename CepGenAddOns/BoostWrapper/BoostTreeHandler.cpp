@@ -89,7 +89,7 @@ namespace cepgen {
 
       try {
         proc_ = bc::unpack(tree_.get_child(PROCESS_NAME));
-        rt_params_->setProcess(proc::ProcessFactory::get().build(proc_));
+        rt_params_->setProcess(ProcessFactory::get().build(proc_));
       } catch (const boost::exception&) {
         throw CG_FATAL("BoostTreeHandler") << "Failed to retrieve a valid \"" << PROCESS_NAME << "\" block"
                                            << " in the steering card!";
@@ -209,6 +209,9 @@ namespace cepgen {
   }  // namespace card
 }  // namespace cepgen
 
-REGISTER_CARD_HANDLER(".json", JsonHandler)
-REGISTER_CARD_HANDLER(".info", InfoHandler)
-REGISTER_CARD_HANDLER(".xml", XmlHandler)
+typedef cepgen::card::JsonHandler JsonCardHandler;
+typedef cepgen::card::InfoHandler InfoCardHandler;
+typedef cepgen::card::XmlHandler XmlCardHandler;
+REGISTER_CARD_HANDLER(".json", JsonCardHandler);
+REGISTER_CARD_HANDLER(".info", InfoCardHandler);
+REGISTER_CARD_HANDLER(".xml", XmlCardHandler);

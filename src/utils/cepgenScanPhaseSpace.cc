@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
     }
   }
   if (!plotter.empty()) {
-    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    auto plt = cepgen::DrawerFactory::get().build(plotter);
     cepgen::utils::Drawer::Mode dm;
     if (draw_grid)
       dm |= cepgen::utils::Drawer::Mode::grid;

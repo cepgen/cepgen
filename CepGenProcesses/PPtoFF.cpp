@@ -271,4 +271,5 @@ namespace cepgen {
   }  // namespace proc
 }  // namespace cepgen
 // register process
-REGISTER_PROCESS("pptoff", PPtoFF)
+typedef cepgen::proc::PPtoFF PPtoFFProcess;
+REGISTER_PROCESS("pptoff", PPtoFFProcess);

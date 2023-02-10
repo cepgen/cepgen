@@ -76,4 +76,4 @@ namespace cepgen {
 }  // namespace cepgen
 
 typedef cepgen::utils::GSLDerivator GSLDerivator;
-REGISTER_DERIVATOR("gsl", GSLDerivator)
+REGISTER_DERIVATOR("gsl", GSLDerivator);

@@ -86,6 +86,7 @@ namespace cepgen {
     };
   }  // namespace formfac
 }  // namespace cepgen
-
-REGISTER_FORMFACTORS(gFFStandardDipoleHandler, StandardDipole)
-REGISTER_FORMFACTORS("HeavyIonDipole", HeavyIonDipole)
+typedef cepgen::formfac::StandardDipole DipoleFF;
+typedef cepgen::formfac::HeavyIonDipole HIDipoleFF;
+REGISTER_FORMFACTORS(cepgen::formfac::gFFStandardDipoleHandler, DipoleFF);
+REGISTER_FORMFACTORS("HeavyIonDipole", HIDipoleFF);

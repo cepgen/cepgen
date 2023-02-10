@@ -204,5 +204,5 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(strfun::Type::FioreBrasse, FioreBrasse, strfun::FioreBrasse)
-REGISTER_STRFUN(strfun::Type::FioreBrasseAlt, FioreBrasseAlt, strfun::FioreBrasseAlt)
+REGISTER_STRFUN(strfun::Type::FioreBrasse, FioreBrasse, strfun::FioreBrasse);
+REGISTER_STRFUN(strfun::Type::FioreBrasseAlt, FioreBrasseAlt, strfun::FioreBrasseAlt);

@@ -171,4 +171,5 @@ namespace cepgen {
   }  // namespace proc
 }  // namespace cepgen
 // register process
-REGISTER_PROCESS("pptoww", PPtoWW)
+typedef cepgen::proc::PPtoWW PPtoWWProcess;
+REGISTER_PROCESS("pptoww", PPtoWWProcess);

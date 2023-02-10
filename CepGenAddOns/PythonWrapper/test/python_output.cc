@@ -41,10 +41,10 @@ int main(int argc, char* argv[]) {
 
   cepgen::Generator gen;
   if (process.empty())
-    process = *cepgen::proc::ProcessFactory::get().modules().begin();
+    process = *cepgen::ProcessFactory::get().modules().begin();
 
   {
-    gen.parametersRef().setProcess(cepgen::proc::ProcessFactory::get().build(process));
+    gen.parametersRef().setProcess(cepgen::ProcessFactory::get().build(process));
     cepgen::utils::PythonConfigWriter py(output_file);
     py << gen.parametersRef();
   }

@@ -303,9 +303,9 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(strfun::Type::ALLM91, ALLM91, strfun::ALLM91)
-REGISTER_STRFUN(strfun::Type::ALLM97, ALLM97, strfun::ALLM97)
-REGISTER_STRFUN(strfun::Type::HHT_ALLM, HHTALLM, strfun::HHTALLM)
-REGISTER_STRFUN(strfun::Type::HHT_ALLM_FT, HHTALLMFT, strfun::HHTALLMFT)
-REGISTER_STRFUN(strfun::Type::GD07p, GD07p, strfun::GD07p)
-REGISTER_STRFUN(strfun::Type::GD11p, GD11p, strfun::GD11p)
+REGISTER_STRFUN(strfun::Type::ALLM91, ALLM91, strfun::ALLM91);
+REGISTER_STRFUN(strfun::Type::ALLM97, ALLM97, strfun::ALLM97);
+REGISTER_STRFUN(strfun::Type::HHT_ALLM, HHTALLM, strfun::HHTALLM);
+REGISTER_STRFUN(strfun::Type::HHT_ALLM_FT, HHTALLMFT, strfun::HHTALLMFT);
+REGISTER_STRFUN(strfun::Type::GD07p, GD07p, strfun::GD07p);
+REGISTER_STRFUN(strfun::Type::GD11p, GD11p, strfun::GD11p);

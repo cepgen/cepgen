@@ -99,4 +99,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_INTEGRATOR("MISER", IntegratorMISER)
+REGISTER_INTEGRATOR("MISER", IntegratorMISER);

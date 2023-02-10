@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
   if (list) {
     CG_LOG.log([](auto& log) {
       log << "List of modules registered in the runtime database:";
-      for (const auto& mod : cepgen::proc::ProcessFactory::get().modules())
+      for (const auto& mod : cepgen::ProcessFactory::get().modules())
         log << "\n> " << cepgen::utils::boldify(mod);
     });
     CG_TEST_SUMMARY;
@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
 
   CG_LOG << "Will build a process named \"" << proc_name << "\".";
 
-  auto proc = cepgen::proc::ProcessFactory::get().build(proc_name, cepgen::ParametersList());
+  auto proc = cepgen::ProcessFactory::get().build(proc_name, cepgen::ParametersList());
   //--- at this point, the process has been found
   CG_LOG.log([&proc](auto& log) {
     log << "Successfully built the process \"" << proc->name() << "\"!\n"

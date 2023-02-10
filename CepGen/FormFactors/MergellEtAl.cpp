@@ -98,5 +98,5 @@ namespace cepgen {
     }
   }  // namespace formfac
 }  // namespace cepgen
-
-REGISTER_FORMFACTORS("Mergell", MergellEtAl)
+typedef cepgen::formfac::MergellEtAl MergellEtAl;
+REGISTER_FORMFACTORS("Mergell", MergellEtAl);

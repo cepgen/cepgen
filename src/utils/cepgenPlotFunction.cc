@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
   cepgen::initialise();
 
   if (functionals.empty())
-    functionals = cepgen::utils::FunctionalFactory::get().modules();
+    functionals = cepgen::FunctionalFactory::get().modules();
   CG_LOG << "Function to be plotted: " << function << ", functional evaluators: " << functionals << ".";
 
   // maps functional evaluators -> graphs
@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
       vector<string> vars{"x"};
       if (func_2d)
         vars.emplace_back("y");
-      auto test = cepgen::utils::FunctionalFactory::get().build(
+      auto test = cepgen::FunctionalFactory::get().build(
           func, cepgen::ParametersList().set<string>("expression", function).set<vector<string> >("variables", vars));
       if (func_2d) {
         if (!yrange.hasMin())
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
   }
 
   if (!plotter.empty()) {
-    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    auto plt = cepgen::DrawerFactory::get().build(plotter);
     cepgen::utils::Drawer::Mode dm;
     if (draw_grid)
       dm |= cepgen::utils::Drawer::Mode::grid;

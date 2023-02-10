@@ -45,7 +45,7 @@ namespace cepgen {
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Kulagin-Barinov (hybrid)");
-        desc.add<ParametersDescription>("derivator", utils::DerivatorFactory::get().describeParameters("gsl"));
+        desc.add<ParametersDescription>("derivator", DerivatorFactory::get().describeParameters("gsl"));
         desc.addParametersDescriptionVector(
             "resonances",
             ResonanceObject::description(),
@@ -189,7 +189,7 @@ namespace cepgen {
           q2max_(steer<double>("q2max")),
           sfs_grid_file_(steerPath("gridFile")),
           dis_params_(steer<ParametersList>("disParameters")),
-          deriv_(utils::DerivatorFactory::get().build(steer<ParametersList>("derivator"))),
+          deriv_(DerivatorFactory::get().build(steer<ParametersList>("derivator"))),
           mpi2_(std::pow(PDG::get().mass(PDG::piZero), 2)),
           meta2_(std::pow(PDG::get().mass(PDG::eta), 2)) {
       for (const auto& res : steer<std::vector<ParametersList> >("resonances"))
@@ -325,4 +325,4 @@ namespace cepgen {
     }
   }  // namespace strfun
 }  // namespace cepgen
-REGISTER_STRFUN(strfun::Type::KulaginBarinov, KulaginBarinov, strfun::KulaginBarinov)
+REGISTER_STRFUN(strfun::Type::KulaginBarinov, KulaginBarinov, strfun::KulaginBarinov);

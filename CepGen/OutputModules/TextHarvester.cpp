@@ -31,4 +31,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_EXPORTER("text", TextHarvester)
+REGISTER_EXPORTER("text", TextHarvester);

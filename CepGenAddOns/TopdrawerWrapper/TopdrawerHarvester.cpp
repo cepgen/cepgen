@@ -31,4 +31,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_EXPORTER("topdrawer", TopdrawerHarvester)
+REGISTER_EXPORTER("topdrawer", TopdrawerHarvester);

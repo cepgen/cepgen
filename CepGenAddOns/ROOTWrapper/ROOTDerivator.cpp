@@ -64,4 +64,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_DERIVATOR("root", ROOTDerivator)
+REGISTER_DERIVATOR("root", ROOTDerivator);

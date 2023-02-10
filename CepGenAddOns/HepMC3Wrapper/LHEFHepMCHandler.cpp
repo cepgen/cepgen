@@ -114,4 +114,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_EXPORTER("lhef_hepmc", LHEFHepMCHandler)
+REGISTER_EXPORTER("lhef_hepmc", LHEFHepMCHandler);

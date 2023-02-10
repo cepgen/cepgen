@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("functionals,f",
                            "functional parsers to benchmark",
                            &functional_parsers,
-                           cepgen::utils::FunctionalFactory::get().modules())
+                           cepgen::FunctionalFactory::get().modules())
       .addOptionalArgument(
           "integrators,i", "integrators to benchmark", &integrators, cepgen::IntegratorFactory::get().modules())
       .addOptionalArgument("outputs,o", "output formats (html, csv, json, pyperf)", &outputs, vector<string>{"html"})

@@ -160,10 +160,9 @@ namespace cepgen {
     }
   }  // namespace utils
 }  // namespace cepgen
-
 typedef cepgen::utils::YODADrawer<YODA::WriterYODA> DrawerYoda;
 typedef cepgen::utils::YODADrawer<YODA::WriterAIDA> DrawerYodaAida;
 typedef cepgen::utils::YODADrawer<YODA::WriterFLAT> DrawerYodaFlat;
-REGISTER_DRAWER("yoda", DrawerYoda)
-REGISTER_DRAWER("yoda_aida", DrawerYodaAida)
-REGISTER_DRAWER("yoda_flat", DrawerYodaFlat)
+REGISTER_DRAWER("yoda", DrawerYoda);
+REGISTER_DRAWER("yoda_aida", DrawerYodaAida);
+REGISTER_DRAWER("yoda_flat", DrawerYodaFlat);

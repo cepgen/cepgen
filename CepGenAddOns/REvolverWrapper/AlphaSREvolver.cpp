@@ -49,4 +49,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_ALPHAS_MODULE("revolver", AlphaSREvolver)
+REGISTER_ALPHAS_MODULE("revolver", AlphaSREvolver);

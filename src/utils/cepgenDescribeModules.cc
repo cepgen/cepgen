@@ -115,21 +115,21 @@ int main(int argc, char* argv[]) {
     };
 
     ostringstream os;
-    LOOP_FACTORY("Cards steering", cepgen::card::CardsHandlerFactory)
+    LOOP_FACTORY("Cards steering", cepgen::CardsHandlerFactory)
     LOOP_FACTORY("Integrator", cepgen::IntegratorFactory)
     LOOP_FACTORY("Analytic integrator", cepgen::AnalyticIntegratorFactory)
-    LOOP_FACTORY("Derivator", cepgen::utils::DerivatorFactory)
-    LOOP_FACTORY("Process", cepgen::proc::ProcessFactory)
+    LOOP_FACTORY("Derivator", cepgen::DerivatorFactory)
+    LOOP_FACTORY("Process", cepgen::ProcessFactory)
     LOOP_FACTORY("Parton flux modelling", cepgen::PartonFluxFactory)
     LOOP_FACTORY("Beam form factors modelling", cepgen::FormFactorsFactory)
-    LOOP_FACTORY_INT("Structure functions modelling", cepgen::strfun::StructureFunctionsFactory)
-    LOOP_FACTORY_INT("Cross sections ratio modelling", cepgen::sigrat::SigmaRatiosFactory)
+    LOOP_FACTORY_INT("Structure functions modelling", cepgen::StructureFunctionsFactory)
+    LOOP_FACTORY_INT("Cross sections ratio modelling", cepgen::SigmaRatiosFactory)
     LOOP_FACTORY("Event modification", cepgen::EventModifierFactory)
     LOOP_FACTORY("Export", cepgen::EventExporterFactory)
     LOOP_FACTORY("alpha(EM)", cepgen::AlphaEMFactory)
     LOOP_FACTORY("alpha(S)", cepgen::AlphaSFactory)
-    LOOP_FACTORY("Functional evaluator", cepgen::utils::FunctionalFactory)
-    LOOP_FACTORY("Drawer", cepgen::utils::DrawerFactory)
+    LOOP_FACTORY("Functional evaluator", cepgen::FunctionalFactory)
+    LOOP_FACTORY("Drawer", cepgen::DrawerFactory)
     CG_LOG << os.str();
     return 0;
   }

@@ -128,4 +128,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_EXPORTER("lhef", LHEFPythiaHandler)
+REGISTER_EXPORTER("lhef", LHEFPythiaHandler);

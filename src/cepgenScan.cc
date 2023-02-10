@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
   mg.setParameters(cepgen::card::Handler::parse(input_config));
 
   if (!parser.extra_config().empty())
-    mg.setParameters(cepgen::card::CardsHandlerFactory::get()
+    mg.setParameters(cepgen::CardsHandlerFactory::get()
                          .build(".cmd", cepgen::ParametersList().set<vector<string> >("args", parser.extra_config()))
                          ->parse("", mg.parametersPtr()));
 
@@ -131,7 +131,7 @@ int main(int argc, char* argv[]) {
       dm |= cepgen::utils::Drawer::Mode::grid;
     graph.xAxis().setLabel(scan_str);
     graph.yAxis().setLabel("$\\sigma_{gen}$ (pb)");
-    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    auto plt = cepgen::DrawerFactory::get().build(plotter);
     plt->draw(graph, dm);
   }
 

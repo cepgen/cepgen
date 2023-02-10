@@ -208,7 +208,7 @@ namespace cepgen {
           *proc_params_ = ParametersList(rt_params_->process().parameters()) + *proc_params_;
         if (proc_name_ == "pptoff" && lepton_id_ != 0)
           proc_params_->operator[]<int>("pair") = 11 + (lepton_id_ - 1) * 2;
-        rt_params_->setProcess(proc::ProcessFactory::get().build(proc_name_, *proc_params_));
+        rt_params_->setProcess(ProcessFactory::get().build(proc_name_, *proc_params_));
       }
 
       rt_params_->generation().setParameters(*gen_params_);
@@ -216,9 +216,8 @@ namespace cepgen {
       rt_params_->par_integrator += *int_params_;
 
       //--- parse the structure functions code
-      auto sf_params = strfun::StructureFunctionsFactory::get().describeParameters(str_fun_).parameters();
-      sf_params.set<ParametersList>("sigmaRatio",
-                                    sigrat::SigmaRatiosFactory::get().describeParameters(sr_type_).parameters());
+      auto sf_params = StructureFunctionsFactory::get().describeParameters(str_fun_).parameters();
+      sf_params.set<ParametersList>("sigmaRatio", SigmaRatiosFactory::get().describeParameters(sr_type_).parameters());
       if (str_fun_ == (int)strfun::Type::MSTWgrid && !mstw_grid_path_.empty())
         sf_params.set<std::string>("gridPath", mstw_grid_path_);
       kin_params_->operator+=(rt_params_->process().kinematics().parameters(true));
@@ -368,5 +367,5 @@ namespace cepgen {
     }
   }  // namespace card
 }  // namespace cepgen
-
-REGISTER_CARD_HANDLER(".card", LpairHandler)
+typedef cepgen::card::LpairHandler LpairCardHandler;
+REGISTER_CARD_HANDLER(".card", LpairCardHandler);

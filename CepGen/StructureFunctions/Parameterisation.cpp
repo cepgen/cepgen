@@ -30,7 +30,7 @@ namespace cepgen {
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
           mx_min_(mp_ + PDG::get().mass(PDG::piZero)),
-          r_ratio_(sigrat::SigmaRatiosFactory::get().build((int)sigrat::Type::SibirtsevBlunden)),
+          r_ratio_(SigmaRatiosFactory::get().build((int)sigrat::Type::SibirtsevBlunden)),
           f2_(f2),
           fl_(fl) {}
 
@@ -55,7 +55,7 @@ namespace cepgen {
           mx_min_(mp_ + PDG::get().mass(PDG::piZero)) {
       CG_DEBUG("Parameterisation") << "Structure functions parameterisation to be built using following parameters:\n"
                                    << ParametersDescription(params_).describe(true);
-      r_ratio_ = sigrat::SigmaRatiosFactory::get().build(steer<int>("sigmaRatio"));
+      r_ratio_ = SigmaRatiosFactory::get().build(steer<int>("sigmaRatio"));
     }
 
     Parameterisation& Parameterisation::operator=(const Parameterisation& sf) {

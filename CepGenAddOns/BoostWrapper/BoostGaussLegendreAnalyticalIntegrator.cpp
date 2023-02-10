@@ -41,19 +41,13 @@ namespace cepgen {
     }
   };
 }  // namespace cepgen
-
-REGISTER_ANALYTIC_INTEGRATOR("boost-gl7",
-                             BoostGaussLegendreAnalyticalIntegrator7,
-                             BoostGaussLegendreAnalyticalIntegrator<7>)
-REGISTER_ANALYTIC_INTEGRATOR("boost-gl15",
-                             BoostGaussLegendreAnalyticalIntegrator15,
-                             BoostGaussLegendreAnalyticalIntegrator<15>)
-REGISTER_ANALYTIC_INTEGRATOR("boost-gl20",
-                             BoostGaussLegendreAnalyticalIntegrator20,
-                             BoostGaussLegendreAnalyticalIntegrator<20>)
-REGISTER_ANALYTIC_INTEGRATOR("boost-gl25",
-                             BoostGaussLegendreAnalyticalIntegrator25,
-                             BoostGaussLegendreAnalyticalIntegrator<25>)
-REGISTER_ANALYTIC_INTEGRATOR("boost-gl30",
-                             BoostGaussLegendreAnalyticalIntegrator30,
-                             BoostGaussLegendreAnalyticalIntegrator<30>)
+typedef cepgen::BoostGaussLegendreAnalyticalIntegrator<7> BGLIntegrator7;
+typedef cepgen::BoostGaussLegendreAnalyticalIntegrator<15> BGLIntegrator15;
+typedef cepgen::BoostGaussLegendreAnalyticalIntegrator<20> BGLIntegrator20;
+typedef cepgen::BoostGaussLegendreAnalyticalIntegrator<25> BGLIntegrator25;
+typedef cepgen::BoostGaussLegendreAnalyticalIntegrator<30> BGLIntegrator30;
+REGISTER_ANALYTIC_INTEGRATOR("boost-gl7", BGLIntegrator7);
+REGISTER_ANALYTIC_INTEGRATOR("boost-gl15", BGLIntegrator15);
+REGISTER_ANALYTIC_INTEGRATOR("boost-gl20", BGLIntegrator20);
+REGISTER_ANALYTIC_INTEGRATOR("boost-gl25", BGLIntegrator25);
+REGISTER_ANALYTIC_INTEGRATOR("boost-gl30", BGLIntegrator30);

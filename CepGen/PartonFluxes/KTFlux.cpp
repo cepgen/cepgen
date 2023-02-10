@@ -138,7 +138,7 @@ namespace cepgen {
   public:
     explicit InelasticNucleonKTFlux(const ParametersList& params)
         : NucleonKTFlux(params),
-          sf_(strfun::StructureFunctionsFactory::get().build(params.get<ParametersList>("structureFunctions"))) {
+          sf_(StructureFunctionsFactory::get().build(params.get<ParametersList>("structureFunctions"))) {
       if (!sf_)
         throw CG_FATAL("InelasticNucleonKTFlux") << "Inelastic kT flux requires a modelling of structure functions!";
     }
@@ -224,8 +224,8 @@ namespace cepgen {
   };*/
 }  // namespace cepgen
 
-REGISTER_FLUX("ElasticKT", ElasticNucleonKTFlux)
-REGISTER_FLUX("BudnevElasticKT", BudnevElasticNucleonKTFlux)
-REGISTER_FLUX("ElasticHeavyIonKT", ElasticHeavyIonKTFlux)
-REGISTER_FLUX("InelasticKT", InelasticNucleonKTFlux)
-REGISTER_FLUX("BudnevInelasticKT", BudnevInelasticNucleonKTFlux)
+REGISTER_FLUX("ElasticKT", ElasticNucleonKTFlux);
+REGISTER_FLUX("BudnevElasticKT", BudnevElasticNucleonKTFlux);
+REGISTER_FLUX("ElasticHeavyIonKT", ElasticHeavyIonKTFlux);
+REGISTER_FLUX("InelasticKT", InelasticNucleonKTFlux);
+REGISTER_FLUX("BudnevInelasticKT", BudnevInelasticNucleonKTFlux);

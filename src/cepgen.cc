@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
     gen.setParameters(cepgen::card::Handler::parse(input_card));
   //--- parse the additional flags
   if (!parser.extra_config().empty())
-    gen.setParameters(cepgen::card::CardsHandlerFactory::get()
+    gen.setParameters(cepgen::CardsHandlerFactory::get()
                           .build(".cmd", cepgen::ParametersList().set<vector<string> >("args", parser.extra_config()))
                           ->parse(string(), gen.parametersPtr()));
 

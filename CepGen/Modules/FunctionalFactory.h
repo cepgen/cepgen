@@ -24,22 +24,21 @@
 /** \file */
 
 /// Add a generic functional object builder definition
-#define REGISTER_FUNCTIONAL(name, obj)                                           \
-  namespace cepgen {                                                             \
-    namespace utils {                                                            \
-      struct BUILDERNM(obj) {                                                    \
-        BUILDERNM(obj)() { FunctionalFactory::get().registerModule<obj>(name); } \
-      };                                                                         \
-      static const BUILDERNM(obj) gFunct##obj;                                   \
-    }                                                                            \
-  }
+#define REGISTER_FUNCTIONAL(name, obj)                                         \
+  namespace cepgen {                                                           \
+    struct BUILDERNM(obj) {                                                    \
+      BUILDERNM(obj)() { FunctionalFactory::get().registerModule<obj>(name); } \
+    };                                                                         \
+    static const BUILDERNM(obj) gFunct##obj;                                   \
+  }                                                                            \
+  static_assert(true, "")
 
 namespace cepgen {
   namespace utils {
     class Functional;
-    /// A functional objects factory
-    DEFINE_FACTORY_STR(FunctionalFactory, Functional, "Functionals factory");
-  }  // namespace utils
+  }
+  /// A functional objects factory
+  DEFINE_FACTORY_STR(FunctionalFactory, utils::Functional, "Functionals factory");
 }  // namespace cepgen
 
 #endif
