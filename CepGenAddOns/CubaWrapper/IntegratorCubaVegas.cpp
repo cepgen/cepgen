@@ -89,4 +89,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_INTEGRATOR("cuba-vegas", IntegratorCubaVegas)
+REGISTER_INTEGRATOR("cuba-vegas", IntegratorCubaVegas);

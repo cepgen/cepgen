@@ -65,4 +65,4 @@ namespace cepgen {
   }  // namespace utils
 }  // namespace cepgen
 typedef cepgen::utils::FunctionalMuParser MuParserFunctional;
-REGISTER_FUNCTIONAL("MuParser", MuParserFunctional)
+REGISTER_FUNCTIONAL("MuParser", MuParserFunctional);

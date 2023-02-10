@@ -126,4 +126,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_INTEGRATOR("cuba-divonne", IntegratorCubaDivonne)
+REGISTER_INTEGRATOR("cuba-divonne", IntegratorCubaDivonne);

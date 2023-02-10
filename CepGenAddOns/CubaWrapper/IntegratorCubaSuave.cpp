@@ -89,4 +89,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_INTEGRATOR("cuba-suave", IntegratorCubaSuave)
+REGISTER_INTEGRATOR("cuba-suave", IntegratorCubaSuave);

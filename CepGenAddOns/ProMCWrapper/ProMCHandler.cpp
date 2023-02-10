@@ -160,4 +160,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_EXPORTER("promc", ProMCHandler)
+REGISTER_EXPORTER("promc", ProMCHandler);

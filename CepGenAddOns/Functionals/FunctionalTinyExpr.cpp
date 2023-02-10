@@ -65,4 +65,4 @@ namespace cepgen {
   }  // namespace utils
 }  // namespace cepgen
 typedef cepgen::utils::FunctionalTinyExpr TinyExprFunctional;
-REGISTER_FUNCTIONAL("tinyexpr", TinyExprFunctional)
+REGISTER_FUNCTIONAL("tinyexpr", TinyExprFunctional);

@@ -151,4 +151,4 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-REGISTER_EXPORTER("delphes", DelphesHandler)
+REGISTER_EXPORTER("delphes", DelphesHandler);
