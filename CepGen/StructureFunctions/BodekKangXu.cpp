@@ -25,24 +25,24 @@
 
 namespace cepgen {
   namespace strfun {
-    /// \f$F_{1,2,E,M}\f$ modelling by Suri and Yennie \cite Suri:1971yx
-    class Bodek : public Parameterisation {
+    /// \f$F_{1,2}\f$ modelling by Bodek, Kang, and Xu \cite Suri:1971yx
+    class BodekKangXu : public Parameterisation {
     public:
       /// User-steered Suri-Yennie continuum structure functions calculator
-      explicit Bodek(const ParametersList& params)
+      explicit BodekKangXu(const ParametersList& params)
           : Parameterisation(params),
             constants_(steer<std::vector<double> >("constants")),
             pi_em_sq_(constants_.empty() ? 0. : std::pow(constants_.at(0) - mp_, 2.)),
             spins_(steer<std::vector<int> >("spins")),
             r_(steer<double>("r")) {
         if (constants_.size() != 24)
-          throw CG_FATAL("Bodek") << "Invalid parameters multiplicity given. Should have size 24, has size "
-                                  << constants_.size() << ".";
+          throw CG_FATAL("BodekKangXu") << "Invalid parameters multiplicity given. Should have size 24, has size "
+                                        << constants_.size() << ".";
       }
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
-        desc.setDescription("Bodek");
+        desc.setDescription("Bodek, Kand, and Xu");
         desc.add<std::vector<double> >(
             "constants",
             {1.0741163,  0.75531124,  3.3506491,    1.7447015,    3.5102405, 1.040004,    1.2299128, 0.10625394,
@@ -54,7 +54,7 @@ namespace cepgen {
         return desc;
       }
 
-      Bodek& eval(double xbj, double q2) override {
+      BodekKangXu& eval(double xbj, double q2) override {
         const auto mx2 = utils::mX2(xbj, q2, mp2_);
         if (mx2 < mp2_) {
           setF1F2(0., 0.);
@@ -140,4 +140,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 
-REGISTER_STRFUN(strfun::Type::Bodek, Bodek, strfun::Bodek)
+REGISTER_STRFUN(strfun::Type::BodekKangXu, BodekKangXu, strfun::BodekKangXu)

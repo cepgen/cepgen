@@ -234,8 +234,8 @@ namespace cepgen {
           return os << "Shamov";
         case strfun::Type::KulaginBarinov:
           return os << "KulaginBarinov";
-        case strfun::Type::Bodek:
-          return os << "Bodek";
+        case strfun::Type::BodekKangXu:
+          return os << "BodekKangXu";
         case strfun::Type::MSTWgrid:
           return os << "MSTWgrid";
         case strfun::Type::Partonic:
