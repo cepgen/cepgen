@@ -70,14 +70,12 @@ namespace cepgen {
       const auto args = Arguments{xbj, q2};
       if (args == old_vals_)
         return *this;
+      clear();
       if (!args.valid()) {
         CG_WARNING("StructureFunctions") << "Invalid range for Q² = " << q2 << " or xBj = " << xbj << ".";
-        clear();
         return *this;
       }
       old_vals_ = args;
-      fl_computed_ = false;
-      (*this).setF2(0.).setFL(0.).setW1(0.).setW2(0.).setFE(0.).setFM(0.);
       return eval(xbj, q2);
     }
 
@@ -104,10 +102,7 @@ namespace cepgen {
     double Parameterisation::FM(double xbj, double q2) { return operator()(xbj, q2).fm_; }
 
     double Parameterisation::F1(double xbj, double q2) {
-      const double f1 = 0.5 * ((1 + tau(xbj, q2)) * F2(xbj, q2) - FL(xbj, q2)) / xbj;
-      CG_DEBUG_LOOP("StructureFunctions:F1") << "F1 for Q² = " << q2 << ", xBj = " << xbj << ": " << f1 << "\n\t"
-                                             << "(F2 = " << f2_ << ", FL = " << fl_ << ").";
-      return f1;
+      return 0.5 * (gamma2(xbj, q2) * F2(xbj, q2) - FL(xbj, q2)) / xbj;
     }
 
     Parameterisation& Parameterisation::eval(double, double) {
@@ -116,9 +111,9 @@ namespace cepgen {
     }
 
     Parameterisation& Parameterisation::setF1F2(double f1, double f2) {
-      setF2(f2);
-      fl_ = (1 + tau(old_vals_.xbj, old_vals_.q2)) * f2_ - 2. * f1 * old_vals_.xbj;
-      return *this;
+      return (*this)
+          .setF2(f2)  // trivial
+          .setFL(gamma2(old_vals_.xbj, old_vals_.q2) * f2_ - 2. * f1 * old_vals_.xbj);
     }
 
     Parameterisation& Parameterisation::setF2(double f2) {
@@ -164,10 +159,8 @@ namespace cepgen {
     }
 
     Parameterisation& Parameterisation::computeFL(double xbj, double q2, double r) {
-      if (!fl_computed_) {
-        fl_ = f2_ * (1. + tau(xbj, q2)) * (r / (1. + r));
-        fl_computed_ = true;
-      }
+      if (!fl_computed_)
+        setFL(f2_ * gamma2(xbj, q2) * (r / (1. + r)));
       return *this;
     }
 

@@ -214,7 +214,7 @@ namespace cepgen {
       const double sigL = resmod507(Polarisation::L, w2_eff, q2_eff);
 
       double f2 =
-          prefactor_ * (1. - xbj) * q2_eff / (1 + tau(xbj, q2_eff)) * (sigT + sigL) / constants::GEVM2_TO_PB * 1.e6;
+          prefactor_ * (1. - xbj) * q2_eff / gamma2(xbj, q2_eff) * (sigT + sigL) / constants::GEVM2_TO_PB * 1.e6;
       if (q2 > q20_)
         f2 *= q21_ / (q21_ + delq2);
       setF2(f2);

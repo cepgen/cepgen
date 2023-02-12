@@ -115,8 +115,7 @@ namespace cepgen {
     };
 
     FioreBrasse& FioreBrasse::eval(double xbj, double q2) {
-      const double akin = 1. + 4. * mp2_ * xbj * xbj / q2;
-      const double prefactor = q2 * (1. - xbj) / (4. * M_PI * constants::ALPHA_EM * akin);
+      const double prefactor = q2 * (1. - xbj) / (4. * M_PI * constants::ALPHA_EM * gamma2(xbj, q2));
       const double s = utils::mX2(xbj, q2, mp2_);
 
       double amplitude_res = 0.;

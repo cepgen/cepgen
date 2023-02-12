@@ -41,7 +41,7 @@ namespace cepgen {
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
-        desc.setDescription("Bodek, Kand, and Xu");
+        desc.setDescription("Bodek, Kang, and Xu");
         desc.add<std::vector<double> >(
             "constants",
             {1.0741163,  0.75531124,  3.3506491,    1.7447015,    3.5102405, 1.040004,    1.2299128, 0.10625394,

@@ -39,21 +39,24 @@ namespace cepgen {
     private:
       double rho(double w2) const;
       void initialise();
+
       /// Transition \f$Q^2\f$ before reaching the continuum/perturbative regions
-      double q2_cut_;
+      const double q2_cut_;
       /// Transition \f$W^2\f$ between:
       /// - resonances and hybrid continuum/resonances low-\f$Q^2\f$ regions,
       /// - hybrid continuum/resonances and continuum low-\f$Q^2\f$ regions, or
       /// - continuum and perturbative high-\f$Q^2\f$ regions
-      std::vector<double> w2_lim_;
-      /// Enable/disable the HT correction
-      bool higher_twist_;
+      const std::vector<double> w2_lim_;
+      /// Value of the higher-twist correction
+      const double higher_twist_;
+      const ParametersList res_params_, pert_params_, cont_params_;
+
       /// Resonances-dominated region (low-\f$Q^2/W^2\f$) modelling
-      std::shared_ptr<Parameterisation> resonances_model_;
+      std::unique_ptr<Parameterisation> resonances_model_;
       /// Perturbative region (high-\f$Q^2/W^2\f$) modelling
-      std::shared_ptr<Parameterisation> perturbative_model_;
+      std::unique_ptr<Parameterisation> perturbative_model_;
       /// Continuum regions modelling
-      std::shared_ptr<Parameterisation> continuum_model_;
+      std::unique_ptr<Parameterisation> continuum_model_;
       bool initialised_{false};
       double inv_omega_range_{-1.};
     };
@@ -62,28 +65,30 @@ namespace cepgen {
         : Parameterisation(params),
           q2_cut_(steer<double>("Q2cut")),
           w2_lim_(steer<std::vector<double> >("W2limits")),
-          higher_twist_(steer<bool>("higherTwist")) {
-      const auto& res_params = steer<ParametersList>("resonancesSF");
-      const auto& pert_params = steer<ParametersList>("perturbativeSF");
-      const auto& cont_params = steer<ParametersList>("continuumSF");
+          higher_twist_(steer<double>("higherTwist")),
+          res_params_(steer<ParametersList>("resonancesSF")),
+          pert_params_(steer<ParametersList>("perturbativeSF")),
+          cont_params_(steer<ParametersList>("continuumSF")) {
       CG_DEBUG("Schaefer") << "LUXlike structure functions built using:\n"
-                           << " *)   resonances: " << res_params << ",\n"
-                           << " *) perturbative: " << pert_params << ",\n"
-                           << " *)    continuum: " << cont_params << ".";
-      resonances_model_ = StructureFunctionsFactory::get().build(res_params);
-      perturbative_model_ = StructureFunctionsFactory::get().build(pert_params);
-      continuum_model_ = StructureFunctionsFactory::get().build(cont_params);
+                           << " *)   resonances: " << res_params_ << ",\n"
+                           << " *) perturbative: " << pert_params_ << ",\n"
+                           << " *)    continuum: " << cont_params_ << ".";
     }
 
     void Schaefer::initialise() {
+      resonances_model_ = StructureFunctionsFactory::get().build(res_params_);
+      perturbative_model_ = StructureFunctionsFactory::get().build(pert_params_);
+      continuum_model_ = StructureFunctionsFactory::get().build(cont_params_);
       CG_DEBUG("LUXlike") << "LUXlike structure functions evaluator successfully initialised.\n"
                           << " * Q² cut:             " << q2_cut_ << " GeV²\n"
                           << " * W² ranges:          " << w2_lim_.at(0) << " GeV² / " << w2_lim_.at(1) << " GeV²\n"
                           << " *   resonances model: " << *resonances_model_ << "\n"
                           << " * perturbative model: " << *perturbative_model_ << "\n"
                           << " *    continuum model: " << *continuum_model_ << "\n"
-                          << " * higher-twist?       " << std::boolalpha << higher_twist_;
+                          << " * higher-twist corr:  " << higher_twist_ << ".";
       inv_omega_range_ = 1. / (w2_lim_.at(1) - w2_lim_.at(0));
+      if (inv_omega_range_ <= 0.)
+        throw CG_FATAL("LUXlike") << "Invalid W² limits: " << w2_lim_.at(0) << " / " << w2_lim_.at(1) << " GeV²!";
       initialised_ = true;
     }
 
@@ -114,7 +119,7 @@ namespace cepgen {
           setFL(continuum_model_->FL(xbj, q2));
           return *this;
         } else {
-          setF2(perturbative_model_->F2(xbj, q2) * (higher_twist_ ? 1. + 5.5 / q2 : 1.));
+          setF2(perturbative_model_->F2(xbj, q2) * (1. + higher_twist_ / q2));
           setFL(perturbative_model_->FL(xbj, q2));
           return *this;
         }
@@ -122,11 +127,9 @@ namespace cepgen {
     }
 
     double Schaefer::rho(double w2) const {
-      if (inv_omega_range_ <= 0.)
-        throw CG_FATAL("LUXlike") << "Invalid W² limits: " << w2_lim_.at(0) << " / " << w2_lim_.at(1) << " GeV²!";
       const double omega = (w2 - w2_lim_.at(0)) * inv_omega_range_;
       const double omega2 = omega * omega;
-      return 2. * omega2 - omega * omega;
+      return 2. * omega2 - omega2 * omega2;
     }
 
     ParametersDescription Schaefer::description() {
@@ -134,7 +137,7 @@ namespace cepgen {
       desc.setDescription("LUXlike (hybrid)");
       desc.add<double>("Q2cut", 9.);
       desc.add<std::vector<double> >("W2limits", {3., 4.});
-      desc.add<bool>("higherTwist", true);
+      desc.add<double>("higherTwist", 5.5);
       desc.add<ParametersDescription>("resonancesSF",
                                       StructureFunctionsFactory::get().describeParameters(102 /* ChristyBosted */));
       desc.add<ParametersDescription>("perturbativeSF",
