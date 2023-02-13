@@ -76,6 +76,7 @@ namespace cepgen {
         : TCanvas(name.c_str(), "", 600, 600), title_(title), ratio_(ratio) {
       gStyle->SetOptStat(0);
       gStyle->SetGridColor(17);
+      gStyle->SetEndErrorSize(0);
       Build();
     }
     inline ~ROOTCanvas() {}
@@ -301,14 +302,16 @@ namespace cepgen {
     }
     /// Save the canvas in an external file
     inline void Save(const std::string& ext, const std::string& out_dir = ".") {
-      if (ext != "pdf" && ext != "png" && ext != "root" && ext != "eps")
+      const auto& extensions = utils::split(ext, ',');
+      if (extensions.empty())
         return;
       TCanvas::cd();
       if (leg_)
         leg_->Draw();
       if (top_label_)
         top_label_->Draw();
-      TCanvas::SaveAs(Form("%s/%s.%s", out_dir.c_str(), TCanvas::GetName(), ext.c_str()));
+      for (const auto& extension : extensions)
+        TCanvas::SaveAs(Form("%s/%s.%s", out_dir.c_str(), TCanvas::GetName(), extension.c_str()));
     }
     /// Retrieve the legend object (if produced)
     inline TLegend* GetLegend() { return leg_.get(); }
