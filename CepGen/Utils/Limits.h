@@ -76,6 +76,10 @@ namespace cepgen {
     /// \param[in] num_bins number of values to generate
     /// \param[in] log_scale generate according to a log10 scale?
     std::vector<double> generate(size_t num_bins, bool log_scale = false) const;
+    /// Split the limits into sub-limits objects
+    /// \param[in] num_bins number of sub-limits to generate
+    /// \param[in] log_scale generate according to a log10 scale?
+    std::vector<Limits> split(size_t num_bins, bool log_scale = false) const;
 
     /// Human-readable expression of the limits
     friend std::ostream& operator<<(std::ostream&, const Limits&);

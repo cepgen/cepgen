@@ -108,6 +108,14 @@ namespace cepgen {
     return out;
   }
 
+  std::vector<Limits> Limits::split(size_t num_bins, bool log_scale) const {
+    const auto& gen = generate(num_bins, log_scale);
+    std::vector<Limits> out;
+    for (size_t i = 0; i < gen.size() - 1; ++i)
+      out.emplace_back(gen.at(i), gen.at(i + 1));
+    return out;
+  }
+
   std::ostream& operator<<(std::ostream& os, const Limits& lim) {
     if (!lim.hasMin() && !lim.hasMax())
       return os << "no cuts";
