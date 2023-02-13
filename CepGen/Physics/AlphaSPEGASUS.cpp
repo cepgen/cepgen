@@ -53,7 +53,7 @@ namespace cepgen {
       desc.add<int>("iord", 2).setDescription("Evolution order");
       desc.add<double>("fr2", 1.);
       desc.add<double>("mur", 1.);
-      desc.add<double>("asmur", 0.68183);
+      desc.add<double>("asmur", 0.49128);
       return desc;
     }
 
