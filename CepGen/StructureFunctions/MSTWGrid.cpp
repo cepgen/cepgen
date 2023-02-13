@@ -67,12 +67,10 @@ namespace mstw {
     Grid& computeFL(double, double, double) override { return *this; }
 
   private:
-    static const unsigned int GOOD_MAGIC;
+    static constexpr unsigned int GOOD_MAGIC = 0x5754534d;  // MSTW in ASCII
 
     header_t header_ = {};
   };
-
-  const unsigned int Grid::GOOD_MAGIC = 0x5754534d;  // MSTW in ASCII
 
   std::ostream& operator<<(std::ostream&, const Grid::sfval_t&);  ///< Human-readable description of a values point
   std::ostream& operator<<(std::ostream&,

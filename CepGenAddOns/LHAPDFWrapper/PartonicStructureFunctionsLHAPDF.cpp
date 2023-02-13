@@ -119,8 +119,7 @@ namespace cepgen {
         lha_pdf_set_ = LHAPDF::PDFSet(pdf_set_);
         lha_pdf_set_.mkPDFs<std::unique_ptr<LHAPDF::PDF> >(pdfs_);
         lhapdf_version = LHAPDF::version();
-        pdf_description = utils::replace_all(lha_pdf_set_.description(), ". ", ".\n  ");
-        ;
+        pdf_description = utils::replace_all(lha_pdf_set_.description(), {{"\\n", "\n"}, {". ", ".\n  "}});
         pdf_type = pdfs_[pdf_member_]->type();
       } catch (const LHAPDF::Exception& e) {
         throw CG_FATAL("Partonic") << "Caught LHAPDF exception:\n\t" << e.what();
