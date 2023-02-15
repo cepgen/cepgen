@@ -1,6 +1,7 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
+ *                2023       Dmitri Konstantinov
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,14 +20,18 @@
 #ifndef CepGen_Utils_Filesystem_h
 #define CepGen_Utils_Filesystem_h
 
-#if __cplusplus >= 201703L && (!defined __GNUC__ || __GNUC__ >= 8)
+#if defined(__has_include)
+#if __has_include(<filesystem>)
 #include <filesystem>
 namespace fs = std::filesystem;
-#elif __cplusplus >= 201103L
+#elif __has_include(<experimental/filesystem>)
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
 #else
-#error "*** no support for filesystem! ***"
+#error "*** no support for filesystem! "
+#endif
+#else
+#error " __has_include not supported! ***"
 #endif
 
 #include <string>
