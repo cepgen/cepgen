@@ -28,10 +28,10 @@ namespace fs = std::filesystem;
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
 #else
-#error "*** no support for filesystem! "
+#error "*** no support for filesystem! ***"
 #endif
 #else
-#error " __has_include not supported! ***"
+#error "*** no support for __has_include! ***"
 #endif
 
 #include <string>
