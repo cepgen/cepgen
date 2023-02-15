@@ -20,6 +20,7 @@
 #define CepGen_Utils_String_h
 
 #include <algorithm>
+#include <functional>
 #include <numeric>
 #include <set>
 #include <string>
@@ -145,17 +146,25 @@ namespace cepgen {
     }
     /// Helper to print a vector
     template <class T>
-    inline std::string repr(const std::vector<T>& vec, const std::string& sep = ",") {
+    inline std::string repr(const std::vector<T>& vec,
+                            const std::function<std::string(const T&)>& printer,
+                            const std::string& sep = ",") {
+      if (vec.empty())
+        return "{}";
       return std::accumulate(
-          std::next(vec.begin()), vec.end(), std::to_string(*vec.begin()), [&sep](std::string str, T xv) {
-            return std::move(str) + sep + std::to_string(xv);
+          std::next(vec.begin()), vec.end(), printer(*vec.begin()), [&printer, &sep](std::string str, const T& xv) {
+            return std::move(str) + sep + printer(xv);
           });
+    }
+    template <class T>
+    inline std::string repr(const std::vector<T>& vec, const std::string& sep = ",") {
+      return repr<T>(
+          vec, [](const T& xv) { return std::to_string(xv); }, sep);
     }
     template <>
     inline std::string repr(const std::vector<std::string>& vec, const std::string& sep) {
-      return std::accumulate(std::next(vec.begin()), vec.end(), *vec.begin(), [&sep](std::string str, std::string xv) {
-        return std::move(str) + sep + xv;
-      });
+      return repr<std::string>(
+          vec, [](const std::string& xv) { return xv; }, sep);
     }
     std::string randomString(size_t size);
     /// Trim leading spaces

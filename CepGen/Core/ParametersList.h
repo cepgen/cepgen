@@ -26,17 +26,19 @@
 
 #include "CepGen/Utils/Limits.h"
 
-#define DEFINE_TYPE(type)                                                        \
-  template <>                                                                    \
-  bool ParametersList::has<type>(const std::string& key) const;                  \
-  template <>                                                                    \
-  type ParametersList::get<type>(const std::string& key, const type& def) const; \
-  template <>                                                                    \
-  type& ParametersList::operator[]<type>(const std::string& key);                \
-  template <>                                                                    \
-  ParametersList& ParametersList::set<type>(std::string key, const type&);       \
-  template <>                                                                    \
-  std::vector<std::string> ParametersList::keysOf<type>() const;
+#define DEFINE_TYPE(type)                                                  \
+  template <>                                                              \
+  bool ParametersList::has<type>(const std::string&) const;                \
+  template <>                                                              \
+  type ParametersList::get<type>(const std::string&, const type&) const;   \
+  template <>                                                              \
+  type& ParametersList::operator[]<type>(const std::string&);              \
+  template <>                                                              \
+  ParametersList& ParametersList::set<type>(std::string key, const type&); \
+  template <>                                                              \
+  std::vector<std::string> ParametersList::keysOf<type>() const;           \
+  template <>                                                              \
+  size_t ParametersList::erase<type>(const std::string&);
 
 namespace cepgen {
   /// Indexing key for the module name
@@ -69,6 +71,10 @@ namespace cepgen {
     bool has(const std::string& key) const;
     /// Erase a parameter with key
     /// \return Number of key-indexed values erased
+    size_t erase(const std::string&);
+    /// Erase a typed parameter with key
+    /// \return Number of key-indexed values erased
+    template <typename T>
     size_t erase(const std::string&);
     /// Does the parameters list have a name key?
     template <typename T>
@@ -141,6 +147,8 @@ namespace cepgen {
     friend std::ostream& operator<<(std::ostream& os, const ParametersList&);
     /// Debugging-like printout of a parameters container
     const ParametersList& print(std::ostream&) const;
+    /// Normal printout of a parameters container
+    std::string print() const;
 
   private:
     std::map<std::string, ParametersList> param_values_;

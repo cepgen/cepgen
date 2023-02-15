@@ -54,6 +54,10 @@
     std::vector<std::string> out;                                                                                   \
     std::transform(coll.begin(), coll.end(), std::back_inserter(out), [](const auto& pair) { return pair.first; }); \
     return out;                                                                                                     \
+  }                                                                                                                 \
+  template <>                                                                                                       \
+  size_t ParametersList::erase<type>(const std::string& key) {                                                      \
+    return coll.erase(key);                                                                                         \
   }
 
 #define IMPL_TYPE_ALL(type, coll, name) \
@@ -209,32 +213,10 @@ namespace cepgen {
   }
 
   size_t ParametersList::erase(const std::string& key) {
-    size_t out = 0ull;
-    if (bool_values_.count(key) > 0)
-      out += bool_values_.erase(key);
-    if (int_values_.count(key) > 0)
-      out += int_values_.erase(key);
-    if (ulong_values_.count(key) > 0)
-      out += ulong_values_.erase(key);
-    if (dbl_values_.count(key) > 0)
-      out += dbl_values_.erase(key);
-    if (str_values_.count(key) > 0)
-      out += str_values_.erase(key);
-    if (lim_values_.count(key) > 0)
-      out += lim_values_.erase(key);
-    if (param_values_.count(key) > 0)
-      out += param_values_.erase(key);
-    if (vec_int_values_.count(key) > 0)
-      out += vec_int_values_.erase(key);
-    if (vec_dbl_values_.count(key) > 0)
-      out += vec_dbl_values_.erase(key);
-    if (vec_str_values_.count(key) > 0)
-      out += vec_str_values_.erase(key);
-    if (vec_param_values_.count(key) > 0)
-      out += vec_param_values_.erase(key);
-    if (vec_vec_dbl_values_.count(key) != 0)
-      out += vec_vec_dbl_values_.erase(key);
-    return out;
+    return erase<bool>(key) + erase<int>(key) + erase<unsigned long long>(key) + erase<double>(key) +
+           erase<std::string>(key) + erase<Limits>(key) + erase<ParametersList>(key) + erase<std::vector<int> >(key) +
+           erase<std::vector<double> >(key) + erase<std::vector<ParametersList> >(key) +
+           erase<std::vector<std::vector<double> > >(key);
   }
 
   bool ParametersList::empty() const { return keys(true).empty(); }
@@ -262,6 +244,12 @@ namespace cepgen {
         os << sep << key << "=" << getString(key, true), sep = ", ";
     os << ")";
     return *this;
+  }
+
+  std::string ParametersList::print() const {
+    std::ostringstream os;
+    print(os);
+    return os.str();
   }
 
   std::vector<std::string> ParametersList::keys(bool name_key) const {

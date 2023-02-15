@@ -135,10 +135,10 @@ namespace cepgen {
           if (!par_desc.empty())
             os << " (" << utils::colourise(par_desc, utils::Colour::none, utils::Modifier::italic) << ")";
           const auto& params = ParametersList::get<ParametersList>(key);
-          if (params.empty())
-            os << " with expected content: " << obj.describe(offset + 1);
-          else
+          if (!params.empty())
             os << " with user-steered content: " << obj.steer(params).describe(offset + 1);
+          else
+            os << " with expected content: " << obj.describe(offset + 1);
         } break;
         default: {
           const auto& descr = obj.describe(offset + 1);
