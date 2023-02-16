@@ -13,3 +13,7 @@ cepgen_build(CepGenHepMC2 SOURCES *.cpp
     EXT_LIBS ${HEPMC_LIB}
     EXT_HEADERS ${HEPMC_INCLUDE}
     INSTALL_COMPONENT hepmc2)
+cpack_add_component(hepmc2
+    DISPLAY_NAME "CepGen HepMC wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the HepMC library"
+    DEPENDS lib)

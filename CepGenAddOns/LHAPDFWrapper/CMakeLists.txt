@@ -12,3 +12,7 @@ cepgen_build(CepGenLHAPDF SOURCES PartonicStructureFunctionsLHAPDF.cpp AlphaSLHA
     EXT_LIBS ${LHAPDF}
     EXT_HEADERS ${LHAPDF_INCLUDE}
     INSTALL_COMPONENT lhapdf)
+cpack_add_component(lhapdf
+    DISPLAY_NAME "CepGen LHAPDF wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the LHAPDF library"
+    DEPENDS lib)

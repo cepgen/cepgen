@@ -24,3 +24,7 @@ cepgen_build(CepGenDelphes SOURCES ${sources}
     PROPERTY CXX_STANDARD ${ROOT_CXX_STANDARD}
     CFLAGS ${ROOT_CXX_FLAGS}
     INSTALL_COMPONENT delphes)
+cpack_add_component(delphes
+    DISPLAY_NAME "CepGen Delphes wrappers library"
+    DESCRIPTION "A CepGen wrapper to the Delphes utility"
+    DEPENDS lib)

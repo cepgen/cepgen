@@ -23,4 +23,7 @@ cepgen_build(CepGenPythia8 SOURCES *.cpp
     TESTS test/*.cc
     OPTIONS "-Wno-misleading-indentation"
     INSTALL_COMPONENT pythia8)
-
+cpack_add_component(pythia8
+    DISPLAY_NAME "CepGen Pythia 8 wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to Pythia 8"
+    DEPENDS lib)

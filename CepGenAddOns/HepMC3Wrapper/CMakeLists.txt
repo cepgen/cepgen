@@ -49,3 +49,7 @@ cepgen_build(CepGenHepMC3 SOURCES *.cpp
     EXT_HEADERS ${headers}
     DEFINITIONS ${defs}
     INSTALL_COMPONENT hepmc3)
+cpack_add_component(hepmc3
+    DISPLAY_NAME "CepGen HepMC3 wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the HepMC3 library"
+    DEPENDS lib)

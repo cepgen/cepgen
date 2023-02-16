@@ -16,3 +16,7 @@ cepgen_build(CepGenProMC SOURCES *.cpp
     EXT_HEADERS ${PROMC_INCLUDE} ${PROMC_EXT_INCLUDE}
     OPTIONS "-Wno-deprecated-declarations"
     INSTALL_COMPONENT promc)
+cpack_add_component(promc
+    DISPLAY_NAME "CepGen ProMC wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the ProMC library"
+    DEPENDS lib)

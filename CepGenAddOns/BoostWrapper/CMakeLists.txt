@@ -27,3 +27,7 @@ cepgen_build(CepGenBoost SOURCES ${sources}
     EXT_HEADERS ${Boost_INCLUDE_DIRS}
     CFLAGS "-pthread -Wno-pedantic"
     INSTALL_COMPONENT boost)
+cpack_add_component(boost
+    DISPLAY_NAME "CepGen Boost wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the Boost library"
+    DEPENDS lib)

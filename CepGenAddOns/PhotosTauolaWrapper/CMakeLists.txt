@@ -39,3 +39,7 @@ cepgen_build(CepGenPhotosTauola SOURCES ${SRCS}
     EXT_LIBS ${EXT_LIBS} CepGenHepMC3
     EXT_HEADERS ${EXT_INCS} ${HEPMC3_INCLUDE}
     INSTALL_COMPONENT photostauola)
+cpack_add_component(photostauola
+    DISPLAY_NAME "CepGen Photos++/Tauola++ wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the Photos and Tauola libraries"
+    DEPENDS lib)

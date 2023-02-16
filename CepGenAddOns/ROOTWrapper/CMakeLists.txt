@@ -39,3 +39,7 @@ cepgen_build(CepGenRoot SOURCES ${sources}
     PROPERTY CXX_STANDARD ${ROOT_CXX_STANDARD}
     CFLAGS "${ROOT_CXX_FLAGS} -Wno-bitwise-instead-of-logical -Wno-sizeof-pointer-div -Wno-unused-command-line-argument"
     INSTALL_COMPONENT root)
+cpack_add_component(root
+    DISPLAY_NAME "CepGen ROOT wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the ROOT library"
+    DEPENDS lib)

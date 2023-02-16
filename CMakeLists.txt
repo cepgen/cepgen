@@ -9,7 +9,7 @@ if($ENV{HOSTNAME} MATCHES "^lxplus[0-9]+.cern.ch")
 endif()
 
 set(CPACK_RPM_COMPONENT_INSTALL ON)
-cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 project(CepGen)
 set(PROJECT_VERSION 1)
 set(VERSION 1.0.1)
@@ -85,6 +85,7 @@ set(CEPGEN_ADDONS_FILE "${CMAKE_CURRENT_BINARY_DIR}/CepGenAddOns.txt")
 
 include(UseEnvironment)
 include(BuildUtils)
+include_directories(${PROJECT_SOURCE_DIR})
 
 #----- enable fortran for external libraries linking
 
@@ -92,11 +93,23 @@ enable_language(Fortran)
 
 #----- build all the intermediate objects
 
-include_directories(${PROJECT_SOURCE_DIR})
+include(BuildPackage)
 if(CMAKE_BUILD_CORE)
   add_subdirectory(CepGen)
   list(APPEND CEPGEN_LIBRARIES CepGen)
 endif()
+export(PACKAGE CepGen)
+
+#--- register packages
+cpack_add_component(lib
+    DISPLAY_NAME "CepGen core library"
+    DESCRIPTION "The full set of core libraries embedded within CepGen"
+    REQUIRED)
+cpack_add_component(devel
+    DISPLAY_NAME "CepGen development headers"
+    DESCRIPTION "Collection of C and C++ includes for the development of CepGen-dependent libraries"
+    DEPENDS lib)
+
 if(CMAKE_BUILD_PROCESSES)
   add_subdirectory(CepGenProcesses)
 endif()
@@ -135,8 +148,6 @@ install(DIRECTORY Cards
 install(FILES ${external_files} ${readme_file} ${CEPGEN_ADDONS_FILE}
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
   COMPONENT lib)
-export(PACKAGE CepGen)
-include(BuildPackage)
 
 #----- documentation
 

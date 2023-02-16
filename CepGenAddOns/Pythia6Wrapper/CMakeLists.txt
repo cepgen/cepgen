@@ -37,3 +37,7 @@ cepgen_build(CepGenPythia6 SOURCES *.cpp
     EXT_LIBS ${PYTHIA6LIB}
     OPTIONS "-Wno-misleading-indentation"
     INSTALL_COMPONENT pythia6)
+cpack_add_component(pythia6
+    DISPLAY_NAME "CepGen Pythia 6 wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to Pythia 6"
+    DEPENDS lib)

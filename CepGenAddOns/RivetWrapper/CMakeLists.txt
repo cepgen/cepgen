@@ -13,3 +13,7 @@ cepgen_build(CepGenRivet SOURCES *.cpp
     EXT_HEADERS ${YODA_INCLUDE}
     OPTIONS "-Wno-deprecated-copy"
     INSTALL_COMPONENT rivet)
+cpack_add_component(rivet
+    DISPLAY_NAME "CepGen Rivet wrappers library"
+    DESCRIPTION "Collection of CepGen wrappers to the Rivet library"
+    DEPENDS lib)
