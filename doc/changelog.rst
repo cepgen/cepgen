@@ -5,6 +5,29 @@ Latest revisions
 ^^^^^^^^^^^^^^^^
 
 .. changelog::
+    :version: 1.1.0
+    :released: Fri Feb 17 2023
+
+    .. change::
+        :tags: core
+
+        Generalisation of parton flux computation through a new intermediate object.
+        Stripped all factories from their objects' namespaces ; now require a `;` at registration, because why not?
+        Base objects for event interaction modules (modifiers, output handlers, ...) now all derive from a base `cepgen::EventHandler` object, and are now given a full `CepGen/EventFilter` directory ; new `cepgen::EventHarvester` base object to hold integrated distributions to be displayed.
+        Added accessor for external algorithm's base object (if defined).
+        Grid parameters for event generation are now downgraded with single-precision floats.
+        Large refactoring of the analytic integrators algorithms, which have a shared API with numerical/MC integrators.
+        New numerical derivators wrapper (ROOT, GSL).
+
+    .. change::
+        :tags: physics
+
+        Improvement in form factors modellings API, stripped most of the LPAIR-specific cases.
+        Huge simplification of the kinematics definitions object.
+        New HI fluxes, and Bodek-Kang-Xu hybrid structure functions.
+        :math:`\alpha_{\rm EM}(Q^2)` evolution can be used in fortran processes, as for :math:`\alpha_S(Q^2)`.
+
+.. changelog::
     :version: 1.0.2
     :released: Mon Aug 22 2022
 
