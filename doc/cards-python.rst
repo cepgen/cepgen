@@ -55,6 +55,12 @@ As of version 0.8 of CepGen, the three GSL implementations of the following inte
 * ``MISER`` stratified sampling by Press et al. :cite:`Press:1989vk`,
 * ``plain`` "hit-and-miss" algorithm.
 
+Since then, several add-ons were introduced, to quote a few:
+
+* a "``Naive``" Boost integrator, as documented in `the official Boost documentation <https://www.boost.org/doc/libs/1_81_0/libs/math/doc/html/math_toolkit/naive_monte_carlo.html>`_,
+* an interface to ``ROOT``'s `ROOT::Math::IntegratorOneDim <https://root.cern.ch/doc/master/classROOT_1_1Math_1_1IntegratorOneDim.html>`_ and `ROOT::Math::IntegratorMultiDim <https://root.cern.ch/doc/master/classROOT_1_1Math_1_1IntegratorMultiDim.html>`_ general purpose MC integrator algorithms, and the more specific interface to the `TFoam <https://root.cern.ch/doc/master/classTFoam.html>`_ implementation of the FOAM algorithm :cite:p:`Jadach:2002kn`,
+* the various interfaces to the integrators of the `Cuba` suite: `cuba-vegas`, `cuba-suave`, `cuba-divonne`, and `cuba-cuhre`, as documented in `the official Cuba library documentation from FeynArts <https://feynarts.de/cuba/>`_.
+
 ``generator`` module block
 --------------------------
 
@@ -140,7 +146,7 @@ See the description page of each process to get a list of supported parameters t
 
 .. warning:: Under construction
 
-.. _configuration-card-example:
+.. _configuration-card-example-python:
 
 Configuration card example
 --------------------------
@@ -184,4 +190,4 @@ can be steered using the following card:
        filename = 'lpair-example.lhef',
    )
 
-This configuration is equivalent to the *LPAIR card* shown `here <cards-lpair#configuration-card-example>`_.
+This configuration is equivalent to the *LPAIR card* shown `here <cards-lpair#configuration-card-example-lpair>`_.

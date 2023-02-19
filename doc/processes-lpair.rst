@@ -30,3 +30,5 @@ It can hence take the following values:
 * ``PDG.tau := 15`` for the :math:`\tau^+\tau^-` pair production.
 
 .. doxygenclass:: cepgen::proc::LPAIR
+   :private-members:
+   :undoc-members:

@@ -15,9 +15,9 @@ else()
 endif()
 set(CEPGEN_VERSION "${VERSION}")
 string(TIMESTAMP CURRENT_YEAR "%Y")
-set(DOXYGEN_INPUT_DIR "${PROJECT_SOURCE_DIR}/CepGen \
-                       ${PROJECT_SOURCE_DIR}/CepGenAddOns \
-                       ${PROJECT_SOURCE_DIR}/CepGenProcesses \
+set(DOXYGEN_INPUT_DIR "${PROJECT_SOURCE_DIR}/CepGen
+                       ${PROJECT_SOURCE_DIR}/CepGenAddOns
+                       ${PROJECT_SOURCE_DIR}/CepGenProcesses
                        ${PROJECT_SOURCE_DIR}/Cards")
 set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/doxygen)
 set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/xml/index.xml)

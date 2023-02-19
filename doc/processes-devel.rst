@@ -6,11 +6,7 @@ Processes development
 
 In CepGen, all processes are defined as an object derivating from the following base class:
 
-.. container::toggle
-
-   .. container::header
-
-      **Show/Hide Code**
+.. toggle::
 
    .. doxygenclass:: cepgen::proc::Process
       :members:

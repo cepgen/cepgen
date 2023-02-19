@@ -98,7 +98,7 @@ Outgoing protons / remnants
 
     Fractional longitudinal momentum loss :math:`\xi = \Delta p/p`
 
-.. _configuration-card-example:
+.. _configuration-card-example-lpair:
 
 Configuration card example
 --------------------------
@@ -128,4 +128,4 @@ can be steered using the following card:
    OUTP lhef
    OUTF lpair-example.lhe
 
-This configuration is equivalent to the *Python card* shown `here <cards-python#configuration-card-example>`_.
+This configuration is equivalent to the *Python card* shown `here <cards-python#configuration-card-example-python>`_.

@@ -41,3 +41,5 @@ It can take the following values:
 * ``4``: transverse-transverse.
 
 .. doxygenclass:: cepgen::proc::PPtoWW
+   :private-members:
+   :undoc-members:

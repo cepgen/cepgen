@@ -40,3 +40,5 @@ It can take the following values:
 * ``PDG.down``, ``PDG.up``, ``PDG.strange``, ``PDG.charm``, ``PDG.bottom``, ``PDG.top`` (or equivalently ``1-6``): quark pair production.
 
 .. doxygenclass:: cepgen::proc::PPtoFF
+   :private-members:
+   :undoc-members:
