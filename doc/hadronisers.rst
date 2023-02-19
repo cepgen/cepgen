@@ -10,11 +10,9 @@ All modules are derived from a common :cpp:class:`cepgen::hadr::Hadroniser` clas
 .. doxygenclass:: cepgen::EventModifier
    :outline:
 
+Detailed description
+
 .. toggle::
-
-   .. container:: header
-
-      Detailed description
 
    .. doxygenclass:: cepgen::EventModifier
       :members:
@@ -25,11 +23,9 @@ All modules are derived from a common :cpp:class:`cepgen::hadr::Hadroniser` clas
 .. doxygenclass:: cepgen::hadr::Hadroniser
    :outline:
 
+Detailed description
+
 .. toggle::
-
-   .. container:: header
-
-      Detailed description
 
    .. doxygenclass:: cepgen::hadr::Hadroniser
       :members:
@@ -37,27 +33,46 @@ All modules are derived from a common :cpp:class:`cepgen::hadr::Hadroniser` clas
 
 ----
 
+Hadronisers
+-----------
+
 A full list of the algorithms and their parameters can be found `here <raw-modules#evtmod>`_.
 In particular, a sub-collection of algorithms currently supported is:
 
 
 ``pythia6``
------------
+~~~~~~~~~~~
 
 .. versionadded:: 0.9.6
 .. doxygenclass:: cepgen::hadr::Pythia6Hadroniser
-   :outline:
+   :private-members:
 
 This legacy fragmentation module mimicks the original LPAIR Jetset interfacing.
 Thus, in dissociative photon emission, this latter is approximated as emitted from a valence quark tied to a diquark system in a beam remnant.
 The flavours mixing is performed randomly on an event-by-event basis (with values chosen in :math:`(u,ud_0)`, :math:`(u,ud_1)`, and :math:`(d,uu_1)`).
 
 ``pythia8``
------------
+~~~~~~~~~~~
 
 .. warning:: Under construction
 
 .. versionadded:: 0.9
 .. doxygenclass:: cepgen::hadr::Pythia8Hadroniser
-   :outline:
+   :private-members:
 
+Event modifiers
+---------------
+
+``PhotosFilter``
+~~~~~~~~~~~~~~~~
+
+.. versionadded:: 1.0
+.. doxygenclass:: cepgen::hadr::PhotosFilter
+   :private-members:
+
+``TauolaFilter``
+~~~~~~~~~~~~~~~~
+
+.. versionadded:: 1.0
+.. doxygenclass:: cepgen::hadr::TauolaFilter
+   :private-members:
