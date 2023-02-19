@@ -20,13 +20,13 @@
 # -- Project information -----------------------------------------------------
 
 project = u'CepGen'
-copyright = u'2013-2023, the CepGen Collaboration'
+copyright = u'2013-@CURRENT_YEAR@, the CepGen Collaboration'
 author = u'Laurent Forthomme'
 
 # The short X.Y version
-version = u'1.1.0'
+version = u'@CEPGEN_VERSION@'
 # The full version, including alpha/beta/rc tags
-release = u'1.1.0'
+release = u'@CEPGEN_VERSION@'
 
 
 # -- General configuration ---------------------------------------------------
