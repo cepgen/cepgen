@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
           "derivators,D", "type of derivators to use", &derivators, cepgen::DerivatorFactory::get().modules())
       .parse();
 
-  auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+  auto plt = cepgen::DrawerFactory::get().build(plotter);
   for (const auto& deriv_name : derivators) {
     auto der = cepgen::DerivatorFactory::get().build(deriv_name, cepgen::ParametersList().set<double>("h", 0.05));
 

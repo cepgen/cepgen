@@ -34,12 +34,11 @@ int main(int argc, char* argv[]) {
 
   cepgen::initialise();
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument(
-          "plotters,p", "type of plotter to user", &plotters, cepgen::utils::DrawerFactory::get().modules())
+      .addOptionalArgument("plotters,p", "type of plotter to user", &plotters, cepgen::DrawerFactory::get().modules())
       .parse();
 
   for (const auto& plotter : plotters) {
-    auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+    auto plt = cepgen::DrawerFactory::get().build(plotter);
 
     CG_LOG << "---------- 1D graph ----------";
 

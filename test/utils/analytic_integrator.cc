@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
       .parse();
   cepgen::initialise();
 
-  auto plt = cepgen::utils::DrawerFactory::get().build(plotter);
+  auto plt = cepgen::DrawerFactory::get().build(plotter);
   auto integ = cepgen::AnalyticIntegratorFactory::get().build(integrator);
 
   // test 1D graph
