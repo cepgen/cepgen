@@ -64,7 +64,7 @@ namespace cepgen {
     for (auto& point : given_)
       given_arr.emplace_back(point.data());
 
-    Divonne(integrand_->size(),
+    Divonne(gIntegrand->size(),
             ncomp_,
             cuba_integrand,
             nullptr,

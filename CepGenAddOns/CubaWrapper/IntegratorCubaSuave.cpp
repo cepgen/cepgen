@@ -50,7 +50,7 @@ namespace cepgen {
     int neval, fail, nregions;
     double integral, error, prob;
 
-    Suave(integrand_->size(),
+    Suave(gIntegrand->size(),
           ncomp_,
           cuba_integrand,
           nullptr,

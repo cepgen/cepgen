@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2022  Laurent Forthomme
+ *  Copyright (C) 2021-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #include "CepGenAddOns/CubaWrapper/IntegratorCuba.h"
 
 namespace cepgen {
-  static Integrand* gIntegrand{nullptr};
+  Integrand* IntegratorCuba::gIntegrand = nullptr;
 
   IntegratorCuba::IntegratorCuba(const ParametersList& params)
       : Integrator(params),
@@ -33,9 +33,9 @@ namespace cepgen {
         maxeval_(steer<int>("maxeval")),
         verbose_(steer<int>("verbose")) {}
 
-  void IntegratorCuba::setIntegrand(Integrand& integr) {
-    Integrator::setIntegrand(integr);
-    gIntegrand = integrand_;
+  void IntegratorCuba::integrate(Integrand& integr, double& result, double& abserr) {
+    gIntegrand = &integr;
+    integrate(result, abserr);
   }
 
   ParametersDescription IntegratorCuba::description() {
@@ -52,10 +52,10 @@ namespace cepgen {
   }
 
   int cuba_integrand(const int* ndim, const double xx[], const int* /*ncomp*/, double ff[], void* /*userdata*/) {
-    if (!gIntegrand)
+    if (!IntegratorCuba::gIntegrand)
       throw CG_FATAL("cuba_integrand") << "Integrand not set for the Cuba algorithm!";
     //FIXME handle the non-[0,1] ranges
-    ff[0] = gIntegrand->eval(std::vector<double>(xx, xx + *ndim));
+    ff[0] = IntegratorCuba::gIntegrand->eval(std::vector<double>(xx, xx + *ndim));
     return 0;
   }
 }  // namespace cepgen

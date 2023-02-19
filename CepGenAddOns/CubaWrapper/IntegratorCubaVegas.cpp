@@ -50,7 +50,7 @@ namespace cepgen {
     int neval, fail;
     double integral, error, prob;
 
-    Vegas(integrand_->size(),
+    Vegas(gIntegrand->size(),
           ncomp_,
           cuba_integrand,
           nullptr,

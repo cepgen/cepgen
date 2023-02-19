@@ -45,7 +45,7 @@ namespace cepgen {
     int nregions, neval, fail;
     double integral, error, prob;
 
-    Cuhre(integrand_->size(),
+    Cuhre(gIntegrand->size(),
           ncomp_,
           cuba_integrand,
           nullptr,
