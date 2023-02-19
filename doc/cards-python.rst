@@ -119,7 +119,7 @@ A default ``pdgIds = (2212, 2212)`` initial state, or equivalently ``(PDG.proton
 The ``structureFunctions`` attribute specifies the :math:`F _ {2/L}(\xbj,Q^2)` structure function to use in the parameterisation of the incoming photon fluxes.
 The name of the structure functions set (see `the complete list here </structure-functions>`_) has to be prepended by ``StructureFunctions``
 
-For instance, the *Suri-Yennie* set may be selected through ``StructureFunctions.SuriYennie``.
+For instance, the *Suri-Yennie* set may either be selected through the ``StructureFunctions.SuriYennie`` enum value, or its numeric code ``11``.
 
 ``process.outKinematics`` parameters block
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

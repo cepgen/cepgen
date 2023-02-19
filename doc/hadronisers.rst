@@ -10,7 +10,7 @@ All modules are derived from a common :cpp:class:`cepgen::hadr::Hadroniser` clas
 .. doxygenclass:: cepgen::EventModifier
    :outline:
 
-.. container:: toggle
+.. toggle::
 
    .. container:: header
 
@@ -25,7 +25,7 @@ All modules are derived from a common :cpp:class:`cepgen::hadr::Hadroniser` clas
 .. doxygenclass:: cepgen::hadr::Hadroniser
    :outline:
 
-.. container:: toggle
+.. toggle::
 
    .. container:: header
 
