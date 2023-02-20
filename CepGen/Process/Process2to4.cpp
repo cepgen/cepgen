@@ -29,7 +29,10 @@ namespace cepgen {
     const Limits Process2to4::x_limits_{0., 1.};
 
     Process2to4::Process2to4(const ParametersList& params, std::array<pdgid_t, 2> partons, pdgid_t cs_id)
-        : KTProcess(params, partons, {cs_id, cs_id}), cs_prop_(PDG::get()(cs_id)), single_limits_(params) {}
+        : KTProcess(params, partons, {cs_id, cs_id}),
+          cs_prop_(PDG::get()(cs_id)),
+          single_limits_(params),
+          rnd_sign_(0, 1) {}
 
     void Process2to4::setCuts(const cuts::Central& single) { single_limits_ = single; }
 
@@ -118,7 +121,8 @@ namespace cepgen {
       amt2_ = std::hypot(p2t, cs_prop_.mass);
 
       //--- window in central system invariant mass
-      const double invm = sqrt(amt1_ * amt1_ + amt2_ * amt2_ + 2. * amt1_ * amt2_ * cosh(y_c1_ - y_c2_) - qt_sum.pt2());
+      const double invm =
+          std::sqrt(amt1_ * amt1_ + amt2_ * amt2_ + 2. * amt1_ * amt2_ * cosh(y_c1_ - y_c2_) - qt_sum.pt2());
       if (!kinematics().cuts().central.mass_sum.contains(invm))
         return 0.;
 
@@ -139,14 +143,9 @@ namespace cepgen {
 
       //--- additional conditions for energy-momentum conservation
 
-      const double s1_eff = x1_ * s() - qt1_ * qt1_, s2_eff = x2_ * s() - qt2_ * qt2_;
-
-      CG_DEBUG_LOOP("2to4:central") << "s(1/2)_eff = " << s1_eff << " / " << s2_eff << " GeV^2\n\t"
-                                    << "central system invariant mass = " << invm << " GeV";
-
-      if (kinematics().incomingBeams().positive().fragmented() && (sqrt(s2_eff) <= mX() + invm))
+      if (kinematics().incomingBeams().positive().fragmented() && std::sqrt(x2_ * s() - qt2_ * qt2_) <= mX() + invm)
         return 0.;
-      if (kinematics().incomingBeams().negative().fragmented() && (sqrt(s1_eff) <= mY() + invm))
+      if (kinematics().incomingBeams().negative().fragmented() && std::sqrt(x1_ * s() - qt1_ * qt1_) <= mY() + invm)
         return 0.;
 
       //--- four-momenta of the outgoing protons (or remnants)
@@ -211,12 +210,12 @@ namespace cepgen {
       //     d^2(kappa_1)d^2(kappa_2) instead of d(kappa_1^2)d(kappa_2^2)
       //=================================================================
 
-      return amat2 * pow(4. * x1_ * x2_ * s() * M_PI, -2) * 0.25 * constants::GEVM2_TO_PB * pt_diff_ * qt1_ * qt2_;
+      return amat2 * std::pow(4. * x1_ * x2_ * s() * M_PI, -2) * 0.25 * constants::GEVM2_TO_PB * pt_diff_ * qt1_ * qt2_;
     }
 
     void Process2to4::fillCentralParticlesKinematics() {
       //--- randomise the charge of outgoing system
-      short sign = (drand() > 0.5) ? +1 : -1;
+      const short sign = rnd_sign_(rnd_gen_) == 1 ? 1 : -1;
 
       //--- first outgoing central particle
       auto& oc1 = event()[Particle::CentralSystem][0].get();

@@ -22,6 +22,7 @@
 #include <cstddef>  // size_t
 #include <map>
 #include <memory>
+#include <random>
 #include <vector>
 
 #include "CepGen/Event/Particle.h"
@@ -193,6 +194,8 @@ namespace cepgen {
 
       /// Numerical limits for sanity comparisons
       static constexpr double NUM_LIMITS = 1.e-3;  // MeV/mm-level
+      /// Random number generator engine
+      std::default_random_engine rnd_gen_;
 
     private:
       /// \f$s\f$, squared centre of mass energy of the incoming particles' system, in \f$\mathrm{GeV}^2\f$

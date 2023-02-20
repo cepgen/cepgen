@@ -182,7 +182,4 @@ namespace cepgen {
   }  // namespace utils
 }  // namespace cepgen
 
-/// Provide a random number generated along a uniform distribution between 0 and 1
-#define drand() (double)rand() / RAND_MAX
-
 #endif

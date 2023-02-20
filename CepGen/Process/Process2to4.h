@@ -66,6 +66,7 @@ namespace cepgen {
       double amt2_{0.};  ///< Transverse mass of the second central particle
 
     private:
+      std::uniform_int_distribution<short> rnd_sign_;
       double ww_{0.};
     };
   }  // namespace proc
