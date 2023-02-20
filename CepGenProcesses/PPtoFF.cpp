@@ -108,14 +108,14 @@ namespace cepgen {
                                  << "charge = " << std::setprecision(2) << qf3_ / 3. << " e)\n\t"
                                  << "matrix element computation method: " << (int)method_ << ".";
 
-      if (!kin_.cuts().central.pt_diff.valid())
-        kin_.cuts().central.pt_diff = {0., 50.};  // tighter cut for fermions
+      if (!kinematics().cuts().central.pt_diff.valid())
+        kinematics().cuts().central.pt_diff = {0., 50.};  // tighter cut for fermions
 
       CG_DEBUG("PPtoFF:prepare") << "Incoming state:\n\t"
                                  << "mp(1/2) = " << sqrt(mA2_) << "/" << sqrt(mB2_) << ".";
 
       for (const auto& role : {Particle::Parton1, Particle::Parton2})
-        switch (event_->oneWithRole(role).pdgId()) {
+        switch (event().oneWithRole(role).pdgId()) {
           case PDG::gluon:
             break;
           case PDG::photon:
@@ -242,11 +242,11 @@ namespace cepgen {
 
       const double tmax = pow(std::max(amt1_, amt2_), 2);
       const double q1val = std::sqrt(std::max(eps12, tmax)), q2val = std::sqrt(std::max(eps22, tmax));
-      if (event_->oneWithRole(Particle::Parton1).pdgId() == PDG::gluon)
+      if (event().oneWithRole(Particle::Parton1).pdgId() == PDG::gluon)
         amat2 *= 0.5 * (*alphas_)(q1val);
       else
         amat2 *= (*alphaem_)(q1val);
-      if (event_->oneWithRole(Particle::Parton2).pdgId() == PDG::gluon)
+      if (event().oneWithRole(Particle::Parton2).pdgId() == PDG::gluon)
         amat2 *= 0.5 * (*alphas_)(q2val);
       else
         amat2 *= (*alphaem_)(q2val);

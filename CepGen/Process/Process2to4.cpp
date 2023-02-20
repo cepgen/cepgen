@@ -39,18 +39,24 @@ namespace cepgen {
 
       ww_ = 0.5 * (1. + sqrt(1. - 4. * sqrt(mA2_ * mB2_) / s_));
 
-      defineVariable(
-          y_c1_, Mapping::linear, kin_.cuts().central.rapidity_single, {-6., 6.}, "First outgoing particle rapidity");
-      defineVariable(
-          y_c2_, Mapping::linear, kin_.cuts().central.rapidity_single, {-6., 6.}, "Second outgoing particle rapidity");
+      defineVariable(y_c1_,
+                     Mapping::linear,
+                     kinematics().cuts().central.rapidity_single,
+                     {-6., 6.},
+                     "First outgoing particle rapidity");
+      defineVariable(y_c2_,
+                     Mapping::linear,
+                     kinematics().cuts().central.rapidity_single,
+                     {-6., 6.},
+                     "Second outgoing particle rapidity");
       defineVariable(pt_diff_,
                      Mapping::linear,
-                     kin_.cuts().central.pt_diff,
+                     kinematics().cuts().central.pt_diff,
                      {0., 500.},
                      "Final state particles transverse momentum difference");
       defineVariable(phi_pt_diff_,
                      Mapping::linear,
-                     kin_.cuts().central.phi_diff,
+                     kinematics().cuts().central.phi_diff,
                      {0., 2. * M_PI},
                      "Final state particles azimuthal angle difference");
 
@@ -90,13 +96,13 @@ namespace cepgen {
                                << "p(1/2)t = " << p1t << " / " << p2t;
 
       //--- window in rapidity distance
-      if (!kin_.cuts().central.rapidity_diff.contains(fabs(y_c1_ - y_c2_)))
+      if (!kinematics().cuts().central.rapidity_diff.contains(fabs(y_c1_ - y_c2_)))
         return 0.;
 
       //--- apply the pt cut already at this stage (remains unchanged)
-      if (!kin_.cuts().central.pt_single.contains(p1t))
+      if (!kinematics().cuts().central.pt_single.contains(p1t))
         return 0.;
-      if (!kin_.cuts().central.pt_single.contains(p2t))
+      if (!kinematics().cuts().central.pt_single.contains(p2t))
         return 0.;
       if (!single_limits_.pt_single.contains(p1t))
         return 0.;
@@ -104,7 +110,7 @@ namespace cepgen {
         return 0.;
 
       //--- window in transverse momentum difference
-      if (!kin_.cuts().central.pt_diff.contains(fabs(p1t - p2t)))
+      if (!kinematics().cuts().central.pt_diff.contains(fabs(p1t - p2t)))
         return 0.;
 
       //--- transverse mass for the two central particles
@@ -113,7 +119,7 @@ namespace cepgen {
 
       //--- window in central system invariant mass
       const double invm = sqrt(amt1_ * amt1_ + amt2_ * amt2_ + 2. * amt1_ * amt2_ * cosh(y_c1_ - y_c2_) - qt_sum.pt2());
-      if (!kin_.cuts().central.mass_sum.contains(invm))
+      if (!kinematics().cuts().central.mass_sum.contains(invm))
         return 0.;
 
       //--- auxiliary quantities
@@ -138,9 +144,9 @@ namespace cepgen {
       CG_DEBUG_LOOP("2to4:central") << "s(1/2)_eff = " << s1_eff << " / " << s2_eff << " GeV^2\n\t"
                                     << "central system invariant mass = " << invm << " GeV";
 
-      if (kin_.incomingBeams().positive().fragmented() && (sqrt(s2_eff) <= sqrt(mX2_) + invm))
+      if (kinematics().incomingBeams().positive().fragmented() && (sqrt(s2_eff) <= sqrt(mX2_) + invm))
         return 0.;
-      if (kin_.incomingBeams().negative().fragmented() && (sqrt(s1_eff) <= sqrt(mY2_) + invm))
+      if (kinematics().incomingBeams().negative().fragmented() && (sqrt(s1_eff) <= sqrt(mY2_) + invm))
         return 0.;
 
       //--- four-momenta of the outgoing protons (or remnants)
@@ -211,12 +217,12 @@ namespace cepgen {
       short sign = (drand() > 0.5) ? +1 : -1;
 
       //--- first outgoing central particle
-      auto& oc1 = (*event_)[Particle::CentralSystem][0].get();
+      auto& oc1 = event()[Particle::CentralSystem][0].get();
       oc1.setChargeSign(+sign);
       oc1.setStatus(Particle::Status::Undecayed);
 
       //--- second outgoing central particle
-      auto& oc2 = (*event_)[Particle::CentralSystem][1].get();
+      auto& oc2 = event()[Particle::CentralSystem][1].get();
       oc2.setChargeSign(-sign);
       oc2.setStatus(Particle::Status::Undecayed);
     }

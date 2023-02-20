@@ -199,6 +199,7 @@ namespace cepgen {
          */
       std::pair<double, double> map(double expo, const Limits& lim, const std::string& var_name = "");
       std::pair<double, double> mapla(double y, double z, int u, const Limits& lim);
+      bool applyCuts() const;
       std::default_random_engine rnd_gen_;
       std::uniform_real_distribution<double> rnd_phi_;
       std::uniform_int_distribution<short> rnd_side_;

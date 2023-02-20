@@ -47,35 +47,41 @@ namespace cepgen {
       setExtraContent();
       CG_DEBUG("KTProcess:addEventContent") << "Addition of:\n\t"
                                             << "Intermediate partons: " << intermediate_parts_ << "\n\t"
-                                            << "Produced system: " << produced_parts_ << ".\n\t" << *event_;
+                                            << "Produced system: " << produced_parts_ << ".\n\t" << event();
     }
 
     void KTProcess::prepareKinematics() {
-      if (!kin_.incomingBeams().positive().flux().ktFactorised() ||
-          !kin_.incomingBeams().negative().flux().ktFactorised())
+      if (!kinematics().incomingBeams().positive().flux().ktFactorised() ||
+          !kinematics().incomingBeams().negative().flux().ktFactorised())
         throw CG_FATAL("KTProcess:prepareKinematics") << "Invalid incoming parton fluxes.";
 
-      const auto& ib1 = event_->oneWithRole(Particle::IncomingBeam1);
-      const auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
-      auto& p1 = event_->oneWithRole(Particle::Parton1);
-      auto& p2 = event_->oneWithRole(Particle::Parton2);
+      const auto& ib1 = event().oneWithRole(Particle::IncomingBeam1);
+      const auto& ib2 = event().oneWithRole(Particle::IncomingBeam2);
+      auto& p1 = event().oneWithRole(Particle::Parton1);
+      auto& p2 = event().oneWithRole(Particle::Parton2);
 
       //============================================================================================
       // register the incoming partons' variables
       //============================================================================================
 
-      defineVariable(
-          qt1_, Mapping::exponential, kin_.cuts().initial.qt, {1.e-10, 500.}, "First incoming parton virtuality");
-      defineVariable(
-          qt2_, Mapping::exponential, kin_.cuts().initial.qt, {1.e-10, 500.}, "Second incoming parton virtuality");
+      defineVariable(qt1_,
+                     Mapping::exponential,
+                     kinematics().cuts().initial.qt,
+                     {1.e-10, 500.},
+                     "First incoming parton virtuality");
+      defineVariable(qt2_,
+                     Mapping::exponential,
+                     kinematics().cuts().initial.qt,
+                     {1.e-10, 500.},
+                     "Second incoming parton virtuality");
       defineVariable(phi_qt1_,
                      Mapping::linear,
-                     kin_.cuts().initial.phi_qt,
+                     kinematics().cuts().initial.phi_qt,
                      {0., 2. * M_PI},
                      "First incoming parton azimuthal angle");
       defineVariable(phi_qt2_,
                      Mapping::linear,
-                     kin_.cuts().initial.phi_qt,
+                     kinematics().cuts().initial.phi_qt,
                      {0., 2. * M_PI},
                      "Second incoming parton azimuthal angle");
 
@@ -83,8 +89,8 @@ namespace cepgen {
       // register the incoming partons
       //============================================================================================
 
-      p1.setPdgId(kin_.incomingBeams().positive().daughterId());
-      p2.setPdgId(kin_.incomingBeams().negative().daughterId());
+      p1.setPdgId(kinematics().incomingBeams().positive().daughterId());
+      p2.setPdgId(kinematics().incomingBeams().negative().daughterId());
 
       //============================================================================================
       // register all process-dependent variables
@@ -98,12 +104,18 @@ namespace cepgen {
 
       mX2_ = ib1.mass2();
       mY2_ = ib2.mass2();
-      if (kin_.incomingBeams().positive().fragmented())
-        defineVariable(
-            mX2_, Mapping::square, kin_.cuts().remnants.mx, {1.07, 1000.}, "Positive z proton remnant squared mass");
-      if (kin_.incomingBeams().negative().fragmented())
-        defineVariable(
-            mY2_, Mapping::square, kin_.cuts().remnants.mx, {1.07, 1000.}, "Negative z proton remnant squared mass");
+      if (kinematics().incomingBeams().positive().fragmented())
+        defineVariable(mX2_,
+                       Mapping::square,
+                       kinematics().cuts().remnants.mx,
+                       {1.07, 1000.},
+                       "Positive z proton remnant squared mass");
+      if (kinematics().incomingBeams().negative().fragmented())
+        defineVariable(mY2_,
+                       Mapping::square,
+                       kinematics().cuts().remnants.mx,
+                       {1.07, 1000.},
+                       "Negative z proton remnant squared mass");
     }
 
     double KTProcess::computeWeight() {
@@ -112,26 +124,26 @@ namespace cepgen {
         return 0.;  // avoid computing the fluxes if the matrix element is already null
 
       // convolute with fluxes according to modelling specified in parameters card
-      return cent_me * kin_.incomingBeams().positive().flux(x1_, qt1_ * qt1_, mX2_) * M_1_PI *
-             kin_.incomingBeams().negative().flux(x2_, qt2_ * qt2_, mY2_) * M_1_PI;
+      return cent_me * kinematics().incomingBeams().positive().flux(x1_, qt1_ * qt1_, mX2_) * M_1_PI *
+             kinematics().incomingBeams().negative().flux(x2_, qt2_ * qt2_, mY2_) * M_1_PI;
     }
 
     void KTProcess::fillKinematics(bool) {
       fillCentralParticlesKinematics();  // process-dependent!
 
       // set the kinematics of the incoming and outgoing beams (or remnants)
-      const auto& ib1 = event_->oneWithRole(Particle::IncomingBeam1);
-      const auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
-      auto& ob1 = event_->oneWithRole(Particle::OutgoingBeam1);
-      auto& ob2 = event_->oneWithRole(Particle::OutgoingBeam2);
-      auto& p1 = event_->oneWithRole(Particle::Parton1);
-      auto& p2 = event_->oneWithRole(Particle::Parton2);
-      auto& cm = event_->oneWithRole(Particle::Intermediate);
+      const auto& ib1 = event().oneWithRole(Particle::IncomingBeam1);
+      const auto& ib2 = event().oneWithRole(Particle::IncomingBeam2);
+      auto& ob1 = event().oneWithRole(Particle::OutgoingBeam1);
+      auto& ob2 = event().oneWithRole(Particle::OutgoingBeam2);
+      auto& p1 = event().oneWithRole(Particle::Parton1);
+      auto& p2 = event().oneWithRole(Particle::Parton2);
+      auto& cm = event().oneWithRole(Particle::Intermediate);
 
       // beam systems
-      if (kin_.incomingBeams().positive().fragmented())
+      if (kinematics().incomingBeams().positive().fragmented())
         ob1.setMass(sqrt(mX2_));
-      if (kin_.incomingBeams().negative().fragmented())
+      if (kinematics().incomingBeams().negative().fragmented())
         ob2.setMass(sqrt(mY2_));
 
       // parton systems

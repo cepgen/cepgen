@@ -198,6 +198,8 @@ namespace cepgen {
       double mY2_{-1.};  ///< Second diffractive state squared mass
       double t1_{-1.};   ///< First parton virtuality
       double t2_{-1.};   ///< Second parton virtuality
+
+    private:
       /// Set of cuts to apply on the final phase space
       Kinematics kin_{ParametersList()};
       /// Event object containing all the information on all particles in the system
