@@ -44,7 +44,7 @@ Elastic unintegrated photon densities are expressed as functions of the proton e
 
    \mathcal F_{\gamma/p}^{\rm el}(\xi,\vecqt^2) = \frac{\alpha}{\pi}\left[(1-\xi)\left(\frac{\vecqt^2}{\vecqt^2+\xi^2 m_p^2}\right)^2 F_E(Q^2)+\frac{\xi^2}{4}\left(\frac{\vecqt^2}{\vecqt^2+\xi^2 m_p^2}\right) F_M(Q^2)\right].
 
-The inelastic contribution further requires both the diffractive state four-momentum norm :math:`M_X` and a `proton structure functions parameterisation <str-fun>`_ as an input:
+The inelastic contribution further requires both the diffractive state four-momentum norm :math:`M_X` and a `proton structure functions parameterisation <structure-functions>`_ as an input:
 
 .. math::
 

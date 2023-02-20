@@ -40,6 +40,9 @@ It can take the following values:
 * ``3``: transverse-longitudinal,
 * ``4``: transverse-transverse.
 
+Full object reference
+---------------------
+
 .. doxygenclass:: cepgen::proc::PPtoWW
    :private-members:
    :undoc-members:

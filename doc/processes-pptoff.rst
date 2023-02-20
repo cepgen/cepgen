@@ -39,6 +39,9 @@ It can take the following values:
 * ``PDG.tau := 15``: :math:`\tau^+\tau^-` pair production
 * ``PDG.down``, ``PDG.up``, ``PDG.strange``, ``PDG.charm``, ``PDG.bottom``, ``PDG.top`` (or equivalently ``1-6``): quark pair production.
 
+Full object reference
+---------------------
+
 .. doxygenclass:: cepgen::proc::PPtoFF
    :private-members:
    :undoc-members:

@@ -43,7 +43,6 @@ This page is constantly evolving, but do not hesitate to contact us through the 
    lpair <processes-lpair>
    pptoff/pptoll <processes-pptoff>
    pptoww <processes-pptoww>
-   diffvm (𝛽) <processes-diffvm>
 
 .. toctree::
    :maxdepth: 1

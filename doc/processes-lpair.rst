@@ -1,6 +1,6 @@
 .. title:: LPAIR's two-photon production of fermion pair
 
-LPAIR’s $\\ggll$
+LPAIR’s :math:`\ggll`
 =====================
 
 The full description of this :math:`pp \rightarrow p^{(\ast)}(\ggll)p^{(\ast)}` process as previously implemented in ``LPAIR`` :cite:`Baranov:1991yq` can be reached through the ``lpair`` process in CepGen.
@@ -28,6 +28,9 @@ It can hence take the following values:
 * ``PDG.electron := 11`` for the :math:`e^+e^-` pair production,
 * ``PDG.muon := 13`` for the :math:`\mu^+\mu^-` pair production, and
 * ``PDG.tau := 15`` for the :math:`\tau^+\tau^-` pair production.
+
+Full object reference
+---------------------
 
 .. doxygenclass:: cepgen::proc::LPAIR
    :private-members:

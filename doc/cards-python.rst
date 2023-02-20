@@ -139,6 +139,13 @@ The kinematics phase space to be used in the integration and events production c
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This block is a generic placeholder for all process-dependent parameters.
+The usual basic parameter for this block is the process mode, which tells about the type of kinematics to be considered when defining its phase space:
+
+.. doxygenclass:: Cards::Config::ProcessMode_cfi::ProcessMode
+   :members:
+   :private-members:
+   :undoc-members:
+
 See the description page of each process to get a list of supported parameters to include in this collection.
 
 ``output`` module/sequence block

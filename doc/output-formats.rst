@@ -153,36 +153,43 @@ For this **text output format**, the default behaviour is storing one event per 
 The variable (here, ``var`` is used as an example) may be defined using the three following conventions:
 
 - ``var`` for event-level information (e.g. diffractive outgoing proton state multiplicity)
-- ``var(role)`` for the retrieval of a single particle with a given role.
+- ``var(role)`` for the retrieval of a single particle with a given role
 
-  This latter may be one of the followings:
+  These particle roles may be one of the followings:
    - ``ib1`` and ``ib2`` (resp. ``ob1`` and ``ob2``) for the incoming (resp. outgoing) beam kinematics,
    - ``pa1`` and ``pa2`` for the parton/initiator particle emitted from the first/second incoming beam particle respectively,
    - ``cs`` for the two-parton/initators system, and
    - ``int`` for any intermediate :math:`s`-channel particle exchange (depending on the process),
-- ``var(id)`` for the retrieval of a single particle with a given integer identifier.
+- ``var(id)`` for the retrieval of a single particle with a given integer identifier
+- ``var(role1,role2)`` or ``var(id1,id2)`` for the multi-particles kinematics correlation.
 
-As from version ``0.9.7`` of CepGen, the following variables are handled for the particles momentum definition:
+As from version ``0.9.7`` of CepGen, the following variables are handled for the particles (single, or combined) momentum definition:
 
 .. doxygenvariable:: cepgen::utils::EventBrowser::m_mom_str_
+
+In addition, particles momenta's correlations can be accessed through the following keywords:
+
+.. doxygenvariable:: cepgen::utils::EventBrowser::m_two_mom_str_
 
 Two extra boolean parameters may also be fed to the module configuration:
 
 - ``saveBanner``, to enable/disable the CepGen banner printout (containing useful information about the process and cuts definition), and
 - ``saveVariables``, to show/hide the list of variables used in this file.
 
-As an example, the following ``output`` block may be used for the ``lpair`` process:
+As an example, the following ``output`` block may be used for a 2-to-4 process such as ``lpair``:
 
 .. code:: python
 
-   output = cepgen.Module('text',
+   output = cepgen.Module('vars',
        filename = 'test.txt',
        variables = [
-           'm(4)', 'pt(cs)', 'pt(6)'
+           'm(4)',    # central two-photon/central system mass
+           'pt(cs)',  # central two-photon/central system transverse momentum
+           'pt(6)'    # first outgoing central system particle transverse momentum
        ],
        saveBanner = False,
        saveVariables = True,
-       separator = ' ', # single space
+       separator = ' ',  # single space
    )
 
 ``root``, ``root_tree``
