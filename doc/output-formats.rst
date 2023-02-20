@@ -11,10 +11,6 @@ All handlers are defined as modules derivating from the following abstract base 
 
 .. toggle::
 
-   .. container:: header
-
-      Detailed description
-
    .. doxygenclass:: cepgen::EventExporter
       :members:
       :no-link:
@@ -111,7 +107,7 @@ This handler allows to translate the CepGen event record into one (or multiple) 
 By default, this version is used in older releases. It allows a ``hepmc2`` output format to be supported.
 
 ``hepmc``, ``hepmc_root``, ``hepevt``, ...
-------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. doxygenclass:: cepgen::HepMC3Handler
    :outline:
@@ -228,16 +224,12 @@ As an example, the following ``output`` block may be used:
 
 The tree handler may be used in parallel to the two :cpp:class:`ROOT::CepGenRun` and :cpp:class:`ROOT::CepGenEvent` helper reader objects for a compact analysis workflow:
 
-  .. toggle::
+.. toggle::
 
-     .. container:: header
-
-        Detailed description
-
-     .. doxygenclass:: ROOT::CepGenRun
-        :members:
-     .. doxygenclass:: ROOT::CepGenEvent
-        :members:
+   .. doxygenclass:: ROOT::CepGenRun
+      :members:
+   .. doxygenclass:: ROOT::CepGenEvent
+      :members:
 
 ``delphes``
 ~~~~~~~~~~~
