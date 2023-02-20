@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -54,30 +54,6 @@ namespace cepgen {
       /// Assignment operator
       Process& operator=(const Process&);
 
-      /// Map of all incoming state particles in the process
-      typedef std::map<Particle::Role, pdgid_t> IncomingState;
-      /// Map of all outgoing particles in the process
-      typedef std::map<Particle::Role, std::vector<pdgid_t> > OutgoingState;
-
-      Momentum& pA();                    ///< Positive-z incoming beam particle's 4-momentum
-      const Momentum& pA() const;        ///< Positive-z incoming beam particle's 4-momentum
-      Momentum& pB();                    ///< Negative-z incoming beam particle's 4-momentum
-      const Momentum& pB() const;        ///< Negative-z incoming beam particle's 4-momentum
-      Momentum& pX();                    ///< Positive-z outgoing beam particle's 4-momentum
-      const Momentum& pX() const;        ///< Positive-z outgoing beam particle's 4-momentum
-      Momentum& pY();                    ///< Negative-z outgoing beam particle's 4-momentum
-      const Momentum& pY() const;        ///< Negative-z outgoing beam particle's 4-momentum
-      Momentum& q1();                    ///< Positive-z incoming parton's 4-momentum
-      const Momentum& q1() const;        ///< Positive-z incoming parton's 4-momentum
-      Momentum& q2();                    ///< Negative-z incoming parton's 4-momentum
-      const Momentum& q2() const;        ///< Negative-z incoming parton's 4-momentum
-      Momentum& pc(size_t);              ///< Central particle's 4-momentum
-      const Momentum& pc(size_t) const;  ///< Central particle's 4-momentum
-
-      //--- Mandelstam variables
-      double shat() const;  ///< \f$\hat s=(p_1+p_2)^2=(p_3+...)^2\f$
-
-    public:
       /// Copy all process attributes into a new object
       virtual std::unique_ptr<Process> clone() const;
       /// Set the incoming and outgoing state to be expected in the process
@@ -90,7 +66,6 @@ namespace cepgen {
       /// \param[in] symmetrise Symmetrise the event? (randomise the production of positively- and negatively-charged outgoing central particles)
       virtual void fillKinematics(bool symmetrise = false) = 0;
 
-    public:
       /// Restore the event object to its initial state
       void clearEvent();
       /// Return a constant reference to the process kinematics
@@ -119,6 +94,29 @@ namespace cepgen {
       Event* eventPtr();
 
     protected:
+      /// Map of all incoming state particles in the process
+      typedef std::map<Particle::Role, pdgid_t> IncomingState;
+      /// Map of all outgoing particles in the process
+      typedef std::map<Particle::Role, std::vector<pdgid_t> > OutgoingState;
+
+      Momentum& pA();                    ///< Positive-z incoming beam particle's 4-momentum
+      const Momentum& pA() const;        ///< Positive-z incoming beam particle's 4-momentum
+      Momentum& pB();                    ///< Negative-z incoming beam particle's 4-momentum
+      const Momentum& pB() const;        ///< Negative-z incoming beam particle's 4-momentum
+      Momentum& pX();                    ///< Positive-z outgoing beam particle's 4-momentum
+      const Momentum& pX() const;        ///< Positive-z outgoing beam particle's 4-momentum
+      Momentum& pY();                    ///< Negative-z outgoing beam particle's 4-momentum
+      const Momentum& pY() const;        ///< Negative-z outgoing beam particle's 4-momentum
+      Momentum& q1();                    ///< Positive-z incoming parton's 4-momentum
+      const Momentum& q1() const;        ///< Positive-z incoming parton's 4-momentum
+      Momentum& q2();                    ///< Negative-z incoming parton's 4-momentum
+      const Momentum& q2() const;        ///< Negative-z incoming parton's 4-momentum
+      Momentum& pc(size_t);              ///< Central particle's 4-momentum
+      const Momentum& pc(size_t) const;  ///< Central particle's 4-momentum
+
+      //--- Mandelstam variables
+      double shat() const;  ///< \f$\hat s=(p_1+p_2)^2=(p_3+...)^2\f$
+
       double mp_;   ///< Proton mass, in GeV/c\f$^2\f$
       double mp2_;  ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
       /**

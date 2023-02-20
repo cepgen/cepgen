@@ -43,8 +43,8 @@ private:
     // this method allows you to prepare the matrix element computation with the kinematics information
     // retrieved from the `kin_` member inherited from the cepgen::proc::Process base object.
     const auto& cs_prop = PDG::get()(produced_parts_.at(0));
-    CG_DEBUG("DummyProcess2to4:prepare") << "Produced particles: " << cs_prop_.descr << " ("
-                                         << "mass = " << cs_prop_.mass << " GeV.";
+    CG_DEBUG("DummyProcess2to4:prepare") << "Produced particles: " << cs_prop.descr << " ("
+                                         << "mass = " << cs_prop.mass << " GeV.";
   }
   double computeCentralMatrixElement() const override { return value_; }
 
