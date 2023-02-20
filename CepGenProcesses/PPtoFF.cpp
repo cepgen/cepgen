@@ -112,7 +112,7 @@ namespace cepgen {
         kinematics().cuts().central.pt_diff = {0., 50.};  // tighter cut for fermions
 
       CG_DEBUG("PPtoFF:prepare") << "Incoming state:\n\t"
-                                 << "mp(1/2) = " << sqrt(mA2_) << "/" << sqrt(mB2_) << ".";
+                                 << "mp(1/2) = " << mA() << "/" << mB() << ".";
 
       for (const auto& role : {Particle::Parton1, Particle::Parton2})
         switch (event().oneWithRole(role).pdgId()) {
@@ -165,8 +165,8 @@ namespace cepgen {
     }
 
     double PPtoFF::offShellME() const {
-      const double alpha1 = amt1_ / sqs_ * exp(y_c1_), beta1 = amt1_ / sqs_ * exp(-y_c1_);
-      const double alpha2 = amt2_ / sqs_ * exp(y_c2_), beta2 = amt2_ / sqs_ * exp(-y_c2_);
+      const double alpha1 = amt1_ / sqrtS() * exp(y_c1_), beta1 = amt1_ / sqrtS() * exp(-y_c1_);
+      const double alpha2 = amt2_ / sqrtS() * exp(y_c2_), beta2 = amt2_ / sqrtS() * exp(-y_c2_);
       const double x1 = alpha1 + alpha2, x2 = beta1 + beta2;
       const double z1p = alpha1 / x1, z1m = alpha2 / x1, z1 = z1p * z1m;
       const double z2p = beta1 / x2, z2m = beta2 / x2, z2 = z2p * z2m;
@@ -178,7 +178,7 @@ namespace cepgen {
       //--- positive-z photon kinematics
       const Momentum ak1 = (z1m * pc(0) - z1p * pc(1)).setPz(0.);
       const Momentum ph_p1 = ak1 + z1p * q2(), ph_m1 = ak1 - z1m * q2();
-      const double t1abs = (q1().pt2() + x1 * (mX2_ - mA2_) + x1 * x1 * mA2_) / (1. - x1);
+      const double t1abs = (q1().pt2() + x1 * (mX2() - mA2()) + x1 * x1 * mA2()) / (1. - x1);
       const double eps12 = mf2_ + z1 * t1abs;
       const double kp1 = 1. / (ph_p1.pt2() + eps12);
       const double km1 = 1. / (ph_m1.pt2() + eps12);
@@ -190,7 +190,7 @@ namespace cepgen {
       //--- negative-z photon kinematics
       const Momentum ak2 = (z2m * pc(0) - z2p * pc(1)).setPz(0.);
       const Momentum ph_p2 = ak2 + z2p * q1(), ph_m2 = ak2 - z2m * q1();
-      const double t2abs = (q2().pt2() + x2 * (mY2_ - mB2_) + x2 * x2 * mB2_) / (1. - x2);
+      const double t2abs = (q2().pt2() + x2 * (mY2() - mB2()) + x2 * x2 * mB2()) / (1. - x2);
       const double eps22 = mf2_ + z2 * t2abs;
       const double kp2 = 1. / (ph_p2.pt2() + eps22);
       const double km2 = 1. / (ph_m2.pt2() + eps22);
@@ -238,18 +238,18 @@ namespace cepgen {
       //     symmetrization
       //=================================================================
 
-      double amat2 = 0.5 * prefactor_ * pow(x1 * x2 * s_, 2) * (osp_.mat1 * amat2_1 + osp_.mat2 * amat2_2);
+      double amat2 = 0.5 * prefactor_ * pow(x1 * x2 * s(), 2) * (osp_.mat1 * amat2_1 + osp_.mat2 * amat2_2);
 
       const double tmax = pow(std::max(amt1_, amt2_), 2);
       const double q1val = std::sqrt(std::max(eps12, tmax)), q2val = std::sqrt(std::max(eps22, tmax));
       if (event().oneWithRole(Particle::Parton1).pdgId() == PDG::gluon)
-        amat2 *= 0.5 * (*alphas_)(q1val);
+        amat2 *= 0.5 * alphaS(q1val);
       else
-        amat2 *= (*alphaem_)(q1val);
+        amat2 *= alphaEM(q1val);
       if (event().oneWithRole(Particle::Parton2).pdgId() == PDG::gluon)
-        amat2 *= 0.5 * (*alphas_)(q2val);
+        amat2 *= 0.5 * alphaS(q2val);
       else
-        amat2 *= (*alphaem_)(q2val);
+        amat2 *= alphaEM(q2val);
 
       CG_DEBUG_LOOP("PPtoFF:offShell") << "aux2(1/2) = " << aux2_1 << " / " << aux2_2 << "\n\t"
                                        << "z(1/2) = " << z1 << " / " << z2 << "\n\t"

@@ -39,13 +39,13 @@ namespace cepgen {
         : NamedModule(proc),
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
-          mapped_variables_(proc.mapped_variables_),
-          point_coord_(proc.point_coord_),
-          base_jacobian_(proc.base_jacobian_),
           s_(proc.s_),
           sqs_(proc.sqs_),
           mA2_(proc.mA2_),
-          mB2_(proc.mB2_) {
+          mB2_(proc.mB2_),
+          mapped_variables_(proc.mapped_variables_),
+          point_coord_(proc.point_coord_),
+          base_jacobian_(proc.base_jacobian_) {
       if (proc.event_)
         event_.reset(new Event(*proc.event_));
       CG_DEBUG("Process").log([&](auto& log) {
@@ -335,6 +335,20 @@ namespace cepgen {
                                        << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.";
         clearEvent();
       }
+    }
+
+    double Process::alphaEM(double q) const {
+      if (!alphaem_)
+        throw CG_FATAL("Process:alphaEM")
+            << "Trying to compute the electromagnetic running coupling while it is not initialised.";
+      return (*alphaem_)(q);
+    }
+
+    double Process::alphaS(double q) const {
+      if (!alphas_)
+        throw CG_FATAL("Process:alphaS")
+            << "Trying to compute the strong running coupling while it is not initialised.";
+      return (*alphas_)(q);
     }
 
     void Process::dumpPoint() const {

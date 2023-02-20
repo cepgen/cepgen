@@ -102,16 +102,16 @@ namespace cepgen {
       // register the outgoing remnants' variables
       //============================================================================================
 
-      mX2_ = ib1.mass2();
-      mY2_ = ib2.mass2();
+      mX2() = ib1.mass2();
+      mY2() = ib2.mass2();
       if (kinematics().incomingBeams().positive().fragmented())
-        defineVariable(mX2_,
+        defineVariable(mX2(),
                        Mapping::square,
                        kinematics().cuts().remnants.mx,
                        {1.07, 1000.},
                        "Positive z proton remnant squared mass");
       if (kinematics().incomingBeams().negative().fragmented())
-        defineVariable(mY2_,
+        defineVariable(mY2(),
                        Mapping::square,
                        kinematics().cuts().remnants.mx,
                        {1.07, 1000.},
@@ -124,8 +124,8 @@ namespace cepgen {
         return 0.;  // avoid computing the fluxes if the matrix element is already null
 
       // convolute with fluxes according to modelling specified in parameters card
-      return cent_me * kinematics().incomingBeams().positive().flux(x1_, qt1_ * qt1_, mX2_) * M_1_PI *
-             kinematics().incomingBeams().negative().flux(x2_, qt2_ * qt2_, mY2_) * M_1_PI;
+      return kinematics().incomingBeams().positive().flux(x1_, qt1_ * qt1_, mX2()) * M_1_PI *
+             kinematics().incomingBeams().negative().flux(x2_, qt2_ * qt2_, mY2()) * M_1_PI * cent_me;
     }
 
     void KTProcess::fillKinematics(bool) {
@@ -142,9 +142,9 @@ namespace cepgen {
 
       // beam systems
       if (kinematics().incomingBeams().positive().fragmented())
-        ob1.setMass(sqrt(mX2_));
+        ob1.setMass(mX());
       if (kinematics().incomingBeams().negative().fragmented())
-        ob2.setMass(sqrt(mY2_));
+        ob2.setMass(mY());
 
       // parton systems
       p1.setMomentum(ib1.momentum() - pX(), true);

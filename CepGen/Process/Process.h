@@ -99,20 +99,43 @@ namespace cepgen {
       /// Map of all outgoing particles in the process
       typedef std::map<Particle::Role, std::vector<pdgid_t> > OutgoingState;
 
-      Momentum& pA();                    ///< Positive-z incoming beam particle's 4-momentum
-      const Momentum& pA() const;        ///< Positive-z incoming beam particle's 4-momentum
-      Momentum& pB();                    ///< Negative-z incoming beam particle's 4-momentum
-      const Momentum& pB() const;        ///< Negative-z incoming beam particle's 4-momentum
-      Momentum& pX();                    ///< Positive-z outgoing beam particle's 4-momentum
-      const Momentum& pX() const;        ///< Positive-z outgoing beam particle's 4-momentum
-      Momentum& pY();                    ///< Negative-z outgoing beam particle's 4-momentum
-      const Momentum& pY() const;        ///< Negative-z outgoing beam particle's 4-momentum
+      Momentum& pA();                                 ///< Positive-z incoming beam particle's 4-momentum
+      const Momentum& pA() const;                     ///< Positive-z incoming beam particle's 4-momentum
+      double mA() const { return std::sqrt(mA2()); }  ///< Positive-z incoming beam particle's mass
+      double mA2() const { return mA2_; }             ///< Positive-z incoming beam particle's squared mass
+
+      Momentum& pB();                                 ///< Negative-z incoming beam particle's 4-momentum
+      const Momentum& pB() const;                     ///< Negative-z incoming beam particle's 4-momentum
+      double mB() const { return std::sqrt(mB2()); }  ///< Negative-z incoming beam particle's mass
+      double mB2() const { return mB2_; }             ///< Negative-z incoming beam particle's squared mass
+
+      Momentum& pX();                                 ///< Positive-z outgoing beam particle's 4-momentum
+      const Momentum& pX() const;                     ///< Positive-z outgoing beam particle's 4-momentum
+      double mX() const { return std::sqrt(mX2()); }  ///< Positive-z outgoing beam particle's mass
+      double& mX2() { return mX2_; }                  ///< Positive-z outgoing beam particle's squared mass
+      double mX2() const { return mX2_; }             ///< Positive-z outgoing beam particle's squared mass
+
+      Momentum& pY();                                 ///< Negative-z outgoing beam particle's 4-momentum
+      const Momentum& pY() const;                     ///< Negative-z outgoing beam particle's 4-momentum
+      double mY() const { return std::sqrt(mY2()); }  ///< Negative-z outgoinging beam particle's mass
+      double& mY2() { return mY2_; }                  ///< Negative-z outgoing beam particle's squared mass
+      double mY2() const { return mY2_; }             ///< Negative-z outgoing beam particle's squared mass
+
       Momentum& q1();                    ///< Positive-z incoming parton's 4-momentum
       const Momentum& q1() const;        ///< Positive-z incoming parton's 4-momentum
+      double& t1() { return t1_; }       ///< Positive-z incoming parton's squared mass
+      double t1() const { return t1_; }  ///< Positive-z incoming parton's squared mass
+
       Momentum& q2();                    ///< Negative-z incoming parton's 4-momentum
       const Momentum& q2() const;        ///< Negative-z incoming parton's 4-momentum
+      double& t2() { return t2_; }       ///< Negative-z incoming parton's squared mass
+      double t2() const { return t2_; }  ///< Negative-z incoming parton's squared mass
+
       Momentum& pc(size_t);              ///< Central particle's 4-momentum
       const Momentum& pc(size_t) const;  ///< Central particle's 4-momentum
+
+      double s() const { return s_; }        ///< Two-beam squared centre of mass energy
+      double sqrtS() const { return sqs_; }  ///< Two-beam centre of mass energy
 
       //--- Mandelstam variables
       double shat() const;  ///< \f$\hat s=(p_1+p_2)^2=(p_3+...)^2\f$
@@ -163,11 +186,25 @@ namespace cepgen {
       /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
       void setEventContent(const IncomingState& ini, const OutgoingState& fin);
 
-      // ---
+      /// Compute the electromagnetic running coupling algorithm at a given scale
+      double alphaEM(double q) const;
+      /// Compute the strong coupling algorithm at a given scale
+      double alphaS(double q) const;
 
-    protected:
       /// Numerical limits for sanity comparisons
       static constexpr double NUM_LIMITS = 1.e-3;  // MeV/mm-level
+
+    private:
+      /// \f$s\f$, squared centre of mass energy of the incoming particles' system, in \f$\mathrm{GeV}^2\f$
+      double s_{-1.};
+      /// \f$\sqrt s\f$, centre of mass energy of the incoming particles' system (in GeV)
+      double sqs_{-1.};
+      double mA2_{-1.};  ///< first incoming beam particle squared mass
+      double mB2_{-1.};  ///< second incoming beam particle squared mass
+      double mX2_{-1.};  ///< First diffractive state squared mass
+      double mY2_{-1.};  ///< Second diffractive state squared mass
+      double t1_{-1.};   ///< First parton virtuality
+      double t2_{-1.};   ///< Second parton virtuality
       /// Electromagnetic running coupling algorithm
       std::unique_ptr<Coupling> alphaem_;
       /// Strong running coupling algorithm
@@ -186,18 +223,6 @@ namespace cepgen {
       std::vector<double> point_coord_;
       /// Phase space point-independent component of the Jacobian weight of the point in the phase space for integration
       double base_jacobian_{1.};
-      /// \f$s\f$, squared centre of mass energy of the incoming particles' system, in \f$\mathrm{GeV}^2\f$
-      double s_{-1.};
-      /// \f$\sqrt s\f$, centre of mass energy of the incoming particles' system (in GeV)
-      double sqs_{-1.};
-      double mA2_{-1.};  ///< first incoming beam particle squared mass
-      double mB2_{-1.};  ///< second incoming beam particle squared mass
-      double mX2_{-1.};  ///< First diffractive state squared mass
-      double mY2_{-1.};  ///< Second diffractive state squared mass
-      double t1_{-1.};   ///< First parton virtuality
-      double t2_{-1.};   ///< Second parton virtuality
-
-    private:
       /// Set of cuts to apply on the final phase space
       Kinematics kin_{ParametersList()};
       /// Event object containing all the information on all particles in the system

@@ -37,7 +37,7 @@ namespace cepgen {
       if (cs_prop_.pdgid == PDG::invalid)  // ensure the central particles properties are correctly initialised
         cs_prop_ = PDG::get()(steer<ParticleProperties>("pair").pdgid);
 
-      ww_ = 0.5 * (1. + sqrt(1. - 4. * sqrt(mA2_ * mB2_) / s_));
+      ww_ = 0.5 * (1. + sqrt(1. - 4. * mA() * mB() / s()));
 
       defineVariable(y_c1_,
                      Mapping::linear,
@@ -124,8 +124,8 @@ namespace cepgen {
 
       //--- auxiliary quantities
 
-      const double alpha1 = amt1_ / sqs_ * exp(y_c1_), beta1 = amt1_ / sqs_ * exp(-y_c1_);
-      const double alpha2 = amt2_ / sqs_ * exp(y_c2_), beta2 = amt2_ / sqs_ * exp(-y_c2_);
+      const double alpha1 = amt1_ / sqrtS() * exp(y_c1_), beta1 = amt1_ / sqrtS() * exp(-y_c1_);
+      const double alpha2 = amt2_ / sqrtS() * exp(y_c2_), beta2 = amt2_ / sqrtS() * exp(-y_c2_);
       x1_ = alpha1 + alpha2;
       x2_ = beta1 + beta2;
 
@@ -139,22 +139,22 @@ namespace cepgen {
 
       //--- additional conditions for energy-momentum conservation
 
-      const double s1_eff = x1_ * s_ - qt1_ * qt1_, s2_eff = x2_ * s_ - qt2_ * qt2_;
+      const double s1_eff = x1_ * s() - qt1_ * qt1_, s2_eff = x2_ * s() - qt2_ * qt2_;
 
       CG_DEBUG_LOOP("2to4:central") << "s(1/2)_eff = " << s1_eff << " / " << s2_eff << " GeV^2\n\t"
                                     << "central system invariant mass = " << invm << " GeV";
 
-      if (kinematics().incomingBeams().positive().fragmented() && (sqrt(s2_eff) <= sqrt(mX2_) + invm))
+      if (kinematics().incomingBeams().positive().fragmented() && (sqrt(s2_eff) <= mX() + invm))
         return 0.;
-      if (kinematics().incomingBeams().negative().fragmented() && (sqrt(s1_eff) <= sqrt(mY2_) + invm))
+      if (kinematics().incomingBeams().negative().fragmented() && (sqrt(s1_eff) <= mY() + invm))
         return 0.;
 
       //--- four-momenta of the outgoing protons (or remnants)
 
       const double px_plus = (1. - x1_) * pA().p() * M_SQRT2;
       const double py_minus = (1. - x2_) * pB().p() * M_SQRT2;
-      const double px_minus = (mX2_ + qt1_ * qt1_) * 0.5 / px_plus;
-      const double py_plus = (mY2_ + qt2_ * qt2_) * 0.5 / py_minus;
+      const double px_minus = (mX2() + qt1_ * qt1_) * 0.5 / px_plus;
+      const double py_plus = (mY2() + qt2_ * qt2_) * 0.5 / py_minus;
       // warning! sign of pz??
 
       CG_DEBUG_LOOP("2to4:pxy") << "px± = " << px_plus << " / " << px_minus << "\n\t"
@@ -166,25 +166,27 @@ namespace cepgen {
       CG_DEBUG_LOOP("2to4:remnants") << "First remnant:  " << pX() << ", mass = " << pX().mass() << "\n\t"
                                      << "Second remnant: " << pY() << ", mass = " << pY().mass() << ".";
 
-      if (fabs(pX().mass2() - mX2_) > NUM_LIMITS) {
-        CG_WARNING("2to4:px") << "Invalid X system squared mass: " << pX().mass2() << "/" << mX2_ << ".";
+      if (fabs(pX().mass2() - mX2()) > NUM_LIMITS) {
+        CG_WARNING("2to4:px") << "Invalid X system squared mass: " << pX().mass2() << "/" << mX2() << ".";
         return 0.;
       }
-      if (fabs(pY().mass2() - mY2_) > NUM_LIMITS) {
-        CG_WARNING("2to4:py") << "Invalid Y system squared mass: " << pY().mass2() << "/" << mY2_ << ".";
+      if (fabs(pY().mass2() - mY2()) > NUM_LIMITS) {
+        CG_WARNING("2to4:py") << "Invalid Y system squared mass: " << pY().mass2() << "/" << mY2() << ".";
         return 0.;
       }
 
       //--- four-momenta of the intermediate partons
 
-      const double norm = 1. / ww_ / ww_ / s_;
+      const double norm = 1. / ww_ / ww_ / s();
       const double tau1 = norm * qt1_ * qt1_ / x1_ / x1_;
-      q1() =
-          Momentum(qt_1).setPz(+0.5 * x1_ * ww_ * sqs_ * (1. - tau1)).setEnergy(+0.5 * x1_ * ww_ * sqs_ * (1. + tau1));
+      q1() = Momentum(qt_1)
+                 .setPz(+0.5 * x1_ * ww_ * sqrtS() * (1. - tau1))
+                 .setEnergy(+0.5 * x1_ * ww_ * sqrtS() * (1. + tau1));
 
       const double tau2 = norm * qt2_ * qt2_ / x2_ / x2_;
-      q2() =
-          Momentum(qt_2).setPz(-0.5 * x2_ * ww_ * sqs_ * (1. - tau2)).setEnergy(+0.5 * x2_ * ww_ * sqs_ * (1. + tau2));
+      q2() = Momentum(qt_2)
+                 .setPz(-0.5 * x2_ * ww_ * sqrtS() * (1. - tau2))
+                 .setEnergy(+0.5 * x2_ * ww_ * sqrtS() * (1. + tau2));
 
       CG_DEBUG_LOOP("2to4:partons") << "First parton:  " << q1() << ", mass2 = " << q1().mass2() << "\n\t"
                                     << "Second parton: " << q2() << ", mass2 = " << q2().mass2() << ".";
@@ -209,7 +211,7 @@ namespace cepgen {
       //     d^2(kappa_1)d^2(kappa_2) instead of d(kappa_1^2)d(kappa_2^2)
       //=================================================================
 
-      return amat2 * pow(4. * x1_ * x2_ * s_ * M_PI, -2) * 0.25 * constants::GEVM2_TO_PB * pt_diff_ * qt1_ * qt2_;
+      return amat2 * pow(4. * x1_ * x2_ * s() * M_PI, -2) * 0.25 * constants::GEVM2_TO_PB * pt_diff_ * qt1_ * qt2_;
     }
 
     void Process2to4::fillCentralParticlesKinematics() {
