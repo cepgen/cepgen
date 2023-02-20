@@ -4,12 +4,25 @@
 Processes development
 =====================
 
-In CepGen, all processes are defined as an object derivating from the following base class:
+In CepGen, all processes are defined as C++ objects derivating, either from the :cpp:class:`cepgen::proc::Process` base class:
 
 .. toggle::
 
    .. doxygenclass:: cepgen::proc::Process
       :members:
+      :protected-members:
+
+or from one of its derivative, such as the $k_{\rm T}$ factorised helpers described below.
+
+To avoid code redundancy, the following helper accessors can be used to retrieve and set the various event content kinematics at the level of the process:
+
+- :cpp:func:`cepgen::proc::Process::pA`, and :cpp:func:`cepgen::proc::Process::pX`, for the positive-$z$ incoming/outgoing beam particle's kinematics ;
+- :cpp:func:`cepgen::proc::Process::pB`, and :cpp:func:`cepgen::proc::Process::pY`, for the negative-$z$ incoming/outgoing beam particle's kinematics ;
+- :cpp:func:`cepgen::proc::Process::q1`, and :cpp:func:`cepgen::proc::Process::q2`, for the positive, and negative-$z$ incoming parton kinematics ;
+- :cpp:func:`cepgen::proc::Process::pc`, with an index (starting at 0) accessor for the central system particles' 4-momentum.
+
+By default, we expect all new processes to be implemented in C++.
+However as seen below, a Fortran interface is provided for historical reasons.
 
 :math:`k_{\rm T}`-factorised processes
 --------------------------------------
@@ -17,13 +30,8 @@ In CepGen, all processes are defined as an object derivating from the following 
 .. versionadded:: 0.9
 
 The transverse-momentum dependent factorisation of two-photon processes can be simulated within CepGen.
-For this purpose, a :class:`cepgen::proc::KTProcess` helper derivated-class of the earlier is introduced to allow the photon fluxes part to be transparent to the process developper.
-
-.. doxygenclass:: cepgen::proc::KTProcess
-   :outline:
 
 As described in `the reference papers <../bibliography#kt-factorisation>`__, the :math:`\kt`-factorisation approach allows a direct factorisation of any hard process (e.g. photon- or gluon-induced productions) while accounting for transverse components of parton virtualities.
-
 For instance, a :math:`pp\to p^{(\ast)}(\ggx)p^{(\ast)}` matrix element can be factorised through the following formalism:
 
 .. math::
@@ -53,6 +61,39 @@ The inelastic contribution further requires both the diffractive state four-mome
 
 with :math:`\xbj = {Q^2}/({Q^2+M_X^2-m_p^2})` the Bjorken scaling variable.
 
+C++ interface
+~~~~~~~~~~~~~
+
+By default, we expect the new processes to be implemented in C++.
+For this purpose, a :class:`cepgen::proc::KTProcess` helper derivated-class of the earlier is introduced to allow the photon fluxes part to be transparent to the process developper.
+
+.. doxygenclass:: cepgen::proc::KTProcess
+   :outline:
+
+.. toggle::
+
+   .. doxygenclass:: cepgen::proc::KTProcess
+      :members:
+      :no-cite:
+
+2-to-4 processes
+^^^^^^^^^^^^^^^^
+
+To further ease their development and integration, the :cpp:class:`cepgen::proc::Process2to4` sub-class has been introduced:
+
+.. toggle::
+
+   .. doxygenclass:: cepgen::proc::Process2to4
+      :protected-members:
+
+It allows to delegate the production of the central system kinematics to concentrate on the central matrix element computation part.
+Again, the same accessors as for :cpp:class:`cepgen::proc::Process` can be used for the retrieval of the event kinematics used in computing the event weight.
+
+As this object is pure virtual, the two following members have to be defined for a 2-to-4 process:
+
+- :cpp:func:`cepgen::proc::Process2to4::prepareProcessKinematics`, to initialise all the process-local kinematic variables (if needed) ;
+- :cpp:func:`cepgen::proc::Process2to4::computeCentralMatrixElement` to retrieve the central matrix element weight that will be convoluted to the incoming $\kt$-dependent parton fluxes and the event Jacobian to form the total matrix element weight.
+
 Fortran interface
 ~~~~~~~~~~~~~~~~~
 
@@ -62,10 +103,12 @@ In this page a summary and hands-on example of such a Fortran implementation and
 Before other things, you will have to provide the definition of your process and its topology for CepGen to handle it properly.
 This requires you to fill in a set of predefined common blocks shared between your process definition and the core CepGen instance.
 
-All these new processes are then linked to CepGen through the construction and association of each matrix element definition and interface to the following object:
+All these new processes are then linked to CepGen through the construction and association of each matrix element definition and interface to the :cpp:class:`cepgen::proc::FortranKTProcess` object.
 
-.. doxygenclass:: cepgen::proc::FortranKTProcess
-   :outline:
+.. toggle::
+
+   .. doxygenclass:: cepgen::proc::FortranKTProcess
+      :members:
 
 In a later paragraph, this linking recipe will be described.
 
@@ -76,6 +119,13 @@ This common block lets CepGen access the whole event structure and kinematics in
 Beside the outgoing beam particles 4-momenta ``px`` and ``py``, it contains the PDG id and 4-momentum of all central system particles in ``pc``.
 
 For this latter, a maximum multiplicity of 10 particles is handled by default in CepGen.
+
+.. code-block:: fortran
+
+      common/evtkin/nout,ipdg,idum2,pc,px,py
+      integer nout,idum2,ipdg(10)
+      double precision pc(4,10),px(4),py(4)
+
 Should this maximal value not be sufficient for your implementation purposes, please get in touch with us.
 
 Process definition
@@ -128,6 +178,13 @@ This common block holds the following :math:`k_{\rm T}`-factorisation processes 
 * ``ptdiff`` and ``phiptdiff`` the 2-norm and azimutal angle of the outgoing system’s transverse momentum difference,
 * ``am_x`` and ``am_y`` the dissociative outgoing beams’ invariant masses (or :math:`m_p` for elastic parton emission from proton).
 
+.. code-block:: fortran
+
+      common/ktkin/q1t,q2t,phiq1t,phiq2t,y1,y2,ptdiff,phiptdiff,
+   &     am_x,am_y
+      double precision q1t,q2t,phiq1t,phiq2t,y1,y2,ptdiff,phiptdiff,
+   &     am_x,am_y
+
 Phase space cuts
 ^^^^^^^^^^^^^^^^
 
@@ -137,12 +194,29 @@ A limited set of pre-registered phase space cuts (one boolean switch, a lower an
 * central system invariant mass, :math:`\pt`,
 * central system correlations: :math:`\Delta y`.
 
+.. code-block:: fortran
+
+      common/constants/am_p,units,pi
+      common/kincuts/ipt,iene,ieta,iinvm,iptsum,idely,
+   &     pt_min,pt_max,ene_min,ene_max,eta_min,eta_max,
+   &     invm_min,invm_max,ptsum_min,ptsum_max,
+   &     dely_min,dely_max
+      logical ipt,iene,ieta,iinvm,iptsum,idely
+      double precision pt_min,pt_max,ene_min,ene_max,eta_min,eta_max,
+   &     invm_min,invm_max,ptsum_min,ptsum_max,
+   &     dely_min,dely_max
+
 Should this collection not be sufficient for your purposes, please contact us.
 
 Physics constants
 ^^^^^^^^^^^^^^^^^
 
-This block introduces all useful and standard physical constants in double precision to help the process definition: :math:`m_p`, GeV²/barn, :math:`\pi`, :math:`\alpha_{\rm em}`.
+This block introduces all useful and standard physical constants in double precision to help the process definition: $m_p$, GeV${}^2$/barn, or $\pi$.
+
+.. code-block:: fortran
+
+      common/constants/am_p,units,pi
+      double precision am_p,units,pi
 
 Matrix element definition
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -163,26 +237,9 @@ We expect your weighting function to follow the C-equivalent signature:
 
 This might get translated, for instance, into the following minimal working example (here using the free form Fortran coding convention):
 
-.. code-block:: fortran
-
-   function dummy_f77_process
-   implicit none
-   double precision dummy_f77_process
-   !--------------------------------------------------------------------------
-   ! CepGen overhead
-   !--------------------------------------------------------------------------
-   include 'KTBlocks.inc' ! mandatory, include the kinematics common blocks
-   call CepGen_print      ! optional, display some run parameters information
-   !--------------------------------------------------------------------------
-   ! end of overhead, beginning of process definition
-   !--------------------------------------------------------------------------
-   dummy_f77_process = 1.D0 ! placeholder, your actual definition is to be
-                            ! implemented here
-   !--------------------------------------------------------------------------
-   ! end of process definition
-   !--------------------------------------------------------------------------
-   return
-   end
+.. literalinclude:: ../CepGenProcesses/Examples/dummy_f77_process.f
+   :language: fortran
+   :linenos:
 
 With the kinematics common blocks defined through the include statement described above.
 
