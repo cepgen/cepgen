@@ -17,6 +17,7 @@
  */
 
 #include <algorithm>
+#include <random>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
@@ -70,7 +71,8 @@ namespace cepgen {
      */
     class Pythia6Hadroniser : public Hadroniser {
     public:
-      using Hadroniser::Hadroniser;
+      explicit Pythia6Hadroniser(const ParametersList& params)
+          : Hadroniser(params), rnd_phi_(0., 2. * M_PI), rnd_cos_theta_(-1., 1.), rnd_qdq_(0., 1.) {}
 
       static ParametersDescription description();
 
@@ -83,6 +85,10 @@ namespace cepgen {
     private:
       /// Maximal number of characters to fetch for the particle's name
       static constexpr unsigned short NAME_CHR = 16;
+      /// Random number generator engine
+      mutable std::default_random_engine rnd_gen_;
+      std::uniform_real_distribution<double> rnd_phi_, rnd_cos_theta_;
+      mutable std::uniform_real_distribution<double> rnd_qdq_;
 
       typedef std::unordered_map<Particle::Status, int, utils::EnumHash<Particle::Status> > ParticlesStatusMap;
       static const ParticlesStatusMap kStatusMatchMap;
@@ -208,7 +214,7 @@ namespace cepgen {
         const double mdq = pymass(partons.second), mdq2 = mdq * mdq;
 
         //--- choose random direction in MX frame
-        const double phi = 2. * M_PI * drand(), theta = acos(2. * drand() - 1.);  // theta angle
+        const double phi = rnd_phi_(rnd_gen_), theta = acos(rnd_cos_theta_(rnd_gen_));  // theta angle
 
         //--- compute momentum of decay particles from MX
         const double px2 = 0.25 * std::pow(mx2 - mdq2 + mq2, 2) / mx2 - mq2;
@@ -311,7 +317,7 @@ namespace cepgen {
     }
 
     std::pair<short, short> Pythia6Hadroniser::pickPartonsContent() const {
-      const double ranudq = drand();
+      const auto ranudq = rnd_qdq_(rnd_gen_);
       if (ranudq < 1. / 9.)
         return {PDG::down, 2203};  // (d,uu1)
       if (ranudq < 5. / 9.)
