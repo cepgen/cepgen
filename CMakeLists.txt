@@ -16,6 +16,7 @@ set(VERSION 1.1.0)
 
 option(CMAKE_BUILD_CORE "Build Core library" ON)
 option(CMAKE_BUILD_PROCESSES "Build physics processes" ON)
+option(CMAKE_BUILD_PROCESSES_EXAMPLES "... also build example processes" OFF)
 option(CMAKE_BUILD_ADDONS "Build AddOns" ON)
 option(CMAKE_BUILD_SCAN "Build cross-section scan utilitary" OFF)
 option(CMAKE_BUILD_CARD_CONV "Build steering cards converter utilitary" OFF)
