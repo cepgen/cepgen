@@ -34,6 +34,7 @@ namespace cepgen {
     /// Module parameters
     virtual const ParametersList& parameters() const { return params_; }
 
+  protected:
     /// Retrieve a parameters as previously steered
     template <typename T>
     T steer(const std::string& key) const {
@@ -47,7 +48,6 @@ namespace cepgen {
     /// Retrieve a path from common search paths
     std::string steerPath(const std::string& key) const;
 
-  protected:
     /// Module parameters
     mutable ParametersList params_;
   };
