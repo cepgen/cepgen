@@ -32,6 +32,6 @@ It can hence take the following values:
 Full object reference
 ---------------------
 
-.. doxygenclass:: cepgen::proc::LPAIR
+.. doxygenclass:: LPAIR
    :private-members:
    :undoc-members:

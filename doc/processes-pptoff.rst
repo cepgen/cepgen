@@ -42,6 +42,6 @@ It can take the following values:
 Full object reference
 ---------------------
 
-.. doxygenclass:: cepgen::proc::PPtoFF
+.. doxygenclass:: PPtoFF
    :private-members:
    :undoc-members:
