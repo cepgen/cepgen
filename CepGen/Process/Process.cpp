@@ -31,6 +31,9 @@ namespace cepgen {
   namespace proc {
     Process::Process(const ParametersList& params)
         : NamedModule(params), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {
+      const auto& kin_params = steer<ParametersList>("kinematics");
+      if (!kin_params.empty())
+        kinematics().setParameters(kin_params);
       if (steer<bool>("hasEvent"))
         event_.reset(new Event);
     }

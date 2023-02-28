@@ -200,6 +200,14 @@ namespace cepgen {
       utils::Logger::get().setLevel((utils::Logger::Level)log_level_);
       utils::Logger::get().setExtended(ext_log_);
 
+      //--- parse the structure functions code
+      auto sf_params = StructureFunctionsFactory::get().describeParameters(str_fun_).parameters();
+      sf_params.set<ParametersList>("sigmaRatio", SigmaRatiosFactory::get().describeParameters(sr_type_).parameters());
+      if (str_fun_ == 205 /* MSTWgrid */ && !mstw_grid_path_.empty())
+        sf_params.set<std::string>("gridPath", mstw_grid_path_);
+      kin_params_->set("structureFunctions", sf_params);
+      proc_params_->set("kinematics", *kin_params_);
+
       //--- parse the process name
       if (!proc_name_.empty() || !proc_params_->empty()) {
         if (!rt_params_->hasProcess() && proc_name_.empty())
@@ -214,15 +222,6 @@ namespace cepgen {
       rt_params_->generation().setParameters(*gen_params_);
 
       rt_params_->par_integrator += *int_params_;
-
-      //--- parse the structure functions code
-      auto sf_params = StructureFunctionsFactory::get().describeParameters(str_fun_).parameters();
-      sf_params.set<ParametersList>("sigmaRatio", SigmaRatiosFactory::get().describeParameters(sr_type_).parameters());
-      if (str_fun_ == 205 /* MSTWgrid */ && !mstw_grid_path_.empty())
-        sf_params.set<std::string>("gridPath", mstw_grid_path_);
-      kin_params_->operator+=(rt_params_->process().kinematics().parameters(true));
-      kin_params_->set<ParametersList>("structureFunctions", sf_params);
-      rt_params_->process().kinematics().setParameters(*kin_params_);
 
       //--- parse the hadronisation algorithm name
       if (!evt_mod_name_.empty())
