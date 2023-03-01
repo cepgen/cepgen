@@ -24,8 +24,8 @@ generator = generator.clone(
 #from Config.OutputModule.ROOTTree_cfi import rootTree # dump everything into a flat tree
 text = cepgen.Module('text', # histogramming/ASCII output capability
     histVariables={
-        'm(4)': cepgen.Parameters(xrange=(0., 50.), nbins=20),
-        'pt(7):pt(8)': cepgen.Parameters(xrange=(0., 50.), yrange=(0., 50.), log=True)
+        'm(4)': cepgen.Parameters(xrange=(0., 10.), nbins=20, log=True),
+        'pt(7):pt(8)': cepgen.Parameters(xrange=(0., 10.), yrange=(0., 10.), log=True)
     }
 )
 #lhef = cepgen.Module('lhef', filename='test.lhe')
