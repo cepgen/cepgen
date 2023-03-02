@@ -51,6 +51,9 @@ namespace cepgen {
   }
 
   bool HeavyIon::isHI(const pdgid_t& pdgid) { return pdgid / 1000000 != 0; }
+  bool HeavyIon::isHI(const ParticleProperties& prop) {
+    return isHI(prop.pdgid);  //FIXME can refine a bit
+  }
 
   double HeavyIon::massP() const {
     if (Z == Element::invalid)

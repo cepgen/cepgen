@@ -124,7 +124,9 @@ namespace cepgen {
     std::string replace_all(const std::string& str, const std::string& from, const std::string& to) {
       auto out{str};
       if (replace_all(out, from, to) == 0)
-        CG_DEBUG("replace_all") << "No occurences of {" << from << "} found in input string.";
+        CG_DEBUG("replace_all") << "No occurrence of {"
+                                << replace_all(from, {{"\n", "\\n"}, {"\t", "\\t"}, {"\r", "\\r"}})
+                                << "} found in input string.";
       return out;
     }
 

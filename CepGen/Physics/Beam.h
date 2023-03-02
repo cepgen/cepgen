@@ -29,14 +29,6 @@
 #include "CepGen/Physics/ParticleProperties.h"
 
 namespace cepgen {
-  namespace strfun {
-    class Parameterisation;
-  }
-  namespace formfac {
-    class Parameterisation;
-  }
-  struct HeavyIon;
-
   /// Incoming beams characteristics
   class Beam : public SteeredObject<Beam> {
   public:
