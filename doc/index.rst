@@ -20,6 +20,7 @@ This page is constantly evolving, but do not hesitate to contact us through the 
 .. toctree::
    :maxdepth: 1
    :caption: Contents:
+   :hidden:
 
    downloads
    changelog
@@ -30,6 +31,7 @@ This page is constantly evolving, but do not hesitate to contact us through the 
 .. toctree::
    :maxdepth: 1
    :caption: Configuration:
+   :hidden:
 
    cards-lpair
    cards-python
@@ -39,6 +41,7 @@ This page is constantly evolving, but do not hesitate to contact us through the 
 .. toctree::
    :maxdepth: 1
    :caption: Processes:
+   :hidden:
 
    lpair <processes-lpair>
    pptoff/pptoll <processes-pptoff>
@@ -47,6 +50,7 @@ This page is constantly evolving, but do not hesitate to contact us through the 
 .. toctree::
    :maxdepth: 1
    :caption: Advanced usage:
+   :hidden:
 
    processes-devel
    structure-functions
