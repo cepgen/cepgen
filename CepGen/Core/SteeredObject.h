@@ -57,42 +57,6 @@ namespace cepgen {
       return desc;
     }
 
-    /// Module user-defined parameters
-    inline const ParametersList& parameters() const override {
-      for (const auto& kv : map_bools_)
-        params_.set<bool>(kv.first, kv.second.get());
-      for (const auto& kv : map_ints_)
-        params_.set<int>(kv.first, kv.second.get());
-      for (const auto& kv : map_ulongs_)
-        params_.set<unsigned long long>(kv.first, kv.second.get());
-      for (const auto& kv : map_dbls_)
-        params_.set<double>(kv.first, kv.second.get());
-      for (const auto& kv : map_strs_)
-        params_.set<std::string>(kv.first, kv.second.get());
-      for (const auto& kv : map_lims_)
-        params_.set<Limits>(kv.first, kv.second.get());
-      for (const auto& kv : map_params_)
-        params_.set<ParametersList>(kv.first, kv.second.get());
-      return params_;
-    }
-    virtual void setParameters(const ParametersList& params) override {
-      Steerable::setParameters(params);
-      for (const auto& kv : map_bools_)
-        kv.second.get() = params_.get<bool>(kv.first);
-      for (const auto& kv : map_ints_)
-        kv.second.get() = params_.get<int>(kv.first);
-      for (const auto& kv : map_ulongs_)
-        kv.second.get() = params_.get<unsigned long long>(kv.first);
-      for (const auto& kv : map_dbls_)
-        kv.second.get() = params_.get<double>(kv.first);
-      for (const auto& kv : map_strs_)
-        kv.second.get() = params_.get<std::string>(kv.first);
-      for (const auto& kv : map_lims_)
-        kv.second.get() = params_.get<Limits>(kv.first);
-      for (const auto& kv : map_params_)
-        kv.second.get() = params_.get<ParametersList>(kv.first);
-    }
-
     REGISTER_TYPE(bool, map_bools_)
     REGISTER_TYPE(int, map_ints_)
     REGISTER_TYPE(unsigned long long, map_ulongs_)
@@ -100,6 +64,43 @@ namespace cepgen {
     REGISTER_TYPE(std::string, map_strs_)
     REGISTER_TYPE(Limits, map_lims_)
     REGISTER_TYPE(ParametersList, map_params_)
+
+  public:
+    /// Module user-defined parameters
+    inline const ParametersList& parameters() const override {
+      for (const auto& kv : map_bools_)
+        params_.set(kv.first, kv.second.get());
+      for (const auto& kv : map_ints_)
+        params_.set(kv.first, kv.second.get());
+      for (const auto& kv : map_ulongs_)
+        params_.set(kv.first, kv.second.get());
+      for (const auto& kv : map_dbls_)
+        params_.set(kv.first, kv.second.get());
+      for (const auto& kv : map_strs_)
+        params_.set(kv.first, kv.second.get());
+      for (const auto& kv : map_lims_)
+        params_.set(kv.first, kv.second.get());
+      for (const auto& kv : map_params_)
+        params_.set(kv.first, kv.second.get());
+      return params_;
+    }
+    virtual void setParameters(const ParametersList& params) override {
+      Steerable::setParameters(params);
+      for (const auto& kv : map_bools_)
+        kv.second.get() = params_.operator[]<bool>(kv.first);
+      for (const auto& kv : map_ints_)
+        kv.second.get() = params_.operator[]<int>(kv.first);
+      for (const auto& kv : map_ulongs_)
+        kv.second.get() = params_.operator[]<unsigned long long>(kv.first);
+      for (const auto& kv : map_dbls_)
+        kv.second.get() = params_.operator[]<double>(kv.first);
+      for (const auto& kv : map_strs_)
+        kv.second.get() = params_.operator[]<std::string>(kv.first);
+      for (const auto& kv : map_lims_)
+        kv.second.get() = params_.operator[]<Limits>(kv.first);
+      for (const auto& kv : map_params_)
+        kv.second.get() = params_.operator[]<ParametersList>(kv.first);
+    }
   };
 }  // namespace cepgen
 
