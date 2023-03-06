@@ -63,8 +63,8 @@ namespace cepgen {
   ParametersDescription ParticleProperties::description() {
     auto pdesc = ParametersDescription();
     pdesc.add<pdgid_t>("pdgid", 0).setDescription("PDG unique identifier");
-    pdesc.add<std::string>("name", "").setDescription("particle computer-readable name");
-    pdesc.add<std::string>("description", "").setDescription("particle human-readable name");
+    pdesc.add<std::string>("name", "n/a").setDescription("particle computer-readable name");
+    pdesc.add<std::string>("description", "n/a").setDescription("particle human-readable name");
     pdesc.add<int>("colours", 0).setDescription("colour factor");
     pdesc.add<double>("mass", 0.).setDescription("particle mass (in GeV/c^2)");
     pdesc.add<double>("width", 0.).setDescription("particle width (in GeV)");
@@ -91,8 +91,7 @@ namespace cepgen {
 
   std::ostream& operator<<(std::ostream& os, const ParticleProperties& prop) {
     return os << (prop.name.empty() ? "unnamed" : prop.name) << "{"
-              << "id=" << prop.pdgid << ",desc=" << (prop.descr.empty() ? "n/a" : prop.descr)
-              << ",colours=" << prop.colours << ",mass=" << prop.mass << ",width=" << prop.width
-              << ",charge=" << prop.charge << (prop.fermion ? ",fermion" : "") << "}";
+              << "id=" << prop.pdgid << ",desc=" << prop.descr << ",colours=" << prop.colours << ",mass=" << prop.mass
+              << ",width=" << prop.width << ",charge=" << prop.charge << (prop.fermion ? ",fermion" : "") << "}";
   }
 }  // namespace cepgen

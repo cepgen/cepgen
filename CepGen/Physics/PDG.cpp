@@ -50,9 +50,15 @@ namespace cepgen {
 
   ParticleProperties& PDG::operator[](pdgid_t id) { return particles_[id]; }
 
-  void PDG::define(ParticleProperties props) {
-    CG_DEBUG("PDG:define") << (has(props.pdgid) ? "Updating the properties of a particle" : "Adding a new particle")
-                           << " with PDG id=" << std::setw(8) << props.pdgid << ", " << props;
+  void PDG::define(const ParticleProperties& props) {
+    CG_DEBUG("PDG:define").log([&](auto& log) {
+      if (has(props.pdgid))
+        log << "Updating the properties of a particle with PDG id=" << props.pdgid << ".\n\t"
+            << "Old properties: " << operator()(props.pdgid) << ",\n\t"
+            << "New properties: " << props << ".";
+      else
+        log << "Adding a new particle with PDG id=" << std::setw(8) << props.pdgid << ", properties: " << props << ".";
+    });
     particles_[props.pdgid] = props;
   }
 
