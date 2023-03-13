@@ -289,9 +289,8 @@ namespace cepgen {
     size_t Hist2D::contents_t::total() const { return std::accumulate(begin(), end(), 0); }
 
     Hist2D::contents_t operator*(double scaling, const Hist2D::contents_t& oth) {
-      auto tmp = oth;
-      for (auto& bin : tmp)
-        bin *= scaling;
+      Hist2D::contents_t tmp = oth;
+      std::transform(tmp.begin(), tmp.end(), tmp.begin(), [&scaling](const auto& bin) { return bin * scaling; });
       return tmp;
     }
 

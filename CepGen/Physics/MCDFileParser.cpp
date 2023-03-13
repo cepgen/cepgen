@@ -39,7 +39,7 @@ namespace pdg {
       std::vector<int> pdg_ids;
       std::vector<short> charges;
       double mass, width;
-      std::string part_name, part_charge_int;
+      std::string part_name;
       {  // pdg ids
         std::istringstream ss(line.substr(PDG_BEG, PDG_END));
         std::string buf;
@@ -59,6 +59,7 @@ namespace pdg {
       }
       {  // name + charge
         std::istringstream oss(line.substr(AUX_BEG));
+        std::string part_charge_int;
         oss >> part_name >> part_charge_int;
         std::istringstream oss_ch(part_charge_int);
         std::string charge_int;

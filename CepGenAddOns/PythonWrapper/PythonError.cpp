@@ -36,7 +36,7 @@ namespace cepgen {
       if (ptype_) {
         // we can start the traceback
         (*this) << "Error: " << get<std::string>(PyObject_Str(pvalue_));
-        if (auto* ptraceback = (PyTracebackObject*)ptraceback_obj_) {
+        if (auto* ptraceback = reinterpret_cast<PyTracebackObject*>(ptraceback_obj_)) {
           const std::string arr = "↪ ";
           std::string tabul;
           while (ptraceback->tb_next) {

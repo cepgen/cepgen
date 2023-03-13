@@ -160,7 +160,7 @@ namespace cepgen {
       CG_INFO("GeneratorWorker:store") << utils::s("event", ngen + 1, true) << " generated.";
     if (callback)
       callback(event, ngen);
-    for (auto& mod : params_->eventExportersSequence())
+    for (const auto& mod : params_->eventExportersSequence())
       *mod << event;
     const_cast<Parameters*>(params_)->addGenerationTime(event.time_total);
     return true;

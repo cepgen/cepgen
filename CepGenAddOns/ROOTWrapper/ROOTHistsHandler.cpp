@@ -112,7 +112,7 @@ namespace cepgen {
               vars,
               new TH2D(
                   key.c_str(), title.c_str(), nbins_x, xrange.min(), xrange.max(), nbins_y, yrange.min(), yrange.max())));
-          CG_INFO("ROOTHistsHandler") << "Booking a " << (profile ? "1D profile" : "2D correlation plot") << " with "
+          CG_INFO("ROOTHistsHandler") << "Booking a 2D correlation plot with "
                                       << utils::s("bin", nbins_x + nbins_y, true) << " in range x=" << xrange
                                       << " and y=" << yrange << " for \"" << utils::merge(vars, " / ") << "\".";
         }

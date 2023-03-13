@@ -29,16 +29,16 @@ namespace cepgen {
     switch (steer<int>("rngEngine")) {
       case 0:
       default:
-        rng_engine = (gsl_rng_type*)gsl_rng_mt19937;
+        rng_engine = const_cast<gsl_rng_type*>(gsl_rng_mt19937);
         break;
       case 1:
-        rng_engine = (gsl_rng_type*)gsl_rng_taus2;
+        rng_engine = const_cast<gsl_rng_type*>(gsl_rng_taus2);
         break;
       case 2:
-        rng_engine = (gsl_rng_type*)gsl_rng_gfsr4;
+        rng_engine = const_cast<gsl_rng_type*>(gsl_rng_gfsr4);
         break;
       case 3:
-        rng_engine = (gsl_rng_type*)gsl_rng_ranlxs0;
+        rng_engine = const_cast<gsl_rng_type*>(gsl_rng_ranlxs0);
         break;
     }
     if (!rng_engine)

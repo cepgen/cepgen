@@ -150,15 +150,15 @@ int main(int argc, char* argv[]) {
                                                                                  {{"fm", "$F_{M}$"}, g_strfuns_fm},
                                                                                  {{"w1", "$W_{1}$"}, g_strfuns_w1},
                                                                                  {{"w2", "$W_{2}$"}, g_strfuns_w2}}) {
-      cepgen::utils::DrawableColl mp;
+      cepgen::utils::DrawableColl plots;
       for (auto& p : canv.second) {
         p.xAxis().setLabel(var_name + (!var_unit.empty() ? " (" + var_unit + ")" : ""));
         p.yAxis().setLabel(canv.first.second + (!var_name.empty() ? "(" + var_name + ", $Q^{2}$)" : ""));
         if (yrange.valid())
           p.yAxis().setRange(yrange);
-        mp.emplace_back(&p);
+        plots.emplace_back(&p);
       }
-      plt->draw(mp, "sfcomp_" + canv.first.first, cepgen::utils::format("$Q^{2}$ = %g GeV$^{2}$", q2), dm);
+      plt->draw(plots, "sfcomp_" + canv.first.first, cepgen::utils::format("$Q^{2}$ = %g GeV$^{2}$", q2), dm);
     }
   }
 

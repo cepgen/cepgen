@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
   for (const auto& q2 : q2range.generate(num_points, logx)) {
     out << q2 << "\t";
     size_t j = 0;
-    for (auto& ff : form_factors) {
+    for (const auto& ff : form_factors) {
       const auto form_factor = (*ff)(q2);
       out << "\t" << form_factor.FE << "\t" << form_factor.FM;
       g_form_factors_fe.at(j).addPoint(q2, form_factor.FE);

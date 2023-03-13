@@ -71,10 +71,10 @@ namespace cepgen {
     }
 
     const Drawable::value_t Graph1D::valueAt(double val) const {
-      for (const auto& xv : values_)
-        if (xv.first.value == val)
-          return xv.second;
-      throw CG_ERROR("Graph1D:valueAt") << "Failed to retrieve a point a the coordinate x=" << val << ".";
+      auto it = std::find_if(values_.begin(), values_.end(), [&val](const auto& xv) { return xv.first.value == val; });
+      if (it == values_.end())
+        throw CG_ERROR("Graph1D:valueAt") << "Failed to retrieve a point a the coordinate x=" << val << ".";
+      return it->second;
     }
 
     Graph2D::Graph2D(const std::string& name, const std::string& title) : Drawable(name, title) {}

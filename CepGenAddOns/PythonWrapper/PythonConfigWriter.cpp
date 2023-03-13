@@ -83,9 +83,9 @@ namespace cepgen {
               os << write(pdesc.get(key), key, offset + 1);
               break;
             case ParametersDescription::Type::ParametersVector: {
-              std::string sep;
+              std::string sep2;
               for (const auto& it : params.get<std::vector<ParametersList> >(key))
-                os << sep << write(ParametersDescription(it), "", 0), sep = ", ";
+                os << sep2 << write(ParametersDescription(it), "", 0), sep2 = ", ";
             } break;
             case ParametersDescription::Type::Value:
               os << off << std::string(4, ' ') << key << " = ";

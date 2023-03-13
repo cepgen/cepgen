@@ -58,38 +58,40 @@ int main(int argc, char* argv[]) {
 
   const auto qvals = q_range.generate(num_points, logx);
 
-  // alphaS(Q) modellings part
-  size_t i = 0;
-  for (const auto& mod : cepgen::AlphaSFactory::get().modules()) {
-    const auto& algo = cepgen::AlphaSFactory::get().build(
-        mod /*, cepgen::ParametersList().set<double>("asmur", 0.35).set<double>("mur", 1.4142)*/);
-    alphas.emplace_back(alpha_t{
-        mod,
-        vector<double>(num_points),
-        cepgen::utils::Graph1D(
-            mod, cepgen::utils::replace_all(cepgen::AlphaSFactory::get().describe(mod), "alpha(S)", "\\alpha_{S}"))});
-    auto& as = alphas[i++];
-    for (size_t j = 0; j < qvals.size(); ++j) {
-      const auto val = (*algo)(qvals[j]);
-      as.vals[j] = val;
-      as.graph.addPoint(q2mode ? qvals[j] * qvals[j] : qvals[j], val);
+  {
+    // alphaS(Q) modellings part
+    size_t i = 0;
+    for (const auto& mod : cepgen::AlphaSFactory::get().modules()) {
+      const auto& algo = cepgen::AlphaSFactory::get().build(
+          mod /*, cepgen::ParametersList().set<double>("asmur", 0.35).set<double>("mur", 1.4142)*/);
+      alphas.emplace_back(alpha_t{
+          mod,
+          vector<double>(num_points),
+          cepgen::utils::Graph1D(
+              mod, cepgen::utils::replace_all(cepgen::AlphaSFactory::get().describe(mod), "alpha(S)", "\\alpha_{S}"))});
+      auto& as = alphas[i++];
+      for (size_t j = 0; j < qvals.size(); ++j) {
+        const auto val = (*algo)(qvals[j]);
+        as.vals[j] = val;
+        as.graph.addPoint(q2mode ? qvals[j] * qvals[j] : qvals[j], val);
+      }
     }
-  }
-  // alphaEM(Q) modellings part
-  i = 0;
-  for (const auto& mod : cepgen::AlphaEMFactory::get().modules()) {
-    const auto& algo = cepgen::AlphaEMFactory::get().build(mod);
-    alphaem.emplace_back(alpha_t{
-        mod,
-        vector<double>(num_points),
-        cepgen::utils::Graph1D(
-            mod,
-            cepgen::utils::replace_all(cepgen::AlphaEMFactory::get().describe(mod), "alpha(EM)", "\\alpha_{EM}"))});
-    auto& aem = alphaem[i++];
-    for (size_t j = 0; j < qvals.size(); ++j) {
-      const auto val = (*algo)(qvals[j]);
-      aem.vals[j] = val;
-      aem.graph.addPoint(q2mode ? qvals[j] * qvals[j] : qvals[j], val);
+    // alphaEM(Q) modellings part
+    i = 0;
+    for (const auto& mod : cepgen::AlphaEMFactory::get().modules()) {
+      const auto& algo = cepgen::AlphaEMFactory::get().build(mod);
+      alphaem.emplace_back(alpha_t{
+          mod,
+          vector<double>(num_points),
+          cepgen::utils::Graph1D(
+              mod,
+              cepgen::utils::replace_all(cepgen::AlphaEMFactory::get().describe(mod), "alpha(EM)", "\\alpha_{EM}"))});
+      auto& aem = alphaem[i++];
+      for (size_t j = 0; j < qvals.size(); ++j) {
+        const auto val = (*algo)(qvals[j]);
+        aem.vals[j] = val;
+        aem.graph.addPoint(q2mode ? qvals[j] * qvals[j] : qvals[j], val);
+      }
     }
   }
 

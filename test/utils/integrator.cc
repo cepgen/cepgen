@@ -49,8 +49,7 @@ int main(int argc, char* argv[]) {
   //--- tests definition
   struct test_t {
     cepgen::FunctionalIntegrand integrand;
-    double result;
-    bool success{false};
+    double result{0.};
   };
 
   vector<test_t> tests;

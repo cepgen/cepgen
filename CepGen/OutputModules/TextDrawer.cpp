@@ -263,7 +263,7 @@ namespace cepgen {
         std::ostream& os, const Drawable& dr, const Drawable::axis_t& axis, const Mode& mode, bool effects) const {
       const std::string sep(17, ' ');
       const double max_val = std::max_element(axis.begin(), axis.end(), map_elements())->second.value *
-                             (mode & Mode::logy ? 5. : 1.2),
+                             ((mode & Mode::logy) ? 5. : 1.2),
                    min_val = std::min_element(axis.begin(), axis.end(), map_elements())->second.value;
       const double min_val_log = std::log(std::max(min_val, 1.e-10));
       const double max_val_log = std::log(std::min(max_val, 1.e+10));
@@ -271,9 +271,9 @@ namespace cepgen {
         const auto ylabel = delatexify(dr.yAxis().label());
         os << sep << std::string(std::max(0., 2. + width_ - ylabel.size()), ' ') << ylabel << "\n";
       }
-      os << sep << utils::format("%-5.2f ", mode & Mode::logy ? std::exp(min_val_log) : min_val)
-         << std::setw(width_ - 11) << std::left << (mode & Mode::logy ? "logarithmic scale" : "linear scale")
-         << utils::format("%5.2e", mode & Mode::logy ? std::exp(max_val_log) : max_val) << "\n"
+      os << sep << utils::format("%-5.2f ", (mode & Mode::logy) ? std::exp(min_val_log) : min_val)
+         << std::setw(width_ - 11) << std::left << ((mode & Mode::logy) ? "logarithmic scale" : "linear scale")
+         << utils::format("%5.2e", (mode & Mode::logy) ? std::exp(max_val_log) : max_val) << "\n"
          << sep << std::string(width_ + 2, '.');  // abscissa axis
       size_t idx = 0;
       for (const auto& coord_set : axis) {

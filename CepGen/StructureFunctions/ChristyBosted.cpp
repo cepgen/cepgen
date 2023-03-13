@@ -17,6 +17,7 @@
  */
 
 #include <array>
+#include <numeric>
 #include <utility>
 #include <vector>
 
@@ -157,10 +158,10 @@ namespace cepgen {
       const auto kin = Resonance::KinematicsBlock(w2, q2, mp2_, mpi2_, meta2_);
 
       //--- calculate Breit-Wigners for all resonances
-      double sig_res = 0.;
-      for (const auto& res : resonances_)
-        sig_res += res.sigma(pol, kin);
-      sig_res *= w;
+      const auto sig_res =
+          w * std::accumulate(resonances_.begin(), resonances_.end(), 0., [&pol, &kin](auto sig, const auto& res) {
+            return sig + res.sigma(pol, kin);
+          });
 
       //--- non-resonant background calculation
       const double xpr = 1. / (1. + (w2 - mx_min_ * mx_min_) / (q2 + q20));

@@ -37,8 +37,8 @@ namespace cepgen {
     void setLimits(const std::vector<Limits>& lims) override {
       Integrator::setLimits(lims);
       bounds_.clear();
-      for (const auto& lim : limits_)
-        bounds_.emplace_back(lim.raw());
+      std::transform(
+          limits_.begin(), limits_.end(), std::back_inserter(bounds_), [](const auto& lim) { return lim.raw(); });
     }
     void integrate(Integrand& integrand, double& result, double& abserr) override {
       checkLimits(integrand);

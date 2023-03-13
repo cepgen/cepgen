@@ -101,7 +101,7 @@ namespace cepgen {
   template <typename T, typename I>
   std::vector<I> ModuleFactory<T, I>::modules() const {
     std::vector<I> out;
-    std::transform(map_.begin(), map_.end(), std::back_inserter(out), [](auto& val) { return val.first; });
+    std::transform(map_.begin(), map_.end(), std::back_inserter(out), [](const auto& val) { return val.first; });
     std::sort(out.begin(), out.end());
     return out;
   }

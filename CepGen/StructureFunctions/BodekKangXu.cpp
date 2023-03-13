@@ -101,7 +101,7 @@ namespace cepgen {
 
         const auto BBKG = b1 + b2, BRES = constants_.at(1) + b2;
 
-        auto res = 0., ressum = 0.;
+        auto ressum = 0.;
         for (size_t i = 0; i < NRES; ++i) {
           const size_t index = i * 3 + 1 + NBKG;
           auto ram = constants_.at(index), rma = constants_.at(index + 1), rwd = constants_.at(index + 2);
@@ -112,19 +112,15 @@ namespace cepgen {
           const auto qstarn = std::sqrt(std::max(0., std::pow((w2 + mp2_ - pi_em_sq_) / (2. * w), 2.) - mp2_));
           const auto qstar0 =
               std::sqrt(std::max(0., std::pow((rma * rma - mp2_ + pi_em_sq_) / (2. * rma), 2.) - pi_em_sq_));
-          if (qstar0 <= 1.e-10) {
-            res = 0.;
-            ressum += res;
+          if (qstar0 <= 1.e-10)
             continue;
-          }
 
           const auto term = prefactor_ * qstarn, term0 = prefactor_ * qstar0;
           const size_t j = 2 * spins_.at(i);
           const auto gamres =
               0.5 * (rwd * std::pow(term / term0, j + 1) * (1. + std::pow(term0, j)) / (1. + std::pow(term, j)));
           const auto brwig = M_1_PI * gamres / (std::pow(w - rma, 2.) + std::pow(gamres, 2.));
-          res = ram * brwig / 2. / mp_;
-          ressum += res;
+          ressum += ram * brwig / 2. / mp_;
         }
 
         return BBKG * (1. + (1. - BBKG) * xpx) + ressum * (1. - BRES);

@@ -61,8 +61,8 @@ namespace cepgen {
     double integral, error, prob;
     int ngiven = given_.size();
     std::vector<double*> given_arr;
-    for (auto& point : given_)
-      given_arr.emplace_back(point.data());
+    std::transform(
+        given_.begin(), given_.end(), std::back_inserter(given_arr), [](auto& point) { return point.data(); });
 
     Divonne(gIntegrand->size(),
             ncomp_,

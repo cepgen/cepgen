@@ -34,7 +34,6 @@ namespace cepgen {
   private:
     int nnew_, nmin_;
     double flatness_;
-    int verbose_;
   };
 
   IntegratorCubaSuave::IntegratorCubaSuave(const ParametersList& params)

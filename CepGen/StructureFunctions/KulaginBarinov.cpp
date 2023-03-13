@@ -260,8 +260,9 @@ namespace cepgen {
         f2 += f2_res;
       }  //--- end of resonances region
       {  //--- perturbative region
-        double ft_dis = 0., f2_dis = 0., fl_dis = 0.;
+        double f2_dis = 0., fl_dis = 0.;
         if (q2 > 1.e-12 && q2 < q2max_) {  // above Q^2 -> 0 limit
+          double ft_dis = 0.;
           const double t = std::max(q2, t0_), xbj_t = utils::xBj(t, mp2_, w2), gam2 = gamma2(xbj_t, t);
           if (t > q2min_) {
             const auto sfs = sfs_grid_.eval({xbj_t, t});  // FT, F2

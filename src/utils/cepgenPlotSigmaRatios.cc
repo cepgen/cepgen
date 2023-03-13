@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
     const auto& x = xvals.at(i);
     out << x << "\t";
     size_t j = 0;
-    for (auto& sr : sigrats) {
+    for (const auto& sr : sigrats) {
       double xbj;
       switch (var) {
         case 0:
