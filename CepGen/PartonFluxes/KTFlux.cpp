@@ -94,7 +94,9 @@ namespace cepgen {
   class ElasticHeavyIonKTFlux : public ElasticNucleonKTFlux {
   public:
     explicit ElasticHeavyIonKTFlux(const ParametersList& params)
-        : ElasticNucleonKTFlux(params), hi_(steerAs<pdgid_t, HeavyIon>("heavyIon")), mass2_(hi_.mass() * hi_.mass()) {}
+        : ElasticNucleonKTFlux(params),
+          hi_(HeavyIon::fromPdgId(steer<pdgid_t>("heavyIon"))),
+          mass2_(hi_.mass() * hi_.mass()) {}
 
     static ParametersDescription description() {
       auto desc = ElasticNucleonKTFlux::description();

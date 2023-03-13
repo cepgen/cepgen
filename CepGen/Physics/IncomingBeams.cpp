@@ -204,13 +204,13 @@ namespace cepgen {
                                                 0.,
                                                 +0.5 * sqs,
                                                 HeavyIon::isHI(pos_beam_.pdgId())
-                                                    ? HeavyIon::mass(HeavyIon(pos_beam_.pdgId()))
+                                                    ? HeavyIon::mass(HeavyIon::fromPdgId(pos_beam_.pdgId()))
                                                     : PDG::get().mass(pos_beam_.pdgId())));
     neg_beam_.setMomentum(Momentum::fromPxPyPzM(0.,
                                                 0.,
                                                 -0.5 * sqs,
                                                 HeavyIon::isHI(neg_beam_.pdgId())
-                                                    ? HeavyIon::mass(HeavyIon(neg_beam_.pdgId()))
+                                                    ? HeavyIon::mass(HeavyIon::fromPdgId(neg_beam_.pdgId()))
                                                     : PDG::get().mass(neg_beam_.pdgId())));
   }
 
@@ -286,7 +286,7 @@ namespace cepgen {
         .set<int>("beam2id", neg_beam_.pdgId())
         .set<double>("beam2pz", -neg_beam_.momentum().pz())
         .setAs<int, mode::Kinematics>("mode", mode());
-    const HeavyIon hi1(pos_beam_.pdgId()), hi2(neg_beam_.pdgId());
+    const auto hi1 = HeavyIon::fromPdgId(pos_beam_.pdgId()), hi2 = HeavyIon::fromPdgId(neg_beam_.pdgId());
     if (hi1)
       params_.set<int>("beam1A", hi1.A).set<int>("beam1Z", (int)hi1.Z);
     if (hi2)

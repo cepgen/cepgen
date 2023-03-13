@@ -81,9 +81,9 @@ namespace cepgen {
     double flux(double x, double q2, double mx2 = -1.) const;
 
   private:
-    pdgid_t pdg_;                       ///< PDG identifier for the beam
+    pdgid_t pdg_{0};                    ///< PDG identifier for the beam
     Momentum momentum_;                 ///< Incoming particle momentum
-    Mode mode_;                         ///< Beam treatment mode
+    Mode mode_{Mode::invalid};          ///< Beam treatment mode
     std::unique_ptr<PartonFlux> flux_;  ///< Incoming parton flux evaluator
   };
 }  // namespace cepgen

@@ -33,7 +33,10 @@ namespace cepgen {
       : SteeredObject(params),
         pdg_(steerAs<int, pdgid_t>("pdgId")),
         momentum_(Momentum::fromPxPyPzM(
-            0., 0., steer<double>("pz"), HeavyIon::isHI(pdg_) ? HeavyIon::mass(HeavyIon(pdg_)) : PDG::get().mass(pdg_))),
+            0.,
+            0.,
+            steer<double>("pz"),
+            HeavyIon::isHI(pdg_) ? HeavyIon::mass(HeavyIon::fromPdgId(pdg_)) : PDG::get().mass(pdg_))),
         mode_(steerAs<int, Mode>("mode")) {
     if (pdg_ == PDG::electron)
       mode_ = Mode::PointLikeFermion;
@@ -77,7 +80,7 @@ namespace cepgen {
 
   ParametersDescription Beam::description() {
     auto desc = ParametersDescription();
-    desc.add<int>("pdgId", (int)PDG::proton);
+    desc.addAs<int, pdgid_t>("pdgId", PDG::proton);
     desc.add<double>("pz", 0.);
     desc.add<int>("mode", (int)Beam::Mode::invalid);
     desc.add<ParametersDescription>("partonFlux", PartonFluxFactory::get().describeParameters("BudnevElasticKT"));
@@ -86,7 +89,7 @@ namespace cepgen {
 
   std::ostream& operator<<(std::ostream& os, const Beam& beam) {
     if (HeavyIon::isHI(beam.pdg_))
-      os << HeavyIon(beam.pdg_);
+      os << HeavyIon::fromPdgId(beam.pdg_);
     else
       os << (PDG::Id)beam.pdg_;
     os << " (" << beam.momentum_.pz() << " GeV/c), " << beam.mode_;

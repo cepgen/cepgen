@@ -29,16 +29,17 @@
     return os << ELEM_EVAL(x)
 
 namespace cepgen {
-  HeavyIon::HeavyIon(pdgid_t pdg) {
+  HeavyIon::HeavyIon(unsigned short a, const Element& z) : Z(z), A(a) {}
+
+  HeavyIon HeavyIon::fromPdgId(pdgid_t pdg) {
     if (pdg == PDG::neutron)
-      *this = neutron();
+      return neutron();
     else if (pdg == PDG::proton)
-      *this = proton();
-    else if (pdg / 1000000 != 0) {
-      Z = static_cast<Element>((pdg / 1000) % 1000);
-      A = pdg % 1000;
-    } else
-      CG_WARNING("HeavyIon") << "Failed to parse heavy ion from PDG id=" << pdg << ".";
+      return proton();
+    else if (pdg / 1000000 != 0)
+      return HeavyIon(pdg % 1000, static_cast<Element>((pdg / 1000) % 1000));
+    CG_WARNING("HeavyIon") << "Failed to parse heavy ion from PDG id=" << pdg << ".";
+    return HeavyIon(0, Element::invalid);
   }
 
   HeavyIon::operator pdgid_t() const {

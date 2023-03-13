@@ -29,7 +29,8 @@ namespace cepgen {
                                          double pwidth,
                                          int pcharge,
                                          bool pfermion)
-      : pdgid(ppdgid),
+      : SteeredObject(ParametersList()),
+        pdgid(ppdgid),
         name(pname),
         descr(pdescr),
         colours(pcolours),

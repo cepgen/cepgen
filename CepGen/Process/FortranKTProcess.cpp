@@ -132,7 +132,7 @@ namespace cepgen {
       genparams_.inp1 = kinematics().incomingBeams().positive().momentum().pz();
       //--- check if first incoming beam is a heavy ion
       if (HeavyIon::isHI(kinematics().incomingBeams().positive().pdgId())) {
-        const HeavyIon in1(kinematics().incomingBeams().positive().pdgId());
+        const auto in1 = HeavyIon::fromPdgId(kinematics().incomingBeams().positive().pdgId());
         genparams_.a_nuc1 = in1.A;
         genparams_.z_nuc1 = (unsigned short)in1.Z;
         if (genparams_.z_nuc1 > 1) {
@@ -146,7 +146,7 @@ namespace cepgen {
       genparams_.inp2 = kinematics().incomingBeams().negative().momentum().pz();
       //--- check if second incoming beam is a heavy ion
       if (HeavyIon::isHI(kinematics().incomingBeams().negative().pdgId())) {
-        const HeavyIon in2(kinematics().incomingBeams().negative().pdgId());
+        const auto in2 = HeavyIon::fromPdgId(kinematics().incomingBeams().negative().pdgId());
         genparams_.a_nuc2 = in2.A;
         genparams_.z_nuc2 = (unsigned short)in2.Z;
         if (genparams_.z_nuc2 > 1) {

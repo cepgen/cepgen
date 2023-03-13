@@ -43,9 +43,7 @@ namespace cepgen {
   /// Heavy ion container (Z+A)
   struct HeavyIon {
     /// General constructor from mass and atomic number
-    explicit HeavyIon(unsigned short a, const Element& z) : Z(z), A(a) {}
-    /// Build from a custom PDG id
-    HeavyIon(pdgid_t pdg = 2212);
+    explicit HeavyIon(unsigned short, const Element&);
 
     bool operator==(const HeavyIon& oth) const { return Z == oth.Z && A == oth.A; }
     bool operator!=(const HeavyIon& oth) const { return !(*this == oth); }
@@ -59,6 +57,8 @@ namespace cepgen {
     /// Heavy ion radius, in fm
     double radius() const;
 
+    /// Build from a custom PDG id
+    static HeavyIon fromPdgId(pdgid_t);
     /// Check if the PDG id is compatible with a HI
     static bool isHI(const pdgid_t&);
     /// Check if the particle properties are compatible with a HI

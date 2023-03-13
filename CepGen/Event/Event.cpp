@@ -327,7 +327,7 @@ namespace cepgen {
         } else {
           //--- if single particle/HI
           if (HeavyIon::isHI(part.pdgId()))
-            oss_pdg << HeavyIon(part.pdgId());
+            oss_pdg << HeavyIon::fromPdgId(part.pdgId());
           else
             try {
               oss_pdg << (PDG::Id)part.pdgId();
