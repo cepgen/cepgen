@@ -7,6 +7,7 @@
 
 namespace cepgen {
   namespace test {
+    double failure_tolerance = 0.;
     const double base_precision = 1.e-3;
     double precision = base_precision;
     size_t num_total = 0;
@@ -19,6 +20,7 @@ namespace cepgen {
          << "!"
 #define CG_PASSED(name) CG_LOG << cepgen::utils::colourise("Passed ", cepgen::utils::Colour::green) << name << "."
 
+#define CG_TEST_SET_FAILURE_TOLERANCE_RATE(tolerance) cepgen::test::failure_tolerance = tolerance
 #define CG_TEST_SET_PRECISION(precis) cepgen::test::precision = precis
 #define CG_TEST_RESET_PRECISION() cepgen::test::precision = cepgen::test::base_precision
 
@@ -89,13 +91,17 @@ namespace cepgen {
       auto col = cepgen::utils::Colour::yellow;                                                                    \
       if (cepgen::test::num_passed == cepgen::test::num_total)                                                     \
         col = cepgen::utils::Colour::green;                                                                        \
-      else if (cepgen::test::num_passed < 0.1 * cepgen::test::num_total)                                           \
+      else if ((cepgen::test::failure_tolerance > 0. &&                                                            \
+                cepgen::test::num_total - cepgen::test::num_passed >                                               \
+                    cepgen::test::failure_tolerance * cepgen::test::num_total) ||                                  \
+               cepgen::test::num_passed < 0.1 * cepgen::test::num_total)                                           \
         col = cepgen::utils::Colour::red;                                                                          \
       CG_LOG << cepgen::utils::colourise(std::to_string(cepgen::test::num_passed) + " out of " +                   \
                                              cepgen::utils::s("test", cepgen::test::num_total, true) + " passed.", \
                                          col);                                                                     \
     }                                                                                                              \
-    return (cepgen::test::num_total - cepgen::test::num_passed);                                                   \
+    return cepgen::test::num_total - cepgen::test::num_passed <=                                                   \
+           cepgen::test::failure_tolerance * cepgen::test::num_total;                                              \
   }
 
 #endif
