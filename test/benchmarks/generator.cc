@@ -34,6 +34,8 @@ int main(int argc, char* argv[]) {
   kin.incomingBeams().positive().setPdgId(2212);
   kin.incomingBeams().negative().setPdgId(2212);
   kin.incomingBeams().setSqrtS(13.e3);
+  kin.cuts().central.pt_single.min() = 15.;
+  kin.cuts().central.eta_single = {-2.5, 2.5};
   for (const auto& integrator_name : integrators)
     bench.context("integrator", integrator_name).run(process + "+" + integrator_name, [&] {
       gen.setIntegrator(cepgen::IntegratorFactory::get().build(integrator_name));
