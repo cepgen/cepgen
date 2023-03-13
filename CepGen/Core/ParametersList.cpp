@@ -215,8 +215,8 @@ namespace cepgen {
   size_t ParametersList::erase(const std::string& key) {
     return erase<bool>(key) + erase<int>(key) + erase<unsigned long long>(key) + erase<double>(key) +
            erase<std::string>(key) + erase<Limits>(key) + erase<ParametersList>(key) + erase<std::vector<int> >(key) +
-           erase<std::vector<double> >(key) + erase<std::vector<ParametersList> >(key) +
-           erase<std::vector<std::vector<double> > >(key);
+           erase<std::vector<double> >(key) + erase<std::vector<std::string> >(key) +
+           erase<std::vector<ParametersList> >(key) + erase<std::vector<std::vector<double> > >(key);
   }
 
   bool ParametersList::empty() const { return keys(true).empty(); }
