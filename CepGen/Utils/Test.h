@@ -100,8 +100,10 @@ namespace cepgen {
                                              cepgen::utils::s("test", cepgen::test::num_total, true) + " passed.", \
                                          col);                                                                     \
     }                                                                                                              \
-    return cepgen::test::num_total - cepgen::test::num_passed <=                                                   \
-           cepgen::test::failure_tolerance * cepgen::test::num_total;                                              \
+    return (cepgen::test::num_total - cepgen::test::num_passed <=                                                  \
+            cepgen::test::failure_tolerance * cepgen::test::num_total)                                             \
+               ? 0                                                                                                 \
+               : cepgen::test::num_total - cepgen::test::num_passed;                                               \
   }
 
 #endif
