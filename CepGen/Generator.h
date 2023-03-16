@@ -51,6 +51,8 @@ namespace cepgen {
   static std::vector<std::string> invalid_libraries;
   /// Collection of search paths to build the runtime environment
   static std::vector<std::string> search_paths;
+  /// Execute an action on a path if found in search paths collection
+  bool callPath(const std::string&, bool (*callback)(const std::string&));
   /// Import a shared library in the runtime environment
   bool loadLibrary(const std::string&, bool match = false);
   /// Launch the initialisation procedure

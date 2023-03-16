@@ -49,33 +49,42 @@ namespace cepgen {
 #else
     const auto fullpath = match ? "lib" + path + ".so" : path;
 #endif
-    for (const auto& search_path : search_paths) {
-      fs::path the_path{search_path};
-      the_path /= fullpath;
-      if (!utils::fileExists(the_path))
-        continue;
-
+    if (callPath(fullpath, [](const auto& path) {
 #ifdef _WIN32
-      if (LoadLibraryA(the_path.c_str()) == nullptr) {
-        CG_DEBUG("loadLibrary") << "Failed to load library \"" << the_path << "\".\n\t"
-                                << "Error code #" << GetLastError() << ".";
-        invalid_libraries.emplace_back(path);
-        return false;
-      }
+          if (LoadLibraryA(path.c_str()) != nullptr)
+            return true;
+          CG_WARNING("loadLibrary") << "Failed to load library \"" << path << "\".\n\t"
+                                    << "Error code #" << GetLastError() << ".";
+          return false;
 #else
-      if (dlopen(the_path.c_str(), RTLD_LAZY | RTLD_GLOBAL) == nullptr) {
-        const char* err = dlerror();
-        CG_WARNING("loadLibrary") << "Failed to load library " << the_path << "."
-                                  << (err != nullptr ? utils::format("\n\t%s", err) : "");
-        invalid_libraries.emplace_back(path);
-        return false;
-      }
+          if (dlopen(path.c_str(), RTLD_LAZY | RTLD_GLOBAL) != nullptr)
+            return true;
+          const char* err = dlerror();
+          CG_WARNING("loadLibrary") << "Failed to load library " << path << "."
+                                    << (err != nullptr ? utils::format("\n\t%s", err) : "");
+          return false;
 #endif
+        })) {
       CG_DEBUG("loadLibrary") << "Loaded library \"" << path << "\".";
       loaded_libraries.emplace_back(path);
       return true;
     }
+    invalid_libraries.emplace_back(path);
     CG_DEBUG("loadLibrary") << "Library \"" << path << "\" (" << fullpath << ") does not exist.";
+    return false;
+  }
+
+  bool callPath(const std::string& local_path, bool (*callback)(const std::string&)) {
+    if (search_paths.empty()) {
+      CG_WARNING("callPath") << "List of search paths is empty.";
+      return false;
+    }
+    for (const auto& search_path : search_paths) {
+      fs::path the_path{search_path};
+      the_path /= local_path;
+      if (utils::fileExists(the_path))
+        return callback(the_path);
+    }
     return false;
   }
 
@@ -86,22 +95,23 @@ namespace cepgen {
     CG_DEBUG("initialise") << utils::s("Search path", search_paths.size(), false) << ": " << search_paths << ".";
 
     //--- particles table parsing
-    std::string mcd_file, addons_file;
-    for (const auto& path : search_paths) {
-      if (mcd_file.empty() && utils::fileExists(path + "/mass_width_2021.mcd"))
-        mcd_file = path + "/mass_width_2021.mcd";
-      if (addons_file.empty() && utils::fileExists(path + "/CepGenAddOns.txt"))
-        addons_file = path + "/CepGenAddOns.txt";
-      utils::env::append("LD_LIBRARY_PATH", path);
-    }
-    if (mcd_file.empty())
+    std::string addons_file;
+    if (!callPath("mass_width_2021.mcd", [](const auto& path) {
+          pdg::MCDFileParser::parse(path);
+          return true;
+        }))
       CG_WARNING("init") << "No particles definition file found.";
-    else
-      pdg::MCDFileParser::parse(mcd_file);
     if (PDG::get().size() < 10)
       CG_WARNING("init") << "Only " << utils::s("particle", PDG::get().size(), true)
                          << " are defined in the runtime environment.\n\t"
                          << "Make sure the path to the MCD file is correct.";
+
+    for (const auto& path : search_paths) {
+      const fs::path the_path{path};
+      if (addons_file.empty() && utils::fileExists(the_path / "CepGenAddOns.txt"))
+        addons_file = the_path / "CepGenAddOns.txt";
+      utils::env::append("LD_LIBRARY_PATH", path);
+    }
 
     //--- header message
     try {
@@ -135,7 +145,7 @@ namespace cepgen {
 
   void printHeader() {
     for (const auto& path : search_paths) {
-      std::ifstream hf(path + "/README");
+      std::ifstream hf(fs::path{path} / "README");
       if (hf.good()) {
         CG_LOG << std::string(std::istreambuf_iterator<char>(hf), std::istreambuf_iterator<char>());
         return;
