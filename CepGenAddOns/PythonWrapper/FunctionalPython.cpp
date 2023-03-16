@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2022-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
  */
 
 // clang-format off
-#include "CepGenAddOns/PythonWrapper/PythonTypes.h"
-#include "CepGenAddOns/PythonWrapper/PythonError.h"
+#include "CepGenAddOns/PythonWrapper/Environment.h"
+#include "CepGenAddOns/PythonWrapper/Error.h"
 #include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 // clang-format on
 

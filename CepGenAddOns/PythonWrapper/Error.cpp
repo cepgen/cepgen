@@ -17,7 +17,7 @@
  */
 
 // clang-format off
-#include "CepGenAddOns/PythonWrapper/PythonError.h"
+#include "CepGenAddOns/PythonWrapper/Error.h"
 #include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 #include <frameobject.h>
 // clang-format on

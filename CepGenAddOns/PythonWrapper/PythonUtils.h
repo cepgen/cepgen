@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,22 +23,6 @@
 
 namespace cepgen {
   namespace python {
-    class Environment {
-    public:
-      /// Initialise the python environment
-      Environment();
-      /// Finalise the python environment
-      ~Environment();
-      /// Set the name of the Python program
-      void setProgramName(const std::string&);
-      /// Is the python environment already initialised?
-      bool initialised();
-
-    private:
-#if PY_VERSION_HEX >= 0x03080000
-      PyConfig config_;
-#endif
-    };
     /// Translate a filename into a python-compatible path
     std::string pythonPath(const std::string&);
     /// Retrieve the element from a python dictionary

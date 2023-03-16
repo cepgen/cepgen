@@ -17,7 +17,8 @@
  */
 
 // clang-format off
-#include "CepGenAddOns/PythonWrapper/PythonError.h"
+#include "CepGenAddOns/PythonWrapper/Environment.h"
+#include "CepGenAddOns/PythonWrapper/Error.h"
 #include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 // clang-format on
 
@@ -30,7 +31,6 @@
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Generator.h"  // for library loading
-#include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
