@@ -92,9 +92,6 @@ namespace cepgen {
     }
 
     Parameters* PythonHandler::parse(const std::string& file, Parameters* params) {
-      if (!utils::fileExists(file))
-        throw CG_FATAL("PythonHandler") << "Unable to locate steering card \"" << file << "\".";
-
       rt_params_ = params;
       std::string filename = python::pythonPath(file);
       env_->setProgramName(filename);
