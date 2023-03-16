@@ -103,6 +103,7 @@ int main(int argc, char* argv[]) {
   } catch (const cepgen::utils::RunAbortedException&) {
     CG_DEBUG("main") << "Run aborted!";
   } catch (const cepgen::Exception& e) {
+    CG_DEBUG("main") << "CepGen exception encountered: " << e.what();
     e.dump();
   } catch (const exception& e) {
     CG_FATAL("main") << "Other exception caught!\n\t" << e.what();

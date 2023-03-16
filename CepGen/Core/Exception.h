@@ -55,6 +55,7 @@ namespace cepgen {
 
   private:
     Type type_;
+    mutable char what_[50];
   };
 }  // namespace cepgen
 

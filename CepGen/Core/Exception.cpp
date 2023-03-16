@@ -40,8 +40,8 @@ namespace cepgen {
   }
 
   const char* Exception::what() const noexcept {
-    dump();
-    return "cepgen::Exception";
+    sprintf(what_, "cepgen::Exception from %s:\n\t%s", from_.data(), message_.str().data());
+    return what_;
   }
 
   void Exception::dump(std::ostream* os) const noexcept {
