@@ -44,8 +44,10 @@ namespace cepgen {
     auto it = particles_.find(id);
     if (it != particles_.end())
       return it->second;
-    dump();
-    throw CG_FATAL("PDG") << "No particle with PDG id " << id << " in the catalogue.";
+    throw CG_FATAL("PDG").log([this, &id](auto& log) {
+      log << "No particle with PDG id " << id << " in the catalogue. ";
+      dump(&log.stream());
+    });
   }
 
   ParticleProperties& PDG::operator[](pdgid_t id) { return particles_[id]; }
@@ -82,11 +84,11 @@ namespace cepgen {
 
   double PDG::width(pdgid_t id) const { return operator()(id).width; }
 
-  double PDG::charge(pdgid_t id) const { return operator()(id).charge / 3.; }
+  double PDG::charge(pdgid_t id) const { return operator()(id).charge * 1. / 3.; }
 
   size_t PDG::size() const { return particles_.size(); }
 
-  void PDG::dump() const {
+  void PDG::dump(std::ostream* os) const {
     //--- first build a sorted vector out of the (unsorted) map
     std::vector<std::pair<pdgid_t, ParticleProperties> > tmp;
     std::transform(particles_.begin(), particles_.end(), std::back_inserter(tmp), [](const auto& prt) {
@@ -98,18 +100,21 @@ namespace cepgen {
                 return a.first < b.first;
               });
     //--- then the proper dump begins
-    CG_INFO("PDG").log([&tmp](auto& info) {
-      info << "List of particles registered:";
-      for (const auto& prt : tmp)
-        if (prt.first != PDG::invalid)
-          info << utils::format(
-              "\n%20s %-32s\tcharge: %2de, colour factor: %1d, mass: %8.4f GeV/c^2, width: %6.3f GeV.",
-              utils::colourise(std::to_string(prt.second.pdgid), utils::Colour::none, utils::Modifier::italic).data(),
-              (utils::boldify(prt.second.name) + " " + (prt.second.fermion ? "fermion" : "boson") + ":").data(),
-              prt.second.charge / 3,
-              prt.second.colours,
-              prt.second.mass,
-              prt.second.width);
-    });
+    std::ostringstream oss;
+    oss << "List of particles registered:";
+    for (const auto& prt : tmp)
+      if (prt.first != PDG::invalid)
+        oss << utils::format(
+            "\n%20s %-32s\tcharge: %2de, colour factor: %1d, mass: %8.4f GeV/c^2, width: %6.3f GeV.",
+            utils::colourise(std::to_string(prt.second.pdgid), utils::Colour::none, utils::Modifier::italic).data(),
+            (utils::boldify(prt.second.name) + " " + (prt.second.fermion ? "fermion" : "boson") + ":").data(),
+            prt.second.charge / 3,
+            prt.second.colours,
+            prt.second.mass,
+            prt.second.width);
+    if (os)
+      (*os) << oss.str();
+    else
+      CG_INFO("PDG") << oss.str();
   }
 }  // namespace cepgen
