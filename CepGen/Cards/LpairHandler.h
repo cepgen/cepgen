@@ -38,7 +38,7 @@ namespace cepgen {
       static ParametersDescription description();
 
       void pack(const Parameters*) override;
-      Parameters* parse(const std::string&, Parameters*) override;
+      Parameters* parseFile(const std::string&, Parameters*) override;
       /// Store a configuration into a LPAIR steering card
       void write(const std::string& file) const override;
 

@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
     throw CG_FATAL("main") << "Number of dimensions to probe (" << dim.size() << ") is too high";
 
   cepgen::Generator gen;
-  gen.setParameters(cepgen::card::Handler::parse(input_card));
+  gen.setParameters(cepgen::card::Handler::parseFile(input_card));
   CG_LOG << gen.parameters();
   const size_t ndim = gen.parametersPtr()->process().ndim();
 

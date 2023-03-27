@@ -28,13 +28,23 @@ namespace cepgen {
     Handler::Handler(const ParametersList& params)
         : NamedModule(params), filename_(steer<std::string>("filename")), rt_params_(new Parameters) {
       if (!filename_.empty())
-        parse(filename_, rt_params_);
+        parseFile(filename_, rt_params_);
     }
 
-    Parameters* Handler::parse(const std::string& filename) {
+    Parameters* Handler::parseString(const std::string& filename) {
       try {
         auto parser = CardsHandlerFactory::get().build(utils::fileExtension(filename));
-        return parser->parse(filename, new Parameters);
+        return parser->parseString(filename, new Parameters);
+      } catch (const std::invalid_argument& err) {
+        throw CG_FATAL("Cards:handler") << "Failed to parse the steering card at \"" << filename << "\"! "
+                                        << err.what();
+      }
+    }
+
+    Parameters* Handler::parseFile(const std::string& filename) {
+      try {
+        auto parser = CardsHandlerFactory::get().build(utils::fileExtension(filename));
+        return parser->parseFile(filename, new Parameters);
       } catch (const std::invalid_argument& err) {
         throw CG_FATAL("Cards:handler") << "Failed to parse the steering card at \"" << filename << "\"! "
                                         << err.what();

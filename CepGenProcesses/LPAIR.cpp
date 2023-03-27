@@ -93,7 +93,7 @@ public:
     auto desc = proc::Process::description();
     desc.setDescription("γγ → l⁺l¯ (LPAIR)");
     desc.add<int>("nopt", 0).setDescription("Optimised mode? (inherited from LPAIR, by default disabled = 0)");
-    desc.add<int>("pair", (int)PDG::muon).setDescription("Lepton pair considered");
+    desc.addAs<int, pdgid_t>("pair", PDG::muon).setDescription("Lepton pair considered");
     desc.add<bool>("symmetrise", false).setDescription("Symmetrise along z the central system?");
     return desc;
   }

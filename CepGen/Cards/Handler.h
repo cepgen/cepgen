@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
 
 namespace cepgen {
   class Parameters;
-  class ParametersList;
   /// Location for all steering card parsers/writers
   namespace card {
     /// Base steering card module
@@ -41,10 +40,13 @@ namespace cepgen {
       Parameters* runtimeParameters() { return rt_params_; }
       /// Specify runtime parameters to the handler
       virtual void pack(const Parameters*){};
+      virtual Parameters* parseString(const std::string&, Parameters* params) { return params; }
       /// Retrieve a configuration from a parsed steering card
-      virtual Parameters* parse(const std::string&, Parameters* params) { return params; }
+      virtual Parameters* parseFile(const std::string&, Parameters* params) { return params; }
       /// Build a configuration from a steering card
-      static Parameters* parse(const std::string&);
+      static Parameters* parseString(const std::string&);
+      /// Build a configuration from a steering card
+      static Parameters* parseFile(const std::string&);
       /// Write the current configuration into a steering card
       virtual void write(const std::string&) const {}
       /// Write a steering card from a configuration

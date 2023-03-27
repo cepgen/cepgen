@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 
   try {
     CG_LOG << "Parsing configuration from '" << card << ".";
-    const auto* params = cepgen::card::Handler::parse(card);
+    const auto* params = cepgen::card::Handler::parseFile(card);
     CG_LOG << "Configuration parsed from '" << card << "':\n" << params;
   } catch (const cepgen::Exception& e) {
     e.dump();

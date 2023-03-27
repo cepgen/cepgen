@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .parse();
 
-  mg.setParameters(cepgen::card::Handler::parse(input_card));
+  mg.setParameters(cepgen::card::Handler::parseFile(input_card));
   mg.parametersRef().clearEventExportersSequence();
 
   // book all histograms

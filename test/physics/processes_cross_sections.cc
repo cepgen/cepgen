@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
     const std::string filename = "test/physics/test_processes/" + test.filename + "_cfg.py";
     try {
       gen.parametersRef().clearProcess();
-      gen.setParameters(cepgen::card::Handler::parse(filename));
+      gen.setParameters(cepgen::card::Handler::parseFile(filename));
 
       gen.parametersRef().par_integrator.setName<std::string>(integrator);
       CG_DEBUG("main") << "Process: " << gen.parameters()->processName() << "\n\t"

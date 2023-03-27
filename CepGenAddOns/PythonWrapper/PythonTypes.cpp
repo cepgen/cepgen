@@ -39,6 +39,15 @@ namespace cepgen {
       return ObjectPtr(PyImport_ImportModule(mod_name.c_str()));  // new
     }
 
+    ObjectPtr defineModule(const std::string& mod_name, const std::string& code) {
+      auto* mod = PyModule_New(mod_name.c_str());
+      PyModule_AddStringConstant(mod, "__file__", "");
+      auto* local_dict = PyModule_GetDict(mod);
+      auto* builtins = PyEval_GetBuiltins();
+      PyDict_SetItemString(local_dict, "__builtins__", builtins);
+      return ObjectPtr(PyRun_String(code.c_str(), Py_file_input, local_dict, local_dict));  // new
+    }
+
     //------------------------------------------------------------------
     // typed retrieval helpers
     //------------------------------------------------------------------
@@ -207,7 +216,7 @@ namespace cepgen {
     template <typename T>
     bool isVector(PyObject* obj) {
       if (!obj)
-        return false;
+        throw CG_ERROR("Python:isVector") << "Object is not a vector ; in fact, it is not even an object.";
       if (!PyTuple_Check(obj) && !PyList_Check(obj))
         return false;
       const bool tuple = PyTuple_Check(obj);
@@ -222,7 +231,8 @@ namespace cepgen {
     template <typename T>
     std::vector<T> getVector(PyObject* obj) {
       if (!isVector<T>(obj))
-        throw CG_ERROR("Python:get") << "Object has invalid type: list/tuple != \"" << obj->ob_type->tp_name << "\".";
+        throw CG_ERROR("Python:getVector")
+            << "Object has invalid type: list/tuple != \"" << obj->ob_type->tp_name << "\".";
       std::vector<T> vec;
       const bool tuple = PyTuple_Check(obj);
       const Py_ssize_t num_entries = tuple ? PyTuple_Size(obj) : PyList_Size(obj);

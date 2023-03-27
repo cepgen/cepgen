@@ -55,7 +55,8 @@ namespace cepgen {
     public:
       /// Read a standard configuration card
       explicit PythonHandler(const ParametersList&);
-      Parameters* parse(const std::string&, Parameters*) override;
+      Parameters* parseFile(const std::string&, Parameters*) override;
+      Parameters* parseString(const std::string&, Parameters*) override;
 
       static ParametersDescription description();
 
@@ -73,6 +74,7 @@ namespace cepgen {
       static constexpr const char* PDGLIST_NAME = "PDG";
       static constexpr const char* MCD_NAME = "mcdFile";
 
+      Parameters* parse(Parameters*);
       void parseLogging(PyObject*);
       void parseIntegrator(PyObject*);
       void parseGenerator(PyObject*);
@@ -83,6 +85,7 @@ namespace cepgen {
       void parseExtraParticles(PyObject*);
 
       std::unique_ptr<python::Environment> env_;
+      python::ObjectPtr cfg_;
     };
 
     PythonHandler::PythonHandler(const ParametersList& params) : Handler(params) {
@@ -91,10 +94,27 @@ namespace cepgen {
       env_.reset(new python::Environment);
     }
 
-    Parameters* PythonHandler::parse(const std::string& file, Parameters* params) {
-      rt_params_ = params;
+    Parameters* PythonHandler::parseFile(const std::string& file, Parameters* params) {
       std::string filename = python::pythonPath(file);
       env_->setProgramName(filename);
+      cfg_ = python::importModule(filename);  // new
+      if (!cfg_)
+        throw PY_ERROR << "Failed to import the configuration card '" << filename << "'\n"
+                       << " (parsed from '" << file << "').";
+      return parse(params);
+    }
+
+    Parameters* PythonHandler::parseString(const std::string& str, Parameters* params) {
+      env_->setProgramName("Cards.Core");
+      cfg_ = python::defineModule("Cards.Core", str);  // new
+      return parse(params);
+    }
+
+    Parameters* PythonHandler::parse(Parameters* params) {
+      if (!cfg_)
+        throw PY_ERROR << "Python configuration card was not defined.";
+
+      rt_params_ = params;
 
       CG_DEBUG("PythonHandler").log([](auto& log) {
         log << "Initialised the Python cards parser.";
@@ -102,13 +122,9 @@ namespace cepgen {
           log << "\n\t" << ln;
       });
 
-      auto cfg = python::importModule(filename);  // new
-      if (!cfg)
-        throw PY_ERROR << "Failed to import the configuration card '" << filename << "'\n"
-                       << " (parsed from '" << file << "').";
 
-      auto parseAttr = [&cfg](const std::string& name, std::function<void(PyObject*)> callback) -> void {
-        auto pobj = python::getAttribute(cfg, name);
+      auto parseAttr = [this](const std::string& name, std::function<void(PyObject*)> callback) -> void {
+        auto pobj = python::getAttribute(cfg_.get(), name);
         if (pobj)
           callback(pobj.get());
       };
@@ -130,7 +146,7 @@ namespace cepgen {
       parseAttr(PDGLIST_NAME, [this](PyObject* pextp) { parseExtraParticles(pextp); });
 
       //--- process definition
-      parseAttr(PROCESS_NAME, [this, &file](PyObject* process) {
+      parseAttr(PROCESS_NAME, [this](PyObject* process) {
         //--- list of process-specific parameters
         ParametersList proc_params;
         python::fillParameter(process, "processParameters", proc_params);
@@ -138,7 +154,7 @@ namespace cepgen {
         //--- type of process to consider
         auto* pproc_name = python::element(process, MODULE_NAME);  // borrowed
         if (!pproc_name)
-          PY_ERROR << "Failed to extract the process name from the configuration card '" << file << "'.";
+          PY_ERROR << "Failed to extract the process name from the configuration.";
 
         //--- process mode
         const auto proc_name = python::get<std::string>(pproc_name);

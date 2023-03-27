@@ -154,7 +154,7 @@ namespace cepgen {
       registerKinematicsParameter<double>("MXMAX", "Maximal invariant mass of proton remnants", "mxmax");
     }
 
-    Parameters* LpairHandler::parse(const std::string& filename, Parameters* params) {
+    Parameters* LpairHandler::parseFile(const std::string& filename, Parameters* params) {
       if (!utils::fileExists(filename))
         throw CG_FATAL("LpairHandler") << "Unable to locate steering card \"" << filename << "\".";
       rt_params_ = params;

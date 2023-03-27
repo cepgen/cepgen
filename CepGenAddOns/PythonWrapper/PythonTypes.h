@@ -51,6 +51,8 @@ namespace cepgen {
 
     /// Import a Python module in a new reference-counted Python object
     ObjectPtr importModule(const std::string&);
+    /// Define a Python module from a Python code in a new reference-counted Python object
+    ObjectPtr defineModule(const std::string&, const std::string&);
 
     /// Check if a Python object holds a given C++ type
     template <typename T>

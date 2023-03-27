@@ -52,7 +52,7 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      Parameters* parse(const std::string&, Parameters*) override;
+      Parameters* parseFile(const std::string&, Parameters*) override;
       void pack(const Parameters* params) override;
 
     protected:
@@ -79,7 +79,7 @@ namespace cepgen {
 
     BoostTreeHandler::BoostTreeHandler(const ParametersList& params) : Handler(params) {}
 
-    Parameters* BoostTreeHandler::parse(const std::string& filename, Parameters* params) {
+    Parameters* BoostTreeHandler::parseFile(const std::string& filename, Parameters* params) {
       rt_params_ = params;
       read(filename);
 

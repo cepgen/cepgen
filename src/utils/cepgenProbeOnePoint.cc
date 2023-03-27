@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
       .parse();
 
   cepgen::Generator gen;
-  gen.setParameters(cepgen::card::Handler::parse(input_card));
+  gen.setParameters(cepgen::card::Handler::parseFile(input_card));
 
   const auto ndim = gen.parameters()->process().ndim();
   if (point.size() < 2)

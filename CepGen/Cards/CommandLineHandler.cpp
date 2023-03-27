@@ -40,7 +40,9 @@ namespace cepgen {
       explicit CommandLineHandler(const ParametersList& params)
           : Handler(params), argv_(steer<std::vector<std::string> >("args")) {
         if (!filename_.empty())
-          parse(filename_, rt_params_);
+          parseFile(filename_, rt_params_);
+        for (const auto& arg : argv_)
+          parseString(arg, rt_params_);
       }
 
       static ParametersDescription description() {
@@ -50,7 +52,8 @@ namespace cepgen {
         return desc;
       }
 
-      Parameters* parse(const std::string&, Parameters*) override;
+      Parameters* parseString(const std::string&, Parameters*) override;
+      Parameters* parseFile(const std::string&, Parameters*) override;
 
     private:
       static constexpr double INVALID = -999.999;
@@ -58,19 +61,22 @@ namespace cepgen {
       std::vector<std::string> argv_;
     };
 
-    Parameters* CommandLineHandler::parse(const std::string& filename, Parameters* params) {
-      if (!filename.empty()) {
-        std::ifstream file(filename);
-        std::string line;
-        while (getline(file, line))
-          argv_.emplace_back(line);
-        file.close();
-      }
+    Parameters* CommandLineHandler::parseFile(const std::string& filename, Parameters* params) {
+      rt_params_ = params;
+      if (filename.empty())
+        throw CG_FATAL("CommandLineHandler") << "Empty filename to be parsed! Aborting.";
+      std::ifstream file(filename);
+      std::string line;
+      while (getline(file, line))
+        rt_params_ = parseString(line, rt_params_);
+      file.close();
+      return rt_params_;
+    }
 
+    Parameters* CommandLineHandler::parseString(const std::string& arg, Parameters* params) {
       ParametersList pars;
-      for (const auto& arg : argv_)
-        pars.feed(arg);
-      CG_INFO("CommandLineHandler") << "Arguments list: " << argv_ << " unpacked to:\n\t" << pars << ".";
+      pars.feed(arg);
+      CG_INFO("CommandLineHandler") << "Arguments list: " << arg << " unpacked to:\n\t" << pars << ".";
 
       rt_params_ = params;
 
