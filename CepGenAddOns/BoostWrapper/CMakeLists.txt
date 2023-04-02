@@ -6,7 +6,8 @@ endif()
 
 include_directories(${PROJECT_SOURCE_DIR})
 
-set(sources BoostTreeHandler.cpp
+set(sources BoostDrawer.cpp
+            BoostTreeHandler.cpp
             BoostTreeUtils.cpp
             BoostTrapAnalyticalIntegrator.cpp
             BoostGaussKronrodAnalyticalIntegrator.cpp
