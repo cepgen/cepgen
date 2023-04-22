@@ -134,7 +134,7 @@ namespace cepgen {
     auto set_part_fluxes_from_name = [&plist_pos, &plist_neg](const std::string& fluxes) {
       if (fluxes.empty())
         return;
-      const auto& params = PartonFluxFactory::get().describeParameters(fluxes).parameters();
+      const auto params = PartonFluxFactory::get().describeParameters(fluxes).parameters();
       plist_pos.set<ParametersList>("partonFlux", params);
       plist_neg.set<ParametersList>("partonFlux", params);
     };

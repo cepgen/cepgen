@@ -46,9 +46,9 @@ namespace cepgen {
     virtual ~SteeredObject() = default;
 
     /// Equality operator
-    virtual bool operator==(const SteeredObject& oth) const { return parameters() == oth.parameters(); }
+    bool operator==(const SteeredObject& oth) const { return parameters() == oth.parameters(); }
     /// Inequality operator
-    virtual bool operator!=(const SteeredObject& oth) const { return !operator==(oth); }
+    bool operator!=(const SteeredObject& oth) const { return !operator==(oth); }
 
     /// Description of all object parameters
     static inline ParametersDescription description() {

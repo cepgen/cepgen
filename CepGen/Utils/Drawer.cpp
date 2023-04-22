@@ -17,6 +17,7 @@
  */
 
 #include <bitset>
+#include <cstdint>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Drawer.h"
