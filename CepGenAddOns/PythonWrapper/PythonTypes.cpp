@@ -35,6 +35,14 @@ namespace cepgen {
       Py_DECREF(obj);
     }
 
+    std::ostream& operator<<(std::ostream& os, const ObjectPtr& ptr) {
+      os << "PyObject{";
+      auto repr = ObjectPtr(PyObject_Repr(ptr.get()));  // new
+      if (repr)
+        os << get<std::string>(repr);
+      return os << "}";
+    }
+
     ObjectPtr importModule(const std::string& mod_name) {
       return ObjectPtr(PyImport_ImportModule(mod_name.c_str()));  // new
     }

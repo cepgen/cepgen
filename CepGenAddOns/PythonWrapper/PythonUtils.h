@@ -32,10 +32,6 @@ namespace cepgen {
       return getAttribute(obj.get(), attr);
     }
     std::vector<std::wstring> info();
-    /// Print all object attributes
-    void print(PyObject*);
-    /// Print all object attributes
-    inline void print(const ObjectPtr& obj) { print(obj.get()); }
 
     void fillParameter(PyObject* parent, const char* key, bool& out);
     void fillParameter(PyObject* parent, const char* key, int& out);

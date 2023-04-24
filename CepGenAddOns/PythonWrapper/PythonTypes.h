@@ -47,7 +47,10 @@ namespace cepgen {
       void operator()(PyObject*);
     };
     /// Smart pointer to a Python object and its dereferencing operator
-    typedef std::unique_ptr<PyObject, ObjectPtrDeleter> ObjectPtr;
+    struct ObjectPtr : public std::unique_ptr<PyObject, ObjectPtrDeleter> {
+      using std::unique_ptr<PyObject, ObjectPtrDeleter>::unique_ptr;
+      friend std::ostream& operator<<(std::ostream&, const ObjectPtr&);
+    };
 
     /// Import a Python module in a new reference-counted Python object
     ObjectPtr importModule(const std::string&);

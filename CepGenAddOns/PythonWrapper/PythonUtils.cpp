@@ -79,19 +79,6 @@ namespace cepgen {
           utils::towstring("Parsed path: ") + path};
     }
 
-    void print(PyObject* obj) {
-      /*char* buffer;  //std::array<char, 1024> buffer{' '};
-      size_t size = 0;
-      //std::unique_ptr<FILE, decltype(&fclose)> pipe(fmemopen(buffer.data(), buffer.size(), "rb"), fclose);
-      std::unique_ptr<FILE, decltype(&fclose)> pipe(open_memstream(&buffer, &size), fclose);
-      PyObject_Print(obj, pipe.get(), Py_PRINT_RAW);
-      CG_LOG.log([&buffer, &size](auto& log) {
-        for (size_t i = 0; i < size; ++i)
-          log << buffer[i];
-      });*/
-      CG_LOG << get<std::string>(PyObject_Repr(obj));
-    }
-
     void fillParameter(PyObject* parent, const char* key, bool& out) {
       auto* pobj = element(parent, key);  // borrowed
       if (!pobj) {

@@ -85,7 +85,7 @@ namespace cepgen {
       void parseExtraParticles(PyObject*);
 
       std::unique_ptr<python::Environment> env_;
-      python::ObjectPtr cfg_;
+      python::ObjectPtr cfg_{nullptr};
     };
 
     PythonHandler::PythonHandler(const ParametersList& params) : Handler(params) {
@@ -107,6 +107,11 @@ namespace cepgen {
     Parameters* PythonHandler::parseString(const std::string& str, Parameters* params) {
       env_->setProgramName("Cards.Core");
       cfg_ = python::defineModule("Cards.Core", str);  // new
+      if (!cfg_)
+        throw PY_ERROR << "Failed to parse a configuration string:\n"
+                       << std::string(80, '-') << "\n"
+                       << str << "\n"
+                       << std::string(80, '-');
       return parse(params);
     }
 
