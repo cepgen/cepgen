@@ -61,7 +61,7 @@ public:
   explicit LPAIR(const cepgen::ParametersList& params)
       : proc::Process(params),
         opt_(steer<int>("nopt")),
-        pair_(params_.has<ParticleProperties>("pair") ? steer<ParticleProperties>("pair").pdgid : steer<int>("pair")),
+        pair_(steer<ParticleProperties>("pair")),
         symmetrise_(steer<bool>("symmetrise")),
         rnd_phi_(0., 2. * M_PI),
         rnd_side_(0, 1) {}
@@ -83,7 +83,7 @@ public:
                                     {Particle::Parton2, PDG::photon}},
                                    {{Particle::OutgoingBeam1, {PDG::proton}},
                                     {Particle::OutgoingBeam2, {PDG::proton}},
-                                    {Particle::CentralSystem, {pair_, pair_}}});
+                                    {Particle::CentralSystem, {pair_.pdgid, pair_.pdgid}}});
   }
   double computeWeight() override;
   void prepareKinematics() override;
@@ -159,7 +159,7 @@ private:
 
   /// Internal switch for the optimised code version (LPAIR legacy)
   const int opt_;
-  const cepgen::pdgid_t pair_;
+  const cepgen::ParticleProperties pair_;
   const bool symmetrise_;
 
   // mapped variables

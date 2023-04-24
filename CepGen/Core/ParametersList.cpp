@@ -512,6 +512,7 @@ namespace cepgen {
   /// Set a particle properties object value
   template <>
   ParametersList& ParametersList::set<ParticleProperties>(std::string key, const ParticleProperties& value) {
+    PDG::get().define(value);
     return set<ParametersList>(std::move(key), value.parameters());
   }
 
