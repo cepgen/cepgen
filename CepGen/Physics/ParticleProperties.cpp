@@ -82,7 +82,8 @@ namespace cepgen {
 
   std::ostream& operator<<(std::ostream& os, const ParticleProperties& prop) {
     return os << (prop.name.empty() ? "unnamed" : prop.name) << "{"
-              << "id=" << prop.pdgid << ",desc=" << prop.descr << ",colours=" << prop.colours << ",mass=" << prop.mass
-              << ",width=" << prop.width << ",charge=" << prop.charge << (prop.fermion ? ",fermion" : "") << "}";
+              << "pdgid=" << prop.pdgid << ",desc=" << prop.descr << ",colours=" << prop.colours
+              << ",mass=" << prop.mass << ",width=" << prop.width << ",charge=" << prop.charge
+              << (prop.fermion ? ",fermion" : "") << "}";
   }
 }  // namespace cepgen

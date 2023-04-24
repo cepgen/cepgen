@@ -29,15 +29,19 @@
 namespace cepgen {
   namespace python {
     void ObjectPtrDeleter::operator()(PyObject* obj) {
-      CG_DEBUG("Python:ObjectPtrDeleter")
-          << "Destroying object at addr 0x" << obj << " (reference count: " << obj->ob_refcnt
-          << ", type: " << obj->ob_type->tp_name << ")";
+      CG_DEBUG("Python:ObjectPtrDeleter").log([&obj](auto& log) {
+        log << "Destroying object at addr 0x" << obj << " (";
+        auto* type = Py_TYPE(obj);
+        if (type)
+          log << "type: " << get<std::string>(PyType_GetName(type)) << ", ";
+        log << "reference count: " << Py_REFCNT(obj) << ")";
+      });
       Py_DECREF(obj);
     }
 
     std::ostream& operator<<(std::ostream& os, const ObjectPtr& ptr) {
       os << "PyObject{";
-      auto repr = ObjectPtr(PyObject_Repr(ptr.get()));  // new
+      auto repr = ObjectPtr(PyObject_Str(ptr.get()));  // new
       if (repr)
         os << get<std::string>(repr);
       return os << "}";
@@ -48,12 +52,17 @@ namespace cepgen {
     }
 
     ObjectPtr defineModule(const std::string& mod_name, const std::string& code) {
-      auto* mod = PyModule_New(mod_name.c_str());
-      PyModule_AddStringConstant(mod, "__file__", "");
-      auto* local_dict = PyModule_GetDict(mod);
-      auto* builtins = PyEval_GetBuiltins();
-      PyDict_SetItemString(local_dict, "__builtins__", builtins);
-      return ObjectPtr(PyRun_String(code.c_str(), Py_file_input, local_dict, local_dict));  // new
+      auto mod = ObjectPtr(PyImport_AddModule(mod_name.data()));
+      if (!mod)
+        throw PY_ERROR << "Failed to add the module.";
+      auto* local_dict = PyModule_GetDict(mod.get());
+      if (!local_dict)
+        throw PY_ERROR << "Failed to retrieve the local dictionary from module.";
+      auto run = ObjectPtr(PyRun_String(code.data(), Py_file_input, local_dict, local_dict));
+      CG_DEBUG("Python:defineModule") << "New '" << mod_name << "' module initialised from Python code parsing.\n"
+                                      << "List of attributes: " << getVector<std::string>(PyObject_Dir(mod.get()))
+                                      << ".";
+      return mod;
     }
 
     //------------------------------------------------------------------

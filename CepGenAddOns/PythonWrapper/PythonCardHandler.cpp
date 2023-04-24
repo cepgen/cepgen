@@ -127,7 +127,6 @@ namespace cepgen {
           log << "\n\t" << ln;
       });
 
-
       auto parseAttr = [this](const std::string& name, std::function<void(PyObject*)> callback) -> void {
         auto pobj = python::getAttribute(cfg_.get(), name);
         if (pobj)
@@ -293,8 +292,9 @@ namespace cepgen {
 
       const auto& parts = python::get<ParametersList>(pparts);
       for (const auto& k : parts.keys(true)) {
-        const ParticleProperties part(parts.get<ParametersList>(k).set<std::string>("name", k));
-        if (part.pdgid == 0 || part.mass < 0.)
+        auto props = parts.get<ParametersList>(k);
+        const ParticleProperties part(props.set<std::string>("name", k).set<pdgid_t>("pdgid", props.get<int>("pdgid")));
+        if (part.mass <= 0. && part.width <= 0.)  // skip aliases
           continue;
         if (!PDG::get().has(part.pdgid) || PDG::get()(part.pdgid) != part) {
           CG_INFO("PythonHandler:particles")
