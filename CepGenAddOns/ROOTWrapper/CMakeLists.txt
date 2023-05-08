@@ -8,8 +8,6 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   return()
 endif()
 
-message(STATUS "... ROOT v${ROOT_VERSION} standard is c++${ROOT_CXX_STANDARD}")
-
 set(sources IntegratorROOT.cpp
             ROOTDerivator.cpp
             ROOTDrawer.cpp
@@ -17,8 +15,6 @@ set(sources IntegratorROOT.cpp
             ROOTHistsHandler.cpp
             ROOTFunctional.cpp
             ROOTAnalyticalIntegrator.cpp)
-
-string(REPLACE "-Qunused-arguments" "" ROOT_CXX_FLAGS ${ROOT_CXX_FLAGS})
 
 #--- FOAM integrator
 if(CMAKE_BUILD_FOAM)
@@ -34,12 +30,13 @@ endif()
 cepgen_build(CepGenRoot SOURCES ${sources}
     EXT_HEADERS ${ROOT_INCLUDE_DIRS}
     EXT_LIBS ${ROOT_LIBRARIES}
-    DEFINITIONS ${ROOT_DEFINITIONS}
     TESTS test/*.cc
     PROPERTY CXX_STANDARD ${ROOT_CXX_STANDARD}
-    CFLAGS "${ROOT_CXX_FLAGS} -Wno-bitwise-instead-of-logical -Wno-sizeof-pointer-div -Wno-unused-command-line-argument"
+    CFLAGS "${ROOT_CXX_FLAGS}"
     INSTALL_COMPONENT root)
 cpack_add_component(root
     DISPLAY_NAME "CepGen ROOT wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the ROOT library"
     DEPENDS lib)
+
+message(STATUS "... ROOT v${ROOT_VERSION} standard is c++${ROOT_CXX_STANDARD}")
