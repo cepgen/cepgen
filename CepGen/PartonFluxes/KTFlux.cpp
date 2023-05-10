@@ -25,7 +25,6 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/PartonFluxes/KTFlux.h"
 #include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"

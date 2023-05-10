@@ -381,7 +381,7 @@ bool LPAIR::pickin() {
   double t1_min = (masses_.w31 * d3 + (d3 - masses_.w31) * (d3 * mA2() - masses_.w31 * mB2()) / s()) /
                   t1_max;  // definition from eq. (A.5) in [1]
 
-  // FIXME dropped in CDF version
+  // this part was dropped in CDF version
   if (t1_max > -kinematics().cuts().initial.q2.min()) {
     CG_DEBUG_LOOP("LPAIR") << "t1max = " << t1_max << " > -q2min = " << -kinematics().cuts().initial.q2.min();
     return false;

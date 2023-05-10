@@ -75,8 +75,8 @@ namespace cepgen {
           out.GM = MU * out.GE;
           return out;
         }
-        const double arg1 = sqrt(q2) * a_, arg2 = 1. / arg1;
-        const double sph = (sin(arg1) - arg1 * cos(arg1)) * 3. * arg2 * arg2 * arg2;
+        const double qr = sqrt(q2) * a_, inv_qr = 1. / qr;
+        const double sph = (sin(qr) - qr * cos(qr)) * 3. * inv_qr * inv_qr * inv_qr;
         FormFactors out;
         out.GE = sph / (1. + q2 * a02_);
         out.GM = MU * out.GE;

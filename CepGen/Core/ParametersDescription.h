@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2022  Laurent Forthomme
+ *  Copyright (C) 2021-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ namespace cepgen {
       ParametersList::set<T>(name, def);
       return obj_descr_[name];
     }
-    /// Add a recasted definition to a new parameter
+    /// Add a recast definition to a new parameter
     template <typename T, typename U>
     inline ParametersDescription& addAs(const std::string& name, const U& def) {
       return add<T>(name, static_cast<T>(def));
@@ -117,3 +117,4 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
+

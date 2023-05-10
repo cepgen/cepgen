@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2022  Laurent Forthomme
+ *  Copyright (C) 2021-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -164,7 +164,8 @@ namespace cepgen {
       log << "Added a new parameters collection \"" << name << "\" as: " << desc;
       const auto& mod_name = this->getNameString();
       if (!mod_name.empty())
-        log << "\nto the object with name: " << mod_name;
+        log << "\n"
+            << "to the object with name: " << mod_name;
       log << ".";
     });
     return obj_descr_[name];
@@ -190,7 +191,8 @@ namespace cepgen {
       log << "Added a new vector of parameters descriptions \"" << name << "\" as: " << desc;
       const auto& mod_name = this->getNameString();
       if (!mod_name.empty())
-        log << "\nto the object with name: " << mod_name;
+        log << "\n"
+            << "to the object with name: " << mod_name;
       log << ".\n";
       if (!def.empty())
         log << "It is now composed of " << def << ".";

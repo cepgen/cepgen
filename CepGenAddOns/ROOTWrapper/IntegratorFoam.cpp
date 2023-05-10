@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -82,13 +82,13 @@ namespace cepgen {
     foam_->SetRho(this);
     foam_->SetkDim(integrand_->size());
     foam_->Initialize();
-    for (size_t i = 0; i < 100000; ++i)
+    for (int i = 0; i < steer<int>("nCalls"); ++i)
       foam_->MakeEvent();
     //--- launch integration
     double norm, err;
     foam_->Finalize(norm, err);
 
-    //FIXME handle the non-[0,1] ranges
+    //TODO: handle the non-[0,1] ranges
     foam_->GetIntegMC(result, abs_error);
     result_ = result;
     err_result_ = abs_error;
@@ -100,7 +100,7 @@ namespace cepgen {
       const double effic = wtmax > 0 ? avewt / wtmax : 0.;
       log << "Result: " << result_ << " +- " << err_result_ << "\n\t"
           << "Relative error: " << err_result_ / result_ * 100. << "%\n\t"
-          << "Dispersion/<wt>= " << sigma << ", <wt>= " << avewt << ", <wt>/wtmax= " << effic << ",\n\t"
+          << "Dispersion/<wt> = " << sigma << ", <wt> = " << avewt << ", <wt>/wtmax = " << effic << ",\n\t"
           << " for epsilon = " << eps << "\n\t"
           << " nCalls (initialisation only)= " << ncalls << ".";
     });
@@ -110,7 +110,9 @@ namespace cepgen {
     auto desc = Integrator::description();
     desc.setDescription("FOAM general purpose MC integrator");
     desc.add<std::string>("rngEngine", "MersenneTwister")
-        .setDescription("Set random number generator engine ('Ranlux', 'generic', 'MersenneTwister' handled)");
+        .setDescription(
+            "Set random number generator engine (currently handled: 'Ranlux', 'generic', 'MersenneTwister')");
+    desc.add<int>("nCalls", 100'000).setDescription("number of calls for the cell evaluation");
     desc.add<int>("nCells", 1000);
     desc.add<int>("nSampl", 200);
     desc.add<int>("nBin", 8);

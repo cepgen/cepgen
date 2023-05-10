@@ -94,10 +94,10 @@ int main(int argc, char* argv[]) {
   }
   for (const auto& x : x_range.generate(num_points)) {
     out << "\n" << x;
-    for (const auto& flux_vs_name : fluxes) {
-      const auto flux = (*flux_vs_name.second)(x, kt2, mx2);
+    for (const auto& flux_name : fluxes_names) {
+      const auto flux = (*fluxes.at(flux_name))(x, kt2, mx2);
       out << "\t" << flux;
-      graph_flux.at(flux_vs_name.first).addPoint(x, flux);
+      graph_flux.at(flux_name).addPoint(x, flux);
     }
   }
   out.close();

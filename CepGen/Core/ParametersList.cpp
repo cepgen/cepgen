@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2021  Laurent Forthomme
+ *  Copyright (C) 2018-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -145,7 +145,7 @@ namespace cepgen {
     const auto raw_list_stripped = utils::between(raw_list, "{", "}");
     if (raw_list_stripped.size() == 1 && raw_list == "{" + raw_list_stripped[0] + "}")
       raw_list = raw_list_stripped[0];
-    // first preprocess the arguments list to isolate all comma-separated arguments
+    // first pre-process the arguments list to isolate all comma-separated arguments
     std::vector<std::string> list;
     std::vector<std::string> buf;
     short num_open_braces = 0;
@@ -158,7 +158,7 @@ namespace cepgen {
       }
     }
     CG_DEBUG("ParametersList:feed") << "Parsed arguments: " << list << ", raw list: " << raw_list
-                                    << " (splitted: " << utils::split(raw_list, ',') << "), "
+                                    << " (split: " << utils::split(raw_list, ',') << "), "
                                     << "{-} imbalance: " << num_open_braces << ".";
     if (num_open_braces != 0)
       throw CG_ERROR("ParametersList:feed") << "Invalid string to be parsed as a parameters list!\n\t"
@@ -186,7 +186,7 @@ namespace cepgen {
       auto words = utils::split(arg, ':');
       auto key = words.at(0);
       if (erase(key) > 0)
-        CG_DEBUG("ParametersList:feed") << "Replacing key:'" << key << "' with a new value.";
+        CG_DEBUG("ParametersList:feed") << "Replacing key '" << key << "' with a new value.";
       if (key == "name")  // replace any "name" key encountered by the canonical module name key
         key = MODULE_NAME;
       if (words.size() == 1)  // basic key:true
@@ -371,27 +371,27 @@ namespace cepgen {
   }
 
   //------------------------------------------------------------------
-  // default template (placeholders)
+  // default template (place holders)
   //------------------------------------------------------------------
 
   template <typename T>
   bool ParametersList::has(const std::string& key) const {
-    throw CG_FATAL("ParametersList") << "Invalid type for key=" << key << "!";
+    throw CG_FATAL("ParametersList") << "Invalid type for key '" << key << "'.";
   }
 
   template <typename T>
   T ParametersList::get(const std::string& key, const T&) const {
-    throw CG_FATAL("ParametersList") << "Invalid type retrieved for key=" << key << "!";
+    throw CG_FATAL("ParametersList") << "Invalid type retrieved for key '" << key << "'.";
   }
 
   template <typename T>
   T& ParametersList::operator[](const std::string& key) {
-    throw CG_FATAL("ParametersList") << "Invalid type retrieved for key=" << key << "!";
+    throw CG_FATAL("ParametersList") << "Invalid type retrieved for key '" << key << "'.";
   }
 
   template <typename T>
   ParametersList& ParametersList::set(std::string key, const T&) {
-    throw CG_FATAL("ParametersList") << "Invalid type to be set for key=" << key << "!";
+    throw CG_FATAL("ParametersList") << "Invalid type to be set for key '" << key << "'.";
   }
 
   //------------------------------------------------------------------

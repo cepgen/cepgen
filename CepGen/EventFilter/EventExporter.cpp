@@ -49,7 +49,7 @@ namespace cepgen {
       os << "\n";
     }
     const auto& cuts = runParameters().kinematics().cuts();
-    auto dump_cuts = [&os, &len, &prep](const auto& obj) {
+    auto dump_cuts = [&os, &prep](const auto& obj) {
       for (const auto& lim : obj.parameters().template keysOf<Limits>()) {
         const auto& limit = obj.parameters().template get<Limits>(lim);
         if (limit.valid() && obj.description().has(lim))

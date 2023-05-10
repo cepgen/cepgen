@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -216,7 +216,7 @@ namespace cepgen {
 
     //--- specify the id
     if (part_with_same_role.empty() && part.id() < 0)
-      part.setId(size());  // set the id if previously invalid/nonexistent
+      part.setId(size());  // set the id if previously invalid/non-existent
     if (!part_with_same_role.empty()) {
       if (replace)
         part.setId(part_with_same_role[0].id());  // set the previous id if replacing a particle
@@ -264,7 +264,7 @@ namespace cepgen {
     return out;
   }
 
-  Momentum Event::missingEnergy() const {
+  Momentum Event::missingMomentum() const {
     Momentum me;
     for (const auto& cp : operator()(Particle::Role::CentralSystem))
       if (cp.status() == Particle::Status::FinalState) {

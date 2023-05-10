@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2020-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -167,7 +167,7 @@ namespace cepgen {
       if (rt_params_->timeKeeper())
         tree_.add_child(TIMER_NAME, bc::pack(ParametersList()));
       log_.set<int>("level", (int)utils::Logger::get().level());
-      //FIXME not yet implemented
+      //TODO: implement the exceptions filtering rules
       //for (const auto& mod : utils::Logger::get().exceptionRules())
       //  log_.operator[]<std::vector<std::string> >("enabledModules").emplace_back(mod);
       tree_.add_child(LOGGER_NAME, bc::pack(log_));

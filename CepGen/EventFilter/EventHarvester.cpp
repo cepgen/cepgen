@@ -57,7 +57,7 @@ namespace cepgen {
           const auto& nbins = (hvar.get<int>("nbins") > 0 ? hvar.get<int>("nbins") : hvar.get<int>("nbinsX"));
           hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(nbins, hvar.get<Limits>("xrange"), name), log});
         } else {
-          CG_WARNING("EventHarvester") << "Neither xrange nor xbins found in parameters for 1D plot of variable \""
+          CG_WARNING("EventHarvester") << "Neither 'xrange' nor 'xbins' found in parameters for 1D plot of variable \""
                                        << vars.at(0) << "\".";
           continue;
         }
@@ -79,7 +79,8 @@ namespace cepgen {
               log});
         } else {
           CG_WARNING("EventHarvester")
-              << "Neither (x/y)range nor (x/y)bins found in parameters for 1D plot of variables \"" << vars << "\".";
+              << "Neither '(x/y)range' nor '(x/y)bins' found in parameters for 1D plot of variables \"" << vars
+              << "\".";
           continue;
         }
         auto& hist = hists2d_.rbegin()->hist;
@@ -124,10 +125,10 @@ namespace cepgen {
   }
 
   void EventHarvester::initialise() {
-    sqrts_ = runParameters().kinematics().incomingBeams().sqrtS();
     num_evts_ = 0ul;
     proc_name_ = ProcessFactory::get().describe(runParameters().processName());
-    proc_name_ += ", \\sqrt{s} = " + utils::format("%g", sqrts_ * 1.e-3) + " TeV";
+    proc_name_ +=
+        ", \\sqrt{s} = " + utils::format("%g", runParameters().kinematics().incomingBeams().sqrtS() * 1.e-3) + " TeV";
     if (save_hists_ && !hists_.empty())
       file_ << banner("#") << "\n";
   }
@@ -145,7 +146,7 @@ namespace cepgen {
     auto desc = EventExporter::description();
     desc.setDescription("Text-based histogramming tool");
     desc.add<std::string>("plotter", "").setDescription("Plotting algorithm to use");
-    desc.add<std::string>("filename", "output.hists.txt").setDescription("Output filename for histogram dump");
+    desc.add<std::string>("filename", "output.hists.txt").setDescription("Output file name for histogram dump");
     desc.add<bool>("show", true).setDescription("Show the histogram(s) at the end of the run?");
     desc.add<bool>("save", false).setDescription("Save the histogram(s) at the end of the run?");
     // per-histogram default parameters

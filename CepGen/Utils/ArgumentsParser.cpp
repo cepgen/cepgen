@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2022  Laurent Forthomme
+ *  Copyright (C) 2019-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -112,7 +112,7 @@ namespace cepgen {
           throw CG_FATAL("ArgumentsParser") << help_message() << " Failed to retrieve required <arg" << i << ">.";
         par.value = !par.boolean() ? args_.at(i).second : "1";
       } else {
-        // for each parameter, loop over arguments to find correspondance
+        // for each parameter, loop over arguments to find correspondence
         auto it = std::find_if(args_.begin(), args_.end(), [&i, &par](const auto& arg) {
           if (arg.first != "--" + par.name.at(0) && (par.name.size() < 2 || arg.first != "-" + par.name.at(1)))
             return false;

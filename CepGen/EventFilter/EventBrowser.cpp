@@ -46,8 +46,9 @@ namespace cepgen {
         const auto& var_name = sm[1].str();
         const auto& str_role = sm[2].str();
         if (role_str_.count(str_role) == 0) {
-          CG_WARNING("TextHandler") << "Invalid particle role retrieved from configuration: \"" << str_role << "\".\n\t"
-                                    << "Skipping the variable \"" << var << "\" in the output module.";
+          CG_WARNING("EventBrowser") << "Invalid particle role retrieved from configuration: \"" << str_role
+                                     << "\".\n\t"
+                                     << "Skipping the variable \"" << var << "\" in the output module.";
           return INVALID_OUTPUT;
         }
         const auto& part = ev(role_str_.at(str_role))[0];
@@ -113,9 +114,9 @@ namespace cepgen {
       if (var == "ttot")
         return ev.time_total;
       if (var == "met")
-        return ev.missingEnergy().pt();
+        return ev.missingMomentum().pt();
       if (var == "mephi")
-        return ev.missingEnergy().phi();
+        return ev.missingMomentum().phi();
       throw CG_ERROR("EventBrowser") << "Failed to retrieve the event-level variable \"" << var << "\".";
     }
   }  // namespace utils

@@ -32,8 +32,6 @@ namespace cepgen {
    */
   class EventExporter : public EventHandler {
   public:
-    /// Class constructor
-    /// \param[in] params User-controlled steering parameters for this module
     explicit EventExporter(const ParametersList&);
 
     /// Set the process cross section and its associated error
@@ -53,3 +51,4 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
+

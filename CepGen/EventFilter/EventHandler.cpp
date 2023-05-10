@@ -29,6 +29,7 @@ namespace cepgen {
 
   ParametersDescription EventHandler::description() {
     auto desc = ParametersDescription();
+    desc.setDescription("Unnamed event handler");
     return desc;
   }
 
