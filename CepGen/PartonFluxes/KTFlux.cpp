@@ -31,37 +31,10 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
 namespace cepgen {
-  class NucleonKTFlux : public KTFlux {
-  public:
-    explicit NucleonKTFlux(const ParametersList& params) : KTFlux(params) {}
-
-    static ParametersDescription description() {
-      auto desc = KTFlux::description();
-      desc.add<pdgid_t>("pdgId", PDG::proton).setDescription("PDG identifier of the incoming nucleon");
-      return desc;
-    }
-
-  protected:
-    virtual double mass2() const = 0;
-
-    struct Q2Values {
-      double min{0.}, q2{0.};
-    };
-    /// Compute the minimum and kT-dependent Q^2
-    Q2Values computeQ2(double x, double kt2, double mx2 = 0.) const {
-      Q2Values out;
-      const auto mi2 = mass2();
-      const auto dm2 = (mx2 == 0.) ? 0. : mx2 - mi2;
-      out.min = ((x * dm2) + x * x * mi2) / (1. - x);
-      out.q2 = out.min + kt2 / (1. - x);
-      return out;
-    }
-  };
-
-  class ElasticNucleonKTFlux : public NucleonKTFlux {
+  class ElasticNucleonKTFlux : public KTFlux {
   public:
     explicit ElasticNucleonKTFlux(const ParametersList& params)
-        : NucleonKTFlux(params), ff_(FormFactorsFactory::get().build(params.get<ParametersList>("formFactors"))) {
+        : KTFlux(params), ff_(FormFactorsFactory::get().build(params.get<ParametersList>("formFactors"))) {
       if (!ff_)
         throw CG_FATAL("ElasticNucleonKTFlux")
             << "Elastic kT flux requires a modelling of electromagnetic form factors!";
@@ -135,10 +108,10 @@ namespace cepgen {
     }
   };
 
-  class InelasticNucleonKTFlux : public NucleonKTFlux {
+  class InelasticNucleonKTFlux : public KTFlux {
   public:
     explicit InelasticNucleonKTFlux(const ParametersList& params)
-        : NucleonKTFlux(params),
+        : KTFlux(params),
           sf_(StructureFunctionsFactory::get().build(params.get<ParametersList>("structureFunctions"))) {
       if (!sf_)
         throw CG_FATAL("InelasticNucleonKTFlux") << "Inelastic kT flux requires a modelling of structure functions!";
@@ -186,43 +159,6 @@ namespace cepgen {
       return constants::ALPHA_EM * M_1_PI * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2vals.q2;
     }
   };
-
-  /// Realistic nuclear form-factor as used in STARLIGHT
-  /// See \cite Klein:2016yzr
-  /*class ElasticHeavyIonKTFlux final : public KTFlux {
-  public:
-    explicit ElasticHeavyIonKTFlux(const ParametersList& params)
-        : KTFlux(params),
-          ff_(formfac::FormFactorsFactory::get().build(params.get<ParametersList>("formFactors"))) {}
-
-    static ParametersDescription description() {
-      auto desc = KTFlux::description();
-      desc.setDescription("Elastic photon emission from heavy ion (from Starlight)");
-      desc.addAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon::Pb());
-      desc.add<ParametersDescription>("formFactors", ParametersDescription().setName<std::string>("HeavyIonDipole"));
-      return desc;
-    }
-
-    bool fragmenting() const override final { return false; }
-
-    double operator()(double x, double kt2, double) const override final {
-      if (!x_range_.contains(x))
-        return 0.;
-      const double r_a = 1.1 * cbrt(hi_.A), a0 = 0.7, m_a = hi_.A * mp_;
-      const double q2_ela = (kt2 + x * x * m_a * m_a) / (1. - x), cons = sqrt(q2_ela) / (constants::GEVM1_TO_M * 1e15);
-      const double tau = cons * r_a, tau1 = cons * a0;
-      const double ff1 = 3. * (sin(tau) - tau * cos(tau)) / pow(tau + 1.e-10, 3);
-      const double ff2 = 1. / (1. + tau1 * tau1);
-      const double ela1 = pow(kt2 / (kt2 + x * x * m_a * m_a), 2);
-      const double ela2 = pow(ff1 * ff2, 2);// ela3 = 1.-( q2_ela-kt2 )/q2_ela;
-      const auto z = (unsigned short)hi_.Z;
-      //return constants::ALPHA_EM * M_1_PI * z * z * ela1 * ela2 / q2_ela;
-      return constants::ALPHA_EM * M_1_PI * z * z * ela1 / q2_ela;
-    }
-
-  private:
-    std::unique_ptr<formfac::Parameterisation> ff_;
-  };*/
 }  // namespace cepgen
 
 REGISTER_FLUX("ElasticKT", ElasticNucleonKTFlux);

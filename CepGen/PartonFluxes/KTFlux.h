@@ -34,5 +34,20 @@ namespace cepgen {
   protected:
     /// Minimal value taken for a \f$\k_{\rm T}\f$-factorised flux
     static constexpr double kMinKTFlux = 1.e-20;
+    virtual double mass2() const { return 0.; }
+
+    struct Q2Values {
+      double min{0.}, q2{0.};
+    };
+    /// Compute the minimum and kT-dependent Q^2
+    Q2Values computeQ2(double x, double kt2, double mx2 = 0.) const {
+      Q2Values out;
+      const auto mi2 = mass2();
+      const auto dm2 = (mx2 == 0.) ? 0. : mx2 - mi2;
+      out.min = ((x * dm2) + x * x * mi2) / (1. - x);
+      out.q2 = out.min + kt2 / (1. - x);
+      return out;
+    }
   };
 }  // namespace cepgen
+
