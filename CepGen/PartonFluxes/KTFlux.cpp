@@ -72,7 +72,7 @@ namespace cepgen {
 
     static ParametersDescription description() {
       auto desc = ElasticNucleonKTFlux::description();
-      desc.setDescription("HI elastic photon emission (from Starlight)");
+      desc.setDescription("HI elastic photon emission");
       desc.addAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon::Pb());
       desc.add<ParametersDescription>("formFactors", ParametersDescription().setName<std::string>("HeavyIonDipole"));
       return desc;

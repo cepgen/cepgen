@@ -61,7 +61,7 @@ namespace cepgen {
       static ParametersDescription description() {
         auto desc = StandardDipole::description();
         desc.setDescription("Heavy ion dipole");
-        desc.addAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon::Pb());
+        desc.addAs<pdgid_t, HeavyIon>("incomingParticle", HeavyIon::Pb());
         return desc;
       }
 
