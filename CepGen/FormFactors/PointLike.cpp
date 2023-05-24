@@ -27,7 +27,7 @@ namespace cepgen {
           : Parameterisation(params), trivial_(ff) {}
 
     private:
-      FormFactors compute(double /*q2*/) override { return trivial_; }
+      const FormFactors& operator()(double /*q2*/) override { return trivial_; }
       const FormFactors trivial_;
     };
 

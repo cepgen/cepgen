@@ -47,7 +47,7 @@ namespace cepgen {
       double tau(double q2) const;
 
       /// Compute all relevant form factors functions for a given \f$Q^2\f$ value
-      const FormFactors& operator()(double /*q2*/);
+      virtual const FormFactors& operator()(double /*q2*/);
 
     protected:
       /// Proton magnetic moment
