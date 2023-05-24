@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@
 #include <cstring>
 #include <vector>
 
+#include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
 
 namespace cepgen {
@@ -306,10 +307,20 @@ namespace cepgen {
       if (extensions.empty())
         return;
       TCanvas::cd();
-      if (leg_)
-        leg_->Draw();
       if (top_label_)
         top_label_->Draw();
+      if (leg_) {
+        double leg_x1, leg_y1;
+        if (TPad::PlaceBox(leg_.get(), leg_width_, leg_height_, leg_x1, leg_y1, "lb")) {
+          leg_x1_ = std::max(leg_x1_, leg_x1);
+          leg_y1_ = std::max(std::min(leg_y1_, leg_y1), 0.9 - leg_height_);
+          leg_->SetX1(leg_x1_);
+          leg_->SetX2(leg_x1_ + leg_width_);
+          leg_->SetY1(leg_y1_);
+          leg_->SetY2(leg_y1_ + leg_height_);
+        }
+        leg_->Draw();
+      }
       for (const auto& extension : extensions)
         TCanvas::SaveAs(Form("%s/%s.%s", out_dir.c_str(), TCanvas::GetName(), extension.c_str()));
     }
@@ -369,7 +380,7 @@ namespace cepgen {
         return;
       if (ratio_)
         TCanvas::cd(1);
-      leg_.reset(new TLegend(leg_x1_, leg_y1_, leg_x1_ + 0.45, leg_y1_ + 0.15));
+      leg_.reset(new TLegend);
       leg_->SetLineColor(kWhite);
       leg_->SetLineWidth(0);
       leg_->SetFillStyle(0);
@@ -390,6 +401,7 @@ namespace cepgen {
     std::string title_;
     bool ratio_;
     double leg_x1_{0.5}, leg_y1_{0.75};
+    double leg_width_{0.45}, leg_height_{0.15};
     std::unique_ptr<TLegend> leg_;
     std::unique_ptr<ROOTPaveText> top_label_;
     std::vector<std::unique_ptr<TObject> > grb_obj_;
