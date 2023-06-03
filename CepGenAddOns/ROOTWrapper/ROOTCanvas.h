@@ -298,6 +298,7 @@ namespace cepgen {
         leg_->SetY1(leg_->GetY1() - (num_entries - 3) * 0.01);
       if (num_entries > 6) {
         leg_->SetNColumns(1 + num_entries / 6);
+        leg_width_ = 0.55;
         leg_->SetTextSize(0.035);
       }
     }
@@ -310,10 +311,9 @@ namespace cepgen {
       if (top_label_)
         top_label_->Draw();
       if (leg_) {
-        double leg_x1, leg_y1;
-        if (TPad::PlaceBox(leg_.get(), leg_width_, leg_height_, leg_x1, leg_y1, "lb")) {
-          leg_x1_ = std::max(leg_x1_, leg_x1);
-          leg_y1_ = std::max(std::min(leg_y1_, leg_y1), 0.9 - leg_height_);
+        if (TPad::PlaceBox(leg_.get(), leg_width_, leg_height_, leg_x1_, leg_y1_, "lb")) {
+          leg_x1_ = std::max(0.15, std::min(leg_x1_, 0.85 - leg_width_));
+          leg_y1_ = std::max(0.15, std::min(leg_y1_, 0.85 - leg_height_));
           leg_->SetX1(leg_x1_);
           leg_->SetX2(leg_x1_ + leg_width_);
           leg_->SetY1(leg_y1_);
