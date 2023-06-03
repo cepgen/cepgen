@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2022       Laurent Forthomme
  *                2021       Sergey Kulagin
  *                           Vladislav Barinov
  *
@@ -213,6 +213,7 @@ namespace cepgen {
                   (1.0974 + 47.7352 * std::pow(xbj, 4))) /
                  q2;
         };
+
         for (size_t idx_xbj = 0; idx_xbj < num_xbj; ++idx_xbj) {  // xbj grid
           const double xbj = idx_xbj < nxbb ? exp(log(min_xbj) + delx * idx_xbj)
                                             : 1. - std::sqrt(fabs(std::pow(1. - x1, 2) - delx1 * (idx_xbj - nxbb + 1)));
