@@ -42,7 +42,7 @@ namespace cepgen {
 
     static ParametersDescription description() {
       auto desc = KTFlux::description();
-      desc.setDescription("Nucleon elastic photon emission");
+      desc.setDescription("Nucl. el. photon emission");
       desc.add<ParametersDescription>("formFactors", ParametersDescription().setName<std::string>("StandardDipole"));
       return desc;
     }
@@ -72,7 +72,7 @@ namespace cepgen {
 
     static ParametersDescription description() {
       auto desc = ElasticNucleonKTFlux::description();
-      desc.setDescription("HI elastic photon emission");
+      desc.setDescription("HI el. photon emission");
       desc.addAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon::Pb());
       desc.add<ParametersDescription>("formFactors", ParametersDescription().setName<std::string>("HeavyIonDipole"));
       return desc;
@@ -93,7 +93,7 @@ namespace cepgen {
     using ElasticNucleonKTFlux::ElasticNucleonKTFlux;
     static ParametersDescription description() {
       auto desc = ElasticNucleonKTFlux::description();
-      desc.setDescription("Nucleon elastic photon emission (Budnev flux)");
+      desc.setDescription("Nucl. el. photon emission (Budnev flux)");
       return desc;
     }
     double operator()(double x, double kt2, double) const override final {
@@ -119,7 +119,7 @@ namespace cepgen {
 
     static ParametersDescription description() {
       auto desc = KTFlux::description();
-      desc.setDescription("Nucleon inelastic photon emission");
+      desc.setDescription("Nucl. inel. photon emission");
       desc.add<ParametersDescription>("structureFunctions", ParametersDescription().setName<int>(301));
       return desc;
     }
@@ -144,7 +144,7 @@ namespace cepgen {
     using InelasticNucleonKTFlux::InelasticNucleonKTFlux;
     static ParametersDescription description() {
       auto desc = InelasticNucleonKTFlux::description();
-      desc.setDescription("Nucleon inelastic photon emission (Budnev flux)");
+      desc.setDescription("Nucl. inel. photon emission (Budnev flux)");
       return desc;
     }
     double operator()(double x, double kt2, double mx2) const override {

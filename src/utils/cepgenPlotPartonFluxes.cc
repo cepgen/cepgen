@@ -79,25 +79,25 @@ int main(int argc, char* argv[]) {
       << "# diffractive mass: " << mx << " GeV/c2\n"
       << "# fractional momentum loss: " << x_range;
 
-  unordered_map<string, cepgen::utils::Graph1D> graph_flux;
-  unordered_map<string, std::unique_ptr<cepgen::PartonFlux> > fluxes;
+  vector<std::unique_ptr<cepgen::PartonFlux> > fluxes;
+  vector<cepgen::utils::Graph1D> graph_flux;
   for (const auto& flux : fluxes_names) {
-    fluxes[flux] = cepgen::PartonFluxFactory::get().build(
+    fluxes.emplace_back(cepgen::PartonFluxFactory::get().build(
         flux,
         cepgen::ParametersList()
             .set<cepgen::ParametersList>(
                 "structureFunctions",
                 cepgen::StructureFunctionsFactory::get().describeParameters(strfun_type).parameters())
             .set<cepgen::ParametersList>(
-                "formFactors", cepgen::FormFactorsFactory::get().describeParameters(formfac_type).parameters()));
-    graph_flux[flux] = cepgen::utils::Graph1D(flux, cepgen::PartonFluxFactory::get().describe(flux));
+                "formFactors", cepgen::FormFactorsFactory::get().describeParameters(formfac_type).parameters())));
+    graph_flux.emplace_back(flux, cepgen::PartonFluxFactory::get().describe(flux));
   }
   for (const auto& x : x_range.generate(num_points)) {
     out << "\n" << x;
-    for (const auto& flux_name : fluxes_names) {
-      const auto flux = (*fluxes.at(flux_name))(x, kt2, mx2);
+    for (size_t j = 0; j < fluxes.size(); ++j) {
+      const auto flux = (*fluxes.at(j))(x, kt2, mx2);
       out << "\t" << flux;
-      graph_flux.at(flux_name).addPoint(x, flux);
+      graph_flux.at(j).addPoint(x, flux);
     }
   }
   out.close();
@@ -119,12 +119,11 @@ int main(int argc, char* argv[]) {
                            cepgen::StructureFunctionsFactory::get().describe(strfun_type);
 
     for (auto& gr : graph_flux) {
-      gr.second.xAxis().setLabel("$\\xi$");
-      gr.second.yAxis().setLabel(normalised ? "\\xi $\\varphi_{T}(\\xi, k_{T}^{2})"
-                                            : "$\\varphi_{T}(\\xi, k_{T}^{2})$");
+      gr.xAxis().setLabel("$\\xi$");
+      gr.yAxis().setLabel(normalised ? "\\xi $\\varphi_{T}(\\xi, k_{T}^{2})" : "$\\varphi_{T}(\\xi, k_{T}^{2})$");
       if (y_range.valid())
-        gr.second.yAxis().setRange(y_range);
-      coll.emplace_back(&gr.second);
+        gr.yAxis().setRange(y_range);
+      coll.emplace_back(&gr);
     }
     plt->draw(coll, "comp_partonflux", top_label, dm);
   }
