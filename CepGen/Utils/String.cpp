@@ -143,6 +143,16 @@ namespace cepgen {
       return out;
     }
 
+    template <typename T>
+    std::string to_string(const T& input) {
+      return std::to_string(input);
+    }
+
+    template <>
+    std::string to_string(const std::string& input) {
+      return input;
+    }
+
     std::string randomString(size_t size) {
       std::stringstream out;
       for (size_t i = 0; i < size; ++i)

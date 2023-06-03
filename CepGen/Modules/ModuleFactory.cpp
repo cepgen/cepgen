@@ -18,6 +18,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/ModuleFactory.h"
+#include "CepGen/Utils/String.h"
 
 // collection of handled objects
 #include "CepGen/Cards/Handler.h"
@@ -61,7 +62,16 @@ namespace cepgen {
   std::unique_ptr<T> ModuleFactory<T, I>::build(const I& name, const ParametersList& params) const {
     if (name == I())
       throw CG_FATAL("ModuleFactory") << description_ << " cannot build a module with empty index/name!";
-    return build(ParametersList(params).setName<I>(name));
+    auto plist = params;
+    if (std::is_base_of<std::string, I>::value) {
+      const auto extra_params = utils::split(utils::to_string(name), '<');
+      plist.setName<std::string>(extra_params.at(0));
+      if (extra_params.size() > 1)
+        for (size_t i = 1; i < extra_params.size(); ++i)
+          plist.feed(extra_params.at(i));
+    } else
+      plist.setName<I>(name);
+    return build(plist);
   }
 
   template <typename T, typename I>
@@ -93,7 +103,18 @@ namespace cepgen {
 
   template <typename T, typename I>
   ParametersDescription ModuleFactory<T, I>::describeParameters(const I& name, const ParametersList& params) const {
-    if (params_map_.count(name) == 0)
+    if (std::is_base_of<std::string, I>::value) {
+      auto extra_params = utils::split(utils::to_string(name), '<');
+      auto* nm = reinterpret_cast<I*>(&extra_params[0]);
+      if (params_map_.count(*nm) == 0)
+        return ParametersDescription().setDescription("{module without description}").steer(params);
+      auto descr = params_map_.at(*nm).steer(params);
+      auto extra_params_obj = ParametersList();
+      if (extra_params.size() > 1)
+        for (size_t i = 1; i < extra_params.size(); ++i)
+          extra_params_obj.feed(extra_params.at(i));
+      return descr.steer(extra_params_obj);
+    } else if (params_map_.count(name) == 0)
       return ParametersDescription().setDescription("{module without description}").steer(params);
     return params_map_.at(name).steer(params);
   }

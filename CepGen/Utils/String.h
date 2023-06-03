@@ -106,6 +106,9 @@ namespace cepgen {
     bool isInt(const std::string&);
     /// Check if a string is also a floating point number
     bool isFloat(const std::string&);
+    /// Transform any type into a string
+    template <typename T>
+    std::string to_string(const T&);
     /// Check if a collection contains an item
     template <typename T>
     bool contains(const std::vector<T>& coll, const T& item) {
