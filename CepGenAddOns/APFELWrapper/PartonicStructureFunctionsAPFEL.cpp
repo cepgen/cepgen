@@ -32,17 +32,18 @@ namespace cepgen {
       /// Quarks types
       enum class Mode { full = 0, valence = 1, sea = 2 };
       /// Build a calculator from its Parameters object
-      explicit APFELPartonic(const ParametersList& params) : PartonicParameterisation(params) {
+      explicit APFELPartonic(const ParametersList& params)
+          : PartonicParameterisation(params), q_limits_(steer<Limits>("qLimits")) {
         const auto perturbative_order = steer<int>("perturbativeOrder");
         APFEL::SetPerturbativeOrder(perturbative_order);
         APFEL::InitializeAPFEL();
-        const auto q_limits = steer<Limits>("qLimits");
-        APFEL::EvolveAPFEL(q_limits.min(), q_limits.max());
-        APFEL::CachePDFsAPFEL(q_limits.min());
+        APFEL::EvolveAPFEL(q_limits_.min(), q_limits_.max());
+        APFEL::CachePDFsAPFEL(q_limits_.min());
         CG_INFO("APFELPartonic") << "Partonic structure functions evaluator successfully built.\n"
                                  << " * APFEL version: " << APFEL::GetVersion() << "\n"
                                  << " * number of flavours: " << num_flavours_ << "\n"
                                  << " * quarks mode: " << mode_ << "\n"
+                                 << " * Q range: " << q_limits_ << "\n"
                                  << " * perturbative order: " << perturbative_order << ".";
       }
 
@@ -55,7 +56,13 @@ namespace cepgen {
       }
 
     private:
-      double evalxQ2(int flavour, double xbj, double q2) override { return APFEL::xPDFxQ(flavour, xbj, std::sqrt(q2)); }
+      double evalxQ2(int flavour, double xbj, double q2) override {
+        const auto q = std::sqrt(q2);
+        if (!q_limits_.contains(std::sqrt(q2)))
+          return 0.;
+        return APFEL::xPDFxQ(flavour, xbj, q);
+      }
+      const Limits q_limits_;
     };
   }  // namespace strfun
 }  // namespace cepgen
