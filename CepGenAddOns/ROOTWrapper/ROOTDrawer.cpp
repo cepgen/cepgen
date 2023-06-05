@@ -188,7 +188,7 @@ namespace cepgen {
       obj->GetXaxis()->SetTitle(delatexify(dr.xAxis().label()));
       obj->GetYaxis()->SetTitle(delatexify(dr.yAxis().label()));
       if (xrng.valid())
-        obj->GetXaxis()->SetRangeUser(xrng.min(), xrng.max());
+        obj->GetXaxis()->SetLimits(xrng.min(), xrng.max());
       if (yrng.valid()) {
         if (yrng.hasMin())
           obj->SetMinimum(yrng.min());

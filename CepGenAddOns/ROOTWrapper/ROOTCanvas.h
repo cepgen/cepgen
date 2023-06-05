@@ -167,17 +167,6 @@ namespace cepgen {
       //else obj->GetXaxis()->SetTitle(ttle);
     }
 
-    inline void DrawDiagonal(const TH1* obj) {
-      TLine l;
-      l.SetLineWidth(2);
-      l.SetLineColor(kGray);
-      l.SetLineStyle(2);
-      l.DrawLine(obj->GetXaxis()->GetXmin(),
-                 obj->GetYaxis()->GetXmin(),
-                 obj->GetXaxis()->GetXmax(),
-                 obj->GetYaxis()->GetXmax());
-    }
-
     inline std::vector<TH1*> RatioPlot(TH1* denom,
                                        const std::vector<TH1*>& numers,
                                        float ymin = -999.,
@@ -410,4 +399,3 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
-

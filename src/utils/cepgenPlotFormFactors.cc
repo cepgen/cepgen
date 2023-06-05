@@ -96,6 +96,8 @@ int main(int argc, char* argv[]) {
       for (auto& gr : canv.second) {
         gr.xAxis().setLabel("Q$^{2}$ (GeV$^{2}$)");
         gr.yAxis().setLabel(canv.first.second);
+        if (q2range.valid())
+          gr.xAxis().setRange(q2range);
         if (yrange.valid())
           gr.yAxis().setRange(yrange);
         mp.emplace_back(&gr);
