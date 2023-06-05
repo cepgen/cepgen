@@ -74,11 +74,12 @@ namespace cepgen {
     /// \param[in] name Canvas name (and subsequently filename on save)
     /// \param[in] ratio Divide the canvas into a main and ratio plots subparts?
     explicit inline ROOTCanvas(const std::string& name, const std::string& title = "", bool ratio = false)
-        : TCanvas(name.c_str(), "", 600, 600), title_(title), ratio_(ratio) {
+        : TCanvas(name.c_str(), "", 600, 600), ratio_(ratio) {
       gStyle->SetOptStat(0);
       gStyle->SetGridColor(17);
       gStyle->SetEndErrorSize(0);
       Build();
+      SetTopLabel(title);
     }
     inline ~ROOTCanvas() {}
 
@@ -263,14 +264,14 @@ namespace cepgen {
     /// Specify the text to show on top of the canvas
     inline void SetTopLabel(const std::string& lab) {
       TCanvas::cd();
-      title_ = "CepGen v" + version::tag;
+      std::string title = "CepGen v" + version::tag;
       if (!lab.empty())
-        title_ += " - " + lab;
+        title += " - " + lab;
       if (!top_label_)
         BuildTopLabel();
       else
         top_label_->Clear();
-      top_label_->AddText(title_.data());
+      top_label_->AddText(title.data());
       //top_label_->Draw();
     }
 
@@ -338,7 +339,6 @@ namespace cepgen {
       TCanvas::SetFillStyle(0);
       Pad()->SetFillStyle(0);
 
-      SetTopLabel("");
       if (ratio_)
         DivideCanvas();
     }
@@ -398,7 +398,6 @@ namespace cepgen {
       return dynamic_cast<T*>(grb_obj_.rbegin()->get());
     }
 
-    std::string title_;
     bool ratio_;
     double leg_x1_{0.5}, leg_y1_{0.75};
     double leg_width_{0.45}, leg_height_{0.15};
@@ -411,3 +410,4 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
+

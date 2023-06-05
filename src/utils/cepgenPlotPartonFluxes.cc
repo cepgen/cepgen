@@ -114,10 +114,6 @@ int main(int argc, char* argv[]) {
       dm |= cepgen::utils::Drawer::Mode::grid;
     cepgen::utils::DrawableColl coll;
 
-    const auto top_label = cepgen::utils::format("$k_{T}^{2}$ = %g GeV$^{2}$", kt2) + ", " +
-                           cepgen::FormFactorsFactory::get().describe(formfac_type) + "/" +
-                           cepgen::StructureFunctionsFactory::get().describe(strfun_type);
-
     for (auto& gr : graph_flux) {
       gr.xAxis().setLabel("$\\xi$");
       gr.yAxis().setLabel(normalised ? "\\xi $\\varphi_{T}(\\xi, k_{T}^{2})" : "$\\varphi_{T}(\\xi, k_{T}^{2})$");
@@ -125,7 +121,7 @@ int main(int argc, char* argv[]) {
         gr.yAxis().setRange(y_range);
       coll.emplace_back(&gr);
     }
-    plt->draw(coll, "comp_partonflux", top_label, dm);
+    plt->draw(coll, "comp_partonflux", cepgen::utils::format("$k_{T}^{2}$ = %g GeV$^{2}$", kt2), dm);
   }
 
   return 0;

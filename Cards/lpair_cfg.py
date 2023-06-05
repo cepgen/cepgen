@@ -24,7 +24,7 @@ process = cepgen.Module('lpair',
     #--- example of a taming function definition
     #tamingFunctions = [
     #    cepgen.Parameters( # central dilepton mass reweighting
-    #        variable = "m(4)",
+    #        variables = ["m(4)"],
     #        expression = "(m(4)>80.) ? exp(-(m(4)-80)/10) : 1.0"
     #    )
     #],
