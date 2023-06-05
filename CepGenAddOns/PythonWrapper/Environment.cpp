@@ -36,6 +36,7 @@ namespace cepgen {
 
     Environment::Environment() {
       for (const auto& path : std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."),
+                                                       fs::path(utils::env::get("CEPGEN_PATH", ".")) / "Cards",
                                                        fs::current_path(),
                                                        fs::current_path() / "Cards",
                                                        fs::current_path().parent_path() / "Cards",
