@@ -144,13 +144,13 @@ namespace cepgen {
   }
 
   void printHeader() {
-    for (const auto& path : search_paths) {
-      std::ifstream hf(fs::path{path} / "README");
-      if (hf.good()) {
-        CG_LOG << std::string(std::istreambuf_iterator<char>(hf), std::istreambuf_iterator<char>());
-        return;
-      }
-    }
-    CG_WARNING("printHeader") << "Failed to open README file.";
+    if (!callPath("README", [](const auto& path) {
+          std::ifstream hf(path);
+          if (!hf.good())
+            return false;
+          CG_LOG << std::string(std::istreambuf_iterator<char>(hf), std::istreambuf_iterator<char>());
+          return true;
+        }))
+      CG_WARNING("printHeader") << "Failed to open README file.";
   }
 }  // namespace cepgen

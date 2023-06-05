@@ -31,7 +31,9 @@ namespace cepgen {
 
       std::vector<std::string> searchPaths() {
         return std::vector<std::string>{fs::path(env::get("CEPGEN_PATH", ".")),
+                                        fs::path(env::get("CEPGEN_PATH", ".")) / "CepGen",
                                         fs::path(env::get("CEPGEN_PATH", ".")) / "External",
+                                        fs::path(env::get("CEPGEN_PATH", ".")) / "build",
                                         fs::path() / "/usr" / "share" / "CepGen",
                                         fs::current_path(),
                                         fs::current_path().parent_path(),
