@@ -8,7 +8,7 @@ endif()
 
 #----- build the object
 
-cepgen_build(CepGenAPFEL SOURCES AlphaSAPFEL.cpp
+cepgen_build(CepGenAPFEL SOURCES AlphaSAPFEL.cpp PartonicStructureFunctionsAPFEL.cpp
     EXT_LIBS ${APFEL}
     EXT_HEADERS ${APFEL_INCLUDE}
     INSTALL_COMPONENT apfel)
