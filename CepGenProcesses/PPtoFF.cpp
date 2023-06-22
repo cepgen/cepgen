@@ -49,7 +49,8 @@ public:
   static ParametersDescription description() {
     auto desc = Process2to4::description();
     desc.setDescription("γγ → f⁺f¯ (kt-factor.)");
-    desc.add<int>("method", (int)Mode::offShell)
+    desc.addAs<int, pdgid_t>("pair", PDG::muon).setDescription("type of central particles emitted");
+    desc.addAs<int, Mode>("method", Mode::offShell)
         .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell)");
     desc.add("offShellParameters", OffShellParameters::description());
     return desc;
@@ -91,7 +92,6 @@ private:
 
     static ParametersDescription description() {
       auto desc = ParametersDescription();
-      desc.add("pair", (pdgid_t)PDG::muon).setDescription("type of central particles emitted");
       desc.add("mat1", 1).setDescription("symmetrisation factor for the first incoming photon");
       desc.add("mat2", 1).setDescription("symmetrisation factor for the second incoming photon");
       desc.add("termLL", 1).setDescription("fully longidudinal relative weight");

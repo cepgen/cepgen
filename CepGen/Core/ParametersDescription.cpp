@@ -213,7 +213,6 @@ namespace cepgen {
         for (const auto& pit : user_params.get<std::vector<ParametersList> >(key))
           plist.operator[]<std::vector<ParametersList> >(key).emplace_back(obj_descr_.at(key).parameters() + pit);
       } else if (user_params.has<ParametersList>(key)) {  // map{key -> ParametersList}
-        auto base = plist.get<ParametersList>(key);
         plist.erase(key);
         const auto& pit = user_params.get<ParametersList>(key);
         for (const auto& kit : pit.keys())

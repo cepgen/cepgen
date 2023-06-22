@@ -495,12 +495,13 @@ namespace cepgen {
   template <>
   ParticleProperties ParametersList::get<ParticleProperties>(const std::string& key,
                                                              const ParticleProperties& def) const {
-    if (has<ParametersList>(key)) {
+    if (has<ParametersList>(key)) {  // first steer as a dictionary of particle properties
       const auto& plist = get<ParametersList>(key);
       if (plist.has<pdgid_t>("pdgid") || plist.has<int>("pdgid"))
         return PDG::get()(plist.get<pdgid_t>("pdgid"));
       return ParticleProperties(plist);
-    } else if (has<int>(key)) {
+    } else if (has<pdgid_t>(key) ||
+               has<int>(key)) {  // if not a dictionary of properties, retrieve from PDG runtime database
       CG_DEBUG("ParametersList") << "Retrieved physical properties for particle with PDG identifier '" << get<int>(key)
                                  << "' from PDG database.";
       return PDG::get()(get<int>(key));
