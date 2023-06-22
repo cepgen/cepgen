@@ -64,7 +64,7 @@ namespace cepgen {
     }
 
     std::string colourise(const std::string& str, const Colour& col, const Modifier& mod) {
-      if (!isatty(fileno(stdout)))
+      if (!Logger::get().isTTY())
         return str;
       std::string out;
       auto get_mod_str = [](const Colour& col, const Modifier& mod) -> std::string {

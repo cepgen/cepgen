@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2015-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,13 +23,14 @@
 
 namespace cepgen {
   namespace utils {
-    Logger::Logger(std::ostream* os) : output_(os) {
-      if (output_ != &std::cout)
-        CG_INFO("Logger") << "New logger initialised for output@" << output_ << ".";
+    Logger::Logger(Logger::StreamHandler os) : output_(std::move(os)) {
+      if (output_.get() != &std::cout)
+        CG_INFO("Logger") << "New logger initialised for output@0x" << output_.get() << ".";
     }
 
     Logger& Logger::get(std::ostream* os) {
-      static Logger log(os ? os : &std::cout);
+      static Logger log(os ? std::unique_ptr<std::ostream, std::default_delete<std::ostream> >(os)
+                           : StreamHandler(&std::cout, [](std::ostream*) -> void {}));
       return log;
     }
 
@@ -52,12 +53,16 @@ namespace cepgen {
       return false;
     }
 
-    std::ostream* Logger::output() {
-      static std::ostream empty_output(nullptr);
+    void Logger::setOutput(std::ostream* os) { output_.reset(os); }
+
+    Logger::StreamHandler& Logger::output() {
+      static StreamHandler empty_output{nullptr};
       if (level_ == Level::nothing)
-        return &empty_output;
+        return empty_output;
       return output_;
     }
+
+    bool Logger::isTTY() const { return output_.get() == &std::cout || output_.get() == &std::cerr; }
   }  // namespace utils
 
   std::ostream& operator<<(std::ostream& os, const utils::Logger::Level& lvl) {

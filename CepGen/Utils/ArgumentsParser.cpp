@@ -19,6 +19,7 @@
 #include <strings.h>
 
 #include <algorithm>
+#include <fstream>
 #include <sstream>
 
 #include "CepGen/Core/Exception.h"
@@ -54,6 +55,8 @@ namespace cepgen {
       for (const auto& str : debug_str_)
         if (arg_val.at(0) == "--" + str.name.at(0) || (str.name.size() > 1 && arg_val.at(0) == "-" + str.name.at(1))) {
           CG_LOG_LEVEL(debug);
+          if (arg_val.size() > 1)
+            utils::Logger::get().output().reset(new std::ofstream(arg_val.at(1)));
           debug_req_ = true;
         }
       //--- check if configuration word is requested

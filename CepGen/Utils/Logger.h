@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2015-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,13 +30,15 @@ namespace cepgen {
     class Logger {
     public:
       /// Retrieve the running instance of the logger
-      static Logger& get(std::ostream* os = nullptr);
+      static Logger& get(std::ostream* = nullptr);
 
       /// \brief Add a new rule to display exceptions/messages
       /// \param[in] rule Regex rule to handle
       void addExceptionRule(const std::string& rule);
       /// Collection of logging exceptions
       const std::vector<std::regex>& exceptionRules() const { return allowed_exc_; }
+
+      typedef std::unique_ptr<std::ostream, std::function<void(std::ostream*)> > StreamHandler;
 
       /// Logging threshold for the output stream
       enum class Level { nothing = 0, error, warning, information, debug, debugInsideLoop };
@@ -52,15 +54,17 @@ namespace cepgen {
       bool extended() const { return extended_; }
       /// Set the extended information flag
       void setExtended(bool ext = true) { extended_ = ext; }
+      /// Is the stream handled a TTY-like stream?
+      bool isTTY() const;
 
       /// Output stream to use for all logging operations
-      std::ostream* output();
+      StreamHandler& output();
       /// Set the output stream
-      void setOutput(std::ostream* os) { output_ = os; }
+      void setOutput(std::ostream*);
 
     private:
       /// Initialize a logging object
-      explicit Logger(std::ostream* os);
+      explicit Logger(StreamHandler);
 
       /// List of enabled logging modules
       std::vector<std::regex> allowed_exc_;
@@ -69,7 +73,7 @@ namespace cepgen {
       /// Logging threshold for the output stream
       Level level_{Level::information};
       /// Output stream to use for all logging operations
-      std::ostream* output_{nullptr};
+      StreamHandler output_{nullptr};
     };
   }  // namespace utils
   std::ostream& operator<<(std::ostream& os, const utils::Logger::Level&);

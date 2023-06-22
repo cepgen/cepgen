@@ -46,7 +46,7 @@ namespace cepgen {
 
   void Exception::dump(std::ostream* os) const noexcept {
     if (!os)
-      os = utils::Logger::get().output();
+      os = utils::Logger::get().output().get();
     if (!os)
       return;
 
