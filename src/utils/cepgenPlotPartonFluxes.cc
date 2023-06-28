@@ -37,8 +37,7 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   vector<string> fluxes_names;
-  string formfac_type;
-  int strfun_type, num_points;
+  int num_points;
   double kt2, mx;
   string output_file, plotter;
   bool logx, logy, draw_grid, normalised;
@@ -49,9 +48,7 @@ int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument(
           "fluxes", "parton fluxe modellings", &fluxes_names, cepgen::PartonFluxFactory::get().modules())
-      .addOptionalArgument("ff,f", "form factors modelling", &formfac_type, "StandardDipole")
       .addOptionalArgument("mx,M", "diffractive mass (GeV)", &mx, 1.5)
-      .addOptionalArgument("sf,s", "structure functions modelling", &strfun_type, 301)
       .addOptionalArgument("xrange,x", "fractional loss range", &x_range, cepgen::Limits{0., 1.})
       .addOptionalArgument("yrange,y", "y range", &y_range)
       .addOptionalArgument("q2range,q", "parton virtuality range (GeV^2)", &q2_range, cepgen::Limits{0., 1000.})
@@ -73,8 +70,6 @@ int main(int argc, char* argv[]) {
 
   ofstream out(output_file);
   out << "# parton fluxes: " << cepgen::utils::merge(fluxes_names, ",") << "\n"
-      << "# struct. functions: " << strfun_type << "\n"
-      << "# form factors: " << formfac_type << "\n"
       << "# virtuality: " << kt2 << " GeV^2\n"
       << "# diffractive mass: " << mx << " GeV/c2\n"
       << "# fractional momentum loss: " << x_range;
@@ -82,14 +77,7 @@ int main(int argc, char* argv[]) {
   vector<std::unique_ptr<cepgen::PartonFlux> > fluxes;
   vector<cepgen::utils::Graph1D> graph_flux;
   for (const auto& flux : fluxes_names) {
-    fluxes.emplace_back(cepgen::PartonFluxFactory::get().build(
-        flux,
-        cepgen::ParametersList()
-            .set<cepgen::ParametersList>(
-                "structureFunctions",
-                cepgen::StructureFunctionsFactory::get().describeParameters(strfun_type).parameters())
-            .set<cepgen::ParametersList>(
-                "formFactors", cepgen::FormFactorsFactory::get().describeParameters(formfac_type).parameters())));
+    fluxes.emplace_back(cepgen::PartonFluxFactory::get().build(flux));
     graph_flux.emplace_back(flux, cepgen::PartonFluxFactory::get().describe(flux));
   }
   for (const auto& x : x_range.generate(num_points)) {

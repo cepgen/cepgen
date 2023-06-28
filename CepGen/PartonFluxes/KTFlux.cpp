@@ -89,7 +89,7 @@ namespace cepgen {
     const double mass2_;
   };
 
-  struct BudnevElasticNucleonKTFlux final : public ElasticNucleonKTFlux {
+  struct BudnevElasticNucleonKTFlux : public ElasticNucleonKTFlux {
     using ElasticNucleonKTFlux::ElasticNucleonKTFlux;
     static ParametersDescription description() {
       auto desc = ElasticNucleonKTFlux::description();
@@ -105,6 +105,20 @@ namespace cepgen {
       const double f_D = formfac.FE * (1. - x) * qnorm;
       const double f_C = formfac.FM;
       return constants::ALPHA_EM * M_1_PI * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2vals.q2;
+    }
+  };
+
+  struct BudnevElasticElectronKTFlux final : public BudnevElasticNucleonKTFlux {
+    using BudnevElasticNucleonKTFlux::BudnevElasticNucleonKTFlux;
+    static ParametersDescription description() {
+      auto desc = BudnevElasticNucleonKTFlux::description();
+      desc.setDescription("Electron el. photon emission");
+      desc.add<ParametersDescription>("formFactors", ParametersDescription().setName<std::string>("PointLikeFermion"));
+      return desc;
+    }
+    double mass2() const override {
+      static const auto me = PDG::get().mass(PDG::electron), me2 = me * me;
+      return me2;
     }
   };
 
@@ -163,6 +177,7 @@ namespace cepgen {
 
 REGISTER_FLUX("ElasticKT", ElasticNucleonKTFlux);
 REGISTER_FLUX("BudnevElasticKT", BudnevElasticNucleonKTFlux);
+REGISTER_FLUX("BudnevElasticElectronKT", BudnevElasticElectronKTFlux);
 REGISTER_FLUX("ElasticHeavyIonKT", ElasticHeavyIonKTFlux);
 REGISTER_FLUX("InelasticKT", InelasticNucleonKTFlux);
 REGISTER_FLUX("BudnevInelasticKT", BudnevInelasticNucleonKTFlux);

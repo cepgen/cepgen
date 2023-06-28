@@ -139,8 +139,14 @@ namespace cepgen {
       plist_neg.set<ParametersList>("partonFlux", params);
     };
 
-    if (params_.has<std::vector<std::string> >("partonFluxes"))
-      set_part_fluxes_from_name_vector(steer<std::vector<std::string> >("ktFluxes"));
+    if (params_.has<std::vector<ParametersList> >("partonFluxes")) {
+      const auto& fluxes = steer<std::vector<ParametersList> >("partonFluxes");
+      if (fluxes.size() < 2)
+        throw CG_FATAL("IncomingBeams") << "Invalid multiplicity of parton fluxes given: " << fluxes << ".";
+      plist_pos.set("partonFlux", fluxes.at(0));
+      plist_neg.set("partonFlux", fluxes.at(1));
+    } else if (params_.has<std::vector<std::string> >("partonFluxes"))
+      set_part_fluxes_from_name_vector(steer<std::vector<std::string> >("partonFluxes"));
     else if (params_.has<std::vector<std::string> >("ktFluxes"))
       set_part_fluxes_from_name_vector(steer<std::vector<std::string> >("ktFluxes"));
     else if (params_.has<std::string>("partonFluxes"))

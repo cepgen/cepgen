@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2021-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,20 +43,6 @@ namespace cepgen {
     static ModuleFactory<T, I> instance;
     return instance;
   }
-
-  /*template <typename T, typename I>
-  template <typename U>
-  void ModuleFactory<T, I>::registerModule(const I& name, const ParametersList& def_params) {
-    static_assert(std::is_base_of<T, U>::value,
-                  "\n\n  *** Failed to register an object with improper inheritance into the factory. ***\n");
-    if (has(name))
-      throw CG_FATAL("ModuleFactory") << description_ << " detected a duplicate module registration for index/name \""
-                                      << name << "\"!";
-    map_[name] = &build<U>;
-    descr_map_[name] = U::description();
-    params_map_[name] = !def_params.empty() ? ParametersDescription(def_params) : U::description();
-    params_map_[name].setName(name);
-  }*/
 
   template <typename T, typename I>
   std::unique_ptr<T> ModuleFactory<T, I>::build(const I& name, const ParametersList& params) const {

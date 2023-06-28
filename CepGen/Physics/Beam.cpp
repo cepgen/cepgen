@@ -57,7 +57,9 @@ namespace cepgen {
         flux_ = PartonFluxFactory::get().build("BudnevElasticKT", params_ + pflux_params);
         break;
       default:
-        CG_WARNING("Beam:initialise") << "Invalid beam mode retrieved: '" << mode_ << "'.";
+        CG_WARNING("Beam:initialise") << "Invalid beam mode retrieved: '" << mode_
+                                      << "'. Infering from parton flux modelling:\n\t" << pflux_params << ".";
+        flux_ = PartonFluxFactory::get().build(params_ + pflux_params);
         break;
     }
   }
