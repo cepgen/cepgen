@@ -64,6 +64,7 @@ namespace cepgen {
     private:
       std::pair<double, FormFactors> last_value_{-1., FormFactors{}};
     };
+    std::ostream& operator<<(std::ostream&, const FormFactors&);
   }  // namespace formfac
 }  // namespace cepgen
 

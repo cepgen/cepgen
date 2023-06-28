@@ -59,11 +59,13 @@ namespace cepgen {
         return os << "[uninitialised form factors]";
       os << ff->name();
       if (ff->last_value_.first >= 0.)
-        os << "(Q²=" << ff->last_value_.first << " GeV²): "
-           << "FE=" << ff->last_value_.second.FE << ",FM=" << ff->last_value_.second.FM;
+        os << "(Q²=" << ff->last_value_.first << " GeV²): " << ff->last_value_.second;
       return os;
     }
 
     std::ostream& operator<<(std::ostream& os, const Parameterisation& ff) { return os << &ff; }
+    std::ostream& operator<<(std::ostream& os, const FormFactors& ff) {
+      return os << "FE=" << ff.FE << ", FM=" << ff.FM << ", GE=" << ff.GE << ", GM=" << ff.GM;
+    }
   }  // namespace formfac
 }  // namespace cepgen

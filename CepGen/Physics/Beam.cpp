@@ -82,7 +82,7 @@ namespace cepgen {
     auto desc = ParametersDescription();
     desc.addAs<int, pdgid_t>("pdgId", PDG::proton);
     desc.add<double>("pz", 0.);
-    desc.add<int>("mode", (int)Beam::Mode::invalid);
+    desc.addAs<int, Beam::Mode>("mode", Beam::Mode::invalid);
     desc.add<ParametersDescription>("partonFlux", PartonFluxFactory::get().describeParameters("BudnevElasticKT"));
     return desc;
   }

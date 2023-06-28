@@ -32,8 +32,6 @@ namespace cepgen {
       /// \param[in] cs_id Central particles PDG id
       explicit Process2to4(const ParametersList& params, std::array<pdgid_t, 2> partons, pdgid_t cs_id);
 
-      static ParametersDescription description();
-
     protected:
       /// Set all cuts for the single outgoing particle phase space definition
       void setCuts(const cuts::Central& single);
@@ -73,4 +71,3 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
-

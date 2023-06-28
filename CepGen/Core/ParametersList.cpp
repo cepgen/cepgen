@@ -497,7 +497,7 @@ namespace cepgen {
                                                              const ParticleProperties& def) const {
     if (has<ParametersList>(key)) {  // first steer as a dictionary of particle properties
       const auto& plist = get<ParametersList>(key);
-      if (plist.has<pdgid_t>("pdgid") || plist.has<int>("pdgid"))
+      if (plist.keys() == std::vector<std::string>{"pdgid"})
         return PDG::get()(plist.get<pdgid_t>("pdgid"));
       return ParticleProperties(plist);
     } else if (has<pdgid_t>(key) ||

@@ -63,7 +63,7 @@ namespace cepgen {
     std::unique_ptr<formfac::Parameterisation> ff_;
   };
 
-  class ElasticHeavyIonKTFlux : public ElasticNucleonKTFlux {
+  class ElasticHeavyIonKTFlux final : public ElasticNucleonKTFlux {
   public:
     explicit ElasticHeavyIonKTFlux(const ParametersList& params)
         : ElasticNucleonKTFlux(params),
