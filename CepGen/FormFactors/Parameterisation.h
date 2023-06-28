@@ -56,10 +56,10 @@ namespace cepgen {
       /// Local form factors evaluation method
       virtual FormFactors compute(double) { return FormFactors{}; }
 
-      const HeavyIon hi_;   ///< Incoming beam
-      const double mass2_;  ///< Incoming beam squared mass
-      const double mp_;     ///< Proton mass, in GeV/c\f$^2\f$
-      const double mp2_;    ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
+      const pdgid_t pdg_id_;  ///< Incoming beam
+      const double mass2_;    ///< Incoming beam squared mass
+      const double mp_;       ///< Proton mass, in GeV/c\f$^2\f$
+      const double mp2_;      ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
 
     private:
       std::pair<double, FormFactors> last_value_{-1., FormFactors{}};

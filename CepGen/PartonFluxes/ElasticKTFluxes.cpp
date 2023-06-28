@@ -28,7 +28,9 @@ namespace cepgen {
   class ElasticNucleonKTFlux : public KTFlux {
   public:
     explicit ElasticNucleonKTFlux(const ParametersList& params)
-        : KTFlux(params), ff_(FormFactorsFactory::get().build(params.get<ParametersList>("formFactors"))) {
+        : KTFlux(params),
+          ff_(FormFactorsFactory::get().build(
+              steer<ParametersList>("formFactors").set<pdgid_t>("pdgId", steer<pdgid_t>("pdgId")))) {
       if (!ff_)
         throw CG_FATAL("ElasticNucleonKTFlux")
             << "Elastic kT flux requires a modelling of electromagnetic form factors!";
@@ -81,7 +83,7 @@ namespace cepgen {
     using BudnevElasticNucleonKTFlux::BudnevElasticNucleonKTFlux;
     static ParametersDescription description() {
       auto desc = BudnevElasticNucleonKTFlux::description();
-      desc.setDescription("Electron el. photon emission");
+      desc.setDescription("Electron el. photon emission (Budnev flux)");
       desc.add<ParametersDescription>("formFactors", ParametersDescription().setName<std::string>("PointLikeFermion"));
       return desc;
     }

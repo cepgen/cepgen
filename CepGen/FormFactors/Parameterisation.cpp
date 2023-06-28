@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cmath>
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Physics/PDG.h"
@@ -24,8 +26,8 @@ namespace cepgen {
   namespace formfac {
     Parameterisation::Parameterisation(const ParametersList& params)
         : NamedModule<std::string>(params),
-          hi_(HeavyIon::fromPdgId(steer<pdgid_t>("incomingParticle"))),
-          mass2_(hi_.mass() * hi_.mass()),
+          pdg_id_(steer<pdgid_t>("pdgId")),
+          mass2_(std::pow(HeavyIon::isHI(pdg_id_) ? HeavyIon::fromPdgId(pdg_id_).mass() : PDG::get().mass(pdg_id_), 2)),
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_) {}
 
@@ -48,7 +50,7 @@ namespace cepgen {
     ParametersDescription Parameterisation::description() {
       auto desc = ParametersDescription();
       desc.setDescription("Unnamed form factors parameterisation");
-      desc.addAs<pdgid_t, HeavyIon>("incomingParticle", HeavyIon::proton());
+      desc.add<pdgid_t>("pdgId", PDG::invalid);
       return desc;
     }
 

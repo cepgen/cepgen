@@ -59,10 +59,10 @@ namespace cepgen {
     bool fragmented() const;
 
     /// Beam particle PDG id
-    pdgid_t pdgId() const { return pdg_; }
+    pdgid_t pdgId() const { return pdg_id_; }
     /// Set the beam particle PDG id
     Beam& setPdgId(pdgid_t pdg) {
-      pdg_ = pdg;
+      pdg_id_ = pdg;
       return *this;
     }
     /// Scattered parton PDG id
@@ -81,7 +81,7 @@ namespace cepgen {
     double flux(double x, double q2, double mx2 = -1.) const;
 
   private:
-    pdgid_t pdg_{0};                    ///< PDG identifier for the beam
+    pdgid_t pdg_id_{0};                 ///< PDG identifier for the beam
     Momentum momentum_;                 ///< Incoming particle momentum
     Mode mode_{Mode::invalid};          ///< Beam treatment mode
     std::unique_ptr<PartonFlux> flux_;  ///< Incoming parton flux evaluator

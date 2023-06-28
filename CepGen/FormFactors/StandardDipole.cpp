@@ -21,6 +21,7 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Physics/Constants.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/Message.h"
 
 namespace cepgen {
@@ -33,6 +34,7 @@ namespace cepgen {
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Standard dipole");
+        desc.add<pdgid_t>("pdgId", PDG::proton);
         desc.add<double>("scale", 0.71)
             .setDescription("scaling (in GeV^2) (0.71 for r_p = 0.81 fm, 0.66 for r_p = 0.84 fm)");
         return desc;
@@ -54,6 +56,7 @@ namespace cepgen {
     public:
       explicit HeavyIonDipole(const ParametersList& params)
           : StandardDipole(params),
+            hi_(HeavyIon::fromPdgId(pdg_id_)),
             a_(hi_.radius() / (constants::GEVM1_TO_M * 1e15)),
             a0_(HeavyIon::proton().radius() / (constants::GEVM1_TO_M * 1e15)),  // [fm -> GeV]
             a02_(a0_ * a0_) {}
@@ -61,7 +64,7 @@ namespace cepgen {
       static ParametersDescription description() {
         auto desc = StandardDipole::description();
         desc.setDescription("Heavy ion dipole");
-        desc.addAs<pdgid_t, HeavyIon>("incomingParticle", HeavyIon::Pb());
+        desc.addAs<pdgid_t, HeavyIon>("pdgId", HeavyIon::Pb());
         return desc;
       }
 
@@ -82,6 +85,7 @@ namespace cepgen {
         out.GM = MU * out.GE;
         return out;
       }
+      const HeavyIon hi_;
       const double a_, a0_, a02_;
     };
   }  // namespace formfac

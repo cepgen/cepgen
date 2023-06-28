@@ -31,21 +31,21 @@
 namespace cepgen {
   Beam::Beam(const ParametersList& params)
       : SteeredObject(params),
-        pdg_(steerAs<int, pdgid_t>("pdgId")),
+        pdg_id_(steer<pdgid_t>("pdgId")),
         momentum_(Momentum::fromPxPyPzM(
             0.,
             0.,
             steer<double>("pz"),
-            HeavyIon::isHI(pdg_) ? HeavyIon::mass(HeavyIon::fromPdgId(pdg_)) : PDG::get().mass(pdg_))),
+            HeavyIon::isHI(pdg_id_) ? HeavyIon::mass(HeavyIon::fromPdgId(pdg_id_)) : PDG::get().mass(pdg_id_))),
         mode_(steerAs<int, Mode>("mode")) {
-    if (pdg_ == PDG::electron)
+    if (pdg_id_ == PDG::electron)
       mode_ = Mode::PointLikeFermion;
-    else if (HeavyIon::isHI(pdg_))
+    else if (HeavyIon::isHI(pdg_id_))
       mode_ = Mode::HIElastic;
   }
 
   void Beam::initialise() {
-    const auto& pflux_params = steer<ParametersList>("partonFlux");
+    const auto pflux_params = steer<ParametersList>("partonFlux").set("pdgId", pdg_id_);
     switch (mode_) {
       case Mode::HIElastic:
         flux_ = PartonFluxFactory::get().build("ElasticHeavyIonKT", params_ + pflux_params);
@@ -57,8 +57,8 @@ namespace cepgen {
         flux_ = PartonFluxFactory::get().build("BudnevElasticKT", params_ + pflux_params);
         break;
       default:
-        CG_WARNING("Beam:initialise") << "Invalid beam mode retrieved: '" << mode_
-                                      << "'. Infering from parton flux modelling:\n\t" << pflux_params << ".";
+        CG_INFO("Beam:initialise") << "Other beam mode retrieved: '" << mode_
+                                   << "'. Infering from parton flux modelling:\n\t" << pflux_params << ".";
         flux_ = PartonFluxFactory::get().build(params_ + pflux_params);
         break;
     }
@@ -90,10 +90,10 @@ namespace cepgen {
   }
 
   std::ostream& operator<<(std::ostream& os, const Beam& beam) {
-    if (HeavyIon::isHI(beam.pdg_))
-      os << HeavyIon::fromPdgId(beam.pdg_);
+    if (HeavyIon::isHI(beam.pdg_id_))
+      os << HeavyIon::fromPdgId(beam.pdg_id_);
     else
-      os << (PDG::Id)beam.pdg_;
+      os << (PDG::Id)beam.pdg_id_;
     os << " (" << beam.momentum_.pz() << " GeV/c), " << beam.mode_;
     if (beam.flux_)
       os << " [part.flux: " << beam.flux_->name() << "]";
