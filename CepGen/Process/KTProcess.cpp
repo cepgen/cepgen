@@ -156,6 +156,7 @@ namespace cepgen {
 
     ParametersDescription KTProcess::description() {
       auto desc = Process::description();
+      desc.setDescription("Unnamed kT-factorised process");
       return desc;
     }
   }  // namespace proc

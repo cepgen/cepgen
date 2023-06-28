@@ -33,7 +33,7 @@ namespace cepgen {
 
     virtual bool ktFactorised() const { return false; }
     virtual bool fragmenting() const { return true; }
-    virtual int partonPdgId() const;
+    virtual int partonPdgId() const = 0;
 
   protected:
     const double mp_, mp2_;

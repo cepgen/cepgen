@@ -28,6 +28,4 @@ namespace cepgen {
     desc.setDescription("Unnamed parton flux evaluator");
     return desc;
   }
-
-  int PartonFlux::partonPdgId() const { return PDG::photon; }
 }  // namespace cepgen
