@@ -88,7 +88,7 @@ namespace cepgen {
   }
 
   std::string ParametersDescription::describe(size_t offset) const {
-    static auto sep = [](size_t offset) -> std::string { return std::string(offset, '\t'); };
+    static auto sep = [](size_t offset) -> std::string { return std::string(2 * offset, ' '); };
     const auto& mod_name = ParametersList::getNameString();
     const auto& pdtype = type();
     const auto& keys = ParametersList::keys(false);

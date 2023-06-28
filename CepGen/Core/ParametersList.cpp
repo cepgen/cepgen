@@ -273,6 +273,7 @@ namespace cepgen {
         out.erase(it_name);
     }
     std::sort(out.begin(), out.end());
+    out.erase(std::unique(out.begin(), out.end()), out.end());  // at most 1 duplicate
     return out;
   }
 
