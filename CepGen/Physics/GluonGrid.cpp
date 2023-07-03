@@ -34,7 +34,7 @@ namespace kmr {
       : cepgen::GridHandler<3, 1>(cepgen::GridType::linear),
         // grid is already logarithmic
         SteeredObject(params),
-        grid_path_(steer<std::string>("path")) {
+        grid_path_(steerPath("path")) {
     CG_INFO("GluonGrid") << "Building the KMR grid evaluator.";
 
     cepgen::utils::Timer tmr;
