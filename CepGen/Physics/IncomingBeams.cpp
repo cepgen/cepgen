@@ -187,8 +187,10 @@ namespace cepgen {
     }
 
     //--- structure functions
-    plist_pos.set<ParametersList>("structureFunctions", steer<ParametersList>("structureFunctions"));
-    plist_neg.set<ParametersList>("structureFunctions", steer<ParametersList>("structureFunctions"));
+    if (!steer<ParametersList>("structureFunctions").empty()) {
+      plist_pos.set<ParametersList>("structureFunctions", steer<ParametersList>("structureFunctions"));
+      plist_neg.set<ParametersList>("structureFunctions", steer<ParametersList>("structureFunctions"));
+    }
     CG_DEBUG("IncomingBeams") << "Will build the following incoming beams:\n* " << plist_pos << "\n* " << plist_neg
                               << ".";
     pos_beam_ = Beam(plist_pos);

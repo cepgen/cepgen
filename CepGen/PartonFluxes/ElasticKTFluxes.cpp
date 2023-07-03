@@ -28,9 +28,7 @@ namespace cepgen {
   class ElasticNucleonKTFlux : public KTFlux {
   public:
     explicit ElasticNucleonKTFlux(const ParametersList& params)
-        : KTFlux(params),
-          ff_(FormFactorsFactory::get().build(
-              steer<ParametersList>("formFactors").set<pdgid_t>("pdgId", steer<pdgid_t>("pdgId")))) {
+        : KTFlux(params), ff_(FormFactorsFactory::get().build(params_ + steer<ParametersList>("formFactors"))) {
       if (!ff_)
         throw CG_FATAL("ElasticNucleonKTFlux")
             << "Elastic kT flux requires a modelling of electromagnetic form factors!";
@@ -79,18 +77,20 @@ namespace cepgen {
     }
   };
 
-  struct BudnevElasticElectronKTFlux final : public BudnevElasticNucleonKTFlux {
-    using BudnevElasticNucleonKTFlux::BudnevElasticNucleonKTFlux;
+  class BudnevElasticElectronKTFlux final : public BudnevElasticNucleonKTFlux {
+  public:
+    explicit BudnevElasticElectronKTFlux(const ParametersList& params)
+        : BudnevElasticNucleonKTFlux(params), me2_(std::pow(PDG::get().mass(PDG::electron), 2)) {}
     static ParametersDescription description() {
       auto desc = BudnevElasticNucleonKTFlux::description();
       desc.setDescription("Electron el. photon emission (Budnev flux)");
       desc.add<ParametersDescription>("formFactors", ParametersDescription().setName<std::string>("PointLikeFermion"));
       return desc;
     }
-    double mass2() const override {
-      static const auto me = PDG::get().mass(PDG::electron), me2 = me * me;
-      return me2;
-    }
+    double mass2() const override { return me2_; }
+
+  private:
+    const double me2_;
   };
 
   class ElasticHeavyIonKTFlux final : public ElasticNucleonKTFlux {
