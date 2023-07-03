@@ -55,8 +55,17 @@ namespace cepgen {
       for (const auto& str : debug_str_)
         if (arg_val.at(0) == "--" + str.name.at(0) || (str.name.size() > 1 && arg_val.at(0) == "-" + str.name.at(1))) {
           CG_LOG_LEVEL(debug);
-          if (arg_val.size() > 1)
-            utils::Logger::get().output().reset(new std::ofstream(arg_val.at(1)));
+          if (arg_val.size() > 1) {
+            const auto& token = arg_val.at(1);
+            if (token.find(":") == std::string::npos)
+              utils::Logger::get().output().reset(new std::ofstream(token));
+            else {
+              const auto tokens = utils::split(token, ':');
+              utils::Logger::get().output().reset(new std::ofstream(tokens.at(1)));
+              for (const auto& tok : utils::split(tokens.at(0), ','))
+                utils::Logger::get().addExceptionRule(tok);
+            }
+          }
           debug_req_ = true;
         }
       //--- check if configuration word is requested
@@ -199,6 +208,9 @@ namespace cepgen {
             par.first.description.c_str(),
             par.first.value.c_str());
     }
+    oss << "\n   "
+        << "debugging:\n\t-d|--debug<=output file|=mod1,mod2,...:output file>\tredirect to output file, enable "
+           "module(s)";
     oss << std::endl;
     return oss.str();
   }
