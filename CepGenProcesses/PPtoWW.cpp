@@ -152,7 +152,7 @@ private:
 
   const double mW_, mW2_;
   const int method_;
-  NachtmannAmplitudes ampl_;
+  const NachtmannAmplitudes ampl_;
 
   std::vector<int> pol_w1_, pol_w2_;
 };
