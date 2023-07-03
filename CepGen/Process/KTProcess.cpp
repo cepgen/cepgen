@@ -36,13 +36,13 @@ namespace cepgen {
     void KTProcess::addEventContent() {
       Process::setEventContent(
           {// incoming state
-           {Particle::IncomingBeam1, PDG::proton},
-           {Particle::IncomingBeam2, PDG::proton},
+           {Particle::IncomingBeam1, kinematics().incomingBeams().positive().pdgId()},
+           {Particle::IncomingBeam2, kinematics().incomingBeams().negative().pdgId()},
            {Particle::Parton1, intermediate_parts_[0]},
            {Particle::Parton2, intermediate_parts_[1]}},
           {// outgoing state
-           {Particle::OutgoingBeam1, {PDG::proton}},
-           {Particle::OutgoingBeam2, {PDG::proton}},
+           {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
+           {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
            {Particle::CentralSystem, produced_parts_}});
       setExtraContent();
       CG_DEBUG("KTProcess:addEventContent") << "Addition of:\n\t"

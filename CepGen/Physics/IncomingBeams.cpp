@@ -294,17 +294,19 @@ namespace cepgen {
         .set<int>("beam2id", neg_beam_.pdgId())
         .set<double>("beam2pz", -neg_beam_.momentum().pz())
         .setAs<int, mode::Kinematics>("mode", mode());
-    const auto hi1 = HeavyIon::fromPdgId(pos_beam_.pdgId()), hi2 = HeavyIon::fromPdgId(neg_beam_.pdgId());
-    if (hi1)
+    if (HeavyIon::isHI(pos_beam_.pdgId())) {
+      const auto hi1 = HeavyIon::fromPdgId(pos_beam_.pdgId());
       params_.set<int>("beam1A", hi1.A).set<int>("beam1Z", (int)hi1.Z);
-    if (hi2)
+    }
+    if (HeavyIon::isHI(neg_beam_.pdgId())) {
+      const auto hi2 = HeavyIon::fromPdgId(neg_beam_.pdgId());
       params_.set<int>("beam2A", hi2.A).set<int>("beam2Z", (int)hi2.Z);
+    }
     return params_;
   }
 
   ParametersDescription IncomingBeams::description() {
     auto desc = ParametersDescription();
-    desc += Beam::description();
     desc.add<int>("beam1id", 2212).setDescription("PDG id of the positive-z beam particle");
     desc.add<int>("beam1A", 1).setDescription("Atomic weight of the positive-z ion beam");
     desc.add<int>("beam1Z", 1).setDescription("Atomic number of the positive-z ion beam");
