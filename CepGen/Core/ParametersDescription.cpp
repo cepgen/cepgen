@@ -160,7 +160,7 @@ namespace cepgen {
                                                                            const ParametersDescription& desc) {
     obj_descr_[name] += desc;
     ParametersList::set<ParametersList>(name, desc.parameters());
-    CG_DEBUG("ParametersDescription:add").log([this, &name, &desc](auto& log) {
+    CG_DEBUG_LOOP("ParametersDescription:add").log([this, &name, &desc](auto& log) {
       log << "Added a new parameters collection \"" << name << "\" as: " << desc;
       const auto& mod_name = this->getNameString();
       if (!mod_name.empty())
@@ -187,7 +187,7 @@ namespace cepgen {
     for (const auto& val : def)
       values.emplace_back(desc.validate(val));
     ParametersList::set<std::vector<ParametersList> >(name, values);
-    CG_DEBUG("ParametersDescription:addParametersDescriptionVector").log([this, &name, &desc, &def](auto& log) {
+    CG_DEBUG_LOOP("ParametersDescription:addParametersDescriptionVector").log([this, &name, &desc, &def](auto& log) {
       log << "Added a new vector of parameters descriptions \"" << name << "\" as: " << desc;
       const auto& mod_name = this->getNameString();
       if (!mod_name.empty())
