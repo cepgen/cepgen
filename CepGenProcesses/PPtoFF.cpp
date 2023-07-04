@@ -35,7 +35,7 @@ using namespace cepgen;
 class PPtoFF final : public cepgen::proc::Process2to4 {
 public:
   explicit PPtoFF(const ParametersList& params)
-      : cepgen::proc::Process2to4(params, {PDG::photon, PDG::photon}, steer<ParticleProperties>("pair").pdgid),
+      : cepgen::proc::Process2to4(params, steer<ParticleProperties>("pair").pdgid),
         method_(steerAs<int, Mode>("method")),
         osp_(steer<ParametersList>("offShellParameters")) {
     if (method_ == Mode::offShell) {  // off-shell matrix element

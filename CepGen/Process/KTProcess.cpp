@@ -26,10 +26,8 @@
 
 namespace cepgen {
   namespace proc {
-    KTProcess::KTProcess(const ParametersList& params,
-                         const std::array<pdgid_t, 2>& partons,
-                         const std::vector<pdgid_t>& central)
-        : Process(params), intermediate_parts_(partons), produced_parts_(central) {
+    KTProcess::KTProcess(const ParametersList& params, const std::vector<pdgid_t>& central)
+        : Process(params), produced_parts_(central) {
       event().map()[Particle::CentralSystem].resize(central.size());
     }
 
@@ -38,16 +36,20 @@ namespace cepgen {
           {// incoming state
            {Particle::IncomingBeam1, kinematics().incomingBeams().positive().pdgId()},
            {Particle::IncomingBeam2, kinematics().incomingBeams().negative().pdgId()},
-           {Particle::Parton1, intermediate_parts_[0]},
-           {Particle::Parton2, intermediate_parts_[1]}},
+           {Particle::Parton1, kinematics().incomingBeams().positive().daughterId()},
+           {Particle::Parton2, kinematics().incomingBeams().negative().daughterId()}},
           {// outgoing state
            {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
            {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
            {Particle::CentralSystem, produced_parts_}});
       setExtraContent();
-      CG_DEBUG("KTProcess:addEventContent") << "Addition of:\n\t"
-                                            << "Intermediate partons: " << intermediate_parts_ << "\n\t"
-                                            << "Produced system: " << produced_parts_ << ".\n\t" << event();
+      CG_DEBUG("KTProcess:addEventContent")
+          << "Addition of:\n\t"
+          << "Intermediate partons: "
+          << std::vector<pdgid_t>{kinematics().incomingBeams().positive().daughterId(),
+                                  kinematics().incomingBeams().negative().daughterId()}
+          << ")\n\t"
+          << "Produced system: " << produced_parts_ << ".\n\t" << event();
     }
 
     void KTProcess::prepareKinematics() {
@@ -57,8 +59,6 @@ namespace cepgen {
 
       const auto& ib1 = event().oneWithRole(Particle::IncomingBeam1);
       const auto& ib2 = event().oneWithRole(Particle::IncomingBeam2);
-      auto& p1 = event().oneWithRole(Particle::Parton1);
-      auto& p2 = event().oneWithRole(Particle::Parton2);
 
       //============================================================================================
       // register the incoming partons' variables
@@ -84,13 +84,6 @@ namespace cepgen {
                      kinematics().cuts().initial.phi_qt,
                      {0., 2. * M_PI},
                      "Second incoming parton azimuthal angle");
-
-      //============================================================================================
-      // register the incoming partons
-      //============================================================================================
-
-      p1.setPdgId(kinematics().incomingBeams().positive().daughterId());
-      p2.setPdgId(kinematics().incomingBeams().negative().daughterId());
 
       //============================================================================================
       // register all process-dependent variables

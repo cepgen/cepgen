@@ -28,11 +28,8 @@ namespace cepgen {
   namespace proc {
     const Limits Process2to4::x_limits_{0., 1.};
 
-    Process2to4::Process2to4(const ParametersList& params, std::array<pdgid_t, 2> partons, pdgid_t cs_id)
-        : KTProcess(params, partons, {cs_id, cs_id}),
-          cs_prop_(PDG::get()(cs_id)),
-          single_limits_(params),
-          rnd_sign_(0, 1) {}
+    Process2to4::Process2to4(const ParametersList& params, pdgid_t cs_id)
+        : KTProcess(params, {cs_id, cs_id}), cs_prop_(PDG::get()(cs_id)), single_limits_(params), rnd_sign_(0, 1) {}
 
     void Process2to4::setCuts(const cuts::Central& single) { single_limits_ = single; }
 

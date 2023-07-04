@@ -35,7 +35,7 @@ using namespace cepgen;
 class PPtoWW final : public cepgen::proc::Process2to4 {
 public:
   explicit PPtoWW(const ParametersList& params)
-      : Process2to4(params, {PDG::photon, PDG::photon}, PDG::W),
+      : Process2to4(params, PDG::W),
         mW_(PDG::get().mass(PDG::W)),
         mW2_(mW_ * mW_),
         method_(steer<int>("method")),

@@ -38,11 +38,8 @@ namespace cepgen {
     public:
       /// Class constructor
       /// \param[in] params Parameters list
-      /// \param[in] partons First and second incoming parton
       /// \param[in] output Produced final state particles
-      explicit KTProcess(const ParametersList& params,
-                         const std::array<pdgid_t, 2>& partons,
-                         const std::vector<pdgid_t>& output);
+      explicit KTProcess(const ParametersList& params, const std::vector<pdgid_t>& output);
 
       /// Populate the event content with the generated process' topology
       void addEventContent() override;
@@ -65,8 +62,6 @@ namespace cepgen {
       virtual double computeKTFactorisedMatrixElement() = 0;
       /// Set the kinematics of the outgoing central system
       virtual void fillCentralParticlesKinematics() = 0;
-      /// Set the list of intermediate partons in the process
-      void setIntermediatePartons(const std::array<pdgid_t, 2>& part) { intermediate_parts_ = part; }
       /// Set the list of central particles produced
       void setProducedParticles(const std::vector<pdgid_t>& prod) { produced_parts_ = prod; }
 
@@ -91,8 +86,7 @@ namespace cepgen {
       /// Azimuthal rotation of the second intermediate parton's transverse virtuality
       double phi_qt2_{0.};
 
-      std::array<pdgid_t, 2> intermediate_parts_;  ///< First and second intermediate parton (photon, pomeron, ...)
-      std::vector<pdgid_t> produced_parts_;        ///< Type of particles produced in the final state
+      std::vector<pdgid_t> produced_parts_;  ///< Type of particles produced in the final state
     };
   }  // namespace proc
 }  // namespace cepgen

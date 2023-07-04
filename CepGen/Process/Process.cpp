@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -290,9 +290,8 @@ namespace cepgen {
       CG_DEBUG("Process:initialise") << "Preparing to set the kinematics parameters. Input parameters: "
                                      << ParametersDescription(kin_.parameters(false)) << ".";
 
-      clear();  // also resets the "first run" flag
-
       kin_.incomingBeams().initialise();
+      clear();  // also resets the "first run" flag
 
       // build the coupling objects
       const auto& alpha_em = steer<ParametersList>("alphaEM");

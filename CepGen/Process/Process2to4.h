@@ -28,9 +28,8 @@ namespace cepgen {
     public:
       /// Initialise a 2-to-4 process
       /// \param[in] params Collection of user-defined steering parameters
-      /// \param[in] partons Incoming hard scattering particles
       /// \param[in] cs_id Central particles PDG id
-      explicit Process2to4(const ParametersList& params, std::array<pdgid_t, 2> partons, pdgid_t cs_id);
+      explicit Process2to4(const ParametersList& params, pdgid_t cs_id);
 
     protected:
       /// Set all cuts for the single outgoing particle phase space definition
@@ -71,3 +70,4 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
+

@@ -70,7 +70,7 @@ namespace cepgen {
     ParametersList FortranKTProcess::kProcParameters;  ///< List of parameters to steer the process
 
     FortranKTProcess::FortranKTProcess(const ParametersList& params, std::function<double(void)> func)
-        : KTProcess(params, {{PDG::photon, PDG::photon}}, {PDG::muon, PDG::muon}), func_(func) {
+        : KTProcess(params, {PDG::muon, PDG::muon}), func_(func) {
       constants_.m_p = Process::mp_;
       constants_.units = constants::GEVM2_TO_PB;
       constants_.pi = M_PI;
