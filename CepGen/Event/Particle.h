@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 
 #include <set>
 #include <unordered_map>
-#include <vector>
 
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Momentum.h"
@@ -268,3 +267,4 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
+

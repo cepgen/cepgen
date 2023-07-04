@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -64,8 +64,8 @@ namespace cepgen {
     particles_[props.pdgid] = props;
   }
 
-  const std::vector<pdgid_t> PDG::particles() const {
-    std::vector<pdgid_t> out;
+  pdgids_t PDG::particles() const {
+    pdgids_t out;
     std::transform(
         particles_.begin(), particles_.end(), std::back_inserter(out), [](const auto& pt) { return pt.first; });
     return out;

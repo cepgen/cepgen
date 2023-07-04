@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 
 #include <cstddef>  // size_t
 #include <unordered_map>
-#include <vector>
 
 #include "CepGen/Physics/ParticleProperties.h"
 
@@ -76,9 +75,9 @@ namespace cepgen {
 
     /// Add a new particle definition to the library
     void define(const ParticleProperties&);
-    const std::vector<pdgid_t> particles() const;  ///< All particles ids in this library
-    void dump(std::ostream* = nullptr) const;      ///< Dump all particles in this library
-    size_t size() const;                           ///< Number of particles defined in this library
+    pdgids_t particles() const;                ///< All particles ids in this library
+    void dump(std::ostream* = nullptr) const;  ///< Dump all particles in this library
+    size_t size() const;                       ///< Number of particles defined in this library
 
     //--- per-particles information
 
@@ -99,3 +98,4 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
+

@@ -26,7 +26,7 @@
 
 namespace cepgen {
   namespace proc {
-    KTProcess::KTProcess(const ParametersList& params, const std::vector<pdgid_t>& central)
+    KTProcess::KTProcess(const ParametersList& params, const pdgids_t& central)
         : Process(params), produced_parts_(central) {
       event().map()[Particle::CentralSystem].resize(central.size());
     }
@@ -43,13 +43,12 @@ namespace cepgen {
            {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
            {Particle::CentralSystem, produced_parts_}});
       setExtraContent();
-      CG_DEBUG("KTProcess:addEventContent")
-          << "Addition of:\n\t"
-          << "Intermediate partons: "
-          << std::vector<pdgid_t>{kinematics().incomingBeams().positive().daughterId(),
-                                  kinematics().incomingBeams().negative().daughterId()}
-          << ")\n\t"
-          << "Produced system: " << produced_parts_ << ".\n\t" << event();
+      CG_DEBUG("KTProcess:addEventContent") << "Addition of:\n\t"
+                                            << "Intermediate partons: "
+                                            << pdgids_t{kinematics().incomingBeams().positive().daughterId(),
+                                                        kinematics().incomingBeams().negative().daughterId()}
+                                            << "\n\t"
+                                            << "Produced system: " << produced_parts_ << ".\n\t" << event();
     }
 
     void KTProcess::prepareKinematics() {

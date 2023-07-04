@@ -21,12 +21,14 @@
 
 #include <iosfwd>
 #include <string>
+#include <vector>
 
 #include "CepGen/Core/SteeredObject.h"
 
 namespace cepgen {
   /// Alias for the integer-like particle PDG id
   typedef unsigned long long pdgid_t;
+  typedef std::vector<pdgid_t> pdgids_t;
   /// A collection of physics constants associated to a single particle
   struct ParticleProperties final : SteeredObject<ParticleProperties> {
     explicit ParticleProperties(const ParametersList&);
@@ -57,3 +59,4 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
+

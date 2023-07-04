@@ -98,7 +98,7 @@ namespace cepgen {
       /// Map of all incoming state particles in the process
       typedef std::map<Particle::Role, pdgid_t> IncomingState;
       /// Map of all outgoing particles in the process
-      typedef std::map<Particle::Role, std::vector<pdgid_t> > OutgoingState;
+      typedef std::map<Particle::Role, pdgids_t> OutgoingState;
 
       Momentum& pA();                                 ///< Positive-z incoming beam particle's 4-momentum
       const Momentum& pA() const;                     ///< Positive-z incoming beam particle's 4-momentum
@@ -237,3 +237,4 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
+
