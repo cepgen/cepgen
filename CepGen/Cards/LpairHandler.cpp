@@ -55,26 +55,25 @@ namespace cepgen {
       //-------------------------------------------------------------------------------------------
 
       registerParameter<std::string>("PROC", "Process name to simulate", &proc_name_);
-      registerIntegratorParameter<std::string>("ITYP", "Integration algorithm", MODULE_NAME);
       registerParameter<std::string>("HADR", "Hadronisation algorithm", &evt_mod_name_);
       registerParameter<std::string>("EVMD", "Events modification algorithms", &evt_mod_name_);
       registerParameter<std::string>("OUTP", "Output module", &out_mod_name_);
       registerParameter<std::string>("OUTF", "Output file name", &out_file_name_);
       registerParameter<std::string>("ADDN", "Additional libraries to load", &addons_list_);
+      registerIntegratorParameter<std::string>("ITYP", "Integration algorithm", MODULE_NAME);
+      registerIntegratorParameter<int>("NTRT", "Smoothen the integrand", "treat");
+      registerIntegratorParameter<int>("NCVG", "Number of function calls", "numFunctionCalls");
+      registerIntegratorParameter<int>("ITVG", "Number of integration iterations", "iterations");
+      registerIntegratorParameter<int>("SEED", "Random generator seed", "seed");
 
       //-------------------------------------------------------------------------------------------
       // General parameters
       //-------------------------------------------------------------------------------------------
 
-      registerIntegratorParameter<int>("NTRT", "Smoothen the integrand", "treat");
       registerParameter<int>("TIMR", "Enable the time ticker", &timer_);
       registerParameter<int>("IEND", "Generation type", &iend_);
       registerParameter<int>("DEBG", "Debugging verbosity", &log_level_);
       registerParameter<int>("LOGE", "Extended logging", &ext_log_);
-      registerIntegratorParameter<int>("NCVG", "Number of function calls", "numFunctionCalls");
-      registerIntegratorParameter<int>("ITVG", "Number of integration iterations", "iterations");
-      registerIntegratorParameter<int>("SEED", "Random generator seed", "seed");
-      registerKinematicsParameter<int>("MODE", "Subprocess' mode", "mode");
       registerGenerationParameter<int>("NTHR", "Number of threads to use for events generation", "numThreads");
       registerGenerationParameter<int>("NCSG", "Number of points to probe", "numPoints");
       registerGenerationParameter<int>("NGEN", "Number of events to generate", "maxgen");
@@ -99,6 +98,7 @@ namespace cepgen {
       registerParameter<int>("RTYP", "R-ratio computation type", &sr_type_);
       registerProcessParameter<int>("PAIR", "Outgoing particles' PDG id", "pair");
       registerKinematicsParameter<std::string>("FFAC", "Form factors for the incoming beams", "formFactors");
+      registerKinematicsParameter<int>("MODE", "Subprocess' mode", "mode");
       registerKinematicsParameter<int>("INA1", "Heavy ion atomic weight (1st incoming beam)", "beam1A");
       registerKinematicsParameter<int>("INZ1", "Heavy ion atomic number (1st incoming beam)", "beam1Z");
       registerKinematicsParameter<int>("INA2", "Heavy ion atomic weight (2nd incoming beam)", "beam2A");
