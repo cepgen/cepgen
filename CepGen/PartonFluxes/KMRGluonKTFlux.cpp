@@ -34,7 +34,7 @@ namespace cepgen {
         return 0.;
       return kmr::GluonGrid::get()(x, kt2, mx2);
     }
-    int partonPdgId() const override final { return PDG::gluon; }
+    pdgid_t partonPdgId() const override final { return PDG::gluon; }
     bool fragmenting() const override { return false; }
   };
 }  // namespace cepgen

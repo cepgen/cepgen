@@ -44,7 +44,7 @@ namespace cepgen {
     }
 
     double mass2() const override { return mp2_; }
-    int partonPdgId() const override { return PDG::photon; }
+    pdgid_t partonPdgId() const override { return PDG::photon; }
     double operator()(double x, double kt2, double mx2) const override {
       if (!x_range_.contains(x))
         return 0.;

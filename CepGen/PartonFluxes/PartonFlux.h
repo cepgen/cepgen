@@ -20,6 +20,7 @@
 #define CepGen_Physics_PartonFlux_h
 
 #include "CepGen/Modules/NamedModule.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 namespace cepgen {
   class PartonFlux : public NamedModule<std::string> {
@@ -33,7 +34,7 @@ namespace cepgen {
 
     virtual bool ktFactorised() const { return false; }
     virtual bool fragmenting() const { return true; }
-    virtual int partonPdgId() const = 0;
+    virtual pdgid_t partonPdgId() const = 0;
 
   protected:
     const double mp_, mp2_;
@@ -42,3 +43,4 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
+
