@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
   for (const auto& x : x_range.generate(num_points)) {
     out << "\n" << x;
     for (size_t j = 0; j < fluxes.size(); ++j) {
-      const auto flux = (*fluxes.at(j))(x, kt2, mx2);
+      const auto flux = (*fluxes.at(j))(x, kt2, mx2) * (normalised ? x : 1.);
       out << "\t" << flux;
       graph_flux.at(j).addPoint(x, flux);
     }
@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
 
     for (auto& gr : graph_flux) {
       gr.xAxis().setLabel("$\\xi$");
-      gr.yAxis().setLabel(normalised ? "\\xi $\\varphi_{T}(\\xi, k_{T}^{2})" : "$\\varphi_{T}(\\xi, k_{T}^{2})$");
+      gr.yAxis().setLabel(normalised ? "$\\xi\\varphi_{T}(\\xi, k_{T}^{2})" : "$\\varphi_{T}(\\xi, k_{T}^{2})$");
       if (y_range.valid())
         gr.yAxis().setRange(y_range);
       coll.emplace_back(&gr);
