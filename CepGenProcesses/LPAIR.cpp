@@ -149,6 +149,7 @@ private:
     double w31 = 0.;  ///< \f$\delta_1=m_3^2-m_1^2\f$ as defined in \cite Vermaseren:1982cz
     double w52 = 0.;  ///< \f$\delta_4=m_5^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
   } masses_;
+  double charge_factor_{0.};
 
   //-- incoming beam particles
   double ep1_{0.};  ///< energy of the first proton-like incoming particle
@@ -241,7 +242,8 @@ private:
 //---------------------------------------------------------------------------------------------
 
 void LPAIR::prepareKinematics() {
-  masses_.Ml2 = event()(Particle::CentralSystem)[0].momentum().mass2();
+  masses_.Ml2 = pair_.mass * pair_.mass;
+  charge_factor_ = std::pow(pair_.charge / 3., 4);
 
   formfac_ = FormFactorsFactory::get().build(kinematics().incomingBeams().formFactors());
   strfun_ = StructureFunctionsFactory::get().build(kinematics().incomingBeams().structureFunctions());
@@ -743,7 +745,7 @@ double LPAIR::computeWeight() {
   const double ecm6 = m_w4_ / (2. * mc4_), pp6cm = std::sqrt(ecm6 * ecm6 - masses_.Ml2);
   const double alpha1 = alphaEM(std::sqrt(-t1())), alpha2 = alphaEM(std::sqrt(-t2()));
 
-  jacobian_ *= pp6cm * constb_ * alpha1 * alpha1 * alpha2 * alpha2 / mc4_ / s();
+  jacobian_ *= pp6cm * constb_ * charge_factor_ * alpha1 * alpha1 * alpha2 * alpha2 / mc4_ / s();
 
   // Let the most obscure part of this code begin...
 
