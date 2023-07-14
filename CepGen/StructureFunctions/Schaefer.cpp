@@ -119,8 +119,8 @@ namespace cepgen {
           setFL(continuum_model_->FL(xbj, q2));
           return *this;
         } else {
-          setF2(perturbative_model_->F2(xbj, q2) * (1. + higher_twist_ / q2));
-          setFL(perturbative_model_->FL(xbj, q2));
+          setF2(perturbative_model_->F2(xbj, q2));
+          setFL(perturbative_model_->FL(xbj, q2) * (1. + higher_twist_ / q2));
           return *this;
         }
       }
