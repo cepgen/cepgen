@@ -301,7 +301,7 @@ namespace cepgen {
       if (top_label_)
         top_label_->Draw();
       if (leg_) {
-        if (TPad::PlaceBox(leg_.get(), leg_width_, leg_height_, leg_x1_, leg_y1_, "lb")) {
+        if (TPad::PlaceBox(leg_.get(), leg_width_, leg_height_, leg_x1_, leg_y1_, "rt")) {
           leg_x1_ = std::max(0.15, std::min(leg_x1_, 0.85 - leg_width_));
           leg_y1_ = std::max(0.15, std::min(leg_y1_, 0.85 - leg_height_));
           leg_->SetX1(leg_x1_);
@@ -316,6 +316,21 @@ namespace cepgen {
     }
     /// Retrieve the legend object (if produced)
     inline TLegend* GetLegend() { return leg_.get(); }
+    inline void Place(TLegend* leg, Option_t* mode = "lt") {
+      if (!leg)
+        return;
+      double leg_x, leg_y;
+      const auto leg_width = leg->GetX2() - leg->GetX1(), leg_height = leg->GetY2() - leg->GetY1();
+      if (TPad::PlaceBox(leg, leg_width, leg_height, leg_x, leg_y, mode)) {
+        leg_x = std::max(0.15, std::min(leg_x, 0.85 - leg_width));
+        leg_y = std::max(0.15, std::min(leg_y, 0.85 - leg_height));
+        leg->SetX1(leg_x);
+        leg->SetX2(leg_x + leg_width);
+        leg->SetY1(leg_y);
+        leg->SetY2(leg_y + leg_height);
+      }
+      leg->Draw();
+    }
 
   private:
     /// Prepare the canvas for later drawing
