@@ -33,6 +33,8 @@
 #include <memory>
 #include <vector>
 
+#include "CepGen/Utils/Limits.h"
+
 namespace cepgen {
   /// Interpolation type for the grid coordinates
   enum struct GridType { linear, logarithmic, square };
@@ -60,8 +62,8 @@ namespace cepgen {
 
     /// Initialise the grid and all useful interpolators/accelerators
     void init();
-    /// Grid boundaries (collection of pair(min,max))
-    std::array<std::pair<double, double>, D> boundaries() const;
+    /// Grid boundaries (collection of (min,max))
+    std::array<Limits, D> boundaries() const;
     /// Lowest bound of the grid coordinates
     std::array<double, D> min() const;
     /// Highest bound of the grid coordinates

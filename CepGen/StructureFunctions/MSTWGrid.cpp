@@ -112,8 +112,8 @@ namespace mstw {
     const auto& bounds = boundaries();
     CG_DEBUG("MSTW") << "MSTW@" << header_.order << " grid evaluator built "
                      << "for " << header_.nucleon << " structure functions (" << header_.cl << ")\n\t"
-                     << "xBj in range [" << std::pow(10., bounds[0].first) << ":" << std::pow(10., bounds[0].second)
-                     << "], Q² in range [" << std::pow(10., bounds[1].first) << ":" << std::pow(10., bounds[1].second)
+                     << "xBj in range [" << std::pow(10., bounds[0].min()) << ":" << std::pow(10., bounds[0].max())
+                     << "], Q² in range [" << std::pow(10., bounds[1].min()) << ":" << std::pow(10., bounds[1].max())
                      << "].";
   }
 

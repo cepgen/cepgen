@@ -263,8 +263,8 @@ namespace cepgen {
   }
 
   template <size_t D, size_t N>
-  std::array<std::pair<double, double>, D> GridHandler<D, N>::boundaries() const {
-    std::array<std::pair<double, double>, D> out;
+  std::array<Limits, D> GridHandler<D, N>::boundaries() const {
+    std::array<Limits, D> out;
     const auto min_val = min(), max_val = max();
     for (size_t i = 0; i < D; ++i)
       out[i] = {min_val[i], max_val[i]};
