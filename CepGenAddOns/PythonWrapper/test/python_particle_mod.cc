@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
   card->parseString(R"(
 from Config.PDG_cfi import PDG, registerParticle
 registerParticle(name='teston', pdgid=42, mass=42.42, width=1.1))",
-                    new cepgen::Parameters);
+                    nullptr);
 
   CG_DEBUG("main") << "Configuration string successfully parsed.";
 
