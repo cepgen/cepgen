@@ -27,11 +27,19 @@ namespace {
   BOOST_PYTHON_MODULE(pycepgen) {
     cepgen::initialise();
 
-    py::class_<cepgen::strfun::Parameterisation, boost::noncopyable>(
+    py::class_<cepgen::Steerable>("_Steerable", "base steerable object", py::no_init)
+        .add_property(
+            "parameters",
+            +[](const cepgen::Steerable& st) { return plist_to_py_dict(st.parameters()); },
+            &cepgen::strfun::Parameterisation::setParameters,
+            "Operational parameters")
+        .add_property(
+            "name",
+            +[](const cepgen::Steerable& st) { return st.parameters().getString(cepgen::MODULE_NAME); },
+            "Module name");
+
+    py::class_<cepgen::strfun::Parameterisation, py::bases<cepgen::Steerable>, boost::noncopyable>(
         "_StructureFunctions", "nucleon structure functions modelling", py::no_init)
-        .add_static_property("name",
-                             py::make_function(&cepgen::strfun::Parameterisation::name,
-                                               py::return_value_policy<py::copy_const_reference>()))
         .def("F2", &cepgen::strfun::Parameterisation::F2)
         .def("FL", &cepgen::strfun::Parameterisation::FL)
         .def("F1", &cepgen::strfun::Parameterisation::F1);
@@ -41,7 +49,7 @@ namespace {
                    "StructureFunctionsFactory",
                    "a structure functions evaluator objects factory");
 
-    py::class_<cepgen::formfac::Parameterisation, boost::noncopyable>(
+    py::class_<cepgen::formfac::Parameterisation, py::bases<cepgen::Steerable>, boost::noncopyable>(
         "_FormFactors", "nucleon electromagnetic form factors modelling", py::no_init)
         .def("__call__",
              py::make_function(&cepgen::formfac::Parameterisation::operator(), py::return_internal_reference()));

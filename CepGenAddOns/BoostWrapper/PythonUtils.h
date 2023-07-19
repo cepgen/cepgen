@@ -53,7 +53,8 @@ std::vector<T> py_list_to_std_vector(const py::list& list) {
   return vec;
 }
 
-cepgen::ParametersList py_dict_to_plist(const py::dict& dict);
+cepgen::ParametersList py_dict_to_plist(const py::dict&);
+py::dict plist_to_py_dict(const cepgen::ParametersList&);
 
 template <typename T, typename... Args>
 py::object adapt_unique(std::unique_ptr<T> (*fn)(Args...)) {

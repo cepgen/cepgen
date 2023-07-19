@@ -46,6 +46,8 @@ cepgen::ParametersList py_dict_to_plist(const py::dict& dict) {
         plist.set(key, py_list_to_std_vector<std::string>(py::extract<py::list>(val_ext())));
       else if (el_type == "float")
         plist.set(key, py_list_to_std_vector<double>(py::extract<py::list>(val_ext())));
+      else if (el_type == "dict")
+        plist.set(key, py_list_to_std_vector<cepgen::ParametersList>(py::extract<py::list>(val_ext())));
       else
         throw CG_FATAL("py_dict_to_plist")
             << "Failed to unpack a Python list for elements of '" << val_type << "' type.";
@@ -54,4 +56,23 @@ cepgen::ParametersList py_dict_to_plist(const py::dict& dict) {
                                          << "'.";
   }
   return plist;
+}
+
+py::dict plist_to_py_dict(const cepgen::ParametersList& plist) {
+  py::dict dict;
+  for (const auto& key : plist.keysOf<int>())
+    dict.setdefault<std::string, int>(key, plist.get<int>(key));
+  for (const auto& key : plist.keysOf<std::string>())
+    dict.setdefault<std::string, std::string>(key, plist.get<std::string>(key));
+  for (const auto& key : plist.keysOf<double>())
+    dict.setdefault<std::string, double>(key, plist.get<double>(key));
+  for (const auto& key : plist.keysOf<cepgen::ParametersList>())
+    dict.setdefault<std::string, py::dict>(key, plist_to_py_dict(plist.get<cepgen::ParametersList>(key)));
+  for (const auto& key : plist.keysOf<std::vector<int> >())
+    dict.setdefault<std::string, py::list>(key, std_vector_to_py_list(plist.get<std::vector<int> >(key)));
+  for (const auto& key : plist.keysOf<std::vector<std::string> >())
+    dict.setdefault<std::string, py::list>(key, std_vector_to_py_list(plist.get<std::vector<std::string> >(key)));
+  for (const auto& key : plist.keysOf<std::vector<double> >())
+    dict.setdefault<std::string, py::list>(key, std_vector_to_py_list(plist.get<std::vector<double> >(key)));
+  return dict;
 }
