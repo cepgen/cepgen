@@ -16,7 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGenAddOns/BoostWrapper/PythonUtils.h"
@@ -38,5 +40,21 @@ namespace {
                    int,
                    "StructureFunctionsFactory",
                    "a structure functions evaluator objects factory");
+
+    py::class_<cepgen::formfac::Parameterisation, boost::noncopyable>(
+        "_FormFactors", "nucleon electromagnetic form factors modelling", py::no_init)
+        .def("__call__",
+             py::make_function(&cepgen::formfac::Parameterisation::operator(), py::return_internal_reference()));
+
+    py::class_<cepgen::formfac::FormFactors>("FormFactors", "nucleon electromagnetic form factors values")
+        .add_property("FE", &cepgen::formfac::FormFactors::FE, "Electric form factor")
+        .add_property("FM", &cepgen::formfac::FormFactors::FM, "Magnetic form factor")
+        .add_property("GE", &cepgen::formfac::FormFactors::GE, "Sachs electric form factor")
+        .add_property("GM", &cepgen::formfac::FormFactors::GM, "Sachs magnetic form factor");
+
+    EXPOSE_FACTORY(cepgen::FormFactorsFactory,
+                   std::string,
+                   "FormFactorsFactory",
+                   "an electromagnetic form factors evaluator objects factory");
   }
 }  // namespace
