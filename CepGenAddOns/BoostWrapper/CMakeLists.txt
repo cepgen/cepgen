@@ -33,7 +33,7 @@ if(NOT Boost_FOUND OR NOT PYTHONLIBS_FOUND)
   return()
 endif()
 
-add_library(pycepgen SHARED PythonWrapper.cpp)
+add_library(pycepgen SHARED PythonWrapper.cpp PythonUtils.cpp)
 target_link_libraries(pycepgen CepGen ${Boost_LIBRARIES})
 target_include_directories(pycepgen PUBLIC ${PYTHON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 configure_file(__init__.py ${CMAKE_CURRENT_BINARY_DIR}/src/__init__.py COPYONLY)
