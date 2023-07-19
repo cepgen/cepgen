@@ -19,7 +19,7 @@
 #ifndef CepGen_Core_Steerable_h
 #define CepGen_Core_Steerable_h
 
-#include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/ParametersDescription.h"
 
 namespace cepgen {
   /// Base runtime module object
@@ -33,6 +33,13 @@ namespace cepgen {
     virtual void setParameters(const ParametersList& params) { params_ += params; }
     /// Module parameters
     virtual const ParametersList& parameters() const { return params_; }
+
+    /// Description of all object parameters
+    static inline ParametersDescription description() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Virtual, base steerable object");
+      return desc;
+    }
 
   protected:
     /// Retrieve a parameters as previously steered

@@ -19,9 +19,6 @@
 #ifndef CepGen_Core_SteeredObject_h
 #define CepGen_Core_SteeredObject_h
 
-#include <functional>
-
-#include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Core/Steerable.h"
 
 #define REGISTER_TYPE(type, coll)                                \
@@ -49,13 +46,6 @@ namespace cepgen {
     bool operator==(const SteeredObject& oth) const { return parameters() == oth.parameters(); }
     /// Inequality operator
     bool operator!=(const SteeredObject& oth) const { return !operator==(oth); }
-
-    /// Description of all object parameters
-    static inline ParametersDescription description() {
-      auto desc = ParametersDescription();
-      desc.setDescription("Virtual, base steerable object");
-      return desc;
-    }
 
     REGISTER_TYPE(bool, map_bools_)
     REGISTER_TYPE(int, map_ints_)

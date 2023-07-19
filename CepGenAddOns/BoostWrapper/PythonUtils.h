@@ -29,6 +29,13 @@
              return obj::get().build(mod, py_dict_to_plist(dict));                                                \
            }))                                                                                                    \
       .def("build", adapt_unique(+[](const py::dict& dict) { return obj::get().build(py_dict_to_plist(dict)); })) \
+      .def(                                                                                                       \
+          "describe",                                                                                             \
+          +[](const key& mod) {                                                                                   \
+            std::ostringstream os;                                                                                \
+            os << obj::get().describeParameters(mod);                                                             \
+            return os.str();                                                                                      \
+          })                                                                                                      \
       .add_static_property(                                                                                       \
           "modules", +[]() { return std_vector_to_py_list(obj::get().modules()); })
 
