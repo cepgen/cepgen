@@ -23,9 +23,9 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
-#define EXPOSE_FACTORY_INT(obj, name, description)                                                              \
+#define EXPOSE_FACTORY(obj, key, name, description)                                                             \
   py::class_<obj, boost::noncopyable>(name, description, py::no_init)                                           \
-      .def("build", adapt_unique(+[](int mod) { return obj::get().build(mod); }))                               \
+      .def("build", adapt_unique(+[](const key& mod) { return obj::get().build(mod); }))                        \
       .def("build", adapt_unique(+[](const cepgen::ParametersList& plist) { return obj::get().build(plist); })) \
       .add_static_property(                                                                                     \
           "modules", +[]() { return std_vector_to_py_list(obj::get().modules()); })
@@ -57,13 +57,15 @@ namespace {
   BOOST_PYTHON_MODULE(pycepgen) {
     cepgen::initialise();
 
-    py::class_<cepgen::strfun::Parameterisation, boost::noncopyable>("StructureFunctions", py::no_init)
+    py::class_<cepgen::strfun::Parameterisation, boost::noncopyable>(
+        "_StructureFunctions", "nucleon structure functions modelling", py::no_init)
         .def("F2", &cepgen::strfun::Parameterisation::F2)
         .def("FL", &cepgen::strfun::Parameterisation::FL)
         .def("F1", &cepgen::strfun::Parameterisation::F1);
 
-    EXPOSE_FACTORY_INT(cepgen::StructureFunctionsFactory,
-                       "StructureFunctionsFactory",
-                       "a structure functions evaluator objects factory");
+    EXPOSE_FACTORY(cepgen::StructureFunctionsFactory,
+                   int,
+                   "StructureFunctionsFactory",
+                   "a structure functions evaluator objects factory");
   }
 }  // namespace
