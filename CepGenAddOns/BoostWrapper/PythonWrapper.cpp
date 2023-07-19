@@ -23,8 +23,22 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
+#define EXPOSE_FACTORY_INT(obj, name, description)                                                              \
+  py::class_<obj, boost::noncopyable>(name, description, py::no_init)                                           \
+      .def("build", adapt_unique(+[](int mod) { return obj::get().build(mod); }))                               \
+      .def("build", adapt_unique(+[](const cepgen::ParametersList& plist) { return obj::get().build(plist); })) \
+      .add_static_property(                                                                                     \
+          "modules", +[]() { return std_vector_to_py_list(obj::get().modules()); })
+
 namespace {
   namespace py = boost::python;
+
+  template <class T>
+  py::list std_vector_to_py_list(const std::vector<T>& vec) {
+    py::list lst;
+    std::for_each(vec.begin(), vec.end(), [&](const auto& t) { lst.append(t); });
+    return lst;
+  }
 
   template <typename T, typename... Args>
   py::object adapt_unique(std::unique_ptr<T> (*fn)(Args...)) {
@@ -43,16 +57,13 @@ namespace {
   BOOST_PYTHON_MODULE(pycepgen) {
     cepgen::initialise();
 
-    py::class_<cepgen::strfun::Parameterisation, boost::noncopyable>("StructureFunctions",
-                                                                     py::init<cepgen::ParametersList>())
+    py::class_<cepgen::strfun::Parameterisation, boost::noncopyable>("StructureFunctions", py::no_init)
         .def("F2", &cepgen::strfun::Parameterisation::F2)
         .def("FL", &cepgen::strfun::Parameterisation::FL)
         .def("F1", &cepgen::strfun::Parameterisation::F1);
 
-    py::class_<cepgen::StructureFunctionsFactory, boost::noncopyable>("StructureFunctionsFactory", py::no_init)
-        .def("build", adapt_unique(+[](int mod) { return cepgen::StructureFunctionsFactory::get().build(mod); }))
-        .def("build", adapt_unique(+[](const cepgen::ParametersList& plist) {
-               return cepgen::StructureFunctionsFactory::get().build(plist);
-             }));
+    EXPOSE_FACTORY_INT(cepgen::StructureFunctionsFactory,
+                       "StructureFunctionsFactory",
+                       "a structure functions evaluator objects factory");
   }
 }  // namespace
