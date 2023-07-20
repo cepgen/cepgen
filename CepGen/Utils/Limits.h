@@ -67,7 +67,7 @@ namespace cepgen {
     /// Have an upper limit?
     bool hasMax() const;
     /// Check if the value is inside limits' boundaries
-    bool contains(double val) const;
+    bool contains(double val, bool exclude_boundaries = false) const;
     /// Is there a lower and upper limit?
     bool valid() const;
     /// Raw value of the limits
