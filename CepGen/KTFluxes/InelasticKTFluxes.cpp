@@ -17,10 +17,9 @@
  */
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/PartonFluxes/KTFlux.h"
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
@@ -52,8 +51,7 @@ namespace cepgen {
         throw CG_FATAL("InelasticNucleonKTFlux") << "Diffractive mass squared mX^2 should be specified!";
       const auto q2vals = computeQ2(x, kt2, mx2);
       const auto xbj = utils::xBj(q2vals.q2, mass2(), mx2), qnorm = 1. - q2vals.min / q2vals.q2;
-      return constants::ALPHA_EM * M_1_PI * sf_->F2(xbj, q2vals.q2) * (xbj / q2vals.q2) * qnorm * qnorm * (1. - x) /
-             q2vals.q2;
+      return prefactor_ * sf_->F2(xbj, q2vals.q2) * (xbj / q2vals.q2) * qnorm * qnorm * (1. - x) / q2vals.q2;
     }
 
   protected:
@@ -76,7 +74,7 @@ namespace cepgen {
       const auto xbj = utils::xBj(q2vals.q2, mass2(), mx2), qnorm = 1. - q2vals.min / q2vals.q2;
       const double f_D = sf_->F2(xbj, q2vals.q2) * (xbj / q2vals.q2) * (1. - x) * qnorm;
       const double f_C = sf_->F1(xbj, q2vals.q2) * 2. / q2vals.q2;
-      return constants::ALPHA_EM * M_1_PI * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2vals.q2;
+      return prefactor_ * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2vals.q2;
     }
   };
 }  // namespace cepgen

@@ -37,10 +37,10 @@ namespace cepgen {
     virtual pdgid_t partonPdgId() const = 0;
 
   protected:
+    const double prefactor_;
     const double mp_, mp2_;
     const Limits x_range_{0., 1.};
   };
 }  // namespace cepgen
 
 #endif
-

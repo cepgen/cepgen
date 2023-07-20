@@ -24,9 +24,9 @@
 
 #include "CepGen/Core/SteeredObject.h"
 #include "CepGen/FormFactors/FormFactors.h"
-#include "CepGen/PartonFluxes/PartonFlux.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Physics/PartonFlux.h"
 
 namespace cepgen {
   /// Incoming beams characteristics

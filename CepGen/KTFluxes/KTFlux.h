@@ -16,7 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/PartonFluxes/PartonFlux.h"
+#ifndef CepGen_KTFluxes_KTFlux_h
+#define CepGen_KTFluxes_KTFlux_h
+
+#include "CepGen/Physics/PartonFlux.h"
 
 namespace cepgen {
   class KTFlux : public PartonFlux {
@@ -51,3 +54,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
+#endif

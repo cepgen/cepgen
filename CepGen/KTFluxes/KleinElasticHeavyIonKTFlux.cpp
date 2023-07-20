@@ -19,10 +19,9 @@
 #include <cmath>
 
 #include "CepGen/FormFactors/Parameterisation.h"
+#include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
-#include "CepGen/PartonFluxes/KTFlux.h"
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 
@@ -59,7 +58,7 @@ namespace cepgen {
       const double ela2 = pow(ff.GE, 2);
       //const double ela3 = kt2 / q2_ela;
       const auto z = (unsigned short)hi_.Z;
-      return constants::ALPHA_EM * M_1_PI * z * z * ela1 * ela2 / q2_ela;
+      return prefactor_ * z * z * ela1 * ela2 / q2_ela;
     }
 
   private:

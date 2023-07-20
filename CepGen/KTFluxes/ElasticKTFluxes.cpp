@@ -16,12 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cmath>
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/FormFactors/Parameterisation.h"
+#include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
-#include "CepGen/PartonFluxes/KTFlux.h"
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 
 namespace cepgen {
@@ -50,7 +51,7 @@ namespace cepgen {
       const auto q2vals = computeQ2(x, kt2);
       const double qnorm = 1. - q2vals.min / q2vals.q2;
       const auto& formfac = (*ff_)(q2vals.q2);
-      return constants::ALPHA_EM * M_1_PI * formfac.FE * qnorm * qnorm / q2vals.q2;
+      return prefactor_ * formfac.FE * qnorm * qnorm / q2vals.q2;
     }
 
   protected:
@@ -73,7 +74,7 @@ namespace cepgen {
       const auto& formfac = (*ff_)(q2vals.q2);
       const double f_D = formfac.FE * (1. - x) * qnorm;
       const double f_C = formfac.FM;
-      return constants::ALPHA_EM * M_1_PI * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2vals.q2;
+      return prefactor_ * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2vals.q2;
     }
   };
 

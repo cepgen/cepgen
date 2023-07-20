@@ -16,16 +16,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/PartonFluxes/PartonFlux.h"
+#include "CepGen/KTFluxes/KTFlux.h"
+#include "CepGen/Modules/PartonFluxFactory.h"
+#include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/PDG.h"
 
 namespace cepgen {
-  PartonFlux::PartonFlux(const ParametersList& params)
-      : NamedModule(params), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {}
-
-  ParametersDescription PartonFlux::description() {
-    auto desc = ParametersDescription();
-    desc.setDescription("Unnamed parton flux evaluator");
-    return desc;
-  }
+  struct KMRGluonKTFlux final : public KTFlux {
+    using KTFlux::KTFlux;
+    static ParametersDescription description() {
+      auto desc = KTFlux::description();
+      desc.setDescription("Proton inelastic gluon emission (KMR flux)");
+      return desc;
+    }
+    double operator()(double x, double kt2, double mx2) const override final {
+      if (!x_range_.contains(x))
+        return 0.;
+      return kmr::GluonGrid::get()(x, kt2, mx2);
+    }
+    pdgid_t partonPdgId() const override final { return PDG::gluon; }
+    bool fragmenting() const override { return false; }
+  };
 }  // namespace cepgen
+
+REGISTER_FLUX("KMR", KMRGluonKTFlux);
