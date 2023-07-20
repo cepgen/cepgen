@@ -77,8 +77,6 @@ namespace cepgen {
 
     /// Scalar parton flux modelling
     const PartonFlux& flux() const;
-    /// Compute the scalar parton flux given its modelling
-    double flux(double x, double q2, double mx2 = -1.) const;
 
   private:
     pdgid_t pdg_id_{0};                 ///< PDG identifier for the beam

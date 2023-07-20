@@ -45,7 +45,7 @@ namespace cepgen {
     double mass2() const override { return mp2_; }
     pdgid_t partonPdgId() const override { return PDG::photon; }
 
-    double operator()(double x, double kt2, double) const override {
+    double fluxMX2(double x, double kt2, double) const override {
       if (!x_range_.contains(x))
         return 0.;
       const auto q2vals = computeQ2(x, kt2);
@@ -66,7 +66,7 @@ namespace cepgen {
       desc.setDescription("Nucl. el. photon emission (Budnev flux)");
       return desc;
     }
-    double operator()(double x, double kt2, double) const override final {
+    double fluxMX2(double x, double kt2, double) const override final {
       if (!x_range_.contains(x))
         return 0.;
       const auto q2vals = computeQ2(x, kt2);
@@ -110,9 +110,9 @@ namespace cepgen {
     }
 
     double mass2() const override { return mass2_; }
-    double operator()(double x, double kt2, double mx2) const override {
+    double fluxMX2(double x, double kt2, double mx2) const override {
       const auto z = (unsigned short)hi_.Z;
-      return z * z * ElasticNucleonKTFlux::operator()(x, kt2, mx2);
+      return z * z * ElasticNucleonKTFlux::fluxMX2(x, kt2, mx2);
     }
 
   private:

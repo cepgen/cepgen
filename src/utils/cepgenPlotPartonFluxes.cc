@@ -21,6 +21,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
+#include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
@@ -47,7 +48,7 @@ int main(int argc, char* argv[]) {
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument(
-          "fluxes", "parton fluxe modellings", &fluxes_names, cepgen::PartonFluxFactory::get().modules())
+          "fluxes,f", "parton fluxe modellings", &fluxes_names, cepgen::PartonFluxFactory::get().modules())
       .addOptionalArgument("mx,M", "diffractive mass (GeV)", &mx, 1.5)
       .addOptionalArgument("xrange,x", "fractional loss range", &x_range, cepgen::Limits{0., 1.})
       .addOptionalArgument("yrange,y", "y range", &y_range)
@@ -83,9 +84,12 @@ int main(int argc, char* argv[]) {
   for (const auto& x : x_range.generate(num_points)) {
     out << "\n" << x;
     for (size_t j = 0; j < fluxes.size(); ++j) {
-      const auto flux = (*fluxes.at(j))(x, kt2, mx2) * (normalised ? x : 1.);
-      out << "\t" << flux;
-      graph_flux.at(j).addPoint(x, flux);
+      if (fluxes.at(j)->ktFactorised()) {
+        const auto flux =
+            dynamic_cast<const cepgen::KTFlux&>(*fluxes.at(j)).fluxMX2(x, kt2, mx2) * (normalised ? x : 1.);
+        out << "\t" << flux;
+        graph_flux.at(j).addPoint(x, flux);
+      }
     }
   }
   out.close();

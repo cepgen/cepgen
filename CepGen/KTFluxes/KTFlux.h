@@ -24,13 +24,14 @@
 namespace cepgen {
   class KTFlux : public PartonFlux {
   public:
-    explicit KTFlux(const ParametersList& params) : PartonFlux(params) {}
+    explicit KTFlux(const ParametersList&);
 
-    static ParametersDescription description() {
-      auto desc = PartonFlux::description();
-      desc.setDescription("kT-factorised flux");
-      return desc;
-    }
+    static ParametersDescription description();
+
+    /// Compute the kt-dependent flux for this x value and virtuality
+    virtual double fluxQ2(double x, double kt2, double q2) const;
+    /// Compute the kt-dependent flux for this x value and remnant mass
+    virtual double fluxMX2(double x, double kt2, double mf2) const;
 
     bool ktFactorised() const override final { return true; }
 
@@ -43,14 +44,9 @@ namespace cepgen {
       double min{0.}, q2{0.};
     };
     /// Compute the minimum and kT-dependent Q^2
-    Q2Values computeQ2(double x, double kt2, double mx2 = 0.) const {
-      Q2Values out;
-      const auto mi2 = mass2();
-      const auto dm2 = (mx2 == 0.) ? 0. : mx2 - mi2;
-      out.min = ((x * dm2) + x * x * mi2) / (1. - x);
-      out.q2 = out.min + kt2 / (1. - x);
-      return out;
-    }
+    Q2Values computeQ2(double x, double kt2, double mx2 = 0.) const;
+    /// Diffractive mass from virtuality
+    double mX2(double x, double kt2, double q2) const;
   };
 }  // namespace cepgen
 

@@ -47,7 +47,7 @@ namespace cepgen {
     double mass2() const override final { return hi_.A * hi_.A * mp2_; }
     pdgid_t partonPdgId() const override { return PDG::photon; }
 
-    double operator()(double x, double kt2, double) const override final {
+    double fluxMX2(double x, double kt2, double) const override final {
       if (!x_range_.contains(x))
         return 0.;
 

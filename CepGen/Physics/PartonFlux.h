@@ -29,12 +29,14 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    /// Compute the kt-dependent flux for this x value
-    virtual double operator()(double x, double kt2, double mf2) const = 0;
-
+    /// is the flux parton kT-dependent?
     virtual bool ktFactorised() const { return false; }
+    /// is the initiator particle fragmenting after the parton emission?
     virtual bool fragmenting() const { return true; }
+    /// parton PDG identifier
     virtual pdgid_t partonPdgId() const = 0;
+    /// initiator particle squared mass
+    virtual double mass2() const = 0;
 
   protected:
     const double prefactor_;

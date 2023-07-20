@@ -78,8 +78,6 @@ namespace cepgen {
     return *flux_;
   }
 
-  double Beam::flux(double x, double q2, double mx2) const { return flux()(x, q2, mx2); }
-
   ParametersDescription Beam::description() {
     auto desc = ParametersDescription();
     desc.addAs<int, pdgid_t>("pdgId", PDG::proton);

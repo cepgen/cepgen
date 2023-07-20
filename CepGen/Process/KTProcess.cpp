@@ -18,10 +18,9 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/HeavyIon.h"
-#include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/KTProcess.h"
 
 namespace cepgen {
@@ -116,8 +115,11 @@ namespace cepgen {
         return 0.;  // avoid computing the fluxes if the matrix element is already null
 
       // convolute with fluxes according to modelling specified in parameters card
-      return kinematics().incomingBeams().positive().flux(x1_, qt1_ * qt1_, mX2()) * M_1_PI *
-             kinematics().incomingBeams().negative().flux(x2_, qt2_ * qt2_, mY2()) * M_1_PI * cent_me;
+      const auto& flux1 = dynamic_cast<const KTFlux&>(kinematics().incomingBeams().positive().flux());
+      const auto& flux2 = dynamic_cast<const KTFlux&>(kinematics().incomingBeams().negative().flux());
+
+      return flux1.fluxMX2(x1_, qt1_ * qt1_, mX2()) * M_1_PI * flux2.fluxMX2(x2_, qt2_ * qt2_, mY2()) * M_1_PI *
+             cent_me;
     }
 
     void KTProcess::fillKinematics(bool) {

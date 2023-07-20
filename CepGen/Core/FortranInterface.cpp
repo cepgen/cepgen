@@ -19,6 +19,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
+#include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
@@ -77,8 +78,8 @@ double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& 
         throw CG_FATAL("cepgen_kt_flux") << "Invalid flux modelling: " << mode << ".";
     }
   };
-  static auto flux = PartonFluxFactory::get().build(flux_name(fmode), params);
-  return (*flux)(x, kt2, mout);
+  static auto* flux = dynamic_cast<KTFlux*>(PartonFluxFactory::get().build(flux_name(fmode), params).release());
+  return flux->fluxMX2(x, kt2, mout * mout);
 }
 
 /// Compute a \f$k_{\rm T}\f$-dependent flux for heavy ions
@@ -90,10 +91,12 @@ double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& 
 double cepgen_kt_flux_hi_(int& fmode, double& x, double& kt2, int& a, int& z) {
   using namespace cepgen;
   (void)fmode;
-  static auto flux = PartonFluxFactory::get().build(
-      "ElasticHeavyIonKT",
-      ParametersList().setAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon{(unsigned short)a, (Element)z}));
-  return (*flux)(x, kt2, 0.);
+  static auto* flux = dynamic_cast<KTFlux*>(
+      PartonFluxFactory::get()
+          .build("ElasticHeavyIonKT",
+                 ParametersList().setAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon{(unsigned short)a, (Element)z}))
+          .release());
+  return flux->fluxMX2(x, kt2, 0.);
 }
 
 /// Mass of a particle, in GeV/c^2

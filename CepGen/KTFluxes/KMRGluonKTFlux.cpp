@@ -29,7 +29,7 @@ namespace cepgen {
       desc.setDescription("Proton inelastic gluon emission (KMR flux)");
       return desc;
     }
-    double operator()(double x, double kt2, double mx2) const override final {
+    double fluxMX2(double x, double kt2, double mx2) const override final {
       if (!x_range_.contains(x))
         return 0.;
       return kmr::GluonGrid::get()(x, kt2, mx2);
