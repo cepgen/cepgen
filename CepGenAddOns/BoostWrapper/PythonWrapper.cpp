@@ -41,6 +41,9 @@ namespace {
 
     py::class_<cepgen::strfun::Parameterisation, py::bases<cepgen::Steerable>, boost::noncopyable>(
         "_StructureFunctions", "nucleon structure functions modelling", py::no_init)
+        .add_static_property("name",
+                             py::make_function(&cepgen::strfun::Parameterisation::name,
+                                               py::return_value_policy<py::copy_const_reference>()))
         .def("F2", &cepgen::strfun::Parameterisation::F2)
         .def("FL", &cepgen::strfun::Parameterisation::FL)
         .def("F1", &cepgen::strfun::Parameterisation::F1);

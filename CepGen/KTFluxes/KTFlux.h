@@ -37,8 +37,7 @@ namespace cepgen {
 
   protected:
     /// Minimal value taken for a \f$\k_{\rm T}\f$-factorised flux
-    static constexpr double kMinKTFlux = 1.e-20;
-    virtual double mass2() const { return 0.; }
+    static constexpr double kMinKTFlux{1.e-20};
 
     struct Q2Values {
       double min{0.}, q2{0.};

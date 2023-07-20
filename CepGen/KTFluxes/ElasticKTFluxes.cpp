@@ -78,20 +78,21 @@ namespace cepgen {
     }
   };
 
-  class BudnevElasticElectronKTFlux final : public BudnevElasticNucleonKTFlux {
+  class BudnevElasticLeptonKTFlux final : public BudnevElasticNucleonKTFlux {
   public:
-    explicit BudnevElasticElectronKTFlux(const ParametersList& params)
-        : BudnevElasticNucleonKTFlux(params), me2_(std::pow(PDG::get().mass(PDG::electron), 2)) {}
+    explicit BudnevElasticLeptonKTFlux(const ParametersList& params)
+        : BudnevElasticNucleonKTFlux(params), ml2_(std::pow(PDG::get().mass(steer<pdgid_t>("pdgId")), 2)) {}
     static ParametersDescription description() {
       auto desc = BudnevElasticNucleonKTFlux::description();
-      desc.setDescription("Electron el. photon emission (Budnev flux)");
+      desc.setDescription("Lepton el. photon emission (Budnev flux)");
       desc.add<ParametersDescription>("formFactors", ParametersDescription().setName<std::string>("PointLikeFermion"));
+      desc.add<pdgid_t>("pdgId", PDG::electron).setDescription("lepton flavour");
       return desc;
     }
-    double mass2() const override { return me2_; }
+    double mass2() const override { return ml2_; }
 
   private:
-    const double me2_;
+    const double ml2_;
   };
 
   class ElasticHeavyIonKTFlux final : public ElasticNucleonKTFlux {
@@ -110,6 +111,7 @@ namespace cepgen {
     }
 
     double mass2() const override { return mass2_; }
+
     double fluxMX2(double x, double kt2, double mx2) const override {
       const auto z = (unsigned short)hi_.Z;
       return z * z * ElasticNucleonKTFlux::fluxMX2(x, kt2, mx2);
@@ -123,5 +125,5 @@ namespace cepgen {
 
 REGISTER_FLUX("ElasticKT", ElasticNucleonKTFlux);
 REGISTER_FLUX("BudnevElasticKT", BudnevElasticNucleonKTFlux);
-REGISTER_FLUX("BudnevElasticElectronKT", BudnevElasticElectronKTFlux);
+REGISTER_FLUX("BudnevElasticLeptonKT", BudnevElasticLeptonKTFlux);
 REGISTER_FLUX("ElasticHeavyIonKT", ElasticHeavyIonKTFlux);

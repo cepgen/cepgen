@@ -20,7 +20,6 @@
 #include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
@@ -45,7 +44,7 @@ namespace cepgen {
     double mass2() const override { return mp2_; }
     pdgid_t partonPdgId() const override { return PDG::photon; }
     double fluxMX2(double x, double kt2, double mx2) const override {
-      if (!x_range_.contains(x))
+      if (!x_range_.contains(x, true))
         return 0.;
       if (mx2 < 0.)
         throw CG_FATAL("InelasticNucleonKTFlux") << "Diffractive mass squared mX^2 should be specified!";
@@ -66,7 +65,7 @@ namespace cepgen {
       return desc;
     }
     double fluxMX2(double x, double kt2, double mx2) const override {
-      if (!x_range_.contains(x))
+      if (!x_range_.contains(x, true))
         return 0.;
       if (mx2 < 0.)
         throw CG_FATAL("InelasticNucleonKTFlux") << "Diffractive mass squared mX^2 should be specified!";

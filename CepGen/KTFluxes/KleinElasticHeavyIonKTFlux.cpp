@@ -47,19 +47,19 @@ namespace cepgen {
     double mass2() const override final { return hi_.A * hi_.A * mp2_; }
     pdgid_t partonPdgId() const override { return PDG::photon; }
 
-    double fluxMX2(double x, double kt2, double) const override final {
+    double fluxQ2(double x, double kt2, double q2) const override final {
       if (!x_range_.contains(x))
         return 0.;
 
-      const auto q2_ela = computeQ2(x, kt2).q2;
-      const auto ff = (*ff_)(q2_ela);
-
-      const double ela1 = pow(kt2 / q2_ela / (1. - x), 2);
+      const auto ff = (*ff_)(q2);
+      const double ela1 = pow(kt2 / q2 / (1. - x), 2);
       const double ela2 = pow(ff.GE, 2);
-      //const double ela3 = kt2 / q2_ela;
+      //const double ela3 = kt2 / q2;
       const auto z = (unsigned short)hi_.Z;
-      return prefactor_ * z * z * ela1 * ela2 / q2_ela;
+      return prefactor_ * z * z * ela1 * ela2 / q2;
     }
+
+    double fluxMX2(double x, double kt2, double) const override final { return fluxQ2(x, kt2, computeQ2(x, kt2).q2); }
 
   private:
     const HeavyIon hi_;
