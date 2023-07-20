@@ -39,10 +39,10 @@ using namespace std;
 int main(int argc, char* argv[]) {
   vector<string> fluxes_names;
   int num_points;
-  double kt2, mx;
+  double kt2, mx, q2;
   string output_file, plotter;
   bool logx, logy, draw_grid, normalised;
-  cepgen::Limits x_range, y_range, q2_range;
+  cepgen::Limits x_range, y_range;
 
   cepgen::initialise();
 
@@ -50,9 +50,9 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument(
           "fluxes,f", "parton fluxe modellings", &fluxes_names, cepgen::PartonFluxFactory::get().modules())
       .addOptionalArgument("mx,M", "diffractive mass (GeV)", &mx, 1.5)
+      .addOptionalArgument("q2,q", "parton virtuality (GeV^2)", &q2, -1.)
       .addOptionalArgument("xrange,x", "fractional loss range", &x_range, cepgen::Limits{0., 1.})
       .addOptionalArgument("yrange,y", "y range", &y_range)
-      .addOptionalArgument("q2range,q", "parton virtuality range (GeV^2)", &q2_range, cepgen::Limits{0., 1000.})
       .addOptionalArgument("kt2,k", "parton transverse virtuality (GeV^2)", &kt2, 100.)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 100)
       .addOptionalArgument("output,o", "output file name", &output_file, "flux.scan.output.txt")
@@ -63,6 +63,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("normalised", "plot xf(x) instead of f(x)", &normalised, false)
       .parse();
 
+  const bool plot_vs_q2 = (q2 > 0.);
   const double mx2 = mx * mx;
   if (logx && x_range.min() == 0.)
     x_range.min() = 1.e-3;
@@ -84,12 +85,14 @@ int main(int argc, char* argv[]) {
   for (const auto& x : x_range.generate(num_points)) {
     out << "\n" << x;
     for (size_t j = 0; j < fluxes.size(); ++j) {
+      double flux{0.};
       if (fluxes.at(j)->ktFactorised()) {
-        const auto flux =
-            dynamic_cast<const cepgen::KTFlux&>(*fluxes.at(j)).fluxMX2(x, kt2, mx2) * (normalised ? x : 1.);
-        out << "\t" << flux;
-        graph_flux.at(j).addPoint(x, flux);
+        const auto& eval = dynamic_cast<const cepgen::KTFlux&>(*fluxes.at(j));
+        flux = plot_vs_q2 ? eval.fluxQ2(x, kt2, q2) : eval.fluxMX2(x, kt2, mx2);
       }
+      flux *= (normalised ? x : 1.);
+      out << "\t" << flux;
+      graph_flux.at(j).addPoint(x, flux);
     }
   }
   out.close();
@@ -108,12 +111,16 @@ int main(int argc, char* argv[]) {
 
     for (auto& gr : graph_flux) {
       gr.xAxis().setLabel("$\\xi$");
-      gr.yAxis().setLabel(normalised ? "$\\xi\\varphi_{T}(\\xi, k_{T}^{2})" : "$\\varphi_{T}(\\xi, k_{T}^{2})$");
+      gr.yAxis().setLabel(normalised ? "$\\xi\\varphi(\\xi, k_{T}^{2})$" : "$\\varphi(\\xi, k_{T}^{2}])$");
       if (y_range.valid())
         gr.yAxis().setRange(y_range);
       coll.emplace_back(&gr);
     }
-    plt->draw(coll, "comp_partonflux", cepgen::utils::format("$k_{T}^{2}$ = %g GeV$^{2}$", kt2), dm);
+    plt->draw(coll,
+              "comp_partonflux",
+              plot_vs_q2 ? cepgen::utils::format("$Q^{2}$ = %g GeV$^{2}$", q2)
+                         : cepgen::utils::format("$k_{T}^{2}$ = %g GeV$^{2}$", kt2),
+              dm);
   }
 
   return 0;
