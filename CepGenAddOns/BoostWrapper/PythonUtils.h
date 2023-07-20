@@ -47,9 +47,9 @@ namespace py = boost::python;
 
 template <class T>
 py::list std_vector_to_py_list(const std::vector<T>& vec) {
-  py::list lst;
-  std::for_each(vec.begin(), vec.end(), [&](const auto& t) { lst.append(t); });
-  return lst;
+  py::list list;
+  std::for_each(vec.begin(), vec.end(), [&list](const auto& t) { list.append(t); });
+  return list;
 }
 
 template <class T>
@@ -58,6 +58,11 @@ std::vector<T> py_list_to_std_vector(const py::list& list) {
   for (ssize_t i = 0; i < py::len(list); ++i)
     vec.emplace_back(py::extract<T>(list[i]));
   return vec;
+}
+
+template <class T>
+py::tuple std_vector_to_py_tuple(const std::vector<T>& vec) {
+  return py::tuple(std_vector_to_py_list(vec));
 }
 
 cepgen::ParametersList py_dict_to_plist(const py::dict&);

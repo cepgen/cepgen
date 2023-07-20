@@ -21,6 +21,7 @@
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
 #include "CepGenAddOns/BoostWrapper/PythonUtils.h"
 
 namespace {
@@ -48,6 +49,20 @@ namespace {
                    int,
                    "StructureFunctionsFactory",
                    "a structure functions evaluator objects factory");
+
+    py::class_<cepgen::sigrat::Parameterisation, py::bases<cepgen::Steerable>, boost::noncopyable>(
+        "_SigmaRatio", "L/T cross section ratio modelling", py::no_init)
+        .def(
+            "__call__", +[](const cepgen::sigrat::Parameterisation& par, double xbj, double q2) {
+              double unc{0.};
+              const auto sig_rat = par(xbj, q2, unc);
+              return std_vector_to_py_tuple(std::vector<double>{sig_rat, unc});
+            });
+
+    EXPOSE_FACTORY(cepgen::SigmaRatiosFactory,
+                   int,
+                   "SigmaRatiosFactory",
+                   "a longitudinal-to-transverse cross section ratio evaluator objects factory");
 
     py::class_<cepgen::formfac::Parameterisation, py::bases<cepgen::Steerable>, boost::noncopyable>(
         "_FormFactors", "nucleon electromagnetic form factors modelling", py::no_init)
