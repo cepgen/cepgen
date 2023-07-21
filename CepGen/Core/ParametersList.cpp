@@ -203,7 +203,12 @@ namespace cepgen {
             set<bool>(key, false);
           else if (value_lc == "on" || value_lc == "yes" || value_lc == "true")
             set<bool>(key, true);
-          else
+          else if (value.find('>') != std::string::npos) {
+            const auto limits = utils::split(value, '>');
+            if (limits.size() != 2)
+              throw CG_FATAL("ParametersList:feed") << "Failed to parse limits value '" << value << "'.";
+            set<Limits>(key, Limits{std::stod(limits.at(0)), std::stod(limits.at(1))});
+          } else
             set<std::string>(key, value);
         }
       } else
