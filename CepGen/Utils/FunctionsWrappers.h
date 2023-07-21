@@ -50,6 +50,7 @@ namespace cepgen {
       }
 
       operator const std::function<double(double)>&() { return func_; }
+      operator const std::function<double(double, void*)>&() { return func_obj_; }
 
     private:
       /// Reference to the parameters-less functor
