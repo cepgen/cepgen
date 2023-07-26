@@ -36,7 +36,8 @@ namespace cepgen {
           : Parameterisation(params),
             sf_(StructureFunctionsFactory::get().build(steer<ParametersList>("structureFunctions"))),
             integr_(AnalyticIntegratorFactory::get().build(steer<ParametersList>("integrator"))),
-            xbj_range_(steer<Limits>("xbjRange")) {}
+            xbj_range_(steer<Limits>("xbjRange")),
+            xbjm3_range_(std::pow(xbj_range_.max(), -3), std::min(1.e9, std::pow(xbj_range_.min(), -3))) {}
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
@@ -49,14 +50,19 @@ namespace cepgen {
 
     protected:
       void compute() override {
-        setFEFM(integr_->integrate([this](double xbj) { return sf_->F2(xbj, q2_) * std::pow(xbj, -1); }, xbj_range_),
-                integr_->integrate([this](double xbj) { return sf_->F2(xbj, q2_) * std::pow(xbj, -3); }, xbj_range_));
+        setFEFM(integr_->integrate([this](double xbj) { return sf_->F2(xbj, q2_) / xbj; }, xbj_range_),
+                integr_->integrate(
+                    [this](double xbjm3) {
+                      const auto xbj = 1. / std::cbrt(xbjm3);
+                      return sf_->F2(xbj, q2_) * xbj / 3.;
+                    },
+                    xbjm3_range_));
       }
 
     private:
       const std::unique_ptr<strfun::Parameterisation> sf_;
       const std::unique_ptr<AnalyticIntegrator> integr_;
-      const Limits xbj_range_;
+      const Limits xbj_range_, xbjm3_range_;
     };
   }  // namespace formfac
 }  // namespace cepgen
