@@ -41,11 +41,9 @@ namespace cepgen {
       }
 
     protected:
-      FormFactors compute(double q2) override {
-        FormFactors out;
-        out.GE = pow(1. + q2 * inv_sq_scale_param_, -2.);
-        out.GM = MU * out.GE;
-        return out;
+      void compute() override {
+        const auto ge = pow(1. + q2_ * inv_sq_scale_param_, -2.);
+        setGEGM(ge, MU * ge);
       }
 
     private:
@@ -69,28 +67,27 @@ namespace cepgen {
       }
 
     private:
-      FormFactors compute(double q2) override {
-        if (hi_ == HeavyIon::proton())
-          return StandardDipole::compute(q2);
-        if ((short)hi_.Z < 7) {  // Gaussian form factor for light nuclei
-          FormFactors out;
-          out.GE = exp(-a_ * a_ * q2 / 6.);
-          out.GM = MU * out.GE;
-          return out;
+      void compute() override {
+        if (hi_ == HeavyIon::proton()) {
+          StandardDipole::compute();
+          return;
         }
-        const double qr = sqrt(q2) * a_, inv_qr = 1. / qr;
+        if ((short)hi_.Z < 7) {  // Gaussian form factor for light nuclei
+          const auto ge = exp(-a_ * a_ * q2_ / 6.);
+          setGEGM(ge, MU * ge);
+          return;
+        }
+        const double qr = sqrt(q2_) * a_, inv_qr = 1. / qr;
         const double sph = (sin(qr) - qr * cos(qr)) * 3. * inv_qr * inv_qr * inv_qr;
-        FormFactors out;
-        out.GE = sph / (1. + q2 * a02_);
-        out.GM = MU * out.GE;
-        return out;
+        const auto ge = sph / (1. + q2_ * a02_);
+        setGEGM(ge, MU * ge);
       }
       const HeavyIon hi_;
       const double a_, a0_, a02_;
     };
   }  // namespace formfac
 }  // namespace cepgen
-typedef cepgen::formfac::StandardDipole DipoleFF;
-typedef cepgen::formfac::HeavyIonDipole HIDipoleFF;
-REGISTER_FORMFACTORS(cepgen::formfac::gFFStandardDipoleHandler, DipoleFF);
-REGISTER_FORMFACTORS("HeavyIonDipole", HIDipoleFF);
+using cepgen::formfac::HeavyIonDipole;
+using cepgen::formfac::StandardDipole;
+REGISTER_FORMFACTORS(cepgen::formfac::gFFStandardDipoleHandler, StandardDipole);
+REGISTER_FORMFACTORS("HeavyIonDipole", HeavyIonDipole);

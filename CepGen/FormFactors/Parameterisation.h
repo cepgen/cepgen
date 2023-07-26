@@ -54,15 +54,21 @@ namespace cepgen {
       static constexpr double MU = 2.79;
 
       /// Local form factors evaluation method
-      virtual FormFactors compute(double) { return FormFactors{}; }
+      virtual void compute() = 0;
+      /// Set the form factors directly
+      void setFEFM(double fe, double fm);
+      /// Set the Sachs form factors
+      void setGEGM(double ge, double gm);
 
       const pdgid_t pdg_id_;  ///< Incoming beam
       const double mass2_;    ///< Incoming beam squared mass
       const double mp_;       ///< Proton mass, in GeV/c\f$^2\f$
       const double mp2_;      ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
 
-    private:
-      std::pair<double, FormFactors> last_value_{-1., FormFactors{}};
+      /// Virtuality at which the form factors are evaluated
+      double q2_{-1.};
+      /// Last form factors computed
+      FormFactors last_ff_{};
     };
     std::ostream& operator<<(std::ostream&, const FormFactors&);
   }  // namespace formfac

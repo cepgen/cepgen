@@ -31,7 +31,7 @@ namespace cepgen {
       static ParametersDescription description();
 
     private:
-      FormFactors compute(double q2) override;
+      void compute() override;
 
       const double a1rho_, a2rho_, b1rho_, b2rho_, c1rho_, c2rho_, d1rho_, d2rho_;
       const double inv_q20_;
@@ -53,31 +53,28 @@ namespace cepgen {
           lambda_sq_(steer<double>("lambdaSq")),
           gamma_(steer<double>("gamma")) {}
 
-    FormFactors MergellEtAl::compute(double q2) {
-      const double log1 = std::pow(log((lambda_sq_ + q2) * inv_q20_), -gamma_);  // L(t=-q2) function in ref.
+    void MergellEtAl::compute() {
+      const double log1 = std::pow(log((lambda_sq_ + q2_) * inv_q20_), -gamma_);  // L(t=-q2) function in ref.
 
       // best fit parameterisation
-      const double d1_1 = 0.611 + q2, d2_1 = 1.039 + q2, d3_1 = 2.560 + q2;
+      const double d1_1 = 0.611 + q2_, d2_1 = 1.039 + q2_, d3_1 = 2.560 + q2_;
       const double Fs1 = (9.464 / d1_1 - 9.054 / d2_1 - 0.410 / d3_1) * log1;
       const double Fs2 = (-1.549 / d1_1 + 1.985 / d2_1 - 0.436 / d3_1) * log1;
 
       const double log2 = std::pow(log((lambda_sq_ - 0.500) * inv_q20_), +gamma_);
       const double log3 = std::pow(log((lambda_sq_ - 0.400) * inv_q20_), +gamma_);
 
-      const double d1_2 = 2.103 + q2, d2_2 = 2.734 + q2, d3_2 = 2.835 + q2;
-      const double Fv1 = (0.5 * (a1rho_ * log2 + b1rho_ * log3 * std::pow(1. + q2 / c1rho_, -2)) / (1. + q2 / d1rho_) -
-                          38.885 / d1_2 + 425.007 / d2_2 - 389.742 / d3_2) *
-                         log1;
-      const double Fv2 = (0.5 * (a2rho_ * log2 + b2rho_ * log3 / (1. + q2 / c2rho_)) / (1. + q2 / d2rho_) -
+      const double d1_2 = 2.103 + q2_, d2_2 = 2.734 + q2_, d3_2 = 2.835 + q2_;
+      const double Fv1 =
+          (0.5 * (a1rho_ * log2 + b1rho_ * log3 * std::pow(1. + q2_ / c1rho_, -2)) / (1. + q2_ / d1rho_) -
+           38.885 / d1_2 + 425.007 / d2_2 - 389.742 / d3_2) *
+          log1;
+      const double Fv2 = (0.5 * (a2rho_ * log2 + b2rho_ * log3 / (1. + q2_ / c2rho_)) / (1. + q2_ / d2rho_) -
                           73.535 / d1_2 + 83.211 / d2_2 - 29.467 / d3_2) *
                          log1;
 
       const double F1 = Fv1 + Fs1, F2 = Fv2 + Fs2;
-
-      FormFactors out;
-      out.GE = F1 - tau(q2) * F2;
-      out.GM = F1 + F2;
-      return out;
+      setGEGM(F1 - tau(q2_) * F2, F1 + F2);
     }
 
     ParametersDescription MergellEtAl::description() {
@@ -98,5 +95,5 @@ namespace cepgen {
     }
   }  // namespace formfac
 }  // namespace cepgen
-typedef cepgen::formfac::MergellEtAl MergellEtAl;
+using cepgen::formfac::MergellEtAl;
 REGISTER_FORMFACTORS("Mergell", MergellEtAl);

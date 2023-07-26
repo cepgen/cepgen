@@ -38,13 +38,9 @@ namespace cepgen {
     }
 
     const FormFactors& Parameterisation::operator()(double q2) {
-      last_value_.first = q2;
-      auto& ff = last_value_.second;
-      ff = compute(q2);
-      const double GE2 = ff.GE * ff.GE, GM2 = ff.GM * ff.GM;
-      ff.FE = (4. * mass2_ * GE2 + q2 * GM2) / (4. * mass2_ + q2);
-      ff.FM = GM2;
-      return ff;
+      q2_ = q2;
+      compute();
+      return last_ff_;
     }
 
     ParametersDescription Parameterisation::description() {
@@ -54,14 +50,29 @@ namespace cepgen {
       return desc;
     }
 
+    void Parameterisation::setFEFM(double fe, double fm) {
+      last_ff_.FE = fe;
+      last_ff_.FM = fm;
+      const double tau = 0.25 * q2_ / mass2_;
+      last_ff_.GM = std::sqrt(last_ff_.FM);
+      last_ff_.GE = std::sqrt((1. + tau) * last_ff_.FE - tau * last_ff_.FM);
+    }
+
+    void Parameterisation::setGEGM(double ge, double gm) {
+      last_ff_.GE = ge;
+      last_ff_.GM = gm;
+      last_ff_.FM = last_ff_.GM * last_ff_.GM;
+      last_ff_.FE = (4. * mass2_ * last_ff_.GE * last_ff_.GE + q2_ * last_ff_.FM) / (4. * mass2_ + q2_);
+    }
+
     //------------------------------------------------------------------
 
     std::ostream& operator<<(std::ostream& os, const Parameterisation* ff) {
       if (!ff)
         return os << "[uninitialised form factors]";
       os << ff->name();
-      if (ff->last_value_.first >= 0.)
-        os << "(Q²=" << ff->last_value_.first << " GeV²): " << ff->last_value_.second;
+      if (ff->q2_ >= 0.)
+        os << "(Q²=" << ff->q2_ << " GeV²): " << ff->last_ff_;
       return os;
     }
 
