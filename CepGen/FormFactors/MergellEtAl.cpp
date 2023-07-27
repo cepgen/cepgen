@@ -31,7 +31,7 @@ namespace cepgen {
       static ParametersDescription description();
 
     private:
-      void compute() override;
+      void eval() override;
 
       const double a1rho_, a2rho_, b1rho_, b2rho_, c1rho_, c2rho_, d1rho_, d2rho_;
       const double inv_q20_;
@@ -53,7 +53,7 @@ namespace cepgen {
           lambda_sq_(steer<double>("lambdaSq")),
           gamma_(steer<double>("gamma")) {}
 
-    void MergellEtAl::compute() {
+    void MergellEtAl::eval() {
       const double log1 = std::pow(log((lambda_sq_ + q2_) * inv_q20_), -gamma_);  // L(t=-q2) function in ref.
 
       // best fit parameterisation

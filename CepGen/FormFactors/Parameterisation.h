@@ -39,8 +39,6 @@ namespace cepgen {
       static ParametersDescription description();
 
       /// Dumping operator for standard output streams
-      friend std::ostream& operator<<(std::ostream&, const Parameterisation*);
-      /// Dumping operator for standard output streams
       friend std::ostream& operator<<(std::ostream&, const Parameterisation&);
 
       /// \f$\tau=Q^2/4m_p^2\f$ variable definition
@@ -54,7 +52,7 @@ namespace cepgen {
       static constexpr double MU = 2.79;
 
       /// Local form factors evaluation method
-      virtual void compute() = 0;
+      virtual void eval() = 0;
       /// Set the form factors directly
       void setFEFM(double fe, double fm);
       /// Set the Sachs form factors
@@ -68,7 +66,7 @@ namespace cepgen {
       /// Virtuality at which the form factors are evaluated
       double q2_{-1.};
       /// Last form factors computed
-      FormFactors last_ff_{};
+      FormFactors ff_{};
     };
     std::ostream& operator<<(std::ostream&, const FormFactors&);
   }  // namespace formfac

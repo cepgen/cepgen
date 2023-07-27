@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2017-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,9 +32,25 @@ namespace cepgen {
     /// \note This code was provided on 2016-04-13 by Silvano Simula and reflects the parameterisation used in \cite Osipenko:2003bu (CLAS) and described in \cite Ricco:1998yr.
     class CLAS : public Parameterisation {
     public:
-      explicit CLAS(const ParametersList&);
+      explicit CLAS(const ParametersList& params) : Parameterisation(params), mpi0_(PDG::get().mass(PDG::piZero)) {
+        const auto& model = steer<std::string>("model");
+        if (model == "proton")
+          mod_params_ = Parameters::standard_proton();
+        else if (model == "neutron")
+          mod_params_ = Parameters::standard_neutron();
+        else if (model == "deuteron")
+          mod_params_ = Parameters::standard_deuteron();
+        else
+          throw CG_FATAL("CLAS") << "Invalid modelling selected: " << model << "!";
+      }
 
-      static ParametersDescription description();
+      static ParametersDescription description() {
+        auto desc = Parameterisation::description();
+        desc.setDescription("CLAS (nucleon data, Q^2 > 0.5 GeV2 / xBj > 0.15)");
+        desc.add<std::string>("model", "proton")
+            .setDescription("Nucleon modelling ('proton', 'deuteron', or 'neutron' handled)");
+        return desc;
+      }
 
       /// List of steering parameters for a physics case
       struct Parameters {
@@ -61,7 +77,13 @@ namespace cepgen {
         std::vector<Resonance> resonances;
       };
 
-      CLAS& eval(double xbj, double q2) override;
+      void eval() override {
+        const double w2 = utils::mX2(args_.xbj, args_.q2, mp2_), w = sqrt(w2);
+        if (w < mx_min_)
+          return;
+        const auto rb = resbkg(args_.q2, w);
+        setF2(f2slac(args_.xbj, args_.q2) * (rb.first + rb.second));
+      }
 
     private:
       /// \brief Method to evaluate the background/resonance terms of
@@ -172,28 +194,6 @@ namespace cepgen {
       return params;
     }
 
-    CLAS::CLAS(const ParametersList& params) : Parameterisation(params), mpi0_(PDG::get().mass(PDG::piZero)) {
-      const auto& model = steer<std::string>("model");
-      if (model == "proton")
-        mod_params_ = Parameters::standard_proton();
-      else if (model == "neutron")
-        mod_params_ = Parameters::standard_neutron();
-      else if (model == "deuteron")
-        mod_params_ = Parameters::standard_deuteron();
-      else
-        throw CG_FATAL("CLAS") << "Invalid modelling selected: " << model << "!";
-    }
-
-    CLAS& CLAS::eval(double xbj, double q2) {
-      const double w2 = utils::mX2(xbj, q2, mp2_), w = sqrt(w2);
-      if (w < mx_min_)
-        return *this;
-
-      const auto rb = resbkg(q2, w);
-      setF2(f2slac(xbj, q2) * (rb.first + rb.second));
-      return *this;
-    }
-
     double CLAS::f2slac(double xbj, double q2) const {
       if (xbj >= 1.)
         return 0.;
@@ -265,15 +265,7 @@ namespace cepgen {
 
       return std::make_pair(f2bkg, f2resn);
     }
-
-    ParametersDescription CLAS::description() {
-      auto desc = Parameterisation::description();
-      desc.setDescription("CLAS (nucleon data, Q^2 > 0.5 GeV2 / xBj > 0.15)");
-      desc.add<std::string>("model", "proton")
-          .setDescription("Nucleon modelling ('proton', 'deuteron', or 'neutron' handled)");
-      return desc;
-    }
   }  // namespace strfun
 }  // namespace cepgen
-typedef cepgen::strfun::CLAS CLAS;
+using cepgen::strfun::CLAS;
 REGISTER_STRFUN(103, CLAS);

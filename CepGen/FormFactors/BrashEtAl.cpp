@@ -41,7 +41,7 @@ namespace cepgen {
       static ParametersDescription description();
 
     private:
-      void compute() override {
+      void eval() override {
         if (q2_ > max_q2_)
           CG_WARNING("BrashEtAl") << "Q² = " << q2_ << " > " << max_q2_ << " GeV² = max(Q²).\n\t"
                                   << "Brash et al. FF parameterisation not designed for high-Q² values.";

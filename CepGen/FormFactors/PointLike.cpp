@@ -27,7 +27,7 @@ namespace cepgen {
           : Parameterisation(params), fe_(fe), fm_(fm) {}
 
     private:
-      void compute() override { setFEFM(fe_, fm_); }
+      void eval() override { setFEFM(fe_, fm_); }
       const double fe_, fm_;
     };
 

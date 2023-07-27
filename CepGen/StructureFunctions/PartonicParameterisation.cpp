@@ -24,7 +24,10 @@ namespace cepgen {
     constexpr std::array<short, 6> PartonicParameterisation::Q_TIMES_3, PartonicParameterisation::QUARK_PDGS;
 
     PartonicParameterisation::PartonicParameterisation(const ParametersList& params)
-        : Parameterisation(params), num_flavours_(steer<int>("numFlavours")), mode_(steerAs<int, Mode>("mode")) {}
+        : Parameterisation(params), num_flavours_(steer<int>("numFlavours")), mode_(steerAs<int, Mode>("mode")) {
+      if (num_flavours_ == 0 || num_flavours_ > QUARK_PDGS.size())
+        throw CG_FATAL("Partonic") << "Invalid number of flavours (" << num_flavours_ << " selected.";
+    }
 
     ParametersDescription PartonicParameterisation::description() {
       auto desc = Parameterisation::description();
@@ -34,15 +37,12 @@ namespace cepgen {
       return desc;
     }
 
-    PartonicParameterisation& PartonicParameterisation::eval(double xbj, double q2) {
-      if (num_flavours_ == 0 || num_flavours_ > QUARK_PDGS.size()) {
-        CG_WARNING("Partonic") << "Invalid number of flavours (" << num_flavours_ << " selected.";
-        return *this;
-      }
+    void PartonicParameterisation::eval() {
       double f2 = 0.;
       for (int i = 0; i < num_flavours_; ++i) {
         const double prefactor = 1. / 9. * Q_TIMES_3.at(i) * Q_TIMES_3.at(i);
-        const double xq = evalxQ2(QUARK_PDGS.at(i), xbj, q2), xqbar = evalxQ2(-QUARK_PDGS.at(i), xbj, q2);
+        const double xq = evalxQ2(QUARK_PDGS.at(i), args_.xbj, args_.q2),
+                     xqbar = evalxQ2(-QUARK_PDGS.at(i), args_.xbj, args_.q2);
         switch (mode_) {
           case Mode::full:
             f2 += prefactor * (xq + xqbar);
@@ -56,7 +56,6 @@ namespace cepgen {
         }
       }
       setF2(f2);
-      return *this;
     }
 
     std::ostream& operator<<(std::ostream& os, const strfun::PartonicParameterisation::Mode& mode) {

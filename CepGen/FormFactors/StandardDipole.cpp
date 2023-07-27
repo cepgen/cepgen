@@ -41,7 +41,7 @@ namespace cepgen {
       }
 
     protected:
-      void compute() override {
+      void eval() override {
         const auto ge = pow(1. + q2_ * inv_sq_scale_param_, -2.);
         setGEGM(ge, MU * ge);
       }
@@ -67,9 +67,9 @@ namespace cepgen {
       }
 
     private:
-      void compute() override {
+      void eval() override {
         if (hi_ == HeavyIon::proton()) {
-          StandardDipole::compute();
+          StandardDipole::eval();
           return;
         }
         if ((short)hi_.Z < 7) {  // Gaussian form factor for light nuclei

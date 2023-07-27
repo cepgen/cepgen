@@ -41,7 +41,7 @@ namespace cepgen {
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
-        desc.setDescription("Proton inelastic form factors");
+        desc.setDescription("Proton inelastic (SF)");
         desc.add<ParametersDescription>("structureFunctions", ParametersDescription().setName<int>(11));
         desc.add<ParametersDescription>("integrator", ParametersDescription().setName<std::string>("gsl"));
         desc.add<Limits>("xbjRange", Limits{1.e-9, 1.});
@@ -49,7 +49,7 @@ namespace cepgen {
       }
 
     protected:
-      void compute() override {
+      void eval() override {
         setFEFM(integr_->integrate([this](double xbj) { return sf_->F2(xbj, q2_) / xbj; }, xbj_range_),
                 integr_->integrate(
                     [this](double xbjm3) {

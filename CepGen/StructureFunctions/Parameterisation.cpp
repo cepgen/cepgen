@@ -39,7 +39,7 @@ namespace cepgen {
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
           mx_min_(mp_ + PDG::get().mass(PDG::piPlus)),
-          old_vals_(sf.old_vals_),
+          args_(sf.args_),
           r_ratio_(sf.r_ratio_),
           f2_(sf.f2_),
           fl_(sf.fl_),
@@ -62,21 +62,22 @@ namespace cepgen {
       f2_ = sf.f2_, fl_ = sf.fl_;
       w1_ = sf.w1_, w2_ = sf.w2_;
       fe_ = sf.fe_, fm_ = sf.fm_;
-      old_vals_ = sf.old_vals_;
+      args_ = sf.args_;
       return *this;
     }
 
     Parameterisation& Parameterisation::operator()(double xbj, double q2) {
       const auto args = Arguments{xbj, q2};
-      if (args == old_vals_)
+      if (args == args_)
         return *this;
       clear();
       if (!args.valid()) {
         CG_WARNING("StructureFunctions") << "Invalid range for Q² = " << q2 << " or xBj = " << xbj << ".";
         return *this;
       }
-      old_vals_ = args;
-      return eval(xbj, q2);
+      args_ = args;
+      eval();
+      return *this;
     }
 
     Parameterisation& Parameterisation::clear() {
@@ -105,15 +106,10 @@ namespace cepgen {
       return 0.5 * (gamma2(xbj, q2) * F2(xbj, q2) - FL(xbj, q2)) / xbj;
     }
 
-    Parameterisation& Parameterisation::eval(double, double) {
-      CG_WARNING("StructureFunctions") << "Evaluation method called on base object!";
-      return *this;
-    }
-
     Parameterisation& Parameterisation::setF1F2(double f1, double f2) {
       return (*this)
           .setF2(f2)  // trivial
-          .setFL(gamma2(old_vals_.xbj, old_vals_.q2) * f2_ - 2. * f1 * old_vals_.xbj);
+          .setFL(gamma2(args_.xbj, args_.q2) * f2_ - 2. * f1 * args_.xbj);
     }
 
     Parameterisation& Parameterisation::setF2(double f2) {
@@ -164,10 +160,10 @@ namespace cepgen {
       return *this;
     }
 
-    std::ostream& operator<<(std::ostream& os, const Parameterisation* sf) {
-      os << sf->description().description();
-      if (sf->old_vals_.valid())
-        os << " at " << sf->old_vals_ << ": F2 = " << sf->f2_ << ", FL = " << sf->fl_;
+    std::ostream& operator<<(std::ostream& os, const Parameterisation& sf) {
+      os << sf.description().description();
+      if (sf.args_.valid())
+        os << " at " << sf.args_ << ": F2 = " << sf.f2_ << ", FL = " << sf.fl_;
       return os;
     }
 
@@ -182,7 +178,5 @@ namespace cepgen {
           .setDescription("Modelling for the sigma(L/T) ratio used in FL computation from F2");
       return desc;
     }
-
-    std::ostream& operator<<(std::ostream& os, const Parameterisation& sf) { return os << &sf; }
   }  // namespace strfun
 }  // namespace cepgen

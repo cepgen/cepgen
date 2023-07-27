@@ -48,15 +48,14 @@ namespace cepgen {
       static ParametersDescription description();
 
       /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
-      friend std::ostream& operator<<(std::ostream&, const Parameterisation*);
-      /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
       friend std::ostream& operator<<(std::ostream&, const Parameterisation&);
-      /// Human-readable description of this SF parameterisation
 
       /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
       const sigrat::Parameterisation* sigmaRatio() const { return r_ratio_.get(); }
 
       /// Compute all relevant structure functions for a given \f$(x_{\rm Bj},Q^2)\f$ couple
+      /// \param[in] xbj Bjorken's x variable
+      /// \param[in] q2 Squared 4-momentum transfer (in GeV^2)
       Parameterisation& operator()(double /*xbj*/, double /*q2*/);
       /// Transverse structure function
       double F2(double xbj, double q2);
@@ -81,9 +80,7 @@ namespace cepgen {
 
     protected:
       /// Local structure functions evaluation method
-      /// \param[in] xbj Bjorken's x variable
-      /// \param[in] q2 Squared 4-momentum transfer (in GeV^2)
-      virtual Parameterisation& eval(double xbj, double q2);
+      virtual void eval() = 0;
       /// Compute the longitudinal structure function for a given point
       virtual Parameterisation& computeFL(double xbj, double q2);
       /// Compute the longitudinal structure function for a given point
@@ -109,8 +106,9 @@ namespace cepgen {
       const double mp2_;     ///< Squared proton mass, in GeV^2/c^4
       const double mx_min_;  ///< Minimum diffractive mass, in GeV/c^2
 
+      Arguments args_;  ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed
+
     private:
-      Arguments old_vals_;  ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed
       /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
       std::shared_ptr<sigrat::Parameterisation> r_ratio_;
       double f2_{0.};  ///< Last computed transverse structure function value

@@ -33,7 +33,7 @@ namespace cepgen {
       friend std::ostream& operator<<(std::ostream&, const Mode& mode);
 
       static ParametersDescription description();
-      PartonicParameterisation& eval(double xbj, double q2) override;
+      void eval() override final;
 
     protected:
       virtual double evalxQ2(int flavour, double xbj, double q2) = 0;
@@ -49,4 +49,3 @@ namespace cepgen {
     };
   }  // namespace strfun
 }  // namespace cepgen
-

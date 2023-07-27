@@ -31,7 +31,7 @@ namespace cepgen {
       static ParametersDescription description();
 
     private:
-      void compute() override;
+      void eval() override;
 
       const int mode_;
       std::vector<double> a_e_, b_e_;
@@ -67,7 +67,7 @@ namespace cepgen {
       }
     }
 
-    void ArringtonEtAl::compute() {
+    void ArringtonEtAl::eval() {
       const double tau_val = tau(q2_);
 
       double num_e = 1., den_e = 1.;
