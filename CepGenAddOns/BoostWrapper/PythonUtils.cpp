@@ -36,7 +36,17 @@ cepgen::ParametersList py_dict_to_plist(const py::dict& dict) {
       plist.set<double>(key, py::extract<double>(val_ext()));
     else if (val_type == "dict")
       plist.set<cepgen::ParametersList>(key, py_dict_to_plist(py::extract<py::dict>(val_ext())));
-    else if (val_type == "list") {
+    else if (val_type == "tuple") {
+      const py::tuple& tuple = py::extract<py::tuple>(val_ext());
+      const std::string el_type{py::extract<const char*>(tuple[0].attr("__class__").attr("__name__"))};
+      if (el_type == "float") {
+        const auto items = py_tuple_to_std_vector<double>(py::extract<py::tuple>(val_ext()));
+        if (items.size() == 2)
+          plist.set<cepgen::Limits>(key, cepgen::Limits(items.at(0), items.at(1)));
+      } else
+        throw CG_FATAL("py_dict_to_plist")
+            << "Tuple unpacking is not (yet) handling the Python '" << val_type << "' type for key='" << key << "'.";
+    } else if (val_type == "list") {
       // find the type of list from its first element
       const py::list& list = py::extract<py::list>(val_ext());
       const std::string el_type{py::extract<const char*>(list[0].attr("__class__").attr("__name__"))};
@@ -66,6 +76,10 @@ py::dict plist_to_py_dict(const cepgen::ParametersList& plist) {
     dict.setdefault<std::string, std::string>(key, plist.get<std::string>(key));
   for (const auto& key : plist.keysOf<double>())
     dict.setdefault<std::string, double>(key, plist.get<double>(key));
+  for (const auto& key : plist.keysOf<cepgen::Limits>()) {
+    const auto& lim = plist.get<cepgen::Limits>(key);
+    dict.setdefault<std::string, py::tuple>(key, std_vector_to_py_tuple(std::vector<double>(lim.min(), lim.max())));
+  }
   for (const auto& key : plist.keysOf<cepgen::ParametersList>())
     dict.setdefault<std::string, py::dict>(key, plist_to_py_dict(plist.get<cepgen::ParametersList>(key)));
   for (const auto& key : plist.keysOf<std::vector<int> >())

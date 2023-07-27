@@ -53,6 +53,14 @@ py::list std_vector_to_py_list(const std::vector<T>& vec) {
 }
 
 template <class T>
+std::vector<T> py_tuple_to_std_vector(const py::tuple& tuple) {
+  std::vector<T> vec;
+  for (ssize_t i = 0; i < py::len(tuple); ++i)
+    vec.emplace_back(py::extract<T>(tuple[i]));
+  return vec;
+}
+
+template <class T>
 std::vector<T> py_list_to_std_vector(const py::list& list) {
   std::vector<T> vec;
   for (ssize_t i = 0; i < py::len(list); ++i)
@@ -83,3 +91,4 @@ py::object adapt_unique(std::unique_ptr<T> (C::*fn)(Args...)) {
 }
 
 #endif
+
