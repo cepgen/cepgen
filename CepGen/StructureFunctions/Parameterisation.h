@@ -68,6 +68,17 @@ namespace cepgen {
         friend std::ostream& operator<<(std::ostream&, const Arguments&);
         double xbj{-1.}, q2{-1.};
       };
+      struct Values {
+        void clear() { f2 = 0., fl = 0., w1 = 0., w2 = 0., f2 = 0., fm = 0.; }
+        friend std::ostream& operator<<(std::ostream&, const Values&);
+        double f2{0.};  ///< Last computed transverse structure function value
+        double fl{0.};  ///< Last computed longitudinal structure function value
+        // alternative quantities
+        double w1{0.};  ///< Longitudinal form factor
+        double w2{0.};
+        double fe{0.};  ///< Electric proton form factor
+        double fm{0.};  ///< Magnetic proton form factor
+      };
 
     protected:
       /// Local structure functions evaluation method
@@ -105,14 +116,8 @@ namespace cepgen {
       Arguments args_;  ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed
 
     private:
-      double f2_{0.};  ///< Last computed transverse structure function value
-      double fl_{0.};  ///< Last computed longitudinal structure function value
+      Values vals_;
       bool fl_computed_{false};
-      // alternative quantities
-      double w1_{0.};  ///< Longitudinal form factor
-      double w2_{0.};
-      double fe_{0.};  ///< Electric proton form factor
-      double fm_{0.};  ///< Magnetic proton form factor
     };
   }  // namespace strfun
 }  // namespace cepgen
