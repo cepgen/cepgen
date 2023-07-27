@@ -264,6 +264,8 @@ namespace cepgen {
       //top_label_->Draw();
     }
 
+    /// Set the placement strategy for the legend
+    inline void SetLegendMode(const std::string& mode) { leg_mode_ = mode; }
     /// Set the horizontal coordinate of the low-left part of the legend object
     /// \note To be called before the first legend entry is added
     inline void SetLegendX1(double x) {
@@ -301,9 +303,7 @@ namespace cepgen {
       if (top_label_)
         top_label_->Draw();
       if (leg_) {
-        if (TPad::PlaceBox(leg_.get(), leg_width_, leg_height_, leg_x1_, leg_y1_, "rt")) {
-          leg_x1_ = std::max(0.15, std::min(leg_x1_, 0.85 - leg_width_));
-          leg_y1_ = std::max(0.15, std::min(leg_y1_, 0.85 - leg_height_));
+        if (TPad::PlaceBox(leg_.get(), leg_width_ * 1.15, leg_height_, leg_x1_, leg_y1_, leg_mode_.data())) {
           leg_->SetX1(leg_x1_);
           leg_->SetX2(leg_x1_ + leg_width_);
           leg_->SetY1(leg_y1_);
@@ -316,14 +316,12 @@ namespace cepgen {
     }
     /// Retrieve the legend object (if produced)
     inline TLegend* GetLegend() { return leg_.get(); }
-    inline void Place(TLegend* leg, Option_t* mode = "lt") {
+    inline void Place(TLegend* leg, const Option_t* mode = "lt") {
       if (!leg)
         return;
       double leg_x, leg_y;
       const auto leg_width = leg->GetX2() - leg->GetX1(), leg_height = leg->GetY2() - leg->GetY1();
-      if (TPad::PlaceBox(leg, leg_width, leg_height, leg_x, leg_y, mode)) {
-        leg_x = std::max(0.15, std::min(leg_x, 0.85 - leg_width));
-        leg_y = std::max(0.15, std::min(leg_y, 0.85 - leg_height));
+      if (TPad::PlaceBox(leg, leg_width * 1.15, leg_height, leg_x, leg_y, mode)) {
         leg->SetX1(leg_x);
         leg->SetX2(leg_x + leg_width);
         leg->SetY1(leg_y);
@@ -403,6 +401,7 @@ namespace cepgen {
     }
 
     bool ratio_;
+    std::string leg_mode_{"rt"};
     double leg_x1_{0.5}, leg_y1_{0.75};
     double leg_width_{0.45}, leg_height_{0.15};
     std::unique_ptr<TLegend> leg_;
