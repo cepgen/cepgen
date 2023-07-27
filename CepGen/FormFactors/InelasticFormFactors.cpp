@@ -25,6 +25,7 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/Message.h"
 
@@ -36,33 +37,42 @@ namespace cepgen {
           : Parameterisation(params),
             sf_(StructureFunctionsFactory::get().build(steer<ParametersList>("structureFunctions"))),
             integr_(AnalyticIntegratorFactory::get().build(steer<ParametersList>("integrator"))),
-            xbj_range_(steer<Limits>("xbjRange")),
-            xbjm3_range_(std::pow(xbj_range_.max(), -3), std::min(1.e9, std::pow(xbj_range_.min(), -3))) {}
+            mx_range_(steer<Limits>("mxRange")) {
+        CG_INFO("InelasticFormFactors") << "Inelastic nucleon form factors parameterisation built with:\n"
+                                        << " * structure functions modelling: "
+                                        << steer<ParametersList>("structureFunctions") << "\n"
+                                        << " * integrator algorithm: " << steer<ParametersList>("integrator") << "\n"
+                                        << " * diffractive mass range: " << steer<Limits>("mxRange") << " GeV^2.";
+      }
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Proton inelastic (SF)");
-        desc.add<ParametersDescription>("structureFunctions", ParametersDescription().setName<int>(11));
-        desc.add<ParametersDescription>("integrator", ParametersDescription().setName<std::string>("gsl"));
-        desc.add<Limits>("xbjRange", Limits{1.e-9, 1.});
+        desc.add<ParametersDescription>("structureFunctions", ParametersDescription().setName<int>(301))
+            .setDescription("type of structure functions parameterisation for the dissociative emission");
+        desc.add<ParametersDescription>("integrator", ParametersDescription().setName<std::string>("gsl"))
+            .setDescription("type of numerical integrator algorithm to use");
+        desc.add<Limits>("mxRange", Limits{1., 1000.}).setDescription("diffractive mass range (in GeV/c^2)");
         return desc;
       }
 
     protected:
       void eval() override {
-        setFEFM(integr_->integrate([this](double xbj) { return sf_->F2(xbj, q2_) / xbj; }, xbj_range_),
+        const auto xbj_range = Limits(utils::xBj(q2_, mp2_, mx_range_.max()), utils::xBj(q2_, mp2_, mx_range_.min())),
+                   xbjm3_range = Limits(std::pow(xbj_range.max(), -3), std::pow(xbj_range.min(), -3));
+        setFEFM(integr_->integrate([this](double xbj) { return sf_->F2(xbj, q2_) / xbj; }, xbj_range),
                 integr_->integrate(
                     [this](double xbjm3) {
                       const auto xbj = 1. / std::cbrt(xbjm3);
                       return sf_->F2(xbj, q2_) * xbj / 3.;
                     },
-                    xbjm3_range_));
+                    xbjm3_range));
       }
 
     private:
       const std::unique_ptr<strfun::Parameterisation> sf_;
       const std::unique_ptr<AnalyticIntegrator> integr_;
-      const Limits xbj_range_, xbjm3_range_;
+      const Limits mx_range_;
     };
   }  // namespace formfac
 }  // namespace cepgen
