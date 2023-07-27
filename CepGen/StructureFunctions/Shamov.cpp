@@ -213,52 +213,51 @@ namespace cepgen {
 
     void Shamov::eval() {
       //--- Suri & Yennie structure functions
-      if (mode_ == Mode::SuriYennie) {  // trivial composite case
-        Parameterisation::operator=((*sy_sf_)(args_.xbj, args_.q2));
-        return;
-      }
-
       const double mx2 = utils::mX2(args_.xbj, args_.q2, mp2_), mx = sqrt(mx2);
+      if (mode_ == Mode::SuriYennie) {  // trivial composite case
+        setW1(sy_sf_->W1(args_.xbj, args_.q2));
+        setW2(sy_sf_->W2(args_.xbj, args_.q2));
+      } else {
+        const auto sigma = sigma_grid_.eval({mx});
+        double sgp = sigma[0];  // cross section value at MX
 
-      const auto sigma = sigma_grid_.eval({mx});
-      double sgp = sigma[0];  // cross section value at MX
+        if (mode_ == Mode::RealAndFitNonRes && mx > 1.5)
+          non_resonant_ = true;
+        //if (mx > sigma_grid_.max()[0] || rand() * 1. / RAND_MAX < sigma[1])
+        //  non_resonant_ = true;
 
-      if (mode_ == Mode::RealAndFitNonRes && mx > 1.5)
-        non_resonant_ = true;
-      //if (mx > sigma_grid_.max()[0] || rand() * 1. / RAND_MAX < sigma[1])
-      //  non_resonant_ = true;
+        //--- q^2 dependence of sigma
+        double Gm;
+        if (non_resonant_) {
+          if (mode_ == Mode::RealAndFitNonRes)
+            /// q^2 dependence of the non-resonant gamma-p cross section
+            /// Some fit of the know e-p data. Good only for Q^2 < 6 GeV^2
+            Gm = std::pow(1. + std::pow(args_.q2 / q20_, 2), -r_power_);
+          else
+            Gm = sy_sf_->W1(args_.xbj, args_.q2) / sy_sf_->W1(args_.xbj, lowq2_);
+        } else {                              // resonant
+          if (args_.q2 >= gm_grid_.max()[0])  // above grid range
+            Gm = gm0_ * exp(-gmb_ * args_.q2);
+          else
+            Gm = gm_grid_.eval({args_.q2})[0];
+          Gm /= 3.;  // due to data normalization
+        }
+        sgp *= Gm;  // cross section with some q^2 dependence
 
-      //--- q^2 dependence of sigma
-      double Gm;
-      if (non_resonant_) {
-        if (mode_ == Mode::RealAndFitNonRes)
-          /// q^2 dependence of the non-resonant gamma-p cross section
-          /// Some fit of the know e-p data. Good only for Q^2 < 6 GeV^2
-          Gm = std::pow(1. + std::pow(args_.q2 / q20_, 2), -r_power_);
-        else
-          Gm = sy_sf_->W1(args_.xbj, args_.q2) / sy_sf_->W1(args_.xbj, lowq2_);
-      } else {                              // resonant
-        if (args_.q2 >= gm_grid_.max()[0])  // above grid range
-          Gm = gm0_ * exp(-gmb_ * args_.q2);
-        else
-          Gm = gm_grid_.eval({args_.q2})[0];
-        Gm /= 3.;  // due to data normalization
-      }
-      sgp *= Gm;  // cross section with some q^2 dependence
+        //--- for W -> cross section
+        const double s1 = prefac_ * 4. * mp_ / (mx2 - mp2_);  // mb/GeV
+        const double s2 = prefac_ * (std::pow(mx2 - mp2_, 2) + 2. * (mx2 + mp2_) * args_.q2 + args_.q2 * args_.q2) /
+                          mp_ / args_.q2 / (mx2 - mp2_);  // mb/GeV
+        //---  ratio (\sigma_T+\sigma_L)/\sigma_T according to S & Y
+        const double ratio = (s2 * sy_sf_->W2(args_.xbj, args_.q2)) / (s1 * sy_sf_->W1(args_.xbj, args_.q2));
 
-      //--- for W -> cross section
-      const double s1 = prefac_ * 4. * mp_ / (mx2 - mp2_);  // mb/GeV
-      const double s2 = prefac_ * (std::pow(mx2 - mp2_, 2) + 2. * (mx2 + mp2_) * args_.q2 + args_.q2 * args_.q2) / mp_ /
-                        args_.q2 / (mx2 - mp2_);  // mb/GeV
-      //---  ratio (\sigma_T+\sigma_L)/\sigma_T according to S & Y
-      const double ratio = (s2 * sy_sf_->W2(args_.xbj, args_.q2)) / (s1 * sy_sf_->W1(args_.xbj, args_.q2));
-
-      if (mode_ == Mode::RealAndFitNonRes) {  // transverse sigma only
-        setW1(sgp / s1);
-        setW2(sgp * ratio / s2);
-      } else {  // longitudinal + transverse component for sigma
-        setW1(sgp / ratio / s1);
-        setW2(sgp / s2);
+        if (mode_ == Mode::RealAndFitNonRes) {  // transverse sigma only
+          setW1(sgp / s1);
+          setW2(sgp * ratio / s2);
+        } else {  // longitudinal + transverse component for sigma
+          setW1(sgp / ratio / s1);
+          setW2(sgp / s2);
+        }
       }
       const double nu = 0.5 * (args_.q2 + mx2 - mp2_) / mp_;
       setF2(W2(args_.xbj, args_.q2) * nu / mp_);

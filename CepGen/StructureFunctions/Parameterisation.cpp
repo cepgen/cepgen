@@ -21,49 +21,17 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/StructureFunctions/SigmaRatio.h"
 
 namespace cepgen {
   namespace strfun {
-    Parameterisation::Parameterisation(double f2, double fl)
-        : NamedModule<int>(ParametersList()),
-          mp_(PDG::get().mass(PDG::proton)),
-          mp2_(mp_ * mp_),
-          mx_min_(mp_ + PDG::get().mass(PDG::piZero)),
-          r_ratio_(SigmaRatiosFactory::get().build(4 /* SibirtsevBlunden */)),
-          f2_(f2),
-          fl_(fl) {}
-
-    Parameterisation::Parameterisation(const Parameterisation& sf)
-        : NamedModule<int>(sf.parameters()),
-          mp_(PDG::get().mass(PDG::proton)),
-          mp2_(mp_ * mp_),
-          mx_min_(mp_ + PDG::get().mass(PDG::piPlus)),
-          args_(sf.args_),
-          r_ratio_(sf.r_ratio_),
-          f2_(sf.f2_),
-          fl_(sf.fl_),
-          w1_(sf.w1_),
-          w2_(sf.w2_),
-          fe_(sf.fe_),
-          fm_(sf.fm_) {}
-
     Parameterisation::Parameterisation(const ParametersList& params)
         : NamedModule<int>(params),
+          r_ratio_(SigmaRatiosFactory::get().build(steer<int>("sigmaRatio"))),
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
           mx_min_(mp_ + PDG::get().mass(PDG::piZero)) {
       CG_DEBUG("Parameterisation") << "Structure functions parameterisation to be built using following parameters:\n"
                                    << ParametersDescription(params_).describe(true);
-      r_ratio_ = SigmaRatiosFactory::get().build(steer<int>("sigmaRatio"));
-    }
-
-    Parameterisation& Parameterisation::operator=(const Parameterisation& sf) {
-      f2_ = sf.f2_, fl_ = sf.fl_;
-      w1_ = sf.w1_, w2_ = sf.w2_;
-      fe_ = sf.fe_, fm_ = sf.fm_;
-      args_ = sf.args_;
-      return *this;
     }
 
     Parameterisation& Parameterisation::operator()(double xbj, double q2) {

@@ -23,26 +23,17 @@
 #include <memory>
 
 #include "CepGen/Modules/NamedModule.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
 
 namespace cepgen {
-  namespace sigrat {
-    class Parameterisation;
-  }
   /// Structure functions modelling scope
   namespace strfun {
     /// Base object for the parameterisation of nucleon structure functions
     class Parameterisation : public NamedModule<int> {
     public:
-      /// Standard SF parameterisation constructor
-      explicit Parameterisation(double f2 = 0., double fl = 0.);
-      /// Copy constructor
-      Parameterisation(const Parameterisation&);
       /// User-steered parameterisation object constructor
       explicit Parameterisation(const ParametersList&);
       virtual ~Parameterisation() = default;
-
-      /// Assign from another SF parameterisation object
-      Parameterisation& operator=(const Parameterisation& sf);
 
       /// Generic description for the structure functions
       static ParametersDescription description();
@@ -102,6 +93,11 @@ namespace cepgen {
       /// Dimensionless variable \f$\gamma^2=1+\frac{4x_{\rm Bj}^m_p^2}{Q^2}=1+\tau\f$
       double gamma2(double xbj, double q2) const;
 
+    private:
+      /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
+      const std::unique_ptr<sigrat::Parameterisation> r_ratio_;
+
+    protected:
       const double mp_;      ///< Proton mass, in GeV/c^2
       const double mp2_;     ///< Squared proton mass, in GeV^2/c^4
       const double mx_min_;  ///< Minimum diffractive mass, in GeV/c^2
@@ -109,8 +105,6 @@ namespace cepgen {
       Arguments args_;  ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed
 
     private:
-      /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
-      std::shared_ptr<sigrat::Parameterisation> r_ratio_;
       double f2_{0.};  ///< Last computed transverse structure function value
       double fl_{0.};  ///< Last computed longitudinal structure function value
       bool fl_computed_{false};
