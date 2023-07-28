@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
     x_range.max() -= 1.e-15;
 
   ofstream out(output_file);
-  out << "# parton fluxes: " << cepgen::utils::merge(fluxes_names, ",") << "\n"
+  out << "# parton fluxes: " << cepgen::utils::merge(fluxes_names, ";") << "\n"
       << "# virtuality: " << kt2 << " GeV^2\n"
       << "# diffractive mass: " << mx << " GeV/c2\n"
       << "# fractional momentum loss: " << x_range;

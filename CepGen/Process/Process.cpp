@@ -107,7 +107,6 @@ namespace cepgen {
     double Process::shat() const { return (q1() + q2()).mass2(); }
 
     void Process::clear() {
-      addEventContent();
       //--- initialise the "constant" (wrt x) part of the Jacobian
       base_jacobian_ = 1.;
       mapped_variables_.clear();
@@ -257,7 +256,8 @@ namespace cepgen {
       CG_DEBUG("Process:initialise") << "Preparing to set the kinematics parameters. Input parameters: "
                                      << ParametersDescription(kin_.parameters(false)) << ".";
 
-      clear();  // also resets the "first run" flag
+      addEventContent();
+      clear();  // reset the "first run" flag
 
       // build the coupling objects
       const auto& alpha_em = steer<ParametersList>("alphaEM");

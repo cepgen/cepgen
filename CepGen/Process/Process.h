@@ -132,6 +132,7 @@ namespace cepgen {
       double mp_;   ///< Proton mass, in GeV/c\f$^2\f$
       double mp2_;  ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
 
+    public:
       /// Type of mapping to apply on the variable
       enum class Mapping {
         linear = 0,   ///< a linear \f${\rm d}x\f$ mapping
@@ -148,6 +149,8 @@ namespace cepgen {
       /// \param[in] lim Integration limits
       /// \param[in] description Human-readable description of the variable
       Process& defineVariable(double& out, const Mapping& type, const Limits& lim, const std::string& description = "");
+
+    protected:
       /// Generate and initialise all variables handled by this process
       /// \return Phase space point-dependent component of the Jacobian weight of the point in the phase space for integration
       /// \note To be run at each point computation (therefore, to be optimised!)

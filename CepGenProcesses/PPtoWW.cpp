@@ -87,7 +87,8 @@ public:
 
   static ParametersDescription description() {
     auto desc = Process2to4::description();
-    desc.setDescription("γγ → W⁺W¯ (kt-factor.)");
+    desc.setDescription("γγ → W⁺W¯");
+    desc.add<bool>("ktFactorised", true);
     desc.add<int>("method", 1)
         .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell by Nachtmann et al.)");
     ParametersDescription pol_states;

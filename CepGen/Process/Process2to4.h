@@ -19,12 +19,12 @@
 #ifndef CepGen_Process_Process2to4_h
 #define CepGen_Process_Process2to4_h
 
-#include "CepGen/Process/KTProcess.h"
+#include "CepGen/Process/FactorisedProcess.h"
 
 namespace cepgen {
   namespace proc {
     /// A 2-to-4 (or 2-to-2 central) process
-    class Process2to4 : public KTProcess {
+    class Process2to4 : public FactorisedProcess {
     public:
       /// Initialise a 2-to-4 process
       /// \param[in] params Collection of user-defined steering parameters
@@ -37,7 +37,7 @@ namespace cepgen {
 
       void preparePhaseSpace() override;
       void fillCentralParticlesKinematics() override;
-      double computeKTFactorisedMatrixElement() override;
+      double computeFactorisedMatrixElement() override;
 
       /// Conform all kinematics variables to the user-defined phase space
       virtual void prepareProcessKinematics() = 0;

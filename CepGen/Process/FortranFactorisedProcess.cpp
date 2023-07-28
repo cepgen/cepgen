@@ -22,7 +22,7 @@
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Fortran/KTStructures.h"
-#include "CepGen/Process/FortranKTProcess.h"
+#include "CepGen/Process/FortranFactorisedProcess.h"
 #include "CepGen/Utils/Message.h"
 
 namespace {
@@ -38,7 +38,7 @@ namespace {
 extern "C" {
 /// Print the full list of parameters in the runtime process parameters collection
 void cepgen_list_params_() {
-  CG_LOG << "\t" << cepgen::ParametersDescription(cepgen::proc::FortranKTProcess::kProcParameters).describe(1);
+  CG_LOG << "\t" << cepgen::ParametersDescription(cepgen::proc::FortranFactorisedProcess::kProcParameters).describe(1);
 }
 
 /// Retrieve an integer process parameter from runtime parameters collection
@@ -46,36 +46,36 @@ void cepgen_list_params_() {
 /// \param[in] def Default parameter value if not found in collection
 int cepgen_param_int_(char* pname, int& def) {
   //--- first check if the "integer" is a particle id
-  if (cepgen::proc::FortranKTProcess::kProcParameters.has<cepgen::ParticleProperties>(pname))
-    return cepgen::proc::FortranKTProcess::kProcParameters.get<cepgen::ParticleProperties>(pname).pdgid;
-  if (cepgen::proc::FortranKTProcess::kProcParameters.has<unsigned long long>(pname)) {
+  if (cepgen::proc::FortranFactorisedProcess::kProcParameters.has<cepgen::ParticleProperties>(pname))
+    return cepgen::proc::FortranFactorisedProcess::kProcParameters.get<cepgen::ParticleProperties>(pname).pdgid;
+  if (cepgen::proc::FortranFactorisedProcess::kProcParameters.has<unsigned long long>(pname)) {
     unsigned long long ulong_def = def;
-    return cepgen::proc::FortranKTProcess::kProcParameters.get<unsigned long long>(pname, ulong_def);
+    return cepgen::proc::FortranFactorisedProcess::kProcParameters.get<unsigned long long>(pname, ulong_def);
   }
   //--- if not, proceed with retrieving the integer value
-  return cepgen::proc::FortranKTProcess::kProcParameters.get<int>(pname, def);
+  return cepgen::proc::FortranFactorisedProcess::kProcParameters.get<int>(pname, def);
 }
 
 /// Retrieve a double precision floating point process parameter from runtime parameters collection
 /// \param[in] pname Parameter name string
 /// \param[in] def Default parameter value if not found in collection
 double cepgen_param_real_(char* pname, double& def) {
-  return cepgen::proc::FortranKTProcess::kProcParameters.get<double>(pname, def);
+  return cepgen::proc::FortranFactorisedProcess::kProcParameters.get<double>(pname, def);
 }
 }
 
 namespace cepgen {
   namespace proc {
-    ParametersList FortranKTProcess::kProcParameters;  ///< List of parameters to steer the process
+    ParametersList FortranFactorisedProcess::kProcParameters;  ///< List of parameters to steer the process
 
-    FortranKTProcess::FortranKTProcess(const ParametersList& params, std::function<double(void)> func)
-        : KTProcess(params, {PDG::muon, PDG::muon}), func_(func) {
+    FortranFactorisedProcess::FortranFactorisedProcess(const ParametersList& params, std::function<double(void)> func)
+        : FactorisedProcess(params, {PDG::muon, PDG::muon}), func_(func) {
       constants_.m_p = Process::mp_;
       constants_.units = constants::GEVM2_TO_PB;
       constants_.pi = M_PI;
     }
 
-    void FortranKTProcess::preparePhaseSpace() {
+    void FortranFactorisedProcess::preparePhaseSpace() {
       const auto lim_rap = kinematics().cuts().central.rapidity_single.truncate(Limits{-6., 6.});
       defineVariable(m_y1_, Mapping::linear, lim_rap, "First central particle rapidity");
       defineVariable(m_y2_, Mapping::linear, lim_rap, "Second central particle rapidity");
@@ -153,7 +153,7 @@ namespace cepgen {
       //genparams_.iflux2 = (int)kinematics().incomingBeams().negative().ktFlux();
     }
 
-    double FortranKTProcess::computeKTFactorisedMatrixElement() {
+    double FortranFactorisedProcess::computeFactorisedMatrixElement() {
       //--- set all kinematics variables for this phase space point
       ktkin_.q1t = q1().p();
       ktkin_.q2t = q2().p();
@@ -170,7 +170,7 @@ namespace cepgen {
       return func_();
     }
 
-    void FortranKTProcess::fillCentralParticlesKinematics() {
+    void FortranFactorisedProcess::fillCentralParticlesKinematics() {
       //===========================================================================================
       // outgoing beam remnants
       //===========================================================================================
