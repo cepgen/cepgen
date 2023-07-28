@@ -51,11 +51,10 @@ namespace cepgen {
 
     //--- first-run preparation
     CG_DEBUG("ProcessIntegrand") << "Preparing all variables for a new run.";
-    const auto& kin = process_->kinematics();
-    CG_DEBUG("ProcessIntegrand").log([&](auto& dbg) {
+    CG_DEBUG("ProcessIntegrand").log([this](auto& dbg) {
       dbg << "Run started for " << process_->name() << " process " << std::hex << (void*)process_.get() << std::dec
           << ".\n\t";
-      const auto& beams = kin.incomingBeams();
+      const auto& beams = process_->kinematics().incomingBeams();
       dbg << "Process mode considered: " << beams.mode() << "\n\t"
           << "  positive-z beam: " << beams.positive() << "\n\t"
           << "  negative-z beam: " << beams.negative();

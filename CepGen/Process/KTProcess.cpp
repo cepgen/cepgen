@@ -19,6 +19,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/KTFluxes/KTFlux.h"
+#include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Process/KTProcess.h"
@@ -48,6 +49,32 @@ namespace cepgen {
                                                         kinematics().incomingBeams().negative().daughterId()}
                                             << "\n\t"
                                             << "Produced system: " << produced_parts_ << ".\n\t" << event();
+    }
+
+    void KTProcess::prepareBeams() {
+      auto set_beam_properties = [](Beam& beam) {
+        ParametersList params;
+        switch (beam.mode()) {
+          case Beam::Mode::HIElastic:
+            params.set<ParametersList>("partonFlux",
+                                       PartonFluxFactory::get().describeParameters("ElasticHeavyIonKT").parameters());
+            break;
+          case Beam::Mode::ProtonInelastic:
+            params.set<ParametersList>("partonFlux",
+                                       PartonFluxFactory::get().describeParameters("BudnevInelasticKT").parameters());
+            break;
+          case Beam::Mode::ProtonElastic:
+            params.set<ParametersList>("partonFlux",
+                                       PartonFluxFactory::get().describeParameters("BudnevElasticKT").parameters());
+            break;
+          default:
+            throw CG_FATAL("KTProcess:prepareBeams")
+                << "No fallback strategy defined for beam mode '" << beam.mode() << "'.";
+        }
+        beam.setParameters(params);
+      };
+      set_beam_properties(kinematics().incomingBeams().positive());
+      set_beam_properties(kinematics().incomingBeams().negative());
     }
 
     void KTProcess::prepareKinematics() {

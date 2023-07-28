@@ -51,10 +51,12 @@ namespace cepgen {
     auto plist = params;
     if (std::is_base_of<std::string, I>::value) {
       const auto extra_params = utils::split(utils::to_string(name), '<');
-      plist.setName<std::string>(extra_params.at(0));
-      if (extra_params.size() > 1)
-        for (size_t i = 1; i < extra_params.size(); ++i)
-          plist.feed(extra_params.at(i));
+      if (!extra_params.empty()) {
+        plist.setName<std::string>(extra_params.at(0));
+        if (extra_params.size() > 1)
+          for (size_t i = 1; i < extra_params.size(); ++i)
+            plist.feed(extra_params.at(i));
+      }
     } else
       plist.setName<I>(name);
     return build(plist);

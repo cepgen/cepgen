@@ -45,23 +45,9 @@ namespace cepgen {
   }
 
   void Beam::initialise() {
-    const auto pflux_params = steer<ParametersList>("partonFlux").set("pdgId", pdg_id_);
-    switch (mode_) {
-      case Mode::HIElastic:
-        flux_ = PartonFluxFactory::get().build("ElasticHeavyIonKT", params_ + pflux_params);
-        break;
-      case Mode::ProtonInelastic:
-        flux_ = PartonFluxFactory::get().build("BudnevInelasticKT", params_ + pflux_params);
-        break;
-      case Mode::ProtonElastic:
-        flux_ = PartonFluxFactory::get().build("BudnevElasticKT", params_ + pflux_params);
-        break;
-      default:
-        CG_INFO("Beam:initialise") << "Other beam mode retrieved: '" << mode_
-                                   << "'. Infering from parton flux modelling:\n\t" << pflux_params << ".";
-        flux_ = PartonFluxFactory::get().build(params_ + pflux_params);
-        break;
-    }
+    const auto flux_info = steer<ParametersList>("partonFlux").set("pdgId", pdg_id_);
+    if (!flux_info.name<std::string>().empty())
+      flux_ = PartonFluxFactory::get().build(flux_info);
   }
 
   bool Beam::fragmented() const {
@@ -83,7 +69,7 @@ namespace cepgen {
     desc.addAs<int, pdgid_t>("pdgId", PDG::proton);
     desc.add<double>("pz", 0.);
     desc.addAs<int, Beam::Mode>("mode", Beam::Mode::invalid);
-    desc.add<ParametersDescription>("partonFlux", PartonFluxFactory::get().describeParameters("BudnevElasticKT"));
+    desc.add<ParametersDescription>("partonFlux", ParametersDescription());
     return desc;
   }
 

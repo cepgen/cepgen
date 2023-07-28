@@ -51,6 +51,7 @@ namespace cepgen {
       static ParametersDescription description();
 
     protected:
+      void prepareBeams() override;
       /// Set the kinematics associated to the phase space definition
       void prepareKinematics() override;
       /// Set the kinematics of the central system before any point computation
@@ -92,4 +93,3 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
-

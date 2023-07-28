@@ -57,12 +57,8 @@ namespace cepgen {
 
       /// Copy all process attributes into a new object
       virtual std::unique_ptr<Process> clone() const;
-      /// Set the incoming and outgoing state to be expected in the process
-      inline virtual void addEventContent() = 0;
       /// Compute the phase space point weight
       virtual double computeWeight() = 0;
-      /// Compute the incoming state kinematics
-      virtual void prepareKinematics() {}
       /// Fill the Event object with the particles' kinematics
       /// \param[in] symmetrise Symmetrise the event? (randomise the production of positively- and negatively-charged outgoing central particles)
       virtual void fillKinematics(bool symmetrise = false) = 0;
@@ -95,6 +91,13 @@ namespace cepgen {
       Event* eventPtr();
 
     protected:
+      /// Set the incoming and outgoing state to be expected in the process
+      virtual void addEventContent() = 0;
+      /// Prepare the parton evaluator objects
+      virtual void prepareBeams() {}
+      /// Compute the incoming state kinematics
+      virtual void prepareKinematics() {}
+
       /// Map of all incoming state particles in the process
       typedef std::map<Particle::Role, pdgid_t> IncomingState;
       /// Map of all outgoing particles in the process
@@ -126,11 +129,13 @@ namespace cepgen {
       const Momentum& q1() const;        ///< Positive-z incoming parton's 4-momentum
       double& t1() { return t1_; }       ///< Positive-z incoming parton's squared mass
       double t1() const { return t1_; }  ///< Positive-z incoming parton's squared mass
+      double& x1() { return x1_; }       ///< Positive-z incoming parton's fractional momentum
 
       Momentum& q2();                    ///< Negative-z incoming parton's 4-momentum
       const Momentum& q2() const;        ///< Negative-z incoming parton's 4-momentum
       double& t2() { return t2_; }       ///< Negative-z incoming parton's squared mass
       double t2() const { return t2_; }  ///< Negative-z incoming parton's squared mass
+      double& x2() { return x2_; }       ///< Negative-z incoming parton's fractional momentum
 
       Momentum& pc(size_t);              ///< Central particle's 4-momentum
       const Momentum& pc(size_t) const;  ///< Central particle's 4-momentum
@@ -208,6 +213,8 @@ namespace cepgen {
       double mY2_{-1.};  ///< Second diffractive state squared mass
       double t1_{-1.};   ///< First parton virtuality
       double t2_{-1.};   ///< Second parton virtuality
+      double x1_{0.};    ///< First parton fractional momentum
+      double x2_{0.};    ///< Second parton fractional momentum
       /// Electromagnetic running coupling algorithm
       std::unique_ptr<Coupling> alphaem_;
       /// Strong running coupling algorithm
@@ -237,4 +244,3 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
-

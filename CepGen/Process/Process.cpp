@@ -90,9 +90,19 @@ namespace cepgen {
 
     const Momentum& Process::q2() const { return event().oneWithRole(Particle::Parton2).momentum(); }
 
-    Momentum& Process::pc(size_t i) { return event()[Particle::CentralSystem].at(i).get().momentum(); }
+    Momentum& Process::pc(size_t i) {
+      if (event()[Particle::CentralSystem].size() <= i)
+        throw CG_FATAL("Process:pc") << "Trying to retrieve central particle #" << i << " while only "
+                                     << event()[Particle::CentralSystem].size() << " is/are registered.";
+      return event()[Particle::CentralSystem].at(i).get().momentum();
+    }
 
-    const Momentum& Process::pc(size_t i) const { return event()(Particle::CentralSystem).at(i).momentum(); }
+    const Momentum& Process::pc(size_t i) const {
+      if (event()(Particle::CentralSystem).size() <= i)
+        throw CG_FATAL("Process:pc") << "Trying to retrieve central particle #" << i << " while only "
+                                     << event()(Particle::CentralSystem).size() << " is/are registered.";
+      return event()(Particle::CentralSystem).at(i).momentum();
+    }
 
     double Process::shat() const { return (q1() + q2()).mass2(); }
 
@@ -290,6 +300,7 @@ namespace cepgen {
       CG_DEBUG("Process:initialise") << "Preparing to set the kinematics parameters. Input parameters: "
                                      << ParametersDescription(kin_.parameters(false)) << ".";
 
+      prepareBeams();
       kin_.incomingBeams().initialise();
       clear();  // also resets the "first run" flag
 
