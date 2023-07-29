@@ -34,8 +34,12 @@ namespace cepgen {
     double Parameterisation::tau(double q2) const { return 0.25 * q2 / mass2_; }
 
     const FormFactors& Parameterisation::operator()(double q2) {
-      q2_ = q2;
-      eval();
+      if (q2 < 0.)
+        ff_ = FormFactors{};
+      else {
+        q2_ = q2;
+        eval();
+      }
       return ff_;
     }
 
