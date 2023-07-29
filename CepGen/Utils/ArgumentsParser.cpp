@@ -62,7 +62,7 @@ namespace cepgen {
             else {
               const auto tokens = utils::split(token, ':');
               utils::Logger::get().output().reset(new std::ofstream(tokens.at(1)));
-              for (const auto& tok : utils::split(tokens.at(0), ','))
+              for (const auto& tok : utils::split(tokens.at(0), ';'))
                 utils::Logger::get().addExceptionRule(tok);
             }
           }
@@ -244,19 +244,19 @@ namespace cepgen {
                                         std::string pdesc,
                                         std::vector<std::string>* var,
                                         std::vector<std::string> def)
-      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ",")), vec_str_variable_(var) {}
+      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ";")), vec_str_variable_(var) {}
 
   ArgumentsParser::Parameter::Parameter(std::string pname,
                                         std::string pdesc,
                                         std::vector<int>* var,
                                         std::vector<int> def)
-      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ",")), vec_int_variable_(var) {}
+      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ";")), vec_int_variable_(var) {}
 
   ArgumentsParser::Parameter::Parameter(std::string pname,
                                         std::string pdesc,
                                         std::vector<double>* var,
                                         std::vector<double> def)
-      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ",")), vec_float_variable_(var) {}
+      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ";")), vec_float_variable_(var) {}
 
   bool ArgumentsParser::Parameter::matches(const std::string& key) const {
     if (key == "--" + name.at(0))
@@ -306,20 +306,20 @@ namespace cepgen {
       }
     }
     if (vec_str_variable_) {
-      *vec_str_variable_ = utils::split(value, ',');
+      *vec_str_variable_ = utils::split(value, ';');
       return *this;
     }
     if (vec_int_variable_) {
       vec_int_variable_->clear();
-      const auto buf = utils::split(value, ',');
+      const auto buf = utils::split(value, ';');
       std::transform(buf.begin(), buf.end(), std::back_inserter(*vec_int_variable_), [](const std::string& str) {
         return std::stoi(str);
       });
       return *this;
     }
-    if (vec_float_variable_ || lim_variable_) {
+    auto unpack_floats = [](const std::string& value, char delim) {
       std::vector<double> vec_flt;
-      const auto buf = utils::split(value, ',');
+      const auto buf = utils::split(value, delim);
       std::transform(buf.begin(), buf.end(), std::back_inserter(vec_flt), [](const std::string& str) {
         try {
           return std::stod(str);
@@ -327,9 +327,15 @@ namespace cepgen {
           return Limits::INVALID;
         }
       });
-      if (vec_float_variable_)
-        *vec_float_variable_ = vec_flt;
-      else if (vec_flt.size() == 2) {
+      return vec_flt;
+    };
+    if (vec_float_variable_) {
+      *vec_float_variable_ = unpack_floats(value, ';');
+      return *this;
+    }
+    if (lim_variable_) {
+      const auto vec_flt = unpack_floats(value, ',');
+      if (vec_flt.size() == 2) {
         if (vec_flt.at(0) != Limits::INVALID)
           lim_variable_->min() = vec_flt.at(0);
         if (vec_flt.at(1) != Limits::INVALID)
