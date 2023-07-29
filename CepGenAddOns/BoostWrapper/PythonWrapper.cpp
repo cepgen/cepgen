@@ -20,6 +20,7 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 #include "CepGenAddOns/BoostWrapper/PythonUtils.h"
@@ -82,5 +83,15 @@ namespace {
                    std::string,
                    "FormFactorsFactory",
                    "an electromagnetic form factors evaluator objects factory");
+
+    py::class_<cepgen::PDG, boost::noncopyable>("PDG", "collection of particle definitions and properties", py::no_init)
+        .def(
+            "colours", +[](cepgen::pdgid_t pdgid) { return cepgen::PDG::get().colours(pdgid); })
+        .def(
+            "mass", +[](cepgen::pdgid_t pdgid) { return cepgen::PDG::get().mass(pdgid); })
+        .def(
+            "width", +[](cepgen::pdgid_t pdgid) { return cepgen::PDG::get().width(pdgid); })
+        .def(
+            "charge", +[](cepgen::pdgid_t pdgid) { return cepgen::PDG::get().charge(pdgid); });
   }
 }  // namespace
