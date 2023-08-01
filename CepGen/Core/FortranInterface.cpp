@@ -61,17 +61,17 @@ double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& 
   auto flux_name = [](int mode) -> std::string {
     switch (mode) {
       case 0:
-        return "ElasticKT";
+        return "Elastic";
       case 10:
-        return "BudnevElasticKT";
+        return "BudnevElastic";
       case 1:
-        return "InelasticKT";
+        return "Inelastic";
       case 11:
-        return "BudnevInelasticKT";
+        return "BudnevInelastic";
       case 100:
-        return "ElasticHeavyIonKT";
+        return "ElasticHeavyIon";
       case 20:
-        return "KMRElasticGluonKT";
+        return "KMR";
       default:
         throw CG_FATAL("cepgen_kt_flux") << "Invalid flux modelling: " << mode << ".";
     }

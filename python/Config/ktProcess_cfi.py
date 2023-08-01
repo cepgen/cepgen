@@ -10,21 +10,21 @@ from .containers_cfi import Module, Parameters
 
 class ProtonFlux:
     """Type of parton (from proton) flux modelling"""
-    PhotonElastic         = 'ElasticKT'
-    PhotonInelastic       = 'InelasticKT'
-    PhotonElasticBudnev   = 'BudnevElasticKT'
-    PhotonInelasticBudnev = 'BudnevInelasticKT'
-    GluonKMR              = 'KMRElasticGluonKT'
+    PhotonElastic         = 'Elastic'
+    PhotonInelastic       = 'Inelastic'
+    PhotonElasticBudnev   = 'BudnevElastic'
+    PhotonInelasticBudnev = 'BudnevInelastic'
+    GluonKMR              = 'KMR'
 
 
 class HeavyIonFlux:
     """Type of parton (from heavy ion) flux modelling"""
-    PhotonElastic         = 'ElasticHeavyIonKT'
+    PhotonElastic         = 'ElasticHeavyIon'
 
 
 class ElectronFlux:
     """Type of parton (from electron) flux modelling"""
-    PhotonElasticBudnev   = 'BudnevElasticElectronKT'
+    PhotonElasticBudnev   = 'BudnevElasticElectron'
 
 
 process = Module('ktProcess',
