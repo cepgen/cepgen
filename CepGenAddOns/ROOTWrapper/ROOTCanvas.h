@@ -304,6 +304,7 @@ namespace cepgen {
         top_label_->Draw();
       if (leg_) {
         if (TPad::PlaceBox(leg_.get(), leg_width_ * 1.15, leg_height_, leg_x1_, leg_y1_, leg_mode_.data())) {
+          leg_y1_ = std::min(leg_y1_, 0.9 - leg_height_);
           leg_->SetX1(leg_x1_);
           leg_->SetX2(leg_x1_ + leg_width_);
           leg_->SetY1(leg_y1_);
