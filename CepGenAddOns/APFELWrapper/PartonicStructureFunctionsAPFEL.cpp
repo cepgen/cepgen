@@ -58,7 +58,7 @@ namespace cepgen {
     private:
       double evalxQ2(int flavour, double xbj, double q2) override {
         const auto q = std::sqrt(q2);
-        if (!q_limits_.contains(std::sqrt(q2)))
+        if (!q_limits_.contains(q))
           return 0.;
         return APFEL::xPDFxQ(flavour, xbj, q);
       }
