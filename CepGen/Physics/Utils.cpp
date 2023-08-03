@@ -26,7 +26,11 @@ namespace cepgen {
 
     double q2(double xbj, double mp2, double mx2) { return xbj / (1. - xbj) * (mx2 - mp2); }
 
-    double xBj(double q2, double mp2, double mx2) { return q2 / (q2 - mp2 + mx2); }
+    double xBj(double q2, double mp2, double mx2) {
+      if (q2 <= 0.)
+        return 0.;
+      return q2 / (q2 + mx2 - mp2);
+    }
 
     double energyFromW(double w, double mp2, double m2) { return 0.5 * (w * w - mp2 + m2) / w; }
   }  // namespace utils
