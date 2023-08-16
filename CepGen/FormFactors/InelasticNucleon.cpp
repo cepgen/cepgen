@@ -39,11 +39,15 @@ namespace cepgen {
             integr_(AnalyticIntegratorFactory::get().build(steer<ParametersList>("integrator"))),
             compute_fm_(steer<bool>("computeFM")),
             mx_range_(steer<Limits>("mxRange")),
-            dm2_range_{std::pow(mx_range_.min(), 2) - mp2_, std::pow(mx_range_.max(), 2) - mp2_},
-            eval_fe_([this](double xbj) { return sf_->F2(xbj, q2_) / xbj; }),
-            eval_fm_([this](double xbjm3) {
-              const auto xbj = inv_cbrt(xbjm3);
+            mx2_range_{mx_range_.min() * mx_range_.min(), mx_range_.max() * mx_range_.max()},
+            dm2_range_{mx2_range_.min() - mp2_, mx2_range_.max() - mp2_},
+            eval_fe_([this](double mx2) {
+              const auto xbj = utils::xBj(q2_, mp2_, mx2);
               return sf_->F2(xbj, q2_) * xbj;
+            }),
+            eval_fm_([this](double mx2) {
+              const auto xbj = utils::xBj(q2_, mp2_, mx2);
+              return sf_->F2(xbj, q2_) / xbj;
             }) {
         CG_INFO("InelasticNucleon") << "Inelastic nucleon form factors parameterisation built with:\n"
                                     << " * structure functions modelling: "
@@ -59,7 +63,7 @@ namespace cepgen {
             .setDescription("type of structure functions parameterisation for the dissociative emission");
         desc.add<ParametersDescription>("integrator", ParametersDescription().setName<std::string>("gsl"))
             .setDescription("type of numerical integrator algorithm to use");
-        desc.add<bool>("computeFM", true).setDescription("compute, or neglect the F2/xbj^3 term");
+        desc.add<bool>("computeFM", false).setDescription("compute, or neglect the F2/xbj^3 term");
         desc.add<Limits>("mxRange", Limits{1.0732 /* mp + mpi0 */, 20.})
             .setDescription("diffractive mass range (in GeV/c^2)");
         return desc;
@@ -67,30 +71,10 @@ namespace cepgen {
 
     protected:
       void eval() override {
-        const auto xbj_range = Limits{q2_ / (q2_ + dm2_range_.max()), q2_ / (q2_ + dm2_range_.min())};
-        const auto fe = integr_->integrate(eval_fe_, xbj_range);
-        double fm = 0.;
-        if (compute_fm_) {
-          const auto xbjm3_range = Limits{1. / xbj_range.max() / xbj_range.max() / xbj_range.max(),
-                                          1. / xbj_range.min() / xbj_range.min() / xbj_range.min()};
-          fm = kOneThird * integr_->integrate(eval_fm_, xbjm3_range);
-        }
+        const auto inv_q2 = 1. / q2_;
+        const auto fe = integr_->integrate(eval_fe_, mx2_range_) * inv_q2;
+        const auto fm = compute_fm_ ? integr_->integrate(eval_fm_, mx2_range_) * inv_q2 : 0.;
         setFEFM(fe, fm);
-      }
-
-      static constexpr float kOneThird = 0.33333333, kFourThirds = 1.3333333;
-      /// Fast inverse cubic root
-      static float inv_cbrt(float x) {
-        float thirdx = x * kOneThird;
-        union {  //get bits from ﬂoating-point number
-          int ix;
-          float fx;
-        } z;
-        z.fx = x;
-        z.ix = 0x54a21d2a - z.ix / 3;                   // initial guess for inverse cube root
-        float y = z.fx;                                 // convert integer type back to floating-point type
-        y *= (kFourThirds - thirdx * y * y * y);        // 1st Newton’s iteration
-        return y * (kFourThirds - thirdx * y * y * y);  // 2nd Newton’s iteration
       }
 
     private:
