@@ -160,14 +160,14 @@ namespace cepgen {
       return out.str();
     }
 
-    std::vector<std::string> split(const std::string& str, char delim) {
+    std::vector<std::string> split(const std::string& str, char delim, bool trim) {
       std::vector<std::string> out;
       if (str.empty())
         return out;
       std::string token;
       std::istringstream iss(str);
       while (std::getline(iss, token, delim))
-        out.emplace_back(token);
+        out.emplace_back(trim ? ltrim(rtrim(token)) : token);
       return out;
     }
 

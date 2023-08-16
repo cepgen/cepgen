@@ -306,7 +306,7 @@ namespace cepgen {
       }
     }
     if (vec_str_variable_) {
-      *vec_str_variable_ = utils::split(value, ';');
+      *vec_str_variable_ = utils::split(value, ';', true);
       return *this;
     }
     if (vec_int_variable_) {
