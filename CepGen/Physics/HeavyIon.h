@@ -54,7 +54,7 @@ namespace cepgen {
     double massP() const;
     /// Total heavy ion mass, in GeV/c2
     double mass() const { return massN() + massP(); }
-    /// Heavy ion radius, in fm
+    /// Heavy ion radius, in m
     double radius() const;
 
     /// Build from a custom PDG id

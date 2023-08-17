@@ -55,8 +55,8 @@ namespace cepgen {
       explicit HeavyIonDipole(const ParametersList& params)
           : StandardDipole(params),
             hi_(HeavyIon::fromPdgId(pdg_id_)),
-            a_(hi_.radius() / (constants::GEVM1_TO_M * 1e15)),
-            a0_(HeavyIon::proton().radius() / (constants::GEVM1_TO_M * 1e15)),  // [fm -> GeV]
+            a_(hi_.radius() / constants::GEVM1_TO_M),
+            a0_(HeavyIon::proton().radius() / constants::GEVM1_TO_M),
             a02_(a0_ * a0_) {}
 
       static ParametersDescription description() {
