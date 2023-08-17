@@ -8,7 +8,7 @@ endif()
 
 #----- build the object
 
-cepgen_build(CepGenLHAPDF SOURCES PartonicStructureFunctionsLHAPDF.cpp AlphaSLHAPDF.cpp
+cepgen_build(CepGenLHAPDF SOURCES *.cpp
     EXT_LIBS ${LHAPDF}
     EXT_HEADERS ${LHAPDF_INCLUDE}
     INSTALL_COMPONENT lhapdf)

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,46 +20,37 @@
 
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Physics/Coupling.h"
+#include "CepGen/Physics/PDG.h"
 
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
-#define LHAPDF_GE_6 1
-#endif
 
 namespace cepgen {
   /// A perturbative PDF-oriented \f$\alpha_S(Q^2)\f$ evaluator
-  class AlphaSLHAPDF final : public Coupling {
+  class AlphaSLHAPDFODE final : public Coupling {
   public:
-    explicit AlphaSLHAPDF(const ParametersList& params)
-        : Coupling(params)
-#ifdef LHAPDF_GE_6
-          ,
-          lhapdf_(LHAPDF::mkPDF(steer<std::string>("pdfSet"), steer<int>("pdfMember"))){}
-#else
-    {
-      LHAPDF::initPDFSet(steer<std::string>("pdfSet"), LHAPDF::LHGRID, steer<int>("pdfMember"));
+    explicit AlphaSLHAPDFODE(const ParametersList& params) : Coupling(params), ode_(new LHAPDF::AlphaS_ODE) {
+      ode_->setOrderQCD(steer<int>("order"));
+      ode_->setAlphaSMZ(steer<double>("alphaSMZ"));
+      ode_->setMZ(PDG::get().mass(23));  // set Z mass
+      for (int i = 1; i <= 6; ++i)       // set all quarks masses
+        ode_->setQuarkMass(i, PDG::get().mass(i));
     }
-#endif
-          static ParametersDescription description() {
+
+    static ParametersDescription description() {
       auto desc = Coupling::description();
-      desc.setDescription("LHAPDF pert.PDF-orient.evol.algo.");
-      desc.add<std::string>("pdfSet", "cteq66");
-      desc.add<int>("pdfMember", 0);
+      desc.setDescription("ODE LHAPDF evol.algo.");
+      desc.add<int>("order", 5).setDescription("QCD order");
+      desc.add<double>("alphaSMZ", 0.118);
       return desc;
     }
 
-    double operator()(double q) const override {
-#ifdef LHAPDF_GE_6
-      return lhapdf_->alphasQ(q);
-#else
-      return LHAPDF::alphasPDF(q);
-#endif
-    }
+    double operator()(double q) const override { return ode_->alphasQ(q); }
 
   private:
-#ifdef LHAPDF_GE_6
-    std::unique_ptr<LHAPDF::PDF> lhapdf_;
-#endif
+    std::unique_ptr<LHAPDF::AlphaS_ODE> ode_;
   };
 }  // namespace cepgen
 
-REGISTER_ALPHAS_MODULE("lhapdf", AlphaSLHAPDF);
+REGISTER_ALPHAS_MODULE("lhapdfODE", AlphaSLHAPDFODE);
+
+#endif
