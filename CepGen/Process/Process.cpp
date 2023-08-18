@@ -168,7 +168,7 @@ namespace cepgen {
       return *this;
     }
 
-    void Process::generateVariables() const {
+    double Process::generateVariables() const {
       if (mapped_variables_.size() == 0)
         throw CG_FATAL("Process:vars") << "No variables are mapped for this process!";
       if (base_jacobian_ == 0.)
@@ -176,6 +176,7 @@ namespace cepgen {
                                        << "process is null.\n\t"
                                        << "Please check the validity of the phase space!";
 
+      double jacobian = 1.;
       for (const auto& var : mapped_variables_) {
         if (!var.limits.valid())
           continue;
@@ -189,13 +190,17 @@ namespace cepgen {
           } break;
           case Mapping::exponential: {          // limits already logarithmic
             var.value = exp(var.limits.x(xv));  // transform back to linear
+            jacobian *= var.value;
           } break;
           case Mapping::square: {
-            var.value = pow(var.limits.x(xv), 2);
+            const auto val = var.limits.x(xv);
+            var.value = val * val;
+            jacobian *= val;
           } break;
           case Mapping::power_law: {
             const double y = var.limits.max() / var.limits.min();
             var.value = var.limits.min() * pow(y, xv);
+            jacobian *= var.value;
           } break;
         }
       }
@@ -219,26 +224,7 @@ namespace cepgen {
               << std::right << ")";
         }
       });
-    }
-
-    double Process::jacobian() const {
-      double jac = 1.;
-      for (const auto& var : mapped_variables_) {
-        if (!var.limits.valid())
-          continue;
-        switch (var.type) {
-          case Mapping::linear:
-            break;
-          case Mapping::square:
-            jac *= sqrt(var.value);
-            break;
-          case Mapping::exponential:
-          case Mapping::power_law:
-            jac *= var.value;
-            break;
-        }
-      }
-      return jac;
+      return jacobian;
     }
 
     double Process::weight(const std::vector<double>& x) {
@@ -246,18 +232,15 @@ namespace cepgen {
       if (CG_LOG_MATCH("Process:dumpPoint", debugInsideLoop))
         dumpPoint();
 
-      //--- generate and initialise all variables
-      generateVariables();
+      //--- generate and initialise all variables and generate auxiliary
+      //    (x-dependent) part of the Jacobian for this phase space point.
+      const auto aux_jacobian = generateVariables();
+      if (aux_jacobian <= 0.)
+        return 0.;
 
       //--- compute the integrand
       const auto me_integrand = computeWeight();
       if (me_integrand <= 0.)
-        return 0.;
-
-      //--- generate auxiliary (x-dependent) part of the Jacobian for
-      //    this phase space point.
-      const double aux_jacobian = jacobian();
-      if (aux_jacobian <= 0.)
         return 0.;
 
       //--- combine every component into a single weight for this point

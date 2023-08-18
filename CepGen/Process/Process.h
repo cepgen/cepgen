@@ -184,10 +184,9 @@ namespace cepgen {
                               const Limits& default_limits = {0., 1.},
                               const std::string& description = "");
       /// Generate and initialise all variables handled by this process
+      /// \return Phase space point-dependent component of the Jacobian weight of the point in the phase space for integration
       /// \note To be run at each point computation (therefore, to be optimised!)
-      void generateVariables() const;
-      /// Phase space point-dependent component of the Jacobian weight of the point in the phase space for integration
-      double jacobian() const;
+      double generateVariables() const;
 
       /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
       void setEventContent(const IncomingState& ini, const OutgoingState& fin);
