@@ -25,7 +25,6 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/String.h"
-#include "CepGen/Version.h"
 
 namespace cepgen {
   EventHarvester::EventHarvester(const ParametersList& params)

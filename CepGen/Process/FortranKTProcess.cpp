@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
@@ -24,7 +23,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Fortran/KTStructures.h"
 #include "CepGen/Process/FortranKTProcess.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/Message.h"
 
 namespace {
   extern "C" {

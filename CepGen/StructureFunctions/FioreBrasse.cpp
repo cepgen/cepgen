@@ -17,15 +17,13 @@
  */
 
 #include <complex>
-#include <vector>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
   namespace strfun {

@@ -19,15 +19,13 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include <array>
-#include <cmath>
+#include <cstdint>
 #include <codecvt>
 #include <locale>
 #include <unordered_set>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
-#include "CepGen/Utils/Filesystem.h"
+#include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
 #ifndef __APPLE__

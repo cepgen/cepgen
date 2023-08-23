@@ -18,7 +18,6 @@
 
 // clang-format off
 #include "CepGenAddOns/PythonWrapper/Environment.h"
-#include "CepGenAddOns/PythonWrapper/Error.h"
 // clang-format on
 
 #include <algorithm>
@@ -26,7 +25,6 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Filesystem.h"
-#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace python {

@@ -19,12 +19,10 @@
 // clang-format off
 #include "CepGenAddOns/PythonWrapper/Error.h"
 #include "CepGenAddOns/PythonWrapper/PythonTypes.h"
-#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 // clang-format on
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
-#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace python {

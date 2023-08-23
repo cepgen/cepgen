@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Integration/FunctionIntegrand.h"
@@ -27,6 +26,7 @@
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
+#include "CepGen/Utils/Message.h"
 
 using namespace std::complex_literals;
 

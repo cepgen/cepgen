@@ -24,7 +24,6 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Utils/AbortHandler.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/ProgressBar.h"
 #include "CepGen/Utils/Test.h"
 #include "CepGen/Utils/Timer.h"
 

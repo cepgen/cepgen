@@ -23,7 +23,6 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/GridHandler.h"
-#include "CepGen/Utils/String.h"
 
 //#define GRID_HANDLER_DEBUG 1
 

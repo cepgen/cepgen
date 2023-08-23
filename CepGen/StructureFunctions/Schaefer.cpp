@@ -17,8 +17,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <vector>
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Utils.h"

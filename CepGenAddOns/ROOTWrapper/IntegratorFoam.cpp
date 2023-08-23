@@ -26,7 +26,6 @@
 #include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Parameters.h"
 
 namespace cepgen {
   /// Foam general-purpose integration algorithm

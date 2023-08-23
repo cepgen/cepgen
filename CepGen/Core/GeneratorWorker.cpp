@@ -20,8 +20,6 @@
 #include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
-#include "CepGen/EventFilter/EventModifier.h"
-#include "CepGen/Generator.h"
 #include "CepGen/Integration/GridParameters.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/ProcessIntegrand.h"

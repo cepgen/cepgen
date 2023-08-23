@@ -24,7 +24,6 @@
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
-#include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Generator.h"  // for library loading
@@ -32,10 +31,8 @@
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/TimeKeeper.h"
 #include "CepGenAddOns/BoostWrapper/BoostTreeUtils.h"
 

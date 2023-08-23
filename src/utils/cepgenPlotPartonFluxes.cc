@@ -18,20 +18,14 @@
 
 #include <fstream>
 
-#include "CepGen/Core/Exception.h"
-#include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
 #include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/DrawerFactory.h"
-#include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Physics/Beam.h"
-#include "CepGen/Physics/PDG.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
+#include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
 using namespace std;

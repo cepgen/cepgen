@@ -18,10 +18,9 @@
 
 #include <algorithm>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Cuts.h"
-#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
   namespace cuts {

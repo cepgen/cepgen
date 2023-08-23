@@ -18,7 +18,6 @@
 
 #include <fstream>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"

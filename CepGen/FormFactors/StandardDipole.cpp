@@ -22,7 +22,6 @@
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
   namespace formfac {

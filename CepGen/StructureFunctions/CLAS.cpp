@@ -16,12 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <array>
-#include <vector>
+#include <cmath>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"

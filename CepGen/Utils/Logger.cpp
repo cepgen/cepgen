@@ -18,8 +18,8 @@
 
 #include <iostream>  // for cout
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Logger.h"
+#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
   namespace utils {

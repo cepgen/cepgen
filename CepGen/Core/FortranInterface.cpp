@@ -17,14 +17,12 @@
  */
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Generator.h"
 #include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"

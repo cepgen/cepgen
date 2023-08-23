@@ -20,9 +20,9 @@
 
 #include <cmath>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/StructureFunctions/PartonicParameterisation.h"
+#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
   namespace strfun {

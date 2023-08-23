@@ -21,7 +21,6 @@
 #include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Physics/Beam.h"
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Process/KTProcess.h"
 
 namespace cepgen {

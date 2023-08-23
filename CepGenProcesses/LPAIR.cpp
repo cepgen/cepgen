@@ -22,12 +22,10 @@
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Utils/String.h"
 
 using namespace cepgen;
 

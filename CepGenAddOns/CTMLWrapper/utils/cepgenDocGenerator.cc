@@ -17,7 +17,6 @@
  */
 
 #include "CepGen/Generator.h"
-#include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/EventExporterFactory.h"

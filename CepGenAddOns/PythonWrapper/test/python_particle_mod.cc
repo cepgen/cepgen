@@ -22,7 +22,6 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Test.h"
-#include "CepGenAddOns/PythonWrapper/Environment.h"
 
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();

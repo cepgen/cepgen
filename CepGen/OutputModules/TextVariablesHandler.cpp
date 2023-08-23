@@ -22,7 +22,6 @@
 #include "CepGen/EventFilter/EventBrowser.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Modules/EventExporterFactory.h"
-#include "CepGen/Parameters.h"
 
 namespace cepgen {
   /**

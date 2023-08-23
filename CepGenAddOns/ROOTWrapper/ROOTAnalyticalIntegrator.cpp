@@ -21,7 +21,6 @@
 #include "CepGen/Integration/AnalyticIntegrator.h"
 #include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Utils/FunctionsWrappers.h"
-#include "CepGen/Utils/GSLFunctionsWrappers.h"
 #include "CepGen/Utils/Message.h"
 
 namespace cepgen {

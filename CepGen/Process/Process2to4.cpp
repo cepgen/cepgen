@@ -22,7 +22,6 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process2to4.h"
-#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace proc {

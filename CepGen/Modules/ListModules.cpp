@@ -18,7 +18,6 @@
 
 #include <iomanip>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
@@ -33,7 +32,7 @@
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {

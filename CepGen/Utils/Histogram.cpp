@@ -19,7 +19,6 @@
 #include <gsl/gsl_errno.h>
 
 #include <cmath>
-#include <iomanip>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Histogram.h"

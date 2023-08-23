@@ -18,7 +18,6 @@
 
 #include <cassert>
 #include <cmath>
-#include <vector>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/SteeredObject.h"

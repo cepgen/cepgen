@@ -26,11 +26,9 @@
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Parameters.h"
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Hadroniser.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Utils/String.h"
 #include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
 namespace cepgen {

@@ -21,7 +21,6 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventBrowser.h"
-#include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
 #include "CepGen/Parameters.h"

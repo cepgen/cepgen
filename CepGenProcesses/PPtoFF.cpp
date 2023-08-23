@@ -18,14 +18,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iomanip>
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
-#include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process2to4.h"
 

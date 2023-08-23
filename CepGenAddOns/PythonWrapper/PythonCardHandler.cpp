@@ -27,7 +27,6 @@
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
-#include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Generator.h"  // for library loading
@@ -41,9 +40,7 @@
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
-#include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/Functional.h"
-#include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
 #define Py_DEBUG

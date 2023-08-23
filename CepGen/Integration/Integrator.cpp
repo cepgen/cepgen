@@ -21,8 +21,6 @@
 #include "CepGen/Integration/FunctionIntegrand.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Parameters.h"
-#include "CepGen/Process/Process.h"
 
 namespace cepgen {
   Integrator::Integrator(const ParametersList& params)

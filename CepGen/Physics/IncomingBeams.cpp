@@ -19,17 +19,14 @@
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/HeavyIon.h"
-#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Physics/IncomingBeams.h"
 #include "CepGen/Physics/Modes.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/StructureFunctions/SigmaRatio.h"
 
 namespace cepgen {
   IncomingBeams::IncomingBeams(const ParametersList& params) : SteeredObject(params) {

@@ -28,7 +28,6 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGenAddOns/HepMC3Wrapper/HepMC3EventInterface.h"

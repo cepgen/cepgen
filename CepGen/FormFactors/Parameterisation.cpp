@@ -18,7 +18,6 @@
 
 #include <cmath>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Physics/PDG.h"
 

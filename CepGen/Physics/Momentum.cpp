@@ -17,10 +17,9 @@
  */
 
 #include <cmath>
-#include <iomanip>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/Momentum.h"
+#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
   Momentum::Momentum(double x, double y, double z, double t) : std::array<double, 4>{{x, y, z, t == -1. ? 0. : t}} {

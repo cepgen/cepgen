@@ -18,9 +18,9 @@
 
 #include <iomanip>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {

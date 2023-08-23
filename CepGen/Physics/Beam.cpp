@@ -19,14 +19,10 @@
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Physics/Beam.h"
-#include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
 
 namespace cepgen {
   Beam::Beam(const ParametersList& params)

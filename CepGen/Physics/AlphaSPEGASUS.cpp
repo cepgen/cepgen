@@ -16,10 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Message.h"
 
 namespace {
   extern "C" {

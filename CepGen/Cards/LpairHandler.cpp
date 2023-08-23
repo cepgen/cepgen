@@ -33,8 +33,6 @@
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Process/Process.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/StructureFunctions/SigmaRatio.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"

@@ -22,7 +22,6 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/NachtmannAmplitudes.h"
-#include "CepGen/Physics/PDG.h"
 
 namespace cepgen {
   NachtmannAmplitudes::NachtmannAmplitudes(const ParametersList& params)
