@@ -90,6 +90,29 @@ namespace cepgen {
       /// Event pointer retrieval method
       Event* eventPtr();
 
+      const Momentum& pA() const;                     ///< Positive-z incoming beam particle's 4-momentum
+      double mA2() const { return mA2_; }             ///< Positive-z incoming beam particle's squared mass
+      double mA() const { return std::sqrt(mA2()); }  ///< Positive-z incoming beam particle's mass
+      const Momentum& pB() const;                     ///< Negative-z incoming beam particle's 4-momentum
+      double mB2() const { return mB2_; }             ///< Negative-z incoming beam particle's squared mass
+      double mB() const { return std::sqrt(mB2()); }  ///< Negative-z incoming beam particle's mass
+      const Momentum& pX() const;                     ///< Positive-z outgoing beam particle's 4-momentum
+      double mX2() const { return mX2_; }             ///< Positive-z outgoing beam particle's squared mass
+      double mX() const { return std::sqrt(mX2()); }  ///< Positive-z outgoing beam particle's mass
+      const Momentum& pY() const;                     ///< Negative-z outgoing beam particle's 4-momentum
+      double mY2() const { return mY2_; }             ///< Negative-z outgoing beam particle's squared mass
+      double mY() const { return std::sqrt(mY2()); }  ///< Negative-z outgoing beam particle's mass
+
+      double x1() const { return x1_; }  ///< Positive-z incoming parton's fractional momentum
+      double t1() const { return t1_; }  ///< Positive-z incoming parton's squared mass
+      const Momentum& q1() const;        ///< Positive-z incoming parton's 4-momentum
+      double x2() const { return x2_; }  ///< Negative-z incoming parton's fractional momentum
+      double t2() const { return t2_; }  ///< Negative-z incoming parton's squared mass
+      const Momentum& q2() const;        ///< Negative-z incoming parton's 4-momentum
+
+      Momentum& q1();  ///< Positive-z incoming parton's 4-momentum
+      Momentum& q2();  ///< Negative-z incoming parton's 4-momentum
+
     protected:
       /// Set the incoming and outgoing state to be expected in the process
       virtual void addEventContent() = 0;
@@ -103,39 +126,17 @@ namespace cepgen {
       /// Map of all outgoing particles in the process
       typedef std::map<Particle::Role, pdgids_t> OutgoingState;
 
-      Momentum& pA();                                 ///< Positive-z incoming beam particle's 4-momentum
-      const Momentum& pA() const;                     ///< Positive-z incoming beam particle's 4-momentum
-      double mA() const { return std::sqrt(mA2()); }  ///< Positive-z incoming beam particle's mass
-      double mA2() const { return mA2_; }             ///< Positive-z incoming beam particle's squared mass
+      Momentum& pA();  ///< Positive-z incoming beam particle's 4-momentum
+      Momentum& pB();  ///< Negative-z incoming beam particle's 4-momentum
+      Momentum& pX();  ///< Positive-z outgoing beam particle's 4-momentum
+      Momentum& pY();  ///< Negative-z outgoing beam particle's 4-momentum
 
-      Momentum& pB();                                 ///< Negative-z incoming beam particle's 4-momentum
-      const Momentum& pB() const;                     ///< Negative-z incoming beam particle's 4-momentum
-      double mB() const { return std::sqrt(mB2()); }  ///< Negative-z incoming beam particle's mass
-      double mB2() const { return mB2_; }             ///< Negative-z incoming beam particle's squared mass
-
-      Momentum& pX();                                 ///< Positive-z outgoing beam particle's 4-momentum
-      const Momentum& pX() const;                     ///< Positive-z outgoing beam particle's 4-momentum
-      double mX() const { return std::sqrt(mX2()); }  ///< Positive-z outgoing beam particle's mass
-      double& mX2() { return mX2_; }                  ///< Positive-z outgoing beam particle's squared mass
-      double mX2() const { return mX2_; }             ///< Positive-z outgoing beam particle's squared mass
-
-      Momentum& pY();                                 ///< Negative-z outgoing beam particle's 4-momentum
-      const Momentum& pY() const;                     ///< Negative-z outgoing beam particle's 4-momentum
-      double mY() const { return std::sqrt(mY2()); }  ///< Negative-z outgoinging beam particle's mass
-      double& mY2() { return mY2_; }                  ///< Negative-z outgoing beam particle's squared mass
-      double mY2() const { return mY2_; }             ///< Negative-z outgoing beam particle's squared mass
-
-      Momentum& q1();                    ///< Positive-z incoming parton's 4-momentum
-      const Momentum& q1() const;        ///< Positive-z incoming parton's 4-momentum
-      double& t1() { return t1_; }       ///< Positive-z incoming parton's squared mass
-      double t1() const { return t1_; }  ///< Positive-z incoming parton's squared mass
-      double& x1() { return x1_; }       ///< Positive-z incoming parton's fractional momentum
-
-      Momentum& q2();                    ///< Negative-z incoming parton's 4-momentum
-      const Momentum& q2() const;        ///< Negative-z incoming parton's 4-momentum
-      double& t2() { return t2_; }       ///< Negative-z incoming parton's squared mass
-      double t2() const { return t2_; }  ///< Negative-z incoming parton's squared mass
-      double& x2() { return x2_; }       ///< Negative-z incoming parton's fractional momentum
+      double& mX2() { return mX2_; }  ///< Positive-z outgoing beam particle's squared mass
+      double& mY2() { return mY2_; }  ///< Negative-z outgoing beam particle's squared mass
+      double& t1() { return t1_; }    ///< Positive-z incoming parton's squared mass
+      double& x1() { return x1_; }    ///< Positive-z incoming parton's fractional momentum
+      double& t2() { return t2_; }    ///< Negative-z incoming parton's squared mass
+      double& x2() { return x2_; }    ///< Negative-z incoming parton's fractional momentum
 
       Momentum& pc(size_t);              ///< Central particle's 4-momentum
       const Momentum& pc(size_t) const;  ///< Central particle's 4-momentum
