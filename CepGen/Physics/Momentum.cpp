@@ -220,7 +220,7 @@ namespace cepgen {
     return mom / ene;
   }
 
-  double Momentum::gamma() const {
+  double Momentum::gamma2() const {
     const auto mom2 = p2(), ene2 = energy2();
     if (ene2 == 0.) {
       if (mom2 == 0.) {
@@ -233,8 +233,10 @@ namespace cepgen {
       return 0.;
     } else if (ene2 == mom2)
       CG_WARNING("Momentum:gamma") << "gamma computed for a lightlike momentum.";
-    return 1. / std::sqrt(1. - mom2 / ene2);
+    return ene2 / (ene2 - mom2);
   }
+
+  double Momentum::gamma() const { return std::sqrt(gamma2()); }
 
   Momentum& Momentum::betaGammaBoost(double gamma, double betagamma) {
     if (gamma == 1. && betagamma == 0.)
