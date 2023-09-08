@@ -45,7 +45,7 @@ namespace cepgen {
           kin_params_(new ParametersList),
           gen_params_(new ParametersList),
           int_params_(new ParametersList),
-          pdg_input_path_("mass_width_2021.mcd") {}
+          pdg_input_path_("mass_width_2023.txt") {}
 
     void LpairHandler::init() {
       //-------------------------------------------------------------------------------------------

@@ -103,7 +103,7 @@ namespace cepgen {
 
     //--- particles table parsing
     std::string addons_file;
-    if (!callPath("mass_width_2021.mcd", [](const auto& path) {
+    if (!callPath("mass_width_2023.txt", [](const auto& path) {
           pdg::MCDFileParser::parse(path);
           return true;
         }))

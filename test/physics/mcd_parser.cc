@@ -26,7 +26,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
   string path;
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("input,i", "path to the MCD file", &path, "../External/mass_width_2021.mcd")
+      .addOptionalArgument("input,i", "path to the MCD file", &path, "../External/mass_width_2023.txt")
       .parse();
 
   pdg::MCDFileParser::parse(path);
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
 
   CG_TEST_EQUAL(cepgen::PDG::get().mass(cepgen::PDG::diffractiveProton), 0., "diffractive proton bare mass");
   CG_TEST_EQUAL(cepgen::PDG::get().mass(6), 172.5, "top mass");
-  CG_TEST_EQUAL(cepgen::PDG::get().width(13), 2.9959837e-19, "muon width");
+  CG_TEST_EQUAL(cepgen::PDG::get().width(13), 2.9959836e-19, "muon width");
 
   CG_TEST_SUMMARY;
 }
