@@ -28,24 +28,10 @@
 namespace cepgen {
   class IntegratorVegasPlus final : public Integrator {
   public:
-    explicit IntegratorVegasPlus(const ParametersList& params) : Integrator(params) {
-      env_.setProgramName("vegas_plus");
-      const auto str = R"(
-import vegas
-def integrate(f, num_dim: int, num_iter: int, num_warmup: int, num_calls: int):
-    integ = vegas.Integrator(num_dim * [(0., 1.)])
-    def f_pyarr(vars):
-        return f(vars.tolist())
-    integ(f_pyarr, nitn=num_iter, neval=num_warmup)
-    res = integ(f_pyarr, nitn=num_iter, neval=num_calls)
-    return (res.mean, res.sdev)
-      )";
-      auto cfg = python::defineModule("vegas_plus", str);  // new
+    explicit IntegratorVegasPlus(const ParametersList& params) : Integrator(params), env_("vegas_plus") {
+      auto cfg = python::importModule("VegasIntegration");
       if (!cfg)
-        throw PY_ERROR << "Failed to parse a configuration string:\n"
-                       << std::string(80, '-') << "\n"
-                       << str << "\n"
-                       << std::string(80, '-');
+        throw PY_ERROR << "Failed to import the Vegas python file.";
       func_ = python::getAttribute(cfg.get(), "integrate");
       if (!func_ || !PyCallable_Check(func_.get()))
         throw PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";

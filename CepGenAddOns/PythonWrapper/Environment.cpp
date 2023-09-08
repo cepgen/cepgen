@@ -32,7 +32,7 @@ namespace cepgen {
     // Python API helpers
     //------------------------------------------------------------------
 
-    Environment::Environment() {
+    Environment::Environment(const std::string& name) {
       for (const auto& path : std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."),
                                                        fs::path(utils::env::get("CEPGEN_PATH", ".")) / "python",
                                                        fs::current_path(),
@@ -50,6 +50,8 @@ namespace cepgen {
       PyConfig_InitPythonConfig(&config_);
 #endif
       utils::env::set("PYTHONDONTWRITEBYTECODE", "1");
+      if (!name.empty())
+        setProgramName(name);
     }
 
     Environment::~Environment() {
