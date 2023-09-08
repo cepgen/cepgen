@@ -250,9 +250,9 @@ namespace cepgen {
       if (!pfirst)
         return false;
       if (!is<T>(pfirst)) {  // only allow same-type tuples/lists
-        CG_WARNING("Python::isVector") << "Wrong object type unpacked from tuple/list: (python)"
-                                       << pfirst->ob_type->tp_name << " != (c++)" << utils::demangle(typeid(T).name())
-                                       << ".";
+        CG_DEBUG("Python::isVector") << "Wrong object type unpacked from tuple/list: (python)"
+                                     << pfirst->ob_type->tp_name << " != (c++)" << utils::demangle(typeid(T).name())
+                                     << ".";
         return false;
       }
       return true;
