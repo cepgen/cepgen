@@ -23,6 +23,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace python {
@@ -68,6 +69,11 @@ namespace cepgen {
     //------------------------------------------------------------------
     // typed retrieval helpers
     //------------------------------------------------------------------
+
+    template <>
+    ObjectPtr set<PyObject*>(PyObject* const& obj) {
+      return ObjectPtr(obj);
+    }
 
     template <>
     bool is<int>(PyObject* obj) {
@@ -234,14 +240,21 @@ namespace cepgen {
     bool isVector(PyObject* obj) {
       if (!obj)
         throw CG_ERROR("Python:isVector") << "Object is not a vector ; in fact, it is not even an object.";
-      if (!PyTuple_Check(obj) && !PyList_Check(obj))
+      const bool tuple = PyTuple_Check(obj), list = PyList_Check(obj);
+      if (!tuple && !list)
         return false;
-      const bool tuple = PyTuple_Check(obj);
-      if ((tuple ? PyTuple_Size(obj) : PyList_Size(obj)) == 0)
+      const auto size = tuple ? PyTuple_Size(obj) : list ? PyList_Size(obj) : 0;
+      if (size == 0)
         return true;
-      auto* pfirst = tuple ? PyTuple_GetItem(obj, 0) : PyList_GetItem(obj, 0);
-      if (!is<T>(pfirst))
+      auto* pfirst = tuple ? PyTuple_GetItem(obj, 0) : list ? PyList_GetItem(obj, 0) : nullptr;
+      if (!pfirst)
         return false;
+      if (!is<T>(pfirst)) {  // only allow same-type tuples/lists
+        CG_WARNING("Python::isVector") << "Wrong object type unpacked from tuple/list: (python)"
+                                       << pfirst->ob_type->tp_name << " != (c++)" << utils::demangle(typeid(T).name())
+                                       << ".";
+        return false;
+      }
       return true;
     }
 
@@ -268,6 +281,14 @@ namespace cepgen {
       ObjectPtr tuple(PyTuple_New(vec.size()));
       for (size_t i = 0; i < vec.size(); ++i)
         PyTuple_SetItem(tuple.get(), i, set<T>(vec.at(i)).release());
+      return tuple;
+    }
+
+    template <>
+    ObjectPtr newTuple(const std::vector<PyObject*>& vec) {
+      ObjectPtr tuple(PyTuple_New(vec.size()));
+      for (size_t i = 0; i < vec.size(); ++i)
+        PyTuple_SetItem(tuple.get(), i, vec.at(i));
       return tuple;
     }
 

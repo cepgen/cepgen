@@ -23,6 +23,7 @@
 
 #include <memory>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include "CepGen/Core/ParametersList.h"
@@ -87,6 +88,22 @@ namespace cepgen {
     template <typename T>
     inline std::vector<T> getVector(const ObjectPtr& obj) {
       return getVector<T>(obj.get());
+    }
+
+    /// Build a Python tuple from a C++ tuple
+    template <typename... Args>
+    ObjectPtr newTuple(const std::tuple<Args...>& c_tuple) {
+      const auto tuple_size = sizeof...(Args);
+      ObjectPtr tuple(PyTuple_New(tuple_size));
+      /*for (size_t i = 0; i < tuple_size; ++i) {
+        auto val = std::get<i>(c_tuple);
+        PyTuple_SetItem(tuple.get(), i, set<decltype(val)>(val));
+      }*/
+      Py_ssize_t i = 0;
+      std::apply([&tuple, &i](
+                     auto... vals) { ((PyTuple_SetItem(tuple.get(), i++, set<decltype(vals)>(vals).release())), ...); },
+                 c_tuple);
+      return tuple;
     }
 
     /// Build a Python tuple from a (uniform) vector of objects
