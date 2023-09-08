@@ -72,6 +72,14 @@ namespace cepgen {
     /// Build a new Python object from a C++ one
     template <typename T>
     ObjectPtr set(const T&);
+    /// Build a new Python list from a C++ STL vector
+    template <typename T>
+    inline ObjectPtr set(const std::vector<T>& vec) {
+      ObjectPtr list(PyList_New(vec.size()));
+      for (size_t i = 0; i < vec.size(); ++i)
+        PyList_SetItem(list.get(), i, set(vec.at(i)).release());
+      return list;
+    }
 
     /// Check if a Python object is compatible with a vector of uniform objects
     template <typename T>

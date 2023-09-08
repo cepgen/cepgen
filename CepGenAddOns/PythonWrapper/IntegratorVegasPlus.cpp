@@ -37,13 +37,17 @@ namespace cepgen {
         throw PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";
     }
 
+    void setLimits(const std::vector<Limits>& lims) override { lims_ = python::set(lims); }
+
     void integrate(Integrand& integrand, double& result, double& abs_error) override {
       gIntegrand = &integrand;
       const auto iterations = steer<int>("iterations");
       const auto evals = steer<int>("evals");
       PyMethodDef py_integr = {"integrand", py_integrand, METH_VARARGS, "A python-wrapped integrand"};
       python::ObjectPtr function(PyCFunction_NewEx(&py_integr, nullptr, python::set<std::string>("integrand").get()));
-      auto value = python::call(func_, function.get(), (int)integrand.size(), iterations, 1000, evals);
+      auto value =
+          lims_ ? python::call(func_, function.get(), (int)integrand.size(), iterations, 1000, evals, lims_.get())
+                : python::call(func_, function.get(), (int)integrand.size(), iterations, 1000, evals);
       if (!value)
         throw PY_ERROR;
       const auto vals = python::getVector<double>(value);
@@ -65,7 +69,7 @@ namespace cepgen {
 
   private:
     python::Environment env_;
-    python::ObjectPtr func_;
+    python::ObjectPtr func_, lims_{nullptr};
     static PyObject* py_integrand(PyObject* /*self*/, PyObject* args) {
       if (!gIntegrand)
         throw CG_FATAL("IntegratorVegasPlus") << "Integrand was not initialised.";
