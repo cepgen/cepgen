@@ -64,6 +64,10 @@ namespace cepgen {
       return ObjectPtr(PyObject_GetAttrString(obj, attr.c_str()));  // new
     }
 
+    void setAttribute(const ObjectPtr& obj, const std::string& attr, const ObjectPtr& value) {
+      PyObject_SetAttrString(obj.get(), attr.c_str(), value.get());
+    }
+
     std::vector<std::wstring> info() {
       auto* py_home = Py_GetPythonHome();
 #ifdef PYTHON2
@@ -237,6 +241,11 @@ namespace cepgen {
       } catch (const Exception& e) {
         PY_ERROR << "Failed to retrieve parameters list collection object \"" << key << "\":\n\t" << e.message();
       }
+    }
+
+    ObjectPtr callArgs(const ObjectPtr& func, const ObjectPtr& args) {
+      return ObjectPtr(PyObject_CallObject(func.get(),
+                                           args.get()));  // new
     }
   }  // namespace python
 }  // namespace cepgen

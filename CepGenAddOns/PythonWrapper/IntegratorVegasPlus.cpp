@@ -43,10 +43,7 @@ namespace cepgen {
       const auto evals = steer<int>("evals");
       PyMethodDef py_integr = {"integrand", py_integrand, METH_VARARGS, "A python-wrapped integrand"};
       python::ObjectPtr function(PyCFunction_NewEx(&py_integr, nullptr, python::set<std::string>("integrand").get()));
-      python::ObjectPtr value(PyObject_CallObject(
-          func_.get(),
-          python::newTuple(std::make_tuple(function.get(), (int)integrand.size(), iterations, 1000, evals))
-              .release()));  // new
+      auto value = python::call(func_, function.get(), (int)integrand.size(), iterations, 1000, evals);
       if (!value)
         throw PY_ERROR;
       const auto vals = python::getVector<double>(value);
