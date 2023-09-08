@@ -19,8 +19,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include <cstdint>
 #include <codecvt>
+#include <cstdint>
 #include <locale>
 #include <unordered_set>
 
@@ -30,6 +30,12 @@
 
 #ifndef __APPLE__
 #include <cstring>
+#endif
+#ifdef __GNUG__
+#include <cxxabi.h>
+
+#include <cstdlib>
+#include <memory>
 #endif
 
 namespace cepgen {
@@ -261,6 +267,17 @@ namespace cepgen {
       typedef std::codecvt_utf8_utf16<wchar_t> convert_type;
       std::wstring_convert<convert_type, wchar_t> converter;
       return converter.from_bytes(str);
+    }
+
+    std::string demangle(const char* name) {
+#ifdef __GNUG__
+      int status = -4;  // some arbitrary value to eliminate the compiler warning
+      // enable c++11 by passing the flag -std=c++11 to g++
+      std::unique_ptr<char, void (*)(void*)> res{abi::__cxa_demangle(name, NULL, NULL, &status), std::free};
+      return status == 0 ? res.get() : name;
+#else
+      return name;
+#endif
     }
 
     std::vector<std::string> between(const std::string& str, const std::string& beg, const std::string& end) {

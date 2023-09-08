@@ -48,6 +48,8 @@ namespace cepgen {
     std::string format(const std::wstring& fmt, Args... args) {
       return format(tostring(fmt), args...);
     }
+    /// Demangle a type id if possible
+    std::string demangle(const char*);
     /// Return the formatted date/time now
     std::string timeAs(const std::string& fmt);
     /// Human-readable boolean printout
