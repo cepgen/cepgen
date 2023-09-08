@@ -30,7 +30,7 @@ namespace cepgen {
   namespace utils {
     PythonConfigWriter::PythonConfigWriter(const std::string& filename) : file_(filename) {
       file_ << "from sys import path\n"
-            << "path.append('Cards')\n\n";
+            << "path.append('python')\n\n";
       file_ << "import Config.Core as cepgen\n\n";
     }
 
