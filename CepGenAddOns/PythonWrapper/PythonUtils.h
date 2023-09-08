@@ -39,6 +39,11 @@ namespace cepgen {
     std::vector<std::wstring> info();
     /// Call a python function with a tuple of arguments
     ObjectPtr callArgs(const ObjectPtr& func, const ObjectPtr& args);
+    /// Call the named method of a python object with an uncounted set of arguments
+    template <typename... Args>
+    inline ObjectPtr callMethod(const ObjectPtr& obj, const std::string& method, Args&&... args) {
+      return call(getAttribute(obj, method), std::forward<Args>(args)...);
+    }
     /// Call a python function with an uncounted set of arguments
     template <typename... Args>
     inline ObjectPtr call(const ObjectPtr& func, Args&&... args) {
