@@ -55,7 +55,9 @@ namespace cepgen {
 
   void Generator::clearRun() {
     CG_DEBUG("Generator:clearRun") << "Run is set to be cleared.";
-    worker_ = GeneratorWorkerFactory::get().build("trivial");
+    worker_ = GeneratorWorkerFactory::get().build(parameters_->generation().parameters().get<ParametersList>("worker"));
+    CG_DEBUG("Generator:clearRun") << "Initialised a generator worker with parameters: " << worker_->parameters()
+                                   << ".";
     // destroy and recreate the integrator instance
     if (!integrator_)
       resetIntegrator();
