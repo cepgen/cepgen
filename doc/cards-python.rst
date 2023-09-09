@@ -36,7 +36,7 @@ In the following sections, you may find a nonexhaustive (and evolving) list of s
 ``PDG`` parameters block
 ------------------------
 
-.. doxygennamespace:: Cards::Config::PDG_cfi
+.. doxygennamespace:: Config::PDG_cfi
    :members:
 
 This :mod:`PDG` ``Parameters`` container object holding the list of particles definitions is parsed by the CepGen core at the initialisation level.
@@ -113,7 +113,7 @@ In that latter case, :math:`p _ {z,1-2} = \pm \sqrt{s}/2`.
 Equivalently, a ``pdgIds`` pair/list of `integer-type PDG identifiers <http://pdg.lbl.gov/2007/reviews/montecarlorpp.pdf>`_ (complete list handled :ref:`here <pdg-block>`) may be used to control beam particles type.
 A default ``pdgIds = (2212, 2212)`` initial state, or equivalently ``(PDG.proton, PDG.proton)``, is used.
 
-.. doxygenclass:: Cards::Config::StructureFunctions_cfi::StructureFunctions
+.. doxygenclass:: Config::StructureFunctions_cfi::StructureFunctions
    :members:
 
 The ``structureFunctions`` attribute specifies the :math:`F _ {2/L}(\xbj,Q^2)` structure function to use in the parameterisation of the incoming photon fluxes.
@@ -141,7 +141,7 @@ The kinematics phase space to be used in the integration and events production c
 This block is a generic placeholder for all process-dependent parameters.
 The usual basic parameter for this block is the process mode, which tells about the type of kinematics to be considered when defining its phase space:
 
-.. doxygenclass:: Cards::Config::ProcessMode_cfi::ProcessMode
+.. doxygenclass:: Config::ProcessMode_cfi::ProcessMode
    :members:
    :private-members:
    :undoc-members:
