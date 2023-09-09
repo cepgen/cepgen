@@ -22,6 +22,7 @@
 
 // collection of handled objects
 #include "CepGen/Cards/Handler.h"
+#include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
@@ -122,6 +123,7 @@ namespace cepgen {
   template class ModuleFactory<EventModifier, std::string>;
   template class ModuleFactory<EventExporter, std::string>;
   template class ModuleFactory<formfac::Parameterisation, std::string>;
+  template class ModuleFactory<GeneratorWorker, std::string>;
   template class ModuleFactory<Integrator, std::string>;
   template class ModuleFactory<AnalyticIntegrator, std::string>;
   template class ModuleFactory<PartonFlux, std::string>;
