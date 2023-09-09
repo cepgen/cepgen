@@ -41,12 +41,14 @@ namespace cepgen {
       else if (rnd_mode == "MersenneTwister")
         rnd_.reset(new TRandom3);
       else
-        throw CG_FATAL("IntegratorFoam") << "Unrecognised random generator: \"" << rnd_mode << "\".";
+        throw CG_FATAL("FoamGeneratorWorker") << "Unrecognised random generator: \"" << rnd_mode << "\".";
       rnd_->SetSeed(steer<unsigned long long>("seed"));
 
       //--- a bit of printout for debugging
-      CG_DEBUG("Integrator:build") << "FOAM integrator built\n\t"
-                                   << "Version: " << foam_->GetVersion() << ".";
+      CG_DEBUG("FoamGeneratorWorker:build") << "FOAM integrator built\n\t"
+                                            << "Version: " << foam_->GetVersion() << ".";
+      CG_WARNING("FoamGeneratorWorker") << "This wrapping of the Foam generation algorithm implemented in ROOT "
+                                           "libraries is still experimental! Please use with care...";
     }
 
     static ParametersDescription description() {
@@ -85,9 +87,9 @@ namespace cepgen {
 
     /// Compute the weight for a given phase space point
     inline double Density(int ndim, double* x) override {
-      if (!integrand_)
-        throw CG_FATAL("FoamDensity") << "Integrand object not yet initialised!";
-      return integrand_->eval(std::vector<double>(x, x + ndim));
+      if (integrand_)
+        return integrand_->eval(std::vector<double>(x, x + ndim));
+      throw CG_FATAL("FoamGeneratorWorker:density") << "Integrand object was not initialised!";
     }
 
   private:
