@@ -16,10 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <array>
 #include <numeric>
 #include <utility>
-#include <vector>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/SteeredObject.h"
@@ -39,7 +37,7 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      ChristyBosted& eval(double xbj, double q2) override;
+      void eval() override;
 
       //--- already computed internally during F2 computation
       ChristyBosted& computeFL(double, double) override { return *this; }
@@ -195,35 +193,33 @@ namespace cepgen {
       return sig_res + sig_nr;
     }
 
-    ChristyBosted& ChristyBosted::eval(double xbj, double q2) {
-      const double w2 = utils::mX2(xbj, q2, mp2_);
+    void ChristyBosted::eval() {
+      const double w2 = utils::mX2(args_.xbj, args_.q2, mp2_);
       if (sqrt(w2) < mx_min_)
-        return *this;
+        return;
 
       //-----------------------------
       // modification of Christy-Bosted at large q2 as described in the LUXqed paper
       //-----------------------------
-      const double delq2 = q2 - q20_;
+      const double delq2 = args_.q2 - q20_;
       //------------------------------
 
-      double q2_eff = q2, w2_eff = w2;
-      if (q2 > q20_) {
+      double q2_eff = args_.q2, w2_eff = w2;
+      if (args_.q2 > q20_) {
         q2_eff = q20_ + delq2 / (1. + delq2 / (q21_ - q20_));
-        w2_eff = utils::mX2(xbj, q2_eff, mp2_);
+        w2_eff = utils::mX2(args_.xbj, q2_eff, mp2_);
       }
       const double sigT = resmod507(Polarisation::T, w2_eff, q2_eff);
       const double sigL = resmod507(Polarisation::L, w2_eff, q2_eff);
 
-      double f2 =
-          prefactor_ * (1. - xbj) * q2_eff / gamma2(xbj, q2_eff) * (sigT + sigL) / constants::GEVM2_TO_PB * 1.e6;
-      if (q2 > q20_)
+      double f2 = prefactor_ * (1. - args_.xbj) * q2_eff / gamma2(args_.xbj, q2_eff) * (sigT + sigL) /
+                  constants::GEVM2_TO_PB * 1.e6;
+      if (args_.q2 > q20_)
         f2 *= q21_ / (q21_ + delq2);
       setF2(f2);
 
       if (sigT != 0.)
-        Parameterisation::computeFL(q2_eff, xbj, sigL / sigT);
-
-      return *this;
+        Parameterisation::computeFL(q2_eff, args_.xbj, sigL / sigT);
     }
 
     ParametersDescription ChristyBosted::description() {

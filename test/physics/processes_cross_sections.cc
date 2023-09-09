@@ -24,7 +24,6 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Utils/AbortHandler.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/ProgressBar.h"
 #include "CepGen/Utils/Test.h"
 #include "CepGen/Utils/Timer.h"
 
@@ -85,7 +84,7 @@ int main(int argc, char* argv[]) {
     const std::string filename = "test/physics/test_processes/" + test.filename + "_cfg.py";
     try {
       gen.parametersRef().clearProcess();
-      gen.setParameters(cepgen::card::Handler::parse(filename));
+      gen.setParameters(cepgen::card::Handler::parseFile(filename));
 
       gen.parametersRef().par_integrator.setName<std::string>(integrator);
       CG_DEBUG("main") << "Process: " << gen.parameters()->processName() << "\n\t"

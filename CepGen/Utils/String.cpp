@@ -19,19 +19,23 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include <array>
-#include <cmath>
 #include <codecvt>
+#include <cstdint>
 #include <locale>
 #include <unordered_set>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
-#include "CepGen/Utils/Filesystem.h"
+#include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
 #ifndef __APPLE__
 #include <cstring>
+#endif
+#ifdef __GNUG__
+#include <cxxabi.h>
+
+#include <cstdlib>
+#include <memory>
 #endif
 
 namespace cepgen {
@@ -64,7 +68,7 @@ namespace cepgen {
     }
 
     std::string colourise(const std::string& str, const Colour& col, const Modifier& mod) {
-      if (!isatty(fileno(stdout)))
+      if (!Logger::get().isTTY())
         return str;
       std::string out;
       auto get_mod_str = [](const Colour& col, const Modifier& mod) -> std::string {
@@ -124,9 +128,9 @@ namespace cepgen {
     std::string replace_all(const std::string& str, const std::string& from, const std::string& to) {
       auto out{str};
       if (replace_all(out, from, to) == 0)
-        CG_DEBUG("replace_all") << "No occurrence of {"
-                                << replace_all(from, {{"\n", "\\n"}, {"\t", "\\t"}, {"\r", "\\r"}})
-                                << "} found in input string.";
+        CG_DEBUG_LOOP("replace_all") << "No occurrence of {"
+                                     << replace_all(from, {{"\n", "\\n"}, {"\t", "\\t"}, {"\r", "\\r"}})
+                                     << "} found in input string.";
       return out;
     }
 
@@ -143,6 +147,16 @@ namespace cepgen {
       return out;
     }
 
+    template <typename T>
+    std::string to_string(const T& input) {
+      return std::to_string(input);
+    }
+
+    template <>
+    std::string to_string(const std::string& input) {
+      return input;
+    }
+
     std::string randomString(size_t size) {
       std::stringstream out;
       for (size_t i = 0; i < size; ++i)
@@ -150,14 +164,14 @@ namespace cepgen {
       return out.str();
     }
 
-    std::vector<std::string> split(const std::string& str, char delim) {
+    std::vector<std::string> split(const std::string& str, char delim, bool trim) {
       std::vector<std::string> out;
       if (str.empty())
         return out;
       std::string token;
       std::istringstream iss(str);
       while (std::getline(iss, token, delim))
-        out.emplace_back(token);
+        out.emplace_back(trim ? ltrim(rtrim(token)) : token);
       return out;
     }
 
@@ -253,6 +267,17 @@ namespace cepgen {
       typedef std::codecvt_utf8_utf16<wchar_t> convert_type;
       std::wstring_convert<convert_type, wchar_t> converter;
       return converter.from_bytes(str);
+    }
+
+    std::string demangle(const char* name) {
+#ifdef __GNUG__
+      int status = -4;  // some arbitrary value to eliminate the compiler warning
+      // enable c++11 by passing the flag -std=c++11 to g++
+      std::unique_ptr<char, void (*)(void*)> res{abi::__cxa_demangle(name, NULL, NULL, &status), std::free};
+      return status == 0 ? res.get() : name;
+#else
+      return name;
+#endif
     }
 
     std::vector<std::string> between(const std::string& str, const std::string& beg, const std::string& end) {

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2018-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,9 +32,49 @@ namespace mstw {
   class Grid final : public cepgen::strfun::Parameterisation, private cepgen::GridHandler<2, 2> {
   public:
     /// Grid MSTW structure functions evaluator
-    explicit Grid(const cepgen::ParametersList&);
+    explicit Grid(const cepgen::ParametersList& params)
+        : cepgen::strfun::Parameterisation(params), cepgen::GridHandler<2, 2>(cepgen::GridType::logarithmic) {
+      {  // file readout part
+        const auto& grid_path = steerPath("gridPath");
+        std::ifstream file(grid_path, std::ios::binary | std::ios::in);
+        if (!file.is_open())
+          throw CG_FATAL("MSTW") << "Failed to load grid file \"" << grid_path << "\"!";
 
-    static cepgen::ParametersDescription description();
+        file.read(reinterpret_cast<char*>(&header_), sizeof(header_t));
+
+        // first checks on the file header
+
+        if (header_.magic != GOOD_MAGIC)
+          throw CG_FATAL("MSTW") << "Wrong magic number retrieved: " << header_.magic << ", expecting " << GOOD_MAGIC
+                                 << ".";
+
+        if (header_.nucleon != header_t::proton)
+          throw CG_FATAL("MSTW") << "Only proton structure function grids can be retrieved for this purpose!";
+
+        // retrieve all points and evaluate grid boundaries
+
+        sfval_t val{};
+        while (file.read(reinterpret_cast<char*>(&val), sizeof(sfval_t)))
+          insert({val.xbj, val.q2}, {val.f2, val.fl});
+        file.close();
+      }
+
+      init();
+
+      const auto& bounds = boundaries();
+      CG_DEBUG("MSTW") << "MSTW@" << header_.order << " grid evaluator built "
+                       << "for " << header_.nucleon << " structure functions (" << header_.cl << ")\n\t"
+                       << "xBj in range [" << std::pow(10., bounds[0].min()) << ":" << std::pow(10., bounds[0].max())
+                       << "], Q² in range [" << std::pow(10., bounds[1].min()) << ":" << std::pow(10., bounds[1].max())
+                       << "].";
+    }
+
+    static cepgen::ParametersDescription description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("MSTW grid (perturbative)");
+      desc.add<std::string>("gridPath", "mstw_sf_scan_nnlo.dat").setDescription("Path to the MSTW grid content");
+      return desc;
+    }
 
     /// Grid header information as parsed from the file
     struct header_t {
@@ -58,7 +98,11 @@ namespace mstw {
     };
 
     /// Compute the structure functions at a given \f$Q^2/x_{\rm Bj}\f$
-    Grid& eval(double xbj, double q2) override;
+    void eval() override {
+      const auto& val = cepgen::GridHandler<2, 2>::eval({args_.xbj, args_.q2});
+      setF2(val.at(0));
+      setFL(val.at(1));
+    }
     /// Retrieve the grid's header information
     header_t header() const { return header_; }
 
@@ -72,70 +116,13 @@ namespace mstw {
     header_t header_ = {};
   };
 
-  std::ostream& operator<<(std::ostream&, const Grid::sfval_t&);  ///< Human-readable description of a values point
-  std::ostream& operator<<(std::ostream&,
-                           const Grid::header_t::order_t&);  ///< Human-readable description of an interpolation order
-  std::ostream& operator<<(std::ostream&,
-                           const Grid::header_t::cl_t&);  ///< Human-readable description of a confidence level
-  std::ostream& operator<<(std::ostream&,
-                           const Grid::header_t::nucleon_t&);  ///< Human-readable description of a nucleon type
-
-  Grid::Grid(const cepgen::ParametersList& params)
-      : cepgen::strfun::Parameterisation(params), cepgen::GridHandler<2, 2>(cepgen::GridType::logarithmic) {
-    {  // file readout part
-      const auto& grid_path = steerPath("gridPath");
-      std::ifstream file(grid_path, std::ios::binary | std::ios::in);
-      if (!file.is_open())
-        throw CG_FATAL("MSTW") << "Failed to load grid file \"" << grid_path << "\"!";
-
-      file.read(reinterpret_cast<char*>(&header_), sizeof(header_t));
-
-      // first checks on the file header
-
-      if (header_.magic != GOOD_MAGIC)
-        throw CG_FATAL("MSTW") << "Wrong magic number retrieved: " << header_.magic << ", expecting " << GOOD_MAGIC
-                               << ".";
-
-      if (header_.nucleon != header_t::proton)
-        throw CG_FATAL("MSTW") << "Only proton structure function grids can be retrieved for this purpose!";
-
-      // retrieve all points and evaluate grid boundaries
-
-      sfval_t val{};
-      while (file.read(reinterpret_cast<char*>(&val), sizeof(sfval_t)))
-        insert({val.xbj, val.q2}, {val.f2, val.fl});
-      file.close();
-    }
-
-    init();
-
-    const auto& bounds = boundaries();
-    CG_DEBUG("MSTW") << "MSTW@" << header_.order << " grid evaluator built "
-                     << "for " << header_.nucleon << " structure functions (" << header_.cl << ")\n\t"
-                     << "xBj in range [" << std::pow(10., bounds[0].first) << ":" << std::pow(10., bounds[0].second)
-                     << "], Q² in range [" << std::pow(10., bounds[1].first) << ":" << std::pow(10., bounds[1].second)
-                     << "].";
-  }
-
-  Grid& Grid::eval(double xbj, double q2) {
-    const auto& val = cepgen::GridHandler<2, 2>::eval({xbj, q2});
-    setF2(val.at(0));
-    setFL(val.at(1));
-    return *this;
-  }
-
-  cepgen::ParametersDescription Grid::description() {
-    auto desc = Parameterisation::description();
-    desc.setDescription("MSTW grid (perturbative)");
-    desc.add<std::string>("gridPath", "mstw_sf_scan_nnlo.dat").setDescription("Path to the MSTW grid content");
-    return desc;
-  }
-
+  /// Human-readable description of a values point
   std::ostream& operator<<(std::ostream& os, const Grid::sfval_t& val) {
     return os << cepgen::utils::format(
                "xbj = %.4f\tQ² = %.5e GeV²\tF_2 = % .6e\tF_1 = % .6e", val.xbj, val.q2, val.f2, val.fl);
   }
 
+  /// Human-readable description of an interpolation order
   std::ostream& operator<<(std::ostream& os, const Grid::header_t::order_t& order) {
     switch (order) {
       case Grid::header_t::lo:
@@ -148,6 +135,7 @@ namespace mstw {
     return os;
   }
 
+  /// Human-readable description of a confidence level
   std::ostream& operator<<(std::ostream& os, const Grid::header_t::cl_t& cl) {
     switch (cl) {
       case Grid::header_t::cl68:
@@ -158,6 +146,7 @@ namespace mstw {
     return os;
   }
 
+  /// Human-readable description of a nucleon type
   std::ostream& operator<<(std::ostream& os, const Grid::header_t::nucleon_t& nucl) {
     switch (nucl) {
       case Grid::header_t::proton:
@@ -168,5 +157,5 @@ namespace mstw {
     return os;
   }
 }  // namespace mstw
-typedef mstw::Grid MSTWgrid;
-REGISTER_STRFUN(205, MSTWgrid);
+using mstw::Grid;
+REGISTER_STRFUN(205, Grid);

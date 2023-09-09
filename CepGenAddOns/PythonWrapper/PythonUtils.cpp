@@ -64,6 +64,10 @@ namespace cepgen {
       return ObjectPtr(PyObject_GetAttrString(obj, attr.c_str()));  // new
     }
 
+    void setAttribute(const ObjectPtr& obj, const std::string& attr, const ObjectPtr& value) {
+      PyObject_SetAttrString(obj.get(), attr.c_str(), value.get());
+    }
+
     std::vector<std::wstring> info() {
       auto* py_home = Py_GetPythonHome();
 #ifdef PYTHON2
@@ -77,19 +81,6 @@ namespace cepgen {
           utils::towstring("Platform: " + std::string(Py_GetPlatform())),
           utils::towstring("Home directory: ") + home,
           utils::towstring("Parsed path: ") + path};
-    }
-
-    void print(PyObject* obj) {
-      /*char* buffer;  //std::array<char, 1024> buffer{' '};
-      size_t size = 0;
-      //std::unique_ptr<FILE, decltype(&fclose)> pipe(fmemopen(buffer.data(), buffer.size(), "rb"), fclose);
-      std::unique_ptr<FILE, decltype(&fclose)> pipe(open_memstream(&buffer, &size), fclose);
-      PyObject_Print(obj, pipe.get(), Py_PRINT_RAW);
-      CG_LOG.log([&buffer, &size](auto& log) {
-        for (size_t i = 0; i < size; ++i)
-          log << buffer[i];
-      });*/
-      CG_LOG << get<std::string>(PyObject_Repr(obj));
     }
 
     void fillParameter(PyObject* parent, const char* key, bool& out) {
@@ -250,6 +241,11 @@ namespace cepgen {
       } catch (const Exception& e) {
         PY_ERROR << "Failed to retrieve parameters list collection object \"" << key << "\":\n\t" << e.message();
       }
+    }
+
+    ObjectPtr callArgs(const ObjectPtr& func, const ObjectPtr& args) {
+      return ObjectPtr(PyObject_CallObject(func.get(),
+                                           args.get()));  // new
     }
   }  // namespace python
 }  // namespace cepgen

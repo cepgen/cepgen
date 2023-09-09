@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
@@ -24,7 +23,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Fortran/KTStructures.h"
 #include "CepGen/Process/FortranKTProcess.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/Message.h"
 
 namespace {
   extern "C" {
@@ -70,7 +69,7 @@ namespace cepgen {
     ParametersList FortranKTProcess::kProcParameters;  ///< List of parameters to steer the process
 
     FortranKTProcess::FortranKTProcess(const ParametersList& params, std::function<double(void)> func)
-        : KTProcess(params, {{PDG::photon, PDG::photon}}, {PDG::muon, PDG::muon}), func_(func) {
+        : KTProcess(params, {PDG::muon, PDG::muon}), func_(func) {
       constants_.m_p = Process::mp_;
       constants_.units = constants::GEVM2_TO_PB;
       constants_.pi = M_PI;

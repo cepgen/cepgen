@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,11 +20,11 @@
 #include <TH2D.h>
 #include <TMultiGraph.h>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
 #include "CepGen/Utils/Histogram.h"
+#include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenAddOns/ROOTWrapper/ROOTCanvas.h"
 
@@ -188,7 +188,7 @@ namespace cepgen {
       obj->GetXaxis()->SetTitle(delatexify(dr.xAxis().label()));
       obj->GetYaxis()->SetTitle(delatexify(dr.yAxis().label()));
       if (xrng.valid())
-        obj->GetXaxis()->SetRangeUser(xrng.min(), xrng.max());
+        obj->GetXaxis()->SetLimits(xrng.min(), xrng.max());
       if (yrng.valid()) {
         if (yrng.hasMin())
           obj->SetMinimum(yrng.min());

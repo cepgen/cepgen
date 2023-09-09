@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@
 #include <cstring>
 #include <vector>
 
+#include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
 
 namespace cepgen {
@@ -73,11 +74,12 @@ namespace cepgen {
     /// \param[in] name Canvas name (and subsequently filename on save)
     /// \param[in] ratio Divide the canvas into a main and ratio plots subparts?
     explicit inline ROOTCanvas(const std::string& name, const std::string& title = "", bool ratio = false)
-        : TCanvas(name.c_str(), "", 600, 600), title_(title), ratio_(ratio) {
+        : TCanvas(name.c_str(), "", 600, 600), ratio_(ratio) {
       gStyle->SetOptStat(0);
       gStyle->SetGridColor(17);
       gStyle->SetEndErrorSize(0);
       Build();
+      SetTopLabel(title);
     }
     inline ~ROOTCanvas() {}
 
@@ -163,17 +165,6 @@ namespace cepgen {
         obj->SetTitle("");
       }
       //else obj->GetXaxis()->SetTitle(ttle);
-    }
-
-    inline void DrawDiagonal(const TH1* obj) {
-      TLine l;
-      l.SetLineWidth(2);
-      l.SetLineColor(kGray);
-      l.SetLineStyle(2);
-      l.DrawLine(obj->GetXaxis()->GetXmin(),
-                 obj->GetYaxis()->GetXmin(),
-                 obj->GetXaxis()->GetXmax(),
-                 obj->GetYaxis()->GetXmax());
     }
 
     inline std::vector<TH1*> RatioPlot(TH1* denom,
@@ -262,17 +253,19 @@ namespace cepgen {
     /// Specify the text to show on top of the canvas
     inline void SetTopLabel(const std::string& lab) {
       TCanvas::cd();
-      title_ = "CepGen v" + version::tag;
+      std::string title = "CepGen v" + version::tag;
       if (!lab.empty())
-        title_ += " - " + lab;
+        title += " - " + lab;
       if (!top_label_)
         BuildTopLabel();
       else
         top_label_->Clear();
-      top_label_->AddText(title_.data());
+      top_label_->AddText(title.data());
       //top_label_->Draw();
     }
 
+    /// Set the placement strategy for the legend
+    inline void SetLegendMode(const std::string& mode) { leg_mode_ = mode; }
     /// Set the horizontal coordinate of the low-left part of the legend object
     /// \note To be called before the first legend entry is added
     inline void SetLegendX1(double x) {
@@ -297,6 +290,7 @@ namespace cepgen {
         leg_->SetY1(leg_->GetY1() - (num_entries - 3) * 0.01);
       if (num_entries > 6) {
         leg_->SetNColumns(1 + num_entries / 6);
+        leg_width_ = 0.55;
         leg_->SetTextSize(0.035);
       }
     }
@@ -306,15 +300,36 @@ namespace cepgen {
       if (extensions.empty())
         return;
       TCanvas::cd();
-      if (leg_)
-        leg_->Draw();
       if (top_label_)
         top_label_->Draw();
+      if (leg_) {
+        if (TPad::PlaceBox(leg_.get(), leg_width_ * 1.15, leg_height_, leg_x1_, leg_y1_, leg_mode_.data())) {
+          leg_y1_ = std::min(leg_y1_, 0.9 - leg_height_);
+          leg_->SetX1(leg_x1_);
+          leg_->SetX2(leg_x1_ + leg_width_);
+          leg_->SetY1(leg_y1_);
+          leg_->SetY2(leg_y1_ + leg_height_);
+        }
+        leg_->Draw();
+      }
       for (const auto& extension : extensions)
         TCanvas::SaveAs(Form("%s/%s.%s", out_dir.c_str(), TCanvas::GetName(), extension.c_str()));
     }
     /// Retrieve the legend object (if produced)
     inline TLegend* GetLegend() { return leg_.get(); }
+    inline void Place(TLegend* leg, const Option_t* mode = "lt") {
+      if (!leg)
+        return;
+      double leg_x, leg_y;
+      const auto leg_width = leg->GetX2() - leg->GetX1(), leg_height = leg->GetY2() - leg->GetY1();
+      if (TPad::PlaceBox(leg, leg_width * 1.15, leg_height, leg_x, leg_y, mode)) {
+        leg->SetX1(leg_x);
+        leg->SetX2(leg_x + leg_width);
+        leg->SetY1(leg_y);
+        leg->SetY2(leg_y + leg_height);
+      }
+      leg->Draw();
+    }
 
   private:
     /// Prepare the canvas for later drawing
@@ -327,7 +342,6 @@ namespace cepgen {
       TCanvas::SetFillStyle(0);
       Pad()->SetFillStyle(0);
 
-      SetTopLabel("");
       if (ratio_)
         DivideCanvas();
     }
@@ -369,7 +383,7 @@ namespace cepgen {
         return;
       if (ratio_)
         TCanvas::cd(1);
-      leg_.reset(new TLegend(leg_x1_, leg_y1_, leg_x1_ + 0.45, leg_y1_ + 0.15));
+      leg_.reset(new TLegend);
       leg_->SetLineColor(kWhite);
       leg_->SetLineWidth(0);
       leg_->SetFillStyle(0);
@@ -387,9 +401,10 @@ namespace cepgen {
       return dynamic_cast<T*>(grb_obj_.rbegin()->get());
     }
 
-    std::string title_;
     bool ratio_;
+    std::string leg_mode_{"rt"};
     double leg_x1_{0.5}, leg_y1_{0.75};
+    double leg_width_{0.45}, leg_height_{0.15};
     std::unique_ptr<TLegend> leg_;
     std::unique_ptr<ROOTPaveText> top_label_;
     std::vector<std::unique_ptr<TObject> > grb_obj_;

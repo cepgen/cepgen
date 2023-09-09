@@ -41,7 +41,7 @@ namespace cepgen {
 #endif
           static ParametersDescription description() {
       auto desc = Coupling::description();
-      desc.setDescription("Perturbative PDF-oriented evolution algorithm");
+      desc.setDescription("LHAPDF pert.PDF-orient.evol.algo.");
       desc.add<std::string>("pdfSet", "cteq66");
       desc.add<int>("pdfMember", 0);
       return desc;

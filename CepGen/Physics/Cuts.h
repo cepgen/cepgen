@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2017-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 #define CepGen_Physics_Cuts_h
 
 #include <unordered_map>
-#include <vector>
 
 #include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Event/Particle.h"
@@ -98,3 +97,4 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
+

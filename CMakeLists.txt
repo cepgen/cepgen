@@ -125,7 +125,7 @@ file(GLOB_RECURSE input_cards RELATIVE ${PROJECT_SOURCE_DIR} Cards/*)
 foreach(_files ${input_cards})
   configure_file(${_files} ${_files} COPYONLY)
 endforeach()
-file(GLOB external_files ${PROJECT_SOURCE_DIR}/External/*.dat ${PROJECT_SOURCE_DIR}/External/*.mcd)
+file(GLOB external_files ${PROJECT_SOURCE_DIR}/External/*.dat ${PROJECT_SOURCE_DIR}/External/mass_width_*.txt)
 file(COPY ${external_files} DESTINATION ${PROJECT_BINARY_DIR})
 file(GLOB readme_file ${PROJECT_SOURCE_DIR}/CepGen/README)
 file(COPY ${readme_file} DESTINATION ${PROJECT_BINARY_DIR})
@@ -143,6 +143,9 @@ endif()
 
 #----- installation rules
 
+install(DIRECTORY python
+  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
+  COMPONENT lib FILES_MATCHING PATTERN "*.py")
 install(DIRECTORY Cards
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
   COMPONENT lib FILES_MATCHING PATTERN "*.py")

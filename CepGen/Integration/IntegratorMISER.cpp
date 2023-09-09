@@ -21,8 +21,6 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/IntegratorGSL.h"
 #include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Parameters.h"
-#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   /// MISER integration algorithm developed by W.H. Press and G.R. Farrar, as documented in \cite Press:1989vk.

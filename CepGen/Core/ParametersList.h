@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2021  Laurent Forthomme
+ *  Copyright (C) 2018-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -103,7 +103,7 @@ namespace cepgen {
     /// Get a parameter value
     template <typename T>
     T get(const std::string& key, const T& def = default_arg<T>::get()) const;
-    /// Get a recasted parameter value
+    /// Get a recast parameter value
     template <typename T, typename U>
     inline U getAs(const std::string& key, const U& def = default_arg<U>::get()) const {
       return static_cast<U>(get<T>(key, static_cast<T>(def)));
@@ -114,7 +114,7 @@ namespace cepgen {
     /// Set a parameter value
     template <typename T>
     ParametersList& set(std::string key, const T& value);
-    /// Set a recasted parameter value
+    /// Set a recast parameter value
     template <typename T, typename U>
     inline ParametersList& setAs(std::string key, const U& value) {
       return set<T>(std::move(key), static_cast<T>(value));
@@ -181,3 +181,4 @@ namespace cepgen {
 
 #undef DEFINE_TYPE
 #endif
+

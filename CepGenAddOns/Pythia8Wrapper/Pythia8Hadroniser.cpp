@@ -26,11 +26,9 @@
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Parameters.h"
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Hadroniser.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Utils/String.h"
 #include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
 namespace cepgen {
@@ -58,7 +56,7 @@ namespace cepgen {
       static constexpr unsigned short PYTHIA_STATUS_IN_BEAM = 12;
       static constexpr unsigned short PYTHIA_STATUS_IN_PARTON_KT = 61;
 
-      Kinematics::pdgids_t min_ids_;
+      pdgids_t min_ids_;
       std::unordered_map<short, short> py_cg_corresp_;
       unsigned short findRole(const Event& ev, const Pythia8::Particle& p) const;
       void updateEvent(Event& ev, double& weight) const;

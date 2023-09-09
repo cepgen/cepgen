@@ -73,7 +73,7 @@ namespace cepgen {
     double FunctionalPython::eval() const {
       auto args = python::newTuple(values_);
       try {
-        python::ObjectPtr value(PyObject_CallObject(func_.get(), args.get()));  // new
+        auto value = python::callArgs(func_, args);
         if (!value)
           throw PY_ERROR;
         return python::get<double>(value.get());

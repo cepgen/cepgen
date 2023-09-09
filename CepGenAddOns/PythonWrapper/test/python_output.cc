@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,14 +21,12 @@
 #include "CepGenAddOns/PythonWrapper/Error.h"
 #include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 // clang-format on
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Test.h"
 #include "CepGenAddOns/PythonWrapper/PythonConfigWriter.h"
 
 using namespace std;
@@ -55,25 +53,14 @@ int main(int argc, char* argv[]) {
     const auto path = cepgen::python::pythonPath(output_file);
     env.setProgramName(path);
     auto obj = cepgen::python::importModule(path);
-    if (!obj) {
-      CG_LOG << "Failed to import the module.";
-      return -1;
-    }
+    CG_TEST(obj != nullptr, "Module import");
     //CG_LOG << cepgen::python::get<cepgen::ParametersList>(PyObject_GenericGetDict(obj.get(), nullptr));
     auto proc = cepgen::python::getAttribute(obj, "process");
-    if (!proc) {
-      CG_LOG << "Failed to retrieve a 'process' attribute.";
-      return -1;
-    }
+    CG_TEST(proc != nullptr, "'process' attribute retrieval");
     const auto proc_params = cepgen::python::get<cepgen::ParametersList>(proc);
-    if (proc_params.name<std::string>() != process) {
-      CG_LOG << "Process name was not conserved in Python file output.";
-      return -1;
-    }
+    CG_TEST_EQUAL(proc_params.name<std::string>(), process, "Process name conservation");
   } catch (const cepgen::python::Error& err) {
     err.dump();
   }
-  CG_LOG << "All tests passed.";
-
-  return 0;
+  CG_TEST_SUMMARY;
 }

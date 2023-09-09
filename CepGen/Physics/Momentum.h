@@ -172,6 +172,8 @@ namespace cepgen {
 
     /// Beta scalar value
     double beta() const;
+    /// Squared gamma scalar value
+    double gamma2() const;
     /// Gamma scalar value
     double gamma() const;
 

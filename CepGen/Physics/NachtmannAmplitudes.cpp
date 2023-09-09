@@ -22,7 +22,6 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/NachtmannAmplitudes.h"
-#include "CepGen/Physics/PDG.h"
 
 namespace cepgen {
   NachtmannAmplitudes::NachtmannAmplitudes(const ParametersList& params)
@@ -59,16 +58,6 @@ namespace cepgen {
     setCosTheta((that - uhat) / shat / beta);
   }
 
-  bool NachtmannAmplitudes::Kinematics::operator!=(const Kinematics& oth) const {
-    // checking only the base variables as all others are computed from these three
-    return shat != oth.shat || that != oth.that || uhat != oth.uhat;
-  }
-
-  std::ostream& operator<<(std::ostream& os, const NachtmannAmplitudes::Kinematics& kin) {
-    return os << "Kin{mW2=" << kin.mw2_ << ",shat=" << kin.shat << ",that=" << kin.that << ",uhat=" << kin.uhat
-              << ",beta=" << kin.beta << ",gamma=" << kin.gamma << ",cos(theta)=" << kin.cos_theta << "}";
-  }
-
   NachtmannAmplitudes::Kinematics NachtmannAmplitudes::Kinematics::fromScosTheta(double shat,
                                                                                  double cos_theta,
                                                                                  double mw2) {
@@ -81,8 +70,19 @@ namespace cepgen {
     cos_theta = cth;
     cos_theta2 = cos_theta * cos_theta;
     sin_theta2 = 1. - cos_theta2;
-    sin_theta = sqrt(sin_theta2);
+    sin_theta = sqrt(fabs(sin_theta2));
     invA = 1. / (1. - beta2 * cos_theta2);
+  }
+
+  bool NachtmannAmplitudes::Kinematics::operator!=(const Kinematics& oth) const {
+    // checking only the base variables as all others are computed from these three
+    return shat != oth.shat || that != oth.that || uhat != oth.uhat;
+  }
+
+  std::ostream& operator<<(std::ostream& os, const NachtmannAmplitudes::Kinematics& kin) {
+    return os << "Kin{mW2=" << kin.mw2_ << ",shat=" << kin.shat << ",that=" << kin.that << ",uhat=" << kin.uhat
+              << ",beta=" << kin.beta << ",gamma=" << kin.gamma << ",cos(theta)=" << kin.cos_theta
+              << "->1/A=" << kin.invA << "}";
   }
 
   std::complex<double> NachtmannAmplitudes::operator()(

@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
       .parse();
 
   cepgen::Generator gen;
-  gen.setParameters(cepgen::card::Handler::parse(input_card));
+  gen.setParameters(cepgen::card::Handler::parseFile(input_card));
   gen.parametersRef().eventExportersSequence().clear();
   for (auto iev = 0; iev < num_events; ++iev)
     gen.next();

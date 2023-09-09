@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
 // clang-format off
 #include "CepGenAddOns/PythonWrapper/Error.h"
 #include "CepGenAddOns/PythonWrapper/PythonTypes.h"
-#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 // clang-format on
 
 #include "CepGen/Core/Exception.h"
@@ -29,19 +28,52 @@
 namespace cepgen {
   namespace python {
     void ObjectPtrDeleter::operator()(PyObject* obj) {
-      CG_DEBUG("Python:ObjectPtrDeleter")
-          << "Destroying object at addr 0x" << obj << " (reference count: " << obj->ob_refcnt
-          << ", type: " << obj->ob_type->tp_name << ")";
+      CG_DEBUG("Python:ObjectPtrDeleter").log([&obj](auto& log) {
+        log << "Destroying object at addr 0x" << obj << " (";
+#if PY_VERSION_HEX >= 0x03110000
+        auto* type = Py_TYPE(obj);
+        if (type)
+          log << "type: " << get<std::string>(PyType_GetName(type)) << ", ";
+#endif
+        log << "reference count: " << Py_REFCNT(obj) << ")";
+      });
       Py_DECREF(obj);
+    }
+
+    std::ostream& operator<<(std::ostream& os, const ObjectPtr& ptr) {
+      os << "PyObject{";
+      auto repr = ObjectPtr(PyObject_Str(ptr.get()));  // new
+      if (repr)
+        os << get<std::string>(repr);
+      return os << "}";
     }
 
     ObjectPtr importModule(const std::string& mod_name) {
       return ObjectPtr(PyImport_ImportModule(mod_name.c_str()));  // new
     }
 
+    ObjectPtr defineModule(const std::string& mod_name, const std::string& code) {
+      auto mod = ObjectPtr(PyImport_AddModule(mod_name.data()));
+      if (!mod)
+        throw PY_ERROR << "Failed to add the module.";
+      auto* local_dict = PyModule_GetDict(mod.get());
+      if (!local_dict)
+        throw PY_ERROR << "Failed to retrieve the local dictionary from module.";
+      auto run = ObjectPtr(PyRun_String(code.data(), Py_file_input, local_dict, local_dict));
+      CG_DEBUG("Python:defineModule") << "New '" << mod_name << "' module initialised from Python code parsing.\n"
+                                      << "List of attributes: " << getVector<std::string>(PyObject_Dir(mod.get()))
+                                      << ".";
+      return mod;
+    }
+
     //------------------------------------------------------------------
     // typed retrieval helpers
     //------------------------------------------------------------------
+
+    template <>
+    ObjectPtr set<PyObject*>(PyObject* const& obj) {
+      return ObjectPtr(obj);
+    }
 
     template <>
     bool is<int>(PyObject* obj) {
@@ -207,22 +239,30 @@ namespace cepgen {
     template <typename T>
     bool isVector(PyObject* obj) {
       if (!obj)
+        throw CG_ERROR("Python:isVector") << "Object is not a vector ; in fact, it is not even an object.";
+      const bool tuple = PyTuple_Check(obj), list = PyList_Check(obj);
+      if (!tuple && !list)
         return false;
-      if (!PyTuple_Check(obj) && !PyList_Check(obj))
-        return false;
-      const bool tuple = PyTuple_Check(obj);
-      if ((tuple ? PyTuple_Size(obj) : PyList_Size(obj)) == 0)
+      const auto size = tuple ? PyTuple_Size(obj) : list ? PyList_Size(obj) : 0;
+      if (size == 0)
         return true;
-      auto* pfirst = tuple ? PyTuple_GetItem(obj, 0) : PyList_GetItem(obj, 0);
-      if (!is<T>(pfirst))
+      auto* pfirst = tuple ? PyTuple_GetItem(obj, 0) : list ? PyList_GetItem(obj, 0) : nullptr;
+      if (!pfirst)
         return false;
+      if (!is<T>(pfirst)) {  // only allow same-type tuples/lists
+        CG_DEBUG("Python::isVector") << "Wrong object type unpacked from tuple/list: (python)"
+                                     << pfirst->ob_type->tp_name << " != (c++)" << utils::demangle(typeid(T).name())
+                                     << ".";
+        return false;
+      }
       return true;
     }
 
     template <typename T>
     std::vector<T> getVector(PyObject* obj) {
       if (!isVector<T>(obj))
-        throw CG_ERROR("Python:get") << "Object has invalid type: list/tuple != \"" << obj->ob_type->tp_name << "\".";
+        throw CG_ERROR("Python:getVector")
+            << "Object has invalid type: list/tuple != \"" << obj->ob_type->tp_name << "\".";
       std::vector<T> vec;
       const bool tuple = PyTuple_Check(obj);
       const Py_ssize_t num_entries = tuple ? PyTuple_Size(obj) : PyList_Size(obj);
@@ -241,6 +281,14 @@ namespace cepgen {
       ObjectPtr tuple(PyTuple_New(vec.size()));
       for (size_t i = 0; i < vec.size(); ++i)
         PyTuple_SetItem(tuple.get(), i, set<T>(vec.at(i)).release());
+      return tuple;
+    }
+
+    template <>
+    ObjectPtr newTuple(const std::vector<PyObject*>& vec) {
+      ObjectPtr tuple(PyTuple_New(vec.size()));
+      for (size_t i = 0; i < vec.size(); ++i)
+        PyTuple_SetItem(tuple.get(), i, vec.at(i));
       return tuple;
     }
 

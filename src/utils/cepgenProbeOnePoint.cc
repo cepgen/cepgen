@@ -17,11 +17,11 @@
  */
 
 #include "CepGen/Cards/Handler.h"
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/Message.h"
 
 using namespace std;
 
@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
       .parse();
 
   cepgen::Generator gen;
-  gen.setParameters(cepgen::card::Handler::parse(input_card));
+  gen.setParameters(cepgen::card::Handler::parseFile(input_card));
 
   const auto ndim = gen.parameters()->process().ndim();
   if (point.size() < 2)

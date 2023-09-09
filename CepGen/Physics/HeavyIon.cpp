@@ -72,21 +72,21 @@ namespace cepgen {
     switch (Z) {
       case Element::H: {
         if (A == 1)  // simple proton
-          return 0.7;
+          return 0.841e-15;
         else  // deuteron
-          return 2.1;
+          return 2.128e-15;
       }
       case Element::Cu:
-        return 4.214;
+        return 4.214e-15;
       case Element::Xe:
-        return 5.36;
+        return 5.36e-15;
       case Element::Au:
-        return 6.38;
+        return 6.38e-15;
       case Element::Pb:
-        return 6.624;
+        return 6.624e-15;
       default: {
         CG_WARNING("HeavyIon:radius") << "Using hard-sphere approximation R ~ 1.2 A^(1/3).";
-        return 1.2 * cbrt(A);
+        return 1.2e-15 * cbrt(A);
       }
     }
   }

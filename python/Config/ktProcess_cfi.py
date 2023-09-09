@@ -22,6 +22,11 @@ class HeavyIonFlux:
     PhotonElastic         = 'ElasticHeavyIonKT'
 
 
+class ElectronFlux:
+    """Type of parton (from electron) flux modelling"""
+    PhotonElasticBudnev   = 'BudnevElasticElectronKT'
+
+
 process = Module('ktProcess',
     outKinematics = Parameters(
         #--- cuts on initial-state partons

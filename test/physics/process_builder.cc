@@ -58,7 +58,6 @@ int main(int argc, char* argv[]) {
         << " *) has event? " << proc->hasEvent() << "\n";
     if (proc->hasEvent()) {  //--- dump a typical event content
       log << "    event content (invalid kinematics, only check the parentage):\n";
-      proc->addEventContent();
       proc->event().dump();
     }
   });

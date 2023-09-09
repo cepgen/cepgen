@@ -22,12 +22,10 @@
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/Utils/String.h"
 
 using namespace cepgen;
 
@@ -61,7 +59,7 @@ public:
   explicit LPAIR(const cepgen::ParametersList& params)
       : proc::Process(params),
         opt_(steer<int>("nopt")),
-        pair_(params_.has<ParticleProperties>("pair") ? steer<ParticleProperties>("pair").pdgid : steer<int>("pair")),
+        pair_(steer<ParticleProperties>("pair")),
         symmetrise_(steer<bool>("symmetrise")),
         rnd_phi_(0., 2. * M_PI),
         rnd_side_(0, 1) {}
@@ -83,7 +81,7 @@ public:
                                     {Particle::Parton2, PDG::photon}},
                                    {{Particle::OutgoingBeam1, {PDG::proton}},
                                     {Particle::OutgoingBeam2, {PDG::proton}},
-                                    {Particle::CentralSystem, {pair_, pair_}}});
+                                    {Particle::CentralSystem, {pair_.pdgid, pair_.pdgid}}});
   }
   double computeWeight() override;
   void prepareKinematics() override;
@@ -93,7 +91,7 @@ public:
     auto desc = proc::Process::description();
     desc.setDescription("γγ → l⁺l¯ (LPAIR)");
     desc.add<int>("nopt", 0).setDescription("Optimised mode? (inherited from LPAIR, by default disabled = 0)");
-    desc.add<int>("pair", (int)PDG::muon).setDescription("Lepton pair considered");
+    desc.addAs<int, pdgid_t>("pair", PDG::muon).setDescription("Lepton pair considered");
     desc.add<bool>("symmetrise", false).setDescription("Symmetrise along z the central system?");
     return desc;
   }
@@ -159,7 +157,7 @@ private:
 
   /// Internal switch for the optimised code version (LPAIR legacy)
   const int opt_;
-  const cepgen::pdgid_t pair_;
+  const cepgen::ParticleProperties pair_;
   const bool symmetrise_;
 
   // mapped variables
@@ -381,7 +379,7 @@ bool LPAIR::pickin() {
   double t1_min = (masses_.w31 * d3 + (d3 - masses_.w31) * (d3 * mA2() - masses_.w31 * mB2()) / s()) /
                   t1_max;  // definition from eq. (A.5) in [1]
 
-  // FIXME dropped in CDF version
+  // this part was dropped in CDF version
   if (t1_max > -kinematics().cuts().initial.q2.min()) {
     CG_DEBUG_LOOP("LPAIR") << "t1max = " << t1_max << " > -q2min = " << -kinematics().cuts().initial.q2.min();
     return false;

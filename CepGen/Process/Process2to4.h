@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2019-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,11 +28,8 @@ namespace cepgen {
     public:
       /// Initialise a 2-to-4 process
       /// \param[in] params Collection of user-defined steering parameters
-      /// \param[in] partons Incoming hard scattering particles
       /// \param[in] cs_id Central particles PDG id
-      explicit Process2to4(const ParametersList& params, std::array<pdgid_t, 2> partons, pdgid_t cs_id);
-
-      static ParametersDescription description();
+      explicit Process2to4(const ParametersList& params, pdgid_t cs_id);
 
     protected:
       /// Set all cuts for the single outgoing particle phase space definition
@@ -52,7 +49,7 @@ namespace cepgen {
       double uhat() const;  ///< \f$\hat u=\frac{1}{2}\left[(p_1-p_4)^2+(p_2-p_3)^2\right]\f$
 
       static const Limits x_limits_;  ///< Standard [0,1] limits for input variables
-      ParticleProperties cs_prop_;    ///< PDG id of the central particles
+      ParticleProperties cs_prop_;    ///< PDG properties of the central outgoing particles
 
       cuts::Central single_limits_;  ///< Limits to be applied on single central system's particles
 
@@ -73,3 +70,4 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
+

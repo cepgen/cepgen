@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2022  Laurent Forthomme
+ *  Copyright (C) 2021-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ namespace cepgen {
   }
 
   std::string ParametersDescription::describe(size_t offset) const {
-    static auto sep = [](size_t offset) -> std::string { return std::string(offset, '\t'); };
+    static auto sep = [](size_t offset) -> std::string { return std::string(2 * offset, ' '); };
     const auto& mod_name = ParametersList::getNameString();
     const auto& pdtype = type();
     const auto& keys = ParametersList::keys(false);
@@ -160,11 +160,12 @@ namespace cepgen {
                                                                            const ParametersDescription& desc) {
     obj_descr_[name] += desc;
     ParametersList::set<ParametersList>(name, desc.parameters());
-    CG_DEBUG("ParametersDescription:add").log([this, &name, &desc](auto& log) {
+    CG_DEBUG_LOOP("ParametersDescription:add").log([this, &name, &desc](auto& log) {
       log << "Added a new parameters collection \"" << name << "\" as: " << desc;
       const auto& mod_name = this->getNameString();
       if (!mod_name.empty())
-        log << "\nto the object with name: " << mod_name;
+        log << "\n"
+            << "to the object with name: " << mod_name;
       log << ".";
     });
     return obj_descr_[name];
@@ -186,11 +187,12 @@ namespace cepgen {
     for (const auto& val : def)
       values.emplace_back(desc.validate(val));
     ParametersList::set<std::vector<ParametersList> >(name, values);
-    CG_DEBUG("ParametersDescription:addParametersDescriptionVector").log([this, &name, &desc, &def](auto& log) {
+    CG_DEBUG_LOOP("ParametersDescription:addParametersDescriptionVector").log([this, &name, &desc, &def](auto& log) {
       log << "Added a new vector of parameters descriptions \"" << name << "\" as: " << desc;
       const auto& mod_name = this->getNameString();
       if (!mod_name.empty())
-        log << "\nto the object with name: " << mod_name;
+        log << "\n"
+            << "to the object with name: " << mod_name;
       log << ".\n";
       if (!def.empty())
         log << "It is now composed of " << def << ".";
@@ -211,7 +213,6 @@ namespace cepgen {
         for (const auto& pit : user_params.get<std::vector<ParametersList> >(key))
           plist.operator[]<std::vector<ParametersList> >(key).emplace_back(obj_descr_.at(key).parameters() + pit);
       } else if (user_params.has<ParametersList>(key)) {  // map{key -> ParametersList}
-        auto base = plist.get<ParametersList>(key);
         plist.erase(key);
         const auto& pit = user_params.get<ParametersList>(key);
         for (const auto& kit : pit.keys())

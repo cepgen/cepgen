@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2021-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,17 +18,19 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/ModuleFactory.h"
+#include "CepGen/Utils/String.h"
 
 // collection of handled objects
 #include "CepGen/Cards/Handler.h"
+#include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Integration/AnalyticIntegrator.h"
 #include "CepGen/Integration/Integrator.h"
-#include "CepGen/PartonFluxes/PartonFlux.h"
 #include "CepGen/Physics/Coupling.h"
+#include "CepGen/Physics/PartonFlux.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
@@ -43,25 +45,22 @@ namespace cepgen {
     return instance;
   }
 
-  /*template <typename T, typename I>
-  template <typename U>
-  void ModuleFactory<T, I>::registerModule(const I& name, const ParametersList& def_params) {
-    static_assert(std::is_base_of<T, U>::value,
-                  "\n\n  *** Failed to register an object with improper inheritance into the factory. ***\n");
-    if (has(name))
-      throw CG_FATAL("ModuleFactory") << description_ << " detected a duplicate module registration for index/name \""
-                                      << name << "\"!";
-    map_[name] = &build<U>;
-    descr_map_[name] = U::description();
-    params_map_[name] = !def_params.empty() ? ParametersDescription(def_params) : U::description();
-    params_map_[name].setName(name);
-  }*/
-
   template <typename T, typename I>
   std::unique_ptr<T> ModuleFactory<T, I>::build(const I& name, const ParametersList& params) const {
     if (name == I())
       throw CG_FATAL("ModuleFactory") << description_ << " cannot build a module with empty index/name!";
-    return build(ParametersList(params).setName<I>(name));
+    auto plist = params;
+    if (std::is_base_of<std::string, I>::value) {
+      const auto extra_params = utils::split(utils::to_string(name), '<');
+      if (!extra_params.empty()) {
+        plist.setName<std::string>(extra_params.at(0));
+        if (extra_params.size() > 1)
+          for (size_t i = 1; i < extra_params.size(); ++i)
+            plist.feed(extra_params.at(i));
+      }
+    } else
+      plist.setName<I>(name);
+    return build(plist);
   }
 
   template <typename T, typename I>
@@ -93,7 +92,18 @@ namespace cepgen {
 
   template <typename T, typename I>
   ParametersDescription ModuleFactory<T, I>::describeParameters(const I& name, const ParametersList& params) const {
-    if (params_map_.count(name) == 0)
+    if (std::is_base_of<std::string, I>::value) {
+      auto extra_params = utils::split(utils::to_string(name), '<');
+      auto* nm = reinterpret_cast<I*>(&extra_params[0]);
+      if (params_map_.count(*nm) == 0)
+        return ParametersDescription().setDescription("{module without description}").steer(params);
+      auto descr = params_map_.at(*nm).steer(params);
+      auto extra_params_obj = ParametersList();
+      if (extra_params.size() > 1)
+        for (size_t i = 1; i < extra_params.size(); ++i)
+          extra_params_obj.feed(extra_params.at(i));
+      return descr.steer(extra_params_obj);
+    } else if (params_map_.count(name) == 0)
       return ParametersDescription().setDescription("{module without description}").steer(params);
     return params_map_.at(name).steer(params);
   }
@@ -113,6 +123,7 @@ namespace cepgen {
   template class ModuleFactory<EventModifier, std::string>;
   template class ModuleFactory<EventExporter, std::string>;
   template class ModuleFactory<formfac::Parameterisation, std::string>;
+  template class ModuleFactory<GeneratorWorker, std::string>;
   template class ModuleFactory<Integrator, std::string>;
   template class ModuleFactory<AnalyticIntegrator, std::string>;
   template class ModuleFactory<PartonFlux, std::string>;

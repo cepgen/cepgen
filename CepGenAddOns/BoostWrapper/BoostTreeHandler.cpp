@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2020-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
-#include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Generator.h"  // for library loading
@@ -32,10 +31,8 @@
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/TimeKeeper.h"
 #include "CepGenAddOns/BoostWrapper/BoostTreeUtils.h"
 
@@ -52,7 +49,7 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      Parameters* parse(const std::string&, Parameters*) override;
+      Parameters* parseFile(const std::string&, Parameters*) override;
       void pack(const Parameters* params) override;
 
     protected:
@@ -79,7 +76,7 @@ namespace cepgen {
 
     BoostTreeHandler::BoostTreeHandler(const ParametersList& params) : Handler(params) {}
 
-    Parameters* BoostTreeHandler::parse(const std::string& filename, Parameters* params) {
+    Parameters* BoostTreeHandler::parseFile(const std::string& filename, Parameters* params) {
       rt_params_ = params;
       read(filename);
 
@@ -167,7 +164,7 @@ namespace cepgen {
       if (rt_params_->timeKeeper())
         tree_.add_child(TIMER_NAME, bc::pack(ParametersList()));
       log_.set<int>("level", (int)utils::Logger::get().level());
-      //FIXME not yet implemented
+      //TODO: implement the exceptions filtering rules
       //for (const auto& mod : utils::Logger::get().exceptionRules())
       //  log_.operator[]<std::vector<std::string> >("enabledModules").emplace_back(mod);
       tree_.add_child(LOGGER_NAME, bc::pack(log_));

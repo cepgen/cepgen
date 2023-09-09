@@ -21,35 +21,36 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Physics/Coupling.h"
+#include "CepGen/Physics/PDG.h"
 
 namespace cepgen {
   class AlphaSAPFEL final : public Coupling {
   public:
-    explicit AlphaSAPFEL(const ParametersList& params)
-        : Coupling(params), order_(steer<int>("order")), q0_(steer<double>("q0")), qmax_(steer<double>("qmax")) {
-      APFEL::SetPerturbativeOrder(order_);
+    explicit AlphaSAPFEL(const ParametersList& params) : Coupling(params), q_range_(steer<Limits>("qrange")) {
+      APFEL::SetPerturbativeOrder(steer<int>("order"));
+      APFEL::SetPoleMasses(PDG::get().mass(4), PDG::get().mass(5), PDG::get().mass(6));
       APFEL::InitializeAPFEL();
-      APFEL::EvolveAPFEL(q0_, qmax_);
+      APFEL::EvolveAPFEL(q_range_.min(), q_range_.max());
+      if (steer<bool>("checkAPFEL") && !APFEL::CheckAPFEL())
+        throw CG_FATAL("AlphaSAPFEL") << "Something is wrong with your APFEL configuration.";
     }
     static ParametersDescription description() {
       auto desc = Coupling::description();
       desc.setDescription("APFEL alpha(S) evolution algorithm");
-      desc.add<int>("order", 2).setDescription("perturbative evolution order");
-      desc.add<double>("q0", 1.).setDescription("minimal Q reachable for evolution (in GeV)");
-      desc.add<double>("qmax", 10000.).setDescription("maximal Q reachable (in GeV)");
+      desc.add<bool>("checkAPFEL", false).setDescription("perform full check of APFEL configuration");
+      desc.add<int>("order", 2).setDescription("QCD perturbative evolution order");
+      desc.add<Limits>("qrange", {1., 1.e4}).setDescription("Q range reachable for evolution (in GeV)");
       return desc;
     }
 
     double operator()(double q) const override {
-      if (q < q0_ || q > qmax_)
-        CG_WARNING("AlphaSAPFEL:get") << "q = " << q << " outside the evolution range"
-                                      << " [" << q0_ << ":" << qmax_ << "].";
+      if (!q_range_.contains(q))
+        CG_WARNING("AlphaSAPFEL:get") << "q = " << q << " outside the evolution range" << q_range_ << ".";
       return APFEL::AlphaQCD(q);
     }
 
   private:
-    int order_;
-    double q0_, qmax_;
+    const Limits q_range_;
   };
 }  // namespace cepgen
 

@@ -21,34 +21,6 @@
 #include "CepGen/Physics/ParticleProperties.h"
 
 namespace cepgen {
-  ParticleProperties::ParticleProperties(pdgid_t ppdgid,
-                                         const std::string& pname,
-                                         const std::string& pdescr,
-                                         int pcolours,
-                                         double pmass,
-                                         double pwidth,
-                                         int pcharge,
-                                         bool pfermion)
-      : SteeredObject(ParametersList()),
-        pdgid(ppdgid),
-        name(pname),
-        descr(pdescr),
-        colours(pcolours),
-        mass(pmass),
-        width(pwidth),
-        charge(pcharge),
-        fermion(pfermion) {
-    (*this)
-        .add("pdgid", pdgid)
-        .add("name", name)
-        .add("description", descr)
-        .add("colours", colours)
-        .add("mass", mass)
-        .add("width", width)
-        .add("charge", charge)
-        .add("fermion", fermion);
-  }
-
   ParticleProperties::ParticleProperties(const ParametersList& params) : SteeredObject(params) {
     (*this)
         .add("pdgid", pdgid)
@@ -60,6 +32,24 @@ namespace cepgen {
         .add("charge", charge)
         .add("fermion", fermion);
   }
+
+  ParticleProperties::ParticleProperties(pdgid_t ppdgid,
+                                         const std::string& pname,
+                                         const std::string& pdescr,
+                                         int pcolours,
+                                         double pmass,
+                                         double pwidth,
+                                         int pcharge,
+                                         bool pfermion)
+      : ParticleProperties(ParametersList()
+                               .set("pdgid", ppdgid)
+                               .set("name", pname)
+                               .set("description", pdescr)
+                               .set("colours", pcolours)
+                               .set("mass", pmass)
+                               .set("width", pwidth)
+                               .set("charge", pcharge)
+                               .set("fermion", pfermion)) {}
 
   ParametersDescription ParticleProperties::description() {
     auto pdesc = ParametersDescription();
@@ -92,7 +82,8 @@ namespace cepgen {
 
   std::ostream& operator<<(std::ostream& os, const ParticleProperties& prop) {
     return os << (prop.name.empty() ? "unnamed" : prop.name) << "{"
-              << "id=" << prop.pdgid << ",desc=" << prop.descr << ",colours=" << prop.colours << ",mass=" << prop.mass
-              << ",width=" << prop.width << ",charge=" << prop.charge << (prop.fermion ? ",fermion" : "") << "}";
+              << "pdgid=" << prop.pdgid << ",desc=" << prop.descr << ",colours=" << prop.colours
+              << ",mass=" << prop.mass << ",width=" << prop.width << ",charge=" << prop.charge
+              << (prop.fermion ? ",fermion" : "") << "}";
   }
 }  // namespace cepgen

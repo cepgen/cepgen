@@ -31,11 +31,24 @@ namespace cepgen {
     inline ObjectPtr getAttribute(const ObjectPtr& obj, const std::string& attr) {
       return getAttribute(obj.get(), attr);
     }
+    void setAttribute(const ObjectPtr& obj, const std::string& attr, const ObjectPtr& value);
+    template <typename T>
+    inline void setAttribute(const ObjectPtr& obj, const std::string& attr, const T& value) {
+      setAttribute(obj, attr, set(value));
+    }
     std::vector<std::wstring> info();
-    /// Print all object attributes
-    void print(PyObject*);
-    /// Print all object attributes
-    inline void print(const ObjectPtr& obj) { print(obj.get()); }
+    /// Call a python function with a tuple of arguments
+    ObjectPtr callArgs(const ObjectPtr& func, const ObjectPtr& args);
+    /// Call the named method of a python object with an uncounted set of arguments
+    template <typename... Args>
+    inline ObjectPtr callMethod(const ObjectPtr& obj, const std::string& method, Args&&... args) {
+      return call(getAttribute(obj, method), std::forward<Args>(args)...);
+    }
+    /// Call a python function with an uncounted set of arguments
+    template <typename... Args>
+    inline ObjectPtr call(const ObjectPtr& func, Args&&... args) {
+      return callArgs(func, python::newTuple(std::make_tuple(std::forward<Args>(args)...)));  // new
+    }
 
     void fillParameter(PyObject* parent, const char* key, bool& out);
     void fillParameter(PyObject* parent, const char* key, int& out);

@@ -19,47 +19,31 @@
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Physics/Beam.h"
-#include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
 
 namespace cepgen {
   Beam::Beam(const ParametersList& params)
       : SteeredObject(params),
-        pdg_(steerAs<int, pdgid_t>("pdgId")),
+        pdg_id_(steer<pdgid_t>("pdgId")),
         momentum_(Momentum::fromPxPyPzM(
             0.,
             0.,
             steer<double>("pz"),
-            HeavyIon::isHI(pdg_) ? HeavyIon::mass(HeavyIon::fromPdgId(pdg_)) : PDG::get().mass(pdg_))),
+            HeavyIon::isHI(pdg_id_) ? HeavyIon::mass(HeavyIon::fromPdgId(pdg_id_)) : PDG::get().mass(pdg_id_))),
         mode_(steerAs<int, Mode>("mode")) {
-    if (pdg_ == PDG::electron)
+    if (pdg_id_ == PDG::electron)
       mode_ = Mode::PointLikeFermion;
-    else if (HeavyIon::isHI(pdg_))
+    else if (HeavyIon::isHI(pdg_id_))
       mode_ = Mode::HIElastic;
   }
 
   void Beam::initialise() {
-    const auto& pflux_params = steer<ParametersList>("partonFlux");
-    switch (mode_) {
-      case Mode::HIElastic:
-        flux_ = PartonFluxFactory::get().build("ElasticHeavyIonKT", params_ + pflux_params);
-        break;
-      case Mode::ProtonInelastic:
-        flux_ = PartonFluxFactory::get().build("BudnevInelasticKT", params_ + pflux_params);
-        break;
-      case Mode::ProtonElastic:
-        flux_ = PartonFluxFactory::get().build("BudnevElasticKT", params_ + pflux_params);
-        break;
-      default:
-        CG_WARNING("Beam:initialise") << "Invalid beam mode retrieved: '" << mode_ << "'.";
-        break;
-    }
+    const auto flux_info = steer<ParametersList>("partonFlux").set("pdgId", pdg_id_);
+    if (!flux_info.name<std::string>().empty())
+      flux_ = PartonFluxFactory::get().build(flux_info);
   }
 
   bool Beam::fragmented() const {
@@ -76,22 +60,20 @@ namespace cepgen {
     return *flux_;
   }
 
-  double Beam::flux(double x, double q2, double mx2) const { return flux()(x, q2, mx2); }
-
   ParametersDescription Beam::description() {
     auto desc = ParametersDescription();
     desc.addAs<int, pdgid_t>("pdgId", PDG::proton);
     desc.add<double>("pz", 0.);
-    desc.add<int>("mode", (int)Beam::Mode::invalid);
-    desc.add<ParametersDescription>("partonFlux", PartonFluxFactory::get().describeParameters("BudnevElasticKT"));
+    desc.addAs<int, Beam::Mode>("mode", Beam::Mode::invalid);
+    desc.add<ParametersDescription>("partonFlux", ParametersDescription());
     return desc;
   }
 
   std::ostream& operator<<(std::ostream& os, const Beam& beam) {
-    if (HeavyIon::isHI(beam.pdg_))
-      os << HeavyIon::fromPdgId(beam.pdg_);
+    if (HeavyIon::isHI(beam.pdg_id_))
+      os << HeavyIon::fromPdgId(beam.pdg_id_);
     else
-      os << (PDG::Id)beam.pdg_;
+      os << (PDG::Id)beam.pdg_id_;
     os << " (" << beam.momentum_.pz() << " GeV/c), " << beam.mode_;
     if (beam.flux_)
       os << " [part.flux: " << beam.flux_->name() << "]";

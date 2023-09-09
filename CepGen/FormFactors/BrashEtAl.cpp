@@ -41,23 +41,19 @@ namespace cepgen {
       static ParametersDescription description();
 
     private:
-      FormFactors compute(double q2) override {
-        if (q2 > max_q2_)
-          CG_WARNING("BrashEtAl") << "Q² = " << q2 << " > " << max_q2_ << " GeV² = max(Q²).\n\t"
+      void eval() override {
+        if (q2_ > max_q2_)
+          CG_WARNING("BrashEtAl") << "Q² = " << q2_ << " > " << max_q2_ << " GeV² = max(Q²).\n\t"
                                   << "Brash et al. FF parameterisation not designed for high-Q² values.";
-        FormFactors out;
-        const double r = std::min(1., 1. - coeff_r_.at(0) * (q2 - coeff_r_.at(1)));
+        const double r = std::min(1., 1. - coeff_r_.at(0) * (q2_ - coeff_r_.at(1)));
         if (r < 0.)
-          return out;
-        const double q = sqrt(q2);
-        out.GM =
-            1. /
-            (1. + q * (coeff_gm_.at(0) +
-                       q * (coeff_gm_.at(1) + q * (coeff_gm_.at(2) + q * (coeff_gm_.at(3) + q * coeff_gm_.at(4))))));
+          return;
+        const double q = sqrt(q2_),
+                     gm = 1. / (1. + q * (coeff_gm_.at(0) +
+                                          q * (coeff_gm_.at(1) +
+                                               q * (coeff_gm_.at(2) + q * (coeff_gm_.at(3) + q * coeff_gm_.at(4))))));
 
-        out.GE = r * out.GM;
-        out.GM *= MU;
-        return out;
+        setGEGM(r * gm, MU * gm);
       }
       const std::vector<double> coeff_gm_, coeff_r_;
       const double max_q2_;
@@ -75,5 +71,5 @@ namespace cepgen {
     }
   }  // namespace formfac
 }  // namespace cepgen
-typedef cepgen::formfac::BrashEtAl BrashFF;
-REGISTER_FORMFACTORS("Brash", BrashFF);
+using cepgen::formfac::BrashEtAl;
+REGISTER_FORMFACTORS("Brash", BrashEtAl);

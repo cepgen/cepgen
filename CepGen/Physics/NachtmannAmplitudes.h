@@ -24,6 +24,8 @@
 
 namespace cepgen {
   class ParametersList;
+  /// Amplitudes computational tool, as developed by Nachtmann et al.
+  /// \cite Nachtmann:2005en
   class NachtmannAmplitudes : public SteeredObject<NachtmannAmplitudes> {
   public:
     explicit NachtmannAmplitudes(const ParametersList&);

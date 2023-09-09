@@ -57,12 +57,8 @@ namespace cepgen {
 
       /// Copy all process attributes into a new object
       virtual std::unique_ptr<Process> clone() const;
-      /// Set the incoming and outgoing state to be expected in the process
-      inline virtual void addEventContent() = 0;
       /// Compute the phase space point weight
       virtual double computeWeight() = 0;
-      /// Compute the incoming state kinematics
-      virtual void prepareKinematics() {}
       /// Fill the Event object with the particles' kinematics
       /// \param[in] symmetrise Symmetrise the event? (randomise the production of positively- and negatively-charged outgoing central particles)
       virtual void fillKinematics(bool symmetrise = false) = 0;
@@ -94,43 +90,53 @@ namespace cepgen {
       /// Event pointer retrieval method
       Event* eventPtr();
 
+      const Momentum& pA() const;                     ///< Positive-z incoming beam particle's 4-momentum
+      double mA2() const { return mA2_; }             ///< Positive-z incoming beam particle's squared mass
+      double mA() const { return std::sqrt(mA2()); }  ///< Positive-z incoming beam particle's mass
+      const Momentum& pB() const;                     ///< Negative-z incoming beam particle's 4-momentum
+      double mB2() const { return mB2_; }             ///< Negative-z incoming beam particle's squared mass
+      double mB() const { return std::sqrt(mB2()); }  ///< Negative-z incoming beam particle's mass
+      const Momentum& pX() const;                     ///< Positive-z outgoing beam particle's 4-momentum
+      double mX2() const { return mX2_; }             ///< Positive-z outgoing beam particle's squared mass
+      double mX() const { return std::sqrt(mX2()); }  ///< Positive-z outgoing beam particle's mass
+      const Momentum& pY() const;                     ///< Negative-z outgoing beam particle's 4-momentum
+      double mY2() const { return mY2_; }             ///< Negative-z outgoing beam particle's squared mass
+      double mY() const { return std::sqrt(mY2()); }  ///< Negative-z outgoing beam particle's mass
+
+      double x1() const { return x1_; }  ///< Positive-z incoming parton's fractional momentum
+      double t1() const { return t1_; }  ///< Positive-z incoming parton's squared mass
+      const Momentum& q1() const;        ///< Positive-z incoming parton's 4-momentum
+      double x2() const { return x2_; }  ///< Negative-z incoming parton's fractional momentum
+      double t2() const { return t2_; }  ///< Negative-z incoming parton's squared mass
+      const Momentum& q2() const;        ///< Negative-z incoming parton's 4-momentum
+
+      Momentum& q1();  ///< Positive-z incoming parton's 4-momentum
+      Momentum& q2();  ///< Negative-z incoming parton's 4-momentum
+
     protected:
+      /// Set the incoming and outgoing state to be expected in the process
+      virtual void addEventContent() = 0;
+      /// Prepare the parton evaluator objects
+      virtual void prepareBeams() {}
+      /// Compute the incoming state kinematics
+      virtual void prepareKinematics() {}
+
       /// Map of all incoming state particles in the process
       typedef std::map<Particle::Role, pdgid_t> IncomingState;
       /// Map of all outgoing particles in the process
-      typedef std::map<Particle::Role, std::vector<pdgid_t> > OutgoingState;
+      typedef std::map<Particle::Role, pdgids_t> OutgoingState;
 
-      Momentum& pA();                                 ///< Positive-z incoming beam particle's 4-momentum
-      const Momentum& pA() const;                     ///< Positive-z incoming beam particle's 4-momentum
-      double mA() const { return std::sqrt(mA2()); }  ///< Positive-z incoming beam particle's mass
-      double mA2() const { return mA2_; }             ///< Positive-z incoming beam particle's squared mass
+      Momentum& pA();  ///< Positive-z incoming beam particle's 4-momentum
+      Momentum& pB();  ///< Negative-z incoming beam particle's 4-momentum
+      Momentum& pX();  ///< Positive-z outgoing beam particle's 4-momentum
+      Momentum& pY();  ///< Negative-z outgoing beam particle's 4-momentum
 
-      Momentum& pB();                                 ///< Negative-z incoming beam particle's 4-momentum
-      const Momentum& pB() const;                     ///< Negative-z incoming beam particle's 4-momentum
-      double mB() const { return std::sqrt(mB2()); }  ///< Negative-z incoming beam particle's mass
-      double mB2() const { return mB2_; }             ///< Negative-z incoming beam particle's squared mass
-
-      Momentum& pX();                                 ///< Positive-z outgoing beam particle's 4-momentum
-      const Momentum& pX() const;                     ///< Positive-z outgoing beam particle's 4-momentum
-      double mX() const { return std::sqrt(mX2()); }  ///< Positive-z outgoing beam particle's mass
-      double& mX2() { return mX2_; }                  ///< Positive-z outgoing beam particle's squared mass
-      double mX2() const { return mX2_; }             ///< Positive-z outgoing beam particle's squared mass
-
-      Momentum& pY();                                 ///< Negative-z outgoing beam particle's 4-momentum
-      const Momentum& pY() const;                     ///< Negative-z outgoing beam particle's 4-momentum
-      double mY() const { return std::sqrt(mY2()); }  ///< Negative-z outgoinging beam particle's mass
-      double& mY2() { return mY2_; }                  ///< Negative-z outgoing beam particle's squared mass
-      double mY2() const { return mY2_; }             ///< Negative-z outgoing beam particle's squared mass
-
-      Momentum& q1();                    ///< Positive-z incoming parton's 4-momentum
-      const Momentum& q1() const;        ///< Positive-z incoming parton's 4-momentum
-      double& t1() { return t1_; }       ///< Positive-z incoming parton's squared mass
-      double t1() const { return t1_; }  ///< Positive-z incoming parton's squared mass
-
-      Momentum& q2();                    ///< Negative-z incoming parton's 4-momentum
-      const Momentum& q2() const;        ///< Negative-z incoming parton's 4-momentum
-      double& t2() { return t2_; }       ///< Negative-z incoming parton's squared mass
-      double t2() const { return t2_; }  ///< Negative-z incoming parton's squared mass
+      double& mX2() { return mX2_; }  ///< Positive-z outgoing beam particle's squared mass
+      double& mY2() { return mY2_; }  ///< Negative-z outgoing beam particle's squared mass
+      double& t1() { return t1_; }    ///< Positive-z incoming parton's squared mass
+      double& x1() { return x1_; }    ///< Positive-z incoming parton's fractional momentum
+      double& t2() { return t2_; }    ///< Negative-z incoming parton's squared mass
+      double& x2() { return x2_; }    ///< Negative-z incoming parton's fractional momentum
 
       Momentum& pc(size_t);              ///< Central particle's 4-momentum
       const Momentum& pc(size_t) const;  ///< Central particle's 4-momentum
@@ -179,10 +185,9 @@ namespace cepgen {
                               const Limits& default_limits = {0., 1.},
                               const std::string& description = "");
       /// Generate and initialise all variables handled by this process
+      /// \return Phase space point-dependent component of the Jacobian weight of the point in the phase space for integration
       /// \note To be run at each point computation (therefore, to be optimised!)
-      void generateVariables() const;
-      /// Phase space point-dependent component of the Jacobian weight of the point in the phase space for integration
-      double jacobian() const;
+      double generateVariables() const;
 
       /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
       void setEventContent(const IncomingState& ini, const OutgoingState& fin);
@@ -208,6 +213,8 @@ namespace cepgen {
       double mY2_{-1.};  ///< Second diffractive state squared mass
       double t1_{-1.};   ///< First parton virtuality
       double t2_{-1.};   ///< Second parton virtuality
+      double x1_{0.};    ///< First parton fractional momentum
+      double x2_{0.};    ///< Second parton fractional momentum
       /// Electromagnetic running coupling algorithm
       std::unique_ptr<Coupling> alphaem_;
       /// Strong running coupling algorithm

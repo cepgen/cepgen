@@ -23,40 +23,30 @@
 #include <memory>
 
 #include "CepGen/Modules/NamedModule.h"
+#include "CepGen/StructureFunctions/SigmaRatio.h"
 
 namespace cepgen {
-  namespace sigrat {
-    class Parameterisation;
-  }
   /// Structure functions modelling scope
   namespace strfun {
     /// Base object for the parameterisation of nucleon structure functions
     class Parameterisation : public NamedModule<int> {
     public:
-      /// Standard SF parameterisation constructor
-      explicit Parameterisation(double f2 = 0., double fl = 0.);
-      /// Copy constructor
-      Parameterisation(const Parameterisation&);
       /// User-steered parameterisation object constructor
       explicit Parameterisation(const ParametersList&);
       virtual ~Parameterisation() = default;
-
-      /// Assign from another SF parameterisation object
-      Parameterisation& operator=(const Parameterisation& sf);
 
       /// Generic description for the structure functions
       static ParametersDescription description();
 
       /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
-      friend std::ostream& operator<<(std::ostream&, const Parameterisation*);
-      /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
       friend std::ostream& operator<<(std::ostream&, const Parameterisation&);
-      /// Human-readable description of this SF parameterisation
 
       /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
       const sigrat::Parameterisation* sigmaRatio() const { return r_ratio_.get(); }
 
       /// Compute all relevant structure functions for a given \f$(x_{\rm Bj},Q^2)\f$ couple
+      /// \param[in] xbj Bjorken's x variable
+      /// \param[in] q2 Squared 4-momentum transfer (in GeV^2)
       Parameterisation& operator()(double /*xbj*/, double /*q2*/);
       /// Transverse structure function
       double F2(double xbj, double q2);
@@ -78,12 +68,21 @@ namespace cepgen {
         friend std::ostream& operator<<(std::ostream&, const Arguments&);
         double xbj{-1.}, q2{-1.};
       };
+      struct Values {
+        void clear() { f2 = 0., fl = 0., w1 = 0., w2 = 0., f2 = 0., fm = 0.; }
+        friend std::ostream& operator<<(std::ostream&, const Values&);
+        double f2{0.};  ///< Last computed transverse structure function value
+        double fl{0.};  ///< Last computed longitudinal structure function value
+        // alternative quantities
+        double w1{0.};  ///< Longitudinal form factor
+        double w2{0.};
+        double fe{0.};  ///< Electric proton form factor
+        double fm{0.};  ///< Magnetic proton form factor
+      };
 
     protected:
       /// Local structure functions evaluation method
-      /// \param[in] xbj Bjorken's x variable
-      /// \param[in] q2 Squared 4-momentum transfer (in GeV^2)
-      virtual Parameterisation& eval(double xbj, double q2);
+      virtual void eval() = 0;
       /// Compute the longitudinal structure function for a given point
       virtual Parameterisation& computeFL(double xbj, double q2);
       /// Compute the longitudinal structure function for a given point
@@ -105,22 +104,20 @@ namespace cepgen {
       /// Dimensionless variable \f$\gamma^2=1+\frac{4x_{\rm Bj}^m_p^2}{Q^2}=1+\tau\f$
       double gamma2(double xbj, double q2) const;
 
+    private:
+      /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
+      const std::unique_ptr<sigrat::Parameterisation> r_ratio_;
+
+    protected:
       const double mp_;      ///< Proton mass, in GeV/c^2
       const double mp2_;     ///< Squared proton mass, in GeV^2/c^4
       const double mx_min_;  ///< Minimum diffractive mass, in GeV/c^2
 
+      Arguments args_;  ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed
+
     private:
-      Arguments old_vals_;  ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed
-      /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
-      std::shared_ptr<sigrat::Parameterisation> r_ratio_;
-      double f2_{0.};  ///< Last computed transverse structure function value
-      double fl_{0.};  ///< Last computed longitudinal structure function value
+      Values vals_;
       bool fl_computed_{false};
-      // alternative quantities
-      double w1_{0.};  ///< Longitudinal form factor
-      double w2_{0.};
-      double fe_{0.};  ///< Electric proton form factor
-      double fm_{0.};  ///< Magnetic proton form factor
     };
   }  // namespace strfun
 }  // namespace cepgen

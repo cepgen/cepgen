@@ -18,7 +18,6 @@
 
 // clang-format off
 #include "CepGenAddOns/PythonWrapper/Environment.h"
-#include "CepGenAddOns/PythonWrapper/Error.h"
 // clang-format on
 
 #include <algorithm>
@@ -26,7 +25,6 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Filesystem.h"
-#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace python {
@@ -34,13 +32,14 @@ namespace cepgen {
     // Python API helpers
     //------------------------------------------------------------------
 
-    Environment::Environment() {
+    Environment::Environment(const std::string& name) {
       for (const auto& path : std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."),
+                                                       fs::path(utils::env::get("CEPGEN_PATH", ".")) / "python",
                                                        fs::current_path(),
-                                                       fs::current_path() / "Cards",
-                                                       fs::current_path().parent_path() / "Cards",
-                                                       fs::current_path().parent_path().parent_path() / "Cards",
-                                                       "/usr/share/CepGen/Cards"})
+                                                       fs::current_path() / "python",
+                                                       fs::current_path().parent_path() / "python",
+                                                       fs::current_path().parent_path().parent_path() / "python",
+                                                       "/usr/share/CepGen/python"})
         utils::env::append("PYTHONPATH", path);
       CG_DEBUG("Python:Environment") << "PYTHONPATH set to " << utils::env::get("PYTHONPATH") << ".";
 
@@ -51,6 +50,8 @@ namespace cepgen {
       PyConfig_InitPythonConfig(&config_);
 #endif
       utils::env::set("PYTHONDONTWRITEBYTECODE", "1");
+      if (!name.empty())
+        setProgramName(name);
     }
 
     Environment::~Environment() {

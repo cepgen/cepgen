@@ -33,16 +33,15 @@ PDG = Parameters(
 # \param charge Particle electric charge (in e)
 # \param colour Colour charge
 # \param fermion Is the particle following the fermion statistics?
-def registerParticle(pdgId, name, mass=0., width=0., charge=0, colour=1, fermion=False):
-    setattr(PDG, name,
-        Parameters(
-            name = name,
-            description = name,
-            pdgid = pdgId,
-            mass = mass,
-            charge = charge,
-            width = width,
-            colour = colour,
-            fermion = fermion
-        )
+def registerParticle(pdgid, name, mass=0., width=0., charge=0, colour=1, fermion=False):
+    globals()['PDG'][name] = Parameters(
+        name = name,
+        description = name,
+        pdgid = pdgid,
+        mass = mass,
+        charge = charge,
+        width = width,
+        colour = colour,
+        fermion = fermion
     )
+    print('particle with pdg={} defined'.format(pdgid))

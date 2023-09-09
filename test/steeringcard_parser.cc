@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2021  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
-#include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 
@@ -36,7 +35,7 @@ int main(int argc, char* argv[]) {
 
   try {
     CG_LOG << "Parsing configuration from '" << card << ".";
-    const auto* params = cepgen::card::Handler::parse(card);
+    const auto* params = cepgen::card::Handler::parseFile(card);
     CG_LOG << "Configuration parsed from '" << card << "':\n" << params;
   } catch (const cepgen::Exception& e) {
     e.dump();

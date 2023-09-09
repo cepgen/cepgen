@@ -17,7 +17,6 @@
  */
 
 #include <cmath>
-#include <vector>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
@@ -28,10 +27,48 @@ namespace cepgen {
     /// \f$F_2\f$ parameterisation from Block, Durand, and Ha \cite Block:2014kza
     class BlockDurandHa final : public Parameterisation {
     public:
-      explicit BlockDurandHa(const ParametersList&);
-      BlockDurandHa& eval(double xbj, double q2) override;
+      explicit BlockDurandHa(const ParametersList& params)
+          : Parameterisation(params),
+            a_(steer<std::vector<double> >("a")),
+            b_(steer<std::vector<double> >("b")),
+            c_(steer<std::vector<double> >("c")),
+            n_(steer<double>("n")),
+            lambda_(steer<double>("lambda")),
+            mu2_(steer<double>("mu2")),
+            m2_(steer<double>("m2")) {
+        if (a_.size() != 3)
+          throw CG_FATAL("BlockDurandHa") << "Parameter 'a' should have 3 components! Parsed " << a_ << ".";
+        if (b_.size() != 3)
+          throw CG_FATAL("BlockDurandHa") << "Parameter 'b' should have 3 components! Parsed " << b_ << ".";
+        if (c_.size() != 2)
+          throw CG_FATAL("BlockDurandHa") << "Parameter 'c' should have 3 components! Parsed " << c_ << ".";
+      }
 
-      static ParametersDescription description();
+      void eval() override {
+        const double tau = args_.q2 / (args_.q2 + mu2_);
+        const double xl = log1p(args_.q2 / mu2_);
+        const double xlx = log(tau / args_.xbj);
+
+        const double A = a_.at(0) + a_.at(1) * xl + a_.at(2) * xl * xl;
+        const double B = b_.at(0) + b_.at(1) * xl + b_.at(2) * xl * xl;
+        const double C = c_.at(0) + c_.at(1) * xl;
+        const double D = args_.q2 * (args_.q2 + lambda_ * m2_) / pow(args_.q2 + m2_, 2);
+
+        setF2(D * pow(1. - args_.xbj, n_) * (C + A * xlx + B * xlx * xlx));
+      }
+
+      static ParametersDescription description() {
+        auto desc = Parameterisation::description();
+        desc.setDescription("Block-Durand-Ha (continuum)");
+        desc.add<std::vector<double> >("a", {8.205e-4, -5.148e-2, -4.725e-3});
+        desc.add<std::vector<double> >("b", {2.217e-3, 1.244e-2, 5.958e-4});
+        desc.add<std::vector<double> >("c", {0.255e0, 1.475e-1});
+        desc.add<double>("n", 11.49);
+        desc.add<double>("lambda", 2.430);
+        desc.add<double>("mu2", 2.82);
+        desc.add<double>("m2", 0.753);
+        return desc;
+      }
 
     private:
       std::vector<double> a_, b_, c_;
@@ -43,52 +80,7 @@ namespace cepgen {
       /// Squared effective mass (~VM mass)
       double m2_;
     };
-
-    BlockDurandHa::BlockDurandHa(const ParametersList& params)
-        : Parameterisation(params),
-          a_(steer<std::vector<double> >("a")),
-          b_(steer<std::vector<double> >("b")),
-          c_(steer<std::vector<double> >("c")),
-          n_(steer<double>("n")),
-          lambda_(steer<double>("lambda")),
-          mu2_(steer<double>("mu2")),
-          m2_(steer<double>("m2")) {
-      if (a_.size() != 3)
-        throw CG_FATAL("BlockDurandHa") << "Parameter 'a' should have 3 components! Parsed " << a_ << ".";
-      if (b_.size() != 3)
-        throw CG_FATAL("BlockDurandHa") << "Parameter 'b' should have 3 components! Parsed " << b_ << ".";
-      if (c_.size() != 2)
-        throw CG_FATAL("BlockDurandHa") << "Parameter 'c' should have 3 components! Parsed " << c_ << ".";
-    }
-
-    BlockDurandHa& BlockDurandHa::eval(double xbj, double q2) {
-      const double tau = q2 / (q2 + mu2_);
-      const double xl = log1p(q2 / mu2_);
-      const double xlx = log(tau / xbj);
-
-      const double A = a_.at(0) + a_.at(1) * xl + a_.at(2) * xl * xl;
-      const double B = b_.at(0) + b_.at(1) * xl + b_.at(2) * xl * xl;
-      const double C = c_.at(0) + c_.at(1) * xl;
-      const double D = q2 * (q2 + lambda_ * m2_) / pow(q2 + m2_, 2);
-
-      setF2(D * pow(1. - xbj, n_) * (C + A * xlx + B * xlx * xlx));
-
-      return *this;
-    }
-
-    ParametersDescription BlockDurandHa::description() {
-      auto desc = Parameterisation::description();
-      desc.setDescription("Block-Durand-Ha (continuum)");
-      desc.add<std::vector<double> >("a", {8.205e-4, -5.148e-2, -4.725e-3});
-      desc.add<std::vector<double> >("b", {2.217e-3, 1.244e-2, 5.958e-4});
-      desc.add<std::vector<double> >("c", {0.255e0, 1.475e-1});
-      desc.add<double>("n", 11.49);
-      desc.add<double>("lambda", 2.430);
-      desc.add<double>("mu2", 2.82);
-      desc.add<double>("m2", 0.753);
-      return desc;
-    }
   }  // namespace strfun
 }  // namespace cepgen
-typedef cepgen::strfun::BlockDurandHa BlockDurandHa;
+using cepgen::strfun::BlockDurandHa;
 REGISTER_STRFUN(13, BlockDurandHa);

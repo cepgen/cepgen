@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,15 +17,13 @@
  */
 
 #include <complex>
-#include <vector>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
   namespace strfun {
@@ -79,7 +77,7 @@ namespace cepgen {
         return desc;
       }
 
-      FioreBrasse& eval(double xbj, double q2) override;
+      void eval() override;
 
     protected:
       /// Description of a single resonance in the modelling
@@ -114,9 +112,10 @@ namespace cepgen {
       double s0_{0.}, norm_{0.};
     };
 
-    FioreBrasse& FioreBrasse::eval(double xbj, double q2) {
-      const double prefactor = q2 * (1. - xbj) / (4. * M_PI * constants::ALPHA_EM * gamma2(xbj, q2));
-      const double s = utils::mX2(xbj, q2, mp2_);
+    void FioreBrasse::eval() {
+      const double prefactor =
+          args_.q2 * (1. - args_.xbj) / (4. * M_PI * constants::ALPHA_EM * gamma2(args_.xbj, args_.q2));
+      const double s = utils::mX2(args_.xbj, args_.q2, mp2_);
 
       double amplitude_res = 0.;
       const double sqrts0 = sqrt(s0_);
@@ -129,7 +128,7 @@ namespace cepgen {
         else
           alpha = std::complex<double>(res.alpha0 + res.alpha1 * s + res.alpha2 * (sqrts0 - sqrt(s0_ - s)), 0.);
 
-        double formfactor = 1. / pow(1. + q2 / res.q02, 2);
+        double formfactor = 1. / pow(1. + args_.q2 / res.q02, 2);
         double denom = pow(res.spinTimesTwo * 0.5 - std::real(alpha), 2) + pow(std::imag(alpha), 2);
         double ampli_imag = res.a * formfactor * formfactor * std::imag(alpha) / denom;
         amplitude_res += ampli_imag;
@@ -143,7 +142,7 @@ namespace cepgen {
           alpha = std::complex<double>(res.alpha0 + res.alpha1 * sqrtsE, res.alpha1 * sqrt(s - sE));
         else
           alpha = std::complex<double>(res.alpha0 + res.alpha1 * (sqrtsE - sqrt(sE - s)), 0.);
-        double formfactor = 1. / pow(1. + q2 / res.q02, 2);
+        double formfactor = 1. / pow(1. + args_.q2 / res.q02, 2);
         double denom = pow(res.spinTimesTwo * 0.75 - std::real(alpha), 2) + pow(std::imag(alpha), 2);
         amplitude_bg = res.a * formfactor * formfactor * std::imag(alpha) / denom;
       }
@@ -155,7 +154,6 @@ namespace cepgen {
                                               << " total (with norm.): " << amplitude_tot << ".";
 
       setF2(prefactor * amplitude_tot);
-      return *this;
     }
 
     class FioreBrasseAlt final : public FioreBrasse {
@@ -202,7 +200,7 @@ namespace cepgen {
     };
   }  // namespace strfun
 }  // namespace cepgen
-typedef cepgen::strfun::FioreBrasse FioreBrasse;
-typedef cepgen::strfun::FioreBrasseAlt FioreBrasseAlt;
+using cepgen::strfun::FioreBrasse;
+using cepgen::strfun::FioreBrasseAlt;
 REGISTER_STRFUN(101, FioreBrasse);
 REGISTER_STRFUN(104, FioreBrasseAlt);

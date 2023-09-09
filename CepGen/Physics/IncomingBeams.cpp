@@ -19,17 +19,14 @@
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
-#include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/HeavyIon.h"
-#include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Physics/IncomingBeams.h"
 #include "CepGen/Physics/Modes.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/StructureFunctions/SigmaRatio.h"
 
 namespace cepgen {
   IncomingBeams::IncomingBeams(const ParametersList& params) : SteeredObject(params) {
@@ -134,13 +131,19 @@ namespace cepgen {
     auto set_part_fluxes_from_name = [&plist_pos, &plist_neg](const std::string& fluxes) {
       if (fluxes.empty())
         return;
-      const auto& params = PartonFluxFactory::get().describeParameters(fluxes).parameters();
+      const auto params = PartonFluxFactory::get().describeParameters(fluxes).parameters();
       plist_pos.set<ParametersList>("partonFlux", params);
       plist_neg.set<ParametersList>("partonFlux", params);
     };
 
-    if (params_.has<std::vector<std::string> >("partonFluxes"))
-      set_part_fluxes_from_name_vector(steer<std::vector<std::string> >("ktFluxes"));
+    if (params_.has<std::vector<ParametersList> >("partonFluxes")) {
+      const auto& fluxes = steer<std::vector<ParametersList> >("partonFluxes");
+      if (fluxes.size() < 2)
+        throw CG_FATAL("IncomingBeams") << "Invalid multiplicity of parton fluxes given: " << fluxes << ".";
+      plist_pos.set("partonFlux", fluxes.at(0));
+      plist_neg.set("partonFlux", fluxes.at(1));
+    } else if (params_.has<std::vector<std::string> >("partonFluxes"))
+      set_part_fluxes_from_name_vector(steer<std::vector<std::string> >("partonFluxes"));
     else if (params_.has<std::vector<std::string> >("ktFluxes"))
       set_part_fluxes_from_name_vector(steer<std::vector<std::string> >("ktFluxes"));
     else if (params_.has<std::string>("partonFluxes"))
@@ -181,8 +184,10 @@ namespace cepgen {
     }
 
     //--- structure functions
-    plist_pos.set<ParametersList>("structureFunctions", steer<ParametersList>("structureFunctions"));
-    plist_neg.set<ParametersList>("structureFunctions", steer<ParametersList>("structureFunctions"));
+    if (!steer<ParametersList>("structureFunctions").empty()) {
+      plist_pos.set<ParametersList>("structureFunctions", steer<ParametersList>("structureFunctions"));
+      plist_neg.set<ParametersList>("structureFunctions", steer<ParametersList>("structureFunctions"));
+    }
     CG_DEBUG("IncomingBeams") << "Will build the following incoming beams:\n* " << plist_pos << "\n* " << plist_neg
                               << ".";
     pos_beam_ = Beam(plist_pos);
@@ -286,17 +291,19 @@ namespace cepgen {
         .set<int>("beam2id", neg_beam_.pdgId())
         .set<double>("beam2pz", -neg_beam_.momentum().pz())
         .setAs<int, mode::Kinematics>("mode", mode());
-    const auto hi1 = HeavyIon::fromPdgId(pos_beam_.pdgId()), hi2 = HeavyIon::fromPdgId(neg_beam_.pdgId());
-    if (hi1)
+    if (HeavyIon::isHI(pos_beam_.pdgId())) {
+      const auto hi1 = HeavyIon::fromPdgId(pos_beam_.pdgId());
       params_.set<int>("beam1A", hi1.A).set<int>("beam1Z", (int)hi1.Z);
-    if (hi2)
+    }
+    if (HeavyIon::isHI(neg_beam_.pdgId())) {
+      const auto hi2 = HeavyIon::fromPdgId(neg_beam_.pdgId());
       params_.set<int>("beam2A", hi2.A).set<int>("beam2Z", (int)hi2.Z);
+    }
     return params_;
   }
 
   ParametersDescription IncomingBeams::description() {
     auto desc = ParametersDescription();
-    desc += Beam::description();
     desc.add<int>("beam1id", 2212).setDescription("PDG id of the positive-z beam particle");
     desc.add<int>("beam1A", 1).setDescription("Atomic weight of the positive-z ion beam");
     desc.add<int>("beam1Z", 1).setDescription("Atomic number of the positive-z ion beam");

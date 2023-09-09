@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2016-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,36 +18,62 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/KTFluxes/KTFlux.h"
+#include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Physics/Beam.h"
-#include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/HeavyIon.h"
-#include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/KTProcess.h"
 
 namespace cepgen {
   namespace proc {
-    KTProcess::KTProcess(const ParametersList& params,
-                         const std::array<pdgid_t, 2>& partons,
-                         const std::vector<pdgid_t>& central)
-        : Process(params), intermediate_parts_(partons), produced_parts_(central) {
+    KTProcess::KTProcess(const ParametersList& params, const pdgids_t& central)
+        : Process(params), produced_parts_(central) {
       event().map()[Particle::CentralSystem].resize(central.size());
     }
 
     void KTProcess::addEventContent() {
       Process::setEventContent(
           {// incoming state
-           {Particle::IncomingBeam1, PDG::proton},
-           {Particle::IncomingBeam2, PDG::proton},
-           {Particle::Parton1, intermediate_parts_[0]},
-           {Particle::Parton2, intermediate_parts_[1]}},
+           {Particle::IncomingBeam1, kinematics().incomingBeams().positive().pdgId()},
+           {Particle::IncomingBeam2, kinematics().incomingBeams().negative().pdgId()},
+           {Particle::Parton1, kinematics().incomingBeams().positive().daughterId()},
+           {Particle::Parton2, kinematics().incomingBeams().negative().daughterId()}},
           {// outgoing state
-           {Particle::OutgoingBeam1, {PDG::proton}},
-           {Particle::OutgoingBeam2, {PDG::proton}},
+           {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
+           {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
            {Particle::CentralSystem, produced_parts_}});
       setExtraContent();
       CG_DEBUG("KTProcess:addEventContent") << "Addition of:\n\t"
-                                            << "Intermediate partons: " << intermediate_parts_ << "\n\t"
+                                            << "Intermediate partons: "
+                                            << pdgids_t{kinematics().incomingBeams().positive().daughterId(),
+                                                        kinematics().incomingBeams().negative().daughterId()}
+                                            << "\n\t"
                                             << "Produced system: " << produced_parts_ << ".\n\t" << event();
+    }
+
+    void KTProcess::prepareBeams() {
+      auto set_beam_properties = [](Beam& beam) {
+        ParametersList params;
+        switch (beam.mode()) {
+          case Beam::Mode::HIElastic:
+            params.set<ParametersList>("partonFlux",
+                                       PartonFluxFactory::get().describeParameters("ElasticHeavyIonKT").parameters());
+            break;
+          case Beam::Mode::ProtonInelastic:
+            params.set<ParametersList>("partonFlux",
+                                       PartonFluxFactory::get().describeParameters("BudnevInelasticKT").parameters());
+            break;
+          case Beam::Mode::ProtonElastic:
+            params.set<ParametersList>("partonFlux",
+                                       PartonFluxFactory::get().describeParameters("BudnevElasticKT").parameters());
+            break;
+          default:
+            throw CG_FATAL("KTProcess:prepareBeams")
+                << "No fallback strategy defined for beam mode '" << beam.mode() << "'.";
+        }
+        beam.setParameters(params);
+      };
+      set_beam_properties(kinematics().incomingBeams().positive());
+      set_beam_properties(kinematics().incomingBeams().negative());
     }
 
     void KTProcess::prepareKinematics() {
@@ -57,8 +83,6 @@ namespace cepgen {
 
       const auto& ib1 = event().oneWithRole(Particle::IncomingBeam1);
       const auto& ib2 = event().oneWithRole(Particle::IncomingBeam2);
-      auto& p1 = event().oneWithRole(Particle::Parton1);
-      auto& p2 = event().oneWithRole(Particle::Parton2);
 
       //============================================================================================
       // register the incoming partons' variables
@@ -84,13 +108,6 @@ namespace cepgen {
                      kinematics().cuts().initial.phi_qt,
                      {0., 2. * M_PI},
                      "Second incoming parton azimuthal angle");
-
-      //============================================================================================
-      // register the incoming partons
-      //============================================================================================
-
-      p1.setPdgId(kinematics().incomingBeams().positive().daughterId());
-      p2.setPdgId(kinematics().incomingBeams().negative().daughterId());
 
       //============================================================================================
       // register all process-dependent variables
@@ -124,8 +141,11 @@ namespace cepgen {
         return 0.;  // avoid computing the fluxes if the matrix element is already null
 
       // convolute with fluxes according to modelling specified in parameters card
-      return kinematics().incomingBeams().positive().flux(x1_, qt1_ * qt1_, mX2()) * M_1_PI *
-             kinematics().incomingBeams().negative().flux(x2_, qt2_ * qt2_, mY2()) * M_1_PI * cent_me;
+      const auto& flux1 = dynamic_cast<const KTFlux&>(kinematics().incomingBeams().positive().flux());
+      const auto& flux2 = dynamic_cast<const KTFlux&>(kinematics().incomingBeams().negative().flux());
+
+      return flux1.fluxMX2(x1_, qt1_ * qt1_, mX2()) * M_1_PI * flux2.fluxMX2(x2_, qt2_ * qt2_, mY2()) * M_1_PI *
+             cent_me;
     }
 
     void KTProcess::fillKinematics(bool) {
@@ -156,6 +176,7 @@ namespace cepgen {
 
     ParametersDescription KTProcess::description() {
       auto desc = Process::description();
+      desc.setDescription("Unnamed kT-factorised process");
       return desc;
     }
   }  // namespace proc

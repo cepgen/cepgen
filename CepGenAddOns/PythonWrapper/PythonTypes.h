@@ -23,6 +23,7 @@
 
 #include <memory>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include "CepGen/Core/ParametersList.h"
@@ -47,10 +48,15 @@ namespace cepgen {
       void operator()(PyObject*);
     };
     /// Smart pointer to a Python object and its dereferencing operator
-    typedef std::unique_ptr<PyObject, ObjectPtrDeleter> ObjectPtr;
+    struct ObjectPtr : public std::unique_ptr<PyObject, ObjectPtrDeleter> {
+      using std::unique_ptr<PyObject, ObjectPtrDeleter>::unique_ptr;
+      friend std::ostream& operator<<(std::ostream&, const ObjectPtr&);
+    };
 
     /// Import a Python module in a new reference-counted Python object
     ObjectPtr importModule(const std::string&);
+    /// Define a Python module from a Python code in a new reference-counted Python object
+    ObjectPtr defineModule(const std::string&, const std::string&);
 
     /// Check if a Python object holds a given C++ type
     template <typename T>
@@ -66,6 +72,14 @@ namespace cepgen {
     /// Build a new Python object from a C++ one
     template <typename T>
     ObjectPtr set(const T&);
+    /// Build a new Python list from a C++ STL vector
+    template <typename T>
+    inline ObjectPtr set(const std::vector<T>& vec) {
+      ObjectPtr list(PyList_New(vec.size()));
+      for (size_t i = 0; i < vec.size(); ++i)
+        PyList_SetItem(list.get(), i, set(vec.at(i)).release());
+      return list;
+    }
 
     /// Check if a Python object is compatible with a vector of uniform objects
     template <typename T>
@@ -82,6 +96,22 @@ namespace cepgen {
     template <typename T>
     inline std::vector<T> getVector(const ObjectPtr& obj) {
       return getVector<T>(obj.get());
+    }
+
+    /// Build a Python tuple from a C++ tuple
+    template <typename... Args>
+    ObjectPtr newTuple(const std::tuple<Args...>& c_tuple) {
+      const auto tuple_size = sizeof...(Args);
+      ObjectPtr tuple(PyTuple_New(tuple_size));
+      /*for (size_t i = 0; i < tuple_size; ++i) {
+        auto val = std::get<i>(c_tuple);
+        PyTuple_SetItem(tuple.get(), i, set<decltype(val)>(val));
+      }*/
+      Py_ssize_t i = 0;
+      std::apply([&tuple, &i](
+                     auto... vals) { ((PyTuple_SetItem(tuple.get(), i++, set<decltype(vals)>(vals).release())), ...); },
+                 c_tuple);
+      return tuple;
     }
 
     /// Build a Python tuple from a (uniform) vector of objects

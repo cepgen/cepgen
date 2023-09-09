@@ -50,6 +50,7 @@ int main(int argc, char* argv[]) {
   struct test_t {
     cepgen::FunctionalIntegrand integrand;
     double result{0.};
+    std::vector<cepgen::Limits> lims{};
   };
 
   vector<test_t> tests;
@@ -59,6 +60,7 @@ int main(int argc, char* argv[]) {
       test_t{cepgen::FunctionalIntegrand(
                  "1./(1.-cos(x*3.141592654)*cos(y*3.141592654)*cos(z*3.141592654))", {"x", "y", "z"}, func_mod),
              1.3932039296856768591842462603255});
+  tests.emplace_back(test_t{cepgen::FunctionalIntegrand("sin(x)", {"x"}, func_mod), 2., {cepgen::Limits{0., M_PI}}});
 
   CG_LOG << "Will test with " << cepgen::utils::s("integrator", integrators.size(), true) << ": " << integrators;
 
@@ -71,6 +73,8 @@ int main(int argc, char* argv[]) {
     size_t i = 0;
     double result, error;
     for (auto& test : tests) {
+      if (!test.lims.empty())
+        integr->setLimits(test.lims);
       integr->integrate(test.integrand, result, error);
       const auto test_name = integrator + " test " + to_string(i);
       CG_DEBUG("main") << "Test " << i << ": ref.: " << test.result << ", result: " << result << " +/- " << error

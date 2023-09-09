@@ -22,10 +22,8 @@
 #include <gsl/gsl_version.h>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Integration/AnalyticIntegrator.h"
 #include "CepGen/Modules/AnalyticIntegratorFactory.h"
-#include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/GSLFunctionsWrappers.h"
 
 namespace cepgen {

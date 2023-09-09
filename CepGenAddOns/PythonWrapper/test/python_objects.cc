@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,31 +19,25 @@
 // clang-format off
 #include "CepGenAddOns/PythonWrapper/Environment.h"
 // clang-format on
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/Test.h"
 
 using namespace std;
 
-#define TEST_TYPE(type, object)                                                      \
-  {                                                                                  \
-    auto py_obj = cepgen::python::set(object);                                       \
-    auto ret = cepgen::python::get<type>(py_obj.get());                              \
-    if (ret != object) {                                                             \
-      CG_LOG << "Object recasted from python is not identical to original object:\n" \
-             << "Original: " << object << ",\n"                                      \
-             << "Recasted: " << ret << ".";                                          \
-      return -1;                                                                     \
-    }                                                                                \
-    CG_LOG << #type << " test passed.";                                              \
+#define TEST_TYPE(type, object)                         \
+  {                                                     \
+    auto py_obj = cepgen::python::set(object);          \
+    auto ret = cepgen::python::get<type>(py_obj.get()); \
+    CG_TEST_EQUAL(ret, object, std::string(#object));   \
   }
 
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
 
   cepgen::python::Environment env;
-  TEST_TYPE(bool, bool(true))
-  TEST_TYPE(bool, bool(false))
-  TEST_TYPE(string, string("Héhéhé, test @ ünıc0d€"))
+  TEST_TYPE(bool, true)
+  TEST_TYPE(bool, false)
+  TEST_TYPE(string, string("Héhéhé, test @ ünıc0d€ 🐗"))
   TEST_TYPE(cepgen::Limits, cepgen::Limits(-2., 3.1))
   TEST_TYPE(
       cepgen::ParametersList,
@@ -56,5 +50,5 @@ int main(int argc, char* argv[]) {
               "plist",
               cepgen::ParametersList().set<int>("foo", 10).set<double>("bar", 42.42).set<std::string>("baz", "hîhî")))
 
-  return 0;
+  CG_TEST_SUMMARY;
 }

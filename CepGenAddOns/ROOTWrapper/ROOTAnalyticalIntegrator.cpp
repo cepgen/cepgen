@@ -21,6 +21,7 @@
 #include "CepGen/Integration/AnalyticIntegrator.h"
 #include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Utils/FunctionsWrappers.h"
+#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
   class ROOTAnalyticalIntegrator final : public AnalyticIntegrator {
@@ -30,22 +31,29 @@ namespace cepgen {
           integr_(steerAs<int, ROOT::Math::IntegrationOneDim::Type>("type"),
                   steer<double>("epsabs"),
                   steer<double>("epsrel"),
-                  steer<int>("limit")) {}
+                  steer<int>("limit"),
+                  steer<int>("rule")) {
+      CG_DEBUG("ROOTAnalyticalIntegrator").log([this](auto& log) {
+        log << "ROOT analytical integrator built with options:\n";
+        integr_.Options().Print(log.stream());
+      });
+    }
 
     static ParametersDescription description() {
       auto desc = AnalyticIntegrator::description();
       desc.setDescription("ROOT integration algorithms wrapper");
-      desc.add<int>("type", -1).setDescription("type of integration");
-      desc.add<int>("limit", 1000).setDescription("maximum number of subintervals to build");
-      desc.add<double>("epsabs", 0.).setDescription("desired absolute error limit");
-      desc.add<double>("epsrel", 0.1).setDescription("desired relative error limit");
+      desc.addAs<int>("type", ROOT::Math::IntegrationOneDim::Type::kDEFAULT).setDescription("type of integration");
+      desc.add<double>("epsabs", -1.).setDescription("desired absolute error limit");
+      desc.add<double>("epsrel", -1.).setDescription("desired relative error limit");
+      desc.add<int>("limit", 0).setDescription("maximum number of subintervals to build");
+      desc.add<int>("rule", 0).setDescription("Gauss-Kronrod integration rule (only for GSL kADAPTIVE type)");
       return desc;
     }
 
-    double integrate(const utils::Function1D& func, void* = nullptr, const Limits& lim = {}) const override {
-      std::function<double(double)> func_local = func;
-      const double xmin = (lim.hasMin() ? lim.min() : range_.min());
-      const double xmax = (lim.hasMax() ? lim.max() : range_.max());
+    double integrate(const utils::Function1D& func, void* params = nullptr, const Limits& lim = {}) const override {
+      const auto func_local = utils::Function1D([&func, &params](double x) { return func(x, params); });
+      const double xmin = lim.hasMin() ? lim.min() : range_.min();
+      const double xmax = lim.hasMax() ? lim.max() : range_.max();
       return integr_.Integral(func_local, xmin, xmax);
     }
 

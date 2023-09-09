@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -94,9 +94,16 @@ namespace cepgen {
     search_paths = utils::env::searchPaths();
     CG_DEBUG("initialise") << utils::s("Search path", search_paths.size(), false) << ": " << search_paths << ".";
 
+    //--- header message
+    try {
+      printHeader();
+    } catch (const Exception& e) {
+      e.dump();
+    }
+
     //--- particles table parsing
     std::string addons_file;
-    if (!callPath("mass_width_2021.mcd", [](const auto& path) {
+    if (!callPath("mass_width_2023.txt", [](const auto& path) {
           pdg::MCDFileParser::parse(path);
           return true;
         }))
@@ -111,13 +118,6 @@ namespace cepgen {
       if (addons_file.empty() && utils::fileExists(the_path / "CepGenAddOns.txt"))
         addons_file = the_path / "CepGenAddOns.txt";
       utils::env::append("LD_LIBRARY_PATH", path);
-    }
-
-    //--- header message
-    try {
-      printHeader();
-    } catch (const Exception& e) {
-      e.dump();
     }
 
     //--- load all necessary modules
@@ -144,13 +144,13 @@ namespace cepgen {
   }
 
   void printHeader() {
-    for (const auto& path : search_paths) {
-      std::ifstream hf(fs::path{path} / "README");
-      if (hf.good()) {
-        CG_LOG << std::string(std::istreambuf_iterator<char>(hf), std::istreambuf_iterator<char>());
-        return;
-      }
-    }
-    CG_WARNING("printHeader") << "Failed to open README file.";
+    if (!callPath("README", [](const auto& path) {
+          std::ifstream hf(path);
+          if (!hf.good())
+            return false;
+          CG_LOG << std::string(std::istreambuf_iterator<char>(hf), std::istreambuf_iterator<char>());
+          return true;
+        }))
+      CG_WARNING("printHeader") << "Failed to open README file.";
   }
 }  // namespace cepgen

@@ -18,7 +18,6 @@
 
 #include <cassert>
 #include <cmath>
-#include <vector>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/SteeredObject.h"
@@ -46,7 +45,7 @@ namespace cepgen {
         return desc;
       }
 
-      ALLM& eval(double xbj, double q2) override;
+      void eval() override;
 
     private:
       class Trajectory : public SteeredObject<Trajectory> {
@@ -133,22 +132,21 @@ namespace cepgen {
                        << " q_0^2=" << q02_ << ", Lambda^2=" << lambda2_ << " GeV^2.";
     }
 
-    ALLM& ALLM::eval(double xbj, double q2) {
-      const double w2_eff = utils::mX2(xbj, q2, mp2_) - mp2_;
-      const double xp = (q2 + mpom2_) / (q2 + w2_eff + mpom2_), xr = (q2 + mreg2_) / (q2 + w2_eff + mreg2_);
+    void ALLM::eval() {
+      const double w2_eff = utils::mX2(args_.xbj, args_.q2, mp2_) - mp2_;
+      const double xp = (args_.q2 + mpom2_) / (args_.q2 + w2_eff + mpom2_),
+                   xr = (args_.q2 + mreg2_) / (args_.q2 + w2_eff + mreg2_);
 
-      const double xlog1 = log((q2 + q02_) / lambda2_), xlog2 = log(q02_ / lambda2_);
+      const double xlog1 = log((args_.q2 + q02_) / lambda2_), xlog2 = log(q02_ / lambda2_);
       const double t = log(xlog1 / xlog2);
 
       const double apom = pomeron_.eval1('a', t), bpom = pomeron_.eval2('b', t), cpom = pomeron_.eval1('c', t);
       const double areg = reggeon_.eval2('a', t), breg = reggeon_.eval2('b', t), creg = reggeon_.eval2('c', t);
 
-      const double F2_Pom = cpom * pow(xp, apom) * pow(1. - xbj, bpom),
-                   F2_Reg = creg * pow(xr, areg) * pow(1. - xbj, breg);
+      const double F2_Pom = cpom * pow(xp, apom) * pow(1. - args_.xbj, bpom),
+                   F2_Reg = creg * pow(xr, areg) * pow(1. - args_.xbj, breg);
 
-      setF2(q2 / (q2 + m02_) * (F2_Pom + F2_Reg));
-
-      return *this;
+      setF2(args_.q2 / (args_.q2 + m02_) * (F2_Pom + F2_Reg));
     }
 
     //---------------------------------------------------------------------------------------------

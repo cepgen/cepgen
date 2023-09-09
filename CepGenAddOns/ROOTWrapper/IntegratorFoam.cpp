@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@
 #include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Parameters.h"
 
 namespace cepgen {
   /// Foam general-purpose integration algorithm
@@ -44,13 +43,16 @@ namespace cepgen {
     inline double Density(int ndim, double* x) override {
       if (!integrand_)
         throw CG_FATAL("FoamDensity") << "Integrand object not yet initialised!";
-      return integrand_->eval(std::vector<double>(x, x + ndim));
+      for (int i = 0; i < ndim; ++i)
+        coord_[i] = limits_.at(i).x(x[i]);
+      return integrand_->eval(coord_);
     }
 
   private:
     std::unique_ptr<TFoam> foam_;
     std::unique_ptr<TRandom> rnd_;
     Integrand* integrand_{nullptr};
+    std::vector<double> coord_;
   };
 
   IntegratorFoam::IntegratorFoam(const ParametersList& params) : Integrator(params), foam_(new TFoam("Foam")) {
@@ -81,15 +83,20 @@ namespace cepgen {
     foam_->SetChat(std::max(verbosity_, 0));
     foam_->SetRho(this);
     foam_->SetkDim(integrand_->size());
+    Integrator::checkLimits(*integrand_);
+    coord_.resize(integrand_->size());
     foam_->Initialize();
-    for (size_t i = 0; i < 100000; ++i)
+    for (int i = 0; i < steer<int>("nCalls"); ++i)
       foam_->MakeEvent();
     //--- launch integration
     double norm, err;
     foam_->Finalize(norm, err);
 
-    //FIXME handle the non-[0,1] ranges
     foam_->GetIntegMC(result, abs_error);
+    for (const auto& lim : limits_) {
+      result *= lim.range();
+      abs_error *= lim.range();
+    }
     result_ = result;
     err_result_ = abs_error;
 
@@ -100,7 +107,7 @@ namespace cepgen {
       const double effic = wtmax > 0 ? avewt / wtmax : 0.;
       log << "Result: " << result_ << " +- " << err_result_ << "\n\t"
           << "Relative error: " << err_result_ / result_ * 100. << "%\n\t"
-          << "Dispersion/<wt>= " << sigma << ", <wt>= " << avewt << ", <wt>/wtmax= " << effic << ",\n\t"
+          << "Dispersion/<wt> = " << sigma << ", <wt> = " << avewt << ", <wt>/wtmax = " << effic << ",\n\t"
           << " for epsilon = " << eps << "\n\t"
           << " nCalls (initialisation only)= " << ncalls << ".";
     });
@@ -110,11 +117,14 @@ namespace cepgen {
     auto desc = Integrator::description();
     desc.setDescription("FOAM general purpose MC integrator");
     desc.add<std::string>("rngEngine", "MersenneTwister")
-        .setDescription("Set random number generator engine ('Ranlux', 'generic', 'MersenneTwister' handled)");
+        .setDescription(
+            "Set random number generator engine (currently handled: 'Ranlux', 'generic', 'MersenneTwister')");
+    desc.add<int>("nCalls", 100'000).setDescription("number of calls for the cell evaluation");
     desc.add<int>("nCells", 1000);
     desc.add<int>("nSampl", 200);
     desc.add<int>("nBin", 8);
     desc.add<int>("EvPerBin", 25);
+    desc.add<int>("verbose", 0).setDescription("Verbosity level");
     return desc;
   }
 }  // namespace cepgen

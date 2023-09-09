@@ -17,10 +17,11 @@
  */
 
 #include <cmath>  // pow
+#include <functional>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/GridParameters.h"
 #include "CepGen/Integration/Integrator.h"
+#include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {

@@ -48,6 +48,8 @@ namespace cepgen {
     std::string format(const std::wstring& fmt, Args... args) {
       return format(tostring(fmt), args...);
     }
+    /// Demangle a type id if possible
+    std::string demangle(const char*);
     /// Return the formatted date/time now
     std::string timeAs(const std::string& fmt);
     /// Human-readable boolean printout
@@ -95,7 +97,7 @@ namespace cepgen {
     /// Replace all occurrences of multiple texts by others
     std::string replace_all(const std::string& str, const std::vector<std::pair<std::string, std::string> >& keys);
     /// Split a string according to a separation character
-    std::vector<std::string> split(const std::string&, char);
+    std::vector<std::string> split(const std::string&, char, bool trim = false);
     /// Merge a collection of a printable type in a single string
     template <typename T>
     std::string merge(const std::vector<T>&, const std::string&);
@@ -106,6 +108,9 @@ namespace cepgen {
     bool isInt(const std::string&);
     /// Check if a string is also a floating point number
     bool isFloat(const std::string&);
+    /// Transform any type into a string
+    template <typename T>
+    std::string to_string(const T&);
     /// Check if a collection contains an item
     template <typename T>
     bool contains(const std::vector<T>& coll, const T& item) {

@@ -16,23 +16,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/PartonFluxes/PartonFlux.h"
+#ifndef CepGen_Physics_PartonFlux_h
+#define CepGen_Physics_PartonFlux_h
+
+#include "CepGen/Modules/NamedModule.h"
+#include "CepGen/Physics/ParticleProperties.h"
 
 namespace cepgen {
-  class KTFlux : public PartonFlux {
+  class PartonFlux : public NamedModule<std::string> {
   public:
-    explicit KTFlux(const ParametersList& params) : PartonFlux(params) {}
+    explicit PartonFlux(const ParametersList&);
 
-    static ParametersDescription description() {
-      auto desc = PartonFlux::description();
-      desc.setDescription("kT-factorised flux");
-      return desc;
-    }
+    static ParametersDescription description();
 
-    bool ktFactorised() const override final { return true; }
+    /// is the flux parton kT-dependent?
+    virtual bool ktFactorised() const { return false; }
+    /// is the initiator particle fragmenting after the parton emission?
+    virtual bool fragmenting() const { return true; }
+    /// parton PDG identifier
+    virtual pdgid_t partonPdgId() const = 0;
+    /// initiator particle squared mass
+    virtual double mass2() const = 0;
 
   protected:
-    /// Minimal value taken for a \f$\k_{\rm T}\f$-factorised flux
-    static constexpr double kMinKTFlux = 1.e-20;
+    const double prefactor_;
+    const double mp_, mp2_;
+    const Limits x_range_{0., 1.};
   };
 }  // namespace cepgen
+
+#endif

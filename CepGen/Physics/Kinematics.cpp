@@ -18,7 +18,6 @@
 
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/Kinematics.h"
-#include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/Message.h"
 
 namespace cepgen {

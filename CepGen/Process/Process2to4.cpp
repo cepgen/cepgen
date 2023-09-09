@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2019-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,17 +22,13 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process2to4.h"
-#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace proc {
     const Limits Process2to4::x_limits_{0., 1.};
 
-    Process2to4::Process2to4(const ParametersList& params, std::array<pdgid_t, 2> partons, pdgid_t cs_id)
-        : KTProcess(params, partons, {cs_id, cs_id}),
-          cs_prop_(PDG::get()(cs_id)),
-          single_limits_(params),
-          rnd_sign_(0, 1) {}
+    Process2to4::Process2to4(const ParametersList& params, pdgid_t cs_id)
+        : KTProcess(params, {cs_id, cs_id}), cs_prop_(PDG::get()(cs_id)), single_limits_(params), rnd_sign_(0, 1) {}
 
     void Process2to4::setCuts(const cuts::Central& single) { single_limits_ = single; }
 
@@ -240,11 +236,6 @@ namespace cepgen {
       const double uhat1 = (q1() - pc(1)).mass2();
       const double uhat2 = (q2() - pc(0)).mass2();
       return 0.5 * (uhat1 + uhat2);
-    }
-
-    ParametersDescription Process2to4::description() {
-      auto desc = KTProcess::description();
-      return desc;
     }
   }  // namespace proc
 }  // namespace cepgen

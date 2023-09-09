@@ -22,7 +22,9 @@
 #include <frameobject.h>
 // clang-format on
 
+#if PY_VERSION_HEX < 0x030b0000
 #include "CepGen/Utils/String.h"
+#endif
 
 namespace cepgen {
   namespace python {

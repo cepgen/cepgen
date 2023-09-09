@@ -19,11 +19,9 @@
 #include <gsl/gsl_monte_vegas.h>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Integration/GridParameters.h"
 #include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/IntegratorGSL.h"
 #include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {

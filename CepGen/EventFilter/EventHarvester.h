@@ -55,8 +55,6 @@ namespace cepgen {
     double cross_section_{1.};
     unsigned long num_evts_{0ul};
 
-    /// centre-of-mass energy
-    double sqrts_{0.};
     /// Name of the physics process
     std::string proc_name_;
 
@@ -78,3 +76,4 @@ namespace cepgen {
     std::vector<Hist2DInfo> hists2d_;
   };
 }  // namespace cepgen
+

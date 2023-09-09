@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2019-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -118,7 +118,7 @@ namespace pdg {
         cepgen::PDG::get().define(prop);
       }
     }
-    CG_INFO("MCDFileParser") << cepgen::utils::s("particle", cepgen::PDG::get().size()) << " defined from \"" << path
-                             << "\". ";
+    CG_DEBUG("MCDFileParser") << cepgen::utils::s("particle", cepgen::PDG::get().size()) << " defined from \"" << path
+                              << "\". ";
   }
 }  // namespace pdg

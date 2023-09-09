@@ -20,11 +20,11 @@
 #include <cmath>
 #include <iomanip>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
 #include "CepGen/Utils/Histogram.h"
+#include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {

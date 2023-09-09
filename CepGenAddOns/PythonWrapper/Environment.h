@@ -26,7 +26,7 @@ namespace cepgen {
     class Environment {
     public:
       /// Initialise the python environment
-      Environment();
+      explicit Environment(const std::string& = "");
       /// Finalise the python environment
       ~Environment();
       /// Set the name of the Python program

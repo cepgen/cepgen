@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2016-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,11 +38,8 @@ namespace cepgen {
     public:
       /// Class constructor
       /// \param[in] params Parameters list
-      /// \param[in] partons First and second incoming parton
       /// \param[in] output Produced final state particles
-      explicit KTProcess(const ParametersList& params,
-                         const std::array<pdgid_t, 2>& partons,
-                         const std::vector<pdgid_t>& output);
+      explicit KTProcess(const ParametersList& params, const pdgids_t& output);
 
       /// Populate the event content with the generated process' topology
       void addEventContent() override;
@@ -54,6 +51,7 @@ namespace cepgen {
       static ParametersDescription description();
 
     protected:
+      void prepareBeams() override;
       /// Set the kinematics associated to the phase space definition
       void prepareKinematics() override;
       /// Set the kinematics of the central system before any point computation
@@ -65,10 +63,8 @@ namespace cepgen {
       virtual double computeKTFactorisedMatrixElement() = 0;
       /// Set the kinematics of the outgoing central system
       virtual void fillCentralParticlesKinematics() = 0;
-      /// Set the list of intermediate partons in the process
-      void setIntermediatePartons(const std::array<pdgid_t, 2>& part) { intermediate_parts_ = part; }
       /// Set the list of central particles produced
-      void setProducedParticles(const std::vector<pdgid_t>& prod) { produced_parts_ = prod; }
+      void setProducedParticles(const pdgids_t& prod) { produced_parts_ = prod; }
 
       /// Log-virtuality range of the intermediate parton
       Limits log_qt_limits_;
@@ -91,8 +87,7 @@ namespace cepgen {
       /// Azimuthal rotation of the second intermediate parton's transverse virtuality
       double phi_qt2_{0.};
 
-      std::array<pdgid_t, 2> intermediate_parts_;  ///< First and second intermediate parton (photon, pomeron, ...)
-      std::vector<pdgid_t> produced_parts_;        ///< Type of particles produced in the final state
+      pdgids_t produced_parts_;  ///< Type of particles produced in the final state
     };
   }  // namespace proc
 }  // namespace cepgen

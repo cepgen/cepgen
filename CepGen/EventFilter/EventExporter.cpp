@@ -19,13 +19,10 @@
 #include <iomanip>
 #include <sstream>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Parameters.h"
-#include "CepGen/Physics/Constants.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
 
@@ -49,7 +46,7 @@ namespace cepgen {
       os << "\n";
     }
     const auto& cuts = runParameters().kinematics().cuts();
-    auto dump_cuts = [&os, &len, &prep](const auto& obj) {
+    auto dump_cuts = [&os, &prep](const auto& obj) {
       for (const auto& lim : obj.parameters().template keysOf<Limits>()) {
         const auto& limit = obj.parameters().template get<Limits>(lim);
         if (limit.valid() && obj.description().has(lim))

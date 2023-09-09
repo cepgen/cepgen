@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2021-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,9 +19,8 @@
 #ifndef CepGen_Core_SteeredObject_h
 #define CepGen_Core_SteeredObject_h
 
-#include <functional>
+#include <functional>  // for std::reference_wrapper
 
-#include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Core/Steerable.h"
 
 #define REGISTER_TYPE(type, coll)                                \
@@ -49,13 +48,6 @@ namespace cepgen {
     bool operator==(const SteeredObject& oth) const { return parameters() == oth.parameters(); }
     /// Inequality operator
     bool operator!=(const SteeredObject& oth) const { return !operator==(oth); }
-
-    /// Description of all object parameters
-    static inline ParametersDescription description() {
-      auto desc = ParametersDescription();
-      desc.setDescription("Virtual, base steerable object");
-      return desc;
-    }
 
     REGISTER_TYPE(bool, map_bools_)
     REGISTER_TYPE(int, map_ints_)

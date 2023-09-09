@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -105,7 +105,7 @@ namespace cepgen {
     Particles operator[](const ParticlesIds& ids_) const;
 
     /// Compute the missing momentum for central particles in this event
-    Momentum missingEnergy() const;
+    Momentum missingMomentum() const;
 
     //----- general particles information retriever
 
@@ -145,3 +145,4 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
+

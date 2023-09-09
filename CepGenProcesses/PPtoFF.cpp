@@ -18,14 +18,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iomanip>
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
-#include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Physics/Constants.h"
-#include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process2to4.h"
 
@@ -35,7 +30,7 @@ using namespace cepgen;
 class PPtoFF final : public cepgen::proc::Process2to4 {
 public:
   explicit PPtoFF(const ParametersList& params)
-      : cepgen::proc::Process2to4(params, {PDG::photon, PDG::photon}, steer<ParticleProperties>("pair").pdgid),
+      : cepgen::proc::Process2to4(params, params.get<ParticleProperties>("pair").pdgid),
         method_(steerAs<int, Mode>("method")),
         osp_(steer<ParametersList>("offShellParameters")) {
     if (method_ == Mode::offShell) {  // off-shell matrix element
@@ -49,7 +44,8 @@ public:
   static ParametersDescription description() {
     auto desc = Process2to4::description();
     desc.setDescription("γγ → f⁺f¯ (kt-factor.)");
-    desc.add<int>("method", (int)Mode::offShell)
+    desc.addAs<int, pdgid_t>("pair", PDG::muon).setDescription("type of central particles emitted");
+    desc.addAs<int, Mode>("method", Mode::offShell)
         .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell)");
     desc.add("offShellParameters", OffShellParameters::description());
     return desc;
@@ -91,10 +87,9 @@ private:
 
     static ParametersDescription description() {
       auto desc = ParametersDescription();
-      desc.add("pair", (pdgid_t)PDG::muon).setDescription("type of central particles emitted");
-      desc.add("mat1", 1).setDescription("symmetrisation factor for the first incoming photon");
-      desc.add("mat2", 1).setDescription("symmetrisation factor for the second incoming photon");
-      desc.add("termLL", 1).setDescription("fully longidudinal relative weight");
+      desc.add("mat1", 1).setDescription("symmetry factor for the first incoming photon");
+      desc.add("mat2", 1).setDescription("symmetry factor for the second incoming photon");
+      desc.add("termLL", 1).setDescription("fully longitudinal relative weight");
       desc.add("termLT", 1).setDescription("cross-polarisation relative weight");
       desc.add("termTT", 1).setDescription("fully transverse relative weight");
       desc.add("termtt", 1).setDescription("fully transverse relative weight");
@@ -106,8 +101,6 @@ private:
   } osp_;
 
   double mf2_{0.};
-  short qf3_{0};
-  unsigned short colf_{0};
 };
 
 void PPtoFF::prepareProcessKinematics() {
@@ -116,27 +109,21 @@ void PPtoFF::prepareProcessKinematics() {
     throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop << ".";
 
   mf2_ = cs_prop.mass * cs_prop.mass;
-  qf3_ = cs_prop.charge;
-  colf_ = cs_prop.colours;
   prefactor_ = 4. * M_PI;
 
-  CG_DEBUG("PPtoFF:prepare") << "Produced particles: " << cs_prop_.descr << " ("
-                             << "mass = " << cs_prop_.mass << " GeV, "
-                             << "charge = " << std::setprecision(2) << qf3_ / 3. << " e)\n\t"
-                             << "matrix element computation method: " << (int)method_ << ".";
+  CG_DEBUG("PPtoFF:prepare") << "Incoming beams: mp(1/2) = " << mA() << "/" << mB() << ".\n\t"
+                             << "Produced particles: " << cs_prop_ << ".\n\t"
+                             << "ME computation method: " << (int)method_ << ".";
 
   if (!kinematics().cuts().central.pt_diff.valid())
     kinematics().cuts().central.pt_diff = {0., 50.};  // tighter cut for fermions
-
-  CG_DEBUG("PPtoFF:prepare") << "Incoming state:\n\t"
-                             << "mp(1/2) = " << mA() << "/" << mB() << ".";
 
   for (const auto& role : {Particle::Parton1, Particle::Parton2})
     switch (event().oneWithRole(role).pdgId()) {
       case PDG::gluon:
         break;
       case PDG::photon:
-        prefactor_ *= pow(qf3_, 2) / 9.;  // electromagnetic coupling
+        prefactor_ *= pow(cs_prop.charge, 2) / 9.;  // electromagnetic coupling
         break;
       default:
         throw CG_FATAL("PPtoFF:prepare") << "Only photon & gluon partons are supported!";
@@ -145,6 +132,7 @@ void PPtoFF::prepareProcessKinematics() {
 
 double PPtoFF::onShellME() const {
   const double s_hat = shat(), t_hat = that(), u_hat = uhat();
+
   CG_DEBUG_LOOP("PPtoFF:onShell") << "shat: " << s_hat << ", that: " << t_hat << ", uhat: " << u_hat << ".";
 
   const double mf4 = mf2_ * mf2_, mf8 = mf4 * mf4;

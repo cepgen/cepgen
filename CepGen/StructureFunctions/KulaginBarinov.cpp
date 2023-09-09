@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2022-2023  Laurent Forthomme
  *                2021       Sergey Kulagin
  *                           Vladislav Barinov
  *
@@ -112,18 +112,18 @@ namespace cepgen {
         desc.add<ParametersDescription>("disParameters", dis_desc);
 
         desc.add<double>("t0", 2.);
-        desc.add<double>("q2min", 0.8).setDescription("minimum Q^2 covered by the grid");
-        desc.add<double>("q2max", 1.e3).setDescription("maximum Q^2 covered by the grid");
+        desc.add<Limits>("q2Range", Limits{1.e-12, 1.e3});
+        desc.add<Limits>("q2GridRange", Limits{0.8, 1.e3}).setDescription("Q^2 range covered by the grid");
         desc.add<std::string>("gridFile", "a08tmc.dat").setDescription("path to the DIS grid");
         return desc;
       }
 
-      KulaginBarinov& eval(double xbj, double q2) override;
+      void eval() override;
 
     private:
       static constexpr double prefactor_ = M_1_PI * M_1_PI / constants::ALPHA_EM;
       const double t0_;
-      const double q2min_, q2max_;
+      const Limits q2_range_, q2_grid_range_;
       const std::string sfs_grid_file_;
       enum Polarisation { L, T };
       class Resonance : public ResonanceObject, public SteeredObject<Resonance> {
@@ -185,8 +185,8 @@ namespace cepgen {
     KulaginBarinov::KulaginBarinov(const ParametersList& params)
         : Parameterisation(params),
           t0_(steer<double>("t0")),
-          q2min_(steer<double>("q2min")),
-          q2max_(steer<double>("q2max")),
+          q2_range_(steer<Limits>("q2Range")),
+          q2_grid_range_(steer<Limits>("q2GridRange")),
           sfs_grid_file_(steerPath("gridFile")),
           dis_params_(steer<ParametersList>("disParameters")),
           deriv_(DerivatorFactory::get().build(steer<ParametersList>("derivator"))),
@@ -206,18 +206,20 @@ namespace cepgen {
         const size_t nxbb = num_xbj / 2;
         const double x1 = 0.3, xlog1 = log(x1), delx = (xlog1 - log(min_xbj)) / (nxbb - 1),
                      delx1 = std::pow(1. - x1, 2) / (nxbb + 1);
-        const double dels = (log(log(q2max_ / 0.04)) - log(log(q2min_ / 0.04))) / (num_q2 - 1);
+        const double dels =
+            (log(log(q2_grid_range_.max() / 0.04)) - log(log(q2_grid_range_.min() / 0.04))) / (num_q2 - 1);
         // parameterisation of Twist-4 correction from A08 analysis arXiv:0710.0124 [hep-ph] (assuming F2ht=FTht)
         auto sfnht = [](double xbj, double q2) -> double {
           return (std::pow(xbj, 0.9) * std::pow(1. - xbj, 3.63) * (xbj - 0.356) *
                   (1.0974 + 47.7352 * std::pow(xbj, 4))) /
                  q2;
         };
+
         for (size_t idx_xbj = 0; idx_xbj < num_xbj; ++idx_xbj) {  // xbj grid
           const double xbj = idx_xbj < nxbb ? exp(log(min_xbj) + delx * idx_xbj)
                                             : 1. - std::sqrt(fabs(std::pow(1. - x1, 2) - delx1 * (idx_xbj - nxbb + 1)));
           for (size_t idx_q2 = 0; idx_q2 < num_q2; ++idx_q2) {  // Q^2 grid
-            const double q2 = 0.04 * exp(exp(log(log(q2min_ / 0.04)) + dels * idx_q2));
+            const double q2 = 0.04 * exp(exp(log(log(q2_grid_range_.min() / 0.04)) + dels * idx_q2));
             std::array<double, num_sf> sfs{};
             for (size_t idx_sf = 0; idx_sf < num_sf; ++idx_sf) {
               grid_file >> sfs[idx_sf];  // FT, F2
@@ -233,44 +235,44 @@ namespace cepgen {
       }
     }
 
-    KulaginBarinov& KulaginBarinov::eval(double xbj, double q2) {
-      const double w2 = utils::mX2(xbj, q2, mp2_), w = std::sqrt(w2);
+    void KulaginBarinov::eval() {
+      const double w2 = utils::mX2(args_.xbj, args_.q2, mp2_), w = std::sqrt(w2);
       double fl{0.}, f2{0.};
       {  //--- resonances region
-        const auto kin = Resonance::KinematicsBlock(w2, q2, mp2_, mpi2_, meta2_);
+        const auto kin = Resonance::KinematicsBlock(w2, args_.q2, mp2_, mpi2_, meta2_);
         // proton c.m. energy and momentum (needed to compute additional kinematics factor for FL)
-        const double ecm = utils::energyFromW(w, -q2, mp2_), q2cm = ecm * ecm - mp2_;
+        const double ecm = utils::energyFromW(w, -args_.q2, mp2_), q2cm = ecm * ecm - mp2_;
         double fl_res{0.}, ft_res{0.};
         for (const auto& res : resonances_) {  // sum over the resonant contributions
           double fl_sng_res, ft_sng_res;
           if (!res.computeStrFuns(kin, fl_sng_res, ft_sng_res)) {
             setFL(0.);
             setF2(0.);
-            return *this;
+            return;
           }
           fl_res += fl_sng_res;
           ft_res += ft_sng_res;
         }  // end of resonance loop
 
         // finalize calculation of sfn and xsec taking into account normalization factors
-        ft_res *= prefactor_ * xbj * mp_;
-        fl_res *= 2. * prefactor_ * xbj * mp_ * q2 / q2cm;
-        const double f2_res = (fl_res + ft_res) / gamma2(xbj, q2);
+        ft_res *= prefactor_ * args_.xbj * mp_;
+        fl_res *= 2. * prefactor_ * args_.xbj * mp_ * args_.q2 / q2cm;
+        const double f2_res = (fl_res + ft_res) / gamma2(args_.xbj, args_.q2);
         fl += fl_res;
         f2 += f2_res;
       }  //--- end of resonances region
       {  //--- perturbative region
         double f2_dis = 0., fl_dis = 0.;
-        if (q2 > 1.e-12 && q2 < q2max_) {  // above Q^2 -> 0 limit
+        if (q2_range_.contains(args_.q2)) {
           double ft_dis = 0.;
-          const double t = std::max(q2, t0_), xbj_t = utils::xBj(t, mp2_, w2), gam2 = gamma2(xbj_t, t);
-          if (t > q2min_) {
+          const double t = std::max(args_.q2, t0_), xbj_t = utils::xBj(t, mp2_, w2), gam2 = gamma2(xbj_t, t);
+          if (t > q2_grid_range_.min()) {
             const auto sfs = sfs_grid_.eval({xbj_t, t});  // FT, F2
             ft_dis = sfs.at(0);
             f2_dis = sfs.at(1);
             fl_dis = gam2 * f2_dis - ft_dis;
           }
-          if (q2 < t0_) {
+          if (args_.q2 < t0_) {
             // make extrapolation in q2 from q2=t down to q2=0
             // compute derivative of SF with respect to q2 at q2=t
 
@@ -292,8 +294,8 @@ namespace cepgen {
                   t,
                   t * 1.e-2);
             }
-            const double fl_der = q2 * (std::pow(q2, dis_params_.pml - 1.) / std::pow(t, dis_params_.pml) *
-                                        (fl_dis + log(t / q2) * (dis_params_.pml * fl_dis - t * ddl)));
+            const double fl_der = args_.q2 * (std::pow(args_.q2, dis_params_.pml - 1.) / std::pow(t, dis_params_.pml) *
+                                              (fl_dis + log(t / args_.q2) * (dis_params_.pml * fl_dis - t * ddl)));
 
             /// Regge fit to total photoproduction cross section from hep-ph/9908218
             /// \param[in] w2 invariant mass squared (in GeV^2)
@@ -304,10 +306,10 @@ namespace cepgen {
             // extrapolation in q2 ; note cross-section in mb units, and converted to GeV units
             const double f0t = photot(w2) / constants::G_EM_SQ * M_1_PI / (constants::GEVM2_TO_PB * 1.e-9);
             const double ft_der =
-                q2 *
-                (f0t + std::pow(q2, dis_params_.pmt - 1.) / std::pow(t, dis_params_.pmt) *
-                           (ft_dis - f0t * t +
-                            log(t / q2) * (dis_params_.pmt * ft_dis - t * ddt - (dis_params_.pmt - 1.) * f0t * t)));
+                args_.q2 * (f0t + std::pow(args_.q2, dis_params_.pmt - 1.) / std::pow(t, dis_params_.pmt) *
+                                      (ft_dis - f0t * t +
+                                       log(t / args_.q2) *
+                                           (dis_params_.pmt * ft_dis - t * ddt - (dis_params_.pmt - 1.) * f0t * t)));
             fl_dis = fl_der;
             ft_dis = ft_der;
           }
@@ -315,14 +317,13 @@ namespace cepgen {
                        bt = 1. - exp(-dis_params_.bg1t * std::pow(w2 - mx_min_, dis_params_.bg2t));
           fl_dis *= bl;
           ft_dis *= bt;
-          f2_dis = (fl_dis + ft_dis) / gamma2(xbj, q2);
+          f2_dis = (fl_dis + ft_dis) / gamma2(args_.xbj, args_.q2);
         }
         fl += fl_dis;
         f2 += f2_dis;
       }  //--- end of perturbative region
       setFL(fl);
       setF2(f2);
-      return *this;
     }
   }  // namespace strfun
 }  // namespace cepgen

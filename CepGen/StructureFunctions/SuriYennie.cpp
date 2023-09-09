@@ -18,7 +18,6 @@
 
 #include <cmath>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
@@ -50,24 +49,24 @@ namespace cepgen {
         return desc;
       }
 
-      SuriYennie& eval(double xbj, double q2) override {
-        const double mx2 = utils::mX2(xbj, q2, mp2_), dm2 = mx2 - mp2_;  // [GeV^2]
-        const double en = q2 + dm2;                                      // [GeV^2]
-        const double nu = 0.5 * en / mp_, x_pr = q2 / (q2 + mx2), tau = 0.25 * q2 / mp2_;
-        const double mq = rho2_ + q2;
+      void eval() override {
+        const double mx2 = utils::mX2(args_.xbj, args_.q2, mp2_), dm2 = mx2 - mp2_;  // [GeV^2]
+        const double en = args_.q2 + dm2;                                            // [GeV^2]
+        const double nu = 0.5 * en / mp_, x_pr = args_.q2 / (args_.q2 + mx2), tau = 0.25 * args_.q2 / mp2_;
+        const double mq = rho2_ + args_.q2;
 
-        const double inv_q2 = 1. / q2;
+        const double inv_q2 = 1. / args_.q2;
 
         const double fm = inv_q2 * (c1_ * dm2 * pow(rho2_ / mq, 2) +
                                     c2_ * mp2_ * pow(1. - x_pr, 4) / (1. + x_pr * (x_pr * cp_ - 2. * bp_)));
-        const double fe = (tau * fm + d1_ * dm2 * q2 * rho2_ / mp2_ * pow(dm2 / mq / en, 2)) / (1. + nu * nu * inv_q2);
+        const double fe =
+            (tau * fm + d1_ * dm2 * args_.q2 * rho2_ / mp2_ * pow(dm2 / mq / en, 2)) / (1. + nu * nu * inv_q2);
 
         setFE(fe);
         setFM(fm);
-        setW1(0.5 * fm * q2 / mp_);
+        setW1(0.5 * fm * args_.q2 / mp_);
         setW2(2. * mp_ * fe);
         setF2(2. * nu * fe);
-        return *this;
       }
 
     private:

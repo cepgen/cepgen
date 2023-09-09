@@ -19,10 +19,10 @@
 #include <Math/Integrator.h>
 #include <Math/IntegratorMultiDim.h>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
   /// FOAM general-purpose integration algorithm

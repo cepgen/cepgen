@@ -23,17 +23,16 @@ namespace cepgen {
   namespace formfac {
     class PointLike : public Parameterisation {
     public:
-      explicit PointLike(const ParametersList& params, const FormFactors& ff)
-          : Parameterisation(params), trivial_(ff) {}
+      explicit PointLike(const ParametersList& params, double fe, double fm)
+          : Parameterisation(params), fe_(fe), fm_(fm) {}
 
     private:
-      FormFactors compute(double /*q2*/) override { return trivial_; }
-      const FormFactors trivial_;
+      void eval() override { setFEFM(fe_, fm_); }
+      const double fe_, fm_;
     };
 
     struct PointLikeScalar final : public PointLike {
-      explicit PointLikeScalar(const ParametersList& params) : PointLike(params, FormFactors{1., 0., 0., 0.}) {}
-
+      explicit PointLikeScalar(const ParametersList& params) : PointLike(params, 1., 0.) {}
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Point-like scalar");
@@ -42,8 +41,7 @@ namespace cepgen {
     };
 
     struct PointLikeFermion final : public PointLike {
-      explicit PointLikeFermion(const ParametersList& params) : PointLike(params, FormFactors{1., 1., 0., 0.}) {}
-
+      explicit PointLikeFermion(const ParametersList& params) : PointLike(params, 1., 1.) {}
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Point-like fermion");
@@ -52,7 +50,7 @@ namespace cepgen {
     };
   }  // namespace formfac
 }  // namespace cepgen
-typedef cepgen::formfac::PointLikeScalar PointLikeScalar;
-typedef cepgen::formfac::PointLikeFermion PointLikeFermion;
+using cepgen::formfac::PointLikeFermion;
+using cepgen::formfac::PointLikeScalar;
 REGISTER_FORMFACTORS("PointLikeScalar", PointLikeScalar);
 REGISTER_FORMFACTORS("PointLikeFermion", PointLikeFermion);

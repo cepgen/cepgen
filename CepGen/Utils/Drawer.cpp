@@ -17,10 +17,10 @@
  */
 
 #include <bitset>
+#include <cstdint>
+#include <iostream>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Drawer.h"
-#include "CepGen/Utils/Graph.h"
 
 namespace cepgen {
   namespace utils {

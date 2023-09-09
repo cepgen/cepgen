@@ -53,16 +53,16 @@ namespace cepgen {
         return desc;
       }
 
-      BodekKangXu& eval(double xbj, double q2) override {
-        const auto mx2 = utils::mX2(xbj, q2, mp2_);
+      void eval() override {
+        const auto mx2 = utils::mX2(args_.xbj, args_.q2, mp2_);
         if (mx2 < mp2_) {
           setF1F2(0., 0.);
-          return *this;
+          return;
         }
-        const auto q0 = 0.5 * q2 / mp_ / xbj;
-        const auto w2h = gp_h(q0, q2) * bodek(std::sqrt(mx2), q2) / q0, w1h = (1. + q0 * q0 / q2) / (1. + r_) * w2h;
+        const auto q0 = 0.5 * args_.q2 / mp_ / args_.xbj;
+        const auto w2h = gp_h(q0, args_.q2) * bodek(std::sqrt(mx2), args_.q2) / q0,
+                   w1h = (1. + q0 * q0 / args_.q2) / (1. + r_) * w2h;
         setF1F2(mp_ * w1h, q0 * w2h);
-        return *this;
       }
 
     private:

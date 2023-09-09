@@ -16,18 +16,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/PartonFluxes/PartonFlux.h"
+#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/PartonFlux.h"
 
 namespace cepgen {
   PartonFlux::PartonFlux(const ParametersList& params)
-      : NamedModule(params), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {}
+      : NamedModule(params),
+        prefactor_(constants::ALPHA_EM * M_1_PI),
+        mp_(PDG::get().mass(PDG::proton)),
+        mp2_(mp_ * mp_) {}
 
   ParametersDescription PartonFlux::description() {
     auto desc = ParametersDescription();
     desc.setDescription("Unnamed parton flux evaluator");
     return desc;
   }
-
-  int PartonFlux::partonPdgId() const { return PDG::photon; }
 }  // namespace cepgen

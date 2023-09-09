@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2022  Laurent Forthomme
+ *  Copyright (C) 2019-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #include <strings.h>
 
 #include <algorithm>
+#include <fstream>
 #include <sstream>
 
 #include "CepGen/Core/Exception.h"
@@ -54,6 +55,17 @@ namespace cepgen {
       for (const auto& str : debug_str_)
         if (arg_val.at(0) == "--" + str.name.at(0) || (str.name.size() > 1 && arg_val.at(0) == "-" + str.name.at(1))) {
           CG_LOG_LEVEL(debug);
+          if (arg_val.size() > 1) {
+            const auto& token = arg_val.at(1);
+            if (token.find(":") == std::string::npos)
+              utils::Logger::get().output().reset(new std::ofstream(token));
+            else {
+              const auto tokens = utils::split(token, ':');
+              utils::Logger::get().output().reset(new std::ofstream(tokens.at(1)));
+              for (const auto& tok : utils::split(tokens.at(0), ';'))
+                utils::Logger::get().addExceptionRule(tok);
+            }
+          }
           debug_req_ = true;
         }
       //--- check if configuration word is requested
@@ -112,7 +124,7 @@ namespace cepgen {
           throw CG_FATAL("ArgumentsParser") << help_message() << " Failed to retrieve required <arg" << i << ">.";
         par.value = !par.boolean() ? args_.at(i).second : "1";
       } else {
-        // for each parameter, loop over arguments to find correspondance
+        // for each parameter, loop over arguments to find correspondence
         auto it = std::find_if(args_.begin(), args_.end(), [&i, &par](const auto& arg) {
           if (arg.first != "--" + par.name.at(0) && (par.name.size() < 2 || arg.first != "-" + par.name.at(1)))
             return false;
@@ -196,6 +208,9 @@ namespace cepgen {
             par.first.description.c_str(),
             par.first.value.c_str());
     }
+    oss << "\n   "
+        << "debugging:\n\t-d|--debug<=output file|=mod1,mod2,...:output file>\tredirect to output file, enable "
+           "module(s)";
     oss << std::endl;
     return oss.str();
   }
@@ -229,19 +244,19 @@ namespace cepgen {
                                         std::string pdesc,
                                         std::vector<std::string>* var,
                                         std::vector<std::string> def)
-      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ",")), vec_str_variable_(var) {}
+      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ";")), vec_str_variable_(var) {}
 
   ArgumentsParser::Parameter::Parameter(std::string pname,
                                         std::string pdesc,
                                         std::vector<int>* var,
                                         std::vector<int> def)
-      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ",")), vec_int_variable_(var) {}
+      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ";")), vec_int_variable_(var) {}
 
   ArgumentsParser::Parameter::Parameter(std::string pname,
                                         std::string pdesc,
                                         std::vector<double>* var,
                                         std::vector<double> def)
-      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ",")), vec_float_variable_(var) {}
+      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ";")), vec_float_variable_(var) {}
 
   bool ArgumentsParser::Parameter::matches(const std::string& key) const {
     if (key == "--" + name.at(0))
@@ -291,20 +306,20 @@ namespace cepgen {
       }
     }
     if (vec_str_variable_) {
-      *vec_str_variable_ = utils::split(value, ',');
+      *vec_str_variable_ = utils::split(value, ';', true);
       return *this;
     }
     if (vec_int_variable_) {
       vec_int_variable_->clear();
-      const auto buf = utils::split(value, ',');
+      const auto buf = utils::split(value, ';');
       std::transform(buf.begin(), buf.end(), std::back_inserter(*vec_int_variable_), [](const std::string& str) {
         return std::stoi(str);
       });
       return *this;
     }
-    if (vec_float_variable_ || lim_variable_) {
+    auto unpack_floats = [](const std::string& value, char delim) {
       std::vector<double> vec_flt;
-      const auto buf = utils::split(value, ',');
+      const auto buf = utils::split(value, delim);
       std::transform(buf.begin(), buf.end(), std::back_inserter(vec_flt), [](const std::string& str) {
         try {
           return std::stod(str);
@@ -312,9 +327,15 @@ namespace cepgen {
           return Limits::INVALID;
         }
       });
-      if (vec_float_variable_)
-        *vec_float_variable_ = vec_flt;
-      else if (vec_flt.size() == 2) {
+      return vec_flt;
+    };
+    if (vec_float_variable_) {
+      *vec_float_variable_ = unpack_floats(value, ';');
+      return *this;
+    }
+    if (lim_variable_) {
+      const auto vec_flt = unpack_floats(value, ',');
+      if (vec_flt.size() == 2) {
         if (vec_flt.at(0) != Limits::INVALID)
           lim_variable_->min() = vec_flt.at(0);
         if (vec_flt.at(1) != Limits::INVALID)

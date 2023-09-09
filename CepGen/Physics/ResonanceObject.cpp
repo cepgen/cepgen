@@ -18,10 +18,10 @@
 
 #include <cmath>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/ResonanceObject.h"
 #include "CepGen/Physics/Utils.h"
+#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
   /// General definition for a resonance

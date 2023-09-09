@@ -10,7 +10,7 @@ file(GLOB core_sources
 file(GLOB phys_sources
         Event/*.cpp
         FormFactors/*.cpp
-        PartonFluxes/*.cpp
+        KTFluxes/*.cpp
         Physics/*.cpp
         StructureFunctions/*.cpp)
 file(GLOB proc_sources
@@ -22,9 +22,9 @@ file(GLOB core_includes
         EventFilter
         FormFactors
         Integration
+        KTFluxes
         Modules
         OutputModules
-        PartonFluxes
         Physics
         Process
         StructureFunctions

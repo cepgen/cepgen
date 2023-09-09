@@ -46,12 +46,12 @@ namespace cepgen {
 
   void Exception::dump(std::ostream* os) const noexcept {
     if (!os)
-      os = utils::Logger::get().output();
+      os = utils::Logger::get().output().get();
     if (!os)
       return;
 
     const std::string sep(80, '-');
-    (*os) << sep << "\n" << type_ << " occured at " << Message::now() << "\n";
+    (*os) << sep << "\n" << type_ << " occurred at " << Message::now() << "\n";
     if (!from_.empty())
       (*os) << "  raised by: " << utils::colourise(from_, utils::Colour::none, utils::Modifier::underline) << "\n";
     if (utils::Logger::get().extended() && !file_.empty()) {

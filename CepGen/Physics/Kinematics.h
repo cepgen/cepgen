@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,7 +43,6 @@ namespace cepgen {
     /// Const-qualified beam/primary particle's kinematics
     const IncomingBeams& incomingBeams() const { return incoming_beams_; }
 
-    typedef std::vector<pdgid_t> pdgids_t;
     /// Minimum list of central particles required
     const pdgids_t& minimumFinalState() const { return minimum_final_state_; }
 
@@ -61,3 +60,4 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
+

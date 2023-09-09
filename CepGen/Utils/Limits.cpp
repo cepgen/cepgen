@@ -66,10 +66,10 @@ namespace cepgen {
 
   bool Limits::hasMax() const { return second != INVALID; }
 
-  bool Limits::contains(double val) const {
-    if (hasMin() && val < min())
+  bool Limits::contains(double val, bool exclude_boundaries) const {
+    if (hasMin() && (val < min() || (exclude_boundaries && val == min())))
       return false;
-    if (hasMax() && val > max())
+    if (hasMax() && (val > max() || (exclude_boundaries && val == max())))
       return false;
     return true;
   }

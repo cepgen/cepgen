@@ -19,10 +19,10 @@
 #include <gsl/gsl_deriv.h>
 #include <gsl/gsl_errno.h>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/DerivatorFactory.h"
 #include "CepGen/Utils/Derivator.h"
 #include "CepGen/Utils/GSLFunctionsWrappers.h"
+#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
   namespace utils {

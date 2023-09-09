@@ -18,19 +18,19 @@
 
 #include <sstream>
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
+#include "CepGen/Utils/Message.h"
 #include "CepGenAddOns/PythonWrapper/PythonConfigWriter.h"
 
 namespace cepgen {
   namespace utils {
     PythonConfigWriter::PythonConfigWriter(const std::string& filename) : file_(filename) {
       file_ << "from sys import path\n"
-            << "path.append('Cards')\n\n";
+            << "path.append('python')\n\n";
       file_ << "import Config.Core as cepgen\n\n";
     }
 
