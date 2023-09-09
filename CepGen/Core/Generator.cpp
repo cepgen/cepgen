@@ -26,6 +26,7 @@
 #include "CepGen/Integration/GridParameters.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
+#include "CepGen/Modules/GeneratorWorkerFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
@@ -54,11 +55,14 @@ namespace cepgen {
 
   void Generator::clearRun() {
     CG_DEBUG("Generator:clearRun") << "Run is set to be cleared.";
-    worker_.reset(new GeneratorWorker(const_cast<const Parameters*>(parameters_.get())));
+    worker_ = GeneratorWorkerFactory::get().build(parameters_->generation().parameters().get<ParametersList>("worker"));
+    CG_DEBUG("Generator:clearRun") << "Initialised a generator worker with parameters: " << worker_->parameters()
+                                   << ".";
     // destroy and recreate the integrator instance
     if (!integrator_)
       resetIntegrator();
 
+    worker_->setRuntimeParameters(const_cast<const Parameters*>(parameters_.get()));
     worker_->setIntegrator(integrator_.get());
     result_ = result_error_ = -1.;
     parameters_->prepareRun();

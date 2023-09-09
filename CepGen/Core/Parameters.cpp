@@ -180,7 +180,8 @@ namespace cepgen {
     for (const auto& key : param->par_integrator.keys(false))
       os << std::setw(wt) << "" << key << ": " << param->par_integrator.getString(key) << "\n";
     os << std::setw(wt) << "Event generation? " << utils::yesno(param->generation_.enabled()) << "\n"
-       << std::setw(wt) << "Number of events to generate" << utils::boldify(param->generation_.maxGen()) << "\n";
+       << std::setw(wt) << "Number of events to generate" << utils::boldify(param->generation_.maxGen()) << "\n"
+       << std::setw(wt) << "Generator worker" << param->generation_.parameters().get<ParametersList>("worker") << "\n";
     if (param->generation_.numThreads() > 1)
       os << std::setw(wt) << "Number of threads" << param->generation_.numThreads() << "\n";
     os << std::setw(wt) << "Number of points to try per bin" << param->generation_.numPoints() << "\n"
@@ -251,6 +252,8 @@ namespace cepgen {
 
   ParametersDescription Parameters::Generation::description() {
     auto desc = ParametersDescription();
+    desc.add<ParametersDescription>("worker", ParametersDescription().setName<std::string>("trivial"))
+        .setDescription("type of generator worker to use for event generation");
     desc.add<int>("maxgen", 0).setDescription("Number of events to generate");
     desc.add<int>("printEvery", 10000).setDescription("Printing frequency for the events content");
     desc.add<double>("targetLumi", -1.).setDescription("Target luminosity (in pb-1) to reach for this run");
