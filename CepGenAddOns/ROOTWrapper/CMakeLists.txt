@@ -21,7 +21,7 @@ if(CMAKE_BUILD_FOAM)
   find_package(ROOT COMPONENTS Hist MathCore Foam)
   list(FIND ROOT_LIBRARIES "/usr/lib64/root/libFoam.so" _idx)
   if(${_idx} GREATER -1)
-    list(APPEND sources IntegratorFoam.cpp)
+    list(APPEND sources IntegratorFoam.cpp FoamGeneratorWorker.cpp)
   endif()
 endif()
 

@@ -38,19 +38,20 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    /// Specify the runtime parameters
-    void setRuntimeParameters(const Parameters*);
     /// Specify the integrator instance handled by the mother generator
     void setIntegrator(const Integrator* integ);
     /// Launch the event generation
     /// \param[in] num_events Number of events to generate
     /// \param[in] callback The callback function applied on every event generated
     void generate(size_t num_events = 0, Event::callback callback = nullptr);
+    /// Function evaluator
+    ProcessIntegrand& integrand() { return *integrand_; }
+
+    /// Specify the runtime parameters
+    virtual void setRuntimeParameters(const Parameters*);
     /// Generate a single event
     /// \param[in] callback The callback function applied on every event generated
     virtual bool next(Event::callback callback = nullptr) = 0;
-    /// Function evaluator
-    ProcessIntegrand& integrand() { return *integrand_; }
 
   protected:
     /// Store the event in the output file
