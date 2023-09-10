@@ -187,6 +187,7 @@ namespace cepgen {
         switch (var.type) {
           case Mapping::linear: {
             var.value = var.limits.x(xv);
+            jacobian *= 1.;
           } break;
           case Mapping::exponential: {          // limits already logarithmic
             var.value = exp(var.limits.x(xv));  // transform back to linear

@@ -142,8 +142,7 @@ double PPtoFF::onShellME() const {
 
   if (t_hat == mf2_ || u_hat == mf2_)
     return 0.;
-  const auto q = std::sqrt(t_hat), g2_sq = couplingPrefactor(q, q);
-
+  const auto q = std::sqrt(t_hat);
   const double mf4 = mf2_ * mf2_, mf8 = mf4 * mf4;
 
   double out = 6. * mf8;
@@ -156,64 +155,49 @@ double PPtoFF::onShellME() const {
   out += 1. * mf2_ * u_hat * u_hat * u_hat;
   out += -1. * t_hat * t_hat * t_hat * u_hat;
   out += -1. * t_hat * u_hat * u_hat * u_hat;
-  return -2. * out * g2_sq * std::pow((mf2_ - t_hat) * (mf2_ - u_hat), -2);
+  return -2. * out * couplingPrefactor(q, q) * std::pow((mf2_ - t_hat) * (mf2_ - u_hat), -2);
 }
 
 double PPtoFF::offShellME() const {
+  const double tmax = pow(std::max(amt1_, amt2_), 2);
+  static const auto compute_polarisation =
+      [&](short pol, const Momentum& pho1, const Momentum& pho2, double mi2, double mf2, double& x, double& q) {
+        const auto norm_pol = pol / abs(pol);
+        const auto alpha1 = amt1_ / sqrtS() * exp(norm_pol * y_c1_);
+        const auto alpha2 = amt2_ / sqrtS() * exp(norm_pol * y_c2_);
+        x = alpha1 + alpha2;
+        const auto zp = alpha1 / x, zm = alpha2 / x, z = zp * zm;
+        const auto ak = Momentum(zm * pc(0) - zp * pc(1)).setPz(0.);
+        const auto ph_p = ak + zp * pho2, ph_m = ak - zm * pho2;
+        const auto qt = pho1.p(), inv_qt = 1. / qt;
+        const auto tabs = (qt * qt + x * (mf2 - mi2) + x * x * mi2) / (1. - x);
+        const auto eps2 = mf2_ + z * tabs;
+        const auto kp = 1. / (ph_p.pt2() + eps2), km = 1. / (ph_m.pt2() + eps2);
+
+        const auto phi = Momentum(kp * ph_p - km * ph_m).setPz(0.).setEnergy(kp - km);
+        const auto dot = phi.threeProduct(pho1) * inv_qt, cross = phi.crossProduct(pho1) * inv_qt;
+
+        const auto aux2 = osp_.term_ll * (mf2_ + 4. * z * z * tabs) * phi.energy2() +
+                          osp_.term_tt1 * ((zp * zp + zm * zm) * (dot * dot + cross * cross)) +
+                          osp_.term_tt2 * (cross * cross - dot * dot) -
+                          osp_.term_lt * 4. * z * (zp - zm) * phi.energy() * qt * dot;
+        q = std::sqrt(std::max(eps2, tmax));
+        return 2. * aux2 * z / pho2.p2();
+      };
   //--- positive polarisation
-  const auto alpha1 = amt1_ / sqrtS() * exp(y_c1_), alpha2 = amt2_ / sqrtS() * exp(y_c2_);
-  const auto x1 = alpha1 + alpha2, z1p = alpha1 / x1, z1m = alpha2 / x1, z1 = z1p * z1m;
-  const auto ak1 = Momentum(z1m * pc(0) - z1p * pc(1)).setPz(0.);
-  const auto ph_p1 = ak1 + z1p * q2(), ph_m1 = ak1 - z1m * q2();
-  const auto qt1 = q1().p(), inv_qt1 = 1. / qt1;
-  const auto t1abs = (qt1 * qt1 + x1 * (mX2() - mA2()) + x1 * x1 * mA2()) / (1. - x1);
-  const auto eps12 = mf2_ + z1 * t1abs;
-  const auto kp1 = 1. / (ph_p1.pt2() + eps12), km1 = 1. / (ph_m1.pt2() + eps12);
-
-  const auto phi1 = Momentum(kp1 * ph_p1 - km1 * ph_m1).setPz(0.).setEnergy(kp1 - km1);
-  const auto dot1 = phi1.threeProduct(q1()) * inv_qt1, cross1 = phi1.crossProduct(q1()) * inv_qt1;
-
-  const auto aux2_1 = osp_.term_ll * (mf2_ + 4. * z1 * z1 * t1abs) * phi1.energy2() +
-                      osp_.term_tt1 * ((z1p * z1p + z1m * z1m) * (dot1 * dot1 + cross1 * cross1)) +
-                      osp_.term_tt2 * (cross1 * cross1 - dot1 * dot1) -
-                      osp_.term_lt * 4. * z1 * (z1p - z1m) * phi1.energy() * qt1 * dot1;
-  const auto amat2_1 = 2. * aux2_1 * z1 * qt1 * qt1;
+  double x1, q1val;
+  const auto amat2_1 = compute_polarisation(+1, q1(), q2(), mA2(), mX2(), x1, q1val);
 
   //--- negative polarisation
-  const auto beta1 = amt1_ / sqrtS() * exp(-y_c1_), beta2 = amt2_ / sqrtS() * exp(-y_c2_);
-  const auto x2 = beta1 + beta2, z2p = beta1 / x2, z2m = beta2 / x2, z2 = z2p * z2m;
-  const auto ak2 = Momentum(z2m * pc(0) - z2p * pc(1)).setPz(0.);
-  const auto ph_p2 = ak2 + z2p * q1(), ph_m2 = ak2 - z2m * q1();
-  const auto qt2 = q2().p(), inv_qt2 = 1. / qt2;
-  const auto t2abs = (qt2 * qt2 + x2 * (mY2() - mB2()) + x2 * x2 * mB2()) / (1. - x2);
-  const auto eps22 = mf2_ + z2 * t2abs;
-  const auto kp2 = 1. / (ph_p2.pt2() + eps22), km2 = 1. / (ph_m2.pt2() + eps22);
-
-  const auto phi2 = Momentum(kp2 * ph_p2 - km2 * ph_m2).setPz(0.).setEnergy(kp2 - km2);
-  const auto dot2 = phi2.threeProduct(q2()) * inv_qt2, cross2 = phi2.crossProduct(q2()) * inv_qt2;
-
-  const auto aux2_2 = osp_.term_ll * (mf2_ + 4. * z2 * z2 * t2abs) * phi2.energy2() +
-                      osp_.term_tt1 * ((z2p * z2p + z2m * z2m) * (dot2 * dot2 + cross2 * cross2)) +
-                      osp_.term_tt2 * (cross2 * cross2 - dot2 * dot2) -
-                      osp_.term_lt * 4. * z2 * (z2p - z2m) * phi2.energy() * qt2 * dot2;
-  const auto amat2_2 = 2. * aux2_2 * z2 * qt2 * qt2;
+  double x2, q2val;
+  const auto amat2_2 = compute_polarisation(-1, q2(), q1(), mB2(), mY2(), x2, q2val);
 
   //--- symmetrisation
   const auto amat2 = 0.5 * (osp_.mat1 * amat2_1 + osp_.mat2 * amat2_2);
   if (amat2 <= 0.)
     return 0.;
 
-  CG_DEBUG_LOOP("PPtoFF:offShell") << "aux2(1/2) = " << aux2_1 << " / " << aux2_2 << "\n\t"
-                                   << "z(1/2) = " << z1 << " / " << z2 << "\n\t"
-                                   << "q(1/2)t2 = " << q1().pt2() << " / " << q2().pt2() << "\n\t"
-                                   << "amat2(1/2) = " << amat2_1 << " / " << amat2_2 << "\n\t"
-                                   << "amat2 = " << amat2 << ".";
-
-  const double tmax = pow(std::max(amt1_, amt2_), 2);
-  const double q1val = std::sqrt(std::max(eps12, tmax)), q2val = std::sqrt(std::max(eps22, tmax));
-  const auto g2_sq = couplingPrefactor(q1val, q2val);
-
-  return g2_sq * std::pow(x1 * x2 * s() * inv_qt1 * inv_qt2, 2) * amat2;
+  return couplingPrefactor(q1val, q2val) * std::pow(x1 * x2 * s(), 2) * amat2;
 }
 // register process
 REGISTER_PROCESS("pptoff", PPtoFF);
