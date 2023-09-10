@@ -202,11 +202,9 @@ namespace cepgen {
 
       //=================================================================
       // factor 1/4 from jacobian of transformations
-      // factors 1/pi and 1/pi due to integration over
-      //     d^2(kappa_1)d^2(kappa_2) instead of d(kappa_1^2)d(kappa_2^2)
       //=================================================================
 
-      return amat2 * std::pow(4. * x1_ * x2_ * s() * M_PI, -2) * 0.25 * constants::GEVM2_TO_PB * pt_diff_ * qt1_ * qt2_;
+      return amat2 * std::pow(4. * M_PI * x1_ * x2_ * s(), -2) * 0.25 * constants::GEVM2_TO_PB * pt_diff_ * qt1_ * qt2_;
     }
 
     void Process2to4::fillCentralParticlesKinematics() {

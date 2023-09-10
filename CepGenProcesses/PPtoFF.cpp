@@ -32,12 +32,7 @@ public:
   explicit PPtoFF(const ParametersList& params)
       : cepgen::proc::Process2to4(params, params.get<ParticleProperties>("pair").pdgid),
         method_(steerAs<int, Mode>("method")),
-        osp_(steer<ParametersList>("offShellParameters")) {
-    if (method_ == Mode::offShell) {  // off-shell matrix element
-      osp_.mat1 = 2;
-      osp_.mat2 = 0;
-    }
-  }
+        osp_(steer<ParametersList>("offShellParameters")) {}
 
   proc::ProcessPtr clone() const override { return proc::ProcessPtr(new PPtoFF(*this)); }
 
@@ -58,20 +53,29 @@ private:
       case Mode::onShell:
         return onShellME();
       case Mode::offShell:
-      case Mode::offShellLegacy:
         return offShellME();
       default:
         throw CG_FATAL("PPtoFF") << "Invalid ME calculation method (" << (int)method_ << ")!";
     }
+  }
+  double couplingPrefactor(double q_1, double q_2) const {
+    double prefactor = g2_prefactor_ * g2_prefactor_;
+    if (event().oneWithRole(Particle::Parton1).pdgId() == PDG::gluon)
+      prefactor *= 0.5 * alphaS(q_1);
+    else
+      prefactor *= alphaEM(q_1);
+    if (event().oneWithRole(Particle::Parton2).pdgId() == PDG::gluon)
+      prefactor *= 0.5 * alphaS(q_2);
+    else
+      prefactor *= alphaEM(q_2);
+    return prefactor;
   }
 
   /// Rapidity range for the outgoing fermions
   double onShellME() const;
   double offShellME() const;
 
-  const enum class Mode { onShell = 0, offShell = 1, offShellLegacy = 2 } method_;
-
-  double prefactor_{1.};
+  const enum class Mode { onShell = 0, offShell = 1 } method_;
 
   //--- parameters for off-shell matrix element
   struct OffShellParameters : SteeredObject<OffShellParameters> {
@@ -101,6 +105,8 @@ private:
   } osp_;
 
   double mf2_{0.};
+  /// Prefactor for the alpha(S/EM) coupling
+  double g2_prefactor_{0.};
 };
 
 void PPtoFF::prepareProcessKinematics() {
@@ -109,7 +115,7 @@ void PPtoFF::prepareProcessKinematics() {
     throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop << ".";
 
   mf2_ = cs_prop.mass * cs_prop.mass;
-  prefactor_ = 4. * M_PI;
+  g2_prefactor_ = 4. * M_PI;
 
   CG_DEBUG("PPtoFF:prepare") << "Incoming beams: mp(1/2) = " << mA() << "/" << mB() << ".\n\t"
                              << "Produced particles: " << cs_prop_ << ".\n\t"
@@ -123,7 +129,7 @@ void PPtoFF::prepareProcessKinematics() {
       case PDG::gluon:
         break;
       case PDG::photon:
-        prefactor_ *= pow(cs_prop.charge, 2) / 9.;  // electromagnetic coupling
+        g2_prefactor_ *= std::pow(cs_prop.charge / 3., 2);  // electromagnetic coupling
         break;
       default:
         throw CG_FATAL("PPtoFF:prepare") << "Only photon & gluon partons are supported!";
@@ -132,8 +138,11 @@ void PPtoFF::prepareProcessKinematics() {
 
 double PPtoFF::onShellME() const {
   const double s_hat = shat(), t_hat = that(), u_hat = uhat();
-
   CG_DEBUG_LOOP("PPtoFF:onShell") << "shat: " << s_hat << ", that: " << t_hat << ", uhat: " << u_hat << ".";
+
+  if (t_hat == mf2_ || u_hat == mf2_)
+    return 0.;
+  const auto q = std::sqrt(t_hat), g2_sq = couplingPrefactor(q, q);
 
   const double mf4 = mf2_ * mf2_, mf8 = mf4 * mf4;
 
@@ -147,95 +156,52 @@ double PPtoFF::onShellME() const {
   out += 1. * mf2_ * u_hat * u_hat * u_hat;
   out += -1. * t_hat * t_hat * t_hat * u_hat;
   out += -1. * t_hat * u_hat * u_hat * u_hat;
-  return -2. * out / (pow((mf2_ - t_hat) * (mf2_ - u_hat), 2));
+  return -2. * out * g2_sq * std::pow((mf2_ - t_hat) * (mf2_ - u_hat), -2);
 }
 
 double PPtoFF::offShellME() const {
-  const double alpha1 = amt1_ / sqrtS() * exp(y_c1_), beta1 = amt1_ / sqrtS() * exp(-y_c1_);
-  const double alpha2 = amt2_ / sqrtS() * exp(y_c2_), beta2 = amt2_ / sqrtS() * exp(-y_c2_);
-  const double x1 = alpha1 + alpha2, x2 = beta1 + beta2;
-  const double z1p = alpha1 / x1, z1m = alpha2 / x1, z1 = z1p * z1m;
-  const double z2p = beta1 / x2, z2m = beta2 / x2, z2 = z2p * z2m;
+  //--- positive polarisation
+  const auto alpha1 = amt1_ / sqrtS() * exp(y_c1_), alpha2 = amt2_ / sqrtS() * exp(y_c2_);
+  const auto x1 = alpha1 + alpha2, z1p = alpha1 / x1, z1m = alpha2 / x1, z1 = z1p * z1m;
+  const auto ak1 = Momentum(z1m * pc(0) - z1p * pc(1)).setPz(0.);
+  const auto ph_p1 = ak1 + z1p * q2(), ph_m1 = ak1 - z1m * q2();
+  const auto qt1 = q1().p(), inv_qt1 = 1. / qt1;
+  const auto t1abs = (qt1 * qt1 + x1 * (mX2() - mA2()) + x1 * x1 * mA2()) / (1. - x1);
+  const auto eps12 = mf2_ + z1 * t1abs;
+  const auto kp1 = 1. / (ph_p1.pt2() + eps12), km1 = 1. / (ph_m1.pt2() + eps12);
 
-  CG_DEBUG_LOOP("2to4:zeta") << "amt(1/2) = " << amt1_ << " / " << amt2_ << "\n\t"
-                             << "z(1/2)p = " << z1p << " / " << z2p << ", z1 = " << z1 << "\n\t"
-                             << "z(1/2)m = " << z1m << " / " << z2m << ", z2 = " << z2 << ".";
+  const auto phi1 = Momentum(kp1 * ph_p1 - km1 * ph_m1).setPz(0.).setEnergy(kp1 - km1);
+  const auto dot1 = phi1.threeProduct(q1()) * inv_qt1, cross1 = phi1.crossProduct(q1()) * inv_qt1;
 
-  //--- positive-z photon kinematics
-  const Momentum ak1 = (z1m * pc(0) - z1p * pc(1)).setPz(0.);
-  const Momentum ph_p1 = ak1 + z1p * q2(), ph_m1 = ak1 - z1m * q2();
-  const double t1abs = (q1().pt2() + x1 * (mX2() - mA2()) + x1 * x1 * mA2()) / (1. - x1);
-  const double eps12 = mf2_ + z1 * t1abs;
-  const double kp1 = 1. / (ph_p1.pt2() + eps12);
-  const double km1 = 1. / (ph_m1.pt2() + eps12);
+  const auto aux2_1 = osp_.term_ll * (mf2_ + 4. * z1 * z1 * t1abs) * phi1.energy2() +
+                      osp_.term_tt1 * ((z1p * z1p + z1m * z1m) * (dot1 * dot1 + cross1 * cross1)) +
+                      osp_.term_tt2 * (cross1 * cross1 - dot1 * dot1) -
+                      osp_.term_lt * 4. * z1 * (z1p - z1m) * phi1.energy() * qt1 * dot1;
+  const auto amat2_1 = 2. * aux2_1 * z1 * qt1 * qt1;
 
-  const Momentum phi1 = (kp1 * ph_p1 - km1 * ph_m1).setPz(0.).setEnergy(kp1 - km1);
-  const double dot1 = phi1.threeProduct(q1()) / qt1_;
-  const double cross1 = phi1.crossProduct(q1()) / qt1_;
+  //--- negative polarisation
+  const auto beta1 = amt1_ / sqrtS() * exp(-y_c1_), beta2 = amt2_ / sqrtS() * exp(-y_c2_);
+  const auto x2 = beta1 + beta2, z2p = beta1 / x2, z2m = beta2 / x2, z2 = z2p * z2m;
+  const auto ak2 = Momentum(z2m * pc(0) - z2p * pc(1)).setPz(0.);
+  const auto ph_p2 = ak2 + z2p * q1(), ph_m2 = ak2 - z2m * q1();
+  const auto qt2 = q2().p(), inv_qt2 = 1. / qt2;
+  const auto t2abs = (qt2 * qt2 + x2 * (mY2() - mB2()) + x2 * x2 * mB2()) / (1. - x2);
+  const auto eps22 = mf2_ + z2 * t2abs;
+  const auto kp2 = 1. / (ph_p2.pt2() + eps22), km2 = 1. / (ph_m2.pt2() + eps22);
 
-  //--- negative-z photon kinematics
-  const Momentum ak2 = (z2m * pc(0) - z2p * pc(1)).setPz(0.);
-  const Momentum ph_p2 = ak2 + z2p * q1(), ph_m2 = ak2 - z2m * q1();
-  const double t2abs = (q2().pt2() + x2 * (mY2() - mB2()) + x2 * x2 * mB2()) / (1. - x2);
-  const double eps22 = mf2_ + z2 * t2abs;
-  const double kp2 = 1. / (ph_p2.pt2() + eps22);
-  const double km2 = 1. / (ph_m2.pt2() + eps22);
+  const auto phi2 = Momentum(kp2 * ph_p2 - km2 * ph_m2).setPz(0.).setEnergy(kp2 - km2);
+  const auto dot2 = phi2.threeProduct(q2()) * inv_qt2, cross2 = phi2.crossProduct(q2()) * inv_qt2;
 
-  const Momentum phi2 = (kp2 * ph_p2 - km2 * ph_m2).setPz(0.).setEnergy(kp2 - km2);
-  const double dot2 = phi2.threeProduct(q2()) / qt2_;
-  const double cross2 = phi2.crossProduct(q2()) / qt2_;
+  const auto aux2_2 = osp_.term_ll * (mf2_ + 4. * z2 * z2 * t2abs) * phi2.energy2() +
+                      osp_.term_tt1 * ((z2p * z2p + z2m * z2m) * (dot2 * dot2 + cross2 * cross2)) +
+                      osp_.term_tt2 * (cross2 * cross2 - dot2 * dot2) -
+                      osp_.term_lt * 4. * z2 * (z2p - z2m) * phi2.energy() * qt2 * dot2;
+  const auto amat2_2 = 2. * aux2_2 * z2 * qt2 * qt2;
 
-  CG_DEBUG_LOOP("PPtoFF:offShell") << "Photon kinematics:\n\t"
-                                   << "q1 = " << q1() << ", q1t = " << qt1_ << ", q1t2 = " << q1().pt2() << "\n\t"
-                                   << "q2 = " << q2() << ", q2t = " << qt2_ << ", q2t2 = " << q2().pt2() << "\n\t"
-                                   << "phi1 = " << phi1 << ", phi2 = " << phi2 << "\n\t"
-                                   << "t1abs = " << t1abs << ", t2abs = " << t2abs << "\n\t"
-                                   << "x1 = " << x1 << ", x2 = " << x2 << "\n\t"
-                                   << "(dot):   " << dot1 << " / " << dot2 << "\n\t"
-                                   << "(cross): " << cross1 << " / " << cross2 << ".";
-
-  const double aux2_1 = osp_.term_ll * (mf2_ + 4. * z1 * z1 * t1abs) * phi1.energy2() +
-                        osp_.term_tt1 * ((z1p * z1p + z1m * z1m) * (dot1 * dot1 + cross1 * cross1)) +
-                        osp_.term_tt2 * (cross1 * cross1 - dot1 * dot1) -
-                        osp_.term_lt * 4. * z1 * (z1p - z1m) * phi1.energy() * qt1_ * dot1;
-
-  const double aux2_2 = osp_.term_ll * (mf2_ + 4. * z2 * z2 * t2abs) * phi2.energy2() +
-                        osp_.term_tt1 * ((z2p * z2p + z2m * z2m) * (dot2 * dot2 + cross2 * cross2)) +
-                        osp_.term_tt2 * (cross2 * cross2 - dot2 * dot2) -
-                        osp_.term_lt * 4. * z2 * (z2p - z2m) * phi2.energy() * qt2_ * dot2;
-
-  //=================================================================
-  //     convention of matrix element as in our kt-factorization
-  //     for heavy flavours
-  //=================================================================
-
-  // Marta's version
-  double amat2_1 = 2. * aux2_1 * z1, amat2_2 = 2. * aux2_2 * z2;
-  const double inv_q1t2 = 1. / q1().pt2(), inv_q2t2 = 1. / q2().pt2();
-  if (method_ == Mode::offShell) {
-    amat2_1 *= inv_q2t2;
-    amat2_2 *= inv_q1t2;
-  } else if (method_ == Mode::offShellLegacy) {
-    amat2_1 *= (t1abs * inv_q1t2 * inv_q2t2) * (t2abs * inv_q2t2);
-    amat2_2 *= (t2abs * inv_q1t2 * inv_q2t2);
-  }
-
-  //=================================================================
-  //     symmetrization
-  //=================================================================
-
-  double amat2 = 0.5 * prefactor_ * pow(x1 * x2 * s(), 2) * (osp_.mat1 * amat2_1 + osp_.mat2 * amat2_2);
-
-  const double tmax = pow(std::max(amt1_, amt2_), 2);
-  const double q1val = std::sqrt(std::max(eps12, tmax)), q2val = std::sqrt(std::max(eps22, tmax));
-  if (event().oneWithRole(Particle::Parton1).pdgId() == PDG::gluon)
-    amat2 *= 0.5 * alphaS(q1val);
-  else
-    amat2 *= alphaEM(q1val);
-  if (event().oneWithRole(Particle::Parton2).pdgId() == PDG::gluon)
-    amat2 *= 0.5 * alphaS(q2val);
-  else
-    amat2 *= alphaEM(q2val);
+  //--- symmetrisation
+  const auto amat2 = 0.5 * (osp_.mat1 * amat2_1 + osp_.mat2 * amat2_2);
+  if (amat2 <= 0.)
+    return 0.;
 
   CG_DEBUG_LOOP("PPtoFF:offShell") << "aux2(1/2) = " << aux2_1 << " / " << aux2_2 << "\n\t"
                                    << "z(1/2) = " << z1 << " / " << z2 << "\n\t"
@@ -243,7 +209,11 @@ double PPtoFF::offShellME() const {
                                    << "amat2(1/2) = " << amat2_1 << " / " << amat2_2 << "\n\t"
                                    << "amat2 = " << amat2 << ".";
 
-  return amat2;
+  const double tmax = pow(std::max(amt1_, amt2_), 2);
+  const double q1val = std::sqrt(std::max(eps12, tmax)), q2val = std::sqrt(std::max(eps22, tmax));
+  const auto g2_sq = couplingPrefactor(q1val, q2val);
+
+  return g2_sq * std::pow(x1 * x2 * s() * inv_qt1 * inv_qt2, 2) * amat2;
 }
 // register process
 REGISTER_PROCESS("pptoff", PPtoFF);
