@@ -160,7 +160,7 @@ double PPtoFF::onShellME() const {
 
 double PPtoFF::offShellME() const {
   const double tmax = pow(std::max(amt1_, amt2_), 2);
-  static const auto compute_polarisation =
+  const auto compute_polarisation =
       [&](short pol, const Momentum& pho1, const Momentum& pho2, double mi2, double mf2, double& x, double& q) {
         const auto norm_pol = pol / abs(pol);
         const auto alpha1 = amt1_ / sqrtS() * exp(norm_pol * y_c1_);

@@ -88,26 +88,14 @@ namespace cepgen {
       // register the incoming partons' variables
       //============================================================================================
 
-      defineVariable(qt1_,
-                     Mapping::exponential,
-                     kinematics().cuts().initial.qt,
-                     {1.e-10, 500.},
-                     "First incoming parton virtuality");
-      defineVariable(qt2_,
-                     Mapping::exponential,
-                     kinematics().cuts().initial.qt,
-                     {1.e-10, 500.},
-                     "Second incoming parton virtuality");
-      defineVariable(phi_qt1_,
-                     Mapping::linear,
-                     kinematics().cuts().initial.phi_qt,
-                     {0., 2. * M_PI},
-                     "First incoming parton azimuthal angle");
-      defineVariable(phi_qt2_,
-                     Mapping::linear,
-                     kinematics().cuts().initial.phi_qt,
-                     {0., 2. * M_PI},
-                     "Second incoming parton azimuthal angle");
+      const auto log_lim_kt = utils::log(kinematics().cuts().initial.qt).truncate(Limits{-10., 10.});
+      const auto lim_phi_kt = utils::log(kinematics().cuts().initial.phi_qt).truncate(Limits{0., 2. * M_PI});
+      defineVariable(qt1_, Mapping::exponential, log_lim_kt, "First incoming parton virtuality");
+      defineVariable(qt2_, Mapping::exponential, log_lim_kt, "Second incoming parton virtuality");
+      defineVariable(
+          phi_qt1_, Mapping::linear, kinematics().cuts().initial.phi_qt, "First incoming parton azimuthal angle");
+      defineVariable(
+          phi_qt2_, Mapping::linear, kinematics().cuts().initial.phi_qt, "Second incoming parton azimuthal angle");
 
       //============================================================================================
       // register all process-dependent variables
@@ -122,17 +110,11 @@ namespace cepgen {
       mX2() = ib1.mass2();
       mY2() = ib2.mass2();
       if (kinematics().incomingBeams().positive().fragmented())
-        defineVariable(mX2(),
-                       Mapping::square,
-                       kinematics().cuts().remnants.mx,
-                       {1.07, 1000.},
-                       "Positive z proton remnant squared mass");
+        defineVariable(
+            mX2(), Mapping::square, kinematics().cuts().remnants.mx, "Positive z proton remnant squared mass");
       if (kinematics().incomingBeams().negative().fragmented())
-        defineVariable(mY2(),
-                       Mapping::square,
-                       kinematics().cuts().remnants.mx,
-                       {1.07, 1000.},
-                       "Negative z proton remnant squared mass");
+        defineVariable(
+            mY2(), Mapping::square, kinematics().cuts().remnants.mx, "Negative z proton remnant squared mass");
     }
 
     double KTProcess::computeWeight() {

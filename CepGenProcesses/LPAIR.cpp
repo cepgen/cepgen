@@ -272,29 +272,22 @@ void LPAIR::prepareKinematics() {
   strfun_ = StructureFunctionsFactory::get().build(kinematics().incomingBeams().structureFunctions());
 
   //--- first define the squared mass range for the diphoton/dilepton system
-  const auto& mll_limits = kinematics().cuts().central.mass_sum;
-  w_limits_ = Limits(mll_limits.hasMin() ? std::pow(mll_limits.min(), 2) : 4. * masses_.Ml2,
-                     mll_limits.hasMax() ? std::pow(mll_limits.max(), 2) : s());
+  w_limits_ = utils::pow(kinematics().cuts().central.mass_sum, 2).truncate(Limits{4. * masses_.Ml2, s()});
 
   CG_DEBUG_LOOP("LPAIR:prepareKinematics") << "w limits = " << w_limits_ << "\n\t"
                                            << "wmax/wmin = " << w_limits_.max() / w_limits_.min();
 
-  const double mx0 = mp_ + PDG::get().mass(PDG::piPlus);  // 1.07
-  const double min_wx = pow(std::max(mx0, kinematics().cuts().remnants.mx.min()), 2);
-  const Limits wx_lim_ob1(
-      min_wx, pow(std::min(sqrtS() - pA().mass() - 2. * sqrt(masses_.Ml2), kinematics().cuts().remnants.mx.max()), 2));
-  const Limits wx_lim_ob2(
-      min_wx, pow(std::min(sqrtS() - pB().mass() - 2. * sqrt(masses_.Ml2), kinematics().cuts().remnants.mx.max()), 2));
-
   //--- variables mapping
 
-  defineVariable(m_u_t1_, Mapping::linear, {0., 1.}, {0., 1.}, "u_t1");
-  defineVariable(m_u_t2_, Mapping::linear, {0., 1.}, {0., 1.}, "u_t2");
-  defineVariable(m_u_s2_, Mapping::linear, {0., 1.}, {0., 1.}, "u_s2");
-  defineVariable(m_w4_, Mapping::power_law, w_limits_, w_limits_, "w4");
-  defineVariable(m_theta4_, Mapping::linear, {0., M_PI}, {0., M_PI}, "theta4");
-  defineVariable(m_phi6_cm_, Mapping::linear, {0., 2. * M_PI}, {0., 2. * M_PI}, "phi6cm");
-  defineVariable(m_x6_, Mapping::linear, {0., 1.}, {0., 1.}, "x6");
+  defineVariable(m_u_t1_, Mapping::linear, {0., 1.}, "u_t1");
+  defineVariable(m_u_t2_, Mapping::linear, {0., 1.}, "u_t2");
+  defineVariable(m_u_s2_, Mapping::linear, {0., 1.}, "u_s2");
+  defineVariable(m_w4_, Mapping::power_law, w_limits_, "w4");
+  defineVariable(m_theta4_, Mapping::linear, {0., M_PI}, "theta4");
+  defineVariable(m_phi6_cm_, Mapping::linear, {0., 2. * M_PI}, "phi6cm");
+  defineVariable(m_x6_, Mapping::linear, {0., 1.}, "x6");
+
+  const double mx0 = mp_ + PDG::get().mass(PDG::piPlus);  // 1.07
 
   //--- first outgoing beam particle or remnant mass
   switch (kinematics().incomingBeams().positive().mode()) {
@@ -304,9 +297,11 @@ void LPAIR::prepareKinematics() {
       event().oneWithRole(Particle::OutgoingBeam1).setPdgId(event().oneWithRole(Particle::IncomingBeam1).pdgId());
       mX2() = pA().mass2();
       break;
-    case Beam::Mode::ProtonInelastic:
-      defineVariable(mX2(), Mapping::power_law, wx_lim_ob1, wx_lim_ob1, "MX2");
-      break;
+    case Beam::Mode::ProtonInelastic: {
+      const auto wx_lim_ob1 =
+          utils::pow(kinematics().cuts().remnants.mx.truncate(Limits{mx0, sqrtS() - mA() - 2. * sqrt(masses_.Ml2)}), 2);
+      defineVariable(mX2(), Mapping::power_law, wx_lim_ob1, "MX2");
+    } break;
     default:
       throw CG_FATAL("LPAIR:kinematics") << "Invalid mode for beam 1: "
                                          << kinematics().incomingBeams().positive().mode() << " is not supported!";
@@ -319,9 +314,11 @@ void LPAIR::prepareKinematics() {
       event().oneWithRole(Particle::OutgoingBeam2).setPdgId(event().oneWithRole(Particle::IncomingBeam2).pdgId());
       mY2() = pB().mass2();
       break;
-    case Beam::Mode::ProtonInelastic:
-      defineVariable(mY2(), Mapping::power_law, wx_lim_ob2, wx_lim_ob2, "MY2");
-      break;
+    case Beam::Mode::ProtonInelastic: {
+      const auto wx_lim_ob2 =
+          utils::pow(kinematics().cuts().remnants.mx.truncate(Limits{mx0, sqrtS() - mB() - 2. * sqrt(masses_.Ml2)}), 2);
+      defineVariable(mY2(), Mapping::power_law, wx_lim_ob2, "MY2");
+    } break;
     default:
       throw CG_FATAL("LPAIR:kinematics") << "Invalid mode for beam 2: "
                                          << kinematics().incomingBeams().negative().mode() << " is not supported!";

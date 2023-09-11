@@ -116,6 +116,15 @@ namespace cepgen {
     return out;
   }
 
+  Limits Limits::truncate(const Limits& ext) const {
+    auto out = *this;
+    if (ext.hasMin() && (!out.hasMin() || out.min() < ext.min()))
+      out.min() = ext.min();
+    if (ext.hasMax() && (!out.hasMax() || out.max() > ext.max()))
+      out.max() = ext.max();
+    return out;
+  }
+
   std::ostream& operator<<(std::ostream& os, const Limits& lim) {
     if (!lim.hasMin() && !lim.hasMax())
       return os << "no cuts";
@@ -141,4 +150,25 @@ namespace cepgen {
     return lim;
   }
 
+  namespace utils {
+    Limits log(const Limits& lim) {
+      return Limits{lim.hasMin() ? std::log(lim.min()) : Limits::INVALID,
+                    lim.hasMax() ? std::log(lim.max()) : Limits::INVALID};
+    }
+
+    Limits log10(const Limits& lim) {
+      return Limits{lim.hasMin() ? std::log10(lim.min()) : Limits::INVALID,
+                    lim.hasMax() ? std::log10(lim.max()) : Limits::INVALID};
+    }
+
+    Limits pow(const Limits& lim, double exp) {
+      return Limits{lim.hasMin() ? std::pow(lim.min(), exp) : Limits::INVALID,
+                    lim.hasMax() ? std::pow(lim.max(), exp) : Limits::INVALID};
+    }
+
+    Limits sqrt(const Limits& lim) {
+      return Limits{lim.hasMin() ? std::sqrt(lim.min()) : Limits::INVALID,
+                    lim.hasMax() ? std::sqrt(lim.max()) : Limits::INVALID};
+    }
+  }  // namespace utils
 }  // namespace cepgen

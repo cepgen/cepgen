@@ -123,18 +123,12 @@ namespace cepgen {
               << " in range " << var.limits;
     }
 
-    Process& Process::defineVariable(
-        double& out, const Mapping& type, Limits in, const Limits& default_limits, const std::string& descr) {
-      if (!in.valid()) {
-        CG_DEBUG("Process:defineVariable") << descr << " could not be retrieved from the user configuration. "
-                                           << "Setting it to the default value: " << default_limits << ".";
-        in = default_limits;
-      }
+    Process& Process::defineVariable(double& out, const Mapping& type, const Limits& lim, const std::string& descr) {
+      if (!lim.valid())
+        throw CG_FATAL("Process:defineVariable")
+            << "The limits for '" << descr << "' (" << lim << ") could not be retrieved from the user configuration.";
 
-      Limits lim = in;
-      out = 0.;                  // reset the variable
       double jacob_weight = 1.;  // initialise the local weight for this variable
-
       switch (type) {
         case Mapping::linear:
           jacob_weight = lim.range();
@@ -142,27 +136,21 @@ namespace cepgen {
         case Mapping::square:
           jacob_weight = 2. * lim.range();
           break;
-        case Mapping::exponential: {
-          lim = {// limits already stored as log(limits)
-                 (!lim.hasMin() || lim.min() == 0.) ? -10. : std::max(log(lim.min()), -10.),
-                 (!lim.hasMax() || lim.max() == 0.) ? +10. : std::min(log(lim.max()), +10.)};
-          jacob_weight = lim.range();  // use the linear version
-        } break;
+        case Mapping::exponential:
+          jacob_weight = lim.range();
+          break;
         case Mapping::power_law:
           jacob_weight = log(lim.max() / lim.min());
           break;
       }
+      const auto var_desc = descr.empty() ? utils::format("var%z", mapped_variables_.size()) : descr;
       mapped_variables_.emplace_back(
-          MappingVariable{descr.empty() ? utils::format("var%z", mapped_variables_.size()) : descr,
-                          lim,
-                          out,
-                          type,
-                          (unsigned short)mapped_variables_.size()});
+          MappingVariable{var_desc, lim, out, type, (unsigned short)mapped_variables_.size()});
       point_coord_.emplace_back(0.);
       base_jacobian_ *= jacob_weight;
       CG_DEBUG("Process:defineVariable") << "\n\t" << descr << " has been mapped to variable "
                                          << mapped_variables_.size() << ".\n\t"
-                                         << "Allowed range for integration: " << in << " (" << lim << ").\n\t"
+                                         << "Allowed range for integration: " << lim << ".\n\t"
                                          << "Variable integration mode: " << type << ".\n\t"
                                          << "Weight in the Jacobian: " << jacob_weight << ".";
       return *this;
@@ -183,14 +171,14 @@ namespace cepgen {
         if (var.index >= point_coord_.size())
           throw CG_FATAL("Process:x") << "Failed to retrieve coordinate " << var.index << " from "
                                       << "a dimension-" << ndim() << " process!";
-        const double xv = point_coord_.at(var.index);  // between 0 and 1
+        const auto& xv = point_coord_.at(var.index);  // between 0 and 1
         switch (var.type) {
           case Mapping::linear: {
             var.value = var.limits.x(xv);
             jacobian *= 1.;
           } break;
-          case Mapping::exponential: {          // limits already logarithmic
-            var.value = exp(var.limits.x(xv));  // transform back to linear
+          case Mapping::exponential: {               // limits already logarithmic
+            var.value = std::exp(var.limits.x(xv));  // transform back to linear
             jacobian *= var.value;
           } break;
           case Mapping::square: {
@@ -200,7 +188,7 @@ namespace cepgen {
           } break;
           case Mapping::power_law: {
             const double y = var.limits.max() / var.limits.min();
-            var.value = var.limits.min() * pow(y, xv);
+            var.value = var.limits.min() * std::pow(y, xv);
             jacobian *= var.value;
           } break;
         }

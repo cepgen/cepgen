@@ -36,28 +36,16 @@ namespace cepgen {
       if (cs_prop_.pdgid == PDG::invalid)  // ensure the central particles properties are correctly initialised
         cs_prop_ = PDG::get()(steer<ParticleProperties>("pair").pdgid);
 
-      ww_ = 0.5 * (1. + sqrt(1. - 4. * mA() * mB() / s()));
+      const auto lim_rap = kinematics().cuts().central.rapidity_single.truncate(Limits{-6., 6.});
+      const auto lim_pt_diff = kinematics().cuts().central.pt_diff.truncate(Limits{0., 500.});
+      const auto lim_phi_diff = kinematics().cuts().central.phi_diff.truncate(Limits{0., 2. * M_PI});
 
-      defineVariable(y_c1_,
-                     Mapping::linear,
-                     kinematics().cuts().central.rapidity_single,
-                     {-6., 6.},
-                     "First outgoing particle rapidity");
-      defineVariable(y_c2_,
-                     Mapping::linear,
-                     kinematics().cuts().central.rapidity_single,
-                     {-6., 6.},
-                     "Second outgoing particle rapidity");
-      defineVariable(pt_diff_,
-                     Mapping::linear,
-                     kinematics().cuts().central.pt_diff,
-                     {0., 500.},
-                     "Final state particles transverse momentum difference");
-      defineVariable(phi_pt_diff_,
-                     Mapping::linear,
-                     kinematics().cuts().central.phi_diff,
-                     {0., 2. * M_PI},
-                     "Final state particles azimuthal angle difference");
+      defineVariable(y_c1_, Mapping::linear, lim_rap, "First outgoing particle rapidity");
+      defineVariable(y_c2_, Mapping::linear, lim_rap, "Second outgoing particle rapidity");
+      defineVariable(pt_diff_, Mapping::linear, lim_pt_diff, "Final state particles transverse momentum difference");
+      defineVariable(phi_pt_diff_, Mapping::linear, lim_phi_diff, "Final state particles azimuthal angle difference");
+
+      ww_ = 0.5 * (1. + std::sqrt(1. - 4. * mA() * mB() / s()));
 
       prepareProcessKinematics();
     }

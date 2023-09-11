@@ -66,6 +66,8 @@ namespace cepgen {
     bool hasMin() const;
     /// Have an upper limit?
     bool hasMax() const;
+    /// Truncate limits to minimal/maximal values
+    Limits truncate(const Limits&) const;
     /// Check if the value is inside limits' boundaries
     bool contains(double val, bool exclude_boundaries = false) const;
     /// Is there a lower and upper limit?
@@ -87,6 +89,16 @@ namespace cepgen {
     /// Placeholder for an invalid value in a limit (for single-edged or invalid limits)
     static constexpr double INVALID = -999.999;
   };
+  namespace utils {
+    /// Compute the natural logarithm of the limits boundaries
+    Limits log(const Limits&);
+    /// Compute the base-10 logarithm of the limits boundaries
+    Limits log10(const Limits&);
+    /// Compute the power of the limits boundaries
+    Limits pow(const Limits&, double exp);
+    /// Compute the square root of the limits boundaries
+    Limits sqrt(const Limits&);
+  }  // namespace utils
 }  // namespace cepgen
 
 #endif
