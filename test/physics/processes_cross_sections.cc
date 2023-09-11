@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
   CG_LOG << "Will run " << cepgen::utils::s("test", tests.size()) << ".";
 
   for (const auto& test : tests) {
-    const std::string filename = "test/physics/test_processes/" + test.filename + "_cfg.py";
+    const std::string filename = "TestProcesses/" + test.filename + "_cfg.py";
     try {
       gen.parametersRef().clearProcess();
       gen.setParameters(cepgen::card::Handler::parseFile(filename));
