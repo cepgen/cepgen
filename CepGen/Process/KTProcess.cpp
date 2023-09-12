@@ -89,13 +89,12 @@ namespace cepgen {
       //============================================================================================
 
       const auto log_lim_kt = utils::log(kinematics().cuts().initial.qt).truncate(Limits{-10., 10.});
-      const auto lim_phi_kt = utils::log(kinematics().cuts().initial.phi_qt).truncate(Limits{0., 2. * M_PI});
       defineVariable(qt1_, Mapping::exponential, log_lim_kt, "First incoming parton virtuality");
       defineVariable(qt2_, Mapping::exponential, log_lim_kt, "Second incoming parton virtuality");
-      defineVariable(
-          phi_qt1_, Mapping::linear, kinematics().cuts().initial.phi_qt, "First incoming parton azimuthal angle");
-      defineVariable(
-          phi_qt2_, Mapping::linear, kinematics().cuts().initial.phi_qt, "Second incoming parton azimuthal angle");
+
+      const auto lim_phi_kt = utils::log(kinematics().cuts().initial.phi_qt).truncate(Limits{0., 2. * M_PI});
+      defineVariable(phi_qt1_, Mapping::linear, lim_phi_kt, "First incoming parton azimuthal angle");
+      defineVariable(phi_qt2_, Mapping::linear, lim_phi_kt, "Second incoming parton azimuthal angle");
 
       //============================================================================================
       // register all process-dependent variables
