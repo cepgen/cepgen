@@ -73,7 +73,7 @@ namespace cepgen {
     /// Is there a lower and upper limit?
     bool valid() const;
     /// Raw value of the limits
-    const std::pair<double, double> raw() const { return *this; }
+    const std::pair<double, double>& raw() const { return *this; }
     /// Generate a collection of values from a number of bins
     /// \param[in] num_bins number of values to generate
     /// \param[in] log_scale generate according to a log10 scale?

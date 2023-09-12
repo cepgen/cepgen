@@ -77,13 +77,13 @@ namespace cepgen {
 
     void FortranKTProcess::preparePhaseSpace() {
       const auto lim_rap = kinematics().cuts().central.rapidity_single.truncate(Limits{-6., 6.});
-      const auto lim_pt_diff = kinematics().cuts().central.pt_diff.truncate(Limits{0., 50.});
-      const auto lim_phi_diff = kinematics().cuts().central.phi_diff.truncate(Limits{0., 2. * M_PI});
-
       defineVariable(y1_, Mapping::linear, lim_rap, "First central particle rapidity");
       defineVariable(y2_, Mapping::linear, lim_rap, "Second central particle rapidity");
-      defineVariable(
-          pt_diff_, Mapping::linear, lim_pt_diff, "Transverse momentum difference between central particles");
+
+      const auto lim_pt_diff = kinematics().cuts().central.pt_diff.truncate(Limits{0., 50.});
+      defineVariable(pt_diff_, Mapping::linear, lim_pt_diff, "Central particles transverse momentum difference");
+
+      const auto lim_phi_diff = kinematics().cuts().central.phi_diff.truncate(Limits{0., 2. * M_PI});
       defineVariable(phi_pt_diff_, Mapping::linear, lim_phi_diff, "Central particles azimuthal angle difference");
 
       //===========================================================================================

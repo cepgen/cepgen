@@ -192,27 +192,11 @@ namespace cepgen {
             jacobian *= var.value;
           } break;
         }
+        CG_DEBUG_LOOP("Process:vars") << "\n\tvariable " << var.index << std::left << std::setw(60)
+                                      << (!var.description.empty() ? " (" + var.description + ")" : "") << " in range "
+                                      << std::setw(20) << var.limits << " has value " << std::setw(20) << var.value
+                                      << " (x=" << point_coord_.at(var.index) << std::right << ")";
       }
-      CG_DEBUG_LOOP("Process:vars").log([&](auto& dbg) {
-        dbg << "Dump of all variables values:";
-        for (const auto& var : mapped_variables_) {
-          double value = 0.;
-          switch (var.type) {
-            case Mapping::linear:
-            case Mapping::exponential:
-            case Mapping::power_law:
-              value = var.value;
-              break;
-            case Mapping::square:
-              value = sqrt(var.value);
-              break;
-          }
-          dbg << "\n\tvariable " << var.index << std::left << std::setw(60)
-              << (!var.description.empty() ? " (" + var.description + ")" : "") << " in range " << std::setw(20)
-              << var.limits << " has value " << std::setw(20) << value << " (x=" << point_coord_.at(var.index)
-              << std::right << ")";
-        }
-      });
       return jacobian;
     }
 

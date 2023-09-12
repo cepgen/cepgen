@@ -52,8 +52,7 @@ namespace cepgen {
         num_gen_events_(param.num_gen_events_),
         generation_(param.generation_) {}
 
-  Parameters::~Parameters()  // required for unique_ptr initialisation!
-  {}
+  Parameters::~Parameters() {}  // required for unique_ptr initialisation!
 
   Parameters& Parameters::operator=(Parameters param) {
     par_integrator = param.par_integrator;
