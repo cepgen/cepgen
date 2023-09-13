@@ -69,6 +69,8 @@ namespace cepgen {
     bool hasMax() const;
     /// Truncate limits to minimal/maximal values
     Limits truncate(const Limits&) const;
+    /// Limit a value to boundaries
+    double trim(double) const;
     /// Check if the value is inside limits' boundaries
     bool contains(double val, bool exclude_boundaries = false) const;
     /// Is there a lower and upper limit?
