@@ -50,6 +50,8 @@ namespace cepgen {
     static Momentum fromPxPyPzM(double px, double py, double pz, double m);
     /// Build a 4-momentum from its transverse momentum, rapidity and mass
     static Momentum fromPxPyYM(double px, double py, double rap, double m);
+    /// Build a 4-momentum from its transverse momentum, azimuthal angle, rapidity and mass
+    static Momentum fromPtYPhiM(double pt, double rap, double phi, double m);
 
     //--- vector and scalar operators
 
@@ -120,6 +122,8 @@ namespace cepgen {
     double pt() const;
     /// Squared transverse momentum (in GeV\f$^2\f$)
     double pt2() const;
+    /// Transverse coordinates of a momentum
+    Momentum transverse() const;
     /// 5-vector of double precision floats (in GeV)
     std::array<double, 5> pVector() const;
     /// 3-momentum norm (in GeV)
@@ -140,11 +144,11 @@ namespace cepgen {
     /// Squared tranverse energy component (in GeV\f$^2\f$)
     double energyT2() const;
     /// Compute the energy from the mass
-    Momentum& setMass2(double m2);
+    Momentum& setMass2(double);
     /// Squared mass (in GeV\f$^2\f$) as computed from its energy and momentum
     inline double mass2() const { return energy2() - p2(); }
     /// Compute the energy from the mass
-    inline Momentum& setMass(double m) { return setMass2(m * m); }
+    Momentum& setMass(double);
     /// Mass (in GeV) as computed from its energy and momentum
     /// \note Returns \f$-\sqrt{|E^2-\mathbf{p}^2|}<0\f$ if \f$\mathbf{p}^2>E^2\f$
     double mass() const;
