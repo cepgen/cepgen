@@ -160,44 +160,48 @@ double PPtoFF::onShellME() const {
 }
 
 double PPtoFF::offShellME() const {
-  const auto compute_polarisation =
-      [&](short pol, const Momentum& pho1, const Momentum& pho2, double mi2, double mf2, double& x, double& q2) {
-        const auto norm_pol = pol / abs(pol);
-        const auto alpha1 = amt1_ / sqrtS() * exp(norm_pol * y_c1_);
-        const auto alpha2 = amt2_ / sqrtS() * exp(norm_pol * y_c2_);
-        x = alpha1 + alpha2;
-        const auto zp = alpha1 / x, zm = alpha2 / x, z = zp * zm;
-        const auto ak = Momentum(zm * pc(0) - zp * pc(1)).setPz(0.);
-        const auto ph_p = ak + zp * pho2, ph_m = ak - zm * pho2;
-        const auto qt = pho1.p(), inv_qt = 1. / qt, q2val = utils::kt::q2(x, qt * qt, mi2, mf2);
-        q2 = mf2_ + z * q2val;
-        const auto kp = 1. / (ph_p.pt2() + q2), km = 1. / (ph_m.pt2() + q2);
+  const auto mt1 = pc(0).massT(), mt2 = pc(1).massT();  // transverse masses
+  const auto compute_zs = [&](short pol, double x) -> std::pair<double, double> {
+    const auto norm_pol = pol / abs(pol);
+    const auto fact = 1. / sqrtS() / x;
+    return std::make_pair(fact * mt1 * exp(norm_pol * y_c1_), fact * mt2 * exp(norm_pol * y_c2_));
+  };
+  const auto compute_mat_element =
+      [this](double zp, double zm, double q2, const Momentum& vec_pho, const Momentum& vec_qt) -> double {
+    const auto vec_kt = Momentum(zm * pc(0) - zp * pc(1)).transverse();
+    const auto phi_p = vec_kt + zp * vec_qt, phi_m = vec_kt - zm * vec_qt;
+    const auto zpm = zp * zm, eps2 = mf2_ + zpm * q2;
 
-        const auto phi = Momentum(kp * ph_p - km * ph_m).setPz(0.).setEnergy(kp - km);
-        const auto dot = phi.threeProduct(pho1) * inv_qt, cross = phi.crossProduct(pho1) * inv_qt;
+    const auto kp = 1. / (phi_p.pt2() + eps2), km = 1. / (phi_m.pt2() + eps2);
+    const auto phi = Momentum(kp * phi_p - km * phi_m).setEnergy(kp - km);
+    const auto dot = phi.threeProduct(vec_pho), cross = phi.crossProduct(vec_pho);
 
-        const auto aux2 = osp_.term_ll * (mf2_ + 4. * z * z * q2val) * phi.energy2() +
-                          osp_.term_tt1 * (zp * zp + zm * zm) * (dot * dot + cross * cross) +
-                          osp_.term_tt2 * (cross * cross - dot * dot) -
-                          osp_.term_lt * 4. * z * (zp - zm) * phi.energy() * qt * dot;
-        return 2. * aux2 * z / pho2.p2();
-      };
-  //--- positive polarisation
-  double x1, q2_1;
-  const auto amat2_1 = compute_polarisation(+1, q1(), q2(), mA2(), mX2(), x1, q2_1);
+    const auto phi_0 = phi.energy(), phi2_0 = phi_0 * phi_0, phi_t = phi.p(), phi2_t = phi_t * phi_t;
 
-  //--- negative polarisation
-  double x2, q2_2;
-  const auto amat2_2 = compute_polarisation(-1, q2(), q1(), mB2(), mY2(), x2, q2_2);
+    return 2. * zpm / vec_qt.pt2() *
+           ((osp_.term_ll * 4. * zpm * zpm * q2 * phi2_0) +
+            (osp_.term_tt1 * (zp * zp + zm * zm) * phi2_t + mf2_ * phi2_0) +
+            (osp_.term_tt2 * (cross * cross - dot * dot) / vec_pho.pt2()) -
+            (osp_.term_lt * 4. * zpm * (zp - zm) * phi_0 * dot));
+  };
+  //--- t-channel
+  const auto q2_1 = utils::kt::q2(x1_, q1().pt2(), mA2(), mX2());
+  const auto [zp_1, zm_1] = compute_zs(+1, x1_);
+  const auto amat2_1 = compute_mat_element(zp_1, zm_1, q2_1, q1(), q2().transverse());
+
+  //--- u-channel
+  const auto q2_2 = utils::kt::q2(x2_, q2().pt2(), mB2(), mY2());
+  const auto [zp_2, zm_2] = compute_zs(-1, x2_);
+  const auto amat2_2 = compute_mat_element(zp_2, zm_2, q2_2, q2(), q1().transverse());
 
   //--- symmetrisation
   const auto amat2 = 0.5 * (osp_.mat1 * amat2_1 + osp_.mat2 * amat2_2);
   if (amat2 <= 0.)
     return 0.;
 
-  const auto t_limits = Limits{0., std::pow(std::max(amt1_, amt2_), 2)};
-  return couplingPrefactor(std::sqrt(t_limits.trim(q2_1)), std::sqrt(t_limits.trim(q2_2))) *
-         std::pow(x1 * x2 * s(), 2) * amat2;
+  const auto t_limits = Limits{0., std::pow(std::max(mt1, mt2), 2)};
+  const auto q_1 = std::sqrt(t_limits.trim(q2_1)), q_2 = std::sqrt(t_limits.trim(q2_2));
+  return couplingPrefactor(q_1, q_2) * std::pow(x1_ * x2_ * s(), 2) * amat2;
 }
 // register process
 REGISTER_PROCESS("pptoff", PPtoFF);

@@ -59,9 +59,6 @@ namespace cepgen {
       double pt_diff_{0.};      ///< Transverse momentum difference for the two central particle
       double phi_pt_diff_{0.};  ///< Azimuthal angle difference for the two central particles
 
-      double amt1_{0.};  ///< Transverse mass of the first central particle
-      double amt2_{0.};  ///< Transverse mass of the second central particle
-
     private:
       std::uniform_int_distribution<short> rnd_sign_;
       double ww_{0.};
@@ -70,4 +67,3 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
-

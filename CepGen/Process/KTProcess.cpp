@@ -125,7 +125,7 @@ namespace cepgen {
       const auto& flux1 = dynamic_cast<const KTFlux&>(kinematics().incomingBeams().positive().flux());
       const auto& flux2 = dynamic_cast<const KTFlux&>(kinematics().incomingBeams().negative().flux());
 
-      return flux1.fluxMX2(x1_, qt1_ * qt1_, mX2()) * M_1_PI * flux2.fluxMX2(x2_, qt2_ * qt2_, mY2()) * M_1_PI *
+      return (flux1.fluxMX2(x1_, qt1_ * qt1_, mX2()) * M_1_PI) * (flux2.fluxMX2(x2_, qt2_ * qt2_, mY2()) * M_1_PI) *
              cent_me;
     }
 
