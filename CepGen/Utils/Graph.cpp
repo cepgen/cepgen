@@ -28,21 +28,21 @@ namespace cepgen {
     Graph1D::Graph1D(const std::string& name, const std::string& title) : Drawable(name, title) {}
 
     Graph1D& Graph1D::addPoint(double x, double y) {
-      values_[coord_t{x}] = value_t{y};
+      values_[coord_t{x}] = Value{y};
       return *this;
     }
 
     Graph1D& Graph1D::addPoint(double x, double y, double ex, double ey) {
-      values_[coord_t{x, ex}] = value_t{y, ey};
+      values_[coord_t{x, ex}] = Value{y, ey};
       return *this;
     }
 
     double Graph1D::minimum() const {
-      return std::min_element(values_.begin(), values_.end(), CompareAxisByValue())->second.value;
+      return std::min_element(values_.begin(), values_.end(), CompareAxisByValue())->second;
     }
 
     double Graph1D::maximum() const {
-      return std::max_element(values_.begin(), values_.end(), CompareAxisByValue())->second.value;
+      return std::max_element(values_.begin(), values_.end(), CompareAxisByValue())->second;
     }
 
     double Graph1D::chi2(const Graph1D& oth) const {
@@ -55,10 +55,10 @@ namespace cepgen {
                                          << "Please ensure the two graphs have the same values definition.";
         const auto& val1 = kv1.second;
         const auto& val2 = oth.values_.at(kv1.first);
-        double norm = std::pow(val1.value_unc, 2) + std::pow(val2.value_unc, 2);
+        double norm = std::pow(val1.uncertainty(), 2) + std::pow(val2.uncertainty(), 2);
         if (norm == 0.)
           norm = 1.;
-        chi2 += std::pow(val1.value - val2.value, 2) / norm;
+        chi2 += std::pow(val1 - val2, 2) / norm;
       }
       return chi2;
     }
@@ -70,7 +70,7 @@ namespace cepgen {
       return coords;
     }
 
-    const Drawable::value_t Graph1D::valueAt(double val) const {
+    const Value Graph1D::valueAt(double val) const {
       auto it = std::find_if(values_.begin(), values_.end(), [&val](const auto& xv) { return xv.first.value == val; });
       if (it == values_.end())
         throw CG_ERROR("Graph1D:valueAt") << "Failed to retrieve a point a the coordinate x=" << val << ".";
@@ -80,12 +80,12 @@ namespace cepgen {
     Graph2D::Graph2D(const std::string& name, const std::string& title) : Drawable(name, title) {}
 
     Graph2D& Graph2D::addPoint(double x, double y, double z) {
-      values_[coord_t{x}][coord_t{y}] = value_t{z};
+      values_[coord_t{x}][coord_t{y}] = Value{z};
       return *this;
     }
 
     Graph2D& Graph2D::addPoint(double x, double y, double z, double ex, double ey, double ez) {
-      values_[coord_t{x, ex}][coord_t{y, ey}] = value_t{z, ez};
+      values_[coord_t{x, ex}][coord_t{y, ey}] = Value{z, ez};
       return *this;
     }
 
@@ -94,8 +94,7 @@ namespace cepgen {
       size_t np = 0ul;
       for (const auto& xaxis : values_)
         for (const auto& yaxis : xaxis.second)
-          os << utils::format(
-              "\n%6zu: (%5g, %5g) = %5g", np++, xaxis.first.value, yaxis.first.value, yaxis.second.value);
+          os << utils::format("\n%6zu: (%5g, %5g) = %5g", np++, xaxis.first.value, yaxis.first.value, yaxis.second);
     }
 
     std::set<double> Graph2D::xCoords() const {
@@ -113,7 +112,7 @@ namespace cepgen {
       return coords;
     }
 
-    const Drawable::value_t Graph2D::valueAt(double xval, double yval) const {
+    const Value Graph2D::valueAt(double xval, double yval) const {
       for (const auto& xv : values_)
         if (xv.first.value == xval)
           for (const auto& yv : xv.second)

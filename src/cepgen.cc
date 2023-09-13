@@ -93,8 +93,7 @@ int main(int argc, char* argv[]) {
     CG_LOG << gen.parameters();
 
     //--- let there be a cross-section...
-    double xsec = 0., err = 0.;
-    gen.computeXsection(xsec, err);
+    gen.computeXsection();
 
     if (params.generation().enabled())
       //--- events generation starts here

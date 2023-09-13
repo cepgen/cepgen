@@ -46,7 +46,7 @@ namespace cepgen {
       /// List of horizontal axis coordinates
       std::set<double> xCoords() const;
       /// Retrieve the value of the graph at a given coordinate
-      const value_t valueAt(double) const;
+      const Value valueAt(double) const;
 
       bool isGraph1D() const override { return true; }
 
@@ -73,7 +73,7 @@ namespace cepgen {
       /// List of vertical axis coordinates
       std::set<double> yCoords() const;
       /// Retrieve the value of the graph at the given coordinates
-      const value_t valueAt(double, double) const;
+      const Value valueAt(double, double) const;
 
       bool isGraph2D() const override { return true; }
 

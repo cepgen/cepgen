@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,14 +35,14 @@ int main(int argc, char* argv[]) {
   string integrator;
   bool verbose;
 
-  cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("cfg,f", "configuration file", &cfg_filename, "test/physics/test_processes.cfg")
-      .addOptionalArgument("verbose,v", "verbose mode", &verbose, false)
-      .addOptionalArgument("num-sigma,n", "max. number of std.dev.", &num_sigma, 3.)
-      .addOptionalArgument("integrator,i", "type of integrator used", &integrator, "Vegas")
-      .parse();
+  auto args = cepgen::ArgumentsParser(argc, argv)
+                  .addOptionalArgument("cfg,f", "configuration file", &cfg_filename, "test/physics/test_processes.cfg")
+                  .addOptionalArgument("verbose,v", "verbose mode", &verbose, false)
+                  .addOptionalArgument("num-sigma,n", "max. number of std.dev.", &num_sigma, 3.)
+                  .addOptionalArgument("integrator,i", "type of integrator used", &integrator, "Vegas")
+                  .parse();
 
-  if (!verbose)
+  if (!args.debugging() && !verbose)
     CG_LOG_LEVEL(warning);
 
   cepgen::utils::Timer tmr;
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
 
   struct Test {
     string filename;
-    double ref_cs, err_ref_cs;
+    cepgen::Value ref_cs;
   };
   vector<Test> tests;
 
@@ -70,9 +70,11 @@ int main(int argc, char* argv[]) {
       line = cepgen::utils::ltrim(line);
       if (line.empty() || line[0] == '#')
         continue;
-      stringstream os(line);
       Test test;
-      os >> test.filename >> test.ref_cs >> test.err_ref_cs;
+      double ref, err;
+      stringstream os(line);
+      os >> test.filename >> ref >> err;
+      test.ref_cs = cepgen::Value{ref, err};
       tests.emplace_back(test);
       CG_DEBUG("main") << "Added test \"" << line << "\".";
     }
@@ -93,17 +95,14 @@ int main(int argc, char* argv[]) {
 
       tmr.reset();
 
-      double new_cs, err_new_cs;
-      gen.computeXsection(new_cs, err_new_cs);
-
-      const double ratio = new_cs / test.ref_cs;
-      const double err_ratio = ratio * hypot(err_new_cs / new_cs, test.err_ref_cs / test.ref_cs);
-      const double pull = (new_cs - test.ref_cs) / hypot(err_new_cs, test.err_ref_cs);
+      const auto new_cs = gen.computeXsection();
+      const auto ratio = new_cs / test.ref_cs,
+                 pull = (new_cs - test.ref_cs) / hypot(new_cs.uncertainty(), test.ref_cs.uncertainty());
 
       CG_DEBUG("main") << "Computed cross section:\n\t"
-                       << "Ref.   = " << test.ref_cs << " +/- " << test.err_ref_cs << "\n\t"
-                       << "CepGen = " << new_cs << " +/- " << err_new_cs << "\n\t"
-                       << "Ratio: " << ratio << " +/- " << err_ratio << "\n\t"
+                       << "Ref.   = " << test.ref_cs << "\n\t"
+                       << "CepGen = " << new_cs << "\n\t"
+                       << "Ratio: " << ratio << "\n\t"
                        << "Pull: " << pull << ".\n\t"
                        << "Computation time: " << tmr.elapsed() * 1.e3 << " ms.";
       tmr.reset();

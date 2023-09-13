@@ -30,7 +30,7 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    void integrate(Integrand&, double&, double&) override;
+    Value integrate(Integrand&) override;
 
   private:
     int ncvg_;
@@ -45,7 +45,7 @@ namespace cepgen {
   IntegratorMISER::IntegratorMISER(const ParametersList& params)
       : IntegratorGSL(params), ncvg_(steer<int>("numFunctionCalls")) {}
 
-  void IntegratorMISER::integrate(Integrand& integrand, double& result, double& abserr) {
+  Value IntegratorMISER::integrate(Integrand& integrand) {
     setIntegrand(integrand);
     miser_state_.reset(gsl_monte_miser_alloc(function_->dim));
     miser_state_->verbose = verbosity_;
@@ -65,6 +65,7 @@ namespace cepgen {
                                  << "Dither: " << miser_params_.dither << ".";
 
     // launch the full integration
+    double result, abserr;
     int res = gsl_monte_miser_integrate(function_.get(),
                                         &xlow_[0],
                                         &xhigh_[0],
@@ -79,8 +80,7 @@ namespace cepgen {
       throw CG_FATAL("Integrator:integrate") << "Error while performing the integration!\n\t"
                                              << "GSL error: " << gsl_strerror(res) << ".";
 
-    result_ = result;
-    err_result_ = abserr;
+    return Value{result, abserr};
   }
 
   ParametersDescription IntegratorMISER::description() {

@@ -39,7 +39,7 @@ namespace cepgen {
 
     void setLimits(const std::vector<Limits>& lims) override { lims_ = python::set(lims); }
 
-    void integrate(Integrand& integrand, double& result, double& abs_error) override {
+    Value integrate(Integrand& integrand) override {
       gIntegrand = &integrand;
       const auto iterations = steer<int>("iterations");
       const auto evals = steer<int>("evals");
@@ -54,8 +54,8 @@ namespace cepgen {
       if (vals.size() < 2)
         throw CG_FATAL("IntegratorVegasPlus")
             << "Wrong multiplicity of result returned from Python's Vegas: " << vals << ".";
-      result_ = result = vals[0];
-      err_result_ = abs_error = vals[1];
+
+      return Value{vals[0], vals[1]};
     }
 
     static ParametersDescription description() {

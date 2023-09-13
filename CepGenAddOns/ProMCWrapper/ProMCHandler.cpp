@@ -31,6 +31,7 @@
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Value.h"
 #include "CepGen/Version.h"
 
 namespace cepgen {
@@ -47,9 +48,7 @@ namespace cepgen {
     static ParametersDescription description();
 
     void initialise() override;
-    void setCrossSection(double cross_section, double err) override {
-      cross_section_ = cross_section, cross_section_err_ = err;
-    }
+    void setCrossSection(const Value& cross_section) override { cross_section_ = cross_section; }
     void operator<<(const Event&) override;
 
   private:
@@ -61,7 +60,7 @@ namespace cepgen {
     const bool compress_evt_;
     const std::string log_file_path_;
     std::ofstream log_file_;
-    double cross_section_{-1.}, cross_section_err_{-1.};
+    Value cross_section_{0., 1.};
   };
 
   ProMCHandler::ProMCHandler(const ParametersList& params)
@@ -74,8 +73,8 @@ namespace cepgen {
   ProMCHandler::~ProMCHandler() {
     ProMCStat stat;
     stat.set_cross_section_accumulated(cross_section_);
-    stat.set_cross_section_error_accumulated(cross_section_err_);
-    stat.set_luminosity_accumulated(event_num_ / cross_section_);
+    stat.set_cross_section_error_accumulated(cross_section.uncertainty());
+    stat.set_luminosity_accumulated(event_num_ / (double)cross_section_);
     stat.set_ntried(event_num_);
     stat.set_nselected(event_num_);
     stat.set_naccepted(event_num_);

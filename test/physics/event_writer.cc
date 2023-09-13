@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
   }
 
   auto writer = EventExporterFactory::get().build(type);
-  writer->setCrossSection(1., 2.);
+  writer->setCrossSection(Value{1., 2.});
 
   Event ev;
 
