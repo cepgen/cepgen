@@ -87,7 +87,7 @@ namespace cepgen {
 
   void Generator::computeXsection(double& cross_section, double& err) {
     const auto xsec = computeXsection();
-    cross_section = (double)xsec;
+    cross_section = xsec;
     err = xsec.uncertainty();
   }
 
@@ -96,9 +96,9 @@ namespace cepgen {
 
     integrate();  // run is cleared here
 
-    if ((double)xsect_ < 1.e-2)
+    if (xsect_ < 1.e-2)
       CG_INFO("Generator") << "Total cross section: " << xsect_ * 1.e3 << " fb.";
-    else if ((double)xsect_ < 0.5e3)
+    else if (xsect_ < 0.5e3)
       CG_INFO("Generator") << "Total cross section: " << xsect_ << " pb.";
     else if (xsect_ < 0.5e6)
       CG_INFO("Generator") << "Total cross section: " << xsect_ * 1.e-3 << " nb.";
@@ -193,7 +193,7 @@ namespace cepgen {
     //--- if invalid argument, retrieve from runtime parameters
     if (num_events < 1) {
       if (parameters_->generation().targetLuminosity() > 0.) {
-        num_events = std::ceil(parameters_->generation().targetLuminosity() * (double)xsect_);
+        num_events = std::ceil(parameters_->generation().targetLuminosity() * xsect_);
         CG_INFO("Generator") << "Target luminosity: " << parameters_->generation().targetLuminosity() << " pb-1.";
       } else
         num_events = parameters_->generation().maxGen();

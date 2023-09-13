@@ -160,7 +160,7 @@ namespace cepgen {
     }
 
     void Pythia8Hadroniser::setCrossSection(const Value& cross_section) {
-      cg_evt_->setCrossSection(0, (double)cross_section, cross_section.uncertainty());
+      cg_evt_->setCrossSection(0, cross_section, cross_section.uncertainty());
     }
 
     bool Pythia8Hadroniser::run(Event& ev, double& weight, bool full) {

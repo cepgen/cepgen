@@ -69,7 +69,7 @@ namespace cepgen {
       output_->write_event(event);
     }
     void setCrossSection(const Value& cross_section) override {
-      xs_->set_cross_section((double)cross_section, cross_section.uncertainty());
+      xs_->set_cross_section(cross_section, cross_section.uncertainty());
     }
 
   private:

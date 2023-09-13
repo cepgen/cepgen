@@ -182,21 +182,21 @@ namespace cepgen {
   void ROOTHistsHandler::operator<<(const Event& ev) {
     //--- increment the corresponding histograms
     for (const auto& h_var : hists1d_)
-      h_var.second->Fill(browser_.get(ev, h_var.first), (double)cross_section_);
+      h_var.second->Fill(browser_.get(ev, h_var.first), cross_section_);
     for (const auto& h_var : hists2d_)
-      h_var.second->Fill(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), (double)cross_section_);
+      h_var.second->Fill(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), cross_section_);
     for (const auto& h_var : hists3d_)
       h_var.second->Fill(browser_.get(ev, h_var.first[0]),
                          browser_.get(ev, h_var.first[1]),
                          browser_.get(ev, h_var.first[2]),
-                         (double)cross_section_);
+                         cross_section_);
     for (const auto& h_var : profiles1d_)
-      h_var.second->Fill(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), (double)cross_section_);
+      h_var.second->Fill(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), cross_section_);
     for (const auto& h_var : profiles2d_)
       h_var.second->Fill(browser_.get(ev, h_var.first[0]),
                          browser_.get(ev, h_var.first[1]),
                          browser_.get(ev, h_var.first[2]),
-                         (double)cross_section_);
+                         cross_section_);
   }
 
   ParametersDescription ROOTHistsHandler::description() {

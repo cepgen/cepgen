@@ -72,7 +72,7 @@ namespace cepgen {
 
   ProMCHandler::~ProMCHandler() {
     ProMCStat stat;
-    stat.set_cross_section_accumulated((double)cross_section_);
+    stat.set_cross_section_accumulated(cross_section_);
     stat.set_cross_section_error_accumulated(cross_section.uncertainty());
     stat.set_luminosity_accumulated(event_num_ / (double)cross_section_);
     stat.set_ntried(event_num_);

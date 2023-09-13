@@ -96,7 +96,7 @@ namespace cepgen {
   }
 
   void ROOTTreeHandler::setCrossSection(const Value& cross_section) {
-    run_tree_.xsect = (double)cross_section;
+    run_tree_.xsect = cross_section;
     run_tree_.errxsect = cross_section.uncertainty();
   }
 

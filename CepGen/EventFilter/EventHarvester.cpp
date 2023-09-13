@@ -97,7 +97,7 @@ namespace cepgen {
     if (!show_hists_ && !save_hists_)
       return;
     for (auto& h_var : hists_) {
-      h_var.hist.scale((double)cross_section_ / (num_evts_ + 1));
+      h_var.hist.scale(cross_section_ / (num_evts_ + 1));
       h_var.hist.setTitle(proc_name_);
       std::ostringstream os;
       if (drawer_)

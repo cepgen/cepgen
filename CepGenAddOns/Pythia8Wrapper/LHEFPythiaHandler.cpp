@@ -117,7 +117,7 @@ namespace cepgen {
   }
 
   void LHEFPythiaHandler::setCrossSection(const Value& cross_section) {
-    lhaevt_->setCrossSection(0, (double)cross_section, cross_section.uncertainty());
+    lhaevt_->setCrossSection(0, cross_section, cross_section.uncertainty());
   }
 
   ParametersDescription LHEFPythiaHandler::description() {
