@@ -22,6 +22,7 @@
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Parameters.h"
+#include "CepGen/Utils/Value.h"
 
 using namespace std;  // account for improper scoping in following includes
 #include <HepMC3/LHEF.h>
@@ -42,7 +43,7 @@ namespace cepgen {
     void initialise() override;
     /// Writer operator
     void operator<<(const Event&) override;
-    void setCrossSection(double, double) override;
+    void setCrossSection(const Value&) override;
 
   private:
     /// Writer object (from HepMC)
@@ -56,13 +57,13 @@ namespace cepgen {
         lhe_output_(new LHEF::Writer(steer<std::string>("filename"))),
         compress_(steer<bool>("compress")) {}
 
-  void LHEFHepMCHandler::setCrossSection(double cross_section, double err) {
+  void LHEFHepMCHandler::setCrossSection(const Value& cross_section) {
     lhe_output_->heprup.NPRUP = 1;
     lhe_output_->heprup.resize();
     lhe_output_->heprup.XMAXUP[0] = 1.;
     lhe_output_->heprup.LPRUP[0] = 1;
-    lhe_output_->heprup.XSECUP[0] = cross_section;
-    lhe_output_->heprup.XERRUP[0] = err;
+    lhe_output_->heprup.XSECUP[0] = (double)cross_section;
+    lhe_output_->heprup.XERRUP[0] = cross_section.uncertainty();
   }
 
   void LHEFHepMCHandler::initialise() {

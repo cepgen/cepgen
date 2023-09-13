@@ -108,7 +108,7 @@ namespace cepgen {
     YODA::Scatter2D YODADrawer<T>::convert(const Graph1D& graph) {
       YODA::Scatter2D gr(path(graph.name()), graph.title());
       for (const auto& it : graph.points())
-        gr.addPoint(it.first.value, it.second.value, 0. /* FIXME not yet supported */, it.second.value_unc);
+        gr.addPoint(it.first.value, it.second, 0. /* FIXME not yet supported */, it.second.uncertainty());
       //gr.setAnnotation("xlabel", graph.xAxis().label());
       //gr.setAnnotation("ylabel", graph.yAxis().label());
       return gr;
@@ -121,7 +121,7 @@ namespace cepgen {
         const auto& ax_x = it_x.first.value;
         for (const auto& it_y : it_x.second) {
           const auto& ax_y = it_y.first.value;
-          gr.addPoint(ax_x, ax_y, it_y.second.value, 0., 0., it_y.second.value_unc);
+          gr.addPoint(ax_x, ax_y, it_y.second, 0., 0., it_y.second.uncertainty());
         }
       }
       //gr.setAnnotation("xlabel", graph.xAxis().label());
@@ -133,8 +133,10 @@ namespace cepgen {
     YODA::Histo1D YODADrawer<T>::convert(const Hist1D& hist) {
       const auto& rng = hist.range();
       YODA::Histo1D h(hist.nbins(), rng.min(), rng.max(), path(hist.name()), hist.title());
-      for (size_t i = 0; i < hist.nbins(); ++i)
-        h.fillBin(i, hist.value(i), std::pow(hist.valueUnc(i), 2));
+      for (size_t i = 0; i < hist.nbins(); ++i) {
+        const auto val = hist.value(i);
+        h.fillBin(i, val, std::pow(val.uncertainty(), 2));
+      }
       //h.setAnnotation("xlabel", hist.xAxis().label());
       //h.setAnnotation("ylabel", hist.yAxis().label());
       return h;
@@ -152,8 +154,10 @@ namespace cepgen {
                       path(hist.name()),
                       hist.title());
       for (size_t ix = 0; ix < hist.nbinsX(); ++ix)
-        for (size_t iy = 0; iy < hist.nbinsY(); ++iy)
-          h.fillBin((ix + 1) * (iy + 1), hist.value(ix, iy), std::pow(hist.valueUnc(ix, iy), 2));
+        for (size_t iy = 0; iy < hist.nbinsY(); ++iy) {
+          const auto val = hist.value(ix, iy);
+          h.fillBin((ix + 1) * (iy + 1), val, std::pow(val.uncertainty(), 2));
+        }
       //h.setAnnotation("xlabel", hist.xAxis().label());
       //h.setAnnotation("ylabel", hist.yAxis().label());
       return h;

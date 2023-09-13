@@ -31,10 +31,10 @@ namespace cepgen {
     static ParametersDescription description();
     static Integrand* gIntegrand;
 
-    void integrate(Integrand& integr, double& result, double& abserr) override;
+    Value integrate(Integrand&) override;
 
   protected:
-    virtual void integrate(double& result, double& abserr) = 0;
+    virtual Value integrate() = 0;
 
     int ncomp_, nvec_;
     double epsrel_, epsabs_;

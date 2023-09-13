@@ -128,9 +128,9 @@ namespace cepgen {
       std::vector<double> x, y, xerr, yerr;
       for (const auto& pt : gr.points()) {
         x.emplace_back(pt.first.value);
-        y.emplace_back(pt.second.value);
+        y.emplace_back(pt.second);
         xerr.emplace_back(pt.first.value_unc);
-        yerr.emplace_back(pt.second.value_unc);
+        yerr.emplace_back(pt.second.uncertainty());
       }
       if ((mode & Mode::logx) && (mode & Mode::logy))
         plt::named_loglog(gr.title(), x, y);
@@ -152,7 +152,7 @@ namespace cepgen {
         for (const auto& yv : xv.second) {
           xrow.emplace_back(xval);
           yrow.emplace_back(yv.first.value);
-          zrow.emplace_back(yv.second.value);
+          zrow.emplace_back(yv.second);
         }
         x.emplace_back(xrow);
         y.emplace_back(yrow);
@@ -166,9 +166,10 @@ namespace cepgen {
     void MatplotlibDrawer::plot(const Hist1D& hist, const Mode& mode) {
       std::vector<double> x, y, yerr;
       for (size_t ibin = 0; ibin < hist.nbins(); ++ibin) {
+        const auto val = hist.value(ibin);
         x.emplace_back(hist.binRange(ibin).x(0.5));
-        y.emplace_back(hist.value(ibin));
-        yerr.emplace_back(hist.valueUnc(ibin));
+        y.emplace_back(val);
+        yerr.emplace_back(val.uncertainty());
       }
       //plt::bar(x, y, "", "", 1., {{"label", hist.title()}});
       //plt::bar(x, y);

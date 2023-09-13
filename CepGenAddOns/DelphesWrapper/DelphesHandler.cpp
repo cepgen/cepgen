@@ -29,6 +29,7 @@
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Utils/Timer.h"
+#include "CepGen/Utils/Value.h"
 
 namespace cepgen {
   /**
@@ -44,9 +45,7 @@ namespace cepgen {
     static ParametersDescription description();
 
     void initialise() override;
-    void setCrossSection(double cross_section, double /*err_cross_section*/) override {
-      cross_section_ = cross_section;
-    }
+    void setCrossSection(const Value& cross_section) override { cross_section_ = cross_section; }
     void operator<<(const Event&) override;
 
   private:
@@ -61,7 +60,7 @@ namespace cepgen {
     DelphesFactory* factory_{nullptr};
     ExRootTreeBranch* evt_branch_{nullptr};
     TObjArray *out_all_parts_{nullptr}, *out_stab_parts_{nullptr}, *out_partons_{nullptr};
-    double cross_section_{-1.};
+    Value cross_section_{0., 1.};
   };
 
   DelphesHandler::DelphesHandler(const ParametersList& params)
@@ -106,7 +105,7 @@ namespace cepgen {
     evt_aux->Number = event_num_++;
     evt_aux->ProcessID = 0;
     evt_aux->Weight = ev.weight;  // events are normally unweighted in CepGen
-    //evt_aux->CrossSection = cross_section_; // not yet fully supported
+    //evt_aux->CrossSection = (double)cross_section_; // not yet fully supported
     evt_aux->ScalePDF = 0.;  // for the time being
     evt_aux->AlphaQED = constants::ALPHA_EM;
     evt_aux->AlphaQCD = constants::ALPHA_QCD;

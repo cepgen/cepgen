@@ -27,7 +27,7 @@ namespace cepgen {
   class IntegratorCubaVegas : public IntegratorCuba {
   public:
     explicit IntegratorCubaVegas(const ParametersList&);
-    void integrate(double&, double&) override;
+    Value integrate() override;
 
     static ParametersDescription description();
 
@@ -46,7 +46,7 @@ namespace cepgen {
     CG_DEBUG("Integrator:build") << "Cuba-VEGAS integrator built.";
   }
 
-  void IntegratorCubaVegas::integrate(double& result, double& abserr) {
+  Value IntegratorCubaVegas::integrate() {
     int neval, fail;
     double integral, error, prob;
 
@@ -73,8 +73,7 @@ namespace cepgen {
           &error,
           &prob);
 
-    result_ = result = integral;
-    err_result_ = abserr = error;
+    return Value{integral, error};
   }
 
   ParametersDescription IntegratorCubaVegas::description() {
