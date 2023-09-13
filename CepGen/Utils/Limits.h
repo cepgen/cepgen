@@ -32,6 +32,7 @@ namespace cepgen {
     /// Copy constructor
     Limits(const Limits&);
 
+    bool operator<(const Limits&) const;         ///< Comparison operator
     Limits operator-() const;                    ///< Invert this limit
     Limits& operator=(const Limits&) = default;  ///< Assignment operator
     /// Equality operator

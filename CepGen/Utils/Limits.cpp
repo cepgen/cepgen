@@ -27,6 +27,12 @@ namespace cepgen {
 
   Limits::Limits(const Limits& rhs) : std::pair<double, double>(rhs.first, rhs.second) {}
 
+  bool Limits::operator<(const Limits& oth) const {
+    if (first < oth.first)
+      return true;
+    return second < oth.second;
+  }
+
   Limits Limits::operator-() const { return Limits(-second, -first); }
 
   Limits& Limits::operator+=(double c) {
