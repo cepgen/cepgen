@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -93,16 +93,15 @@ int main(int argc, char* argv[]) {
 
       tmr.reset();
 
-      double new_cs, err_new_cs;
-      gen.computeXsection(new_cs, err_new_cs);
+      const auto new_cs = gen.computeXsection();
 
       const double ratio = new_cs / test.ref_cs;
-      const double err_ratio = ratio * hypot(err_new_cs / new_cs, test.err_ref_cs / test.ref_cs);
-      const double pull = (new_cs - test.ref_cs) / hypot(err_new_cs, test.err_ref_cs);
+      const double err_ratio = ratio * hypot(new_cs.uncertainty() / new_cs, test.err_ref_cs / test.ref_cs);
+      const double pull = (new_cs - test.ref_cs) / hypot(new_cs.uncertainty(), test.err_ref_cs);
 
       CG_DEBUG("main") << "Computed cross section:\n\t"
                        << "Ref.   = " << test.ref_cs << " +/- " << test.err_ref_cs << "\n\t"
-                       << "CepGen = " << new_cs << " +/- " << err_new_cs << "\n\t"
+                       << "CepGen = " << new_cs << "\n\t"
                        << "Ratio: " << ratio << " +/- " << err_ratio << "\n\t"
                        << "Pull: " << pull << ".\n\t"
                        << "Computation time: " << tmr.elapsed() * 1.e3 << " ms.";

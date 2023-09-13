@@ -28,6 +28,7 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Value.h"
 #include "CepGen/Version.h"
 #include "CepGenAddOns/ROOTWrapper/ROOTTreeInfo.h"
 
@@ -48,7 +49,7 @@ namespace cepgen {
     void initialise() override;
     /// Writer operator
     void operator<<(const Event&) override;
-    void setCrossSection(double, double) override;
+    void setCrossSection(const Value&) override;
 
   private:
     std::string generateFilename() const;
@@ -94,9 +95,9 @@ namespace cepgen {
     run_tree_.num_events += 1;
   }
 
-  void ROOTTreeHandler::setCrossSection(double cross_section, double cross_section_err) {
-    run_tree_.xsect = cross_section;
-    run_tree_.errxsect = cross_section_err;
+  void ROOTTreeHandler::setCrossSection(const Value& cross_section) {
+    run_tree_.xsect = (double)cross_section;
+    run_tree_.errxsect = cross_section.uncertainty();
   }
 
   std::string ROOTTreeHandler::generateFilename() const {

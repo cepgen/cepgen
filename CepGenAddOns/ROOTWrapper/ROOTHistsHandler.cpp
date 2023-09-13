@@ -30,6 +30,7 @@
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Utils/Limits.h"
 #include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Value.h"
 
 namespace cepgen {
   /**
@@ -45,7 +46,7 @@ namespace cepgen {
     static ParametersDescription description();
 
     void initialise() override {}
-    void setCrossSection(double cross_section, double) override { cross_section_ = cross_section; }
+    void setCrossSection(const Value& cross_section) override { cross_section_ = cross_section; }
     void operator<<(const Event&) override;
 
   private:
@@ -58,7 +59,7 @@ namespace cepgen {
 
     const ParametersList variables_;
 
-    double cross_section_{1.};
+    Value cross_section_{1., 0.};
     const utils::EventBrowser browser_;
   };
 
@@ -181,21 +182,21 @@ namespace cepgen {
   void ROOTHistsHandler::operator<<(const Event& ev) {
     //--- increment the corresponding histograms
     for (const auto& h_var : hists1d_)
-      h_var.second->Fill(browser_.get(ev, h_var.first), cross_section_);
+      h_var.second->Fill(browser_.get(ev, h_var.first), (double)cross_section_);
     for (const auto& h_var : hists2d_)
-      h_var.second->Fill(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), cross_section_);
+      h_var.second->Fill(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), (double)cross_section_);
     for (const auto& h_var : hists3d_)
       h_var.second->Fill(browser_.get(ev, h_var.first[0]),
                          browser_.get(ev, h_var.first[1]),
                          browser_.get(ev, h_var.first[2]),
-                         cross_section_);
+                         (double)cross_section_);
     for (const auto& h_var : profiles1d_)
-      h_var.second->Fill(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), cross_section_);
+      h_var.second->Fill(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), (double)cross_section_);
     for (const auto& h_var : profiles2d_)
       h_var.second->Fill(browser_.get(ev, h_var.first[0]),
                          browser_.get(ev, h_var.first[1]),
                          browser_.get(ev, h_var.first[2]),
-                         cross_section_);
+                         (double)cross_section_);
   }
 
   ParametersDescription ROOTHistsHandler::description() {

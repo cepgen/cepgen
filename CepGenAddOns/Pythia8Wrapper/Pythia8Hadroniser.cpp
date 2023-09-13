@@ -29,6 +29,7 @@
 #include "CepGen/Physics/Hadroniser.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Value.h"
 #include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
 namespace cepgen {
@@ -48,7 +49,7 @@ namespace cepgen {
       void initialise() override;
       bool run(Event& ev, double& weight, bool full) override;
 
-      void setCrossSection(double cross_section, double cross_section_err) override;
+      void setCrossSection(const Value&) override;
 
     private:
       void* enginePtr() override { return (void*)pythia_.get(); }
@@ -158,8 +159,8 @@ namespace cepgen {
         cg_evt_->initLHEF();
     }
 
-    void Pythia8Hadroniser::setCrossSection(double cross_section, double cross_section_err) {
-      cg_evt_->setCrossSection(0, cross_section, cross_section_err);
+    void Pythia8Hadroniser::setCrossSection(const Value& cross_section) {
+      cg_evt_->setCrossSection(0, (double)cross_section, cross_section.uncertainty());
     }
 
     bool Pythia8Hadroniser::run(Event& ev, double& weight, bool full) {

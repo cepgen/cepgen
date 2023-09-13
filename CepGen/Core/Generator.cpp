@@ -64,7 +64,7 @@ namespace cepgen {
 
     worker_->setRuntimeParameters(const_cast<const Parameters*>(parameters_.get()));
     worker_->setIntegrator(integrator_.get());
-    result_ = result_error_ = -1.;
+    xsect_ = Value{-1., -1.};
     parameters_->prepareRun();
   }
 
@@ -86,23 +86,28 @@ namespace cepgen {
   }
 
   void Generator::computeXsection(double& cross_section, double& err) {
+    const auto xsec = computeXsection();
+    cross_section = (double)xsec;
+    err = xsec.uncertainty();
+  }
+
+  Value Generator::computeXsection() {
     CG_INFO("Generator") << "Starting the computation of the process cross-section.";
 
     integrate();  // run is cleared here
 
-    cross_section = result_;
-    err = result_error_;
-
-    if (cross_section < 1.e-2)
-      CG_INFO("Generator") << "Total cross section: " << cross_section * 1.e3 << " +/- " << err * 1.e3 << " fb.";
-    else if (cross_section < 0.5e3)
-      CG_INFO("Generator") << "Total cross section: " << cross_section << " +/- " << err << " pb.";
-    else if (cross_section < 0.5e6)
-      CG_INFO("Generator") << "Total cross section: " << cross_section * 1.e-3 << " +/- " << err * 1.e-3 << " nb.";
-    else if (cross_section < 0.5e9)
-      CG_INFO("Generator") << "Total cross section: " << cross_section * 1.e-6 << " +/- " << err * 1.e-6 << " µb.";
+    if ((double)xsect_ < 1.e-2)
+      CG_INFO("Generator") << "Total cross section: " << xsect_ * 1.e3 << " fb.";
+    else if ((double)xsect_ < 0.5e3)
+      CG_INFO("Generator") << "Total cross section: " << xsect_ << " pb.";
+    else if (xsect_ < 0.5e6)
+      CG_INFO("Generator") << "Total cross section: " << xsect_ * 1.e-3 << " nb.";
+    else if (xsect_ < 0.5e9)
+      CG_INFO("Generator") << "Total cross section: " << xsect_ * 1.e-6 << " µb.";
     else
-      CG_INFO("Generator") << "Total cross section: " << cross_section * 1.e-9 << " +/- " << err * 1.e-9 << " mb.";
+      CG_INFO("Generator") << "Total cross section: " << xsect_ * 1.e-9 << " mb.";
+
+    return xsect_;
   }
 
   void Generator::resetIntegrator() {
@@ -137,16 +142,18 @@ namespace cepgen {
     if (!integrator_)
       throw CG_FATAL("Generator:integrate") << "No integrator object was declared for the generator!";
 
-    integrator_->integrate(worker_->integrand(), result_, result_error_);
+    double result, result_error;
+    integrator_->integrate(worker_->integrand(), result, result_error);
+    xsect_ = Value{result, result_error};
 
-    CG_DEBUG("Generator:integrate") << "Computed cross section: (" << result_ << " +- " << result_error_ << ") pb.";
+    CG_DEBUG("Generator:integrate") << "Computed cross section: (" << xsect_ << ") pb.";
 
     // now that the cross section has been computed, feed it to the event modification algorithms...
     for (auto& mod : parameters_->eventModifiersSequence())
-      mod->setCrossSection(result_, result_error_);
+      mod->setCrossSection(xsect_);
     // ...and to the event storage algorithms
     for (auto& mod : parameters_->eventExportersSequence())
-      mod->setCrossSection(result_, result_error_);
+      mod->setCrossSection(xsect_);
   }
 
   const Event& Generator::generateOneEvent(Event::callback callback) { return next(callback); }
@@ -188,7 +195,7 @@ namespace cepgen {
     //--- if invalid argument, retrieve from runtime parameters
     if (num_events < 1) {
       if (parameters_->generation().targetLuminosity() > 0.) {
-        num_events = std::ceil(parameters_->generation().targetLuminosity() * result_);
+        num_events = std::ceil(parameters_->generation().targetLuminosity() * (double)xsect_);
         CG_INFO("Generator") << "Target luminosity: " << parameters_->generation().targetLuminosity() << " pb-1.";
       } else
         num_events = parameters_->generation().maxGen();

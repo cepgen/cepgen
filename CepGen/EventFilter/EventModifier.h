@@ -25,6 +25,7 @@
 #include "CepGen/EventFilter/EventHandler.h"
 
 namespace cepgen {
+  class Value;
   /// Class template to interface (external/internal) events modification algorithms
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date July 2019
@@ -55,7 +56,7 @@ namespace cepgen {
        */
     virtual bool run(Event& ev, double& weight, bool full = true) = 0;
     /// Specify the process cross section and uncertainty, in pb
-    virtual void setCrossSection(double, double) {}
+    virtual void setCrossSection(const Value&) {}
 
   protected:
     /// Random numbers generator seed fed to the algorithm
