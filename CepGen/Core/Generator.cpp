@@ -142,9 +142,7 @@ namespace cepgen {
     if (!integrator_)
       throw CG_FATAL("Generator:integrate") << "No integrator object was declared for the generator!";
 
-    double result, result_error;
-    integrator_->integrate(worker_->integrand(), result, result_error);
-    xsect_ = Value{result, result_error};
+    xsect_ = integrator_->integrate(worker_->integrand());
 
     CG_DEBUG("Generator:integrate") << "Computed cross section: (" << xsect_ << ") pb.";
 

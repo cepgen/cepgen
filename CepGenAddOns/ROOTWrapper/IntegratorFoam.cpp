@@ -36,7 +36,7 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    void integrate(Integrand&, double&, double&) override;
+    Value integrate(Integrand&) override;
     inline double uniform(double min, double max) const override { return rnd_->Uniform(min, max); }
 
     /// Compute the weight for a given phase space point
@@ -72,7 +72,7 @@ namespace cepgen {
                                  << "Version: " << foam_->GetVersion() << ".";
   }
 
-  void IntegratorFoam::integrate(Integrand& integrand, double& result, double& abs_error) {
+  Value IntegratorFoam::integrate(Integrand& integrand) {
     integrand_ = &integrand;
     foam_.reset(new TFoam("Foam"));
     foam_->SetPseRan(rnd_.get());
@@ -92,25 +92,26 @@ namespace cepgen {
     double norm, err;
     foam_->Finalize(norm, err);
 
+    double result, abs_error;
     foam_->GetIntegMC(result, abs_error);
     for (const auto& lim : limits_) {
       result *= lim.range();
       abs_error *= lim.range();
     }
-    result_ = result;
-    err_result_ = abs_error;
+    const auto res = Value{result, abs_error};
 
     CG_DEBUG("IntegratorFoam").log([&](auto& log) {
       double eps = 5.e-4, avewt, wtmax, sigma;
       foam_->GetWtParams(eps, avewt, wtmax, sigma);
       const double ncalls = foam_->GetnCalls();
       const double effic = wtmax > 0 ? avewt / wtmax : 0.;
-      log << "Result: " << result_ << " +- " << err_result_ << "\n\t"
-          << "Relative error: " << err_result_ / result_ * 100. << "%\n\t"
+      log << "Result: " << res << "\n\t"
+          << "Relative error: " << res.relativeUncertainty() * 100. << "%\n\t"
           << "Dispersion/<wt> = " << sigma << ", <wt> = " << avewt << ", <wt>/wtmax = " << effic << ",\n\t"
           << " for epsilon = " << eps << "\n\t"
           << " nCalls (initialisation only)= " << ncalls << ".";
     });
+    return res;
   }
 
   ParametersDescription IntegratorFoam::description() {

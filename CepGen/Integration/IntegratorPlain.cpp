@@ -30,7 +30,7 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    void integrate(Integrand&, double& result, double& abserr) override;
+    Value integrate(Integrand&) override;
 
   private:
     const int ncvg_;
@@ -39,12 +39,13 @@ namespace cepgen {
   IntegratorPlain::IntegratorPlain(const ParametersList& params)
       : IntegratorGSL(params), ncvg_(steer<int>("numFunctionCalls")) {}
 
-  void IntegratorPlain::integrate(Integrand& integrand, double& result, double& abserr) {
+  Value IntegratorPlain::integrate(Integrand& integrand) {
     setIntegrand(integrand);
 
     //--- launch integration
     std::unique_ptr<gsl_monte_plain_state, void (*)(gsl_monte_plain_state*)> pln_state(
         gsl_monte_plain_alloc(function_->dim), gsl_monte_plain_free);
+    double result, abserr;
     int res = gsl_monte_plain_integrate(function_.get(),
                                         &xlow_[0],
                                         &xhigh_[0],
@@ -59,8 +60,7 @@ namespace cepgen {
       throw CG_FATAL("Integrator:integrate") << "Error while performing the integration!\n\t"
                                              << "GSL error: " << gsl_strerror(res) << ".";
 
-    result_ = result;
-    err_result_ = abserr;
+    return Value{result, abserr};
   }
 
   ParametersDescription IntegratorPlain::description() {

@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "CepGen/Modules/NamedModule.h"
+#include "CepGen/Utils/Value.h"
 
 namespace cepgen {
   class Integrand;
@@ -46,24 +47,18 @@ namespace cepgen {
 
     /// Perform the multidimensional Monte Carlo integration
     /// \param[out] result integral computed over the full phase space
-    /// \param[out] abserr uncertainty associated to the computed integral
-    virtual void integrate(Integrand&, double& result, double& abserr) = 0;
-    /// Perform an integration with no use of the numerical error
-    /// \return the integral computed over the full phase space
-    double integrate(Integrand&);
+    virtual Value integrate(Integrand& result) = 0;
     /// Perform an integration with a given functional and a given set of parameters
-    static double integrate(const std::function<double(const std::vector<double>&)>&, const ParametersList&, size_t);
+    static Value integrate(const std::function<double(const std::vector<double>&)>&, const ParametersList&, size_t);
     /// Perform an integration with a given functional and a given set of parameters
-    static double integrate(const std::function<double(const std::vector<double>&)>&,
-                            const ParametersList&,
-                            const std::vector<Limits>&);
+    static Value integrate(const std::function<double(const std::vector<double>&)>&,
+                           const ParametersList&,
+                           const std::vector<Limits>&);
 
   protected:
     const unsigned long seed_;    ///< Random number generator seed
     int verbosity_;               ///< Integrator verbosity
     std::vector<Limits> limits_;  ///< List of per-variable integration limits
-    double result_{0.};           ///< Result of the last integration
-    double err_result_{0.};       ///< Standard deviation for the last integration
     mutable std::default_random_engine rnd_gen_;
     mutable std::uniform_real_distribution<double> rnd_;
   };
