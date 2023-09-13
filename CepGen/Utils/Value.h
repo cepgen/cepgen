@@ -41,14 +41,26 @@ namespace cepgen {
 
     //--- error propagation operators
 
-    Value operator+(double) const;
     Value operator+(const Value&) const;
-    Value operator-(double) const;
+    template <typename T>
+    inline Value operator+(T cst) const {
+      return Value{val_ + cst, unc_};
+    }
     Value operator-(const Value&) const;
-    Value operator*(double) const;
+    template <typename T>
+    inline Value operator-(T cst) const {
+      return Value{val_ - cst, unc_};
+    }
     Value operator*(const Value&) const;
-    Value operator/(double) const;
+    template <typename T>
+    inline Value operator*(T cst) const {
+      return Value{val_ * cst, unc_ * cst};
+    }
     Value operator/(const Value&) const;
+    template <typename T>
+    inline Value operator/(T cst) const {
+      return Value{val_ / cst, unc_ / cst};
+    }
 
   private:
     double val_;  ///< Central value

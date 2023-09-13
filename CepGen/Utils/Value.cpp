@@ -26,22 +26,14 @@ namespace cepgen {
 
   double Value::relativeUncertainty() const { return val_ == 0. ? 0. : unc_ / val_; }
 
-  Value Value::operator+(double cst) const { return Value{val_ + cst, unc_}; }
-
   Value Value::operator+(const Value& oth) const { return Value{val_ + oth.val_, std::hypot(unc_, oth.unc_)}; }
 
-  Value Value::operator-(double cst) const { return Value{val_ - cst, unc_}; }
-
   Value Value::operator-(const Value& oth) const { return Value{val_ - oth.val_, std::hypot(unc_, oth.unc_)}; }
-
-  Value Value::operator*(double cst) const { return Value{val_ * cst, unc_ * cst}; }
 
   Value Value::operator*(const Value& oth) const {
     const auto prod = val_ * oth.val_;
     return Value{prod, prod * std::hypot(relativeUncertainty(), oth.relativeUncertainty())};
   }
-
-  Value Value::operator/(double cst) const { return Value{val_ / cst, unc_ / cst}; }
 
   Value Value::operator/(const Value& oth) const {
     const auto ratio = val_ / oth.val_;
