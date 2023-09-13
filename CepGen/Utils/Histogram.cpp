@@ -113,7 +113,7 @@ namespace cepgen {
         const auto& range_i = binRange(bin);
         axis[coord_t{
             range_i.x(0.5), 0.5 * range_i.range(), utils::format("[%7.2f,%7.2f)", range_i.min(), range_i.max())}] =
-            value_t{value(bin), valueUnc(bin)};
+            value(bin);
       }
       return axis;
     }
@@ -128,8 +128,9 @@ namespace cepgen {
       return range;
     }
 
-    double Hist1D::value(size_t bin) const { return gsl_histogram_get(hist_.get(), bin); }
-    double Hist1D::valueUnc(size_t bin) const { return std::sqrt(gsl_histogram_get(hist_w2_.get(), bin)); }
+    Value Hist1D::value(size_t bin) const {
+      return Value{gsl_histogram_get(hist_.get(), bin), std::sqrt(gsl_histogram_get(hist_w2_.get(), bin))};
+    }
 
     double Hist1D::mean() const { return gsl_histogram_mean(hist_.get()); }
     double Hist1D::rms() const { return gsl_histogram_sigma(hist_.get()); }
@@ -267,9 +268,9 @@ namespace cepgen {
       return range;
     }
 
-    double Hist2D::value(size_t bin_x, size_t bin_y) const { return gsl_histogram2d_get(hist_.get(), bin_x, bin_y); }
-    double Hist2D::valueUnc(size_t bin_x, size_t bin_y) const {
-      return std::sqrt(gsl_histogram2d_get(hist_w2_.get(), bin_x, bin_y));
+    Value Hist2D::value(size_t bin_x, size_t bin_y) const {
+      return Value{gsl_histogram2d_get(hist_.get(), bin_x, bin_y),
+                   std::sqrt(gsl_histogram2d_get(hist_w2_.get(), bin_x, bin_y))};
     }
 
     double Hist2D::meanX() const { return gsl_histogram2d_xmean(hist_.get()); }

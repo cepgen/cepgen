@@ -25,7 +25,7 @@ namespace cepgen {
   /// A scalar value with its uncertainty
   class Value {
   public:
-    explicit Value(double val, double unc = 0.);
+    explicit Value(double val = 0., double unc = 0.);
 
     friend std::ostream& operator<<(std::ostream&, const Value&);
 
@@ -35,6 +35,9 @@ namespace cepgen {
     double uncertainty() const { return unc_; }
     /// Relative uncertainty around the central value
     double relativeUncertainty() const;
+
+    /// Comparison operator
+    bool operator<(const Value& oth) const { return val_ < oth.val_; }
 
     //--- error propagation operators
 

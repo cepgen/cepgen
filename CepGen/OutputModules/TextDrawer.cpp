@@ -71,9 +71,9 @@ namespace cepgen {
       /// Sorting helper for the axis metadata container
       struct map_elements {
         /// Sort two values in an axis
-        bool operator()(const std::pair<Drawable::coord_t, Drawable::value_t>& lhs,
-                        const std::pair<Drawable::coord_t, Drawable::value_t>& rhs) {
-          return lhs.second.value < rhs.second.value;
+        bool operator()(const std::pair<Drawable::coord_t, Value>& lhs,
+                        const std::pair<Drawable::coord_t, Value>& rhs) {
+          return lhs.second < rhs.second;
         }
       };
 
@@ -142,7 +142,7 @@ namespace cepgen {
           for (size_t biny = 0; biny < hist.nbinsY(); ++biny) {
             const auto& range_y = hist.binRangeY(biny);
             axis_x[Drawable::coord_t{range_y.x(0.5), 0.5 * range_y.range(), utils::format("%+g", range_y.min())}] =
-                Drawable::value_t{hist.value(binx, biny), hist.valueUnc(binx, biny)};
+                hist.value(binx, biny);
           }
         }
         drawValues(log.stream(), hist, axes, mode, colourise_);
@@ -262,9 +262,9 @@ namespace cepgen {
     void TextDrawer::drawValues(
         std::ostream& os, const Drawable& dr, const Drawable::axis_t& axis, const Mode& mode, bool effects) const {
       const std::string sep(17, ' ');
-      const double max_val = std::max_element(axis.begin(), axis.end(), map_elements())->second.value *
+      const double max_val = std::max_element(axis.begin(), axis.end(), map_elements())->second *
                              ((mode & Mode::logy) ? 5. : 1.2),
-                   min_val = std::min_element(axis.begin(), axis.end(), map_elements())->second.value;
+                   min_val = std::min_element(axis.begin(), axis.end(), map_elements())->second;
       const double min_val_log = std::log(std::max(min_val, 1.e-10));
       const double max_val_log = std::log(std::min(max_val, 1.e+10));
       if (!dr.yAxis().label().empty()) {
@@ -289,8 +289,7 @@ namespace cepgen {
             os << std::string(width_, ' ');
           os << ":";
         } else {
-          const auto& set = coord_set.second;
-          const double val = set.value, unc = set.value_unc;
+          const auto& val = coord_set.second;
           size_t ival = 0ull, ierr = 0ull;
           {
             double val_dbl = width_, unc_dbl = width_;
@@ -299,11 +298,11 @@ namespace cepgen {
                              ? std::max((std::log(val) - min_val_log) / (max_val_log - min_val_log), 0.)
                              : 0.;
               unc_dbl *= (val > 0. && max_val > 0.)
-                             ? std::max((std::log(unc) - min_val_log) / (max_val_log - min_val_log), 0.)
+                             ? std::max((std::log(val.uncertainty()) - min_val_log) / (max_val_log - min_val_log), 0.)
                              : 0.;
             } else if (max_val > 0.) {
               val_dbl *= (val - min_val) / (max_val - min_val);
-              unc_dbl *= unc / (max_val - min_val);
+              unc_dbl *= val.uncertainty() / (max_val - min_val);
             }
             ival = std::ceil(val_dbl);
             ierr = std::ceil(unc_dbl);
@@ -314,7 +313,7 @@ namespace cepgen {
              << (effects ? utils::boldify(std::string(1, CHAR)) : std::string(1, CHAR))
              << (ierr > 0 ? std::string(std::min(width_ - ival - 1, ierr), ERR_CHAR) : "")
              << (ival + ierr < width_ + 1 ? std::string(width_ - ival - ierr - 1, ' ') : "") << ": "
-             << utils::format("%6.2e +/- %6.2e", val, unc);
+             << utils::format("%6.2e +/- %6.2e", val, val.uncertainty());
         }
         ++idx;
       }
@@ -335,13 +334,13 @@ namespace cepgen {
       double min_logval = -3.;
       for (const auto& xval : axes) {
         min_val =
-            std::min(min_val, std::min_element(xval.second.begin(), xval.second.end(), map_elements())->second.value);
+            std::min(min_val, (double)std::min_element(xval.second.begin(), xval.second.end(), map_elements())->second);
         max_val =
-            std::max(max_val, std::max_element(xval.second.begin(), xval.second.end(), map_elements())->second.value);
+            std::max(max_val, (double)std::max_element(xval.second.begin(), xval.second.end(), map_elements())->second);
         if (mode & Mode::logz)
           for (const auto& yval : xval.second)
-            if (yval.second.value > 0.)
-              min_logval = std::min(min_logval, std::log(yval.second.value / max_val));
+            if (yval.second > 0.)
+              min_logval = std::min(min_logval, std::log(yval.second / max_val));
       }
       const auto& y_axis = axes.begin()->second;
       os << sep << utils::format("%-5.2f", y_axis.begin()->first.value) << std::string(axes.size() - 11, ' ')
@@ -358,7 +357,7 @@ namespace cepgen {
             os << std::string(width_, ' ');
         } else {
           for (const auto& yval : xval.second) {
-            const double val = yval.second.value;
+            const double val = yval.second;
             double val_norm = 0.;
             if (mode & Mode::logz)
               val_norm = val <= 0. ? 0. : std::max(0., (std::log(val / max_val) - min_logval) / fabs(min_logval));

@@ -146,7 +146,7 @@ namespace cepgen {
         std::ostringstream os;
         os << y;
         for (const auto& x : xvec)
-          os << "\t" << graph.valueAt(x, y).value;
+          os << "\t" << (double)graph.valueAt(x, y);
         cmds += os.str();
       }
       cmds += "EOD";
@@ -194,7 +194,7 @@ namespace cepgen {
         std::ostringstream os;
         os << hist.binRangeY(iy).x(0.5);
         for (size_t ix = 0; ix < hist.nbinsX(); ++ix)
-          os << "\t" << hist.value(ix, iy);
+          os << "\t" << (double)hist.value(ix, iy);
         cmds += os.str();
       }
       cmds += "EOD";
@@ -279,7 +279,7 @@ namespace cepgen {
       cmds += "$DATA_" + rnd + " << EOD";
       for (const auto& pt : graph.points())
         cmds +=
-            merge(std::vector<double>{pt.first.value, pt.first.value_unc, pt.second.value, pt.second.value_unc}, "\t");
+            merge(std::vector<double>{pt.first.value, pt.first.value_unc, pt.second, pt.second.uncertainty()}, "\t");
       cmds += "EOD";
       cmds += "plot '$DATA_" + rnd + "' u 1:3 notitle";
       return cmds;
@@ -295,7 +295,7 @@ namespace cepgen {
 
       cmds += "$DATA_" + rnd + " << EOH";
       for (size_t ibin = 0; ibin < hist.nbins(); ++ibin)
-        cmds += merge(std::vector<double>{hist.binRange(ibin).x(0.5), hist.value(ibin)}, "\t");
+        cmds += merge(std::vector<double>{hist.binRange(ibin).x(0.5), (double)hist.value(ibin)}, "\t");
       cmds += "EOH";
       cmds += "set style data lines";
       cmds += "set yrange [" + std::to_string(hist.minimum()) + ":" + std::to_string(hist.maximum()) + "]";
