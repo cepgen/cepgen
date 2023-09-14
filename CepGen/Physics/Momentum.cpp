@@ -18,10 +18,24 @@
 
 #include <cmath>
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/Momentum.h"
-#include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/Limits.h"
 
 namespace cepgen {
+  /// Express an angle in between two extrema
+  static double normalisePhi(double phi, const Limits& range = Limits{-M_PI, M_PI}) {
+    static const double M_2PI = 2. * M_PI;
+    if (range.range() != M_2PI)
+      throw CG_FATAL("Momentum:normalisePhi") << "Invalid boundaries for the angle normalisation: " << range
+                                              << ". Must be of range 2*pi, has range " << range.range() << ".";
+    while (phi < range.min())
+      phi += M_2PI;
+    while (phi > range.max())
+      phi -= M_2PI;
+    return phi;  // contained in range
+  }
+
   Momentum::Momentum(double x, double y, double z, double t) : std::array<double, 4>{{x, y, z, t == -1. ? 0. : t}} {
     computeP();
   }
@@ -173,7 +187,7 @@ namespace cepgen {
 
   double Momentum::theta() const { return atan2(pt(), pz()); }
 
-  double Momentum::phi() const { return atan2(py(), px()); }
+  double Momentum::phi() const { return normalisePhi(atan2(py(), px()), {0., 2. * M_PI}); }
 
   double Momentum::pt() const { return std::hypot(px(), py()); }
 
@@ -194,14 +208,7 @@ namespace cepgen {
   double Momentum::deltaEta(const Momentum& oth) const { return fabs(eta() - oth.eta()); }
 
   double Momentum::deltaPhi(const Momentum& oth) const {
-    static const double M_2PI = 2. * M_PI;
-    double dphi = phi() - oth.phi();
-    // has to be contained in [-M_PI, M_PI]
-    while (dphi < -M_PI)
-      dphi += M_2PI;
-    while (dphi > +M_PI)
-      dphi -= M_2PI;
-    return dphi;
+    return normalisePhi(phi() - oth.phi());  // has to be contained in [-M_PI, M_PI]
   }
 
   double Momentum::deltaPt(const Momentum& oth) const { return fabs(pt() - oth.pt()); }

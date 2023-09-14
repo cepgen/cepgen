@@ -115,12 +115,15 @@ namespace cepgen {
     }
 
     void Process::dumpVariables(std::ostream* os) const {
-      if (!os)
-        os = &CG_LOG.stream();
-      (*os) << "List of variables handled by this process:";
+      std::ostringstream ss;
+      ss << "List of variables handled by this process:";
       for (const auto& var : mapped_variables_)
-        (*os) << "\n\t(" << var.index << ") " << var.type << " mapping (" << var.description << ")"
-              << " in range " << var.limits;
+        ss << "\n\t(" << var.index << ") " << var.type << " mapping (" << var.description << ")"
+           << " in range " << var.limits;
+      if (os)
+        (*os) << ss.str();
+      else
+        CG_LOG << ss.str();
     }
 
     Process& Process::defineVariable(double& out, const Mapping& type, const Limits& lim, const std::string& descr) {
