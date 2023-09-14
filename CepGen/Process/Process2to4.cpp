@@ -37,14 +37,14 @@ namespace cepgen {
         cs_prop_ = PDG::get()(steer<ParticleProperties>("pair").pdgid);
 
       const auto lim_rap = kinematics().cuts().central.rapidity_single.truncate(Limits{-6., 6.});
-      defineVariable(y_c1_, Mapping::linear, lim_rap, "First outgoing particle rapidity");
-      defineVariable(y_c2_, Mapping::linear, lim_rap, "Second outgoing particle rapidity");
+      defineVariable(m_y_c1_, Mapping::linear, lim_rap, "First outgoing particle rapidity");
+      defineVariable(m_y_c2_, Mapping::linear, lim_rap, "Second outgoing particle rapidity");
 
       const auto lim_pt_diff = kinematics().cuts().central.pt_diff.truncate(Limits{0., 500.});
-      defineVariable(pt_diff_, Mapping::linear, lim_pt_diff, "Final state particles transverse momentum difference");
+      defineVariable(m_pt_diff_, Mapping::linear, lim_pt_diff, "Final state particles transverse momentum difference");
 
       const auto lim_phi_diff = kinematics().cuts().central.phi_diff.truncate(Limits{0., 2. * M_PI});
-      defineVariable(phi_pt_diff_, Mapping::linear, lim_phi_diff, "Final state particles azimuthal angle difference");
+      defineVariable(m_phi_pt_diff_, Mapping::linear, lim_phi_diff, "Final state particles azimuthal angle difference");
 
       ww_ = 0.5 * (1. + std::sqrt(1. - 4. * mA() * mB() / s()));
 
@@ -53,18 +53,18 @@ namespace cepgen {
 
     double Process2to4::computeKTFactorisedMatrixElement() {
       //--- transverse kinematics of initial partons
-      const auto qt_1 = Momentum::fromPtEtaPhiE(qt1_, 0., phi_qt1_), qt_2 = Momentum::fromPtEtaPhiE(qt2_, 0., phi_qt2_),
-                 qt_sum = qt_1 + qt_2;
+      const auto qt_1 = Momentum::fromPtEtaPhiE(m_qt1_, 0., m_phi_qt1_),
+                 qt_2 = Momentum::fromPtEtaPhiE(m_qt2_, 0., m_phi_qt2_), qt_sum = qt_1 + qt_2;
 
       //--- transverse kinematics of outgoing central system
-      const auto pt_diff = Momentum::fromPtEtaPhiE(pt_diff_, 0., phi_pt_diff_);
+      const auto pt_diff = Momentum::fromPtEtaPhiE(m_pt_diff_, 0., m_phi_pt_diff_);
 
       {  //--- define the central system from the computed quantities
         const auto pt_c1 = 0.5 * (qt_sum + pt_diff);
         const auto pt_c2 = 0.5 * (qt_sum - pt_diff);
         const double p1t = pt_c1.pt(), p2t = pt_c2.pt();
         //--- cuts on central system
-        if (!kinematics().cuts().central.rapidity_diff.contains(fabs(y_c1_ - y_c2_)))  // window in rapidity distance
+        if (!kinematics().cuts().central.rapidity_diff.contains(fabs(m_y_c1_ - m_y_c2_)))  // rapidity distance
           return 0.;
         if (!kinematics().cuts().central.pt_single.contains(p1t) || !single_limits_.pt_single.contains(p1t))
           return 0.;
@@ -73,8 +73,8 @@ namespace cepgen {
         if (!kinematics().cuts().central.pt_diff.contains(fabs(p1t - p2t)))  // transverse momentum difference
           return 0.;
         //--- four-momenta of the outgoing central particles
-        pc(0) = Momentum::fromPtYPhiM(p1t, y_c1_, pt_c1.phi(), cs_prop_.mass);
-        pc(1) = Momentum::fromPtYPhiM(p2t, y_c2_, pt_c2.phi(), cs_prop_.mass);
+        pc(0) = Momentum::fromPtYPhiM(p1t, m_y_c1_, pt_c1.phi(), cs_prop_.mass);
+        pc(1) = Momentum::fromPtYPhiM(p2t, m_y_c2_, pt_c2.phi(), cs_prop_.mass);
       }
 
       //--- window in central system invariant mass
@@ -87,8 +87,8 @@ namespace cepgen {
       //--- transverse mass for the two central particles
       const auto amt1 = pc(0).massT(), amt2 = pc(1).massT();
 
-      x1_ = amt1 / sqrtS() * exp(+y_c1_) + amt2 / sqrtS() * exp(+y_c2_);
-      x2_ = amt1 / sqrtS() * exp(-y_c1_) + amt2 / sqrtS() * exp(-y_c2_);
+      x1_ = amt1 / sqrtS() * exp(+m_y_c1_) + amt2 / sqrtS() * exp(+m_y_c2_);
+      x2_ = amt1 / sqrtS() * exp(-m_y_c1_) + amt2 / sqrtS() * exp(-m_y_c2_);
 
       //--- sanity check for x_i values
       if (!x_limits_.contains(x1_) || !x_limits_.contains(x2_))
@@ -96,17 +96,17 @@ namespace cepgen {
 
       //--- additional conditions for energy-momentum conservation
 
-      if (!kinematics().incomingBeams().positive().elastic() && std::sqrt(x2_ * s() - invm - qt2_ * qt2_) <= mX())
+      if (!kinematics().incomingBeams().positive().elastic() && std::sqrt(x2_ * s() - invm - m_qt2_ * m_qt2_) <= mX())
         return 0.;
-      if (!kinematics().incomingBeams().negative().elastic() && std::sqrt(x1_ * s() - invm - qt1_ * qt1_) <= mY())
+      if (!kinematics().incomingBeams().negative().elastic() && std::sqrt(x1_ * s() - invm - m_qt1_ * m_qt1_) <= mY())
         return 0.;
 
       //--- four-momenta of the outgoing protons (or remnants)
 
       const double px_plus = (1. - x1_) * pA().p() * M_SQRT2;
       const double py_minus = (1. - x2_) * pB().p() * M_SQRT2;
-      const double px_minus = (mX2() + qt1_ * qt1_) * 0.5 / px_plus;
-      const double py_plus = (mY2() + qt2_ * qt2_) * 0.5 / py_minus;
+      const double px_minus = (mX2() + m_qt1_ * m_qt1_) * 0.5 / px_plus;
+      const double py_plus = (mY2() + m_qt2_ * m_qt2_) * 0.5 / py_minus;
       // warning! sign of pz??
 
       CG_DEBUG_LOOP("2to4:pxy") << "px± = " << px_plus << " / " << px_minus << "\n\t"
@@ -130,12 +130,12 @@ namespace cepgen {
       //--- four-momenta of the intermediate partons
 
       const double norm = 1. / ww_ / ww_ / s();
-      const double tau1 = norm * qt1_ * qt1_ / x1_ / x1_;
+      const double tau1 = norm * m_qt1_ * m_qt1_ / x1_ / x1_;
       q1() = Momentum(qt_1)
                  .setPz(+0.5 * x1_ * ww_ * sqrtS() * (1. - tau1))
                  .setEnergy(+0.5 * x1_ * ww_ * sqrtS() * (1. + tau1));
 
-      const double tau2 = norm * qt2_ * qt2_ / x2_ / x2_;
+      const double tau2 = norm * m_qt2_ * m_qt2_ / x2_ / x2_;
       q2() = Momentum(qt_2)
                  .setPz(-0.5 * x2_ * ww_ * sqrtS() * (1. - tau2))
                  .setEnergy(+0.5 * x2_ * ww_ * sqrtS() * (1. + tau2));
@@ -153,7 +153,8 @@ namespace cepgen {
       // factor 1/4 from jacobian of transformations
       //=================================================================
 
-      return amat2 * std::pow(4. * M_PI * x1_ * x2_ * s(), -2) * 0.25 * constants::GEVM2_TO_PB * pt_diff_ * qt1_ * qt2_;
+      return amat2 * std::pow(4. * M_PI * x1_ * x2_ * s(), -2) * 0.25 * constants::GEVM2_TO_PB *
+             (m_pt_diff_ * m_qt1_ * m_qt2_);
     }
 
     void Process2to4::fillCentralParticlesKinematics() {

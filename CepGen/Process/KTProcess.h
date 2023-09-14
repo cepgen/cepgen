@@ -75,17 +75,19 @@ namespace cepgen {
 
       /// Fractional momentum  for the first intermediate parton
       double x1_{0.};
-      /// Virtuality of the first intermediate parton (photon, pomeron, ...)
-      double qt1_{0.};
-      /// Azimuthal rotation of the first intermediate parton's transverse virtuality
-      double phi_qt1_{0.};
-
       /// Fractional momentum  for the second intermediate parton
       double x2_{0.};
+
+      //--- mapped variables
+
+      /// Virtuality of the first intermediate parton (photon, pomeron, ...)
+      double m_qt1_{0.};
+      /// Azimuthal rotation of the first intermediate parton's transverse virtuality
+      double m_phi_qt1_{0.};
       /// Virtuality of the second intermediate parton (photon, pomeron, ...)
-      double qt2_{0.};
+      double m_qt2_{0.};
       /// Azimuthal rotation of the second intermediate parton's transverse virtuality
-      double phi_qt2_{0.};
+      double m_phi_qt2_{0.};
 
       pdgids_t produced_parts_;  ///< Type of particles produced in the final state
       std::shared_ptr<PartonFlux> pos_flux_{nullptr}, neg_flux_{nullptr};

@@ -39,10 +39,12 @@ namespace cepgen {
       void fillCentralParticlesKinematics() override;
 
       std::function<double(void)> func_;  ///< Function to be called for weight computation
-      double y1_;                         ///< First outgoing particle rapidity
-      double y2_;                         ///< Second outgoing particle rapidity
-      double pt_diff_;                    ///< Transverse momentum balance between outgoing particles
-      double phi_pt_diff_;                ///< Azimuthal angle difference between outgoing particles
+
+      // mapped variables
+      double m_y1_;           ///< First outgoing particle rapidity
+      double m_y2_;           ///< Second outgoing particle rapidity
+      double m_pt_diff_;      ///< Transverse momentum balance between outgoing particles
+      double m_phi_pt_diff_;  ///< Azimuthal angle difference between outgoing particles
     };
   }  // namespace proc
 }  // namespace cepgen

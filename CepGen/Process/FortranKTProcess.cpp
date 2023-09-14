@@ -77,14 +77,14 @@ namespace cepgen {
 
     void FortranKTProcess::preparePhaseSpace() {
       const auto lim_rap = kinematics().cuts().central.rapidity_single.truncate(Limits{-6., 6.});
-      defineVariable(y1_, Mapping::linear, lim_rap, "First central particle rapidity");
-      defineVariable(y2_, Mapping::linear, lim_rap, "Second central particle rapidity");
+      defineVariable(m_y1_, Mapping::linear, lim_rap, "First central particle rapidity");
+      defineVariable(m_y2_, Mapping::linear, lim_rap, "Second central particle rapidity");
 
       const auto lim_pt_diff = kinematics().cuts().central.pt_diff.truncate(Limits{0., 50.});
-      defineVariable(pt_diff_, Mapping::linear, lim_pt_diff, "Central particles transverse momentum difference");
+      defineVariable(m_pt_diff_, Mapping::linear, lim_pt_diff, "Central particles transverse momentum difference");
 
       const auto lim_phi_diff = kinematics().cuts().central.phi_diff.truncate(Limits{0., 2. * M_PI});
-      defineVariable(phi_pt_diff_, Mapping::linear, lim_phi_diff, "Central particles azimuthal angle difference");
+      defineVariable(m_phi_pt_diff_, Mapping::linear, lim_phi_diff, "Central particles azimuthal angle difference");
 
       //===========================================================================================
       // feed phase space cuts to the common block
@@ -155,14 +155,14 @@ namespace cepgen {
 
     double FortranKTProcess::computeKTFactorisedMatrixElement() {
       //--- set all kinematics variables for this phase space point
-      ktkin_.q1t = qt1_;
-      ktkin_.q2t = qt2_;
-      ktkin_.phiq1t = phi_qt1_;
-      ktkin_.phiq2t = phi_qt2_;
-      ktkin_.y1 = y1_;
-      ktkin_.y2 = y2_;
-      ktkin_.ptdiff = pt_diff_;
-      ktkin_.phiptdiff = phi_pt_diff_;
+      ktkin_.q1t = m_qt1_;
+      ktkin_.q2t = m_qt2_;
+      ktkin_.phiq1t = m_phi_qt1_;
+      ktkin_.phiq2t = m_phi_qt2_;
+      ktkin_.y1 = m_y1_;
+      ktkin_.y2 = m_y2_;
+      ktkin_.ptdiff = m_pt_diff_;
+      ktkin_.phiptdiff = m_phi_pt_diff_;
       ktkin_.m_x = mX();
       ktkin_.m_y = mY();
 

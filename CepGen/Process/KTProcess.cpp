@@ -75,12 +75,12 @@ namespace cepgen {
       //============================================================================================
 
       const auto log_lim_kt = utils::log(kinematics().cuts().initial.qt).truncate(Limits{-10., 10.});
-      defineVariable(qt1_, Mapping::exponential, log_lim_kt, "First incoming parton virtuality");
-      defineVariable(qt2_, Mapping::exponential, log_lim_kt, "Second incoming parton virtuality");
+      defineVariable(m_qt1_, Mapping::exponential, log_lim_kt, "First incoming parton virtuality");
+      defineVariable(m_qt2_, Mapping::exponential, log_lim_kt, "Second incoming parton virtuality");
 
       const auto lim_phi_kt = kinematics().cuts().initial.phi_qt.truncate(Limits{0., 2. * M_PI});
-      defineVariable(phi_qt1_, Mapping::linear, lim_phi_kt, "First incoming parton azimuthal angle");
-      defineVariable(phi_qt2_, Mapping::linear, lim_phi_kt, "Second incoming parton azimuthal angle");
+      defineVariable(m_phi_qt1_, Mapping::linear, lim_phi_kt, "First incoming parton azimuthal angle");
+      defineVariable(m_phi_qt2_, Mapping::linear, lim_phi_kt, "Second incoming parton azimuthal angle");
 
       //============================================================================================
       // register all process-dependent variables
@@ -111,8 +111,8 @@ namespace cepgen {
       const auto& flux1 = dynamic_cast<const KTFlux&>(*pos_flux_);
       const auto& flux2 = dynamic_cast<const KTFlux&>(*neg_flux_);
 
-      return (flux1.fluxMX2(x1_, qt1_ * qt1_, mX2()) * M_1_PI) * (flux2.fluxMX2(x2_, qt2_ * qt2_, mY2()) * M_1_PI) *
-             cent_me;
+      return (flux1.fluxMX2(x1_, m_qt1_ * m_qt1_, mX2()) * M_1_PI) *
+             (flux2.fluxMX2(x2_, m_qt2_ * m_qt2_, mY2()) * M_1_PI) * cent_me;
     }
 
     void KTProcess::fillKinematics(bool) {
