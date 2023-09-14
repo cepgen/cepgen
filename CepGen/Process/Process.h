@@ -116,8 +116,6 @@ namespace cepgen {
     protected:
       /// Set the incoming and outgoing state to be expected in the process
       virtual void addEventContent() = 0;
-      /// Prepare the parton evaluator objects
-      virtual void prepareBeams() {}
       /// Compute the incoming state kinematics
       virtual void prepareKinematics() {}
 

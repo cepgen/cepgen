@@ -151,10 +151,10 @@ namespace cepgen {
             !process_->kinematics().cuts().central_particles.at(part.pdgId()).contain({part}))
           return 0.;
       }
-    if (process_->kinematics().incomingBeams().positive().fragmented() &&
+    if (!process_->kinematics().incomingBeams().positive().elastic() &&
         !process_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam1), event))
       return 0.;
-    if (process_->kinematics().incomingBeams().negative().fragmented() &&
+    if (!process_->kinematics().incomingBeams().negative().elastic() &&
         !process_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam2), event))
       return 0.;
 

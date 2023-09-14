@@ -22,6 +22,7 @@
 #include "CepGen/Process/Process.h"
 
 namespace cepgen {
+  class PartonFlux;
   namespace proc {
     /**
      * A generic \f$k_{\rm T}\f$-factorisation process.
@@ -51,7 +52,6 @@ namespace cepgen {
       static ParametersDescription description();
 
     protected:
-      void prepareBeams() override;
       /// Set the kinematics associated to the phase space definition
       void prepareKinematics() override;
       /// Set the kinematics of the central system before any point computation
@@ -88,6 +88,7 @@ namespace cepgen {
       double phi_qt2_{0.};
 
       pdgids_t produced_parts_;  ///< Type of particles produced in the final state
+      std::shared_ptr<PartonFlux> pos_flux_{nullptr}, neg_flux_{nullptr};
     };
   }  // namespace proc
 }  // namespace cepgen

@@ -126,33 +126,25 @@ private:
    * \return Success state of the operation
    */
   bool pickin();
-  cepgen::formfac::FormFactors computeFormFactors(const cepgen::Beam::Mode& type, double q2, double mx2) const {
-    switch (type) {
-      case Beam::Mode::ProtonElastic:
-      case Beam::Mode::PointLikeFermion:
-        return (*formfac_)(q2);
-      case Beam::Mode::ProtonInelastic: {
-        if (!strfun_)
-          throw CG_FATAL("LPAIR:computeFormFactors")
-              << "Inelastic proton form factors computation requires a structure functions definition!";
-        const double xbj = utils::xBj(q2, mp2_, mx2);
-        formfac::FormFactors ff;
-        switch (strfun_->name()) {
-          case 11 /* SuriYennie */: {  // this one requires its own object to deal with FM
-            ff.FE = strfun_->F2(xbj, q2) * xbj * mp_ / q2;
-            ff.FM = strfun_->FM(xbj, q2);
-          } break;
-          default: {
-            ff.FE = strfun_->F2(xbj, q2) * xbj / q2;
-            ff.FM = -2. * strfun_->F1(xbj, q2) / q2;
-          } break;
-        }
-        return ff;
-      }
-      default:
-        throw CG_FATAL("LPAIR::computeFormFactors")
-            << "Invalid incoming beam requested for LPAIR form factors evaluation: " << type << ".";
+  cepgen::formfac::FormFactors computeFormFactors(const Beam& beam, double q2, double mx2) const {
+    if (beam.elastic())
+      return (*formfac_)(q2);
+    if (!strfun_)
+      throw CG_FATAL("LPAIR:computeFormFactors")
+          << "Inelastic proton form factors computation requires a structure functions definition!";
+    const double xbj = utils::xBj(q2, mp2_, mx2);
+    formfac::FormFactors ff;
+    switch (strfun_->name()) {
+      case 11 /* SuriYennie */: {  // this one requires its own object to deal with FM
+        ff.FE = strfun_->F2(xbj, q2) * xbj * mp_ / q2;
+        ff.FM = strfun_->FM(xbj, q2);
+      } break;
+      default: {
+        ff.FE = strfun_->F2(xbj, q2) * xbj / q2;
+        ff.FM = -2. * strfun_->F1(xbj, q2) / q2;
+      } break;
     }
+    return ff;
   }
 
   /// Internal switch for the optimised code version (LPAIR legacy)
@@ -290,38 +282,22 @@ void LPAIR::prepareKinematics() {
   const double mx0 = mp_ + PDG::get().mass(PDG::piPlus);  // 1.07
 
   //--- first outgoing beam particle or remnant mass
-  switch (kinematics().incomingBeams().positive().mode()) {
-    case Beam::Mode::PointLikeFermion:
-    case Beam::Mode::ProtonElastic:
-    case Beam::Mode::HIElastic:
-      event().oneWithRole(Particle::OutgoingBeam1).setPdgId(event().oneWithRole(Particle::IncomingBeam1).pdgId());
-      mX2() = pA().mass2();
-      break;
-    case Beam::Mode::ProtonInelastic: {
-      const auto wx_lim_ob1 =
-          utils::pow(kinematics().cuts().remnants.mx.truncate(Limits{mx0, sqrtS() - mA() - 2. * sqrt(masses_.Ml2)}), 2);
-      defineVariable(mX2(), Mapping::power_law, wx_lim_ob1, "MX2");
-    } break;
-    default:
-      throw CG_FATAL("LPAIR:kinematics") << "Invalid mode for beam 1: "
-                                         << kinematics().incomingBeams().positive().mode() << " is not supported!";
+  if (kinematics().incomingBeams().positive().elastic()) {
+    event().oneWithRole(Particle::OutgoingBeam1).setPdgId(event().oneWithRole(Particle::IncomingBeam1).pdgId());
+    mX2() = pA().mass2();
+  } else {
+    const auto wx_lim_ob1 =
+        utils::pow(kinematics().cuts().remnants.mx.truncate(Limits{mx0, sqrtS() - mA() - 2. * sqrt(masses_.Ml2)}), 2);
+    defineVariable(mX2(), Mapping::power_law, wx_lim_ob1, "MX2");
   }
   //--- second outgoing beam particle or remnant mass
-  switch (kinematics().incomingBeams().negative().mode()) {
-    case Beam::Mode::PointLikeFermion:
-    case Beam::Mode::ProtonElastic:
-    case Beam::Mode::HIElastic:
-      event().oneWithRole(Particle::OutgoingBeam2).setPdgId(event().oneWithRole(Particle::IncomingBeam2).pdgId());
-      mY2() = pB().mass2();
-      break;
-    case Beam::Mode::ProtonInelastic: {
-      const auto wx_lim_ob2 =
-          utils::pow(kinematics().cuts().remnants.mx.truncate(Limits{mx0, sqrtS() - mB() - 2. * sqrt(masses_.Ml2)}), 2);
-      defineVariable(mY2(), Mapping::power_law, wx_lim_ob2, "MY2");
-    } break;
-    default:
-      throw CG_FATAL("LPAIR:kinematics") << "Invalid mode for beam 2: "
-                                         << kinematics().incomingBeams().negative().mode() << " is not supported!";
+  if (kinematics().incomingBeams().negative().elastic()) {
+    event().oneWithRole(Particle::OutgoingBeam2).setPdgId(event().oneWithRole(Particle::IncomingBeam2).pdgId());
+    mY2() = pB().mass2();
+  } else {
+    const auto wx_lim_ob2 =
+        utils::pow(kinematics().cuts().remnants.mx.truncate(Limits{mx0, sqrtS() - mB() - 2. * sqrt(masses_.Ml2)}), 2);
+    defineVariable(mY2(), Mapping::power_law, wx_lim_ob2, "MY2");
   }
 }
 
@@ -1014,19 +990,21 @@ void LPAIR::fillKinematics(bool) {
 
   //----- first outgoing proton
   auto& op1 = event().oneWithRole(Particle::OutgoingBeam1);
-  if (kinematics().incomingBeams().positive().fragmented()) {
+  if (kinematics().incomingBeams().positive().elastic())
+    op1.setStatus(Particle::Status::FinalState);  // stable proton
+  else {
     op1.setStatus(Particle::Status::Unfragmented);  // fragmenting remnants
     op1.setMass(mX());
-  } else
-    op1.setStatus(Particle::Status::FinalState);  // stable proton
+  }
 
   //----- second outgoing proton
   auto& op2 = event().oneWithRole(Particle::OutgoingBeam2);
-  if (kinematics().incomingBeams().negative().fragmented()) {
+  if (kinematics().incomingBeams().negative().elastic())
+    op2.setStatus(Particle::Status::FinalState);  // stable proton
+  else {
     op2.setStatus(Particle::Status::Unfragmented);  // fragmenting remnants
     op2.setMass(mY());
-  } else
-    op2.setStatus(Particle::Status::FinalState);  // stable proton
+  }
 
   auto central_system = event()[Particle::CentralSystem];
 
@@ -1063,8 +1041,8 @@ double LPAIR::periPP() const {
               sa1_ * alpha6_ * alpha6_ - sa2_ * alpha5_ * alpha5_ - sa1_ * sa2_ * qqq);  // electric-electric
 
   //--- compute the electric/magnetic form factors for the two considered parton momenta transfers
-  const auto fp1 = computeFormFactors(kinematics().incomingBeams().positive().mode(), -t1(), mX2()),
-             fp2 = computeFormFactors(kinematics().incomingBeams().negative().mode(), -t2(), mY2());
+  const auto fp1 = computeFormFactors(kinematics().incomingBeams().positive(), -t1(), mX2()),
+             fp2 = computeFormFactors(kinematics().incomingBeams().negative(), -t2(), mY2());
 
   const double peripp =
       (fp1.FM * fp2.FM * t11 + fp1.FE * fp2.FM * t21 + fp1.FM * fp2.FE * t12 + fp1.FE * fp2.FE * t22) /
@@ -1099,11 +1077,9 @@ bool LPAIR::applyCuts() const {
         return false;
   //--- cut on mass of final hadronic system (MX/Y)
   if (kinematics().cuts().remnants.mx.valid()) {
-    if (kinematics().incomingBeams().positive().mode() == Beam::Mode::ProtonInelastic &&
-        !kinematics().cuts().remnants.mx.contains(mX()))
+    if (!kinematics().incomingBeams().positive().elastic() && !kinematics().cuts().remnants.mx.contains(mX()))
       return false;
-    if (kinematics().incomingBeams().negative().mode() == Beam::Mode::ProtonInelastic &&
-        !kinematics().cuts().remnants.mx.contains(mY()))
+    if (!kinematics().incomingBeams().negative().elastic() && !kinematics().cuts().remnants.mx.contains(mY()))
       return false;
   }
   return true;

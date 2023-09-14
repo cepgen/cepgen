@@ -96,9 +96,9 @@ namespace cepgen {
 
       //--- additional conditions for energy-momentum conservation
 
-      if (kinematics().incomingBeams().positive().fragmented() && std::sqrt(x2_ * s() - qt2_ * qt2_) <= mX() + invm)
+      if (!kinematics().incomingBeams().positive().elastic() && std::sqrt(x2_ * s() - invm - qt2_ * qt2_) <= mX())
         return 0.;
-      if (kinematics().incomingBeams().negative().fragmented() && std::sqrt(x1_ * s() - qt1_ * qt1_) <= mY() + invm)
+      if (!kinematics().incomingBeams().negative().elastic() && std::sqrt(x1_ * s() - invm - qt1_ * qt1_) <= mY())
         return 0.;
 
       //--- four-momenta of the outgoing protons (or remnants)

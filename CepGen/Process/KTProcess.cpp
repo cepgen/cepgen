@@ -21,6 +21,8 @@
 #include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Physics/Beam.h"
+#include "CepGen/Physics/HeavyIon.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/KTProcess.h"
 
 namespace cepgen {
@@ -35,51 +37,35 @@ namespace cepgen {
           {// incoming state
            {Particle::IncomingBeam1, kinematics().incomingBeams().positive().pdgId()},
            {Particle::IncomingBeam2, kinematics().incomingBeams().negative().pdgId()},
-           {Particle::Parton1, kinematics().incomingBeams().positive().daughterId()},
-           {Particle::Parton2, kinematics().incomingBeams().negative().daughterId()}},
+           {Particle::Parton1, PDG::invalid},
+           {Particle::Parton2, PDG::invalid}},
           {// outgoing state
            {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
            {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
            {Particle::CentralSystem, produced_parts_}});
       setExtraContent();
-      CG_DEBUG("KTProcess:addEventContent") << "Addition of:\n\t"
-                                            << "Intermediate partons: "
-                                            << pdgids_t{kinematics().incomingBeams().positive().daughterId(),
-                                                        kinematics().incomingBeams().negative().daughterId()}
-                                            << "\n\t"
-                                            << "Produced system: " << produced_parts_ << ".\n\t" << event();
-    }
-
-    void KTProcess::prepareBeams() {
-      auto set_beam_properties = [](Beam& beam) {
-        ParametersList params;
-        switch (beam.mode()) {
-          case Beam::Mode::HIElastic:
-            params.set<ParametersList>("partonFlux",
-                                       PartonFluxFactory::get().describeParameters("ElasticHeavyIonKT").parameters());
-            break;
-          case Beam::Mode::ProtonInelastic:
-            params.set<ParametersList>("partonFlux",
-                                       PartonFluxFactory::get().describeParameters("BudnevInelasticKT").parameters());
-            break;
-          case Beam::Mode::ProtonElastic:
-            params.set<ParametersList>("partonFlux",
-                                       PartonFluxFactory::get().describeParameters("BudnevElasticKT").parameters());
-            break;
-          default:
-            throw CG_FATAL("KTProcess:prepareBeams")
-                << "No fallback strategy defined for beam mode '" << beam.mode() << "'.";
-        }
-        beam.setParameters(params);
-      };
-      set_beam_properties(kinematics().incomingBeams().positive());
-      set_beam_properties(kinematics().incomingBeams().negative());
     }
 
     void KTProcess::prepareKinematics() {
-      if (!kinematics().incomingBeams().positive().flux().ktFactorised() ||
-          !kinematics().incomingBeams().negative().flux().ktFactorised())
+      auto set_beam_properties = [](Beam& beam, std::shared_ptr<PartonFlux>& flux) {
+        auto params = beam.partonFluxParameters();
+        if (beam.elastic()) {
+          if (HeavyIon::isHI(beam.pdgId()))
+            params = PartonFluxFactory::get().describeParameters("ElasticHeavyIonKT").validate(params);
+          else
+            params = PartonFluxFactory::get().describeParameters("BudnevElasticKT").validate(params);
+        } else
+          params = PartonFluxFactory::get().describeParameters("BudnevInelasticKT").validate(params);
+        flux.reset(PartonFluxFactory::get().build(params).release());
+      };
+      set_beam_properties(kinematics().incomingBeams().positive(), pos_flux_);
+      set_beam_properties(kinematics().incomingBeams().negative(), neg_flux_);
+
+      if (!pos_flux_ || !neg_flux_)
         throw CG_FATAL("KTProcess:prepareKinematics") << "Invalid incoming parton fluxes.";
+
+      event().oneWithRole(Particle::Parton1).setPdgId(pos_flux_->partonPdgId());
+      event().oneWithRole(Particle::Parton2).setPdgId(neg_flux_->partonPdgId());
 
       const auto& ib1 = event().oneWithRole(Particle::IncomingBeam1);
       const auto& ib2 = event().oneWithRole(Particle::IncomingBeam2);
@@ -108,10 +94,10 @@ namespace cepgen {
 
       mX2() = ib1.mass2();
       mY2() = ib2.mass2();
-      if (kinematics().incomingBeams().positive().fragmented())
+      if (!kinematics().incomingBeams().positive().elastic())
         defineVariable(
             mX2(), Mapping::square, kinematics().cuts().remnants.mx, "Positive z proton remnant squared mass");
-      if (kinematics().incomingBeams().negative().fragmented())
+      if (!kinematics().incomingBeams().negative().elastic())
         defineVariable(
             mY2(), Mapping::square, kinematics().cuts().remnants.mx, "Negative z proton remnant squared mass");
     }
@@ -122,8 +108,8 @@ namespace cepgen {
         return 0.;  // avoid computing the fluxes if the matrix element is already null
 
       // convolute with fluxes according to modelling specified in parameters card
-      const auto& flux1 = dynamic_cast<const KTFlux&>(kinematics().incomingBeams().positive().flux());
-      const auto& flux2 = dynamic_cast<const KTFlux&>(kinematics().incomingBeams().negative().flux());
+      const auto& flux1 = dynamic_cast<const KTFlux&>(*pos_flux_);
+      const auto& flux2 = dynamic_cast<const KTFlux&>(*neg_flux_);
 
       return (flux1.fluxMX2(x1_, qt1_ * qt1_, mX2()) * M_1_PI) * (flux2.fluxMX2(x2_, qt2_ * qt2_, mY2()) * M_1_PI) *
              cent_me;
@@ -142,9 +128,9 @@ namespace cepgen {
       auto& cm = event().oneWithRole(Particle::Intermediate);
 
       // beam systems
-      if (kinematics().incomingBeams().positive().fragmented())
+      if (!kinematics().incomingBeams().positive().elastic())
         ob1.setMass(mX());
-      if (kinematics().incomingBeams().negative().fragmented())
+      if (!kinematics().incomingBeams().negative().elastic())
         ob2.setMass(mY());
 
       // parton systems

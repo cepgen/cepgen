@@ -38,11 +38,8 @@ namespace cepgen {
     /// List containing all parameters handled
     const ParametersList& parameters() const override;
 
-    /// Initialise the beam parameterisation objects
-    void initialise();
-
     /// Find the type of kinematics from the positive/negative beams
-    static mode::Kinematics modeFromBeams(const Beam::Mode&, const Beam::Mode&);
+    static mode::Kinematics modeFromBeams(const Beam&, const Beam&);
     /// Type of kinematics to consider for the phase space
     mode::Kinematics mode() const;
 

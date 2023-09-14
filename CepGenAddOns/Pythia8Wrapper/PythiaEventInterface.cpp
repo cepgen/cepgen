@@ -32,8 +32,8 @@ namespace Pythia8 {
 
   void CepGenEvent::initialise(const cepgen::Parameters& params) {
     params_ = &params;
-    inel1_ = params_->kinematics().incomingBeams().positive().fragmented();
-    inel2_ = params_->kinematics().incomingBeams().negative().fragmented();
+    inel1_ = !params_->kinematics().incomingBeams().positive().elastic();
+    inel2_ = !params_->kinematics().incomingBeams().negative().elastic();
 
     setBeamA((short)params_->kinematics().incomingBeams().positive().pdgId(),
              params_->kinematics().incomingBeams().positive().momentum().pz());

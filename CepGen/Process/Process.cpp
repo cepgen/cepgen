@@ -256,8 +256,6 @@ namespace cepgen {
       CG_DEBUG("Process:initialise") << "Preparing to set the kinematics parameters. Input parameters: "
                                      << ParametersDescription(kin_.parameters(false)) << ".";
 
-      prepareBeams();
-      kin_.incomingBeams().initialise();
       clear();  // also resets the "first run" flag
 
       // build the coupling objects
@@ -280,12 +278,12 @@ namespace cepgen {
         ib2.setMomentum(p2);
         auto& ob1 = event_->oneWithRole(Particle::OutgoingBeam1);
         ob1.setPdgId(kin_.incomingBeams().positive().pdgId());
-        ob1.setStatus(kin_.incomingBeams().positive().fragmented() ? Particle::Status::Unfragmented
-                                                                   : Particle::Status::FinalState);
+        ob1.setStatus(kin_.incomingBeams().positive().elastic() ? Particle::Status::FinalState
+                                                                : Particle::Status::Unfragmented);
         auto& ob2 = event_->oneWithRole(Particle::OutgoingBeam2);
         ob2.setPdgId(kin_.incomingBeams().negative().pdgId());
-        ob2.setStatus(kin_.incomingBeams().negative().fragmented() ? Particle::Status::Unfragmented
-                                                                   : Particle::Status::FinalState);
+        ob2.setStatus(kin_.incomingBeams().negative().elastic() ? Particle::Status::FinalState
+                                                                : Particle::Status::Unfragmented);
         for (auto& cp : (*event_)[Particle::CentralSystem])
           cp.get().setPdgId(cp.get().pdgId());
       }

@@ -156,31 +156,26 @@ namespace cepgen {
     plist_neg.set<ParametersList>("formFactors", steer<ParametersList>("formFactors"));
 
     auto mode = steerAs<int, mode::Kinematics>("mode");
-    if (mode == mode::Kinematics::invalid)
-      mode = modeFromBeams(plist_pos.getAs<int, Beam::Mode>("mode"), plist_neg.getAs<int, Beam::Mode>("mode"));
     switch (mode) {
       case mode::Kinematics::ElasticElastic:
-        plist_pos.setAs<int, Beam::Mode>("mode",
-                                         HeavyIon::isHI(pos_pdg) ? Beam::Mode::HIElastic : Beam::Mode::ProtonElastic);
-        plist_neg.setAs<int, Beam::Mode>("mode",
-                                         HeavyIon::isHI(neg_pdg) ? Beam::Mode::HIElastic : Beam::Mode::ProtonElastic);
+        plist_pos.set<bool>("elastic", true);
+        plist_neg.set<bool>("elastic", true);
         break;
       case mode::Kinematics::ElasticInelastic:
-        plist_pos.setAs<int, Beam::Mode>("mode",
-                                         HeavyIon::isHI(pos_pdg) ? Beam::Mode::HIElastic : Beam::Mode::ProtonElastic);
-        plist_neg.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonInelastic);
+        plist_pos.set<bool>("elastic", true);
+        plist_neg.set<bool>("elastic", false);
         break;
       case mode::Kinematics::InelasticElastic:
-        plist_pos.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonInelastic);
-        plist_neg.setAs<int, Beam::Mode>("mode",
-                                         HeavyIon::isHI(neg_pdg) ? Beam::Mode::HIElastic : Beam::Mode::ProtonElastic);
+        plist_pos.set<bool>("elastic", false);
+        plist_neg.set<bool>("elastic", true);
         break;
       case mode::Kinematics::InelasticInelastic:
-        plist_pos.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonInelastic);
-        plist_neg.setAs<int, Beam::Mode>("mode", Beam::Mode::ProtonInelastic);
+        plist_pos.set<bool>("elastic", false);
+        plist_neg.set<bool>("elastic", false);
         break;
       default:
-        throw CG_FATAL("Kinematics:IncomingBeams:mode") << "Unsupported kinematics mode: " << mode << "!";
+        CG_WARNING("IncomingBeams:mode") << "Unsupported kinematics mode: " << mode << ".";
+        break;
     }
 
     //--- structure functions
@@ -193,12 +188,6 @@ namespace cepgen {
     pos_beam_ = Beam(plist_pos);
     neg_beam_ = Beam(plist_neg);
   }  // namespace cepgen
-
-  void IncomingBeams::initialise() {
-    CG_DEBUG("IncomingBeams:initialise") << "Initialising the beams objects.";
-    pos_beam_.initialise();
-    neg_beam_.initialise();
-  }
 
   void IncomingBeams::setSqrtS(double sqs) {
     if (pos_beam_.pdgId() != neg_beam_.pdgId())
@@ -234,36 +223,20 @@ namespace cepgen {
     const auto& mode = steerAs<int, mode::Kinematics>("mode");
     if (mode != mode::Kinematics::invalid)
       return mode;
-    return modeFromBeams(pos_beam_.parameters().getAs<int, Beam::Mode>("mode"),
-                         neg_beam_.parameters().getAs<int, Beam::Mode>("mode"));
+    return modeFromBeams(pos_beam_, neg_beam_);
   }
 
-  mode::Kinematics IncomingBeams::modeFromBeams(const Beam::Mode& pos_mode, const Beam::Mode& neg_mode) {
-    switch (pos_mode) {
-      case Beam::Mode::PointLikeFermion:
-      case Beam::Mode::HIElastic:
-      case Beam::Mode::ProtonElastic: {
-        switch (neg_mode) {
-          case Beam::Mode::ProtonElastic:
-          case Beam::Mode::PointLikeFermion:
-            return mode::Kinematics::ElasticElastic;
-          default:
-            return mode::Kinematics::ElasticInelastic;
-        }
-      }
-      case Beam::Mode::ProtonInelastic: {
-        switch (neg_mode) {
-          case Beam::Mode::ProtonElastic:
-          case Beam::Mode::HIElastic:
-          case Beam::Mode::PointLikeFermion:
-            return mode::Kinematics::InelasticElastic;
-          default:
-            return mode::Kinematics::InelasticInelastic;
-        }
-      }
-      default:
-        return mode::Kinematics::invalid;
+  mode::Kinematics IncomingBeams::modeFromBeams(const Beam& pos, const Beam& neg) {
+    if (pos.elastic()) {
+      if (neg.elastic())
+        return mode::Kinematics::ElasticElastic;
+      else
+        return mode::Kinematics::ElasticInelastic;
     }
+    if (neg.elastic())
+      return mode::Kinematics::InelasticElastic;
+    else
+      return mode::Kinematics::InelasticInelastic;
   }
 
   void IncomingBeams::setStructureFunctions(int sf_model, int sr_model) {
