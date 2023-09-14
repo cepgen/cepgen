@@ -135,7 +135,7 @@ namespace cepgen {
                                     << "Second parton: " << q2() << ", mass2 = " << q2().mass2() << ".";
 
       //--- central 2-to-2 matrix element
-      const double amat2 = computeCentralMatrixElement();
+      const auto amat2 = computeCentralMatrixElement();
       if (amat2 <= 0.)  // skip computing the fluxes if no contribution
         return 0.;
 

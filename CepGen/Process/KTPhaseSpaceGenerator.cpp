@@ -42,7 +42,10 @@ namespace cepgen {
             params = PartonFluxFactory::get().describeParameters("BudnevInelasticKT").validate(params);
           //TODO: fermions/pions
         }
-        flux = PartonFluxFactory::get().build(params);
+        flux = std::move(PartonFluxFactory::get().build(params));
+        if (!flux)
+          throw CG_FATAL("KTPhaseSpaceGenerator:init")
+              << "Failed to initiate a parton flux object with properties: " << params << ".";
       };
       set_flux_properties(kin.incomingBeams().positive(), pos_flux_);
       set_flux_properties(kin.incomingBeams().negative(), neg_flux_);
@@ -79,8 +82,7 @@ namespace cepgen {
       return (dynamic_cast<KTFlux*>(pos_flux_.get())->fluxMX2(process().x1(), m_qt1_ * m_qt1_, process().mX2()) *
               M_1_PI) *
              (dynamic_cast<KTFlux*>(neg_flux_.get())->fluxMX2(process().x2(), m_qt2_ * m_qt2_, process().mY2()) *
-              M_1_PI) *
-             m_qt1_ * m_qt2_;
+              M_1_PI);
     }
   }  // namespace proc
 }  // namespace cepgen
