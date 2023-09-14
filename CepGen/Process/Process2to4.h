@@ -35,9 +35,9 @@ namespace cepgen {
       /// Set all cuts for the single outgoing particle phase space definition
       void setCuts(const cuts::Central& single);
 
-      void preparePhaseSpace() override;
-      void fillCentralParticlesKinematics() override;
+      void prepareFactorisedPhaseSpace() override;
       double computeFactorisedMatrixElement() override;
+      void fillCentralParticlesKinematics() override;
 
       /// Conform all kinematics variables to the user-defined phase space
       virtual void prepareProcessKinematics() = 0;

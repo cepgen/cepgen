@@ -78,11 +78,12 @@ namespace cepgen {
     }
 
     double KTPhaseSpaceGenerator::fluxes() const {
+      const auto& flux1 = dynamic_cast<const KTFlux&>(*pos_flux_);
+      const auto& flux2 = dynamic_cast<const KTFlux&>(*neg_flux_);
+
       // factors 1/2pi and 1/2pi due to integration over d^2(kt1) d^2(kt2) instead of d(kt1^2) d(kt2^2)
-      return (dynamic_cast<KTFlux*>(pos_flux_.get())->fluxMX2(process().x1(), m_qt1_ * m_qt1_, process().mX2()) *
-              M_1_PI) *
-             (dynamic_cast<KTFlux*>(neg_flux_.get())->fluxMX2(process().x2(), m_qt2_ * m_qt2_, process().mY2()) *
-              M_1_PI);
+      return (flux1.fluxMX2(process().x1(), m_qt1_ * m_qt1_, process().mX2()) * M_1_PI) *
+             (flux2.fluxMX2(process().x2(), m_qt2_ * m_qt2_, process().mY2()) * M_1_PI);
     }
   }  // namespace proc
 }  // namespace cepgen

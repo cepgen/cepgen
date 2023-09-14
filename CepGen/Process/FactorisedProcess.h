@@ -52,7 +52,7 @@ namespace cepgen {
       /// Set the kinematics of the central system before any point computation
       virtual void setExtraContent() {}
       /// Prepare the central part of the Jacobian (only done once, as soon as the kinematics is set)
-      virtual void preparePhaseSpace() = 0;
+      virtual void prepareFactorisedPhaseSpace() = 0;
       /// Factorised matrix element (event weight)
       virtual double computeFactorisedMatrixElement() = 0;
       /// Set the kinematics of the outgoing central system

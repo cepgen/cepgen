@@ -25,7 +25,7 @@
 
 namespace cepgen {
   namespace proc {
-    /// Compute the matrix element for a generic collinear, or \f$k_{\rm T}\f$-factorised process defined in a Fortran weighting function
+    /// Compute the matrix element for a generic factorised process defined in a Fortran weighting function
     class FortranFactorisedProcess : public FactorisedProcess {
     public:
       explicit FortranFactorisedProcess(const ParametersList& params, std::function<double(void)> func);
@@ -34,9 +34,9 @@ namespace cepgen {
       static ParametersList kProcParameters;
 
     private:
-      void preparePhaseSpace() override;
-      double computeFactorisedMatrixElement() override;
-      void fillCentralParticlesKinematics() override;
+      void prepareFactorisedPhaseSpace() override final;
+      double computeFactorisedMatrixElement() override final;
+      void fillCentralParticlesKinematics() override final;
 
       std::function<double(void)> func_;  ///< Function to be called for weight computation
 

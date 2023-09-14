@@ -75,7 +75,7 @@ namespace cepgen {
       constants_.pi = M_PI;
     }
 
-    void FortranFactorisedProcess::preparePhaseSpace() {
+    void FortranFactorisedProcess::prepareFactorisedPhaseSpace() {
       const auto lim_rap = kinematics().cuts().central.rapidity_single.truncate(Limits{-6., 6.});
       defineVariable(m_y1_, Mapping::linear, lim_rap, "First central particle rapidity");
       defineVariable(m_y2_, Mapping::linear, lim_rap, "Second central particle rapidity");

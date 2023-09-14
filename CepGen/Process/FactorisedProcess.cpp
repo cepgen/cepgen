@@ -63,13 +63,9 @@ namespace cepgen {
       event().oneWithRole(Particle::Parton1).setPdgId(psgen_->positiveFlux().partonPdgId());
       event().oneWithRole(Particle::Parton2).setPdgId(psgen_->negativeFlux().partonPdgId());
 
-      //============================================================================================
       // register all process-dependent variables
-      //============================================================================================
+      prepareFactorisedPhaseSpace();
 
-      preparePhaseSpace();
-
-      //============================================================================================
       // register the outgoing remnants' variables
       //============================================================================================
 
@@ -102,8 +98,8 @@ namespace cepgen {
       // parton systems
       auto& part1 = event().oneWithRole(Particle::Parton1);
       auto& part2 = event().oneWithRole(Particle::Parton2);
-      part1.setMomentum(event().oneWithRole(Particle::IncomingBeam1).momentum() - pX(), true);
-      part2.setMomentum(event().oneWithRole(Particle::IncomingBeam2).momentum() - pY(), true);
+      part1.setMomentum(pA() - pX(), true);
+      part2.setMomentum(pB() - pY(), true);
 
       // two-parton system
       event().oneWithRole(Particle::Intermediate).setMomentum(part1.momentum() + part2.momentum());
