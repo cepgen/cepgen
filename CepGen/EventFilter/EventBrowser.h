@@ -45,7 +45,7 @@ namespace cepgen {
       /// Retrieve a named variable from the whole event
       static double variable(const Event&, const std::string&);
 
-      static const std::regex rgx_select_id_, rgx_select_id2_, rgx_select_role_;
+      static const std::regex rgx_select_id_, rgx_select_id2_, rgx_select_role_, rgx_select_role2_;
       static constexpr double INVALID_OUTPUT = -999.;
 
       //--- auxiliary helper maps
