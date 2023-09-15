@@ -59,24 +59,15 @@ namespace cepgen {
                                                                          {"int", Particle::Role::Intermediate}};
       typedef double (Momentum::*pMethod)() const;
       /// Mapping of string variables to momentum getter methods
-      const std::unordered_map<std::string, pMethod> m_mom_str_ = {{"px", &Momentum::px},
-                                                                   {"py", &Momentum::py},
-                                                                   {"pz", &Momentum::pz},
-                                                                   {"pt", &Momentum::pt},
-                                                                   {"eta", &Momentum::eta},
-                                                                   {"phi", &Momentum::phi},
-                                                                   {"m", &Momentum::mass},
-                                                                   {"mt", &Momentum::massT},
-                                                                   {"mt2", &Momentum::massT2},
-                                                                   {"e", &Momentum::energy},
-                                                                   {"et", &Momentum::energyT},
-                                                                   {"et2", &Momentum::energyT2},
-                                                                   {"p", &Momentum::p},
-                                                                   {"pt2", &Momentum::pt2},
-                                                                   {"th", &Momentum::theta},
-                                                                   {"y", &Momentum::rapidity},
-                                                                   {"beta", &Momentum::beta},
-                                                                   {"gamma", &Momentum::gamma}};
+      const std::unordered_map<std::string, pMethod> m_mom_str_ = {
+          {"px", &Momentum::px},        {"py", &Momentum::py},      {"pz", &Momentum::pz},
+          {"pt", &Momentum::pt},        {"pt2", &Momentum::pt2},    {"eta", &Momentum::eta},
+          {"phi", &Momentum::phi},      {"m", &Momentum::mass},     {"m2", &Momentum::mass2},
+          {"mt", &Momentum::massT},     {"mt2", &Momentum::massT2}, {"e", &Momentum::energy},
+          {"e2", &Momentum::energy2},   {"et", &Momentum::energyT}, {"et2", &Momentum::energyT2},
+          {"p", &Momentum::p},          {"p2", &Momentum::p2},      {"th", &Momentum::theta},
+          {"y", &Momentum::rapidity},   {"beta", &Momentum::beta},  {"gamma", &Momentum::gamma},
+          {"gamma2", &Momentum::gamma2}};
       typedef double (Momentum::*pMethodOth)(const Momentum&) const;
       const std::unordered_map<std::string, pMethodOth> m_two_mom_str_ = {{"deta", &Momentum::deltaEta},
                                                                           {"dphi", &Momentum::deltaPhi},
