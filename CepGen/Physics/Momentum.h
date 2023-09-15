@@ -131,10 +131,7 @@ namespace cepgen {
     /// Squared 3-momentum norm (in GeV\f$^2\f$)
     inline double p2() const { return p_ * p_; }
     /// Set the energy (in GeV)
-    inline Momentum& setEnergy(double e) {
-      (*this)[E] = e;
-      return *this;
-    }
+    Momentum& setEnergy(double);
     /// Energy (in GeV)
     inline double energy() const { return (*this)[E]; }
     /// Squared energy (in GeV\f$^2\f$)
@@ -146,7 +143,7 @@ namespace cepgen {
     /// Compute the energy from the mass
     Momentum& setMass2(double);
     /// Squared mass (in GeV\f$^2\f$) as computed from its energy and momentum
-    inline double mass2() const { return energy2() - p2(); }
+    double mass2() const;
     /// Compute the energy from the mass
     Momentum& setMass(double);
     /// Mass (in GeV) as computed from its energy and momentum
@@ -181,8 +178,16 @@ namespace cepgen {
     /// Gamma scalar value
     double gamma() const;
 
+    /// Compute the mass from 4-momentum
+    /// \param[in] on_shell_mass Specify on-shell mass to constrain energy
+    Momentum& computeEnergyFromMass(double on_shell_mass);
+    /// Compute the longitudinal coordinate from energy-mass-transverse momentum constraints
+    /// \param[in] on_shell_mass Specify on-shell mass to constrain longitudinal momentum
+    Momentum& computePzFromMass(double on_shell_mass);
+
     /// Apply a threshold to all values with a given tolerance
     Momentum& truncate(double tolerance = 1.e-10);
+
     /// Rotate the transverse components by an angle phi (and reflect the y coordinate)
     Momentum& rotatePhi(double phi, double sign);
     /// Rotate the particle's momentum by a polar/azimuthal angle
@@ -210,8 +215,6 @@ namespace cepgen {
     /// 3-momentum's norm (in GeV/c)
     double p_{0.};
   };
-  /// Compute the centre of mass energy of two particles momenta
-  double CMEnergy(const Momentum& m1, const Momentum& m2);
 }  // namespace cepgen
 
 #endif
