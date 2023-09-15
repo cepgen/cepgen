@@ -128,8 +128,8 @@ namespace cepgen {
       // parton systems
       auto& p1 = event().oneWithRole(Particle::Parton1);
       auto& p2 = event().oneWithRole(Particle::Parton2);
-      p1.setMomentum((pA() - pX()).computePzFromMass(std::sqrt(t1())), true);
-      p2.setMomentum((pB() - pY()).computePzFromMass(std::sqrt(t2())), true);
+      p1.setMomentum(pA() - pX(), true);
+      p2.setMomentum(pB() - pY(), true);
 
       // two-parton system
       event().oneWithRole(Particle::Intermediate).setMomentum(p1.momentum() + p2.momentum(), true);
