@@ -119,8 +119,8 @@ namespace ROOT {
       pt[np] = mom.pt();
       eta[np] = mom.eta();
       phi[np] = mom.phi();
-      E[np] = part.energy();
-      m[np] = part.mass();
+      E[np] = mom.energy();
+      m[np] = mom.mass();
       pdg_id[np] = part.integerPdgId();
       parent1[np] = (part.mothers().size() > 0) ? *part.mothers().begin() : -1;
       parent2[np] = (part.mothers().size() > 1) ? *part.mothers().rbegin() : -1;

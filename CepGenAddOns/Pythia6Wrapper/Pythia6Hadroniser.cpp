@@ -187,8 +187,8 @@ namespace cepgen {
         pa.setId(p);
         pa.setStatus(pyjets_.k[0][p]);
         pa.setPdgId((long)pyjets_.k[1][p]);
-        pa.setMomentum(Momentum(pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p]));
-        pa.setMass(pyjets_.p[4][p]);
+        pa.setMomentum(
+            Momentum(pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p]).setMass(pyjets_.p[4][p]));
         auto& moth = ev[moth_id];
         if (role != Particle::Role::UnknownRole)
           moth.setStatus(role == Particle::Role::CentralSystem ? Particle::Status::Resonance
@@ -207,7 +207,7 @@ namespace cepgen {
         //--- only loop over all protons to be fragmented
 
         const auto partons = pickPartonsContent();
-        const double mx2 = part.mass2();
+        const double mx2 = part.momentum().mass2();
         const double mq = pymass(partons.first), mq2 = mq * mq;
         const double mdq = pymass(partons.second), mdq2 = mdq * mdq;
 
@@ -260,8 +260,8 @@ namespace cepgen {
           pyjets_.p[0][i] = part.momentum().px();
           pyjets_.p[1][i] = part.momentum().py();
           pyjets_.p[2][i] = part.momentum().pz();
-          pyjets_.p[3][i] = part.energy();
-          pyjets_.p[4][i] = part.mass();
+          pyjets_.p[3][i] = part.momentum().energy();
+          pyjets_.p[4][i] = part.momentum().mass();
           try {
             pyjets_.k[0][i] = kStatusMatchMap.at(part.status());
           } catch (const std::out_of_range&) {

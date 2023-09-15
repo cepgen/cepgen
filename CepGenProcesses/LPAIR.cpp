@@ -258,7 +258,7 @@ private:
 //---------------------------------------------------------------------------------------------
 
 void LPAIR::prepareKinematics() {
-  masses_.Ml2 = event()(Particle::CentralSystem)[0].mass2();
+  masses_.Ml2 = event()(Particle::CentralSystem)[0].momentum().mass2();
 
   formfac_ = FormFactorsFactory::get().build(kinematics().incomingBeams().formFactors());
   strfun_ = StructureFunctionsFactory::get().build(kinematics().incomingBeams().structureFunctions());
@@ -710,8 +710,8 @@ bool LPAIR::orient() {
 //---------------------------------------------------------------------------------------------
 
 double LPAIR::computeWeight() {
-  ep1_ = event()(Particle::IncomingBeam1)[0].energy();
-  ep2_ = event()(Particle::IncomingBeam2)[0].energy();
+  ep1_ = pA().energy();
+  ep2_ = pB().energy();
   // Mass difference between the first outgoing particle and the first incoming particle
   masses_.w31 = mX2() - mA2();
   // Mass difference between the second outgoing particle and the second incoming particle
@@ -994,7 +994,7 @@ void LPAIR::fillKinematics(bool) {
     op1.setStatus(Particle::Status::FinalState);  // stable proton
   else {
     op1.setStatus(Particle::Status::Unfragmented);  // fragmenting remnants
-    op1.setMass(mX());
+    pX().setMass(mX());
   }
 
   //----- second outgoing proton
@@ -1003,7 +1003,7 @@ void LPAIR::fillKinematics(bool) {
     op2.setStatus(Particle::Status::FinalState);  // stable proton
   else {
     op2.setStatus(Particle::Status::Unfragmented);  // fragmenting remnants
-    op2.setMass(mY());
+    pY().setMass(mY());
   }
 
   auto central_system = event()[Particle::CentralSystem];

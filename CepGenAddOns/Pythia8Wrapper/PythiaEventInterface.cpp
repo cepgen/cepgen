@@ -58,13 +58,13 @@ namespace Pythia8 {
   }
 
   void CepGenEvent::feedEvent(const cepgen::Event& ev, const Type& type) {
-    const double scale = ev(cepgen::Particle::Intermediate)[0].mass();
+    const double scale = ev(cepgen::Particle::Intermediate)[0].momentum().mass();
     setProcess(0, 1., scale, cepgen::constants::ALPHA_EM, cepgen::constants::ALPHA_QCD);
 
     const auto &part1 = ev(cepgen::Particle::Parton1)[0], &part2 = ev(cepgen::Particle::Parton2)[0];
     const auto &op1 = ev(cepgen::Particle::OutgoingBeam1)[0], &op2 = ev(cepgen::Particle::OutgoingBeam2)[0];
     const double q2_1 = -part1.momentum().mass2(), q2_2 = -part2.momentum().mass2();
-    const double x1 = q2_1 / (q2_1 + op1.mass2() - mp2_), x2 = q2_2 / (q2_2 + op2.mass2() - mp2_);
+    const double x1 = q2_1 / (q2_1 + op1.momentum().mass2() - mp2_), x2 = q2_2 / (q2_2 + op2.momentum().mass2() - mp2_);
 
     unsigned short colour_index = MIN_COLOUR_INDEX;
 

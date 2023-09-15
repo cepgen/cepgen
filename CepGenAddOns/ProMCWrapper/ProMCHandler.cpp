@@ -131,7 +131,7 @@ namespace cepgen {
       part->add_px(inGeV(par.momentum().px()));
       part->add_py(inGeV(par.momentum().py()));
       part->add_pz(inGeV(par.momentum().pz()));
-      part->add_energy(inGeV(par.energy()));
+      part->add_energy(inGeV(par.momentum().energy()));
       part->add_mass(inGeV(par.mass()));
       part->add_barcode(0);
       //--- parentage

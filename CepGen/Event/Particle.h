@@ -64,19 +64,11 @@ namespace cepgen {
 
     //----- static getters
 
-    /// Convert a polar angle to a pseudo-rapidity
-    static double thetaToEta(double theta);
-    /// Convert a pseudo-rapidity to a polar angle
-    static double etaToTheta(double eta);
-    /// Convert a pseudo-rapidity to a rapidity
-    static double etaToY(double eta_, double m_, double pt_);
-
-    Particle() = default;
     /// Build using the role of the particle in the process and its PDG id
     /// \param[in] role Role of the particle in the process
     /// \param[in] id PDG identifier
     /// \param[in] st Current status
-    Particle(Role role, pdgid_t id, Status st = Status::Undefined);
+    explicit Particle(Role role = Role::UnknownRole, pdgid_t id = 0, Status st = Status::Undefined);
     /// Copy constructor
     Particle(const Particle&);
     inline ~Particle() = default;
@@ -144,19 +136,6 @@ namespace cepgen {
       helicity_ = heli;
       return *this;
     }
-    /// Particle mass in GeV/c\f$^2\f$
-    /// \return Particle's mass
-    inline double mass() const { return mass_; };
-    /// Compute the particle mass
-    /// \param[in] offshell Allow the particle to be produced off-shell?
-    /// \note This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
-    Particle& computeMass(bool offshell = false);
-    /// Set the particle mass, in GeV/c\f$^2\f$
-    /// \param m Mass in GeV/c\f$^2\f$
-    /// \note This method ensures that the kinematics is properly set (the mass is set according to the energy and the momentum in priority)
-    Particle& setMass(double m = -1.);
-    /// Particle squared mass, in GeV\f$^2\f$/c\f$^4\f$
-    inline double mass2() const { return mass_ * mass_; };
     /// Retrieve the momentum object associated with this particle
     inline Momentum& momentum() { return momentum_; }
     /// Retrieve the momentum object associated with this particle
@@ -174,13 +153,6 @@ namespace cepgen {
     /// Set the 4-momentum associated to the particle
     /// \param[in] p 4-momentum
     inline Particle& setMomentum(double p[4]) { return setMomentum(p[0], p[1], p[2], p[3]); }
-    /// Set the particle's energy
-    /// \param[in] e Energy, in GeV
-    Particle& setEnergy(double e = -1.);
-    /// Get the particle's energy, in GeV
-    double energy() const;
-    /// Get the particle's squared energy, in GeV\f$^2\f$
-    inline double energy2() const { return energy() * energy(); };
     /// Is this particle a valid particle which can be used for kinematic computations?
     bool valid();
 
@@ -222,8 +194,6 @@ namespace cepgen {
     short charge_sign_{1};
     /// Momentum properties handler
     Momentum momentum_;
-    /// Mass, in GeV/c\f$^2\f$
-    double mass_{-1.};
     /// Helicity
     float helicity_{0.};
     /// Role in the process
@@ -239,11 +209,6 @@ namespace cepgen {
     /// Collection of standard, bare-level physical properties
     ParticleProperties phys_prop_;
   };
-
-  /// Compute the centre of mass energy of two particles (incoming or outgoing states)
-  double CMEnergy(const Particle& p1, const Particle& p2);
-
-  //bool operator<( const Particle& a, const Particle& b ) { return a.id<b.id; }
 
   // --- particle containers
 
@@ -267,4 +232,3 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
-

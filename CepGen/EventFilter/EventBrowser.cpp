@@ -71,7 +71,7 @@ namespace cepgen {
                                      << part;
           return INVALID_OUTPUT;
         }
-        return 1. - part.energy() / ev[*moth.begin()].energy();
+        return 1. - part.momentum().energy() / ev[*moth.begin()].momentum().energy();
       }
       if (var == "pdg")
         return (double)part.integerPdgId();

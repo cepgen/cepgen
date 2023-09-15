@@ -256,8 +256,7 @@ namespace cepgen {
       op.setStatus(py_part.isFinal()                                       ? Particle::Status::FinalState
                    : (Particle::Role)role == Particle::Role::CentralSystem ? Particle::Status::Propagator
                                                                            : Particle::Status::Fragmented);
-      op.setMomentum(Momentum(mom.px(), mom.py(), mom.pz(), mom.e()));
-      op.setMass(mom.mCalc());
+      op.setMomentum(Momentum(mom.px(), mom.py(), mom.pz(), mom.e()).setMass(mom.mCalc()));
       cg_evt_->addCorresp(py_part.index() - offset_, op.id());
       return op;
     }
