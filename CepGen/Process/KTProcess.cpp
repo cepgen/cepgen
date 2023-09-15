@@ -23,6 +23,7 @@
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/Process/KTProcess.h"
 
 namespace cepgen {
@@ -67,9 +68,6 @@ namespace cepgen {
       event().oneWithRole(Particle::Parton1).setPdgId(pos_flux_->partonPdgId());
       event().oneWithRole(Particle::Parton2).setPdgId(neg_flux_->partonPdgId());
 
-      const auto& ib1 = event().oneWithRole(Particle::IncomingBeam1);
-      const auto& ib2 = event().oneWithRole(Particle::IncomingBeam2);
-
       //============================================================================================
       // register the incoming partons' variables
       //============================================================================================
@@ -92,8 +90,8 @@ namespace cepgen {
       // register the outgoing remnants' variables
       //============================================================================================
 
-      mX2() = ib1.mass2();
-      mY2() = ib2.mass2();
+      mX2() = pA().mass2();
+      mY2() = pB().mass2();
       if (!kinematics().incomingBeams().positive().elastic())
         defineVariable(
             mX2(), Mapping::square, kinematics().cuts().remnants.mx, "Positive z proton remnant squared mass");
@@ -116,29 +114,25 @@ namespace cepgen {
     }
 
     void KTProcess::fillKinematics(bool) {
-      fillCentralParticlesKinematics();  // process-dependent!
+      t1() = utils::kt::q2(x1_, m_qt1_ * m_qt1_, mA2(), mX2());
+      t2() = utils::kt::q2(x2_, m_qt2_ * m_qt2_, mB2(), mY2());
 
-      // set the kinematics of the incoming and outgoing beams (or remnants)
-      const auto& ib1 = event().oneWithRole(Particle::IncomingBeam1);
-      const auto& ib2 = event().oneWithRole(Particle::IncomingBeam2);
-      auto& ob1 = event().oneWithRole(Particle::OutgoingBeam1);
-      auto& ob2 = event().oneWithRole(Particle::OutgoingBeam2);
-      auto& p1 = event().oneWithRole(Particle::Parton1);
-      auto& p2 = event().oneWithRole(Particle::Parton2);
-      auto& cm = event().oneWithRole(Particle::Intermediate);
+      fillCentralParticlesKinematics();  // process-dependent!
 
       // beam systems
       if (!kinematics().incomingBeams().positive().elastic())
-        ob1.setMass(mX());
+        pX().setMass2(mX2());
       if (!kinematics().incomingBeams().negative().elastic())
-        ob2.setMass(mY());
+        pY().setMass2(mY2());
 
       // parton systems
-      p1.setMomentum(ib1.momentum() - pX(), true);
-      p2.setMomentum(ib2.momentum() - pY(), true);
+      auto& p1 = event().oneWithRole(Particle::Parton1);
+      auto& p2 = event().oneWithRole(Particle::Parton2);
+      p1.setMomentum((pA() - pX()).computePzFromMass(std::sqrt(t1())), true);
+      p2.setMomentum((pB() - pY()).computePzFromMass(std::sqrt(t2())), true);
 
       // two-parton system
-      cm.setMomentum(p1.momentum() + p2.momentum());
+      event().oneWithRole(Particle::Intermediate).setMomentum(p1.momentum() + p2.momentum(), true);
     }
 
     ParametersDescription KTProcess::description() {
