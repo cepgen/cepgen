@@ -147,8 +147,7 @@ namespace cepgen {
           break;
       }
       const auto var_desc = descr.empty() ? utils::format("var%z", mapped_variables_.size()) : descr;
-      mapped_variables_.emplace_back(
-          MappingVariable{var_desc, lim, out, type, (unsigned short)mapped_variables_.size()});
+      mapped_variables_.emplace_back(MappingVariable{var_desc, lim, out, type, mapped_variables_.size()});
       point_coord_.emplace_back(0.);
       base_jacobian_ *= jacob_weight;
       CG_DEBUG("Process:defineVariable") << "\n\t" << descr << " has been mapped to variable "
@@ -180,13 +179,13 @@ namespace cepgen {
             var.value = var.limits.x(xv);
             jacobian *= 1.;
           } break;
-          case Mapping::exponential: {               // limits already logarithmic
+          case Mapping::exponential: {
             var.value = std::exp(var.limits.x(xv));  // transform back to linear
             jacobian *= var.value;
           } break;
           case Mapping::square: {
             const auto val = var.limits.x(xv);
-            var.value = val * val;
+            var.value = val * val;  // transform to square
             jacobian *= val;
           } break;
           case Mapping::power_law: {

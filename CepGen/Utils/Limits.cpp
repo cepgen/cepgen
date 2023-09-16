@@ -163,26 +163,4 @@ namespace cepgen {
     lim *= c;
     return lim;
   }
-
-  namespace utils {
-    Limits log(const Limits& lim) {
-      return Limits{lim.hasMin() ? std::log(lim.min()) : Limits::INVALID,
-                    lim.hasMax() ? std::log(lim.max()) : Limits::INVALID};
-    }
-
-    Limits log10(const Limits& lim) {
-      return Limits{lim.hasMin() ? std::log10(lim.min()) : Limits::INVALID,
-                    lim.hasMax() ? std::log10(lim.max()) : Limits::INVALID};
-    }
-
-    Limits pow(const Limits& lim, double exp) {
-      return Limits{lim.hasMin() ? std::pow(lim.min(), exp) : Limits::INVALID,
-                    lim.hasMax() ? std::pow(lim.max(), exp) : Limits::INVALID};
-    }
-
-    Limits sqrt(const Limits& lim) {
-      return Limits{lim.hasMin() ? std::sqrt(lim.min()) : Limits::INVALID,
-                    lim.hasMax() ? std::sqrt(lim.max()) : Limits::INVALID};
-    }
-  }  // namespace utils
 }  // namespace cepgen

@@ -73,6 +73,18 @@ namespace cepgen {
     double trim(double) const;
     /// Check if the value is inside limits' boundaries
     bool contains(double val, bool exclude_boundaries = false) const;
+    /// Apply an operator on limits boundaries
+    template <typename... Args>
+    Limits& apply(double (*op)(double, Args...), Args&&... args) {
+      (*this) = compute(op, std::forward<Args>(args)...);
+      return *this;
+    }
+    /// Compute a copy of limits with an operator applied on boundaries
+    template <typename... Args>
+    Limits compute(double (*op)(double, Args...), Args&&... args) const {
+      return Limits{hasMin() ? op(min(), std::forward<Args>(args)...) : Limits::INVALID,
+                    hasMax() ? op(max(), std::forward<Args>(args)...) : Limits::INVALID};
+    }
     /// Is there a lower and upper limit?
     bool valid() const;
     /// Raw value of the limits
@@ -92,16 +104,6 @@ namespace cepgen {
     /// Placeholder for an invalid value in a limit (for single-edged or invalid limits)
     static constexpr double INVALID = -999.999;
   };
-  namespace utils {
-    /// Compute the natural logarithm of the limits boundaries
-    Limits log(const Limits&);
-    /// Compute the base-10 logarithm of the limits boundaries
-    Limits log10(const Limits&);
-    /// Compute the power of the limits boundaries
-    Limits pow(const Limits&, double exp);
-    /// Compute the square root of the limits boundaries
-    Limits sqrt(const Limits&);
-  }  // namespace utils
 }  // namespace cepgen
 
 #endif

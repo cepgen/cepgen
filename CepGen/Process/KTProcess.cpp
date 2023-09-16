@@ -72,13 +72,13 @@ namespace cepgen {
       // register the incoming partons' variables
       //============================================================================================
 
-      const auto log_lim_kt = utils::log(kinematics().cuts().initial.qt).truncate(Limits{-10., 10.});
-      defineVariable(m_qt1_, Mapping::exponential, log_lim_kt, "First incoming parton virtuality");
-      defineVariable(m_qt2_, Mapping::exponential, log_lim_kt, "Second incoming parton virtuality");
+      const auto log_lim_kt = kinematics().cuts().initial.qt.compute(std::log).truncate(Limits{-10., 10.});
+      defineVariable(m_qt1_, Mapping::exponential, log_lim_kt, "Positive-z parton virtuality");
+      defineVariable(m_qt2_, Mapping::exponential, log_lim_kt, "Negative-z parton virtuality");
 
-      const auto lim_phi_kt = kinematics().cuts().initial.phi_qt.truncate(Limits{0., 2. * M_PI});
-      defineVariable(m_phi_qt1_, Mapping::linear, lim_phi_kt, "First incoming parton azimuthal angle");
-      defineVariable(m_phi_qt2_, Mapping::linear, lim_phi_kt, "Second incoming parton azimuthal angle");
+      const auto lim_phi = kinematics().cuts().initial.phi_qt.truncate(Limits{0., 2. * M_PI});
+      defineVariable(m_phi_qt1_, Mapping::linear, lim_phi, "Positive-z parton azimuthal angle");
+      defineVariable(m_phi_qt2_, Mapping::linear, lim_phi, "Negative-z parton azimuthal angle");
 
       //============================================================================================
       // register all process-dependent variables
@@ -91,13 +91,11 @@ namespace cepgen {
       //============================================================================================
 
       mX2() = pA().mass2();
-      mY2() = pB().mass2();
       if (!kinematics().incomingBeams().positive().elastic())
-        defineVariable(
-            mX2(), Mapping::square, kinematics().cuts().remnants.mx, "Positive z proton remnant squared mass");
+        defineVariable(mX2(), Mapping::square, kinematics().cuts().remnants.mx, "Positive z-beam remnant squared mass");
+      mY2() = pB().mass2();
       if (!kinematics().incomingBeams().negative().elastic())
-        defineVariable(
-            mY2(), Mapping::square, kinematics().cuts().remnants.mx, "Negative z proton remnant squared mass");
+        defineVariable(mY2(), Mapping::square, kinematics().cuts().remnants.mx, "Negative z-beam remnant squared mass");
     }
 
     double KTProcess::computeWeight() {
