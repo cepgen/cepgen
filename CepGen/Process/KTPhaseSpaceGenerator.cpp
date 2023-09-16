@@ -28,9 +28,9 @@ namespace cepgen {
   namespace proc {
     KTPhaseSpaceGenerator::KTPhaseSpaceGenerator(Process* proc) : PhaseSpaceGenerator(proc) {}
 
-    void KTPhaseSpaceGenerator::init() {
+    void KTPhaseSpaceGenerator::initialise() {
       auto& kin = process().kinematics();
-      auto set_flux_properties = [](Beam& beam, std::unique_ptr<PartonFlux>& flux) {
+      auto set_flux_properties = [](const Beam& beam, std::unique_ptr<PartonFlux>& flux) {
         auto params = beam.partonFluxParameters();
         if (params.name<std::string>().empty()) {
           if (beam.elastic()) {
@@ -78,12 +78,9 @@ namespace cepgen {
     }
 
     double KTPhaseSpaceGenerator::fluxes() const {
-      const auto& flux1 = dynamic_cast<const KTFlux&>(*pos_flux_);
-      const auto& flux2 = dynamic_cast<const KTFlux&>(*neg_flux_);
-
       // factors 1/2pi and 1/2pi due to integration over d^2(kt1) d^2(kt2) instead of d(kt1^2) d(kt2^2)
-      return (flux1.fluxMX2(process().x1(), m_qt1_ * m_qt1_, process().mX2()) * M_1_PI) *
-             (flux2.fluxMX2(process().x2(), m_qt2_ * m_qt2_, process().mY2()) * M_1_PI);
+      return (positiveFlux<KTFlux>().fluxMX2(process().x1(), m_qt1_ * m_qt1_, process().mX2()) * M_1_PI) *
+             (negativeFlux<KTFlux>().fluxMX2(process().x2(), m_qt2_ * m_qt2_, process().mY2()) * M_1_PI);
     }
   }  // namespace proc
 }  // namespace cepgen

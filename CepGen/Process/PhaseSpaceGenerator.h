@@ -36,25 +36,32 @@ namespace cepgen {
       /// \param[in] output Produced final state particles
       explicit PhaseSpaceGenerator(Process* proc) : proc_(*proc) {}
 
-      const PartonFlux& positiveFlux() const { return *pos_flux_; }
-      const PartonFlux& negativeFlux() const { return *neg_flux_; }
-
       /// Is the phase space generator intended to generate primordial kT for the incoming partons?
       virtual bool ktFactorised() const = 0;
 
       /// Initialise the process and define the integration phase space
-      virtual void init() = 0;
+      virtual void initialise() = 0;
       /// Generate the 4-momentum of incoming partons
       virtual bool generatePartonKinematics() = 0;
       /// Retrieve the event weight in the phase space
       virtual double fluxes() const = 0;
 
+      /// Retrieve a type-casted positive-z parton flux modelling
+      template <typename T = PartonFlux>
+      inline const T& positiveFlux() const {
+        return dynamic_cast<const T&>(*pos_flux_);
+      }
+      /// Retrieve a type-casted negative-z parton flux modelling
+      template <typename T = PartonFlux>
+      inline const T& negativeFlux() const {
+        return dynamic_cast<const T&>(*neg_flux_);
+      }
+
+    protected:
       /// Consumer process object
       Process& process() { return proc_; }
       /// Const-qualified consumer process object
       const Process& process() const { return const_cast<const Process&>(proc_); }
-
-    protected:
       std::unique_ptr<PartonFlux> pos_flux_{nullptr}, neg_flux_{nullptr};
 
     private:

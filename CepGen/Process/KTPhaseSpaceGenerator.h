@@ -23,40 +23,25 @@
 
 namespace cepgen {
   namespace proc {
-    /**
-     * A generic \f$k_{\rm T}\f$-factorisation process.
-     * \note 4 dimensions of the phase space are required for the incoming partons'
-     *  virtualities (radial and azimuthal coordinates).
-     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-     * \date Apr 2016
-     */
+    /// \f$k_{\rm T}\f$-factorisation phase space generator
+    /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+    /// \date Apr 2016
     class KTPhaseSpaceGenerator final : public PhaseSpaceGenerator {
     public:
       explicit KTPhaseSpaceGenerator(Process*);
 
       bool ktFactorised() const override { return true; }
 
-      void init() override;
+      void initialise() override;
       bool generatePartonKinematics() override;
       double fluxes() const override;
 
     protected:
-      /// Log-virtuality range of the intermediate parton
-      Limits log_qt_limits_;
-      /// Intermediate azimuthal angle range
-      Limits phi_qt_limits_;
-
-      //--- mapped variables
-
-      /// Virtuality of the first intermediate parton (photon, pomeron, ...)
-      double m_qt1_{0.};
-      /// Azimuthal rotation of the first intermediate parton's transverse virtuality
-      double m_phi_qt1_{0.};
-
-      /// Virtuality of the second intermediate parton (photon, pomeron, ...)
-      double m_qt2_{0.};
-      /// Azimuthal rotation of the second intermediate parton's transverse virtuality
-      double m_phi_qt2_{0.};
+      // mapped variables
+      double m_qt1_{0.};      ///< Virtuality of the first intermediate parton (photon, pomeron, ...)
+      double m_phi_qt1_{0.};  ///< Azimuthal rotation of the first intermediate parton's transverse virtuality
+      double m_qt2_{0.};      ///< Virtuality of the second intermediate parton (photon, pomeron, ...)
+      double m_phi_qt2_{0.};  ///< Azimuthal rotation of the second intermediate parton's transverse virtuality
     };
   }  // namespace proc
 }  // namespace cepgen

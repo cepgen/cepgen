@@ -58,7 +58,7 @@ namespace cepgen {
         throw CG_FATAL("FactorisedProcess:prepareKinematics")
             << "Phase space generator not set. Please check your process initialisation procedure, as you might "
                "be doing something irregular.";
-      psgen_->init();
+      psgen_->initialise();
 
       event().oneWithRole(Particle::Parton1).setPdgId(psgen_->positiveFlux().partonPdgId());
       event().oneWithRole(Particle::Parton2).setPdgId(psgen_->negativeFlux().partonPdgId());
