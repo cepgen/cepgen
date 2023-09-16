@@ -155,10 +155,10 @@ namespace cepgen {
 
     double FortranKTProcess::computeKTFactorisedMatrixElement() {
       //--- set all kinematics variables for this phase space point
-      ktkin_.q1t = m_qt1_;
-      ktkin_.q2t = m_qt2_;
-      ktkin_.phiq1t = m_phi_qt1_;
-      ktkin_.phiq2t = m_phi_qt2_;
+      ktkin_.q1t = q1().p2();
+      ktkin_.q2t = q2().p2();
+      ktkin_.phiq1t = q1().phi();
+      ktkin_.phiq2t = q2().phi();
       ktkin_.y1 = m_y1_;
       ktkin_.y2 = m_y2_;
       ktkin_.ptdiff = m_pt_diff_;

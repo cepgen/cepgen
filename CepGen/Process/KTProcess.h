@@ -66,31 +66,18 @@ namespace cepgen {
       /// Set the list of central particles produced
       void setProducedParticles(const pdgids_t& prod) { produced_parts_ = prod; }
 
-      /// Log-virtuality range of the intermediate parton
-      Limits log_qt_limits_;
-      /// Intermediate azimuthal angle range
-      Limits phi_qt_limits_;
-      /// Invariant mass range for the scattered excited system
-      Limits mx_limits_;
-
-      /// Fractional momentum  for the first intermediate parton
-      double x1_{0.};
-      /// Fractional momentum  for the second intermediate parton
-      double x2_{0.};
-
-      //--- mapped variables
-
-      /// Virtuality of the first intermediate parton (photon, pomeron, ...)
-      double m_qt1_{0.};
-      /// Azimuthal rotation of the first intermediate parton's transverse virtuality
-      double m_phi_qt1_{0.};
-      /// Virtuality of the second intermediate parton (photon, pomeron, ...)
-      double m_qt2_{0.};
-      /// Azimuthal rotation of the second intermediate parton's transverse virtuality
-      double m_phi_qt2_{0.};
+      double x1_{0.};  ///< Fractional momentum for the first intermediate parton
+      double x2_{0.};  ///< Fractional momentum for the second intermediate parton
 
       pdgids_t produced_parts_;  ///< Type of particles produced in the final state
       std::shared_ptr<PartonFlux> pos_flux_{nullptr}, neg_flux_{nullptr};
+
+    private:
+      // mapped variables
+      double m_qt1_{0.};      ///< Virtuality of the first intermediate parton (photon, pomeron, ...)
+      double m_phi_qt1_{0.};  ///< Azimuthal rotation of the first intermediate parton's transverse virtuality
+      double m_qt2_{0.};      ///< Virtuality of the second intermediate parton (photon, pomeron, ...)
+      double m_phi_qt2_{0.};  ///< Azimuthal rotation of the second intermediate parton's transverse virtuality
     };
   }  // namespace proc
 }  // namespace cepgen

@@ -101,6 +101,11 @@ namespace cepgen {
     }
 
     double KTProcess::computeWeight() {
+      // compute the transverse kinematics of the initial partons
+      q1() = Momentum::fromPtEtaPhiE(m_qt1_, 0., m_phi_qt1_);
+      q2() = Momentum::fromPtEtaPhiE(m_qt2_, 0., m_phi_qt2_);
+
+      // compute the central matrix element
       const auto cent_me = computeKTFactorisedMatrixElement();
       if (cent_me <= 0)
         return 0.;  // avoid computing the fluxes if the matrix element is already null
