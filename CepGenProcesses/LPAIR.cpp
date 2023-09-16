@@ -264,7 +264,10 @@ void LPAIR::prepareKinematics() {
   strfun_ = StructureFunctionsFactory::get().build(kinematics().incomingBeams().structureFunctions());
 
   //--- first define the squared mass range for the diphoton/dilepton system
-  w_limits_ = kinematics().cuts().central.mass_sum.compute(std::pow, 2).truncate(Limits{4. * masses_.Ml2, s()});
+  w_limits_ = kinematics()
+                  .cuts()
+                  .central.mass_sum.compute([](double ext) { return std::pow(ext, 2); })
+                  .truncate(Limits{4. * masses_.Ml2, s()});
 
   CG_DEBUG_LOOP("LPAIR:prepareKinematics") << "w limits = " << w_limits_ << "\n\t"
                                            << "wmax/wmin = " << w_limits_.max() / w_limits_.min();
@@ -289,7 +292,7 @@ void LPAIR::prepareKinematics() {
     const auto wx_lim_ob1 = kinematics()
                                 .cuts()
                                 .remnants.mx.truncate(Limits{mx0, sqrtS() - mA() - 2. * sqrt(masses_.Ml2)})
-                                .compute(std::pow, 2);
+                                .compute([](double ext) { return std::pow(ext, 2); });
     defineVariable(mX2(), Mapping::power_law, wx_lim_ob1, "MX2");
   }
   //--- second outgoing beam particle or remnant mass
@@ -300,7 +303,7 @@ void LPAIR::prepareKinematics() {
     const auto wx_lim_ob2 = kinematics()
                                 .cuts()
                                 .remnants.mx.truncate(Limits{mx0, sqrtS() - mB() - 2. * sqrt(masses_.Ml2)})
-                                .compute(std::pow, 2);
+                                .compute([](double ext) { return std::pow(ext, 2); });
     defineVariable(mY2(), Mapping::power_law, wx_lim_ob2, "MY2");
   }
 }

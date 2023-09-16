@@ -139,6 +139,15 @@ namespace cepgen {
     return val;
   }
 
+  Limits& Limits::apply(double (*op)(double)) {
+    (*this) = compute(op);
+    return *this;
+  }
+
+  Limits Limits::compute(double (*op)(double)) const {
+    return Limits{hasMin() ? op(min()) : Limits::INVALID, hasMax() ? op(max()) : Limits::INVALID};
+  }
+
   std::ostream& operator<<(std::ostream& os, const Limits& lim) {
     if (!lim.hasMin() && !lim.hasMax())
       return os << "no cuts";

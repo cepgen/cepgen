@@ -74,17 +74,9 @@ namespace cepgen {
     /// Check if the value is inside limits' boundaries
     bool contains(double val, bool exclude_boundaries = false) const;
     /// Apply an operator on limits boundaries
-    template <typename... Args>
-    Limits& apply(double (*op)(double, Args...), Args&&... args) {
-      (*this) = compute(op, std::forward<Args>(args)...);
-      return *this;
-    }
+    Limits& apply(double (*)(double));
     /// Compute a copy of limits with an operator applied on boundaries
-    template <typename... Args>
-    Limits compute(double (*op)(double, Args...), Args&&... args) const {
-      return Limits{hasMin() ? op(min(), std::forward<Args>(args)...) : Limits::INVALID,
-                    hasMax() ? op(max(), std::forward<Args>(args)...) : Limits::INVALID};
-    }
+    Limits compute(double (*)(double)) const;
     /// Is there a lower and upper limit?
     bool valid() const;
     /// Raw value of the limits
