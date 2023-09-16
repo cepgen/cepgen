@@ -29,7 +29,7 @@ namespace cepgen {
     KTPhaseSpaceGenerator::KTPhaseSpaceGenerator(Process* proc) : PhaseSpaceGenerator(proc) {}
 
     void KTPhaseSpaceGenerator::initialise() {
-      auto& kin = process().kinematics();
+      const auto& kin = process().kinematics();
       auto set_flux_properties = [](const Beam& beam, std::unique_ptr<PartonFlux>& flux) {
         auto params = beam.partonFluxParameters();
         if (params.name<std::string>().empty()) {

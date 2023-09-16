@@ -102,7 +102,7 @@ namespace cepgen {
       part2.setMomentum(pB() - pY(), true);
 
       // two-parton system
-      event().oneWithRole(Particle::Intermediate).setMomentum(part1.momentum() + part2.momentum());
+      event().oneWithRole(Particle::Intermediate).setMomentum(part1.momentum() + part2.momentum(), true);
     }
 
     ParametersDescription FactorisedProcess::description() {
