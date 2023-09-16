@@ -55,9 +55,6 @@ namespace cepgen {
     double Process2to4::computeFactorisedMatrixElement() {
       if (!kinematics().cuts().central.rapidity_diff.contains(fabs(m_y_c1_ - m_y_c2_)))  // rapidity distance
         return 0.;
-      if (!psgen_->generatePartonKinematics())
-        return 0.;
-
       {
         const auto qt_sum = q1() + q2();  // two-parton system
         const auto pt_diff = Momentum::fromPtEtaPhiE(m_pt_diff_, 0., m_phi_pt_diff_);
@@ -65,8 +62,6 @@ namespace cepgen {
         const auto pt_c2 = 0.5 * (qt_sum - pt_diff);
         const double p1t = pt_c1.pt(), p2t = pt_c2.pt();
         //--- cuts on central system
-        if (!kinematics().cuts().central.rapidity_diff.contains(fabs(m_y_c1_ - m_y_c2_)))  // rapidity distance
-          return 0.;
         if (!kinematics().cuts().central.pt_single.contains(p1t) || !single_limits_.pt_single.contains(p1t))
           return 0.;
         if (!kinematics().cuts().central.pt_single.contains(p2t) || !single_limits_.pt_single.contains(p2t))

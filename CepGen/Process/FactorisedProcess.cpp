@@ -81,6 +81,8 @@ namespace cepgen {
     }
 
     double FactorisedProcess::computeWeight() {
+      if (!psgen_->generatePartonKinematics())
+        return 0.;
       if (const auto cent_me = computeFactorisedMatrixElement() > 0.)
         return psgen_->fluxes() * cent_me;
       return 0.;  // avoid computing the fluxes if the matrix element is already null
