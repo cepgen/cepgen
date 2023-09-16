@@ -149,10 +149,7 @@ namespace cepgen {
       if (amat2 <= 0.)  // skip computing the fluxes if no contribution
         return 0.;
 
-      //=================================================================
       // factor 1/4 from jacobian of transformations
-      //=================================================================
-
       return amat2 * std::pow(4. * M_PI * x1_ * x2_ * s(), -2) * 0.25 * constants::GEVM2_TO_PB *
              (m_pt_diff_ * m_qt1_ * m_qt2_);
     }

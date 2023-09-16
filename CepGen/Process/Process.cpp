@@ -187,7 +187,7 @@ namespace cepgen {
           case Mapping::square: {
             const auto val = var.limits.x(xv);
             var.value = val * val;
-            jacobian *= 2. * val;
+            jacobian *= val;
           } break;
           case Mapping::power_law: {
             const double y = var.limits.max() / var.limits.min();
