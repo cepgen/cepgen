@@ -79,7 +79,8 @@ namespace cepgen {
       throw CG_FATAL("Generator:computePoint") << "Trying to compute a point with no process specified!";
     const size_t ndim = worker_->integrand().process().ndim();
     if (coord.size() != ndim)
-      throw CG_FATAL("Generator:computePoint") << "Invalid phase space dimension (ndim=" << ndim << ")!";
+      throw CG_FATAL("Generator:computePoint")
+          << "Invalid phase space dimension (ndim=" << ndim << ", given=" << coord.size() << ").";
     double res = worker_->integrand().eval(coord);
     CG_DEBUG("Generator:computePoint") << "Result for x[" << ndim << "] = " << coord << ":\n\t" << res << ".";
     return res;

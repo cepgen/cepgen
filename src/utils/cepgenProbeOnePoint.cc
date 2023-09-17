@@ -28,17 +28,17 @@ using namespace std;
 int main(int argc, char* argv[]) {
   string input_card;
   vector<double> point;
-  bool enable_plugins, verbose;
+  bool enable_plugins;
 
-  cepgen::ArgumentsParser(argc, argv)
-      .addArgument("input,i", "input card", &input_card)
-      .addOptionalArgument("point,p", "point to test", &point, vector<double>(12, 0.3))
-      .addOptionalArgument("verbose,v", "high verbosity mode", &verbose, false)
-      .addOptionalArgument("enable-plugins,m", "enable the external plugins", &enable_plugins, false)
-      .parse();
+  const auto args = cepgen::ArgumentsParser(argc, argv)
+                        .addArgument("input,i", "input card", &input_card)
+                        .addOptionalArgument("point,p", "point to test", &point, vector<double>(12, 0.3))
+                        .addOptionalArgument("enable-plugins,m", "enable the external plugins", &enable_plugins, false)
+                        .parse();
 
   cepgen::Generator gen;
   gen.setParameters(cepgen::card::Handler::parseFile(input_card));
+  gen.parametersRef().process().initialise();
 
   const auto ndim = gen.parameters()->process().ndim();
   if (point.size() < 2)
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
   else if (point.size() != ndim)
     point.resize(ndim);
 
-  if (verbose)
+  if (args.debugging())
     CG_LOG_LEVEL(debugInsideLoop);
 
   if (!enable_plugins) {
@@ -54,8 +54,8 @@ int main(int argc, char* argv[]) {
     gen.parametersPtr()->clearEventExportersSequence();
   }
 
-  CG_LOG << gen.parameters() << "\n\t"
-         << "point: " << point;
+  CG_DEBUG("main") << gen.parameters();
+  CG_LOG << "point: " << point;
   const double weight = gen.computePoint(point);
   CG_LOG << "weight: " << weight;
 

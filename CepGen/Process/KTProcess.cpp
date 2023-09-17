@@ -68,6 +68,10 @@ namespace cepgen {
       event().oneWithRole(Particle::Parton1).setPdgId(pos_flux_->partonPdgId());
       event().oneWithRole(Particle::Parton2).setPdgId(neg_flux_->partonPdgId());
 
+      CG_DEBUG("KTProcess:prepareKinematics")
+          << "Partons: " << pdgids_t{pos_flux_->partonPdgId(), neg_flux_->partonPdgId()} << ", "
+          << "central system: " << produced_parts_ << ". " << event();
+
       //============================================================================================
       // register the incoming partons' variables
       //============================================================================================
