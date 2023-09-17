@@ -101,76 +101,64 @@ namespace cepgen {
     //--- prepare the event content
     auto* event = process_->eventPtr();
 
-    if (!storage_ && !params_->eventModifiersSequence().empty() && !params_->tamingFunctions().empty() &&
-        params_->kinematics().cuts().central_particles.empty())
-      return weight;
+    if (storage_) {
+      CG_TICKER(const_cast<Parameters*>(params_)->timeKeeper());
+      //--- fill in the process' Event object
+      process_->fillKinematics();
 
-    //--- fill in the process' Event object
-    process_->fillKinematics();
-
-    //--- once the kinematics variables have been populated, can apply the
-    //    collection of taming functions
-    try {
-      utils::EventBrowser bws;
+      // once kinematics variables computed, can apply taming functions
       weight = std::accumulate(params_->tamingFunctions().begin(),
                                params_->tamingFunctions().end(),
                                weight,
-                               [&bws, &event](double init, const auto& tam) {
-                                 return init * (*tam)(bws.get(*event, tam->variables().at(0)));
+                               [this, &event](double init, const auto& tam) {
+                                 return init * (*tam)(bws_.get(*event, tam->variables().at(0)));
                                });
-    } catch (const Exception&) {
-      throw CG_FATAL("ProcessIntegrand") << "Failed to apply taming function(s) taming!";
-    }
 
-    if (weight <= 0.)
-      return 0.;
+      if (weight <= 0.)
+        return 0.;
 
-    //--- set the CepGen part of the event generation
-    if (storage_)
+      // pure CepGen part of the event generation
       event->time_generation = (float)tmr_->elapsed();
 
-    //--- trigger all event modification algorithms
-    if (!params_->eventModifiersSequence().empty()) {
-      double br = -1.;
-      for (auto& mod : params_->eventModifiersSequence()) {
-        if (!mod->run(*event, br, storage_) || br == 0.)
-          return 0.;
-        weight *= br;  // branching fraction for all decays
+      // trigger all event modification algorithms
+      if (!params_->eventModifiersSequence().empty()) {
+        double br = -1.;
+        for (auto& mod : params_->eventModifiersSequence()) {
+          if (!mod->run(*event, br, storage_) || br == 0.)
+            return 0.;
+          weight *= br;  // branching fraction for all decays
+        }
       }
-    }
 
-    //--- apply cuts on final state system (after hadronisation!)
-    //    (polish your cuts, as this might be very time-consuming...)
+      // apply cuts on final state system (after event modification algorithms)
+      // (polish your cuts, as this might be very time-consuming...)
+      if (!process_->kinematics().cuts().central.contain((*event)(Particle::CentralSystem)))
+        return 0.;
+      if (!process_->kinematics().cuts().central_particles.empty())
+        for (const auto& part : (*event)(Particle::CentralSystem)) {
+          // retrieve all cuts associated to this final state particle in the central system
+          if (process_->kinematics().cuts().central_particles.count(part.pdgId()) > 0 &&
+              !process_->kinematics().cuts().central_particles.at(part.pdgId()).contain({part}))
+            return 0.;
+        }
+      if (!process_->kinematics().incomingBeams().positive().elastic() &&
+          !process_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam1), event))
+        return 0.;
+      if (!process_->kinematics().incomingBeams().negative().elastic() &&
+          !process_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam2), event))
+        return 0.;
 
-    if (!process_->kinematics().cuts().central.contain((*event)(Particle::CentralSystem)))
-      return 0.;
-    if (!process_->kinematics().cuts().central_particles.empty())
-      for (const auto& part : (*event)(Particle::CentralSystem)) {
-        // retrieve all cuts associated to this final state particle in the central system
-        if (process_->kinematics().cuts().central_particles.count(part.pdgId()) > 0 &&
-            !process_->kinematics().cuts().central_particles.at(part.pdgId()).contain({part}))
-          return 0.;
-      }
-    if (!process_->kinematics().incomingBeams().positive().elastic() &&
-        !process_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam1), event))
-      return 0.;
-    if (!process_->kinematics().incomingBeams().negative().elastic() &&
-        !process_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam2), event))
-      return 0.;
-
-    //--- store the last event in parameters block for a later usage
-    if (storage_) {
+      // add generation metadata to the event
       event->weight = (float)weight;
       event->time_total = (float)tmr_->elapsed();
 
       CG_DEBUG_LOOP("ProcessIntegrand") << "[process " << std::hex << (void*)process_.get() << std::dec << "]\n\t"
                                         << "Generation time: " << event->time_generation * 1.e3 << " ms\n\t"
                                         << "Total time (gen+hadr+cuts): " << event->time_total * 1.e3 << " ms";
+
+      // a bit of debugging information
+      CG_DEBUG_LOOP("ProcessIntegrand") << "f value for dim-" << x.size() << " point " << x << ": " << weight << ".";
     }
-
-    //--- a bit of useful debugging
-    CG_DEBUG_LOOP("ProcessIntegrand") << "f value for dim-" << x.size() << " point " << x << ": " << weight << ".";
-
     return weight;
   }
 }  // namespace cepgen

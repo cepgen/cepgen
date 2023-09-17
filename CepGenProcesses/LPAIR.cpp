@@ -1026,7 +1026,7 @@ void LPAIR::fillKinematics(bool) {
   ol2.setStatus(Particle::Status::FinalState);
 
   //----- intermediate two-lepton system
-  event().oneWithRole(Particle::Intermediate).setMomentum(pc(0) + pc(1));
+  event().oneWithRole(Particle::Intermediate).setMomentum(pc(0) + pc(1), true);
 }
 
 //---------------------------------------------------------------------------------------------

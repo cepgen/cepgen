@@ -22,6 +22,7 @@
 #include <memory>
 #include <vector>
 
+#include "CepGen/EventFilter/EventBrowser.h"
 #include "CepGen/Integration/Integrand.h"
 
 namespace cepgen {
@@ -64,7 +65,8 @@ namespace cepgen {
   private:
     std::unique_ptr<proc::Process> process_;   ///< Local instance of the physics process
     const Parameters* params_{nullptr};        ///< Generator-owned runtime parameters
-    const std::unique_ptr<utils::Timer> tmr_;  ///< A precious timekeeper for event timing
+    const std::unique_ptr<utils::Timer> tmr_;  ///< Timekeeper for event generation
+    utils::EventBrowser bws_;                  ///< Event browser
     bool storage_{false};                      ///< Is the next event to be generated to be stored?
   };
 }  // namespace cepgen
