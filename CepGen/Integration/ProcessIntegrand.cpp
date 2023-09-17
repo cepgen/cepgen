@@ -41,15 +41,11 @@ namespace cepgen {
     //--- each integrand object has its own clone of the process
     process_ = params_->process().clone();  // note: kinematics is already set by the process copy constructor
 
-    CG_DEBUG("ProcessIntegrand") << "Process " << process_->name() << " successfully cloned from base process "
-                                 << params_->process().name() << ".";
+    CG_DEBUG("ProcessIntegrand") << "New " << process_->name() << " process cloned from " << params_->process().name()
+                                 << " process.";
     process_->kinematics().setParameters(params_->process().kinematics().parameters(true));
 
-    //--- process-specific phase space definition
-    CG_DEBUG("ProcessIntegrand").log([this](auto& log) { process_->dumpVariables(&log.stream()); });
-
     //--- first-run preparation
-    CG_DEBUG("ProcessIntegrand") << "Preparing all variables for a new run.";
     CG_DEBUG("ProcessIntegrand").log([this](auto& dbg) {
       dbg << "Run started for " << process_->name() << " process " << std::hex << (void*)process_.get() << std::dec
           << ".\n\t";
@@ -59,13 +55,12 @@ namespace cepgen {
           << "  negative-z beam: " << beams.negative();
       if (!beams.structureFunctions().empty())
         dbg << "\n\t  structure functions: " << beams.structureFunctions();
+      process_->dumpVariables(&dbg.stream());
     });
     process_->initialise();
 
     CG_DEBUG("ProcessIntegrand") << "New integrand object defined for process \"" << process_->name() << "\".";
   }
-
-  ProcessIntegrand::~ProcessIntegrand() { CG_DEBUG("ProcessIntegrand") << "Destructor called"; }
 
   size_t ProcessIntegrand::size() const { return process().ndim(); }
 
@@ -88,7 +83,7 @@ namespace cepgen {
     tmr_->reset();
 
     //--- specify the phase space point to probe and calculate weight
-    double weight = process().weight(x);
+    auto weight = process().weight(x);
 
     //--- invalidate any unphysical behaviour
     if (weight <= 0.)
@@ -98,59 +93,51 @@ namespace cepgen {
     if (!process_->hasEvent())
       return weight;
 
-    //--- prepare the event content
-    auto* event = process_->eventPtr();
+    auto* event = process_->eventPtr();  // prepare the event content
+    process_->fillKinematics();          // fill in the process' Event object
 
-    if (storage_) {
-      CG_TICKER(const_cast<Parameters*>(params_)->timeKeeper());
-      //--- fill in the process' Event object
-      process_->fillKinematics();
-
-      // once kinematics variables computed, can apply taming functions
-      weight = std::accumulate(params_->tamingFunctions().begin(),
-                               params_->tamingFunctions().end(),
-                               weight,
-                               [this, &event](double init, const auto& tam) {
-                                 return init * (*tam)(bws_.get(*event, tam->variables().at(0)));
-                               });
-
-      if (weight <= 0.)
+    // once kinematics variables computed, can apply taming functions
+    for (const auto& tam : params_->tamingFunctions())
+      if (const auto val = (*tam)(bws_.get(*event, tam->variables().at(0))) != 0.)
+        weight *= val;
+      else
         return 0.;
 
-      // pure CepGen part of the event generation
-      event->time_generation = (float)tmr_->elapsed();
+    if (storage_)
+      event->time_generation = (float)tmr_->elapsed();  // pure CepGen part of the event generation
 
-      // trigger all event modification algorithms
-      if (!params_->eventModifiersSequence().empty()) {
-        double br = -1.;
-        for (auto& mod : params_->eventModifiersSequence()) {
-          if (!mod->run(*event, br, storage_) || br == 0.)
-            return 0.;
-          weight *= br;  // branching fraction for all decays
-        }
+    {  // trigger all event modification algorithms
+      double br = -1.;
+      for (auto& mod : params_->eventModifiersSequence()) {
+        if (!mod->run(*event, br, storage_) || br == 0.)
+          return 0.;
+        weight *= br;  // branching fraction for all decays
       }
-
-      // apply cuts on final state system (after event modification algorithms)
+    }
+    {  // apply cuts on final state system (after event modification algorithms)
+      const auto& kin = process_->kinematics();
       // (polish your cuts, as this might be very time-consuming...)
-      if (!process_->kinematics().cuts().central.contain((*event)(Particle::CentralSystem)))
+      if (!kin.cuts().central.contain((*event)(Particle::CentralSystem)))
         return 0.;
-      if (!process_->kinematics().cuts().central_particles.empty())
+      if (!kin.cuts().central_particles.empty())
         for (const auto& part : (*event)(Particle::CentralSystem)) {
           // retrieve all cuts associated to this final state particle in the central system
-          if (process_->kinematics().cuts().central_particles.count(part.pdgId()) > 0 &&
-              !process_->kinematics().cuts().central_particles.at(part.pdgId()).contain({part}))
+          if (kin.cuts().central_particles.count(part.pdgId()) > 0 &&
+              !kin.cuts().central_particles.at(part.pdgId()).contain({part}))
             return 0.;
         }
-      if (!process_->kinematics().incomingBeams().positive().elastic() &&
-          !process_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam1), event))
+      if (!kin.incomingBeams().positive().elastic() &&
+          !kin.cuts().remnants.contain((*event)(Particle::OutgoingBeam1), event))
         return 0.;
-      if (!process_->kinematics().incomingBeams().negative().elastic() &&
-          !process_->kinematics().cuts().remnants.contain((*event)(Particle::OutgoingBeam2), event))
+      if (!kin.incomingBeams().negative().elastic() &&
+          !kin.cuts().remnants.contain((*event)(Particle::OutgoingBeam2), event))
         return 0.;
 
-      // add generation metadata to the event
-      event->weight = (float)weight;
-      event->time_total = (float)tmr_->elapsed();
+      if (storage_) {
+        // add generation metadata to the event
+        event->weight = (float)weight;
+        event->time_total = (float)tmr_->elapsed();
+      }
 
       CG_DEBUG_LOOP("ProcessIntegrand") << "[process " << std::hex << (void*)process_.get() << std::dec << "]\n\t"
                                         << "Generation time: " << event->time_generation * 1.e3 << " ms\n\t"
