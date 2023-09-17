@@ -23,12 +23,10 @@
 #include "CepGen/Process/Process.h"
 
 namespace cepgen {
-  class PartonFlux;
   namespace proc {
     /**
-     * A generic factorised process.
+     * Generic parton emission-factorised process
      * \note 0 to 2 dimensions may be used for the scattered diffractive system(s)' invariant mass definition.
-     * \brief Class template to define any factorised process
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2023
      */
@@ -49,19 +47,13 @@ namespace cepgen {
       void addEventContent() override final;
       void prepareKinematics() override final;
 
-      /// Set the kinematics of the central system before any point computation
-      virtual void setExtraContent() {}
-      /// Prepare the central part of the Jacobian (only done once, as soon as the kinematics is set)
-      virtual void prepareFactorisedPhaseSpace() = 0;
-      /// Factorised matrix element (event weight)
-      virtual double computeFactorisedMatrixElement() = 0;
-      /// Set the kinematics of the outgoing central system
-      virtual void fillCentralParticlesKinematics() = 0;
+      virtual void setExtraContent() {}                ///< Set central system kinematics prior to point computation
+      virtual void prepareFactorisedPhaseSpace() = 0;  ///< Prepare central part of the Jacobian after kinematics is set
+      virtual double computeFactorisedMatrixElement() = 0;  ///< Factorised matrix element (event weight)
+      virtual void fillCentralParticlesKinematics() = 0;    ///< Set the kinematics of the outgoing central system
 
-      /// Type of particles produced in the final state
-      pdgids_t produced_parts_;
-      /// Kinematic variables generator for the phase space coverage
-      const std::unique_ptr<PhaseSpaceGenerator> psgen_;
+      pdgids_t produced_parts_;                           ///< Type of particles produced in the final state
+      const std::unique_ptr<PhaseSpaceGenerator> psgen_;  ///< Kinematic variables generator for the phase space coverage
     };
   }  // namespace proc
 }  // namespace cepgen

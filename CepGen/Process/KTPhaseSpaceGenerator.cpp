@@ -44,7 +44,7 @@ namespace cepgen {
             params = PartonFluxFactory::get().describeParameters("BudnevInelasticKT").validate(params);
           //TODO: fermions/pions
         }
-        flux = std::move(PartonFluxFactory::get().build(params));
+        flux.reset(PartonFluxFactory::get().build(params).release());
         if (!flux)
           throw CG_FATAL("KTPhaseSpaceGenerator:init")
               << "Failed to initiate a parton flux object with properties: " << params << ".";
@@ -61,9 +61,9 @@ namespace cepgen {
       process().defineVariable(m_qt2_, Process::Mapping::exponential, log_lim_kt, "Negative-z parton virtuality");
 
       // register the incoming partons' azimuthal angles range
-      const auto lim_phi_kt = kin.cuts().initial.phi_qt.truncate(Limits{0., 2. * M_PI});
-      process().defineVariable(m_phi_qt1_, Process::Mapping::linear, lim_phi_kt, "Positive-z parton azimuthal angle");
-      process().defineVariable(m_phi_qt2_, Process::Mapping::linear, lim_phi_kt, "Negative-z parton azimuthal angle");
+      const auto lim_phi = kin.cuts().initial.phi_qt.truncate(Limits{0., 2. * M_PI});
+      process().defineVariable(m_phi_qt1_, Process::Mapping::linear, lim_phi, "Positive-z parton azimuthal angle");
+      process().defineVariable(m_phi_qt2_, Process::Mapping::linear, lim_phi, "Negative-z parton azimuthal angle");
     }
 
     bool KTPhaseSpaceGenerator::generatePartonKinematics() {

@@ -46,11 +46,6 @@ namespace cepgen {
            {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
            {Particle::CentralSystem, produced_parts_}});
       setExtraContent();
-      CG_DEBUG("FactorisedProcess:addEventContent")
-          << "Addition of:\n\t"
-          << "Intermediate partons: "
-          << pdgids_t{psgen_->positiveFlux().partonPdgId(), psgen_->negativeFlux().partonPdgId()} << "\n\t"
-          << "Produced system: " << produced_parts_ << ".\n\t" << event();
     }
 
     void FactorisedProcess::prepareKinematics() {
@@ -63,21 +58,20 @@ namespace cepgen {
       event().oneWithRole(Particle::Parton1).setPdgId(psgen_->positiveFlux().partonPdgId());
       event().oneWithRole(Particle::Parton2).setPdgId(psgen_->negativeFlux().partonPdgId());
 
+      CG_DEBUG("FactorisedProcess:prepareKinematics")
+          << "Partons: " << pdgids_t{psgen_->positiveFlux().partonPdgId(), psgen_->negativeFlux().partonPdgId()} << ", "
+          << "central system: " << produced_parts_ << ". " << event();
+
       // register all process-dependent variables
       prepareFactorisedPhaseSpace();
 
       // register the outgoing remnants' variables
-      //============================================================================================
-
       mX2() = pA().mass2();
       if (!kinematics().incomingBeams().positive().elastic())
-        defineVariable(
-            mX2(), Mapping::square, kinematics().cuts().remnants.mx, "Positive z proton remnant squared mass");
-
+        defineVariable(mX2(), Mapping::square, kinematics().cuts().remnants.mx, "Positive-z beam remnant squared mass");
       mY2() = pB().mass2();
       if (!kinematics().incomingBeams().negative().elastic())
-        defineVariable(
-            mY2(), Mapping::square, kinematics().cuts().remnants.mx, "Negative z proton remnant squared mass");
+        defineVariable(mY2(), Mapping::square, kinematics().cuts().remnants.mx, "Negative-z beam remnant squared mass");
     }
 
     double FactorisedProcess::computeWeight() {
