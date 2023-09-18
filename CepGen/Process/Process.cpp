@@ -204,31 +204,30 @@ namespace cepgen {
 
     double Process::weight(const std::vector<double>& x) {
       point_coord_ = x;
-      if (CG_LOG_MATCH("Process:dumpPoint", debugInsideLoop))
-        dumpPoint();
 
       //--- generate and initialise all variables and generate auxiliary
       //    (x-dependent) part of the Jacobian for this phase space point.
       const auto aux_jacobian = generateVariables();
+
+      CG_DEBUG_LOOP("Process:weight").log([&](auto& log) {
+        log << "Jacobian: " << base_jacobian_ << " * " << aux_jacobian << " = " << (base_jacobian_ * aux_jacobian)
+            << ".\n\t";
+        dumpPoint(&log.stream());
+      });
+
       if (aux_jacobian <= 0.)
         return 0.;
 
       //--- compute the integrand
       const auto me_integrand = computeWeight();
+      CG_DEBUG_LOOP("Process:weight") << "Integrand = " << me_integrand << "\n\t"
+                                      << "Proc.-specific integrand * Jacobian (excl. global Jacobian) = "
+                                      << (me_integrand * aux_jacobian) << ".";
       if (me_integrand <= 0.)
         return 0.;
 
       //--- combine every component into a single weight for this point
-      const auto weight = (base_jacobian_ * aux_jacobian) * me_integrand;
-
-      CG_DEBUG_LOOP("Process:weight") << "Jacobian: " << base_jacobian_ << " * " << aux_jacobian << " = "
-                                      << (base_jacobian_ * aux_jacobian) << ".\n\t"
-                                      << "Integrand = " << me_integrand << "\n\t"
-                                      << "Proc.-specific integrand * Jacobian (excl. global Jacobian) = "
-                                      << (me_integrand * aux_jacobian) << "\n\t"
-                                      << "Point weight = " << weight << ".";
-
-      return weight;
+      return (base_jacobian_ * aux_jacobian) * me_integrand;
     }
 
     void Process::clearEvent() {
@@ -320,13 +319,14 @@ namespace cepgen {
       return (*alphas_)(q);
     }
 
-    void Process::dumpPoint() const {
-      CG_INFO("Process").log([&](auto& info) {
-        info << "Number of integration parameters: " << mapped_variables_.size();
-        for (unsigned short i = 0; i < point_coord_.size(); ++i)
-          info << utils::format("\n\t  x(%2d) = %8.6f", i, point_coord_[i]);
-        info << ".";
-      });
+    void Process::dumpPoint(std::ostream* os) const {
+      std::ostringstream oss;
+      oss << "Number of integration parameters: " << mapped_variables_.size() << ", point: {"
+          << utils::merge(point_coord_, ", ") << "}.";
+      if (!os)
+        CG_INFO("Process") << oss.str();
+      else
+        (*os) << oss.str();
     }
 
     void Process::setEventContent(const IncomingState& ini, const OutgoingState& fin) {

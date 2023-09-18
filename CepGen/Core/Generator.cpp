@@ -121,8 +121,9 @@ namespace cepgen {
     CG_TICKER(parameters_->timeKeeper());
     // copy the integrator instance (or create it if unspecified) in the current scope
     if (!integ)
-      integ = IntegratorFactory::get().build(parameters_->par_integrator);
-    integrator_ = std::move(integ);
+      resetIntegrator();
+    else
+      integrator_ = std::move(integ);
     CG_INFO("Generator:integrator") << "Generator will use a " << integrator_->name() << "-type integrator.";
   }
 

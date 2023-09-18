@@ -64,8 +64,8 @@ namespace cepgen {
       Kinematics& kinematics() { return kin_; }              ///< Reference to the process kinematics
 
       // debugging utilities
-      double weight(const std::vector<double>&);  ///< Compute the weight for a phase-space point
-      void dumpPoint() const;                     ///< Dump the coordinate of the phase-space point being evaluated
+      double weight(const std::vector<double>&);      ///< Compute the weight for a phase-space point
+      void dumpPoint(std::ostream* = nullptr) const;  ///< Dump the coordinate of the phase-space point being evaluated
       void dumpVariables(std::ostream* = nullptr) const;  ///< List all variables handled by this generic process
 
       /// Number of dimensions on which the integration is performed
