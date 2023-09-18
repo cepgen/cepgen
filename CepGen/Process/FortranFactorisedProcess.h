@@ -16,27 +16,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Process_FortranKTProcess_h
-#define CepGen_Process_FortranKTProcess_h
+#ifndef CepGen_Process_FortranFactorisedProcess_h
+#define CepGen_Process_FortranFactorisedProcess_h
 
 #include <functional>
 
-#include "CepGen/Process/KTProcess.h"
+#include "CepGen/Process/FactorisedProcess.h"
 
 namespace cepgen {
   namespace proc {
-    /// Compute the matrix element for a generic \f$k_{\rm T}\f$-factorised process defined in a Fortran weighting function
-    class FortranKTProcess : public KTProcess {
+    /// Compute the matrix element for a generic factorised process defined in a Fortran weighting function
+    class FortranFactorisedProcess : public FactorisedProcess {
     public:
-      explicit FortranKTProcess(const ParametersList& params, std::function<double(void)> func);
-      ProcessPtr clone() const override { return ProcessPtr(new FortranKTProcess(*this)); }
+      explicit FortranFactorisedProcess(const ParametersList& params, std::function<double(void)> func);
+      ProcessPtr clone() const override { return ProcessPtr(new FortranFactorisedProcess(*this)); }
 
       static ParametersList kProcParameters;
 
     private:
-      void preparePhaseSpace() override;
-      double computeKTFactorisedMatrixElement() override;
-      void fillCentralParticlesKinematics() override;
+      void prepareFactorisedPhaseSpace() override final;
+      double computeFactorisedMatrixElement() override final;
+      void fillCentralParticlesKinematics() override final;
 
       std::function<double(void)> func_;  ///< Function to be called for weight computation
 

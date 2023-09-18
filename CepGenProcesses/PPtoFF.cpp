@@ -39,7 +39,8 @@ public:
 
   static ParametersDescription description() {
     auto desc = Process2to4::description();
-    desc.setDescription("γγ → f⁺f¯ (kt-factor.)");
+    desc.setDescription("γγ → f⁺f¯");
+    desc.add<bool>("ktFactorised", true);
     desc.addAs<int, pdgid_t>("pair", PDG::muon).setDescription("type of central particles emitted");
     desc.addAs<int, Mode>("method", Mode::offShell)
         .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell)");
@@ -185,13 +186,13 @@ double PPtoFF::offShellME() const {
             (osp_.term_lt * 4. * zpm * (zp - zm) * phi_0 * dot));
   };
   //--- t-channel
-  const auto q2_1 = utils::kt::q2(x1_, q1().pt2(), mA2(), mX2());
-  const auto [zp_1, zm_1] = compute_zs(+1, x1_);
+  const auto q2_1 = utils::kt::q2(x1(), q1().pt2(), mA2(), mX2());
+  const auto [zp_1, zm_1] = compute_zs(+1, x1());
   const auto amat2_1 = compute_mat_element(zp_1, zm_1, q2_1, q1(), q2().transverse());
 
   //--- u-channel
-  const auto q2_2 = utils::kt::q2(x2_, q2().pt2(), mB2(), mY2());
-  const auto [zp_2, zm_2] = compute_zs(-1, x2_);
+  const auto q2_2 = utils::kt::q2(x2(), q2().pt2(), mB2(), mY2());
+  const auto [zp_2, zm_2] = compute_zs(-1, x2());
   const auto amat2_2 = compute_mat_element(zp_2, zm_2, q2_2, q2(), q1().transverse());
 
   //--- symmetrisation
@@ -201,7 +202,7 @@ double PPtoFF::offShellME() const {
 
   const auto t_limits = Limits{0., std::pow(std::max(mt1, mt2), 2)};
   const auto q_1 = std::sqrt(t_limits.trim(q2_1)), q_2 = std::sqrt(t_limits.trim(q2_2));
-  return couplingPrefactor(q_1, q_2) * std::pow(x1_ * x2_ * s(), 2) * amat2;
+  return couplingPrefactor(q_1, q_2) * std::pow(x1() * x2() * s(), 2) * amat2;
 }
 // register process
 REGISTER_PROCESS("pptoff", PPtoFF);

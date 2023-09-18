@@ -18,7 +18,7 @@
 
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Process/FortranKTProcess.h"
+#include "CepGen/Process/FortranFactorisedProcess.h"
 
 //=============================================================================
 // START BY LISTING ALL FORTRAN FUNCTIONS

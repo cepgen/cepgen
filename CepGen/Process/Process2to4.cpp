@@ -26,11 +26,14 @@
 namespace cepgen {
   namespace proc {
     Process2to4::Process2to4(const ParametersList& params, pdgid_t cs_id)
-        : KTProcess(params, {cs_id, cs_id}), cs_prop_(PDG::get()(cs_id)), single_limits_(params), rnd_sign_(0, 1) {}
+        : FactorisedProcess(params, {cs_id, cs_id}),
+          cs_prop_(PDG::get()(cs_id)),
+          single_limits_(params),
+          rnd_sign_(0, 1) {}
 
     void Process2to4::setCuts(const cuts::Central& single) { single_limits_ = single; }
 
-    void Process2to4::preparePhaseSpace() {
+    void Process2to4::prepareFactorisedPhaseSpace() {
       if (cs_prop_.pdgid == PDG::invalid)  // ensure the central particles properties are correctly initialised
         cs_prop_ = PDG::get()(steer<ParticleProperties>("pair").pdgid);
 
@@ -49,16 +52,16 @@ namespace cepgen {
       prepareProcessKinematics();
     }
 
-    double Process2to4::computeKTFactorisedMatrixElement() {
+    double Process2to4::computeFactorisedMatrixElement() {
+      if (!kinematics().cuts().central.rapidity_diff.contains(fabs(m_y_c1_ - m_y_c2_)))  // rapidity distance
+        return 0.;
       {
-        const auto qt_sum = q1() + q2();  // two-parton transverse momentum
+        const auto qt_sum = q1() + q2();  // two-parton system
         const auto pt_diff = Momentum::fromPtEtaPhiE(m_pt_diff_, 0., m_phi_pt_diff_);
         const auto pt_c1 = 0.5 * (qt_sum + pt_diff);
         const auto pt_c2 = 0.5 * (qt_sum - pt_diff);
         const double p1t = pt_c1.pt(), p2t = pt_c2.pt();
         //--- cuts on central system
-        if (!kinematics().cuts().central.rapidity_diff.contains(fabs(m_y_c1_ - m_y_c2_)))  // rapidity distance
-          return 0.;
         if (!kinematics().cuts().central.pt_single.contains(p1t) || !single_limits_.pt_single.contains(p1t))
           return 0.;
         if (!kinematics().cuts().central.pt_single.contains(p2t) || !single_limits_.pt_single.contains(p2t))
@@ -80,24 +83,23 @@ namespace cepgen {
       //--- compute and sanitise the momentum losses
       const auto amt1 = pc(0).massT() / sqrtS(), amt2 = pc(1).massT() / sqrtS();
       static const auto x_lim = Limits{0., 1.};
-      x1_ = amt1 * exp(+m_y_c1_) + amt2 * exp(+m_y_c2_);
-      if (!x_lim.contains(x1_))
+      x1() = amt1 * exp(+m_y_c1_) + amt2 * exp(+m_y_c2_);
+      if (!x_lim.contains(x1()))
         return 0.;
-      x2_ = amt1 * exp(-m_y_c1_) + amt2 * exp(-m_y_c2_);
-      if (!x_lim.contains(x2_))
+      x2() = amt1 * exp(-m_y_c1_) + amt2 * exp(-m_y_c2_);
+      if (!x_lim.contains(x2()))
         return 0.;
 
       //--- additional conditions for energy-momentum conservation
-
-      if (!kinematics().incomingBeams().positive().elastic() && std::sqrt(x2_ * s() - invm - q2().p2()) <= mX())
+      if (!kinematics().incomingBeams().positive().elastic() && std::sqrt(x2() * s() - invm - q2().p2()) <= mX())
         return 0.;
-      if (!kinematics().incomingBeams().negative().elastic() && std::sqrt(x1_ * s() - invm - q1().p2()) <= mY())
+      if (!kinematics().incomingBeams().negative().elastic() && std::sqrt(x1() * s() - invm - q1().p2()) <= mY())
         return 0.;
 
       //--- four-momenta of the outgoing protons (or remnants)
 
-      const auto px_plus = (1. - x1_) * pA().p() * M_SQRT2, px_minus = (mX2() + q1().p2()) * 0.5 / px_plus;
-      const auto py_minus = (1. - x2_) * pB().p() * M_SQRT2, py_plus = (mY2() + q2().p2()) * 0.5 / py_minus;
+      const auto px_plus = (1. - x1()) * pA().p() * M_SQRT2, px_minus = (mX2() + q1().p2()) * 0.5 / px_plus;
+      const auto py_minus = (1. - x2()) * pB().p() * M_SQRT2, py_plus = (mY2() + q2().p2()) * 0.5 / py_minus;
       CG_DEBUG_LOOP("2to4:pxy") << "px± = " << px_plus << " / " << px_minus << "\n\t"
                                 << "py± = " << py_plus << " / " << py_minus << ".";
 
@@ -118,22 +120,25 @@ namespace cepgen {
 
       //--- four-momenta of the intermediate partons
       const double norm = 1. / ww_ / ww_ / s(), prefac = 0.5 * ww_ * sqrtS();
-      const double tau1 = norm * q1().p2() / x1_ / x1_;
-      q1().setPz(+prefac * x1_ * (1. - tau1)).setEnergy(+prefac * x1_ * (1. + tau1));
+      const double tau1 = norm * q1().p2() / x1() / x1();
+      q1().setPz(+prefac * x1() * (1. - tau1)).setEnergy(+prefac * x1() * (1. + tau1));
 
-      const double tau2 = norm * q2().p2() / x2_ / x2_;
-      q2().setPz(-prefac * x2_ * (1. - tau2)).setEnergy(+prefac * x2_ * (1. + tau2));
+      const double tau2 = norm * q2().p2() / x2() / x2();
+      q2().setPz(-prefac * x2() * (1. - tau2)).setEnergy(+prefac * x2() * (1. + tau2));
 
-      CG_DEBUG_LOOP("2to4:partons") << "First parton:  " << q1() << ", mass2 = " << q1().mass2() << "\n\t"
-                                    << "Second parton: " << q2() << ", mass2 = " << q2().mass2() << ".";
+      CG_DEBUG_LOOP("2to4:partons") << "Squared c.m. energy = " << s() << " GeV^2\n\t"
+                                    << "First parton: " << q1() << ", mass2 = " << q1().mass2() << ", x1 = " << x1()
+                                    << ", p = " << q1().p() << "\n\t"
+                                    << "Second parton: " << q2() << ", mass2 = " << q2().mass2() << ", x2 = " << x2()
+                                    << ", p = " << q2().p() << ".";
 
       //--- central 2-to-2 matrix element
-      const double amat2 = computeCentralMatrixElement();
+      const auto amat2 = computeCentralMatrixElement();
       if (amat2 <= 0.)  // skip computing the fluxes if no contribution
         return 0.;
 
       // factor 1/4 from jacobian of transformations
-      return amat2 * std::pow(4. * M_PI * x1_ * x2_ * s(), -2) * 0.25 * constants::GEVM2_TO_PB *
+      return amat2 * std::pow(4. * M_PI * x1() * x2() * s(), -2) * 0.25 * constants::GEVM2_TO_PB *
              (m_pt_diff_ * q1().p() * q2().p());
     }
 
