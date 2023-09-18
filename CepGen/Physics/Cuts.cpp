@@ -86,7 +86,7 @@ namespace cepgen {
     }
 
     Initial::Initial(const ParametersList& params) : SteeredObject(params) {
-      (*this).add("q2", q2).add("qt", qt).add("phiqt", phi_qt);
+      (*this).add("q2", q2).add("qt", qt).add("phi", phi);
     }
 
     ParametersDescription Initial::description() {

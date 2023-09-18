@@ -39,6 +39,7 @@ namespace cepgen {
     protected:
       // mapped variables
       double m_t1_{0.}, m_t2_{0.};
+      double m_phi1_{0.}, m_phi2_{0.};
     };
   }  // namespace proc
 }  // namespace cepgen
