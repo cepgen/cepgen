@@ -12,7 +12,6 @@ process = coll.process.clone('pptoww',
         mode = cepgen.ProcessMode.ElasticElastic,
         method = 0,  # on-shell (0) or off-shell (1) formula
         polarisationStates = 0,  # full
-        ktFactorised = False,
     ),
     inKinematics = cepgen.Parameters(
         #partonFluxes = (lhapdfLUXlep, lhapdfLUXlep),
