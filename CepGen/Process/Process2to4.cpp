@@ -126,8 +126,11 @@ namespace cepgen {
       const double tau2 = norm * q2().p2() / x2() / x2();
       q2().setPz(-prefac * x2() * (1. - tau2)).setEnergy(+prefac * x2() * (1. + tau2));
 
-      CG_DEBUG_LOOP("2to4:partons") << "First parton:  " << q1() << ", mass2 = " << q1().mass2() << "\n\t"
-                                    << "Second parton: " << q2() << ", mass2 = " << q2().mass2() << ".";
+      CG_DEBUG_LOOP("2to4:partons") << "Squared c.m. energy = " << s() << " GeV^2\n\t"
+                                    << "First parton: " << q1() << ", mass2 = " << q1().mass2() << ", x1 = " << x1()
+                                    << ", p = " << q1().p() << "\n\t"
+                                    << "Second parton: " << q2() << ", mass2 = " << q2().mass2() << ", x2 = " << x2()
+                                    << ", p = " << q2().p() << ".";
 
       //--- central 2-to-2 matrix element
       const auto amat2 = computeCentralMatrixElement();
