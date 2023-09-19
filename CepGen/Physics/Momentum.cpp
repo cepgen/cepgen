@@ -147,6 +147,21 @@ namespace cepgen {
 
   //--- various setters
 
+  Momentum& Momentum::setPx(double px) {
+    (*this)[X] = px;
+    return computeP();
+  }
+
+  Momentum& Momentum::setPy(double py) {
+    (*this)[Y] = py;
+    return computeP();
+  }
+
+  Momentum& Momentum::setPz(double pz) {
+    (*this)[Z] = pz;
+    return computeP();
+  }
+
   Momentum& Momentum::setEnergy(double e) {
     (*this)[E] = e;
     return *this;
@@ -158,7 +173,7 @@ namespace cepgen {
 
   Momentum& Momentum::setP(double px, double py, double pz, double e) { return setEnergy(e).setP(px, py, pz); }
 
-  Momentum& Momentum::setP(double px, double py, double pz) { return setPx(px).setPy(py).setPz(pz).computeP(); }
+  Momentum& Momentum::setP(double px, double py, double pz) { return setPx(px).setPy(py).setPz(pz); }
 
   //--- kinematics constrainers
 
@@ -273,7 +288,7 @@ namespace cepgen {
 
     const double apz = pz(), ae = energy();
 
-    return setPz(gamma * apz + betagamma * ae).setEnergy(gamma * ae + betagamma * apz).computeP();
+    return setEnergy(gamma * ae + betagamma * apz).setPz(gamma * apz + betagamma * ae);
   }
 
   Momentum& Momentum::lorentzBoost(const Momentum& mom) {

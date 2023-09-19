@@ -98,24 +98,15 @@ namespace cepgen {
     /// Set all the components of the 3-momentum (in GeV)
     Momentum& setP(double px, double py, double pz);
     /// Set the momentum along the \f$x\f$-axis (in GeV)
-    inline Momentum& setPx(double px) {
-      (*this)[X] = px;
-      return *this;
-    }
+    Momentum& setPx(double px);
     /// Momentum along the \f$x\f$-axis (in GeV)
     inline double px() const { return (*this)[X]; }
     /// Set the momentum along the \f$y\f$-axis (in GeV)
-    inline Momentum& setPy(double py) {
-      (*this)[Y] = py;
-      return *this;
-    }
+    Momentum& setPy(double py);
     /// Momentum along the \f$y\f$-axis (in GeV)
     inline double py() const { return (*this)[Y]; }
     /// Set the longitudinal momentum (in GeV)
-    inline Momentum& setPz(double pz) {
-      (*this)[Z] = pz;
-      return *this;
-    }
+    Momentum& setPz(double pz);
     /// Longitudinal momentum (in GeV)
     inline double pz() const { return (*this)[Z]; }
     /// Transverse momentum (in GeV)
