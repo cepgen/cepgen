@@ -148,7 +148,7 @@ private:
         hel_mat_elem += norm(p1 * (pp + mm) - std::complex<double>(0, 1) * p2 * (pp - mm) - p3 * (pm + mp) -
                              std::complex<double>(0, 1) * p4 * (pm - mp));
       }
-    return hel_mat_elem * std::pow(0.5 / q1().p() / q2().p(), 2);
+    return hel_mat_elem * std::pow(0.5 / q1().pt() / q2().pt(), 2);
   }
 
   const double mW_, mW2_;
