@@ -74,7 +74,7 @@ namespace cepgen {
             << ".";
 
       // register the incoming partons' virtuality
-      const auto log_lim_q2 = kin.cuts().initial.q2.truncate(Limits{1.e-5, 50.}).compute(std::log);
+      const auto log_lim_q2 = kin.cuts().initial.q2.truncate(Limits{1.e-10, 5.}).compute(std::log);
       process().defineVariable(m_t1_, Process::Mapping::exponential, log_lim_q2, "Positive-z parton virtuality");
       process().defineVariable(m_t2_, Process::Mapping::exponential, log_lim_q2, "Negative-z parton virtuality");
     }
@@ -86,14 +86,14 @@ namespace cepgen {
       process().q1() = Momentum::fromPxPyPzM(0., 0., +pz1, std::sqrt(m_t1_));
       const auto pz2 = 0.5 * (m_t2_ - proc.mB2() - proc.mY2()) / (proc.pB().energy() - proc.pB().pz());
       process().q2() = Momentum::fromPxPyPzM(0., 0., -pz2, std::sqrt(m_t2_));*/
-      process().q1() = Momentum::fromPtYPhiM(0., 0., m_phi1_, std::sqrt(m_t1_));
-      process().q2() = Momentum::fromPtYPhiM(0., 0., m_phi2_, std::sqrt(m_t2_));
+      process().q1() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t1_));
+      process().q2() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t2_));
       return true;
     }
 
     double CollinearPhaseSpaceGenerator::fluxes() const {
-      return positiveFlux<CollinearFlux>().fluxQ2(process().x1(), m_t1_) *
-             negativeFlux<CollinearFlux>().fluxQ2(process().x2(), m_t2_);
+      return positiveFlux<CollinearFlux>().fluxQ2(process().x1(), m_t1_) * m_t1_ *
+             negativeFlux<CollinearFlux>().fluxQ2(process().x2(), m_t2_) * m_t2_;
     }
   }  // namespace proc
 }  // namespace cepgen

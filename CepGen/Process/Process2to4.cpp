@@ -41,15 +41,11 @@ namespace cepgen {
       defineVariable(m_y_c1_, Mapping::linear, lim_rap, "First outgoing particle rapidity");
       defineVariable(m_y_c2_, Mapping::linear, lim_rap, "Second outgoing particle rapidity");
 
-      if (psgen_->ktFactorised()) {
-        const auto lim_pt_diff = kinematics().cuts().central.pt_diff.truncate(Limits{0., 500.});
-        defineVariable(
-            m_pt_diff_, Mapping::linear, lim_pt_diff, "Final state particles transverse momentum difference");
+      const auto lim_pt_diff = kinematics().cuts().central.pt_diff.truncate(Limits{0., 500.});
+      defineVariable(m_pt_diff_, Mapping::linear, lim_pt_diff, "Final state particles transverse momentum difference");
 
-        const auto lim_phi_diff = kinematics().cuts().central.phi_diff.truncate(Limits{0., 2. * M_PI});
-        defineVariable(
-            m_phi_pt_diff_, Mapping::linear, lim_phi_diff, "Final state particles azimuthal angle difference");
-      }
+      const auto lim_phi_diff = kinematics().cuts().central.phi_diff.truncate(Limits{0., 2. * M_PI});
+      defineVariable(m_phi_pt_diff_, Mapping::linear, lim_phi_diff, "Final state particles azimuthal angle difference");
 
       ww_ = 0.5 * (1. + std::sqrt(1. - 4. * mA() * mB() / s()));
 
@@ -66,15 +62,12 @@ namespace cepgen {
         const auto pt_c2 = 0.5 * (qt_sum - pt_diff);
         const double p1t = pt_c1.pt(), p2t = pt_c2.pt();
         //--- cuts on central system
-        if (psgen_->ktFactorised()) {  // transverse kinematics of outgoing central system
-          //--- cuts on central system
-          if (!kinematics().cuts().central.pt_single.contains(p1t) || !single_limits_.pt_single.contains(p1t))
-            return 0.;
-          if (!kinematics().cuts().central.pt_single.contains(p2t) || !single_limits_.pt_single.contains(p2t))
-            return 0.;
-          if (!kinematics().cuts().central.pt_diff.contains(fabs(p1t - p2t)))  // transverse momentum difference
-            return 0.;
-        }
+        if (!kinematics().cuts().central.pt_single.contains(p1t) || !single_limits_.pt_single.contains(p1t))
+          return 0.;
+        if (!kinematics().cuts().central.pt_single.contains(p2t) || !single_limits_.pt_single.contains(p2t))
+          return 0.;
+        if (!kinematics().cuts().central.pt_diff.contains(fabs(p1t - p2t)))  // transverse momentum difference
+          return 0.;
         //--- four-momenta of the outgoing central particles
         pc(0) = Momentum::fromPtYPhiM(p1t, m_y_c1_, pt_c1.phi(), cs_prop_.mass);
         pc(1) = Momentum::fromPtYPhiM(p2t, m_y_c2_, pt_c2.phi(), cs_prop_.mass);
