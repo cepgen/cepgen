@@ -78,5 +78,5 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_FLUX("InelasticKT", InelasticNucleonKTFlux);
-REGISTER_FLUX("BudnevInelasticKT", BudnevInelasticNucleonKTFlux);
+REGISTER_KT_FLUX("Inelastic", InelasticNucleonKTFlux);
+REGISTER_KT_FLUX("BudnevInelastic", BudnevInelasticNucleonKTFlux);

@@ -62,7 +62,7 @@ namespace cepgen {
       };
 
       list_modules(ProcessFactory::get(), "Physics processes");
-      list_modules(PartonFluxFactory::get(), "Parton fluxes modellings");
+      list_modules(KTFluxFactory::get(), "kt-factorised fluxes modellings");
       list_modules(FormFactorsFactory::get(), "Beam form factors modellings");
       list_int_modules(SigmaRatiosFactory::get(), "Cross section ratios modellings");
       list_int_modules(StructureFunctionsFactory::get(), "Structure functions modellings", [](int mod) {

@@ -119,7 +119,7 @@ int main(int argc, char* argv[]) {
     LOOP_FACTORY("Analytic integrator", cepgen::AnalyticIntegratorFactory)
     LOOP_FACTORY("Derivator", cepgen::DerivatorFactory)
     LOOP_FACTORY("Process", cepgen::ProcessFactory)
-    LOOP_FACTORY("Parton flux modelling", cepgen::PartonFluxFactory)
+    LOOP_FACTORY("KT-factorised parton flux modelling", cepgen::KTFluxFactory)
     LOOP_FACTORY("Beam form factors modelling", cepgen::FormFactorsFactory)
     LOOP_FACTORY_INT("Structure functions modelling", cepgen::StructureFunctionsFactory)
     LOOP_FACTORY_INT("Cross sections ratio modelling", cepgen::SigmaRatiosFactory)

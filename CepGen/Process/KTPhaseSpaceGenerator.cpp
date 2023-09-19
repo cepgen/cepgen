@@ -37,14 +37,14 @@ namespace cepgen {
         if (params.name<std::string>().empty()) {
           if (beam.elastic()) {
             if (HeavyIon::isHI(beam.pdgId()))
-              params = PartonFluxFactory::get().describeParameters("ElasticHeavyIonKT").validate(params);
+              params = KTFluxFactory::get().describeParameters("ElasticHeavyIon").validate(params);
             else
-              params = PartonFluxFactory::get().describeParameters("BudnevElasticKT").validate(params);
+              params = KTFluxFactory::get().describeParameters("BudnevElastic").validate(params);
           } else
-            params = PartonFluxFactory::get().describeParameters("BudnevInelasticKT").validate(params);
+            params = KTFluxFactory::get().describeParameters("BudnevInelastic").validate(params);
           //TODO: fermions/pions
         }
-        flux.reset(PartonFluxFactory::get().build(params).release());
+        flux.reset(KTFluxFactory::get().build(params).release());
         if (!flux)
           throw CG_FATAL("KTPhaseSpaceGenerator:init")
               << "Failed to initiate a parton flux object with properties: " << params << ".";

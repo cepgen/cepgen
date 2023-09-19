@@ -29,8 +29,8 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Integration/AnalyticIntegrator.h"
 #include "CepGen/Integration/Integrator.h"
+#include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Physics/Coupling.h"
-#include "CepGen/Physics/PartonFlux.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
@@ -126,7 +126,7 @@ namespace cepgen {
   template class ModuleFactory<GeneratorWorker, std::string>;
   template class ModuleFactory<Integrator, std::string>;
   template class ModuleFactory<AnalyticIntegrator, std::string>;
-  template class ModuleFactory<PartonFlux, std::string>;
+  template class ModuleFactory<KTFlux, std::string>;
   template class ModuleFactory<proc::Process, std::string>;
   template class ModuleFactory<sigrat::Parameterisation, int>;
   template class ModuleFactory<strfun::Parameterisation, int>;
