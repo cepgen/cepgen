@@ -47,15 +47,7 @@ namespace cepgen {
         << "Dim-" << integrand_->size() << " " << integrator_->name() << " integrator set.";
   }
 
-  void GeneratorWorker::generate(size_t num_events, Event::callback callback) {
-    if (!params_)
-      throw CG_FATAL("GeneratorWorker:generate") << "No steering parameters specified!";
-    callback_evt_ = callback;
-    while (params_->numGeneratedEvents() < num_events)
-      next();
-  }
-
-  void GeneratorWorker::generate(size_t num_events, void (*callback)(const proc::Process&)) {
+  void GeneratorWorker::generate(size_t num_events, const std::function<void(const proc::Process&)>& callback) {
     if (!params_)
       throw CG_FATAL("GeneratorWorker:generate") << "No steering parameters specified!";
     callback_proc_ = callback;
@@ -75,8 +67,6 @@ namespace cepgen {
       CG_INFO("GeneratorWorker:store") << utils::s("event", ngen + 1, true) << " generated.";
     if (callback_proc_)
       callback_proc_(integrand_->process());
-    if (callback_evt_)
-      callback_evt_(event, ngen);
     for (const auto& mod : params_->eventExportersSequence())
       *mod << event;
     const_cast<Parameters*>(params_)->addGenerationTime(event.time_total);

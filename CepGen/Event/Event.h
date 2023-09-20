@@ -49,9 +49,6 @@ namespace cepgen {
     /// Compress the event record
     Event compress() const;
 
-    /// Callback function each event is required to pass through
-    typedef std::function<void(const Event&, unsigned long long)> callback;
-
     /// Human-readable version of the event content
     friend std::ostream& operator<<(std::ostream&, const Event&);
     /// Dump all the known information on every Particle object contained in this Event container in the output stream
@@ -145,4 +142,3 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
-

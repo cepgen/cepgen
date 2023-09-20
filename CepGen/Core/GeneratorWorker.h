@@ -46,11 +46,7 @@ namespace cepgen {
     /// Launch the event generation
     /// \param[in] num_events Number of events to generate
     /// \param[in] callback The callback function applied on every event generated
-    void generate(size_t num_events, Event::callback callback = nullptr);
-    /// Launch the event generation
-    /// \param[in] num_events Number of events to generate
-    /// \param[in] callback The callback function applied on every event generated
-    void generate(size_t num_events, void (*callback)(const proc::Process&));
+    void generate(size_t num_events, const std::function<void(const proc::Process&)>&);
     /// Function evaluator
     ProcessIntegrand& integrand() { return *integrand_; }
 
@@ -73,8 +69,8 @@ namespace cepgen {
     const Parameters* params_{nullptr};
     /// Local event weight evaluator
     std::unique_ptr<ProcessIntegrand> integrand_;
-    Event::callback callback_evt_{nullptr};                 ///< Callback function on event for each new event
-    void (*callback_proc_)(const proc::Process&){nullptr};  ///< Callback function on process for each new event
+    /// Callback function on process for each new event
+    std::function<void(const proc::Process&)> callback_proc_{nullptr};
   };
 }  // namespace cepgen
 

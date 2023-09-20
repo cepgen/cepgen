@@ -128,16 +128,12 @@ namespace cepgen {
     /// Last error on the cross section computed by the generator
     double crossSectionError() const { return xsect_.uncertainty(); }
 
-    // void terminate();
-    /// \deprecated Replaced by the generic method \a generate.
-    [[deprecated("Please use generate or next instead")]] const Event& generateOneEvent(Event::callback = nullptr);
     /// Launch the generation of events
-    void generate(size_t num_events = 0, Event::callback = nullptr);
+    void generate(size_t num_events, const std::function<void(const Event&, size_t)>&);
     /// Launch the generation of events
-    void generate(size_t num_events, void (*)(const proc::Process&));
+    void generate(size_t num_events, const std::function<void(const proc::Process&)>& = nullptr);
     /// Generate one event
-    /// \param[in] callback Callback function where the generated event can be fed
-    const Event& next(Event::callback callback = nullptr);
+    const Event& next();
     /// Compute one single point from the total phase space
     /// \param[in] x the n-dimensional point to compute
     /// \return the function value for the given point

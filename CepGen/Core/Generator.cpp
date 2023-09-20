@@ -156,8 +156,6 @@ namespace cepgen {
       mod->setCrossSection(xsect_);
   }
 
-  const Event& Generator::generateOneEvent(Event::callback callback) { return next(callback); }
-
   void Generator::initialise() {
     if (initialised_)
       return;
@@ -176,7 +174,7 @@ namespace cepgen {
     initialised_ = true;
   }
 
-  const Event& Generator::next(Event::callback callback) {
+  const Event& Generator::next() {
     if (!worker_ || !initialised_)
       initialise();
     size_t num_try = 0;
@@ -187,10 +185,11 @@ namespace cepgen {
     return worker_->integrand().process().event();
   }
 
-  void Generator::generate(size_t num_events, Event::callback callback) {
+  void Generator::generate(size_t num_events, const std::function<void(const proc::Process&)>& callback) {
     CG_TICKER(parameters_->timeKeeper());
 
-    initialise();
+    if (!worker_ || !initialised_)
+      initialise();
 
     //--- if invalid argument, retrieve from runtime parameters
     if (num_events < 1) {
@@ -219,19 +218,10 @@ namespace cepgen {
                          << "Equivalent luminosity: " << utils::format("%g", equiv_lumi) << " pb^-1.";
   }
 
-  void Generator::generate(size_t num_events, void (*callback)(const proc::Process&)) {
-    CG_TICKER(parameters_->timeKeeper());
-    initialise();
-    CG_INFO("Generator") << utils::s("event", num_events, true) << " will be generated.";
-    const utils::Timer tmr;
-
-    worker_->generate(num_events, callback);  // launch the event generation
-
-    const double gen_time_s = tmr.elapsed();
-    const double rate_ms =
-        (parameters_->numGeneratedEvents() > 0) ? gen_time_s / parameters_->numGeneratedEvents() * 1.e3 : 0.;
-    CG_INFO("Generator") << utils::s("event", parameters_->numGeneratedEvents()) << " generated in " << gen_time_s
-                         << " s "
-                         << "(" << rate_ms << " ms/event).";
+  void Generator::generate(size_t num_events, const std::function<void(const Event&, size_t)>& callback) {
+    generate(num_events, [&](const proc::Process& proc) {
+      if (callback)
+        callback(proc.event(), parameters_->numGeneratedEvents());
+    });
   }
 }  // namespace cepgen
