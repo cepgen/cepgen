@@ -50,15 +50,20 @@ namespace cepgen {
   void GeneratorWorker::generate(size_t num_events, Event::callback callback) {
     if (!params_)
       throw CG_FATAL("GeneratorWorker:generate") << "No steering parameters specified!";
-
-    if (num_events < 1)
-      num_events = params_->generation().maxGen();
-
+    callback_evt_ = callback;
     while (params_->numGeneratedEvents() < num_events)
-      next(callback);
+      next();
   }
 
-  bool GeneratorWorker::storeEvent(Event::callback callback) {
+  void GeneratorWorker::generate(size_t num_events, void (*callback)(const proc::Process&)) {
+    if (!params_)
+      throw CG_FATAL("GeneratorWorker:generate") << "No steering parameters specified!";
+    callback_proc_ = callback;
+    while (params_->numGeneratedEvents() < num_events)
+      next();
+  }
+
+  bool GeneratorWorker::storeEvent() {
     CG_TICKER(const_cast<Parameters*>(params_)->timeKeeper());
 
     if (!integrand_->process().hasEvent())
@@ -68,8 +73,10 @@ namespace cepgen {
     const auto ngen = params_->numGeneratedEvents();
     if ((ngen + 1) % params_->generation().printEvery() == 0)
       CG_INFO("GeneratorWorker:store") << utils::s("event", ngen + 1, true) << " generated.";
-    if (callback)
-      callback(event, ngen);
+    if (callback_proc_)
+      callback_proc_(integrand_->process());
+    if (callback_evt_)
+      callback_evt_(event, ngen);
     for (const auto& mod : params_->eventExportersSequence())
       *mod << event;
     const_cast<Parameters*>(params_)->addGenerationTime(event.time_total);

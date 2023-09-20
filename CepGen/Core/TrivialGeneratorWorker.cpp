@@ -39,7 +39,7 @@ namespace cepgen {
     /// Book the memory slots and structures for the generator
     explicit TrivialGeneratorWorker(const ParametersList& params) : GeneratorWorker(params) {}
 
-    bool next(Event::callback callback = nullptr) override;
+    bool next() override;
 
   private:
     /// Placeholder for invalid bin indexing
@@ -72,7 +72,7 @@ namespace cepgen {
   // events generation part
   //-----------------------------------------------------------------------------------------------
 
-  bool TrivialGeneratorWorker::next(Event::callback callback) {
+  bool TrivialGeneratorWorker::next() {
     CG_TICKER(const_cast<Parameters*>(params_)->timeKeeper());
 
     if (!integrator_)
@@ -87,7 +87,7 @@ namespace cepgen {
       while (!correctionCycle(store)) {
       }
       if (store)
-        return storeEvent(callback);
+        return storeEvent();
     }
 
     //--- normal generation cycle
@@ -118,7 +118,7 @@ namespace cepgen {
       ps_bin_ = UNASSIGNED_BIN;
 
     // return with an accepted event
-    return storeEvent(callback);
+    return storeEvent();
   }
 
   bool TrivialGeneratorWorker::correctionCycle(bool& store) {

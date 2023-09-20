@@ -45,8 +45,6 @@ namespace cepgen {
       rnd_->SetSeed(steer<unsigned long long>("seed"));
 
       //--- a bit of printout for debugging
-      CG_DEBUG("FoamGeneratorWorker:build") << "FOAM integrator built\n\t"
-                                            << "Version: " << foam_->GetVersion() << ".";
       CG_WARNING("FoamGeneratorWorker") << "This wrapping of the Foam generation algorithm implemented in ROOT "
                                            "libraries is still experimental! Please use with care...";
     }
@@ -79,10 +77,12 @@ namespace cepgen {
       foam_->SetRho(this);
       foam_->SetkDim(integrand_->size());
       foam_->Initialize();
+      CG_DEBUG("FoamGeneratorWorker:build") << "FOAM integrator built\n\t"
+                                            << "Version: " << foam_->GetVersion() << ".";
     }
-    bool next(Event::callback callback = nullptr) override {
+    bool next() override {
       foam_->MakeEvent();
-      return storeEvent(callback);
+      return storeEvent();
     }
 
     /// Compute the weight for a given phase space point

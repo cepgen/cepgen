@@ -29,6 +29,9 @@ namespace cepgen {
   class Integrator;
   class Parameters;
   class ProcessIntegrand;
+  namespace proc {
+    class Process;
+  }
   /// Monte-Carlo generator instance
   class GeneratorWorker : public SteeredObject<GeneratorWorker> {
   public:
@@ -43,21 +46,24 @@ namespace cepgen {
     /// Launch the event generation
     /// \param[in] num_events Number of events to generate
     /// \param[in] callback The callback function applied on every event generated
-    void generate(size_t num_events = 0, Event::callback callback = nullptr);
+    void generate(size_t num_events, Event::callback callback = nullptr);
+    /// Launch the event generation
+    /// \param[in] num_events Number of events to generate
+    /// \param[in] callback The callback function applied on every event generated
+    void generate(size_t num_events, void (*callback)(const proc::Process&));
     /// Function evaluator
     ProcessIntegrand& integrand() { return *integrand_; }
 
     /// Specify the runtime parameters
     virtual void setRuntimeParameters(const Parameters*);
     /// Generate a single event
-    /// \param[in] callback The callback function applied on every event generated
-    virtual bool next(Event::callback callback = nullptr) = 0;
+    virtual bool next() = 0;
 
   protected:
     /// Store the event in the output file
     /// \param[in] callback The callback function for every event generated
     /// \return A boolean stating whether or not the event was successfully saved
-    bool storeEvent(Event::callback);
+    bool storeEvent();
 
     /// Pointer to the mother-handled integrator instance
     /// \note NOT owning
@@ -67,6 +73,8 @@ namespace cepgen {
     const Parameters* params_{nullptr};
     /// Local event weight evaluator
     std::unique_ptr<ProcessIntegrand> integrand_;
+    Event::callback callback_evt_{nullptr};                 ///< Callback function on event for each new event
+    void (*callback_proc_)(const proc::Process&){nullptr};  ///< Callback function on process for each new event
   };
 }  // namespace cepgen
 

@@ -180,7 +180,7 @@ namespace cepgen {
     if (!worker_ || !initialised_)
       initialise();
     size_t num_try = 0;
-    while (!worker_->next(callback)) {
+    while (!worker_->next()) {
       if (num_try++ > 5)
         throw CG_FATAL("Generator:next") << "Failed to generate the next event!";
     }
@@ -217,5 +217,21 @@ namespace cepgen {
                          << " s "
                          << "(" << rate_ms << " ms/event).\n\t"
                          << "Equivalent luminosity: " << utils::format("%g", equiv_lumi) << " pb^-1.";
+  }
+
+  void Generator::generate(size_t num_events, void (*callback)(const proc::Process&)) {
+    CG_TICKER(parameters_->timeKeeper());
+    initialise();
+    CG_INFO("Generator") << utils::s("event", num_events, true) << " will be generated.";
+    const utils::Timer tmr;
+
+    worker_->generate(num_events, callback);  // launch the event generation
+
+    const double gen_time_s = tmr.elapsed();
+    const double rate_ms =
+        (parameters_->numGeneratedEvents() > 0) ? gen_time_s / parameters_->numGeneratedEvents() * 1.e3 : 0.;
+    CG_INFO("Generator") << utils::s("event", parameters_->numGeneratedEvents()) << " generated in " << gen_time_s
+                         << " s "
+                         << "(" << rate_ms << " ms/event).";
   }
 }  // namespace cepgen

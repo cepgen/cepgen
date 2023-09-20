@@ -45,6 +45,9 @@ namespace cepgen {
   class GeneratorWorker;
   class GridParameters;
   class Parameters;
+  namespace proc {
+    class Process;
+  }
 
   /// Collection of libraries loaded in the runtime environment
   static std::vector<std::string> loaded_libraries;
@@ -130,6 +133,8 @@ namespace cepgen {
     [[deprecated("Please use generate or next instead")]] const Event& generateOneEvent(Event::callback = nullptr);
     /// Launch the generation of events
     void generate(size_t num_events = 0, Event::callback = nullptr);
+    /// Launch the generation of events
+    void generate(size_t num_events, void (*)(const proc::Process&));
     /// Generate one event
     /// \param[in] callback Callback function where the generated event can be fed
     const Event& next(Event::callback callback = nullptr);
