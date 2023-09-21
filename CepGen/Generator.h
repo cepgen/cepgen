@@ -43,7 +43,6 @@
 namespace cepgen {
   class Integrator;
   class GeneratorWorker;
-  class GridParameters;
   class Parameters;
   namespace proc {
     class Process;
@@ -148,8 +147,6 @@ namespace cepgen {
     std::unique_ptr<GeneratorWorker> worker_;
     /// Integration algorithm
     std::unique_ptr<Integrator> integrator_;
-    /// Integration grid instance
-    std::unique_ptr<GridParameters> grid_;
     /// Has the event generator already been initialised?
     bool initialised_{false};
     /// Cross section value computed at the last integration

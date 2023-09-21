@@ -16,13 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <memory>
-#include <vector>
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/GeneratorWorker.h"
-#include "CepGen/Event/Event.h"
-#include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Integration/GridParameters.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
@@ -42,6 +37,13 @@ namespace cepgen {
     void initialise() override;
     bool next() override;
 
+    static ParametersDescription description() {
+      auto desc = GeneratorWorker::description();
+      desc.setDescription("Grid-optimised worker");
+      desc.add<int>("binSize", 3);
+      return desc;
+    }
+
   private:
     /// Placeholder for invalid bin indexing
     static constexpr int UNASSIGNED_BIN = -999;
@@ -59,7 +61,7 @@ namespace cepgen {
   };
 
   void TrivialGeneratorWorker::initialise() {
-    grid_.reset(new GridParameters(integrand_->size()));
+    grid_.reset(new GridParameters(steer<int>("binSize"), integrand_->size()));
     coords_ = std::vector<double>(integrand_->size());
     if (!grid_->prepared())
       computeGenerationParameters();
