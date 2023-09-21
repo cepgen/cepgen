@@ -25,6 +25,7 @@
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/GeneratorWorkerFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
@@ -55,6 +56,7 @@ int main(int argc, char* argv[]) {
       .document("strfun", "Structure functions", cepgen::StructureFunctionsFactory::get())
       .document(
           "sigrat", "Longitudinal/transverse cross section ratio parameterisations", cepgen::SigmaRatiosFactory::get())
+      .document("ktflux", "KT-factorised parton flux modelling", cepgen::KTFluxFactory::get())
       .document("alphaem", "Electromagnetic coupling evolution", cepgen::AlphaEMFactory::get())
       .document("alphas", "Strong coupling evolution", cepgen::AlphaSFactory::get())
       .document("integr", "Integrator algorithms", cepgen::IntegratorFactory::get())
