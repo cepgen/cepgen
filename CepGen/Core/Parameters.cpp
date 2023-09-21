@@ -251,7 +251,7 @@ namespace cepgen {
 
   ParametersDescription Parameters::Generation::description() {
     auto desc = ParametersDescription();
-    desc.add<ParametersDescription>("worker", ParametersDescription().setName<std::string>("trivial"))
+    desc.add<ParametersDescription>("worker", ParametersDescription().setName<std::string>("grid_optimised"))
         .setDescription("type of generator worker to use for event generation");
     desc.add<int>("maxgen", 0).setDescription("Number of events to generate");
     desc.add<int>("printEvery", 10000).setDescription("Printing frequency for the events content");
