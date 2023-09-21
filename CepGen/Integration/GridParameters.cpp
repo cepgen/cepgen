@@ -19,9 +19,9 @@
 #include <cmath>  // pow
 #include <functional>
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/GridParameters.h"
 #include "CepGen/Integration/Integrator.h"
-#include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
@@ -43,6 +43,7 @@ namespace cepgen {
   }
 
   void GridParameters::shoot(const Integrator* integr, size_t coord, std::vector<double>& out) const {
+    CG_ASSERT(integr != nullptr);
     const auto& nv = coords_.at(coord);
     for (size_t i = 0; i < nv.size(); ++i)
       out[i] = (integr->uniform() + nv.at(i)) * inv_mbin_;
