@@ -39,13 +39,13 @@ namespace cepgen {
     /// Book the memory slots and structures for the generator
     explicit TrivialGeneratorWorker(const ParametersList& params) : GeneratorWorker(params) {}
 
+    void initialise() override;
     bool next() override;
 
   private:
     /// Placeholder for invalid bin indexing
     static constexpr int UNASSIGNED_BIN = -999;
 
-    void setGrid();
     /// Apply a correction cycle to the grid
     bool correctionCycle(bool&);
     /// Prepare the object for event generation
@@ -58,12 +58,12 @@ namespace cepgen {
     std::vector<double> coords_;  ///< Phase space coordinates being evaluated
   };
 
-  void TrivialGeneratorWorker::setGrid() {
+  void TrivialGeneratorWorker::initialise() {
     grid_.reset(new GridParameters(integrand_->size()));
     coords_ = std::vector<double>(integrand_->size());
     if (!grid_->prepared())
       computeGenerationParameters();
-    CG_DEBUG("TrivialGeneratorWorker:integrator")
+    CG_DEBUG("TrivialGeneratorWorker:initialise")
         << "Dim-" << integrand_->size() << " " << integrator_->name() << " integrator "
         << "set for dim-" << grid_->n(0).size() << " grid.";
   }
@@ -73,13 +73,12 @@ namespace cepgen {
   //-----------------------------------------------------------------------------------------------
 
   bool TrivialGeneratorWorker::next() {
-    CG_TICKER(const_cast<Parameters*>(params_)->timeKeeper());
-
     if (!integrator_)
       throw CG_FATAL("TrivialGeneratorWorker:next") << "No integrator object handled!";
-    // initialise grid if not already done
     if (!grid_)
-      setGrid();
+      throw CG_FATAL("TrivialGeneratorWorker:next") << "Grid object was not initialised.";
+
+    CG_TICKER(const_cast<Parameters*>(params_)->timeKeeper());
 
     // apply correction cycles if required from previous event
     if (ps_bin_ != UNASSIGNED_BIN) {
@@ -155,10 +154,10 @@ namespace cepgen {
   //-----------------------------------------------------------------------------------------------
 
   void TrivialGeneratorWorker::computeGenerationParameters() {
-    if (grid_->prepared())
-      return;  // do not prepare again the grid
     if (!params_)
       throw CG_FATAL("TrivialGeneratorWorker:setGen") << "No steering parameters specified!";
+    if (!integrator_)
+      throw CG_FATAL("TrivialGeneratorWorker:setGen") << "No integrator object specified!";
 
     integrand_->setStorage(false);
 

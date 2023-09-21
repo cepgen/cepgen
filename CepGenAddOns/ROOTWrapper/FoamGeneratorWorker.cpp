@@ -65,8 +65,7 @@ namespace cepgen {
       return desc;
     }
 
-    void setRuntimeParameters(const Parameters* params) override {
-      GeneratorWorker::setRuntimeParameters(params);
+    void initialise() override {
       foam_.reset(new TFoam("Foam"));
       foam_->SetPseRan(rnd_.get());
       foam_->SetnCells(steer<int>("nCells"));

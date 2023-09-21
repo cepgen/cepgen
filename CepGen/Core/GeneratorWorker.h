@@ -41,6 +41,8 @@ namespace cepgen {
 
     static ParametersDescription description();
 
+    /// Specify the runtime parameters
+    void setRuntimeParameters(const Parameters*);
     /// Specify the integrator instance handled by the mother generator
     void setIntegrator(const Integrator* integ);
     /// Launch the event generation
@@ -50,8 +52,8 @@ namespace cepgen {
     /// Function evaluator
     ProcessIntegrand& integrand() { return *integrand_; }
 
-    /// Specify the runtime parameters
-    virtual void setRuntimeParameters(const Parameters*);
+    /// Initialise the generation parameters
+    virtual void initialise() = 0;
     /// Generate a single event
     virtual bool next() = 0;
 

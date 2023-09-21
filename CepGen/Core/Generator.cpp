@@ -170,6 +170,7 @@ namespace cepgen {
 
     // prepare the run parameters for event generation
     parameters_->initialise();
+    worker_->initialise();
 
     initialised_ = true;
   }
