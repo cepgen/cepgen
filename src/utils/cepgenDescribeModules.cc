@@ -27,6 +27,7 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
+#include "CepGen/Modules/GeneratorWorkerFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
@@ -36,36 +37,41 @@
 
 using namespace std;
 
-#define LOOP_FACTORY(desc, obj)                                                                                 \
-  if (all)                                                                                                      \
-    os << "\n"                                                                                                  \
-       << cepgen::utils::colourise(string(80, '=') + "\n" + string(desc) + " modules" + "\n" + string(80, '='), \
-                                   cepgen::utils::Colour::green,                                                \
-                                   cepgen::utils::Modifier::bold)                                               \
-       << "\n";                                                                                                 \
-  for (const auto& mod_name : obj::get().modules()) {                                                           \
-    if (all)                                                                                                    \
-      os << describe_one(desc, false, obj::get().describeParameters(mod_name));                                 \
-    else                                                                                                        \
-      for (const auto& mod : modules)                                                                           \
-        if (mod == mod_name)                                                                                    \
-          os << describe_one(desc, true, obj::get().describeParameters(mod_name));                              \
-  }
+#define LOOP_FACTORY(desc, obj)                                                                                   \
+  {                                                                                                               \
+    if (all)                                                                                                      \
+      os << "\n"                                                                                                  \
+         << cepgen::utils::colourise(string(80, '=') + "\n" + string(desc) + " modules" + "\n" + string(80, '='), \
+                                     cepgen::utils::Colour::green,                                                \
+                                     cepgen::utils::Modifier::bold)                                               \
+         << "\n";                                                                                                 \
+    for (const auto& mod_name : obj::get().modules()) {                                                           \
+      if (all)                                                                                                    \
+        os << describe_one(desc, false, obj::get().describeParameters(mod_name));                                 \
+      else                                                                                                        \
+        for (const auto& mod : modules)                                                                           \
+          if (mod == mod_name)                                                                                    \
+            os << describe_one(desc, true, obj::get().describeParameters(mod_name));                              \
+    }                                                                                                             \
+  }                                                                                                               \
+  static_assert(true, "")
 #define LOOP_FACTORY_INT(desc, obj)                                                                             \
-  if (all)                                                                                                      \
+  if (all) {                                                                                                    \
     os << "\n"                                                                                                  \
        << cepgen::utils::colourise(string(80, '=') + "\n" + string(desc) + " modules" + "\n" + string(80, '='), \
                                    cepgen::utils::Colour::green,                                                \
                                    cepgen::utils::Modifier::bold)                                               \
        << "\n";                                                                                                 \
-  for (const auto& mod_name : obj::get().modules()) {                                                           \
-    if (all)                                                                                                    \
-      os << describe_one(desc, false, obj::get().describeParameters(mod_name));                                 \
-    else                                                                                                        \
-      for (const auto& mod : modules)                                                                           \
-        if (cepgen::utils::isInt(mod) && stod(mod) == mod_name)                                                 \
-          os << describe_one(desc, true, obj::get().describeParameters(mod_name));                              \
-  }
+    for (const auto& mod_name : obj::get().modules()) {                                                         \
+      if (all)                                                                                                  \
+        os << describe_one(desc, false, obj::get().describeParameters(mod_name));                               \
+      else                                                                                                      \
+        for (const auto& mod : modules)                                                                         \
+          if (cepgen::utils::isInt(mod) && stod(mod) == mod_name)                                               \
+            os << describe_one(desc, true, obj::get().describeParameters(mod_name));                            \
+    }                                                                                                           \
+  }                                                                                                             \
+  static_assert(true, "")
 
 /** Listing module for CepGen
  * \author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -114,21 +120,25 @@ int main(int argc, char* argv[]) {
     };
 
     ostringstream os;
-    LOOP_FACTORY("Cards steering", cepgen::CardsHandlerFactory)
-    LOOP_FACTORY("Integrator", cepgen::IntegratorFactory)
-    LOOP_FACTORY("Analytic integrator", cepgen::AnalyticIntegratorFactory)
-    LOOP_FACTORY("Derivator", cepgen::DerivatorFactory)
-    LOOP_FACTORY("Process", cepgen::ProcessFactory)
-    LOOP_FACTORY("KT-factorised parton flux modelling", cepgen::KTFluxFactory)
-    LOOP_FACTORY("Beam form factors modelling", cepgen::FormFactorsFactory)
-    LOOP_FACTORY_INT("Structure functions modelling", cepgen::StructureFunctionsFactory)
-    LOOP_FACTORY_INT("Cross sections ratio modelling", cepgen::SigmaRatiosFactory)
-    LOOP_FACTORY("Event modification", cepgen::EventModifierFactory)
-    LOOP_FACTORY("Export", cepgen::EventExporterFactory)
-    LOOP_FACTORY("alpha(EM)", cepgen::AlphaEMFactory)
-    LOOP_FACTORY("alpha(S)", cepgen::AlphaSFactory)
-    LOOP_FACTORY("Functional evaluator", cepgen::FunctionalFactory)
-    LOOP_FACTORY("Drawer", cepgen::DrawerFactory)
+    LOOP_FACTORY("Cards steering", cepgen::CardsHandlerFactory);
+    // event management
+    LOOP_FACTORY("Process", cepgen::ProcessFactory);
+    LOOP_FACTORY("Event generation", cepgen::GeneratorWorkerFactory);
+    LOOP_FACTORY("Event modification", cepgen::EventModifierFactory);
+    LOOP_FACTORY("Event export", cepgen::EventExporterFactory);
+    // physics evaluators
+    LOOP_FACTORY("KT-factorised parton flux modelling", cepgen::KTFluxFactory);
+    LOOP_FACTORY("Beam form factors modelling", cepgen::FormFactorsFactory);
+    LOOP_FACTORY_INT("Structure functions modelling", cepgen::StructureFunctionsFactory);
+    LOOP_FACTORY_INT("Cross sections ratio modelling", cepgen::SigmaRatiosFactory);
+    LOOP_FACTORY("alpha(EM)", cepgen::AlphaEMFactory);
+    LOOP_FACTORY("alpha(S)", cepgen::AlphaSFactory);
+    // utilities
+    LOOP_FACTORY("Functional evaluator", cepgen::FunctionalFactory);
+    LOOP_FACTORY("Integrator", cepgen::IntegratorFactory);
+    LOOP_FACTORY("Analytic integrator", cepgen::AnalyticIntegratorFactory);
+    LOOP_FACTORY("Derivator", cepgen::DerivatorFactory);
+    LOOP_FACTORY("Drawer", cepgen::DrawerFactory);
     CG_LOG << os.str();
     return 0;
   }
