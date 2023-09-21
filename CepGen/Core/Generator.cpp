@@ -17,6 +17,7 @@
  */
 
 #include <chrono>
+#include <thread>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/GeneratorWorker.h"
@@ -54,15 +55,13 @@ namespace cepgen {
 
   void Generator::clearRun() {
     CG_DEBUG("Generator:clearRun") << "Run is set to be cleared.";
-    worker_ = GeneratorWorkerFactory::get().build(parameters_->generation().parameters().get<ParametersList>("worker"));
-    CG_DEBUG("Generator:clearRun") << "Initialised a generator worker with parameters: " << worker_->parameters()
-                                   << ".";
     // destroy and recreate the integrator instance
     if (!integrator_)
       resetIntegrator();
-
+    worker_ = GeneratorWorkerFactory::get().build(parameters_->generation().parameters().get<ParametersList>("worker"));
     worker_->setRunParameters(const_cast<const RunParameters*>(parameters_.get()));
     worker_->setIntegrator(integrator_.get());
+
     xsect_ = Value{-1., -1.};
     parameters_->prepareRun();
     initialised_ = false;
@@ -178,8 +177,9 @@ namespace cepgen {
 
     // prepare the run parameters for event generation
     parameters_->initialiseModules();
+    worker_->setRunParameters(const_cast<const RunParameters*>(parameters_.get()));
+    worker_->setIntegrator(integrator_.get());
     worker_->initialise();
-
     initialised_ = true;
   }
 
@@ -209,13 +209,25 @@ namespace cepgen {
         num_events = parameters_->generation().maxGen();
     }
 
-    CG_INFO("Generator") << utils::s("event", num_events, true) << " will be generated.";
+    std::vector<std::thread> threads;
+    for (size_t i = 0; i < parameters_->generation().numThreads(); ++i)
+      threads.emplace_back([&] {
+        auto worker = worker_->clone();
+        worker->generate(num_events, callback);
+      });
+
+    CG_INFO("Generator") << utils::s("event", num_events, true) << " will be generated using "
+                         << utils::s("worker", parameters_->generation().numThreads(), true) << ".";
 
     const utils::Timer tmr;
 
     //--- launch the event generation
 
-    worker_->generate(num_events, callback);
+    std::vector<size_t> num_gen_evt_per_worker;
+    for (size_t i = 0; i < threads.size(); ++i) {
+      threads.at(i).join();
+      //num_gen_evt_per_worker.at(i) = workers_.at(i)->numGeneratedEvents();
+    }
 
     const double gen_time_s = tmr.elapsed();
     const double rate_ms =
@@ -224,7 +236,8 @@ namespace cepgen {
     CG_INFO("Generator") << utils::s("event", parameters_->numGeneratedEvents()) << " generated in " << gen_time_s
                          << " s "
                          << "(" << rate_ms << " ms/event).\n\t"
-                         << "Equivalent luminosity: " << utils::format("%g", equiv_lumi) << " pb^-1.";
+                         << "Equivalent luminosity: " << utils::format("%g", equiv_lumi) << " pb^-1.\n\t"
+                         << "Events generated per worker: " << num_gen_evt_per_worker << ".";
   }
 
   void Generator::generate(size_t num_events, const std::function<void(const Event&, size_t)>& callback) {

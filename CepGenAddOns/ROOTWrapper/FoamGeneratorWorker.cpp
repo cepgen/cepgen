@@ -65,6 +65,10 @@ namespace cepgen {
       return desc;
     }
 
+    std::unique_ptr<GeneratorWorker> clone() const override {
+      return std::unique_ptr<GeneratorWorker>(new FoamGeneratorWorker(parameters()));
+    }
+
     void initialise() override {
       foam_.reset(new TFoam("Foam"));
       foam_->SetPseRan(rnd_.get());
