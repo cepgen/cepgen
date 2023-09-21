@@ -19,12 +19,12 @@
 #ifndef CepGen_Process_Process2to4_h
 #define CepGen_Process_Process2to4_h
 
-#include "CepGen/Process/KTProcess.h"
+#include "CepGen/Process/FactorisedProcess.h"
 
 namespace cepgen {
   namespace proc {
     /// A 2-to-4 (or 2-to-2 central) process
-    class Process2to4 : public KTProcess {
+    class Process2to4 : public FactorisedProcess {
     public:
       /// Initialise a 2-to-4 process
       /// \param[in] params Collection of user-defined steering parameters
@@ -35,9 +35,9 @@ namespace cepgen {
       /// Set all cuts for the single outgoing particle phase space definition
       void setCuts(const cuts::Central& single);
 
-      void preparePhaseSpace() override;
+      void prepareFactorisedPhaseSpace() override;
+      double computeFactorisedMatrixElement() override;
       void fillCentralParticlesKinematics() override;
-      double computeKTFactorisedMatrixElement() override;
 
       /// Conform all kinematics variables to the user-defined phase space
       virtual void prepareProcessKinematics() = 0;
@@ -48,19 +48,15 @@ namespace cepgen {
       double that() const;  ///< \f$\hat t=\frac{1}{2}\left[(p_1-p_3)^2+(p_2-p_4)^2\right]\f$
       double uhat() const;  ///< \f$\hat u=\frac{1}{2}\left[(p_1-p_4)^2+(p_2-p_3)^2\right]\f$
 
-      static const Limits x_limits_;  ///< Standard [0,1] limits for input variables
-      ParticleProperties cs_prop_;    ///< PDG properties of the central outgoing particles
+      ParticleProperties cs_prop_;  ///< PDG properties of the central outgoing particles
 
       cuts::Central single_limits_;  ///< Limits to be applied on single central system's particles
 
       // mapped variables
-      double y_c1_{0.};         ///< Rapidity of the first central particle
-      double y_c2_{0.};         ///< Rapidity of the second central particle
-      double pt_diff_{0.};      ///< Transverse momentum difference for the two central particle
-      double phi_pt_diff_{0.};  ///< Azimuthal angle difference for the two central particles
-
-      double amt1_{0.};  ///< Transverse mass of the first central particle
-      double amt2_{0.};  ///< Transverse mass of the second central particle
+      double m_y_c1_{0.};         ///< Rapidity of the first central particle
+      double m_y_c2_{0.};         ///< Rapidity of the second central particle
+      double m_pt_diff_{0.};      ///< Transverse momentum difference for the two central particle
+      double m_phi_pt_diff_{0.};  ///< Azimuthal angle difference for the two central particles
 
     private:
       std::uniform_int_distribution<short> rnd_sign_;
@@ -70,4 +66,3 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
-

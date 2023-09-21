@@ -40,15 +40,14 @@ namespace cepgen {
       std::transform(
           limits_.begin(), limits_.end(), std::back_inserter(bounds_), [](const auto& lim) { return lim.raw(); });
     }
-    void integrate(Integrand& integrand, double& result, double& abserr) override {
+    Value integrate(Integrand& integrand) override {
       checkLimits(integrand);
 
       auto funct = [&](const std::vector<double>& coord) -> double { return integrand.eval(coord); };
       boost::math::quadrature::naive_monte_carlo<double, decltype(funct)> mc(funct, bounds_, 1.e-2, true, 1);
       auto task = mc.integrate();
 
-      result_ = result = task.get();
-      err_result_ = abserr = mc.current_error_estimate();
+      return Value{task.get(), mc.current_error_estimate()};
     }
 
   private:

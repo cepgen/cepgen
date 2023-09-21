@@ -33,9 +33,9 @@ namespace cepgen {
         maxeval_(steer<int>("maxeval")),
         verbose_(steer<int>("verbose")) {}
 
-  void IntegratorCuba::integrate(Integrand& integr, double& result, double& abserr) {
+  Value IntegratorCuba::integrate(Integrand& integr) {
     gIntegrand = &integr;
-    integrate(result, abserr);
+    return integrate();
   }
 
   ParametersDescription IntegratorCuba::description() {

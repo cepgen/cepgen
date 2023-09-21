@@ -39,25 +39,11 @@ namespace cepgen {
     /// Human-readable description of a beam particle/system
     friend std::ostream& operator<<(std::ostream&, const Beam&);
 
-    /// Type of beam treatment
-    enum class Mode {
-      invalid = 0,
-      ProtonElastic = 1,     ///< Elastic scattering from proton
-      ProtonInelastic = 2,   ///< Inelastic scattering from proton (according to the proton structure functions set)
-      PointLikeScalar = 3,   ///< Trivial, spin-0 emission
-      PointLikeFermion = 4,  ///< Trivial, spin-1/2 emission
-      CompositeScalar = 5,   ///< Composite pion emission
-      HIElastic = 10,        ///< Elastic scattering from heavy ion
-      Other = 6,             ///< Other beam type
-    };
-    /// Human-readable format of a beam mode (elastic/dissociative parts)
-    friend std::ostream& operator<<(std::ostream&, const Mode&);
-    const Mode& mode() const { return mode_; }
     /// Initialise the fluxes evaluator object
     void initialise();
-    /// Is the beam particle expected to be fragmented after emission?
-    bool fragmented() const;
 
+    /// Does the beam remain on-shell after parton emission?
+    bool elastic() const { return elastic_; }
     /// Beam particle PDG id
     pdgid_t pdgId() const { return pdg_id_; }
     /// Set the beam particle PDG id
@@ -65,8 +51,6 @@ namespace cepgen {
       pdg_id_ = pdg;
       return *this;
     }
-    /// Scattered parton PDG id
-    pdgid_t daughterId() const;
     /// Beam particle 4-momentum
     const Momentum& momentum() const { return momentum_; }
     /// Set the beam particle 4-momentum
@@ -74,15 +58,13 @@ namespace cepgen {
       momentum_ = mom;
       return *this;
     }
-
-    /// Scalar parton flux modelling
-    const PartonFlux& flux() const;
+    const ParametersList& partonFluxParameters() const { return flux_info_; }
 
   private:
-    pdgid_t pdg_id_{0};                 ///< PDG identifier for the beam
-    Momentum momentum_;                 ///< Incoming particle momentum
-    Mode mode_{Mode::invalid};          ///< Beam treatment mode
-    std::unique_ptr<PartonFlux> flux_;  ///< Incoming parton flux evaluator
+    pdgid_t pdg_id_{0};         ///< PDG identifier for the beam
+    Momentum momentum_;         ///< Incoming particle momentum
+    ParametersList flux_info_;  ///< Incoming parton flux parameters
+    bool elastic_;              ///< Elastic parton emission?
   };
 }  // namespace cepgen
 

@@ -32,6 +32,7 @@ namespace cepgen {
     /// Copy constructor
     Limits(const Limits&);
 
+    bool operator<(const Limits&) const;         ///< Comparison operator
     Limits operator-() const;                    ///< Invert this limit
     Limits& operator=(const Limits&) = default;  ///< Assignment operator
     /// Equality operator
@@ -66,12 +67,20 @@ namespace cepgen {
     bool hasMin() const;
     /// Have an upper limit?
     bool hasMax() const;
+    /// Truncate limits to minimal/maximal values
+    Limits truncate(const Limits&) const;
+    /// Limit a value to boundaries
+    double trim(double) const;
     /// Check if the value is inside limits' boundaries
     bool contains(double val, bool exclude_boundaries = false) const;
+    /// Apply an operator on limits boundaries
+    Limits& apply(double (*)(double));
+    /// Compute a copy of limits with an operator applied on boundaries
+    Limits compute(double (*)(double)) const;
     /// Is there a lower and upper limit?
     bool valid() const;
     /// Raw value of the limits
-    const std::pair<double, double> raw() const { return *this; }
+    const std::pair<double, double>& raw() const { return *this; }
     /// Generate a collection of values from a number of bins
     /// \param[in] num_bins number of values to generate
     /// \param[in] log_scale generate according to a log10 scale?

@@ -47,7 +47,7 @@ namespace HepMC3 {
     unsigned short idx = 0;
     for (const auto& part_orig : evt.particles()) {
       const auto& mom_orig = part_orig.momentum();
-      FourVector pmom(mom_orig.px(), mom_orig.py(), mom_orig.pz(), part_orig.energy());
+      FourVector pmom(mom_orig.px(), mom_orig.py(), mom_orig.pz(), mom_orig.energy());
       auto part = make_shared<GenParticle>(pmom, part_orig.pdgId(), (int)part_orig.status());
       part->set_generated_mass(cepgen::PDG::get().mass(part_orig.pdgId()));
       assoc_map_[idx] = part;

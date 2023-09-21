@@ -61,22 +61,22 @@ double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& 
   auto flux_name = [](int mode) -> std::string {
     switch (mode) {
       case 0:
-        return "ElasticKT";
+        return "Elastic";
       case 10:
-        return "BudnevElasticKT";
+        return "BudnevElastic";
       case 1:
-        return "InelasticKT";
+        return "Inelastic";
       case 11:
-        return "BudnevInelasticKT";
+        return "BudnevInelastic";
       case 100:
-        return "ElasticHeavyIonKT";
+        return "ElasticHeavyIon";
       case 20:
-        return "KMRElasticGluonKT";
+        return "KMR";
       default:
         throw CG_FATAL("cepgen_kt_flux") << "Invalid flux modelling: " << mode << ".";
     }
   };
-  static auto* flux = dynamic_cast<KTFlux*>(PartonFluxFactory::get().build(flux_name(fmode), params).release());
+  static auto* flux = KTFluxFactory::get().build(flux_name(fmode), params).release();
   return flux->fluxMX2(x, kt2, mout * mout);
 }
 
@@ -89,11 +89,11 @@ double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& 
 double cepgen_kt_flux_hi_(int& fmode, double& x, double& kt2, int& a, int& z) {
   using namespace cepgen;
   (void)fmode;
-  static auto* flux = dynamic_cast<KTFlux*>(
-      PartonFluxFactory::get()
-          .build("ElasticHeavyIonKT",
+  static auto* flux =
+      KTFluxFactory::get()
+          .build("ElasticHeavyIon",
                  ParametersList().setAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon{(unsigned short)a, (Element)z}))
-          .release());
+          .release();
   return flux->fluxMX2(x, kt2, 0.);
 }
 

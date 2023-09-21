@@ -23,20 +23,30 @@
 
 /** \file */
 
-/// Add a generic parton flux evaluator builder definition
-#define REGISTER_FLUX(name, obj)                                               \
-  namespace cepgen {                                                           \
-    struct BUILDERNM(obj) {                                                    \
-      BUILDERNM(obj)() { PartonFluxFactory::get().registerModule<obj>(name); } \
-    };                                                                         \
-    static const BUILDERNM(obj) gPartonFlux##obj;                              \
-  }                                                                            \
+/// Add a generic KT-factorised flux evaluator builder definition
+#define REGISTER_KT_FLUX(name, obj)                                        \
+  namespace cepgen {                                                       \
+    struct BUILDERNM(obj) {                                                \
+      BUILDERNM(obj)() { KTFluxFactory::get().registerModule<obj>(name); } \
+    };                                                                     \
+    static const BUILDERNM(obj) gKTFlux##obj;                              \
+  }                                                                        \
   static_assert(true, "")
 
 namespace cepgen {
-  class PartonFlux;
-  /// A functional objects factory
-  DEFINE_FACTORY_STR(PartonFluxFactory, PartonFlux, "Parton flux estimators factory");
+  class KTFlux;
+  /// A KT-factorised parton fluxes objects factory
+  DEFINE_FACTORY_STR(KTFluxFactory, KTFlux, "KT-factorised flux estimators factory");
+
+  struct PartonFluxFactory {
+    static PartonFluxFactory& get() {
+      static PartonFluxFactory instance;
+      return instance;
+    }
+
+    ParametersDescription describeParameters(const std::string& name,
+                                             const ParametersList& params = ParametersList()) const;
+  };
 }  // namespace cepgen
 
 #endif

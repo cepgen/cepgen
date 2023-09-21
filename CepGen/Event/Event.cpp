@@ -115,10 +115,6 @@ namespace cepgen {
     return out;
   }
 
-  double Event::cmEnergy() const {
-    return CMEnergy(oneWithRole(Particle::IncomingBeam1), oneWithRole(Particle::IncomingBeam2));
-  }
-
   ParticlesRefs Event::operator[](Particle::Role role) {
     ParticlesRefs out;
     //--- retrieve all particles with a given role
@@ -365,7 +361,7 @@ namespace cepgen {
         os << "       ";
       const auto& mom = part.momentum();
       os << utils::format(
-          "% 9.6e % 9.6e % 9.6e % 9.6e % 12.5f", mom.px(), mom.py(), mom.pz(), part.energy(), part.mass());
+          "% 9.6e % 9.6e % 9.6e % 9.6e % 12.5f", mom.px(), mom.py(), mom.pz(), mom.energy(), mom.mass());
 
       // discard non-primary, decayed particles
       if (part.status() >= Particle::Status::Undefined) {

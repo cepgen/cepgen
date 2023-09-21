@@ -57,8 +57,7 @@ int main(int argc, char* argv[]) {
   for (const auto& integrator_name : integrators)
     bench.context("integrator", integrator_name).run(process + "+" + integrator_name, [&] {
       gen.setIntegrator(cepgen::IntegratorFactory::get().build(integrator_name));
-      double xsec, xsec_unc;
-      gen.computeXsection(xsec, xsec_unc);
+      gen.computeXsection();
     });
   render_benchmark(bench, outputs);
 

@@ -27,6 +27,12 @@ namespace cepgen {
 
   Limits::Limits(const Limits& rhs) : std::pair<double, double>(rhs.first, rhs.second) {}
 
+  bool Limits::operator<(const Limits& oth) const {
+    if (first < oth.first)
+      return true;
+    return second < oth.second;
+  }
+
   Limits Limits::operator-() const { return Limits(-second, -first); }
 
   Limits& Limits::operator+=(double c) {
@@ -116,6 +122,32 @@ namespace cepgen {
     return out;
   }
 
+  Limits Limits::truncate(const Limits& ext) const {
+    auto out = *this;
+    if (ext.hasMin() && (!out.hasMin() || out.min() < ext.min()))
+      out.min() = ext.min();
+    if (ext.hasMax() && (!out.hasMax() || out.max() > ext.max()))
+      out.max() = ext.max();
+    return out;
+  }
+
+  double Limits::trim(double val) const {
+    if (hasMin() && val < min())
+      return min();
+    if (hasMax() && val > max())
+      return max();
+    return val;
+  }
+
+  Limits& Limits::apply(double (*op)(double)) {
+    (*this) = compute(op);
+    return *this;
+  }
+
+  Limits Limits::compute(double (*op)(double)) const {
+    return Limits{hasMin() ? op(min()) : Limits::INVALID, hasMax() ? op(max()) : Limits::INVALID};
+  }
+
   std::ostream& operator<<(std::ostream& os, const Limits& lim) {
     if (!lim.hasMin() && !lim.hasMax())
       return os << "no cuts";
@@ -140,5 +172,4 @@ namespace cepgen {
     lim *= c;
     return lim;
   }
-
 }  // namespace cepgen

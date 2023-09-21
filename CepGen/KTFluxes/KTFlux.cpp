@@ -18,6 +18,7 @@
 
 #include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Physics/PartonFlux.h"
+#include "CepGen/Physics/Utils.h"
 
 namespace cepgen {
   KTFlux::KTFlux(const ParametersList& params) : PartonFlux(params) {}
@@ -28,20 +29,11 @@ namespace cepgen {
     return desc;
   }
 
-  double KTFlux::fluxQ2(double x, double kt2, double q2) const { return fluxMX2(x, kt2, mX2(x, kt2, q2)); }
-
-  double KTFlux::fluxMX2(double x, double kt2, double mf2) const { return fluxQ2(x, kt2, computeQ2(x, kt2, mf2).q2); }
-
-  KTFlux::Q2Values KTFlux::computeQ2(double x, double kt2, double mx2) const {
-    Q2Values out;
-    const auto mi2 = mass2();
-    const auto dm2 = (mx2 == 0.) ? 0. : mx2 - mi2;
-    out.min = ((x * dm2) + x * x * mi2) / (1. - x);
-    out.q2 = out.min + kt2 / (1. - x);
-    return out;
+  double KTFlux::fluxQ2(double x, double kt2, double q2) const {
+    return fluxMX2(x, kt2, utils::kt::mX2(x, kt2, q2, mass2()));
   }
 
-  double KTFlux::mX2(double x, double kt2, double q2) const {
-    return mass2() + (q2 * (1. - x) - kt2 - x * x * mass2()) / x;
+  double KTFlux::fluxMX2(double x, double kt2, double mf2) const {
+    return fluxQ2(x, kt2, utils::kt::q2(x, kt2, mass2(), mf2));
   }
 }  // namespace cepgen

@@ -86,16 +86,17 @@ public:
   proc::ProcessPtr clone() const override { return proc::ProcessPtr(new PPtoWW(*this)); }
 
   static ParametersDescription description() {
-    auto params = Process2to4::description();
-    params.setDescription("γγ → W⁺W¯ (kt-factor.)");
-    params.add<int>("method", 1)
+    auto desc = Process2to4::description();
+    desc.setDescription("γγ → W⁺W¯");
+    desc.add<bool>("ktFactorised", true);
+    desc.add<int>("method", 1)
         .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell by Nachtmann et al.)");
     ParametersDescription pol_states;
     pol_states.add<std::vector<int> >("W1", {-1, 0, 1}).setDescription("First W+- polarisation states");
     pol_states.add<std::vector<int> >("W2", {-1, 0, 1}).setDescription("Second W+- polarisation states");
-    params.add<ParametersDescription>("polarisationStates", pol_states);
-    params += NachtmannAmplitudes::description();
-    return params;
+    desc.add<ParametersDescription>("polarisationStates", pol_states);
+    desc += NachtmannAmplitudes::description();
+    return desc;
   }
 
 private:
@@ -147,7 +148,7 @@ private:
         hel_mat_elem += norm(p1 * (pp + mm) - std::complex<double>(0, 1) * p2 * (pp - mm) - p3 * (pm + mp) -
                              std::complex<double>(0, 1) * p4 * (pm - mp));
       }
-    return 0.25 * hel_mat_elem * std::pow(1. / qt1_ / qt2_, 2);
+    return hel_mat_elem * std::pow(0.5 / q1().pt() / q2().pt(), 2);
   }
 
   const double mW_, mW2_;

@@ -24,6 +24,7 @@
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Utils.h"
 
 namespace cepgen {
   /// Realistic nuclear form-factor as used in STARLIGHT
@@ -59,7 +60,9 @@ namespace cepgen {
       return prefactor_ * z * z * ela1 * ela2 / q2;
     }
 
-    double fluxMX2(double x, double kt2, double) const override final { return fluxQ2(x, kt2, computeQ2(x, kt2).q2); }
+    double fluxMX2(double x, double kt2, double) const override final {
+      return fluxQ2(x, kt2, utils::kt::q2(x, kt2, mass2()));
+    }
 
   private:
     const HeavyIon hi_;
@@ -67,4 +70,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_FLUX("KleinElasticHeavyIonKT", KleinElasticHeavyIonKTFlux);
+REGISTER_KT_FLUX("KleinElasticHI", KleinElasticHeavyIonKTFlux);

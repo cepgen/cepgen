@@ -33,7 +33,7 @@ namespace cepgen {
     static ParametersDescription description();
 
     void setLimits(const std::vector<Limits>&) override;
-    void integrate(Integrand&, double&, double&) override;
+    Value integrate(Integrand&) override;
 
   private:
     /// integration type (adaptive, MC methods, etc..)
@@ -101,22 +101,19 @@ namespace cepgen {
     }
   }
 
-  void IntegratorROOT::integrate(Integrand& integrand, double& result, double& abserr) {
+  Value IntegratorROOT::integrate(Integrand& integrand) {
     checkLimits(integrand);
 
     if (integrand.size() == 1) {
       auto funct = [&](double x) -> double { return integrand.eval(std::vector<double>{x}); };
       integr_1d_->SetFunction(funct);
-      result_ = result = integr_1d_->Integral(limits_.at(0).min(), limits_.at(0).max());
-      err_result_ = abserr = integr_1d_->Error();
-    } else {
-      auto funct = [&](const double* x) -> double {
-        return integrand.eval(std::vector<double>(x, x + integrand.size()));
-      };
-      integr_->SetFunction(funct, integrand.size());
-      result_ = result = integr_->Integral(xlow_.data(), xhigh_.data());
-      err_result_ = abserr = integr_->Error();
+      return Value{integr_1d_->Integral(limits_.at(0).min(), limits_.at(0).max()), integr_1d_->Error()};
     }
+    auto funct = [&](const double* x) -> double {
+      return integrand.eval(std::vector<double>(x, x + integrand.size()));
+    };
+    integr_->SetFunction(funct, integrand.size());
+    return Value{integr_->Integral(xlow_.data(), xhigh_.data()), integr_->Error()};
   }
 
   ParametersDescription IntegratorROOT::description() {

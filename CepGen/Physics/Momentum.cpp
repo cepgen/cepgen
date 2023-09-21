@@ -18,10 +18,36 @@
 
 #include <cmath>
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/Momentum.h"
-#include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/Limits.h"
 
 namespace cepgen {
+  /// Express an angle in between two extrema
+  static double normalisePhi(double phi, const Limits& range) {
+    static const double M_2PI = 2. * M_PI;
+    if (range.range() != M_2PI)
+      throw CG_FATAL("Momentum:normalisePhi") << "Invalid boundaries for the angle normalisation: " << range
+                                              << ". Must be of range 2*pi, has range " << range.range() << ".";
+    while (phi < range.min())
+      phi += M_2PI;
+    while (phi > range.max())
+      phi -= M_2PI;
+    return phi;  // contained in range
+  }
+
+  static double normaliseSqrt(double x2) { return std::sqrt(x2 < 0. ? -x2 : x2); }
+
+  static double fastHypot(double x, double y) {
+    x *= x, y *= y;
+    return std::sqrt(x + y);
+  }
+
+  static double fastHypot(double x, double y, double z) {
+    x *= x, y *= y, z *= z;
+    return std::sqrt(x + y + z);
+  }
+
   Momentum::Momentum(double x, double y, double z, double t) : std::array<double, 4>{{x, y, z, t == -1. ? 0. : t}} {
     computeP();
   }
@@ -34,18 +60,16 @@ namespace cepgen {
   //--- static constructors
 
   Momentum Momentum::fromPtEtaPhiE(double pt, double eta, double phi, double e) {
-    const double px = pt * cos(phi), py = pt * sin(phi), pz = pt * sinh(eta);
-    return Momentum(px, py, pz, e);
+    return Momentum(pt * cos(phi), pt * sin(phi), pt * sinh(eta), e);
   }
 
   Momentum Momentum::fromPtEtaPhiM(double pt, double eta, double phi, double m) {
-    const double px = pt * cos(phi), py = pt * sin(phi), pz = pt * sinh(eta), e = px * px + py * py + pz * pz + m * m;
-    return Momentum(px, py, pz, e);
+    return Momentum::fromPtEtaPhiE(pt, eta, phi, fastHypot(pt * cosh(eta), m));
   }
 
   Momentum Momentum::fromPThetaPhiE(double p, double theta, double phi, double e) {
-    const double px = p * sin(theta) * cos(phi), py = p * sin(theta) * sin(phi), pz = p * cos(theta);
-    return Momentum(px, py, pz, e);
+    const double pt = p * sin(theta), px = pt * cos(phi), py = pt * sin(phi);
+    return Momentum(px, py, p * cos(theta), e);
   }
 
   Momentum Momentum::fromPxPyPzE(double px, double py, double pz, double e) { return Momentum(px, py, pz, e); }
@@ -55,8 +79,13 @@ namespace cepgen {
   }
 
   Momentum Momentum::fromPxPyYM(double px, double py, double rap, double m) {
-    const double pt = std::hypot(px, py), et = std::hypot(pt, m);
+    const double et = fastHypot(px, py, m);
     return Momentum(px, py, et * sinh(rap), et * cosh(rap));
+  }
+
+  Momentum Momentum::fromPtYPhiM(double pt, double rap, double phi, double m) {
+    const double et = fastHypot(pt, m);
+    return Momentum(pt * cos(phi), pt * sin(phi), et * sinh(rap), et * cosh(rap));
   }
 
   //--- arithmetic operators
@@ -118,14 +147,44 @@ namespace cepgen {
 
   //--- various setters
 
-  Momentum& Momentum::setMass2(double m2) { return setEnergy(sqrt(p2() + m2)).computeP(); }
+  Momentum& Momentum::setPx(double px) {
+    (*this)[X] = px;
+    return computeP();
+  }
 
-  Momentum& Momentum::setP(double px, double py, double pz, double e) { return setP(px, py, pz).setEnergy(e); }
+  Momentum& Momentum::setPy(double py) {
+    (*this)[Y] = py;
+    return computeP();
+  }
 
-  Momentum& Momentum::setP(double px, double py, double pz) { return setPx(px).setPy(py).setPz(pz).computeP(); }
+  Momentum& Momentum::setPz(double pz) {
+    (*this)[Z] = pz;
+    return computeP();
+  }
+
+  Momentum& Momentum::setEnergy(double e) {
+    (*this)[E] = e;
+    return *this;
+  }
+
+  Momentum& Momentum::setMass(double m) { return setEnergy(fastHypot(p_, m)).computeP(); }
+
+  Momentum& Momentum::setMass2(double m2) { return setEnergy(std::sqrt(p_ * p_ + m2)).computeP(); }
+
+  Momentum& Momentum::setP(double px, double py, double pz, double e) { return setEnergy(e).setP(px, py, pz); }
+
+  Momentum& Momentum::setP(double px, double py, double pz) { return setPx(px).setPy(py).setPz(pz); }
+
+  //--- kinematics constrainers
+
+  Momentum& Momentum::computeEnergyFromMass(double on_shell_mass) { return setMass(on_shell_mass); }
+
+  Momentum& Momentum::computePzFromMass(double on_shell_mass) {
+    return setPz(normaliseSqrt(pz() * pz() + mass2() - on_shell_mass * on_shell_mass)).computeP();
+  }
 
   Momentum& Momentum::computeP() {
-    p_ = std::hypot(pt(), pz());
+    p_ = fastHypot(px(), py(), pz());
     return *this;
   }
 
@@ -149,58 +208,45 @@ namespace cepgen {
     return ptsq > 0. ? energy2() * ptsq / (ptsq + pz() * pz()) : 0.;
   }
 
-  double Momentum::energyT() const {
-    const auto et2 = energyT2();
-    return et2 > 0. ? std::sqrt(et2) : -std::sqrt(-et2);
-  }
+  double Momentum::energyT() const { return normaliseSqrt(energyT2()); }
 
-  double Momentum::mass() const {
-    if (mass2() >= 0.)
-      return sqrt(mass2());
-    return -sqrt(-mass2());
-  }
+  double Momentum::mass2() const { return energy2() - p2(); }
+
+  double Momentum::mass() const { return normaliseSqrt(mass2()); }
 
   double Momentum::massT2() const { return energy2() - pz() * pz(); }
 
-  double Momentum::massT() const {
-    const auto mt2 = massT2();
-    return mt2 > 0. ? std::sqrt(mt2) : -std::sqrt(-mt2);
-  }
+  double Momentum::massT() const { return normaliseSqrt(massT2()); }
 
   double Momentum::theta() const { return atan2(pt(), pz()); }
 
-  double Momentum::phi() const { return atan2(py(), px()); }
+  double Momentum::phi() const { return normalisePhi(atan2(py(), px()), {0., 2. * M_PI}); }
 
-  double Momentum::pt() const { return std::hypot(px(), py()); }
+  double Momentum::pt() const { return fastHypot(px(), py()); }
 
   double Momentum::pt2() const { return px() * px() + py() * py(); }
 
+  Momentum Momentum::transverse() const { return Momentum::fromPxPyPzE(px(), py(), 0., energy()); }
+
   double Momentum::eta() const {
-    const int sign = (pz() / fabs(pz()));
-    return pt() != 0. ? log((p() + fabs(pz())) / pt()) * sign : 9999. * sign;
+    const int sign = pz() / fabs(pz());
+    return pt() != 0. ? std::log((p() + fabs(pz())) / pt()) * sign : 9999. * sign;
   }
 
   double Momentum::rapidity() const {
-    const int sign = (pz() / fabs(pz()));
-    return energy() >= 0. ? log((energy() + pz()) / (energy() - pz())) * 0.5 : 999. * sign;
+    const int sign = pz() / fabs(pz());
+    return energy() >= 0. ? std::log((energy() + pz()) / (energy() - pz())) * 0.5 : 999. * sign;
   }
 
   double Momentum::deltaEta(const Momentum& oth) const { return fabs(eta() - oth.eta()); }
 
   double Momentum::deltaPhi(const Momentum& oth) const {
-    static const double M_2PI = 2. * M_PI;
-    double dphi = phi() - oth.phi();
-    // has to be contained in [-M_PI, M_PI]
-    while (dphi < -M_PI)
-      dphi += M_2PI;
-    while (dphi > +M_PI)
-      dphi -= M_2PI;
-    return dphi;
+    return normalisePhi(phi() - oth.phi(), {-M_PI, M_PI});  // has to be contained in [-M_PI, M_PI]
   }
 
   double Momentum::deltaPt(const Momentum& oth) const { return fabs(pt() - oth.pt()); }
 
-  double Momentum::deltaR(const Momentum& oth) const { return std::hypot(rapidity() - oth.rapidity(), deltaPhi(oth)); }
+  double Momentum::deltaR(const Momentum& oth) const { return fastHypot(rapidity() - oth.rapidity(), deltaPhi(oth)); }
 
   //--- boosts/rotations
 
@@ -222,10 +268,9 @@ namespace cepgen {
   double Momentum::gamma2() const {
     const auto mom2 = p2(), ene2 = energy2();
     if (ene2 == 0.) {
-      if (mom2 == 0.) {
+      if (mom2 == 0.)
         return 1.;
-      } else
-        CG_WARNING("Momentum:gamma") << "gamma computed for t=0 momentum.";
+      CG_WARNING("Momentum:gamma") << "gamma computed for t=0 momentum.";
     }
     if (ene2 < mom2) {
       CG_WARNING("Momentum:gamma") << "gamma computed for an invalid spacelike momentum.";
@@ -243,7 +288,7 @@ namespace cepgen {
 
     const double apz = pz(), ae = energy();
 
-    return setPz(gamma * apz + betagamma * ae).setEnergy(gamma * ae + betagamma * apz).computeP();
+    return setEnergy(gamma * ae + betagamma * apz).setPz(gamma * apz + betagamma * ae);
   }
 
   Momentum& Momentum::lorentzBoost(const Momentum& mom) {
@@ -290,11 +335,5 @@ namespace cepgen {
 
   std::ostream& operator<<(std::ostream& os, const Momentum& mom) {
     return os << "(" << mom.energy() << "|" << mom.px() << " " << mom.py() << " " << mom.pz() << ")";
-  }
-
-  double CMEnergy(const Momentum& m1, const Momentum& m2) {
-    if (m1.mass() * m2.mass() < 0. || m1.energy() * m2.energy() < 0.)
-      return 0.;
-    return sqrt(m1.mass2() + m2.mass2() + 2. * m1.energy() * m2.energy() - 2. * (m1 * m2));
   }
 }  // namespace cepgen

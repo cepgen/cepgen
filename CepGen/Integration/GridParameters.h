@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,67 +28,55 @@ namespace cepgen {
   class GridParameters {
   public:
     /// Build a generation grid for a ndim-dimensional phase space
-    explicit GridParameters(size_t ndim);
+    explicit GridParameters(size_t mbin, size_t ndim);
 
-    /// Coordinates definition
-    typedef std::vector<unsigned short> coord_t;
+    typedef std::vector<unsigned short> coord_t;  ///< Coordinates definition
 
-    /// Dump the grid coordinates
-    void dump() const;
+    void dump() const;  ///< Dump the grid coordinates
 
-    /// Grid multiplicity
-    size_t size() const;
+    inline size_t size() const { return coords_.size(); }  ///< Grid multiplicity
     /// Number of times a phase space point has been randomly selected
-    const coord_t& n(size_t coord) const;
-    /// Global function maximum
-    float globalMax() const { return f_max_global_; }
+    inline const coord_t& n(size_t coord) const { return coords_.at(coord); }
+    inline float globalMax() const { return f_max_global_; }  ///< Global function maximum
+
     /// Maximal function value for a given grid coordinate
-    float maxValue(size_t) const;
-    /// Set the function value for a given grid coordinate
-    void setValue(size_t, float);
+    inline float maxValue(size_t coord) const { return f_max_.at(coord); }
+    inline double maxValueDiff() const { return f_max_diff_; }
+    inline double maxHistValue() const { return f_max_old_; }
+
+    void setValue(size_t, float);  ///< Set the function value for a given grid coordinate
     /// Shoot a phase space point for a grid coordinate
     void shoot(const Integrator* integ, size_t coord, std::vector<double>& out) const;
-    /// Specify a new trial has been attempted for bin
-    void increment(size_t coord);
     /// Number of points already shot for a given grid coordinate
-    size_t numPoints(size_t coord) const;
-    /// Has the grid been prepared
-    bool prepared() const { return gen_prepared_; }
-    /// Mark the grid as prepared
-    void setPrepared(bool prepared = true) { gen_prepared_ = prepared; }
+    inline size_t numPoints(size_t coord) const { return num_points_.at(coord); }
+    /// Specify a new trial has been attempted for bin
+    inline void increment(size_t coord) { num_points_.at(coord)++; }
+
+    inline bool prepared() const { return gen_prepared_; }                       ///< Has the grid been prepared
+    inline void setPrepared(bool prepared = true) { gen_prepared_ = prepared; }  ///< Mark the grid as prepared
+
     /// Correction to apply on the next phase space point generation
-    float correctionValue() const { return correc_; }
+    inline float correctionValue() const { return correc_; }
     /// Set the correction to apply on the next phase space point generation
-    void setCorrectionValue(float correc) { correc_ = correc; }
-    /// Apply the correction requested at the previous generation
-    bool correct(size_t);
+    inline void setCorrectionValue(float correc) { correc_ = correc; }
+    bool correct(size_t);  ///< Apply the correction requested at the previous generation
+
     void rescale(size_t, float);
     void initCorrectionCycle(size_t, float);
-    double maxValueDiff() const { return f_max_diff_; }
-    double maxHistValue() const { return f_max_old_; }
-
-    /// Integration grid size parameter
-    static constexpr unsigned short M_BIN = 3;
-    /// Weight of each grid coordinate
-    static constexpr double INV_M_BIN = 1. / M_BIN;
 
   private:
     void generateCoordinates(coord_t&, size_t) const;
-    /// Phase space multiplicity
-    size_t ndim_{0};
-    /// Has the grid been already prepared?
-    bool gen_prepared_{false};
-    /// Correction to apply on the next phase space point generation
-    float correc_{0.};
+
+    const size_t mbin_;         ///< Integration grid size parameter
+    const double inv_mbin_;     ///< Weight of each grid coordinate
+    size_t ndim_{0};            ///< Phase space multiplicity
+    bool gen_prepared_{false};  ///< Has the grid been already prepared?
+    float correc_{0.};          ///< Correction to apply on the next phase space point generation
     float correc2_{0.};
-    /// Point coordinates in grid
-    std::vector<coord_t> coords_;
-    /// Number of functions values evaluated for this point
-    std::vector<size_t> num_points_;
-    /// Maximal value of the function at one given point
-    std::vector<float> f_max_;
-    /// Maximal value of the function in the considered integration range
-    float f_max_global_{0.};
+    std::vector<coord_t> coords_;     ///< Point coordinates in grid
+    std::vector<size_t> num_points_;  ///< Number of functions values evaluated for this point
+    std::vector<float> f_max_;        ///< Maximal value of the function at one given point
+    float f_max_global_{0.};          ///< Maximal value of the function in the considered integration range
     float f_max2_{0.};
     float f_max_diff_{0.};
     float f_max_old_{0.};

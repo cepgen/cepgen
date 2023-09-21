@@ -53,23 +53,21 @@ namespace cepgen {
 
   double Integrator::uniform(double min, double max) const { return min + (max - min) * rnd_(rnd_gen_); }
 
-  double Integrator::integrate(Integrand& integrand) {
+  Value Integrator::integrate(Integrand& integrand) {
     if (limits_.size() != integrand.size())
       limits_ = std::vector<Limits>(integrand.size(), Limits{0., 1.});
-    double result, tmp;
-    integrate(integrand, result, tmp);
-    return result;
+    return integrate(integrand);
   }
 
-  double Integrator::integrate(const std::function<double(const std::vector<double>&)>& func,
-                               const ParametersList& params,
-                               size_t num_vars) {
+  Value Integrator::integrate(const std::function<double(const std::vector<double>&)>& func,
+                              const ParametersList& params,
+                              size_t num_vars) {
     return integrate(func, params, std::vector<Limits>(num_vars, Limits{0., 1.}));
   }
 
-  double Integrator::integrate(const std::function<double(const std::vector<double>&)>& func,
-                               const ParametersList& params,
-                               const std::vector<Limits>& limits) {
+  Value Integrator::integrate(const std::function<double(const std::vector<double>&)>& func,
+                              const ParametersList& params,
+                              const std::vector<Limits>& limits) {
     auto integr = IntegratorFactory::get().build(params);
     integr->setLimits(limits);
     auto integrand = FunctionIntegrand(limits.size(), func);

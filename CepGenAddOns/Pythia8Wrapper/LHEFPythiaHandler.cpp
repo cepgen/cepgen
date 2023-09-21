@@ -24,6 +24,7 @@
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Value.h"
 #include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
 namespace cepgen {
@@ -43,7 +44,7 @@ namespace cepgen {
     void initialise() override;
     /// Writer operator
     void operator<<(const Event&) override;
-    void setCrossSection(double, double) override;
+    void setCrossSection(const Value&) override;
 
   private:
     std::unique_ptr<Pythia8::Pythia> pythia_;
@@ -115,8 +116,8 @@ namespace cepgen {
     lhaevt_->eventLHEF();
   }
 
-  void LHEFPythiaHandler::setCrossSection(double cross_section, double cross_section_err) {
-    lhaevt_->setCrossSection(0, cross_section, cross_section_err);
+  void LHEFPythiaHandler::setCrossSection(const Value& cross_section) {
+    lhaevt_->setCrossSection(0, cross_section, cross_section.uncertainty());
   }
 
   ParametersDescription LHEFPythiaHandler::description() {

@@ -100,8 +100,7 @@ int main(int argc, char* argv[]) {
       double phi1 = params[1] * 2. * M_PI, phi2 = params[3] * 2. * M_PI;
       return dsig(theta1, phi1, theta2, phi2);
     });
-    double val, unc;
-    integrator->integrate(integr, val, unc);
+    auto val = integrator->integrate(integr);
     return 3. * kin.beta * std::pow(2., -13) * std::pow(M_1_PI, -3) / shat * val;
   };
 

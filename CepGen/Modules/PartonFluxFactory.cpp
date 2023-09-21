@@ -16,29 +16,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_KTFluxes_KTFlux_h
-#define CepGen_KTFluxes_KTFlux_h
-
-#include "CepGen/Physics/PartonFlux.h"
+#include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/PartonFluxFactory.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
-  class KTFlux : public PartonFlux {
-  public:
-    explicit KTFlux(const ParametersList&);
-
-    static ParametersDescription description();
-
-    /// Compute the kt-dependent flux for this x value and virtuality
-    virtual double fluxQ2(double x, double kt2, double q2) const;
-    /// Compute the kt-dependent flux for this x value and remnant mass
-    virtual double fluxMX2(double x, double kt2, double mf2) const;
-
-    bool ktFactorised() const override final { return true; }
-
-  protected:
-    /// Minimal value taken for a \f$\k_{\rm T}\f$-factorised flux
-    static constexpr double kMinKTFlux{1.e-20};
-  };
+  ParametersDescription PartonFluxFactory::describeParameters(const std::string& name,
+                                                              const ParametersList& params) const {
+    if (utils::contains(KTFluxFactory::get().modules(), name))
+      return KTFluxFactory::get().describeParameters(name, params);
+    throw CG_FATAL("PartonFluxFactory:describeParameters")
+        << "Failed to find a parton flux with name '" << name << "'.";
+  }
 }  // namespace cepgen
-
-#endif

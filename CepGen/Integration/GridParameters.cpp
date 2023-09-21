@@ -25,10 +25,10 @@
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
-  GridParameters::GridParameters(size_t ndim) : ndim_(ndim) {
+  GridParameters::GridParameters(size_t mbin, size_t ndim) : mbin_(mbin), inv_mbin_(1. / mbin_), ndim_(ndim) {
     //--- build and populate the grid
     coord_t coord(ndim, 0);
-    for (size_t i = 0; i < (size_t)pow(M_BIN, ndim_); ++i) {
+    for (size_t i = 0; i < (size_t)std::pow(mbin_, ndim_); ++i) {
       generateCoordinates(coord, i);
       coords_.emplace_back(coord);
       num_points_.emplace_back(0ul);
@@ -36,26 +36,16 @@ namespace cepgen {
     }
   }
 
-  size_t GridParameters::size() const { return coords_.size(); }
-
-  const GridParameters::coord_t& GridParameters::n(size_t coord) const { return coords_.at(coord); }
-
   void GridParameters::setValue(size_t coord, float val) {
     //--- update function local and global maxima if needed
     f_max_.at(coord) = std::max(f_max_.at(coord), val);
     f_max_global_ = std::max(f_max_global_, val);
   }
 
-  float GridParameters::maxValue(size_t coord) const { return f_max_.at(coord); }
-
-  size_t GridParameters::numPoints(size_t coord) const { return num_points_.at(coord); }
-
-  void GridParameters::increment(size_t coord) { num_points_.at(coord)++; }
-
   void GridParameters::shoot(const Integrator* integr, size_t coord, std::vector<double>& out) const {
     const auto& nv = coords_.at(coord);
     for (size_t i = 0; i < nv.size(); ++i)
-      out[i] = (integr->uniform() + nv.at(i)) * INV_M_BIN;
+      out[i] = (integr->uniform() + nv.at(i)) * inv_mbin_;
   }
 
   void GridParameters::dump() const {
@@ -71,8 +61,8 @@ namespace cepgen {
   void GridParameters::generateCoordinates(coord_t& coord, size_t i) const {
     size_t jj = i;
     for (size_t j = 0; j < ndim_; ++j) {
-      size_t tmp = jj * INV_M_BIN;
-      coord[j] = jj - tmp * M_BIN;
+      size_t tmp = jj * inv_mbin_;
+      coord[j] = jj - tmp * mbin_;
       jj = tmp;
     }
   }

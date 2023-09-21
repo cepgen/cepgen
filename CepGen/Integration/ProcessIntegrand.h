@@ -22,22 +22,21 @@
 #include <memory>
 #include <vector>
 
+#include "CepGen/EventFilter/EventBrowser.h"
 #include "CepGen/Integration/Integrand.h"
 
 namespace cepgen {
   class Parameters;
-  class Event;
-  namespace utils {
-    class Timer;
-  }
   namespace proc {
     class Process;
+  }
+  namespace utils {
+    class Timer;
   }
   /// Wrapper to the function to be integrated
   class ProcessIntegrand : public Integrand {
   public:
     explicit ProcessIntegrand(const Parameters*);
-    ~ProcessIntegrand();
 
     /// Compute the integrand for a given phase space point (or "event")
     /// \param[in] x Phase space point coordinates
@@ -48,23 +47,19 @@ namespace cepgen {
     ///  numbers defined inside its boundaries (as normalised so that
     ///  \f$\forall i=1,\ldots,N\f$, \f$0<x_i<1\f$).
     double eval(const std::vector<double>& x) override;
-    /// Phase space dimension
-    size_t size() const override;
+    size_t size() const override;  ///< Phase space dimension
 
-    /// Thread-local physics process
-    proc::Process& process();
-    /// Thread-local physics process
-    const proc::Process& process() const;
+    proc::Process& process();              ///< Thread-local physics process
+    const proc::Process& process() const;  ///< Thread-local physics process
 
-    /// Specify if the generated events are to be stored
-    void setStorage(bool store) { storage_ = store; }
-    /// Are the events currently generated in this run to be stored?
-    bool storage() const { return storage_; }
+    void setStorage(bool store) { storage_ = store; }  ///< Specify if the generated events are to be stored
+    bool storage() const { return storage_; }          ///< Are the events currently generated in this run to be stored?
 
   private:
     std::unique_ptr<proc::Process> process_;   ///< Local instance of the physics process
     const Parameters* params_{nullptr};        ///< Generator-owned runtime parameters
-    const std::unique_ptr<utils::Timer> tmr_;  ///< A precious timekeeper for event timing
+    const std::unique_ptr<utils::Timer> tmr_;  ///< Timekeeper for event generation
+    utils::EventBrowser bws_;                  ///< Event browser
     bool storage_{false};                      ///< Is the next event to be generated to be stored?
   };
 }  // namespace cepgen

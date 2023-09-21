@@ -33,5 +33,21 @@ namespace cepgen {
     }
 
     double energyFromW(double w, double mp2, double m2) { return 0.5 * (w * w - mp2 + m2) / w; }
-  }  // namespace utils
+
+    namespace kt {
+      double mX2(double x, double kt2, double q2, double mi2) {
+        if (x != 0.)
+          return mi2 + (q2 * (1. - x) - kt2 - x * x * mi2) / x;
+        return 0.;
+      }
+
+      double q2(double x, double kt2, double mi2, double mx2) {
+        if (mx2 < 0.)
+          mx2 = mi2;
+        if (x != 1.)
+          return (kt2 + x * (mx2 - mi2) + x * x * mi2) / (1. - x);
+        return 0.;
+      }
+    }  // namespace kt
+  }    // namespace utils
 }  // namespace cepgen

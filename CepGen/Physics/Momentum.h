@@ -50,6 +50,8 @@ namespace cepgen {
     static Momentum fromPxPyPzM(double px, double py, double pz, double m);
     /// Build a 4-momentum from its transverse momentum, rapidity and mass
     static Momentum fromPxPyYM(double px, double py, double rap, double m);
+    /// Build a 4-momentum from its transverse momentum, azimuthal angle, rapidity and mass
+    static Momentum fromPtYPhiM(double pt, double rap, double phi, double m);
 
     //--- vector and scalar operators
 
@@ -96,30 +98,23 @@ namespace cepgen {
     /// Set all the components of the 3-momentum (in GeV)
     Momentum& setP(double px, double py, double pz);
     /// Set the momentum along the \f$x\f$-axis (in GeV)
-    inline Momentum& setPx(double px) {
-      (*this)[X] = px;
-      return *this;
-    }
+    Momentum& setPx(double px);
     /// Momentum along the \f$x\f$-axis (in GeV)
     inline double px() const { return (*this)[X]; }
     /// Set the momentum along the \f$y\f$-axis (in GeV)
-    inline Momentum& setPy(double py) {
-      (*this)[Y] = py;
-      return *this;
-    }
+    Momentum& setPy(double py);
     /// Momentum along the \f$y\f$-axis (in GeV)
     inline double py() const { return (*this)[Y]; }
     /// Set the longitudinal momentum (in GeV)
-    inline Momentum& setPz(double pz) {
-      (*this)[Z] = pz;
-      return *this;
-    }
+    Momentum& setPz(double pz);
     /// Longitudinal momentum (in GeV)
     inline double pz() const { return (*this)[Z]; }
     /// Transverse momentum (in GeV)
     double pt() const;
     /// Squared transverse momentum (in GeV\f$^2\f$)
     double pt2() const;
+    /// Transverse coordinates of a momentum
+    Momentum transverse() const;
     /// 5-vector of double precision floats (in GeV)
     std::array<double, 5> pVector() const;
     /// 3-momentum norm (in GeV)
@@ -127,10 +122,7 @@ namespace cepgen {
     /// Squared 3-momentum norm (in GeV\f$^2\f$)
     inline double p2() const { return p_ * p_; }
     /// Set the energy (in GeV)
-    inline Momentum& setEnergy(double e) {
-      (*this)[E] = e;
-      return *this;
-    }
+    Momentum& setEnergy(double);
     /// Energy (in GeV)
     inline double energy() const { return (*this)[E]; }
     /// Squared energy (in GeV\f$^2\f$)
@@ -140,11 +132,11 @@ namespace cepgen {
     /// Squared tranverse energy component (in GeV\f$^2\f$)
     double energyT2() const;
     /// Compute the energy from the mass
-    Momentum& setMass2(double m2);
+    Momentum& setMass2(double);
     /// Squared mass (in GeV\f$^2\f$) as computed from its energy and momentum
-    inline double mass2() const { return energy2() - p2(); }
+    double mass2() const;
     /// Compute the energy from the mass
-    inline Momentum& setMass(double m) { return setMass2(m * m); }
+    Momentum& setMass(double);
     /// Mass (in GeV) as computed from its energy and momentum
     /// \note Returns \f$-\sqrt{|E^2-\mathbf{p}^2|}<0\f$ if \f$\mathbf{p}^2>E^2\f$
     double mass() const;
@@ -177,8 +169,16 @@ namespace cepgen {
     /// Gamma scalar value
     double gamma() const;
 
+    /// Compute the mass from 4-momentum
+    /// \param[in] on_shell_mass Specify on-shell mass to constrain energy
+    Momentum& computeEnergyFromMass(double on_shell_mass);
+    /// Compute the longitudinal coordinate from energy-mass-transverse momentum constraints
+    /// \param[in] on_shell_mass Specify on-shell mass to constrain longitudinal momentum
+    Momentum& computePzFromMass(double on_shell_mass);
+
     /// Apply a threshold to all values with a given tolerance
     Momentum& truncate(double tolerance = 1.e-10);
+
     /// Rotate the transverse components by an angle phi (and reflect the y coordinate)
     Momentum& rotatePhi(double phi, double sign);
     /// Rotate the particle's momentum by a polar/azimuthal angle
@@ -206,8 +206,6 @@ namespace cepgen {
     /// 3-momentum's norm (in GeV/c)
     double p_{0.};
   };
-  /// Compute the centre of mass energy of two particles momenta
-  double CMEnergy(const Momentum& m1, const Momentum& m2);
 }  // namespace cepgen
 
 #endif

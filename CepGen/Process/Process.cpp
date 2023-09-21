@@ -115,26 +115,23 @@ namespace cepgen {
     }
 
     void Process::dumpVariables(std::ostream* os) const {
-      if (!os)
-        os = &CG_LOG.stream();
-      (*os) << "List of variables handled by this process:";
+      std::ostringstream ss;
+      ss << "List of variables handled by this process:";
       for (const auto& var : mapped_variables_)
-        (*os) << "\n\t(" << var.index << ") " << var.type << " mapping (" << var.description << ")"
-              << " in range " << var.limits;
+        ss << "\n\t(" << var.index << ") " << var.type << " mapping (" << var.description << ")"
+           << " in range " << var.limits;
+      if (os)
+        (*os) << ss.str();
+      else
+        CG_LOG << ss.str();
     }
 
-    Process& Process::defineVariable(
-        double& out, const Mapping& type, Limits in, const Limits& default_limits, const std::string& descr) {
-      if (!in.valid()) {
-        CG_DEBUG("Process:defineVariable") << descr << " could not be retrieved from the user configuration. "
-                                           << "Setting it to the default value: " << default_limits << ".";
-        in = default_limits;
-      }
+    Process& Process::defineVariable(double& out, const Mapping& type, const Limits& lim, const std::string& descr) {
+      if (!lim.valid())
+        throw CG_FATAL("Process:defineVariable")
+            << "The limits for '" << descr << "' (" << lim << ") could not be retrieved from the user configuration.";
 
-      Limits lim = in;
-      out = 0.;                  // reset the variable
       double jacob_weight = 1.;  // initialise the local weight for this variable
-
       switch (type) {
         case Mapping::linear:
           jacob_weight = lim.range();
@@ -142,27 +139,20 @@ namespace cepgen {
         case Mapping::square:
           jacob_weight = 2. * lim.range();
           break;
-        case Mapping::exponential: {
-          lim = {// limits already stored as log(limits)
-                 (!lim.hasMin() || lim.min() == 0.) ? -10. : std::max(log(lim.min()), -10.),
-                 (!lim.hasMax() || lim.max() == 0.) ? +10. : std::min(log(lim.max()), +10.)};
-          jacob_weight = lim.range();  // use the linear version
-        } break;
+        case Mapping::exponential:
+          jacob_weight = lim.range();
+          break;
         case Mapping::power_law:
           jacob_weight = log(lim.max() / lim.min());
           break;
       }
-      mapped_variables_.emplace_back(
-          MappingVariable{descr.empty() ? utils::format("var%z", mapped_variables_.size()) : descr,
-                          lim,
-                          out,
-                          type,
-                          (unsigned short)mapped_variables_.size()});
+      const auto var_desc = descr.empty() ? utils::format("var%z", mapped_variables_.size()) : descr;
+      mapped_variables_.emplace_back(MappingVariable{var_desc, lim, out, type, mapped_variables_.size()});
       point_coord_.emplace_back(0.);
       base_jacobian_ *= jacob_weight;
       CG_DEBUG("Process:defineVariable") << "\n\t" << descr << " has been mapped to variable "
                                          << mapped_variables_.size() << ".\n\t"
-                                         << "Allowed range for integration: " << in << " (" << lim << ").\n\t"
+                                         << "Allowed range for integration: " << lim << ".\n\t"
                                          << "Variable integration mode: " << type << ".\n\t"
                                          << "Weight in the Jacobian: " << jacob_weight << ".";
       return *this;
@@ -183,77 +173,61 @@ namespace cepgen {
         if (var.index >= point_coord_.size())
           throw CG_FATAL("Process:x") << "Failed to retrieve coordinate " << var.index << " from "
                                       << "a dimension-" << ndim() << " process!";
-        const double xv = point_coord_.at(var.index);  // between 0 and 1
+        const auto& xv = point_coord_.at(var.index);  // between 0 and 1
         switch (var.type) {
           case Mapping::linear: {
             var.value = var.limits.x(xv);
+            jacobian *= 1.;
           } break;
-          case Mapping::exponential: {          // limits already logarithmic
-            var.value = exp(var.limits.x(xv));  // transform back to linear
+          case Mapping::exponential: {
+            var.value = std::exp(var.limits.x(xv));  // transform back to linear
             jacobian *= var.value;
           } break;
           case Mapping::square: {
             const auto val = var.limits.x(xv);
-            var.value = val * val;
-            jacobian *= 2. * val;
+            var.value = val * val;  // transform to square
+            jacobian *= val;
           } break;
           case Mapping::power_law: {
             const double y = var.limits.max() / var.limits.min();
-            var.value = var.limits.min() * pow(y, xv);
+            var.value = var.limits.min() * std::pow(y, xv);
             jacobian *= var.value;
           } break;
         }
+        CG_DEBUG_LOOP("Process:vars") << "\n\tvariable " << var.index << std::left << std::setw(60)
+                                      << (!var.description.empty() ? " (" + var.description + ")" : "") << " in range "
+                                      << std::setw(20) << var.limits << " has value " << std::setw(20) << var.value
+                                      << " (x=" << point_coord_.at(var.index) << std::right << ")";
       }
-      CG_DEBUG_LOOP("Process:vars").log([&](auto& dbg) {
-        dbg << "Dump of all variables values:";
-        for (const auto& var : mapped_variables_) {
-          double value = 0.;
-          switch (var.type) {
-            case Mapping::linear:
-            case Mapping::exponential:
-            case Mapping::power_law:
-              value = var.value;
-              break;
-            case Mapping::square:
-              value = sqrt(var.value);
-              break;
-          }
-          dbg << "\n\tvariable " << var.index << std::left << std::setw(60)
-              << (!var.description.empty() ? " (" + var.description + ")" : "") << " in range " << std::setw(20)
-              << var.limits << " has value " << std::setw(20) << value << " (x=" << point_coord_.at(var.index)
-              << std::right << ")";
-        }
-      });
       return jacobian;
     }
 
     double Process::weight(const std::vector<double>& x) {
       point_coord_ = x;
-      if (CG_LOG_MATCH("Process:dumpPoint", debugInsideLoop))
-        dumpPoint();
 
       //--- generate and initialise all variables and generate auxiliary
       //    (x-dependent) part of the Jacobian for this phase space point.
       const auto aux_jacobian = generateVariables();
+
+      CG_DEBUG_LOOP("Process:weight").log([&](auto& log) {
+        log << "Jacobian: " << base_jacobian_ << " * " << aux_jacobian << " = " << (base_jacobian_ * aux_jacobian)
+            << ".\n\t";
+        dumpPoint(&log.stream());
+      });
+
       if (aux_jacobian <= 0.)
         return 0.;
 
       //--- compute the integrand
       const auto me_integrand = computeWeight();
+      CG_DEBUG_LOOP("Process:weight") << "Integrand = " << me_integrand << "\n\t"
+                                      << "Proc.-specific integrand * Jacobian (excl. global Jacobian) = "
+                                      << (me_integrand * aux_jacobian) << ".";
       if (me_integrand <= 0.)
         return 0.;
 
       //--- combine every component into a single weight for this point
-      const auto weight = (base_jacobian_ * aux_jacobian) * me_integrand;
-
-      CG_DEBUG_LOOP("Process:weight") << "Jacobian: " << base_jacobian_ << " * " << aux_jacobian << " = "
-                                      << (base_jacobian_ * aux_jacobian) << ".\n\t"
-                                      << "Integrand = " << me_integrand << "\n\t"
-                                      << "Proc.-specific integrand * Jacobian (excl. global Jacobian) = "
-                                      << (me_integrand * aux_jacobian) << "\n\t"
-                                      << "Point weight = " << weight << ".";
-
-      return weight;
+      return (base_jacobian_ * aux_jacobian) * me_integrand;
     }
 
     void Process::clearEvent() {
@@ -283,8 +257,6 @@ namespace cepgen {
       CG_DEBUG("Process:initialise") << "Preparing to set the kinematics parameters. Input parameters: "
                                      << ParametersDescription(kin_.parameters(false)) << ".";
 
-      prepareBeams();
-      kin_.incomingBeams().initialise();
       clear();  // also resets the "first run" flag
 
       // build the coupling objects
@@ -307,12 +279,12 @@ namespace cepgen {
         ib2.setMomentum(p2);
         auto& ob1 = event_->oneWithRole(Particle::OutgoingBeam1);
         ob1.setPdgId(kin_.incomingBeams().positive().pdgId());
-        ob1.setStatus(kin_.incomingBeams().positive().fragmented() ? Particle::Status::Unfragmented
-                                                                   : Particle::Status::FinalState);
+        ob1.setStatus(kin_.incomingBeams().positive().elastic() ? Particle::Status::FinalState
+                                                                : Particle::Status::Unfragmented);
         auto& ob2 = event_->oneWithRole(Particle::OutgoingBeam2);
         ob2.setPdgId(kin_.incomingBeams().negative().pdgId());
-        ob2.setStatus(kin_.incomingBeams().negative().fragmented() ? Particle::Status::Unfragmented
-                                                                   : Particle::Status::FinalState);
+        ob2.setStatus(kin_.incomingBeams().negative().elastic() ? Particle::Status::FinalState
+                                                                : Particle::Status::Unfragmented);
         for (auto& cp : (*event_)[Particle::CentralSystem])
           cp.get().setPdgId(cp.get().pdgId());
       }
@@ -347,13 +319,14 @@ namespace cepgen {
       return (*alphas_)(q);
     }
 
-    void Process::dumpPoint() const {
-      CG_INFO("Process").log([&](auto& info) {
-        info << "Number of integration parameters: " << mapped_variables_.size();
-        for (unsigned short i = 0; i < point_coord_.size(); ++i)
-          info << utils::format("\n\t  x(%2d) = %8.6f", i, point_coord_[i]);
-        info << ".";
-      });
+    void Process::dumpPoint(std::ostream* os) const {
+      std::ostringstream oss;
+      oss << "Number of integration parameters: " << mapped_variables_.size() << ", point: {"
+          << utils::merge(point_coord_, ", ") << "}.";
+      if (!os)
+        CG_INFO("Process") << oss.str();
+      else
+        (*os) << oss.str();
     }
 
     void Process::setEventContent(const IncomingState& ini, const OutgoingState& fin) {
@@ -368,7 +341,7 @@ namespace cepgen {
         auto& p = event_->addParticle(ip.first).get();
         const auto& part_info = PDG::get()(ip.second);
         p.setPdgId(ip.second, part_info.charge / 3.);
-        p.setMass(part_info.mass);
+        p.momentum().setMass(part_info.mass);
         if (ip.first == Particle::IncomingBeam1 || ip.first == Particle::IncomingBeam2)
           p.setStatus(Particle::Status::PrimordialIncoming);
         if (ip.first == Particle::Parton1 || ip.first == Particle::Parton2)
@@ -387,7 +360,7 @@ namespace cepgen {
           auto& p = event_->addParticle(opl.first).get();
           const auto& part_info = PDG::get()(pdg);
           p.setPdgId(pdg, part_info.charge / 3.);
-          p.setMass(part_info.mass);
+          p.momentum().setMass(part_info.mass);
         }
       }
 

@@ -37,7 +37,6 @@ namespace cepgen {
     static ParametersDescription description();
 
     void initialise() override;
-    void setCrossSection(double, double) override {}
     void operator<<(const Event&) override;
 
   private:

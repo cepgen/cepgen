@@ -16,13 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <memory>
-#include <vector>
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/GeneratorWorker.h"
-#include "CepGen/Event/Event.h"
-#include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Integration/GridParameters.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
@@ -34,18 +29,25 @@
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  class TrivialGeneratorWorker final : public GeneratorWorker {
+  class GridOptimisedGeneratorWorker final : public GeneratorWorker {
   public:
     /// Book the memory slots and structures for the generator
-    explicit TrivialGeneratorWorker(const ParametersList& params) : GeneratorWorker(params) {}
+    explicit GridOptimisedGeneratorWorker(const ParametersList& params) : GeneratorWorker(params) {}
 
-    bool next(Event::callback callback = nullptr) override;
+    void initialise() override;
+    bool next() override;
+
+    static ParametersDescription description() {
+      auto desc = GeneratorWorker::description();
+      desc.setDescription("Grid-optimised worker");
+      desc.add<int>("binSize", 3);
+      return desc;
+    }
 
   private:
     /// Placeholder for invalid bin indexing
     static constexpr int UNASSIGNED_BIN = -999;
 
-    void setGrid();
     /// Apply a correction cycle to the grid
     bool correctionCycle(bool&);
     /// Prepare the object for event generation
@@ -58,12 +60,12 @@ namespace cepgen {
     std::vector<double> coords_;  ///< Phase space coordinates being evaluated
   };
 
-  void TrivialGeneratorWorker::setGrid() {
-    grid_.reset(new GridParameters(integrand_->size()));
+  void GridOptimisedGeneratorWorker::initialise() {
+    grid_.reset(new GridParameters(steer<int>("binSize"), integrand_->size()));
     coords_ = std::vector<double>(integrand_->size());
     if (!grid_->prepared())
       computeGenerationParameters();
-    CG_DEBUG("TrivialGeneratorWorker:integrator")
+    CG_DEBUG("GridOptimisedGeneratorWorker:initialise")
         << "Dim-" << integrand_->size() << " " << integrator_->name() << " integrator "
         << "set for dim-" << grid_->n(0).size() << " grid.";
   }
@@ -72,14 +74,13 @@ namespace cepgen {
   // events generation part
   //-----------------------------------------------------------------------------------------------
 
-  bool TrivialGeneratorWorker::next(Event::callback callback) {
-    CG_TICKER(const_cast<Parameters*>(params_)->timeKeeper());
-
+  bool GridOptimisedGeneratorWorker::next() {
     if (!integrator_)
-      throw CG_FATAL("TrivialGeneratorWorker:next") << "No integrator object handled!";
-    // initialise grid if not already done
+      throw CG_FATAL("GridOptimisedGeneratorWorker:next") << "No integrator object handled!";
     if (!grid_)
-      setGrid();
+      throw CG_FATAL("GridOptimisedGeneratorWorker:next") << "Grid object was not initialised.";
+
+    CG_TICKER(const_cast<Parameters*>(params_)->timeKeeper());
 
     // apply correction cycles if required from previous event
     if (ps_bin_ != UNASSIGNED_BIN) {
@@ -87,7 +88,7 @@ namespace cepgen {
       while (!correctionCycle(store)) {
       }
       if (store)
-        return storeEvent(callback);
+        return storeEvent();
     }
 
     //--- normal generation cycle
@@ -118,15 +119,16 @@ namespace cepgen {
       ps_bin_ = UNASSIGNED_BIN;
 
     // return with an accepted event
-    return storeEvent(callback);
+    return storeEvent();
   }
 
-  bool TrivialGeneratorWorker::correctionCycle(bool& store) {
+  bool GridOptimisedGeneratorWorker::correctionCycle(bool& store) {
     CG_TICKER(const_cast<Parameters*>(params_)->timeKeeper());
 
-    CG_DEBUG_LOOP("TrivialGeneratorWorker:correction") << "Correction cycles are started.\n\t"
-                                                       << "bin = " << ps_bin_ << "\n\t"
-                                                       << "correction value = " << grid_->correctionValue() << ".";
+    CG_DEBUG_LOOP("GridOptimisedGeneratorWorker:correction")
+        << "Correction cycles are started.\n\t"
+        << "bin = " << ps_bin_ << "\n\t"
+        << "correction value = " << grid_->correctionValue() << ".";
 
     if (grid_->correctionValue() >= 1.)
       grid_->setCorrectionValue(grid_->correctionValue() - 1.);
@@ -154,15 +156,15 @@ namespace cepgen {
   // initial preparation run before the generation of unweighted events
   //-----------------------------------------------------------------------------------------------
 
-  void TrivialGeneratorWorker::computeGenerationParameters() {
-    if (grid_->prepared())
-      return;  // do not prepare again the grid
+  void GridOptimisedGeneratorWorker::computeGenerationParameters() {
     if (!params_)
-      throw CG_FATAL("TrivialGeneratorWorker:setGen") << "No steering parameters specified!";
+      throw CG_FATAL("GridOptimisedGeneratorWorker:setGen") << "No steering parameters specified!";
+    if (!integrator_)
+      throw CG_FATAL("GridOptimisedGeneratorWorker:setGen") << "No integrator object specified!";
 
     integrand_->setStorage(false);
 
-    CG_INFO("TrivialGeneratorWorker:setGen")
+    CG_INFO("GridOptimisedGeneratorWorker:setGen")
         << "Preparing the grid (" << utils::s("point", params_->generation().numPoints(), true) << "/bin) "
         << "for the generation of unweighted events.";
 
@@ -193,7 +195,7 @@ namespace cepgen {
       sum2p += sig2;
 
       // per-bin debugging loop
-      CG_DEBUG_LOOP("TrivialGeneratorWorker:setGen").log([&](auto& dbg) {
+      CG_DEBUG_LOOP("GridOptimisedGeneratorWorker:setGen").log([&](auto& dbg) {
         const double sig = sqrt(sig2);
         const double eff = (grid_->maxValue(i) != 0.) ? av / grid_->maxValue(i) : 0.;
         dbg << "n-vector for bin " << i << ": " << utils::repr(grid_->n(i)) << "\n\t"
@@ -217,18 +219,20 @@ namespace cepgen {
       eff1 += sum / grid_->size() * grid_->maxValue(i);
     const double eff2 = sum / grid_->globalMax();
 
-    CG_DEBUG("TrivialGeneratorWorker:setGen") << "Average function value         = " << sum << "\n\t"
-                                              << "Average squared function value = " << sum2 << "\n\t"
-                                              << "Overall standard deviation     = " << sig << "\n\t"
-                                              << "Average standard deviation     = " << sigp << "\n\t"
-                                              << "Maximum function value         = " << grid_->globalMax() << "\n\t"
-                                              << "Average inefficiency           = " << eff1 << "\n\t"
-                                              << "Overall inefficiency           = " << eff2;
+    CG_DEBUG("GridOptimisedGeneratorWorker:setGen")
+        << "Average function value         = " << sum << "\n\t"
+        << "Average squared function value = " << sum2 << "\n\t"
+        << "Overall standard deviation     = " << sig << "\n\t"
+        << "Average standard deviation     = " << sigp << "\n\t"
+        << "Maximum function value         = " << grid_->globalMax() << "\n\t"
+        << "Average inefficiency           = " << eff1 << "\n\t"
+        << "Overall inefficiency           = " << eff2;
     grid_->setPrepared(true);
     //--- from now on events will be stored
     integrand_->setStorage(true);
 
-    CG_INFO("TrivialGeneratorWorker:setGen") << "Grid prepared! Now launching the production.";
+    CG_INFO("GridOptimisedGeneratorWorker:setGen")
+        << "Finished the grid preparation. Now launching the unweighted event production.";
   }
 }  // namespace cepgen
-REGISTER_GENERATOR_WORKER("trivial", TrivialGeneratorWorker);
+REGISTER_GENERATOR_WORKER("grid_optimised", GridOptimisedGeneratorWorker);

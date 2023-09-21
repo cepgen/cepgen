@@ -25,6 +25,7 @@
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/Test.h"
 #include "CepGenAddOns/ROOTWrapper/ROOTTreeInfo.h"
 
 using namespace std;
@@ -62,34 +63,19 @@ int main(int argc, char* argv[]) {
     auto* file = TFile::Open(tmp_filename.c_str());
     ROOT::CepGenRun run_info;
     run_info.attach(file);
-    if (run_info.xsect != cross_sec) {
-      CG_LOG << "Invalid cross section retrieved from run tree: " << run_info.xsect << " != " << cross_sec << ".";
-      return -1;
-    }
-    if (run_info.errxsect != cross_sec_unc) {
-      CG_LOG << "Invalid cross section uncertainty retrieved from run tree: " << run_info.errxsect
-             << " != " << cross_sec_unc << ".";
-      return -1;
-    }
+
+    CG_TEST_EQUIV(run_info.xsect, cross_sec, "cross section from run tree");
+    CG_TEST_EQUIV(run_info.errxsect, cross_sec_unc, "cross section uncertainty from run tree");
+
     ROOT::CepGenEvent evt_info;
     evt_info.attach(file);
-    if (!evt_info.tree()) {
-      CG_LOG << "Failed to retrieve an events tree.";
-      return -1;
-    }
-    const auto num_gen_eff = evt_info.tree()->GetEntriesFast();
-    if (num_gen_eff != num_gen) {
-      CG_LOG << "Invalid number of events generated: " << num_gen_eff << " != " << num_gen << ".";
-      return -1;
-    }
+    CG_TEST(evt_info.tree(), "events tree present");
+    if (evt_info.tree())
+      CG_TEST(evt_info.tree()->GetEntriesFast() == num_gen, "number of events generated");
   }
 
-  {  // tree removal part
-    if (!keep_file && !fs::remove(tmp_filename)) {
-      CG_LOG << "Failed to remove the temporary file \"" << tmp_filename << "\".";
-      return -1;
-    }
-  }
+  if (!keep_file)  // tree removal part
+    CG_TEST(fs::remove(tmp_filename), "removal the temporary file \"" << tmp_filename << "\".");
 
-  return 0;
+  CG_TEST_SUMMARY;
 }
