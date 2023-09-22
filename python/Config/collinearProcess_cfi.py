@@ -11,6 +11,7 @@ class ProtonFlux:
     PhotonElastic = Module('EPAFlux',
         formFactors = Module('StandardDipole')
     )
+    PhotonElasticDZ = Module('DreesZeppenfeld')
     PhotonInelastic = Module('EPAFlux',
         formFactors = Module('InelasticNucleon')
     )

@@ -33,30 +33,24 @@ namespace cepgen {
       auto& kin = process().kinematics();
       auto set_flux_properties = [&kin](const Beam& beam, std::unique_ptr<PartonFlux>& flux) {
         auto params = beam.partonFluxParameters();
+        const auto params_p_el = CollinearFluxFactory::get().describeParameters(
+            "EPAFlux", ParametersList().set("formFactors", kin.incomingBeams().formFactors()));
+        const auto params_p_inel = CollinearFluxFactory::get().describeParameters(
+            "EPAFlux",
+            ParametersList().set("formFactors",
+                                 ParametersList()
+                                     .setName<std::string>("InelasticNucleon")
+                                     .set("structureFunctions", kin.incomingBeams().structureFunctions())));
+        const auto params_hi_el = CollinearFluxFactory::get().describeParameters(
+            "EPAFlux", ParametersList().set("formFactors", ParametersList().setName<std::string>("HeavyIonDipole")));
         if (params.name<std::string>().empty()) {
           if (beam.elastic()) {
             if (HeavyIon::isHI(beam.pdgId()))
-              params =
-                  CollinearFluxFactory::get()
-                      .describeParameters(
-                          "EPAFlux",
-                          ParametersList().set("formFactors", ParametersList().setName<std::string>("HeavyIonDipole")))
-                      .validate(params);
+              params = params_hi_el.validate(params);
             else
-              params = CollinearFluxFactory::get()
-                           .describeParameters("EPAFlux",
-                                               ParametersList().set("formFactors", kin.incomingBeams().formFactors()))
-                           .validate(params);
+              params = params_p_el.validate(params);
           } else
-            params =
-                CollinearFluxFactory::get()
-                    .describeParameters(
-                        "EPAFlux",
-                        ParametersList().set("formFactors",
-                                             ParametersList()
-                                                 .setName<std::string>("InelasticNucleon")
-                                                 .set("structureFunctions", kin.incomingBeams().structureFunctions())))
-                    .validate(params);
+            params = params_p_inel.validate(params);
           //TODO: fermions/pions
         }
         CG_LOG << params;
@@ -92,8 +86,8 @@ namespace cepgen {
     }
 
     double CollinearPhaseSpaceGenerator::fluxes() const {
-      return positiveFlux<CollinearFlux>().fluxQ2(process().x1(), m_t1_) * m_t1_ *
-             negativeFlux<CollinearFlux>().fluxQ2(process().x2(), m_t2_) * m_t2_;
+      return positiveFlux<CollinearFlux>().fluxQ2(process().x1(), m_t1_) * process().x1() *
+             negativeFlux<CollinearFlux>().fluxQ2(process().x2(), m_t2_) * process().x2();
     }
   }  // namespace proc
 }  // namespace cepgen
