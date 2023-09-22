@@ -61,7 +61,7 @@ namespace cepgen {
       process().defineVariable(m_qt2_, Process::Mapping::exponential, log_lim_kt, "Negative-z parton virtuality");
 
       // register the incoming partons' azimuthal angles range
-      const auto lim_phi = kin.cuts().initial.phi_qt.truncate(Limits{0., 2. * M_PI});
+      const auto lim_phi = kin.cuts().initial.phi.truncate(Limits{0., 2. * M_PI});
       process().defineVariable(m_phi_qt1_, Process::Mapping::linear, lim_phi, "Positive-z parton azimuthal angle");
       process().defineVariable(m_phi_qt2_, Process::Mapping::linear, lim_phi, "Negative-z parton azimuthal angle");
     }

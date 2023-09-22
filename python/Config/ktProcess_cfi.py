@@ -28,6 +28,7 @@ class ElectronFlux:
 
 
 process = Module('ktProcess',
+    ktFactorised = True,
     outKinematics = Parameters(
         #--- cuts on initial-state partons
         qt = (0., 50.),

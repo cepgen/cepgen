@@ -22,6 +22,7 @@
 
 // collection of handled objects
 #include "CepGen/Cards/Handler.h"
+#include "CepGen/CollinearFluxes/CollinearFlux.h"
 #include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
@@ -117,6 +118,7 @@ namespace cepgen {
   }
 
   template class ModuleFactory<card::Handler, std::string>;
+  template class ModuleFactory<CollinearFlux, std::string>;
   template class ModuleFactory<Coupling, std::string>;
   template class ModuleFactory<utils::Derivator, std::string>;
   template class ModuleFactory<utils::Drawer, std::string>;

@@ -23,6 +23,15 @@
 
 /** \file */
 
+/// Add a generic collinear parton flux evaluator builder definition
+#define REGISTER_COLLINEAR_FLUX(name, obj)                                        \
+  namespace cepgen {                                                              \
+    struct BUILDERNM(obj) {                                                       \
+      BUILDERNM(obj)() { CollinearFluxFactory::get().registerModule<obj>(name); } \
+    };                                                                            \
+    static const BUILDERNM(obj) gCollinearFlux##obj;                              \
+  }                                                                               \
+  static_assert(true, "")
 /// Add a generic KT-factorised flux evaluator builder definition
 #define REGISTER_KT_FLUX(name, obj)                                        \
   namespace cepgen {                                                       \
@@ -34,7 +43,10 @@
   static_assert(true, "")
 
 namespace cepgen {
+  class CollinearFlux;
   class KTFlux;
+  /// A collinear parton fluxes objects factory
+  DEFINE_FACTORY_STR(CollinearFluxFactory, CollinearFlux, "Collinear parton flux estimators factory");
   /// A KT-factorised parton fluxes objects factory
   DEFINE_FACTORY_STR(KTFluxFactory, KTFlux, "KT-factorised flux estimators factory");
 

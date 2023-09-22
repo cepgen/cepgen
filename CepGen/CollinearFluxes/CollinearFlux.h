@@ -16,18 +16,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Modules/PartonFluxFactory.h"
-#include "CepGen/Utils/String.h"
+#ifndef CepGen_CollinearFluxes_CollinearFlux_h
+#define CepGen_CollinearFluxes_CollinearFlux_h
+
+#include "CepGen/Physics/PartonFlux.h"
 
 namespace cepgen {
-  ParametersDescription PartonFluxFactory::describeParameters(const std::string& name,
-                                                              const ParametersList& params) const {
-    if (utils::contains(CollinearFluxFactory::get().modules(), name))
-      return CollinearFluxFactory::get().describeParameters(name, params);
-    if (utils::contains(KTFluxFactory::get().modules(), name))
-      return KTFluxFactory::get().describeParameters(name, params);
-    throw CG_FATAL("PartonFluxFactory:describeParameters")
-        << "Failed to find a parton flux with name '" << name << "'.";
-  }
+  class CollinearFlux : public PartonFlux {
+  public:
+    explicit CollinearFlux(const ParametersList&);
+
+    static ParametersDescription description();
+
+    /// Compute the collinear flux for this x value and virtuality
+    virtual double fluxQ2(double x, double q2) const;
+    /// Compute the collinear flux for this x value and remnant mass
+    virtual double fluxMX2(double x, double mf2 = 0.) const;
+
+    bool ktFactorised() const override final { return false; }
+  };
 }  // namespace cepgen
+
+#endif

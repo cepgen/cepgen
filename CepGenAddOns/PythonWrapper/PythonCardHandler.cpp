@@ -159,6 +159,8 @@ namespace cepgen {
 
         //--- process mode
         const auto proc_name = python::get<std::string>(pproc_name);
+        if (auto* pkt = python::element(process, "ktFactorised"))
+          proc_params.set<bool>("ktFactorised", python::get<bool>(pkt));
         CG_DEBUG("PythonHandler") << "Building a process with name '" << proc_name << "' and parameters:\n\t"
                                   << proc_params << ".";
         //--- process kinematics
@@ -179,8 +181,7 @@ namespace cepgen {
         rt_params_->setProcess(std::move(proc_obj));
 
         //--- taming functions
-        auto* ptam = python::element(process, "tamingFunctions");  // borrowed
-        if (ptam)
+        if (auto* ptam = python::element(process, "tamingFunctions"))  // borrowed
           for (const auto& p : python::getVector<ParametersList>(ptam))
             rt_params_->addTamingFunction(FunctionalFactory::get().build("ROOT", p));
       });

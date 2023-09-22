@@ -112,8 +112,8 @@ namespace cepgen {
         desc.add<ParametersDescription>("disParameters", dis_desc);
 
         desc.add<double>("t0", 2.);
-        desc.add<Limits>("q2Range", Limits{1.e-12, 1.e3});
-        desc.add<Limits>("q2GridRange", Limits{0.8, 1.e3}).setDescription("Q^2 range covered by the grid");
+        desc.add<Limits>("Q2range", Limits{1.e-12, 1.e3});
+        desc.add<Limits>("Q2gridRange", Limits{0.8, 1.e3}).setDescription("Q^2 range covered by the grid");
         desc.add<std::string>("gridFile", "a08tmc.dat").setDescription("path to the DIS grid");
         return desc;
       }
@@ -185,8 +185,8 @@ namespace cepgen {
     KulaginBarinov::KulaginBarinov(const ParametersList& params)
         : Parameterisation(params),
           t0_(steer<double>("t0")),
-          q2_range_(steer<Limits>("q2Range")),
-          q2_grid_range_(steer<Limits>("q2GridRange")),
+          q2_range_(steer<Limits>("Q2range")),
+          q2_grid_range_(steer<Limits>("Q2gridRange")),
           sfs_grid_file_(steerPath("gridFile")),
           dis_params_(steer<ParametersList>("disParameters")),
           deriv_(DerivatorFactory::get().build(steer<ParametersList>("derivator"))),

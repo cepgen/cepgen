@@ -180,7 +180,7 @@ namespace cepgen {
   Momentum& Momentum::computeEnergyFromMass(double on_shell_mass) { return setMass(on_shell_mass); }
 
   Momentum& Momentum::computePzFromMass(double on_shell_mass) {
-    return setPz(normaliseSqrt(pz() * pz() + mass2() - on_shell_mass * on_shell_mass)).computeP();
+    return setPz(normaliseSqrt(pz() * pz() + mass2() - on_shell_mass * on_shell_mass));
   }
 
   Momentum& Momentum::computeP() {
