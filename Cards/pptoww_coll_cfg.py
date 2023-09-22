@@ -2,11 +2,6 @@ import Config.Core as cepgen
 import Config.collinearProcess_cfi as coll
 from Config.generator_cff import generator as _gen
 
-lhapdfLUXlep = coll.ProtonFlux.LHAPDF.clone('LHAPDF',
-    set = 'LUXlep-NNPDF31_nlo_as_0118_luxqed',
-    fromRemnant = False,
-)
-
 process = coll.process.clone('pptoww',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
@@ -14,7 +9,7 @@ process = coll.process.clone('pptoww',
         polarisationStates = 0,  # full
     ),
     inKinematics = cepgen.Parameters(
-        #partonFluxes = (lhapdfLUXlep, lhapdfLUXlep),
+        #partonFluxes = (coll.ProtonFlux.LHAPDFLUXlep, coll.ProtonFlux.LHAPDFLUXlep),
         partonFluxes = (coll.ProtonFlux.PhotonElastic, coll.ProtonFlux.PhotonElastic),
         cmEnergy = 13.e3,
     ),

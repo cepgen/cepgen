@@ -24,6 +24,10 @@ class ProtonFlux:
         )
     )
     LHAPDF = Module('LHAPDF')
+    LHAPDFLUXlep = LHAPDF.clone('LHAPDF',
+        set = 'LUXlep-NNPDF31_nlo_as_0118_luxqed',
+        fromRemnant = False,
+    )
 
 
 class HeavyIonFlux:
