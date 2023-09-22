@@ -53,7 +53,6 @@ namespace cepgen {
             params = params_p_inel.validate(params);
           //TODO: fermions/pions
         }
-        CG_LOG << params;
         flux = std::move(CollinearFluxFactory::get().build(params));
         if (!flux)
           throw CG_FATAL("CollinearPhaseSpaceGenerator:init")
@@ -75,11 +74,6 @@ namespace cepgen {
 
     bool CollinearPhaseSpaceGenerator::generatePartonKinematics() {
       // gaussian smearing of kt can be introduced here
-      /*const auto& proc = process();
-      const auto pz1 = 0.5 * (m_t1_ - proc.mA2() - proc.mX2()) / (proc.pA().energy() - proc.pA().pz());
-      process().q1() = Momentum::fromPxPyPzM(0., 0., +pz1, std::sqrt(m_t1_));
-      const auto pz2 = 0.5 * (m_t2_ - proc.mB2() - proc.mY2()) / (proc.pB().energy() - proc.pB().pz());
-      process().q2() = Momentum::fromPxPyPzM(0., 0., -pz2, std::sqrt(m_t2_));*/
       process().q1() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t1_));
       process().q2() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t2_));
       return true;
