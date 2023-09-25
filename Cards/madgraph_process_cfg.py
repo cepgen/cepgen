@@ -1,11 +1,11 @@
 import Config.Core as cepgen
-import Config.ktProcess_cfi as kt
+import Config.collinearProcess_cfi as coll
 from Config.generator_cff import generator
 from Config.Logger_cfi import logger
 #logger.enabledModules += ('MadGraphProcess.eval',)
 
 #--- process definition
-process = kt.process.clone('mg5_aMC',
+process = coll.process.clone('mg5_aMC',
     processParameters = cepgen.Parameters(
         process = 'a a > mu+ mu-',
         # alternatively, if shared object is already generated
@@ -18,7 +18,7 @@ process = kt.process.clone('mg5_aMC',
         pz = (6500., 6500.),
         structureFunctions = cepgen.StructureFunctions.LUXlike,
     ),
-    outKinematics = kt.process.outKinematics.clone(
+    outKinematics = coll.process.outKinematics.clone(
         #eta = (-2.5, 2.5),
         qt = (0., 10.),
         mx = (1.07, 1000.),
