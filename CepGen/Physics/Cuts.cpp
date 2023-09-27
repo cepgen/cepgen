@@ -93,12 +93,20 @@ namespace cepgen {
       auto desc = ParametersDescription();
       desc.add<Limits>("q2", Limits{0., 1.e5}).setDescription("Virtuality (GeV^2)");
       desc.add<Limits>("qt", Limits{}).setDescription("Transverse virtuality (GeV)");
-      desc.add<Limits>("phiqt", Limits{}).setDescription("Partons D(phi) (rad)");
+      desc.add<Limits>("phi", Limits{}).setDescription("Partons D(phi) (rad)");
       return desc;
     }
 
-    bool Initial::contain(const Particles&, const Event*) const {
-      //if (!q2().contains(
+    bool Initial::contain(const Particles& parts, const Event*) const {
+      for (const auto& part : parts) {
+        const auto& mom = part.momentum();
+        if (!qt.contains(mom.pt()))
+          return false;
+        if (!q2.contains(mom.mass2()))
+          return false;
+      }
+      if (parts.size() == 2 && phi.valid() && !phi.contains(parts.at(0).momentum().deltaPhi(parts.at(1).momentum())))
+        return false;
       return true;
     }
 
@@ -108,17 +116,18 @@ namespace cepgen {
 
     ParametersDescription Remnants::description() {
       auto desc = ParametersDescription();
-      desc.add<Limits>("xi", Limits{0., 1.}).setDescription("Longit.fract.mom. loss (\"xi\")");
       desc.add<Limits>("mx", Limits{Remnants::MX_MIN, 1.e3}).setDescription("Diffractive mass (GeV/c^2)");
       desc.add<Limits>("yj", Limits{}).setDescription("Diffractive jet rapidity");
+      desc.add<Limits>("xi", Limits{}).setDescription("Longit.fract.mom. loss (\"xi\")");
       return desc;
     }
 
     bool Remnants::contain(const Particles& parts, const Event* evt) const {
       for (const auto& part : parts) {
         if (part.status() != Particle::Status::FinalState)
-          return true;
-        if (evt && !xi.contains(1. - part.momentum().pz() / (*evt)[*part.mothers().begin()].momentum().pz()))
+          continue;
+        if (evt && xi.valid() &&
+            !xi.contains(1. - part.momentum().pz() / (*evt)[*part.mothers().begin()].momentum().pz()))
           return false;
         if (!yj.contains(fabs(part.momentum().rapidity())))
           return false;
