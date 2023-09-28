@@ -291,12 +291,14 @@ namespace cepgen {
       const auto& parts = python::get<ParametersList>(pparts);
       for (const auto& k : parts.keys(true)) {
         auto props = parts.get<ParametersList>(k);
-        const ParticleProperties part(props.set<std::string>("name", k).set<pdgid_t>("pdgid", props.get<int>("pdgid")));
+        if (props.has<int>("pdgid"))
+          props.set<pdgid_t>("pdgid", props.get<int>("pdgid"));
+        const ParticleProperties part(props);
         if (part.mass <= 0. && part.width <= 0.)  // skip aliases
           continue;
         if (!PDG::get().has(part.pdgid) || PDG::get()(part.pdgid) != part) {
-          CG_INFO("PythonHandler:particles")
-              << "Adding a new particle with name \"" << part.name << "\" to the PDG dictionary.";
+          CG_INFO("PythonHandler:particles") << "Adding a new particle with PDG id=" << part.pdgid << " and name \""
+                                             << part.name << "\" to the PDG dictionary.";
           PDG::get().define(part);
         }
       }

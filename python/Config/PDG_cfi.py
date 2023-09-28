@@ -26,14 +26,20 @@ PDG = Parameters(
 )
 
 ## Define a new particle type into the PDG library
-# \param pdgId Integer-type PDG identifier
+# \param pdgid Integer-type PDG identifier
 # \param name Computer-safe (and preferably human-readable) particle name
 # \param mass Particle on-shell mass (in GeV/c^2)
 # \param width Decay width (in GeV)
 # \param charge Particle electric charge (in e)
 # \param colour Colour charge
 # \param fermion Is the particle following the fermion statistics?
-def registerParticle(pdgid, name, mass=0., width=0., charge=0, colour=1, fermion=False):
+def registerParticle(pdgid: int,
+                     name: str,
+                     mass: float=0.,
+                     width: float=0.,
+                     charge: int=0,
+                     colour: int=1,
+                     fermion: bool=False):
     globals()['PDG'][name] = Parameters(
         name = name,
         description = name,
@@ -44,4 +50,4 @@ def registerParticle(pdgid, name, mass=0., width=0., charge=0, colour=1, fermion
         colour = colour,
         fermion = fermion
     )
-    print('particle with pdg={} defined'.format(pdgid))
+    print('particle with pdg={} defined: {}'.format(pdgid, globals()['PDG'][name]))

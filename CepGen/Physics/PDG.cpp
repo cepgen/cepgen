@@ -53,6 +53,8 @@ namespace cepgen {
   ParticleProperties& PDG::operator[](pdgid_t id) { return particles_[id]; }
 
   void PDG::define(const ParticleProperties& props) {
+    if (props.pdgid == PDG::invalid && props.name != "invalid")
+      throw CG_FATAL("PDG:define") << "Trying to define a particle with invalid PDG id: " << props << ".";
     CG_DEBUG("PDG:define").log([&](auto& log) {
       if (has(props.pdgid))
         log << "Updating the properties of a particle with PDG id=" << props.pdgid << ".\n\t"

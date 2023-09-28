@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2017-2022  Laurent Forthomme
+ *  Copyright (C) 2017-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,32 +52,16 @@ namespace cepgen {
                                .set("fermion", pfermion)) {}
 
   ParametersDescription ParticleProperties::description() {
-    auto pdesc = ParametersDescription();
-    pdesc.add<pdgid_t>("pdgid", 0).setDescription("PDG unique identifier");
-    pdesc.add<std::string>("name", "n/a").setDescription("particle computer-readable name");
-    pdesc.add<std::string>("description", "n/a").setDescription("particle human-readable name");
-    pdesc.add<int>("colours", 0).setDescription("colour factor");
-    pdesc.add<double>("mass", 0.).setDescription("particle mass (in GeV/c^2)");
-    pdesc.add<double>("width", 0.).setDescription("particle width (in GeV)");
-    pdesc.add<int>("charge", 0).setDescription("electric charge (in units of e)");
-    pdesc.add<bool>("fermion", false).setDescription("is the particle following the Fermi-Dirac statistics?");
-    return pdesc;
-  }
-
-  bool ParticleProperties::operator==(const ParticleProperties& oth) const {
-    if (pdgid != oth.pdgid)
-      return false;
-    if (mass != oth.mass)
-      return false;
-    if (charge != oth.charge)
-      return false;
-    if (width != oth.width)
-      return false;
-    if (fermion != oth.fermion)
-      return false;
-    if (colours != oth.colours)
-      return false;
-    return true;
+    auto desc = ParametersDescription();
+    desc.add<pdgid_t>("pdgid", 0).setDescription("PDG unique identifier");
+    desc.add<std::string>("name", "n/a").setDescription("particle computer-readable name");
+    desc.add<std::string>("description", "n/a").setDescription("particle human-readable name");
+    desc.add<int>("colours", 0).setDescription("colour factor");
+    desc.add<double>("mass", 0.).setDescription("particle mass (in GeV/c^2)");
+    desc.add<double>("width", 0.).setDescription("particle width (in GeV)");
+    desc.add<int>("charge", 0).setDescription("electric charge (in units of e)");
+    desc.add<bool>("fermion", false).setDescription("is the particle following the Fermi-Dirac statistics?");
+    return desc;
   }
 
   std::ostream& operator<<(std::ostream& os, const ParticleProperties& prop) {
