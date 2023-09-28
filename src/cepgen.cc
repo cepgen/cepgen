@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
   if (!parser.extra_config().empty())
     gen.setParameters(cepgen::CardsHandlerFactory::get()
                           .build(".cmd", cepgen::ParametersList().set<vector<string> >("args", parser.extra_config()))
-                          ->parseFile(string(), gen.parametersPtr()));
+                          ->parseString(string(), gen.parametersPtr()));
 
   cepgen::utils::AbortHandler();
 
