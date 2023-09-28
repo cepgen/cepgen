@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,16 +19,26 @@
 #include <cmath>
 
 #include "CepGen/Utils/Environment.h"
+#include "CepGen/Utils/Logger.h"
 #include "CepGen/Utils/ProgressBar.h"
+#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Timer.h"
 
 namespace cepgen {
   namespace utils {
     ProgressBar::ProgressBar(size_t tot, size_t freq)
-        : bar_length_(std::stoi(env::get("COLUMNS", "60")) - 10),
+        : tmr_(new Timer),
+          bar_length_(std::stoi(env::get("COLUMNS", "60")) - 10),
           bar_pattern_(bar_length_, '='),
-          enabled_(env::get("CG_CI").empty()),
+          enabled_(env::get("CG_CI").empty() && Logger::get().isTTY()),
           total_(tot),
           frequency_(freq) {}
+
+    ProgressBar::~ProgressBar() {
+      const std::string message = format("[Finished in %g s]", tmr_->elapsed());
+      fprintf(stderr, "\r%s%.*s%*s\n", message.data(), 0, "", (int)bar_length_, "");
+      fflush(stderr);
+    }
 
     void ProgressBar::update(size_t iter) const {
       if (!enabled_)
@@ -39,8 +49,6 @@ namespace cepgen {
         int rpad = bar_length_ - lpad;
         fprintf(stderr, "\r%3zu%% [%.*s%*s]", percent, lpad, bar_pattern_.c_str(), rpad, "");
         fflush(stderr);
-        if (iter == total_)
-          fprintf(stderr, "\n");
       }
     }
   }  // namespace utils
