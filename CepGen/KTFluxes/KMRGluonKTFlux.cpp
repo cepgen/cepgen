@@ -40,4 +40,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_FLUX("KMR", KMRGluonKTFlux);
+REGISTER_KT_FLUX("KMR", KMRGluonKTFlux);

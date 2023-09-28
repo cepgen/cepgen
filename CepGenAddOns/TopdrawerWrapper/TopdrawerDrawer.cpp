@@ -228,7 +228,8 @@ namespace cepgen {
       Piper::Commands cmds;
       for (size_t i = 0; i < hist.nbins(); ++i) {
         const auto& bin = hist.binRange(i);
-        cmds += format("%g,%g,%g,%g", bin.x(0.5), hist.value(i), 0.5 * bin.range(), hist.valueUnc(i));
+        const auto& val = hist.value(i);
+        cmds += format("%g,%g,%g,%g", bin.x(0.5), val, 0.5 * bin.range(), val.uncertainty());
       }
       cmds += "HIST";
       return cmds;

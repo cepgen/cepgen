@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
   if (!parser.extra_config().empty())
     gen.setParameters(cepgen::CardsHandlerFactory::get()
                           .build(".cmd", cepgen::ParametersList().set<vector<string> >("args", parser.extra_config()))
-                          ->parseFile(string(), gen.parametersPtr()));
+                          ->parseString(string(), gen.parametersPtr()));
 
   cepgen::utils::AbortHandler();
 
@@ -93,13 +93,12 @@ int main(int argc, char* argv[]) {
     CG_LOG << gen.parameters();
 
     //--- let there be a cross-section...
-    double xsec = 0., err = 0.;
-    gen.computeXsection(xsec, err);
+    gen.computeXsection();
 
     if (params.generation().enabled())
       //--- events generation starts here
       // (one may use a callback function)
-      gen.generate();
+      gen.generate(0);
   } catch (const cepgen::utils::RunAbortedException&) {
     CG_DEBUG("main") << "Run aborted!";
   } catch (const cepgen::Exception& e) {

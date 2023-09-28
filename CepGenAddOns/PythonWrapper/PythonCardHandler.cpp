@@ -159,6 +159,8 @@ namespace cepgen {
 
         //--- process mode
         const auto proc_name = python::get<std::string>(pproc_name);
+        if (auto* pkt = python::element(process, "ktFactorised"))
+          proc_params.set<bool>("ktFactorised", python::get<bool>(pkt));
         CG_DEBUG("PythonHandler") << "Building a process with name '" << proc_name << "' and parameters:\n\t"
                                   << proc_params << ".";
         //--- process kinematics
@@ -179,8 +181,7 @@ namespace cepgen {
         rt_params_->setProcess(std::move(proc_obj));
 
         //--- taming functions
-        auto* ptam = python::element(process, "tamingFunctions");  // borrowed
-        if (ptam)
+        if (auto* ptam = python::element(process, "tamingFunctions"))  // borrowed
           for (const auto& p : python::getVector<ParametersList>(ptam))
             rt_params_->addTamingFunction(FunctionalFactory::get().build("ROOT", p));
       });
@@ -290,12 +291,14 @@ namespace cepgen {
       const auto& parts = python::get<ParametersList>(pparts);
       for (const auto& k : parts.keys(true)) {
         auto props = parts.get<ParametersList>(k);
-        const ParticleProperties part(props.set<std::string>("name", k).set<pdgid_t>("pdgid", props.get<int>("pdgid")));
+        if (props.has<int>("pdgid"))
+          props.set<pdgid_t>("pdgid", props.get<int>("pdgid"));
+        const ParticleProperties part(props);
         if (part.mass <= 0. && part.width <= 0.)  // skip aliases
           continue;
         if (!PDG::get().has(part.pdgid) || PDG::get()(part.pdgid) != part) {
-          CG_INFO("PythonHandler:particles")
-              << "Adding a new particle with name \"" << part.name << "\" to the PDG dictionary.";
+          CG_INFO("PythonHandler:particles") << "Adding a new particle with PDG id=" << part.pdgid << " and name \""
+                                             << part.name << "\" to the PDG dictionary.";
           PDG::get().define(part);
         }
       }

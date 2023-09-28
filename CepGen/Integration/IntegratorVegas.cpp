@@ -32,7 +32,7 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    void integrate(Integrand&, double&, double&) override;
+    Value integrate(Integrand&) override;
 
     enum class Mode { importance = 1, importanceOnly = 0, stratified = -1 };
 
@@ -68,7 +68,7 @@ namespace cepgen {
     verbosity_ = steer<int>("verbose");  // supersede the parent default verbosity level
   }
 
-  void IntegratorVegas::integrate(Integrand& integrand, double& result, double& abserr) {
+  Value IntegratorVegas::integrate(Integrand& integrand) {
     setIntegrand(integrand);
 
     //--- start by preparing the grid/state
@@ -106,6 +106,7 @@ namespace cepgen {
 
     // integration phase
     unsigned short it_chisq = 0;
+    double result, abserr;
     do {
       int res = gsl_monte_vegas_integrate(function_.get(),
                                           &xlow_[0],
@@ -133,8 +134,7 @@ namespace cepgen {
                                      << "and generated " << vegas_state_->bins_max << " bins.\n\t"
                                      << "Integration volume: " << vegas_state_->vol << ".";
 
-    result_ = result;
-    err_result_ = abserr;
+    return Value{result, abserr};
   }
 
   void IntegratorVegas::warmup(size_t ncall) {

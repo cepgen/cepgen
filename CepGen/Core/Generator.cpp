@@ -23,7 +23,6 @@
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Generator.h"
-#include "CepGen/Integration/GridParameters.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
 #include "CepGen/Modules/GeneratorWorkerFactory.h"
@@ -64,7 +63,7 @@ namespace cepgen {
 
     worker_->setRuntimeParameters(const_cast<const Parameters*>(parameters_.get()));
     worker_->setIntegrator(integrator_.get());
-    result_ = result_error_ = -1.;
+    xsect_ = Value{-1., -1.};
     parameters_->prepareRun();
   }
 
@@ -79,30 +78,36 @@ namespace cepgen {
       throw CG_FATAL("Generator:computePoint") << "Trying to compute a point with no process specified!";
     const size_t ndim = worker_->integrand().process().ndim();
     if (coord.size() != ndim)
-      throw CG_FATAL("Generator:computePoint") << "Invalid phase space dimension (ndim=" << ndim << ")!";
+      throw CG_FATAL("Generator:computePoint")
+          << "Invalid phase space dimension (ndim=" << ndim << ", given=" << coord.size() << ").";
     double res = worker_->integrand().eval(coord);
     CG_DEBUG("Generator:computePoint") << "Result for x[" << ndim << "] = " << coord << ":\n\t" << res << ".";
     return res;
   }
 
   void Generator::computeXsection(double& cross_section, double& err) {
+    const auto xsec = computeXsection();
+    cross_section = xsec;
+    err = xsec.uncertainty();
+  }
+
+  Value Generator::computeXsection() {
     CG_INFO("Generator") << "Starting the computation of the process cross-section.";
 
     integrate();  // run is cleared here
 
-    cross_section = result_;
-    err = result_error_;
-
-    if (cross_section < 1.e-2)
-      CG_INFO("Generator") << "Total cross section: " << cross_section * 1.e3 << " +/- " << err * 1.e3 << " fb.";
-    else if (cross_section < 0.5e3)
-      CG_INFO("Generator") << "Total cross section: " << cross_section << " +/- " << err << " pb.";
-    else if (cross_section < 0.5e6)
-      CG_INFO("Generator") << "Total cross section: " << cross_section * 1.e-3 << " +/- " << err * 1.e-3 << " nb.";
-    else if (cross_section < 0.5e9)
-      CG_INFO("Generator") << "Total cross section: " << cross_section * 1.e-6 << " +/- " << err * 1.e-6 << " µb.";
+    if (xsect_ < 1.e-2)
+      CG_INFO("Generator") << "Total cross section: " << xsect_ * 1.e3 << " fb.";
+    else if (xsect_ < 0.5e3)
+      CG_INFO("Generator") << "Total cross section: " << xsect_ << " pb.";
+    else if (xsect_ < 0.5e6)
+      CG_INFO("Generator") << "Total cross section: " << xsect_ * 1.e-3 << " nb.";
+    else if (xsect_ < 0.5e9)
+      CG_INFO("Generator") << "Total cross section: " << xsect_ * 1.e-6 << " µb.";
     else
-      CG_INFO("Generator") << "Total cross section: " << cross_section * 1.e-9 << " +/- " << err * 1.e-9 << " mb.";
+      CG_INFO("Generator") << "Total cross section: " << xsect_ * 1.e-9 << " mb.";
+
+    return xsect_;
   }
 
   void Generator::resetIntegrator() {
@@ -115,8 +120,9 @@ namespace cepgen {
     CG_TICKER(parameters_->timeKeeper());
     // copy the integrator instance (or create it if unspecified) in the current scope
     if (!integ)
-      integ = IntegratorFactory::get().build(parameters_->par_integrator);
-    integrator_ = std::move(integ);
+      resetIntegrator();
+    else
+      integrator_ = std::move(integ);
     CG_INFO("Generator:integrator") << "Generator will use a " << integrator_->name() << "-type integrator.";
   }
 
@@ -137,19 +143,17 @@ namespace cepgen {
     if (!integrator_)
       throw CG_FATAL("Generator:integrate") << "No integrator object was declared for the generator!";
 
-    integrator_->integrate(worker_->integrand(), result_, result_error_);
+    xsect_ = integrator_->integrate(worker_->integrand());
 
-    CG_DEBUG("Generator:integrate") << "Computed cross section: (" << result_ << " +- " << result_error_ << ") pb.";
+    CG_DEBUG("Generator:integrate") << "Computed cross section: (" << xsect_ << ") pb.";
 
     // now that the cross section has been computed, feed it to the event modification algorithms...
     for (auto& mod : parameters_->eventModifiersSequence())
-      mod->setCrossSection(result_, result_error_);
+      mod->setCrossSection(xsect_);
     // ...and to the event storage algorithms
     for (auto& mod : parameters_->eventExportersSequence())
-      mod->setCrossSection(result_, result_error_);
+      mod->setCrossSection(xsect_);
   }
-
-  const Event& Generator::generateOneEvent(Event::callback callback) { return next(callback); }
 
   void Generator::initialise() {
     if (initialised_)
@@ -165,30 +169,32 @@ namespace cepgen {
 
     // prepare the run parameters for event generation
     parameters_->initialise();
+    worker_->initialise();
 
     initialised_ = true;
   }
 
-  const Event& Generator::next(Event::callback callback) {
+  const Event& Generator::next() {
     if (!worker_ || !initialised_)
       initialise();
     size_t num_try = 0;
-    while (!worker_->next(callback)) {
+    while (!worker_->next()) {
       if (num_try++ > 5)
         throw CG_FATAL("Generator:next") << "Failed to generate the next event!";
     }
     return worker_->integrand().process().event();
   }
 
-  void Generator::generate(size_t num_events, Event::callback callback) {
+  void Generator::generate(size_t num_events, const std::function<void(const proc::Process&)>& callback) {
     CG_TICKER(parameters_->timeKeeper());
 
-    initialise();
+    if (!worker_ || !initialised_)
+      initialise();
 
     //--- if invalid argument, retrieve from runtime parameters
     if (num_events < 1) {
       if (parameters_->generation().targetLuminosity() > 0.) {
-        num_events = std::ceil(parameters_->generation().targetLuminosity() * result_);
+        num_events = std::ceil(parameters_->generation().targetLuminosity() * xsect_);
         CG_INFO("Generator") << "Target luminosity: " << parameters_->generation().targetLuminosity() << " pb-1.";
       } else
         num_events = parameters_->generation().maxGen();
@@ -210,5 +216,12 @@ namespace cepgen {
                          << " s "
                          << "(" << rate_ms << " ms/event).\n\t"
                          << "Equivalent luminosity: " << utils::format("%g", equiv_lumi) << " pb^-1.";
+  }
+
+  void Generator::generate(size_t num_events, const std::function<void(const Event&, size_t)>& callback) {
+    generate(num_events, [&](const proc::Process& proc) {
+      if (callback)
+        callback(proc.event(), parameters_->numGeneratedEvents());
+    });
   }
 }  // namespace cepgen

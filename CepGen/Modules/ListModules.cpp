@@ -28,6 +28,7 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
+#include "CepGen/Modules/GeneratorWorkerFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
@@ -62,7 +63,8 @@ namespace cepgen {
       };
 
       list_modules(ProcessFactory::get(), "Physics processes");
-      list_modules(PartonFluxFactory::get(), "Parton fluxes modellings");
+      list_modules(KTFluxFactory::get(), "kt-factorised fluxes modellings");
+      list_modules(CollinearFluxFactory::get(), "Collinear parton fluxes modellings");
       list_modules(FormFactorsFactory::get(), "Beam form factors modellings");
       list_int_modules(SigmaRatiosFactory::get(), "Cross section ratios modellings");
       list_int_modules(StructureFunctionsFactory::get(), "Structure functions modellings", [](int mod) {
@@ -72,6 +74,7 @@ namespace cepgen {
       });
       list_modules(AlphaEMFactory::get(), "alpha(EM) evolution algorithms");
       list_modules(AlphaSFactory::get(), "alpha(s) evolution algorithms");
+      list_modules(GeneratorWorkerFactory::get(), "Event generation modules");
       list_modules(EventModifierFactory::get(), "Event modification modules");
       list_modules(EventExporterFactory::get(), "Export modules");
       list_modules(FunctionalFactory::get(), "Functional evaluators");

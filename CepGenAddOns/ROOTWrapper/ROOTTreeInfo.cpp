@@ -23,6 +23,18 @@
 namespace ROOT {
   CepGenRun::CepGenRun() { clear(); }
 
+  CepGenRun CepGenRun::load(TFile* file, const std::string& run_tree) {
+    CepGenRun run;
+    run.attach(file, run_tree.data());
+    return run;
+  }
+
+  CepGenRun CepGenRun::load(const std::string& filename, const std::string& run_tree) {
+    CepGenRun run;
+    run.attach(filename.data(), run_tree.data());
+    return run;
+  }
+
   void CepGenRun::clear() {
     sqrt_s = -1.;
     xsect = errxsect = -1.;
@@ -68,6 +80,18 @@ namespace ROOT {
     tree_->GetEntry(0);
     process_name = *process_name_view;
     process_parameters = *process_params_view;
+  }
+
+  CepGenEvent CepGenEvent::load(TFile* file, const std::string& evt_tree) {
+    CepGenEvent evt;
+    evt.attach(file, evt_tree.data());
+    return evt;
+  }
+
+  CepGenEvent CepGenEvent::load(const std::string& filename, const std::string& evt_tree) {
+    CepGenEvent evt;
+    evt.attach(filename.data(), evt_tree.data());
+    return evt;
   }
 
   void CepGenEvent::clear() {
@@ -119,8 +143,8 @@ namespace ROOT {
       pt[np] = mom.pt();
       eta[np] = mom.eta();
       phi[np] = mom.phi();
-      E[np] = part.energy();
-      m[np] = part.mass();
+      E[np] = mom.energy();
+      m[np] = mom.mass();
       pdg_id[np] = part.integerPdgId();
       parent1[np] = (part.mothers().size() > 0) ? *part.mothers().begin() : -1;
       parent2[np] = (part.mothers().size() > 1) ? *part.mothers().rbegin() : -1;
@@ -151,7 +175,10 @@ namespace ROOT {
     ev.weight = weight;
     //--- first loop to populate the particles content
     for (unsigned short i = 0; i < np; ++i) {
-      cepgen::Particle part((cepgen::Particle::Role)role[i], (long)pdg_id[i], (cepgen::Particle::Status)status[i]);
+      cepgen::Particle part;
+      part.setRole((cepgen::Particle::Role)role[i]);
+      part.setPdgId((long)pdg_id[i]);
+      part.setStatus((cepgen::Particle::Status)status[i]);
       part.setMomentum(cepgen::Momentum::fromPtEtaPhiE(pt[i], eta[i], phi[i], E[i]));
       ev.addParticle(part);
     }

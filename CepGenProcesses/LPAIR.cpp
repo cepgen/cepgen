@@ -56,7 +56,7 @@ class LPAIR final : public cepgen::proc::Process {
 public:
   /// \brief Class constructor: set the mandatory parameters before integration and events generation
   /// \param[in] params General process parameters (nopt = Optimisation, legacy from LPAIR)
-  explicit LPAIR(const cepgen::ParametersList& params)
+  explicit LPAIR(const ParametersList& params)
       : proc::Process(params),
         opt_(steer<int>("nopt")),
         pair_(steer<ParticleProperties>("pair")),
@@ -72,7 +72,7 @@ public:
         rnd_phi_(oth.rnd_phi_),
         rnd_side_(oth.rnd_side_) {}
   /// Copy constructor
-  cepgen::proc::ProcessPtr clone() const override { return cepgen::proc::ProcessPtr(new LPAIR(*this)); }
+  proc::ProcessPtr clone() const override { return proc::ProcessPtr(new LPAIR(*this)); }
 
   void addEventContent() override {
     proc::Process::setEventContent({{Particle::IncomingBeam1, PDG::proton},
@@ -87,7 +87,7 @@ public:
   void prepareKinematics() override;
   void fillKinematics(bool) override;
 
-  static cepgen::ParametersDescription description() {
+  static ParametersDescription description() {
     auto desc = proc::Process::description();
     desc.setDescription("γγ → l⁺l¯ (LPAIR)");
     desc.add<int>("nopt", 0).setDescription("Optimised mode? (inherited from LPAIR, by default disabled = 0)");
@@ -126,38 +126,11 @@ private:
    * \return Success state of the operation
    */
   bool pickin();
-  cepgen::formfac::FormFactors computeFormFactors(const cepgen::Beam::Mode& type, double q2, double mx2) const {
-    switch (type) {
-      case Beam::Mode::ProtonElastic:
-      case Beam::Mode::PointLikeFermion:
-        return (*formfac_)(q2);
-      case Beam::Mode::ProtonInelastic: {
-        if (!strfun_)
-          throw CG_FATAL("LPAIR:computeFormFactors")
-              << "Inelastic proton form factors computation requires a structure functions definition!";
-        const double xbj = utils::xBj(q2, mp2_, mx2);
-        formfac::FormFactors ff;
-        switch (strfun_->name()) {
-          case 11 /* SuriYennie */: {  // this one requires its own object to deal with FM
-            ff.FE = strfun_->F2(xbj, q2) * xbj * mp_ / q2;
-            ff.FM = strfun_->FM(xbj, q2);
-          } break;
-          default: {
-            ff.FE = strfun_->F2(xbj, q2) * xbj / q2;
-            ff.FM = -2. * strfun_->F1(xbj, q2) / q2;
-          } break;
-        }
-        return ff;
-      }
-      default:
-        throw CG_FATAL("LPAIR::computeFormFactors")
-            << "Invalid incoming beam requested for LPAIR form factors evaluation: " << type << ".";
-    }
-  }
+  formfac::FormFactors computeFormFactors(const Beam& beam, double q2, double mx2) const;
 
   /// Internal switch for the optimised code version (LPAIR legacy)
   const int opt_;
-  const cepgen::ParticleProperties pair_;
+  const ParticleProperties pair_;
   const bool symmetrise_;
 
   // mapped variables
@@ -169,7 +142,7 @@ private:
   double m_phi6_cm_{0.};  ///< azimutal angle of the first outgoing lepton
   double m_x6_{0.};
 
-  cepgen::Limits w_limits_;
+  Limits w_limits_;
   struct Masses {
     double Ml2 = 0.;  ///< squared mass of the outgoing leptons
     double w12 = 0.;  ///< \f$\delta_2=m_1^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
@@ -217,6 +190,9 @@ private:
          * with \f$p_i, q_i\f$ the 4-momenta associated to the incoming proton-like particle and to the photon emitted from it.
          */
   double delta_{0.}, delta3_{0.}, delta5_{0.};
+  struct {
+    double gamma{0.}, betgam{0.};
+  } boost_props_;
 
   double jacobian_{0.};
 
@@ -237,94 +213,81 @@ private:
    *  - opposite sign :
    * > `mapt1`, `mapt2`
    */
-  std::pair<double, double> map(double expo, const cepgen::Limits& lim, const std::string& var_name = "") {
-    const double y = lim.max() / lim.min(), out = lim.min() * pow(y, expo), dout = out * log(y);
+  std::pair<double, double> map(double expo, const Limits& lim, const std::string& var_name = "") {
+    const double y = lim.max() / lim.min(), out = lim.min() * std::pow(y, expo), dout = out * log(y);
     CG_DEBUG_LOOP("LPAIR:map") << "Mapping variable \"" << var_name << "\" in range (" << lim << ")"
                                << " (max/min = " << y << ")\n\t"
                                << "exponent = " << expo << " => "
                                << "x = " << out << ", dx = " << dout;
     return {out, dout};
   }
-  std::pair<double, double> mapla(double y, double z, int u, const cepgen::Limits& lim) {
+  std::pair<double, double> mapla(double y, double z, int u, const Limits& lim) {
     const double xmb = lim.min() - y - z, xpb = lim.max() - y - z;
     const double c = -4. * y * z;
     const double alp = sqrt(xpb * xpb + c), alm = sqrt(xmb * xmb + c);
     const double am = xmb + alm, ap = xpb + alp;
-    const double yy = ap / am, zz = pow(yy, u);
+    const double yy = ap / am, zz = std::pow(yy, u);
 
     const double out = y + z + 0.5 * (am * zz - c / (am * zz));
-    const double ax = sqrt(pow(out - y - z, 2) + c);
+    const double ax = std::sqrt(std::pow(out - y - z, 2) + c);
     return {out, ax * log(yy)};
   }
-  bool applyCuts() const;
   std::uniform_real_distribution<double> rnd_phi_;
   std::uniform_int_distribution<short> rnd_side_;
-  std::unique_ptr<cepgen::formfac::Parameterisation> formfac_;
-  std::unique_ptr<cepgen::strfun::Parameterisation> strfun_;
+  std::unique_ptr<formfac::Parameterisation> formfac_;
+  std::unique_ptr<strfun::Parameterisation> strfun_;
 };
 
 //---------------------------------------------------------------------------------------------
 
 void LPAIR::prepareKinematics() {
-  masses_.Ml2 = event()(Particle::CentralSystem)[0].mass2();
+  masses_.Ml2 = event()(Particle::CentralSystem)[0].momentum().mass2();
 
   formfac_ = FormFactorsFactory::get().build(kinematics().incomingBeams().formFactors());
   strfun_ = StructureFunctionsFactory::get().build(kinematics().incomingBeams().structureFunctions());
 
   //--- first define the squared mass range for the diphoton/dilepton system
-  const auto& mll_limits = kinematics().cuts().central.mass_sum;
-  w_limits_ = Limits(mll_limits.hasMin() ? std::pow(mll_limits.min(), 2) : 4. * masses_.Ml2,
-                     mll_limits.hasMax() ? std::pow(mll_limits.max(), 2) : s());
+  w_limits_ = kinematics()
+                  .cuts()
+                  .central.mass_sum.compute([](double ext) { return std::pow(ext, 2); })
+                  .truncate(Limits{4. * masses_.Ml2, s()});
 
   CG_DEBUG_LOOP("LPAIR:prepareKinematics") << "w limits = " << w_limits_ << "\n\t"
                                            << "wmax/wmin = " << w_limits_.max() / w_limits_.min();
 
-  const double mx0 = mp_ + PDG::get().mass(PDG::piPlus);  // 1.07
-  const double min_wx = pow(std::max(mx0, kinematics().cuts().remnants.mx.min()), 2);
-  const Limits wx_lim_ob1(
-      min_wx, pow(std::min(sqrtS() - pA().mass() - 2. * sqrt(masses_.Ml2), kinematics().cuts().remnants.mx.max()), 2));
-  const Limits wx_lim_ob2(
-      min_wx, pow(std::min(sqrtS() - pB().mass() - 2. * sqrt(masses_.Ml2), kinematics().cuts().remnants.mx.max()), 2));
-
   //--- variables mapping
 
-  defineVariable(m_u_t1_, Mapping::linear, {0., 1.}, {0., 1.}, "u_t1");
-  defineVariable(m_u_t2_, Mapping::linear, {0., 1.}, {0., 1.}, "u_t2");
-  defineVariable(m_u_s2_, Mapping::linear, {0., 1.}, {0., 1.}, "u_s2");
-  defineVariable(m_w4_, Mapping::power_law, w_limits_, w_limits_, "w4");
-  defineVariable(m_theta4_, Mapping::linear, {0., M_PI}, {0., M_PI}, "theta4");
-  defineVariable(m_phi6_cm_, Mapping::linear, {0., 2. * M_PI}, {0., 2. * M_PI}, "phi6cm");
-  defineVariable(m_x6_, Mapping::linear, {0., 1.}, {0., 1.}, "x6");
+  defineVariable(m_u_t1_, Mapping::linear, {0., 1.}, "u_t1");
+  defineVariable(m_u_t2_, Mapping::linear, {0., 1.}, "u_t2");
+  defineVariable(m_u_s2_, Mapping::linear, {0., 1.}, "u_s2");
+  defineVariable(m_w4_, Mapping::power_law, w_limits_, "w4");
+  defineVariable(m_theta4_, Mapping::linear, {0., M_PI}, "theta4");
+  defineVariable(m_phi6_cm_, Mapping::linear, {0., 2. * M_PI}, "phi6cm");
+  defineVariable(m_x6_, Mapping::linear, {0., 1.}, "x6");
+
+  const double mx0 = mp_ + PDG::get().mass(PDG::piPlus);  // 1.07
 
   //--- first outgoing beam particle or remnant mass
-  switch (kinematics().incomingBeams().positive().mode()) {
-    case Beam::Mode::PointLikeFermion:
-    case Beam::Mode::ProtonElastic:
-    case Beam::Mode::HIElastic:
-      event().oneWithRole(Particle::OutgoingBeam1).setPdgId(event().oneWithRole(Particle::IncomingBeam1).pdgId());
-      mX2() = pA().mass2();
-      break;
-    case Beam::Mode::ProtonInelastic:
-      defineVariable(mX2(), Mapping::power_law, wx_lim_ob1, wx_lim_ob1, "MX2");
-      break;
-    default:
-      throw CG_FATAL("LPAIR:kinematics") << "Invalid mode for beam 1: "
-                                         << kinematics().incomingBeams().positive().mode() << " is not supported!";
+  if (kinematics().incomingBeams().positive().elastic()) {
+    event().oneWithRole(Particle::OutgoingBeam1).setPdgId(event().oneWithRole(Particle::IncomingBeam1).pdgId());
+    mX2() = pA().mass2();
+  } else {
+    const auto wx_lim_ob1 = kinematics()
+                                .cuts()
+                                .remnants.mx.truncate(Limits{mx0, sqrtS() - mA() - 2. * sqrt(masses_.Ml2)})
+                                .compute([](double ext) { return std::pow(ext, 2); });
+    defineVariable(mX2(), Mapping::power_law, wx_lim_ob1, "MX2");
   }
   //--- second outgoing beam particle or remnant mass
-  switch (kinematics().incomingBeams().negative().mode()) {
-    case Beam::Mode::PointLikeFermion:
-    case Beam::Mode::ProtonElastic:
-    case Beam::Mode::HIElastic:
-      event().oneWithRole(Particle::OutgoingBeam2).setPdgId(event().oneWithRole(Particle::IncomingBeam2).pdgId());
-      mY2() = pB().mass2();
-      break;
-    case Beam::Mode::ProtonInelastic:
-      defineVariable(mY2(), Mapping::power_law, wx_lim_ob2, wx_lim_ob2, "MY2");
-      break;
-    default:
-      throw CG_FATAL("LPAIR:kinematics") << "Invalid mode for beam 2: "
-                                         << kinematics().incomingBeams().negative().mode() << " is not supported!";
+  if (kinematics().incomingBeams().negative().elastic()) {
+    event().oneWithRole(Particle::OutgoingBeam2).setPdgId(event().oneWithRole(Particle::IncomingBeam2).pdgId());
+    mY2() = pB().mass2();
+  } else {
+    const auto wx_lim_ob2 = kinematics()
+                                .cuts()
+                                .remnants.mx.truncate(Limits{mx0, sqrtS() - mB() - 2. * sqrt(masses_.Ml2)})
+                                .compute([](double ext) { return std::pow(ext, 2); });
+    defineVariable(mY2(), Mapping::power_law, wx_lim_ob2, "MY2");
   }
 }
 
@@ -337,25 +300,21 @@ bool LPAIR::pickin() {
 
   // min(s2) = sigma and sig2 = sigma' in [1]
   const double sig = mc4_ + mY();
-  Limits s2_range(sig * sig, s() + mX2() - 2 * mX() * sqrtS());
+  auto s2_range = Limits{sig * sig, s() + mX2() - 2 * mX() * sqrtS()};
 
   CG_DEBUG_LOOP("LPAIR") << "mc4 = " << mc4_ << "\n\t"
                          << "s2 in range " << s2_range << ".";
-
-  const double d6 = m_w4_ - mY2();
 
   CG_DEBUG_LOOP("LPAIR") << "w1 = " << mA2() << ", w2 = " << mB2() << ", w3 = " << mX2() << ", w4 = " << m_w4_
                          << ", w5 = " << mY2() << ". w31 = " << masses_.w31 << ", w52 = " << masses_.w52
                          << ", w12 = " << masses_.w12 << ".";
 
-  const double ss = s() + masses_.w12;
-
-  const double rl1 = ss * ss - 4. * mA2() * s();  // lambda(s, m1**2, m2**2)
+  const double ss = s() + masses_.w12, rl1 = ss * ss - 4. * mA2() * s();  // lambda(s, m1**2, m2**2)
   if (rl1 <= 0.) {
     CG_DEBUG_LOOP("LPAIR") << "rl1 = " << rl1 << " <= 0";
     return false;
   }
-  sl1_ = sqrt(rl1);
+  sl1_ = std::sqrt(rl1);
 
   s2_ = 0.;
   double ds2 = 0.;
@@ -373,31 +332,21 @@ bool LPAIR::pickin() {
     CG_DEBUG_LOOP("LPAIR") << "rl2 = " << rl2 << " <= 0";
     return false;
   }
-  const double sl2 = sqrt(rl2);
-
-  double t1_max = mA2() + mX2() - (ss * sp + sl1_ * sl2) / (2. * s());  // definition from eq. (A.4) in [1]
+  double t1_max = mA2() + mX2() - (ss * sp + sl1_ * std::sqrt(rl2)) / (2. * s());  // definition from eq. (A.4) in [1]
   double t1_min = (masses_.w31 * d3 + (d3 - masses_.w31) * (d3 * mA2() - masses_.w31 * mB2()) / s()) /
                   t1_max;  // definition from eq. (A.5) in [1]
+  const auto t1_range = Limits{t1_min, t1_max};
 
-  // this part was dropped in CDF version
-  if (t1_max > -kinematics().cuts().initial.q2.min()) {
-    CG_DEBUG_LOOP("LPAIR") << "t1max = " << t1_max << " > -q2min = " << -kinematics().cuts().initial.q2.min();
+  // ensure the t1 range overlaps with the user-steered Q^2 constraints
+  // note: this part was dropped in CDF version
+  if (t1_range != t1_range.truncate(-kinematics().cuts().initial.q2))
     return false;
-  }
-  if (t1_min < -kinematics().cuts().initial.q2.max() && kinematics().cuts().initial.q2.hasMax()) {
-    CG_DEBUG_LOOP("LPAIR") << "t1min = " << t1_min << " < -q2max = " << -kinematics().cuts().initial.q2.max();
-    return false;
-  }
-  if (t1_max < -kinematics().cuts().initial.q2.max() && kinematics().cuts().initial.q2.hasMax())
-    t1_max = -kinematics().cuts().initial.q2.max();
-  if (t1_min > -kinematics().cuts().initial.q2.min() && kinematics().cuts().initial.q2.hasMin())
-    t1_min = -kinematics().cuts().initial.q2.min();
-  /////
 
-  // t1, the first photon propagator, is defined here
-  const Limits t1_range(t1_min, t1_max);
+  // definition of first photon propagator
   const auto comp_t1 = map(m_u_t1_, t1_range, "t1");
   t1() = comp_t1.first;
+  if (!kinematics().cuts().initial.q2.contains(-t1()))
+    return false;
   const double dt1 = -comp_t1.second;  // changes wrt mapt1 : dx->-dx
 
   CG_DEBUG_LOOP("LPAIR") << "Definition of t1 = " << t1() << " in range " << t1_range << ".";
@@ -407,13 +356,13 @@ bool LPAIR::pickin() {
   const double d8 = t1() - mB2();
   const double t13 = t1() - mA2() - mX2();
 
-  sa1_ = -pow(t1() - masses_.w31, 2) / 4. + mA2() * t1();
+  sa1_ = -std::pow(t1() - masses_.w31, 2) / 4. + mA2() * t1();
   if (sa1_ >= 0.) {
     CG_WARNING("LPAIR") << "sa1_ = " << sa1_ << " >= 0";
     return false;
   }
 
-  const double sl3 = sqrt(-sa1_);
+  const double sl3 = std::sqrt(-sa1_);
 
   s2_range.min() = sig * sig;
   // one computes splus and (s2x=s2max)
@@ -458,6 +407,7 @@ bool LPAIR::pickin() {
   CG_DEBUG_LOOP("LPAIR") << "s2x = " << s2x;
 
   // 7
+  const double d6 = m_w4_ - mY2();
   const double r1 = s2x - d8, r2 = s2x - d6;
 
   const double rl4 = (r1 * r1 - 4. * mB2() * s2x) * (r2 * r2 - 4. * mY2() * s2x);
@@ -465,7 +415,7 @@ bool LPAIR::pickin() {
     CG_DEBUG_LOOP("LPAIR") << "rl4 = " << rl4 << " <= 0";
     return false;
   }
-  const double sl4 = sqrt(rl4);
+  const double sl4 = std::sqrt(rl4);
 
   // t2max, t2min definitions from eq. (A.12) and (A.13) in [1]
   const double t2_max = mB2() + mY2() - (r1 * r2 + sl4) / s2x * 0.5,
@@ -476,6 +426,8 @@ bool LPAIR::pickin() {
   // t2, the second photon propagator, is defined here
   const auto comp_t2 = map(m_u_t2_, Limits(t2_min, t2_max), "t2");
   t2() = comp_t2.first;
+  if (!kinematics().cuts().initial.q2.contains(-t2()))
+    return false;
   const double dt2 = -comp_t2.second;  // changes wrt mapt2 : dx->-dx
 
   // \f$\delta_6=m_4^2-m_5^2\f$ as defined in Vermaseren's paper
@@ -494,7 +446,7 @@ bool LPAIR::pickin() {
     return false;
   }
 
-  const double sl6 = 2. * sqrt(-sa2_);
+  const double sl6 = 2. * std::sqrt(-sa2_);
 
   gamma4_ = -r3 * r3 / 4. + t1() * t2();
   if (gamma4_ >= 0.) {
@@ -502,7 +454,7 @@ bool LPAIR::pickin() {
     return false;
   }
 
-  const double sl7 = 2. * sqrt(-gamma4_);
+  const double sl7 = 2. * std::sqrt(-gamma4_);
   const double sl5 = sl6 * sl7;
 
   double s2p;
@@ -520,7 +472,7 @@ bool LPAIR::pickin() {
     ds2 = s2.second;
   }
 
-  const double ap = -0.25 * pow(s2_ + d8, 2) + s2_ * t1();
+  const double ap = -0.25 * std::pow(s2_ + d8, 2) + s2_ * t1();
 
   deltas_[0] = 0.25 * (s2_ - s2_range.max()) * (mA2() != 0. ? (splus - s2_) * mA2() : ss * t13);
   deltas_[1] = 0.25 * (s2_ - s2_range.min()) * (s2p - s2_) * t2();
@@ -545,7 +497,7 @@ bool LPAIR::pickin() {
     return false;
   }
 
-  delta_ = delb - yy4 * st * sqrt(dd) / ap * 0.5;
+  delta_ = delb - 0.5 * yy4 * st * std::sqrt(dd) / ap;
   s1_ = t2() + mA2() + (2. * p12_ * r3 - 4. * delta_) / st;
 
   if (ap >= 0.) {
@@ -553,7 +505,7 @@ bool LPAIR::pickin() {
     return false;
   }
 
-  jacobian_ = ds2 * dt1 * dt2 * 0.125 * 0.5 / (sl1_ * sqrt(-ap));
+  jacobian_ = ds2 * dt1 * dt2 * 0.125 * 0.5 / (sl1_ * std::sqrt(-ap));
   if (jacobian_ == 0.) {
     CG_WARNING("LPAIR:pickin") << "Null Jacobian.\n\t"
                                << "D(s2)=" << ds2 << ", D(t1)=" << dt1 << ", D(t2)=" << dt2 << ".";
@@ -655,7 +607,7 @@ bool LPAIR::orient() {
   }
 
   // What if the protons' momenta are not along the z-axis?
-  pc4_ = sqrt(ec4_ * ec4_ - mc4_ * mc4_);
+  pc4_ = std::sqrt(ec4_ * ec4_ - mc4_ * mc4_);
   if (pc4_ == 0.) {
     CG_WARNING("LPAIR") << "pzc4 is null and should not be...";
     return false;
@@ -665,7 +617,7 @@ bool LPAIR::orient() {
                          << "               momentum: p4 = " << pc4_ << "\n\t"
                          << "         invariant mass: m4 = " << mc4_ << ".";
 
-  pt4_ = sqrt(deltas_[4]) / sqrtS() / p_cm_;
+  pt4_ = std::sqrt(deltas_[4]) / sqrtS() / p_cm_;
   sin_theta4_ = pt4_ / pc4_;
 
   if (sin_theta4_ > 1.) {
@@ -673,7 +625,7 @@ bool LPAIR::orient() {
     return false;
   }
 
-  cos_theta4_ = sqrt(1. - sin_theta4_ * sin_theta4_);
+  cos_theta4_ = std::sqrt(1. - sin_theta4_ * sin_theta4_);
   if (ep1_ * ec4_ < p14_)
     cos_theta4_ *= -1.;
 
@@ -689,13 +641,14 @@ bool LPAIR::orient() {
                          << "sin(theta4) = " << sin_theta4_ << "\n\t"
                          << "alpha4 = " << alpha4_ << ", beta4 = " << beta4_;
 
-  const double rr = sqrt(-gram_) / sqrtS() / (p_cm_ * pt4_);
+  const double rr = std::sqrt(-gram_) / sqrtS() / (p_cm_ * pt4_);
 
   //----- outgoing beam states
+  const auto prefac = 1. / sqrtS() / p_cm_;
 
   //--- beam 1 -> 3
-  const double ep3 = ep1_ - delta3_, pp3 = sqrt(ep3 * ep3 - mX2());
-  const double pt3 = sqrt(deltas_[0]) / sqrtS() / p_cm_;
+  const double ep3 = ep1_ - delta3_, pp3 = std::sqrt(ep3 * ep3 - mX2());
+  const double pt3 = prefac * std::sqrt(deltas_[0]);
 
   if (pt3 > pp3) {
     CG_WARNING("LPAIR") << "Invalid momentum for outgoing beam 1.";
@@ -713,8 +666,8 @@ bool LPAIR::orient() {
                          << "momentum = " << pX() << ".";
 
   //--- beam 2 -> 5
-  const double ep5 = ep2_ - delta5_, pp5 = sqrt(ep5 * ep5 - mY2());
-  const double pt5 = sqrt(deltas_[2]) / sqrtS() / p_cm_;
+  const double ep5 = ep2_ - delta5_, pp5 = std::sqrt(ep5 * ep5 - mY2());
+  const double pt5 = prefac * std::sqrt(deltas_[2]);
 
   if (pt5 > pp5) {
     CG_WARNING("LPAIR") << "Invalid momentum for outgoing beam 2.";
@@ -751,8 +704,8 @@ bool LPAIR::orient() {
 //---------------------------------------------------------------------------------------------
 
 double LPAIR::computeWeight() {
-  ep1_ = event()(Particle::IncomingBeam1)[0].energy();
-  ep2_ = event()(Particle::IncomingBeam2)[0].energy();
+  ep1_ = pA().energy();
+  ep2_ = pB().energy();
   // Mass difference between the first outgoing particle and the first incoming particle
   masses_.w31 = mX2() - mA2();
   // Mass difference between the second outgoing particle and the second incoming particle
@@ -761,16 +714,15 @@ double LPAIR::computeWeight() {
   masses_.w12 = mA2() - mB2();
   // Mass difference between the central two-photons system and the second outgoing particle
 
-  const double mx = mX(), my = mY();
   CG_DEBUG_LOOP("LPAIR") << "sqrt(s) = " << sqrtS() << " GeV\n\t"
-                         << "m^2(X) = " << mX2() << " GeV^2, m(X) = " << mx << " GeV\n\t"
-                         << "m^2(Y) = " << mY2() << " GeV^2, m(Y) = " << my << " GeV";
+                         << "m^2(X) = " << mX2() << " GeV^2, m(X) = " << mX() << " GeV\n\t"
+                         << "m^2(Y) = " << mY2() << " GeV^2, m(Y) = " << mY() << " GeV";
 
-  // Maximal energy for the central system is beam-beam CM energy with the outgoing particles' mass energy subtracted (or wmax if specified)
-  w_limits_.max() = std::min(pow(sqrtS() - mx - my, 2), w_limits_.max());
+  // Maximal energy for the central system set to beam-beam CM energy minus the outgoing particles' mass energy
+  w_limits_ = w_limits_.truncate(Limits{0., std::pow(sqrtS() - mX() - mY(), 2)});
 
   // compute the two-photon energy for this point
-  mc4_ = sqrt(m_w4_);
+  mc4_ = std::sqrt(m_w4_);
 
   CG_DEBUG_LOOP("LPAIR") << "Computed value for w4 = " << m_w4_ << " -> mc4 = " << mc4_;
 
@@ -788,7 +740,7 @@ double LPAIR::computeWeight() {
     return 0.;
   }
 
-  const double ecm6 = m_w4_ / (2. * mc4_), pp6cm = sqrt(ecm6 * ecm6 - masses_.Ml2);
+  const double ecm6 = m_w4_ / (2. * mc4_), pp6cm = std::sqrt(ecm6 * ecm6 - masses_.Ml2);
   const double alpha1 = alphaEM(std::sqrt(-t1())), alpha2 = alphaEM(std::sqrt(-t2()));
 
   jacobian_ *= pp6cm * constb_ * alpha1 * alpha1 * alpha2 * alpha2 / mc4_ / s();
@@ -798,11 +750,11 @@ double LPAIR::computeWeight() {
   const double e1mp1 = mA2() / (ep1_ + p_cm_);
   const double e3mp3 = mX2() / (pX().energy() + pX().p());
 
-  const double al3 = pow(sin(pX().theta()), 2) / (1. + (pX().theta()));
+  const double al3 = std::pow(sin(pX().theta()), 2) / (1. + (pX().theta()));
 
   // 2-photon system kinematics ?!
   const double eg = (m_w4_ + t1() - t2()) / (2. * mc4_);
-  double p_gam = sqrt(eg * eg - t1());
+  double p_gam = std::sqrt(eg * eg - t1());
 
   const double gamma4 = ec4_ / mc4_;
   const Momentum pg(-pX().px() * cos_theta4_ - (pX().p() * al3 + e3mp3 - e1mp1 + delta3_) * sin_theta4_,
@@ -821,11 +773,12 @@ double LPAIR::computeWeight() {
   const double sin_theta_gam = pt_gam / p_gam;
 
   const int theta_sign = pg.pz() > 0. ? 1 : -1;
-  const double cos_theta_gam = theta_sign * sqrt(1. - sin_theta_gam * sin_theta_gam);
+  const double cos_theta_gam = theta_sign * std::sqrt(1. - sin_theta_gam * sin_theta_gam);
 
   const double amap = 0.5 * (m_w4_ - t1() - t2()),
-               bmap = 0.5 * sqrt((pow(m_w4_ - t1() - t2(), 2) - 4. * t1() * t2()) * (1. - 4. * masses_.Ml2 / m_w4_)),
-               ymap = (amap + bmap) / (amap - bmap), beta = pow(ymap, 2. * m_x6_ - 1.);
+               bmap = 0.5 * std::sqrt((std::pow(m_w4_ - t1() - t2(), 2) - 4. * t1() * t2()) *
+                                      (1. - 4. * masses_.Ml2 / m_w4_)),
+               ymap = (amap + bmap) / (amap - bmap), beta = std::pow(ymap, 2. * m_x6_ - 1.);
   double xx6 = 0.5 * (1. + amap / bmap * (beta - 1.) / (beta + 1.));
   xx6 = std::max(0., std::min(xx6, 1.));  // xx6 in [0., 1.]
 
@@ -881,11 +834,10 @@ double LPAIR::computeWeight() {
 
   const double hq = ec4_ * qcz / mc4_;
 
-  const Momentum qve(+qcx * cos_theta4_ + hq * sin_theta4_,
-                     2. * pc(0).py(),
-                     -qcx * sin_theta4_ + hq * cos_theta4_,
-                     +qcz * pc4_ / mc4_  // energy
-  );
+  const auto qve = Momentum::fromPxPyPzE(+qcx * cos_theta4_ + hq * sin_theta4_,
+                                         2. * pc(0).py(),
+                                         -qcx * sin_theta4_ + hq * cos_theta4_,
+                                         +qcz * pc4_ / mc4_);
 
   // second outgoing lepton's kinematics
   pc(1) = Momentum::fromPThetaPhiE(pc4_, acos(cos_theta4_), 0., ec4_) - pc(0);
@@ -904,7 +856,8 @@ double LPAIR::computeWeight() {
   const double phi3 = pX().phi(), cos_phi3 = cos(phi3), sin_phi3 = sin(phi3);
   const double phi5 = pY().phi(), cos_phi5 = cos(phi5), sin_phi5 = sin(phi5);
 
-  bb_ = t1() * t2() + (m_w4_ * pow(sin(theta6cm), 2) + 4. * masses_.Ml2 * pow(cos(theta6cm), 2)) * p_gam * p_gam;
+  bb_ = t1() * t2() +
+        (m_w4_ * std::pow(sin(theta6cm), 2) + 4. * masses_.Ml2 * std::pow(cos(theta6cm), 2)) * p_gam * p_gam;
 
   const double c1 = pX().pt() * (qve.px() * sin_phi3 - qve.py() * cos_phi3),
                c2 = pX().pt() * (qve.pz() * ep1_ - qve.energy() * p_cm_),
@@ -947,69 +900,47 @@ double LPAIR::computeWeight() {
   ////////////////////////////////////////////////////////////////
 
   const Momentum cm = pA() + pB();
-  const double gamma = cm.energy() / sqrtS(), betgam = cm.pz() / sqrtS();
+  boost_props_.gamma = cm.energy() / sqrtS();
+  boost_props_.betgam = cm.pz() / sqrtS();
+  CG_DEBUG_LOOP("LPAIR:gmufil") << "sqrt(s)=" << sqrtS() << " GeV, initial two-proton system: " << cm << "\n\t"
+                                << "gamma=" << boost_props_.gamma << ", betgam=" << boost_props_.betgam;
 
-  //--- kinematics computation for both leptons
-
-  CG_DEBUG_LOOP("LPAIR:gmufil") << "unboosted P(l1)=" << pc(0) << "\n\t"
-                                << "unboosted P(l2)=" << pc(1);
-
-  const double mass_before = (pc(0) + pc(1)).mass();
-
-  pc(0).betaGammaBoost(gamma, betgam);
-  pc(1).betaGammaBoost(gamma, betgam);
-
-  CG_DEBUG_LOOP("LPAIR:gmufil") << "Invariant mass difference from boost:" << (pc(0) + pc(1)).mass() - mass_before
-                                << ".";
-
-  if (!applyCuts())
+  //----- outgoing leptons
+  const auto mass_before = (pc(0) + pc(1)).mass();
+  pc(0).betaGammaBoost(boost_props_.gamma, boost_props_.betgam);
+  pc(1).betaGammaBoost(boost_props_.gamma, boost_props_.betgam);
+  CG_DEBUG_LOOP("LPAIR:gmufil") << "Invariant mass imbalance after beta/gamma boost:"
+                                << (pc(0) + pc(1)).mass() - mass_before << ".";
+  if (!kinematics().cuts().central.contain(event()(Particle::CentralSystem)))
     return 0.;
 
-  //--- compute the structure functions factors
+  const auto peripp = periPP();  // compute the structure functions factors
+  CG_DEBUG_LOOP("LPAIR:f") << "Jacobian: " << jacobian_ << ", str.fun. factor: " << peripp << ".";
 
-  jacobian_ *= periPP();
-
-  CG_DEBUG_LOOP("LPAIR:f") << "Jacobian: " << jacobian_;
-
-  //--- compute the event weight using the Jacobian
-
-  return constants::GEVM2_TO_PB * jacobian_;
+  return constants::GEVM2_TO_PB * jacobian_ * peripp;  // compute the event weight using the Jacobian
 }
 
 //---------------------------------------------------------------------------------------------
 
 void LPAIR::fillKinematics(bool) {
-  const Momentum cm = pA() + pB();
-  const double gamma = cm.energy() / sqrtS(), betgam = cm.pz() / sqrtS();
   //----- parameterise a random rotation around z-axis
   const short rany = rnd_side_(rnd_gen_) == 1 ? 1 : -1, ransign = rnd_side_(rnd_gen_) == 1 ? 1 : -1;
   const double ranphi = rnd_phi_(rnd_gen_);
   const short ranz = symmetrise_ ? (rnd_side_(rnd_gen_) == 1 ? 1 : -1) : 1;
 
-  CG_DEBUG_LOOP("LPAIR:gmufil") << "sqrt(s)=" << sqrtS() << " GeV, initial two-proton system: " << cm << "\n\t"
-                                << "gamma=" << gamma << ", betgam=" << betgam;
-
-  //----- incoming protons
-  pA() = Momentum(0., 0., p_cm_, ep1_).betaGammaBoost(gamma, betgam);
-  pB() = Momentum(0., 0., -p_cm_, ep2_).betaGammaBoost(gamma, betgam);
-
-  CG_DEBUG_LOOP("LPAIR:gmufil") << "unboosted PX=" << pX() << "\n\t"
-                                << "unboosted PY=" << pY();
-
-  //----- outgoing protons
-  pX().betaGammaBoost(gamma, betgam);
-  pY().betaGammaBoost(gamma, betgam);
-
-  CG_DEBUG_LOOP("LPAIR:gmufil") << "boosted PX=" << pX() << "\n\t"
-                                << "boosted PY=" << pY() << "\n\t"
-                                << "boosted P(l1)=" << pc(0) << "\n\t"
-                                << "boosted P(l2)=" << pc(1);
-
+  //----- incoming beams
+  pA() = Momentum(0., 0., +p_cm_, ep1_).betaGammaBoost(boost_props_.gamma, boost_props_.betgam);
+  pB() = Momentum(0., 0., -p_cm_, ep2_).betaGammaBoost(boost_props_.gamma, boost_props_.betgam);
+  //----- outgoing beams
+  pX().betaGammaBoost(boost_props_.gamma, boost_props_.betgam);
+  pY().betaGammaBoost(boost_props_.gamma, boost_props_.betgam);
   //----- incoming partons
-  q1() = (pA() - pX()).rotatePhi(ranphi, rany);
-  q2() = (pB() - pY()).rotatePhi(ranphi, rany);
+  q1() = pA() - pX();
+  q2() = pB() - pY();
 
-  //--- rotate the outgoing particles
+  //--- rotate all particles
+  q1().rotatePhi(ranphi, rany);
+  q2().rotatePhi(ranphi, rany);
   pc(0).rotatePhi(ranphi, rany);
   pc(1).rotatePhi(ranphi, rany);
   pX().rotatePhi(ranphi, rany);
@@ -1022,7 +953,6 @@ void LPAIR::fillKinematics(bool) {
     pX().mirrorZ();
     pY().mirrorZ();
   }
-
   CG_DEBUG_LOOP("LPAIR:gmufil") << "boosted+rotated PX=" << pX() << "\n\t"
                                 << "boosted+rotated PY=" << pY() << "\n\t"
                                 << "boosted+rotated P(l1)=" << pc(0) << "\n\t"
@@ -1030,19 +960,21 @@ void LPAIR::fillKinematics(bool) {
 
   //----- first outgoing proton
   auto& op1 = event().oneWithRole(Particle::OutgoingBeam1);
-  if (kinematics().incomingBeams().positive().fragmented()) {
-    op1.setStatus(Particle::Status::Unfragmented);  // fragmenting remnants
-    op1.setMass(mX());
-  } else
+  if (kinematics().incomingBeams().positive().elastic())
     op1.setStatus(Particle::Status::FinalState);  // stable proton
+  else {
+    op1.setStatus(Particle::Status::Unfragmented);  // fragmenting remnants
+    pX().setMass(mX());
+  }
 
   //----- second outgoing proton
   auto& op2 = event().oneWithRole(Particle::OutgoingBeam2);
-  if (kinematics().incomingBeams().negative().fragmented()) {
-    op2.setStatus(Particle::Status::Unfragmented);  // fragmenting remnants
-    op2.setMass(mY());
-  } else
+  if (kinematics().incomingBeams().negative().elastic())
     op2.setStatus(Particle::Status::FinalState);  // stable proton
+  else {
+    op2.setStatus(Particle::Status::Unfragmented);  // fragmenting remnants
+    pY().setMass(mY());
+  }
 
   auto central_system = event()[Particle::CentralSystem];
 
@@ -1057,7 +989,7 @@ void LPAIR::fillKinematics(bool) {
   ol2.setStatus(Particle::Status::FinalState);
 
   //----- intermediate two-lepton system
-  event().oneWithRole(Particle::Intermediate).setMomentum(pc(0) + pc(1));
+  event().oneWithRole(Particle::Intermediate).setMomentum(pc(0) + pc(1), true);
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1075,16 +1007,16 @@ double LPAIR::periPP() const {
       128. * (-bb_ * (deltas_[3] + gamma5_) - 2. * (t2() + 2. * masses_.Ml2) * (sa1_ * qqq + alpha5_ * alpha5_)) *
       t2();  // magnetic-electric
   const double t22 =
-      512. * (bb_ * (delta_ * delta_ - gram_) - pow(epsilon_ - delta_ * (qdq + q1dq2_), 2) - sa1_ * alpha6_ * alpha6_ -
-              sa2_ * alpha5_ * alpha5_ - sa1_ * sa2_ * qqq);  // electric-electric
+      512. * (bb_ * (delta_ * delta_ - gram_) - std::pow(epsilon_ - delta_ * (qdq + q1dq2_), 2) -
+              sa1_ * alpha6_ * alpha6_ - sa2_ * alpha5_ * alpha5_ - sa1_ * sa2_ * qqq);  // electric-electric
 
   //--- compute the electric/magnetic form factors for the two considered parton momenta transfers
-  const auto fp1 = computeFormFactors(kinematics().incomingBeams().positive().mode(), -t1(), mX2()),
-             fp2 = computeFormFactors(kinematics().incomingBeams().negative().mode(), -t2(), mY2());
+  const auto fp1 = computeFormFactors(kinematics().incomingBeams().positive(), -t1(), mX2()),
+             fp2 = computeFormFactors(kinematics().incomingBeams().negative(), -t2(), mY2());
 
   const double peripp =
-      (fp1.FM * fp2.FM * t11 + fp1.FE * fp2.FM * t21 + fp1.FM * fp2.FE * t12 + fp1.FE * fp2.FE * t22) /
-      pow(2. * t1() * t2() * bb_, 2);
+      0.25 * (fp1.FM * fp2.FM * t11 + fp1.FE * fp2.FM * t21 + fp1.FM * fp2.FE * t12 + fp1.FE * fp2.FE * t22) *
+      std::pow(t1() * t2() * bb_, -2);
 
   CG_DEBUG_LOOP("LPAIR:peripp") << "bb = " << bb_ << ", qqq = " << qqq << ", qdq = " << qdq << "\n\t"
                                 << "t11 = " << t11 << "\t"
@@ -1096,33 +1028,26 @@ double LPAIR::periPP() const {
   return peripp;
 }
 
-bool LPAIR::applyCuts() const {
-  //--- cut on the proton's Q2 (first photon propagator T1)
-  if (!kinematics().cuts().initial.q2.contains(-t1()))
-    return false;
-  //----- cuts on the individual leptons
-  if (kinematics().cuts().central.pt_single.valid())
-    for (size_t i = 0; i < 2; ++i)
-      if (!kinematics().cuts().central.pt_single.contains(pc(i).pt()))
-        return false;
-  if (kinematics().cuts().central.energy_single.valid())
-    for (size_t i = 0; i < 2; ++i)
-      if (!kinematics().cuts().central.energy_single.contains(pc(i).energy()))
-        return false;
-  if (kinematics().cuts().central.eta_single.valid())
-    for (size_t i = 0; i < 2; ++i)
-      if (!kinematics().cuts().central.eta_single.contains(pc(i).eta()))
-        return false;
-  //--- cut on mass of final hadronic system (MX/Y)
-  if (kinematics().cuts().remnants.mx.valid()) {
-    if (kinematics().incomingBeams().positive().mode() == Beam::Mode::ProtonInelastic &&
-        !kinematics().cuts().remnants.mx.contains(mX()))
-      return false;
-    if (kinematics().incomingBeams().negative().mode() == Beam::Mode::ProtonInelastic &&
-        !kinematics().cuts().remnants.mx.contains(mY()))
-      return false;
+formfac::FormFactors LPAIR::computeFormFactors(const Beam& beam, double q2, double mx2) const {
+  if (beam.elastic())
+    return (*formfac_)(q2);
+  // at this point, deal with an inelastic photon emission
+  if (!strfun_)
+    throw CG_FATAL("LPAIR:computeFormFactors")
+        << "Inelastic proton form factors computation requires a structure functions definition!";
+  const double xbj = utils::xBj(q2, mp2_, mx2);
+  formfac::FormFactors ff;
+  switch (strfun_->name()) {
+    case 11 /* SuriYennie */: {  // this one requires its own object to deal with FM
+      ff.FE = strfun_->F2(xbj, q2) * xbj * mp_ / q2;
+      ff.FM = strfun_->FM(xbj, q2);
+    } break;
+    default: {
+      ff.FE = strfun_->F2(xbj, q2) * xbj / q2;
+      ff.FM = -2. * strfun_->F1(xbj, q2) / q2;
+    } break;
   }
-  return true;
+  return ff;
 }
 
 // register process

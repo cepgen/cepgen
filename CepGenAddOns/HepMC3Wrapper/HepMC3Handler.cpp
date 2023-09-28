@@ -25,6 +25,7 @@
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/Value.h"
 #include "CepGenAddOns/HepMC3Wrapper/HepMC3EventInterface.h"
 
 using namespace HepMC3;
@@ -67,8 +68,8 @@ namespace cepgen {
       event.set_event_number(event_num_++);
       output_->write_event(event);
     }
-    void setCrossSection(double cross_section, double cross_section_err) override {
-      xs_->set_cross_section(cross_section, cross_section_err);
+    void setCrossSection(const Value& cross_section) override {
+      xs_->set_cross_section(cross_section, cross_section.uncertainty());
     }
 
   private:

@@ -61,5 +61,8 @@ namespace cepgen {
 
 #define CG_ERROR(mod) cepgen::Exception(mod, __FUNC__, cepgen::Exception::Type::error, __FILE__, __LINE__)
 #define CG_FATAL(mod) cepgen::Exception(mod, __FUNC__, cepgen::Exception::Type::fatal, __FILE__, __LINE__)
+#define CG_ASSERT(assertion) \
+  if (!(assertion))          \
+    throw CG_FATAL("Assertion") << "Assertion '" << #assertion << " failed.";
 
 #endif

@@ -26,6 +26,8 @@ namespace cepgen {
     const std::regex EventBrowser::rgx_select_id2_("([a-zA-Z]+)\\(([0-9]+),([0-9]+)\\)",
                                                    std::regex_constants::extended);
     const std::regex EventBrowser::rgx_select_role_("([a-zA-Z]+)\\(([a-z]+[0-9]?)\\)", std::regex_constants::extended);
+    const std::regex EventBrowser::rgx_select_role2_("([a-zA-Z]+)\\(([a-z]+[0-9]?),([a-z]+[0-9]?)\\)",
+                                                     std::regex_constants::extended);
 
     double EventBrowser::get(const Event& ev, const std::string& var) const {
       std::smatch sm;
@@ -42,17 +44,30 @@ namespace cepgen {
         return variable(ev, part1, part2, var_name);
       }
       //--- particle-level variables (indexed by role)
+      const auto check_role = [&](const std::string& role, const std::string& var) -> bool {
+        bool ret = role_str_.count(role) > 0;
+        if (!ret)
+          CG_WARNING("EventBrowser") << "Invalid particle role retrieved from configuration: \"" << role << "\".\n\t"
+                                     << "Skipping the variable \"" << var << "\" in the output module.";
+        return ret;
+      };
       if (std::regex_match(var, sm, rgx_select_role_)) {
         const auto& var_name = sm[1].str();
         const auto& str_role = sm[2].str();
-        if (role_str_.count(str_role) == 0) {
-          CG_WARNING("EventBrowser") << "Invalid particle role retrieved from configuration: \"" << str_role
-                                     << "\".\n\t"
-                                     << "Skipping the variable \"" << var << "\" in the output module.";
+        if (!check_role(str_role, var))
           return INVALID_OUTPUT;
-        }
         const auto& part = ev(role_str_.at(str_role))[0];
         return variable(ev, part, var_name);
+      }
+      if (std::regex_match(var, sm, rgx_select_role2_)) {
+        const auto& var_name = sm[1].str();
+        const auto& str_role1 = sm[2].str();
+        const auto& str_role2 = sm[3].str();
+        if (!check_role(str_role1, var) || !check_role(str_role2, var))
+          return INVALID_OUTPUT;
+        const auto& part1 = ev(role_str_.at(str_role1))[0];
+        const auto& part2 = ev(role_str_.at(str_role2))[0];
+        return variable(ev, part1, part2, var_name);
       }
       //--- event-level variables
       return variable(ev, var);
@@ -71,7 +86,7 @@ namespace cepgen {
                                      << part;
           return INVALID_OUTPUT;
         }
-        return 1. - part.energy() / ev[*moth.begin()].energy();
+        return 1. - part.momentum().energy() / ev[*moth.begin()].momentum().energy();
       }
       if (var == "pdg")
         return (double)part.integerPdgId();

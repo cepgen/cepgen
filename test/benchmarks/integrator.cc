@@ -56,8 +56,7 @@ int main(int argc, char* argv[]) {
     for (const auto& integrator_name : integrators)
       bench.context("integrator", integrator_name).run(functional_parser + "+" + integrator_name, [&] {
         auto integr = cepgen::IntegratorFactory::get().build(integrator_name);
-        double result, unc;
-        integr->integrate(integrand, result, unc);
+        integr->integrate(integrand);
       });
   }
   render_benchmark(bench, outputs);

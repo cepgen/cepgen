@@ -25,6 +25,7 @@
 
 namespace cepgen {
   class Event;
+  class Value;
   /**
    * \brief Output format handler for events export
    * \author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -34,8 +35,8 @@ namespace cepgen {
   public:
     explicit EventExporter(const ParametersList&);
 
-    /// Set the process cross section and its associated error
-    virtual void setCrossSection(double /*cross_section*/, double /*err_cross_section*/) {}
+    /// Specify the process cross section and uncertainty, in pb
+    virtual void setCrossSection(const Value&) {}
     /// Set the event number
     void setEventNumber(unsigned long long ev_id) { event_num_ = ev_id; }
 
@@ -51,4 +52,3 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
-

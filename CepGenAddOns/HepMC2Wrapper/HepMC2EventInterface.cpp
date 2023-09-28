@@ -46,7 +46,7 @@ namespace HepMC {
     unsigned short idx = 1;
     for (const auto& part_orig : evt.particles()) {
       const auto& mom_orig = part_orig.momentum();
-      FourVector pmom(mom_orig.px(), mom_orig.py(), mom_orig.pz(), part_orig.energy());
+      FourVector pmom(mom_orig.px(), mom_orig.py(), mom_orig.pz(), mom_orig.energy());
       auto part = new GenParticle(pmom, part_orig.integerPdgId(), (int)part_orig.status());
       part->set_generated_mass(cepgen::PDG::get().mass(part_orig.pdgId()));
       part->suggest_barcode(idx);
@@ -117,7 +117,7 @@ namespace HepMC {
     if (v1->particles_in_size() > 0 && v2->particles_in_size() > 0)
       set_beam_particles(*v1->particles_in_const_begin(), *v2->particles_in_const_begin());
     if (evt.hasRole(cepgen::Particle::Role::Intermediate))
-      set_event_scale(evt.oneWithRole(cepgen::Particle::Role::Intermediate).mass());
+      set_event_scale(evt.oneWithRole(cepgen::Particle::Role::Intermediate).momentum().mass());
     set_signal_process_vertex(vcm);
   }
 }  // namespace HepMC

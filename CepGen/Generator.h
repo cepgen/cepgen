@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "CepGen/Event/Event.h"
+#include "CepGen/Utils/Value.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -42,8 +43,10 @@
 namespace cepgen {
   class Integrator;
   class GeneratorWorker;
-  class GridParameters;
   class Parameters;
+  namespace proc {
+    class Process;
+  }
 
   /// Collection of libraries loaded in the runtime environment
   static std::vector<std::string> loaded_libraries;
@@ -112,27 +115,24 @@ namespace cepgen {
     void clearRun();
     /// Integrate the functional over the whole phase space
     void integrate();
-    /**
-       * Compute the cross section for the run parameters defined by this object.
-       * This returns the cross section as well as the absolute error computed along.
-       * \brief Compute the cross-section for the given process
-       * \param[out] xsec The computed cross-section, in pb
-       * \param[out] err The absolute integration error on the computed cross-section, in pb
-       */
-    void computeXsection(double& cross_section, double& err);
+    /// Compute the cross section for the run parameters
+    /// \return The computed cross-section and uncertainty, in pb
+    Value computeXsection();
+    /// Compute the cross section for the run parameters
+    /// \param[out] xsec The computed cross-section, in pb
+    /// \param[out] err The absolute integration error on the computed cross-section, in pb
+    [[deprecated("Please use the parameters-less version")]] void computeXsection(double& cross_section, double& err);
     /// Last cross section computed by the generator
-    double crossSection() const { return result_; }
+    double crossSection() const { return xsect_; }
     /// Last error on the cross section computed by the generator
-    double crossSectionError() const { return result_error_; }
+    double crossSectionError() const { return xsect_.uncertainty(); }
 
-    // void terminate();
-    /// \deprecated Replaced by the generic method \a generate.
-    [[deprecated("Please use generate or next instead")]] const Event& generateOneEvent(Event::callback = nullptr);
     /// Launch the generation of events
-    void generate(size_t num_events = 0, Event::callback = nullptr);
+    void generate(size_t num_events, const std::function<void(const Event&, size_t)>&);
+    /// Launch the generation of events
+    void generate(size_t num_events, const std::function<void(const proc::Process&)>& = nullptr);
     /// Generate one event
-    /// \param[in] callback Callback function where the generated event can be fed
-    const Event& next(Event::callback callback = nullptr);
+    const Event& next();
     /// Compute one single point from the total phase space
     /// \param[in] x the n-dimensional point to compute
     /// \return the function value for the given point
@@ -147,14 +147,10 @@ namespace cepgen {
     std::unique_ptr<GeneratorWorker> worker_;
     /// Integration algorithm
     std::unique_ptr<Integrator> integrator_;
-    /// Integration grid instance
-    std::unique_ptr<GridParameters> grid_;
     /// Has the event generator already been initialised?
     bool initialised_{false};
     /// Cross section value computed at the last integration
-    double result_{-1.};
-    /// Error on the cross section as computed in the last integration
-    double result_error_{-1.};
+    Value xsect_{-1., -1.};
   };
 }  // namespace cepgen
 

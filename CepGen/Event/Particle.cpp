@@ -27,15 +27,12 @@ namespace cepgen {
   Particle::Particle(Role role, pdgid_t pdgId, Status st) : role_(role), status_((int)st), pdg_id_(pdgId) {
     if (PDG::get().has(pdg_id_))
       phys_prop_ = PDG::get()(pdg_id_);
-    if (pdg_id_ != PDG::invalid)
-      computeMass();
   }
 
   Particle::Particle(const Particle& part)
       : id_(part.id_),
         charge_sign_(part.charge_sign_),
         momentum_(part.momentum_),
-        mass_(part.mass_),
         helicity_(part.helicity_),
         role_(part.role_),
         status_(part.status_),
@@ -48,38 +45,15 @@ namespace cepgen {
 
   bool Particle::operator<(const Particle& rhs) const { return id_ >= 0 && rhs.id_ > 0 && id_ < rhs.id_; }
 
-  double Particle::thetaToEta(double theta) { return -log(tan(0.5 * theta * M_PI / 180.)); }
-
-  double Particle::etaToTheta(double eta) { return 2. * atan(exp(-eta)) * 180. * M_1_PI; }
-
   bool Particle::valid() {
     if (pdg_id_ == PDG::invalid)
       return false;
-    if (momentum_.p() == 0. && mass_ == 0.)
+    if (momentum_.p() == 0. && momentum_.mass() == 0.)
       return false;
     return true;
   }
 
   float Particle::charge() const { return charge_sign_ * phys_prop_.charge / 3.; }
-
-  Particle& Particle::computeMass(bool offshell) {
-    if (!offshell && pdg_id_ != PDG::invalid)  // retrieve the mass from the on-shell particle's properties
-      mass_ = phys_prop_.mass;
-    else if (momentum_.energy() >= 0.)
-      mass_ = sqrt(energy2() - momentum_.p2());
-    //--- finish by setting the energy accordingly
-    if (momentum_.energy() < 0.)  // invalid energy
-      momentum_.setEnergy(sqrt(momentum_.p2() + mass2()));
-
-    return *this;
-  }
-
-  Particle& Particle::setMass(double m) {
-    if (m < 0.)
-      return computeMass();
-    mass_ = m;
-    return *this;
-  }
 
   Particle& Particle::clearMothers() {
     mothers_.clear();
@@ -128,28 +102,15 @@ namespace cepgen {
 
   Particle& Particle::setMomentum(const Momentum& mom, bool offshell) {
     momentum_ = mom;
-    if (offshell || mom.mass() <= 0.)
-      return computeMass(offshell);
-    mass_ = momentum_.mass();
+    if (!offshell)
+      momentum_.computeEnergyFromMass(phys_prop_.mass);
     return *this;
   }
 
   Particle& Particle::setMomentum(double px, double py, double pz, double e) {
-    momentum_.setP(px, py, pz);
-    setEnergy(e);
+    momentum_.setP(px, py, pz).setEnergy(e);
     if (fabs(e - momentum_.energy()) > 1.e-6)  // more than 1 eV difference
       CG_WARNING("Particle") << "Energy difference: " << e - momentum_.energy();
-    return *this;
-  }
-
-  double Particle::energy() const {
-    return (momentum_.energy() < 0. ? std::hypot(mass_, momentum_.p()) : momentum_.energy());
-  }
-
-  Particle& Particle::setEnergy(double e) {
-    if (e < 0. && mass_ >= 0.)
-      e = std::hypot(mass_, momentum_.p());
-    momentum_.setEnergy(e);
     return *this;
   }
 
@@ -159,9 +120,8 @@ namespace cepgen {
     pdg_id_ = labs(pdg);
     if (PDG::get().has(pdg_id_)) {
       phys_prop_ = PDG::get()(pdg_id_);
-      mass_ = phys_prop_.mass;
       CG_DEBUG("Particle:setPdgId") << "Particle PDG id set to " << pdg_id_ << ", "
-                                    << "on-shell mass set to " << mass_ << " GeV/c^2.";
+                                    << "properties set " << phys_prop_ << ".";
     }
     switch (pdg_id_) {
       case 0:
@@ -188,15 +148,10 @@ namespace cepgen {
     return static_cast<int>(pdg_id_) * charge_sign_ * (ch / fabs(ch));
   }
 
-  double Particle::etaToY(double eta_, double m_, double pt_) {
-    const double m2 = m_ * m_, mt = std::hypot(m_, pt_);
-    return asinh(sqrt(((mt * mt - m2) * cosh(2. * eta_) + m2) / mt * mt - 1.) * M_SQRT1_2);
-  }
-
   std::ostream& operator<<(std::ostream& os, const Particle& part) {
     os << std::resetiosflags(std::ios::showbase) << "Particle[" << part.id_ << "]{role=" << part.role_
        << ", status=" << (int)part.status_ << ", "
-       << "pdg=" << part.integerPdgId() << ", p4=" << part.momentum_ << " GeV, m=" << part.mass_ << " GeV, "
+       << "pdg=" << part.integerPdgId() << ", p4=" << part.momentum_ << " GeV, m=" << part.momentum_.mass() << " GeV, "
        << "p⟂=" << part.momentum_.pt() << " GeV, eta=" << part.momentum_.eta() << ", phi=" << part.momentum_.phi();
     if (part.primary())
       os << ", primary";
@@ -238,12 +193,6 @@ namespace cepgen {
         return os << "central";
     }
     return os;
-  }
-
-  double CMEnergy(const Particle& p1, const Particle& p2) {
-    if (p1.mass() * p2.mass() < 0. || p1.energy() * p2.energy() < 0.)
-      return 0.;
-    return sqrt(p1.mass2() + p2.mass2() + 2. * p1.energy() * p2.energy() - 2. * (p1.momentum() * p2.momentum()));
   }
 
   ParticlesMap::ParticlesMap(const ParticlesMap& oth)

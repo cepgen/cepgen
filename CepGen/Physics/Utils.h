@@ -29,7 +29,13 @@ namespace cepgen {
     double q2(double xbj, double mp2, double mx2);
     /// Compute energy from mass and emitted mass
     double energyFromW(double w, double mp2, double m2);
-  }  // namespace utils
+    namespace kt {
+      /// Compute the diffractive mass from longitudinal loss/transverse virtuality/virtuality
+      double mX2(double x, double kt2, double q2, double mi2);
+      /// Compute the virtuality from longitudinal loss/transverse virtuality/diffractive mass
+      double q2(double x, double kt2, double mi2, double mf2 = -1.);
+    }  // namespace kt
+  }    // namespace utils
 }  // namespace cepgen
 
 #endif

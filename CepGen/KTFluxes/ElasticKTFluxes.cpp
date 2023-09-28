@@ -24,6 +24,7 @@
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Utils.h"
 
 namespace cepgen {
   class ElasticNucleonKTFlux : public KTFlux {
@@ -48,10 +49,10 @@ namespace cepgen {
     double fluxMX2(double x, double kt2, double) const override {
       if (!x_range_.contains(x))
         return 0.;
-      const auto q2vals = computeQ2(x, kt2);
-      const double qnorm = 1. - q2vals.min / q2vals.q2;
-      const auto& formfac = (*ff_)(q2vals.q2);
-      return prefactor_ * formfac.FE * qnorm * qnorm / q2vals.q2;
+      const auto q2 = utils::kt::q2(x, kt2, mass2()), q2min = q2 - kt2 / (1. - x);
+      const double qnorm = 1. - q2min / q2;
+      const auto& formfac = (*ff_)(q2);
+      return prefactor_ * formfac.FE * qnorm * qnorm / q2;
     }
 
   protected:
@@ -69,12 +70,12 @@ namespace cepgen {
     double fluxMX2(double x, double kt2, double) const override final {
       if (!x_range_.contains(x))
         return 0.;
-      const auto q2vals = computeQ2(x, kt2);
-      const double qnorm = 1. - q2vals.min / q2vals.q2;
-      const auto& formfac = (*ff_)(q2vals.q2);
+      const auto q2 = utils::kt::q2(x, kt2, mass2()), q2min = q2 - kt2 / (1. - x);
+      const double qnorm = 1. - q2min / q2;
+      const auto& formfac = (*ff_)(q2);
       const double f_D = formfac.FE * (1. - x) * qnorm;
       const double f_C = formfac.FM;
-      return prefactor_ * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2vals.q2;
+      return prefactor_ * (f_D + 0.5 * x * x * f_C) * (1. - x) / q2;
     }
   };
 
@@ -123,7 +124,7 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_FLUX("ElasticKT", ElasticNucleonKTFlux);
-REGISTER_FLUX("BudnevElasticKT", BudnevElasticNucleonKTFlux);
-REGISTER_FLUX("BudnevElasticLeptonKT", BudnevElasticLeptonKTFlux);
-REGISTER_FLUX("ElasticHeavyIonKT", ElasticHeavyIonKTFlux);
+REGISTER_KT_FLUX("Elastic", ElasticNucleonKTFlux);
+REGISTER_KT_FLUX("BudnevElastic", BudnevElasticNucleonKTFlux);
+REGISTER_KT_FLUX("BudnevElasticLepton", BudnevElasticLeptonKTFlux);
+REGISTER_KT_FLUX("ElasticHeavyIon", ElasticHeavyIonKTFlux);

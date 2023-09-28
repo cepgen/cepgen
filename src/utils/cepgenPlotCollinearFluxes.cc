@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,14 +18,14 @@
 
 #include <fstream>
 
+#include "CepGen/CollinearFluxes/CollinearFlux.h"
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
-#include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
-#include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
 using namespace std;
@@ -33,7 +33,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
   vector<string> fluxes_names;
   int num_points;
-  double kt2, mx, q2;
+  double mx, q2;
   string output_file, plotter;
   bool logx, logy, draw_grid, normalised;
   cepgen::Limits x_range, y_range;
@@ -42,12 +42,11 @@ int main(int argc, char* argv[]) {
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument(
-          "fluxes,f", "parton fluxe modellings", &fluxes_names, cepgen::PartonFluxFactory::get().modules())
+          "fluxes,f", "parton fluxes modellings", &fluxes_names, cepgen::CollinearFluxFactory::get().modules())
       .addOptionalArgument("mx,M", "diffractive mass (GeV)", &mx, 1.5)
       .addOptionalArgument("q2,q", "parton virtuality (GeV^2)", &q2, -1.)
       .addOptionalArgument("xrange,x", "fractional loss range", &x_range, cepgen::Limits{0., 1.})
       .addOptionalArgument("yrange,y", "y range", &y_range)
-      .addOptionalArgument("kt2,k", "parton transverse virtuality (GeV^2)", &kt2, 100.)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 100)
       .addOptionalArgument("output,o", "output file name", &output_file, "flux.scan.output.txt")
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
@@ -64,26 +63,21 @@ int main(int argc, char* argv[]) {
   if (x_range.max() == 1.)
     x_range.max() -= 1.e-15;
 
-  ofstream out(output_file);
-  out << "# parton fluxes: " << cepgen::utils::merge(fluxes_names, ",") << "\n"
-      << "# virtuality: " << kt2 << " GeV^2\n"
-      << "# diffractive mass: " << mx << " GeV/c2\n"
-      << "# fractional momentum loss: " << x_range;
-
-  vector<std::unique_ptr<cepgen::PartonFlux> > fluxes;
+  vector<std::unique_ptr<cepgen::CollinearFlux> > fluxes;
   vector<cepgen::utils::Graph1D> graph_flux;
   for (const auto& flux : fluxes_names) {
-    fluxes.emplace_back(cepgen::PartonFluxFactory::get().build(flux));
-    graph_flux.emplace_back(flux, cepgen::PartonFluxFactory::get().describe(flux));
+    fluxes.emplace_back(cepgen::CollinearFluxFactory::get().build(flux));
+    graph_flux.emplace_back(flux, cepgen::CollinearFluxFactory::get().describe(flux));
   }
+
+  ofstream out(output_file);
+  out << "# parton fluxes: " << cepgen::utils::merge(fluxes_names, ";") << "\n";
+  out << "# fractional momentum loss: " << x_range;
+
   for (const auto& x : x_range.generate(num_points)) {
     out << "\n" << x;
     for (size_t j = 0; j < fluxes.size(); ++j) {
-      double flux{0.};
-      if (fluxes.at(j)->ktFactorised()) {
-        const auto& eval = dynamic_cast<const cepgen::KTFlux&>(*fluxes.at(j));
-        flux = plot_vs_q2 ? eval.fluxQ2(x, kt2, q2) : eval.fluxMX2(x, kt2, mx2);
-      }
+      auto flux = plot_vs_q2 ? fluxes.at(j)->fluxQ2(x, q2) : fluxes.at(j)->fluxMX2(x, mx2);
       flux *= (normalised ? x : 1.);
       out << "\t" << flux;
       graph_flux.at(j).addPoint(x, flux);
@@ -105,7 +99,8 @@ int main(int argc, char* argv[]) {
 
     for (auto& gr : graph_flux) {
       gr.xAxis().setLabel("$\\xi$");
-      gr.yAxis().setLabel(normalised ? "$\\xi\\varphi(\\xi, k_{T}^{2})$" : "$\\varphi(\\xi, k_{T}^{2}])$");
+      gr.yAxis().setLabel(string("$") + (normalised ? "\\xi\\varphi" : "\\varphi") + "(\\xi, " +
+                          (plot_vs_q2 ? "Q^{2}" : "M_{X}") + ")" + "$");
       if (y_range.valid())
         gr.yAxis().setRange(y_range);
       coll.emplace_back(&gr);
@@ -113,7 +108,7 @@ int main(int argc, char* argv[]) {
     plt->draw(coll,
               "comp_partonflux",
               plot_vs_q2 ? cepgen::utils::format("$Q^{2}$ = %g GeV$^{2}$", q2)
-                         : cepgen::utils::format("$k_{T}^{2}$ = %g GeV$^{2}$", kt2),
+                         : cepgen::utils::format("$M_{X}$ = %g GeV/c$^{2}$", mx),
               dm);
   }
 

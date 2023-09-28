@@ -28,6 +28,7 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Parameters.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
@@ -98,6 +99,11 @@ namespace cepgen {
             utils::Logger::get().addExceptionRule(mod);
         utils::Logger::get().setExtended(log.get<bool>("extended", false));
       }
+
+      //----- PDG definition
+      auto pars_pdg = pars.get<ParametersList>("pdg");
+      for (const auto& id : pars_pdg.keys())
+        PDG::get().define(pars_pdg.get<ParticleProperties>(id));
 
       //----- phase space definition
       auto pars_kin = pars.get<ParametersList>("kinematics");

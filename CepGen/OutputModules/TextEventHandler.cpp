@@ -22,6 +22,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Modules/EventExporterFactory.h"
+#include "CepGen/Utils/Value.h"
 
 namespace cepgen {
   /// Simple event dump module
@@ -35,7 +36,7 @@ namespace cepgen {
     static ParametersDescription description();
 
     void initialise() override;
-    void setCrossSection(double, double) override;
+    void setCrossSection(const Value&) override;
     void operator<<(const Event&) override;
 
   private:
@@ -63,9 +64,9 @@ namespace cepgen {
       *out_ << banner("#") << "\n";
   }
 
-  void TextEventHandler::setCrossSection(double cross_section, double cross_section_err) {
+  void TextEventHandler::setCrossSection(const Value& cross_section) {
     if (out_ != &std::cout)
-      *out_ << "Total cross-section: " << cross_section << " +/- " << cross_section_err << " pb.\n";
+      *out_ << "Total cross-section: " << cross_section << " pb.\n";
   }
 
   void TextEventHandler::operator<<(const Event& ev) {

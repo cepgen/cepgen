@@ -61,9 +61,9 @@ namespace cepgen {
       static ParametersDescription description();
       bool contain(const Particles&, const Event* evt = nullptr) const;
 
-      Limits q2;      ///< parton virtuality
-      Limits qt;      ///< parton transverse virtuality
-      Limits phi_qt;  ///< parton azimuthal angle difference
+      Limits q2;   ///< parton virtuality
+      Limits qt;   ///< parton transverse virtuality
+      Limits phi;  ///< parton azimuthal angle
     };
 
     /// Outgoing beam remnant-like particles phase space cuts
@@ -97,4 +97,3 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
-

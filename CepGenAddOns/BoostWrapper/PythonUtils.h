@@ -90,5 +90,11 @@ py::object adapt_unique(std::unique_ptr<T> (C::*fn)(Args...)) {
                            boost::mpl::vector<T*, C&, Args...>());
 }
 
+template <typename T>
+inline py::object adapt_reference(T* ptr) {
+  typename py::reference_existing_object::apply<T*>::type converter;
+  return py::object(py::handle(converter(ptr)));
+}
+
 #endif
 

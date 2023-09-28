@@ -49,7 +49,7 @@ namespace cepgen {
 
     protected:
       /// Proton magnetic moment
-      static constexpr double MU = 2.79;
+      static constexpr double MU = 2.792847337;
 
       /// Local form factors evaluation method
       virtual void eval() = 0;

@@ -23,6 +23,7 @@
 #include <string>
 
 #include "CepGen/Utils/Limits.h"
+#include "CepGen/Utils/Value.h"
 
 namespace cepgen {
   namespace utils {
@@ -89,19 +90,12 @@ namespace cepgen {
         double value_unc = 0.;   ///< Bin uncertainty
         std::string label = "";  ///< Human-readable description of the bin
       };
-      /// Helper view of a pair of bin value and its uncertainty
-      struct value_t {
-        /// Sorting helper for bin values
-        bool operator<(const value_t& oth) const { return value < oth.value; }
-        double value{0.};       ///< Single bin content
-        double value_unc = 0.;  ///< Uncertainty on bin content
-      };
       /// Metadata for an axis (coordinates and bins value)
-      typedef std::map<coord_t, value_t> axis_t;
+      typedef std::map<coord_t, Value> axis_t;
       /// Comparator of an axis by the values it holds
       struct CompareAxisByValue {
-        bool operator()(const std::pair<coord_t, value_t>& lhs, const std::pair<coord_t, value_t>& rhs) {
-          return lhs.second.value < rhs.second.value;
+        bool operator()(const std::pair<coord_t, Value>& lhs, const std::pair<coord_t, Value>& rhs) {
+          return lhs.second < rhs.second;
         }
       };
       /// Metadata for a two-dimensional axis definition (coordinates and bins values)

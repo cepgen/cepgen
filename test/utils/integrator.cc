@@ -71,15 +71,13 @@ int main(int argc, char* argv[]) {
 
     //--- integration part
     size_t i = 0;
-    double result, error;
     for (auto& test : tests) {
       if (!test.lims.empty())
         integr->setLimits(test.lims);
-      integr->integrate(test.integrand, result, error);
+      auto res = integr->integrate(test.integrand);
       const auto test_name = integrator + " test " + to_string(i);
-      CG_DEBUG("main") << "Test " << i << ": ref.: " << test.result << ", result: " << result << " +/- " << error
-                       << ".";
-      CG_TEST_UNCERT(fabs(test.result - result), error, num_sigma, test_name + " rel. unc. control");
+      CG_DEBUG("main") << "Test " << i << ": ref.: " << test.result << ", result: " << res << ".";
+      CG_TEST_UNCERT(fabs(test.result - res), res.uncertainty(), num_sigma, test_name + " rel. unc. control");
       ++i;
     }
   }

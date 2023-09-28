@@ -38,14 +38,6 @@ namespace cepgen {
   protected:
     /// Minimal value taken for a \f$\k_{\rm T}\f$-factorised flux
     static constexpr double kMinKTFlux{1.e-20};
-
-    struct Q2Values {
-      double min{0.}, q2{0.};
-    };
-    /// Compute the minimum and kT-dependent Q^2
-    Q2Values computeQ2(double x, double kt2, double mx2 = 0.) const;
-    /// Diffractive mass from virtuality
-    double mX2(double x, double kt2, double q2) const;
   };
 }  // namespace cepgen
 

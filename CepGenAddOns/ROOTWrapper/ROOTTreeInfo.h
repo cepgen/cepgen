@@ -36,6 +36,9 @@ namespace ROOT {
   public:
     static constexpr const char* TREE_NAME = "run";  ///< Output tree name
 
+    static CepGenRun load(TFile*, const std::string& run_tree = TREE_NAME);
+    static CepGenRun load(const std::string&, const std::string& run_tree = TREE_NAME);
+
     double sqrt_s{-1.};                ///< Centre of mass energy for beam particles
     double xsect{-1.};                 ///< Process cross section, in pb
     double errxsect{-1.};              ///< Uncertainty on process cross section, in pb
@@ -70,6 +73,9 @@ namespace ROOT {
     // of excited proton fragmentation products
     static constexpr size_t MAX_PART = 5000;            ///< Maximal number of particles in event
     static constexpr const char* TREE_NAME = "events";  ///< Output tree name
+
+    static CepGenEvent load(TFile*, const std::string& events_tree = TREE_NAME);
+    static CepGenEvent load(const std::string&, const std::string& events_tree = TREE_NAME);
 
     float gen_time{-1.};        ///< Event generation time
     float tot_time{-1.};        ///< Total event generation time

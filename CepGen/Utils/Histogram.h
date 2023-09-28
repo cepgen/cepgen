@@ -70,10 +70,8 @@ namespace cepgen {
       void add(Hist1D, double scaling = 1.);
       void scale(double) override;
 
-      /// Retrieve the value for one bin
-      double value(size_t bin) const;
-      /// Retrieve the absolute uncertainty on one bin value
-      double valueUnc(size_t bin) const;
+      /// Retrieve the value + uncertainty for one bin
+      Value value(size_t bin) const;
 
       /// Axis content
       axis_t axis() const;
@@ -129,10 +127,8 @@ namespace cepgen {
       void add(Hist2D, double scaling = 1.);
       void scale(double) override;
 
-      /// Retrieve the value for one bin
-      double value(size_t bin_x, size_t bin_y) const;
-      /// Retrieve the absolute uncertainty on one bin value
-      double valueUnc(size_t bin_x, size_t bin_y) const;
+      /// Retrieve the value + uncertainty for one bin
+      Value value(size_t bin_x, size_t bin_y) const;
 
       /// Number of x-axis bins
       size_t nbinsX() const;

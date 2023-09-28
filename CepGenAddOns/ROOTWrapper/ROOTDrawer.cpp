@@ -207,8 +207,9 @@ namespace cepgen {
       gr.SetTitle(delatexify(graph.title()));
       int i = 0;
       for (const auto& it : graph.points()) {
-        gr.SetPoint(i, it.first.value, it.second.value);
-        gr.SetPointError(i, it.first.value_unc, it.second.value_unc);
+        const auto& val = it.second;
+        gr.SetPoint(i, it.first.value, val);
+        gr.SetPointError(i, it.first.value_unc, val.uncertainty());
         ++i;
       }
       gr.SetLineWidth(3);
@@ -223,8 +224,9 @@ namespace cepgen {
         const auto& ax_x = it_x.first.value;
         for (const auto& it_y : it_x.second) {
           const auto& ax_y = it_y.first.value;
-          gr.SetPoint(i, ax_x, ax_y, it_y.second.value);
-          gr.SetPointError(i, 0., 0., it_y.second.value_unc);
+          const auto& val = it_y.second;
+          gr.SetPoint(i, ax_x, ax_y, val);
+          gr.SetPointError(i, 0., 0., val.uncertainty());
           ++i;
         }
       }
@@ -236,8 +238,9 @@ namespace cepgen {
       TH1D h(hist.name().c_str(), delatexify(hist.title()), hist.nbins(), rng.min(), rng.max());
       h.SetBinContent(0, hist.underflow());
       for (size_t i = 0; i < hist.nbins(); ++i) {
-        h.SetBinContent(i + 1, hist.value(i));
-        h.SetBinError(i + 1, hist.valueUnc(i));
+        const auto val = hist.value(i);
+        h.SetBinContent(i + 1, val);
+        h.SetBinError(i + 1, val.uncertainty());
       }
       h.SetBinContent(hist.nbins() + 1, hist.overflow());
       h.GetXaxis()->SetTitle(delatexify(hist.xAxis().label()));
@@ -257,8 +260,9 @@ namespace cepgen {
              rng_y.max());
       for (size_t ix = 0; ix < hist.nbinsX(); ++ix)
         for (size_t iy = 0; iy < hist.nbinsY(); ++iy) {
-          h.SetBinContent(ix + 1, iy + 1, hist.value(ix, iy));
-          h.SetBinError(ix + 1, iy + 1, hist.valueUnc(ix, iy));
+          const auto val = hist.value(ix, iy);
+          h.SetBinContent(ix + 1, iy + 1, val);
+          h.SetBinError(ix + 1, iy + 1, val.uncertainty());
         }
       h.SetBinContent(0, 0, hist.outOfRange().at(Hist2D::contents_t::LT_LT));
       h.SetBinContent(0, 1, hist.outOfRange().at(Hist2D::contents_t::LT_IN));

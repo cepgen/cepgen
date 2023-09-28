@@ -20,6 +20,7 @@
 
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Utils/Histogram.h"
+#include "CepGen/Utils/Value.h"
 
 namespace cepgen {
   class Event;
@@ -40,7 +41,7 @@ namespace cepgen {
     static ParametersDescription description();
 
     void initialise() override;
-    void setCrossSection(double cross_section, double) override { cross_section_ = cross_section; }
+    void setCrossSection(const Value& cross_section) override { cross_section_ = cross_section; }
     void operator<<(const Event&) override;
 
   private:
@@ -52,7 +53,7 @@ namespace cepgen {
     std::ofstream file_;
     std::unique_ptr<utils::Drawer> drawer_;
 
-    double cross_section_{1.};
+    Value cross_section_{1., 0.};
     unsigned long num_evts_{0ul};
 
     /// Name of the physics process
@@ -76,4 +77,3 @@ namespace cepgen {
     std::vector<Hist2DInfo> hists2d_;
   };
 }  // namespace cepgen
-

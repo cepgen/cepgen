@@ -43,8 +43,6 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    bool operator==(const ParticleProperties& oth) const;
-    inline bool operator!=(const ParticleProperties& oth) const { return !operator==(oth); }
     friend std::ostream& operator<<(std::ostream&, const ParticleProperties&);
 
     pdgid_t pdgid{0ull};  ///< PDG identifier
@@ -59,4 +57,3 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
-
