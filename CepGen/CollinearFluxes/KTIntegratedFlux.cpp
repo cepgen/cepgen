@@ -33,7 +33,7 @@ namespace cepgen {
   public:
     explicit KTIntegratedFlux(const ParametersList& params)
         : CollinearFlux(params),
-          integr_(AnalyticIntegratorFactory::get().build(params.get<ParametersList>("integrator"))),
+          integr_(AnalyticIntegratorFactory::get().build(steer<ParametersList>("integrator"))),
           flux_(KTFluxFactory::get().build(steer<ParametersList>("ktFlux"))),
           kt2_range_(steer<Limits>("kt2range")),
           func_q2_([&](double kt2, void* params) {
