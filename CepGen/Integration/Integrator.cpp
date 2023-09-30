@@ -24,10 +24,7 @@
 
 namespace cepgen {
   Integrator::Integrator(const ParametersList& params)
-      : NamedModule(params),
-        seed_(params_.get<int>("seed", time(nullptr))),
-        verbosity_(steer<int>("verbose")),
-        rnd_(0., 1.) {}
+      : NamedModule(params), seed_(steer<int>("seed")), verbosity_(steer<int>("verbose")), rnd_(0., 1.) {}
 
   void Integrator::checkLimits(const Integrand& integrand) {
     const auto ps_size = integrand.size();

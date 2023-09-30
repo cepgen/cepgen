@@ -28,8 +28,7 @@ namespace cepgen {
   class InelasticNucleonKTFlux : public KTFlux {
   public:
     explicit InelasticNucleonKTFlux(const ParametersList& params)
-        : KTFlux(params),
-          sf_(StructureFunctionsFactory::get().build(params.get<ParametersList>("structureFunctions"))) {
+        : KTFlux(params), sf_(StructureFunctionsFactory::get().build(steer<ParametersList>("structureFunctions"))) {
       if (!sf_)
         throw CG_FATAL("InelasticNucleonKTFlux") << "Inelastic kT flux requires a modelling of structure functions!";
     }
