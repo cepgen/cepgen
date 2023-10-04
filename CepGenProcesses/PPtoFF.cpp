@@ -27,7 +27,7 @@
 
 using namespace cepgen;
 
-/// Compute the matrix element for a CE \f$\gamma\gamma\rightarrow f\bar f\f$ process using \f$k_{\rm T}\f$-factorization approach
+/// Compute the 2-to-4 matrix element for a CE \f$\gamma\gamma\rightarrow f\bar f\f$ process
 class PPtoFF final : public cepgen::proc::Process2to4 {
 public:
   explicit PPtoFF(const ParametersList& params)
@@ -40,7 +40,6 @@ public:
   static ParametersDescription description() {
     auto desc = Process2to4::description();
     desc.setDescription("γγ → f⁺f¯");
-    desc.add<bool>("ktFactorised", true);
     desc.addAs<int, pdgid_t>("pair", PDG::muon).setDescription("type of central particles emitted");
     desc.addAs<int, Mode>("method", Mode::offShell)
         .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell)");
@@ -49,7 +48,36 @@ public:
   }
 
 private:
-  void prepareProcessKinematics() override;
+  void prepareProcessKinematics() override {
+    // define central particle properties and couplings with partons
+    if (!cs_prop_.fermion || cs_prop_.charge == 0.)
+      throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop_ << ".";
+    mf2_ = cs_prop_.mass * cs_prop_.mass;
+    qf2_ = cs_prop_.charge * cs_prop_.charge * (1. / 9);
+    const auto generate_coupling = [this](const pdgid_t& parton_id) -> std::function<double(double)> {
+      switch (parton_id) {
+        case PDG::gluon: {
+          if (cs_prop_.colours == 0)
+            throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion type for gluon coupling. Should be a quark.";
+          return [this](double q) { return kFourPi * 0.5 * alphaS(q); };
+        }
+        case PDG::photon:
+          return [this](double q) { return kFourPi * qf2_ * alphaEM(q); };
+        default:
+          throw CG_FATAL("PPtoFF:prepare") << "Unsupported parton id: '" << parton_id << "'.";
+      }
+    };
+    g_part1_ = generate_coupling(event().oneWithRole(Particle::Parton1).pdgId());
+    g_part2_ = generate_coupling(event().oneWithRole(Particle::Parton2).pdgId());
+
+    CG_DEBUG("PPtoFF:prepare") << "Incoming beams: mA = " << mA() << " GeV/mB = " << mB() << " GeV.\n\t"
+                               << "Produced particles: " << cs_prop_ << ".\n\t"
+                               << "ME computation method: " << (int)method_ << ".";
+
+    // constrain central particles cuts
+    if (!kinematics().cuts().central.pt_diff.valid())
+      kinematics().cuts().central.pt_diff = {0., 50.};
+  }
   double computeCentralMatrixElement() const override {
     switch (method_) {
       case Mode::onShell:
@@ -60,26 +88,12 @@ private:
         throw CG_FATAL("PPtoFF") << "Invalid ME calculation method (" << (int)method_ << ")!";
     }
   }
-  double couplingPrefactor(double q_1, double q_2) const {
-    double prefactor = g2_prefactor_ * g2_prefactor_;
-    if (event().oneWithRole(Particle::Parton1).pdgId() == PDG::gluon)
-      prefactor *= 0.5 * alphaS(q_1);
-    else
-      prefactor *= alphaEM(q_1);
-    if (event().oneWithRole(Particle::Parton2).pdgId() == PDG::gluon)
-      prefactor *= 0.5 * alphaS(q_2);
-    else
-      prefactor *= alphaEM(q_2);
-    return prefactor;
-  }
-
-  /// Rapidity range for the outgoing fermions
   double onShellME() const;
   double offShellME() const;
 
   const enum class Mode { onShell = 0, offShell = 1 } method_;
 
-  //--- parameters for off-shell matrix element
+  /// Parameters for the off-shell matrix element
   struct OffShellParameters : SteeredObject<OffShellParameters> {
     explicit OffShellParameters(const ParametersList& params) : SteeredObject(params) {
       (*this)
@@ -106,66 +120,36 @@ private:
     int term_ll{0}, term_lt{0}, term_tt1{0}, term_tt2{0};
   } osp_;
 
-  double mf2_{0.};
-  /// Prefactor for the alpha(S/EM) coupling
-  double g2_prefactor_{0.};
+  static constexpr double kFourPi = 4. * M_PI;
+  double mf2_{0.}, qf2_{0.};
+  std::function<double(double)> g_part1_{nullptr}, g_part2_{nullptr};
 };
 
-void PPtoFF::prepareProcessKinematics() {
-  const auto& cs_prop = PDG::get()(produced_parts_.at(0));
-  if (!cs_prop.fermion || cs_prop.charge == 0.)
-    throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop << ".";
-
-  mf2_ = cs_prop.mass * cs_prop.mass;
-  g2_prefactor_ = 4. * M_PI;
-
-  CG_DEBUG("PPtoFF:prepare") << "Incoming beams: mp(1/2) = " << mA() << "/" << mB() << ".\n\t"
-                             << "Produced particles: " << cs_prop_ << ".\n\t"
-                             << "ME computation method: " << (int)method_ << ".";
-
-  if (!kinematics().cuts().central.pt_diff.valid())
-    kinematics().cuts().central.pt_diff = {0., 50.};  // tighter cut for fermions
-
-  for (const auto& role : {Particle::Parton1, Particle::Parton2})
-    switch (event().oneWithRole(role).pdgId()) {
-      case PDG::gluon:
-        break;
-      case PDG::photon:
-        g2_prefactor_ *= std::pow(cs_prop.charge / 3., 2);  // electromagnetic coupling
-        break;
-      default:
-        throw CG_FATAL("PPtoFF:prepare") << "Only photon & gluon partons are supported!";
-    }
-}
-
 double PPtoFF::onShellME() const {
-  const double s_hat = shat(), t_hat = that(), u_hat = uhat();
-  CG_DEBUG_LOOP("PPtoFF:onShell") << "shat: " << s_hat << ", that: " << t_hat << ", uhat: " << u_hat << ".";
+  const double t_hat = that(), u_hat = uhat();
+  CG_DEBUG_LOOP("PPtoFF:onShell") << "that: " << t_hat << ", uhat: " << u_hat << ".";
 
   if (t_hat == mf2_ || u_hat == mf2_)
     return 0.;
   const auto q = std::sqrt(t_hat);
-  const double mf4 = mf2_ * mf2_, mf8 = mf4 * mf4;
+  const auto prefac = g_part1_(q) * g_part2_(q);
+  if (prefac <= 0.)
+    return 0.;
 
-  double out = 6. * mf8;
-  out += -3. * mf4 * t_hat * t_hat;
-  out += -14. * mf4 * t_hat * u_hat;
-  out += -3. * mf4 * u_hat * u_hat;
-  out += 1. * mf2_ * t_hat * t_hat * t_hat;
-  out += 7. * mf2_ * t_hat * t_hat * u_hat;
-  out += 7. * mf2_ * t_hat * u_hat * u_hat;
-  out += 1. * mf2_ * u_hat * u_hat * u_hat;
-  out += -1. * t_hat * t_hat * t_hat * u_hat;
-  out += -1. * t_hat * u_hat * u_hat * u_hat;
-  return -2. * out * couplingPrefactor(q, q) * std::pow((mf2_ - t_hat) * (mf2_ - u_hat), -2);
+  const auto mf4 = mf2_ * mf2_, mf8 = mf4 * mf4;
+  const auto out = 6. * mf8 + (-3. * mf4 * t_hat * t_hat) + (-14. * mf4 * t_hat * u_hat) + (-3. * mf4 * u_hat * u_hat) +
+                   (1. * mf2_ * t_hat * t_hat * t_hat) + (7. * mf2_ * t_hat * t_hat * u_hat) +
+                   (7. * mf2_ * t_hat * u_hat * u_hat) + (1. * mf2_ * u_hat * u_hat * u_hat) +
+                   (-1. * t_hat * t_hat * t_hat * u_hat) + (-1. * t_hat * u_hat * u_hat * u_hat);
+  return -2. * prefac * out * std::pow((mf2_ - t_hat) * (mf2_ - u_hat), -2);
 }
 
 double PPtoFF::offShellME() const {
   const auto mt1 = pc(0).massT(), mt2 = pc(1).massT();  // transverse masses
-  const auto compute_zs = [&](short pol, double x) -> std::pair<double, double> {
-    const auto norm_pol = pol / abs(pol);
+  const auto compute_zs = [this, &mt1, &mt2](short pol, double x) -> std::pair<double, double> {
+    const auto norm_pol = pol / std::abs(pol);
     const auto fact = 1. / sqrtS() / x;
-    return std::make_pair(fact * mt1 * exp(norm_pol * m_y_c1_), fact * mt2 * exp(norm_pol * m_y_c2_));
+    return std::make_pair(fact * mt1 * std::exp(norm_pol * m_y_c1_), fact * mt2 * std::exp(norm_pol * m_y_c2_));
   };
   const auto compute_mat_element =
       [this](double zp, double zm, double q2, const Momentum& vec_pho, const Momentum& vec_qt) -> double {
@@ -202,7 +186,7 @@ double PPtoFF::offShellME() const {
 
   const auto t_limits = Limits{0., std::pow(std::max(mt1, mt2), 2)};
   const auto q_1 = std::sqrt(t_limits.trim(q2_1)), q_2 = std::sqrt(t_limits.trim(q2_2));
-  return couplingPrefactor(q_1, q_2) * std::pow(x1() * x2() * s(), 2) * amat2;
+  return g_part1_(q_1) * g_part2_(q_2) * std::pow(x1() * x2() * s(), 2) * amat2;
 }
 // register process
 REGISTER_PROCESS("pptoff", PPtoFF);

@@ -243,7 +243,7 @@ private:
 
 void LPAIR::prepareKinematics() {
   masses_.Ml2 = pair_.mass * pair_.mass;
-  charge_factor_ = std::pow(pair_.charge / 3., 4);
+  charge_factor_ = std::pow(pair_.charge / 3., 2);
 
   formfac_ = FormFactorsFactory::get().build(kinematics().incomingBeams().formFactors());
   strfun_ = StructureFunctionsFactory::get().build(kinematics().incomingBeams().structureFunctions());
