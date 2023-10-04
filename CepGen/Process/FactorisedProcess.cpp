@@ -32,7 +32,8 @@ namespace cepgen {
           produced_parts_(central),
           psgen_(steer<bool>("ktFactorised")
                      ? std::unique_ptr<PhaseSpaceGenerator>(new KTPhaseSpaceGenerator(this))
-                     : std::unique_ptr<PhaseSpaceGenerator>(new CollinearPhaseSpaceGenerator(this))) {
+                     : std::unique_ptr<PhaseSpaceGenerator>(new CollinearPhaseSpaceGenerator(this))),
+          store_alphas_(steer<bool>("storeAlphas")) {
       event().map()[Particle::CentralSystem].resize(central.size());
     }
 
@@ -41,7 +42,8 @@ namespace cepgen {
           produced_parts_(proc.produced_parts_),
           psgen_(proc.psgen_->ktFactorised()
                      ? std::unique_ptr<PhaseSpaceGenerator>(new KTPhaseSpaceGenerator(this))
-                     : std::unique_ptr<PhaseSpaceGenerator>(new CollinearPhaseSpaceGenerator(this))) {}
+                     : std::unique_ptr<PhaseSpaceGenerator>(new CollinearPhaseSpaceGenerator(this))),
+          store_alphas_(proc.store_alphas_) {}
 
     void FactorisedProcess::addEventContent() {
       Process::setEventContent(
@@ -109,11 +111,18 @@ namespace cepgen {
 
       // two-parton system
       event().oneWithRole(Particle::Intermediate).setMomentum(part1.momentum() + part2.momentum(), true);
+      if (store_alphas_) {
+        const auto two_part_mass = event().oneWithRole(Particle::Intermediate).momentum().mass();
+        event().alpha_em = alphaEM(two_part_mass);
+        event().alpha_s = alphaS(two_part_mass);
+      }
     }
 
     ParametersDescription FactorisedProcess::description() {
       auto desc = Process::description();
       desc.setDescription("Unnamed factorised process");
+      desc.add<bool>("storeAlphas", false)
+          .setDescription("store the electromagnetic and strong coupling constants to the event content?");
       return desc;
     }
   }  // namespace proc

@@ -185,8 +185,8 @@ double PPtoFF::offShellME() const {
     return 0.;
 
   const auto t_limits = Limits{0., std::pow(std::max(mt1, mt2), 2)};
-  const auto q_1 = std::sqrt(t_limits.trim(q2_1)), q_2 = std::sqrt(t_limits.trim(q2_2));
-  return g_part1_(q_1) * g_part2_(q_2) * std::pow(x1() * x2() * s(), 2) * amat2;
+  const auto prefac = g_part1_(std::sqrt(t_limits.trim(q2_1))) * g_part2_(std::sqrt(t_limits.trim(q2_2)));
+  return prefac * std::pow(x1() * x2() * s(), 2) * amat2;
 }
 // register process
 REGISTER_PROCESS("pptoff", PPtoFF);
