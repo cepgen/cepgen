@@ -24,30 +24,23 @@
 #include "CepGen/Event/Particle.h"
 
 namespace cepgen {
-  /**
-   * Class containing all the information on the in- and outgoing particles' kinematics
-   * \brief Kinematic information on the particles in the event
-   */
+  /// Container for the information on the in- and outgoing particles' kinematics
   class Event {
   public:
-    /// Build an empty event
-    explicit Event(bool compressed = false);
-    /// Copy constructor
-    Event(const Event&);
+    explicit Event(bool compressed = false);  ///< Build an empty event
+    Event(const Event&);                      ///< Copy constructor
 
-    /// Assignment operator
-    Event& operator=(const Event&);
+    Event& operator=(const Event&);  ///< Assignment operator
 
-    /// Empty the whole event content
-    void clear();
-    /// Initialize an "empty" event collection
-    void freeze();
-    /// Restore the event to its "empty" state
-    void restore();
-    /// Is the event already without intermediate-channel information?
-    bool compressed() const;
-    /// Compress the event record
-    Event compress() const;
+    /// Build a trivial event with the minimal information
+    /// \param[in] num_out_particles produced particles multiplicity (excluding outgoing beam remnants)
+    static Event minimal(size_t num_out_particles = 1);
+
+    void clear();             ///< Empty the whole event content
+    void freeze();            ///< Initialize an "empty" event collection
+    void restore();           ///< Restore the event to its "empty" state
+    bool compressed() const;  ///< Is the event already without intermediate-channel information?
+    Event compress() const;   ///< Compress the event record
 
     /// Human-readable version of the event content
     friend std::ostream& operator<<(std::ostream&, const Event&);
@@ -69,14 +62,11 @@ namespace cepgen {
 
     //----- particles retrievers
 
-    /// Number of particles in the event
-    size_t size() const;
-    /// Vector of all particles in the event
-    Particles particles() const;
-    /// Vector of all stable particles in the event
-    Particles stableParticles() const;
-    /// Internal particles map retrieval operator
-    ParticlesMap& map() { return particles_; }
+    size_t size() const;                        ///< Number of particles in the event
+    Particles particles() const;                ///< Vector of all particles in the event
+    Particles stableParticles() const;          ///< Vector of all stable particles in the event
+    ParticlesMap& map() { return particles_; }  ///< Internal particles map retrieval operator
+
     /// List of references to Particle objects corresponding to a certain role in the process kinematics
     /// \param[in] role The role the particles have to play in the process
     ParticlesRefs operator[](Particle::Role role);
@@ -124,18 +114,15 @@ namespace cepgen {
 
   private:
     static constexpr double MIN_PRECISION = 1.e-10;
-    /// Check if the event kinematics is properly defined
-    void checkKinematics() const;
-    /// List of particles in the event, mapped to their role in the process
-    ParticlesMap particles_;
+    void checkKinematics() const;  ///< Check if the event kinematics is properly defined
+    ParticlesMap particles_;       ///< List of particles in the event, mapped to their role in the process
     /// Typical event indices structure
     struct NumParticles {
       size_t cs{0};   ///< Index of the first central system particle
       size_t op1{0};  ///< Index of the first positive-z outgoing beam state
       size_t op2{0};  ///< Index of the first negative-z outgoing beam state
     } evtcontent_{};
-    /// Is the event "compressed"?
-    bool compressed_{false};
+    bool compressed_{false};  ///< Is the event "compressed"?
   };
 }  // namespace cepgen
 

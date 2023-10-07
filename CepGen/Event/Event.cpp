@@ -37,6 +37,28 @@ namespace cepgen {
     return *this;
   }
 
+  Event Event::minimal(size_t num_out_particles) {
+    auto evt = Event();
+    auto ib1 = evt.addParticle(Particle::Role::IncomingBeam1);
+    auto ib2 = evt.addParticle(Particle::Role::IncomingBeam2);
+    auto ob1 = evt.addParticle(Particle::Role::OutgoingBeam1);
+    ob1.get().addMother(ib1);
+    auto ob2 = evt.addParticle(Particle::Role::OutgoingBeam2);
+    ob2.get().addMother(ib2);
+    auto part1 = evt.addParticle(Particle::Role::Parton1);
+    part1.get().addMother(ib1);
+    auto part2 = evt.addParticle(Particle::Role::Parton2);
+    part2.get().addMother(ib2);
+    auto twopart = evt.addParticle(Particle::Role::Intermediate);
+    twopart.get().addMother(part1);
+    twopart.get().addMother(part2);
+    for (size_t i = 0; i < num_out_particles; ++i) {
+      auto cs = evt.addParticle(Particle::Role::CentralSystem);
+      cs.get().addMother(twopart);
+    }
+    return evt;
+  }
+
   void Event::clear() {
     particles_.clear();
     time_generation = -1.;
