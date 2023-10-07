@@ -31,13 +31,15 @@ namespace cepgen {
     explicit Pythia8CollinearFlux(const ParametersList& params)
         : CollinearFlux(params), type_(steer<std::string>("type")), pdgid_(steer<pdgid_t>("partonPdgId")) {
       if (type_ == "Lepton") {
+        auto lepton_params = steer<ParametersList>("leptonParams");
         info_.reset(new Pythia8::Info);
-        if (const auto dil_sqrt_s = steer<double>("leptonBeamsSqrtS"); dil_sqrt_s > 0.)
+        if (const auto dil_sqrt_s = lepton_params.get<double>("sqrtS"); dil_sqrt_s > 0.)
           info_->setECM(dil_sqrt_s);
         else
-          CG_WARNING("Pythia8CollinearFlux") << "Beam-beam centre-of-mass energy is required (through the "
-                                                "'leptonBeamsSqrtS' parameter) for the 'Lepton' collinear flux mode.";
-        pdf_.reset(new Pythia8::Lepton(steer<pdgid_t>("leptonBeamPdgId"), steer<double>("Q2max"), info_.get()));
+          CG_WARNING("Pythia8CollinearFlux") << "Beam-beam centre-of-mass energy is required (through the 'sqrtS' "
+                                                "parameter) for the 'Lepton' collinear flux mode.";
+        pdf_.reset(new Pythia8::Lepton(
+            lepton_params.get<pdgid_t>("beamPdgId"), lepton_params.get<double>("Q2max"), info_.get()));
       } else if (type_ == "LHAGrid1")
         pdf_.reset(new Pythia8::LHAGrid1);
       else if (type_ == "MSTWpdf")
@@ -59,9 +61,11 @@ namespace cepgen {
       desc.setDescription("Pythia 8 coll.flux");
       desc.add<std::string>("type", "Proton2gammaDZ").setDescription("type of PDF evaluator to use");
       desc.add<pdgid_t>("partonPdgId", PDG::photon).setDescription("parton PDG identifier");
-      desc.add<pdgid_t>("leptonBeamPdgId", PDG::electron).setDescription("beam particle PDG identifier (lepton case)");
-      desc.add<double>("leptonBeamsSqrtS", -1.);
-      desc.add<double>("Q2max", 50.);
+      auto lepton_desc = ParametersDescription();
+      lepton_desc.add<pdgid_t>("beamPdgId", PDG::electron).setDescription("beam particle PDG identifier");
+      lepton_desc.add<double>("sqrtS", -1.);
+      lepton_desc.add<double>("Q2max", 50.);
+      desc.add<ParametersDescription>("leptonParams", lepton_desc);
       return desc;
     }
 
