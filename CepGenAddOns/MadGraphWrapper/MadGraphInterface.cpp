@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2022  Laurent Forthomme
+ *  Copyright (C) 2020-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Caller.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenAddOns/MadGraphWrapper/MadGraphInterface.h"
 #include "CepGenAddOns/MadGraphWrapper/MadGraphProcess.h"
@@ -230,14 +231,8 @@ namespace cepgen {
 
   void MadGraphInterface::generateProcess() const {
     std::ofstream log(log_filename_, std::ios::app);  // appending at the end of the log
-    std::string cmd{MADGRAPH_BIN}, out;
-    cmd += " -f " + card_path_.string();
-    const auto ret = runCommand(cmd, out);
     log << "\n\n*** mg5_aMC process generation ***\n\n";
-    log << out;
-    if (ret != 0)
-      throw CG_FATAL("MadGraphInterface:generateProcess")
-          << "Failed to generate the process! ret=" << ret << "!\nOutput: " << out;
+    log << utils::Caller::call({MADGRAPH_BIN, "-f", card_path_.string()});
     fs::remove(card_path_);
   }
 
@@ -277,34 +272,16 @@ namespace cepgen {
     throw CG_FATAL("MadGraphInterface:generateLibrary")
         << "Library generation not yet implemented for Window$ systems!";
 #else
-    std::string cmd{CC_CFLAGS}, out;
-    cmd += " -fPIC -shared";
-    cmd += " -Wno-unused-variable -Wno-int-in-bool-context";
-    cmd += " -I" + (in_path / "src").string();
-    cmd += " -I" + processes.at(0);
-    cmd += " " + utils::merge(src_files, " ");
-    cmd += " -o " + out_lib.string();
-    if (runCommand(cmd, out) != 0)
-      throw CG_FATAL("MadGraphInterface:generateLibrary")
-          << "Failed to generate the wrapping library!\nOutput: " << out;
+    utils::Caller::call({CC_CFLAGS,
+                         "-fPIC",
+                         "-shared",
+                         "-Wno-unused-variable",
+                         "-Wno-int-in-bool-context",
+                         "-I" + (in_path / "src").string(),
+                         "-I" + processes.at(0),
+                         utils::merge(src_files, " "),
+                         "-o " + out_lib.string()});
 #endif
-  }
-
-  int MadGraphInterface::runCommand(const std::string& cmd, std::string& result) {
-    std::array<char, cmd_buffer_size_> buffer{};
-    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
-    if (!pipe) {
-      int err = errno;
-      CG_ERROR("MadGraphInterface:runCommand")
-          << "Failed to open pipe for \"" << cmd << "\".\nOutput value: " << utils::describeError(err) << ".";
-      return err;
-    }
-
-    CG_DEBUG("MadGraphInterface:runCommand") << "Running\n\t" << cmd;
-    while (fgets(buffer.data(), buffer.size(), pipe.get()))
-      result += buffer.data();
-
-    return 0;
   }
 
   ParametersDescription MadGraphInterface::description() {

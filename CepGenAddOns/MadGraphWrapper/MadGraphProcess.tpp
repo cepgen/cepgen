@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2022  Laurent Forthomme
+ *  Copyright (C) 2020-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,14 +41,16 @@ void MadGraphProcess::initialise(const std::string& param_card) {
   try {
     proc_->initProc(param_card);
   } catch (const char* chr) {
-    throw CG_FATAL("MadGraphProcess") << "Failed to initialise parameters card at \"" << param_card << "\":\n\t" << chr;
+    throw CG_FATAL("MadGraphProcess:init")
+        << "Failed to initialise parameters card at \"" << param_card << "\":\n\t" << chr;
   }
   if (proc_->nprocesses > 1)
-    throw CG_FATAL("MadGraphProcess") << "Multi-processes matrix elements are not supported!";
+    throw CG_FATAL("MadGraphProcess:init") << "Multi-processes matrix elements are not (yet) supported!";
   if (proc_->ninitial != 2)
-    throw CG_FATAL("MadGraphProcess") << "Currently only 2->N processes are supported!";
+    throw CG_FATAL("MadGraphProcess:init") << "Currently only 2->N processes are supported!";
 
-  CG_DEBUG("MadGraphProcess") << "External particles masses (partons + central system): " << proc_->getMasses() << ".";
+  CG_DEBUG("MadGraphProcess:init") << "External particles masses (partons + central system): " << proc_->getMasses()
+                                   << ".";
 
   mom_.clear();
   for (size_t i = 0; i < proc_->nexternal; ++i)

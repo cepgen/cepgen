@@ -39,6 +39,12 @@ public:
         const MadGraphInterface interf(params);
         loadLibrary(interf.run());
       }
+      // once MadGraph process library is loaded into runtime environment, can define its wrapper object
+      mg5_proc_.reset(new MadGraphProcess);
+      produced_parts_ = mg5_proc_->centralSystem();
+      CG_DEBUG("MadGraphProcessBuilder") << "MadGraph_aMC process created for:\n\t"
+                                         << "* interm. parts.: " << mg5_proc_->intermediatePartons() << "\n\t"
+                                         << "* central system: " << produced_parts_ << ".";
     } catch (const utils::RunAbortedException&) {
       CG_FATAL("MadGraphProcessBuilder") << "MadGraph_aMC process generation aborted.";
     }
@@ -55,23 +61,25 @@ public:
   }
 
   void prepareProcessKinematics() override {
-    // once MadGraph process library is loaded into runtime environment, can define its wrapper object
-    mg5_proc_.reset(new MadGraphProcess);
     const auto& interm_part = mg5_proc_->intermediatePartons();
-    const auto& cent_sys = mg5_proc_->centralSystem();
-    CG_DEBUG("MadGraphProcessBuilder") << "MadGraph_aMC process created for:\n\t"
-                                       << "* interm. parts.: " << interm_part << "\n\t"
-                                       << "* central system: " << cent_sys << ".";
-    produced_parts_ = std::vector<pdgid_t>(cent_sys.begin(), cent_sys.end());
-
-    const auto& params_card = steer<std::string>("parametersCard");
-    CG_INFO("MadGRaphProcessBuilder") << "Preparing process kinematics for card at \"" << params_card << "\".";
-    mg5_proc_->initialise(params_card);
+    const auto flux_interm_part = std::array<pdgid_t, 2>{psgen_->positiveFlux<PartonFlux>().partonPdgId(),
+                                                         psgen_->negativeFlux<PartonFlux>().partonPdgId()};
+    if (interm_part != flux_interm_part)
+      throw CG_FATAL("MadGraphProcessBuilder")
+          << "MadGraph unpacked process incoming state (" << interm_part << ") "
+          << "is incompatible with user-steered incoming fluxes particles (" << flux_interm_part << ").";
+    if (const auto params_card = steer<std::string>("parametersCard"); !params_card.empty()) {
+      CG_INFO("MadGraphProcessBuilder") << "Preparing process kinematics for card at \"" << params_card << "\".";
+      mg5_proc_->initialise(params_card);
+    }
   }
   double computeCentralMatrixElement() const override {
     if (!mg5_proc_)
       CG_FATAL("MadGraphProcessBuilder:eval") << "Process not properly linked!";
-    if (!passesCuts())
+    if (!kinematics().cuts().initial.contain(event()(Particle::Role::Parton1)) ||
+        !kinematics().cuts().initial.contain(event()(Particle::Role::Parton2)))
+      return 0.;
+    if (!kinematics().cuts().central.contain(event()(Particle::Role::CentralSystem)))
       return 0.;
 
     CG_DEBUG_LOOP("MadGraphProcessBuilder:eval")

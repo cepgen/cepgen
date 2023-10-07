@@ -19,7 +19,6 @@
 #ifndef CepGenAddOns_MadGraphWrapper_MadGraphProcess_h
 #define CepGenAddOns_MadGraphWrapper_MadGraphProcess_h
 
-#include <memory>
 #include <string>
 
 #include "CepGen/Physics/Momentum.h"
@@ -38,8 +37,8 @@ namespace cepgen {
     const std::string& description() const { return descr_; }
 
     void initialise(const std::string&);
-    inline const std::array<int, 2>& intermediatePartons() const { return incoming_pdgids_; }
-    inline const std::vector<int>& centralSystem() const { return central_pdgids_; }
+    inline const std::array<unsigned long long, 2>& intermediatePartons() const { return incoming_pdgids_; }
+    inline const std::vector<unsigned long long>& centralSystem() const { return central_pdgids_; }
     double eval();
 
     inline MadGraphProcess& setMomentum(size_t i, const Momentum& mom) {
@@ -59,8 +58,8 @@ namespace cepgen {
 
     const std::string name_;
     const std::string descr_;
-    const std::array<int, 2> incoming_pdgids_;
-    const std::vector<int> central_pdgids_;
+    const std::array<unsigned long long, 2> incoming_pdgids_;
+    const std::vector<unsigned long long> central_pdgids_;
 
     std::vector<Momentum> momenta_;
   };

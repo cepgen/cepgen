@@ -42,8 +42,6 @@ namespace cepgen {
     static constexpr size_t cmd_buffer_size_ = 256;
     static std::unordered_map<std::string, pdgid_t> mg5_parts_;
 
-    static int runCommand(const std::string&, std::string&);
-
     using ProcessParticles = std::pair<std::vector<pdgid_t>, std::vector<pdgid_t> >;
     static ProcessParticles unpackProcessParticles(const std::string&);
 
