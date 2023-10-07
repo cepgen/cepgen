@@ -75,7 +75,6 @@ double MadGraphProcess::eval() {
       log << sep << std::vector<double>(mom_[i + 2], mom_[i + 2] + 4), sep = ", ";
     log << "\n\tResulting matrix element: " << me[0] << ".";
   });
-  //return me[0]*constants::GEVM2_TO_PB;
   return me[0];
 }
 

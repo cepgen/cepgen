@@ -20,6 +20,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process2to4.h"
 #include "CepGen/Utils/AbortHandler.h"
 #include "CepGenAddOns/MadGraphWrapper/MadGraphInterface.h"
@@ -29,27 +30,19 @@ using namespace cepgen;
 
 class MadGraphProcessBuilder : public proc::Process2to4 {
 public:
-  explicit MadGraphProcessBuilder(const ParametersList& params) : Process2to4(params, {}) {
-    utils::AbortHandler();
-    try {
-      const auto& lib_file = steer<std::string>("lib");
-      if (!lib_file.empty())
-        loadLibrary(lib_file);
-      else {
-        const MadGraphInterface interf(params);
-        loadLibrary(interf.run());
-      }
-      // once MadGraph process library is loaded into runtime environment, can define its wrapper object
-      mg5_proc_.reset(new MadGraphProcess);
-      produced_parts_ = mg5_proc_->centralSystem();
-      CG_DEBUG("MadGraphProcessBuilder") << "MadGraph_aMC process created for:\n\t"
-                                         << "* interm. parts.: " << mg5_proc_->intermediatePartons() << "\n\t"
-                                         << "* central system: " << produced_parts_ << ".";
-    } catch (const utils::RunAbortedException&) {
-      CG_FATAL("MadGraphProcessBuilder") << "MadGraph_aMC process generation aborted.";
-    }
+  explicit MadGraphProcessBuilder(const ParametersList& params, bool load_library = true) : Process2to4(params, {}) {
+    if (load_library)
+      loadMG5Library();
+    // once MadGraph process library is loaded into runtime environment, can define its wrapper object
+    mg5_proc_.reset(new MadGraphProcess);
+    produced_parts_ = mg5_proc_->centralSystem();
+    cs_prop_ = PDG::get()(produced_parts_.at(0));
+    CG_DEBUG("MadGraphProcessBuilder") << "MadGraph_aMC process created for:\n\t"
+                                       << "* interm. parts.: " << mg5_proc_->intermediatePartons() << "\n\t"
+                                       << "* central system: " << produced_parts_ << ".";
   }
-  proc::ProcessPtr clone() const override { return proc::ProcessPtr(new MadGraphProcessBuilder(parameters())); }
+
+  proc::ProcessPtr clone() const override { return proc::ProcessPtr(new MadGraphProcessBuilder(parameters(), false)); }
 
   static ParametersDescription description() {
     auto desc = Process2to4::description();
@@ -95,6 +88,21 @@ public:
   }
 
 private:
+  void loadMG5Library() {
+    utils::AbortHandler();
+    try {
+      const auto& lib_file = steer<std::string>("lib");
+      if (!lib_file.empty())
+        loadLibrary(lib_file);
+      else {
+        const MadGraphInterface interf(params_);
+        loadLibrary(interf.run());
+      }
+    } catch (const utils::RunAbortedException&) {
+      CG_FATAL("MadGraphProcessBuilder") << "MadGraph_aMC process generation aborted.";
+    }
+  }
+
   std::unique_ptr<MadGraphProcess> mg5_proc_;
 };
 REGISTER_PROCESS("mg5_aMC", MadGraphProcessBuilder);
