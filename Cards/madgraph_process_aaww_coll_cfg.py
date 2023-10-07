@@ -1,28 +1,22 @@
 import Config.Core as cepgen
-import Config.ktProcess_cfi as kt
+import Config.collinearProcess_cfi as coll
 from Config.generator_cff import generator
-#from Config.Logger_cfi import logger
-#logger.enabledModules += ('MadGraphProcess.eval',)
 
 #--- process definition
-process = kt.process.clone('mg5_aMC',
+process = coll.process.clone('mg5_aMC',
     processParameters = cepgen.Parameters(
-        process = 'a a > mu+ mu-',
-        # alternatively, if shared object is already generated
-        #lib = 'libCepGenMadGraphProcess.so',
-        # alternatively, if standalone_cpp directory is already generated
-        #standaloneCppPath = '/tmp/cepgen_mg5_aMC',
+        process = 'a a > w+ w-',
         mode = cepgen.ProcessMode.ElasticElastic,
     ),
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
         structureFunctions = cepgen.StructureFunctions.LUXlike,
     ),
-    outKinematics = kt.process.outKinematics.clone(
-        qt = (0., 10.),
+    outKinematics = coll.process.outKinematics.clone(
+        q2 = (0., 10.),
         #eta = (-2.5, 2.5),
         mx = (1.07, 1000.),
-        pt = (25.,),
+        pt = (0.,),
     ),
 )
 
@@ -30,7 +24,6 @@ process = kt.process.clone('mg5_aMC',
 generator.numEvents = 10000
 
 text = cepgen.Module('text',  # histogramming/ASCII output capability
-    #variables = ['nev', 'm(4)', 'tgen'],
     histVariables={
         'm(4)': cepgen.Parameters(xrange=(0., 250.), nbins=10, log=True),
         'pt(4)': cepgen.Parameters(xrange=(0., 25.), nbins=10, log=True),
