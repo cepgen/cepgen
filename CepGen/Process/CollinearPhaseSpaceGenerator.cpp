@@ -30,7 +30,9 @@ namespace cepgen {
     CollinearPhaseSpaceGenerator::CollinearPhaseSpaceGenerator(Process* proc) : PhaseSpaceGenerator(proc) {}
 
     void CollinearPhaseSpaceGenerator::initialise() {
-      auto& kin = process().kinematics();
+      const auto& kin = process().kinematics();
+
+      // pick a parton flux parameterisation for each beam
       auto set_flux_properties = [&kin](const Beam& beam, std::unique_ptr<PartonFlux>& flux) {
         auto params = beam.partonFluxParameters();
         const auto params_p_el = CollinearFluxFactory::get().describeParameters(
@@ -57,14 +59,12 @@ namespace cepgen {
         if (!flux)
           throw CG_FATAL("CollinearPhaseSpaceGenerator:init")
               << "Failed to initiate a parton flux object with properties: " << params << ".";
+        if (flux->ktFactorised())
+          throw CG_FATAL("CollinearPhaseSpaceGenerator:init")
+              << "Invalid incoming parton flux: " << flux->name() << ".";
       };
       set_flux_properties(kin.incomingBeams().positive(), pos_flux_);
       set_flux_properties(kin.incomingBeams().negative(), neg_flux_);
-
-      if (pos_flux_->ktFactorised() || neg_flux_->ktFactorised())
-        throw CG_FATAL("CollinearPhaseSpaceGenerator:init")
-            << "Invalid incoming parton fluxes: " << std::vector<std::string>{pos_flux_->name(), neg_flux_->name()}
-            << ".";
 
       // register the incoming partons' virtuality
       const auto log_lim_q2 = kin.cuts().initial.q2.truncate(Limits{1.e-10, 5.}).compute(std::log);
