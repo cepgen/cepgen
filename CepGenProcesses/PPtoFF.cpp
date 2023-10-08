@@ -193,6 +193,8 @@ double PPtoFF::offShellME() const {
 
   const auto t_limits = Limits{0., std::pow(std::max(mt1, mt2), 2)};
   const auto prefac = g_part1_(std::sqrt(t_limits.trim(q2_1))) * g_part2_(std::sqrt(t_limits.trim(q2_2)));
+  if (!utils::positive(prefac))
+    return 0.;
   return prefac * std::pow(x1() * x2() * s(), 2) * amat2;
 }
 // register process

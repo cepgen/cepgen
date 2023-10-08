@@ -24,9 +24,10 @@ namespace cepgen {
   namespace utils {
     template <typename T>
     bool positive(const T& val) {
-      return val > T{0} && !std::isnan(val);
+      return val > T{} && std::isfinite(val);
     }
     template bool positive<double>(const double&);
     template bool positive<float>(const float&);
+    template bool positive<int>(const int&);
   }  // namespace utils
 }  // namespace cepgen

@@ -6,6 +6,7 @@ from Config.generator_cff import generator
 process = kt.process.clone('pptoff',
     processParameters = cepgen.Parameters(
         pair = PDG.muon,
+        mode = cepgen.ProcessMode.InelasticInelastic,
     ),
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),

@@ -22,6 +22,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process2to4.h"
+#include "CepGen/Utils/Math.h"
 
 namespace cepgen {
   namespace proc {
@@ -134,7 +135,7 @@ namespace cepgen {
 
       //--- central 2-to-2 matrix element
       const auto amat2 = computeCentralMatrixElement();
-      if (amat2 <= 0.)  // skip computing the fluxes if no contribution
+      if (!utils::positive(amat2))  // skip computing the prefactors if invalid
         return 0.;
 
       // factor 1/4 from jacobian of transformations

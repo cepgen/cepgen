@@ -91,7 +91,7 @@ namespace cepgen {
         return 0.;
       const auto cent_me = computeFactorisedMatrixElement();
       if (!utils::positive(cent_me))
-        return 0.;  // avoid computing the fluxes if the matrix element is already null
+        return 0.;  // avoid computing the fluxes if the matrix element is already null or invalid
       const auto fluxes_weight = psgen_->fluxes();
       if (!utils::positive(fluxes_weight))
         return 0.;
