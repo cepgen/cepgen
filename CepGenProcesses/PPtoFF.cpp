@@ -24,6 +24,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/Process/Process2to4.h"
+#include "CepGen/Utils/Math.h"
 
 using namespace cepgen;
 
@@ -33,7 +34,11 @@ public:
   explicit PPtoFF(const ParametersList& params)
       : cepgen::proc::Process2to4(params, params.get<ParticleProperties>("pair").pdgid),
         method_(steerAs<int, Mode>("method")),
-        osp_(steer<ParametersList>("offShellParameters")) {}
+        osp_(steer<ParametersList>("offShellParameters")) {
+    if (method_ == Mode::offShell && !psgen_->ktFactorised())
+      throw CG_FATAL("PPtoFF:prepare")
+          << "Off-shell matrix element only defined for factorised process with partons kt.";
+  }
 
   proc::ProcessPtr clone() const override { return proc::ProcessPtr(new PPtoFF(*this)); }
 
@@ -145,6 +150,8 @@ double PPtoFF::onShellME() const {
 }
 
 double PPtoFF::offShellME() const {
+  if (q1().pt2() == 0. || q2().pt2() == 0)  // only works for kt-factorised case
+    return 0.;
   const auto mt1 = pc(0).massT(), mt2 = pc(1).massT();  // transverse masses
   const auto compute_zs = [this, &mt1, &mt2](short pol, double x) -> std::pair<double, double> {
     const auto norm_pol = pol / std::abs(pol);
@@ -181,7 +188,7 @@ double PPtoFF::offShellME() const {
 
   //--- symmetrisation
   const auto amat2 = 0.5 * (osp_.mat1 * amat2_1 + osp_.mat2 * amat2_2);
-  if (amat2 <= 0.)
+  if (!utils::positive(amat2))
     return 0.;
 
   const auto t_limits = Limits{0., std::pow(std::max(mt1, mt2), 2)};

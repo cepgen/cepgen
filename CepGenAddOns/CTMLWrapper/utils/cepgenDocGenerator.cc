@@ -17,6 +17,10 @@
  */
 
 #include "CepGen/Generator.h"
+#include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGenAddOns/CTMLWrapper/DocumentationGenerator.h"
+
+// list of factories documented
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/EventExporterFactory.h"
@@ -28,8 +32,6 @@
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGenAddOns/CTMLWrapper/DocumentationGenerator.h"
 
 namespace cepgen {
   namespace utils {}

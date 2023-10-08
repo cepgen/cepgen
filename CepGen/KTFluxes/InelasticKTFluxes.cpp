@@ -23,6 +23,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/Math.h"
 
 namespace cepgen {
   class InelasticNucleonKTFlux : public KTFlux {
@@ -45,8 +46,8 @@ namespace cepgen {
     double fluxMX2(double x, double kt2, double mx2) const override {
       if (!x_range_.contains(x, true))
         return 0.;
-      if (mx2 < 0.)
-        throw CG_FATAL("InelasticNucleonKTFlux") << "Diffractive mass squared mX^2 should be specified!";
+      if (!utils::positive(mx2))
+        throw CG_FATAL("InelasticNucleonKTFlux") << "Invalid diffractive mass squared mX^2 specified: " << mx2 << ".";
       const auto q2 = utils::kt::q2(x, kt2, mass2(), mx2), q2min = q2 - kt2 / (1. - x);
       const auto xbj = utils::xBj(q2, mass2(), mx2), qnorm = 1. - q2min / q2;
       return prefactor_ * sf_->F2(xbj, q2) * (xbj / q2) * qnorm * qnorm * (1. - x) / q2;
@@ -66,8 +67,8 @@ namespace cepgen {
     double fluxMX2(double x, double kt2, double mx2) const override {
       if (!x_range_.contains(x, true))
         return 0.;
-      if (mx2 < 0.)
-        throw CG_FATAL("InelasticNucleonKTFlux") << "Diffractive mass squared mX^2 should be specified!";
+      if (!utils::positive(mx2))
+        throw CG_FATAL("InelasticNucleonKTFlux") << "Invalid diffractive mass squared mX^2 specified: " << mx2 << ".";
       const auto q2 = utils::kt::q2(x, kt2, mass2(), mx2), q2min = q2 - kt2 / (1. - x);
       const auto xbj = utils::xBj(q2, mass2(), mx2), qnorm = 1. - q2min / q2;
       const double f_D = sf_->F2(xbj, q2) * (xbj / q2) * (1. - x) * qnorm;

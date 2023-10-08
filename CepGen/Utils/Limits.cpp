@@ -93,15 +93,18 @@ namespace cepgen {
   }
 
   double Limits::x(double v) const {
-    if (v < 0. || v > 1.)
-      throw CG_ERROR("Limits:shoot") << "x must be comprised between 0 and 1; x value = " << v << ".";
-
-    if (!hasMin() && hasMax())  // if no lower limit, assume 0
+    static const Limits x_limits{0., 1.};
+    if (!x_limits.contains(v))
+      throw CG_ERROR("Limits:shoot") << "x = " << v << " must be inside " << x_limits << ".";
+    if (!hasMin() && hasMax()) {  // if no lower limit, assume 0
+      CG_WARNING("Limits:shoot") << "Requested to give a value inside interval while no lower limit is set. "
+                                 << "Assuming this latter is equal to 0.";
       return second * v;
-
-    if (!valid())
+    }
+    if (!valid()) {
+      CG_WARNING("Limits:shoot") << "Requested to give a value inside interval although this latter is invalid.";
       return INVALID;
-
+    }
     return first + (second - first) * v;
   }
 

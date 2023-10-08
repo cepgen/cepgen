@@ -19,6 +19,10 @@
 #include <iomanip>
 
 #include "CepGen/Generator.h"
+#include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/String.h"
+
+// list of factories listed
 #include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/CouplingFactory.h"
@@ -33,8 +37,6 @@
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Utils/Message.h"
-#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   void dumpModules() {

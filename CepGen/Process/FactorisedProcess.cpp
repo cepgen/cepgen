@@ -24,6 +24,7 @@
 #include "CepGen/Process/CollinearPhaseSpaceGenerator.h"
 #include "CepGen/Process/FactorisedProcess.h"
 #include "CepGen/Process/KTPhaseSpaceGenerator.h"
+#include "CepGen/Utils/Math.h"
 
 namespace cepgen {
   namespace proc {
@@ -89,9 +90,12 @@ namespace cepgen {
       if (!psgen_->generatePartonKinematics())
         return 0.;
       const auto cent_me = computeFactorisedMatrixElement();
-      if (cent_me <= 0.)
+      if (!utils::positive(cent_me))
         return 0.;  // avoid computing the fluxes if the matrix element is already null
-      return psgen_->fluxes() * cent_me;
+      const auto fluxes_weight = psgen_->fluxes();
+      if (!utils::positive(fluxes_weight))
+        return 0.;
+      return fluxes_weight * cent_me;
     }
 
     void FactorisedProcess::fillKinematics(bool) {
