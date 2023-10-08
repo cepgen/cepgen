@@ -230,7 +230,7 @@ namespace cepgen {
             sfs_grid_.insert({xbj, q2}, sfs);
           }
         }
-        sfs_grid_.init();
+        sfs_grid_.initialise();
         CG_DEBUG("KulaginBarinov:grid") << "Grid boundaries: " << sfs_grid_.boundaries();
       }
     }

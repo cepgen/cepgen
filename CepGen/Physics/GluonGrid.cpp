@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2018-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
 
 #include <cmath>
 #include <fstream>
-#include <set>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/GluonGrid.h"
@@ -31,41 +30,35 @@ namespace kmr {
   }
 
   GluonGrid::GluonGrid(const cepgen::ParametersList& params)
-      : cepgen::GridHandler<3, 1>(cepgen::GridType::linear),
-        // grid is already logarithmic
+      : cepgen::GridHandler<3, 1>(cepgen::GridType::linear /*grid is already logarithmic*/),
         SteeredObject(params),
         grid_path_(steerPath("path")) {
     CG_INFO("GluonGrid") << "Building the KMR grid evaluator.";
 
     cepgen::utils::Timer tmr;
-
-    std::set<double> kt2_vals, x_vals, mu2_vals;
     {  // file readout part
       std::ifstream file(grid_path_, std::ios::in);
       if (!file.is_open())
         throw CG_FATAL("GluonGrid") << "Failed to load grid file \"" << grid_path_ << "\"!";
 
-      std::string x_tmp, kt2_tmp, mu2_tmp, fg_tmp;
-      while (file >> x_tmp >> kt2_tmp >> mu2_tmp >> fg_tmp) {
-        const double x = stod(x_tmp), kt2 = stod(kt2_tmp), mu2 = stod(mu2_tmp), fg = stod(fg_tmp);
-        x_vals.insert(x);
-        kt2_vals.insert(kt2);
-        mu2_vals.insert(mu2);
-        insert({x, kt2, mu2}, {fg});
-      }
+      std::string x, kt2, mu2, fg;
+      while (file >> x >> kt2 >> mu2 >> fg)
+        insert({std::stod(x), std::stod(kt2), std::stod(mu2)}, {std::stod(fg)});
       file.close();
+      initialise();  // initialise the grid after filling its nodes
     }
-
-    init();
-
+    const auto limits = boundaries();
     CG_INFO("GluonGrid") << "KMR grid evaluator built in " << tmr.elapsed() << " s.\n\t"
-                         << " kt^2 in range [" << *kt2_vals.begin() << ":" << *kt2_vals.rbegin() << "]\n\t"
-                         << "    x in range [" << *x_vals.begin() << ":" << *x_vals.rbegin() << "]\n\t"
-                         << " mu^2 in range [" << *mu2_vals.begin() << ":" << *mu2_vals.rbegin() << "].";
+                         << " log(x)    in range " << limits.at(0) << ",\t"
+                         << "x    in range " << limits.at(0).compute(std::exp) << "\n\t"
+                         << " log(kt^2) in range " << limits.at(1) << ",\t"
+                         << "kt^2 in range " << limits.at(1).compute(std::exp) << "\n\t"
+                         << " log(mu^2) in range " << limits.at(2) << ",\t"
+                         << "mu^2 in range " << limits.at(2).compute(std::exp) << ".";
   }
 
   double GluonGrid::operator()(double x, double kt2, double mu2) const {
-    return cepgen::GridHandler<3, 1>::eval({log10(x), log10(kt2), log10(mu2)}).at(0);
+    return cepgen::GridHandler<3, 1>::eval({std::log10(x), std::log10(kt2), std::log10(mu2)}).at(0);
   }
 
   cepgen::ParametersDescription GluonGrid::description() {

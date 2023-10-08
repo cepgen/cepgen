@@ -142,6 +142,10 @@ namespace cepgen {
         throw CG_FATAL("IncomingBeams") << "Invalid multiplicity of parton fluxes given: " << fluxes << ".";
       plist_pos.set("partonFlux", fluxes.at(0));
       plist_neg.set("partonFlux", fluxes.at(1));
+    } else if (params_.has<ParametersList>("partonFluxes")) {
+      const auto& fluxes = steer<ParametersList>("partonFluxes");
+      plist_pos.set("partonFlux", fluxes);
+      plist_neg.set("partonFlux", fluxes);
     } else if (params_.has<std::vector<std::string> >("partonFluxes"))
       set_part_fluxes_from_name_vector(steer<std::vector<std::string> >("partonFluxes"));
     else if (params_.has<std::vector<std::string> >("ktFluxes"))
@@ -156,27 +160,10 @@ namespace cepgen {
     plist_neg.set<ParametersList>("formFactors", steer<ParametersList>("formFactors"));
 
     auto mode = steerAs<int, mode::Kinematics>("mode");
-    switch (mode) {
-      case mode::Kinematics::ElasticElastic:
-        plist_pos.set<bool>("elastic", true);
-        plist_neg.set<bool>("elastic", true);
-        break;
-      case mode::Kinematics::ElasticInelastic:
-        plist_pos.set<bool>("elastic", true);
-        plist_neg.set<bool>("elastic", false);
-        break;
-      case mode::Kinematics::InelasticElastic:
-        plist_pos.set<bool>("elastic", false);
-        plist_neg.set<bool>("elastic", true);
-        break;
-      case mode::Kinematics::InelasticInelastic:
-        plist_pos.set<bool>("elastic", false);
-        plist_neg.set<bool>("elastic", false);
-        break;
-      default:
-        CG_WARNING("IncomingBeams:mode") << "Unsupported kinematics mode: " << mode << ".";
-        break;
-    }
+    plist_pos.set<bool>("elastic",
+                        mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::ElasticInelastic);
+    plist_neg.set<bool>("elastic",
+                        mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::InelasticElastic);
 
     //--- structure functions
     if (!steer<ParametersList>("structureFunctions").empty()) {
@@ -187,7 +174,7 @@ namespace cepgen {
                               << ".";
     pos_beam_ = Beam(plist_pos);
     neg_beam_ = Beam(plist_neg);
-  }  // namespace cepgen
+  }
 
   void IncomingBeams::setSqrtS(double sqs) {
     if (pos_beam_.pdgId() != neg_beam_.pdgId())

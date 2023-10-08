@@ -147,7 +147,7 @@ namespace cepgen {
   }
 
   template <size_t D, size_t N>
-  void GridHandler<D, N>::init() {
+  void GridHandler<D, N>::initialise() {
     if (values_raw_.empty())
       throw CG_ERROR("GridHandler") << "Empty grid.";
     gsl_set_error_handler_off();

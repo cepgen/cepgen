@@ -61,7 +61,7 @@ namespace cepgen {
     inline std::map<coord_t, values_t> values() const { return values_raw_; }
 
     /// Initialise the grid and all useful interpolators/accelerators
-    void init();
+    void initialise();
     /// Grid boundaries (collection of (min,max))
     std::array<Limits, D> boundaries() const;
     /// Lowest bound of the grid coordinates
