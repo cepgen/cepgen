@@ -26,6 +26,7 @@
 #include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Functional.h"
+#include "CepGen/Utils/Math.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
@@ -86,7 +87,7 @@ namespace cepgen {
     auto weight = process().weight(x);
 
     //--- invalidate any unphysical behaviour
-    if (weight <= 0.)
+    if (!utils::positive(weight))
       return 0.;
 
     //--- speed up the integration process if no event is to be generated

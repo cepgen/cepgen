@@ -24,6 +24,7 @@
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Graph.h"
 #include "CepGen/Utils/Histogram.h"
+#include "CepGen/Utils/Math.h"
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
@@ -360,7 +361,7 @@ namespace cepgen {
             const double val = yval.second;
             double val_norm = 0.;
             if (mode & Mode::logz)
-              val_norm = val <= 0. ? 0. : std::max(0., (std::log(val / max_val) - min_logval) / fabs(min_logval));
+              val_norm = positive(val) ? std::max(0., (std::log(val / max_val) - min_logval) / fabs(min_logval)) : 0.;
             else
               val_norm = val / max_val;
             if (std::isnan(val_norm)) {

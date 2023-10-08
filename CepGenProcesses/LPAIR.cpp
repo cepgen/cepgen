@@ -26,6 +26,7 @@
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/Math.h"
 
 using namespace cepgen;
 
@@ -312,8 +313,8 @@ bool LPAIR::pickin() {
                          << ", w12 = " << masses_.w12 << ".";
 
   const double ss = s() + masses_.w12, rl1 = ss * ss - 4. * mA2() * s();  // lambda(s, m1**2, m2**2)
-  if (rl1 <= 0.) {
-    CG_DEBUG_LOOP("LPAIR") << "rl1 = " << rl1 << " <= 0";
+  if (!utils::positive(rl1)) {
+    CG_DEBUG_LOOP("LPAIR") << "Invalid rl1 = " << rl1 << ".";
     return false;
   }
   sl1_ = std::sqrt(rl1);
@@ -330,8 +331,8 @@ bool LPAIR::pickin() {
 
   const double sp = s() + mX2() - s2_range.min(), d3 = s2_range.min() - mB2();
   const double rl2 = sp * sp - 4. * s() * mX2();  // lambda(s, m3**2, sigma)
-  if (rl2 <= 0.) {
-    CG_DEBUG_LOOP("LPAIR") << "rl2 = " << rl2 << " <= 0";
+  if (!utils::positive(rl2)) {
+    CG_DEBUG_LOOP("LPAIR") << "Invalid rl2 = " << rl2 << ".";
     return false;
   }
   double t1_max = mA2() + mX2() - (ss * sp + sl1_ * std::sqrt(rl2)) / (2. * s());  // definition from eq. (A.4) in [1]
@@ -413,8 +414,8 @@ bool LPAIR::pickin() {
   const double r1 = s2x - d8, r2 = s2x - d6;
 
   const double rl4 = (r1 * r1 - 4. * mB2() * s2x) * (r2 * r2 - 4. * mY2() * s2x);
-  if (rl4 <= 0.) {
-    CG_DEBUG_LOOP("LPAIR") << "rl4 = " << rl4 << " <= 0";
+  if (!utils::positive(rl4)) {
+    CG_DEBUG_LOOP("LPAIR") << "Invalid rl4 = " << rl4 << ".";
     return false;
   }
   const double sl4 = std::sqrt(rl4);
@@ -494,8 +495,8 @@ bool LPAIR::pickin() {
 
   CG_DEBUG_LOOP("LPAIR") << std::scientific << "dd = " << dd << ", dd1/2 = " << deltas_ << std::fixed;
 
-  if (dd <= 0.) {
-    CG_WARNING("LPAIR:pickin") << "dd = " << dd << " <= 0.";
+  if (!utils::positive(dd)) {
+    CG_WARNING("LPAIR:pickin") << "Invalid dd = " << dd << ".";
     return false;
   }
 
@@ -508,7 +509,7 @@ bool LPAIR::pickin() {
   }
 
   jacobian_ = ds2 * dt1 * dt2 * 0.125 * 0.5 / (sl1_ * std::sqrt(-ap));
-  if (jacobian_ == 0.) {
+  if (!utils::positive(jacobian_)) {
     CG_WARNING("LPAIR:pickin") << "Null Jacobian.\n\t"
                                << "D(s2)=" << ds2 << ", D(t1)=" << dt1 << ", D(t2)=" << dt2 << ".";
     return false;
@@ -570,8 +571,8 @@ bool LPAIR::pickin() {
                ((p12_ * (t1() - masses_.w31) * 0.5 - mA2() * p2k1_) * (p2k1_ * (t2() - masses_.w52) - mB2() * r3) -
                 delta_ * (2. * p12_ * p2k1_ - mB2() * (t1() - masses_.w31))) /
                    p2k1_;
-  if (deltas_[4] < 0.) {
-    CG_WARNING("LPAIR") << "dd5 = " << deltas_[4] << " < 0";
+  if (!utils::positive(deltas_[4])) {
+    CG_WARNING("LPAIR") << "Invalid dd5 = " << deltas_[4] << ".";
     return false;
   }
 

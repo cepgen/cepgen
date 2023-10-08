@@ -20,6 +20,7 @@
 // NOLI SE TANGERE
 #include "CPPProcess.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/Math.h"
 #include "CepGenAddOns/MadGraphWrapper/MadGraphProcess.h"
 
 using namespace cepgen;
@@ -62,7 +63,7 @@ double MadGraphProcess::eval() {
   proc_->setMomenta(mom_);
   proc_->sigmaKin();
   const double* me = proc_->getMatrixElements();
-  if (me[0] <= 0)
+  if (!utils::positive(me[0]))
     return 0.;
 
   CG_DEBUG_LOOP("MadGraphProcess:eval").log([&](auto& log) {

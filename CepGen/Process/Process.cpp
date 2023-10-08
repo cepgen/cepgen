@@ -25,6 +25,7 @@
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
+#include "CepGen/Utils/Math.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
@@ -215,7 +216,7 @@ namespace cepgen {
         dumpPoint(&log.stream());
       });
 
-      if (aux_jacobian <= 0.)
+      if (!utils::positive(aux_jacobian))
         return 0.;
 
       //--- compute the integrand
@@ -223,7 +224,7 @@ namespace cepgen {
       CG_DEBUG_LOOP("Process:weight") << "Integrand = " << me_integrand << "\n\t"
                                       << "Proc.-specific integrand * Jacobian (excl. global Jacobian) = "
                                       << (me_integrand * aux_jacobian) << ".";
-      if (me_integrand <= 0.)
+      if (!utils::positive(me_integrand))
         return 0.;
 
       //--- combine every component into a single weight for this point

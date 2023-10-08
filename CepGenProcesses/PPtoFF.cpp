@@ -138,7 +138,7 @@ double PPtoFF::onShellME() const {
     return 0.;
   const auto q = std::sqrt(t_hat);
   const auto prefac = g_part1_(q) * g_part2_(q);
-  if (prefac <= 0.)
+  if (!utils::positive(prefac))
     return 0.;
 
   const auto mf4 = mf2_ * mf2_, mf8 = mf4 * mf4;
