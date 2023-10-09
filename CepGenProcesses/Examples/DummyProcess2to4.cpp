@@ -28,12 +28,11 @@ using namespace cepgen;
 class DummyProcess2to4 final : public cepgen::proc::Process2to4 {
 public:
   explicit DummyProcess2to4(const cepgen::ParametersList& params)
-      : Process2to4(params, {PDG::photon, PDG::photon}, steer<ParticleProperties>("pair").pdgid),
-        value_(steer<double>("value")) {}
+      : Process2to4(params, params.get<ParticleProperties>("pair").pdgid), value_(steer<double>("value")) {}
 
   static ParametersDescription description() {
     auto desc = cepgen::proc::Process2to4::description();
-    desc.setDescription("Dummy 2-to-4 process (kt-factor.)");
+    desc.setDescription("Dummy 2-to-4 process");
     desc.add<double>("value", 1.);
     return desc;
   }
