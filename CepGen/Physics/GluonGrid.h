@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2018-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,6 @@ namespace kmr {
   public:
     /// Retrieve the grid interpolator (singleton)
     static GluonGrid& get(const cepgen::ParametersList& params = {});
-
     GluonGrid(const GluonGrid&) = delete;
     void operator=(const GridHandler&) = delete;
 
@@ -39,7 +38,6 @@ namespace kmr {
 
     /// Retrieve the path to the interpolation grid values
     const std::string& path() const { return grid_path_; }
-
     /// Compute the gluon flux
     double operator()(double x, double kt2, double mu2) const;
 

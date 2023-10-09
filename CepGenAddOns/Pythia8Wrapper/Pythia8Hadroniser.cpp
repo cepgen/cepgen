@@ -16,14 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <memory>
 #include <unordered_map>
-#include <vector>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
-#include "CepGen/Event/Particle.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/Hadroniser.h"
@@ -34,22 +30,37 @@
 
 namespace cepgen {
   namespace hadr {
-    /**
-     * Full interface to the Pythia8 hadronisation algorithm. It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
-     * \brief Pythia8 hadronisation algorithm
-     */
+    /// Interface to the Pythia8 hadronisation algorithm
+    /// \note It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
     class Pythia8Hadroniser : public Hadroniser {
     public:
-      explicit Pythia8Hadroniser(const ParametersList&);
-      ~Pythia8Hadroniser();
+      explicit Pythia8Hadroniser(const ParametersList& plist)
+          : Hadroniser(plist),
+            pythia_(new Pythia8::Pythia),
+            cg_evt_(new Pythia8::CepGenEvent),
+            correct_central_(steer<bool>("correctCentralSystem")),
+            debug_lhef_(steer<bool>("debugLHEF")),
+            output_config_(steer<std::string>("outputConfig")) {}
+
+      virtual ~Pythia8Hadroniser() {
+        if (!output_config_.empty())
+          pythia_->settings.writeFile(output_config_, false);
+        if (debug_lhef_)
+          cg_evt_->closeLHEF(true);
+      }
 
       static ParametersDescription description();
 
-      void readString(const char* param) override;
+      void readString(const char* param) override {
+        if (!pythia_->readString(param))
+          throw CG_FATAL("Pythia8Hadroniser") << "The Pythia8 core failed to parse the following setting:\n\t" << param;
+      }
       void initialise() override;
       bool run(Event& ev, double& weight, bool full) override;
 
-      void setCrossSection(const Value&) override;
+      void setCrossSection(const Value& cross_section) override {
+        cg_evt_->setCrossSection(0, cross_section, cross_section.uncertainty());
+      }
 
     private:
       void* enginePtr() override { return (void*)pythia_.get(); }
@@ -62,9 +73,10 @@ namespace cepgen {
       unsigned short findRole(const Event& ev, const Pythia8::Particle& p) const;
       void updateEvent(Event& ev, double& weight) const;
       Particle& addParticle(Event& ev, const Pythia8::Particle&, const Pythia8::Vec4& mom, unsigned short) const;
-      /// A Pythia8 core to be wrapped
-      std::unique_ptr<Pythia8::Pythia> pythia_;
-      std::shared_ptr<Pythia8::CepGenEvent> cg_evt_;
+
+      const std::unique_ptr<Pythia8::Pythia> pythia_;       ///< Pythia 8 core to be wrapped
+      const std::shared_ptr<Pythia8::CepGenEvent> cg_evt_;  ///< Event interface between CepGen and Pythia
+
       const bool correct_central_;
       const bool debug_lhef_;
       const std::string output_config_;
@@ -74,29 +86,9 @@ namespace cepgen {
       bool first_evt_{true};
     };
 
-    Pythia8Hadroniser::Pythia8Hadroniser(const ParametersList& plist)
-        : Hadroniser(plist),
-          pythia_(new Pythia8::Pythia),
-          cg_evt_(new Pythia8::CepGenEvent),
-          correct_central_(steer<bool>("correctCentralSystem")),
-          debug_lhef_(steer<bool>("debugLHEF")),
-          output_config_(steer<std::string>("outputConfig")) {}
-
-    Pythia8Hadroniser::~Pythia8Hadroniser() {
-      if (!output_config_.empty())
-        pythia_->settings.writeFile(output_config_, false);
-      if (debug_lhef_)
-        cg_evt_->closeLHEF(true);
-    }
-
-    void Pythia8Hadroniser::readString(const char* param) {
-      if (!pythia_->readString(param))
-        throw CG_FATAL("Pythia8Hadroniser") << "The Pythia8 core failed to parse the following setting:\n\t" << param;
-    }
-
     void Pythia8Hadroniser::initialise() {
       cg_evt_->initialise(runParameters());
-#if PYTHIA_VERSION_INTEGER < 8300
+#if defined(PYTHIA_VERSION_INTEGER) && PYTHIA_VERSION_INTEGER < 8300
       pythia_->setLHAupPtr(cg_evt_.get());
 #else
       pythia_->setLHAupPtr(cg_evt_);
@@ -126,13 +118,15 @@ namespace cepgen {
       switch (kin.incomingBeams().mode()) {
         case mode::Kinematics::ElasticElastic: {
           pythia_->settings.mode("BeamRemnants:unresolvedHadron", 3);
-          pythia_->settings.flag("PartonLevel:all", false);
+          pythia_->settings.flag("PartonLevel:MPI", false);
         } break;
         case mode::Kinematics::InelasticElastic: {
           pythia_->settings.mode("BeamRemnants:unresolvedHadron", 2);
+          pythia_->settings.flag("PartonLevel:MPI", false);
         } break;
         case mode::Kinematics::ElasticInelastic: {
           pythia_->settings.mode("BeamRemnants:unresolvedHadron", 1);
+          pythia_->settings.flag("PartonLevel:MPI", false);
         } break;
         case mode::Kinematics::InelasticInelastic:
         default: {
@@ -157,10 +151,6 @@ namespace cepgen {
 
       if (debug_lhef_)
         cg_evt_->initLHEF();
-    }
-
-    void Pythia8Hadroniser::setCrossSection(const Value& cross_section) {
-      cg_evt_->setCrossSection(0, cross_section, cross_section.uncertainty());
     }
 
     bool Pythia8Hadroniser::run(Event& ev, double& weight, bool full) {
@@ -370,5 +360,5 @@ namespace cepgen {
   }  // namespace hadr
 }  // namespace cepgen
 // register hadroniser
-typedef cepgen::hadr::Pythia8Hadroniser Pythia8Hadroniser;
+using cepgen::hadr::Pythia8Hadroniser;
 REGISTER_MODIFIER("pythia8", Pythia8Hadroniser);

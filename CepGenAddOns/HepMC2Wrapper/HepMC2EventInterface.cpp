@@ -33,8 +33,8 @@
 
 namespace HepMC {
   CepGenEvent::CepGenEvent(const cepgen::Event& evt) : GenEvent(Units::GEV, Units::MM) {
-    set_alphaQCD(cepgen::constants::ALPHA_QCD);
-    set_alphaQED(cepgen::constants::ALPHA_EM);
+    set_alphaQCD(evt.alpha_s);
+    set_alphaQED(evt.alpha_em);
 
     weights().push_back(1.);  // unweighted events
 

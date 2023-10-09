@@ -99,8 +99,8 @@ namespace cepgen {
       // select a function value and reject if fmax is too small
       do {
         // ...
-        ps_bin_ = integrator_->uniform(0., grid_->size());
-        y = integrator_->uniform(0., grid_->globalMax());
+        ps_bin_ = integrator_->uniform({0., (double)grid_->size()});
+        y = integrator_->uniform({0., grid_->globalMax()});
         grid_->increment(ps_bin_);
       } while (y > grid_->maxValue(ps_bin_));
       // shoot a point x in this bin
@@ -141,7 +141,7 @@ namespace cepgen {
       // parameter for correction of correction
       grid_->rescale(ps_bin_, weight);
       // accept event
-      if (weight >= integrator_->uniform(0., grid_->maxValueDiff()) + grid_->maxHistValue()) {
+      if (weight >= integrator_->uniform({0., grid_->maxValueDiff()}) + grid_->maxHistValue()) {
         store = true;
         return true;
       }

@@ -34,17 +34,20 @@ namespace cepgen {
       // pick a parton flux parameterisation for each beam
       auto set_flux_properties = [](const Beam& beam, std::unique_ptr<PartonFlux>& flux) {
         auto params = beam.partonFluxParameters();
+        const auto params_p_el = KTFluxFactory::get().describeParameters("BudnevElastic");
+        const auto params_p_inel = KTFluxFactory::get().describeParameters("BudnevInelastic");
+        const auto params_hi_el = KTFluxFactory::get().describeParameters("ElasticHeavyIon");
         if (params.name<std::string>().empty()) {
           if (beam.elastic()) {
             if (HeavyIon::isHI(beam.pdgId()))
-              params = KTFluxFactory::get().describeParameters("ElasticHeavyIon").validate(params);
+              params = params_hi_el.validate(params);
             else
-              params = KTFluxFactory::get().describeParameters("BudnevElastic").validate(params);
+              params = params_p_el.validate(params);
           } else
-            params = KTFluxFactory::get().describeParameters("BudnevInelastic").validate(params);
+            params = params_p_inel.validate(params);
           //TODO: fermions/pions
         }
-        flux.reset(KTFluxFactory::get().build(params).release());
+        flux = std::move(KTFluxFactory::get().build(params));
         if (!flux)
           throw CG_FATAL("KTPhaseSpaceGenerator:init")
               << "Failed to initiate a parton flux object with properties: " << params << ".";

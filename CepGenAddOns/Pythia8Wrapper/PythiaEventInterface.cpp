@@ -20,7 +20,6 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Parameters.h"
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
@@ -59,7 +58,7 @@ namespace Pythia8 {
 
   void CepGenEvent::feedEvent(const cepgen::Event& ev, const Type& type) {
     const double scale = ev(cepgen::Particle::Intermediate)[0].momentum().mass();
-    setProcess(0, 1., scale, cepgen::constants::ALPHA_EM, cepgen::constants::ALPHA_QCD);
+    setProcess(0, 1., scale, ev.alpha_em, ev.alpha_s);
 
     const auto &part1 = ev(cepgen::Particle::Parton1)[0], &part2 = ev(cepgen::Particle::Parton2)[0];
     const auto &op1 = ev(cepgen::Particle::OutgoingBeam1)[0], &op2 = ev(cepgen::Particle::OutgoingBeam2)[0];

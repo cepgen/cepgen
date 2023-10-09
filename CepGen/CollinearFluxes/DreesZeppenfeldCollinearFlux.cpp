@@ -36,7 +36,7 @@ namespace cepgen {
 
     static ParametersDescription description() {
       auto desc = CollinearFlux::description();
-      desc.setDescription("Drees-Zeppenfeld Q^2-dependent flux");
+      desc.setDescription("Drees-Zeppenfeld Q^{2}-dependent flux");
       desc.add<double>("scale", 0.71);
       return desc;
     }

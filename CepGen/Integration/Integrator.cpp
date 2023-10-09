@@ -24,10 +24,7 @@
 
 namespace cepgen {
   Integrator::Integrator(const ParametersList& params)
-      : NamedModule(params),
-        seed_(params_.get<int>("seed", time(nullptr))),
-        verbosity_(steer<int>("verbose")),
-        rnd_(0., 1.) {}
+      : NamedModule(params), seed_(steer<int>("seed")), verbosity_(steer<int>("verbose")), rnd_(0., 1.) {}
 
   void Integrator::checkLimits(const Integrand& integrand) {
     const auto ps_size = integrand.size();
@@ -51,7 +48,7 @@ namespace cepgen {
 
   double Integrator::eval(Integrand& integrand, const std::vector<double>& x) const { return integrand.eval(x); }
 
-  double Integrator::uniform(double min, double max) const { return min + (max - min) * rnd_(rnd_gen_); }
+  double Integrator::uniform(const Limits& lim) const { return lim.x(rnd_(rnd_gen_)); }
 
   Value Integrator::integrate(Integrand& integrand) {
     if (limits_.size() != integrand.size())

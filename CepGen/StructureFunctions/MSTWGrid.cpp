@@ -57,10 +57,8 @@ namespace mstw {
         while (file.read(reinterpret_cast<char*>(&val), sizeof(sfval_t)))
           insert({val.xbj, val.q2}, {val.f2, val.fl});
         file.close();
+        initialise();  // initialise the grid after filling its nodes
       }
-
-      init();
-
       const auto& bounds = boundaries();
       CG_DEBUG("MSTW") << "MSTW@" << header_.order << " grid evaluator built "
                        << "for " << header_.nucleon << " structure functions (" << header_.cl << ")\n\t"

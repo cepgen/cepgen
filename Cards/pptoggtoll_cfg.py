@@ -1,16 +1,16 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
 from Config.PDG_cfi import PDG
+from Config.generator_cff import generator
 
 process = kt.process.clone('pptoff',
     processParameters = cepgen.Parameters(
         pair = PDG.muon,
+        mode = cepgen.ProcessMode.InelasticInelastic,
     ),
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
-        structureFunctions = cepgen.StructureFunctions.SuriYennie,
-        #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
-        ktFluxes = kt.ProtonFlux.GluonKMR
+        partonFluxes = kt.ProtonFlux.GluonKMR
     ),
     outKinematics = kt.process.outKinematics.clone(
         pt = (25.,),
@@ -24,8 +24,11 @@ process = kt.process.clone('pptoff',
     ),
 )
 
-#--- events generation
-from Config.generator_cff import generator
 generator.numEvents = 100000
 
-output = cepgen.Module('root_tree')
+root = cepgen.Module('root_tree')
+dump = cepgen.Module('dump', printEvery = generator.printEvery)
+output = cepgen.Sequence(
+    root,
+    dump,
+)

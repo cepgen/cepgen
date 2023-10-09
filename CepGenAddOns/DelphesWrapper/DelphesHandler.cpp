@@ -107,8 +107,8 @@ namespace cepgen {
     evt_aux->Weight = ev.weight;  // events are normally unweighted in CepGen
     //evt_aux->CrossSection = (double)cross_section_; // not yet fully supported
     evt_aux->ScalePDF = 0.;  // for the time being
-    evt_aux->AlphaQED = constants::ALPHA_EM;
-    evt_aux->AlphaQCD = constants::ALPHA_QCD;
+    evt_aux->AlphaQED = ev.alpha_em;
+    evt_aux->AlphaQCD = ev.alpha_s;
     evt_aux->ReadTime = ev.time_generation;
     utils::Timer tmr;
     const auto& parts = compress_ ? ev.compress().particles() : ev.particles();

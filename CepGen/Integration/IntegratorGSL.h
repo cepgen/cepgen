@@ -34,7 +34,7 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    double uniform(double min, double max) const override;
+    double uniform(const Limits&) const override;
     void setLimits(const std::vector<Limits>&) override;
 
   protected:

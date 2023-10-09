@@ -199,12 +199,12 @@ namespace cepgen {
       //--- grid E -> (cross section, norm)
       for (size_t i = 0; i < gp_en_.size(); ++i)
         sigma_grid_.insert({gp_en_.at(i)}, {gp_cs_.at(i), gp_nr_.at(i)});
-      sigma_grid_.init();
+      sigma_grid_.initialise();
 
       //--- grid Q -> gamma_v
       for (size_t i = 0; i < gmv_.size(); ++i)
         gm_grid_.insert({gmq_.at(i)}, {gmv_.at(i)});
-      gm_grid_.init();
+      gm_grid_.initialise();
       if (mode_ == Mode::SuriYennie || mode_ == Mode::RealAndSuriYennieNonRes || mode_ == Mode::RealResAndNonRes ||
           mode_ == Mode::RealAndFitNonRes)
         non_resonant_ = true;

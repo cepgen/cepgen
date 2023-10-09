@@ -25,6 +25,7 @@
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
+#include "CepGen/Utils/Math.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
@@ -215,7 +216,7 @@ namespace cepgen {
         dumpPoint(&log.stream());
       });
 
-      if (aux_jacobian <= 0.)
+      if (!utils::positive(aux_jacobian))
         return 0.;
 
       //--- compute the integrand
@@ -223,7 +224,7 @@ namespace cepgen {
       CG_DEBUG_LOOP("Process:weight") << "Integrand = " << me_integrand << "\n\t"
                                       << "Proc.-specific integrand * Jacobian (excl. global Jacobian) = "
                                       << (me_integrand * aux_jacobian) << ".";
-      if (me_integrand <= 0.)
+      if (!utils::positive(me_integrand))
         return 0.;
 
       //--- combine every component into a single weight for this point
@@ -339,9 +340,14 @@ namespace cepgen {
       //--- incoming state
       for (const auto& ip : ini) {
         auto& p = event_->addParticle(ip.first).get();
-        const auto& part_info = PDG::get()(ip.second);
-        p.setPdgId(ip.second, part_info.charge / 3.);
-        p.momentum().setMass(part_info.mass);
+        if (HeavyIon::isHI(ip.second)) {
+          p.setPdgId(ip.second);
+          p.momentum().setMass(HeavyIon::fromPdgId(ip.second).mass());
+        } else {
+          const auto& part_info = PDG::get()(ip.second);
+          p.setPdgId(ip.second, part_info.charge / 3.);
+          p.momentum().setMass(part_info.mass);
+        }
         if (ip.first == Particle::IncomingBeam1 || ip.first == Particle::IncomingBeam2)
           p.setStatus(Particle::Status::PrimordialIncoming);
         if (ip.first == Particle::Parton1 || ip.first == Particle::Parton2)
@@ -358,9 +364,14 @@ namespace cepgen {
       for (const auto& opl : fin) {  // pair(role, list of PDGids)
         for (const auto& pdg : opl.second) {
           auto& p = event_->addParticle(opl.first).get();
-          const auto& part_info = PDG::get()(pdg);
-          p.setPdgId(pdg, part_info.charge / 3.);
-          p.momentum().setMass(part_info.mass);
+          if (HeavyIon::isHI(pdg)) {
+            p.setPdgId(pdg);
+            p.momentum().setMass(HeavyIon::fromPdgId(pdg).mass());
+          } else {
+            const auto& part_info = PDG::get()(pdg);
+            p.setPdgId(pdg, part_info.charge / 3.);
+            p.momentum().setMass(part_info.mass);
+          }
         }
       }
 
