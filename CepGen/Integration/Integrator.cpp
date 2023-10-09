@@ -48,7 +48,7 @@ namespace cepgen {
 
   double Integrator::eval(Integrand& integrand, const std::vector<double>& x) const { return integrand.eval(x); }
 
-  double Integrator::uniform(double min, double max) const { return min + (max - min) * rnd_(rnd_gen_); }
+  double Integrator::uniform(const Limits& lim) const { return lim.x(rnd_(rnd_gen_)); }
 
   Value Integrator::integrate(Integrand& integrand) {
     if (limits_.size() != integrand.size())
