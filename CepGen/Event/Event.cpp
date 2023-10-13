@@ -40,20 +40,28 @@ namespace cepgen {
   Event Event::minimal(size_t num_out_particles) {
     auto evt = Event();
     auto ib1 = evt.addParticle(Particle::Role::IncomingBeam1);
+    ib1.get().setStatus(Particle::Status::PrimordialIncoming);
     auto ib2 = evt.addParticle(Particle::Role::IncomingBeam2);
+    ib2.get().setStatus(Particle::Status::PrimordialIncoming);
     auto ob1 = evt.addParticle(Particle::Role::OutgoingBeam1);
+    ob1.get().setStatus(Particle::Status::FinalState);
     ob1.get().addMother(ib1);
     auto ob2 = evt.addParticle(Particle::Role::OutgoingBeam2);
+    ob2.get().setStatus(Particle::Status::FinalState);
     ob2.get().addMother(ib2);
     auto part1 = evt.addParticle(Particle::Role::Parton1);
+    part1.get().setStatus(Particle::Status::Incoming);
     part1.get().addMother(ib1);
     auto part2 = evt.addParticle(Particle::Role::Parton2);
+    part2.get().setStatus(Particle::Status::Incoming);
     part2.get().addMother(ib2);
     auto twopart = evt.addParticle(Particle::Role::Intermediate);
+    twopart.get().setStatus(Particle::Status::Propagator);
     twopart.get().addMother(part1);
     twopart.get().addMother(part2);
     for (size_t i = 0; i < num_out_particles; ++i) {
       auto cs = evt.addParticle(Particle::Role::CentralSystem);
+      cs.get().setStatus(Particle::Status::FinalState);
       cs.get().addMother(twopart);
     }
     return evt;

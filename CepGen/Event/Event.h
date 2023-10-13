@@ -108,7 +108,7 @@ namespace cepgen {
     unsigned short num_hadronisation_trials{0};  ///< Number of trials before the event was "correctly" hadronised
     float time_generation{-1.};                  ///< Time (in s) to generate the event at parton level
     float time_total{-1.};                       ///< Time (in s) to generate the (possibly modified/hadronised) event
-    float weight{0.};                            ///< Event weight
+    float weight{1.};                            ///< Event weight
     float alpha_em{constants::ALPHA_EM};         ///< Electromagnetic coupling constant
     float alpha_s{constants::ALPHA_QCD};         ///< Strong coupling constant
 
