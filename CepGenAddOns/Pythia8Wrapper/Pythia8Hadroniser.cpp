@@ -187,9 +187,10 @@ namespace cepgen {
       // launch the hadronisation / resonances decays, and update the event accordingly
       //===========================================================================================
 
-      ev.num_hadronisation_trials = 0;
+      auto& num_hadr_trials = ev.metadata["pythia8:num_hadronisation_trials"];
+      num_hadr_trials = 0;
       while (true) {
-        if (ev.num_hadronisation_trials++ > max_trials_)
+        if (num_hadr_trials++ > max_trials_)
           return false;
         //--- run the hadronisation/fragmentation algorithm
         if (pythia_->next()) {
@@ -206,8 +207,7 @@ namespace cepgen {
         }
       }
       CG_DEBUG("Pythia8Hadroniser") << "Pythia8 hadronisation performed successfully.\n\t"
-                                    << "Number of trials: " << ev.num_hadronisation_trials << "/" << max_trials_
-                                    << ".\n\t"
+                                    << "Number of trials: " << num_hadr_trials << "/" << max_trials_ << ".\n\t"
                                     << "Particles multiplicity: " << ev.particles().size() << " → "
                                     << pythia_->event.size() << ".\n\t"
                                     << "  indices offset: " << offset_ << ".";

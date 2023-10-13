@@ -34,8 +34,8 @@
 
 namespace HepMC3 {
   CepGenEvent::CepGenEvent(const cepgen::Event& evt) : GenEvent(Units::GEV, Units::MM) {
-    add_attribute("AlphaQCD", make_shared<DoubleAttribute>(evt.alpha_s));
-    add_attribute("AlphaEM", make_shared<DoubleAttribute>(evt.alpha_em));
+    add_attribute("AlphaQCD", make_shared<DoubleAttribute>(evt.metadata.at("alphaS")));
+    add_attribute("AlphaEM", make_shared<DoubleAttribute>(evt.metadata.at("alphaEM")));
 
     weights().push_back(1.);  // unweighted events
 

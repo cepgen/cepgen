@@ -58,7 +58,7 @@ namespace Pythia8 {
 
   void CepGenEvent::feedEvent(const cepgen::Event& ev, const Type& type) {
     const double scale = ev(cepgen::Particle::Intermediate)[0].momentum().mass();
-    setProcess(0, 1., scale, ev.alpha_em, ev.alpha_s);
+    setProcess(0, 1., scale, ev.metadata.at("alphaEM"), ev.metadata.at("alphaS"));
 
     const auto &part1 = ev(cepgen::Particle::Parton1)[0], &part2 = ev(cepgen::Particle::Parton2)[0];
     const auto &op1 = ev(cepgen::Particle::OutgoingBeam1)[0], &op2 = ev(cepgen::Particle::OutgoingBeam2)[0];

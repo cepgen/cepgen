@@ -104,12 +104,12 @@ namespace cepgen {
     auto evt_aux = static_cast<LHEFEvent*>(evt_branch_->NewEntry());
     evt_aux->Number = event_num_++;
     evt_aux->ProcessID = 0;
-    evt_aux->Weight = ev.weight;  // events are normally unweighted in CepGen
+    evt_aux->Weight = ev.metadata.at("weight");  // events are normally unweighted in CepGen
     //evt_aux->CrossSection = (double)cross_section_; // not yet fully supported
     evt_aux->ScalePDF = 0.;  // for the time being
-    evt_aux->AlphaQED = ev.alpha_em;
-    evt_aux->AlphaQCD = ev.alpha_s;
-    evt_aux->ReadTime = ev.time_generation;
+    evt_aux->AlphaQED = ev.metadata.at("alphaEM");
+    evt_aux->AlphaQCD = ev.metadata.at("alphaS");
+    evt_aux->ReadTime = ev.metadata.at("time:generation");
     utils::Timer tmr;
     const auto& parts = compress_ ? ev.compress().particles() : ev.particles();
     //--- particles content

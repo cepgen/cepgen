@@ -83,8 +83,8 @@ namespace cepgen {
     out.XWGTUP = 1.;
     out.XPDWUP = std::pair<double, double>(0., 0.);
     out.SCALUP = 0.;
-    out.AQEDUP = ev.alpha_em;
-    out.AQCDUP = ev.alpha_s;
+    out.AQEDUP = ev.metadata.at("alphaEM");
+    out.AQCDUP = ev.metadata.at("alphaS");
     const auto& particles = compress_ ? ev.compress().particles() : ev.particles();
     out.NUP = particles.size();
     out.resize();

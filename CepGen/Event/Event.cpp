@@ -34,6 +34,7 @@ namespace cepgen {
     particles_ = oth.particles_;
     evtcontent_ = oth.evtcontent_;
     compressed_ = oth.compressed_;
+    metadata = oth.metadata;
     return *this;
   }
 
@@ -77,9 +78,7 @@ namespace cepgen {
 
   void Event::clear() {
     particles_.clear();
-    time_generation = -1.;
-    time_total = -1.;
-    weight = 0.;
+    metadata.clear();
   }
 
   void Event::freeze() {
@@ -428,4 +427,11 @@ namespace cepgen {
                p_total.pz(),
                p_total.energy());
   }
+
+  Event::EventMetadata::EventMetadata()
+      : std::unordered_map<std::string, float>{{"time:generation", -1.f},
+                                               {"time:total", -1.f},
+                                               {"weight", 1.f},
+                                               {"alphaEM", (float)constants::ALPHA_EM},
+                                               {"alphaS", (float)constants::ALPHA_QCD}} {}
 }  // namespace cepgen

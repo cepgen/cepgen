@@ -105,7 +105,7 @@ namespace cepgen {
         return 0.;
 
     if (storage_)
-      event->time_generation = (float)tmr_->elapsed();  // pure CepGen part of the event generation
+      event->metadata["time:generation"] = tmr_->elapsed();  // pure CepGen part of the event generation
 
     {  // trigger all event modification algorithms
       double br = -1.;
@@ -136,13 +136,15 @@ namespace cepgen {
 
       if (storage_) {
         // add generation metadata to the event
-        event->weight = (float)weight;
-        event->time_total = (float)tmr_->elapsed();
+        event->metadata["weight"] = weight;
+        event->metadata["time:total"] = tmr_->elapsed();
       }
 
       CG_DEBUG_LOOP("ProcessIntegrand") << "[process " << std::hex << (void*)process_.get() << std::dec << "]\n\t"
-                                        << "Generation time: " << event->time_generation * 1.e3 << " ms\n\t"
-                                        << "Total time (gen+hadr+cuts): " << event->time_total * 1.e3 << " ms";
+                                        << "Generation time: " << event->metadata.at("time:generation") * 1.e3
+                                        << " ms\n\t"
+                                        << "Total time (gen+hadr+cuts): " << event->metadata.at("time:total") * 1.e3
+                                        << " ms";
 
       // a bit of debugging information
       CG_DEBUG_LOOP("ProcessIntegrand") << "f value for dim-" << x.size() << " point " << x << ": " << weight << ".";

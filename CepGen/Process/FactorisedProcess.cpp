@@ -114,8 +114,8 @@ namespace cepgen {
       event().oneWithRole(Particle::Intermediate).setMomentum(part1.momentum() + part2.momentum(), true);
       if (store_alphas_) {
         const auto two_part_mass = event().oneWithRole(Particle::Intermediate).momentum().mass();
-        event().alpha_em = alphaEM(two_part_mass);
-        event().alpha_s = alphaS(two_part_mass);
+        event().metadata["alphaEM"] = alphaEM(two_part_mass);
+        event().metadata["alphaS"] = alphaS(two_part_mass);
       }
     }
 
