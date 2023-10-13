@@ -330,74 +330,30 @@ namespace cepgen {
         (*os) << oss.str();
     }
 
-    void Process::setEventContent(const IncomingState& ini, const OutgoingState& fin) {
+    void Process::setEventContent(const std::unordered_map<Particle::Role, pdgids_t>& part_ids) {
       if (!event_)
         return;
+      if (part_ids.count(Particle::Role::CentralSystem) == 0)
+        throw CG_FATAL("Process") << "The central system was not specified for this process.";
 
-      event_->clear();
-      //----- add the particles in the event
-
-      //--- incoming state
-      for (const auto& ip : ini) {
-        auto& p = event_->addParticle(ip.first).get();
-        if (HeavyIon::isHI(ip.second)) {
-          p.setPdgId(ip.second);
-          p.momentum().setMass(HeavyIon::fromPdgId(ip.second).mass());
-        } else {
-          const auto& part_info = PDG::get()(ip.second);
-          p.setPdgId(ip.second, part_info.charge / 3.);
-          p.momentum().setMass(part_info.mass);
-        }
-        if (ip.first == Particle::IncomingBeam1 || ip.first == Particle::IncomingBeam2)
-          p.setStatus(Particle::Status::PrimordialIncoming);
-        if (ip.first == Particle::Parton1 || ip.first == Particle::Parton2)
-          p.setStatus(Particle::Status::Incoming);
-      }
-      //--- central system (if not already there)
-      const auto& central_system = ini.find(Particle::CentralSystem);
-      if (central_system == ini.end()) {
-        auto& p = event_->addParticle(Particle::Intermediate).get();
-        p.setPdgId((pdgid_t)PDG::invalid);
-        p.setStatus(Particle::Status::Propagator);
-      }
-      //--- outgoing state
-      for (const auto& opl : fin) {  // pair(role, list of PDGids)
-        for (const auto& pdg : opl.second) {
-          auto& p = event_->addParticle(opl.first).get();
-          if (HeavyIon::isHI(pdg)) {
-            p.setPdgId(pdg);
-            p.momentum().setMass(HeavyIon::fromPdgId(pdg).mass());
+      *event_ = Event::minimal(part_ids.at(Particle::Role::CentralSystem).size());
+      for (const auto& role_vs_parts : part_ids) {
+        auto evt_parts = (*event_)[role_vs_parts.first];
+        if (evt_parts.size() != role_vs_parts.second.size())
+          throw CG_FATAL("Process") << "Invalid number of '" << role_vs_parts.first << "' given. "
+                                    << "Expecting " << evt_parts.size() << ", got " << role_vs_parts.second.size()
+                                    << ".";
+        for (size_t i = 0; i < evt_parts.size(); ++i) {
+          auto& evt_part = evt_parts.at(i).get();
+          const auto user_evt_part_pdgid = role_vs_parts.second.at(i);
+          if (HeavyIon::isHI(user_evt_part_pdgid)) {
+            evt_part.setPdgId(user_evt_part_pdgid);
+            evt_part.momentum().setMass(HeavyIon::fromPdgId(user_evt_part_pdgid).mass());
           } else {
-            const auto& part_info = PDG::get()(pdg);
-            p.setPdgId(pdg, part_info.charge / 3.);
-            p.momentum().setMass(part_info.mass);
+            const auto& part_info = PDG::get()(user_evt_part_pdgid);
+            evt_part.setPdgId(user_evt_part_pdgid, part_info.charge / 3.);
+            evt_part.momentum().setMass(part_info.mass);
           }
-        }
-      }
-
-      //----- define the particles parentage
-
-      const Particles parts = event_->particles();
-      for (const auto& p : parts) {
-        Particle& part = (*event_)[p.id()];
-        switch (part.role()) {
-          case Particle::OutgoingBeam1:
-          case Particle::Parton1:
-            part.addMother(event_->oneWithRole(Particle::IncomingBeam1));
-            break;
-          case Particle::OutgoingBeam2:
-          case Particle::Parton2:
-            part.addMother(event_->oneWithRole(Particle::IncomingBeam2));
-            break;
-          case Particle::Intermediate:
-            part.addMother(event_->oneWithRole(Particle::Parton1));
-            part.addMother(event_->oneWithRole(Particle::Parton2));
-            break;
-          case Particle::CentralSystem:
-            part.addMother(event_->oneWithRole(Particle::Intermediate));
-            break;
-          default:
-            break;
         }
       }
       event_->freeze();  // freeze the event as it is

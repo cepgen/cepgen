@@ -76,11 +76,11 @@ public:
   proc::ProcessPtr clone() const override { return proc::ProcessPtr(new LPAIR(*this)); }
 
   void addEventContent() override {
-    proc::Process::setEventContent({{Particle::IncomingBeam1, PDG::proton},
-                                    {Particle::IncomingBeam2, PDG::proton},
-                                    {Particle::Parton1, PDG::photon},
-                                    {Particle::Parton2, PDG::photon}},
-                                   {{Particle::OutgoingBeam1, {PDG::proton}},
+    proc::Process::setEventContent({{Particle::IncomingBeam1, {PDG::proton}},
+                                    {Particle::IncomingBeam2, {PDG::proton}},
+                                    {Particle::Parton1, {PDG::photon}},
+                                    {Particle::Parton2, {PDG::photon}},
+                                    {Particle::OutgoingBeam1, {PDG::proton}},
                                     {Particle::OutgoingBeam2, {PDG::proton}},
                                     {Particle::CentralSystem, {pair_.pdgid, pair_.pdgid}}});
   }

@@ -47,16 +47,13 @@ namespace cepgen {
           store_alphas_(proc.store_alphas_) {}
 
     void FactorisedProcess::addEventContent() {
-      Process::setEventContent(
-          {// incoming state
-           {Particle::IncomingBeam1, kinematics().incomingBeams().positive().pdgId()},
-           {Particle::IncomingBeam2, kinematics().incomingBeams().negative().pdgId()},
-           {Particle::Parton1, PDG::invalid},
-           {Particle::Parton2, PDG::invalid}},
-          {// outgoing state
-           {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
-           {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
-           {Particle::CentralSystem, produced_parts_}});
+      Process::setEventContent({{Particle::IncomingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
+                                {Particle::IncomingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
+                                {Particle::Parton1, {PDG::invalid}},
+                                {Particle::Parton2, {PDG::invalid}},
+                                {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
+                                {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
+                                {Particle::CentralSystem, produced_parts_}});
       setExtraContent();
     }
 

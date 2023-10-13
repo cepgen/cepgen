@@ -105,9 +105,6 @@ namespace cepgen {
       virtual void addEventContent() = 0;  ///< Set the incoming and outgoing state to be expected in the process
       virtual void prepareKinematics() {}  ///< Compute the incoming state kinematics
 
-      typedef std::map<Particle::Role, pdgid_t> IncomingState;   ///< Map of all incoming state particles in the process
-      typedef std::map<Particle::Role, pdgids_t> OutgoingState;  ///< Map of all outgoing particles in the process
-
       Momentum& pA();  ///< Positive-z incoming beam particle's 4-momentum
       Momentum& pB();  ///< Negative-z incoming beam particle's 4-momentum
       Momentum& pX();  ///< Positive-z outgoing beam particle's 4-momentum
@@ -157,7 +154,7 @@ namespace cepgen {
       double generateVariables() const;
 
       /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
-      void setEventContent(const IncomingState& ini, const OutgoingState& fin);
+      void setEventContent(const std::unordered_map<Particle::Role, pdgids_t>&);
 
       double alphaEM(double q) const;  ///< Compute the electromagnetic running coupling algorithm at a given scale
       double alphaS(double q) const;   ///< Compute the strong coupling algorithm at a given scale
