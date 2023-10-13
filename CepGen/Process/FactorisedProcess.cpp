@@ -54,7 +54,6 @@ namespace cepgen {
                                 {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
                                 {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
                                 {Particle::CentralSystem, produced_parts_}});
-      setExtraContent();
     }
 
     void FactorisedProcess::prepareKinematics() {

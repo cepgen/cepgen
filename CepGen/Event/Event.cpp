@@ -31,6 +31,7 @@ namespace cepgen {
   Event::Event(const Event& oth) { *this = oth; }
 
   Event& Event::operator=(const Event& oth) {
+    clear();
     particles_ = oth.particles_;
     evtcontent_ = oth.evtcontent_;
     compressed_ = oth.compressed_;
@@ -82,7 +83,6 @@ namespace cepgen {
   }
 
   void Event::freeze() {
-    //--- store a snapshot of the primordial event block
     if (particles_.count(Particle::CentralSystem) > 0)
       evtcontent_.cs = particles_[Particle::CentralSystem].size();
     if (particles_.count(Particle::OutgoingBeam1) > 0)
@@ -92,7 +92,6 @@ namespace cepgen {
   }
 
   void Event::restore() {
-    //--- remove all particles after the primordial event block
     if (particles_.count(Particle::CentralSystem) > 0)
       particles_[Particle::CentralSystem].resize(evtcontent_.cs);
     if (particles_.count(Particle::OutgoingBeam1) > 0)

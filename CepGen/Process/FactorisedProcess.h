@@ -47,7 +47,6 @@ namespace cepgen {
       void addEventContent() override final;
       void prepareKinematics() override final;
 
-      virtual void setExtraContent() {}                ///< Set central system kinematics prior to point computation
       virtual void prepareFactorisedPhaseSpace() = 0;  ///< Prepare central part of the Jacobian after kinematics is set
       virtual double computeFactorisedMatrixElement() = 0;  ///< Factorised matrix element (event weight)
       virtual void fillCentralParticlesKinematics() = 0;    ///< Set the kinematics of the outgoing central system

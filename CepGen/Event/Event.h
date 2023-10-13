@@ -37,7 +37,7 @@ namespace cepgen {
     static Event minimal(size_t num_out_particles = 1);
 
     void clear();             ///< Empty the whole event content
-    void freeze();            ///< Initialize an "empty" event collection
+    void freeze();            ///< Store a snapshot of the primordial event block
     void restore();           ///< Restore the event to its "empty" state
     bool compressed() const;  ///< Is the event already without intermediate-channel information?
     Event compress() const;   ///< Compress the event record
