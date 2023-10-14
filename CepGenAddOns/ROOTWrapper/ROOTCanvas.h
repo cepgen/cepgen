@@ -40,7 +40,7 @@ namespace cepgen {
   /// A "prettified" text box object
   class ROOTPaveText : public TPaveText {
   public:
-    inline ROOTPaveText(float x1, float y1, float x2, float y2, const std::string& text = "")
+    inline explicit ROOTPaveText(float x1, float y1, float x2, float y2, const std::string& text = "")
         : TPaveText(x1, y1, x2, y2, "NB NDC") {
       TPaveText::SetTextAlign(kHAlignLeft + kVAlignTop);
       if (!text.empty()) {
@@ -78,10 +78,9 @@ namespace cepgen {
       gStyle->SetOptStat(0);
       gStyle->SetGridColor(17);
       gStyle->SetEndErrorSize(0);
-      Build();
       SetTopLabel(title);
+      Build();
     }
-    inline ~ROOTCanvas() {}
 
     /// Set horizontal canvas width
     inline void SetSize(float size = 600) { TCanvas::SetCanvasSize(size, 600); }
@@ -167,88 +166,136 @@ namespace cepgen {
       //else obj->GetXaxis()->SetTitle(ttle);
     }
 
+    inline void Prettify(THStack* hs) {
+      Prettify(hs->GetHistogram());
+      if (!ratio_)
+        return;
+      auto* objarr = hs->GetHists();
+      if (objarr->GetEntries() < 2)
+        return;
+      TH1* denom = nullptr;
+      std::vector<TH1*> numers{};
+      for (int i = 0; i < objarr->GetEntries(); ++i)
+        if (i == 0) {  // reference is conventionally the first histogram
+          denom = dynamic_cast<TH1*>(objarr->At(i)->Clone());
+          denom->GetXaxis()->SetTitle(hs->GetHistogram()->GetXaxis()->GetTitle());
+        } else
+          numers.emplace_back(dynamic_cast<TH1*>(objarr->At(i)->Clone()));
+      RatioPlot(denom, numers);
+    }
+    inline void Prettify(TMultiGraph* mg) {
+      Prettify(mg->GetHistogram());
+      if (!ratio_)
+        return;
+      auto* list = mg->GetListOfGraphs();
+      if (list->GetEntries() < 2)
+        return;
+      TGraphErrors* denom = nullptr;
+      std::vector<TGraphErrors*> numers{};
+      for (int i = 0; i < list->GetEntries(); ++i) {
+        TGraphErrors* gre{nullptr};
+        if (strcmp(list->At(i)->ClassName(), "TGraph") == 0) {
+          auto* gr = dynamic_cast<TGraph*>(list->At(i));
+          gre = new TGraphErrors(gr->GetN(), gr->GetX(), gr->GetY());
+          gre->SetLineColor(gr->GetLineColor());
+          gre->SetLineWidth(gr->GetLineWidth());
+          gre->SetLineStyle(gr->GetLineStyle());
+        } else
+          gre = dynamic_cast<TGraphErrors*>(list->At(i));
+        if (i == 0) {  // reference is conventionally the first graph
+          denom = gre;
+          denom->GetXaxis()->SetTitle(mg->GetHistogram()->GetXaxis()->GetTitle());
+        } else
+          numers.emplace_back(gre);
+      }
+      RatioPlot(denom, numers, -1., 3.);
+    }
+
     inline std::vector<TH1*> RatioPlot(TH1* denom,
                                        const std::vector<TH1*>& numers,
                                        float ymin = -999.,
                                        float ymax = -999.,
                                        Option_t* draw_style = "hist") {
-      std::vector<TH1*> ratios;
+      std::vector<TH1*> ratios{};
       if (!ratio_)
         return ratios;
+      TCanvas::cd(2);
       auto* hs = Make<THStack>();  // garbage collected
       for (const auto& numer : numers) {
         auto* ratio = dynamic_cast<TH1*>(numer->Clone("ratio"));
-        //ratio->Divide(denom);
-        //ratio->Sumw2();
+        ratio->Divide(denom);
+        auto* ratio_shadow = dynamic_cast<TH1*>(ratio->Clone("ratio_shadow"));
+        ratio_shadow->SetFillColorAlpha(ratio->GetLineColor(), 0.25);
+        hs->Add(ratio_shadow, "e2");
         hs->Add(ratio, draw_style);
         ratios.emplace_back(ratio);
       }
-      TCanvas::cd(2);
+      auto* p2 = dynamic_cast<TPad*>(TCanvas::GetPad(2));
+      p2->SetLogy(false);
       hs->Draw("nostack");
+      const double xmin = denom->GetXaxis()->GetXmin(), xmax = denom->GetXaxis()->GetXmax();
+      TLine l;
+      l.SetLineWidth(2);
+      l.DrawLine(xmin, 1., xmax, 1.);
       auto* hst = hs->GetHistogram();
       Prettify(hst);
       if (ymin != ymax)
         hst->GetYaxis()->SetRangeUser(ymin, ymax);
       hst->GetYaxis()->SetTitle("Ratio");
-      printf("%s::%s\n", denom->GetTitle(), denom->GetXaxis()->GetTitle());
       hst->GetXaxis()->SetTitle(denom->GetXaxis()->GetTitle());
-      const double xmin = denom->GetXaxis()->GetXmin(), xmax = denom->GetXaxis()->GetXmax();
+      hst->GetXaxis()->SetTitleOffset(0.);
       hst->GetXaxis()->SetLimits(xmin, xmax);
-      TLine l;
-      l.SetLineWidth(2);
-      l.DrawLine(xmin, 1., xmax, 1.);
       denom->GetXaxis()->SetTitle("");
-      TCanvas::cd();
+      TCanvas::cd(1);
       return ratios;
     }
 
-    inline TGraphErrors* RatioPlot(TGraphErrors* obj1,
-                                   const TGraphErrors* obj2,
-                                   float ymin = -999.,
-                                   float ymax = -999.) {
+    inline std::vector<TGraphErrors*> RatioPlot(TGraphErrors* denom,
+                                                const std::vector<TGraphErrors*>& numers,
+                                                float ymin = -999.,
+                                                float ymax = -999.) {
+      std::vector<TGraphErrors*> ratios{};
       if (!ratio_)
-        return 0;
-      auto* ratio = Make<TGraphErrors>();
-      ratio->SetTitle(obj1->GetTitle());
-
-      unsigned int n = 0;
-      float min_x = 9.e10, max_x = -9.e10;
-      for (int i = 0; i < obj1->GetN(); i++) {
-        const float x1 = obj1->GetX()[i];
-
-        for (int j = 0; j < obj2->GetN(); j++) {
-          const float x2 = obj2->GetX()[j];
-          if (x2 > max_x)
-            max_x = x2;
-          if (x2 < min_x)
-            min_x = x2;
-
-          if (fabs(x2 - x1) > 1.e-3)
-            continue;
-          const float y1 = obj1->GetY()[i], y1_err = obj1->GetEY()[i], y2 = obj2->GetY()[j], y2_err = obj2->GetEY()[j];
-          const float y = (y2 - y1) / y1, err_y = sqrt(pow(y1_err / y1, 2) + pow(y2_err / y2, 2) * y2 / y1);
-          ratio->SetPoint(n, x1, y);
-          ratio->SetPointError(n, 0., err_y);
-          n++;
+        return ratios;
+      float min_x{999e10}, max_x{-999e10};
+      auto* mg = Make<TMultiGraph>();
+      const auto* x1 = denom->GetX();
+      const auto *y1 = denom->GetY(), *y1e = denom->GetEY();
+      for (const auto& numer : numers) {
+        if (numer->GetN() != denom->GetN())
+          continue;
+        auto* ratio = new TGraphErrors();
+        ratio->SetTitle(denom->GetTitle());
+        const auto *y2 = numer->GetY(), *y2e = numer->GetEY();
+        for (int i = 0; i <= denom->GetN(); i++) {
+          const float x1_val = x1[i], y1_val = y1[i], y1_err = y1e[i];
+          const float y2_val = y2[i], y2_err = y2e[i];
+          min_x = TMath::Min(min_x, x1_val);
+          max_x = TMath::Max(max_x, x1_val);
+          const float y = (y1_val == 0. ? 0. : y2_val / y1_val),
+                      err_y = (y == 0. ? 0. : std::hypot(y1_err / y1_val, y2_err / y2_val) * y);
+          ratio->SetPoint(i, x1_val, y);
+          ratio->SetPointError(i, 0., err_y);
         }
+        mg->Add(ratio);
+        ratio->SetLineColor(numer->GetLineColor());
+        ratio->SetLineWidth(numer->GetLineWidth());
+        ratio->SetLineStyle(numer->GetLineStyle());
+        ratios.emplace_back(ratio);
       }
-
       TCanvas::cd(2);
-      ratio->Draw("ap");
-      ratio->GetXaxis()->SetRangeUser(obj1->GetXaxis()->GetXmin(), obj1->GetXaxis()->GetXmax());
-      ratio->SetMarkerStyle(20);
-      if (ymin != ymax) {
-        ratio->GetYaxis()->SetRangeUser(ymin, ymax);
-      }
-      ratio->GetXaxis()->SetLimits(min_x, max_x);
-      Prettify(ratio->GetHistogram());
-      obj1->GetXaxis()->SetTitle("");
-      TLine l(min_x, 0., max_x, 0.);
+      mg->Draw("al");
+      mg->GetXaxis()->SetRangeUser(denom->GetXaxis()->GetXmin(), denom->GetXaxis()->GetXmax());
+      if (ymin != ymax)
+        mg->GetYaxis()->SetRangeUser(ymin, ymax);
+      mg->GetXaxis()->SetLimits(min_x, max_x);
+      Prettify(mg->GetHistogram());
+      denom->GetXaxis()->SetTitle("");
+      TLine l(min_x, 1., max_x, 1.);
       l.Draw();
-      ratio->GetYaxis()->SetLabelSize(14);
-      TCanvas::cd();
-
-      return ratio;
+      mg->GetYaxis()->SetLabelSize(14);
+      TCanvas::cd(1);
+      return ratios;
     }
     /// Specify the text to show on top of the canvas
     inline void SetTopLabel(const std::string& lab) {
@@ -330,6 +377,12 @@ namespace cepgen {
       }
       leg->Draw();
     }
+    /// Garbage collector-like TObjects producer
+    template <typename T, typename... Args>
+    inline T* Make(Args&&... args) {
+      grb_obj_.emplace_back(new T(std::forward<Args>(args)...));
+      return dynamic_cast<T*>(grb_obj_.rbegin()->get());
+    }
 
   private:
     /// Prepare the canvas for later drawing
@@ -340,14 +393,13 @@ namespace cepgen {
       TCanvas::SetBottomMargin(0.12);
       TCanvas::SetTicks(1, 1);
       TCanvas::SetFillStyle(0);
-      Pad()->SetFillStyle(0);
-
+      TCanvas::Pad()->SetFillStyle(0);
       if (ratio_)
         DivideCanvas();
     }
     /// Divide the canvas into two sub-pads if a ratio plot is to be shown
     inline void DivideCanvas() {
-      TCanvas::Divide(1, 2);
+      TCanvas::Pad()->Divide(1, 2);
       // main pad
       auto* p1 = dynamic_cast<TPad*>(TCanvas::GetPad(1));
       p1->SetPad(0., 0.3, 1., 1.);
@@ -394,14 +446,8 @@ namespace cepgen {
     inline float GetBinning(const TH1* hist) {
       return (hist->GetXaxis()->GetXmax() - hist->GetXaxis()->GetXmin()) / hist->GetXaxis()->GetNbins();
     }
-    /// Garbage collector-like TObjects producer
-    template <typename T, typename... Args>
-    inline T* Make(Args&&... args) {
-      grb_obj_.emplace_back(new T(std::forward<Args>(args)...));
-      return dynamic_cast<T*>(grb_obj_.rbegin()->get());
-    }
 
-    bool ratio_;
+    const bool ratio_;
     std::string leg_mode_{"rt"};
     double leg_x1_{0.5}, leg_y1_{0.75};
     double leg_width_{0.45}, leg_height_{0.15};

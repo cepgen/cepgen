@@ -17,7 +17,6 @@
  */
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Event/Event.h"
 #include "CepGenAddOns/ROOTWrapper/ROOTTreeInfo.h"
 
 namespace ROOT {

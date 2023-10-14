@@ -26,9 +26,7 @@
 #include <iostream>
 #include <string>
 
-namespace cepgen {
-  class Event;
-}
+#include "CepGen/Event/Event.h"
 
 namespace ROOT {
   /// All useful information about a generation run
