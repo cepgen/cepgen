@@ -45,7 +45,7 @@ namespace cepgen {
       const auto evals = steer<int>("evals");
       PyMethodDef py_integr = {"integrand", py_integrand, METH_VARARGS, "A python-wrapped integrand"};
       python::ObjectPtr function(PyCFunction_NewEx(&py_integr, nullptr, python::set<std::string>("integrand").get()));
-      auto value =
+      const auto value =
           lims_ ? python::call(func_, function.get(), (int)integrand.size(), iterations, 1000, evals, lims_.get())
                 : python::call(func_, function.get(), (int)integrand.size(), iterations, 1000, evals);
       if (!value)

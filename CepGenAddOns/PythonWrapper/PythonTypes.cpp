@@ -49,7 +49,7 @@ namespace cepgen {
     }
 
     ObjectPtr importModule(const std::string& mod_name) {
-      return ObjectPtr(PyImport_ImportModule(mod_name.c_str()));  // new
+      return ObjectPtr(PyImport_Import(set<std::string>(mod_name).get()));  // new
     }
 
     ObjectPtr defineModule(const std::string& mod_name, const std::string& code) {
