@@ -8,7 +8,6 @@ def integrate(f, num_dim: int, num_iter: int, num_warmup: int, num_calls: int, l
     limits = limits if len(limits) > 0 else num_dim * [(0., 1.)]
     limits_len = [lim[1] - lim[0] for lim in limits]
     jacob = np.prod(limits_len)
-    print(limits,limits_len)
     def xnorm(xarr):
         return [limits[i][0] + limits_len[i] * xarr[i] for i in range(len(xarr))]
 
@@ -19,8 +18,7 @@ def integrate(f, num_dim: int, num_iter: int, num_warmup: int, num_calls: int, l
         return tf.constant(np.array([f(xnorm(x)) for x in xarr.numpy()]))
 
     vegas.compile(func)
-    res, unc = vegas.run_integration(2)
-    return (res * jacob, unc * jacob)
+    return tuple(jacob * value for value in vegas.run_integration(num_iter))
 
 if __name__ == '__main__':
     import math
