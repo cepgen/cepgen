@@ -49,8 +49,6 @@ namespace cepgen {
     void FactorisedProcess::addEventContent() {
       Process::setEventContent({{Particle::IncomingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
                                 {Particle::IncomingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
-                                {Particle::Parton1, {PDG::invalid}},
-                                {Particle::Parton2, {PDG::invalid}},
                                 {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
                                 {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
                                 {Particle::CentralSystem, produced_parts_}});
