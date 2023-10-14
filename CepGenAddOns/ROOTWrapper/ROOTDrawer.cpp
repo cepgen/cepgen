@@ -72,7 +72,7 @@ namespace cepgen {
 
     const ROOTDrawer& ROOTDrawer::draw(const Graph1D& graph, const Mode& mode) const {
       auto gr = convert(graph);
-      ROOTCanvas canv(graph.name().empty() ? def_filename_ : graph.name(), gr.GetTitle());
+      ROOTCanvas canv(graph.name().empty() ? def_filename_ : graph.name(), gr.GetTitle(), mode & Mode::ratio);
       setMode(canv, mode);
       gr.Draw("al");
       gr.GetHistogram()->SetTitle(delatexify(";" + graph.xAxis().label() + ";" + graph.yAxis().label()));
@@ -84,7 +84,7 @@ namespace cepgen {
 
     const ROOTDrawer& ROOTDrawer::draw(const Graph2D& graph, const Mode& mode) const {
       auto gr = convert(graph);
-      ROOTCanvas canv(graph.name().empty() ? def_filename_ : graph.name(), gr.GetTitle());
+      ROOTCanvas canv(graph.name().empty() ? def_filename_ : graph.name(), gr.GetTitle(), mode & Mode::ratio);
       setMode(canv, mode);
       if (mode & Mode::col)
         gr.Draw("colz");
@@ -102,7 +102,7 @@ namespace cepgen {
 
     const ROOTDrawer& ROOTDrawer::draw(const Hist1D& hist, const Mode& mode) const {
       auto h = convert(hist);
-      ROOTCanvas canv(hist.name().empty() ? def_filename_ : hist.name(), h.GetTitle());
+      ROOTCanvas canv(hist.name().empty() ? def_filename_ : hist.name(), h.GetTitle(), mode & Mode::ratio);
       setMode(canv, mode);
       h.Draw();
       canv.Prettify(&h);
@@ -113,7 +113,7 @@ namespace cepgen {
 
     const ROOTDrawer& ROOTDrawer::draw(const Hist2D& hist, const Mode& mode) const {
       auto h = convert(hist);
-      ROOTCanvas canv(hist.name().empty() ? def_filename_ : hist.name(), h.GetTitle());
+      ROOTCanvas canv(hist.name().empty() ? def_filename_ : hist.name(), h.GetTitle(), mode & Mode::ratio);
       setMode(canv, mode);
       h.Draw("colz");
       canv.Prettify(&h);
@@ -126,9 +126,9 @@ namespace cepgen {
                                        const std::string& name,
                                        const std::string& title,
                                        const Mode& mode) const {
-      TMultiGraph mg;
-      THStack hs;
-      ROOTCanvas canv(name.empty() ? def_filename_ : name, delatexify(title).Data());
+      ROOTCanvas canv(name.empty() ? def_filename_ : name, delatexify(title).Data(), mode & Mode::ratio);
+      auto* mg = canv.Make<TMultiGraph>();
+      auto* hs = canv.Make<THStack>();
       setMode(canv, mode);
       size_t i = 0;
       Drawable* first = nullptr;
@@ -138,13 +138,13 @@ namespace cepgen {
           auto* hist = new TH1D(convert(*dynamic_cast<const Hist1D*>(obj)));
           hist->SetLineColor(colour);
           hist->SetLineStyle(i + 1);
-          hs.Add(hist);
+          hs->Add(hist);
           canv.AddLegendEntry(hist, hist->GetTitle(), "l");
         } else if (obj->isGraph1D()) {
           auto* gr = new TGraphErrors(convert(*dynamic_cast<const Graph1D*>(obj)));
           gr->SetLineColor(colour);
           gr->SetLineStyle(i + 1);
-          mg.Add(gr);
+          mg->Add(gr);
           canv.AddLegendEntry(gr, gr->GetTitle(), "l");
         } else {
           CG_WARNING("ROOTDrawer:draw") << "Cannot add drawable '" << obj->name() << "' to the stack.";
@@ -154,18 +154,18 @@ namespace cepgen {
         if (!first)
           first = const_cast<Drawable*>(obj);
       }
-      const bool has_hists = hs.GetHists() && !hs.GetHists()->IsEmpty();
-      const bool has_graphs = mg.GetListOfGraphs() && !mg.GetListOfGraphs()->IsEmpty();
+      const bool has_hists = hs->GetHists() && !hs->GetHists()->IsEmpty();
+      const bool has_graphs = mg->GetListOfGraphs() && !mg->GetListOfGraphs()->IsEmpty();
       if (has_hists)
-        hs.Draw(mode & Mode::nostack ? "nostack" : "");
+        hs->Draw(mode & Mode::nostack ? "nostack" : "");
       if (has_graphs)
-        mg.Draw((std::string("l") + (!has_hists ? "a" : "")).c_str());
+        mg->Draw((std::string("l") + (!has_hists ? "a" : "")).c_str());
       if (has_hists) {
-        canv.Prettify(hs.GetHistogram());
-        postDraw(hs.GetHistogram(), *first);
+        postDraw(hs->GetHistogram(), *first);
+        canv.Prettify(hs);
       } else if (has_graphs) {
-        canv.Prettify(mg.GetHistogram());
-        postDraw(mg.GetHistogram(), *first);
+        postDraw(mg->GetHistogram(), *first);
+        canv.Prettify(mg);
       }
       canv.Save(def_extension_);
       return *this;

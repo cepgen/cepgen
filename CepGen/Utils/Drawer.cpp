@@ -54,6 +54,8 @@ namespace cepgen {
         os << sep << "col", sep = "|";
       if (mode & Drawer::Mode::cont)
         os << sep << "cont", sep = "|";
+      if (mode & Drawer::Mode::ratio)
+        os << sep << "ratio", sep = "|";
       return os;
     }
   }  // namespace utils

@@ -200,15 +200,17 @@ namespace cepgen {
           gre->SetLineColor(gr->GetLineColor());
           gre->SetLineWidth(gr->GetLineWidth());
           gre->SetLineStyle(gr->GetLineStyle());
-        } else
+          gre->SetTitle(gr->GetTitle());
+        } else if (strcmp(list->At(i)->ClassName(), "TGraphErrors") == 0)
           gre = dynamic_cast<TGraphErrors*>(list->At(i));
+        gre->SetTitle(mg->GetTitle());
         if (i == 0) {  // reference is conventionally the first graph
           denom = gre;
-          denom->GetXaxis()->SetTitle(mg->GetHistogram()->GetXaxis()->GetTitle());
         } else
           numers.emplace_back(gre);
       }
-      RatioPlot(denom, numers, -1., 3.);
+      RatioPlot(denom, numers);
+      mg->GetXaxis()->SetRangeUser(denom->GetXaxis()->GetXmin(), denom->GetXaxis()->GetXmax());
     }
 
     inline std::vector<TH1*> RatioPlot(TH1* denom,
@@ -230,8 +232,7 @@ namespace cepgen {
         hs->Add(ratio, draw_style);
         ratios.emplace_back(ratio);
       }
-      auto* p2 = dynamic_cast<TPad*>(TCanvas::GetPad(2));
-      p2->SetLogy(false);
+      pads_.at(1)->SetLogy(false);
       hs->Draw("nostack");
       const double xmin = denom->GetXaxis()->GetXmin(), xmax = denom->GetXaxis()->GetXmax();
       TLine l;
@@ -245,6 +246,7 @@ namespace cepgen {
       hst->GetXaxis()->SetTitle(denom->GetXaxis()->GetTitle());
       hst->GetXaxis()->SetTitleOffset(0.);
       hst->GetXaxis()->SetLimits(xmin, xmax);
+      hst->GetXaxis()->SetTickSize(0.065);
       denom->GetXaxis()->SetTitle("");
       TCanvas::cd(1);
       return ratios;
@@ -257,25 +259,27 @@ namespace cepgen {
       std::vector<TGraphErrors*> ratios{};
       if (!ratio_)
         return ratios;
-      float min_x{999e10}, max_x{-999e10};
       auto* mg = Make<TMultiGraph>();
-      const auto* x1 = denom->GetX();
-      const auto *y1 = denom->GetY(), *y1e = denom->GetEY();
+      const auto *xd = denom->GetX(), *yd = denom->GetY(), *yde = denom->GetEY();
       for (const auto& numer : numers) {
         if (numer->GetN() != denom->GetN())
           continue;
+        const auto *xn = numer->GetX(), *yn = numer->GetY(), *yne = numer->GetEY();
         auto* ratio = new TGraphErrors();
         ratio->SetTitle(denom->GetTitle());
-        const auto *y2 = numer->GetY(), *y2e = numer->GetEY();
-        for (int i = 0; i <= denom->GetN(); i++) {
-          const float x1_val = x1[i], y1_val = y1[i], y1_err = y1e[i];
-          const float y2_val = y2[i], y2_err = y2e[i];
-          min_x = TMath::Min(min_x, x1_val);
-          max_x = TMath::Max(max_x, x1_val);
-          const float y = (y1_val == 0. ? 0. : y2_val / y1_val),
-                      err_y = (y == 0. ? 0. : std::hypot(y1_err / y1_val, y2_err / y2_val) * y);
-          ratio->SetPoint(i, x1_val, y);
-          ratio->SetPointError(i, 0., err_y);
+        for (int i = 0; i < denom->GetN(); i++) {
+          const float xd_val = xd[i], yd_val = yd[i], yd_err = yde[i];
+          for (int j = 0; j < numer->GetN(); ++j) {
+            const float xn_val = xn[j], yn_val = yn[j], yn_err = yne[j];
+            if ((xn_val == 0. && xd_val == 0.) || fabs(1. - xd_val / xn_val) < 1.e-2) {
+              const float y = (yd_val == 0. ? 0. : yn_val / yd_val),
+                          err_y = (y == 0. ? 0. : std::hypot(yn_err / yn_val, yd_err / yd_val) * y);
+              const auto n = ratio->GetN();
+              ratio->SetPoint(n, xd_val, y);
+              ratio->SetPointError(n, 0., err_y);
+              break;
+            }
+          }
         }
         mg->Add(ratio);
         ratio->SetLineColor(numer->GetLineColor());
@@ -285,15 +289,18 @@ namespace cepgen {
       }
       TCanvas::cd(2);
       mg->Draw("al");
+      Prettify(mg->GetHistogram());
       mg->GetXaxis()->SetRangeUser(denom->GetXaxis()->GetXmin(), denom->GetXaxis()->GetXmax());
       if (ymin != ymax)
         mg->GetYaxis()->SetRangeUser(ymin, ymax);
-      mg->GetXaxis()->SetLimits(min_x, max_x);
-      Prettify(mg->GetHistogram());
+      mg->GetXaxis()->SetTitle(denom->GetXaxis()->GetTitle());
       denom->GetXaxis()->SetTitle("");
-      TLine l(min_x, 1., max_x, 1.);
-      l.Draw();
+      mg->GetXaxis()->SetTickSize(0.065);
+      mg->GetXaxis()->SetTitleOffset(0.);
       mg->GetYaxis()->SetLabelSize(14);
+      mg->GetYaxis()->SetTitle("Ratio");
+      TLine l(denom->GetXaxis()->GetXmin(), 1., denom->GetXaxis()->GetXmax(), 1.);
+      l.Draw();
       TCanvas::cd(1);
       return ratios;
     }
@@ -310,6 +317,13 @@ namespace cepgen {
       top_label_->AddText(title.data());
       //top_label_->Draw();
     }
+    inline void SetGrid(int x = true, int y = true) { pads_.at(0)->SetGrid(x, y); }
+    inline void SetLogx(int log = true) {
+      for (auto& pad : pads_)
+        pad->SetLogx(log);
+    }
+    inline void SetLogy(int log = true) { pads_.at(0)->SetLogy(log); }
+    inline void SetLogz(int log = true) { pads_.at(0)->SetLogz(log); }
 
     /// Set the placement strategy for the legend
     inline void SetLegendMode(const std::string& mode) { leg_mode_ = mode; }
@@ -400,6 +414,7 @@ namespace cepgen {
     /// Divide the canvas into two sub-pads if a ratio plot is to be shown
     inline void DivideCanvas() {
       TCanvas::Pad()->Divide(1, 2);
+      pads_.clear();
       // main pad
       auto* p1 = dynamic_cast<TPad*>(TCanvas::GetPad(1));
       p1->SetPad(0., 0.3, 1., 1.);
@@ -409,6 +424,7 @@ namespace cepgen {
       p1->SetTopMargin(TCanvas::GetTopMargin() + 0.025);
       p1->SetBottomMargin(0.02);
       p1->SetTicks(1, 1);
+      pads_.emplace_back(p1);
       // ratio plot(s) pad
       auto* p2 = dynamic_cast<TPad*>(TCanvas::GetPad(2));
       p2->SetPad(0., 0.0, 1., 0.3);
@@ -419,6 +435,7 @@ namespace cepgen {
       p2->SetBottomMargin(TCanvas::GetBottomMargin() + 0.25);
       p2->SetTicks(1, 1);
       p2->SetGrid(0, 1);
+      pads_.emplace_back(p2);
       // roll back to main pad
       TCanvas::cd(1);
     }
@@ -454,6 +471,7 @@ namespace cepgen {
     std::unique_ptr<TLegend> leg_;
     std::unique_ptr<ROOTPaveText> top_label_;
     std::vector<std::unique_ptr<TObject> > grb_obj_;
+    std::vector<TPad*> pads_{};
   };
   const std::vector<int> ROOTCanvas::colours = {
       kBlack, kRed + 1, kBlue - 2, kGreen + 1, kOrange + 1, kAzure + 1, kMagenta + 1, kCyan + 3, kPink + 5};

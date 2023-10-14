@@ -48,7 +48,8 @@ namespace cepgen {
           nostack = 1 << 3,
           grid = 1 << 4,
           col = 1 << 5,
-          cont = 1 << 6
+          cont = 1 << 6,
+          ratio = 1 << 7
         };
         Mode() : value_(none) {}
         Mode(int val) : value_((value_t)val) {}
@@ -95,4 +96,3 @@ namespace cepgen {
 cepgen::utils::Drawer::Mode& operator|=(cepgen::utils::Drawer::Mode&, const cepgen::utils::Drawer::Mode::value_t&);
 
 #endif
-
