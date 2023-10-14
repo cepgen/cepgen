@@ -77,7 +77,7 @@ namespace ROOT {
     static CepGenEvent load(TFile*, const std::string& events_tree = TREE_NAME);
     static CepGenEvent load(const std::string&, const std::string& events_tree = TREE_NAME);
 
-    Event::EventMetadata metadata;
+    cepgen::Event::EventMetadata metadata;
     float gen_time{-1.};        ///< Event generation time
     float tot_time{-1.};        ///< Total event generation time
     float weight{-1.};          ///< Event weight
