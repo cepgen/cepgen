@@ -25,20 +25,10 @@ else()
   list(APPEND Python_LIBRARIES ${PYTHON_LIBRARIES})
 endif()
 
-file(GLOB sources *.cpp)
-
-execute_process(COMMAND pip show vegas RESULT_VARIABLE VEGAS_RES OUTPUT_QUIET)
-if(${VEGAS_RES} EQUAL 0)
-  message(STATUS "... Vegas python package present")
-else()
-  file(GLOB vegas IntegratorVegasPlus.cpp)
-  list(REMOVE_ITEM sources ${vegas})
-endif()
-
 #----- build the object
 
 enable_testing()
-cepgen_build(CepGenPython SOURCES ${sources}
+cepgen_build(CepGenPython SOURCES *.cpp
     TESTS ${tests}
     EXT_LIBS ${Python_LIBRARIES}
     EXT_HEADERS ${Python_INCLUDE_DIRS}
