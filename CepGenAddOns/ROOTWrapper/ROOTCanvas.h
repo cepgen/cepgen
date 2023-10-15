@@ -205,7 +205,7 @@ namespace cepgen {
           gre->SetTitle(gr->GetTitle());
         } else if (strcmp(list->At(i)->ClassName(), "TGraphErrors") == 0)
           gre = dynamic_cast<TGraphErrors*>(list->At(i));
-        gre->SetTitle(mg->GetTitle());
+        gre->GetXaxis()->SetTitle(mg->GetHistogram()->GetXaxis()->GetTitle());
         x_min = TMath::Min(TMath::MinElement(gre->GetN(), gre->GetX()), x_min);
         x_max = TMath::Max(TMath::MaxElement(gre->GetN(), gre->GetX()), x_max);
         if (i == 0) {  // reference is conventionally the first graph
