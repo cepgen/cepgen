@@ -286,7 +286,7 @@ namespace cepgen {
           const float xd_val = xd[i], yd_val = yd[i], yd_err = yde[i];
           for (int j = 0; j < numer->GetN(); ++j) {
             const float xn_val = xn[j], yn_val = yn[j], yn_err = yne[j];
-            if ((xn_val == 0. && xd_val == 0.) || fabs(1. - xd_val / xn_val) < 1.e-2) {
+            if ((xn_val == 0. && xd_val == 0.) || fabs(1. - xd_val / xn_val) * 2. * numer->GetN() < 1.) {
               if (yd_val == 0. || yn_val == 0.)
                 break;
               const float y = yn_val / yd_val, err_y = std::hypot(yn_err / yn_val, yd_err / yd_val) * y;
