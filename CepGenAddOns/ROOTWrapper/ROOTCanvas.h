@@ -254,11 +254,12 @@ namespace cepgen {
       hst->GetXaxis()->SetTickSize(0.065);
       hst->GetXaxis()->SetRangeUser(xmin, xmax);
       hst->GetYaxis()->SetTitle("Ratio");
+      hst->GetYaxis()->SetLabelSize(15);
       if (ymin != ymax)
         hst->GetYaxis()->SetRangeUser(ymin, ymax);
       else
-        hst->GetYaxis()->SetRangeUser(TMath::Max(-0.1, hst->GetYaxis()->GetXmin()),
-                                      TMath::Min(2.1, hst->GetYaxis()->GetXmax()));
+        hst->GetYaxis()->SetRangeUser(TMath::Max(-0.65, hst->GetYaxis()->GetXmin()),
+                                      TMath::Min(2.65, hst->GetYaxis()->GetXmax()));
       denom->GetXaxis()->SetTitle("");
       TCanvas::cd(1);
       return ratios;
@@ -312,12 +313,13 @@ namespace cepgen {
       mg->GetXaxis()->SetTitle(denom->GetXaxis()->GetTitle());
       mg->GetXaxis()->SetTitleOffset(0.);
       mg->GetXaxis()->SetTickSize(0.065);
+      mg->GetYaxis()->SetTitle("Ratio");
+      mg->GetYaxis()->SetLabelSize(15);
       if (ymin != ymax)
         mg->GetYaxis()->SetRangeUser(ymin, ymax);
       else
-        mg->GetYaxis()->SetRangeUser(TMath::Max(-0.1, mg->GetYaxis()->GetXmin()),
-                                     TMath::Min(2.1, mg->GetYaxis()->GetXmax()));
-      mg->GetYaxis()->SetTitle("Ratio");
+        mg->GetYaxis()->SetRangeUser(TMath::Max(-0.65, mg->GetYaxis()->GetXmin()),
+                                     TMath::Min(2.65, mg->GetYaxis()->GetXmax()));
       denom->GetXaxis()->SetTitle("");
       TLine l(denom->GetXaxis()->GetXmin(), 1., denom->GetXaxis()->GetXmax(), 1.);
       l.Draw();
