@@ -29,6 +29,7 @@
 #include "CepGen/Utils/String.h"
 
 using namespace std;
+using namespace std::string_literals;
 
 int main(int argc, char* argv[]) {
   vector<string> fluxes_names;
@@ -101,9 +102,8 @@ int main(int argc, char* argv[]) {
     cepgen::utils::DrawableColl coll;
 
     for (auto& gr : graph_flux) {
-      gr.xAxis().setLabel("$\\xi$");
-      gr.yAxis().setLabel(string("$") + (normalised ? "\\xi\\varphi" : "\\varphi") + "(\\xi, " +
-                          (plot_vs_q2 ? "Q^{2}" : "M_{X}") + ")" + "$");
+      gr.xAxis().setLabel("$x$");
+      gr.yAxis().setLabel("$"s + (normalised ? "xf" : "f") + "(x," + (plot_vs_q2 ? "Q^{2}" : "M_{X}") + ")$");
       if (y_range.valid())
         gr.yAxis().setRange(y_range);
       coll.emplace_back(&gr);

@@ -25,6 +25,7 @@
 #include <THStack.h>
 #include <TLegend.h>
 #include <TLine.h>
+#include <TMath.h>
 #include <TObjArray.h>
 #include <TObjString.h>
 #include <TPaveText.h>
@@ -192,6 +193,7 @@ namespace cepgen {
         return;
       TGraphErrors* denom = nullptr;
       std::vector<TGraphErrors*> numers{};
+      double x_min{1.e10}, x_max{-1.e10};
       for (int i = 0; i < list->GetEntries(); ++i) {
         TGraphErrors* gre{nullptr};
         if (strcmp(list->At(i)->ClassName(), "TGraph") == 0) {
@@ -204,17 +206,21 @@ namespace cepgen {
         } else if (strcmp(list->At(i)->ClassName(), "TGraphErrors") == 0)
           gre = dynamic_cast<TGraphErrors*>(list->At(i));
         gre->SetTitle(mg->GetTitle());
+        x_min = TMath::Min(TMath::MinElement(gre->GetN(), gre->GetX()), x_min);
+        x_max = TMath::Max(TMath::MaxElement(gre->GetN(), gre->GetX()), x_max);
         if (i == 0) {  // reference is conventionally the first graph
           denom = gre;
         } else
           numers.emplace_back(gre);
       }
-      RatioPlot(denom, numers);
-      mg->GetXaxis()->SetRangeUser(denom->GetXaxis()->GetXmin(), denom->GetXaxis()->GetXmax());
+      RatioPlot(denom, numers, x_min, x_max);
+      mg->GetXaxis()->SetRangeUser(x_min, x_max);
     }
 
     inline std::vector<TH1*> RatioPlot(TH1* denom,
                                        const std::vector<TH1*>& numers,
+                                       float xmin = -999.,
+                                       float xmax = -999.,
                                        float ymin = -999.,
                                        float ymax = -999.,
                                        Option_t* draw_style = "hist") {
@@ -234,19 +240,25 @@ namespace cepgen {
       }
       pads_.at(1)->SetLogy(false);
       hs->Draw("nostack");
-      const double xmin = denom->GetXaxis()->GetXmin(), xmax = denom->GetXaxis()->GetXmax();
+      if (xmin == xmax) {
+        xmin = denom->GetXaxis()->GetXmin();
+        xmax = denom->GetXaxis()->GetXmax();
+      }
       TLine l;
       l.SetLineWidth(2);
       l.DrawLine(xmin, 1., xmax, 1.);
       auto* hst = hs->GetHistogram();
       Prettify(hst);
-      if (ymin != ymax)
-        hst->GetYaxis()->SetRangeUser(ymin, ymax);
-      hst->GetYaxis()->SetTitle("Ratio");
       hst->GetXaxis()->SetTitle(denom->GetXaxis()->GetTitle());
       hst->GetXaxis()->SetTitleOffset(0.);
-      hst->GetXaxis()->SetLimits(xmin, xmax);
       hst->GetXaxis()->SetTickSize(0.065);
+      hst->GetXaxis()->SetRangeUser(xmin, xmax);
+      hst->GetYaxis()->SetTitle("Ratio");
+      if (ymin != ymax)
+        hst->GetYaxis()->SetRangeUser(ymin, ymax);
+      else
+        hst->GetYaxis()->SetRangeUser(TMath::Max(-0.1, hst->GetYaxis()->GetXmin()),
+                                      TMath::Min(2.1, hst->GetYaxis()->GetXmax()));
       denom->GetXaxis()->SetTitle("");
       TCanvas::cd(1);
       return ratios;
@@ -254,6 +266,8 @@ namespace cepgen {
 
     inline std::vector<TGraphErrors*> RatioPlot(TGraphErrors* denom,
                                                 const std::vector<TGraphErrors*>& numers,
+                                                float xmin = -999.,
+                                                float xmax = -999.,
                                                 float ymin = -999.,
                                                 float ymax = -999.) {
       std::vector<TGraphErrors*> ratios{};
@@ -272,8 +286,9 @@ namespace cepgen {
           for (int j = 0; j < numer->GetN(); ++j) {
             const float xn_val = xn[j], yn_val = yn[j], yn_err = yne[j];
             if ((xn_val == 0. && xd_val == 0.) || fabs(1. - xd_val / xn_val) < 1.e-2) {
-              const float y = (yd_val == 0. ? 0. : yn_val / yd_val),
-                          err_y = (y == 0. ? 0. : std::hypot(yn_err / yn_val, yd_err / yd_val) * y);
+              if (yd_val == 0. || yn_val == 0.)
+                break;
+              const float y = yn_val / yd_val, err_y = std::hypot(yn_err / yn_val, yd_err / yd_val) * y;
               const auto n = ratio->GetN();
               ratio->SetPoint(n, xd_val, y);
               ratio->SetPointError(n, 0., err_y);
@@ -290,15 +305,20 @@ namespace cepgen {
       TCanvas::cd(2);
       mg->Draw("al");
       Prettify(mg->GetHistogram());
-      mg->GetXaxis()->SetRangeUser(denom->GetXaxis()->GetXmin(), denom->GetXaxis()->GetXmax());
+      if (xmin != xmax)
+        mg->GetXaxis()->SetRangeUser(xmin, xmax);
+      else
+        mg->GetXaxis()->SetRangeUser(denom->GetXaxis()->GetXmin(), denom->GetXaxis()->GetXmax());
+      mg->GetXaxis()->SetTitle(denom->GetXaxis()->GetTitle());
+      mg->GetXaxis()->SetTitleOffset(0.);
+      mg->GetXaxis()->SetTickSize(0.065);
       if (ymin != ymax)
         mg->GetYaxis()->SetRangeUser(ymin, ymax);
-      mg->GetXaxis()->SetTitle(denom->GetXaxis()->GetTitle());
-      denom->GetXaxis()->SetTitle("");
-      mg->GetXaxis()->SetTickSize(0.065);
-      mg->GetXaxis()->SetTitleOffset(0.);
-      mg->GetYaxis()->SetLabelSize(14);
+      else
+        mg->GetYaxis()->SetRangeUser(TMath::Max(-0.1, mg->GetYaxis()->GetXmin()),
+                                     TMath::Min(2.1, mg->GetYaxis()->GetXmax()));
       mg->GetYaxis()->SetTitle("Ratio");
+      denom->GetXaxis()->SetTitle("");
       TLine l(denom->GetXaxis()->GetXmin(), 1., denom->GetXaxis()->GetXmax(), 1.);
       l.Draw();
       TCanvas::cd(1);
