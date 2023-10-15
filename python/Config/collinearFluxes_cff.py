@@ -23,13 +23,13 @@ class ProtonFlux:
             formFactors = Module('InelasticNucleon')
         )
     )
-    def LHAPDF(pdfset='', fromRemnant: bool=False):
+    def LHAPDF(pdfset: str='', extrapolatePDF: bool=False):
         return Module('LHAPDF',
             set = pdfset,
-            fromRemnant = fromRemnant)
+            extrapolatePDF = extrapolatePDF)
     LHAPDFLUXlep = LHAPDF(
         pdfset = 'LUXlep-NNPDF31_nlo_as_0118_luxqed',
-        fromRemnant = False
+        extrapolatePDF = False
     )
 
 
