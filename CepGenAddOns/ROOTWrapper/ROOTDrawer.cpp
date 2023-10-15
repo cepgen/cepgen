@@ -130,20 +130,21 @@ namespace cepgen {
       auto* mg = canv.Make<TMultiGraph>();
       auto* hs = canv.Make<THStack>();
       setMode(canv, mode);
-      size_t i = 0;
       Drawable* first = nullptr;
+      size_t i = 0;
       for (const auto* obj : objs) {
-        auto colour = (i >= ROOTCanvas::colours.size()) ? i + 1 : ROOTCanvas::colours.at(i);
+        auto colour = ROOTCanvas::colours.at(i % ROOTCanvas::colours.size());
+        auto style = i + 1;
         if (obj->isHist1D()) {
           auto* hist = new TH1D(convert(*dynamic_cast<const Hist1D*>(obj)));
           hist->SetLineColor(colour);
-          hist->SetLineStyle(i + 1);
+          hist->SetLineStyle(style);
           hs->Add(hist);
           canv.AddLegendEntry(hist, hist->GetTitle(), "l");
         } else if (obj->isGraph1D()) {
           auto* gr = new TGraphErrors(convert(*dynamic_cast<const Graph1D*>(obj)));
           gr->SetLineColor(colour);
-          gr->SetLineStyle(i + 1);
+          gr->SetLineStyle(style);
           mg->Add(gr);
           canv.AddLegendEntry(gr, gr->GetTitle(), "l");
         } else {

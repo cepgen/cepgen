@@ -204,12 +204,13 @@ namespace cepgen {
           gre->SetLineStyle(gr->GetLineStyle());
           gre->SetTitle(gr->GetTitle());
         } else if (strcmp(list->At(i)->ClassName(), "TGraphErrors") == 0)
-          gre = dynamic_cast<TGraphErrors*>(list->At(i));
+          gre = dynamic_cast<TGraphErrors*>(list->At(i)->Clone());
         gre->GetXaxis()->SetTitle(mg->GetHistogram()->GetXaxis()->GetTitle());
         x_min = TMath::Min(TMath::MinElement(gre->GetN(), gre->GetX()), x_min);
         x_max = TMath::Max(TMath::MaxElement(gre->GetN(), gre->GetX()), x_max);
         if (i == 0) {  // reference is conventionally the first graph
           denom = gre;
+          denom->GetXaxis()->SetTitle(mg->GetHistogram()->GetXaxis()->GetTitle());
         } else
           numers.emplace_back(gre);
       }
@@ -245,7 +246,9 @@ namespace cepgen {
         xmax = denom->GetXaxis()->GetXmax();
       }
       TLine l;
-      l.SetLineWidth(2);
+      l.SetLineWidth(1);
+      l.SetLineColor(denom->GetLineColor());
+      l.SetLineStyle(denom->GetLineStyle());
       l.DrawLine(xmin, 1., xmax, 1.);
       auto* hst = hs->GetHistogram();
       Prettify(hst);
@@ -306,10 +309,11 @@ namespace cepgen {
       TCanvas::cd(2);
       mg->Draw("al");
       Prettify(mg->GetHistogram());
-      if (xmin != xmax)
-        mg->GetXaxis()->SetRangeUser(xmin, xmax);
-      else
-        mg->GetXaxis()->SetRangeUser(denom->GetXaxis()->GetXmin(), denom->GetXaxis()->GetXmax());
+      if (xmin == xmax) {
+        xmin = denom->GetXaxis()->GetXmin();
+        xmax = denom->GetXaxis()->GetXmax();
+      }
+      mg->GetXaxis()->SetRangeUser(xmin, xmax);
       mg->GetXaxis()->SetTitle(denom->GetXaxis()->GetTitle());
       mg->GetXaxis()->SetTitleOffset(0.);
       mg->GetXaxis()->SetTickSize(0.065);
@@ -321,8 +325,11 @@ namespace cepgen {
         mg->GetYaxis()->SetRangeUser(TMath::Max(-0.65, mg->GetYaxis()->GetXmin()),
                                      TMath::Min(2.65, mg->GetYaxis()->GetXmax()));
       denom->GetXaxis()->SetTitle("");
-      TLine l(denom->GetXaxis()->GetXmin(), 1., denom->GetXaxis()->GetXmax(), 1.);
-      l.Draw();
+      TLine l;
+      l.SetLineWidth(1);
+      l.SetLineColor(denom->GetLineColor());
+      l.SetLineStyle(denom->GetLineStyle());
+      l.DrawLine(xmin, 1., xmax, 1.);
       TCanvas::cd(1);
       return ratios;
     }
@@ -339,13 +346,31 @@ namespace cepgen {
       top_label_->AddText(title.data());
       //top_label_->Draw();
     }
-    inline void SetGrid(int x = true, int y = true) { pads_.at(0)->SetGrid(x, y); }
-    inline void SetLogx(int log = true) {
-      for (auto& pad : pads_)
-        pad->SetLogx(log);
+    inline void SetGrid(int x = 1, int y = 1) {
+      if (pads_.empty())
+        TCanvas::SetGrid(x, y);
+      else
+        pads_.at(0)->SetGrid(x, y);
     }
-    inline void SetLogy(int log = true) { pads_.at(0)->SetLogy(log); }
-    inline void SetLogz(int log = true) { pads_.at(0)->SetLogz(log); }
+    inline void SetLogx(int log = 1) {
+      if (pads_.empty())
+        TCanvas::SetLogx(log);
+      else
+        for (auto& pad : pads_)
+          pad->SetLogx(log);
+    }
+    inline void SetLogy(int log = 1) {
+      if (pads_.empty())
+        TCanvas::SetLogy(log);
+      else
+        pads_.at(0)->SetLogy(log);
+    }
+    inline void SetLogz(int log = 1) {
+      if (pads_.empty())
+        TCanvas::SetLogz(log);
+      else
+        pads_.at(0)->SetLogz(log);
+    }
 
     /// Set the placement strategy for the legend
     inline void SetLegendMode(const std::string& mode) { leg_mode_ = mode; }
