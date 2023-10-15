@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
   vector<string> functionals;
   int num_points;
   cepgen::Limits xrange, yrange;
-  bool log, draw_grid, func_2d;
+  bool log, draw_grid, func_2d, ratio_plot;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("function,f", "function to parse", &function, "min(1.,exp(-x/10))")
@@ -43,6 +43,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .addOptionalArgument("log,l", "logarithmic y-axis", &log, false)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
+      .addOptionalArgument("ratio,r", "draw the ratio plot", &ratio_plot, false)
       .addOptionalArgument("2d,t", "two-dimensional function", &func_2d, false)
       .parse();
 
@@ -91,6 +92,8 @@ int main(int argc, char* argv[]) {
     cepgen::utils::Drawer::Mode dm;
     if (draw_grid)
       dm |= cepgen::utils::Drawer::Mode::grid;
+    if (ratio_plot)
+      dm |= cepgen::utils::Drawer::Mode::ratio;
 
     if (func_2d) {
       if (log)

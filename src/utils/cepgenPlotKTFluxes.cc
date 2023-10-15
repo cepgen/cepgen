@@ -84,11 +84,11 @@ int main(int argc, char* argv[]) {
 
   for (const auto& x : x_range.generate(num_points)) {
     out << "\n" << x;
-    for (size_t j = 0; j < fluxes.size(); ++j) {
-      auto flux = plot_vs_q2 ? fluxes.at(j)->fluxQ2(x, kt2, q2) : fluxes.at(j)->fluxMX2(x, kt2, mx2);
+    for (size_t i = 0; i < fluxes.size(); ++i) {
+      auto flux = plot_vs_q2 ? fluxes.at(i)->fluxQ2(x, kt2, q2) : fluxes.at(i)->fluxMX2(x, kt2, mx2);
       flux *= (normalised ? x : 1.);
       out << "\t" << flux;
-      graph_flux.at(j).addPoint(x, flux);
+      graph_flux.at(i).addPoint(x, flux);
     }
   }
   out.close();

@@ -35,6 +35,8 @@
 #define GNUPLOT TOSTRING(GNUPLOT_BIN)
 #endif
 
+using namespace std::string_literals;
+
 namespace cepgen {
   namespace utils {
     /// Gnuplot drawable objects drawing utility
@@ -45,7 +47,7 @@ namespace cepgen {
           : Drawer(params),
             extension_(steer<std::string>("extension")),
             persist_(steer<bool>("persist")),
-            size_(steer<std::vector<int> >("size")),
+            size_(steer<std::vector<std::string> >("size")),
             font_(steer<std::string>("font")) {
         if (size_.size() != 2)
           throw CG_FATAL("GnuplotDrawer") << "Invalid canvas size specified: " << size_ << ".";
@@ -56,8 +58,8 @@ namespace cepgen {
         desc.setDescription("Gnuplot drawing utility");
         desc.add<std::string>("extension", "png");
         desc.add<bool>("persist", false);
-        desc.add<std::vector<int> >("size", {640, 480});
-        desc.add<std::string>("font", "Helvetica,15pt");
+        desc.add<std::vector<std::string> >("size", {"30cm", "20cm"});
+        desc.add<std::string>("font", "");
         return desc;
       }
 
@@ -82,6 +84,8 @@ namespace cepgen {
           term = "epslatex";
         else if (extension_ == "ps")
           term = "postscript nobackground enhanced";
+        else if (extension_ == "fig")
+          term = "fig";
         else
           throw CG_FATAL("GnuplotDrawer:execute") << "Invalid extension set: '" + extension_ + "'";
         if (!font_.empty())
@@ -108,11 +112,11 @@ namespace cepgen {
         if (mode & Mode::logz)
           cmds += "set logscale z";
         if (!dr.title().empty())
-          cmds += "set title '" + dr.title() + "'";
+          cmds += "set title " + delatexify(dr.title());
         for (const auto& ai : std::unordered_map<std::string, const Drawable::AxisInfo&>{
                  {"x", dr.xAxis()}, {"y", dr.yAxis()}, {"z", dr.zAxis()}}) {
           if (!ai.second.label().empty())
-            cmds += "set " + ai.first + "label \"" + ai.second.label() + "\"";
+            cmds += "set " + ai.first + "label " + delatexify(ai.second.label());
           const auto& rng = ai.second.range();
           if (rng.valid())
             cmds += "set " + ai.first + "range [" + std::to_string(rng.min()) + ":" + std::to_string(rng.max()) + "]";
@@ -122,10 +126,14 @@ namespace cepgen {
       }
       static Piper::Commands drawGraph1D(const Graph1D&, const Mode&);
       static Piper::Commands drawHist1D(const Hist1D&, const Mode&);
+      static std::string delatexify(const std::string& tok) {
+        //return "\""s + utils::replace_all(tok, {{"\\", "\\\\"}}) + "\"";
+        return "'"s + utils::replace_all(tok, {{"'", "\\'"}}) + "'";
+      }
 
       const std::string extension_;
       const bool persist_;
-      const std::vector<int> size_;
+      const std::vector<std::string> size_;
       const std::string font_;
     };
 
@@ -224,7 +232,7 @@ namespace cepgen {
       if (objs.empty())
         return *this;
       auto cmds = preDraw(*objs.at(0), mode);
-      cmds += "set title '" + title + "'";
+      cmds += "set title " + delatexify(title);
       std::vector<std::string> plot_cmds, splot_cmds;
       for (const auto* obj : objs) {
         if (obj->isGraph1D()) {
@@ -232,10 +240,10 @@ namespace cepgen {
           auto it = gr_cmds.begin();
           while (it != gr_cmds.end())
             if (startsWith(*it, "plot")) {
-              plot_cmds.emplace_back(replace_all(it->substr(5), " notitle", " title '" + obj->title() + "'"));
+              plot_cmds.emplace_back(replace_all(it->substr(5), " notitle", " title " + delatexify(obj->title())));
               it = gr_cmds.erase(it);
             } else if (startsWith(*it, "splot")) {
-              splot_cmds.emplace_back(replace_all(it->substr(6), " notitle", " title '" + obj->title() + "'"));
+              splot_cmds.emplace_back(replace_all(it->substr(6), " notitle", " title " + delatexify(obj->title())));
               it = gr_cmds.erase(it);
             } else
               ++it;
@@ -248,10 +256,10 @@ namespace cepgen {
           auto it = h_cmds.begin();
           while (it != h_cmds.end())
             if (startsWith(*it, "plot")) {
-              plot_cmds.emplace_back(replace_all(it->substr(5), " notitle", " title '" + obj->title() + "'"));
+              plot_cmds.emplace_back(replace_all(it->substr(5), " notitle", " title " + delatexify(obj->title())));
               it = h_cmds.erase(it);
             } else if (startsWith(*it, "splot")) {
-              splot_cmds.emplace_back(replace_all(it->substr(6), " notitle", " title '" + obj->title() + "'"));
+              splot_cmds.emplace_back(replace_all(it->substr(6), " notitle", " title " + delatexify(obj->title())));
               it = h_cmds.erase(it);
             } else
               ++it;
