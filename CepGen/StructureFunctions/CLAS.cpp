@@ -45,7 +45,7 @@ namespace cepgen {
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
-        desc.setDescription("CLAS (nucleon data, Q^2 > 0.5 GeV2 / xBj > 0.15)");
+        desc.setDescription("CLAS");
         desc.add<std::string>("model", "proton")
             .setDescription("Nucleon modelling ('proton', 'deuteron', or 'neutron' handled)");
         return desc;

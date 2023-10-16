@@ -60,7 +60,6 @@ int main(int argc, char* argv[]) {
       .parse();
 
   const bool plot_vs_q2 = (q2 > 0.);
-  const double mx2 = mx * mx;
   if (logx && x_range.min() == 0.)
     x_range.min() = 1.e-3;
   if (x_range.max() == 1.)
@@ -85,7 +84,7 @@ int main(int argc, char* argv[]) {
   for (const auto& x : x_range.generate(num_points)) {
     out << "\n" << x;
     for (size_t i = 0; i < fluxes.size(); ++i) {
-      auto flux = plot_vs_q2 ? fluxes.at(i)->fluxQ2(x, kt2, q2) : fluxes.at(i)->fluxMX2(x, kt2, mx2);
+      auto flux = plot_vs_q2 ? fluxes.at(i)->fluxQ2(x, kt2, q2) : fluxes.at(i)->fluxMX2(x, kt2, mx * mx);
       flux *= (normalised ? x : 1.);
       out << "\t" << flux;
       graph_flux.at(i).addPoint(x, flux);
@@ -118,7 +117,7 @@ int main(int argc, char* argv[]) {
     plt->draw(coll,
               "comp_partonflux",
               (plot_vs_q2 ? cepgen::utils::format("$Q^{2}$ = %g GeV$^{2}$", q2)
-                          : cepgen::utils::format("$M_{X}$ = %g GeV$^{2}$", mx)) +
+                          : cepgen::utils::format("$M_{X}$ = %g GeV", mx)) +
                   ", " + cepgen::utils::format("$k_{T}^{2}$ = %g GeV$^{2}$", kt2),
               dm);
   }
