@@ -61,7 +61,7 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = Integrator::description();
       desc.setDescription("Python integration algorithm");
-      desc.add<std::string>("module", "VegasIntegration")
+      desc.add<std::string>("module", "IntegrationAlgos.Vegas")
           .setDescription("name of the Python module embedding the integrate() function");
       desc.add<int>("iterations", 10);
       desc.add<int>("evals", 1000);
