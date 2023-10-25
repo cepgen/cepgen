@@ -42,9 +42,7 @@ namespace cepgen {
     void setSeed(long long seed) { seed_ = seed; }
 
     /// Parse a configuration string
-    virtual void readString(const char*) {}
-    /// Parse a configuration string
-    virtual void readString(const std::string& param) { readString(param.c_str()); }
+    virtual void readString(const std::string&) {}
     /// Parse a list of configuration strings
     virtual void readStrings(const std::vector<std::string>& params);
 

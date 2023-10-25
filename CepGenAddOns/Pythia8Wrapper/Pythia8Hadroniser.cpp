@@ -51,7 +51,7 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      void readString(const char* param) override {
+      void readString(const std::string& param) override {
         if (!pythia_->readString(param))
           throw CG_FATAL("Pythia8Hadroniser") << "The Pythia8 core failed to parse the following setting:\n\t" << param;
       }
