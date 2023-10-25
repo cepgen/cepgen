@@ -66,6 +66,23 @@ namespace cepgen {
     inline static int fontType(int mode) { return 130 + mode; }
   };
 
+  template <typename T>
+  T* AddUnderOverflowBins(const T* hist) {
+    std::vector<double> bins;
+    if (hist->GetXaxis()->IsVariableBinSize()) {
+      const auto* arr_bins = hist->GetXaxis()->GetXbins();
+      bins = std::vector<double>(arr_bins->GetArray(), arr_bins->GetArray() + hist->GetNbinsX());
+    } else
+      for (int i = 0; i <= hist->GetNbinsX(); ++i)
+        bins.emplace_back(hist->GetXaxis()->GetBinUpEdge(i));
+    bins.insert(bins.begin(), bins.at(0) - (bins.at(1) - bins.at(0)));
+    bins.insert(bins.end(), bins.at(bins.size() - 1) + (bins.at(bins.size() - 1) - bins.at(bins.size() - 2)));
+    auto* hist_new = new T(TString(hist->GetName()) + "_uo", hist->GetTitle(), bins.size() - 1, bins.data());
+    for (int i = 0; i <= hist->GetNbinsX() + 1; ++i)
+      hist_new->SetBinContent(i + 1, hist->GetBinContent(i));
+    return hist_new;
+  }
+
   /// A "prettified" generic figure canvas
   class ROOTCanvas : public TCanvas {
   public:
