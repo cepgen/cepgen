@@ -191,7 +191,7 @@ namespace cepgen {
     Piper::Commands TopdrawerDrawer::plot(const Graph1D& graph) {
       Piper::Commands cmds;
       for (const auto& pt : graph.points())
-        cmds += format("%g,%g,%g,%g", pt.first.value, pt.second.value, pt.first.value_unc, pt.second.value_unc);
+        cmds += format("%g,%g,%g,%g", pt.first.value, pt.second, pt.first.value_unc, pt.second.uncertainty());
       cmds += "JOIN";
       return cmds;
     }
@@ -210,7 +210,7 @@ namespace cepgen {
         osl.str("");
         osl << "X " << to_fortran_float(xval.first.value) << " Z";
         for (const auto& yval : xval.second)
-          osl << " " << (std::isfinite(yval.second.value) ? to_fortran_float(yval.second.value) : "0.");
+          osl << " " << (std::isfinite(yval.second) ? to_fortran_float(yval.second) : "0.");
         cmds += osl.str();
       }
       if (mode & Mode::col)
