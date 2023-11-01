@@ -1,5 +1,3 @@
-#include <Pythia8/Pythia.h>
-
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/EventModifierFactory.h"
@@ -9,7 +7,6 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Test.h"
-#include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
 using namespace std;
 
@@ -47,20 +44,6 @@ int main() {
   auto gen = cepgen::Generator();
 
   auto evt = generate_event();
-
-  /*CG_TEST_EQUAL((unsigned long long)py_evt.idBeamA(),
-                evt.oneWithRole(cepgen::Particle::Role::IncomingBeam1).pdgId(),
-                "first incoming beam PDG id");
-  CG_TEST_EQUAL((unsigned long long)py_evt.idBeamB(),
-                evt.oneWithRole(cepgen::Particle::Role::IncomingBeam2).pdgId(),
-                "second incoming beam PDG id");
-  CG_TEST_EQUAL(py_evt.eBeamA(),
-                evt.oneWithRole(cepgen::Particle::Role::IncomingBeam1).momentum().pz(),
-                "first incoming beam pz");
-  CG_TEST_EQUAL(py_evt.eBeamB(),
-                evt.oneWithRole(cepgen::Particle::Role::IncomingBeam2).momentum().pz(),
-                "second incoming beam pz");*/
-
   evt.dump();
 
   gen.parametersRef().setProcess(cepgen::ProcessFactory::get().build(
