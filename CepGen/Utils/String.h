@@ -104,6 +104,11 @@ namespace cepgen {
     /// Merge a collection of collections of a printable type in a single string
     template <typename T>
     std::string merge(const std::vector<std::vector<T> >&, const std::string&);
+    /// Merge a collection of a printable type in a single string
+    template <typename T, size_t N>
+    inline std::string merge(const std::array<T, N>& arr, const std::string& delim) {
+      return merge(std::vector<T>(arr.begin(), arr.end()), delim);
+    }
     /// Check if a string is also an integer
     bool isInt(const std::string&);
     /// Check if a string is also a floating point number

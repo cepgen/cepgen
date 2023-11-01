@@ -17,10 +17,12 @@
  */
 
 #include <cmath>
+#include <iomanip>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Utils/Limits.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   /// Express an angle in between two extrema
@@ -230,7 +232,8 @@ namespace cepgen {
 
   double Momentum::eta() const {
     const int sign = pz() / fabs(pz());
-    return pt() != 0. ? std::log((p() + fabs(pz())) / pt()) * sign : 9999. * sign;
+    const auto ptval = pt();
+    return (ptval != 0. ? std::log((p() + fabs(pz())) / ptval) : 9999.) * sign;
   }
 
   double Momentum::rapidity() const {
@@ -334,6 +337,7 @@ namespace cepgen {
   //--- printout
 
   std::ostream& operator<<(std::ostream& os, const Momentum& mom) {
-    return os << "(" << mom.energy() << "|" << mom.px() << " " << mom.py() << " " << mom.pz() << ")";
+    return os << utils::format(
+               "(%8.3f,%8.3f,%8.3f;%8.3f|%8.3f)", mom.px(), mom.py(), mom.pz(), mom.energy(), mom.mass());
   }
 }  // namespace cepgen
