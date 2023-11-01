@@ -171,6 +171,32 @@ namespace cepgen {
     return os << "}";
   }
 
+  std::ostream& operator<<(std::ostream& os, const Particle::Status& st) {
+    switch (st) {
+      case Particle::Status::PrimordialIncoming:
+        return os << "incoming beam particle";
+      case Particle::Status::DebugResonance:
+        return os << "intermediate resonance";
+      case Particle::Status::Resonance:
+        return os << "decayed intermediate resonance";
+      case Particle::Status::Fragmented:
+        return os << "fragmented outgoing beam";
+      case Particle::Status::Propagator:
+        return os << "propagator";
+      case Particle::Status::Incoming:
+        return os << "incoming parton";
+      case Particle::Status::Undefined:
+        return os << "undefined";
+      case Particle::Status::FinalState:
+        return os << "final state particle";
+      case Particle::Status::Undecayed:
+        return os << "particle to be decayed externally";
+      case Particle::Status::Unfragmented:
+        return os << "particle to be hadronised externally";
+    }
+    return os;
+  }
+
   std::ostream& operator<<(std::ostream& os, const Particle::Role& rl) {
     switch (rl) {
       case Particle::UnknownRole:

@@ -47,6 +47,8 @@ namespace cepgen {
       Undecayed = 2,            ///< Particle to be decayed externally
       Unfragmented = 3          ///< Particle to be hadronised externally
     };
+    /// Human-readable format for a particle's role in the event
+    friend std::ostream& operator<<(std::ostream& os, const Status&);
     /// Role of the particle in the process
     enum Role {
       UnknownRole = -1,   ///< Undefined role
@@ -60,7 +62,7 @@ namespace cepgen {
       Parton2 = 42        ///< \f$z<0\f$ beam incoming parton
     };
     /// Human-readable format for a particle's role in the event
-    friend std::ostream& operator<<(std::ostream& os, const Role& rl);
+    friend std::ostream& operator<<(std::ostream& os, const Role&);
 
     //----- static getters
 
