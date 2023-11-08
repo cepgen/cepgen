@@ -42,7 +42,6 @@ cepgen::Event generate_event() {
 
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
-  //cepgen::initialise();
   auto gen = cepgen::Generator();
 
   auto evt = generate_event();
@@ -62,7 +61,7 @@ int main(int argc, char* argv[]) {
   double evt_weight = 1.;
   cg_pythia->run(evt, evt_weight, true);
 
-  CG_LOG << evt;
+  CG_DEBUG("main") << "Pythia 6-filtered event:\n" << evt;
 
   CG_TEST_EQUAL(evt_weight, 1., "event weight");
   CG_TEST(evt(cepgen::Particle::Role::OutgoingBeam1).size() > 1, "decayed diffractive beam system");

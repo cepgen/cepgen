@@ -98,7 +98,6 @@ namespace pythia6 {
   }
 
   cepgen::Particle::Status cepgenStatus(int py_status) {
-    CG_LOG << py_status;
     switch (py_status) {
       case 1:
         return cepgen::Particle::Status::FinalState;
