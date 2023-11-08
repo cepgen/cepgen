@@ -6,6 +6,7 @@
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
+#include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Test.h"
 
 using namespace std;
@@ -39,7 +40,8 @@ cepgen::Event generate_event() {
   return evt;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+  cepgen::ArgumentsParser(argc, argv).parse();
   //cepgen::initialise();
   auto gen = cepgen::Generator();
 
@@ -59,6 +61,8 @@ int main() {
   cg_pythia->initialise(gen.parametersRef());
   double evt_weight = 1.;
   cg_pythia->run(evt, evt_weight, true);
+
+  CG_LOG << evt;
 
   CG_TEST_EQUAL(evt_weight, 1., "event weight");
 

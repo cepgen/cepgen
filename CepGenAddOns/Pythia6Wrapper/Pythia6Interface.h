@@ -40,6 +40,7 @@ extern pyjets_t pyjets_;
 
 namespace pythia6 {
   int status(int);
+  void checkPDGid(int);
 
   void pyexec();
   double pymass(int pdgid_);

@@ -18,6 +18,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Particle.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenAddOns/Pythia6Wrapper/Pythia6Interface.h"
 
@@ -39,6 +40,7 @@ extern void pyname_(int&, char*, int);
 extern int pyk_(int&, int&);
 /// Get real-valued event information from Pythia
 extern double pyp_(int&, int&);
+extern double pychge_(int&);
 /// Purely virtual method to call at the end of the run
 void pystop_() { CG_INFO("pythia6:pystop") << "End of run"; }
 }
@@ -46,7 +48,7 @@ void pystop_() { CG_INFO("pythia6:pystop") << "End of run"; }
 namespace pythia6 {
   void pyexec() { pyexec_(); }
 
-  double pymass(int pdgid_) { return pymass_(pdgid_); }
+  double pymass(int pdgid) { return pymass_(pdgid); }
 
   void pyckbd() { pyckbd_(); }
 
@@ -57,6 +59,8 @@ namespace pythia6 {
   int pyk(int id, int qty) { return pyk_(id, qty); }
 
   double pyp(int id, int qty) { return pyp_(id, qty); }
+
+  double pychge(int pdgid) { return pychge_(pdgid); }
 
   std::string pyname(int pdgid) {
     // maximal number of characters to fetch for the particle's name
@@ -91,5 +95,21 @@ namespace pythia6 {
       default:
         throw CG_FATAL("pythia6:status") << "No conversion rule for CepGen status code: " << cg_status << ".";
     }
+  }
+
+  void checkPDGid(int pdg_id) {
+    if (cepgen::PDG::get().has(pdg_id))
+      return;
+    const auto name = pythia6::pyname(pdg_id);
+    cepgen::ParticleProperties prop;
+    prop.pdgid = pdg_id;
+    prop.name = name;
+    prop.descr = name;
+    //prop.colours = pyk(p + 1, 12);  // colour factor
+    prop.mass = pymass(pdg_id);
+    prop.width = -1.;              //pmas( pdg_id, 2 ),
+    prop.charge = pychge(pdg_id);  // charge
+    prop.fermion = false;
+    cepgen::PDG::get().define(prop);
   }
 }  // namespace pythia6
