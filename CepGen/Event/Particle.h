@@ -203,9 +203,9 @@ namespace cepgen {
     /// Decay/stability status
     int status_{(int)Status::Undefined};
     /// List of mother particles
-    ParticlesIds mothers_;
+    ParticlesIds mothers_{};
     /// List of daughter particles
-    ParticlesIds daughters_;
+    ParticlesIds daughters_{};
     /// PDG id
     pdgid_t pdg_id_{(pdgid_t)0};
     /// Collection of standard, bare-level physical properties

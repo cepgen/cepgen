@@ -156,10 +156,13 @@ namespace cepgen {
     if (part.primary())
       os << ", primary";
     else {
-      os << ", " << utils::s("mother", part.mothers_.size()) << "=";
-      std::string delim;
-      for (const auto& moth : part.mothers_)
-        os << delim << moth, delim = ",";
+      os << ", " << utils::s("mother", part.mothers_.size());
+      if (!part.mothers_.empty()) {
+        os << "=";
+        std::string delim;
+        for (const auto moth : part.mothers_)
+          os << delim << moth, delim = ",";
+      }
     }
     const auto& daughters_list = part.daughters();
     if (!daughters_list.empty()) {

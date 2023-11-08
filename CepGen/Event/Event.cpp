@@ -243,25 +243,15 @@ namespace cepgen {
     if (part.role() <= 0)
       throw CG_FATAL("Event") << "Trying to add a particle with role=" << (int)part.role() << ".";
 
-    //--- retrieve the list of particles with the same role
-    auto& part_with_same_role = particles_[part.role()];
-
-    //--- specify the id
-    if (part_with_same_role.empty() && part.id() < 0)
-      part.setId(size());  // set the id if previously invalid/non-existent
-    if (!part_with_same_role.empty()) {
-      if (replace)
-        part.setId(part_with_same_role[0].id());  // set the previous id if replacing a particle
-      else
-        part.setId(size());
-    }
-
-    //--- add the particle to the collection
-    if (replace && !part_with_same_role.empty())
-      part_with_same_role = Particles(1, part);
+    auto& part_with_same_role = particles_[part.role()];  // list of particles with the same role
+    if (part.id() < 0)
+      part.setId(part_with_same_role.empty() || !replace
+                     ? size()                         // set the id if previously invalid/non-existent
+                     : part_with_same_role[0].id());  // set the previous id if replacing a particle
+    if (replace)
+      part_with_same_role = {part};
     else
       part_with_same_role.emplace_back(part);
-
     return std::ref(part_with_same_role.back());
   }
 
