@@ -19,6 +19,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Parameters.h"
 #include "CepGen/Physics/Hadroniser.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenAddOns/Pythia6Wrapper/EventInterface.h"
@@ -45,10 +46,11 @@ namespace cepgen {
         CG_WARNING("Pythia6Hadroniser") << "Branching fraction not yet implemented in this hadroniser.\n\t"
                                         << "You will have to specify manually the multiplication factor according\n\t"
                                         << "to your list of open channels.";
+        kin_mode_ = runParameters().kinematics().incomingBeams().mode();
       }
       inline bool run(Event& ev, double& weight, bool full) override {
         weight = 1.;
-        pythia6::EventInterface evt(ev);
+        pythia6::EventInterface evt(ev, kin_mode_);
         evt.prepareHadronisation();  // fill Pythia 6 common blocks
 
         CG_DEBUG_LOOP("Pythia6Hadroniser")
@@ -62,6 +64,9 @@ namespace cepgen {
 
         return true;
       }
+
+    private:
+      mode::Kinematics kin_mode_;
     };
   }  // namespace hadr
 }  // namespace cepgen

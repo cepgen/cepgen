@@ -28,13 +28,20 @@
 #include "CepGenAddOns/Pythia6Wrapper/Pythia6Interface.h"
 
 namespace pythia6 {
-  EventInterface::EventInterface(cepgen::Event& event)
-      : evt_(event), rnd_phi_(0., 2. * M_PI), rnd_cos_theta_(-1., 1.), rnd_qdq_(0., 9.) {}
+  EventInterface::EventInterface(cepgen::Event& event, const cepgen::mode::Kinematics kin_mode)
+      : evt_(event), rnd_phi_(0., 2. * M_PI), rnd_cos_theta_(-1., 1.), rnd_qdq_(0., 9.) {
+    if (kin_mode == cepgen::mode::Kinematics::InelasticElastic ||
+        kin_mode == cepgen::mode::Kinematics::InelasticInelastic)
+      roles_.emplace_back(cepgen::Particle::Role::OutgoingBeam1);
+    if (kin_mode == cepgen::mode::Kinematics::ElasticInelastic ||
+        kin_mode == cepgen::mode::Kinematics::InelasticInelastic)
+      roles_.emplace_back(cepgen::Particle::Role::OutgoingBeam2);
+  }
 
   void EventInterface::prepareHadronisation() {
     CG_DEBUG_LOOP("EventInterface:prepareHadronisation") << "Hadronisation preparation called.";
 
-    for (auto role : {cepgen::Particle::Role::OutgoingBeam1, cepgen::Particle::Role::OutgoingBeam2}) {
+    for (auto role : roles_) {
       if (!evt_.hasRole(role))
         continue;
       const auto& part = evt_.oneWithRole(role);

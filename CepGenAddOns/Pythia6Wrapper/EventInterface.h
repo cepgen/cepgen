@@ -22,6 +22,8 @@
 #include <random>
 #include <vector>
 
+#include "CepGen/Physics/Modes.h"
+
 namespace cepgen {
   class Event;
 }
@@ -29,7 +31,7 @@ namespace pythia6 {
   /// Interface to the Pythia 6 event content.
   class EventInterface {
   public:
-    explicit EventInterface(cepgen::Event&);
+    explicit EventInterface(cepgen::Event&, cepgen::mode::Kinematics);
 
     void prepareHadronisation();
     size_t numStrings() const { return evt_strings_.size(); }
@@ -39,6 +41,7 @@ namespace pythia6 {
     void fillEventBlock();
 
     cepgen::Event& evt_;  // NOT owning
+    std::vector<cepgen::Particle::Role> roles_;
 
     std::default_random_engine rnd_gen_;  ///< Random number generator engine
     std::uniform_real_distribution<double> rnd_phi_, rnd_cos_theta_, rnd_qdq_;
