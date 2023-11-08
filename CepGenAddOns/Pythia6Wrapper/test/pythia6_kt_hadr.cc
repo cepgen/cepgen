@@ -65,6 +65,14 @@ int main(int argc, char* argv[]) {
   CG_LOG << evt;
 
   CG_TEST_EQUAL(evt_weight, 1., "event weight");
+  CG_TEST(evt(cepgen::Particle::Role::OutgoingBeam1).size() > 1, "decayed diffractive beam system");
+  CG_TEST(evt(cepgen::Particle::Role::OutgoingBeam2).size() == 1, "undecayed elastic beam system");
+  cepgen::Momentum daugh_total_momentum;
+  for (const auto& daugh : evt.stableDaughters(evt(cepgen::Particle::Role::OutgoingBeam1)[0], true))
+    daugh_total_momentum += daugh.get().momentum();
+  CG_TEST_EQUIV((daugh_total_momentum - evt(cepgen::Particle::Role::OutgoingBeam1)[0].momentum()).p(),
+                0.,
+                "diffractive system momentum balance");
 
   CG_TEST_SUMMARY;
 }
