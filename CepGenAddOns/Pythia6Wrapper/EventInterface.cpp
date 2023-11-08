@@ -35,6 +35,8 @@ namespace pythia6 {
     CG_DEBUG_LOOP("EventInterface:prepareHadronisation") << "Hadronisation preparation called.";
 
     for (auto role : {cepgen::Particle::Role::OutgoingBeam1, cepgen::Particle::Role::OutgoingBeam2}) {
+      if (!evt_.hasRole(role))
+        continue;
       const auto& part = evt_.oneWithRole(role);
 
       const auto partons = pickPartonsContent();
