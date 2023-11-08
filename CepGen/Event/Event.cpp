@@ -220,16 +220,56 @@ namespace cepgen {
     throw CG_FATAL("Event") << "Failed to retrieve the particle with id=" << id << ".";
   }
 
-  Particles Event::operator[](const ParticlesIds& ids) const {
+  ParticlesRefs Event::operator[](const ParticlesIds& ids) {
+    ParticlesRefs out;
+    std::transform(ids.begin(), ids.end(), std::back_inserter(out), [this](const auto& id) {
+      return std::ref(this->operator[](id));
+    });
+    return out;
+  }
+
+  Particles Event::operator()(const ParticlesIds& ids) const {
     Particles out;
     std::transform(
         ids.begin(), ids.end(), std::back_inserter(out), [this](const auto& id) { return this->operator[](id); });
     return out;
   }
 
-  Particles Event::mothers(const Particle& part) const { return operator[](part.mothers()); }
+  Particles Event::mothers(const Particle& part) const { return operator()(part.mothers()); }
 
-  Particles Event::daughters(const Particle& part) const { return operator[](part.daughters()); }
+  ParticlesRefs Event::mothers(const Particle& part) { return operator[](part.mothers()); }
+
+  Particles Event::daughters(const Particle& part) const { return operator()(part.daughters()); }
+
+  ParticlesRefs Event::daughters(const Particle& part) { return operator[](part.daughters()); }
+
+  Particles Event::stableDaughters(const Particle& part, bool recursive) const {
+    Particles parts;
+    for (const auto& daugh : operator()(part.daughters())) {
+      if (daugh.status() == Particle::Status::FinalState)
+        parts.emplace_back(daugh);
+      else if (recursive) {
+        const auto daugh_daugh = stableDaughters(daugh, recursive);
+        parts.insert(
+            parts.end(), std::make_move_iterator(daugh_daugh.begin()), std::make_move_iterator(daugh_daugh.end()));
+      }
+    }
+    return parts;
+  }
+
+  ParticlesRefs Event::stableDaughters(const Particle& part, bool recursive) {
+    ParticlesRefs parts;
+    for (const auto& daugh : operator[](part.daughters())) {
+      if (daugh.get().status() == Particle::Status::FinalState)
+        parts.emplace_back(daugh);
+      else if (recursive) {
+        const auto daugh_daugh = stableDaughters(daugh, recursive);
+        parts.insert(
+            parts.end(), std::make_move_iterator(daugh_daugh.begin()), std::make_move_iterator(daugh_daugh.end()));
+      }
+    }
+    return parts;
+  }
 
   ParticleRoles Event::roles() const {
     ParticleRoles out;

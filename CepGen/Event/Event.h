@@ -75,7 +75,7 @@ namespace cepgen {
     /// Get a list of particle identifiers in Event corresponding to a certain role in the process kinematics
     ParticlesIds ids(Particle::Role role) const;
     /// Check whether a particle role is represented in this event
-    bool hasRole(Particle::Role role) const { return particles_.count(role) != 0; }
+    inline bool hasRole(Particle::Role role) const { return particles_.count(role) != 0; }
     /// First Particle object with a given role in the event
     /// \param[in] role The role the particle has to play in the event
     Particle& oneWithRole(Particle::Role role);
@@ -88,8 +88,11 @@ namespace cepgen {
     /// \param[in] id Unique identifier of the particle in the event
     const Particle& operator[](int id) const;
     /// References to the Particle objects corresponding to the unique identifiers in the event
-    /// \param[in] ids_ The unique identifiers to the particles to be selected in the event
-    Particles operator[](const ParticlesIds& ids_) const;
+    /// \param[in] ids The unique identifiers to the particles to be selected in the event
+    ParticlesRefs operator[](const ParticlesIds& ids);
+    /// Particle objects corresponding to the unique identifiers in the event
+    /// \param[in] ids The unique identifiers to the particles to be selected in the event
+    Particles operator()(const ParticlesIds& ids) const;
 
     /// Compute the missing momentum for central particles in this event
     Momentum missingMomentum() const;
@@ -99,9 +102,19 @@ namespace cepgen {
     /// List of all parent Particle object for this given particle
     /// \param[in] part The particle for which the mother particles have to be retrieved
     Particles mothers(const Particle& part) const;
+    /// List of all parent Particle object for this given particle
+    /// \param[in] part The particle for which the mother particles have to be retrieved
+    ParticlesRefs mothers(const Particle& part);
     /// List of all the daughters from a particle
     /// \param[in] part The particle for which the daughter particles have to be retrieved
     Particles daughters(const Particle& part) const;
+    /// List of all the daughters from a particle
+    /// \param[in] part The particle for which the daughter particles have to be retrieved
+    ParticlesRefs daughters(const Particle& part);
+    /// List all the stable daughters of a particle in this event
+    Particles stableDaughters(const Particle& part, bool recursive = false) const;
+    /// List all the stable daughters of a particle in this event
+    ParticlesRefs stableDaughters(const Particle& part, bool recursive = false);
     /// List of roles defined for the given event (really process-dependant for the central system)
     ParticleRoles roles() const;
 
