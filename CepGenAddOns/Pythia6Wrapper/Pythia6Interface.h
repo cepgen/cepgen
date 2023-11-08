@@ -39,7 +39,8 @@ extern pyjets_t pyjets_;
 }
 
 namespace pythia6 {
-  int status(int);
+  int pythia6Status(int);
+  cepgen::Particle::Status cepgenStatus(int);
   void checkPDGid(int);
 
   void pyexec();

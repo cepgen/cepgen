@@ -79,7 +79,7 @@ namespace pythia6 {
     return pyjoin_(njoin, *join.data());
   }
 
-  int status(int cg_status) {
+  int pythia6Status(int cg_status) {
     switch ((cepgen::Particle::Status)cg_status) {
       case cepgen::Particle::Status::PrimordialIncoming:
         return 21;
@@ -94,6 +94,22 @@ namespace pythia6 {
         return 11;
       default:
         throw CG_FATAL("pythia6:status") << "No conversion rule for CepGen status code: " << cg_status << ".";
+    }
+  }
+
+  cepgen::Particle::Status cepgenStatus(int py_status) {
+    CG_LOG << py_status;
+    switch (py_status) {
+      case 1:
+        return cepgen::Particle::Status::FinalState;
+      case 3:
+        return cepgen::Particle::Status::Propagator;
+      case 11:
+        return cepgen::Particle::Status::Fragmented;
+      case 21:
+        return cepgen::Particle::Status::PrimordialIncoming;
+      default:
+        return (cepgen::Particle::Status)py_status;
     }
   }
 

@@ -40,10 +40,10 @@ namespace pythia6 {
       const auto& part = evt_.oneWithRole(role);
 
       const auto partons = pickPartonsContent();
-      pythia6::checkPDGid(partons.first);
-      pythia6::checkPDGid(partons.second);
-      const double mq = pythia6::pymass(partons.first), mq2 = mq * mq;
-      const double mdq = pythia6::pymass(partons.second), mdq2 = mdq * mdq;
+      checkPDGid(partons.first);
+      checkPDGid(partons.second);
+      const double mq = pymass(partons.first), mq2 = mq * mq;
+      const double mdq = pymass(partons.second), mdq2 = mdq * mdq;
 
       // choose random direction in MX frame
       const double phi = rnd_phi_(rnd_gen_), theta = acos(rnd_cos_theta_(rnd_gen_));
@@ -95,7 +95,7 @@ namespace pythia6 {
         pyjets_.p[3][i] = part.momentum().energy();
         pyjets_.p[4][i] = part.momentum().mass();
         try {
-          pyjets_.k[0][i] = pythia6::status((int)part.status());
+          pyjets_.k[0][i] = pythia6Status((int)part.status());
         } catch (const std::out_of_range&) {
           evt_.dump();
           throw CG_FATAL("EventInterface") << "Failed to retrieve a Pythia 6 particle status translation for "
@@ -141,19 +141,19 @@ namespace pythia6 {
             dbg << cepgen::utils::format("\n\t * %2d (pdgId=%4d)", part_id, pyjets_.k[1][part_id - 1]);
         }
       });
-      pythia6::pyjoin(evt_string);
+      pyjoin(evt_string);
     }
   }
 
   void EventInterface::run() {
     fillEventBlock();
     const auto old_npart = pyjets_.n;
-    pythia6::pyexec();
+    pyexec();
     //--- update the event
     for (int p = old_npart; p < pyjets_.n; ++p) {
       // filter the first particles already present in the event
       const auto pdg_id = std::abs(pyjets_.k[1][p]);
-      pythia6::checkPDGid(pdg_id);
+      checkPDGid(pdg_id);
 
       const auto moth_id = pyjets_.k[2][p] - 1;
       const auto role = pyjets_.k[2][p] != 0 ? evt_[moth_id].role()  // child particle inherits its mother's role
@@ -161,10 +161,11 @@ namespace pythia6 {
 
       auto& pa = evt_.addParticle(role).get();
       pa.setId(p);
-      pa.setStatus(pyjets_.k[0][p]);
+      pa.setStatus(cepgenStatus(pyjets_.k[0][p]));
       pa.setPdgId((long)pyjets_.k[1][p]);
       pa.setMomentum(
           cepgen::Momentum(pyjets_.p[0][p], pyjets_.p[1][p], pyjets_.p[2][p], pyjets_.p[3][p]).setMass(pyjets_.p[4][p]));
+      // define particle parentage
       auto& moth = evt_[moth_id];
       if (role != cepgen::Particle::Role::UnknownRole)
         moth.setStatus(role == cepgen::Particle::Role::CentralSystem ? cepgen::Particle::Status::Resonance
