@@ -82,6 +82,7 @@ namespace cepgen {
 
     //--- start the timer
     tmr_->reset();
+    process().clearEvent();
 
     //--- specify the phase space point to probe and calculate weight
     auto weight = process().weight(x);

@@ -60,4 +60,3 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
-
