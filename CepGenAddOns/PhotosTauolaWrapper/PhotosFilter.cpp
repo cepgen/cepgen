@@ -43,7 +43,7 @@ namespace cepgen {
       static ParametersDescription description();
 
       void initialise() override;
-      bool run(Event& ev, double& weight, bool full) override;
+      bool run(Event& ev, double& weight, bool fast) override;
     };
 
     PhotosFilter::PhotosFilter(const ParametersList& params) : EventModifier(params) {

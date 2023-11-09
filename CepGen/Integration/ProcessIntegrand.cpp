@@ -109,8 +109,9 @@ namespace cepgen {
 
     {  // trigger all event modification algorithms
       double br = -1.;
+      const auto fast_mode = !storage_;
       for (auto& mod : params_->eventModifiersSequence()) {
-        if (!mod->run(*event, br, storage_) || br == 0.)
+        if (!mod->run(*event, br, fast_mode) || br == 0.)
           return 0.;
         weight *= br;  // branching fraction for all decays
       }

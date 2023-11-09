@@ -41,7 +41,7 @@ namespace cepgen {
       ~TauolaFilter();
 
       void initialise() override;
-      bool run(Event& ev, double& weight, bool full) override;
+      bool run(Event& ev, double& weight, bool fast) override;
 
       static ParametersDescription description();
 
@@ -100,7 +100,7 @@ namespace cepgen {
       }
     }
 
-    bool TauolaFilter::run(Event& ev, double& weight, bool /* full */) {
+    bool TauolaFilter::run(Event& ev, double& weight, bool /*fast*/) {
       weight = 1.;
 
       HepMC3::CepGenEvent hepmc_evt(ev);
