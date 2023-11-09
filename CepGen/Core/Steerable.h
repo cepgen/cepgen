@@ -52,6 +52,11 @@ namespace cepgen {
     U steerAs(const std::string& key) const {
       return params_.getAs<T, U>(key);
     }
+    /// Retrieve module name from parameters
+    template <typename T>
+    T steerName() const {
+      return steer<T>(MODULE_NAME);
+    }
     /// Retrieve a path from common search paths
     std::string steerPath(const std::string& key) const;
 
