@@ -18,7 +18,7 @@ int main() {
   const auto evt_size_bef = evt.size();
 
   double weight;
-  pythia->run(evt, weight, true);
+  pythia->run(evt, weight, false);
 
   CG_LOG << evt;
   CG_TEST_EQUAL(evt[0].status(), cepgen::Particle::Status::Resonance, "tau 'decayed' status");

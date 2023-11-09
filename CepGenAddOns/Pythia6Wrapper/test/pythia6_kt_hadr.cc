@@ -59,7 +59,13 @@ int main(int argc, char* argv[]) {
   cg_pythia->setCrossSection(cepgen::Value{1.46161e-1, 1.25691e-3});
   cg_pythia->initialise(gen.parametersRef());
   double evt_weight = 1.;
+
+  const auto evt_before_particles = evt.particles().size();
   cg_pythia->run(evt, evt_weight, true);
+  CG_TEST(evt_weight == 1., "no event weight modification in fast mode");
+  CG_TEST(evt.particles().size() == evt_before_particles, "no event modification in fast mode");
+
+  cg_pythia->run(evt, evt_weight, false);
 
   CG_DEBUG("main") << "Pythia 6-filtered event:\n" << evt;
 

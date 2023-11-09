@@ -48,9 +48,12 @@ namespace cepgen {
                                         << "to your list of open channels.";
         kin_mode_ = runParameters().kinematics().incomingBeams().mode();
       }
-      inline bool run(Event& ev, double& weight, bool full) override {
+      inline bool run(Event& ev, double& weight, bool fast) override {
         weight = 1.;
-        pythia6::EventInterface evt(ev, kin_mode_);
+        pythia6::EventInterface evt(
+            ev,
+            fast ? mode::Kinematics::ElasticElastic  // do not treat beam remnants when running in fast mode
+                 : kin_mode_);
         evt.prepareHadronisation();  // fill Pythia 6 common blocks
 
         CG_DEBUG_LOOP("Pythia6Hadroniser")
@@ -59,7 +62,7 @@ namespace cepgen {
 
         const int old_npart = pyjets_.n;
         evt.run();  // run the hadronisation/decay
-        if (full && pyjets_.n == old_npart)
+        if (!fast && pyjets_.n == old_npart)
           return false;  // hadronisation failed
 
         return true;
