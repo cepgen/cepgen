@@ -85,11 +85,8 @@ namespace cepgen {
       python::ObjectPtr cfg_{nullptr};
     };
 
-    PythonHandler::PythonHandler(const ParametersList& params) : Handler(params) {
-      Py_DebugFlag = steer<int>("debugging");
-      Py_VerboseFlag = steer<int>("verbosity");
-      env_.reset(new python::Environment);
-    }
+    PythonHandler::PythonHandler(const ParametersList& params)
+        : Handler(params), env_(new python::Environment(params)) {}
 
     Parameters* PythonHandler::parseFile(const std::string& file, Parameters* params) {
       std::string filename = python::pythonPath(file);
