@@ -23,13 +23,16 @@
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
+#include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenAddOns/Pythia6Wrapper/EventInterface.h"
 #include "CepGenAddOns/Pythia6Wrapper/Pythia6Interface.h"
 
 namespace pythia6 {
-  EventInterface::EventInterface(cepgen::Event& event, const cepgen::mode::Kinematics kin_mode)
-      : evt_(event), rnd_phi_(0., 2. * M_PI), rnd_cos_theta_(-1., 1.), rnd_qdq_(0., 9.) {
+  EventInterface::EventInterface(cepgen::Event& event,
+                                 const cepgen::mode::Kinematics kin_mode,
+                                 cepgen::utils::RandomGenerator* rnd)
+      : evt_(event), rnd_(rnd) {
     if (kin_mode == cepgen::mode::Kinematics::InelasticElastic ||
         kin_mode == cepgen::mode::Kinematics::InelasticInelastic)
       roles_.emplace_back(cepgen::Particle::Role::OutgoingBeam1);
@@ -53,7 +56,7 @@ namespace pythia6 {
       const double mdq = pymass(partons.second), mdq2 = mdq * mdq;
 
       // choose random direction in MX frame
-      const double phi = rnd_phi_(rnd_gen_), theta = acos(rnd_cos_theta_(rnd_gen_));
+      const double phi = rnd_->uniform(0., 2. * M_PI), theta = acos(rnd_->uniform(-1., 1.));
 
       // compute momentum of decay particles from MX
       const double px2 = std::pow(cepgen::utils::energyFromW(part.momentum().mass(), mdq2, mq2), 2) - mq2;
@@ -182,10 +185,10 @@ namespace pythia6 {
   }
 
   std::pair<short, short> EventInterface::pickPartonsContent() {
-    const auto ranudq = rnd_qdq_(rnd_gen_);
-    if (ranudq < 1.)
+    const auto ranudq = rnd_->uniformInt(0, 9);
+    if (ranudq < 1)
       return {cepgen::PDG::down, 2203};  // (d,uu1)
-    if (ranudq < 5.)
+    if (ranudq < 5)
       return {cepgen::PDG::up, 2101};  // (u,ud0)
     return {cepgen::PDG::up, 2103};    // (u,ud1)
   }

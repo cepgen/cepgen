@@ -19,6 +19,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/EventModifierFactory.h"
+#include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/Hadroniser.h"
 #include "CepGen/Utils/String.h"
@@ -33,11 +34,15 @@ namespace cepgen {
      */
     class Pythia6Hadroniser : public Hadroniser {
     public:
-      explicit Pythia6Hadroniser(const ParametersList& params) : Hadroniser(params) {}
+      explicit Pythia6Hadroniser(const ParametersList& params)
+          : Hadroniser(params),
+            rnd_gen_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))) {}
 
       static inline ParametersDescription description() {
         auto desc = Hadroniser::description();
         desc.setDescription("Interface to the Pythia 6 string hadronisation/fragmentation algorithm");
+        desc.add<ParametersDescription>("randomGenerator", ParametersDescription().setName<std::string>("stl:mt19937"))
+            .setDescription("random number generator to use for the various intermediate computations");
         return desc;
       }
 
@@ -53,7 +58,8 @@ namespace cepgen {
         pythia6::EventInterface evt(
             ev,
             fast ? mode::Kinematics::ElasticElastic  // do not treat beam remnants when running in fast mode
-                 : kin_mode_);
+                 : kin_mode_,
+            rnd_gen_.get());
         evt.prepareHadronisation();  // fill Pythia 6 common blocks
 
         CG_DEBUG_LOOP("Pythia6Hadroniser")
@@ -70,6 +76,7 @@ namespace cepgen {
 
     private:
       mode::Kinematics kin_mode_;
+      std::unique_ptr<utils::RandomGenerator> rnd_gen_;
     };
   }  // namespace hadr
 }  // namespace cepgen
