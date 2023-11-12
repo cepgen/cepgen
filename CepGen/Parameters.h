@@ -22,6 +22,7 @@
 #include <memory>
 
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Utils/RandomGenerator.h"
 
 namespace cepgen {
   class EventExporter;
@@ -31,8 +32,8 @@ namespace cepgen {
     class Process;
   }
   namespace utils {
-    class TimeKeeper;
     class Functional;
+    class TimeKeeper;
   }  // namespace utils
   enum class IntegratorType;
   /// An ordered collection of event modification algorithms
@@ -206,6 +207,7 @@ namespace cepgen {
     /// A collection of stopwatches for timing
     std::unique_ptr<utils::TimeKeeper> tmr_;
   };
+  static std::unique_ptr<utils::RandomGenerator> gRandomGen;
 }  // namespace cepgen
 
 #endif

@@ -1,11 +1,12 @@
 #include <fstream>
-#include <random>
 
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/EventExporterFactory.h"
+#include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Filesystem.h"
+#include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/Test.h"
 
 using namespace std;
@@ -24,10 +25,8 @@ int main(int argc, char* argv[]) {
       "lhef", cepgen::ParametersList().set<std::string>("filename", output_file));
 
   // randomise the number of events to be written in the output file
-  random_device rand;
-  mt19937 gen(rand());
-  uniform_int_distribution<> dis(1, 10);
-  const size_t num_events = dis(gen);
+  auto rng = cepgen::RandomGeneratorFactory::get().build("stl");
+  const size_t num_events = rng->uniformInt(1, 10);
 
   // generate one simple event
   auto evt = cepgen::Event::minimal();
