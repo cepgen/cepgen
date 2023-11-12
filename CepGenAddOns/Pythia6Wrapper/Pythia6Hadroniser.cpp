@@ -41,7 +41,7 @@ namespace cepgen {
       static inline ParametersDescription description() {
         auto desc = Hadroniser::description();
         desc.setDescription("Interface to the Pythia 6 string hadronisation/fragmentation algorithm");
-        desc.add<ParametersDescription>("randomGenerator", ParametersDescription().setName<std::string>("stl:mt19937"))
+        desc.add<ParametersDescription>("randomGenerator", ParametersDescription().setName<std::string>("stl"))
             .setDescription("random number generator to use for the various intermediate computations");
         return desc;
       }

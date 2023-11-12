@@ -24,36 +24,54 @@
 #include "CepGen/Utils/RandomGenerator.h"
 
 namespace cepgen {
-  template <typename T>
   class STLRandomGenerator : public utils::RandomGenerator {
   public:
     explicit STLRandomGenerator(const ParametersList& params) : utils::RandomGenerator(params) {
       std::random_device rd;
-      rng_.reset(new T(seed_ > 0ull ? seed_ : rd()));
-      if (!rng_)
+      const auto seed = seed_ > 0ull ? seed_ : rd();
+      const auto& type = steer<std::string>("type");
+      if (type == "mt19937")
+        gen_.reset(new Generator<std::mt19937>(seed));
+      else if (type == "mt19937_64")
+        gen_.reset(new Generator<std::mt19937_64>(seed));
+      else if (type == "ranlux24_base")
+        gen_.reset(new Generator<std::ranlux24_base>(seed));
+      else if (type == "ranlux48_base")
+        gen_.reset(new Generator<std::ranlux48_base>(seed));
+      else
         throw CG_FATAL("STLRandomGenerator") << "Random number generator engine not set!";
 
       CG_DEBUG("STLRandomGenerator") << "Random numbers generator with seed: " << seed_ << ".";
     }
 
-    int uniformInt(int min, int max) override { return std::uniform_int_distribution<>(min, max)(*rng_); }
+    static ParametersDescription description() {
+      auto desc = utils::RandomGenerator::description();
+      desc.setDescription("STL random number generator engine");
+      desc.add<std::string>("type", "mt19937").setDescription("random number engine");
+      return desc;
+    }
 
-    double uniform(double min, double max) override { return std::uniform_real_distribution<>(min, max)(*rng_); }
-
-    double normal(double mean, double rms) override { return std::normal_distribution<>(mean, rms)(*rng_); }
-
-    double exponential(double exponent) override { return std::exponential_distribution<>(exponent)(*rng_); }
+    int uniformInt(int min, int max) override { return gen_->uniformInt(min, max); }
+    double uniform(double min, double max) override { return gen_->uniform(min, max); }
+    double normal(double mean, double rms) override { return gen_->normal(mean, rms); }
+    double exponential(double exponent) override { return gen_->exponential(exponent); }
 
   private:
-    std::unique_ptr<T> rng_;
+    template <typename T>
+    class Generator : public utils::RandomGenerator {
+    public:
+      explicit Generator(unsigned long int value) : utils::RandomGenerator(ParametersList()), rng_(value) {}
+      int uniformInt(int min, int max) override { return std::uniform_int_distribution<>(min, max)(rng_); }
+      double uniform(double min, double max) override { return std::uniform_real_distribution<>(min, max)(rng_); }
+      double normal(double mean, double rms) override { return std::normal_distribution<>(mean, rms)(rng_); }
+      double exponential(double exponent) override { return std::exponential_distribution<>(exponent)(rng_); }
+
+    private:
+      T rng_;
+    };
+
+    std::unique_ptr<utils::RandomGenerator> gen_;
   };
 }  // namespace cepgen
 
-typedef cepgen::STLRandomGenerator<std::mt19937> mt19937;
-typedef cepgen::STLRandomGenerator<std::mt19937_64> mt19937_64;
-typedef cepgen::STLRandomGenerator<std::ranlux24_base> ranlux24_base;
-typedef cepgen::STLRandomGenerator<std::ranlux48_base> ranlux48_base;
-REGISTER_RANDOM_GENERATOR("stl:mt19937", mt19937);
-REGISTER_RANDOM_GENERATOR("stl:mt19937_64", mt19937_64);
-REGISTER_RANDOM_GENERATOR("stl:ranlux24_base", ranlux24_base);
-REGISTER_RANDOM_GENERATOR("stl:ranlux48_base", ranlux48_base);
+REGISTER_RANDOM_GENERATOR("stl", STLRandomGenerator);
