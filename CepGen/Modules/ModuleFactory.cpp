@@ -38,6 +38,7 @@
 #include "CepGen/Utils/Derivator.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Functional.h"
+#include "CepGen/Utils/RandomGenerator.h"
 
 namespace cepgen {
   template <typename T, typename I>
@@ -133,4 +134,5 @@ namespace cepgen {
   template class ModuleFactory<sigrat::Parameterisation, int>;
   template class ModuleFactory<strfun::Parameterisation, int>;
   template class ModuleFactory<utils::Functional, std::string>;
+  template class ModuleFactory<utils::RandomGenerator, std::string>;
 }  // namespace cepgen

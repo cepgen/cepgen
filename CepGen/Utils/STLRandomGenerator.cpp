@@ -20,22 +20,20 @@
 #include <random>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
 namespace cepgen {
+  template <typename T>
   class STLRandomGenerator : public utils::RandomGenerator {
   public:
     explicit STLRandomGenerator(const ParametersList& params) : utils::RandomGenerator(params) {
-      const auto& type = steer<std::string>("type");
-      if (type == "mt19937")
-        rng_.reset(new Generator<std::mt19937>(rd_()));
+      std::random_device rd;
+      rng_.reset(new T(seed_ > 0ull ? seed_ : rd()));
       if (!rng_)
         throw CG_FATAL("STLRandomGenerator") << "Random number generator engine not set!";
 
-      //gsl_rng_set(rng_.get(), seed_);
-
-      CG_DEBUG("STLRandomGenerator") << "Random numbers generator: " << type << ".\n\t"
-                                     << "Seed: " << seed_ << ".";
+      CG_DEBUG("STLRandomGenerator") << "Random numbers generator with seed: " << seed_ << ".";
     }
 
     int uniformInt(int min, int max) override { return std::uniform_int_distribution<>(min, max)(*rng_); }
@@ -47,24 +45,15 @@ namespace cepgen {
     double exponential(double exponent) override { return std::exponential_distribution<>(exponent)(*rng_); }
 
   private:
-    std::random_device rd_;
-    struct GeneratorObject {
-      typedef std::random_device::result_type result_type;
-      //long double operator()() { return 0.; }
-      virtual long double min() = 0;
-      virtual long double max() = 0;
-    };
-    template <typename T>
-    class Generator : public GeneratorObject {
-    public:
-      explicit Generator(std::random_device::result_type rd) : gen_(rd) {}
-      T& operator()() { return gen_; }
-      long double min() override { return gen_.min(); }
-      long double max() override { return gen_.max(); }
-
-    private:
-      T gen_;
-    };
-    std::unique_ptr<GeneratorObject> rng_;
+    std::unique_ptr<T> rng_;
   };
 }  // namespace cepgen
+
+typedef cepgen::STLRandomGenerator<std::mt19937> mt19937;
+typedef cepgen::STLRandomGenerator<std::mt19937_64> mt19937_64;
+typedef cepgen::STLRandomGenerator<std::ranlux24_base> ranlux24_base;
+typedef cepgen::STLRandomGenerator<std::ranlux48_base> ranlux48_base;
+REGISTER_RANDOM_GENERATOR("stl:mt19937", mt19937);
+REGISTER_RANDOM_GENERATOR("stl:mt19937_64", mt19937_64);
+REGISTER_RANDOM_GENERATOR("stl:ranlux24_base", ranlux24_base);
+REGISTER_RANDOM_GENERATOR("stl:ranlux48_base", ranlux48_base);

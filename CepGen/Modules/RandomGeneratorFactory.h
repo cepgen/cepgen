@@ -24,12 +24,12 @@
 /** \file */
 
 /// Add a generic random number generator definition to the list of handled modules
-#define REGISTER_INTEGRATOR(name, obj)                                              \
+#define REGISTER_RANDOM_GENERATOR(name, obj)                                        \
   namespace cepgen {                                                                \
     struct BUILDERNM(obj) {                                                         \
       BUILDERNM(obj)() { RandomGeneratorFactory::get().registerModule<obj>(name); } \
     };                                                                              \
-    static const BUILDERNM(obj) gIntegr##obj;                                       \
+    static const BUILDERNM(obj) gRndGen##obj;                                       \
   }                                                                                 \
   static_assert(true, "")
 
