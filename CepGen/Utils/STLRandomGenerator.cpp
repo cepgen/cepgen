@@ -30,7 +30,13 @@ namespace cepgen {
       std::random_device rd;
       const auto seed = seed_ > 0ull ? seed_ : rd();
       const auto& type = steer<std::string>("type");
-      if (type == "mt19937")
+      if (type == "default")
+        gen_.reset(new Generator<std::default_random_engine>(seed));
+      else if (type == "minstd_rand0")
+        gen_.reset(new Generator<std::minstd_rand0>(seed));
+      else if (type == "minstd_rand")
+        gen_.reset(new Generator<std::minstd_rand>(seed));
+      else if (type == "mt19937")
         gen_.reset(new Generator<std::mt19937>(seed));
       else if (type == "mt19937_64")
         gen_.reset(new Generator<std::mt19937_64>(seed));
@@ -38,6 +44,12 @@ namespace cepgen {
         gen_.reset(new Generator<std::ranlux24_base>(seed));
       else if (type == "ranlux48_base")
         gen_.reset(new Generator<std::ranlux48_base>(seed));
+      else if (type == "ranlux24")
+        gen_.reset(new Generator<std::ranlux24>(seed));
+      else if (type == "ranlux48")
+        gen_.reset(new Generator<std::ranlux48>(seed));
+      else if (type == "knuth_b")
+        gen_.reset(new Generator<std::knuth_b>(seed));
       else
         throw CG_FATAL("STLRandomGenerator") << "Random number generator engine not set!";
 
@@ -47,7 +59,7 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = utils::RandomGenerator::description();
       desc.setDescription("STL random number generator engine");
-      desc.add<std::string>("type", "mt19937").setDescription("random number engine");
+      desc.add<std::string>("type", "default").setDescription("random number engine");
       return desc;
     }
 
