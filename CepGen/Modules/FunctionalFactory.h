@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,15 +24,13 @@
 /** \file */
 
 /// Add a generic functional object builder definition
-#define REGISTER_FUNCTIONAL(name, obj)                                           \
-  namespace cepgen {                                                             \
-    namespace utils {                                                            \
-      struct BUILDERNM(obj) {                                                    \
-        BUILDERNM(obj)() { FunctionalFactory::get().registerModule<obj>(name); } \
-      };                                                                         \
-      static const BUILDERNM(obj) gFunct##obj;                                   \
-    }                                                                            \
-  }                                                                              \
+#define REGISTER_FUNCTIONAL(name, obj)                                         \
+  namespace cepgen {                                                           \
+    struct BUILDERNM(obj) {                                                    \
+      BUILDERNM(obj)() { FunctionalFactory::get().registerModule<obj>(name); } \
+    };                                                                         \
+    static const BUILDERNM(obj) gFunct##obj;                                   \
+  }                                                                            \
   static_assert(true, "")
 
 namespace cepgen {
