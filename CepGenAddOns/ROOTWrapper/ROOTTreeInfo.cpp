@@ -17,7 +17,6 @@
  */
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Event/Event.h"
 #include "CepGenAddOns/ROOTWrapper/ROOTTreeInfo.h"
 
 namespace ROOT {
@@ -124,6 +123,7 @@ namespace ROOT {
     tree_->Branch("weight", &weight, "weight/F");
     tree_->Branch("generation_time", &gen_time, "generation_time/F");
     tree_->Branch("total_time", &tot_time, "total_time/F");
+    tree_->Branch("metadata", &metadata);
   }
 
   void CepGenEvent::fill(const cepgen::Event& ev, bool compress) {
@@ -131,9 +131,9 @@ namespace ROOT {
       throw CG_FATAL("CepGenEvent:fill") << "Trying to fill a non-existent tree!";
 
     clear();
-    gen_time = ev.time_generation;
-    tot_time = ev.time_total;
-    weight = ev.weight;
+    gen_time = ev.metadata.at("time:generation");
+    tot_time = ev.metadata.at("time:total");
+    weight = ev.metadata.at("weight");
     np = 0;
     const auto& parts = compress ? ev.compress().particles() : ev.particles();
     //--- loop over all particles in event
@@ -154,6 +154,7 @@ namespace ROOT {
       role[np] = part.role();
       np++;
     }
+    metadata = ev.metadata;
     tree_->Fill();
     clear();
   }
@@ -170,9 +171,9 @@ namespace ROOT {
       return false;
 
     ev.clear();
-    ev.time_generation = gen_time;
-    ev.time_total = tot_time;
-    ev.weight = weight;
+    ev.metadata["time:generation"] = gen_time;
+    ev.metadata["time:total"] = tot_time;
+    ev.metadata["weight"] = weight;
     //--- first loop to populate the particles content
     for (unsigned short i = 0; i < np; ++i) {
       cepgen::Particle part;

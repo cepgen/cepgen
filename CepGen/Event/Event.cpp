@@ -31,29 +31,47 @@ namespace cepgen {
   Event::Event(const Event& oth) { *this = oth; }
 
   Event& Event::operator=(const Event& oth) {
+    clear();
     particles_ = oth.particles_;
     evtcontent_ = oth.evtcontent_;
     compressed_ = oth.compressed_;
+    metadata = oth.metadata;
     return *this;
   }
 
   Event Event::minimal(size_t num_out_particles) {
     auto evt = Event();
+    // add the two incoming beam particles
     auto ib1 = evt.addParticle(Particle::Role::IncomingBeam1);
+    ib1.get().setStatus(Particle::Status::PrimordialIncoming);
     auto ib2 = evt.addParticle(Particle::Role::IncomingBeam2);
-    auto ob1 = evt.addParticle(Particle::Role::OutgoingBeam1);
-    ob1.get().addMother(ib1);
-    auto ob2 = evt.addParticle(Particle::Role::OutgoingBeam2);
-    ob2.get().addMother(ib2);
+    ib2.get().setStatus(Particle::Status::PrimordialIncoming);
+
+    // add the two incoming partons
     auto part1 = evt.addParticle(Particle::Role::Parton1);
+    part1.get().setStatus(Particle::Status::Incoming);
     part1.get().addMother(ib1);
     auto part2 = evt.addParticle(Particle::Role::Parton2);
+    part2.get().setStatus(Particle::Status::Incoming);
     part2.get().addMother(ib2);
+    // add the two-parton system
     auto twopart = evt.addParticle(Particle::Role::Intermediate);
+    twopart.get().setStatus(Particle::Status::Propagator);
     twopart.get().addMother(part1);
     twopart.get().addMother(part2);
+
+    // add the two outgoing beam particles
+    auto ob1 = evt.addParticle(Particle::Role::OutgoingBeam1);
+    ob1.get().setStatus(Particle::Status::FinalState);
+    ob1.get().addMother(ib1);
+    auto ob2 = evt.addParticle(Particle::Role::OutgoingBeam2);
+    ob2.get().setStatus(Particle::Status::FinalState);
+    ob2.get().addMother(ib2);
+
+    // finally add the central system
     for (size_t i = 0; i < num_out_particles; ++i) {
       auto cs = evt.addParticle(Particle::Role::CentralSystem);
+      cs.get().setStatus(Particle::Status::FinalState);
       cs.get().addMother(twopart);
     }
     return evt;
@@ -61,13 +79,10 @@ namespace cepgen {
 
   void Event::clear() {
     particles_.clear();
-    time_generation = -1.;
-    time_total = -1.;
-    weight = 0.;
+    metadata.clear();
   }
 
   void Event::freeze() {
-    //--- store a snapshot of the primordial event block
     if (particles_.count(Particle::CentralSystem) > 0)
       evtcontent_.cs = particles_[Particle::CentralSystem].size();
     if (particles_.count(Particle::OutgoingBeam1) > 0)
@@ -77,7 +92,6 @@ namespace cepgen {
   }
 
   void Event::restore() {
-    //--- remove all particles after the primordial event block
     if (particles_.count(Particle::CentralSystem) > 0)
       particles_[Particle::CentralSystem].resize(evtcontent_.cs);
     if (particles_.count(Particle::OutgoingBeam1) > 0)
@@ -206,16 +220,56 @@ namespace cepgen {
     throw CG_FATAL("Event") << "Failed to retrieve the particle with id=" << id << ".";
   }
 
-  Particles Event::operator[](const ParticlesIds& ids) const {
+  ParticlesRefs Event::operator[](const ParticlesIds& ids) {
+    ParticlesRefs out;
+    std::transform(ids.begin(), ids.end(), std::back_inserter(out), [this](const auto& id) {
+      return std::ref(this->operator[](id));
+    });
+    return out;
+  }
+
+  Particles Event::operator()(const ParticlesIds& ids) const {
     Particles out;
     std::transform(
         ids.begin(), ids.end(), std::back_inserter(out), [this](const auto& id) { return this->operator[](id); });
     return out;
   }
 
-  Particles Event::mothers(const Particle& part) const { return operator[](part.mothers()); }
+  Particles Event::mothers(const Particle& part) const { return operator()(part.mothers()); }
 
-  Particles Event::daughters(const Particle& part) const { return operator[](part.daughters()); }
+  ParticlesRefs Event::mothers(const Particle& part) { return operator[](part.mothers()); }
+
+  Particles Event::daughters(const Particle& part) const { return operator()(part.daughters()); }
+
+  ParticlesRefs Event::daughters(const Particle& part) { return operator[](part.daughters()); }
+
+  Particles Event::stableDaughters(const Particle& part, bool recursive) const {
+    Particles parts;
+    for (const auto& daugh : operator()(part.daughters())) {
+      if (daugh.status() == Particle::Status::FinalState)
+        parts.emplace_back(daugh);
+      else if (recursive) {
+        const auto daugh_daugh = stableDaughters(daugh, recursive);
+        parts.insert(
+            parts.end(), std::make_move_iterator(daugh_daugh.begin()), std::make_move_iterator(daugh_daugh.end()));
+      }
+    }
+    return parts;
+  }
+
+  ParticlesRefs Event::stableDaughters(const Particle& part, bool recursive) {
+    ParticlesRefs parts;
+    for (const auto& daugh : operator[](part.daughters())) {
+      if (daugh.get().status() == Particle::Status::FinalState)
+        parts.emplace_back(daugh);
+      else if (recursive) {
+        const auto daugh_daugh = stableDaughters(daugh, recursive);
+        parts.insert(
+            parts.end(), std::make_move_iterator(daugh_daugh.begin()), std::make_move_iterator(daugh_daugh.end()));
+      }
+    }
+    return parts;
+  }
 
   ParticleRoles Event::roles() const {
     ParticleRoles out;
@@ -229,25 +283,15 @@ namespace cepgen {
     if (part.role() <= 0)
       throw CG_FATAL("Event") << "Trying to add a particle with role=" << (int)part.role() << ".";
 
-    //--- retrieve the list of particles with the same role
-    auto& part_with_same_role = particles_[part.role()];
-
-    //--- specify the id
-    if (part_with_same_role.empty() && part.id() < 0)
-      part.setId(size());  // set the id if previously invalid/non-existent
-    if (!part_with_same_role.empty()) {
-      if (replace)
-        part.setId(part_with_same_role[0].id());  // set the previous id if replacing a particle
-      else
-        part.setId(size());
-    }
-
-    //--- add the particle to the collection
-    if (replace && !part_with_same_role.empty())
-      part_with_same_role = Particles(1, part);
+    auto& part_with_same_role = particles_[part.role()];  // list of particles with the same role
+    if (part.id() < 0)
+      part.setId(part_with_same_role.empty() || !replace
+                     ? size()                         // set the id if previously invalid/non-existent
+                     : part_with_same_role[0].id());  // set the previous id if replacing a particle
+    if (replace)
+      part_with_same_role = {part};
     else
       part_with_same_role.emplace_back(part);
-
     return std::ref(part_with_same_role.back());
   }
 
@@ -412,4 +456,11 @@ namespace cepgen {
                p_total.pz(),
                p_total.energy());
   }
+
+  Event::EventMetadata::EventMetadata()
+      : std::unordered_map<std::string, float>{{"time:generation", -1.f},
+                                               {"time:total", -1.f},
+                                               {"weight", 1.f},
+                                               {"alphaEM", (float)constants::ALPHA_EM},
+                                               {"alphaS", (float)constants::ALPHA_QCD}} {}
 }  // namespace cepgen

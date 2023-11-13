@@ -42,19 +42,17 @@ namespace cepgen {
     void setSeed(long long seed) { seed_ = seed; }
 
     /// Parse a configuration string
-    virtual void readString(const char*) {}
-    /// Parse a configuration string
-    virtual void readString(const std::string& param) { readString(param.c_str()); }
+    virtual void readString(const std::string&) {}
     /// Parse a list of configuration strings
     virtual void readStrings(const std::vector<std::string>& params);
 
     /** \brief Modify a full event
        * \param[inout] ev Input/output event
        * \param[inout] weight Event weight after modification
-       * \param[in] full Perform the full state modification
+       * \param[in] fast run a faster version of the algorithm (whenever available)
        * \return Boolean stating whether or not the modification occurred successfully
        */
-    virtual bool run(Event& ev, double& weight, bool full = true) = 0;
+    virtual bool run(Event& ev, double& weight, bool fast = false) = 0;
     /// Specify the process cross section and uncertainty, in pb
     virtual void setCrossSection(const Value&) {}
 

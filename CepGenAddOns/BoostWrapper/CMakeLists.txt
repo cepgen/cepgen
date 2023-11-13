@@ -45,6 +45,8 @@ if(NOT Python_FOUND)
       print(sc.get_python_lib('platlib'))"
     OUTPUT_VARIABLE Python_SITEARCH
     OUTPUT_STRIP_TRAILING_WHITESPACE)
+else()
+  target_include_directories(pycepgen PUBLIC ${Python_INCLUDE_DIRS})
 endif()
 install(TARGETS pycepgen DESTINATION "${Python_SITEARCH}" COMPONENT boost)
 #install(TARGETS pycepgen __init__.py DESTINATION "${Python_SITEARCH}" COMPONENT boost)

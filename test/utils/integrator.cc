@@ -27,7 +27,7 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-  bool quiet;
+  bool quiet, python_integ;
   double num_sigma;
   vector<string> integrators;
   string func_mod;
@@ -41,6 +41,7 @@ int main(int argc, char* argv[]) {
                            cepgen::IntegratorFactory::get().modules())  // by default, all integrators are tested
       .addOptionalArgument("functional,f", "type of functional parser user", &func_mod, "ROOT")
       .addOptionalArgument("quiet,q", "quiet mode", &quiet, false)
+      .addOptionalArgument("python,p", "also add python integrator?", &python_integ, false)
       .parse();
 
   if (quiet)
@@ -67,6 +68,8 @@ int main(int argc, char* argv[]) {
   CG_TEST_SET_FAILURE_TOLERANCE_RATE(0.15);
 
   for (const auto& integrator : integrators) {
+    if (integrator == "python" && !python_integ)  // skip the python integrators test unless required
+      continue;
     auto integr = cepgen::IntegratorFactory::get().build(integrator);
 
     //--- integration part

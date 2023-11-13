@@ -24,10 +24,11 @@
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/Utils/Limits.h"
 
 namespace cepgen {
-  class EPACollinearFlux : public CollinearFlux {
+  class EPACollinearFlux final : public CollinearFlux {
   public:
     explicit EPACollinearFlux(const ParametersList& params)
         : CollinearFlux(params), ff_(FormFactorsFactory::get().build(steer<ParametersList>("formFactors"))) {}
@@ -45,15 +46,14 @@ namespace cepgen {
     double fluxQ2(double x, double q2) const override {
       if (!x_range_.contains(x, true))
         return 0.;
-      const auto q2min = minQ2(x);
+      const auto q2min = utils::kt::q2(x, 0., mass2());
       if (q2min == 0. || q2 < q2min)
         return 0.;
       const auto form_factors = (*ff_)(q2);
-      return prefactor_ * ((1. - x) * (1. - q2min / q2) * form_factors.FE + 0.5 * x * x * form_factors.FM) / x / q2;
+      return prefactor_ * ((1. - x) * (1. - q2min / q2) * form_factors.FE + 0.5 * x * x * form_factors.FM) / x;
     }
 
   protected:
-    double minQ2(double x) const { return x >= 1. ? 0. : mass2() * x * x / (1. - x); }
     double mass2() const override { return mp2_; }
     const std::unique_ptr<formfac::Parameterisation> ff_;
   };

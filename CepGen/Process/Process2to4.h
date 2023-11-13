@@ -59,7 +59,6 @@ namespace cepgen {
       double m_phi_pt_diff_{0.};  ///< Azimuthal angle difference for the two central particles
 
     private:
-      std::uniform_int_distribution<short> rnd_sign_;
       double ww_{0.};
     };
   }  // namespace proc

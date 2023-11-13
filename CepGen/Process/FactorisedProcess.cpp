@@ -47,17 +47,11 @@ namespace cepgen {
           store_alphas_(proc.store_alphas_) {}
 
     void FactorisedProcess::addEventContent() {
-      Process::setEventContent(
-          {// incoming state
-           {Particle::IncomingBeam1, kinematics().incomingBeams().positive().pdgId()},
-           {Particle::IncomingBeam2, kinematics().incomingBeams().negative().pdgId()},
-           {Particle::Parton1, PDG::invalid},
-           {Particle::Parton2, PDG::invalid}},
-          {// outgoing state
-           {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
-           {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
-           {Particle::CentralSystem, produced_parts_}});
-      setExtraContent();
+      Process::setEventContent({{Particle::IncomingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
+                                {Particle::IncomingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
+                                {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
+                                {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
+                                {Particle::CentralSystem, produced_parts_}});
     }
 
     void FactorisedProcess::prepareKinematics() {
@@ -117,8 +111,8 @@ namespace cepgen {
       event().oneWithRole(Particle::Intermediate).setMomentum(part1.momentum() + part2.momentum(), true);
       if (store_alphas_) {
         const auto two_part_mass = event().oneWithRole(Particle::Intermediate).momentum().mass();
-        event().alpha_em = alphaEM(two_part_mass);
-        event().alpha_s = alphaS(two_part_mass);
+        event().metadata["alphaEM"] = alphaEM(two_part_mass);
+        event().metadata["alphaS"] = alphaS(two_part_mass);
       }
     }
 

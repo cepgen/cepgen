@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2022-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,15 +21,13 @@
 #include <iostream>
 
 #include "CepGen/Utils/Drawer.h"
+#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
   namespace utils {
     Drawer::Drawer(const ParametersList& params) : NamedModule(params) {}
 
-    bool operator&(const Drawer::Mode& lhs, const Drawer::Mode::value_t& rhs) {
-      //return ((int)lhs > (int)rhs) - ((int)lhs < (int)rhs);
-      return (int)lhs.value_ & (int)rhs;
-    }
+    bool operator&(const Drawer::Mode& lhs, const Drawer::Mode::value_t& rhs) { return (int)lhs.value_ & (int)rhs; }
 
     Drawer::Mode operator|(const Drawer::Mode& lhs, const Drawer::Mode::value_t& rhs) {
       std::bitset<16> mod1((int)lhs.value()), mod2((int)rhs);
@@ -54,6 +52,8 @@ namespace cepgen {
         os << sep << "col", sep = "|";
       if (mode & Drawer::Mode::cont)
         os << sep << "cont", sep = "|";
+      if (mode & Drawer::Mode::ratio)
+        os << sep << "ratio", sep = "|";
       return os;
     }
   }  // namespace utils

@@ -33,7 +33,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
   int num_points;
   string output_file, plotter;
-  bool logx, logy, draw_grid;
+  bool logx, logy, draw_grid, ratio_plot;
   cepgen::Limits q2range, yrange;
   vector<string> modules;
 
@@ -43,10 +43,11 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("yrange,y", "y range", &yrange)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
       .addOptionalArgument("output,o", "output file name", &output_file, "formfacs.scan.output.txt")
-      .addOptionalArgument("logx", "logarithmic x-axis", &logx, false)
-      .addOptionalArgument("logy,l", "logarithmic y-axis", &logy, false)
-      .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
+      .addOptionalArgument("logx", "logarithmic x-scale", &logx, false)
+      .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
+      .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
+      .addOptionalArgument("ratio,r", "draw the ratio plot", &ratio_plot, false)
       .parse();
 
   cepgen::initialise();
@@ -77,8 +78,8 @@ int main(int argc, char* argv[]) {
     }
     out << "\n";
   }
-  CG_LOG << "Scan written in \"" << output_file << "\".";
   out.close();
+  CG_LOG << "Scan written in \"" << output_file << "\".";
 
   if (!plotter.empty()) {
     auto plt = cepgen::DrawerFactory::get().build(plotter);
@@ -89,20 +90,22 @@ int main(int argc, char* argv[]) {
       dm |= cepgen::utils::Drawer::Mode::logy;
     if (draw_grid)
       dm |= cepgen::utils::Drawer::Mode::grid;
+    if (ratio_plot)
+      dm |= cepgen::utils::Drawer::Mode::ratio;
 
     for (auto& canv : map<pair<string, string>, vector<cepgen::utils::Graph1D> >{
              {{"fe", "$F_{E}$"}, g_form_factors_fe}, {{"fm", "$F_{M}$"}, g_form_factors_fm}}) {
-      cepgen::utils::DrawableColl mp;
+      cepgen::utils::DrawableColl coll;
       for (auto& gr : canv.second) {
-        gr.xAxis().setLabel("Q$^{2}$ (GeV$^{2}$)");
+        gr.xAxis().setLabel("$Q^{2}$ (GeV$^{2}$)");
         gr.yAxis().setLabel(canv.first.second);
         if (q2range.valid())
           gr.xAxis().setRange(q2range);
         if (yrange.valid())
           gr.yAxis().setRange(yrange);
-        mp.emplace_back(&gr);
+        coll.emplace_back(&gr);
       }
-      plt->draw(mp, "comp_" + canv.first.first, "", dm);
+      plt->draw(coll, "comp_" + canv.first.first, "", dm);
     }
   }
 

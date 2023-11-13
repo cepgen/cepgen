@@ -51,7 +51,7 @@ namespace cepgen {
                                         &xhigh_[0],
                                         function_->dim,
                                         ncvg_,
-                                        gsl_rng_.get(),
+                                        rnd_gen_->engine<gsl_rng>(),
                                         pln_state.get(),
                                         &result,
                                         &abserr);

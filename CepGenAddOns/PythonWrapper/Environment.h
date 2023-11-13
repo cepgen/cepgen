@@ -19,16 +19,20 @@
 #ifndef CepGenAddOns_PythonWrapper_Environment_h
 #define CepGenAddOns_PythonWrapper_Environment_h
 
+#include "CepGen/Core/SteeredObject.h"
 #include "CepGenAddOns/PythonWrapper/PythonTypes.h"
 
 namespace cepgen {
   namespace python {
-    class Environment {
+    class Environment : SteeredObject<Environment> {
     public:
       /// Initialise the python environment
-      explicit Environment(const std::string& = "");
+      explicit Environment(const ParametersList&);
       /// Finalise the python environment
       ~Environment();
+
+      static ParametersDescription description();
+
       /// Set the name of the Python program
       void setProgramName(const std::string&);
       /// Is the python environment already initialised?

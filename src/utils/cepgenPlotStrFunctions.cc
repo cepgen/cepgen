@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
   cepgen::Limits xrange, yrange;
   int var, num_points;
   string output_file, plotter;
-  bool logx, logy, draw_grid;
+  bool logx, logy, draw_grid, ratio_plot;
 
   cepgen::initialise();
 
@@ -51,10 +51,11 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("yrange", "plotting range for y", &yrange, cepgen::Limits())
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
       .addOptionalArgument("output,o", "output file name", &output_file, "strfuns.scan.output.txt")
+      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .addOptionalArgument("logx", "logarithmic x-axis", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-axis", &logy, false)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
-      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
+      .addOptionalArgument("ratio,r", "draw the ratio plot", &ratio_plot, false)
       .parse();
 
   string var_name, var_unit;
@@ -83,14 +84,6 @@ int main(int argc, char* argv[]) {
       << "# x in [" << xrange << "]\n";
 
   const float mp = cepgen::PDG::get().mass(2212), mp2 = mp * mp;
-
-  cepgen::utils::Drawer::Mode dm;
-  if (logx)
-    dm |= cepgen::utils::Drawer::Mode::logx;
-  if (logy)
-    dm |= cepgen::utils::Drawer::Mode::logy;
-  if (draw_grid)
-    dm |= cepgen::utils::Drawer::Mode::grid;
 
   vector<unique_ptr<cepgen::strfun::Parameterisation> > strfuns;
   vector<cepgen::utils::Graph1D> g_strfuns_f2, g_strfuns_fl, g_strfuns_fe, g_strfuns_fm, g_strfuns_w1, g_strfuns_w2;
@@ -144,6 +137,16 @@ int main(int argc, char* argv[]) {
 
   if (!plotter.empty()) {
     auto plt = cepgen::DrawerFactory::get().build(plotter);
+    cepgen::utils::Drawer::Mode dm;
+    if (logx)
+      dm |= cepgen::utils::Drawer::Mode::logx;
+    if (logy)
+      dm |= cepgen::utils::Drawer::Mode::logy;
+    if (draw_grid)
+      dm |= cepgen::utils::Drawer::Mode::grid;
+    if (ratio_plot)
+      dm |= cepgen::utils::Drawer::Mode::ratio;
+
     for (auto& canv : map<pair<string, string>, vector<cepgen::utils::Graph1D> >{{{"f2", "$F_{2}$"}, g_strfuns_f2},
                                                                                  {{"fl", "$F_{L}$"}, g_strfuns_fl},
                                                                                  {{"fe", "$F_{E}$"}, g_strfuns_fe},

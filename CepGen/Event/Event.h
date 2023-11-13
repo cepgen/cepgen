@@ -37,7 +37,7 @@ namespace cepgen {
     static Event minimal(size_t num_out_particles = 1);
 
     void clear();             ///< Empty the whole event content
-    void freeze();            ///< Initialize an "empty" event collection
+    void freeze();            ///< Store a snapshot of the primordial event block
     void restore();           ///< Restore the event to its "empty" state
     bool compressed() const;  ///< Is the event already without intermediate-channel information?
     Event compress() const;   ///< Compress the event record
@@ -75,7 +75,7 @@ namespace cepgen {
     /// Get a list of particle identifiers in Event corresponding to a certain role in the process kinematics
     ParticlesIds ids(Particle::Role role) const;
     /// Check whether a particle role is represented in this event
-    bool hasRole(Particle::Role role) const { return particles_.count(role) != 0; }
+    inline bool hasRole(Particle::Role role) const { return particles_.count(role) != 0; }
     /// First Particle object with a given role in the event
     /// \param[in] role The role the particle has to play in the event
     Particle& oneWithRole(Particle::Role role);
@@ -88,8 +88,11 @@ namespace cepgen {
     /// \param[in] id Unique identifier of the particle in the event
     const Particle& operator[](int id) const;
     /// References to the Particle objects corresponding to the unique identifiers in the event
-    /// \param[in] ids_ The unique identifiers to the particles to be selected in the event
-    Particles operator[](const ParticlesIds& ids_) const;
+    /// \param[in] ids The unique identifiers to the particles to be selected in the event
+    ParticlesRefs operator[](const ParticlesIds& ids);
+    /// Particle objects corresponding to the unique identifiers in the event
+    /// \param[in] ids The unique identifiers to the particles to be selected in the event
+    Particles operator()(const ParticlesIds& ids) const;
 
     /// Compute the missing momentum for central particles in this event
     Momentum missingMomentum() const;
@@ -99,18 +102,28 @@ namespace cepgen {
     /// List of all parent Particle object for this given particle
     /// \param[in] part The particle for which the mother particles have to be retrieved
     Particles mothers(const Particle& part) const;
+    /// List of all parent Particle object for this given particle
+    /// \param[in] part The particle for which the mother particles have to be retrieved
+    ParticlesRefs mothers(const Particle& part);
     /// List of all the daughters from a particle
     /// \param[in] part The particle for which the daughter particles have to be retrieved
     Particles daughters(const Particle& part) const;
+    /// List of all the daughters from a particle
+    /// \param[in] part The particle for which the daughter particles have to be retrieved
+    ParticlesRefs daughters(const Particle& part);
+    /// List all the stable daughters of a particle in this event
+    Particles stableDaughters(const Particle& part, bool recursive = false) const;
+    /// List all the stable daughters of a particle in this event
+    ParticlesRefs stableDaughters(const Particle& part, bool recursive = false);
     /// List of roles defined for the given event (really process-dependant for the central system)
     ParticleRoles roles() const;
 
-    unsigned short num_hadronisation_trials{0};  ///< Number of trials before the event was "correctly" hadronised
-    float time_generation{-1.};                  ///< Time (in s) to generate the event at parton level
-    float time_total{-1.};                       ///< Time (in s) to generate the (possibly modified/hadronised) event
-    float weight{0.};                            ///< Event weight
-    float alpha_em{constants::ALPHA_EM};         ///< Electromagnetic coupling constant
-    float alpha_s{constants::ALPHA_QCD};         ///< Strong coupling constant
+    /// Collection of key -> value pairs storing event metadata
+    struct EventMetadata : std::unordered_map<std::string, float> {
+      EventMetadata();
+    };
+    /// List of auxiliary information
+    EventMetadata metadata;
 
   private:
     static constexpr double MIN_PRECISION = 1.e-10;

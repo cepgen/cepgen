@@ -19,6 +19,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventBrowser.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace utils {
@@ -124,14 +125,12 @@ namespace cepgen {
         return (double)std::count_if(
             bparts.begin(), bparts.end(), [](const auto& part) { return (int)part.status() > 0; });
       }
-      if (var == "tgen")
-        return ev.time_generation;
-      if (var == "ttot")
-        return ev.time_total;
       if (var == "met")
         return ev.missingMomentum().pt();
       if (var == "mephi")
         return ev.missingMomentum().phi();
+      if (utils::startsWith(var, "meta:"))
+        return ev.metadata.at(var.substr(5));
       throw CG_ERROR("EventBrowser") << "Failed to retrieve the event-level variable \"" << var << "\".";
     }
   }  // namespace utils

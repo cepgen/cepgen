@@ -21,10 +21,13 @@
 #include "CepGen/Integration/FunctionIntegrand.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Modules/RandomGeneratorFactory.h"
 
 namespace cepgen {
   Integrator::Integrator(const ParametersList& params)
-      : NamedModule(params), seed_(steer<int>("seed")), verbosity_(steer<int>("verbose")), rnd_(0., 1.) {}
+      : NamedModule(params),
+        rnd_gen_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))),
+        verbosity_(steer<int>("verbose")) {}
 
   void Integrator::checkLimits(const Integrand& integrand) {
     const auto ps_size = integrand.size();
@@ -48,7 +51,7 @@ namespace cepgen {
 
   double Integrator::eval(Integrand& integrand, const std::vector<double>& x) const { return integrand.eval(x); }
 
-  double Integrator::uniform(const Limits& lim) const { return lim.x(rnd_(rnd_gen_)); }
+  double Integrator::uniform(const Limits& lim) const { return rnd_gen_->uniform(lim.min(), lim.max()); }
 
   Value Integrator::integrate(Integrand& integrand) {
     if (limits_.size() != integrand.size())
@@ -74,8 +77,9 @@ namespace cepgen {
   ParametersDescription Integrator::description() {
     auto desc = ParametersDescription();
     desc.setDescription("Unnamed integrator");
-    desc.add<int>("seed", time(nullptr)).setDescription("Random number generator seed");
     desc.add<int>("verbose", 1).setDescription("Verbosity level");
+    desc.add<ParametersDescription>("randomGenerator", ParametersDescription().setName<std::string>("stl"))
+        .setDescription("random number generator engine");
     return desc;
   }
 }  // namespace cepgen

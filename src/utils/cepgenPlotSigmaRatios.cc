@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
   cepgen::Limits x_range;
   int var, num_points;
   string output_file, plotter;
-  bool logx, logy, draw_grid;
+  bool logx, logy, draw_grid, ratio_plot;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("sr,s", "longitud./transv. cross section ratio modelling", &sigrat_types)
@@ -48,10 +48,11 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("xrange,x", "Bjorken x range", &x_range, cepgen::Limits{1.e-7, 1.})
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
       .addOptionalArgument("output,o", "output file name", &output_file, "strfuns.scan.output.txt")
+      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .addOptionalArgument("logx", "logarithmic x-axis", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-axis", &logy, false)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
-      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
+      .addOptionalArgument("ratio,r", "draw the ratio plot", &ratio_plot, false)
       .parse();
 
   if (q2 < 0. && w2 < 0.)
@@ -102,9 +103,7 @@ int main(int argc, char* argv[]) {
     g_sigrats.emplace_back(to_string(sr_type), sr_name);
     sigrats.emplace_back(move(sr));
   }
-  const auto xvals = x_range.generate(num_points, logx);
-  for (int i = 0; i < num_points; ++i) {
-    const auto& x = xvals.at(i);
+  for (const auto& x : x_range.generate(num_points, logx)) {
     out << x << "\t";
     size_t j = 0;
     for (const auto& sr : sigrats) {
@@ -143,6 +142,8 @@ int main(int argc, char* argv[]) {
       dm |= cepgen::utils::Drawer::Mode::logy;
     if (draw_grid)
       dm |= cepgen::utils::Drawer::Mode::grid;
+    if (ratio_plot)
+      dm |= cepgen::utils::Drawer::Mode::ratio;
 
     cepgen::utils::DrawableColl mg;
     for (auto& gr : g_sigrats) {

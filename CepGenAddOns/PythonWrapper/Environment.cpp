@@ -32,7 +32,7 @@ namespace cepgen {
     // Python API helpers
     //------------------------------------------------------------------
 
-    Environment::Environment(const std::string& name) {
+    Environment::Environment(const ParametersList& params) : SteeredObject(params) {
       for (const auto& path : std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."),
                                                        fs::path(utils::env::get("CEPGEN_PATH", ".")) / "python",
                                                        fs::current_path(),
@@ -43,14 +43,20 @@ namespace cepgen {
         utils::env::append("PYTHONPATH", path);
       CG_DEBUG("Python:Environment") << "PYTHONPATH set to " << utils::env::get("PYTHONPATH") << ".";
 
-      Py_InitializeEx(1);
-      if (!initialised())
-        throw CG_FATAL("Python:Environment") << "Failed to initialise the Python environment!";
 #if PY_VERSION_HEX >= 0x03080000
       PyConfig_InitPythonConfig(&config_);
+      config_.parser_debug = steer<int>("debug");
+      config_.verbose = steer<int>("verbosity");
+      Py_InitializeFromConfig(&config_);
+#else
+      Py_DebugFlag = steer<int>("debug");
+      Py_VerboseFlag = steer<int>("verbosity");
+      Py_InitializeEx(1);
 #endif
+      if (!initialised())
+        throw CG_FATAL("Python:Environment") << "Failed to initialise the Python environment!";
       utils::env::set("PYTHONDONTWRITEBYTECODE", "1");
-      if (!name.empty())
+      if (const auto& name = steer<std::string>("name"); !name.empty())
         setProgramName(name);
     }
 
@@ -83,6 +89,13 @@ namespace cepgen {
 #endif
       delete[] sfilename;
       CG_DEBUG("Python:setProgramName") << "Programme name set to \"" << readable_s_filename << "\".";
+    }
+
+    ParametersDescription Environment::description() {
+      auto desc = ParametersDescription();
+      desc.add<int>("verbosity", 0).setDescription("overall Python verbosity");
+      desc.add<int>("debug", 0).setDescription("debugging level");
+      return desc;
     }
   }  // namespace python
 }  // namespace cepgen

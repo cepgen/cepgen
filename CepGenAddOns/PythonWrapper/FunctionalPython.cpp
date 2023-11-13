@@ -37,7 +37,7 @@ namespace cepgen {
       static ParametersDescription description();
 
     private:
-      python::Environment env_;
+      python::Environment env_{ParametersList()};
       python::ObjectPtr mod_;
       python::ObjectPtr func_;
     };

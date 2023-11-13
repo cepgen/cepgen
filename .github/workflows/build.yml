@@ -8,6 +8,7 @@ on:
 
 env:
   BUILD_TYPE: Release  # Release, Debug, RelWithDebInfo, etc
+  CEPGEN_PATH: ${{github.workspace}}
 
 jobs:
   build:
@@ -25,4 +26,6 @@ jobs:
 
     - name: Test
       working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{env.BUILD_TYPE}} --rerun-failed --output-on-failure --verbose
+      run: |
+        echo "PYTHONPATH=${{env.CEPGEN_PATH}}:$PYTHONPATH" >> $GITHUB_ENV
+        ctest -C ${{env.BUILD_TYPE}} --rerun-failed --output-on-failure --verbose

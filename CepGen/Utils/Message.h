@@ -19,9 +19,9 @@
 #ifndef CepGen_Utils_Message_h
 #define CepGen_Utils_Message_h
 
-#include <map>
 #include <set>
 #include <sstream>
+#include <unordered_map>
 
 #include "CepGen/Utils/Logger.h"
 
@@ -121,6 +121,17 @@ namespace cepgen {
     /// Generic templated mapping-variables feeder operator
     template <typename T, typename U>
     inline friend const LoggedMessage& operator<<(const LoggedMessage& exc, const std::map<T, U>& map_var) noexcept {
+      exc << "{";
+      std::string sep;
+      if (!map_var.empty())
+        for (const auto& var : map_var)
+          exc << sep << "{" << var.first << " -> " << var.second << "}", sep = ", ";
+      return exc << "}";
+    }
+    /// Generic templated mapping-variables feeder operator
+    template <typename T, typename U>
+    inline friend const LoggedMessage& operator<<(const LoggedMessage& exc,
+                                                  const std::unordered_map<T, U>& map_var) noexcept {
       exc << "{";
       std::string sep;
       if (!map_var.empty())

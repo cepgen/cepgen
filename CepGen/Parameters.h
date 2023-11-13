@@ -31,8 +31,8 @@ namespace cepgen {
     class Process;
   }
   namespace utils {
-    class TimeKeeper;
     class Functional;
+    class TimeKeeper;
   }  // namespace utils
   enum class IntegratorType;
   /// An ordered collection of event modification algorithms

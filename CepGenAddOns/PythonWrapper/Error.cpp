@@ -22,13 +22,11 @@
 #include <frameobject.h>
 // clang-format on
 
-#if PY_VERSION_HEX < 0x030b0000
 #include "CepGen/Utils/String.h"
-#endif
 
 namespace cepgen {
   namespace python {
-    Error::Error(const char* origin, const char* file, short lineno) noexcept
+    Error::Error(const char *origin, const char *file, short lineno) noexcept
         : Exception("", origin, Exception::Type::error, file, lineno) {
       // retrieve error indicator and clear it to handle ourself the error
       PyErr_Fetch(&ptype_, &pvalue_, &ptraceback_obj_);
@@ -38,24 +36,20 @@ namespace cepgen {
       if (ptype_) {
         // we can start the traceback
         (*this) << "Error: " << get<std::string>(PyObject_Str(pvalue_));
-        if (auto* ptraceback = reinterpret_cast<PyTracebackObject*>(ptraceback_obj_)) {
-          const std::string arr = "↪ ";
-          std::string tabul;
-          while (ptraceback->tb_next) {
-            (*this) << "\n\t" << tabul << arr;
-#if PY_VERSION_HEX < 0x030b0000
-            if (PyFrameObject* pframe = ptraceback->tb_frame)
-              (*this) << utils::boldify(get<std::string>(pframe->f_code->co_name)) << " on "
-                      << get<std::string>(pframe->f_code->co_filename) << " (line "
-                      << PyCode_Addr2Line(pframe->f_code, pframe->f_lasti) << ")";
-            else
-#endif
-              (*this) << " issue on line " << ptraceback->tb_lineno;
-            tabul += "  ";
-            ptraceback = ptraceback->tb_next;
-          }
-        }
-        (*this) << "\n" << std::string(80, '.') << "\n";
+        if (auto mod_traceback = importModule("traceback"))
+          if (auto fmt = getAttribute(mod_traceback.get(), "format_exception"); PyCallable_Check(fmt.get()))
+            if (ObjectPtr pyth_val(PyObject_CallFunctionObjArgs(fmt.get(), ptype_, pvalue_, ptraceback_obj_, nullptr));
+                pyth_val) {
+              (*this) << "\n" << std::string(80, '.') << "\n";
+              for (const auto &tb : getVector<std::string>(pyth_val)) {
+                size_t i = 0;
+                std::string sep;
+                for (const auto &err_line : utils::split(tb, '\n'))
+                  (*this) << sep << (i == 0 ? utils::boldify(err_line) : err_line), ++i, sep = "\n";
+                (*this) << "\n";
+              }
+            }
+        (*this) << std::string(80, '.') << "\n";
       }
     }
   }  // namespace python

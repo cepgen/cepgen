@@ -26,9 +26,7 @@
 #include <iostream>
 #include <string>
 
-namespace cepgen {
-  class Event;
-}
+#include "CepGen/Event/Event.h"
 
 namespace ROOT {
   /// All useful information about a generation run
@@ -77,6 +75,7 @@ namespace ROOT {
     static CepGenEvent load(TFile*, const std::string& events_tree = TREE_NAME);
     static CepGenEvent load(const std::string&, const std::string& events_tree = TREE_NAME);
 
+    cepgen::Event::EventMetadata metadata;
     float gen_time{-1.};        ///< Event generation time
     float tot_time{-1.};        ///< Total event generation time
     float weight{-1.};          ///< Event weight
@@ -134,6 +133,7 @@ namespace ROOT {
       tree_->SetBranchAddress("weight", &weight);
       tree_->SetBranchAddress("generation_time", &gen_time);
       tree_->SetBranchAddress("total_time", &tot_time);
+      tree_->SetBranchAddress("metadata", &metadata);
       tree_attached_ = true;
     }
 

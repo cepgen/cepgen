@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
   cepgen::Limits q_range;
   int num_points;
   string output_file, plotter;
-  bool q2mode, logx, logy, draw_grid;
+  bool q2mode, logx, logy, draw_grid, ratio_plot;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("qrange,q", "virtuality range (GeV)", &q_range, cepgen::Limits{1., 101.})
@@ -43,6 +43,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("logx", "logarithmic x-scale", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
+      .addOptionalArgument("ratio,r", "draw the ratio plot", &ratio_plot, false)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .parse();
 
@@ -61,8 +62,7 @@ int main(int argc, char* argv[]) {
     // alphaS(Q) modellings part
     size_t i = 0;
     for (const auto& mod : cepgen::AlphaSFactory::get().modules()) {
-      const auto& algo = cepgen::AlphaSFactory::get().build(
-          mod /*, cepgen::ParametersList().set<double>("asmur", 0.35).set<double>("mur", 1.4142)*/);
+      const auto& algo = cepgen::AlphaSFactory::get().build(mod);
       alphas.emplace_back(alpha_t{
           mod,
           vector<double>(num_points),
@@ -120,6 +120,8 @@ int main(int argc, char* argv[]) {
       dm |= cepgen::utils::Drawer::Mode::logy;
     if (draw_grid)
       dm |= cepgen::utils::Drawer::Mode::grid;
+    if (ratio_plot)
+      dm |= cepgen::utils::Drawer::Mode::ratio;
     string xlabel = q2mode ? "Q^{2} (GeV^{2})" : "Q (GeV)", spectrum = q2mode ? "Q^{2}" : "Q";
 
     {
@@ -128,8 +130,6 @@ int main(int argc, char* argv[]) {
         alphas[i].graph.xAxis().setLabel(xlabel);
         alphas[i].graph.yAxis().setLabel("$\\alpha_{S}(" + spectrum + ")$");
         mp.emplace_back(&alphas[i].graph);
-        //const auto descr = cepgen::utils::replace_all(cepgen::AlphaSFactory::get().describe(alphas[i].name),
-        //                                              {{" alphaS", ""}, {" evolution algorithm", ""}});
       }
       plt->draw(mp, "comp_alphas", cepgen::utils::s("$\\alpha_{S}$ modelling", alphas.size(), false), dm);
     }
@@ -139,8 +139,6 @@ int main(int argc, char* argv[]) {
         alphaem[i].graph.xAxis().setLabel(xlabel);
         alphaem[i].graph.yAxis().setLabel("$\\alpha_{EM}$(" + spectrum + ")");
         mp.emplace_back(&alphaem[i].graph);
-        //const auto descr = cepgen::utils::replace_all(cepgen::AlphaEMFactory::get().describe(alphaem[i].name),
-        //                                              {{" alphaS", ""}, {" evolution algorithm", ""}});
       }
       plt->draw(mp, "comp_alphaem", cepgen::utils::s("$\\alpha_{EM}$ modelling", alphaem.size(), false), dm);
     }

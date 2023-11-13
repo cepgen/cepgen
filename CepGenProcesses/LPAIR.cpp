@@ -61,26 +61,19 @@ public:
       : proc::Process(params),
         opt_(steer<int>("nopt")),
         pair_(steer<ParticleProperties>("pair")),
-        symmetrise_(steer<bool>("symmetrise")),
-        rnd_phi_(0., 2. * M_PI),
-        rnd_side_(0, 1) {}
+        symmetrise_(steer<bool>("symmetrise")) {}
 
   explicit LPAIR(const LPAIR& oth)
-      : proc::Process(oth),
-        opt_(oth.opt_),
-        pair_(oth.pair_),
-        symmetrise_(oth.symmetrise_),
-        rnd_phi_(oth.rnd_phi_),
-        rnd_side_(oth.rnd_side_) {}
+      : proc::Process(oth), opt_(oth.opt_), pair_(oth.pair_), symmetrise_(oth.symmetrise_) {}
   /// Copy constructor
   proc::ProcessPtr clone() const override { return proc::ProcessPtr(new LPAIR(*this)); }
 
   void addEventContent() override {
-    proc::Process::setEventContent({{Particle::IncomingBeam1, PDG::proton},
-                                    {Particle::IncomingBeam2, PDG::proton},
-                                    {Particle::Parton1, PDG::photon},
-                                    {Particle::Parton2, PDG::photon}},
-                                   {{Particle::OutgoingBeam1, {PDG::proton}},
+    proc::Process::setEventContent({{Particle::IncomingBeam1, {PDG::proton}},
+                                    {Particle::IncomingBeam2, {PDG::proton}},
+                                    {Particle::Parton1, {PDG::photon}},
+                                    {Particle::Parton2, {PDG::photon}},
+                                    {Particle::OutgoingBeam1, {PDG::proton}},
                                     {Particle::OutgoingBeam2, {PDG::proton}},
                                     {Particle::CentralSystem, {pair_.pdgid, pair_.pdgid}}});
   }
@@ -234,8 +227,6 @@ private:
     const double ax = std::sqrt(std::pow(out - y - z, 2) + c);
     return {out, ax * log(yy)};
   }
-  std::uniform_real_distribution<double> rnd_phi_;
-  std::uniform_int_distribution<short> rnd_side_;
   std::unique_ptr<formfac::Parameterisation> formfac_;
   std::unique_ptr<strfun::Parameterisation> strfun_;
 };
@@ -927,9 +918,9 @@ double LPAIR::computeWeight() {
 
 void LPAIR::fillKinematics(bool) {
   //----- parameterise a random rotation around z-axis
-  const short rany = rnd_side_(rnd_gen_) == 1 ? 1 : -1, ransign = rnd_side_(rnd_gen_) == 1 ? 1 : -1;
-  const double ranphi = rnd_phi_(rnd_gen_);
-  const short ranz = symmetrise_ ? (rnd_side_(rnd_gen_) == 1 ? 1 : -1) : 1;
+  const short rany = rnd_gen_->uniformInt(0, 1) == 1 ? 1 : -1, ransign = rnd_gen_->uniformInt(0, 1) == 1 ? 1 : -1;
+  const double ranphi = rnd_gen_->uniform(0., 2. * M_PI);
+  const short ranz = symmetrise_ ? (rnd_gen_->uniformInt(0, 1) == 1 ? 1 : -1) : 1;
 
   //----- incoming beams
   pA() = Momentum(0., 0., +p_cm_, ep1_).betaGammaBoost(boost_props_.gamma, boost_props_.betgam);

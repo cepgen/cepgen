@@ -26,12 +26,13 @@
 #include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 
 namespace cepgen {
-  class IntegratorVegasPlus final : public Integrator {
+  class IntegratorPython final : public Integrator {
   public:
-    explicit IntegratorVegasPlus(const ParametersList& params) : Integrator(params), env_("vegas_plus") {
-      auto cfg = python::importModule("VegasIntegration");
+    explicit IntegratorPython(const ParametersList& params)
+        : Integrator(params), env_(ParametersList().setName<std::string>("python_integrator")) {
+      auto cfg = python::importModule(steer<std::string>("module"));
       if (!cfg)
-        throw PY_ERROR << "Failed to import the Vegas python file.";
+        throw PY_ERROR << "Failed to import the Python module '" << steer<std::string>("module") << "'.";
       func_ = python::getAttribute(cfg.get(), "integrate");
       if (!func_ || !PyCallable_Check(func_.get()))
         throw PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";
@@ -45,22 +46,24 @@ namespace cepgen {
       const auto evals = steer<int>("evals");
       PyMethodDef py_integr = {"integrand", py_integrand, METH_VARARGS, "A python-wrapped integrand"};
       python::ObjectPtr function(PyCFunction_NewEx(&py_integr, nullptr, python::set<std::string>("integrand").get()));
-      auto value =
+      const auto value =
           lims_ ? python::call(func_, function.get(), (int)integrand.size(), iterations, 1000, evals, lims_.get())
                 : python::call(func_, function.get(), (int)integrand.size(), iterations, 1000, evals);
       if (!value)
         throw PY_ERROR;
       const auto vals = python::getVector<double>(value);
       if (vals.size() < 2)
-        throw CG_FATAL("IntegratorVegasPlus")
-            << "Wrong multiplicity of result returned from Python's Vegas: " << vals << ".";
+        throw CG_FATAL("IntegratorPython")
+            << "Wrong multiplicity of result returned from Python's integration algorithm: " << vals << ".";
 
       return Value{vals[0], vals[1]};
     }
 
     static ParametersDescription description() {
       auto desc = Integrator::description();
-      desc.setDescription("Vegas+ MC integrator");
+      desc.setDescription("Python integration algorithm");
+      desc.add<std::string>("module", "IntegrationAlgos.Vegas")
+          .setDescription("name of the Python module embedding the integrate() function");
       desc.add<int>("iterations", 10);
       desc.add<int>("evals", 1000);
       return desc;
@@ -72,12 +75,12 @@ namespace cepgen {
     python::ObjectPtr func_, lims_{nullptr};
     static PyObject* py_integrand(PyObject* /*self*/, PyObject* args) {
       if (!gIntegrand)
-        throw CG_FATAL("IntegratorVegasPlus") << "Integrand was not initialised.";
+        throw CG_FATAL("IntegratorPython") << "Integrand was not initialised.";
       const auto c_args = python::getVector<double>(PyTuple_GetItem(args, 0));
       return python::set<double>(gIntegrand->eval(c_args)).release();
     }
   };
-  Integrand* IntegratorVegasPlus::gIntegrand = nullptr;
+  Integrand* IntegratorPython::gIntegrand = nullptr;
 }  // namespace cepgen
 
-REGISTER_INTEGRATOR("vegas_plus", IntegratorVegasPlus);
+REGISTER_INTEGRATOR("python", IntegratorPython);

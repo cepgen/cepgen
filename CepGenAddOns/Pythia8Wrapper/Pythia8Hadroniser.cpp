@@ -51,12 +51,12 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      void readString(const char* param) override {
+      void readString(const std::string& param) override {
         if (!pythia_->readString(param))
           throw CG_FATAL("Pythia8Hadroniser") << "The Pythia8 core failed to parse the following setting:\n\t" << param;
       }
       void initialise() override;
-      bool run(Event& ev, double& weight, bool full) override;
+      bool run(Event& ev, double& weight, bool fast) override;
 
       void setCrossSection(const Value& cross_section) override {
         cg_evt_->setCrossSection(0, cross_section, cross_section.uncertainty());
@@ -153,7 +153,7 @@ namespace cepgen {
         cg_evt_->initLHEF();
     }
 
-    bool Pythia8Hadroniser::run(Event& ev, double& weight, bool full) {
+    bool Pythia8Hadroniser::run(Event& ev, double& weight, bool fast) {
       //--- initialise the event weight before running any decay algorithm
       weight = 1.;
 
@@ -161,14 +161,14 @@ namespace cepgen {
       // 1) the full event kinematics (i.e. with remnants) is to be specified,
       // 2) the remnants are to be fragmented, or
       // 3) the resonances are to be decayed.
-      if (full && !remn_fragm_ && !res_decay_)
+      if (!fast && !remn_fragm_ && !res_decay_)
         return true;
-      if (!full && !res_decay_)
+      if (fast && !res_decay_)
         return true;
 
       //--- switch full <-> partial event
-      if (full != enable_hadr_) {
-        enable_hadr_ = full;
+      if (!fast != enable_hadr_) {
+        enable_hadr_ = !fast;
         initialise();
       }
 
@@ -178,23 +178,23 @@ namespace cepgen {
 
       cg_evt_->feedEvent(
           ev,
-          full ? Pythia8::CepGenEvent::Type::centralAndBeamRemnants : Pythia8::CepGenEvent::Type::centralAndPartons);
-      //if ( full ) cg_evt_->listEvent();
-      if (debug_lhef_ && full)
+          fast ? Pythia8::CepGenEvent::Type::centralAndPartons : Pythia8::CepGenEvent::Type::centralAndBeamRemnants);
+      if (debug_lhef_ && !fast)
         cg_evt_->eventLHEF();
 
       //===========================================================================================
       // launch the hadronisation / resonances decays, and update the event accordingly
       //===========================================================================================
 
-      ev.num_hadronisation_trials = 0;
+      auto& num_hadr_trials = ev.metadata["pythia8:num_hadronisation_trials"];
+      num_hadr_trials = 0;
       while (true) {
-        if (ev.num_hadronisation_trials++ > max_trials_)
+        if (num_hadr_trials++ > max_trials_)
           return false;
         //--- run the hadronisation/fragmentation algorithm
         if (pythia_->next()) {
           //--- hadronisation successful
-          if (first_evt_ && full) {
+          if (first_evt_ && !fast) {
             offset_ = 0;
             for (unsigned short i = 1; i < pythia_->event.size(); ++i)
               if (pythia_->event[i].status() == -PYTHIA_STATUS_IN_BEAM)
@@ -206,8 +206,7 @@ namespace cepgen {
         }
       }
       CG_DEBUG("Pythia8Hadroniser") << "Pythia8 hadronisation performed successfully.\n\t"
-                                    << "Number of trials: " << ev.num_hadronisation_trials << "/" << max_trials_
-                                    << ".\n\t"
+                                    << "Number of trials: " << num_hadr_trials << "/" << max_trials_ << ".\n\t"
                                     << "Particles multiplicity: " << ev.particles().size() << " → "
                                     << pythia_->event.size() << ".\n\t"
                                     << "  indices offset: " << offset_ << ".";

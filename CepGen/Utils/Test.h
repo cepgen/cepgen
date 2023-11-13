@@ -1,6 +1,8 @@
 #ifndef CepGen_Utils_Test_h
 #define CepGen_Utils_Test_h
 
+#include <cmath>
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
@@ -48,7 +50,7 @@ namespace cepgen {
 
 #define CG_TEST_EQUIV(var1, var2, name)                                                                        \
   {                                                                                                            \
-    if (fabs((var1) - (var2)) > cepgen::test::precision)                                                       \
+    if (std::fabs((var1) - (var2)) > cepgen::test::precision)                                                  \
       CG_FAILED(name) << " " << var1 << " is not within " << cepgen::test::precision << " of " << var2 << "."; \
     else {                                                                                                     \
       CG_PASSED(name);                                                                                         \

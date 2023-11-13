@@ -19,10 +19,10 @@
 #ifndef CepGen_Integration_Integrator_h
 #define CepGen_Integration_Integrator_h
 
-#include <random>
 #include <vector>
 
 #include "CepGen/Modules/NamedModule.h"
+#include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/Value.h"
 
 namespace cepgen {
@@ -56,11 +56,9 @@ namespace cepgen {
                            const std::vector<Limits>&);
 
   protected:
-    const unsigned long seed_;    ///< Random number generator seed
+    const std::unique_ptr<utils::RandomGenerator> rnd_gen_;
     int verbosity_;               ///< Integrator verbosity
     std::vector<Limits> limits_;  ///< List of per-variable integration limits
-    mutable std::default_random_engine rnd_gen_;
-    mutable std::uniform_real_distribution<double> rnd_;
   };
 }  // namespace cepgen
 

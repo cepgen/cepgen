@@ -34,6 +34,7 @@ int main(int argc, char* argv[]) {
 
   int num_epochs;
   vector<string> functional_parsers, integrators, outputs;
+  bool python_integ;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("epochs,e", "number of epochs to try", &num_epochs, 20)
       .addOptionalArgument("functionals,f",
@@ -43,6 +44,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument(
           "integrators,i", "integrators to benchmark", &integrators, cepgen::IntegratorFactory::get().modules())
       .addOptionalArgument("outputs,o", "output formats (html, csv, json, pyperf)", &outputs, vector<string>{"html"})
+      .addOptionalArgument("python,p", "also add python integrator?", &python_integ, false)
       .parse();
 
   ofstream out_file("benchmark.html");
@@ -53,11 +55,14 @@ int main(int argc, char* argv[]) {
   for (const auto& functional_parser : functional_parsers) {
     bench.context("functional", functional_parser);
     cepgen::FunctionalIntegrand integrand("x+y^2+z^3", {"x", "y", "z"}, functional_parser);
-    for (const auto& integrator_name : integrators)
+    for (const auto& integrator_name : integrators) {
+      if (integrator_name == "python" && !python_integ)  // skip the python integrators test unless required
+        continue;
       bench.context("integrator", integrator_name).run(functional_parser + "+" + integrator_name, [&] {
         auto integr = cepgen::IntegratorFactory::get().build(integrator_name);
         integr->integrate(integrand);
       });
+    }
   }
   render_benchmark(bench, outputs);
 

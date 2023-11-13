@@ -35,6 +35,7 @@
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
 using namespace std;
@@ -141,6 +142,7 @@ int main(int argc, char* argv[]) {
     LOOP_FACTORY("Integrator", cepgen::IntegratorFactory);
     LOOP_FACTORY("Analytic integrator", cepgen::AnalyticIntegratorFactory);
     LOOP_FACTORY("Derivator", cepgen::DerivatorFactory);
+    LOOP_FACTORY("Random generator", cepgen::RandomGeneratorFactory);
     LOOP_FACTORY("Drawer", cepgen::DrawerFactory);
     CG_LOG << os.str();
     return 0;
