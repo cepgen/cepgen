@@ -26,8 +26,7 @@
 namespace cepgen {
   Integrator::Integrator(const ParametersList& params)
       : NamedModule(params),
-        rnd_gen_(RandomGeneratorFactory::get().build(
-            steer<ParametersList>("randomGenerator").set<unsigned long long>("seed", steer<int>("seed")))),
+        rnd_gen_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))),
         verbosity_(steer<int>("verbose")) {}
 
   void Integrator::checkLimits(const Integrand& integrand) {
@@ -78,7 +77,6 @@ namespace cepgen {
   ParametersDescription Integrator::description() {
     auto desc = ParametersDescription();
     desc.setDescription("Unnamed integrator");
-    desc.add<int>("seed", time(nullptr)).setDescription("Random number generator seed");
     desc.add<int>("verbose", 1).setDescription("Verbosity level");
     desc.add<ParametersDescription>("randomGenerator", ParametersDescription().setName<std::string>("stl"))
         .setDescription("random number generator engine");
