@@ -22,6 +22,7 @@
 #include <memory>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
 namespace cepgen {
@@ -40,7 +41,7 @@ namespace cepgen {
       else if (type == "ranlxs0")
         rng_engine = const_cast<gsl_rng_type*>(gsl_rng_ranlxs0);
       else
-        throw CG_FATAL("GSLRandomGenerator") << "Random number generator engine not set!";
+        throw CG_FATAL("GSLRandomGenerator") << "Random number generator engine invalid: '" << type << "'.";
 
       rng_.reset(gsl_rng_alloc(rng_engine));
       gsl_rng_set(rng_.get(), seed_);
@@ -49,12 +50,16 @@ namespace cepgen {
                                      << "Seed: " << seed_ << ".";
     }
 
+    static ParametersDescription description() {
+      auto desc = utils::RandomGenerator::description();
+      desc.setDescription("GSL random number generator engine");
+      desc.add<std::string>("type", "mt19937").setDescription("random number engine");
+      return desc;
+    }
+
     int uniformInt(int min, int max) override { return min + gsl_rng_uniform_int(rng_.get(), max - min + 1); }
-
     double uniform(double min, double max) override { return Limits{min, max}.x(gsl_rng_uniform(rng_.get())); }
-
     double normal(double mean, double rms) override { return gsl_ran_gaussian(rng_.get(), rms) + mean; }
-
     double exponential(double exponent) override { return gsl_ran_exponential(rng_.get(), exponent); }
 
   private:
@@ -65,5 +70,9 @@ namespace cepgen {
     };
     /// Instance of random number generator service
     std::unique_ptr<gsl_rng, gsl_rng_deleter> rng_;
+
+    void* enginePtr() override { return rng_.get(); }
   };
 }  // namespace cepgen
+
+REGISTER_RANDOM_GENERATOR("gsl", GSLRandomGenerator);

@@ -65,7 +65,7 @@ namespace cepgen {
       rnd_.reset(new TRandom3);
     else
       throw CG_FATAL("IntegratorFoam") << "Unrecognised random generator: \"" << rnd_mode << "\".";
-    rnd_->SetSeed(seed_);
+    rnd_->SetSeed(rnd_gen_->parameters().get<unsigned long long>("seed"));
 
     //--- a bit of printout for debugging
     CG_DEBUG("Integrator:build") << "FOAM integrator built\n\t"

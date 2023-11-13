@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Utils/Message.h"
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
 namespace cepgen {
@@ -28,6 +28,10 @@ namespace cepgen {
       CG_WARNING("RandomGenerator:exponential")
           << "Exponential distribution not implemented for this random number generator.";
       return 0.;
+    }
+
+    void* RandomGenerator::enginePtr() {
+      throw CG_FATAL("RandomGenerator:enginePtr") << "No engine object declared for this random generator.";
     }
 
     ParametersDescription RandomGenerator::description() {

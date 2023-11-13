@@ -57,7 +57,7 @@ namespace cepgen {
           epsrel_,
           epsabs_,
           verbose_,
-          seed_,
+          rnd_gen_->parameters().get<unsigned long long>("seed"),
           mineval_,
           maxeval_,
           nnew_,

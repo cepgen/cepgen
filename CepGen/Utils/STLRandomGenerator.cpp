@@ -51,7 +51,7 @@ namespace cepgen {
       else if (type == "knuth_b")
         gen_.reset(new Generator<std::knuth_b>(seed));
       else
-        throw CG_FATAL("STLRandomGenerator") << "Random number generator engine not set!";
+        throw CG_FATAL("STLRandomGenerator") << "Random number generator engine invalid: '" << type << "'.";
 
       CG_DEBUG("STLRandomGenerator") << "Random numbers generator with seed: " << seed_ << ".";
     }

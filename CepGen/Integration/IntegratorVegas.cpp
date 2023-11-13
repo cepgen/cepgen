@@ -113,7 +113,7 @@ namespace cepgen {
                                           &xhigh_[0],
                                           function_->dim,
                                           0.2 * ncvg_,
-                                          gsl_rng_.get(),
+                                          rnd_gen_->engine<gsl_rng>(),
                                           vegas_state_.get(),
                                           &result,
                                           &abserr);
@@ -148,7 +148,7 @@ namespace cepgen {
                                         &xhigh_[0],
                                         function_->dim,
                                         ncall,
-                                        gsl_rng_.get(),
+                                        rnd_gen_->engine<gsl_rng>(),
                                         vegas_state_.get(),
                                         &result,
                                         &abserr);

@@ -45,8 +45,15 @@ namespace cepgen {
       // specialised distributions
       virtual double exponential(double exponent = 1.);
 
+      /// Retrieve the engine object
+      template <typename T>
+      T* engine() {
+        return static_cast<T*>(enginePtr());
+      }
+
     protected:
       unsigned long long seed_;
+      virtual void* enginePtr();  ///< engine object
     };
   }  // namespace utils
 }  // namespace cepgen
