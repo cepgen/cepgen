@@ -22,6 +22,7 @@
 #include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/Hadroniser.h"
+#include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenAddOns/Pythia6Wrapper/EventInterface.h"
 #include "CepGenAddOns/Pythia6Wrapper/Pythia6Interface.h"
