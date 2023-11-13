@@ -27,10 +27,7 @@
 namespace cepgen {
   namespace proc {
     Process2to4::Process2to4(const ParametersList& params, pdgid_t cs_id)
-        : FactorisedProcess(params, {cs_id, cs_id}),
-          cs_prop_(PDG::get()(cs_id)),
-          single_limits_(params),
-          rnd_sign_(0, 1) {}
+        : FactorisedProcess(params, {cs_id, cs_id}), cs_prop_(PDG::get()(cs_id)), single_limits_(params) {}
 
     void Process2to4::setCuts(const cuts::Central& single) { single_limits_ = single; }
 
@@ -144,7 +141,7 @@ namespace cepgen {
 
     void Process2to4::fillCentralParticlesKinematics() {
       //--- randomise the charge of outgoing system
-      const short sign = rnd_sign_(rnd_gen_) == 1 ? 1 : -1;
+      const short sign = rnd_gen_->uniformInt(0, 1) == 1 ? 1 : -1;
 
       //--- first outgoing central particle
       auto& oc1 = event()[Particle::CentralSystem][0].get();

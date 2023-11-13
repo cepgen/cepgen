@@ -31,6 +31,7 @@
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
 namespace cepgen {
@@ -64,6 +65,7 @@ int main(int argc, char* argv[]) {
       .document("alphas", "Strong coupling evolution", cepgen::AlphaSFactory::get())
       .document("integr", "Integrator algorithms", cepgen::IntegratorFactory::get())
       .document("func", "Functional parsers", cepgen::FunctionalFactory::get())
+      .document("rndgen", "Random number generators", cepgen::RandomGeneratorFactory::get())
       .document("drawer", "Drawing tools", cepgen::DrawerFactory::get())
       .document("evtgen", "Event generation algorithms", cepgen::GeneratorWorkerFactory::get())
       .document("evtmod", "Event modification algorithms", cepgen::EventModifierFactory::get())

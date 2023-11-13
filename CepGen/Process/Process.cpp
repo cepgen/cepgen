@@ -21,17 +21,22 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Modules/CouplingFactory.h"
+#include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Math.h"
+#include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace proc {
     Process::Process(const ParametersList& params)
-        : NamedModule(params), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {
+        : NamedModule(params),
+          mp_(PDG::get().mass(PDG::proton)),
+          mp2_(mp_ * mp_),
+          rnd_gen_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))) {
       const auto& kin_params = steer<ParametersList>("kinematics");
       if (!kin_params.empty())
         kinematics().setParameters(kin_params);
@@ -43,6 +48,7 @@ namespace cepgen {
         : NamedModule(proc),
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
+          rnd_gen_(RandomGeneratorFactory::get().build(proc.rnd_gen_->parameters())),
           s_(proc.s_),
           sqs_(proc.sqs_),
           mA2_(proc.mA2_),
@@ -366,6 +372,8 @@ namespace cepgen {
       desc.add<ParametersDescription>("alphaS", AlphaSFactory::get().describeParameters("pegasus"))
           .setDescription("strong coupling evolution algorithm");
       desc.add<bool>("hasEvent", true).setDescription("does the process carry an event definition");
+      desc.add<ParametersDescription>("randomGenerator", ParametersDescription().setName<std::string>("stl"))
+          .setDescription("random number generator engine");
       return desc;
     }
 

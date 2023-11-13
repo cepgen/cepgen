@@ -34,7 +34,6 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    double uniform(const Limits&) const override;
     void setLimits(const std::vector<Limits>&) override;
 
   protected:
@@ -44,13 +43,6 @@ namespace cepgen {
     /// GSL structure storing the function to be integrated by this
     /// integrator instance (along with its parameters)
     std::unique_ptr<gsl_monte_function> function_;
-    /// A deleter object for GSL's random number generator
-    struct gsl_rng_deleter {
-      /// Destructor method for the random number generator service
-      inline void operator()(gsl_rng* rng) { gsl_rng_free(rng); }
-    };
-    /// Instance of random number generator service
-    std::unique_ptr<gsl_rng, gsl_rng_deleter> gsl_rng_;
     std::vector<double> xlow_, xhigh_;
   };
 }  // namespace cepgen

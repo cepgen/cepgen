@@ -36,6 +36,7 @@
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 
 namespace cepgen {
@@ -84,6 +85,7 @@ namespace cepgen {
       list_modules(IntegratorFactory::get(), "Integration algorithms");
       list_modules(AnalyticIntegratorFactory::get(), "Analytic integration algorithms");
       list_modules(DerivatorFactory::get(), "Derivation algorithm");
+      list_modules(RandomGeneratorFactory::get(), "Random number generator engines");
       list_modules(DrawerFactory::get(), "Drawer utilities");
     });
   }

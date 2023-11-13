@@ -19,19 +19,21 @@
 #ifndef CepGenAddOns_Pythia6Wrapper_EventInterface_h
 #define CepGenAddOns_Pythia6Wrapper_EventInterface_h
 
-#include <random>
 #include <vector>
 
 #include "CepGen/Physics/Modes.h"
 
 namespace cepgen {
   class Event;
-}
+  namespace utils {
+    class RandomGenerator;
+  }
+}  // namespace cepgen
 namespace pythia6 {
   /// Interface to the Pythia 6 event content.
   class EventInterface {
   public:
-    explicit EventInterface(cepgen::Event&, cepgen::mode::Kinematics);
+    explicit EventInterface(cepgen::Event&, cepgen::mode::Kinematics, cepgen::utils::RandomGenerator*);
 
     void prepareHadronisation();
     size_t numStrings() const { return evt_strings_.size(); }
@@ -40,11 +42,9 @@ namespace pythia6 {
   private:
     void fillEventBlock();
 
-    cepgen::Event& evt_;  // NOT owning
+    cepgen::Event& evt_;                   // NOT owning
+    cepgen::utils::RandomGenerator* rnd_;  ///< Random number generator engine (not owning)
     std::vector<cepgen::Particle::Role> roles_;
-
-    std::default_random_engine rnd_gen_;  ///< Random number generator engine
-    std::uniform_real_distribution<double> rnd_phi_, rnd_cos_theta_, rnd_qdq_;
 
     std::pair<short, short> pickPartonsContent();
 

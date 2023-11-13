@@ -22,13 +22,13 @@
 #include <cstddef>  // size_t
 #include <map>
 #include <memory>
-#include <random>
 #include <vector>
 
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Utils/RandomGenerator.h"
 
 namespace cepgen {
   class Event;
@@ -159,7 +159,7 @@ namespace cepgen {
       double alphaEM(double q) const;  ///< Compute the electromagnetic running coupling algorithm at a given scale
       double alphaS(double q) const;   ///< Compute the strong coupling algorithm at a given scale
 
-      std::default_random_engine rnd_gen_;  ///< Random number generator engine
+      std::unique_ptr<utils::RandomGenerator> rnd_gen_;  ///< Process-local random number generator engine
 
     private:
       double s_{-1.};    ///< \f$s\f$, squared centre of mass energy of the two-beam system, in \f$\mathrm{GeV}^2\f$
