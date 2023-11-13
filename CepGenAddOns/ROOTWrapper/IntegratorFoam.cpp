@@ -18,9 +18,6 @@
 
 #include <TFoam.h>
 #include <TFoamIntegrand.h>
-#include <TRandom1.h>
-#include <TRandom2.h>
-#include <TRandom3.h>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/Integrand.h"
@@ -37,7 +34,6 @@ namespace cepgen {
     static ParametersDescription description();
 
     Value integrate(Integrand&) override;
-    inline double uniform(const Limits& limits) const override { return rnd_->Uniform(limits.min(), limits.max()); }
 
     /// Compute the weight for a given phase space point
     inline double Density(int ndim, double* x) override {
@@ -50,24 +46,11 @@ namespace cepgen {
 
   private:
     std::unique_ptr<TFoam> foam_;
-    std::unique_ptr<TRandom> rnd_;
     Integrand* integrand_{nullptr};
     std::vector<double> coord_;
   };
 
   IntegratorFoam::IntegratorFoam(const ParametersList& params) : Integrator(params), foam_(new TFoam("Foam")) {
-    const auto& rnd_mode = steer<std::string>("rngEngine");
-    if (rnd_mode == "Ranlux")
-      rnd_.reset(new TRandom1);
-    else if (rnd_mode == "generic")
-      rnd_.reset(new TRandom2);
-    else if (rnd_mode == "MersenneTwister")
-      rnd_.reset(new TRandom3);
-    else
-      throw CG_FATAL("IntegratorFoam") << "Unrecognised random generator: \"" << rnd_mode << "\".";
-    rnd_->SetSeed(rnd_gen_->parameters().get<unsigned long long>("seed"));
-
-    //--- a bit of printout for debugging
     CG_DEBUG("Integrator:build") << "FOAM integrator built\n\t"
                                  << "Version: " << foam_->GetVersion() << ".";
   }
@@ -75,7 +58,7 @@ namespace cepgen {
   Value IntegratorFoam::integrate(Integrand& integrand) {
     integrand_ = &integrand;
     foam_.reset(new TFoam("Foam"));
-    foam_->SetPseRan(rnd_.get());
+    foam_->SetPseRan(rnd_gen_->engine<TRandom>());
     foam_->SetnCells(steer<int>("nCells"));
     foam_->SetnSampl(steer<int>("nSampl"));
     foam_->SetnBin(steer<int>("nBin"));
@@ -117,9 +100,7 @@ namespace cepgen {
   ParametersDescription IntegratorFoam::description() {
     auto desc = Integrator::description();
     desc.setDescription("FOAM general purpose MC integrator");
-    desc.add<std::string>("rngEngine", "MersenneTwister")
-        .setDescription(
-            "Set random number generator engine (currently handled: 'Ranlux', 'generic', 'MersenneTwister')");
+    desc.add<ParametersDescription>("randomGenerator", ParametersDescription().setName<std::string>("root"));
     desc.add<int>("nCalls", 100'000).setDescription("number of calls for the cell evaluation");
     desc.add<int>("nCells", 1000);
     desc.add<int>("nSampl", 200);

@@ -9,12 +9,13 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 set(sources IntegratorROOT.cpp
+            ROOTAnalyticalIntegrator.cpp
             ROOTDerivator.cpp
             ROOTDrawer.cpp
-            ROOTTree*.cpp
-            ROOTHistsHandler.cpp
             ROOTFunctional.cpp
-            ROOTAnalyticalIntegrator.cpp)
+            ROOTHistsHandler.cpp
+            ROOTRandomGenerator.cpp
+            ROOTTree*.cpp)
 
 #--- FOAM integrator
 if(CMAKE_BUILD_FOAM)
