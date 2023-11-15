@@ -22,6 +22,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Utils/Limits.h"
+#include "CepGen/Utils/Math.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
@@ -40,16 +41,6 @@ namespace cepgen {
 
   static double normaliseSqrt(double x2) { return std::sqrt(x2 < 0. ? -x2 : x2); }
 
-  static double fastHypot(double x, double y) {
-    x *= x, y *= y;
-    return std::sqrt(x + y);
-  }
-
-  static double fastHypot(double x, double y, double z) {
-    x *= x, y *= y, z *= z;
-    return std::sqrt(x + y + z);
-  }
-
   Momentum::Momentum(double x, double y, double z, double t) : std::array<double, 4>{{x, y, z, t == -1. ? 0. : t}} {
     computeP();
   }
@@ -66,7 +57,7 @@ namespace cepgen {
   }
 
   Momentum Momentum::fromPtEtaPhiM(double pt, double eta, double phi, double m) {
-    return Momentum::fromPtEtaPhiE(pt, eta, phi, fastHypot(pt * cosh(eta), m));
+    return Momentum::fromPtEtaPhiE(pt, eta, phi, utils::fastHypot(pt * cosh(eta), m));
   }
 
   Momentum Momentum::fromPThetaPhiE(double p, double theta, double phi, double e) {
@@ -81,12 +72,12 @@ namespace cepgen {
   }
 
   Momentum Momentum::fromPxPyYM(double px, double py, double rap, double m) {
-    const double et = fastHypot(px, py, m);
+    const double et = utils::fastHypot(px, py, m);
     return Momentum(px, py, et * sinh(rap), et * cosh(rap));
   }
 
   Momentum Momentum::fromPtYPhiM(double pt, double rap, double phi, double m) {
-    const double et = fastHypot(pt, m);
+    const double et = utils::fastHypot(pt, m);
     return Momentum(pt * cos(phi), pt * sin(phi), et * sinh(rap), et * cosh(rap));
   }
 
@@ -169,7 +160,7 @@ namespace cepgen {
     return *this;
   }
 
-  Momentum& Momentum::setMass(double m) { return setEnergy(fastHypot(p_, m)).computeP(); }
+  Momentum& Momentum::setMass(double m) { return setEnergy(utils::fastHypot(p_, m)).computeP(); }
 
   Momentum& Momentum::setMass2(double m2) { return setEnergy(std::sqrt(p_ * p_ + m2)).computeP(); }
 
@@ -186,7 +177,7 @@ namespace cepgen {
   }
 
   Momentum& Momentum::computeP() {
-    p_ = fastHypot(px(), py(), pz());
+    p_ = utils::fastHypot(px(), py(), pz());
     return *this;
   }
 
@@ -224,7 +215,7 @@ namespace cepgen {
 
   double Momentum::phi() const { return normalisePhi(atan2(py(), px()), {0., 2. * M_PI}); }
 
-  double Momentum::pt() const { return fastHypot(px(), py()); }
+  double Momentum::pt() const { return utils::fastHypot(px(), py()); }
 
   double Momentum::pt2() const { return px() * px() + py() * py(); }
 
@@ -249,7 +240,9 @@ namespace cepgen {
 
   double Momentum::deltaPt(const Momentum& oth) const { return fabs(pt() - oth.pt()); }
 
-  double Momentum::deltaR(const Momentum& oth) const { return fastHypot(rapidity() - oth.rapidity(), deltaPhi(oth)); }
+  double Momentum::deltaR(const Momentum& oth) const {
+    return utils::fastHypot(rapidity() - oth.rapidity(), deltaPhi(oth));
+  }
 
   //--- boosts/rotations
 
