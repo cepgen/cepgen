@@ -99,6 +99,8 @@ namespace cepgen {
       Momentum& q1();  ///< Positive-z incoming parton's 4-momentum
       Momentum& q2();  ///< Negative-z incoming parton's 4-momentum
 
+      double wCM() const { return wcm_; }  ///< Two-parton centre of mass energy
+
     protected:
       static constexpr double NUM_LIMITS = 1.e-3;  ///< Numerical limits for sanity comparisons (MeV/mm-level)
 
@@ -164,6 +166,7 @@ namespace cepgen {
     private:
       double s_{-1.};    ///< \f$s\f$, squared centre of mass energy of the two-beam system, in \f$\mathrm{GeV}^2\f$
       double sqs_{-1.};  ///< \f$\sqrt s\f$, centre of mass energy of the two-beam system (in GeV)
+      double wcm_{-1.};  ///< two-parton centre of mass energy
       double mA2_{-1.};  ///< first incoming beam particle squared mass
       double mB2_{-1.};  ///< second incoming beam particle squared mass
       double mX2_{-1.};  ///< First diffractive state squared mass

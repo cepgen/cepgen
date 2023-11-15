@@ -300,6 +300,7 @@ namespace cepgen {
 
       mA2_ = p1.mass2();
       mB2_ = p2.mass2();
+      wcm_ = 0.5 * (1. + std::sqrt(1. - 4. * std::sqrt(mA2_ * mB2_) / s_));
 
       prepareKinematics();
 

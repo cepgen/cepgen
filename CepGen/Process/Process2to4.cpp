@@ -45,8 +45,6 @@ namespace cepgen {
       const auto lim_phi_diff = kinematics().cuts().central.phi_diff.truncate(Limits{0., 2. * M_PI});
       defineVariable(m_phi_pt_diff_, Mapping::linear, lim_phi_diff, "Final state particles azimuthal angle difference");
 
-      ww_ = 0.5 * (1. + std::sqrt(1. - 4. * mA() * mB() / s()));
-
       prepareProcessKinematics();
     }
 
@@ -116,7 +114,7 @@ namespace cepgen {
       }
 
       //--- four-momenta of the intermediate partons
-      const double norm = 1. / ww_ / ww_ / s(), prefac = 0.5 * ww_ * sqrtS();
+      const double norm = 1. / wCM() / wCM() / s(), prefac = 0.5 * wCM() * sqrtS();
       {  // positive-z incoming parton collinear kinematics
         const double tau1 = norm * q1().p2() / x1() / x1();
         q1().setPz(+prefac * x1() * (1. - tau1)).setEnergy(+prefac * x1() * (1. + tau1));

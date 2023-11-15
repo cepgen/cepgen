@@ -57,9 +57,6 @@ namespace cepgen {
       double m_y_c2_{0.};         ///< Rapidity of the second central particle
       double m_pt_diff_{0.};      ///< Transverse momentum difference for the two central particle
       double m_phi_pt_diff_{0.};  ///< Azimuthal angle difference for the two central particles
-
-    private:
-      double ww_{0.};
     };
   }  // namespace proc
 }  // namespace cepgen
