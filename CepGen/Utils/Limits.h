@@ -77,6 +77,11 @@ namespace cepgen {
     Limits& apply(double (*)(double));
     /// Compute a copy of limits with an operator applied on boundaries
     Limits compute(double (*)(double)) const;
+    /// Compute a copy of limits with an operator applied on boundaries
+    template <typename F>
+    inline Limits compute(const F& op) const {
+      return Limits{hasMin() ? op(min()) : INVALID, hasMax() ? op(max()) : INVALID};
+    }
     /// Is there a lower and upper limit?
     bool valid() const;
     /// Raw value of the limits

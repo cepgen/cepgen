@@ -148,7 +148,7 @@ namespace cepgen {
   }
 
   Limits Limits::compute(double (*op)(double)) const {
-    return Limits{hasMin() ? op(min()) : Limits::INVALID, hasMax() ? op(max()) : Limits::INVALID};
+    return compute([&op](double ext) { return op(ext); });
   }
 
   std::ostream& operator<<(std::ostream& os, const Limits& lim) {
