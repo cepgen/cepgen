@@ -67,9 +67,11 @@ private:
 
     if (pair_.fermion)  // charginos
       return (2. * prefactor_) *
-             ((1. + 4. * mass2_norm - 8. * mass2_norm * mass2_norm) * log_term - beta * (1 + 4. * mass2_norm));
+             ((1. + 4. * mass2_norm - 8. * mass2_norm * mass2_norm) * log_term - beta * (1 + 4. * mass2_norm)) *
+             inv_s_hat * inv_s_hat;
     else  // sleptons/H+-
-      return prefactor_ * (beta * (1 + 4. * mass2_norm) - 4. * mass2_norm * (1. - 2. * mass2_norm) * log_term);
+      return prefactor_ * (beta * (1 + 4. * mass2_norm) - 4. * mass2_norm * (1. - 2. * mass2_norm) * log_term) *
+             inv_s_hat * inv_s_hat;
   }
 
   const ParticleProperties pair_;
