@@ -26,6 +26,7 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/NachtmannAmplitudes.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/PolarisationState.h"
 #include "CepGen/Process/Process2to4.h"
 
 using namespace cepgen;
@@ -39,37 +40,12 @@ public:
         mW_(PDG::get().mass(PDG::W)),
         mW2_(mW_ * mW_),
         method_(steer<int>("method")),
-        ampl_(params_) {
-    const auto& states = steer<ParametersList>("polarisationStates");
-    if (!states.empty()) {
-      pol_w1_ = states.get<std::vector<int> >("W1");
-      pol_w2_ = states.get<std::vector<int> >("W2");
-    }
-    if (params_.has<int>("polarisationStates"))
-      switch (steerAs<int, Polarisation>("polarisationStates")) {
-        case Polarisation::LL:
-          pol_w1_ = {0};
-          pol_w2_ = {0};
-          break;
-        case Polarisation::LT:
-          pol_w1_ = {0};
-          pol_w2_ = {-1, 1};
-          break;
-        case Polarisation::TL:
-          pol_w1_ = {-1, 1};
-          pol_w2_ = {0};
-          break;
-        case Polarisation::TT:
-          pol_w1_ = {-1, 1};
-          pol_w2_ = {-1, 1};
-          break;
-        case Polarisation::full:
-          pol_w1_ = {-1, 0, 1};
-          pol_w2_ = {-1, 0, 1};
-          break;
-      }
+        ampl_(params_),
+        pol_(steer<ParametersList>("polarisationStates")) {
     CG_DEBUG("PPtoWW") << "matrix element computation method: " << method_ << ", "
-                       << "polarisation states: W1=" << pol_w1_ << ", W2=" << pol_w2_ << ".";
+                       << "polarisation states: "
+                       << "W1=" << pol_.polarisations().first << ", "
+                       << "W2=" << pol_.polarisations().second << ".";
 
     if (method_ == 1) {
       CG_INFO("PPtoWW") << "Nachtmann amplitudes (model: " << ampl_.mode() << ") initialised.";
@@ -91,10 +67,7 @@ public:
     desc.add<bool>("ktFactorised", true);
     desc.add<int>("method", 1)
         .setDescription("Matrix element computation method (0 = on-shell, 1 = off-shell by Nachtmann et al.)");
-    ParametersDescription pol_states;
-    pol_states.add<std::vector<int> >("W1", {-1, 0, 1}).setDescription("First W+- polarisation states");
-    pol_states.add<std::vector<int> >("W2", {-1, 0, 1}).setDescription("Second W+- polarisation states");
-    desc.add<ParametersDescription>("polarisationStates", pol_states);
+    desc.add<ParametersDescription>("polarisationStates", PolarisationState::description());
     desc += NachtmannAmplitudes::description();
     return desc;
   }
@@ -139,8 +112,8 @@ private:
 
     double hel_mat_elem{0.};
     // compute ME for each W helicity
-    for (const auto& lam3 : pol_w1_)
-      for (const auto& lam4 : pol_w2_) {
+    for (const auto& lam3 : pol_.polarisations().first)
+      for (const auto& lam4 : pol_.polarisations().second) {
         // compute all photon helicity amplitudes
         const auto pp = ampl_(kin, +1, +1, lam3, lam4), mm = ampl_(kin, -1, -1, lam3, lam4),
                    pm = ampl_(kin, +1, -1, lam3, lam4), mp = ampl_(kin, -1, +1, lam3, lam4);
@@ -154,8 +127,7 @@ private:
   const double mW_, mW2_;
   const int method_;
   const NachtmannAmplitudes ampl_;
-
-  std::vector<int> pol_w1_, pol_w2_;
+  const PolarisationState pol_;
 };
 // register process
 REGISTER_PROCESS("pptoww", PPtoWW);
