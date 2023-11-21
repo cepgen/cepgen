@@ -130,7 +130,7 @@ private:
     const double term2 =
         2. * s_hat * s_hat * (s_hat * s_hat + 3. * mW2_ * mW2_) / (3. * pow(mW2_ - t_hat, 2) * pow(mW2_ - u_hat, 2));
 
-    return 6. * constants::G_EM_SQ * constants::G_EM_SQ * (1. - term1 + term2);
+    return 6. * constants::G_EM_SQ * constants::G_EM_SQ * (1. - term1 + term2) / s_hat / s_hat;
   }
   double offShellME() const {
     const NachtmannAmplitudes::Kinematics kin(mW2_, shat(), that(), uhat());
@@ -148,7 +148,7 @@ private:
         hel_mat_elem += norm(p1 * (pp + mm) - std::complex<double>(0, 1) * p2 * (pp - mm) - p3 * (pm + mp) -
                              std::complex<double>(0, 1) * p4 * (pm - mp));
       }
-    return hel_mat_elem * std::pow(0.5 / q1().pt() / q2().pt(), 2);
+    return hel_mat_elem * std::pow(0.5 / q1().pt() / q2().pt() / shat(), 2);
   }
 
   const double mW_, mW2_;

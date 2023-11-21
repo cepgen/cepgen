@@ -234,7 +234,7 @@ namespace cepgen {
         return 0.;
 
       //--- combine every component into a single weight for this point
-      return (base_jacobian_ * aux_jacobian) * me_integrand;
+      return (base_jacobian_ * aux_jacobian) * me_integrand * constants::GEVM2_TO_PB;
     }
 
     void Process::clearEvent() {

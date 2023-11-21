@@ -911,7 +911,7 @@ double LPAIR::computeWeight() {
   const auto peripp = periPP();  // compute the structure functions factors
   CG_DEBUG_LOOP("LPAIR:f") << "Jacobian: " << jacobian_ << ", str.fun. factor: " << peripp << ".";
 
-  return constants::GEVM2_TO_PB * jacobian_ * peripp;  // compute the event weight using the Jacobian
+  return jacobian_ * peripp;  // compute the event weight using the Jacobian
 }
 
 //---------------------------------------------------------------------------------------------

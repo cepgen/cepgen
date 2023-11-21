@@ -136,7 +136,7 @@ namespace cepgen {
         return 0.;
 
       // factor 1/4 from jacobian of transformations
-      return amat2 * std::pow(4. * M_PI * x1() * x2() * s(), -2) * 0.25 * constants::GEVM2_TO_PB * m_pt_diff_;
+      return amat2 * std::pow(4. * M_PI, -2) * 0.25 * m_pt_diff_;
     }
 
     void Process2to4::fillCentralParticlesKinematics() {
