@@ -61,7 +61,7 @@ namespace cepgen {
           return 0.;
         if (!kinematics().cuts().central.pt_single.contains(p2t) || !single_limits_.pt_single.contains(p2t))
           return 0.;
-        if (!kinematics().cuts().central.pt_diff.contains(fabs(p1t - p2t)))  // transverse momentum difference
+        if (!kinematics().cuts().central.pt_diff.contains(std::fabs(p1t - p2t)))  // transverse momentum difference
           return 0.;
         //--- four-momenta of the outgoing central particles
         pc(0) = Momentum::fromPtYPhiM(p1t, m_y_c1_, pt_c1.phi(), cs_prop_.mass);
