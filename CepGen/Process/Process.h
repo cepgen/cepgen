@@ -122,8 +122,9 @@ namespace cepgen {
       Momentum& pc(size_t);              ///< Central particle's 4-momentum
       const Momentum& pc(size_t) const;  ///< Central particle's 4-momentum
 
-      double s() const { return s_; }        ///< Two-beam squared centre of mass energy
-      double sqrtS() const { return sqs_; }  ///< Two-beam centre of mass energy
+      double s() const { return s_; }                   ///< Two-beam squared centre of mass energy
+      double sqrtS() const { return sqs_; }             ///< Two-beam centre of mass energy
+      double inverseSqrtS() const { return inv_sqs_; }  ///< Inverse two-beam centre of mass energy
 
       //--- Mandelstam variables
       double shat() const;  ///< \f$\hat s=(p_1+p_2)^2=(p_3+...)^2\f$
@@ -164,17 +165,18 @@ namespace cepgen {
       std::unique_ptr<utils::RandomGenerator> rnd_gen_;  ///< Process-local random number generator engine
 
     private:
-      double s_{-1.};    ///< \f$s\f$, squared centre of mass energy of the two-beam system, in \f$\mathrm{GeV}^2\f$
-      double sqs_{-1.};  ///< \f$\sqrt s\f$, centre of mass energy of the two-beam system (in GeV)
-      double wcm_{-1.};  ///< two-parton centre of mass energy
-      double mA2_{-1.};  ///< first incoming beam particle squared mass
-      double mB2_{-1.};  ///< second incoming beam particle squared mass
-      double mX2_{-1.};  ///< First diffractive state squared mass
-      double mY2_{-1.};  ///< Second diffractive state squared mass
-      double t1_{-1.};   ///< First parton virtuality
-      double t2_{-1.};   ///< Second parton virtuality
-      double x1_{0.};    ///< First parton fractional momentum
-      double x2_{0.};    ///< Second parton fractional momentum
+      double s_{-1.};        ///< \f$s\f$, squared centre of mass energy of the two-beam system, in GeV\f${}^2\f$
+      double sqs_{-1.};      ///< \f$\sqrt s\f$, centre of mass energy of the two-beam system (in GeV)
+      double inv_sqs_{-1.};  ///< \f$s^{-1/2}\f$, inverse CM energy of the two-beam system (in GeV\f${}^{-1}\f$)
+      double wcm_{-1.};      ///< two-parton centre of mass energy
+      double mA2_{-1.};      ///< first incoming beam particle squared mass
+      double mB2_{-1.};      ///< second incoming beam particle squared mass
+      double mX2_{-1.};      ///< First diffractive state squared mass
+      double mY2_{-1.};      ///< Second diffractive state squared mass
+      double t1_{-1.};       ///< First parton virtuality
+      double t2_{-1.};       ///< Second parton virtuality
+      double x1_{0.};        ///< First parton fractional momentum
+      double x2_{0.};        ///< Second parton fractional momentum
       std::unique_ptr<Coupling> alphaem_;  ///< Electromagnetic running coupling algorithm
       std::unique_ptr<Coupling> alphas_;   ///< Strong running coupling algorithm
       /// Handler to a variable mapped by this process

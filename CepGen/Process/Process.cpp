@@ -51,6 +51,7 @@ namespace cepgen {
           rnd_gen_(RandomGeneratorFactory::get().build(proc.rnd_gen_->parameters())),
           s_(proc.s_),
           sqs_(proc.sqs_),
+          inv_sqs_(proc.inv_sqs_),
           mA2_(proc.mA2_),
           mB2_(proc.mB2_),
           mapped_variables_(proc.mapped_variables_),
@@ -297,6 +298,7 @@ namespace cepgen {
       }
       s_ = kin_.incomingBeams().s();
       sqs_ = std::sqrt(s_);
+      inv_sqs_ = 1. / sqs_;
 
       mA2_ = p1.mass2();
       mB2_ = p2.mass2();

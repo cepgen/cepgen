@@ -155,7 +155,7 @@ double PPtoFF::offShellME() const {
   const auto mt1 = pc(0).massT(), mt2 = pc(1).massT();  // transverse masses
   const auto compute_zs = [this, &mt1, &mt2](short pol, double x) -> std::pair<double, double> {
     const auto norm_pol = pol / std::abs(pol);
-    const auto fact = 1. / sqrtS() / x;
+    const auto fact = inverseSqrtS() / x;
     return std::make_pair(fact * mt1 * std::exp(norm_pol * m_y_c1_), fact * mt2 * std::exp(norm_pol * m_y_c2_));
   };
   const auto compute_mat_element =

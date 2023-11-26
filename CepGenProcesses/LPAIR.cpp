@@ -578,7 +578,7 @@ bool LPAIR::orient() {
     return false;
   }
 
-  const double re = 0.5 / sqrtS();
+  const double re = 0.5 * inverseSqrtS();
   ep1_ = re * (s() + masses_.w12);
   ep2_ = re * (s() - masses_.w12);
 
@@ -611,7 +611,7 @@ bool LPAIR::orient() {
                          << "               momentum: p4 = " << pc4_ << "\n\t"
                          << "         invariant mass: m4 = " << mc4_ << ".";
 
-  pt4_ = std::sqrt(deltas_[4]) / sqrtS() / p_cm_;
+  pt4_ = std::sqrt(deltas_[4]) * inverseSqrtS() / p_cm_;
   sin_theta4_ = pt4_ / pc4_;
 
   if (sin_theta4_ > 1.) {
@@ -635,10 +635,10 @@ bool LPAIR::orient() {
                          << "sin(theta4) = " << sin_theta4_ << "\n\t"
                          << "alpha4 = " << alpha4_ << ", beta4 = " << beta4_;
 
-  const double rr = std::sqrt(-gram_) / sqrtS() / (p_cm_ * pt4_);
+  const double rr = std::sqrt(-gram_) * inverseSqrtS() / (p_cm_ * pt4_);
 
   //----- outgoing beam states
-  const auto prefac = 1. / sqrtS() / p_cm_;
+  const auto prefac = inverseSqrtS() / p_cm_;
 
   //--- beam 1 -> 3
   const double ep3 = ep1_ - delta3_, pp3 = std::sqrt(ep3 * ep3 - mX2());
@@ -894,8 +894,8 @@ double LPAIR::computeWeight() {
   ////////////////////////////////////////////////////////////////
 
   const Momentum cm = pA() + pB();
-  boost_props_.gamma = cm.energy() / sqrtS();
-  boost_props_.betgam = cm.pz() / sqrtS();
+  boost_props_.gamma = cm.energy() * inverseSqrtS();
+  boost_props_.betgam = cm.pz() * inverseSqrtS();
   CG_DEBUG_LOOP("LPAIR:gmufil") << "sqrt(s)=" << sqrtS() << " GeV, initial two-proton system: " << cm << "\n\t"
                                 << "gamma=" << boost_props_.gamma << ", betgam=" << boost_props_.betgam;
 
