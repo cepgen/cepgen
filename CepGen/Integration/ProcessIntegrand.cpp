@@ -30,40 +30,45 @@
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  ProcessIntegrand::ProcessIntegrand(const Parameters* params) : params_(params), tmr_(new utils::Timer) {
-    if (!params_) {
-      CG_WARNING("ProcessIntegrand") << "Invalid runtime parameters specified.";
-      return;
-    }
-    if (!params_->hasProcess()) {
-      CG_WARNING("ProcessIntegrand") << "No process defined in runtime parameters.";
-      return;
-    }
-    //--- each integrand object has its own clone of the process
-    process_ = params_->process().clone();  // note: kinematics is already set by the process copy constructor
+  ProcessIntegrand::ProcessIntegrand(const proc::Process& proc) : params_(new Parameters), tmr_(new utils::Timer) {
+    setProcess(proc);
+  }
 
-    CG_DEBUG("ProcessIntegrand") << "New " << process_->name() << " process cloned from " << params_->process().name()
-                                 << " process.";
-    process_->kinematics().setParameters(params_->process().kinematics().parameters(true));
+  ProcessIntegrand::ProcessIntegrand(const Parameters* params) : params_(params), tmr_(new utils::Timer) {
+    if (!params_)
+      throw CG_FATAL("ProcessIntegrand") << "Invalid runtime parameters specified.";
+    if (!params_->hasProcess())
+      throw CG_FATAL("ProcessIntegrand") << "No process defined in runtime parameters.";
+    setProcess(params_->process());
+  }
+
+  size_t ProcessIntegrand::size() const { return process().ndim(); }
+
+  void ProcessIntegrand::setProcess(const proc::Process& proc) {
+    //--- each integrand object has its own clone of the process
+    process_ = std::move(proc.clone());  // note: kinematics is already set by the process copy constructor
+
+    CG_DEBUG("ProcessIntegrand:setProcess")
+        << "New '" << process().name() << "' process cloned from '" << proc.name() << "' process.";
+    process().kinematics().setParameters(proc.kinematics().parameters(true));
 
     //--- first-run preparation
-    CG_DEBUG("ProcessIntegrand").log([this](auto& dbg) {
-      dbg << "Run started for " << process_->name() << " process " << std::hex << (void*)process_.get() << std::dec
+    CG_DEBUG("ProcessIntegrand:setProcess").log([this](auto& dbg) {
+      dbg << "Run started for " << process().name() << " process " << std::hex << (void*)process_.get() << std::dec
           << ".\n\t";
-      const auto& beams = process_->kinematics().incomingBeams();
+      const auto& beams = process().kinematics().incomingBeams();
       dbg << "Process mode considered: " << beams.mode() << "\n\t"
           << "  positive-z beam: " << beams.positive() << "\n\t"
           << "  negative-z beam: " << beams.negative();
       if (!beams.structureFunctions().empty())
         dbg << "\n\t  structure functions: " << beams.structureFunctions();
-      process_->dumpVariables(&dbg.stream());
+      process().dumpVariables(&dbg.stream());
     });
-    process_->initialise();
+    process().initialise();
 
-    CG_DEBUG("ProcessIntegrand") << "New integrand object defined for process \"" << process_->name() << "\".";
+    CG_DEBUG("ProcessIntegrand:setProcess")
+        << "Process integrand defined for dimension-" << size() << " process '" << process().name() << "'.";
   }
-
-  size_t ProcessIntegrand::size() const { return process().ndim(); }
 
   proc::Process& ProcessIntegrand::process() {
     if (!process_)

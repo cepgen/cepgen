@@ -36,6 +36,7 @@ namespace cepgen {
   /// Wrapper to the function to be integrated
   class ProcessIntegrand : public Integrand {
   public:
+    explicit ProcessIntegrand(const proc::Process&);
     explicit ProcessIntegrand(const Parameters*);
 
     /// Compute the integrand for a given phase space point (or "event")
@@ -56,6 +57,8 @@ namespace cepgen {
     bool storage() const { return storage_; }          ///< Are the events currently generated in this run to be stored?
 
   private:
+    void setProcess(const proc::Process&);
+
     std::unique_ptr<proc::Process> process_;   ///< Local instance of the physics process
     const Parameters* params_{nullptr};        ///< Generator-owned runtime parameters
     const std::unique_ptr<utils::Timer> tmr_;  ///< Timekeeper for event generation
