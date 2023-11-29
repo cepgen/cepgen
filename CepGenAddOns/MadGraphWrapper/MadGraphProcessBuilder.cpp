@@ -84,7 +84,7 @@ public:
     mg5_proc_->setMomentum(2, pc(0));  // first outgoing central particle
     mg5_proc_->setMomentum(3, pc(1));  // second outgoing central particle
 
-    return mg5_proc_->eval();
+    return mg5_proc_->eval() / shat() / shat();
   }
 
 private:
