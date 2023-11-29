@@ -133,9 +133,14 @@ namespace cepgen {
     }
 
     Process& Process::defineVariable(double& out, const Mapping& type, const Limits& lim, const std::string& descr) {
-      if (!lim.valid())
-        throw CG_FATAL("Process:defineVariable")
-            << "The limits for '" << descr << "' (" << lim << ") could not be retrieved from the user configuration.";
+      if (lim.min() == lim.max()) {
+        if (lim.hasMin()) {
+          out = lim.min();
+          return *this;
+        } else
+          throw CG_FATAL("Process:defineVariable")
+              << "The limits for '" << descr << "' (" << lim << ") could not be retrieved from the user configuration.";
+      }
 
       double jacob_weight = 1.;  // initialise the local weight for this variable
       switch (type) {
