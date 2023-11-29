@@ -38,7 +38,7 @@ namespace cepgen {
       explicit FactorisedProcess(const ParametersList& params, const pdgids_t& output);
       FactorisedProcess(const FactorisedProcess&);
 
-      double computeWeight() override final;
+      double computeWeight() override;
       void fillKinematics(bool) override final;
 
       static ParametersDescription description();

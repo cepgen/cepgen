@@ -44,19 +44,16 @@ namespace cepgen {
         event_.reset(new Event);
     }
 
-    Process::Process(const Process& proc)
-        : NamedModule(proc),
-          mp_(PDG::get().mass(PDG::proton)),
-          mp2_(mp_ * mp_),
-          rnd_gen_(RandomGeneratorFactory::get().build(proc.rnd_gen_->parameters())),
-          s_(proc.s_),
-          sqs_(proc.sqs_),
-          inv_sqs_(proc.inv_sqs_),
-          mA2_(proc.mA2_),
-          mB2_(proc.mB2_),
-          mapped_variables_(proc.mapped_variables_),
-          point_coord_(proc.point_coord_),
-          base_jacobian_(proc.base_jacobian_) {
+    Process::Process(const Process& proc) : Process(proc.parameters()) { *this = proc; }
+
+    Process& Process::operator=(const Process& proc) {
+      s_ = proc.s_;
+      sqs_ = proc.sqs_;
+      inv_sqs_ = proc.inv_sqs_;
+      mA2_ = proc.mA2_;
+      mB2_ = proc.mB2_;
+      point_coord_ = proc.point_coord_;
+      base_jacobian_ = proc.base_jacobian_;
       if (proc.event_)
         event_.reset(new Event(*proc.event_));
       CG_DEBUG("Process").log([&](auto& log) {
@@ -68,6 +65,7 @@ namespace cepgen {
         if (event_)
           log << "\n\t" << *event_;
       });
+      return *this;
     }
 
     std::unique_ptr<Process> Process::clone() const {
