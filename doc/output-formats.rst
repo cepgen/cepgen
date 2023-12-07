@@ -48,17 +48,15 @@ As an example, equivalently to ``vars`` output defined above, the following ``ou
 
 .. code:: python
 
-   output = cepgen.Module('text',
+   cepgen.Module('text',
        histVariables = {
           # 1D histogram (pt of central system)
-          'pt(4)': cepgen.Parameters(nbins=10, low=0., high=20.),
+          'pt(4)': cepgen.Parameters(nbins=10, xrange=(0., 20.)),
           # 1D histogram (outgoing proton mass)
           'm(5)': cepgen.Parameters(xbins=[float(bin) for bin in range(0, 20, 1)]),
           # 2D histogram (central system rapidity vs. mass)
-          'y(cs):m(cs)': cepgen.Parameters(nbinsX=10, lowX=-10., highX=10.,
-                                           nbinxY=10, lowY=0., highY=400.),
-          # 1D histogram (event generation time)
-          'tgen': cepgen.Parameters(nbins=100, low=0., high=1.e-5),
+          'y(cs):m(cs)': cepgen.Parameters(nbinsX=10, xrange=(-10., 10.),
+                                           nbinxY=10, yrange=(0., 400.)),
        },
        save = False,
        show = True
@@ -176,7 +174,7 @@ As an example, the following ``output`` block may be used for a 2-to-4 process s
 
 .. code:: python
 
-   output = cepgen.Module('vars',
+   cepgen.Module('vars',
        filename = 'test.txt',
        variables = [
            'm(4)',    # central two-photon/central system mass
@@ -212,13 +210,12 @@ As an example, the following ``output`` block may be used:
 
 .. code:: python
 
-   output = cepgen.Module('root',
+   cepgen.Module('root',
        filename = 'output.hists.root',
        variables = {
-          'pt(4)': cepgen.Parameters(nbins=10, low=0., high=20.),
-          'm(5)': cepgen.Parameters(nbins=10, low=0., high=100.),
-          'y(cs)': cepgen.Parameters(nbins=10, low=-10., high=10.),
-          'tgen': cepgen.Parameters(nbins=100, low=0., high=1.e-5),
+          'pt(4)': cepgen.Parameters(nbins=10, xrange=(0., 20.)),
+          'm(5)': cepgen.Parameters(nbins=10, xrange=(0., 100.)),
+          'y(cs)': cepgen.Parameters(nbins=10, xrange=(-10., 10.)),
        },
    )
 
