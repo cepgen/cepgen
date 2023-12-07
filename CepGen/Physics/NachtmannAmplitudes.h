@@ -18,6 +18,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef CepGen_Physics_NachtmannAmplitudes_h
+#define CepGen_Physics_NachtmannAmplitudes_h
+
 #include <complex>
 
 #include "CepGen/Core/SteeredObject.h"
@@ -93,3 +96,5 @@ namespace cepgen {
     std::complex<double> amplitudeWbarB(const Kinematics&, const Helicities&) const;
   };
 }  // namespace cepgen
+
+#endif

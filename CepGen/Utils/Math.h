@@ -24,6 +24,9 @@ namespace cepgen {
     /// Check if a number is positive and finite
     template <typename T>
     bool positive(const T& val);
+
+    double fastHypot(double, double);
+    double fastHypot(double, double, double);
   }  // namespace utils
 }  // namespace cepgen
 

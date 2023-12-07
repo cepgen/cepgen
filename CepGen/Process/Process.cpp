@@ -32,6 +32,19 @@
 
 namespace cepgen {
   namespace proc {
+    auto compute_value = [](double in, const Process::Mapping& type) -> double {
+      switch (type) {
+        case Process::Mapping::linear:
+        case Process::Mapping::power_law:  //FIXME
+        default:
+          return in;
+        case Process::Mapping::square:
+          return in * in;
+        case Process::Mapping::exponential:
+          return std::exp(in);
+      }
+    };
+
     Process::Process(const ParametersList& params)
         : NamedModule(params),
           mp_(PDG::get().mass(PDG::proton)),
@@ -44,18 +57,16 @@ namespace cepgen {
         event_.reset(new Event);
     }
 
-    Process::Process(const Process& proc)
-        : NamedModule(proc),
-          mp_(PDG::get().mass(PDG::proton)),
-          mp2_(mp_ * mp_),
-          rnd_gen_(RandomGeneratorFactory::get().build(proc.rnd_gen_->parameters())),
-          s_(proc.s_),
-          sqs_(proc.sqs_),
-          mA2_(proc.mA2_),
-          mB2_(proc.mB2_),
-          mapped_variables_(proc.mapped_variables_),
-          point_coord_(proc.point_coord_),
-          base_jacobian_(proc.base_jacobian_) {
+    Process::Process(const Process& proc) : Process(proc.parameters()) { *this = proc; }
+
+    Process& Process::operator=(const Process& proc) {
+      s_ = proc.s_;
+      sqs_ = proc.sqs_;
+      inv_sqs_ = proc.inv_sqs_;
+      mA2_ = proc.mA2_;
+      mB2_ = proc.mB2_;
+      point_coord_ = proc.point_coord_;
+      base_jacobian_ = proc.base_jacobian_;
       if (proc.event_)
         event_.reset(new Event(*proc.event_));
       CG_DEBUG("Process").log([&](auto& log) {
@@ -67,6 +78,7 @@ namespace cepgen {
         if (event_)
           log << "\n\t" << *event_;
       });
+      return *this;
     }
 
     std::unique_ptr<Process> Process::clone() const {
@@ -134,9 +146,16 @@ namespace cepgen {
     }
 
     Process& Process::defineVariable(double& out, const Mapping& type, const Limits& lim, const std::string& descr) {
-      if (!lim.valid())
-        throw CG_FATAL("Process:defineVariable")
-            << "The limits for '" << descr << "' (" << lim << ") could not be retrieved from the user configuration.";
+      if (lim.min() == lim.max()) {
+        if (lim.hasMin()) {
+          out = compute_value(lim.min(), type);
+          CG_DEBUG("Process:defineVariable")
+              << "Quantity " << descr << " is set to be constant with a value " << out << ".";
+          return *this;
+        } else
+          throw CG_FATAL("Process:defineVariable")
+              << "The limits for '" << descr << "' (" << lim << ") could not be retrieved from the user configuration.";
+      }
 
       double jacob_weight = 1.;  // initialise the local weight for this variable
       switch (type) {
@@ -181,19 +200,16 @@ namespace cepgen {
           throw CG_FATAL("Process:x") << "Failed to retrieve coordinate " << var.index << " from "
                                       << "a dimension-" << ndim() << " process!";
         const auto& xv = point_coord_.at(var.index);  // between 0 and 1
+        var.value = compute_value(var.limits.x(xv), var.type);
         switch (var.type) {
           case Mapping::linear: {
-            var.value = var.limits.x(xv);
-            jacobian *= 1.;
+            // jacobian *= 1
           } break;
           case Mapping::exponential: {
-            var.value = std::exp(var.limits.x(xv));  // transform back to linear
             jacobian *= var.value;
           } break;
           case Mapping::square: {
-            const auto val = var.limits.x(xv);
-            var.value = val * val;  // transform to square
-            jacobian *= val;
+            jacobian *= var.limits.x(xv);
           } break;
           case Mapping::power_law: {
             const double y = var.limits.max() / var.limits.min();
@@ -234,7 +250,7 @@ namespace cepgen {
         return 0.;
 
       //--- combine every component into a single weight for this point
-      return (base_jacobian_ * aux_jacobian) * me_integrand;
+      return (base_jacobian_ * aux_jacobian) * me_integrand * constants::GEVM2_TO_PB;
     }
 
     void Process::clearEvent() {
@@ -297,9 +313,11 @@ namespace cepgen {
       }
       s_ = kin_.incomingBeams().s();
       sqs_ = std::sqrt(s_);
+      inv_sqs_ = 1. / sqs_;
 
       mA2_ = p1.mass2();
       mB2_ = p2.mass2();
+      wcm_ = 0.5 * (1. + std::sqrt(1. - 4. * std::sqrt(mA2_ * mB2_) / s_));
 
       prepareKinematics();
 

@@ -27,6 +27,8 @@ namespace cepgen {
 
   Limits::Limits(const Limits& rhs) : std::pair<double, double>(rhs.first, rhs.second) {}
 
+  Limits Limits::constant(double val) { return Limits{val, val}; }
+
   bool Limits::operator<(const Limits& oth) const {
     if (first < oth.first)
       return true;
@@ -148,7 +150,7 @@ namespace cepgen {
   }
 
   Limits Limits::compute(double (*op)(double)) const {
-    return Limits{hasMin() ? op(min()) : Limits::INVALID, hasMax() ? op(max()) : Limits::INVALID};
+    return compute([&op](double ext) { return op(ext); });
   }
 
   std::ostream& operator<<(std::ostream& os, const Limits& lim) {

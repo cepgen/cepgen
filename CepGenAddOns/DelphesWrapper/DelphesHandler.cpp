@@ -119,8 +119,8 @@ namespace cepgen {
       cand->Status = (int)part.status();
       cand->Charge = part.charge();
       //--- kinematics part
-      cand->Mass = part.mass();
       const auto& mom = part.momentum();
+      cand->Mass = mom.mass();
       cand->Momentum.SetPxPyPzE(mom.px(), mom.py(), mom.pz(), mom.energy());
       // no cand->Position specified (particles produced at origin)
       //--- parentage part

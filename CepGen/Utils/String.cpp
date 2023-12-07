@@ -189,6 +189,7 @@ namespace cepgen {
 
     template std::string merge<std::string>(const std::vector<std::string>&, const std::string&);
     template std::string merge<int>(const std::vector<int>&, const std::string&);
+    template std::string merge<unsigned long long>(const std::vector<unsigned long long>&, const std::string&);
     template std::string merge<double>(const std::vector<double>&, const std::string&);
     template std::string merge<ParametersList>(const std::vector<ParametersList>&, const std::string&);
 

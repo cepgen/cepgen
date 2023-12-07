@@ -29,5 +29,15 @@ namespace cepgen {
     template bool positive<double>(const double&);
     template bool positive<float>(const float&);
     template bool positive<int>(const int&);
+
+    double fastHypot(double x, double y) {
+      x *= x, y *= y;
+      return std::sqrt(x + y);
+    }
+
+    double fastHypot(double x, double y, double z) {
+      x *= x, y *= y, z *= z;
+      return std::sqrt(x + y + z);
+    }
   }  // namespace utils
 }  // namespace cepgen

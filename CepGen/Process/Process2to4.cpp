@@ -45,8 +45,6 @@ namespace cepgen {
       const auto lim_phi_diff = kinematics().cuts().central.phi_diff.truncate(Limits{0., 2. * M_PI});
       defineVariable(m_phi_pt_diff_, Mapping::linear, lim_phi_diff, "Final state particles azimuthal angle difference");
 
-      ww_ = 0.5 * (1. + std::sqrt(1. - 4. * mA() * mB() / s()));
-
       prepareProcessKinematics();
     }
 
@@ -54,17 +52,16 @@ namespace cepgen {
       if (!kinematics().cuts().central.rapidity_diff.contains(fabs(m_y_c1_ - m_y_c2_)))  // rapidity distance
         return 0.;
       {
-        const auto qt_sum = q1() + q2();  // two-parton system
+        const auto qt_sum = (q1() + q2()).transverse();  // two-parton system
         const auto pt_diff = Momentum::fromPtEtaPhiE(m_pt_diff_, 0., m_phi_pt_diff_);
-        const auto pt_c1 = 0.5 * (qt_sum + pt_diff);
-        const auto pt_c2 = 0.5 * (qt_sum - pt_diff);
-        const double p1t = pt_c1.pt(), p2t = pt_c2.pt();
-        //--- cuts on central system
+        const auto pt_c1 = 0.5 * (qt_sum + pt_diff), pt_c2 = 0.5 * (qt_sum - pt_diff);
+        const auto p1t = pt_c1.pt(), p2t = pt_c2.pt();
+        // apply user cuts on central system
         if (!kinematics().cuts().central.pt_single.contains(p1t) || !single_limits_.pt_single.contains(p1t))
           return 0.;
         if (!kinematics().cuts().central.pt_single.contains(p2t) || !single_limits_.pt_single.contains(p2t))
           return 0.;
-        if (!kinematics().cuts().central.pt_diff.contains(fabs(p1t - p2t)))  // transverse momentum difference
+        if (!kinematics().cuts().central.pt_diff.contains(std::fabs(p1t - p2t)))  // transverse momentum difference
           return 0.;
         //--- four-momenta of the outgoing central particles
         pc(0) = Momentum::fromPtYPhiM(p1t, m_y_c1_, pt_c1.phi(), cs_prop_.mass);
@@ -96,13 +93,13 @@ namespace cepgen {
 
       //--- four-momenta of the outgoing protons (or remnants)
 
-      const auto px_plus = (1. - x1()) * pA().p() * M_SQRT2, px_minus = (mX2() + q1().p2()) * 0.5 / px_plus;
-      const auto py_minus = (1. - x2()) * pB().p() * M_SQRT2, py_plus = (mY2() + q2().p2()) * 0.5 / py_minus;
-      CG_DEBUG_LOOP("2to4:pxy") << "px± = " << px_plus << " / " << px_minus << "\n\t"
-                                << "py± = " << py_plus << " / " << py_minus << ".";
+      const auto px_p = (1. - x1()) * pA().p() * M_SQRT2, px_m = (mX2() + q1().p2()) * 0.5 / px_p;
+      const auto py_m = (1. - x2()) * pB().p() * M_SQRT2, py_p = (mY2() + q2().p2()) * 0.5 / py_m;
+      CG_DEBUG_LOOP("2to4:pxy") << "px+ = " << px_p << " / px- = " << px_m << "\n\t"
+                                << "py+ = " << py_p << " / py- = " << py_m << ".";
 
-      pX() = -Momentum(q1()).setPz((px_plus - px_minus) * M_SQRT1_2).setEnergy((px_plus + px_minus) * M_SQRT1_2);
-      pY() = -Momentum(q2()).setPz((py_plus - py_minus) * M_SQRT1_2).setEnergy((py_plus + py_minus) * M_SQRT1_2);
+      pX() = -Momentum(q1()).setPz((px_p - px_m) * M_SQRT1_2).setEnergy((px_p + px_m) * M_SQRT1_2);
+      pY() = -Momentum(q2()).setPz((py_p - py_m) * M_SQRT1_2).setEnergy((py_p + py_m) * M_SQRT1_2);
 
       CG_DEBUG_LOOP("2to4:remnants") << "First remnant:  " << pX() << ", mass = " << pX().mass() << "\n\t"
                                      << "Second remnant: " << pY() << ", mass = " << pY().mass() << ".";
@@ -117,12 +114,15 @@ namespace cepgen {
       }
 
       //--- four-momenta of the intermediate partons
-      const double norm = 1. / ww_ / ww_ / s(), prefac = 0.5 * ww_ * sqrtS();
-      const double tau1 = norm * q1().p2() / x1() / x1();
-      q1().setPz(+prefac * x1() * (1. - tau1)).setEnergy(+prefac * x1() * (1. + tau1));
-
-      const double tau2 = norm * q2().p2() / x2() / x2();
-      q2().setPz(-prefac * x2() * (1. - tau2)).setEnergy(+prefac * x2() * (1. + tau2));
+      const double norm = 1. / wCM() / wCM() / s(), prefac = 0.5 * wCM() * sqrtS();
+      {  // positive-z incoming parton collinear kinematics
+        const double tau1 = norm * q1().p2() / x1() / x1();
+        q1().setPz(+prefac * x1() * (1. - tau1)).setEnergy(+prefac * x1() * (1. + tau1));
+      }
+      {  // negative-z incoming parton collinear kinematics
+        const double tau2 = norm * q2().p2() / x2() / x2();
+        q2().setPz(-prefac * x2() * (1. - tau2)).setEnergy(+prefac * x2() * (1. + tau2));
+      }
 
       CG_DEBUG_LOOP("2to4:partons") << "Squared c.m. energy = " << s() << " GeV^2\n\t"
                                     << "First parton: " << q1() << ", mass2 = " << q1().mass2() << ", x1 = " << x1()
@@ -136,7 +136,7 @@ namespace cepgen {
         return 0.;
 
       // factor 1/4 from jacobian of transformations
-      return amat2 * std::pow(4. * M_PI * x1() * x2() * s(), -2) * 0.25 * constants::GEVM2_TO_PB * m_pt_diff_;
+      return amat2 * std::pow(4. * M_PI, -2) * 0.25 * m_pt_diff_;
     }
 
     void Process2to4::fillCentralParticlesKinematics() {

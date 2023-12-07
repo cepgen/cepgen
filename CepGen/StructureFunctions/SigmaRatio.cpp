@@ -23,6 +23,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
+#include "CepGen/Utils/Math.h"
 
 namespace cepgen {
   namespace sigrat {
@@ -72,15 +73,15 @@ namespace cepgen {
 
       double operator()(double xbj, double q2, double& err) const override {
         const double u = q2 / q2_b_;
-        const double inv_xl = 1. / log(q2 / lambda2_);
-        const double pa = (1. + a_.at(3) * xbj + a_.at(4) * xbj * xbj) * pow(xbj, a_.at(5));
-        const double pb = (1. + b_.at(3) * xbj + b_.at(4) * xbj * xbj) * pow(xbj, b_.at(5));
+        const double inv_xl = 1. / std::log(q2 / lambda2_);
+        const double pa = (1. + a_.at(3) * xbj + a_.at(4) * xbj * xbj) * std::pow(xbj, a_.at(5));
+        const double pb = (1. + b_.at(3) * xbj + b_.at(4) * xbj * xbj) * std::pow(xbj, b_.at(5));
         const double q2_thr = c_.at(3) * xbj + c_.at(4) * xbj * xbj + c_.at(5) * xbj * xbj * xbj;
         const double th = theta(xbj, q2);
         // here come the three fits
-        const double ra = a_.at(0) * inv_xl * th + a_.at(1) / pow(pow(q2, 4) + pow(a_.at(2), 4), 0.25) * pa,
+        const double ra = a_.at(0) * inv_xl * th + a_.at(1) / std::pow(pow(q2, 4) + std::pow(a_.at(2), 4), 0.25) * pa,
                      rb = b_.at(0) * inv_xl * th + (b_.at(1) / q2 + b_.at(2) / (q2 * q2 + 0.3 * 0.3)) * pb,
-                     rc = c_.at(0) * inv_xl * th + c_.at(1) / std::hypot(q2 - q2_thr, c_.at(2));
+                     rc = c_.at(0) * inv_xl * th + c_.at(1) / utils::fastHypot(q2 - q2_thr, c_.at(2));
 
         const double r = (ra + rb + rc) / 3.;  // R is set to be the average of the three fits
         // numerical safety for low-Q²
@@ -117,7 +118,7 @@ namespace cepgen {
 
       double operator()(double xbj, double q2, double& err) const override {
         err = 0.;
-        return b_.at(0) + theta(xbj, q2) / log(q2 / lambda2_) + b_.at(1) / q2 + b_.at(2) / (q2 * q2 + 0.09);
+        return b_.at(0) + theta(xbj, q2) / std::log(q2 / lambda2_) + b_.at(1) / q2 + b_.at(2) / (q2 * q2 + 0.09);
       }
 
     private:
@@ -153,12 +154,12 @@ namespace cepgen {
         //--- 2 kinematic regions: resonances ( w < wth ), and DIS ( w > wth )
         const double w2 = utils::mX2(xbj, q2, mp2_), w = sqrt(w2);
         const double xth = q2 / (q2 + wth_ * wth_ - mp2_);  // xth = x( W = wth )
-        const double zeta = log(25. * q2);
+        const double zeta = std::log(25. * q2);
         const double xitmp = (w < wth_) ? theta(xth, q2) : theta(xbj, q2);
         const double tmp = p_.at(0) * xitmp / zeta + p_.at(1) / q2 - p_.at(2) / (q20_ * q20_ + q2 * q2);
         if (w >= wth_)
           return tmp;
-        return tmp * pow((1. - xbj) / (1. - xth), 3);
+        return tmp * std::pow((1. - xbj) / (1. - xth), 3);
       }
 
     private:
