@@ -32,6 +32,19 @@
 
 namespace cepgen {
   namespace proc {
+    auto compute_value = [](double in, const Process::Mapping& type) -> double {
+      switch (type) {
+        case Process::Mapping::linear:
+        case Process::Mapping::power_law:  //FIXME
+        default:
+          return in;
+        case Process::Mapping::square:
+          return in * in;
+        case Process::Mapping::exponential:
+          return std::exp(in);
+      }
+    };
+
     Process::Process(const ParametersList& params)
         : NamedModule(params),
           mp_(PDG::get().mass(PDG::proton)),
@@ -135,7 +148,9 @@ namespace cepgen {
     Process& Process::defineVariable(double& out, const Mapping& type, const Limits& lim, const std::string& descr) {
       if (lim.min() == lim.max()) {
         if (lim.hasMin()) {
-          out = lim.min();
+          out = compute_value(lim.min(), type);
+          CG_DEBUG("Process:defineVariable")
+              << "Quantity " << descr << " is set to be constant with a value " << out << ".";
           return *this;
         } else
           throw CG_FATAL("Process:defineVariable")
@@ -185,19 +200,16 @@ namespace cepgen {
           throw CG_FATAL("Process:x") << "Failed to retrieve coordinate " << var.index << " from "
                                       << "a dimension-" << ndim() << " process!";
         const auto& xv = point_coord_.at(var.index);  // between 0 and 1
+        var.value = compute_value(var.limits.x(xv), var.type);
         switch (var.type) {
           case Mapping::linear: {
-            var.value = var.limits.x(xv);
             // jacobian *= 1
           } break;
           case Mapping::exponential: {
-            var.value = std::exp(var.limits.x(xv));  // transform back to linear
             jacobian *= var.value;
           } break;
           case Mapping::square: {
-            const auto val = var.limits.x(xv);
-            var.value = val * val;  // transform to square
-            jacobian *= val;
+            jacobian *= var.limits.x(xv);
           } break;
           case Mapping::power_law: {
             const double y = var.limits.max() / var.limits.min();
