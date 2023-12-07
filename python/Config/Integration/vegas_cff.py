@@ -11,7 +11,7 @@ class VegasIntegrationMode:
 integrator = plain.clone('Vegas',
     numFunctionCalls = 50000,
     treat = True,  # smoothing of the integrand
-    chiSqCut = 1.5,
+    chiSqCut = 1.2,
     # VEGAS-specific parameters
     iterations = 10,
     alpha = 1.5,
