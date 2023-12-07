@@ -159,11 +159,18 @@ namespace cepgen {
     plist_pos.set<ParametersList>("formFactors", steer<ParametersList>("formFactors"));
     plist_neg.set<ParametersList>("formFactors", steer<ParametersList>("formFactors"));
 
-    auto mode = steerAs<int, mode::Kinematics>("mode");
-    plist_pos.set<bool>("elastic",
-                        mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::ElasticInelastic);
-    plist_neg.set<bool>("elastic",
-                        mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::InelasticElastic);
+    if (auto mode = steerAs<int, mode::Kinematics>("mode"); mode != mode::Kinematics::invalid) {
+      plist_pos.set<bool>("elastic",
+                          mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::ElasticInelastic);
+      plist_neg.set<bool>("elastic",
+                          mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::InelasticElastic);
+    } else {
+      const auto set_beam_elasticity = [](ParametersList& plist_beam) {
+        plist_beam.set<bool>("elastic", PartonFluxFactory::get().elastic(plist_beam.get<ParametersList>("partonFlux")));
+      };
+      set_beam_elasticity(plist_pos);
+      set_beam_elasticity(plist_neg);
+    }
 
     //--- structure functions
     if (!steer<ParametersList>("structureFunctions").empty()) {
@@ -274,7 +281,7 @@ namespace cepgen {
     desc.add<std::vector<int> >("pdgIds", {}).setDescription("PDG ids of incoming beam particles");
     desc.add<std::vector<double> >("pz", {}).setDescription("Beam momenta (in GeV/c)");
     desc.add<double>("sqrtS", 0.).setDescription("Two-beam centre of mass energy (in GeV)");
-    desc.addAs<int, mode::Kinematics>("mode", mode::Kinematics::ElasticElastic)
+    desc.addAs<int, mode::Kinematics>("mode", mode::Kinematics::invalid)
         .setDescription("Process kinematics mode (1 = elastic, (2-3) = single-dissociative, 4 = double-dissociative)");
     desc.add<ParametersDescription>("formFactors",
                                     FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler))

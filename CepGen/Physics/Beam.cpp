@@ -34,13 +34,13 @@ namespace cepgen {
             steer<double>("pz"),
             HeavyIon::isHI(pdg_id_) ? HeavyIon::mass(HeavyIon::fromPdgId(pdg_id_)) : PDG::get().mass(pdg_id_))),
         flux_info_(steer<ParametersList>("partonFlux")),
-        elastic_(PartonFluxFactory::get().elastic(flux_info_)) {}
+        elastic_(steer<bool>("elastic")) {}
 
   ParametersDescription Beam::description() {
     auto desc = ParametersDescription();
     desc.addAs<int, pdgid_t>("pdgId", PDG::proton);
     desc.add<double>("pz", 0.);
-    desc.add<ParametersDescription>("partonFlux", ParametersDescription().setName<std::string>("BudnevElastic"));
+    desc.add<ParametersDescription>("partonFlux", ParametersDescription());
     return desc;
   }
 
