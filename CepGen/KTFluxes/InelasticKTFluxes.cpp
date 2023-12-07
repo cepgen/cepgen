@@ -45,6 +45,7 @@ namespace cepgen {
     }
 
     double mass2() const override { return mp2_; }
+    bool fragmenting() const override final { return true; }
     pdgid_t partonPdgId() const override { return PDG::photon; }
     double fluxMX2(double x, double kt2, double mx2) const override {
       if (!x_range_.contains(x, true))
