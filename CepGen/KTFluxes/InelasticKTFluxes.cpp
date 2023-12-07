@@ -32,6 +32,9 @@ namespace cepgen {
         : KTFlux(params), sf_(StructureFunctionsFactory::get().build(steer<ParametersList>("structureFunctions"))) {
       if (!sf_)
         throw CG_FATAL("InelasticNucleonKTFlux") << "Inelastic kT flux requires a modelling of structure functions!";
+      CG_DEBUG("InelasticNucleonKTFlux") << "Inelastic KT-dependent flux initialised with '"
+                                         << steer<ParametersList>("structureFunctions")
+                                         << "' structure functions modelling.";
     }
 
     static ParametersDescription description() {

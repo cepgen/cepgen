@@ -16,7 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/CollinearFluxes/CollinearFlux.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Utils/String.h"
 
@@ -29,5 +31,14 @@ namespace cepgen {
       return KTFluxFactory::get().describeParameters(name, params);
     throw CG_FATAL("PartonFluxFactory:describeParameters")
         << "Failed to find a parton flux with name '" << name << "'.";
+  }
+
+  bool PartonFluxFactory::elastic(const ParametersList& params) const {
+    const auto& name = params.name<std::string>();
+    if (utils::contains(CollinearFluxFactory::get().modules(), name))
+      return !CollinearFluxFactory::get().build(name, params)->fragmenting();
+    if (utils::contains(KTFluxFactory::get().modules(), name))
+      return !KTFluxFactory::get().build(name, params)->fragmenting();
+    throw CG_FATAL("PartonFluxFactory:elastic") << "Failed to find a parton flux with name '" << name << "'.";
   }
 }  // namespace cepgen

@@ -14,7 +14,7 @@ process = kt.process.clone('pptoff',
         #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
         #structureFunctions = cepgen.StructureFunctions.ALLM97,
         structureFunctions = cepgen.StructureFunctions.LUXlike,
-        ktFluxes = (kt.ProtonFlux.PhotonInelasticBudnev, kt.HeavyIonFlux.PhotonElastic),
+        partonFluxes = (kt.ProtonFlux.PhotonInelasticBudnev, kt.HeavyIonFlux.PhotonElastic),
         heavyIon2 = (208, 82),
     ),
     outKinematics = kt.process.outKinematics.clone(

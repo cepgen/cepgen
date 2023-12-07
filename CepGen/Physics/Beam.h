@@ -44,11 +44,6 @@ namespace cepgen {
 
     /// Does the beam remain on-shell after parton emission?
     bool elastic() const { return elastic_; }
-    /// Specify if the beam remains on-shell after parton emission
-    Beam& setElastic(bool elastic) {
-      elastic_ = elastic;
-      return *this;
-    }
     /// Beam particle PDG id
     pdgid_t pdgId() const { return pdg_id_; }
     /// Set the beam particle PDG id
