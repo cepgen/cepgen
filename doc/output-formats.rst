@@ -186,7 +186,7 @@ As an example, the following ``output`` block may be used for a 2-to-4 process s
        separator = ' ',  # single space
    )
 
-``root``, ``root_tree``
+``root_hist``, ``root_tree``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 .. versionadded:: 0.9.7
@@ -210,7 +210,7 @@ As an example, the following ``output`` block may be used:
 
 .. code:: python
 
-   cepgen.Module('root',
+   cepgen.Module('root_hist',
        filename = 'output.hists.root',
        variables = {
           'pt(4)': cepgen.Parameters(nbins=10, xrange=(0., 20.)),
