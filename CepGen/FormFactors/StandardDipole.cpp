@@ -54,9 +54,8 @@ namespace cepgen {
       explicit HeavyIonDipole(const ParametersList& params)
           : StandardDipole(params),
             hi_(HeavyIon::fromPdgId(pdg_id_)),
-            a_(hi_.radius() / constants::GEVM1_TO_M),
-            a0_(HeavyIon::proton().radius() / constants::GEVM1_TO_M),
-            a02_(a0_ * a0_) {}
+            a2_(std::pow(hi_.radius() / constants::GEVM1_TO_M, 2)),
+            a02_(std::pow(HeavyIon::proton().radius() / constants::GEVM1_TO_M, 2)) {}
 
       static ParametersDescription description() {
         auto desc = StandardDipole::description();
@@ -71,18 +70,19 @@ namespace cepgen {
           StandardDipole::eval();
           return;
         }
-        if ((short)hi_.Z < 7) {  // Gaussian form factor for light nuclei
-          const auto ge = exp(-a_ * a_ * q2_ / 6.);
+        const auto qr2 = q2_ * a2_;
+        if ((short)hi_.Z <= (short)Element::C) {  // Gaussian form factor for light nuclei
+          const auto ge = std::exp(-qr2 / 6.);
           setGEGM(ge, MU * ge);
           return;
         }
-        const double qr = sqrt(q2_) * a_, inv_qr = 1. / qr;
-        const double sph = (sin(qr) - qr * cos(qr)) * 3. * inv_qr * inv_qr * inv_qr;
+        const auto qr = std::sqrt(qr2), inv_qr = 1. / qr;
+        const auto sph = (std::sin(qr) - qr * std::cos(qr)) * 3. * inv_qr * inv_qr * inv_qr;
         const auto ge = sph / (1. + q2_ * a02_);
         setGEGM(ge, MU * ge);
       }
       const HeavyIon hi_;
-      const double a_, a0_, a02_;
+      const double a2_, a02_;
     };
   }  // namespace formfac
 }  // namespace cepgen
