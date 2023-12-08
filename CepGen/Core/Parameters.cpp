@@ -24,7 +24,9 @@
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Modules/EventExporterFactory.h"
+#include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Parameters.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
@@ -192,9 +194,13 @@ namespace cepgen {
        << std::setw(wt) << "Incoming particles" << beams.positive() << ",\n"
        << std::setw(wt) << "" << beams.negative() << "\n"
        << std::setw(wt) << "C.m. energy (GeV)" << utils::format("%g", beams.sqrtS()) << "\n"
-       << std::setw(wt) << "Form factors" << beams.formFactors() << "\n";
+       << std::setw(wt) << "Form factors"
+       << FormFactorsFactory::get().describeParameters(beams.formFactors()).description() << ": " << beams.formFactors()
+       << "\n";
     if (beams.mode() != mode::Kinematics::ElasticElastic)
-      os << std::setw(wt) << "Structure functions" << beams.structureFunctions() << "\n";
+      os << std::setw(wt) << "Structure functions"
+         << StructureFunctionsFactory::get().describeParameters(beams.structureFunctions()).description() << ": "
+         << beams.structureFunctions() << "\n";
     os << "\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Incoming partons ") << std::setfill(' ') << "\n\n";
     const auto& cuts = kin.cuts();

@@ -96,6 +96,9 @@ namespace cepgen {
     /// Describe one named module
     std::string describe(const I& name) const;
     /// Describe the parameters of one named module
+    /// \params[in] params Parameters (incl. the name) to steer the description
+    ParametersDescription describeParameters(const ParametersList&) const;
+    /// Describe the parameters of one named module
     /// \params[in] name Name of the module to describe
     /// \params[in] params Additional parameters to steer the description
     ParametersDescription describeParameters(const I& name, const ParametersList& params = ParametersList()) const;
