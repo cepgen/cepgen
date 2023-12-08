@@ -1,6 +1,5 @@
 import Config.Core as cepgen
 from Config.PDG_cfi import PDG
-from Config.Integration.vegas_cff import integrator
 
 integrator.numFunctionCalls = 500000
 #integrator.verbose = 0
