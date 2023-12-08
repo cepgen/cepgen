@@ -1,4 +1,4 @@
-from Config.Integration.plain_cff import plain
+from Config.Integration.plain_cfi import plain
 
 miser = plain.clone('MISER',
     # MISER-specific parameters
