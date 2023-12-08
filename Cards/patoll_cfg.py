@@ -1,8 +1,8 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
 from Config.PDG_cfi import PDG
-from Config.generator_cff import generator
-from Config.Integration.vegas_cff import integrator
+from Config.generator_cfi import generator
+from Config.Integration.vegas_cfi import vegas as integrator
 
 process = kt.process.clone('pptoff',
     processParameters = cepgen.Parameters(

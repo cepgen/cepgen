@@ -1,8 +1,9 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
-#from Config.Hadronisation.pythia6_cff import pythia6
-#from Config.Hadronisation.pythia8_cff import pythia8
+#from Config.Hadronisation.pythia6_cfi import pythia6
+#from Config.Hadronisation.pythia8_cfi import pythia8
 from Config.PDG_cfi import PDG
+from Config.generator_cfi import generator
 
 #--- redefinition of top to modify its bare mass
 #registerParticle(6, 'top', mass=174., charge=2./3., fermion=True)
@@ -34,5 +35,4 @@ eventSequence = cepgen.Sequence(
 )
 
 #--- events generation
-from Config.generator_cff import generator
 generator.numEvents = 25000

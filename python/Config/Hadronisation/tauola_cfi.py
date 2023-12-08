@@ -1,4 +1,4 @@
-from Config.containers_cfi import Module, Parameters
+from Config.containers_cff import Module, Parameters
 
 class DecayMode:
     All = 0

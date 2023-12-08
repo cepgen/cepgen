@@ -1,10 +1,12 @@
 import Config.Core as cepgen
 from Config.PDG_cfi import PDG
-from Config.Timer_cfi import timer # enable timing framework
-from Config.Cuts_cfi import vermaserenCuts
+from Config.timer_cfi import timer # enable timing framework
+from Config.generator_cfi import generator as _gen
+from Config.vermaserenCuts_cfi import vermaserenCuts
 
 process = cepgen.Module('lpair',
     processParameters = cepgen.Parameters(
+        mode = cepgen.ProcessMode.ElasticElastic,
         pair = PDG.muon,
     ),
     inKinematics = cepgen.Parameters(
@@ -15,13 +17,12 @@ process = cepgen.Module('lpair',
 )
 
 # events generation parameters
-from Config.generator_cff import generator
-generator = generator.clone(
+generator = _gen.clone(
     numEvents = 100000,
     printEvery = 10000,
 )
 
-#from Config.OutputModule.ROOTTree_cfi import rootTree # dump everything into a flat tree
+#from Config.OutputModule.rootTree_cfi import rootTree # dump everything into a flat tree
 text = cepgen.Module('text', # histogramming/ASCII output capability
     histVariables={
         'm(4)': cepgen.Parameters(xrange=(0., 10.), nbins=20, log=True),

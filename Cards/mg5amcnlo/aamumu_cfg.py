@@ -1,7 +1,7 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
-from Config.generator_cff import generator
-#from Config.Logger_cfi import logger
+from Config.generator_cfi import generator
+#from Config.logger_cfi import logger
 #logger.enabledModules += ('MadGraphProcess.eval',)
 
 #--- process definition

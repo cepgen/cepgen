@@ -3,7 +3,7 @@
 A collection of beam-collinear parton fluxes f(x, Q^2)
 """
 
-from .containers_cfi import Module, Parameters
+from .containers_cff import Module, Parameters
 
 
 class ProtonFlux:
