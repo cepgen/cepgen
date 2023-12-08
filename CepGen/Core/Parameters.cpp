@@ -150,10 +150,19 @@ namespace cepgen {
 
     os << std::left << "\n"
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "\n\n";
-    if (param->process_)
-      os << std::setw(wt) << "Process to generate:\n"
-         << ProcessFactory::get().describeParameters(param->process().name(), param->process().parameters()).describe(1)
-         << "\n\n";
+    if (param->process_) {
+      const auto& proc_params = param->process().parameters();
+      os << std::setw(wt) << "Process to generate:"
+         << utils::boldify(ProcessFactory::get().describeParameters(proc_params).description()) << "\n";
+      for (const auto& key : proc_params.keys(false)) {
+        if (key == "kinematics" || key == "partonFluxes" || key == "ktFluxes")  // these are shown below
+          continue;
+        if (proc_params.has<ParametersList>(key))
+          os << std::setw(wt) << "" << key << ": " << proc_params.get<ParametersList>(key) << "\n";
+        else
+          os << std::setw(wt) << "" << key << ": " << proc_params.getString(key) << "\n";
+      }
+    }
     if (!param->evt_modifiers_.empty() || param->evt_exporters_.empty() || !param->taming_functions_.empty())
       os << "\n"
          << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Event treatment ") << std::setfill(' ')
@@ -195,12 +204,13 @@ namespace cepgen {
        << std::setw(wt) << "" << beams.negative() << "\n"
        << std::setw(wt) << "C.m. energy (GeV)" << utils::format("%g", beams.sqrtS()) << "\n"
        << std::setw(wt) << "Form factors"
-       << FormFactorsFactory::get().describeParameters(beams.formFactors()).description() << ": " << beams.formFactors()
-       << "\n";
+       << utils::boldify(FormFactorsFactory::get().describeParameters(beams.formFactors()).description()) << ": "
+       << beams.formFactors() << "\n";
     if (beams.mode() != mode::Kinematics::ElasticElastic)
       os << std::setw(wt) << "Structure functions"
-         << StructureFunctionsFactory::get().describeParameters(beams.structureFunctions()).description() << ": "
-         << beams.structureFunctions() << "\n";
+         << utils::boldify(
+                StructureFunctionsFactory::get().describeParameters(beams.structureFunctions()).description())
+         << ": " << beams.structureFunctions() << "\n";
     os << "\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Incoming partons ") << std::setfill(' ') << "\n\n";
     const auto& cuts = kin.cuts();
