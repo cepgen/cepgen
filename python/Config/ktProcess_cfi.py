@@ -5,7 +5,7 @@ general kT-factorised process steering card
 """
 
 from math import pi
-from .containers_cfi import Module, Parameters
+from .containers_cff import Module, Parameters
 from .ktFluxes_cff import *
 
 

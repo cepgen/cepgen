@@ -1,6 +1,6 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
-from Config.generator_cff import generator
+from Config.generator_cfi import generator
 
 #--- process definition
 process = kt.process.clone('mg5_aMC',

@@ -4,7 +4,7 @@ A collection of useful objects for the definition of a
 general collinear parton momentum-factorised process steering card
 """
 
-from .containers_cfi import Module, Parameters
+from .containers_cff import Module, Parameters
 from .collinearFluxes_cff import *
 
 

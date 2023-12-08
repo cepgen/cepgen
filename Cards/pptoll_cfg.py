@@ -1,8 +1,9 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
-#from Config.Hadronisation.pythia6_cff import pythia6 as hadroniser
-#from Config.Hadronisation.pythia8_cff import pythia8 as hadroniser
+#from Config.Hadronisation.pythia6_cfi import pythia6 as hadroniser
+#from Config.Hadronisation.pythia8_cfi import pythia8 as hadroniser
 from Config.PDG_cfi import PDG
+from Config.generator_cfi import generator
 
 #--- example of an auxiliary particles definition
 #registerParticle(1000001, 'sd_l', mass=100., charge=1., fermion=True) # right now, only fermionic coupling handled
@@ -33,5 +34,4 @@ process = kt.process.clone('pptoff',
 )
 
 #--- events generation
-from Config.generator_cff import generator
 generator.numEvents = 10000

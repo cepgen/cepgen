@@ -1,6 +1,6 @@
-from Config.Integration.plain_cff import integrator as plain
+from Config.Integration.plain_cff import plain
 
-integrator = plain.clone('MISER',
+miser = plain.clone('MISER',
     # MISER-specific parameters
     estimateFraction = 0.1,
     alpha = 2.,

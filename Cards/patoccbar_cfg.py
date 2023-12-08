@@ -1,11 +1,12 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
-from Config.Logger_cfi import logger
+from Config.logger_cfi import logger
 from Config.PDG_cfi import PDG
+from Config.generator_cfi import generator
 
 logger.enabledModules += ('GenericKTProcess.registerVariable',)
 
-process = kt.process.clone('pptoff_f77',
+process = kt.process.clone('pptoff',
     processParameters = cepgen.Parameters(
         pair = PDG.charm,
     ),
@@ -13,8 +14,8 @@ process = kt.process.clone('pptoff_f77',
         pz = (6500., 2562.2),
         structureFunctions = cepgen.StructureFunctions.SuriYennie,
         #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
-        ktFluxes = (kt.ProtonFlux.GluonKMR, kt.HeavyIonFlux.PhotonElastic),
-        #ktFluxes = (kt.ProtonFlux.PhotonElastic, kt.HeavyIonFlux.PhotonElastic),
+        partonFluxes = (kt.ProtonFlux.GluonKMR, kt.HeavyIonFlux.PhotonElastic),
+        #partonFluxes = (kt.ProtonFlux.PhotonElastic, kt.HeavyIonFlux.PhotonElastic),
         heavyIon2 = (208, 82),
         kmrGridPath = 'gluon_mmht2014nlo_Watt.dat',
     ),
@@ -33,6 +34,5 @@ process = kt.process.clone('pptoff_f77',
 )
 
 #--- events generation
-from Config.generator_cff import generator
 generator.numEvents = 10000
 generator.numThreads = 1

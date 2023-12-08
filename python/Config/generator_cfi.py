@@ -1,4 +1,4 @@
-from .containers_cfi import Parameters
+from .containers_cff import Parameters
 
 generator = Parameters(
     numEvents = 100000,

@@ -1,4 +1,4 @@
-from Config.Integration.plain_cff import integrator as plain
+from Config.Integration.plain_cfi import plain
 
 
 class VegasIntegrationMode:
@@ -8,7 +8,7 @@ class VegasIntegrationMode:
     Importance = 1
 
 
-integrator = plain.clone('Vegas',
+vegas = plain.clone('Vegas',
     numFunctionCalls = 50000,
     treat = True,  # smoothing of the integrand
     chiSqCut = 1.2,

@@ -1,7 +1,8 @@
 import Config.Core as cepgen
 from Config.PDG_cfi import PDG
+from Config.generator_cfi import generator as _gen
 #--- enable timing framework
-#from Config.Timer_cfi import timer
+#from Config.timer_cfi import timer
 
 process = cepgen.Module('lpair',
     processParameters = cepgen.Parameters(
@@ -31,19 +32,18 @@ process = cepgen.Module('lpair',
 )
 
 #--- let the user specify the events generation parameters
-from Config.generator_cff import generator
-generator = generator.clone(
+generator = _gen.clone(
     numEvents = 100000,
     printEvery = 10000,
 )
 
 #--- example of an events modification procedure
-#from Config.Hadronisation.pythia8_cff import pythia8
+#from Config.Hadronisation.pythia8_cfi import pythia8
 #eventSequence = cepgen.Sequence(pythia8)
 
 #--- example of an output module(s) procedure
 #... dump everything into a flat ROOT tree (if CepGenRoot was built and loaded)
-#from Config.OutputModule.ROOTTree_cfi import rootTree
+#from Config.OutputModule.rootTree_cfi import rootTree
 #... accumulate and dump everything into an ASCII text output
 text = cepgen.Module('text',
     #variables = ['nev', 'm(4)', 'tgen'],

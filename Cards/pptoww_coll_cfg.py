@@ -1,6 +1,6 @@
 import Config.Core as cepgen
 import Config.collinearProcess_cfi as coll
-from Config.generator_cff import generator as _gen
+from Config.generator_cfi import generator as _gen
 
 process = coll.process.clone('pptoww',
     processParameters = cepgen.Parameters(
