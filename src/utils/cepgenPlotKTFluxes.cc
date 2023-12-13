@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("normalised", "plot xf(x) instead of f(x)", &normalised, false)
       .parse();
 
-  const bool plot_vs_q2 = (q2 > 0.);
+  const bool plot_vs_q2 = (q2 >= 0.);
   if (logx && x_range.min() == 0.)
     x_range.min() = 1.e-3;
   if (x_range.max() == 1.)
