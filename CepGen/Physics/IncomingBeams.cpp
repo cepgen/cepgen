@@ -36,55 +36,35 @@ namespace cepgen {
   void IncomingBeams::setParameters(const ParametersList& params) {
     SteeredObject::setParameters(params);
     ParametersList plist_pos, plist_neg;
+    auto& pos_pdg = plist_pos.operator[]<int>("pdgId");
+    auto& neg_pdg = plist_neg.operator[]<int>("pdgId");
 
     // positive-z incoming beam
-    pdgid_t pos_pdg = steer<int>("beam1id");
-    const int hi_Z1 = steer<int>("beam1Z");
-    if (hi_Z1 != 0)
-      pos_pdg = HeavyIon(steer<int>("beam1A"), (Element)hi_Z1);
-    const auto& hi_beam1 = steer<std::vector<int> >("heavyIon1");
-    if (hi_beam1.size() == 2)
-      pos_pdg = HeavyIon{(unsigned short)hi_beam1.at(0), (Element)hi_beam1.at(1)};
-    else if (!hi_beam1.empty())
-      throw CG_FATAL("Kinematics") << "Invalid format for first incoming beam's HI specification!\n\t"
-                                   << "A pair of (A,Z) is required, got " << hi_beam1 << ".";
+    if (const auto& hi_Z1 = steerAs<int, Element>("beam1Z"); hi_Z1 != Element::invalid)
+      pos_pdg = HeavyIon(steer<int>("beam1A"), hi_Z1);
+    else if (const auto& hi_beam1 = steer<std::vector<int> >("heavyIon1"); hi_beam1.size() >= 2)
+      pos_pdg = HeavyIon{(unsigned short)hi_beam1.at(0), static_cast<Element>(hi_beam1.at(1))};
+    else
+      pos_pdg = steer<int>("beam1id");
 
     // negative-z incoming beam
-    pdgid_t neg_pdg = steer<int>("beam2id");
-    const int hi_A2 = steer<int>("beam2A");
-    const int hi_Z2 = steer<int>("beam2Z");
-    if (hi_Z2 != 0)
-      neg_pdg = HeavyIon(hi_A2, (Element)hi_Z2);
-    const auto& hi_beam2 = steer<std::vector<int> >("heavyIon2");
-    if (hi_beam2.size() == 2)
+    if (const auto& hi_Z2 = steerAs<int, Element>("beam2Z"); hi_Z2 != Element::invalid)
+      neg_pdg = HeavyIon(steer<int>("beam2A"), hi_Z2);
+    else if (const auto& hi_beam2 = steer<std::vector<int> >("heavyIon2"); hi_beam2.size() >= 2)
       neg_pdg = HeavyIon{(unsigned short)hi_beam2.at(0), (Element)hi_beam2.at(1)};
-    else if (!hi_beam2.empty())
-      throw CG_FATAL("Kinematics") << "Invalid format for second incoming beam's HI specification!\n\t"
-                                   << "A pair of (A,Z) is required, got " << hi_beam2 << ".";
+    else
+      neg_pdg = steer<int>("beam2id");
 
     //----- combined two-beam system
 
     //--- beams PDG ids
-    if (params_.has<std::vector<ParametersList> >("pdgIds")) {
-      const auto& beams_pdg = steer<std::vector<ParametersList> >("pdgIds");
-      if (beams_pdg.size() == 2) {
-        pos_pdg = abs(beams_pdg.at(0).get<int>("pdgid"));
-        neg_pdg = abs(beams_pdg.at(1).get<int>("pdgid"));
-      } else if (!beams_pdg.empty())
-        throw CG_FATAL("Kinematics") << "Invalid list of PDG ids retrieved for incoming beams:\n\t"
-                                     << "2 PDG ids are expected, " << beams_pdg << " provided.";
-    } else if (params_.has<std::vector<int> >("pdgIds")) {
-      const auto& beams_pdg = steer<std::vector<int> >("pdgIds");
-      if (beams_pdg.size() == 2) {
-        pos_pdg = abs(beams_pdg.at(0));
-        neg_pdg = abs(beams_pdg.at(1));
-      } else if (!beams_pdg.empty())
-        throw CG_FATAL("Kinematics") << "Invalid list of PDG ids retrieved for incoming beams:\n\t"
-                                     << "2 PDG ids are expected, " << beams_pdg << " provided.";
+    if (const auto& beams_pdg = steer<std::vector<ParametersList> >("pdgIds"); beams_pdg.size() >= 2) {
+      pos_pdg = std::abs(beams_pdg.at(0).get<int>("pdgid"));
+      neg_pdg = std::abs(beams_pdg.at(1).get<int>("pdgid"));
+    } else if (const auto& beams_pdg = steer<std::vector<int> >("pdgIds"); beams_pdg.size() >= 2) {
+      pos_pdg = std::abs(beams_pdg.at(0));
+      neg_pdg = std::abs(beams_pdg.at(1));
     }
-
-    plist_pos.set<int>("pdgId", pos_pdg);
-    plist_neg.set<int>("pdgId", neg_pdg);
 
     //--- beams longitudinal momentum
     double p1z = 0., p2z = 0;
@@ -202,8 +182,7 @@ namespace cepgen {
   double IncomingBeams::sqrtS() const { return std::sqrt(s()); }
 
   mode::Kinematics IncomingBeams::mode() const {
-    const auto& mode = steerAs<int, mode::Kinematics>("mode");
-    if (mode != mode::Kinematics::invalid)
+    if (const auto& mode = steerAs<int, mode::Kinematics>("mode"); mode != mode::Kinematics::invalid)
       return mode;
     return modeFromBeams(pos_beam_, neg_beam_);
   }
@@ -259,12 +238,12 @@ namespace cepgen {
 
   ParametersDescription IncomingBeams::description() {
     auto desc = ParametersDescription();
-    desc.add<int>("beam1id", 2212).setDescription("PDG id of the positive-z beam particle");
-    desc.add<int>("beam1A", 1).setDescription("Atomic weight of the positive-z ion beam");
-    desc.add<int>("beam1Z", 1).setDescription("Atomic number of the positive-z ion beam");
-    desc.add<int>("beam2id", 2212).setDescription("PDG id of the negative-z beam particle");
-    desc.add<int>("beam2A", 1).setDescription("Atomic weight of the negative-z ion beam");
-    desc.add<int>("beam2Z", 1).setDescription("Atomic number of the negative-z ion beam");
+    desc.addAs<int, pdgid_t>("beam1id", PDG::proton).setDescription("PDG id of the positive-z beam particle");
+    desc.add<int>("beam1A", 0).setDescription("Atomic weight of the positive-z ion beam");
+    desc.addAs<int, Element>("beam1Z", Element::invalid).setDescription("Atomic number of the positive-z ion beam");
+    desc.addAs<int, pdgid_t>("beam2id", PDG::proton).setDescription("PDG id of the negative-z beam particle");
+    desc.add<int>("beam2A", 0).setDescription("Atomic weight of the negative-z ion beam");
+    desc.addAs<int, Element>("beam2Z", Element::invalid).setDescription("Atomic number of the negative-z ion beam");
     desc.add<std::vector<ParametersList> >("pdgIds", {}).setDescription("PDG description of incoming beam particles");
     desc.add<std::vector<int> >("pdgIds", {}).setDescription("PDG ids of incoming beam particles");
     desc.add<std::vector<double> >("pz", {}).setDescription("Beam momenta (in GeV/c)");
@@ -275,9 +254,8 @@ namespace cepgen {
     desc.add<ParametersDescription>("formFactors",
                                     FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler))
         .setDescription("Beam form factors modelling");
-    desc.add<ParametersDescription>(
-            "structureFunctions", strfun::Parameterisation::description().setName<int>(11)  // default is SY
-            )
+    desc.add<ParametersDescription>("structureFunctions",
+                                    strfun::Parameterisation::description().setName<int>(11 /*default is SY*/))
         .setDescription("Beam inelastic structure functions modelling");
     return desc;
   }
