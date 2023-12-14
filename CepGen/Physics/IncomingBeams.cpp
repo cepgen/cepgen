@@ -89,26 +89,26 @@ namespace cepgen {
     //--- beams longitudinal momentum
     double p1z = 0., p2z = 0;
     if (const auto& beams_pz = steer<std::vector<double> >("pz"); beams_pz.size() >= 2) {
+      // fill from beam momenta
       p1z = beams_pz.at(0);
       p2z = beams_pz.at(1);
     } else if (const auto& beams_ene = steer<std::vector<double> >("energies"); beams_ene.size() >= 2) {
-      p1z = std::hypot(beams_ene.at(0),
-                       HeavyIon::isHI(pos_pdg) ? HeavyIon::fromPdgId(pos_pdg).mass() : PDG::get().mass(pos_pdg));
-      p2z = std::hypot(beams_ene.at(1),
-                       HeavyIon::isHI(neg_pdg) ? HeavyIon::fromPdgId(neg_pdg).mass() : PDG::get().mass(neg_pdg));
-    } else {
-      params_.fill<double>("beam1pz", p1z);
-      params_.fill<double>("beam2pz", p2z);
-    }
-    //--- centre-of-mass energy
-    if (pos_pdg == neg_pdg) {
+      // fill from beam energies
+      p1z = std::hypot(beams_ene.at(0), PDG::get().mass(pos_pdg));
+      p2z = std::hypot(beams_ene.at(1), PDG::get().mass(neg_pdg));
+    } else if (pos_pdg == neg_pdg) {
+      // fill from centre-of-mass energy (symmetric beams)
       const auto sqrts = params_.has<double>("sqrtS") && steer<double>("sqrtS") > 0.         ? steer<double>("sqrtS")
                          : params_.has<double>("cmEnergy") && steer<double>("cmEnergy") > 0. ? steer<double>("cmEnergy")
                                                                                              : 0.;
       if (sqrts > 0.) {
-        p1z = +0.5 * sqrts;
-        p2z = -0.5 * sqrts;
+        const auto pz_abs = 0.5 * std::hypot(sqrts, PDG::get().mass(pos_pdg));  // compute momenta from energy
+        p1z = +pz_abs;
+        p2z = -pz_abs;
       }
+    } else {  // when everything failed, retrieve "beamNpz" attributes
+      params_.fill<double>("beam1pz", p1z);
+      params_.fill<double>("beam2pz", p2z);
     }
     //--- check the sign of both beams' pz
     if (p1z * p2z < 0. && p1z < 0.)
@@ -184,23 +184,14 @@ namespace cepgen {
     neg_beam_ = Beam(plist_neg);
   }
 
-  void IncomingBeams::setSqrtS(double sqs) {
+  void IncomingBeams::setSqrtS(double sqrts) {
     if (pos_beam_.pdgId() != neg_beam_.pdgId())
       throw CG_FATAL("IncomingBeams:setSqrtS") << "Trying to set √s with asymmetric beams"
                                                << " (" << pos_beam_.pdgId() << "/" << neg_beam_.pdgId() << ").\n"
                                                << "Please fill incoming beams objects manually!";
-    pos_beam_.setMomentum(Momentum::fromPxPyPzM(0.,
-                                                0.,
-                                                +0.5 * sqs,
-                                                HeavyIon::isHI(pos_beam_.pdgId())
-                                                    ? HeavyIon::mass(HeavyIon::fromPdgId(pos_beam_.pdgId()))
-                                                    : PDG::get().mass(pos_beam_.pdgId())));
-    neg_beam_.setMomentum(Momentum::fromPxPyPzM(0.,
-                                                0.,
-                                                -0.5 * sqs,
-                                                HeavyIon::isHI(neg_beam_.pdgId())
-                                                    ? HeavyIon::mass(HeavyIon::fromPdgId(neg_beam_.pdgId()))
-                                                    : PDG::get().mass(neg_beam_.pdgId())));
+    const auto pz_abs = 0.5 * std::hypot(sqrts, PDG::get().mass(pos_beam_.pdgId()));
+    pos_beam_.setMomentum(Momentum::fromPxPyPzM(0., 0., +pz_abs, PDG::get().mass(pos_beam_.pdgId())));
+    neg_beam_.setMomentum(Momentum::fromPxPyPzM(0., 0., -pz_abs, PDG::get().mass(neg_beam_.pdgId())));
   }
 
   double IncomingBeams::s() const {

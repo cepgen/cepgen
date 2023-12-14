@@ -26,7 +26,7 @@ namespace cepgen {
     Parameterisation::Parameterisation(const ParametersList& params)
         : NamedModule<std::string>(params),
           pdg_id_(steer<pdgid_t>("pdgId")),
-          mass2_(std::pow(HeavyIon::isHI(pdg_id_) ? HeavyIon::fromPdgId(pdg_id_).mass() : PDG::get().mass(pdg_id_), 2)),
+          mass2_(std::pow(PDG::get().mass(pdg_id_), 2)),
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_) {}
 

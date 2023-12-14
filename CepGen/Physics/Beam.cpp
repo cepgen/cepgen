@@ -28,11 +28,7 @@ namespace cepgen {
   Beam::Beam(const ParametersList& params)
       : SteeredObject(params),
         pdg_id_(steer<pdgid_t>("pdgId")),
-        momentum_(Momentum::fromPxPyPzM(
-            0.,
-            0.,
-            steer<double>("pz"),
-            HeavyIon::isHI(pdg_id_) ? HeavyIon::mass(HeavyIon::fromPdgId(pdg_id_)) : PDG::get().mass(pdg_id_))),
+        momentum_(Momentum::fromPxPyPzM(0., 0., steer<double>("pz"), PDG::get().mass(pdg_id_))),
         flux_info_(steer<ParametersList>("partonFlux")),
         elastic_(steer<bool>("elastic")) {}
 
