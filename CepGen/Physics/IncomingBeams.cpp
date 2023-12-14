@@ -137,24 +137,20 @@ namespace cepgen {
       plist_neg.set<ParametersList>("partonFlux", params);
     };
 
-    if (params_.has<std::vector<ParametersList> >("partonFluxes")) {
-      const auto& fluxes = steer<std::vector<ParametersList> >("partonFluxes");
-      if (fluxes.size() < 2)
-        throw CG_FATAL("IncomingBeams") << "Invalid multiplicity of parton fluxes given: " << fluxes << ".";
+    if (const auto& fluxes = steer<std::vector<ParametersList> >("partonFluxes"); fluxes.size() >= 2) {
       plist_pos.set("partonFlux", fluxes.at(0));
       plist_neg.set("partonFlux", fluxes.at(1));
-    } else if (params_.has<ParametersList>("partonFluxes")) {
-      const auto& fluxes = steer<ParametersList>("partonFluxes");
+    } else if (const auto& fluxes = steer<ParametersList>("partonFluxes"); !fluxes.empty()) {
       plist_pos.set("partonFlux", fluxes);
       plist_neg.set("partonFlux", fluxes);
-    } else if (params_.has<std::vector<std::string> >("partonFluxes"))
-      set_part_fluxes_from_name_vector(steer<std::vector<std::string> >("partonFluxes"));
-    else if (params_.has<std::vector<std::string> >("ktFluxes"))
-      set_part_fluxes_from_name_vector(steer<std::vector<std::string> >("ktFluxes"));
-    else if (params_.has<std::string>("partonFluxes"))
-      set_part_fluxes_from_name(steer<std::string>("partonFluxes"));
-    else if (params_.has<std::string>("ktFluxes"))
-      set_part_fluxes_from_name(steer<std::string>("ktFluxes"));
+    } else if (const auto& fluxes = steer<std::vector<std::string> >("partonFluxes"); !fluxes.empty())
+      set_part_fluxes_from_name_vector(fluxes);
+    else if (const auto& fluxes = steer<std::vector<std::string> >("ktFluxes"); !fluxes.empty())
+      set_part_fluxes_from_name_vector(fluxes);
+    else if (const auto& flux = steer<std::string>("partonFluxes"); flux.empty())
+      set_part_fluxes_from_name(flux);
+    else if (const auto& flux = steer<std::string>("ktFluxes"); !flux.empty())
+      set_part_fluxes_from_name(flux);
 
     //--- form factors
     plist_pos.set<ParametersList>("formFactors", steer<ParametersList>("formFactors"));
