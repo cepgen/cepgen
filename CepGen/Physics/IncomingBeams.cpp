@@ -74,15 +74,15 @@ namespace cepgen {
       p2z = beams_pz.at(1);
     } else if (const auto& beams_ene = steer<std::vector<double> >("energies"); beams_ene.size() >= 2) {
       // fill from beam energies
-      p1z = std::hypot(beams_ene.at(0), PDG::get().mass(pos_pdg));
-      p2z = std::hypot(beams_ene.at(1), PDG::get().mass(neg_pdg));
+      p1z = std::sqrt(beams_ene.at(0) * beams_ene.at(0) - std::pow(PDG::get().mass(pos_pdg), 2));
+      p2z = std::sqrt(beams_ene.at(1) * beams_ene.at(1) - std::pow(PDG::get().mass(neg_pdg), 2));
     } else if (pos_pdg == neg_pdg) {
       // fill from centre-of-mass energy (symmetric beams)
       const auto sqrts = params_.has<double>("sqrtS") && steer<double>("sqrtS") > 0.         ? steer<double>("sqrtS")
                          : params_.has<double>("cmEnergy") && steer<double>("cmEnergy") > 0. ? steer<double>("cmEnergy")
                                                                                              : 0.;
-      if (sqrts > 0.) {
-        const auto pz_abs = 0.5 * std::hypot(sqrts, PDG::get().mass(pos_pdg));  // compute momenta from energy
+      if (sqrts > 0.) {  // compute momenta from energy
+        const auto pz_abs = std::sqrt(0.25 * sqrts * sqrts - std::pow(PDG::get().mass(pos_pdg), 2));
         p1z = +pz_abs;
         p2z = -pz_abs;
       }
@@ -165,7 +165,7 @@ namespace cepgen {
       throw CG_FATAL("IncomingBeams:setSqrtS") << "Trying to set √s with asymmetric beams"
                                                << " (" << pos_beam_.pdgId() << "/" << neg_beam_.pdgId() << ").\n"
                                                << "Please fill incoming beams objects manually!";
-    const auto pz_abs = 0.5 * std::hypot(sqrts, PDG::get().mass(pos_beam_.pdgId()));
+    const auto pz_abs = std::sqrt(0.25 * sqrts * sqrts - std::pow(PDG::get().mass(pos_beam_.pdgId()), 2));
     pos_beam_.setMomentum(Momentum::fromPxPyPzM(0., 0., +pz_abs, PDG::get().mass(pos_beam_.pdgId())));
     neg_beam_.setMomentum(Momentum::fromPxPyPzM(0., 0., -pz_abs, PDG::get().mass(neg_beam_.pdgId())));
   }
@@ -175,7 +175,7 @@ namespace cepgen {
     CG_DEBUG("IncomingBeams:s") << "Beams momenta:\n"
                                 << "\t" << pos_beam_.momentum() << "\n"
                                 << "\t" << neg_beam_.momentum() << "\n"
-                                << "\ts = (p1 + p2)^2 = " << sval << ", sqrt(s) = " << sqrt(sval) << ".";
+                                << "\ts = (p1 + p2)^2 = " << sval << ", sqrt(s) = " << std::sqrt(sval) << ".";
     return sval;
   }
 
