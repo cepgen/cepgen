@@ -88,14 +88,15 @@ namespace cepgen {
 
     //--- beams longitudinal momentum
     double p1z = 0., p2z = 0;
-    const auto& beams_pz = steer<std::vector<double> >("pz");
-    if (beams_pz.size() == 2) {
+    if (const auto& beams_pz = steer<std::vector<double> >("pz"); beams_pz.size() >= 2) {
       p1z = beams_pz.at(0);
       p2z = beams_pz.at(1);
-    } else if (!beams_pz.empty())
-      throw CG_FATAL("Kinematics") << "Invalid format for beams pz specification!\n\t"
-                                   << "A vector of two pz's is required.";
-    else {
+    } else if (const auto& beams_ene = steer<std::vector<double> >("energies"); beams_ene.size() >= 2) {
+      p1z = std::hypot(beams_ene.at(0),
+                       HeavyIon::isHI(pos_pdg) ? HeavyIon::fromPdgId(pos_pdg).mass() : PDG::get().mass(pos_pdg));
+      p2z = std::hypot(beams_ene.at(1),
+                       HeavyIon::isHI(neg_pdg) ? HeavyIon::fromPdgId(neg_pdg).mass() : PDG::get().mass(neg_pdg));
+    } else {
       params_.fill<double>("beam1pz", p1z);
       params_.fill<double>("beam2pz", p2z);
     }
@@ -280,6 +281,7 @@ namespace cepgen {
     desc.add<std::vector<ParametersList> >("pdgIds", {}).setDescription("PDG description of incoming beam particles");
     desc.add<std::vector<int> >("pdgIds", {}).setDescription("PDG ids of incoming beam particles");
     desc.add<std::vector<double> >("pz", {}).setDescription("Beam momenta (in GeV/c)");
+    desc.add<std::vector<double> >("energies", {}).setDescription("Beam energies (in GeV/c)");
     desc.add<double>("sqrtS", 0.).setDescription("Two-beam centre of mass energy (in GeV)");
     desc.addAs<int, mode::Kinematics>("mode", mode::Kinematics::invalid)
         .setDescription("Process kinematics mode (1 = elastic, (2-3) = single-dissociative, 4 = double-dissociative)");
