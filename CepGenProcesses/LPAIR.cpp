@@ -601,7 +601,7 @@ bool LPAIR::orient() {
   }
 
   // What if the protons' momenta are not along the z-axis?
-  pc4_ = std::sqrt(ec4_ * ec4_ - mc4_ * mc4_);
+  pc4_ = utils::fastSqrtSqDiff(ec4_, mc4_);
   if (pc4_ == 0.) {
     CG_WARNING("LPAIR") << "pzc4 is null and should not be...";
     return false;
