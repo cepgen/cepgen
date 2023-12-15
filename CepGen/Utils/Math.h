@@ -27,6 +27,8 @@ namespace cepgen {
 
     double fastHypot(double, double);
     double fastHypot(double, double, double);
+    /// Compute the square root of the squared difference (sqrt(a^2-b^2))
+    double fastSqrtSqDiff(double, double);
   }  // namespace utils
 }  // namespace cepgen
 

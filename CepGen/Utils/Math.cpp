@@ -39,5 +39,11 @@ namespace cepgen {
       x *= x, y *= y, z *= z;
       return std::sqrt(x + y + z);
     }
+
+    double fastSqrtSqDiff(double x, double y) {
+      if (std::fabs(x) == std::fabs(y))
+        return 0.;
+      return std::sqrt((x + y) * (x - y));
+    }
   }  // namespace utils
 }  // namespace cepgen
