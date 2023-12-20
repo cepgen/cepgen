@@ -77,7 +77,7 @@ namespace cepgen {
           return;
         }
         const auto qr = std::sqrt(qr2), inv_qr = 1. / qr;
-        const auto sph = (std::sin(qr) - qr * std::cos(qr)) * 3. * inv_qr * inv_qr * inv_qr;
+        const auto sph = (std::sin(qr) - qr * std::cos(qr)) * 3. * inv_qr * inv_qr;
         const auto ge = sph / (1. + q2_ * a02_);
         setGEGM(ge, MU * ge);
       }
