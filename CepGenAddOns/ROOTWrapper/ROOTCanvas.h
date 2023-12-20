@@ -41,7 +41,7 @@ namespace cepgen {
   /// A "prettified" text box object
   class ROOTPaveText : public TPaveText {
   public:
-    inline explicit ROOTPaveText(float x1, float y1, float x2, float y2, const std::string& text = "")
+    inline explicit ROOTPaveText(double x1, double y1, double x2, double y2, const std::string& text = "")
         : TPaveText(x1, y1, x2, y2, "NB NDC") {
       TPaveText::SetTextAlign(kHAlignLeft + kVAlignTop);
       if (!text.empty()) {
@@ -101,7 +101,7 @@ namespace cepgen {
     }
 
     /// Set horizontal canvas width
-    inline void SetSize(float size = 600) { TCanvas::SetCanvasSize(size, 600); }
+    inline void SetSize(double size = 600) { TCanvas::SetCanvasSize(size, 600); }
 
     /// Draw main plot attributes in a pretty manner
     inline void Prettify(TH1* obj) {
@@ -237,10 +237,10 @@ namespace cepgen {
 
     inline std::vector<TH1*> RatioPlot(TH1* denom,
                                        const std::vector<TH1*>& numers,
-                                       float xmin = -999.,
-                                       float xmax = -999.,
-                                       float ymin = -999.,
-                                       float ymax = -999.,
+                                       double xmin = -999.,
+                                       double xmax = -999.,
+                                       double ymin = -999.,
+                                       double ymax = -999.,
                                        Option_t* draw_style = "hist") {
       std::vector<TH1*> ratios{};
       if (!ratio_)
@@ -287,10 +287,10 @@ namespace cepgen {
 
     inline std::vector<TGraphErrors*> RatioPlot(TGraphErrors* denom,
                                                 const std::vector<TGraphErrors*>& numers,
-                                                float xmin = -999.,
-                                                float xmax = -999.,
-                                                float ymin = -999.,
-                                                float ymax = -999.) {
+                                                double xmin = -999.,
+                                                double xmax = -999.,
+                                                double ymin = -999.,
+                                                double ymax = -999.) {
       std::vector<TGraphErrors*> ratios{};
       if (!ratio_)
         return ratios;
@@ -303,13 +303,13 @@ namespace cepgen {
         auto* ratio = new TGraphErrors();
         ratio->SetTitle(denom->GetTitle());
         for (int i = 0; i < denom->GetN(); i++) {
-          const float xd_val = xd[i], yd_val = yd[i], yd_err = yde[i];
+          const auto xd_val = xd[i], yd_val = yd[i], yd_err = yde[i];
           for (int j = 0; j < numer->GetN(); ++j) {
-            const float xn_val = xn[j], yn_val = yn[j], yn_err = yne[j];
+            const auto xn_val = xn[j], yn_val = yn[j], yn_err = yne[j];
             if ((xn_val == 0. && xd_val == 0.) || fabs(1. - xd_val / xn_val) * 2. * numer->GetN() < 1.) {
               if (yd_val == 0. || yn_val == 0.)
                 break;
-              const float y = yn_val / yd_val, err_y = std::hypot(yn_err / yn_val, yd_err / yd_val) * y;
+              const auto y = yn_val / yd_val, err_y = std::hypot(yn_err / yn_val, yd_err / yd_val) * y;
               const auto n = ratio->GetN();
               ratio->SetPoint(n, xd_val, y);
               ratio->SetPointError(n, 0., err_y);
@@ -524,17 +524,17 @@ namespace cepgen {
       leg_->SetTextSize(0.04);
     }
     /// Retrieve the bin size for a histogram
-    inline float GetBinning(const TH1* hist) {
+    inline double GetBinning(const TH1* hist) {
       return (hist->GetXaxis()->GetXmax() - hist->GetXaxis()->GetXmin()) / hist->GetXaxis()->GetNbins();
     }
 
-    const bool ratio_;
+    const bool ratio_{false};
     std::string leg_mode_{"rt"};
     double leg_x1_{0.5}, leg_y1_{0.75};
     double leg_width_{0.45}, leg_height_{0.15};
-    std::unique_ptr<TLegend> leg_;
-    std::unique_ptr<ROOTPaveText> top_label_;
-    std::vector<std::unique_ptr<TObject> > grb_obj_;
+    std::unique_ptr<TLegend> leg_{nullptr};
+    std::unique_ptr<ROOTPaveText> top_label_{nullptr};
+    std::vector<std::unique_ptr<TObject> > grb_obj_{};
     std::vector<TPad*> pads_{};
   };
   const std::vector<int> ROOTCanvas::colours = {
