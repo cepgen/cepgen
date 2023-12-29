@@ -81,6 +81,8 @@ namespace cepgen {
       Limits range() const;
       /// Range for a single bin
       Limits binRange(size_t bin) const;
+      /// List of bins limits (nbins + 1 values)
+      std::vector<double> bins() const;
 
       /// Compute the mean histogram value over full range
       double mean() const;
@@ -136,12 +138,16 @@ namespace cepgen {
       Limits rangeX() const;
       /// Range for a single x-axis bin
       Limits binRangeX(size_t bin) const;
+      /// List of x-bins limits (nbinsX + 1 values)
+      std::vector<double> binsX() const;
       /// Number of y-axis bins
       size_t nbinsY() const;
       /// y-axis range
       Limits rangeY() const;
       /// Range for a single y-axis bin
       Limits binRangeY(size_t bin) const;
+      /// List of y-bins limits (nbinsX + 1 values)
+      std::vector<double> binsY() const;
 
       /// Compute the mean histogram value over full x-axis range
       double meanX() const;
