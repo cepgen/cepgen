@@ -75,13 +75,15 @@ namespace cepgen {
     }
 
     void Hist2D::fill(double x, double y, double weight) {
-      auto ret = gsl_histogram2d_accumulate(hist_.get(), x, y, weight);
-      if (ret == GSL_SUCCESS) {
-        gsl_histogram2d_accumulate(hist_w2_.get(), x, y, weight * weight);
-        return;
+      {  // reduce the scope of 'ret'
+        auto ret = gsl_histogram2d_accumulate(hist_.get(), x, y, weight);
+        if (ret == GSL_SUCCESS) {
+          gsl_histogram2d_accumulate(hist_w2_.get(), x, y, weight * weight);
+          return;
+        }
+        if (ret != GSL_EDOM)
+          throw CG_ERROR("Hist2D:fill") << gsl_strerror(ret);
       }
-      if (ret != GSL_EDOM)
-        throw CG_ERROR("Hist2D:fill") << gsl_strerror(ret);
       const auto &xrng = rangeX(), &yrng = rangeY();
       if (xrng.contains(x)) {
         if (y < yrng.min())
@@ -106,6 +108,10 @@ namespace cepgen {
     }
 
     void Hist2D::add(Hist2D oth, double scaling) {
+      CG_ASSERT(hist_);
+      CG_ASSERT(hist_w2_);
+      CG_ASSERT(oth.hist_);
+      CG_ASSERT(oth.hist_w2_);
       if (oth.integral(true) == 0.) {
         CG_WARNING("Hist1D:add") << "Other histogram is empty.";
         return;
@@ -120,31 +126,42 @@ namespace cepgen {
     }
 
     void Hist2D::scale(double scaling) {
+      CG_ASSERT(hist_);
       if (auto ret = gsl_histogram2d_scale(hist_.get(), scaling); ret != GSL_SUCCESS)
         throw CG_ERROR("Hist2D:scale") << gsl_strerror(ret);
       gsl_histogram2d_scale(hist_w2_.get(), scaling * scaling);
     }
 
-    size_t Hist2D::nbinsX() const { return gsl_histogram2d_nx(hist_.get()); }
+    size_t Hist2D::nbinsX() const {
+      CG_ASSERT(hist_);
+      return gsl_histogram2d_nx(hist_.get());
+    }
 
     Limits Hist2D::rangeX() const {
+      CG_ASSERT(hist_);
       return Limits{gsl_histogram2d_xmin(hist_.get()), gsl_histogram2d_xmax(hist_.get())};
     }
 
     Limits Hist2D::binRangeX(size_t bin) const {
+      CG_ASSERT(hist_);
       Limits range;
       if (auto ret = gsl_histogram2d_get_xrange(hist_.get(), bin, &range.min(), &range.max()); ret != GSL_SUCCESS)
         throw CG_ERROR("Hist1D:binRange") << "Bin " << bin << ": " << gsl_strerror(ret);
       return range;
     }
 
-    size_t Hist2D::nbinsY() const { return gsl_histogram2d_ny(hist_.get()); }
+    size_t Hist2D::nbinsY() const {
+      CG_ASSERT(hist_);
+      return gsl_histogram2d_ny(hist_.get());
+    }
 
     Limits Hist2D::rangeY() const {
+      CG_ASSERT(hist_);
       return Limits{gsl_histogram2d_ymin(hist_.get()), gsl_histogram2d_ymax(hist_.get())};
     }
 
     Limits Hist2D::binRangeY(size_t bin) const {
+      CG_ASSERT(hist_);
       Limits range;
       if (auto ret = gsl_histogram2d_get_yrange(hist_.get(), bin, &range.min(), &range.max()); ret != GSL_SUCCESS)
         throw CG_ERROR("Hist1D:binRange") << "Bin " << bin << ": " << gsl_strerror(ret);
@@ -152,17 +169,43 @@ namespace cepgen {
     }
 
     Value Hist2D::value(size_t bin_x, size_t bin_y) const {
+      CG_ASSERT(hist_);
       return Value{gsl_histogram2d_get(hist_.get(), bin_x, bin_y),
                    std::sqrt(gsl_histogram2d_get(hist_w2_.get(), bin_x, bin_y))};
     }
 
-    double Hist2D::meanX() const { return gsl_histogram2d_xmean(hist_.get()); }
-    double Hist2D::rmsX() const { return gsl_histogram2d_xsigma(hist_.get()); }
-    double Hist2D::meanY() const { return gsl_histogram2d_ymean(hist_.get()); }
-    double Hist2D::rmsY() const { return gsl_histogram2d_ysigma(hist_.get()); }
-    double Hist2D::minimum() const { return gsl_histogram2d_min_val(hist_.get()); }
-    double Hist2D::maximum() const { return gsl_histogram2d_max_val(hist_.get()); }
+    double Hist2D::meanX() const {
+      CG_ASSERT(hist_);
+      return gsl_histogram2d_xmean(hist_.get());
+    }
+
+    double Hist2D::rmsX() const {
+      CG_ASSERT(hist_);
+      return gsl_histogram2d_xsigma(hist_.get());
+    }
+
+    double Hist2D::meanY() const {
+      CG_ASSERT(hist_);
+      return gsl_histogram2d_ymean(hist_.get());
+    }
+
+    double Hist2D::rmsY() const {
+      CG_ASSERT(hist_);
+      return gsl_histogram2d_ysigma(hist_.get());
+    }
+
+    double Hist2D::minimum() const {
+      CG_ASSERT(hist_);
+      return gsl_histogram2d_min_val(hist_.get());
+    }
+
+    double Hist2D::maximum() const {
+      CG_ASSERT(hist_);
+      return gsl_histogram2d_max_val(hist_.get());
+    }
+
     double Hist2D::integral(bool include_out_of_range) const {
+      CG_ASSERT(hist_);
       auto integr = gsl_histogram2d_sum(hist_.get());
       if (include_out_of_range)
         integr += out_of_range_values_.total();

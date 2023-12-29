@@ -61,19 +61,24 @@ namespace cepgen {
           overflow_(oth.overflow_) {}
 
     void Hist1D::clear() {
+      CG_ASSERT(hist_);
+      CG_ASSERT(hist_w2_);
       gsl_histogram_reset(hist_.get());
       gsl_histogram_reset(hist_w2_.get());
     }
 
     void Hist1D::fill(double x, double weight) {
-      auto ret = gsl_histogram_accumulate(hist_.get(), x, weight);
-      if (ret == GSL_SUCCESS) {
-        if (auto ret2 = gsl_histogram_accumulate(hist_w2_.get(), x, weight * weight) != GSL_SUCCESS)
-          throw CG_ERROR("Hist1D:fill") << "(w2 histogram): " << gsl_strerror(ret2);
-        return;
+      CG_ASSERT(hist_);
+      {  // reduce the scope of 'ret'
+        auto ret = gsl_histogram_accumulate(hist_.get(), x, weight);
+        if (ret == GSL_SUCCESS) {
+          if (auto ret2 = gsl_histogram_accumulate(hist_w2_.get(), x, weight * weight) != GSL_SUCCESS)
+            throw CG_ERROR("Hist1D:fill") << "(w2 histogram): " << gsl_strerror(ret2);
+          return;
+        }
+        if (ret != GSL_EDOM)
+          throw CG_ERROR("Hist1D:fill") << gsl_strerror(ret);
       }
-      if (ret != GSL_EDOM)
-        throw CG_ERROR("Hist1D:fill") << gsl_strerror(ret);
       if (x < range().min())
         underflow_ += weight;
       else
@@ -81,6 +86,10 @@ namespace cepgen {
     }
 
     void Hist1D::add(Hist1D oth, double scaling) {
+      CG_ASSERT(hist_);
+      CG_ASSERT(hist_w2_);
+      CG_ASSERT(oth.hist_);
+      CG_ASSERT(oth.hist_w2_);
       if (oth.integral(true) == 0.) {
         CG_WARNING("Hist1D:add") << "Other histogram is empty.";
         return;
@@ -96,6 +105,7 @@ namespace cepgen {
     }
 
     void Hist1D::scale(double scaling) {
+      CG_ASSERT(hist_);
       if (auto ret = gsl_histogram_scale(hist_.get(), scaling); ret != GSL_SUCCESS)
         throw CG_ERROR("Hist1D:scale") << gsl_strerror(ret);
       gsl_histogram_scale(hist_w2_.get(), scaling * scaling);
@@ -113,11 +123,18 @@ namespace cepgen {
       return axis;
     }
 
-    size_t Hist1D::nbins() const { return gsl_histogram_bins(hist_.get()); }
+    size_t Hist1D::nbins() const {
+      CG_ASSERT(hist_);
+      return gsl_histogram_bins(hist_.get());
+    }
 
-    Limits Hist1D::range() const { return Limits{gsl_histogram_min(hist_.get()), gsl_histogram_max(hist_.get())}; }
+    Limits Hist1D::range() const {
+      CG_ASSERT(hist_);
+      return Limits{gsl_histogram_min(hist_.get()), gsl_histogram_max(hist_.get())};
+    }
 
     Limits Hist1D::binRange(size_t bin) const {
+      CG_ASSERT(hist_);
       Limits range;
       if (auto ret = gsl_histogram_get_range(hist_.get(), bin, &range.min(), &range.max()); ret != GSL_SUCCESS)
         throw CG_ERROR("Hist1D:binRange") << "Bin " << bin << ": " << gsl_strerror(ret);
@@ -142,11 +159,28 @@ namespace cepgen {
       return Value{gsl_histogram_get(hist_.get(), bin), std::sqrt(gsl_histogram_get(hist_w2_.get(), bin))};
     }
 
-    double Hist1D::mean() const { return gsl_histogram_mean(hist_.get()); }
-    double Hist1D::rms() const { return gsl_histogram_sigma(hist_.get()); }
-    double Hist1D::minimum() const { return gsl_histogram_min_val(hist_.get()); }
-    double Hist1D::maximum() const { return gsl_histogram_max_val(hist_.get()); }
+    double Hist1D::mean() const {
+      CG_ASSERT(hist_);
+      return gsl_histogram_mean(hist_.get());
+    }
+
+    double Hist1D::rms() const {
+      CG_ASSERT(hist_);
+      return gsl_histogram_sigma(hist_.get());
+    }
+
+    double Hist1D::minimum() const {
+      CG_ASSERT(hist_);
+      return gsl_histogram_min_val(hist_.get());
+    }
+
+    double Hist1D::maximum() const {
+      CG_ASSERT(hist_);
+      return gsl_histogram_max_val(hist_.get());
+    }
+
     double Hist1D::integral(bool include_out_of_range) const {
+      CG_ASSERT(hist_);
       auto integr = gsl_histogram_sum(hist_.get());
       if (include_out_of_range)
         integr += underflow_ + overflow_;
