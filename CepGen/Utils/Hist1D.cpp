@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2021-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -141,21 +141,21 @@ namespace cepgen {
       return range;
     }
 
-    std::vector<double> Hist1D::bins() const {
-      std::set<double> bins;
-      const auto num_bins = nbins();
-      for (size_t i = 0; i < num_bins; ++i) {
-        const auto range = binRange(i);
-        bins.insert(range.min());
-        bins.insert(range.max());
-      }
-      if (bins.size() != num_bins + 1)
-        CG_WARNING("Hist1D:bins") << "Invalid number of values to bin ranges: got " << bins.size() << ", expecting "
-                                  << num_bins + 1 << ".";
+    std::vector<double> Hist1D::bins(BinMode mode) const {
+      const auto bins = extractBins(mode, nbins(), std::bind(&Hist1D::binRange, this, std::placeholders::_1));
       return std::vector<double>(bins.begin(), bins.end());
     }
 
+    std::vector<Value> Hist1D::values() const {
+      std::vector<Value> values;
+      for (size_t i = 0; i < nbins(); ++i)
+        values.emplace_back(value(i));
+      return values;
+    }
+
     Value Hist1D::value(size_t bin) const {
+      CG_ASSERT(hist_);
+      CG_ASSERT(hist_w2_);
       return Value{gsl_histogram_get(hist_.get(), bin), std::sqrt(gsl_histogram_get(hist_w2_.get(), bin))};
     }
 

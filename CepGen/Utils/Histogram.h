@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2021-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,7 +23,9 @@
 #include <gsl/gsl_histogram2d.h>
 
 #include <array>
+#include <functional>
 #include <memory>
+#include <set>
 #include <vector>
 
 #include "CepGen/Utils/Drawable.h"
@@ -40,6 +42,8 @@ namespace cepgen {
       Histogram() = default;
       virtual ~Histogram() = default;
 
+      enum BinMode { low = 0, high, both };
+
       /// Reset the histogram
       virtual void clear() = 0;
       /// Rescale all histogram bins by a constant factor
@@ -51,7 +55,16 @@ namespace cepgen {
       /// Retrieve the minimum bin value
       virtual double maximum() const = 0;
       /// Normalise the histogram to a given constant
-      void normalise(double integ = 1.) { scale(integ / integral()); }
+      void normalise(double integ = 1.);
+
+    protected:
+      /// Extract the list of bin limits
+      /// \param[in] mode type of extraction (low/high/low-high)
+      /// \param[in] num_bins total number of bins
+      /// \param[in] bins_extractor method used to extract range of one single bin
+      std::set<double> extractBins(BinMode mode,
+                                   size_t num_bins,
+                                   const std::function<Limits(size_t)>& bins_extractor) const;
     };
 
     /// 1D histogram container
@@ -70,6 +83,8 @@ namespace cepgen {
       void add(Hist1D, double scaling = 1.);
       void scale(double) override;
 
+      /// Retrieve the value + uncertainty for all bins
+      std::vector<Value> values() const;
       /// Retrieve the value + uncertainty for one bin
       Value value(size_t bin) const;
 
@@ -81,8 +96,8 @@ namespace cepgen {
       Limits range() const;
       /// Range for a single bin
       Limits binRange(size_t bin) const;
-      /// List of bins limits (nbins + 1 values)
-      std::vector<double> bins() const;
+      /// List of bins limits (nbins + 1 values if min-max, nbins values otherwise)
+      std::vector<double> bins(BinMode) const;
 
       /// Compute the mean histogram value over full range
       double mean() const;
@@ -94,7 +109,7 @@ namespace cepgen {
       size_t underflow() const { return underflow_; }
       size_t overflow() const { return overflow_; }
 
-      bool isHist1D() const override { return true; }
+      bool isHist1D() const override final { return true; }
 
     private:
       struct gsl_histogram_deleter {
@@ -138,16 +153,16 @@ namespace cepgen {
       Limits rangeX() const;
       /// Range for a single x-axis bin
       Limits binRangeX(size_t bin) const;
-      /// List of x-bins limits (nbinsX + 1 values)
-      std::vector<double> binsX() const;
+      /// List of x-bins limits (nbinsX + 1 values if min-max, nbins values otherwise)
+      std::vector<double> binsX(BinMode) const;
       /// Number of y-axis bins
       size_t nbinsY() const;
       /// y-axis range
       Limits rangeY() const;
       /// Range for a single y-axis bin
       Limits binRangeY(size_t bin) const;
-      /// List of y-bins limits (nbinsX + 1 values)
-      std::vector<double> binsY() const;
+      /// List of y-bins limits (nbinsY + 1 values if min-max, nbins values otherwise)
+      std::vector<double> binsY(BinMode) const;
 
       /// Compute the mean histogram value over full x-axis range
       double meanX() const;
@@ -181,7 +196,7 @@ namespace cepgen {
       };
       const contents_t& outOfRange() const { return out_of_range_values_; }
 
-      bool isHist2D() const override { return true; }
+      bool isHist2D() const override final { return true; }
 
     private:
       struct gsl_histogram2d_deleter {

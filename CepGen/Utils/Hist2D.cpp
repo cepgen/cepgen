@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2021-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -150,6 +150,11 @@ namespace cepgen {
       return range;
     }
 
+    std::vector<double> Hist2D::binsX(BinMode mode) const {
+      const auto bins = extractBins(mode, nbinsX(), std::bind(&Hist2D::binRangeX, this, std::placeholders::_1));
+      return std::vector<double>(bins.begin(), bins.end());
+    }
+
     size_t Hist2D::nbinsY() const {
       CG_ASSERT(hist_);
       return gsl_histogram2d_ny(hist_.get());
@@ -166,6 +171,11 @@ namespace cepgen {
       if (auto ret = gsl_histogram2d_get_yrange(hist_.get(), bin, &range.min(), &range.max()); ret != GSL_SUCCESS)
         throw CG_ERROR("Hist1D:binRange") << "Bin " << bin << ": " << gsl_strerror(ret);
       return range;
+    }
+
+    std::vector<double> Hist2D::binsY(BinMode mode) const {
+      const auto bins = extractBins(mode, nbinsY(), std::bind(&Hist2D::binRangeY, this, std::placeholders::_1));
+      return std::vector<double>(bins.begin(), bins.end());
     }
 
     Value Hist2D::value(size_t bin_x, size_t bin_y) const {
