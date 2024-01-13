@@ -77,10 +77,10 @@ int main(int argc, char* argv[]) {
     for (auto& test : tests) {
       if (!test.lims.empty())
         integr->setLimits(test.lims);
-      auto res = integr->integrate(test.integrand);
+      const auto res = integr->integrate(test.integrand);
       const auto test_name = integrator + " test " + to_string(i);
       CG_DEBUG("main") << "Test " << i << ": ref.: " << test.result << ", result: " << res << ".";
-      CG_TEST_UNCERT(fabs(test.result - res), res.uncertainty(), num_sigma, test_name + " rel. unc. control");
+      CG_TEST_UNCERT(test.result - res, res.uncertainty(), num_sigma, test_name + " rel. unc. control");
       ++i;
     }
   }

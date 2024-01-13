@@ -30,10 +30,13 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   vector<string> parsers;
+  bool verbose;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("parsers,p", "list of parsers to use", &parsers, vector<string>{})
+      .addOptionalArgument("verbose", "verbose mode", &verbose, false)
       .parse();
 
+  CG_TEST_DEBUG(verbose);
   const double epsilon = 1.e-9;  // tolerance
   cepgen::initialise();
 

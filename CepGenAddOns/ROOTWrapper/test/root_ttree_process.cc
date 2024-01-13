@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
   }
 
   if (!keep_file)  // tree removal part
-    CG_TEST(fs::remove(tmp_filename), "removal the temporary file \"" << tmp_filename << "\".");
+    CG_TEST(fs::remove(tmp_filename), "removal the temporary file \"" + tmp_filename + "\".");
 
   CG_TEST_SUMMARY;
 }

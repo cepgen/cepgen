@@ -17,11 +17,16 @@
  */
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Test.h"
 
 using namespace std;
 
-int main() {
+int main(int argc, char* argv[]) {
+  bool verbose;
+  cepgen::ArgumentsParser(argc, argv).addOptionalArgument("verbose", "verbose mode", &verbose, false).parse();
+  CG_TEST_DEBUG(verbose);
+
   const std::string test_string = "Haha, ceci est un test à géométrie variable! ☺";  // try with a bit of unicode too
   for (int type = (int)cepgen::Exception::Type::undefined; type < (int)cepgen::Exception::Type::fatal; ++type) {
     ostringstream type_name;
