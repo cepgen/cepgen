@@ -42,9 +42,9 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = Coupling::description();
       desc.setDescription("Webber alpha(S) evolution algorithm");
-      desc.add<int>("Nc", 3);
-      desc.add<int>("nf", 3);
-      desc.add<double>("lambda", 0.25);
+      desc.add<int>("Nc", 3).setDescription("number of colours considered");
+      desc.add<int>("nf", 3).setDescription("number of fermion flavours considered");
+      desc.add<double>("lambda", 0.25).setDescription("evolution scale (in GeV)");
       return desc;
     }
 
