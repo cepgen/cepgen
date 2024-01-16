@@ -147,8 +147,13 @@ namespace cepgen {
       /// \param[out] out Reference to the variable to be mapped
       /// \param[in] type Type of mapping to apply
       /// \param[in] lim Integration limits
+      /// \param[in] name Computer-readable variable name
       /// \param[in] description Human-readable description of the variable
-      Process& defineVariable(double& out, const Mapping& type, const Limits& lim, const std::string& description = "");
+      Process& defineVariable(double& out,
+                              const Mapping& type,
+                              const Limits& lim,
+                              const std::string& name,
+                              const std::string& description = "");
 
     protected:
       /// Generate and initialise all variables handled by this process
@@ -181,6 +186,7 @@ namespace cepgen {
       std::unique_ptr<Coupling> alphas_;   ///< Strong running coupling algorithm
       /// Handler to a variable mapped by this process
       struct MappingVariable {
+        std::string name;         ///< Variable name for debugging
         std::string description;  ///< Human-readable description of the variable
         Limits limits;            ///< Kinematic limits to apply on the variable
         double& value;            ///< Reference to the process variable to generate/map

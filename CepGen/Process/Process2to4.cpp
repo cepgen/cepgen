@@ -36,14 +36,19 @@ namespace cepgen {
         cs_prop_ = PDG::get()(steer<ParticleProperties>("pair").pdgid);
 
       const auto lim_rap = kinematics().cuts().central.rapidity_single.truncate(Limits{-6., 6.});
-      defineVariable(m_y_c1_, Mapping::linear, lim_rap, "First outgoing particle rapidity");
-      defineVariable(m_y_c2_, Mapping::linear, lim_rap, "Second outgoing particle rapidity");
+      defineVariable(m_y_c1_, Mapping::linear, lim_rap, "y1", "First outgoing particle rapidity");
+      defineVariable(m_y_c2_, Mapping::linear, lim_rap, "y2", "Second outgoing particle rapidity");
 
       const auto lim_pt_diff = kinematics().cuts().central.pt_diff.truncate(Limits{0., 500.});
-      defineVariable(m_pt_diff_, Mapping::linear, lim_pt_diff, "Final state particles transverse momentum difference");
+      defineVariable(
+          m_pt_diff_, Mapping::linear, lim_pt_diff, "pt_diff", "Final state particles transverse momentum difference");
 
       const auto lim_phi_diff = kinematics().cuts().central.phi_diff.truncate(Limits{0., 2. * M_PI});
-      defineVariable(m_phi_pt_diff_, Mapping::linear, lim_phi_diff, "Final state particles azimuthal angle difference");
+      defineVariable(m_phi_pt_diff_,
+                     Mapping::linear,
+                     lim_phi_diff,
+                     "phi_pt_diff",
+                     "Final state particles azimuthal angle difference");
 
       prepareProcessKinematics();
     }

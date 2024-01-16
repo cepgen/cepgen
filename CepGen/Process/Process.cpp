@@ -145,7 +145,8 @@ namespace cepgen {
         CG_LOG << ss.str();
     }
 
-    Process& Process::defineVariable(double& out, const Mapping& type, const Limits& lim, const std::string& descr) {
+    Process& Process::defineVariable(
+        double& out, const Mapping& type, const Limits& lim, const std::string& name, const std::string& descr) {
       if (lim.min() == lim.max()) {
         if (lim.hasMin()) {
           out = compute_value(lim.min(), type);
@@ -172,8 +173,9 @@ namespace cepgen {
           jacob_weight = log(lim.max() / lim.min());
           break;
       }
-      const auto var_desc = descr.empty() ? utils::format("var%z", mapped_variables_.size()) : descr;
-      mapped_variables_.emplace_back(MappingVariable{var_desc, lim, out, type, mapped_variables_.size()});
+      const auto var_desc =
+          (!descr.empty() ? descr : (!name.empty() ? name : utils::format("var%z", mapped_variables_.size())));
+      mapped_variables_.emplace_back(MappingVariable{name, var_desc, lim, out, type, mapped_variables_.size()});
       point_coord_.emplace_back(0.);
       base_jacobian_ *= jacob_weight;
       CG_DEBUG("Process:defineVariable") << "\n\t" << descr << " has been mapped to variable "

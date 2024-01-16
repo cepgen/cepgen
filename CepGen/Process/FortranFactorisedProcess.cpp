@@ -78,14 +78,16 @@ namespace cepgen {
 
     void FortranFactorisedProcess::prepareFactorisedPhaseSpace() {
       const auto lim_rap = kinematics().cuts().central.rapidity_single.truncate(Limits{-6., 6.});
-      defineVariable(m_y1_, Mapping::linear, lim_rap, "First central particle rapidity");
-      defineVariable(m_y2_, Mapping::linear, lim_rap, "Second central particle rapidity");
+      defineVariable(m_y1_, Mapping::linear, lim_rap, "y1", "First central particle rapidity");
+      defineVariable(m_y2_, Mapping::linear, lim_rap, "y2", "Second central particle rapidity");
 
       const auto lim_pt_diff = kinematics().cuts().central.pt_diff.truncate(Limits{0., 50.});
-      defineVariable(m_pt_diff_, Mapping::linear, lim_pt_diff, "Central particles transverse momentum difference");
+      defineVariable(
+          m_pt_diff_, Mapping::linear, lim_pt_diff, "pt_diff", "Central particles transverse momentum difference");
 
       const auto lim_phi_diff = kinematics().cuts().central.phi_diff.truncate(Limits{0., 2. * M_PI});
-      defineVariable(m_phi_pt_diff_, Mapping::linear, lim_phi_diff, "Central particles azimuthal angle difference");
+      defineVariable(
+          m_phi_pt_diff_, Mapping::linear, lim_phi_diff, "phi_diff", "Central particles azimuthal angle difference");
 
       //===========================================================================================
       // feed phase space cuts to the common block
