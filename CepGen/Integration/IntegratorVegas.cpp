@@ -22,6 +22,7 @@
 #include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/IntegratorGSL.h"
 #include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Utils/ProcessVariablesAnalyser.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
