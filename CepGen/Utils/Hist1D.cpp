@@ -159,6 +159,15 @@ namespace cepgen {
       return Value{gsl_histogram_get(hist_.get(), bin), std::sqrt(gsl_histogram_get(hist_w2_.get(), bin))};
     }
 
+    void Hist1D::setValue(size_t bin, Value val) {
+      const auto bin_centre = binRange(bin).x(0.5);
+      const auto val_old = value(bin);
+      gsl_histogram_accumulate(hist_.get(), bin_centre, val - val_old);
+      gsl_histogram_accumulate(hist_w2_.get(),
+                               bin_centre,
+                               val.uncertainty() * val.uncertainty() - val_old.uncertainty() * val_old.uncertainty());
+    }
+
     double Hist1D::mean() const {
       CG_ASSERT(hist_);
       return gsl_histogram_mean(hist_.get());

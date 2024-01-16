@@ -87,6 +87,8 @@ namespace cepgen {
       std::vector<Value> values() const;
       /// Retrieve the value + uncertainty for one bin
       Value value(size_t bin) const;
+      /// Set the value + uncertainty for one bin
+      void setValue(size_t bin, Value value);
 
       /// Axis content
       axis_t axis() const;
@@ -146,6 +148,8 @@ namespace cepgen {
 
       /// Retrieve the value + uncertainty for one bin
       Value value(size_t bin_x, size_t bin_y) const;
+      /// Set the value + uncertainty for one bin
+      void setValue(size_t bin_x, size_t bin_y, Value value);
 
       /// Number of x-axis bins
       size_t nbinsX() const;

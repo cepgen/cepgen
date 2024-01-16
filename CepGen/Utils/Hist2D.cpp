@@ -184,6 +184,16 @@ namespace cepgen {
                    std::sqrt(gsl_histogram2d_get(hist_w2_.get(), bin_x, bin_y))};
     }
 
+    void Hist2D::setValue(size_t bin_x, size_t bin_y, Value val) {
+      const auto bin_centre_x = binRangeX(bin_x).x(0.5), bin_centre_y = binRangeY(bin_y).x(0.5);
+      const auto val_old = value(bin_x, bin_y);
+      gsl_histogram2d_accumulate(hist_.get(), bin_centre_x, bin_centre_y, val - val_old);
+      gsl_histogram2d_accumulate(hist_w2_.get(),
+                                 bin_centre_x,
+                                 bin_centre_y,
+                                 val.uncertainty() * val.uncertainty() - val_old.uncertainty() * val_old.uncertainty());
+    }
+
     double Hist2D::meanX() const {
       CG_ASSERT(hist_);
       return gsl_histogram2d_xmean(hist_.get());
