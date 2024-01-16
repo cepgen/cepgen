@@ -154,6 +154,8 @@ namespace cepgen {
                               const Limits& lim,
                               const std::string& name,
                               const std::string& description = "");
+      /// Retrieve the integration limits for one variable
+      Limits variableLimits(size_t) const;
 
     protected:
       /// Generate and initialise all variables handled by this process

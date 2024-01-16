@@ -186,6 +186,8 @@ namespace cepgen {
       return *this;
     }
 
+    Limits Process::variableLimits(size_t i) const { return mapped_variables_.at(i).limits; }
+
     double Process::generateVariables() const {
       if (mapped_variables_.size() == 0)
         throw CG_FATAL("Process:vars") << "No variables are mapped for this process!";
