@@ -170,8 +170,11 @@ namespace cepgen {
         return out;
       std::string token;
       std::istringstream iss(str);
-      while (std::getline(iss, token, delim))
-        out.emplace_back(trim ? ltrim(rtrim(token)) : token);
+      while (std::getline(iss, token, delim)) {
+        const auto tok = trim ? ltrim(rtrim(token)) : token;
+        if (!trim || !tok.empty())
+          out.emplace_back(tok);
+      }
       return out;
     }
 
