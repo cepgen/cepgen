@@ -71,13 +71,18 @@ namespace cepgen {
     Integrator::checkLimits(*integrand_);
     coord_.resize(integrand_->size());
     foam_->Initialize();
-    const auto& proc = dynamic_cast<ProcessIntegrand&>(integrand).process();
-    auto analyser = utils::ProcessVariablesAnalyser(proc, ParametersList{});
-    for (int i = 0; i < steer<int>("nCalls"); ++i) {
+    std::unique_ptr<utils::ProcessVariablesAnalyser> analyser;
+    if (integrand.hasProcess())
+      analyser.reset(
+          new utils::ProcessVariablesAnalyser(dynamic_cast<ProcessIntegrand&>(integrand).process(), ParametersList{}));
+    const auto num_calls = steer<int>("nCalls");
+    for (int i = 0; i < num_calls; ++i) {
       foam_->MakeEvent();
-      analyser.feed(foam_->GetMCwt());
+      if (analyser)
+        analyser->feed(foam_->GetMCwt() / num_calls);
     }
-    analyser.analyse();
+    if (analyser)
+      analyser->analyse();
     //--- launch integration
     double norm, err;
     foam_->Finalize(norm, err);
