@@ -130,10 +130,11 @@ class Module(Parameters):
     def name(self):
         return self.mod_name
 
-    def clone(self, name, **kwargs):
+    def clone(self, name='', **kwargs):
         """Return a deep copy of this object"""
         out = Parameters(self).clone(**kwargs)
-        out.mod_name = name
+        if name:
+            out.mod_name = name
         return out
 
 
