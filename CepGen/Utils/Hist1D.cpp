@@ -60,21 +60,29 @@ namespace cepgen {
           overflow_(oth.overflow_) {}
 
     void Hist1D::buildFromBins(const std::vector<double>& bins) {
-      auto hist = gsl_histogram_alloc(bins.size() - 1);
-      if (auto ret = gsl_histogram_set_ranges(hist, bins.data(), bins.size()); ret != GSL_SUCCESS)
+      if (bins.size() < 1)
+        throw CG_ERROR("Hist1D:buildFromBins") << "Building a 1D histogram requires at least 1 bin.";
+      hist_.reset(gsl_histogram_alloc(bins.size() - 1));
+      CG_ASSERT(hist_);
+      if (auto ret = gsl_histogram_set_ranges(hist_.get(), bins.data(), bins.size()); ret != GSL_SUCCESS)
         throw CG_ERROR("Hist1D:buildFromBins") << gsl_strerror(ret);
-      hist_ = gsl_histogram_ptr(hist);
       hist_w2_ = gsl_histogram_ptr(gsl_histogram_clone(hist_.get()));
+      CG_ASSERT(hist_w2_);
       CG_DEBUG("Hist1D:buildFromBins") << "Booking a 1D histogram with " << s("bin", bins.size(), true) << " in range "
                                        << bins << ".";
     }
 
     void Hist1D::buildFromRange(size_t num_bins, const Limits& range) {
-      auto hist = gsl_histogram_alloc(num_bins);
-      if (auto ret = gsl_histogram_set_ranges_uniform(hist, range.min(), range.max()); ret != GSL_SUCCESS)
+      if (range.range() <= 0.)
+        throw CG_ERROR("Hist1D:buildFromRange") << "Invalid range for binning: " << range << ".";
+      if (num_bins < 1)
+        throw CG_ERROR("Hist1D:buildFromRange") << "Building a 1D histogram requires at least 1 bin.";
+      hist_.reset(gsl_histogram_alloc(num_bins));
+      CG_ASSERT(hist_);
+      if (auto ret = gsl_histogram_set_ranges_uniform(hist_.get(), range.min(), range.max()); ret != GSL_SUCCESS)
         throw CG_ERROR("Hist1D:buildFromRange") << gsl_strerror(ret);
-      hist_ = gsl_histogram_ptr(hist);
       hist_w2_ = gsl_histogram_ptr(gsl_histogram_clone(hist_.get()));
+      CG_ASSERT(hist_w2_);
       CG_DEBUG("Hist1D:buildFromRange") << "Booking a 1D histogram with " << s("bin", num_bins, true) << " in range "
                                         << range << ".";
     }

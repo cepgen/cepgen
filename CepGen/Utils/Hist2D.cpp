@@ -70,24 +70,33 @@ namespace cepgen {
           out_of_range_values_(oth.out_of_range_values_) {}
 
     void Hist2D::buildFromBins(const std::vector<double>& xbins, const std::vector<double>& ybins) {
-      auto hist = gsl_histogram2d_alloc(xbins.size() - 1, ybins.size() - 1);
-      if (auto ret = gsl_histogram2d_set_ranges(hist, xbins.data(), xbins.size(), ybins.data(), ybins.size());
+      if (xbins.size() < 1 || ybins.size() < 1)
+        throw CG_ERROR("Hist2D:buildFromBins") << "Building a 2D histogram requires at least 1x1 bin.";
+      hist_.reset(gsl_histogram2d_alloc(xbins.size() - 1, ybins.size() - 1));
+      CG_ASSERT(hist_);
+      if (auto ret = gsl_histogram2d_set_ranges(hist_.get(), xbins.data(), xbins.size(), ybins.data(), ybins.size());
           ret != GSL_SUCCESS)
         throw CG_ERROR("Hist2D:buildFromBins") << gsl_strerror(ret);
-      hist_ = gsl_histogram2d_ptr(hist);
       hist_w2_ = gsl_histogram2d_ptr(gsl_histogram2d_clone(hist_.get()));
+      CG_ASSERT(hist_w2_);
       CG_DEBUG("Hist2D:buildFromBins") << "Booking a 2D correlation plot with " << s("bin", xbins.size(), true)
                                        << " in range x=" << xbins << " and " << s("bin", ybins.size(), true)
                                        << " in range y=" << ybins << ".";
     }
 
     void Hist2D::buildFromRange(size_t num_bins_x, const Limits& xrange, size_t num_bins_y, const Limits& yrange) {
-      auto hist = gsl_histogram2d_alloc(num_bins_x, num_bins_y);
-      if (auto ret = gsl_histogram2d_set_ranges_uniform(hist, xrange.min(), xrange.max(), yrange.min(), yrange.max());
+      if (xrange.range() <= 0. || yrange.range() <= 0.)
+        throw CG_ERROR("Hist2D:buildFromRange") << "Invalid range for binning: " << xrange << "x" << yrange << ".";
+      if (num_bins_x < 1 || num_bins_y < 1)
+        throw CG_ERROR("Hist2D:buildFromRange") << "Building a 2D histogram requires at least 1x1 bin.";
+      hist_.reset(gsl_histogram2d_alloc(num_bins_x, num_bins_y));
+      CG_ASSERT(hist_);
+      if (auto ret =
+              gsl_histogram2d_set_ranges_uniform(hist_.get(), xrange.min(), xrange.max(), yrange.min(), yrange.max());
           ret != GSL_SUCCESS)
         throw CG_ERROR("Hist2D:buildFromRange") << gsl_strerror(ret);
-      hist_ = gsl_histogram2d_ptr(hist);
       hist_w2_ = gsl_histogram2d_ptr(gsl_histogram2d_clone(hist_.get()));
+      CG_ASSERT(hist_w2_);
       CG_DEBUG("Hist2D:buildFromRange") << "Booking a 2D correlation plot with " << s("bin", num_bins_x, true)
                                         << " in range " << xrange << " and " << s("bin", num_bins_y, true)
                                         << " in range " << yrange << ".";
