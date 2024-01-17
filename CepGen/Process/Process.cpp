@@ -186,7 +186,10 @@ namespace cepgen {
       return *this;
     }
 
-    Limits Process::variableLimits(size_t i) const { return mapped_variables_.at(i).limits; }
+    double Process::variableValue(size_t i, double x) const {
+      const auto& var = mapped_variables_.at(i);
+      return compute_value(var.limits.x(x), var.type);
+    }
 
     double Process::generateVariables() const {
       if (mapped_variables_.size() == 0)
