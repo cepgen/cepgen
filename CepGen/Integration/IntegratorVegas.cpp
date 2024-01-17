@@ -28,18 +28,70 @@ namespace cepgen {
   /// Vegas integration algorithm developed by P. Lepage, as documented in \cite Lepage:1977sw
   class IntegratorVegas final : public IntegratorGSL {
   public:
-    explicit IntegratorVegas(const ParametersList&);
+    explicit IntegratorVegas(const ParametersList& params)
+        : IntegratorGSL(params),
+          ncvg_(steer<int>("numFunctionCalls")),
+          chisq_cut_(steer<double>("chiSqCut")),
+          treat_(steer<bool>("treat")) {
+      verbosity_ = steer<int>("verbose");  // supersede the parent default verbosity level
+    }
 
-    static ParametersDescription description();
+    static ParametersDescription description() {
+      auto desc = IntegratorGSL::description();
+      desc.setDescription("Vegas stratified sampling integrator");
+      desc.add<int>("numFunctionCalls", 50000);
+      desc.add<double>("chiSqCut", 1.5);
+      desc.add<bool>("treat", true).setDescription("Phase space treatment");
+      desc.add<int>("iterations", 10);
+      desc.add<double>("alpha", 1.25);
+      desc.addAs<int, Mode>("mode", Mode::stratified);
+      desc.add<std::string>("loggingOutput", "cerr");
+      desc.add<int>("verbose", -1);
+      return desc;
+    }
 
     Value integrate(Integrand&) override;
 
     enum class Mode { importance = 1, importanceOnly = 0, stratified = -1 };
+    friend std::ostream& operator<<(std::ostream& os, const Mode& mode) {
+      switch (mode) {
+        case IntegratorVegas::Mode::importance:
+          return os << "importance";
+        case IntegratorVegas::Mode::importanceOnly:
+          return os << "importance-only";
+        case IntegratorVegas::Mode::stratified:
+          return os << "stratified";
+      }
+      return os;
+    }
 
   private:
     void warmup(size_t);
 
-    double eval(Integrand&, const std::vector<double>&) const override;
+    double COORD(size_t i, size_t j) const { return vegas_state_->xi[i * vegas_state_->dim + j]; }
+
+    double eval(Integrand& integrand, const std::vector<double>& x) const override {
+      //--- by default, no grid treatment
+      if (!treat_)
+        return integrand.eval(x);
+      //--- treatment of the integration grid
+      if (r_boxes_ == 0) {
+        r_boxes_ = (size_t)std::pow(vegas_state_->bins, integrand.size());
+        x_new_.resize(integrand.size());
+      }
+      double w = r_boxes_;
+      for (size_t j = 0; j < integrand.size(); ++j) {
+        //--- find surrounding coordinates and interpolate
+        const double z = x.at(j) * vegas_state_->bins;
+        const auto id = (size_t)z;      // coordinate of point before
+        const double rel_pos = z - id;  // position between coordinates (norm.)
+        const double bin_width = (id == 0) ? COORD(1, j) : COORD(id + 1, j) - COORD(id, j);
+        //--- build new coordinate from linear interpolation
+        x_new_[j] = COORD(id + 1, j) - bin_width * (1. - rel_pos);
+        w *= bin_width;
+      }
+      return w * integrand.eval(x_new_);
+    }
 
     const int ncvg_;
     const double chisq_cut_;
@@ -57,16 +109,6 @@ namespace cepgen {
     mutable unsigned long long r_boxes_{0ull};
     mutable std::vector<double> x_new_;
   };
-
-  std::ostream& operator<<(std::ostream&, const IntegratorVegas::Mode&);
-
-  IntegratorVegas::IntegratorVegas(const ParametersList& params)
-      : IntegratorGSL(params),
-        ncvg_(steer<int>("numFunctionCalls")),
-        chisq_cut_(steer<double>("chiSqCut")),
-        treat_(steer<bool>("treat")) {
-    verbosity_ = steer<int>("verbose");  // supersede the parent default verbosity level
-  }
 
   Value IntegratorVegas::integrate(Integrand& integrand) {
     setIntegrand(integrand);
@@ -159,57 +201,6 @@ namespace cepgen {
                                          << "GSL error: " << gsl_strerror(res) << ".";
 
     CG_INFO("Integrator:vegas") << "Finished the Vegas warm-up.";
-  }
-
-  double IntegratorVegas::eval(Integrand& integrand, const std::vector<double>& x) const {
-    //--- by default, no grid treatment
-    if (!treat_)
-      return integrand.eval(x);
-    //--- treatment of the integration grid
-    if (r_boxes_ == 0) {
-      r_boxes_ = (size_t)std::pow(vegas_state_->bins, integrand.size());
-      x_new_.resize(integrand.size());
-    }
-    auto COORD = [](gsl_monte_vegas_state* s, size_t i, size_t j) { return s->xi[i * s->dim + j]; };
-    double w = r_boxes_;
-    for (size_t j = 0; j < integrand.size(); ++j) {
-      //--- find surrounding coordinates and interpolate
-      const double z = x.at(j) * vegas_state_->bins;
-      const auto id = (size_t)z;      // coordinate of point before
-      const double rel_pos = z - id;  // position between coordinates (norm.)
-      const double bin_width = (id == 0) ? COORD(vegas_state_.get(), 1, j)
-                                         : COORD(vegas_state_.get(), id + 1, j) - COORD(vegas_state_.get(), id, j);
-      //--- build new coordinate from linear interpolation
-      x_new_[j] = COORD(vegas_state_.get(), id + 1, j) - bin_width * (1. - rel_pos);
-      w *= bin_width;
-    }
-    return w * integrand.eval(x_new_);
-  }
-
-  std::ostream& operator<<(std::ostream& os, const IntegratorVegas::Mode& mode) {
-    switch (mode) {
-      case IntegratorVegas::Mode::importance:
-        return os << "importance";
-      case IntegratorVegas::Mode::importanceOnly:
-        return os << "importance-only";
-      case IntegratorVegas::Mode::stratified:
-        return os << "stratified";
-    }
-    return os;
-  }
-
-  ParametersDescription IntegratorVegas::description() {
-    auto desc = IntegratorGSL::description();
-    desc.setDescription("Vegas stratified sampling integrator");
-    desc.add<int>("numFunctionCalls", 50000);
-    desc.add<double>("chiSqCut", 1.5);
-    desc.add<bool>("treat", true).setDescription("Phase space treatment");
-    desc.add<int>("iterations", 10);
-    desc.add<double>("alpha", 1.5);
-    desc.addAs<int, Mode>("mode", Mode::importance);
-    desc.add<std::string>("loggingOutput", "cerr");
-    desc.add<int>("verbose", -1);
-    return desc;
   }
 }  // namespace cepgen
 
