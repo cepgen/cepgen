@@ -218,6 +218,7 @@ namespace cepgen {
       const auto &xrng = dr.xAxis().range(), &yrng = dr.yAxis().range();
       obj->GetXaxis()->SetTitle(delatexify(dr.xAxis().label()));
       obj->GetYaxis()->SetTitle(delatexify(dr.yAxis().label()));
+      obj->SetLineWidth(std::max((short)3, obj->GetLineWidth()));
       if (xrng.valid())
         obj->GetXaxis()->SetLimits(xrng.min(), xrng.max());
       if (yrng.valid()) {
