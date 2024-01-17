@@ -50,8 +50,6 @@ namespace cepgen {
       if (num_bins_x == 0 || num_bins_y == 0)
         throw CG_ERROR("Hist1D") << "Number of bins must be strictly positive!";
       buildFromRange(num_bins_x, xrange, num_bins_y, yrange);
-      CG_DEBUG("Hist2D") << "Booking a 2D correlation plot with " << s("bin", num_bins_x + num_bins_y, true)
-                         << " in ranges " << xrange << " and " << yrange << ".";
     }
 
     Hist2D::Hist2D(const std::vector<double>& xbins,
@@ -62,8 +60,6 @@ namespace cepgen {
       if (xbins.empty() || ybins.empty())
         throw CG_ERROR("Hist1D") << "Number of bins must be strictly positive!";
       buildFromBins(xbins, ybins);
-      CG_DEBUG("Hist2D") << "Booking a 2D correlation plot with " << s("bin", xbins.size() + ybins.size(), true)
-                         << " in ranges x=(" << xbins << ") and y=" << ybins << ".";
     }
 
     Hist2D::Hist2D(const Hist2D& oth)
@@ -80,6 +76,9 @@ namespace cepgen {
         throw CG_ERROR("Hist2D:buildFromBins") << gsl_strerror(ret);
       hist_ = gsl_histogram2d_ptr(hist);
       hist_w2_ = gsl_histogram2d_ptr(gsl_histogram2d_clone(hist_.get()));
+      CG_DEBUG("Hist2D:buildFromBins") << "Booking a 2D correlation plot with " << s("bin", xbins.size(), true)
+                                       << " in range x=" << xbins << " and " << s("bin", ybins.size(), true)
+                                       << " in range y=" << ybins << ".";
     }
 
     void Hist2D::buildFromRange(size_t num_bins_x, const Limits& xrange, size_t num_bins_y, const Limits& yrange) {
@@ -89,14 +88,21 @@ namespace cepgen {
         throw CG_ERROR("Hist2D:buildFromRange") << gsl_strerror(ret);
       hist_ = gsl_histogram2d_ptr(hist);
       hist_w2_ = gsl_histogram2d_ptr(gsl_histogram2d_clone(hist_.get()));
+      CG_DEBUG("Hist2D:buildFromRange") << "Booking a 2D correlation plot with " << s("bin", num_bins_x, true)
+                                        << " in range " << xrange << " and " << s("bin", num_bins_y, true)
+                                        << " in range " << yrange << ".";
     }
 
     void Hist2D::clear() {
+      CG_ASSERT(hist_);
+      CG_ASSERT(hist_w2_);
       gsl_histogram2d_reset(hist_.get());
       gsl_histogram2d_reset(hist_w2_.get());
     }
 
     void Hist2D::fill(double x, double y, double weight) {
+      CG_ASSERT(hist_);
+      CG_ASSERT(hist_w2_);
       {  // reduce the scope of 'ret'
         auto ret = gsl_histogram2d_accumulate(hist_.get(), x, y, weight);
         if (ret == GSL_SUCCESS) {

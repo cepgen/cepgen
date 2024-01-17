@@ -42,8 +42,6 @@ namespace cepgen {
       if (num_bins_x == 0)
         throw CG_ERROR("Hist1D") << "Number of bins must be strictly positive!";
       buildFromRange(num_bins_x, xrange);
-      CG_DEBUG("Hist1D") << "Booking a 1D histogram with " << s("bin", num_bins_x, true) << " in range " << xrange
-                         << ".";
     }
 
     Hist1D::Hist1D(const std::vector<double>& xbins, const std::string& name, const std::string& title)
@@ -51,8 +49,6 @@ namespace cepgen {
       if (xbins.empty())
         throw CG_ERROR("Hist1D") << "Number of bins must be strictly positive!";
       buildFromBins(xbins);
-      CG_DEBUG("Hist1D") << "Booking a 1D histogram with " << s("bin", xbins.size(), true) << " in range " << xbins
-                         << ".";
     }
 
     Hist1D::Hist1D(const Hist1D& oth)
@@ -66,17 +62,21 @@ namespace cepgen {
     void Hist1D::buildFromBins(const std::vector<double>& bins) {
       auto hist = gsl_histogram_alloc(bins.size() - 1);
       if (auto ret = gsl_histogram_set_ranges(hist, bins.data(), bins.size()); ret != GSL_SUCCESS)
-        throw CG_ERROR("Hist1D:buildFromRange") << gsl_strerror(ret);
+        throw CG_ERROR("Hist1D:buildFromBins") << gsl_strerror(ret);
       hist_ = gsl_histogram_ptr(hist);
       hist_w2_ = gsl_histogram_ptr(gsl_histogram_clone(hist_.get()));
+      CG_DEBUG("Hist1D:buildFromBins") << "Booking a 1D histogram with " << s("bin", bins.size(), true) << " in range "
+                                       << bins << ".";
     }
 
     void Hist1D::buildFromRange(size_t num_bins, const Limits& range) {
       auto hist = gsl_histogram_alloc(num_bins);
       if (auto ret = gsl_histogram_set_ranges_uniform(hist, range.min(), range.max()); ret != GSL_SUCCESS)
-        throw CG_ERROR("Hist1D:buildFromBins") << gsl_strerror(ret);
+        throw CG_ERROR("Hist1D:buildFromRange") << gsl_strerror(ret);
       hist_ = gsl_histogram_ptr(hist);
       hist_w2_ = gsl_histogram_ptr(gsl_histogram_clone(hist_.get()));
+      CG_DEBUG("Hist1D:buildFromRange") << "Booking a 1D histogram with " << s("bin", num_bins, true) << " in range "
+                                        << range << ".";
     }
 
     void Hist1D::clear() {
@@ -88,6 +88,7 @@ namespace cepgen {
 
     void Hist1D::fill(double x, double weight) {
       CG_ASSERT(hist_);
+      CG_ASSERT(hist_w2_);
       {  // reduce the scope of 'ret'
         auto ret = gsl_histogram_accumulate(hist_.get(), x, weight);
         if (ret == GSL_SUCCESS) {
