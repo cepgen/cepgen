@@ -265,8 +265,8 @@ namespace cepgen {
     }
 
     TH1D ROOTDrawer::convert(const Hist1D& hist) {
-      const auto& rng = hist.range();
-      TH1D h(hist.name().c_str(), delatexify(hist.title()), hist.nbins(), rng.min(), rng.max());
+      const auto bins = hist.bins(Histogram::BinMode::both);
+      TH1D h(hist.name().c_str(), delatexify(hist.title()), bins.size() - 1, bins.data());
       h.SetBinContent(0, hist.underflow());
       for (size_t i = 0; i < hist.nbins(); ++i) {
         const auto val = hist.value(i);
@@ -280,15 +280,13 @@ namespace cepgen {
     }
 
     TH2D ROOTDrawer::convert(const Hist2D& hist) {
-      const auto &rng_x = hist.rangeX(), &rng_y = hist.rangeY();
+      const auto bins_x = hist.binsX(Histogram::BinMode::both), bins_y = hist.binsY(Histogram::BinMode::both);
       TH2D h(hist.name().c_str(),
              delatexify(hist.title()),
-             hist.nbinsX(),
-             rng_x.min(),
-             rng_x.max(),
-             hist.nbinsY(),
-             rng_y.min(),
-             rng_y.max());
+             bins_x.size() - 1,
+             bins_x.data(),
+             bins_y.size() - 1,
+             bins_y.data());
       for (size_t ix = 0; ix < hist.nbinsX(); ++ix)
         for (size_t iy = 0; iy < hist.nbinsY(); ++iy) {
           const auto val = hist.value(ix, iy);
