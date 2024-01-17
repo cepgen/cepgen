@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2020-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,9 +20,11 @@
 #include <TFoamIntegrand.h>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Integration/Integrand.h"
 #include "CepGen/Integration/Integrator.h"
+#include "CepGen/Integration/ProcessIntegrand.h"
 #include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Utils/Drawer.h"
+#include "CepGen/Utils/ProcessVariablesAnalyser.h"
 
 namespace cepgen {
   /// Foam general-purpose integration algorithm
@@ -69,8 +71,18 @@ namespace cepgen {
     Integrator::checkLimits(*integrand_);
     coord_.resize(integrand_->size());
     foam_->Initialize();
-    for (int i = 0; i < steer<int>("nCalls"); ++i)
+    std::unique_ptr<utils::ProcessVariablesAnalyser> analyser;
+    if (integrand.hasProcess())
+      analyser.reset(
+          new utils::ProcessVariablesAnalyser(dynamic_cast<ProcessIntegrand&>(integrand).process(), ParametersList{}));
+    const auto num_calls = steer<int>("nCalls");
+    for (int i = 0; i < num_calls; ++i) {
       foam_->MakeEvent();
+      if (analyser)
+        analyser->feed(foam_->GetMCwt() / num_calls);
+    }
+    if (analyser)
+      analyser->analyse();
     //--- launch integration
     double norm, err;
     foam_->Finalize(norm, err);

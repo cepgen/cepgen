@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,26 +16,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Integration_Integrand_h
-#define CepGen_Integration_Integrand_h
+#ifndef CepGen_Utils_ProcessVariablesAnalyser_h
+#define CepGen_Utils_ProcessVariablesAnalyser_h
 
-#include <cstddef>  // size_t
-#include <vector>
+#include "CepGen/Core/SteeredObject.h"
+#include "CepGen/Utils/Histogram.h"
 
 namespace cepgen {
-  /// An integrand wrapper placeholder
-  class Integrand {
-  public:
-    Integrand() = default;
-    virtual ~Integrand() {}
+  namespace proc {
+    class Process;
+  }
+  namespace utils {
+    class Drawer;
+    class ProcessVariablesAnalyser : public SteeredObject<ProcessVariablesAnalyser> {
+    public:
+      explicit ProcessVariablesAnalyser(const proc::Process&, const ParametersList&);
 
-    /// Compute the integrand for a given coordinates set
-    virtual double eval(const std::vector<double>&) = 0;
-    /// Phase space dimension
-    virtual size_t size() const = 0;
-    /// Does this integrand also contain a process object?
-    virtual bool hasProcess() const { return false; }
-  };
+      static ParametersDescription description();
+
+      void feed(double weight);
+      void analyse();
+
+    private:
+      const proc::Process& proc_;
+      const std::unique_ptr<Drawer> drawer_;
+      std::unordered_map<std::string, Hist1D> hists_;
+    };
+  }  // namespace utils
 }  // namespace cepgen
 
 #endif

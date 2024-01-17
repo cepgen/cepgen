@@ -28,6 +28,7 @@
 #include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Utils/ProcessVariablesAnalyser.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
 namespace cepgen {
@@ -202,6 +203,7 @@ namespace cepgen {
       double base_jacobian_{1.};
       Kinematics kin_{ParametersList()};  ///< Set of cuts to apply on the final phase space
       std::unique_ptr<Event> event_;      ///< Event object tracking all information on all particles in the system
+      friend class utils::ProcessVariablesAnalyser;
     };
     /// Helper typedef for a Process unique pointer
     typedef std::unique_ptr<Process> ProcessPtr;
