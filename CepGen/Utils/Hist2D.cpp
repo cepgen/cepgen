@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2023  Laurent Forthomme
+ *  Copyright (C) 2021-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,11 +21,25 @@
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace utils {
+    Hist2D::Hist2D(const ParametersList& params)
+        : Drawable(params.get<std::string>("name"), params.get<std::string>("title")) {
+      const auto &xbins = params.get<std::vector<double> >("xbins"), &ybins = params.get<std::vector<double> >("ybins");
+      const auto &xrange = params.get<Limits>("xrange"), &yrange = params.get<Limits>("yrange");
+      const auto &nbinsx = params.get<int>("nbinsX"), &nbinsy = params.get<int>("nbinsY");
+      if (xbins.size() > 1 && ybins.size() > 1)
+        buildFromBins(xbins, ybins);
+      else if (xrange.valid() && yrange.valid() && nbinsx > 1 && nbinsy > 1)
+        buildFromRange(nbinsx, xrange, nbinsy, yrange);
+      else
+        throw CG_FATAL("Hist2D") << "Failed to build a 2D histogram with user parameters: " << params << ".";
+    }
+
     Hist2D::Hist2D(size_t num_bins_x,
                    const Limits& xrange,
                    size_t num_bins_y,
@@ -35,12 +49,7 @@ namespace cepgen {
         : Drawable(name, title) {
       if (num_bins_x == 0 || num_bins_y == 0)
         throw CG_ERROR("Hist1D") << "Number of bins must be strictly positive!";
-      auto hist = gsl_histogram2d_alloc(num_bins_x, num_bins_y);
-      if (auto ret = gsl_histogram2d_set_ranges_uniform(hist, xrange.min(), xrange.max(), yrange.min(), yrange.max());
-          ret != GSL_SUCCESS)
-        throw CG_ERROR("Hist2D") << gsl_strerror(ret);
-      hist_ = gsl_histogram2d_ptr(hist);
-      hist_w2_ = gsl_histogram2d_ptr(gsl_histogram2d_clone(hist_.get()));
+      buildFromRange(num_bins_x, xrange, num_bins_y, yrange);
       CG_DEBUG("Hist2D") << "Booking a 2D correlation plot with " << s("bin", num_bins_x + num_bins_y, true)
                          << " in ranges " << xrange << " and " << yrange << ".";
     }
@@ -52,12 +61,7 @@ namespace cepgen {
         : Drawable(name, title) {
       if (xbins.empty() || ybins.empty())
         throw CG_ERROR("Hist1D") << "Number of bins must be strictly positive!";
-      auto hist = gsl_histogram2d_alloc(xbins.size() - 1, ybins.size() - 1);
-      if (auto ret = gsl_histogram2d_set_ranges(hist, xbins.data(), xbins.size(), ybins.data(), ybins.size());
-          ret != GSL_SUCCESS)
-        throw CG_ERROR("Hist2D") << gsl_strerror(ret);
-      hist_ = gsl_histogram2d_ptr(hist);
-      hist_w2_ = gsl_histogram2d_ptr(gsl_histogram2d_clone(hist_.get()));
+      buildFromBins(xbins, ybins);
       CG_DEBUG("Hist2D") << "Booking a 2D correlation plot with " << s("bin", xbins.size() + ybins.size(), true)
                          << " in ranges x=(" << xbins << ") and y=" << ybins << ".";
     }
@@ -68,6 +72,24 @@ namespace cepgen {
           hist_(gsl_histogram2d_clone(oth.hist_.get())),
           hist_w2_(gsl_histogram2d_clone(oth.hist_w2_.get())),
           out_of_range_values_(oth.out_of_range_values_) {}
+
+    void Hist2D::buildFromBins(const std::vector<double>& xbins, const std::vector<double>& ybins) {
+      auto hist = gsl_histogram2d_alloc(xbins.size() - 1, ybins.size() - 1);
+      if (auto ret = gsl_histogram2d_set_ranges(hist, xbins.data(), xbins.size(), ybins.data(), ybins.size());
+          ret != GSL_SUCCESS)
+        throw CG_ERROR("Hist2D:buildFromBins") << gsl_strerror(ret);
+      hist_ = gsl_histogram2d_ptr(hist);
+      hist_w2_ = gsl_histogram2d_ptr(gsl_histogram2d_clone(hist_.get()));
+    }
+
+    void Hist2D::buildFromRange(size_t num_bins_x, const Limits& xrange, size_t num_bins_y, const Limits& yrange) {
+      auto hist = gsl_histogram2d_alloc(num_bins_x, num_bins_y);
+      if (auto ret = gsl_histogram2d_set_ranges_uniform(hist, xrange.min(), xrange.max(), yrange.min(), yrange.max());
+          ret != GSL_SUCCESS)
+        throw CG_ERROR("Hist2D:buildFromRange") << gsl_strerror(ret);
+      hist_ = gsl_histogram2d_ptr(hist);
+      hist_w2_ = gsl_histogram2d_ptr(gsl_histogram2d_clone(hist_.get()));
+    }
 
     void Hist2D::clear() {
       gsl_histogram2d_reset(hist_.get());

@@ -21,20 +21,27 @@
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
   namespace utils {
+    Hist1D::Hist1D(const ParametersList& params)
+        : Drawable(params.get<std::string>("name"), params.get<std::string>("title")) {
+      if (const auto& xbins = params.get<std::vector<double> >("xbins"); xbins.size() > 1)
+        buildFromBins(xbins);
+      else if (const auto& xrange = params.get<Limits>("xrange"); xrange.valid())
+        buildFromRange(params.get<int>("nbins") > 0 ? params.get<int>("nbins") : params.get<int>("nbinsX"), xrange);
+      else
+        throw CG_FATAL("Hist1D") << "Failed to build a 1D histogram with user parameters: " << params << ".";
+    }
+
     Hist1D::Hist1D(size_t num_bins_x, const Limits& xrange, const std::string& name, const std::string& title)
         : Drawable(name, title) {
       if (num_bins_x == 0)
         throw CG_ERROR("Hist1D") << "Number of bins must be strictly positive!";
-      auto hist = gsl_histogram_alloc(num_bins_x);
-      if (auto ret = gsl_histogram_set_ranges_uniform(hist, xrange.min(), xrange.max()); ret != GSL_SUCCESS)
-        throw CG_ERROR("Hist1D") << gsl_strerror(ret);
-      hist_ = gsl_histogram_ptr(hist);
-      hist_w2_ = gsl_histogram_ptr(gsl_histogram_clone(hist_.get()));
+      buildFromRange(num_bins_x, xrange);
       CG_DEBUG("Hist1D") << "Booking a 1D histogram with " << s("bin", num_bins_x, true) << " in range " << xrange
                          << ".";
     }
@@ -43,11 +50,7 @@ namespace cepgen {
         : Drawable(name, title) {
       if (xbins.empty())
         throw CG_ERROR("Hist1D") << "Number of bins must be strictly positive!";
-      auto hist = gsl_histogram_alloc(xbins.size() - 1);
-      if (auto ret = gsl_histogram_set_ranges(hist, xbins.data(), xbins.size()); ret != GSL_SUCCESS)
-        throw CG_ERROR("Hist1D") << gsl_strerror(ret);
-      hist_ = gsl_histogram_ptr(hist);
-      hist_w2_ = gsl_histogram_ptr(gsl_histogram_clone(hist_.get()));
+      buildFromBins(xbins);
       CG_DEBUG("Hist1D") << "Booking a 1D histogram with " << s("bin", xbins.size(), true) << " in range " << xbins
                          << ".";
     }
@@ -59,6 +62,22 @@ namespace cepgen {
           hist_w2_(gsl_histogram_clone(oth.hist_w2_.get())),
           underflow_(oth.underflow_),
           overflow_(oth.overflow_) {}
+
+    void Hist1D::buildFromBins(const std::vector<double>& bins) {
+      auto hist = gsl_histogram_alloc(bins.size() - 1);
+      if (auto ret = gsl_histogram_set_ranges(hist, bins.data(), bins.size()); ret != GSL_SUCCESS)
+        throw CG_ERROR("Hist1D:buildFromRange") << gsl_strerror(ret);
+      hist_ = gsl_histogram_ptr(hist);
+      hist_w2_ = gsl_histogram_ptr(gsl_histogram_clone(hist_.get()));
+    }
+
+    void Hist1D::buildFromRange(size_t num_bins, const Limits& range) {
+      auto hist = gsl_histogram_alloc(num_bins);
+      if (auto ret = gsl_histogram_set_ranges_uniform(hist, range.min(), range.max()); ret != GSL_SUCCESS)
+        throw CG_ERROR("Hist1D:buildFromBins") << gsl_strerror(ret);
+      hist_ = gsl_histogram_ptr(hist);
+      hist_w2_ = gsl_histogram_ptr(gsl_histogram_clone(hist_.get()));
+    }
 
     void Hist1D::clear() {
       CG_ASSERT(hist_);

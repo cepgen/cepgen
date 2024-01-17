@@ -31,6 +31,7 @@
 #include "CepGen/Utils/Drawable.h"
 
 namespace cepgen {
+  class ParametersList;
   namespace utils {
     /**
      * \brief Generic text-based plotting utility
@@ -70,6 +71,8 @@ namespace cepgen {
     /// 1D histogram container
     class Hist1D : public Histogram, public Drawable {
     public:
+      /// Build a histogram from user-steeed parameters
+      explicit Hist1D(const ParametersList&);
       /// Build a histogram from uniform-width bins
       explicit Hist1D(size_t num_bins_x, const Limits&, const std::string& name = "", const std::string& title = "");
       /// Build a histogram from variable-width bins
@@ -114,6 +117,9 @@ namespace cepgen {
       bool isHist1D() const override final { return true; }
 
     private:
+      void buildFromBins(const std::vector<double>&);
+      void buildFromRange(size_t, const Limits&);
+
       struct gsl_histogram_deleter {
         void operator()(gsl_histogram* h) { gsl_histogram_free(h); }
       };
@@ -125,6 +131,8 @@ namespace cepgen {
     /// 2D histogram container
     class Hist2D : public Histogram, public Drawable {
     public:
+      /// Build a histogram from user-steeed parameters
+      explicit Hist2D(const ParametersList&);
       /// Build a histogram from uniform-width bins
       explicit Hist2D(size_t num_bins_x,
                       const Limits& xlim,
@@ -203,6 +211,9 @@ namespace cepgen {
       bool isHist2D() const override final { return true; }
 
     private:
+      void buildFromBins(const std::vector<double>&, const std::vector<double>&);
+      void buildFromRange(size_t, const Limits&, size_t, const Limits&);
+
       struct gsl_histogram2d_deleter {
         void operator()(gsl_histogram2d* h) { gsl_histogram2d_free(h); }
       };
