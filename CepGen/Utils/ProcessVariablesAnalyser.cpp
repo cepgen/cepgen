@@ -16,48 +16,48 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Process/Process.h"
+#include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/ProcessVariablesAnalyser.h"
 
 namespace cepgen {
   namespace utils {
-    ProcessVariablesAnalyser::ProcessVariablesAnalyser(const ParametersList& params) : SteeredObject(params) {}
-
-    ProcessVariablesAnalyser& ProcessVariablesAnalyser::get(const ParametersList& params) {
-      static ProcessVariablesAnalyser analyser(params);
-      return analyser;
+    ProcessVariablesAnalyser::ProcessVariablesAnalyser(const proc::Process& proc, const ParametersList& params)
+        : SteeredObject(params), proc_(proc), drawer_(DrawerFactory::get().build(steer<ParametersList>("drawer"))) {
+      for (const auto& var : proc_.mapped_variables_)
+        if (auto hist = steer<ParametersList>(var.name); !hist.empty())
+          hists_.insert(std::make_pair(var.name, Hist1D(hist.set<std::string>("name", var.name))));
+        else
+          hists_.insert(std::make_pair(var.name,
+                                       Hist1D(ParametersList()
+                                                  .set<std::string>("name", var.name)
+                                                  .set<int>("nbinsX", 50)
+                                                  .set<Limits>("xrange", var.limits))));
     }
 
-    void ProcessVariablesAnalyser::reset(const proc::Process& proc) {
-      hists_.clear();
-      for (const auto& var : proc.mapped_variables_) {
-        if (const auto& hist = steer<ParametersList>(var.name); !hist.empty()) {
-          if (const auto& xbins = hist.get<std::vector<double> >("xbins"); xbins.size() > 1)
-            hists_.insert(std::make_pair(var.name, Hist1D(xbins, var.name)));
-          else if (hist.get<Limits>("xrange").valid()) {
-            const auto& nbins = (hist.get<int>("nbins") > 0 ? hist.get<int>("nbins") : hist.get<int>("nbinsX"));
-            hists_.insert(std::make_pair(var.name, Hist1D(nbins, hist.get<Limits>("xrange"), var.name)));
-          }
-        }
-      }
-    }
-
-    void ProcessVariablesAnalyser::analyse(proc::Process& proc, double weight) {
-      for (const auto& var : proc.mapped_variables_) {
+    void ProcessVariablesAnalyser::feed(double weight) {
+      for (const auto& var : proc_.mapped_variables_) {
         if (hists_.count(var.name))
+          //hists_.at(var.name).fill(var.limits.x(var.value), weight);
           hists_.at(var.name).fill(var.value, weight);
       }
+    }
+
+    void ProcessVariablesAnalyser::analyse() {
+      for (const auto& var : hists_)
+        drawer_->draw(var.second);
     }
 
     ParametersDescription ProcessVariablesAnalyser::description() {
       auto desc = ParametersDescription();
       ParametersDescription hist_desc;
       hist_desc.add<std::vector<double> >("xbins", {}).setDescription("x-axis bins definition");
-      hist_desc.add<int>("nbins", 25).setDescription("Bins multiplicity for x-axis");
-      hist_desc.add<int>("nbinsX", -1).setDescription("Bins multiplicity for x-axis");
+      hist_desc.add<int>("nbinsX", 25).setDescription("Bins multiplicity for x-axis");
       hist_desc.add<Limits>("xrange", Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
       desc.addParametersDescriptionVector("histVariables", hist_desc, {}).setDescription("Histogram definition");
+      desc.add<ParametersDescription>("drawer", ParametersDescription().setName<std::string>("root"));
       return desc;
     }
   }  // namespace utils

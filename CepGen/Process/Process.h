@@ -28,6 +28,7 @@
 #include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Utils/ProcessVariablesAnalyser.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
 namespace cepgen {

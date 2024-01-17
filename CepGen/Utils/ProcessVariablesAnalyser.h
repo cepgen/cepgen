@@ -27,16 +27,19 @@ namespace cepgen {
     class Process;
   }
   namespace utils {
+    class Drawer;
     class ProcessVariablesAnalyser : public SteeredObject<ProcessVariablesAnalyser> {
     public:
-      static ProcessVariablesAnalyser& get(const ParametersList& = ParametersList());
+      explicit ProcessVariablesAnalyser(const proc::Process&, const ParametersList&);
+
       static ParametersDescription description();
 
-      void reset(const proc::Process&);
-      void analyse(proc::Process&, double weight);
+      void feed(double weight);
+      void analyse();
 
     private:
-      explicit ProcessVariablesAnalyser(const ParametersList&);
+      const proc::Process& proc_;
+      const std::unique_ptr<Drawer> drawer_;
       std::unordered_map<std::string, Hist1D> hists_;
     };
   }  // namespace utils
