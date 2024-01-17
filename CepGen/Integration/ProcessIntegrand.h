@@ -49,6 +49,7 @@ namespace cepgen {
     ///  \f$\forall i=1,\ldots,N\f$, \f$0<x_i<1\f$).
     double eval(const std::vector<double>& x) override;
     size_t size() const override;  ///< Phase space dimension
+    bool hasProcess() const override final { return true; }
 
     proc::Process& process();              ///< Thread-local physics process
     const proc::Process& process() const;  ///< Thread-local physics process
