@@ -38,11 +38,9 @@ namespace cepgen {
     }
 
     void ProcessVariablesAnalyser::feed(double weight) {
-      for (const auto& var : proc_.mapped_variables_) {
+      for (const auto& var : proc_.mapped_variables_)
         if (hists_.count(var.name))
-          //hists_.at(var.name).fill(var.limits.x(var.value), weight);
           hists_.at(var.name).fill(var.value, weight);
-      }
     }
 
     void ProcessVariablesAnalyser::analyse() {

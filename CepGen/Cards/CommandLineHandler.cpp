@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2023  Laurent Forthomme
+ *  Copyright (C) 2020-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -57,8 +57,6 @@ namespace cepgen {
       Parameters* parseFile(const std::string&, Parameters*) override;
 
     private:
-      static constexpr double INVALID = -999.999;
-
       std::vector<std::string> argv_;
     };
 
@@ -160,5 +158,5 @@ namespace cepgen {
     }
   }  // namespace card
 }  // namespace cepgen
-typedef cepgen::card::CommandLineHandler CmdHandler;
-REGISTER_CARD_HANDLER(".cmd", CmdHandler);
+using cepgen::card::CommandLineHandler;
+REGISTER_CARD_HANDLER(".cmd", CommandLineHandler);

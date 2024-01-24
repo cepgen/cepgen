@@ -327,5 +327,5 @@ namespace cepgen {
     }
   }  // namespace strfun
 }  // namespace cepgen
-typedef cepgen::strfun::KulaginBarinov KulaginBarinov;
+using cepgen::strfun::KulaginBarinov;
 REGISTER_STRFUN(303, KulaginBarinov);

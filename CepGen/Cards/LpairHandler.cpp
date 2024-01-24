@@ -364,5 +364,5 @@ namespace cepgen {
     }
   }  // namespace card
 }  // namespace cepgen
-typedef cepgen::card::LpairHandler LpairCardHandler;
-REGISTER_CARD_HANDLER(".card", LpairCardHandler);
+using cepgen::card::LpairHandler;
+REGISTER_CARD_HANDLER(".card", LpairHandler);

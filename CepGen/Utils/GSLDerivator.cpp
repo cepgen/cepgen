@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2023  Laurent Forthomme
+ *  Copyright (C) 2021-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -75,5 +75,5 @@ namespace cepgen {
   }  // namespace utils
 }  // namespace cepgen
 
-typedef cepgen::utils::GSLDerivator GSLDerivator;
+using cepgen::utils::GSLDerivator;
 REGISTER_DERIVATOR("gsl", GSLDerivator);

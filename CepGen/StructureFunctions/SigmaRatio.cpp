@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2017-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -200,10 +200,10 @@ namespace cepgen {
     };
   }  // namespace sigrat
 }  // namespace cepgen
-typedef cepgen::sigrat::E143 E143;
-typedef cepgen::sigrat::R1990 R1990;
-typedef cepgen::sigrat::CLAS CLAS;
-typedef cepgen::sigrat::SibirtsevBlunden SibirtsevBlunden;
+using cepgen::sigrat::CLAS;
+using cepgen::sigrat::E143;
+using cepgen::sigrat::R1990;
+using cepgen::sigrat::SibirtsevBlunden;
 REGISTER_SIGRAT(1, E143);
 REGISTER_SIGRAT(2, R1990);
 REGISTER_SIGRAT(3, CLAS);
