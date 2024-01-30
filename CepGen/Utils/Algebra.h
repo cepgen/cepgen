@@ -117,16 +117,19 @@ namespace cepgen {
     std::unique_ptr<gsl_matrix, void (*)(gsl_matrix*)> gsl_mat_;
   };
 
-  class VectorRef {
+  class VectorRef : public gsl_vector_view {
   public:
     VectorRef(const gsl_vector_view&);
 
-    VectorRef& operator=(const Vector&);  ///< Assignment operator
-    double& operator()(size_t);           ///< Component access operator
-    double operator()(size_t) const;      ///< Component retrieval operator
+    VectorRef& operator=(const Vector&);                                          ///< Assignment operator
+    operator Vector() const;                                                      ///< Conversion operator to a vector
+    bool operator==(const Vector&) const;                                         ///< Equality with a vector operator
+    inline bool operator!=(const Vector& vec) const { return !operator==(vec); }  ///< Inequality with a vector operator
+    double& operator()(size_t);                                                   ///< Component access operator
+    double operator()(size_t) const;                                              ///< Component retrieval operator
+    friend std::ostream& operator<<(std::ostream&, const VectorRef&);             ///< Printout operator
 
   private:
-    gsl_vector_view& view_;
     friend class Vector;
   };
 

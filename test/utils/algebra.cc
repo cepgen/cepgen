@@ -63,9 +63,7 @@ int main(int argc, char* argv[]) {
     auto A = Matrix{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
     const auto new_line = Vector{1, 2, 3};
     A.row(1) = new_line;
-    CG_LOG << A;
-    //const auto new_A = const_cast<const Matrix&>(A).row(1);
-    CG_TEST_EQUAL(new_A, new_line, "line ref.assignment");
+    CG_TEST_EQUAL(A.row(1), new_line, "line ref.assignment");
   }
 
   return 0;
