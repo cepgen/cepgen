@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2019-2024  Laurent Forthomme
  *                2017-2019  Wolfgang Schaefer
  *                2019       Marta Luszczak
  *
@@ -22,6 +22,8 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/NachtmannAmplitudes.h"
+
+using namespace std::complex_literals;
 
 namespace cepgen {
   NachtmannAmplitudes::NachtmannAmplitudes(const ParametersList& params)
@@ -100,12 +102,11 @@ namespace cepgen {
       case Mode::phiW:
         return amplitudephiW(kin, hel);
       case Mode::phiWbar:
-        return std::complex<double>(0, 2) * double(lam1) * amplitudephiW(kin, hel);
+        return 2i * double(lam1) * amplitudephiW(kin, hel);
       case Mode::phiB:
         return std::pow(eft_ext_.c1() / eft_ext_.s1, 2) * amplitudephiW(kin, hel);
       case Mode::phiBbar:
-        return std::complex<double>(0, 2) * double(lam1) * std::pow(eft_ext_.c1() / eft_ext_.s1, 2) *
-               amplitudephiW(kin, hel);
+        return 2i * double(lam1) * std::pow(eft_ext_.c1() / eft_ext_.s1, 2) * amplitudephiW(kin, hel);
       case Mode::WB:
         return amplitudeWB(kin, hel);
       case Mode::WbarB:
@@ -116,18 +117,18 @@ namespace cepgen {
 
   std::complex<double> NachtmannAmplitudes::amplitudeSM(const Kinematics& kin, const Helicities& hel) const {
     if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-      return std::complex<double>(0, 1) * G_EM_SQ * kin.invA * kin.inv_gamma2 *
+      return 1i * G_EM_SQ * kin.invA * kin.inv_gamma2 *
              ((kin.gamma2 + 1.) * (1. - hel.lam1 * hel.lam2) * kin.sin_theta2 - (1. + hel.lam1 * hel.lam2));
 
     if (hel.lam4 == 0)  // transverse-longitudinal
-      return std::complex<double>(0, -1) * G_EM_SQ * M_SQRT2 * kin.invA * kin.inv_gamma * double(hel.lam1 - hel.lam2) *
+      return -1i * G_EM_SQ * M_SQRT2 * kin.invA * kin.inv_gamma * double(hel.lam1 - hel.lam2) *
              (1. + hel.lam1 * hel.lam3 * kin.cos_theta) * kin.sin_theta;
 
     if (hel.lam3 == 0)  // longitudinal-transverse
       return amplitudeSM(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
 
     // transverse-transverse
-    return std::complex<double>(0, -0.5) * G_EM_SQ * kin.invA *
+    return -0.5i * G_EM_SQ * kin.invA *
            (2. * kin.beta * float(hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) -
             kin.inv_gamma2 * (1. + hel.lam3 * hel.lam4) *
                 (2. * hel.lam1 * hel.lam2 + (1. - hel.lam1 * hel.lam2) * kin.cos_theta2) +
@@ -138,12 +139,11 @@ namespace cepgen {
 
   std::complex<double> NachtmannAmplitudes::amplitudeW(const Kinematics& kin, const Helicities& hel) const {
     if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-      return std::complex<double>(0, 3) * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.invA *
-             kin.inv_gamma2 * kin.sin_theta2 * (1. + hel.lam1 * hel.lam2);
+      return 3i * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.invA * kin.inv_gamma2 *
+             kin.sin_theta2 * (1. + hel.lam1 * hel.lam2);
 
     if (hel.lam4 == 0)  // transverse-longitudinal
-      return std::complex<double>(0, 1.5) * G_EM * kin.shat * eft_ext_.s1 * constants::G_F * kin.invA * kin.inv_gamma *
-             kin.sin_theta *
+      return 1.5i * G_EM * kin.shat * eft_ext_.s1 * constants::G_F * kin.invA * kin.inv_gamma * kin.sin_theta *
              ((hel.lam1 - hel.lam2) * kin.beta2 - kin.beta * kin.cos_theta * (hel.lam1 + hel.lam2) -
               2 * hel.lam3 * kin.cos_theta * (hel.lam1 * hel.lam2 + kin.inv_gamma2));
 
@@ -151,7 +151,7 @@ namespace cepgen {
       return amplitudeW(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
 
     // transverse-transverse
-    return std::complex<double>(0, 0.75) * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F *
+    return 0.75i * G_EM * kin.shat * eft_ext_.s1 * M_SQRT2 * constants::G_F *
            (-kin.inv_gamma2 * kin.beta * (1. + kin.cos_theta2) * (hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) +
             2 * kin.sin_theta2 *
                 (3. + hel.lam3 * hel.lam4 + hel.lam1 * hel.lam2 * (1 - hel.lam3 * hel.lam4) -
@@ -184,29 +184,28 @@ namespace cepgen {
   std::complex<double> NachtmannAmplitudes::amplitudephiW(const Kinematics& kin, const Helicities& hel) const {
     const double invB = 1. / (kin.shat - eft_ext_.mH * eft_ext_.mH);
     if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-      return std::complex<double>(0, -0.25) * kin.shat2 * eft_ext_.s1 * eft_ext_.s1 * M_SQRT2 * constants::G_F * invB *
-             (1. + kin.beta2) * (1. + hel.lam1 * hel.lam2);
+      return -0.25i * kin.shat2 * eft_ext_.s1 * eft_ext_.s1 * M_SQRT2 * constants::G_F * invB * (1. + kin.beta2) *
+             (1. + hel.lam1 * hel.lam2);
 
     if (hel.lam4 == 0 || hel.lam3 == 0)  // transverse-longitudinal or longitudinal-transverse
       return 0.;
 
     // transverse-transverse
-    return std::complex<double>(0, -0.125) * kin.shat2 * eft_ext_.s1 * eft_ext_.s1 * M_SQRT2 * constants::G_F *
-           kin.inv_gamma2 * invB * (1. + hel.lam1 * hel.lam2) * (1. + hel.lam3 * hel.lam4);
+    return -0.125i * kin.shat2 * eft_ext_.s1 * eft_ext_.s1 * M_SQRT2 * constants::G_F * kin.inv_gamma2 * invB *
+           (1. + hel.lam1 * hel.lam2) * (1. + hel.lam3 * hel.lam4);
   }
 
   std::complex<double> NachtmannAmplitudes::amplitudeWB(const Kinematics& kin, const Helicities& hel) const {
     const double invB = 1. / (kin.shat - eft_ext_.mH * eft_ext_.mH);
     if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-      return std::complex<double>(0, 2) * G_EM_SQ * kin.invA * eft_ext_.c1() / eft_ext_.s1 *
+      return 2i * G_EM_SQ * kin.invA * eft_ext_.c1() / eft_ext_.s1 *
                  (1 - hel.lam1 * hel.lam2 - 2 * kin.cos_theta2 -
                   kin.gamma2 * (1. + hel.lam1 * hel.lam2) * kin.sin_theta2) +
-             std::complex<double>(0, 0.5) * kin.shat2 * constants::G_F * M_SQRT2 * invB * eft_ext_.s1 * eft_ext_.c1() *
-                 (1. + kin.beta2) * (1. + hel.lam1 * hel.lam2);
+             0.5i * kin.shat2 * constants::G_F * M_SQRT2 * invB * eft_ext_.s1 * eft_ext_.c1() * (1. + kin.beta2) *
+                 (1. + hel.lam1 * hel.lam2);
 
     if (hel.lam4 == 0)  // transverse-longitudinal
-      return std::complex<double>(0, 0.5) * G_EM_SQ * kin.gamma * M_SQRT2 * kin.invA * eft_ext_.c1() / eft_ext_.s1 *
-             kin.sin_theta *
+      return 0.5i * G_EM_SQ * kin.gamma * M_SQRT2 * kin.invA * eft_ext_.c1() / eft_ext_.s1 * kin.sin_theta *
              ((hel.lam2 - hel.lam1) * (1. + kin.inv_gamma2) +
               (kin.beta * float(hel.lam1 + hel.lam2) + 2 * hel.lam3 * (hel.lam1 * hel.lam2 - kin.inv_gamma2)) *
                   kin.cos_theta);
@@ -215,12 +214,12 @@ namespace cepgen {
       return amplitudeWB(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
 
     // transverse-transverse
-    return std::complex<double>(0, -0.5) * G_EM_SQ * kin.invA * eft_ext_.c1() / eft_ext_.s1 *
+    return -0.5i * G_EM_SQ * kin.invA * eft_ext_.c1() / eft_ext_.s1 *
                (kin.beta * float(hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) * (1. + kin.cos_theta2) +
                 2 * (2 + (hel.lam1 - hel.lam2) * (hel.lam3 - hel.lam4) * kin.cos_theta +
                      ((hel.lam1 * hel.lam2 - 1) * kin.cos_theta2 + 1. + hel.lam1 * hel.lam2) * hel.lam3 * hel.lam4)) +
-           std::complex<double>(0, 0.25) * kin.shat2 * M_SQRT2 * constants::G_F * kin.inv_gamma2 * invB * eft_ext_.s1 *
-               eft_ext_.c1() * (1. + hel.lam1 * hel.lam2) * (1. + hel.lam3 * hel.lam4);
+           0.25i * kin.shat2 * M_SQRT2 * constants::G_F * kin.inv_gamma2 * invB * eft_ext_.s1 * eft_ext_.c1() *
+               (1. + hel.lam1 * hel.lam2) * (1. + hel.lam3 * hel.lam4);
   }
 
   std::complex<double> NachtmannAmplitudes::amplitudeWbarB(const Kinematics& kin, const Helicities& hel) const {
@@ -249,7 +248,7 @@ namespace cepgen {
 
   ParametersDescription NachtmannAmplitudes::description() {
     auto desc = ParametersDescription();
-    desc.add<int>("model", (int)Mode::SM).setDescription("SM/anomalous model to consider");
+    desc.addAs<int, Mode>("model", Mode::SM).setDescription("SM/anomalous model to consider");
     desc.add<ParametersDescription>("eftParameters", EFTParameters::description());
     return desc;
   }
