@@ -140,7 +140,7 @@ namespace cepgen {
     std::vector<double> out(vec.size(), 0.);
     gsl_vector_view res_v = gsl_vector_view_array(out.data(), out.size());
     gsl_linalg_LU_solve(cpy.gsl_mat_.get(), perm.get(), &vec_v.vector, &res_v.vector);
-    return res_v;
+    return VectorRef(res_v);
   }
 
   double& Matrix::operator()(size_t ix, size_t iy) {
@@ -218,11 +218,17 @@ namespace cepgen {
 
   Matrix Matrix::inverted() const { return Matrix(*this).invert(); }
 
-  Vector Matrix::column(size_t i) const { return gsl_matrix_column(gsl_mat_.get(), i); }
+  Vector Matrix::column(size_t i) const { return gsl_matrix_const_column(gsl_mat_.get(), i); }
 
-  Vector Matrix::row(size_t i) const { return gsl_matrix_row(gsl_mat_.get(), i); }
+  VectorRef Matrix::column(size_t i) { return gsl_matrix_column(gsl_mat_.get(), i); }
 
-  Vector Matrix::diagonal() const { return gsl_matrix_diagonal(gsl_mat_.get()); }
+  Vector Matrix::row(size_t i) const { return gsl_matrix_const_row(gsl_mat_.get(), i); }
+
+  VectorRef Matrix::row(size_t i) { return gsl_matrix_row(gsl_mat_.get(), i); }
+
+  Vector Matrix::diagonal() const { return gsl_matrix_const_diagonal(gsl_mat_.get()); }
+
+  VectorRef Matrix::diagonal() { return gsl_matrix_diagonal(gsl_mat_.get()); }
 
   //--- friend operators
 
@@ -255,7 +261,7 @@ namespace cepgen {
     std::vector<double> out(mat.numRows(), 0.);
     gsl_vector_view res_v = gsl_vector_view_array(out.data(), out.size());
     gsl_blas_dgemv(CblasNoTrans, 1., mat.gsl_mat_.get(), &vec_v.vector, 0., &res_v.vector);
-    return res_v;
+    return VectorRef(res_v);
   }
 
   Matrix operator*(const Matrix& mat1, const Matrix& mat2) {
@@ -274,6 +280,22 @@ namespace cepgen {
 
   //---------------------------------------------------------------------------
 
+  VectorRef::VectorRef(const gsl_vector_view& view) : view_(const_cast<gsl_vector_view&>(view)) { CG_WARNING(""); }
+
+  VectorRef& VectorRef::operator=(const Vector& vec) {
+    CG_WARNING("") << "c" << vec;
+    CG_WARNING("") << "b" << Vector(*this);
+    for (size_t i = 0; i < vec.size(); ++i)
+      operator()(i) = vec(i);
+    return *this;
+  }
+
+  double& VectorRef::operator()(size_t i) { return *gsl_vector_ptr(&view_.vector, i); }
+
+  double VectorRef::operator()(size_t i) const { return gsl_vector_get(&view_.vector, i); }
+
+  //---------------------------------------------------------------------------
+
   Vector::Vector(size_t num_coord, double def) : Matrix(Matrix::uniform(num_coord, 1, def)) {}
 
   Vector::Vector(const std::initializer_list<double>& vec) : Matrix(vec.size(), 1) {
@@ -282,7 +304,12 @@ namespace cepgen {
       operator()(i++) = elem;
   }
 
-  Vector::Vector(const gsl_vector_view& vec) : Matrix(vec.vector.size, 1) {
+  Vector::Vector(const VectorRef& ref) : Matrix(ref.view_.vector.size, 1) {
+    for (size_t i = 0; i < ref.view_.vector.size; ++i)
+      Matrix::operator()(i, 0) = gsl_vector_get(&ref.view_.vector, i);
+  }
+
+  Vector::Vector(const gsl_vector_const_view& vec) : Matrix(vec.vector.size, 1) {
     for (size_t i = 0; i < vec.vector.size; ++i)
       Matrix::operator()(i, 0) = gsl_vector_get(&vec.vector, i);
   }

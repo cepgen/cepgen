@@ -26,6 +26,7 @@
 
 namespace cepgen {
   struct Vector;
+  struct VectorRef;
   /// A \f$n\times m\f$ matrix object
   class Matrix {
   public:
@@ -99,16 +100,34 @@ namespace cepgen {
     friend std::ostream& operator<<(std::ostream&, const Matrix&);  ///< Printout of matrix components
 
     Matrix& truncate(double min = 1.e-14);  ///< Truncate (specify minimum non-zero value) for all matrix components
-    Matrix& transpose();                    ///< Transpose the matrix
-    Matrix transposed() const;              ///< Return a transposition of this matrix
-    Matrix& invert();                       ///< Invert the matrix
-    Matrix inverted() const;                ///< Return the inverse of this matrix (LU decomposition)
-    Vector column(size_t) const;            ///< Return whole column of the matrix
-    Vector row(size_t) const;               ///< Return whole row of the matrix
-    Vector diagonal() const;                ///< Return the diagonal components of the matrix
+
+    Matrix& transpose();        ///< Transpose the matrix
+    Matrix transposed() const;  ///< Return a transposition of this matrix
+    Matrix& invert();           ///< Invert the matrix
+    Matrix inverted() const;    ///< Return the inverse of this matrix (LU decomposition)
+
+    VectorRef column(size_t);     ///< Return whole column of the matrix
+    Vector column(size_t) const;  ///< Return whole column of the matrix
+    VectorRef row(size_t);        ///< Return whole row of the matrix
+    Vector row(size_t) const;     ///< Return whole row of the matrix
+    VectorRef diagonal();         ///< Return the diagonal components of the matrix
+    Vector diagonal() const;      ///< Return the diagonal components of the matrix
 
   private:
     std::unique_ptr<gsl_matrix, void (*)(gsl_matrix*)> gsl_mat_;
+  };
+
+  class VectorRef {
+  public:
+    VectorRef(const gsl_vector_view&);
+
+    VectorRef& operator=(const Vector&);  ///< Assignment operator
+    double& operator()(size_t);           ///< Component access operator
+    double operator()(size_t) const;      ///< Component retrieval operator
+
+  private:
+    gsl_vector_view& view_;
+    friend class Vector;
   };
 
   /// Specialisation of a \f$m\times 1\f$ matrix
@@ -118,10 +137,9 @@ namespace cepgen {
     /// \param[in] num_coord vector multiplicity
     /// \param[in] def default value for all components
     explicit Vector(size_t num_coord, double def = 0.);
-    /// Build a vector from a {...} list of double precision floats
-    Vector(const std::initializer_list<double>&);
-    /// Build a vector from a GSL vector view (for line/column matrix extraction)
-    Vector(const gsl_vector_view& vec);
+    Vector(const std::initializer_list<double>&);  ///< Build a vector from a {...} list of double precision floats
+    Vector(const VectorRef&);                      ///< Build a vector from a GSL vector view
+    Vector(const gsl_vector_const_view&);          ///< Build a vector from a constant GSL vector view
 
     size_t size() const;  ///< Vector multiplicity (number of lines)
 
