@@ -1,10 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
-<<<<<<< HEAD
  *  Copyright (C) 2015-2024  Laurent Forthomme
-=======
- *  Copyright (C) 2022-2024  Laurent Forthomme
->>>>>>> 22bf0315 (Momentum is now a standard Vector)
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,8 +38,7 @@ namespace cepgen {
     /// Build a 4-momentum using its 3-momentum coordinates and its energy
     explicit Momentum(double* p);
     /// Build a 4-momentum using its coordinates
-    explicit Momentum(const Matrix&);
->>>>>>> 22bf0315 (Momentum is now a standard Vector)
+    Momentum(const Matrix&);
 
     //--- static definitions
 
@@ -70,21 +65,13 @@ namespace cepgen {
     double fourProduct(const Momentum&) const;   ///< Scalar product of the 4-momentum with another 4-momentum
     double crossProduct(const Momentum&) const;  ///< Vector product of the 3-momentum with another 3-momentum
 
-    Momentum operator+(const Momentum&) const;           ///< Compute the 4-vector sum of two 4-momenta
-    Momentum& operator+=(const Momentum&);               ///< Add a 4-momentum through a 4-vector sum
-    Momentum operator-() const;                          ///< Unary inverse operator
-    Momentum operator-(const Momentum&) const;           ///< Compute the inverse per-coordinate 4-vector
-    Momentum& operator-=(const Momentum&);               ///< Subtract a 4-momentum through a 4-vector sum
-    double operator*(const Momentum&) const;             ///< Scalar product of two 3-momenta
-    Momentum operator%(const Momentum&) const;           ///< Vector product of two 3-momenta
-    double operator*=(const Momentum&);                  ///< Scalar product of the 3-momentum with another 3-momentum
-    Momentum operator*(double c) const;                  ///< Multiply all components of a 4-momentum by a scalar
-    Momentum& operator*=(double c);                      ///< Multiply all 4-momentum coordinates by a scalar
-    friend Momentum operator*(double, const Momentum&);  ///< Left-multiply all 4-momentum coordinates by a scalar
+    Momentum operator+(const Momentum&) const;  ///< Compute the 4-vector sum of two 4-momenta
+    Momentum& operator+=(const Momentum&);      ///< Add a 4-momentum through a 4-vector sum
+    double operator*(const Momentum&) const;    ///< Scalar product of two 3-momenta
+    Momentum operator%(const Momentum&) const;  ///< Vector product of two 3-momenta
+    double operator*=(const Momentum&);         ///< Scalar product of the 3-momentum with another 3-momentum
 
     friend std::ostream& operator<<(std::ostream&, const Momentum&);  ///< Human-readable printout of a momentum
-
-    operator Vector() const;  ///< Cast the 4-momentum object into a 4-dimensional vector
 
     //--- setters and getters
 

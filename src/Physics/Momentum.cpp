@@ -55,19 +55,6 @@ namespace cepgen {
 
   Momentum::Momentum(const Matrix& mat) : Vector(mat.column(0)) { computeP(); }
 
-  Momentum::Momentum(const Vector& vec) {
-    if (vec.size() < 3)
-      throw CG_FATAL("Momentum") << "Failed to initialise a momentum from a vector with coordinates " << vec
-                                 << ". Should have at least 3 coordinates.";
-    setPx(vec(0)).setPy(vec(1)).setPz(vec(2));
-    if (vec.size() > 3)
-      setEnergy(vec(3));
-  }
-
-  bool Momentum::operator==(const Momentum& oth) const {
-    return px() == oth.px() && py() == oth.py() && pz() == oth.pz() && energy() == oth.energy();
-  }
-
   //--- static constructors
 
   Momentum Momentum::fromPtEtaPhiE(double pt, double eta, double phi, double e) {
@@ -160,15 +147,13 @@ namespace cepgen {
   }
 
   Momentum& Momentum::truncate(double tolerance) {
-    std::replace_if(begin(), end(), [&tolerance](const auto& p) { return p <= tolerance; }, 0.);
+    Vector::truncate(tolerance);
     return computeP();
   }
 
   //--- various getters
 
   std::array<double, 5> Momentum::pVector() const { return std::array<double, 5>{px(), py(), pz(), energy(), mass()}; }
-
-  Momentum::operator Vector() const { return Vector{px(), py(), pz(), energy()}; }
 
   double Momentum::energyT2() const {
     const auto square_pt_value = pt2();
@@ -283,23 +268,23 @@ namespace cepgen {
   Momentum& Momentum::rotatePhi(double phi, double sign) {
     const auto sin_phi = std::sin(phi), cos_phi = std::cos(phi);
     const Matrix rot{
-        {+cphi, sign * sphi, 0., 0.},  // px
-        {-sphi, sign * cphi, 0., 0.},  // py
-        {0., 0., 1., 0.},              // pz
-        {0., 0., 0., 1.}               // e
+        {+cos_phi, sign * sin_phi, 0., 0.},  // px
+        {-sin_phi, sign * cos_phi, 0., 0.},  // py
+        {0., 0., 1., 0.},                    // pz
+        {0., 0., 0., 1.}                     // e
     };
     *this = rot * (*this);
     return *this;
   }
 
   Momentum& Momentum::rotateThetaPhi(double theta, double phi) {
-    const double ctheta = cos(theta), stheta = sin(theta);
-    const double cphi = cos(phi), sphi = sin(phi);
+    const double cos_theta = std::cos(theta), sin_theta = std::sin(theta);
+    const double cos_phi = std::cos(phi), sin_phi = std::sin(phi);
     const Matrix rot{
-        {-sphi, -ctheta * cphi, stheta * cphi, 0.},  // px
-        {cphi, -ctheta * sphi, stheta * sphi, 0.},   // py
-        {0., stheta, ctheta, 0.},                    // pz
-        {0., 0., 0., 1.}                             // e
+        {-sin_phi, -cos_theta * cos_phi, sin_theta * cos_phi, 0.},  // px
+        {+cos_phi, -cos_theta * sin_phi, sin_theta * sin_phi, 0.},  // py
+        {0., sin_theta, cos_theta, 0.},                             // pz
+        {0., 0., 0., 1.}                                            // e
     };
     //FIXME check this! cos(phi)->-sin(phi) & sin(phi)->cos(phi) --> phi->phi+pi/2 ?
     *this = rot * (*this);
