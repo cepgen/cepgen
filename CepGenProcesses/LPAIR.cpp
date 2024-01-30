@@ -824,11 +824,11 @@ double LPAIR::computeWeight() {
                                 << "gamma=" << boost_props_.gamma << ", betgam=" << boost_props_.beta_gamma;
 
   //----- outgoing leptons
-  const auto mass_before = (pc(0) + pc(1)).mass();
+  const auto mass_before = Momentum(pc(0) + pc(1)).mass();
   pc(0).betaGammaBoost(boost_props_.gamma, boost_props_.beta_gamma);
   pc(1).betaGammaBoost(boost_props_.gamma, boost_props_.beta_gamma);
   CG_DEBUG_LOOP("LPAIR:gmufil") << "Invariant mass imbalance after beta/gamma boost:"
-                                << (pc(0) + pc(1)).mass() - mass_before << ".";
+                                << Momentum(pc(0) + pc(1)).mass() - mass_before << ".";
   if (!kinematics().cuts().central.contain(event()(Particle::CentralSystem)))
     return 0.;
 

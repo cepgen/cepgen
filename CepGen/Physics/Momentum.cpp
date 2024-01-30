@@ -142,8 +142,7 @@ namespace cepgen {
   }
 
   Momentum& Momentum::truncate(double tolerance) {
-    std::replace_if(
-        begin(), end(), [&tolerance](const auto& p) { return p <= tolerance; }, 0.);
+    Vector::truncate(tolerance);
     return computeP();
   }
 
@@ -257,7 +256,7 @@ namespace cepgen {
   Momentum& Momentum::rotatePhi(double phi, double sign) {
     const double sphi = sin(phi), cphi = cos(phi);
     const Matrix rot{
-        {cphi, sign * sphi, 0., 0.},   // px
+        {+cphi, sign * sphi, 0., 0.},  // px
         {-sphi, sign * cphi, 0., 0.},  // py
         {0., 0., 1., 0.},              // pz
         {0., 0., 0., 1.}               // e
@@ -271,7 +270,7 @@ namespace cepgen {
     const double cphi = cos(phi), sphi = sin(phi);
     const Matrix rot{
         {-sphi, -ctheta * cphi, stheta * cphi, 0.},  // px
-        {cphi, -ctheta * sphi, stheta * sphi, 0.},   // py
+        {+cphi, -ctheta * sphi, stheta * sphi, 0.},  // py
         {0., stheta, ctheta, 0.},                    // pz
         {0., 0., 0., 1.}                             // e
     };

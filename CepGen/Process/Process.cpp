@@ -125,7 +125,7 @@ namespace cepgen {
       return event()(Particle::CentralSystem).at(i).momentum();
     }
 
-    double Process::shat() const { return (q1() + q2()).mass2(); }
+    double Process::shat() const { return Momentum(q1() + q2()).mass2(); }
 
     void Process::clear() {
       addEventContent();

@@ -38,7 +38,7 @@ namespace cepgen {
     /// Build a 4-momentum using its 3-momentum coordinates and its energy
     explicit Momentum(double* p);
     /// Build a 4-momentum using its coordinates
-    explicit Momentum(const Matrix&);
+    Momentum(const Matrix&);
 
     //--- static definitions
 
