@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2020-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -67,9 +67,9 @@ namespace cepgen {
 
       static const double s_to_ms = 1.e3;
       std::ostringstream oss;
-      oss << utils::format("%2s | %-90s | %12s\t%10s\t%5s", "#", "Caller", "Total (ms)", "Average (ms)", "RMS (ms)");
+      oss << utils::format("%2s | %-100s | %12s\t%10s\t%5s", "#", "Caller", "Total (ms)", "Average (ms)", "RMS (ms)");
       for (const auto& mon : mons)
-        oss << utils::format("\n%10u | %-90s | %12.6f\t%10e\t%5.3e",
+        oss << utils::format("\n%10u | %-100s | %12.6f\t%10e\t%5.3e",
                              mon.size,
                              mon.name.c_str(),
                              mon.total * s_to_ms,
