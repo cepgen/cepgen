@@ -919,15 +919,9 @@ void LPAIR::fillKinematics() {
   }
 
   // central system
-  auto central_system = event()[Particle::CentralSystem];
   const short ransign = rnd_gen_->uniformInt(0, 1) == 1 ? 1 : -1;
-  auto& ol1 = central_system[0].get();
-  ol1.setChargeSign(+ransign);
-  ol1.setStatus(Particle::Status::FinalState);
-  auto& ol2 = central_system[1].get();
-  ol2.setChargeSign(-ransign);
-  ol2.setStatus(Particle::Status::FinalState);
-  event().oneWithRole(Particle::Intermediate).setMomentum(pc(0) + pc(1), true);
+  event()[Particle::CentralSystem][0].get().setChargeSign(+ransign).setStatus(Particle::Status::FinalState);
+  event()[Particle::CentralSystem][1].get().setChargeSign(-ransign).setStatus(Particle::Status::FinalState);
 }
 
 //---------------------------------------------------------------------------------------------
@@ -947,7 +941,7 @@ double LPAIR::periPP() const {
                     sa1_ * alpha6_ * alpha6_ - sa2_ * alpha5_ * alpha5_ - sa1_ * sa2_ * qqq)}};
 
   // compute the electric/magnetic form factors for the two considered parton momenta transfers
-  const auto compute_form_factors = [this](bool elastic, double q2, double mx2) -> Vector {
+  const auto compute_form_factors = [this](bool elastic, double q2, double mi2, double mx2) -> Vector {
     if (elastic) {  // trivial case for elastic photon emission
       const auto ff = (*formfac_)(q2);
       return Vector{ff.FM, ff.FE};
@@ -955,15 +949,15 @@ double LPAIR::periPP() const {
     if (!strfun_)
       throw CG_FATAL("LPAIR:computeFormFactors")
           << "Inelastic proton form factors computation requires a structure functions definition!";
-    const double xbj = utils::xBj(q2, mp2_, mx2);
+    const double xbj = utils::xBj(q2, mi2, mx2);
     if (strfun_->name() == 11 /* SuriYennie */)  // this one requires its own object to deal with FM
       return Vector{strfun_->FM(xbj, q2), strfun_->F2(xbj, q2) * xbj * mp_ / q2};
     return Vector{-2. * strfun_->F1(xbj, q2) / q2, strfun_->F2(xbj, q2) * xbj / q2};
   };
-  const auto fp1 = compute_form_factors(kinematics().incomingBeams().positive().elastic(), -t1(), mX2()),
-             fp2 = compute_form_factors(kinematics().incomingBeams().negative().elastic(), -t2(), mY2());
-
-  const double peripp = std::pow(t1() * t2() * bb_, -2) * (fp1.transposed() * m_em * fp2)(0);
+  const double peripp =
+      std::pow(t1() * t2() * bb_, -2) *
+      (compute_form_factors(kinematics().incomingBeams().positive().elastic(), -t1(), mA2(), mX2()).transposed() *
+       m_em * compute_form_factors(kinematics().incomingBeams().negative().elastic(), -t2(), mB2(), mY2()))(0);
   CG_DEBUG_LOOP("LPAIR:peripp") << "bb = " << bb_ << ", qqq = " << qqq << ", qdq = " << qdq << "\n\t"
                                 << "e-m matrix = " << m_em << "\n\t"
                                 << "=> PeriPP = " << peripp;

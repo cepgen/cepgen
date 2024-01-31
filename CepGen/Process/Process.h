@@ -49,7 +49,6 @@ namespace cepgen {
 
       virtual std::unique_ptr<Process> clone() const;  ///< Copy all process attributes into a new object
       virtual double computeWeight() = 0;              ///< Compute the phase space point weight
-      virtual void fillKinematics() = 0;               ///< Fill the Event object with the particles' kinematics
 
       void clear();       ///< Reset process prior to the phase space and variables definition
       void clearEvent();  ///< Restore the event object to its initial state
@@ -57,6 +56,7 @@ namespace cepgen {
 
       const Kinematics& kinematics() const { return kin_; }  ///< Constant reference to the process kinematics
       Kinematics& kinematics() { return kin_; }              ///< Reference to the process kinematics
+      void setKinematics();
 
       // debugging utilities
       double weight(const std::vector<double>&);      ///< Compute the weight for a phase-space point
@@ -101,6 +101,7 @@ namespace cepgen {
 
       virtual void addEventContent() = 0;  ///< Set the incoming and outgoing state to be expected in the process
       virtual void prepareKinematics() {}  ///< Compute the incoming state kinematics
+      virtual void fillKinematics() = 0;   ///< Fill the Event object with the particles' kinematics
 
       Momentum& pA();  ///< Positive-z incoming beam particle's 4-momentum
       Momentum& pB();  ///< Negative-z incoming beam particle's 4-momentum

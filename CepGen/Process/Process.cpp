@@ -390,6 +390,14 @@ namespace cepgen {
       event_->freeze();  // freeze the event as it is
     }
 
+    void Process::setKinematics() {
+      fillKinematics();
+      Momentum interm_mom;
+      for (size_t i = 0; i < event()[Particle::CentralSystem].size(); ++i)
+        interm_mom += pc(i);
+      event().oneWithRole(Particle::Intermediate).setMomentum(interm_mom, true);
+    }
+
     ParametersDescription Process::description() {
       auto desc = ParametersDescription();
       desc.add<ParametersDescription>("alphaEM", AlphaEMFactory::get().describeParameters("fixed"))

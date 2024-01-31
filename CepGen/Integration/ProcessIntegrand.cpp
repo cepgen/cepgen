@@ -100,7 +100,7 @@ namespace cepgen {
     if (!process_->hasEvent())
       return weight;
 
-    process_->fillKinematics();          // fill in the process' Event object
+    process_->setKinematics();           // fill in the process' Event object
     auto* event = process_->eventPtr();  // prepare the event content
 
     // once kinematics variables computed, can apply taming functions
