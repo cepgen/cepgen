@@ -889,19 +889,11 @@ void LPAIR::fillKinematics() {
   // randomly rotate all particles
   const short rany = rnd_gen_->uniformInt(0, 1) == 1 ? 1 : -1;
   const double ranphi = rnd_gen_->uniform(0., 2. * M_PI);
-  q1().rotatePhi(ranphi, rany);
-  q2().rotatePhi(ranphi, rany);
-  pc(0).rotatePhi(ranphi, rany);
-  pc(1).rotatePhi(ranphi, rany);
-  pX().rotatePhi(ranphi, rany);
-  pY().rotatePhi(ranphi, rany);
-  if (symmetrise_ && rnd_gen_->uniformInt(0, 1) == 1) {
-    q1().mirrorZ();
-    q2().mirrorZ();
-    pc(0).mirrorZ();
-    pc(1).mirrorZ();
-    pX().mirrorZ();
-    pY().mirrorZ();
+  const bool mirror = rnd_gen_->uniformInt(0, 1) == 1;
+  for (auto* mom : {&q1(), &q2(), &pc(0), &pc(1), &pX(), &pY()}) {
+    mom->rotatePhi(ranphi, rany);
+    if (symmetrise_ && mirror)
+      mom->mirrorZ();
   }
   CG_DEBUG_LOOP("LPAIR:gmufil") << "boosted+rotated PX=" << pX() << "\n\t"
                                 << "boosted+rotated PY=" << pY() << "\n\t"
