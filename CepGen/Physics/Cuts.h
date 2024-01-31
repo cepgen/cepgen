@@ -89,6 +89,8 @@ namespace cepgen {
     void setParameters(const ParametersList&) override;
     ParametersList parameters(bool) const;
 
+    friend std::ostream& operator<<(std::ostream&, const CutsList&);
+
     cuts::Initial initial;        ///< Cuts on the initial particles kinematics
     cuts::Central central;        ///< Cuts on the central system produced
     PerIdCuts central_particles;  ///< Cuts on the central individual particles

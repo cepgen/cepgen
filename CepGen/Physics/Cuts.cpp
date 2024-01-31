@@ -180,5 +180,24 @@ namespace cepgen {
                                              << "It is now set to " << cuts::Remnants::MX_MIN << " GeV/c^2.";
       remnants.mx.min() = cuts::Remnants::MX_MIN;
     }
+    CG_DEBUG("CutsList:setParameters") << "User specified the following cuts list:\n" << *this << ".";
+  }
+
+  std::ostream& operator<<(std::ostream& os, const CutsList& cl) {
+    auto dump_cuts = [&os](const auto& obj) {
+      std::string sep;
+      for (const auto& lim : obj.parameters().template keysOf<Limits>()) {
+        const auto& limit = obj.parameters().template get<Limits>(lim);
+        if (limit.valid() && obj.description().has(lim))
+          os << sep << obj.description().get(lim).description() << ": " << limit, sep = ";";
+      }
+    };
+    os << "init.system{";
+    dump_cuts(cl.initial);
+    os << "}, cent.system{";
+    dump_cuts(cl.central);
+    os << "}, remnants{";
+    dump_cuts(cl.remnants);
+    return os << "}";
   }
 }  // namespace cepgen
