@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,9 +40,6 @@ namespace cepgen {
     /// \date Jan 2014
     class Process : public NamedModule<std::string> {
     public:
-      /// Default constructor for an undefined process
-      /// \param[in] params Process-level parameters
-      /// \param[in] has_event Do we generate the associated event structure?
       explicit Process(const ParametersList&);
       Process(const Process&);  ///< Copy constructor for a user process
       virtual ~Process() = default;
@@ -51,11 +48,8 @@ namespace cepgen {
       static ParametersDescription description();
 
       virtual std::unique_ptr<Process> clone() const;  ///< Copy all process attributes into a new object
-      /// Compute the phase space point weight
-      virtual double computeWeight() = 0;
-      /// Fill the Event object with the particles' kinematics
-      /// \param[in] symmetrise Symmetrise the event? (randomise the production of positively- and negatively-charged outgoing central particles)
-      virtual void fillKinematics(bool symmetrise = false) = 0;
+      virtual double computeWeight() = 0;              ///< Compute the phase space point weight
+      virtual void fillKinematics() = 0;               ///< Fill the Event object with the particles' kinematics
 
       void clear();       ///< Reset process prior to the phase space and variables definition
       void clearEvent();  ///< Restore the event object to its initial state

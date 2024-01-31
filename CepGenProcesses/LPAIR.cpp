@@ -70,7 +70,7 @@ public:
   }
   double computeWeight() override;
   void prepareKinematics() override;
-  void fillKinematics(bool) override;
+  void fillKinematics() override;
 
   static ParametersDescription description() {
     auto desc = proc::Process::description();
@@ -875,7 +875,7 @@ double LPAIR::computeWeight() {
 
 //---------------------------------------------------------------------------------------------
 
-void LPAIR::fillKinematics(bool) {
+void LPAIR::fillKinematics() {
   // boost of the incoming beams
   pA() = Momentum(0., 0., +p_cm_, ep1_).betaGammaBoost(boost_props_.gamma, boost_props_.betgam);
   pB() = Momentum(0., 0., -p_cm_, ep2_).betaGammaBoost(boost_props_.gamma, boost_props_.betgam);

@@ -92,7 +92,7 @@ namespace cepgen {
       return fluxes_weight * cent_me;
     }
 
-    void FactorisedProcess::fillKinematics(bool) {
+    void FactorisedProcess::fillKinematics() {
       fillCentralParticlesKinematics();  // process-dependent!
 
       // beam systems

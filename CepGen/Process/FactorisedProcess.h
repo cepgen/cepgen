@@ -39,7 +39,7 @@ namespace cepgen {
       FactorisedProcess(const FactorisedProcess&);
 
       double computeWeight() override;
-      void fillKinematics(bool) override final;
+      void fillKinematics() override final;
 
       static ParametersDescription description();
 
