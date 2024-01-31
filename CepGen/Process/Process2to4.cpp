@@ -140,8 +140,7 @@ namespace cepgen {
       if (!utils::positive(amat2))  // skip computing the prefactors if invalid
         return 0.;
 
-      // factor 1/4 from jacobian of transformations
-      return amat2 * std::pow(4. * M_PI, -2) * 0.25 * m_pt_diff_;
+      return amat2 * prefactor_ * m_pt_diff_;
     }
 
     void Process2to4::fillCentralParticlesKinematics() {

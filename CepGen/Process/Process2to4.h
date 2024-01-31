@@ -57,6 +57,10 @@ namespace cepgen {
       double m_y_c2_{0.};         ///< Rapidity of the second central particle
       double m_pt_diff_{0.};      ///< Transverse momentum difference for the two central particle
       double m_phi_pt_diff_{0.};  ///< Azimuthal angle difference for the two central particles
+
+    private:
+      // factor 1/4 from jacobian of transformations
+      static constexpr double prefactor_ = 0.25 * 0.0625 * M_1_PI * M_1_PI;
     };
   }  // namespace proc
 }  // namespace cepgen
