@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2016-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include <unordered_map>
 
 namespace cepgen {
-  class Parameters;
+  class RunParameters;
   class Event;
   class Particle;
 }  // namespace cepgen
@@ -41,7 +41,7 @@ namespace Pythia8 {
     };
     explicit CepGenEvent();
     /// Initialise this conversion object with CepGen parameters
-    void initialise(const cepgen::Parameters&);
+    void initialise(const cepgen::RunParameters&);
     /// Feed a new CepGen event to this conversion object
     /// \param[in] ev CepGen event to be fed
     /// \param[in] type Type of storage
@@ -97,7 +97,7 @@ namespace Pythia8 {
     const double mp_, mp2_;
     bool inel1_{false}, inel2_{false};
     std::unordered_map<unsigned short, unsigned short> py_cg_corresp_;
-    const cepgen::Parameters* params_{nullptr};  // borrowed
+    const cepgen::RunParameters* params_{nullptr};  // borrowed
   };
 }  // namespace Pythia8
 #endif

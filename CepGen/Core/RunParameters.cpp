@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
@@ -27,7 +28,6 @@
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Functional.h"
@@ -35,9 +35,9 @@
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  Parameters::Parameters() : par_integrator(ParametersList().setName<std::string>("Vegas")) {}
+  RunParameters::RunParameters() : par_integrator(ParametersList().setName<std::string>("Vegas")) {}
 
-  Parameters::Parameters(Parameters& param)
+  RunParameters::RunParameters(RunParameters& param)
       : par_integrator(param.par_integrator),
         process_(std::move(param.process_)),
         evt_modifiers_(std::move(param.evt_modifiers_)),
@@ -48,15 +48,15 @@ namespace cepgen {
         generation_(param.generation_),
         tmr_(std::move(param.tmr_)) {}
 
-  Parameters::Parameters(const Parameters& param)
+  RunParameters::RunParameters(const RunParameters& param)
       : par_integrator(param.par_integrator),
         total_gen_time_(param.total_gen_time_),
         num_gen_events_(param.num_gen_events_),
         generation_(param.generation_) {}
 
-  Parameters::~Parameters() {}  // required for unique_ptr initialisation!
+  RunParameters::~RunParameters() {}  // required for unique_ptr initialisation!
 
-  Parameters& Parameters::operator=(Parameters param) {
+  RunParameters& RunParameters::operator=(RunParameters param) {
     par_integrator = param.par_integrator;
     process_ = std::move(param.process_);
     evt_modifiers_ = std::move(param.evt_modifiers_);
@@ -69,7 +69,7 @@ namespace cepgen {
     return *this;
   }
 
-  void Parameters::initialise() {
+  void RunParameters::initialiseModules() {
     // prepare the event modifications algorithms for event generation
     for (auto& mod : evt_modifiers_)
       mod->initialise(*this);
@@ -78,7 +78,7 @@ namespace cepgen {
       mod->initialise(*this);
   }
 
-  void Parameters::prepareRun() {
+  void RunParameters::prepareRun() {
     if (tmr_)
       tmr_->clear();
     CG_TICKER(tmr_.get());
@@ -88,70 +88,72 @@ namespace cepgen {
     num_gen_events_ = 0ul;
   }
 
-  void Parameters::setTimeKeeper(utils::TimeKeeper* kpr) { tmr_.reset(kpr); }
+  void RunParameters::setTimeKeeper(utils::TimeKeeper* kpr) { tmr_.reset(kpr); }
 
-  void Parameters::addGenerationTime(double gen_time) {
+  void RunParameters::addGenerationTime(double gen_time) {
     total_gen_time_ += gen_time;
     num_gen_events_++;
   }
 
-  proc::Process& Parameters::process() { return *process_.get(); }
+  proc::Process& RunParameters::process() { return *process_.get(); }
 
-  const proc::Process& Parameters::process() const { return *process_.get(); }
+  const proc::Process& RunParameters::process() const { return *process_.get(); }
 
-  std::string Parameters::processName() const {
+  std::string RunParameters::processName() const {
     if (!process_)
       return "no process";
     return process_->name();
   }
 
-  void Parameters::clearProcess() { process_.release(); }
+  void RunParameters::clearProcess() { process_.release(); }
 
-  void Parameters::setProcess(std::unique_ptr<proc::Process> proc) { process_ = std::move(proc); }
+  void RunParameters::setProcess(std::unique_ptr<proc::Process> proc) { process_ = std::move(proc); }
 
-  void Parameters::setProcess(proc::Process* proc) {
+  void RunParameters::setProcess(proc::Process* proc) {
     if (!proc)
-      throw CG_FATAL("Parameters") << "Trying to clone an invalid process!";
+      throw CG_FATAL("RunParameters") << "Trying to clone an invalid process!";
     process_.reset(proc);
   }
 
-  const Kinematics& Parameters::kinematics() const {
+  const Kinematics& RunParameters::kinematics() const {
     if (!process_)
-      throw CG_FATAL("Parameters") << "Process must be defined before its kinematics is retrieved!";
+      throw CG_FATAL("RunParameters") << "Process must be defined before its kinematics is retrieved!";
     return process_->kinematics();
   }
 
-  EventModifier& Parameters::eventModifier(size_t i) { return *evt_modifiers_.at(i); }
+  EventModifier& RunParameters::eventModifier(size_t i) { return *evt_modifiers_.at(i); }
 
-  void Parameters::clearEventModifiersSequence() { evt_modifiers_.clear(); }
+  void RunParameters::clearEventModifiersSequence() { evt_modifiers_.clear(); }
 
-  void Parameters::addModifier(std::unique_ptr<EventModifier> mod) { evt_modifiers_.emplace_back(std::move(mod)); }
+  void RunParameters::addModifier(std::unique_ptr<EventModifier> mod) { evt_modifiers_.emplace_back(std::move(mod)); }
 
-  void Parameters::addModifier(EventModifier* mod) {
+  void RunParameters::addModifier(EventModifier* mod) {
     evt_modifiers_.emplace_back(std::move(std::unique_ptr<EventModifier>(mod)));
   }
 
-  EventExporter& Parameters::eventExporter(size_t i) { return *evt_exporters_.at(i); }
+  EventExporter& RunParameters::eventExporter(size_t i) { return *evt_exporters_.at(i); }
 
-  void Parameters::clearEventExportersSequence() { evt_exporters_.clear(); }
+  void RunParameters::clearEventExportersSequence() { evt_exporters_.clear(); }
 
-  void Parameters::addEventExporter(std::unique_ptr<EventExporter> mod) { evt_exporters_.emplace_back(std::move(mod)); }
+  void RunParameters::addEventExporter(std::unique_ptr<EventExporter> mod) {
+    evt_exporters_.emplace_back(std::move(mod));
+  }
 
-  void Parameters::addEventExporter(EventExporter* mod) {
+  void RunParameters::addEventExporter(EventExporter* mod) {
     evt_exporters_.emplace_back(std::unique_ptr<EventExporter>(mod));
   }
 
-  void Parameters::addTamingFunction(std::unique_ptr<utils::Functional> fct) {
+  void RunParameters::addTamingFunction(std::unique_ptr<utils::Functional> fct) {
     taming_functions_.emplace_back(std::move(fct));
   }
 
-  std::ostream& operator<<(std::ostream& os, const Parameters* param) {
+  std::ostream& operator<<(std::ostream& os, const RunParameters& param) {
     const int wb = 90, wt = 33;
 
     os << std::left << "\n"
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "\n\n";
-    if (param->process_) {
-      const auto& proc_params = param->process().parameters();
+    if (param.process_) {
+      const auto& proc_params = param.process().parameters();
       os << std::setw(wt) << "Process to generate:"
          << utils::boldify(ProcessFactory::get().describeParameters(proc_params).description()) << "\n";
       for (const auto& key : proc_params.keys(false)) {
@@ -163,40 +165,40 @@ namespace cepgen {
           os << std::setw(wt) << "" << key << ": " << proc_params.getString(key) << "\n";
       }
     }
-    if (!param->evt_modifiers_.empty() || param->evt_exporters_.empty() || !param->taming_functions_.empty())
+    if (!param.evt_modifiers_.empty() || param.evt_exporters_.empty() || !param.taming_functions_.empty())
       os << "\n"
          << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Event treatment ") << std::setfill(' ')
          << "\n\n";
-    if (!param->evt_modifiers_.empty()) {
-      std::string mod_name = utils::s("Event modifier", param->evt_modifiers_.size(), false), sep;
-      for (const auto& mod : param->evt_modifiers_)
+    if (!param.evt_modifiers_.empty()) {
+      std::string mod_name = utils::s("Event modifier", param.evt_modifiers_.size(), false), sep;
+      for (const auto& mod : param.evt_modifiers_)
         os << std::setw(wt) << mod_name << sep << utils::boldify(mod->name()) << "\n", sep = "+ ", mod_name.clear();
       os << "\n";
     }
-    if (!param->evt_exporters_.empty()) {
-      os << utils::s("Output module", param->evt_exporters_.size(), false);
-      for (const auto& mod : param->evt_exporters_)
+    if (!param.evt_exporters_.empty()) {
+      os << utils::s("Output module", param.evt_exporters_.size(), false);
+      for (const auto& mod : param.evt_exporters_)
         os << "\n\t*) " << EventExporterFactory::get().describeParameters(mod->name(), mod->parameters()).describe(1);
     }
-    if (!param->taming_functions_.empty()) {
-      os << std::setw(wt) << utils::s("Taming function", param->taming_functions_.size(), false) << "\n";
-      for (const auto& tf : param->taming_functions_)
+    if (!param.taming_functions_.empty()) {
+      os << std::setw(wt) << utils::s("Taming function", param.taming_functions_.size(), false) << "\n";
+      for (const auto& tf : param.taming_functions_)
         os << std::setw(wt) << "" << tf->variables().at(0) << ": " << tf->expression() << "\n";
     }
     os << "\n\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Integration/generation parameters ")
        << std::setfill(' ') << "\n\n"
-       << std::setw(wt) << "Integration" << utils::boldify(param->par_integrator.name<std::string>("N/A")) << "\n";
-    for (const auto& key : param->par_integrator.keys(false))
-      os << std::setw(wt) << "" << key << ": " << param->par_integrator.getString(key) << "\n";
-    os << std::setw(wt) << "Event generation? " << utils::yesno(param->generation_.enabled()) << "\n"
-       << std::setw(wt) << "Number of events to generate" << utils::boldify(param->generation_.maxGen()) << "\n"
-       << std::setw(wt) << "Generator worker" << param->generation_.parameters().get<ParametersList>("worker") << "\n";
-    if (param->generation_.numThreads() > 1)
-      os << std::setw(wt) << "Number of threads" << param->generation_.numThreads() << "\n";
-    os << std::setw(wt) << "Number of points to try per bin" << param->generation_.numPoints() << "\n"
+       << std::setw(wt) << "Integration" << utils::boldify(param.par_integrator.name<std::string>("N/A")) << "\n";
+    for (const auto& key : param.par_integrator.keys(false))
+      os << std::setw(wt) << "" << key << ": " << param.par_integrator.getString(key) << "\n";
+    os << std::setw(wt) << "Event generation? " << utils::yesno(param.generation_.enabled()) << "\n"
+       << std::setw(wt) << "Number of events to generate" << utils::boldify(param.generation_.maxGen()) << "\n"
+       << std::setw(wt) << "Generator worker" << param.generation_.parameters().get<ParametersList>("worker") << "\n";
+    if (param.generation_.numThreads() > 1)
+      os << std::setw(wt) << "Number of threads" << param.generation_.numThreads() << "\n";
+    os << std::setw(wt) << "Number of points to try per bin" << param.generation_.numPoints() << "\n"
        << std::setw(wt) << "Verbosity level " << utils::Logger::get().level() << "\n";
-    const auto& kin = param->process().kinematics();
+    const auto& kin = param.process().kinematics();
     const auto& beams = kin.incomingBeams();
     os << "\n"
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill(' ') << "\n\n"
@@ -255,7 +257,7 @@ namespace cepgen {
 
   //-----------------------------------------------------------------------------------------------
 
-  Parameters::Generation::Generation(const ParametersList& params) : SteeredObject(params) {
+  RunParameters::Generation::Generation(const ParametersList& params) : SteeredObject(params) {
     (*this)
         .add("maxgen", max_gen_)
         .add("printEvery", gen_print_every_)
@@ -265,7 +267,7 @@ namespace cepgen {
         .add("numPoints", num_points_);
   }
 
-  ParametersDescription Parameters::Generation::description() {
+  ParametersDescription RunParameters::Generation::description() {
     auto desc = ParametersDescription();
     desc.add<ParametersDescription>("worker", ParametersDescription().setName<std::string>("grid_optimised"))
         .setDescription("type of generator worker to use for event generation");

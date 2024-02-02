@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2021-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include <fstream>
 
 namespace cepgen {
-  class Parameters;
+  class RunParameters;
   class ParametersDescription;
   namespace utils {
     class PythonConfigWriter final {
@@ -30,7 +30,7 @@ namespace cepgen {
       PythonConfigWriter(const std::string&);
       ~PythonConfigWriter();
 
-      PythonConfigWriter& operator<<(const Parameters&);
+      PythonConfigWriter& operator<<(const RunParameters&);
       PythonConfigWriter& operator<<(const ParametersDescription&);
 
     private:

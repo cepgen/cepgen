@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/GeneratorWorker.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Generator.h"
@@ -27,13 +28,12 @@
 #include "CepGen/Integration/ProcessIntegrand.h"
 #include "CepGen/Modules/GeneratorWorkerFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  Generator::Generator(bool safe_mode) : parameters_(new Parameters) {
+  Generator::Generator(bool safe_mode) : parameters_(new RunParameters) {
     static bool init = false;
     if (!init) {
       cepgen::initialise(safe_mode);
@@ -45,7 +45,7 @@ namespace cepgen {
     srandom(time.time_since_epoch().count());
   }
 
-  Generator::Generator(Parameters* ip) : parameters_(ip) {}
+  Generator::Generator(RunParameters* ip) : parameters_(ip) {}
 
   Generator::~Generator() {
     if (parameters_->timeKeeper())
@@ -61,15 +61,25 @@ namespace cepgen {
     if (!integrator_)
       resetIntegrator();
 
-    worker_->setRuntimeParameters(const_cast<const Parameters*>(parameters_.get()));
+    worker_->setRunParameters(const_cast<const RunParameters*>(parameters_.get()));
     worker_->setIntegrator(integrator_.get());
     xsect_ = Value{-1., -1.};
     parameters_->prepareRun();
   }
 
-  Parameters& Generator::parametersRef() { return *parameters_; }
+  const RunParameters& Generator::runParameters() const {
+    if (!parameters_)
+      throw CG_FATAL("Generator:runParameters") << "Run parameters object is not yet initialised.";
+    return *parameters_;
+  }
 
-  void Generator::setParameters(Parameters* ip) { parameters_.reset(ip); }
+  RunParameters& Generator::runParameters() {
+    if (!parameters_)
+      throw CG_FATAL("Generator:runParameters") << "Run parameters object is not yet initialised.";
+    return *parameters_;
+  }
+
+  void Generator::setRunParameters(RunParameters* ip) { parameters_.reset(ip); }
 
   double Generator::computePoint(const std::vector<double>& coord) {
     if (!worker_)
@@ -168,7 +178,7 @@ namespace cepgen {
       integrate();
 
     // prepare the run parameters for event generation
-    parameters_->initialise();
+    parameters_->initialiseModules();
     worker_->initialise();
 
     initialised_ = true;

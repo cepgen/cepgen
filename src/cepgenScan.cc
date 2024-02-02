@@ -20,11 +20,11 @@
 
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/AbortHandler.h"
@@ -57,21 +57,21 @@ int main(int argc, char* argv[]) {
       .parse();
 
   cepgen::Generator mg;
-  mg.setParameters(cepgen::card::Handler::parse(input_config));
+  mg.setRunParameters(cepgen::card::Handler::parseFile(input_config));
 
   if (!parser.extra_config().empty())
-    mg.setParameters(cepgen::CardsHandlerFactory::get()
-                         .build(".cmd", cepgen::ParametersList().set<vector<string> >("args", parser.extra_config()))
-                         ->parse("", mg.parametersPtr()));
+    mg.setRunParameters(cepgen::CardsHandlerFactory::get()
+                            .build(".cmd", cepgen::ParametersList().set<vector<string> >("args", parser.extra_config()))
+                            ->parseString("", &mg.runParameters()));
 
-  CG_LOG << mg.parameters();
+  CG_LOG << mg.runParameters();
 
   ofstream xsect_file(output_file);
   if (!xsect_file.is_open())
     throw CG_FATAL("main") << "Output file \"" << output_file << "\" cannot be opened!";
   xsect_file << "# " << scan << "\txsect (pb)\td(xsect) (pb)\n";
 
-  auto& par = mg.parametersRef();
+  auto& par = mg.runParameters();
   //--- ensure nothing is written in the output sequence
   par.eventExportersSequence().clear();
 
@@ -84,7 +84,6 @@ int main(int argc, char* argv[]) {
   cepgen::utils::Graph1D graph("comp_sigma_gen");
 
   auto& kin = par.process().kinematics();
-  double cross_section, err_cross_section;
   string scan_str = scan;
   for (const auto& value : points) {
     try {
@@ -111,9 +110,9 @@ int main(int argc, char* argv[]) {
         kin.setParameters(modif);
       }
       CG_LOG << "Scan of \"" << scan << "\". Value = " << value << ".";
-      mg.computeXsection(cross_section, err_cross_section);
-      string out_line = cepgen::utils::format("%.2f\t%.8e\t%.8e\n", value, cross_section, err_cross_section);
-      graph.addPoint(value, cross_section, 0., err_cross_section);
+      const auto cross_section = mg.computeXsection();
+      string out_line = cepgen::utils::format("%.2f\t%.8e\t%.8e\n", value, cross_section, cross_section.uncertainty());
+      graph.addPoint(value, cross_section, 0., cross_section.uncertainty());
       xsect_file << out_line;
       CG_LOG << out_line;
       xsect_file.flush();

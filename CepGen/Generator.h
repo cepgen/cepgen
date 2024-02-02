@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,28 +43,22 @@
 namespace cepgen {
   class Integrator;
   class GeneratorWorker;
-  class Parameters;
+  class RunParameters;
   namespace proc {
     class Process;
   }
 
-  /// Collection of libraries loaded in the runtime environment
-  static std::vector<std::string> loaded_libraries;
-  /// Collection of libraries tested not to work in the runtime environment
-  static std::vector<std::string> invalid_libraries;
-  /// Collection of search paths to build the runtime environment
-  static std::vector<std::string> search_paths;
+  static std::vector<std::string> loaded_libraries;   ///< Collection of libraries loaded in RTE
+  static std::vector<std::string> invalid_libraries;  ///< Collection of libraries tested not to work with RTE
+  static std::vector<std::string> search_paths;       ///< Collection of search paths to build RTE
   /// Execute an action on a path if found in search paths collection
   bool callPath(const std::string&, bool (*callback)(const std::string&));
-  /// Import a shared library in the runtime environment
-  bool loadLibrary(const std::string&, bool match = false);
+  bool loadLibrary(const std::string&, bool match = false);  ///< Import a shared library in RTE
   /// Launch the initialisation procedure
   /// \param[in] safe_mode Drop libraries initialisation?
   void initialise(bool safe_mode = false);
-  /// Dump this program's header into the standard output stream
-  void printHeader();
-  /// List the modules registered in the runtime database
-  void dumpModules();
+  void printHeader();  ///< Dump this program's header into the standard output stream
+  void dumpModules();  ///< List the modules registered in RTE database
 
   ////////////////////////////////////////////////////////////////////////////////
 
@@ -75,7 +69,7 @@ namespace cepgen {
    * while scanning the various parameters (point \f${\bf x}\f$ in the
    * multi-dimensional phase space).
    *
-   * The phase space is constrained using the Parameters object given as an
+   * The phase space is constrained using the RunParameters object given as an
    * argument to the constructor, and the differential cross-sections for each
    * value of the array \f${\bf x}\f$ are computed in the \a f-function defined
    * outside (but populated inside) this object.
@@ -94,27 +88,20 @@ namespace cepgen {
     /// Core of the Monte Carlo integrator and events generator
     /// \param[in] safe_mode Load the generator without external libraries?
     explicit Generator(bool safe_mode = false);
-    /// Core of the Monte Carlo integrator and events generator
-    /// \param[in] ip List of input parameters defining the phase space on which to perform the integration
-    explicit Generator(Parameters* ip);
+    explicit Generator(RunParameters*);  ///< Build a MC generator object
     ~Generator();
 
-    /// Pointer to the parameters block
-    const Parameters* parameters() const { return parameters_.get(); }
-    /// Extracted pointer to the parameters block
-    Parameters* parametersPtr() { return parameters_.release(); }
-    /// Getter to the run parameters block
-    Parameters& parametersRef();
-    /// Feed the generator with a Parameters object
-    void setParameters(Parameters* ip);
-    /// Reset integrator algorithm from the user-specified configuration
-    void resetIntegrator();
-    /// Specify an integrator algorithm configuration
-    void setIntegrator(std::unique_ptr<Integrator>);
-    /// Remove all references to a previous generation/run
-    void clearRun();
-    /// Integrate the functional over the whole phase space
-    void integrate();
+    const RunParameters& runParameters() const;  ///< Pointer to the parameters block
+    RunParameters& runParameters();              ///< Run parameters block
+    void setRunParameters(RunParameters* ip);    ///< Feed the generator with a RunParameters object
+
+    void resetIntegrator();  ///< Reset integrator algorithm from the user-specified configuration
+    void setIntegrator(std::unique_ptr<Integrator>);  ///< Specify an integrator algorithm configuration
+
+    void clearRun();  ///< Remove all references to a previous generation/run
+
+    void integrate();  ///< Integrate the functional over the phase space of interest
+
     /// Compute the cross section for the run parameters
     /// \return The computed cross-section and uncertainty, in pb
     Value computeXsection();
@@ -122,35 +109,26 @@ namespace cepgen {
     /// \param[out] xsec The computed cross-section, in pb
     /// \param[out] err The absolute integration error on the computed cross-section, in pb
     [[deprecated("Please use the parameters-less version")]] void computeXsection(double& cross_section, double& err);
-    /// Last cross section computed by the generator
-    double crossSection() const { return xsect_; }
-    /// Last error on the cross section computed by the generator
-    double crossSectionError() const { return xsect_.uncertainty(); }
+    double crossSection() const { return xsect_; }                     ///< Last cross section computed by the generator
+    double crossSectionError() const { return xsect_.uncertainty(); }  ///< Last error on the cross section computed
 
-    /// Launch the generation of events
-    void generate(size_t num_events, const std::function<void(const Event&, size_t)>&);
-    /// Launch the generation of events
+    void generate(size_t num_events, const std::function<void(const Event&, size_t)>&);  ///< Launch event generation
+    /// Launch event generation
     void generate(size_t num_events, const std::function<void(const proc::Process&)>& = nullptr);
-    /// Generate one event
-    const Event& next();
+    const Event& next();  //</ Generate one event
+
     /// Compute one single point from the total phase space
     /// \param[in] x the n-dimensional point to compute
     /// \return the function value for the given point
     double computePoint(const std::vector<double>& x);
 
   private:
-    /// Initialise the generation of events
-    void initialise();
-    /// Physical Parameters used in the events generation and cross-section computation
-    std::unique_ptr<Parameters> parameters_;
-    /// Generator worker instance
-    std::unique_ptr<GeneratorWorker> worker_;
-    /// Integration algorithm
-    std::unique_ptr<Integrator> integrator_;
-    /// Has the event generator already been initialised?
-    bool initialised_{false};
-    /// Cross section value computed at the last integration
-    Value xsect_{-1., -1.};
+    void initialise();                           ///< Initialise event generation
+    std::unique_ptr<RunParameters> parameters_;  ///< Run parameters for event generation and cross-section computation
+    std::unique_ptr<GeneratorWorker> worker_;    ///< Generator worker instance
+    std::unique_ptr<Integrator> integrator_;     ///< Integration algorithm
+    bool initialised_{false};                    ///< Has the event generator already been initialised?
+    Value xsect_{-1., -1.};                      ///< Cross section value computed at the last integration
   };
 }  // namespace cepgen
 

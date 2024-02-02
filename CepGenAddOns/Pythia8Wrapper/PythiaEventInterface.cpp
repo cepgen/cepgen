@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2016-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,9 +17,9 @@
  */
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGenAddOns/Pythia8Wrapper/PythiaEventInterface.h"
 
@@ -29,7 +29,7 @@ namespace Pythia8 {
 
   CepGenEvent::CepGenEvent() : LHAup(3), mp_(cepgen::PDG::get().mass(cepgen::PDG::proton)), mp2_(mp_ * mp_) {}
 
-  void CepGenEvent::initialise(const cepgen::Parameters& params) {
+  void CepGenEvent::initialise(const cepgen::RunParameters& params) {
     params_ = &params;
     inel1_ = !params_->kinematics().incomingBeams().positive().elastic();
     inel2_ = !params_->kinematics().incomingBeams().negative().elastic();

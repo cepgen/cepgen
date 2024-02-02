@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2021-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,9 +19,9 @@
 #include <sstream>
 
 #include "CepGen/Core/ParametersDescription.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Message.h"
 #include "CepGenAddOns/PythonWrapper/PythonConfigWriter.h"
@@ -36,7 +36,7 @@ namespace cepgen {
 
     PythonConfigWriter::~PythonConfigWriter() { file_.close(); }
 
-    PythonConfigWriter& PythonConfigWriter::operator<<(const Parameters& params) {
+    PythonConfigWriter& PythonConfigWriter::operator<<(const RunParameters& params) {
       if (params.timeKeeper())
         (*this) << ParametersDescription("timer");
       if (params.hasProcess())

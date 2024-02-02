@@ -20,6 +20,7 @@
 
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
@@ -27,7 +28,6 @@
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/TimeKeeper.h"
@@ -53,14 +53,14 @@ namespace cepgen {
         return desc;
       }
 
-      Parameters* parseString(const std::string&, Parameters*) override;
-      Parameters* parseFile(const std::string&, Parameters*) override;
+      RunParameters* parseString(const std::string&, RunParameters*) override;
+      RunParameters* parseFile(const std::string&, RunParameters*) override;
 
     private:
       std::vector<std::string> argv_;
     };
 
-    Parameters* CommandLineHandler::parseFile(const std::string& filename, Parameters* params) {
+    RunParameters* CommandLineHandler::parseFile(const std::string& filename, RunParameters* params) {
       rt_params_ = params;
       if (filename.empty())
         throw CG_FATAL("CommandLineHandler") << "Empty filename to be parsed! Aborting.";
@@ -72,7 +72,7 @@ namespace cepgen {
       return rt_params_;
     }
 
-    Parameters* CommandLineHandler::parseString(const std::string& arg, Parameters* params) {
+    RunParameters* CommandLineHandler::parseString(const std::string& arg, RunParameters* params) {
       ParametersList pars;
       pars.feed(arg);
       CG_INFO("CommandLineHandler") << "Arguments list: " << arg << " unpacked to:\n\t" << pars << ".";

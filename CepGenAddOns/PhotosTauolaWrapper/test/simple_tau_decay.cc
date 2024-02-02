@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2023  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,11 +16,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/EventModifierFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Test.h"
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
     CG_LOG << "Failed to retrieve the Tauola interface!";
     return -1;
   }
-  tauola->initialise(cepgen::Parameters());
+  tauola->initialise(cepgen::RunParameters());
 
   cepgen::Event ev;
   cepgen::Particle pho(cepgen::Particle::Role::CentralSystem, cepgen::PDG::photon, cepgen::Particle::Status::Resonance);

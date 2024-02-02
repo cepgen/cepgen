@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2018-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Generator.h"  // for library loading
@@ -35,7 +36,6 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
@@ -52,8 +52,8 @@ namespace cepgen {
     public:
       /// Read a standard configuration card
       explicit PythonHandler(const ParametersList&);
-      Parameters* parseFile(const std::string&, Parameters*) override;
-      Parameters* parseString(const std::string&, Parameters*) override;
+      RunParameters* parseFile(const std::string&, RunParameters*) override;
+      RunParameters* parseString(const std::string&, RunParameters*) override;
 
       static ParametersDescription description();
 
@@ -71,7 +71,7 @@ namespace cepgen {
       static constexpr const char* PDGLIST_NAME = "PDG";
       static constexpr const char* MCD_NAME = "mcdFile";
 
-      Parameters* parse(Parameters*);
+      RunParameters* parse(RunParameters*);
       void parseLogging(PyObject*);
       void parseIntegrator(PyObject*);
       void parseGenerator(PyObject*);
@@ -88,7 +88,7 @@ namespace cepgen {
     PythonHandler::PythonHandler(const ParametersList& params)
         : Handler(params), env_(new python::Environment(params)) {}
 
-    Parameters* PythonHandler::parseFile(const std::string& file, Parameters* params) {
+    RunParameters* PythonHandler::parseFile(const std::string& file, RunParameters* params) {
       std::string filename = python::pythonPath(file);
       env_->setProgramName(filename);
       cfg_ = python::importModule(filename);  // new
@@ -98,7 +98,7 @@ namespace cepgen {
       return parse(params);
     }
 
-    Parameters* PythonHandler::parseString(const std::string& str, Parameters* params) {
+    RunParameters* PythonHandler::parseString(const std::string& str, RunParameters* params) {
       env_->setProgramName("Cards.Core");
       cfg_ = python::defineModule("Cards.Core", str);  // new
       if (!cfg_)
@@ -109,7 +109,7 @@ namespace cepgen {
       return parse(params);
     }
 
-    Parameters* PythonHandler::parse(Parameters* params) {
+    RunParameters* PythonHandler::parse(RunParameters* params) {
       if (!cfg_)
         throw PY_ERROR << "Python configuration card was not defined.";
 
