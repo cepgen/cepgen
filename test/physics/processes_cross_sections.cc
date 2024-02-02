@@ -20,9 +20,9 @@
 #include <fstream>
 
 #include "CepGen/Cards/Handler.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/IntegratorFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Utils/AbortHandler.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Test.h"
@@ -88,11 +88,11 @@ int main(int argc, char* argv[]) {
   for (const auto& test : tests) {
     const std::string filename = "TestProcesses/" + test.filename + "_cfg.py";
     try {
-      gen.parametersRef().clearProcess();
-      gen.setParameters(cepgen::card::Handler::parseFile(filename));
-      gen.parametersRef().par_integrator = cepgen::IntegratorFactory::get().describeParameters(integrator).parameters();
+      gen.runParameters().clearProcess();
+      gen.setRunParameters(cepgen::card::Handler::parseFile(filename));
+      gen.runParameters().par_integrator = cepgen::IntegratorFactory::get().describeParameters(integrator).parameters();
 
-      CG_DEBUG("main") << "Process: " << gen.parameters()->processName() << "\n\t"
+      CG_DEBUG("main") << "Process: " << gen.runParameters().processName() << "\n\t"
                        << "File: " << filename << "\n\t"
                        << "Configuration time: " << tmr.elapsed() * 1.e3 << " ms.";
 

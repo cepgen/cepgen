@@ -164,6 +164,11 @@ namespace cepgen {
       return out.str();
     }
 
+    std::string s(const std::string& word, float num, bool show_number) {
+      return show_number ? (num == 0 ? "no" : format("%g", num)) + format(" %s%s", word.c_str(), num > 1. ? "s" : "")
+                         : format("%s%s", word.c_str(), num > 1. ? "s" : "");
+    }
+
     std::vector<std::string> split(const std::string& str, char delim, bool trim) {
       std::vector<std::string> out;
       if (str.empty())

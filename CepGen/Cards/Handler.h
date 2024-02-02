@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,41 +22,34 @@
 #include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen {
-  class Parameters;
+  class RunParameters;
   /// Location for all steering card parsers/writers
   namespace card {
     /// Base steering card module
     class Handler : public NamedModule<std::string> {
     public:
-      /// Build a configuration from an external steering card
-      explicit Handler(const ParametersList&);
+      explicit Handler(const ParametersList&);  ///< Build a configuration from an external steering card
       virtual ~Handler() = default;
 
       static ParametersDescription description();
 
-      /// Get the list of runtime parameters as parsed
-      const Parameters* runtimeParameters() const { return rt_params_; }
-      /// Get the list of runtime parameters as parsed
-      Parameters* runtimeParameters() { return rt_params_; }
-      /// Specify runtime parameters to the handler
-      virtual void pack(const Parameters*){};
-      virtual Parameters* parseString(const std::string&, Parameters* params) { return params; }
+      const RunParameters* runParameters() const { return rt_params_; }  ///< Parsed list of runtime parameters
+      RunParameters* runParameters() { return rt_params_; }              ///< Parsed list of runtime parameters
+
+      virtual void pack(const RunParameters*) {}  ///< Specify runtime parameters to the handler
+
+      virtual RunParameters* parseString(const std::string&, RunParameters* params) { return params; }
       /// Retrieve a configuration from a parsed steering card
-      virtual Parameters* parseFile(const std::string&, Parameters* params) { return params; }
-      /// Build a configuration from a steering card
-      static Parameters* parseString(const std::string&);
-      /// Build a configuration from a steering card
-      static Parameters* parseFile(const std::string&);
-      /// Write the current configuration into a steering card
-      virtual void write(const std::string&) const {}
-      /// Write a steering card from a configuration
-      static void write(const Parameters*, const std::string&);
+      virtual RunParameters* parseFile(const std::string&, RunParameters* params) { return params; }
+      static RunParameters* parseString(const std::string&);  ///< Build a configuration from a steering card
+      static RunParameters* parseFile(const std::string&);    ///< Build a configuration from a steering card
+
+      virtual void write(const std::string&) const {}  ///< Write the current configuration into a steering card
+      static void write(const RunParameters*, const std::string&);  ///< Write a steering card from a configuration
 
     protected:
-      /// Input filename
-      const std::string filename_;
-      /// List of parameters parsed from a card handler
-      Parameters* rt_params_;
+      const std::string filename_;  ///< Input filename
+      RunParameters* rt_params_;    ///< List of parameters parsed from a card handler
     };
   }  // namespace card
 }  // namespace cepgen

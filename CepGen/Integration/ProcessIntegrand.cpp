@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,22 +19,22 @@
 #include <numeric>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventBrowser.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/Math.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  ProcessIntegrand::ProcessIntegrand(const proc::Process& proc) : params_(new Parameters), tmr_(new utils::Timer) {
+  ProcessIntegrand::ProcessIntegrand(const proc::Process& proc) : params_(new RunParameters), tmr_(new utils::Timer) {
     setProcess(proc);
   }
 
-  ProcessIntegrand::ProcessIntegrand(const Parameters* params) : params_(params), tmr_(new utils::Timer) {
+  ProcessIntegrand::ProcessIntegrand(const RunParameters* params) : params_(params), tmr_(new utils::Timer) {
     if (!params_)
       throw CG_FATAL("ProcessIntegrand") << "Invalid runtime parameters specified.";
     if (!params_->hasProcess())
@@ -83,7 +83,7 @@ namespace cepgen {
   }
 
   double ProcessIntegrand::eval(const std::vector<double>& x) {
-    CG_TICKER(const_cast<Parameters*>(params_)->timeKeeper());
+    CG_TICKER(const_cast<RunParameters*>(params_)->timeKeeper());
 
     //--- start the timer
     tmr_->reset();

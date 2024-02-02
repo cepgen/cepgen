@@ -17,11 +17,11 @@
  */
 
 #include "CepGen/Cards/Handler.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventBrowser.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/DrawerFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Histogram.h"
@@ -47,8 +47,8 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .parse();
 
-  mg.setParameters(cepgen::card::Handler::parseFile(input_card));
-  mg.parametersRef().clearEventExportersSequence();
+  mg.setRunParameters(cepgen::card::Handler::parseFile(input_card));
+  mg.runParameters().clearEventExportersSequence();
 
   // book all histograms
   map<string, unique_ptr<cepgen::utils::Hist1D> > h_var_hist;
@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
   }
   CG_DEBUG("main") << "Variables to be plotted: " << vars << ".";
 
-  CG_LOG << "Process name: " << mg.parameters()->processName() << ".";
+  CG_LOG << "Process name: " << mg.runParameters().processName() << ".";
 
   cepgen::utils::EventBrowser browser;
 

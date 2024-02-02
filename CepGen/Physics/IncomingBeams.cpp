@@ -77,19 +77,21 @@ namespace cepgen {
       // fill from beam energies
       p1z = utils::fastSqrtSqDiff(beams_ene.at(0), PDG::get().mass(pos_pdg));
       p2z = utils::fastSqrtSqDiff(beams_ene.at(1), PDG::get().mass(neg_pdg));
-    } else if (pos_pdg == neg_pdg) {
-      // fill from centre-of-mass energy (symmetric beams)
-      const auto sqrts = params_.has<double>("sqrtS") && steer<double>("sqrtS") > 0.         ? steer<double>("sqrtS")
-                         : params_.has<double>("cmEnergy") && steer<double>("cmEnergy") > 0. ? steer<double>("cmEnergy")
-                                                                                             : 0.;
-      if (sqrts > 0.) {  // compute momenta from energy
-        const auto pz_abs = utils::fastSqrtSqDiff(0.5 * sqrts, PDG::get().mass(pos_pdg));
-        p1z = +pz_abs;
-        p2z = -pz_abs;
-      }
-    } else {  // when everything failed, retrieve "beamNpz" attributes
+    } else {
+      // when everything failed, retrieve "beamNpz" attributes
       params_.fill<double>("beam1pz", p1z);
       params_.fill<double>("beam2pz", p2z);
+      if (pos_pdg == neg_pdg) {  // special case: symmetric beams -> fill from centre-of-mass energy
+        if (const auto sqrts = params_.has<double>("sqrtS") && steer<double>("sqrtS") > 0. ? steer<double>("sqrtS")
+                               : params_.has<double>("cmEnergy") && steer<double>("cmEnergy") > 0.
+                                   ? steer<double>("cmEnergy")
+                                   : 0.;
+            sqrts > 0.) {  // compute momenta from energy
+          const auto pz_abs = utils::fastSqrtSqDiff(0.5 * sqrts, PDG::get().mass(pos_pdg));
+          p1z = +pz_abs;
+          p2z = -pz_abs;
+        }
+      }
     }
     //--- check the sign of both beams' pz
     if (p1z * p2z < 0. && p1z < 0.)

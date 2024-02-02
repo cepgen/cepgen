@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,11 +18,11 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/GeneratorWorker.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Integration/GridParameters.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
 #include "CepGen/Modules/GeneratorWorkerFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ProgressBar.h"
 #include "CepGen/Utils/String.h"
@@ -80,7 +80,7 @@ namespace cepgen {
     if (!grid_)
       throw CG_FATAL("GridOptimisedGeneratorWorker:next") << "Grid object was not initialised.";
 
-    CG_TICKER(const_cast<Parameters*>(params_)->timeKeeper());
+    CG_TICKER(const_cast<RunParameters*>(params_)->timeKeeper());
 
     // apply correction cycles if required from previous event
     if (ps_bin_ != UNASSIGNED_BIN) {
@@ -123,7 +123,7 @@ namespace cepgen {
   }
 
   bool GridOptimisedGeneratorWorker::correctionCycle(bool& store) {
-    CG_TICKER(const_cast<Parameters*>(params_)->timeKeeper());
+    CG_TICKER(const_cast<RunParameters*>(params_)->timeKeeper());
 
     CG_DEBUG_LOOP("GridOptimisedGeneratorWorker:correction")
         << "Correction cycles are started.\n\t"
