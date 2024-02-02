@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2016-2023  Laurent Forthomme
+ *  Copyright (C) 2016-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@
 #include <sstream>
 
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
 

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 
 namespace cepgen {
   class Event;
-  class Parameters;
+  class RunParameters;
   /// Class template for modules interacting with events
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Jan 2023
@@ -38,9 +38,9 @@ namespace cepgen {
     static ParametersDescription description();
 
     /// Initialise the handler and its inner parameterisation
-    void initialise(const Parameters&);
+    void initialise(const RunParameters&);
     /// List of run parameters
-    const Parameters& runParameters() const;
+    const RunParameters& runParameters() const;
 
     /// Retrieve the engine object
     template <typename T>
@@ -54,7 +54,7 @@ namespace cepgen {
     virtual void* enginePtr();
 
   private:
-    const Parameters* run_params_{nullptr};  // NOT owning
+    const RunParameters* run_params_{nullptr};  // NOT owning
     bool initialised_{false};
   };
 }  // namespace cepgen

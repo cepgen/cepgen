@@ -1,8 +1,8 @@
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
   auto evt = cepgen::utils::generateLPAIREvent();
   evt.dump();
 
-  gen.parametersRef().setProcess(cepgen::ProcessFactory::get().build(
+  gen.runParameters().setProcess(cepgen::ProcessFactory::get().build(
       "lpair",
       cepgen::ParametersList().set(
           "kinematics",
@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
 
   auto cg_pythia = cepgen::EventModifierFactory::get().build("pythia6");
   cg_pythia->setCrossSection(cepgen::Value{1.46161e-1, 1.25691e-3});
-  cg_pythia->initialise(gen.parametersRef());
+  cg_pythia->initialise(gen.runParameters());
   double evt_weight = 1.;
 
   const auto evt_before_particles = evt.particles().size();

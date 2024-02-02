@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,11 +18,11 @@
 
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/EventExporterFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Utils/AbortHandler.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 
@@ -71,26 +71,27 @@ int main(int argc, char* argv[]) {
   }
   //--- parse the steering card
   if (!input_card.empty())
-    gen.setParameters(cepgen::card::Handler::parseFile(input_card));
+    gen.setRunParameters(cepgen::card::Handler::parseFile(input_card));
   //--- parse the additional flags
   if (!parser.extra_config().empty())
-    gen.setParameters(cepgen::CardsHandlerFactory::get()
-                          .build(".cmd", cepgen::ParametersList().set<vector<string> >("args", parser.extra_config()))
-                          ->parseString(string(), gen.parametersPtr()));
+    gen.setRunParameters(
+        cepgen::CardsHandlerFactory::get()
+            .build(".cmd", cepgen::ParametersList().set<vector<string> >("args", parser.extra_config()))
+            ->parseString(string(), &gen.runParameters()));
 
   cepgen::utils::AbortHandler();
 
   try {
-    auto& params = gen.parametersRef();
+    auto& params = gen.runParameters();
     if (num_events >= 0)  // user specified a number of events to generate
       params.generation().setMaxGen(num_events);
 
     if (params.generation().enabled() && !outputs.empty())
       for (const auto& output : outputs)
-        gen.parametersRef().addEventExporter(cepgen::EventExporterFactory::get().build(output));
+        gen.runParameters().addEventExporter(cepgen::EventExporterFactory::get().build(output));
 
     //--- list all parameters
-    CG_LOG << gen.parameters();
+    CG_LOG << gen.runParameters();
 
     //--- let there be a cross-section...
     gen.computeXsection();

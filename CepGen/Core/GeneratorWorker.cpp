@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,11 +18,11 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/GeneratorWorker.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
@@ -30,11 +30,11 @@
 namespace cepgen {
   GeneratorWorker::GeneratorWorker(const ParametersList& params) : SteeredObject(params) {}
 
-  void GeneratorWorker::setRuntimeParameters(const Parameters* params) {
+  void GeneratorWorker::setRunParameters(const RunParameters* params) {
     params_ = params;
     integrand_.reset(new ProcessIntegrand(params));
     CG_DEBUG("GeneratorWorker") << "New generator worker initialised for integration/event generation.\n\t"
-                                << "Parameters at " << (void*)params_ << ".";
+                                << "Run parameters at " << (void*)params_ << ".";
   }
 
   GeneratorWorker::~GeneratorWorker() {
@@ -56,7 +56,7 @@ namespace cepgen {
   }
 
   bool GeneratorWorker::storeEvent() {
-    CG_TICKER(const_cast<Parameters*>(params_)->timeKeeper());
+    CG_TICKER(const_cast<RunParameters*>(params_)->timeKeeper());
 
     if (!integrand_->process().hasEvent())
       return true;
@@ -69,7 +69,7 @@ namespace cepgen {
       callback_proc_(integrand_->process());
     for (const auto& mod : params_->eventExportersSequence())
       *mod << event;
-    const_cast<Parameters*>(params_)->addGenerationTime(event.metadata.at("time:total"));
+    const_cast<RunParameters*>(params_)->addGenerationTime(event.metadata.at("time:total"));
     return true;
   }
 

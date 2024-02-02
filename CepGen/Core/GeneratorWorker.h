@@ -27,7 +27,7 @@
 
 namespace cepgen {
   class Integrator;
-  class Parameters;
+  class RunParameters;
   class ProcessIntegrand;
   namespace proc {
     class Process;
@@ -42,7 +42,7 @@ namespace cepgen {
     static ParametersDescription description();
 
     /// Specify the runtime parameters
-    void setRuntimeParameters(const Parameters*);
+    void setRunParameters(const RunParameters*);
     /// Specify the integrator instance handled by the mother generator
     void setIntegrator(const Integrator* integ);
     /// Launch the event generation
@@ -68,7 +68,7 @@ namespace cepgen {
     const Integrator* integrator_{nullptr};
     /// Steering parameters for the event generation
     /// \note NOT owning
-    const Parameters* params_{nullptr};
+    const RunParameters* params_{nullptr};
     /// Local event weight evaluator
     std::unique_ptr<ProcessIntegrand> integrand_;
     /// Callback function on process for each new event

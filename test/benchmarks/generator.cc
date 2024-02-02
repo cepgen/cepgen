@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,11 +16,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Version.h"
@@ -49,8 +49,8 @@ int main(int argc, char* argv[]) {
       .epochs(num_epochs)
       .context("process", process);
 
-  gen.parametersRef().setProcess(cepgen::ProcessFactory::get().build(process));
-  auto& kin = gen.parametersRef().process().kinematics();
+  gen.runParameters().setProcess(cepgen::ProcessFactory::get().build(process));
+  auto& kin = gen.runParameters().process().kinematics();
   kin.incomingBeams().positive().setPdgId(2212);
   kin.incomingBeams().negative().setPdgId(2212);
   kin.incomingBeams().setSqrtS(13.e3);

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,8 +37,8 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      void pack(const Parameters*) override;
-      Parameters* parseFile(const std::string&, Parameters*) override;
+      void pack(const RunParameters*) override;
+      RunParameters* parseFile(const std::string&, RunParameters*) override;
       /// Store a configuration into a LPAIR steering card
       void write(const std::string& file) const override;
 

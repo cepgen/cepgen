@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2023  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,11 +16,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Filesystem.h"
@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
   double cross_sec, cross_sec_unc;
   {  // generation + tree building part
     cepgen::Generator gen;
-    auto& pars = gen.parametersRef();
+    auto& pars = gen.runParameters();
     pars.setProcess(cepgen::ProcessFactory::get().build(proc_name));
     pars.process().kinematics().setParameters(cepgen::ParametersList()
                                                   .set<vector<int> >("pdgIds", {2212, 2212})

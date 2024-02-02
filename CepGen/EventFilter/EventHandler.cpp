@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
  */
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/EventFilter/EventHandler.h"
-#include "CepGen/Parameters.h"
 
 namespace cepgen {
   EventHandler::EventHandler(const ParametersList& params) : NamedModule(params) {}
@@ -33,7 +33,7 @@ namespace cepgen {
     return desc;
   }
 
-  void EventHandler::initialise(const Parameters& params) {
+  void EventHandler::initialise(const RunParameters& params) {
     if (initialised_)
       CG_WARNING("EventHandler:initialise") << "Event handler '" << name_ << "' was already initialised.";
     run_params_ = &params;
@@ -41,7 +41,7 @@ namespace cepgen {
     initialised_ = true;
   }
 
-  const Parameters& EventHandler::runParameters() const {
+  const RunParameters& EventHandler::runParameters() const {
     if (!run_params_)
       throw CG_FATAL("EventHandler:runParameters") << "Run parameters not yet initialised.";
     return *run_params_;

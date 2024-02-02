@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2022  Laurent Forthomme
+ *  Copyright (C) 2020-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,12 +20,12 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersDescription.h"
-#include "CepGen/Parameters.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGenAddOns/BoostWrapper/BoostTreeUtils.h"
 
 namespace boost {
   namespace cepgen {
-    pt::ptree pack(const ::cepgen::Parameters&) {
+    pt::ptree pack(const ::cepgen::RunParameters&) {
       pt::ptree out;
       return out;
     }
