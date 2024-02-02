@@ -37,7 +37,9 @@ namespace cepgen {
                                         fs::path() / "/usr" / "share" / "CepGen",
                                         fs::current_path(),
                                         fs::current_path().parent_path(),
-                                        fs::current_path().parent_path().parent_path()};
+                                        fs::current_path().parent_path().parent_path(),
+                                        fs::path() / "/usr" / "local",
+                                        fs::path() / "/usr" / "local" / "lib"};
       }
 
       void set(const std::string& var, const std::string& value) { setenv(var.c_str(), value.c_str(), 1); }
