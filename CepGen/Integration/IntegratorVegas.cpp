@@ -40,7 +40,7 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = IntegratorGSL::description();
       desc.setDescription("Vegas stratified sampling integrator");
-      desc.add<int>("numFunctionCalls", 50000);
+      desc.add<int>("numFunctionCalls", 100'000);
       desc.add<double>("chiSqCut", 1.5);
       desc.add<bool>("treat", true).setDescription("Phase space treatment");
       desc.add<int>("iterations", 10);
