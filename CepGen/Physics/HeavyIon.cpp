@@ -36,7 +36,7 @@ namespace cepgen {
       return neutron();
     else if (pdg == PDG::proton)
       return proton();
-    else if (pdg / 1000000 != 0)
+    else if (pdg / 10'000'000 != 0)
       return HeavyIon(pdg % 1000, static_cast<Element>((pdg / 1000) % 1000));
     CG_WARNING("HeavyIon") << "Failed to parse heavy ion from PDG id=" << pdg << ".";
     return HeavyIon(0, Element::invalid);
@@ -48,10 +48,10 @@ namespace cepgen {
       return PDG::proton;
     if (*this == neutron())
       return PDG::neutron;
-    return (pdgid_t)(1000000 + 1000 * (unsigned short)Z + A);
+    return (pdgid_t)(10'000'000 + 1000 * (unsigned short)Z + A);
   }
 
-  bool HeavyIon::isHI(const pdgid_t& pdgid) { return pdgid / 1000000 != 0; }
+  bool HeavyIon::isHI(const pdgid_t& pdgid) { return pdgid / 10'000'000 != 0; }
   bool HeavyIon::isHI(const ParticleProperties& prop) {
     return isHI(prop.pdgid);  //FIXME can refine a bit
   }
