@@ -57,8 +57,8 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = Integrator::description();
       desc.setDescription("Bases integration algorithm");
-      desc.add<int>("numFunctionCalls", 1'000);
-      desc.add<int>("intv", 0);
+      desc.add<int>("numFunctionCalls", 50'000);
+      desc.add<int>("intv", 1);
       desc.add<int>("verbose", 0);
       desc.add<std::vector<int> >("wildVars", {}).setDescription("list of 'wild' variables");
       return desc;
