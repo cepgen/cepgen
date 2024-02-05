@@ -5,6 +5,7 @@ if(CMAKE_BUILD_TESTS)
 endif()
 
 add_subdirectory(APFELWrapper)
+add_subdirectory(BasesWrapper)
 add_subdirectory(BoostWrapper)
 add_subdirectory(CTMLWrapper)
 add_subdirectory(CubaWrapper)
