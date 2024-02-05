@@ -72,10 +72,10 @@ namespace cepgen {
       prepareFactorisedPhaseSpace();
 
       // register the outgoing remnants' variables
-      mX2() = pA().mass2();
+      mX2() = mA2();
       if (!kinematics().incomingBeams().positive().elastic())
         defineVariable(mX2(), Mapping::square, kinematics().cuts().remnants.mx, "Positive-z beam remnant squared mass");
-      mY2() = pB().mass2();
+      mY2() = mB2();
       if (!kinematics().incomingBeams().negative().elastic())
         defineVariable(mY2(), Mapping::square, kinematics().cuts().remnants.mx, "Negative-z beam remnant squared mass");
     }

@@ -251,7 +251,7 @@ void LPAIR::prepareKinematics() {
   //--- first outgoing beam particle or remnant mass
   if (kinematics().incomingBeams().positive().elastic()) {
     event().oneWithRole(Particle::OutgoingBeam1).setPdgId(event().oneWithRole(Particle::IncomingBeam1).pdgId());
-    mX2() = pA().mass2();
+    mX2() = mA2();
   } else {
     const auto wx_lim_ob1 = kinematics()
                                 .cuts()
@@ -262,7 +262,7 @@ void LPAIR::prepareKinematics() {
   //--- second outgoing beam particle or remnant mass
   if (kinematics().incomingBeams().negative().elastic()) {
     event().oneWithRole(Particle::OutgoingBeam2).setPdgId(event().oneWithRole(Particle::IncomingBeam2).pdgId());
-    mY2() = pB().mass2();
+    mY2() = mB2();
   } else {
     const auto wx_lim_ob2 = kinematics()
                                 .cuts()
