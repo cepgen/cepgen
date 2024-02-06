@@ -44,12 +44,12 @@ int main(int argc, char* argv[]) {
 
   {
     gen.runParameters().setProcess(cepgen::ProcessFactory::get().build(process));
-    cepgen::utils::PythonConfigWriter py(output_file);
+    cepgen::python::PythonConfigWriter py(output_file);
     py << gen.runParameters();
   }
 
   try {
-    auto env = cepgen::python::Environment();
+    auto env = cepgen::python::Environment(cepgen::ParametersList{});
     const auto path = cepgen::python::pythonPath(output_file);
     env.setProgramName(path);
     auto obj = cepgen::python::importModule(path);

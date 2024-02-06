@@ -34,7 +34,7 @@ using namespace std;
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
 
-  cepgen::python::Environment env;
+  cepgen::python::Environment env(cepgen::ParametersList{});
   TEST_TYPE(bool, true)
   TEST_TYPE(bool, false)
   TEST_TYPE(string, string("Héhéhé, test @ ünıc0d€ 🐗"))

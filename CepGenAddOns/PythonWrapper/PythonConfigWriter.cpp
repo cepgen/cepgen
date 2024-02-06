@@ -24,10 +24,26 @@
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/String.h"
 #include "CepGenAddOns/PythonWrapper/PythonConfigWriter.h"
 
+using namespace std::string_literals;
+
 namespace cepgen {
-  namespace utils {
+  namespace python {
+    static std::string repr(const ParametersList& params, const std::string& key) {
+      if (params.has<bool>(key))
+        return params.get<bool>(key) ? "True" : "False";
+      else if (params.has<Limits>(key)) {
+        const auto lim = params.get<Limits>(key);
+        return "("s + std::to_string(lim.min()) + "," + (lim.hasMax() ? std::to_string(lim.max()) : "") + ")";
+      } else if (params.has<std::vector<int> >(key))
+        return "["s + utils::repr(params.get<std::vector<int> >(key)) + "]";
+      else if (params.has<std::vector<double> >(key))
+        return "["s + utils::repr(params.get<std::vector<double> >(key)) + "]";
+      return params.getString(key, true);
+    }
+
     PythonConfigWriter::PythonConfigWriter(const std::string& filename) : file_(filename) {
       file_ << "from sys import path\n"
             << "path.append('python')\n\n";
@@ -59,10 +75,12 @@ namespace cepgen {
         if (!key.empty())
           os << key << " = ";
 
+        std::string sep = "";
         const auto& params = pdesc.parameters();
         switch (pdesc.type()) {
           case ParametersDescription::Type::Module:
-            os << "cepgen.Module(\"" << params.getNameString() << "\",";
+            os << "cepgen.Module(\"" << params.getNameString() << "\"";
+            sep = ",";
             break;
           case ParametersDescription::Type::Parameters:
             os << "cepgen.Parameters(";
@@ -73,7 +91,6 @@ namespace cepgen {
           case ParametersDescription::Type::Value:
             break;
         }
-        std::string sep = "";
         for (const auto& key : params.keys(false)) {
           os << sep << "\n";
           const auto& daugh = pdesc.get(key);
@@ -88,17 +105,16 @@ namespace cepgen {
                 os << sep2 << write(ParametersDescription(it), "", 0), sep2 = ", ";
             } break;
             case ParametersDescription::Type::Value:
-              os << off << std::string(4, ' ') << key << " = ";
-              if (params.has<bool>(key))
-                os << (params.get<bool>(key) ? "True" : "False");
-              else
-                os << params.getString(key, true);
+              os << off << std::string(4, ' ') << key << " = " << repr(params, key);
               break;
           }
           sep = ",";
         }
         switch (pdesc.type()) {
           case ParametersDescription::Type::Module:
+            if (!params.keys(false).empty())
+              os << "\n" << off;
+            break;
           case ParametersDescription::Type::Parameters:
             os << "\n" << off;
             break;
@@ -118,5 +134,5 @@ namespace cepgen {
 
       return *this;
     }
-  }  // namespace utils
+  }  // namespace python
 }  // namespace cepgen

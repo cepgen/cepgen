@@ -24,7 +24,7 @@
 namespace cepgen {
   class RunParameters;
   class ParametersDescription;
-  namespace utils {
+  namespace python {
     class PythonConfigWriter final {
     public:
       PythonConfigWriter(const std::string&);
@@ -36,7 +36,7 @@ namespace cepgen {
     private:
       mutable std::ofstream file_;
     };
-  }  // namespace utils
+  }  // namespace python
 }  // namespace cepgen
 
 #endif
