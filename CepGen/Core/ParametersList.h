@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2023  Laurent Forthomme
+ *  Copyright (C) 2018-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,7 +38,8 @@
   template <>                                                              \
   std::vector<std::string> ParametersList::keysOf<type>() const;           \
   template <>                                                              \
-  size_t ParametersList::erase<type>(const std::string&);
+  size_t ParametersList::erase<type>(const std::string&);                  \
+  static_assert(true, "")
 
 namespace cepgen {
   /// Indexing key for the module name
@@ -161,24 +162,25 @@ namespace cepgen {
     std::unordered_map<std::string, std::vector<int> > vec_int_values_;
     std::unordered_map<std::string, std::vector<double> > vec_dbl_values_;
     std::unordered_map<std::string, std::vector<std::string> > vec_str_values_;
+    std::unordered_map<std::string, std::vector<Limits> > vec_lim_values_;
     std::unordered_map<std::string, std::vector<ParametersList> > vec_param_values_;
     std::unordered_map<std::string, std::vector<std::vector<double> > > vec_vec_dbl_values_;
   };
 
-  DEFINE_TYPE(ParametersList)
-  DEFINE_TYPE(bool)
-  DEFINE_TYPE(int)
-  DEFINE_TYPE(unsigned long long)
-  DEFINE_TYPE(double)
-  DEFINE_TYPE(std::string)
-  DEFINE_TYPE(Limits)
-  DEFINE_TYPE(std::vector<int>)
-  DEFINE_TYPE(std::vector<double>)
-  DEFINE_TYPE(std::vector<std::string>)
-  DEFINE_TYPE(std::vector<ParametersList>)
-  DEFINE_TYPE(std::vector<std::vector<double> >)
+  DEFINE_TYPE(ParametersList);
+  DEFINE_TYPE(bool);
+  DEFINE_TYPE(int);
+  DEFINE_TYPE(unsigned long long);
+  DEFINE_TYPE(double);
+  DEFINE_TYPE(std::string);
+  DEFINE_TYPE(Limits);
+  DEFINE_TYPE(std::vector<int>);
+  DEFINE_TYPE(std::vector<double>);
+  DEFINE_TYPE(std::vector<std::string>);
+  DEFINE_TYPE(std::vector<Limits>);
+  DEFINE_TYPE(std::vector<ParametersList>);
+  DEFINE_TYPE(std::vector<std::vector<double> >);
 }  // namespace cepgen
 
 #undef DEFINE_TYPE
 #endif
-
