@@ -5,7 +5,7 @@ if(NOT BASES)
 endif()
 
 #----- build the object
-cepgen_build(CepGenBases SOURCES IntegratorBases.cpp
+cepgen_build(CepGenBases SOURCES *.cpp
     EXT_LIBS ${BASES}
     PROPERTY POSITION_INDEPENDENT_CODE ON
     INSTALL_COMPONENT bases)
