@@ -21,25 +21,7 @@
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/String.h"
-
-extern "C" {
-void bsinit_();
-void bases_(double (*fxn)(double[]), double& s, double& sigma, double& ctime, int& it1, int& it2);
-static constexpr size_t mxdim = 50;
-extern struct {
-  std::array<double, mxdim> xl, xu;
-  int ndim, nwild;
-  std::array<int, mxdim> ig;
-  int ncall;
-} bparm1_;
-extern struct {
-  double acc1, acc2;
-  int itmx1, itmx2;
-} bparm2_;
-extern struct {
-  int intv, ipnt, nloop, mloop;
-} bscntl_;
-}
+#include "CepGenAddOns/BasesWrapper/BasesCommonBlocks.h"
 
 namespace cepgen {
   /// Bases integration algorithm
