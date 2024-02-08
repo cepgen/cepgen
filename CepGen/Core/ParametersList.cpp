@@ -175,7 +175,7 @@ namespace cepgen {
     for (const auto& arg : list) {
       // browse through the parameters hierarchy
       auto cmd = utils::split(arg, '/');
-      if (cmd.size() > 1) {  // sub-parameters word found
+      if (arg[arg.size() - 1] != '\'' && arg[arg.size() - 1] != '"' && cmd.size() > 1) {  // sub-parameters word found
         operator[]<ParametersList>(cmd.at(0)).feed(
             utils::merge(std::vector<std::string>(cmd.begin() + 1, cmd.end()), "/"));
         continue;
@@ -214,8 +214,12 @@ namespace cepgen {
             if (limits.size() != 2)
               throw CG_FATAL("ParametersList:feed") << "Failed to parse limits value '" << value << "'.";
             set<Limits>(key, Limits{std::stod(limits.at(0)), std::stod(limits.at(1))});
-          } else
-            set<std::string>(key, value);
+          } else {
+            auto parsed_value = value;
+            if (value.size() > 2 && value[0] == value[value.size() - 1] && (value[0] == '"' || value[0] == '\''))
+              parsed_value = parsed_value.substr(1, value.size() - 2);
+            set<std::string>(key, parsed_value);
+          }
         }
       } else
         throw CG_FATAL("ParametersList:feed") << "Invalid key:value unpacking: " << word << "!";
