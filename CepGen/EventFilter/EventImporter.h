@@ -45,9 +45,12 @@ namespace cepgen {
       return out;
     }
 
+    /// Read the next event
+    virtual bool next(Event&) const { return false; }
+
   private:
     /// Output format-custom conversion algorithm
-    virtual void convert(const void*, Event&) const = 0;
+    virtual void convert(const void*, Event&) const {}
   };
 }  // namespace cepgen
 
