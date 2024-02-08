@@ -131,9 +131,11 @@ namespace ROOT {
       throw CG_FATAL("CepGenEvent:fill") << "Trying to fill a non-existent tree!";
 
     clear();
-    gen_time = ev.metadata.at("time:generation");
-    tot_time = ev.metadata.at("time:total");
-    weight = ev.metadata.at("weight");
+    if (!ev.metadata.empty()) {
+      gen_time = ev.metadata.at("time:generation");
+      tot_time = ev.metadata.at("time:total");
+      weight = ev.metadata.at("weight");
+    }
     np = 0;
     const auto& parts = compress ? ev.compress().particles() : ev.particles();
     //--- loop over all particles in event

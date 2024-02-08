@@ -85,9 +85,11 @@ namespace cepgen {
     run_tree_.create();
     evt_tree_.create();
     run_tree_.litigious_events = 0;
-    run_tree_.sqrt_s = runParameters().kinematics().incomingBeams().sqrtS();
-    run_tree_.process_name = runParameters().processName();
-    run_tree_.process_parameters = runParameters().process().parameters().serialise();
+    if (runParameters().hasProcess()) {
+      run_tree_.sqrt_s = runParameters().kinematics().incomingBeams().sqrtS();
+      run_tree_.process_name = runParameters().processName();
+      run_tree_.process_parameters = runParameters().process().parameters().serialise();
+    }
   }
 
   void ROOTTreeHandler::operator<<(const Event& ev) {
