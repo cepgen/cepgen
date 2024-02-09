@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2016-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -59,6 +59,10 @@ namespace cepgen {
       event.set_cross_section(*xs_);
       event.set_event_number(event_num_++);
       output_->write_event(&event);
+      CG_DEBUG("HepMC2Handler").log([&event](auto& log) {
+        log << "\n";
+        event.print(log.stream());
+      });
     }
     void setCrossSection(const Value& cross_section) override {
       xs_->set_cross_section((double)cross_section, cross_section.uncertainty());
@@ -66,9 +70,9 @@ namespace cepgen {
 
   private:
     /// Writer object
-    std::unique_ptr<T> output_;
+    const std::unique_ptr<T> output_;
     /// Generator cross section and error
-    std::shared_ptr<GenCrossSection> xs_;
+    const std::shared_ptr<GenCrossSection> xs_;
   };
 }  // namespace cepgen
 

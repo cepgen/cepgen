@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2023  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,17 +16,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <HepMC/GenEvent.h>
+#include <HepMC/IO_GenEvent.h>
 #include <HepMC/Version.h>
 
 #include <memory>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventImporter.h"
 #include "CepGen/Modules/EventImporterFactory.h"
 #include "CepGenAddOns/HepMC2Wrapper/HepMC2EventInterface.h"
-
-using namespace HepMC;
 
 namespace cepgen {
   /// Handler for the HepMC file output
@@ -35,9 +34,22 @@ namespace cepgen {
   class HepMC2Importer final : public EventImporter {
   public:
     /// Class constructor
-    explicit HepMC2Importer(const ParametersList& params) : EventImporter(params) {
-      CG_INFO("HepMC") << "Interfacing module initialised "
-                       << "for HepMC version " << HEPMC_VERSION << ".";
+    explicit HepMC2Importer(const ParametersList& params)
+        : EventImporter(params), reader_(new HepMC::IO_GenEvent(steer<std::string>("filename"), std::ios::in)) {
+      if (!reader_)
+        throw CG_FATAL("HepMC2Importer") << "Failed to initialise HepMCv2 reader.";
+      CG_INFO("HepMC2Importer") << "Interfacing module initialised "
+                                << "for HepMC version " << HEPMC_VERSION << " and HepMC ASCII file '"
+                                << steer<std::string>("filename") << "' with I/O state " << reader_->rdstate() << ".";
+    }
+
+    bool operator>>(Event& evt) const override {
+      HepMC::GenEvent event;
+      if (!reader_->fill_next_event(&event))
+        return false;
+      CG_DEBUG("HepMC2Importer").log([&event](auto& log) { event.print(log.stream()); });
+      evt = Event(static_cast<const HepMC::CepGenEvent&>(event));
+      return true;
     }
 
     static ParametersDescription description() {
@@ -47,13 +59,9 @@ namespace cepgen {
       return desc;
     }
 
-    void convert(const void* in, Event& evt) const override {
-      auto* evt_in = static_cast<const HepMC::GenEvent*>(in);
-      evt_in->print();
-      evt = Event(*static_cast<const HepMC::CepGenEvent*>(in));
-    }
-
   private:
+    void initialise() override {}
+    const std::unique_ptr<HepMC::IO_GenEvent> reader_;
   };
 }  // namespace cepgen
 REGISTER_EVENT_IMPORTER("hepmc2", HepMC2Importer)

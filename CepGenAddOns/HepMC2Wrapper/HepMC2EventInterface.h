@@ -40,7 +40,7 @@ namespace HepMC {
     operator cepgen::Event() const;
 
   private:
-    std::unordered_map<unsigned short, std::shared_ptr<GenParticle> > assoc_map_;
+    std::unordered_map<unsigned short, GenParticle*> assoc_map_;
   };
 }  // namespace HepMC
 #endif

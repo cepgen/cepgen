@@ -33,8 +33,10 @@
 
 namespace HepMC {
   CepGenEvent::CepGenEvent(const cepgen::Event& evt) : GenEvent(Units::GEV, Units::MM) {
-    set_alphaQCD(evt.metadata.at("alphaS"));
-    set_alphaQED(evt.metadata.at("alphaEM"));
+    if (!evt.metadata.empty()) {
+      set_alphaQCD(evt.metadata.at("alphaS"));
+      set_alphaQED(evt.metadata.at("alphaEM"));
+    }
 
     weights().push_back(1.);  // unweighted events
 
@@ -50,7 +52,7 @@ namespace HepMC {
       auto part = new GenParticle(pmom, part_orig.integerPdgId(), (int)part_orig.status());
       part->set_generated_mass(cepgen::PDG::get().mass(part_orig.pdgId()));
       part->suggest_barcode(idx);
-      assoc_map_[idx].reset(part);
+      assoc_map_[idx] = part;
 
       switch (part_orig.role()) {
         case cepgen::Particle::IncomingBeam1:
@@ -100,7 +102,7 @@ namespace HepMC {
             if (!vprod) {
               vprod = new GenVertex();
               for (const auto& id : ids)
-                vprod->add_particle_in(assoc_map_.at(id).get());
+                vprod->add_particle_in(assoc_map_.at(id));
               add_vertex(vprod);
             }
             vprod->add_particle_out(part);

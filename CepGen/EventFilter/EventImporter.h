@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2023  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,37 +20,32 @@
 #define CepGen_EventFilter_EventImporter_h
 
 #include "CepGen/Event/Event.h"
-#include "CepGen/Modules/NamedModule.h"
+#include "CepGen/EventFilter/EventHandler.h"
+#include "CepGen/Utils/Value.h"
 
 namespace cepgen {
-  class Event;
   /// Base event importer module
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Dec 2022
-  class EventImporter : public NamedModule<std::string> {
+  class EventImporter : public EventHandler {
   public:
-    explicit EventImporter(const ParametersList& params) : NamedModule(params) {}
+    explicit EventImporter(const ParametersList& params) : EventHandler(params) {}
 
     static ParametersDescription description() {
-      auto desc = ParametersDescription();
+      auto desc = EventHandler::description();
       desc.setDescription("Unnamed event importer");
       return desc;
     }
 
-    /// Output format-custom extraction operator
-    template <typename T>
-    Event convert(const T& in) const {
-      Event out;
-      convert((void*)&in, out);
-      return out;
-    }
+    virtual bool operator>>(Event&) const = 0;           ///< Read the next event
+    const Value& crossSection() const { return xsec_; }  ///< Process cross section and uncertainty, in pb
 
-    /// Read the next event
-    virtual bool next(Event&) const { return false; }
+  protected:
+    /// Specify the process cross section and uncertainty, in pb
+    void setCrossSection(const Value& xsec) { xsec_ = xsec; }
 
   private:
-    /// Output format-custom conversion algorithm
-    virtual void convert(const void*, Event&) const {}
+    Value xsec_;
   };
 }  // namespace cepgen
 

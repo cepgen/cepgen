@@ -55,7 +55,7 @@ namespace cepgen {
       return desc;
     }
 
-    bool next(Event& evt) const override {
+    bool operator>>(Event& evt) const override {
       if (!reader_->readEvent())
         return false;
       evt.clear();
@@ -84,6 +84,12 @@ namespace cepgen {
     }
 
   private:
+    void initialise() override {
+      const auto& heprup = reader_->heprup;
+      CG_DEBUG("LHEFHepMCImporter").log([&heprup](auto& log) { heprup.print(log.stream()); });
+      setCrossSection(Value{heprup.XSECUP[0], heprup.XERRUP[0]});
+    }
+
     std::unique_ptr<LHEF::Reader> reader_;
   };
 }  // namespace cepgen
