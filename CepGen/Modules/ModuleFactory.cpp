@@ -26,6 +26,7 @@
 #include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
+#include "CepGen/EventFilter/EventImporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Integration/AnalyticIntegrator.h"
@@ -137,6 +138,7 @@ namespace cepgen {
   template class ModuleFactory<Coupling, std::string>;
   template class ModuleFactory<utils::Derivator, std::string>;
   template class ModuleFactory<utils::Drawer, std::string>;
+  template class ModuleFactory<EventImporter, std::string>;
   template class ModuleFactory<EventModifier, std::string>;
   template class ModuleFactory<EventExporter, std::string>;
   template class ModuleFactory<formfac::Parameterisation, std::string>;
