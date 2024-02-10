@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2023  Laurent Forthomme
+ *  Copyright (C) 2020-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,9 +24,9 @@
 
 namespace cepgen {
   /// Boost's Naive integration algorithm
-  class IntegratorNaive final : public Integrator {
+  class NaiveBoostIntegrator final : public Integrator {
   public:
-    explicit IntegratorNaive(const ParametersList& params) : Integrator(params) {}
+    explicit NaiveBoostIntegrator(const ParametersList& params) : Integrator(params) {}
 
     static ParametersDescription description() {
       auto desc = Integrator::description();
@@ -55,4 +55,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_INTEGRATOR("Naive", IntegratorNaive);
+REGISTER_INTEGRATOR("Naive", NaiveBoostIntegrator);
