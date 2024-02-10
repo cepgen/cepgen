@@ -26,9 +26,9 @@
 #include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 
 namespace cepgen {
-  class IntegratorPython final : public Integrator {
+  class PythonIntegrator final : public Integrator {
   public:
-    explicit IntegratorPython(const ParametersList& params)
+    explicit PythonIntegrator(const ParametersList& params)
         : Integrator(params), env_(ParametersList().setName<std::string>("python_integrator")) {
       auto cfg = python::importModule(steer<std::string>("module"));
       if (!cfg)
@@ -53,7 +53,7 @@ namespace cepgen {
         throw PY_ERROR;
       const auto vals = python::getVector<double>(value);
       if (vals.size() < 2)
-        throw CG_FATAL("IntegratorPython")
+        throw CG_FATAL("PythonIntegrator")
             << "Wrong multiplicity of result returned from Python's integration algorithm: " << vals << ".";
 
       return Value{vals[0], vals[1]};
@@ -75,12 +75,12 @@ namespace cepgen {
     python::ObjectPtr func_, lims_{nullptr};
     static PyObject* py_integrand(PyObject* /*self*/, PyObject* args) {
       if (!gIntegrand)
-        throw CG_FATAL("IntegratorPython") << "Integrand was not initialised.";
+        throw CG_FATAL("PythonIntegrator") << "Integrand was not initialised.";
       const auto c_args = python::getVector<double>(PyTuple_GetItem(args, 0));
       return python::set<double>(gIntegrand->eval(c_args)).release();
     }
   };
-  Integrand* IntegratorPython::gIntegrand = nullptr;
+  Integrand* PythonIntegrator::gIntegrand = nullptr;
 }  // namespace cepgen
 
-REGISTER_INTEGRATOR("python", IntegratorPython);
+REGISTER_INTEGRATOR("python", PythonIntegrator);
