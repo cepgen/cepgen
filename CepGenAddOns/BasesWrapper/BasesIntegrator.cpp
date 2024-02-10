@@ -25,15 +25,14 @@
 
 namespace cepgen {
   /// Bases integration algorithm
-  class IntegratorBases : public Integrator {
+  class BasesIntegrator : public Integrator {
   public:
-    explicit IntegratorBases(const ParametersList& params) : Integrator(params) {
+    explicit BasesIntegrator(const ParametersList& params) : Integrator(params) {
       bsinit_();
       bparm1_.ncall = steer<int>("numFunctionCalls");
       std::fill(bparm1_.ig.begin(), bparm1_.ig.end(), false);
       bscntl_.intv = steer<int>("intv");
       bscntl_.ipnt = steer<int>("verbose");
-      setLimits(std::vector<Limits>(50, {0., 1.}));
     }
 
     static ParametersDescription description() {
@@ -55,19 +54,20 @@ namespace cepgen {
     }
 
     Value integrate(Integrand& integr) override {
+      checkLimits(integr);  // check the integration bounds
       bparm1_.ndim = integr.size();
       const auto wild_vars = steer<std::vector<int> >("wildVars");
       bparm1_.nwild = wild_vars.size();
       for (const auto& wc : wild_vars) {
         if (wc < 0 || wc >= bparm1_.ndim)
-          throw CG_FATAL("IntegratorBases:integrate") << "Invalid 'wild' variable coordinate set: " << wc << ".";
+          throw CG_FATAL("BasesIntegrator:integrate") << "Invalid 'wild' variable coordinate set: " << wc << ".";
         bparm1_.ig[wc] = true;
       }
       double res, unc, ctime;
       int it1, it2;
       gIntegrand = &integr;
       bases_(integrand_bases, res, unc, ctime, it1, it2);
-      CG_DEBUG("IntegratorBases:integrate")
+      CG_DEBUG("BasesIntegrator:integrate")
           << "Integration performed in " << ctime << " s. " << utils::s("iteration", it1, true)
           << " for the grid definition, " << utils::s("iteration", it2, true) << " for the integration.";
       return Value{res, unc};
@@ -77,10 +77,10 @@ namespace cepgen {
     static Integrand* gIntegrand;
     static double integrand_bases(double in[]) {
       if (!gIntegrand)
-        throw CG_FATAL("IntegratorBases") << "Integrand was not specified before integration.";
+        throw CG_FATAL("BasesIntegrator") << "Integrand was not specified before integration.";
       return gIntegrand->eval(std::vector<double>(in, in + gIntegrand->size()));
     }
   };
-  Integrand* IntegratorBases::gIntegrand = nullptr;
+  Integrand* BasesIntegrator::gIntegrand = nullptr;
 }  // namespace cepgen
-REGISTER_INTEGRATOR("bases", IntegratorBases);
+REGISTER_INTEGRATOR("bases", BasesIntegrator);
