@@ -22,13 +22,13 @@ if(CMAKE_BUILD_FOAM)
   find_package(ROOT COMPONENTS Hist MathCore Foam)
   list(FIND ROOT_LIBRARIES "/usr/lib64/root/libFoam.so" _idx)
   if(${_idx} GREATER -1)
-    list(APPEND sources IntegratorFoam.cpp FoamGeneratorWorker.cpp)
+    file(GLOB foam_sources Foam*.cpp)
   endif()
 endif()
 
 #----- build the object
 
-cepgen_build(CepGenRoot SOURCES ${sources}
+cepgen_build(CepGenRoot SOURCES ${sources} ${foam_sources}
     EXT_HEADERS ${ROOT_INCLUDE_DIRS}
     EXT_LIBS ${ROOT_LIBRARIES}
     TESTS test/*.cc
