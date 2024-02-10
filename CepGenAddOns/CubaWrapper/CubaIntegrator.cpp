@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2023  Laurent Forthomme
+ *  Copyright (C) 2021-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,12 +18,12 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/Integrand.h"
-#include "CepGenAddOns/CubaWrapper/IntegratorCuba.h"
+#include "CepGenAddOns/CubaWrapper/CubaIntegrator.h"
 
 namespace cepgen {
-  Integrand* IntegratorCuba::gIntegrand = nullptr;
+  Integrand* CubaIntegrator::gIntegrand = nullptr;
 
-  IntegratorCuba::IntegratorCuba(const ParametersList& params)
+  CubaIntegrator::CubaIntegrator(const ParametersList& params)
       : Integrator(params),
         ncomp_(steer<int>("ncomp")),
         nvec_(steer<int>("nvec")),
@@ -33,12 +33,12 @@ namespace cepgen {
         maxeval_(steer<int>("maxeval")),
         verbose_(steer<int>("verbose")) {}
 
-  Value IntegratorCuba::integrate(Integrand& integr) {
+  Value CubaIntegrator::integrate(Integrand& integr) {
     gIntegrand = &integr;
     return integrate();
   }
 
-  ParametersDescription IntegratorCuba::description() {
+  ParametersDescription CubaIntegrator::description() {
     auto desc = Integrator::description();
     desc.setDescription("Cuba generic integration algorithm");
     desc.add<int>("ncomp", 1).setDescription("number of components of the integrand");
@@ -46,16 +46,16 @@ namespace cepgen {
     desc.add<double>("epsrel", 1.e-3).setDescription("requested relative accuracy");
     desc.add<double>("epsabs", 1.e-12).setDescription("requested absolute accuracy");
     desc.add<int>("mineval", 0).setDescription("minimum number of integrand evaluations required");
-    desc.add<int>("maxeval", 50000).setDescription("(approximate) maximum number of integrand evaluations allowed");
+    desc.add<int>("maxeval", 50'000).setDescription("(approximate) maximum number of integrand evaluations allowed");
     desc.add<int>("verbose", 0);
     return desc;
   }
 
   int cuba_integrand(const int* ndim, const double xx[], const int* /*ncomp*/, double ff[], void* /*userdata*/) {
-    if (!IntegratorCuba::gIntegrand)
+    if (!CubaIntegrator::gIntegrand)
       throw CG_FATAL("cuba_integrand") << "Integrand not set for the Cuba algorithm!";
     //TODO: handle the non-[0,1] ranges
-    ff[0] = IntegratorCuba::gIntegrand->eval(std::vector<double>(xx, xx + *ndim));
+    ff[0] = CubaIntegrator::gIntegrand->eval(std::vector<double>(xx, xx + *ndim));
     return 0;
   }
 }  // namespace cepgen
