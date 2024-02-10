@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,18 +19,18 @@
 #include <gsl/gsl_monte_vegas.h>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Integration/GSLIntegrator.h"
 #include "CepGen/Integration/Integrand.h"
-#include "CepGen/Integration/IntegratorGSL.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/ProcessVariablesAnalyser.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
   /// Vegas integration algorithm developed by P. Lepage, as documented in \cite Lepage:1977sw
-  class IntegratorVegas final : public IntegratorGSL {
+  class VegasIntegrator final : public GSLIntegrator {
   public:
-    explicit IntegratorVegas(const ParametersList& params)
-        : IntegratorGSL(params),
+    explicit VegasIntegrator(const ParametersList& params)
+        : GSLIntegrator(params),
           ncvg_(steer<int>("numFunctionCalls")),
           chisq_cut_(steer<double>("chiSqCut")),
           treat_(steer<bool>("treat")) {
@@ -38,7 +38,7 @@ namespace cepgen {
     }
 
     static ParametersDescription description() {
-      auto desc = IntegratorGSL::description();
+      auto desc = GSLIntegrator::description();
       desc.setDescription("Vegas stratified sampling integrator");
       desc.add<int>("numFunctionCalls", 100'000);
       desc.add<double>("chiSqCut", 1.5);
@@ -56,11 +56,11 @@ namespace cepgen {
     enum class Mode { importance = 1, importanceOnly = 0, stratified = -1 };
     friend std::ostream& operator<<(std::ostream& os, const Mode& mode) {
       switch (mode) {
-        case IntegratorVegas::Mode::importance:
+        case VegasIntegrator::Mode::importance:
           return os << "importance";
-        case IntegratorVegas::Mode::importanceOnly:
+        case VegasIntegrator::Mode::importanceOnly:
           return os << "importance-only";
-        case IntegratorVegas::Mode::stratified:
+        case VegasIntegrator::Mode::stratified:
           return os << "stratified";
       }
       return os;
@@ -111,7 +111,7 @@ namespace cepgen {
     mutable std::vector<double> x_new_;
   };
 
-  Value IntegratorVegas::integrate(Integrand& integrand) {
+  Value VegasIntegrator::integrate(Integrand& integrand) {
     setIntegrand(integrand);
 
     //--- start by preparing the grid/state
@@ -123,11 +123,9 @@ namespace cepgen {
     vegas_params_.mode = steer<int>("mode");
     //--- output logging
     const auto& log = steer<std::string>("loggingOutput");
-    if (log == "cerr")
-      // redirect all debugging information to the error stream
+    if (log == "cerr")  // redirect all debugging information to the error stream
       vegas_params_.ostream = stderr;
-    else if (log == "cout")
-      // redirect all debugging information to the standard stream
+    else if (log == "cout")  // redirect all debugging information to the standard stream
       vegas_params_.ostream = stdout;
     else
       vegas_params_.ostream = fopen(log.c_str(), "w");
@@ -138,28 +136,32 @@ namespace cepgen {
                                  << "Number of iterations in Vegas: " << vegas_params_.iterations << ",\n\t"
                                  << "α-value: " << vegas_params_.alpha << ",\n\t"
                                  << "Verbosity: " << vegas_params_.verbose << ",\n\t"
-                                 << "Grid interpolation mode: " << (IntegratorVegas::Mode)vegas_params_.mode << ".";
+                                 << "Grid interpolation mode: " << (VegasIntegrator::Mode)vegas_params_.mode << ".";
     if (!vegas_state_)
       throw CG_FATAL("Integrator:integrate") << "Vegas state not initialised!";
 
     //--- launch integration
 
     // warmup (prepare the grid)
-    warmup(25000);
+    warmup(25'000);
 
     // integration phase
     unsigned short it_chisq = 0;
     double result, abserr;
     do {
-      int res = gsl_monte_vegas_integrate(function_.get(),
-                                          &xlow_[0],
-                                          &xhigh_[0],
-                                          function_->dim,
-                                          0.2 * ncvg_,
-                                          rnd_gen_->engine<gsl_rng>(),
-                                          vegas_state_.get(),
-                                          &result,
-                                          &abserr);
+      if (int res = gsl_monte_vegas_integrate(function_.get(),
+                                              &xlow_[0],
+                                              &xhigh_[0],
+                                              function_->dim,
+                                              0.2 * ncvg_,
+                                              rnd_gen_->engine<gsl_rng>(),
+                                              vegas_state_.get(),
+                                              &result,
+                                              &abserr);
+          res != GSL_SUCCESS)
+        throw CG_FATAL("Integrator:integrate")
+            << "Error at iteration #" << it_chisq << " while performing the integration!\n\t"
+            << "GSL error: " << gsl_strerror(res) << ".";
       CG_LOG << "\t>> at call " << (++it_chisq) << ": "
              << utils::format(
                     "average = %10.6f   "
@@ -167,11 +169,7 @@ namespace cepgen {
                     result,
                     abserr,
                     gsl_monte_vegas_chisq(vegas_state_.get()));
-      if (res != GSL_SUCCESS)
-        throw CG_FATAL("Integrator:integrate")
-            << "Error at iteration #" << it_chisq << " while performing the integration!\n\t"
-            << "GSL error: " << gsl_strerror(res) << ".";
-    } while (fabs(gsl_monte_vegas_chisq(vegas_state_.get()) - 1.) > chisq_cut_ - 1.);
+    } while (std::fabs(gsl_monte_vegas_chisq(vegas_state_.get()) - 1.) > chisq_cut_ - 1.);
     CG_DEBUG("Integrator:integrate") << "Vegas grid information:\n\t"
                                      << "ran for " << vegas_state_->dim << " dimensions, "
                                      << "and generated " << vegas_state_->bins_max << " bins.\n\t"
@@ -180,29 +178,28 @@ namespace cepgen {
     return Value{result, abserr};
   }
 
-  void IntegratorVegas::warmup(size_t ncall) {
+  void VegasIntegrator::warmup(size_t ncall) {
     if (!vegas_state_)
       throw CG_FATAL("Integrator:warmup") << "Vegas state not initialised!";
-
     // perform a first integration to warm up the grid
     double result = 0., abserr = 0.;
-    int res = gsl_monte_vegas_integrate(function_.get(),
-                                        &xlow_[0],
-                                        &xhigh_[0],
-                                        function_->dim,
-                                        ncall,
-                                        rnd_gen_->engine<gsl_rng>(),
-                                        vegas_state_.get(),
-                                        &result,
-                                        &abserr);
-
     // ensure the operation was successful
-    if (res != GSL_SUCCESS)
-      throw CG_ERROR("Integrator:vegas") << "Failed to warm-up the Vegas grid.\n\t"
-                                         << "GSL error: " << gsl_strerror(res) << ".";
+    if (int res = gsl_monte_vegas_integrate(function_.get(),
+                                            &xlow_[0],
+                                            &xhigh_[0],
+                                            function_->dim,
+                                            ncall,
+                                            rnd_gen_->engine<gsl_rng>(),
+                                            vegas_state_.get(),
+                                            &result,
+                                            &abserr);
 
-    CG_INFO("Integrator:vegas") << "Finished the Vegas warm-up.";
+        res != GSL_SUCCESS)
+      throw CG_ERROR("VegasIntegrator:warmup") << "Failed to warm-up the Vegas grid.\n\t"
+                                               << "GSL error: " << gsl_strerror(res) << ".";
+
+    CG_INFO("VegasIntegrator:warmup") << "Finished the Vegas warm-up.";
   }
 }  // namespace cepgen
 
-REGISTER_INTEGRATOR("Vegas", IntegratorVegas);
+REGISTER_INTEGRATOR("Vegas", VegasIntegrator);

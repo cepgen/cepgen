@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Integration_IntegratorGSL_h
-#define CepGen_Integration_IntegratorGSL_h
+#ifndef CepGen_Integration_GSLIntegrator_h
+#define CepGen_Integration_GSLIntegrator_h
 
 #include <gsl/gsl_rng.h>
 
@@ -28,9 +28,9 @@
 #include "CepGen/Utils/GSLFunctionsWrappers.h"
 
 namespace cepgen {
-  class IntegratorGSL : public Integrator {
+  class GSLIntegrator : public Integrator {
   public:
-    explicit IntegratorGSL(const ParametersList&);
+    explicit GSLIntegrator(const ParametersList&);
 
     static ParametersDescription description();
 
