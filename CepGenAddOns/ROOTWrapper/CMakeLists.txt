@@ -8,14 +8,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   return()
 endif()
 
-set(sources IntegratorROOT.cpp
-            ROOTAnalyticalIntegrator.cpp
-            ROOTDerivator.cpp
-            ROOTDrawer.cpp
-            ROOTFunctional.cpp
-            ROOTHistsHandler.cpp
-            ROOTRandomGenerator.cpp
-            ROOTTree*.cpp)
+file(GLOB root_sources ROOT*.cpp)
 
 #--- FOAM integrator
 if(CMAKE_BUILD_FOAM)
@@ -28,7 +21,7 @@ endif()
 
 #----- build the object
 
-cepgen_build(CepGenRoot SOURCES ${sources} ${foam_sources}
+cepgen_build(CepGenRoot SOURCES ${root_sources} ${foam_sources}
     EXT_HEADERS ${ROOT_INCLUDE_DIRS}
     EXT_LIBS ${ROOT_LIBRARIES}
     TESTS test/*.cc
