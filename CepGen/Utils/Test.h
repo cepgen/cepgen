@@ -77,7 +77,7 @@ namespace cepgen {
              << " " << cepgen::utils::colourise(name, cepgen::utils::Colour::magenta) << "\n"                        \
              << "\tdifference: " << diff << ", sigma: " << unc << " = " << diff / unc << " * sigma "                 \
              << ((diff > nsigma * unc) ? ">" : "<") << " " << nsigma << " * sigma.";                                 \
-    if (diff > nsigma * unc)                                                                                         \
+    if (unc > 0 && diff > nsigma * unc)                                                                              \
       CG_FAILED(name) << " difference " << diff << " is not within " << nsigma << " sigmas=" << unc << ".";          \
     else {                                                                                                           \
       CG_PASSED(name);                                                                                               \
