@@ -48,7 +48,8 @@ namespace cepgen {
             extension_(steer<std::string>("extension")),
             persist_(steer<bool>("persist")),
             size_(steer<std::vector<std::string> >("size")),
-            font_(steer<std::string>("font")) {
+            font_(steer<std::string>("font")),
+            plot_style_(steer<std::string>("plotStyle")) {
         if (size_.size() != 2)
           throw CG_FATAL("GnuplotDrawer") << "Invalid canvas size specified: " << size_ << ".";
       }
@@ -60,6 +61,7 @@ namespace cepgen {
         desc.add<bool>("persist", false);
         desc.add<std::vector<std::string> >("size", {"30cm", "20cm"});
         desc.add<std::string>("font", "");
+        desc.add<std::string>("plotStyle", "lp");
         return desc;
       }
 
@@ -124,7 +126,7 @@ namespace cepgen {
         cmds += "set label 'CepGen v" + version::tag + "' at graph 1,1.025 right";
         return cmds;
       }
-      static Piper::Commands drawGraph1D(const Graph1D&, const Mode&);
+      static Piper::Commands drawGraph1D(const Graph1D&, const Mode&, const std::string&);
       static Piper::Commands drawHist1D(const Hist1D&, const Mode&);
       static std::string delatexify(const std::string& tok) {
         //return "\""s + utils::replace_all(tok, {{"\\", "\\\\"}}) + "\"";
@@ -134,12 +136,12 @@ namespace cepgen {
       const std::string extension_;
       const bool persist_;
       const std::vector<std::string> size_;
-      const std::string font_;
+      const std::string font_, plot_style_;
     };
 
     const GnuplotDrawer& GnuplotDrawer::draw(const Graph1D& graph, const Mode& mode) const {
       auto cmds = preDraw(graph, mode);
-      cmds += drawGraph1D(graph, mode);
+      cmds += drawGraph1D(graph, mode, plot_style_);
       execute(cmds, graph.name());
       return *this;
     }
@@ -236,7 +238,7 @@ namespace cepgen {
       std::vector<std::string> plot_cmds, splot_cmds;
       for (const auto* obj : objs) {
         if (obj->isGraph1D()) {
-          auto gr_cmds = drawGraph1D(*dynamic_cast<const Graph1D*>(obj), mode);
+          auto gr_cmds = drawGraph1D(*dynamic_cast<const Graph1D*>(obj), mode, plot_style_);
           auto it = gr_cmds.begin();
           while (it != gr_cmds.end())
             if (startsWith(*it, "plot")) {
@@ -281,7 +283,7 @@ namespace cepgen {
       return *this;
     }
 
-    Piper::Commands GnuplotDrawer::drawGraph1D(const Graph1D& graph, const Mode&) {
+    Piper::Commands GnuplotDrawer::drawGraph1D(const Graph1D& graph, const Mode&, const std::string& style) {
       Piper::Commands cmds;
       auto rnd = randomString(5);
       cmds += "$DATA_" + rnd + " << EOD";
@@ -289,7 +291,7 @@ namespace cepgen {
         cmds +=
             merge(std::vector<double>{pt.first.value, pt.first.value_unc, pt.second, pt.second.uncertainty()}, "\t");
       cmds += "EOD";
-      cmds += "plot '$DATA_" + rnd + "' u 1:3 notitle";
+      cmds += "plot '$DATA_" + rnd + "' u 1:3 w " + style + " notitle";
       return cmds;
     }
 

@@ -254,11 +254,14 @@ namespace cepgen {
         break;
     }
     init_ = true;
+    CG_DEBUG("GridHandler").log([&](auto& log) {
+      log << "Grid evaluator initialised with boundaries: " << boundaries() << ".";
 #ifdef GRID_HANDLER_DEBUG
-    CG_DEBUG("GridHandler") << "Grid evaluator initialised with boundaries: " << boundaries() << "\n"
-                            << "Values handled:\n"
-                            << values_raw_;
+      log << "\n"
+          << "Values handled:\n"
+          << values_raw_;
 #endif
+    });
   }
 
   template <size_t D, size_t N>

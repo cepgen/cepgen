@@ -10,7 +10,7 @@ endif()
 
 #----- build the object
 
-cepgen_build(CepGenCuba SOURCES IntegratorCuba*.cpp
+cepgen_build(CepGenCuba SOURCES *CubaIntegrator.cpp
     EXT_LIBS ${CUBA}
     EXT_HEADERS ${CUBA_INCLUDE}
     PROPERTY POSITION_INDEPENDENT_CODE ON

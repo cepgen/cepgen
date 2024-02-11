@@ -17,8 +17,8 @@
  */
 
 #include "CepGen/Cards/Handler.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Generator.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Message.h"
@@ -41,11 +41,11 @@ int main(int argc, char* argv[]) {
     CG_LOG_LEVEL(debugInsideLoop);
 
   cepgen::Generator gen;
-  gen.setParameters(cepgen::card::Handler::parseFile(input_card));
-  gen.parametersRef().process().initialise();
-  CG_DEBUG("main") << gen.parameters();
+  gen.setRunParameters(cepgen::card::Handler::parseFile(input_card));
+  gen.runParameters().process().initialise();
+  CG_DEBUG("main") << gen.runParameters();
 
-  const auto ndim = gen.parameters()->process().ndim();
+  const auto ndim = gen.runParameters().process().ndim();
   vector<point_t> points;
   if (num_scans > 0) {
     for (const auto& range : cepgen::Limits{0., 1.}.generate(num_scans))

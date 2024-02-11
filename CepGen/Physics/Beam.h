@@ -42,22 +42,19 @@ namespace cepgen {
     /// Initialise the fluxes evaluator object
     void initialise();
 
-    /// Does the beam remain on-shell after parton emission?
-    bool elastic() const { return elastic_; }
+    bool elastic() const { return elastic_; }  ///< Does the beam remain on-shell after parton emission?
     /// Specify if the beam remains on-shell after parton emission
-    Beam& setElastic(bool elastic) {
-      elastic_ = elastic;
+    Beam& setElastic(bool el) {
+      elastic_ = el;
       return *this;
     }
-    /// Beam particle PDG id
-    pdgid_t pdgId() const { return pdg_id_; }
+    pdgid_t pdgId() const { return pdg_id_; }  ///< Beam particle PDG id
     /// Set the beam particle PDG id
     Beam& setPdgId(pdgid_t pdg) {
       pdg_id_ = pdg;
       return *this;
     }
-    /// Beam particle 4-momentum
-    const Momentum& momentum() const { return momentum_; }
+    const Momentum& momentum() const { return momentum_; }  ///< Beam particle 4-momentum
     /// Set the beam particle 4-momentum
     Beam& setMomentum(const Momentum& mom) {
       momentum_ = mom;

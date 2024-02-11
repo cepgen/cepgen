@@ -131,8 +131,9 @@ namespace cepgen {
       auto* hs = canv.Make<THStack>();
       setMode(canv, mode);
       Drawable* first = nullptr;
-      size_t i = 0;
-      for (const auto* obj : objs) {
+      DrawableColl plots_2d;
+      for (size_t i = 0; i < objs.size(); ++i) {
+        const auto* obj = objs.at(i);
         auto colour = ROOTCanvas::colours.at(i % ROOTCanvas::colours.size());
         auto style = i + 1;
         if (obj->isHist1D()) {
@@ -148,27 +149,56 @@ namespace cepgen {
           mg->Add(gr);
           canv.AddLegendEntry(gr, gr->GetTitle(), "l");
         } else {
-          CG_WARNING("ROOTDrawer:draw") << "Cannot add drawable '" << obj->name() << "' to the stack.";
+          plots_2d.emplace_back(obj);
+          CG_DEBUG("ROOTDrawer:draw") << "Adding a 2-dimensional drawable '" << obj->name() << "' to the stack.";
           continue;
         }
-        ++i;
         if (!first)
           first = const_cast<Drawable*>(obj);
       }
       const bool has_hists = hs->GetHists() && !hs->GetHists()->IsEmpty();
       const bool has_graphs = mg->GetListOfGraphs() && !mg->GetListOfGraphs()->IsEmpty();
-      if (has_hists)
-        hs->Draw(mode & Mode::nostack ? "nostack" : "");
-      if (has_graphs)
-        mg->Draw((std::string("l") + (!has_hists ? "a" : "")).c_str());
-      if (has_hists) {
-        postDraw(hs->GetHistogram(), *first);
-        canv.Prettify(hs);
-      } else if (has_graphs) {
-        postDraw(mg->GetHistogram(), *first);
-        canv.Prettify(mg);
+      if (has_hists || has_graphs) {
+        if (has_hists)
+          hs->Draw(mode & Mode::nostack ? "nostack" : "");
+        if (has_graphs)
+          mg->Draw((std::string("l") + (!has_hists ? "a" : "")).c_str());
+        if (has_hists) {
+          postDraw(hs->GetHistogram(), *first);
+          canv.Prettify(hs);
+        } else if (has_graphs) {
+          postDraw(mg->GetHistogram(), *first);
+          canv.Prettify(mg);
+        }
+        canv.Save(def_extension_);
       }
-      canv.Save(def_extension_);
+      for (size_t i = 0; i < plots_2d.size(); ++i) {
+        const auto* obj = plots_2d.at(i);
+        const std::string postfix = i == 0 ? "(" : i == plots_2d.size() - 1 ? ")" : "";
+        if (obj->isHist2D()) {
+          const auto* hist = dynamic_cast<const Hist2D*>(obj);
+          auto* h = new TH2D(convert(*hist));
+          setMode(canv, mode);
+          h->Draw("colz");
+          canv.Prettify(h);
+          postDraw(h, *hist);
+        } else if (obj->isGraph2D()) {
+          const auto* graph = dynamic_cast<const Graph2D*>(obj);
+          auto* gr = new TGraph2D(convert(*graph));
+          setMode(canv, mode);
+          if (mode & Mode::col)
+            gr->Draw("colz");
+          else if (mode & Mode::cont)
+            gr->Draw("cont");
+          else
+            gr->Draw("surf3");
+          gr->GetHistogram()->SetTitle(
+              delatexify(";" + graph->xAxis().label() + ";" + graph->yAxis().label() + ";" + graph->zAxis().label()));
+          canv.Prettify(gr->GetHistogram());
+          postDraw(gr->GetHistogram(), *graph);
+        }
+        canv.Print(utils::format("%s_multi.%s%s", canv.GetName(), def_extension_.data(), postfix.data()).data());
+      }
       return *this;
     }
 
@@ -188,6 +218,7 @@ namespace cepgen {
       const auto &xrng = dr.xAxis().range(), &yrng = dr.yAxis().range();
       obj->GetXaxis()->SetTitle(delatexify(dr.xAxis().label()));
       obj->GetYaxis()->SetTitle(delatexify(dr.yAxis().label()));
+      obj->SetLineWidth(std::max((short)3, obj->GetLineWidth()));
       if (xrng.valid())
         obj->GetXaxis()->SetLimits(xrng.min(), xrng.max());
       if (yrng.valid()) {
@@ -235,8 +266,8 @@ namespace cepgen {
     }
 
     TH1D ROOTDrawer::convert(const Hist1D& hist) {
-      const auto& rng = hist.range();
-      TH1D h(hist.name().c_str(), delatexify(hist.title()), hist.nbins(), rng.min(), rng.max());
+      const auto bins = hist.bins(Histogram::BinMode::both);
+      TH1D h(hist.name().c_str(), delatexify(hist.title()), bins.size() - 1, bins.data());
       h.SetBinContent(0, hist.underflow());
       for (size_t i = 0; i < hist.nbins(); ++i) {
         const auto val = hist.value(i);
@@ -250,15 +281,13 @@ namespace cepgen {
     }
 
     TH2D ROOTDrawer::convert(const Hist2D& hist) {
-      const auto &rng_x = hist.rangeX(), &rng_y = hist.rangeY();
+      const auto bins_x = hist.binsX(Histogram::BinMode::both), bins_y = hist.binsY(Histogram::BinMode::both);
       TH2D h(hist.name().c_str(),
              delatexify(hist.title()),
-             hist.nbinsX(),
-             rng_x.min(),
-             rng_x.max(),
-             hist.nbinsY(),
-             rng_y.min(),
-             rng_y.max());
+             bins_x.size() - 1,
+             bins_x.data(),
+             bins_y.size() - 1,
+             bins_y.data());
       for (size_t ix = 0; ix < hist.nbinsX(); ++ix)
         for (size_t iy = 0; iy < hist.nbinsY(); ++iy) {
           const auto val = hist.value(ix, iy);

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #include "CepGen/Cards/LpairHandler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Generator.h"  // for library loading
@@ -29,7 +30,6 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Process/Process.h"
@@ -152,7 +152,7 @@ namespace cepgen {
       registerKinematicsParameter<double>("MXMAX", "Maximal invariant mass of proton remnants", "mxmax");
     }
 
-    Parameters* LpairHandler::parseFile(const std::string& filename, Parameters* params) {
+    RunParameters* LpairHandler::parseFile(const std::string& filename, RunParameters* params) {
       if (!utils::fileExists(filename))
         throw CG_FATAL("LpairHandler") << "Unable to locate steering card \"" << filename << "\".";
       rt_params_ = params;
@@ -265,8 +265,8 @@ namespace cepgen {
       f.close();
     }
 
-    void LpairHandler::pack(const Parameters* params) {
-      rt_params_ = const_cast<Parameters*>(params);
+    void LpairHandler::pack(const RunParameters* params) {
+      rt_params_ = const_cast<RunParameters*>(params);
       str_fun_ = rt_params_->kinematics().incomingBeams().structureFunctions().name<int>();
       sr_type_ = rt_params_->kinematics().incomingBeams().structureFunctions().get<int>("sigmaRatio");
       //kmr_grid_path_ = kmr::GluonGrid::get().path();
@@ -364,5 +364,5 @@ namespace cepgen {
     }
   }  // namespace card
 }  // namespace cepgen
-typedef cepgen::card::LpairHandler LpairCardHandler;
-REGISTER_CARD_HANDLER(".card", LpairCardHandler);
+using cepgen::card::LpairHandler;
+REGISTER_CARD_HANDLER(".card", LpairHandler);

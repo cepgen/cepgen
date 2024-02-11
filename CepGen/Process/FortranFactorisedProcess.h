@@ -28,7 +28,9 @@ namespace cepgen {
     /// Compute the matrix element for a generic factorised process defined in a Fortran weighting function
     class FortranFactorisedProcess : public FactorisedProcess {
     public:
-      explicit FortranFactorisedProcess(const ParametersList& params, std::function<double(void)> func);
+      /// Construct a Fortran-CepGen interface object using a double precision argument-less F77 function
+      /// \param[in] func a double precision argument-less Fortran function returning the event weight
+      explicit FortranFactorisedProcess(const ParametersList&, const std::function<double(void)>& func);
       ProcessPtr clone() const override { return ProcessPtr(new FortranFactorisedProcess(*this)); }
 
       static ParametersList kProcParameters;
@@ -38,7 +40,7 @@ namespace cepgen {
       double computeFactorisedMatrixElement() override final;
       void fillCentralParticlesKinematics() override final;
 
-      std::function<double(void)> func_;  ///< Function to be called for weight computation
+      const std::function<double(void)> func_;  ///< Function to be called for weight computation
 
       // mapped variables
       double m_y1_;           ///< First outgoing particle rapidity

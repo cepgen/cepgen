@@ -72,10 +72,10 @@ namespace cepgen {
       prepareFactorisedPhaseSpace();
 
       // register the outgoing remnants' variables
-      mX2() = pA().mass2();
+      mX2() = mA2();
       if (!kinematics().incomingBeams().positive().elastic())
         defineVariable(mX2(), Mapping::square, kinematics().cuts().remnants.mx, "Positive-z beam remnant squared mass");
-      mY2() = pB().mass2();
+      mY2() = mB2();
       if (!kinematics().incomingBeams().negative().elastic())
         defineVariable(mY2(), Mapping::square, kinematics().cuts().remnants.mx, "Negative-z beam remnant squared mass");
     }
@@ -92,7 +92,7 @@ namespace cepgen {
       return fluxes_weight * cent_me;
     }
 
-    void FactorisedProcess::fillKinematics(bool) {
+    void FactorisedProcess::fillKinematics() {
       fillCentralParticlesKinematics();  // process-dependent!
 
       // beam systems
@@ -107,10 +107,9 @@ namespace cepgen {
       part1.setMomentum(pA() - pX(), true);
       part2.setMomentum(pB() - pY(), true);
 
-      // two-parton system
-      event().oneWithRole(Particle::Intermediate).setMomentum(part1.momentum() + part2.momentum(), true);
+      // add couplings to metadata
       if (store_alphas_) {
-        const auto two_part_mass = event().oneWithRole(Particle::Intermediate).momentum().mass();
+        const auto two_part_mass = (part1.momentum() + part2.momentum()).mass();
         event().metadata["alphaEM"] = alphaEM(two_part_mass);
         event().metadata["alphaS"] = alphaS(two_part_mass);
       }

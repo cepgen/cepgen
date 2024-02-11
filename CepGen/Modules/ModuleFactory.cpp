@@ -26,6 +26,7 @@
 #include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
+#include "CepGen/EventFilter/EventImporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Integration/AnalyticIntegrator.h"
@@ -93,6 +94,20 @@ namespace cepgen {
   }
 
   template <typename T, typename I>
+  ParametersDescription ModuleFactory<T, I>::describeParameters(const ParametersList& params) const {
+    if (!params.hasName<I>())
+      throw CG_FATAL("ModuleFactory") << description_ << " failed to retrieve an indexing key "
+                                      << "from parameters to describe the module!\n"
+                                      << "Parameters: " << params << ".\n"
+                                      << "Registered modules: " << modules() << ".";
+    const auto& idx = params.name<I>();
+    if (params_map_.count(idx) == 0)
+      throw CG_FATAL("ModuleFactory") << "No parameters description were found for module index/name '" << idx << "'.\n"
+                                      << "Registered modules: " << modules() << ".";
+    return params_map_.at(idx).steer(params);
+  }
+
+  template <typename T, typename I>
   ParametersDescription ModuleFactory<T, I>::describeParameters(const I& name, const ParametersList& params) const {
     if (std::is_base_of<std::string, I>::value) {
       auto extra_params = utils::split(utils::to_string(name), '<');
@@ -123,6 +138,7 @@ namespace cepgen {
   template class ModuleFactory<Coupling, std::string>;
   template class ModuleFactory<utils::Derivator, std::string>;
   template class ModuleFactory<utils::Drawer, std::string>;
+  template class ModuleFactory<EventImporter, std::string>;
   template class ModuleFactory<EventModifier, std::string>;
   template class ModuleFactory<EventExporter, std::string>;
   template class ModuleFactory<formfac::Parameterisation, std::string>;

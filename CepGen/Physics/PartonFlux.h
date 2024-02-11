@@ -32,7 +32,7 @@ namespace cepgen {
     /// is the flux parton kT-dependent?
     virtual bool ktFactorised() const { return false; }
     /// is the initiator particle fragmenting after the parton emission?
-    virtual bool fragmenting() const { return true; }
+    virtual bool fragmenting() const = 0;
     /// parton PDG identifier
     virtual pdgid_t partonPdgId() const = 0;
     /// initiator particle squared mass

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -410,5 +410,5 @@ namespace cepgen {
     std::string TextDrawer::delatexify(const std::string& tok) { return utils::replace_all(tok, {{"$", ""}}); }
   }  // namespace utils
 }  // namespace cepgen
-typedef cepgen::utils::TextDrawer TxtDrawer;
-REGISTER_DRAWER("text", TxtDrawer);
+using cepgen::utils::TextDrawer;
+REGISTER_DRAWER("text", TextDrawer);

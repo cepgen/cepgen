@@ -1,6 +1,8 @@
 import Config.Core as cepgen
-from Config.Integration.vegas_cff import integrator
-from Config.Logger_cfi import logger
+import Config.ktProcess_cfi as kt
+from Config.Integration.vegas_cfi import vegas as integrator
+from Config.logger_cfi import logger
+from Config.generator_cfi import generator as _gen
 
 #logger.enabledModules += ('Generator.*',)
 
@@ -15,7 +17,6 @@ class EFTModel:
     WB = 7
     WbarB = 8
 
-import Config.ktProcess_cfi as kt
 process = kt.process.clone('pptoww',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
@@ -51,8 +52,7 @@ process = kt.process.clone('pptoww',
 )
 
 #--- generation parameters
-from Config.generator_cff import generator
-generator = generator.clone(
+generator = _gen.clone(
     numEvents = 10000,
     printEvery = 1000,
 )

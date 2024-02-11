@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2020-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,35 +31,30 @@
 
 namespace cepgen {
   namespace utils {
-    /// A collection of clocks to benchmark execution blocks
+    /// Collection of clocks to benchmark execution blocks
     class TimeKeeper {
     public:
-      /// Object constructor
       explicit TimeKeeper() = default;
 
-      /// Reset all counters and the timer
-      void clear();
-      /// Check if at least one monitor recorded something
-      bool empty() const { return monitors_.empty(); }
-      /// Count the time for one monitor
-      /// \param[in] func Which monitor to increment
-      /// \param[in] time Increment, in second (< 0 to count since last timer reset)
-      TimeKeeper& tick(const std::string& func, double time = -1.);
-      /// Write a summary of all monitors
-      std::string summary() const;
+      void clear();                                     ///< Reset all counters and the timer
+      bool empty() const { return monitors_.empty(); }  ///< Check if at least one monitor recorded something
+      std::string summary() const;                      ///< Write a summary of all monitors
 
-      /// Local timer object
-      const Timer& timer() const;
-      /// A scoped timekeeping utility
+      /// Count the time for one monitor
+      /// \param[in] func monitor to increment
+      /// \param[in] time increment, in second (< 0 to count since last timer reset)
+      TimeKeeper& tick(const std::string& func, double time = -1.);
+
+      const Timer& timer() const;  ///< Local timer object
+
+      /// Scoped timekeeping utility
       class Ticker {
       public:
-        /// Build a named and scoped time ticker
-        explicit Ticker(TimeKeeper*, const std::string&);
-        /// Ticker destructor to store the timing information to the parent timekeeper
-        ~Ticker();
+        explicit Ticker(TimeKeeper*, const std::string&);  ///< Build a named and scoped time ticker
+        ~Ticker();  ///< Ticker destructor to store the timing information to the parent timekeeper
 
       private:
-        TimeKeeper* tk_;
+        TimeKeeper* tk_{nullptr};
         std::string name_;
         Timer tmr_;
       };

@@ -19,7 +19,6 @@
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Filesystem.h"
 
@@ -36,7 +35,7 @@ int main(int argc, char* argv[]) {
   cepgen::initialise();
 
   try {
-    auto params = cepgen::card::Handler::parse(input_config);
+    auto* params = cepgen::card::Handler::parseFile(input_config);
     cepgen::card::Handler::write(params, output_config);
     CG_LOG << "Successfully converted the \"" << cepgen::utils::fileExtension(input_config) << "\" card into a \""
            << cepgen::utils::fileExtension(output_config) << "\" card.\n\t"

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,11 +21,11 @@
 #include <sstream>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Modules/EventExporterFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/Value.h"
@@ -85,9 +85,11 @@ namespace cepgen {
     run_tree_.create();
     evt_tree_.create();
     run_tree_.litigious_events = 0;
-    run_tree_.sqrt_s = runParameters().kinematics().incomingBeams().sqrtS();
-    run_tree_.process_name = runParameters().processName();
-    run_tree_.process_parameters = runParameters().process().parameters().serialise();
+    if (runParameters().hasProcess()) {
+      run_tree_.sqrt_s = runParameters().kinematics().incomingBeams().sqrtS();
+      run_tree_.process_name = runParameters().processName();
+      run_tree_.process_parameters = runParameters().process().parameters().serialise();
+    }
   }
 
   void ROOTTreeHandler::operator<<(const Event& ev) {

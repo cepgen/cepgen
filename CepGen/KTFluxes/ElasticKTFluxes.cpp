@@ -30,7 +30,7 @@ namespace cepgen {
   class ElasticNucleonKTFlux : public KTFlux {
   public:
     explicit ElasticNucleonKTFlux(const ParametersList& params)
-        : KTFlux(params), ff_(FormFactorsFactory::get().build(params_ + steer<ParametersList>("formFactors"))) {
+        : KTFlux(params), ff_(FormFactorsFactory::get().build(steer<ParametersList>("formFactors"))) {
       if (!ff_)
         throw CG_FATAL("ElasticNucleonKTFlux")
             << "Elastic kT flux requires a modelling of electromagnetic form factors!";
@@ -57,7 +57,7 @@ namespace cepgen {
 
   protected:
     /// Elastic form factors computation
-    std::unique_ptr<formfac::Parameterisation> ff_;
+    const std::unique_ptr<formfac::Parameterisation> ff_;
   };
 
   struct BudnevElasticNucleonKTFlux : public ElasticNucleonKTFlux {
@@ -101,7 +101,11 @@ namespace cepgen {
     explicit ElasticHeavyIonKTFlux(const ParametersList& params)
         : ElasticNucleonKTFlux(params),
           hi_(HeavyIon::fromPdgId(steer<pdgid_t>("heavyIon"))),
-          mass2_(hi_.mass() * hi_.mass()) {}
+          mass2_(hi_.mass() * hi_.mass()) {
+      CG_DEBUG("ElasticHeavyIonKTFlux") << "KT-factorised elastic photon-from-HI flux evaluator built for HI=" << hi_
+                                        << ", (mass=" << hi_.mass()
+                                        << "), electromagnetic form factors: " << ff_->parameters() << ".";
+    }
 
     static ParametersDescription description() {
       auto desc = ElasticNucleonKTFlux::description();

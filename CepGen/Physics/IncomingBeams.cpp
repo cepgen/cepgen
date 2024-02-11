@@ -27,6 +27,7 @@
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
+#include "CepGen/Utils/Math.h"
 
 namespace cepgen {
   IncomingBeams::IncomingBeams(const ParametersList& params) : SteeredObject(params) {
@@ -36,77 +37,60 @@ namespace cepgen {
   void IncomingBeams::setParameters(const ParametersList& params) {
     SteeredObject::setParameters(params);
     ParametersList plist_pos, plist_neg;
+    auto& pos_pdg = plist_pos.operator[]<int>("pdgId");
+    auto& neg_pdg = plist_neg.operator[]<int>("pdgId");
 
     // positive-z incoming beam
-    pdgid_t pos_pdg = steer<int>("beam1id");
-    const int hi_Z1 = steer<int>("beam1Z");
-    if (hi_Z1 != 0)
-      pos_pdg = HeavyIon(steer<int>("beam1A"), (Element)hi_Z1);
-    const auto& hi_beam1 = steer<std::vector<int> >("heavyIon1");
-    if (hi_beam1.size() == 2)
-      pos_pdg = HeavyIon{(unsigned short)hi_beam1.at(0), (Element)hi_beam1.at(1)};
-    else if (!hi_beam1.empty())
-      throw CG_FATAL("Kinematics") << "Invalid format for first incoming beam's HI specification!\n\t"
-                                   << "A pair of (A,Z) is required, got " << hi_beam1 << ".";
+    if (const auto& hi_Z1 = steerAs<int, Element>("beam1Z"); hi_Z1 != Element::invalid)
+      pos_pdg = HeavyIon(steer<int>("beam1A"), hi_Z1);
+    else if (const auto& hi_beam1 = steer<std::vector<int> >("heavyIon1"); hi_beam1.size() >= 2)
+      pos_pdg = HeavyIon{(unsigned short)hi_beam1.at(0), static_cast<Element>(hi_beam1.at(1))};
+    else
+      pos_pdg = steer<int>("beam1id");
 
     // negative-z incoming beam
-    pdgid_t neg_pdg = steer<int>("beam2id");
-    const int hi_A2 = steer<int>("beam2A");
-    const int hi_Z2 = steer<int>("beam2Z");
-    if (hi_Z2 != 0)
-      neg_pdg = HeavyIon(hi_A2, (Element)hi_Z2);
-    const auto& hi_beam2 = steer<std::vector<int> >("heavyIon2");
-    if (hi_beam2.size() == 2)
+    if (const auto& hi_Z2 = steerAs<int, Element>("beam2Z"); hi_Z2 != Element::invalid)
+      neg_pdg = HeavyIon(steer<int>("beam2A"), hi_Z2);
+    else if (const auto& hi_beam2 = steer<std::vector<int> >("heavyIon2"); hi_beam2.size() >= 2)
       neg_pdg = HeavyIon{(unsigned short)hi_beam2.at(0), (Element)hi_beam2.at(1)};
-    else if (!hi_beam2.empty())
-      throw CG_FATAL("Kinematics") << "Invalid format for second incoming beam's HI specification!\n\t"
-                                   << "A pair of (A,Z) is required, got " << hi_beam2 << ".";
+    else
+      neg_pdg = steer<int>("beam2id");
 
     //----- combined two-beam system
 
     //--- beams PDG ids
-    if (params_.has<std::vector<ParametersList> >("pdgIds")) {
-      const auto& beams_pdg = steer<std::vector<ParametersList> >("pdgIds");
-      if (beams_pdg.size() == 2) {
-        pos_pdg = abs(beams_pdg.at(0).get<int>("pdgid"));
-        neg_pdg = abs(beams_pdg.at(1).get<int>("pdgid"));
-      } else if (!beams_pdg.empty())
-        throw CG_FATAL("Kinematics") << "Invalid list of PDG ids retrieved for incoming beams:\n\t"
-                                     << "2 PDG ids are expected, " << beams_pdg << " provided.";
-    } else if (params_.has<std::vector<int> >("pdgIds")) {
-      const auto& beams_pdg = steer<std::vector<int> >("pdgIds");
-      if (beams_pdg.size() == 2) {
-        pos_pdg = abs(beams_pdg.at(0));
-        neg_pdg = abs(beams_pdg.at(1));
-      } else if (!beams_pdg.empty())
-        throw CG_FATAL("Kinematics") << "Invalid list of PDG ids retrieved for incoming beams:\n\t"
-                                     << "2 PDG ids are expected, " << beams_pdg << " provided.";
+    if (const auto& beams_pdg = steer<std::vector<ParametersList> >("pdgIds"); beams_pdg.size() >= 2) {
+      pos_pdg = std::abs(beams_pdg.at(0).get<int>("pdgid"));
+      neg_pdg = std::abs(beams_pdg.at(1).get<int>("pdgid"));
+    } else if (const auto& beams_pdg = steer<std::vector<int> >("pdgIds"); beams_pdg.size() >= 2) {
+      pos_pdg = std::abs(beams_pdg.at(0));
+      neg_pdg = std::abs(beams_pdg.at(1));
     }
-
-    plist_pos.set<int>("pdgId", pos_pdg);
-    plist_neg.set<int>("pdgId", neg_pdg);
 
     //--- beams longitudinal momentum
     double p1z = 0., p2z = 0;
-    const auto& beams_pz = steer<std::vector<double> >("pz");
-    if (beams_pz.size() == 2) {
+    if (const auto& beams_pz = steer<std::vector<double> >("pz"); beams_pz.size() >= 2) {
+      // fill from beam momenta
       p1z = beams_pz.at(0);
       p2z = beams_pz.at(1);
-    } else if (!beams_pz.empty())
-      throw CG_FATAL("Kinematics") << "Invalid format for beams pz specification!\n\t"
-                                   << "A vector of two pz's is required.";
-    else {
+    } else if (const auto& beams_ene = steer<std::vector<double> >("energies"); beams_ene.size() >= 2) {
+      // fill from beam energies
+      p1z = utils::fastSqrtSqDiff(beams_ene.at(0), PDG::get().mass(pos_pdg));
+      p2z = utils::fastSqrtSqDiff(beams_ene.at(1), PDG::get().mass(neg_pdg));
+    } else {
+      // when everything failed, retrieve "beamNpz" attributes
       params_.fill<double>("beam1pz", p1z);
       params_.fill<double>("beam2pz", p2z);
-    }
-    //--- centre-of-mass energy
-    if (pos_pdg == neg_pdg) {
-      const auto sqrts = params_.has<double>("sqrtS") && steer<double>("sqrtS") > 0.         ? steer<double>("sqrtS")
-                         : params_.has<double>("cmEnergy") && steer<double>("cmEnergy") > 0. ? steer<double>("cmEnergy")
-                                                                                             : 0.;
-      if (sqrts > 0.) {
-        p1z = +0.5 * sqrts;
-        p2z = -0.5 * sqrts;
+      if (pos_pdg == neg_pdg) {  // special case: symmetric beams -> fill from centre-of-mass energy
+        if (const auto sqrts = params_.has<double>("sqrtS") && steer<double>("sqrtS") > 0. ? steer<double>("sqrtS")
+                               : params_.has<double>("cmEnergy") && steer<double>("cmEnergy") > 0.
+                                   ? steer<double>("cmEnergy")
+                                   : 0.;
+            sqrts > 0.) {  // compute momenta from energy
+          const auto pz_abs = utils::fastSqrtSqDiff(0.5 * sqrts, PDG::get().mass(pos_pdg));
+          p1z = +pz_abs;
+          p2z = -pz_abs;
+        }
       }
     }
     //--- check the sign of both beams' pz
@@ -136,34 +120,37 @@ namespace cepgen {
       plist_neg.set<ParametersList>("partonFlux", params);
     };
 
-    if (params_.has<std::vector<ParametersList> >("partonFluxes")) {
-      const auto& fluxes = steer<std::vector<ParametersList> >("partonFluxes");
-      if (fluxes.size() < 2)
-        throw CG_FATAL("IncomingBeams") << "Invalid multiplicity of parton fluxes given: " << fluxes << ".";
+    if (const auto& fluxes = steer<std::vector<ParametersList> >("partonFluxes"); fluxes.size() >= 2) {
       plist_pos.set("partonFlux", fluxes.at(0));
       plist_neg.set("partonFlux", fluxes.at(1));
-    } else if (params_.has<ParametersList>("partonFluxes")) {
-      const auto& fluxes = steer<ParametersList>("partonFluxes");
+    } else if (const auto& fluxes = steer<ParametersList>("partonFluxes"); !fluxes.empty()) {
       plist_pos.set("partonFlux", fluxes);
       plist_neg.set("partonFlux", fluxes);
-    } else if (params_.has<std::vector<std::string> >("partonFluxes"))
-      set_part_fluxes_from_name_vector(steer<std::vector<std::string> >("partonFluxes"));
-    else if (params_.has<std::vector<std::string> >("ktFluxes"))
-      set_part_fluxes_from_name_vector(steer<std::vector<std::string> >("ktFluxes"));
-    else if (params_.has<std::string>("partonFluxes"))
-      set_part_fluxes_from_name(steer<std::string>("partonFluxes"));
-    else if (params_.has<std::string>("ktFluxes"))
-      set_part_fluxes_from_name(steer<std::string>("ktFluxes"));
+    } else if (const auto& fluxes = steer<std::vector<std::string> >("partonFluxes"); !fluxes.empty())
+      set_part_fluxes_from_name_vector(fluxes);
+    else if (const auto& fluxes = steer<std::vector<std::string> >("ktFluxes"); !fluxes.empty())
+      set_part_fluxes_from_name_vector(fluxes);
+    else if (const auto& flux = steer<std::string>("partonFluxes"); flux.empty())
+      set_part_fluxes_from_name(flux);
+    else if (const auto& flux = steer<std::string>("ktFluxes"); !flux.empty())
+      set_part_fluxes_from_name(flux);
 
     //--- form factors
     plist_pos.set<ParametersList>("formFactors", steer<ParametersList>("formFactors"));
     plist_neg.set<ParametersList>("formFactors", steer<ParametersList>("formFactors"));
 
-    auto mode = steerAs<int, mode::Kinematics>("mode");
-    plist_pos.set<bool>("elastic",
-                        mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::ElasticInelastic);
-    plist_neg.set<bool>("elastic",
-                        mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::InelasticElastic);
+    if (auto mode = steerAs<int, mode::Kinematics>("mode"); mode != mode::Kinematics::invalid) {
+      plist_pos.set<bool>("elastic",
+                          mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::ElasticInelastic);
+      plist_neg.set<bool>("elastic",
+                          mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::InelasticElastic);
+    } else {
+      const auto set_beam_elasticity = [](ParametersList& plist_beam) {
+        plist_beam.set<bool>("elastic", PartonFluxFactory::get().elastic(plist_beam.get<ParametersList>("partonFlux")));
+      };
+      set_beam_elasticity(plist_pos);
+      set_beam_elasticity(plist_neg);
+    }
 
     //--- structure functions
     if (!steer<ParametersList>("structureFunctions").empty()) {
@@ -176,23 +163,14 @@ namespace cepgen {
     neg_beam_ = Beam(plist_neg);
   }
 
-  void IncomingBeams::setSqrtS(double sqs) {
+  void IncomingBeams::setSqrtS(double sqrts) {
     if (pos_beam_.pdgId() != neg_beam_.pdgId())
       throw CG_FATAL("IncomingBeams:setSqrtS") << "Trying to set √s with asymmetric beams"
                                                << " (" << pos_beam_.pdgId() << "/" << neg_beam_.pdgId() << ").\n"
                                                << "Please fill incoming beams objects manually!";
-    pos_beam_.setMomentum(Momentum::fromPxPyPzM(0.,
-                                                0.,
-                                                +0.5 * sqs,
-                                                HeavyIon::isHI(pos_beam_.pdgId())
-                                                    ? HeavyIon::mass(HeavyIon::fromPdgId(pos_beam_.pdgId()))
-                                                    : PDG::get().mass(pos_beam_.pdgId())));
-    neg_beam_.setMomentum(Momentum::fromPxPyPzM(0.,
-                                                0.,
-                                                -0.5 * sqs,
-                                                HeavyIon::isHI(neg_beam_.pdgId())
-                                                    ? HeavyIon::mass(HeavyIon::fromPdgId(neg_beam_.pdgId()))
-                                                    : PDG::get().mass(neg_beam_.pdgId())));
+    const auto pz_abs = utils::fastSqrtSqDiff(0.5 * sqrts, PDG::get().mass(pos_beam_.pdgId()));
+    pos_beam_.setMomentum(Momentum::fromPxPyPzM(0., 0., +pz_abs, PDG::get().mass(pos_beam_.pdgId())));
+    neg_beam_.setMomentum(Momentum::fromPxPyPzM(0., 0., -pz_abs, PDG::get().mass(neg_beam_.pdgId())));
   }
 
   double IncomingBeams::s() const {
@@ -200,15 +178,14 @@ namespace cepgen {
     CG_DEBUG("IncomingBeams:s") << "Beams momenta:\n"
                                 << "\t" << pos_beam_.momentum() << "\n"
                                 << "\t" << neg_beam_.momentum() << "\n"
-                                << "\ts = (p1 + p2)^2 = " << sval << ", sqrt(s) = " << sqrt(sval) << ".";
+                                << "\ts = (p1 + p2)^2 = " << sval << ", sqrt(s) = " << std::sqrt(sval) << ".";
     return sval;
   }
 
   double IncomingBeams::sqrtS() const { return std::sqrt(s()); }
 
   mode::Kinematics IncomingBeams::mode() const {
-    const auto& mode = steerAs<int, mode::Kinematics>("mode");
-    if (mode != mode::Kinematics::invalid)
+    if (const auto& mode = steerAs<int, mode::Kinematics>("mode"); mode != mode::Kinematics::invalid)
       return mode;
     return modeFromBeams(pos_beam_, neg_beam_);
   }
@@ -264,24 +241,24 @@ namespace cepgen {
 
   ParametersDescription IncomingBeams::description() {
     auto desc = ParametersDescription();
-    desc.add<int>("beam1id", 2212).setDescription("PDG id of the positive-z beam particle");
-    desc.add<int>("beam1A", 1).setDescription("Atomic weight of the positive-z ion beam");
-    desc.add<int>("beam1Z", 1).setDescription("Atomic number of the positive-z ion beam");
-    desc.add<int>("beam2id", 2212).setDescription("PDG id of the negative-z beam particle");
-    desc.add<int>("beam2A", 1).setDescription("Atomic weight of the negative-z ion beam");
-    desc.add<int>("beam2Z", 1).setDescription("Atomic number of the negative-z ion beam");
+    desc.addAs<int, pdgid_t>("beam1id", PDG::proton).setDescription("PDG id of the positive-z beam particle");
+    desc.add<int>("beam1A", 0).setDescription("Atomic weight of the positive-z ion beam");
+    desc.addAs<int, Element>("beam1Z", Element::invalid).setDescription("Atomic number of the positive-z ion beam");
+    desc.addAs<int, pdgid_t>("beam2id", PDG::proton).setDescription("PDG id of the negative-z beam particle");
+    desc.add<int>("beam2A", 0).setDescription("Atomic weight of the negative-z ion beam");
+    desc.addAs<int, Element>("beam2Z", Element::invalid).setDescription("Atomic number of the negative-z ion beam");
     desc.add<std::vector<ParametersList> >("pdgIds", {}).setDescription("PDG description of incoming beam particles");
     desc.add<std::vector<int> >("pdgIds", {}).setDescription("PDG ids of incoming beam particles");
     desc.add<std::vector<double> >("pz", {}).setDescription("Beam momenta (in GeV/c)");
+    desc.add<std::vector<double> >("energies", {}).setDescription("Beam energies (in GeV/c)");
     desc.add<double>("sqrtS", 0.).setDescription("Two-beam centre of mass energy (in GeV)");
-    desc.addAs<int, mode::Kinematics>("mode", mode::Kinematics::ElasticElastic)
+    desc.addAs<int, mode::Kinematics>("mode", mode::Kinematics::invalid)
         .setDescription("Process kinematics mode (1 = elastic, (2-3) = single-dissociative, 4 = double-dissociative)");
     desc.add<ParametersDescription>("formFactors",
                                     FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler))
         .setDescription("Beam form factors modelling");
-    desc.add<ParametersDescription>(
-            "structureFunctions", strfun::Parameterisation::description().setName<int>(11)  // default is SY
-            )
+    desc.add<ParametersDescription>("structureFunctions",
+                                    strfun::Parameterisation::description().setName<int>(11 /*default is SY*/))
         .setDescription("Beam inelastic structure functions modelling");
     return desc;
   }

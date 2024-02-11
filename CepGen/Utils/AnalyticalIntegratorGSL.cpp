@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -81,7 +81,6 @@ namespace cepgen {
       const double alpha_, beta_;
       const size_t limit_;
       const double epsabs_, epsrel_;
-      static constexpr double INVALID = -999.999;
     };
 
     double AnalyticalIntegratorGSL::eval(const gsl_function* wrp, const Limits& lim) const {
@@ -155,5 +154,5 @@ namespace cepgen {
     }
   }  // namespace utils
 }  // namespace cepgen
-typedef cepgen::utils::AnalyticalIntegratorGSL GSLIntegrator;
-REGISTER_ANALYTIC_INTEGRATOR("gsl", GSLIntegrator);
+using cepgen::utils::AnalyticalIntegratorGSL;
+REGISTER_ANALYTIC_INTEGRATOR("gsl", AnalyticalIntegratorGSL);

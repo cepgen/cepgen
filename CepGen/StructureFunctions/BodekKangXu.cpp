@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -133,5 +133,5 @@ namespace cepgen {
     };
   }  // namespace strfun
 }  // namespace cepgen
-typedef cepgen::strfun::BodekKangXu BodekKangXu;
+using cepgen::strfun::BodekKangXu;
 REGISTER_STRFUN(304, BodekKangXu);

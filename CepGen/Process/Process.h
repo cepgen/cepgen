@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/Kinematics.h"
+#include "CepGen/Utils/ProcessVariablesAnalyser.h"
 #include "CepGen/Utils/RandomGenerator.h"
 
 namespace cepgen {
@@ -39,9 +40,6 @@ namespace cepgen {
     /// \date Jan 2014
     class Process : public NamedModule<std::string> {
     public:
-      /// Default constructor for an undefined process
-      /// \param[in] params Process-level parameters
-      /// \param[in] has_event Do we generate the associated event structure?
       explicit Process(const ParametersList&);
       Process(const Process&);  ///< Copy constructor for a user process
       virtual ~Process() = default;
@@ -50,11 +48,7 @@ namespace cepgen {
       static ParametersDescription description();
 
       virtual std::unique_ptr<Process> clone() const;  ///< Copy all process attributes into a new object
-      /// Compute the phase space point weight
-      virtual double computeWeight() = 0;
-      /// Fill the Event object with the particles' kinematics
-      /// \param[in] symmetrise Symmetrise the event? (randomise the production of positively- and negatively-charged outgoing central particles)
-      virtual void fillKinematics(bool symmetrise = false) = 0;
+      virtual double computeWeight() = 0;              ///< Compute the phase space point weight
 
       void clear();       ///< Reset process prior to the phase space and variables definition
       void clearEvent();  ///< Restore the event object to its initial state
@@ -62,6 +56,7 @@ namespace cepgen {
 
       const Kinematics& kinematics() const { return kin_; }  ///< Constant reference to the process kinematics
       Kinematics& kinematics() { return kin_; }              ///< Reference to the process kinematics
+      void setKinematics();
 
       // debugging utilities
       double weight(const std::vector<double>&);      ///< Compute the weight for a phase-space point
@@ -106,6 +101,7 @@ namespace cepgen {
 
       virtual void addEventContent() = 0;  ///< Set the incoming and outgoing state to be expected in the process
       virtual void prepareKinematics() {}  ///< Compute the incoming state kinematics
+      virtual void fillKinematics() = 0;   ///< Fill the Event object with the particles' kinematics
 
       Momentum& pA();  ///< Positive-z incoming beam particle's 4-momentum
       Momentum& pB();  ///< Negative-z incoming beam particle's 4-momentum
@@ -147,8 +143,15 @@ namespace cepgen {
       /// \param[out] out Reference to the variable to be mapped
       /// \param[in] type Type of mapping to apply
       /// \param[in] lim Integration limits
+      /// \param[in] name Computer-readable variable name
       /// \param[in] description Human-readable description of the variable
-      Process& defineVariable(double& out, const Mapping& type, const Limits& lim, const std::string& description = "");
+      Process& defineVariable(double& out,
+                              const Mapping& type,
+                              const Limits& lim,
+                              const std::string& name,
+                              const std::string& description = "");
+      /// Retrieve the physical value for one variable
+      double variableValue(size_t i, double x) const;
 
     protected:
       /// Generate and initialise all variables handled by this process
@@ -181,6 +184,7 @@ namespace cepgen {
       std::unique_ptr<Coupling> alphas_;   ///< Strong running coupling algorithm
       /// Handler to a variable mapped by this process
       struct MappingVariable {
+        std::string name;         ///< Variable name for debugging
         std::string description;  ///< Human-readable description of the variable
         Limits limits;            ///< Kinematic limits to apply on the variable
         double& value;            ///< Reference to the process variable to generate/map
@@ -194,6 +198,7 @@ namespace cepgen {
       double base_jacobian_{1.};
       Kinematics kin_{ParametersList()};  ///< Set of cuts to apply on the final phase space
       std::unique_ptr<Event> event_;      ///< Event object tracking all information on all particles in the system
+      friend class utils::ProcessVariablesAnalyser;
     };
     /// Helper typedef for a Process unique pointer
     typedef std::unique_ptr<Process> ProcessPtr;

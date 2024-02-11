@@ -20,8 +20,9 @@
 #include <fstream>
 
 #include "CepGen/Cards/Handler.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Generator.h"
-#include "CepGen/Parameters.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/AbortHandler.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Test.h"
@@ -33,12 +34,13 @@ int main(int argc, char* argv[]) {
   double num_sigma;
   string cfg_filename;
   string integrator;
-  bool verbose;
+  bool verbose, quiet;
 
   auto args = cepgen::ArgumentsParser(argc, argv)
                   .addOptionalArgument("cfg,f", "configuration file", &cfg_filename, "test/physics/test_processes.cfg")
                   .addOptionalArgument("verbose,v", "verbose mode", &verbose, false)
                   .addOptionalArgument("num-sigma,n", "max. number of std.dev.", &num_sigma, 3.)
+                  .addOptionalArgument("quiet,q", "quiet mode", &quiet, true)
                   .addOptionalArgument("integrator,i", "type of integrator used", &integrator, "Vegas")
                   .parse();
 
@@ -48,10 +50,9 @@ int main(int argc, char* argv[]) {
   cepgen::utils::Timer tmr;
   cepgen::Generator gen;
 
-  CG_LOG << "Testing with " << integrator << " integrator.";
-
-  CG_LOG << "Initial configuration time: " << tmr.elapsed() * 1.e3 << " ms.";
-  tmr.reset();
+  CG_TEST_DEBUG(verbose);
+  if (quiet)
+    CG_LOG_LEVEL(warning);
 
   new cepgen::utils::AbortHandler;
 
@@ -80,16 +81,18 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  CG_LOG << "Will run " << cepgen::utils::s("test", tests.size()) << ".";
+  CG_LOG << "Will run " << cepgen::utils::s("test", tests.size()) << " with " << integrator << " integrator.";
+  CG_LOG << "Initial configuration time: " << tmr.elapsed() * 1.e3 << " ms.";
+  tmr.reset();
 
   for (const auto& test : tests) {
     const std::string filename = "TestProcesses/" + test.filename + "_cfg.py";
     try {
-      gen.parametersRef().clearProcess();
-      gen.setParameters(cepgen::card::Handler::parseFile(filename));
+      gen.runParameters().clearProcess();
+      gen.setRunParameters(cepgen::card::Handler::parseFile(filename));
+      gen.runParameters().par_integrator = cepgen::IntegratorFactory::get().describeParameters(integrator).parameters();
 
-      gen.parametersRef().par_integrator.setName<std::string>(integrator);
-      CG_DEBUG("main") << "Process: " << gen.parameters()->processName() << "\n\t"
+      CG_DEBUG("main") << "Process: " << gen.runParameters().processName() << "\n\t"
                        << "File: " << filename << "\n\t"
                        << "Configuration time: " << tmr.elapsed() * 1.e3 << " ms.";
 

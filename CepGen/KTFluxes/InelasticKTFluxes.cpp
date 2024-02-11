@@ -32,6 +32,9 @@ namespace cepgen {
         : KTFlux(params), sf_(StructureFunctionsFactory::get().build(steer<ParametersList>("structureFunctions"))) {
       if (!sf_)
         throw CG_FATAL("InelasticNucleonKTFlux") << "Inelastic kT flux requires a modelling of structure functions!";
+      CG_DEBUG("InelasticNucleonKTFlux") << "Inelastic KT-dependent flux initialised with '"
+                                         << steer<ParametersList>("structureFunctions")
+                                         << "' structure functions modelling.";
     }
 
     static ParametersDescription description() {
@@ -42,12 +45,15 @@ namespace cepgen {
     }
 
     double mass2() const override { return mp2_; }
+    bool fragmenting() const override final { return true; }
     pdgid_t partonPdgId() const override { return PDG::photon; }
     double fluxMX2(double x, double kt2, double mx2) const override {
       if (!x_range_.contains(x, true))
         return 0.;
-      if (!utils::positive(mx2))
-        throw CG_FATAL("InelasticNucleonKTFlux") << "Invalid diffractive mass squared mX^2 specified: " << mx2 << ".";
+      if (!utils::positive(mx2)) {
+        CG_WARNING("InelasticNucleonKTFlux") << "Invalid diffractive mass squared mX^2 specified: " << mx2 << ".";
+        return 0.;
+      }
       const auto q2 = utils::kt::q2(x, kt2, mass2(), mx2), q2min = q2 - kt2 / (1. - x);
       const auto xbj = utils::xBj(q2, mass2(), mx2), qnorm = 1. - q2min / q2;
       return prefactor_ * sf_->F2(xbj, q2) * (xbj / q2) * qnorm * qnorm * (1. - x) / q2;
@@ -67,8 +73,10 @@ namespace cepgen {
     double fluxMX2(double x, double kt2, double mx2) const override {
       if (!x_range_.contains(x, true))
         return 0.;
-      if (!utils::positive(mx2))
-        throw CG_FATAL("InelasticNucleonKTFlux") << "Invalid diffractive mass squared mX^2 specified: " << mx2 << ".";
+      if (!utils::positive(mx2)) {
+        CG_WARNING("InelasticNucleonKTFlux") << "Invalid diffractive mass squared mX^2 specified: " << mx2 << ".";
+        return 0.;
+      }
       const auto q2 = utils::kt::q2(x, kt2, mass2(), mx2), q2min = q2 - kt2 / (1. - x);
       const auto xbj = utils::xBj(q2, mass2(), mx2), qnorm = 1. - q2min / q2;
       const double f_D = sf_->F2(xbj, q2) * (xbj / q2) * (1. - x) * qnorm;

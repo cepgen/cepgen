@@ -33,6 +33,8 @@ namespace cepgen {
     virtual double eval(const std::vector<double>&) = 0;
     /// Phase space dimension
     virtual size_t size() const = 0;
+    /// Does this integrand also contain a process object?
+    virtual bool hasProcess() const { return false; }
   };
 }  // namespace cepgen
 

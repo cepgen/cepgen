@@ -1,8 +1,8 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
 from Config.PDG_cfi import PDG
-from Config.generator_cff import generator
-from Config.Integration.vegas_cff import integrator
+from Config.generator_cfi import generator
+from Config.Integration.vegas_cfi import vegas as integrator
 
 process = kt.process.clone('pptoff',
     processParameters = cepgen.Parameters(
@@ -14,7 +14,7 @@ process = kt.process.clone('pptoff',
         #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
         #structureFunctions = cepgen.StructureFunctions.ALLM97,
         structureFunctions = cepgen.StructureFunctions.LUXlike,
-        ktFluxes = (kt.ProtonFlux.PhotonInelasticBudnev, kt.HeavyIonFlux.PhotonElastic),
+        partonFluxes = (kt.ProtonFlux.PhotonInelasticBudnev, kt.HeavyIonFlux.PhotonElastic),
         heavyIon2 = (208, 82),
     ),
     outKinematics = kt.process.outKinematics.clone(

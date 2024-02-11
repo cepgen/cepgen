@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2023  Laurent Forthomme
+ *  Copyright (C) 2018-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,7 +33,8 @@
     CG_DEBUG("ParametersList") << "Failed to retrieve " << name << " parameter with key=" << key << ". " \
                                << "Default value: " << def << ".";                                       \
     return def;                                                                                          \
-  }
+  }                                                                                                      \
+  static_assert(true, "")
 
 #define IMPL_TYPE_SET(type, coll, name)                                                                             \
   template <>                                                                                                       \
@@ -58,11 +59,13 @@
   template <>                                                                                                       \
   size_t ParametersList::erase<type>(const std::string& key) {                                                      \
     return coll.erase(key);                                                                                         \
-  }
+  }                                                                                                                 \
+  static_assert(true, "")
 
 #define IMPL_TYPE_ALL(type, coll, name) \
-  IMPL_TYPE_GET(type, coll, #name)      \
-  IMPL_TYPE_SET(type, coll, #name)
+  IMPL_TYPE_GET(type, coll, #name);     \
+  IMPL_TYPE_SET(type, coll, #name);     \
+  static_assert(true, "")
 
 namespace cepgen {
   ParametersList::ParametersList(const ParametersList& oth) { operator+=(oth); }
@@ -87,6 +90,8 @@ namespace cepgen {
     if (vec_dbl_values_ != oth.vec_dbl_values_)
       return false;
     if (vec_str_values_ != oth.vec_str_values_)
+      return false;
+    if (vec_lim_values_ != oth.vec_lim_values_)
       return false;
     if (vec_param_values_ != oth.vec_param_values_)
       return false;
@@ -129,6 +134,7 @@ namespace cepgen {
     vec_int_values_.insert(oth.vec_int_values_.begin(), oth.vec_int_values_.end());
     vec_dbl_values_.insert(oth.vec_dbl_values_.begin(), oth.vec_dbl_values_.end());
     vec_str_values_.insert(oth.vec_str_values_.begin(), oth.vec_str_values_.end());
+    vec_lim_values_.insert(oth.vec_lim_values_.begin(), oth.vec_lim_values_.end());
     vec_param_values_.insert(oth.vec_param_values_.begin(), oth.vec_param_values_.end());
     vec_vec_dbl_values_.insert(oth.vec_vec_dbl_values_.begin(), oth.vec_vec_dbl_values_.end());
     return *this;
@@ -169,7 +175,7 @@ namespace cepgen {
     for (const auto& arg : list) {
       // browse through the parameters hierarchy
       auto cmd = utils::split(arg, '/');
-      if (cmd.size() > 1) {  // sub-parameters word found
+      if (arg[arg.size() - 1] != '\'' && arg[arg.size() - 1] != '"' && cmd.size() > 1) {  // sub-parameters word found
         operator[]<ParametersList>(cmd.at(0)).feed(
             utils::merge(std::vector<std::string>(cmd.begin() + 1, cmd.end()), "/"));
         continue;
@@ -208,8 +214,12 @@ namespace cepgen {
             if (limits.size() != 2)
               throw CG_FATAL("ParametersList:feed") << "Failed to parse limits value '" << value << "'.";
             set<Limits>(key, Limits{std::stod(limits.at(0)), std::stod(limits.at(1))});
-          } else
-            set<std::string>(key, value);
+          } else {
+            auto parsed_value = value;
+            if (value.size() > 2 && value[0] == value[value.size() - 1] && (value[0] == '"' || value[0] == '\''))
+              parsed_value = parsed_value.substr(1, value.size() - 2);
+            set<std::string>(key, parsed_value);
+          }
         }
       } else
         throw CG_FATAL("ParametersList:feed") << "Invalid key:value unpacking: " << word << "!";
@@ -270,6 +280,7 @@ namespace cepgen {
     std::transform(vec_int_values_.begin(), vec_int_values_.end(), std::back_inserter(out), key);
     std::transform(vec_dbl_values_.begin(), vec_dbl_values_.end(), std::back_inserter(out), key);
     std::transform(vec_str_values_.begin(), vec_str_values_.end(), std::back_inserter(out), key);
+    std::transform(vec_lim_values_.begin(), vec_lim_values_.end(), std::back_inserter(out), key);
     std::transform(vec_param_values_.begin(), vec_param_values_.end(), std::back_inserter(out), key);
     std::transform(vec_vec_dbl_values_.begin(), vec_vec_dbl_values_.end(), std::back_inserter(out), key);
     if (!name_key) {
@@ -325,6 +336,8 @@ namespace cepgen {
         os << sep << wrap_val(get<Limits>(key), "Limits");
     } else if (has<std::vector<std::string> >(key))
       os << wrap_coll(get<std::vector<std::string> >(key), "vstr");
+    else if (has<std::vector<Limits> >(key))
+      os << wrap_coll(get<std::vector<Limits> >(key), "VLimits");
     else if (has<std::vector<std::vector<double> > >(key))
       os << wrap_coll(get<std::vector<std::vector<double> > >(key), "vvfloat");
     return os.str();
@@ -351,6 +364,8 @@ namespace cepgen {
       set(new_key, get<std::vector<double> >(old_key)).erase(old_key);
     if (has<std::vector<std::string> >(old_key))
       set(new_key, get<std::vector<std::string> >(old_key)).erase(old_key);
+    if (has<std::vector<Limits> >(old_key))
+      set(new_key, get<std::vector<Limits> >(old_key)).erase(old_key);
     if (has<std::vector<ParametersList> >(old_key))
       set(new_key, get<std::vector<ParametersList> >(old_key)).erase(old_key);
     return *this;
@@ -404,10 +419,10 @@ namespace cepgen {
   // sub-parameters-type attributes
   //------------------------------------------------------------------
 
-  IMPL_TYPE_ALL(ParametersList, param_values_, "parameters")
-  IMPL_TYPE_ALL(bool, bool_values_, "boolean")
+  IMPL_TYPE_ALL(ParametersList, param_values_, "parameters");
+  IMPL_TYPE_ALL(bool, bool_values_, "boolean");
 
-  IMPL_TYPE_SET(int, int_values_, "integer")
+  IMPL_TYPE_SET(int, int_values_, "integer");
   template <>
   int ParametersList::get<int>(const std::string& key, const int& def) const {
     if (has<int>(key))
@@ -422,7 +437,7 @@ namespace cepgen {
     return def;
   }
 
-  IMPL_TYPE_SET(unsigned long long, ulong_values_, "unsigned long integer")
+  IMPL_TYPE_SET(unsigned long long, ulong_values_, "unsigned long integer");
   template <>
   unsigned long long ParametersList::get<unsigned long long>(const std::string& key,
                                                              const unsigned long long& def) const {
@@ -438,19 +453,20 @@ namespace cepgen {
     return def;
   }
 
-  IMPL_TYPE_ALL(double, dbl_values_, "floating number")
-  IMPL_TYPE_ALL(std::string, str_values_, "string")
-  IMPL_TYPE_ALL(std::vector<int>, vec_int_values_, "vector of integers")
-  IMPL_TYPE_ALL(std::vector<double>, vec_dbl_values_, "vector of floating numbers")
-  IMPL_TYPE_ALL(std::vector<std::string>, vec_str_values_, "vector of strings")
-  IMPL_TYPE_ALL(std::vector<ParametersList>, vec_param_values_, "vector of parameters")
-  IMPL_TYPE_ALL(std::vector<std::vector<double> >, vec_vec_dbl_values_, "vector of vectors of floating numbers")
+  IMPL_TYPE_ALL(double, dbl_values_, "floating number");
+  IMPL_TYPE_ALL(std::string, str_values_, "string");
+  IMPL_TYPE_ALL(std::vector<int>, vec_int_values_, "vector of integers");
+  IMPL_TYPE_ALL(std::vector<double>, vec_dbl_values_, "vector of floating numbers");
+  IMPL_TYPE_ALL(std::vector<std::string>, vec_str_values_, "vector of strings");
+  IMPL_TYPE_ALL(std::vector<Limits>, vec_lim_values_, "vector of limits");
+  IMPL_TYPE_ALL(std::vector<ParametersList>, vec_param_values_, "vector of parameters");
+  IMPL_TYPE_ALL(std::vector<std::vector<double> >, vec_vec_dbl_values_, "vector of vectors of floating numbers");
 
   //------------------------------------------------------------------
   // limits-type attributes
   //------------------------------------------------------------------
 
-  IMPL_TYPE_SET(Limits, lim_values_, "limits")
+  IMPL_TYPE_SET(Limits, lim_values_, "limits");
 
   template <>
   Limits ParametersList::get<Limits>(const std::string& key, const Limits& def) const {
@@ -533,4 +549,6 @@ namespace cepgen {
   }
 }  // namespace cepgen
 
-#undef IMPL_TYPE
+#undef IMPL_TYPE_SET
+#undef IMPL_TYPE_GET
+#undef IMPL_TYPE_ALL

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2023  Laurent Forthomme
+ *  Copyright (C) 2020-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Generator.h"  // for library loading
@@ -31,7 +32,6 @@
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/TimeKeeper.h"
 #include "CepGenAddOns/BoostWrapper/BoostTreeUtils.h"
@@ -49,8 +49,8 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      Parameters* parseFile(const std::string&, Parameters*) override;
-      void pack(const Parameters* params) override;
+      RunParameters* parseFile(const std::string&, RunParameters*) override;
+      void pack(const RunParameters* params) override;
 
     protected:
       /// Read and cast a file into the property tree
@@ -76,7 +76,7 @@ namespace cepgen {
 
     BoostTreeHandler::BoostTreeHandler(const ParametersList& params) : Handler(params) {}
 
-    Parameters* BoostTreeHandler::parseFile(const std::string& filename, Parameters* params) {
+    RunParameters* BoostTreeHandler::parseFile(const std::string& filename, RunParameters* params) {
       rt_params_ = params;
       read(filename);
 
@@ -134,8 +134,8 @@ namespace cepgen {
       return rt_params_;
     }
 
-    void BoostTreeHandler::pack(const Parameters* params) {
-      rt_params_ = const_cast<Parameters*>(params);
+    void BoostTreeHandler::pack(const RunParameters* params) {
+      rt_params_ = const_cast<RunParameters*>(params);
       tree_.add_child(PROCESS_NAME, bc::pack(rt_params_->process().parameters()));
       if (!rt_params_->par_integrator.empty())
         tree_.add_child(INTEGR_NAME, bc::pack(rt_params_->par_integrator));

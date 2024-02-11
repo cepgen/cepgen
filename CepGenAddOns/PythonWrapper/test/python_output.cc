@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2023  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,9 +21,9 @@
 #include "CepGenAddOns/PythonWrapper/Error.h"
 #include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 // clang-format on
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Test.h"
@@ -43,13 +43,13 @@ int main(int argc, char* argv[]) {
     process = *cepgen::ProcessFactory::get().modules().begin();
 
   {
-    gen.parametersRef().setProcess(cepgen::ProcessFactory::get().build(process));
-    cepgen::utils::PythonConfigWriter py(output_file);
-    py << gen.parametersRef();
+    gen.runParameters().setProcess(cepgen::ProcessFactory::get().build(process));
+    cepgen::python::PythonConfigWriter py(output_file);
+    py << gen.runParameters();
   }
 
   try {
-    auto env = cepgen::python::Environment();
+    auto env = cepgen::python::Environment(cepgen::ParametersList{});
     const auto path = cepgen::python::pythonPath(output_file);
     env.setProgramName(path);
     auto obj = cepgen::python::importModule(path);

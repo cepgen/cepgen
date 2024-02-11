@@ -5,8 +5,6 @@ c     =================================================================
 c     CepGen common blocks for kinematics definition
 c     =================================================================
       include 'CepGen/Process/Fortran/KTBlocks.inc'
-      data iflux1,iflux2,pdg_l/10,100,13/
-      data a_nuc1,z_nuc1,a_nuc2,z_nuc2/1,1,208,82/
 
 c     =================================================================
 c     input parameters
@@ -19,7 +17,7 @@ c     =================================================================
 c     =================================================================
 c     local variables
 c     =================================================================
-      double precision s,s12
+      double precision s
       double precision alpha1,alpha2,amt1,amt2
       double precision pt1,pt2,eta1,eta2,dely
       double precision pt1x,pt1y,pt2x,pt2y
@@ -134,7 +132,6 @@ c     =================================================================
       ak2z = -inp_B
 
       s = 4.*inp_A*inp_B*(1.d0 + r1*r2)/2.d0+(am_A**2+am_B**2)
-      s12 = dsqrt(s)
 
       p1_plus = (ak10+ak1z)/dsqrt(2.d0)
       p2_minus = (ak20-ak2z)/dsqrt(2.d0)

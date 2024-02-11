@@ -58,6 +58,8 @@ namespace cepgen {
 
     ParametersDescription describeParameters(const std::string& name,
                                              const ParametersList& params = ParametersList()) const;
+    /// Is the beam modelling elastic?
+    bool elastic(const ParametersList&) const;
   };
 }  // namespace cepgen
 

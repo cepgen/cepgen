@@ -8,27 +8,20 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   return()
 endif()
 
-set(sources IntegratorROOT.cpp
-            ROOTAnalyticalIntegrator.cpp
-            ROOTDerivator.cpp
-            ROOTDrawer.cpp
-            ROOTFunctional.cpp
-            ROOTHistsHandler.cpp
-            ROOTRandomGenerator.cpp
-            ROOTTree*.cpp)
+file(GLOB root_sources ROOT*.cpp)
 
 #--- FOAM integrator
 if(CMAKE_BUILD_FOAM)
   find_package(ROOT COMPONENTS Hist MathCore Foam)
   list(FIND ROOT_LIBRARIES "/usr/lib64/root/libFoam.so" _idx)
   if(${_idx} GREATER -1)
-    list(APPEND sources IntegratorFoam.cpp FoamGeneratorWorker.cpp)
+    file(GLOB foam_sources Foam*.cpp)
   endif()
 endif()
 
 #----- build the object
 
-cepgen_build(CepGenRoot SOURCES ${sources}
+cepgen_build(CepGenRoot SOURCES ${root_sources} ${foam_sources}
     EXT_HEADERS ${ROOT_INCLUDE_DIRS}
     EXT_LIBS ${ROOT_LIBRARIES}
     TESTS test/*.cc

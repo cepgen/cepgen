@@ -30,6 +30,7 @@
 #include "CepGen/Process/Process2to4.h"
 
 using namespace cepgen;
+using namespace std::complex_literals;
 
 /// \brief Compute the matrix element for a CE \f$\gamma\gamma\rightarrow W^+W^-\f$ process using \f$k_{\rm T}\f$-factorization approach
 /// \note The full theoretical description of this process definition may be found in \cite Luszczak:2018ntp.
@@ -100,13 +101,13 @@ private:
     const double s_hat = shat(), t_hat = that(), u_hat = uhat();
 
     const double term1 = 2. * s_hat * (2. * s_hat + 3. * mW2_) / (3. * (mW2_ - t_hat) * (mW2_ - u_hat));
-    const double term2 =
-        2. * s_hat * s_hat * (s_hat * s_hat + 3. * mW2_ * mW2_) / (3. * pow(mW2_ - t_hat, 2) * pow(mW2_ - u_hat, 2));
+    const double term2 = 2. * s_hat * s_hat * (s_hat * s_hat + 3. * mW2_ * mW2_) /
+                         (3. * std::pow(mW2_ - t_hat, 2) * std::pow(mW2_ - u_hat, 2));
 
     return 6. * constants::G_EM_SQ * constants::G_EM_SQ * (1. - term1 + term2) / s_hat / s_hat;
   }
   double offShellME() const {
-    const NachtmannAmplitudes::Kinematics kin(mW2_, shat(), that(), uhat());
+    const auto kin = NachtmannAmplitudes::Kinematics(mW2_, shat(), that(), uhat());
     const double p1 = q1().px() * q2().px() + q1().py() * q2().py(), p2 = q1().px() * q2().py() - q1().py() * q2().px(),
                  p3 = q1().px() * q2().px() - q1().py() * q2().py(), p4 = q1().px() * q2().py() + q1().py() * q2().px();
 
@@ -118,8 +119,7 @@ private:
         const auto pp = ampl_(kin, +1, +1, lam3, lam4), mm = ampl_(kin, -1, -1, lam3, lam4),
                    pm = ampl_(kin, +1, -1, lam3, lam4), mp = ampl_(kin, -1, +1, lam3, lam4);
         // add ME for this W helicity to total ME
-        hel_mat_elem += norm(p1 * (pp + mm) - std::complex<double>(0, 1) * p2 * (pp - mm) - p3 * (pm + mp) -
-                             std::complex<double>(0, 1) * p4 * (pm - mp));
+        hel_mat_elem += std::norm(p1 * (pp + mm) - 1i * p2 * (pp - mm) - p3 * (pm + mp) - 1i * p4 * (pm - mp));
       }
     return hel_mat_elem * std::pow(0.5 / q1().pt() / q2().pt() / shat(), 2);
   }

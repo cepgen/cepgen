@@ -68,7 +68,8 @@ namespace cepgen {
   namespace proc {
     ParametersList FortranFactorisedProcess::kProcParameters;  ///< List of parameters to steer the process
 
-    FortranFactorisedProcess::FortranFactorisedProcess(const ParametersList& params, std::function<double(void)> func)
+    FortranFactorisedProcess::FortranFactorisedProcess(const ParametersList& params,
+                                                       const std::function<double(void)>& func)
         : FactorisedProcess(params, {PDG::muon, PDG::muon}), func_(func) {
       constants_.m_p = Process::mp_;
       constants_.units = constants::GEVM2_TO_PB;
@@ -77,14 +78,16 @@ namespace cepgen {
 
     void FortranFactorisedProcess::prepareFactorisedPhaseSpace() {
       const auto lim_rap = kinematics().cuts().central.rapidity_single.truncate(Limits{-6., 6.});
-      defineVariable(m_y1_, Mapping::linear, lim_rap, "First central particle rapidity");
-      defineVariable(m_y2_, Mapping::linear, lim_rap, "Second central particle rapidity");
+      defineVariable(m_y1_, Mapping::linear, lim_rap, "y1", "First central particle rapidity");
+      defineVariable(m_y2_, Mapping::linear, lim_rap, "y2", "Second central particle rapidity");
 
       const auto lim_pt_diff = kinematics().cuts().central.pt_diff.truncate(Limits{0., 50.});
-      defineVariable(m_pt_diff_, Mapping::linear, lim_pt_diff, "Central particles transverse momentum difference");
+      defineVariable(
+          m_pt_diff_, Mapping::linear, lim_pt_diff, "pt_diff", "Central particles transverse momentum difference");
 
       const auto lim_phi_diff = kinematics().cuts().central.phi_diff.truncate(Limits{0., 2. * M_PI});
-      defineVariable(m_phi_pt_diff_, Mapping::linear, lim_phi_diff, "Central particles azimuthal angle difference");
+      defineVariable(
+          m_phi_pt_diff_, Mapping::linear, lim_phi_diff, "phi_diff", "Central particles azimuthal angle difference");
 
       //===========================================================================================
       // feed phase space cuts to the common block
@@ -93,10 +96,8 @@ namespace cepgen {
       // export the limits into external variables
       auto save_lim = [](const Limits& lim, int& on, double& min, double& max) {
         on = lim.valid();
-        min = max = 0.;
-        if (lim.hasMin())
-          min = lim.min();
-        max = lim.hasMax() ? lim.max() : 9999.999;
+        min = lim.hasMin() ? lim.min() : -9999.999;
+        max = lim.hasMax() ? lim.max() : +9999.999;
       };
 
       save_lim(kinematics().cuts().central.pt_single, kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max);
@@ -144,17 +145,13 @@ namespace cepgen {
       } else
         genparams_.a_nuc2 = genparams_.z_nuc2 = 1;
 
-      //-------------------------------------------------------------------------------------------
       // intermediate partons information
-      //-------------------------------------------------------------------------------------------
-
-      //FIXME
-      //genparams_.iflux1 = (int)kinematics().incomingBeams().positive().ktFlux();
-      //genparams_.iflux2 = (int)kinematics().incomingBeams().negative().ktFlux();
+      genparams_.iflux1 = (int)kinematics().incomingBeams().positive().partonFluxParameters().name<int>();
+      genparams_.iflux2 = (int)kinematics().incomingBeams().negative().partonFluxParameters().name<int>();
     }
 
     double FortranFactorisedProcess::computeFactorisedMatrixElement() {
-      //--- set all kinematics variables for this phase space point
+      // set all kinematics variables for this phase space point
       ktkin_.q1t = q1().p();
       ktkin_.q2t = q2().p();
       ktkin_.phiq1t = q1().phi();
@@ -166,7 +163,7 @@ namespace cepgen {
       ktkin_.m_x = mX();
       ktkin_.m_y = mY();
 
-      //--- compute the event weight
+      // compute the event weight
       return func_();
     }
 

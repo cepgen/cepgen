@@ -1,7 +1,7 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
 from Config.PDG_cfi import PDG
-from Config.generator_cff import generator
+from Config.generator_cfi import generator
 
 process = kt.process.clone('pptoff',
     processParameters = cepgen.Parameters(

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2023  Laurent Forthomme
+ *  Copyright (C) 2019-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,13 +16,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cmath>
-
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process2to4.h"
 #include "CepGen/Utils/Math.h"
+#include "CepGen/Utils/Message.h"
 
 namespace cepgen {
   namespace proc {
@@ -36,20 +34,25 @@ namespace cepgen {
         cs_prop_ = PDG::get()(steer<ParticleProperties>("pair").pdgid);
 
       const auto lim_rap = kinematics().cuts().central.rapidity_single.truncate(Limits{-6., 6.});
-      defineVariable(m_y_c1_, Mapping::linear, lim_rap, "First outgoing particle rapidity");
-      defineVariable(m_y_c2_, Mapping::linear, lim_rap, "Second outgoing particle rapidity");
+      defineVariable(m_y_c1_, Mapping::linear, lim_rap, "y1", "First outgoing particle rapidity");
+      defineVariable(m_y_c2_, Mapping::linear, lim_rap, "y2", "Second outgoing particle rapidity");
 
       const auto lim_pt_diff = kinematics().cuts().central.pt_diff.truncate(Limits{0., 500.});
-      defineVariable(m_pt_diff_, Mapping::linear, lim_pt_diff, "Final state particles transverse momentum difference");
+      defineVariable(
+          m_pt_diff_, Mapping::linear, lim_pt_diff, "pt_diff", "Final state particles transverse momentum difference");
 
       const auto lim_phi_diff = kinematics().cuts().central.phi_diff.truncate(Limits{0., 2. * M_PI});
-      defineVariable(m_phi_pt_diff_, Mapping::linear, lim_phi_diff, "Final state particles azimuthal angle difference");
+      defineVariable(m_phi_pt_diff_,
+                     Mapping::linear,
+                     lim_phi_diff,
+                     "phi_pt_diff",
+                     "Final state particles azimuthal angle difference");
 
       prepareProcessKinematics();
     }
 
     double Process2to4::computeFactorisedMatrixElement() {
-      if (!kinematics().cuts().central.rapidity_diff.contains(fabs(m_y_c1_ - m_y_c2_)))  // rapidity distance
+      if (!kinematics().cuts().central.rapidity_diff.contains(std::fabs(m_y_c1_ - m_y_c2_)))  // rapidity distance
         return 0.;
       {
         const auto qt_sum = (q1() + q2()).transverse();  // two-parton system
@@ -72,8 +75,6 @@ namespace cepgen {
       const auto invm = (pc(0) + pc(1)).mass();
       if (!kinematics().cuts().central.mass_sum.contains(invm))
         return 0.;
-
-      //--- auxiliary quantities
 
       //--- compute and sanitise the momentum losses
       const auto amt1 = pc(0).massT() / sqrtS(), amt2 = pc(1).massT() / sqrtS();
@@ -104,11 +105,11 @@ namespace cepgen {
       CG_DEBUG_LOOP("2to4:remnants") << "First remnant:  " << pX() << ", mass = " << pX().mass() << "\n\t"
                                      << "Second remnant: " << pY() << ", mass = " << pY().mass() << ".";
 
-      if (fabs(pX().mass2() - mX2()) > NUM_LIMITS) {
+      if (std::fabs(pX().mass2() - mX2()) > NUM_LIMITS) {
         CG_WARNING("2to4:px") << "Invalid X system squared mass: " << pX().mass2() << "/" << mX2() << ".";
         return 0.;
       }
-      if (fabs(pY().mass2() - mY2()) > NUM_LIMITS) {
+      if (std::fabs(pY().mass2() - mY2()) > NUM_LIMITS) {
         CG_WARNING("2to4:py") << "Invalid Y system squared mass: " << pY().mass2() << "/" << mY2() << ".";
         return 0.;
       }
@@ -130,28 +131,15 @@ namespace cepgen {
                                     << "Second parton: " << q2() << ", mass2 = " << q2().mass2() << ", x2 = " << x2()
                                     << ", p = " << q2().p() << ".";
 
-      //--- central 2-to-2 matrix element
-      const auto amat2 = computeCentralMatrixElement();
-      if (!utils::positive(amat2))  // skip computing the prefactors if invalid
-        return 0.;
-
-      // factor 1/4 from jacobian of transformations
-      return amat2 * std::pow(4. * M_PI, -2) * 0.25 * m_pt_diff_;
+      if (const auto amat2 = computeCentralMatrixElement(); utils::positive(amat2))
+        return amat2 * prefactor_ * m_pt_diff_;
+      return 0.;  // skip computing the prefactors if invalid
     }
 
     void Process2to4::fillCentralParticlesKinematics() {
-      //--- randomise the charge of outgoing system
-      const short sign = rnd_gen_->uniformInt(0, 1) == 1 ? 1 : -1;
-
-      //--- first outgoing central particle
-      auto& oc1 = event()[Particle::CentralSystem][0].get();
-      oc1.setChargeSign(+sign);
-      oc1.setStatus(Particle::Status::Undecayed);
-
-      //--- second outgoing central particle
-      auto& oc2 = event()[Particle::CentralSystem][1].get();
-      oc2.setChargeSign(-sign);
-      oc2.setStatus(Particle::Status::Undecayed);
+      const short sign = rnd_gen_->uniformInt(0, 1) == 1 ? 1 : -1;  // randomise the charge of outgoing system
+      event()[Particle::CentralSystem][0].get().setChargeSign(+sign).setStatus(Particle::Status::Undecayed);
+      event()[Particle::CentralSystem][1].get().setChargeSign(-sign).setStatus(Particle::Status::Undecayed);
     }
 
     //----- utilities

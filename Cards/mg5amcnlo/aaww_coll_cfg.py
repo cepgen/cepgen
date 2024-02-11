@@ -1,6 +1,6 @@
 import Config.Core as cepgen
 import Config.collinearProcess_cfi as coll
-from Config.generator_cff import generator
+from Config.generator_cfi import generator
 
 #--- process definition
 process = coll.process.clone('mg5_aMC',

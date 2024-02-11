@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #include "CepGen/Integration/Integrand.h"
 
 namespace cepgen {
-  class Parameters;
+  class RunParameters;
   namespace proc {
     class Process;
   }
@@ -37,7 +37,7 @@ namespace cepgen {
   class ProcessIntegrand : public Integrand {
   public:
     explicit ProcessIntegrand(const proc::Process&);
-    explicit ProcessIntegrand(const Parameters*);
+    explicit ProcessIntegrand(const RunParameters*);
 
     /// Compute the integrand for a given phase space point (or "event")
     /// \param[in] x Phase space point coordinates
@@ -49,6 +49,7 @@ namespace cepgen {
     ///  \f$\forall i=1,\ldots,N\f$, \f$0<x_i<1\f$).
     double eval(const std::vector<double>& x) override;
     size_t size() const override;  ///< Phase space dimension
+    bool hasProcess() const override final { return true; }
 
     proc::Process& process();              ///< Thread-local physics process
     const proc::Process& process() const;  ///< Thread-local physics process
@@ -60,7 +61,7 @@ namespace cepgen {
     void setProcess(const proc::Process&);
 
     std::unique_ptr<proc::Process> process_;   ///< Local instance of the physics process
-    const Parameters* params_{nullptr};        ///< Generator-owned runtime parameters
+    const RunParameters* params_{nullptr};     ///< Generator-owned runtime parameters
     const std::unique_ptr<utils::Timer> tmr_;  ///< Timekeeper for event generation
     utils::EventBrowser bws_;                  ///< Event browser
     bool storage_{false};                      ///< Is the next event to be generated to be stored?

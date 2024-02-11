@@ -1,8 +1,12 @@
+#include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Test.h"
 
 using namespace std;
 
-int main() {
+int main(int argc, char* argv[]) {
+  bool verbose;
+  cepgen::ArgumentsParser(argc, argv).addOptionalArgument("verbose", "verbose mode", &verbose, false).parse();
+  CG_TEST_DEBUG(verbose);
   {
     auto str = "This {is} a text with {sub-strings}";
     const auto substr = cepgen::utils::between(str, "{", "}");

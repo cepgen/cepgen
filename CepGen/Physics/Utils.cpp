@@ -58,10 +58,10 @@ namespace cepgen {
       }
 
       double q2(double x, double kt2, double mi2, double mx2) {
-        if (mx2 < 0.)
-          mx2 = mi2;
         if (!x_limits.contains(x))
           return 0.;
+        if (mx2 < 0.)  // mx2 = mi2
+          return (kt2 + x * x * mi2) / (1. - x);
         return (kt2 + x * (mx2 - mi2) + x * x * mi2) / (1. - x);
       }
     }  // namespace kt

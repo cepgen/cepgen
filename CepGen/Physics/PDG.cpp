@@ -19,6 +19,7 @@
 #include <iomanip>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/String.h"
 
@@ -82,7 +83,11 @@ namespace cepgen {
 
   double PDG::colours(pdgid_t id) const { return operator()(id).colours; }
 
-  double PDG::mass(pdgid_t id) const { return operator()(id).mass; }
+  double PDG::mass(pdgid_t id) const {
+    if (HeavyIon::isHI(id))
+      return HeavyIon::fromPdgId(id).mass();
+    return operator()(id).mass;
+  }
 
   double PDG::width(pdgid_t id) const { return operator()(id).width; }
 

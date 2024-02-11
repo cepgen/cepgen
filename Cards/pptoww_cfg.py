@@ -1,21 +1,23 @@
 import Config.Core as cepgen
+import Config.ktProcess_cfi as kt
+from Config.generator_cfi import generator as _gen
 #--------------------------------------------------------------------
 # Logging/debugging example
 #--------------------------------------------------------------------
-#from Config.Logger_cfi import logger
+#from Config.logger_cfi import logger
 #logger.enabledModules += ('Hadroniser.configure', 'Generator.*',)
 #--------------------------------------------------------------------
 # Pythia 6 example (with fully leptonic WW decay)
 #--------------------------------------------------------------------
-#from Config.Hadronisation.pythia6_cff import pythia6 as hadroniser
-#from Config.Hadronisation.pythia6Defaults_cfi import WDecayToEMu
+#from Config.Hadronisation.pythia6_cfi import pythia6 as hadroniser
+#from Config.Hadronisation.pythia6Defaults_cff import WDecayToEMu
 #hadroniser.wDecays = WDecayToEMu
 #hadroniser.processConfiguration += ('wDecays',)
 #hadroniser.remnantsFragmentation = False
 #--------------------------------------------------------------------
 # Pythia 8 example (with fully leptonic WW decay)
 #--------------------------------------------------------------------
-#from Config.Hadronisation.pythia8_cff import pythia8
+#from Config.Hadronisation.pythia8_cfi import pythia8
 #hadroniser = pythia8.clone('pythia8',
 #    pythiaConfiguration = (
 #        # process-specific
@@ -28,7 +30,6 @@ import Config.Core as cepgen
 #    processConfiguration = pythia8.processConfiguration+('pythiaConfiguration',),
 #)
 
-import Config.ktProcess_cfi as kt
 process = kt.process.clone('pptoww',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
@@ -67,8 +68,7 @@ process = kt.process.clone('pptoww',
 )
 
 #--- generation parameters
-from Config.generator_cff import generator
-generator = generator.clone(
+generator = _gen.clone(
     numEvents = 50000,
     printEvery = 5000,
 )

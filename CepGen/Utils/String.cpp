@@ -164,14 +164,22 @@ namespace cepgen {
       return out.str();
     }
 
+    std::string s(const std::string& word, float num, bool show_number) {
+      return show_number ? (num == 0 ? "no" : format("%g", num)) + format(" %s%s", word.c_str(), num > 1. ? "s" : "")
+                         : format("%s%s", word.c_str(), num > 1. ? "s" : "");
+    }
+
     std::vector<std::string> split(const std::string& str, char delim, bool trim) {
       std::vector<std::string> out;
       if (str.empty())
         return out;
       std::string token;
       std::istringstream iss(str);
-      while (std::getline(iss, token, delim))
-        out.emplace_back(trim ? ltrim(rtrim(token)) : token);
+      while (std::getline(iss, token, delim)) {
+        const auto tok = trim ? ltrim(rtrim(token)) : token;
+        if (!trim || !tok.empty())
+          out.emplace_back(tok);
+      }
       return out;
     }
 
@@ -188,6 +196,7 @@ namespace cepgen {
     }
 
     template std::string merge<std::string>(const std::vector<std::string>&, const std::string&);
+    template std::string merge<Limits>(const std::vector<Limits>&, const std::string&);
     template std::string merge<int>(const std::vector<int>&, const std::string&);
     template std::string merge<unsigned long long>(const std::vector<unsigned long long>&, const std::string&);
     template std::string merge<double>(const std::vector<double>&, const std::string&);

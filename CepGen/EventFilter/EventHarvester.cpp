@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2023  Laurent Forthomme
+ *  Copyright (C) 2019-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,12 +17,12 @@
  */
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventBrowser.h"
 #include "CepGen/EventFilter/EventHarvester.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
-#include "CepGen/Parameters.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/String.h"
 
@@ -45,47 +45,20 @@ namespace cepgen {
       if (vars.size() < 1 || vars.size() > 2)
         throw CG_FATAL("EventHarvester") << "Invalid number of variables to correlate for '" << key << "'!";
 
-      const auto& hvar = hist_vars.get<ParametersList>(key);
+      auto hvar = hist_vars.get<ParametersList>(key);
       const auto& log = hvar.get<bool>("log");
       auto name = utils::sanitise(key);
       if (vars.size() == 1) {  // 1D histogram
-        const auto& xbins = hvar.get<std::vector<double> >("xbins");
-        if (xbins.size() > 1)
-          hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(xbins, name), log});
-        else if (hvar.get<Limits>("xrange").valid()) {
-          const auto& nbins = (hvar.get<int>("nbins") > 0 ? hvar.get<int>("nbins") : hvar.get<int>("nbinsX"));
-          hists_.emplace_back(Hist1DInfo{vars.at(0), utils::Hist1D(nbins, hvar.get<Limits>("xrange"), name), log});
-        } else {
-          CG_WARNING("EventHarvester") << "Neither 'xrange' nor 'xbins' found in parameters for 1D plot of variable \""
-                                       << vars.at(0) << "\".";
-          continue;
-        }
-        auto& hist = hists_.rbegin()->hist;
+        auto hist = utils::Hist1D(hvar.set<std::string>("name", name));
         hist.xAxis().setLabel(vars.at(0));
         hist.yAxis().setLabel("d$\\sigma$/d" + vars.at(0) + " (pb/bin)");
+        hists_.emplace_back(Hist1DInfo{vars.at(0), hist, log});
       } else if (vars.size() == 2) {  // 2D histogram
-        const auto &xbins = hvar.get<std::vector<double> >("xbins"), &ybins = hvar.get<std::vector<double> >("ybins");
-        name = utils::sanitise(name);
-        if (xbins.size() > 1 && ybins.size() > 1)
-          hists2d_.emplace_back(Hist2DInfo{vars.at(0), vars.at(1), utils::Hist2D(xbins, ybins, name), log});
-        else if (hvar.get<Limits>("xrange").valid()) {
-          const auto& nbinsx = (hvar.get<int>("nbins") > 0 ? hvar.get<int>("nbins") : hvar.get<int>("nbinsX"));
-          hists2d_.emplace_back(Hist2DInfo{
-              vars.at(0),
-              vars.at(1),
-              utils::Hist2D(
-                  nbinsx, hvar.get<Limits>("xrange"), hvar.get<int>("nbinsY"), hvar.get<Limits>("yrange"), name),
-              log});
-        } else {
-          CG_WARNING("EventHarvester")
-              << "Neither '(x/y)range' nor '(x/y)bins' found in parameters for 1D plot of variables \"" << vars
-              << "\".";
-          continue;
-        }
-        auto& hist = hists2d_.rbegin()->hist;
+        auto hist = utils::Hist2D(hvar.set<std::string>("name", utils::sanitise(name)));
         hist.xAxis().setLabel(vars.at(0));
         hist.yAxis().setLabel(vars.at(1));
         hist.zAxis().setLabel("d$^2$$\\sigma$/d" + vars.at(0) + "/d" + vars.at(1) + " (pb/bin)");
+        hists2d_.emplace_back(Hist2DInfo{vars.at(0), vars.at(1), hist, log});
       }
     }
     if (save_hists_ && !hists_.empty())
@@ -152,8 +125,7 @@ namespace cepgen {
     ParametersDescription hist_desc;
     // x-axis attributes
     hist_desc.add<std::vector<double> >("xbins", {}).setDescription("x-axis bins definition");
-    hist_desc.add<int>("nbins", 25).setDescription("Bins multiplicity for x-axis");
-    hist_desc.add<int>("nbinsX", -1).setDescription("Bins multiplicity for x-axis");
+    hist_desc.add<int>("nbinsX", 25).setDescription("Bins multiplicity for x-axis");
     hist_desc.add<Limits>("xrange", Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
     // y-axis attributes
     hist_desc.add<std::vector<double> >("ybins", {}).setDescription("y-axis bins definition");

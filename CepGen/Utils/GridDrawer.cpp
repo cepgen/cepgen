@@ -84,9 +84,11 @@ namespace cepgen {
           plots[i][1].addPoint(val.first[0], val.first[2], val.second[i]);
           plots[i][2].addPoint(val.first[1], val.first[2], val.second[i]);
         }
+      DrawableColl coll;
       for (size_t i = 0; i < N; ++i)
         for (size_t j = 0; j < 3; ++j)
-          gd.drawer_->draw(plots[i][j], mode);
+          coll.emplace_back(&plots[i][j]);
+      gd.drawer_->draw(coll, "", "", mode);
     }
 
     ParametersDescription GridDrawer::description() {
