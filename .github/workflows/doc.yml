@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
     container:
-      image: 'laufor/ci-images:cepgen-fedora37'
+      image: 'laufor/ci-images:cepgen-fedora39'
       options: -v ${{ github.workspace }}:/Package
     steps:
       - uses: actions/checkout@v3
