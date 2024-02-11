@@ -31,9 +31,10 @@ jobs:
           git config --global --add safe.directory /Package
           cmake3 -GNinja -B ${{env.CEPGEN_PATH}} -DCMAKE_BUILD_UTILS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always"
       - name: Generate cepgen documentation
+        working-directory: ${{env.CEPGEN_PATH}}
         run: |
           cmake3 --build ${{env.CEPGEN_PATH}} -- cepgenDocGenerator
-          cd ${{env.CEPGEN_PATH}} && bin/cepgenDocGenerator -o /Package/doc/.raw_modules.html -e && cd -
+          bin/cepgenDocGenerator -o /Package/doc/.raw_modules.html -e
           cmake3 --build ${{env.CEPGEN_PATH}} -- Sphinx
       - name: Upload documentation
         uses: burnett01/rsync-deployments@5.2.1
