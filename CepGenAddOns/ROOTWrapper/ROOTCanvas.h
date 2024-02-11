@@ -428,7 +428,13 @@ namespace cepgen {
       if (top_label_)
         top_label_->Draw();
       if (leg_) {
-        if (TPad::PlaceBox(leg_.get(), leg_width_ * 1.15, leg_height_, leg_x1_, leg_y1_, leg_mode_.data())) {
+        if (
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 10, 0)
+            TPad::PlaceBox(leg_.get(), leg_width_ * 1.15, leg_height_, leg_x1_, leg_y1_, leg_mode_.data())
+#else
+            true
+#endif
+        ) {
           leg_y1_ = std::min(leg_y1_, 0.9 - leg_height_);
           leg_->SetX1(leg_x1_);
           leg_->SetX2(leg_x1_ + leg_width_);
@@ -447,7 +453,13 @@ namespace cepgen {
         return;
       double leg_x, leg_y;
       const auto leg_width = leg->GetX2() - leg->GetX1(), leg_height = leg->GetY2() - leg->GetY1();
-      if (TPad::PlaceBox(leg, leg_width * 1.15, leg_height, leg_x, leg_y, mode)) {
+      if (
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 10, 0)
+          TPad::PlaceBox(leg, leg_width * 1.15, leg_height, leg_x, leg_y, mode)
+#else
+          true
+#endif
+      ) {
         leg->SetX1(leg_x);
         leg->SetX2(leg_x + leg_width);
         leg->SetY1(leg_y);
