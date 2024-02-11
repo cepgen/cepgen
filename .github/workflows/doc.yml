@@ -33,6 +33,7 @@ jobs:
       - name: Generate cepgen documentation
         working-directory: ${{env.CEPGEN_PATH}}
         run: |
+          cmake3 --build ${{env.CEPGEN_PATH}}
           cmake3 --build ${{env.CEPGEN_PATH}} -- cepgenDocGenerator
           bin/cepgenDocGenerator -o /Package/doc/.raw_modules.html -e
           cmake3 --build ${{env.CEPGEN_PATH}} -- Sphinx
