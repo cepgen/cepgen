@@ -40,12 +40,14 @@ namespace cepgen {
   typedef std::vector<std::unique_ptr<utils::Functional> > TamingFunctionsSequence;  ///< Taming functions evaluators set
 
   /// List of parameters used to start and run the simulation job
-  class RunParameters {
+  class RunParameters : public SteeredObject<RunParameters> {
   public:
     RunParameters();
     RunParameters(RunParameters&);  ///< Copy constructor (transfers ownership to process/event modification algorithm!)
     RunParameters(const RunParameters&);  ///< Const copy constructor (all but process + event handling algorithms)
     ~RunParameters();                     // required for unique_ptr initialisation!
+
+    static ParametersDescription description();
 
     RunParameters& operator=(RunParameters);  ///< Assignment operator
 

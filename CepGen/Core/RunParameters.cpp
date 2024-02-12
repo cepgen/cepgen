@@ -35,10 +35,14 @@
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  RunParameters::RunParameters() : par_integrator(ParametersList().setName<std::string>("Vegas")) {}
+  RunParameters::RunParameters()
+      : SteeredObject(ParametersList()),
+        par_integrator(steer<ParametersList>("integrator")),
+        generation_(steer<ParametersList>("generation")) {}
 
   RunParameters::RunParameters(RunParameters& param)
-      : par_integrator(param.par_integrator),
+      : SteeredObject(param),
+        par_integrator(param.par_integrator),
         process_(std::move(param.process_)),
         evt_modifiers_(std::move(param.evt_modifiers_)),
         evt_exporters_(std::move(param.evt_exporters_)),
@@ -49,7 +53,8 @@ namespace cepgen {
         tmr_(std::move(param.tmr_)) {}
 
   RunParameters::RunParameters(const RunParameters& param)
-      : par_integrator(param.par_integrator),
+      : SteeredObject(param),
+        par_integrator(param.par_integrator),
         total_gen_time_(param.total_gen_time_),
         num_gen_events_(param.num_gen_events_),
         generation_(param.generation_) {}
@@ -253,6 +258,13 @@ namespace cepgen {
     return os << "\n"
               << std::setfill('_') << std::setw(wb) << ""
               << "\n";
+  }
+
+  ParametersDescription RunParameters::description() {
+    auto desc = ParametersDescription();
+    desc.add<ParametersDescription>("integrator", ParametersDescription().setName<std::string>("Vegas"));
+    desc.add<ParametersDescription>("generation", Generation::description());
+    return desc;
   }
 
   //-----------------------------------------------------------------------------------------------
