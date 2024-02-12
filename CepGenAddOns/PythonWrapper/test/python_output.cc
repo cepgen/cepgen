@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
     auto obj = cepgen::python::importModule(path);
     CG_TEST(obj != nullptr, "Module import");
     //CG_LOG << cepgen::python::get<cepgen::ParametersList>(PyObject_GenericGetDict(obj.get(), nullptr));
-    auto proc = cepgen::python::getAttribute(obj, "process");
+    auto proc = obj.attribute("process");
     CG_TEST(proc != nullptr, "'process' attribute retrieval");
     const auto proc_params = cepgen::python::get<cepgen::ParametersList>(proc);
     CG_TEST_EQUAL(proc_params.name<std::string>(), process, "Process name conservation");

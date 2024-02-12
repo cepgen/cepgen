@@ -33,8 +33,7 @@ namespace cepgen {
       auto cfg = python::importModule(steer<std::string>("module"));
       if (!cfg)
         throw PY_ERROR << "Failed to import the Python module '" << steer<std::string>("module") << "'.";
-      func_ = python::getAttribute(cfg.get(), "integrate");
-      if (!func_ || !PyCallable_Check(func_.get()))
+      if (func_ = cfg.attribute("integrate"); !func_ || !PyCallable_Check(func_.get()))
         throw PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";
     }
 

@@ -18,6 +18,7 @@
 
 // clang-format off
 #include "CepGenAddOns/PythonWrapper/Error.h"
+#include "CepGenAddOns/PythonWrapper/PythonTypes.h"
 #include "CepGenAddOns/PythonWrapper/PythonUtils.h"
 #include <frameobject.h>
 // clang-format on
@@ -37,7 +38,7 @@ namespace cepgen {
         // we can start the traceback
         (*this) << "Error: " << get<std::string>(PyObject_Str(pvalue_));
         if (auto mod_traceback = importModule("traceback"))
-          if (auto fmt = getAttribute(mod_traceback.get(), "format_exception"); PyCallable_Check(fmt.get()))
+          if (auto fmt = mod_traceback.attribute("format_exception"); PyCallable_Check(fmt.get()))
             if (ObjectPtr pyth_val(PyObject_CallFunctionObjArgs(fmt.get(), ptype_, pvalue_, ptraceback_obj_, nullptr));
                 pyth_val) {
               (*this) << "\n" << std::string(80, '.') << "\n";

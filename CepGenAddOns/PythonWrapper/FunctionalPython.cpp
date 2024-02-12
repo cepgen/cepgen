@@ -60,8 +60,7 @@ namespace cepgen {
         python::ObjectPtr value(PyRun_String(os.str().c_str(), Py_file_input, local, local));  // new
         if (!value)
           throw PY_ERROR;
-        func_ = python::getAttribute(mod_.get(), "custom_functional");
-        if (!func_ || !PyCallable_Check(func_.get()))
+        if (func_ = mod_.attribute("custom_functional"); !func_ || !PyCallable_Check(func_.get()))
           throw CG_ERROR("FunctionalPython") << "Failed to retrieve/cast the object to a Python functional.";
       } catch (const python::Error& err) {
         throw CG_ERROR("FunctionalPython")

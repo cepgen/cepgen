@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2018-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,40 +19,28 @@
 #ifndef CepGenAddOns_PythonWrapper_PythonTypes_h
 #define CepGenAddOns_PythonWrapper_PythonTypes_h
 
-#include <Python.h>
-
-#include <memory>
-#include <string>
 #include <tuple>
 #include <vector>
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/Limits.h"
+#include "CepGenAddOns/PythonWrapper/ObjectPtr.h"
 
 #if PY_MAJOR_VERSION < 3
 #define PYTHON2
 #endif
 
-#define DEFINE_TYPE(type)         \
-  template <>                     \
-  bool is<type>(PyObject * obj);  \
-  template <>                     \
-  type get<type>(PyObject * obj); \
-  template <>                     \
-  ObjectPtr set<type>(const type&);
+#define DEFINE_TYPE(type)           \
+  template <>                       \
+  bool is<type>(PyObject * obj);    \
+  template <>                       \
+  type get<type>(PyObject * obj);   \
+  template <>                       \
+  ObjectPtr set<type>(const type&); \
+  static_assert(true, "")
 
 namespace cepgen {
   namespace python {
-    /// Common deleter for a PyObject
-    struct ObjectPtrDeleter {
-      void operator()(PyObject*);
-    };
-    /// Smart pointer to a Python object and its dereferencing operator
-    struct ObjectPtr : public std::unique_ptr<PyObject, ObjectPtrDeleter> {
-      using std::unique_ptr<PyObject, ObjectPtrDeleter>::unique_ptr;
-      friend std::ostream& operator<<(std::ostream&, const ObjectPtr&);
-    };
-
     /// Import a Python module in a new reference-counted Python object
     ObjectPtr importModule(const std::string&);
     /// Define a Python module from a Python code in a new reference-counted Python object
@@ -61,6 +49,12 @@ namespace cepgen {
     /// Check if a Python object holds a given C++ type
     template <typename T>
     bool is(PyObject* obj);
+    /// Check if a Python object holds a given C++ type
+    template <typename T>
+    inline bool is(const ObjectPtr& obj) {
+      return is<T>(obj.get());
+    }
+
     /// Cast a Python object into a C++ type
     template <typename T>
     T get(PyObject* obj);
@@ -103,10 +97,6 @@ namespace cepgen {
     ObjectPtr newTuple(const std::tuple<Args...>& c_tuple) {
       const auto tuple_size = sizeof...(Args);
       ObjectPtr tuple(PyTuple_New(tuple_size));
-      /*for (size_t i = 0; i < tuple_size; ++i) {
-        auto val = std::get<i>(c_tuple);
-        PyTuple_SetItem(tuple.get(), i, set<decltype(val)>(val));
-      }*/
       Py_ssize_t i = 0;
       std::apply([&tuple, &i](
                      auto... vals) { ((PyTuple_SetItem(tuple.get(), i++, set<decltype(vals)>(vals).release())), ...); },
@@ -127,12 +117,12 @@ namespace cepgen {
     template <>
     unsigned long get<unsigned long>(PyObject* obj);
     //--- others
-    DEFINE_TYPE(bool)
-    DEFINE_TYPE(int)
-    DEFINE_TYPE(double)
-    DEFINE_TYPE(std::string)
-    DEFINE_TYPE(Limits)
-    DEFINE_TYPE(ParametersList)
+    DEFINE_TYPE(bool);
+    DEFINE_TYPE(int);
+    DEFINE_TYPE(double);
+    DEFINE_TYPE(std::string);
+    DEFINE_TYPE(Limits);
+    DEFINE_TYPE(ParametersList);
   }  // namespace python
 }  // namespace cepgen
 

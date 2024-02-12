@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2018-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,27 +27,6 @@
 
 namespace cepgen {
   namespace python {
-    void ObjectPtrDeleter::operator()(PyObject* obj) {
-      CG_DEBUG("Python:ObjectPtrDeleter").log([&obj](auto& log) {
-        log << "Destroying object at addr 0x" << obj << " (";
-#if PY_VERSION_HEX >= 0x03110000
-        auto* type = Py_TYPE(obj);
-        if (type)
-          log << "type: " << get<std::string>(PyType_GetName(type)) << ", ";
-#endif
-        log << "reference count: " << Py_REFCNT(obj) << ")";
-      });
-      Py_DECREF(obj);
-    }
-
-    std::ostream& operator<<(std::ostream& os, const ObjectPtr& ptr) {
-      os << "PyObject{";
-      auto repr = ObjectPtr(PyObject_Str(ptr.get()));  // new
-      if (repr)
-        os << get<std::string>(repr);
-      return os << "}";
-    }
-
     ObjectPtr importModule(const std::string& mod_name) {
       return ObjectPtr(PyImport_Import(set<std::string>(mod_name).get()));  // new
     }
