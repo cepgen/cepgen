@@ -9,6 +9,7 @@ on:
 env:
   BUILD_TYPE: Release  # Release, Debug, RelWithDebInfo, etc
   CEPGEN_PATH: /Package/build
+  CG_CI: True
 
 jobs:
   build:
