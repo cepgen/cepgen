@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -50,7 +50,8 @@ int main(int argc, char* argv[]) {
 
   CG_LOG << "Will build a process named \"" << proc_name << "\".";
 
-  auto proc = cepgen::ProcessFactory::get().build(proc_name, cepgen::ParametersList());
+  auto proc = cepgen::ProcessFactory::get().build(proc_name);
+  proc->initialise();
   //--- at this point, the process has been found
   CG_LOG.log([&proc](auto& log) {
     log << "Successfully built the process \"" << proc->name() << "\"!\n"

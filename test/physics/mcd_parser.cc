@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Test.h"
 
 using namespace std;
@@ -26,7 +27,10 @@ using namespace std;
 int main(int argc, char* argv[]) {
   string path;
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("input,i", "path to the MCD file", &path, "../External/mass_width_2023.txt")
+      .addOptionalArgument("input,i",
+                           "path to the MCD file",
+                           &path,
+                           cepgen::utils::env::get("CEPGEN_PATH") + "/External/mass_width_2023.txt")
       .parse();
 
   pdg::MCDFileParser::parse(path);
