@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2023  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,8 +19,9 @@
 #ifndef CepGenAddOns_PythonWrapper_Environment_h
 #define CepGenAddOns_PythonWrapper_Environment_h
 
+#include <Python.h>
+
 #include "CepGen/Core/SteeredObject.h"
-#include "CepGenAddOns/PythonWrapper/PythonTypes.h"
 
 namespace cepgen {
   namespace python {

@@ -30,27 +30,27 @@ namespace cepgen {
   public:
     explicit PythonIntegrator(const ParametersList& params)
         : Integrator(params), env_(ParametersList().setName<std::string>("python_integrator")) {
-      auto cfg = python::importModule(steer<std::string>("module"));
+      auto cfg = python::ObjectPtr::importModule(steer<std::string>("module"));
       if (!cfg)
         throw PY_ERROR << "Failed to import the Python module '" << steer<std::string>("module") << "'.";
       if (func_ = cfg.attribute("integrate"); !func_ || !PyCallable_Check(func_.get()))
         throw PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";
     }
 
-    void setLimits(const std::vector<Limits>& lims) override { lims_ = python::set(lims); }
+    void setLimits(const std::vector<Limits>& lims) override { lims_ = python::ObjectPtr::make(lims); }
 
     Value integrate(Integrand& integrand) override {
       gIntegrand = &integrand;
       const auto iterations = steer<int>("iterations");
       const auto evals = steer<int>("evals");
       PyMethodDef py_integr = {"integrand", py_integrand, METH_VARARGS, "A python-wrapped integrand"};
-      python::ObjectPtr function(PyCFunction_NewEx(&py_integr, nullptr, python::set<std::string>("integrand").get()));
-      const auto value =
-          lims_ ? python::call(func_, function.get(), (int)integrand.size(), iterations, 1000, evals, lims_.get())
-                : python::call(func_, function.get(), (int)integrand.size(), iterations, 1000, evals);
+      python::ObjectPtr function(
+          PyCFunction_NewEx(&py_integr, nullptr, python::ObjectPtr::make<std::string>("integrand").get()));
+      const auto value = lims_ ? func_(function.get(), (int)integrand.size(), iterations, 1000, evals, lims_.get())
+                               : func_(function.get(), (int)integrand.size(), iterations, 1000, evals);
       if (!value)
         throw PY_ERROR;
-      const auto vals = python::getVector<double>(value);
+      const auto vals = value.vector<double>();
       if (vals.size() < 2)
         throw CG_FATAL("PythonIntegrator")
             << "Wrong multiplicity of result returned from Python's integration algorithm: " << vals << ".";
@@ -71,12 +71,12 @@ namespace cepgen {
 
   private:
     python::Environment env_;
-    python::ObjectPtr func_, lims_{nullptr};
+    python::ObjectPtr func_{nullptr}, lims_{nullptr};
     static PyObject* py_integrand(PyObject* /*self*/, PyObject* args) {
       if (!gIntegrand)
         throw CG_FATAL("PythonIntegrator") << "Integrand was not initialised.";
-      const auto c_args = python::getVector<double>(PyTuple_GetItem(args, 0));
-      return python::set<double>(gIntegrand->eval(c_args)).release();
+      const auto c_args = python::ObjectPtr::wrap(PyTuple_GetItem(args, 0)).vector<double>();
+      return python::ObjectPtr::make<double>(gIntegrand->eval(c_args)).release();
     }
   };
   Integrand* PythonIntegrator::gIntegrand = nullptr;

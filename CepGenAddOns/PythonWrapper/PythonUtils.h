@@ -19,20 +19,11 @@
 #ifndef CepGenAddOns_PythonWrapper_PythonUtils_h
 #define CepGenAddOns_PythonWrapper_PythonUtils_h
 
-#include "CepGenAddOns/PythonWrapper/PythonTypes.h"
-
 namespace cepgen {
   namespace python {
     /// Translate a filename into a python-compatible path
     std::string pythonPath(const std::string&);
     std::vector<std::wstring> info();
-    /// Call a python function with a tuple of arguments
-    ObjectPtr callArgs(const ObjectPtr& func, const ObjectPtr& args);
-    /// Call a python function with an uncounted set of arguments
-    template <typename... Args>
-    inline ObjectPtr call(const ObjectPtr& func, Args&&... args) {
-      return callArgs(func, python::newTuple(std::make_tuple(std::forward<Args>(args)...)));  // new
-    }
   }  // namespace python
 }  // namespace cepgen
 

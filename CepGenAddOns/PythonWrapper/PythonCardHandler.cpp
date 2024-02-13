@@ -55,7 +55,7 @@ namespace cepgen {
     RunParameters* parseFile(const std::string& file, RunParameters* params) override {
       const auto filename = python::pythonPath(file);
       env_->setProgramName(filename);
-      if (cfg_ = python::importModule(filename) /* new */; !cfg_)
+      if (cfg_ = python::ObjectPtr::importModule(filename) /* new */; !cfg_)
         throw PY_ERROR << "Failed to import the configuration card '" << filename << "'\n"
                        << " (parsed from '" << file << "').";
       return parse(params);
@@ -63,7 +63,7 @@ namespace cepgen {
     RunParameters* parseString(const std::string& str, RunParameters* params) override {
       const std::string name = "Cards.Core";
       env_->setProgramName(name);
-      if (cfg_ = python::defineModule(name, str) /* new */; !cfg_)
+      if (cfg_ = python::ObjectPtr::defineModule(name, str) /* new */; !cfg_)
         throw PY_ERROR << "Failed to parse a configuration string:\n"
                        << std::string(80, '-') << "\n"
                        << str << "\n"
@@ -84,16 +84,27 @@ namespace cepgen {
       CG_ASSERT(cfg_);
       // convert the imported module into a CepGen user-steered configuration parameters object
       ParametersList plist;
-      for (const auto& attr : python::getVector<std::string>(python::call(cfg_.attribute("__dir__")))) {
+      for (const auto& attr : cfg_.attribute("__dir__")().vector<std::string>()) {
         if (attr[0] == '_')
           continue;
         const auto obj = cfg_.attribute(attr);
-        if (python::is<ParametersList>(obj))
-          plist.set(attr, python::get<ParametersList>(obj));
-        if (python::isVector<ParametersList>(obj))
-          plist.set(attr, python::getVector<ParametersList>(obj));
+        if (obj.is<ParametersList>())
+          plist.set(attr, obj.value<ParametersList>());
+        if (obj.isVector<ParametersList>())
+          plist.set(attr, obj.vector<ParametersList>());
       }
       rt_params_ = params;
+
+      // logging module
+      auto logging = plist.get<ParametersList>("logger");
+      utils::Logger::get().setLevel(logging.getAs<int, utils::Logger::Level>("level", utils::Logger::get().level()));
+      utils::Logger::get().setExtended(logging.get<bool>("extended", utils::Logger::get().extended()));
+      for (const auto& log_mod : logging.get<std::vector<std::string> >("enabledModules"))
+        utils::Logger::get().addExceptionRule(log_mod);
+
+      // external libraries
+      for (const auto& lib : plist.get<std::vector<std::string> >("addons"))  // additional libraries to load
+        loadLibrary(lib);
 
       CG_DEBUG("PythonCardHandler").log([](auto& log) {
         log << "Initialised the Python cards parser.";
@@ -101,19 +112,15 @@ namespace cepgen {
           log << "\n\t" << ln;
       });
 
-      for (const auto& lib : plist.get<std::vector<std::string> >("addons"))  // additional libraries to load
-        loadLibrary(lib);
-
-      //--- timekeeper definition
-      // (currently, does not parse the object, just check its presence)
+      // timekeeper definition (currently, does not parse the object, just check its presence)
       if (!plist.get<ParametersList>("timer").empty())
         rt_params_->setTimeKeeper(new utils::TimeKeeper);
 
-      //--- general particles definition
+      // general particles definition
       if (const auto mcd_file = plist.get<std::string>("mcdFile"); !mcd_file.empty())
         pdg::MCDFileParser::parse(mcd_file);
 
-      //--- additional particles definition
+      // additional particles definition
       const auto parts = plist.get<ParametersList>("PDG");
       for (const auto& k : parts.keys(true)) {
         auto props = parts.get<ParametersList>(k);
@@ -130,28 +137,28 @@ namespace cepgen {
       }
 
       // process definition
-      auto process = plist.get<ParametersList>("process");
-      process += process.get<ParametersList>("processParameters");
-      process.erase("processParameters");
-      auto& pkin = process.operator[]<ParametersList>("kinematics");
-      pkin += process.get<ParametersList>("inKinematics");
-      process.erase("inKinematics");
-      pkin += process.get<ParametersList>("outKinematics");
-      process.erase("outKinematics");
-      if (process.has<int>("mode"))
-        pkin.set("mode", (int)process.getAs<int, mode::Kinematics>("mode"));
-      rt_params_->setProcess(ProcessFactory::get().build(process));
+      if (auto process = plist.get<ParametersList>("process"); !process.empty()) {
+        process += process.get<ParametersList>("processParameters");
+        process.erase("processParameters");
+        auto& pkin = process.operator[]<ParametersList>("kinematics");
+        pkin += process.get<ParametersList>("inKinematics");
+        process.erase("inKinematics");
+        pkin += process.get<ParametersList>("outKinematics");
+        process.erase("outKinematics");
+        if (process.has<int>("mode"))
+          pkin.set("mode", (int)process.getAs<int, mode::Kinematics>("mode"));
+        rt_params_->setProcess(ProcessFactory::get().build(process));
 
-      for (const auto& tf : process.get<std::vector<ParametersList> >("tamingFunctions"))
-        rt_params_->addTamingFunction(FunctionalFactory::get().build("ROOT", tf));
+        for (const auto& tf : process.get<std::vector<ParametersList> >("tamingFunctions"))
+          rt_params_->addTamingFunction(FunctionalFactory::get().build("ROOT", tf));
+      }
 
-      // logging module
-      auto logging = plist.get<ParametersList>("logger");
-      utils::Logger::get().setLevel(logging.getAs<int, utils::Logger::Level>("level", utils::Logger::get().level()));
-      utils::Logger::get().setExtended(logging.get<bool>("extended", utils::Logger::get().extended()));
-      for (const auto& log_mod : logging.get<std::vector<std::string> >("enabledModules"))
-        utils::Logger::get().addExceptionRule(log_mod);
+      // generation parameters
+      rt_params_->par_integrator += plist.get<ParametersList>("integrator");
+      auto pgen = plist.get<ParametersList>("generator");
+      rt_params_->generation().setParameters(pgen.set("maxgen", pgen.get<int>("numEvents")));
 
+      // event modification algorithms / hadronisers
       auto parse_evtmod_module = [&](const ParametersList& mod) {
         rt_params_->addModifier(EventModifierFactory::get().build(mod));
         auto h = rt_params_->eventModifiersSequence().rbegin()->get();
@@ -166,11 +173,7 @@ namespace cepgen {
       for (const auto& mod : plist.get<std::vector<ParametersList> >("eventSequence"))  // event modification algorithms
         parse_evtmod_module(mod);
 
-      // generation parameters
-      rt_params_->par_integrator += plist.get<ParametersList>("integrator");
-      auto pgen = plist.get<ParametersList>("generator");
-      rt_params_->generation().setParameters(pgen.set("maxgen", pgen.get<int>("numEvents")));
-
+      // output modules
       for (const auto& mod : plist.get<std::vector<ParametersList> >("output"))
         rt_params_->addEventExporter(EventExporterFactory::get().build(mod));
 

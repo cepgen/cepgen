@@ -39,7 +39,7 @@ namespace cepgen {
     private:
       python::Environment env_{ParametersList()};
       python::ObjectPtr mod_;
-      python::ObjectPtr func_;
+      python::ObjectPtr func_{nullptr};
     };
 
     FunctionalPython::FunctionalPython(const ParametersList& params)
@@ -70,15 +70,14 @@ namespace cepgen {
     }
 
     double FunctionalPython::eval() const {
-      auto args = python::newTuple(values_);
+      auto args = python::ObjectPtr::tupleFromVector(values_);
       try {
-        auto value = python::callArgs(func_, args);
-        if (!value)
-          throw PY_ERROR;
-        return python::get<double>(value.get());
+        if (auto value = func_.call(args); value)
+          return value.value<double>();
+        throw PY_ERROR;
       } catch (const python::Error& err) {
         throw CG_ERROR("FunctionalPython:eval")
-            << "Failed to call the function with arguments=" << python::getVector<double>(args) << ".\n"
+            << "Failed to call the function with arguments=" << args.vector<double>() << ".\n"
             << err.message();
       }
     }

@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <Python.h>
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Filesystem.h"
@@ -50,11 +52,6 @@ namespace cepgen {
           utils::towstring("Platform: " + std::string(Py_GetPlatform())),
           utils::towstring("Home directory: ") + home,
           utils::towstring("Parsed path: ") + path};
-    }
-
-    ObjectPtr callArgs(const ObjectPtr& func, const ObjectPtr& args) {
-      return ObjectPtr(PyObject_CallObject(func.get(),
-                                           args.get()));  // new
     }
   }  // namespace python
 }  // namespace cepgen
