@@ -33,12 +33,11 @@ int main(int argc, char* argv[]) {
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("integrator,i", "analytical integrator to use", &integrator, "gsl")
-      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "text")
+      .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .addOptionalArgument("npoints,n", "number of points to compute", &npoints, 100)
       .parse();
   cepgen::initialise();
 
-  auto plt = cepgen::DrawerFactory::get().build(plotter);
   auto integ = cepgen::AnalyticIntegratorFactory::get().build(integrator);
 
   // test 1D graph
@@ -52,7 +51,10 @@ int main(int argc, char* argv[]) {
     graph_int_cos.addPoint(x, int_cos);
     graph_diff.addPoint(x, sin(x) - int_cos);
   }
-  plt->draw({&graph_sin, &graph_int_cos, &graph_diff}, "test_deriv");
+  if (!plotter.empty()) {
+    auto plt = cepgen::DrawerFactory::get().build(plotter);
+    plt->draw({&graph_sin, &graph_int_cos, &graph_diff}, "test_deriv");
+  }
 
   const auto chi2 = graph_sin.chi2(graph_int_cos);
   CG_TEST(chi2 <= 1.e-6, "chi^2 test");

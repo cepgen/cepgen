@@ -25,6 +25,7 @@
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/AbortHandler.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Test.h"
 #include "CepGen/Utils/Timer.h"
 
@@ -37,11 +38,14 @@ int main(int argc, char* argv[]) {
   bool verbose, quiet;
 
   auto args = cepgen::ArgumentsParser(argc, argv)
-                  .addOptionalArgument("cfg,f", "configuration file", &cfg_filename, "test/physics/test_processes.cfg")
+                  .addOptionalArgument("cfg,f",
+                                       "configuration file",
+                                       &cfg_filename,
+                                       cepgen::utils::env::get("CEPGEN_PATH") + "/test/physics/test_processes.cfg")
                   .addOptionalArgument("verbose,v", "verbose mode", &verbose, false)
+                  .addOptionalArgument("quiet,q", "quiet mode", &quiet, false)
                   .addOptionalArgument("num-sigma,n", "max. number of std.dev.", &num_sigma, 3.)
-                  .addOptionalArgument("quiet,q", "quiet mode", &quiet, true)
-                  .addOptionalArgument("integrator,i", "type of integrator used", &integrator, "Vegas")
+                  .addOptionalArgument("integrator,i", "type of integrator used", &integrator, "MISER")
                   .parse();
 
   if (!args.debugging() && !verbose)
@@ -65,8 +69,7 @@ int main(int argc, char* argv[]) {
   {  // parse the various tests to be performed
     ifstream cfg(cfg_filename);
     string line;
-    while (!cfg.eof()) {
-      getline(cfg, line);
+    while (getline(cfg, line)) {
       // skip the commented out lines
       line = cepgen::utils::ltrim(line);
       if (line.empty() || line[0] == '#')
@@ -77,7 +80,7 @@ int main(int argc, char* argv[]) {
       os >> test.filename >> ref >> err;
       test.ref_cs = cepgen::Value{ref, err};
       tests.emplace_back(test);
-      CG_DEBUG("main") << "Added test \"" << line << "\".";
+      CG_DEBUG("main") << "Added test '" << test.filename << "' with expected cross section: " << test.ref_cs << " pb.";
     }
   }
 
@@ -88,14 +91,11 @@ int main(int argc, char* argv[]) {
   for (const auto& test : tests) {
     const std::string filename = "TestProcesses/" + test.filename + "_cfg.py";
     try {
-      gen.runParameters().clearProcess();
       gen.setRunParameters(cepgen::card::Handler::parseFile(filename));
       gen.runParameters().integrator() = cepgen::IntegratorFactory::get().describeParameters(integrator).parameters();
-
       CG_DEBUG("main") << "Process: " << gen.runParameters().processName() << "\n\t"
                        << "File: " << filename << "\n\t"
                        << "Configuration time: " << tmr.elapsed() * 1.e3 << " ms.";
-
       tmr.reset();
 
       const auto new_cs = gen.computeXsection();
@@ -113,6 +113,7 @@ int main(int argc, char* argv[]) {
       const string test_res = cepgen::utils::format(
           "%-40s\tref=%g\tgot=%g\tratio=%g\tpull=%+10.5f", test.filename.c_str(), test.ref_cs, new_cs, ratio, pull);
       CG_TEST(fabs(pull) < num_sigma, filename);
+      gen.runParameters().clearProcess();
     } catch (const cepgen::utils::RunAbortedException&) {
       CG_TEST_SUMMARY;
     } catch (const cepgen::Exception& e) {

@@ -86,6 +86,24 @@ namespace cepgen {
     cepgen::test::num_total++;                                                                                       \
   }
 
+#define CG_TEST_VALUES(val1, val2, nsigma, name)                                                                     \
+  {                                                                                                                  \
+    const auto diff = cepgen::Value(val1) - cepgen::Value(val2);                                                     \
+    if (cepgen::test::debug)                                                                                         \
+      CG_LOG << cepgen::utils::colourise("TEST INFO", cepgen::utils::Colour::magenta, cepgen::utils::Modifier::bold) \
+             << " " << cepgen::utils::colourise(name, cepgen::utils::Colour::magenta) << "\n"                        \
+             << "\tvals: " << val1 << ", " << val2 << ", difference: " << (val1 - val2)                              \
+             << ", sigma: " << diff.uncertainty() << " = " << diff.relativeUncertainty() << " * sigma "              \
+             << ((std::fabs(1. / diff.relativeUncertainty()) > nsigma) ? ">" : "<") << " " << nsigma << " * sigma."; \
+    if (diff.uncertainty() > 0 && diff > nsigma * diff.uncertainty())                                                \
+      CG_FAILED(name) << " difference " << diff << " is not within " << nsigma << " sigmas.";                        \
+    else {                                                                                                           \
+      CG_PASSED(name);                                                                                               \
+      cepgen::test::num_passed++;                                                                                    \
+    }                                                                                                                \
+    cepgen::test::num_total++;                                                                                       \
+  }
+
 #define CG_TEST_EXCEPT(sequence, name)                                                                                \
   if (cepgen::test::debug)                                                                                            \
     CG_LOG << cepgen::utils::colourise("TEST INFO", cepgen::utils::Colour::magenta, cepgen::utils::Modifier::bold)    \
