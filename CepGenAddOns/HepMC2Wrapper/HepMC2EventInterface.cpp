@@ -29,6 +29,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/String.h"
 #include "CepGenAddOns/HepMC2Wrapper/HepMC2EventInterface.h"
 
 namespace HepMC {
@@ -44,13 +45,18 @@ namespace HepMC {
     const FourVector origin(0., 0., 0., 0.);
     int cm_id = 0;
 
+    auto convert_particle = [](const cepgen::Particle& cg_part) -> GenParticle* {
+      auto cg_mom = cg_part.momentum();
+      auto* part =
+          new GenParticle(FourVector(cg_mom.px(), cg_mom.py(), cg_mom.pz(), cg_mom.energy()), cg_part.integerPdgId());
+      part->set_generated_mass(cepgen::PDG::get().mass(cg_part.pdgId()));
+      return part;
+    };
+
     auto v1 = new GenVertex(origin), v2 = new GenVertex(origin), vcm = new GenVertex(origin);
     unsigned short idx = 1;
     for (const auto& part_orig : evt.particles()) {
-      const auto& mom_orig = part_orig.momentum();
-      FourVector pmom(mom_orig.px(), mom_orig.py(), mom_orig.pz(), mom_orig.energy());
-      auto part = new GenParticle(pmom, part_orig.integerPdgId(), (int)part_orig.status());
-      part->set_generated_mass(cepgen::PDG::get().mass(part_orig.pdgId()));
+      auto* part = convert_particle(part_orig);
       part->suggest_barcode(idx);
       assoc_map_[idx] = part;
 
@@ -125,7 +131,82 @@ namespace HepMC {
 
   CepGenEvent::operator cepgen::Event() const {
     cepgen::Event evt;
-    print();
+    auto convert_particle = [](const GenParticle& part,
+                               const cepgen::Particle::Role& role =
+                                   cepgen::Particle::Role::UnknownRole) -> cepgen::Particle {
+      auto convert_momentum = [](const FourVector& mom) -> cepgen::Momentum {
+        return cepgen::Momentum::fromPxPyPzE(mom.px(), mom.py(), mom.pz(), mom.e());
+      };
+      auto cg_part = cepgen::Particle(role, 0, (cepgen::Particle::Status)part.status());
+      cg_part.setPdgId((long)part.pdg_id());
+      cg_part.setMomentum(convert_momentum(part));
+      return cg_part;
+    };
+
+    auto [ip1, ip2] = beam_particles();
+    std::unordered_map<size_t, size_t> h_to_cg;
+    std::vector<int> beam_vtx_barcodes;
+    for (auto it_vtx = vertices_begin(); it_vtx != vertices_end(); ++it_vtx) {
+      if ((*it_vtx)->particles_in_size() == 1) {
+        auto role1 = cepgen::Particle::Role::UnknownRole, role2 = role1, role3 = role1;
+        auto status1 = cepgen::Particle::Status::PrimordialIncoming, status2 = cepgen::Particle::Status::Incoming,
+             status3 = cepgen::Particle::Status::Unfragmented;
+        size_t id_beam_in = 0;
+        if (auto* part = *(*it_vtx)->particles_in_const_begin(); part) {
+          if (part->barcode() == ip1->barcode()) {
+            role1 = cepgen::Particle::IncomingBeam1;
+            role2 = cepgen::Particle::Parton1;
+            role3 = cepgen::Particle::OutgoingBeam1;
+          } else if (part->barcode() == ip2->barcode()) {
+            role1 = cepgen::Particle::IncomingBeam2;
+            role2 = cepgen::Particle::Parton2;
+            role3 = cepgen::Particle::OutgoingBeam2;
+          }
+          auto cg_part = convert_particle(*part, role1);
+          cg_part.setStatus(status1);
+          evt.addParticle(cg_part);
+          h_to_cg[part->barcode()] = cg_part.id();
+          id_beam_in = cg_part.id();
+        }
+        if ((*it_vtx)->particles_out_size() == 2) {  //FIXME handle cases with multiple partons?
+          size_t num_op = 0;
+          for (auto it_op = (*it_vtx)->particles_out_const_begin(); it_op != (*it_vtx)->particles_out_const_end();
+               ++it_op, ++num_op) {
+            auto cg_part = convert_particle(*(*it_op), num_op == 0 ? role2 : role3);
+            cg_part.setStatus(num_op == 0 ? status2 : status3);
+            cg_part.addMother(evt[id_beam_in]);
+            evt.addParticle(cg_part);
+            h_to_cg[(*it_op)->barcode()] = cg_part.id();
+          }
+        }
+        beam_vtx_barcodes.emplace_back((*it_vtx)->barcode());
+      }
+    }
+
+    auto cg_interm = cepgen::Particle(cepgen::Particle::Role::Intermediate, 0, cepgen::Particle::Status::Propagator);
+    auto &part1 = evt.oneWithRole(cepgen::Particle::Role::Parton1),
+         &part2 = evt.oneWithRole(cepgen::Particle::Role::Parton2);
+    cg_interm.setMomentum(part1.momentum() + part2.momentum(), true);
+    cg_interm.addMother(part1);
+    cg_interm.addMother(part2);
+    evt.addParticle(cg_interm);
+
+    for (auto it_vtx = vertices_begin(); it_vtx != vertices_end(); ++it_vtx) {
+      if (cepgen::utils::contains(beam_vtx_barcodes, (*it_vtx)->barcode()))
+        continue;
+      if ((*it_vtx)->barcode() == signal_process_vertex()->barcode()) {
+        for (auto it_op = (*it_vtx)->particles_out_const_begin(); it_op != (*it_vtx)->particles_out_const_end();
+             ++it_op) {
+          auto cg_part = convert_particle(*(*it_op), cepgen::Particle::Role::CentralSystem);
+          cg_part.addMother(evt.oneWithRole(cepgen::Particle::Role::Intermediate));
+          evt.addParticle(cg_part);
+          h_to_cg[(*it_op)->barcode()] = cg_part.id();
+        }
+      } else {
+        (*it_vtx)->print(std::cout);
+        throw CG_FATAL("CepGenEvent") << "Not yet supporting secondary decay of central system.";
+      }
+    }
     return evt;
   }
 }  // namespace HepMC

@@ -13,29 +13,26 @@ int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
   cepgen::initialise();
 
-  auto evt = cepgen::Event();
+  auto evt = cepgen::Event::minimal(2);
   {
-    auto p0 =
-        cepgen::Particle(cepgen::Particle::Role::IncomingBeam1, 2212, cepgen::Particle::Status::PrimordialIncoming);
-    p0.momentum().setP(0.5, 1., 1.5, 2.);
-    evt.addParticle(p0);
-    auto p1 =
-        cepgen::Particle(cepgen::Particle::Role::IncomingBeam2, 2212, cepgen::Particle::Status::PrimordialIncoming);
-    p1.momentum().setP(1., 2., 3., 4.);
-    evt.addParticle(p1);
-    auto p2 = cepgen::Particle(cepgen::Particle::Role::OutgoingBeam1, 2212, cepgen::Particle::Status::FinalState);
-    p2.momentum().setP(2., 4., 6., 8.);
-    evt.addParticle(p2);
-    p2.addMother(p0);
-    auto p3 = cepgen::Particle(cepgen::Particle::Role::OutgoingBeam2, 2212, cepgen::Particle::Status::FinalState);
-    p3.momentum().setP(4., 8., 12., 16.);
-    evt.addParticle(p3);
-    p3.addMother(p1);
-    auto p4 = cepgen::Particle(cepgen::Particle::Role::CentralSystem, 12, cepgen::Particle::Status::FinalState);
-    p4.momentum().setP(8., 16., 24., 32.);
-    evt.addParticle(p4);
-    p4.addMother(p0);
-    p4.addMother(p1);
+    auto &ip1 = evt.oneWithRole(cepgen::Particle::Role::IncomingBeam1),
+         &ip2 = evt.oneWithRole(cepgen::Particle::Role::IncomingBeam2),
+         &op1 = evt.oneWithRole(cepgen::Particle::Role::OutgoingBeam1),
+         &op2 = evt.oneWithRole(cepgen::Particle::Role::OutgoingBeam2),
+         &part1 = evt.oneWithRole(cepgen::Particle::Role::Parton1),
+         &part2 = evt.oneWithRole(cepgen::Particle::Role::Parton2);
+    ip1.setPdgId((long)2212);
+    ip1.momentum().setP(0.5, 1., 1.5, 2.);
+    ip2.setPdgId((long)2212);
+    ip2.momentum().setP(1., 2., 3., 4.);
+    op1.setPdgId((long)2212);
+    op1.momentum().setP(2., 4., 6., 8.);
+    op2.setPdgId((long)2212);
+    op2.momentum().setP(4., 8., 12., 16.);
+    part1.setPdgId((long)22);
+    part2.setPdgId((long)22);
+    evt[cepgen::Particle::Role::CentralSystem][0].get().momentum().setP(8., 16., 24., 32.);
+    evt[cepgen::Particle::Role::CentralSystem][1].get().momentum().setP(16., 32., 64., 128.);
   }
 
   auto temp_file = "/tmp/test_hepmc.out";
@@ -50,8 +47,24 @@ int main(int argc, char* argv[]) {
     cepgen::Event evt_in;
     CG_TEST_EQUAL(((*hepmc_in) >> evt_in), true, "Event re-import [HepMC2]");
     CG_TEST_EQUAL(evt_in.size(), evt.size(), "Event re-import size");
-    for (const auto& part : evt_in.particles()) {
-      //CG_TEST_EQUAL(part.pdgId(), evt[part.id()].pdgId(), "Event re-import");
+    for (const auto& role : {cepgen::Particle::Role::IncomingBeam1,
+                             cepgen::Particle::Role::IncomingBeam2,
+                             cepgen::Particle::Role::OutgoingBeam1,
+                             cepgen::Particle::Role::OutgoingBeam2,
+                             cepgen::Particle::Role::Parton1,
+                             cepgen::Particle::Role::Parton2}) {
+      ostringstream os_role;
+      os_role << role;
+      CG_TEST_EQUAL(evt_in.oneWithRole(role).pdgId(), evt.oneWithRole(role).pdgId(), "PDG of " + os_role.str());
+      CG_TEST_EQUAL(evt_in.oneWithRole(role).momentum().px(),
+                    evt.oneWithRole(role).momentum().px(),
+                    "x-momentum of " + os_role.str());
+      CG_TEST_EQUAL(evt_in.oneWithRole(role).momentum().py(),
+                    evt.oneWithRole(role).momentum().py(),
+                    "y-momentum of " + os_role.str());
+      CG_TEST_EQUAL(evt_in.oneWithRole(role).momentum().pz(),
+                    evt.oneWithRole(role).momentum().pz(),
+                    "z-momentum of " + os_role.str());
     }
   }
 
