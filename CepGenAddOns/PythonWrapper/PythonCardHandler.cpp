@@ -160,8 +160,11 @@ namespace cepgen {
 
       // generation parameters
       rt_params_->integrator() += plist_.get<ParametersList>("integrator");
-      auto pgen = plist_.get<ParametersList>("generator");
-      rt_params_->generation().setParameters(pgen.set("maxgen", pgen.get<int>("numEvents")));
+      if (auto pgen = plist_.get<ParametersList>("generator"); !pgen.empty()) {
+        rt_params_->generation().setParameters(plist_.get<ParametersList>("generator"));
+        if (auto maxgen = pgen.get<int>("numEvents", -1); maxgen > 0)
+          rt_params_->generation().setMaxGen(maxgen);
+      }
 
       // event modification algorithms / hadronisers
       auto parse_evtmod_module = [&](const ParametersList& mod) {
