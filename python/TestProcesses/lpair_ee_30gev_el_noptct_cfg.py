@@ -1,11 +1,9 @@
 import Config.Core as cepgen
 from Config.PDG_cfi import PDG
 
-integrator.numFunctionCalls = 500000
-#integrator.verbose = 0
-
 process = cepgen.Module('lpair',
     processParameters = cepgen.Parameters(
+        mode = cepgen.ProcessMode.ElasticElastic,
         pair = PDG.muon,
     ),
     inKinematics = cepgen.Parameters(

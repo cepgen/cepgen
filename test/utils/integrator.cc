@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
       const auto res = integr->integrate(test.integrand);
       const auto test_name = integrator + " test " + to_string(i);
       CG_DEBUG("main") << "Test " << i << ": ref.: " << test.result << ", result: " << res << ".";
-      CG_TEST_UNCERT(test.result - res, res.uncertainty(), num_sigma, test_name + " rel. unc. control");
+      CG_TEST_VALUES(test.result, res, num_sigma, test_name + " rel. unc. control");
       ++i;
     }
   }

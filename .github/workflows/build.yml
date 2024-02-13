@@ -33,4 +33,4 @@ jobs:
       working-directory: ${{env.CEPGEN_PATH}}
       run: |
         echo "PYTHONPATH=${{env.CEPGEN_PATH}}:$PYTHONPATH" >> $GITHUB_ENV
-        ctest -C ${{env.BUILD_TYPE}} --rerun-failed --output-on-failure --verbose -LE "^unstable$"
+        ctest -C ${{env.BUILD_TYPE}} -LE "unstable" --verbose --output-on-failure
