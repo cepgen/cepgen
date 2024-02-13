@@ -59,7 +59,8 @@ namespace cepgen {
 
     void initialiseModules();  ///< Initialise the event handling modules for an event generation
 
-    ParametersList par_integrator;  ///< Integrator specific user-defined parameters
+    ParametersList& integrator() { return integrator_; }              ///< Integrator specific user-defined parameters
+    const ParametersList& integrator() const { return integrator_; }  ///< Integrator specific user-defined parameters
 
     //----- process to compute
 
@@ -151,6 +152,7 @@ namespace cepgen {
     TamingFunctionsSequence taming_functions_;  ///< Functions to be used to account for rescattering corrections
     double total_gen_time_{0.};                 ///< Total generation time (in seconds)
     unsigned long num_gen_events_{0ul};         ///< Number of events already generated
+    ParametersList integrator_;                 ///< Integrator parameters
     Generation generation_;                     ///< Events generation parameters
     std::unique_ptr<utils::TimeKeeper> tmr_;    ///< Collection of stopwatches for timing
   };

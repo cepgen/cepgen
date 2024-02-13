@@ -123,7 +123,7 @@ namespace cepgen {
   void Generator::resetIntegrator() {
     CG_TICKER(parameters_->timeKeeper());
     // create a spec-defined integrator in the current scope
-    setIntegrator(IntegratorFactory::get().build(parameters_->par_integrator));
+    setIntegrator(IntegratorFactory::get().build(parameters_->integrator()));
   }
 
   void Generator::setIntegrator(std::unique_ptr<Integrator> integ) {

@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
     try {
       gen.runParameters().clearProcess();
       gen.setRunParameters(cepgen::card::Handler::parseFile(filename));
-      gen.runParameters().par_integrator = cepgen::IntegratorFactory::get().describeParameters(integrator).parameters();
+      gen.runParameters().integrator() = cepgen::IntegratorFactory::get().describeParameters(integrator).parameters();
 
       CG_DEBUG("main") << "Process: " << gen.runParameters().processName() << "\n\t"
                        << "File: " << filename << "\n\t"

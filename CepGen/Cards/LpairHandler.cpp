@@ -217,9 +217,8 @@ namespace cepgen {
         rt_params_->setProcess(ProcessFactory::get().build(proc_name_, *proc_params_));
       }
 
+      rt_params_->integrator() += *int_params_;
       rt_params_->generation().setParameters(*gen_params_);
-
-      rt_params_->par_integrator += *int_params_;
 
       //--- parse the hadronisation algorithm name
       if (!evt_mod_name_.empty())
@@ -301,8 +300,8 @@ namespace cepgen {
       timer_ = (rt_params_->timeKeeper() != nullptr);
 
       *kin_params_ += rt_params_->kinematics().parameters(true);
+      *int_params_ += rt_params_->integrator();
       *gen_params_ += rt_params_->generation().parameters();
-      *int_params_ += rt_params_->par_integrator;
       init();
     }
 

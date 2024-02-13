@@ -154,7 +154,7 @@ namespace cepgen {
       }
 
       // generation parameters
-      rt_params_->par_integrator += plist.get<ParametersList>("integrator");
+      rt_params_->integrator() += plist.get<ParametersList>("integrator");
       auto pgen = plist.get<ParametersList>("generator");
       rt_params_->generation().setParameters(pgen.set("maxgen", pgen.get<int>("numEvents")));
 
