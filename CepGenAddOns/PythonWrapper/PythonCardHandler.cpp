@@ -55,19 +55,23 @@ namespace cepgen {
     RunParameters* parseFile(const std::string& file, RunParameters* params) override {
       const auto filename = python::pythonPath(file);
       env_->setProgramName(filename);
-      if (cfg_ = python::ObjectPtr::importModule(filename) /* new */; !cfg_)
+      auto cfg = python::ObjectPtr::importModule(filename) /* new */;
+      if (!cfg)
         throw PY_ERROR << "Failed to import the configuration card '" << filename << "'\n"
                        << " (parsed from '" << file << "').";
+      parseParameters(cfg);
       return parse(params);
     }
     RunParameters* parseString(const std::string& str, RunParameters* params) override {
       const std::string name = "Cards.Core";
       env_->setProgramName(name);
-      if (cfg_ = python::ObjectPtr::defineModule(name, str) /* new */; !cfg_)
+      auto cfg = python::ObjectPtr::defineModule(name, str) /* new */;
+      if (!cfg)
         throw PY_ERROR << "Failed to parse a configuration string:\n"
                        << std::string(80, '-') << "\n"
                        << str << "\n"
                        << std::string(80, '-');
+      parseParameters(cfg);
       return parse(params);
     }
 
@@ -80,30 +84,31 @@ namespace cepgen {
     }
 
   private:
-    RunParameters* parse(RunParameters* params) {
-      CG_ASSERT(cfg_);
-      // convert the imported module into a CepGen user-steered configuration parameters object
-      ParametersList plist;
-      for (const auto& attr : cfg_.attribute("__dir__")().vector<std::string>()) {
+    /// Convert the imported module into a CepGen user-steered configuration parameters object
+    void parseParameters(const python::ObjectPtr& cfg) {
+      CG_ASSERT(cfg);
+      for (const auto& attr : cfg.attribute("__dir__")().vector<std::string>()) {
         if (attr[0] == '_')
           continue;
-        const auto obj = cfg_.attribute(attr);
+        const auto obj = cfg.attribute(attr);
         if (obj.is<ParametersList>())
-          plist.set(attr, obj.value<ParametersList>());
+          plist_.set(attr, obj.value<ParametersList>());
         if (obj.isVector<ParametersList>())
-          plist.set(attr, obj.vector<ParametersList>());
+          plist_.set(attr, obj.vector<ParametersList>());
       }
+    }
+    RunParameters* parse(RunParameters* params) {
       rt_params_ = params;
 
       // logging module
-      auto logging = plist.get<ParametersList>("logger");
+      auto logging = plist_.get<ParametersList>("logger");
       utils::Logger::get().setLevel(logging.getAs<int, utils::Logger::Level>("level", utils::Logger::get().level()));
       utils::Logger::get().setExtended(logging.get<bool>("extended", utils::Logger::get().extended()));
       for (const auto& log_mod : logging.get<std::vector<std::string> >("enabledModules"))
         utils::Logger::get().addExceptionRule(log_mod);
 
       // external libraries
-      for (const auto& lib : plist.get<std::vector<std::string> >("addons"))  // additional libraries to load
+      for (const auto& lib : plist_.get<std::vector<std::string> >("addons"))  // additional libraries to load
         loadLibrary(lib);
 
       CG_DEBUG("PythonCardHandler").log([](auto& log) {
@@ -113,15 +118,15 @@ namespace cepgen {
       });
 
       // timekeeper definition (currently, does not parse the object, just check its presence)
-      if (!plist.get<ParametersList>("timer").empty())
+      if (!plist_.get<ParametersList>("timer").empty())
         rt_params_->setTimeKeeper(new utils::TimeKeeper);
 
       // general particles definition
-      if (const auto mcd_file = plist.get<std::string>("mcdFile"); !mcd_file.empty())
+      if (const auto mcd_file = plist_.get<std::string>("mcdFile"); !mcd_file.empty())
         pdg::MCDFileParser::parse(mcd_file);
 
       // additional particles definition
-      const auto parts = plist.get<ParametersList>("PDG");
+      const auto parts = plist_.get<ParametersList>("PDG");
       for (const auto& k : parts.keys(true)) {
         auto props = parts.get<ParametersList>(k);
         if (props.has<int>("pdgid"))
@@ -137,7 +142,7 @@ namespace cepgen {
       }
 
       // process definition
-      if (auto process = plist.get<ParametersList>("process"); !process.empty()) {
+      if (auto process = plist_.get<ParametersList>("process"); !process.empty()) {
         process += process.get<ParametersList>("processParameters");
         process.erase("processParameters");
         auto& pkin = process.operator[]<ParametersList>("kinematics");
@@ -154,8 +159,8 @@ namespace cepgen {
       }
 
       // generation parameters
-      rt_params_->integrator() += plist.get<ParametersList>("integrator");
-      auto pgen = plist.get<ParametersList>("generator");
+      rt_params_->integrator() += plist_.get<ParametersList>("integrator");
+      auto pgen = plist_.get<ParametersList>("generator");
       rt_params_->generation().setParameters(pgen.set("maxgen", pgen.get<int>("numEvents")));
 
       // event modification algorithms / hadronisers
@@ -168,19 +173,20 @@ namespace cepgen {
         for (const auto& block : mod.get<std::vector<std::string> >("processConfiguration"))
           h->readStrings(mod.get<std::vector<std::string> >(block));
       };
-      if (const auto had = plist.get<ParametersList>("hadroniser"); !had.empty())  // hadronisation algorithms (legacy)
+      if (const auto had = plist_.get<ParametersList>("hadroniser"); !had.empty())  // hadronisation algorithms (legacy)
         parse_evtmod_module(had);
-      for (const auto& mod : plist.get<std::vector<ParametersList> >("eventSequence"))  // event modification algorithms
+      for (const auto& mod :
+           plist_.get<std::vector<ParametersList> >("eventSequence"))  // event modification algorithms
         parse_evtmod_module(mod);
 
       // output modules
-      for (const auto& mod : plist.get<std::vector<ParametersList> >("output"))
+      for (const auto& mod : plist_.get<std::vector<ParametersList> >("output"))
         rt_params_->addEventExporter(EventExporterFactory::get().build(mod));
 
       return rt_params_;
     }
     std::unique_ptr<python::Environment> env_;
-    python::ObjectPtr cfg_{nullptr};
+    ParametersList plist_;
   };
 }  // namespace cepgen
 using cepgen::PythonCardHandler;
