@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2024  Laurent Forthomme
+ *  Copyright (C) 2019-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,23 +35,72 @@
 #include "CepGen/Version.h"
 
 namespace cepgen {
-  /**
-     * \brief Handler for the ProMC file output
-     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-     * \date Jul 2019
-     */
-  class ProMCHandler : public EventExporter {
+  /// Handler for the ProMC file output
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date Jul 2019
+  class ProMCHandler final : public EventExporter {
   public:
-    explicit ProMCHandler(const ParametersList&);
-    ~ProMCHandler();
+    explicit ProMCHandler(const ParametersList& params)
+        : EventExporter(params),
+          compress_evt_(steer<bool>("compress")),
+          log_file_path_(steer<std::string>("logFile")),
+          log_file_(log_file_path_) {}
 
-    static ParametersDescription description();
+    ~ProMCHandler() {
+      if (file_) {
+        ProMCStat stat;
+        stat.set_cross_section_accumulated(cross_section_);
+        stat.set_cross_section_error_accumulated(cross_section_.uncertainty());
+        stat.set_luminosity_accumulated(event_num_ / (double)cross_section_);
+        stat.set_ntried(event_num_);
+        stat.set_nselected(event_num_);
+        stat.set_naccepted(event_num_);
+        file_->setStatistics(stat);
+        file_->close();
+      }
+      const auto num_removed_files = fs::remove_all(log_file_path_);  // delete the log file once attached
+      CG_DEBUG("ProMCHandler") << utils::s("file", num_removed_files, true) << " removed.";
+    }
 
-    void initialise() override;
+    static ParametersDescription description() {
+      auto desc = EventExporter::description();
+      desc.setDescription("ProMC file output module");
+      desc.add<std::string>("filename", "output.promc");
+      desc.add<bool>("compress", false);
+      desc.add<std::string>("logFile", "logfile.txt");
+      return desc;
+    }
+
     void setCrossSection(const Value& cross_section) override { cross_section_ = cross_section; }
-    void operator<<(const Event&) override;
+    bool operator<<(const Event&) override;
 
   private:
+    void initialise() override {
+      file_.reset(new ProMCBook(steer<std::string>("filename").c_str(), "w"));
+      file_->setDescription(runParameters().generation().maxGen(), "Sample generated using CepGen v" + version::tag);
+      log_file_ << banner() << "\n";
+      ProMCHeader hdr;
+      hdr.set_momentumunit(GEV_UNIT);
+      hdr.set_lengthunit(M_UNIT);  // unused as for now
+      for (const auto& pdg : PDG::get().particles()) {
+        auto data = hdr.add_particledata();
+        const auto& desc = PDG::get()(pdg);
+        data->set_id((int)pdg);
+        data->set_mass(desc.mass);
+        data->set_name(desc.name);
+        data->set_width(desc.width);
+        data->set_charge(desc.charge * 1. / 3.);
+      }
+      hdr.set_id1(runParameters().kinematics().incomingBeams().positive().pdgId());
+      hdr.set_id2(runParameters().kinematics().incomingBeams().negative().pdgId());
+      hdr.set_pdf1(0);
+      hdr.set_pdf2(0);
+      hdr.set_x1(0);
+      hdr.set_x2(0);
+      hdr.set_ecm(runParameters().kinematics().incomingBeams().sqrtS());
+      file_->setHeader(hdr);
+    }
+
     static constexpr double GEV_UNIT = 1.e6;  // base unit in GEV_UNIT^-1 GeV = keV
     static constexpr double M_UNIT = 1.e3;    // base unit in M^-1 m = mm
     static int inGeV(double val) { return int(val * GEV_UNIT); }
@@ -63,59 +112,14 @@ namespace cepgen {
     Value cross_section_{0., 1.};
   };
 
-  ProMCHandler::ProMCHandler(const ParametersList& params)
-      : EventExporter(params),
-        file_(new ProMCBook(steer<std::string>("filename").c_str(), "w")),
-        compress_evt_(steer<bool>("compress")),
-        log_file_path_(steer<std::string>("logFile")),
-        log_file_(log_file_path_) {}
-
-  ProMCHandler::~ProMCHandler() {
-    ProMCStat stat;
-    stat.set_cross_section_accumulated(cross_section_);
-    stat.set_cross_section_error_accumulated(cross_section.uncertainty());
-    stat.set_luminosity_accumulated(event_num_ / (double)cross_section_);
-    stat.set_ntried(event_num_);
-    stat.set_nselected(event_num_);
-    stat.set_naccepted(event_num_);
-    file_->setStatistics(stat);
-    file_->close();
-    //--- delete the log file once attached
-    const auto num_removed_files = fs::remove_all(log_file_path_);
-    CG_DEBUG("ProMCHandler") << utils::s("file", num_removed_files, true) << " removed.";
-  }
-
-  void ProMCHandler::initialise() {
-    file_->setDescription(runParameters().generation().maxGen(), "Sample generated using CepGen v" + version::tag);
-    log_file_ << banner() << "\n";
-    ProMCHeader hdr;
-    hdr.set_momentumunit(GEV_UNIT);
-    hdr.set_lengthunit(M_UNIT);  // unused as for now
-    for (const auto& pdg : PDG::get().particles()) {
-      auto data = hdr.add_particledata();
-      const auto& desc = PDG::get()(pdg);
-      data->set_id((int)pdg);
-      data->set_mass(desc.mass);
-      data->set_name(desc.name);
-      data->set_width(desc.width);
-      data->set_charge(desc.charge * 1. / 3.);
-    }
-    hdr.set_id1(runParameters().kinematics().incomingBeams().positive().pdg);
-    hdr.set_id2(runParameters().kinematics().incomingBeams().negative().pdg);
-    hdr.set_pdf1(0);
-    hdr.set_pdf2(0);
-    hdr.set_x1(0);
-    hdr.set_x2(0);
-    hdr.set_ecm(runParameters().kinematics().incomingBeams().sqrtS());
-    file_->setHeader(hdr);
-  }
-
-  void ProMCHandler::operator<<(const Event& ev) {
+  bool ProMCHandler::operator<<(const Event& ev) {
+    if (!file_)
+      return false;
     ProMCEvent event;
     auto evt = event.mutable_event();
     evt->set_number(event_num_++);
     evt->set_process_id(0);
-    evt->set_scale(ev[Particle::Role::Intermediate][0].mass());
+    evt->set_scale(ev.oneWithRole(Particle::Role::Intermediate).momentum().mass());
     evt->set_alpha_qed(ev.metadata("alphaEM"));
     evt->set_alpha_qcd(ev.metadata("alphaS"));
     evt->set_weight(1.);
@@ -132,7 +136,7 @@ namespace cepgen {
       part->add_py(inGeV(par.momentum().py()));
       part->add_pz(inGeV(par.momentum().pz()));
       part->add_energy(inGeV(par.momentum().energy()));
-      part->add_mass(inGeV(par.mass()));
+      part->add_mass(inGeV(par.momentum().mass()));
       part->add_barcode(0);
       //--- parentage
       const auto &daughter = par.daughters(), &moth = par.mothers();
@@ -146,17 +150,7 @@ namespace cepgen {
       part->add_z(0);
       part->add_t(0);
     }
-    file_->write(event);
-  }
-
-  ParametersDescription ProMCHandler::description() {
-    auto desc = EventExporter::description();
-    desc.setDescription("ProMC file output module");
-    desc.add<std::string>("filename", "output.promc");
-    desc.add<bool>("compress", false);
-    desc.add<std::string>("logFile", "logfile.txt");
-    return desc;
+    return file_->write(event);
   }
 }  // namespace cepgen
-
 REGISTER_EXPORTER("promc", ProMCHandler);

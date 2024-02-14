@@ -41,7 +41,7 @@ namespace cepgen {
     void setEventNumber(unsigned long long ev_id) { event_num_ = ev_id; }
 
     /// Writer operator
-    virtual void operator<<(const Event&) = 0;
+    virtual bool operator<<(const Event&) = 0;
 
   protected:
     /// Print a banner containing all runtime parameters information

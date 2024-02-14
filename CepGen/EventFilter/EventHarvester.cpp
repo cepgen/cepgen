@@ -105,13 +105,14 @@ namespace cepgen {
       file_ << banner("#") << "\n";
   }
 
-  void EventHarvester::operator<<(const Event& ev) {
-    //--- increment the corresponding histograms
+  bool EventHarvester::operator<<(const Event& ev) {
+    // increment the corresponding histograms
     for (auto& h_var : hists_)
       h_var.hist.fill(browser_->get(ev, h_var.var));
     for (auto& h_var : hists2d_)
       h_var.hist.fill(browser_->get(ev, h_var.var1), browser_->get(ev, h_var.var2));
     ++num_evts_;
+    return true;
   }
 
   ParametersDescription EventHarvester::description() {

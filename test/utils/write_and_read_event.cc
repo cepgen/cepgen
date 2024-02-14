@@ -39,15 +39,20 @@ int main(int argc, char* argv[]) {
       common.emplace_back(mod);
 
   cepgen::ArgumentsParser(argc, argv).parse();
+  CG_INFO("main") << "Will test with the following writer/reader pairs: " << common << ".";
 
   const auto evt_base = cepgen::utils::generateLPAIREvent();
-  const auto temp_file = "/tmp/cepgen_event_output.out";
   for (const auto& mod : common) {
+    string temp_file = "output.txt";  // default value
+
     {  // write event to output file
-      auto writer =
-          cepgen::EventExporterFactory::get().build(mod, cepgen::ParametersList().set<string>("filename", temp_file));
+      auto writer = cepgen::EventExporterFactory::get().build(mod);
+      temp_file = writer->parameters().get<string>("filename");
       writer->initialise(gen.runParameters());
-      (*writer) << evt_base;
+      const auto wrote = ((*writer) << evt_base);
+      CG_TEST(wrote, "event export: " + mod);
+      if (!wrote)
+        continue;
     }
     {  // read back output file
       auto reader =
@@ -79,6 +84,5 @@ int main(int argc, char* argv[]) {
       }
     }
   }
-
   CG_TEST_SUMMARY;
 }

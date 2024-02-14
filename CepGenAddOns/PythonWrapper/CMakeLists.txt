@@ -37,4 +37,4 @@ cepgen_build(CepGenPython SOURCES *.cpp
     EXT_HEADERS ${Python_INCLUDE_DIRS}
     INSTALL_COMPONENT python)
 
-set_tests_properties(python_output python_particle_mod PROPERTIES LABELS unstable)
+cepgen_test_declare_unstable(python_output python_particle_mod)

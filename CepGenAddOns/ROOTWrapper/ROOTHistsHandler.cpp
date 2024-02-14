@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2019-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,24 +33,39 @@
 #include "CepGen/Utils/Value.h"
 
 namespace cepgen {
-  /**
-     * \brief Handler for the generic ROOT file output
-     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-     * \date Jul 2019
-     */
+  /// Handler for the generic ROOT file output
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date Jul 2019
   class ROOTHistsHandler final : public EventExporter {
   public:
     explicit ROOTHistsHandler(const ParametersList&);
     ~ROOTHistsHandler();
 
-    static ParametersDescription description();
+    static ParametersDescription description() {
+      auto desc = EventExporter::description();
+      desc.setDescription("ROOT histograming/profiling module");
+      desc.add<std::string>("filename", "output.root").setDescription("Output filename");
+      auto var_desc = ParametersDescription();
+      var_desc.add<std::string>("title", "").setDescription("Variable description");
+      var_desc.add<int>("nbins", -1);
+      var_desc.add<int>("nbinsX", 10).setDescription("Bins multiplicity for x-axis");
+      var_desc.add<Limits>("xrange", Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
+      var_desc.add<int>("nbinsY", 10).setDescription("Bins multiplicity for y-axis");
+      var_desc.add<Limits>("yrange", Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
+      var_desc.add<int>("nbinsZ", 10).setDescription("Bins multiplicity for z-axis");
+      var_desc.add<Limits>("zrange", Limits{0., 1.}).setDescription("Minimum-maximum range for z-axis");
+      var_desc.add<bool>("profile", false);
+      desc.addParametersDescriptionVector("variables", var_desc);
+      return desc;
+    }
 
-    void initialise() override {}
     void setCrossSection(const Value& cross_section) override { cross_section_ = cross_section; }
-    void operator<<(const Event&) override;
+    bool operator<<(const Event&) override;
 
   private:
-    TFile file_;
+    void initialise() override {}
+
+    const std::unique_ptr<TFile> file_;
     std::vector<std::pair<std::string, TH1*> > hists1d_;
     std::vector<std::pair<std::vector<std::string>, TH2*> > hists2d_;
     std::vector<std::pair<std::vector<std::string>, TH3*> > hists3d_;
@@ -65,7 +80,7 @@ namespace cepgen {
 
   ROOTHistsHandler::ROOTHistsHandler(const ParametersList& params)
       : EventExporter(params),
-        file_(steer<std::string>("filename").c_str(), "recreate"),
+        file_(TFile::Open(steer<std::string>("filename").c_str(), "recreate")),
         variables_(steer<ParametersList>("variables")) {
     //--- extract list of variables/correlations to be plotted in histograms
     for (const auto& key : variables_.keys()) {
@@ -164,7 +179,7 @@ namespace cepgen {
   }
 
   ROOTHistsHandler::~ROOTHistsHandler() {
-    //--- finalisation of the output file
+    // finalisation of the output file
     for (const auto& hist : hists1d_)
       hist.second->Write(hist.first.c_str());
     for (const auto& hist : hists2d_)
@@ -175,12 +190,11 @@ namespace cepgen {
       hist.second->Write(utils::merge(hist.first, "_vs_").c_str());
     for (const auto& hist : profiles2d_)
       hist.second->Write(utils::merge(hist.first, "_vs_").c_str());
-    // ROOT and its sumptuous memory management disallows the "delete" here
-    file_.Close();
+    file_->Close();  // ROOT and its sumptuous memory management disallows the "delete" here
   }
 
-  void ROOTHistsHandler::operator<<(const Event& ev) {
-    //--- increment the corresponding histograms
+  bool ROOTHistsHandler::operator<<(const Event& ev) {
+    // increment the corresponding histograms
     for (const auto& h_var : hists1d_)
       h_var.second->Fill(browser_.get(ev, h_var.first), cross_section_);
     for (const auto& h_var : hists2d_)
@@ -197,25 +211,7 @@ namespace cepgen {
                          browser_.get(ev, h_var.first[1]),
                          browser_.get(ev, h_var.first[2]),
                          cross_section_);
-  }
-
-  ParametersDescription ROOTHistsHandler::description() {
-    auto desc = EventExporter::description();
-    desc.setDescription("ROOT histograming/profiling module");
-    desc.add<std::string>("filename", "output.root").setDescription("Output filename");
-    auto var_desc = ParametersDescription();
-    var_desc.add<std::string>("title", "").setDescription("Variable description");
-    var_desc.add<int>("nbins", -1);
-    var_desc.add<int>("nbinsX", 10).setDescription("Bins multiplicity for x-axis");
-    var_desc.add<Limits>("xrange", Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
-    var_desc.add<int>("nbinsY", 10).setDescription("Bins multiplicity for y-axis");
-    var_desc.add<Limits>("yrange", Limits{0., 1.}).setDescription("Minimum-maximum range for y-axis");
-    var_desc.add<int>("nbinsZ", 10).setDescription("Bins multiplicity for z-axis");
-    var_desc.add<Limits>("zrange", Limits{0., 1.}).setDescription("Minimum-maximum range for z-axis");
-    var_desc.add<bool>("profile", false);
-    desc.addParametersDescriptionVector("variables", var_desc);
-    return desc;
+    return true;
   }
 }  // namespace cepgen
-
 REGISTER_EXPORTER("root_hist", ROOTHistsHandler);

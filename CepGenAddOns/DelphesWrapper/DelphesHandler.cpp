@@ -42,13 +42,21 @@ namespace cepgen {
     explicit DelphesHandler(const ParametersList&);
     ~DelphesHandler();
 
-    static ParametersDescription description();
+    static ParametersDescription description() {
+      auto desc = EventExporter::description();
+      desc.setDescription("Delphes interfacing module");
+      desc.add<std::string>("filename", "output.delphes.root");
+      desc.add<std::string>("inputCard", "input.tcl");
+      desc.add<bool>("compress", false);
+      return desc;
+    }
 
-    void initialise() override;
     void setCrossSection(const Value& cross_section) override { cross_section_ = cross_section; }
-    void operator<<(const Event&) override;
+    bool operator<<(const Event&) override;
 
   private:
+    void initialise() override;
+
     std::unique_ptr<TFile> output_;
     const std::string input_card_;
     const bool compress_;
@@ -97,7 +105,7 @@ namespace cepgen {
     delphes_->InitTask();
   }
 
-  void DelphesHandler::operator<<(const Event& ev) {
+  bool DelphesHandler::operator<<(const Event& ev) {
     delphes_->Clear();
     tree_writer_->Clear();
     //--- auxiliary event quantities
@@ -110,7 +118,6 @@ namespace cepgen {
     evt_aux->AlphaQED = ev.metadata("alphaEM");
     evt_aux->AlphaQCD = ev.metadata("alphaS");
     evt_aux->ReadTime = ev.metadata("time:generation");
-    utils::Timer tmr;
     const auto& parts = compress_ ? ev.compress().particles() : ev.particles();
     //--- particles content
     for (const auto& part : parts) {
@@ -135,18 +142,11 @@ namespace cepgen {
       else if (cand->PID <= 5 || cand->PID == 21 || cand->PID == 15)
         out_partons_->Add(cand);
     }
+    utils::Timer tmr;
     delphes_->ProcessTask();
     evt_aux->ProcTime = tmr.elapsed();
     tree_writer_->Fill();
-  }
-
-  ParametersDescription DelphesHandler::description() {
-    auto desc = EventExporter::description();
-    desc.setDescription("Delphes interfacing module");
-    desc.add<std::string>("filename", "output.delphes.root");
-    desc.add<std::string>("inputCard", "input.tcl");
-    desc.add<bool>("compress", false);
-    return desc;
+    return true;
   }
 }  // namespace cepgen
 

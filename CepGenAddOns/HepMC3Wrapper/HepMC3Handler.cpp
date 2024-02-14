@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,7 +38,6 @@ namespace cepgen {
   template <typename T>
   class HepMC3Handler : public EventExporter {
   public:
-    /// Class constructor
     explicit HepMC3Handler(const ParametersList& params)
         : EventExporter(params),
           output_(new T(steer<std::string>("filename").c_str())),
@@ -58,27 +57,24 @@ namespace cepgen {
       return desc;
     }
 
-    void initialise() override {}
-    /// Writer operator
-    void operator<<(const Event& cg_event) override {
+    bool operator<<(const Event& cg_event) override {
       CepGenEvent event(cg_event);
-      // general information
       event.set_cross_section(xs_);
       event.set_run_info(run_info_);
       event.set_event_number(event_num_++);
       output_->write_event(event);
+      return !output_->failed();
     }
     void setCrossSection(const Value& cross_section) override {
       xs_->set_cross_section(cross_section, cross_section.uncertainty());
     }
 
   private:
-    /// Writer object
-    std::unique_ptr<T> output_;
-    /// Generator cross section and error
-    std::shared_ptr<GenCrossSection> xs_;
-    /// Auxiliary information on run
-    std::shared_ptr<GenRunInfo> run_info_;
+    void initialise() override {}
+
+    std::unique_ptr<T> output_;             ///< writer object
+    std::shared_ptr<GenCrossSection> xs_;   ///< generator cross section and error
+    std::shared_ptr<GenRunInfo> run_info_;  ///< auxiliary information on run
   };
 }  // namespace cepgen
 
@@ -86,7 +82,6 @@ namespace cepgen {
 // Defining the various templated plugins made available by this
 // specific version of HepMC
 //----------------------------------------------------------------------
-
 #include <HepMC3/WriterAscii.h>
 #include <HepMC3/WriterHEPEVT.h>
 typedef cepgen::HepMC3Handler<WriterAscii> HepMC3AsciiHandler;

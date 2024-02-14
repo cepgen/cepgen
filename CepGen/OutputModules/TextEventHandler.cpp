@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2023  Laurent Forthomme
+ *  Copyright (C) 2020-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -53,20 +53,21 @@ namespace cepgen {
       return desc;
     }
 
-    void initialise() override {
-      if (save_banner_)
-        *out_ << banner("#") << "\n";
-    }
     void setCrossSection(const Value& cross_section) override {
       if (out_ != &std::cout)
         *out_ << "Total cross-section: " << cross_section << " pb.\n";
     }
-    void operator<<(const Event& ev) override {
+    bool operator<<(const Event& ev) override {
       if (print_every_ < 0 || event_num_++ % print_every_ == 0)
         *out_ << ev << "\n";
+      return true;
     }
 
   private:
+    void initialise() override {
+      if (save_banner_)
+        *out_ << banner("#") << "\n";
+    }
     const bool save_banner_;
     const int print_every_;
     std::ostream* out_{nullptr};
