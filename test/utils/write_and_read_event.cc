@@ -1,0 +1,84 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2023-2024  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "CepGen/Event/Event.h"
+#include "CepGen/EventFilter/EventExporter.h"
+#include "CepGen/EventFilter/EventImporter.h"
+#include "CepGen/Generator.h"
+#include "CepGen/Modules/EventExporterFactory.h"
+#include "CepGen/Modules/EventImporterFactory.h"
+#include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/Test.h"
+#include "CepGenAddOns/Common/EventUtils.h"
+
+using namespace std;
+
+int main(int argc, char* argv[]) {
+  cepgen::Generator gen;
+
+  const auto writers = cepgen::EventExporterFactory::get().modules(),
+             readers = cepgen::EventImporterFactory::get().modules();
+  vector<string> common;
+  for (const auto& mod : writers)
+    if (cepgen::utils::contains(readers, mod))
+      common.emplace_back(mod);
+
+  cepgen::ArgumentsParser(argc, argv).parse();
+
+  const auto evt_base = cepgen::utils::generateLPAIREvent();
+  const auto temp_file = "/tmp/cepgen_event_output.out";
+  for (const auto& mod : common) {
+    {  // write event to output file
+      auto writer =
+          cepgen::EventExporterFactory::get().build(mod, cepgen::ParametersList().set<string>("filename", temp_file));
+      writer->initialise(gen.runParameters());
+      (*writer) << evt_base;
+    }
+    {  // read back output file
+      auto reader =
+          cepgen::EventImporterFactory::get().build(mod, cepgen::ParametersList().set<string>("filename", temp_file));
+      reader->initialise(gen.runParameters());
+      cepgen::Event evt_in;
+      CG_TEST_EQUAL(((*reader) >> evt_in), true, "event re-import: " + mod);
+      CG_TEST_EQUAL(evt_in.size(), evt_base.size(), "event re-import size: " + mod);
+      for (const auto& role : {cepgen::Particle::Role::IncomingBeam1,
+                               cepgen::Particle::Role::IncomingBeam2,
+                               cepgen::Particle::Role::OutgoingBeam1,
+                               cepgen::Particle::Role::OutgoingBeam2,
+                               cepgen::Particle::Role::Parton1,
+                               cepgen::Particle::Role::Parton2}) {
+        ostringstream os_role;
+        os_role << role;
+        CG_TEST_EQUAL(evt_in.oneWithRole(role).pdgId(),
+                      evt_base.oneWithRole(role).pdgId(),
+                      "PDG of " + os_role.str() + ": " + mod);
+        CG_TEST_EQUIV(evt_in.oneWithRole(role).momentum().px(),
+                      evt_base.oneWithRole(role).momentum().px(),
+                      "x-momentum of " + os_role.str() + ": " + mod);
+        CG_TEST_EQUIV(evt_in.oneWithRole(role).momentum().py(),
+                      evt_base.oneWithRole(role).momentum().py(),
+                      "y-momentum of " + os_role.str() + ": " + mod);
+        CG_TEST_EQUIV(evt_in.oneWithRole(role).momentum().pz(),
+                      evt_base.oneWithRole(role).momentum().pz(),
+                      "z-momentum of " + os_role.str() + ": " + mod);
+      }
+    }
+  }
+
+  CG_TEST_SUMMARY;
+}
