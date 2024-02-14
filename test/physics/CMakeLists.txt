@@ -9,5 +9,4 @@ endforeach()
 configure_file(${CMAKE_CURRENT_LIST_DIR}/test_processes.cfg test_processes.cfg COPYONLY)
 
 add_test(NAME cross_section_vegas COMMAND processes_cross_sections -i Vegas -q --cfg test_processes.cfg)
-set_tests_properties(cross_section_vegas PROPERTIES WILL_FAIL TRUE)  # FIXME remove once agreement is reached
-set_tests_properties(processes_cross_sections cross_section_vegas PROPERTIES LABELS unstable)
+cepgen_test_declare_unstable(processes_cross_sections cross_section_vegas)  # FIXME remove once agreement is reached
