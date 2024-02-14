@@ -221,7 +221,7 @@ endmacro()
 
 macro(cepgen_test_declare_unstable test_names)
     if(CMAKE_BUILD_TESTS)
-        foreach(_t ${test_names})
+        foreach(_t IN LISTS ARGN)
             set_tests_properties(${_t} PROPERTIES WILL_FAIL TRUE)
             set_tests_properties(${_t} PROPERTIES LABELS unstable)
         endforeach()
