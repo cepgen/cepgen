@@ -75,8 +75,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 set(CEPGEN_CORE_EXT dl)
 set(CEPGEN_LIBRARIES)
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
-set(CEPGEN_HAS_FUNCTIONAL OFF)
 set(CEPGEN_ADDONS_FILE "${CMAKE_CURRENT_BINARY_DIR}/CepGenAddOns.txt")
+set(CEPGEN_UNSTABLE_TESTS)
 
 include(UseEnvironment)
 include(BuildUtils)
@@ -126,6 +126,7 @@ if(CMAKE_BUILD_CORE)
   add_subdirectory(src)  # build the executables
   if(CMAKE_BUILD_TESTS)
     add_subdirectory(test)  # build the tests
+    message(STATUS "... list of unstable tests: ${CEPGEN_UNSTABLE_TESTS}")
   endif()
 endif()
 
