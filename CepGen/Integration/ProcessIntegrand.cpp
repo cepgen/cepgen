@@ -148,9 +148,8 @@ namespace cepgen {
       }
 
       CG_DEBUG_LOOP("ProcessIntegrand") << "[process " << std::hex << (void*)process_.get() << std::dec << "]\n\t"
-                                        << "Generation time: " << event->metadata.at("time:generation") * 1.e3
-                                        << " ms\n\t"
-                                        << "Total time (gen+hadr+cuts): " << event->metadata.at("time:total") * 1.e3
+                                        << "Generation time: " << event->metadata("time:generation") * 1.e3 << " ms\n\t"
+                                        << "Total time (gen+hadr+cuts): " << event->metadata("time:total") * 1.e3
                                         << " ms";
 
       // a bit of debugging information

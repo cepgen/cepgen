@@ -158,7 +158,7 @@ namespace cepgen {
                         browser_.get(ev, h_var.first[1]),
                         browser_.get(ev, h_var.first[2]),
                         cross_section_);
-    weight_cnt_.fill(ev.metadata.at("weight"));
+    weight_cnt_.fill(ev.metadata("weight"));
   }
 
   template <typename T>

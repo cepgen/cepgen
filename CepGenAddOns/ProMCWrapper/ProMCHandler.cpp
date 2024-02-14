@@ -116,8 +116,8 @@ namespace cepgen {
     evt->set_number(event_num_++);
     evt->set_process_id(0);
     evt->set_scale(ev[Particle::Role::Intermediate][0].mass());
-    evt->set_alpha_qed(ev.metadata.at("alphaEM"));
-    evt->set_alpha_qcd(ev.metadata.at("alphaS"));
+    evt->set_alpha_qed(ev.metadata("alphaEM"));
+    evt->set_alpha_qcd(ev.metadata("alphaS"));
     evt->set_weight(1.);
 
     unsigned short i = 0;

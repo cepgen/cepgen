@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2016-2023  Laurent Forthomme
+ *  Copyright (C) 2016-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ namespace Pythia8 {
 
   void CepGenEvent::feedEvent(const cepgen::Event& ev, const Type& type) {
     const double scale = ev(cepgen::Particle::Intermediate)[0].momentum().mass();
-    setProcess(0, 1., scale, ev.metadata.at("alphaEM"), ev.metadata.at("alphaS"));
+    setProcess(0, 1., scale, ev.metadata("alphaEM"), ev.metadata("alphaS"));
 
     const auto &part1 = ev(cepgen::Particle::Parton1)[0], &part2 = ev(cepgen::Particle::Parton2)[0];
     const auto &op1 = ev(cepgen::Particle::OutgoingBeam1)[0], &op2 = ev(cepgen::Particle::OutgoingBeam2)[0];

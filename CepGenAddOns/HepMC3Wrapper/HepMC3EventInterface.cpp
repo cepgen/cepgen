@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,8 +34,8 @@
 
 namespace HepMC3 {
   CepGenEvent::CepGenEvent(const cepgen::Event& evt) : GenEvent(Units::GEV, Units::MM) {
-    add_attribute("AlphaQCD", make_shared<DoubleAttribute>(evt.metadata.at("alphaS")));
-    add_attribute("AlphaEM", make_shared<DoubleAttribute>(evt.metadata.at("alphaEM")));
+    add_attribute("AlphaQCD", make_shared<DoubleAttribute>(evt.metadata("alphaS")));
+    add_attribute("AlphaEM", make_shared<DoubleAttribute>(evt.metadata("alphaEM")));
 
     weights().push_back(1.);  // unweighted events
 

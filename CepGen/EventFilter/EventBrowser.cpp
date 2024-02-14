@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2023  Laurent Forthomme
+ *  Copyright (C) 2019-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -130,7 +130,7 @@ namespace cepgen {
       if (var == "mephi")
         return ev.missingMomentum().phi();
       if (utils::startsWith(var, "meta:"))
-        return ev.metadata.at(var.substr(5));
+        return ev.metadata(var.substr(5));
       throw CG_ERROR("EventBrowser") << "Failed to retrieve the event-level variable \"" << var << "\".";
     }
   }  // namespace utils

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -121,6 +121,8 @@ namespace cepgen {
     /// Collection of key -> value pairs storing event metadata
     struct EventMetadata : std::unordered_map<std::string, float> {
       EventMetadata();
+      /// Retrieve the metadata value associated to a key
+      float operator()(const std::string& key) const { return count(key) > 0 ? at(key) : -1.; }
     };
     /// List of auxiliary information
     EventMetadata metadata;
