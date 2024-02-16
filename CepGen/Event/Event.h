@@ -84,9 +84,9 @@ namespace cepgen {
     /// Reference to the Particle object corresponding to a unique identifier in the event
     /// \param[in] id The unique identifier to this particle in the event
     Particle& operator[](int id);
-    /// Constant Particle reference object using its unique identifier
-    /// \param[in] id Unique identifier of the particle in the event
-    const Particle& operator[](int id) const;
+    /// Constant reference to the Particle object corresponding to a unique identifier in the event
+    /// \param[in] id The unique identifier to this particle in the event
+    const Particle& operator()(int id) const;
     /// References to the Particle objects corresponding to the unique identifiers in the event
     /// \param[in] ids The unique identifiers to the particles to be selected in the event
     ParticlesRefs operator[](const ParticlesIds& ids);

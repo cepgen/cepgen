@@ -209,7 +209,7 @@ namespace cepgen {
     throw CG_FATAL("Event") << "Failed to retrieve the particle with id=" << id << ".";
   }
 
-  const Particle& Event::operator[](int id) const {
+  const Particle& Event::operator()(int id) const {
     for (const auto& role_part : particles_) {
       auto it = std::find_if(
           role_part.second.begin(), role_part.second.end(), [&id](const auto& part) { return part.id() == id; });
@@ -231,7 +231,7 @@ namespace cepgen {
   Particles Event::operator()(const ParticlesIds& ids) const {
     Particles out;
     std::transform(
-        ids.begin(), ids.end(), std::back_inserter(out), [this](const auto& id) { return this->operator[](id); });
+        ids.begin(), ids.end(), std::back_inserter(out), [this](const auto& id) { return this->operator()(id); });
     return out;
   }
 
@@ -347,14 +347,14 @@ namespace cepgen {
         continue;
       Momentum ptot;
       for (const auto& daughter : daughters) {
-        const Particle& d = operator[](daughter);
-        const ParticlesIds mothers = d.mothers();
+        const auto& d = operator()(daughter);
+        const auto mothers = d.mothers();
         ptot += d.momentum();
         if (mothers.size() < 2)
           continue;
         for (const auto& moth : mothers)
           if (moth != part.id())
-            ptot -= operator[](moth).momentum();
+            ptot -= operator()(moth).momentum();
       }
       const double mass_diff = (ptot - part.momentum()).mass();
       if (fabs(mass_diff) > MIN_PRECISION) {
@@ -368,7 +368,7 @@ namespace cepgen {
   void Event::dump() const { CG_INFO("Event") << *this; }
 
   std::ostream& operator<<(std::ostream& out, const Event& ev) {
-    const Particles parts = ev.particles();
+    const auto parts = ev.particles();
     std::ostringstream os;
 
     Momentum p_total;
@@ -381,9 +381,9 @@ namespace cepgen {
           std::string delim;
           for (size_t i = 0; i < mothers.size(); ++i)
             try {
-              oss_pdg << delim << (PDG::Id)ev[*std::next(mothers.begin(), i)].pdgId(), delim = "/";
+              oss_pdg << delim << (PDG::Id)ev(*std::next(mothers.begin(), i)).pdgId(), delim = "/";
             } catch (const Exception&) {
-              oss_pdg << delim << ev[*std::next(mothers.begin(), i)].pdgId(), delim = "/";
+              oss_pdg << delim << ev(*std::next(mothers.begin(), i)).pdgId(), delim = "/";
             }
           os << utils::format("\n %2d\t\t   %-7s", part.id(), oss_pdg.str().c_str());
         } else {

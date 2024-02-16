@@ -35,13 +35,13 @@ namespace cepgen {
       //--- particle-level variables (indexed by integer id)
       if (std::regex_match(var, sm, rgx_select_id_)) {
         const auto& var_name = sm[1].str();
-        const auto& part = ev[std::stoul(sm[2].str())];
+        const auto& part = ev(std::stoul(sm[2].str()));
         return variable(ev, part, var_name);
       }
       if (std::regex_match(var, sm, rgx_select_id2_)) {
         const auto& var_name = sm[1].str();
-        const auto& part1 = ev[std::stoul(sm[2].str())];
-        const auto& part2 = ev[std::stoul(sm[3].str())];
+        const auto& part1 = ev(std::stoul(sm[2].str()));
+        const auto& part2 = ev(std::stoul(sm[3].str()));
         return variable(ev, part1, part2, var_name);
       }
       //--- particle-level variables (indexed by role)
@@ -87,7 +87,7 @@ namespace cepgen {
                                      << part;
           return INVALID_OUTPUT;
         }
-        return 1. - part.momentum().energy() / ev[*moth.begin()].momentum().energy();
+        return 1. - part.momentum().energy() / ev(int(*moth.begin())).momentum().energy();
       }
       if (var == "pdg")
         return (double)part.integerPdgId();
