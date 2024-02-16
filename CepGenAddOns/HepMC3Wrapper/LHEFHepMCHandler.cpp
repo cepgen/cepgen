@@ -42,43 +42,41 @@ namespace cepgen {
       auto desc = EventExporter::description();
       desc.setDescription("HepMC 3-based LHEF output module");
       desc.add<std::string>("filename", "output.lhe").setDescription("Output filename");
-      desc.add<bool>("compress", true);
+      desc.add<bool>("compress", false);
       return desc;
     }
 
-    bool operator<<(const Event& ev) override {
-      LHEF::HEPEUP out;
-      out.heprup = &lhe_output_->heprup;
-      out.XWGTUP = 1.;
-      out.XPDWUP = std::pair<double, double>(0., 0.);
-      out.SCALUP = 0.;
-      out.AQEDUP = ev.metadata("alphaEM");
-      out.AQCDUP = ev.metadata("alphaS");
-      const auto& particles = compress_ ? ev.compress().particles() : ev.particles();
-      out.NUP = particles.size();
-      out.resize();
-      for (unsigned short ip = 0; ip < particles.size(); ++ip) {
-        const Particle& part = particles[ip];
-        out.IDUP[ip] = part.integerPdgId();    // PDG id
-        out.ISTUP[ip] = (short)part.status();  // status code
-        std::copy(part.momentum().pVector().begin(), part.momentum().pVector().end(),
-                  out.PUP[ip].begin());  // momentum
-        out.MOTHUP[ip] = {               // mothers
-                          part.mothers().size() > 0 ? *part.mothers().begin() + 1 : 0,
-                          part.mothers().size() > 1 ? *part.mothers().rbegin() + 1 : 0};
-        out.ICOLUP[ip] = {0, 0};
-        out.VTIMUP[ip] = 0.;  // invariant lifetime
-        out.SPINUP[ip] = 0.;
+    bool operator<<(const Event& cg_ev) override {
+      auto& hepeup = lhe_output_->hepeup;
+      hepeup.heprup = &lhe_output_->heprup;
+      hepeup.XWGTUP = 1.;
+      hepeup.XPDWUP = std::pair<double, double>(0., 0.);
+      hepeup.SCALUP = 0.;
+      hepeup.AQEDUP = cg_ev.metadata("alphaEM");
+      hepeup.AQCDUP = cg_ev.metadata("alphaS");
+      const auto cg_particles = compress_ ? cg_ev.compress().particles() : cg_ev.particles();
+      hepeup.resize(cg_particles.size());
+      for (unsigned short ip = 0; ip < hepeup.NUP; ++ip) {
+        const auto& cg_part = cg_particles.at(ip);
+        hepeup.IDUP[ip] = cg_part.integerPdgId();    // PDG id
+        hepeup.ISTUP[ip] = (short)cg_part.status();  // status code
+        hepeup.PUP[ip] = {cg_part.momentum().px(),
+                          cg_part.momentum().py(),
+                          cg_part.momentum().pz(),
+                          cg_part.momentum().energy(),
+                          cg_part.momentum().mass()};
+        hepeup.MOTHUP[ip] = {// mothers
+                             cg_part.mothers().size() > 0 ? *cg_part.mothers().begin() + 1 : 0,
+                             cg_part.mothers().size() > 1 ? *cg_part.mothers().rbegin() + 1 : 0};
+        hepeup.ICOLUP[ip] = {0, 0};
+        hepeup.VTIMUP[ip] = 0.;  // invariant lifetime
+        hepeup.SPINUP[ip] = 0.;
       }
-      lhe_output_->hepeup = out;
       lhe_output_->writeEvent();
+      return true;
     }
 
     void setCrossSection(const Value& cross_section) override {
-      lhe_output_->heprup.NPRUP = 1;
-      lhe_output_->heprup.resize();
-      lhe_output_->heprup.XMAXUP[0] = 1.;
-      lhe_output_->heprup.LPRUP[0] = 1;
       lhe_output_->heprup.XSECUP[0] = (double)cross_section;
       lhe_output_->heprup.XERRUP[0] = cross_section.uncertainty();
     }
@@ -86,11 +84,17 @@ namespace cepgen {
   private:
     void initialise() override {
       lhe_output_->headerBlock() << "<!--\n" << banner() << "\n-->";
-      // run information
-      lhe_output_->heprup.IDBMUP = {(int)runParameters().kinematics().incomingBeams().positive().pdgId(),
-                                    (int)runParameters().kinematics().incomingBeams().negative().pdgId()};
-      lhe_output_->heprup.EBMUP = {(double)runParameters().kinematics().incomingBeams().positive().momentum().pz(),
-                                   (double)runParameters().kinematics().incomingBeams().negative().momentum().pz()};
+      if (runParameters().hasProcess()) {  // run information only specified if process (and kinematics) is specified
+        lhe_output_->heprup.IDBMUP = {(int)runParameters().kinematics().incomingBeams().positive().pdgId(),
+                                      (int)runParameters().kinematics().incomingBeams().negative().pdgId()};
+        lhe_output_->heprup.EBMUP = {(double)runParameters().kinematics().incomingBeams().positive().momentum().pz(),
+                                     (double)runParameters().kinematics().incomingBeams().negative().momentum().pz()};
+      }
+      lhe_output_->heprup.resize(1);
+      lhe_output_->heprup.XMAXUP[0] = 1.;
+      lhe_output_->heprup.LPRUP[0] = 1;
+      lhe_output_->heprup.XSECUP[0] = 0.;  // placeholders
+      lhe_output_->heprup.XERRUP[0] = 0.;
       lhe_output_->init();  // ensure everything is properly parsed
     }
 
