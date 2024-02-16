@@ -340,7 +340,7 @@ namespace cepgen {
           return (unsigned short)Particle::OutgoingBeam2;
         const unsigned short par_cg_id = cg_evt_->cepgenId(par_id - offset_);
         if (par_cg_id != Pythia8::CepGenEvent::INVALID_ID)
-          return (unsigned short)ev[par_cg_id].role();
+          return (unsigned short)ev(par_cg_id).role();
         return findRole(ev, pythia_->event[par_id]);
       }
       return (unsigned short)Particle::UnknownRole;

@@ -38,8 +38,8 @@ hists_t fill_histograms(const string& filename) {
   evt_tree.attach(file);
   cepgen::Event evt;
   while (evt_tree.next(evt)) {
-    out[0]->Fill(evt[4].mass());
-    out[1]->Fill(evt[4].momentum().pt());
+    out[0]->Fill(evt(4).mass());
+    out[1]->Fill(evt(4).momentum().pt());
     //out[2]->Fill(
   }
   return out;
