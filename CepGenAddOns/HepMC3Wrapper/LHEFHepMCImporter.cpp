@@ -93,4 +93,4 @@ namespace cepgen {
     std::unique_ptr<LHEF::Reader> reader_;
   };
 }  // namespace cepgen
-REGISTER_EVENT_IMPORTER("lhef", LHEFHepMCImporter)
+REGISTER_EVENT_IMPORTER("lhef_hepmc", LHEFHepMCImporter)
