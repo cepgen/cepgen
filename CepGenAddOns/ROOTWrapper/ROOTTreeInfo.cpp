@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <TSystem.h>
+
 #include "CepGen/Core/Exception.h"
 #include "CepGenAddOns/ROOTWrapper/ROOTTreeInfo.h"
 
@@ -81,6 +83,11 @@ namespace ROOT {
     process_parameters = *process_params_view;
   }
 
+  CepGenEvent::CepGenEvent() {
+    gSystem->Load("libCepGenRoot");
+    clear();
+  }
+
   CepGenEvent CepGenEvent::load(TFile* file, const std::string& evt_tree) {
     CepGenEvent evt;
     evt.attach(file, evt_tree.data());
@@ -106,6 +113,8 @@ namespace ROOT {
     tree_ = std::make_shared<TTree>(TREE_NAME, "a tree containing information on events generated in previous run");
     if (!tree_)
       throw CG_FATAL("CepGenEvent:create") << "Failed to create the events TTree!";
+    event = new cepgen::Event;
+    tree_->Branch("event", &event);
     tree_->Branch("npart", &np, "npart/I");
     tree_->Branch("role", role, "role[npart]/I");
     tree_->Branch("pt", pt, "pt[npart]/D");
@@ -155,6 +164,7 @@ namespace ROOT {
       np++;
     }
     metadata = ev.metadata;
+    *event = ev;
     tree_->Fill();
     clear();
   }

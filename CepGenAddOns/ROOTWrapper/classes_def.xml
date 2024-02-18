@@ -1,0 +1,22 @@
+<lcgdict>
+  <!-- generic STL objects/containers -->
+  <class name="std::set<int>"/> <!-- for mothers/daughters -->
+  <!-- physics objects -->
+  <class name="cepgen::Momentum"/>
+  <class name="cepgen::ParticleProperties"/>
+  <!-- particles objects -->
+  <class name="cepgen::Particle"/>
+  <class name="std::vector<cepgen::Particle>"/>
+  <class name="cepgen::ParticlesMap"/>
+  <!-- event object -->
+  <class name="cepgen::Event">
+    <field name="evtcontent_" transient="true"/>
+    <!--<field name="particles_" transient="true"/>-->
+  </class>
+  <exclusion>
+    <class name="cepgen::Event">
+      <method name="compressed"/>
+    </class>
+    <class name="cepgen::Event::NumParticles"/> <!-- only for filling/modification part -->
+  </exclusion>
+</lcgdict>

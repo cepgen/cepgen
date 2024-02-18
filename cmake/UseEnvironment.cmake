@@ -53,7 +53,7 @@ else()
 endif()
 include_directories(${GSL_INCLUDE})
 #--- searching for ROOT
-find_package(ROOT QUIET)
+find_package(ROOT QUIET COMPONENTS RIO Tree)
 if(ROOT_FOUND)
   if(${ROOT_CXX_FLAGS} MATCHES "-std=c\\+\\+([0-9]+).*")
     string(SUBSTRING ${CMAKE_MATCH_1} 0 2 ROOT_CXX_STANDARD)

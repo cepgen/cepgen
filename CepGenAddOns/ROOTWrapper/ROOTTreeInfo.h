@@ -76,6 +76,7 @@ namespace ROOT {
     static CepGenEvent load(const std::string&, const std::string& events_tree = TREE_NAME);
 
     cepgen::Event::EventMetadata metadata;
+    cepgen::Event* event{nullptr};
     float gen_time{-1.};        ///< Event generation time
     float tot_time{-1.};        ///< Total event generation time
     float weight{-1.};          ///< Event weight
@@ -94,7 +95,7 @@ namespace ROOT {
     int role[MAX_PART];         ///< Particles role in the event
     int status[MAX_PART];       ///< Integer status code
 
-    CepGenEvent() { clear(); }
+    CepGenEvent();
     /// Reinitialise the event content
     void clear();
     /// Retrieve the ROOT tree
@@ -134,6 +135,7 @@ namespace ROOT {
       tree_->SetBranchAddress("generation_time", &gen_time);
       tree_->SetBranchAddress("total_time", &tot_time);
       tree_->SetBranchAddress("metadata", &metadata);
+      tree_->SetBranchAddress("event", &event);
       tree_attached_ = true;
     }
 
