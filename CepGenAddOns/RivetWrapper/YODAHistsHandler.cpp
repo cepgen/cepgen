@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2023  Laurent Forthomme
+ *  Copyright (C) 2019-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,12 +37,10 @@
 #include "CepGen/Utils/Value.h"
 
 namespace cepgen {
-  /**
-     * \brief Handler for the generic YODA file output
-     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-     * \date Jul 2019
-     * \tparam T YODA writer type
-     */
+  /// Handler for the generic YODA file output
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date Jul 2019
+  /// \tparam T YODA writer type
   template <typename T>
   class YODAHistsHandler final : public EventExporter {
   public:
@@ -51,11 +49,12 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    void initialise() override {}
     void setCrossSection(const Value& cross_section) override { cross_section_ = cross_section; }
-    void operator<<(const Event&) override;
+    bool operator<<(const Event&) override;
 
   private:
+    void initialise() override {}
+
     std::ofstream file_;
     std::vector<std::pair<std::string, YODA::Histo1D> > hists1d_;
     std::vector<std::pair<std::vector<std::string>, YODA::Histo2D> > hists2d_;
@@ -145,8 +144,8 @@ namespace cepgen {
   }
 
   template <typename T>
-  void YODAHistsHandler<T>::operator<<(const Event& ev) {
-    //--- increment the corresponding histograms
+  bool YODAHistsHandler<T>::operator<<(const Event& ev) {
+    // increment the corresponding histograms
     for (auto& h_var : hists1d_)
       h_var.second.fillBin(browser_.get(ev, h_var.first), cross_section_);
     for (auto& h_var : hists2d_)
@@ -158,7 +157,8 @@ namespace cepgen {
                         browser_.get(ev, h_var.first[1]),
                         browser_.get(ev, h_var.first[2]),
                         cross_section_);
-    weight_cnt_.fill(ev.metadata.at("weight"));
+    weight_cnt_.fill(ev.metadata("weight"));
+    return true;
   }
 
   template <typename T>
@@ -177,7 +177,6 @@ namespace cepgen {
     return desc;
   }
 }  // namespace cepgen
-
 typedef cepgen::YODAHistsHandler<YODA::WriterYODA> YodaOutputHandler;
 typedef cepgen::YODAHistsHandler<YODA::WriterAIDA> YodaAidaOutputHandler;
 typedef cepgen::YODAHistsHandler<YODA::WriterFLAT> YodaFlatOutputHandler;

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -72,10 +72,8 @@ namespace cepgen {
       prepareFactorisedPhaseSpace();
 
       // register the outgoing remnants' variables
-      mX2() = mA2();
       if (!kinematics().incomingBeams().positive().elastic())
         defineVariable(mX2(), Mapping::square, kinematics().cuts().remnants.mx, "Positive-z beam remnant squared mass");
-      mY2() = mB2();
       if (!kinematics().incomingBeams().negative().elastic())
         defineVariable(mY2(), Mapping::square, kinematics().cuts().remnants.mx, "Negative-z beam remnant squared mass");
     }

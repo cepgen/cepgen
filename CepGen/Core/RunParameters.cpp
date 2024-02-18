@@ -35,35 +35,40 @@
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
-  RunParameters::RunParameters() : par_integrator(ParametersList().setName<std::string>("Vegas")) {}
+  RunParameters::RunParameters()
+      : SteeredObject(ParametersList()),
+        integrator_(steer<ParametersList>("integrator")),
+        generation_(steer<ParametersList>("generation")) {}
 
   RunParameters::RunParameters(RunParameters& param)
-      : par_integrator(param.par_integrator),
+      : SteeredObject(param),
         process_(std::move(param.process_)),
         evt_modifiers_(std::move(param.evt_modifiers_)),
         evt_exporters_(std::move(param.evt_exporters_)),
         taming_functions_(std::move(param.taming_functions_)),
         total_gen_time_(param.total_gen_time_),
         num_gen_events_(param.num_gen_events_),
+        integrator_(param.integrator_),
         generation_(param.generation_),
         tmr_(std::move(param.tmr_)) {}
 
   RunParameters::RunParameters(const RunParameters& param)
-      : par_integrator(param.par_integrator),
+      : SteeredObject(param),
         total_gen_time_(param.total_gen_time_),
         num_gen_events_(param.num_gen_events_),
+        integrator_(param.integrator_),
         generation_(param.generation_) {}
 
   RunParameters::~RunParameters() {}  // required for unique_ptr initialisation!
 
   RunParameters& RunParameters::operator=(RunParameters param) {
-    par_integrator = param.par_integrator;
     process_ = std::move(param.process_);
     evt_modifiers_ = std::move(param.evt_modifiers_);
     evt_exporters_ = std::move(param.evt_exporters_);
     taming_functions_ = std::move(param.taming_functions_);
     total_gen_time_ = param.total_gen_time_;
     num_gen_events_ = param.num_gen_events_;
+    integrator_ = param.integrator_;
     generation_ = param.generation_;
     tmr_ = std::move(param.tmr_);
     return *this;
@@ -188,9 +193,9 @@ namespace cepgen {
     os << "\n\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Integration/generation parameters ")
        << std::setfill(' ') << "\n\n"
-       << std::setw(wt) << "Integration" << utils::boldify(param.par_integrator.name<std::string>("N/A")) << "\n";
-    for (const auto& key : param.par_integrator.keys(false))
-      os << std::setw(wt) << "" << key << ": " << param.par_integrator.getString(key) << "\n";
+       << std::setw(wt) << "Integration" << utils::boldify(param.integrator_.name<std::string>("N/A")) << "\n";
+    for (const auto& key : param.integrator_.keys(false))
+      os << std::setw(wt) << "" << key << ": " << param.integrator_.getString(key) << "\n";
     os << std::setw(wt) << "Event generation? " << utils::yesno(param.generation_.enabled()) << "\n"
        << std::setw(wt) << "Number of events to generate" << utils::boldify(param.generation_.maxGen()) << "\n"
        << std::setw(wt) << "Generator worker" << param.generation_.parameters().get<ParametersList>("worker") << "\n";
@@ -253,6 +258,13 @@ namespace cepgen {
     return os << "\n"
               << std::setfill('_') << std::setw(wb) << ""
               << "\n";
+  }
+
+  ParametersDescription RunParameters::description() {
+    auto desc = ParametersDescription();
+    desc.add<ParametersDescription>("integrator", ParametersDescription().setName<std::string>("Vegas"));
+    desc.add<ParametersDescription>("generation", Generation::description());
+    return desc;
   }
 
   //-----------------------------------------------------------------------------------------------

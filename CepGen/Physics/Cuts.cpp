@@ -127,7 +127,7 @@ namespace cepgen {
         if (part.status() != Particle::Status::FinalState)
           continue;
         if (evt && xi.valid() &&
-            !xi.contains(1. - part.momentum().pz() / (*evt)[*part.mothers().begin()].momentum().pz()))
+            !xi.contains(1. - part.momentum().pz() / (*evt)(*part.mothers().begin()).momentum().pz()))
           return false;
         if (!yj.contains(fabs(part.momentum().rapidity())))
           return false;

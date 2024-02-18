@@ -97,7 +97,7 @@ namespace cepgen {
         if (tree_.count(KIN_NAME))
           par_kinematics += bc::unpack(tree_.get_child(KIN_NAME));
         if (tree_.count(INTEGR_NAME))
-          rt_params_->par_integrator += bc::unpack(tree_.get_child(INTEGR_NAME));
+          rt_params_->integrator() += bc::unpack(tree_.get_child(INTEGR_NAME));
         if (tree_.count(GENERATOR_NAME))
           rt_params_->generation().setParameters(bc::unpack(tree_.get_child(GENERATOR_NAME)));
         if (tree_.count(EVT_MOD_SEQ_NAME)) {
@@ -137,8 +137,8 @@ namespace cepgen {
     void BoostTreeHandler::pack(const RunParameters* params) {
       rt_params_ = const_cast<RunParameters*>(params);
       tree_.add_child(PROCESS_NAME, bc::pack(rt_params_->process().parameters()));
-      if (!rt_params_->par_integrator.empty())
-        tree_.add_child(INTEGR_NAME, bc::pack(rt_params_->par_integrator));
+      if (!rt_params_->integrator().empty())
+        tree_.add_child(INTEGR_NAME, bc::pack(rt_params_->integrator()));
 
       //----- kinematics block
       tree_.add_child(KIN_NAME, bc::pack(rt_params_->kinematics().parameters(false)));

@@ -85,6 +85,5 @@ int main(int argc, char* argv[]) {
       }
     }
   }
-
-  return 0;
+  CG_TEST_SUMMARY;
 }

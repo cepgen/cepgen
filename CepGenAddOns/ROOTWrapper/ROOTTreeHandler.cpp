@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2014-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,55 +33,61 @@
 #include "CepGenAddOns/ROOTWrapper/ROOTTreeInfo.h"
 
 namespace cepgen {
-  /**
-     * Handler for the storage of events in a ROOT format
-     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-     * \date 27 Jan 2014
-     */
-  class ROOTTreeHandler : public EventExporter {
+  /// Handler for the storage of events in a ROOT format
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date 27 Jan 2014
+  class ROOTTreeHandler final : public EventExporter {
   public:
-    /// Class constructor
-    explicit ROOTTreeHandler(const ParametersList&);
-    ~ROOTTreeHandler();
+    explicit ROOTTreeHandler(const ParametersList& params)
+        : EventExporter(params),
+          filename_(steer<std::string>("filename")),
+          compress_(steer<bool>("compress")),
+          file_(TFile::Open(filename_.data(), "recreate")) {
+      if (!file_->IsOpen())
+        throw CG_FATAL("ROOTTreeHandler") << "Failed to create the output file!";
+    }
+    ~ROOTTreeHandler() {
+      run_tree_.fill();
+      file_->Write();
+    }
 
-    static ParametersDescription description();
+    static ParametersDescription description() {
+      auto desc = EventExporter::description();
+      desc.setDescription("ROOT TTree storage module");
+      desc.add<std::string>("filename", "output.root").setDescription("Output filename");
+      desc.add<bool>("compress", false).setDescription("Compress the event content? (merge down two-parton system)");
+      desc.add<bool>("autoFilename", false).setDescription("automatically generate the output filename");
+      return desc;
+    }
 
-    void initialise() override;
-    /// Writer operator
-    void operator<<(const Event&) override;
-    void setCrossSection(const Value&) override;
+    bool operator<<(const Event& ev) override {
+      evt_tree_.fill(ev, compress_);
+      run_tree_.num_events += 1;
+      return true;
+    }
+    void setCrossSection(const Value& cross_section) override {
+      run_tree_.xsect = cross_section;
+      run_tree_.errxsect = cross_section.uncertainty();
+    }
 
   private:
+    void initialise() override;
     std::string generateFilename() const;
 
     const std::string filename_;
     const bool compress_;
-    const bool auto_filename_;
     std::unique_ptr<TFile> file_;
     ROOT::CepGenRun run_tree_;
     ROOT::CepGenEvent evt_tree_;
   };
 
-  ROOTTreeHandler::ROOTTreeHandler(const ParametersList& params)
-      : EventExporter(params),
-        filename_(steer<std::string>("filename")),
-        compress_(steer<bool>("compress")),
-        auto_filename_(steer<bool>("autoFilename")) {}
-
-  ROOTTreeHandler::~ROOTTreeHandler() {
-    run_tree_.fill();
-    file_->Write();
-  }
-
   void ROOTTreeHandler::initialise() {
-    auto filename = filename_;
-    if (auto_filename_) {
-      filename = generateFilename();
+    if (steer<bool>("autoFilename")) {
+      auto filename = generateFilename();
       CG_INFO("ROOTTreeHandler") << "Output ROOT filename automatically set to '" << filename << "'.";
+      if (file_.reset(TFile::Open(filename.data(), "recreate")); !file_->IsOpen())
+        throw CG_FATAL("ROOTTreeHandler") << "Failed to create the output file!";
     }
-    file_.reset(TFile::Open(filename.data(), "recreate"));
-    if (!file_->IsOpen())
-      throw CG_FATAL("ROOTTreeHandler") << "Failed to create the output file!";
     run_tree_.create();
     evt_tree_.create();
     run_tree_.litigious_events = 0;
@@ -90,16 +96,6 @@ namespace cepgen {
       run_tree_.process_name = runParameters().processName();
       run_tree_.process_parameters = runParameters().process().parameters().serialise();
     }
-  }
-
-  void ROOTTreeHandler::operator<<(const Event& ev) {
-    evt_tree_.fill(ev, compress_);
-    run_tree_.num_events += 1;
-  }
-
-  void ROOTTreeHandler::setCrossSection(const Value& cross_section) {
-    run_tree_.xsect = cross_section;
-    run_tree_.errxsect = cross_section.uncertainty();
   }
 
   std::string ROOTTreeHandler::generateFilename() const {
@@ -131,15 +127,6 @@ namespace cepgen {
                          proc_mode.data(),
                          runParameters().kinematics().incomingBeams().sqrtS() / 1000.,
                          evt_mods.data());
-  }
-
-  ParametersDescription ROOTTreeHandler::description() {
-    auto desc = EventExporter::description();
-    desc.setDescription("ROOT TTree storage module");
-    desc.add<std::string>("filename", "output.root").setDescription("Output filename");
-    desc.add<bool>("compress", false).setDescription("Compress the event content? (merge down two-parton system)");
-    desc.add<bool>("autoFilename", false).setDescription("automatically generate the output filename");
-    return desc;
   }
 }  // namespace cepgen
 

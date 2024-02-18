@@ -99,10 +99,13 @@ namespace cepgen {
   }
 
   ParametersList& ParametersList::operator+=(const ParametersList& oth) {
-    // ensure the two collections are not identical
-    if (*this == oth)
+    if (oth.empty() || *this == oth)  // ensure the two collections are not identical or empty
       return *this;
-    // then check if any key of the other collection is lready present in the list
+    if (empty()) {
+      *this = oth;
+      return *this;
+    }
+    // then check if any key of the other collection is already present in the list
     std::vector<std::string> keys_erased;
     for (const auto& key : oth.keys()) {
       if (has<ParametersList>(key)) {

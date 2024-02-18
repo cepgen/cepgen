@@ -52,12 +52,12 @@ int main(int argc, char* argv[]) {
     auto env = cepgen::python::Environment(cepgen::ParametersList{});
     const auto path = cepgen::python::pythonPath(output_file);
     env.setProgramName(path);
-    auto obj = cepgen::python::importModule(path);
+    auto obj = cepgen::python::ObjectPtr::importModule(path);
     CG_TEST(obj != nullptr, "Module import");
-    //CG_LOG << cepgen::python::get<cepgen::ParametersList>(PyObject_GenericGetDict(obj.get(), nullptr));
-    auto proc = cepgen::python::getAttribute(obj, "process");
+    //CG_LOG << cepgen::python::ObjectPtr(PyObject_GenericGetDict(obj.get(), nullptr)).value<cepgen::ParametersList>();
+    auto proc = obj.attribute("process");
     CG_TEST(proc != nullptr, "'process' attribute retrieval");
-    const auto proc_params = cepgen::python::get<cepgen::ParametersList>(proc);
+    const auto proc_params = proc.value<cepgen::ParametersList>();
     CG_TEST_EQUAL(proc_params.name<std::string>(), process, "Process name conservation");
   } catch (const cepgen::python::Error& err) {
     err.dump();

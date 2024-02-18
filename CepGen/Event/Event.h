@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -84,9 +84,9 @@ namespace cepgen {
     /// Reference to the Particle object corresponding to a unique identifier in the event
     /// \param[in] id The unique identifier to this particle in the event
     Particle& operator[](int id);
-    /// Constant Particle reference object using its unique identifier
-    /// \param[in] id Unique identifier of the particle in the event
-    const Particle& operator[](int id) const;
+    /// Constant reference to the Particle object corresponding to a unique identifier in the event
+    /// \param[in] id The unique identifier to this particle in the event
+    const Particle& operator()(int id) const;
     /// References to the Particle objects corresponding to the unique identifiers in the event
     /// \param[in] ids The unique identifiers to the particles to be selected in the event
     ParticlesRefs operator[](const ParticlesIds& ids);
@@ -121,6 +121,8 @@ namespace cepgen {
     /// Collection of key -> value pairs storing event metadata
     struct EventMetadata : std::unordered_map<std::string, float> {
       EventMetadata();
+      /// Retrieve the metadata value associated to a key
+      float operator()(const std::string& key) const { return count(key) > 0 ? at(key) : -1.; }
     };
     /// List of auxiliary information
     EventMetadata metadata;

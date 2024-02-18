@@ -1,9 +1,3 @@
-#----- check the external dependencies for physics utilities
-
-if(CMAKE_BUILD_TESTS)
-  enable_testing()
-endif()
-
 add_subdirectory(APFELWrapper)
 add_subdirectory(BasesWrapper)
 add_subdirectory(BoostWrapper)
@@ -29,6 +23,4 @@ add_subdirectory(TopdrawerWrapper)
 add_subdirectory(Functionals)
 
 #----- propagate global variables to parent scope
-
-set(CEPGEN_ADDONS_EXT ${CEPGEN_ADDONS_EXT} PARENT_SCOPE)
-
+set(CEPGEN_UNSTABLE_TESTS ${CEPGEN_UNSTABLE_TESTS} PARENT_SCOPE)

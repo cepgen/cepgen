@@ -131,7 +131,7 @@ namespace cepgen {
       }
 
       //----- integration
-      pars.fill<ParametersList>("integrator", rt_params_->par_integrator);
+      pars.fill<ParametersList>("integrator", rt_params_->integrator());
 
       //----- events generation
       const auto& gen = pars.get<ParametersList>("generation");
@@ -141,7 +141,7 @@ namespace cepgen {
       if (gen.has<int>("nprn"))
         rt_params_->generation().setPrintEvery(gen.get<int>("nprn"));
       if (gen.has<int>("seed"))
-        rt_params_->par_integrator.set<int>("seed", gen.get<int>("seed"));
+        rt_params_->integrator().set<int>("seed", gen.get<int>("seed"));
 
       //----- event modification modules
       const auto& mod = pars.get<ParametersList>("eventmod");

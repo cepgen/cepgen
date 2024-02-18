@@ -15,5 +15,5 @@ add_subdirectory(utils)
 
 add_test(NAME cepgen_list COMMAND cepgen -l)
 set_property(TEST cepgen_list PROPERTY ENVIRONMENT "CEPGEN_PATH=${PROJECT_BINARY_DIR}")
-add_test(NAME cepgen_lpair COMMAND cepgen -i Cards/lpair_cfg.py -n 5000 -d)
+add_test(NAME cepgen_lpair COMMAND cepgen -i Cards/lpair_cfg.py -n 5000)
 set_property(TEST cepgen_lpair PROPERTY ENVIRONMENT "CEPGEN_PATH=${PROJECT_BINARY_DIR};PYTHONPATH=${PROJECT_BINARY_DIR}")

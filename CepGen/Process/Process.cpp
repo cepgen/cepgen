@@ -65,6 +65,8 @@ namespace cepgen {
       inv_sqs_ = proc.inv_sqs_;
       mA2_ = proc.mA2_;
       mB2_ = proc.mB2_;
+      mX2_ = proc.mX2_;
+      mY2_ = proc.mY2_;
       point_coord_ = proc.point_coord_;
       base_jacobian_ = proc.base_jacobian_;
       if (proc.event_)
@@ -322,8 +324,8 @@ namespace cepgen {
       sqs_ = std::sqrt(s_);
       inv_sqs_ = 1. / sqs_;
 
-      mA2_ = p1.mass2();
-      mB2_ = p2.mass2();
+      mA2_ = mX2_ = p1.mass2();
+      mB2_ = mY2_ = p2.mass2();
       wcm_ = 0.5 * (1. + std::sqrt(1. - 4. * std::sqrt(mA2_ * mB2_) / s_));
 
       prepareKinematics();

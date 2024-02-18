@@ -21,14 +21,15 @@
 // clang-format on
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Test.h"
+#include "CepGenAddOns/PythonWrapper/ObjectPtr.h"
 
 using namespace std;
 
-#define TEST_TYPE(type, object)                         \
-  {                                                     \
-    auto py_obj = cepgen::python::set(object);          \
-    auto ret = cepgen::python::get<type>(py_obj.get()); \
-    CG_TEST_EQUAL(ret, object, std::string(#object));   \
+#define TEST_TYPE(type, object)                            \
+  {                                                        \
+    auto py_obj = cepgen::python::ObjectPtr::make(object); \
+    auto ret = py_obj.value<type>();                       \
+    CG_TEST_EQUAL(ret, object, std::string(#object));      \
   }
 
 int main(int argc, char* argv[]) {

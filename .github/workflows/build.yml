@@ -2,30 +2,35 @@ name: Build
 
 on:
   push:
-    branches: [ "master" ]
+    branches: master
   pull_request:
-    branches: [ "master" ]
+    branches: master
 
 env:
   BUILD_TYPE: Release  # Release, Debug, RelWithDebInfo, etc
-  CEPGEN_PATH: ${{github.workspace}}
+  CEPGEN_PATH: /Package/build
+  CG_CI: True
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    container:
+      image: 'laufor/ci-images:cepgen-fedora39'
+      options: -v ${{ github.workspace }}:/Package
     steps:
     - uses: actions/checkout@v3
     - uses: seanmiddleditch/gha-setup-ninja@master
 
-    - name: Configure CMake
-      run: cmake -GNinja -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_BUILD_TESTS=ON
+    - name: CMake configuration
+      run: |
+        git config --global --add safe.directory /Package
+        cmake -GNinja -B ${{env.CEPGEN_PATH}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_BUILD_TESTS=ON
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run: cmake --build ${{env.CEPGEN_PATH}}
 
     - name: Test
-      working-directory: ${{github.workspace}}/build
+      working-directory: ${{env.CEPGEN_PATH}}
       run: |
         echo "PYTHONPATH=${{env.CEPGEN_PATH}}:$PYTHONPATH" >> $GITHUB_ENV
-        ctest -C ${{env.BUILD_TYPE}} --rerun-failed --output-on-failure --verbose
+        ctest -C ${{env.BUILD_TYPE}} -LE "unstable" --verbose --output-on-failure

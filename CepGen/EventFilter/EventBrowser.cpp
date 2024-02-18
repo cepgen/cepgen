@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2023  Laurent Forthomme
+ *  Copyright (C) 2019-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,13 +35,13 @@ namespace cepgen {
       //--- particle-level variables (indexed by integer id)
       if (std::regex_match(var, sm, rgx_select_id_)) {
         const auto& var_name = sm[1].str();
-        const auto& part = ev[std::stoul(sm[2].str())];
+        const auto& part = ev(std::stoul(sm[2].str()));
         return variable(ev, part, var_name);
       }
       if (std::regex_match(var, sm, rgx_select_id2_)) {
         const auto& var_name = sm[1].str();
-        const auto& part1 = ev[std::stoul(sm[2].str())];
-        const auto& part2 = ev[std::stoul(sm[3].str())];
+        const auto& part1 = ev(std::stoul(sm[2].str()));
+        const auto& part2 = ev(std::stoul(sm[3].str()));
         return variable(ev, part1, part2, var_name);
       }
       //--- particle-level variables (indexed by role)
@@ -87,7 +87,7 @@ namespace cepgen {
                                      << part;
           return INVALID_OUTPUT;
         }
-        return 1. - part.momentum().energy() / ev[*moth.begin()].momentum().energy();
+        return 1. - part.momentum().energy() / ev(int(*moth.begin())).momentum().energy();
       }
       if (var == "pdg")
         return (double)part.integerPdgId();
@@ -130,7 +130,7 @@ namespace cepgen {
       if (var == "mephi")
         return ev.missingMomentum().phi();
       if (utils::startsWith(var, "meta:"))
-        return ev.metadata.at(var.substr(5));
+        return ev.metadata(var.substr(5));
       throw CG_ERROR("EventBrowser") << "Failed to retrieve the event-level variable \"" << var << "\".";
     }
   }  // namespace utils

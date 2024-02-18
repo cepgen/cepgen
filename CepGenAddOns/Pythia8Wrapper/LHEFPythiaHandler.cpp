@@ -96,11 +96,12 @@ namespace cepgen {
       pythia_->init();
       lhaevt_->initLHEF();
     }
-    /// Writer operator
-    inline void operator<<(const Event& ev) override {
+
+    inline bool operator<<(const Event& ev) override {
       lhaevt_->feedEvent(compress_event_ ? ev : ev.compress(), Pythia8::CepGenEvent::Type::centralAndFullBeamRemnants);
       pythia_->next();
       lhaevt_->eventLHEF();
+      return true;
     }
     inline void setCrossSection(const Value& cross_section) override {
       lhaevt_->setCrossSection(0, cross_section, cross_section.uncertainty());

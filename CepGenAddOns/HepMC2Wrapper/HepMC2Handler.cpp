@@ -37,7 +37,6 @@ namespace cepgen {
   template <typename T>
   class HepMC2Handler : public EventExporter {
   public:
-    /// Class constructor
     explicit HepMC2Handler(const ParametersList& params)
         : EventExporter(params), output_(new T(steer<std::string>("filename").c_str())), xs_(new GenCrossSection) {
       CG_INFO("HepMC") << "Interfacing module initialised "
@@ -51,11 +50,9 @@ namespace cepgen {
       return desc;
     }
 
-    void initialise() override {}
     /// Writer operator
-    void operator<<(const Event& cg_evt) override {
+    bool operator<<(const Event& cg_evt) override {
       CepGenEvent event(cg_evt);
-      // general information
       event.set_cross_section(*xs_);
       event.set_event_number(event_num_++);
       output_->write_event(&event);
@@ -63,25 +60,24 @@ namespace cepgen {
         log << "\n";
         event.print(log.stream());
       });
+      return true;
     }
     void setCrossSection(const Value& cross_section) override {
       xs_->set_cross_section((double)cross_section, cross_section.uncertainty());
     }
 
   private:
-    /// Writer object
-    const std::unique_ptr<T> output_;
-    /// Generator cross section and error
-    const std::shared_ptr<GenCrossSection> xs_;
+    void initialise() override {}
+
+    const std::unique_ptr<T> output_;            ///< writer object
+    const std::shared_ptr<GenCrossSection> xs_;  ///< generator cross section and error
   };
 }  // namespace cepgen
 
 //----------------------------------------------------------------------
 // Defining the various templated plugins made available by this
-// specific version of HepMC
+// specific version of HepMC (v2 and below)
 //----------------------------------------------------------------------
-
-//--- HepMC version 2 and below
 #include "HepMC/IO_AsciiParticles.h"
 #include "HepMC/IO_GenEvent.h"
 typedef cepgen::HepMC2Handler<IO_GenEvent> HepMC2GenEventHandler;

@@ -125,20 +125,20 @@ namespace cepgen {
     {  // apply cuts on final state system (after event modification algorithms)
       const auto& kin = process_->kinematics();
       // (polish your cuts, as this might be very time-consuming...)
-      if (!kin.cuts().central.contain((*event)(Particle::CentralSystem)))
+      if (!kin.cuts().central.contain((*event)(Particle::Role::CentralSystem)))
         return 0.;
       if (!kin.cuts().central_particles.empty())
-        for (const auto& part : (*event)(Particle::CentralSystem)) {
+        for (const auto& part : (*event)(Particle::Role::CentralSystem)) {
           // retrieve all cuts associated to this final state particle in the central system
           if (kin.cuts().central_particles.count(part.pdgId()) > 0 &&
               !kin.cuts().central_particles.at(part.pdgId()).contain({part}))
             return 0.;
         }
       if (!kin.incomingBeams().positive().elastic() &&
-          !kin.cuts().remnants.contain((*event)(Particle::OutgoingBeam1), event))
+          !kin.cuts().remnants.contain((*event)(Particle::Role::OutgoingBeam1), event))
         return 0.;
       if (!kin.incomingBeams().negative().elastic() &&
-          !kin.cuts().remnants.contain((*event)(Particle::OutgoingBeam2), event))
+          !kin.cuts().remnants.contain((*event)(Particle::Role::OutgoingBeam2), event))
         return 0.;
 
       if (storage_) {
@@ -148,9 +148,8 @@ namespace cepgen {
       }
 
       CG_DEBUG_LOOP("ProcessIntegrand") << "[process " << std::hex << (void*)process_.get() << std::dec << "]\n\t"
-                                        << "Generation time: " << event->metadata.at("time:generation") * 1.e3
-                                        << " ms\n\t"
-                                        << "Total time (gen+hadr+cuts): " << event->metadata.at("time:total") * 1.e3
+                                        << "Generation time: " << event->metadata("time:generation") * 1.e3 << " ms\n\t"
+                                        << "Total time (gen+hadr+cuts): " << event->metadata("time:total") * 1.e3
                                         << " ms";
 
       // a bit of debugging information

@@ -16,16 +16,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// clang-format off
-#include "CepGenAddOns/PythonWrapper/Environment.h"
-#include "CepGenAddOns/PythonWrapper/Error.h"
-#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
-// clang-format on
-
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/String.h"
+#include "CepGenAddOns/PythonWrapper/Environment.h"
+#include "CepGenAddOns/PythonWrapper/Error.h"
+#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
+
+using namespace std::string_literals;
 
 namespace cepgen {
   namespace utils {
@@ -38,31 +37,19 @@ namespace cepgen {
 
     private:
       python::Environment env_{ParametersList()};
-      python::ObjectPtr mod_;
-      python::ObjectPtr func_;
+      python::ObjectPtr mod_{nullptr};
+      python::ObjectPtr func_{nullptr};
     };
 
-    FunctionalPython::FunctionalPython(const ParametersList& params)
-        : Functional(params), mod_(PyModule_New("functional")) {
-      PyModule_AddStringConstant(mod_.get(), "__file__", "");
-      auto* local = PyModule_GetDict(mod_.get());  // borrowed
-      python::ObjectPtr math(PyRun_String("from math import *", Py_file_input, local, local));
-      auto expr = utils::replace_all(expression_, {{"^", "**"}});
-      std::ostringstream os;
-      os << "def custom_functional(";
-      std::string sep;
-      for (const auto& var : vars_)
-        os << sep << var << ": float", sep = ", ";
-      os << ") -> float:\n"
-         << "\treturn " << expr << "\n";
-      CG_DEBUG("FunctionalPython") << "Will compile Python expression:\n" << os.str();
+    FunctionalPython::FunctionalPython(const ParametersList& params) : Functional(params) {
+      const auto cmd = "from math import *\ndef " + steer<std::string>("functionName") + "("s +
+                       utils::merge(vars_, ",") + ") -> float:\n\treturn " +
+                       utils::replace_all(expression_, {{"^", "**"}}) + "\n";
+      CG_DEBUG("FunctionalPython") << "Will compile Python expression:\n" << cmd;
+      mod_ = python::ObjectPtr::defineModule("functional", cmd);
       try {
-        python::ObjectPtr value(PyRun_String(os.str().c_str(), Py_file_input, local, local));  // new
-        if (!value)
-          throw PY_ERROR;
-        func_ = python::getAttribute(mod_.get(), "custom_functional");
-        if (!func_ || !PyCallable_Check(func_.get()))
-          throw CG_ERROR("FunctionalPython") << "Failed to retrieve/cast the object to a Python functional.";
+        if (func_ = mod_.attribute(steer<std::string>("functionName")); !func_ || !PyCallable_Check(func_.get()))
+          throw PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";
       } catch (const python::Error& err) {
         throw CG_ERROR("FunctionalPython")
             << "Failed to initialise the Python functional with \"" << expression_ << "\".\n"
@@ -71,15 +58,14 @@ namespace cepgen {
     }
 
     double FunctionalPython::eval() const {
-      auto args = python::newTuple(values_);
+      auto args = python::ObjectPtr::tupleFromVector(values_);
       try {
-        auto value = python::callArgs(func_, args);
-        if (!value)
-          throw PY_ERROR;
-        return python::get<double>(value.get());
+        if (auto value = func_.call(args); value)
+          return value.value<double>();
+        throw PY_ERROR;
       } catch (const python::Error& err) {
         throw CG_ERROR("FunctionalPython:eval")
-            << "Failed to call the function with arguments=" << python::getVector<double>(args) << ".\n"
+            << "Failed to call the function with arguments=" << args.vector<double>() << ".\n"
             << err.message();
       }
     }
@@ -87,6 +73,8 @@ namespace cepgen {
     ParametersDescription FunctionalPython::description() {
       auto desc = Functional::description();
       desc.setDescription("Python mathematical expression evaluator");
+      desc.add<std::string>("functionName", "custom_functional")
+          .setDescription("Python function name (in case multiple instance have to be declared in a same environment)");
       return desc;
     }
   }  // namespace utils

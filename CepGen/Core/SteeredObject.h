@@ -77,6 +77,8 @@ namespace cepgen {
       return params_;
     }
     virtual void setParameters(const ParametersList& params) override {
+      if (params.empty())
+        return;
       Steerable::setParameters(params);
       for (const auto& kv : map_bools_)
         kv.second.get() = params_.operator[]<bool>(kv.first);

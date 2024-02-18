@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2023  Laurent Forthomme
+ *  Copyright (C) 2019-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,11 +28,9 @@ namespace cepgen {
     class Drawer;
     class EventBrowser;
   }  // namespace utils
-  /**
-     * \brief Handler for the generic text file output
-     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-     * \date Jul 2019
-     */
+  /// Generic text file output handler
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date Jul 2019
   class EventHarvester : public EventExporter {
   public:
     explicit EventHarvester(const ParametersList&);
@@ -40,11 +38,11 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    void initialise() override;
     void setCrossSection(const Value& cross_section) override { cross_section_ = cross_section; }
-    void operator<<(const Event&) override;
+    bool operator<<(const Event&) override;
 
   private:
+    void initialise() override;
     const std::unique_ptr<utils::EventBrowser> browser_;
     //--- variables definition
     const bool show_hists_, save_hists_;
