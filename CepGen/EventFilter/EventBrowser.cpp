@@ -108,7 +108,7 @@ namespace cepgen {
       }
       if (m_mom_str_.count(var)) {
         const auto& meth = m_mom_str_.at(var);
-        return ((part1.momentum() + part2.momentum()).*meth)();
+        return (Momentum(part1.momentum() + part2.momentum()).*meth)();
       }
       if (var == "acop")
         return 1. - fabs(part1.momentum().deltaPhi(part2.momentum()) * M_1_PI);

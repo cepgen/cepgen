@@ -55,9 +55,9 @@ namespace cepgen {
       if (!kinematics().cuts().central.rapidity_diff.contains(std::fabs(m_y_c1_ - m_y_c2_)))  // rapidity distance
         return 0.;
       {
-        const auto qt_sum = (q1() + q2()).transverse();  // two-parton system
+        const auto qt_sum = Momentum(q1() + q2()).transverse();  // two-parton system
         const auto pt_diff = Momentum::fromPtEtaPhiE(m_pt_diff_, 0., m_phi_pt_diff_);
-        const auto pt_c1 = 0.5 * (qt_sum + pt_diff), pt_c2 = 0.5 * (qt_sum - pt_diff);
+        const Momentum pt_c1 = 0.5 * (qt_sum + pt_diff), pt_c2 = 0.5 * (qt_sum - pt_diff);
         const auto p1t = pt_c1.pt(), p2t = pt_c2.pt();
         // apply user cuts on central system
         if (!kinematics().cuts().central.pt_single.contains(p1t) || !single_limits_.pt_single.contains(p1t))
@@ -72,7 +72,7 @@ namespace cepgen {
       }
 
       //--- window in central system invariant mass
-      const auto invm = (pc(0) + pc(1)).mass();
+      const auto invm = Momentum(pc(0) + pc(1)).mass();
       if (!kinematics().cuts().central.mass_sum.contains(invm))
         return 0.;
 
@@ -145,14 +145,14 @@ namespace cepgen {
     //----- utilities
 
     double Process2to4::that() const {
-      const double that1 = (q1() - pc(0)).mass2();
-      const double that2 = (q2() - pc(1)).mass2();
+      const double that1 = Momentum(q1() - pc(0)).mass2();
+      const double that2 = Momentum(q2() - pc(1)).mass2();
       return 0.5 * (that1 + that2);
     }
 
     double Process2to4::uhat() const {
-      const double uhat1 = (q1() - pc(1)).mass2();
-      const double uhat2 = (q2() - pc(0)).mass2();
+      const double uhat1 = Momentum(q1() - pc(1)).mass2();
+      const double uhat2 = Momentum(q2() - pc(0)).mass2();
       return 0.5 * (uhat1 + uhat2);
     }
   }  // namespace proc

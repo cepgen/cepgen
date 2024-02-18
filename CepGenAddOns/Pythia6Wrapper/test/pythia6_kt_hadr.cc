@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
   cepgen::Momentum daugh_total_momentum;
   for (const auto& daugh : evt.stableDaughters(evt(cepgen::Particle::Role::OutgoingBeam1)[0], true))
     daugh_total_momentum += daugh.get().momentum();
-  CG_TEST_EQUIV((daugh_total_momentum - evt(cepgen::Particle::Role::OutgoingBeam1)[0].momentum()).p(),
+  CG_TEST_EQUIV(cepgen::Momentum(daugh_total_momentum - evt(cepgen::Particle::Role::OutgoingBeam1)[0].momentum()).p(),
                 0.,
                 "diffractive system momentum balance");
 

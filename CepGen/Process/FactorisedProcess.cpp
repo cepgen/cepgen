@@ -107,7 +107,7 @@ namespace cepgen {
 
       // add couplings to metadata
       if (store_alphas_) {
-        const auto two_part_mass = (part1.momentum() + part2.momentum()).mass();
+        const auto two_part_mass = Momentum(part1.momentum() + part2.momentum()).mass();
         event().metadata["alphaEM"] = alphaEM(two_part_mass);
         event().metadata["alphaS"] = alphaS(two_part_mass);
       }
