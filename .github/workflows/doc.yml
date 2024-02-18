@@ -29,7 +29,7 @@ jobs:
       - name: CMake configuration
         run: |
           git config --global --add safe.directory /Package
-          cmake3 -GNinja -B ${{env.CEPGEN_PATH}} -DCMAKE_BUILD_UTILS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always"
+          cmake3 -GNinja -B ${{env.CEPGEN_PATH}} -DCMAKE_BUILD_UTILS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always" -DCMAKE_BUILD_FOAM=ON
       - name: Generate cepgen documentation
         working-directory: ${{env.CEPGEN_PATH}}
         run: |
