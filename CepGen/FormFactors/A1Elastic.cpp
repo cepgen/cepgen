@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,19 +39,20 @@ namespace cepgen {
           throw CG_FATAL("A1Elastic") << "Invalid coefficients multiplicity for the G_E functional form!";
         if (coeff_m_.size() < 3)
           throw CG_FATAL("A1Elastic") << "Invalid coefficients multiplicity for the G_M functional form!";
-        const auto grid_filename = steerPath("A1SplinesGrid");
-        std::ifstream grid_file(grid_filename);
-        for (std::string line; std::getline(grid_file, line);) {
-          const auto vals = utils::split(line, ' ');
-          if (vals.size() < 6)  // should be 13
-            continue;
-          const auto q2 = std::stod(vals.at(0)), ge = std::stod(vals.at(1)), gm = std::stod(vals.at(5));
-          coh_grid_.insert({q2}, {ge, gm});
+        if (const auto grid_filename = steerPath("A1SplinesGrid"); !grid_filename.empty()) {
+          std::ifstream grid_file(grid_filename);
+          for (std::string line; std::getline(grid_file, line);) {
+            const auto vals = utils::split(line, ' ');
+            if (vals.size() < 6)  // should be 13
+              continue;
+            const auto q2 = std::stod(vals.at(0)), ge = std::stod(vals.at(1)), gm = std::stod(vals.at(5));
+            coh_grid_.insert({q2}, {ge, gm});
+          }
+          coh_grid_.initialise();
+          min_interp_q2_ = coh_grid_.min().at(0);
+          CG_DEBUG("A1Elastic") << "Splines interpolation grid file loaded from '" << grid_filename << ". "
+                                << "Q^2 range: " << coh_grid_.boundaries().at(0) << " GeV^2.";
         }
-        coh_grid_.init();
-        min_interp_q2_ = coh_grid_.min().at(0);
-        CG_DEBUG("A1Elastic") << "Splines interpolation grid file loaded from '" << grid_filename << ". "
-                              << "Q^2 range: " << coh_grid_.boundaries().at(0) << " GeV^2.";
       }
 
       static ParametersDescription description() {
@@ -70,26 +71,18 @@ namespace cepgen {
       /// Friedrich-Walcher double dipole parameterisation
       /// \cite Friedrich:2003iz
       double doubleDipoleGEM(double q2, const std::vector<double>& coeffs) const {
-        return coeffs.at(0) * std::pow(1. + q2 / coeffs.at(1), -2) +
-               (1. - coeffs.at(0)) * std::pow(1. + q2 / coeffs.at(2), -2);
+        return M_SQRT1_2 * (coeffs.at(0) * std::pow(1. + q2 / coeffs.at(1), -2) +
+                            (1. - coeffs.at(0)) * std::pow(1. + q2 / coeffs.at(2), -2));
       }
-      FormFactors compute(double q2) override {
-        FormFactors out;
-        if (q2 < min_interp_q2_) {
+      void eval() override {
+        if (q2_ < min_interp_q2_) {
           const auto& min_vals = coh_grid_.values().begin()->second;
-          out.GE = (1. + q2 * (min_vals.at(0) - 1.) / 0.005);
-          out.GM = (1. + q2 * (min_vals.at(1) - 1.) / 0.005) * MU;
-          return out;
-        }
-        if (q2 < max_interp_q2_) {
-          const auto& grid_vals = coh_grid_.eval({q2});
-          out.GE = grid_vals.at(0);
-          out.GM = grid_vals.at(1) * MU;
-          return out;
-        }
-        out.GE = doubleDipoleGEM(q2, coeff_e_);
-        out.GM = doubleDipoleGEM(q2, coeff_m_) * MU;
-        return out;
+          setGEGM(1. + q2_ * (min_vals.at(0) - 1.) / 0.005, (1. + q2_ * (min_vals.at(1) - 1.) / 0.005) * MU);
+        } else if (q2_ < max_interp_q2_) {
+          const auto& grid_vals = coh_grid_.eval({q2_});
+          setGEGM(grid_vals.at(0), grid_vals.at(1) * MU);
+        } else
+          setGEGM(doubleDipoleGEM(q2_, coeff_e_), doubleDipoleGEM(q2_, coeff_m_) * MU);
       }
       const std::vector<double> coeff_e_, coeff_m_;
       GridHandler<1, 2> coh_grid_{GridType::linear};
