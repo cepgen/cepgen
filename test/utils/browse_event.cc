@@ -29,18 +29,17 @@ int main(int argc, char* argv[]) {
   cepgen::initialise();
   cepgen::ArgumentsParser(argc, argv).parse();
 
-  cepgen::utils::EventBrowser bws;
-
   const auto evt = cepgen::utils::generateLPAIREvent();
-  CG_LOG << evt;
-
-  vector<pair<string, double> > values = {
+  const vector<pair<string, double> > values = {
       {"pdg(ib1)", evt.oneWithRole(cepgen::Particle::Role::IncomingBeam1).integerPdgId()},
+      {"status(7)", (int)evt(7).status()},
       {"m(4)", evt(4).momentum().mass()},
       {"m2(4)", evt(4).momentum().mass2()},
       {"m(ob1)", evt.oneWithRole(cepgen::Particle::Role::OutgoingBeam1).momentum().mass()},
       {"acop(7,8)", 1. - fabs(evt(7).momentum().deltaPhi(evt(8).momentum())) * M_1_PI},
-      {"m(7,8)", evt(4).momentum().mass()}};
+      {"m(7,8)", (evt(7).momentum() + evt(8).momentum()).mass()}};
+
+  const cepgen::utils::EventBrowser bws;
   for (const auto& val_pair : values)
     CG_TEST_EQUIV(bws.get(evt, val_pair.first), val_pair.second, val_pair.first);
   CG_TEST_SUMMARY;
