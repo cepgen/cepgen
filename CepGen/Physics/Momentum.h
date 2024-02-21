@@ -23,6 +23,7 @@
 #include <iosfwd>
 
 namespace cepgen {
+  class Vector;
   /**
    * Container for a particle's 4-momentum, along with useful methods to ease the development of any matrix element level generator
    * \brief 4-momentum for a particle
@@ -35,6 +36,11 @@ namespace cepgen {
     explicit Momentum(double x = 0., double y = 0., double z = 0., double t = -1.);
     /// Build a 4-momentum using its 3-momentum coordinates and its energy
     explicit Momentum(double* p);
+    /// Build a 4-momentum using its 3-momentum coordinates and its energy
+    explicit Momentum(const Vector&);
+
+    bool operator==(const Momentum&) const;                                         ///< Equality operator
+    inline bool operator!=(const Momentum& oth) const { return !operator==(oth); }  ///< Inequality operator
 
     //--- static definitions
 
@@ -85,6 +91,9 @@ namespace cepgen {
     friend Momentum operator*(double, const Momentum&);
     /// Human-readable format for a particle's momentum
     friend std::ostream& operator<<(std::ostream&, const Momentum&);
+
+    /// Cast the 4-momentum object into a 4-dimensional vector
+    operator Vector() const;
 
     /// Forward \f$\beta-\gamma\f$ boost
     Momentum& betaGammaBoost(double gamma, double betagamma);

@@ -21,6 +21,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/Momentum.h"
+#include "CepGen/Utils/Algebra.h"
 #include "CepGen/Utils/Limits.h"
 #include "CepGen/Utils/Math.h"
 #include "CepGen/Utils/String.h"
@@ -48,6 +49,19 @@ namespace cepgen {
   Momentum::Momentum(double* p) {
     std::copy(p, p + 4, begin());
     computeP();
+  }
+
+  Momentum::Momentum(const Vector& vec) {
+    if (vec.size() < 3)
+      throw CG_FATAL("Momentum") << "Failed to initialise a momentum from a vector with coordinates " << vec
+                                 << ". Should have at least 3 coordinates.";
+    setPx(vec(0)).setPy(vec(1)).setPz(vec(2));
+    if (vec.size() > 3)
+      setEnergy(vec(3));
+  }
+
+  bool Momentum::operator==(const Momentum& oth) const {
+    return px() == oth.px() && py() == oth.py() && pz() == oth.pz() && energy() == oth.energy();
   }
 
   //--- static constructors
@@ -195,6 +209,8 @@ namespace cepgen {
     out[4] = mass();
     return out;
   }
+
+  Momentum::operator Vector() const { return Vector{px(), py(), pz(), energy()}; }
 
   double Momentum::energyT2() const {
     const auto ptsq = pt2();
