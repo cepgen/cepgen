@@ -84,9 +84,14 @@ public:
     mom_prefactor_ = 2. / sl1_;
     p12_ = 0.5 * (s() - mA2() - mB2());
     e1mp1_ = mA2() / (ep1_ + p_cm_);
-
-    CG_DEBUG_LOOP("LPAIR:repareKinematics") << std::scientific << "w12 = " << w12_ << std::fixed
-                                            << " -> incoming particles' energy = " << ep1_ << ", " << ep2_ << ".";
+    {  // definition of boost-to-lab boost variables
+      const Momentum cm = pA() + pB();
+      gamma_cm_ = cm.energy() * inverseSqrtS();
+      beta_gamma_cm_ = cm.pz() * inverseSqrtS();
+      CG_DEBUG_LOOP("LPAIR:prepareKinematics")
+          << "sqrt(s)=" << sqrtS() << " GeV, initial two-proton system: " << cm << "\n\t"
+          << "gamma=" << gamma_cm_ << ", beta*gamma=" << beta_gamma_cm_;
+    }
 
     formfac_ = FormFactorsFactory::get().build(kinematics().incomingBeams().formFactors());
     strfun_ = StructureFunctionsFactory::get().build(kinematics().incomingBeams().structureFunctions());
@@ -122,11 +127,11 @@ public:
 
   void fillKinematics() override {
     // boost of the incoming beams
-    pA() = Momentum(0., 0., +p_cm_, ep1_).betaGammaBoost(boost_props_.gamma, boost_props_.beta_gamma);
-    pB() = Momentum(0., 0., -p_cm_, ep2_).betaGammaBoost(boost_props_.gamma, boost_props_.beta_gamma);
+    pA() = Momentum(0., 0., +p_cm_, ep1_).betaGammaBoost(gamma_cm_, beta_gamma_cm_);
+    pB() = Momentum(0., 0., -p_cm_, ep2_).betaGammaBoost(gamma_cm_, beta_gamma_cm_);
     // boost of the outgoing beams
-    pX().betaGammaBoost(boost_props_.gamma, boost_props_.beta_gamma);
-    pY().betaGammaBoost(boost_props_.gamma, boost_props_.beta_gamma);
+    pX().betaGammaBoost(gamma_cm_, beta_gamma_cm_);
+    pY().betaGammaBoost(gamma_cm_, beta_gamma_cm_);
     // incoming partons
     q1() = pA() - pX();
     q2() = pB() - pY();
@@ -212,6 +217,8 @@ private:
   const ParticleProperties pair_;
   const bool symmetrise_;
 
+  ///////////////////////////////////////////////////////////////////
+  // variables computed at phase space definition
   double ml2_{0.};  ///< squared mass of the outgoing leptons
   double charge_factor_{0.};
   mode::Kinematics beams_mode_;
@@ -220,41 +227,41 @@ private:
   double w12_{0.};  ///< \f$\delta_2=m_1^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
   double ss_{0.};
   double p12_{0.};  ///< \f$p_{12} = \frac{1}{2}\left(s-m_{p_1}^2-m_{p_2}^2\right)\f$
+  double sl1_{0.};
   double e1mp1_{0.};
+  double p_cm_{0.}, mom_prefactor_{0.};
+  double gamma_cm_{0.}, beta_gamma_cm_{0.};
+
+  std::unique_ptr<formfac::Parameterisation> formfac_;
+  std::unique_ptr<strfun::Parameterisation> strfun_;
 
   // mapped variables
-  double m_u_t1_{0.};
-  double m_u_t2_{0.};
+  double m_u_t1_{0.};  ///< first parton normalised virtuality
+  double m_u_t2_{0.};  ///< second parton normalised virtuality
   double m_u_s2_{0.};
   double m_w4_{0.};       ///< squared mass of the two-photon system
   double m_theta4_{0.};   ///< polar angle of the two-photon system
   double m_phi6_cm_{0.};  ///< azimutal angle of the first outgoing lepton
   double m_x6_{0.};
 
-  double w31_{0.};  ///< \f$\delta_1=m_3^2-m_1^2\f$ as defined in \cite Vermaseren:1982cz
-  double w52_{0.};  ///< \f$\delta_4=m_5^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
-  double p_cm_{0.}, mom_prefactor_{0.};
-
-  //-- two-photon system
-  double ec4_{0.};         ///< energy of the two-photon system
-  double pc4_{0.};         ///< 3-momentum norm of the two-photon system
-  double pt4_{0.};         ///< transverse momentum of the two-photon system
-  double mc4_{0.};         ///< mass of the two-photon system
-  double cos_theta4_{0.};  ///< cosine of the polar angle for the two-photon system
-  double sin_theta4_{0.};  ///< sine of the polar angle for the two-photon system
-
+  ///////////////////////////////////////////////////////////////////
+  // variables computed for each phase space point computation
+  double w31_{0.};         ///< first beam final-initial squared mass difference
+  double w52_{0.};         ///< second beam final-initial squared mass difference
+  double ec4_{0.};         ///< central system energy
+  double pc4_{0.};         ///< central system 3-momentum norm
+  double pt4_{0.};         ///< central system transverse momentum
+  double mc4_{0.};         ///< central system invariant mass
+  double cos_theta4_{0.};  ///< central system polar angle cosine
+  double sin_theta4_{0.};  ///< central system polar angle sine
   double p1k2_{0.}, p2k1_{0.};
-
   double q1dq_{0.}, q1dq2_{0.};
-
   double s1_{0.}, s2_{0.};
-  double sa1_{0.}, sa2_{0.}, sl1_{0.};
-
+  double sa1_{0.}, sa2_{0.};
   double epsilon_{0.};
   double alpha4_{0.}, beta4_{0.}, gamma4_{0.};
   double alpha5_{0.}, gamma5_{0.}, alpha6_{0.}, gamma6_{0.};
   double bb_{0.};
-
   double gram_{0.};
   /// Deltas such as \f$\delta_5=m_4^2-t_1\f$ as defined in Vermaseren's paper
   /// \cite Vermaseren:1982cz for the full definition of these quantities
@@ -264,13 +271,8 @@ private:
    * \f[\Delta = \left(p_1\cdot p_2\right)\left(q_1\cdot q_2\right)-\left(p_1\cdot q_2\right)\left(p_2\cdot q_1\right)\f]
    * with \f$p_i, q_i\f$ the 4-momenta associated to the incoming proton-like particle and to the photon emitted from it.
    */
-  double delta_{0.}, delta3_{0.}, delta5_{0.};
-  struct {
-    double gamma{0.}, beta_gamma{0.};
-  } boost_props_;
-
-  std::unique_ptr<formfac::Parameterisation> formfac_;
-  std::unique_ptr<strfun::Parameterisation> strfun_;
+  double delta_{0.};
+  double delta3_{0.}, delta5_{0.};
 };
 
 //---------------------------------------------------------------------------------------------
@@ -468,12 +470,13 @@ bool LPAIR::orient() {
   }
   const auto p14 = +0.5 * (s1_ + t1() - t2() - mX2());
   cos_theta4_ = std::sqrt(1. - sin_theta4_ * sin_theta4_) * (ep1_ * ec4_ < p14 ? -1. : 1.);
+  const auto sin2_theta4 = sin_theta4_ * sin_theta4_;
   alpha4_ = 1. - cos_theta4_;
   beta4_ = 1. + cos_theta4_;
   if (cos_theta4_ < 0.)
-    beta4_ = sin_theta4_ * sin_theta4_ / alpha4_;
+    beta4_ = sin2_theta4 / alpha4_;
   else
-    alpha4_ = sin_theta4_ * sin_theta4_ / beta4_;
+    alpha4_ = sin2_theta4 / beta4_;
 
   CG_DEBUG_LOOP("LPAIR:orient") << "cos(theta4) = " << cos_theta4_ << "\t"
                                 << "sin(theta4) = " << sin_theta4_ << "\n\t"
@@ -672,15 +675,9 @@ double LPAIR::computeWeight() {
   // INFO from f.f
   ////////////////////////////////////////////////////////////////
 
-  const Momentum cm = pA() + pB();
-  boost_props_.gamma = cm.energy() * inverseSqrtS();
-  boost_props_.beta_gamma = cm.pz() * inverseSqrtS();
-  CG_DEBUG_LOOP("LPAIR:gmufil") << "sqrt(s)=" << sqrtS() << " GeV, initial two-proton system: " << cm << "\n\t"
-                                << "gamma=" << boost_props_.gamma << ", betgam=" << boost_props_.beta_gamma;
-
   //----- outgoing leptons
-  pc(0).betaGammaBoost(boost_props_.gamma, boost_props_.beta_gamma);
-  pc(1).betaGammaBoost(boost_props_.gamma, boost_props_.beta_gamma);
+  pc(0).betaGammaBoost(gamma_cm_, beta_gamma_cm_);
+  pc(1).betaGammaBoost(gamma_cm_, beta_gamma_cm_);
   if (!kinematics().cuts().central.contain(event()(Particle::CentralSystem)))
     return 0.;
 
