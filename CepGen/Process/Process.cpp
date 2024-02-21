@@ -331,10 +331,13 @@ namespace cepgen {
       prepareKinematics();
 
       if (event_) {
-        CG_DEBUG("Process:initialise") << "Kinematics successfully set!\n"
-                                       << "  sqrt(s) = " << sqs_ * 1.e-3 << " TeV,\n"
-                                       << "  p1=" << p1 << ",\tmass=" << p1.mass() << " GeV\n"
-                                       << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.";
+        CG_DEBUG("Process:initialise").log([this, &p1, &p2](auto& log) {
+          log << "Kinematics successfully set!\n"
+              << "  sqrt(s) = " << sqs_ * 1.e-3 << " TeV,\n"
+              << "  p1=" << p1 << ",\tmass=" << p1.mass() << " GeV\n"
+              << "  p2=" << p2 << ",\tmass=" << p2.mass() << " GeV.\n";
+          dumpVariables(&log.stream());
+        });
         clearEvent();
       }
     }
