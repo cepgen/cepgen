@@ -76,7 +76,7 @@ public:
     ep2_ = pB().energy();
     w12_ = mA2() - mB2();  // mass difference between the two incoming particles
     ss_ = s() + w12_;
-    if (const auto rl1 = ss_ * ss_ - 4. * mA2() * s(); utils::positive(rl1))
+    if (const auto rl1 = ss_ * ss_ - 4. * mA2() * s(); rl1 >= 0.)
       sl1_ = std::sqrt(rl1);
     else
       throw CG_FATAL("LPAIR:prepareKinematics") << "Invalid rl1 = " << rl1 << ".";
