@@ -35,10 +35,14 @@ int main(int argc, char* argv[]) {
 
   pdg::MCDFileParser::parse(path);
   cepgen::PDG::get().dump();
+  CG_TEST_SET_PRECISION(1.e-6);
 
-  CG_TEST_EQUAL(cepgen::PDG::get().mass(cepgen::PDG::diffractiveProton), 0., "diffractive proton bare mass");
-  CG_TEST_EQUAL(cepgen::PDG::get().mass(6), 172.5, "top mass");
-  CG_TEST_EQUAL(cepgen::PDG::get().width(13), 2.9959836e-19, "muon width");
+  CG_TEST_EQUIV(cepgen::PDG::get().mass(cepgen::PDG::diffractiveProton), 0., "diffractive proton bare mass");
+  CG_TEST_EQUIV(cepgen::PDG::get().mass(6), 172.5, "top mass");
+  CG_TEST_EQUIV(cepgen::PDG::get().width(13), 2.9959836e-19, "muon width");
+  CG_TEST_EQUIV(cepgen::PDG::get().mass(12), 0., "electron neutrino mass");
+  CG_TEST_EQUIV(cepgen::PDG::get().mass(14), 0., "muon neutrino mass");
+  CG_TEST_EQUIV(cepgen::PDG::get().mass(16), 0., "tau neutrino mass");
 
   CG_TEST_SUMMARY;
 }
