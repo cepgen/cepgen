@@ -126,14 +126,16 @@ public:
   }
 
   void fillKinematics() override {
-    if (beams_mode_ == mode::Kinematics::ElasticInelastic) {
-      std::swap(pX(), pY());
-      std::swap(pc(0), pc(1));
-    }
     // boost of the incoming beams
     pA() = Momentum(0., 0., +p_cm_, ep1_).betaGammaBoost(gamma_cm_, beta_gamma_cm_);
     pB() = Momentum(0., 0., -p_cm_, ep2_).betaGammaBoost(gamma_cm_, beta_gamma_cm_);
     // boost of the outgoing beams
+    pX().setMass(mX());
+    pY().setMass(mY());
+    if (beams_mode_ == mode::Kinematics::ElasticInelastic) {  // mirror X/Y and dilepton systems if needed
+      std::swap(pX(), pY());
+      std::swap(pc(0), pc(1));
+    }
     pX().betaGammaBoost(gamma_cm_, beta_gamma_cm_);
     pY().betaGammaBoost(gamma_cm_, beta_gamma_cm_);
     // incoming partons
@@ -149,28 +151,16 @@ public:
       if (symmetrise_ && mirror)
         mom->mirrorZ();
     }
-    CG_DEBUG_LOOP("LPAIR:gmufil") << "boosted+rotated PX=" << pX() << "\n\t"
-                                  << "boosted+rotated PY=" << pY() << "\n\t"
-                                  << "boosted+rotated P(l1)=" << pc(0) << "\n\t"
-                                  << "boosted+rotated P(l2)=" << pc(1);
-
     // first outgoing beam
-    auto& op1 = event().oneWithRole(Particle::OutgoingBeam1);
-    if (kinematics().incomingBeams().positive().elastic())
-      op1.setStatus(Particle::Status::FinalState);  // stable proton
-    else {
-      op1.setStatus(Particle::Status::Unfragmented);  // fragmenting remnants
-      pX().setMass(mX());
-    }
-
+    event()
+        .oneWithRole(Particle::OutgoingBeam1)
+        .setStatus(kinematics().incomingBeams().positive().elastic() ? Particle::Status::FinalState
+                                                                     : Particle::Status::Unfragmented);
     // second outgoing beam
-    auto& op2 = event().oneWithRole(Particle::OutgoingBeam2);
-    if (kinematics().incomingBeams().negative().elastic())
-      op2.setStatus(Particle::Status::FinalState);  // stable proton
-    else {
-      op2.setStatus(Particle::Status::Unfragmented);  // fragmenting remnants
-      pY().setMass(mY());
-    }
+    event()
+        .oneWithRole(Particle::OutgoingBeam2)
+        .setStatus(kinematics().incomingBeams().negative().elastic() ? Particle::Status::FinalState
+                                                                     : Particle::Status::Unfragmented);
 
     // central system
     const short ransign = rnd_gen_->uniformInt(0, 1) == 1 ? 1 : -1;
