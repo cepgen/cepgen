@@ -49,13 +49,23 @@ namespace pdg {
       }
       {                                      // mass + error(s)
         double mass_err_low, mass_err_high;  // unused
-        std::istringstream oss(line.substr(MASS_BEG, MASS_END));
-        oss >> mass >> mass_err_low >> mass_err_high;
+        const auto mass_substr = cepgen::utils::trim(line.substr(MASS_BEG, MASS_END));
+        if (mass_substr.empty())
+          mass = mass_err_low = mass_err_high = 0.;
+        else {
+          std::istringstream oss(mass_substr);
+          oss >> mass >> mass_err_low >> mass_err_high;
+        }
       }
       {                                        // width + error(s)
         double width_err_low, width_err_high;  // unused
-        std::istringstream oss(line.substr(WIDTH_BEG, WIDTH_END));
-        oss >> width >> width_err_low >> width_err_high;
+        const auto width_substr = cepgen::utils::trim(line.substr(WIDTH_BEG, WIDTH_END));
+        if (width_substr.empty())
+          width = width_err_low = width_err_high = 0.;
+        else {
+          std::istringstream oss(width_substr);
+          oss >> width >> width_err_low >> width_err_high;
+        }
       }
       {  // name + charge
         std::istringstream oss(line.substr(AUX_BEG));
