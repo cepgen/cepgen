@@ -23,11 +23,12 @@
 
 namespace cepgen {
   namespace utils {
-    const std::regex EventBrowser::rgx_select_id_("([a-zA-Z]+)\\(([0-9]+)\\)", std::regex_constants::extended);
-    const std::regex EventBrowser::rgx_select_id2_("([a-zA-Z]+)\\(([0-9]+),([0-9]+)\\)",
+    const std::regex EventBrowser::rgx_select_id_("([a-zA-Z0-9]+)\\(([0-9]+)\\)", std::regex_constants::extended);
+    const std::regex EventBrowser::rgx_select_id2_("([a-zA-Z0-9]+)\\(([0-9]+),([0-9]+)\\)",
                                                    std::regex_constants::extended);
-    const std::regex EventBrowser::rgx_select_role_("([a-zA-Z]+)\\(([a-z]+[0-9]?)\\)", std::regex_constants::extended);
-    const std::regex EventBrowser::rgx_select_role2_("([a-zA-Z]+)\\(([a-z]+[0-9]?),([a-z]+[0-9]?)\\)",
+    const std::regex EventBrowser::rgx_select_role_("([a-zA-Z0-9]+)\\(([a-z]+[0-9]?)\\)",
+                                                    std::regex_constants::extended);
+    const std::regex EventBrowser::rgx_select_role2_("([a-zA-Z0-9]+)\\(([a-z]+[0-9]?),([a-z]+[0-9]?)\\)",
                                                      std::regex_constants::extended);
 
     double EventBrowser::get(const Event& ev, const std::string& var) const {
