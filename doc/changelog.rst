@@ -5,6 +5,18 @@ Latest revisions
 ^^^^^^^^^^^^^^^^
 
 .. changelog::
+    :version: 1.2.0
+    :released: Thu Feb 22 2024
+
+    .. change::
+        :tags: core
+
+        This major release introduces a collection of bug fixes and new features to be used in future processes developments.
+        Most important part resides in the large scale refactoring of kt-factorised matrix elements, now allowing for collinear parton emission and fluxes estimations to provide a 1-to-1 comparison to other two-photon processes generators.
+        Also noticeable is the long awaited bug fix in single-dissociative LPAIR production (elastic-inelastic could result in cross sections 1000x larger than inelastic-elastic ones).
+        A few other features were also transformed into modules to ease user-steering, e.g. events can now be generated using Foam, with future tools to be provided in the future. Also, a couple event import modules are now provided to allow for future hadronisation/modification/output of events produced in another generator (transforming CepGen into an event filter).
+
+.. changelog::
     :version: 1.1.0
     :released: Fri Feb 17 2023
 
