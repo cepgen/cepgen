@@ -119,13 +119,17 @@ public:
           .remnants.mx.truncate(Limits{mp_ + PDG::get().mass(PDG::piPlus), sqrtS() - m_in - 2. * pair_.mass})
           .compute([](double m) { return m * m; });
     };
-    if (!kinematics().incomingBeams().positive().elastic())  // first outgoing beam particle or remnant mass
+    if (beams_mode_ != mode::Kinematics::ElasticElastic)  // first outgoing beam particle or remnant mass
       defineVariable(mX2(), Mapping::power_law, mx_range(mA()), "MX2");
-    if (!kinematics().incomingBeams().negative().elastic())  // second outgoing beam particle or remnant mass
+    if (beams_mode_ == mode::Kinematics::InelasticInelastic)  // second outgoing beam particle or remnant mass
       defineVariable(mY2(), Mapping::power_law, mx_range(mB()), "MY2");
   }
 
   void fillKinematics() override {
+    if (beams_mode_ == mode::Kinematics::ElasticInelastic) {
+      std::swap(pX(), pY());
+      std::swap(pc(0), pc(1));
+    }
     // boost of the incoming beams
     pA() = Momentum(0., 0., +p_cm_, ep1_).betaGammaBoost(gamma_cm_, beta_gamma_cm_);
     pB() = Momentum(0., 0., -p_cm_, ep2_).betaGammaBoost(gamma_cm_, beta_gamma_cm_);
@@ -720,14 +724,16 @@ double LPAIR::periPP() const {
       return Vector{strfun_->FM(xbj, q2), strfun_->F2(xbj, q2) * xbj * mp_ / q2};
     return Vector{-2. * strfun_->F1(xbj, q2) / q2, strfun_->F2(xbj, q2) * xbj / q2};
   };
-  const double peripp =
-      std::pow(t1() * t2() * bb_, -2) *
-      (compute_form_factors(kinematics().incomingBeams().positive().elastic(), -t1(), mA2(), mX2()).transposed() *
-       m_em * compute_form_factors(kinematics().incomingBeams().negative().elastic(), -t2(), mB2(), mY2()))(0);
+  const auto u1 = beams_mode_ == mode::Kinematics::ElasticInelastic
+                      ? compute_form_factors(false, -t1(), mA2(), mX2())
+                      : compute_form_factors(kinematics().incomingBeams().positive().elastic(), -t1(), mA2(), mX2()),
+             u2 = beams_mode_ == mode::Kinematics::ElasticInelastic
+                      ? compute_form_factors(true, -t2(), mB2(), mY2())
+                      : compute_form_factors(kinematics().incomingBeams().negative().elastic(), -t2(), mB2(), mY2());
+  const double peripp = std::pow(t1() * t2() * bb_, -2) * (u1.transposed() * m_em * u2)(0);
   CG_DEBUG_LOOP("LPAIR:peripp") << "bb = " << bb_ << ", qqq = " << qqq << ", qdq = " << qdq << "\n\t"
                                 << "e-m matrix = " << m_em << "\n\t"
-                                << "=> PeriPP = " << peripp;
-
+                                << "u1-2: " << u1 << ", " << u2 << " -> PeriPP = " << peripp << ".";
   return peripp;
 }
 REGISTER_PROCESS("lpair", LPAIR);
