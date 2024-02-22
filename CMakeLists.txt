@@ -12,7 +12,7 @@ set(CPACK_RPM_COMPONENT_INSTALL ON)
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 project(CepGen)
 set(PROJECT_VERSION 1)
-set(VERSION 1.1.0)
+set(VERSION 1.2.0)
 
 option(CMAKE_BUILD_CORE "Build Core library" ON)
 option(CMAKE_BUILD_PROCESSES "Build physics processes" ON)
