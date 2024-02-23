@@ -105,7 +105,7 @@ namespace cepgen {
   bool Matrix::operator==(const Matrix& oth) const { return gsl_matrix_equal(gsl_mat_.get(), oth.gsl_mat_.get()) == 1; }
 
   Matrix& Matrix::operator*=(double val) {
-    *this = *this * val;
+    gsl_matrix_scale(gsl_mat_.get(), val);
     return *this;
   }
 
@@ -119,15 +119,17 @@ namespace cepgen {
     return *this;
   }
 
+  Matrix& Matrix::operator/=(double val) { return operator*=(1. / val); }
+
   Matrix Matrix::operator-() const { return Matrix::zero(numRows(), numColumns()) - *this; }
 
   Matrix& Matrix::operator+=(const Matrix& oth) {
-    *this = *this + oth;
+    gsl_matrix_add(gsl_mat_.get(), oth.gsl_mat_.get());
     return *this;
   }
 
   Matrix& Matrix::operator-=(const Matrix& oth) {
-    *this = *this - oth;
+    gsl_matrix_sub(gsl_mat_.get(), oth.gsl_mat_.get());
     return *this;
   }
 
@@ -234,25 +236,25 @@ namespace cepgen {
 
   Matrix operator+(const Matrix& lhs, const Matrix& rhs) {
     Matrix out(lhs);
-    gsl_matrix_add(out.gsl_mat_.get(), rhs.gsl_mat_.get());
+    out += rhs;
     return out;
   }
 
   Matrix operator-(const Matrix& lhs, const Matrix& rhs) {
     Matrix out(lhs);
-    gsl_matrix_sub(out.gsl_mat_.get(), rhs.gsl_mat_.get());
+    out -= rhs;
     return out;
   }
 
   Matrix operator*(double val, const Matrix& lhs) {
     Matrix out(lhs);
-    gsl_matrix_scale(out.gsl_mat_.get(), val);
+    out *= val;
     return out;
   }
 
   Matrix operator*(const Matrix& lhs, double val) {
     Matrix out(lhs);
-    gsl_matrix_scale(out.gsl_mat_.get(), val);
+    out *= val;
     return out;
   }
 
@@ -269,6 +271,8 @@ namespace cepgen {
     gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1., mat1.gsl_mat_.get(), mat2.gsl_mat_.get(), 0., out.gsl_mat_.get());
     return out;
   }
+
+  Matrix operator/(const Matrix& lhs, double val) { return lhs * (1. / val); }
 
   std::ostream& operator<<(std::ostream& os, const Matrix& mat) {
     os << "(";
