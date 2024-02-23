@@ -159,8 +159,8 @@ namespace cepgen {
     }
     CG_DEBUG("IncomingBeams") << "Will build the following incoming beams:\n* " << plist_pos << "\n* " << plist_neg
                               << ".";
-    pos_beam_ = Beam(plist_pos);
-    neg_beam_ = Beam(plist_neg);
+    pos_beam_ = Beam(plist_pos).setPdgId(pos_pdg);
+    neg_beam_ = Beam(plist_neg).setPdgId(neg_pdg);
   }
 
   void IncomingBeams::setSqrtS(double sqrts) {
@@ -241,10 +241,10 @@ namespace cepgen {
 
   ParametersDescription IncomingBeams::description() {
     auto desc = ParametersDescription();
-    desc.addAs<int, pdgid_t>("beam1id", PDG::proton).setDescription("PDG id of the positive-z beam particle");
+    desc.addAs<int, pdgid_t>("beam1id", PDG::invalid).setDescription("PDG id of the positive-z beam particle");
     desc.add<int>("beam1A", 0).setDescription("Atomic weight of the positive-z ion beam");
     desc.addAs<int, Element>("beam1Z", Element::invalid).setDescription("Atomic number of the positive-z ion beam");
-    desc.addAs<int, pdgid_t>("beam2id", PDG::proton).setDescription("PDG id of the negative-z beam particle");
+    desc.addAs<int, pdgid_t>("beam2id", PDG::invalid).setDescription("PDG id of the negative-z beam particle");
     desc.add<int>("beam2A", 0).setDescription("Atomic weight of the negative-z ion beam");
     desc.addAs<int, Element>("beam2Z", Element::invalid).setDescription("Atomic number of the negative-z ion beam");
     desc.add<std::vector<ParametersList> >("pdgIds", {}).setDescription("PDG description of incoming beam particles");
