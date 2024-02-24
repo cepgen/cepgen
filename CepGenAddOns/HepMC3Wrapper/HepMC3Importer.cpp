@@ -76,7 +76,7 @@ namespace cepgen {
 typedef cepgen::HepMC3Importer<HepMC3::ReaderAscii> HepMC3ImporterASCII;
 typedef cepgen::HepMC3Importer<HepMC3::ReaderHEPEVT> HepMC3ImporterHEPEVT;
 REGISTER_EVENT_IMPORTER("hepmc", HepMC3ImporterASCII);
-REGISTER_EVENT_IMPORTER("hepevt", HepMC3ImporterHEPEVT);
+//REGISTER_EVENT_IMPORTER("hepevt", HepMC3ImporterHEPEVT); // HEPEVT input is still very shaky, disabling it by default
 #if HEPMC3_VERSION_CODE >= 3001000
 #include <HepMC3/ReaderAsciiHepMC2.h>
 typedef cepgen::HepMC3Importer<HepMC3::ReaderAsciiHepMC2> HepMC3ImporterHepMC2;
