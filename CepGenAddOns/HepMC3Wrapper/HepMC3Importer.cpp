@@ -19,6 +19,7 @@
 #include <HepMC3/GenEvent.h>
 #include <HepMC3/Print.h>
 #include <HepMC3/ReaderAscii.h>
+#include <HepMC3/ReaderHEPEVT.h>
 #include <HepMC3/Version.h>
 
 #include <memory>
@@ -67,4 +68,6 @@ namespace cepgen {
   };
 }  // namespace cepgen
 typedef cepgen::HepMC3Importer<HepMC3::ReaderAscii> HepMC3ImporterASCII;
-REGISTER_EVENT_IMPORTER("hepmc", HepMC3ImporterASCII)
+typedef cepgen::HepMC3Importer<HepMC3::ReaderHEPEVT> HepMC3ImporterHEPEVT;
+REGISTER_EVENT_IMPORTER("hepmc", HepMC3ImporterASCII);
+REGISTER_EVENT_IMPORTER("hepevt", HepMC3ImporterHEPEVT);

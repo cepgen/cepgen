@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
     if (cepgen::utils::contains(readers, mod))
       common.emplace_back(mod);
 
-  cepgen::ArgumentsParser(argc, argv).parse();
+  cepgen::ArgumentsParser(argc, argv).addOptionalArgument("modules,m", "modules to test", &common, common).parse();
   CG_INFO("main") << "Will test with the following writer/reader pairs: " << common << ".";
 
   const auto evt_base = cepgen::utils::generateLPAIREvent();
