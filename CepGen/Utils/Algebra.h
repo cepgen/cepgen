@@ -70,6 +70,7 @@ namespace cepgen {
     Matrix& operator*=(double);               ///< Multiplication by a scalar operator
     Matrix& operator*=(const Vector&);        ///< Multiplication by a vector operator
     Matrix& operator*=(const Matrix&);        ///< Multiplication by a matrix operator
+    Matrix& operator/=(double);               ///< Division by a scalar operator
     Matrix operator-() const;                 ///< Unary inverse operator
     Matrix& operator+=(const Matrix&);        ///< Addition of another matrix
     Matrix& operator-=(const Matrix&);        ///< Subtraction of another matrix
@@ -82,6 +83,7 @@ namespace cepgen {
     friend Matrix operator*(const Matrix&, double);         ///< Multiplication of a matrix by a scalar
     friend Vector operator*(const Matrix&, const Vector&);  ///< Multiplication of a matrix by a vector
     friend Matrix operator*(const Matrix&, const Matrix&);  ///< Multiplication of a matrix by another matrix
+    friend Matrix operator/(const Matrix&, double);         ///< Division of a matrix by a scalar
     friend Matrix operator+(const Matrix&, const Matrix&);  ///< Addition of two matrices
     friend Matrix operator-(const Matrix&, const Matrix&);  ///< Subtraction of two matrices
 

@@ -36,7 +36,8 @@ namespace HepMC3 {
   public:
     /// Construct an event interface from a CepGen Event object
     CepGenEvent(const cepgen::Event&);
-
+    /// Extract a CepGen Event object from a HepMC3 GenEvent object
+    operator cepgen::Event() const;
     /// Write the event content in the standard stream
     void dump() const;
 

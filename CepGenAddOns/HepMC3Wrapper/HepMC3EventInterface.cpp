@@ -30,6 +30,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/String.h"
 #include "CepGenAddOns/HepMC3Wrapper/HepMC3EventInterface.h"
 
 namespace HepMC3 {
@@ -48,7 +49,7 @@ namespace HepMC3 {
     for (const auto& part_orig : evt.particles()) {
       const auto& mom_orig = part_orig.momentum();
       FourVector pmom(mom_orig.px(), mom_orig.py(), mom_orig.pz(), mom_orig.energy());
-      auto part = make_shared<GenParticle>(pmom, part_orig.pdgId(), (int)part_orig.status());
+      auto part = make_shared<GenParticle>(pmom, part_orig.integerPdgId(), (int)part_orig.status());
       part->set_generated_mass(cepgen::PDG::get().mass(part_orig.pdgId()));
       assoc_map_[idx] = part;
 
@@ -105,7 +106,7 @@ namespace HepMC3 {
             }
             vprod->add_particle_out(part);
           } else
-            throw CG_FATAL("HepMCHandler:fillEvent") << "Other particle requested! Not yet implemented!";
+            throw CG_FATAL("HepMC3:fillEvent") << "Other particle requested! Not yet implemented!";
         } break;
       }
       idx++;
@@ -117,6 +118,81 @@ namespace HepMC3 {
 
   std::ostream& operator<<(std::ostream& os, const FourVector& vec) {
     return os << "(" << vec.x() << ", " << vec.y() << ", " << vec.z() << "; " << vec.t() << ")";
+  }
+
+  CepGenEvent::operator cepgen::Event() const {
+    cepgen::Event evt;
+    auto convert_particle = [](const GenParticle& part,
+                               const cepgen::Particle::Role& role =
+                                   cepgen::Particle::Role::UnknownRole) -> cepgen::Particle {
+      auto convert_momentum = [](const FourVector& mom) -> cepgen::Momentum {
+        return cepgen::Momentum::fromPxPyPzE(mom.px(), mom.py(), mom.pz(), mom.e());
+      };
+      auto cg_part = cepgen::Particle(role, 0, (cepgen::Particle::Status)part.status());
+      cg_part.setPdgId((long)part.pdg_id());
+      cg_part.setMomentum(convert_momentum(part.momentum()));
+      return cg_part;
+    };
+
+    auto ip1 = beams().at(0), ip2 = beams().at(1);
+    std::unordered_map<size_t, size_t> h_to_cg;
+    std::vector<int> beam_vtx_ids;
+    for (const auto& vtx : vertices()) {
+      if (vtx->particles_in().size() == 1) {
+        auto role1 = cepgen::Particle::Role::UnknownRole, role2 = role1, role3 = role1;
+        auto status1 = cepgen::Particle::Status::PrimordialIncoming, status2 = cepgen::Particle::Status::Incoming,
+             status3 = cepgen::Particle::Status::Unfragmented;
+        size_t id_beam_in = 0;
+        if (auto& part = vtx->particles_in().at(0); part) {
+          if (part->id() == ip1->id()) {
+            role1 = cepgen::Particle::IncomingBeam1;
+            role2 = cepgen::Particle::Parton1;
+            role3 = cepgen::Particle::OutgoingBeam1;
+          } else if (part->id() == ip2->id()) {
+            role1 = cepgen::Particle::IncomingBeam2;
+            role2 = cepgen::Particle::Parton2;
+            role3 = cepgen::Particle::OutgoingBeam2;
+          }
+          auto cg_part = convert_particle(*part, role1);
+          cg_part.setStatus(status1);
+          evt.addParticle(cg_part);
+          h_to_cg[part->id()] = cg_part.id();
+          id_beam_in = cg_part.id();
+        }
+        if (vtx->particles_out_size() == 2) {  //FIXME handle cases with multiple partons?
+          size_t num_op = 0;
+          for (auto op : vtx->particles_out()) {
+            auto cg_part = convert_particle(*op, num_op == 0 ? role2 : role3);
+            cg_part.setStatus(num_op == 0 ? status2 : status3);
+            cg_part.addMother(evt[id_beam_in]);
+            evt.addParticle(cg_part);
+            h_to_cg[op->id()] = cg_part.id();
+            ++num_op;
+          }
+        }
+        beam_vtx_ids.emplace_back(vtx->id());
+      }
+    }
+
+    auto cg_interm = cepgen::Particle(cepgen::Particle::Role::Intermediate, 0, cepgen::Particle::Status::Propagator);
+    auto &part1 = evt.oneWithRole(cepgen::Particle::Role::Parton1),
+         &part2 = evt.oneWithRole(cepgen::Particle::Role::Parton2);
+    cg_interm.setMomentum(part1.momentum() + part2.momentum(), true);
+    cg_interm.addMother(part1);
+    cg_interm.addMother(part2);
+    evt.addParticle(cg_interm);
+
+    for (const auto& vtx : vertices()) {
+      if (cepgen::utils::contains(beam_vtx_ids, vtx->id()))
+        continue;
+      for (auto op : vtx->particles_out()) {
+        auto cg_part = convert_particle(*op, cepgen::Particle::Role::CentralSystem);
+        cg_part.addMother(evt.oneWithRole(cepgen::Particle::Role::Intermediate));
+        evt.addParticle(cg_part);
+        h_to_cg[op->id()] = cg_part.id();
+      }
+    }
+    return evt;
   }
 
   void CepGenEvent::merge(cepgen::Event& evt) const {

@@ -138,8 +138,8 @@ namespace cepgen {
 
     void Process2to4::fillCentralParticlesKinematics() {
       const short sign = rnd_gen_->uniformInt(0, 1) == 1 ? 1 : -1;  // randomise the charge of outgoing system
-      event()[Particle::CentralSystem][0].get().setChargeSign(+sign).setStatus(Particle::Status::Undecayed);
-      event()[Particle::CentralSystem][1].get().setChargeSign(-sign).setStatus(Particle::Status::Undecayed);
+      event()[Particle::CentralSystem][0].get().setChargeSign(+sign).setStatus(Particle::Status::FinalState);
+      event()[Particle::CentralSystem][1].get().setChargeSign(-sign).setStatus(Particle::Status::FinalState);
     }
 
     //----- utilities

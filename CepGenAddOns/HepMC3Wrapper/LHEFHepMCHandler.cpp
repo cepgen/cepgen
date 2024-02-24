@@ -47,6 +47,10 @@ namespace cepgen {
     }
 
     bool operator<<(const Event& cg_ev) override {
+      if (!header_initialised_) {
+        lhe_output_->init();  // ensure everything is properly parsed
+        header_initialised_ = true;
+      }
       auto& hepeup = lhe_output_->hepeup;
       hepeup.heprup = &lhe_output_->heprup;
       hepeup.XWGTUP = 1.;
@@ -95,11 +99,11 @@ namespace cepgen {
       lhe_output_->heprup.LPRUP[0] = 1;
       lhe_output_->heprup.XSECUP[0] = 0.;  // placeholders
       lhe_output_->heprup.XERRUP[0] = 0.;
-      lhe_output_->init();  // ensure everything is properly parsed
     }
 
     const std::unique_ptr<LHEF::Writer> lhe_output_;
     const bool compress_;
+    bool header_initialised_{false};
   };
 }  // namespace cepgen
 REGISTER_EXPORTER("lhef_hepmc", LHEFHepMCHandler);

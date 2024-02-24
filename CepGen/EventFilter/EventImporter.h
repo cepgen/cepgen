@@ -37,7 +37,7 @@ namespace cepgen {
       return desc;
     }
 
-    virtual bool operator>>(Event&) const = 0;           ///< Read the next event
+    virtual bool operator>>(Event&) = 0;                 ///< Read the next event
     const Value& crossSection() const { return xsec_; }  ///< Process cross section and uncertainty, in pb
 
   protected:
