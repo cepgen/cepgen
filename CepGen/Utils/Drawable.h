@@ -31,6 +31,7 @@ namespace cepgen {
     class Drawable {
     public:
       explicit Drawable(const std::string& name = "", const std::string& title = "") : name_(name), title_(title) {}
+      virtual ~Drawable() {}
 
       /// Drawable name
       const std::string& name() const { return name_; }
