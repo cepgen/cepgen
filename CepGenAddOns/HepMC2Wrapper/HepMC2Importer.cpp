@@ -43,10 +43,15 @@ namespace cepgen {
                                 << steer<std::string>("filename") << "' with I/O state " << reader_->rdstate() << ".";
     }
 
-    bool operator>>(Event& evt) const override {
+    bool operator>>(Event& evt) override {
       HepMC::GenEvent event;
       if (!reader_->fill_next_event(&event))
         return false;
+      if (!cross_section_retrieved_) {
+        if (const auto xsec = event.cross_section(); xsec)
+          setCrossSection(Value{xsec->cross_section(), xsec->cross_section_error()});
+        cross_section_retrieved_ = true;
+      }
       CG_DEBUG("HepMC2Importer").log([&event](auto& log) { event.print(log.stream()); });
       evt = Event(static_cast<const HepMC::CepGenEvent&>(event));
       return true;
@@ -62,6 +67,7 @@ namespace cepgen {
   private:
     void initialise() override {}
     const std::unique_ptr<HepMC::IO_GenEvent> reader_;
+    bool cross_section_retrieved_{false};
   };
 }  // namespace cepgen
 REGISTER_EVENT_IMPORTER("hepmc2", HepMC2Importer)

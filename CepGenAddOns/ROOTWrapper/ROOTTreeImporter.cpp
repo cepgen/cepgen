@@ -49,7 +49,7 @@ namespace cepgen {
       return desc;
     }
 
-    bool operator>>(Event& evt) const override { return evt_tree_.next(evt); }
+    bool operator>>(Event& evt) override { return evt_tree_.next(evt); }
 
   private:
     void initialise() override { setCrossSection(Value{run_tree_.xsect, run_tree_.errxsect}); }

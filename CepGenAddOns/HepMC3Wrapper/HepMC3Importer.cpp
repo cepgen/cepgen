@@ -46,10 +46,15 @@ namespace cepgen {
                                 << steer<std::string>("filename") << "'.";
     }
 
-    bool operator>>(Event& evt) const override {
+    bool operator>>(Event& evt) override {
       HepMC3::GenEvent event;
       if (!reader_->read_event(event))
         return false;
+      if (!cross_section_retrieved_) {
+        if (const auto xsec = event.cross_section(); xsec)
+          setCrossSection(Value{xsec->xsec(), xsec->xsec_err()});
+        cross_section_retrieved_ = true;
+      }
       CG_DEBUG("HepMC3Importer").log([&event](auto& log) { HepMC3::Print::content(log.stream(), event); });
       evt = Event(static_cast<const HepMC3::CepGenEvent&>(event));
       return true;
@@ -65,9 +70,40 @@ namespace cepgen {
   private:
     void initialise() override {}
     const std::unique_ptr<T> reader_;
+    bool cross_section_retrieved_{false};
   };
 }  // namespace cepgen
 typedef cepgen::HepMC3Importer<HepMC3::ReaderAscii> HepMC3ImporterASCII;
 typedef cepgen::HepMC3Importer<HepMC3::ReaderHEPEVT> HepMC3ImporterHEPEVT;
 REGISTER_EVENT_IMPORTER("hepmc", HepMC3ImporterASCII);
 REGISTER_EVENT_IMPORTER("hepevt", HepMC3ImporterHEPEVT);
+#if HEPMC3_VERSION_CODE >= 3001000
+#include <HepMC3/ReaderAsciiHepMC2.h>
+typedef cepgen::HepMC3Importer<HepMC3::ReaderAsciiHepMC2> HepMC3ImporterHepMC2;
+REGISTER_EVENT_IMPORTER("hepmc3_hepmc2", HepMC3ImporterHepMC2);
+/*#if HEPMC3_VERSION_CODE >= 3002005 && HEPMC3_USE_COMPRESSION
+#include <HepMC3/ReaderGZ.h>
+typedef cepgen::HepMC3Importer<HepMC3::ReaderGZ<HepMC3::ReaderAscii> > HepMC3ImporterAsciiZ;
+typedef cepgen::HepMC3Importer<HepMC3::ReaderGZ<HepMC3::ReaderHEPEVT> > HepMC3ImporterHEPEVTZ;
+REGISTER_EVENT_IMPORTER("hepmc_z", HepMC3ImporterAsciiZ);
+REGISTER_EVENT_IMPORTER("hepevt_z", HepMC3ImporterHEPEVTZ);
+#endif*/
+#endif
+
+/*#ifdef HEPMC3_ROOTIO
+#include <HepMC3/ReaderRoot.h>
+#include <HepMC3/ReaderRootTree.h>
+typedef cepgen::HepMC3Importer<HepMC3::ReaderRoot> HepMC3ImporterRoot;
+typedef cepgen::HepMC3Importer<HepMC3::ReaderRootTree> HepMC3ImporterRootTree;
+REGISTER_EVENT_IMPORTER("hepmc_root", HepMC3ImporterRoot);
+REGISTER_EVENT_IMPORTER("hepmc_root_tree", HepMC3ImporterRootTree);
+#endif*/
+
+#ifdef HEPMC3_EXTRA_PLUGINS
+#include <ConvertExample/include/ReaderDOT.h>
+#include <ConvertExample/include/ReaderRootTreeOPAL.h>
+typedef cepgen::HepMC3Importer<HepMC3::ReaderDOT> HepMC3ImporterDOT;
+typedef cepgen::HepMC3Importer<HepMC3::ReaderRootTreeOPAL> HepMC3ImporterRootTreeOPAL;
+REGISTER_EVENT_IMPORTER("hepmc_dot", HepMC3ImporterDOT);
+REGISTER_EVENT_IMPORTER("hepmc_root_tree_opal", HepMC3ImporterRootTreeOPAL);
+#endif
