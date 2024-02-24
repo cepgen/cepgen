@@ -63,9 +63,9 @@ namespace cepgen {
 
       // generate dilepton system kinematics
       auto oc = evt[cepgen::Particle::CentralSystem];
-      oc[0].get().setPdgId(cepgen::PDG::muon);
+      oc[0].get().setPdgId(cepgen::PDG::muon, -1);
       oc[0].get().setMomentum(cepgen::Momentum::fromPxPyPzE(2.193109e1, -6.725967e1, -4.248568e1, 8.252200e1), false);
-      oc[1].get().setPdgId(cepgen::PDG::muon);
+      oc[1].get().setPdgId(cepgen::PDG::muon, +1);
       oc[1].get().setMomentum(cepgen::Momentum::fromPxPyPzE(-1.402852e1, 5.906575e1, 6.430959e1, 8.843809e1), false);
       return evt;
     }

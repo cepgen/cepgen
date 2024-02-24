@@ -38,10 +38,14 @@ int main(int argc, char* argv[]) {
     if (cepgen::utils::contains(readers, mod))
       common.emplace_back(mod);
 
-  cepgen::ArgumentsParser(argc, argv).parse();
+  cepgen::ArgumentsParser(argc, argv).addOptionalArgument("modules,m", "modules to test", &common, common).parse();
   CG_INFO("main") << "Will test with the following writer/reader pairs: " << common << ".";
 
   const auto evt_base = cepgen::utils::generateLPAIREvent();
+  const auto xsect = cepgen::Value{42.4242, 0.4242};
+
+  CG_DEBUG("main") << "Input event to be tested:\n" << evt_base;
+
   for (const auto& mod : common) {
     string temp_file = "output.txt";  // default value
 
@@ -49,6 +53,7 @@ int main(int argc, char* argv[]) {
       auto writer = cepgen::EventExporterFactory::get().build(mod);
       temp_file = writer->parameters().get<string>("filename");
       writer->initialise(gen.runParameters());
+      writer->setCrossSection(xsect);
       const auto wrote = ((*writer) << evt_base);
       CG_TEST(wrote, "event export: " + mod);
       if (!wrote)
@@ -61,6 +66,7 @@ int main(int argc, char* argv[]) {
       cepgen::Event evt_in;
       CG_TEST_EQUAL(((*reader) >> evt_in), true, "event re-import: " + mod);
       CG_TEST_EQUAL(evt_in.size(), evt_base.size(), "event re-import size: " + mod);
+      CG_TEST_EQUAL(reader->crossSection(), xsect, "stored cross-section: " + mod);
       for (const auto& role : {cepgen::Particle::Role::IncomingBeam1,
                                cepgen::Particle::Role::IncomingBeam2,
                                cepgen::Particle::Role::OutgoingBeam1,
@@ -69,8 +75,8 @@ int main(int argc, char* argv[]) {
                                cepgen::Particle::Role::Parton2}) {
         ostringstream os_role;
         os_role << role;
-        CG_TEST_EQUAL(evt_in.oneWithRole(role).pdgId(),
-                      evt_base.oneWithRole(role).pdgId(),
+        CG_TEST_EQUAL(evt_in.oneWithRole(role).integerPdgId(),
+                      evt_base.oneWithRole(role).integerPdgId(),
                       "PDG of " + os_role.str() + ": " + mod);
         CG_TEST_EQUIV(evt_in.oneWithRole(role).momentum().px(),
                       evt_base.oneWithRole(role).momentum().px(),

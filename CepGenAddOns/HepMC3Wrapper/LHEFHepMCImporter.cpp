@@ -56,7 +56,7 @@ namespace cepgen {
       return desc;
     }
 
-    bool operator>>(Event& evt) const override {
+    bool operator>>(Event& evt) override {
       if (!reader_->readEvent())
         return false;
       evt.clear();
@@ -101,10 +101,8 @@ namespace cepgen {
           else
             part.setRole(Particle::Role::Parton2);
         }
-        CG_LOG << part;
         evt.addParticle(part);
       }
-      CG_LOG << evt;
       return true;
     }
 
