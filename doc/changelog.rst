@@ -5,6 +5,22 @@ Latest revisions
 ^^^^^^^^^^^^^^^^
 
 .. changelog::
+    :version: 1.2.1
+    :released: Mon Feb 26 2024
+
+    .. change::
+        :tags: core
+
+        Minor bugfixes release to fix the ROOT version dependence to `TPad::PlaceBox` arguments, preventing the build on systems with ROOT version below 6.28.
+        It also fixes a couple of issues encountered in some workflows requiring the particles charge and status to be properly set in the HepMC2 event output.
+        Additionally, an event importer is introduced for HepMC3 formats.
+
+    .. change::
+        :tags: physics
+
+        The `LPAIR::periPP` method is slightly simplified to exploit process symmetry.
+
+.. changelog::
     :version: 1.2.0
     :released: Thu Feb 22 2024
 
