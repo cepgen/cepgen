@@ -429,8 +429,10 @@ namespace cepgen {
         top_label_->Draw();
       if (leg_) {
         if (
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 10, 0)
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 28, 0)
             TPad::PlaceBox(leg_.get(), leg_width_ * 1.15, leg_height_, leg_x1_, leg_y1_, leg_mode_.data())
+#elif ROOT_VERSION_CODE >= ROOT_VERSION(6, 10, 0)
+            TPad::PlaceBox(leg_.get(), leg_width_ * 1.15, leg_height_, leg_x1_, leg_y1_)
 #else
             true
 #endif
@@ -454,8 +456,10 @@ namespace cepgen {
       double leg_x, leg_y;
       const auto leg_width = leg->GetX2() - leg->GetX1(), leg_height = leg->GetY2() - leg->GetY1();
       if (
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 10, 0)
-          TPad::PlaceBox(leg, leg_width * 1.15, leg_height, leg_x, leg_y, mode)
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 28, 0)
+          TPad::PlaceBox(leg, leg_width_ * 1.15, leg_height_, leg_x, leg_y, mode)
+#elif ROOT_VERSION_CODE >= ROOT_VERSION(6, 10, 0)
+          TPad::PlaceBox(leg, leg_width_ * 1.15, leg_height_, leg_x, leg_y)
 #else
           true
 #endif

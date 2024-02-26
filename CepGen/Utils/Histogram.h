@@ -189,7 +189,7 @@ namespace cepgen {
       double integral(bool = false) const override;
 
       struct contents_t : public std::array<size_t, 8> {
-        contents_t() : std::array<size_t, 8>::array{0, 0, 0, 0, 0, 0, 0, 0} {}
+        contents_t() { std::fill(begin(), end(), 0ull); }
         size_t total() const;
         friend std::ostream& operator<<(std::ostream&, const contents_t&);
         friend contents_t operator*(double, const contents_t&);
