@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@
 
 #ifndef CepGen_Process_PhaseSpaceGenerator_h
 #define CepGen_Process_PhaseSpaceGenerator_h
+
+#include <memory>
 
 namespace cepgen {
   class PartonFlux;
