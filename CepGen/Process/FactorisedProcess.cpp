@@ -18,10 +18,11 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/Modules/CentralPhaseSpaceGeneratorFactory.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/PartonFlux.h"
-#include "CepGen/Process/Central2to4PhaseSpaceGenerator.h"
+#include "CepGen/Process/CentralPhaseSpaceGenerator.h"
 #include "CepGen/Process/CollinearPhaseSpaceGenerator.h"
 #include "CepGen/Process/FactorisedProcess.h"
 #include "CepGen/Process/KTPhaseSpaceGenerator.h"
@@ -34,7 +35,7 @@ namespace cepgen {
           psgen_(steer<bool>("ktFactorised")
                      ? std::unique_ptr<PhaseSpaceGenerator>(new KTPhaseSpaceGenerator(this))
                      : std::unique_ptr<PhaseSpaceGenerator>(new CollinearPhaseSpaceGenerator(this))),
-          cent_psgen_(new Central2to4PhaseSpaceGenerator(this, central)),
+          cent_psgen_(CentralPhaseSpaceGeneratorFactory::get().build(steer<ParametersList>("kinematicsGenerator"))),
           store_alphas_(steer<bool>("storeAlphas")) {
       event().map()[Particle::CentralSystem].resize(central.size());
     }
@@ -44,7 +45,7 @@ namespace cepgen {
           psgen_(proc.psgen_->ktFactorised()
                      ? std::unique_ptr<PhaseSpaceGenerator>(new KTPhaseSpaceGenerator(this))
                      : std::unique_ptr<PhaseSpaceGenerator>(new CollinearPhaseSpaceGenerator(this))),
-          cent_psgen_(new Central2to4PhaseSpaceGenerator(this, proc.cent_psgen_->particles())),
+          cent_psgen_(CentralPhaseSpaceGeneratorFactory::get().build(proc.cent_psgen_->parameters())),
           store_alphas_(proc.store_alphas_) {}
 
     void FactorisedProcess::addEventContent() {
@@ -61,7 +62,7 @@ namespace cepgen {
             << "Phase space generator not set. Please check your process initialisation procedure, as you might "
                "be doing something irregular.";
       psgen_->initialise();
-      cent_psgen_->initialise();
+      cent_psgen_->initialise(this);
 
       event().oneWithRole(Particle::Parton1).setPdgId(psgen_->positiveFlux().partonPdgId());
       event().oneWithRole(Particle::Parton2).setPdgId(psgen_->negativeFlux().partonPdgId());
@@ -137,6 +138,7 @@ namespace cepgen {
       desc.setDescription("Unnamed factorised process");
       desc.add<bool>("storeAlphas", false)
           .setDescription("store the electromagnetic and strong coupling constants to the event content?");
+      desc.add<ParametersDescription>("kinematicsGenerator", ParametersDescription().setName<std::string>("2to4"));
       return desc;
     }
   }  // namespace proc
