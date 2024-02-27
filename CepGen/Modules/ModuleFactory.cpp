@@ -33,7 +33,7 @@
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Physics/Coupling.h"
-#include "CepGen/Process/CentralPhaseSpaceGenerator.h"
+#include "CepGen/Process/PhaseSpaceGenerator.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
@@ -135,7 +135,6 @@ namespace cepgen {
   }
 
   template class ModuleFactory<card::Handler, std::string>;
-  template class ModuleFactory<CentralPhaseSpaceGenerator, std::string>;
   template class ModuleFactory<CollinearFlux, std::string>;
   template class ModuleFactory<Coupling, std::string>;
   template class ModuleFactory<utils::Derivator, std::string>;
@@ -148,6 +147,7 @@ namespace cepgen {
   template class ModuleFactory<Integrator, std::string>;
   template class ModuleFactory<AnalyticIntegrator, std::string>;
   template class ModuleFactory<KTFlux, std::string>;
+  template class ModuleFactory<PhaseSpaceGenerator, std::string>;
   template class ModuleFactory<proc::Process, std::string>;
   template class ModuleFactory<sigrat::Parameterisation, int>;
   template class ModuleFactory<strfun::Parameterisation, int>;

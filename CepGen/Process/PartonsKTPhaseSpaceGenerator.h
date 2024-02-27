@@ -22,28 +22,25 @@
 #include "CepGen/Process/PartonsPhaseSpaceGenerator.h"
 
 namespace cepgen {
-  namespace proc {
-    /// \f$k_{\rm T}\f$-factorisation phase space generator
-    /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
-    /// \date Apr 2016
-    class PartonsKTPhaseSpaceGenerator final : public PartonsPhaseSpaceGenerator {
-    public:
-      explicit PartonsKTPhaseSpaceGenerator(FactorisedProcess*);
+  /// \f$k_{\rm T}\f$-factorisation phase space generator
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date Apr 2016
+  class PartonsKTPhaseSpaceGenerator final : public PartonsPhaseSpaceGenerator {
+  public:
+    using PartonsPhaseSpaceGenerator::PartonsPhaseSpaceGenerator;
 
-      bool ktFactorised() const override { return true; }
+    bool ktFactorised() const override { return true; }
+    bool generatePartonKinematics() override;
+    double fluxes() const override;
 
-      void initialise() override;
-      bool generatePartonKinematics() override;
-      double fluxes() const override;
-
-    protected:
-      // mapped variables
-      double m_qt1_{0.};      ///< Virtuality of the first intermediate parton (photon, pomeron, ...)
-      double m_phi_qt1_{0.};  ///< Azimuthal rotation of the first intermediate parton's transverse virtuality
-      double m_qt2_{0.};      ///< Virtuality of the second intermediate parton (photon, pomeron, ...)
-      double m_phi_qt2_{0.};  ///< Azimuthal rotation of the second intermediate parton's transverse virtuality
-    };
-  }  // namespace proc
+  protected:
+    void initialise() override;
+    // mapped variables
+    double m_qt1_{0.};      ///< Virtuality of the first intermediate parton (photon, pomeron, ...)
+    double m_phi_qt1_{0.};  ///< Azimuthal rotation of the first intermediate parton's transverse virtuality
+    double m_qt2_{0.};      ///< Virtuality of the second intermediate parton (photon, pomeron, ...)
+    double m_phi_qt2_{0.};  ///< Azimuthal rotation of the second intermediate parton's transverse virtuality
+  };
 }  // namespace cepgen
 
 #endif

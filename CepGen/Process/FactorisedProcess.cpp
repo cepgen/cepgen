@@ -18,34 +18,27 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
-#include "CepGen/Modules/CentralPhaseSpaceGeneratorFactory.h"
+#include "CepGen/Modules/PhaseSpaceGeneratorFactory.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/PartonFlux.h"
-#include "CepGen/Process/CentralPhaseSpaceGenerator.h"
 #include "CepGen/Process/FactorisedProcess.h"
-#include "CepGen/Process/PartonsCollinearPhaseSpaceGenerator.h"
-#include "CepGen/Process/PartonsKTPhaseSpaceGenerator.h"
+#include "CepGen/Process/PhaseSpaceGenerator.h"
 #include "CepGen/Utils/Math.h"
 
 namespace cepgen {
   namespace proc {
     FactorisedProcess::FactorisedProcess(const ParametersList& params, const pdgids_t& central)
         : Process(params),
-          part_psgen_(steer<bool>("ktFactorised")
-                          ? std::unique_ptr<PartonsPhaseSpaceGenerator>(new PartonsKTPhaseSpaceGenerator(this))
-                          : std::unique_ptr<PartonsPhaseSpaceGenerator>(new PartonsCollinearPhaseSpaceGenerator(this))),
-          cent_psgen_(CentralPhaseSpaceGeneratorFactory::get().build(steer<ParametersList>("kinematicsGenerator"))),
+          psgen_(PhaseSpaceGeneratorFactory::get().build(
+              steer<ParametersList>("kinematicsGenerator")
+                  .set("ids", std::vector<int>(central.begin(), central.end())))),
           store_alphas_(steer<bool>("storeAlphas")) {
       event().map()[Particle::CentralSystem].resize(central.size());
     }
 
     FactorisedProcess::FactorisedProcess(const FactorisedProcess& proc)
         : Process(proc),
-          part_psgen_(proc.part_psgen_->ktFactorised()
-                          ? std::unique_ptr<PartonsPhaseSpaceGenerator>(new PartonsKTPhaseSpaceGenerator(this))
-                          : std::unique_ptr<PartonsPhaseSpaceGenerator>(new PartonsCollinearPhaseSpaceGenerator(this))),
-          cent_psgen_(CentralPhaseSpaceGeneratorFactory::get().build(proc.cent_psgen_->parameters())),
+          psgen_(PhaseSpaceGeneratorFactory::get().build(proc.psgen_->parameters())),
           store_alphas_(proc.store_alphas_) {}
 
     void FactorisedProcess::addEventContent() {
@@ -53,24 +46,21 @@ namespace cepgen {
                                 {Particle::IncomingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
                                 {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
                                 {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
-                                {Particle::CentralSystem, cent_psgen_->particles()}});
+                                {Particle::CentralSystem, psgen_->central()}});
     }
 
     void FactorisedProcess::prepareKinematics() {
-      if (!part_psgen_)
+      if (!psgen_)
         throw CG_FATAL("FactorisedProcess:prepareKinematics")
             << "Phase space generator not set. Please check your process initialisation procedure, as you might "
                "be doing something irregular.";
-      part_psgen_->initialise();
-      cent_psgen_->initialise(this);
+      psgen_->initialise(this);
 
-      event().oneWithRole(Particle::Parton1).setPdgId(part_psgen_->positiveFlux().partonPdgId());
-      event().oneWithRole(Particle::Parton2).setPdgId(part_psgen_->negativeFlux().partonPdgId());
+      event().oneWithRole(Particle::Parton1).setPdgId(psgen_->partons().at(0));
+      event().oneWithRole(Particle::Parton2).setPdgId(psgen_->partons().at(1));
 
-      CG_DEBUG("FactorisedProcess:prepareKinematics")
-          << "Partons: "
-          << pdgids_t{part_psgen_->positiveFlux().partonPdgId(), part_psgen_->negativeFlux().partonPdgId()} << ", "
-          << "central system: " << cent_psgen_->particles() << ". " << event();
+      CG_DEBUG("FactorisedProcess:prepareKinematics") << "Partons: " << psgen_->partons() << ", "
+                                                      << "central system: " << psgen_->central() << ". " << event();
 
       // register all process-dependent variables
       prepareFactorisedPhaseSpace();
@@ -83,18 +73,9 @@ namespace cepgen {
     }
 
     double FactorisedProcess::computeWeight() {
-      if (!part_psgen_->generatePartonKinematics())
-        return 0.;
-      const auto cent_kin_weight = cent_psgen_->generateKinematics();
-      if (!utils::positive(cent_kin_weight))
-        return 0.;
-      const auto cent_me = computeFactorisedMatrixElement();
-      if (!utils::positive(cent_me))
-        return 0.;  // avoid computing the fluxes if the matrix element is already null or invalid
-      const auto fluxes_weight = part_psgen_->fluxes();
-      if (!utils::positive(fluxes_weight))
-        return 0.;
-      return fluxes_weight * cent_kin_weight * cent_me;
+      if (const auto ps_weight = psgen_->generate(); utils::positive(ps_weight))
+        return ps_weight * computeFactorisedMatrixElement();
+      return 0.;
     }
 
     void FactorisedProcess::fillKinematics() {
@@ -139,7 +120,6 @@ namespace cepgen {
       desc.setDescription("Unnamed factorised process");
       desc.add<bool>("storeAlphas", false)
           .setDescription("store the electromagnetic and strong coupling constants to the event content?");
-      desc.add<ParametersDescription>("kinematicsGenerator", ParametersDescription().setName<std::string>("2to4"));
       return desc;
     }
   }  // namespace proc

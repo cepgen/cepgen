@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,8 +19,7 @@
 #ifndef CepGen_Process_FactorisedProcess_h
 #define CepGen_Process_FactorisedProcess_h
 
-#include "CepGen/Process/CentralPhaseSpaceGenerator.h"
-#include "CepGen/Process/PartonsPhaseSpaceGenerator.h"
+#include "CepGen/Process/PhaseSpaceGenerator.h"
 #include "CepGen/Process/Process.h"
 
 namespace cepgen {
@@ -56,9 +55,7 @@ namespace cepgen {
       double uhat() const;  ///< \f$\hat u=\frac{1}{2}\left[(p_1-p_4)^2+(p_2-p_3)^2\right]\f$
 
       /// Kinematic variables generator for the phase space coverage
-      const std::unique_ptr<PartonsPhaseSpaceGenerator> part_psgen_;
-      /// Kinematic variables generator for the central system's phase space coverage
-      const std::unique_ptr<CentralPhaseSpaceGenerator> cent_psgen_;
+      const std::unique_ptr<PhaseSpaceGenerator> psgen_;
       const bool store_alphas_;
     };
   }  // namespace proc

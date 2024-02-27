@@ -25,7 +25,7 @@ namespace cepgen {
   /// A 2-to-4 (or 2-to-2 central) phase space generator
   class Central2to4PhaseSpaceGenerator : public CentralPhaseSpaceGenerator {
   public:
-    explicit Central2to4PhaseSpaceGenerator(proc::FactorisedProcess*, const pdgids_t&);
+    explicit Central2to4PhaseSpaceGenerator(const ParametersList&);
 
     size_t ndim() const override { return 4; }
     const pdgids_t& particles() const override { return particles_; }
@@ -43,6 +43,7 @@ namespace cepgen {
   private:
     // factor 1/4 from jacobian of transformations
     static constexpr double prefactor_ = 0.25 * 0.0625 * M_1_PI * M_1_PI;
+    const std::vector<int> int_particles_;
     const pdgids_t particles_;  ///< Type of particles produced in the final state
   };
 }  // namespace cepgen

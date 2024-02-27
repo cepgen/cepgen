@@ -78,7 +78,7 @@ private:
     cuts::Central single_w_cuts(ParametersList{});
     if (kinematics().cuts().central_particles.count(PDG::W) > 0)
       single_w_cuts = kinematics().cuts().central_particles.at(PDG::W);
-    cent_psgen_->setCuts(single_w_cuts);
+    //cent_psgen_->setCuts(single_w_cuts);//FIXME
   }
   double computeFactorisedMatrixElement() override {
     CG_DEBUG_LOOP("PPtoWW:ME") << "matrix element mode: " << method_ << ".";
