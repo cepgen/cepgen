@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Process_PhaseSpaceGenerator_h
-#define CepGen_Process_PhaseSpaceGenerator_h
+#ifndef CepGen_Process_PartonsPhaseSpaceGenerator_h
+#define CepGen_Process_PartonsPhaseSpaceGenerator_h
 
 #include <memory>
 
@@ -31,12 +31,12 @@ namespace cepgen {
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2023
      */
-    class PhaseSpaceGenerator {
+    class PartonsPhaseSpaceGenerator {
     public:
       /// Class constructor
       /// \param[in] params Parameters list
       /// \param[in] output Produced final state particles
-      explicit PhaseSpaceGenerator(FactorisedProcess* proc) : proc_(*proc) {}
+      explicit PartonsPhaseSpaceGenerator(FactorisedProcess* proc) : proc_(*proc) {}
 
       virtual bool ktFactorised() const = 0;  ///< Do incoming partons carry a primordial kT?
 

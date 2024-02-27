@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2016-2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,21 +16,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Process_KTPhaseSpaceGenerator_h
-#define CepGen_Process_KTPhaseSpaceGenerator_h
+#ifndef CepGen_Process_PartonsCollinearPhaseSpaceGenerator_h
+#define CepGen_Process_PartonsCollinearPhaseSpaceGenerator_h
 
-#include "CepGen/Process/PhaseSpaceGenerator.h"
+#include "CepGen/Process/PartonsPhaseSpaceGenerator.h"
 
 namespace cepgen {
   namespace proc {
-    /// \f$k_{\rm T}\f$-factorisation phase space generator
+    /// Collinear factorisation phase space generator
     /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
-    /// \date Apr 2016
-    class KTPhaseSpaceGenerator final : public PhaseSpaceGenerator {
+    /// \date Jul 2023
+    class PartonsCollinearPhaseSpaceGenerator final : public PartonsPhaseSpaceGenerator {
     public:
-      explicit KTPhaseSpaceGenerator(FactorisedProcess*);
+      explicit PartonsCollinearPhaseSpaceGenerator(FactorisedProcess*);
 
-      bool ktFactorised() const override { return true; }
+      bool ktFactorised() const override { return false; }
 
       void initialise() override;
       bool generatePartonKinematics() override;
@@ -38,10 +38,7 @@ namespace cepgen {
 
     protected:
       // mapped variables
-      double m_qt1_{0.};      ///< Virtuality of the first intermediate parton (photon, pomeron, ...)
-      double m_phi_qt1_{0.};  ///< Azimuthal rotation of the first intermediate parton's transverse virtuality
-      double m_qt2_{0.};      ///< Virtuality of the second intermediate parton (photon, pomeron, ...)
-      double m_phi_qt2_{0.};  ///< Azimuthal rotation of the second intermediate parton's transverse virtuality
+      double m_t1_{0.}, m_t2_{0.};
     };
   }  // namespace proc
 }  // namespace cepgen

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2016-2023  Laurent Forthomme
+ *  Copyright (C) 2016-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,13 +22,14 @@
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Process/FactorisedProcess.h"
-#include "CepGen/Process/KTPhaseSpaceGenerator.h"
+#include "CepGen/Process/PartonsKTPhaseSpaceGenerator.h"
 
 namespace cepgen {
   namespace proc {
-    KTPhaseSpaceGenerator::KTPhaseSpaceGenerator(FactorisedProcess* proc) : PhaseSpaceGenerator(proc) {}
+    PartonsKTPhaseSpaceGenerator::PartonsKTPhaseSpaceGenerator(FactorisedProcess* proc)
+        : PartonsPhaseSpaceGenerator(proc) {}
 
-    void KTPhaseSpaceGenerator::initialise() {
+    void PartonsKTPhaseSpaceGenerator::initialise() {
       const auto& kin = process().kinematics();
 
       // pick a parton flux parameterisation for each beam
@@ -49,10 +50,10 @@ namespace cepgen {
         }
         flux = std::move(KTFluxFactory::get().build(params));
         if (!flux)
-          throw CG_FATAL("KTPhaseSpaceGenerator:init")
+          throw CG_FATAL("PartonsKTPhaseSpaceGenerator:init")
               << "Failed to initiate a parton flux object with properties: " << params << ".";
         if (!flux->ktFactorised())
-          throw CG_FATAL("KTPhaseSpaceGenerator:init")
+          throw CG_FATAL("PartonsKTPhaseSpaceGenerator:init")
               << "Invalid incoming parton flux modelling: " << flux->name() << ".";
       };
       set_flux_properties(kin.incomingBeams().positive(), pos_flux_);
@@ -73,14 +74,14 @@ namespace cepgen {
           m_phi_qt2_, Process::Mapping::linear, lim_phi, "phi_qt2", "Negative-z parton azimuthal angle");
     }
 
-    bool KTPhaseSpaceGenerator::generatePartonKinematics() {
+    bool PartonsKTPhaseSpaceGenerator::generatePartonKinematics() {
       // set the fully transverse kinematics (eta = 0) of initial partons
       process().q1() = Momentum::fromPtEtaPhiE(m_qt1_, 0., m_phi_qt1_);
       process().q2() = Momentum::fromPtEtaPhiE(m_qt2_, 0., m_phi_qt2_);
       return true;
     }
 
-    double KTPhaseSpaceGenerator::fluxes() const {
+    double PartonsKTPhaseSpaceGenerator::fluxes() const {
       // factors 1/pi due to integration over d^2(kt1) d^2(kt2) instead of d(kt1^2) d(kt2^2)
       return (positiveFlux<KTFlux>().fluxMX2(process().x1(), m_qt1_ * m_qt1_, process().mX2()) * M_1_PI * m_qt1_) *
              (negativeFlux<KTFlux>().fluxMX2(process().x2(), m_qt2_ * m_qt2_, process().mY2()) * M_1_PI * m_qt2_);

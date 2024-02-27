@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2016-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,21 +16,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Process_CollinearPhaseSpaceGenerator_h
-#define CepGen_Process_CollinearPhaseSpaceGenerator_h
+#ifndef CepGen_Process_PartonsKTPhaseSpaceGenerator_h
+#define CepGen_Process_PartonsKTPhaseSpaceGenerator_h
 
-#include "CepGen/Process/PhaseSpaceGenerator.h"
+#include "CepGen/Process/PartonsPhaseSpaceGenerator.h"
 
 namespace cepgen {
   namespace proc {
-    /// Collinear factorisation phase space generator
+    /// \f$k_{\rm T}\f$-factorisation phase space generator
     /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
-    /// \date Jul 2023
-    class CollinearPhaseSpaceGenerator final : public PhaseSpaceGenerator {
+    /// \date Apr 2016
+    class PartonsKTPhaseSpaceGenerator final : public PartonsPhaseSpaceGenerator {
     public:
-      explicit CollinearPhaseSpaceGenerator(FactorisedProcess*);
+      explicit PartonsKTPhaseSpaceGenerator(FactorisedProcess*);
 
-      bool ktFactorised() const override { return false; }
+      bool ktFactorised() const override { return true; }
 
       void initialise() override;
       bool generatePartonKinematics() override;
@@ -38,7 +38,10 @@ namespace cepgen {
 
     protected:
       // mapped variables
-      double m_t1_{0.}, m_t2_{0.};
+      double m_qt1_{0.};      ///< Virtuality of the first intermediate parton (photon, pomeron, ...)
+      double m_phi_qt1_{0.};  ///< Azimuthal rotation of the first intermediate parton's transverse virtuality
+      double m_qt2_{0.};      ///< Virtuality of the second intermediate parton (photon, pomeron, ...)
+      double m_phi_qt2_{0.};  ///< Azimuthal rotation of the second intermediate parton's transverse virtuality
     };
   }  // namespace proc
 }  // namespace cepgen

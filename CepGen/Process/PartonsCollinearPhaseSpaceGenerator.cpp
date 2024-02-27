@@ -22,14 +22,15 @@
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Process/CollinearPhaseSpaceGenerator.h"
 #include "CepGen/Process/FactorisedProcess.h"
+#include "CepGen/Process/PartonsCollinearPhaseSpaceGenerator.h"
 
 namespace cepgen {
   namespace proc {
-    CollinearPhaseSpaceGenerator::CollinearPhaseSpaceGenerator(FactorisedProcess* proc) : PhaseSpaceGenerator(proc) {}
+    PartonsCollinearPhaseSpaceGenerator::PartonsCollinearPhaseSpaceGenerator(FactorisedProcess* proc)
+        : PartonsPhaseSpaceGenerator(proc) {}
 
-    void CollinearPhaseSpaceGenerator::initialise() {
+    void PartonsCollinearPhaseSpaceGenerator::initialise() {
       const auto& kin = process().kinematics();
 
       // pick a parton flux parameterisation for each beam
@@ -57,10 +58,10 @@ namespace cepgen {
         }
         flux = std::move(CollinearFluxFactory::get().build(params));
         if (!flux)
-          throw CG_FATAL("CollinearPhaseSpaceGenerator:init")
+          throw CG_FATAL("PartonsCollinearPhaseSpaceGenerator:init")
               << "Failed to initiate a parton flux object with properties: " << params << ".";
         if (flux->ktFactorised())
-          throw CG_FATAL("CollinearPhaseSpaceGenerator:init")
+          throw CG_FATAL("PartonsCollinearPhaseSpaceGenerator:init")
               << "Invalid incoming parton flux: " << flux->name() << ".";
       };
       set_flux_properties(kin.incomingBeams().positive(), pos_flux_);
@@ -72,14 +73,14 @@ namespace cepgen {
       process().defineVariable(m_t2_, Process::Mapping::exponential, log_lim_q2, "Negative-z parton virtuality");
     }
 
-    bool CollinearPhaseSpaceGenerator::generatePartonKinematics() {
+    bool PartonsCollinearPhaseSpaceGenerator::generatePartonKinematics() {
       // gaussian smearing of kt can be introduced here
       process().q1() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t1_));
       process().q2() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t2_));
       return true;
     }
 
-    double CollinearPhaseSpaceGenerator::fluxes() const {
+    double PartonsCollinearPhaseSpaceGenerator::fluxes() const {
       return positiveFlux<CollinearFlux>().fluxQ2(process().x1(), m_t1_) * process().x1() / m_t1_ *
              negativeFlux<CollinearFlux>().fluxQ2(process().x2(), m_t2_) * process().x2() / m_t2_;
     }

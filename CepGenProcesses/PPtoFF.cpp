@@ -35,7 +35,7 @@ public:
       : cepgen::proc::FactorisedProcess(params, pdgids_t(2, params.get<ParticleProperties>("pair").pdgid)),
         method_(steerAs<int, Mode>("method")),
         osp_(steer<ParametersList>("offShellParameters")) {
-    if (method_ == Mode::offShell && !psgen_->ktFactorised())
+    if (method_ == Mode::offShell && !part_psgen_->ktFactorised())
       throw CG_FATAL("PPtoFF:prepare")
           << "Off-shell matrix element only defined for factorised process with partons kt.";
   }

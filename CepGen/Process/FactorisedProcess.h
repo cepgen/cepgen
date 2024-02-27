@@ -20,7 +20,7 @@
 #define CepGen_Process_FactorisedProcess_h
 
 #include "CepGen/Process/CentralPhaseSpaceGenerator.h"
-#include "CepGen/Process/PhaseSpaceGenerator.h"
+#include "CepGen/Process/PartonsPhaseSpaceGenerator.h"
 #include "CepGen/Process/Process.h"
 
 namespace cepgen {
@@ -55,7 +55,8 @@ namespace cepgen {
       double that() const;  ///< \f$\hat t=\frac{1}{2}\left[(p_1-p_3)^2+(p_2-p_4)^2\right]\f$
       double uhat() const;  ///< \f$\hat u=\frac{1}{2}\left[(p_1-p_4)^2+(p_2-p_3)^2\right]\f$
 
-      const std::unique_ptr<PhaseSpaceGenerator> psgen_;  ///< Kinematic variables generator for the phase space coverage
+      /// Kinematic variables generator for the phase space coverage
+      const std::unique_ptr<PartonsPhaseSpaceGenerator> part_psgen_;
       /// Kinematic variables generator for the central system's phase space coverage
       const std::unique_ptr<CentralPhaseSpaceGenerator> cent_psgen_;
       const bool store_alphas_;
