@@ -19,6 +19,7 @@
 #ifndef CepGen_Process_FactorisedProcess_h
 #define CepGen_Process_FactorisedProcess_h
 
+#include "CepGen/Process/CentralPhaseSpaceGenerator.h"
 #include "CepGen/Process/PhaseSpaceGenerator.h"
 #include "CepGen/Process/Process.h"
 
@@ -49,10 +50,14 @@ namespace cepgen {
 
       virtual void prepareFactorisedPhaseSpace() = 0;  ///< Prepare central part of the Jacobian after kinematics is set
       virtual double computeFactorisedMatrixElement() = 0;  ///< Factorised matrix element (event weight)
-      virtual void fillCentralParticlesKinematics() = 0;    ///< Set the kinematics of the outgoing central system
 
-      pdgids_t produced_parts_;                           ///< Type of particles produced in the final state
+      //--- Mandelstam variables
+      double that() const;  ///< \f$\hat t=\frac{1}{2}\left[(p_1-p_3)^2+(p_2-p_4)^2\right]\f$
+      double uhat() const;  ///< \f$\hat u=\frac{1}{2}\left[(p_1-p_4)^2+(p_2-p_3)^2\right]\f$
+
       const std::unique_ptr<PhaseSpaceGenerator> psgen_;  ///< Kinematic variables generator for the phase space coverage
+      /// Kinematic variables generator for the central system's phase space coverage
+      const std::unique_ptr<CentralPhaseSpaceGenerator> cent_psgen_;
       const bool store_alphas_;
     };
   }  // namespace proc

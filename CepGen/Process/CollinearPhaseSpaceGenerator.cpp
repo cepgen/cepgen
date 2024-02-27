@@ -23,11 +23,11 @@
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/CollinearPhaseSpaceGenerator.h"
-#include "CepGen/Process/Process.h"
+#include "CepGen/Process/FactorisedProcess.h"
 
 namespace cepgen {
   namespace proc {
-    CollinearPhaseSpaceGenerator::CollinearPhaseSpaceGenerator(Process* proc) : PhaseSpaceGenerator(proc) {}
+    CollinearPhaseSpaceGenerator::CollinearPhaseSpaceGenerator(FactorisedProcess* proc) : PhaseSpaceGenerator(proc) {}
 
     void CollinearPhaseSpaceGenerator::initialise() {
       const auto& kin = process().kinematics();

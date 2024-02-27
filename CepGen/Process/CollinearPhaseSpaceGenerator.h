@@ -28,7 +28,7 @@ namespace cepgen {
     /// \date Jul 2023
     class CollinearPhaseSpaceGenerator final : public PhaseSpaceGenerator {
     public:
-      explicit CollinearPhaseSpaceGenerator(Process*);
+      explicit CollinearPhaseSpaceGenerator(FactorisedProcess*);
 
       bool ktFactorised() const override { return false; }
 

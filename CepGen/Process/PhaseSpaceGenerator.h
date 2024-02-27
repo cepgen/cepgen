@@ -24,7 +24,7 @@
 namespace cepgen {
   class PartonFlux;
   namespace proc {
-    class Process;
+    class FactorisedProcess;
     /**
      * A generic phase space integration wrapper.
      * \brief Class template to define any phase space helper process
@@ -36,7 +36,7 @@ namespace cepgen {
       /// Class constructor
       /// \param[in] params Parameters list
       /// \param[in] output Produced final state particles
-      explicit PhaseSpaceGenerator(Process* proc) : proc_(*proc) {}
+      explicit PhaseSpaceGenerator(FactorisedProcess* proc) : proc_(*proc) {}
 
       virtual bool ktFactorised() const = 0;  ///< Do incoming partons carry a primordial kT?
 
@@ -56,13 +56,13 @@ namespace cepgen {
       }
 
     protected:
-      inline Process& process() { return proc_; }  ///< Consumer process object
+      inline FactorisedProcess& process() { return proc_; }  ///< Consumer process object
       /// Const-qualified consumer process object
-      inline const Process& process() const { return const_cast<const Process&>(proc_); }
+      inline const FactorisedProcess& process() const { return const_cast<const FactorisedProcess&>(proc_); }
       std::unique_ptr<PartonFlux> pos_flux_{nullptr}, neg_flux_{nullptr};
 
     private:
-      Process& proc_;  //NOT owning
+      FactorisedProcess& proc_;  //NOT owning
     };
   }  // namespace proc
 }  // namespace cepgen

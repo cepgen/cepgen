@@ -21,12 +21,12 @@
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/HeavyIon.h"
+#include "CepGen/Process/FactorisedProcess.h"
 #include "CepGen/Process/KTPhaseSpaceGenerator.h"
-#include "CepGen/Process/Process.h"
 
 namespace cepgen {
   namespace proc {
-    KTPhaseSpaceGenerator::KTPhaseSpaceGenerator(Process* proc) : PhaseSpaceGenerator(proc) {}
+    KTPhaseSpaceGenerator::KTPhaseSpaceGenerator(FactorisedProcess* proc) : PhaseSpaceGenerator(proc) {}
 
     void KTPhaseSpaceGenerator::initialise() {
       const auto& kin = process().kinematics();

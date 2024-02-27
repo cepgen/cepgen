@@ -27,17 +27,17 @@
 #include "CepGen/Physics/NachtmannAmplitudes.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/PolarisationState.h"
-#include "CepGen/Process/Process2to4.h"
+#include "CepGen/Process/FactorisedProcess.h"
 
 using namespace cepgen;
 using namespace std::complex_literals;
 
 /// \brief Compute the matrix element for a CE \f$\gamma\gamma\rightarrow W^+W^-\f$ process using \f$k_{\rm T}\f$-factorization approach
 /// \note The full theoretical description of this process definition may be found in \cite Luszczak:2018ntp.
-class PPtoWW final : public cepgen::proc::Process2to4 {
+class PPtoWW final : public cepgen::proc::FactorisedProcess {
 public:
   explicit PPtoWW(const ParametersList& params)
-      : Process2to4(params, PDG::W),
+      : FactorisedProcess(params, {PDG::W, PDG::W}),
         mW_(PDG::get().mass(PDG::W)),
         mW2_(mW_ * mW_),
         method_(steer<int>("method")),
@@ -63,7 +63,7 @@ public:
   proc::ProcessPtr clone() const override { return proc::ProcessPtr(new PPtoWW(*this)); }
 
   static ParametersDescription description() {
-    auto desc = Process2to4::description();
+    auto desc = FactorisedProcess::description();
     desc.setDescription("γγ → W⁺W¯");
     desc.add<bool>("ktFactorised", true);
     desc.add<int>("method", 1)
@@ -74,13 +74,13 @@ public:
   }
 
 private:
-  void prepareProcessKinematics() override {
+  void prepareFactorisedPhaseSpace() override {
     cuts::Central single_w_cuts(ParametersList{});
     if (kinematics().cuts().central_particles.count(PDG::W) > 0)
       single_w_cuts = kinematics().cuts().central_particles.at(PDG::W);
-    setCuts(single_w_cuts);
+    cent_psgen_->setCuts(single_w_cuts);
   }
-  double computeCentralMatrixElement() const override {
+  double computeFactorisedMatrixElement() override {
     CG_DEBUG_LOOP("PPtoWW:ME") << "matrix element mode: " << method_ << ".";
     switch (method_) {
       case 0:

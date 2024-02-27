@@ -28,7 +28,7 @@ namespace cepgen {
     /// \date Apr 2016
     class KTPhaseSpaceGenerator final : public PhaseSpaceGenerator {
     public:
-      explicit KTPhaseSpaceGenerator(Process*);
+      explicit KTPhaseSpaceGenerator(FactorisedProcess*);
 
       bool ktFactorised() const override { return true; }
 

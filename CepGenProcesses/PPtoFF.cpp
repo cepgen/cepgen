@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2023  Laurent Forthomme
+ *  Copyright (C) 2018-2024  Laurent Forthomme
  *                2017-2019  Wolfgang Schaefer
  *                2019       Marta Luszczak
  *
@@ -23,16 +23,16 @@
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
-#include "CepGen/Process/Process2to4.h"
+#include "CepGen/Process/FactorisedProcess.h"
 #include "CepGen/Utils/Math.h"
 
 using namespace cepgen;
 
 /// Compute the 2-to-4 matrix element for a CE \f$\gamma\gamma\rightarrow f\bar f\f$ process
-class PPtoFF final : public cepgen::proc::Process2to4 {
+class PPtoFF final : public cepgen::proc::FactorisedProcess {
 public:
   explicit PPtoFF(const ParametersList& params)
-      : cepgen::proc::Process2to4(params, params.get<ParticleProperties>("pair").pdgid),
+      : cepgen::proc::FactorisedProcess(params, pdgids_t(2, params.get<ParticleProperties>("pair").pdgid)),
         method_(steerAs<int, Mode>("method")),
         osp_(steer<ParametersList>("offShellParameters")) {
     if (method_ == Mode::offShell && !psgen_->ktFactorised())
@@ -43,7 +43,7 @@ public:
   proc::ProcessPtr clone() const override { return proc::ProcessPtr(new PPtoFF(*this)); }
 
   static ParametersDescription description() {
-    auto desc = Process2to4::description();
+    auto desc = FactorisedProcess::description();
     desc.setDescription("γγ → f⁺f¯");
     desc.addAs<int, pdgid_t>("pair", PDG::muon).setDescription("type of central particles emitted");
     desc.addAs<int, Mode>("method", Mode::offShell)
@@ -53,16 +53,17 @@ public:
   }
 
 private:
-  void prepareProcessKinematics() override {
+  void prepareFactorisedPhaseSpace() override {
+    const auto cs_prop = PDG::get()(cent_psgen_->particles().at(0));
     // define central particle properties and couplings with partons
-    if (!cs_prop_.fermion || cs_prop_.charge == 0.)
-      throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop_ << ".";
-    mf2_ = cs_prop_.mass * cs_prop_.mass;
-    qf2_ = cs_prop_.charge * cs_prop_.charge * (1. / 9);
-    const auto generate_coupling = [this](const pdgid_t& parton_id) -> std::function<double(double)> {
+    if (!cs_prop.fermion || cs_prop.charge == 0.)
+      throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop << ".";
+    mf2_ = cs_prop.mass * cs_prop.mass;
+    qf2_ = cs_prop.charge * cs_prop.charge * (1. / 9);
+    const auto generate_coupling = [this, &cs_prop](const pdgid_t& parton_id) -> std::function<double(double)> {
       switch (parton_id) {
         case PDG::gluon: {
-          if (cs_prop_.colours == 0)
+          if (cs_prop.colours == 0)
             throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion type for gluon coupling. Should be a quark.";
           return [this](double q) { return kFourPi * 0.5 * alphaS(q); };
         }
@@ -76,14 +77,14 @@ private:
     g_part2_ = generate_coupling(event().oneWithRole(Particle::Parton2).pdgId());
 
     CG_DEBUG("PPtoFF:prepare") << "Incoming beams: mA = " << mA() << " GeV/mB = " << mB() << " GeV.\n\t"
-                               << "Produced particles: " << cs_prop_ << ".\n\t"
+                               << "Produced particles: " << cent_psgen_->particles() << ".\n\t"
                                << "ME computation method: " << (int)method_ << ".";
 
     // constrain central particles cuts
     if (!kinematics().cuts().central.pt_diff.valid())
       kinematics().cuts().central.pt_diff = {0., 50.};
   }
-  double computeCentralMatrixElement() const override {
+  double computeFactorisedMatrixElement() override {
     switch (method_) {
       case Mode::onShell:
         return onShellME();
@@ -156,7 +157,8 @@ double PPtoFF::offShellME() const {
   const auto compute_zs = [this, &mt1, &mt2](short pol, double x) -> std::pair<double, double> {
     const auto norm_pol = pol / std::abs(pol);
     const auto fact = inverseSqrtS() / x;
-    return std::make_pair(fact * mt1 * std::exp(norm_pol * m_y_c1_), fact * mt2 * std::exp(norm_pol * m_y_c2_));
+    return std::make_pair(fact * mt1 * std::exp(norm_pol * pc(0).rapidity()),
+                          fact * mt2 * std::exp(norm_pol * pc(1).rapidity()));
   };
   const auto compute_mat_element =
       [this](double zp, double zm, double q2, const Momentum& vec_pho, const Momentum& vec_qt) -> double {
