@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2023  Laurent Forthomme
+ *  Copyright (C) 2019-2024  Laurent Forthomme
  *                2017-2019  Wolfgang Schaefer
  *                2019       Marta Luszczak
  *
@@ -78,7 +78,7 @@ private:
     cuts::Central single_w_cuts(ParametersList{});
     if (kinematics().cuts().central_particles.count(PDG::W) > 0)
       single_w_cuts = kinematics().cuts().central_particles.at(PDG::W);
-    //cent_psgen_->setCuts(single_w_cuts);//FIXME
+    psgen_->setCentralCuts(single_w_cuts);
   }
   double computeFactorisedMatrixElement() override {
     CG_DEBUG_LOOP("PPtoWW:ME") << "matrix element mode: " << method_ << ".";

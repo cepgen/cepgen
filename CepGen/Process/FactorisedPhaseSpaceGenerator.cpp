@@ -20,6 +20,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/PhaseSpaceGeneratorFactory.h"
+#include "CepGen/Physics/Cuts.h"
 #include "CepGen/Process/Central2to4PhaseSpaceGenerator.h"
 #include "CepGen/Process/FactorisedProcess.h"
 #include "CepGen/Process/PartonsCollinearPhaseSpaceGenerator.h"
@@ -38,6 +39,11 @@ namespace cepgen {
     bool ktFactorised() const override {
       CG_ASSERT(part_psgen_);
       return part_psgen_->ktFactorised();
+    }
+
+    void setCentralCuts(const cuts::Central& cuts) const override {
+      CG_ASSERT(cent_psgen_);
+      cent_psgen_->setCuts(cuts);
     }
 
     void initialise(proc::FactorisedProcess* process) override {
