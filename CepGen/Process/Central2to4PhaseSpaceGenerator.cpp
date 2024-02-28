@@ -24,9 +24,7 @@
 
 namespace cepgen {
   Central2to4PhaseSpaceGenerator::Central2to4PhaseSpaceGenerator(const ParametersList& params)
-      : CentralPhaseSpaceGenerator(params),
-        int_particles_(steer<std::vector<int> >("ids")),
-        particles_(int_particles_.begin(), int_particles_.end()) {}
+      : CentralPhaseSpaceGenerator(params) {}
 
   void Central2to4PhaseSpaceGenerator::initialise() {
     const auto& kin_cuts = process().kinematics().cuts().central;
@@ -137,5 +135,11 @@ namespace cepgen {
     process().pX() = px;
     process().pY() = py;
     return prefactor_ * m_pt_diff_;
+  }
+
+  ParametersDescription Central2to4PhaseSpaceGenerator::description() {
+    auto desc = CentralPhaseSpaceGenerator::description();
+    desc.setDescription("2-to-4 process");
+    return desc;
   }
 }  // namespace cepgen

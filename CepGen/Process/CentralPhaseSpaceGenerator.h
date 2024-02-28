@@ -20,6 +20,7 @@
 #define CepGen_Process_CentralPhaseSpaceGenerator_h
 
 #include <memory>
+#include <vector>
 
 #include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Physics/Cuts.h"
@@ -33,27 +34,35 @@ namespace cepgen {
   /// \date Feb 2024
   class CentralPhaseSpaceGenerator : public SteeredObject<CentralPhaseSpaceGenerator> {
   public:
-    explicit CentralPhaseSpaceGenerator(const ParametersList& params) : SteeredObject(params) {}
+    explicit CentralPhaseSpaceGenerator(const ParametersList& params)
+        : SteeredObject(params),
+          int_particles_(steer<std::vector<int> >("ids")),
+          particles_(int_particles_.begin(), int_particles_.end()) {}
+
+    static ParametersDescription description() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Central system phase space mapper");
+      desc.add<std::vector<int> >("ids", {}).setDescription("list of particles produced");
+      return desc;
+    }
 
     void initialise(proc::FactorisedProcess* process) {
       proc_ = process;
       initialise();
     }
-    /// Number of dimensions required to generate the kinematics
-    virtual size_t ndim() const = 0;
-    /// List of produced particles PDG id
-    virtual const pdgids_t& particles() const = 0;
+    virtual size_t ndim() const = 0;          ///< Number of variables required to generate the kinematics
+    virtual double generateKinematics() = 0;  ///< Generate the 4-momenta of central system
 
-    /// Generate the 4-momentum of incoming partons
-    virtual double generateKinematics() = 0;
-
+    const pdgids_t& particles() const { return particles_; }  ///< List of produced particles PDG id
     /// Set all cuts for the single outgoing particle phase space definition
     void setCuts(const cuts::Central& single) { single_limits_ = single; }
 
   protected:
     static constexpr double NUM_LIMITS = 1.e-3;  ///< Numerical limits for sanity comparisons (MeV/mm-level)
-    /// Initialise the process and define the integration phase space
-    virtual void initialise() = 0;
+    const std::vector<int> int_particles_;       ///< Type of particles produced in the final state (integer values)
+    const pdgids_t particles_;                   ///< Type of particles produced in the final state (PDG ids)
+
+    virtual void initialise() = 0;  ///< Initialise the process and define the integration phase space
 
     inline proc::FactorisedProcess& process() { return *proc_; }  ///< Consumer process object
     /// Const-qualified consumer process object

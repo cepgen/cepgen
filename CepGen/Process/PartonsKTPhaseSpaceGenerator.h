@@ -27,14 +27,18 @@ namespace cepgen {
   /// \date Apr 2016
   class PartonsKTPhaseSpaceGenerator final : public PartonsPhaseSpaceGenerator {
   public:
-    using PartonsPhaseSpaceGenerator::PartonsPhaseSpaceGenerator;
+    explicit PartonsKTPhaseSpaceGenerator(const ParametersList&);
+
+    static ParametersDescription description();
 
     bool ktFactorised() const override { return true; }
     bool generatePartonKinematics() override;
     double fluxes() const override;
 
-  protected:
+  private:
     void initialise() override;
+
+    const bool log_part_virt_;
     // mapped variables
     double m_qt1_{0.};      ///< Virtuality of the first intermediate parton (photon, pomeron, ...)
     double m_phi_qt1_{0.};  ///< Azimuthal rotation of the first intermediate parton's transverse virtuality

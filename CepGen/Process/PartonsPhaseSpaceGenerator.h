@@ -21,21 +21,22 @@
 
 #include <memory>
 
+#include "CepGen/Core/SteeredObject.h"
+
 namespace cepgen {
   class PartonFlux;
-  class FactorisedProcess;
+  namespace proc {
+    class FactorisedProcess;
+  }
   /**
      * A generic phase space integration wrapper.
      * \brief Class template to define any phase space helper process
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
      * \date Jul 2023
      */
-  class PartonsPhaseSpaceGenerator {
+  class PartonsPhaseSpaceGenerator : public SteeredObject<PartonsPhaseSpaceGenerator> {
   public:
-    /// Class constructor
-    /// \param[in] params Parameters list
-    /// \param[in] output Produced final state particles
-    explicit PartonsPhaseSpaceGenerator() {}
+    explicit PartonsPhaseSpaceGenerator(const ParametersList& params) : SteeredObject(params) {}
 
     void initialise(proc::FactorisedProcess* process) {
       proc_ = process;

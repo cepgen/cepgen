@@ -27,14 +27,18 @@ namespace cepgen {
   /// \date Jul 2023
   class PartonsCollinearPhaseSpaceGenerator final : public PartonsPhaseSpaceGenerator {
   public:
-    using PartonsPhaseSpaceGenerator::PartonsPhaseSpaceGenerator;
+    explicit PartonsCollinearPhaseSpaceGenerator(const ParametersList&);
+
+    static ParametersDescription description();
 
     bool ktFactorised() const override { return false; }
     bool generatePartonKinematics() override;
     double fluxes() const override;
 
-  protected:
+  private:
     void initialise() override;
+
+    const bool log_part_virt_;
     // mapped variables
     double m_t1_{0.}, m_t2_{0.};
   };

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2023  Laurent Forthomme
+ *  Copyright (C) 2021-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 #include "CepGen/Modules/GeneratorWorkerFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
+#include "CepGen/Modules/PhaseSpaceGeneratorFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
@@ -132,6 +133,7 @@ int main(int argc, char* argv[]) {
     LOOP_FACTORY("Event modification", cepgen::EventModifierFactory);
     LOOP_FACTORY("Event export", cepgen::EventExporterFactory);
     // physics evaluators
+    LOOP_FACTORY("Phase space mapper", cepgen::PhaseSpaceGeneratorFactory);
     LOOP_FACTORY("Collinear parton flux modelling", cepgen::CollinearFluxFactory);
     LOOP_FACTORY("KT-factorised parton flux modelling", cepgen::KTFluxFactory);
     LOOP_FACTORY("Beam form factors modelling", cepgen::FormFactorsFactory);

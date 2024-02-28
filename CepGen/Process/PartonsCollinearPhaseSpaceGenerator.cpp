@@ -26,6 +26,9 @@
 #include "CepGen/Process/PartonsCollinearPhaseSpaceGenerator.h"
 
 namespace cepgen {
+  PartonsCollinearPhaseSpaceGenerator::PartonsCollinearPhaseSpaceGenerator(const ParametersList& params)
+      : PartonsPhaseSpaceGenerator(params), log_part_virt_(steer<bool>("logPartonVirtuality")) {}
+
   void PartonsCollinearPhaseSpaceGenerator::initialise() {
     const auto& kin = process().kinematics();
 
@@ -64,9 +67,18 @@ namespace cepgen {
     set_flux_properties(kin.incomingBeams().negative(), neg_flux_);
 
     // register the incoming partons' virtuality
-    const auto log_lim_q2 = kin.cuts().initial.q2.truncate(Limits{1.e-10, 5.}).compute(std::log);
-    process().defineVariable(m_t1_, proc::Process::Mapping::exponential, log_lim_q2, "Positive-z parton virtuality");
-    process().defineVariable(m_t2_, proc::Process::Mapping::exponential, log_lim_q2, "Negative-z parton virtuality");
+    CG_LOG << log_part_virt_;
+    if (log_part_virt_) {
+      const auto log_lim_q2 = kin.cuts().initial.q2.truncate(Limits{1.e-10, 5.}).compute(std::log);
+      process()
+          .defineVariable(m_t1_, proc::Process::Mapping::exponential, log_lim_q2, "Positive-z parton virtuality")
+          .defineVariable(m_t2_, proc::Process::Mapping::exponential, log_lim_q2, "Negative-z parton virtuality");
+    } else {
+      const auto lim_q2 = kin.cuts().initial.q2.truncate(Limits{1.e-10, 5.});
+      process()
+          .defineVariable(m_t1_, proc::Process::Mapping::linear, lim_q2, "Positive-z parton virtuality")
+          .defineVariable(m_t2_, proc::Process::Mapping::linear, lim_q2, "Negative-z parton virtuality");
+    }
   }
 
   bool PartonsCollinearPhaseSpaceGenerator::generatePartonKinematics() {
@@ -79,5 +91,12 @@ namespace cepgen {
   double PartonsCollinearPhaseSpaceGenerator::fluxes() const {
     return positiveFlux<CollinearFlux>().fluxQ2(process().x1(), m_t1_) * process().x1() / m_t1_ *
            negativeFlux<CollinearFlux>().fluxQ2(process().x2(), m_t2_) * process().x2() / m_t2_;
+  }
+
+  ParametersDescription PartonsCollinearPhaseSpaceGenerator::description() {
+    auto desc = PartonsPhaseSpaceGenerator::description();
+    desc.setDescription("Collinear phase space mapper");
+    desc.add<bool>("logPartonVirtuality", true);
+    return desc;
   }
 }  // namespace cepgen

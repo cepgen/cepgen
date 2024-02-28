@@ -34,7 +34,16 @@ namespace cepgen {
   class FactorisedPhaseSpaceGenerator : public PhaseSpaceGenerator {
   public:
     explicit FactorisedPhaseSpaceGenerator(const ParametersList& params)
-        : PhaseSpaceGenerator(params), part_psgen_(new Tp), cent_psgen_(new Tc(params)) {}
+        : PhaseSpaceGenerator(params), part_psgen_(new Tp(params)), cent_psgen_(new Tc(params)) {}
+
+    static ParametersDescription description() {
+      auto desc = PhaseSpaceGenerator::description();
+      desc.setDescription("Factorised parton/central phase space mapper (" + Tp::description().description() + "/" +
+                          Tc::description().description() + ")");
+      desc += Tp::description();
+      desc += Tc::description();
+      return desc;
+    }
 
     bool ktFactorised() const override {
       CG_ASSERT(part_psgen_);

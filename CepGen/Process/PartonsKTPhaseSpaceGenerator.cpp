@@ -25,6 +25,9 @@
 #include "CepGen/Process/PartonsKTPhaseSpaceGenerator.h"
 
 namespace cepgen {
+  PartonsKTPhaseSpaceGenerator::PartonsKTPhaseSpaceGenerator(const ParametersList& params)
+      : PartonsPhaseSpaceGenerator(params), log_part_virt_(steer<bool>("logPartonVirtuality")) {}
+
   void PartonsKTPhaseSpaceGenerator::initialise() {
     const auto& kin = process().kinematics();
 
@@ -56,18 +59,27 @@ namespace cepgen {
     set_flux_properties(kin.incomingBeams().negative(), neg_flux_);
 
     // register the incoming partons' transverse virtualities range
-    const auto log_lim_kt = kin.cuts().initial.qt.compute(std::log).truncate(Limits{-10., 10.});
-    process().defineVariable(
-        m_qt1_, proc::Process::Mapping::exponential, log_lim_kt, "qt1", "Positive-z parton virtuality");
-    process().defineVariable(
-        m_qt2_, proc::Process::Mapping::exponential, log_lim_kt, "qt2", "Negative-z parton virtuality");
+    if (log_part_virt_) {
+      const auto log_lim_kt = kin.cuts().initial.qt.compute(std::log).truncate(Limits{-10., 10.});
+      process()
+          .defineVariable(
+              m_qt1_, proc::Process::Mapping::exponential, log_lim_kt, "qt1", "Positive-z parton virtuality")
+          .defineVariable(
+              m_qt2_, proc::Process::Mapping::exponential, log_lim_kt, "qt2", "Negative-z parton virtuality");
+    } else {
+      const auto lim_kt = kin.cuts().initial.qt.truncate(Limits{1.e-5, 1.e3});
+      process()
+          .defineVariable(m_qt1_, proc::Process::Mapping::linear, lim_kt, "qt1", "Positive-z parton virtuality")
+          .defineVariable(m_qt2_, proc::Process::Mapping::linear, lim_kt, "qt2", "Negative-z parton virtuality");
+    }
 
     // register the incoming partons' azimuthal angles range
     const auto lim_phi = kin.cuts().initial.phi.truncate(Limits{0., 2. * M_PI});
-    process().defineVariable(
-        m_phi_qt1_, proc::Process::Mapping::linear, lim_phi, "phi_qt1", "Positive-z parton azimuthal angle");
-    process().defineVariable(
-        m_phi_qt2_, proc::Process::Mapping::linear, lim_phi, "phi_qt2", "Negative-z parton azimuthal angle");
+    process()
+        .defineVariable(
+            m_phi_qt1_, proc::Process::Mapping::linear, lim_phi, "phi_qt1", "Positive-z parton azimuthal angle")
+        .defineVariable(
+            m_phi_qt2_, proc::Process::Mapping::linear, lim_phi, "phi_qt2", "Negative-z parton azimuthal angle");
   }
 
   bool PartonsKTPhaseSpaceGenerator::generatePartonKinematics() {
@@ -81,5 +93,12 @@ namespace cepgen {
     // factors 1/pi due to integration over d^2(kt1) d^2(kt2) instead of d(kt1^2) d(kt2^2)
     return (positiveFlux<KTFlux>().fluxMX2(process().x1(), m_qt1_ * m_qt1_, process().mX2()) * M_1_PI * m_qt1_) *
            (negativeFlux<KTFlux>().fluxMX2(process().x2(), m_qt2_ * m_qt2_, process().mY2()) * M_1_PI * m_qt2_);
+  }
+
+  ParametersDescription PartonsKTPhaseSpaceGenerator::description() {
+    auto desc = PartonsPhaseSpaceGenerator::description();
+    desc.setDescription("KT-dependent phase space mapper");
+    desc.add<bool>("logPartonVirtuality", true);
+    return desc;
   }
 }  // namespace cepgen
