@@ -49,10 +49,7 @@ namespace cepgen {
     auto it = particles_.find(std::abs(id));
     if (it != particles_.end())
       return it->second;
-    throw CG_FATAL("PDG").log([this, &id](auto& log) {
-      log << "No particle with PDG id " << id << " in the catalogue. ";
-      dump(&log.stream());
-    });
+    throw CG_FATAL("PDG") << "No particle with PDG id " << id << " in the catalogue. ";
   }
 
   ParticleProperties& PDG::operator[](spdgid_t id) { return particles_[std::abs(id)]; }
@@ -60,14 +57,13 @@ namespace cepgen {
   void PDG::define(const ParticleProperties& props) {
     if (props.pdgid == PDG::invalid && props.name != "invalid")
       throw CG_FATAL("PDG:define") << "Trying to define a particle with invalid PDG id: " << props << ".";
-    CG_DEBUG("PDG:define").log([&](auto& log) {
-      if (has(props.pdgid))
-        log << "Updating the properties of a particle with PDG id=" << props.pdgid << ".\n\t"
-            << "Old properties: " << operator()(props.pdgid) << ",\n\t"
-            << "New properties: " << props << ".";
-      else
-        log << "Adding a new particle with PDG id=" << std::setw(8) << props.pdgid << ", properties: " << props << ".";
-    });
+    if (has(props.pdgid))
+      CG_DEBUG("PDG:define") << "Updating the properties of a particle with PDG id="s << (int)props.pdgid << ".\n\t"
+                             << "Old properties: " << operator()(props.pdgid) << ",\n\t"
+                             << "New properties: " << props << ".";
+    else
+      CG_DEBUG("PDG:define") << "Adding a new particle with PDG id="s << std::setw(8) << (int)props.pdgid
+                             << ", properties: " << props << ".";
     particles_[props.pdgid] = props;
   }
 

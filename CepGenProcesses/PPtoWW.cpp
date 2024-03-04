@@ -121,7 +121,8 @@ private:
         const auto pp = ampl_(kin, +1, +1, lam3, lam4), mm = ampl_(kin, -1, -1, lam3, lam4),
                    pm = ampl_(kin, +1, -1, lam3, lam4), mp = ampl_(kin, -1, +1, lam3, lam4);
         // add ME for this W helicity to total ME
-        hel_mat_elem += std::norm(p1 * (pp + mm) - 1i * p2 * (pp - mm) - p3 * (pm + mp) - 1i * p4 * (pm - mp));
+        hel_mat_elem += std::norm(p1 * (pp + mm) - std::complex<double>(0., 1.) * p2 * (pp - mm) - p3 * (pm + mp) -
+                                  std::complex<double>(0., 1.) * p4 * (pm - mp));
       }
     return hel_mat_elem * std::pow(0.5 / q1().pt() / q2().pt() / shat(), 2);
   }
