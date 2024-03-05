@@ -103,19 +103,9 @@ namespace cepgen {
 
     //----- utilities
 
-    double FactorisedProcess::that() const {
-      //FIXME only works for 2-to-4
-      const double that1 = (q1() - pc(0)).mass2();
-      const double that2 = (q2() - pc(1)).mass2();
-      return 0.5 * (that1 + that2);
-    }
+    double FactorisedProcess::that() const { return psgen_->that(); }
 
-    double FactorisedProcess::uhat() const {
-      //FIXME only works for 2-to-4
-      const double uhat1 = (q1() - pc(1)).mass2();
-      const double uhat2 = (q2() - pc(0)).mass2();
-      return 0.5 * (uhat1 + uhat2);
-    }
+    double FactorisedProcess::uhat() const { return psgen_->uhat(); }
 
     ParametersDescription FactorisedProcess::description() {
       auto desc = Process::description();

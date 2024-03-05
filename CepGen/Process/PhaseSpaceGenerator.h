@@ -39,10 +39,16 @@ namespace cepgen {
 
     virtual void setCentralCuts(const cuts::Central&) {}    ///< Set cuts on central particles
     virtual void initialise(proc::FactorisedProcess*) = 0;  ///< Set all process parameters
-    virtual bool generate() = 0;           ///< Generate a kinematics combination, and return a success flag
-    virtual double weight() const = 0;     ///< Return the event weight for a kinematics combination
+
+    virtual bool generate() = 0;        ///< Generate a kinematics combination, and return a success flag
+    virtual double weight() const = 0;  ///< Return the event weight for a kinematics combination
+
     virtual pdgids_t partons() const = 0;  ///< List of incoming partons in kinematics
     virtual pdgids_t central() const = 0;  ///< List of outgoing central particles in kinematics
+
+    // Mandelstam variables
+    virtual double that() const = 0;
+    virtual double uhat() const = 0;
   };
 }  // namespace cepgen
 

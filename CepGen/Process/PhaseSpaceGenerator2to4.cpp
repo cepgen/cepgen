@@ -98,7 +98,16 @@ namespace cepgen {
       CG_ASSERT(part_psgen_);
       return pdgids_t{part_psgen_->positiveFlux().partonPdgId(), part_psgen_->negativeFlux().partonPdgId()};
     }
+
     pdgids_t central() const override { return particles_; }
+
+    double that() const override {
+      return 0.5 * ((proc_->q1() - proc_->pc(0)).mass2() + (proc_->q2() - proc_->pc(1)).mass2());
+    }
+
+    double uhat() const override {
+      return 0.5 * ((proc_->q1() - proc_->pc(1)).mass2() + (proc_->q2() - proc_->pc(0)).mass2());
+    }
 
   private:
     double generateCentralKinematics() {
