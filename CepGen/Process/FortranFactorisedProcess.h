@@ -38,7 +38,6 @@ namespace cepgen {
     private:
       void prepareFactorisedPhaseSpace() override final;
       double computeFactorisedMatrixElement() override final;
-      void fillCentralParticlesKinematics() override final;
 
       const std::function<double(void)> func_;  ///< Function to be called for weight computation
 

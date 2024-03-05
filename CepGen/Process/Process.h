@@ -96,13 +96,6 @@ namespace cepgen {
 
       double wCM() const { return wcm_; }  ///< Two-parton centre of mass energy
 
-    protected:
-      static constexpr double NUM_LIMITS = 1.e-3;  ///< Numerical limits for sanity comparisons (MeV/mm-level)
-
-      virtual void addEventContent() = 0;  ///< Set the incoming and outgoing state to be expected in the process
-      virtual void prepareKinematics() {}  ///< Compute the incoming state kinematics
-      virtual void fillKinematics() = 0;   ///< Fill the Event object with the particles' kinematics
-
       Momentum& pA();  ///< Positive-z incoming beam particle's 4-momentum
       Momentum& pB();  ///< Negative-z incoming beam particle's 4-momentum
       Momentum& pX();  ///< Positive-z outgoing beam particle's 4-momentum
@@ -121,6 +114,13 @@ namespace cepgen {
       double s() const { return s_; }                   ///< Two-beam squared centre of mass energy
       double sqrtS() const { return sqs_; }             ///< Two-beam centre of mass energy
       double inverseSqrtS() const { return inv_sqs_; }  ///< Inverse two-beam centre of mass energy
+
+      utils::RandomGenerator& randomGenerator() const;  ///< Accessor for this process' random number generator
+
+    protected:
+      virtual void addEventContent() = 0;  ///< Set the incoming and outgoing state to be expected in the process
+      virtual void prepareKinematics() {}  ///< Compute the incoming state kinematics
+      virtual void fillKinematics() = 0;   ///< Fill the Event object with the particles' kinematics
 
       //--- Mandelstam variables
       double shat() const;  ///< \f$\hat s=(p_1+p_2)^2=(p_3+...)^2\f$
