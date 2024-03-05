@@ -73,8 +73,10 @@ namespace cepgen {
     }
 
     double FactorisedProcess::computeWeight() {
-      if (const auto ps_weight = psgen_->generate(); utils::positive(ps_weight))
-        return ps_weight * computeFactorisedMatrixElement();
+      if (!psgen_->generate())
+        return 0.;
+      if (const auto cent_weight = computeFactorisedMatrixElement(); utils::positive(cent_weight))
+        return cent_weight * psgen_->weight();
       return 0.;
     }
 

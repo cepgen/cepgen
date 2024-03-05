@@ -79,17 +79,19 @@ namespace cepgen {
                           "Final state particles azimuthal angle difference");
     }
 
-    double generate() override {
+    bool generate() override {
       CG_ASSERT(part_psgen_);
       if (!part_psgen_->generatePartonKinematics())
-        return 0.;
-      const auto cent_weight = generateCentralKinematics();
-      if (!utils::positive(cent_weight))
-        return 0.;
+        return false;
+      central_weight_ = generateCentralKinematics();
+      return utils::positive(central_weight_);
+    }
+
+    double weight() const override {
       const auto fluxes_weight = part_psgen_->fluxes();
       if (!utils::positive(fluxes_weight))
         return 0.;
-      return fluxes_weight * cent_weight;
+      return fluxes_weight * central_weight_;
     }
 
     pdgids_t partons() const override {
@@ -208,6 +210,8 @@ namespace cepgen {
     double m_y_c2_{0.};         ///< Rapidity of the second central particle
     double m_pt_diff_{0.};      ///< Transverse momentum difference for the two central particle
     double m_phi_pt_diff_{0.};  ///< Azimuthal angle difference for the two central particles
+
+    double central_weight_{0.};
   };
 
   typedef PhaseSpaceGenerator2to4<PartonsKTPhaseSpaceGenerator> KT2to4;
