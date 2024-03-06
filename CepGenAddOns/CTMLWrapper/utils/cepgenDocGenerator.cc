@@ -31,6 +31,7 @@
 #include "CepGen/Modules/GeneratorWorkerFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
+#include "CepGen/Modules/PhaseSpaceGeneratorFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
@@ -60,6 +61,7 @@ int main(int argc, char* argv[]) {
       .document("strfun", "Structure functions", cepgen::StructureFunctionsFactory::get())
       .document(
           "sigrat", "Longitudinal/transverse cross section ratio parameterisations", cepgen::SigmaRatiosFactory::get())
+      .document("psmap", "Phase space mapper", cepgen::PhaseSpaceGeneratorFactory::get())
       .document("collflux", "Collinear parton flux modelling", cepgen::CollinearFluxFactory::get())
       .document("ktflux", "KT-factorised parton flux modelling", cepgen::KTFluxFactory::get())
       .document("alphaem", "Electromagnetic coupling evolution", cepgen::AlphaEMFactory::get())
