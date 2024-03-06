@@ -56,30 +56,26 @@ namespace cepgen {
     Value integrate(Integrand& integr) override {
       checkLimits(integr);  // check the integration bounds
       bparm1_.ndim = integr.size();
-      const auto wild_vars = steer<std::vector<int> >("wildVars");
-      bparm1_.nwild = wild_vars.size();
-      for (const auto& wc : wild_vars) {
+      for (const auto& wc : steer<std::vector<int> >("wildVars")) {
         if (wc < 0 || wc >= bparm1_.ndim)
           throw CG_FATAL("BasesIntegrator:integrate") << "Invalid 'wild' variable coordinate set: " << wc << ".";
         bparm1_.ig[wc] = true;
+        ++bparm1_.nwild;
       }
       double res, unc, ctime;
       int it1, it2;
-      gIntegrand = &integr;
-      bases_(integrand_bases, res, unc, ctime, it1, it2);
+      if (gIntegrand = &integr; !gIntegrand)
+        throw CG_FATAL("BasesIntegrator") << "Integrand was not specified before integration.";
+      bases_(integrand, res, unc, ctime, it1, it2);
       CG_DEBUG("BasesIntegrator:integrate")
-          << "Integration performed in " << ctime << " s. " << utils::s("iteration", it1, true)
+          << "Integration performed in " << utils::s("second", ctime, true) << ". " << utils::s("iteration", it1, true)
           << " for the grid definition, " << utils::s("iteration", it2, true) << " for the integration.";
       return Value{res, unc};
     }
 
   private:
     static Integrand* gIntegrand;
-    static double integrand_bases(double in[]) {
-      if (!gIntegrand)
-        throw CG_FATAL("BasesIntegrator") << "Integrand was not specified before integration.";
-      return gIntegrand->eval(std::vector<double>(in, in + gIntegrand->size()));
-    }
+    static double integrand(double* in) { return gIntegrand->eval(std::vector<double>(in, in + gIntegrand->size())); }
   };
   Integrand* BasesIntegrator::gIntegrand = nullptr;
 }  // namespace cepgen
