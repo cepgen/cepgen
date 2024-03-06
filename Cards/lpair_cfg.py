@@ -10,6 +10,7 @@ process = cepgen.Module('lpair',
         pair = PDG.muon,
     ),
     inKinematics = cepgen.Parameters(
+        pdgIds = (PDG.proton, PDG.proton),
         pz = (6500., 6500.),
         structureFunctions = cepgen.StructureFunctions.SuriYennie,
         #--- other structure functions parameterisation are also available

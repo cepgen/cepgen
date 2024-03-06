@@ -3,12 +3,14 @@ from Config.PDG_cfi import PDG
 from Config.generator_cfi import generator as _gen
 #from Config.timer_cfi import timer  # enable timing framework
 
+
 process = cepgen.Module('lpair',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.InelasticInelastic,
         pair = PDG.top,
     ),
     inKinematics = cepgen.Parameters(
+        pdgIds = (PDG.proton, PDG.proton),
         pz = (6500., 6500.),
         structureFunctions = cepgen.StructureFunctions.LUXlike,
     ),

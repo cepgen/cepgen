@@ -1,5 +1,6 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
+from Config.PDG_cfi import PDG
 from Config.generator_cfi import generator as _gen
 #--------------------------------------------------------------------
 # Logging/debugging example
@@ -30,6 +31,7 @@ from Config.generator_cfi import generator as _gen
 #    processConfiguration = pythia8.processConfiguration+('pythiaConfiguration',),
 #)
 
+
 process = kt.process.clone('pptoww',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
@@ -39,6 +41,7 @@ process = kt.process.clone('pptoww',
         polarisationStates = 0,  # full
     ),
     inKinematics = cepgen.Parameters(
+        pdgIds = (PDG.proton, PDG.proton),
         cmEnergy = 13.e3,
         #structureFunctions = cepgen.StructureFunctions.SzczurekUleshchenko,
         #structureFunctions = cepgen.StructureFunctions.ALLM97,
@@ -67,8 +70,7 @@ process = kt.process.clone('pptoww',
     )
 )
 
-#--- generation parameters
-generator = _gen.clone(
+generator = _gen.clone(  # generation parameters
     numEvents = 50000,
     printEvery = 5000,
 )

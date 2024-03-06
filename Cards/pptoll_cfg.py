@@ -16,10 +16,11 @@ process = kt.process.clone('pptoff',
         #pair = PDG.sd_l, # whatever was defined above as "new" particle
     ),
     inKinematics = cepgen.Parameters(
+        pdgIds = (PDG.proton, PDG.proton),
+        #pdgIds = (PDG.proton, PDG.electron),
         pz = (6500., 6500.),
         structureFunctions = cepgen.StructureFunctions.SuriYennie,
         #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
-        #pdgIds = (PDG.proton, PDG.electron),
     ),
     outKinematics = kt.process.outKinematics.clone(
         pt = (25.,),

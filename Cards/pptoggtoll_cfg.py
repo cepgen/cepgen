@@ -9,6 +9,7 @@ process = kt.process.clone('pptoff',
         mode = cepgen.ProcessMode.InelasticInelastic,
     ),
     inKinematics = cepgen.Parameters(
+        pdgIds = (PDG.proton, PDG.proton),
         pz = (6500., 6500.),
         partonFluxes = kt.ProtonFlux.GluonKMR
     ),
