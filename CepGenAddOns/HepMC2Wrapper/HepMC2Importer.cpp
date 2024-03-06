@@ -70,4 +70,4 @@ namespace cepgen {
     bool cross_section_retrieved_{false};
   };
 }  // namespace cepgen
-REGISTER_EVENT_IMPORTER("hepmc2", HepMC2Importer)
+REGISTER_EVENT_IMPORTER("hepmc2", HepMC2Importer);

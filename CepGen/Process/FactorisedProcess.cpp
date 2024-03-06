@@ -18,32 +18,27 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/Modules/PhaseSpaceGeneratorFactory.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/PartonFlux.h"
-#include "CepGen/Process/CollinearPhaseSpaceGenerator.h"
 #include "CepGen/Process/FactorisedProcess.h"
-#include "CepGen/Process/KTPhaseSpaceGenerator.h"
+#include "CepGen/Process/PhaseSpaceGenerator.h"
 #include "CepGen/Utils/Math.h"
 
 namespace cepgen {
   namespace proc {
     FactorisedProcess::FactorisedProcess(const ParametersList& params, const pdgids_t& central)
         : Process(params),
-          produced_parts_(central),
-          psgen_(steer<bool>("ktFactorised")
-                     ? std::unique_ptr<PhaseSpaceGenerator>(new KTPhaseSpaceGenerator(this))
-                     : std::unique_ptr<PhaseSpaceGenerator>(new CollinearPhaseSpaceGenerator(this))),
+          psgen_(PhaseSpaceGeneratorFactory::get().build(
+              steer<ParametersList>("kinematicsGenerator")
+                  .set("ids", std::vector<int>(central.begin(), central.end())))),
           store_alphas_(steer<bool>("storeAlphas")) {
       event().map()[Particle::CentralSystem].resize(central.size());
     }
 
     FactorisedProcess::FactorisedProcess(const FactorisedProcess& proc)
         : Process(proc),
-          produced_parts_(proc.produced_parts_),
-          psgen_(proc.psgen_->ktFactorised()
-                     ? std::unique_ptr<PhaseSpaceGenerator>(new KTPhaseSpaceGenerator(this))
-                     : std::unique_ptr<PhaseSpaceGenerator>(new CollinearPhaseSpaceGenerator(this))),
+          psgen_(PhaseSpaceGeneratorFactory::get().build(proc.psgen_->parameters())),
           store_alphas_(proc.store_alphas_) {}
 
     void FactorisedProcess::addEventContent() {
@@ -51,7 +46,7 @@ namespace cepgen {
                                 {Particle::IncomingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
                                 {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
                                 {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
-                                {Particle::CentralSystem, produced_parts_}});
+                                {Particle::CentralSystem, psgen_->central()}});
     }
 
     void FactorisedProcess::prepareKinematics() {
@@ -59,14 +54,13 @@ namespace cepgen {
         throw CG_FATAL("FactorisedProcess:prepareKinematics")
             << "Phase space generator not set. Please check your process initialisation procedure, as you might "
                "be doing something irregular.";
-      psgen_->initialise();
+      psgen_->initialise(this);
 
-      event().oneWithRole(Particle::Parton1).setPdgId(psgen_->positiveFlux().partonPdgId());
-      event().oneWithRole(Particle::Parton2).setPdgId(psgen_->negativeFlux().partonPdgId());
+      event().oneWithRole(Particle::Parton1).setPdgId(psgen_->partons().at(0));
+      event().oneWithRole(Particle::Parton2).setPdgId(psgen_->partons().at(1));
 
-      CG_DEBUG("FactorisedProcess:prepareKinematics")
-          << "Partons: " << pdgids_t{psgen_->positiveFlux().partonPdgId(), psgen_->negativeFlux().partonPdgId()} << ", "
-          << "central system: " << produced_parts_ << ". " << event();
+      CG_DEBUG("FactorisedProcess:prepareKinematics") << "Partons: " << psgen_->partons() << ", "
+                                                      << "central system: " << psgen_->central() << ". " << event();
 
       // register all process-dependent variables
       prepareFactorisedPhaseSpace();
@@ -79,20 +73,14 @@ namespace cepgen {
     }
 
     double FactorisedProcess::computeWeight() {
-      if (!psgen_->generatePartonKinematics())
+      if (!psgen_->generate())
         return 0.;
-      const auto cent_me = computeFactorisedMatrixElement();
-      if (!utils::positive(cent_me))
-        return 0.;  // avoid computing the fluxes if the matrix element is already null or invalid
-      const auto fluxes_weight = psgen_->fluxes();
-      if (!utils::positive(fluxes_weight))
-        return 0.;
-      return fluxes_weight * cent_me;
+      if (const auto cent_weight = computeFactorisedMatrixElement(); utils::positive(cent_weight))
+        return cent_weight * psgen_->weight();
+      return 0.;
     }
 
     void FactorisedProcess::fillKinematics() {
-      fillCentralParticlesKinematics();  // process-dependent!
-
       // beam systems
       if (!kinematics().incomingBeams().positive().elastic())
         pX().setMass2(mX2());
@@ -112,6 +100,12 @@ namespace cepgen {
         event().metadata["alphaS"] = alphaS(two_part_mass);
       }
     }
+
+    //----- utilities
+
+    double FactorisedProcess::that() const { return psgen_->that(); }
+
+    double FactorisedProcess::uhat() const { return psgen_->uhat(); }
 
     ParametersDescription FactorisedProcess::description() {
       auto desc = Process::description();

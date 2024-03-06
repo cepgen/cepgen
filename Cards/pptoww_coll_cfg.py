@@ -1,6 +1,8 @@
 import Config.Core as cepgen
 import Config.collinearProcess_cfi as coll
+from Config.PDG_cfi import PDG
 from Config.generator_cfi import generator as _gen
+
 
 process = coll.process.clone('pptoww',
     processParameters = cepgen.Parameters(
@@ -9,6 +11,7 @@ process = coll.process.clone('pptoww',
         polarisationStates = 0,  # full
     ),
     inKinematics = cepgen.Parameters(
+        pdgIds = (PDG.proton, PDG.proton),
         #partonFluxes = (coll.ProtonFlux.LHAPDFLUXlep, coll.ProtonFlux.LHAPDFLUXlep),
         partonFluxes = (coll.ProtonFlux.PhotonElastic, coll.ProtonFlux.PhotonElastic),
         cmEnergy = 13.e3,

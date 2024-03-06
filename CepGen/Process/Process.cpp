@@ -342,6 +342,12 @@ namespace cepgen {
       }
     }
 
+    utils::RandomGenerator& Process::randomGenerator() const {
+      if (!rnd_gen_)
+        throw CG_FATAL("Process:randomGenerator") << "Process-local random generator was not yet initialised.";
+      return *rnd_gen_;
+    }
+
     double Process::alphaEM(double q) const {
       if (!alphaem_)
         throw CG_FATAL("Process:alphaEM")

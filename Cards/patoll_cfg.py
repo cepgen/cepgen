@@ -4,18 +4,20 @@ from Config.PDG_cfi import PDG
 from Config.generator_cfi import generator
 from Config.Integration.vegas_cfi import vegas as integrator
 
+
 process = kt.process.clone('pptoff',
     processParameters = cepgen.Parameters(
         pair = PDG.muon,
     ),
     inKinematics = cepgen.Parameters(
+        beam1id = 2212,
+        heavyIon2 = (208, 82),
         pz = (6500., 2562.2),
         #structureFunctions = cepgen.StructureFunctions.SuriYennie,
         #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
         #structureFunctions = cepgen.StructureFunctions.ALLM97,
         structureFunctions = cepgen.StructureFunctions.LUXlike,
         partonFluxes = (kt.ProtonFlux.PhotonInelasticBudnev, kt.HeavyIonFlux.PhotonElastic),
-        heavyIon2 = (208, 82),
     ),
     outKinematics = kt.process.outKinematics.clone(
         pt = (4.,),

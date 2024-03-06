@@ -6,15 +6,17 @@ from Config.PDG_cfi import PDG
 from Config.generator_cfi import generator
 
 #--- redefinition of top to modify its bare mass
+#from Config.PDG_cfi import registerParticle
 #registerParticle(6, 'top', mass=174., charge=2./3., fermion=True)
 
-#--- process definition
-process = kt.process.clone('pptoff',
+
+process = kt.process.clone('pptoff',  # process definition
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
         pair = PDG.top,
     ),
     inKinematics = cepgen.Parameters(
+        pdgIds = (PDG.proton, PDG.proton),
         pz = (6500., 6500.),
         structureFunctions = cepgen.StructureFunctions.LUXlike,
     ),
@@ -29,10 +31,8 @@ process = kt.process.clone('pptoff',
     ),
 )
 
-#--- events modification sequence
-eventSequence = cepgen.Sequence(
+eventSequence = cepgen.Sequence(  # events modification sequence
     #pythia6,
 )
 
-#--- events generation
-generator.numEvents = 25000
+generator.numEvents = 25000  # events generation

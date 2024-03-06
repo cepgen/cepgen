@@ -151,23 +151,6 @@ namespace cepgen {
     }
 
     double FortranFactorisedProcess::computeFactorisedMatrixElement() {
-      // set all kinematics variables for this phase space point
-      ktkin_.q1t = q1().p();
-      ktkin_.q2t = q2().p();
-      ktkin_.phiq1t = q1().phi();
-      ktkin_.phiq2t = q2().phi();
-      ktkin_.y1 = m_y1_;
-      ktkin_.y2 = m_y2_;
-      ktkin_.ptdiff = m_pt_diff_;
-      ktkin_.phiptdiff = m_phi_pt_diff_;
-      ktkin_.m_x = mX();
-      ktkin_.m_y = mY();
-
-      // compute the event weight
-      return func_();
-    }
-
-    void FortranFactorisedProcess::fillCentralParticlesKinematics() {
       //===========================================================================================
       // outgoing beam remnants
       //===========================================================================================
@@ -198,6 +181,20 @@ namespace cepgen {
         p.setStatus(Particle::Status::FinalState);
         p.setMomentum(Momentum(evtkin_.pc[i]));
       }
+      // set all kinematics variables for this phase space point
+      ktkin_.q1t = q1().p();
+      ktkin_.q2t = q2().p();
+      ktkin_.phiq1t = q1().phi();
+      ktkin_.phiq2t = q2().phi();
+      ktkin_.y1 = m_y1_;
+      ktkin_.y2 = m_y2_;
+      ktkin_.ptdiff = m_pt_diff_;
+      ktkin_.phiptdiff = m_phi_pt_diff_;
+      ktkin_.m_x = mX();
+      ktkin_.m_y = mY();
+
+      // compute the event weight
+      return func_();
     }
   }  // namespace proc
 }  // namespace cepgen

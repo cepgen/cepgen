@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,50 +19,37 @@
 #ifndef CepGen_Process_PhaseSpaceGenerator_h
 #define CepGen_Process_PhaseSpaceGenerator_h
 
+#include "CepGen/Core/SteeredObject.h"
+
 namespace cepgen {
-  class PartonFlux;
   namespace proc {
-    class Process;
-    /**
-     * A generic phase space integration wrapper.
-     * \brief Class template to define any phase space helper process
-     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-     * \date Jul 2023
-     */
-    class PhaseSpaceGenerator {
-    public:
-      /// Class constructor
-      /// \param[in] params Parameters list
-      /// \param[in] output Produced final state particles
-      explicit PhaseSpaceGenerator(Process* proc) : proc_(*proc) {}
+    class FactorisedProcess;
+  }
+  namespace cuts {
+    class Central;
+  }
+  /// Class template to define any phase space helper process
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date Feb 2024
+  class PhaseSpaceGenerator : public SteeredObject<PhaseSpaceGenerator> {
+  public:
+    explicit PhaseSpaceGenerator(const ParametersList& params) : SteeredObject(params) {}
 
-      virtual bool ktFactorised() const = 0;  ///< Do incoming partons carry a primordial kT?
+    virtual bool ktFactorised() const { return false; }
 
-      virtual void initialise() = 0;                ///< Initialise the process and define the integration phase space
-      virtual bool generatePartonKinematics() = 0;  ///< Generate the 4-momentum of incoming partons
-      virtual double fluxes() const = 0;            ///< Retrieve the event weight in the phase space
+    virtual void setCentralCuts(const cuts::Central&) {}    ///< Set cuts on central particles
+    virtual void initialise(proc::FactorisedProcess*) = 0;  ///< Set all process parameters
 
-      /// Retrieve a type-casted positive-z parton flux modelling
-      template <typename T = PartonFlux>
-      inline const T& positiveFlux() const {
-        return dynamic_cast<const T&>(*pos_flux_);
-      }
-      /// Retrieve a type-casted negative-z parton flux modelling
-      template <typename T = PartonFlux>
-      inline const T& negativeFlux() const {
-        return dynamic_cast<const T&>(*neg_flux_);
-      }
+    virtual bool generate() = 0;        ///< Generate a kinematics combination, and return a success flag
+    virtual double weight() const = 0;  ///< Return the event weight for a kinematics combination
 
-    protected:
-      inline Process& process() { return proc_; }  ///< Consumer process object
-      /// Const-qualified consumer process object
-      inline const Process& process() const { return const_cast<const Process&>(proc_); }
-      std::unique_ptr<PartonFlux> pos_flux_{nullptr}, neg_flux_{nullptr};
+    virtual pdgids_t partons() const = 0;  ///< List of incoming partons in kinematics
+    virtual pdgids_t central() const = 0;  ///< List of outgoing central particles in kinematics
 
-    private:
-      Process& proc_;  //NOT owning
-    };
-  }  // namespace proc
+    // Mandelstam variables
+    virtual double that() const = 0;
+    virtual double uhat() const = 0;
+  };
 }  // namespace cepgen
 
 #endif

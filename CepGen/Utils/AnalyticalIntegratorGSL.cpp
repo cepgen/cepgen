@@ -16,10 +16,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gsl/gsl_version.h>
+
+#if defined(GSL_MAJOR_VERSION) && (GSL_MAJOR_VERSION > 2 || (GSL_MAJOR_VERSION == 2 && GSL_MINOR_VERSION >= 4))
+
 #include <gsl/gsl_deriv.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_integration.h>
-#include <gsl/gsl_version.h>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/AnalyticIntegrator.h"
@@ -156,3 +159,4 @@ namespace cepgen {
 }  // namespace cepgen
 using cepgen::utils::AnalyticalIntegratorGSL;
 REGISTER_ANALYTIC_INTEGRATOR("gsl", AnalyticalIntegratorGSL);
+#endif

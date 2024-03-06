@@ -10,8 +10,8 @@ process = cepgen.Module('lpair',
         pair = PDG.muon,
     ),
     inKinematics = cepgen.Parameters(
-        pz = (45., 45.),
         pdgIds = (11, -11),
+        pz = (45., 45.),
     ),
     outKinematics = vermaserenCuts,
 )

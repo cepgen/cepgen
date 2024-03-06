@@ -30,7 +30,8 @@
       BUILDERNM(obj)() { EventImporterFactory::get().registerModule<obj>(name); } \
     };                                                                            \
     static const BUILDERNM(obj) gIOImporter##obj;                                 \
-  }
+  }                                                                               \
+  static_assert(true, "")
 
 namespace cepgen {
   class EventImporter;

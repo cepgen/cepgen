@@ -146,12 +146,19 @@ namespace cepgen {
         process += process.get<ParametersList>("processParameters");
         process.erase("processParameters");
         auto& pkin = process.operator[]<ParametersList>("kinematics");
-        pkin += process.get<ParametersList>("inKinematics");
-        process.erase("inKinematics");
-        pkin += process.get<ParametersList>("outKinematics");
-        process.erase("outKinematics");
+        {
+          pkin += process.get<ParametersList>("inKinematics");
+          process.erase("inKinematics");
+          pkin += process.get<ParametersList>("outKinematics");
+          process.erase("outKinematics");
+        }
         if (process.has<int>("mode"))
           pkin.set("mode", (int)process.getAs<int, mode::Kinematics>("mode"));
+        {
+          if (auto& pkgen = process.operator[]<ParametersList>("kinematicsGenerator");
+              pkgen.name<std::string>().empty())
+            pkgen.setName<std::string>(process.get<bool>("ktFactorised", true) ? "kt2to4" : "coll2to4");
+        }
         rt_params_->setProcess(ProcessFactory::get().build(process));
 
         for (const auto& tf : process.get<std::vector<ParametersList> >("tamingFunctions"))

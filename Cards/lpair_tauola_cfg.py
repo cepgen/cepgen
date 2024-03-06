@@ -4,12 +4,14 @@ from Config.generator_cfi import generator as _gen
 from Config.Hadronisation.tauola_cfi import tauola
 #from Config.timer_cfi import timer # enable timing framework
 
+
 process = cepgen.Module('lpair',
     processParameters = cepgen.Parameters(
         mode = cepgen.ProcessMode.ElasticElastic,
         pair = PDG.tau,
     ),
     inKinematics = cepgen.Parameters(
+        pdgIds = (PDG.proton, PDG.proton),
         pz = (6500., 6500.),
         structureFunctions = cepgen.StructureFunctions.SuriYennie,
     ),
