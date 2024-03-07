@@ -23,6 +23,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/Histogram.h"
+#include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
@@ -174,6 +175,13 @@ namespace cepgen {
       return std::vector<double>(bins.begin(), bins.end());
     }
 
+    size_t Hist1D::bin(double x) const {
+      size_t bin_id;
+      if (auto ret = gsl_histogram_find(hist_.get(), x, &bin_id); ret != GSL_SUCCESS)
+        throw CG_ERROR("Hist1D:bin") << "Failed to retrieve bin index for value " << x << ": " << gsl_strerror(ret);
+      return bin_id;
+    }
+
     std::vector<Value> Hist1D::values() const {
       std::vector<Value> values;
       for (size_t i = 0; i < nbins(); ++i)
@@ -222,6 +230,15 @@ namespace cepgen {
       if (include_out_of_range)
         integr += underflow_ + overflow_;
       return integr;
+    }
+
+    double Hist1D::sample(RandomGenerator& rng) const {
+      if (!pdf_) {
+        pdf_.reset(gsl_histogram_pdf_alloc(nbins()));
+        if (const auto ret = gsl_histogram_pdf_init(pdf_.get(), hist_.get()); ret != GSL_SUCCESS)
+          throw CG_ERROR("Hist1D:sample") << "Failed to allocate the histogram PDF. GSL yielded: " << gsl_strerror(ret);
+      }
+      return gsl_histogram_pdf_sample(pdf_.get(), rng.uniform());
     }
   }  // namespace utils
 }  // namespace cepgen

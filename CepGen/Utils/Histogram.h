@@ -33,6 +33,7 @@
 namespace cepgen {
   class ParametersList;
   namespace utils {
+    class RandomGenerator;
     /**
      * \brief Generic text-based plotting utility
      * \author Laurent Forthomme <laurent.forthomme@cern.ch>
@@ -85,6 +86,8 @@ namespace cepgen {
       /// Bin-to-bin addition of another histogram to this one
       void add(Hist1D, double scaling = 1.);
       void scale(double) override;
+      /// Sample individual "events" from a distribution
+      double sample(RandomGenerator&) const;
 
       /// Retrieve the value + uncertainty for all bins
       std::vector<Value> values() const;
@@ -103,6 +106,8 @@ namespace cepgen {
       Limits binRange(size_t bin) const;
       /// List of bins limits (nbins + 1 values if min-max, nbins values otherwise)
       std::vector<double> bins(BinMode) const;
+      /// Retrieve the bin index for a x value
+      size_t bin(double x) const;
 
       /// Compute the mean histogram value over full range
       double mean() const;
@@ -126,6 +131,11 @@ namespace cepgen {
       typedef std::unique_ptr<gsl_histogram, gsl_histogram_deleter> gsl_histogram_ptr;
       gsl_histogram_ptr hist_, hist_w2_;
       size_t underflow_{0ull}, overflow_{0ull};
+      struct gsl_histogram_pdf_deleter {
+        void operator()(gsl_histogram_pdf* h) { gsl_histogram_pdf_free(h); }
+      };
+      typedef std::unique_ptr<gsl_histogram_pdf, gsl_histogram_pdf_deleter> gsl_histogram_pdf_ptr;
+      mutable gsl_histogram_pdf_ptr pdf_;
     };
 
     /// 2D histogram container
@@ -150,9 +160,13 @@ namespace cepgen {
       void clear() override;
       /// Fill the histogram with one value
       void fill(double x, double y, double weight = 1.);
+      /// Fill the histogram with one value
+      inline void fill(const std::pair<double, double>& xy, double weight = 1.) { fill(xy.first, xy.second, weight); }
       /// Bin-by-bin addition of another histogram to this one
       void add(Hist2D, double scaling = 1.);
       void scale(double) override;
+      /// Sample individual "events" from a distribution
+      std::pair<double, double> sample(RandomGenerator&) const;
 
       /// Retrieve the value + uncertainty for one bin
       Value value(size_t bin_x, size_t bin_y) const;
@@ -175,6 +189,8 @@ namespace cepgen {
       Limits binRangeY(size_t bin) const;
       /// List of y-bins limits (nbinsY + 1 values if min-max, nbins values otherwise)
       std::vector<double> binsY(BinMode) const;
+      /// Retrieve the bin indices for a (x, y) value
+      std::pair<size_t, size_t> bin(double x, double y) const;
 
       /// Compute the mean histogram value over full x-axis range
       double meanX() const;
@@ -220,6 +236,11 @@ namespace cepgen {
       typedef std::unique_ptr<gsl_histogram2d, gsl_histogram2d_deleter> gsl_histogram2d_ptr;
       gsl_histogram2d_ptr hist_, hist_w2_;
       contents_t out_of_range_values_;
+      struct gsl_histogram2d_pdf_deleter {
+        void operator()(gsl_histogram2d_pdf* h) { gsl_histogram2d_pdf_free(h); }
+      };
+      typedef std::unique_ptr<gsl_histogram2d_pdf, gsl_histogram2d_pdf_deleter> gsl_histogram2d_pdf_ptr;
+      mutable gsl_histogram2d_pdf_ptr pdf_;
     };
   }  // namespace utils
 }  // namespace cepgen
