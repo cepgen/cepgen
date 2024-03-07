@@ -26,7 +26,7 @@ jobs:
       image: 'laufor/ci-images:cepgen-fedora39'
       options: -v ${{ github.workspace }}:/Package
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: seanmiddleditch/gha-setup-ninja@master
 
     - name: CMake configuration
@@ -49,7 +49,7 @@ jobs:
       image: 'laufor/ci-images:cepgen-fedora39'
       options: -v ${{ github.workspace }}:/Package
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/download-artifact@master
       with:
         name: build-env
@@ -68,7 +68,7 @@ jobs:
       image: 'laufor/ci-images:cepgen-fedora39'
       options: -v ${{ github.workspace }}:/Package
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/download-artifact@master
       with:
         name: build-env
