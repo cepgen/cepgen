@@ -22,7 +22,7 @@ This page is constantly evolving, but do not hesitate to contact us through the 
    :caption: Contents:
    :hidden:
 
-   downloads
+   Downloads <https://github.com/cepgen/cepgen/releases>
    changelog
    install
    usage
