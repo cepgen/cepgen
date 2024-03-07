@@ -1,0 +1,30 @@
+name: Package
+
+on:
+  push:
+    branches: ci-rpm_build  #FIXME to be switched to tag
+
+env:
+  BUILD_TYPE: Release  # Release, Debug, RelWithDebInfo, etc
+  CEPGEN_PATH: /Package/build
+  CG_CI: True
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    container:
+      image: 'laufor/ci-images:cepgen-fedora39'
+      options: -v ${{ github.workspace }}:/Package
+    permissions:
+      content: read
+      pull-request: write
+    steps:
+    - uses: cepgen/cepgen/.github/workflows/build.yml@master
+      with:
+        config-path: .github/labeler.yml
+        secrets:
+          token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: seanmiddleditch/gha-setup-ninja@master
+
+    - name: Build
+      run: cmake --build ${{env.CEPGEN_PATH}} --target package

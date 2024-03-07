@@ -5,6 +5,14 @@ on:
     branches: master
   pull_request:
     branches: master
+  workflow_call:
+    inputs:
+      config-path:
+        required: true
+        type: string
+    secrets:
+      token:
+        required: true
 
 env:
   BUILD_TYPE: Release  # Release, Debug, RelWithDebInfo, etc
@@ -19,6 +27,10 @@ jobs:
       options: -v ${{ github.workspace }}:/Package
     steps:
     - uses: actions/checkout@v3
+    - uses: actions/labeler@v4
+      with:
+        repo-token: ${{ secrets.token }}
+        configuration-path: ${{ inputs.config-path }}
     - uses: seanmiddleditch/gha-setup-ninja@master
 
     - name: CMake configuration
