@@ -23,6 +23,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Utils/Histogram.h"
+#include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
@@ -215,6 +216,14 @@ namespace cepgen {
       return std::vector<double>(bins.begin(), bins.end());
     }
 
+    std::pair<size_t, size_t> Hist2D::bin(double x, double y) const {
+      std::pair<size_t, size_t> bin_ids;
+      if (auto ret = gsl_histogram2d_find(hist_.get(), x, y, &bin_ids.first, &bin_ids.second); ret != GSL_SUCCESS)
+        throw CG_ERROR("Hist2D:bin") << "Failed to retrieve bin index for values (" << x << ", " << y
+                                     << "): " << gsl_strerror(ret);
+      return bin_ids;
+    }
+
     Value Hist2D::value(size_t bin_x, size_t bin_y) const {
       CG_ASSERT(hist_);
       return Value{gsl_histogram2d_get(hist_.get(), bin_x, bin_y),
@@ -297,6 +306,21 @@ namespace cepgen {
                  cnt.at(Hist2D::contents_t::GT_LT),
                  cnt.at(Hist2D::contents_t::GT_IN),
                  cnt.at(Hist2D::contents_t::GT_GT));
+    }
+
+    std::pair<double, double> Hist2D::sample(RandomGenerator& rng) const {
+      if (!pdf_) {
+        pdf_.reset(gsl_histogram2d_pdf_alloc(nbinsX(), nbinsY()));
+        if (const auto ret = gsl_histogram2d_pdf_init(pdf_.get(), hist_.get()); ret != GSL_SUCCESS)
+          throw CG_FATAL("Hist2D:sample") << "Failed to allocate the histogram PDF. GSL yielded: " << gsl_strerror(ret);
+      }
+      std::pair<double, double> value;
+      const auto xi = rng.uniform(), yi = rng.uniform();
+      if (const auto ret = gsl_histogram2d_pdf_sample(pdf_.get(), xi, yi, &value.first, &value.second);
+          ret != GSL_SUCCESS)
+        throw CG_FATAL("Hist2D:sample") << "Failed to sample point (" << xi << ", " << yi
+                                        << ") from the histogram PDF. GSL yielded: " << gsl_strerror(ret);
+      return value;
     }
   }  // namespace utils
 }  // namespace cepgen

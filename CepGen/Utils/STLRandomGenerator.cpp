@@ -67,6 +67,8 @@ namespace cepgen {
     double uniform(double min, double max) override { return gen_->uniform(min, max); }
     double normal(double mean, double rms) override { return gen_->normal(mean, rms); }
     double exponential(double exponent) override { return gen_->exponential(exponent); }
+    double breitWigner(double mean, double scale) override { return gen_->breitWigner(mean, scale); }
+    int poisson(double mean) override { return gen_->poisson(mean); }
 
   private:
     template <typename T>
@@ -77,6 +79,8 @@ namespace cepgen {
       double uniform(double min, double max) override { return std::uniform_real_distribution<>(min, max)(rng_); }
       double normal(double mean, double rms) override { return std::normal_distribution<>(mean, rms)(rng_); }
       double exponential(double exponent) override { return std::exponential_distribution<>(exponent)(rng_); }
+      double breitWigner(double mean, double scale) override { return std::cauchy_distribution<>(mean, scale)(rng_); }
+      int poisson(double mean) override { return std::poisson_distribution<>(mean)(rng_); }
 
     private:
       T rng_;

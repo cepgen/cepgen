@@ -63,6 +63,9 @@ namespace cepgen {
     double uniform(double min, double max) override { return rng_->Uniform(min, max); }
     double normal(double mean, double rms) override { return rng_->Gaus(mean, rms); }
     double exponential(double exponent) override { return rng_->Exp(exponent); }
+    double breitWigner(double mean, double scale) override { return rng_->BreitWigner(mean, scale); }
+    double landau(double location, double width) override { return rng_->Landau(location, width); }
+    int poisson(double mean) override { return rng_->Poisson(mean); }
 
   private:
     void* enginePtr() override { return rng_.get(); }
