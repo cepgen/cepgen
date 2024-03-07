@@ -30,6 +30,22 @@ namespace cepgen {
       return 0.;
     }
 
+    double RandomGenerator::breitWigner(double /*mean*/, double /*scale*/) {
+      CG_WARNING("RandomGenerator:breitWigner")
+          << "Breit-Wigner/Cauchy distribution not implemented for this random number generator.";
+      return 0.;
+    }
+
+    double RandomGenerator::landau(double /*location*/, double /*width*/) {
+      CG_WARNING("RandomGenerator:landau") << "Landau distribution not implemented for this random number generator.";
+      return 0.;
+    }
+
+    int RandomGenerator::poisson(double /*mean*/) {
+      CG_WARNING("RandomGenerator:poisson") << "Poisson distribution not implemented for this random number generator.";
+      return 0;
+    }
+
     void* RandomGenerator::enginePtr() {
       throw CG_FATAL("RandomGenerator:enginePtr") << "No engine object declared for this random generator.";
     }

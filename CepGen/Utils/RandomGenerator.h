@@ -44,6 +44,9 @@ namespace cepgen {
 
       // specialised distributions
       virtual double exponential(double exponent = 1.);
+      virtual double breitWigner(double mean = 0., double scale = 1.);
+      virtual double landau(double location = 0., double width = 1.);
+      virtual int poisson(double mean = 0.);
 
       /// Retrieve the engine object
       template <typename T>

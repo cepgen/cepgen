@@ -52,12 +52,8 @@ int main(int argc, char* argv[]) {
   if (!plotter.empty())
     plt = cepgen::DrawerFactory::get().build(plotter);
 
-  // distribution to test
-  default_random_engine gen;
-  cauchy_distribution<double> bw(0., 1.);
-
   // define the CepGen random number generator
-  auto cg_rnd = cepgen::RandomGeneratorFactory::get().build(rng_name);
+  auto rng = cepgen::RandomGeneratorFactory::get().build(rng_name);
 
   {  // 1D histogram testing
     // first define the histograms (original, and one to be resampled)
@@ -65,11 +61,11 @@ int main(int argc, char* argv[]) {
          hist_resampled = cepgen::utils::Hist1D(100, {-10., 10.}, "resampled", "Resampled");
 
     for (int i = 0; i < num_samples_ini; ++i)
-      hist.fill(bw(gen));
+      hist.fill(rng->breitWigner(0., 1.));
 
     // sample the original histogram
     for (int i = 0; i < num_samples; ++i)
-      hist_resampled.fill(hist.sample(*cg_rnd));
+      hist_resampled.fill(hist.sample(*rng));
 
     CG_TEST_EQUIV(hist_resampled.mean(), hist.mean(), "histograms mean");
     CG_TEST_EQUIV(hist_resampled.rms(), hist.rms(), "histograms rms");
@@ -86,11 +82,11 @@ int main(int argc, char* argv[]) {
          hist_resampled = cepgen::utils::Hist2D(100, {-10., 10.}, 100, {-10., 10.}, "resampled2d", "Resampled");
 
     for (int i = 0; i < num_samples_ini; ++i)
-      hist.fill(bw(gen), bw(gen));
+      hist.fill(rng->breitWigner(0., 1.), rng->breitWigner(0., 1.));
 
     // sample the original histogram
     for (int i = 0; i < num_samples; ++i)
-      hist_resampled.fill(hist.sample(*cg_rnd));
+      hist_resampled.fill(hist.sample(*rng));
 
     CG_TEST_EQUIV(hist_resampled.meanX(), hist.meanX(), "histograms mean X");
     CG_TEST_EQUIV(hist_resampled.rmsX(), hist.rmsX(), "histograms rms X");

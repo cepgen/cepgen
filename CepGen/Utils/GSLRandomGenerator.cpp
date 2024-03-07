@@ -61,6 +61,9 @@ namespace cepgen {
     double uniform(double min, double max) override { return Limits{min, max}.x(gsl_rng_uniform(rng_.get())); }
     double normal(double mean, double rms) override { return gsl_ran_gaussian(rng_.get(), rms) + mean; }
     double exponential(double exponent) override { return gsl_ran_exponential(rng_.get(), exponent); }
+    double breitWigner(double mean, double scale) override { return gsl_ran_cauchy(rng_.get(), scale) + mean; }
+    double landau(double location, double width) override { return width * gsl_ran_landau(rng_.get()) + location; }
+    int poisson(double mean) override { return gsl_ran_poisson(rng_.get(), mean); }
 
   private:
     /// A deleter object for GSL's random number generator
