@@ -59,7 +59,7 @@ jobs:
       working-directory: ${{env.CEPGEN_PATH}}
       run: |
         echo "PYTHONPATH=${{env.CEPGEN_PATH}}:$PYTHONPATH" >> $GITHUB_ENV
-        ctest -C ${{env.BUILD_TYPE}} -LE "unstable" --verbose --output-on-failure
+        ctest -C ${{env.BUILD_TYPE}} -LE "unstable" --output-on-failure
 
   package:
     needs: build
