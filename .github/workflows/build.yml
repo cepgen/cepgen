@@ -58,7 +58,7 @@ jobs:
       with:
         name: build-env
     - name: 'Uncompress environment'
-      run: tar -xvf environment.tar
+      run: tar -xvf environment.tar -C /
     - uses: seanmiddleditch/gha-setup-ninja@master
     - name: Test
       working-directory: ${{env.CEPGEN_PATH}}
@@ -80,7 +80,7 @@ jobs:
       with:
         name: build-env
     - name: 'Uncompress environment'
-      run: tar -xvf environment.tar
+      run: tar -xvf environment.tar -C /
 
     - uses: seanmiddleditch/gha-setup-ninja@master
     - name: Package
