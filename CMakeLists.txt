@@ -9,7 +9,7 @@ if($ENV{HOSTNAME} MATCHES "^lxplus[0-9]+.cern.ch")
 endif()
 
 set(CPACK_RPM_COMPONENT_INSTALL ON)
-cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.17.2 FATAL_ERROR)
 project(CepGen)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/cmake $ENV{ROOTSYS}/cmake)
 include(CepGenVersion)
