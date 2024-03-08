@@ -132,10 +132,6 @@ public:
     // boost of the outgoing beams
     pX().setMass(mX());
     pY().setMass(mY());
-    if (beams_mode_ == mode::Kinematics::ElasticInelastic) {  // mirror X/Y and dilepton systems if needed
-      std::swap(pX(), pY());
-      std::swap(pc(0), pc(1));
-    }
     pX().betaGammaBoost(gamma_cm_, beta_gamma_cm_);
     pY().betaGammaBoost(gamma_cm_, beta_gamma_cm_);
     // incoming partons
@@ -150,6 +146,14 @@ public:
       mom->rotatePhi(ranphi, rany);
       if (symmetrise_ && mirror)
         mom->mirrorZ();
+    }
+    if (beams_mode_ == mode::Kinematics::ElasticInelastic) {  // mirror X/Y and dilepton systems if needed
+      std::swap(pX(), pY());
+      std::swap(pc(0), pc(1));
+      pX().mirrorZ();
+      pY().mirrorZ();
+      pc(0).mirrorZ();
+      pc(1).mirrorZ();
     }
     // first outgoing beam
     event()
