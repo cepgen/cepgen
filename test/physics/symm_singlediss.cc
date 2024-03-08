@@ -18,11 +18,13 @@
 
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/AbortHandler.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Test.h"
 #include "CepGen/Utils/Timer.h"
 
@@ -30,14 +32,16 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   double num_sigma;
-  int str_fun;
-  string proc_name, integrator;
+  int num_gen, str_fun;
+  string proc_name, integrator, plotter;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("process,p", "process to compute", &proc_name, "lpair")
+      .addOptionalArgument("num-gen,g", "number of events to generate", &num_gen, 10000)
       .addOptionalArgument("num-sigma,n", "max. number of std.dev.", &num_sigma, 3.)
       .addOptionalArgument("str-fun,s", "struct.functions modelling", &str_fun, 11)
       .addOptionalArgument("integrator,i", "type of integrator used", &integrator, "Vegas")
+      .addOptionalArgument("plotter,t", "type of plotter to use", &plotter, "")
       .parse();
 
   cepgen::utils::Timer tmr;
@@ -58,16 +62,63 @@ int main(int argc, char* argv[]) {
   gen.runParameters().setProcess(
       cepgen::ProcessFactory::get().build(proc_name, cepgen::ParametersList().set<int>("pair", 13)));
   cepgen::Value cs_ei, cs_ie;
+
+  auto h_eta_lead_ei = cepgen::utils::Hist1D(50, {-2.5, 2.5}, "eta_lead_ei", "el-inel"),
+       h_eta_lead_ie = cepgen::utils::Hist1D(50, {-2.5, 2.5}, "eta_lead_ie", "inel-el"),
+       h_eta_sublead_ei = cepgen::utils::Hist1D(50, {-2.5, 2.5}, "eta_sublead_ei", "el-inel"),
+       h_eta_sublead_ie = cepgen::utils::Hist1D(50, {-2.5, 2.5}, "eta_sublead_ie", "inel-el");
+
   {  // elastic-inelastic
     pkin.set<int>("mode", 2);
     gen.runParameters().process().kinematics().setParameters(pkin);
     cs_ei = gen.computeXsection();
+    if (num_gen > 0)
+      gen.generate(num_gen, [&](const cepgen::Event& evt, size_t) {
+        const auto &mom1 = evt(cepgen::Particle::Role::CentralSystem).at(0).momentum(),
+                   &mom2 = evt(cepgen::Particle::Role::CentralSystem).at(1).momentum();
+        if (mom1.pt() > mom2.pt()) {
+          h_eta_lead_ei.fill(mom1.eta());
+          h_eta_sublead_ei.fill(mom2.eta());
+        } else {
+          h_eta_lead_ei.fill(mom2.eta());
+          h_eta_sublead_ei.fill(mom1.eta());
+        }
+      });
   }
   {  // inelastic-elastic
     pkin.set<int>("mode", 3);
     gen.runParameters().process().kinematics().setParameters(pkin);
     cs_ie = gen.computeXsection();
+    if (num_gen > 0)
+      gen.generate(num_gen, [&](const cepgen::Event& evt, size_t) {
+        const auto &mom1 = evt(cepgen::Particle::Role::CentralSystem).at(0).momentum(),
+                   &mom2 = evt(cepgen::Particle::Role::CentralSystem).at(1).momentum();
+        if (mom1.pt() > mom2.pt()) {
+          h_eta_lead_ie.fill(mom1.eta());
+          h_eta_sublead_ie.fill(mom2.eta());
+        } else {
+          h_eta_lead_ie.fill(mom2.eta());
+          h_eta_sublead_ie.fill(mom1.eta());
+        }
+      });
   }
   CG_TEST_VALUES(cs_ei, cs_ie, num_sigma, "el-inel == inel-el");
+
+  size_t ndf;
+  CG_TEST(h_eta_lead_ei.chi2test(h_eta_lead_ie, ndf) / ndf > 1., "leading lepton eta");
+  CG_TEST(h_eta_sublead_ei.chi2test(h_eta_sublead_ie, ndf) / ndf > 1., "subleading lepton eta");
+
+  if (!plotter.empty()) {
+    auto plt = cepgen::DrawerFactory::get().build(plotter);
+    plt->draw({&h_eta_lead_ie, &h_eta_lead_ei},
+              "leading_eta",
+              "leading lepton $\\eta$",
+              cepgen::utils::Drawer::Mode::nostack);
+    plt->draw({&h_eta_sublead_ie, &h_eta_sublead_ei},
+              "subleading_eta",
+              "subleading lepton $\\eta$",
+              cepgen::utils::Drawer::Mode::nostack);
+  }
+
   CG_TEST_SUMMARY;
 }
