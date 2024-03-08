@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2022  Laurent Forthomme
+ *  Copyright (C) 2020-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,12 +21,19 @@
 // Include it in your source file prior to any linking with libCepGenMadGraph.
 
 #include "CepGenAddOns/MadGraphWrapper/MadGraphProcess.h"
+#include "CepGenAddOns/MadGraphWrapper/MadGraphProcessFactory.h"
 
-class CPPProcess {};
 namespace cepgen {
-  MadGraphProcess::MadGraphProcess() : incoming_pdgids_{0, 0} {}
-  MadGraphProcess::~MadGraphProcess() {}
-  double MadGraphProcess::eval() { return 0.; }
-  void MadGraphProcess::initialise(const std::string&) {}
-}  // namespace cepgen
+  class MadGraphDummyProcess : public MadGraphProcess {
+  public:
+    using MadGraphProcess::MadGraphProcess;
 
+    double eval() override { return 0.; }
+    void initialise(const std::string&) override {}
+    const std::vector<Momentum>& momenta() override { return momenta_; }
+
+  private:
+    std::vector<Momentum> momenta_;
+  };
+}  // namespace cepgen
+REGISTER_MG5AMC_PROCESS("dummy", MadGraphDummyProcess);

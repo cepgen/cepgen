@@ -44,7 +44,7 @@ namespace cepgen {
       static ParametersDescription description();
 
     protected:
-      void addEventContent() override final;
+      void addEventContent() override;
       void prepareKinematics() override final;
 
       virtual void prepareFactorisedPhaseSpace() = 0;  ///< Prepare central part of the Jacobian after kinematics is set

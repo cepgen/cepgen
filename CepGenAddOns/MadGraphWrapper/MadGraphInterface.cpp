@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2023  Laurent Forthomme
+ *  Copyright (C) 2020-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,6 +35,8 @@
 #include "CepGen/Utils/String.h"
 #include "CepGenAddOns/MadGraphWrapper/MadGraphInterface.h"
 #include "CepGenAddOns/MadGraphWrapper/MadGraphProcess.h"
+#include "CepGenAddOns/MadGraphWrapper/Utils.h"
+#include "CepGenAddOns/PythonWrapper/Environment.h"
 
 namespace cepgen {
   std::unordered_map<std::string, pdgid_t> MadGraphInterface::mg5_parts_ = {
@@ -106,12 +108,22 @@ namespace cepgen {
       cg_proc = tmp_dir_ / "cepgen_proc_interface.cpp";
     } else {
       CG_INFO("MadGraphInterface:run") << "Running the mg5_aMC process generation.";
-      prepareCard();
+      std::vector<std::string> cmds;
+      if (!model_.empty()) {
+        cmds.emplace_back("set auto_convert_model T");
+        cmds.emplace_back("import model " + model_);
+      }
+      cmds.emplace_back(extra_part_definitions_);
+      cmds.emplace_back("generate " + proc_);
+      cmds.emplace_back("output standalone_cpp " + tmp_dir_.string());
       cpp_path = tmp_dir_;
       const auto num_removed_files = fs::remove_all(cpp_path);
       CG_DEBUG("MadGraphInterface:run") << "Removed " << utils::s("file", num_removed_files, true)
                                         << " from process directory " << cpp_path << ".";
-      generateProcess();
+
+      std::ofstream log(log_filename_, std::ios::app);  // appending at the end of the log
+      log << "\n\n*** mg5_aMC process generation ***\n\n";
+      log << utils::merge(mg5amc::runCommand(cmds, card_path_, true), "\n");
 
       CG_INFO("MadGraphInterface:run") << "Preparing the mg5_aMC process library.";
       log << "\n\n*** mg5_aMC process library compilation ***\n\n";
@@ -125,23 +137,8 @@ namespace cepgen {
 #endif
 
     generateLibrary(cg_proc, cpp_path, lib_path);
-
-    CG_INFO("MadGraphInterface:run") << "Creating links for all cards in current directory.";
     linkCards();
-
     return lib_path;
-  }
-
-  void MadGraphInterface::prepareCard() const {
-    std::ofstream card(card_path_);
-    if (!model_.empty())
-      card << "set auto_convert_model T\n"
-           << "import model " << model_ << "\n";
-    card << extra_part_definitions_ << "\n"
-         << "generate " << proc_ << "\n"
-         << "output standalone_cpp " << tmp_dir_.string() << "\n"
-         << "exit\n";
-    card.close();
   }
 
   void MadGraphInterface::linkCards() const {
@@ -151,6 +148,8 @@ namespace cepgen {
         if (!fs::exists(link_path))
           fs::create_symlink(f, link_path);
       }
+    CG_DEBUG("MadGraphInterface:run") << "Created links in current directory for all cards in '" +
+                                             std::string(tmp_dir_ / "Cards") + "'.";
   }
 
   std::string MadGraphInterface::prepareMadGraphProcess() const {
@@ -160,80 +159,40 @@ namespace cepgen {
     std::ofstream log(log_filename_, std::ios::app);  // appending at the end of the log
     log << "\n\n*** mg5_aMC process library compilation ***\n\n";
 
-    const auto& parts = unpackProcessParticles(proc_);
-    CG_INFO("MadGraphInterface.prepareMadGraphProcess")
-        << "Unpacked process particles: "
-        << "incoming=" << std::vector<PDG::Id>(parts.first.begin(), parts.first.end()) << ", "
-        << "outgoing=" << std::vector<PDG::Id>(parts.second.begin(), parts.second.end()) << ".";
+    const auto& parts = mg5amc::unpackProcessParticles(proc_);
+    std::vector<pdgid_t> in_parts, out_parts;
+    for (const auto& in_part : parts.first) {
+      if (mg5_parts_.count(in_part) == 0) {
+        const auto pprops = mg5amc::describeParticle(in_part, model_);
+        mg5_parts_[in_part] = pprops.pdgid;
+        PDG::get().define(pprops);
+      }
+      in_parts.emplace_back(mg5_parts_.at(in_part));
+    }
+    for (const auto& out_part : parts.second) {
+      if (mg5_parts_.count(out_part) == 0) {
+        const auto pprops = mg5amc::describeParticle(out_part, model_);
+        mg5_parts_[out_part] = pprops.pdgid;
+        PDG::get().define(pprops);
+      }
+      out_parts.emplace_back(mg5_parts_.at(out_part));
+    }
+    CG_INFO("MadGraphInterface.prepareMadGraphProcess") << "Unpacked process particles: "
+                                                        << "incoming=" << in_parts << ", "
+                                                        << "outgoing=" << out_parts << ".";
 
-    const auto& in_parts = parts.first;
-    utils::replace_all(tmpl, "XXX_PART1_XXX", std::to_string(in_parts[0]));
-    utils::replace_all(tmpl, "XXX_PART2_XXX", std::to_string(in_parts[1]));
-
-    const auto& out_parts = parts.second;
-    std::ostringstream outparts_str;
-    std::string sep;
-    for (const auto& op : out_parts)
-      outparts_str << sep << std::to_string(op), sep = ", ";
-    utils::replace_all(tmpl, "XXX_OUT_PART_XXX", outparts_str.str());
-
-    utils::replace_all(tmpl, "XXX_PROC_NAME_XXX", proc_);
-    std::string descr = proc_;
-    if (!model_.empty())
-      descr += " (model: " + model_ + ")";
-    utils::replace_all(tmpl, "XXX_PROC_DESCRIPTION_XXX", descr);
+    const std::string process_description = proc_ + (!model_.empty() ? " (model: " + model_ + ")" : "");
 
     std::string src_filename = tmp_dir_ / "cepgen_proc_interface.cpp";
     std::ofstream src_file(src_filename);
-    src_file << tmpl;
+    src_file << utils::replace_all(tmpl,
+                                   {{"XXX_PART1_XXX", std::to_string(in_parts[0])},
+                                    {"XXX_PART2_XXX", std::to_string(in_parts[1])},
+                                    {"XXX_OUT_PART_XXX", utils::merge(out_parts, ", ")},
+                                    {"XXX_PROC_NAME_XXX", mg5amc::normalise(proc_)},
+                                    {"XXX_PROC_DESCRIPTION_XXX", process_description}});
     src_file.close();
     return src_filename;
-  }
-
-  //--------------- static utilities ---------------
-
-  MadGraphInterface::ProcessParticles MadGraphInterface::unpackProcessParticles(const std::string& proc) {
-    ProcessParticles out;
-    auto trim_all = [](std::vector<std::string> coll) -> std::vector<std::string> {
-      std::for_each(coll.begin(), coll.end(), [](std::string& it) { it = utils::trim(it); });
-      return coll;
-    };
-    //--- dirty fix to specify incoming- and outgoing states
-    //    as extracted from the mg5_aMC process string
-    const auto prim_proc = utils::split(utils::trim(proc), ',')[0];
-    auto parts = trim_all(utils::split(prim_proc, '>'));
-    if (parts.size() != 2)
-      throw CG_FATAL("MadGraphInterface:unpackProcessParticles")
-          << "Unable to unpack particles from process name: \"" << proc << "\" -> " << parts << "!";
-    //--- incoming parton-like particles
-    auto prim_parts = trim_all(utils::split(parts[0], ' '));
-    CG_DEBUG("MadGraphInterface:unpackProcessParticles") << "Primary particles: " << prim_parts;
-    if (prim_parts.size() != 2)
-      throw CG_FATAL("MadGraphInterface:unpackProcessParticles")
-          << "Unable to unpack particles from primary particles list: \"" << parts[0] << "\" -> " << prim_parts << "!";
-    for (const auto& p : prim_parts) {
-      if (mg5_parts_.count(p) == 0)
-        throw CG_FATAL("MadGraphInterface:unpackProcessParticles")
-            << "Particle with mg5_aMC name '" << p << "' was not recognised!";
-      out.first.emplace_back(mg5_parts_.at(p));
-    }
-    //---- outgoing system
-    auto dec_parts = trim_all(utils::split(parts[1], ' '));
-    CG_DEBUG("MadGraphInterface:unpackProcessParticles") << "Outgoing system: " << dec_parts;
-    for (auto& p : dec_parts) {
-      if (mg5_parts_.count(p) == 0)
-        throw CG_FATAL("MadGraphInterface:unpackProcessParticles")
-            << "Particle with mg5_aMC name '" << p << "' was not recognised!";
-      out.second.emplace_back(mg5_parts_.at(p));
-    }
-    return out;
-  }
-
-  void MadGraphInterface::generateProcess() const {
-    std::ofstream log(log_filename_, std::ios::app);  // appending at the end of the log
-    log << "\n\n*** mg5_aMC process generation ***\n\n";
-    log << utils::Caller::call({MADGRAPH_BIN, "-f", card_path_.string()});
-    fs::remove(card_path_);
   }
 
   void MadGraphInterface::generateLibrary(const fs::path& proc_path,

@@ -4,8 +4,10 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
-#include "CepGenAddOns/MadGraphWrapper/MadGraphDummyProcess.hxx"
 #include "CepGenAddOns/MadGraphWrapper/MadGraphProcess.h"
+
+using namespace std;
+using namespace std::string_literals;
 
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
@@ -19,8 +21,9 @@ int main(int argc, char* argv[]) {
   auto mg5 = cepgen::ProcessFactory::get().build(
       "mg5_aMC",
       cepgen::ParametersList()
+          .set("kinematicsGenerator", cepgen::ParametersList().setName("coll2to4"s))
           .set("extraParticles", cepgen::ParametersList().set("la", cepgen::PDG::get()(my_part)))
-          .set<std::string>("process", "a a > la+ la-"));
+          .set("process", "a a > la+ la-"s));
 
   return 0;
 }

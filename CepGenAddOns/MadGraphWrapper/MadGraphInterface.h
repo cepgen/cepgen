@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2022  Laurent Forthomme
+ *  Copyright (C) 2020-2023  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,15 +19,8 @@
 #ifndef CepGenAddOns_MadGraphWrapper_MadGraphInterface_h
 #define CepGenAddOns_MadGraphWrapper_MadGraphInterface_h
 
-#include <memory>
-#include <string>
-
 #include "CepGen/Core/SteeredObject.h"
-#include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Utils/Filesystem.h"
-
-// forward-declaration of base MadGraph standalone_cpp process
-class CPPProcess;
 
 namespace cepgen {
   class MadGraphInterface : public SteeredObject<MadGraphInterface> {
@@ -42,13 +35,8 @@ namespace cepgen {
     static constexpr size_t cmd_buffer_size_ = 256;
     static std::unordered_map<std::string, pdgid_t> mg5_parts_;
 
-    using ProcessParticles = std::pair<std::vector<pdgid_t>, std::vector<pdgid_t> >;
-    static ProcessParticles unpackProcessParticles(const std::string&);
-
-    void generateProcess() const;
     void generateLibrary(const fs::path&, const fs::path&, const fs::path&) const;
     void parseExtraParticles();
-    void prepareCard() const;
     void linkCards() const;
     std::string prepareMadGraphProcess() const;
 
