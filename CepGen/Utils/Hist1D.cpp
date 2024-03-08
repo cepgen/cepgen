@@ -240,5 +240,21 @@ namespace cepgen {
       }
       return gsl_histogram_pdf_sample(pdf_.get(), rng.uniform());
     }
+
+    double Hist1D::chi2test(const Hist1D& oth, size_t& ndfval) const {
+      if (nbins() != oth.nbins())
+        return 0.;
+      double chi2val = 0.;
+      ndfval = nbins();
+      for (size_t i = 0; i < nbins(); ++i) {
+        const auto bin_val1 = value(i), bin_val2 = oth.value(i);
+        if (bin_val1 == 0. && bin_val2 == 0.) {
+          --ndfval;
+          continue;
+        }
+        chi2val += std::pow((double)bin_val1 - (double)bin_val2, 2) / ((double)bin_val1 + (double)bin_val2);
+      }
+      return chi2val;
+    }
   }  // namespace utils
 }  // namespace cepgen

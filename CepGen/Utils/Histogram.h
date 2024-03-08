@@ -89,6 +89,11 @@ namespace cepgen {
       /// Sample individual "events" from a distribution
       double sample(RandomGenerator&) const;
 
+      /// Perform a chi^2 test between two histograms
+      /// \param[out] ndf number of degrees of freedom (non-empty bins)
+      /// \return chi^2-value of the equivalence test
+      double chi2test(const Hist1D&, size_t& ndf) const;
+
       /// Retrieve the value + uncertainty for all bins
       std::vector<Value> values() const;
       /// Retrieve the value + uncertainty for one bin
