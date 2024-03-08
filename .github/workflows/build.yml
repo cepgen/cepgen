@@ -3,6 +3,7 @@ name: Build
 on:
   push:
     branches: master
+    tags:
   pull_request:
     branches: master
 
@@ -18,19 +19,70 @@ jobs:
       image: 'laufor/ci-images:cepgen-fedora39'
       options: -v ${{ github.workspace }}:/Package
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: seanmiddleditch/gha-setup-ninja@master
 
-    - name: CMake configuration
+    - name: 'CMake configuration'
       run: |
         git config --global --add safe.directory /Package
         cmake -GNinja -B ${{env.CEPGEN_PATH}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_BUILD_TESTS=ON
 
-    - name: Build
+    - name: 'Build environment'
       run: cmake --build ${{env.CEPGEN_PATH}}
+    - name: 'Compress environment'
+      run: tar -cvf environment.tar /Package
 
+    - name: 'Upload artifacts'
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-env
+        path: environment.tar
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    container:
+      image: 'laufor/ci-images:cepgen-fedora39'
+      options: -v ${{ github.workspace }}:/Package
+    steps:
+    - uses: actions/checkout@v4
+    - name: 'Download artifacts'
+      uses: actions/download-artifact@v4
+      with:
+        name: build-env
+    - name: 'Uncompress environment'
+      run: tar -xvf environment.tar -C /
+    - uses: seanmiddleditch/gha-setup-ninja@master
     - name: Test
       working-directory: ${{env.CEPGEN_PATH}}
       run: |
         echo "PYTHONPATH=${{env.CEPGEN_PATH}}:$PYTHONPATH" >> $GITHUB_ENV
-        ctest -C ${{env.BUILD_TYPE}} -LE "unstable" --verbose --output-on-failure
+        ctest -C ${{env.BUILD_TYPE}} -LE "unstable" --output-on-failure
+
+  package:
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    container:
+      image: 'laufor/ci-images:cepgen-fedora39'
+      options: -v ${{ github.workspace }}:/Package
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: 'Download artifacts'
+      uses: actions/download-artifact@v4
+      with:
+        name: build-env
+    - name: 'Uncompress environment'
+      run: tar -xvf environment.tar -C /
+
+    - uses: seanmiddleditch/gha-setup-ninja@master
+    - name: Package
+      run: cmake --build ${{env.CEPGEN_PATH}} --target package
+
+    - name: 'Upload artifacts'
+      uses: actions/upload-artifact@v4
+      with:
+        name: packages
+        path: ${{env.CEPGEN_PATH}}/*.rpm
+        if-no-files-found: warn
