@@ -124,7 +124,7 @@ namespace pythia6 {
     prop.mass = pymass(pdg_id);
     prop.width = -1.;  //pmas( pdg_id, 2 ),
     if (const auto ch = pychge(pdg_id); std::fabs(ch) > 0)
-      prop.charges = {+std::abs(int(ch * 3.)), -std::abs(int(ch * 3.))};
+      prop.charges = {-std::abs(int(ch * 3.)), +std::abs(int(ch * 3.))};
     prop.fermion = false;
     cepgen::PDG::get().define(prop);
   }

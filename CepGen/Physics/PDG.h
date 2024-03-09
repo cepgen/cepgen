@@ -89,6 +89,8 @@ namespace cepgen {
     double mass(spdgid_t) const;                           ///< Particle mass (in GeV)
     double width(spdgid_t) const;                          ///< Resonance width (in GeV)
     double charge(spdgid_t) const;                         ///< Electric charge (in \f$e\f$) for this particle
+    /// Electric charges (in \f$e\f$) for this particle (and its potential anti-particles)
+    std::vector<double> charges(spdgid_t) const;
 
   private:
     explicit PDG();

@@ -90,10 +90,11 @@ namespace pdg {
       prop.colours = 1;
       prop.mass = mass;
       prop.width = width;
-      prop.charges = charges;
       prop.fermion = false;
       for (size_t i = 0; i < pdg_ids.size(); ++i) {
         prop.pdgid = (cepgen::pdgid_t)pdg_ids.at(i);
+        if (const auto ch = charges.at(i); ch != 0)
+          prop.charges = {-std::abs(ch), +std::abs(ch)};
         switch (pdg_ids.at(i)) {
           // start with quarks
           case 1:
