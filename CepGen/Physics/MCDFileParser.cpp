@@ -36,8 +36,7 @@ namespace pdg {
     while (std::getline(ifile, line)) {
       if (line[0] == '*')  // skip comments
         continue;
-      std::vector<int> pdg_ids;
-      std::vector<short> charges;
+      std::vector<int> pdg_ids, charges;
       double mass, width;
       std::string part_name;
       {  // pdg ids
@@ -94,7 +93,8 @@ namespace pdg {
       prop.fermion = false;
       for (size_t i = 0; i < pdg_ids.size(); ++i) {
         prop.pdgid = (cepgen::pdgid_t)pdg_ids.at(i);
-        prop.charge = charges.at(i);
+        if (const auto ch = charges.at(i); ch != 0)
+          prop.charges = {ch, -ch};
         switch (pdg_ids.at(i)) {
           // start with quarks
           case 1:

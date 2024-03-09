@@ -60,11 +60,11 @@ namespace cepgen {
 
     //--- beams PDG ids
     if (const auto& beams_pdg = steer<std::vector<ParametersList> >("pdgIds"); beams_pdg.size() >= 2) {
-      pos_pdg = std::abs(beams_pdg.at(0).get<int>("pdgid"));
-      neg_pdg = std::abs(beams_pdg.at(1).get<int>("pdgid"));
+      pos_pdg = beams_pdg.at(0).get<int>("pdgid");
+      neg_pdg = beams_pdg.at(1).get<int>("pdgid");
     } else if (const auto& beams_pdg = steer<std::vector<int> >("pdgIds"); beams_pdg.size() >= 2) {
-      pos_pdg = std::abs(beams_pdg.at(0));
-      neg_pdg = std::abs(beams_pdg.at(1));
+      pos_pdg = beams_pdg.at(0);
+      neg_pdg = beams_pdg.at(1);
     }
 
     //--- beams longitudinal momentum
@@ -81,7 +81,7 @@ namespace cepgen {
       // when everything failed, retrieve "beamNpz" attributes
       params_.fill<double>("beam1pz", p1z);
       params_.fill<double>("beam2pz", p2z);
-      if (pos_pdg == neg_pdg) {  // special case: symmetric beams -> fill from centre-of-mass energy
+      if (std::abs(pos_pdg) == std::abs(neg_pdg)) {  // special case: symmetric beams -> fill from centre-of-mass energy
         if (const auto sqrts = params_.has<double>("sqrtS") && steer<double>("sqrtS") > 0. ? steer<double>("sqrtS")
                                : params_.has<double>("cmEnergy") && steer<double>("cmEnergy") > 0.
                                    ? steer<double>("cmEnergy")
@@ -159,18 +159,19 @@ namespace cepgen {
     }
     CG_DEBUG("IncomingBeams") << "Will build the following incoming beams:\n* " << plist_pos << "\n* " << plist_neg
                               << ".";
-    pos_beam_ = Beam(plist_pos).setPdgId(pos_pdg);
-    neg_beam_ = Beam(plist_neg).setPdgId(neg_pdg);
+    pos_beam_ = Beam(plist_pos).setIntegerPdgId(pos_pdg);
+    neg_beam_ = Beam(plist_neg).setIntegerPdgId(neg_pdg);
   }
 
   void IncomingBeams::setSqrtS(double sqrts) {
-    if (pos_beam_.pdgId() != neg_beam_.pdgId())
-      throw CG_FATAL("IncomingBeams:setSqrtS") << "Trying to set √s with asymmetric beams"
-                                               << " (" << pos_beam_.pdgId() << "/" << neg_beam_.pdgId() << ").\n"
-                                               << "Please fill incoming beams objects manually!";
-    const auto pz_abs = utils::fastSqrtSqDiff(0.5 * sqrts, PDG::get().mass(pos_beam_.pdgId()));
-    pos_beam_.setMomentum(Momentum::fromPxPyPzM(0., 0., +pz_abs, PDG::get().mass(pos_beam_.pdgId())));
-    neg_beam_.setMomentum(Momentum::fromPxPyPzM(0., 0., -pz_abs, PDG::get().mass(neg_beam_.pdgId())));
+    if (std::abs(pos_beam_.integerPdgId()) != std::abs(neg_beam_.integerPdgId()))
+      throw CG_FATAL("IncomingBeams:setSqrtS")
+          << "Trying to set √s with asymmetric beams"
+          << " (" << pos_beam_.integerPdgId() << "/" << neg_beam_.integerPdgId() << ").\n"
+          << "Please fill incoming beams objects manually!";
+    const auto pz_abs = utils::fastSqrtSqDiff(0.5 * sqrts, PDG::get().mass(pos_beam_.integerPdgId()));
+    pos_beam_.setMomentum(Momentum::fromPxPyPzM(0., 0., +pz_abs, PDG::get().mass(pos_beam_.integerPdgId())));
+    neg_beam_.setMomentum(Momentum::fromPxPyPzM(0., 0., -pz_abs, PDG::get().mass(neg_beam_.integerPdgId())));
   }
 
   double IncomingBeams::s() const {
@@ -223,17 +224,17 @@ namespace cepgen {
     params_ = SteeredObject::parameters();
     params_
         //.set<std::vector<int> >("partonFluxes", {(int)pos_beam_.partonFlux(), (int)neg_beam_.partonFlux()})
-        .set<int>("beam1id", pos_beam_.pdgId())
+        .set<int>("beam1id", pos_beam_.integerPdgId())
         .set<double>("beam1pz", +pos_beam_.momentum().pz())
-        .set<int>("beam2id", neg_beam_.pdgId())
+        .set<int>("beam2id", neg_beam_.integerPdgId())
         .set<double>("beam2pz", -neg_beam_.momentum().pz())
         .setAs<int, mode::Kinematics>("mode", mode());
-    if (HeavyIon::isHI(pos_beam_.pdgId())) {
-      const auto hi1 = HeavyIon::fromPdgId(pos_beam_.pdgId());
+    if (HeavyIon::isHI(pos_beam_.integerPdgId())) {
+      const auto hi1 = HeavyIon::fromPdgId(pos_beam_.integerPdgId());
       params_.set<int>("beam1A", hi1.A).set<int>("beam1Z", (int)hi1.Z);
     }
-    if (HeavyIon::isHI(neg_beam_.pdgId())) {
-      const auto hi2 = HeavyIon::fromPdgId(neg_beam_.pdgId());
+    if (HeavyIon::isHI(neg_beam_.integerPdgId())) {
+      const auto hi2 = HeavyIon::fromPdgId(neg_beam_.integerPdgId());
       params_.set<int>("beam2A", hi2.A).set<int>("beam2Z", (int)hi2.Z);
     }
     return params_;

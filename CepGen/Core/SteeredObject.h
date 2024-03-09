@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2023  Laurent Forthomme
+ *  Copyright (C) 2021-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,77 +23,76 @@
 
 #include "CepGen/Core/Steerable.h"
 
-#define REGISTER_TYPE(type, coll)                                \
-public:                                                          \
-  inline SteeredObject& add(const std::string& key, type& var) { \
-    coll.insert({key, std::ref(var)});                           \
-    var = params_.operator[]<type>(key);                         \
-    return *this;                                                \
-  }                                                              \
-                                                                 \
-private:                                                         \
-  std::unordered_map<std::string, std::reference_wrapper<type> > coll;
+#define REGISTER_TYPE(type, coll)                                      \
+public:                                                                \
+  inline SteeredObject& add(const std::string& key, type& var) {       \
+    coll.insert({key, std::ref(var)});                                 \
+    coll.at(key).get() = params_.operator[]<type>(key);                \
+    return *this;                                                      \
+  }                                                                    \
+                                                                       \
+private:                                                               \
+  std::unordered_map<std::string, std::reference_wrapper<type> > coll; \
+  static_assert(true, "")
 
 namespace cepgen {
   /// Base user-steerable object
+  /// \tparam T the type of object to be steered (using its T::description() static member)
   template <typename T>
   class SteeredObject : public Steerable {
   public:
     /// Build a module
-    SteeredObject() : Steerable(T::description().parameters()) {}
-    explicit SteeredObject(const ParametersList& params) : Steerable(T::description().validate(params)) {}
+    inline SteeredObject() : Steerable(T::description().parameters()) {}
+    explicit inline SteeredObject(const ParametersList& params) : Steerable(T::description().validate(params)) {}
     virtual ~SteeredObject() = default;
 
     /// Equality operator
-    bool operator==(const SteeredObject& oth) const { return parameters() == oth.parameters(); }
+    inline bool operator==(const SteeredObject& oth) const { return parameters() == oth.parameters(); }
     /// Inequality operator
-    bool operator!=(const SteeredObject& oth) const { return !operator==(oth); }
+    inline bool operator!=(const SteeredObject& oth) const { return !operator==(oth); }
 
-    REGISTER_TYPE(bool, map_bools_)
-    REGISTER_TYPE(int, map_ints_)
-    REGISTER_TYPE(unsigned long long, map_ulongs_)
-    REGISTER_TYPE(double, map_dbls_)
-    REGISTER_TYPE(std::string, map_strs_)
-    REGISTER_TYPE(Limits, map_lims_)
-    REGISTER_TYPE(ParametersList, map_params_)
+    REGISTER_TYPE(bool, map_bools_);
+    REGISTER_TYPE(int, map_ints_);
+    REGISTER_TYPE(unsigned long long, map_ulongs_);
+    REGISTER_TYPE(double, map_dbls_);
+    REGISTER_TYPE(std::string, map_strs_);
+    REGISTER_TYPE(Limits, map_lims_);
+    REGISTER_TYPE(ParametersList, map_params_);
+    REGISTER_TYPE(std::vector<int>, map_vints_);
 
   public:
     /// Module user-defined parameters
     inline const ParametersList& parameters() const override {
-      for (const auto& kv : map_bools_)
-        params_.set(kv.first, kv.second.get());
-      for (const auto& kv : map_ints_)
-        params_.set(kv.first, kv.second.get());
-      for (const auto& kv : map_ulongs_)
-        params_.set(kv.first, kv.second.get());
-      for (const auto& kv : map_dbls_)
-        params_.set(kv.first, kv.second.get());
-      for (const auto& kv : map_strs_)
-        params_.set(kv.first, kv.second.get());
-      for (const auto& kv : map_lims_)
-        params_.set(kv.first, kv.second.get());
-      for (const auto& kv : map_params_)
-        params_.set(kv.first, kv.second.get());
+      const auto set = [this](auto& map) {
+        for (const auto& kv : map)
+          params_.set(kv.first, kv.second.get());
+      };
+      set(map_bools_);
+      set(map_ints_);
+      set(map_ulongs_);
+      set(map_dbls_);
+      set(map_strs_);
+      set(map_lims_);
+      set(map_params_);
+      set(map_vints_);
       return params_;
     }
-    virtual void setParameters(const ParametersList& params) override {
+    virtual inline void setParameters(const ParametersList& params) override {
       if (params.empty())
         return;
       Steerable::setParameters(params);
-      for (const auto& kv : map_bools_)
-        kv.second.get() = params_.operator[]<bool>(kv.first);
-      for (const auto& kv : map_ints_)
-        kv.second.get() = params_.operator[]<int>(kv.first);
-      for (const auto& kv : map_ulongs_)
-        kv.second.get() = params_.operator[]<unsigned long long>(kv.first);
-      for (const auto& kv : map_dbls_)
-        kv.second.get() = params_.operator[]<double>(kv.first);
-      for (const auto& kv : map_strs_)
-        kv.second.get() = params_.operator[]<std::string>(kv.first);
-      for (const auto& kv : map_lims_)
-        kv.second.get() = params_.operator[]<Limits>(kv.first);
-      for (const auto& kv : map_params_)
-        kv.second.get() = params_.operator[]<ParametersList>(kv.first);
+      const auto fill = [this](auto& map) {
+        for (const auto& kv : map)
+          params_.fill(kv.first, kv.second.get());
+      };
+      fill(map_bools_);
+      fill(map_ints_);
+      fill(map_ulongs_);
+      fill(map_dbls_);
+      fill(map_strs_);
+      fill(map_lims_);
+      fill(map_params_);
+      fill(map_vints_);
     }
   };
 }  // namespace cepgen

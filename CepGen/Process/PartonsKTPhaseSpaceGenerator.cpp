@@ -39,7 +39,7 @@ namespace cepgen {
       const auto params_hi_el = KTFluxFactory::get().describeParameters("ElasticHeavyIon");
       if (params.name<std::string>().empty()) {
         if (beam.elastic()) {
-          if (HeavyIon::isHI(beam.pdgId()))
+          if (HeavyIon::isHI(beam.integerPdgId()))
             params = params_hi_el.validate(params);
           else
             params = params_p_el.validate(params);

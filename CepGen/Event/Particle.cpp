@@ -53,7 +53,7 @@ namespace cepgen {
     return true;
   }
 
-  float Particle::charge() const { return charge_sign_ * phys_prop_.charge / 3.; }
+  float Particle::charge() const { return charge_sign_ * phys_prop_.integerCharge() / 3.; }
 
   Particle& Particle::clearMothers() {
     mothers_.clear();
@@ -142,10 +142,9 @@ namespace cepgen {
   }
 
   long Particle::integerPdgId() const {
-    const float ch = phys_prop_.charge / 3.;
-    if (ch == 0)
-      return static_cast<long>(pdg_id_);
-    return static_cast<long>(pdg_id_) * charge_sign_ * (ch / fabs(ch));
+    if (const auto ch = phys_prop_.integerCharge(); ch != 0)
+      return static_cast<long>(pdg_id_) * charge_sign_ * (ch / std::abs(ch));
+    return static_cast<long>(pdg_id_);
   }
 
   std::ostream& operator<<(std::ostream& os, const Particle& part) {

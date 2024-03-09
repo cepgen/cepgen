@@ -160,7 +160,7 @@ namespace cepgen {
       double generateVariables() const;
 
       /// Set the incoming and outgoing states to be defined in this process (and prepare the Event object accordingly)
-      void setEventContent(const std::unordered_map<Particle::Role, pdgids_t>&);
+      void setEventContent(const std::unordered_map<Particle::Role, spdgids_t>&);
 
       double alphaEM(double q) const;  ///< Compute the electromagnetic running coupling algorithm at a given scale
       double alphaS(double q) const;   ///< Compute the strong coupling algorithm at a given scale

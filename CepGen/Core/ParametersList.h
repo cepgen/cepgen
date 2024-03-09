@@ -26,19 +26,19 @@
 
 #include "CepGen/Utils/Limits.h"
 
-#define DEFINE_TYPE(type)                                                  \
-  template <>                                                              \
-  bool ParametersList::has<type>(const std::string&) const;                \
-  template <>                                                              \
-  type ParametersList::get<type>(const std::string&, const type&) const;   \
-  template <>                                                              \
-  type& ParametersList::operator[]<type>(const std::string&);              \
-  template <>                                                              \
-  ParametersList& ParametersList::set<type>(std::string key, const type&); \
-  template <>                                                              \
-  std::vector<std::string> ParametersList::keysOf<type>() const;           \
-  template <>                                                              \
-  size_t ParametersList::erase<type>(const std::string&);                  \
+#define DEFINE_TYPE(type)                                                     \
+  template <>                                                                 \
+  bool ParametersList::has<type>(const std::string&) const;                   \
+  template <>                                                                 \
+  type ParametersList::get<type>(const std::string&, const type&) const;      \
+  template <>                                                                 \
+  type& ParametersList::operator[]<type>(const std::string&);                 \
+  template <>                                                                 \
+  ParametersList& ParametersList::set<type>(const std::string&, const type&); \
+  template <>                                                                 \
+  std::vector<std::string> ParametersList::keysOf<type>() const;              \
+  template <>                                                                 \
+  size_t ParametersList::erase<type>(const std::string&);                     \
   static_assert(true, "")
 
 namespace cepgen {
@@ -114,11 +114,11 @@ namespace cepgen {
     T& operator[](const std::string& key);
     /// Set a parameter value
     template <typename T>
-    ParametersList& set(std::string key, const T& value);
+    ParametersList& set(const std::string&, const T&);
     /// Set a recast parameter value
     template <typename T, typename U>
-    inline ParametersList& setAs(std::string key, const U& value) {
-      return set<T>(std::move(key), static_cast<T>(value));
+    inline ParametersList& setAs(const std::string& key, const U& value) {
+      return set<T>(key, static_cast<T>(value));
     }
     /// Rename the key to a parameter value
     ParametersList& rename(const std::string& old_key, const std::string& new_key);

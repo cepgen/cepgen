@@ -89,8 +89,8 @@ namespace cepgen {
     void initialise() override {
       lhe_output_->headerBlock() << "<!--\n" << banner() << "\n-->";
       if (runParameters().hasProcess()) {  // run information only specified if process (and kinematics) is specified
-        lhe_output_->heprup.IDBMUP = {(int)runParameters().kinematics().incomingBeams().positive().pdgId(),
-                                      (int)runParameters().kinematics().incomingBeams().negative().pdgId()};
+        lhe_output_->heprup.IDBMUP = {(int)runParameters().kinematics().incomingBeams().positive().integerPdgId(),
+                                      (int)runParameters().kinematics().incomingBeams().negative().integerPdgId()};
         lhe_output_->heprup.EBMUP = {(double)runParameters().kinematics().incomingBeams().positive().momentum().pz(),
                                      (double)runParameters().kinematics().incomingBeams().negative().momentum().pz()};
       }
