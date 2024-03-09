@@ -18,6 +18,8 @@
 
 //=============================================================================
 // NOLI SE TANGERE
+#include <iostream>
+
 #include "CPPProcess.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Math.h"
@@ -43,12 +45,16 @@ public:
   }
 
   void initialise(const std::string& param_card) override {
+    std::stringstream buf;
+    auto* old = std::cout.rdbuf(buf.rdbuf());
     try {
       proc_->initProc(param_card);
     } catch (const char* chr) {
       throw CG_FATAL("MadGraphProcessImpl:init")
           << "Failed to initialise parameters card at \"" << param_card << "\":\n\t" << chr;
     }
+    std::cout.rdbuf(old);
+    CG_DEBUG("MadGraphProcessImpl:init") << "MadGraph process initialisation result:\n" << buf.str();
     if (proc_->nprocesses > 1)
       throw CG_FATAL("MadGraphProcessImpl:init") << "Multi-processes matrix elements are not (yet) supported!";
     if (proc_->ninitial != 2)

@@ -23,12 +23,12 @@
 namespace cepgen {
   template class ModuleFactory<MadGraphProcess, std::string>;
 
+  const auto translate_vint_to_vpdg = [](const std::vector<int>& ints) { return pdgids_t(ints.begin(), ints.end()); };
+
   MadGraphProcess::MadGraphProcess(const ParametersList& params)
       : SteeredObject(params),
-        incoming_pdgids_(steer<std::vector<int> >("incomingSystem").begin(),
-                         steer<std::vector<int> >("incomingSystem").end()),
-        central_pdgids_(steer<std::vector<int> >("outgoingSystem").begin(),
-                        steer<std::vector<int> >("outgoingSystem").end()) {}
+        incoming_pdgids_(translate_vint_to_vpdg(steer<std::vector<int> >("incomingSystem"))),
+        central_pdgids_(translate_vint_to_vpdg(steer<std::vector<int> >("outgoingSystem"))) {}
 
   MadGraphProcess& MadGraphProcess::setMomentum(size_t i, const Momentum& mom) {
     if (i > mom_.size())
