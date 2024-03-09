@@ -37,13 +37,18 @@ namespace cepgen {
   class PhaseSpaceGenerator2to4 : public PhaseSpaceGenerator {
   public:
     explicit PhaseSpaceGenerator2to4(const ParametersList& params)
-        : PhaseSpaceGenerator(params), part_psgen_(new T(params)), particles_(steer<std::vector<int> >("ids")) {}
+        : PhaseSpaceGenerator(params),
+          part_psgen_(new T(params)),
+          particles_(steer<std::vector<int> >("ids")),
+          randomise_charge_(steer<bool>("randomiseCharge")) {}
 
     static ParametersDescription description() {
       auto desc = PhaseSpaceGenerator::description();
       desc.setDescription("2-to-4 phase space mapper (" + T::description().description() + "/" +
                           T::description().description() + ")");
       desc.add<std::vector<int> >("ids", {}).setDescription("list of particles produced");
+      desc.add<bool>("randomiseCharge", true)
+          .setDescription("randomise the charges of the central system (if charged)?");
       desc += T::description();
       return desc;
     }
@@ -191,10 +196,13 @@ namespace cepgen {
                                     << "Second parton: " << proc_->q2() << ", mass2 = " << proc_->q2().mass2()
                                     << ", x2 = " << x2 << ", p = " << proc_->q2().p() << ".";
 
-      // randomise the charge of outgoing system
-      const short sign = proc_->randomGenerator().uniformInt(0, 1) == 1 ? 1 : -1;
-      proc_->event()[Particle::CentralSystem][0].get().setChargeSign(+sign).setStatus(Particle::Status::FinalState);
-      proc_->event()[Particle::CentralSystem][1].get().setChargeSign(-sign).setStatus(Particle::Status::FinalState);
+      if (randomise_charge_) {  // randomise the charge of outgoing system
+        const short sign = proc_->randomGenerator().uniformInt(0, 1) == 1 ? 1 : -1;
+        proc_->event()[Particle::CentralSystem][0].get().setChargeSign(+sign);
+        proc_->event()[Particle::CentralSystem][1].get().setChargeSign(-sign);
+      }
+      proc_->event()[Particle::CentralSystem][0].get().setStatus(Particle::Status::FinalState);
+      proc_->event()[Particle::CentralSystem][1].get().setStatus(Particle::Status::FinalState);
       proc_->x1() = x1;
       proc_->x2() = x2;
       proc_->pX() = px;
@@ -208,6 +216,7 @@ namespace cepgen {
 
     const std::unique_ptr<PartonsPhaseSpaceGenerator> part_psgen_;
     std::vector<int> particles_;  ///< Type of particles produced in the final state (integer values)
+    const bool randomise_charge_;
 
     proc::FactorisedProcess* proc_{nullptr};  //NOT owning
 
