@@ -49,14 +49,14 @@ namespace cepgen {
 
     short integerCharge() const;  ///< Integer charge, in \f$e\f$/3
 
-    pdgid_t pdgid{0ull};       ///< PDG identifier
-    std::string name{};        ///< Particle name
-    std::string descr{};       ///< Human-readable name
-    int colours{0};            ///< Colour factor
-    double mass{0.};           ///< Mass, in GeV/c\f$^2\f$
-    double width{0.};          ///< Decay width, in GeV/c\f$^2\f$
-    std::vector<int> charges;  ///< Electric charges, in \f$e\f$/3
-    bool fermion{false};       ///< Is the particle a fermion?
+    pdgid_t pdgid{0ull};         ///< PDG identifier
+    std::string name{};          ///< Particle name
+    std::string descr{};         ///< Human-readable name
+    int colours{0};              ///< Colour factor
+    double mass{0.};             ///< Mass, in GeV/c\f$^2\f$
+    double width{0.};            ///< Decay width, in GeV/c\f$^2\f$
+    std::vector<int> charges{};  ///< Electric charges, in \f$e\f$/3
+    bool fermion{false};         ///< Is the particle a fermion?
   };
 }  // namespace cepgen
 

@@ -31,7 +31,7 @@ namespace cepgen {
         .add("colours", colours)
         .add("mass", mass)
         .add("width", width)
-        .add("charges", charges)
+        //.add("charges", charges)  // we disable this for the time being
         .add("fermion", fermion);
   }
 
