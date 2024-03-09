@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ namespace cepgen {
     static constexpr const char* gFFStandardDipoleHandler = "StandardDipole";
   }  // namespace formfac
   /// A form factors parameterisations factory
-  DEFINE_FACTORY_STR(FormFactorsFactory, formfac::Parameterisation, "Nucleon form factors factory");
+  DEFINE_FACTORY(std::string, FormFactorsFactory, formfac::Parameterisation, "Nucleon form factors factory");
 }  // namespace cepgen
 
 #endif

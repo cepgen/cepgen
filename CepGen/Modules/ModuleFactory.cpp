@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2023  Laurent Forthomme
+ *  Copyright (C) 2021-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,36 +18,12 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/ModuleFactory.h"
+#include "CepGen/Modules/ModuleFactoryImpl.h"
 #include "CepGen/Utils/String.h"
-
-// collection of handled objects
-#include "CepGen/Cards/Handler.h"
-#include "CepGen/CollinearFluxes/CollinearFlux.h"
-#include "CepGen/Core/GeneratorWorker.h"
-#include "CepGen/Event/Event.h"
-#include "CepGen/EventFilter/EventExporter.h"
-#include "CepGen/EventFilter/EventImporter.h"
-#include "CepGen/EventFilter/EventModifier.h"
-#include "CepGen/FormFactors/Parameterisation.h"
-#include "CepGen/Integration/AnalyticIntegrator.h"
-#include "CepGen/Integration/Integrator.h"
-#include "CepGen/KTFluxes/KTFlux.h"
-#include "CepGen/Physics/Coupling.h"
-#include "CepGen/Process/PhaseSpaceGenerator.h"
-#include "CepGen/Process/Process.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
-#include "CepGen/StructureFunctions/SigmaRatio.h"
-#include "CepGen/Utils/Derivator.h"
-#include "CepGen/Utils/Drawer.h"
-#include "CepGen/Utils/Functional.h"
-#include "CepGen/Utils/RandomGenerator.h"
 
 namespace cepgen {
   template <typename T, typename I>
-  ModuleFactory<T, I>& ModuleFactory<T, I>::get() {
-    static ModuleFactory<T, I> instance;
-    return instance;
-  }
+  ModuleFactory<T, I>::ModuleFactory(const std::string& descr) : description_(descr) {}
 
   template <typename T, typename I>
   std::unique_ptr<T> ModuleFactory<T, I>::build(const I& name, const ParametersList& params) const {
@@ -133,24 +109,4 @@ namespace cepgen {
     std::sort(out.begin(), out.end());
     return out;
   }
-
-  template class ModuleFactory<card::Handler, std::string>;
-  template class ModuleFactory<CollinearFlux, std::string>;
-  template class ModuleFactory<Coupling, std::string>;
-  template class ModuleFactory<utils::Derivator, std::string>;
-  template class ModuleFactory<utils::Drawer, std::string>;
-  template class ModuleFactory<EventImporter, std::string>;
-  template class ModuleFactory<EventModifier, std::string>;
-  template class ModuleFactory<EventExporter, std::string>;
-  template class ModuleFactory<formfac::Parameterisation, std::string>;
-  template class ModuleFactory<GeneratorWorker, std::string>;
-  template class ModuleFactory<Integrator, std::string>;
-  template class ModuleFactory<AnalyticIntegrator, std::string>;
-  template class ModuleFactory<KTFlux, std::string>;
-  template class ModuleFactory<PhaseSpaceGenerator, std::string>;
-  template class ModuleFactory<proc::Process, std::string>;
-  template class ModuleFactory<sigrat::Parameterisation, int>;
-  template class ModuleFactory<strfun::Parameterisation, int>;
-  template class ModuleFactory<utils::Functional, std::string>;
-  template class ModuleFactory<utils::RandomGenerator, std::string>;
 }  // namespace cepgen

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@
 namespace cepgen {
   class EventImporter;
   /// An event import algorithm factory
-  DEFINE_FACTORY_STR(EventImporterFactory, EventImporter, "Event importers factory");
+  DEFINE_FACTORY(std::string, EventImporterFactory, EventImporter, "Event importers factory");
 }  // namespace cepgen
 
 #endif

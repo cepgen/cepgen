@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -46,9 +46,9 @@ namespace cepgen {
   class CollinearFlux;
   class KTFlux;
   /// A collinear parton fluxes objects factory
-  DEFINE_FACTORY_STR(CollinearFluxFactory, CollinearFlux, "Collinear parton flux estimators factory");
+  DEFINE_FACTORY(std::string, CollinearFluxFactory, CollinearFlux, "Collinear parton flux estimators factory");
   /// A KT-factorised parton fluxes objects factory
-  DEFINE_FACTORY_STR(KTFluxFactory, KTFlux, "KT-factorised flux estimators factory");
+  DEFINE_FACTORY(std::string, KTFluxFactory, KTFlux, "KT-factorised flux estimators factory");
 
   struct PartonFluxFactory {
     static PartonFluxFactory& get() {

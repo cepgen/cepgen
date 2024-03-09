@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -50,14 +50,15 @@ namespace cepgen {
     class Parameterisation;
   }
   /// A structure functions parameterisations factory
-  DEFINE_FACTORY_INT(StructureFunctionsFactory,
-                     strfun::Parameterisation,
-                     "Nucleon structure functions parameterisations factory");
+  DEFINE_FACTORY(int,
+                 StructureFunctionsFactory,
+                 strfun::Parameterisation,
+                 "Nucleon structure functions parameterisations factory");
   namespace sigrat {
     class Parameterisation;
   }
   /// A sigma ratio parameterisations factory
-  DEFINE_FACTORY_INT(SigmaRatiosFactory, sigrat::Parameterisation, "Sigma L/T parameterisations factory");
+  DEFINE_FACTORY(int, SigmaRatiosFactory, sigrat::Parameterisation, "Sigma L/T parameterisations factory");
 }  // namespace cepgen
 
 #endif
