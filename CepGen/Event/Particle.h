@@ -124,20 +124,19 @@ namespace cepgen {
     /// \param[in] pdg PDG identifier
     /// \param[in] ch Electric charge (0, 1, or -1)
     Particle& setPdgId(pdgid_t pdg, short ch = 0);
+    pdgid_t pdgId() const;  ///< Retrieve the objectified PDG identifier
     /// Set the PDG identifier (along with the particle's electric charge)
     /// \param[in] pdg_id PDG identifier (incl. electric charge in e)
-    Particle& setPdgId(long pdg_id);
-    /// Retrieve the objectified PDG identifier
-    pdgid_t pdgId() const;
-    /// Retrieve the integer value of the PDG identifier
-    int integerPdgId() const;
-    /// Particle's helicity
-    float helicity() const { return helicity_; }
+    Particle& setIntegerPdgId(long pdg_id);
+    long integerPdgId() const;  ///< Retrieve the integer value of the PDG identifier
+
+    float helicity() const { return helicity_; }  ///< Particle's helicity
     /// Set the helicity of the particle
     Particle& setHelicity(float heli) {
       helicity_ = heli;
       return *this;
     }
+
     /// Retrieve the momentum object associated with this particle
     inline Momentum& momentum() { return momentum_; }
     /// Retrieve the momentum object associated with this particle
