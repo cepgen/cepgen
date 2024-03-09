@@ -51,11 +51,12 @@ public:
   proc::ProcessPtr clone() const override { return proc::ProcessPtr(new MadGraphProcessBuilder(parameters(), false)); }
 
   void addEventContent() override {
+    const auto mg5_proc_cent = mg5_proc_->centralSystem();
     Process::setEventContent({{Particle::IncomingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
                               {Particle::IncomingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
                               {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
                               {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
-                              {Particle::CentralSystem, mg5_proc_->centralSystem()}});
+                              {Particle::CentralSystem, pdgids_t(mg5_proc_cent.begin(), mg5_proc_cent.end())}});
   }
 
   static ParametersDescription description() {
@@ -68,7 +69,8 @@ public:
   }
 
   void prepareFactorisedPhaseSpace() override {
-    if (mg5_proc_->intermediatePartons() != psgen_->partons())
+    const auto psgen_partons = psgen_->partons();
+    if (mg5_proc_->intermediatePartons() != std::vector<int>(psgen_partons.begin(), psgen_partons.end()))
       throw CG_FATAL("MadGraphProcessBuilder")
           << "MadGraph unpacked process incoming state (" << mg5_proc_->intermediatePartons() << ") "
           << "is incompatible with user-steered incoming fluxes particles (" << psgen_->partons() << ").";

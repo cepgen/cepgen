@@ -32,8 +32,8 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    inline const pdgids_t& intermediatePartons() const { return incoming_pdgids_; }
-    inline const pdgids_t& centralSystem() const { return central_pdgids_; }
+    inline const std::vector<int>& intermediatePartons() const { return incoming_pdgids_; }
+    inline const std::vector<int>& centralSystem() const { return central_pdgids_; }
 
     virtual void initialise(const std::string&) = 0;
     virtual double eval() = 0;
@@ -42,7 +42,7 @@ namespace cepgen {
     MadGraphProcess& setMomentum(size_t i, const Momentum& mom);
 
   protected:
-    const pdgids_t incoming_pdgids_, central_pdgids_;
+    const std::vector<int> incoming_pdgids_, central_pdgids_;
     std::vector<double*> mom_;
   };
 }  // namespace cepgen

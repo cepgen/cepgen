@@ -160,7 +160,7 @@ namespace cepgen {
     log << "\n\n*** mg5_aMC process library compilation ***\n\n";
 
     const auto& parts = mg5amc::unpackProcessParticles(proc_);
-    std::vector<pdgid_t> in_parts, out_parts;
+    std::vector<int> in_parts, out_parts;
     for (const auto& in_part : parts.first) {
       if (mg5_parts_.count(in_part) == 0) {
         const auto pprops = mg5amc::describeParticle(in_part, model_);

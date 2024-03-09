@@ -69,13 +69,14 @@ namespace cepgen {
       ParametersList plist_part;
       {  // this part retrieves the list of parameters for a given particle name, using a python call to MadGraph
         python::Environment env({});
+        const std::string name_part_dict = "part_dict";
         std::vector<std::string> cmds;
         if (!model.empty()) {
           cmds.emplace_back("set auto_convert_model T");
           cmds.emplace_back("import model " + model);
         }
         cmds.emplace_back("display particles " + part_name);
-        std::string py_output{"part_dict="};
+        auto py_output = name_part_dict + "=";
         bool found_properties{false};
         for (const auto& line : runCommand(cmds, "/tmp/mg5_aMC_part_query.dat", true)) {
           if (!found_properties) {
@@ -93,7 +94,7 @@ namespace cepgen {
               << "Error while parsing the MadGraph python output for particle '" << part_name << "' of model '" << model
               << ". Python output:\n"
               << py_output;
-        auto part_prop = mod.attribute("part_dict");
+        auto part_prop = mod.attribute(name_part_dict);
         if (!part_prop)
           throw CG_FATAL("MadGraphInterface:describeParticle")
               << "Error while parsing the MadGraph python output for particle '" << part_name << "' of model '" << model
@@ -106,6 +107,9 @@ namespace cepgen {
       if (pdg_id == 0)
         throw CG_FATAL("MadGraphInterface:describeParticle")
             << "Failed to retrieve a 'pdg_code' key to the unpacked particle properties: " << plist_part << ".";
+      CG_DEBUG("MadGraphInterface:describeParticle") << "List of parameters retrieved from MadGraph on particle '"
+                                                     << part_name << "' from model '" << model << "':\n"
+                                                     << plist_part << ".";
       ParticleProperties props;
       if (const auto name = plist_part.get<std::string>("name"); !name.empty()) {
         props.name = name;

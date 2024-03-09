@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
   CG_TEST_EQUAL(proc_evt(cepgen::Particle::Role::CentralSystem).size(), 2, "cent.part.multiplicity");
   for (size_t i = 0; i < 2; ++i) {
     const auto& cent = proc_evt(cepgen::Particle::Role::CentralSystem).at(i);
-    CG_TEST_EQUAL(cent.pdgId(), +my_part, "cent." + to_string(i) + " PDG id");
+    CG_TEST_EQUAL(cent.integerPdgId(), short((i == 0 ? -1 : +1) * my_part), "cent." + to_string(i) + " PDG id");
     CG_TEST_EQUAL(cent.momentum().mass(), my_part_mass, "cent." + to_string(i) + " mass");
   }
 
