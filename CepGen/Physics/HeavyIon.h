@@ -60,7 +60,7 @@ namespace cepgen {
     /// Build from a custom PDG id
     static HeavyIon fromPdgId(pdgid_t);
     /// Check if the PDG id is compatible with a HI
-    static bool isHI(const pdgid_t&);
+    static bool isHI(const spdgid_t&);
     /// Check if the particle properties are compatible with a HI
     static bool isHI(const ParticleProperties&);
     /// Mass of a heavy ion, in GeV/c\f$^2\f$

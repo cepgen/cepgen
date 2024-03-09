@@ -39,10 +39,10 @@ namespace cepgen {
     return instance;
   }
 
-  bool PDG::has(pdgid_t id) const { return particles_.count(id) > 0; }
+  bool PDG::has(spdgid_t id) const { return particles_.count(std::abs(id)) > 0; }
 
-  const ParticleProperties& PDG::operator()(pdgid_t id) const {
-    auto it = particles_.find(id);
+  const ParticleProperties& PDG::operator()(spdgid_t id) const {
+    auto it = particles_.find(std::abs(id));
     if (it != particles_.end())
       return it->second;
     throw CG_FATAL("PDG").log([this, &id](auto& log) {
@@ -51,7 +51,7 @@ namespace cepgen {
     });
   }
 
-  ParticleProperties& PDG::operator[](pdgid_t id) { return particles_[id]; }
+  ParticleProperties& PDG::operator[](spdgid_t id) { return particles_[std::abs(id)]; }
 
   void PDG::define(const ParticleProperties& props) {
     if (props.pdgid == PDG::invalid && props.name != "invalid")
@@ -74,24 +74,24 @@ namespace cepgen {
     return out;
   }
 
-  const std::string& PDG::name(pdgid_t id) const {
+  const std::string& PDG::name(spdgid_t id) const {
     const auto& descr = operator()(id).descr;
     if (!descr.empty())
       return descr;
     return operator()(id).name;
   }
 
-  double PDG::colours(pdgid_t id) const { return operator()(id).colours; }
+  double PDG::colours(spdgid_t id) const { return operator()(id).colours; }
 
-  double PDG::mass(pdgid_t id) const {
+  double PDG::mass(spdgid_t id) const {
     if (HeavyIon::isHI(id))
       return HeavyIon::fromPdgId(id).mass();
     return operator()(id).mass;
   }
 
-  double PDG::width(pdgid_t id) const { return operator()(id).width; }
+  double PDG::width(spdgid_t id) const { return operator()(id).width; }
 
-  double PDG::charge(pdgid_t id) const { return operator()(id).integerCharge() * 1. / 3.; }
+  double PDG::charge(spdgid_t id) const { return operator()(id).integerCharge() * 1. / 3.; }
 
   size_t PDG::size() const { return particles_.size(); }
 
