@@ -56,10 +56,10 @@ private:
   void prepareFactorisedPhaseSpace() override {
     const auto cs_prop = PDG::get()(psgen_->central().at(0));
     // define central particle properties and couplings with partons
-    if (!cs_prop.fermion || cs_prop.charge == 0.)
+    if (!cs_prop.fermion || cs_prop.charges.empty())
       throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop << ".";
     mf2_ = cs_prop.mass * cs_prop.mass;
-    qf2_ = cs_prop.charge * cs_prop.charge * (1. / 9);
+    qf2_ = std::pow(cs_prop.integerCharge() * (1. / 3), 2);
     const auto generate_coupling = [this, &cs_prop](const pdgid_t& parton_id) -> std::function<double(double)> {
       switch (parton_id) {
         case PDG::gluon: {

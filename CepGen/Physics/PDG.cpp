@@ -28,10 +28,10 @@ namespace cepgen {
 
   PDG::PDG() {
     // PDG id, name, description, colour, mass, width, charge, is fermion
-    define(ParticleProperties(invalid, "invalid", "invalid", 0, -1., -1., 0, false));
-    define(ParticleProperties(diffractiveProton, "diff_proton", "p\u002A", 0, 0., 0., 3, false));
-    define(ParticleProperties(pomeron, "pomeron", "\u2119", 0, 0., 0., 0, false));
-    define(ParticleProperties(reggeon, "reggeon", "\u211D", 0, 0., 0., 0, false));
+    define(ParticleProperties(invalid, "invalid", "invalid", 0, -1., -1., {}, false));
+    define(ParticleProperties(diffractiveProton, "diff_proton", "p\u002A", 0, 0., 0., {3}, false));
+    define(ParticleProperties(pomeron, "pomeron", "\u2119", 0, 0., 0., {0}, false));
+    define(ParticleProperties(reggeon, "reggeon", "\u211D", 0, 0., 0., {0}, false));
   }
 
   PDG& PDG::get() {
@@ -91,7 +91,7 @@ namespace cepgen {
 
   double PDG::width(pdgid_t id) const { return operator()(id).width; }
 
-  double PDG::charge(pdgid_t id) const { return operator()(id).charge * 1. / 3.; }
+  double PDG::charge(pdgid_t id) const { return operator()(id).integerCharge() * 1. / 3.; }
 
   size_t PDG::size() const { return particles_.size(); }
 
@@ -115,7 +115,7 @@ namespace cepgen {
             "\n%20s %-32s\tcharge: %2de, colour factor: %1d, mass: %8.4f GeV/c^2, width: %6.3f GeV.",
             utils::colourise(std::to_string(prt.second.pdgid), utils::Colour::none, utils::Modifier::italic).data(),
             (utils::boldify(prt.second.name) + " " + (prt.second.fermion ? "fermion" : "boson") + ":").data(),
-            prt.second.charge / 3,
+            prt.second.charges,
             prt.second.colours,
             prt.second.mass,
             prt.second.width);

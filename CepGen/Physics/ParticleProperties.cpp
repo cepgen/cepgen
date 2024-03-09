@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2017-2023  Laurent Forthomme
+ *  Copyright (C) 2017-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,8 +17,11 @@
  */
 
 #include <iostream>
+#include <set>
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/ParticleProperties.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   ParticleProperties::ParticleProperties(const ParametersList& params) : SteeredObject(params) {
@@ -29,7 +32,7 @@ namespace cepgen {
         .add("colours", colours)
         .add("mass", mass)
         .add("width", width)
-        .add("charge", charge)
+        .add("charges", charges)
         .add("fermion", fermion);
   }
 
@@ -39,7 +42,7 @@ namespace cepgen {
                                          int pcolours,
                                          double pmass,
                                          double pwidth,
-                                         int pcharge,
+                                         const std::vector<int>& pcharges,
                                          bool pfermion)
       : ParticleProperties(ParametersList()
                                .set("pdgid", ppdgid)
@@ -48,8 +51,20 @@ namespace cepgen {
                                .set("colours", pcolours)
                                .set("mass", pmass)
                                .set("width", pwidth)
-                               .set("charge", pcharge)
+                               .set("charges", pcharges)
                                .set("fermion", pfermion)) {}
+
+  short ParticleProperties::integerCharge() const {
+    if (charges.empty())
+      return 0;
+    std::set<short> abs_charges;
+    for (const auto& ch : charges)
+      abs_charges.insert(std::abs(ch));
+    if (abs_charges.size() > 1)
+      throw CG_ERROR("ParticleProperties:integerCharge")
+          << "Multiple charges are possible for the given particle: " << abs_charges << ".";
+    return *abs_charges.begin();
+  }
 
   ParametersDescription ParticleProperties::description() {
     auto desc = ParametersDescription();
@@ -59,7 +74,7 @@ namespace cepgen {
     desc.add<int>("colours", 0).setDescription("colour factor");
     desc.add<double>("mass", 0.).setDescription("particle mass (in GeV/c^2)");
     desc.add<double>("width", 0.).setDescription("particle width (in GeV)");
-    desc.add<int>("charge", 0).setDescription("electric charge (in units of e)");
+    desc.add<std::vector<int> >("charges", {}).setDescription("possible electric charges (in units of e)");
     desc.add<bool>("fermion", false).setDescription("is the particle following the Fermi-Dirac statistics?");
     return desc;
   }
@@ -67,7 +82,7 @@ namespace cepgen {
   std::ostream& operator<<(std::ostream& os, const ParticleProperties& prop) {
     return os << (prop.name.empty() ? "unnamed" : prop.name) << "{"
               << "pdgid=" << prop.pdgid << ",desc=" << prop.descr << ",colours=" << prop.colours
-              << ",mass=" << prop.mass << ",width=" << prop.width << ",charge=" << prop.charge
-              << (prop.fermion ? ",fermion" : "") << "}";
+              << ",mass=" << prop.mass << ",width=" << prop.width << ",charges={" << utils::merge(prop.charges, ", ")
+              << "}" << (prop.fermion ? ",fermion" : "") << "}";
   }
 }  // namespace cepgen

@@ -48,9 +48,9 @@ namespace cepgen {
       elastic_ = el;
       return *this;
     }
-    pdgid_t pdgId() const { return pdg_id_; }  ///< Beam particle PDG id
+    spdgid_t integerPdgId() const { return pdg_id_; }  ///< Beam particle PDG id
     /// Set the beam particle PDG id
-    Beam& setPdgId(pdgid_t pdg) {
+    Beam& setIntegerPdgId(spdgid_t pdg) {
       pdg_id_ = pdg;
       return *this;
     }
@@ -63,7 +63,7 @@ namespace cepgen {
     const ParametersList& partonFluxParameters() const { return flux_info_; }
 
   private:
-    pdgid_t pdg_id_{0};         ///< PDG identifier for the beam
+    spdgid_t pdg_id_{0};        ///< PDG identifier for the beam
     Momentum momentum_;         ///< Incoming particle momentum
     ParametersList flux_info_;  ///< Incoming parton flux parameters
     bool elastic_;              ///< Elastic parton emission?

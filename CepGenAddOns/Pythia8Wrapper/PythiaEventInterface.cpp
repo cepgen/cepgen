@@ -34,9 +34,9 @@ namespace Pythia8 {
     inel1_ = !params_->kinematics().incomingBeams().positive().elastic();
     inel2_ = !params_->kinematics().incomingBeams().negative().elastic();
 
-    setBeamA((short)params_->kinematics().incomingBeams().positive().pdgId(),
+    setBeamA((short)params_->kinematics().incomingBeams().positive().integerPdgId(),
              params_->kinematics().incomingBeams().positive().momentum().pz());
-    setBeamB((short)params_->kinematics().incomingBeams().negative().pdgId(),
+    setBeamB((short)params_->kinematics().incomingBeams().negative().integerPdgId(),
              params_->kinematics().incomingBeams().negative().momentum().pz());
     //addProcess( 0, params_->integration().result, params_->integration().err_result, 100. );
   }

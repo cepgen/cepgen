@@ -37,10 +37,7 @@ namespace cepgen {
   class PhaseSpaceGenerator2to4 : public PhaseSpaceGenerator {
   public:
     explicit PhaseSpaceGenerator2to4(const ParametersList& params)
-        : PhaseSpaceGenerator(params),
-          part_psgen_(new T(params)),
-          int_particles_(steer<std::vector<int> >("ids")),
-          particles_(int_particles_.begin(), int_particles_.end()) {}
+        : PhaseSpaceGenerator(params), part_psgen_(new T(params)), particles_(steer<std::vector<int> >("ids")) {}
 
     static ParametersDescription description() {
       auto desc = PhaseSpaceGenerator::description();
@@ -99,7 +96,9 @@ namespace cepgen {
       return pdgids_t{part_psgen_->positiveFlux().partonPdgId(), part_psgen_->negativeFlux().partonPdgId()};
     }
 
-    pdgids_t central() const override { return particles_; }
+    std::vector<int> central() const override { return particles_; }
+
+    void setCentral(const std::vector<int>& cent) override { particles_ = cent; }
 
     double that() const override {
       return 0.5 * ((proc_->q1() - proc_->pc(0)).mass2() + (proc_->q2() - proc_->pc(1)).mass2());
@@ -208,8 +207,7 @@ namespace cepgen {
     static constexpr double NUM_LIMITS = 1.e-3;  ///< Numerical limits for sanity comparisons (MeV/mm-level)
 
     const std::unique_ptr<PartonsPhaseSpaceGenerator> part_psgen_;
-    const std::vector<int> int_particles_;  ///< Type of particles produced in the final state (integer values)
-    const pdgids_t particles_;              ///< Type of particles produced in the final state (PDG ids)
+    std::vector<int> particles_;  ///< Type of particles produced in the final state (integer values)
 
     proc::FactorisedProcess* proc_{nullptr};  //NOT owning
 

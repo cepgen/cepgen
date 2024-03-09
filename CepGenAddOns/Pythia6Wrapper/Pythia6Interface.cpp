@@ -122,8 +122,9 @@ namespace pythia6 {
     prop.descr = name;
     //prop.colours = pyk(p + 1, 12);  // colour factor
     prop.mass = pymass(pdg_id);
-    prop.width = -1.;              //pmas( pdg_id, 2 ),
-    prop.charge = pychge(pdg_id);  // charge
+    prop.width = -1.;  //pmas( pdg_id, 2 ),
+    if (const auto ch = pychge(pdg_id); std::fabs(ch) > 0)
+      prop.charges = {+std::abs(int(ch * 3.)), -std::abs(int(ch * 3.))};
     prop.fermion = false;
     cepgen::PDG::get().define(prop);
   }

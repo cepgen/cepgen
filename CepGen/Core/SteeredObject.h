@@ -56,6 +56,7 @@ namespace cepgen {
     REGISTER_TYPE(std::string, map_strs_)
     REGISTER_TYPE(Limits, map_lims_)
     REGISTER_TYPE(ParametersList, map_params_)
+    REGISTER_TYPE(std::vector<int>, map_vints_)
 
   public:
     /// Module user-defined parameters
@@ -73,6 +74,8 @@ namespace cepgen {
       for (const auto& kv : map_lims_)
         params_.set(kv.first, kv.second.get());
       for (const auto& kv : map_params_)
+        params_.set(kv.first, kv.second.get());
+      for (const auto& kv : map_vints_)
         params_.set(kv.first, kv.second.get());
       return params_;
     }
@@ -94,6 +97,8 @@ namespace cepgen {
         kv.second.get() = params_.operator[]<Limits>(kv.first);
       for (const auto& kv : map_params_)
         kv.second.get() = params_.operator[]<ParametersList>(kv.first);
+      for (const auto& kv : map_vints_)
+        kv.second.get() = params_.operator[]<std::vector<int> >(kv.first);
     }
   };
 }  // namespace cepgen

@@ -95,8 +95,8 @@ namespace cepgen {
 #endif
       const auto& kin = runParameters().kinematics();
 
-      pythia_->settings.parm("Beams:idA", (long)kin.incomingBeams().positive().pdgId());
-      pythia_->settings.parm("Beams:idB", (long)kin.incomingBeams().negative().pdgId());
+      pythia_->settings.parm("Beams:idA", (long)kin.incomingBeams().positive().integerPdgId());
+      pythia_->settings.parm("Beams:idB", (long)kin.incomingBeams().negative().integerPdgId());
       // specify we will be using a LHA input
       pythia_->settings.mode("Beams:frameType", 5);
       pythia_->settings.parm("Beams:eCM", kin.incomingBeams().sqrtS());
