@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ namespace cepgen {
     class Process;
   }
   /// A processes factory
-  DEFINE_FACTORY_STR(ProcessFactory, proc::Process, "Physics processes factory");
+  DEFINE_FACTORY(std::string, ProcessFactory, proc::Process, "Physics processes factory");
 }  // namespace cepgen
 
 #endif

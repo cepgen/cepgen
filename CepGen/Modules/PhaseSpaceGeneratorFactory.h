@@ -36,7 +36,7 @@
 namespace cepgen {
   class PhaseSpaceGenerator;
   /// An integration algorithms factory
-  DEFINE_FACTORY_STR(PhaseSpaceGeneratorFactory, PhaseSpaceGenerator, "Phase space generator factory");
+  DEFINE_FACTORY(std::string, PhaseSpaceGeneratorFactory, PhaseSpaceGenerator, "Phase space generator factory");
 }  // namespace cepgen
 
 #endif

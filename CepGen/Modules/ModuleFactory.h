@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2023  Laurent Forthomme
+ *  Copyright (C) 2018-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,22 +27,15 @@
 #include "CepGen/Modules/NamedModule.h"
 
 #define BUILDERNM(obj) obj##Builder
-#define DEFINE_FACTORY_STR(name, objtype, descr)             \
-  struct name : public ModuleFactory<objtype, std::string> { \
-    explicit name() : ModuleFactory(descr) {}                \
-    static name& get() {                                     \
-      static name instance;                                  \
-      return instance;                                       \
-    }                                                        \
-  }
-#define DEFINE_FACTORY_INT(name, objtype, descr)     \
-  struct name : public ModuleFactory<objtype, int> { \
-    explicit name() : ModuleFactory(descr) {}        \
-    static name& get() {                             \
-      static name instance;                          \
-      return instance;                               \
-    }                                                \
-  }
+#define DEFINE_FACTORY(idx_type, name, obj_type, descr)    \
+  struct name : public ModuleFactory<obj_type, idx_type> { \
+    explicit name() : ModuleFactory(descr) {}              \
+    static name& get() {                                   \
+      static name instance;                                \
+      return instance;                                     \
+    }                                                      \
+  };                                                       \
+  static_assert(true, "")
 
 namespace cepgen {
   /// A generic factory to build modules

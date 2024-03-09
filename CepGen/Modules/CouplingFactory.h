@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -46,9 +46,9 @@
 namespace cepgen {
   class Coupling;
   /// An electromagnetic coupling evolution algorithms factory
-  DEFINE_FACTORY_STR(AlphaEMFactory, Coupling, "Electromagnetic coupling evolution factory");
+  DEFINE_FACTORY(std::string, AlphaEMFactory, Coupling, "Electromagnetic coupling evolution factory");
   /// A strong coupling evolution algorithms factory
-  DEFINE_FACTORY_STR(AlphaSFactory, Coupling, "Strong coupling evolution factory");
+  DEFINE_FACTORY(std::string, AlphaSFactory, Coupling, "Strong coupling evolution factory");
 }  // namespace cepgen
 
 #endif
