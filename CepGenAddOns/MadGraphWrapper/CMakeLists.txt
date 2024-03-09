@@ -7,7 +7,7 @@ endif()
 #----- build the object
 
 set(mg_defs)
-file(GLOB tmpl *.tpp)
+file(GLOB tmpl template/*.cpp)
 list(APPEND mg_defs "-DMADGRAPH_BIN=\"${MADGRAPH_BIN}\"")
 list(APPEND mg_defs "-DMADGRAPH_PROC_TMPL=\"${tmpl}\"")
 list(APPEND mg_defs "-DCC_CFLAGS=\"${CMAKE_CXX_COMPILER} ${CMAKE_CXX_FLAGS} -I${PROJECT_SOURCE_DIR}\"")
