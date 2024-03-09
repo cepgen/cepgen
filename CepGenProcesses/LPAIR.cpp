@@ -167,9 +167,9 @@ public:
                                                                      : Particle::Status::Unfragmented);
 
     // central system
-    const short ransign = rnd_gen_->uniformInt(0, 1) == 1 ? 1 : -1;
-    event()[Particle::CentralSystem][0].get().setChargeSign(+ransign).setStatus(Particle::Status::FinalState);
-    event()[Particle::CentralSystem][1].get().setChargeSign(-ransign).setStatus(Particle::Status::FinalState);
+    const short ransign = rnd_gen_->uniformInt(0, 1) == 1;
+    event()[Particle::CentralSystem][0].get().setAntiparticle(ransign).setStatus(Particle::Status::FinalState);
+    event()[Particle::CentralSystem][1].get().setAntiparticle(!ransign).setStatus(Particle::Status::FinalState);
   }
 
   static ParametersDescription description() {
