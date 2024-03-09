@@ -44,8 +44,6 @@ namespace cepgen {
   template <typename T, typename I = std::string>
   class ModuleFactory {
   public:
-    /// Retrieve a unique instance of this factory
-    static ModuleFactory& get();
     /// Disabled copy constructor
     ModuleFactory(const ModuleFactory&) = delete;
     /// Default destructor
@@ -54,12 +52,12 @@ namespace cepgen {
     void operator=(const ModuleFactory&) = delete;
 
     /// Describe the modules factory
-    const std::string& description() const { return description_; }
+    inline const std::string& description() const { return description_; }
 
     /// Register a named module in the database
     /// \tparam U Class to register (inherited from T base class)
     template <typename U>
-    void registerModule(const I& name, const ParametersList& def_params = ParametersList()) {
+    inline void registerModule(const I& name, const ParametersList& def_params = ParametersList()) {
       static_assert(std::is_base_of<T, U>::value,
                     "\n\n  *** Failed to register an object with improper inheritance into the factory. ***\n");
       if (has(name)) {
@@ -81,7 +79,7 @@ namespace cepgen {
     std::unique_ptr<T> build(const I& name, const ParametersList& params = ParametersList()) const;
     /// Build one instance of a named module
     /// \param[in] params List of parameters to be invoked by the constructor
-    std::unique_ptr<T> build(const ParametersList& params = ParametersList()) const;
+    std::unique_ptr<T> build(const ParametersList&) const;
 
     /// Constructor type for a module
     typedef std::unique_ptr<T> (*Builder)(const ParametersList&);
@@ -99,16 +97,16 @@ namespace cepgen {
     /// List of modules registred in the database
     std::vector<I> modules() const;
     /// Is the database empty?
-    bool empty() const { return map_.empty(); }
+    inline bool empty() const { return map_.empty(); }
     /// Number of modules registered in the database
-    size_t size() const { return map_.size(); }
+    inline size_t size() const { return map_.size(); }
     /// Check if a named module is registered
-    bool has(const I& name) const { return map_.count(name) > 0; }
+    inline bool has(const I& name) const { return map_.count(name) > 0; }
 
   private:
     /// Construct a module with its parameters set
     template <typename U>
-    static std::unique_ptr<T> buildModule(const ParametersList& params) {
+    inline static std::unique_ptr<T> buildModule(const ParametersList& params) {
       return std::unique_ptr<T>(new U(params));
     }
     /// Factory name
@@ -122,7 +120,7 @@ namespace cepgen {
 
   protected:
     /// Hidden default constructor for singleton operations
-    explicit ModuleFactory(const std::string& descr = "Unnamed factory") : description_(descr) {}
+    explicit ModuleFactory(const std::string&);
   };
 }  // namespace cepgen
 

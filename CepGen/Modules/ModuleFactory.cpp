@@ -23,10 +23,7 @@
 
 namespace cepgen {
   template <typename T, typename I>
-  ModuleFactory<T, I>& ModuleFactory<T, I>::get() {
-    static ModuleFactory<T, I> instance;
-    return instance;
-  }
+  ModuleFactory<T, I>::ModuleFactory(const std::string& descr) : description_(descr) {}
 
   template <typename T, typename I>
   std::unique_ptr<T> ModuleFactory<T, I>::build(const I& name, const ParametersList& params) const {
