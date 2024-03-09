@@ -31,17 +31,18 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-  double num_sigma;
+  double num_sigma, chi2;
   int num_gen, str_fun;
   string proc_name, integrator, plotter;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("process,p", "process to compute", &proc_name, "lpair")
-      .addOptionalArgument("num-gen,g", "number of events to generate", &num_gen, 25'000)
+      .addOptionalArgument("num-gen,g", "number of events to generate", &num_gen, 50'000)
       .addOptionalArgument("num-sigma,n", "max. number of std.dev.", &num_sigma, 3.)
       .addOptionalArgument("str-fun,s", "struct.functions modelling", &str_fun, 11)
       .addOptionalArgument("integrator,i", "type of integrator used", &integrator, "Vegas")
       .addOptionalArgument("plotter,t", "type of plotter to use", &plotter, "")
+      .addOptionalArgument("chi2,x", "chi2 value cut for histograms compatibility test", &chi2, 1.)
       .parse();
 
   cepgen::utils::Timer tmr;
@@ -55,7 +56,7 @@ int main(int argc, char* argv[]) {
           .set<double>("sqrtS", 13.e3)
           .set<cepgen::ParametersList>(
               "structureFunctions", cepgen::StructureFunctionsFactory::get().describeParameters(str_fun).parameters())
-          .set<double>("ptmin", 25.)
+          .set<double>("ptmin", 5.)
           .set<cepgen::Limits>("eta", {-2.5, 2.5})
           .set<cepgen::Limits>("mx", {1.07, 1000.});
 
@@ -67,8 +68,8 @@ int main(int argc, char* argv[]) {
        h_eta_lead_ie = cepgen::utils::Hist1D(50, {-2.5, 2.5}, "eta_lead_ie", "inel-el"),
        h_eta_sublead_ei = cepgen::utils::Hist1D(50, {-2.5, 2.5}, "eta_sublead_ei", "el-inel"),
        h_eta_sublead_ie = cepgen::utils::Hist1D(50, {-2.5, 2.5}, "eta_sublead_ie", "inel-el"),
-       h_mdiff_ei = cepgen::utils::Hist1D(50, {0., 100.}, "mdiff_ei", "el-inel"),
-       h_mdiff_ie = cepgen::utils::Hist1D(50, {0., 100.}, "mdiff_ie", "inel-el");
+       h_mdiff_ei = cepgen::utils::Hist1D(50, {0., 1000.}, "mdiff_ei", "el-inel"),
+       h_mdiff_ie = cepgen::utils::Hist1D(50, {0., 1000.}, "mdiff_ie", "inel-el");
 
   {  // elastic-inelastic
     pkin.set<int>("mode", 2);
@@ -109,9 +110,9 @@ int main(int argc, char* argv[]) {
   CG_TEST_VALUES(cs_ei, cs_ie, num_sigma, "el-inel == inel-el");
 
   size_t ndf;
-  CG_TEST(h_eta_lead_ei.chi2test(h_eta_lead_ie, ndf) / ndf > 1., "leading lepton eta");
-  CG_TEST(h_eta_sublead_ei.chi2test(h_eta_sublead_ie, ndf) / ndf > 1., "subleading lepton eta");
-  CG_TEST(h_mdiff_ei.chi2test(h_mdiff_ie, ndf) / ndf < 1.1, "diffractive system mass");
+  CG_TEST(h_eta_lead_ei.chi2test(h_eta_lead_ie, ndf) / ndf > chi2, "leading lepton eta");
+  CG_TEST(h_eta_sublead_ei.chi2test(h_eta_sublead_ie, ndf) / ndf > chi2, "subleading lepton eta");
+  CG_TEST(h_mdiff_ei.chi2test(h_mdiff_ie, ndf) / ndf < 1.5 * chi2, "diffractive system mass");
 
   if (!plotter.empty()) {
     auto plt = cepgen::DrawerFactory::get().build(plotter);

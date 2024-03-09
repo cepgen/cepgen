@@ -53,7 +53,7 @@ namespace cepgen {
     return true;
   }
 
-  float Particle::charge() const { return charge_sign_ * phys_prop_.charge / 3.; }
+  float Particle::charge() const { return charge_sign_ * phys_prop_.integerCharge() / 3.; }
 
   Particle& Particle::clearMothers() {
     mothers_.clear();
@@ -116,12 +116,14 @@ namespace cepgen {
 
   pdgid_t Particle::pdgId() const { return pdg_id_; }
 
-  Particle& Particle::setPdgId(long pdg) {
+  Particle& Particle::setPdgId(pdgid_t pdg, short ch) { return setIntegerPdgId(pdg * (ch == 0 ? 1 : ch / abs(ch))); }
+
+  Particle& Particle::setIntegerPdgId(long pdg) {
     pdg_id_ = labs(pdg);
     if (PDG::get().has(pdg_id_)) {
       phys_prop_ = PDG::get()(pdg_id_);
-      CG_DEBUG("Particle:setPdgId") << "Particle PDG id set to " << pdg_id_ << ", "
-                                    << "properties set " << phys_prop_ << ".";
+      CG_DEBUG("Particle:setIntegerPdgId") << "Particle PDG id set to " << pdg_id_ << ", "
+                                           << "properties set " << phys_prop_ << ".";
     }
     switch (pdg_id_) {
       case 0:
@@ -139,13 +141,11 @@ namespace cepgen {
     return *this;
   }
 
-  Particle& Particle::setPdgId(pdgid_t pdg, short ch) { return setPdgId(long(pdg * (ch == 0 ? 1 : ch / abs(ch)))); }
-
-  int Particle::integerPdgId() const {
-    const float ch = phys_prop_.charge / 3.;
+  long Particle::integerPdgId() const {
+    const float ch = phys_prop_.integerCharge() / 3.;
     if (ch == 0)
-      return static_cast<int>(pdg_id_);
-    return static_cast<int>(pdg_id_) * charge_sign_ * (ch / fabs(ch));
+      return static_cast<long>(pdg_id_);
+    return static_cast<long>(pdg_id_) * charge_sign_ * (ch / fabs(ch));
   }
 
   std::ostream& operator<<(std::ostream& os, const Particle& part) {

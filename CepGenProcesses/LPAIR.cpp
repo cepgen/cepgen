@@ -63,14 +63,14 @@ public:
                                     {Particle::Parton2, {PDG::photon}},
                                     {Particle::OutgoingBeam1, {PDG::proton}},
                                     {Particle::OutgoingBeam2, {PDG::proton}},
-                                    {Particle::CentralSystem, {pair_.pdgid, pair_.pdgid}}});
+                                    {Particle::CentralSystem, {+(spdgid_t)pair_.pdgid, -(spdgid_t)pair_.pdgid}}});
   }
 
   double computeWeight() override;
 
   void prepareKinematics() override {
     ml2_ = pair_.mass * pair_.mass;
-    charge_factor_ = std::pow(pair_.charge / 3., 2);
+    charge_factor_ = std::pow(pair_.integerCharge() / 3., 2);
     beams_mode_ = kinematics().incomingBeams().mode();
     ep1_ = pA().energy();
     ep2_ = pB().energy();

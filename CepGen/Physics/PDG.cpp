@@ -28,10 +28,10 @@ namespace cepgen {
 
   PDG::PDG() {
     // PDG id, name, description, colour, mass, width, charge, is fermion
-    define(ParticleProperties(invalid, "invalid", "invalid", 0, -1., -1., 0, false));
-    define(ParticleProperties(diffractiveProton, "diff_proton", "p\u002A", 0, 0., 0., 3, false));
-    define(ParticleProperties(pomeron, "pomeron", "\u2119", 0, 0., 0., 0, false));
-    define(ParticleProperties(reggeon, "reggeon", "\u211D", 0, 0., 0., 0, false));
+    define(ParticleProperties(invalid, "invalid", "invalid", 0, -1., -1., {}, false));
+    define(ParticleProperties(diffractiveProton, "diff_proton", "p\u002A", 0, 0., 0., {-3, 3}, false));
+    define(ParticleProperties(pomeron, "pomeron", "\u2119", 0, 0., 0., {}, false));
+    define(ParticleProperties(reggeon, "reggeon", "\u211D", 0, 0., 0., {}, false));
   }
 
   PDG& PDG::get() {
@@ -39,10 +39,10 @@ namespace cepgen {
     return instance;
   }
 
-  bool PDG::has(pdgid_t id) const { return particles_.count(id) > 0; }
+  bool PDG::has(spdgid_t id) const { return particles_.count(std::abs(id)) > 0; }
 
-  const ParticleProperties& PDG::operator()(pdgid_t id) const {
-    auto it = particles_.find(id);
+  const ParticleProperties& PDG::operator()(spdgid_t id) const {
+    auto it = particles_.find(std::abs(id));
     if (it != particles_.end())
       return it->second;
     throw CG_FATAL("PDG").log([this, &id](auto& log) {
@@ -51,7 +51,7 @@ namespace cepgen {
     });
   }
 
-  ParticleProperties& PDG::operator[](pdgid_t id) { return particles_[id]; }
+  ParticleProperties& PDG::operator[](spdgid_t id) { return particles_[std::abs(id)]; }
 
   void PDG::define(const ParticleProperties& props) {
     if (props.pdgid == PDG::invalid && props.name != "invalid")
@@ -74,24 +74,31 @@ namespace cepgen {
     return out;
   }
 
-  const std::string& PDG::name(pdgid_t id) const {
+  const std::string& PDG::name(spdgid_t id) const {
     const auto& descr = operator()(id).descr;
     if (!descr.empty())
       return descr;
     return operator()(id).name;
   }
 
-  double PDG::colours(pdgid_t id) const { return operator()(id).colours; }
+  double PDG::colours(spdgid_t id) const { return operator()(id).colours; }
 
-  double PDG::mass(pdgid_t id) const {
+  double PDG::mass(spdgid_t id) const {
     if (HeavyIon::isHI(id))
       return HeavyIon::fromPdgId(id).mass();
     return operator()(id).mass;
   }
 
-  double PDG::width(pdgid_t id) const { return operator()(id).width; }
+  double PDG::width(spdgid_t id) const { return operator()(id).width; }
 
-  double PDG::charge(pdgid_t id) const { return operator()(id).charge * 1. / 3.; }
+  double PDG::charge(spdgid_t id) const { return operator()(id).integerCharge() * (id / std::abs(id)) * 1. / 3.; }
+
+  std::vector<double> PDG::charges(spdgid_t id) const {
+    std::vector<double> chs;
+    for (const auto& ch : operator()(id).charges)
+      chs.emplace_back(ch * 1. / 3);
+    return chs;
+  }
 
   size_t PDG::size() const { return particles_.size(); }
 
@@ -112,10 +119,10 @@ namespace cepgen {
     for (const auto& prt : tmp)
       if (prt.first != PDG::invalid)
         oss << utils::format(
-            "\n%20s %-32s\tcharge: %2de, colour factor: %1d, mass: %8.4f GeV/c^2, width: %6.3f GeV.",
+            "\n%16s %-32s\tcharges: {%6s}, colour factor: %1d, mass: %8.4f GeV/c^2, width: %6.3f GeV.",
             utils::colourise(std::to_string(prt.second.pdgid), utils::Colour::none, utils::Modifier::italic).data(),
             (utils::boldify(prt.second.name) + " " + (prt.second.fermion ? "fermion" : "boson") + ":").data(),
-            prt.second.charge / 3,
+            utils::merge(prt.second.charges, ",").data(),
             prt.second.colours,
             prt.second.mass,
             prt.second.width);

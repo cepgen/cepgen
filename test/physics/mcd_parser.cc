@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
       .parse();
 
   pdg::MCDFileParser::parse(path);
-  cepgen::PDG::get().dump();
+  CG_DEBUG("main").log([](auto& log) { cepgen::PDG::get().dump(&log.stream()); });
   CG_TEST_SET_PRECISION(1.e-6);
 
   CG_TEST_EQUIV(cepgen::PDG::get().mass(cepgen::PDG::diffractiveProton), 0., "diffractive proton bare mass");
@@ -43,6 +43,13 @@ int main(int argc, char* argv[]) {
   CG_TEST_EQUIV(cepgen::PDG::get().mass(12), 0., "electron neutrino mass");
   CG_TEST_EQUIV(cepgen::PDG::get().mass(14), 0., "muon neutrino mass");
   CG_TEST_EQUIV(cepgen::PDG::get().mass(16), 0., "tau neutrino mass");
+  {
+    const auto exp_ele_ch = std::vector<double>{-1., 1.};
+    CG_TEST_EQUAL(cepgen::PDG::get().charges(11), exp_ele_ch, "electron/positron charges");
+  }
+  CG_TEST_EQUAL(cepgen::PDG::get().charge(11), -1, "electron charge");
+  CG_TEST_EQUAL(cepgen::PDG::get().charge(-11), 1, "positron charge");
+  CG_TEST_EQUAL(cepgen::PDG::get().charges(22), std::vector<double>{}, "photon charge");
 
   CG_TEST_SUMMARY;
 }

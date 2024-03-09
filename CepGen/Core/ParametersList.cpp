@@ -42,8 +42,8 @@
     return coll.count(key) != 0;                                                                                    \
   }                                                                                                                 \
   template <>                                                                                                       \
-  ParametersList& ParametersList::set<type>(std::string key, const type& value) {                                   \
-    coll[std::move(key)] = (type)(value);                                                                           \
+  ParametersList& ParametersList::set<type>(const std::string& key, const type& value) {                            \
+    coll[key] = static_cast<type>(value);                                                                           \
     return *this;                                                                                                   \
   }                                                                                                                 \
   template <>                                                                                                       \
@@ -414,7 +414,7 @@ namespace cepgen {
   }
 
   template <typename T>
-  ParametersList& ParametersList::set(std::string key, const T&) {
+  ParametersList& ParametersList::set(const std::string& key, const T&) {
     throw CG_FATAL("ParametersList") << "Invalid type to be set for key '" << key << "'.";
   }
 
@@ -523,7 +523,7 @@ namespace cepgen {
     if (has<ParametersList>(key)) {  // first steer as a dictionary of particle properties
       const auto& plist = get<ParametersList>(key);
       if (plist.keys() == std::vector<std::string>{"pdgid"})
-        return PDG::get()(plist.get<pdgid_t>("pdgid"));
+        return PDG::get()(plist.get<int>("pdgid"));
       return ParticleProperties(plist);
     } else if (has<pdgid_t>(key) ||
                has<int>(key)) {  // if not a dictionary of properties, retrieve from PDG runtime database
@@ -537,9 +537,9 @@ namespace cepgen {
 
   /// Set a particle properties object value
   template <>
-  ParametersList& ParametersList::set<ParticleProperties>(std::string key, const ParticleProperties& value) {
+  ParametersList& ParametersList::set<ParticleProperties>(const std::string& key, const ParticleProperties& value) {
     PDG::get().define(value);
-    return set<ParametersList>(std::move(key), value.parameters());
+    return set<ParametersList>(key, value.parameters());
   }
 
   template <>
