@@ -91,7 +91,7 @@ namespace cepgen {
 
   double PDG::width(spdgid_t id) const { return operator()(id).width; }
 
-  double PDG::charge(spdgid_t id) const { return operator()(id).integerCharge() * 1. / 3.; }
+  double PDG::charge(spdgid_t id) const { return operator()(id).integerCharge() * (id / std::abs(id)) * 1. / 3.; }
 
   std::vector<double> PDG::charges(spdgid_t id) const {
     std::vector<double> chs;

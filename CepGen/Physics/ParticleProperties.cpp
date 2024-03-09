@@ -17,7 +17,6 @@
  */
 
 #include <iostream>
-#include <set>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/ParticleProperties.h"
@@ -57,13 +56,10 @@ namespace cepgen {
   short ParticleProperties::integerCharge() const {
     if (charges.empty())
       return 0;
-    std::set<short> abs_charges;
-    for (const auto& ch : charges)
-      abs_charges.insert(std::abs(ch));
-    if (abs_charges.size() > 1)
+    if (charges.size() > 2)
       throw CG_ERROR("ParticleProperties:integerCharge")
-          << "Multiple charges are possible for the given particle: " << abs_charges << ".";
-    return *abs_charges.begin();
+          << "Multiple charges are possible for the given particle: " << charges << ".";
+    return charges.at(0);
   }
 
   ParametersDescription ParticleProperties::description() {
