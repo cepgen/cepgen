@@ -27,7 +27,7 @@
 
 namespace cepgen {
   namespace proc {
-    FactorisedProcess::FactorisedProcess(const ParametersList& params, const pdgids_t& central)
+    FactorisedProcess::FactorisedProcess(const ParametersList& params, const spdgids_t& central)
         : Process(params),
           psgen_(PhaseSpaceGeneratorFactory::get().build(
               steer<ParametersList>("kinematicsGenerator")

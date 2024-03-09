@@ -35,7 +35,7 @@ namespace cepgen {
       /// Class constructor
       /// \param[in] params Parameters list
       /// \param[in] output Produced final state particles
-      explicit FactorisedProcess(const ParametersList& params, const pdgids_t& output);
+      explicit FactorisedProcess(const ParametersList& params, const spdgids_t& output);
       FactorisedProcess(const FactorisedProcess&);
 
       double computeWeight() override;

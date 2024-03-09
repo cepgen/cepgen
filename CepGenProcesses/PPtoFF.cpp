@@ -28,11 +28,13 @@
 
 using namespace cepgen;
 
+auto make_pdgids_pair = [](pdgid_t pair) { return spdgids_t(pair, -pair); };
+
 /// Compute the 2-to-4 matrix element for a CE \f$\gamma\gamma\rightarrow f\bar f\f$ process
 class PPtoFF final : public cepgen::proc::FactorisedProcess {
 public:
   explicit PPtoFF(const ParametersList& params)
-      : cepgen::proc::FactorisedProcess(params, pdgids_t(2, params.get<ParticleProperties>("pair").pdgid)),
+      : cepgen::proc::FactorisedProcess(params, make_pdgids_pair(params.get<ParticleProperties>("pair").pdgid)),
         method_(steerAs<int, Mode>("method")),
         osp_(steer<ParametersList>("offShellParameters")) {
     if (method_ == Mode::offShell && !psgen_->ktFactorised())
