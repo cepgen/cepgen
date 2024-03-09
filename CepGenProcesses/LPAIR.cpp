@@ -51,8 +51,12 @@ using namespace cepgen;
 class LPAIR final : public cepgen::proc::Process {
 public:
   explicit LPAIR(const ParametersList& params)
-      : proc::Process(params), pair_(steer<ParticleProperties>("pair")), symmetrise_(steer<bool>("symmetrise")) {}
-  LPAIR(const LPAIR& oth) : proc::Process(oth), pair_(oth.pair_), symmetrise_(oth.symmetrise_) {}
+      : proc::Process(params),
+        pair_(steer<ParticleProperties>("pair")),
+        symmetrise_(steer<bool>("symmetrise")),
+        randomise_charge_(steer<bool>("randomiseCharge")) {}
+  LPAIR(const LPAIR& oth)
+      : proc::Process(oth), pair_(oth.pair_), symmetrise_(oth.symmetrise_), randomise_charge_(oth.randomise_charge_) {}
 
   proc::ProcessPtr clone() const override { return proc::ProcessPtr(new LPAIR(*this)); }
 
@@ -167,9 +171,13 @@ public:
                                                                      : Particle::Status::Unfragmented);
 
     // central system
-    const short ransign = rnd_gen_->uniformInt(0, 1) == 1 ? 1 : -1;
-    event()[Particle::CentralSystem][0].get().setChargeSign(+ransign).setStatus(Particle::Status::FinalState);
-    event()[Particle::CentralSystem][1].get().setChargeSign(-ransign).setStatus(Particle::Status::FinalState);
+    const auto ransign = rnd_gen_->uniformInt(0, 1) == 1;
+    if (randomise_charge_) {  // randomise the charge of outgoing system
+      event()[Particle::CentralSystem][0].get().setAntiparticle(ransign);
+      event()[Particle::CentralSystem][1].get().setAntiparticle(!ransign);
+    }
+    event()[Particle::CentralSystem][0].get().setStatus(Particle::Status::FinalState);
+    event()[Particle::CentralSystem][1].get().setStatus(Particle::Status::FinalState);
   }
 
   static ParametersDescription description() {
@@ -178,6 +186,7 @@ public:
     desc.add<int>("nopt", 0).setDescription("Optimised mode? (inherited from LPAIR, by default disabled = 0)");
     desc.addAs<int, pdgid_t>("pair", PDG::muon).setDescription("Lepton pair considered");
     desc.add<bool>("symmetrise", false).setDescription("Symmetrise along z the central system?");
+    desc.add<bool>("randomiseCharge", true).setDescription("randomise the charges of the two central fermions?");
     return desc;
   }
 
@@ -254,6 +263,7 @@ private:
 
   const ParticleProperties pair_;
   const bool symmetrise_;
+  const bool randomise_charge_;
 
   ///////////////////////////////////////////////////////////////////
   // variables computed at phase space definition

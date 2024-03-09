@@ -31,7 +31,7 @@ namespace cepgen {
 
   Particle::Particle(const Particle& part)
       : id_(part.id_),
-        charge_sign_(part.charge_sign_),
+        antiparticle_(part.antiparticle_),
         momentum_(part.momentum_),
         helicity_(part.helicity_),
         role_(part.role_),
@@ -53,7 +53,7 @@ namespace cepgen {
     return true;
   }
 
-  float Particle::charge() const { return charge_sign_ * phys_prop_.integerCharge() / 3.; }
+  float Particle::charge() const { return (antiparticle_ ? -1 : +1) * phys_prop_.integerCharge() / 3.; }
 
   Particle& Particle::clearMothers() {
     mothers_.clear();
@@ -119,34 +119,16 @@ namespace cepgen {
   Particle& Particle::setPdgId(pdgid_t pdg, short ch) { return setIntegerPdgId(pdg * (ch == 0 ? 1 : ch / abs(ch))); }
 
   Particle& Particle::setIntegerPdgId(long pdg) {
-    pdg_id_ = labs(pdg);
-    if (PDG::get().has(pdg_id_)) {
+    if (pdg_id_ = labs(pdg); PDG::get().has(pdg_id_)) {
       phys_prop_ = PDG::get()(pdg_id_);
       CG_DEBUG("Particle:setIntegerPdgId") << "Particle PDG id set to " << pdg_id_ << ", "
                                            << "properties set " << phys_prop_ << ".";
     }
-    switch (pdg_id_) {
-      case 0:
-        charge_sign_ = 0.;
-        break;
-      case PDG::electron:
-      case PDG::muon:
-      case PDG::tau:
-        charge_sign_ = -pdg / labs(pdg);
-        break;
-      default:
-        charge_sign_ = pdg / labs(pdg);
-        break;
-    }
+    antiparticle_ = pdg < 0;
     return *this;
   }
 
-  long Particle::integerPdgId() const {
-    const float ch = phys_prop_.integerCharge() / 3.;
-    if (ch == 0)
-      return static_cast<long>(pdg_id_);
-    return static_cast<long>(pdg_id_) * charge_sign_ * (ch / fabs(ch));
-  }
+  long Particle::integerPdgId() const { return static_cast<long>(pdg_id_) * (antiparticle_ ? -1 : +1); }
 
   std::ostream& operator<<(std::ostream& os, const Particle& part) {
     os << std::resetiosflags(std::ios::showbase) << "Particle[" << part.id_ << "]{role=" << part.role_
