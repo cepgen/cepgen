@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2017-2023  Laurent Forthomme
+ *  Copyright (C) 2017-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,14 +34,14 @@ namespace cepgen {
   /// A collection of physics constants associated to a single particle
   struct ParticleProperties final : SteeredObject<ParticleProperties> {
     explicit ParticleProperties(const ParametersList&);
-    explicit ParticleProperties(pdgid_t ppdgid = 0ull,  // PDG::invalid
-                                const std::string& pname = "",
-                                const std::string& pdescr = "",
-                                int pcolours = -1,
-                                double pmass = -1.,
-                                double pwidth = -1.,
-                                const std::vector<int>& pcharges = {},
-                                bool pfermion = false);
+    explicit ParticleProperties(pdgid_t pdgid = 0ull,  // PDG::invalid
+                                const std::string& name = "",
+                                const std::string& descr = "",
+                                int colours = -1,
+                                double mass = -1.,
+                                double width = -1.,
+                                const std::vector<int>& charges = {},
+                                bool fermion = false);
 
     static ParametersDescription description();
 

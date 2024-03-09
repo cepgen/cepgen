@@ -8,7 +8,7 @@
 
 class TestObject : public cepgen::SteeredObject<TestObject> {
 public:
-  explicit TestObject(const cepgen::ParametersList& params)
+  explicit TestObject(const cepgen::ParametersList& params = cepgen::ParametersList())
       : cepgen::SteeredObject<TestObject>(params),
         particle_props_(steer<cepgen::ParticleProperties>("particleProps")) {}
   const cepgen::ParticleProperties& particleProperties() const { return particle_props_; }
@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
   }
   {
     cepgen::initialise();
-    auto object = TestObject(cepgen::ParametersList());
+    TestObject object;
     CG_TEST_EQUAL(
         object.particleProperties(), cepgen::PDG::get()(cepgen::PDG::muon), "Full particle properties object");
   }
