@@ -58,8 +58,8 @@ namespace cepgen {
                "be doing something irregular.";
       psgen_->initialise(this);
 
-      event().oneWithRole(Particle::Parton1).setPdgId(psgen_->partons().at(0));
-      event().oneWithRole(Particle::Parton2).setPdgId(psgen_->partons().at(1));
+      event().oneWithRole(Particle::Parton1).setIntegerPdgId(psgen_->partons().at(0));
+      event().oneWithRole(Particle::Parton2).setIntegerPdgId(psgen_->partons().at(1));
 
       CG_DEBUG("FactorisedProcess:prepareKinematics") << "Partons: " << psgen_->partons() << ", "
                                                       << "central system: " << psgen_->central() << ". " << event();
