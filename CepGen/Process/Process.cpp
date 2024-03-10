@@ -304,21 +304,21 @@ namespace cepgen {
       //--- define incoming system
       if (event_) {
         auto& ib1 = event_->oneWithRole(Particle::IncomingBeam1);
-        ib1.setPdgId(kin_.incomingBeams().positive().integerPdgId());
+        ib1.setIntegerPdgId(kin_.incomingBeams().positive().integerPdgId());
         ib1.setMomentum(p1);
         auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
-        ib2.setPdgId(kin_.incomingBeams().negative().integerPdgId());
+        ib2.setIntegerPdgId(kin_.incomingBeams().negative().integerPdgId());
         ib2.setMomentum(p2);
         auto& ob1 = event_->oneWithRole(Particle::OutgoingBeam1);
-        ob1.setPdgId(kin_.incomingBeams().positive().integerPdgId());
+        ob1.setIntegerPdgId(kin_.incomingBeams().positive().integerPdgId());
         ob1.setStatus(kin_.incomingBeams().positive().elastic() ? Particle::Status::FinalState
                                                                 : Particle::Status::Unfragmented);
         auto& ob2 = event_->oneWithRole(Particle::OutgoingBeam2);
-        ob2.setPdgId(kin_.incomingBeams().negative().integerPdgId());
+        ob2.setIntegerPdgId(kin_.incomingBeams().negative().integerPdgId());
         ob2.setStatus(kin_.incomingBeams().negative().elastic() ? Particle::Status::FinalState
                                                                 : Particle::Status::Unfragmented);
         for (auto& cp : (*event_)[Particle::CentralSystem])
-          cp.get().setPdgId(cp.get().pdgId());
+          cp.get().setIntegerPdgId(cp.get().integerPdgId());
       }
       s_ = kin_.incomingBeams().s();
       sqs_ = std::sqrt(s_);
