@@ -52,11 +52,11 @@ public:
 
   void addEventContent() override {
     const auto mg5_proc_cent = mg5_proc_->centralSystem();
-    Process::setEventContent({{Particle::IncomingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
-                              {Particle::IncomingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
-                              {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
-                              {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
-                              {Particle::CentralSystem, pdgids_t(mg5_proc_cent.begin(), mg5_proc_cent.end())}});
+    Process::setEventContent({{Particle::IncomingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
+                              {Particle::IncomingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
+                              {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
+                              {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
+                              {Particle::CentralSystem, spdgids_t(mg5_proc_cent.begin(), mg5_proc_cent.end())}});
   }
 
   static ParametersDescription description() {

@@ -75,32 +75,40 @@ namespace cepgen {
           cmds.emplace_back("set auto_convert_model T");
           cmds.emplace_back("import model " + model);
         }
-        cmds.emplace_back("display particles " + part_name);
-        auto py_output = name_part_dict + "=";
-        bool found_properties{false};
-        for (const auto& line : runCommand(cmds, "/tmp/mg5_aMC_part_query.dat", true)) {
-          if (!found_properties) {
-            if (line.find("has the following properties") != std::string::npos)
-              found_properties = true;
-            continue;
+        try {
+          cmds.emplace_back("display particles " + part_name);
+          std::string py_output;
+          bool found_properties{false};
+          for (const auto& line : runCommand(cmds, "/tmp/mg5_aMC_part_query.dat", true)) {
+            if (!found_properties) {
+              if (line.find("has the following properties") != std::string::npos)
+                found_properties = true;
+              continue;
+            }
+            if (utils::startsWith(line, "exit"))
+              break;
+            py_output += line;
           }
-          if (utils::startsWith(line, "exit"))
-            break;
-          py_output += line;
+          if (py_output.empty())
+            throw CG_ERROR("MadGraphInterface:describeParticle")
+                << "No output retrieved from MadGraph command '" << cmds << "'. See the possible message output above.";
+          if (auto mod = python::ObjectPtr::defineModule("part", name_part_dict + "=" + py_output); mod) {
+            if (auto part_prop = mod.attribute(name_part_dict); part_prop)
+              plist_part = part_prop.value<ParametersList>();
+          } else
+            throw CG_ERROR("MadGraphInterface:describeParticle")
+                << "Error while parsing the MadGraph python output for particle '" << part_name << "' of model '"
+                << model << ". Python output:\n"
+                << py_output;
+        } catch (const Exception& exc) {
+          switch (part_name[part_name.size() - 1]) {
+            case '+':
+            case '-':
+              throw;
+            default:
+              return describeParticle(part_name + "+", model);
+          }
         }
-        auto mod = python::ObjectPtr::defineModule("part", py_output);
-        if (!mod)
-          throw CG_FATAL("MadGraphInterface:describeParticle")
-              << "Error while parsing the MadGraph python output for particle '" << part_name << "' of model '" << model
-              << ". Python output:\n"
-              << py_output;
-        auto part_prop = mod.attribute(name_part_dict);
-        if (!part_prop)
-          throw CG_FATAL("MadGraphInterface:describeParticle")
-              << "Error while parsing the MadGraph python output for particle '" << part_name << "' of model '" << model
-              << ". Python output:\n"
-              << py_output;
-        plist_part = part_prop.value<ParametersList>();
       }
       // recast all the properties retrieved from the MG output into CepGen-specific particle properties
       const auto pdg_id = plist_part.get<int>("pdg_code", 0);
@@ -111,7 +119,9 @@ namespace cepgen {
                                                      << part_name << "' from model '" << model << "':\n"
                                                      << plist_part << ".";
       ParticleProperties props;
-      if (const auto name = plist_part.get<std::string>("name"); !name.empty()) {
+      if (auto name = plist_part.get<std::string>("name"); !name.empty()) {
+        if (const auto last_chr = name[name.size() - 1]; last_chr == '-' || last_chr == '+')
+          name.pop_back();
         props.name = name;
         props.descr = name;
       }
@@ -119,8 +129,14 @@ namespace cepgen {
       plist_part.fill<int>("color", props.colours);  //FIXME might not be correct
       props.mass = plist_part.has<double>("mass") ? plist_part.get<double>("mass") : PDG::get().mass(props.pdgid);
       props.width = plist_part.has<double>("width") ? plist_part.get<double>("width") : PDG::get().width(props.pdgid);
-      if (plist_part.has<double>("charge"))
-        props.charge = plist_part.get<double>("charge");
+      if (plist_part.has<double>("charge")) {
+        const auto ch = int(plist_part.get<double>("charge") * 3.);
+        if (ch != 0) {
+          props.charges.emplace_back(ch);
+          if (!plist_part.get<bool>("self_antipart"))
+            props.charges.emplace_back(-ch);
+        }
+      }
       props.fermion = plist_part.get<int>("spin", 0) % 2 == 0;
       CG_DEBUG("MadGraphInterface:describeParticle")
           << "Particle '" << part_name << "' of model '" << model
