@@ -197,9 +197,9 @@ namespace cepgen {
                                     << ", x2 = " << x2 << ", p = " << proc_->q2().p() << ".";
 
       if (randomise_charge_) {  // randomise the charge of outgoing system
-        const short sign = proc_->randomGenerator().uniformInt(0, 1) == 1 ? 1 : -1;
-        proc_->event()[Particle::CentralSystem][0].get().setChargeSign(+sign);
-        proc_->event()[Particle::CentralSystem][1].get().setChargeSign(-sign);
+        const auto sign = proc_->randomGenerator().uniformInt(0, 1) == 1;
+        proc_->event()[Particle::CentralSystem][0].get().setAntiparticle(sign);
+        proc_->event()[Particle::CentralSystem][1].get().setAntiparticle(!sign);
       }
       proc_->event()[Particle::CentralSystem][0].get().setStatus(Particle::Status::FinalState);
       proc_->event()[Particle::CentralSystem][1].get().setStatus(Particle::Status::FinalState);
