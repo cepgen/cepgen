@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #ifndef CepGen_Utils_Caller_h
 #define CepGen_Utils_Caller_h
 
+#include <iosfwd>
 #include <string>
 #include <vector>
 
@@ -27,13 +28,21 @@ namespace cepgen {
     /// External command piping utility
     class Caller {
     public:
-      Caller() {}
+      Caller();
+      ~Caller();
       /// Start a logged call command
       /// \param[in] commands Command path for the session
       static std::string call(const std::vector<std::string>& commands);
       /// Start a logged call command
       /// \param[in] command Command path for the session
       static std::string call(const std::string& command);
+
+      std::string output() const;  ///< Retrieve the (potential) output from the command
+      std::string error() const;   ///< Retrieve the (potential) error stream from the command
+
+    private:
+      std::stringstream os_cout_, os_cerr_;
+      std::streambuf *oldcout_{nullptr}, *oldcerr_{nullptr};
     };
   }  // namespace utils
 }  // namespace cepgen
