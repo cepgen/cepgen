@@ -1,3 +1,21 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2023-2024  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/ProcessFactory.h"
@@ -17,7 +35,8 @@ int main(int argc, char* argv[]) {
   const cepgen::pdgid_t my_part = 13;
   const auto my_part_mass = 42.;
 
-  cepgen::PDG::get().define(cepgen::ParticleProperties(my_part, "la", "laurentino", 0., my_part_mass, 0., 3, true));
+  cepgen::PDG::get().define(
+      cepgen::ParticleProperties(my_part, "la", "laurentino", 0., my_part_mass, 0., {-3, 3}, true));
   CG_LOG << cepgen::PDG::get()(my_part);
 
   auto mg5 = cepgen::ProcessFactory::get().build(

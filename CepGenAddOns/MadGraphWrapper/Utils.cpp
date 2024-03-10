@@ -137,9 +137,12 @@ namespace cepgen {
       tmp_card << "exit\n";
       tmp_card.close();
       std::vector<std::string> output;
-      for (const auto& line : utils::split(utils::Caller::call({MADGRAPH_BIN, "-f", card_path}), '\n'))
-        if (!utils::startsWith(line, "MG5_aMC>"))
-          output.emplace_back(line);
+      {
+        utils::Caller caller;
+        for (const auto& line : utils::split(caller.call({MADGRAPH_BIN, "-f", card_path}), '\n'))
+          if (!utils::startsWith(line, "MG5_aMC>"))
+            output.emplace_back(line);
+      }
       CG_DEBUG("MadGraphInterface:runCommand") << "\nCommands:\n"
                                                << cmds << "\nOutput:\n"
                                                << utils::merge(output, "\n");

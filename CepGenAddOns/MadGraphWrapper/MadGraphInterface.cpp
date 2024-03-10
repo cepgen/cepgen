@@ -81,7 +81,7 @@ namespace cepgen {
             << "No equivalent for particle with PDG id=" << extra_part_prop.pdgid << " in MadGraph LUT.";
       if (found_mg_equiv.at(found_mg_equiv.size() - 1) == '+' || found_mg_equiv.at(found_mg_equiv.size() - 1) == '-')
         found_mg_equiv.pop_back();
-      if (extra_part_prop.charge != 0) {
+      if (!extra_part_prop.charges.empty()) {
         extra_part_definitions_ += "\ndefine " + extra_part + "+ = " + found_mg_equiv + "+";
         extra_part_definitions_ += "\ndefine " + extra_part + "- = " + found_mg_equiv + "-";
         mg5_parts_[extra_part + "+"] = mg5_parts_.at(found_mg_equiv + "+");
@@ -231,15 +231,18 @@ namespace cepgen {
     throw CG_FATAL("MadGraphInterface:generateLibrary")
         << "Library generation not yet implemented for Window$ systems!";
 #else
-    utils::Caller::call({CC_CFLAGS,
-                         "-fPIC",
-                         "-shared",
-                         "-Wno-unused-variable",
-                         "-Wno-int-in-bool-context",
-                         "-I" + (in_path / "src").string(),
-                         "-I" + processes.at(0),
-                         utils::merge(src_files, " "),
-                         "-o " + out_lib.string()});
+    {
+      utils::Caller caller;
+      caller.call({CC_CFLAGS,
+                   "-fPIC",
+                   "-shared",
+                   "-Wno-unused-variable",
+                   "-Wno-int-in-bool-context",
+                   "-I" + (in_path / "src").string(),
+                   "-I" + processes.at(0),
+                   utils::merge(src_files, " "),
+                   "-o " + out_lib.string()});
+    }
 #endif
   }
 
