@@ -39,13 +39,11 @@
 #include "CepGenAddOns/PythonWrapper/Environment.h"
 
 namespace cepgen {
-  std::unordered_map<std::string, pdgid_t> MadGraphInterface::mg5_parts_ = {
-      {"d", (pdgid_t)1},     {"d~", (pdgid_t)1},    {"u", (pdgid_t)2},    {"u~", (pdgid_t)2},   {"s", (pdgid_t)3},
-      {"s~", (pdgid_t)3},    {"c", (pdgid_t)4},     {"c~", (pdgid_t)4},   {"b", (pdgid_t)5},    {"b~", (pdgid_t)5},
-      {"t", (pdgid_t)6},     {"t~", (pdgid_t)6},    {"e+", (pdgid_t)11},  {"e-", (pdgid_t)11},  {"ve", (pdgid_t)12},
-      {"ve~", (pdgid_t)12},  {"mu+", (pdgid_t)13},  {"mu-", (pdgid_t)13}, {"vm", (pdgid_t)14},  {"vm~", (pdgid_t)14},
-      {"tau+", (pdgid_t)15}, {"tau-", (pdgid_t)15}, {"vt", (pdgid_t)16},  {"vt~", (pdgid_t)16}, {"g", (pdgid_t)21},
-      {"a", (pdgid_t)22},    {"z", (pdgid_t)23},    {"w+", (pdgid_t)24},  {"w-", (pdgid_t)24},  {"h", (pdgid_t)25},
+  std::unordered_map<std::string, spdgid_t> MadGraphInterface::mg5_parts_ = {
+      {"d", 1},     {"d~", -1},  {"u", 2},   {"u~", -2},   {"s", 3},      {"s~", -3},   {"c", 4},   {"c~", -4},
+      {"b", 5},     {"b~", -5},  {"t", 6},   {"t~", -6},   {"e+", -11},   {"e-", 11},   {"ve", 12}, {"ve~", -12},
+      {"mu+", -13}, {"mu-", 13}, {"vm", 14}, {"vm~", -14}, {"tau+", -15}, {"tau-", 15}, {"vt", 16}, {"vt~", -16},
+      {"g", 21},    {"a", 22},   {"z", 23},  {"w+", -24},  {"w-", 24},    {"h", 25},
   };
 
   MadGraphInterface::MadGraphInterface(const ParametersList& params)
@@ -74,7 +72,7 @@ namespace cepgen {
       // find the equivalent MadGraph particle to alias
       std::string found_mg_equiv;
       for (const auto& part : mg5_parts_)
-        if (part.second == extra_part_prop.pdgid)
+        if (std::labs(part.second) == extra_part_prop.pdgid)
           found_mg_equiv = part.first;
       if (found_mg_equiv.empty())
         throw CG_FATAL("MadGraphInterface")
@@ -95,7 +93,6 @@ namespace cepgen {
                                     << "' as MadGraph alias for CepGen particle with properties: " << extra_part_prop
                                     << ".";
     }
-    CG_LOG << extra_part_definitions_;
   }
 
   std::string MadGraphInterface::run() const {

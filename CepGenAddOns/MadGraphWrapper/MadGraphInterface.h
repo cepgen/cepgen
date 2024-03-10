@@ -33,7 +33,7 @@ namespace cepgen {
 
   private:
     static constexpr size_t cmd_buffer_size_ = 256;
-    static std::unordered_map<std::string, pdgid_t> mg5_parts_;
+    static std::unordered_map<std::string, spdgid_t> mg5_parts_;
 
     void generateLibrary(const fs::path&, const fs::path&, const fs::path&) const;
     void parseExtraParticles();

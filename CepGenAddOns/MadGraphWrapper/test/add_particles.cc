@@ -37,7 +37,6 @@ int main(int argc, char* argv[]) {
 
   cepgen::PDG::get().define(
       cepgen::ParticleProperties(my_part, "la", "laurentino", 0., my_part_mass, 0., {-3, 3}, true));
-  CG_LOG << cepgen::PDG::get()(my_part);
 
   auto mg5 = cepgen::ProcessFactory::get().build(
       "mg5_aMC",
