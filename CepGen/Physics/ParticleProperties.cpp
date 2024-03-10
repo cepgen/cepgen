@@ -33,6 +33,7 @@ namespace cepgen {
         .add("width", width)
         //.add("charges", charges)  // we disable this for the time being
         .add("fermion", fermion);
+    charges = steer<std::vector<int> >("charges");
   }
 
   ParticleProperties::ParticleProperties(pdgid_t ppdgid,
