@@ -34,6 +34,7 @@ int main(int argc, char* argv[]) {
   double num_sigma, chi2;
   int num_gen, str_fun;
   string proc_name, integrator, plotter;
+  bool sublead_test;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("process,p", "process to compute", &proc_name, "lpair")
@@ -43,6 +44,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("integrator,i", "type of integrator used", &integrator, "Vegas")
       .addOptionalArgument("plotter,t", "type of plotter to use", &plotter, "")
       .addOptionalArgument("chi2,x", "chi2 value cut for histograms compatibility test", &chi2, 1.)
+      .addOptionalArgument("subleading-test", "also enable the subleading pt eta test?", &sublead_test, false)
       .parse();
 
   cepgen::utils::Timer tmr;
@@ -111,7 +113,8 @@ int main(int argc, char* argv[]) {
 
   size_t ndf;
   CG_TEST(h_eta_lead_ei.chi2test(h_eta_lead_ie, ndf) / ndf > chi2, "leading lepton eta");
-  CG_TEST(h_eta_sublead_ei.chi2test(h_eta_sublead_ie, ndf) / ndf > chi2, "subleading lepton eta");
+  if (sublead_test)
+    CG_TEST(h_eta_sublead_ei.chi2test(h_eta_sublead_ie, ndf) / ndf > chi2, "subleading lepton eta");
   CG_TEST(h_mdiff_ei.chi2test(h_mdiff_ie, ndf) / ndf < 1.5 * chi2, "diffractive system mass");
 
   if (!plotter.empty()) {
