@@ -36,8 +36,7 @@ jobs:
     - name: 'CMake configuration'
       run: |
         git config --global --add safe.directory /Package
-        echo "MADGRAPH_DIR=${{env.MG5_aMC_VERSION}}" >> $GITHUB_ENV
-        cmake -GNinja -B ${{env.CEPGEN_PATH}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_BUILD_TESTS=ON
+        cmake -GNinja -B ${{env.CEPGEN_PATH}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_BUILD_TESTS=ON -DMADGRAPH_DIRS=/Package/${{env.MG5_aMC_VERSION}}
 
     - name: 'Build environment'
       run: cmake --build ${{env.CEPGEN_PATH}}
