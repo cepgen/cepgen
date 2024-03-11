@@ -31,6 +31,11 @@ namespace cepgen {
 
     std::string run() const;
 
+    /// Retrieve a CepGen-compatible parameters list from a MadGraph parameters card
+    static ParametersDescription extractParamCardParameters(const std::string&);
+    /// Generate a MadGraph parameters card from CepGen user-steered parameters
+    static std::string generateParamCard(const ParametersDescription&);
+
   private:
     static constexpr size_t cmd_buffer_size_ = 256;
     static std::unordered_map<std::string, spdgid_t> mg5_parts_;
@@ -46,7 +51,7 @@ namespace cepgen {
     const fs::path card_path_;
     const fs::path log_filename_;
     const fs::path standalone_cpp_path_;
-    const ParametersList extra_particles_;
+    const ParametersList extra_particles_, model_parameters_;
 
     std::string extra_part_definitions_;
   };

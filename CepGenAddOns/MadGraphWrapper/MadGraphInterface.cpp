@@ -54,7 +54,8 @@ namespace cepgen {
         card_path_(steerAs<std::string, fs::path>("cardPath")),
         log_filename_(steer<std::string>("logFile")),
         standalone_cpp_path_(steerAs<std::string, fs::path>("standaloneCppPath")),
-        extra_particles_(steer<ParametersList>("extraParticles")) {
+        extra_particles_(steer<ParametersList>("extraParticles")),
+        model_parameters_(steer<ParametersList>("modelParameters")) {
     if (proc_.empty() && standalone_cpp_path_.empty())
       throw CG_FATAL("MadGraphInterface") << "Neither a 'process' keyword nor a path to a MadGraph process interface "
                                              "already generated ('standaloneCppPath') was set to the parameters!\n"
@@ -243,6 +244,62 @@ namespace cepgen {
 #endif
   }
 
+  ParametersDescription MadGraphInterface::extractParamCardParameters(const std::string& card_content) {
+    ParametersDescription output, block_params, decay_params("DECAY");
+    std::string block_name;
+    for (const auto& buf : utils::split(card_content, '\n', true)) {
+      if (buf[0] == '#')
+        continue;
+      const auto ln = utils::split(buf, '#', true);  // info, comments
+      const auto vars = utils::split(ln.at(0), ' ', true);
+      if (utils::tolower(vars.at(0)) == "block") {
+        if (!block_params.empty())
+          output.add(block_name, block_params);
+        block_name = vars.at(1);
+        block_params = ParametersDescription(block_name);
+        if (ln.size() > 1)
+          block_params.setDescription(ln.at(1));
+        continue;
+      } else if (vars.size() == 3 && vars.at(0) == "DECAY") {
+        if (!block_params.empty())
+          output.add(block_name, block_params);
+        auto& par = decay_params.add<double>(vars.at(1), std::stod(vars.at(2)));
+        if (ln.size() > 1)
+          par.setDescription(ln.at(1));
+        continue;
+      }
+      if (vars.size() == 2) {
+        auto& par = block_params.add<double>(vars.at(0), std::stod(vars.at(1)));
+        if (ln.size() > 1)
+          par.setDescription(ln.at(1));
+      } else
+        throw CG_ERROR("MadGraphInterface:extractParamCardParameters")
+            << "Failed to unpack parameters line:\n\t" << buf;
+    }
+    if (!block_params.empty())
+      output.add(block_name, block_params);
+    output.add("DECAY", decay_params);
+    return output;
+  }
+
+  std::string MadGraphInterface::generateParamCard(const ParametersDescription& params) {
+    std::ostringstream output;
+    for (const auto& key : params.parameters().keysOf<ParametersList>()) {
+      const auto& block_params = params.parameters().get<ParametersList>(key);
+      if (key == "DECAY")
+        for (const auto& key2 : block_params.keys())
+          output << utils::format("\n%5s %3s %.6e # ", key.data(), key2.data(), block_params.get<double>(key2))
+                 << params.get(key).get(key2).description();
+      else {
+        output << "\nBlock " << key;
+        for (const auto& key2 : block_params.keys())
+          output << utils::format("\n%5s %.6e # ", key2.data(), block_params.get<double>(key2))
+                 << params.get(key).get(key2).description();
+      }
+    }
+    return output.str();
+  }
+
   ParametersDescription MadGraphInterface::description() {
     auto desc = ParametersDescription();
     desc.add<std::string>("process", "").setDescription("MadGraph_aMC process definition");
@@ -256,7 +313,8 @@ namespace cepgen {
         .setDescription("Temporary path where to store the log for this run");
     desc.add<ParametersDescription>("extraParticles", ParametersDescription())
         .setDescription("define internal MadGraph alias for a particle name");
-
+    desc.add<ParametersDescription>("modelParameters", ParametersDescription())
+        .setDescription("list of model parameters for the process generation");
     return desc;
   }
 }  // namespace cepgen

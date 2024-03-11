@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <fstream>
+
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/Generator.h"
@@ -76,6 +78,18 @@ public:
           << "is incompatible with user-steered incoming fluxes particles (" << psgen_->partons() << ").";
     if (const auto params_card = steer<std::string>("parametersCard"); !params_card.empty()) {
       CG_INFO("MadGraphProcessBuilder") << "Preparing process kinematics for card at \"" << params_card << "\".";
+      if (const auto mod_params = steer<ParametersList>("modelParameters"); !mod_params.empty()) {
+        const auto unsteered_pcard_txt = utils::readFile(params_card);
+        const auto steered_pcard = MadGraphInterface::extractParamCardParameters(unsteered_pcard_txt).steer(mod_params);
+        CG_DEBUG("MadGraphProcessBuilder") << "Unsteered parameters card:\n"
+                                           << unsteered_pcard_txt << "\n\n"
+                                           << std::string(50, '-') << "\n"
+                                           << "Steered parameters card:\n"
+                                           << steered_pcard;
+        std::ofstream params_card_steered(params_card);
+        params_card_steered << MadGraphInterface::generateParamCard(steered_pcard);
+        params_card_steered.close();
+      }
       mg5_proc_->initialise(params_card);
     }
   }
