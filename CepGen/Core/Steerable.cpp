@@ -25,7 +25,7 @@ namespace cepgen {
   std::string Steerable::steerPath(const std::string& key) const {
     const auto fn = steer<std::string>(key);
     if (fn.empty())
-      throw CG_ERROR("Steerable:steerPath") << "Trying to retrieve an empty path. Aborting.";
+      return fn;
     for (const auto& path : utils::env::searchPaths())
       if (const auto abs_path = fs::path(path) / fn; utils::fileExists(abs_path)) {
         CG_DEBUG("Steerable:steerPath") << "Found path for '" << key << "' at '" << abs_path << "'.";
