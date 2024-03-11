@@ -24,8 +24,11 @@ jobs:
     - uses: seanmiddleditch/gha-setup-ninja@master
 
     - name: 'MadGraph fetch'
+      uses: wei/wget@v1
+      with:
+        args: -O mg.tar.gz https://launchpad.net/mg5amcnlo/3.0/3.5.x/+download/${{env.MG5_aMC_VERSION}}.tar.gz
+    - name: 'MadGraph install'
       run: |
-        wget -O mg.tar.gz https://launchpad.net/mg5amcnlo/3.0/3.5.x/+download/${{env.MG5_aMC_VERSION}}.tar.gz
         tar -xvfz mg.tar.gz
         rm -f mg.tar.gz
 
