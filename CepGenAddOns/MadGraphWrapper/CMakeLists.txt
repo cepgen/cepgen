@@ -20,3 +20,6 @@ cepgen_build(CepGenMadGraph
     DEFINITIONS ${mg_defs}
     TESTS test/*.cc
     INSTALL_COMPONENT madgraph)
+
+add_test(NAME cepgen_mg5 COMMAND cepgen Cards/mg5amcnlo/aamumu_cfg.py -n 1000)
+set_property(TEST cepgen_mg5 PROPERTY ENVIRONMENT "CEPGEN_PATH=${PROJECT_SOURCE_DIR}")
