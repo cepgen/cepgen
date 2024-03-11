@@ -30,19 +30,20 @@ int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
   cepgen::initialise();
 
-  const cepgen::pdgid_t my_part = 13;
-  {
-    const auto pprop = cepgen::mg5amc::describeParticle("a", "sm");
-    CG_LOG << "photon:" << pprop;
+  for (const auto& part : vector<pair<cepgen::spdgid_t, string> >{
+           {11, "e"},    {12, "ve"},   {13, "mu"},   {14, "vm"},   {15, "ta"}, {16, "vt"}, {-11, "e+"}, {-12, "ve~"},
+           {-13, "mu+"}, {-14, "vm~"}, {-15, "ta+"}, {-16, "vt~"}, {22, "a"},  {23, "z"},  {-24, "w-"}, {24, "w+"},
+           {25, "h"},    {1, "d"},     {2, "u"},     {3, "s"},     {4, "c"},   {5, "b"},   {6, "t"},    {-1, "d~"},
+           {-2, "u~"},   {-3, "s~"},   {-4, "c~"},   {-5, "b~"},   {-6, "t~"}}) {
+    const auto mg_prop = cepgen::mg5amc::describeParticle(part.second, "sm");
+    const auto cg_prop = cepgen::PDG::get()(part.first);
+    const auto name = part.second + "/" + cepgen::PDG::get().name(part.first);
+    CG_TEST_EQUAL(mg_prop.pdgid, std::labs(part.first), name + " PDG");
+    CG_TEST_EQUAL(mg_prop.fermion, cg_prop.fermion, name + " fermion/boson");
+    CG_TEST_EQUIV(mg_prop.mass, cg_prop.mass, name + " mass");
+    CG_TEST_EQUIV(mg_prop.width, cg_prop.width, name + " width");
+    CG_TEST_EQUAL(mg_prop.charges, cg_prop.charges, name + " charges");
   }
-  for (const auto& part : vector<pair<cepgen::pdgid_t, string> >{{11, "e"s}, {13, "mu"s}, {15, "ta"s}}) {
-    const auto pprop = cepgen::mg5amc::describeParticle(part.second, "sm");
-    const auto cprop = cepgen::PDG::get()(part.first);
-    CG_TEST_EQUAL(pprop.pdgid, part.first, part.second + " PDG");
-    CG_TEST_EQUAL(pprop.fermion, cprop.fermion, part.second + " fermion");
-    CG_TEST_EQUAL(pprop.mass, cprop.mass, part.second + " mass");
-  }
-  //CG_TEST_EQUAL(cent.momentum().mass(), my_part_mass, "cent." + to_string(i) + " mass");
 
   CG_TEST_SUMMARY;
 }

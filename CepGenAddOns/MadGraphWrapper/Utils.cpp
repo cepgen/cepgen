@@ -130,7 +130,7 @@ namespace cepgen {
       props.mass = plist_part.has<double>("mass") ? plist_part.get<double>("mass") : PDG::get().mass(props.pdgid);
       props.width = plist_part.has<double>("width") ? plist_part.get<double>("width") : PDG::get().width(props.pdgid);
       if (plist_part.has<double>("charge")) {
-        const auto ch = int(plist_part.get<double>("charge") * 3.);
+        const auto ch = std::floor(plist_part.get<double>("charge") * 3.);
         if (ch != 0) {
           props.charges.emplace_back(ch);
           if (!plist_part.get<bool>("self_antipart"))
