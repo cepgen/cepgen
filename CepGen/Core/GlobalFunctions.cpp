@@ -121,12 +121,9 @@ namespace cepgen {
     }
 
     //--- load all necessary modules
-    if (!safe_mode && !addons_file.empty()) {
-      std::ifstream addons(addons_file);
-      std::string lib;
-      while (std::getline(addons, lib))
+    if (!safe_mode && !addons_file.empty())
+      for (const auto& lib : utils::split(utils::readFile(addons_file), '\n'))
         loadLibrary(lib, true);
-    }
     loadLibrary("CepGenProcesses", true);
     if (!invalid_libraries.empty())
       CG_WARNING("init") << "Failed to load the following libraries:\n\t" << invalid_libraries << ".";
