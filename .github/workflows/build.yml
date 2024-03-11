@@ -29,7 +29,7 @@ jobs:
         args: -O mg.tar.gz https://launchpad.net/mg5amcnlo/3.0/3.5.x/+download/${{env.MG5_aMC_VERSION}}.tar.gz
     - name: 'MadGraph install'
       run: |
-        tar xvfz mg.tar.gz
+        tar xvfz mg.tar.gz --one-top-level=${{env.MG5_aMC_VERSION}} --strip-components 1
         rm -f mg.tar.gz
 
     - name: 'CMake configuration'
