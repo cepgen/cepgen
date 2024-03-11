@@ -16,15 +16,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <YODA/Counter.h>
+#if defined(YOGA_VERSION) && YOGA_VERSION < 10800
 #include <YODA/Histo1D.h>
 #include <YODA/Histo2D.h>
 #include <YODA/Profile1D.h>
 #include <YODA/Profile2D.h>
-#include <YODA/WriterAIDA.h>
-#include <YODA/WriterFLAT.h>
-#include <YODA/WriterYODA.h>
+#include <YODA/Scatter2D.h>
+#include <YODA/Scatter3D.h>
+#else
+#include <YODA/Histo.h>
+#include <YODA/Profile.h>
+#include <YODA/Scatter.h>
+#endif
 
+#include <YODA/Counter.h>
+#include <YODA/Writer.h>
+
+#include <fstream>
 #include <limits>
 
 #include "CepGen/Core/Exception.h"
@@ -147,9 +155,17 @@ namespace cepgen {
   bool YODAHistsHandler<T>::operator<<(const Event& ev) {
     // increment the corresponding histograms
     for (auto& h_var : hists1d_)
+#if defined(YOGA_VERSION) && YOGA_VERSION < 10800
       h_var.second.fillBin(browser_.get(ev, h_var.first), cross_section_);
+#else
+      h_var.second.fill(browser_.get(ev, h_var.first), cross_section_);
+#endif
     for (auto& h_var : hists2d_)
+#if defined(YOGA_VERSION) && YOGA_VERSION < 10800
       h_var.second.fillBin(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), cross_section_);
+#else
+      h_var.second.fill(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), cross_section_);
+#endif
     for (auto& h_var : profiles1d_)
       h_var.second.fill(browser_.get(ev, h_var.first[0]), browser_.get(ev, h_var.first[1]), cross_section_);
     for (auto& h_var : profiles2d_)
@@ -177,9 +193,15 @@ namespace cepgen {
     return desc;
   }
 }  // namespace cepgen
+#include <YODA/WriterFLAT.h>
+#include <YODA/WriterYODA.h>
 typedef cepgen::YODAHistsHandler<YODA::WriterYODA> YodaOutputHandler;
-typedef cepgen::YODAHistsHandler<YODA::WriterAIDA> YodaAidaOutputHandler;
 typedef cepgen::YODAHistsHandler<YODA::WriterFLAT> YodaFlatOutputHandler;
 REGISTER_EXPORTER("yoda", YodaOutputHandler);
-REGISTER_EXPORTER("yoda_aida", YodaAidaOutputHandler);
 REGISTER_EXPORTER("yoda_flat", YodaFlatOutputHandler);
+
+#if defined(YOGA_VERSION) && YOGA_VERSION < 10800
+#include <YODA/WriterAIDA.h>  // dropped in 2.0.0
+typedef cepgen::YODAHistsHandler<YODA::WriterAIDA> YodaAidaOutputHandler;
+REGISTER_EXPORTER("yoda_aida", YodaAidaOutputHandler);
+#endif
