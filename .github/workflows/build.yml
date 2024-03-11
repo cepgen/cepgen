@@ -25,7 +25,7 @@ jobs:
 
     - name: 'MadGraph fetch'
       run: |
-        curl -o mg.tar.gz https://launchpad.net/mg5amcnlo/3.0/3.5.x/+download/${{env.MG5_aMC_VERSION}}.tar.gz
+        wget -O mg.tar.gz https://launchpad.net/mg5amcnlo/3.0/3.5.x/+download/${{env.MG5_aMC_VERSION}}.tar.gz
         tar -xvfz mg.tar.gz
         rm -f mg.tar.gz
 
