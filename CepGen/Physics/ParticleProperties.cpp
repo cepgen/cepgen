@@ -23,8 +23,8 @@
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
-  ParticleProperties::ParticleProperties(const ParametersList& params)
-      : SteeredObject(params), charges(steer<std::vector<int> >("charges")) {
+  ParticleProperties::ParticleProperties(const ParametersList& params) : SteeredObject(params) {
+    charges.reserve(4);
     (*this)
         .add("pdgid", pdgid)
         .add("name", name)
