@@ -17,7 +17,6 @@
  */
 
 #include <atomic>
-#include <fstream>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
@@ -142,10 +141,9 @@ namespace cepgen {
 
   void printHeader() {
     if (!callPath("README", [](const auto& path) {
-          std::ifstream hf(path);
-          if (!hf.good())
+          if (!utils::fileExists(path))
             return false;
-          CG_LOG << std::string(std::istreambuf_iterator<char>(hf), std::istreambuf_iterator<char>());
+          CG_LOG << utils::readFile(path);
           return true;
         }))
       CG_WARNING("printHeader") << "Failed to open README file.";

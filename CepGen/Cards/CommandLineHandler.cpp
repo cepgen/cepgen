@@ -16,8 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <fstream>
-
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/RunParameters.h"
@@ -30,6 +28,8 @@
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
+#include "CepGen/Utils/Filesystem.h"
+#include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
 
 namespace cepgen {
@@ -64,11 +64,8 @@ namespace cepgen {
       rt_params_ = params;
       if (filename.empty())
         throw CG_FATAL("CommandLineHandler") << "Empty filename to be parsed! Aborting.";
-      std::ifstream file(filename);
-      std::string line;
-      while (getline(file, line))
+      for (const auto& line : utils::split(utils::readFile(filename), '\n'))
         rt_params_ = parseString(line, rt_params_);
-      file.close();
       return rt_params_;
     }
 
