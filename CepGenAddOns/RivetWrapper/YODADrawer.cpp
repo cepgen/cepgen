@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2022  Laurent Forthomme
+ *  Copyright (C) 2020-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(YOGA_VERSION) && YOGA_VERSION < 10800
+#if defined(YODA_VERSION) && YODA_VERSION < 20000
 #include <YODA/Histo1D.h>
 #include <YODA/Histo2D.h>
 #include <YODA/Scatter2D.h>
@@ -141,7 +141,7 @@ namespace cepgen {
       YODA::Histo1D h(hist.nbins(), rng.min(), rng.max(), path(hist.name()), hist.title());
       for (size_t i = 0; i < hist.nbins(); ++i) {
         const auto val = hist.value(i);
-#if defined(YOGA_VERSION) && YOGA_VERSION < 10800
+#if defined(YODA_VERSION) && YODA_VERSION < 20000
         h.fillBin(i, val, std::pow(val.uncertainty(), 2));
 #else
         h.fill(i, val, std::pow(val.uncertainty(), 2));
@@ -166,7 +166,7 @@ namespace cepgen {
       for (size_t ix = 0; ix < hist.nbinsX(); ++ix)
         for (size_t iy = 0; iy < hist.nbinsY(); ++iy) {
           const auto val = hist.value(ix, iy);
-#if defined(YOGA_VERSION) && YOGA_VERSION < 10800
+#if defined(YODA_VERSION) && YODA_VERSION < 20000
           h.fillBin((ix + 1) * (iy + 1), val, std::pow(val.uncertainty(), 2));
 #else
           h.fill((ix + 1) * (iy + 1), val, std::pow(val.uncertainty(), 2));
@@ -185,7 +185,7 @@ typedef cepgen::utils::YODADrawer<YODA::WriterFLAT> DrawerYodaFlat;
 REGISTER_DRAWER("yoda", DrawerYoda);
 REGISTER_DRAWER("yoda_flat", DrawerYodaFlat);
 
-#if defined(YOGA_VERSION) && YOGA_VERSION < 10800
+#if defined(YODA_VERSION) && YODA_VERSION < 20000
 #include <YODA/WriterAIDA.h>  // dropped in 2.0.0
 typedef cepgen::utils::YODADrawer<YODA::WriterAIDA> DrawerYodaAida;
 REGISTER_DRAWER("yoda_aida", DrawerYodaAida);
