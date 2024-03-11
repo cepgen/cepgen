@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *                2023       Dmitri Konstantinov
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -38,10 +38,10 @@ namespace fs = std::experimental::filesystem;
 
 namespace cepgen {
   namespace utils {
-    /// Check if the file exists
-    inline bool fileExists(const std::string& path) { return fs::exists(path); }
-    /// Small utility to retrieve the extension of a filename
-    inline std::string fileExtension(const std::string& file) { return fs::path(file).extension(); }
+    bool fileExists(const std::string&);                 ///< Check if the file exists
+    std::string fileExtension(const std::string& file);  ///< Small utility to retrieve the extension of a filename
+    std::string readFile(const std::string&);            ///< Read the content of a file into a string buffer
+
   }  //namespace utils
 }  // namespace cepgen
 

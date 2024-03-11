@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2023  Laurent Forthomme
+ *  Copyright (C) 2019-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
 
 namespace pdg {
@@ -29,11 +30,7 @@ namespace pdg {
       {"-", -3}, {"--", -6}, {"+", +3}, {"++", +6}, {"0", 0}, {"-1/3", -1}, {"-2/3", -2}, {"+1/3", +1}, {"+2/3", +2}};
 
   void MCDFileParser::parse(const std::string& path) {
-    std::ifstream ifile(path);
-    if (!ifile.is_open())
-      throw CG_FATAL("MCDFileParser") << "Failed to parse MCD file \"" << path << "\"!";
-    std::string line;
-    while (std::getline(ifile, line)) {
+    for (const auto& line : cepgen::utils::split(cepgen::utils::readFile(path), '\n')) {
       if (line[0] == '*')  // skip comments
         continue;
       std::vector<int> pdg_ids, charges;
