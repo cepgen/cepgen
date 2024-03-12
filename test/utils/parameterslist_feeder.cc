@@ -29,16 +29,23 @@ int main(int argc, char* argv[]) {
     plist.feed("bat:5E10").feed("foo:42");
     CG_TEST_EQUAL(plist.get<double>("bat"), 5e10, "float (from re-parsing)");
     CG_TEST_EQUAL(plist.get<int>("foo"), 42, "integer (from re-parsing)");
+    CG_TEST_EQUAL(plist.get<double>("foo", -1.), -1., "integer as float (from re-parsing)");
   }
   {
     auto feeded = "this/is/a:test,this/works:true,that/{one:42,other:3.141592}";
     cepgen::ParametersList plist;
     plist.feed(feeded);
-    CG_DEBUG("main") << "\n\t"
-                     << "Feeded string: " << feeded << "\n\t"
-                     << "Fed parameters list: " << cepgen::ParametersDescription(plist) << "\n\t"
-                     << "Re-serialised string: " << plist.serialise();
-    CG_TEST_EQUAL(cepgen::ParametersList().feed(plist.serialise()), plist, "serialised parameters list parsing");
+    const auto plist_refed = cepgen::ParametersList().feed(plist.serialise());
+    CG_DEBUG("main") << "\n"
+                     << "Feeded string: " << feeded << "\n"
+                     << "Fed parameters list:\n"
+                     << cepgen::ParametersDescription(plist) << "\n"
+                     << "Re-serialised string: " << plist.serialise() << "\n"
+                     << "Re-fed parameters list:\n"
+                     << cepgen::ParametersDescription(plist_refed) << ".\n"
+                     << "Diff:\n"
+                     << cepgen::ParametersDescription(plist.diff(plist_refed)) << ".";
+    CG_TEST_EQUAL(plist_refed, plist, "serialised parameters list parsing");
   }
   CG_TEST_EXCEPT([]() { cepgen::ParametersList().feed("invalid/string/{{feeded:true}"); },
                  "parsing of an invalid string");

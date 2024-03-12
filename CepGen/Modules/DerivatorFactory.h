@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2023  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ namespace cepgen {
     class Derivator;
   }
   /// An analytical integrator objects factory
-  DEFINE_FACTORY_STR(DerivatorFactory, utils::Derivator, "Derivators factory");
+  DEFINE_FACTORY(std::string, DerivatorFactory, utils::Derivator, "Derivators factory");
 }  // namespace cepgen
 
 #endif

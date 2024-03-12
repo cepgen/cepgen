@@ -95,12 +95,8 @@ namespace cepgen {
     RunParameters& runParameters();              ///< Run parameters block
     void setRunParameters(RunParameters* ip);    ///< Feed the generator with a RunParameters object
 
-    void resetIntegrator();  ///< Reset integrator algorithm from the user-specified configuration
     void setIntegrator(std::unique_ptr<Integrator>);  ///< Specify an integrator algorithm configuration
-
-    void clearRun();  ///< Remove all references to a previous generation/run
-
-    void integrate();  ///< Integrate the functional over the phase space of interest
+    void integrate();                                 ///< Integrate the functional over the phase space of interest
 
     /// Compute the cross section for the run parameters
     /// \return The computed cross-section and uncertainty, in pb
@@ -123,7 +119,10 @@ namespace cepgen {
     double computePoint(const std::vector<double>& x);
 
   private:
-    void initialise();                           ///< Initialise event generation
+    void initialise();       ///< Initialise event generation
+    void clearRun();         ///< Remove all references to a previous generation/run
+    void resetIntegrator();  ///< Reset integrator algorithm from the user-specified configuration
+
     std::unique_ptr<RunParameters> parameters_;  ///< Run parameters for event generation and cross-section computation
     std::unique_ptr<GeneratorWorker> worker_;    ///< Generator worker instance
     std::unique_ptr<Integrator> integrator_;     ///< Integration algorithm

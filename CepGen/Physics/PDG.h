@@ -81,14 +81,16 @@ namespace cepgen {
 
     //--- per-particles information
 
-    bool has(pdgid_t) const;                              ///< Is the particle defined for a given PDG id
-    const ParticleProperties& operator()(pdgid_t) const;  ///< All physical properties for one particle
-    ParticleProperties& operator[](pdgid_t id);           /// Accessor for particle properties
-    const std::string& name(pdgid_t) const;               ///< Human-readable name for this particle
-    double colours(pdgid_t) const;                        ///< Colour factor for this particle
-    double mass(pdgid_t) const;                           ///< Particle mass (in GeV)
-    double width(pdgid_t) const;                          ///< Resonance width (in GeV)
-    double charge(pdgid_t) const;                         ///< Electric charge (in \f$e\f$) for this particle
+    bool has(spdgid_t) const;                              ///< Is the particle defined for a given PDG id
+    const ParticleProperties& operator()(spdgid_t) const;  ///< All physical properties for one particle
+    ParticleProperties& operator[](spdgid_t id);           /// Accessor for particle properties
+    const std::string& name(spdgid_t) const;               ///< Human-readable name for this particle
+    double colours(spdgid_t) const;                        ///< Colour factor for this particle
+    double mass(spdgid_t) const;                           ///< Particle mass (in GeV)
+    double width(spdgid_t) const;                          ///< Resonance width (in GeV)
+    double charge(spdgid_t) const;                         ///< Electric charge (in \f$e\f$) for this particle
+    /// Electric charges (in \f$e\f$) for this particle (and its potential anti-particles)
+    std::vector<double> charges(spdgid_t) const;
 
   private:
     explicit PDG();
@@ -98,4 +100,3 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
-

@@ -157,25 +157,17 @@ namespace cepgen {
         throw CG_FATAL("LpairHandler") << "Unable to locate steering card \"" << filename << "\".";
       rt_params_ = params;
       std::ostringstream os;
-      {  //--- file parsing part
-        std::ifstream file(filename, std::fstream::in);
-        if (!file.is_open())
-          throw CG_FATAL("LpairHandler") << "Failed to parse file \"" << filename << "\".";
-
-        init();
-
-        //--- parse all fields
-        std::string line, key, value;
-        while (getline(file, line)) {
-          std::istringstream iss(line);
-          iss >> key >> value;
-          if (utils::ltrim(key)[0] == '#')
-            continue;
-          setParameter(key, value);
-          if (describe(key) != kInvalidStr)
-            os << utils::format("\n>> %-8s %-25s (%s)", key.c_str(), parameter(key).c_str(), describe(key).c_str());
-        }
-        file.close();
+      init();
+      for (auto line : utils::split(utils::readFile(filename), '\n')) {  // file parsing part
+        if (line = utils::trim(line); line.empty() || line[0] == '#')    // skip comments
+          continue;
+        const auto fields = utils::split(line, ' ', true);  // parse all fields
+        if (fields.size() < 2)                              // break on invalid lines
+          throw CG_FATAL("LpairHandler") << "Invalid line read from steering card: '" << line << "'.";
+        const auto key = fields.at(0), value = fields.at(1);
+        setParameter(key, value);
+        if (const auto descr = describe(key); descr != kInvalidStr)
+          os << utils::format("\n>> %-8s %-25s (%s)", key.data(), parameter(key).data(), descr.data());
       }
 
       CG_INFO("LpairHandler") << "File '" << filename << "' successfully retrieved!\n\t"

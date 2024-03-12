@@ -16,29 +16,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Modules_RandomGeneratorFactory_h
-#define CepGen_Modules_RandomGeneratorFactory_h
+#ifndef CepGenAddOns_MadGraphWrapper_MadGraphProcessFactory_h
+#define CepGenAddOns_MadGraphWrapper_MadGraphProcessFactory_h
 
 #include "CepGen/Modules/ModuleFactory.h"
 
-/** \file */
-
-/// Add a generic random number generator definition to the list of handled modules
-#define REGISTER_RANDOM_GENERATOR(name, obj)                                        \
+/// Add a MadGraph process definition to the factory
+#define REGISTER_MG5AMC_PROCESS(name, obj)                                          \
   namespace cepgen {                                                                \
     struct BUILDERNM(obj) {                                                         \
-      BUILDERNM(obj)() { RandomGeneratorFactory::get().registerModule<obj>(name); } \
+      BUILDERNM(obj)() { MadGraphProcessFactory::get().registerModule<obj>(name); } \
     };                                                                              \
-    static const BUILDERNM(obj) gRndGen##obj;                                       \
+    static const BUILDERNM(obj) gMGProc##obj;                                       \
   }                                                                                 \
   static_assert(true, "")
 
 namespace cepgen {
-  namespace utils {
-    class RandomGenerator;
-  }
-  /// A random number generator algorithms factory
-  DEFINE_FACTORY(std::string, RandomGeneratorFactory, utils::RandomGenerator, "Random number generator factory");
+  class MadGraphProcess;
+  /// A MadGraph process factory
+  DEFINE_FACTORY(std::string, MadGraphProcessFactory, MadGraphProcess, "MadGraph process definition factory");
 }  // namespace cepgen
 
 #endif

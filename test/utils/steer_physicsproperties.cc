@@ -8,41 +8,42 @@
 
 class TestObject : public cepgen::SteeredObject<TestObject> {
 public:
-  explicit TestObject(const cepgen::ParametersList& params)
+  explicit TestObject(const cepgen::ParametersList& params = cepgen::ParametersList())
       : cepgen::SteeredObject<TestObject>(params),
         particle_props_(steer<cepgen::ParticleProperties>("particleProps")) {}
   const cepgen::ParticleProperties& particleProperties() const { return particle_props_; }
   static cepgen::ParametersDescription description() {
     auto desc = cepgen::ParametersDescription();
-    desc.addAs<int, cepgen::pdgid_t>("particleProps", cepgen::PDG::muon);
+    desc.add<cepgen::pdgid_t>("particleProps", cepgen::PDG::muon);
     return desc;
   }
 
 private:
-  cepgen::ParticleProperties particle_props_;
+  const cepgen::ParticleProperties particle_props_;
 };
 
 int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
 
+  cepgen::initialise();
   {
-    //const auto pdesc = cepgen::ParametersList().setAs<int, cepgen::pdgid_t>("particleProps", cepgen::PDG::muon);
     auto pprop = cepgen::ParticleProperties{};
     pprop.fermion = true;
     pprop.name = "laurenton";
     pprop.pdgid = 42;
     pprop.mass = 42.4242;
-    const auto pdesc = cepgen::ParametersList().set<cepgen::ParticleProperties>("particleProps", pprop);
+    pprop.charges = {-3, 3};
 
-    auto object = TestObject(pdesc);
-
-    CG_TEST_EQUAL(cepgen::PDG::get()(42), pprop, "Full particle properties object");
+    auto object = TestObject(cepgen::ParametersList().set<cepgen::ParticleProperties>("particleProps", pprop));
+    CG_TEST_EQUAL(cepgen::PDG::get()(42), pprop, "part.prop. registered in PDG database");
+    CG_TEST_EQUAL(object.particleProperties(), pprop, "part.prop. retrieved from steered object");
   }
   {
-    cepgen::initialise();
-    auto object = TestObject(cepgen::ParametersList());
-    CG_TEST_EQUAL(
-        object.particleProperties(), cepgen::PDG::get()(cepgen::PDG::muon), "Full particle properties object");
+    TestObject object;
+    CG_TEST_EQUAL(object.particleProperties().pdgid, cepgen::PDG::muon, "part. default from steered object");
+    CG_TEST_EQUAL(object.particleProperties().mass,
+                  cepgen::PDG::get()(cepgen::PDG::muon).mass,
+                  "part.prop. default from steered object");
   }
   CG_TEST_SUMMARY;
 }

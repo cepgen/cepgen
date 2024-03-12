@@ -27,7 +27,7 @@
 
 namespace cepgen {
   namespace proc {
-    FactorisedProcess::FactorisedProcess(const ParametersList& params, const pdgids_t& central)
+    FactorisedProcess::FactorisedProcess(const ParametersList& params, const spdgids_t& central)
         : Process(params),
           psgen_(PhaseSpaceGeneratorFactory::get().build(
               steer<ParametersList>("kinematicsGenerator")
@@ -42,11 +42,13 @@ namespace cepgen {
           store_alphas_(proc.store_alphas_) {}
 
     void FactorisedProcess::addEventContent() {
-      Process::setEventContent({{Particle::IncomingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
-                                {Particle::IncomingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
-                                {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().pdgId()}},
-                                {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().pdgId()}},
-                                {Particle::CentralSystem, psgen_->central()}});
+      CG_ASSERT(psgen_);
+      const auto cent_pdgids = psgen_->central();
+      Process::setEventContent({{Particle::IncomingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
+                                {Particle::IncomingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
+                                {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
+                                {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
+                                {Particle::CentralSystem, spdgids_t(cent_pdgids.begin(), cent_pdgids.end())}});
     }
 
     void FactorisedProcess::prepareKinematics() {
@@ -56,8 +58,8 @@ namespace cepgen {
                "be doing something irregular.";
       psgen_->initialise(this);
 
-      event().oneWithRole(Particle::Parton1).setPdgId(psgen_->partons().at(0));
-      event().oneWithRole(Particle::Parton2).setPdgId(psgen_->partons().at(1));
+      event().oneWithRole(Particle::Parton1).setIntegerPdgId(psgen_->partons().at(0));
+      event().oneWithRole(Particle::Parton2).setIntegerPdgId(psgen_->partons().at(1));
 
       CG_DEBUG("FactorisedProcess:prepareKinematics") << "Partons: " << psgen_->partons() << ", "
                                                       << "central system: " << psgen_->central() << ". " << event();

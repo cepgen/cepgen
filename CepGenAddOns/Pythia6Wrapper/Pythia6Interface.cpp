@@ -40,7 +40,7 @@ extern void pyname_(int&, char*, int);
 extern int pyk_(int&, int&);
 /// Get real-valued event information from Pythia
 extern double pyp_(int&, int&);
-extern double pychge_(int&);
+extern int pychge_(int&);
 /// Purely virtual method to call at the end of the run
 void pystop_() { CG_INFO("pythia6:pystop") << "End of run"; }
 }
@@ -60,7 +60,7 @@ namespace pythia6 {
 
   double pyp(int id, int qty) { return pyp_(id, qty); }
 
-  double pychge(int pdgid) { return pychge_(pdgid); }
+  int pychge(int pdgid) { return pychge_(pdgid); }
 
   std::string pyname(int pdgid) {
     // maximal number of characters to fetch for the particle's name
@@ -122,8 +122,9 @@ namespace pythia6 {
     prop.descr = name;
     //prop.colours = pyk(p + 1, 12);  // colour factor
     prop.mass = pymass(pdg_id);
-    prop.width = -1.;              //pmas( pdg_id, 2 ),
-    prop.charge = pychge(pdg_id);  // charge
+    prop.width = -1.;  //pmas( pdg_id, 2 ),
+    if (const auto ch = pychge(pdg_id); std::fabs(ch) > 0)
+      prop.charges = {ch, -ch};
     prop.fermion = false;
     cepgen::PDG::get().define(prop);
   }

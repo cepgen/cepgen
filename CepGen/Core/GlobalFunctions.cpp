@@ -17,7 +17,6 @@
  */
 
 #include <atomic>
-#include <fstream>
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
@@ -121,12 +120,9 @@ namespace cepgen {
     }
 
     //--- load all necessary modules
-    if (!safe_mode && !addons_file.empty()) {
-      std::ifstream addons(addons_file);
-      std::string lib;
-      while (std::getline(addons, lib))
+    if (!safe_mode && !addons_file.empty())
+      for (const auto& lib : utils::split(utils::readFile(addons_file), '\n'))
         loadLibrary(lib, true);
-    }
     loadLibrary("CepGenProcesses", true);
     if (!invalid_libraries.empty())
       CG_WARNING("init") << "Failed to load the following libraries:\n\t" << invalid_libraries << ".";
@@ -145,10 +141,9 @@ namespace cepgen {
 
   void printHeader() {
     if (!callPath("README", [](const auto& path) {
-          std::ifstream hf(path);
-          if (!hf.good())
+          if (!utils::fileExists(path))
             return false;
-          CG_LOG << std::string(std::istreambuf_iterator<char>(hf), std::istreambuf_iterator<char>());
+          CG_LOG << utils::readFile(path);
           return true;
         }))
       CG_WARNING("printHeader") << "Failed to open README file.";

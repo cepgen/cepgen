@@ -304,21 +304,21 @@ namespace cepgen {
       //--- define incoming system
       if (event_) {
         auto& ib1 = event_->oneWithRole(Particle::IncomingBeam1);
-        ib1.setPdgId(kin_.incomingBeams().positive().pdgId());
+        ib1.setIntegerPdgId(kin_.incomingBeams().positive().integerPdgId());
         ib1.setMomentum(p1);
         auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
-        ib2.setPdgId(kin_.incomingBeams().negative().pdgId());
+        ib2.setIntegerPdgId(kin_.incomingBeams().negative().integerPdgId());
         ib2.setMomentum(p2);
         auto& ob1 = event_->oneWithRole(Particle::OutgoingBeam1);
-        ob1.setPdgId(kin_.incomingBeams().positive().pdgId());
+        ob1.setIntegerPdgId(kin_.incomingBeams().positive().integerPdgId());
         ob1.setStatus(kin_.incomingBeams().positive().elastic() ? Particle::Status::FinalState
                                                                 : Particle::Status::Unfragmented);
         auto& ob2 = event_->oneWithRole(Particle::OutgoingBeam2);
-        ob2.setPdgId(kin_.incomingBeams().negative().pdgId());
+        ob2.setIntegerPdgId(kin_.incomingBeams().negative().integerPdgId());
         ob2.setStatus(kin_.incomingBeams().negative().elastic() ? Particle::Status::FinalState
                                                                 : Particle::Status::Unfragmented);
         for (auto& cp : (*event_)[Particle::CentralSystem])
-          cp.get().setPdgId(cp.get().pdgId());
+          cp.get().setIntegerPdgId(cp.get().integerPdgId());
       }
       s_ = kin_.incomingBeams().s();
       sqs_ = std::sqrt(s_);
@@ -372,7 +372,7 @@ namespace cepgen {
         (*os) << oss.str();
     }
 
-    void Process::setEventContent(const std::unordered_map<Particle::Role, pdgids_t>& part_ids) {
+    void Process::setEventContent(const std::unordered_map<Particle::Role, spdgids_t>& part_ids) {
       if (!event_)
         return;
       if (part_ids.count(Particle::Role::CentralSystem) == 0)
@@ -393,7 +393,7 @@ namespace cepgen {
             evt_part.momentum().setMass(HeavyIon::fromPdgId(user_evt_part_pdgid).mass());
           } else {
             const auto& part_info = PDG::get()(user_evt_part_pdgid);
-            evt_part.setPdgId(user_evt_part_pdgid, part_info.charge / 3.);
+            evt_part.setIntegerPdgId(user_evt_part_pdgid);
             evt_part.momentum().setMass(part_info.mass);
           }
         }

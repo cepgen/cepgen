@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2020-2022  Laurent Forthomme
+ *  Copyright (C) 2020-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,49 +19,31 @@
 #ifndef CepGenAddOns_MadGraphWrapper_MadGraphProcess_h
 #define CepGenAddOns_MadGraphWrapper_MadGraphProcess_h
 
-#include <string>
-
+#include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Physics/Momentum.h"
-
-// forward-declaration of base MadGraph standalone_cpp process
-class CPPProcess;
+#include "CepGen/Physics/ParticleProperties.h"
 
 namespace cepgen {
-  /// Wrapper around a generic MadGraph CPPProcess definition
-  class MadGraphProcess {
+  /// Wrapper around a generic MadGraph process definition
+  class MadGraphProcess : public SteeredObject<MadGraphProcess> {
   public:
-    MadGraphProcess();
-    ~MadGraphProcess();
+    explicit MadGraphProcess(const ParametersList&);
+    virtual ~MadGraphProcess() = default;
 
-    const std::string& name() const { return name_; }
-    const std::string& description() const { return descr_; }
+    static ParametersDescription description();
 
-    void initialise(const std::string&);
-    inline const std::array<unsigned long long, 2>& intermediatePartons() const { return incoming_pdgids_; }
-    inline const std::vector<unsigned long long>& centralSystem() const { return central_pdgids_; }
-    double eval();
+    inline const std::vector<int>& intermediatePartons() const { return incoming_pdgids_; }
+    inline const std::vector<int>& centralSystem() const { return central_pdgids_; }
 
-    inline MadGraphProcess& setMomentum(size_t i, const Momentum& mom) {
-      if (i > mom_.size())
-        throw CG_FATAL("MadGraphProcess") << "Invalid index for momentum: " << i << "!";
-      mom_[i][0] = mom.energy();
-      mom_[i][1] = mom.px();
-      mom_[i][2] = mom.py();
-      mom_[i][3] = mom.pz();
-      return *this;
-    }
-    const std::vector<Momentum>& momenta();
+    virtual void initialise(const std::string&) = 0;
+    virtual double eval() = 0;
+    virtual const std::vector<Momentum>& momenta() = 0;
 
-  private:
-    std::unique_ptr<CPPProcess> proc_;
+    MadGraphProcess& setMomentum(size_t i, const Momentum& mom);
+
+  protected:
+    const std::vector<int> incoming_pdgids_, central_pdgids_;
     std::vector<double*> mom_;
-
-    const std::string name_;
-    const std::string descr_;
-    const std::array<unsigned long long, 2> incoming_pdgids_;
-    const std::vector<unsigned long long> central_pdgids_;
-
-    std::vector<Momentum> momenta_;
   };
 }  // namespace cepgen
 

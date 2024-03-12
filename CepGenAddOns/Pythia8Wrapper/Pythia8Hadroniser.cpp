@@ -95,8 +95,8 @@ namespace cepgen {
 #endif
       const auto& kin = runParameters().kinematics();
 
-      pythia_->settings.parm("Beams:idA", (long)kin.incomingBeams().positive().pdgId());
-      pythia_->settings.parm("Beams:idB", (long)kin.incomingBeams().negative().pdgId());
+      pythia_->settings.parm("Beams:idA", (long)kin.incomingBeams().positive().integerPdgId());
+      pythia_->settings.parm("Beams:idB", (long)kin.incomingBeams().negative().integerPdgId());
       // specify we will be using a LHA input
       pythia_->settings.mode("Beams:frameType", 5);
       pythia_->settings.parm("Beams:eCM", kin.incomingBeams().sqrtS());
@@ -235,7 +235,8 @@ namespace cepgen {
         prop.colours = py_part.col();  // colour factor
         prop.mass = py_part.m0();
         prop.width = py_part.mWidth();
-        prop.charge = py_part.charge();  // charge
+        if (const auto ch = int(py_part.charge() * 3.); std::abs(ch) > 0)
+          prop.charges = {ch, -ch};
         prop.fermion = py_part.isLepton();
         PDG::get().define(prop);
       }

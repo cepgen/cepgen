@@ -42,8 +42,8 @@
     return coll.count(key) != 0;                                                                                    \
   }                                                                                                                 \
   template <>                                                                                                       \
-  ParametersList& ParametersList::set<type>(std::string key, const type& value) {                                   \
-    coll[std::move(key)] = (type)(value);                                                                           \
+  ParametersList& ParametersList::set<type>(const std::string& key, const type& value) {                            \
+    coll[key] = static_cast<type>(value);                                                                           \
     return *this;                                                                                                   \
   }                                                                                                                 \
   template <>                                                                                                       \
@@ -71,31 +71,41 @@ namespace cepgen {
   ParametersList::ParametersList(const ParametersList& oth) { operator+=(oth); }
 
   bool ParametersList::operator==(const ParametersList& oth) const {
-    if (bool_values_ != oth.bool_values_)
-      return false;
-    if (int_values_ != oth.int_values_)
-      return false;
-    if (ulong_values_ != oth.ulong_values_)
-      return false;
-    if (dbl_values_ != oth.dbl_values_)
-      return false;
-    if (str_values_ != oth.str_values_)
-      return false;
-    if (lim_values_ != oth.lim_values_)
-      return false;
-    if (param_values_ != oth.param_values_)
-      return false;
-    if (vec_int_values_ != oth.vec_int_values_)
-      return false;
-    if (vec_dbl_values_ != oth.vec_dbl_values_)
-      return false;
-    if (vec_str_values_ != oth.vec_str_values_)
-      return false;
-    if (vec_lim_values_ != oth.vec_lim_values_)
-      return false;
-    if (vec_param_values_ != oth.vec_param_values_)
-      return false;
+#define __TYPE_ENUM(type, map, name) \
+  if (map != oth.map)                \
+    return false;
+    REGISTER_CONTENT_TYPE
+#undef __TYPE_ENUM
     return true;
+  }
+
+  ParametersList ParametersList::diff(const ParametersList& oth) const {
+    ParametersList diff;
+    ParametersList &mine = diff.operator[]<ParametersList>("mine"), &theirs = diff.operator[]<ParametersList>("theirs");
+    if (*this == oth)
+      return diff;
+    for (const auto& key : keys()) {
+      if (has<ParametersList>(key)) {
+        const auto& my_plist = get<ParametersList>(key);
+        if (!has<ParametersList>(key))
+          mine.set(key, my_plist);
+        else if (const auto their_plist = oth.get<ParametersList>(key); my_plist != their_plist) {
+          mine.set(key, my_plist);
+          theirs.set(key, their_plist);
+        }
+        continue;
+      }
+#define __TYPE_ENUM(type, map, name)                                                                     \
+  if (const auto my_param = get<type>(key), their_param = oth.get<type>(key); my_param != their_param) { \
+    mine.set(key, my_param);                                                                             \
+    if (!oth.empty())                                                                                    \
+      theirs.set(key, their_param);                                                                      \
+    continue;                                                                                            \
+  }
+      REGISTER_CONTENT_TYPE
+#undef __TYPE_ENUM
+    }
+    return diff;
   }
 
   ParametersList& ParametersList::operator+=(const ParametersList& oth) {
@@ -119,12 +129,10 @@ namespace cepgen {
     }
     if (!keys_erased.empty())
       CG_DEBUG_LOOP("ParametersList") << utils::s("key", keys_erased.size(), true) << " erased: " << keys_erased << ".";
-    //--- concatenate all typed lists
-    bool_values_.insert(oth.bool_values_.begin(), oth.bool_values_.end());
-    int_values_.insert(oth.int_values_.begin(), oth.int_values_.end());
-    ulong_values_.insert(oth.ulong_values_.begin(), oth.ulong_values_.end());
-    dbl_values_.insert(oth.dbl_values_.begin(), oth.dbl_values_.end());
-    str_values_.insert(oth.str_values_.begin(), oth.str_values_.end());
+      //--- concatenate all typed lists
+#define __TYPE_ENUM(type, map, name) map.insert(oth.map.begin(), oth.map.end());
+    REGISTER_CONTENT_TYPE
+#undef __TYPE_ENUM
     // special case for parameters collection: concatenate values instead of full containers
     for (const auto& par : oth.param_values_)
       // if the two parameters list are modules, and do not have the same name,
@@ -133,13 +141,6 @@ namespace cepgen {
         param_values_[par.first] += par.second;
       else
         param_values_[par.first] = par.second;
-    lim_values_.insert(oth.lim_values_.begin(), oth.lim_values_.end());
-    vec_int_values_.insert(oth.vec_int_values_.begin(), oth.vec_int_values_.end());
-    vec_dbl_values_.insert(oth.vec_dbl_values_.begin(), oth.vec_dbl_values_.end());
-    vec_str_values_.insert(oth.vec_str_values_.begin(), oth.vec_str_values_.end());
-    vec_lim_values_.insert(oth.vec_lim_values_.begin(), oth.vec_lim_values_.end());
-    vec_param_values_.insert(oth.vec_param_values_.begin(), oth.vec_param_values_.end());
-    vec_vec_dbl_values_.insert(oth.vec_vec_dbl_values_.begin(), oth.vec_vec_dbl_values_.end());
     return *this;
   }
 
@@ -231,10 +232,11 @@ namespace cepgen {
   }
 
   size_t ParametersList::erase(const std::string& key) {
-    return erase<bool>(key) + erase<int>(key) + erase<unsigned long long>(key) + erase<double>(key) +
-           erase<std::string>(key) + erase<Limits>(key) + erase<ParametersList>(key) + erase<std::vector<int> >(key) +
-           erase<std::vector<double> >(key) + erase<std::vector<std::string> >(key) +
-           erase<std::vector<ParametersList> >(key) + erase<std::vector<std::vector<double> > >(key);
+    size_t num_keys_erased = 0;
+#define __TYPE_ENUM(type, map, name) num_keys_erased += erase<type>(key);
+    REGISTER_CONTENT_TYPE
+#undef __TYPE_ENUM
+    return num_keys_erased;
   }
 
   bool ParametersList::empty() const { return keys(true).empty(); }
@@ -273,19 +275,9 @@ namespace cepgen {
   std::vector<std::string> ParametersList::keys(bool name_key) const {
     std::vector<std::string> out{};
     auto key = [](const auto& p) { return p.first; };
-    std::transform(bool_values_.begin(), bool_values_.end(), std::back_inserter(out), key);
-    std::transform(int_values_.begin(), int_values_.end(), std::back_inserter(out), key);
-    std::transform(ulong_values_.begin(), ulong_values_.end(), std::back_inserter(out), key);
-    std::transform(dbl_values_.begin(), dbl_values_.end(), std::back_inserter(out), key);
-    std::transform(str_values_.begin(), str_values_.end(), std::back_inserter(out), key);
-    std::transform(param_values_.begin(), param_values_.end(), std::back_inserter(out), key);
-    std::transform(lim_values_.begin(), lim_values_.end(), std::back_inserter(out), key);
-    std::transform(vec_int_values_.begin(), vec_int_values_.end(), std::back_inserter(out), key);
-    std::transform(vec_dbl_values_.begin(), vec_dbl_values_.end(), std::back_inserter(out), key);
-    std::transform(vec_str_values_.begin(), vec_str_values_.end(), std::back_inserter(out), key);
-    std::transform(vec_lim_values_.begin(), vec_lim_values_.end(), std::back_inserter(out), key);
-    std::transform(vec_param_values_.begin(), vec_param_values_.end(), std::back_inserter(out), key);
-    std::transform(vec_vec_dbl_values_.begin(), vec_vec_dbl_values_.end(), std::back_inserter(out), key);
+#define __TYPE_ENUM(type, map, name) std::transform(map.begin(), map.end(), std::back_inserter(out), key);
+    REGISTER_CONTENT_TYPE
+#undef __TYPE_ENUM
     if (!name_key) {
       const auto it_name = std::find(out.begin(), out.end(), MODULE_NAME);
       if (it_name != out.end())
@@ -301,10 +293,8 @@ namespace cepgen {
     auto wrap_val = [&wrap](const auto& val, const std::string& type) -> std::string {
       std::ostringstream os;
       if (type == "float" || type == "vfloat")
-        os << std::fixed;
-      else if (type == "bool")
-        os << std::boolalpha;
-      os << val;
+        os << std::defaultfloat << std::showpoint;
+      os << utils::merge(val, ",");
       return (wrap ? type + "(" : "")  //+ (type == "bool" ? utils::yesno(std::stoi(os.str())) : os.str()) +
              + os.str() + (wrap ? ")" : "");
     };
@@ -313,23 +303,11 @@ namespace cepgen {
       return wrap_val(utils::merge(coll, ", "), type);
     };
     std::ostringstream os;
-    if (has<ParametersList>(key))
+    if (has<ParametersList>(key)) {
       os << get<ParametersList>(key);
-    else if (has<bool>(key))
-      os << wrap_val(get<bool>(key), "bool");
-    else if (has<int>(key))
-      os << wrap_val(get<int>(key), "int");
-    else if (has<unsigned long long>(key))
-      os << wrap_val(get<unsigned long long>(key), "ulong");
-    else if (has<double>(key))
-      os << wrap_val(get<double>(key), "float");
-    else if (has<std::string>(key))
-      os << wrap_val(get<std::string>(key), "str");
-    else if (has<std::vector<ParametersList> >(key))
-      os << wrap_coll(get<std::vector<ParametersList> >(key), "VParams");
-    else if (has<std::vector<int> >(key))
-      os << wrap_coll(get<std::vector<int> >(key), "vint");
-    else if (has<std::vector<double> >(key) || has<Limits>(key)) {
+      return os.str();
+    }
+    if (has<std::vector<double> >(key) || has<Limits>(key)) {
       std::string sep;
       if (has<std::vector<double> >(key)) {
         os << wrap_coll(get<std::vector<double> >(key), "vfloat");
@@ -337,40 +315,29 @@ namespace cepgen {
       }
       if (has<Limits>(key))
         os << sep << wrap_val(get<Limits>(key), "Limits");
-    } else if (has<std::vector<std::string> >(key))
-      os << wrap_coll(get<std::vector<std::string> >(key), "vstr");
-    else if (has<std::vector<Limits> >(key))
-      os << wrap_coll(get<std::vector<Limits> >(key), "VLimits");
-    else if (has<std::vector<std::vector<double> > >(key))
-      os << wrap_coll(get<std::vector<std::vector<double> > >(key), "vvfloat");
-    return os.str();
-  }
+      return os.str();
+    }
+    if (has<bool>(key)) {
+      os << std::boolalpha << get<bool>(key);
+      return os.str();
+    }
+#define __TYPE_ENUM(type, map, name) \
+  if (has<type>(key))                \
+    return wrap_val(get<type>(key), name);
+    REGISTER_CONTENT_TYPE
+#undef __TYPE_ENUM
+    if (key == MODULE_NAME)
+      return "";
+    throw CG_ERROR("ParametersList:getString")
+        << "Unrecognised type for key '" << key << "' from parameters list " << *this << ".";
+  }  // namespace cepgen
 
   ParametersList& ParametersList::rename(const std::string& old_key, const std::string& new_key) {
-    if (has<bool>(old_key))
-      set(new_key, get<bool>(old_key)).erase(old_key);
-    if (has<int>(old_key))
-      set(new_key, get<int>(old_key)).erase(old_key);
-    if (has<unsigned long long>(old_key))
-      set(new_key, get<unsigned long long>(old_key)).erase(old_key);
-    if (has<double>(old_key))
-      set(new_key, get<double>(old_key)).erase(old_key);
-    if (has<std::string>(old_key))
-      set(new_key, get<std::string>(old_key)).erase(old_key);
-    if (has<Limits>(old_key))
-      set(new_key, get<Limits>(old_key)).erase(old_key);
-    if (has<ParametersList>(old_key))
-      set(new_key, get<ParametersList>(old_key)).erase(old_key);
-    if (has<std::vector<int> >(old_key))
-      set(new_key, get<std::vector<int> >(old_key)).erase(old_key);
-    if (has<std::vector<double> >(old_key))
-      set(new_key, get<std::vector<double> >(old_key)).erase(old_key);
-    if (has<std::vector<std::string> >(old_key))
-      set(new_key, get<std::vector<std::string> >(old_key)).erase(old_key);
-    if (has<std::vector<Limits> >(old_key))
-      set(new_key, get<std::vector<Limits> >(old_key)).erase(old_key);
-    if (has<std::vector<ParametersList> >(old_key))
-      set(new_key, get<std::vector<ParametersList> >(old_key)).erase(old_key);
+#define __TYPE_ENUM(type, map, name) \
+  if (has<type>(old_key))            \
+    set(new_key, get<type>(old_key)).erase(old_key);
+    REGISTER_CONTENT_TYPE
+#undef __TYPE_ENUM
     return *this;
   }
 
@@ -414,7 +381,7 @@ namespace cepgen {
   }
 
   template <typename T>
-  ParametersList& ParametersList::set(std::string key, const T&) {
+  ParametersList& ParametersList::set(const std::string& key, const T&) {
     throw CG_FATAL("ParametersList") << "Invalid type to be set for key '" << key << "'.";
   }
 
@@ -520,13 +487,16 @@ namespace cepgen {
   template <>
   ParticleProperties ParametersList::get<ParticleProperties>(const std::string& key,
                                                              const ParticleProperties& def) const {
-    if (has<ParametersList>(key)) {  // first steer as a dictionary of particle properties
+    if (has<ParametersList>(key)) {  // try to steer as a dictionary of particle properties
       const auto& plist = get<ParametersList>(key);
       if (plist.keys() == std::vector<std::string>{"pdgid"})
-        return PDG::get()(plist.get<pdgid_t>("pdgid"));
+        return PDG::get()(plist.get<int>("pdgid"));
       return ParticleProperties(plist);
-    } else if (has<pdgid_t>(key) ||
-               has<int>(key)) {  // if not a dictionary of properties, retrieve from PDG runtime database
+    } else if (has<pdgid_t>(key)) {  // if not a dictionary of properties, retrieve from PDG runtime database
+      CG_DEBUG("ParametersList") << "Retrieved physical properties for particle with PDG identifier '"
+                                 << get<pdgid_t>(key) << "' from PDG database.";
+      return PDG::get()(get<pdgid_t>(key));
+    } else if (has<int>(key)) {  // if not a dictionary of properties, retrieve from PDG runtime database
       CG_DEBUG("ParametersList") << "Retrieved physical properties for particle with PDG identifier '" << get<int>(key)
                                  << "' from PDG database.";
       return PDG::get()(get<int>(key));
@@ -537,9 +507,9 @@ namespace cepgen {
 
   /// Set a particle properties object value
   template <>
-  ParametersList& ParametersList::set<ParticleProperties>(std::string key, const ParticleProperties& value) {
+  ParametersList& ParametersList::set<ParticleProperties>(const std::string& key, const ParticleProperties& value) {
     PDG::get().define(value);
-    return set<ParametersList>(std::move(key), value.parameters());
+    return set<ParametersList>(key, value.parameters());
   }
 
   template <>

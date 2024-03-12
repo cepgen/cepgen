@@ -65,6 +65,7 @@ namespace cepgen {
     worker_->setIntegrator(integrator_.get());
     xsect_ = Value{-1., -1.};
     parameters_->prepareRun();
+    initialised_ = false;
   }
 
   const RunParameters& Generator::runParameters() const {
@@ -166,8 +167,6 @@ namespace cepgen {
   }
 
   void Generator::initialise() {
-    if (initialised_)
-      return;
     if (!parameters_)
       throw CG_FATAL("Generator:generate") << "No steering parameters specified!";
 

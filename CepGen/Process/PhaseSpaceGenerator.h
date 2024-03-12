@@ -43,8 +43,9 @@ namespace cepgen {
     virtual bool generate() = 0;        ///< Generate a kinematics combination, and return a success flag
     virtual double weight() const = 0;  ///< Return the event weight for a kinematics combination
 
-    virtual pdgids_t partons() const = 0;  ///< List of incoming partons in kinematics
-    virtual pdgids_t central() const = 0;  ///< List of outgoing central particles in kinematics
+    virtual pdgids_t partons() const = 0;                  ///< List of incoming partons in kinematics
+    virtual void setCentral(const std::vector<int>&) = 0;  ///< Override the central particles list
+    virtual std::vector<int> central() const = 0;          ///< List of outgoing central particles in kinematics
 
     // Mandelstam variables
     virtual double that() const = 0;

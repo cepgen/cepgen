@@ -37,7 +37,7 @@ using namespace std::complex_literals;
 class PPtoWW final : public cepgen::proc::FactorisedProcess {
 public:
   explicit PPtoWW(const ParametersList& params)
-      : FactorisedProcess(params, {PDG::W, PDG::W}),
+      : FactorisedProcess(params, {+(spdgid_t)PDG::W, -(spdgid_t)PDG::W}),
         mW_(PDG::get().mass(PDG::W)),
         mW2_(mW_ * mW_),
         method_(steer<int>("method")),
