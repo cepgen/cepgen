@@ -28,6 +28,8 @@
 #include <vector>
 
 namespace cepgen {
+  class Limits;
+  class ParametersList;
   namespace utils {
     std::string tostring(const std::wstring& str);   ///< Convert a wide characters to a standard characters string
     std::wstring towstring(const std::string& str);  ///< Convert a wide characters to a standard characters string
@@ -104,6 +106,17 @@ namespace cepgen {
     template <typename T, size_t N>
     inline std::string merge(const std::array<T, N>& arr, const std::string& delim) {
       return merge(std::vector<T>(arr.begin(), arr.end()), delim);
+    }
+    /// Trivial dimension-1 "merger" for string input
+    inline std::string merge(const std::string& val, const std::string&) { return val; }
+    /// Trivial dimension-1 "merger" for parameters list input
+    std::string merge(const ParametersList&, const std::string&);
+    /// Trivial dimension-1 "merger" for limits input
+    std::string merge(const Limits&, const std::string&);
+    /// Trivial dimension-1 "merger" for generic input
+    template <typename T>
+    inline std::string merge(const T& val, const std::string&) {
+      return std::to_string(val);
     }
     bool isInt(const std::string&);    ///< Check if a string is also an integer
     bool isFloat(const std::string&);  ///< Check if a string is also a floating point number

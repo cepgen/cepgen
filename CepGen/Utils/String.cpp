@@ -217,6 +217,14 @@ namespace cepgen {
 
     template std::string merge<double>(const std::vector<std::vector<double> >&, const std::string&);
 
+    std::string merge(const ParametersList& plist, const std::string&) { return plist.print(); }
+
+    std::string merge(const Limits& lim, const std::string&) {
+      std::ostringstream os;
+      os << lim;
+      return os.str();
+    }
+
     bool isInt(const std::string& str) {
       return !str.empty() &&
              std::find_if(str.begin(), str.end(), [](unsigned char c) { return !std::isdigit(c); }) == str.end();
