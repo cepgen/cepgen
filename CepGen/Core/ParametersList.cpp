@@ -301,7 +301,7 @@ namespace cepgen {
     auto wrap_val = [&wrap](const auto& val, const std::string& type) -> std::string {
       std::ostringstream os;
       if (type == "float" || type == "vfloat")
-        os << std::fixed;
+        os << std::defaultfloat << std::showpoint;
       else if (type == "bool")
         os << std::boolalpha;
       os << val;
