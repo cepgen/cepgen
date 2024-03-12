@@ -292,9 +292,7 @@ namespace cepgen {
     // wrapper for the printout of a general variable
     auto wrap_val = [&wrap](const auto& val, const std::string& type) -> std::string {
       std::ostringstream os;
-      if (type == "bool")
-        os << std::boolalpha;
-      else if (type == "float" || type == "vfloat")
+      if (type == "float" || type == "vfloat")
         os << std::defaultfloat << std::showpoint;
       os << utils::merge(val, ",");
       return (wrap ? type + "(" : "")  //+ (type == "bool" ? utils::yesno(std::stoi(os.str())) : os.str()) +
@@ -319,12 +317,19 @@ namespace cepgen {
         os << sep << wrap_val(get<Limits>(key), "Limits");
       return os.str();
     }
+    if (has<bool>(key)) {
+      os << std::boolalpha << get<bool>(key);
+      return os.str();
+    }
 #define __TYPE_ENUM(type, map, name) \
   if (has<type>(key))                \
     return wrap_val(get<type>(key), name);
     REGISTER_CONTENT_TYPE
 #undef __TYPE_ENUM
-    return os.str();
+    if (key == MODULE_NAME)
+      return "";
+    throw CG_ERROR("ParametersList:getString")
+        << "Unrecognised type for key '" << key << "' from parameters list " << *this << ".";
   }  // namespace cepgen
 
   ParametersList& ParametersList::rename(const std::string& old_key, const std::string& new_key) {
