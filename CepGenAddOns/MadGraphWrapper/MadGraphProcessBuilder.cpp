@@ -78,12 +78,11 @@ public:
           << "is incompatible with user-steered incoming fluxes particles (" << psgen_->partons() << ").";
     if (const auto params_card = steer<std::string>("parametersCard"); !params_card.empty()) {
       CG_INFO("MadGraphProcessBuilder") << "Preparing process kinematics for card at \"" << params_card << "\".";
+      const auto unsteered_pcard = MadGraphInterface::extractParamCardParameters(utils::readFile(params_card));
+      CG_DEBUG("MadGraphProcessBuilder") << "Unsteered parameters card:\n" << unsteered_pcard;
       if (const auto mod_params = steer<ParametersList>("modelParameters"); !mod_params.empty()) {
-        const auto unsteered_pcard_txt = utils::readFile(params_card);
-        const auto steered_pcard = MadGraphInterface::extractParamCardParameters(unsteered_pcard_txt).steer(mod_params);
-        CG_DEBUG("MadGraphProcessBuilder") << "Unsteered parameters card:\n"
-                                           << unsteered_pcard_txt << "\n\n"
-                                           << std::string(50, '-') << "\n"
+        const auto steered_pcard = unsteered_pcard.steer(mod_params);
+        CG_DEBUG("MadGraphProcessBuilder") << "User-steered parameters:" << mod_params << "\n"
                                            << "Steered parameters card:\n"
                                            << steered_pcard;
         std::ofstream params_card_steered(params_card);
