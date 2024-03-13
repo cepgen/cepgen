@@ -5,6 +5,8 @@ on:
 env:
   BUILD_TYPE: Release
   CEPGEN_PATH: /Package/build
+  MG5_aMC_VERSION: MG5_aMC_v3.5.3
+
 jobs:
   doc:
     runs-on: ubuntu-latest
@@ -14,36 +16,46 @@ jobs:
       image: 'laufor/ci-images:cepgen-fedora39'
       options: -v ${{ github.workspace }}:/Package
     steps:
-      - uses: actions/checkout@v3
-      - uses: seanmiddleditch/gha-setup-ninja@master
-      - name: Install SSH Key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
-      - name: Add known hosts
-        run: mkdir -p ~/.ssh && ssh-keyscan -p 222 -H login.hepforge.org >> ~/.ssh/known_hosts
-      - name: Python requirements
-        run: |
-          sudo pip install -r requirements.txt
-      - name: CMake configuration
-        run: |
-          git config --global --add safe.directory /Package
-          cmake3 -GNinja -B ${{env.CEPGEN_PATH}} -DCMAKE_BUILD_UTILS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always" -DCMAKE_BUILD_FOAM=ON
-      - name: Generate cepgen documentation
-        working-directory: ${{env.CEPGEN_PATH}}
-        run: |
-          cmake3 --build ${{env.CEPGEN_PATH}}
-          cmake3 --build ${{env.CEPGEN_PATH}} -- cepgenDocGenerator
-          bin/cepgenDocGenerator -o /Package/doc/.raw_modules.html -e
-          cmake3 --build ${{env.CEPGEN_PATH}} -- Sphinx
-      - name: Upload documentation
-        uses: burnett01/rsync-deployments@5.2.1
-        with:
-          switches: -arvz --no-perms --no-owner --no-group --delete -O -q
-          path: build/doc/output_html/
-          remote_path: ~/cepgen/public_html/
-          remote_host: login.hepforge.org
-          remote_port: 222
-          remote_user: ${{ secrets.SSH_USER }}
-          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - uses: actions/checkout@v4
+    - uses: seanmiddleditch/gha-setup-ninja@master
+    - name: 'Install SSH Key'
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+    - name: 'Add known hosts'
+      run: mkdir -p ~/.ssh && ssh-keyscan -p 222 -H login.hepforge.org >> ~/.ssh/known_hosts
+    - name: Python requirements
+      run: |
+        sudo pip install -r requirements.txt
+    - name: 'MadGraph fetch'
+      uses: wei/wget@v1
+      with:
+        args: -O mg.tar.gz https://launchpad.net/mg5amcnlo/3.0/3.5.x/+download/${{env.MG5_aMC_VERSION}}.tar.gz
+    - name: 'MadGraph install'
+      run: |
+        tar xvfz mg.tar.gz
+        mv `ls -d MG5*/` ${{env.MG5_aMC_VERSION}}
+        rm -f mg.tar.gz
+
+    - name: 'CMake configuration'
+      run: |
+        git config --global --add safe.directory /Package
+        cmake -GNinja -B ${{env.CEPGEN_PATH}} -DCMAKE_BUILD_UTILS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always" -DCMAKE_BUILD_FOAM=ON -DMADGRAPH_BIN=/Package/${{env.MG5_aMC_VERSION}}/bin/mg5_aMC
+    - name: 'Generate cepgen documentation'
+      working-directory: ${{env.CEPGEN_PATH}}
+      run: |
+        cmake --build ${{env.CEPGEN_PATH}}
+        cmake --build ${{env.CEPGEN_PATH}} -- cepgenDocGenerator
+        bin/cepgenDocGenerator -o /Package/doc/.raw_modules.html -e
+        cmake --build ${{env.CEPGEN_PATH}} -- Sphinx
+    - name: 'Upload documentation'
+      uses: burnett01/rsync-deployments@5.2.1
+      with:
+        switches: -arvz --no-perms --no-owner --no-group --delete -O -q
+        path: build/doc/output_html/
+        remote_path: ~/cepgen/public_html/
+        remote_host: login.hepforge.org
+        remote_port: 222
+        remote_user: ${{ secrets.SSH_USER }}
+        remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
