@@ -128,7 +128,7 @@ macro(cepgen_build mod_name)
         install(TARGETS ${mod_name}
             DESTINATION ${CMAKE_INSTALL_LIBDIR}
             COMPONENT ${ARG_INSTALL_COMPONENT})
-        get_filename_component(mod_path ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+        file(RELATIVE_PATH mod_path ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
         install(DIRECTORY ./
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${mod_path}
             COMPONENT ${ARG_INSTALL_COMPONENT}
