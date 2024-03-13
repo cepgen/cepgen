@@ -40,7 +40,7 @@ namespace cepgen {
       return desc;
     }
 
-    bool fragmenting() const override final { return ff_->name() != "InelasticNucleon"; }
+    bool fragmenting() const override final { return ff_->fragmenting(); }
     pdgid_t partonPdgId() const override final { return PDG::photon; }
 
     double fluxQ2(double x, double q2) const override {

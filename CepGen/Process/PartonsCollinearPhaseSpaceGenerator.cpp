@@ -67,7 +67,6 @@ namespace cepgen {
     set_flux_properties(kin.incomingBeams().negative(), neg_flux_);
 
     // register the incoming partons' virtuality
-    CG_LOG << log_part_virt_;
     if (log_part_virt_) {
       const auto log_lim_q2 = kin.cuts().initial.q2.truncate(Limits{1.e-10, 5.}).compute(std::log);
       process()

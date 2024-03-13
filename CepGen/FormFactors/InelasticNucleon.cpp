@@ -74,6 +74,7 @@ namespace cepgen {
         const auto fm = compute_fm_ ? integr_->integrate(eval_fm_, mx2_range_) * inv_q2 : 0.;
         setFEFM(fe, fm);
       }
+      bool fragmenting() const override { return true; }
 
     private:
       const std::unique_ptr<strfun::Parameterisation> sf_;

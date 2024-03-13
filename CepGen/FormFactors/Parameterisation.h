@@ -46,6 +46,8 @@ namespace cepgen {
 
       /// Compute all relevant form factors functions for a given \f$Q^2\f$ value
       virtual const FormFactors& operator()(double /*q2*/);
+      /// Is the nucleon surviving the exchange?
+      virtual bool fragmenting() const { return false; }
 
     protected:
       /// Proton magnetic moment

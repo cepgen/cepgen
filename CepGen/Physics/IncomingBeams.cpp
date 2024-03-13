@@ -21,12 +21,12 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/IncomingBeams.h"
 #include "CepGen/Physics/Modes.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/Math.h"
 
 namespace cepgen {
@@ -259,7 +259,7 @@ namespace cepgen {
                                     FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler))
         .setDescription("Beam form factors modelling");
     desc.add<ParametersDescription>("structureFunctions",
-                                    strfun::Parameterisation::description().setName<int>(11 /*default is SY*/))
+                                    StructureFunctionsFactory::get().describeParameters(11 /*default is SY*/))
         .setDescription("Beam inelastic structure functions modelling");
     return desc;
   }
