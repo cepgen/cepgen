@@ -28,7 +28,7 @@
 
 using namespace cepgen;
 
-auto make_pdgids_pair = [](pdgid_t pair) { return spdgids_t(pair, -pair); };
+auto make_pdgids_pair = [](pdgid_t pair) { return spdgids_t{(spdgid_t)pair, -(spdgid_t)pair}; };
 
 /// Compute the 2-to-4 matrix element for a CE \f$\gamma\gamma\rightarrow f\bar f\f$ process
 class PPtoFF final : public cepgen::proc::FactorisedProcess {
