@@ -344,6 +344,7 @@ OPTIMIZE_OUTPUT_SLICE  = NO
 
 EXTENSION_MAPPING      = f=Fortran \
                          inc=Fortran \
+                         cc=C++ \
                          cpp=C++ \
                          h=C++ \
                          py=Python
@@ -953,8 +954,8 @@ INPUT_FILE_ENCODING    =
 # *.vhdl, *.ucf, *.qsf and *.ice.
 
 FILE_PATTERNS          = *.h \
-                         *.cpp \
                          *.cc \
+                         *.cpp \
                          *.py \
                          *.f \
                          *.inc

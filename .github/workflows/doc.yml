@@ -41,7 +41,7 @@ jobs:
     - name: 'CMake configuration'
       run: |
         git config --global --add safe.directory /Package
-        cmake -GNinja -B ${{env.CEPGEN_PATH}} -DCMAKE_BUILD_UTILS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always" -DCMAKE_BUILD_FOAM=ON -DMADGRAPH_BIN=/Package/${{env.MG5_aMC_VERSION}}/bin/mg5_aMC
+        cmake -GNinja -B ${{env.CEPGEN_PATH}} -DGH_API_TOKEN=${{secrets.GH_API_TOKEN}} -DCMAKE_BUILD_UTILS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_FLAGS=" -fdiagnostics-color=always" -DCMAKE_BUILD_FOAM=ON -DMADGRAPH_BIN=/Package/${{env.MG5_aMC_VERSION}}/bin/mg5_aMC
     - name: 'Generate cepgen documentation'
       working-directory: ${{env.CEPGEN_PATH}}
       run: |

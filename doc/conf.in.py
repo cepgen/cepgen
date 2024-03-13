@@ -41,7 +41,9 @@ release = u'@CEPGEN_VERSION@'
 extensions = [
     'breathe',
     'changelog',
+    'myst_parser',
     'sphinx_git',
+    'sphinx_github_changelog',
     #'sphinxemoji.sphinxemoji',
     'sphinxcontrib.bibtex',
     'sphinx_togglebutton',
@@ -61,7 +63,11 @@ templates_path = ['_templates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.txt': 'markdown',
+    '.md': 'markdown'
+}
 
 # The master toctree document.
 master_doc = 'index'
@@ -148,7 +154,7 @@ html_theme_options = {
     #'style_external_links': True,
     #'logo_only': True,
 }
-#html_use_index = True
+html_use_index = True
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -210,7 +216,7 @@ mathjax3_config = {
       'Reg': "{\\rm I\\!R}",
       'gg': ["{\\gamma\\gamma\\rightarrow #1}", 1],
       'ggx': "{\\gg{X}}",
-      'ggll': "{\\gg{\ell^+\\ell^-}}",
+      'ggll': "{\\gg{\\ell^+\\ell^-}}",
       'ggff': "{\\gg{f\\bar f}}",
       'ggww': "{\\gg{W^+W^-}}",
       'kt': "{k_{\\rm T}}",
@@ -270,6 +276,8 @@ breathe_implementation_filename_extensions = ['.cxx', '.C', '.f']
 #changelog_render_pullreq = "https://phab.hepforge.org/D%s"
 changelog_render_changeset = "https://github.com/cepgen/cepgen/commit/%s"
 changelog_render_pullreq = "https://gitlab.cern.ch/lforthom/cepgen/-/merge_requests/%s"
+
+sphinx_github_changelog_token = '@GH_API_TOKEN@'
 
 def setup(app):
     app.add_css_file('hacks.css')

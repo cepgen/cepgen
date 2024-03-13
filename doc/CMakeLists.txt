@@ -19,7 +19,6 @@ set(DOXYGEN_INPUT_DIR "${PROJECT_SOURCE_DIR}/src \\
                        ${PROJECT_SOURCE_DIR}/CepGen \\
                        ${PROJECT_SOURCE_DIR}/CepGenAddOns \\
                        ${PROJECT_SOURCE_DIR}/CepGenProcesses \\
-                       ${PROJECT_SOURCE_DIR}/Cards \\
                        ${PROJECT_SOURCE_DIR}/python")
 set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/doxygen)
 set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/xml/index.xml)
@@ -50,7 +49,7 @@ if(SPHINX_FOUND)
                     -Dbreathe_projects.CepGen=${DOXYGEN_OUTPUT_DIR}/xml
                     ${SPHINX_SOURCE} ${SPHINX_BUILD}
                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/index.rst
+                    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/index.md
                     ${DOXYGEN_INDEX_FILE}
                     #MAIN_DEPENDENCY ${SPHINX_SOURCE}/conf.py
                     COMMENT "Generating documentation with Sphinx")
