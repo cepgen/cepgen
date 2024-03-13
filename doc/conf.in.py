@@ -40,10 +40,11 @@ release = u'@CEPGEN_VERSION@'
 # ones.
 extensions = [
     'breathe',
-    'changelog',
+    #'changelog',
     'myst_parser',
     'sphinx_git',
     'sphinx_github_changelog',
+    #'sphinx_github_style',
     #'sphinxemoji.sphinxemoji',
     'sphinxcontrib.bibtex',
     'sphinx_togglebutton',
@@ -269,13 +270,22 @@ epub_exclude_files = ['search.html']
 
 # Breathe Configuration
 breathe_default_project = "CepGen"
-breathe_implementation_filename_extensions = ['.cxx', '.C', '.f']
+breathe_implementation_filename_extensions = ['.cxx', 'cpp', 'cc', '.C', '.f']
 
 # Changelog configuration
 #changelog_render_changeset = "https://phab.hepforge.org/rCEPGEN%s"
 #changelog_render_pullreq = "https://phab.hepforge.org/D%s"
-changelog_render_changeset = "https://github.com/cepgen/cepgen/commit/%s"
-changelog_render_pullreq = "https://gitlab.cern.ch/lforthom/cepgen/-/merge_requests/%s"
+#changelog_render_changeset = "https://github.com/cepgen/cepgen/commit/%s"
+#changelog_render_pullreq = "https://gitlab.cern.ch/lforthom/cepgen/-/merge_requests/%s"
+
+#linkcode_url = 'https://github.com/cepgen/cepgen'
+#linkcode_blob = 'master'
+#linkcode_link_text = 'Source'
+#def linkcode_resolve(domain, info):
+#    print('hahahaha')
+#    print('domain:',domain,'info:',info)
+
+viewcode_line_numbers = True
 
 sphinx_github_changelog_token = '@GH_API_TOKEN@'
 

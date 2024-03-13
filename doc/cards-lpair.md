@@ -5,7 +5,7 @@ All keys currently handled by this parser are listed below, along with their def
 
 ## General parameters
 
-- `PROC`: Process to generate (complete list [here](/processes.md))
+- `PROC`: Process to generate (complete list [here](/raw-modules.md#proc))
 - `MODE` (default: `1` = elastic-elastic): Subprocess’ mode
 - `NGEN` (default: `0`): Number of unweighted events to generate
 - `NTRT` (default: `1`): Flag to specify if the integrant is required to be smoothed
@@ -78,4 +78,4 @@ OUTP lhef
 OUTF lpair-example.lhe
 ```
 
-This configuration is equivalent to the *Python card* shown [here](/cards-python.md#configuration-card-example-python).
+This configuration is equivalent to the *Python card* shown [here](/cards-python.md#configuration-card-example).

@@ -386,8 +386,6 @@ F_2^{\rm sea}(\xbj,Q^2) = 2 \sum_{i=1}^{n_q} e_i^2 \bar q_i(\xbj,Q^2)\\
 F_2^{\rm tot}(\xbj,Q^2) = F_2^{\rm val}(\xbj,Q^2)+F_2^{\rm sea}(\xbj,Q^2)
 ```
 
-______________________________________________________________________
-
 [^f1]: This (set of) structure function(s) is/ar only defining $F_2$ and use the $R$ modelling-dependent relation:
 
     $$

@@ -202,4 +202,4 @@ output = cepgen.Module('lhef',
 )
 ```
 
-This configuration is equivalent to the *LPAIR card* shown [here](/cards-lpair.md#configuration-card-example-lpair).
+This configuration is equivalent to the *LPAIR card* shown [here](/cards-lpair.md#configuration-card-example).

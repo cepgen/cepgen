@@ -33,7 +33,7 @@ Therefore, the so-called factorised processes definition can be useful for most 
 ```
 
 CepGen attempts to give the user a relative freedom in its implementation of factorised, two-parton level processes.
-The kinematics of the latter can indeed be generated collinearly to the incoming beams kinematics (as done in major modern central exclusive processes generator), or with a physical transverse momentum, according to the approach described in [the reference papers](/bibliography.md#kt-factorisation).
+The kinematics of the latter can indeed be generated collinearly to the incoming beams kinematics (as done in major modern central exclusive processes generator), or with a physical transverse momentum, according to the approach described in [the reference papers](/zz-bibliography.md).
 The $\kt$-factorisation approach allows a direct factorisation of any hard process (e.g. photon- or gluon-induced productions) while accounting for transverse components of parton virtualities.
 For instance, a $pp\to p^{(\ast)}(\ggx)p^{(\ast)}$ matrix element can be factorised through the following formalism:
 
@@ -74,7 +74,6 @@ The {class}`cepgen::proc::FactorisedProcess` helper derivated-class of the earli
 ````{toggle}
 ```{doxygenclass} cepgen::proc::FactorisedProcess
 :members:
-:no-cite:
 ```
 ````
 
