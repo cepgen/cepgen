@@ -386,10 +386,10 @@ F_2^{\rm sea}(\xbj,Q^2) = 2 \sum_{i=1}^{n_q} e_i^2 \bar q_i(\xbj,Q^2)\\
 F_2^{\rm tot}(\xbj,Q^2) = F_2^{\rm val}(\xbj,Q^2)+F_2^{\rm sea}(\xbj,Q^2)
 ```
 
-[^f1]: This (set of) structure function(s) is/ar only defining $F_2$ and use the $R$ modelling-dependent relation:
+[^f1]: This (set of) structure function(s) is/are only defining $F_2$ and use the $R$ modelling-dependent relation:
 
-    $$
+    ```{math}
     F_L(\xbj,Q^2) = \left(1+\frac{4m_p^2\xbj^2}{Q^2}\right)\frac{R}{1+R}F_2(\xbj,Q^2).
-    $$
+    ```
 
     Where this ratio can be evaluated for any \$(\\xbj,Q^2)\$ range of interest {cite}`Abe:1998ym,Beringer:1900zz,Sibirtsev:2013cga,Whitlow:1990gk`.

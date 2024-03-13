@@ -65,7 +65,7 @@ with $\xbj = {Q^2}/({Q^2+M_X^2-m_p^2})$ the Bjorken scaling variable.
 
 ### C++ interface
 
-The {class}`cepgen::proc::FactorisedProcess` helper derivated-class of the earlier is introduced to allow the parton emission part to be transparent to the process developper.
+The {cpp:class}`cepgen::proc::FactorisedProcess` helper derivated-class of the earlier is introduced to allow the parton emission part to be transparent to the process developper.
 
 ```{doxygenclass} cepgen::proc::FactorisedProcess
 :outline:
@@ -74,6 +74,7 @@ The {class}`cepgen::proc::FactorisedProcess` helper derivated-class of the earli
 ````{toggle}
 ```{doxygenclass} cepgen::proc::FactorisedProcess
 :members:
+:protected-members:
 ```
 ````
 
