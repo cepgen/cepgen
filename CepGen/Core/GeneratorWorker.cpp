@@ -70,6 +70,7 @@ namespace cepgen {
     for (const auto& mod : params_->eventExportersSequence())
       *mod << event;
     const_cast<RunParameters*>(params_)->addGenerationTime(event.metadata("time:total"));
+    ++num_generated_events_;
     return true;
   }
 

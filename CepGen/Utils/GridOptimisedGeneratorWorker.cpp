@@ -34,6 +34,18 @@ namespace cepgen {
     /// Book the memory slots and structures for the generator
     explicit GridOptimisedGeneratorWorker(const ParametersList& params) : GeneratorWorker(params) {}
 
+    std::unique_ptr<GeneratorWorker> clone() const override {
+      auto worker = new GridOptimisedGeneratorWorker(parameters());
+      if (integrator_)
+        worker->integrator_ = integrator_;
+      if (params_)
+        worker->params_ = params_;
+      //if (integrand_)
+      //  worker->integrand_ = integrand_;
+      if (grid_)
+        worker->grid_.reset(new GridParameters(*grid_));
+      return std::unique_ptr<GeneratorWorker>(worker);
+    }
     void initialise() override;
     bool next() override;
 
