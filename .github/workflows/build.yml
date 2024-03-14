@@ -35,6 +35,7 @@ jobs:
         rm -f mg.tar.gz
 
     - name: 'CMake configuration'
+      working-directory: /Package
       run: |
         git config --global --add safe.directory /Package
         cmake -GNinja -B ${{ env.CEPGEN_PATH }} \
@@ -43,8 +44,12 @@ jobs:
               -DMADGRAPH_BIN=/Package/${{ env.MG5_aMC_VERSION }}/bin/mg5_aMC
 
     - name: 'Build environment'
-      run: cmake --build ${{ env.CEPGEN_PATH }}
+      working-directory: /Package
+      run: |
+        cmake --build ${{ env.CEPGEN_PATH }}
+        cmake --build ${{ env.CEPGEN_PATH }} -- cepgenDocGenerator
     - name: 'Compress environment'
+      working-directory: /Package
       run: tar -cvf environment.tar /Package
 
     - name: 'Upload artifacts'
