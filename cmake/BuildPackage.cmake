@@ -15,7 +15,7 @@ set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 find_program(RPMBUILD rpmbuild QUIET)
 if(RPMBUILD)
     #--- RPM information
-    message(STATUS "RPM packaging utilitaries detected")
+    message(STATUS "RPM packaging may be performed")
     set(CPACK_GENERATOR "RPM")
     set(CPACK_RPM_MAIN_COMPONENT lib)
     set(CPACK_RPM_FILE_NAME RPM-DEFAULT)
