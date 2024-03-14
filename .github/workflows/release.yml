@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags:
+
+env:
+  BUILD_TYPE: Release
+  CEPGEN_PATH: /Package/build
+
+jobs:
+  tests:
+    uses: ./.github/workflows/build.yml
+  package:
+    needs: tests
+    runs-on: ubuntu-latest
+    container:
+      image: 'laufor/ci-images:cepgen-fedora39'
+      options: -v ${{ github.workspace }}:/Package
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: 'Download artifacts'
+      uses: actions/download-artifact@v4
+      with:
+        name: build-env
+    - name: 'Uncompress environment'
+      run: tar -xvf environment.tar -C /
+
+    - uses: seanmiddleditch/gha-setup-ninja@master
+    - name: Package
+      run: cmake --build ${{env.CEPGEN_PATH}} --target package
+
+    - name: 'Upload artifacts'
+      uses: actions/upload-artifact@v4
+      with:
+        name: packages
+        path: ${{ env.CEPGEN_PATH }}/*.rpm
+        if-no-files-found: warn

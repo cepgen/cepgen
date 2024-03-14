@@ -6,6 +6,7 @@ on:
     tags:
   pull_request:
     branches: master
+  workflow_call:
 
 env:
   BUILD_TYPE: Release  # Release, Debug, RelWithDebInfo, etc
@@ -26,20 +27,23 @@ jobs:
     - name: 'MadGraph fetch'
       uses: wei/wget@v1
       with:
-        args: -O mg.tar.gz https://launchpad.net/mg5amcnlo/3.0/3.5.x/+download/${{env.MG5_aMC_VERSION}}.tar.gz
+        args: -O mg.tar.gz https://launchpad.net/mg5amcnlo/3.0/3.5.x/+download/${{ env.MG5_aMC_VERSION }}.tar.gz
     - name: 'MadGraph install'
       run: |
         tar xvfz mg.tar.gz
-        mv `ls -d MG5*/` ${{env.MG5_aMC_VERSION}}
+        mv `ls -d MG5*/` ${{ env.MG5_aMC_VERSION }}
         rm -f mg.tar.gz
 
     - name: 'CMake configuration'
       run: |
         git config --global --add safe.directory /Package
-        cmake -GNinja -B ${{env.CEPGEN_PATH}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_BUILD_TESTS=ON -DMADGRAPH_BIN=/Package/${{env.MG5_aMC_VERSION}}/bin/mg5_aMC
+        cmake -GNinja -B ${{ env.CEPGEN_PATH }} \
+              -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+              -DCMAKE_BUILD_TESTS=ON \
+              -DMADGRAPH_BIN=/Package/${{ env.MG5_aMC_VERSION }}/bin/mg5_aMC
 
     - name: 'Build environment'
-      run: cmake --build ${{env.CEPGEN_PATH}}
+      run: cmake --build ${{ env.CEPGEN_PATH }}
     - name: 'Compress environment'
       run: tar -cvf environment.tar /Package
 
@@ -65,35 +69,7 @@ jobs:
       run: tar -xvf environment.tar -C /
     - uses: seanmiddleditch/gha-setup-ninja@master
     - name: Test
-      working-directory: ${{env.CEPGEN_PATH}}
+      working-directory: ${{ env.CEPGEN_PATH }}
       run: |
-        echo "PYTHONPATH=${{env.CEPGEN_PATH}}:$PYTHONPATH" >> $GITHUB_ENV
-        ctest -C ${{env.BUILD_TYPE}} -LE "unstable" --output-on-failure
-
-  package:
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
-    needs: build
-    runs-on: ubuntu-latest
-    container:
-      image: 'laufor/ci-images:cepgen-fedora39'
-      options: -v ${{ github.workspace }}:/Package
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: 'Download artifacts'
-      uses: actions/download-artifact@v4
-      with:
-        name: build-env
-    - name: 'Uncompress environment'
-      run: tar -xvf environment.tar -C /
-
-    - uses: seanmiddleditch/gha-setup-ninja@master
-    - name: Package
-      run: cmake --build ${{env.CEPGEN_PATH}} --target package
-
-    - name: 'Upload artifacts'
-      uses: actions/upload-artifact@v4
-      with:
-        name: packages
-        path: ${{env.CEPGEN_PATH}}/*.rpm
-        if-no-files-found: warn
+        echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
+        ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" --output-on-failure
