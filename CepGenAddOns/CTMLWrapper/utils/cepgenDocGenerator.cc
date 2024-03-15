@@ -24,6 +24,7 @@
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/EventExporterFactory.h"
+#include "CepGen/Modules/EventImporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/FunctionalFactory.h"
@@ -72,6 +73,7 @@ int main(int argc, char* argv[]) {
       .document("rndgen", "Random number generators", cepgen::RandomGeneratorFactory::get())
       .document("drawer", "Drawing tools", cepgen::DrawerFactory::get())
       .document("evtgen", "Event generation algorithms", cepgen::GeneratorWorkerFactory::get())
+      .document("evtimp", "Event import algorithms", cepgen::EventImporterFactory::get())
       .document("evtmod", "Event modification algorithms", cepgen::EventModifierFactory::get())
       .document("evtout", "Event export modules", cepgen::EventExporterFactory::get());
 
