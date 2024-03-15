@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -129,8 +129,8 @@ namespace cepgen {
       static Piper::Commands drawGraph1D(const Graph1D&, const Mode&, const std::string&);
       static Piper::Commands drawHist1D(const Hist1D&, const Mode&);
       static std::string delatexify(const std::string& tok) {
-        //return "\""s + utils::replace_all(tok, {{"\\", "\\\\"}}) + "\"";
-        return "'"s + utils::replace_all(tok, {{"'", "\\'"}}) + "'";
+        //return "\""s + utils::replaceAll(tok, {{"\\", "\\\\"}}) + "\"";
+        return "'"s + utils::replaceAll(tok, {{"'", "\\'"}}) + "'";
       }
 
       const std::string extension_;
@@ -242,10 +242,10 @@ namespace cepgen {
           auto it = gr_cmds.begin();
           while (it != gr_cmds.end())
             if (startsWith(*it, "plot")) {
-              plot_cmds.emplace_back(replace_all(it->substr(5), " notitle", " title " + delatexify(obj->title())));
+              plot_cmds.emplace_back(replaceAll(it->substr(5), " notitle", " title " + delatexify(obj->title())));
               it = gr_cmds.erase(it);
             } else if (startsWith(*it, "splot")) {
-              splot_cmds.emplace_back(replace_all(it->substr(6), " notitle", " title " + delatexify(obj->title())));
+              splot_cmds.emplace_back(replaceAll(it->substr(6), " notitle", " title " + delatexify(obj->title())));
               it = gr_cmds.erase(it);
             } else
               ++it;
@@ -258,10 +258,10 @@ namespace cepgen {
           auto it = h_cmds.begin();
           while (it != h_cmds.end())
             if (startsWith(*it, "plot")) {
-              plot_cmds.emplace_back(replace_all(it->substr(5), " notitle", " title " + delatexify(obj->title())));
+              plot_cmds.emplace_back(replaceAll(it->substr(5), " notitle", " title " + delatexify(obj->title())));
               it = h_cmds.erase(it);
             } else if (startsWith(*it, "splot")) {
-              splot_cmds.emplace_back(replace_all(it->substr(6), " notitle", " title " + delatexify(obj->title())));
+              splot_cmds.emplace_back(replaceAll(it->substr(6), " notitle", " title " + delatexify(obj->title())));
               it = h_cmds.erase(it);
             } else
               ++it;
@@ -317,5 +317,5 @@ namespace cepgen {
     }
   }  // namespace utils
 }  // namespace cepgen
-typedef cepgen::utils::GnuplotDrawer GPDrawer;
-REGISTER_DRAWER("gnuplot", GPDrawer);
+using cepgen::utils::GnuplotDrawer;
+REGISTER_DRAWER("gnuplot", GnuplotDrawer);

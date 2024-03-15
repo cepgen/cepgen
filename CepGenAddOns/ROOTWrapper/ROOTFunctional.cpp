@@ -40,7 +40,7 @@ namespace cepgen {
       for (auto& var : vars_)
         func_.AddVariable(var, 0.);
       auto expr = expression_;
-      expr = utils::replace_all(expr, {{"min(", "TMath::Min("}, {"max(", "TMath::Max("}});
+      expr = utils::replaceAll(expr, {{"min(", "TMath::Min("}, {"max(", "TMath::Max("}});
       if (func_.Compile(expr.c_str()) != 0)
         throw CG_ERROR("ROOTFunctional") << "Failed to define the function\n\t" << expression_;
       CG_DEBUG("ROOTFunctional") << "Successfully defined a dimension-" << vars_.size() << " function with arguments "

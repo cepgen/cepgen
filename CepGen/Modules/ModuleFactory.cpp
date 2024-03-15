@@ -32,7 +32,7 @@ namespace cepgen {
       throw CG_FATAL("ModuleFactory") << description_ << " cannot build a module with empty index/name!";
     auto plist = params;
     if (std::is_base_of<std::string, I>::value) {
-      const auto extra_params = utils::split(utils::to_string(name), '<');
+      const auto extra_params = utils::split(utils::toString(name), '<');
       if (!extra_params.empty()) {
         plist.setName<std::string>(extra_params.at(0));
         if (extra_params.size() > 1)
@@ -88,7 +88,7 @@ namespace cepgen {
   template <typename T, typename I>
   ParametersDescription ModuleFactory<T, I>::describeParameters(const I& name, const ParametersList& params) const {
     if (std::is_base_of<std::string, I>::value) {
-      auto extra_params = utils::split(utils::to_string(name), '<');
+      auto extra_params = utils::split(utils::toString(name), '<');
       auto* nm = reinterpret_cast<I*>(&extra_params[0]);
       if (params_map_.count(*nm) == 0)
         return ParametersDescription().setDescription("{module without description}").steer(params);

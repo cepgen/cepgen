@@ -45,7 +45,7 @@ namespace cepgen {
           filename_(steer<std::string>("filename")) {
       if (utils::fileExtension(filename_) == ".gz") {
 #ifdef GZIP_BIN
-        utils::replace_all(filename_, ".gz", "");
+        utils::replaceAll(filename_, ".gz", "");
 #else
         CG_WARNING("LHEFPythiaHandler")
             << "gzip compression requested, but the executable was not linked at Pythia8 wrapper compile time.";

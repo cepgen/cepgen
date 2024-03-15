@@ -230,7 +230,7 @@ namespace cepgen {
     }
 
     TString ROOTDrawer::delatexify(const std::string& tok) {
-      auto out = utils::replace_all(tok, {{"$", ""}});
+      auto out = utils::replaceAll(tok, {{"$", ""}});
       return TString(out);
     }
 

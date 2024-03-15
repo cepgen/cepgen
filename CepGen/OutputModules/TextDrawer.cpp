@@ -407,7 +407,7 @@ namespace cepgen {
       os << ")\n";
     }
 
-    std::string TextDrawer::delatexify(const std::string& tok) { return utils::replace_all(tok, {{"$", ""}}); }
+    std::string TextDrawer::delatexify(const std::string& tok) { return utils::replaceAll(tok, {{"$", ""}}); }
   }  // namespace utils
 }  // namespace cepgen
 using cepgen::utils::TextDrawer;

@@ -33,8 +33,8 @@ namespace cepgen {
         utils::env::append("PYTHONPATH", dir);
       }
 
-      const auto filename = utils::replace_all(fs::path{file}.replace_extension("").string() /* remove the extension */,
-                                               {{"../", ".."}, {"/", "."}});
+      const auto filename = utils::replaceAll(fs::path{file}.replace_extension("").string() /* remove the extension */,
+                                              {{"../", ".."}, {"/", "."}});
       CG_DEBUG("Python") << "Python path: " << filename;
       return filename;
     }
@@ -42,16 +42,16 @@ namespace cepgen {
     std::vector<std::wstring> info() {
       auto* py_home = Py_GetPythonHome();
 #ifdef PYTHON2
-      std::wstring path{utils::towstring(std::string(Py_GetPath()))},
-          home{utils::towstring(std::string(py_home ? py_home : "(not set)"))};
+      std::wstring path{utils::toWstring(std::string(Py_GetPath()))},
+          home{utils::toWstring(std::string(py_home ? py_home : "(not set)"))};
 #else
       std::wstring path{Py_GetPath()}, home{py_home ? py_home : L"(not set)"};
 #endif
       return std::vector<std::wstring>{
-          utils::towstring("Python version: " + utils::replace_all(std::string{Py_GetVersion()}, "\n", " ")),
-          utils::towstring("Platform: " + std::string(Py_GetPlatform())),
-          utils::towstring("Home directory: ") + home,
-          utils::towstring("Parsed path: ") + path};
+          utils::toWstring("Python version: " + utils::replaceAll(std::string{Py_GetVersion()}, "\n", " ")),
+          utils::toWstring("Platform: " + std::string(Py_GetPlatform())),
+          utils::toWstring("Home directory: ") + home,
+          utils::toWstring("Parsed path: ") + path};
     }
   }  // namespace python
 }  // namespace cepgen

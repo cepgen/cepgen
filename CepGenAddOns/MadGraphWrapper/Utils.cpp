@@ -171,7 +171,7 @@ namespace cepgen {
 
     std::string normalise(const std::string& proc_name, const std::string& model) {
       return (!model.empty() ? model + "__" : "") +
-             utils::replace_all(proc_name, {{" ", "_"}, {">", "_to_"}, {"+", "p"}, {"-", "m"}, {"~", "bar"}});
+             utils::replaceAll(proc_name, {{" ", "_"}, {">", "_to_"}, {"+", "p"}, {"-", "m"}, {"~", "bar"}});
     }
   }  // namespace mg5amc
 }  // namespace cepgen

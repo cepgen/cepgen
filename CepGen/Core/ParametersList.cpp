@@ -209,7 +209,7 @@ namespace cepgen {
         else if (utils::isFloat(value))
           set<double>(key, std::stod(value));
         else {
-          const auto value_lc = utils::tolower(value);
+          const auto value_lc = utils::toLower(value);
           if (value_lc == "off" || value_lc == "no" || value_lc == "false")
             set<bool>(key, false);
           else if (value_lc == "on" || value_lc == "yes" || value_lc == "true")

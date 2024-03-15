@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
           mod,
           vector<double>(num_points),
           cepgen::utils::Graph1D(
-              mod, cepgen::utils::replace_all(cepgen::AlphaSFactory::get().describe(mod), "alpha(S)", "\\alpha_{S}"))});
+              mod, cepgen::utils::replaceAll(cepgen::AlphaSFactory::get().describe(mod), "alpha(S)", "\\alpha_{S}"))});
       auto& as = alphas[i++];
       for (size_t j = 0; j < qvals.size(); ++j) {
         const auto val = (*algo)(qvals[j]);
@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
           vector<double>(num_points),
           cepgen::utils::Graph1D(
               mod,
-              cepgen::utils::replace_all(cepgen::AlphaEMFactory::get().describe(mod), "alpha(EM)", "\\alpha_{EM}"))});
+              cepgen::utils::replaceAll(cepgen::AlphaEMFactory::get().describe(mod), "alpha(EM)", "\\alpha_{EM}"))});
       auto& aem = alphaem[i++];
       for (size_t j = 0; j < qvals.size(); ++j) {
         const auto val = (*algo)(qvals[j]);

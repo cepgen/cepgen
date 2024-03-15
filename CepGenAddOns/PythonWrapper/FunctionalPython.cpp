@@ -44,7 +44,7 @@ namespace cepgen {
     FunctionalPython::FunctionalPython(const ParametersList& params) : Functional(params) {
       const auto cmd = "from math import *\ndef " + steer<std::string>("functionName") + "("s +
                        utils::merge(vars_, ",") + ") -> float:\n\treturn " +
-                       utils::replace_all(expression_, {{"^", "**"}}) + "\n";
+                       utils::replaceAll(expression_, {{"^", "**"}}) + "\n";
       CG_DEBUG("FunctionalPython") << "Will compile Python expression:\n" << cmd;
       mod_ = python::ObjectPtr::defineModule("functional", cmd);
       try {

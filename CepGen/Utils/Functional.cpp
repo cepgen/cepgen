@@ -32,7 +32,7 @@ namespace cepgen {
           values_(vars_.size()) {
       for (size_t i = 0; i < vars_.size(); ++i) {
         vars_.at(i) = sanitise(vars_.at(i));
-        replace_all(expression_, vars_orig_.at(i), vars_.at(i));
+        replaceAll(expression_, vars_orig_.at(i), vars_.at(i));
       }
     }
 

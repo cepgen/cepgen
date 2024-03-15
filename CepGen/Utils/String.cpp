@@ -88,7 +88,7 @@ namespace cepgen {
     }
 
     std::string parseSpecialChars(const std::string& str) {
-      return replace_all(
+      return replaceAll(
           str, {{"Α", "\\Alpha"},      {"Β", "\\Beta"},      {"Χ", "\\Chi"},     {"Δ", "\\Delta"},   {"Ε", "\\Epsilon"},
                 {"Φ", "\\Phi"},        {"Γ", "\\Gamma"},     {"Η", "\\Eta"},     {"Ι", "\\Iota"},    {"Κ", "\\Kappa"},
                 {"Λ", "\\Lambda"},     {"Μ", "\\Mu"},        {"Ν", "\\Nu"},      {"Ο", "\\Omicron"}, {"Π", "\\Pi"},
@@ -103,8 +103,8 @@ namespace cepgen {
     }
 
     std::string sanitise(const std::string& str) {
-      return tolower(
-          replace_all(str, {{")", ""}, {"(", "_"}, {"{", "_"}, {".", ""}, {",", "_"}, {":", "_"}, {"-", ""}}));
+      return toLower(
+          replaceAll(str, {{")", ""}, {"(", "_"}, {"{", "_"}, {".", ""}, {",", "_"}, {":", "_"}, {"-", ""}}));
     }
 
     std::string timeAs(const std::string& fmt) {
@@ -115,7 +115,7 @@ namespace cepgen {
       return std::string(out_str);
     }
 
-    size_t replace_all(std::string& str, const std::string& from, const std::string& to) {
+    size_t replaceAll(std::string& str, const std::string& from, const std::string& to) {
       size_t count = 0, pos = 0;
       while ((pos = str.find(from, pos)) != std::string::npos) {
         str.replace(pos, from.length(), to);
@@ -125,20 +125,20 @@ namespace cepgen {
       return count;
     }
 
-    std::string replace_all(const std::string& str, const std::string& from, const std::string& to) {
+    std::string replaceAll(const std::string& str, const std::string& from, const std::string& to) {
       auto out{str};
-      if (replace_all(out, from, to) == 0)
-        CG_DEBUG_LOOP("replace_all") << "No occurrence of {"
-                                     << replace_all(from, {{"\n", "\\n"}, {"\t", "\\t"}, {"\r", "\\r"}})
-                                     << "} found in input string.";
+      if (replaceAll(out, from, to) == 0)
+        CG_DEBUG_LOOP("replaceAll") << "No occurrence of {"
+                                    << replaceAll(from, {{"\n", "\\n"}, {"\t", "\\t"}, {"\r", "\\r"}})
+                                    << "} found in input string.";
       return out;
     }
 
-    std::string replace_all(const std::string& str, const std::vector<std::pair<std::string, std::string> >& keys) {
+    std::string replaceAll(const std::string& str, const std::vector<std::pair<std::string, std::string> >& keys) {
       auto out{str};
       for (const auto& key : keys)
-        replace_all(out, key.first, key.second);
-      CG_DEBUG_LOOP("replace_all").log([&keys, &out](auto& log) {
+        replaceAll(out, key.first, key.second);
+      CG_DEBUG_LOOP("replaceAll").log([&keys, &out](auto& log) {
         log << "Values to be replaced: ";
         for (const auto& key : keys)
           log << "\n\t{\"" << key.first << "\" -> \"" << key.second << "\"}";
@@ -147,14 +147,17 @@ namespace cepgen {
       return out;
     }
 
-    template <typename T>
-    std::string to_string(const T& input) {
-      return std::to_string(input);
+    template <>
+    std::string toString(const std::wstring& str) {
+      typedef std::codecvt_utf8_utf16<wchar_t> convert_type;
+      std::wstring_convert<convert_type, wchar_t> converter;
+      return converter.to_bytes(str);
     }
 
-    template <>
-    std::string to_string(const std::string& input) {
-      return input;
+    std::wstring toWstring(const std::string& str) {
+      typedef std::codecvt_utf8_utf16<wchar_t> convert_type;
+      std::wstring_convert<convert_type, wchar_t> converter;
+      return converter.from_bytes(str);
     }
 
     std::string randomString(size_t size) {
@@ -197,6 +200,7 @@ namespace cepgen {
 
     template std::string merge<std::string>(const std::vector<std::string>&, const std::string&);
     template std::string merge<Limits>(const std::vector<Limits>&, const std::string&);
+    template std::string merge<unsigned short>(const std::vector<unsigned short>&, const std::string&);
     template std::string merge<int>(const std::vector<int>&, const std::string&);
     template std::string merge<unsigned long long>(const std::vector<unsigned long long>&, const std::string&);
     template std::string merge<double>(const std::vector<double>&, const std::string&);
@@ -232,14 +236,14 @@ namespace cepgen {
 
     bool isFloat(const std::string& str) { return std::regex_match(str, kFloatRegex); }
 
-    std::string toupper(const std::string& str) {
+    std::string toUpper(const std::string& str) {
       std::string out;
       out.resize(str.size());
       std::transform(str.begin(), str.end(), out.begin(), ::toupper);
       return out;
     }
 
-    std::string tolower(const std::string& str) {
+    std::string toLower(const std::string& str) {
       std::string out;
       out.resize(str.size());
       std::transform(str.begin(), str.end(), out.begin(), ::tolower);
@@ -274,17 +278,6 @@ namespace cepgen {
       out.resize(std::remove_if(out.begin(), out.end(), [](char x) { return !std::isalnum(x) && !std::isspace(x); }) -
                  out.begin());
       return out;
-    }
-
-    std::string tostring(const std::wstring& str) {
-      typedef std::codecvt_utf8_utf16<wchar_t> convert_type;
-      std::wstring_convert<convert_type, wchar_t> converter;
-      return converter.to_bytes(str);
-    }
-    std::wstring towstring(const std::string& str) {
-      typedef std::codecvt_utf8_utf16<wchar_t> convert_type;
-      std::wstring_convert<convert_type, wchar_t> converter;
-      return converter.from_bytes(str);
     }
 
     std::string demangle(const char* name) {

@@ -110,7 +110,7 @@ namespace cepgen {
         {"hbar", {'H', 'K'}},       {"lambdabar", {'L', 'K'}}};
 
     TopdrawerDrawer::TopdrawerDrawer(const ParametersList& params)
-        : Drawer(params), font_(toupper(steer<std::string>("font"))), filling_(steer<bool>("filling")) {}
+        : Drawer(params), font_(toUpper(steer<std::string>("font"))), filling_(steer<bool>("filling")) {}
 
     const TopdrawerDrawer& TopdrawerDrawer::draw(const Graph1D& graph, const Mode& mode) const {
       Piper::Commands cmds;
@@ -199,7 +199,7 @@ namespace cepgen {
     Piper::Commands TopdrawerDrawer::plot(const Graph2D& graph, const Mode& mode) {
       Piper::Commands cmds;
       auto to_fortran_float = [](double val) -> std::string {
-        return utils::replace_all(utils::format("%g", val), {{"e", "D"}});
+        return utils::replaceAll(utils::format("%g", val), {{"e", "D"}});
       };
       cmds += "READ MESH";
       std::ostringstream osl;

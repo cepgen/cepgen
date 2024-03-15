@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
     cepgen::Limits lim{0., 250.};
     if (var == "eta")
       lim = {-3., 3.};
-    const auto parsed_var = cepgen::utils::replace_all(var, ":", ",");
+    const auto parsed_var = cepgen::utils::replaceAll(var, ":", ",");
     h_var_hist[parsed_var].reset(new cepgen::utils::Hist1D(100, lim, cepgen::utils::sanitise(var)));
     h_var_hist[parsed_var]->xAxis().setLabel(parsed_var);
     h_var_hist[parsed_var]->yAxis().setLabel("d$\\sigma$/d" + parsed_var);

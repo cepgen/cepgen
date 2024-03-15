@@ -48,7 +48,7 @@ namespace cepgen {
 
   const LoggedMessage& operator<<(const LoggedMessage& exc, const std::wstring& var) noexcept {
     LoggedMessage& nc_except = const_cast<LoggedMessage&>(exc);
-    nc_except.message_ << utils::tostring(var);
+    nc_except.message_ << utils::toString(var);
     return exc;
   }
 

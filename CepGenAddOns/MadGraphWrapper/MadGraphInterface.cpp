@@ -183,12 +183,12 @@ namespace cepgen {
 
     std::string src_filename = tmp_dir_ / "cepgen_proc_interface.cpp";
     std::ofstream src_file(src_filename);
-    src_file << utils::replace_all(tmpl,
-                                   {{"XXX_PART1_XXX", std::to_string(in_parts[0])},
-                                    {"XXX_PART2_XXX", std::to_string(in_parts[1])},
-                                    {"XXX_OUT_PART_XXX", utils::merge(out_parts, ", ")},
-                                    {"XXX_PROC_NAME_XXX", mg5amc::normalise(proc_)},
-                                    {"XXX_PROC_DESCRIPTION_XXX", process_description}});
+    src_file << utils::replaceAll(tmpl,
+                                  {{"XXX_PART1_XXX", std::to_string(in_parts[0])},
+                                   {"XXX_PART2_XXX", std::to_string(in_parts[1])},
+                                   {"XXX_OUT_PART_XXX", utils::merge(out_parts, ", ")},
+                                   {"XXX_PROC_NAME_XXX", mg5amc::normalise(proc_)},
+                                   {"XXX_PROC_DESCRIPTION_XXX", process_description}});
     src_file.close();
     return src_filename;
   }
@@ -252,7 +252,7 @@ namespace cepgen {
         continue;
       const auto ln = utils::split(buf, '#', true);  // info, comments
       const auto vars = utils::split(ln.at(0), ' ', true);
-      if (utils::tolower(vars.at(0)) == "block") {
+      if (utils::toLower(vars.at(0)) == "block") {
         if (!block_params.empty())
           output.add(block_name, block_params);
         block_name = vars.at(1);

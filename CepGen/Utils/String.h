@@ -31,8 +31,20 @@ namespace cepgen {
   class Limits;
   class ParametersList;
   namespace utils {
-    std::string tostring(const std::wstring& str);   ///< Convert a wide characters to a standard characters string
-    std::wstring towstring(const std::string& str);  ///< Convert a wide characters to a standard characters string
+    /// Transform any type into a string
+    template <typename T>
+    inline std::string toString(const T& obj) {
+      return std::to_string(obj);
+    }
+    template <>
+    inline std::string toString(const std::string& obj) {
+      return obj;
+    }
+    template <>
+    std::string toString(const std::wstring&);
+    std::wstring toWstring(const std::string& str);  ///< Convert a wide characters to a standard characters string
+    bool isInt(const std::string&);                  ///< Check if a string is also an integer
+    bool isFloat(const std::string&);                ///< Check if a string is also a floating point number
     /// Format a string using a printf style format descriptor.
     template <typename... Args>
     inline std::string format(const std::string& fmt, Args... args) {
@@ -47,7 +59,7 @@ namespace cepgen {
     /// Format a wide string using a printf style format descriptor
     template <typename... Args>
     inline std::string format(const std::wstring& fmt, Args... args) {
-      return format(tostring(fmt), args...);
+      return format(toString(fmt), args...);
     }
     std::string demangle(const char*);           ///< Demangle a type id if possible
     std::string timeAs(const std::string& fmt);  ///< Return the formatted date/time now
@@ -89,16 +101,22 @@ namespace cepgen {
     /// Transform all emoji-like special characters into their LaTeX representation
     std::string parseSpecialChars(const std::string&);
     /// Replace all occurrences of a text by another
-    size_t replace_all(std::string& str, const std::string& from, const std::string& to);
+    size_t replaceAll(std::string& str, const std::string& from, const std::string& to);
     /// Replace all occurrences of a text by another
-    std::string replace_all(const std::string& str, const std::string& from, const std::string& to);
+    std::string replaceAll(const std::string& str, const std::string& from, const std::string& to);
     /// Replace all occurrences of multiple texts by others
-    std::string replace_all(const std::string& str, const std::vector<std::pair<std::string, std::string> >& keys);
+    std::string replaceAll(const std::string& str, const std::vector<std::pair<std::string, std::string> >& keys);
     /// Split a string according to a separation character
     std::vector<std::string> split(const std::string&, char, bool trim = false);
+    /// Merge a a printable type in a single string
+    template <typename T>
+    inline std::string merge(const T& val, const std::string&) {
+      return toString(val);
+    }
     /// Merge a collection of a printable type in a single string
     template <typename T>
     std::string merge(const std::vector<T>&, const std::string&);
+    /// Trivial dimension-1 "merger" for generic input
     /// Merge a collection of collections of a printable type in a single string
     template <typename T>
     std::string merge(const std::vector<std::vector<T> >&, const std::string&);
@@ -113,15 +131,6 @@ namespace cepgen {
     std::string merge(const ParametersList&, const std::string&);
     /// Trivial dimension-1 "merger" for limits input
     std::string merge(const Limits&, const std::string&);
-    /// Trivial dimension-1 "merger" for generic input
-    template <typename T>
-    inline std::string merge(const T& val, const std::string&) {
-      return std::to_string(val);
-    }
-    bool isInt(const std::string&);    ///< Check if a string is also an integer
-    bool isFloat(const std::string&);  ///< Check if a string is also a floating point number
-    template <typename T>
-    std::string to_string(const T&);  ///< Transform any type into a string
     /// Check if a collection contains an item
     template <typename T>
     inline bool contains(const std::vector<T>& coll, const T& item) {
@@ -144,8 +153,8 @@ namespace cepgen {
     inline bool uniform(const std::vector<T>& coll) {
       return coll.size() > 1 ? coll == std::vector<T>(coll.size(), coll.at(0)) : true;
     }
-    std::string toupper(const std::string&);  ///< Capitalise a string
-    std::string tolower(const std::string&);  ///< Lowercase version of a string
+    std::string toUpper(const std::string&);  ///< Capitalise a string
+    std::string toLower(const std::string&);  ///< Lowercase version of a string
     /// Get a (list of) substring(s) between two characters chains
     /// \param[in] beg Start delimiter of the substring(s)
     /// \param[in] end End delimiter of the substring(s)
@@ -167,7 +176,7 @@ namespace cepgen {
     template <class T>
     inline std::string repr(const std::vector<T>& vec, const std::string& sep = ",") {
       return repr<T>(
-          vec, [](const T& xv) { return std::to_string(xv); }, sep);
+          vec, [](const T& xv) { return toString(xv); }, sep);
     }
     /// Helper to print a vector
     template <>
