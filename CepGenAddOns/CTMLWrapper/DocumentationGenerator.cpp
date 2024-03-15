@@ -31,6 +31,7 @@ namespace cepgen {
         : SteeredObject(params),
           output_filename_(steer<std::string>("output")),
           bare_(steer<bool>("bare")),
+          show_git_(steer<bool>("showGit")),
           container_(CTML::Node("div.container-fluid")) {
       doc_.AppendNodeToHead(CTML::Node("title", "CepGen v" + version::tag + " modules documentation"));
       if (!bare_ && steer<bool>("useBS")) {
@@ -45,14 +46,14 @@ namespace cepgen {
                                   .SetAttribute("content", "width=device-width, initial-scale=1"));
       }
       container_.AppendChild(CTML::Node("h1", "Modules documentation"));
-      container_.AppendChild(CTML::Node("div")
-                                 .AppendText("CepGen version ")
-                                 .AppendChild(CTML::Node("mark", version::tag))
-                                 .AppendChild(CTML::Node("br").UseClosingTag(false))
-                                 .AppendText("Git hash/branch: ")
-                                 .AppendChild(CTML::Node("code", version::extended))
-                                 .AppendChild(CTML::Node("br").UseClosingTag(false))
-                                 .AppendText("Last generated: " + timeAs("%B %d, %Y")));
+      auto header = CTML::Node("div").AppendText("CepGen version ").AppendChild(CTML::Node("mark", version::tag));
+      if (show_git_)
+        header.AppendChild(CTML::Node("br").UseClosingTag(false))
+            .AppendText("Git hash/branch: ")
+            .AppendChild(CTML::Node("code", version::extended));
+      header.AppendChild(CTML::Node("br").UseClosingTag(false))
+          .AppendText("Documentation last generated on " + timeAs("%B %d, %Y"));
+      container_.AppendChild(header);
     }
 
     DocumentationGenerator::~DocumentationGenerator() {
@@ -133,6 +134,7 @@ namespace cepgen {
       desc.setDescription("CTML HTML document generator helper");
       desc.add<std::string>("output", "index.html").setDescription("output path for the generated HTML file");
       desc.add<bool>("useBS", true).setDescription("use the Bootstrap CDN to prettify this output?");
+      desc.add<bool>("showGit", false).setDescription("print out the git hash/branch in the output?");
       desc.add<bool>("bare", false).setDescription("generate a bare version (without <html>/<head>/<body> attributes)");
       return desc;
     }

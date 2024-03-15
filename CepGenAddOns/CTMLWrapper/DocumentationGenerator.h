@@ -59,7 +59,7 @@ namespace cepgen {
       static CTML::Node moduleDescription(const ParametersDescription&);
 
       const std::string output_filename_;
-      const bool bare_;
+      const bool bare_, show_git_;
       CTML::Document doc_;
       CTML::Node container_;
     };

@@ -41,10 +41,11 @@ namespace cepgen {
 
 int main(int argc, char* argv[]) {
   std::string output_file;
-  bool use_bs, bare;
+  bool use_bs, show_git, bare;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("output,o", "output HTML file", &output_file, "index.html")
       .addOptionalArgument("bootstrap,b", "use Bootstrap CDN to prettify the output?", &use_bs, true)
+      .addOptionalArgument("show-git,g", "show the git hash/branch?", &show_git, false)
       .addOptionalArgument("bare,e", "generate a bare version (without document tags) of the output?", &bare, false)
       .parse();
 
@@ -52,6 +53,7 @@ int main(int argc, char* argv[]) {
   cepgen::utils::DocumentationGenerator gen{cepgen::ParametersList()
                                                 .set<std::string>("output", output_file)
                                                 .set<bool>("useBS", use_bs)
+                                                .set<bool>("showGit", show_git)
                                                 .set<bool>("bare", bare)};
 
   gen.document("proc", "Processes", cepgen::ProcessFactory::get())
