@@ -15,13 +15,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/** \file */
 
 #ifndef CepGen_Modules_PartonFluxFactory_h
 #define CepGen_Modules_PartonFluxFactory_h
 
 #include "CepGen/Modules/ModuleFactory.h"
-
-/** \file */
 
 /// Add a generic collinear parton flux evaluator builder definition
 #define REGISTER_COLLINEAR_FLUX(name, obj)                                        \
@@ -50,6 +49,7 @@ namespace cepgen {
   /// A KT-factorised parton fluxes objects factory
   DEFINE_FACTORY(std::string, KTFluxFactory, KTFlux, "KT-factorised flux estimators factory");
 
+  /// A generic parton fluxes objects factory
   struct PartonFluxFactory {
     static PartonFluxFactory& get() {
       static PartonFluxFactory instance;

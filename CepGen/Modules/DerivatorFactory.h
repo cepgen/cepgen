@@ -15,13 +15,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/** \file */
 
 #ifndef CepGen_Modules_DerivatorFactory_h
 #define CepGen_Modules_DerivatorFactory_h
 
 #include "CepGen/Modules/ModuleFactory.h"
-
-/** \file */
 
 /// Add a generic derivator object builder definition
 #define REGISTER_DERIVATOR(name, obj)                                           \
@@ -39,7 +38,7 @@ namespace cepgen {
   namespace utils {
     class Derivator;
   }
-  /// An analytical integrator objects factory
+  /// An analytical derivator objects factory
   DEFINE_FACTORY(std::string, DerivatorFactory, utils::Derivator, "Derivators factory");
 }  // namespace cepgen
 

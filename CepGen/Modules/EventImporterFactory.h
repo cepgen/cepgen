@@ -15,15 +15,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/** \file */
 
 #ifndef CepGen_Modules_EventImporterFactory_h
 #define CepGen_Modules_EventImporterFactory_h
 
 #include "CepGen/Modules/ModuleFactory.h"
 
-/** \file */
-
-/// Add a generic export module definition to the factory
+/// Add a generic import module definition to the factory
 #define REGISTER_EVENT_IMPORTER(name, obj)                                        \
   namespace cepgen {                                                              \
     struct BUILDERNM(obj) {                                                       \

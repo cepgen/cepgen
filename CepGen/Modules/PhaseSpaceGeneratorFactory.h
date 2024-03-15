@@ -15,13 +15,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/** \file */
 
 #ifndef CepGen_Modules_PhaseSpaceGeneratorFactory_h
 #define CepGen_Modules_PhaseSpaceGeneratorFactory_h
 
 #include "CepGen/Modules/ModuleFactory.h"
-
-/** \file */
 
 /// Add a central phase space generator to the list of handled modules
 #define REGISTER_PSGEN(name, obj)                                                       \
@@ -35,7 +34,7 @@
 
 namespace cepgen {
   class PhaseSpaceGenerator;
-  /// An integration algorithms factory
+  /// A phase space mapping algorithms factory
   DEFINE_FACTORY(std::string, PhaseSpaceGeneratorFactory, PhaseSpaceGenerator, "Phase space generator factory");
 }  // namespace cepgen
 

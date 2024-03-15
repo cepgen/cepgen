@@ -15,13 +15,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/** \file */
 
 #ifndef CepGen_Modules_CouplingFactory_h
 #define CepGen_Modules_CouplingFactory_h
 
 #include "CepGen/Modules/ModuleFactory.h"
-
-/** \file */
 
 /// Add an electromagnetic coupling evolution algorithm
 #define REGISTER_ALPHAEM_MODULE(name, obj)                                  \

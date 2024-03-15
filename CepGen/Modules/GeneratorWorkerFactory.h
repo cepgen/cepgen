@@ -15,13 +15,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/** \file */
 
 #ifndef CepGen_Modules_GeneratorWorkerFactory_h
 #define CepGen_Modules_GeneratorWorkerFactory_h
 
 #include "CepGen/Modules/ModuleFactory.h"
-
-/** \file */
 
 /// Add a generator worker to the list of handled modules
 #define REGISTER_GENERATOR_WORKER(name, obj)                                        \
@@ -35,7 +34,7 @@
 
 namespace cepgen {
   class GeneratorWorker;
-  /// An integration algorithms factory
+  /// A generator worker algorithms factory
   DEFINE_FACTORY(std::string, GeneratorWorkerFactory, GeneratorWorker, "Generator worker factory");
 }  // namespace cepgen
 

@@ -15,13 +15,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/** \file */
 
 #ifndef CepGen_Modules_EventModifierFactory_h
 #define CepGen_Modules_EventModifierFactory_h
 
 #include "CepGen/Modules/ModuleFactory.h"
-
-/** \file */
 
 /// Add a generic event modification module definition to the factory
 #define REGISTER_MODIFIER(name, obj)                                              \
