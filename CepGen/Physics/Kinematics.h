@@ -20,7 +20,6 @@
 #define CepGen_Physics_Kinematics_h
 
 #include <iosfwd>
-#include <memory>
 #include <vector>
 
 #include "CepGen/Physics/Cuts.h"

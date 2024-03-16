@@ -19,8 +19,6 @@
 #ifndef CepGen_Core_RunParameters_h
 #define CepGen_Core_RunParameters_h
 
-#include <memory>
-
 #include "CepGen/Physics/Kinematics.h"
 
 namespace cepgen {

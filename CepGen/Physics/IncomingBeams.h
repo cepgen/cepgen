@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 
 #include <iosfwd>
 #include <memory>
-#include <vector>
 
 #include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Physics/Beam.h"
@@ -35,36 +34,23 @@ namespace cepgen {
 
     static ParametersDescription description();
     void setParameters(const ParametersList&) override;
-    /// List containing all parameters handled
-    const ParametersList& parameters() const override;
+    const ParametersList& parameters() const override;  ///< List containing all parameters handled
 
-    /// Find the type of kinematics from the positive/negative beams
-    static mode::Kinematics modeFromBeams(const Beam&, const Beam&);
-    /// Type of kinematics to consider for the phase space
-    mode::Kinematics mode() const;
+    static mode::Kinematics modeFromBeams(const Beam&, const Beam&);  ///< Extract kinematics type from both beams
+    mode::Kinematics mode() const;  ///< Type of kinematics to consider for the phase space
 
-    /// Constant reference to the positive-z beam information
-    const Beam& positive() const { return pos_beam_; }
-    /// Reference to the positive-z beam information
-    Beam& positive() { return pos_beam_; }
-    /// Constant reference to the negative-z beam information
-    const Beam& negative() const { return neg_beam_; }
-    /// Reference to the negative-z beam information
-    Beam& negative() { return neg_beam_; }
+    inline const Beam& positive() const { return pos_beam_; }  ///< Reference to the positive-z beam information
+    inline Beam& positive() { return pos_beam_; }              ///< Reference to the positive-z beam information
+    inline const Beam& negative() const { return neg_beam_; }  ///< Reference to the negative-z beam information
+    inline Beam& negative() { return neg_beam_; }              ///< Reference to the negative-z beam information
 
-    /// Form factors evaluator parameters
-    const ParametersList& formFactors() const { return formfac_; }
-    /// Structure functions evaluator parameters
-    const ParametersList& structureFunctions() const { return strfun_; }
-    /// Set the integer-type of structure functions evaluator to build
-    void setStructureFunctions(int, int);
+    inline const ParametersList& formFactors() const { return formfac_; }        ///< Form factors parameters
+    inline const ParametersList& structureFunctions() const { return strfun_; }  ///< Structure functions parameters
+    void setStructureFunctions(int, int);  ///< Set the integer-type of structure functions evaluator to build
 
-    /// Set the incoming beams centre of mass energy (in GeV)
-    void setSqrtS(double);
-    /// Incoming beams squared centre of mass energy (in GeV^2)
-    double s() const;
-    /// Incoming beams centre of mass energy (in GeV)
-    double sqrtS() const;
+    void setSqrtS(double);  ///< Set the incoming beams centre of mass energy (in GeV)
+    double s() const;       ///< Incoming beams squared centre of mass energy (in GeV^2)
+    double sqrtS() const;   ///< Incoming beams centre of mass energy (in GeV)
 
   private:
     ParametersList formfac_;
