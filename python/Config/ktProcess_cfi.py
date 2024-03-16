@@ -1,8 +1,9 @@
-"""@package kT-factorised process objects definition
-
-A collection of useful objects for the definition of a
-general kT-factorised process steering card
-"""
+##
+# \file
+# \defgroup kt \f$\kt\f$-factorised processes
+# \ingroup python kt
+#
+# A collection of objects for the definition of a general \f$\kt\f$-factorised process
 
 from math import pi
 from .containers_cff import Module, Parameters

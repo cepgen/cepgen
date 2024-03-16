@@ -1,3 +1,9 @@
+##
+# \file
+# \ingroup python pythia8
+#
+# Collection of Pythia 8 runtime parameters to steer a few decay modes
+
 pythia8Defaults = (
     'Tune:preferLHAPDF = 2',
     #'Beams:setProductionScalesFromLHEF = off',

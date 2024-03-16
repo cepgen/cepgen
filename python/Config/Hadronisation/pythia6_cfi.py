@@ -1,5 +1,11 @@
-from Config.containers_cff import Module
+##
+# \file
+# \ingroup python pythia6
+#
+# Base Pythia 6 configuration parameters to define the hadronisation module
 
+
+from Config.containers_cff import Module
 from Config.Hadronisation.pythia6Tunes_cff import *
 
 pythia6 = Module('pythia6',

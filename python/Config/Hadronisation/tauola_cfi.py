@@ -1,4 +1,11 @@
+##
+# \file
+# \ingroup python tauola
+#
+# Collection of parameters to define the TAUOLA algorithm interface
+
 from Config.containers_cff import Module, Parameters
+
 
 class DecayMode:
     All = 0

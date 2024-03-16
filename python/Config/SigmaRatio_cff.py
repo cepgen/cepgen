@@ -1,3 +1,9 @@
+##
+# \file
+# \ingroup python
+#
+# Enumeration of \f$\sigma_R/\sigma_L\f$ computation algorithms
+
 from .containers_cff import Module
 
 

@@ -1,3 +1,9 @@
+##
+# \file
+# \ingroup python pythia6
+#
+# Collection of Pythia 6 runtime parameters to steer a few decay modes
+
 WDecayToEMu = (
     'MDME(190,1) = 0    !W decay into dbar u',
     'MDME(191,1) = 0    !W decay into dbar c',

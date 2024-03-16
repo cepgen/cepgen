@@ -1,3 +1,10 @@
+##
+# \file
+# \ingroup python
+#
+# Enumeration of nucleon structure functions modellings
+
+
 from .SigmaRatio_cff import SigmaRatio
 from .containers_cff import Module
 

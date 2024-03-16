@@ -1,4 +1,11 @@
+##
+# \file
+# \ingroup python integration
+#
+# Vegas integration algorithm interface
+
 import vegas
+
 
 def integrate(f, num_dim: int, num_iter: int, num_warmup: int, num_calls: int, limits: list[tuple[float]]=[]):
     limits = limits if len(limits) > 0 else num_dim * [(0., 1.)]
@@ -8,6 +15,7 @@ def integrate(f, num_dim: int, num_iter: int, num_warmup: int, num_calls: int, l
     integ(f_pyarr, nitn=num_iter, neval=num_warmup)
     res = integ(f_pyarr, nitn=num_iter, neval=num_calls)
     return (res.mean, res.sdev)
+
 
 if __name__ == '__main__':
     import math

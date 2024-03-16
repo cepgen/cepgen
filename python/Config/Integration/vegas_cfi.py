@@ -1,3 +1,9 @@
+##
+# \file
+# \ingroup python
+#
+# Collection of parameters for the steering of a Vegas integration algorithm
+
 from Config.Integration.plain_cfi import plain
 
 

@@ -1,5 +1,12 @@
+##
+# \file
+# \ingroup python pythia6
+#
+# Collection of Pythia 6 runtime parameters to steer a few underlying event (UE) tunes
+
+
 pythia8CUEP8M1Settings = (
-    'Tune:pp 14',  # Monash 2013 tune by Peter Skands (January 2014)
+    'Tune:pp 14',  ##< Monash 2013 tune by Peter Skands (January 2014)
     'Tune:ee 7',
     'MultipartonInteractions:pT0Ref = 2.4024',
     'MultipartonInteractions:ecmPow = 0.25208',
@@ -17,7 +24,7 @@ pythia8CUEP8S1CTEQ6L1Settings = (
 )
 
 pythia8CUEP8M2T4Settings = (
-    'Tune:pp 14',
+    'Tune:pp 14',  ##< Monash 2013 tune by Peter Skands (January 2014)
     'Tune:ee 7',
     'MultipartonInteractions:pT0Ref = 2.20',
     'MultipartonInteractions:ecmPow = 0.25208',

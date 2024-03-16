@@ -1,3 +1,7 @@
+##
+# \file
+# \ingroup python
+
 class PrintHelper(object):
     """Helper class for the pretty-printing of configuration parameters"""
     _indent = 0

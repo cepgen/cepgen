@@ -1,7 +1,8 @@
-"""@package collinear parton-factorised fluxes definition
-
-A collection of beam-collinear parton fluxes f(x, Q^2)
-"""
+##
+# \file
+# \ingroup python collinear
+#
+# Collection of beam-collinear parton fluxes \f$f(x, Q^2)\f$
 
 from .containers_cff import Module, Parameters
 

@@ -1,3 +1,10 @@
+##
+# \file
+# \ingroup python pythia6
+#
+# Collection of Pythia 6 runtime parameters to steer a few underlying event (UE) tunes
+
+
 pythia6noUESettings = (
     'MSTU(21)=1     ! Check on possible errors during program execution',
     'MSTJ(22)=2     ! Decay those unstable particles',

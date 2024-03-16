@@ -1,5 +1,11 @@
-from Config.containers_cff import Module
+##
+# \file
+# \ingroup python pythia8
+#
+# Base Pythia 8 configuration parameters to define the hadronisation module
 
+
+from Config.containers_cff import Module
 from Config.Hadronisation.pythia8Defaults_cff import pythia8Defaults
 from Config.Hadronisation.pythia8Tunes_cff import pythia8CUEP8M1Settings
 

@@ -1,14 +1,15 @@
 #!/usr/bin/env python
+##
+# \file
+# \ingroup python
+#
+# A collection of tools for Python steering cards definition
 
-'''@package Cards
-A collection of tools for Python steering cards definition
-'''
-
-#--- core components includes
+# Includes for core components
 from .containers_cff import Module, Parameters, Sequence
 from .logger_cfi import Logging
 
-#--- physics-level includes
+# Includes for physics components
 from .StructureFunctions_cff import StructureFunctions
 from .SigmaRatio_cff import SigmaRatio
 from .ProcessMode_cff import ProcessMode

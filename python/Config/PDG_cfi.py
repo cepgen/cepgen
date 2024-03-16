@@ -1,6 +1,7 @@
-"""\file
-\brief Utilities for the PDG identifiers manipulation
-"""
+##
+# \file
+# \ingroup python
+# Utilities for the PDG identifiers manipulation
 
 from Config.Core import Parameters
 

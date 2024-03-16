@@ -1,4 +1,9 @@
+##
+# \file
+# \ingroup python
+
 from .containers_cff import Parameters
+
 
 vermaserenCuts = Parameters(
     pt = (0.5,),

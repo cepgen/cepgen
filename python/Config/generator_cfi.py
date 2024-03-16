@@ -1,3 +1,9 @@
+##
+# \file
+# \ingroup python
+#
+# Collection of generator parameters
+
 from .containers_cff import Parameters
 
 generator = Parameters(

@@ -1,8 +1,16 @@
+##
+# \file
+# \ingroup python integration
+#
+# PyTorch Torchquad integration algorithm interface
+
 import torch
 import numpy as np
 from torchquad import MonteCarlo, set_up_backend
 
+
 set_up_backend('torch', data_type='float32')
+
 
 def integrate(f, num_dim: int, num_iter: int, num_warmup: int, num_calls: int, limits: list[tuple[float]]=[]):
     limits = limits if len(limits) > 0 else num_dim * [(0., 1.)]
@@ -13,6 +21,7 @@ def integrate(f, num_dim: int, num_iter: int, num_warmup: int, num_calls: int, l
     mc = MonteCarlo()
     res = mc.integrate(func, dim=num_dim, N=num_calls, integration_domain=limits, backend='torch')
     return (float(res.numpy()), 1.)
+
 
 if __name__ == '__main__':
     import math

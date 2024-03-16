@@ -1,8 +1,10 @@
-"""@package collinear parton-factorised process objects definition
-
-A collection of useful objects for the definition of a
-general collinear parton momentum-factorised process steering card
-"""
+##
+# \file
+# \defgroup collinear Collinear factorised processes
+# \ingroup python collinear
+#
+# A collection of useful objects for the definition of a general
+# collinear parton momentum-factorised process steering card
 
 from .containers_cff import Module, Parameters
 from .collinearFluxes_cff import *

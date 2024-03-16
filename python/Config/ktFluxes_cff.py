@@ -1,7 +1,8 @@
-"""@package kT-dependent fluxes definition
-
-A collection of beam parton fluxes f(x, kt^2, Q^2)
-"""
+##
+# \file
+# \ingroup python kt
+#
+# A collection of beam parton fluxes \f$f(x, \kt^2, Q^2)\f$
 
 from .containers_cff import Module, Parameters
 

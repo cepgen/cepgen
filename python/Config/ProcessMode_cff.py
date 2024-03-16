@@ -1,3 +1,10 @@
+##
+# \file
+# \ingroup python
+#
+# Enumeration of the types of process kinematics (elastic, dissociative emissions)
+
+
 class ProcessMode:
     """Types of processes supported"""
     ElectronProton      = 0
@@ -5,5 +12,3 @@ class ProcessMode:
     ElasticInelastic    = 2
     InelasticElastic    = 3
     InelasticInelastic  = 4
-    ProtonElectron      = 5
-    ElectronElectron    = 6

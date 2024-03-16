@@ -1,3 +1,9 @@
+##
+# \file
+# \ingroup python
+#
+# Collection of parameters for the steering of the output logging
+
 from .containers_cff import Parameters
 
 
