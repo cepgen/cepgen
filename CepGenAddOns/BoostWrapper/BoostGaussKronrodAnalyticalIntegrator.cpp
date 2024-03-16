@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "CepGen/Utils/FunctionsWrappers.h"
 
 namespace cepgen {
+  /// Boost Gauss-Kronrod integration algorithm
   template <size_t N>
   class BoostGaussKronrodAnalyticalIntegrator final : public AnalyticIntegrator {
   public:
@@ -40,9 +41,11 @@ namespace cepgen {
     }
 
     double integrate(const utils::Function1D& func, void* = nullptr, const Limits& lim = {}) const override {
-      const double xmin = (lim.hasMin() ? lim.min() : range_.min());
-      const double xmax = (lim.hasMax() ? lim.max() : range_.max());
-      return boost::math::quadrature::gauss_kronrod<double, N>::integrate(func, xmin, xmax, tol_, max_refinements_);
+      return boost::math::quadrature::gauss_kronrod<double, N>::integrate(func,
+                                                                          lim.hasMin() ? lim.min() : range_.min(),
+                                                                          lim.hasMax() ? lim.max() : range_.max(),
+                                                                          tol_,
+                                                                          max_refinements_);
     }
 
   private:
@@ -55,8 +58,8 @@ typedef cepgen::BoostGaussKronrodAnalyticalIntegrator<31> BGKIntegrator31;
 typedef cepgen::BoostGaussKronrodAnalyticalIntegrator<41> BGKIntegrator41;
 typedef cepgen::BoostGaussKronrodAnalyticalIntegrator<51> BGKIntegrator51;
 typedef cepgen::BoostGaussKronrodAnalyticalIntegrator<61> BGKIntegrator61;
-REGISTER_ANALYTIC_INTEGRATOR("boost-gk15", BGKIntegrator15);
-REGISTER_ANALYTIC_INTEGRATOR("boost-gk31", BGKIntegrator31);
-REGISTER_ANALYTIC_INTEGRATOR("boost-gk41", BGKIntegrator41);
-REGISTER_ANALYTIC_INTEGRATOR("boost-gk51", BGKIntegrator51);
-REGISTER_ANALYTIC_INTEGRATOR("boost-gk61", BGKIntegrator61);
+REGISTER_ANALYTIC_INTEGRATOR("boost_gk15", BGKIntegrator15);
+REGISTER_ANALYTIC_INTEGRATOR("boost_gk31", BGKIntegrator31);
+REGISTER_ANALYTIC_INTEGRATOR("boost_gk41", BGKIntegrator41);
+REGISTER_ANALYTIC_INTEGRATOR("boost_gk51", BGKIntegrator51);
+REGISTER_ANALYTIC_INTEGRATOR("boost_gk61", BGKIntegrator61);

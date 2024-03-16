@@ -28,6 +28,7 @@
 #include "CepGenAddOns/BoostWrapper/PythonUtils.h"
 
 namespace {
+  /// Python interfacing module definition
   BOOST_PYTHON_MODULE(pycepgen) {
     cepgen::initialise();
 

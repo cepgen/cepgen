@@ -205,10 +205,9 @@ namespace cepgen {
     };
   }  // namespace card
 }  // namespace cepgen
-
-typedef cepgen::card::JsonHandler JsonCardHandler;
-typedef cepgen::card::InfoHandler InfoCardHandler;
-typedef cepgen::card::XmlHandler XmlCardHandler;
-REGISTER_CARD_HANDLER(".json", JsonCardHandler);
-REGISTER_CARD_HANDLER(".info", InfoCardHandler);
-REGISTER_CARD_HANDLER(".xml", XmlCardHandler);
+using cepgen::card::InfoHandler;
+using cepgen::card::JsonHandler;
+using cepgen::card::XmlHandler;
+REGISTER_CARD_HANDLER(".json", JsonHandler);
+REGISTER_CARD_HANDLER(".info", InfoHandler);
+REGISTER_CARD_HANDLER(".xml", XmlHandler);

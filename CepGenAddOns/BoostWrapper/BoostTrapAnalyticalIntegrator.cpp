@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "CepGen/Utils/FunctionsWrappers.h"
 
 namespace cepgen {
+  /// Trapezoidal integration algorithm
   class BoostAnalyticalIntegrator final : public AnalyticIntegrator {
   public:
     explicit BoostAnalyticalIntegrator(const ParametersList& params)
@@ -49,5 +50,5 @@ namespace cepgen {
     const double tol_;
   };
 }  // namespace cepgen
-typedef cepgen::BoostAnalyticalIntegrator BAIntegrator;
-REGISTER_ANALYTIC_INTEGRATOR("boost", BAIntegrator);
+using cepgen::BoostAnalyticalIntegrator;
+REGISTER_ANALYTIC_INTEGRATOR("boost", BoostAnalyticalIntegrator);

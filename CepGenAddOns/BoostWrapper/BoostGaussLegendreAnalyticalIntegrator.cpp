@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "CepGen/Utils/FunctionsWrappers.h"
 
 namespace cepgen {
+  /// Gauss-Legendre integration algorithm
   template <size_t N>
   class BoostGaussLegendreAnalyticalIntegrator final : public AnalyticIntegrator {
   public:
@@ -35,9 +36,8 @@ namespace cepgen {
     }
 
     double integrate(const utils::Function1D& func, void* = nullptr, const Limits& lim = {}) const override {
-      const double xmin = (lim.hasMin() ? lim.min() : range_.min());
-      const double xmax = (lim.hasMax() ? lim.max() : range_.max());
-      return boost::math::quadrature::gauss<double, N>::integrate(func, xmin, xmax);
+      return boost::math::quadrature::gauss<double, N>::integrate(
+          func, lim.hasMin() ? lim.min() : range_.min(), lim.hasMax() ? lim.max() : range_.max());
     }
   };
 }  // namespace cepgen
@@ -46,8 +46,8 @@ typedef cepgen::BoostGaussLegendreAnalyticalIntegrator<15> BGLIntegrator15;
 typedef cepgen::BoostGaussLegendreAnalyticalIntegrator<20> BGLIntegrator20;
 typedef cepgen::BoostGaussLegendreAnalyticalIntegrator<25> BGLIntegrator25;
 typedef cepgen::BoostGaussLegendreAnalyticalIntegrator<30> BGLIntegrator30;
-REGISTER_ANALYTIC_INTEGRATOR("boost-gl7", BGLIntegrator7);
-REGISTER_ANALYTIC_INTEGRATOR("boost-gl15", BGLIntegrator15);
-REGISTER_ANALYTIC_INTEGRATOR("boost-gl20", BGLIntegrator20);
-REGISTER_ANALYTIC_INTEGRATOR("boost-gl25", BGLIntegrator25);
-REGISTER_ANALYTIC_INTEGRATOR("boost-gl30", BGLIntegrator30);
+REGISTER_ANALYTIC_INTEGRATOR("boost_gl7", BGLIntegrator7);
+REGISTER_ANALYTIC_INTEGRATOR("boost_gl15", BGLIntegrator15);
+REGISTER_ANALYTIC_INTEGRATOR("boost_gl20", BGLIntegrator20);
+REGISTER_ANALYTIC_INTEGRATOR("boost_gl25", BGLIntegrator25);
+REGISTER_ANALYTIC_INTEGRATOR("boost_gl30", BGLIntegrator30);
