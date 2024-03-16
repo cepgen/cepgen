@@ -25,7 +25,7 @@
 namespace cepgen {
   namespace strfun {
     Parameterisation::Parameterisation(const ParametersList& params)
-        : NamedModule<int>(params),
+        : NamedModule(params),
           r_ratio_(SigmaRatiosFactory::get().build(steer<int>("sigmaRatio"))),
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),

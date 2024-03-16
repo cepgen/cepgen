@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2023  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ namespace cepgen {
     /// A collection of drawable objects
     typedef std::vector<const Drawable*> DrawableColl;
     /// A generic drawing utility
-    class Drawer : public NamedModule<std::string> {
+    class Drawer : public NamedModule<Drawer, std::string> {
     public:
       /// Build a drawing utility
       explicit Drawer(const ParametersList& params);

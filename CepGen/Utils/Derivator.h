@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,14 +19,14 @@
 #ifndef CepGen_Utils_Derivator_h
 #define CepGen_Utils_Derivator_h
 
-#include "CepGen/Core/SteeredObject.h"
+#include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Utils/FunctionsWrappers.h"
 
 namespace cepgen {
   namespace utils {
-    class Derivator : public SteeredObject<Derivator> {
+    class Derivator : public NamedModule<Derivator, std::string> {
     public:
-      explicit Derivator(const ParametersList& params) : SteeredObject(params), h_(steer<double>("h")) {}
+      explicit Derivator(const ParametersList& params) : NamedModule(params), h_(steer<double>("h")) {}
 
       static ParametersDescription description() {
         auto desc = ParametersDescription();

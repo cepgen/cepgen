@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,13 +23,12 @@
 
 namespace cepgen {
   /// A generic \f$\alpha_S(Q^2)\f$ evaluation algorithm
-  class Coupling : public NamedModule<std::string> {
+  class Coupling : public NamedModule<Coupling, std::string> {
   public:
     /// Build an \f$\alpha_{S,EM}\f$ interpolator object
     explicit Coupling(const ParametersList& params) : NamedModule(params) {}
     virtual ~Coupling() {}
-    /// Compute \f$\alpha_{S,EM}\f$ for a given \f$Q\f$
-    virtual double operator()(double q) const = 0;
+    virtual double operator()(double q) const = 0;  ///< Compute \f$\alpha_{S,EM}\f$ for a given \f$Q\f$
   };
 }  // namespace cepgen
 

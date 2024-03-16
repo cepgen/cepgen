@@ -24,7 +24,7 @@
 namespace cepgen {
   namespace formfac {
     Parameterisation::Parameterisation(const ParametersList& params)
-        : NamedModule<std::string>(params),
+        : NamedModule(params),
           pdg_id_(steer<pdgid_t>("pdgId")),
           mass2_(std::pow(PDG::get().mass(pdg_id_), 2)),
           mp_(PDG::get().mass(PDG::proton)),

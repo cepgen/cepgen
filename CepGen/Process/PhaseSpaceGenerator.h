@@ -19,7 +19,7 @@
 #ifndef CepGen_Process_PhaseSpaceGenerator_h
 #define CepGen_Process_PhaseSpaceGenerator_h
 
-#include "CepGen/Core/SteeredObject.h"
+#include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen {
   namespace proc {
@@ -31,9 +31,9 @@ namespace cepgen {
   /// Class template to define any phase space helper process
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Feb 2024
-  class PhaseSpaceGenerator : public SteeredObject<PhaseSpaceGenerator> {
+  class PhaseSpaceGenerator : public NamedModule<PhaseSpaceGenerator, std::string> {
   public:
-    explicit PhaseSpaceGenerator(const ParametersList& params) : SteeredObject(params) {}
+    explicit PhaseSpaceGenerator(const ParametersList& params) : NamedModule(params) {}
 
     virtual bool ktFactorised() const { return false; }
 

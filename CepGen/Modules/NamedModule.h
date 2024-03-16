@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2021-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,16 +20,18 @@
 #define CepGen_Modules_NamedModule_h
 
 #include "CepGen/Core/ParametersDescription.h"
-#include "CepGen/Core/Steerable.h"
+#include "CepGen/Core/SteeredObject.h"
 
 namespace cepgen {
   /// Base runtime module object
+  /// \tparam T Object type
   /// \tparam I Indexing type for runtime factory builder registration
-  template <typename I = std::string>
-  class NamedModule : public Steerable {
+  template <typename T, typename I = std::string>
+  class NamedModule : public SteeredObject<T> {
   public:
     /// Build a module from its steering parameters
-    explicit NamedModule(const ParametersList& params) : Steerable(params), name_(params.name<I>()) {}
+    explicit NamedModule(const ParametersList& params)
+        : SteeredObject<T>(params), name_(SteeredObject<T>::template steerName<I>()) {}
     virtual ~NamedModule() = default;
 
     /// Describe all steering parameters for this module
@@ -39,12 +41,10 @@ namespace cepgen {
       return desc;
     }
 
-    /// Module unique indexing name
-    const I& name() const { return name_; }
+    const I& name() const { return name_; }  ///< Module unique indexing name
 
   protected:
-    /// Module unique indeing name
-    const I name_;
+    const I name_;  ///< Module unique indexing name
   };
 }  // namespace cepgen
 

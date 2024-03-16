@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,17 +20,16 @@
 #define CepGen_Utils_RandomGenerator_h
 
 #include <array>
-#include <string>
 #include <vector>
 
-#include "CepGen/Core/SteeredObject.h"
+#include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen {
   namespace utils {
     /// A random number generator
     /// \author L. Forthomme <laurent.forthomme@cern.ch>
     /// \date Nov 2023
-    class RandomGenerator : public SteeredObject<RandomGenerator> {
+    class RandomGenerator : public NamedModule<RandomGenerator, std::string> {
     public:
       /// Default constructor
       explicit RandomGenerator(const ParametersList&);

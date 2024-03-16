@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,20 +23,16 @@
 #include "CepGen/Physics/ParticleProperties.h"
 
 namespace cepgen {
-  class PartonFlux : public NamedModule<std::string> {
+  class PartonFlux : public NamedModule<PartonFlux, std::string> {
   public:
     explicit PartonFlux(const ParametersList&);
 
     static ParametersDescription description();
 
-    /// is the flux parton kT-dependent?
-    virtual bool ktFactorised() const { return false; }
-    /// is the initiator particle fragmenting after the parton emission?
-    virtual bool fragmenting() const = 0;
-    /// parton PDG identifier
-    virtual pdgid_t partonPdgId() const = 0;
-    /// initiator particle squared mass
-    virtual double mass2() const = 0;
+    virtual bool ktFactorised() const { return false; }  ///< Is the flux parton kT-dependent?
+    virtual bool fragmenting() const = 0;                ///< Is initiator particle fragmenting after parton emission?
+    virtual pdgid_t partonPdgId() const = 0;             ///< Parton PDG identifier
+    virtual double mass2() const = 0;                    ///< Initiator particle squared mass (in \f${\rm GeV}^2/c^4\f$)
 
   protected:
     const double prefactor_;

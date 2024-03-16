@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,51 +24,36 @@
 #include "CepGen/Physics/HeavyIon.h"
 
 namespace cepgen {
-  class ParametersList;
-  namespace strfun {
-    class Parameterisation;
-  }
-  /// Form factors definition scope
   namespace formfac {
     /// Nucleon electromagnetic form factors parameterisation
-    class Parameterisation : public NamedModule<std::string> {
+    class Parameterisation : public NamedModule<Parameterisation, std::string> {
     public:
-      /// Steered parameterisation object constructor
       explicit Parameterisation(const ParametersList&);
 
       static ParametersDescription description();
 
-      /// Dumping operator for standard output streams
-      friend std::ostream& operator<<(std::ostream&, const Parameterisation&);
+      friend std::ostream& operator<<(std::ostream&, const Parameterisation&);  ///< Friendly printout operator
 
-      /// \f$\tau=Q^2/4m_p^2\f$ variable definition
-      double tau(double q2) const;
+      double tau(double q2) const;  ///< \f$\tau={Q^2}\over{4m_p^2}\f$ variable definition
 
-      /// Compute all relevant form factors functions for a given \f$Q^2\f$ value
-      virtual const FormFactors& operator()(double /*q2*/);
-      /// Is the nucleon surviving the exchange?
-      virtual bool fragmenting() const { return false; }
+      virtual const FormFactors& operator()(double /*q2*/);  ///< Compute all form factors for a given \f$Q^2\f$ value
+      virtual bool fragmenting() const { return false; }     ///< Is the nucleon surviving the exchange?
 
     protected:
-      /// Proton magnetic moment
-      static constexpr double MU = 2.792847337;
+      static constexpr double MU = 2.792847337;  ///< Proton magnetic moment
 
-      /// Local form factors evaluation method
-      virtual void eval() = 0;
-      /// Set the form factors directly
-      void setFEFM(double fe, double fm);
-      /// Set the Sachs form factors
-      void setGEGM(double ge, double gm);
+      virtual void eval() = 0;  ///< Local form factors evaluation method
+
+      void setFEFM(double fe, double fm);  ///< Set the electromagnetic form factors
+      void setGEGM(double ge, double gm);  ///< Set the Sachs form factors
 
       const pdgid_t pdg_id_;  ///< Incoming beam
       const double mass2_;    ///< Incoming beam squared mass
       const double mp_;       ///< Proton mass, in GeV/c\f$^2\f$
       const double mp2_;      ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
 
-      /// Virtuality at which the form factors are evaluated
-      double q2_{-1.};
-      /// Last form factors computed
-      FormFactors ff_{};
+      double q2_{-1.};    ///< Virtuality at which the form factors are evaluated
+      FormFactors ff_{};  ///< Last form factors computed
     };
     std::ostream& operator<<(std::ostream&, const FormFactors&);
   }  // namespace formfac

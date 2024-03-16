@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 namespace cepgen {
   class Integrand;
   /// Monte-Carlo integration algorithm
-  class Integrator : public NamedModule<std::string> {
+  class Integrator : public NamedModule<Integrator, std::string> {
   public:
     /// Integrator algorithm constructor
     explicit Integrator(const ParametersList& params);

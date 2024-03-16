@@ -28,7 +28,7 @@
 namespace cepgen {
   namespace sigrat {
     Parameterisation::Parameterisation(const ParametersList& params)
-        : NamedModule<int>(params), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {}
+        : NamedModule(params), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {}
 
     double Parameterisation::theta(double xbj, double q2) {
       return 1. + 12. * (q2 / (q2 + 1.)) * (0.125 * 0.125 / (0.125 * 0.125 + xbj * xbj));

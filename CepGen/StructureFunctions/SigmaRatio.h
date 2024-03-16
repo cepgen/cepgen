@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2017-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ namespace cepgen {
   /// A collector namespace for modellings of the \f$R=\sigma_L/\sigma_T\f$ ratio
   namespace sigrat {
     /// A generic modelling of the \f$R=\sigma_L/\sigma_T\f$ ratio
-    class Parameterisation : public NamedModule<int> {
+    class Parameterisation : public NamedModule<Parameterisation, int> {
     public:
       /// \f$R=\sigma_L/\sigma_T\f$ ratio computation algorithm constructor
       explicit Parameterisation(const ParametersList& params = ParametersList());

@@ -19,9 +19,6 @@
 #ifndef CepGen_EventFilter_EventHandler_h
 #define CepGen_EventFilter_EventHandler_h
 
-#include <string>
-#include <vector>
-
 #include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen {
@@ -30,17 +27,15 @@ namespace cepgen {
   /// Class template for modules interacting with events
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Jan 2023
-  class EventHandler : public NamedModule<std::string> {
+  class EventHandler : public NamedModule<EventHandler, std::string> {
   public:
     explicit EventHandler(const ParametersList&);
     virtual ~EventHandler();
 
     static ParametersDescription description();
 
-    /// Initialise the handler and its inner parameterisation
-    void initialise(const RunParameters&);
-    /// List of run parameters
-    const RunParameters& runParameters() const;
+    void initialise(const RunParameters&);       ///< Initialise the handler and its inner parameterisation
+    const RunParameters& runParameters() const;  ///< List of run parameters
 
     /// Retrieve the engine object
     template <typename T>
@@ -50,8 +45,7 @@ namespace cepgen {
 
   protected:
     virtual void initialise() = 0;
-    /// Engine object
-    virtual void* enginePtr();
+    virtual void* enginePtr();  ///< Engine object
 
   private:
     const RunParameters* run_params_{nullptr};  // NOT owning

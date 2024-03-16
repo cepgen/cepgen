@@ -38,7 +38,7 @@ namespace cepgen {
     /// \brief Class template to define any process to compute using this MC integrator/events generator
     /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
     /// \date Jan 2014
-    class Process : public NamedModule<std::string> {
+    class Process : public NamedModule<Process, std::string> {
     public:
       explicit Process(const ParametersList&);
       Process(const Process&);  ///< Copy constructor for a user process

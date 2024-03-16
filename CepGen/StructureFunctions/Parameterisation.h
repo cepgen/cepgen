@@ -29,7 +29,7 @@ namespace cepgen {
   /// Structure functions modelling scope
   namespace strfun {
     /// Base object for the parameterisation of nucleon structure functions
-    class Parameterisation : public NamedModule<int> {
+    class Parameterisation : public NamedModule<Parameterisation, int> {
     public:
       /// User-steered parameterisation object constructor
       explicit Parameterisation(const ParametersList&);
