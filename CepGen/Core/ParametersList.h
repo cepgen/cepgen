@@ -23,16 +23,15 @@
 #include <map>
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 #include "CepGen/Utils/Limits.h"
 
-// List of parameters containers handled by the ParametersList object
-// This can be edited to add an extra handled collection to this steering utility
-//   e.g. add __TYPE_ENUM(typename,      // any C/C++ type name
-//                        map_variable,  // ParametersList object private attribute
-//                        "human-readable name of parameter")
-//        to the following list.
+/// Looper over the list of parameters containers handled by the ParametersList object
+/// \note This can be edited to add an extra handled collection to this steering utility
+///   e.g. add __TYPE_ENUM(typename,      // any C/C++ type name
+///                        map_variable,  // ParametersList object private attribute
+///                        "human-readable name of parameter")
+///        to the following list.
 #define REGISTER_CONTENT_TYPE                                            \
   __TYPE_ENUM(bool, bool_values_, "bool")                                \
   __TYPE_ENUM(int, int_values_, "int")                                   \
@@ -159,6 +158,7 @@ namespace cepgen {
     std::unordered_map<std::string, std::vector<std::vector<double> > > vec_vec_dbl_values_;
   };
 
+/// Implement all setters and getters for a given type
 #define __TYPE_ENUM(type, map, name)                                          \
   template <>                                                                 \
   bool ParametersList::has<type>(const std::string&) const;                   \

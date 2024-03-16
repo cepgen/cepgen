@@ -39,7 +39,9 @@
   extern double f77_func##_();             \
   }                                        \
   static_assert(true, "")
+/// Name of the process (Fortran scope)
 #define PROCESS_F77_NAME(name) F77_##name
+/// Convert a token into a string
 #define STRINGIFY(name) #name
 /// Add the Fortran process definition to the list of handled processes
 #define REGISTER_FORTRAN_PROCESS(name, descr, f77_func)                           \

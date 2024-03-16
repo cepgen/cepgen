@@ -27,7 +27,9 @@
 
 #include "CepGen/Modules/NamedModule.h"
 
+/// Name of the object builder
 #define BUILDERNM(obj) obj##Builder
+/// Define a new factory instance for the definition of modules
 #define DEFINE_FACTORY(idx_type, name, obj_type, descr)    \
   struct name : public ModuleFactory<obj_type, idx_type> { \
     explicit name() : ModuleFactory(descr) {}              \
@@ -45,15 +47,11 @@ namespace cepgen {
   template <typename T, typename I = std::string>
   class ModuleFactory {
   public:
-    /// Disabled copy constructor
-    ModuleFactory(const ModuleFactory&) = delete;
-    /// Default destructor
-    virtual ~ModuleFactory() = default;
-    /// Disabled assignment operator
-    void operator=(const ModuleFactory&) = delete;
+    ModuleFactory(const ModuleFactory&) = delete;   ///< Disabled copy constructor
+    virtual ~ModuleFactory() = default;             ///< Default destructor
+    void operator=(const ModuleFactory&) = delete;  ///< Disabled assignment operator
 
-    /// Describe the modules factory
-    inline const std::string& description() const { return description_; }
+    inline const std::string& description() const { return description_; }  ///< Describe the modules factory
 
     /// Register a named module in the database
     /// \tparam U Class to register (inherited from T base class)
@@ -82,11 +80,9 @@ namespace cepgen {
     /// \param[in] params List of parameters to be invoked by the constructor
     std::unique_ptr<T> build(const ParametersList&) const;
 
-    /// Constructor type for a module
-    typedef std::unique_ptr<T> (*Builder)(const ParametersList&);
+    typedef std::unique_ptr<T> (*Builder)(const ParametersList&);  ///< Constructor type for a module
 
-    /// Describe one named module
-    std::string describe(const I& name) const;
+    std::string describe(const I& name) const;  ///< Describe one named module
     /// Describe the parameters of one named module
     /// \params[in] params Parameters (incl. the name) to steer the description
     ParametersDescription describeParameters(const ParametersList&) const;
@@ -95,14 +91,10 @@ namespace cepgen {
     /// \params[in] params Additional parameters to steer the description
     ParametersDescription describeParameters(const I& name, const ParametersList& params = ParametersList()) const;
 
-    /// List of modules registred in the database
-    std::vector<I> modules() const;
-    /// Is the database empty?
-    inline bool empty() const { return map_.empty(); }
-    /// Number of modules registered in the database
-    inline size_t size() const { return map_.size(); }
-    /// Check if a named module is registered
-    inline bool has(const I& name) const { return map_.count(name) > 0; }
+    std::vector<I> modules() const;                     ///< List of modules registred in the database
+    inline bool empty() const { return map_.empty(); }  ///< Is the database empty?
+    inline size_t size() const { return map_.size(); }  ///< Number of modules registered in the database
+    inline bool has(const I& name) const { return map_.count(name) > 0; }  ///< Check if a named module is registered
 
   private:
     /// Construct a module with its parameters set
@@ -110,18 +102,13 @@ namespace cepgen {
     inline static std::unique_ptr<T> buildModule(const ParametersList& params) {
       return std::unique_ptr<T>(new U(params));
     }
-    /// Factory name
-    const std::string description_;
-    /// Database of modules handled by this instance
-    std::unordered_map<I, Builder> map_;
-    /// Database of default parameters associated to modules
-    std::unordered_map<I, ParametersDescription> params_map_;
-    /// An empty parameters description
-    const ParametersDescription empty_params_desc_;
+    const std::string description_;                            ///< Factory name
+    std::unordered_map<I, Builder> map_;                       ///< Database of modules handled by this instance
+    std::unordered_map<I, ParametersDescription> params_map_;  ///< Database of default parameters associated to modules
+    const ParametersDescription empty_params_desc_;            ///< An empty parameters description
 
   protected:
-    /// Hidden default constructor for singleton operations
-    explicit ModuleFactory(const std::string&);
+    explicit ModuleFactory(const std::string&);  ///< Hidden default constructor for singleton operations
   };
 }  // namespace cepgen
 
