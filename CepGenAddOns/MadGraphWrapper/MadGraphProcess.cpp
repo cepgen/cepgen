@@ -22,7 +22,7 @@
 
 namespace cepgen {
   MadGraphProcess::MadGraphProcess(const ParametersList& params)
-      : SteeredObject(params),
+      : NamedModule(params),
         incoming_pdgids_(steer<std::vector<int> >("incomingSystem")),
         central_pdgids_(steer<std::vector<int> >("outgoingSystem")) {}
 

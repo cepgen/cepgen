@@ -19,13 +19,13 @@
 #ifndef CepGenAddOns_MadGraphWrapper_MadGraphProcess_h
 #define CepGenAddOns_MadGraphWrapper_MadGraphProcess_h
 
-#include "CepGen/Core/SteeredObject.h"
+#include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/ParticleProperties.h"
 
 namespace cepgen {
   /// Wrapper around a generic MadGraph process definition
-  class MadGraphProcess : public SteeredObject<MadGraphProcess> {
+  class MadGraphProcess : public NamedModule<MadGraphProcess, std::string> {
   public:
     explicit MadGraphProcess(const ParametersList&);
     virtual ~MadGraphProcess() = default;
