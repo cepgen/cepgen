@@ -30,6 +30,7 @@ namespace cepgen {
     DocumentationGenerator::DocumentationGenerator(const ParametersList& params)
         : SteeredObject(params),
           output_filename_(steer<std::string>("output")),
+          page_title_(steer<std::string>("pageTitle")),
           bare_(steer<bool>("bare")),
           show_git_(steer<bool>("showGit")),
           container_(CTML::Node("div.container-fluid")) {
@@ -45,7 +46,8 @@ namespace cepgen {
                                   .SetAttribute("name", "viewport")
                                   .SetAttribute("content", "width=device-width, initial-scale=1"));
       }
-      container_.AppendChild(CTML::Node("h1", "Modules documentation"));
+      if (!page_title_.empty())
+        container_.AppendChild(CTML::Node("h1", page_title_));
       auto header = CTML::Node("div").AppendText("CepGen version ").AppendChild(CTML::Node("mark", version::tag));
       if (show_git_)
         header.AppendChild(CTML::Node("br").UseClosingTag(false))
@@ -133,6 +135,8 @@ namespace cepgen {
       auto desc = ParametersDescription();
       desc.setDescription("CTML HTML document generator helper");
       desc.add<std::string>("output", "index.html").setDescription("output path for the generated HTML file");
+      desc.add<std::string>("pageTitle", "Modules documentation")
+          .setDescription("documentation page upper level title");
       desc.add<bool>("useBS", true).setDescription("use the Bootstrap CDN to prettify this output?");
       desc.add<bool>("showGit", false).setDescription("print out the git hash/branch in the output?");
       desc.add<bool>("bare", false).setDescription("generate a bare version (without <html>/<head>/<body> attributes)");
