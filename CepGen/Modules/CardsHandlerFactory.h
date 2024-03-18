@@ -21,8 +21,6 @@
 
 #include "CepGen/Modules/ModuleFactory.h"
 
-/** \file */
-
 /// Add a cards handler definition to the list of handled parsers
 #define REGISTER_CARD_HANDLER(name, obj)                                           \
   namespace cepgen {                                                               \

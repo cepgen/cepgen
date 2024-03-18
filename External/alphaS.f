@@ -1,6 +1,6 @@
 C----------------------------------------------------------------------
 C--   Stand-alone code for alpha_s cannibalised (with permission)
-C--   from Andreas Vogt's QCD-PEGASUS package (hep-ph/0408244).
+C--   from Andreas Vogt QCD-PEGASUS package (hep-ph/0408244).
 C--   The running coupling alpha_s is obtained at N^mLO (m = 0,1,2,3)
 C--   by solving the renormalisation group equation in the MSbar scheme
 C--   by a fourth-order Runge-Kutta integration.  Transitions from
@@ -309,7 +309,7 @@ c
 c
 c ---------------------------------------------------------------------
 c
-c ..The coupling-constant matching coefficients (CMC's) up to NNNLO
+c ..The coupling-constant matching coefficients (CMCs) up to NNNLO
 c   (calculated and saved in the first call of this routine)
 c
        IF (PRVCLL .NE. 1) THEN
@@ -335,7 +335,7 @@ c
 c
 c ---------------------------------------------------------------------
 c
-c ..The N_f dependent CMC's, and the alpha_s matching at order NAORD
+c ..The N_f dependent CMCs, and the alpha_s matching at order NAORD
 c
        CMC(3,0) = CMCI30 + NF * CMCF30
        CMC(3,1) = CMCI31 + NF * CMCF31

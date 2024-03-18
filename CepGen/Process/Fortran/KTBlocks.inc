@@ -1,10 +1,25 @@
-      !> \file KTBlocks.inc
-c     ================================================================
+      ! CepGen: a central exclusive processes event generator
+      ! Copyright (C) 2018-2024  Laurent Forthomme
+      !
+      ! This program is free software: you can redistribute it and/or modify
+      ! it under the terms of the GNU General Public License as published by
+      ! the Free Software Foundation, either version 3 of the License, or
+      ! any later version.
+      !
+      ! This program is distributed in the hope that it will be useful,
+      ! but WITHOUT ANY WARRANTY; without even the implied warranty of
+      ! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      ! GNU General Public License for more details.
+      !
+      ! You should have received a copy of the GNU General Public License
+      ! along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+c     =================================================================
 c     F77 process-to-CepGen helper
 c     > this header file defines a set of common blocks useful for
 c     > the interfacing of any kt-factorised matrix element computation
 c     > to a mother CepGen instance
-c     ================================================================
+c     =================================================================
 
 c     =================================================================
       !> collection of fundamental physics constants
