@@ -24,7 +24,7 @@
 #include <memory>
 #include <vector>
 
-#include "CepGen/Event/Particle.h"
+#include "CepGen/Event/Event.h"
 #include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/Kinematics.h"
@@ -32,7 +32,6 @@
 #include "CepGen/Utils/RandomGenerator.h"
 
 namespace cepgen {
-  class Event;
   /// Location for all physics processes to be generated
   namespace proc {
     /// \brief Class template to define any process to compute using this MC integrator/events generator

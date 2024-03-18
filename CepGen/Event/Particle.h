@@ -20,7 +20,6 @@
 #define CepGen_Event_Particle_h
 
 #include <set>
-#include <unordered_map>
 
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Momentum.h"

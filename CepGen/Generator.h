@@ -16,31 +16,14 @@
 #ifndef CepGen_Generator_h
 #define CepGen_Generator_h
 
+#include <functional>
 #include <memory>
 
-#include "CepGen/Event/Event.h"
 #include "CepGen/Utils/Value.h"
-
-////////////////////////////////////////////////////////////////////////////////
-
-/**
- * \mainpage Foreword
- * This Monte Carlo generator was developed as a modern version of the LPAIR code introduced
- * in the early 1990s by J. Vermaseren *et al*\cite Baranov:1991yq\cite Vermaseren:1982cz. This
- * latter allows to compute the cross-section and to generate events for the
- * \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$ process for ee, ep, and pp collisions.
- *
- * Soon after the integration of its matrix element, it was extended as a tool to compute and
- * generate events for any generic 2\f$\rightarrow\f$ 3 central exclusive process.
- * To do so, the main operation performed here is the integration of the matrix element (given
- * as a subset of a Process object) over the full available phase space.
- *
- */
-
-////////////////////////////////////////////////////////////////////////////////
 
 /// Common namespace for this Monte Carlo generator
 namespace cepgen {
+  class Event;
   class Integrator;
   class GeneratorWorker;
   class RunParameters;
@@ -60,32 +43,12 @@ namespace cepgen {
   void printHeader();  ///< Dump this program's header into the standard output stream
   void dumpModules();  ///< List the modules registered in RTE database
 
-  ////////////////////////////////////////////////////////////////////////////////
-
-  /**
-   * This object represents the core of this Monte Carlo generator, with its
-   * capability to generate the events (using the embedded Vegas object) and to
-   * study the phase space in term of the variation of resulting cross section
-   * while scanning the various parameters (point \f${\bf x}\f$ in the
-   * multi-dimensional phase space).
-   *
-   * The phase space is constrained using the RunParameters object given as an
-   * argument to the constructor, and the differential cross-sections for each
-   * value of the array \f${\bf x}\f$ are computed in the \a f-function defined
-   * outside (but populated inside) this object.
-   *
-   * This f-function embeds a Process-inherited object which defines all the
-   * methods to compute this differential cross-section as well as the in- and outgoing
-   * kinematics associated to each particle.
-   *
-   * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-   * \date Feb 2013
-   * \brief Core of the Monte-Carlo generator
-   *
-   */
+  /// Core generator object allowing for process definition, cross section computation, and event generation
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date Feb 2013
   class Generator {
   public:
-    /// Core of the Monte Carlo integrator and events generator
+    /// Initialise the Monte Carlo integrator and event generator
     /// \param[in] safe_mode Load the generator without external libraries?
     explicit Generator(bool safe_mode = false);
     explicit Generator(RunParameters*);  ///< Build a MC generator object
@@ -98,9 +61,7 @@ namespace cepgen {
     void setIntegrator(std::unique_ptr<Integrator>);  ///< Specify an integrator algorithm configuration
     void integrate();                                 ///< Integrate the functional over the phase space of interest
 
-    /// Compute the cross section for the run parameters
-    /// \return The computed cross-section and uncertainty, in pb
-    Value computeXsection();
+    Value computeXsection();  ///< Compute the cross section and uncertainty, in pb, for the run parameters
     /// Compute the cross section for the run parameters
     /// \param[out] xsec The computed cross-section, in pb
     /// \param[out] err The absolute integration error on the computed cross-section, in pb
@@ -108,10 +69,9 @@ namespace cepgen {
     double crossSection() const { return xsect_; }                     ///< Last cross section computed by the generator
     double crossSectionError() const { return xsect_.uncertainty(); }  ///< Last error on the cross section computed
 
-    void generate(size_t num_events, const std::function<void(const Event&, size_t)>&);  ///< Launch event generation
-    /// Launch event generation
-    void generate(size_t num_events, const std::function<void(const proc::Process&)>& = nullptr);
-    const Event& next();  //</ Generate one event
+    void generate(size_t num_events, const std::function<void(const Event&, size_t)>&);            ///< Generate events
+    void generate(size_t num_events, const std::function<void(const proc::Process&)>& = nullptr);  ///< Generate events
+    const Event& next();  ///< Generate one single event
 
     /// Compute one single point from the total phase space
     /// \param[in] x the n-dimensional point to compute
