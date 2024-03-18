@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ extern pyjets_t pyjets_;
 
 namespace pythia6 {
   int pythia6Status(int);
-  cepgen::Particle::Status cepgenStatus(int);
+  int cepgenStatus(int);
   void checkPDGid(int);
 
   void pyexec();

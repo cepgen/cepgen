@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ namespace pythia6 {
   }
 
   int pythia6Status(int cg_status) {
-    switch ((cepgen::Particle::Status)cg_status) {
+    switch (static_cast<cepgen::Particle::Status>(cg_status)) {
       case cepgen::Particle::Status::PrimordialIncoming:
         return 21;
       case cepgen::Particle::Status::FinalState:
@@ -97,18 +97,18 @@ namespace pythia6 {
     }
   }
 
-  cepgen::Particle::Status cepgenStatus(int py_status) {
+  int cepgenStatus(int py_status) {
     switch (py_status) {
       case 1:
-        return cepgen::Particle::Status::FinalState;
+        return static_cast<int>(cepgen::Particle::Status::FinalState);
       case 3:
-        return cepgen::Particle::Status::Propagator;
+        return static_cast<int>(cepgen::Particle::Status::Propagator);
       case 11:
-        return cepgen::Particle::Status::Fragmented;
+        return static_cast<int>(cepgen::Particle::Status::Fragmented);
       case 21:
-        return cepgen::Particle::Status::PrimordialIncoming;
+        return static_cast<int>(cepgen::Particle::Status::PrimordialIncoming);
       default:
-        return (cepgen::Particle::Status)py_status;
+        return py_status;
     }
   }
 
