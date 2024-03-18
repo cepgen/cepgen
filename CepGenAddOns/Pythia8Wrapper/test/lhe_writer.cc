@@ -1,5 +1,4 @@
-#include <fstream>
-
+#include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/EventExporterFactory.h"
@@ -40,12 +39,9 @@ int main(int argc, char* argv[]) {
 
   size_t num_stored_events = 0, num_events_invalid_multiplicity_hdr = 0, num_events_invalid_multiplicity_cnt = 0;
 
-  ifstream lhe_file(output_file);
-  string buf;
   bool in_event = false;
   size_t num_lines_in_event = 999, num_particles_in_event_hdr = 999;
-  while (!lhe_file.eof()) {
-    getline(lhe_file, buf);
+  for (const auto& buf : cepgen::utils::split(cepgen::utils::readFile(output_file), '\n')) {
     if (buf == "<event>") {
       in_event = true;
       num_lines_in_event = 0;
