@@ -1,9 +1,9 @@
 ##
 # \file
-# \defgroup kt \f$\kt\f$-factorised processes
+# \defgroup kt kt-factorised processes
 # \ingroup python kt
 #
-# A collection of objects for the definition of a general \f$\kt\f$-factorised process
+# A collection of objects for the definition of a general \f$k_{\rm T}\f$-factorised process
 
 from math import pi
 from .containers_cff import Module, Parameters

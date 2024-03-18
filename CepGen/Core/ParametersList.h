@@ -69,8 +69,10 @@ namespace cepgen {
 
     ParametersList& feed(const std::string&);  ///< Feed a control string to the list of parameters
 
+    /// Check if a given parameter is handled in this list
+    /// \param key Unique key for parameter
     template <typename T>
-    bool has(const std::string& key) const;  ///< Check if a given parameter is handled in this list
+    bool has(const std::string& key) const;
     /// Erase a parameter with key
     /// \return Number of key-indexed values erased
     size_t erase(const std::string&);
@@ -96,24 +98,39 @@ namespace cepgen {
       return set<T>(MODULE_NAME, value);
     }
     /// Fill a variable with the key content if exists
+    /// \param[in] key Unique key for parameter
+    /// \param[out] value Object/variable to be filled with parameter value
     template <typename T>
     inline const ParametersList& fill(const std::string& key, T& value) const {
       if (has<T>(key))
         value = get<T>(key);
       return *this;
     }
+    /// Get a parameter value
+    /// \param[in] key Unique key for parameter
+    /// \param[in] def Default parameters value if parameter is not contained
     template <typename T>
-    T get(const std::string& key, const T& def = default_arg<T>::get()) const;  ///< Get a parameter value
+    T get(const std::string& key, const T& def = default_arg<T>::get()) const;
     /// Get a recast parameter value
+    /// \tparam T Base type of the parameter
+    /// \tparam U Type to recast the parameter into
+    /// \param[in] key Unique key for parameter
+    /// \param[in] def Default parameters value if parameter is not contained
     template <typename T, typename U>
     inline U getAs(const std::string& key, const U& def = default_arg<U>::get()) const {
       return static_cast<U>(get<T>(key, static_cast<T>(def)));
     }
+    /// Reference to a parameter value
+    /// \param[in] key Unique key for parameter
     template <typename T>
-    T& operator[](const std::string& key);  ///< Reference to a parameter value
+    T& operator[](const std::string& key);
     template <typename T>
     ParametersList& set(const std::string&, const T&);  ///< Set a parameter value
     /// Set a recast parameter value
+    /// \tparam T Base type of the parameter
+    /// \tparam U Type to recast the parameter into
+    /// \param[in] key Unique key for parameter
+    /// \param[in] value Value to set the parameter
     template <typename T, typename U>
     inline ParametersList& setAs(const std::string& key, const U& value) {
       return set<T>(key, static_cast<T>(value));
@@ -129,6 +146,7 @@ namespace cepgen {
     /// \param[in] name_key Include the name variable?
     std::vector<std::string> keys(bool name_key = true) const;
     /// Get a string-converted version of a value
+    /// \param[in] key Unique key for parameter
     /// \param[in] wrap Encapsulate the value with type()
     std::string getString(const std::string& key, bool wrap = false) const;
     /// Get a string-converted version of the module name if any

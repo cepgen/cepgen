@@ -2,7 +2,7 @@
 # \file
 # \ingroup python kt
 #
-# A collection of beam parton fluxes \f$f(x, \kt^2, Q^2)\f$
+# A collection of beam parton fluxes \f$f(x, k_{\rm T}^2, Q^2)\f$
 
 from .containers_cff import Module, Parameters
 

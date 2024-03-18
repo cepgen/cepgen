@@ -1,5 +1,6 @@
 ##
 # \file
+# \defgroup pythia8 Pythia 8 hadronisation module
 # \ingroup python pythia8
 #
 # Base Pythia 8 configuration parameters to define the hadronisation module

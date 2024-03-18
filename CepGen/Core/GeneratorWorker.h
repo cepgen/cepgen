@@ -59,7 +59,6 @@ namespace cepgen {
 
   protected:
     /// Store the event in the output file
-    /// \param[in] callback The callback function for every event generated
     /// \return A boolean stating whether or not the event was successfully saved
     bool storeEvent();
 

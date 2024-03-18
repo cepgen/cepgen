@@ -37,8 +37,8 @@ namespace cepgen {
       explicit Functional(const ParametersList&);
 
       /// Build a collection of parameters to define a functional from its mathematical expression
-      /// \params[in] expr Mathematical expression to evaluate
-      /// \params[in] vars List of expression variables
+      /// \param[in] expr Mathematical expression to evaluate
+      /// \param[in] vars List of expression variables
       static ParametersList fromExpression(const std::string& expr, const std::vector<std::string>& vars);
       static ParametersDescription description();
 

@@ -1,8 +1,8 @@
 ##
 # \file
-# \ingroup python pythia6
+# \ingroup python pythia8
 #
-# Collection of Pythia 6 runtime parameters to steer a few underlying event (UE) tunes
+# Collection of Pythia 8 runtime parameters to steer a few underlying event (UE) tunes
 
 
 pythia8CUEP8M1Settings = (

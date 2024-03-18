@@ -83,11 +83,11 @@ namespace cepgen {
 
     std::string describe(const I& name) const;  ///< Describe one named module
     /// Describe the parameters of one named module
-    /// \params[in] params Parameters (incl. the name) to steer the description
+    /// \param[in] params Parameters (incl. the name) to steer the description
     ParametersDescription describeParameters(const ParametersList&) const;
     /// Describe the parameters of one named module
-    /// \params[in] name Name of the module to describe
-    /// \params[in] params Additional parameters to steer the description
+    /// \param[in] name Name of the module to describe
+    /// \param[in] params Additional parameters to steer the description
     ParametersDescription describeParameters(const I& name, const ParametersList& params = ParametersList()) const;
 
     std::vector<I> modules() const;                     ///< List of modules registred in the database

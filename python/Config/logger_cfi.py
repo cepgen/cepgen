@@ -19,5 +19,5 @@ class Logging:
 
 logger = Parameters(
     level = Logging.Information,
-    enabledModules = ('',),
+    enabledModules = tuple()
 )

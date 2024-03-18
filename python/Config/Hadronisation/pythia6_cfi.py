@@ -1,5 +1,6 @@
 ##
 # \file
+# \defgroup pythia6 Pythia 6 hadronisation module
 # \ingroup python pythia6
 #
 # Base Pythia 6 configuration parameters to define the hadronisation module

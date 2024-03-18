@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 ##
 # \file
+# \defgroup python Python steering utilities
 # \ingroup python
 #
 # A collection of tools for Python steering cards definition
