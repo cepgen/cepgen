@@ -51,6 +51,7 @@ namespace cepgen {
     /// Inequality operator
     inline bool operator!=(const SteeredObject& oth) const { return !operator==(oth); }
 
+  protected:
     REGISTER_TYPE(bool, map_bools_);
     REGISTER_TYPE(int, map_ints_);
     REGISTER_TYPE(unsigned long long, map_ulongs_);
