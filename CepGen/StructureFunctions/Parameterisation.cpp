@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ namespace cepgen {
   namespace strfun {
     Parameterisation::Parameterisation(const ParametersList& params)
         : NamedModule(params),
-          r_ratio_(SigmaRatiosFactory::get().build(steer<int>("sigmaRatio"))),
+          r_ratio_(SigmaRatiosFactory::get().build(steer<ParametersList>("sigmaRatio"))),
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
           mx_min_(mp_ + PDG::get().mass(PDG::piZero)) {
@@ -146,7 +146,7 @@ namespace cepgen {
     ParametersDescription Parameterisation::description() {
       auto desc = ParametersDescription();
       desc.setDescription("Unnamed structure functions parameterisation");
-      desc.add<int>("sigmaRatio", 4 /* SibirtsevBlunden */)
+      desc.add<ParametersDescription>("sigmaRatio", ParametersDescription().setName<int>(4 /* SibirtsevBlunden */))
           .setDescription("Modelling for the sigma(L/T) ratio used in FL computation from F2");
       return desc;
     }
