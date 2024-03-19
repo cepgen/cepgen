@@ -26,6 +26,7 @@
 #include <TLegend.h>
 #include <TLine.h>
 #include <TMath.h>
+#include <TMultiGraph.h>
 #include <TObjArray.h>
 #include <TObjString.h>
 #include <TPaveText.h>
