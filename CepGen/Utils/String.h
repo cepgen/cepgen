@@ -37,6 +37,8 @@ namespace cepgen {
       return std::to_string(obj);
     }
     template <>
+    std::string toString(const ParametersList&);
+    template <>
     inline std::string toString(const std::string& obj) {
       return obj;
     }

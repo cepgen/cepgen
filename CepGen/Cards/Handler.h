@@ -36,7 +36,7 @@ namespace cepgen {
       const RunParameters* runParameters() const { return rt_params_; }  ///< Parsed list of runtime parameters
       RunParameters* runParameters() { return rt_params_; }              ///< Parsed list of runtime parameters
 
-      virtual void pack(const RunParameters*) {}  ///< Specify runtime parameters to the handler
+      virtual void pack(const RunParameters*);  ///< Specify runtime parameters to the handler
 
       virtual RunParameters* parseString(const std::string&, RunParameters* params) { return params; }
       /// Retrieve a configuration from a parsed steering card
