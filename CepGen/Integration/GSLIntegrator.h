@@ -21,9 +21,6 @@
 
 #include <gsl/gsl_rng.h>
 
-#include <functional>
-#include <memory>
-
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Utils/GSLFunctionsWrappers.h"
 

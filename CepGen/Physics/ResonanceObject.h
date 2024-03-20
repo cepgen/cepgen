@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,8 +19,6 @@
 #ifndef CepGen_Physics_ResonanceObject_h
 #define CepGen_Physics_ResonanceObject_h
 
-#include <vector>
-
 #include "CepGen/Core/SteeredObject.h"
 
 namespace cepgen {
@@ -31,31 +29,26 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    /// kinematics needed for threshold relativistic B-W
+    /// Kinematics needed for threshold relativistic B-W
     struct KinematicsBlock {
       explicit KinematicsBlock(double w2, double q2, double mp2, double mpi2, double meta2);
-      static double mom(double energy, double mass2) { return std::sqrt(std::max(0., energy * energy - mass2)); }
+      static inline double mom(double energy, double mass2) { return std::sqrt(std::max(0., energy * energy - mass2)); }
       const double w2, w;
       const double q2;
       // equivalent photon energy-momentum
       const double k, kcm;
-      // pion momentum
-      const double ppicm;
-      // two-pion momentum
-      const double ppi2cm;
-      // eta meson momentum
-      const double petacm;
+      const double ppicm;   ///< pion momentum
+      const double ppi2cm;  ///< two-pion momentum
+      const double petacm;  ///< eta meson momentum
     };
 
   protected:
-    double kr() const { return 0.5 * (mass_ * mass_ - mp2_) / mp_; }
-    double pcmr(double m2) const { return KinematicsBlock::mom(ecmr(m2), m2); }
+    inline double kr() const { return 0.5 * (mass_ * mass_ - mp2_) / mp_; }
+    inline double pcmr(double m2) const { return KinematicsBlock::mom(ecmr(m2), m2); }
     double ecmr(double m2) const;
-    double kcmr() const { return ecmr(0.); }
-    /// partial widths for all decays
-    double partialWidth(const KinematicsBlock&) const;
-    /// virtual photon width
-    double photonWidth(const KinematicsBlock&) const;
+    inline double kcmr() const { return ecmr(0.); }
+    double partialWidth(const KinematicsBlock&) const;  ///< partial widths for all decays
+    double photonWidth(const KinematicsBlock&) const;   ///< virtual photon width
 
     /// Branching ratios container for resonance decay into single, double pion or eta states
     const struct BranchingRatios : SteeredObject<BranchingRatios> {
@@ -64,32 +57,21 @@ namespace cepgen {
       static ParametersDescription description();
 
       /// Sanity check to ensure only three decay channels are opened
-      bool valid() const { return singlepi + doublepi + eta == 1.; }
-      /// single pion branching ratio
-      double singlepi;
-      /// double pion branching ratio
-      double doublepi;
-      /// eta meson branching ratio
-      double eta;
+      inline bool valid() const { return singlepi + doublepi + eta == 1.; }
+
+      double singlepi;  ///< single pion branching ratio
+      double doublepi;  ///< double pion branching ratio
+      double eta;       ///< eta meson branching ratio
     } br_;
-    /// meson angular momentum
-    const int ang_mom_;
-    /// damping parameter
-    const double x0_;
-    /// mass, in GeV/c2
-    const double mass_;
-    /// full width, in GeV
-    const double width_;
-    /// proton mass, in GeV/c^2
-    const double mp_;
-    /// proton squared mass, in GeV^2/c^4
-    const double mp2_;
-    /// pion squared mass, in GeV^2/c^4
-    const double mpi2_;
-    /// eta meson squared mass, in GeV^2/c^4
-    const double meta2_;
-    /// squared damping parameter
-    const double x02_;
+    const int ang_mom_;   ///< meson angular momentum
+    const double x0_;     ///< damping parameter
+    const double mass_;   ///< mass, in GeV/c2
+    const double width_;  ///< full width, in GeV
+    const double mp_;     ///< proton mass, in GeV/c^2
+    const double mp2_;    ///< proton squared mass, in GeV^2/c^4
+    const double mpi2_;   ///< pion squared mass, in GeV^2/c^4
+    const double meta2_;  ///< eta meson squared mass, in GeV^2/c^4
+    const double x02_;    ///< squared damping parameter
   };
 }  // namespace cepgen
 

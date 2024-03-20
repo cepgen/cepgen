@@ -21,7 +21,6 @@
 
 #include <memory>
 
-#include "CepGen/Core/SteeredObject.h"
 #include "CepGen/FormFactors/FormFactors.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/PartonFlux.h"
@@ -34,11 +33,9 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    /// Human-readable description of a beam particle/system
-    friend std::ostream& operator<<(std::ostream&, const Beam&);
+    friend std::ostream& operator<<(std::ostream&, const Beam&);  ///< Human-readable description of beam system
 
-    /// Initialise the fluxes evaluator object
-    void initialise();
+    void initialise();  ///< Initialise the fluxes evaluator object
 
     inline bool elastic() const { return elastic_; }  ///< Does the beam remain on-shell after parton emission?
     /// Specify if the beam remains on-shell after parton emission
@@ -46,19 +43,22 @@ namespace cepgen {
       elastic_ = el;
       return *this;
     }
+
     inline spdgid_t integerPdgId() const { return pdg_id_; }  ///< Beam particle PDG id
     /// Set the beam particle PDG id
     inline Beam& setIntegerPdgId(spdgid_t pdg) {
       pdg_id_ = pdg;
       return *this;
     }
+
     inline const Momentum& momentum() const { return momentum_; }  ///< Beam particle 4-momentum
     /// Set the beam particle 4-momentum
     inline Beam& setMomentum(const Momentum& mom) {
       momentum_ = mom;
       return *this;
     }
-    inline const ParametersList& partonFluxParameters() const { return flux_info_; }
+
+    inline const ParametersList& partonFluxParameters() const { return flux_info_; }  ///< Parton flux modelling
 
   private:
     spdgid_t pdg_id_{0};        ///< PDG identifier for the beam

@@ -21,8 +21,6 @@
 
 #include <memory>
 #include <sstream>
-#include <unordered_map>
-#include <vector>
 
 #include "CepGen/Modules/NamedModule.h"
 

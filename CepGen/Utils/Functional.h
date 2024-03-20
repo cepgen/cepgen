@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2017-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,6 @@
 #define CepGen_Utils_Functional_h
 
 #include <array>
-#include <string>
-#include <vector>
 
 #include "CepGen/Modules/NamedModule.h"
 
@@ -33,8 +31,7 @@ namespace cepgen {
     /// \date 21 Aug 2017
     class Functional : public NamedModule<Functional, std::string> {
     public:
-      /// Default constructor
-      explicit Functional(const ParametersList&);
+      explicit Functional(const ParametersList&);  ///< Default constructor
 
       /// Build a collection of parameters to define a functional from its mathematical expression
       /// \param[in] expr Mathematical expression to evaluate
@@ -50,13 +47,12 @@ namespace cepgen {
       double operator()(const std::vector<double>& x) const;
 
       /// List of string variable names
-      const std::vector<std::string>& variables() const { return vars_orig_; }
+      inline const std::vector<std::string>& variables() const { return vars_orig_; }
       /// String expression held by this functional parser
-      const std::string& expression() const { return expression_orig_; }
+      inline const std::string& expression() const { return expression_orig_; }
 
     protected:
-      /// Compute the functional for a given value of the variables
-      virtual double eval() const = 0;
+      virtual double eval() const = 0;  ///< Compute the functional for a given value of the variables
 
     private:
       std::vector<std::string> vars_orig_;  ///< User-defined variables to be reached

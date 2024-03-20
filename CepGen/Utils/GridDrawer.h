@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 
 #include <memory>
 
-#include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Utils/Drawer.h"
 
 namespace cepgen {
@@ -29,6 +28,7 @@ namespace cepgen {
   class GridHandler;
 
   namespace utils {
+    /// Utility object to draw a grid values mapping
     class GridDrawer : public SteeredObject<GridDrawer> {
     public:
       static ParametersDescription description();

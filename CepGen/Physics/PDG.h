@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 #define CepGen_Physics_PDG_h
 
 #include <cstddef>  // size_t
-#include <unordered_map>
 
 #include "CepGen/Physics/ParticleProperties.h"
 
@@ -55,26 +54,20 @@ namespace cepgen {
     /// A class-in-the-middle PDG identifier for printout operations
     class Id {
     public:
-      /// Construct an object from a PDG identifier
-      Id(pdgid_t pdgid) : pdgid_(pdgid) {}
-      /// Recasting operator to get back the pdgid_t number
-      operator pdgid_t() const { return pdgid_; }
-      /// Human-readable PDG name
-      friend std::ostream& operator<<(std::ostream&, const Id&);
+      inline Id(pdgid_t pdgid) : pdgid_(pdgid) {}                 ///< Construct an object from a PDG identifier
+      inline operator pdgid_t() const { return pdgid_; }          ///< Recasting operator to get back the pdgid_t number
+      friend std::ostream& operator<<(std::ostream&, const Id&);  ///< Human-readable PDG name
 
     private:
       pdgid_t pdgid_;
     };
 
-    /// Retrieve a unique instance of this particles info collection
-    static PDG& get();
+    static PDG& get();  ///< Retrieve a unique instance of this particles info collection
     PDG(const PDG&) = delete;
     void operator=(const PDG&) = delete;
-    /// Default destructor
-    ~PDG() = default;
+    ~PDG() = default;  ///< Default destructor
 
-    /// Add a new particle definition to the library
-    void define(const ParticleProperties&);
+    void define(const ParticleProperties&);    ///< Add a new particle definition to the library
     pdgids_t particles() const;                ///< All particles ids in this library
     void dump(std::ostream* = nullptr) const;  ///< Dump all particles in this library
     size_t size() const;                       ///< Number of particles defined in this library
@@ -89,13 +82,11 @@ namespace cepgen {
     double mass(spdgid_t) const;                           ///< Particle mass (in GeV)
     double width(spdgid_t) const;                          ///< Resonance width (in GeV)
     double charge(spdgid_t) const;                         ///< Electric charge (in \f$e\f$) for this particle
-    /// Electric charges (in \f$e\f$) for this particle (and its potential anti-particles)
-    std::vector<double> charges(spdgid_t) const;
+    std::vector<double> charges(spdgid_t) const;  ///< Electric charges (in \f$e\f$) for this particle and anti-particles
 
   private:
     explicit PDG();
-    /** \note Indexing variable: PDG id of particle */
-    std::unordered_map<pdgid_t, ParticleProperties> particles_;
+    std::unordered_map<pdgid_t, ParticleProperties> particles_;  ///< Collection of properties, indexed by PDG id
   };
 }  // namespace cepgen
 

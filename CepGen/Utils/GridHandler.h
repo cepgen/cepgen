@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2018-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,6 @@
 #include <array>
 #include <map>
 #include <memory>
-#include <vector>
 
 #include "CepGen/Utils/Limits.h"
 
@@ -48,56 +47,41 @@ namespace cepgen {
     typedef std::array<double, N> values_t;  ///< Value(s) at a given coordinate
 
   public:
-    /// Build a grid interpolator from a grid type
-    explicit GridHandler(const GridType& grid_type);
-    ~GridHandler() {}
+    explicit GridHandler(const GridType& grid_type);  ///< Build a grid interpolator from a grid type
+    virtual ~GridHandler() = default;
 
-    /// Interpolate a point to a given coordinate
-    values_t eval(coord_t in_coords) const;
+    values_t eval(coord_t in_coords) const;  ///< Interpolate a point to a given coordinate
 
-    /// Insert a new value in the grid
-    void insert(coord_t coord, values_t value);
-    /// Return the list of values handled in the grid
-    inline std::map<coord_t, values_t> values() const { return values_raw_; }
+    void insert(coord_t coord, values_t value);                                ///< Insert a new value in the grid
+    inline std::map<coord_t, values_t> values() const { return values_raw_; }  ///< List of values in the grid
 
-    /// Initialise the grid and all useful interpolators/accelerators
-    void initialise();
-    /// Grid boundaries (collection of (min,max))
-    std::array<Limits, D> boundaries() const;
-    /// Lowest bound of the grid coordinates
-    std::array<double, D> min() const;
-    /// Highest bound of the grid coordinates
-    std::array<double, D> max() const;
+    void initialise();                         ///< Initialise the grid and all useful interpolators/accelerators
+    std::array<Limits, D> boundaries() const;  ///< Grid boundaries (collection of (min,max))
+    std::array<double, D> min() const;         ///< Lowest bound of the grid coordinates
+    std::array<double, D> max() const;         ///< Highest bound of the grid coordinates
 
   protected:
-    /// Type of interpolation for the grid members
-    GridType grid_type_;
-    /// List of coordinates and associated value(s) in the grid
-    std::map<coord_t, values_t> values_raw_;
-    /// GSL grid interpolation accelerator
+    const GridType grid_type_;                ///< Type of interpolation for the grid members
+    std::map<coord_t, values_t> values_raw_;  ///< List of coordinates and associated value(s) in the grid
+    /// Grid interpolation accelerator
     std::vector<std::unique_ptr<gsl_interp_accel, void (*)(gsl_interp_accel*)> > accel_;
-    /// Collection of splines for linear interpolations
-    std::vector<std::unique_ptr<gsl_spline, void (*)(gsl_spline*)> > splines_1d_;
+    std::vector<std::unique_ptr<gsl_spline, void (*)(gsl_spline*)> > splines_1d_;  ///< Splines for linear interpolations
 #ifdef GSL_VERSION_ABOVE_2_1
-    /// Collection of splines for bilinear interpolations
+    /// Splines for bilinear interpolations
     std::vector<std::unique_ptr<gsl_spline2d, void (*)(gsl_spline2d*)> > splines_2d_;
 #endif
-    /// Collection of coordinates building up the grid
-    std::array<coord_t, D> coords_;
-    /// Collection of values for all points in the grid
-    std::array<std::unique_ptr<double[]>, N> values_;
+    std::array<coord_t, D> coords_;                    ///< Coordinates building up the grid
+    std::array<std::unique_ptr<double[]>, N> values_;  ///< Values for all points in the grid
 
   private:
-    /// Retrieve lower and upper grid indices for a given coordinate
-    void findIndices(const coord_t& coord, coord_t& min, coord_t& max) const;
+    void findIndices(const coord_t& coord, coord_t& min, coord_t& max) const;  ///< Lower/upper indices for a coordinate
     /// A single value in grid coordinates
     struct gridpoint_t : values_t {
       gridpoint_t(const values_t& arr) : values_t(arr) {}
       gridpoint_t operator*(double c) const;
       gridpoint_t operator+(const gridpoint_t& rhs) const;
     };
-    /// Has the extrapolator been initialised?
-    bool init_{false};
+    bool init_{false};  ///< Has the extrapolator been initialised?
   };
 }  // namespace cepgen
 

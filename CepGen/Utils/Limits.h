@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2018-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,68 +27,51 @@ namespace cepgen {
   /// Validity interval for a variable
   class Limits : private std::pair<double, double> {
   public:
-    /// Define lower and upper limits on a quantity
-    Limits(double min = INVALID, double max = INVALID);
-    /// Copy constructor
-    Limits(const Limits&);
+    Limits(double min = INVALID, double max = INVALID);  ///< Define lower and upper limits on a quantity
+    Limits(const Limits&);                               ///< Copy constructor
 
-    /// Build dimension-0 limits (constant)
-    static Limits constant(double);
+    static Limits constant(double);  ///< Build dimension-0 limits (constant)
 
     bool operator<(const Limits&) const;         ///< Comparison operator
     Limits operator-() const;                    ///< Invert this limit
     Limits& operator=(const Limits&) = default;  ///< Assignment operator
     /// Equality operator
-    bool operator==(const Limits& oth) const { return *this == (std::pair<double, double>)oth; }
-    /// Inequality operator
-    bool operator!=(const Limits& oth) const { return !operator==(oth); }
-    Limits& operator+=(double c);                   ///< Add a constant to this limit
-    Limits& operator-=(double c);                   ///< Subtract a constant to this limit
-    Limits& operator*=(double c);                   ///< Multiply this limit by a constant
-    friend Limits operator+(Limits lim, double c);  ///< Add a constant to a limit
-    friend Limits operator-(Limits lim, double c);  ///< Subtract a constant to a limit
-    friend Limits operator*(Limits lim, double c);  ///< Multiply a limit by a constant
+    inline bool operator==(const Limits& oth) const { return *this == (std::pair<double, double>)oth; }
+    inline bool operator!=(const Limits& oth) const { return !operator==(oth); }  ///< Inequality operator
+    Limits& operator+=(double);                                                   ///< Add a constant to this limit
+    Limits& operator-=(double);                                                   ///< Subtract a constant to this limit
+    Limits& operator*=(double);                                                   ///< Multiply this limit by a constant
+    friend Limits operator+(Limits, double);                                      ///< Add a constant to a limit
+    friend Limits operator-(Limits, double);                                      ///< Subtract a constant to a limit
+    friend Limits operator*(Limits, double);                                      ///< Multiply a limit by a constant
 
-    /// Ensure the limit object is valid by correcting it if necessary
-    Limits& validate();
+    Limits& validate();  ///< Ensure the limit object is valid by correcting it if necessary
 
-    /// Lower limit to apply on the variable
-    double min() const { return first; }
-    /// Lower limit to apply on the variable
-    double& min() { return first; }
-    /// Upper limit to apply on the variable
-    double max() const { return second; }
-    /// Upper limit to apply on the variable
-    double& max() { return second; }
-    /// Find the [0,1] value scaled between minimum and maximum
-    double x(double v) const;
-    /// Specify the lower and upper limits on the variable
-    void in(double low, double up);
-    /// Full variable range allowed
-    double range() const;
-    /// Have a lower limit?
-    bool hasMin() const;
-    /// Have an upper limit?
-    bool hasMax() const;
-    /// Truncate limits to minimal/maximal values
-    Limits truncate(const Limits&) const;
-    /// Limit a value to boundaries
-    double trim(double) const;
-    /// Check if the value is inside limits' boundaries
-    bool contains(double val, bool exclude_boundaries = false) const;
-    /// Apply an operator on limits boundaries
-    Limits& apply(double (*)(double));
-    /// Compute a copy of limits with an operator applied on boundaries
-    Limits compute(double (*)(double)) const;
+    bool hasMin() const;                          ///< Have a lower limit?
+    bool hasMax() const;                          ///< Have an upper limit?
+    inline double min() const { return first; }   ///< Lower limit to apply on the variable
+    inline double& min() { return first; }        ///< Lower limit to apply on the variable
+    inline double max() const { return second; }  ///< Upper limit to apply on the variable
+    inline double& max() { return second; }       ///< Upper limit to apply on the variable
+
+    double x(double v) const;        ///< Find the [0,1] value scaled between minimum and maximum
+    void in(double low, double up);  ///< Specify the lower and upper limits on the variable
+    double range() const;            ///< Full variable range allowed
+
+    Limits truncate(const Limits&) const;                              ///< Truncate limits to minimal/maximal values
+    double trim(double) const;                                         ///< Limit a value to boundaries
+    bool contains(double val, bool exclude_boundaries = false) const;  ///< Check if value is inside limits' boundaries
+    Limits& apply(double (*)(double));                                 ///< Apply an operator on limits boundaries
+
+    Limits compute(double (*)(double)) const;  ///< Compute a copy of limits with an operator applied on boundaries
     /// Compute a copy of limits with an operator applied on boundaries
     template <typename F>
     inline Limits compute(const F& op) const {
       return Limits{hasMin() ? op(min()) : INVALID, hasMax() ? op(max()) : INVALID};
     }
-    /// Is there a lower and upper limit?
-    bool valid() const;
-    /// Raw value of the limits
-    const std::pair<double, double>& raw() const { return *this; }
+    bool valid() const;                                                    ///< Is there a lower and upper limit?
+    inline const std::pair<double, double>& raw() const { return *this; }  ///< Raw value of limits
+
     /// Generate a collection of values from a number of bins
     /// \param[in] num_bins number of values to generate
     /// \param[in] log_scale generate according to a log10 scale?
@@ -98,11 +81,9 @@ namespace cepgen {
     /// \param[in] log_scale generate according to a log10 scale?
     std::vector<Limits> split(size_t num_bins, bool log_scale = false) const;
 
-    /// Human-readable expression of the limits
-    friend std::ostream& operator<<(std::ostream&, const Limits&);
+    friend std::ostream& operator<<(std::ostream&, const Limits&);  ///< Human-readable expression of the limits
 
-    /// Placeholder for an invalid value in a limit (for single-edged or invalid limits)
-    static constexpr double INVALID = -999.999;
+    static constexpr double INVALID = -999.999;  ///< Invalid value placeholder (single-edged or invalid limits)
   };
 }  // namespace cepgen
 

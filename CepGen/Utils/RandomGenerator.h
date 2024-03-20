@@ -20,7 +20,6 @@
 #define CepGen_Utils_RandomGenerator_h
 
 #include <array>
-#include <vector>
 
 #include "CepGen/Modules/NamedModule.h"
 

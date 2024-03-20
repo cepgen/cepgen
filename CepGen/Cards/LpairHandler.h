@@ -20,7 +20,6 @@
 #define CepGen_Cards_LpairReader_h
 
 #include <memory>
-#include <unordered_map>
 
 #include "CepGen/Cards/Handler.h"
 

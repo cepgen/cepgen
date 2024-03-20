@@ -4,7 +4,6 @@
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {

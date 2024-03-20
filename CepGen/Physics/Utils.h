@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2020-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,14 +21,10 @@
 
 namespace cepgen {
   namespace utils {
-    /// Compute the diffractive mass from virtuality/Bjorken x
-    double mX2(double xbj, double q2, double mp2);
-    /// Compute Bjorken x from virtuality/diffractive mass
-    double xBj(double q2, double mp2, double mx2);
-    /// Compute the virtuality from Bjorken x/diffractive mass
-    double q2(double xbj, double mp2, double mx2);
-    /// Compute energy from mass and emitted mass
-    double energyFromW(double w, double mp2, double m2);
+    double mX2(double xbj, double q2, double mp2);        ///< Compute the diffractive mass from virtuality/Bjorken x
+    double xBj(double q2, double mp2, double mx2);        ///< Compute Bjorken x from virtuality/diffractive mass
+    double q2(double xbj, double mp2, double mx2);        ///< Compute the virtuality from Bjorken x/diffractive mass
+    double energyFromW(double w, double mp2, double m2);  ///< Compute energy from mass and emitted mass
     namespace kt {
       /// Compute the diffractive mass from longitudinal loss/transverse virtuality/virtuality
       double mX2(double x, double kt2, double q2, double mi2);

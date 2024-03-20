@@ -20,7 +20,6 @@
 
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Utils/Histogram.h"
-#include "CepGen/Utils/Value.h"
 
 namespace cepgen {
   class Event;
@@ -38,7 +37,7 @@ namespace cepgen {
 
     static ParametersDescription description();
 
-    void setCrossSection(const Value& cross_section) override { cross_section_ = cross_section; }
+    inline void setCrossSection(const Value& cross_section) override { cross_section_ = cross_section; }
     bool operator<<(const Event&) override;
 
   private:
@@ -51,11 +50,9 @@ namespace cepgen {
     std::ofstream file_;
     std::unique_ptr<utils::Drawer> drawer_;
 
-    Value cross_section_{1., 0.};
-    unsigned long num_evts_{0ul};
-
-    /// Name of the physics process
-    std::string proc_name_;
+    Value cross_section_{1., 0.};  ///< Cross section value, in pb
+    unsigned long num_evts_{0ul};  ///< Number of events processed
+    std::string proc_name_;        ///< Name of the physics process
 
     /// 1D histogram definition
     struct Hist1DInfo {
@@ -63,15 +60,13 @@ namespace cepgen {
       utils::Hist1D hist;
       bool log;
     };
-    /// List of 1D histograms
-    std::vector<Hist1DInfo> hists_;
+    std::vector<Hist1DInfo> hists_;  ///< List of 1D histograms
     /// 2D histogram definition
     struct Hist2DInfo {
       std::string var1, var2;
       utils::Hist2D hist;
       bool log;
     };
-    /// List of 2D histograms
-    std::vector<Hist2DInfo> hists2d_;
+    std::vector<Hist2DInfo> hists2d_;  ///< List of 2D histograms
   };
 }  // namespace cepgen

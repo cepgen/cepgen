@@ -21,7 +21,6 @@
 
 #include <memory>
 
-#include "CepGen/Modules/NamedModule.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 
 namespace cepgen {

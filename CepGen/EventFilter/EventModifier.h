@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2023  Laurent Forthomme
+ *  Copyright (C) 2019-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,9 +19,6 @@
 #ifndef CepGen_EventFilter_EventModifier_h
 #define CepGen_EventFilter_EventModifier_h
 
-#include <string>
-#include <vector>
-
 #include "CepGen/EventFilter/EventHandler.h"
 
 namespace cepgen {
@@ -31,9 +28,7 @@ namespace cepgen {
   /// \date July 2019
   class EventModifier : public EventHandler {
   public:
-    /// Default constructor for an undefined modifier
-    /// \param[in] params User-controlled steering parameters for this module
-    explicit EventModifier(const ParametersList&);
+    explicit EventModifier(const ParametersList&);  ///< Default constructor for an undefined modifier
 
     static ParametersDescription description();
 
@@ -41,26 +36,20 @@ namespace cepgen {
     /// \param[in] seed A RNG seed
     void setSeed(long long seed) { seed_ = seed; }
 
-    /// Parse a configuration string
-    virtual void readString(const std::string&) {}
-    /// Parse a list of configuration strings
-    virtual void readStrings(const std::vector<std::string>& params);
+    inline virtual void readString(const std::string&) {}       ///< Parse a configuration string
+    virtual void readStrings(const std::vector<std::string>&);  ///< Parse a list of configuration strings
 
-    /** \brief Modify a full event
-       * \param[inout] ev Input/output event
-       * \param[inout] weight Event weight after modification
-       * \param[in] fast run a faster version of the algorithm (whenever available)
-       * \return Boolean stating whether or not the modification occurred successfully
-       */
+    /// Modify an event
+    /// \param[inout] ev Input/output event
+    /// \param[inout] weight Event weight after modification
+    /// \param[in] fast run a faster version of the algorithm (whenever available)
+    /// \return Boolean stating whether or not the modification occurred successfully
     virtual bool run(Event& ev, double& weight, bool fast = false) = 0;
-    /// Specify the process cross section and uncertainty, in pb
-    virtual void setCrossSection(const Value&) {}
+    inline virtual void setCrossSection(const Value&) {}  ///< Specify the cross section value, in pb
 
   protected:
-    /// Random numbers generator seed fed to the algorithm
-    long long seed_{0ll};
-    /// Maximal number of trials for the algorithm
-    unsigned short max_trials_{1};
+    long long seed_{0ll};           ///< Random numbers generator seed fed to the algorithm
+    unsigned short max_trials_{1};  ///< Maximal number of trials for the algorithm
   };
 }  // namespace cepgen
 

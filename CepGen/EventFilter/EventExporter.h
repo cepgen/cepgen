@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2016-2023  Laurent Forthomme
+ *  Copyright (C) 2016-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,35 +19,26 @@
 #ifndef CepGen_EventFilter_EventExporter_h
 #define CepGen_EventFilter_EventExporter_h
 
-#include <string>
-
 #include "CepGen/EventFilter/EventHandler.h"
 
 namespace cepgen {
   class Event;
   class Value;
-  /**
-   * \brief Output format handler for events export
-   * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-   * \date Sep 2016
-   */
+  /// Output format handler for events export
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date Sep 2016
   class EventExporter : public EventHandler {
   public:
     explicit EventExporter(const ParametersList&);
 
-    /// Specify the process cross section and uncertainty, in pb
-    virtual void setCrossSection(const Value&) {}
-    /// Set the event number
-    void setEventNumber(unsigned long long ev_id) { event_num_ = ev_id; }
+    virtual void setCrossSection(const Value&) {}  ///< Specify the cross section value, in pb
+    inline void setEventNumber(unsigned long long ev_id) { event_num_ = ev_id; }  ///< Set event number
 
-    /// Writer operator
-    virtual bool operator<<(const Event&) = 0;
+    virtual bool operator<<(const Event&) = 0;  ///< Writer operator
 
   protected:
-    /// Print a banner containing all runtime parameters information
-    std::string banner(const std::string& prep = "") const;
-    /// Event index
-    unsigned long long event_num_{0ull};
+    std::string banner(const std::string& prep = "") const;  ///< Print a banner containing runtime parameters
+    unsigned long long event_num_{0ull};                     ///< Event index
   };
 }  // namespace cepgen
 

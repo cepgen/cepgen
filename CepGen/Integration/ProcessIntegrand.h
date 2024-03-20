@@ -20,7 +20,6 @@
 #define CepGen_Integration_ProcessIntegrand_h
 
 #include <memory>
-#include <vector>
 
 #include "CepGen/EventFilter/EventBrowser.h"
 #include "CepGen/Integration/Integrand.h"

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,8 +19,6 @@
 #ifndef CepGen_Integration_AnalyticIntegrator_h
 #define CepGen_Integration_AnalyticIntegrator_h
 
-#include <functional>
-
 #include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Utils/Limits.h"
 
@@ -31,8 +29,7 @@ namespace cepgen {
   /// Analytic (functional) integration algorithm
   class AnalyticIntegrator : public NamedModule<AnalyticIntegrator, std::string> {
   public:
-    /// Integrator algorithm constructor
-    explicit AnalyticIntegrator(const ParametersList& params);
+    explicit AnalyticIntegrator(const ParametersList& params);  ///< Integrator algorithm constructor
 
     static ParametersDescription description();
 

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2023  Laurent Forthomme
+ *  Copyright (C) 2019-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 
 #include <map>
 #include <string>
-#include <vector>
 
 #include "CepGen/Utils/Limits.h"
 
@@ -37,64 +36,54 @@ namespace cepgen {
     ArgumentsParser(int argc, char* argv[]);
     /// Add a parameter required for the parser
     template <typename... Args>
-    ArgumentsParser& addArgument(Args&&... args) {
+    inline ArgumentsParser& addArgument(Args&&... args) {
       params_.emplace_back(std::forward<Args>(args)...);
       params_.rbegin()->optional = false;
       return *this;
     }
     /// Add a non-mandatory parameters that can be parsed
     template <typename... Args>
-    ArgumentsParser& addOptionalArgument(Args&&... args) {
+    inline ArgumentsParser& addOptionalArgument(Args&&... args) {
       params_.emplace_back(std::forward<Args>(args)...);
       params_.rbegin()->optional = true;
       return *this;
     }
-    /// Associate the command-line arguments to parameters
-    ArgumentsParser& parse();
-    /// Read required and optional parameters
-    std::string operator[](std::string name) const;
-    /// Dump the list of arguments into the terminal
-    void dump() const;
-    /// Show usage
-    void print_help() const;
-    /// Show version
-    void print_version() const;
-    /// Return usage message
-    std::string help_message() const;
-    /// Is the debugging flag set?
-    bool debugging() const { return debug_req_; }
-    /// Are extra configuration flags found in arguments list?
-    const std::vector<std::string>& extra_config() const { return extra_config_; }
+    ArgumentsParser& parse();                             ///< Associate command-line arguments to parameters
+    std::string operator[](std::string name) const;       ///< Read required and optional parameters
+    void dump() const;                                    ///< Dump the list of arguments into the terminal
+    void print_help() const;                              ///< Show usage
+    void print_version() const;                           ///< Show version
+    std::string help_message() const;                     ///< Usage message
+    inline bool debugging() const { return debug_req_; }  ///< Is the debugging flag set?
+    /// Extra configuration flags in arguments?
+    inline const std::vector<std::string>& extra_config() const { return extra_config_; }
 
   private:
     /// A parameter parsed from user's input
     class Parameter {
     public:
-      /// A string parameter constructor
+      /// String parameter constructor
       Parameter(std::string, std::string = "", std::string* = nullptr, std::string = "");
-      /// An unsigned integer parameter constructor
+      /// Unsigned integer parameter constructor
       Parameter(std::string name, std::string, unsigned int* = nullptr, unsigned int = 0);
-      /// An integer parameter constructor
+      /// Integer parameter constructor
       Parameter(std::string, std::string, int* = nullptr, int = 0);
-      /// A boolean parameter constructor
+      /// Boolean parameter constructor
       Parameter(std::string, std::string, bool* = nullptr, bool = false);
-      /// A double-precision floating point parameter constructor
+      /// Double-precision floating point parameter constructor
       Parameter(std::string, std::string, double* = nullptr, double = -999.999);
-      /// A vector of strings parameter constructor
+      /// Vector of strings parameter constructor
       Parameter(std::string, std::string, std::vector<std::string>* = nullptr, std::vector<std::string> = {});
-      /// A vector of integer parameter constructor
+      /// Vector of integer parameter constructor
       Parameter(std::string, std::string, std::vector<int>* = nullptr, std::vector<int> = {});
-      /// A vector of floating point parameter constructor
+      /// Vector of floating point parameter constructor
       Parameter(std::string, std::string, std::vector<double>* = nullptr, std::vector<double> = {});
-      /// A vector of floating point parameter constructor
+      /// Vector of floating point parameter constructor
       Parameter(std::string, std::string, Limits* = nullptr, Limits = Limits{});
 
-      /// Cast the user input into a proper container value
-      Parameter& parse();
-      /// Is the parameter a simple boolean?
-      inline bool boolean() const { return bool_variable_ != nullptr; }
-      /// Does the parameter name matches a user-given argument?
-      bool matches(const std::string&) const;
+      Parameter& parse();  ///< Cast the user input into a proper container value
+      inline bool boolean() const { return bool_variable_ != nullptr; }  ///< Is the parameter a simple boolean?
+      bool matches(const std::string&) const;  ///< Does the parameter name match a user-given argument?
 
       //----- parameters attributes
 
@@ -106,27 +95,17 @@ namespace cepgen {
     private:
       //----- parameters containers
 
-      /// Pointer to a string variable possibly handled by this parameter
-      std::string* str_variable_{nullptr};
-      /// Pointer to a double-precision floating point variable possibly handled by this parameter
-      double* float_variable_{nullptr};
-      /// Pointer to an integer variable possibly handled by this parameter
-      int* int_variable_{nullptr};
-      /// Pointer to an unsigned integer variable possibly handled by this parameter
-      unsigned int* uint_variable_{nullptr};
-      /// Pointer to a boolean variable possibly handled by this parameter
-      bool* bool_variable_{nullptr};
-      /// Pointer to a limits object possibly handled by this parameter
-      Limits* lim_variable_{nullptr};
-      /// Pointer to a vector of string variables possibly handled by this parameter
-      std::vector<std::string>* vec_str_variable_{nullptr};
-      /// Pointer to a vector of integer variables possibly handled by this parameter
-      std::vector<int>* vec_int_variable_{nullptr};
-      /// Pointer to a vector of floating point variables possibly handled by this parameter
-      std::vector<double>* vec_float_variable_{nullptr};
+      std::string* str_variable_{nullptr};                   ///< Pointer to a string variable
+      double* float_variable_{nullptr};                      ///< Pointer to a double-precision floating point variable
+      int* int_variable_{nullptr};                           ///< Pointer to an integer variable
+      unsigned int* uint_variable_{nullptr};                 ///< Pointer to an unsigned integer variable
+      bool* bool_variable_{nullptr};                         ///< Pointer to a boolean variable
+      Limits* lim_variable_{nullptr};                        ///< Pointer to a limits object
+      std::vector<std::string>* vec_str_variable_{nullptr};  ///< Pointer to a vector of string variables
+      std::vector<int>* vec_int_variable_{nullptr};          ///< Pointer to a vector of integer variables
+      std::vector<double>* vec_float_variable_{nullptr};     ///< Pointer to a vector of floating point variables
     };
-    /// A collection of parameters
-    typedef std::vector<Parameter> ParametersCollection;
+    typedef std::vector<Parameter> ParametersCollection;  ///< A collection of parameters
 
     std::string command_name_;
     const ParametersCollection help_str_;
@@ -141,4 +120,3 @@ namespace cepgen {
 }  // namespace cepgen
 
 #endif
-

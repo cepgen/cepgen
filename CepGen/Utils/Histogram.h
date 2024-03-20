@@ -26,7 +26,6 @@
 #include <functional>
 #include <memory>
 #include <set>
-#include <vector>
 
 #include "CepGen/Utils/Drawable.h"
 
