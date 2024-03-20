@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2019-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,10 +22,6 @@
 #include <TFile.h>
 #include <TTree.h>
 
-#include <exception>
-#include <iostream>
-#include <string>
-
 #include "CepGen/Event/Event.h"
 
 namespace ROOT {
@@ -46,29 +42,26 @@ namespace ROOT {
     std::string process_parameters;    ///< Serialised process parameters
 
     explicit CepGenRun();
-    /// Reinitialise the run tree
-    void clear();
-    /// Populate the run tree
-    void create();
-    /// Retrieve the ROOT tree
-    TTree* tree() { return tree_.get(); }
-    /// Fill the run tree
-    void fill();
+    void clear();                                                       ///< Reinitialise the run tree
+    void create();                                                      ///< Populate the run tree
+    inline TTree* tree() { return tree_.get(); }                        ///< Retrieve the ROOT tree
+    void fill();                                                        ///< Fill the run tree
+    void attach(TFile* file, const std::string& run_tree = TREE_NAME);  ///< Attach the run tree reader to a given tree
     /// Attach the run tree reader to a given file
-    void attach(const char* filename, const char* run_tree = TREE_NAME) { attach(TFile::Open(filename), run_tree); }
-    /// Attach the run tree reader to a given tree
-    void attach(TFile* file, const char* run_tree = TREE_NAME);
+    void attach(const std::string& filename, const std::string& run_tree = TREE_NAME) {
+      attach(TFile::Open(filename.data()), run_tree);
+    }
 
   private:
-    /// ROOT tree used for storage/retrieval of this run information
-    std::shared_ptr<TTree> tree_;
+    std::shared_ptr<TTree> tree_;  ///< ROOT tree used for storage/retrieval of this run information
   };
 
   /// All useful information about a generated event
   class CepGenEvent {
   public:
-    // book a sufficiently large number to allow the large multiplicity
-    // of excited proton fragmentation products
+    inline CepGenEvent() { clear(); }
+
+    // book a sufficiently large number to allow the large multiplicity of excited proton fragmentation products
     static constexpr size_t MAX_PART = 5000;            ///< Maximal number of particles in event
     static constexpr const char* TREE_NAME = "events";  ///< Output tree name
 
@@ -94,59 +87,22 @@ namespace ROOT {
     int role[MAX_PART];         ///< Particles role in the event
     int status[MAX_PART];       ///< Integer status code
 
-    CepGenEvent() { clear(); }
-    /// Reinitialise the event content
-    void clear();
-    /// Retrieve the ROOT tree
-    TTree* tree() { return tree_.get(); }
-    /// Populate the tree and all associated branches
-    void create();
-    /// Attach the event tree reader to a given file
-    void attach(const char* filename, const char* events_tree = TREE_NAME) {
-      file_.reset(TFile::Open(filename));
-      attach(file_.get(), events_tree);
-    }
-    /// Attach the event tree reader to a given ROOT file
-    void attach(TFile* f, const char* events_tree = TREE_NAME) {
-      //--- special constructor to avoid the memory to be cleared at destruction time
-      tree_ = std::shared_ptr<TTree>(dynamic_cast<TTree*>(f->Get(events_tree)), [=](TTree*) {});
-      attach();
-    }
-    /// Attach the event tree reader to a given tree
-    void attach() {
-      if (!tree_)
-        throw std::runtime_error("Failed to attach to the events TTree!");
-      tree_->SetBranchAddress("npart", &np);
-      tree_->SetBranchAddress("role", role);
-      tree_->SetBranchAddress("pt", pt);
-      tree_->SetBranchAddress("eta", eta);
-      tree_->SetBranchAddress("phi", phi);
-      tree_->SetBranchAddress("rapidity", rapidity);
-      tree_->SetBranchAddress("E", E);
-      tree_->SetBranchAddress("m", m);
-      tree_->SetBranchAddress("charge", charge);
-      tree_->SetBranchAddress("pdg_id", pdg_id);
-      tree_->SetBranchAddress("parent1", parent1);
-      tree_->SetBranchAddress("parent2", parent2);
-      tree_->SetBranchAddress("stable", stable);
-      tree_->SetBranchAddress("status", status);
-      tree_->SetBranchAddress("weight", &weight);
-      tree_->SetBranchAddress("generation_time", &gen_time);
-      tree_->SetBranchAddress("total_time", &tot_time);
-      tree_->SetBranchAddress("metadata", &metadata);
-      tree_attached_ = true;
-    }
+    void clear();                                 ///< Reinitialise the event content
+    inline TTree* tree() { return tree_.get(); }  ///< Retrieve the ROOT tree
+    void create();                                ///< Populate the tree and all associated branches
+
+    void attach();                                                      ///< Attach the event tree reader to a tree
+    void attach(TFile* f, const std::string& events_tree = TREE_NAME);  ///< Attach the event tree reader to a file
+    /// Attach the event tree reader to a file
+    void attach(const std::string& filename, const std::string& events_tree = TREE_NAME);
 
     //--- direct cepgen::Event I/O helpers
 
-    /// Fill the tree with a new event
-    void fill(const cepgen::Event&, bool compress = false);
-    /// Read the next event in the file
-    bool next(cepgen::Event&);
+    void fill(const cepgen::Event&, bool compress = false);  ///< Fill the tree with a new event
+    bool next(cepgen::Event&);                               ///< Read the next event in the file
 
   private:
-    /// Tree for which the event is booked
-    std::shared_ptr<TTree> tree_;
+    std::shared_ptr<TTree> tree_;  ///< Tree for which the event is booked
     std::unique_ptr<TFile> file_;
     bool tree_attached_{false};
     unsigned long long num_read_events_{0ull};

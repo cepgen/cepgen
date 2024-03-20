@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2019-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ namespace ROOT {
   void CepGenRun::create() {
     tree_ = std::make_shared<TTree>(TREE_NAME, "a tree containing information on the previous run");
     if (!tree_)
-      throw std::runtime_error("Failed to create the run TTree!");
+      throw CG_FATAL("CepGenRun:create") << "Failed to create the run TTree!";
     tree_->Branch("xsect", &xsect, "xsect/D");
     tree_->Branch("errxsect", &errxsect, "errxsect/D");
     tree_->Branch("num_events", &num_events, "num_events/i");
@@ -61,11 +61,11 @@ namespace ROOT {
     tree_->Fill();
   }
 
-  void CepGenRun::attach(TFile* file, const char* run_tree) {
+  void CepGenRun::attach(TFile* file, const std::string& run_tree) {
     //--- special constructor to avoid the memory to be cleared at destruction time
-    tree_ = std::shared_ptr<TTree>(dynamic_cast<TTree*>(file->Get(run_tree)), [=](TTree*) {});
+    tree_ = std::shared_ptr<TTree>(dynamic_cast<TTree*>(file->Get(run_tree.data())), [=](TTree*) {});
     if (!tree_)
-      throw std::runtime_error("Failed to attach to the run TTree!");
+      throw CG_FATAL("CepGenRun:attach") << "Failed to attach to the run TTree!";
     tree_->SetBranchAddress("xsect", &xsect);
     tree_->SetBranchAddress("errxsect", &errxsect);
     tree_->SetBranchAddress("num_events", &num_events);
@@ -74,8 +74,14 @@ namespace ROOT {
     auto *process_name_view = new std::string(), *process_params_view = new std::string();
     tree_->SetBranchAddress("process_name", &process_name_view);
     tree_->SetBranchAddress("process_parameters", &process_params_view);
-    if (tree_->GetEntriesFast() > 1)
-      std::cerr << "The run tree has more than one entry." << std::endl;
+    if (const auto num_entries = tree_->GetEntriesFast(); num_entries != 1) {
+      if (num_entries <= 0) {
+        CG_ERROR("CepGenRun:attach") << "No entries retrieved from the run tree. Aborting the 'attach' method.";
+        return;
+      }
+      CG_WARNING("CepGenRun:attach") << "The run tree has more than one entry. Number of entries retrieved: "
+                                     << num_entries << ".";
+    }
     tree_->GetEntry(0);
     process_name = *process_name_view;
     process_parameters = *process_params_view;
@@ -126,6 +132,30 @@ namespace ROOT {
     tree_->Branch("metadata", &metadata);
   }
 
+  void CepGenEvent::attach() {
+    if (!tree_)
+      throw CG_FATAL("CepGenEvent:attach") << "Failed to attach to the events TTree!";
+    tree_->SetBranchAddress("npart", &np);
+    tree_->SetBranchAddress("role", role);
+    tree_->SetBranchAddress("pt", pt);
+    tree_->SetBranchAddress("eta", eta);
+    tree_->SetBranchAddress("phi", phi);
+    tree_->SetBranchAddress("rapidity", rapidity);
+    tree_->SetBranchAddress("E", E);
+    tree_->SetBranchAddress("m", m);
+    tree_->SetBranchAddress("charge", charge);
+    tree_->SetBranchAddress("pdg_id", pdg_id);
+    tree_->SetBranchAddress("parent1", parent1);
+    tree_->SetBranchAddress("parent2", parent2);
+    tree_->SetBranchAddress("stable", stable);
+    tree_->SetBranchAddress("status", status);
+    tree_->SetBranchAddress("weight", &weight);
+    tree_->SetBranchAddress("generation_time", &gen_time);
+    tree_->SetBranchAddress("total_time", &tot_time);
+    tree_->SetBranchAddress("metadata", &metadata);
+    tree_attached_ = true;
+  }
+
   void CepGenEvent::fill(const cepgen::Event& ev, bool compress) {
     if (!tree_)
       throw CG_FATAL("CepGenEvent:fill") << "Trying to fill a non-existent tree!";
@@ -159,17 +189,22 @@ namespace ROOT {
     clear();
   }
 
+  void CepGenEvent::attach(TFile* f, const std::string& events_tree) {
+    //--- special constructor to avoid the memory to be cleared at destruction time
+    tree_ = std::shared_ptr<TTree>(dynamic_cast<TTree*>(f->Get(events_tree.data())), [=](TTree*) {});
+    attach();
+  }
+
+  void CepGenEvent::attach(const std::string& filename, const std::string& events_tree) {
+    file_.reset(TFile::Open(filename.data()));
+    attach(file_.get(), events_tree);
+  }
+
   bool CepGenEvent::next(cepgen::Event& ev) {
     if (!tree_attached_)
-      try {
-        attach();
-      } catch (const std::runtime_error& err) {
-        throw CG_FATAL("CepGenEvent:next") << "Failed to attach to the events TTree!\n" << err.what();
-      }
-
+      attach();
     if (tree_->GetEntry(num_read_events_++) <= 0)
       return false;
-
     ev.clear();
     ev.metadata["time:generation"] = gen_time;
     ev.metadata["time:total"] = tot_time;
