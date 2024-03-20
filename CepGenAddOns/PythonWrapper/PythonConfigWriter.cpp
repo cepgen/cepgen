@@ -34,6 +34,8 @@ namespace cepgen {
     static std::string repr(const ParametersList& params, const std::string& key) {
       if (params.has<bool>(key))
         return params.get<bool>(key) ? "True" : "False";
+      else if (params.has<std::string>(key))
+        return "'" + utils::replaceAll(params.get<std::string>(key), "'", "\\'") + "'";
       else if (params.has<Limits>(key)) {
         const auto lim = params.get<Limits>(key);
         return "("s + std::to_string(lim.min()) + "," + (lim.hasMax() ? std::to_string(lim.max()) : "") + ")";
@@ -41,6 +43,17 @@ namespace cepgen {
         return "["s + utils::repr(params.get<std::vector<int> >(key)) + "]";
       else if (params.has<std::vector<double> >(key))
         return "["s + utils::repr(params.get<std::vector<double> >(key)) + "]";
+      else if (params.has<std::vector<ParametersList> >(key)) {
+        std::string out{"["}, sep;
+        for (const auto& param : params.get<std::vector<ParametersList> >(key)) {
+          out += sep + "cepgen.Parameters(";
+          for (const auto& key : param.keys())
+            out += key + " = " + repr(param, key);
+          out += ")";
+          sep = ", ";
+        }
+        return out + "]";
+      }
       return params.getString(key, true);
     }
 
@@ -58,9 +71,9 @@ namespace cepgen {
       if (params.hasProcess())
         (*this) << ParametersDescription(params.process().parameters()).setKey<std::string>("process");
       for (const auto& mod : params.eventModifiersSequence())
-        (*this) << ParametersDescription(mod->parameters());
+        (*this) << ParametersDescription(mod->parameters()).setKey<std::string>("eventSequence");
       for (const auto& mod : params.eventExportersSequence())
-        (*this) << ParametersDescription(mod->parameters());
+        (*this) << ParametersDescription(mod->parameters()).setKey<std::string>("output");
       return *this;
     }
 
@@ -79,7 +92,9 @@ namespace cepgen {
         const auto& params = pdesc.parameters();
         switch (pdesc.type()) {
           case ParametersDescription::Type::Module:
-            os << "cepgen.Module(\"" << params.getNameString() << "\"";
+            os << "cepgen.Module("
+               << (params.hasName<std::string>() ? "'" + params.getNameString() + "'"
+                                                 : utils::toString(params.name<int>()));
             sep = ",";
             break;
           case ParametersDescription::Type::Parameters:

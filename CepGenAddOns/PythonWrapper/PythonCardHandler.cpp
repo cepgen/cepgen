@@ -42,6 +42,7 @@
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/TimeKeeper.h"
+#include "CepGenAddOns/PythonWrapper/PythonConfigWriter.h"
 
 #define Py_DEBUG
 
@@ -194,6 +195,10 @@ namespace cepgen {
         rt_params_->addEventExporter(EventExporterFactory::get().build(mod));
 
       return rt_params_;
+    }
+    void write(const std::string& filename) const override {
+      python::PythonConfigWriter writer(filename);
+      writer << *rt_params_;
     }
     std::unique_ptr<python::Environment> env_;
     ParametersList plist_;
