@@ -387,14 +387,8 @@ namespace cepgen {
         for (size_t i = 0; i < evt_parts.size(); ++i) {
           auto& evt_part = evt_parts.at(i).get();
           const auto user_evt_part_pdgid = role_vs_parts.second.at(i);
-          if (HeavyIon::isHI(user_evt_part_pdgid)) {
-            evt_part.setPdgId(user_evt_part_pdgid);
-            evt_part.momentum().setMass(HeavyIon::fromPdgId(user_evt_part_pdgid).mass());
-          } else {
-            const auto& part_info = PDG::get()(user_evt_part_pdgid);
-            evt_part.setIntegerPdgId(user_evt_part_pdgid);
-            evt_part.momentum().setMass(part_info.mass);
-          }
+          evt_part.setIntegerPdgId(user_evt_part_pdgid);
+          evt_part.momentum().setMass(PDG::get().mass(user_evt_part_pdgid));
         }
       }
       event_->freeze();  // freeze the event as it is

@@ -76,6 +76,8 @@ public:
     ml2_ = pair_.mass * pair_.mass;
     charge_factor_ = std::pow(pair_.integerCharge() / 3., 2);
     beams_mode_ = kinematics().incomingBeams().mode();
+    pA() = kinematics().incomingBeams().positive().momentum();
+    pB() = kinematics().incomingBeams().negative().momentum();
     ep1_ = pA().energy();
     ep2_ = pB().energy();
     w12_ = mA2() - mB2();  // mass difference between the two incoming particles

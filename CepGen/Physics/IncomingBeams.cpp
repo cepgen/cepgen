@@ -221,20 +221,18 @@ namespace cepgen {
   }
 
   const ParametersList& IncomingBeams::parameters() const {
-    params_ = SteeredObject::parameters();
-    params_
-        //.set<std::vector<int> >("partonFluxes", {(int)pos_beam_.partonFlux(), (int)neg_beam_.partonFlux()})
-        .set<int>("beam1id", pos_beam_.integerPdgId())
-        .set<double>("beam1pz", +pos_beam_.momentum().pz())
-        .set<int>("beam2id", neg_beam_.integerPdgId())
-        .set<double>("beam2pz", -neg_beam_.momentum().pz())
-        .setAs<int, mode::Kinematics>("mode", mode());
+    params_ = ParametersList(SteeredObject::parameters())
+                  .set<int>("beam1id", pos_beam_.integerPdgId())
+                  .set<double>("beam1pz", +pos_beam_.momentum().pz())
+                  .set<int>("beam2id", neg_beam_.integerPdgId())
+                  .set<double>("beam2pz", -neg_beam_.momentum().pz())
+                  .setAs<int, mode::Kinematics>("mode", mode());
     if (HeavyIon::isHI(pos_beam_.integerPdgId())) {
-      const auto hi1 = HeavyIon::fromPdgId(pos_beam_.integerPdgId());
+      const auto hi1 = HeavyIon::fromPdgId(std::abs(pos_beam_.integerPdgId()));
       params_.set<int>("beam1A", hi1.A).set<int>("beam1Z", (int)hi1.Z);
     }
     if (HeavyIon::isHI(neg_beam_.integerPdgId())) {
-      const auto hi2 = HeavyIon::fromPdgId(neg_beam_.integerPdgId());
+      const auto hi2 = HeavyIon::fromPdgId(std::abs(neg_beam_.integerPdgId()));
       params_.set<int>("beam2A", hi2.A).set<int>("beam2Z", (int)hi2.Z);
     }
     return params_;
