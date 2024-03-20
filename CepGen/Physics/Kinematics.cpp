@@ -44,10 +44,10 @@ namespace cepgen {
       kmr::GluonGrid::get(ParametersList(params_).set<std::string>("path", kmr_grid_path));
   }
 
-  ParametersList Kinematics::parameters(bool extended) const {
+  ParametersList Kinematics::fullParameters() const {
     ParametersList params;
     params += incoming_beams_.parameters();  // beam particles
-    params += cuts_.parameters(extended);
+    params += cuts_.fullParameters();
     // minimum final state content
     if (!minimum_final_state_.empty()) {
       std::vector<int> min_pdgs;

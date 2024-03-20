@@ -50,7 +50,7 @@ namespace cepgen {
 
     CG_DEBUG("ProcessIntegrand:setProcess")
         << "New '" << process().name() << "' process cloned from '" << proc.name() << "' process.";
-    process().kinematics().setParameters(proc.kinematics().parameters(true));
+    process().kinematics().setParameters(proc.kinematics().fullParameters());
 
     //--- first-run preparation
     CG_DEBUG("ProcessIntegrand:setProcess").log([this](auto& dbg) {

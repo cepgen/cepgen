@@ -286,7 +286,7 @@ namespace cepgen {
 
     void Process::initialise() {
       CG_DEBUG("Process:initialise") << "Preparing to set the kinematics parameters. Input parameters: "
-                                     << ParametersDescription(kin_.parameters(false)) << ".";
+                                     << ParametersDescription(kin_.fullParameters()) << ".";
 
       clear();  // also resets the "first run" flag
 

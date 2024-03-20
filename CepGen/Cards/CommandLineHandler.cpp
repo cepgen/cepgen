@@ -123,7 +123,7 @@ namespace cepgen {
         pars_kin.rename("formfac", "formFactors");
 
         //----- get the kinematics as already defined in the process object and modify it accordingly
-        pars_kin = rt_params_->process().kinematics().parameters(true) + pars_kin;
+        pars_kin = rt_params_->process().kinematics().fullParameters() + pars_kin;
         rt_params_->process().kinematics().setParameters(pars_kin);
       }
 

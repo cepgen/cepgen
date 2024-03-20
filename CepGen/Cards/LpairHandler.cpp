@@ -291,7 +291,7 @@ namespace cepgen {
       }
       timer_ = (rt_params_->timeKeeper() != nullptr);
 
-      *kin_params_ += rt_params_->kinematics().parameters(true);
+      *kin_params_ += rt_params_->kinematics().fullParameters();
       *int_params_ += rt_params_->integrator();
       *gen_params_ += rt_params_->generation().parameters();
       init();

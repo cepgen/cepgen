@@ -145,7 +145,7 @@ namespace cepgen {
     setParameters(params_);
   }
 
-  ParametersList CutsList::parameters(bool) const {
+  ParametersList CutsList::fullParameters() const {
     auto params = SteeredObject::parameters() + initial.parameters() + central.parameters() + remnants.parameters();
     if (!central_particles.empty()) {
       ParametersList per_part;
