@@ -20,12 +20,10 @@
 #define CepGen_Process_Process_h
 
 #include <cstddef>  // size_t
-#include <map>
 #include <memory>
 #include <vector>
 
 #include "CepGen/Event/Event.h"
-#include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/Kinematics.h"
 #include "CepGen/Utils/ProcessVariablesAnalyser.h"
