@@ -19,33 +19,35 @@
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Drawer.h"
+#include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/ProcessVariablesAnalyser.h"
 
 namespace cepgen {
   namespace utils {
     ProcessVariablesAnalyser::ProcessVariablesAnalyser(const proc::Process& proc, const ParametersList& params)
-        : SteeredObject(params), proc_(proc), drawer_(DrawerFactory::get().build(steer<ParametersList>("drawer"))) {
+        : SteeredObject(params), proc_(proc) {
       for (const auto& var : proc_.mapped_variables_)
         if (auto hist = steer<ParametersList>(var.name); !hist.empty())
-          hists_.insert(std::make_pair(var.name, Hist1D(hist.set<std::string>("name", var.name))));
+          hists_.insert(std::make_pair(var.name, new Hist1D(hist.set<std::string>("name", var.name))));
         else
           hists_.insert(std::make_pair(var.name,
-                                       Hist1D(ParametersList()
-                                                  .set<std::string>("name", var.name)
-                                                  .set<int>("nbinsX", 50)
-                                                  .set<Limits>("xrange", var.limits))));
+                                       new Hist1D(ParametersList()
+                                                      .set<std::string>("name", var.name)
+                                                      .set<int>("nbinsX", 50)
+                                                      .set<Limits>("xrange", var.limits))));
     }
 
     void ProcessVariablesAnalyser::feed(double weight) {
       for (const auto& var : proc_.mapped_variables_)
         if (hists_.count(var.name))
-          hists_.at(var.name).fill(var.value, weight);
+          hists_.at(var.name)->fill(var.value, weight);
     }
 
     void ProcessVariablesAnalyser::analyse() {
+      auto drawer = DrawerFactory::get().build(steer<ParametersList>("drawer"));
       for (const auto& var : hists_)
-        drawer_->draw(var.second);
+        drawer->draw(*var.second);
     }
 
     ParametersDescription ProcessVariablesAnalyser::description() {

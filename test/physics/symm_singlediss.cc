@@ -25,6 +25,7 @@
 #include "CepGen/Utils/AbortHandler.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
+#include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/Test.h"
 #include "CepGen/Utils/Timer.h"
 

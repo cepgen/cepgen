@@ -20,14 +20,13 @@
 #define CepGen_Utils_ProcessVariablesAnalyser_h
 
 #include "CepGen/Core/SteeredObject.h"
-#include "CepGen/Utils/Histogram.h"
 
 namespace cepgen {
   namespace proc {
     class Process;
   }
   namespace utils {
-    class Drawer;
+    class Hist1D;
     class ProcessVariablesAnalyser : public SteeredObject<ProcessVariablesAnalyser> {
     public:
       explicit ProcessVariablesAnalyser(const proc::Process&, const ParametersList&);
@@ -39,8 +38,7 @@ namespace cepgen {
 
     private:
       const proc::Process& proc_;
-      const std::unique_ptr<Drawer> drawer_;
-      std::unordered_map<std::string, Hist1D> hists_;
+      std::unordered_map<std::string, std::unique_ptr<Hist1D> > hists_;
     };
   }  // namespace utils
 }  // namespace cepgen
