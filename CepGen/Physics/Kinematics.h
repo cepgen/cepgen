@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,9 +19,6 @@
 #ifndef CepGen_Physics_Kinematics_h
 #define CepGen_Physics_Kinematics_h
 
-#include <iosfwd>
-#include <vector>
-
 #include "CepGen/Physics/Cuts.h"
 #include "CepGen/Physics/IncomingBeams.h"
 
@@ -34,21 +31,15 @@ namespace cepgen {
     static ParametersDescription description();
 
     void setParameters(const ParametersList&) override;
-    /// List containing all parameters handled
-    ParametersList parameters(bool extended) const;
+    ParametersList parameters(bool extended) const;  ///< List containing all parameters handled
 
-    /// Beam/primary particle's kinematics
-    IncomingBeams& incomingBeams() { return incoming_beams_; }
-    /// Const-qualified beam/primary particle's kinematics
-    const IncomingBeams& incomingBeams() const { return incoming_beams_; }
+    inline IncomingBeams& incomingBeams() { return incoming_beams_; }              ///< Beam/primary particle kinematics
+    inline const IncomingBeams& incomingBeams() const { return incoming_beams_; }  ///< Beam/primary particle kinematics
 
-    /// Minimum list of central particles required
-    const pdgids_t& minimumFinalState() const { return minimum_final_state_; }
+    inline const pdgids_t& minimumFinalState() const { return minimum_final_state_; }  ///< Minimum central particles
 
-    /// Phase space cuts
-    CutsList& cuts() { return cuts_; }
-    /// Const-qualified phase space cuts
-    const CutsList& cuts() const { return cuts_; }
+    inline CutsList& cuts() { return cuts_; }              ///< Phase space cuts
+    inline const CutsList& cuts() const { return cuts_; }  ///< Phase space cuts
 
   private:
     /// Beam/primary particle's kinematics

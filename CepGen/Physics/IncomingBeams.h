@@ -19,10 +19,6 @@
 #ifndef CepGen_Physics_IncomingBeams_h
 #define CepGen_Physics_IncomingBeams_h
 
-#include <iosfwd>
-#include <memory>
-
-#include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/Modes.h"
 

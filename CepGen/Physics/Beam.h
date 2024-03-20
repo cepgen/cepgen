@@ -24,7 +24,6 @@
 #include "CepGen/Core/SteeredObject.h"
 #include "CepGen/FormFactors/FormFactors.h"
 #include "CepGen/Physics/Momentum.h"
-#include "CepGen/Physics/ParticleProperties.h"
 #include "CepGen/Physics/PartonFlux.h"
 
 namespace cepgen {
@@ -41,25 +40,25 @@ namespace cepgen {
     /// Initialise the fluxes evaluator object
     void initialise();
 
-    bool elastic() const { return elastic_; }  ///< Does the beam remain on-shell after parton emission?
+    inline bool elastic() const { return elastic_; }  ///< Does the beam remain on-shell after parton emission?
     /// Specify if the beam remains on-shell after parton emission
-    Beam& setElastic(bool el) {
+    inline Beam& setElastic(bool el) {
       elastic_ = el;
       return *this;
     }
-    spdgid_t integerPdgId() const { return pdg_id_; }  ///< Beam particle PDG id
+    inline spdgid_t integerPdgId() const { return pdg_id_; }  ///< Beam particle PDG id
     /// Set the beam particle PDG id
-    Beam& setIntegerPdgId(spdgid_t pdg) {
+    inline Beam& setIntegerPdgId(spdgid_t pdg) {
       pdg_id_ = pdg;
       return *this;
     }
-    const Momentum& momentum() const { return momentum_; }  ///< Beam particle 4-momentum
+    inline const Momentum& momentum() const { return momentum_; }  ///< Beam particle 4-momentum
     /// Set the beam particle 4-momentum
-    Beam& setMomentum(const Momentum& mom) {
+    inline Beam& setMomentum(const Momentum& mom) {
       momentum_ = mom;
       return *this;
     }
-    const ParametersList& partonFluxParameters() const { return flux_info_; }
+    inline const ParametersList& partonFluxParameters() const { return flux_info_; }
 
   private:
     spdgid_t pdg_id_{0};        ///< PDG identifier for the beam

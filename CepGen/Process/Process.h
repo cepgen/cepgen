@@ -19,10 +19,6 @@
 #ifndef CepGen_Process_Process_h
 #define CepGen_Process_Process_h
 
-#include <cstddef>  // size_t
-#include <memory>
-#include <vector>
-
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/Kinematics.h"

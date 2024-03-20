@@ -19,10 +19,6 @@
 #ifndef CepGen_Physics_ParticleProperties_h
 #define CepGen_Physics_ParticleProperties_h
 
-#include <iosfwd>
-#include <string>
-#include <vector>
-
 #include "CepGen/Core/SteeredObject.h"
 
 namespace cepgen {
