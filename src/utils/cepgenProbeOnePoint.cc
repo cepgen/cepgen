@@ -19,6 +19,7 @@
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Message.h"
@@ -41,7 +42,7 @@ int main(int argc, char* argv[]) {
     CG_LOG_LEVEL(debugInsideLoop);
 
   cepgen::Generator gen;
-  gen.setRunParameters(cepgen::card::Handler::parseFile(input_card));
+  gen.setRunParameters(cepgen::CardsHandlerFactory::get().parseFile(input_card)->runParameters());
   gen.runParameters().process().initialise();
   CG_DEBUG("main") << gen.runParameters();
 

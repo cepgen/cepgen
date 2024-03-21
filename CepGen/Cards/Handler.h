@@ -33,23 +33,22 @@ namespace cepgen {
 
       static ParametersDescription description();
 
+      /// Retrieve a configuration from a parsed steering string
+      inline virtual RunParameters* parseString(const std::string&, RunParameters* params = nullptr) { return params; }
+      /// Retrieve a configuration from a parsed steering card
+      inline virtual RunParameters* parseFile(const std::string&, RunParameters* params = nullptr) { return params; }
+
+      /// Specify runtime parameters to the handler
+      inline virtual void pack(const RunParameters* params) { rt_params_ = const_cast<RunParameters*>(params); }
+      /// Write a steering card from a configuration
+      inline virtual void write(const std::string&) const {}
+
       const RunParameters* runParameters() const { return rt_params_; }  ///< Parsed list of runtime parameters
       RunParameters* runParameters() { return rt_params_; }              ///< Parsed list of runtime parameters
 
-      virtual void pack(const RunParameters*);  ///< Specify runtime parameters to the handler
-
-      virtual RunParameters* parseString(const std::string&, RunParameters* params) { return params; }
-      /// Retrieve a configuration from a parsed steering card
-      virtual RunParameters* parseFile(const std::string&, RunParameters* params) { return params; }
-      static RunParameters* parseString(const std::string&);  ///< Build a configuration from a steering card
-      static RunParameters* parseFile(const std::string&);    ///< Build a configuration from a steering card
-
-      virtual void write(const std::string&) const {}  ///< Write the current configuration into a steering card
-      static void write(const RunParameters*, const std::string&);  ///< Write a steering card from a configuration
-
     protected:
-      const std::string filename_;  ///< Input filename
-      RunParameters* rt_params_;    ///< List of parameters parsed from a card handler
+      const std::string filename_;         ///< Input filename
+      RunParameters* rt_params_{nullptr};  ///< List of parameters parsed from a card handler
     };
   }  // namespace card
 }  // namespace cepgen

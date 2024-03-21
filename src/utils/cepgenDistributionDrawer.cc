@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventBrowser.h"
 #include "CepGen/Generator.h"
+#include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
@@ -47,7 +48,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .parse();
 
-  mg.setRunParameters(cepgen::card::Handler::parseFile(input_card));
+  mg.setRunParameters(cepgen::CardsHandlerFactory::get().parseFile(input_card)->runParameters());
   mg.runParameters().clearEventExportersSequence();
 
   // book all histograms

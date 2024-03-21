@@ -36,12 +36,12 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      void pack(const RunParameters*) override;
       RunParameters* parseFile(const std::string&, RunParameters*) override;
       /// Store a configuration into a LPAIR steering card
       void write(const std::string& file) const override;
 
     private:
+      void pack(const RunParameters*) override;
       /// Single parameter handler
       /// \tparam T Parameter type
       template <typename T>
