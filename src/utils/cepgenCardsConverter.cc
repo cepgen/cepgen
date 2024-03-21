@@ -36,9 +36,9 @@ int main(int argc, char* argv[]) {
   cepgen::initialise();
 
   try {
-    auto in_card = cepgen::CardsHandlerFactory::get().parseFile(input_config);
+    auto in_card = cepgen::CardsHandlerFactory::get().buildFromFilename(input_config)->parseFile(input_config);
     auto out_card = cepgen::CardsHandlerFactory::get().buildFromFilename(output_config);
-    out_card->pack(in_card->runParameters());
+    out_card->setRunParameters(in_card.runParameters());
     out_card->write(output_config);
     CG_LOG << "Successfully converted the \"" << cepgen::utils::fileExtension(input_config) << "\" card into a \""
            << cepgen::utils::fileExtension(output_config) << "\" card.\n\t"

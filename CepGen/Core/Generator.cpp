@@ -18,6 +18,7 @@
 
 #include <chrono>
 
+#include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Core/RunParameters.h"
@@ -26,6 +27,7 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
+#include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/GeneratorWorkerFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Process/Process.h"
@@ -66,6 +68,10 @@ namespace cepgen {
     xsect_ = Value{-1., -1.};
     parameters_->prepareRun();
     initialised_ = false;
+  }
+
+  void Generator::parseRunParameters(const std::string& filename) {
+    setRunParameters(CardsHandlerFactory::get().buildFromFilename(filename)->parseFile(filename).runParameters());
   }
 
   const RunParameters& Generator::runParameters() const {

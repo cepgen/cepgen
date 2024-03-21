@@ -34,20 +34,24 @@ namespace cepgen {
       static ParametersDescription description();
 
       /// Retrieve a configuration from a parsed steering string
-      inline virtual RunParameters* parseString(const std::string&, RunParameters* params = nullptr) { return params; }
+      inline virtual Handler& parseCommands(const std::vector<std::string>&) { return *this; }
       /// Retrieve a configuration from a parsed steering card
-      inline virtual RunParameters* parseFile(const std::string&, RunParameters* params = nullptr) { return params; }
+      inline virtual Handler& parseFile(const std::string&) { return *this; }
 
+      inline const RunParameters* runParameters() const { return rt_params_; }  ///< Parsed list of runtime parameters
+      inline RunParameters* runParameters() { return rt_params_; }              ///< Parsed list of runtime parameters
       /// Specify runtime parameters to the handler
-      inline virtual void pack(const RunParameters* params) { rt_params_ = const_cast<RunParameters*>(params); }
+      inline virtual Handler& setRunParameters(const RunParameters* params) {
+        rt_params_ = const_cast<RunParameters*>(params);
+        return *this;
+      }
       /// Write a steering card from a configuration
       inline virtual void write(const std::string&) const {}
 
-      const RunParameters* runParameters() const { return rt_params_; }  ///< Parsed list of runtime parameters
-      RunParameters* runParameters() { return rt_params_; }              ///< Parsed list of runtime parameters
-
     protected:
-      const std::string filename_;         ///< Input filename
+      const std::string filename_;  ///< Input filename
+
+    private:
       RunParameters* rt_params_{nullptr};  ///< List of parameters parsed from a card handler
     };
   }  // namespace card

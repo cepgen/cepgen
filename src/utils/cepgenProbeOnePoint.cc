@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
     CG_LOG_LEVEL(debugInsideLoop);
 
   cepgen::Generator gen;
-  gen.setRunParameters(cepgen::CardsHandlerFactory::get().parseFile(input_card)->runParameters());
+  gen.parseRunParameters(input_card);
   gen.runParameters().process().initialise();
   CG_DEBUG("main") << gen.runParameters();
 

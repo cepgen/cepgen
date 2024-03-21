@@ -25,7 +25,7 @@ namespace cepgen {
     Handler::Handler(const ParametersList& params)
         : NamedModule(params), filename_(steer<std::string>("filename")), rt_params_(new RunParameters) {
       if (!filename_.empty())
-        parseFile(filename_, rt_params_);
+        parseFile(filename_);
     }
 
     ParametersDescription Handler::description() {

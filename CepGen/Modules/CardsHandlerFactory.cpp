@@ -30,19 +30,4 @@ namespace cepgen {
   std::unique_ptr<card::Handler> CardsHandlerFactory::buildFromFilename(const std::string& filename) const {
     return build(utils::fileExtension(filename));
   }
-
-  std::unique_ptr<card::Handler> CardsHandlerFactory::parseFile(const std::string& filename,
-                                                                RunParameters* params) const {
-    auto mod = buildFromFilename(filename);
-    mod->parseFile(filename, params);
-    return mod;
-  }
-
-  std::unique_ptr<card::Handler> CardsHandlerFactory::parseString(const std::string& mod_name,
-                                                                  const std::string& str_to_parse,
-                                                                  RunParameters* params) const {
-    auto mod = build(mod_name);
-    mod->parseString(str_to_parse, params);
-    return mod;
-  }
 }  // namespace cepgen
