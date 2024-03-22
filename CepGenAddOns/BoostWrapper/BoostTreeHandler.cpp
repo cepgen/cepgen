@@ -168,7 +168,6 @@ namespace cepgen {
       //for (const auto& mod : utils::Logger::get().exceptionRules())
       //  log_.operator[]<std::vector<std::string> >("enabledModules").emplace_back(mod);
       tree_.add_child(LOGGER_NAME, bc::pack(log_));
-      CG_LOG << "aaa";
       return *this;
     }
 
@@ -177,25 +176,24 @@ namespace cepgen {
     //------------------------------------------------------------------
 
     /// A JSON configuration file parser
-    struct JsonHandler final : public BoostTreeHandler {
+    class JsonHandler final : public BoostTreeHandler {
       using BoostTreeHandler::BoostTreeHandler;
       void read(const std::string& filename) override { pt::read_json(filename, tree_); }
       void write(const std::string& filename) const override { pt::write_json(filename, tree_); }
     };
 
     /// An INFO configuration file parser
-    struct InfoHandler final : public BoostTreeHandler {
+    class InfoHandler final : public BoostTreeHandler {
       using BoostTreeHandler::BoostTreeHandler;
       void read(const std::string& filename) override { pt::read_info(filename, tree_); }
       void write(const std::string& filename) const override { pt::write_info(filename, tree_); }
     };
 
     /// An XML configuration file parser
-    struct XmlHandler final : public BoostTreeHandler {
+    class XmlHandler final : public BoostTreeHandler {
       using BoostTreeHandler::BoostTreeHandler;
       void read(const std::string& filename) override { pt::read_xml(filename, tree_); }
       void write(const std::string& filename) const override {
-        CG_LOG << "bbb";
         std::ofstream file(filename);
         pt::write_xml(file, tree_);
       }
