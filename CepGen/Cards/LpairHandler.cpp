@@ -21,7 +21,6 @@
 
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventModifier.h"
@@ -33,6 +32,7 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/GluonGrid.h"
 #include "CepGen/Physics/MCDFileParser.h"
+#include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
@@ -47,13 +47,7 @@ namespace cepgen {
     class LpairHandler final : public Handler {
     public:
       /// Read a LPAIR steering card
-      explicit LpairHandler(const ParametersList& params)
-          : Handler(params),
-            proc_params_(new ParametersList),
-            kin_params_(new ParametersList),
-            gen_params_(new ParametersList),
-            int_params_(new ParametersList),
-            pdg_input_path_("mass_width_2023.txt") {}
+      explicit LpairHandler(const ParametersList& params) : Handler(params) {}
 
       static ParametersDescription description() {
         auto desc = Handler::description();
@@ -61,30 +55,62 @@ namespace cepgen {
         return desc;
       }
 
-      LpairHandler& parseFile(const std::string& filename) override {
+      inline LpairHandler& parseFile(const std::string& filename) override {
         if (!utils::fileExists(filename))
-          throw CG_FATAL("LpairHandler") << "Unable to locate steering card \"" << filename << "\".";
+          throw CG_FATAL("LpairHandler:parseFile") << "Unable to locate steering card \"" << filename << "\".";
+        if (const auto file_content = utils::split(utils::readFile(filename), '\n'); !file_content.empty())
+          return parseCommands(file_content);
+        CG_WARNING("LpairHandler:parseFile") << "Empty steering card.";
+        return *this;
+      }
+
+      inline LpairHandler& parseCommands(const std::vector<std::string>& commands) override {
         std::ostringstream os;
         init();
-        for (auto line : utils::split(utils::readFile(filename), '\n')) {  // file parsing part
-          if (line = utils::trim(line); line.empty() || line[0] == '#')    // skip comments
+        for (auto line : commands) {
+          if (line = utils::trim(line); line.empty() || line[0] == '#')  // skip comments
             continue;
           const auto fields = utils::split(line, ' ', true);  // parse all fields
-          if (fields.size() < 2)                              // break on invalid lines
-            throw CG_FATAL("LpairHandler") << "Invalid line read from steering card: '" << line << "'.";
+
+          if (fields.size() < 2) {  // skip all invalid lines
+            CG_WARNING("LpairHandler:parseCommands") << "Invalid command read: '" << line << "'.";
+            continue;
+          }
           const auto key = fields.at(0), value = fields.at(1);
           setParameter(key, value);
           if (const auto descr = describe(key); descr != kInvalidStr)
-            os << utils::format("\n>> %-8s %-25s (%s)", key.data(), parameter(key).data(), descr.data());
+            os << utils::format("\n\t>> %-8s %-25s (%s)", key.data(), parameter(key).data(), descr.data());
         }
 
-        CG_INFO("LpairHandler") << "File '" << filename << "' successfully retrieved!\n\t"
-                                << "The following parameters are set:" << os.str() << "\n\t"
-                                << "Now parsing the configuration.";
+        CG_INFO("LpairHandler:parseCommands")
+            << "LPAIR configuration successfully loaded! Now parsing the following parameters:" << os.str() << ".";
+        parse();
+        return *this;
+      }
 
-        if (!addons_list_.empty())
-          for (const auto& lib : utils::split(addons_list_, ','))
-            loadLibrary(lib);
+      /// Store a configuration into a LPAIR steering card
+      inline void write(const std::string& filename) const override {
+        std::ofstream file(filename, std::fstream::out | std::fstream::trunc);
+        if (!file.is_open())
+          throw CG_ERROR("LpairHandler") << "Failed to open file '" << filename << "' for writing.";
+        for (const auto& it : p_strings_)
+          if (it.second.value && !it.second.value->empty())
+            file << utils::format(
+                "%-8s %-20s ! %s\n", it.first.data(), it.second.value->data(), it.second.description.data());
+        for (const auto& it : p_ints_)
+          if (it.second.value && *it.second.value != kInvalidInt)
+            file << utils::format("%-8s %-20d ! %s\n", it.first.data(), *it.second.value, it.second.description.data());
+        for (const auto& it : p_doubles_)
+          if (it.second.value && *it.second.value != Limits::INVALID)
+            file << utils::format("%-8s %-20e ! %s\n", it.first.data(), *it.second.value, it.second.description.data());
+        file.close();
+      }
+
+    private:
+      LpairHandler& setRunParameters(const RunParameters*) override;
+      void parse() {
+        for (const auto& lib : utils::split(addons_list_, ','))
+          loadLibrary(lib);
 
         //--- parse the PDG library
         if (!pdg_input_path_.empty())
@@ -99,27 +125,53 @@ namespace cepgen {
         utils::Logger::get().setExtended(ext_log_);
 
         //--- parse the structure functions code
-        auto sf_params = StructureFunctionsFactory::get().describeParameters(str_fun_).parameters();
-        sf_params.set<ParametersList>("sigmaRatio",
-                                      SigmaRatiosFactory::get().describeParameters(sr_type_).parameters());
-        if (str_fun_ == 205 /* MSTWgrid */ && !mstw_grid_path_.empty())
-          sf_params.set<std::string>("gridPath", mstw_grid_path_);
-        kin_params_->set("structureFunctions", sf_params);
-        proc_params_->set("kinematics", *kin_params_);
+        auto& kin_params = proc_params_.operator[]<ParametersList>("kinematics");
+        bool beam1_elastic{true}, beam2_elastic{true};
+        if (pmod_ == 1)
+          kin_params.set<int>("beam1id", PDG::electron);
+        else {
+          kin_params.set<int>("beam1id", PDG::proton);
+          if (pmod_ != 2) {
+            beam1_elastic = false;
+            auto sf_params = StructureFunctionsFactory::get().describeParameters(pmod_).parameters();
+            sf_params.set<ParametersList>("sigmaRatio",
+                                          SigmaRatiosFactory::get().describeParameters(sr_type_).parameters());
+            if (pmod_ == 205 /* MSTWgrid */ && !mstw_grid_path_.empty())
+              sf_params.set<std::string>("gridPath", mstw_grid_path_);
+            kin_params.set("structureFunctions", sf_params);
+          }
+        }
+        if (emod_ == 1)
+          kin_params.set<int>("beam2id", PDG::electron);
+        else {
+          kin_params.set<int>("beam2id", PDG::proton);
+          if (emod_ != 2) {
+            beam2_elastic = false;
+            if (emod_ != pmod_)
+              CG_WARNING("LpairHandler") << "Incoming particles' modes are inconsistent: PMOD=" << pmod_
+                                         << ", EMOD=" << emod_ << ".";
+          }
+        }
+        auto& mode = kin_params.operator[]<int>("mode");
+        mode = static_cast<int>(
+            beam1_elastic
+                ? (beam2_elastic ? mode::Kinematics::ElasticElastic : mode::Kinematics::ElasticInelastic)
+                : (beam2_elastic ? mode::Kinematics::InelasticElastic : mode::Kinematics::InelasticInelastic));
 
         //--- parse the process name
-        if (!proc_name_.empty() || !proc_params_->empty()) {
+        if (!proc_name_.empty() || !proc_params_.empty()) {
           if (!runParameters()->hasProcess() && proc_name_.empty())
             throw CG_FATAL("LpairHandler") << "Process name not specified!";
           if (runParameters()->hasProcess() && runParameters()->process().name() == proc_name_)
-            *proc_params_ = ParametersList(runParameters()->process().parameters()) + *proc_params_;
+            proc_params_ = ParametersList(runParameters()->process().parameters()) + proc_params_;
           if (proc_name_ == "pptoff" && lepton_id_ != 0)
-            proc_params_->operator[]<int>("pair") = 11 + (lepton_id_ - 1) * 2;
-          runParameters()->setProcess(ProcessFactory::get().build(proc_name_, *proc_params_));
+            proc_params_.operator[]<int>("pair") = PDG::electron + (lepton_id_ - 1) * 2;
+          runParameters()->setProcess(ProcessFactory::get().build(proc_name_, proc_params_));
         }
 
-        runParameters()->integrator() += *int_params_;
-        runParameters()->generation().setParameters(*gen_params_);
+        if (!int_params_.name<std::string>().empty())
+          runParameters()->integrator() += int_params_;
+        runParameters()->generation().setParameters(gen_params_);
 
         //--- parse the hadronisation algorithm name
         if (!evt_mod_name_.empty())
@@ -138,34 +190,8 @@ namespace cepgen {
             ++i;
           }
         }
-        return *this;
-      }
-      /// Store a configuration into a LPAIR steering card
-      void write(const std::string& filename) const override {
-        std::map<std::string, std::string> out_map;
-        for (const auto& it : p_strings_)
-          if (it.second.value && !it.second.value->empty())
-            out_map[it.first] = utils::format(
-                "%-8s %-20s ! %s\n", it.first.data(), it.second.value->data(), it.second.description.data());
-        for (const auto& it : p_ints_)
-          if (it.second.value && *it.second.value != kInvalidInt)
-            out_map[it.first] =
-                utils::format("%-8s %-20d ! %s\n", it.first.data(), *it.second.value, it.second.description.data());
-        for (const auto& it : p_doubles_)
-          if (it.second.value && *it.second.value != Limits::INVALID)
-            out_map[it.first] =
-                utils::format("%-8s %-20e ! %s\n", it.first.data(), *it.second.value, it.second.description.data());
-
-        std::ofstream f(filename, std::fstream::out | std::fstream::trunc);
-        if (!f.is_open())
-          throw CG_ERROR("LpairHandler") << "Failed to open file '" << filename << "' for writing.";
-        for (const auto& ln : out_map)
-          f << ln.second;
-        f.close();
       }
 
-    private:
-      LpairHandler& setRunParameters(const RunParameters*) override;
       /// Single parameter handler
       /// \tparam T Parameter type
       template <typename T>
@@ -180,26 +206,27 @@ namespace cepgen {
       void registerProcessParameter(const std::string& key,
                                     const std::string& description,
                                     const std::string& proc_key) {
-        registerParameter<T>(key, description, &proc_params_->operator[]<T>(proc_key));
+        registerParameter<T>(key, description, &proc_params_.operator[]<T>(proc_key));
       }
       /// Register a kinematics block parameter to be steered
       template <typename T>
       void registerKinematicsParameter(const std::string& key,
                                        const std::string& description,
                                        const std::string& kin_key) {
-        registerParameter<T>(key, description, &kin_params_->operator[]<T>(kin_key));
+        registerParameter<T>(
+            key, description, &proc_params_.operator[]<ParametersList>("kinematics").operator[]<T>(kin_key));
       }
       template <typename T>
       void registerGenerationParameter(const std::string& key,
                                        const std::string& description,
                                        const std::string& gen_key) {
-        registerParameter<T>(key, description, &gen_params_->operator[]<T>(gen_key));
+        registerParameter<T>(key, description, &gen_params_.operator[]<T>(gen_key));
       }
       template <typename T>
       void registerIntegratorParameter(const std::string& key,
                                        const std::string& description,
                                        const std::string& int_key) {
-        registerParameter<T>(key, description, &int_params_->operator[]<T>(int_key));
+        registerParameter<T>(key, description, &int_params_.operator[]<T>(int_key));
       }
       /// Set a parameter value
       template <typename T>
@@ -226,14 +253,15 @@ namespace cepgen {
       static constexpr double kInvalidDbl = 999.999;
       static constexpr const char* kInvalidStr = "(null)";
 
-      std::unordered_map<std::string, Parameter<std::string> > p_strings_;
-      std::unordered_map<std::string, Parameter<double> > p_doubles_;
-      std::unordered_map<std::string, Parameter<int> > p_ints_;
+      std::map<std::string, Parameter<std::string> > p_strings_;
+      std::map<std::string, Parameter<double> > p_doubles_;
+      std::map<std::string, Parameter<int> > p_ints_;
 
       void init();
-      std::shared_ptr<ParametersList> proc_params_, kin_params_, gen_params_, int_params_;
-      int timer_{0}, iend_{1}, log_level_{0}, ext_log_{0};
-      int str_fun_{11}, sr_type_{1}, lepton_id_{0};
+
+      ParametersList proc_params_, gen_params_, int_params_;
+      int timer_{0}, iend_{1}, log_level_{(int)utils::Logger::get().level()}, ext_log_{0};
+      int emod_{2}, pmod_{2}, sr_type_{1}, lepton_id_{0};
       std::string proc_name_, evt_mod_name_, out_mod_name_;
       std::string out_file_name_, addons_list_;
       std::string kmr_grid_path_, mstw_grid_path_, pdg_input_path_;
@@ -314,8 +342,6 @@ namespace cepgen {
     void LpairHandler::init() {
       //-------------------------------------------------------------------------------------------
       // Process/integration/hadronisation parameters
-      //-------------------------------------------------------------------------------------------
-
       registerParameter<std::string>("PROC", "Process name to simulate", &proc_name_);
       registerParameter<std::string>("HADR", "Hadronisation algorithm", &evt_mod_name_);
       registerParameter<std::string>("EVMD", "Events modification algorithms", &evt_mod_name_);
@@ -330,8 +356,6 @@ namespace cepgen {
 
       //-------------------------------------------------------------------------------------------
       // General parameters
-      //-------------------------------------------------------------------------------------------
-
       registerParameter<int>("TIMR", "Enable the time ticker", &timer_);
       registerParameter<int>("IEND", "Generation type", &iend_);
       registerParameter<int>("DEBG", "Debugging verbosity", &log_level_);
@@ -343,20 +367,16 @@ namespace cepgen {
 
       //-------------------------------------------------------------------------------------------
       // Process-specific parameters
-      //-------------------------------------------------------------------------------------------
-
       registerProcessParameter<int>("METH", "Computation method (kT-factorisation)", "method");
       registerProcessParameter<int>("IPOL", "Polarisation states to consider", "polarisationStates");
 
       //-------------------------------------------------------------------------------------------
       // Process kinematics parameters
-      //-------------------------------------------------------------------------------------------
-
       registerParameter<std::string>("KMRG", "KMR grid interpolation path", &kmr_grid_path_);
       registerParameter<std::string>("MGRD", "MSTW grid interpolation path", &mstw_grid_path_);
       registerParameter<std::string>("PDGI", "Input file for PDG information", &pdg_input_path_);
-      registerParameter<int>("PMOD", "Outgoing primary particles' mode", &str_fun_);
-      registerParameter<int>("EMOD", "Outgoing primary particles' mode", &str_fun_);
+      registerParameter<int>("PMOD", "Outgoing primary particles' mode", &pmod_);
+      registerParameter<int>("EMOD", "Outgoing primary particles' mode", &emod_);
       registerParameter<int>("RTYP", "R-ratio computation type", &sr_type_);
       registerProcessParameter<int>("PAIR", "Outgoing particles' PDG id", "pair");
       registerKinematicsParameter<std::string>("FFAC", "Form factors for the incoming beams", "formFactors");
@@ -397,8 +417,6 @@ namespace cepgen {
 
       //-------------------------------------------------------------------------------------------
       // PPtoLL cards backward compatibility
-      //-------------------------------------------------------------------------------------------
-
       registerIntegratorParameter<int>("NTREAT", "Smoothen the integrand", "treat");
       registerIntegratorParameter<int>("ITMX", "Number of integration iterations", "iterations");
       registerIntegratorParameter<int>("NCVG", "Number of function calls to perform", "numFunctionCalls");
@@ -418,7 +436,17 @@ namespace cepgen {
 
     LpairHandler& LpairHandler::setRunParameters(const RunParameters* params) {
       Handler::setRunParameters(params);
-      str_fun_ = runParameters()->kinematics().incomingBeams().structureFunctions().name<int>();
+      const auto beam_mode = runParameters()->kinematics().incomingBeams().mode();
+      pmod_ = (beam_mode == mode::Kinematics::InelasticElastic || beam_mode == mode::Kinematics::InelasticInelastic)
+                  ? runParameters()->kinematics().incomingBeams().structureFunctions().name<int>()
+                  : (std::abs(runParameters()->kinematics().incomingBeams().positive().integerPdgId()) == PDG::electron
+                         ? 1
+                         : 2);
+      emod_ = (beam_mode == mode::Kinematics::ElasticInelastic || beam_mode == mode::Kinematics::InelasticInelastic)
+                  ? runParameters()->kinematics().incomingBeams().structureFunctions().name<int>()
+                  : (std::abs(runParameters()->kinematics().incomingBeams().negative().integerPdgId()) == PDG::electron
+                         ? 1
+                         : 2);
       sr_type_ = runParameters()->kinematics().incomingBeams().structureFunctions().get<int>("sigmaRatio");
       //kmr_grid_path_ = kmr::GluonGrid::get().path();
       //mstw_grid_path_ =
@@ -427,11 +455,11 @@ namespace cepgen {
       log_level_ = (int)utils::Logger::get().level();
       ext_log_ = utils::Logger::get().extended();
       proc_name_ = runParameters()->processName();
-      *proc_params_ += runParameters()->process().parameters();
-      if (proc_params_->has<ParticleProperties>("pair"))
-        proc_params_->set<int>("pair", proc_params_->get<ParticleProperties>("pair").pdgid);
+      proc_params_ += runParameters()->process().parameters();
+      if (proc_params_.has<ParticleProperties>("pair"))
+        proc_params_.set<int>("pair", proc_params_.get<ParticleProperties>("pair").pdgid);
       if (proc_name_ == "pptoff" || proc_name_ == "pptoll" /* legacy */)
-        lepton_id_ = (runParameters()->process().parameters().get<int>("pair") - 11) / 2. + 1;
+        lepton_id_ = (runParameters()->process().parameters().get<int>("pair") - PDG::electron) / 2. + 1;
       {
         std::vector<std::string> evt_mod;
         std::transform(runParameters()->eventModifiersSequence().begin(),
@@ -451,9 +479,8 @@ namespace cepgen {
       }
       timer_ = (runParameters()->timeKeeper() != nullptr);
 
-      *kin_params_ += runParameters()->kinematics().fullParameters();
-      *int_params_ += runParameters()->integrator();
-      *gen_params_ += runParameters()->generation().parameters();
+      int_params_ += runParameters()->integrator();
+      gen_params_ += runParameters()->generation().parameters();
       init();
       return *this;
     }
