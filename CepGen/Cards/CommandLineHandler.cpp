@@ -60,7 +60,8 @@ namespace cepgen {
         if (commands.empty())
           return *this;
         ParametersList pars;
-        pars.feed(commands.at(0));
+        for (const auto& cmd : commands)
+          pars.feed(cmd);
         CG_INFO("CommandLineHandler") << "Arguments list: " << commands << " unpacked to:\n\t" << pars << ".";
 
         //----- timer definition
