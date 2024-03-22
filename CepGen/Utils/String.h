@@ -192,6 +192,7 @@ namespace cepgen {
     inline std::string trim(const std::string& str) { return ltrim(rtrim(str)); }  ///< Trim leading and trailing spaces
     std::string strip(const std::string&);                    ///< Strip all special characters from string
     bool startsWith(const std::string&, const std::string&);  ///< Check if a string starts with a given token
+    bool endsWith(const std::string&, const std::string&);    ///< Check if a string ends with a given token
     std::string describeError(int errnum);                    ///< Describe an error code
 
   }  // namespace utils
