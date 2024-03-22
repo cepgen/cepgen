@@ -49,8 +49,7 @@ namespace cepgen {
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
           rnd_gen_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))) {
-      const auto& kin_params = steer<ParametersList>("kinematics");
-      if (!kin_params.empty())
+      if (const auto& kin_params = steer<ParametersList>("kinematics"); !kin_params.empty())
         kinematics().setParameters(kin_params);
       if (steer<bool>("hasEvent"))
         event_.reset(new Event);

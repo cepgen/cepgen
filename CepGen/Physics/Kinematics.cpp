@@ -21,10 +21,7 @@
 #include "CepGen/Utils/Message.h"
 
 namespace cepgen {
-  Kinematics::Kinematics(const ParametersList& params) : SteeredObject(params) {
-    if (!params.empty())
-      setParameters(params);
-  }
+  Kinematics::Kinematics(const ParametersList& params) : SteeredObject(params) {}
 
   void Kinematics::setParameters(const ParametersList& params) {
     SteeredObject::setParameters(params);

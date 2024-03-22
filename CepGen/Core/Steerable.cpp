@@ -22,6 +22,8 @@
 #include "CepGen/Utils/Filesystem.h"
 
 namespace cepgen {
+  Steerable::Steerable(const ParametersList& params) { setParameters(params); }
+
   std::string Steerable::steerPath(const std::string& key) const {
     const auto fn = steer<std::string>(key);
     if (fn.empty())

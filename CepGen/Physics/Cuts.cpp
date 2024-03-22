@@ -141,9 +141,7 @@ namespace cepgen {
   //--------------------------------------------------------------------
 
   CutsList::CutsList(const ParametersList& params)
-      : SteeredObject(params), initial(params_), central(params_), remnants(params_) {
-    setParameters(params_);
-  }
+      : SteeredObject(params), initial(params_), central(params_), remnants(params_) {}
 
   const ParametersList& CutsList::parameters() const {
     params_ += initial.parameters() + central.parameters() + remnants.parameters();
@@ -158,11 +156,6 @@ namespace cepgen {
     initial.setParameters(params_);
     central.setParameters(params_);
     remnants.setParameters(params_);
-    if (params_.has<Limits>("phiptdiff")) {
-      CG_WARNING("CutsList:setParameters") << "\"phiptdiff\" parameter is deprecated! "
-                                           << "Please use \"phidiff\" instead.";
-      params_.fill<Limits>("phiptdiff", central.phi_diff);  //legacy
-    }
     if (params_.has<ParametersList>("cuts")) {  // per-particle cuts
       const auto& per_parts = steer<ParametersList>("cuts");
       for (const auto& part : per_parts.keys())
@@ -170,6 +163,11 @@ namespace cepgen {
     }
 
     // sanity checks
+    if (params_.has<Limits>("phiptdiff")) {
+      CG_WARNING("CutsList:setParameters") << "\"phiptdiff\" parameter is deprecated! "
+                                           << "Please use \"phidiff\" instead.";
+      params_.fill<Limits>("phiptdiff", central.phi_diff);  //legacy
+    }
     if (initial.q2.max() <= 0.) {
       CG_WARNING("CutsList:setParameters") << "Maximum parton virtuality (" << initial.q2 << ") is invalid. "
                                            << "It is now set to " << 1.e4 << " GeV^2.";
@@ -180,6 +178,7 @@ namespace cepgen {
                                            << "It is now set to " << cuts::Remnants::MX_MIN << " GeV/c^2.";
       remnants.mx.min() = cuts::Remnants::MX_MIN;
     }
+
     CG_DEBUG("CutsList:setParameters") << "User specified the following cuts list:\n" << *this << ".";
   }
 
