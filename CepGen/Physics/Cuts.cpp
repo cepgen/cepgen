@@ -159,8 +159,8 @@ namespace cepgen {
     central.setParameters(params_);
     remnants.setParameters(params_);
     if (params_.has<Limits>("phiptdiff")) {
-      CG_WARNING("Kinematics") << "\"phiptdiff\" parameter is deprecated! "
-                               << "Please use \"phidiff\" instead.";
+      CG_WARNING("CutsList:setParameters") << "\"phiptdiff\" parameter is deprecated! "
+                                           << "Please use \"phidiff\" instead.";
       params_.fill<Limits>("phiptdiff", central.phi_diff);  //legacy
     }
     if (params_.has<ParametersList>("cuts")) {  // per-particle cuts
@@ -169,11 +169,15 @@ namespace cepgen {
         central_particles[(pdgid_t)stoi(part)].setParameters(per_parts.get<ParametersList>(part));
     }
 
-    //--- outgoing remnants
-    // sanity check
+    // sanity checks
+    if (initial.q2.max() <= 0.) {
+      CG_WARNING("CutsList:setParameters") << "Maximum parton virtuality (" << initial.q2 << ") is invalid. "
+                                           << "It is now set to " << 1.e4 << " GeV^2.";
+      initial.q2.max() = 1.e4;
+    }
     if (remnants.mx.min() < cuts::Remnants::MX_MIN) {
-      CG_WARNING("Kinematics:setParameters") << "Minimum diffractive mass range (" << remnants.mx << ") is invalid. "
-                                             << "It is now set to " << cuts::Remnants::MX_MIN << " GeV/c^2.";
+      CG_WARNING("CutsList:setParameters") << "Minimum diffractive mass range (" << remnants.mx << ") is invalid. "
+                                           << "It is now set to " << cuts::Remnants::MX_MIN << " GeV/c^2.";
       remnants.mx.min() = cuts::Remnants::MX_MIN;
     }
     CG_DEBUG("CutsList:setParameters") << "User specified the following cuts list:\n" << *this << ".";

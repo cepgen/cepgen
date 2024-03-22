@@ -135,39 +135,40 @@ namespace cepgen {
         utils::Logger::get().setLevel((utils::Logger::Level)log_level_);
         utils::Logger::get().setExtended(ext_log_);
 
-        //--- parse the structure functions code
-        auto& kin_params = proc_params_.operator[]<ParametersList>("kinematics");
-        bool beam1_elastic{true}, beam2_elastic{true};
-        if (pmod_ == 1)
-          kin_params.set<int>("beam1id", PDG::electron);
-        else {
-          kin_params.set<int>("beam1id", PDG::proton);
-          if (pmod_ != 2) {
-            beam1_elastic = false;
-            auto sf_params = StructureFunctionsFactory::get().describeParameters(pmod_).parameters();
-            sf_params.set<ParametersList>("sigmaRatio",
-                                          SigmaRatiosFactory::get().describeParameters(sr_type_).parameters());
-            if (pmod_ == 205 /* MSTWgrid */ && !mstw_grid_path_.empty())
-              sf_params.set<std::string>("gridPath", mstw_grid_path_);
-            kin_params.set("structureFunctions", sf_params);
+        {  //--- parse the structure functions code
+          auto& kin_params = proc_params_.operator[]<ParametersList>("kinematics");
+          bool beam1_elastic{true}, beam2_elastic{true};
+          if (pmod_ == 1)
+            kin_params.set<int>("beam1id", PDG::electron);
+          else {
+            kin_params.set<int>("beam1id", PDG::proton);
+            if (pmod_ != 2) {
+              beam1_elastic = false;
+              auto sf_params = StructureFunctionsFactory::get().describeParameters(pmod_).parameters();
+              sf_params.set<ParametersList>("sigmaRatio",
+                                            SigmaRatiosFactory::get().describeParameters(sr_type_).parameters());
+              if (pmod_ == 205 /* MSTWgrid */ && !mstw_grid_path_.empty())
+                sf_params.set<std::string>("gridPath", mstw_grid_path_);
+              kin_params.set("structureFunctions", sf_params);
+            }
           }
-        }
-        if (emod_ == 1)
-          kin_params.set<int>("beam2id", PDG::electron);
-        else {
-          kin_params.set<int>("beam2id", PDG::proton);
-          if (emod_ != 2) {
-            beam2_elastic = false;
-            if (emod_ != pmod_)
-              CG_WARNING("LpairHandler") << "Incoming particles' modes are inconsistent: PMOD=" << pmod_
-                                         << ", EMOD=" << emod_ << ".";
+          if (emod_ == 1)
+            kin_params.set<int>("beam2id", PDG::electron);
+          else {
+            kin_params.set<int>("beam2id", PDG::proton);
+            if (emod_ != 2) {
+              beam2_elastic = false;
+              if (emod_ != pmod_)
+                CG_WARNING("LpairHandler")
+                    << "Incoming particles' modes are inconsistent: PMOD=" << pmod_ << ", EMOD=" << emod_ << ".";
+            }
           }
+          auto& mode = kin_params.operator[]<int>("mode");
+          mode = static_cast<int>(
+              beam1_elastic
+                  ? (beam2_elastic ? mode::Kinematics::ElasticElastic : mode::Kinematics::ElasticInelastic)
+                  : (beam2_elastic ? mode::Kinematics::InelasticElastic : mode::Kinematics::InelasticInelastic));
         }
-        auto& mode = kin_params.operator[]<int>("mode");
-        mode = static_cast<int>(
-            beam1_elastic
-                ? (beam2_elastic ? mode::Kinematics::ElasticElastic : mode::Kinematics::ElasticInelastic)
-                : (beam2_elastic ? mode::Kinematics::InelasticElastic : mode::Kinematics::InelasticInelastic));
 
         //--- parse the process name
         if (!proc_name_.empty() || !proc_params_.empty()) {
