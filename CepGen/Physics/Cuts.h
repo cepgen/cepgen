@@ -82,7 +82,7 @@ namespace cepgen {
     explicit CutsList(const ParametersList&);
 
     void setParameters(const ParametersList&) override;
-    ParametersList fullParameters() const;
+    const ParametersList& parameters() const override;
 
     friend std::ostream& operator<<(std::ostream&, const CutsList&);
 
