@@ -19,6 +19,8 @@
 #ifndef CepGen_Cards_Handler_h
 #define CepGen_Cards_Handler_h
 
+#include <memory>
+
 #include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen {
@@ -33,26 +35,21 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      /// Retrieve a configuration from a parsed steering string
+      /// Read configuration from command strings
       inline virtual Handler& parseCommands(const std::vector<std::string>&) { return *this; }
-      /// Retrieve a configuration from a parsed steering card
+      /// Read configuration from steering card
       inline virtual Handler& parseFile(const std::string&) { return *this; }
+      inline virtual void write(const std::string&) const {}  ///< Write steering card from configuration
 
-      inline const RunParameters* runParameters() const { return rt_params_; }  ///< Parsed list of runtime parameters
-      inline RunParameters* runParameters() { return rt_params_; }              ///< Parsed list of runtime parameters
-      /// Specify runtime parameters to the handler
-      inline virtual Handler& setRunParameters(const RunParameters* params) {
-        rt_params_ = const_cast<RunParameters*>(params);
-        return *this;
-      }
-      /// Write a steering card from a configuration
-      inline virtual void write(const std::string&) const {}
+      virtual Handler& setRunParameters(const RunParameters*);                        ///< Specify runtime parameters
+      inline const RunParameters* runParameters() const { return rt_params_.get(); }  ///< Parsed runtime parameters
+      inline std::unique_ptr<RunParameters>& runParameters() { return rt_params_; }   ///< Parsed runtime parameters
 
     protected:
       const std::string filename_;  ///< Input filename
 
     private:
-      RunParameters* rt_params_{nullptr};  ///< List of parameters parsed from a card handler
+      std::unique_ptr<RunParameters> rt_params_{nullptr};  ///< List of parameters parsed from a card handler
     };
   }  // namespace card
 }  // namespace cepgen

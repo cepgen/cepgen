@@ -17,6 +17,7 @@
  */
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Modules/ModuleFactory.h"
 #include "CepGen/Modules/ModuleFactoryImpl.h"
 #include "CepGen/Utils/String.h"

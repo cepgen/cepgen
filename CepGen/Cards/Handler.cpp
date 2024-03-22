@@ -28,6 +28,11 @@ namespace cepgen {
         parseFile(filename_);
     }
 
+    Handler& Handler::setRunParameters(const RunParameters* params) {
+      rt_params_.reset(const_cast<RunParameters*>(params));
+      return *this;
+    }
+
     ParametersDescription Handler::description() {
       auto desc = ParametersDescription();
       desc.setDescription("Generic steering cards handler");

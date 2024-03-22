@@ -57,7 +57,7 @@ namespace cepgen {
     void parseRunParameters(const std::string&);  ///< Read a steering card to populate the run parameters block
     const RunParameters& runParameters() const;   ///< Pointer to the parameters block
     RunParameters& runParameters();               ///< Run parameters block
-    void setRunParameters(RunParameters* ip);     ///< Feed the generator with a RunParameters object
+    void setRunParameters(std::unique_ptr<RunParameters>&);  ///< Feed the generator with a RunParameters object
 
     void setIntegrator(std::unique_ptr<Integrator>);  ///< Specify an integrator algorithm configuration
     void integrate();                                 ///< Integrate the functional over the phase space of interest

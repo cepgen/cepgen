@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Core/RunParameters.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
@@ -36,9 +37,10 @@ int main(int argc, char* argv[]) {
   cepgen::initialise();
 
   try {
-    auto in_card = cepgen::CardsHandlerFactory::get().buildFromFilename(input_config)->parseFile(input_config);
+    auto in_card = cepgen::CardsHandlerFactory::get().buildFromFilename(input_config);
+    in_card->parseFile(input_config);
     auto out_card = cepgen::CardsHandlerFactory::get().buildFromFilename(output_config);
-    out_card->setRunParameters(in_card.runParameters());
+    out_card->setRunParameters(in_card->runParameters().get());
     out_card->write(output_config);
     CG_LOG << "Successfully converted the \"" << cepgen::utils::fileExtension(input_config) << "\" card into a \""
            << cepgen::utils::fileExtension(output_config) << "\" card.\n\t"

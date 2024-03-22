@@ -86,7 +86,7 @@ namespace cepgen {
     return *parameters_;
   }
 
-  void Generator::setRunParameters(RunParameters* ip) { parameters_.reset(ip); }
+  void Generator::setRunParameters(std::unique_ptr<RunParameters>& ip) { parameters_ = std::move(ip); }
 
   double Generator::computePoint(const std::vector<double>& coord) {
     if (!worker_)
