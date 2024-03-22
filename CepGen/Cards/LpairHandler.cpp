@@ -40,6 +40,15 @@
 
 using std::string;
 
+static constexpr int kInvalidInt = -999999;
+static constexpr double kInvalidDbl = 999.999;
+static constexpr const char* kInvalidStr = "(null)";
+
+#define REGISTER_LPAIR_CONTENT_TYPE             \
+  __TYPE_ENUM(int, p_ints_, -kInvalidInt)       \
+  __TYPE_ENUM(double, p_doubles_, -kInvalidDbl) \
+  __TYPE_ENUM(std::string, p_strings_, kInvalidStr)
+
 namespace cepgen {
   class ParametersList;
   namespace card {
@@ -108,7 +117,9 @@ namespace cepgen {
 
     private:
       LpairHandler& setRunParameters(const RunParameters*) override;
-      void parse() {
+
+      void init();
+      inline void parse() {
         for (const auto& lib : utils::split(addons_list_, ','))
           loadLibrary(lib);
 
@@ -240,24 +251,13 @@ namespace cepgen {
       void setParameter(const std::string& key, const std::string& value);
       std::string parameter(std::string key) const;
       inline std::string describe(std::string key) const {
-        if (p_strings_.count(key))
-          return p_strings_.find(key)->second.description;
-        if (p_ints_.count(key))
-          return p_ints_.find(key)->second.description;
-        if (p_doubles_.count(key))
-          return p_doubles_.find(key)->second.description;
+#define __TYPE_ENUM(type, map, default_val) \
+  if (map.count(key))                       \
+    return map.at(key).description;
+        REGISTER_LPAIR_CONTENT_TYPE
+#undef __TYPE_ENUM
         return kInvalidStr;
       }
-
-      static constexpr int kInvalidInt = -999999;
-      static constexpr double kInvalidDbl = 999.999;
-      static constexpr const char* kInvalidStr = "(null)";
-
-      std::map<std::string, Parameter<std::string> > p_strings_;
-      std::map<std::string, Parameter<double> > p_doubles_;
-      std::map<std::string, Parameter<int> > p_ints_;
-
-      void init();
 
       ParametersList proc_params_, gen_params_, int_params_;
       int timer_{0}, iend_{1}, log_level_{(int)utils::Logger::get().level()}, ext_log_{0};
@@ -265,78 +265,41 @@ namespace cepgen {
       std::string proc_name_, evt_mod_name_, out_mod_name_;
       std::string out_file_name_, addons_list_;
       std::string kmr_grid_path_, mstw_grid_path_, pdg_input_path_;
+
+#define __TYPE_ENUM(type, map_name, default_val) std::map<std::string, Parameter<type> > map_name;
+      REGISTER_LPAIR_CONTENT_TYPE
+#undef __TYPE_ENUM
     };
 
     //----- specialised registerers
-
-    /// Register a string parameter
-    template <>
-    inline void LpairHandler::registerParameter<std::string>(const std::string& key,
-                                                             const std::string& description,
-                                                             std::string* def) {
-      p_strings_[key] = Parameter<std::string>{key, description, def};
-    }
-    /// Register a double floating point parameter
-    template <>
-    inline void LpairHandler::registerParameter<double>(const std::string& key,
-                                                        const std::string& description,
-                                                        double* def) {
-      p_doubles_[key] = Parameter<double>{key, description, def};
-    }
-    /// Register an integer parameter
-    template <>
-    inline void LpairHandler::registerParameter<int>(const std::string& key, const std::string& description, int* def) {
-      p_ints_[key] = Parameter<int>{key, description, def};
-    }
-
-    //----- specialised setters
-
-    template <>
-    inline void LpairHandler::set<std::string>(const std::string& key, const std::string& value) {
-      if (p_strings_.count(key))
-        *p_strings_.at(key).value = value;
-    }
-    template <>
-    inline void LpairHandler::set<double>(const std::string& key, const double& value) {
-      if (p_doubles_.count(key))
-        *p_doubles_.at(key).value = value;
-    }
-    template <>
-    inline void LpairHandler::set<int>(const std::string& key, const int& value) {
-      if (p_ints_.count(key))
-        *p_ints_.at(key).value = value;
-    }
-
-    //----- specialised getters
-
-    /// Retrieve a string parameter value
-    template <>
-    inline std::string LpairHandler::get(const std::string& key) const {
-      if (p_strings_.count(key))
-        return *p_strings_.at(key).value;
-      return kInvalidStr;
-    }
-    /// Retrieve a floating point parameter value
-    template <>
-    inline double LpairHandler::get(const std::string& key) const {
-      if (p_doubles_.count(key))
-        return *p_doubles_.at(key).value;
-      return -kInvalidDbl;
-    }
-    /// Retrieve an integer parameter value
-    template <>
-    inline int LpairHandler::get(const std::string& key) const {
-      if (p_ints_.count(key))
-        return *p_ints_.at(key).value;
-      return -kInvalidInt;
-    }
+#define __TYPE_ENUM(type, map, default_val)                                        \
+  template <>                                                                      \
+  inline void LpairHandler::registerParameter<type>(                               \
+      const std::string& key, const std::string& description, type* def) {         \
+    map[key] = Parameter<type>{key, description, def};                             \
+  }                                                                                \
+  template <>                                                                      \
+  inline void LpairHandler::set<type>(const std::string& key, const type& value) { \
+    if (map.count(key))                                                            \
+      *map.at(key).value = value;                                                  \
+  }                                                                                \
+  template <>                                                                      \
+  inline type LpairHandler::get(const std::string& key) const {                    \
+    if (map.count(key))                                                            \
+      return *map.at(key).value;                                                   \
+    return default_val;                                                            \
+  }
+    REGISTER_LPAIR_CONTENT_TYPE
+#undef __TYPE_ENUM
 
     std::string LpairHandler::parameter(std::string key) const {
-      if (auto var = get<double>(key); var != -kInvalidDbl)
-        return std::to_string(var);
-      if (auto var = get<int>(key); var != -kInvalidInt)
-        return std::to_string(var);
-      return get<std::string>(key);
+#define __TYPE_ENUM(type, map, default_val)          \
+  if (auto var = get<type>(key); var != default_val) \
+    return utils::toString(var);
+      REGISTER_LPAIR_CONTENT_TYPE
+#undef __TYPE_ENUM
+      CG_ERROR("LpairHandler:parameter") << "Failed to retrieve a parameter with key '" << key << "'.";
+      return kInvalidStr;
     }
 
     void LpairHandler::init() {
