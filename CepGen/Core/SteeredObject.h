@@ -23,17 +23,15 @@
 
 #include "CepGen/Core/Steerable.h"
 
-#define REGISTER_TYPE(type, coll)                                      \
-public:                                                                \
-  inline SteeredObject& add(const std::string& key, type& var) {       \
-    coll.insert({key, std::ref(var)});                                 \
-    coll.at(key).get() = params_.operator[]<type>(key);                \
-    return *this;                                                      \
-  }                                                                    \
-                                                                       \
-private:                                                               \
-  std::unordered_map<std::string, std::reference_wrapper<type> > coll; \
-  static_assert(true, "")
+#define REGISTER_STEEREDOBJ_CONTENT_TYPE       \
+  __TYPE_ENUM(bool, map_bools_)                \
+  __TYPE_ENUM(int, map_ints_)                  \
+  __TYPE_ENUM(unsigned long long, map_ulongs_) \
+  __TYPE_ENUM(double, map_dbls_)               \
+  __TYPE_ENUM(std::string, map_strs_)          \
+  __TYPE_ENUM(Limits, map_lims_)               \
+  __TYPE_ENUM(ParametersList, map_params_)     \
+  __TYPE_ENUM(std::vector<int>, map_vints_)
 
 namespace cepgen {
   /// Base user-steerable object
@@ -51,53 +49,42 @@ namespace cepgen {
     /// Inequality operator
     inline bool operator!=(const SteeredObject& oth) const { return !operator==(oth); }
 
-  protected:
-    REGISTER_TYPE(bool, map_bools_);
-    REGISTER_TYPE(int, map_ints_);
-    REGISTER_TYPE(unsigned long long, map_ulongs_);
-    REGISTER_TYPE(double, map_dbls_);
-    REGISTER_TYPE(std::string, map_strs_);
-    REGISTER_TYPE(Limits, map_lims_);
-    REGISTER_TYPE(ParametersList, map_params_);
-    REGISTER_TYPE(std::vector<int>, map_vints_);
-
-  public:
     /// Module user-defined parameters
     inline const ParametersList& parameters() const override {
-      const auto set = [this](auto& map) {
-        for (const auto& kv : map)
-          params_.set(kv.first, kv.second.get());
-      };
-      set(map_bools_);
-      set(map_ints_);
-      set(map_ulongs_);
-      set(map_dbls_);
-      set(map_strs_);
-      set(map_lims_);
-      set(map_params_);
-      set(map_vints_);
-      return params_;
+#define __TYPE_ENUM(type, map_name) \
+  for (const auto& kv : map_name)   \
+    params_.set(kv.first, kv.second.get());
+      REGISTER_STEEREDOBJ_CONTENT_TYPE
+#undef __TYPE_ENUM
+      return Steerable::parameters();
     }
     virtual inline void setParameters(const ParametersList& params) override {
       if (params.empty())
         return;
       Steerable::setParameters(params);
-      const auto fill = [this](auto& map) {
-        for (const auto& kv : map)
-          params_.fill(kv.first, kv.second.get());
-      };
-      fill(map_bools_);
-      fill(map_ints_);
-      fill(map_ulongs_);
-      fill(map_dbls_);
-      fill(map_strs_);
-      fill(map_lims_);
-      fill(map_params_);
-      fill(map_vints_);
+#define __TYPE_ENUM(type, map_name) \
+  for (const auto& kv : map_name)   \
+    params_.fill(kv.first, kv.second.get());
+      REGISTER_STEEREDOBJ_CONTENT_TYPE
+#undef __TYPE_ENUM
     }
+
+#define __TYPE_ENUM(type, map_name)                              \
+  inline SteeredObject& add(const std::string& key, type& var) { \
+    map_name.insert({key, std::ref(var)});                       \
+    map_name.at(key).get() = params_.operator[]<type>(key);      \
+    return *this;                                                \
+  }
+    REGISTER_STEEREDOBJ_CONTENT_TYPE
+#undef __TYPE_ENUM
+
+  private:
+#define __TYPE_ENUM(type, map_name) std::unordered_map<std::string, std::reference_wrapper<type> > map_name;
+    REGISTER_STEEREDOBJ_CONTENT_TYPE
+#undef __TYPE_ENUM
   };
 }  // namespace cepgen
 
-#undef REGISTER_TYPE
+#undef REGISTER_STEEREDOBJ_CONTENT_TYPE
 
 #endif
