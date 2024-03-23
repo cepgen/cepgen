@@ -108,24 +108,32 @@ namespace cepgen {
     return diff;
   }
 
-  ParametersList& ParametersList::operator+=(const ParametersList& oth) {
-    if (oth.empty() || *this == oth)  // ensure the two collections are not identical or empty
-      return *this;
+  ParametersList& ParametersList::operator+=(const ParametersList& oth_orig) {
     if (empty()) {
-      *this = oth;
+      *this = oth_orig;
       return *this;
     }
-    // then check if any key of the other collection is already present in the list
+    if (oth_orig.empty() || *this == oth_orig)  // ensure the two collections are not identical or empty
+      return *this;
+    auto oth = oth_orig;
     std::vector<std::string> keys_erased;
-    for (const auto& key : oth.keys()) {
-      if (has<ParametersList>(key)) {
+    for (const auto& oth_key : oth.keys()) {  // check if any key of the other collection is already present in the list
+      if (has<ParametersList>(oth_key)) {
         // do not remove a duplicate parameters collection if they are not strictly identical ;
         // will concatenate its values with the other object's
-        if (get<ParametersList>(key) == oth.get<ParametersList>(key) && erase(key) > 0)
-          keys_erased.emplace_back(key);
-      } else if (erase(key) > 0)
-        // any other duplicate key is just replaced
-        keys_erased.emplace_back(key);
+        if (get<ParametersList>(oth_key) == oth.get<ParametersList>(oth_key) && oth.erase(oth_key) > 0)
+          keys_erased.emplace_back(oth_key);
+      } else if (oth.has<double>(oth_key) && (utils::endsWith(oth_key, "max") || utils::endsWith(oth_key, "min"))) {
+        // hacky path to drop 'xxxmin'/'xxxmax' keys if 'xxx' limits were found
+        auto& lim = operator[]<Limits>(oth_key.substr(0, oth_key.size() - 3));
+        if (utils::endsWith(oth_key, "max"))
+          lim.max() = oth.get<double>(oth_key);
+        else if (utils::endsWith(oth_key, "min"))
+          lim.min() = oth.get<double>(oth_key);
+        if (erase(oth_key) > 0 && oth.erase(oth_key) > 0)
+          keys_erased.emplace_back(oth_key);
+      } else if (erase(oth_key) > 0)  // any other duplicate key is just replaced
+        keys_erased.emplace_back(oth_key);
     }
     if (!keys_erased.empty())
       CG_DEBUG_LOOP("ParametersList") << utils::s("key", keys_erased.size(), true) << " erased: " << keys_erased << ".";
