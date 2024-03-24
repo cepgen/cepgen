@@ -175,9 +175,9 @@ namespace cepgen {
           if (!runParameters()->hasProcess() && proc_name_.empty())
             throw CG_FATAL("LpairHandler") << "Process name not specified!";
           if (runParameters()->hasProcess() && runParameters()->process().name() == proc_name_)
-            proc_params_ = ParametersList(runParameters()->process().parameters()) + proc_params_;
-          if (proc_name_ == "pptoff" && lepton_id_ != 0)
-            proc_params_.operator[]<int>("pair") = PDG::electron + (lepton_id_ - 1) * 2;
+            proc_params_ = runParameters()->process().parameters() + proc_params_;
+          if (proc_name_ == "pptoff" && lepton_id_ != 0)  // backward-compatibility for PPtoLL cards
+            proc_params_.set<int>("pair", PDG::electron + (lepton_id_ - 1) * 2);
           runParameters()->setProcess(ProcessFactory::get().build(proc_name_, proc_params_));
         }
 

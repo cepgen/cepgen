@@ -19,7 +19,7 @@
 #ifndef CepGen_Core_SteeredObject_h
 #define CepGen_Core_SteeredObject_h
 
-#include <functional>  // for std::reference_wrapper
+#include <algorithm>
 
 #include "CepGen/Core/Steerable.h"
 
@@ -53,33 +53,44 @@ namespace cepgen {
     inline const ParametersList& parameters() const override {
 #define __TYPE_ENUM(type, map_name) \
   for (const auto& kv : map_name)   \
-    params_.set(kv.first, kv.second.get());
+    params_.set(kv.first, kv.second);
       REGISTER_STEEREDOBJ_CONTENT_TYPE
 #undef __TYPE_ENUM
       return Steerable::parameters();
     }
+    /// Set (documented) module parameters
     virtual inline void setParameters(const ParametersList& params) override {
       if (params.empty())
         return;
       Steerable::setParameters(params);
 #define __TYPE_ENUM(type, map_name) \
   for (const auto& kv : map_name)   \
-    params_.fill(kv.first, kv.second.get());
+    params_.fill(kv.first, kv.second);
       REGISTER_STEEREDOBJ_CONTENT_TYPE
 #undef __TYPE_ENUM
+    }
+    inline void setDescribedParameters(const ParametersList& params_orig) {
+      const auto obj_keys = T::description().parameters().keys();
+      if (obj_keys.empty())
+        return;
+      auto params = params_orig;
+      for (const auto& key : params.keys())
+        if (std::find(obj_keys.begin(), obj_keys.end(), key) == obj_keys.end())
+          params.erase(key);
+      setParameters(params);
     }
 
 #define __TYPE_ENUM(type, map_name)                              \
   inline SteeredObject& add(const std::string& key, type& var) { \
-    map_name.insert({key, std::ref(var)});                       \
-    map_name.at(key).get() = params_.operator[]<type>(key);      \
+    map_name.insert({key, var});                                 \
+    map_name.at(key) = params_.operator[]<type>(key);            \
     return *this;                                                \
   }
     REGISTER_STEEREDOBJ_CONTENT_TYPE
 #undef __TYPE_ENUM
 
   private:
-#define __TYPE_ENUM(type, map_name) std::unordered_map<std::string, std::reference_wrapper<type> > map_name;
+#define __TYPE_ENUM(type, map_name) std::unordered_map<std::string, type&> map_name;
     REGISTER_STEEREDOBJ_CONTENT_TYPE
 #undef __TYPE_ENUM
   };

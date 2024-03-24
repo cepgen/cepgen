@@ -449,9 +449,10 @@ namespace cepgen {
     auto val = std::find_if(lim_values_.begin(), lim_values_.end(), [&key](const auto& kv) { return kv.first == key; });
     if (val != lim_values_.end())
       out = val->second;
-    // still trying to build it from (min/max) attributes
-    fill<double>(key + "min", out.min());
-    fill<double>(key + "max", out.max());
+    else {  // still trying to build it from (min/max) attributes
+      fill<double>(key + "min", out.min());
+      fill<double>(key + "max", out.max());
+    }
     return out.validate();
     // nothing found ; returning default
     CG_DEBUG("ParametersList") << "Failed to retrieve limits parameter with key=" << key << ". "
@@ -461,8 +462,6 @@ namespace cepgen {
 
   template <>
   const ParametersList& ParametersList::fill<Limits>(const std::string& key, Limits& value) const {
-    fill<double>(key + "min", value.min());
-    fill<double>(key + "max", value.max());
     if (has<Limits>(key)) {
       const auto& lim = get<Limits>(key);
       if (lim.hasMin())
@@ -471,6 +470,8 @@ namespace cepgen {
         value.max() = lim.max();
       return *this;
     }
+    fill<double>(key + "min", value.min());
+    fill<double>(key + "max", value.max());
     return *this;
   }
 

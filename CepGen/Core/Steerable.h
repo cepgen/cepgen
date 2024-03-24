@@ -28,15 +28,10 @@ namespace cepgen {
     explicit Steerable(const ParametersList&);  ///< Build a module from its steering parameters
     virtual ~Steerable() = default;
 
-    inline virtual void setParameters(const ParametersList& params) { params_ += params; }  ///< Set module parameters
-    inline virtual const ParametersList& parameters() const { return params_; }             ///< Module parameters
+    static ParametersDescription description();  ///< Description of all object parameters
 
-    /// Description of all object parameters
-    static inline ParametersDescription description() {
-      auto desc = ParametersDescription();
-      desc.setDescription("Virtual, base steerable object");
-      return desc;
-    }
+    inline virtual const ParametersList& parameters() const { return params_; }  ///< Module parameters
+    virtual void setParameters(const ParametersList&);                           ///< Set module parameters
 
   protected:
     /// Retrieve a parameters as previously steered
@@ -55,8 +50,7 @@ namespace cepgen {
       return steer<T>(MODULE_NAME);
     }
     std::string steerPath(const std::string& key) const;  ///< Retrieve a path from common search paths
-
-    mutable ParametersList params_;  ///< Module parameters
+    mutable ParametersList params_;                       ///< Module parameters
   };
 }  // namespace cepgen
 

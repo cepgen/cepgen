@@ -24,20 +24,19 @@ namespace cepgen {
   Kinematics::Kinematics(const ParametersList& params) : SteeredObject(params) {}
 
   void Kinematics::setParameters(const ParametersList& params) {
+    if (params.empty())
+      return;
     SteeredObject::setParameters(params);
     CG_DEBUG("Kinematics") << "Building a Kinematics parameters container "
                            << "with the following parameters:\n\t" << params_ << ".";
 
     incoming_beams_.setParameters(params_);
     cuts_.setParameters(params_);
-    //----- outgoing particles definition
-    if (params_.has<std::vector<int> >("minFinalState"))
+    if (params_.has<std::vector<int> >("minFinalState"))  // outgoing particles definition
       for (const auto& pdg : steer<std::vector<int> >("minFinalState"))
         minimum_final_state_.emplace_back((pdgid_t)pdg);
 
-    //--- specify where to look for the grid path for gluon emission
-    const auto& kmr_grid_path = steerPath("kmrGridPath");
-    if (!kmr_grid_path.empty())
+    if (const auto kmr_grid_path = steerPath("kmrGridPath"); !kmr_grid_path.empty())  // grid path for gluon emission
       kmr::GluonGrid::get(ParametersList(params_).set<std::string>("path", kmr_grid_path));
   }
 
