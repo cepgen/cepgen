@@ -45,12 +45,16 @@ namespace cepgen {
     class BoostTreeHandler : public Handler {
     public:
       /// Boost tree parser from a configuration card
-      explicit BoostTreeHandler(const ParametersList&);
+      explicit BoostTreeHandler(const ParametersList& params) : Handler(params) {}
 
-      static ParametersDescription description();
+      static ParametersDescription description() {
+        auto desc = ParametersDescription();
+        desc.setDescription("Boost tree parser/writer");
+        return desc;
+      }
 
-      RunParameters* parseFile(const std::string&, RunParameters*) override;
-      void pack(const RunParameters* params) override;
+      BoostTreeHandler& parseFile(const std::string&) override;
+      BoostTreeHandler& setRunParameters(const RunParameters* params) override;
 
     protected:
       /// Read and cast a file into the property tree
@@ -74,10 +78,7 @@ namespace cepgen {
       ParametersList evt_mod_, evt_out_;
     };
 
-    BoostTreeHandler::BoostTreeHandler(const ParametersList& params) : Handler(params) {}
-
-    RunParameters* BoostTreeHandler::parseFile(const std::string& filename, RunParameters* params) {
-      rt_params_ = params;
+    BoostTreeHandler& BoostTreeHandler::parseFile(const std::string& filename) {
       read(filename);
 
       if (tree_.count(ADDONS_NAME))
@@ -86,7 +87,7 @@ namespace cepgen {
 
       try {
         proc_ = bc::unpack(tree_.get_child(PROCESS_NAME));
-        rt_params_->setProcess(ProcessFactory::get().build(proc_));
+        runParameters()->setProcess(ProcessFactory::get().build(proc_));
       } catch (const boost::exception&) {
         throw CG_FATAL("BoostTreeHandler") << "Failed to retrieve a valid \"" << PROCESS_NAME << "\" block"
                                            << " in the steering card!";
@@ -97,15 +98,15 @@ namespace cepgen {
         if (tree_.count(KIN_NAME))
           par_kinematics += bc::unpack(tree_.get_child(KIN_NAME));
         if (tree_.count(INTEGR_NAME))
-          rt_params_->integrator() += bc::unpack(tree_.get_child(INTEGR_NAME));
+          runParameters()->integrator() += bc::unpack(tree_.get_child(INTEGR_NAME));
         if (tree_.count(GENERATOR_NAME))
-          rt_params_->generation().setParameters(bc::unpack(tree_.get_child(GENERATOR_NAME)));
+          runParameters()->generation().setParameters(bc::unpack(tree_.get_child(GENERATOR_NAME)));
         if (tree_.count(EVT_MOD_SEQ_NAME)) {
           evt_mod_ = bc::unpack(tree_.get_child(EVT_MOD_SEQ_NAME));
           for (const auto& name : evt_mod_.keys()) {
             const auto& mod = evt_mod_.get<ParametersList>(name);
             if (!mod.empty())
-              rt_params_->addModifier(EventModifierFactory::get().build(name, mod));
+              runParameters()->addModifier(EventModifierFactory::get().build(name, mod));
           }
         }
         if (tree_.count(OUTPUT_NAME)) {
@@ -113,11 +114,11 @@ namespace cepgen {
           for (const auto& name : evt_out_.keys()) {
             const auto& mod = evt_out_.get<ParametersList>(name);
             if (!mod.empty())
-              rt_params_->addEventExporter(EventExporterFactory::get().build(name, mod));
+              runParameters()->addEventExporter(EventExporterFactory::get().build(name, mod));
           }
         }
         if (tree_.count(TIMER_NAME))
-          rt_params_->setTimeKeeper(new utils::TimeKeeper);
+          runParameters()->setTimeKeeper(new utils::TimeKeeper);
         if (tree_.count(LOGGER_NAME)) {
           log_ = bc::unpack(tree_.get_child(LOGGER_NAME));
           utils::Logger::get().setLevel(
@@ -126,54 +127,48 @@ namespace cepgen {
           for (const auto& mod : log_.get<std::vector<std::string> >("enabledModules"))
             utils::Logger::get().addExceptionRule(mod);
         }
-        rt_params_->process().kinematics().setParameters(par_kinematics);
+        runParameters()->process().kinematics().setParameters(par_kinematics);
       } catch (const boost::exception&) {
       } catch (const Exception&) {
       }
-
-      return rt_params_;
+      return *this;
     }
 
-    void BoostTreeHandler::pack(const RunParameters* params) {
-      rt_params_ = const_cast<RunParameters*>(params);
-      tree_.add_child(PROCESS_NAME, bc::pack(rt_params_->process().parameters()));
-      if (!rt_params_->integrator().empty())
-        tree_.add_child(INTEGR_NAME, bc::pack(rt_params_->integrator()));
+    BoostTreeHandler& BoostTreeHandler::setRunParameters(const RunParameters* params) {
+      Handler::setRunParameters(params);
+      tree_.add_child(PROCESS_NAME, bc::pack(runParameters()->process().parameters()));
+      if (!runParameters()->integrator().empty())
+        tree_.add_child(INTEGR_NAME, bc::pack(runParameters()->integrator()));
 
       //----- kinematics block
-      tree_.add_child(KIN_NAME, bc::pack(rt_params_->kinematics().fullParameters()));
+      tree_.add_child(KIN_NAME, bc::pack(runParameters()->kinematics().parameters()));
 
       //----- generation block
-      tree_.add_child(GENERATOR_NAME, bc::pack(rt_params_->generation().parameters()));
+      tree_.add_child(GENERATOR_NAME, bc::pack(runParameters()->generation().parameters()));
 
       //----- event modification and output
-      if (!rt_params_->eventModifiersSequence().empty()) {
+      if (!runParameters()->eventModifiersSequence().empty()) {
         auto evt_mod_tree = bc::pack(evt_mod_);
-        for (const auto& mod : rt_params_->eventModifiersSequence())
+        for (const auto& mod : runParameters()->eventModifiersSequence())
           evt_mod_tree.put("", mod->name());
         tree_.add_child(EVT_MOD_SEQ_NAME, evt_mod_tree);
       }
-      if (!rt_params_->eventExportersSequence().empty()) {
+      if (!runParameters()->eventExportersSequence().empty()) {
         auto out_mod_tree = bc::pack(evt_out_);
-        for (const auto& mod : rt_params_->eventExportersSequence())
+        for (const auto& mod : runParameters()->eventExportersSequence())
           out_mod_tree.add_child(mod->name(), bc::pack(mod->parameters()));
         tree_.add_child(OUTPUT_NAME, out_mod_tree);
       }
 
       //----- timing and logging
-      if (rt_params_->timeKeeper())
+      if (runParameters()->timeKeeper())
         tree_.add_child(TIMER_NAME, bc::pack(ParametersList()));
       log_.set<int>("level", (int)utils::Logger::get().level());
       //TODO: implement the exceptions filtering rules
       //for (const auto& mod : utils::Logger::get().exceptionRules())
       //  log_.operator[]<std::vector<std::string> >("enabledModules").emplace_back(mod);
       tree_.add_child(LOGGER_NAME, bc::pack(log_));
-    }
-
-    ParametersDescription BoostTreeHandler::description() {
-      auto desc = ParametersDescription();
-      desc.setDescription("Boost tree parser/writer");
-      return desc;
+      return *this;
     }
 
     //------------------------------------------------------------------

@@ -71,13 +71,14 @@ int main(int argc, char* argv[]) {
   }
   //--- parse the steering card
   if (!input_card.empty())
-    gen.setRunParameters(cepgen::card::Handler::parseFile(input_card));
+    gen.parseRunParameters(input_card);
   //--- parse the additional flags
-  if (!parser.extra_config().empty())
-    gen.setRunParameters(
-        cepgen::CardsHandlerFactory::get()
-            .build(".cmd", cepgen::ParametersList().set<vector<string> >("args", parser.extra_config()))
-            ->parseString(string(), &gen.runParameters()));
+  if (!parser.extra_config().empty()) {
+    auto args_handler = cepgen::CardsHandlerFactory::get().build(".cmd");
+    args_handler->setRunParameters(&gen.runParameters());
+    args_handler->parseCommands(parser.extra_config());
+    gen.setRunParameters(args_handler->runParameters());
+  }
 
   cepgen::utils::AbortHandler();
 

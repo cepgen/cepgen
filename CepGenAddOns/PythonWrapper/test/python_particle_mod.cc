@@ -29,10 +29,9 @@ int main(int argc, char* argv[]) {
   CG_DEBUG("main") << "Will build a Python cards handler.";
 
   auto card = cepgen::CardsHandlerFactory::get().build(".py");
-  card->parseString(R"(
+  card->parseCommands({R"(
 from Config.PDG_cfi import PDG, registerParticle
-registerParticle(name='teston', pdgid=42, mass=42.42, width=1.1))",
-                    nullptr);
+registerParticle(name='teston', pdgid=42, mass=42.42, width=1.1))"});
 
   CG_DEBUG("main") << "Configuration string successfully parsed.";
 

@@ -64,7 +64,7 @@ namespace cepgen {
     spdgid_t pdg_id_{0};        ///< PDG identifier for the beam
     Momentum momentum_;         ///< Incoming particle momentum
     ParametersList flux_info_;  ///< Incoming parton flux parameters
-    bool elastic_;              ///< Elastic parton emission?
+    bool elastic_{true};        ///< Elastic parton emission?
   };
 }  // namespace cepgen
 

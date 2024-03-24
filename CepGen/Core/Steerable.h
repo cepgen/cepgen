@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2023  Laurent Forthomme
+ *  Copyright (C) 2021-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,43 +25,32 @@ namespace cepgen {
   /// Base runtime module object
   class Steerable {
   public:
-    /// Build a module from its steering parameters
-    explicit Steerable(const ParametersList& params) : params_(params) {}
+    explicit Steerable(const ParametersList&);  ///< Build a module from its steering parameters
     virtual ~Steerable() = default;
 
-    /// Set all module parameters
-    virtual void setParameters(const ParametersList& params) { params_ += params; }
-    /// Module parameters
-    virtual const ParametersList& parameters() const { return params_; }
+    static ParametersDescription description();  ///< Description of all object parameters
 
-    /// Description of all object parameters
-    static inline ParametersDescription description() {
-      auto desc = ParametersDescription();
-      desc.setDescription("Virtual, base steerable object");
-      return desc;
-    }
+    inline virtual const ParametersList& parameters() const { return params_; }  ///< Module parameters
+    virtual void setParameters(const ParametersList&);                           ///< Set module parameters
 
   protected:
     /// Retrieve a parameters as previously steered
     template <typename T>
-    T steer(const std::string& key) const {
+    inline T steer(const std::string& key) const {
       return params_.get<T>(key);
     }
     /// Retrieve a recasted parameters as previously steered
     template <typename T, typename U>
-    U steerAs(const std::string& key) const {
+    inline U steerAs(const std::string& key) const {
       return params_.getAs<T, U>(key);
     }
     /// Retrieve module name from parameters
     template <typename T>
-    T steerName() const {
+    inline T steerName() const {
       return steer<T>(MODULE_NAME);
     }
-    /// Retrieve a path from common search paths
-    std::string steerPath(const std::string& key) const;
-
-    /// Module parameters
-    mutable ParametersList params_;
+    std::string steerPath(const std::string& key) const;  ///< Retrieve a path from common search paths
+    mutable ParametersList params_;                       ///< Module parameters
   };
 }  // namespace cepgen
 

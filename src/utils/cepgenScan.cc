@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -56,22 +56,24 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .parse();
 
-  cepgen::Generator mg;
-  mg.setRunParameters(cepgen::card::Handler::parseFile(input_config));
+  cepgen::Generator gen;
+  gen.parseRunParameters(input_config);
 
-  if (!parser.extra_config().empty())
-    mg.setRunParameters(cepgen::CardsHandlerFactory::get()
-                            .build(".cmd", cepgen::ParametersList().set<vector<string> >("args", parser.extra_config()))
-                            ->parseString("", &mg.runParameters()));
+  if (!parser.extra_config().empty()) {
+    auto args_handler = cepgen::CardsHandlerFactory::get().build(".cmd");
+    args_handler->setRunParameters(&gen.runParameters());
+    args_handler->parseCommands(parser.extra_config());
+    gen.setRunParameters(args_handler->runParameters());
+  }
 
-  CG_LOG << mg.runParameters();
+  CG_LOG << gen.runParameters();
 
   ofstream xsect_file(output_file);
   if (!xsect_file.is_open())
     throw CG_FATAL("main") << "Output file \"" << output_file << "\" cannot be opened!";
   xsect_file << "# " << scan << "\txsect (pb)\td(xsect) (pb)\n";
 
-  auto& par = mg.runParameters();
+  auto& par = gen.runParameters();
   //--- ensure nothing is written in the output sequence
   par.eventExportersSequence().clear();
 
@@ -110,7 +112,7 @@ int main(int argc, char* argv[]) {
         kin.setParameters(modif);
       }
       CG_LOG << "Scan of \"" << scan << "\". Value = " << value << ".";
-      const auto cross_section = mg.computeXsection();
+      const auto cross_section = gen.computeXsection();
       string out_line = cepgen::utils::format("%.2f\t%.8e\t%.8e\n", value, cross_section, cross_section.uncertainty());
       graph.addPoint(value, cross_section, 0., cross_section.uncertainty());
       xsect_file << out_line;

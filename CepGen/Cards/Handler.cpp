@@ -17,49 +17,21 @@
  */
 
 #include "CepGen/Cards/Handler.h"
-#include "CepGen/Core/Exception.h"
-#include "CepGen/Core/ParametersList.h"
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
-#include "CepGen/Utils/Filesystem.h"
 
 namespace cepgen {
   namespace card {
     Handler::Handler(const ParametersList& params)
         : NamedModule(params), filename_(steer<std::string>("filename")), rt_params_(new RunParameters) {
       if (!filename_.empty())
-        parseFile(filename_, rt_params_);
+        parseFile(filename_);
     }
 
-    RunParameters* Handler::parseString(const std::string& filename) {
-      try {
-        auto parser = CardsHandlerFactory::get().build(utils::fileExtension(filename));
-        return parser->parseString(filename, new RunParameters);
-      } catch (const std::invalid_argument& err) {
-        throw CG_FATAL("Cards:handler") << "Failed to parse the steering card at '" << filename << "'. " << err.what();
-      }
+    Handler& Handler::setRunParameters(const RunParameters* params) {
+      rt_params_.reset(const_cast<RunParameters*>(params));
+      return *this;
     }
-
-    RunParameters* Handler::parseFile(const std::string& filename) {
-      try {
-        auto parser = CardsHandlerFactory::get().build(utils::fileExtension(filename));
-        return parser->parseFile(filename, new RunParameters);
-      } catch (const std::invalid_argument& err) {
-        throw CG_FATAL("Cards:handler") << "Failed to parse the steering card at '" << filename << "'. " << err.what();
-      }
-    }
-
-    void Handler::write(const RunParameters* params, const std::string& filename) {
-      try {
-        auto writer = CardsHandlerFactory::get().build(utils::fileExtension(filename));
-        writer->pack(params);
-        return writer->write(filename);
-      } catch (const std::invalid_argument& err) {
-        throw CG_FATAL("Cards:handler") << "Failed to write the configuration to '" << filename << "'. " << err.what();
-      }
-    }
-
-    void Handler::pack(const RunParameters* params) { rt_params_ = const_cast<RunParameters*>(params); }
 
     ParametersDescription Handler::description() {
       auto desc = ParametersDescription();

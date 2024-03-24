@@ -19,7 +19,6 @@
 #include <cmath>
 #include <fstream>
 
-#include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/IntegratorFactory.h"
@@ -91,7 +90,7 @@ int main(int argc, char* argv[]) {
   for (const auto& test : tests) {
     const std::string filename = "TestProcesses/" + test.filename + "_cfg.py";
     try {
-      gen.setRunParameters(cepgen::card::Handler::parseFile(filename));
+      gen.parseRunParameters(filename);
       gen.runParameters().integrator() = cepgen::IntegratorFactory::get().describeParameters(integrator).parameters();
       CG_DEBUG("main") << "Process: " << gen.runParameters().processName() << "\n\t"
                        << "File: " << filename << "\n\t"

@@ -56,6 +56,8 @@ namespace cepgen {
       static ParametersDescription description();
       bool contain(const Particles&, const Event* evt = nullptr) const;
 
+      void setParameters(const ParametersList&) override;
+
       Limits q2;   ///< parton virtuality
       Limits qt;   ///< parton transverse virtuality
       Limits phi;  ///< parton azimuthal angle
@@ -67,6 +69,8 @@ namespace cepgen {
 
       static ParametersDescription description();
       bool contain(const Particles&, const Event* evt = nullptr) const;
+
+      void setParameters(const ParametersList&) override;
 
       Limits mx;  ///< diffractive mass
       Limits yj;  ///< diffractive jet rapidity
@@ -81,8 +85,9 @@ namespace cepgen {
   struct CutsList final : SteeredObject<CutsList> {
     explicit CutsList(const ParametersList&);
 
+    static ParametersDescription description();
+
     void setParameters(const ParametersList&) override;
-    ParametersList fullParameters() const;
 
     friend std::ostream& operator<<(std::ostream&, const CutsList&);
 

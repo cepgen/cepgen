@@ -19,6 +19,8 @@
 #ifndef CepGen_Cards_Handler_h
 #define CepGen_Cards_Handler_h
 
+#include <memory>
+
 #include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen {
@@ -33,23 +35,21 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      const RunParameters* runParameters() const { return rt_params_; }  ///< Parsed list of runtime parameters
-      RunParameters* runParameters() { return rt_params_; }              ///< Parsed list of runtime parameters
+      /// Read configuration from command strings
+      inline virtual Handler& parseCommands(const std::vector<std::string>&) { return *this; }
+      /// Read configuration from steering card
+      inline virtual Handler& parseFile(const std::string&) { return *this; }
+      inline virtual void write(const std::string&) const {}  ///< Write steering card from configuration
 
-      virtual void pack(const RunParameters*);  ///< Specify runtime parameters to the handler
-
-      virtual RunParameters* parseString(const std::string&, RunParameters* params) { return params; }
-      /// Retrieve a configuration from a parsed steering card
-      virtual RunParameters* parseFile(const std::string&, RunParameters* params) { return params; }
-      static RunParameters* parseString(const std::string&);  ///< Build a configuration from a steering card
-      static RunParameters* parseFile(const std::string&);    ///< Build a configuration from a steering card
-
-      virtual void write(const std::string&) const {}  ///< Write the current configuration into a steering card
-      static void write(const RunParameters*, const std::string&);  ///< Write a steering card from a configuration
+      virtual Handler& setRunParameters(const RunParameters*);                        ///< Specify runtime parameters
+      inline const RunParameters* runParameters() const { return rt_params_.get(); }  ///< Parsed runtime parameters
+      inline std::unique_ptr<RunParameters>& runParameters() { return rt_params_; }   ///< Parsed runtime parameters
 
     protected:
       const std::string filename_;  ///< Input filename
-      RunParameters* rt_params_;    ///< List of parameters parsed from a card handler
+
+    private:
+      std::unique_ptr<RunParameters> rt_params_{nullptr};  ///< List of parameters parsed from a card handler
     };
   }  // namespace card
 }  // namespace cepgen

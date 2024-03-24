@@ -313,6 +313,12 @@ namespace cepgen {
 
     bool startsWith(const std::string& str, const std::string& beg) { return ltrim(str).rfind(beg, 0) == 0; }
 
+    bool endsWith(const std::string& str, const std::string& end) {
+      if (end.size() > str.size())
+        return false;
+      return std::equal(end.rbegin(), end.rend(), str.rbegin());
+    }
+
     std::string describeError(int errnum) {
 #ifdef __APPLE__
       return std::to_string(errnum);

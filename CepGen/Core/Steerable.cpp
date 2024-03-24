@@ -16,12 +16,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/Steerable.h"
 #include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Filesystem.h"
+#include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/String.h"
 
 namespace cepgen {
+  Steerable::Steerable(const ParametersList& params) { setParameters(params); }
+
+  void Steerable::setParameters(const ParametersList& params) { params_ += params; }
+
   std::string Steerable::steerPath(const std::string& key) const {
     const auto fn = steer<std::string>(key);
     if (fn.empty())
@@ -32,5 +37,11 @@ namespace cepgen {
         return abs_path;
       }
     return fn;
+  }
+
+  ParametersDescription Steerable::description() {
+    auto desc = ParametersDescription("Steerable");
+    desc.setDescription("Pure virtual base steerable object");
+    return desc;
   }
 }  // namespace cepgen

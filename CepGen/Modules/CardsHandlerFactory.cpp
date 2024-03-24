@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2024  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,32 +16,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <string>
-
 #include "CepGen/Cards/Handler.h"
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/RunParameters.h"
-#include "CepGen/Generator.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
-#include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/Filesystem.h"
 
-using namespace std;
-
-int main(int argc, char* argv[]) {
-  string card;
-
-  cepgen::initialise();
-
-  cepgen::ArgumentsParser(argc, argv).addArgument("card,i", "input card", &card, "Cards/lpair_cfg.py").parse();
-
-  try {
-    CG_LOG << "Parsing configuration from '" << card << ".";
-    auto in_card = cepgen::CardsHandlerFactory::get().buildFromFilename(card);
-    in_card->parseFile(card);
-    CG_LOG << "Configuration parsed from '" << card << "':\n" << *in_card->runParameters();
-  } catch (const cepgen::Exception& e) {
-    e.dump();
-    return -1;
+namespace cepgen {
+  CardsHandlerFactory& CardsHandlerFactory::get() {
+    static CardsHandlerFactory instance;
+    return instance;
   }
-  return 0;
-}
+
+  std::unique_ptr<card::Handler> CardsHandlerFactory::buildFromFilename(const std::string& filename) const {
+    return build(utils::fileExtension(filename));
+  }
+}  // namespace cepgen

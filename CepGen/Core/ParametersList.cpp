@@ -25,18 +25,18 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/String.h"
 
-#define IMPL_TYPE_GET(type, coll, name)                                                                  \
-  template <>                                                                                            \
-  type ParametersList::get<type>(const std::string& key, const type& def) const {                        \
-    if (coll.count(key) > 0)                                                                             \
-      return coll.at(key);                                                                               \
-    CG_DEBUG("ParametersList") << "Failed to retrieve " << name << " parameter with key=" << key << ". " \
-                               << "Default value: " << def << ".";                                       \
-    return def;                                                                                          \
-  }                                                                                                      \
+#define IMPL_TYPE_GET(type, coll)                                                                     \
+  template <>                                                                                         \
+  type ParametersList::get<type>(const std::string& key, const type& def) const {                     \
+    if (coll.count(key) > 0)                                                                          \
+      return coll.at(key);                                                                            \
+    CG_DEBUG("ParametersList") << "Failed to retrieve " << utils::demangle(typeid(type).name())       \
+                               << " parameter with key=" << key << ". Default value: " << def << "."; \
+    return def;                                                                                       \
+  }                                                                                                   \
   static_assert(true, "")
 
-#define IMPL_TYPE_SET(type, coll, name)                                                                             \
+#define IMPL_TYPE_SET(type, coll)                                                                                   \
   template <>                                                                                                       \
   bool ParametersList::has<type>(const std::string& key) const {                                                    \
     return coll.count(key) != 0;                                                                                    \
@@ -62,9 +62,9 @@
   }                                                                                                                 \
   static_assert(true, "")
 
-#define IMPL_TYPE_ALL(type, coll, name) \
-  IMPL_TYPE_GET(type, coll, #name);     \
-  IMPL_TYPE_SET(type, coll, #name);     \
+#define IMPL_TYPE_ALL(type, coll) \
+  IMPL_TYPE_GET(type, coll);      \
+  IMPL_TYPE_SET(type, coll);      \
   static_assert(true, "")
 
 namespace cepgen {
@@ -108,24 +108,32 @@ namespace cepgen {
     return diff;
   }
 
-  ParametersList& ParametersList::operator+=(const ParametersList& oth) {
-    if (oth.empty() || *this == oth)  // ensure the two collections are not identical or empty
-      return *this;
+  ParametersList& ParametersList::operator+=(const ParametersList& oth_orig) {
     if (empty()) {
-      *this = oth;
+      *this = oth_orig;
       return *this;
     }
-    // then check if any key of the other collection is already present in the list
+    if (oth_orig.empty() || *this == oth_orig)  // ensure the two collections are not identical or empty
+      return *this;
+    auto oth = oth_orig;
     std::vector<std::string> keys_erased;
-    for (const auto& key : oth.keys()) {
-      if (has<ParametersList>(key)) {
+    for (const auto& oth_key : oth.keys()) {  // check if any key of the other collection is already present in the list
+      if (has<ParametersList>(oth_key)) {
         // do not remove a duplicate parameters collection if they are not strictly identical ;
         // will concatenate its values with the other object's
-        if (get<ParametersList>(key) == oth.get<ParametersList>(key) && erase(key) > 0)
-          keys_erased.emplace_back(key);
-      } else if (erase(key) > 0)
-        // any other duplicate key is just replaced
-        keys_erased.emplace_back(key);
+        if (get<ParametersList>(oth_key) == oth.get<ParametersList>(oth_key) && oth.erase(oth_key) > 0)
+          keys_erased.emplace_back(oth_key);
+      } else if (oth.has<double>(oth_key) && (utils::endsWith(oth_key, "max") || utils::endsWith(oth_key, "min"))) {
+        // hacky path to drop 'xxxmin'/'xxxmax' keys if 'xxx' limits were found
+        auto& lim = operator[]<Limits>(oth_key.substr(0, oth_key.size() - 3));
+        if (utils::endsWith(oth_key, "max"))
+          lim.max() = oth.get<double>(oth_key);
+        else if (utils::endsWith(oth_key, "min"))
+          lim.min() = oth.get<double>(oth_key);
+        if (erase(oth_key) > 0 && oth.erase(oth_key) > 0)
+          keys_erased.emplace_back(oth_key);
+      } else if (erase(oth_key) > 0)  // any other duplicate key is just replaced
+        keys_erased.emplace_back(oth_key);
     }
     if (!keys_erased.empty())
       CG_DEBUG_LOOP("ParametersList") << utils::s("key", keys_erased.size(), true) << " erased: " << keys_erased << ".";
@@ -137,7 +145,7 @@ namespace cepgen {
     for (const auto& par : oth.param_values_)
       // if the two parameters list are modules, and do not have the same name,
       // simply replace the old one with the new parameters list
-      if (param_values_[par.first].getString(MODULE_NAME) == par.second.getString(MODULE_NAME))
+      if (param_values_[par.first].getNameString() == par.second.getNameString())
         param_values_[par.first] += par.second;
       else
         param_values_[par.first] = par.second;
@@ -145,7 +153,7 @@ namespace cepgen {
   }
 
   ParametersList ParametersList::operator+(const ParametersList& oth) const {
-    ParametersList out = *this;
+    auto out = *this;
     out += oth;
     return out;
   }
@@ -175,17 +183,14 @@ namespace cepgen {
                                             << "Open-closed braces imbalance: " << num_open_braces << "\n\t"
                                             << "Raw list: " << raw_list << "\n\t"
                                             << "Resulting list: " << list << ", buffer: " << buf << ".";
-    // now loop through all unpacked arguments
-    for (const auto& arg : list) {
-      // browse through the parameters hierarchy
-      auto cmd = utils::split(arg, '/');
+    for (const auto& arg : list) {        // loop through all unpacked arguments
+      auto cmd = utils::split(arg, '/');  // browse through the parameters hierarchy
       if (arg[arg.size() - 1] != '\'' && arg[arg.size() - 1] != '"' && cmd.size() > 1) {  // sub-parameters word found
         operator[]<ParametersList>(cmd.at(0)).feed(
             utils::merge(std::vector<std::string>(cmd.begin() + 1, cmd.end()), "/"));
         continue;
       }
-
-      // from this moment on, a "key:value" or "key(:true)" was found
+      // from this point, a "key:value" or "key(:true)" was found
       const auto& subplist = utils::between(arg, "{", "}");
       if (!subplist.empty()) {
         for (const auto& subp : subplist)
@@ -193,7 +198,7 @@ namespace cepgen {
         return *this;
       }
       const auto& word = cmd.at(0);
-      auto words = utils::split(arg, ':');
+      const auto words = utils::split(arg, ':');
       auto key = words.at(0);
       if (erase(key) > 0)
         CG_DEBUG("ParametersList:feed") << "Replacing key '" << key << "' with a new value.";
@@ -274,13 +279,12 @@ namespace cepgen {
 
   std::vector<std::string> ParametersList::keys(bool name_key) const {
     std::vector<std::string> out{};
-    auto key = [](const auto& p) { return p.first; };
+    const auto key = [](const auto& p) { return p.first; };
 #define __TYPE_ENUM(type, map, name) std::transform(map.begin(), map.end(), std::back_inserter(out), key);
     REGISTER_CONTENT_TYPE
 #undef __TYPE_ENUM
     if (!name_key) {
-      const auto it_name = std::find(out.begin(), out.end(), MODULE_NAME);
-      if (it_name != out.end())
+      if (const auto it_name = std::find(out.begin(), out.end(), MODULE_NAME); it_name != out.end())
         out.erase(it_name);
     }
     std::sort(out.begin(), out.end());
@@ -389,10 +393,10 @@ namespace cepgen {
   // sub-parameters-type attributes
   //------------------------------------------------------------------
 
-  IMPL_TYPE_ALL(ParametersList, param_values_, "parameters");
-  IMPL_TYPE_ALL(bool, bool_values_, "boolean");
+  IMPL_TYPE_ALL(ParametersList, param_values_);
+  IMPL_TYPE_ALL(bool, bool_values_);
 
-  IMPL_TYPE_SET(int, int_values_, "integer");
+  IMPL_TYPE_SET(int, int_values_);
   template <>
   int ParametersList::get<int>(const std::string& key, const int& def) const {
     if (has<int>(key))
@@ -407,7 +411,7 @@ namespace cepgen {
     return def;
   }
 
-  IMPL_TYPE_SET(unsigned long long, ulong_values_, "unsigned long integer");
+  IMPL_TYPE_SET(unsigned long long, ulong_values_);
   template <>
   unsigned long long ParametersList::get<unsigned long long>(const std::string& key,
                                                              const unsigned long long& def) const {
@@ -423,20 +427,20 @@ namespace cepgen {
     return def;
   }
 
-  IMPL_TYPE_ALL(double, dbl_values_, "floating number");
-  IMPL_TYPE_ALL(std::string, str_values_, "string");
-  IMPL_TYPE_ALL(std::vector<int>, vec_int_values_, "vector of integers");
-  IMPL_TYPE_ALL(std::vector<double>, vec_dbl_values_, "vector of floating numbers");
-  IMPL_TYPE_ALL(std::vector<std::string>, vec_str_values_, "vector of strings");
-  IMPL_TYPE_ALL(std::vector<Limits>, vec_lim_values_, "vector of limits");
-  IMPL_TYPE_ALL(std::vector<ParametersList>, vec_param_values_, "vector of parameters");
-  IMPL_TYPE_ALL(std::vector<std::vector<double> >, vec_vec_dbl_values_, "vector of vectors of floating numbers");
+  IMPL_TYPE_ALL(double, dbl_values_);
+  IMPL_TYPE_ALL(std::string, str_values_);
+  IMPL_TYPE_ALL(std::vector<int>, vec_int_values_);
+  IMPL_TYPE_ALL(std::vector<double>, vec_dbl_values_);
+  IMPL_TYPE_ALL(std::vector<std::string>, vec_str_values_);
+  IMPL_TYPE_ALL(std::vector<Limits>, vec_lim_values_);
+  IMPL_TYPE_ALL(std::vector<ParametersList>, vec_param_values_);
+  IMPL_TYPE_ALL(std::vector<std::vector<double> >, vec_vec_dbl_values_);
 
   //------------------------------------------------------------------
   // limits-type attributes
   //------------------------------------------------------------------
 
-  IMPL_TYPE_SET(Limits, lim_values_, "limits");
+  IMPL_TYPE_SET(Limits, lim_values_);
 
   template <>
   Limits ParametersList::get<Limits>(const std::string& key, const Limits& def) const {
@@ -445,9 +449,10 @@ namespace cepgen {
     auto val = std::find_if(lim_values_.begin(), lim_values_.end(), [&key](const auto& kv) { return kv.first == key; });
     if (val != lim_values_.end())
       out = val->second;
-    // still trying to build it from (min/max) attributes
-    fill<double>(key + "min", out.min());
-    fill<double>(key + "max", out.max());
+    else {  // still trying to build it from (min/max) attributes
+      fill<double>(key + "min", out.min());
+      fill<double>(key + "max", out.max());
+    }
     return out.validate();
     // nothing found ; returning default
     CG_DEBUG("ParametersList") << "Failed to retrieve limits parameter with key=" << key << ". "
@@ -457,8 +462,6 @@ namespace cepgen {
 
   template <>
   const ParametersList& ParametersList::fill<Limits>(const std::string& key, Limits& value) const {
-    fill<double>(key + "min", value.min());
-    fill<double>(key + "max", value.max());
     if (has<Limits>(key)) {
       const auto& lim = get<Limits>(key);
       if (lim.hasMin())
@@ -467,6 +470,8 @@ namespace cepgen {
         value.max() = lim.max();
       return *this;
     }
+    fill<double>(key + "min", value.min());
+    fill<double>(key + "max", value.max());
     return *this;
   }
 

@@ -18,6 +18,7 @@
 
 #include <chrono>
 
+#include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Core/RunParameters.h"
@@ -26,6 +27,7 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
+#include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/GeneratorWorkerFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Process/Process.h"
@@ -68,6 +70,10 @@ namespace cepgen {
     initialised_ = false;
   }
 
+  void Generator::parseRunParameters(const std::string& filename) {
+    setRunParameters(CardsHandlerFactory::get().buildFromFilename(filename)->parseFile(filename).runParameters());
+  }
+
   const RunParameters& Generator::runParameters() const {
     if (!parameters_)
       throw CG_FATAL("Generator:runParameters") << "Run parameters object is not yet initialised.";
@@ -80,7 +86,7 @@ namespace cepgen {
     return *parameters_;
   }
 
-  void Generator::setRunParameters(RunParameters* ip) { parameters_.reset(ip); }
+  void Generator::setRunParameters(std::unique_ptr<RunParameters>& ip) { parameters_ = std::move(ip); }
 
   double Generator::computePoint(const std::vector<double>& coord) {
     if (!worker_)

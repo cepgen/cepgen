@@ -19,6 +19,8 @@
 #ifndef CepGen_Integration_AnalyticIntegrator_h
 #define CepGen_Integration_AnalyticIntegrator_h
 
+#include <functional>
+
 #include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Utils/Limits.h"
 

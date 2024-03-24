@@ -34,11 +34,20 @@
   static_assert(true, "")
 
 namespace cepgen {
+  class RunParameters;
   namespace card {
     class Handler;
   }
+  /// A cards handler base factory
+  DEFINE_FACTORY(std::string, BaseCardsHandlerFactory, card::Handler, "Cards handlers factory");
   /// A cards handler factory
-  DEFINE_FACTORY(std::string, CardsHandlerFactory, card::Handler, "Cards handlers factory");
+  struct CardsHandlerFactory : public BaseCardsHandlerFactory {
+    using BaseCardsHandlerFactory::BaseCardsHandlerFactory;
+    static CardsHandlerFactory& get();
+    /// Build one instance of a cards handler
+    /// \param[in] filename File path to retrieve
+    std::unique_ptr<card::Handler> buildFromFilename(const std::string& filename) const;
+  };
 }  // namespace cepgen
 
 #endif

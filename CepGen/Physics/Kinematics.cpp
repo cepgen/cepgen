@@ -21,43 +21,33 @@
 #include "CepGen/Utils/Message.h"
 
 namespace cepgen {
-  Kinematics::Kinematics(const ParametersList& params) : SteeredObject(params) {
-    if (!params.empty())
-      setParameters(params);
-  }
+  Kinematics::Kinematics(const ParametersList& params) : SteeredObject(params) {}
 
   void Kinematics::setParameters(const ParametersList& params) {
+    if (params.empty())
+      return;
     SteeredObject::setParameters(params);
     CG_DEBUG("Kinematics") << "Building a Kinematics parameters container "
                            << "with the following parameters:\n\t" << params_ << ".";
 
     incoming_beams_.setParameters(params_);
     cuts_.setParameters(params_);
-    //----- outgoing particles definition
-    if (params_.has<std::vector<int> >("minFinalState"))
+    if (params_.has<std::vector<int> >("minFinalState"))  // outgoing particles definition
       for (const auto& pdg : steer<std::vector<int> >("minFinalState"))
         minimum_final_state_.emplace_back((pdgid_t)pdg);
 
-    //--- specify where to look for the grid path for gluon emission
-    const auto& kmr_grid_path = steerPath("kmrGridPath");
-    if (!kmr_grid_path.empty())
+    if (const auto kmr_grid_path = steerPath("kmrGridPath"); !kmr_grid_path.empty())  // grid path for gluon emission
       kmr::GluonGrid::get(ParametersList(params_).set<std::string>("path", kmr_grid_path));
   }
 
-  ParametersList Kinematics::fullParameters() const {
-    ParametersList params;
-    params += incoming_beams_.parameters();  // beam particles
-    params += cuts_.fullParameters();
+  const ParametersList& Kinematics::parameters() const {
+    params_ += incoming_beams_.parameters() + cuts_.parameters();
     // minimum final state content
-    if (!minimum_final_state_.empty()) {
-      std::vector<int> min_pdgs;
-      std::transform(
-          minimum_final_state_.begin(), minimum_final_state_.end(), std::back_inserter(min_pdgs), [](const auto& pdg) {
-            return (int)pdg;
-          });
-      params.set<std::vector<int> >("minFinalState", min_pdgs);
-    }
-    return params;
+    std::transform(minimum_final_state_.begin(),
+                   minimum_final_state_.end(),
+                   std::back_inserter(params_.operator[]<std::vector<int> >("minFinalState")),
+                   [](const auto& pdg) { return (int)pdg; });
+    return SteeredObject::parameters();
   }
 
   ParametersDescription Kinematics::description() {

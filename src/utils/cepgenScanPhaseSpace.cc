@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/Generator.h"
@@ -52,7 +51,7 @@ int main(int argc, char* argv[]) {
     throw CG_FATAL("main") << "Number of dimensions to probe (" << dim.size() << ") is too high";
 
   cepgen::Generator gen;
-  gen.setRunParameters(cepgen::card::Handler::parseFile(input_card));
+  gen.parseRunParameters(input_card);
   CG_LOG << gen.runParameters();
   const size_t ndim = gen.runParameters().process().ndim();
 

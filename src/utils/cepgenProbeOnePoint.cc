@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Cards/Handler.h"
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Process/Process.h"
@@ -41,7 +40,7 @@ int main(int argc, char* argv[]) {
     CG_LOG_LEVEL(debugInsideLoop);
 
   cepgen::Generator gen;
-  gen.setRunParameters(cepgen::card::Handler::parseFile(input_card));
+  gen.parseRunParameters(input_card);
   gen.runParameters().process().initialise();
   CG_DEBUG("main") << gen.runParameters();
 
