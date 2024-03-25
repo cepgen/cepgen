@@ -11,5 +11,4 @@ endif()
 
 cepgen_build(CepGenCTML SOURCES *.cpp
     EXT_HEADERS ${CTML_INCLUDE}
-    UTILS utils/*.cc
     INSTALL_COMPONENT doc)

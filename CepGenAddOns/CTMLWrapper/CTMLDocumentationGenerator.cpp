@@ -63,7 +63,7 @@ public:
   }
 
   static ParametersDescription description() {
-    auto desc = ParametersDescription();
+    auto desc = DocumentationGenerator::description();
     desc.setDescription("CTML HTML document generator helper");
     desc.add<std::string>("output", "index.html").setDescription("output path for the generated HTML file");
     desc.add<std::string>("pageTitle", "Modules documentation").setDescription("documentation page upper level title");
@@ -152,7 +152,7 @@ private:
     return out;
   }
 
-  const std::string output_filename_, page_title_;
+  const std::string page_title_;
   const bool bare_, show_git_;
   CTML::Document doc_;
   CTML::Node container_;

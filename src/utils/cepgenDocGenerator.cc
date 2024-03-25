@@ -25,10 +25,11 @@
 #include "CepGen/Utils/Message.h"
 
 int main(int argc, char* argv[]) {
-  std::string output_file;
+  std::string doc_generator, output_file;
   bool use_bs, show_title, show_git, bare;
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("output,o", "output HTML file", &output_file, "index.html")
+      .addOptionalArgument("documentation-generator,D", "type of documentation", &doc_generator, "text")
+      .addOptionalArgument("output,o", "output HTML file", &output_file, "")
       .addOptionalArgument("bootstrap,b", "use Bootstrap CDN to prettify the output?", &use_bs, true)
       .addOptionalArgument("show-title,t", "show the page title?", &show_title, true)
       .addOptionalArgument("show-git,g", "show the git hash/branch?", &show_git, false)
@@ -37,10 +38,10 @@ int main(int argc, char* argv[]) {
 
   cepgen::initialise();
   auto gen_params =
-      cepgen::ParametersList().set<bool>("useBS", use_bs).set<bool>("showGit", show_git).set<bool>("bare", bare);
+      cepgen::ParametersList().setName(doc_generator).set("useBS", use_bs).set("showGit", show_git).set("bare", bare);
   if (!show_title)
-    gen_params.set<bool>("pageTitle", "");
-  auto gen = cepgen::DocumentationGeneratorFactory::get().build("ctml", gen_params);
+    gen_params.set<std::string>("pageTitle", "");
+  auto gen = cepgen::DocumentationGeneratorFactory::get().build(gen_params);
   gen->initialise();
   const auto documentation = gen->describe();
 
