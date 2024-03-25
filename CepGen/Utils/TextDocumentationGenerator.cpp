@@ -16,11 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/DocumentationGeneratorFactory.h"
 #include "CepGen/Utils/DocumentationGenerator.h"
 #include "CepGen/Utils/String.h"
-#include "CepGen/Version.h"
 
 namespace cepgen {
   namespace utils {
@@ -47,17 +45,13 @@ namespace cepgen {
           if (cat.second.modules.empty())
             continue;
           os << "\n"
-             << cepgen::utils::colourise(separator + "\n" + cat.second.title + " modules" + "\n" + separator,
-                                         cepgen::utils::Colour::green,
-                                         cepgen::utils::Modifier::bold)
+             << colourise(
+                    separator + "\n" + cat.second.title + " modules" + "\n" + separator, Colour::green, Modifier::bold)
              << "\n";
           for (const auto& mod : cat.second.modules) {
             os << "\n"
-               << cepgen::utils::colourise(utils::toString(mod.first),
-                                           cepgen::utils::Colour::none,
-                                           cepgen::utils::Modifier::underline | cepgen::utils::Modifier::bold)
-               << " module:\n\n";
-            os << mod.second.describe();
+               << colourise(toString(mod.first), Colour::none, Modifier::underline | Modifier::bold) << " module:\n\n"
+               << mod.second.describe();
             if (dump_params_)
               os << "\n\tParametersList object:\n\t\t" << mod.second.parameters();
             os << "\n";
