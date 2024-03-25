@@ -87,7 +87,7 @@ namespace cepgen {
 
     ConfigWriter& ConfigWriter::operator<<(const ParametersDescription& pdesc) {
       CG_DEBUG("ConfigWriter") << "Adding a parameters description object:\n" << pdesc;
-      std::function<std::string(const ParametersDescription&, const std::string&, size_t)> write =
+      const std::function<std::string(const ParametersDescription&, const std::string&, size_t)> write =
           [&](const ParametersDescription& pdesc, const std::string& key, size_t offset_num) -> std::string {
         // write a generic parameters description object
         std::stringstream os;
@@ -124,14 +124,16 @@ namespace cepgen {
               break;
             case ParametersDescription::Type::ParametersVector: {
               std::string sep2;
+              os << offset(offset_num + 1) << key << " = [\n";
               for (const auto& it : params.get<std::vector<ParametersList> >(key))
-                os << sep2 << write(ParametersDescription(it), "", 0), sep2 = ", ";
+                os << sep2 << write(ParametersDescription(it), "", offset_num + 2), sep2 = ",\n" + offset(offset_num);
+              os << "\n" << offset(offset_num + 1) << "]";
             } break;
             case ParametersDescription::Type::Value: {
               if (params.has<ParametersList>(key))
                 os << off << write(ParametersDescription(params.get<ParametersList>(key)), key, offset_num + 1);
               else
-                os << off << offset(1) << key << " = " << repr(params, key);
+                os << offset(offset_num + 1) << key << " = " << repr(params, key);
             } break;
           }
           sep = ",";
@@ -153,11 +155,7 @@ namespace cepgen {
         os << ")";
         return os.str();
       };
-
-      if (!pdesc.key().empty())
-        os_ << pdesc.key() << " = ";
-      os_ << write(pdesc, "", 0) << "\n";
-
+      os_ << write(pdesc, pdesc.key(), 0) << "\n";
       return *this;
     }
 
