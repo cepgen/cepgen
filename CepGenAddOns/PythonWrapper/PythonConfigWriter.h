@@ -34,7 +34,9 @@ namespace cepgen {
       PythonConfigWriter& operator<<(const ParametersDescription&);
 
     private:
+      inline std::string offset(size_t num) { return std::string(num * tab_len_, ' '); }  ///< Compute a char-offset
       mutable std::ofstream file_;
+      const size_t tab_len_{4};
     };
   }  // namespace python
 }  // namespace cepgen

@@ -80,10 +80,10 @@ namespace cepgen {
     PythonConfigWriter& PythonConfigWriter::operator<<(const ParametersDescription& pdesc) {
       CG_DEBUG("PythonConfigWriter") << "Adding a parameters description object:\n" << pdesc;
       std::function<std::string(const ParametersDescription&, const std::string&, size_t)> write =
-          [&](const ParametersDescription& pdesc, const std::string& key, size_t offset) -> std::string {
+          [&](const ParametersDescription& pdesc, const std::string& key, size_t offset_num) -> std::string {
         // write a generic parameters description object
         std::stringstream os;
-        const std::string off(offset * 4, ' ');
+        const auto off = offset(offset_num);
         os << off;
         if (!key.empty())
           os << key << " = ";
@@ -112,16 +112,19 @@ namespace cepgen {
           switch (daugh.type()) {
             case ParametersDescription::Type::Module:
             case ParametersDescription::Type::Parameters:
-              os << write(pdesc.get(key), key, offset + 1);
+              os << write(pdesc.get(key), key, offset_num + 1);
               break;
             case ParametersDescription::Type::ParametersVector: {
               std::string sep2;
               for (const auto& it : params.get<std::vector<ParametersList> >(key))
                 os << sep2 << write(ParametersDescription(it), "", 0), sep2 = ", ";
             } break;
-            case ParametersDescription::Type::Value:
-              os << off << std::string(4, ' ') << key << " = " << repr(params, key);
-              break;
+            case ParametersDescription::Type::Value: {
+              if (params.has<ParametersList>(key))
+                os << off << write(ParametersDescription(params.get<ParametersList>(key)), key, offset_num + 1);
+              else
+                os << off << offset(1) << key << " = " << repr(params, key);
+            } break;
           }
           sep = ",";
         }
