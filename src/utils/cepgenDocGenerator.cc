@@ -24,12 +24,17 @@
 #include "CepGen/Utils/DocumentationGenerator.h"
 #include "CepGen/Utils/Message.h"
 
+using namespace std;
+
 int main(int argc, char* argv[]) {
-  std::string doc_generator, output_file;
+  string doc_generator, output_file;
   bool use_bs, show_title, show_git, bare;
+  vector<string> categories, modules_names;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("documentation-generator,D", "type of documentation", &doc_generator, "text")
       .addOptionalArgument("output,o", "output HTML file", &output_file, "")
+      .addOptionalArgument("categories,C", "categories to document", &categories, vector<string>{})
+      .addOptionalArgument("modules,m", "module names to document", &modules_names, vector<string>{})
       .addOptionalArgument("bootstrap,b", "use Bootstrap CDN to prettify the output?", &use_bs, true)
       .addOptionalArgument("show-title,t", "show the page title?", &show_title, true)
       .addOptionalArgument("show-git,g", "show the git hash/branch?", &show_git, false)
@@ -37,10 +42,16 @@ int main(int argc, char* argv[]) {
       .parse();
 
   cepgen::initialise();
-  auto gen_params =
-      cepgen::ParametersList().setName(doc_generator).set("useBS", use_bs).set("showGit", show_git).set("bare", bare);
+  auto gen_params = cepgen::ParametersList()
+                        .setName(doc_generator)
+                        .feed(doc_generator)
+                        .set("categories", categories)
+                        .set("modules", modules_names)
+                        .set("useBS", use_bs)
+                        .set("showGit", show_git)
+                        .set("bare", bare);
   if (!show_title)
-    gen_params.set<std::string>("pageTitle", "");
+    gen_params.set<string>("pageTitle", "");
   auto gen = cepgen::DocumentationGeneratorFactory::get().build(gen_params);
   gen->initialise();
   const auto documentation = gen->describe();
@@ -48,7 +59,7 @@ int main(int argc, char* argv[]) {
   if (output_file.empty())
     CG_LOG << documentation;
   else {
-    std::ofstream of(output_file);
+    ofstream of(output_file);
     of << documentation;
     of.close();
     CG_INFO("main") << "Documentation written in '" << output_file << "'.";

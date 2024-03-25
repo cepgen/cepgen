@@ -44,6 +44,8 @@ namespace cepgen {
         std::ostringstream os;
         const auto separator = std::string(80, '=');
         for (const auto& cat : categories_) {
+          if (cat.second.modules.empty())
+            continue;
           os << "\n"
              << cepgen::utils::colourise(separator + "\n" + cat.second.title + " modules" + "\n" + separator,
                                          cepgen::utils::Colour::green,

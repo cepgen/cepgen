@@ -41,16 +41,23 @@ namespace cepgen {
     DocumentationGenerator::DocumentationGenerator(const ParametersList& params) : NamedModule(params) {}
 
     void DocumentationGenerator::initialise() {
-      const auto add_category =
-          [&](const std::string& name, const std::string& title, const std::string& description, auto& factory) {
-            category_t cat;
-            cat.name = name;
-            cat.title = title;
-            cat.description = description;
-            for (const auto& mod : factory.modules())
-              cat.modules[utils::toString(mod)] = factory.describeParameters(mod);
-            categories_.emplace_back(std::make_pair(name, cat));
-          };
+      const auto categories = steer<std::vector<std::string> >("categories"),
+                 mod_names = steer<std::vector<std::string> >("modules");
+      const auto add_category = [&categories, &mod_names, this](const std::string& name,
+                                                                const std::string& title,
+                                                                const std::string& description,
+                                                                auto& factory) -> void {
+        if (!categories.empty() && !contains(categories, name))
+          return;
+        category_t cat;
+        cat.name = name;
+        cat.title = title;
+        cat.description = description;
+        for (const auto& mod : factory.modules())
+          if (mod_names.empty() || contains(mod_names, utils::toString(mod)))
+            cat.modules[utils::toString(mod)] = factory.describeParameters(mod);
+        categories_.emplace_back(std::make_pair(name, cat));
+      };
       add_category("proc", "Processes", "", cepgen::ProcessFactory::get());
       add_category("cards", "Cards handler", "", cepgen::CardsHandlerFactory::get());
       add_category("formfac", "Form factors", "", cepgen::FormFactorsFactory::get());
