@@ -33,6 +33,7 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/StructureFunctions/SigmaRatio.h"
 #include "CepGen/Utils/Derivator.h"
+#include "CepGen/Utils/DocumentationGenerator.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/RandomGenerator.h"
@@ -42,6 +43,7 @@ namespace cepgen {
   template class ModuleFactory<CollinearFlux, std::string>;
   template class ModuleFactory<Coupling, std::string>;
   template class ModuleFactory<utils::Derivator, std::string>;
+  template class ModuleFactory<utils::DocumentationGenerator, std::string>;
   template class ModuleFactory<utils::Drawer, std::string>;
   template class ModuleFactory<EventImporter, std::string>;
   template class ModuleFactory<EventModifier, std::string>;
