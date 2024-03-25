@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <sstream>
+#include <fstream>
 
 #include "CepGen/Core/ParametersDescription.h"
 #include "CepGen/Core/RunParameters.h"
@@ -25,7 +25,7 @@
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
-#include "CepGenAddOns/PythonWrapper/PythonConfigWriter.h"
+#include "CepGenAddOns/PythonWrapper/ConfigWriter.h"
 
 using namespace std::string_literals;
 
@@ -57,15 +57,23 @@ namespace cepgen {
       return params.getString(key, true);
     }
 
-    PythonConfigWriter::PythonConfigWriter(const std::string& filename) : file_(filename) {
-      file_ << "from sys import path\n"
+    ConfigWriter::ConfigWriter(const ParametersList& params)
+        : SteeredObject(params), tab_len_(steer<int>("tabLength")) {
+      if (steer<bool>("importPath"))
+        os_ << "from sys import path\n"
             << "path.append('python')\n\n";
-      file_ << "import Config.Core as cepgen\n\n";
+      os_ << "import Config.Core as cepgen\n\n";
     }
 
-    PythonConfigWriter::~PythonConfigWriter() { file_.close(); }
+    ConfigWriter::~ConfigWriter() {
+      if (const auto filename = steer<std::string>("filename"); !filename.empty()) {
+        std::ofstream of(filename);
+        of << os_.str();
+        of.close();
+      }
+    }
 
-    PythonConfigWriter& PythonConfigWriter::operator<<(const RunParameters& params) {
+    ConfigWriter& ConfigWriter::operator<<(const RunParameters& params) {
       if (params.timeKeeper())
         (*this) << ParametersDescription("timer");
       if (params.hasProcess())
@@ -77,8 +85,8 @@ namespace cepgen {
       return *this;
     }
 
-    PythonConfigWriter& PythonConfigWriter::operator<<(const ParametersDescription& pdesc) {
-      CG_DEBUG("PythonConfigWriter") << "Adding a parameters description object:\n" << pdesc;
+    ConfigWriter& ConfigWriter::operator<<(const ParametersDescription& pdesc) {
+      CG_DEBUG("ConfigWriter") << "Adding a parameters description object:\n" << pdesc;
       std::function<std::string(const ParametersDescription&, const std::string&, size_t)> write =
           [&](const ParametersDescription& pdesc, const std::string& key, size_t offset_num) -> std::string {
         // write a generic parameters description object
@@ -147,10 +155,20 @@ namespace cepgen {
       };
 
       if (!pdesc.key().empty())
-        file_ << pdesc.key() << " = ";
-      file_ << write(pdesc, "", 0) << "\n";
+        os_ << pdesc.key() << " = ";
+      os_ << write(pdesc, "", 0) << "\n";
 
       return *this;
+    }
+
+    std::string ConfigWriter::operator()() const { return os_.str(); }
+
+    ParametersDescription ConfigWriter::description() {
+      auto desc = ParametersDescription();
+      desc.add<bool>("importPath", false).setDescription("prepare the Python environment with path?");
+      desc.add<int>("tabLength", 4).setDescription("number of spaces for one tabulation");
+      desc.add<std::string>("filename", "").setDescription("Python output filename");
+      return desc;
     }
   }  // namespace python
 }  // namespace cepgen

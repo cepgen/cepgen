@@ -27,7 +27,7 @@
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Test.h"
-#include "CepGenAddOns/PythonWrapper/PythonConfigWriter.h"
+#include "CepGenAddOns/PythonWrapper/ConfigWriter.h"
 
 using namespace std;
 
@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
 
   {
     gen.runParameters().setProcess(cepgen::ProcessFactory::get().build(process));
-    cepgen::python::PythonConfigWriter py(output_file);
+    cepgen::python::ConfigWriter py(cepgen::ParametersList().set("filename", output_file));
     py << gen.runParameters();
   }
 

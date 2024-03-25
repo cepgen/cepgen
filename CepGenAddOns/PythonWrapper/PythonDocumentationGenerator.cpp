@@ -18,7 +18,7 @@
 
 #include "CepGen/Modules/DocumentationGeneratorFactory.h"
 #include "CepGen/Utils/DocumentationGenerator.h"
-#include "CepGenAddOns/PythonWrapper/PythonConfigWriter.h"
+#include "CepGenAddOns/PythonWrapper/ConfigWriter.h"
 
 using namespace cepgen;
 
@@ -37,8 +37,7 @@ public:
   }
 
   std::string describe() override {
-    python::PythonConfigWriter writer(steer<std::string>("filename"));
-    const auto separator = std::string(80, '=');
+    python::ConfigWriter writer(params_);
     for (const auto& cat : categories_) {
       if (cat.second.modules.empty())
         continue;
