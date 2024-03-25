@@ -31,7 +31,7 @@
 #include "CepGenAddOns/MadGraphWrapper/Utils.h"
 #include "CepGenAddOns/PythonWrapper/Environment.h"
 #include "CepGenAddOns/PythonWrapper/ObjectPtr.h"
-#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
+#include "CepGenAddOns/PythonWrapper/Utils.h"
 
 namespace cepgen {
   namespace mg5amc {

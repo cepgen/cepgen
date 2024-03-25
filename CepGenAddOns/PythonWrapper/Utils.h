@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGenAddOns_PythonWrapper_PythonUtils_h
-#define CepGenAddOns_PythonWrapper_PythonUtils_h
+#ifndef CepGenAddOns_PythonWrapper_Utils_h
+#define CepGenAddOns_PythonWrapper_Utils_h
 
 namespace cepgen {
   namespace python {

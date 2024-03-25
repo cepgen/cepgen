@@ -19,7 +19,7 @@
 // clang-format off
 #include "CepGenAddOns/PythonWrapper/Environment.h"
 #include "CepGenAddOns/PythonWrapper/Error.h"
-#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
+#include "CepGenAddOns/PythonWrapper/Utils.h"
 // clang-format on
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/Generator.h"
