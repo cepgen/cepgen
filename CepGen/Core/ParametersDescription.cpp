@@ -77,10 +77,10 @@ namespace cepgen {
   }
 
   ParametersDescription::Type ParametersDescription::type() const {
-    if (obj_descr_.empty())
-      return Type::Value;
     if (is_vec_params_)
       return Type::ParametersVector;
+    if (obj_descr_.empty())
+      return Type::Value;
     const auto& mod_name = ParametersList::getNameString();
     if (mod_name.empty())
       return Type::Parameters;
@@ -104,10 +104,13 @@ namespace cepgen {
       os << " <- " << utils::colourise(mod_descr_, utils::Colour::blue, utils::Modifier::italic);
     if (keys.empty())  // no keys to this module ; can return
       return os.str();
+    if (pdtype == Type::ParametersVector) {
+      os << parameters();
+      return os.str();
+    }
     if (pdtype == Type::Module)
       os << " with parameters";
-    if (pdtype != Type::ParametersVector)
-      os << ":";
+    os << ":";
     // write list of parameters (if has some)
     for (const auto& key : keys) {
       if (pdtype == Type::ParametersVector && !ParametersList::has<ParametersList>(key))
@@ -183,10 +186,9 @@ namespace cepgen {
                                                                                const std::vector<ParametersList>& def) {
     obj_descr_[name] += desc;
     obj_descr_[name].setParametersVector(true);
-    std::vector<ParametersList> values;
+    auto& values = ParametersList::operator[]<std::vector<ParametersList> >(name);
     for (const auto& val : def)
       values.emplace_back(desc.validate(val));
-    ParametersList::set<std::vector<ParametersList> >(name, values);
     CG_DEBUG_LOOP("ParametersDescription:addParametersDescriptionVector").log([this, &name, &desc, &def](auto& log) {
       log << "Added a new vector of parameters descriptions \"" << name << "\" as: " << desc;
       const auto& mod_name = this->getNameString();

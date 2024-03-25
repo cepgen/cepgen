@@ -19,7 +19,7 @@
 // clang-format off
 #include "CepGenAddOns/PythonWrapper/Environment.h"
 #include "CepGenAddOns/PythonWrapper/Error.h"
-#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
+#include "CepGenAddOns/PythonWrapper/Utils.h"
 // clang-format on
 
 #include <algorithm>
@@ -43,7 +43,7 @@
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Utils/TimeKeeper.h"
-#include "CepGenAddOns/PythonWrapper/PythonConfigWriter.h"
+#include "CepGenAddOns/PythonWrapper/ConfigWriter.h"
 
 #define Py_DEBUG
 
@@ -196,7 +196,7 @@ namespace cepgen {
         runParameters()->addEventExporter(EventExporterFactory::get().build(mod));
     }
     void write(const std::string& filename) const override {
-      python::PythonConfigWriter writer(filename);
+      python::ConfigWriter writer(ParametersList().set("filename", filename));
       writer << *runParameters();
     }
     std::unique_ptr<python::Environment> env_;

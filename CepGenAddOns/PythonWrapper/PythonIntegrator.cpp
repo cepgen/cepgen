@@ -23,7 +23,7 @@
 #include "CepGen/Utils/String.h"
 #include "CepGenAddOns/PythonWrapper/Environment.h"
 #include "CepGenAddOns/PythonWrapper/Error.h"
-#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
+#include "CepGenAddOns/PythonWrapper/Utils.h"
 
 namespace cepgen {
   class PythonIntegrator final : public Integrator {

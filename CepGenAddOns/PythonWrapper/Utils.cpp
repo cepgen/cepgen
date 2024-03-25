@@ -22,7 +22,7 @@
 #include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
-#include "CepGenAddOns/PythonWrapper/PythonUtils.h"
+#include "CepGenAddOns/PythonWrapper/Utils.h"
 
 namespace cepgen {
   namespace python {

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2021-2024  Laurent Forthomme
+ *  Copyright (C) 2018-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,28 +16,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGenAddOns_PythonWrapper_PythonConfigWriter_h
-#define CepGenAddOns_PythonWrapper_PythonConfigWriter_h
-
-#include <fstream>
+#ifndef CepGenAddOns_PythonWrapper_Utils_h
+#define CepGenAddOns_PythonWrapper_Utils_h
 
 namespace cepgen {
-  class RunParameters;
-  class ParametersDescription;
   namespace python {
-    class PythonConfigWriter final {
-    public:
-      PythonConfigWriter(const std::string&);
-      ~PythonConfigWriter();
-
-      PythonConfigWriter& operator<<(const RunParameters&);
-      PythonConfigWriter& operator<<(const ParametersDescription&);
-
-    private:
-      inline std::string offset(size_t num) { return std::string(num * tab_len_, ' '); }  ///< Compute a char-offset
-      mutable std::ofstream file_;
-      const size_t tab_len_{4};
-    };
+    /// Translate a filename into a python-compatible path
+    std::string pythonPath(const std::string&);
+    std::vector<std::wstring> info();
   }  // namespace python
 }  // namespace cepgen
 
