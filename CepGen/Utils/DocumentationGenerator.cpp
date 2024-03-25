@@ -22,6 +22,7 @@
 // list of factories documented
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/CouplingFactory.h"
+#include "CepGen/Modules/DocumentationGeneratorFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventImporterFactory.h"
@@ -38,9 +39,7 @@
 
 namespace cepgen {
   namespace utils {
-    DocumentationGenerator::DocumentationGenerator(const ParametersList& params) : NamedModule(params) {}
-
-    void DocumentationGenerator::initialise() {
+    DocumentationGenerator::DocumentationGenerator(const ParametersList& params) : NamedModule(params) {
       const auto categories = steer<std::vector<std::string> >("categories"),
                  mod_names = steer<std::vector<std::string> >("modules");
       const auto add_category = [&categories, &mod_names, this](const std::string& name,
@@ -79,6 +78,7 @@ namespace cepgen {
       add_category("evtimp", "Event import algorithms", "", cepgen::EventImporterFactory::get());
       add_category("evtmod", "Event modification algorithms", "", cepgen::EventModifierFactory::get());
       add_category("evtout", "Event export modules", "", cepgen::EventExporterFactory::get());
+      add_category("docs", "Documentation generator modules", "", cepgen::DocumentationGeneratorFactory::get());
     }
 
     ParametersDescription DocumentationGenerator::description() {

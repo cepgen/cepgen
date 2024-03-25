@@ -33,7 +33,6 @@ namespace cepgen {
 
       static ParametersDescription description();
 
-      virtual void initialise();
       virtual std::string describe() = 0;
 
     protected:

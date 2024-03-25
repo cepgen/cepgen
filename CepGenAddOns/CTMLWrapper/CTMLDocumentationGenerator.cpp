@@ -32,12 +32,21 @@ using namespace cepgen;
 /// \date Apr 2022
 class CTMLDocumentationGenerator final : public cepgen::utils::DocumentationGenerator {
 public:
-  explicit CTMLDocumentationGenerator(const ParametersList& params)
-      : DocumentationGenerator(params),
-        page_title_(steer<std::string>("pageTitle")),
-        bare_(steer<bool>("bare")),
-        show_git_(steer<bool>("showGit")),
-        container_(CTML::Node("div.container-fluid")) {
+  inline explicit CTMLDocumentationGenerator(const ParametersList& params)
+      : DocumentationGenerator(params), bare_(steer<bool>("bare")), container_(CTML::Node("div.container-fluid")) {}
+
+  inline static ParametersDescription description() {
+    auto desc = DocumentationGenerator::description();
+    desc.setDescription("CTML HTML document generator helper");
+    desc.add<std::string>("output", "index.html").setDescription("output path for the generated HTML file");
+    desc.add<std::string>("pageTitle", "Modules documentation").setDescription("documentation page upper level title");
+    desc.add<bool>("useBS", true).setDescription("use the Bootstrap CDN to prettify this output?");
+    desc.add<bool>("showGit", false).setDescription("print out the git hash/branch in the output?");
+    desc.add<bool>("bare", false).setDescription("generate a bare version (without <html>/<head>/<body> attributes)");
+    return desc;
+  }
+
+  inline std::string describe() override {
     doc_.AppendNodeToHead(CTML::Node("title", "CepGen v" + version::tag + " modules documentation"));
     if (!bare_ && steer<bool>("useBS")) {
       doc_.AppendNodeToHead(
@@ -50,31 +59,16 @@ public:
                                 .SetAttribute("name", "viewport")
                                 .SetAttribute("content", "width=device-width, initial-scale=1"));
     }
-    if (!page_title_.empty())
-      container_.AppendChild(CTML::Node("h1", page_title_));
+    if (const auto page_title = steer<std::string>("pageTitle"); !page_title.empty())
+      container_.AppendChild(CTML::Node("h1", page_title));
     auto header = CTML::Node("div").AppendText("CepGen version ").AppendChild(CTML::Node("mark", version::tag));
-    if (show_git_)
+    if (steer<bool>("showGit"))
       header.AppendChild(CTML::Node("br").UseClosingTag(false))
           .AppendText("Git hash/branch: ")
           .AppendChild(CTML::Node("code", version::extended));
     header.AppendChild(CTML::Node("br").UseClosingTag(false))
         .AppendText("Documentation last generated on " + utils::timeAs("%B %d, %Y"));
     container_.AppendChild(header);
-  }
-
-  static ParametersDescription description() {
-    auto desc = DocumentationGenerator::description();
-    desc.setDescription("CTML HTML document generator helper");
-    desc.add<std::string>("output", "index.html").setDescription("output path for the generated HTML file");
-    desc.add<std::string>("pageTitle", "Modules documentation").setDescription("documentation page upper level title");
-    desc.add<bool>("useBS", true).setDescription("use the Bootstrap CDN to prettify this output?");
-    desc.add<bool>("showGit", false).setDescription("print out the git hash/branch in the output?");
-    desc.add<bool>("bare", false).setDescription("generate a bare version (without <html>/<head>/<body> attributes)");
-    return desc;
-  }
-
-  void initialise() override {
-    DocumentationGenerator::initialise();
     for (const auto& cat : categories_) {
       container_.AppendChild(CTML::Node("a").SetAttribute("name", cat.first))
           .AppendChild(CTML::Node("h2", cat.second.title));
@@ -84,8 +78,6 @@ public:
             .AppendChild(CTML::Node("span").AppendChild(moduleDescription(mod.second)));
       container_.AppendChild(mods);
     }
-  }
-  std::string describe() override {
     doc_.AppendNodeToBody(container_);
     std::ostringstream out;
     if (bare_)
@@ -152,8 +144,7 @@ private:
     return out;
   }
 
-  const std::string page_title_;
-  const bool bare_, show_git_;
+  const bool bare_;
   CTML::Document doc_;
   CTML::Node container_;
 };

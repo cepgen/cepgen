@@ -61,7 +61,6 @@ int main(int argc, char* argv[]) {
   if (list_mods) {  // modules listing is requested ; dump and exit
     auto doc_dump =
         cepgen::DocumentationGeneratorFactory::get().build("text", cepgen::ParametersList().set("light", true));
-    doc_dump->initialise();
     CG_LOG << doc_dump->describe();
     return 0;
   }
