@@ -170,7 +170,7 @@ namespace cepgen {
           os << std::setw(wt) << "" << key << ": " << proc_params.getString(key) << "\n";
       }
     }
-    if (!param.evt_modifiers_.empty() || param.evt_exporters_.empty() || !param.taming_functions_.empty())
+    if (!param.evt_modifiers_.empty() || !param.evt_exporters_.empty() || !param.taming_functions_.empty())
       os << "\n"
          << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Event treatment ") << std::setfill(' ')
          << "\n\n";

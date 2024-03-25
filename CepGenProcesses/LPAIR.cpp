@@ -119,6 +119,8 @@ public:
     defineVariable(m_phi6_cm_, Mapping::linear, {0., 2. * M_PI}, "phi6cm");
     defineVariable(m_x6_, Mapping::linear, {-1., 1.}, "x6");
 
+    mX2() = mA2();
+    mY2() = mB2();
     const auto mx_range = [&](double m_in) {
       return kinematics()
           .cuts()
@@ -646,9 +648,7 @@ double LPAIR::computeWeight() {
   else
     jacobian *= 0.5;
 
-  // First outgoing lepton's 3-momentum in the centre of mass system
-  const auto p6cm = Momentum::fromPThetaPhiE(pp6cm, theta6cm, m_phi6_cm_);
-
+  const auto p6cm = Momentum::fromPThetaPhiE(pp6cm, theta6cm, m_phi6_cm_);  // 1st outgoing lepton 3-mom. in CoM system
   CG_DEBUG_LOOP("LPAIR") << "p3cm6 = " << p6cm;
 
   const double h1 = p6cm.pz() * sin_theta_gam + p6cm.px() * cos_theta_gam;
@@ -668,10 +668,8 @@ double LPAIR::computeWeight() {
                    el6);
   pc(1) = pc4 - pc(0);
   CG_DEBUG_LOOP("LPAIR") << "Outgoing kinematics\n\t"
-                         << " first outgoing lepton: p = " << pc(0).p() << ", E = " << pc(0).energy() << "\n\t"
-                         << "second outgoing lepton: p = " << pc(1).p() << ", E = " << pc(1).energy();
-  const double phi3 = pX().phi(), cos_phi3 = std::cos(phi3), sin_phi3 = std::sin(phi3);
-  const double phi5 = pY().phi(), cos_phi5 = std::cos(phi5), sin_phi5 = std::sin(phi5);
+                         << " first outgoing lepton: p = " << pc(0) << "\n\t"
+                         << "second outgoing lepton: p = " << pc(1) << ".";
 
   bb_ = t1() * t2() + (m_w4_ * sin2_theta6cm + 4. * ml2_ * cos2_theta6cm) * p_gam * p_gam;
   q2dq_ = std::pow(eg * (2. * ecm6 - mc4_) - 2. * p_gam * p6cm.pz(), 2);
@@ -679,33 +677,33 @@ double LPAIR::computeWeight() {
                          << "eg = " << eg << ", pg = " << p_gam << "\n\t"
                          << "q1dq^2 = " << q2dq_ << ".";
 
-  const double hq = ec4_ * qcz / mc4_;
+  const auto hq = ec4_ * qcz / mc4_;
   const auto qve = Momentum::fromPxPyPzE(+qcx * cos_theta4_ + hq * sin_theta4_,
                                          2. * pc(0).py(),
                                          -qcx * sin_theta4_ + hq * cos_theta4_,
                                          +qcz * pc4_ / mc4_);
 
-  const double c1 = pX().pt() * (qve.px() * sin_phi3 - qve.py() * cos_phi3),
-               c2 = pX().pt() * (qve.pz() * ep1_ - qve.energy() * p_cm_),
-               c3 = ((mX2() - mA2()) * ep1_ * ep1_ + 2. * mA2() * delta3_ * ep1_ - mA2() * delta3_ * delta3_ +
-                     pX().pt2() * ep1_ * ep1_) /
-                    (pX().pz() * ep1_ + pX().energy() * p_cm_);
+  const auto phi3 = pX().phi(), cos_phi3 = std::cos(phi3), sin_phi3 = std::sin(phi3);
+  const auto c1 = pX().pt() * (qve.px() * sin_phi3 - qve.py() * cos_phi3),
+             c2 = pX().pt() * (qve.pz() * ep1_ - qve.energy() * p_cm_),
+             c3 = ((mX2() - mA2()) * ep1_ * ep1_ + 2. * mA2() * delta3_ * ep1_ - mA2() * delta3_ * delta3_ +
+                   pX().pt2() * ep1_ * ep1_) /
+                  (pX().pz() * ep1_ + pX().energy() * p_cm_);
+  const auto r12 = c2 * sin_phi3 + c3 * qve.py(), r13 = -c2 * cos_phi3 - c3 * qve.px();
 
-  const double b1 = pY().pt() * (qve.px() * sin_phi5 - qve.py() * cos_phi5),
-               b2 = pY().pt() * (qve.pz() * ep2_ + qve.energy() * p_cm_),
-               b3 = ((mY2() - mB2()) * ep2_ * ep2_ + 2. * mB2() * delta5_ * ep2_ - mB2() * delta5_ * delta5_ +
-                     pY().pt2() * ep2_ * ep2_) /
-                    (pY().pz() * ep2_ - pY().energy() * p_cm_);
-
-  const double r12 = c2 * sin_phi3 + c3 * qve.py(), r13 = -c2 * cos_phi3 - c3 * qve.px();
-  const double r22 = b2 * sin_phi5 + b3 * qve.py(), r23 = -b2 * cos_phi5 - b3 * qve.px();
+  const auto phi5 = pY().phi(), cos_phi5 = std::cos(phi5), sin_phi5 = std::sin(phi5);
+  const auto b1 = pY().pt() * (qve.px() * sin_phi5 - qve.py() * cos_phi5),
+             b2 = pY().pt() * (qve.pz() * ep2_ + qve.energy() * p_cm_),
+             b3 = ((mY2() - mB2()) * ep2_ * ep2_ + 2. * mB2() * delta5_ * ep2_ - mB2() * delta5_ * delta5_ +
+                   pY().pt2() * ep2_ * ep2_) /
+                  (pY().pz() * ep2_ - pY().energy() * p_cm_);
+  const auto r22 = b2 * sin_phi5 + b3 * qve.py(), r23 = -b2 * cos_phi5 - b3 * qve.px();
 
   epsilon_ = p12_ * c1 * b1 + r12 * r22 + r13 * r23;
-
   gamma5_ = mA2() * c1 * c1 + r12 * r12 + r13 * r13;
   gamma6_ = mB2() * b1 * b1 + r22 * r22 + r23 * r23;
 
-  const double pt3 = pY().pt(), pt5 = pY().pt();
+  const auto pt3 = pY().pt(), pt5 = pY().pt();
   alpha5_ = -(qve.px() * cos_phi3 + qve.py() * sin_phi3) * pt3 * p1k2_ -
             (ep1_ * qve.energy() - p_cm_ * qve.pz()) * (cos_phi3 * cos_phi5 + sin_phi3 * sin_phi5) * pt3 * pt5 +
             (delta5_ * qve.pz() + qve.energy() * (p_cm_ + pY().pz())) * c3;

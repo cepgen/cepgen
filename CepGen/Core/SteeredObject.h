@@ -58,7 +58,6 @@ namespace cepgen {
 #undef __TYPE_ENUM
       return Steerable::parameters();
     }
-    /// Set (documented) module parameters
     virtual inline void setParameters(const ParametersList& params) override {
       if (params.empty())
         return;
@@ -69,6 +68,7 @@ namespace cepgen {
       REGISTER_STEEREDOBJ_CONTENT_TYPE
 #undef __TYPE_ENUM
     }
+    /// Set (documented) module parameters
     inline void setDescribedParameters(const ParametersList& params_orig) {
       const auto obj_keys = T::description().parameters().keys();
       if (obj_keys.empty())
