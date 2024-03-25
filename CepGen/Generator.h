@@ -41,7 +41,6 @@ namespace cepgen {
   /// \param[in] safe_mode Drop libraries initialisation?
   void initialise(bool safe_mode = false);
   void printHeader();  ///< Dump this program's header into the standard output stream
-  void dumpModules();  ///< List the modules registered in RTE database
 
   /// Core generator object allowing for process definition, cross section computation, and event generation
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>

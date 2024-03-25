@@ -33,6 +33,7 @@ namespace cepgen {
       static ParametersDescription description() {
         auto desc = DocumentationGenerator::description();
         desc.setDescription("Bare text documentation generator");
+        desc.add<bool>("light", false).setDescription("lightweight module description (without parameters)");
         desc.add<bool>("dumpParameters", false)
             .setDescription("dump the parameters list along with their parameters description?");
         return desc;
@@ -40,19 +41,24 @@ namespace cepgen {
 
       std::string describe() override {
         std::ostringstream os;
-        const auto separator = std::string(80, '=');
+        const auto separator = std::string(80, '-');
+        const auto light = steer<bool>("light");
         for (const auto& cat : categories_) {
           if (cat.second.modules.empty())
             continue;
-          os << "\n"
-             << colourise(
-                    separator + "\n" + cat.second.title + " modules" + "\n" + separator, Colour::green, Modifier::bold)
-             << "\n";
-          for (const auto& mod : cat.second.modules) {
-            os << "\n" << mod.second.describe();
-            if (dump_params_)
-              os << "\n\tParametersList object:\n\t\t" << mod.second.parameters();
+          os << colourise("\n" + separator + "\n" + cat.second.title + " modules", Colour::green, Modifier::bold);
+          if (!light)
             os << "\n";
+          for (const auto& mod : cat.second.modules) {
+            if (light) {
+              os << "\n> " << colourise(mod.first, Colour::cyan, Modifier::underline | Modifier::bold) << ": "
+                 << mod.second.description() << (mod.second.empty() ? " (*)" : "");
+            } else {
+              os << "\n" << mod.second.describe();
+              if (dump_params_)
+                os << "\n\tParametersList object:\n\t\t" << mod.second.parameters();
+              os << "\n";
+            }
           }
         }
         return os.str();
