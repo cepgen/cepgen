@@ -49,9 +49,7 @@ namespace cepgen {
                     separator + "\n" + cat.second.title + " modules" + "\n" + separator, Colour::green, Modifier::bold)
              << "\n";
           for (const auto& mod : cat.second.modules) {
-            os << "\n"
-               << colourise(toString(mod.first), Colour::none, Modifier::underline | Modifier::bold) << " module:\n\n"
-               << mod.second.describe();
+            os << "\n" << mod.second.describe();
             if (dump_params_)
               os << "\n\tParametersList object:\n\t\t" << mod.second.parameters();
             os << "\n";
