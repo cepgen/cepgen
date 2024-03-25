@@ -22,9 +22,11 @@
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
+#include "CepGen/Modules/DocumentationGeneratorFactory.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Utils/AbortHandler.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/DocumentationGenerator.h"
 
 using namespace std;
 
@@ -48,39 +50,36 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("safe-mode,s", "safe mode", &safe_mode, false)
       .parse();
 
-  cepgen::Generator gen(safe_mode);
-
-  //--- first start by defining the generator object
-  for (const auto& lib : addons)
+  cepgen::Generator gen(safe_mode);  // first start by defining the generator object
+  for (const auto& lib : addons)     // loading of additional plugins into the runtime environment manager
     try {
       cepgen::loadLibrary(lib);
     } catch (const cepgen::Exception& e) {
       e.dump();
     }
 
-  //--- if modules listing is requested
-  if (list_mods) {
-    cepgen::dumpModules();
+  if (list_mods) {  // modules listing is requested ; dump and exit
+    auto doc_dump =
+        cepgen::DocumentationGeneratorFactory::get().build("text", cepgen::ParametersList().set("light", true));
+    doc_dump->initialise();
+    CG_LOG << doc_dump->describe();
     return 0;
   }
 
-  //--- no steering card nor additional flags found
-  if (input_card.empty() && parser.extra_config().empty()) {
+  if (input_card.empty() && parser.extra_config().empty()) {  // no steering card nor additional flags found
     CG_WARNING("main") << "Neither input card nor configuration word provided!\n\n " << parser.help_message();
     return 0;
   }
-  //--- parse the steering card
   if (!input_card.empty())
-    gen.parseRunParameters(input_card);
-  //--- parse the additional flags
-  if (!parser.extra_config().empty()) {
+    gen.parseRunParameters(input_card);  // parse the steering card
+  if (!parser.extra_config().empty()) {  // parse any additional flags
     auto args_handler = cepgen::CardsHandlerFactory::get().build(".cmd");
     args_handler->setRunParameters(&gen.runParameters());
     args_handler->parseCommands(parser.extra_config());
     gen.setRunParameters(args_handler->runParameters());
   }
 
-  cepgen::utils::AbortHandler();
+  cepgen::utils::AbortHandler();  // allow C-c to be triggered during a run
 
   try {
     auto& params = gen.runParameters();
@@ -91,14 +90,12 @@ int main(int argc, char* argv[]) {
       for (const auto& output : outputs)
         gen.runParameters().addEventExporter(cepgen::EventExporterFactory::get().build(output));
 
-    //--- list all parameters
-    CG_LOG << gen.runParameters();
+    CG_LOG << gen.runParameters();  // user-friendly printout of all run parameters
 
-    //--- let there be a cross-section...
-    gen.computeXsection();
+    gen.computeXsection();  //--- let there be a cross-section...
 
     if (params.generation().enabled())
-      //--- events generation starts here
+      // events generation happens here
       // (one may use a callback function)
       gen.generate(0);
   } catch (const cepgen::utils::RunAbortedException&) {

@@ -46,7 +46,7 @@ jobs:
     - name: 'Build environment'
       run: |
         cmake --build ${{ env.CEPGEN_PATH }}
-        cmake --build ${{ env.CEPGEN_PATH }} -- cepgenDocGenerator
+        cmake --build ${{ env.CEPGEN_PATH }} -- cepgenDescribeModules
     - name: 'Compress environment'
       run: tar -cvf environment.tar /Package
 
