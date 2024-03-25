@@ -37,11 +37,8 @@ int main(int argc, char* argv[]) {
       .parse();
 
   cepgen::initialise();
-  auto gen = cepgen::DocumentationGeneratorFactory::get().build(cepgen::ParametersList()
-                                                                    .setName(doc_generator)
-                                                                    .feed(doc_generator)
-                                                                    .set("categories", categories)
-                                                                    .set("modules", modules_names));
+  auto gen = cepgen::DocumentationGeneratorFactory::get().build(
+      doc_generator, cepgen::ParametersList().set("categories", categories).set("modules", modules_names));
   gen->initialise();
   const auto documentation = gen->describe();
 

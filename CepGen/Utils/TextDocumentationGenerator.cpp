@@ -46,7 +46,7 @@ namespace cepgen {
         for (const auto& cat : categories_) {
           if (cat.second.modules.empty())
             continue;
-          os << colourise("\n" + separator + "\n" + cat.second.title + " modules", Colour::green, Modifier::bold);
+          os << colourise("\n" + separator + "\n" + cat.second.title, Colour::green, Modifier::bold);
           if (!light)
             os << "\n";
           for (const auto& mod : cat.second.modules) {
