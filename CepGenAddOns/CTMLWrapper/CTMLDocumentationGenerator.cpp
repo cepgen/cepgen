@@ -94,9 +94,13 @@ private:
       return out;
     CTML::Node mod_summary(CTML::Node("summary").AppendChild(CTML::Node("b", desc.parameters().getNameString())));
     CTML::Node mod_details("details");
+    CTML::Node mod_params_list(CTML::Node("p").AppendText("List of parameters:"));
     const auto desc_type = desc.type();
-    if (desc_type == ParametersDescription::Type::ParametersVector) {
-    } else if (desc_type == ParametersDescription::Type::Value) {
+    if (desc_type == ParametersDescription::Type::ParametersVector)
+      mod_summary.AppendChild(CTML::Node("b", "Children attributes"));
+    else if (desc_type == ParametersDescription::Type::Parameters)
+      mod_summary.AppendChild(CTML::Node("b", "parameters list"));
+    else if (desc_type == ParametersDescription::Type::Value) {
     } else {
       mod_summary.AppendText(" " + desc.description());
     }
@@ -122,21 +126,26 @@ private:
           if (!subdesc.description().empty())
             item.AppendText(" defining a ").AppendChild(CTML::Node("i", subdesc.description()));
           item.AppendChild(moduleDescription(subdesc));
-          const auto& vparams = desc.parameters().get<std::vector<ParametersList> >(key);
-          if (!vparams.empty()) {
+          if (const auto& vparams = desc.parameters().get<std::vector<ParametersList> >(key); !vparams.empty()) {
             CTML::Node itparams("ol");
             for (const auto& it : vparams)
               itparams.AppendChild(CTML::Node("li").AppendChild(moduleDescription(ParametersDescription(it))));
-            item.AppendChild(CTML::Node("details")
-                                 .AppendChild(CTML::Node("summary").AppendChild(CTML::Node("b", "Default content")))
-                                 .AppendChild(CTML::Node("p").AppendChild(itparams)));
+            item.AppendChild(
+                CTML::Node("details")
+                    .AppendChild(CTML::Node("summary").AppendChild(CTML::Node("b", "Default vector content")))
+                    .AppendChild(CTML::Node("p").AppendChild(itparams.SetAttribute("start", "0"))));
           }
         } else
           item.AppendChild(CTML::Node("i", " " + subdesc.description())).AppendChild(moduleDescription(subdesc));
         items.AppendChild(item);
       }
-      if (!items.GetChildren().empty())
-        mod_details.AppendChild(CTML::Node("p").AppendText("List of parameters:").AppendChild(items));
+      if (!items.GetChildren().empty()) {
+        if (desc_type == ParametersDescription::Type::ParametersVector ||
+            desc_type == ParametersDescription::Type::Parameters)
+          mod_details.AppendChild(items);
+        else
+          mod_details.AppendChild(mod_params_list.AppendChild(items));
+      }
       out.AppendChild(mod_details);
     } catch (const Exception& exc) {
       exc.dump();

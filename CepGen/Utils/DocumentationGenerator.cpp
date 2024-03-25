@@ -54,7 +54,7 @@ namespace cepgen {
         cat.description = description;
         for (const auto& mod : factory.modules())
           if (mod_names.empty() || contains(mod_names, utils::toString(mod)))
-            cat.modules[utils::toString(mod)] = factory.describeParameters(mod);
+            cat.modules[utils::toString(mod)] = factory.describeParameters(mod).setKey(mod);
         categories_.emplace_back(std::make_pair(name, cat));
       };
       add_category("proc", "Processes", "", cepgen::ProcessFactory::get());
