@@ -31,23 +31,7 @@
 
 using namespace cepgen;
 
-/**
- * Analytic matrix element \cite Vermaseren:1982cz for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$ process
- * The integrand variables are mapped as:
- * - 0 = \f$t_1\f$, first incoming photon's virtuality
- * - 1 = \f$t_2\f$, second incoming photon's virtuality
- * - 2 = \f$s_2\f$ mapping
- * - 3 = yy4 = \f$\cos\left(\pi x_3\right)\f$ definition
- * - 4 = \f$w_4\f$, the two-photon system's invariant mass
- * - 5 = xx6 = \f$\frac{1}{2}\left(1-\cos\theta^{\rm CM}_6\right)\f$ definition (3D rotation of the first outgoing lepton with respect to the two-photon centre-of-mass system). If the \a nm_ optimisation flag is set this angle coefficient value becomes
- *   \f[\frac{1}{2}\left(\frac{a_{\rm map}}{b_{\rm map}}\frac{\beta-1}{\beta+1}+1\right)\f] with
- *   \f$a_{\rm map}=\frac{1}{2}\left(w_4-t_1-t_2\right)\f$, \f$b_{\rm map}=\frac{1}{2}\sqrt{\left(\left(w_4-t_1-t_2\right)^2-4t_1t_2\right)\left(1-4\frac{w_6}{w_4}\right)}\f$, and
- *   \f$\beta=\left(\frac{a_{\rm map}+b_{\rm map}}{a_{\rm map}-b_{\rm map}}\right)^{2x_5-1}\f$
- *   and the Jacobian element is scaled by a factor
- *   \f$\frac{1}{2}\frac{\left(a_{\rm map}^2-b_{\rm map}^2\cos^2\theta^{\rm CM}_6\right)}{a_{\rm map}b_{\rm map}}\log\left(\frac{a_{\rm map}+b_{\rm map}}{a_{\rm map}-b_{\rm map}}\right)\f$
- * - 6 = _phicm6_, or \f$\phi_6^{\rm CM}\f$ the rotation angle of the dilepton system in the centre-of-mass system
- * - 7 = \f$x_q\f$, \f$w_X\f$ mappings, as used in the single- and double-dissociative cases only
- */
+/// Matrix element for the \f$\gamma\gamma\to\ell^{+}\ell^{-}\f$ process as defined in \cite Vermaseren:1982cz
 class LPAIR final : public cepgen::proc::Process {
 public:
   explicit LPAIR(const ParametersList& params)
@@ -138,10 +122,8 @@ public:
     pA() = Momentum(0., 0., +p_cm_, ep1_).betaGammaBoost(gamma_cm_, beta_gamma_cm_);
     pB() = Momentum(0., 0., -p_cm_, ep2_).betaGammaBoost(gamma_cm_, beta_gamma_cm_);
     // boost of the outgoing beams
-    pX().setMass(mX());
-    pY().setMass(mY());
-    pX().betaGammaBoost(gamma_cm_, beta_gamma_cm_);
-    pY().betaGammaBoost(gamma_cm_, beta_gamma_cm_);
+    pX().setMass(mX()).betaGammaBoost(gamma_cm_, beta_gamma_cm_);
+    pY().setMass(mY()).betaGammaBoost(gamma_cm_, beta_gamma_cm_);
     // incoming partons
     q1() = pA() - pX();
     q2() = pB() - pY();
@@ -158,10 +140,8 @@ public:
     if (beams_mode_ == mode::Kinematics::ElasticInelastic) {  // mirror X/Y and dilepton systems if needed
       std::swap(pX(), pY());
       std::swap(pc(0), pc(1));
-      pX().mirrorZ();
-      pY().mirrorZ();
-      pc(0).mirrorZ();
-      pc(1).mirrorZ();
+      for (auto* mom : {&pX(), &pY(), &pc(0), &pc(1)})
+        mom->mirrorZ();
     }
     // first outgoing beam
     event()
@@ -196,27 +176,14 @@ public:
 
 private:
   static constexpr double constb_ = 0.5 * M_1_PI * M_1_PI * M_1_PI;
-  /**
-   * Calculate energies and momenta of the
-   *  1st, 2nd (resp. the "proton-like" and the "electron-like" incoming particles),
-   *  3rd (the "proton-like" outgoing particle),
-   *  4th (the two-photons central system), and
-   *  5th (the "electron-like" outgoing particle) particles in the overall centre-of-mass frame.
-   * \brief Energies/momenta computation for the various particles, in the CM system
-   * \return Success state of the operation
-   */
+  /// Calculate energies and momenta of full event content, in the CM system
   bool orient();
-  /**
-   * Compute the expression of the matrix element squared for the \f$\gamma\gamma\rightarrow\ell^{+}\ell^{-}\f$ process.
-   * It returns the value of the convolution of the form factor or structure functions with the central two-photons matrix element squared.
-   * \brief Computes the matrix element squared for the requested process
-   * \return Full matrix element for the two-photon production of a pair of spin\f$-\frac{1}{2}-\f$point particles.
-   *  It is noted as \f[
-   *  M = \frac{1}{4bt_1 t_2}\sum_{i=1}^2\sum_{j=1}^2 u_i v_j t_{ij} = \frac{1}{4}\frac{u_1 v_1 t_{11}+u_2 v_1 t_{21}+u_1 v_2 t_{12}+u_2 v_2 t_{22}}{t_1 t_2 b}
-   * \f] where \f$b\f$ = \a bb_ is defined in \a ComputeWeight as : \f[
-   *  b = t_1 t_2+\left(w_{\gamma\gamma}\sin^2{\theta^{\rm CM}_6}+4m_\ell\cos^2{\theta^{\rm CM}_6}\right) p_g^2
-   * \f]
-   */
+  /// Compute the squared matrix element squared for the \f$\gamma\gamma\rightarrow\ell^{+}\ell^{-}\f$ process
+  /// \return Convolution of the form factor or structure functions with the squared central two-photons matrix element (for a pair of spin\f$-\frac{1}{2}-\f$point particles)
+  /// \note Its expression is of the form:
+  ///     \f[M = \frac{1}{4bt_1 t_2}\sum_{i=1}^2\sum_{j=1}^2 u_i v_j t_{ij} = \frac{1}{4}\frac{u_1 v_1 t_{11}+u_2 v_1 t_{21}+u_1 v_2 t_{12}+u_2 v_2 t_{22}}{t_1 t_2 b}\f]
+  ///   where \f$b\f$ = \a bb_ is defined in \a computeWeight as:
+  ///     \f[b = t_1 t_2+\left(w_{\gamma\gamma}\sin^2{\theta^{\rm CM}_6}+4m_\ell\cos^2{\theta^{\rm CM}_6}\right) p_g^2\f]
   double periPP() const {
     const auto qdq = 4. * ml2_ - m_w4_;
     const auto m_em =
@@ -258,11 +225,9 @@ private:
                                   << "u1-2: " << u1 << ", " << u2 << " -> PeriPP = " << peripp << ".";
     return peripp;
   }
-  /**
-   * Describe the kinematics of the process \f$p_1+p_2\to p_3+p_4+p_5\f$ in terms of Lorentz-invariant variables.
-   * These variables (along with others) will then be fed into the \a PeriPP method (thus are essential for the evaluation of the full matrix element).
-   * \return Value of the Jacobian after the operation
-   */
+  /// Describe the kinematics of the process \f$p_1+p_2\to p_3+p_4+p_5\f$ in terms of Lorentz-invariant variables.
+  /// \note These variables (along with others) will then be fed into the \a periPP method (thus are essential for the evaluation of the full matrix element).
+  /// \return Value of the Jacobian after the operation
   double pickin();
 
   const ParticleProperties pair_;
@@ -288,12 +253,21 @@ private:
   std::unique_ptr<strfun::Parameterisation> strfun_;
 
   // mapped variables
-  double m_u_t1_{0.};  ///< first parton normalised virtuality
-  double m_u_t2_{0.};  ///< second parton normalised virtuality
-  double m_u_s2_{0.};
-  double m_w4_{0.};       ///< squared mass of the two-photon system
+  double m_u_t1_{0.};  ///< \f$t_1\f$, first parton normalised virtuality
+  double m_u_t2_{0.};  ///< \f$t_2\f$, second parton normalised virtuality
+  double m_u_s2_{0.};  ///< \f$s_2\f$
+  // yy4 = \f$\cos\left(\pi x_3\right)\f$
+  double m_w4_{0.};       ///< \f$w_4\f$, squared invariant mass of the two-parton system
   double m_theta4_{0.};   ///< polar angle of the two-photon system
-  double m_phi6_cm_{0.};  ///< azimutal angle of the first outgoing lepton
+  double m_phi6_cm_{0.};  ///< \f$\phi_6^{\rm CM}\f$, azimutal angle of the first outgoing lepton
+  /// xx6 = \f$\frac{1}{2}\left(1-\cos\theta^{\rm CM}_6\right)\f$ definition (3D rotation of the first outgoing lepton with respect to the two-photon centre-of-mass system).
+  /// \note If the \a nm_ optimisation flag is set this angle coefficient value becomes
+  ///     \f[\frac{1}{2}\left(\frac{a_{\rm map}}{b_{\rm map}}\frac{\beta-1}{\beta+1}+1\right)\f] with
+  ///     \f$a_{\rm map}=\frac{1}{2}\left(w_4-t_1-t_2\right)\f$, \f$b_{\rm map}=\frac{1}{2}\sqrt{\left(\left(w_4-t_1-t_2\right)^2-4t_1t_2\right)\left(1-4\frac{w_6}{w_4}\right)}\f$,
+  ///   and
+  ///     \f$\beta=\left(\frac{a_{\rm map}+b_{\rm map}}{a_{\rm map}-b_{\rm map}}\right)^{2x_5-1}\f$
+  ///   and the Jacobian element is scaled by a factor
+  ///     \f$\frac{1}{2}\frac{\left(a_{\rm map}^2-b_{\rm map}^2\cos^2\theta^{\rm CM}_6\right)}{a_{\rm map}b_{\rm map}}\log\left(\frac{a_{\rm map}+b_{\rm map}}{a_{\rm map}-b_{\rm map}}\right)\f$
   double m_x6_{0.};
 
   ///////////////////////////////////////////////////////////////////
@@ -315,11 +289,9 @@ private:
   double gram_{0.};
   double dd5_{0.};
   std::array<double, 2> deltas1_, deltas2_;
-  /**
-   * Invariant used to tame divergences in the matrix element computation. It is defined as
-   * \f[\Delta = \left(p_1\cdot p_2\right)\left(q_1\cdot q_2\right)-\left(p_1\cdot q_2\right)\left(p_2\cdot q_1\right)\f]
-   * with \f$p_i, q_i\f$ the 4-momenta associated to the incoming proton-like particle and to the photon emitted from it.
-   */
+  /// Invariant used to tame divergences in the matrix element computation
+  /// \note Defined as \f[\Delta = \left(p_1\cdot p_2\right)\left(q_1\cdot q_2\right)-\left(p_1\cdot q_2\right)\left(p_2\cdot q_1\right)\f]
+  ///   with \f$p_i, q_i\f$ the 4-momenta associated to the incoming proton-like particle and to the photon emitted from it.
   double delta_{0.};
   double delta3_{0.}, delta5_{0.};
 };
@@ -327,26 +299,19 @@ private:
 //---------------------------------------------------------------------------------------------
 
 double LPAIR::pickin() {
-  const auto map_expo = [](double expo, const Limits& lim, const std::string& var_name = "") {
-    /**
-     * Define modified variables of integration to avoid peaks integrations (see \cite Vermaseren:1982cz for details)
-     * Return a set of two modified variables of integration to maintain the stability of the integrand. These two new variables are :
-     * - \f$y_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\f$ the new variable
-     * - \f$\mathrm dy_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\log\frac{x_{min}}{x_{max}}\f$, the new variable's differential form
-     * \param[in] expo Exponent
-     * \param[in] lim Min/maximal value of the variable
-     * \param[in] var_name The variable name
-     * \return A pair containing the value and the bin width the new variable definition
-     */
-    const double y = lim.max() / lim.min(), out = lim.min() * std::pow(y, expo), dout = out * std::log(y);
-    CG_DEBUG_LOOP("LPAIR:map") << "Mapping variable \"" << var_name << "\" in range (" << lim << ")"
-                               << " (max/min = " << y << ")\n\t"
-                               << "exponent = " << expo << " => "
-                               << "x = " << out << ", dx = " << dout;
-    return std::make_pair(out, dout);
+  /// Define modified variables of integration to avoid peaks integrations
+  /// \return two modified variables of integration to maintain the stability of the integrand:
+  ///   - \f$y_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\f$ the new variable
+  ///   - \f$\mathrm dy_{out} = x_{min}\left(\frac{x_{max}}{x_{min}}\right)^{exp}\log\frac{x_{min}}{x_{max}}\f$,
+  ///     the new variable's differential form
+  /// \param[in] expo Exponent
+  /// \param[in] lim Min/maximal value of the variable
+  const auto map_expo = [](double expo, const Limits& lim) {
+    const double y = lim.max() / lim.min(), out = lim.min() * std::pow(y, expo);
+    return std::make_pair(out, out * std::log(y));
   };
   const auto [s2_val, s2_width] =
-      map_expo(m_u_s2_, Limits{mc4_ + mY(), sqrtS() - mX()}.compute([](double lim) { return lim * lim; }), "s2");
+      map_expo(m_u_s2_, Limits{mc4_ + mY(), sqrtS() - mX()}.compute([](double lim) { return lim * lim; }));
   s2_ = s2_val;
   if (s2_width <= 0.)
     return 0.;
@@ -362,7 +327,7 @@ double LPAIR::pickin() {
   const auto t1_max = mA2() + mX2() - 0.5 * (ss_ * sp + sl1_ * std::sqrt(rl2)) / s(),
              t1_min = (w31 * d3 + (d3 - w31) * (d3 * mA2() - w31 * mB2()) / s()) / t1_max;
   const auto [t1_val, t1_width] =
-      map_expo(m_u_t1_, Limits{t1_min, t1_max}, "t1");  // definition of the first photon propagator (t1 < 0)
+      map_expo(m_u_t1_, Limits{t1_min, t1_max});  // definition of the first photon propagator (t1 < 0)
   t1() = t1_val;
   if (t1_width >= 0.)
     return 0.;
@@ -380,7 +345,7 @@ double LPAIR::pickin() {
   const auto t2_max = mB2() + mY2() - 0.5 * (r1 * r2 + std::sqrt(rl4)) / s2_,
              t2_min = (w52 * d4 + (d4 - w52) * (d4 * mB2() - w52 * t1()) / s2_) / t2_max;
   const auto [t2_val, t2_width] =
-      map_expo(m_u_t2_, Limits{t2_min, t2_max}, "t2");  // definition of the second photon propagator (t2 < 0)
+      map_expo(m_u_t2_, Limits{t2_min, t2_max});  // definition of the second photon propagator (t2 < 0)
   t2() = t2_val;
   if (t2_width >= 0.)
     return 0.;
@@ -543,11 +508,11 @@ bool LPAIR::orient() {
   //--- beam 1 -> 3
   const auto ep3 = ep1_ - delta3_, pp3 = std::sqrt(ep3 * ep3 - mX2()), pt3 = mom_prefactor_ * std::sqrt(deltas1_[0]);
   if (pt3 > pp3) {
-    CG_WARNING("LPAIR:orient") << "Invalid momentum for outgoing beam 1.";
+    CG_DEBUG("LPAIR:orient") << "Invalid momentum for outgoing beam 1.";
     return false;
   }
   if (pt3 < rr) {
-    CG_WARNING("LPAIR:orient") << "Invalid momentum balance for outgoing beam 1.";
+    CG_DEBUG("LPAIR:orient") << "Invalid momentum balance for outgoing beam 1.";
     return false;
   }
   pX() = Momentum::fromPThetaPhiE(pp3, -std::asin(pt3 / pp3), std::asin(-rr / pt3), ep3);
@@ -558,11 +523,11 @@ bool LPAIR::orient() {
   //--- beam 2 -> 5
   const auto ep5 = ep2_ - delta5_, pp5 = std::sqrt(ep5 * ep5 - mY2()), pt5 = mom_prefactor_ * std::sqrt(deltas2_[0]);
   if (pt5 > pp5) {
-    CG_WARNING("LPAIR:orient") << "Invalid momentum for outgoing beam 2.";
+    CG_DEBUG("LPAIR:orient") << "Invalid momentum for outgoing beam 2.";
     return false;
   }
   if (pt5 < rr) {
-    CG_WARNING("LPAIR:orient") << "Invalid momentum balance for outgoing beam 2.";
+    CG_DEBUG("LPAIR:orient") << "Invalid momentum balance for outgoing beam 2.";
     return false;
   }
   pY() = Momentum::fromPThetaPhiE(pp5, M_PI + std::asin(pt5 / pp5), std::asin(+rr / pt5), ep5);
@@ -660,7 +625,7 @@ double LPAIR::computeWeight() {
   const double h2 = (ec4_ * pc6z + pc4_ * ecm6) / mc4_;
   CG_DEBUG_LOOP("LPAIR") << "h1 = " << h1 << ", h2 = " << h2;
 
-  // outgoing lepton's kinematics (in the two-photon CM frame)
+  // outgoing leptons' kinematics (in the two-photon CM frame)
   const auto pc4 = Momentum::fromPThetaPhiE(pc4_, std::acos(cos_theta4_), 0., ec4_);
   pc(0) = Momentum(+pc6x * cos_theta4_ + h2 * sin_theta4_,
                    p6cm.py() * cos_phi_gam + h1 * sin_phi_gam,
@@ -683,42 +648,39 @@ double LPAIR::computeWeight() {
                                          -qcx * sin_theta4_ + hq * cos_theta4_,
                                          +qcz * pc4_ / mc4_);
 
-  const auto phi3 = pX().phi(), cos_phi3 = std::cos(phi3), sin_phi3 = std::sin(phi3);
-  const auto c1 = pX().pt() * (qve.px() * sin_phi3 - qve.py() * cos_phi3),
-             c2 = pX().pt() * (qve.pz() * ep1_ - qve.energy() * p_cm_),
-             c3 = ((mX2() - mA2()) * ep1_ * ep1_ + 2. * mA2() * delta3_ * ep1_ - mA2() * delta3_ * delta3_ +
-                   pX().pt2() * ep1_ * ep1_) /
-                  (pX().pz() * ep1_ + pX().energy() * p_cm_);
-  const auto r12 = c2 * sin_phi3 + c3 * qve.py(), r13 = -c2 * cos_phi3 - c3 * qve.px();
-
-  const auto phi5 = pY().phi(), cos_phi5 = std::cos(phi5), sin_phi5 = std::sin(phi5);
-  const auto b1 = pY().pt() * (qve.px() * sin_phi5 - qve.py() * cos_phi5),
-             b2 = pY().pt() * (qve.pz() * ep2_ + qve.energy() * p_cm_),
-             b3 = ((mY2() - mB2()) * ep2_ * ep2_ + 2. * mB2() * delta5_ * ep2_ - mB2() * delta5_ * delta5_ +
-                   pY().pt2() * ep2_ * ep2_) /
-                  (pY().pz() * ep2_ - pY().energy() * p_cm_);
-  const auto r22 = b2 * sin_phi5 + b3 * qve.py(), r23 = -b2 * cos_phi5 - b3 * qve.px();
-
-  epsilon_ = p12_ * c1 * b1 + r12 * r22 + r13 * r23;
-  gamma5_ = mA2() * c1 * c1 + r12 * r12 + r13 * r13;
-  gamma6_ = mB2() * b1 * b1 + r22 * r22 + r23 * r23;
-
-  const auto pt3 = pY().pt(), pt5 = pY().pt();
-  alpha5_ = -(qve.px() * cos_phi3 + qve.py() * sin_phi3) * pt3 * p1k2_ -
-            (ep1_ * qve.energy() - p_cm_ * qve.pz()) * (cos_phi3 * cos_phi5 + sin_phi3 * sin_phi5) * pt3 * pt5 +
-            (delta5_ * qve.pz() + qve.energy() * (p_cm_ + pY().pz())) * c3;
-  alpha6_ = -(qve.px() * cos_phi5 + qve.py() * sin_phi5) * pt5 * p2k1_ -
-            (ep2_ * qve.energy() + p_cm_ * qve.pz()) * (cos_phi3 * cos_phi5 + sin_phi3 * sin_phi5) * pt3 * pt5 +
-            (delta3_ * qve.pz() - qve.energy() * (p_cm_ - pY().pz())) * b3;
-
-  CG_DEBUG_LOOP("LPAIR") << "alpha5 = " << alpha5_ << "\n\t"
-                         << "alpha6 = " << alpha6_;
-
-  pc(0).betaGammaBoost(gamma_cm_, beta_gamma_cm_);
-  pc(1).betaGammaBoost(gamma_cm_, beta_gamma_cm_);
+  for (size_t i = 0; i < 2; ++i)  // boost outgoing leptons' kinematics into lab frame
+    pc(i).betaGammaBoost(gamma_cm_, beta_gamma_cm_);
   if (!kinematics().cuts().central.contain(event()(Particle::CentralSystem)))  // cuts on outgoing leptons
     return 0.;
 
+  {  // preparation for the periPP call
+    const auto compute_coeffs = [&qve](
+                                    const Momentum& pin, const Momentum& pout, double delta, double pcm, double& gamma)
+        -> std::tuple<double, double, double, double, double, double, double> {
+      const auto phi_out = pout.phi(), cos_phi_out = std::cos(phi_out), sin_phi_out = std::sin(phi_out);
+      const auto pt_out = pout.pt();
+      const auto c1 = pt_out * (qve.px() * sin_phi_out - qve.py() * cos_phi_out),
+                 c2 = pt_out * (qve.pz() * pin.energy() - qve.energy() * pcm),
+                 c3 = ((pout.mass2() - pin.mass2()) * pin.energy2() + 2. * pin.mass2() * delta * pin.energy() -
+                       pin.mass2() * delta * delta + pt_out * pt_out * pin.energy2()) /
+                      (pout.pz() * pin.energy() + pout.energy() * pcm);
+      const auto r2 = c2 * sin_phi_out + c3 * qve.py(), r3 = -c2 * cos_phi_out - c3 * qve.px();
+      gamma = pin.mass2() * c1 * c1 + r2 * r2 + r3 * r3;
+      return std::make_tuple(cos_phi_out, sin_phi_out, c1, c2, c3, r2, r3);
+    };
+    const auto [cos_phi3, sin_phi3, c1, c2, c3, r12, r13] = compute_coeffs(pA(), pX(), delta3_, +p_cm_, gamma5_);
+    const auto [cos_phi5, sin_phi5, b1, b2, b3, r22, r23] = compute_coeffs(pB(), pY(), delta5_, -p_cm_, gamma6_);
+
+    const auto pt3 = pY().pt(), pt5 = pY().pt();
+    alpha5_ = -(qve.px() * cos_phi3 + qve.py() * sin_phi3) * pt3 * p1k2_ -
+              (ep1_ * qve.energy() - p_cm_ * qve.pz()) * (cos_phi3 * cos_phi5 + sin_phi3 * sin_phi5) * pt3 * pt5 +
+              (delta5_ * qve.pz() + qve.energy() * (p_cm_ + pY().pz())) * c3;
+    alpha6_ = -(qve.px() * cos_phi5 + qve.py() * sin_phi5) * pt5 * p2k1_ -
+              (ep2_ * qve.energy() + p_cm_ * qve.pz()) * (cos_phi3 * cos_phi5 + sin_phi3 * sin_phi5) * pt3 * pt5 +
+              (delta3_ * qve.pz() - qve.energy() * (p_cm_ - pY().pz())) * b3;
+    epsilon_ = p12_ * c1 * b1 + r12 * r22 + r13 * r23;
+    CG_DEBUG_LOOP("LPAIR") << "alpha5=" << alpha5_ << ", alpha6=" << alpha6_ << ", epsilon=" << epsilon_ << ".";
+  }
   const auto peripp = periPP();  // compute the structure functions factors
   if (!utils::positive(peripp))
     return 0.;
