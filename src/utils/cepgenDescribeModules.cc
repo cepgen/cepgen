@@ -28,31 +28,20 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   string doc_generator, output_file;
-  bool use_bs, show_title, show_git, bare;
   vector<string> categories, modules_names;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("documentation-generator,D", "type of documentation", &doc_generator, "text")
-      .addOptionalArgument("output,o", "output HTML file", &output_file, "")
+      .addOptionalArgument("output,o", "output file", &output_file, "")
       .addOptionalArgument("categories,C", "categories to document", &categories, vector<string>{})
       .addOptionalArgument("modules,m", "module names to document", &modules_names, vector<string>{})
-      .addOptionalArgument("bootstrap,b", "use Bootstrap CDN to prettify the output?", &use_bs, true)
-      .addOptionalArgument("show-title,t", "show the page title?", &show_title, true)
-      .addOptionalArgument("show-git,g", "show the git hash/branch?", &show_git, false)
-      .addOptionalArgument("bare,e", "generate a bare version (without document tags) of the output?", &bare, false)
       .parse();
 
   cepgen::initialise();
-  auto gen_params = cepgen::ParametersList()
-                        .setName(doc_generator)
-                        .feed(doc_generator)
-                        .set("categories", categories)
-                        .set("modules", modules_names)
-                        .set("useBS", use_bs)
-                        .set("showGit", show_git)
-                        .set("bare", bare);
-  if (!show_title)
-    gen_params.set<string>("pageTitle", "");
-  auto gen = cepgen::DocumentationGeneratorFactory::get().build(gen_params);
+  auto gen = cepgen::DocumentationGeneratorFactory::get().build(cepgen::ParametersList()
+                                                                    .setName(doc_generator)
+                                                                    .feed(doc_generator)
+                                                                    .set("categories", categories)
+                                                                    .set("modules", modules_names));
   gen->initialise();
   const auto documentation = gen->describe();
 
