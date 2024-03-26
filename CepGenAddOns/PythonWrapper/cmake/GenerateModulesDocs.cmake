@@ -24,5 +24,7 @@ macro(cepgen_generate_python_descriptions)
 endmacro()
 
 file(MAKE_DIRECTORY ${MODULE_DOC_OUTPUT})
+cepgen_generate_python_descriptions(NAME EventModifiers CATEGORY evtmod)
 cepgen_generate_python_descriptions(NAME OutputModules CATEGORY evtout)
+cepgen_generate_python_descriptions(NAME Integrators CATEGORY integr)
 cepgen_generate_python_descriptions(NAME Processes CATEGORY proc)

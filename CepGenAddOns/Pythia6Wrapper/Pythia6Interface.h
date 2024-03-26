@@ -25,19 +25,16 @@
 extern "C" {
 /// Particles content of the event
 struct pyjets_t {
-  /// Number of particles in the event
-  int n;
+  int n;  ///< Number of particles in the event
   int npad;
-  /// Particles' general information (status, PDG id, mother, daughter 1, daughter 2)
-  int k[5][4000];
-  /// Particles' kinematics, in GeV (px, py, pz, E, M)
-  double p[5][4000];
-  /// Primary vertex for the particles
-  double v[5][4000];
+  int k[5][4000];     ///< Particles' general information (status, PDG id, mother, daughter 1, daughter 2)
+  double p[5][4000];  ///< Particles' kinematics, in GeV (px, py, pz, E, M)
+  double v[5][4000];  ///< Primary vertex location for the particles
 };
 extern pyjets_t pyjets_;
 }
 
+/// Pythia 6 utilities namespace
 namespace pythia6 {
   int pythia6Status(int);
   int cepgenStatus(int);

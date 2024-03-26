@@ -29,10 +29,8 @@
 
 namespace cepgen {
   namespace hadr {
-    /**
-     * Interface to the Pythia 6 algorithm
-     * \note It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
-     */
+    /// Interface to the Pythia 6 algorithm
+    /// \note It can be used in a single particle decay mode as well as a full event hadronisation using the string model, as in Jetset.
     class Pythia6Hadroniser : public Hadroniser {
     public:
       explicit Pythia6Hadroniser(const ParametersList& params)

@@ -36,11 +36,13 @@ cepgen_build(CepGenPython SOURCES *.cpp
     EXT_LIBS ${Python_LIBRARIES}
     EXT_HEADERS ${Python_INCLUDE_DIRS}
     INSTALL_COMPONENT python)
-add_custom_target(NAME ALL
-  DEPENDS CepGenPython
-  COMMAND ${CMAKE_COMMAND}
-    -DMODULE_DOC_EXE=${PROJECT_BINARY_DIR}/bin/cepgenDescribeModules
-    -DMODULE_DOC_OUTPUT=${PROJECT_BINARY_DIR}/python_modules
-    -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/GenerateModulesDocs.cmake)
+if(CMAKE_BUILD_UTILS)
+  add_custom_target(NAME ALL
+    DEPENDS CepGenPython
+    COMMAND ${CMAKE_COMMAND}
+      -DMODULE_DOC_EXE=${PROJECT_BINARY_DIR}/bin/cepgenDescribeModules
+      -DMODULE_DOC_OUTPUT=${PROJECT_BINARY_DIR}/python_modules
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/GenerateModulesDocs.cmake)
+endif()
 
 cepgen_test_declare_unstable(python_output python_particle_mod)

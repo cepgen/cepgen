@@ -53,7 +53,8 @@ namespace cepgen {
         cat.title = title;
         cat.description = description;
         for (const auto& mod : factory.modules())
-          if (mod_names.empty() || contains(mod_names, utils::toString(mod)))
+          if (mod_names.empty() || contains(mod_names, utils::toString(mod)) ||
+              contains(mod_names, utils::toCamelCase(utils::toString(mod))))
             cat.modules[utils::toString(mod)] = factory.describeParameters(mod).setKey(mod);
         categories_.emplace_back(std::make_pair(name, cat));
       };

@@ -1,8 +1,11 @@
 import Config.Core as cepgen
 from Config.PDG_cfi import PDG
 from Config.generator_cfi import generator as _gen
-#--- enable timing framework
-#from Config.timer_cfi import timer
+#from Config.timer_cfi import timer # enable timing framework
+from OutputModules.dump_cfi import dump as _dump_output # periodic event printout
+from OutputModules.text_cfi import text as _text_output # ASCII histograms
+#from OutputModules.rootTree_cfi import rootTree # dump everything into a flat ROOT tree
+
 
 process = cepgen.Module('lpair',
     processParameters = cepgen.Parameters(
@@ -38,15 +41,12 @@ generator = _gen.clone(
     printEvery = 10000,
 )
 
-#--- example of an events modification procedure
+#--- example of an event modification procedure
 #from Config.Hadronisation.pythia8_cfi import pythia8
 #eventSequence = cepgen.Sequence(pythia8)
 
 #--- example of an output module(s) procedure
-#... dump everything into a flat ROOT tree (if CepGenRoot was built and loaded)
-#from Config.OutputModule.rootTree_cfi import rootTree
-#... accumulate and dump everything into an ASCII text output
-text = cepgen.Module('text',
+text = _text_output.clone(
     #variables = ['nev', 'm(4)', 'tgen'],
     histVariables={
         'm(4)': cepgen.Parameters(xbins=[float(bin) for bin in range(0, 250, 10)]),
@@ -54,14 +54,7 @@ text = cepgen.Module('text',
         'pt(7):pt(8)': cepgen.Parameters(xrange=(0., 250.), yrange=(0., 250.), log=True)
     }
 )
-#... or write onto one of various event formats handled
 #lhef = cepgen.Module('lhef', filename='test.lhe')
 #hepmc = cepgen.Module('hepmc', filename='test.hepmc')
-dump = cepgen.Module('dump', printEvery = generator.printEvery)
-output = cepgen.Sequence(
-    #rootTree,
-    text,
-    #lhef,
-    #hepmc,
-    dump,
-)
+dump = _dump_output.clone(printEvery = generator.printEvery)
+output = cepgen.Sequence(text, dump)
