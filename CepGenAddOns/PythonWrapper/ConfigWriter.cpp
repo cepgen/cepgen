@@ -91,8 +91,7 @@ namespace cepgen {
           [&](const ParametersDescription& pdesc, const std::string& key, size_t offset_num) -> std::string {
         // write a generic parameters description object
         std::stringstream os;
-        const auto off = offset(offset_num);
-        os << off;
+        os << offset(offset_num);
         if (!key.empty())
           os << key << " = ";
 
@@ -123,15 +122,14 @@ namespace cepgen {
               os << write(pdesc.get(key), key, offset_num + 1);
               break;
             case ParametersDescription::Type::ParametersVector: {
-              std::string sep2;
               os << offset(offset_num + 1) << key << " = [\n";
               for (const auto& it : params.get<std::vector<ParametersList> >(key))
-                os << sep2 << write(ParametersDescription(it), "", offset_num + 2), sep2 = ",\n" + offset(offset_num);
-              os << "\n" << offset(offset_num + 1) << "]";
+                os << write(ParametersDescription(it), "", offset_num + 2) << ",\n";
+              os << offset(offset_num + 1) << "]";
             } break;
             case ParametersDescription::Type::Value: {
               if (params.has<ParametersList>(key))
-                os << off << write(ParametersDescription(params.get<ParametersList>(key)), key, offset_num + 1);
+                os << write(ParametersDescription(params.get<ParametersList>(key)), key, offset_num + 1);
               else
                 os << offset(offset_num + 1) << key << " = " << repr(params, key);
             } break;
@@ -141,13 +139,13 @@ namespace cepgen {
         switch (pdesc.type()) {
           case ParametersDescription::Type::Module:
             if (!params.keys(false).empty())
-              os << "\n" << off;
+              os << "\n" << offset(offset_num);
             break;
           case ParametersDescription::Type::Parameters:
-            os << "\n" << off;
+            os << "\n" << offset(offset_num);
             break;
           case ParametersDescription::Type::ParametersVector:
-            os << ")" << off;
+            os << ")" << offset(offset_num);
             break;
           case ParametersDescription::Type::Value:
             break;
@@ -155,7 +153,8 @@ namespace cepgen {
         os << ")";
         return os.str();
       };
-      os_ << write(pdesc, pdesc.key(), 0) << "\n";
+      const auto key = steer<bool>("camelCaseModuleNames") ? utils::toCamelCase(pdesc.key()) : pdesc.key();
+      os_ << write(pdesc, key, 0) << "\n";
       return *this;
     }
 
@@ -164,6 +163,7 @@ namespace cepgen {
     ParametersDescription ConfigWriter::description() {
       auto desc = ParametersDescription();
       desc.add<bool>("importPath", false).setDescription("prepare the Python environment with path?");
+      desc.add<bool>("camelCaseModuleNames", false).setDescription("convert the module names to camel case?");
       desc.add<int>("tabLength", 4).setDescription("number of spaces for one tabulation");
       desc.add<std::string>("filename", "").setDescription("Python output filename");
       return desc;

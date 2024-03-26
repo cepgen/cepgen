@@ -33,8 +33,9 @@ namespace cepgen {
       static ParametersDescription description() {
         auto desc = cepgen::utils::DocumentationGenerator::description();
         desc.setDescription("Python modules documentation generator");
-        desc.add<std::string>("filename", "output.py").setDescription("Python output filename");
         desc += ConfigWriter::description();
+        desc.add<std::string>("filename", "output.py").setDescription("Python output filename");
+        desc.add<bool>("camelCaseModuleNames", true);
         return desc;
       }
 
