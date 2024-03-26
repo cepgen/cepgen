@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2023  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,16 +34,22 @@ namespace cepgen {
 
     Environment::Environment(const ParametersList& params) : SteeredObject(params) {
       const auto cepgen_path = fs::path(utils::env::get("CEPGEN_PATH", "."));
-      for (const auto& path : std::vector<std::string>{cepgen_path,
-                                                       cepgen_path / "python",
-                                                       cepgen_path / "python_modules",
-                                                       cepgen_path / "build" / "python",
-                                                       cepgen_path / "build" / "python_modules",
-                                                       fs::current_path(),
-                                                       fs::current_path() / "python",
-                                                       fs::current_path() / "python_modules",
-                                                       "/usr/share/CepGen/python",
-                                                       "/usr/share/CepGen/python_modules"})
+      CG_DEBUG("python:Environment") << "CEPGEN_PATH set to " << cepgen_path << ".";
+      for (const auto& path :
+           std::vector<std::string>{cepgen_path,
+                                    cepgen_path / "python",
+                                    cepgen_path / "python_modules",
+                                    cepgen_path / "build" / "python",
+                                    cepgen_path / "build" / "python_modules",
+                                    fs::current_path(),
+                                    fs::current_path() / "python",
+                                    fs::current_path() / "python_modules",
+                                    fs::current_path().parent_path() / "python",
+                                    fs::current_path().parent_path() / "python_modules",
+                                    fs::current_path().parent_path().parent_path() / "python",
+                                    fs::current_path().parent_path().parent_path() / "python_modules",
+                                    "/usr/share/CepGen/python",
+                                    "/usr/share/CepGen/python_modules"})
         utils::env::append("PYTHONPATH", path);
       CG_DEBUG("Python:Environment") << "PYTHONPATH set to " << utils::env::get("PYTHONPATH") << ".";
 

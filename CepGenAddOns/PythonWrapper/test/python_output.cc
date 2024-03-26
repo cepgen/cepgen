@@ -54,6 +54,8 @@ int main(int argc, char* argv[]) {
     env.setProgramName(path);
     auto obj = cepgen::python::ObjectPtr::importModule(path);
     CG_TEST(obj != nullptr, "Module import");
+    if (!obj)
+      return -1;
     //CG_LOG << cepgen::python::ObjectPtr(PyObject_GenericGetDict(obj.get(), nullptr)).value<cepgen::ParametersList>();
     auto proc = obj.attribute("process");
     CG_TEST(proc != nullptr, "'process' attribute retrieval");

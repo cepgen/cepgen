@@ -6,7 +6,7 @@ message(STATUS "Utilities will be built")
 
 #-- build all utils and link them to the core library
 
-file(GLOB utils_standalone RELATIVE ${PROJECT_SOURCE_DIR}/src/utils *.cc)
+file(GLOB utils_standalone RELATIVE ${CEPGEN_PATH}/src/utils *.cc)
 foreach(exec_src ${utils_standalone})
   get_filename_component(exec_bin ${exec_src} NAME_WE)
   add_executable(${exec_bin} ${exec_src})
