@@ -168,23 +168,35 @@ namespace cepgen {
     }
 
     std::string toCamelCase(const std::string& in, bool lower) {
-      if (in.empty() ||
-          (in.find('_') == std::string::npos && in.find('-') == std::string::npos && in.find(' ') == std::string::npos))
-        return in;
       auto out = in;
-      bool tail = false;
-      size_t n = 0;
-      for (const auto& c : out) {
-        if (c == '-' || c == '_' || c == ' ')
-          tail = false;
-        else if (tail)
-          out[n++] = std::tolower(c);
-        else {
-          tail = true;
-          out[n++] = std::toupper(c);
+      if (in.size() < 2 || (in.find('_') == std::string::npos && in.find('-') == std::string::npos &&
+                            in.find(' ') == std::string::npos)) {
+        if (!std::isupper(in[0]))
+          return in;
+        for (size_t i = 1; i < out.size(); ++i) {  // convert "weird" CAMELCase string
+          if (std::islower(out[i])) {
+            out[i - 1] = std::toupper(out[i - 1]);
+            break;
+          }
+          out[i] = std::tolower(out[i]);
         }
+      } else {
+        bool tail = true;  // start from lowercase "tail-like" characters
+        size_t n = 0;
+        for (const auto& c : out) {
+          if (c == '-' || c == '_' || c == ' ') {
+            tail = false;
+            continue;  // skip this character to concentrate on the following ones (head+tail)
+          }
+          if (tail)
+            out[n++] = std::tolower(c);
+          else {  // head (uppercase letter)
+            out[n++] = std::toupper(c);
+            tail = true;
+          }
+        }
+        out.resize(n);
       }
-      out.resize(n);
       if (lower)
         out[0] = std::tolower(out[0]);
       return out;

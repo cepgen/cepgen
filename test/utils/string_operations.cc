@@ -25,5 +25,9 @@ int main(int argc, char* argv[]) {
     const auto camel_str = "thisIsACamelCaseString";
     CG_TEST_EQUAL(cepgen::utils::toCamelCase(camel_str), camel_str, "camel -> camel");
   }
+  {
+    const auto camel_str = "THISIsAHybridCamelCaseString";
+    CG_TEST_EQUAL(cepgen::utils::toCamelCase(camel_str), "thisIsAHybridCamelCaseString", "hybrid camel -> camel");
+  }
   CG_TEST_SUMMARY;
 }
