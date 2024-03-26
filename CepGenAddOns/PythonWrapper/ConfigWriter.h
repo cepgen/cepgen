@@ -25,6 +25,7 @@ namespace cepgen {
   class RunParameters;
   class ParametersDescription;
   namespace python {
+    /// Toolbox to dump user-steered configuration into Python scripts
     class ConfigWriter final : public SteeredObject<ConfigWriter> {
     public:
       ConfigWriter(const ParametersList&);
