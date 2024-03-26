@@ -8,7 +8,15 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   return()
 endif()
 
-file(GLOB root_sources ROOT*.cpp)
+file(GLOB root_sources ROOT*.cpp
+                       AnalyticalIntegrator.cpp
+                       Derivator.cpp
+                       Drawer.cpp
+                       EventExporter.cpp
+                       EventImporter.cpp
+                       Functional.cpp
+                       Integrator.cpp
+                       RandomGenerator.cpp)
 
 #--- FOAM integrator
 if(CMAKE_BUILD_FOAM)
