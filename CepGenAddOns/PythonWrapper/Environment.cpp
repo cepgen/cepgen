@@ -33,9 +33,12 @@ namespace cepgen {
     //------------------------------------------------------------------
 
     Environment::Environment(const ParametersList& params) : SteeredObject(params) {
-      for (const auto& path : std::vector<std::string>{utils::env::get("CEPGEN_PATH", "."),
-                                                       fs::path(utils::env::get("CEPGEN_PATH", ".")) / "python",
-                                                       fs::path(utils::env::get("CEPGEN_PATH", ".")) / "python_modules",
+      const auto cepgen_path = fs::path(utils::env::get("CEPGEN_PATH", "."));
+      for (const auto& path : std::vector<std::string>{cepgen_path,
+                                                       cepgen_path / "python",
+                                                       cepgen_path / "python_modules",
+                                                       cepgen_path / "build" / "python",
+                                                       cepgen_path / "build" / "python_modules",
                                                        fs::current_path(),
                                                        fs::current_path() / "python",
                                                        fs::current_path() / "python_modules",
