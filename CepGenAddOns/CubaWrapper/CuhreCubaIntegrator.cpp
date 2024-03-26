@@ -78,4 +78,4 @@ namespace cepgen {
     const int key_;
   };
 }  // namespace cepgen
-REGISTER_INTEGRATOR("cuba-cuhre", CuhreCubaIntegrator);
+REGISTER_INTEGRATOR("cuba_cuhre", CuhreCubaIntegrator);

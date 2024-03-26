@@ -79,4 +79,4 @@ namespace cepgen {
     const double flatness_;
   };
 }  // namespace cepgen
-REGISTER_INTEGRATOR("cuba-suave", SuaveCubaIntegrator);
+REGISTER_INTEGRATOR("cuba_suave", SuaveCubaIntegrator);

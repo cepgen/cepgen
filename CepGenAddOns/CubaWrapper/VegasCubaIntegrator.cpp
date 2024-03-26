@@ -80,4 +80,4 @@ namespace cepgen {
     const int gridno_;
   };
 }  // namespace cepgen
-REGISTER_INTEGRATOR("cuba-vegas", VegasCubaIntegrator);
+REGISTER_INTEGRATOR("cuba_vegas", VegasCubaIntegrator);

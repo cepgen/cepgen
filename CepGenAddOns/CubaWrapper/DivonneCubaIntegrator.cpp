@@ -121,4 +121,4 @@ namespace cepgen {
     const int nextra_;
   };
 }  // namespace cepgen
-REGISTER_INTEGRATOR("cuba-divonne", DivonneCubaIntegrator);
+REGISTER_INTEGRATOR("cuba_divonne", DivonneCubaIntegrator);
