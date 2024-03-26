@@ -37,10 +37,13 @@ cepgen_build(CepGenPython SOURCES *.cpp
     EXT_HEADERS ${Python_INCLUDE_DIRS}
     INSTALL_COMPONENT python)
 if(CMAKE_BUILD_UTILS)
-  add_custom_target(NAME ALL
-    DEPENDS CepGenPython
+  set(MODULES_DESCRIPTOR ${PROJECT_BINARY_DIR}/bin/cepgenDescribeModules)
+  add_custom_target(${PROJECT_NAME}_moddesc ALL
+    DEPENDS ${MODULES_DESCRIPTOR}
+    COMMENT "Generation of Python modules descriptions")
+  add_custom_command(TARGET ${PROJECT_NAME}_moddesc POST_BUILD
     COMMAND ${CMAKE_COMMAND}
-      -DMODULE_DOC_EXE=${PROJECT_BINARY_DIR}/bin/cepgenDescribeModules
+      -DMODULE_DOC_EXE=${MODULES_DESCRIPTOR}
       -DMODULE_DOC_OUTPUT=${PROJECT_BINARY_DIR}/python_modules
       -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/GenerateModulesDocs.cmake)
 endif()
