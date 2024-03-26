@@ -23,6 +23,8 @@
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/Environment.h"
+#include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Version.h"
 #include "nanobench_interface.h"
 
@@ -32,7 +34,7 @@ int main(int argc, char* argv[]) {
   cepgen::Generator gen;
 
   int num_epochs;
-  string process;
+  string process, filename;
   vector<string> integrators, outputs;
   bool python_integ;
   cepgen::ArgumentsParser(argc, argv)
@@ -41,6 +43,10 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument(
           "integrators,i", "integrators to benchmark", &integrators, cepgen::IntegratorFactory::get().modules())
       .addOptionalArgument("outputs,o", "output formats (html, csv, json, pyperf)", &outputs, vector<string>{"html"})
+      .addOptionalArgument("filename,f",
+                           "output filename",
+                           &filename,
+                           fs::path(cepgen::utils::env::get("CEPGEN_PATH", ".")) / "benchmark_generator")
       .addOptionalArgument("python,p", "also add python integrator?", &python_integ, false)
       .parse();
 
@@ -64,7 +70,7 @@ int main(int argc, char* argv[]) {
       gen.computeXsection();
     });
   }
-  render_benchmark(bench, outputs);
+  render_benchmark(bench, filename, outputs);
 
   return 0;
 }

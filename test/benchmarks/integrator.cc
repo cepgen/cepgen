@@ -22,6 +22,8 @@
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/Environment.h"
+#include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/Logger.h"
 #include "CepGen/Version.h"
 #include "nanobench_interface.h"
@@ -30,28 +32,29 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   cepgen::initialise();
-  CG_LOG_LEVEL(nothing);
 
   int num_epochs;
+  string filename;
   vector<string> functional_parsers, integrators, outputs;
   bool python_integ;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("epochs,e", "number of epochs to try", &num_epochs, 20)
-      .addOptionalArgument("functionals,f",
+      .addOptionalArgument("functionals,F",
                            "functional parsers to benchmark",
                            &functional_parsers,
                            cepgen::FunctionalFactory::get().modules())
       .addOptionalArgument(
           "integrators,i", "integrators to benchmark", &integrators, cepgen::IntegratorFactory::get().modules())
       .addOptionalArgument("outputs,o", "output formats (html, csv, json, pyperf)", &outputs, vector<string>{"html"})
+      .addOptionalArgument("filename,f",
+                           "output filename",
+                           &filename,
+                           fs::path(cepgen::utils::env::get("CEPGEN_PATH", ".")) / "benchmark_integrator")
       .addOptionalArgument("python,p", "also add python integrator?", &python_integ, false)
       .parse();
 
-  ofstream out_file("benchmark.html");
-
   ankerl::nanobench::Bench bench;
   bench.title("CepGen v" + cepgen::version::tag + " (" + cepgen::version::extended + ")").epochs(num_epochs);
-
   for (const auto& functional_parser : functional_parsers) {
     bench.context("functional", functional_parser);
     cepgen::FunctionalIntegrand integrand("x+y^2+z^3", {"x", "y", "z"}, functional_parser);
@@ -64,7 +67,7 @@ int main(int argc, char* argv[]) {
       });
     }
   }
-  render_benchmark(bench, outputs);
+  render_benchmark(bench, filename, outputs);
 
   return 0;
 }
