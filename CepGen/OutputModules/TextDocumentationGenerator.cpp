@@ -33,6 +33,7 @@ namespace cepgen {
       static ParametersDescription description() {
         auto desc = DocumentationGenerator::description();
         desc.setDescription("Bare text documentation generator");
+        desc.add<bool>("modulesOnly", false).setDescription("only list the module names (for a category)?");
         desc.add<bool>("light", false).setDescription("lightweight module description (without parameters)");
         desc.add<bool>("dumpParameters", false)
             .setDescription("dump the parameters list along with their parameters description?");
@@ -43,6 +44,7 @@ namespace cepgen {
         std::ostringstream os;
         const auto separator = std::string(80, '-');
         const auto light = steer<bool>("light");
+        std::vector<std::string> modules_names;
         for (const auto& cat : categories_) {
           if (cat.second.modules.empty())
             continue;
@@ -50,6 +52,7 @@ namespace cepgen {
           if (!light)
             os << "\n";
           for (const auto& mod : cat.second.modules) {
+            modules_names.emplace_back(mod.first);
             if (light) {
               os << "\n> " << colourise(mod.first, Colour::cyan, Modifier::underline | Modifier::bold) << ": "
                  << mod.second.description() << (mod.second.empty() ? " (*)" : "");
@@ -61,6 +64,8 @@ namespace cepgen {
             }
           }
         }
+        if (steer<bool>("modulesOnly"))
+          return repr(modules_names);
         return os.str();
       }
 
