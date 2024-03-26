@@ -167,6 +167,16 @@ namespace cepgen {
       return converter.from_bytes(str);
     }
 
+    std::string toCamelCase(const std::string& in) {
+      auto out = in;
+      for (auto it = out.begin(); it != out.end(); it++)
+        if (*it == '-' || *it == '_') {
+          it = out.erase(it);
+          *it = toupper(*it);
+        }
+      return out;
+    }
+
     std::string randomString(size_t size) {
       std::stringstream out;
       for (size_t i = 0; i < size; ++i)
