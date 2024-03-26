@@ -209,8 +209,10 @@ namespace cepgen {
 #define __FUNC__ __PRETTY_FUNCTION__
 #endif
 
-#define CG_LOG \
-  cepgen::LoggedMessage("Logging", __FUNC__, cepgen::LoggedMessage::MessageType::verbatim, __FILE__, __LINE__)
+#define CG_LOG                                                                    \
+  (cepgen::utils::Logger::get().level() <= cepgen::utils::Logger::Level::nothing) \
+      ? cepgen::NullStream()                                                      \
+      : cepgen::LoggedMessage("Logging", __FUNC__, cepgen::LoggedMessage::MessageType::verbatim, __FILE__, __LINE__)
 #define CG_INFO(mod)                \
   (!CG_LOG_MATCH(mod, information)) \
       ? cepgen::NullStream()        \
