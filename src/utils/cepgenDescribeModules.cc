@@ -29,21 +29,27 @@ using namespace std;
 int main(int argc, char* argv[]) {
   string doc_generator, output_file;
   vector<string> categories, modules_names;
+  bool quiet;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("documentation-generator,D", "type of documentation", &doc_generator, "text")
       .addOptionalArgument("output,o", "output file", &output_file, "")
       .addOptionalArgument("categories,C", "categories to document", &categories, vector<string>{})
       .addOptionalArgument("modules,m", "module names to document", &modules_names, vector<string>{})
+      .addOptionalArgument("quiet,q", "quiet mode", &quiet, false)
       .parse();
 
+  if (quiet)
+    CG_LOG_LEVEL(nothing);
   cepgen::initialise();
   auto gen = cepgen::DocumentationGeneratorFactory::get().build(
       doc_generator, cepgen::ParametersList().set("categories", categories).set("modules", modules_names));
   const auto documentation = gen->describe();
 
-  if (output_file.empty())
+  if (output_file.empty()) {
+    if (quiet)
+      CG_LOG_LEVEL(information);
     CG_LOG << documentation;
-  else {
+  } else {
     ofstream of(output_file);
     of << documentation;
     of.close();
