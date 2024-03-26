@@ -45,9 +45,9 @@ namespace cepgen {
     template <>
     std::string toString(const std::wstring&);
     std::wstring toWstring(const std::string& str);  ///< Convert a wide characters to a standard characters string
-    std::string toCamelCase(const std::string&);     ///< Convert any case into a camelCase string
-    bool isInt(const std::string&);                  ///< Check if a string is also an integer
-    bool isFloat(const std::string&);                ///< Check if a string is also a floating point number
+    std::string toCamelCase(const std::string&, bool lower = true);  ///< Convert any case into a camelCase string
+    bool isInt(const std::string&);                                  ///< Check if a string is also an integer
+    bool isFloat(const std::string&);  ///< Check if a string is also a floating point number
     /// Format a string using a printf style format descriptor.
     template <typename... Args>
     inline std::string format(const std::string& fmt, Args... args) {

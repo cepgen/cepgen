@@ -17,6 +17,11 @@ int main(int argc, char* argv[]) {
     CG_TEST_EQUAL(cepgen::utils::toCamelCase(snake_str), "thisIsASnakeCaseString", "snake -> camel");
   }
   {
+    const auto screaming_snake_str = "THIS_IS_A_SCREAMING_SNAKE_CASE_STRING";
+    CG_TEST_EQUAL(
+        cepgen::utils::toCamelCase(screaming_snake_str), "thisIsAScreamingSnakeCaseString", "screaming snake -> camel");
+  }
+  {
     const auto camel_str = "thisIsACamelCaseString";
     CG_TEST_EQUAL(cepgen::utils::toCamelCase(camel_str), camel_str, "camel -> camel");
   }

@@ -167,13 +167,26 @@ namespace cepgen {
       return converter.from_bytes(str);
     }
 
-    std::string toCamelCase(const std::string& in) {
+    std::string toCamelCase(const std::string& in, bool lower) {
+      if (in.empty() ||
+          (in.find('_') == std::string::npos && in.find('-') == std::string::npos && in.find(' ') == std::string::npos))
+        return in;
       auto out = in;
-      for (auto it = out.begin(); it != out.end(); it++)
-        if (*it == '-' || *it == '_') {
-          it = out.erase(it);
-          *it = toupper(*it);
+      bool tail = false;
+      size_t n = 0;
+      for (const auto& c : out) {
+        if (c == '-' || c == '_' || c == ' ')
+          tail = false;
+        else if (tail)
+          out[n++] = std::tolower(c);
+        else {
+          tail = true;
+          out[n++] = std::toupper(c);
         }
+      }
+      out.resize(n);
+      if (lower)
+        out[0] = std::tolower(out[0]);
       return out;
     }
 
