@@ -71,8 +71,16 @@ jobs:
     - name: 'Uncompress environment'
       run: tar -xvf environment.tar -C /
     - uses: seanmiddleditch/gha-setup-ninja@master
-    - name: Test
+    - name: 'Test CepGen'
       working-directory: ${{ env.CEPGEN_PATH }}
       run: |
         echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
         ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" --output-on-failure
+    - name: 'Compress environment'
+      run: tar -cvf test-environment.tar /Package/*.html
+    - name: 'Upload artifacts'
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-env
+        path: test-environment.tar
+
