@@ -40,7 +40,7 @@ add_custom_target(NAME ALL
   DEPENDS CepGenPython
   COMMAND ${CMAKE_COMMAND}
     -DMODULE_DOC_EXE=${PROJECT_BINARY_DIR}/bin/cepgenDescribeModules
+    -DMODULE_DOC_OUTPUT=${PROJECT_BINARY_DIR}/python_modules
     -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/GenerateModulesDocs.cmake)
-#add_dependencies(CepGenPythonModulesDoc CepGenPython)
 
 cepgen_test_declare_unstable(python_output python_particle_mod)
