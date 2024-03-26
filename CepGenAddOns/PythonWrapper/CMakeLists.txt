@@ -36,5 +36,23 @@ cepgen_build(CepGenPython SOURCES *.cpp
     EXT_LIBS ${Python_LIBRARIES}
     EXT_HEADERS ${Python_INCLUDE_DIRS}
     INSTALL_COMPONENT python)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/python
+  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
+  COMPONENT python FILES_MATCHING PATTERN "*.py")
+if(CMAKE_BUILD_UTILS)
+  set(MODULES_DESCRIPTOR ${PROJECT_BINARY_DIR}/bin/cepgenDescribeModules)
+  set(MODULES_OUTPUT ${PROJECT_BINARY_DIR}/python_modules)
+  add_custom_target(${PROJECT_NAME}_moddesc ALL
+    DEPENDS ${MODULES_DESCRIPTOR}
+    COMMENT "Generation of Python modules descriptions")
+  add_custom_command(TARGET ${PROJECT_NAME}_moddesc POST_BUILD
+    COMMAND ${CMAKE_COMMAND}
+      -DMODULE_DOC_EXE=${MODULES_DESCRIPTOR}
+      -DMODULE_DOC_OUTPUT=${MODULES_OUTPUT}
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/GenerateModulesDocs.cmake)
+  install(DIRECTORY ${MODULES_OUTPUT}
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen/python_modules
+    COMPONENT python)
+endif()
 
 cepgen_test_declare_unstable(python_output python_particle_mod)

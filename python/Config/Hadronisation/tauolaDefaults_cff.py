@@ -4,8 +4,6 @@
 #
 # Collection of parameters to define the TAUOLA algorithm interface
 
-from Config.containers_cff import Module, Parameters
-
 
 class DecayMode:
     All = 0
@@ -31,10 +29,3 @@ class DecayMode:
     TwoPionEtaMode = 20 # eta pi^pm pi^0 nu
     TwoPionGammaMode = 21 # pi^pm pi^0 gamma nu
     TwoKMode = 22 # K^pm K^0 nu
-
-tauola = Module('tauola',
-    polarisations = Parameters(
-        full = True,
-        #GAMMA = False,
-    ),
-)

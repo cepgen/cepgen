@@ -6,13 +6,12 @@
 # Base Pythia 8 configuration parameters to define the hadronisation module
 
 
-from Config.containers_cff import Module
+from EventModifiers.pythia8_cfi import pythia8 as _pythia8
 from Config.Hadronisation.pythia8Defaults_cff import pythia8Defaults
 from Config.Hadronisation.pythia8Tunes_cff import pythia8CUEP8M1Settings
 
-pythia8 = Module('pythia8',
+pythia8 = _pythia8.clone(
     seed = 1000,
-    maxTrials = 1,
     preConfiguration = (
         # printout properties
         # start by disabling some unnecessary output

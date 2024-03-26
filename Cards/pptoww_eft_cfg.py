@@ -1,9 +1,9 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
 from Config.PDG_cfi import PDG
-from Config.Integration.vegas_cfi import vegas as integrator
 from Config.logger_cfi import logger
 from Config.generator_cfi import generator as _gen
+from Integrators.vegas_cfi import vegas as integrator
 
 #logger.enabledModules += ('Generator.*',)
 

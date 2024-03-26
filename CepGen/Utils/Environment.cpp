@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cstdlib>
+
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
 
@@ -23,23 +25,23 @@ namespace cepgen {
   namespace utils {
     namespace env {
       std::string get(const std::string& var, const std::string& def) {
-        const auto out = std::getenv(var.c_str());
-        if (!out)
-          return def;
-        return std::string(out);
+        if (const auto out = std::getenv(var.c_str()); out != nullptr)
+          return std::string(out);
+        return def;
       }
 
       std::vector<std::string> searchPaths() {
-        return std::vector<std::string>{fs::path(env::get("CEPGEN_PATH", ".")),
-                                        fs::path(env::get("CEPGEN_PATH", ".")) / "CepGen",
-                                        fs::path(env::get("CEPGEN_PATH", ".")) / "External",
-                                        fs::path(env::get("CEPGEN_PATH", ".")) / "build",
+        const auto cepgen_path = fs::path(env::get("CEPGEN_PATH", "."));
+        return std::vector<std::string>{cepgen_path,
+                                        cepgen_path / "CepGen",
+                                        cepgen_path / "External",
+                                        cepgen_path / "build",
                                         fs::path() / "/usr" / "share" / "CepGen",
+                                        fs::path() / "/usr" / "local",
+                                        fs::path() / "/usr" / "local" / "lib",
                                         fs::current_path(),
                                         fs::current_path().parent_path(),
-                                        fs::current_path().parent_path().parent_path(),
-                                        fs::path() / "/usr" / "local",
-                                        fs::path() / "/usr" / "local" / "lib"};
+                                        fs::current_path().parent_path().parent_path()};
       }
 
       void set(const std::string& var, const std::string& value) { setenv(var.c_str(), value.c_str(), 1); }

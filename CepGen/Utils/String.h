@@ -181,12 +181,6 @@ namespace cepgen {
       return repr<T>(
           vec, [](const T& xv) { return toString(xv); }, sep);
     }
-    /// Helper to print a vector
-    template <>
-    inline std::string repr(const std::vector<std::string>& vec, const std::string& sep) {
-      return repr<std::string>(
-          vec, [](const std::string& xv) { return xv; }, sep);
-    }
     std::string randomString(size_t size);      ///< Generate a random string of a given size
     std::string ltrim(const std::string& str);  ///< Trim leading spaces
     std::string rtrim(const std::string& str);  ///< Trim trailing spaces

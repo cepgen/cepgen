@@ -10,7 +10,7 @@ on:
 
 env:
   BUILD_TYPE: Release  # Release, Debug, RelWithDebInfo, etc
-  CEPGEN_PATH: /Package/build
+  CEPGEN_PATH: /Package
   CG_CI: True
   MG5_aMC_VERSION: MG5_aMC_v3.5.3
 

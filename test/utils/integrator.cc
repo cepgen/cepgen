@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
                            "type of integrator used",
                            &integrators,
                            cepgen::IntegratorFactory::get().modules())  // by default, all integrators are tested
-      .addOptionalArgument("functional,f", "type of functional parser user", &func_mod, "ROOT")
+      .addOptionalArgument("functional,f", "type of functional parser user", &func_mod, "root")
       .addOptionalArgument("quiet,q", "quiet mode", &quiet, false)
       .addOptionalArgument("python,p", "also add python integrator?", &python_integ, false)
       .parse();

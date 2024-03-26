@@ -23,26 +23,17 @@
 #include "CepGenAddOns/Pythia6Wrapper/Pythia6Interface.h"
 
 extern "C" {
-/// Get the particle's mass in GeV from Pythia
-extern double pymass_(int&);
-/// Launch the Pythia6 fragmentation
-extern void pyexec_();
-/// Set a parameter value to the Pythia module
-extern void pygive_(const char*, int);
+extern double pymass_(int&);            ///< Get the particle's mass in GeV from Pythia
+extern void pyexec_();                  ///< Launch the Pythia6 fragmentation
+extern void pygive_(const char*, int);  ///< Set a parameter value to the Pythia module
 extern void pyckbd_();
-/// List all the particles in the event in a human-readable format
-extern void pylist_(int&);
-/// Join two coloured particles in a colour singlet
-extern void pyjoin_(int&, int&);
-/// Get a particle's human-readable name from Pythia
-extern void pyname_(int&, char*, int);
-/// Get integer-valued event information from Pythia
-extern int pyk_(int&, int&);
-/// Get real-valued event information from Pythia
-extern double pyp_(int&, int&);
+extern void pylist_(int&);              ///< List all the particles in the event in a human-readable format
+extern void pyjoin_(int&, int&);        ///< Join two coloured particles in a colour singlet
+extern void pyname_(int&, char*, int);  ///< Get a particle's human-readable name from Pythia
+extern int pyk_(int&, int&);            ///< Get integer-valued event information from Pythia
+extern double pyp_(int&, int&);         ///< Get real-valued event information from Pythia
 extern int pychge_(int&);
-/// Purely virtual method to call at the end of the run
-void pystop_() { CG_INFO("pythia6:pystop") << "End of run"; }
+void pystop_() { CG_INFO("pythia6:pystop") << "End of run"; }  ///< Purely virtual method to call at the end of the run
 }
 
 namespace pythia6 {
