@@ -34,6 +34,10 @@ namespace cepgen {
     static std::string repr(const ParametersList& params, const std::string& key) {
       if (params.has<bool>(key))
         return params.get<bool>(key) ? "True" : "False";
+      else if (params.has<int>(key))
+        return "int(" + std::to_string(params.get<int>(key)) + ")";
+      else if (params.has<unsigned long long>(key))
+        return "int(" + std::to_string(params.get<unsigned long long>(key)) + ")";
       else if (params.has<std::string>(key))
         return "'" + utils::replaceAll(params.get<std::string>(key), "'", "\\'") + "'";
       else if (params.has<Limits>(key)) {

@@ -145,17 +145,21 @@ namespace cepgen {
 
       // process definition
       if (auto process = plist_.get<ParametersList>("process"); !process.empty()) {
-        process += process.get<ParametersList>("processParameters");
-        process.erase("processParameters");
         auto& pkin = process.operator[]<ParametersList>("kinematics");
-        {
+        {  // remove extra layer of 'processParameters' and move it to the main process parameters block
+          process += process.get<ParametersList>("processParameters");
+          process.erase("processParameters");
+          if (process.has<int>("mode")) {  // move the kinematics mode from process to the main kinematics block
+            pkin.set("mode", (int)process.getAs<int, mode::Kinematics>("mode"));
+            process.erase("mode");
+          }
+        }
+        {  // remove extra layers of 'inKinematics' and 'outKinematics' and move them to the main kinematics block
           pkin += process.get<ParametersList>("inKinematics");
           process.erase("inKinematics");
           pkin += process.get<ParametersList>("outKinematics");
           process.erase("outKinematics");
         }
-        if (process.has<int>("mode"))
-          pkin.set("mode", (int)process.getAs<int, mode::Kinematics>("mode"));
         {
           if (auto& pkgen = process.operator[]<ParametersList>("kinematicsGenerator");
               pkgen.name<std::string>().empty())
