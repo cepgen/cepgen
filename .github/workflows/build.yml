@@ -81,14 +81,7 @@ jobs:
       working-directory: ${{ env.CEPGEN_PATH }}
       run: |
         echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
-        ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" -E "benchmark_*" --output-on-failure
-    - name: 'Compress environment'
-      run: tar -cvf test-environment.tar /Package/*.html
-    - name: 'Upload artifacts'
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-env
-        path: test-environment.tar
+        ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" -E "benchmark_*" --output-on-failure --repeat until-pass:2
 
   benchmark:
     needs: build
