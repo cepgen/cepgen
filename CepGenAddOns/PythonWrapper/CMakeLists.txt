@@ -42,10 +42,10 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/python
 if(CMAKE_BUILD_UTILS)
   set(MODULES_DESCRIPTOR ${PROJECT_BINARY_DIR}/bin/cepgenDescribeModules)
   set(MODULES_OUTPUT ${PROJECT_BINARY_DIR}/python_modules)
-  add_custom_target(${PROJECT_NAME}_moddesc ALL
+  add_custom_target(CepGenPythonModules ALL
     DEPENDS ${MODULES_DESCRIPTOR}
     COMMENT "Generation of Python modules descriptions")
-  add_custom_command(TARGET ${PROJECT_NAME}_moddesc POST_BUILD
+  add_custom_command(TARGET CepGenPythonModules POST_BUILD
     COMMAND ${CMAKE_COMMAND}
       -DMODULE_DOC_EXE=${MODULES_DESCRIPTOR}
       -DMODULE_DOC_OUTPUT=${MODULES_OUTPUT}
