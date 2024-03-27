@@ -81,7 +81,7 @@ jobs:
       working-directory: ${{ env.CEPGEN_PATH }}
       run: |
         echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
-        ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" --output-on-failure
+        ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" -E "benchmark_*" --output-on-failure
     - name: 'Compress environment'
       run: tar -cvf test-environment.tar /Package/*.html
     - name: 'Upload artifacts'
@@ -90,3 +90,30 @@ jobs:
         name: test-env
         path: test-environment.tar
 
+  benchmark:
+    needs: build
+    runs-on: ubuntu-latest
+    container:
+      image: 'laufor/ci-images:cepgen-fedora39'
+      options: -v ${{ github.workspace }}:/Package
+    steps:
+    - uses: actions/checkout@v4
+    - name: 'Download artifacts'
+      uses: actions/download-artifact@v4
+      with:
+        name: build-env
+    - name: 'Uncompress environment'
+      run: tar -xvf environment.tar -C /
+    - uses: seanmiddleditch/gha-setup-ninja@master
+    - name: 'Benchmark CepGen modules'
+      working-directory: ${{ env.CEPGEN_PATH }}
+      run: |
+        echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
+        ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" -R "benchmark_*" --output-on-failure
+    - name: 'Compress environment'
+      run: tar -cvf benchmark-environment.tar /Package/*.html
+    - name: 'Upload artifacts'
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-env
+        path: benchmark-environment.tar
