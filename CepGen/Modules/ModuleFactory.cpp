@@ -91,7 +91,7 @@ namespace cepgen {
       auto extra_params = utils::split(utils::toString(name), '<');
       auto* nm = reinterpret_cast<I*>(&extra_params[0]);
       if (params_map_.count(*nm) == 0)
-        return ParametersDescription().setDescription("{module without description}").steer(params);
+        return ParametersDescription().setName(*nm).setDescription("{module without description}").steer(params);
       auto descr = params_map_.at(*nm).steer(params);
       auto extra_params_obj = ParametersList();
       if (extra_params.size() > 1)
@@ -99,7 +99,7 @@ namespace cepgen {
           extra_params_obj.feed(extra_params.at(i));
       return descr.steer(extra_params_obj);
     } else if (params_map_.count(name) == 0)
-      return ParametersDescription().setDescription("{module without description}").steer(params);
+      return ParametersDescription().setName(name).setDescription("{module without description}").steer(params);
     return params_map_.at(name).steer(params);
   }
 

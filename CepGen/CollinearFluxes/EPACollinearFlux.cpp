@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *                2009-2012  Nicolas Schul, Jerome de Favereau de Jeneret
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -36,7 +36,7 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = CollinearFlux::description();
       desc.setDescription("EPA FF-dependent flux");
-      desc.add<ParametersDescription>("formFactors", ParametersDescription().setName<std::string>("StandardDipole"));
+      desc.add<ParametersDescription>("formFactors", FormFactorsFactory::get().describeParameters("StandardDipole"));
       return desc;
     }
 

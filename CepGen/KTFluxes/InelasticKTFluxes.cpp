@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = KTFlux::description();
       desc.setDescription("Nucl. inel. photon emission");
-      desc.add<ParametersDescription>("structureFunctions", ParametersDescription().setName<int>(301));
+      desc.add<ParametersDescription>("structureFunctions", StructureFunctionsFactory::get().describeParameters(301));
       return desc;
     }
 

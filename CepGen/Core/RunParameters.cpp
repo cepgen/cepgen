@@ -26,6 +26,8 @@
 #include "CepGen/EventFilter/EventModifier.h"
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
+#include "CepGen/Modules/GeneratorWorkerFactory.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/PDG.h"
@@ -262,7 +264,7 @@ namespace cepgen {
 
   ParametersDescription RunParameters::description() {
     auto desc = ParametersDescription();
-    desc.add<ParametersDescription>("integrator", ParametersDescription().setName<std::string>("Vegas"));
+    desc.add<ParametersDescription>("integrator", IntegratorFactory::get().describeParameters("Vegas"));
     desc.add<ParametersDescription>("generation", Generation::description());
     return desc;
   }
@@ -281,7 +283,7 @@ namespace cepgen {
 
   ParametersDescription RunParameters::Generation::description() {
     auto desc = ParametersDescription();
-    desc.add<ParametersDescription>("worker", ParametersDescription().setName<std::string>("grid_optimised"))
+    desc.add<ParametersDescription>("worker", GeneratorWorkerFactory::get().describeParameters("grid_optimised"))
         .setDescription("type of generator worker to use for event generation");
     desc.add<int>("maxgen", 0).setDescription("Number of events to generate");
     desc.add<int>("printEvery", 10000).setDescription("Printing frequency for the events content");

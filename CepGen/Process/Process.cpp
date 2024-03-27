@@ -408,7 +408,7 @@ namespace cepgen {
       desc.add<ParametersDescription>("alphaS", AlphaSFactory::get().describeParameters("pegasus"))
           .setDescription("strong coupling evolution algorithm");
       desc.add<bool>("hasEvent", true).setDescription("does the process carry an event definition");
-      desc.add<ParametersDescription>("randomGenerator", ParametersDescription().setName<std::string>("stl"))
+      desc.add<ParametersDescription>("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
           .setDescription("random number generator engine");
       return desc;
     }

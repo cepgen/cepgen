@@ -78,7 +78,7 @@ namespace cepgen {
     auto desc = ParametersDescription();
     desc.setDescription("Unnamed integrator");
     desc.add<int>("verbose", 1).setDescription("Verbosity level");
-    desc.add<ParametersDescription>("randomGenerator", ParametersDescription().setName<std::string>("stl"))
+    desc.add<ParametersDescription>("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
         .setDescription("random number generator engine");
     return desc;
   }

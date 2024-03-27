@@ -25,16 +25,19 @@
 namespace cepgen {
   ParametersDescription PartonFluxFactory::describeParameters(const std::string& name,
                                                               const ParametersList& params) const {
+    if (name.empty())
+      throw CG_FATAL("PartonFluxFactory:describeParameters") << "No name given to describe parton flux modelling.";
     if (utils::contains(CollinearFluxFactory::get().modules(), name))
       return CollinearFluxFactory::get().describeParameters(name, params);
     if (utils::contains(KTFluxFactory::get().modules(), name))
       return KTFluxFactory::get().describeParameters(name, params);
-    throw CG_FATAL("PartonFluxFactory:describeParameters")
-        << "Failed to find a parton flux with name '" << name << "'.";
+    return ParametersDescription().setName(name);
   }
 
   bool PartonFluxFactory::elastic(const ParametersList& params) const {
     const auto& name = params.name<std::string>();
+    if (name.empty())
+      throw CG_FATAL("PartonFluxFactory:elastic") << "No name given to get parton flux modelling elasticity.";
     if (utils::contains(CollinearFluxFactory::get().modules(), name))
       return !CollinearFluxFactory::get().build(name, params)->fragmenting();
     if (utils::contains(KTFluxFactory::get().modules(), name))

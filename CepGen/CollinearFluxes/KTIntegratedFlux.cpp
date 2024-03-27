@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2023  Laurent Forthomme
+ *  Copyright (C) 2018-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -60,9 +60,9 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = CollinearFlux::description();
       desc.setDescription("kt-integr. coll.flux");
-      desc.add<ParametersDescription>("integrator", ParametersDescription().setName<std::string>("gsl"))
+      desc.add<ParametersDescription>("integrator", AnalyticIntegratorFactory::get().describeParameters("gsl"))
           .setDescription("Steering parameters for the analytical integrator");
-      desc.add<ParametersDescription>("ktFlux", ParametersDescription().setName<std::string>("BudnevElastic"))
+      desc.add<ParametersDescription>("ktFlux", PartonFluxFactory::get().describeParameters("BudnevElastic"))
           .setDescription("Type of unintegrated kT-dependent parton flux");
       desc.add<Limits>("kt2range", {0., 1.e4})
           .setDescription("kinematic range for the parton transverse virtuality, in GeV^2");

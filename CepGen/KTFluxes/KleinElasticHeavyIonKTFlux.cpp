@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ namespace cepgen {
       auto desc = KTFlux::description();
       desc.setDescription("Elastic photon emission from heavy ion (from Starlight)");
       desc.addAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon::Pb());
-      desc.add<ParametersDescription>("formFactors", ParametersDescription().setName<std::string>("HeavyIonDipole"));
+      desc.add<ParametersDescription>("formFactors", FormFactorsFactory::get().describeParameters("HeavyIonDipole"));
       return desc;
     }
 

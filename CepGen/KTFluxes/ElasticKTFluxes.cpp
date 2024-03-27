@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = KTFlux::description();
       desc.setDescription("Nucl. el. photon emission");
-      desc.add<ParametersDescription>("formFactors", ParametersDescription().setName<std::string>("StandardDipole"));
+      desc.add<ParametersDescription>("formFactors", FormFactorsFactory::get().describeParameters("StandardDipole"));
       return desc;
     }
     bool fragmenting() const override final { return false; }
@@ -86,7 +86,7 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = BudnevElasticNucleonKTFlux::description();
       desc.setDescription("Lepton el. photon emission (Budnev flux)");
-      desc.add<ParametersDescription>("formFactors", ParametersDescription().setName<std::string>("PointLikeFermion"));
+      desc.add<ParametersDescription>("formFactors", FormFactorsFactory::get().describeParameters("PointLikeFermion"));
       desc.add<pdgid_t>("pdgId", PDG::electron).setDescription("lepton flavour");
       return desc;
     }
@@ -111,7 +111,7 @@ namespace cepgen {
       auto desc = ElasticNucleonKTFlux::description();
       desc.setDescription("HI el. photon emission");
       desc.addAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon::Pb());
-      desc.add<ParametersDescription>("formFactors", ParametersDescription().setName<std::string>("HeavyIonDipole"));
+      desc.add<ParametersDescription>("formFactors", FormFactorsFactory::get().describeParameters("HeavyIonDipole"));
       return desc;
     }
 

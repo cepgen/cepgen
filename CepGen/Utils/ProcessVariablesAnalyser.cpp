@@ -57,7 +57,7 @@ namespace cepgen {
       hist_desc.add<int>("nbinsX", 25).setDescription("Bins multiplicity for x-axis");
       hist_desc.add<Limits>("xrange", Limits{0., 1.}).setDescription("Minimum-maximum range for x-axis");
       desc.addParametersDescriptionVector("histVariables", hist_desc, {}).setDescription("Histogram definition");
-      desc.add<ParametersDescription>("drawer", ParametersDescription().setName<std::string>("root"));
+      desc.add<ParametersDescription>("drawer", DrawerFactory::get().describeParameters("root"));
       return desc;
     }
   }  // namespace utils

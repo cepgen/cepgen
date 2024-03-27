@@ -20,6 +20,7 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Integration/GSLIntegrator.h"
 #include "CepGen/Integration/Integrand.h"
+#include "CepGen/Modules/RandomGeneratorFactory.h"
 
 namespace cepgen {
   GSLIntegrator::GSLIntegrator(const ParametersList& params) : Integrator(params) {
@@ -52,7 +53,7 @@ namespace cepgen {
 
   ParametersDescription GSLIntegrator::description() {
     auto desc = Integrator::description();
-    desc.add<ParametersDescription>("randomGenerator", ParametersDescription().setName<std::string>("gsl"));
+    desc.add<ParametersDescription>("randomGenerator", RandomGeneratorFactory::get().describeParameters("gsl"));
     return desc;
   }
 }  // namespace cepgen

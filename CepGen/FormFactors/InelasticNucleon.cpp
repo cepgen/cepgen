@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -57,9 +57,9 @@ namespace cepgen {
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Proton inelastic (SF)");
-        desc.add<ParametersDescription>("structureFunctions", ParametersDescription().setName<int>(301))
+        desc.add<ParametersDescription>("structureFunctions", StructureFunctionsFactory::get().describeParameters(301))
             .setDescription("type of structure functions parameterisation for the dissociative emission");
-        desc.add<ParametersDescription>("integrator", ParametersDescription().setName<std::string>("gsl"))
+        desc.add<ParametersDescription>("integrator", AnalyticIntegratorFactory::get().describeParameters("gsl"))
             .setDescription("type of numerical integrator algorithm to use");
         desc.add<bool>("computeFM", false).setDescription("compute, or neglect the F2/xbj^3 term");
         desc.add<Limits>("mxRange", Limits{1.0732 /* mp + mpi0 */, 20.})
