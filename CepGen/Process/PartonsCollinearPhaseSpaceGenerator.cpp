@@ -36,7 +36,7 @@ namespace cepgen {
     auto set_flux_properties = [&kin](const Beam& beam, std::unique_ptr<PartonFlux>& flux) {
       auto params = beam.partonFluxParameters();
       const auto params_p_el = CollinearFluxFactory::get().describeParameters(
-          "EPAFlux", ParametersList().set("formFactors", kin.incomingBeams().formFactors()));
+          "EPAFlux", ParametersList().set("formFactors", beam.formFactors()));
       const auto params_p_inel = CollinearFluxFactory::get().describeParameters(
           "EPAFlux",
           ParametersList().set("formFactors",

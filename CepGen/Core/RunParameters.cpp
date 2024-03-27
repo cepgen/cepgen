@@ -211,10 +211,7 @@ namespace cepgen {
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill(' ') << "\n\n"
        << std::setw(wt) << "Incoming particles" << beams.positive() << ",\n"
        << std::setw(wt) << "" << beams.negative() << "\n"
-       << std::setw(wt) << "C.m. energy (GeV)" << utils::format("%g", beams.sqrtS()) << "\n"
-       << std::setw(wt) << "Form factors"
-       << utils::boldify(FormFactorsFactory::get().describeParameters(beams.formFactors()).description()) << ": "
-       << beams.formFactors() << "\n";
+       << std::setw(wt) << "C.m. energy (GeV)" << utils::format("%g", beams.sqrtS()) << "\n";
     if (beams.mode() != mode::Kinematics::ElasticElastic)
       os << std::setw(wt) << "Structure functions"
          << utils::boldify(

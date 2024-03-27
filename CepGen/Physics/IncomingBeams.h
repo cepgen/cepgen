@@ -40,7 +40,6 @@ namespace cepgen {
     inline const Beam& negative() const { return neg_beam_; }  ///< Reference to the negative-z beam information
     inline Beam& negative() { return neg_beam_; }              ///< Reference to the negative-z beam information
 
-    inline const ParametersList& formFactors() const { return formfac_; }        ///< Form factors parameters
     inline const ParametersList& structureFunctions() const { return strfun_; }  ///< Structure functions parameters
     void setStructureFunctions(int, int);  ///< Set the integer-type of structure functions evaluator to build
 
@@ -49,7 +48,6 @@ namespace cepgen {
     double sqrtS() const;   ///< Incoming beams centre of mass energy (in GeV)
 
   private:
-    ParametersList formfac_;
     ParametersList strfun_;
     Beam pos_beam_{ParametersList()};
     Beam neg_beam_{ParametersList()};
