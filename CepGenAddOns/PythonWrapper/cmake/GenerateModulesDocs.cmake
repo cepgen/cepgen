@@ -10,6 +10,7 @@ macro(cepgen_generate_python_descriptions)
         OUTPUT_VARIABLE modules)
     message(STATUS "Python... generating modules description for ${ARG_CATEGORY} in ${ARG_NAME}")
     file(MAKE_DIRECTORY ${MODULE_DOC_OUTPUT}/${ARG_NAME})
+    file(WRITE ${MODULE_DOC_OUTPUT}/${ARG_NAME}/__init__.py "## \\ingroup python")
     foreach(_mod ${modules})
         exec_program(${MODULE_DOC_EXE}
             ARGS --documentation-generator python
@@ -24,6 +25,7 @@ macro(cepgen_generate_python_descriptions)
 endmacro()
 
 file(MAKE_DIRECTORY ${MODULE_DOC_OUTPUT})
+file(WRITE ${MODULE_DOC_OUTPUT}/__init__.py "## \\ingroup python")
 cepgen_generate_python_descriptions(NAME EventModifiers CATEGORY evtmod)
 cepgen_generate_python_descriptions(NAME OutputModules CATEGORY evtout)
 cepgen_generate_python_descriptions(NAME Integrators CATEGORY integr)
