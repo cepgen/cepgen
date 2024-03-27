@@ -31,7 +31,7 @@
 
 namespace cepgen {
   IncomingBeams::IncomingBeams(const ParametersList& params) : SteeredObject(params) {
-    (*this).add("formFactors", formfac_).add("structureFunctions", strfun_);
+    (*this).add("structureFunctions", strfun_);
   }
 
   void IncomingBeams::setParameters(const ParametersList& params) {
@@ -135,8 +135,13 @@ namespace cepgen {
       set_part_fluxes_from_name(flux);
 
     //--- form factors
-    plist_pos.set<ParametersList>("formFactors", steer<ParametersList>("formFactors"));
-    plist_neg.set<ParametersList>("formFactors", steer<ParametersList>("formFactors"));
+    if (const auto& formfacs = steer<std::vector<ParametersList> >("formFactors"); formfacs.size() >= 2) {
+      plist_pos.set<ParametersList>("formFactors", formfacs.at(0));
+      plist_neg.set<ParametersList>("formFactors", formfacs.at(1));
+    } else if (const auto& formfacs = steer<ParametersList>("formFactors"); !formfacs.empty()) {
+      plist_pos.set<ParametersList>("formFactors", formfacs);
+      plist_neg.set<ParametersList>("formFactors", formfacs);
+    }
 
     if (auto mode = steerAs<int, mode::Kinematics>("mode"); mode != mode::Kinematics::invalid) {
       plist_pos.set<bool>("elastic",
@@ -252,8 +257,11 @@ namespace cepgen {
     desc.add<double>("sqrtS", 0.).setDescription("Two-beam centre of mass energy (in GeV)");
     desc.addAs<int, mode::Kinematics>("mode", mode::Kinematics::invalid)
         .setDescription("Process kinematics mode (1 = elastic, (2-3) = single-dissociative, 4 = double-dissociative)");
-    desc.add<ParametersDescription>("formFactors",
-                                    FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler))
+    desc.addParametersDescriptionVector(
+            "formFactors",
+            FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler),
+            std::vector<ParametersList>(
+                2, FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler).parameters()))
         .setDescription("Beam form factors modelling");
     desc.add<ParametersDescription>("structureFunctions",
                                     StructureFunctionsFactory::get().describeParameters(11 /*default is SY*/))

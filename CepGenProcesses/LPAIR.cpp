@@ -84,7 +84,8 @@ public:
           << "gamma=" << gamma_cm_ << ", beta*gamma=" << beta_gamma_cm_;
     }
 
-    formfac_ = FormFactorsFactory::get().build(kinematics().incomingBeams().formFactors());
+    formfac1_ = FormFactorsFactory::get().build(kinematics().incomingBeams().positive().formFactors());
+    formfac2_ = FormFactorsFactory::get().build(kinematics().incomingBeams().negative().formFactors());
     strfun_ = StructureFunctionsFactory::get().build(kinematics().incomingBeams().structureFunctions());
 
     //--- first define the squared mass range for the diphoton/dilepton system
@@ -201,9 +202,10 @@ private:
         std::pow(4. / t1() / t2() / bb_, 2);
 
     // compute the electric/magnetic form factors for the two considered parton momenta transfers
-    const auto compute_form_factors = [this](bool elastic, double q2, double mi2, double mx2) -> Vector {
+    const auto compute_form_factors =
+        [this](formfac::Parameterisation& formfac, bool elastic, double q2, double mi2, double mx2) -> Vector {
       if (elastic) {  // trivial case for elastic photon emission
-        const auto ff = (*formfac_)(q2);
+        const auto ff = formfac(q2);
         return Vector{ff.FM, ff.FE};
       }
       if (!strfun_)
@@ -215,11 +217,13 @@ private:
       return Vector{-2. * strfun_->F1(xbj, q2) / q2, strfun_->F2(xbj, q2) * xbj / q2};
     };
     const auto u1 = beams_mode_ == mode::Kinematics::ElasticInelastic
-                        ? compute_form_factors(false, -t1(), mA2(), mX2())
-                        : compute_form_factors(kinematics().incomingBeams().positive().elastic(), -t1(), mA2(), mX2()),
+                        ? compute_form_factors(*formfac1_, false, -t1(), mA2(), mX2())
+                        : compute_form_factors(
+                              *formfac1_, kinematics().incomingBeams().positive().elastic(), -t1(), mA2(), mX2()),
                u2 = beams_mode_ == mode::Kinematics::ElasticInelastic
-                        ? compute_form_factors(true, -t2(), mB2(), mY2())
-                        : compute_form_factors(kinematics().incomingBeams().negative().elastic(), -t2(), mB2(), mY2());
+                        ? compute_form_factors(*formfac2_, true, -t2(), mB2(), mY2())
+                        : compute_form_factors(
+                              *formfac2_, kinematics().incomingBeams().negative().elastic(), -t2(), mB2(), mY2());
     const auto peripp = (u1.transposed() * m_em * u2)(0);
     CG_DEBUG_LOOP("LPAIR:peripp") << "bb = " << bb_ << ", qqq = " << q2dq_ << ", qdq = " << qdq << "\n\t"
                                   << "e-m matrix = " << m_em << "\n\t"
@@ -251,7 +255,7 @@ private:
   double p_cm_{0.}, mom_prefactor_{0.};
   double gamma_cm_{0.}, beta_gamma_cm_{0.};
 
-  std::unique_ptr<formfac::Parameterisation> formfac_;
+  std::unique_ptr<formfac::Parameterisation> formfac1_, formfac2_;
   std::unique_ptr<strfun::Parameterisation> strfun_;
 
   // mapped variables

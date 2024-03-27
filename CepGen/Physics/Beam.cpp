@@ -29,6 +29,7 @@ namespace cepgen {
       : SteeredObject(params),
         pdg_id_(steerAs<int, pdgid_t>("pdgId")),
         momentum_(Momentum::fromPxPyPzM(0., 0., steer<double>("pz"), PDG::get().mass(pdg_id_))),
+        formfac_(steer<ParametersList>("formFactors").set<pdgid_t>("pdgId", std::abs(pdg_id_))),
         flux_info_(steer<ParametersList>("partonFlux")),
         elastic_(steer<bool>("elastic")) {}
 
@@ -46,8 +47,15 @@ namespace cepgen {
     else
       os << (PDG::Id)beam.pdg_id_;
     os << " (" << beam.momentum_.pz() << " GeV/c) " << (beam.elastic_ ? "elastic" : "inelastic");
-    if (!beam.flux_info_.name<std::string>().empty())
-      os << " [part.flux: " << beam.flux_info_ << "]";
+    const auto &formfac_name = beam.formfac_.name<std::string>(), &part_flux_name = beam.flux_info_.name<std::string>();
+    if (!formfac_name.empty() || !part_flux_name.empty()) {
+      os << " [" << formfac_name;
+      if (!formfac_name.empty() && !part_flux_name.empty())
+        os << ", ";
+      if (!part_flux_name.empty())
+        os << beam.flux_info_;
+      os << "]";
+    }
     return os;
   }
 }  // namespace cepgen

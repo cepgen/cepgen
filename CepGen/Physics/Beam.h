@@ -58,11 +58,13 @@ namespace cepgen {
       return *this;
     }
 
+    inline const ParametersList& formFactors() const { return formfac_; }             ///< Form factors parameters
     inline const ParametersList& partonFluxParameters() const { return flux_info_; }  ///< Parton flux modelling
 
   private:
     spdgid_t pdg_id_{0};        ///< PDG identifier for the beam
     Momentum momentum_;         ///< Incoming particle momentum
+    ParametersList formfac_;    ///< Form factors modelling parameters
     ParametersList flux_info_;  ///< Incoming parton flux parameters
     bool elastic_{true};        ///< Elastic parton emission?
   };
