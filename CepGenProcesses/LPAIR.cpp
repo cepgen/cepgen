@@ -57,7 +57,8 @@ public:
   double computeWeight() override;
 
   void prepareKinematics() override {
-    ml2_ = pair_.mass * pair_.mass;
+    ml_ = pair_.mass;
+    ml2_ = ml_ * ml_;
     charge_factor_ = std::pow(pair_.integerCharge() / 3., 2);
     beams_mode_ = kinematics().incomingBeams().mode();
     pA() = kinematics().incomingBeams().positive().momentum();
@@ -236,6 +237,7 @@ private:
 
   ///////////////////////////////////////////////////////////////////
   // variables computed at phase space definition
+  double ml_{0.};   ///< mass of the outgoing leptons
   double ml2_{0.};  ///< squared mass of the outgoing leptons
   double charge_factor_{0.};
   mode::Kinematics beams_mode_;
@@ -293,7 +295,7 @@ private:
   /// \note Defined as \f[\Delta = \left(p_1\cdot p_2\right)\left(q_1\cdot q_2\right)-\left(p_1\cdot q_2\right)\left(p_2\cdot q_1\right)\f]
   ///   with \f$p_i, q_i\f$ the 4-momenta associated to the incoming proton-like particle and to the photon emitted from it.
   double delta_{0.};
-  double delta3_{0.}, delta5_{0.};
+  double eph1_{0.}, eph2_{0.};
 };
 
 //---------------------------------------------------------------------------------------------
@@ -465,13 +467,14 @@ double LPAIR::pickin() {
 
 bool LPAIR::orient() {
   const auto re = 0.5 * inverseSqrtS();
-  delta3_ = re * (s2_ - mX2() + w12_);
-  delta5_ = re * (s1_ - mY2() - w12_);
+  eph1_ = re * (s2_ - mX2() + w12_);
+  eph2_ = re * (s1_ - mY2() - w12_);
+  //CG_LOG << eph1_ << ":" << eph2_;
 
   //----- central two-photon/lepton system
-  if (ec4_ = delta3_ + delta5_; ec4_ < mc4_) {
-    CG_WARNING("LPAIR:orient") << "ec4_ = " << ec4_ << " < mc4_ = " << mc4_ << "\n\t"
-                               << "==> delta3 = " << delta3_ << ", delta5 = " << delta5_;
+  if (ec4_ = eph1_ + eph2_; ec4_ < mc4_) {
+    CG_WARNING("LPAIR:orient") << "ec4_ = " << ec4_ << " < mc4_ = " << mc4_ << "==> photon energies: " << eph1_ << ", "
+                               << eph2_ << ".";
     return false;
   }
   if (pc4_ = utils::fastSqrtSqDiff(ec4_, mc4_); pc4_ == 0.) {  // protons' momenta are not along the z-axis
@@ -506,9 +509,9 @@ bool LPAIR::orient() {
   const auto rr = mom_prefactor_ * std::sqrt(-gram_) / pt4_;
 
   //--- beam 1 -> 3
-  const auto ep3 = ep1_ - delta3_, pp3 = std::sqrt(ep3 * ep3 - mX2()), pt3 = mom_prefactor_ * std::sqrt(deltas1_[0]);
+  const auto ep3 = ep1_ - eph1_, pp3 = utils::fastSqrtSqDiff(ep3, mX()), pt3 = mom_prefactor_ * std::sqrt(deltas1_[0]);
   if (pt3 > pp3) {
-    CG_DEBUG("LPAIR:orient") << "Invalid momentum for outgoing beam 1.";
+    CG_DEBUG("LPAIR:orient") << "Invalid momentum for outgoing beam 1: pt=" << pt3 << ", p=" << pp3 << ".";
     return false;
   }
   if (pt3 < rr) {
@@ -521,9 +524,9 @@ bool LPAIR::orient() {
                                 << "momentum = " << pX() << ".";
 
   //--- beam 2 -> 5
-  const auto ep5 = ep2_ - delta5_, pp5 = std::sqrt(ep5 * ep5 - mY2()), pt5 = mom_prefactor_ * std::sqrt(deltas2_[0]);
+  const auto ep5 = ep2_ - eph2_, pp5 = utils::fastSqrtSqDiff(ep5, mY()), pt5 = mom_prefactor_ * std::sqrt(deltas2_[0]);
   if (pt5 > pp5) {
-    CG_DEBUG("LPAIR:orient") << "Invalid momentum for outgoing beam 2.";
+    CG_DEBUG("LPAIR:orient") << "Invalid momentum for outgoing beam 2: pt=" << pt5 << ", p=" << pp5 << ".";
     return false;
   }
   if (pt5 < rr) {
@@ -569,7 +572,7 @@ double LPAIR::computeWeight() {
     return 0.;
   }
 
-  const double ecm6 = m_w4_ / (2. * mc4_), pp6cm = std::sqrt(ecm6 * ecm6 - ml2_);
+  const double ecm6 = m_w4_ / (2. * mc4_), pp6cm = utils::fastSqrtSqDiff(ecm6, ml_);
 
   jacobian *= pp6cm / mc4_;
 
@@ -582,10 +585,10 @@ double LPAIR::computeWeight() {
   const double eg = (m_w4_ + t1() - t2()) / (2. * mc4_);
 
   const double gamma4 = ec4_ / mc4_;
-  const Momentum pg(-pX().px() * cos_theta4_ - (pX().p() * al3 + e3mp3 - e1mp1_ + delta3_) * sin_theta4_,
+  const Momentum pg(-pX().px() * cos_theta4_ - (pX().p() * al3 + e3mp3 - e1mp1_ + eph1_) * sin_theta4_,
                     -pX().py(),
                     -gamma4 * pX().px() * sin_theta4_ + (pX().p() * al3 + e3mp3 - e1mp1_) * gamma4 * cos_theta4_ +
-                        mc4_ * delta3_ / (ec4_ + pc4_) - gamma4 * delta3_ * alpha4_);
+                        mc4_ * eph1_ / (ec4_ + pc4_) - gamma4 * eph1_ * alpha4_);
 
   CG_DEBUG_LOOP("LPAIR") << "pg = " << pg;
 
@@ -654,30 +657,30 @@ double LPAIR::computeWeight() {
     return 0.;
 
   {  // preparation for the periPP call
-    const auto compute_coeffs = [&qve](
-                                    const Momentum& pin, const Momentum& pout, double delta, double pcm, double& gamma)
+    const auto compute_coeffs =
+        [&qve](const Momentum& pin, const Momentum& pout, double ene_pho, double pcm, double& gamma)
         -> std::tuple<double, double, double, double, double, double, double> {
       const auto phi_out = pout.phi(), cos_phi_out = std::cos(phi_out), sin_phi_out = std::sin(phi_out);
       const auto pt_out = pout.pt();
       const auto c1 = pt_out * (qve.px() * sin_phi_out - qve.py() * cos_phi_out),
                  c2 = pt_out * (qve.pz() * pin.energy() - qve.energy() * pcm),
-                 c3 = ((pout.mass2() - pin.mass2()) * pin.energy2() + 2. * pin.mass2() * delta * pin.energy() -
-                       pin.mass2() * delta * delta + pt_out * pt_out * pin.energy2()) /
+                 c3 = ((pout.mass2() - pin.mass2()) * pin.energy2() + 2. * pin.mass2() * ene_pho * pin.energy() -
+                       pin.mass2() * ene_pho * ene_pho + pt_out * pt_out * pin.energy2()) /
                       (pout.pz() * pin.energy() + pout.energy() * pcm);
       const auto r2 = c2 * sin_phi_out + c3 * qve.py(), r3 = -c2 * cos_phi_out - c3 * qve.px();
       gamma = pin.mass2() * c1 * c1 + r2 * r2 + r3 * r3;
       return std::make_tuple(cos_phi_out, sin_phi_out, c1, c2, c3, r2, r3);
     };
-    const auto [cos_phi3, sin_phi3, c1, c2, c3, r12, r13] = compute_coeffs(pA(), pX(), delta3_, +p_cm_, gamma5_);
-    const auto [cos_phi5, sin_phi5, b1, b2, b3, r22, r23] = compute_coeffs(pB(), pY(), delta5_, -p_cm_, gamma6_);
+    const auto [cos_phi3, sin_phi3, c1, c2, c3, r12, r13] = compute_coeffs(pA(), pX(), eph1_, +p_cm_, gamma5_);
+    const auto [cos_phi5, sin_phi5, b1, b2, b3, r22, r23] = compute_coeffs(pB(), pY(), eph2_, -p_cm_, gamma6_);
 
     const auto pt3 = pY().pt(), pt5 = pY().pt();
     alpha5_ = -(qve.px() * cos_phi3 + qve.py() * sin_phi3) * pt3 * p1k2_ -
               (ep1_ * qve.energy() - p_cm_ * qve.pz()) * (cos_phi3 * cos_phi5 + sin_phi3 * sin_phi5) * pt3 * pt5 +
-              (delta5_ * qve.pz() + qve.energy() * (p_cm_ + pY().pz())) * c3;
+              (eph2_ * qve.pz() + qve.energy() * (p_cm_ + pY().pz())) * c3;
     alpha6_ = -(qve.px() * cos_phi5 + qve.py() * sin_phi5) * pt5 * p2k1_ -
               (ep2_ * qve.energy() + p_cm_ * qve.pz()) * (cos_phi3 * cos_phi5 + sin_phi3 * sin_phi5) * pt3 * pt5 +
-              (delta3_ * qve.pz() - qve.energy() * (p_cm_ - pY().pz())) * b3;
+              (eph1_ * qve.pz() - qve.energy() * (p_cm_ - pY().pz())) * b3;
     epsilon_ = p12_ * c1 * b1 + r12 * r22 + r13 * r23;
     CG_DEBUG_LOOP("LPAIR") << "alpha5=" << alpha5_ << ", alpha6=" << alpha6_ << ", epsilon=" << epsilon_ << ".";
   }
