@@ -46,15 +46,21 @@ jobs:
     - name: 'Build environment'
       run: |
         cmake --build ${{ env.CEPGEN_PATH }}
-        cmake --build ${{ env.CEPGEN_PATH }} -- cepgenDescribeModules
+        cmake --build ${{ env.CEPGEN_PATH }} -- package
     - name: 'Compress environment'
       run: tar -cvf environment.tar /Package
 
-    - name: 'Upload artifacts'
+    - name: 'Upload environment artifact'
       uses: actions/upload-artifact@v4
       with:
         name: build-env
         path: environment.tar
+
+    - name: 'Upload packages artifacts'
+      uses: actions/upload-artifact@v4
+      with:
+        name: package-env
+        path: /Package/cepgen-*.rpm
 
   test:
     needs: build
