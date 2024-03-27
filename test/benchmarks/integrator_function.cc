@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
   vector<string> functional_parsers, integrators, outputs;
   bool python_integ;
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("epochs,e", "number of epochs to try", &num_epochs, 20)
+      .addOptionalArgument("epochs,e", "number of epochs to try", &num_epochs, 10)
       .addOptionalArgument("functionals,F",
                            "functional parsers to benchmark",
                            &functional_parsers,
@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("filename,f",
                            "output filename",
                            &filename,
-                           fs::path(cepgen::utils::env::get("CEPGEN_PATH", ".")) / "benchmark_integrator")
+                           fs::path(cepgen::utils::env::get("CEPGEN_PATH", ".")) / "benchmark_integrator_function")
       .addOptionalArgument("python,p", "also add python integrator?", &python_integ, false)
       .parse();
 
