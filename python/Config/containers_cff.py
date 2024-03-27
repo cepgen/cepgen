@@ -50,15 +50,28 @@ class Parameters(dict):
     def dump(self, printer=PrintHelper()):
         """Human-readable dump of this object"""
         out = self.__class__.__name__+'(\n'
+        printer.indent()
         for k, v in self.items():
-            printer.indent()
             out += ('%s%s = ' % (printer.indentation(), k))
-            if v.__class__.__name__ not in ['Parameters', 'Module']:
-                out += v.__repr__()
-            else:
+            if v.__class__.__name__ in ['Parameters', 'Module']:
                 out += v.dump(printer)
+            elif v.__class__.__name__ in ['list', 'tuple']:
+                out += v.__class__.__name__ + '('
+                printer.indent()
+                for it in v:
+                    if it.__class__.__name__ in ['Parameters', 'Module']:
+                        out += '\n' + printer.indentation()
+                        out += it.dump(printer)
+                    else:
+                        out += it.__repr__()
+                    if it != v[-1]:
+                        out += ', '
+                out += ')'
+                printer.unindent()
+            else:
+                out += v.__repr__()
             out += ',\n'
-            printer.unindent()
+        printer.unindent()
         out += printer.indentation()+')'
         return out
 
