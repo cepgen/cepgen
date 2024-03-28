@@ -470,11 +470,10 @@ double LPAIR::pickin() {
 //---------------------------------------------------------------------------------------------
 
 bool LPAIR::orient() {
-  const auto re = 0.5 * inverseSqrtS();
-  eph1_ = re * (s2_ - mX2() + w12_);
-  eph2_ = re * (s1_ - mY2() - w12_);
-  //CG_LOG << eph1_ << ":" << eph2_;
-
+  if (const auto re = 0.5 * inverseSqrtS(); utils::positive(re)) {
+    eph1_ = re * (s2_ - mX2() + w12_);
+    eph2_ = re * (s1_ - mY2() - w12_);
+  }
   //----- central two-photon/lepton system
   if (ec4_ = eph1_ + eph2_; ec4_ < mc4_) {
     CG_WARNING("LPAIR:orient") << "ec4_ = " << ec4_ << " < mc4_ = " << mc4_ << "==> photon energies: " << eph1_ << ", "
@@ -558,7 +557,8 @@ bool LPAIR::orient() {
 //---------------------------------------------------------------------------------------------
 
 double LPAIR::computeWeight() {
-  mc4_ = std::sqrt(m_w4_);  // compute the two-photon energy for this point
+  if (mc4_ = std::sqrt(m_w4_); !utils::positive(mc4_))  // compute the two-photon energy for this point
+    return 0.;
 
   CG_DEBUG_LOOP("LPAIR:weight") << "Masses dump:\n\t"
                                 << "m1 = " << mA() << ", m2 = " << mB() << ", m3 = " << mX() << ", m4 = " << mc4_
