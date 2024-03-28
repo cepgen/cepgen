@@ -112,6 +112,7 @@ namespace cepgen {
     ParametersDescription FactorisedProcess::description() {
       auto desc = Process::description();
       desc.setDescription("Unnamed factorised process");
+      desc.add("kinematicsGenerator", PhaseSpaceGeneratorFactory::get().describeParameters("kt2to4"));
       desc.add<bool>("storeAlphas", false)
           .setDescription("store the electromagnetic and strong coupling constants to the event content?");
       return desc;
