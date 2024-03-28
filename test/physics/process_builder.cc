@@ -28,15 +28,23 @@ using namespace std;
 int main(int argc, char* argv[]) {
   cepgen::initialise();
 
+  bool include_mg5_proc;
   vector<string> processes;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("processes,p", "name of the processes", &processes, cepgen::ProcessFactory::get().modules())
+      .addOptionalArgument("include-madgraph", "include MG5_aMC process?", &include_mg5_proc, true)
       .parse();
 
   CG_LOG << "Will test process(es): " << processes << ".";
   for (const auto& proc_name : processes) {
-    auto proc = cepgen::ProcessFactory::get().build(proc_name);
+    auto proc_name_fix = proc_name;
+    if (proc_name == "mg5_aMC") {
+      if (!include_mg5_proc)
+        continue;
+      proc_name_fix += "<process:'a a > mu- mu+'";
+    }
+    auto proc = cepgen::ProcessFactory::get().build(proc_name_fix);
     proc->initialise();
     CG_DEBUG("main").log([&proc](auto& log) {
       log << "Successfully built the process \"" << proc->name() << "\"!\n"
@@ -50,7 +58,7 @@ int main(int argc, char* argv[]) {
     CG_TEST_EQUAL(proc->hasEvent(), true, "process has event");
     if (!proc->hasEvent())
       continue;
-    if (proc_name == "lpair" || proc_name == "pptoff") {
+    if (proc_name == "lpair" || proc_name == "pptoff" || proc_name == "mg5_aMC") {
       CG_TEST_EQUAL(proc->event().particles().size(), 9, proc_name + " particles content");
       const auto& cs = proc->event()(cepgen::Particle::Role::CentralSystem);
       CG_TEST_EQUAL(cs.size(), 2, proc_name + " outgoing state");
