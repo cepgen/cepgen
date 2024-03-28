@@ -158,9 +158,11 @@ namespace cepgen {
                           mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::InelasticElastic);
     } else {
       const auto set_beam_elasticity = [](ParametersList& plist_beam) {
-        if (const auto& parton_flux_mod = plist_beam.get<ParametersList>("partonFlux"); !parton_flux_mod.empty())
+        if (const auto& parton_flux_mod = plist_beam.get<ParametersList>("partonFlux");
+            !parton_flux_mod.name<std::string>().empty())
           plist_beam.set<bool>("elastic", PartonFluxFactory::get().elastic(parton_flux_mod));
-        else if (const auto& formfac_mod = plist_beam.get<ParametersList>("formFactors"); !formfac_mod.empty())
+        else if (const auto& formfac_mod = plist_beam.get<ParametersList>("formFactors");
+                 !formfac_mod.name<std::string>().empty())
           plist_beam.set<bool>("elastic", !FormFactorsFactory::get().build(formfac_mod)->fragmenting());
         else {
           CG_WARNING("IncomingBeams") << "Neither kinematics mod, parton flux modelling, or form factors modelling "
