@@ -185,12 +185,12 @@ namespace cepgen {
       //--- four-momenta of the intermediate partons
       const double norm = 1. / proc_->wCM() / proc_->wCM() / s, prefac = 0.5 / std::sqrt(norm);
       {  // positive-z incoming parton collinear kinematics
-        const double tau1 = norm * proc_->q1().p2() / x1 / x1;
-        proc_->q1().setPz(+prefac * x1 * (1. - tau1)).setEnergy(+prefac * x1 * (1. + tau1));
+        const double tau1 = norm * proc_->q1().p2() / x1;
+        proc_->q1().setPz(+prefac * (x1 - tau1)).setEnergy(+prefac * (x1 + tau1));
       }
       {  // negative-z incoming parton collinear kinematics
-        const double tau2 = norm * proc_->q2().p2() / x2 / x2;
-        proc_->q2().setPz(-prefac * x2 * (1. - tau2)).setEnergy(+prefac * x2 * (1. + tau2));
+        const double tau2 = norm * proc_->q2().p2() / x2;
+        proc_->q2().setPz(-prefac * (x2 - tau2)).setEnergy(+prefac * (x2 + tau2));
       }
 
       CG_DEBUG_LOOP("2to4:partons") << "Squared c.m. energy = " << s << " GeV^2\n\t"
@@ -232,9 +232,8 @@ namespace cepgen {
 
     double central_weight_{0.};
   };
-
-  typedef PhaseSpaceGenerator2to4<PartonsKTPhaseSpaceGenerator> KT2to4;
-  typedef PhaseSpaceGenerator2to4<PartonsCollinearPhaseSpaceGenerator> Coll2to4;
 }  // namespace cepgen
+using KT2to4 = cepgen::PhaseSpaceGenerator2to4<cepgen::PartonsKTPhaseSpaceGenerator>;
+using Coll2to4 = cepgen::PhaseSpaceGenerator2to4<cepgen::PartonsCollinearPhaseSpaceGenerator>;
 REGISTER_PSGEN("kt2to4", KT2to4);
 REGISTER_PSGEN("coll2to4", Coll2to4);
