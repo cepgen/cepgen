@@ -19,6 +19,7 @@
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
@@ -162,7 +163,15 @@ namespace cepgen {
                           mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::InelasticElastic);
     } else {
       const auto set_beam_elasticity = [](ParametersList& plist_beam) {
-        plist_beam.set<bool>("elastic", PartonFluxFactory::get().elastic(plist_beam.get<ParametersList>("partonFlux")));
+        if (const auto& parton_flux_mod = plist_beam.get<ParametersList>("partonFlux"); !parton_flux_mod.empty())
+          plist_beam.set<bool>("elastic", PartonFluxFactory::get().elastic(parton_flux_mod));
+        else if (const auto& formfac_mod = plist_beam.get<ParametersList>("formFactors"); !formfac_mod.empty())
+          plist_beam.set<bool>("elastic", !FormFactorsFactory::get().build(formfac_mod)->fragmenting());
+        else {
+          CG_WARNING("IncomingBeams") << "Neither kinematics mod, parton flux modelling, or form factors modelling "
+                                         "were set. Assuming elastic emission.";
+          plist_beam.set<bool>("elastic", true);
+        }
       };
       set_beam_elasticity(plist_pos);
       set_beam_elasticity(plist_neg);
@@ -270,11 +279,6 @@ namespace cepgen {
     desc.add<double>("sqrtS", 0.).setDescription("Two-beam centre of mass energy (in GeV)");
     desc.addAs<int, mode::Kinematics>("mode", mode::Kinematics::invalid)
         .setDescription("Process kinematics mode (1 = elastic, (2-3) = single-dissociative, 4 = double-dissociative)");
-    desc.addParametersDescriptionVector(
-            "partonFluxes",
-            PartonFluxFactory::get().describeParameters("BudnevElastic"),
-            std::vector<ParametersList>(2, PartonFluxFactory::get().describeParameters("BudnevElastic").parameters()))
-        .setDescription("Parton fluxes modelling");
     desc.addParametersDescriptionVector(
             "formFactors",
             FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler),

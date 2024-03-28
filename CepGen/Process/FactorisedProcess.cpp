@@ -18,6 +18,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/PhaseSpaceGeneratorFactory.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/PDG.h"
@@ -112,6 +113,14 @@ namespace cepgen {
     ParametersDescription FactorisedProcess::description() {
       auto desc = Process::description();
       desc.setDescription("Unnamed factorised process");
+      desc.add("kinematics",
+               Kinematics::description()
+                   .addParametersDescriptionVector(
+                       "partonFluxes",
+                       PartonFluxFactory::get().describeParameters("BudnevElastic"),
+                       std::vector<ParametersList>(
+                           2, PartonFluxFactory::get().describeParameters("BudnevElastic").parameters()))
+                   .setDescription("Parton fluxes modelling"));
       desc.add("kinematicsGenerator", PhaseSpaceGeneratorFactory::get().describeParameters("kt2to4"));
       desc.add<bool>("storeAlphas", false)
           .setDescription("store the electromagnetic and strong coupling constants to the event content?");
