@@ -24,8 +24,6 @@ namespace cepgen {
   Kinematics::Kinematics(const ParametersList& params) : SteeredObject(params) {}
 
   void Kinematics::setParameters(const ParametersList& params) {
-    if (params.empty())
-      return;
     SteeredObject::setParameters(params);
     CG_DEBUG("Kinematics") << "Building a Kinematics parameters container "
                            << "with the following parameters:\n\t" << params_ << ".";
