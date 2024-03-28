@@ -103,50 +103,41 @@ namespace cepgen {
     plist_neg.set<double>("pz", -fabs(p2z)).set<int>("pdgId", neg_pdg);
 
     //--- form factors
+    ParametersList pos_formfac, neg_formfac;
     if (auto formfacs = steer<std::vector<ParametersList> >("formFactors"); formfacs.size() >= 2) {
-      plist_pos.set("formFactors", formfacs.at(0).set<int>("pdgId", std::abs(pos_pdg)));
-      plist_neg.set("formFactors", formfacs.at(1).set<int>("pdgId", std::abs(neg_pdg)));
-    } else if (auto formfacs = steer<ParametersList>("formFactors"); !formfacs.empty()) {
-      plist_pos.set("formFactors", formfacs.set<int>("pdgId", std::abs(pos_pdg)));
-      plist_neg.set("formFactors", formfacs.set<int>("pdgId", std::abs(neg_pdg)));
-    }
+      pos_formfac = formfacs.at(0);
+      neg_formfac = formfacs.at(1);
+    } else if (auto formfacs = steer<ParametersList>("formFactors"); !formfacs.empty())
+      pos_formfac = neg_formfac = formfacs;
+    pos_formfac.set<int>("pdgId", std::abs(pos_pdg));
+    neg_formfac.set<int>("pdgId", std::abs(neg_pdg));
+    plist_pos.set("formFactors", pos_formfac);
+    plist_neg.set("formFactors", neg_formfac);
 
+    //--- structure functions
+    const auto strfuns = steer<ParametersList>("structureFunctions");
+    if (!strfuns.empty()) {
+      plist_pos.set<ParametersList>("structureFunctions", strfuns);
+      plist_neg.set<ParametersList>("structureFunctions", strfuns);
+    }
     //--- parton fluxes
-    auto set_part_fluxes_from_name_vector = [&plist_pos, &plist_neg](const std::vector<std::string>& fluxes) {
-      if (fluxes.empty())
-        return;
-      plist_pos.set<ParametersList>("partonFlux",
-                                    PartonFluxFactory::get()
-                                        .describeParameters(fluxes.at(0))
-                                        .parameters()
-                                        .set("formFactors", plist_pos.get<ParametersList>("formFactors")));
-      plist_neg.set<ParametersList>("partonFlux",
-                                    fluxes.size() > 1
-                                        ? PartonFluxFactory::get()
-                                              .describeParameters(fluxes.at(1))
-                                              .parameters()
-                                              .set("formFactors", plist_pos.get<ParametersList>("formFactors"))
-                                        : plist_pos.get<ParametersList>("partonFlux"));
+    ParametersList pos_flux, neg_flux;
+    auto set_part_fluxes_from_name_vector = [&](const std::vector<std::string>& fluxes) {
+      pos_flux = PartonFluxFactory::get().describeParameters(fluxes.at(0)).parameters();
+      neg_flux = fluxes.size() > 1 ? PartonFluxFactory::get().describeParameters(fluxes.at(1)).parameters() : pos_flux;
     };
-    auto set_part_fluxes_from_name = [&plist_pos, &plist_neg](const std::string& fluxes) {
-      if (fluxes.empty())
-        return;
-      auto params = PartonFluxFactory::get().describeParameters(fluxes).parameters();
-      plist_pos.set<ParametersList>("partonFlux",
-                                    params.set("formFactors", plist_pos.get<ParametersList>("formFactors")));
-      plist_neg.set<ParametersList>("partonFlux",
-                                    params.set("formFactors", plist_neg.get<ParametersList>("formFactors")));
+    auto set_part_fluxes_from_name = [&](const std::string& fluxes) {
+      pos_flux = neg_flux = PartonFluxFactory::get().describeParameters(fluxes).parameters();
     };
 
     if (auto fluxes = steer<std::vector<ParametersList> >("partonFluxes"); fluxes.size() >= 2) {
-      plist_pos.set("partonFlux", fluxes.at(0).set("formFactors", plist_pos.get<ParametersList>("formFactors")));
-      plist_neg.set("partonFlux", fluxes.at(1).set("formFactors", plist_neg.get<ParametersList>("formFactors")));
-    } else if (auto fluxes = steer<ParametersList>("partonFluxes"); !fluxes.empty()) {
-      plist_pos.set("partonFlux", fluxes.set("formFactors", plist_pos.get<ParametersList>("formFactors")));
-      plist_neg.set("partonFlux", fluxes.set("formFactors", plist_neg.get<ParametersList>("formFactors")));
-    } else if (const auto& fluxes = steer<std::vector<std::string> >("partonFluxes"); !fluxes.empty())
+      pos_flux = fluxes.at(0);
+      neg_flux = fluxes.at(1);
+    } else if (auto fluxes = steer<ParametersList>("partonFluxes"); !fluxes.empty())
+      pos_flux = neg_flux = fluxes;
+    else if (const auto& fluxes = steer<std::vector<std::string> >("partonFluxes"); !fluxes.empty())
       set_part_fluxes_from_name_vector(fluxes);
-    else if (const auto& flux = steer<std::string>("partonFluxes"); flux.empty())
+    else if (const auto& flux = steer<std::string>("partonFluxes"); !flux.empty())
       set_part_fluxes_from_name(flux);
     else if (const auto& fluxes = steer<std::vector<std::string> >("ktFluxes"); !fluxes.empty()) {
       set_part_fluxes_from_name_vector(fluxes);
@@ -155,6 +146,10 @@ namespace cepgen {
       set_part_fluxes_from_name(flux);
       CG_WARNING("IncomingBeams") << "Key 'ktFluxes' is deprecated. Please use 'partonFluxes' instead.";
     }
+    pos_flux.set("formFactors", pos_formfac).set("structureFunctions", strfuns);
+    neg_flux.set("formFactors", neg_formfac).set("structureFunctions", strfuns);
+    plist_pos.set("partonFlux", pos_flux);
+    plist_neg.set("partonFlux", neg_flux);
 
     if (auto mode = steerAs<int, mode::Kinematics>("mode"); mode != mode::Kinematics::invalid) {
       plist_pos.set<bool>("elastic",
@@ -177,11 +172,6 @@ namespace cepgen {
       set_beam_elasticity(plist_neg);
     }
 
-    //--- structure functions
-    if (!steer<ParametersList>("structureFunctions").empty()) {
-      plist_pos.set<ParametersList>("structureFunctions", steer<ParametersList>("structureFunctions"));
-      plist_neg.set<ParametersList>("structureFunctions", steer<ParametersList>("structureFunctions"));
-    }
     CG_DEBUG("IncomingBeams") << "Will build the following incoming beams:\n"
                               << "* " << plist_pos << "\n"
                               << "* " << plist_neg << ".";

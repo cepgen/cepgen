@@ -36,7 +36,6 @@ namespace cepgen {
     auto desc = ParametersDescription();
     desc.addAs<int, pdgid_t>("pdgId", PDG::proton);
     desc.add<double>("pz", 0.);
-    desc.add<ParametersDescription>("partonFlux", ParametersDescription());
     return desc;
   }
 

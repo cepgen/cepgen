@@ -217,7 +217,8 @@ namespace cepgen {
       os << std::setw(wt) << "Structure functions"
          << utils::boldify(
                 StructureFunctionsFactory::get().describeParameters(beams.structureFunctions()).description())
-         << " / " << beams.structureFunctions().print(true) << "\n";
+         << "\n"
+         << std::setw(wt) << "" << beams.structureFunctions().print(true) << "\n ";
     os << "\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Incoming partons ") << std::setfill(' ') << "\n\n";
     const auto& cuts = kin.cuts();
