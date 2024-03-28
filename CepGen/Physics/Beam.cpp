@@ -28,26 +28,24 @@ namespace cepgen {
   Beam::Beam(const ParametersList& params)
       : SteeredObject(params),
         pdg_id_(steerAs<int, pdgid_t>("pdgId")),
-        momentum_(Momentum::fromPxPyPzM(0., 0., steer<double>("pz"), PDG::get().mass(pdg_id_))),
-        flux_info_(steer<ParametersList>("partonFlux")),
-        elastic_(steer<bool>("elastic")) {}
+        momentum_(Momentum::fromPxPyPzM(0., 0., steer<double>("pz"), PDG::get().mass(pdg_id_))) {
+    (*this).add("formFactors", formfac_).add("partonFlux", flux_info_).add("elastic", elastic_);
+  }
 
   ParametersDescription Beam::description() {
     auto desc = ParametersDescription();
     desc.addAs<int, pdgid_t>("pdgId", PDG::proton);
     desc.add<double>("pz", 0.);
-    desc.add<ParametersDescription>("partonFlux", ParametersDescription());
     return desc;
   }
 
   std::ostream& operator<<(std::ostream& os, const Beam& beam) {
-    if (HeavyIon::isHI(beam.pdg_id_))
-      os << HeavyIon::fromPdgId(beam.pdg_id_);
-    else
-      os << (PDG::Id)beam.pdg_id_;
-    os << " (" << beam.momentum_.pz() << " GeV/c) " << (beam.elastic_ ? "elastic" : "inelastic");
-    if (!beam.flux_info_.name<std::string>().empty())
-      os << " [part.flux: " << beam.flux_info_ << "]";
+    os << (PDG::Id)beam.pdg_id_ << " (" << beam.momentum_.pz() << " GeV/c) "
+       << (beam.elastic_ ? "elastic" : "inelastic");
+    if (const auto& part_flux_name = beam.flux_info_.name<std::string>(); !part_flux_name.empty())
+      os << " [parton flux: " << beam.flux_info_.print(true) << "]";
+    else if (const auto& formfac_name = beam.formfac_.name<std::string>(); !formfac_name.empty())
+      os << " [form factors: " << beam.formfac_.print(true) << "]";
     return os;
   }
 }  // namespace cepgen

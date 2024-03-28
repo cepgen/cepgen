@@ -49,8 +49,8 @@ namespace cepgen {
           mp_(PDG::get().mass(PDG::proton)),
           mp2_(mp_ * mp_),
           rnd_gen_(RandomGeneratorFactory::get().build(steer<ParametersList>("randomGenerator"))) {
-      if (const auto& kin_params = steer<ParametersList>("kinematics"); !kin_params.empty())
-        kinematics().setParameters(kin_params);
+      if (const auto& kin = steer<ParametersList>("kinematics"); !kin.empty())
+        kin_.setParameters(kin);
       if (steer<bool>("hasEvent"))
         event_.reset(new Event);
     }
@@ -78,6 +78,7 @@ namespace cepgen {
         if (event_)
           log << "\n\t" << *event_;
       });
+      kin_ = proc.kin_;
       return *this;
     }
 
@@ -410,6 +411,7 @@ namespace cepgen {
       desc.add<bool>("hasEvent", true).setDescription("does the process carry an event definition");
       desc.add<ParametersDescription>("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
           .setDescription("random number generator engine");
+      desc.add("kinematics", Kinematics::description());
       return desc;
     }
 

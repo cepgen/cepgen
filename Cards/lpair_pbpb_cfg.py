@@ -2,6 +2,7 @@ import Config.Core as cepgen
 from Config.PDG_cfi import PDG
 from Config.timer_cfi import timer # enable timing framework
 from Config.generator_cfi import generator as _gen
+from FormFactors.heavyIonDipole_cfi import heavyIonDipole
 from OutputModules.dump_cfi import dump as _dump_output # periodic event printout
 from OutputModules.text_cfi import text as _text_output # ASCII histograms
 #from OutputModules.rootTree_cfi import rootTree # dump everything into a flat tree
@@ -15,6 +16,7 @@ process = cepgen.Module('lpair',
     inKinematics = cepgen.Parameters(
         heavyIon1 = (208, 82),
         heavyIon2 = (208, 82),
+        formFactors = [heavyIonDipole, heavyIonDipole],
         pz = (2562.2, 2562.2),
     ),
     outKinematics = cepgen.Parameters(

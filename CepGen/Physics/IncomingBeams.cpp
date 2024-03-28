@@ -19,6 +19,7 @@
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
@@ -31,7 +32,7 @@
 
 namespace cepgen {
   IncomingBeams::IncomingBeams(const ParametersList& params) : SteeredObject(params) {
-    (*this).add("formFactors", formfac_).add("structureFunctions", strfun_);
+    (*this).add("structureFunctions", strfun_);
   }
 
   void IncomingBeams::setParameters(const ParametersList& params) {
@@ -97,46 +98,58 @@ namespace cepgen {
       std::swap(p1z, p2z);
     else if (p1z * p2z > 0. && p2z > 0.)
       p2z *= -1.;
-    plist_pos.set<double>("pz", +fabs(p1z));
-    plist_neg.set<double>("pz", -fabs(p2z));
 
-    //--- parton fluxes
-    auto set_part_fluxes_from_name_vector = [&plist_pos, &plist_neg](const std::vector<std::string>& fluxes) {
-      if (fluxes.empty())
-        return;
-      plist_pos.set<ParametersList>("partonFlux",
-                                    PartonFluxFactory::get().describeParameters(fluxes.at(0)).parameters());
-      plist_neg.set<ParametersList>("partonFlux",
-                                    fluxes.size() > 1
-                                        ? PartonFluxFactory::get().describeParameters(fluxes.at(1)).parameters()
-                                        : plist_pos.get<ParametersList>("partonFlux"));
-    };
-    auto set_part_fluxes_from_name = [&plist_pos, &plist_neg](const std::string& fluxes) {
-      if (fluxes.empty())
-        return;
-      const auto params = PartonFluxFactory::get().describeParameters(fluxes).parameters();
-      plist_pos.set<ParametersList>("partonFlux", params);
-      plist_neg.set<ParametersList>("partonFlux", params);
-    };
-
-    if (const auto& fluxes = steer<std::vector<ParametersList> >("partonFluxes"); fluxes.size() >= 2) {
-      plist_pos.set("partonFlux", fluxes.at(0));
-      plist_neg.set("partonFlux", fluxes.at(1));
-    } else if (const auto& fluxes = steer<ParametersList>("partonFluxes"); !fluxes.empty()) {
-      plist_pos.set("partonFlux", fluxes);
-      plist_neg.set("partonFlux", fluxes);
-    } else if (const auto& fluxes = steer<std::vector<std::string> >("partonFluxes"); !fluxes.empty())
-      set_part_fluxes_from_name_vector(fluxes);
-    else if (const auto& fluxes = steer<std::vector<std::string> >("ktFluxes"); !fluxes.empty())
-      set_part_fluxes_from_name_vector(fluxes);
-    else if (const auto& flux = steer<std::string>("partonFluxes"); flux.empty())
-      set_part_fluxes_from_name(flux);
-    else if (const auto& flux = steer<std::string>("ktFluxes"); !flux.empty())
-      set_part_fluxes_from_name(flux);
+    plist_pos.set<double>("pz", +fabs(p1z)).set<int>("pdgId", pos_pdg);
+    plist_neg.set<double>("pz", -fabs(p2z)).set<int>("pdgId", neg_pdg);
 
     //--- form factors
-    plist_pos.set<ParametersList>("formFactors", steer<ParametersList>("formFactors"));
-    plist_neg.set<ParametersList>("formFactors", steer<ParametersList>("formFactors"));
+    ParametersList pos_formfac, neg_formfac;
+    if (auto formfacs = steer<std::vector<ParametersList> >("formFactors"); formfacs.size() >= 2) {
+      pos_formfac = formfacs.at(0);
+      neg_formfac = formfacs.at(1);
+    } else if (auto formfacs = steer<ParametersList>("formFactors"); !formfacs.empty())
+      pos_formfac = neg_formfac = formfacs;
+    pos_formfac.set<int>("pdgId", std::abs(pos_pdg));
+    neg_formfac.set<int>("pdgId", std::abs(neg_pdg));
+    plist_pos.set("formFactors", pos_formfac);
+    plist_neg.set("formFactors", neg_formfac);
+
+    //--- structure functions
+    const auto strfuns = steer<ParametersList>("structureFunctions");
+    if (!strfuns.empty()) {
+      plist_pos.set<ParametersList>("structureFunctions", strfuns);
+      plist_neg.set<ParametersList>("structureFunctions", strfuns);
+    }
+    //--- parton fluxes
+    ParametersList pos_flux, neg_flux;
+    auto set_part_fluxes_from_name_vector = [&](const std::vector<std::string>& fluxes) {
+      pos_flux = PartonFluxFactory::get().describeParameters(fluxes.at(0)).parameters();
+      neg_flux = fluxes.size() > 1 ? PartonFluxFactory::get().describeParameters(fluxes.at(1)).parameters() : pos_flux;
+    };
+    auto set_part_fluxes_from_name = [&](const std::string& fluxes) {
+      pos_flux = neg_flux = PartonFluxFactory::get().describeParameters(fluxes).parameters();
+    };
+
+    if (auto fluxes = steer<std::vector<ParametersList> >("partonFluxes"); fluxes.size() >= 2) {
+      pos_flux = fluxes.at(0);
+      neg_flux = fluxes.at(1);
+    } else if (auto fluxes = steer<ParametersList>("partonFluxes"); !fluxes.empty())
+      pos_flux = neg_flux = fluxes;
+    else if (const auto& fluxes = steer<std::vector<std::string> >("partonFluxes"); !fluxes.empty())
+      set_part_fluxes_from_name_vector(fluxes);
+    else if (const auto& flux = steer<std::string>("partonFluxes"); !flux.empty())
+      set_part_fluxes_from_name(flux);
+    else if (const auto& fluxes = steer<std::vector<std::string> >("ktFluxes"); !fluxes.empty()) {
+      set_part_fluxes_from_name_vector(fluxes);
+      CG_WARNING("IncomingBeams") << "Key 'ktFluxes' is deprecated. Please use 'partonFluxes' instead.";
+    } else if (const auto& flux = steer<std::string>("ktFluxes"); !flux.empty()) {
+      set_part_fluxes_from_name(flux);
+      CG_WARNING("IncomingBeams") << "Key 'ktFluxes' is deprecated. Please use 'partonFluxes' instead.";
+    }
+    pos_flux.set("formFactors", pos_formfac).set("structureFunctions", strfuns);
+    neg_flux.set("formFactors", neg_formfac).set("structureFunctions", strfuns);
+    plist_pos.set("partonFlux", pos_flux);
+    plist_neg.set("partonFlux", neg_flux);
 
     if (auto mode = steerAs<int, mode::Kinematics>("mode"); mode != mode::Kinematics::invalid) {
       plist_pos.set<bool>("elastic",
@@ -145,21 +158,27 @@ namespace cepgen {
                           mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::InelasticElastic);
     } else {
       const auto set_beam_elasticity = [](ParametersList& plist_beam) {
-        plist_beam.set<bool>("elastic", PartonFluxFactory::get().elastic(plist_beam.get<ParametersList>("partonFlux")));
+        if (const auto& parton_flux_mod = plist_beam.get<ParametersList>("partonFlux");
+            !parton_flux_mod.name<std::string>().empty())
+          plist_beam.set<bool>("elastic", PartonFluxFactory::get().elastic(parton_flux_mod));
+        else if (const auto& formfac_mod = plist_beam.get<ParametersList>("formFactors");
+                 !formfac_mod.name<std::string>().empty())
+          plist_beam.set<bool>("elastic", !FormFactorsFactory::get().build(formfac_mod)->fragmenting());
+        else {
+          CG_WARNING("IncomingBeams") << "Neither kinematics mod, parton flux modelling, or form factors modelling "
+                                         "were set. Assuming elastic emission.";
+          plist_beam.set<bool>("elastic", true);
+        }
       };
       set_beam_elasticity(plist_pos);
       set_beam_elasticity(plist_neg);
     }
 
-    //--- structure functions
-    if (!steer<ParametersList>("structureFunctions").empty()) {
-      plist_pos.set<ParametersList>("structureFunctions", steer<ParametersList>("structureFunctions"));
-      plist_neg.set<ParametersList>("structureFunctions", steer<ParametersList>("structureFunctions"));
-    }
-    CG_DEBUG("IncomingBeams") << "Will build the following incoming beams:\n* " << plist_pos << "\n* " << plist_neg
-                              << ".";
-    pos_beam_ = Beam(plist_pos).setIntegerPdgId(pos_pdg);
-    neg_beam_ = Beam(plist_neg).setIntegerPdgId(neg_pdg);
+    CG_DEBUG("IncomingBeams") << "Will build the following incoming beams:\n"
+                              << "* " << plist_pos << "\n"
+                              << "* " << plist_neg << ".";
+    pos_beam_ = Beam(plist_pos);
+    neg_beam_ = Beam(plist_neg);
   }
 
   void IncomingBeams::setSqrtS(double sqrts) {
@@ -252,8 +271,11 @@ namespace cepgen {
     desc.add<double>("sqrtS", 0.).setDescription("Two-beam centre of mass energy (in GeV)");
     desc.addAs<int, mode::Kinematics>("mode", mode::Kinematics::invalid)
         .setDescription("Process kinematics mode (1 = elastic, (2-3) = single-dissociative, 4 = double-dissociative)");
-    desc.add<ParametersDescription>("formFactors",
-                                    FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler))
+    desc.addParametersDescriptionVector(
+            "formFactors",
+            FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler),
+            std::vector<ParametersList>(
+                2, FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler).parameters()))
         .setDescription("Beam form factors modelling");
     desc.add<ParametersDescription>("structureFunctions",
                                     StructureFunctionsFactory::get().describeParameters(11 /*default is SY*/))

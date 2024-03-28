@@ -157,7 +157,7 @@ namespace cepgen {
     friend std::ostream& operator<<(std::ostream&,
                                     const ParametersList&);  ///< Human-readable version of a parameters container
     const ParametersList& print(std::ostream&) const;        ///< Debugging-like printout of a parameters container
-    std::string print() const;                               ///< Normal printout of a parameters container
+    std::string print(bool compact = false) const;           ///< Normal printout of a parameters container
 
   private:
     std::map<std::string, ParametersList> param_values_;

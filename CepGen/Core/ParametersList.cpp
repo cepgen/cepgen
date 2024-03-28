@@ -212,6 +212,8 @@ namespace cepgen {
           set<int>(key, std::stoi(value));
         else if (utils::isFloat(value))
           set<double>(key, std::stod(value));
+        else if (value[0] == value[value.size() - 1] && (value[0] == '\'' || value[0] == '"'))  // string parameter
+          set(key, value.substr(1, value.size() - 2));
         else {
           const auto value_lc = utils::toLower(value);
           if (value_lc == "off" || value_lc == "no" || value_lc == "false")
@@ -271,8 +273,18 @@ namespace cepgen {
     return *this;
   }
 
-  std::string ParametersList::print() const {
+  std::string ParametersList::print(bool compact) const {
     std::ostringstream os;
+    if (compact) {
+      os << utils::colourise(getNameString(), utils::Colour::none, utils::Modifier::underline);
+      if (const auto& keys_list = keys(false); !keys_list.empty()) {
+        std::string sep = "{";
+        for (const auto& key : keys_list)
+          os << sep << key << "=" << getString(key), sep = ", ";
+        os << "}";
+      }
+      return os.str();
+    }
     print(os);
     return os.str();
   }
@@ -395,38 +407,8 @@ namespace cepgen {
 
   IMPL_TYPE_ALL(ParametersList, param_values_);
   IMPL_TYPE_ALL(bool, bool_values_);
-
-  IMPL_TYPE_SET(int, int_values_);
-  template <>
-  int ParametersList::get<int>(const std::string& key, const int& def) const {
-    if (has<int>(key))
-      return int_values_.at(key);
-    if (has<unsigned long long>(key)) {
-      const auto ulong_val = ulong_values_.at(key);
-      if (ulong_val >= std::numeric_limits<int>::max())
-        CG_WARNING("ParametersList:get")
-            << "Trying to retrieve a (too) long unsigned integer with an integer getter. Please fix your code.";
-      return (int)ulong_val;
-    }
-    return def;
-  }
-
-  IMPL_TYPE_SET(unsigned long long, ulong_values_);
-  template <>
-  unsigned long long ParametersList::get<unsigned long long>(const std::string& key,
-                                                             const unsigned long long& def) const {
-    if (has<unsigned long long>(key))
-      return ulong_values_.at(key);
-    if (has<int>(key)) {
-      const auto& int_val = int_values_.at(key);
-      if (int_val < 0)
-        CG_WARNING("ParametersList:get")
-            << "Trying to retrieve a negative-value integer with an unsigned long getter. Please fix your code.";
-      return int_val;
-    }
-    return def;
-  }
-
+  IMPL_TYPE_ALL(int, int_values_);
+  IMPL_TYPE_ALL(unsigned long long, ulong_values_);
   IMPL_TYPE_ALL(double, dbl_values_);
   IMPL_TYPE_ALL(std::string, str_values_);
   IMPL_TYPE_ALL(std::vector<int>, vec_int_values_);

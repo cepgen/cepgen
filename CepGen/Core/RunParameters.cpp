@@ -166,10 +166,10 @@ namespace cepgen {
       for (const auto& key : proc_params.keys(false)) {
         if (key == "kinematics" || key == "partonFluxes" || key == "ktFluxes")  // these are shown below
           continue;
-        if (proc_params.has<ParametersList>(key))
-          os << std::setw(wt) << "" << key << ": " << proc_params.get<ParametersList>(key) << "\n";
-        else
-          os << std::setw(wt) << "" << key << ": " << proc_params.getString(key) << "\n";
+        os << std::setw(wt) << "" << key << ": "
+           << (proc_params.has<ParametersList>(key) ? proc_params.get<ParametersList>(key).print(true)
+                                                    : proc_params.getString(key))
+           << "\n";
       }
     }
     if (!param.evt_modifiers_.empty() || !param.evt_exporters_.empty() || !param.taming_functions_.empty())
@@ -200,7 +200,8 @@ namespace cepgen {
       os << std::setw(wt) << "" << key << ": " << param.integrator_.getString(key) << "\n";
     os << std::setw(wt) << "Event generation? " << utils::yesno(param.generation_.enabled()) << "\n"
        << std::setw(wt) << "Number of events to generate" << utils::boldify(param.generation_.maxGen()) << "\n"
-       << std::setw(wt) << "Generator worker" << param.generation_.parameters().get<ParametersList>("worker") << "\n";
+       << std::setw(wt) << "Generator worker"
+       << param.generation_.parameters().get<ParametersList>("worker").print(true) << "\n";
     if (param.generation_.numThreads() > 1)
       os << std::setw(wt) << "Number of threads" << param.generation_.numThreads() << "\n";
     os << std::setw(wt) << "Number of points to try per bin" << param.generation_.numPoints() << "\n"
@@ -211,15 +212,13 @@ namespace cepgen {
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ EVENTS KINEMATICS ¯\\_" << std::setfill(' ') << "\n\n"
        << std::setw(wt) << "Incoming particles" << beams.positive() << ",\n"
        << std::setw(wt) << "" << beams.negative() << "\n"
-       << std::setw(wt) << "C.m. energy (GeV)" << utils::format("%g", beams.sqrtS()) << "\n"
-       << std::setw(wt) << "Form factors"
-       << utils::boldify(FormFactorsFactory::get().describeParameters(beams.formFactors()).description()) << ": "
-       << beams.formFactors() << "\n";
+       << std::setw(wt) << "C.m. energy (GeV)" << utils::format("%g", beams.sqrtS()) << "\n";
     if (beams.mode() != mode::Kinematics::ElasticElastic)
       os << std::setw(wt) << "Structure functions"
          << utils::boldify(
                 StructureFunctionsFactory::get().describeParameters(beams.structureFunctions()).description())
-         << ": " << beams.structureFunctions() << "\n";
+         << "\n"
+         << std::setw(wt) << "" << beams.structureFunctions().print(true) << "\n ";
     os << "\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Incoming partons ") << std::setfill(' ') << "\n\n";
     const auto& cuts = kin.cuts();
