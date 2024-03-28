@@ -60,8 +60,7 @@ namespace cepgen {
     CG_DEBUG("Generator:clearRun") << "Initialised a generator worker with parameters: " << worker_->parameters()
                                    << ".";
     // destroy and recreate the integrator instance
-    if (!integrator_)
-      resetIntegrator();
+    resetIntegrator();
 
     worker_->setRunParameters(const_cast<const RunParameters*>(parameters_.get()));
     worker_->setIntegrator(integrator_.get());
