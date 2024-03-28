@@ -41,20 +41,12 @@ namespace cepgen {
   }
 
   std::ostream& operator<<(std::ostream& os, const Beam& beam) {
-    if (HeavyIon::isHI(beam.pdg_id_))
-      os << HeavyIon::fromPdgId(beam.pdg_id_);
-    else
-      os << (PDG::Id)beam.pdg_id_;
-    os << " (" << beam.momentum_.pz() << " GeV/c) " << (beam.elastic_ ? "elastic" : "inelastic");
-    const auto &formfac_name = beam.formfac_.name<std::string>(), &part_flux_name = beam.flux_info_.name<std::string>();
-    if (!formfac_name.empty() || !part_flux_name.empty()) {
-      os << " [" << beam.formfac_;
-      if (!formfac_name.empty() && !part_flux_name.empty())
-        os << ", ";
-      if (!part_flux_name.empty())
-        os << beam.flux_info_;
-      os << "]";
-    }
+    os << (PDG::Id)beam.pdg_id_ << " (" << beam.momentum_.pz() << " GeV/c) "
+       << (beam.elastic_ ? "elastic" : "inelastic");
+    if (const auto& part_flux_name = beam.flux_info_.name<std::string>(); !part_flux_name.empty())
+      os << " [parton flux: " << beam.flux_info_.print(true) << "]";
+    else if (const auto& formfac_name = beam.formfac_.name<std::string>(); !formfac_name.empty())
+      os << " [form factors: " << beam.formfac_.print(true) << "]";
     return os;
   }
 }  // namespace cepgen

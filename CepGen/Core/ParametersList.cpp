@@ -271,8 +271,18 @@ namespace cepgen {
     return *this;
   }
 
-  std::string ParametersList::print() const {
+  std::string ParametersList::print(bool compact) const {
     std::ostringstream os;
+    if (compact) {
+      os << utils::colourise(getNameString(), utils::Colour::none, utils::Modifier::underline);
+      if (const auto& keys_list = keys(false); !keys_list.empty()) {
+        std::string sep = "{";
+        for (const auto& key : keys_list)
+          os << sep << key << "=" << getString(key), sep = ", ";
+        os << "}";
+      }
+      return os.str();
+    }
     print(os);
     return os.str();
   }

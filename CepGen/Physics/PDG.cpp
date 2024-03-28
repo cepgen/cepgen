@@ -24,7 +24,11 @@
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
-  std::ostream& operator<<(std::ostream& os, const PDG::Id& pdg) { return os << PDG::get().name(pdg); }
+  std::ostream& operator<<(std::ostream& os, const PDG::Id& pdg) {
+    if (HeavyIon::isHI(pdg))
+      return os << HeavyIon::fromPdgId(pdg);
+    return os << PDG::get().name(pdg);
+  }
 
   PDG::PDG() {
     // PDG id, name, description, colour, mass, width, charge, is fermion
