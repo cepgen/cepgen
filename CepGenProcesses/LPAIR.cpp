@@ -217,11 +217,11 @@ private:
       return Vector{-2. * strfun_->F1(xbj, q2) / q2, strfun_->F2(xbj, q2) * xbj / q2};
     };
     const auto u1 = beams_mode_ == mode::Kinematics::ElasticInelastic
-                        ? compute_form_factors(*formfac1_, false, -t1(), mA2(), mX2())
+                        ? compute_form_factors(*formfac2_, false, -t1(), mA2(), mX2())
                         : compute_form_factors(
                               *formfac1_, kinematics().incomingBeams().positive().elastic(), -t1(), mA2(), mX2()),
                u2 = beams_mode_ == mode::Kinematics::ElasticInelastic
-                        ? compute_form_factors(*formfac2_, true, -t2(), mB2(), mY2())
+                        ? compute_form_factors(*formfac1_, true, -t2(), mB2(), mY2())
                         : compute_form_factors(
                               *formfac2_, kinematics().incomingBeams().negative().elastic(), -t2(), mB2(), mY2());
     const auto peripp = (u1.transposed() * m_em * u2)(0);
