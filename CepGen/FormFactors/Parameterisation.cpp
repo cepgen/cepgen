@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ namespace cepgen {
     const FormFactors& Parameterisation::operator()(double q2) {
       if (q2 < 0.)
         ff_ = FormFactors{};
-      else {
+      else if (q2 != q2_) {
         q2_ = q2;
         eval();
       }
