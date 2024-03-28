@@ -28,10 +28,9 @@ namespace cepgen {
   Beam::Beam(const ParametersList& params)
       : SteeredObject(params),
         pdg_id_(steerAs<int, pdgid_t>("pdgId")),
-        momentum_(Momentum::fromPxPyPzM(0., 0., steer<double>("pz"), PDG::get().mass(pdg_id_))),
-        formfac_(steer<ParametersList>("formFactors").set<pdgid_t>("pdgId", std::abs(pdg_id_))),
-        flux_info_(steer<ParametersList>("partonFlux")),
-        elastic_(steer<bool>("elastic")) {}
+        momentum_(Momentum::fromPxPyPzM(0., 0., steer<double>("pz"), PDG::get().mass(pdg_id_))) {
+    (*this).add("formFactors", formfac_).add("partonFlux", flux_info_).add("elastic", elastic_);
+  }
 
   ParametersDescription Beam::description() {
     auto desc = ParametersDescription();
@@ -49,7 +48,7 @@ namespace cepgen {
     os << " (" << beam.momentum_.pz() << " GeV/c) " << (beam.elastic_ ? "elastic" : "inelastic");
     const auto &formfac_name = beam.formfac_.name<std::string>(), &part_flux_name = beam.flux_info_.name<std::string>();
     if (!formfac_name.empty() || !part_flux_name.empty()) {
-      os << " [" << formfac_name;
+      os << " [" << beam.formfac_;
       if (!formfac_name.empty() && !part_flux_name.empty())
         os << ", ";
       if (!part_flux_name.empty())

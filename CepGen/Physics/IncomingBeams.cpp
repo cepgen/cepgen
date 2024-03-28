@@ -97,8 +97,9 @@ namespace cepgen {
       std::swap(p1z, p2z);
     else if (p1z * p2z > 0. && p2z > 0.)
       p2z *= -1.;
-    plist_pos.set<double>("pz", +fabs(p1z));
-    plist_neg.set<double>("pz", -fabs(p2z));
+
+    plist_pos.set<double>("pz", +fabs(p1z)).set<int>("pdgId", pos_pdg);
+    plist_neg.set<double>("pz", -fabs(p2z)).set<int>("pdgId", neg_pdg);
 
     //--- parton fluxes
     auto set_part_fluxes_from_name_vector = [&plist_pos, &plist_neg](const std::vector<std::string>& fluxes) {
@@ -135,12 +136,12 @@ namespace cepgen {
       set_part_fluxes_from_name(flux);
 
     //--- form factors
-    if (const auto& formfacs = steer<std::vector<ParametersList> >("formFactors"); formfacs.size() >= 2) {
-      plist_pos.set<ParametersList>("formFactors", formfacs.at(0));
-      plist_neg.set<ParametersList>("formFactors", formfacs.at(1));
-    } else if (const auto& formfacs = steer<ParametersList>("formFactors"); !formfacs.empty()) {
-      plist_pos.set<ParametersList>("formFactors", formfacs);
-      plist_neg.set<ParametersList>("formFactors", formfacs);
+    if (auto formfacs = steer<std::vector<ParametersList> >("formFactors"); formfacs.size() >= 2) {
+      plist_pos.set("formFactors", formfacs.at(0).set<int>("pdgId", std::abs(pos_pdg)));
+      plist_neg.set("formFactors", formfacs.at(1).set<int>("pdgId", std::abs(neg_pdg)));
+    } else if (auto formfacs = steer<ParametersList>("formFactors"); !formfacs.empty()) {
+      plist_pos.set("formFactors", formfacs.set<int>("pdgId", std::abs(pos_pdg)));
+      plist_neg.set("formFactors", formfacs.set<int>("pdgId", std::abs(neg_pdg)));
     }
 
     if (auto mode = steerAs<int, mode::Kinematics>("mode"); mode != mode::Kinematics::invalid) {
@@ -161,10 +162,11 @@ namespace cepgen {
       plist_pos.set<ParametersList>("structureFunctions", steer<ParametersList>("structureFunctions"));
       plist_neg.set<ParametersList>("structureFunctions", steer<ParametersList>("structureFunctions"));
     }
-    CG_DEBUG("IncomingBeams") << "Will build the following incoming beams:\n* " << plist_pos << "\n* " << plist_neg
-                              << ".";
-    pos_beam_ = Beam(plist_pos).setIntegerPdgId(pos_pdg);
-    neg_beam_ = Beam(plist_neg).setIntegerPdgId(neg_pdg);
+    CG_DEBUG("IncomingBeams") << "Will build the following incoming beams:\n"
+                              << "* " << plist_pos << "\n"
+                              << "* " << plist_neg << ".";
+    pos_beam_ = Beam(plist_pos);
+    neg_beam_ = Beam(plist_neg);
   }
 
   void IncomingBeams::setSqrtS(double sqrts) {
