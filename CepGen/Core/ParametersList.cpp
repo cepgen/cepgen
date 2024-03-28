@@ -212,6 +212,8 @@ namespace cepgen {
           set<int>(key, std::stoi(value));
         else if (utils::isFloat(value))
           set<double>(key, std::stod(value));
+        else if (value[0] == value[value.size() - 1] && (value[0] == '\'' || value[0] == '"'))  // string parameter
+          set(key, value.substr(1, value.size() - 2));
         else {
           const auto value_lc = utils::toLower(value);
           if (value_lc == "off" || value_lc == "no" || value_lc == "false")
