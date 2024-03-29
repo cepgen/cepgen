@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
     ++i;
   }
   if (!plotter.empty()) {
-    auto plt = cepgen::DrawerFactory::get().build(plotter);
+    auto plt = cepgen::DrawerFactory::get().build(plotter, cepgen::ParametersList().set<string>("format", "png,pdf"));
     cepgen::utils::Drawer::Mode dm = cepgen::utils::Drawer::Mode::nostack | cepgen::utils::Drawer::Mode::grid;
     if (ratio_plot)
       dm |= cepgen::utils::Drawer::Mode::ratio;

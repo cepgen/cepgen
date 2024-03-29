@@ -19,6 +19,7 @@
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Modules/PhaseSpaceGeneratorFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
@@ -62,12 +63,16 @@ int main(int argc, char* argv[]) {
   cepgen::Generator gen;
   auto& pars = gen.runParameters();
   size_t i = 0;
-  const string plot_title = "SD $\\gamma\\gamma \\rightarrow l^{+}l^{-}$ (13.6 TeV), $p_{T}^{l} > 10$ GeV";
+  const string plot_title = "SD $\\gamma\\gamma \\rightarrow l^{+}l^{-}$ (13.6 TeV), $p_{T}^{l} > 10$ GeV, $k_{T}$";
   for (const auto& proc_name : processes) {
     auto proc = proc_name;
     if (proc_name == "mg5_aMC")
       proc += "<process:'a a > mu- mu+'";
-    pars.setProcess(cepgen::ProcessFactory::get().build(proc));
+    pars.setProcess(cepgen::ProcessFactory::get().build(
+        proc,
+        cepgen::ParametersList().set(
+            "kinematicsGenerator",
+            cepgen::PhaseSpaceGeneratorFactory::get().describeParameters("kt2to4").parameters())));
     pars.process().kinematics().setParameters(cepgen::ParametersList()
                                                   .set<vector<int> >("pdgIds", {2212, 2212})
                                                   .set<double>("sqrtS", 13.6e3)
@@ -98,7 +103,7 @@ int main(int argc, char* argv[]) {
     ++i;
   }
   if (!plotter.empty()) {
-    auto plt = cepgen::DrawerFactory::get().build(plotter);
+    auto plt = cepgen::DrawerFactory::get().build(plotter, cepgen::ParametersList().set<string>("format", "png,pdf"));
     cepgen::utils::Drawer::Mode dm = cepgen::utils::Drawer::Mode::nostack | cepgen::utils::Drawer::Mode::grid;
     if (ratio_plot)
       dm |= cepgen::utils::Drawer::Mode::ratio;
