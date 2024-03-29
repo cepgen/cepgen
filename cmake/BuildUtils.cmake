@@ -179,6 +179,7 @@ macro(cepgen_test_category)
                    BSOURCES
                    FSOURCES
                    EXT_LIBS
+                   WORKING_DIRECTORY
                    PREPEND)
     cmake_parse_arguments(ARG "${options}" "${one_val}" "${multi_vals}" ${ARGN})
     if(ARG_NAME)
@@ -208,7 +209,11 @@ macro(cepgen_test_category)
     endif()
     foreach(test ${tests})
         message(STATUS "... added test ${test}")
-        add_test(NAME ${test} COMMAND ${test})
+        if(ARG_WORKING_DIRECTORY)
+            add_test(NAME ${test} COMMAND ${test} WORKING_DIRECTORY ${ARG_WORKING_DIRECTORY})
+        else()
+            add_test(NAME ${test} COMMAND ${test})
+        endif()
         set_property(TEST ${test} PROPERTY ENVIRONMENT "CEPGEN_PATH=${PROJECT_SOURCE_DIR}")
     endforeach()
     foreach(benchmark ${benchmarks})

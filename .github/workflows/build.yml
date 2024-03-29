@@ -130,7 +130,7 @@ jobs:
       working-directory: ${{ env.CEPGEN_PATH }}
       run: |
         echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
-        ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" -R "validation_*" --output-on-failure --build-run-dir ${{ env.CEPGEN_PATH }} --verbose
+        ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" -R "validation_*" --output-on-failure --verbose
     - name: 'Compress environment'
       run: |
         ls --recursive ${{ env.CEPGEN_PATH }}/validation/
