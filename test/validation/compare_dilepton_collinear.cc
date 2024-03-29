@@ -28,8 +28,10 @@
 #include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
+#include "Comparator.h"
 
 using namespace std;
+using namespace std::string_literals;
 
 int main(int argc, char* argv[]) {
   int num_gen;
@@ -37,27 +39,59 @@ int main(int argc, char* argv[]) {
   string filename, plotter;
   bool ratio_plot;
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("processes,p", "processes to generate", &processes, vector<string>{"pptoff", "mg5_aMC"})
+      .addOptionalArgument("processes,P", "processes to generate", &processes, vector<string>{"pptoff", "mg5_aMC"})
       .addOptionalArgument("num-gen,n", "number of events to generate", &num_gen, 10'000)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "root")
       .addOptionalArgument("ratio,r", "draw the ratio plot", &ratio_plot, false)
       .addOptionalArgument("filename,f", "output base filename", &filename, "validation/comparison_dilepton_coll_")
       .parse();
 
-  vector<cepgen::utils::Hist1D> h_invmass(processes.size(),
-                                          cepgen::utils::Hist1D(50, {10., 510.}, "", "$m(l^{+}l^{-})$ (GeV)")),
-      h_ptpair(processes.size(), cepgen::utils::Hist1D(50, {0., 5.}, "", "$p_{T}(l^{+}l^{-})$ (GeV)")),
-      h_ptlead(processes.size(), cepgen::utils::Hist1D(50, {0., 100.}, "", "$p_{T}^{lead}$ (GeV)")),
-      h_ptsublead(processes.size(), cepgen::utils::Hist1D(50, {0., 100.}, "", "$p_{T}^{sublead}$ (GeV)")),
-      h_etalead(processes.size(), cepgen::utils::Hist1D(50, {-2.5, 2.5}, "", "$\\eta^{lead}$")),
-      h_etasublead(processes.size(), cepgen::utils::Hist1D(50, {-2.5, 2.5}, "", "$\\eta^{sublead}$")),
-      h_acop(processes.size(), cepgen::utils::Hist1D(50, {0., 1.}, "", "1-|\\Delta\\phi(l^{+}l^{-})/\\pi|")),
-      h_mx(processes.size(), cepgen::utils::Hist1D(50, {0., 1000.}, "", "M_{X} (GeV)"));
+  struct comparison_t : public cepgen::validation::Comparator {
+    using cepgen::validation::Comparator::Comparator;
+    void initialise() override {
+      (*this)
+          .book("invmass", "$m(l^{+}l^{-})$", "GeV", cepgen::utils::Hist1D(50, {10., 510.}))
+          .book("ptpair", "$p_{T}(l^{+}l^{-})$", "GeV", cepgen::utils::Hist1D(50, {0., 5.}))
+          .book("ptlead", "$p_{T}^{lead}$", "GeV", cepgen::utils::Hist1D(50, {0., 100.}))
+          .book("ptsublead", "$p_{T}^{sublead}$", "GeV", cepgen::utils::Hist1D(50, {0., 100.}))
+          .book("etalead", "$\\eta^{lead}$", "", cepgen::utils::Hist1D(50, {-2.5, 2.5}))
+          .book("etasublead", "$\\eta^{sublead}$", "", cepgen::utils::Hist1D(50, {-2.5, 2.5}))
+          .book("acop", "$1-|\\Delta\\phi(l^{+}l^{-})/\\pi|$", "", cepgen::utils::Hist1D(50, {0., 1.}))
+          .book("mx", "$M_{X}$", "GeV", cepgen::utils::Hist1D(50, {0., 1000.}));
+      for (const auto& plot : {"invmass", "ptpair", "ptlead", "ptsublead", "mx"})
+        drawMode(plot) |= cepgen::utils::Drawer::Mode::logy;
+    }
+    void process(const cepgen::Event& evt) override {
+      const auto &cm = evt(cepgen::Particle::Role::Intermediate).at(0).momentum(),
+                 &pl1 = evt(cepgen::Particle::Role::CentralSystem).at(0).momentum(),
+                 &pl2 = evt(cepgen::Particle::Role::CentralSystem).at(1).momentum();
+      cepgen::Momentum pl_lead, pl_sublead;
+      if (pl1.pt() > pl2.pt())
+        pl_lead = pl1, pl_sublead = pl2;
+      else
+        pl_lead = pl2, pl_sublead = pl1;
+      (*this)
+          .fill("invmass", cm.mass())
+          .fill("ptpair", cm.pt())
+          .fill("ptlead", pl_lead.pt())
+          .fill("etalead", pl_lead.eta())
+          .fill("ptsublead", pl_sublead.pt())
+          .fill("etasublead", pl_sublead.eta())
+          .fill("acop", 1. - fabs(pl1.deltaPhi(pl2) * M_1_PI))
+          .fill("mx", evt(cepgen::Particle::Role::OutgoingBeam1).at(0).momentum().mass());
+    }
+  };
 
   cepgen::Generator gen;
+  auto comp = comparison_t(
+      gen,
+      cepgen::ParametersList()
+          .set("topLabel", "SD $\\gamma\\gamma \\rightarrow l^{+}l^{-}$ (13.6 TeV), $p_{T}^{l} > 10$ GeV, coll."s)
+          .set("numEvents", num_gen)
+          .set("pathTemplate", filename)
+          .set("plotter", cepgen::ParametersList().setName(plotter).feed(plotter).set("format", "png,pdf"s)));
+
   auto& pars = gen.runParameters();
-  size_t i = 0;
-  const string plot_title = "SD $\\gamma\\gamma \\rightarrow l^{+}l^{-}$ (13.6 TeV), $p_{T}^{l} > 10$ GeV, coll.";
   for (const auto& proc_name : processes) {
     auto proc = proc_name;
     if (proc_name == "mg5_aMC")
@@ -74,65 +108,7 @@ int main(int argc, char* argv[]) {
                                                   .set<double>("sqrtS", 13.6e3)
                                                   .set<int>("mode", 3 /* inelastic-elastic */)
                                                   .set<double>("ptmin", 10.));
-    const auto cs = gen.computeXsection();
-    CG_LOG << "Cross section computed for process '" << proc_name << "': " << cs << " pb.";
-    const auto weight = (double)cs / num_gen;
-    gen.generate(num_gen, [&](const cepgen::Event& evt, size_t) {
-      const auto &cm = evt(cepgen::Particle::Role::Intermediate).at(0).momentum(),
-                 &px = evt(cepgen::Particle::Role::OutgoingBeam1).at(0).momentum(),
-                 &pl1 = evt(cepgen::Particle::Role::CentralSystem).at(0).momentum(),
-                 &pl2 = evt(cepgen::Particle::Role::CentralSystem).at(1).momentum();
-      h_invmass[i].fill(cm.mass(), weight);
-      h_ptpair[i].fill(cm.pt(), weight);
-      cepgen::Momentum pl_lead, pl_sublead;
-      if (pl1.pt() > pl2.pt())
-        pl_lead = pl1, pl_sublead = pl2;
-      else
-        pl_lead = pl2, pl_sublead = pl1;
-      h_ptlead[i].fill(pl_lead.pt(), weight);
-      h_etalead[i].fill(pl_lead.eta(), weight);
-      h_ptsublead[i].fill(pl_sublead.pt(), weight);
-      h_etasublead[i].fill(pl_sublead.eta(), weight);
-      h_acop[i].fill(1. - fabs(pl1.deltaPhi(pl2) * M_1_PI), weight);
-      h_mx[i].fill(px.mass());
-    });
-    ++i;
-  }
-  if (!plotter.empty()) {
-    auto plt = cepgen::DrawerFactory::get().build(plotter, cepgen::ParametersList().set<string>("format", "png,pdf"));
-    cepgen::utils::Drawer::Mode dm = cepgen::utils::Drawer::Mode::nostack | cepgen::utils::Drawer::Mode::grid;
-    if (ratio_plot)
-      dm |= cepgen::utils::Drawer::Mode::ratio;
-
-    for (auto& plot : vector<pair<string, vector<cepgen::utils::Hist1D> > >{{"invmass", h_invmass},
-                                                                            {"ptpair", h_invmass},
-                                                                            {"ptlead", h_ptlead},
-                                                                            {"etalead", h_etalead},
-                                                                            {"ptsublead", h_ptsublead},
-                                                                            {"etasublead", h_etasublead},
-                                                                            {"acop", h_acop},
-                                                                            {"mx", h_mx}}) {
-      cepgen::utils::DrawableColl coll;
-      auto mode = dm;
-      if (plot.first == "etalead" || plot.first == "etasublead") {
-      } else
-        mode |= cepgen::utils::Drawer::Mode::logy;
-      size_t i = 0;
-      for (auto& gr : plot.second) {
-        gr.xAxis().setLabel(gr.title());
-        gr.yAxis().setLabel("d$\\sigma/dx");
-        string chi2_info;
-        if (i > 0) {  // take first plot as reference for chi^2 test
-          size_t ndf;
-          const auto chi2 = gr.chi2test(plot.second.at(0), ndf);
-          chi2_info = cepgen::utils::format(", $\\chi^{2}$/ndf = %.2g/%zu", chi2, ndf);
-        }
-        gr.setTitle(processes.at(i) + chi2_info);
-        coll.emplace_back(&gr);
-        ++i;
-      }
-      plt->draw(coll, filename + plot.first, plot_title, mode);
-    }
+    comp.loop(proc_name);
   }
   return 0;
 }

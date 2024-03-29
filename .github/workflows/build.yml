@@ -130,10 +130,9 @@ jobs:
       working-directory: ${{ env.CEPGEN_PATH }}
       run: |
         echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
-        ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" -R "validation_*" --output-on-failure --verbose
+        ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" -R "validation_*" --output-on-failure
     - name: 'Compress environment'
       run: |
-        ls --recursive ${{ env.CEPGEN_PATH }}/validation/
         tar -cvf validation-environment.tar ${{ env.CEPGEN_PATH }}/validation/
     - name: 'Upload artifacts'
       uses: actions/upload-artifact@v4
