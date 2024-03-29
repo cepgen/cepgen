@@ -252,7 +252,7 @@ namespace cepgen {
           --ndfval;
           continue;
         }
-        chi2val += std::pow((double)bin_val1 - (double)bin_val2, 2) / ((double)bin_val1 + (double)bin_val2);
+        chi2val += std::pow((double)bin_val1 - (double)bin_val2, 2) / ((double)bin_val1);
       }
       return chi2val;
     }
