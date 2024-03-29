@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
   bool ratio_plot;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument(
-          "processes,P", "processes to generate", &processes, vector<string>{/*"lpair",*/ "pptoff", "mg5_aMC"})
+          "processes,P", "processes to generate", &processes, vector<string>{"lpair", "pptoff", "mg5_aMC"})
       .addOptionalArgument("num-gen,n", "number of events to generate", &num_gen, 10'000)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "root")
       .addOptionalArgument("ratio,r", "draw the ratio plot", &ratio_plot, false)

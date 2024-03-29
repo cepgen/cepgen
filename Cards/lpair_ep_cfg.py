@@ -31,7 +31,7 @@ generator = _gen.clone(
 text = cepgen.Module('text', # histogramming/ASCII output capability
     histVariables={
         'm(4)': cepgen.Parameters(xrange=(0., 25.), nbins=20, log=False),
-        'pt(7):pt(8)': cepgen.Parameters(xrange=(0., 5.), yrange=(0., 5.), log=True)
+        'pt(7):pt(8)': cepgen.Parameters(xrange=(0., 50.), yrange=(0., 50.), log=True)
     }
 )
 #lhef = cepgen.Module('lhef', filename='test.lhe')
