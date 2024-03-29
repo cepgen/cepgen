@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
           "filename,f",
           "output base filename",
           &filename,
-          fs::path(cepgen::utils::env::get("CEPGEN_PATH", ".")) / "validation" / "comparison_dilepton_coll_")
+          fs::path(cepgen::utils::env::get("CEPGEN_PATH")) / "validation" / "comparison_dilepton_coll_")
       .parse();
 
   vector<cepgen::utils::Hist1D> h_invmass(processes.size(),

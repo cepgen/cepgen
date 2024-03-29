@@ -43,11 +43,10 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("num-gen,n", "number of events to generate", &num_gen, 10'000)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "root")
       .addOptionalArgument("ratio,r", "draw the ratio plot", &ratio_plot, false)
-      .addOptionalArgument(
-          "filename,f",
-          "output base filename",
-          &filename,
-          fs::path(cepgen::utils::env::get("CEPGEN_PATH", ".")) / "validation" / "comparison_dilepton_kt_")
+      .addOptionalArgument("filename,f",
+                           "output base filename",
+                           &filename,
+                           fs::path(cepgen::utils::env::get("CEPGEN_PATH")) / "validation" / "comparison_dilepton_kt_")
       .parse();
 
   vector<cepgen::utils::Hist1D> h_invmass(processes.size(),
