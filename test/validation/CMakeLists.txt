@@ -1,4 +1,4 @@
-file(MAKE_DIRECTORY ${CEPGEN_PATH}/validation)
+file(MAKE_DIRECTORY $ENV{CEPGEN_PATH}/validation)
 
 cepgen_test_category(NAME "Validation"
     SOURCES *.cc
