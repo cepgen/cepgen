@@ -63,9 +63,11 @@ public:
     beams_mode_ = kinematics().incomingBeams().mode();
     pA() = kinematics().incomingBeams().positive().momentum();
     pB() = kinematics().incomingBeams().negative().momentum();
-    ep1_ = pA().energy();
-    ep2_ = pB().energy();
-    w12_ = mA2() - mB2();  // mass difference between the two incoming particles
+    if (re_ = 0.5 * inverseSqrtS(); !utils::positive(re_))
+      throw CG_FATAL("LPAIR:prepareKinematics") << "Invalid centre of mass energy: sqrt(s)=" << sqrtS() << ".";
+    w12_ = mA2() - mB2();       // mass difference between the two incoming particles
+    ep1_ = re_ * (s() + w12_);  // in centre of mass system (pp != ep)
+    ep2_ = re_ * (s() - w12_);
     ss_ = s() + w12_;
     if (const auto rl1 = ss_ * ss_ - 4. * mA2() * s(); rl1 >= 0.)
       sl1_ = std::sqrt(rl1);
@@ -226,7 +228,8 @@ private:
                               *formfac2_, kinematics().incomingBeams().negative().elastic(), -t2(), mB2(), mY2());
     const auto peripp = (u1.transposed() * m_em * u2)(0);
     CG_DEBUG_LOOP("LPAIR:peripp") << "bb = " << bb_ << ", qqq = " << q2dq_ << ", qdq = " << qdq << "\n\t"
-                                  << "e-m matrix = " << m_em << "\n\t"
+                                  << "e-m matrix=\n"
+                                  << m_em << "\n\t"
                                   << "u1-2: " << u1 << ", " << u2 << " -> PeriPP = " << peripp << ".";
     return peripp;
   }
@@ -245,6 +248,7 @@ private:
   double ml2_{0.};  ///< squared mass of the outgoing leptons
   double charge_factor_{0.};
   mode::Kinematics beams_mode_;
+  double re_{0.};
   double ep1_{0.};  ///< energy of the first proton-like incoming particle
   double ep2_{0.};  ///< energy of the second proton-like incoming particle
   double w12_{0.};  ///< \f$\delta_2=m_1^2-m_2^2\f$ as defined in \cite Vermaseren:1982cz
@@ -330,10 +334,12 @@ double LPAIR::pickin() {
   }
   const auto w31 = mX2() - mA2();
   // definition from eq. (A.4) and (A.5) in [1]
-  const auto t1_max = mA2() + mX2() - 0.5 * (ss_ * sp + sl1_ * std::sqrt(rl2)) / s(),
-             t1_min = (w31 * d3 + (d3 - w31) * (d3 * mA2() - w31 * mB2()) / s()) / t1_max;
-  const auto [t1_val, t1_width] =
-      map_expo(m_u_t1_, Limits{t1_min, t1_max});  // definition of the first photon propagator (t1 < 0)
+  auto t1_max = mA2() + mX2() - 0.5 * (ss_ * sp + sl1_ * std::sqrt(rl2)) / s(),
+       t1_min = (w31 * d3 + (d3 - w31) * (d3 * mA2() - w31 * mB2()) / s()) / t1_max;
+  t1_max = std::max(t1_max, -kinematics().cuts().initial.q2.max());
+  t1_min = std::min(t1_min, -kinematics().cuts().initial.q2.min());
+  const auto t1_limits = Limits{t1_min, t1_max};
+  const auto [t1_val, t1_width] = map_expo(m_u_t1_, t1_limits);  // definition of the first photon propagator (t1 < 0)
   t1() = t1_val;
   if (t1_width >= 0.)
     return 0.;
@@ -348,10 +354,12 @@ double LPAIR::pickin() {
   const auto d4 = m_w4_ - t1();
   const auto w52 = mY2() - mB2();
   // t2max, t2min definitions from eq. (A.12) and (A.13) in [1]
-  const auto t2_max = mB2() + mY2() - 0.5 * (r1 * r2 + std::sqrt(rl4)) / s2_,
-             t2_min = (w52 * d4 + (d4 - w52) * (d4 * mB2() - w52 * t1()) / s2_) / t2_max;
-  const auto [t2_val, t2_width] =
-      map_expo(m_u_t2_, Limits{t2_min, t2_max});  // definition of the second photon propagator (t2 < 0)
+  auto t2_max = mB2() + mY2() - 0.5 * (r1 * r2 + std::sqrt(rl4)) / s2_,
+       t2_min = (w52 * d4 + (d4 - w52) * (d4 * mB2() - w52 * t1()) / s2_) / t2_max;
+  t2_max = std::max(t2_max, -kinematics().cuts().initial.q2.max());
+  t2_min = std::min(t2_min, -kinematics().cuts().initial.q2.min());
+  const auto t2_limits = Limits{t2_min, t2_max};
+  const auto [t2_val, t2_width] = map_expo(m_u_t2_, t2_limits);  // definition of the second photon propagator (t2 < 0)
   t2() = t2_val;
   if (t2_width >= 0.)
     return 0.;
@@ -470,10 +478,9 @@ double LPAIR::pickin() {
 //---------------------------------------------------------------------------------------------
 
 bool LPAIR::orient() {
-  if (const auto re = 0.5 * inverseSqrtS(); utils::positive(re)) {
-    eph1_ = re * (s2_ - mX2() + w12_);
-    eph2_ = re * (s1_ - mY2() - w12_);
-  }
+  eph1_ = re_ * (s2_ - mX2() + w12_);  // de3 in original LPAIR
+  eph2_ = re_ * (s1_ - mY2() - w12_);  // de5 un original LPAIR
+
   //----- central two-photon/lepton system
   if (ec4_ = eph1_ + eph2_; ec4_ < mc4_) {
     CG_WARNING("LPAIR:orient") << "ec4_ = " << ec4_ << " < mc4_ = " << mc4_ << "==> photon energies: " << eph1_ << ", "
@@ -608,7 +615,7 @@ double LPAIR::computeWeight() {
   // 3D rotation of the first outgoing lepton wrt the CM system
   const auto cos_theta6cm = Limits{-1., 1.}.trim(amap / bmap * (beta - 1.) / (beta + 1.)),
              cos2_theta6cm = cos_theta6cm * cos_theta6cm, sin2_theta6cm = 1. - cos2_theta6cm,
-             theta6cm = std::acos(cos_theta6cm);
+             theta6cm = M_PI - std::acos(cos_theta6cm);
 
   // match the Jacobian
   jacobian *= (amap + bmap * cos_theta6cm);
@@ -662,23 +669,31 @@ double LPAIR::computeWeight() {
 
   {  // preparation for the periPP call
     const auto compute_coeffs =
-        [&qve](const Momentum& pin, const Momentum& pout, double ene_pho, double pcm, double& gamma)
+        [&qve](double e_in, double m_in, const Momentum& pout, double ene_pho, double pcm, double& gamma)
         -> std::tuple<double, double, double, double, double, double, double> {
       const auto phi_out = pout.phi(), cos_phi_out = std::cos(phi_out), sin_phi_out = std::sin(phi_out);
-      const auto pt_out = pout.pt();
+      const auto e2_in = e_in * e_in, m2_in = m_in * m_in, pt_out = pout.pt();
       const auto c1 = pt_out * (qve.px() * sin_phi_out - qve.py() * cos_phi_out),
-                 c2 = pt_out * (qve.pz() * pin.energy() - qve.energy() * pcm),
-                 c3 = ((pout.mass2() - pin.mass2()) * pin.energy2() + 2. * pin.mass2() * ene_pho * pin.energy() -
-                       pin.mass2() * ene_pho * ene_pho + pt_out * pt_out * pin.energy2()) /
-                      (pout.pz() * pin.energy() + pout.energy() * pcm);
+                 c2 = pt_out * (qve.pz() * e_in - qve.energy() * pcm),
+                 c3 = ((pout.mass2() - m2_in) * e2_in + 2. * m2_in * ene_pho * e_in - m2_in * ene_pho * ene_pho +
+                       pt_out * pt_out * e2_in) /
+                      (pout.pz() * e2_in + pout.energy() * pcm);
       const auto r2 = c2 * sin_phi_out + c3 * qve.py(), r3 = -c2 * cos_phi_out - c3 * qve.px();
-      gamma = pin.mass2() * c1 * c1 + r2 * r2 + r3 * r3;
+      gamma = m2_in * c1 * c1 + r2 * r2 + r3 * r3;
       return std::make_tuple(cos_phi_out, sin_phi_out, c1, c2, c3, r2, r3);
     };
-    const auto [cos_phi3, sin_phi3, c1, c2, c3, r12, r13] = compute_coeffs(pA(), pX(), eph1_, +p_cm_, gamma5_);
-    const auto [cos_phi5, sin_phi5, b1, b2, b3, r22, r23] = compute_coeffs(pB(), pY(), eph2_, -p_cm_, gamma6_);
+    const auto [cos_phi3, sin_phi3, c1, c2, c3, r12, r13] = compute_coeffs(ep1_, mA(), pX(), eph1_, +p_cm_, gamma5_);
+    const auto [cos_phi5, sin_phi5, b1, b2, b3, r22, r23] = compute_coeffs(ep2_, mB(), pY(), eph2_, -p_cm_, gamma6_);
+    const auto pt3 = pX().pt(), pt5 = pY().pt();
 
-    const auto pt3 = pY().pt(), pt5 = pY().pt();
+    CG_DEBUG_LOOP("LPAIR") << "cos(phi3)=" << cos_phi3 << ", sin(phi3)=" << sin_phi3 << ", cos(phi5)=" << cos_phi5
+                           << ", sin(phi5)=" << sin_phi5 << ".\n\t"
+                           << "pp3=" << pt3 << ", pp5=" << pt5 << ", p1k2=" << p1k2_ << ", p2k1=" << p2k1_
+                           << ", p12=" << p12_ << "\n\t"
+                           << "b1=" << b1 << " b2=" << b2 << ", b3=" << b3 << ", c1=" << c1 << ", c2=" << c2
+                           << ", c3=" << c3 << "\n\t"
+                           << "r12=" << r12 << ", r22=" << r22 << ", r13=" << r13 << ", r23=" << r23 << ".";
+
     alpha5_ = -(qve.px() * cos_phi3 + qve.py() * sin_phi3) * pt3 * p1k2_ -
               (ep1_ * qve.energy() - p_cm_ * qve.pz()) * (cos_phi3 * cos_phi5 + sin_phi3 * sin_phi5) * pt3 * pt5 +
               (eph2_ * qve.pz() + qve.energy() * (p_cm_ + pY().pz())) * c3;
