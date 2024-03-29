@@ -23,39 +23,51 @@
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Drawer.h"
+#include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/String.h"
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
-  cepgen::Generator gen;
   int num_gen;
   vector<string> processes;
-  string plotter;
+  string filename, plotter;
   bool ratio_plot;
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("processes,p", "processes to generate", &processes, vector<string>{"lpair", "pptoff"})
+      .addOptionalArgument(
+          "processes,p", "processes to generate", &processes, vector<string>{"lpair", "pptoff", "mg5_aMC"})
       .addOptionalArgument("num-gen,n", "number of events to generate", &num_gen, 10'000)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "root")
       .addOptionalArgument("ratio,r", "draw the ratio plot", &ratio_plot, false)
+      .addOptionalArgument(
+          "filename,f",
+          "output base filename",
+          &filename,
+          fs::path(cepgen::utils::env::get("CEPGEN_PATH", ".")) / "validation" / "comparison_dilepton_kt_")
       .parse();
 
   vector<cepgen::utils::Hist1D> h_invmass(processes.size(),
                                           cepgen::utils::Hist1D(50, {10., 510.}, "", "$m(l^{+}l^{-})$ (GeV)")),
       h_ptpair(processes.size(), cepgen::utils::Hist1D(50, {0., 50.}, "", "$p_{T}(l^{+}l^{-})$ (GeV)")),
-      h_ptlead(processes.size(), cepgen::utils::Hist1D(50, {0., 50.}, "", "$p_{T}^{lead}$ (GeV)")),
-      h_ptsublead(processes.size(), cepgen::utils::Hist1D(50, {0., 50.}, "", "$p_{T}^{sublead}$ (GeV)")),
+      h_ptlead(processes.size(), cepgen::utils::Hist1D(50, {0., 100.}, "", "$p_{T}^{lead}$ (GeV)")),
+      h_ptsublead(processes.size(), cepgen::utils::Hist1D(50, {0., 100.}, "", "$p_{T}^{sublead}$ (GeV)")),
       h_etalead(processes.size(), cepgen::utils::Hist1D(50, {-2.5, 2.5}, "", "$\\eta^{lead}$")),
       h_etasublead(processes.size(), cepgen::utils::Hist1D(50, {-2.5, 2.5}, "", "$\\eta^{sublead}$")),
       h_acop(processes.size(), cepgen::utils::Hist1D(50, {0., 1.}, "", "1-|\\Delta\\phi(l^{+}l^{-})/\\pi|")),
       h_mx(processes.size(), cepgen::utils::Hist1D(50, {0., 1000.}, "", "M_{X} (GeV)"));
 
+  cepgen::Generator gen;
   auto& pars = gen.runParameters();
   size_t i = 0;
+  const string plot_title = "SD $\\gamma\\gamma \\rightarrow l^{+}l^{-}$ (13.6 TeV), $p_{T}^{l} > 10$ GeV";
   for (const auto& proc_name : processes) {
-    pars.setProcess(cepgen::ProcessFactory::get().build(proc_name));
+    auto proc = proc_name;
+    if (proc_name == "mg5_aMC")
+      proc += "<process:'a a > mu- mu+'";
+    pars.setProcess(cepgen::ProcessFactory::get().build(proc));
     pars.process().kinematics().setParameters(cepgen::ParametersList()
                                                   .set<vector<int> >("pdgIds", {2212, 2212})
                                                   .set<double>("sqrtS", 13.6e3)
@@ -108,11 +120,17 @@ int main(int argc, char* argv[]) {
       for (auto& gr : plot.second) {
         gr.xAxis().setLabel(gr.title());
         gr.yAxis().setLabel("d$\\sigma/dx");
-        gr.setTitle(processes.at(i));
+        string chi2_info;
+        if (i > 0) {  // take first plot as reference for chi^2 test
+          size_t ndf;
+          const auto chi2 = gr.chi2test(plot.second.at(0), ndf);
+          chi2_info = cepgen::utils::format(", $\\chi^{2}$/ndf = %.2g/%zu", chi2, ndf);
+        }
+        gr.setTitle(processes.at(i) + chi2_info);
         coll.emplace_back(&gr);
         ++i;
       }
-      plt->draw(coll, "comparison_dilepton_" + plot.first, "", mode);
+      plt->draw(coll, filename + plot.first, plot_title, mode);
     }
   }
   return 0;
