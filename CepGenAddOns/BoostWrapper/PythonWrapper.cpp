@@ -56,10 +56,6 @@ namespace {
                    std::string,
                    "StructureFunctionsFactory",
                    "a structure functions evaluator objects factory");
-    EXPOSE_FACTORY(cepgen::LegacyStructureFunctionsFactory,
-                   int,
-                   "StructureFunctionsFactoryInt",
-                   "a structure functions evaluator objects factory");
 
     py::class_<cepgen::sigrat::Parameterisation, py::bases<cepgen::Steerable>, boost::noncopyable>(
         "_SigmaRatio", "L/T cross section ratio modelling", py::no_init)

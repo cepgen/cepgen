@@ -22,18 +22,15 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a structure functions definition to the list of handled parameterisation
-#define REGISTER_STRFUN(name, obj)                                                  \
-  namespace cepgen {                                                                \
-    namespace strfun {                                                              \
-      struct BUILDERNM(obj) {                                                       \
-        BUILDERNM(obj)() {                                                          \
-          StructureFunctionsFactory::get().registerModule<obj>(name);               \
-          LegacyStructureFunctionsFactory::get().registerModule<obj>(obj::index()); \
-        }                                                                           \
-      };                                                                            \
-      static const BUILDERNM(obj) gStrFun##obj;                                     \
-    }                                                                               \
-  }                                                                                 \
+#define REGISTER_STRFUN(name, obj)                                                                                    \
+  namespace cepgen {                                                                                                  \
+    namespace strfun {                                                                                                \
+      struct BUILDERNM(obj) {                                                                                         \
+        BUILDERNM(obj)() { StructureFunctionsFactory::get().addIndex(obj::index(), name).registerModule<obj>(name); } \
+      };                                                                                                              \
+      static const BUILDERNM(obj) gStrFun##obj;                                                                       \
+    }                                                                                                                 \
+  }                                                                                                                   \
   static_assert(true, "")
 
 /// Add a sigma ratio definition to the list of handled parameterisation
@@ -52,16 +49,29 @@ namespace cepgen {
   namespace strfun {
     class Parameterisation;
   }
-  /// A structure functions parameterisations factory
+  /// A structure functions parameterisations base factory
   DEFINE_FACTORY(std::string,
-                 StructureFunctionsFactory,
+                 BaseStructureFunctionsFactory,
                  strfun::Parameterisation,
-                 "Nucleon structure functions parameterisations factory (str-indexed)");
-  /// A (integer-indexed) structure functions parameterisations factory
-  DEFINE_FACTORY(int,
-                 LegacyStructureFunctionsFactory,
-                 strfun::Parameterisation,
-                 "Nucleon structure functions parameterisations factory (int-indexed)");
+                 "Nucleon structure functions parameterisations factory");
+  /// A structure functions parameterisations factory
+  class StructureFunctionsFactory : public BaseStructureFunctionsFactory {
+  public:
+    using BaseStructureFunctionsFactory::BaseStructureFunctionsFactory;
+    using BaseStructureFunctionsFactory::build;
+    using BaseStructureFunctionsFactory::describeParameters;
+    static StructureFunctionsFactory& get();
+    /// Build parameterisation from integer index
+    std::unique_ptr<strfun::Parameterisation> build(int, const ParametersList& = ParametersList()) const;
+    ParametersDescription describeParameters(int, const ParametersList& = ParametersList()) const;
+    inline StructureFunctionsFactory& addIndex(int index, const std::string& name) {
+      indices_[index] = name;
+      return *this;
+    }
+
+  private:
+    std::unordered_map<int, std::string> indices_;
+  };
   namespace sigrat {
     class Parameterisation;
   }

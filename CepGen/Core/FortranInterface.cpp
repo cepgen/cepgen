@@ -34,7 +34,7 @@ extern "C" {
 /// Expose structure functions calculators to Fortran
 void cepgen_structure_functions_(int& sfmode, double& xbj, double& q2, double& f2, double& fl) {
   using namespace cepgen;
-  static auto sf = StructureFunctionsFactory::get().build(std::to_string(sfmode));
+  static auto sf = StructureFunctionsFactory::get().build(sfmode);
   f2 = sf->F2(xbj, q2);
   fl = sf->FL(xbj, q2);
 }
@@ -52,7 +52,7 @@ double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& 
       ParametersList()
           .set<double>("mass", min)
           .set<ParametersList>("structureFunctions",
-                               StructureFunctionsFactory::get().describeParameters(std::to_string(sfmode)).parameters())
+                               StructureFunctionsFactory::get().describeParameters(sfmode).parameters())
           .set<ParametersList>(
               "formFactors",
               FormFactorsFactory::get()
