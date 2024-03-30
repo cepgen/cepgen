@@ -42,8 +42,6 @@ namespace cepgen {
     public:
       explicit KulaginBarinov(const ParametersList&);
 
-      static int index() { return 303; }
-
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Kulagin-Barinov (hybrid)");
@@ -330,4 +328,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::KulaginBarinov;
-REGISTER_STRFUN("kulaginBarinov", KulaginBarinov);
+REGISTER_STRFUN("kulaginBarinov", 303, KulaginBarinov);

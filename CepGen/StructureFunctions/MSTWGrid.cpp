@@ -67,8 +67,6 @@ namespace mstw {
                        << "].";
     }
 
-    static int index() { return 205; }
-
     static cepgen::ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("MSTW grid (perturbative)");
@@ -158,4 +156,4 @@ namespace mstw {
   }
 }  // namespace mstw
 using mstw::Grid;
-REGISTER_STRFUN("mstwGrid", Grid);
+REGISTER_STRFUN("mstwGrid", 205, Grid);

@@ -32,7 +32,6 @@ namespace cepgen {
       /// Extract the longitudinal/transverse cross section ratio and associated error for a given \f$(x_{\rm Bj},Q^2)\f$ couple.
       virtual double operator()(double xbj, double q2, double& err) const = 0;
 
-      static int index() { return 0; }  ///< Legacy integer index for sigma ratios modelling
       static ParametersDescription description();
 
     protected:

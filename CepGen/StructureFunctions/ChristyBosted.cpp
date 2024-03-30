@@ -35,7 +35,6 @@ namespace cepgen {
     public:
       explicit ChristyBosted(const ParametersList&);
 
-      static int index() { return 102; }
       static ParametersDescription description();
 
       void eval() override;
@@ -347,4 +346,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::ChristyBosted;
-REGISTER_STRFUN("christyBosted", ChristyBosted);
+REGISTER_STRFUN("christyBosted", 102, ChristyBosted);

@@ -43,8 +43,6 @@ namespace cepgen {
           throw CG_FATAL("CLAS") << "Invalid modelling selected: " << model << "!";
       }
 
-      static int index() { return 103; }
-
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("CLAS");
@@ -269,4 +267,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::CLAS;
-REGISTER_STRFUN("clas", CLAS);
+REGISTER_STRFUN("clas", 103, CLAS);

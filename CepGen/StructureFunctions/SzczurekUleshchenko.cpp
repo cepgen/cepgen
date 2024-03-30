@@ -36,8 +36,6 @@ namespace cepgen {
       explicit SzczurekUleshchenko(const ParametersList& params)
           : Parameterisation(params), q2_shift_(steerAs<double, float>("q2shift")) {}
 
-      static int index() { return 12; }
-
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Szczurek-Uleshchenko (based on GRV parton content)");
@@ -63,11 +61,9 @@ namespace cepgen {
         const double F2_aux = 4. / 9. * (xuv + 2. * xus) + 1. / 9. * (xdv + 2. * xds) + 1. / 9. * (2. * xss);
         setF2(F2_aux * args_.q2 / amu2);  // F2 corrected for low Q^2 behaviour
       }
-
-      /// \f$Q^2\f$ scale shift
-      const float q2_shift_;
+      const float q2_shift_;  ///< \f$Q^2\f$ scale shift
     };
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::SzczurekUleshchenko;
-REGISTER_STRFUN("szczurekUleshchenko", SzczurekUleshchenko);
+REGISTER_STRFUN("szczurekUleshchenko", 12, SzczurekUleshchenko);

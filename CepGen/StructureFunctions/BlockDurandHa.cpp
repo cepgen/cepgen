@@ -57,8 +57,6 @@ namespace cepgen {
         setF2(D * pow(1. - args_.xbj, n_) * (C + A * xlx + B * xlx * xlx));
       }
 
-      static int index() { return 13; }
-
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Block-Durand-Ha (continuum)");
@@ -85,4 +83,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::BlockDurandHa;
-REGISTER_STRFUN("blockDurandHa", BlockDurandHa);
+REGISTER_STRFUN("blockDurandHa", 13, BlockDurandHa);

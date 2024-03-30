@@ -55,8 +55,6 @@ namespace cepgen {
                                     << w2_lim_.at(1) << " GeV^2!";
       }
 
-      static int index() { return 301; }
-
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("LUXlike (hybrid)");
@@ -126,4 +124,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::Schaefer;
-REGISTER_STRFUN("luxLike", Schaefer);
+REGISTER_STRFUN("luxLike", 301, Schaefer);

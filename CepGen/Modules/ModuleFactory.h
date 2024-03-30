@@ -27,14 +27,18 @@
 /// Name of the object builder
 #define BUILDERNM(obj) obj##Builder
 /// Define a new factory instance for the definition of modules
-#define DEFINE_FACTORY(name, obj_type, descr)    \
-  struct name : public ModuleFactory<obj_type> { \
-    explicit name() : ModuleFactory(descr) {}    \
-    static name& get() {                         \
-      static name instance;                      \
-      return instance;                           \
-    }                                            \
-  };                                             \
+#define DEFINE_FACTORY(name, obj_type, descr)                       \
+  struct name : public ModuleFactory<obj_type> {                    \
+    explicit name() : ModuleFactory(descr) {}                       \
+    inline static name& get() {                                     \
+      static name instance;                                         \
+      return instance;                                              \
+    }                                                               \
+    inline name& addIndex(int index, const std::string& mod_name) { \
+      indices_[index] = mod_name;                                   \
+      return *this;                                                 \
+    }                                                               \
+  };                                                                \
   static_assert(true, "")
 
 namespace cepgen {
@@ -69,12 +73,16 @@ namespace cepgen {
       params_map_[name] = desc;
     }
     /// Build one instance of a named module
+    /// \param[in] params List of parameters to be invoked by the constructor
+    std::unique_ptr<T> build(const ParametersList&) const;
+    /// Build one instance of a named module
     /// \param[in] name Module name to retrieve
     /// \param[in] params List of parameters to be invoked by the constructor
     std::unique_ptr<T> build(const std::string& name, const ParametersList& params = ParametersList()) const;
     /// Build one instance of a named module
+    /// \param[in] index Module index (if found) to retrieve
     /// \param[in] params List of parameters to be invoked by the constructor
-    std::unique_ptr<T> build(const ParametersList&) const;
+    std::unique_ptr<T> build(int index, const ParametersList& params = ParametersList()) const;
 
     typedef std::unique_ptr<T> (*Builder)(const ParametersList&);  ///< Constructor type for a module
 
@@ -87,6 +95,10 @@ namespace cepgen {
     /// \param[in] params Additional parameters to steer the description
     ParametersDescription describeParameters(const std::string& name,
                                              const ParametersList& params = ParametersList()) const;
+    /// Describe the parameters of one named module
+    /// \param[in] index Index of the module to describe
+    /// \param[in] params Additional parameters to steer the description
+    ParametersDescription describeParameters(int index, const ParametersList& params = ParametersList()) const;
 
     std::vector<std::string> modules() const;           ///< List of modules registred in the database
     inline bool empty() const { return map_.empty(); }  ///< Is the database empty?
@@ -107,7 +119,8 @@ namespace cepgen {
     const ParametersDescription empty_params_desc_;                      ///< An empty parameters description
 
   protected:
-    explicit ModuleFactory(const std::string&);  ///< Hidden default constructor for singleton operations
+    explicit ModuleFactory(const std::string&);     ///< Hidden default constructor for singleton operations
+    std::unordered_map<int, std::string> indices_;  ///< Index-to-map association map
   };
 }  // namespace cepgen
 

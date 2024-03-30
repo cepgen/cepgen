@@ -28,8 +28,6 @@ namespace cepgen {
     public:
       explicit Shamov(const ParametersList&);
 
-      static int index() { return 302; }
-
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Shamov (hybrid, soft)");
@@ -266,4 +264,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::Shamov;
-REGISTER_STRFUN("shamov", Shamov);
+REGISTER_STRFUN("shamov", 302, Shamov);

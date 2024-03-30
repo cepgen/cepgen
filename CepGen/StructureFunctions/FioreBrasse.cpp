@@ -37,8 +37,6 @@ namespace cepgen {
           resonances_.emplace_back(res);
       }
 
-      static int index() { return 101; }
-
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Fiore-Brasse (low-mass resonances)");
@@ -162,8 +160,6 @@ namespace cepgen {
     public:
       explicit FioreBrasseAlt(const ParametersList& params) : FioreBrasse(params) {}
 
-      static int index() { return 104; }
-
       static ParametersDescription description() {
         auto desc = FioreBrasse::description();
         desc.add<double>("s0", 1.2871);
@@ -206,5 +202,5 @@ namespace cepgen {
 }  // namespace cepgen
 using cepgen::strfun::FioreBrasse;
 using cepgen::strfun::FioreBrasseAlt;
-REGISTER_STRFUN("fioreBrasse", FioreBrasse);
-REGISTER_STRFUN("fioreBrasseAlt", FioreBrasseAlt);
+REGISTER_STRFUN("fioreBrasse", 101, FioreBrasse);
+REGISTER_STRFUN("fioreBrasseAlt", 104, FioreBrasseAlt);

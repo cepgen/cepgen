@@ -27,20 +27,6 @@ namespace cepgen {
   ModuleFactory<T>::ModuleFactory(const std::string& descr) : description_(descr) {}
 
   template <typename T>
-  std::unique_ptr<T> ModuleFactory<T>::build(const std::string& name, const ParametersList& params) const {
-    if (name.empty())
-      throw CG_FATAL("ModuleFactory") << description_ << " cannot build a module with empty index/name!";
-    auto plist = params;
-    if (const auto extra_params = utils::split(name, '<'); !extra_params.empty()) {
-      plist.setName(extra_params.at(0));
-      if (extra_params.size() > 1)
-        for (size_t i = 1; i < extra_params.size(); ++i)
-          plist.feed(extra_params.at(i));
-    }
-    return build(plist);
-  }
-
-  template <typename T>
   std::unique_ptr<T> ModuleFactory<T>::build(const ParametersList& params) const {
     if (!params.hasName())
       throw CG_FATAL("ModuleFactory") << description_ << " failed to retrieve an indexing key "
@@ -60,6 +46,32 @@ namespace cepgen {
         log << "with parameters:\n" << plist << ".";
     });
     return map_.at(idx)(plist);
+  }
+
+  template <typename T>
+  std::unique_ptr<T> ModuleFactory<T>::build(const std::string& name, const ParametersList& params) const {
+    if (name.empty())
+      throw CG_FATAL("ModuleFactory") << description_ << " cannot build a module with empty index/name!";
+    auto plist = params;
+    if (const auto extra_params = utils::split(name, '<'); !extra_params.empty()) {
+      plist.setName(extra_params.at(0));
+      if (extra_params.size() > 1)
+        for (size_t i = 1; i < extra_params.size(); ++i)
+          plist.feed(extra_params.at(i));
+    }
+    return build(plist);
+  }
+
+  template <typename T>
+  std::unique_ptr<T> ModuleFactory<T>::build(int index, const ParametersList& params) const {
+    if (indices_.count(index) > 0)
+      return build(indices_.at(index), params);
+    const auto& mod_names = modules();
+    if (const auto str_index = std::to_string(index);
+        std::find(mod_names.begin(), mod_names.end(), str_index) != mod_names.end())
+      return build(str_index, params);
+    throw CG_FATAL("ModuleFactory") << description_ << " failed to build a module with index '" << index << "'. \n"
+                                    << "Registered indices: " << indices_ << ".";
   }
 
   template <typename T>
@@ -94,6 +106,18 @@ namespace cepgen {
       for (size_t i = 1; i < extra_params.size(); ++i)
         extra_params_obj.feed(extra_params.at(i));
     return descr.steer(extra_params_obj);
+  }
+
+  template <typename T>
+  ParametersDescription ModuleFactory<T>::describeParameters(int index, const ParametersList& params) const {
+    if (indices_.count(index) > 0)
+      return describeParameters(indices_.at(index), params);
+    const auto& mod_names = modules();
+    if (const auto str_index = std::to_string(index);
+        std::find(mod_names.begin(), mod_names.end(), str_index) != mod_names.end())
+      return describeParameters(str_index, params);
+    throw CG_FATAL("ModuleFactory") << "No parameters description were found for module index '" << index << "'.\n"
+                                    << "Registered modules: " << indices_ << ".";
   }
 
   template <typename T>

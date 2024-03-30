@@ -37,8 +37,6 @@ namespace cepgen {
             cp_(steer<double>("Cp")),
             bp_(steer<double>("Bp")) {}
 
-      static int index() { return 11; }
-
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Suri-Yennie");
@@ -80,7 +78,6 @@ namespace cepgen {
 
     struct SuriYennieAlt final : public SuriYennie {
       using SuriYennie::SuriYennie;
-      static int index() { return 14; }
       static ParametersDescription description() {
         auto desc = SuriYennie::description();
         desc.setDescription("Suri-Yennie (alternative)");
@@ -97,5 +94,5 @@ namespace cepgen {
 }  // namespace cepgen
 using cepgen::strfun::SuriYennie;
 using cepgen::strfun::SuriYennieAlt;
-REGISTER_STRFUN("suriYennie", SuriYennie);
-REGISTER_STRFUN("suriYennieAlt", SuriYennieAlt);
+REGISTER_STRFUN("suriYennie", 11, SuriYennie);
+REGISTER_STRFUN("suriYennieAlt", 14, SuriYennieAlt);

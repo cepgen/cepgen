@@ -36,8 +36,6 @@ namespace cepgen {
             epsilon_(steer<double>("epsilon")),
             delta_r_(steer<double>("deltaR")) {}
 
-      static int index() { return 105; }
-
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Donnachie-Landshoff");
@@ -61,4 +59,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::DonnachieLandshoff;
-REGISTER_STRFUN("donnachieLandshoff", DonnachieLandshoff);
+REGISTER_STRFUN("donnachieLandshoff", 105, DonnachieLandshoff);
