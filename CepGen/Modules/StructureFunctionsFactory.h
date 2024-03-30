@@ -34,66 +34,53 @@
   static_assert(true, "")
 
 /// Add a sigma ratio definition to the list of handled parameterisation
-#define REGISTER_SIGRAT(id, obj)                                                \
-  namespace cepgen {                                                            \
-    namespace sigrat {                                                          \
-      struct BUILDERNM(obj) {                                                   \
-        BUILDERNM(obj)() { SigmaRatiosFactory::get().registerModule<obj>(id); } \
-      };                                                                        \
-      static const BUILDERNM(obj) gSigRat##obj;                                 \
-    }                                                                           \
-  }                                                                             \
+#define REGISTER_SIGRAT(name, obj)                                                                             \
+  namespace cepgen {                                                                                           \
+    namespace sigrat {                                                                                         \
+      struct BUILDERNM(obj) {                                                                                  \
+        BUILDERNM(obj)() { SigmaRatiosFactory::get().addIndex(obj::index(), name).registerModule<obj>(name); } \
+      };                                                                                                       \
+      static const BUILDERNM(obj) gSigRat##obj;                                                                \
+    }                                                                                                          \
+  }                                                                                                            \
+  static_assert(true, "")
+
+/// Define a new factory instance for the definition of modules
+#define DEFINE_HYBRID_FACTORY(name, obj_type, descr)                                               \
+  DEFINE_FACTORY(Base##name, obj_type, descr);                                                     \
+  class name : public Base##name {                                                                 \
+  public:                                                                                          \
+    using Base##name::Base##name;                                                                  \
+    using Base##name::build;                                                                       \
+    using Base##name::describeParameters;                                                          \
+    static name& get();                                                                            \
+    std::unique_ptr<obj_type> build(int, const ParametersList& = ParametersList()) const;          \
+    ParametersDescription describeParameters(int, const ParametersList& = ParametersList()) const; \
+    inline name& addIndex(int index, const std::string& mod_name) {                                \
+      indices_[index] = mod_name;                                                                  \
+      return *this;                                                                                \
+    }                                                                                              \
+                                                                                                   \
+  private:                                                                                         \
+    std::unordered_map<int, std::string> indices_;                                                 \
+  };                                                                                               \
   static_assert(true, "")
 
 namespace cepgen {
   namespace strfun {
     class Parameterisation;
   }
-  /// A structure functions parameterisations base factory
-  DEFINE_FACTORY(BaseStructureFunctionsFactory,
-                 strfun::Parameterisation,
-                 "Nucleon structure functions parameterisations factory");
   /// A structure functions parameterisations factory
-  class StructureFunctionsFactory : public BaseStructureFunctionsFactory {
-  public:
-    using BaseStructureFunctionsFactory::BaseStructureFunctionsFactory;
-    using BaseStructureFunctionsFactory::build;
-    using BaseStructureFunctionsFactory::describeParameters;
-    static StructureFunctionsFactory& get();
-    /// Build parameterisation from integer index
-    std::unique_ptr<strfun::Parameterisation> build(int, const ParametersList& = ParametersList()) const;
-    ParametersDescription describeParameters(int, const ParametersList& = ParametersList()) const;
-    inline StructureFunctionsFactory& addIndex(int index, const std::string& name) {
-      indices_[index] = name;
-      return *this;
-    }
-
-  private:
-    std::unordered_map<int, std::string> indices_;
-  };
+  DEFINE_HYBRID_FACTORY(StructureFunctionsFactory,
+                        strfun::Parameterisation,
+                        "Nucleon structure functions parameterisations factory");
   namespace sigrat {
     class Parameterisation;
   }
-  /// A sigma ratio parameterisations base factory
-  DEFINE_FACTORY(BaseSigmaRatiosFactory, sigrat::Parameterisation, "Sigma L/T parameterisations factory");
   /// A sigma ratio parameterisations factory
-  class SigmaRatiosFactory : public BaseSigmaRatiosFactory {
-  public:
-    using BaseSigmaRatiosFactory::BaseSigmaRatiosFactory;
-    using BaseSigmaRatiosFactory::build;
-    using BaseSigmaRatiosFactory::describeParameters;
-    static SigmaRatiosFactory& get();
-    /// Build parameterisation from integer index
-    std::unique_ptr<sigrat::Parameterisation> build(int, const ParametersList& = ParametersList()) const;
-    ParametersDescription describeParameters(int, const ParametersList& = ParametersList()) const;
-    inline SigmaRatiosFactory& addIndex(int index, const std::string& name) {
-      indices_[index] = name;
-      return *this;
-    }
-
-  private:
-    std::unordered_map<int, std::string> indices_;
-  };
+  DEFINE_HYBRID_FACTORY(SigmaRatiosFactory, sigrat::Parameterisation, "Sigma L/T parameterisations factory");
 }  // namespace cepgen
+
+#undef DEFINE_HYBRID_FACTORY
 
 #endif

@@ -20,62 +20,34 @@
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
+#define IMPLEMENT_HYBRID_FACTORY(name, obj_type)                                                                     \
+  name& name::get() {                                                                                                \
+    static name instance;                                                                                            \
+    return instance;                                                                                                 \
+  }                                                                                                                  \
+  std::unique_ptr<obj_type> name::build(int index, const ParametersList& params) const {                             \
+    if (indices_.count(index) > 0)                                                                                   \
+      return name::build(indices_.at(index), params);                                                                \
+    const auto& mod_names = modules();                                                                               \
+    if (const auto str_index = std::to_string(index);                                                                \
+        std::find(mod_names.begin(), mod_names.end(), str_index) != mod_names.end())                                 \
+      return name::build(str_index, params);                                                                         \
+    throw CG_FATAL("HybridFactory") << description() << " failed to build a module with index '" << index << "'. \n" \
+                                    << "Registered indices: " << indices_ << ".";                                    \
+  }                                                                                                                  \
+  ParametersDescription name::describeParameters(int index, const ParametersList& params) const {                    \
+    if (indices_.count(index) > 0)                                                                                   \
+      return name::describeParameters(indices_.at(index), params);                                                   \
+    const auto& mod_names = modules();                                                                               \
+    if (const auto str_index = std::to_string(index);                                                                \
+        std::find(mod_names.begin(), mod_names.end(), str_index) != mod_names.end())                                 \
+      return name::describeParameters(str_index, params);                                                            \
+    throw CG_FATAL("HybridFactory") << "No parameters description were found for module index '" << index << "'.\n"  \
+                                    << "Registered modules: " << indices_ << ".";                                    \
+  }                                                                                                                  \
+  static_assert(true, "")
+
 namespace cepgen {
-  StructureFunctionsFactory& StructureFunctionsFactory::get() {
-    static StructureFunctionsFactory instance;
-    return instance;
-  }
-
-  std::unique_ptr<strfun::Parameterisation> StructureFunctionsFactory::build(int index,
-                                                                             const ParametersList& params) const {
-    if (indices_.count(index) > 0)
-      return StructureFunctionsFactory::build(indices_.at(index), params);
-    const auto& mod_names = modules();
-    if (const auto str_index = std::to_string(index);
-        std::find(mod_names.begin(), mod_names.end(), str_index) != mod_names.end())
-      return StructureFunctionsFactory::build(str_index, params);
-    throw CG_FATAL("StructureFunctionsFactory")
-        << description() << " failed to build a module with index '" << index << "'. \n"
-        << "Registered indices: " << indices_ << ".";
-  }
-
-  ParametersDescription StructureFunctionsFactory::describeParameters(int index, const ParametersList& params) const {
-    if (indices_.count(index) > 0)
-      return StructureFunctionsFactory::describeParameters(indices_.at(index), params);
-    const auto& mod_names = modules();
-    if (const auto str_index = std::to_string(index);
-        std::find(mod_names.begin(), mod_names.end(), str_index) != mod_names.end())
-      return StructureFunctionsFactory::describeParameters(str_index, params);
-    throw CG_FATAL("StructureFunctionsFactory")
-        << "No parameters description were found for module index '" << index << "'.\n"
-        << "Registered modules: " << indices_ << ".";
-  }
-
-  SigmaRatiosFactory& SigmaRatiosFactory::get() {
-    static SigmaRatiosFactory instance;
-    return instance;
-  }
-
-  std::unique_ptr<sigrat::Parameterisation> SigmaRatiosFactory::build(int index, const ParametersList& params) const {
-    if (indices_.count(index) > 0)
-      return SigmaRatiosFactory::build(indices_.at(index), params);
-    const auto& mod_names = modules();
-    if (const auto str_index = std::to_string(index);
-        std::find(mod_names.begin(), mod_names.end(), str_index) != mod_names.end())
-      return SigmaRatiosFactory::build(str_index, params);
-    throw CG_FATAL("SigmaRatiosFactory") << description() << " failed to build a module with index '" << index
-                                         << "'. \n"
-                                         << "Registered indices: " << indices_ << ".";
-  }
-
-  ParametersDescription SigmaRatiosFactory::describeParameters(int index, const ParametersList& params) const {
-    if (indices_.count(index) > 0)
-      return SigmaRatiosFactory::describeParameters(indices_.at(index), params);
-    const auto& mod_names = modules();
-    if (const auto str_index = std::to_string(index);
-        std::find(mod_names.begin(), mod_names.end(), str_index) != mod_names.end())
-      return SigmaRatiosFactory::describeParameters(str_index, params);
-    throw CG_FATAL("SigmaRatiosFactory") << "No parameters description were found for module index '" << index << "'.\n"
-                                         << "Registered modules: " << indices_ << ".";
-  }
+  IMPLEMENT_HYBRID_FACTORY(StructureFunctionsFactory, strfun::Parameterisation);
+  IMPLEMENT_HYBRID_FACTORY(SigmaRatiosFactory, sigrat::Parameterisation);
 }  // namespace cepgen
