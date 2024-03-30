@@ -214,7 +214,7 @@ private:
         throw CG_FATAL("LPAIR:peripp")
             << "Inelastic proton form factors computation requires a structure functions definition!";
       const double xbj = utils::xBj(q2, mi2, mx2);
-      if (strfun_->name() == 11 /* SuriYennie */)  // this one requires its own object to deal with FM
+      if (strfun_->name() == "suriYennie")  // this one requires its own object to deal with FM
         return Vector{strfun_->FM(xbj, q2), strfun_->F2(xbj, q2) * xbj * mp_ / q2};
       return Vector{-2. * strfun_->F1(xbj, q2) / q2, strfun_->F2(xbj, q2) * xbj / q2};
     };

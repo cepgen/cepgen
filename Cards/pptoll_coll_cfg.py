@@ -18,7 +18,7 @@ process = coll.process.clone('pptoff',
         #partonFluxes = (coll.ProtonFlux.LHAPDF(pdfset='cteq6l1', extrapolatePDF=True),
         #                coll.ProtonFlux.LHAPDF(pdfset='cteq6l1', extrapolatePDF=True)),
         #partonFluxes = (coll.ProtonFlux.LHAPDFLUXlep, coll.ProtonFlux.LHAPDFLUXlep),
-        structureFunctions = cepgen.StructureFunctions.SuriYennie,
+        structureFunctions = cepgen.StructureFunctions.suriYennie,
     ),
     outKinematics = coll.process.outKinematics.clone(
         pt = (25.,),

@@ -33,7 +33,7 @@ namespace cepgen {
     /// A collection of drawable objects
     typedef std::vector<const Drawable*> DrawableColl;
     /// A generic drawing utility
-    class Drawer : public NamedModule<Drawer, std::string> {
+    class Drawer : public NamedModule<Drawer> {
     public:
       /// Build a drawing utility
       explicit Drawer(const ParametersList& params);

@@ -12,7 +12,7 @@ process = cepgen.Module('lpair',
     inKinematics = cepgen.Parameters(
         pdgIds = (PDG.proton, PDG.proton),
         pz = (6500., 6500.),
-        structureFunctions = cepgen.StructureFunctions.LUXlike,
+        structureFunctions = cepgen.StructureFunctions.luxLike,
     ),
     outKinematics = cepgen.Parameters(
         pt = (0.,),

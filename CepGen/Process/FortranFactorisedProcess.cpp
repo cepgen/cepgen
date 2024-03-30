@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2023  Laurent Forthomme
+ *  Copyright (C) 2018-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
@@ -146,8 +147,8 @@ namespace cepgen {
         genparams_.a_nuc2 = genparams_.z_nuc2 = 1;
 
       // intermediate partons information
-      genparams_.iflux1 = (int)kinematics().incomingBeams().positive().partonFluxParameters().name<int>();
-      genparams_.iflux2 = (int)kinematics().incomingBeams().negative().partonFluxParameters().name<int>();
+      genparams_.iflux1 = (int)psgen_->partons().at(0);
+      genparams_.iflux2 = (int)psgen_->partons().at(1);
     }
 
     double FortranFactorisedProcess::computeFactorisedMatrixElement() {

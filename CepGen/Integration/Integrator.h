@@ -25,7 +25,7 @@
 namespace cepgen {
   class Integrand;
   /// Monte-Carlo integration algorithm
-  class Integrator : public NamedModule<Integrator, std::string> {
+  class Integrator : public NamedModule<Integrator> {
   public:
     /// Integrator algorithm constructor
     explicit Integrator(const ParametersList& params);

@@ -34,7 +34,7 @@
 namespace cepgen {
   class AnalyticIntegrator;
   /// An analytical integrator objects factory
-  DEFINE_FACTORY(std::string, AnalyticIntegratorFactory, AnalyticIntegrator, "Analytic integrators factory");
+  DEFINE_FACTORY(AnalyticIntegratorFactory, AnalyticIntegrator, "Analytic integrators factory");
 }  // namespace cepgen
 
 #endif

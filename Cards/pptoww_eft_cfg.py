@@ -32,7 +32,7 @@ process = kt.process.clone('pptoww',
     inKinematics = cepgen.Parameters(
         pdgIds = (PDG.proton, PDG.proton),
         cmEnergy = 13.e3,
-        structureFunctions = cepgen.StructureFunctions.LUXlike,
+        structureFunctions = cepgen.StructureFunctions.luxLike,
     ),
     outKinematics = kt.process.outKinematics.clone(
         mx = (1.07, 1000.),

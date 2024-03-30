@@ -39,7 +39,7 @@ namespace cepgen {
     class Handler;
   }
   /// A cards handler base factory
-  DEFINE_FACTORY(std::string, BaseCardsHandlerFactory, card::Handler, "Cards handlers factory");
+  DEFINE_FACTORY(BaseCardsHandlerFactory, card::Handler, "Cards handlers factory");
   /// A cards handler factory
   struct CardsHandlerFactory : public BaseCardsHandlerFactory {
     using BaseCardsHandlerFactory::BaseCardsHandlerFactory;

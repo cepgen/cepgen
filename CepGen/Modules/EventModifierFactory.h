@@ -34,7 +34,7 @@
 namespace cepgen {
   class EventModifier;
   /// A event modifier algorithms factory
-  DEFINE_FACTORY(std::string, EventModifierFactory, EventModifier, "Event modifiers factory");
+  DEFINE_FACTORY(EventModifierFactory, EventModifier, "Event modifiers factory");
 }  // namespace cepgen
 
 #endif

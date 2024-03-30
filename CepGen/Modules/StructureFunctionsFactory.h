@@ -22,27 +22,27 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a structure functions definition to the list of handled parameterisation
-#define REGISTER_STRFUN(id, obj)                                                       \
-  namespace cepgen {                                                                   \
-    namespace strfun {                                                                 \
-      struct BUILDERNM(obj) {                                                          \
-        BUILDERNM(obj)() { StructureFunctionsFactory::get().registerModule<obj>(id); } \
-      };                                                                               \
-      static const BUILDERNM(obj) gStrFun##obj;                                        \
-    }                                                                                  \
-  }                                                                                    \
+#define REGISTER_STRFUN(name, id, obj)                                                                      \
+  namespace cepgen {                                                                                        \
+    namespace strfun {                                                                                      \
+      struct BUILDERNM(obj) {                                                                               \
+        BUILDERNM(obj)() { StructureFunctionsFactory::get().addIndex(id, name).registerModule<obj>(name); } \
+      };                                                                                                    \
+      static const BUILDERNM(obj) gStrFun##obj;                                                             \
+    }                                                                                                       \
+  }                                                                                                         \
   static_assert(true, "")
 
 /// Add a sigma ratio definition to the list of handled parameterisation
-#define REGISTER_SIGRAT(id, obj)                                                \
-  namespace cepgen {                                                            \
-    namespace sigrat {                                                          \
-      struct BUILDERNM(obj) {                                                   \
-        BUILDERNM(obj)() { SigmaRatiosFactory::get().registerModule<obj>(id); } \
-      };                                                                        \
-      static const BUILDERNM(obj) gSigRat##obj;                                 \
-    }                                                                           \
-  }                                                                             \
+#define REGISTER_SIGRAT(name, id, obj)                                                               \
+  namespace cepgen {                                                                                 \
+    namespace sigrat {                                                                               \
+      struct BUILDERNM(obj) {                                                                        \
+        BUILDERNM(obj)() { SigmaRatiosFactory::get().addIndex(id, name).registerModule<obj>(name); } \
+      };                                                                                             \
+      static const BUILDERNM(obj) gSigRat##obj;                                                      \
+    }                                                                                                \
+  }                                                                                                  \
   static_assert(true, "")
 
 namespace cepgen {
@@ -50,15 +50,14 @@ namespace cepgen {
     class Parameterisation;
   }
   /// A structure functions parameterisations factory
-  DEFINE_FACTORY(int,
-                 StructureFunctionsFactory,
+  DEFINE_FACTORY(StructureFunctionsFactory,
                  strfun::Parameterisation,
                  "Nucleon structure functions parameterisations factory");
   namespace sigrat {
     class Parameterisation;
   }
   /// A sigma ratio parameterisations factory
-  DEFINE_FACTORY(int, SigmaRatiosFactory, sigrat::Parameterisation, "Sigma L/T parameterisations factory");
+  DEFINE_FACTORY(SigmaRatiosFactory, sigrat::Parameterisation, "Sigma L/T parameterisations factory");
 }  // namespace cepgen
 
 #endif

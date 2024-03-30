@@ -66,6 +66,5 @@ namespace cepgen {
     };
   }  // namespace strfun
 }  // namespace cepgen
-
 using cepgen::strfun::APFELPartonic;
-REGISTER_STRFUN(402, APFELPartonic);
+REGISTER_STRFUN("apfel", 402, APFELPartonic);

@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
     auto proc = obj.attribute("process");
     CG_TEST(proc != nullptr, "'process' attribute retrieval");
     const auto proc_params = proc.value<cepgen::ParametersList>();
-    CG_TEST_EQUAL(proc_params.name<std::string>(), process, "Process name conservation");
+    CG_TEST_EQUAL(proc_params.name(), process, "Process name conservation");
   } catch (const cepgen::python::Error& err) {
     err.dump();
   }

@@ -34,7 +34,7 @@
 namespace cepgen {
   class EventExporter;
   /// An output modules factory
-  DEFINE_FACTORY(std::string, EventExporterFactory, EventExporter, "Export modules factory");
+  DEFINE_FACTORY(EventExporterFactory, EventExporter, "Export modules factory");
 }  // namespace cepgen
 
 #endif

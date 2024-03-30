@@ -63,7 +63,7 @@ namespace cepgen {
     class Process;
   }
   /// A processes factory
-  DEFINE_FACTORY(std::string, ProcessFactory, proc::Process, "Physics processes factory");
+  DEFINE_FACTORY(ProcessFactory, proc::Process, "Physics processes factory");
 }  // namespace cepgen
 
 #endif

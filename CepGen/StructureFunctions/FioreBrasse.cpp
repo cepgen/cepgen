@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -202,5 +202,5 @@ namespace cepgen {
 }  // namespace cepgen
 using cepgen::strfun::FioreBrasse;
 using cepgen::strfun::FioreBrasseAlt;
-REGISTER_STRFUN(101, FioreBrasse);
-REGISTER_STRFUN(104, FioreBrasseAlt);
+REGISTER_STRFUN("fioreBrasse", 101, FioreBrasse);
+REGISTER_STRFUN("fioreBrasseAlt", 104, FioreBrasseAlt);

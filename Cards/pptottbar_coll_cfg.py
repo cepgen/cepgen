@@ -13,7 +13,7 @@ process = coll.process.clone('pptoff',
     inKinematics = cepgen.Parameters(
         pdgIds = (PDG.proton, PDG.proton),
         pz = (6500., 6500.),
-        structureFunctions = cepgen.StructureFunctions.LUXlike,
+        structureFunctions = cepgen.StructureFunctions.luxLike,
     ),
     outKinematics = coll.process.outKinematics.clone(
         #eta = (-2.5, 2.5),

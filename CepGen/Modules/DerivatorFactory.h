@@ -38,7 +38,7 @@ namespace cepgen {
     class Derivator;
   }
   /// An analytical derivator objects factory
-  DEFINE_FACTORY(std::string, DerivatorFactory, utils::Derivator, "Derivators factory");
+  DEFINE_FACTORY(DerivatorFactory, utils::Derivator, "Derivators factory");
 }  // namespace cepgen
 
 #endif

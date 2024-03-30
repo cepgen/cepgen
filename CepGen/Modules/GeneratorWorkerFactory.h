@@ -34,7 +34,7 @@
 namespace cepgen {
   class GeneratorWorker;
   /// A generator worker algorithms factory
-  DEFINE_FACTORY(std::string, GeneratorWorkerFactory, GeneratorWorker, "Generator worker factory");
+  DEFINE_FACTORY(GeneratorWorkerFactory, GeneratorWorker, "Generator worker factory");
 }  // namespace cepgen
 
 #endif

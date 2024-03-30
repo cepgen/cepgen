@@ -34,7 +34,7 @@
 namespace cepgen {
   class EventImporter;
   /// An event import algorithm factory
-  DEFINE_FACTORY(std::string, EventImporterFactory, EventImporter, "Event importers factory");
+  DEFINE_FACTORY(EventImporterFactory, EventImporter, "Event importers factory");
 }  // namespace cepgen
 
 #endif

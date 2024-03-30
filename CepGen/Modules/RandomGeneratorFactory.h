@@ -36,7 +36,7 @@ namespace cepgen {
     class RandomGenerator;
   }
   /// A random number generator algorithms factory
-  DEFINE_FACTORY(std::string, RandomGeneratorFactory, utils::RandomGenerator, "Random number generator factory");
+  DEFINE_FACTORY(RandomGeneratorFactory, utils::RandomGenerator, "Random number generator factory");
 }  // namespace cepgen
 
 #endif

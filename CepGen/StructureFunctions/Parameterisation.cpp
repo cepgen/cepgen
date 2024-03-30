@@ -146,8 +146,7 @@ namespace cepgen {
     ParametersDescription Parameterisation::description() {
       auto desc = ParametersDescription();
       desc.setDescription("Unnamed structure functions parameterisation");
-      desc.add<ParametersDescription>("sigmaRatio",
-                                      SigmaRatiosFactory::get().describeParameters(4 /* SibirtsevBlunden */))
+      desc.add<ParametersDescription>("sigmaRatio", SigmaRatiosFactory::get().describeParameters("sibirtsevBlunden"))
           .setDescription("Modelling for the sigma(L/T) ratio used in FL computation from F2");
       return desc;
     }

@@ -94,5 +94,5 @@ namespace cepgen {
 }  // namespace cepgen
 using cepgen::strfun::SuriYennie;
 using cepgen::strfun::SuriYennieAlt;
-REGISTER_STRFUN(11, SuriYennie);
-REGISTER_STRFUN(14, SuriYennieAlt);
+REGISTER_STRFUN("suriYennie", 11, SuriYennie);
+REGISTER_STRFUN("suriYennieAlt", 14, SuriYennieAlt);
