@@ -39,24 +39,24 @@
 #include "CepGen/Utils/RandomGenerator.h"
 
 namespace cepgen {
-  template class ModuleFactory<card::Handler, std::string>;
-  template class ModuleFactory<CollinearFlux, std::string>;
-  template class ModuleFactory<Coupling, std::string>;
-  template class ModuleFactory<utils::Derivator, std::string>;
-  template class ModuleFactory<utils::DocumentationGenerator, std::string>;
-  template class ModuleFactory<utils::Drawer, std::string>;
-  template class ModuleFactory<EventImporter, std::string>;
-  template class ModuleFactory<EventModifier, std::string>;
-  template class ModuleFactory<EventExporter, std::string>;
-  template class ModuleFactory<formfac::Parameterisation, std::string>;
-  template class ModuleFactory<GeneratorWorker, std::string>;
-  template class ModuleFactory<Integrator, std::string>;
-  template class ModuleFactory<AnalyticIntegrator, std::string>;
-  template class ModuleFactory<KTFlux, std::string>;
-  template class ModuleFactory<PhaseSpaceGenerator, std::string>;
-  template class ModuleFactory<proc::Process, std::string>;
-  template class ModuleFactory<sigrat::Parameterisation, std::string>;
-  template class ModuleFactory<strfun::Parameterisation, std::string>;
-  template class ModuleFactory<utils::Functional, std::string>;
-  template class ModuleFactory<utils::RandomGenerator, std::string>;
+  template class ModuleFactory<card::Handler>;
+  template class ModuleFactory<CollinearFlux>;
+  template class ModuleFactory<Coupling>;
+  template class ModuleFactory<utils::Derivator>;
+  template class ModuleFactory<utils::DocumentationGenerator>;
+  template class ModuleFactory<utils::Drawer>;
+  template class ModuleFactory<EventImporter>;
+  template class ModuleFactory<EventModifier>;
+  template class ModuleFactory<EventExporter>;
+  template class ModuleFactory<formfac::Parameterisation>;
+  template class ModuleFactory<GeneratorWorker>;
+  template class ModuleFactory<Integrator>;
+  template class ModuleFactory<AnalyticIntegrator>;
+  template class ModuleFactory<KTFlux>;
+  template class ModuleFactory<PhaseSpaceGenerator>;
+  template class ModuleFactory<proc::Process>;
+  template class ModuleFactory<sigrat::Parameterisation>;
+  template class ModuleFactory<strfun::Parameterisation>;
+  template class ModuleFactory<utils::Functional>;
+  template class ModuleFactory<utils::RandomGenerator>;
 }  // namespace cepgen

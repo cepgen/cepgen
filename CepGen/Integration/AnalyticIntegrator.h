@@ -29,7 +29,7 @@ namespace cepgen {
     class Function1D;
   }
   /// Analytic (functional) integration algorithm
-  class AnalyticIntegrator : public NamedModule<AnalyticIntegrator, std::string> {
+  class AnalyticIntegrator : public NamedModule<AnalyticIntegrator> {
   public:
     explicit AnalyticIntegrator(const ParametersList& params);  ///< Integrator algorithm constructor
 

@@ -181,7 +181,7 @@ namespace cepgen {
           runParameters()->setProcess(ProcessFactory::get().build(proc_name_, proc_params_));
         }
 
-        if (!int_params_.name<std::string>().empty())
+        if (!int_params_.name().empty())
           runParameters()->integrator() += int_params_;
         runParameters()->generation().setParameters(gen_params_);
 
@@ -403,12 +403,12 @@ namespace cepgen {
       Handler::setRunParameters(params);
       const auto beam_mode = runParameters()->kinematics().incomingBeams().mode();
       pmod_ = (beam_mode == mode::Kinematics::InelasticElastic || beam_mode == mode::Kinematics::InelasticInelastic)
-                  ? runParameters()->kinematics().incomingBeams().structureFunctions().name<std::string>()
+                  ? runParameters()->kinematics().incomingBeams().structureFunctions().name()
                   : (std::abs(runParameters()->kinematics().incomingBeams().positive().integerPdgId()) == PDG::electron
                          ? "1"
                          : "2");
       emod_ = (beam_mode == mode::Kinematics::ElasticInelastic || beam_mode == mode::Kinematics::InelasticInelastic)
-                  ? runParameters()->kinematics().incomingBeams().structureFunctions().name<std::string>()
+                  ? runParameters()->kinematics().incomingBeams().structureFunctions().name()
                   : (std::abs(runParameters()->kinematics().incomingBeams().negative().integerPdgId()) == PDG::electron
                          ? "1"
                          : "2");

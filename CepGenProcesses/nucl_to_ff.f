@@ -82,7 +82,7 @@ c       two terms in Wolfgang formula for off-shell gamma gamma --> l^+ l^-
 c       central particles properties
         am_l = CepGen_particle_mass(pdg_l)      ! central particles mass
         q_l = CepGen_particle_charge(pdg_l)     ! central particles charge
-        if(iflux1.ge.20.and.iflux1.lt.40) then
+        if(iflux1.eq.21) then
           if(icontri.eq.3.or.icontri.eq.4) then
             print *,'Invalid process mode for gluon emission!'
             stop
@@ -442,7 +442,7 @@ c     first parton coupling
 c     =================================================================
       t_max = max(amt1,amt2)**2
       amu2 = max(eps12,t_max)
-      if(iflux1.ge.20.and.iflux1.lt.40) then ! at least one gluon exchanged
+      if(iflux1.eq.21) then ! at least one gluon exchanged
         coupling = coupling * 4.d0*pi*CepGen_alphaS(dsqrt(amu2))/2.d0
       else ! photon exchange
         coupling = coupling * 4.d0*pi*CepGen_alphaEM(dsqrt(amu2))*q_l**2

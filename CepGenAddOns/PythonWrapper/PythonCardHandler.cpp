@@ -160,15 +160,12 @@ namespace cepgen {
           pkin += process.get<ParametersList>("outKinematics");
           process.erase("outKinematics");
         }
-        {
-          if (auto& pkgen = process.operator[]<ParametersList>("kinematicsGenerator");
-              pkgen.name<std::string>().empty())
-            pkgen.setName<std::string>(process.get<bool>("ktFactorised", true) ? "kt2to4" : "coll2to4");
-        }
+        if (auto& pkgen = process.operator[]<ParametersList>("kinematicsGenerator"); pkgen.name().empty())
+          pkgen.setName(process.get<bool>("ktFactorised", true) ? "kt2to4" : "coll2to4");
         runParameters()->setProcess(ProcessFactory::get().build(process));
 
         for (const auto& tf : process.get<std::vector<ParametersList> >("tamingFunctions"))
-          runParameters()->addTamingFunction(FunctionalFactory::get().build("ROOT", tf));
+          runParameters()->addTamingFunction(FunctionalFactory::get().build("python", tf));
       }
 
       // generation parameters

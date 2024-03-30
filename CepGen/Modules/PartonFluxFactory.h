@@ -44,9 +44,9 @@ namespace cepgen {
   class CollinearFlux;
   class KTFlux;
   /// A collinear parton fluxes objects factory
-  DEFINE_FACTORY(std::string, CollinearFluxFactory, CollinearFlux, "Collinear parton flux estimators factory");
+  DEFINE_FACTORY(CollinearFluxFactory, CollinearFlux, "Collinear parton flux estimators factory");
   /// A KT-factorised parton fluxes objects factory
-  DEFINE_FACTORY(std::string, KTFluxFactory, KTFlux, "KT-factorised flux estimators factory");
+  DEFINE_FACTORY(KTFluxFactory, KTFlux, "KT-factorised flux estimators factory");
 
   /// A generic parton fluxes objects factory
   struct PartonFluxFactory {
@@ -57,8 +57,8 @@ namespace cepgen {
 
     ParametersDescription describeParameters(const std::string& name,
                                              const ParametersList& params = ParametersList()) const;
-    /// Is the beam modelling elastic?
-    bool elastic(const ParametersList&) const;
+    bool elastic(const ParametersList&) const;     ///< Is the beam modelling elastic?
+    int partonPdgId(const ParametersList&) const;  ///< Type of parton exchanged
   };
 }  // namespace cepgen
 

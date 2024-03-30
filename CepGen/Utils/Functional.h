@@ -29,7 +29,7 @@ namespace cepgen {
     /// A string-to-functional parser
     /// \author L. Forthomme <laurent.forthomme@cern.ch>
     /// \date 21 Aug 2017
-    class Functional : public NamedModule<Functional, std::string> {
+    class Functional : public NamedModule<Functional> {
     public:
       explicit Functional(const ParametersList&);  ///< Default constructor
 

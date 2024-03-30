@@ -36,7 +36,7 @@ namespace cepgen {
     class Functional;
   }
   /// A functional objects factory
-  DEFINE_FACTORY(std::string, FunctionalFactory, utils::Functional, "Functionals factory");
+  DEFINE_FACTORY(FunctionalFactory, utils::Functional, "Functionals factory");
 }  // namespace cepgen
 
 #endif

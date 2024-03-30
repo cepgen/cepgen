@@ -195,7 +195,7 @@ namespace cepgen {
     os << "\n\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Integration/generation parameters ")
        << std::setfill(' ') << "\n\n"
-       << std::setw(wt) << "Integration" << utils::boldify(param.integrator_.name<std::string>("N/A")) << "\n";
+       << std::setw(wt) << "Integration" << utils::boldify(param.integrator_.name("N/A")) << "\n";
     for (const auto& key : param.integrator_.keys(false))
       os << std::setw(wt) << "" << key << ": " << param.integrator_.getString(key) << "\n";
     os << std::setw(wt) << "Event generation? " << utils::yesno(param.generation_.enabled()) << "\n"

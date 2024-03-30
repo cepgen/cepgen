@@ -28,7 +28,7 @@ namespace cepgen {
   /// Location for all steering card parsers/writers
   namespace card {
     /// Base steering card module
-    class Handler : public NamedModule<Handler, std::string> {
+    class Handler : public NamedModule<Handler> {
     public:
       explicit Handler(const ParametersList&);  ///< Build a configuration from an external steering card
       virtual ~Handler() = default;

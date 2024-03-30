@@ -23,7 +23,7 @@
 #include "CepGen/Physics/ParticleProperties.h"
 
 namespace cepgen {
-  class PartonFlux : public NamedModule<PartonFlux, std::string> {
+  class PartonFlux : public NamedModule<PartonFlux> {
   public:
     explicit PartonFlux(const ParametersList&);
 

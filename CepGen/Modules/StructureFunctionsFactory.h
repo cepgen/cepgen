@@ -50,8 +50,7 @@ namespace cepgen {
     class Parameterisation;
   }
   /// A structure functions parameterisations base factory
-  DEFINE_FACTORY(std::string,
-                 BaseStructureFunctionsFactory,
+  DEFINE_FACTORY(BaseStructureFunctionsFactory,
                  strfun::Parameterisation,
                  "Nucleon structure functions parameterisations factory");
   /// A structure functions parameterisations factory
@@ -76,7 +75,7 @@ namespace cepgen {
     class Parameterisation;
   }
   /// A sigma ratio parameterisations base factory
-  DEFINE_FACTORY(std::string, BaseSigmaRatiosFactory, sigrat::Parameterisation, "Sigma L/T parameterisations factory");
+  DEFINE_FACTORY(BaseSigmaRatiosFactory, sigrat::Parameterisation, "Sigma L/T parameterisations factory");
   /// A sigma ratio parameterisations factory
   class SigmaRatiosFactory : public BaseSigmaRatiosFactory {
   public:

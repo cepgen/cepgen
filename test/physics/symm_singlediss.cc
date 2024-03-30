@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
 
   cepgen::utils::Timer tmr;
   cepgen::Generator gen;
-  gen.runParameters().integrator().setName<string>(integrator);
+  gen.runParameters().integrator().setName(integrator);
 
   cepgen::utils::AbortHandler ah;
 

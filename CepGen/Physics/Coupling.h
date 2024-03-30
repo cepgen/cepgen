@@ -23,7 +23,7 @@
 
 namespace cepgen {
   /// A generic \f$\alpha_S(Q^2)\f$ evaluation algorithm
-  class Coupling : public NamedModule<Coupling, std::string> {
+  class Coupling : public NamedModule<Coupling> {
   public:
     /// Build an \f$\alpha_{S,EM}\f$ interpolator object
     explicit Coupling(const ParametersList& params) : NamedModule(params) {}

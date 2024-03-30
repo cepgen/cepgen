@@ -26,6 +26,7 @@
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
+#include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Filesystem.h"
@@ -105,7 +106,16 @@ namespace cepgen {
           //----- set auxiliary information for phase space definition
           if (pars_kin.has<int>("strfun"))
             pars_kin
-                .set<ParametersList>("structureFunctions", ParametersList().setName<int>(pars_kin.get<int>("strfun")))
+                .set<ParametersList>(
+                    "structureFunctions",
+                    StructureFunctionsFactory::get().describeParameters(pars_kin.get<int>("strfun")).parameters())
+                .erase("strfun");
+          else if (pars_kin.has<std::string>("strfun"))
+            pars_kin
+                .set<ParametersList>("structureFunctions",
+                                     StructureFunctionsFactory::get()
+                                         .describeParameters(pars_kin.get<std::string>("strfun"))
+                                         .parameters())
                 .erase("strfun");
           else if (pars_kin.has<ParametersList>("strfun"))
             pars_kin.rename("strfun", "structureFunctions");

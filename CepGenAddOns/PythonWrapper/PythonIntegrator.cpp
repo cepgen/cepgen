@@ -29,7 +29,7 @@ namespace cepgen {
   class PythonIntegrator final : public Integrator {
   public:
     explicit PythonIntegrator(const ParametersList& params)
-        : Integrator(params), env_(ParametersList().setName<std::string>("python_integrator")) {
+        : Integrator(params), env_(ParametersList().setName("python_integrator")) {
       auto cfg = python::ObjectPtr::importModule(steer<std::string>("module"));
       if (!cfg)
         throw PY_ERROR << "Failed to import the Python module '" << steer<std::string>("module") << "'.";
