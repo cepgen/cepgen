@@ -11,7 +11,7 @@ from .containers_cff import Module, Parameters, Sequence
 from .logger_cfi import Logging
 
 # Includes for physics components
-from .StructureFunctions_cff import StructureFunctions
+import StructureFunctions
 from .SigmaRatio_cff import SigmaRatio
 from .ProcessMode_cff import ProcessMode
 

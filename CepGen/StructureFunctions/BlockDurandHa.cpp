@@ -33,7 +33,7 @@ namespace cepgen {
             b_(steer<std::vector<double> >("b")),
             c_(steer<std::vector<double> >("c")),
             n_(steer<double>("n")),
-            lambda_(steer<double>("lambda")),
+            lambda_(steer<double>("Lambda")),
             mu2_(steer<double>("mu2")),
             m2_(steer<double>("m2")) {
         if (a_.size() != 3)
@@ -66,7 +66,7 @@ namespace cepgen {
         desc.add<std::vector<double> >("b", {2.217e-3, 1.244e-2, 5.958e-4});
         desc.add<std::vector<double> >("c", {0.255e0, 1.475e-1});
         desc.add<double>("n", 11.49);
-        desc.add<double>("lambda", 2.430);
+        desc.add<double>("Lambda", 2.430);
         desc.add<double>("mu2", 2.82);
         desc.add<double>("m2", 0.753);
         return desc;

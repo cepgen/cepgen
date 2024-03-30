@@ -16,7 +16,7 @@ process = kt.process.clone('mg5_aMC',
     ),
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
-        structureFunctions = cepgen.StructureFunctions.LUXlike,
+        structureFunctions = cepgen.StructureFunctions.luxLike,
     ),
     outKinematics = kt.process.outKinematics.clone(
         qt = (0., 10.),
