@@ -156,6 +156,7 @@ namespace cepgen {
     /// Pre-HERA data fit (694 data points)
     struct ALLM91 final : public ALLM {
       using ALLM::ALLM;
+      static int index() { return 201; }
       static ParametersDescription description() {
         auto desc = ALLM::description();
         desc.setDescription("ALLM91 (continuum, pre-HERA 694 points fit)");
@@ -181,6 +182,7 @@ namespace cepgen {
     /// Fixed target and HERA photoproduction total cross sections (1356 points)
     struct ALLM97 final : public ALLM {
       using ALLM::ALLM;
+      static int index() { return 202; }
       static ParametersDescription description() {
         auto desc = ALLM::description();
         desc.setDescription("ALLM97 (continuum, FT/HERA photoprod. tot.x-s 1356 points fit)");
@@ -205,6 +207,7 @@ namespace cepgen {
 
     struct HHTALLM final : public ALLM {
       using ALLM::ALLM;
+      static int index() { return 206; }
       static ParametersDescription description() {
         auto desc = ALLM::description();
         desc.setDescription("HHT (continuum)");
@@ -229,6 +232,7 @@ namespace cepgen {
 
     struct HHTALLMFT final : public ALLM {
       using ALLM::ALLM;
+      static int index() { return 207; }
       static ParametersDescription description() {
         auto desc = ALLM::description();
         desc.setDescription("HHT_FT (continuum)");
@@ -253,6 +257,7 @@ namespace cepgen {
 
     struct GD07p final : public ALLM {
       using ALLM::ALLM;
+      static int index() { return 203; }
       static ParametersDescription description() {
         auto desc = ALLM::description();
         desc.setDescription("GD07p (continuum)");
@@ -277,6 +282,7 @@ namespace cepgen {
 
     struct GD11p final : public ALLM {
       using ALLM::ALLM;
+      static int index() { return 204; }
       static ParametersDescription description() {
         auto desc = ALLM::description();
         desc.setDescription("GD11p (continuum)");
@@ -306,9 +312,9 @@ using cepgen::strfun::GD07p;
 using cepgen::strfun::GD11p;
 using cepgen::strfun::HHTALLM;
 using cepgen::strfun::HHTALLMFT;
-REGISTER_STRFUN(201, ALLM91);
-REGISTER_STRFUN(202, ALLM97);
-REGISTER_STRFUN(203, GD07p);
-REGISTER_STRFUN(204, GD11p);
-REGISTER_STRFUN(206, HHTALLM);
-REGISTER_STRFUN(207, HHTALLMFT);
+REGISTER_STRFUN("allm91", ALLM91);
+REGISTER_STRFUN("allm97", ALLM97);
+REGISTER_STRFUN("gd07p", GD07p);
+REGISTER_STRFUN("gd11p", GD11p);
+REGISTER_STRFUN("hhtALLM", HHTALLM);
+REGISTER_STRFUN("hhtALLMft", HHTALLMFT);

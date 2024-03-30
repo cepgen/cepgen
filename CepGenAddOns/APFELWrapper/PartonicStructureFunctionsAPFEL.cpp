@@ -47,6 +47,8 @@ namespace cepgen {
                                  << " * perturbative order: " << perturbative_order << ".";
       }
 
+      static int index() { return 402; }
+
       static ParametersDescription description() {
         auto desc = PartonicParameterisation::description();
         desc.setDescription("APFEL (partonic)");
@@ -66,6 +68,5 @@ namespace cepgen {
     };
   }  // namespace strfun
 }  // namespace cepgen
-
 using cepgen::strfun::APFELPartonic;
-REGISTER_STRFUN(402, APFELPartonic);
+REGISTER_STRFUN("apfel", APFELPartonic);

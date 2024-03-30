@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2017-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -57,6 +57,8 @@ namespace cepgen {
         setF2(D * pow(1. - args_.xbj, n_) * (C + A * xlx + B * xlx * xlx));
       }
 
+      static int index() { return 13; }
+
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Block-Durand-Ha (continuum)");
@@ -83,4 +85,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::BlockDurandHa;
-REGISTER_STRFUN(13, BlockDurandHa);
+REGISTER_STRFUN("blockDurandHa", BlockDurandHa);

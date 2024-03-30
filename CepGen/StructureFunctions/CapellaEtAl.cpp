@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,6 +40,8 @@ namespace cepgen {
           throw CG_FATAL("CapellaEtAl") << "Invalid multiplicity of coefficients given: " << coeffs_ << ".";
       }
 
+      static int index() { return 106; }
+
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Capella et al.");
@@ -72,4 +74,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::CapellaEtAl;
-REGISTER_STRFUN(106, CapellaEtAl);
+REGISTER_STRFUN("capella", CapellaEtAl);

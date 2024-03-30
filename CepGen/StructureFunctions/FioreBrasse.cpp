@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,6 +36,8 @@ namespace cepgen {
         for (const auto& res : steer<std::vector<ParametersList> >("resonances"))
           resonances_.emplace_back(res);
       }
+
+      static int index() { return 101; }
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
@@ -160,6 +162,8 @@ namespace cepgen {
     public:
       explicit FioreBrasseAlt(const ParametersList& params) : FioreBrasse(params) {}
 
+      static int index() { return 104; }
+
       static ParametersDescription description() {
         auto desc = FioreBrasse::description();
         desc.add<double>("s0", 1.2871);
@@ -202,5 +206,5 @@ namespace cepgen {
 }  // namespace cepgen
 using cepgen::strfun::FioreBrasse;
 using cepgen::strfun::FioreBrasseAlt;
-REGISTER_STRFUN(101, FioreBrasse);
-REGISTER_STRFUN(104, FioreBrasseAlt);
+REGISTER_STRFUN("fioreBrasse", FioreBrasse);
+REGISTER_STRFUN("fioreBrasseAlt", FioreBrasseAlt);

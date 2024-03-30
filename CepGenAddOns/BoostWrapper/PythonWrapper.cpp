@@ -53,8 +53,12 @@ namespace {
         .def("F1", &cepgen::strfun::Parameterisation::F1);
 
     EXPOSE_FACTORY(cepgen::StructureFunctionsFactory,
-                   int,
+                   std::string,
                    "StructureFunctionsFactory",
+                   "a structure functions evaluator objects factory");
+    EXPOSE_FACTORY(cepgen::LegacyStructureFunctionsFactory,
+                   int,
+                   "StructureFunctionsFactoryInt",
                    "a structure functions evaluator objects factory");
 
     py::class_<cepgen::sigrat::Parameterisation, py::bases<cepgen::Steerable>, boost::noncopyable>(

@@ -43,6 +43,8 @@ namespace cepgen {
             pdf_code_(steer<int>("pdfCode")),
             pdf_member_(steer<int>("pdfMember")) {}
 
+      static int index() { return 401; }
+
       static ParametersDescription description() {
         auto desc = PartonicParameterisation::description();
         desc.setDescription("LHAPDF (partonic)");
@@ -151,4 +153,4 @@ namespace cepgen {
 #endif
 
 using cepgen::strfun::LHAPDFPartonic;
-REGISTER_STRFUN(401, LHAPDFPartonic);
+REGISTER_STRFUN("lhapdf", LHAPDFPartonic);

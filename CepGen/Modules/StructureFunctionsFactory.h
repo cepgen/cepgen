@@ -22,15 +22,18 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a structure functions definition to the list of handled parameterisation
-#define REGISTER_STRFUN(id, obj)                                                       \
-  namespace cepgen {                                                                   \
-    namespace strfun {                                                                 \
-      struct BUILDERNM(obj) {                                                          \
-        BUILDERNM(obj)() { StructureFunctionsFactory::get().registerModule<obj>(id); } \
-      };                                                                               \
-      static const BUILDERNM(obj) gStrFun##obj;                                        \
-    }                                                                                  \
-  }                                                                                    \
+#define REGISTER_STRFUN(name, obj)                                                  \
+  namespace cepgen {                                                                \
+    namespace strfun {                                                              \
+      struct BUILDERNM(obj) {                                                       \
+        BUILDERNM(obj)() {                                                          \
+          StructureFunctionsFactory::get().registerModule<obj>(name);               \
+          LegacyStructureFunctionsFactory::get().registerModule<obj>(obj::index()); \
+        }                                                                           \
+      };                                                                            \
+      static const BUILDERNM(obj) gStrFun##obj;                                     \
+    }                                                                               \
+  }                                                                                 \
   static_assert(true, "")
 
 /// Add a sigma ratio definition to the list of handled parameterisation
@@ -50,10 +53,15 @@ namespace cepgen {
     class Parameterisation;
   }
   /// A structure functions parameterisations factory
-  DEFINE_FACTORY(int,
+  DEFINE_FACTORY(std::string,
                  StructureFunctionsFactory,
                  strfun::Parameterisation,
-                 "Nucleon structure functions parameterisations factory");
+                 "Nucleon structure functions parameterisations factory (str-indexed)");
+  /// A (integer-indexed) structure functions parameterisations factory
+  DEFINE_FACTORY(int,
+                 LegacyStructureFunctionsFactory,
+                 strfun::Parameterisation,
+                 "Nucleon structure functions parameterisations factory (int-indexed)");
   namespace sigrat {
     class Parameterisation;
   }

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022-2023  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *                2021       Sergey Kulagin
  *                           Vladislav Barinov
  *
@@ -41,6 +41,8 @@ namespace cepgen {
     class KulaginBarinov : public Parameterisation {
     public:
       explicit KulaginBarinov(const ParametersList&);
+
+      static int index() { return 303; }
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
@@ -328,4 +330,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::KulaginBarinov;
-REGISTER_STRFUN(303, KulaginBarinov);
+REGISTER_STRFUN("kulaginBarinov", KulaginBarinov);

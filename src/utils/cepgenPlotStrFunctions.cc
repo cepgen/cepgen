@@ -33,12 +33,12 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-  vector<int> strfun_types;
-  double q2;
-  cepgen::Limits xrange, yrange;
   int var, num_points;
+  double q2;
   string output_file, plotter;
+  vector<string> strfun_types;
   bool logx, logy, draw_grid, ratio_plot;
+  cepgen::Limits xrange, yrange;
 
   cepgen::initialise();
 
@@ -90,14 +90,12 @@ int main(int argc, char* argv[]) {
   for (const auto& sf_type : strfun_types) {
     auto sf = cepgen::StructureFunctionsFactory::get().build(sf_type);
     const auto sf_name = cepgen::StructureFunctionsFactory::get().describe(sf_type);
-    ostringstream os;
-    os << sf_type;
-    g_strfuns_f2.emplace_back("f2_" + os.str(), sf_name);
-    g_strfuns_fl.emplace_back("fl_" + os.str(), sf_name);
-    g_strfuns_fe.emplace_back("fe_" + os.str(), sf_name);
-    g_strfuns_fm.emplace_back("fm_" + os.str(), sf_name);
-    g_strfuns_w1.emplace_back("w1_" + os.str(), sf_name);
-    g_strfuns_w2.emplace_back("w2_" + os.str(), sf_name);
+    g_strfuns_f2.emplace_back("f2_" + sf_type, sf_name);
+    g_strfuns_fl.emplace_back("fl_" + sf_type, sf_name);
+    g_strfuns_fe.emplace_back("fe_" + sf_type, sf_name);
+    g_strfuns_fm.emplace_back("fm_" + sf_type, sf_name);
+    g_strfuns_w1.emplace_back("w1_" + sf_type, sf_name);
+    g_strfuns_w2.emplace_back("w2_" + sf_type, sf_name);
     strfuns.emplace_back(move(sf));
   }
   const auto xvals = xrange.generate(num_points, logx);

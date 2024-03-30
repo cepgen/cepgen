@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2017-2023  Laurent Forthomme
+ *  Copyright (C) 2017-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,6 +42,8 @@ namespace cepgen {
         else
           throw CG_FATAL("CLAS") << "Invalid modelling selected: " << model << "!";
       }
+
+      static int index() { return 103; }
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
@@ -267,4 +269,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::CLAS;
-REGISTER_STRFUN(103, CLAS);
+REGISTER_STRFUN("clas", CLAS);

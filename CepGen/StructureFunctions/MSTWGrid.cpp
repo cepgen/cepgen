@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2018-2023  Laurent Forthomme
+ *  Copyright (C) 2018-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -66,6 +66,8 @@ namespace mstw {
                        << "], Q² in range [" << std::pow(10., bounds[1].min()) << ":" << std::pow(10., bounds[1].max())
                        << "].";
     }
+
+    static int index() { return 205; }
 
     static cepgen::ParametersDescription description() {
       auto desc = Parameterisation::description();
@@ -156,4 +158,4 @@ namespace mstw {
   }
 }  // namespace mstw
 using mstw::Grid;
-REGISTER_STRFUN(205, Grid);
+REGISTER_STRFUN("mstwGrid", Grid);

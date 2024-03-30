@@ -138,25 +138,25 @@ namespace cepgen {
         {  //--- parse the structure functions code
           auto& kin_params = proc_params_.operator[]<ParametersList>("kinematics");
           bool beam1_elastic{true}, beam2_elastic{true};
-          if (pmod_ == 1)
+          if (pmod_ == "1")
             kin_params.set<int>("beam1id", PDG::electron);
           else {
             kin_params.set<int>("beam1id", PDG::proton);
-            if (pmod_ != 2) {
+            if (pmod_ != "2") {
               beam1_elastic = false;
               auto sf_params = StructureFunctionsFactory::get().describeParameters(pmod_).parameters();
               sf_params.set<ParametersList>("sigmaRatio",
                                             SigmaRatiosFactory::get().describeParameters(sr_type_).parameters());
-              if (pmod_ == 205 /* MSTWgrid */ && !mstw_grid_path_.empty())
+              if (pmod_ == "205" /* MSTWgrid */ && !mstw_grid_path_.empty())
                 sf_params.set<std::string>("gridPath", mstw_grid_path_);
               kin_params.set("structureFunctions", sf_params);
             }
           }
-          if (emod_ == 1)
+          if (emod_ == "1")
             kin_params.set<int>("beam2id", PDG::electron);
           else {
             kin_params.set<int>("beam2id", PDG::proton);
-            if (emod_ != 2) {
+            if (emod_ != "2") {
               beam2_elastic = false;
               if (emod_ != pmod_)
                 CG_WARNING("LpairHandler")
@@ -262,7 +262,8 @@ namespace cepgen {
 
       ParametersList proc_params_, gen_params_, int_params_;
       int timer_{0}, iend_{1}, log_level_{(int)utils::Logger::get().level()}, ext_log_{0};
-      int emod_{2}, pmod_{2}, sr_type_{1}, lepton_id_{0};
+      std::string emod_{"2"}, pmod_{"2"};
+      int sr_type_{1}, lepton_id_{0};
       std::string proc_name_, evt_mod_name_, out_mod_name_;
       std::string out_file_name_, addons_list_;
       std::string kmr_grid_path_, mstw_grid_path_, pdg_input_path_;
@@ -339,8 +340,8 @@ namespace cepgen {
       registerParameter<std::string>("KMRG", "KMR grid interpolation path", &kmr_grid_path_);
       registerParameter<std::string>("MGRD", "MSTW grid interpolation path", &mstw_grid_path_);
       registerParameter<std::string>("PDGI", "Input file for PDG information", &pdg_input_path_);
-      registerParameter<int>("PMOD", "Outgoing primary particles' mode", &pmod_);
-      registerParameter<int>("EMOD", "Outgoing primary particles' mode", &emod_);
+      registerParameter<std::string>("PMOD", "Outgoing primary particles' mode", &pmod_);
+      registerParameter<std::string>("EMOD", "Outgoing primary particles' mode", &emod_);
       registerParameter<int>("RTYP", "R-ratio computation type", &sr_type_);
       registerProcessParameter<int>("PAIR", "Outgoing particles' PDG id", "pair");
       registerKinematicsParameter<std::string>("FFAC", "Form factors for the incoming beams", "formFactors");
@@ -402,15 +403,15 @@ namespace cepgen {
       Handler::setRunParameters(params);
       const auto beam_mode = runParameters()->kinematics().incomingBeams().mode();
       pmod_ = (beam_mode == mode::Kinematics::InelasticElastic || beam_mode == mode::Kinematics::InelasticInelastic)
-                  ? runParameters()->kinematics().incomingBeams().structureFunctions().name<int>()
+                  ? runParameters()->kinematics().incomingBeams().structureFunctions().name<std::string>()
                   : (std::abs(runParameters()->kinematics().incomingBeams().positive().integerPdgId()) == PDG::electron
-                         ? 1
-                         : 2);
+                         ? "1"
+                         : "2");
       emod_ = (beam_mode == mode::Kinematics::ElasticInelastic || beam_mode == mode::Kinematics::InelasticInelastic)
-                  ? runParameters()->kinematics().incomingBeams().structureFunctions().name<int>()
+                  ? runParameters()->kinematics().incomingBeams().structureFunctions().name<std::string>()
                   : (std::abs(runParameters()->kinematics().incomingBeams().negative().integerPdgId()) == PDG::electron
-                         ? 1
-                         : 2);
+                         ? "1"
+                         : "2");
       sr_type_ = runParameters()->kinematics().incomingBeams().structureFunctions().get<int>("sigmaRatio");
       //kmr_grid_path_ = kmr::GluonGrid::get().path();
       //mstw_grid_path_ =

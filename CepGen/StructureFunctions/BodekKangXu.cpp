@@ -39,6 +39,8 @@ namespace cepgen {
                                         << constants_.size() << ".";
       }
 
+      static int index() { return 304; }
+
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Bodek, Kang, and Xu");
@@ -134,4 +136,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::BodekKangXu;
-REGISTER_STRFUN(304, BodekKangXu);
+REGISTER_STRFUN("bodekKangXu", BodekKangXu);

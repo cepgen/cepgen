@@ -27,12 +27,14 @@ namespace cepgen {
   /// Structure functions modelling scope
   namespace strfun {
     /// Base object for the parameterisation of nucleon structure functions
-    class Parameterisation : public NamedModule<Parameterisation, int> {
+    class Parameterisation : public NamedModule<Parameterisation, std::string> {
     public:
       explicit Parameterisation(const ParametersList&);
       virtual ~Parameterisation() = default;
 
       static ParametersDescription description();  ///< Generic description for the structure functions
+
+      static int index() { return 0; }  ///< Legacy integer index for structure functions modelling
 
       /// Human-readable dump of the SF parameterisation at this (xBj,Q^2) value
       friend std::ostream& operator<<(std::ostream&, const Parameterisation&);

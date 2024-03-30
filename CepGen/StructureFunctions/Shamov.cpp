@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@ namespace cepgen {
     class Shamov final : public Parameterisation {
     public:
       explicit Shamov(const ParametersList&);
+
+      static int index() { return 302; }
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
@@ -193,7 +195,7 @@ namespace cepgen {
           q20_(steer<double>("q20")),
           r_power_(steer<double>("rPower")),
           lowq2_(steer<double>("lowQ2")),
-          sy_sf_(StructureFunctionsFactory::get().build(11 /* SuriYennie */, steer<ParametersList>("syParams"))) {
+          sy_sf_(StructureFunctionsFactory::get().build("suriYennie", steer<ParametersList>("syParams"))) {
       //----- initialise the interpolation grids
 
       //--- grid E -> (cross section, norm)
@@ -264,4 +266,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::Shamov;
-REGISTER_STRFUN(302, Shamov);
+REGISTER_STRFUN("shamov", Shamov);

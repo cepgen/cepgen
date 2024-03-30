@@ -57,7 +57,8 @@ namespace cepgen {
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Proton inelastic (SF)");
-        desc.add<ParametersDescription>("structureFunctions", StructureFunctionsFactory::get().describeParameters(301))
+        desc.add<ParametersDescription>("structureFunctions",
+                                        StructureFunctionsFactory::get().describeParameters("luxLike"))
             .setDescription("type of structure functions parameterisation for the dissociative emission");
         desc.add<ParametersDescription>("integrator", AnalyticIntegratorFactory::get().describeParameters("gsl"))
             .setDescription("type of numerical integrator algorithm to use");
