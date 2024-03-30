@@ -128,5 +128,4 @@ namespace cepgen {
     const double c_;
   };
 }  // namespace cepgen
-
 REGISTER_ALPHAEM_MODULE("running", AlphaEMRunning);
