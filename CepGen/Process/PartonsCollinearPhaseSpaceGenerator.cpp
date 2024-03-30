@@ -41,11 +41,11 @@ namespace cepgen {
           "EPAFlux",
           ParametersList().set("formFactors",
                                ParametersList()
-                                   .setName<std::string>("InelasticNucleon")
+                                   .setName("InelasticNucleon")
                                    .set("structureFunctions", kin.incomingBeams().structureFunctions())));
       const auto params_hi_el = CollinearFluxFactory::get().describeParameters(
-          "EPAFlux", ParametersList().set("formFactors", ParametersList().setName<std::string>("HeavyIonDipole")));
-      if (params.name<std::string>().empty()) {
+          "EPAFlux", ParametersList().set("formFactors", ParametersList().setName("HeavyIonDipole")));
+      if (params.name().empty()) {
         if (beam.elastic()) {
           if (HeavyIon::isHI(beam.integerPdgId()))
             params = params_hi_el.validate(params);

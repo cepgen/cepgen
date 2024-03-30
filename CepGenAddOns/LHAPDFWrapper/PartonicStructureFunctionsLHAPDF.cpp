@@ -151,4 +151,4 @@ namespace cepgen {
 #endif
 
 using cepgen::strfun::LHAPDFPartonic;
-REGISTER_STRFUN(401, LHAPDFPartonic);
+REGISTER_STRFUN("lhapdf", 401, LHAPDFPartonic);

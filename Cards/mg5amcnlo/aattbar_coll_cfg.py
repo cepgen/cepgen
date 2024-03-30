@@ -10,7 +10,7 @@ process = coll.process.clone('mg5_aMC',
     ),
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
-        structureFunctions = cepgen.StructureFunctions.LUXlike,
+        structureFunctions = cepgen.StructureFunctions.luxLike,
     ),
     outKinematics = coll.process.outKinematics.clone(
         q2 = (0., 10.),

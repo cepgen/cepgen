@@ -15,10 +15,10 @@ process = cepgen.Module('lpair',
     inKinematics = cepgen.Parameters(
         pdgIds = (PDG.proton, PDG.proton),
         pz = (6500., 6500.),
-        structureFunctions = cepgen.StructureFunctions.SuriYennie,
+        structureFunctions = cepgen.StructureFunctions.suriYennie,
         #--- other structure functions parameterisation are also available
-        #structureFunctions = cepgen.StructureFunctions.FioreBrasse,
-        #structureFunctions = cepgen.StructureFunctions.LUXlike,
+        #structureFunctions = cepgen.StructureFunctions.fioreBrasse,
+        #structureFunctions = cepgen.StructureFunctions.luxLike,
     ),
     outKinematics = cepgen.Parameters(
         pt = (25.,),

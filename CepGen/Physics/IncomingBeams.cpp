@@ -158,11 +158,9 @@ namespace cepgen {
                           mode == mode::Kinematics::ElasticElastic || mode == mode::Kinematics::InelasticElastic);
     } else {
       const auto set_beam_elasticity = [](ParametersList& plist_beam) {
-        if (const auto& parton_flux_mod = plist_beam.get<ParametersList>("partonFlux");
-            !parton_flux_mod.name<std::string>().empty())
+        if (const auto& parton_flux_mod = plist_beam.get<ParametersList>("partonFlux"); !parton_flux_mod.name().empty())
           plist_beam.set<bool>("elastic", PartonFluxFactory::get().elastic(parton_flux_mod));
-        else if (const auto& formfac_mod = plist_beam.get<ParametersList>("formFactors");
-                 !formfac_mod.name<std::string>().empty())
+        else if (const auto& formfac_mod = plist_beam.get<ParametersList>("formFactors"); !formfac_mod.name().empty())
           plist_beam.set<bool>("elastic", !FormFactorsFactory::get().build(formfac_mod)->fragmenting());
         else {
           CG_WARNING("IncomingBeams") << "Neither kinematics mod, parton flux modelling, or form factors modelling "
@@ -227,10 +225,11 @@ namespace cepgen {
     sf_model = (sf_model == 0 ? 11 /* SuriYennie */ : sf_model);
     sr_model = (sr_model == 0 ? 4 /* SibirtsevBlunden */ : sr_model);
     auto& sf_params = params_.operator[]<ParametersList>("structureFunctions");
-    sf_params.setName<int>(sf_model).set<int>("sigmaRatio", sr_model);
+    sf_params = StructureFunctionsFactory::get().describeParameters(sf_model).parameters().set(
+        "sigmaRatio", SigmaRatiosFactory::get().describeParameters(sr_model).parameters());
     if (sf_model / kLHAPDFCodeDec == 1) {  // SF from parton
       const unsigned long icode = sf_model % kLHAPDFCodeDec;
-      sf_params.setName<int>(401 /* Partonic */)
+      sf_params.setName("lhapdf")
           .set<int>("pdfId", icode % kLHAPDFPartDec)
           .set<int>("mode", icode / kLHAPDFPartDec);  // 0, 1, 2
     }
@@ -278,7 +277,7 @@ namespace cepgen {
                 2, FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler).parameters()))
         .setDescription("Beam form factors modelling");
     desc.add<ParametersDescription>("structureFunctions",
-                                    StructureFunctionsFactory::get().describeParameters(11 /*default is SY*/))
+                                    StructureFunctionsFactory::get().describeParameters("suriYennie"))
         .setDescription("Beam inelastic structure functions modelling");
     return desc;
   }

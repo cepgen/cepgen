@@ -36,10 +36,7 @@ namespace cepgen {
     class DocumentationGenerator;
   }
   /// A documentation generator factory
-  DEFINE_FACTORY(std::string,
-                 DocumentationGeneratorFactory,
-                 utils::DocumentationGenerator,
-                 "Documentation generator factory");
+  DEFINE_FACTORY(DocumentationGeneratorFactory, utils::DocumentationGenerator, "Documentation generator factory");
 }  // namespace cepgen
 
 #endif

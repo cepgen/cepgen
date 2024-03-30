@@ -81,7 +81,7 @@ jobs:
       working-directory: ${{ env.CEPGEN_PATH }}
       run: |
         echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
-        ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" -E "benchmark_*" -E "validation_*" --output-on-failure --repeat until-pass:2
+        ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" -E "benchmark_|validation_" --output-on-failure --repeat until-pass:2
 
   benchmark:
     needs: build

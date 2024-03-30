@@ -36,7 +36,7 @@ namespace cepgen {
     class Drawer;
   }
   /// A plotting utilitaries factory
-  DEFINE_FACTORY(std::string, DrawerFactory, utils::Drawer, "Drawing utilitary factory");
+  DEFINE_FACTORY(DrawerFactory, utils::Drawer, "Drawing utilitary factory");
 }  // namespace cepgen
 
 #endif

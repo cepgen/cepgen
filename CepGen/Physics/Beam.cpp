@@ -42,9 +42,9 @@ namespace cepgen {
   std::ostream& operator<<(std::ostream& os, const Beam& beam) {
     os << (PDG::Id)beam.pdg_id_ << " (" << beam.momentum_.pz() << " GeV/c) "
        << (beam.elastic_ ? "elastic" : "inelastic");
-    if (const auto& part_flux_name = beam.flux_info_.name<std::string>(); !part_flux_name.empty())
+    if (const auto& part_flux_name = beam.flux_info_.name(); !part_flux_name.empty())
       os << " [parton flux: " << beam.flux_info_.print(true) << "]";
-    else if (const auto& formfac_name = beam.formfac_.name<std::string>(); !formfac_name.empty())
+    else if (const auto& formfac_name = beam.formfac_.name(); !formfac_name.empty())
       os << " [form factors: " << beam.formfac_.print(true) << "]";
     return os;
   }

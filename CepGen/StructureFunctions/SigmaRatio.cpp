@@ -137,7 +137,7 @@ namespace cepgen {
             wth_(steer<double>("wth")),
             q20_(steer<double>("q20")) {
         if (p_.size() != 3)
-          throw CG_FATAL("R1990") << "Parameter 'p' should have 3 components! Parsed " << p_ << ".";
+          throw CG_FATAL("CLAS") << "Parameter 'p' should have 3 components! Parsed " << p_ << ".";
       }
 
       static ParametersDescription description() {
@@ -204,7 +204,7 @@ using cepgen::sigrat::CLAS;
 using cepgen::sigrat::E143;
 using cepgen::sigrat::R1990;
 using cepgen::sigrat::SibirtsevBlunden;
-REGISTER_SIGRAT(1, E143);
-REGISTER_SIGRAT(2, R1990);
-REGISTER_SIGRAT(3, CLAS);
-REGISTER_SIGRAT(4, SibirtsevBlunden);
+REGISTER_SIGRAT("e143", 1, E143);
+REGISTER_SIGRAT("r1990", 2, R1990);
+REGISTER_SIGRAT("clas", 3, CLAS);
+REGISTER_SIGRAT("sibirtsevBlunden", 4, SibirtsevBlunden);

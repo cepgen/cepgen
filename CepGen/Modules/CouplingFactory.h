@@ -44,9 +44,9 @@
 namespace cepgen {
   class Coupling;
   /// An electromagnetic coupling evolution algorithms factory
-  DEFINE_FACTORY(std::string, AlphaEMFactory, Coupling, "Electromagnetic coupling evolution factory");
+  DEFINE_FACTORY(AlphaEMFactory, Coupling, "Electromagnetic coupling evolution factory");
   /// A strong coupling evolution algorithms factory
-  DEFINE_FACTORY(std::string, AlphaSFactory, Coupling, "Strong coupling evolution factory");
+  DEFINE_FACTORY(AlphaSFactory, Coupling, "Strong coupling evolution factory");
 }  // namespace cepgen
 
 #endif

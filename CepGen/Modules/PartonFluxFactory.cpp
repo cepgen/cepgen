@@ -35,7 +35,7 @@ namespace cepgen {
   }
 
   bool PartonFluxFactory::elastic(const ParametersList& params) const {
-    const auto& name = params.name<std::string>();
+    const auto& name = params.name();
     if (name.empty())
       throw CG_FATAL("PartonFluxFactory:elastic") << "No name given to get parton flux modelling elasticity.";
     if (utils::contains(CollinearFluxFactory::get().modules(), name))
@@ -43,5 +43,16 @@ namespace cepgen {
     if (utils::contains(KTFluxFactory::get().modules(), name))
       return !KTFluxFactory::get().build(name, params)->fragmenting();
     throw CG_FATAL("PartonFluxFactory:elastic") << "Failed to find a parton flux with name '" << name << "'.";
+  }
+
+  int PartonFluxFactory::partonPdgId(const ParametersList& params) const {
+    const auto& name = params.name();
+    if (name.empty())
+      throw CG_FATAL("PartonFluxFactory:partonPdgId") << "No name given to get parton flux modelling PDG id.";
+    if (utils::contains(CollinearFluxFactory::get().modules(), name))
+      return CollinearFluxFactory::get().build(name, params)->partonPdgId();
+    if (utils::contains(KTFluxFactory::get().modules(), name))
+      return KTFluxFactory::get().build(name, params)->partonPdgId();
+    throw CG_FATAL("PartonFluxFactory:partonPdgId") << "Failed to find a parton flux with name '" << name << "'.";
   }
 }  // namespace cepgen

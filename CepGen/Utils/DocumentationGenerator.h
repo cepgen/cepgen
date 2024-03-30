@@ -26,7 +26,7 @@ namespace cepgen {
     /// Documentation generator object
     /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
     /// \date Mar 2024
-    class DocumentationGenerator : public NamedModule<DocumentationGenerator, std::string> {
+    class DocumentationGenerator : public NamedModule<DocumentationGenerator> {
     public:
       explicit DocumentationGenerator(const ParametersList&);
       virtual ~DocumentationGenerator() = default;

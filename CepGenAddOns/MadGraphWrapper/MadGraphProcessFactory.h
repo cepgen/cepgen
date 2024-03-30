@@ -34,7 +34,7 @@
 namespace cepgen {
   class MadGraphProcess;
   /// A MadGraph process factory
-  DEFINE_FACTORY(std::string, MadGraphProcessFactory, MadGraphProcess, "MadGraph process definition factory");
+  DEFINE_FACTORY(MadGraphProcessFactory, MadGraphProcess, "MadGraph process definition factory");
 }  // namespace cepgen
 
 #endif

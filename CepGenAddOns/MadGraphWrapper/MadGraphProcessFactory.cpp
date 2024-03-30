@@ -21,13 +21,13 @@
 #include "CepGenAddOns/MadGraphWrapper/MadGraphProcess.h"
 
 namespace cepgen {
-  template class ModuleFactory<MadGraphProcess, std::string>;
+  template class ModuleFactory<MadGraphProcess>;
 
   template <>
-  ModuleFactory<MadGraphProcess, std::string>::ModuleFactory(const std::string& desc) : description_(desc) {}
+  ModuleFactory<MadGraphProcess>::ModuleFactory(const std::string& desc) : description_(desc) {}
 
   template <>
-  std::vector<std::string> ModuleFactory<MadGraphProcess, std::string>::modules() const {
+  std::vector<std::string> ModuleFactory<MadGraphProcess>::modules() const {
     std::vector<std::string> out;
     std::transform(map_.begin(), map_.end(), std::back_inserter(out), [](const auto& val) { return val.first; });
     std::sort(out.begin(), out.end());
@@ -35,11 +35,11 @@ namespace cepgen {
   }
 
   template <>
-  std::unique_ptr<MadGraphProcess> ModuleFactory<MadGraphProcess, std::string>::build(
-      const std::string& mod_name, const ParametersList& params) const {
+  std::unique_ptr<MadGraphProcess> ModuleFactory<MadGraphProcess>::build(const std::string& mod_name,
+                                                                         const ParametersList& params) const {
     if (map_.count(mod_name) == 0)
-      throw CG_FATAL("ModuleFactory") << description_ << " failed to build a MadGraph5 process with name '" << mod_name
-                                      << "'. Registered modules: " << modules() << ".";
+      throw CG_FATAL("ModuleFactory") << "Failed to build a mg5_aMC process with name '" << mod_name << "'.\n"
+                                      << "Registered modules: " << modules() << ".";
     return map_.at(mod_name)(params_map_.at(mod_name).validate(params));
   }
 }  // namespace cepgen

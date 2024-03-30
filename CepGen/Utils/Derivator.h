@@ -24,7 +24,7 @@
 
 namespace cepgen {
   namespace utils {
-    class Derivator : public NamedModule<Derivator, std::string> {
+    class Derivator : public NamedModule<Derivator> {
     public:
       explicit Derivator(const ParametersList& params) : NamedModule(params), h_(steer<double>("h")) {}
 

@@ -262,7 +262,7 @@ namespace cepgen {
     std::string sep;
     if (std::find(keys_list.begin(), keys_list.end(), MODULE_NAME) != keys_list.end()) {
       const auto plist_name = getNameString();
-      auto mod_name = hasName<std::string>() ? "\"" + plist_name + "\"" : plist_name;
+      auto mod_name = hasName() ? "\"" + plist_name + "\"" : plist_name;
       os << "Module(" << mod_name, sep = ", ";
     } else
       os << "Parameters(";
@@ -288,6 +288,12 @@ namespace cepgen {
     print(os);
     return os.str();
   }
+
+  bool ParametersList::hasName() const { return has<std::string>(MODULE_NAME); }
+
+  std::string ParametersList::name(const std::string& def) const { return get<std::string>(MODULE_NAME, def); }
+
+  ParametersList& ParametersList::setName(const std::string& value) { return set<std::string>(MODULE_NAME, value); }
 
   std::vector<std::string> ParametersList::keys(bool name_key) const {
     std::vector<std::string> out{};

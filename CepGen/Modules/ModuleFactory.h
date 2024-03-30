@@ -27,21 +27,24 @@
 /// Name of the object builder
 #define BUILDERNM(obj) obj##Builder
 /// Define a new factory instance for the definition of modules
-#define DEFINE_FACTORY(idx_type, name, obj_type, descr)    \
-  struct name : public ModuleFactory<obj_type, idx_type> { \
-    explicit name() : ModuleFactory(descr) {}              \
-    static name& get() {                                   \
-      static name instance;                                \
-      return instance;                                     \
-    }                                                      \
-  };                                                       \
+#define DEFINE_FACTORY(name, obj_type, descr)                       \
+  struct name : public ModuleFactory<obj_type> {                    \
+    explicit name() : ModuleFactory(descr) {}                       \
+    inline static name& get() {                                     \
+      static name instance;                                         \
+      return instance;                                              \
+    }                                                               \
+    inline name& addIndex(int index, const std::string& mod_name) { \
+      indices_[index] = mod_name;                                   \
+      return *this;                                                 \
+    }                                                               \
+  };                                                                \
   static_assert(true, "")
 
 namespace cepgen {
   /// A generic factory to build modules
   /// \tparam T Base class to build
-  /// \tparam I Indexing variable type
-  template <typename T, typename I = std::string>
+  template <typename T>
   class ModuleFactory {
   public:
     ModuleFactory(const ModuleFactory&) = delete;   ///< Disabled copy constructor
@@ -53,7 +56,7 @@ namespace cepgen {
     /// Register a named module in the database
     /// \tparam U Class to register (inherited from T base class)
     template <typename U>
-    inline void registerModule(const I& name, const ParametersList& def_params = ParametersList()) {
+    inline void registerModule(const std::string& name, const ParametersList& def_params = ParametersList()) {
       static_assert(std::is_base_of<T, U>::value,
                     "\n\n  *** Failed to register an object with improper inheritance into the factory. ***\n");
       if (has(name)) {
@@ -70,28 +73,39 @@ namespace cepgen {
       params_map_[name] = desc;
     }
     /// Build one instance of a named module
-    /// \param[in] name Module name to retrieve
-    /// \param[in] params List of parameters to be invoked by the constructor
-    std::unique_ptr<T> build(const I& name, const ParametersList& params = ParametersList()) const;
-    /// Build one instance of a named module
     /// \param[in] params List of parameters to be invoked by the constructor
     std::unique_ptr<T> build(const ParametersList&) const;
+    /// Build one instance of a named module
+    /// \param[in] name Module name to retrieve
+    /// \param[in] params List of parameters to be invoked by the constructor
+    std::unique_ptr<T> build(const std::string& name, const ParametersList& params = ParametersList()) const;
+    /// Build one instance of a named module
+    /// \param[in] index Module index (if found) to retrieve
+    /// \param[in] params List of parameters to be invoked by the constructor
+    std::unique_ptr<T> build(int index, const ParametersList& params = ParametersList()) const;
 
     typedef std::unique_ptr<T> (*Builder)(const ParametersList&);  ///< Constructor type for a module
 
-    std::string describe(const I& name) const;  ///< Describe one named module
+    std::string describe(const std::string& name) const;  ///< Describe one named module
     /// Describe the parameters of one named module
     /// \param[in] params Parameters (incl. the name) to steer the description
     ParametersDescription describeParameters(const ParametersList&) const;
     /// Describe the parameters of one named module
     /// \param[in] name Name of the module to describe
     /// \param[in] params Additional parameters to steer the description
-    ParametersDescription describeParameters(const I& name, const ParametersList& params = ParametersList()) const;
+    ParametersDescription describeParameters(const std::string& name,
+                                             const ParametersList& params = ParametersList()) const;
+    /// Describe the parameters of one named module
+    /// \param[in] index Index of the module to describe
+    /// \param[in] params Additional parameters to steer the description
+    ParametersDescription describeParameters(int index, const ParametersList& params = ParametersList()) const;
 
-    std::vector<I> modules() const;                     ///< List of modules registred in the database
+    std::vector<std::string> modules() const;           ///< List of modules registred in the database
     inline bool empty() const { return map_.empty(); }  ///< Is the database empty?
     inline size_t size() const { return map_.size(); }  ///< Number of modules registered in the database
-    inline bool has(const I& name) const { return map_.count(name) > 0; }  ///< Check if a named module is registered
+
+    /// Check if a named module is registered
+    inline bool has(const std::string& name) const { return map_.count(name) > 0; }
 
   private:
     /// Construct a module with its parameters set
@@ -99,13 +113,14 @@ namespace cepgen {
     inline static std::unique_ptr<T> buildModule(const ParametersList& params) {
       return std::unique_ptr<T>(new U(params));
     }
-    const std::string description_;                            ///< Factory name
-    std::unordered_map<I, Builder> map_;                       ///< Database of modules handled by this instance
-    std::unordered_map<I, ParametersDescription> params_map_;  ///< Database of default parameters associated to modules
-    const ParametersDescription empty_params_desc_;            ///< An empty parameters description
+    const std::string description_;                 ///< Factory name
+    std::unordered_map<std::string, Builder> map_;  ///< Database of modules handled by this instance
+    std::unordered_map<std::string, ParametersDescription> params_map_;  ///< Default parameters associated to modules
+    const ParametersDescription empty_params_desc_;                      ///< An empty parameters description
 
   protected:
-    explicit ModuleFactory(const std::string&);  ///< Hidden default constructor for singleton operations
+    explicit ModuleFactory(const std::string&);     ///< Hidden default constructor for singleton operations
+    std::unordered_map<int, std::string> indices_;  ///< Index-to-map association map
   };
 }  // namespace cepgen
 

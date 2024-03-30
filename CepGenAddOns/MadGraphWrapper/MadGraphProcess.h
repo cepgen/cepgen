@@ -25,7 +25,7 @@
 
 namespace cepgen {
   /// Wrapper around a generic MadGraph process definition
-  class MadGraphProcess : public NamedModule<MadGraphProcess, std::string> {
+  class MadGraphProcess : public NamedModule<MadGraphProcess> {
   public:
     explicit MadGraphProcess(const ParametersList&);
     virtual ~MadGraphProcess() = default;

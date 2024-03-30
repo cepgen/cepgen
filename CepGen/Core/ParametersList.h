@@ -63,6 +63,10 @@ namespace cepgen {
     ~ParametersList() {}  // required for unique_ptr initialisation! avoids cleaning all individual objects
     ParametersList& operator=(const ParametersList&) = default;  ///< Assignment operator
 
+    bool hasName() const;                                 ///< Does the parameters list have a name key?
+    std::string name(const std::string& def = "") const;  ///< Retrieve the module name if any
+    ParametersList& setName(const std::string&);          ///< Set the module name
+
     bool operator==(const ParametersList&) const;                                  ///< Equality operator
     bool operator!=(const ParametersList& oth) const { return !operator==(oth); }  ///< Inequality operator
     ParametersList diff(const ParametersList&) const;  ///< Diff with another parameters list ('mine' + 'theirs' keys)
@@ -80,23 +84,7 @@ namespace cepgen {
     /// \return Number of key-indexed values erased
     template <typename T>
     size_t erase(const std::string&);
-    /// Does the parameters list have a name key?
-    template <typename T>
-    inline bool hasName() const {
-      return has<T>(MODULE_NAME);
-    }
-    /// Retrieve the module name if any
-    template <typename T>
-    inline T name(const T& def = default_arg<T>::get()) const {
-      if (!has<T>(MODULE_NAME))
-        return def;
-      return get<T>(MODULE_NAME);
-    }
-    /// Set the module name
-    template <typename T>
-    inline ParametersList& setName(const T& value) {
-      return set<T>(MODULE_NAME, value);
-    }
+
     /// Fill a variable with the key content if exists
     /// \param[in] key Unique key for parameter
     /// \param[out] value Object/variable to be filled with parameter value

@@ -26,7 +26,7 @@
 namespace cepgen {
   namespace formfac {
     /// Nucleon electromagnetic form factors parameterisation
-    class Parameterisation : public NamedModule<Parameterisation, std::string> {
+    class Parameterisation : public NamedModule<Parameterisation> {
     public:
       explicit Parameterisation(const ParametersList&);
 

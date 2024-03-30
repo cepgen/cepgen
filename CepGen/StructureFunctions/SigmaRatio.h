@@ -25,7 +25,7 @@ namespace cepgen {
   /// A collector namespace for modellings of the \f$R=\sigma_L/\sigma_T\f$ ratio
   namespace sigrat {
     /// A generic modelling of the \f$R=\sigma_L/\sigma_T\f$ ratio
-    class Parameterisation : public NamedModule<Parameterisation, int> {
+    class Parameterisation : public NamedModule<Parameterisation> {
     public:
       /// \f$R=\sigma_L/\sigma_T\f$ ratio computation algorithm constructor
       explicit Parameterisation(const ParametersList& params = ParametersList());

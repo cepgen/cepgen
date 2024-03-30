@@ -40,7 +40,7 @@ namespace cepgen {
       static inline ParametersDescription description() {
         auto desc = Hadroniser::description();
         desc.setDescription("Interface to the Pythia 6 string hadronisation/fragmentation algorithm");
-        desc.add<ParametersDescription>("randomGenerator", ParametersDescription().setName<std::string>("stl"))
+        desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("stl"))
             .setDescription("random number generator to use for the various intermediate computations");
         return desc;
       }
@@ -75,7 +75,7 @@ namespace cepgen {
 
     private:
       mode::Kinematics kin_mode_;
-      std::unique_ptr<utils::RandomGenerator> rnd_gen_;
+      const std::unique_ptr<utils::RandomGenerator> rnd_gen_;
     };
   }  // namespace hadr
 }  // namespace cepgen

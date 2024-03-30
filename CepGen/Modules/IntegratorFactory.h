@@ -34,7 +34,7 @@
 namespace cepgen {
   class Integrator;
   /// An integration algorithms factory
-  DEFINE_FACTORY(std::string, IntegratorFactory, Integrator, "Integrator factory");
+  DEFINE_FACTORY(IntegratorFactory, Integrator, "Integrator factory");
 }  // namespace cepgen
 
 #endif

@@ -27,7 +27,7 @@ namespace cepgen {
   /// Class template for modules interacting with events
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Jan 2023
-  class EventHandler : public NamedModule<EventHandler, std::string> {
+  class EventHandler : public NamedModule<EventHandler> {
   public:
     explicit EventHandler(const ParametersList&);
     virtual ~EventHandler();

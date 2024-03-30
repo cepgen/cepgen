@@ -28,7 +28,7 @@ namespace cepgen {
     /// A random number generator
     /// \author L. Forthomme <laurent.forthomme@cern.ch>
     /// \date Nov 2023
-    class RandomGenerator : public NamedModule<RandomGenerator, std::string> {
+    class RandomGenerator : public NamedModule<RandomGenerator> {
     public:
       /// Default constructor
       explicit RandomGenerator(const ParametersList&);

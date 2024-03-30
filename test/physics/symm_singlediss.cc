@@ -33,15 +33,15 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
   double num_sigma, chi2;
-  int num_gen, str_fun;
-  string proc_name, integrator, plotter;
+  int num_gen;
+  string str_fun, proc_name, integrator, plotter;
   bool sublead_test;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("process,p", "process to compute", &proc_name, "lpair")
       .addOptionalArgument("num-gen,g", "number of events to generate", &num_gen, 50'000)
       .addOptionalArgument("num-sigma,n", "max. number of std.dev.", &num_sigma, 3.)
-      .addOptionalArgument("str-fun,s", "struct.functions modelling", &str_fun, 11)
+      .addOptionalArgument("str-fun,s", "struct.functions modelling", &str_fun, "suriYennie")
       .addOptionalArgument("integrator,i", "type of integrator used", &integrator, "Vegas")
       .addOptionalArgument("plotter,t", "type of plotter to use", &plotter, "")
       .addOptionalArgument("chi2,x", "chi2 value cut for histograms compatibility test", &chi2, 1.)
@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
 
   cepgen::utils::Timer tmr;
   cepgen::Generator gen;
-  gen.runParameters().integrator().setName<string>(integrator);
+  gen.runParameters().integrator().setName(integrator);
 
   cepgen::utils::AbortHandler ah;
 

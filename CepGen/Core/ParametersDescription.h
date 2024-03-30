@@ -70,9 +70,8 @@ namespace cepgen {
       return add<T>(name, static_cast<T>(def));
     }
     /// Set the module name
-    template <typename T>
-    inline ParametersDescription& setName(T name) {
-      ParametersList::setName<T>(name);
+    inline ParametersDescription& setName(const std::string& name) {
+      ParametersList::setName(name);
       return *this;
     }
     /// Add the description to a collection of ParametersList objects

@@ -23,6 +23,7 @@
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Integration/ProcessIntegrand.h"
 #include "CepGen/Modules/IntegratorFactory.h"
+#include "CepGen/Modules/RandomGeneratorFactory.h"
 #include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/ProcessVariablesAnalyser.h"
 
@@ -36,7 +37,7 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = Integrator::description();
       desc.setDescription("FOAM general purpose MC integrator");
-      desc.add<ParametersDescription>("randomGenerator", ParametersDescription().setName<std::string>("root"));
+      desc.add("randomGenerator", RandomGeneratorFactory::get().describeParameters("root"));
       desc.add<int>("nCalls", 100'000).setDescription("number of calls for the cell evaluation");
       desc.add<int>("nCells", 1000);
       desc.add<int>("nSampl", 200);

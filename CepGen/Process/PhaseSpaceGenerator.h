@@ -31,7 +31,7 @@ namespace cepgen {
   /// Class template to define any phase space helper process
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Feb 2024
-  class PhaseSpaceGenerator : public NamedModule<PhaseSpaceGenerator, std::string> {
+  class PhaseSpaceGenerator : public NamedModule<PhaseSpaceGenerator> {
   public:
     explicit PhaseSpaceGenerator(const ParametersList& params) : NamedModule(params) {}
 
