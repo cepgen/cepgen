@@ -147,10 +147,8 @@ namespace cepgen {
         genparams_.a_nuc2 = genparams_.z_nuc2 = 1;
 
       // intermediate partons information
-      genparams_.iflux1 =
-          (int)PartonFluxFactory::get().partonPdgId(kinematics().incomingBeams().positive().partonFluxParameters());
-      genparams_.iflux2 =
-          (int)PartonFluxFactory::get().partonPdgId(kinematics().incomingBeams().negative().partonFluxParameters());
+      genparams_.iflux1 = (int)psgen_->partons().at(0);
+      genparams_.iflux2 = (int)psgen_->partons().at(1);
     }
 
     double FortranFactorisedProcess::computeFactorisedMatrixElement() {
