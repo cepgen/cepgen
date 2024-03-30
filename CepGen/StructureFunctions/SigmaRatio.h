@@ -25,13 +25,14 @@ namespace cepgen {
   /// A collector namespace for modellings of the \f$R=\sigma_L/\sigma_T\f$ ratio
   namespace sigrat {
     /// A generic modelling of the \f$R=\sigma_L/\sigma_T\f$ ratio
-    class Parameterisation : public NamedModule<Parameterisation, int> {
+    class Parameterisation : public NamedModule<Parameterisation, std::string> {
     public:
       /// \f$R=\sigma_L/\sigma_T\f$ ratio computation algorithm constructor
       explicit Parameterisation(const ParametersList& params = ParametersList());
       /// Extract the longitudinal/transverse cross section ratio and associated error for a given \f$(x_{\rm Bj},Q^2)\f$ couple.
       virtual double operator()(double xbj, double q2, double& err) const = 0;
 
+      static int index() { return 0; }  ///< Legacy integer index for sigma ratios modelling
       static ParametersDescription description();
 
     protected:

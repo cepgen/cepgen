@@ -50,4 +50,32 @@ namespace cepgen {
         << "No parameters description were found for module index '" << index << "'.\n"
         << "Registered modules: " << indices_ << ".";
   }
+
+  SigmaRatiosFactory& SigmaRatiosFactory::get() {
+    static SigmaRatiosFactory instance;
+    return instance;
+  }
+
+  std::unique_ptr<sigrat::Parameterisation> SigmaRatiosFactory::build(int index, const ParametersList& params) const {
+    if (indices_.count(index) > 0)
+      return SigmaRatiosFactory::build(indices_.at(index), params);
+    const auto& mod_names = modules();
+    if (const auto str_index = std::to_string(index);
+        std::find(mod_names.begin(), mod_names.end(), str_index) != mod_names.end())
+      return SigmaRatiosFactory::build(str_index, params);
+    throw CG_FATAL("SigmaRatiosFactory") << description() << " failed to build a module with index '" << index
+                                         << "'. \n"
+                                         << "Registered indices: " << indices_ << ".";
+  }
+
+  ParametersDescription SigmaRatiosFactory::describeParameters(int index, const ParametersList& params) const {
+    if (indices_.count(index) > 0)
+      return SigmaRatiosFactory::describeParameters(indices_.at(index), params);
+    const auto& mod_names = modules();
+    if (const auto str_index = std::to_string(index);
+        std::find(mod_names.begin(), mod_names.end(), str_index) != mod_names.end())
+      return SigmaRatiosFactory::describeParameters(str_index, params);
+    throw CG_FATAL("SigmaRatiosFactory") << "No parameters description were found for module index '" << index << "'.\n"
+                                         << "Registered modules: " << indices_ << ".";
+  }
 }  // namespace cepgen

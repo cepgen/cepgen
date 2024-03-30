@@ -60,6 +60,8 @@ namespace cepgen {
           throw CG_FATAL("E143") << "Parameter 'c' should have 6 components! Parsed " << c_ << ".";
       }
 
+      static int index() { return 1; }
+
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("E143 (experimental)");
@@ -108,6 +110,8 @@ namespace cepgen {
           throw CG_FATAL("R1990") << "Parameter 'b' should have 3 components! Parsed " << b_ << ".";
       }
 
+      static int index() { return 2; }
+
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("SLAC (experimental)");
@@ -137,8 +141,10 @@ namespace cepgen {
             wth_(steer<double>("wth")),
             q20_(steer<double>("q20")) {
         if (p_.size() != 3)
-          throw CG_FATAL("R1990") << "Parameter 'p' should have 3 components! Parsed " << p_ << ".";
+          throw CG_FATAL("CLAS") << "Parameter 'p' should have 3 components! Parsed " << p_ << ".";
       }
+
+      static int index() { return 3; }
 
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
@@ -179,6 +185,8 @@ namespace cepgen {
             b2_(steer<double>("b2")),
             c_(steer<double>("c")) {}
 
+      static int index() { return 4; }
+
       static ParametersDescription description() {
         auto desc = Parameterisation::description();
         desc.setDescription("Sibirtsev-Blunden (theoretical)");
@@ -204,7 +212,7 @@ using cepgen::sigrat::CLAS;
 using cepgen::sigrat::E143;
 using cepgen::sigrat::R1990;
 using cepgen::sigrat::SibirtsevBlunden;
-REGISTER_SIGRAT(1, E143);
-REGISTER_SIGRAT(2, R1990);
-REGISTER_SIGRAT(3, CLAS);
-REGISTER_SIGRAT(4, SibirtsevBlunden);
+REGISTER_SIGRAT("e143", E143);
+REGISTER_SIGRAT("r1990", R1990);
+REGISTER_SIGRAT("clas", CLAS);
+REGISTER_SIGRAT("sibirtsevBlunden", SibirtsevBlunden);

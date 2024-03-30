@@ -75,8 +75,26 @@ namespace cepgen {
   namespace sigrat {
     class Parameterisation;
   }
+  /// A sigma ratio parameterisations base factory
+  DEFINE_FACTORY(std::string, BaseSigmaRatiosFactory, sigrat::Parameterisation, "Sigma L/T parameterisations factory");
   /// A sigma ratio parameterisations factory
-  DEFINE_FACTORY(int, SigmaRatiosFactory, sigrat::Parameterisation, "Sigma L/T parameterisations factory");
+  class SigmaRatiosFactory : public BaseSigmaRatiosFactory {
+  public:
+    using BaseSigmaRatiosFactory::BaseSigmaRatiosFactory;
+    using BaseSigmaRatiosFactory::build;
+    using BaseSigmaRatiosFactory::describeParameters;
+    static SigmaRatiosFactory& get();
+    /// Build parameterisation from integer index
+    std::unique_ptr<sigrat::Parameterisation> build(int, const ParametersList& = ParametersList()) const;
+    ParametersDescription describeParameters(int, const ParametersList& = ParametersList()) const;
+    inline SigmaRatiosFactory& addIndex(int index, const std::string& name) {
+      indices_[index] = name;
+      return *this;
+    }
+
+  private:
+    std::unordered_map<int, std::string> indices_;
+  };
 }  // namespace cepgen
 
 #endif

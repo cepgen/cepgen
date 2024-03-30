@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,15 +33,18 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-  vector<int> sigrat_types;
-  double q2, w2;
-  cepgen::Limits x_range;
   int var, num_points;
+  double q2, w2;
   string output_file, plotter;
+  vector<string> sigrat_types;
+  cepgen::Limits x_range;
   bool logx, logy, draw_grid, ratio_plot;
 
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("sr,s", "longitud./transv. cross section ratio modelling", &sigrat_types)
+      .addOptionalArgument("sr,s",
+                           "longitud./transv. cross section ratio modelling",
+                           &sigrat_types,
+                           cepgen::SigmaRatiosFactory::get().modules())
       .addOptionalArgument("q2,q", "parton virtuality (GeV^2)", &q2, -1.)
       .addOptionalArgument("w2,w", "scattered particle squared mass (GeV^2/c^4)", &w2, -1.)
       .addOptionalArgument("var,t", "variable to study (0=xBj, 1=w)", &var, 0)
@@ -84,23 +87,17 @@ int main(int argc, char* argv[]) {
     fixed_var = "$w^{2}$";
 
   ofstream out(output_file);
-  out << "# sigma ratios: ";
-  string sep;
-  for (const auto& sr_type : sigrat_types)
-    out << sep << sr_type, sep = ", ";
-  out << "\n"
+  out << "# sigma ratios: " << cepgen::utils::repr(sigrat_types) << "\n"
       << "# x in [" << x_range << "]\n";
 
   const float mp = cepgen::PDG::get().mass(2212), mp2 = mp * mp;
 
   vector<unique_ptr<cepgen::sigrat::Parameterisation> > sigrats;
   vector<cepgen::utils::Graph1D> g_sigrats;
-  if (sigrat_types.empty())
-    sigrat_types = cepgen::SigmaRatiosFactory::get().modules();
   for (const auto& sr_type : sigrat_types) {
     auto sr = cepgen::SigmaRatiosFactory::get().build(sr_type);
     const auto sr_name = cepgen::SigmaRatiosFactory::get().describe(sr_type);
-    g_sigrats.emplace_back(to_string(sr_type), sr_name);
+    g_sigrats.emplace_back(sr_type, sr_name);
     sigrats.emplace_back(move(sr));
   }
   for (const auto& x : x_range.generate(num_points, logx)) {

@@ -55,9 +55,8 @@ namespace cepgen {
   template class ModuleFactory<KTFlux, std::string>;
   template class ModuleFactory<PhaseSpaceGenerator, std::string>;
   template class ModuleFactory<proc::Process, std::string>;
-  template class ModuleFactory<sigrat::Parameterisation, int>;
+  template class ModuleFactory<sigrat::Parameterisation, std::string>;
   template class ModuleFactory<strfun::Parameterisation, std::string>;
-  template class ModuleFactory<strfun::Parameterisation, int>;
   template class ModuleFactory<utils::Functional, std::string>;
   template class ModuleFactory<utils::RandomGenerator, std::string>;
 }  // namespace cepgen
