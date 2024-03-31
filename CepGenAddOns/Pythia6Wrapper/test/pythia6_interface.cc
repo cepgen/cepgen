@@ -13,8 +13,8 @@ int main(int argc, char* argv[]) {
 
   for (auto pdgid : {2212, 11, 13, 22}) {
     ostringstream os;
-    os << cepgen::PDG::get()(pdgid).name << "/" << pythia6::pyname(pdgid);
-    CG_TEST_EQUIV(pythia6::pymass(pdgid), cepgen::PDG::get().mass(pdgid), os.str() + " mass");
+    os << cepgen::PDG::get()(pdgid).name << "/" << cepgen::pythia6::pyname(pdgid);
+    CG_TEST_EQUIV(cepgen::pythia6::pymass(pdgid), cepgen::PDG::get().mass(pdgid), os.str() + " mass");
   }
 
   CG_TEST_SUMMARY;

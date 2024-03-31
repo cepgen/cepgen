@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,29 +28,29 @@ namespace cepgen {
   namespace utils {
     class RandomGenerator;
   }
+  namespace pythia6 {
+    /// Interface to the Pythia 6 event content.
+    class EventInterface {
+    public:
+      explicit EventInterface(Event&, mode::Kinematics, utils::RandomGenerator*);
+
+      void prepareHadronisation();
+      size_t numStrings() const { return evt_strings_.size(); }
+      void run();
+
+    private:
+      void fillEventBlock();
+
+      Event& evt_;                   // NOT owning
+      utils::RandomGenerator* rnd_;  ///< Random number generator engine (not owning)
+      std::vector<Particle::Role> roles_;
+
+      std::pair<short, short> pickPartonsContent();
+
+      using string_t = std::vector<int>;
+      std::vector<string_t> evt_strings_;
+    };
+  }  // namespace pythia6
 }  // namespace cepgen
-namespace pythia6 {
-  /// Interface to the Pythia 6 event content.
-  class EventInterface {
-  public:
-    explicit EventInterface(cepgen::Event&, cepgen::mode::Kinematics, cepgen::utils::RandomGenerator*);
-
-    void prepareHadronisation();
-    size_t numStrings() const { return evt_strings_.size(); }
-    void run();
-
-  private:
-    void fillEventBlock();
-
-    cepgen::Event& evt_;                   // NOT owning
-    cepgen::utils::RandomGenerator* rnd_;  ///< Random number generator engine (not owning)
-    std::vector<cepgen::Particle::Role> roles_;
-
-    std::pair<short, short> pickPartonsContent();
-
-    using string_t = std::vector<int>;
-    std::vector<string_t> evt_strings_;
-  };
-}  // namespace pythia6
 
 #endif

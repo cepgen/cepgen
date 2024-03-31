@@ -16,29 +16,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <array>
-
 #include "CepGen/Modules/CouplingFactory.h"
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Coupling.h"
-
-namespace {
-  extern "C" {
-  double pyalem_(double& q2);
-  extern struct {
-    std::array<int, 200> mstu;
-    std::array<double, 200> paru;
-    std::array<int, 200> mstj;
-    std::array<double, 200> parj;
-  } pydat1_;
-  }
-}  // namespace
+#include "CepGenAddOns/Pythia6Wrapper/Pythia6Interface.h"
 
 namespace cepgen {
   namespace pythia6 {
-    static int& mstu(size_t i) { return pydat1_.mstu.at(i - 1); }
-    static double& paru(size_t i) { return pydat1_.paru.at(i - 1); }
-
     class AlphaEM final : public Coupling {
     public:
       explicit AlphaEM(const ParametersList& params) : Coupling(params) {
@@ -67,10 +50,7 @@ namespace cepgen {
         return desc;
       }
 
-      inline double operator()(double q) const override {
-        double q2 = q * q;
-        return pyalem_(q2);
-      }
+      inline double operator()(double q) const override { return pyalem(q * q); }
     };
   }  // namespace pythia6
 }  // namespace cepgen

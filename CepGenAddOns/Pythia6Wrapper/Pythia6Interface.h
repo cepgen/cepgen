@@ -19,38 +19,50 @@
 #ifndef CepGenAddOns_Pythia6Wrapper_Pythia6Interface_h
 #define CepGenAddOns_Pythia6Wrapper_Pythia6Interface_h
 
+#include <array>
 #include <string>
 #include <vector>
 
 extern "C" {
 /// Particles content of the event
-struct pyjets_t {
+extern struct {
   int n;  ///< Number of particles in the event
   int npad;
   int k[5][4000];     ///< Particles' general information (status, PDG id, mother, daughter 1, daughter 2)
   double p[5][4000];  ///< Particles' kinematics, in GeV (px, py, pz, E, M)
   double v[5][4000];  ///< Primary vertex location for the particles
-};
-extern pyjets_t pyjets_;
+} pyjets_;
+extern struct {
+  std::array<int, 200> mstu;
+  std::array<double, 200> paru;
+  std::array<int, 200> mstj;
+  std::array<double, 200> parj;
+} pydat1_;
 }
 
-/// Pythia 6 utilities namespace
-namespace pythia6 {
-  int pythia6Status(int);
-  int cepgenStatus(int);
-  void checkPDGid(int);
+namespace cepgen {
+  /// Pythia 6 utilities namespace
+  namespace pythia6 {
+    int pythia6Status(int);
+    int cepgenStatus(int);
+    void checkPDGid(int);
 
-  void pyexec();
-  double pymass(int pdgid_);
-  void pyckbd();
-  void pygive(const std::string&);
-  void pylist(int mlist);
-  int pyk(int id, int qty);
-  double pyp(int id, int qty);
-  std::string pyname(int pdgid);
-  /// Connect entries with colour flow information
-  /// \param[in] join List of particles unique identifier to join in the colour flow
-  void pyjoin(std::vector<int> join);
-}  // namespace pythia6
+    double pyalem(double);
+    double pyalps(double);
+    void pyckbd();
+    void pyexec();
+    void pygive(const std::string&);
+    /// Connect entries with colour flow information
+    /// \param[in] join List of particles unique identifier to join in the colour flow
+    void pyjoin(std::vector<int> join);
+    int pyk(int id, int qty);
+    void pylist(int mlist);
+    double pymass(int pdgid_);
+    std::string pyname(int pdgid);
+    double pyp(int id, int qty);
+    inline static int& mstu(size_t i) { return pydat1_.mstu.at(i - 1); }
+    inline static double& paru(size_t i) { return pydat1_.paru.at(i - 1); }
+  }  // namespace pythia6
+}  // namespace cepgen
 
 #endif
