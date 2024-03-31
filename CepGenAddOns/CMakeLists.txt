@@ -14,13 +14,15 @@ add_subdirectory(PhotosTauolaWrapper)
 add_subdirectory(ProMCWrapper)
 add_subdirectory(Pythia6Wrapper)
 add_subdirectory(Pythia8Wrapper)
-add_subdirectory(PythonWrapper)
 add_subdirectory(REvolverWrapper)
 add_subdirectory(RivetWrapper)
 add_subdirectory(ROOTWrapper)
 add_subdirectory(TopdrawerWrapper)
 
 add_subdirectory(Functionals)
+
+#----- Python wrapper set to be the last to have everything else generated
+add_subdirectory(PythonWrapper)
 
 #----- propagate global variables to parent scope
 set(CEPGEN_UNSTABLE_TESTS ${CEPGEN_UNSTABLE_TESTS} PARENT_SCOPE)
