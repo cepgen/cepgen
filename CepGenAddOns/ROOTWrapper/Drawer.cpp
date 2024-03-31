@@ -28,6 +28,8 @@
 #include "CepGen/Utils/String.h"
 #include "CepGenAddOns/ROOTWrapper/ROOTCanvas.h"
 
+using namespace std::string_literals;
+
 namespace cepgen {
   namespace root {
     class Drawer : public cepgen::utils::Drawer {
@@ -41,8 +43,8 @@ namespace cepgen {
 
       inline static ParametersDescription description() {
         auto desc = cepgen::utils::Drawer::description();
-        desc.add<std::string>("filename", "canvas").setDescription("default filename for the output");
-        desc.add<std::string>("format", "pdf").setDescription("default extension for the output");
+        desc.add("filename", "canvas"s).setDescription("default filename for the output");
+        desc.add("format", "pdf"s).setDescription("default extension for the output");
         desc.add<int>("palette", kLightTemperature).setDescription("ROOT colour palette to use");
         return desc;
       }
@@ -179,9 +181,9 @@ namespace cepgen {
       const bool has_graphs = mg->GetListOfGraphs() && !mg->GetListOfGraphs()->IsEmpty();
       if (has_hists || has_graphs) {
         if (has_hists)
-          hs->Draw(mode & Mode::nostack ? "nostack" : "");
+          hs->Draw(((mode & Mode::bar ? "hist"s : ""s) + (mode & Mode::nostack ? "nostack"s : ""s)).data());
         if (has_graphs)
-          mg->Draw((std::string("l") + (!has_hists ? "a" : "")).c_str());
+          mg->Draw(("l"s + (!has_hists ? "a" : "")).c_str());
         if (has_hists) {
           postDraw(hs->GetHistogram(), *first);
           canv.Prettify(hs);
@@ -264,6 +266,7 @@ namespace cepgen {
       h.SetBinContent(hist.nbins() + 1, hist.overflow());
       h.GetXaxis()->SetTitle(delatexify(hist.xAxis().label()));
       h.GetYaxis()->SetTitle(delatexify(hist.yAxis().label()));
+      h.SetLineWidth(3);
       return h;
     }
 

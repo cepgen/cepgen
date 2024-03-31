@@ -49,7 +49,8 @@ namespace cepgen {
           grid = 1 << 4,
           col = 1 << 5,
           cont = 1 << 6,
-          ratio = 1 << 7
+          ratio = 1 << 7,
+          bar = 1 << 8
         };
         Mode() : value_(none) {}
         Mode(int val) : value_((value_t)val) {}
