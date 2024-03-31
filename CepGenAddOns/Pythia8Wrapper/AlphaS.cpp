@@ -27,7 +27,10 @@ namespace cepgen {
   namespace pythia8 {
     class AlphaS final : public Coupling {
     public:
-      explicit AlphaS(const ParametersList& params) : Coupling(params), alphas_(new Pythia8::AlphaStrong) {}
+      explicit AlphaS(const ParametersList& params) : Coupling(params), alphas_(new Pythia8::AlphaStrong) {
+        alphas_->init(
+            steer<double>("alphaSvalue"), steer<int>("alphaSorder"), steer<int>("alphaSnfmax"), steer<bool>("useCMW"));
+      }
 
       inline static ParametersDescription description() {
         auto desc = cepgen::Coupling::description();
@@ -39,22 +42,12 @@ namespace cepgen {
         return desc;
       }
 
-      inline double operator()(double q) const override {
-        if (!init_) {
-          alphas_->init(steer<double>("alphaSvalue"),
-                        steer<int>("alphaSorder"),
-                        steer<int>("alphaSnfmax"),
-                        steer<bool>("useCMW"));
-          init_ = true;
-        }
-        return alphas_->alphaS(q * q);
-      }
+      inline double operator()(double q) const override { return alphas_->alphaS(q * q); }
 
     private:
       const std::unique_ptr<Pythia8::AlphaStrong> alphas_;
-      mutable bool init_{false};
     };
   }  // namespace pythia8
 }  // namespace cepgen
-using PythiaAlphaS = cepgen::pythia8::AlphaS;
-REGISTER_ALPHAS_MODULE("pythia8", PythiaAlphaS);
+using Pythia8AlphaS = cepgen::pythia8::AlphaS;
+REGISTER_ALPHAS_MODULE("pythia8", Pythia8AlphaS);
