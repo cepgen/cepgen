@@ -1,5 +1,5 @@
 #--- searching for Herwig 6
-set(HERWIG6_DIRS $ENV{HERWIG6_DIR} /usr /usr/local /opt/herwig6)
+set(HERWIG6_DIRS ${CMAKE_CURRENT_BINARY_DIR} $ENV{HERWIG6_DIR} /usr /usr/local /opt/herwig6)
 find_library(HERWIG6 herwig6 HINTS ${HERWIG6_DIRS} PATH_SUFFIXES lib)
 
 if(NOT HERWIG6)
@@ -15,7 +15,6 @@ if(NOT HERWIG6)
   message(STATUS "Herwig 6 source found in ${herwig6_src}")
   add_library(herwig6 SHARED ${herwig6_src})
   target_include_directories(herwig6 PUBLIC ${HERWIG6_INC})
-  #target_compile_options(herwig6 PRIVATE "-Wno-tabs -Wno-maybe-uninitialized -Wno-integer-division -Wno-unused-variable -Wno-unused-dummy-argument")
   install(TARGETS herwig6 DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT herwig6)
   set(HERWIG6 herwig6)
 endif()

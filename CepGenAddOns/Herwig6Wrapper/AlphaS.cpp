@@ -28,6 +28,9 @@ namespace cepgen {
       explicit AlphaS(const ParametersList& params) : cepgen::Coupling(params), mode_(steer<int>("mode")) {
         if (mode_ < 1 || mode_ > 3)
           throw CG_FATAL("herwig6:AlphaS") << "Invalid mode steered: should be between 1 and 3, got " << mode_ << ".";
+        hwpram_.ncolo = steer<int>("ncolo");
+        hwpram_.qcdlam = steer<double>("qcdlam");
+        hwpram_.qcdl5 = steer<double>("qcdl5");
         hwualf(0, 0.);
       }
 
@@ -38,6 +41,9 @@ namespace cepgen {
         desc.add<int>("mode", 1).setDescription(
             "running mode (1=two-loop flavour thresholds, 2=ratio of mode-1 with 5-flavour beta with Lambda=QCDL3, "
             "3=one-loop with 5-flavour beta and Lambda=QCDL3)");
+        desc.add<int>("ncolo", hwpram_.ncolo).setDescription("number of colours to consider");
+        desc.add<double>("qcdlam", hwpram_.qcdlam).setDescription("5-flavour Lambda_MS-bar at large x/z");
+        desc.add<double>("qcdl5", hwpram_.qcdl5).setDescription("5-flavour Lambda_MC");
         return desc;
       }
 
