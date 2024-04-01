@@ -12,7 +12,7 @@ env:
   BUILD_TYPE: Release  # Release, Debug, RelWithDebInfo, etc
   CEPGEN_PATH: /Package
   CG_CI: True
-  MG5_aMC_VERSION: MG5_aMC_v3.5.3
+  MG5_aMC_VERSION: 3.5.3
 
 jobs:
   build:
@@ -27,11 +27,10 @@ jobs:
     - name: 'MadGraph fetch'
       uses: wei/wget@v1
       with:
-        args: -O mg.tar.gz https://launchpad.net/mg5amcnlo/3.0/3.5.x/+download/${{ env.MG5_aMC_VERSION }}.tar.gz
+        args: -O mg.tar.gz https://github.com/mg5amcnlo/mg5amcnlo/archive/refs/tags/v${{ env.MG5_aMC_VERSION }}.tar.gz
     - name: 'MadGraph install'
       run: |
         tar xvfz mg.tar.gz
-        mv `ls -d MG5*/` ${{ env.MG5_aMC_VERSION }}
         rm -f mg.tar.gz
 
     - name: 'CMake configuration'
@@ -41,7 +40,7 @@ jobs:
               -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
               -DCMAKE_BUILD_TESTS=ON \
               -DCMAKE_BUILD_FOAM=ON \
-              -DMADGRAPH_BIN=/Package/${{ env.MG5_aMC_VERSION }}/bin/mg5_aMC
+              -DMADGRAPH_BIN=/Package/mg5amcnlo-${{ env.MG5_aMC_VERSION }}/bin/mg5_aMC
 
     - name: 'Build environment'
       run: |
