@@ -47,13 +47,13 @@ jobs:
         cmake --build ${{ env.CEPGEN_PATH }}
         cmake --build ${{ env.CEPGEN_PATH }} -- package
     - name: 'Compress environment'
-      run: tar -cvf --exclude={*.root,*.o,*.pyc,*.swp,*/.cmake,*/CMakeFiles,*/CTestTestfile.cmake,*/cmake_install.cmake,*/nanobench-*,*.rpm,*/__pycache__,*/_CPack_*,*/.qtc*} environment.tar /Package
+      run: tar cvfz environment.tar.gz --exclude={*.root,*.o,*.pyc,*.swp,*/.cmake,*/CMakeFiles,*/CTestTestfile.cmake,*/cmake_install.cmake,*/nanobench-*,*.rpm,*/__pycache__,*/_CPack_*,*/.qtc*} /Package
 
     - name: 'Upload environment artifact'
       uses: actions/upload-artifact@v4
       with:
         name: build-env
-        path: environment.tar
+        path: environment.tar.gz
 
     - name: 'Upload packages artifacts'
       uses: actions/upload-artifact@v4
@@ -74,7 +74,7 @@ jobs:
       with:
         name: build-env
     - name: 'Uncompress environment'
-      run: tar -xvf environment.tar -C /
+      run: tar xvfz environment.tar.gz -C /
     - uses: seanmiddleditch/gha-setup-ninja@master
     - name: 'Test CepGen'
       working-directory: ${{ env.CEPGEN_PATH }}
@@ -95,7 +95,7 @@ jobs:
       with:
         name: build-env
     - name: 'Uncompress environment'
-      run: tar -xvf environment.tar -C /
+      run: tar xvfz environment.tar.gz -C /
     - uses: seanmiddleditch/gha-setup-ninja@master
     - name: 'Benchmark CepGen modules'
       working-directory: ${{ env.CEPGEN_PATH }}
@@ -103,12 +103,12 @@ jobs:
         echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
         ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" -R "benchmark_*" --output-on-failure
     - name: 'Compress environment'
-      run: tar -cvf benchmark-environment.tar /Package/*.html
+      run: tar cvfz benchmark-environment.tar.gz /Package/*.html
     - name: 'Upload artifacts'
       uses: actions/upload-artifact@v4
       with:
         name: benchmark-env
-        path: benchmark-environment.tar
+        path: benchmark-environment.tar.gz
 
   validation:
     needs: build
@@ -123,7 +123,7 @@ jobs:
       with:
         name: build-env
     - name: 'Uncompress environment'
-      run: tar -xvf environment.tar -C /
+      run: tar xvfz environment.tar.gz -C /
     - uses: seanmiddleditch/gha-setup-ninja@master
     - name: 'Validate CepGen modules'
       working-directory: ${{ env.CEPGEN_PATH }}
@@ -132,9 +132,9 @@ jobs:
         ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" -R "validation_*" --output-on-failure
     - name: 'Compress environment'
       run: |
-        tar -cvf validation-environment.tar ${{ env.CEPGEN_PATH }}/validation/
+        tar cvfz validation-environment.tar.gz ${{ env.CEPGEN_PATH }}/validation/
     - name: 'Upload artifacts'
       uses: actions/upload-artifact@v4
       with:
         name: validation-env
-        path: validation-environment.tar
+        path: validation-environment.tar.gz
