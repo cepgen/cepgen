@@ -47,7 +47,7 @@ jobs:
         cmake --build ${{ env.CEPGEN_PATH }}
         cmake --build ${{ env.CEPGEN_PATH }} -- package
     - name: 'Compress environment'
-      run: tar -cvf environment.tar /Package
+      run: tar -cvf --exclude={*.root,*.o,*.pyc,*.swp,*/.cmake,*/CMakeFiles,*/CTestTestfile.cmake,*/cmake_install.cmake,*/nanobench-*,*.rpm,*/__pycache__,*/_CPack_*,*/.qtc*} environment.tar /Package
 
     - name: 'Upload environment artifact'
       uses: actions/upload-artifact@v4
