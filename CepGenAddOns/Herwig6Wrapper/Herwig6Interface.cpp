@@ -16,25 +16,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/Modules/CouplingFactory.h"
-#include "CepGen/Physics/Coupling.h"
 #include "CepGenAddOns/Herwig6Wrapper/Herwig6Interface.h"
+
+namespace {
+  extern "C" {
+  void hwigin_();
+  double hwuaem_(double&);
+  double hwualf_(int&, double&);
+  }
+}  // namespace
 
 namespace cepgen {
   namespace herwig6 {
-    class AlphaEM final : public Coupling {
-    public:
-      explicit AlphaEM(const ParametersList& params) : Coupling(params) { initialise(); }
-
-      inline static ParametersDescription description() {
-        auto desc = cepgen::Coupling::description();
-        desc.setDescription("Herwig6 modelling of alpha(EM) running");
-        return desc;
-      }
-
-      inline double operator()(double q) const override { return hwuaem(q * q); }
-    };
+    void initialise() {
+      static bool kInitialised = false;
+      if (kInitialised)
+        return;
+      hwigin_();
+      kInitialised = true;
+    }
+    double hwuaem(double q2) { return hwuaem_(q2); }
+    double hwualf(int mode, double q2) { return hwualf_(mode, q2); }
   }  // namespace herwig6
 }  // namespace cepgen
-using Herwig6AlphaEM = cepgen::herwig6::AlphaEM;
-REGISTER_ALPHAEM_MODULE("herwig6", Herwig6AlphaEM);

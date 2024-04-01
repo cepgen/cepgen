@@ -16,25 +16,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Physics/Coupling.h"
-
-namespace {
-  extern "C" {
-  double hwualf_(int&, double&);
-  }
-}  // namespace
+#include "CepGenAddOns/Herwig6Wrapper/Herwig6Interface.h"
 
 namespace cepgen {
   namespace herwig6 {
     class AlphaS final : public Coupling {
     public:
       explicit AlphaS(const ParametersList& params) : Coupling(params), mode_(steer<int>("mode")) {
-        int one = 1;
-        double dum;
-        hwualf_(one, dum);
+        initialise();
         if (mode_ < 1 || mode_ > 3)
           throw CG_FATAL("herwig6:AlphaS") << "Invalid mode steered: should be between 1 and 3, got " << mode_ << ".";
+        hwualf(0, 0.);
       }
 
       inline static ParametersDescription description() {
@@ -46,15 +41,11 @@ namespace cepgen {
         return desc;
       }
 
-      inline double operator()(double q) const override {
-        double q2 = q * q;
-        static int two = 2;
-        return hwualf_(two, q2);
-      }
-    };
+      inline double operator()(double q) const override { return hwualf(mode_, q * q); }
 
-  private:
-    mutable int mode_;
+    private:
+      const int mode_;
+    };
   }  // namespace herwig6
 }  // namespace cepgen
 using Herwig6AlphaS = cepgen::herwig6::AlphaS;
