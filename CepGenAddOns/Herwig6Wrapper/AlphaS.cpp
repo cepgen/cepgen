@@ -23,10 +23,9 @@
 
 namespace cepgen {
   namespace herwig6 {
-    class AlphaS final : public Coupling {
+    class AlphaS final : public cepgen::Coupling {
     public:
-      explicit AlphaS(const ParametersList& params) : Coupling(params), mode_(steer<int>("mode")) {
-        initialise();
+      explicit AlphaS(const ParametersList& params) : cepgen::Coupling(params), mode_(steer<int>("mode")) {
         if (mode_ < 1 || mode_ > 3)
           throw CG_FATAL("herwig6:AlphaS") << "Invalid mode steered: should be between 1 and 3, got " << mode_ << ".";
         hwualf(0, 0.);
@@ -35,6 +34,7 @@ namespace cepgen {
       inline static ParametersDescription description() {
         auto desc = cepgen::Coupling::description();
         desc.setDescription("Herwig6 modelling of alpha(S) running");
+        initialise();
         desc.add<int>("mode", 1).setDescription(
             "running mode (1=two-loop flavour thresholds, 2=ratio of mode-1 with 5-flavour beta with Lambda=QCDL3, "
             "3=one-loop with 5-flavour beta and Lambda=QCDL3)");

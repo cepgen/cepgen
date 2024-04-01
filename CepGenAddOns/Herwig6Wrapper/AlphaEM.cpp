@@ -22,13 +22,17 @@
 
 namespace cepgen {
   namespace herwig6 {
-    class AlphaEM final : public Coupling {
+    class AlphaEM final : public cepgen::Coupling {
     public:
-      explicit AlphaEM(const ParametersList& params) : Coupling(params) { initialise(); }
+      explicit AlphaEM(const ParametersList& params) : cepgen::Coupling(params) {
+        hwpram_.alphem = steer<double>("alphem");
+      }
 
       inline static ParametersDescription description() {
         auto desc = cepgen::Coupling::description();
         desc.setDescription("Herwig6 modelling of alpha(EM) running");
+        initialise();
+        desc.add<double>("alphem", hwpram_.alphem).setDescription("alpha(EM) at beginning of evolution");
         return desc;
       }
 
