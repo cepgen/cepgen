@@ -1,0 +1,61 @@
+/*
+ *  CepGen: a central exclusive processes event generator
+ *  Copyright (C) 2024  Laurent Forthomme
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "CepGen/Modules/CouplingFactory.h"
+#include "CepGen/Physics/Coupling.h"
+
+namespace {
+  extern "C" {
+  double hwualf_(int&, double&);
+  }
+}  // namespace
+
+namespace cepgen {
+  namespace herwig6 {
+    class AlphaS final : public Coupling {
+    public:
+      explicit AlphaS(const ParametersList& params) : Coupling(params), mode_(steer<int>("mode")) {
+        int one = 1;
+        double dum;
+        hwualf_(one, dum);
+        if (mode_ < 1 || mode_ > 3)
+          throw CG_FATAL("herwig6:AlphaS") << "Invalid mode steered: should be between 1 and 3, got " << mode_ << ".";
+      }
+
+      inline static ParametersDescription description() {
+        auto desc = cepgen::Coupling::description();
+        desc.setDescription("Herwig6 modelling of alpha(S) running");
+        desc.add<int>("mode", 1).setDescription(
+            "running mode (1=two-loop flavour thresholds, 2=ratio of mode-1 with 5-flavour beta with Lambda=QCDL3, "
+            "3=one-loop with 5-flavour beta and Lambda=QCDL3)");
+        return desc;
+      }
+
+      inline double operator()(double q) const override {
+        double q2 = q * q;
+        static int two = 2;
+        return hwualf_(two, q2);
+      }
+    };
+
+  private:
+    mutable int mode_;
+  }  // namespace herwig6
+}  // namespace cepgen
+using Herwig6AlphaS = cepgen::herwig6::AlphaS;
+REGISTER_ALPHAS_MODULE("herwig6", Herwig6AlphaS);
