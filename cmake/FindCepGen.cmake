@@ -4,6 +4,10 @@ pkg_check_modules(PC_CepGen QUIET CepGen)
 find_path(CepGen_INCLUDE_DIR
     NAMES CepGen/Generator.h
     PATHS ${PC_CepGen_INCLUDE_DIRS} ${CEPGEN_PATH})
+find_path(CepGen_DATA_DIR
+    NAMES mstw_sf_scan_nnlo.dat
+    PATHS ${PC_CepGen_INCLUDE_DIRS} ${CEPGEN_PATH}
+    PATH_SUFFIXES share External)
 find_library(CepGen_LIBRARY
     NAMES CepGen
     PATHS ${PC_CepGEN_LIBRARY_DIRS} ${CEPGEN_PATH}
@@ -21,7 +25,10 @@ find_package_handle_standard_args(CepGen
 if(CepGen_FOUND)
     set(CepGen_LIBRARIES ${CepGen_LIBRARY})
     set(CepGen_INCLUDE_DIRS ${CepGen_INCLUDE_DIR})
+    set(CepGen_DATA_DIRS ${CepGen_DATA_DIR})
     set(CepGen_DEFINITIONS ${PC_CepGen_CFLAGS_OTHER})
+else()
+    message(STATUS "CepGen path was not found. Did you set the $CEPGEN_DIR environment variable?")
 endif()
 
 if(CepGen_FOUND AND NOT TARGET CepGen::CepGen)
