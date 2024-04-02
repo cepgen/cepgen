@@ -16,6 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <unistd.h>
+
 #include "CepGenAddOns/Herwig6Wrapper/Herwig6Interface.h"
 
 namespace {
@@ -32,7 +34,11 @@ namespace cepgen {
       static bool kInitialised = false;
       if (kInitialised)
         return;
+      int out = dup(fileno(stdout));
+      freopen("/tmp/herwig.log", "w", stdout);
       hwigin_();
+      dup2(out, fileno(stdout));
+      close(out);
       kInitialised = true;
     }
     double hwuaem(double q2) { return hwuaem_(q2); }
