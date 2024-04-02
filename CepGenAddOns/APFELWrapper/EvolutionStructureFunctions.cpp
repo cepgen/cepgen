@@ -34,12 +34,11 @@ namespace cepgen {
       explicit EvolutionStructureFunctions(const ParametersList& params)
           : strfun::Parameterisation(params),
             proc_(steer<std::string>("processDIS")),
+            q2_range_(steer<Limits>("q2range")),
             xbj_min_(steer<double>("xBjmin")) {
-        const auto q2range = steer<Limits>("q2range");
-        if (!q2range.valid())
-          throw CG_FATAL("apfel:EvolutionStructureFunctions") << "Invalid Q^2 range: " << q2range << ".";
-        const auto qrange = q2range.compute([](double lim) { return std::sqrt(lim); });
-
+        if (!q2_range_.valid())
+          throw CG_FATAL("apfel:EvolutionStructureFunctions") << "Invalid Q^2 range: " << q2_range_ << ".";
+        const auto qrange = q2_range_.compute([](double lim) { return std::sqrt(lim); });
         APFEL::SetMassScheme(steer<std::string>("massScheme"));
         APFEL::SetProcessDIS(proc_);
         APFEL::SetQLimits(qrange.min(), qrange.max());
@@ -55,20 +54,25 @@ namespace cepgen {
       static ParametersDescription description() {
         auto desc = strfun::Parameterisation::description();
         desc.setDescription("APFEL DIS structure functions");
-        desc.add("q2range", Limits{1., 1.e6});
-        desc.add<double>("xBjmin", 1.e-6);
-        desc.add("massScheme", "ZM-VFNS"s);
-        desc.add("processDIS", "NC"s);
-        desc.add<int>("maxFlavourAlpha", 5);
-        desc.add<int>("maxFlavourPDFs", 5);
-        desc.add("pdfSet", "CT14nnlo"s);
+        desc.add("q2range", Limits{1., 1.e6}).setDescription("evolution scale range, in GeV^2");
+        desc.add<double>("xBjmin", 2.e-6).setDescription("minimum Bjorken-x reachable for this PDF set");
+        desc.add("massScheme", "ZM-VFNS"s).setDescription("mass scheme for the structure functions");
+        desc.add("processDIS", "NC"s).setDescription("process of the structure functions (EM, NC, or CC)");
+        desc.add<int>("maxFlavourAlpha", 5)
+            .setDescription("maximum number of flavours that the evolution of alpha(S) and alpha(EM) can reach");
+        desc.add<int>("maxFlavourPDFs", 5)
+            .setDescription("maximum number of flavours that the evolution of PDFs can reach");
+        desc.add("pdfSet", "CT14nnlo"s).setDescription("name of the PDF set to be used at the initial scale");
         desc.add("targetDIS", "isoscalar"s);
         return desc;
       }
 
     private:
       void eval() override {
-        if (args_.xbj < xbj_min_) {
+        if (!q2_range_.contains(args_.q2) || args_.xbj < xbj_min_) {
+          CG_WARNING("apfel:EvolutionStructureFunctions")
+              << "(xBj=" << args_.xbj << ", Q^2=" << args_.q2 << ")"
+              << " not in validity range (min.xBj = " << xbj_min_ << ", Q^2 = " << q2_range_ << ").";
           clear();
           return;
         }
@@ -78,6 +82,7 @@ namespace cepgen {
       }
 
       const std::string proc_;
+      const Limits q2_range_;
       const double xbj_min_;
     };
   }  // namespace apfel
