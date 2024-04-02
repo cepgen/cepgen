@@ -104,6 +104,9 @@ namespace cepgen {
     inline bool empty() const { return map_.empty(); }  ///< Is the database empty?
     inline size_t size() const { return map_.size(); }  ///< Number of modules registered in the database
 
+    ///< List of index-to-string associations in the database
+    inline const std::unordered_map<int, std::string>& indices() const { return indices_; }
+
     /// Check if a named module is registered
     inline bool has(const std::string& name) const { return map_.count(name) > 0; }
 

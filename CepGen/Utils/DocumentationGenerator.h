@@ -39,6 +39,7 @@ namespace cepgen {
       struct category_t {
         std::string name, title, description;
         std::map<std::string, ParametersDescription> modules{};
+        std::map<std::string, int> modules_indices{};
       };
       std::vector<std::pair<std::string, category_t> > categories_;
     };

@@ -54,8 +54,12 @@ namespace cepgen {
         cat.description = description;
         for (const auto& mod : factory.modules())
           if (mod_names.empty() || contains(mod_names, utils::toString(mod)) ||
-              contains(mod_names, utils::toCamelCase(utils::toString(mod))))
-            cat.modules[utils::toString(mod)] = factory.describeParameters(mod).setKey(mod);
+              contains(mod_names, utils::toCamelCase(utils::toString(mod)))) {
+            cat.modules[mod] = factory.describeParameters(mod).setKey(mod);
+            for (const auto& index_vs_modname : factory.indices())
+              if (index_vs_modname.second == mod)
+                cat.modules_indices[mod] = index_vs_modname.first;
+          }
         categories_.emplace_back(std::make_pair(name, cat));
       };
       add_category("proc", "Processes", "", cepgen::ProcessFactory::get());

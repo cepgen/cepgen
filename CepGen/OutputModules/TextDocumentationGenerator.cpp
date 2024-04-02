@@ -58,7 +58,10 @@ namespace cepgen {
               os << "\n> " << colourise(mod.first, Colour::cyan, Modifier::underline | Modifier::bold) << ": "
                  << mod.second.description() << (mod.second.empty() ? " (*)" : "");
             } else {
-              os << "\n" << mod.second.describe();
+              os << "\n";
+              if (cat.second.modules_indices.count(mod.first) > 0)
+                os << "#" << cat.second.modules_indices.at(mod.first) << ": ";
+              os << mod.second.describe();
               if (dump_params_)
                 os << "\n\tParametersList object:\n\t\t" << mod.second.parameters();
               os << "\n";
