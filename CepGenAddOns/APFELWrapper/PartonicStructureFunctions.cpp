@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,33 +25,33 @@
 #include "CepGen/Utils/Message.h"
 
 namespace cepgen {
-  namespace strfun {
+  namespace apfel {
     /// Generic partonic level perturbative structure functions built from an external PDFs grid
-    class APFELPartonic final : public PartonicParameterisation {
+    class PartonicStructureFunctions final : public strfun::PartonicParameterisation {
     public:
       /// Quarks types
       enum class Mode { full = 0, valence = 1, sea = 2 };
       /// Build a calculator from its Parameters object
-      explicit APFELPartonic(const ParametersList& params)
-          : PartonicParameterisation(params), q_limits_(steer<Limits>("qLimits")) {
+      explicit PartonicStructureFunctions(const ParametersList& params)
+          : PartonicParameterisation(params), q_limits_(steer<Limits>("qrange")) {
         const auto perturbative_order = steer<int>("perturbativeOrder");
         APFEL::SetPerturbativeOrder(perturbative_order);
         APFEL::InitializeAPFEL();
         APFEL::EvolveAPFEL(q_limits_.min(), q_limits_.max());
         APFEL::CachePDFsAPFEL(q_limits_.min());
-        CG_INFO("APFELPartonic") << "Partonic structure functions evaluator successfully built.\n"
-                                 << " * APFEL version: " << APFEL::GetVersion() << "\n"
-                                 << " * number of flavours: " << num_flavours_ << "\n"
-                                 << " * quarks mode: " << mode_ << "\n"
-                                 << " * Q range: " << q_limits_ << "\n"
-                                 << " * perturbative order: " << perturbative_order << ".";
+        CG_INFO("apfel:PartonicStructureFunctions") << "Partonic structure functions evaluator successfully built.\n"
+                                                    << " * APFEL version: " << APFEL::GetVersion() << "\n"
+                                                    << " * number of flavours: " << num_flavours_ << "\n"
+                                                    << " * quarks mode: " << mode_ << "\n"
+                                                    << " * Q range: " << q_limits_ << "\n"
+                                                    << " * perturbative order: " << perturbative_order << ".";
       }
 
       static ParametersDescription description() {
         auto desc = PartonicParameterisation::description();
         desc.setDescription("APFEL (partonic)");
         desc.add<int>("perturbativeOrder", 2);
-        desc.add<Limits>("qLimits", {1., 100.});
+        desc.add<Limits>("qrange", {1., 100.});
         return desc;
       }
 
@@ -64,7 +64,7 @@ namespace cepgen {
       }
       const Limits q_limits_;
     };
-  }  // namespace strfun
+  }  // namespace apfel
 }  // namespace cepgen
-using cepgen::strfun::APFELPartonic;
-REGISTER_STRFUN("apfel", 402, APFELPartonic);
+using PartonicStructureFunctionsAPFEL = cepgen::apfel::PartonicStructureFunctions;
+REGISTER_STRFUN("apfel", 402, PartonicStructureFunctionsAPFEL);
