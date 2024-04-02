@@ -31,7 +31,7 @@ namespace cepgen {
         : Coupling(params),
           nc_(steer<int>("Nc")),
           nf_(steer<int>("nf")),
-          lambda_(steer<double>("lambda")),
+          lambda_(steer<double>("Lambda")),
           beta0_((11. * nc_ - 2. * nf_) / 3.),
           prefac_(4. * M_PI / beta0_) {
       CG_INFO("AlphaSWebber:init") << "Webber et al. alpha(S) evolution algorithm initialised with parameters:\n\t"
@@ -44,7 +44,7 @@ namespace cepgen {
       desc.setDescription("Webber alpha(S) evolution algorithm");
       desc.add<int>("Nc", 3).setDescription("number of colours considered");
       desc.add<int>("nf", 3).setDescription("number of fermion flavours considered");
-      desc.add<double>("lambda", 0.25).setDescription("evolution scale (in GeV)");
+      desc.add<double>("Lambda", 0.25).setDescription("evolution scale (in GeV)");
       return desc;
     }
 
