@@ -89,6 +89,7 @@ public:
     formfac1_ = FormFactorsFactory::get().build(kinematics().incomingBeams().positive().formFactors());
     formfac2_ = FormFactorsFactory::get().build(kinematics().incomingBeams().negative().formFactors());
     strfun_ = StructureFunctionsFactory::get().build(kinematics().incomingBeams().structureFunctions());
+    is_strfun_sy_ = strfun_->name() == "SuriYennie";
 
     //--- first define the squared mass range for the diphoton/dilepton system
     const auto w_limits = kinematics()
@@ -214,7 +215,7 @@ private:
         throw CG_FATAL("LPAIR:peripp")
             << "Inelastic proton form factors computation requires a structure functions definition!";
       const double xbj = utils::xBj(q2, mi2, mx2);
-      if (strfun_->name() == "suriYennie")  // this one requires its own object to deal with FM
+      if (is_strfun_sy_)  // this one requires its own object to deal with FM
         return Vector{strfun_->FM(xbj, q2), strfun_->F2(xbj, q2) * xbj * mp_ / q2};
       return Vector{-2. * strfun_->F1(xbj, q2) / q2, strfun_->F2(xbj, q2) * xbj / q2};
     };
@@ -261,6 +262,7 @@ private:
 
   std::unique_ptr<formfac::Parameterisation> formfac1_, formfac2_;
   std::unique_ptr<strfun::Parameterisation> strfun_;
+  bool is_strfun_sy_{false};
 
   // mapped variables
   double m_u_t1_{0.};  ///< \f$t_1\f$, first parton normalised virtuality

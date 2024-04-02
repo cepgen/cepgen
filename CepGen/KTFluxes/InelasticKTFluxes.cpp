@@ -41,7 +41,7 @@ namespace cepgen {
       auto desc = KTFlux::description();
       desc.setDescription("Nucl. inel. photon emission");
       desc.add<ParametersDescription>("structureFunctions",
-                                      StructureFunctionsFactory::get().describeParameters("luxLike"));
+                                      StructureFunctionsFactory::get().describeParameters("LUXLike"));
       return desc;
     }
 

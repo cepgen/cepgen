@@ -193,7 +193,7 @@ namespace cepgen {
           q20_(steer<double>("q20")),
           r_power_(steer<double>("rPower")),
           lowq2_(steer<double>("lowQ2")),
-          sy_sf_(StructureFunctionsFactory::get().build("suriYennie", steer<ParametersList>("syParams"))) {
+          sy_sf_(StructureFunctionsFactory::get().build("SuriYennie", steer<ParametersList>("syParams"))) {
       //----- initialise the interpolation grids
 
       //--- grid E -> (cross section, norm)
@@ -264,4 +264,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::Shamov;
-REGISTER_STRFUN("shamov", 302, Shamov);
+REGISTER_STRFUN("Shamov", 302, Shamov);

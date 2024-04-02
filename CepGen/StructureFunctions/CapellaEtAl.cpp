@@ -72,4 +72,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::CapellaEtAl;
-REGISTER_STRFUN("capella", 106, CapellaEtAl);
+REGISTER_STRFUN("Capella", 106, CapellaEtAl);

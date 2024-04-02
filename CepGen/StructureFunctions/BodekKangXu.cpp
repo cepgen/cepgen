@@ -134,4 +134,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::BodekKangXu;
-REGISTER_STRFUN("bodekKangXu", 304, BodekKangXu);
+REGISTER_STRFUN("BodekKangXu", 304, BodekKangXu);

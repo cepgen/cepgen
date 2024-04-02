@@ -61,9 +61,9 @@ namespace cepgen {
         desc.add<double>("Q2cut", 9.);
         desc.add<std::vector<double> >("W2limits", {3., 4.});
         desc.add<double>("higherTwist", 5.5);
-        desc.add("resonancesSF", StructureFunctionsFactory::get().describeParameters("christyBosted"));
-        desc.add("perturbativeSF", StructureFunctionsFactory::get().describeParameters("mstwGrid"));
-        desc.add("continuumSF", StructureFunctionsFactory::get().describeParameters("gd11p"));
+        desc.add("resonancesSF", StructureFunctionsFactory::get().describeParameters("ChristyBosted"));
+        desc.add("perturbativeSF", StructureFunctionsFactory::get().describeParameters("MSTWGrid"));
+        desc.add("continuumSF", StructureFunctionsFactory::get().describeParameters("GD11p"));
         return desc;
       }
 
@@ -124,4 +124,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::Schaefer;
-REGISTER_STRFUN("luxLike", 301, Schaefer);
+REGISTER_STRFUN("LUXLike", 301, Schaefer);

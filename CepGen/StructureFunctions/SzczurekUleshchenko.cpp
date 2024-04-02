@@ -66,4 +66,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::SzczurekUleshchenko;
-REGISTER_STRFUN("szczurekUleshchenko", 12, SzczurekUleshchenko);
+REGISTER_STRFUN("SzczurekUleshchenko", 12, SzczurekUleshchenko);

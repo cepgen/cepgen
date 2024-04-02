@@ -59,4 +59,4 @@ namespace cepgen {
   }  // namespace strfun
 }  // namespace cepgen
 using cepgen::strfun::DonnachieLandshoff;
-REGISTER_STRFUN("donnachieLandshoff", 105, DonnachieLandshoff);
+REGISTER_STRFUN("DonnachieLandshoff", 105, DonnachieLandshoff);

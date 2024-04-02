@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("process,p", "process to compute", &proc_name, "lpair")
       .addOptionalArgument("num-gen,g", "number of events to generate", &num_gen, 50'000)
       .addOptionalArgument("num-sigma,n", "max. number of std.dev.", &num_sigma, 3.)
-      .addOptionalArgument("str-fun,s", "struct.functions modelling", &str_fun, "suriYennie")
+      .addOptionalArgument("str-fun,s", "struct.functions modelling", &str_fun, "SuriYennie")
       .addOptionalArgument("integrator,i", "type of integrator used", &integrator, "Vegas")
       .addOptionalArgument("plotter,t", "type of plotter to use", &plotter, "")
       .addOptionalArgument("chi2,x", "chi2 value cut for histograms compatibility test", &chi2, 1.)
