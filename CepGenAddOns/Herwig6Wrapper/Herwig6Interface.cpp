@@ -18,6 +18,8 @@
 
 #include <unistd.h>
 
+#include <cstdio>
+
 #include "CepGenAddOns/Herwig6Wrapper/Herwig6Interface.h"
 
 namespace {
@@ -34,11 +36,13 @@ namespace cepgen {
       static bool kInitialised = false;
       if (kInitialised)
         return;
-      int out = dup(fileno(stdout));
-      freopen("/tmp/herwig.log", "w", stdout);
-      hwigin_();
-      dup2(out, fileno(stdout));
-      close(out);
+      {  // capture stdout to avoid "polluting" consumer code with unmanaged output
+        int out = dup(fileno(stdout));
+        freopen("/tmp/herwig.log", "w", stdout);
+        hwigin_();
+        dup2(out, fileno(stdout));
+        close(out);
+      }
       kInitialised = true;
     }
     double hwuaem(double q2) { return hwuaem_(q2); }
