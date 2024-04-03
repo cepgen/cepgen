@@ -59,6 +59,7 @@ namespace cepgen {
         add<ParametersDescription>(key, oth.get(key)).setDescription(desc);
       }
     obj_descr_.insert(oth.obj_descr_.begin(), oth.obj_descr_.end());
+    obj_values_.append(oth.obj_values_);
     ParametersList::operator+=(oth);
     return *this;
   }
@@ -273,6 +274,13 @@ namespace cepgen {
   ParametersDescription::ParameterValues& ParametersDescription::ParameterValues::allow(const std::string& val,
                                                                                         const std::string& descr) {
     str_vals_[val] = descr;
+    return *this;
+  }
+
+  ParametersDescription::ParameterValues& ParametersDescription::ParameterValues::append(
+      const ParametersDescription::ParameterValues& oth) {
+    int_vals_.insert(oth.int_vals_.begin(), oth.int_vals_.end());
+    str_vals_.insert(oth.str_vals_.begin(), oth.str_vals_.end());
     return *this;
   }
 
