@@ -102,9 +102,6 @@ namespace cepgen {
       inline bool allAllowed() const { return all_allowed_; }  ///< Are all values allowed?
       bool empty() const;  ///< Check if a parameter has a limited set of allowed values
 
-      ParameterValues& allow(int, const std::string& = "");                 ///< Allow an integer value for a parameter
-      ParameterValues& allow(const std::string&, const std::string& = "");  ///< Allow a string value for a parameter
-      void allowAll() { all_allowed_ = true; }             ///< Allow all values to be set for a parameter
       std::map<std::string, std::string> allowed() const;  ///< Helper list of allowed values (all types) for a parameter
 
       bool validate(int) const;                 ///< Check if an integer value is allowed for a parameter
@@ -114,12 +111,17 @@ namespace cepgen {
       bool all_allowed_{true};
       std::map<int, std::string> int_vals_;
       std::map<std::string, std::string> str_vals_;
+      friend ParametersDescription;
     };
-
-    inline const ParameterValues& values() const { return obj_values_; }  ///< Possible values for a parameter
-    inline ParameterValues& values() { return obj_values_; }              ///< Possible values for a parameter
+    inline const ParameterValues& allowedValues() const { return obj_values_; }  ///< Possible values for a parameter
+    ParametersDescription& allow(int, const std::string& = "");  ///< Allow an integer value for a parameter
+    ParametersDescription& allow(const std::string&,
+                                 const std::string& = "");  ///< Allow a string value for a parameter
+    void allowAll() { obj_values_.all_allowed_ = true; }    ///< Allow all values to be set for a parameter
 
   private:
+    inline ParameterValues& allowedValues() { return obj_values_; }  ///< Possible values for a parameter
+
     std::string mod_key_, mod_descr_;
     bool is_vec_params_{false};
     std::map<std::string, ParametersDescription> obj_descr_;

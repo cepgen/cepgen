@@ -68,7 +68,6 @@ public:
     desc.add<bool>("ktFactorised", true);
     desc.add<int>("method", 1)
         .setDescription("Matrix element computation method")
-        .values()
         .allow(0, "on-shell")
         .allow(1, "off-shell by Nachtmann et al.");
     desc.add<ParametersDescription>("polarisationStates", PolarisationState::description());

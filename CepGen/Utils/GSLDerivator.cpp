@@ -35,7 +35,6 @@ namespace cepgen {
         desc.setDescription("GSL numerical differentiation algorithm");
         desc.addAs<int, Mode>("mode", Mode::central)
             .setDescription("mode used for the adaptive difference algorithm")
-            .values()
             .allow(0, "central")
             .allow(1, "forward")
             .allow(2, "backward");

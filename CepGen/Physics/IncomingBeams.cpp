@@ -270,7 +270,6 @@ namespace cepgen {
     desc.add<double>("sqrtS", 0.).setDescription("Two-beam centre of mass energy (in GeV)");
     desc.addAs<int, mode::Kinematics>("mode", mode::Kinematics::invalid)
         .setDescription("Process kinematics mode")
-        .values()
         .allow(1, "elastic")
         .allow(2, "elastic-inelastic")
         .allow(3, "inelastic-elastic")

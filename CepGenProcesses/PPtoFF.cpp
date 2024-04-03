@@ -50,7 +50,6 @@ public:
     desc.addAs<int, pdgid_t>("pair", PDG::muon).setDescription("type of central particles emitted");
     desc.addAs<int, Mode>("method", Mode::offShell)
         .setDescription("Matrix element computation method")
-        .values()
         .allow(0, "on-shell")
         .allow(1, "off-shell");
     desc.add("offShellParameters", OffShellParameters::description());

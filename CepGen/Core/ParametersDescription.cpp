@@ -58,7 +58,10 @@ namespace cepgen {
       if (static_cast<ParametersList>(oth).has<ParametersList>(key)) {
         ParametersList::erase(key);
         const auto& desc = get(key);
-        add<ParametersDescription>(key, oth.get(key)).setDescription(desc.description()).values().append(desc.values());
+        add<ParametersDescription>(key, oth.get(key))
+            .setDescription(desc.description())
+            .allowedValues()
+            .append(desc.allowedValues());
       }
     obj_descr_.insert(oth.obj_descr_.begin(), oth.obj_descr_.end());
     obj_values_.append(oth.obj_values_);
@@ -131,7 +134,7 @@ namespace cepgen {
             os << ParametersList::getString(key);
           if (const auto& par_desc = obj.description(); !par_desc.empty())
             os << " <- " << utils::colourise(par_desc, utils::Colour::blue, utils::Modifier::italic);
-          if (const auto& allowed_vals = obj.values(); !allowed_vals.empty()) {
+          if (const auto& allowed_vals = obj.allowedValues(); !allowed_vals.empty()) {
             os << " with allowed values:\n" << sep(offset + 2);
             std::string list_sep;
             for (const auto& kv : allowed_vals.allowed())
@@ -231,22 +234,22 @@ namespace cepgen {
       }
     }
     for (const auto& kv : obj_descr_) {  // simple value
-      if (!kv.second.values().allAllowed()) {
+      if (!kv.second.allowedValues().allAllowed()) {
         const auto validation_error =
             [](const auto& key, const auto& val, const ParametersDescription& desc) -> std::string {
           std::ostringstream os;
           os << "Invalid value for key '" << key << "'"
              << (!desc.description().empty() ? " ("s + desc.description() + ")" : "") << ".\n"
              << "Allowed values:\n";
-          for (const auto& kv : desc.values().allowed())
+          for (const auto& kv : desc.allowedValues().allowed())
             os << " * " << kv.first << (!kv.second.empty() ? " (" + kv.second + ")" : "") << "\n";
           os << "Steered value: '" << utils::toString(val) + "'.";
           return os.str();
         };
-        if (plist.has<int>(kv.first) && !kv.second.values().validate(plist.get<int>(kv.first)))
+        if (plist.has<int>(kv.first) && !kv.second.allowedValues().validate(plist.get<int>(kv.first)))
           throw CG_FATAL("ParametersDescription:validate")
               << validation_error(kv.first, plist.get<int>(kv.first), kv.second);
-        if (plist.has<std::string>(kv.first) && !kv.second.values().validate(plist.get<std::string>(kv.first)))
+        if (plist.has<std::string>(kv.first) && !kv.second.allowedValues().validate(plist.get<std::string>(kv.first)))
           throw CG_FATAL("ParametersDescription:validate")
               << validation_error(kv.first, plist.get<std::string>(kv.first), kv.second);
       }
@@ -270,6 +273,18 @@ namespace cepgen {
     return *this;
   }
 
+  ParametersDescription& ParametersDescription::allow(int val, const std::string& descr) {
+    obj_values_.int_vals_[val] = descr;
+    obj_values_.all_allowed_ = false;
+    return *this;
+  }
+
+  ParametersDescription& ParametersDescription::allow(const std::string& val, const std::string& descr) {
+    obj_values_.str_vals_[val] = descr;
+    obj_values_.all_allowed_ = false;
+    return *this;
+  }
+
   std::ostream& operator<<(std::ostream& os, const ParametersDescription& desc) { return os << desc.describe(); }
 
   std::ostream& operator<<(std::ostream& os, const ParametersDescription::Type& type) {
@@ -287,20 +302,6 @@ namespace cepgen {
   }
 
   bool ParametersDescription::ParameterValues::empty() const { return int_vals_.empty() && str_vals_.empty(); }
-
-  ParametersDescription::ParameterValues& ParametersDescription::ParameterValues::allow(int val,
-                                                                                        const std::string& descr) {
-    int_vals_[val] = descr;
-    all_allowed_ = false;
-    return *this;
-  }
-
-  ParametersDescription::ParameterValues& ParametersDescription::ParameterValues::allow(const std::string& val,
-                                                                                        const std::string& descr) {
-    str_vals_[val] = descr;
-    all_allowed_ = false;
-    return *this;
-  }
 
   ParametersDescription::ParameterValues& ParametersDescription::ParameterValues::append(
       const ParametersDescription::ParameterValues& oth) {

@@ -40,7 +40,6 @@ namespace cepgen {
         initialise();
         desc.add<int>("mode", 1)
             .setDescription("running mode")
-            .values()
             .allow(1, "two-loop flavour thresholds")
             .allow(2, "ratio of mode-1 with 5-flavour beta with Lambda=QCDL3")
             .allow(3, "one-loop with 5-flavour beta and Lambda=QCDL3");
