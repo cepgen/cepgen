@@ -237,17 +237,18 @@ namespace cepgen {
           std::ostringstream os;
           os << "Invalid value for key '" << key << "'"
              << (!desc.description().empty() ? " ("s + desc.description() + ")" : "") << ".\n"
-             << desc.values() << ", got '" << utils::toString(val) + "'.";
+             << "Allowed values:\n";
+          for (const auto& kv : desc.values().allowed())
+            os << " * " << kv.first << (!kv.second.empty() ? " (" + kv.second + ")" : "") << "\n";
+          os << "Steered value: '" << utils::toString(val) + "'.";
           return os.str();
         };
         if (plist.has<int>(kv.first) && !kv.second.values().validate(plist.get<int>(kv.first)))
           throw CG_FATAL("ParametersDescription:validate")
-              << validation_error(kv.first, plist.get<int>(kv.first), kv.second) << "\n"
-              << "Full description: " << (*this) << ".";
+              << validation_error(kv.first, plist.get<int>(kv.first), kv.second);
         if (plist.has<std::string>(kv.first) && !kv.second.values().validate(plist.get<std::string>(kv.first)))
           throw CG_FATAL("ParametersDescription:validate")
-              << validation_error(kv.first, plist.get<std::string>(kv.first), kv.second) << "\n"
-              << "Full description: " << (*this) << ".";
+              << validation_error(kv.first, plist.get<std::string>(kv.first), kv.second);
       }
     }
     CG_DEBUG_LOOP("ParametersDescription:validate") << "Validating user parameters:\n"
