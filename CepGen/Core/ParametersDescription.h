@@ -78,32 +78,54 @@ namespace cepgen {
     ParametersDescription& addParametersDescriptionVector(const std::string&,
                                                           const ParametersDescription&,
                                                           const std::vector<ParametersList>& def = {});
-    /// Human-readable description of all parameters and their default value
-    std::string describe(size_t offset = 0) const;
-    /// List of parameters associated to this description object
-    ParametersList& parameters();
-    /// List of parameters associated to this description object
-    const ParametersList& parameters() const;
-    /// Ensure the description exists
-    bool has(const std::string&) const;
-    /// Get the description of a sub-object
-    const ParametersDescription& get(const std::string&) const;
-    /// Validate a set of used-steered parameters
-    ParametersList validate(const ParametersList&) const;
-    /// Set the parameters value for this description object
-    ParametersDescription steer(const ParametersList&) const;
+    std::string describe(size_t offset = 0) const;  ///< Human-readable description of parameters and their default value
+    ParametersList& parameters();                   ///< List of parameters associated to this description object
+    const ParametersList& parameters() const;       ///< List of parameters associated to this description object
+    bool has(const std::string&) const;             ///< Ensure the description exists
+    const ParametersDescription& get(const std::string&) const;  ///< Get the description of a sub-object
+    ParametersList validate(const ParametersList&) const;        ///< Validate a set of used-steered parameters
+    ParametersDescription steer(const ParametersList&) const;    ///< Set parameters value for this description object
 
-    /// Parameter type
-    enum struct Type { Value, Parameters, Module, ParametersVector };
-    /// Human-readable description of a parameter type
-    friend std::ostream& operator<<(std::ostream&, const Type&);
-    /// Get the type of parameter considered
-    Type type() const;
+    enum struct Type { Value, Parameters, Module, ParametersVector };  ///< Parameter type
+    friend std::ostream& operator<<(std::ostream&, const Type&);       ///< Human-readable description of parameter type
+    Type type() const;                                                 ///< Get the type of parameter considered
+
+    /// A collection of valid values for a given parameter
+    class ParameterValues {
+    public:
+      ParameterValues() {}
+
+      /// Short printout of allowed parameter values
+      friend std::ostream& operator<<(std::ostream&, const ParameterValues&);
+
+      ParameterValues& append(const ParameterValues&);         ///< Merge two collections of allowed values
+      inline bool allAllowed() const { return all_allowed_; }  ///< Are all values allowed?
+      bool empty() const;  ///< Check if a parameter has a limited set of allowed values
+
+      std::map<std::string, std::string> allowed() const;  ///< Helper list of allowed values (all types) for a parameter
+
+      bool validate(int) const;                 ///< Check if an integer value is allowed for a parameter
+      bool validate(const std::string&) const;  ///< Check if a string value is allowed for a parameter
+
+    private:
+      bool all_allowed_{true};
+      std::map<int, std::string> int_vals_;
+      std::map<std::string, std::string> str_vals_;
+      friend ParametersDescription;
+    };
+    inline const ParameterValues& allowedValues() const { return obj_values_; }  ///< Possible values for a parameter
+    ParametersDescription& allow(int, const std::string& = "");  ///< Allow an integer value for a parameter
+    ParametersDescription& allow(const std::string&,
+                                 const std::string& = "");  ///< Allow a string value for a parameter
+    void allowAll() { obj_values_.all_allowed_ = true; }    ///< Allow all values to be set for a parameter
 
   private:
+    inline ParameterValues& allowedValues() { return obj_values_; }  ///< Possible values for a parameter
+
     std::string mod_key_, mod_descr_;
     bool is_vec_params_{false};
     std::map<std::string, ParametersDescription> obj_descr_;
+    ParameterValues obj_values_;
   };
   template <>
   ParametersDescription& ParametersDescription::setKey<std::string>(const std::string&);

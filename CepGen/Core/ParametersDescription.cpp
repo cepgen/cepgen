@@ -23,6 +23,8 @@
 #include "CepGen/Utils/Collections.h"
 #include "CepGen/Utils/String.h"
 
+using namespace std::string_literals;
+
 namespace cepgen {
   ParametersDescription::ParametersDescription(const std::string& mod_key) {
     if (!mod_key.empty())
@@ -53,12 +55,16 @@ namespace cepgen {
   ParametersDescription& ParametersDescription::operator+=(const ParametersDescription& oth) {
     for (const auto& key : ParametersList::keysOf<std::vector<ParametersList> >())
       // particular case if one describes a set of key-indexed parameters list as a vector of parameters lists
-      if (((ParametersList)oth).has<ParametersList>(key)) {
-        const auto desc = get(key).description();
+      if (static_cast<ParametersList>(oth).has<ParametersList>(key)) {
+        const auto& desc = get(key);
         ParametersList::erase(key);
-        add<ParametersDescription>(key, oth.get(key)).setDescription(desc);
+        add<ParametersDescription>(key, oth.get(key))
+            .setDescription(desc.description())
+            .allowedValues()
+            .append(desc.allowedValues());
       }
     obj_descr_.insert(oth.obj_descr_.begin(), oth.obj_descr_.end());
+    obj_values_.append(oth.obj_values_);
     ParametersList::operator+=(oth);
     return *this;
   }
@@ -82,8 +88,7 @@ namespace cepgen {
       return Type::ParametersVector;
     if (obj_descr_.empty())
       return Type::Value;
-    const auto& mod_name = ParametersList::getNameString();
-    if (mod_name.empty())
+    if (const auto& mod_name = ParametersList::getNameString(); mod_name.empty())
       return Type::Parameters;
     return Type::Module;
   }
@@ -127,9 +132,14 @@ namespace cepgen {
             os << "\"" << ParametersList::getString(key) << "\"";
           else
             os << ParametersList::getString(key);
-          const auto& par_desc = obj.description();
-          if (!par_desc.empty())
+          if (const auto& par_desc = obj.description(); !par_desc.empty())
             os << " <- " << utils::colourise(par_desc, utils::Colour::blue, utils::Modifier::italic);
+          if (const auto& allowed_vals = obj.allowedValues(); !allowed_vals.empty()) {
+            os << " with allowed values:\n" << sep(offset + 2);
+            std::string list_sep;
+            for (const auto& kv : allowed_vals.allowed())
+              os << list_sep << kv.first << (!kv.second.empty() ? " (" + kv.second + ")" : ""), list_sep = ", ";
+          }
         } break;
         case Type::ParametersVector: {
           os << utils::colourise("Vector of parameters collections",
@@ -208,7 +218,7 @@ namespace cepgen {
   const ParametersList& ParametersDescription::parameters() const { return *this; }
 
   ParametersList ParametersDescription::validate(const ParametersList& user_params) const {
-    ParametersList plist = parameters();
+    auto plist = parameters();  // first copy the current parameters handled
     plist += user_params;
     for (const auto& key : keysOf<std::vector<ParametersList> >()) {
       if (user_params.has<std::vector<ParametersList> >(key)) {  // vector{ParametersList}
@@ -221,6 +231,27 @@ namespace cepgen {
         for (const auto& kit : pit.keys())
           plist.operator[]<ParametersList>(key).operator[]<ParametersList>(kit) =
               obj_descr_.at(key).validate(pit.get<ParametersList>(kit));
+      }
+    }
+    for (const auto& kv : obj_descr_) {  // simple value
+      if (!kv.second.allowedValues().allAllowed()) {
+        const auto validation_error =
+            [](const auto& key, const auto& val, const ParametersDescription& desc) -> std::string {
+          std::ostringstream os;
+          os << "Invalid value for key '" << key << "'"
+             << (!desc.description().empty() ? " ("s + desc.description() + ")" : "") << ".\n"
+             << "Allowed values:\n";
+          for (const auto& kv : desc.allowedValues().allowed())
+            os << " * " << kv.first << (!kv.second.empty() ? " (" + kv.second + ")" : "") << "\n";
+          os << "Steered value: '" << utils::toString(val) + "'.";
+          return os.str();
+        };
+        if (plist.has<int>(kv.first) && !kv.second.allowedValues().validate(plist.get<int>(kv.first)))
+          throw CG_FATAL("ParametersDescription:validate")
+              << validation_error(kv.first, plist.get<int>(kv.first), kv.second);
+        if (plist.has<std::string>(kv.first) && !kv.second.allowedValues().validate(plist.get<std::string>(kv.first)))
+          throw CG_FATAL("ParametersDescription:validate")
+              << validation_error(kv.first, plist.get<std::string>(kv.first), kv.second);
       }
     }
     CG_DEBUG_LOOP("ParametersDescription:validate") << "Validating user parameters:\n"
@@ -242,6 +273,18 @@ namespace cepgen {
     return *this;
   }
 
+  ParametersDescription& ParametersDescription::allow(int val, const std::string& descr) {
+    obj_values_.int_vals_[val] = descr;
+    obj_values_.all_allowed_ = false;
+    return *this;
+  }
+
+  ParametersDescription& ParametersDescription::allow(const std::string& val, const std::string& descr) {
+    obj_values_.str_vals_[val] = descr;
+    obj_values_.all_allowed_ = false;
+    return *this;
+  }
+
   std::ostream& operator<<(std::ostream& os, const ParametersDescription& desc) { return os << desc.describe(); }
 
   std::ostream& operator<<(std::ostream& os, const ParametersDescription::Type& type) {
@@ -256,5 +299,46 @@ namespace cepgen {
         return os << "Parameters vector";
     }
     return os << "{invalid}";
+  }
+
+  bool ParametersDescription::ParameterValues::empty() const { return int_vals_.empty() && str_vals_.empty(); }
+
+  ParametersDescription::ParameterValues& ParametersDescription::ParameterValues::append(
+      const ParametersDescription::ParameterValues& oth) {
+    int_vals_.insert(oth.int_vals_.begin(), oth.int_vals_.end());
+    str_vals_.insert(oth.str_vals_.begin(), oth.str_vals_.end());
+    return *this;
+  }
+
+  std::map<std::string, std::string> ParametersDescription::ParameterValues::allowed() const {
+    auto out = str_vals_;
+    for (const auto& val : int_vals_)
+      out[std::to_string(val.first)] = val.second;
+    return out;
+  }
+
+  bool ParametersDescription::ParameterValues::validate(int val) const {
+    if (allAllowed())
+      return true;
+    return int_vals_.count(val) > 0;
+  }
+
+  bool ParametersDescription::ParameterValues::validate(const std::string& val) const {
+    if (allAllowed())
+      return true;
+    return str_vals_.count(val) > 0;
+  }
+
+  std::ostream& operator<<(std::ostream& os, const ParametersDescription::ParameterValues& vals) {
+    os << "Allowed values:";
+    if (vals.allAllowed())
+      return os << " any";
+    if (vals.empty())
+      return os << " none";
+    if (!vals.int_vals_.empty())
+      os << " integer{" << utils::repr(utils::keys(vals.int_vals_)) << "}";
+    if (!vals.str_vals_.empty())
+      os << " string{" << utils::repr(utils::keys(vals.str_vals_)) << "}";
+    return os;
   }
 }  // namespace cepgen
