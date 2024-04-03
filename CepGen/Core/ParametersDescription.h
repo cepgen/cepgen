@@ -98,17 +98,20 @@ namespace cepgen {
       /// Short printout of allowed parameter values
       friend std::ostream& operator<<(std::ostream&, const ParameterValues&);
 
-      ParameterValues& append(const ParameterValues&);  ///< Merge two collections of allowed values
-      bool empty() const;                               ///< Check if a parameter has a limited set of allowed values
+      ParameterValues& append(const ParameterValues&);         ///< Merge two collections of allowed values
+      inline bool allAllowed() const { return all_allowed_; }  ///< Are all values allowed?
+      bool empty() const;  ///< Check if a parameter has a limited set of allowed values
 
       ParameterValues& allow(int, const std::string& = "");                 ///< Allow an integer value for a parameter
       ParameterValues& allow(const std::string&, const std::string& = "");  ///< Allow a string value for a parameter
+      void allowAll() { all_allowed_ = true; }             ///< Allow all values to be set for a parameter
       std::map<std::string, std::string> allowed() const;  ///< Helper list of allowed values (all types) for a parameter
 
       bool validate(int) const;                 ///< Check if an integer value is allowed for a parameter
       bool validate(const std::string&) const;  ///< Check if a string value is allowed for a parameter
 
     private:
+      bool all_allowed_{true};
       std::map<int, std::string> int_vals_;
       std::map<std::string, std::string> str_vals_;
     };

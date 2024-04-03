@@ -274,7 +274,8 @@ namespace cepgen {
         .allow(1, "elastic")
         .allow(2, "elastic-inelastic")
         .allow(3, "inelastic-elastic")
-        .allow(4, "double-dissociative");
+        .allow(4, "double-dissociative")
+        .allowAll();
     desc.addParametersDescriptionVector(
             "formFactors",
             FormFactorsFactory::get().describeParameters(formfac::gFFStandardDipoleHandler),
