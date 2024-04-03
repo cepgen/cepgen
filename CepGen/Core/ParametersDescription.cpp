@@ -208,7 +208,7 @@ namespace cepgen {
   const ParametersList& ParametersDescription::parameters() const { return *this; }
 
   ParametersList ParametersDescription::validate(const ParametersList& user_params) const {
-    ParametersList plist = parameters();
+    auto plist = parameters();  // first copy the current parameters handled
     plist += user_params;
     for (const auto& key : keysOf<std::vector<ParametersList> >()) {
       if (user_params.has<std::vector<ParametersList> >(key)) {  // vector{ParametersList}

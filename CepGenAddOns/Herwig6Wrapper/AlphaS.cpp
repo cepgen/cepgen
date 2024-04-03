@@ -38,9 +38,12 @@ namespace cepgen {
         auto desc = cepgen::Coupling::description();
         desc.setDescription("Herwig6 modelling of alpha(S) running");
         initialise();
-        desc.add<int>("mode", 1).setDescription(
-            "running mode (1=two-loop flavour thresholds, 2=ratio of mode-1 with 5-flavour beta with Lambda=QCDL3, "
-            "3=one-loop with 5-flavour beta and Lambda=QCDL3)");
+        desc.add<int>("mode", 1)
+            .setDescription("running mode")
+            .values()
+            .allow(1, "two-loop flavour thresholds")
+            .allow(2, "ratio of mode-1 with 5-flavour beta with Lambda=QCDL3")
+            .allow(3, "one-loop with 5-flavour beta and Lambda=QCDL3");
         desc.add<int>("ncolo", hwpram_.ncolo).setDescription("number of colours to consider");
         desc.add<double>("qcdlam", hwpram_.qcdlam).setDescription("5-flavour Lambda_MS-bar at large x/z");
         desc.add<double>("qcdl5", hwpram_.qcdl5).setDescription("5-flavour Lambda_MC");
