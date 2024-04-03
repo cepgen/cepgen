@@ -121,6 +121,18 @@ private:
                     .AppendText("(default value: ")
                     .AppendChild(CTML::Node("code", desc.parameters().getString(key, false)))
                     .AppendText(")"));
+          if (const auto& allowed_vals = desc.get(key).allowedValues(); !allowed_vals.empty()) {
+            item.AppendText(". Allowed values:");
+            CTML::Node itparams("ul");
+            for (const auto& it : allowed_vals.allowed()) {
+              CTML::Node val("li");
+              val.AppendChild(CTML::Node("code", it.first));
+              if (!it.second.empty())
+                val.AppendText(" (" + it.second + ")");
+              itparams.AppendChild(val);
+            }
+            item.AppendChild(itparams);
+          }
         } else if (subdesc_type == ParametersDescription::Type::ParametersVector) {
           item.AppendText(" vector of parameters");
           if (!subdesc.description().empty())
