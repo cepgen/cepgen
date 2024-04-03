@@ -61,7 +61,7 @@ namespace cepgen {
     virtual inline void setParameters(const ParametersList& params) override {
       if (params.empty())
         return;
-      Steerable::setParameters(T::description().validate(params));
+      Steerable::setParameters(params);
 #define __TYPE_ENUM(type, map_name) \
   for (const auto& kv : map_name)   \
     params_.fill(kv.first, kv.second);
