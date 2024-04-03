@@ -41,17 +41,20 @@ namespace cepgen {
         auto desc = cepgen::Coupling::description();
         desc.setDescription("Pythia6 modelling of alpha(S) running");
         desc.add<int>("order", mstu(111))
-            .setDescription(
-                "order of alpha(S) evaluation (0=fixed at 'fixedAlphaS', 1=1st order running, 2=2nd order running)");
+            .setDescription("order of alpha(S) evaluation")
+            .allow(0, "fixed at 'fixedAlphaS'")
+            .allow(1, "1st order running")
+            .allow(2, "2nd order running");
         desc.add<int>("nf", mstu(112)).setDescription("nominal number of ﬂavours assumed in alpha(s) expression");
         desc.add<int>("minNf", mstu(113))
             .setDescription("minimum number of ﬂavours that may be assumed in alpha(S) expression");
         desc.add<int>("maxNf", mstu(114))
             .setDescription("minimum number of ﬂavours that may be assumed in alpha(S) expression");
         desc.add<int>("singularityTreatment", mstu(115))
-            .setDescription(
-                "treatment of alpha(S) singularities for Q^2->0 (0=allow divergence, 1=log-softening, 2=freeze under "
-                "Q^2 transition value)");
+            .setDescription("treatment of alpha(S) singularities for Q^2->0")
+            .allow(0, "allow divergence")
+            .allow(1, "log-softening")
+            .allow(2, "freeze under Q^2 transition value");
         desc.add<double>("fixedAlphaS", paru(111))
             .setDescription(
                 "fix alpha(S) value assumed when order=0 (and also in parton showers when alpha(S) is assumed fix "
