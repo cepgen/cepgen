@@ -257,4 +257,35 @@ namespace cepgen {
     }
     return os << "{invalid}";
   }
+
+  bool ParametersDescription::ParameterValues::empty() const { return int_vals_.empty() && str_vals_.empty(); }
+
+  ParametersDescription::ParameterValues& ParametersDescription::ParameterValues::allow(int val,
+                                                                                        const std::string& descr) {
+    int_vals_[val] = descr;
+    return *this;
+  }
+
+  ParametersDescription::ParameterValues& ParametersDescription::ParameterValues::allow(const std::string& val,
+                                                                                        const std::string& descr) {
+    str_vals_[val] = descr;
+    return *this;
+  }
+
+  bool ParametersDescription::ParameterValues::validate(int val) const {
+    if (empty())
+      return true;
+    return int_vals_.count(val) > 0;
+  }
+
+  bool ParametersDescription::ParameterValues::validate(const std::string& val) const {
+    if (empty())
+      return true;
+    return str_vals_.count(val) > 0;
+  }
+
+  std::ostream& operator<<(std::ostream& os, const ParametersDescription::ParameterValues& vals) {
+    return os << "Allowed values: integer" << utils::repr(utils::keys(vals.int_vals_)) << ", string"
+              << utils::repr(utils::keys(vals.str_vals_));
+  }
 }  // namespace cepgen
