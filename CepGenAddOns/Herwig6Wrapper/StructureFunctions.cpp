@@ -51,7 +51,6 @@ namespace cepgen {
             .allow(6, "MRST98LO (central alpha(S)/gluon)")
             .allow(7, "MRST98LO (higher gluon)")
             .allow(8, "MRST98LO (average of central and higher gluon)");
-        ;
         return desc;
       }
 
