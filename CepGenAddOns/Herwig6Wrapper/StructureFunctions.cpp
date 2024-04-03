@@ -41,13 +41,17 @@ namespace cepgen {
             .allow(75, "neutron")
             .allow(91, "antiproton")
             .allow(93, "antineutron");
-        desc.add<int>("nset", 5)
+        desc.add<int>("nset", 8)
             .setDescription("structure functions set")
-            .allow(1, "Duke & Owens for soft glue")
-            .allow(2, "Duke & Owens for hard glue")
-            .allow(3, "Eichten & al. nucleons only")
-            .allow(4, "Eichten & al. nucleons only")
-            .allow(5, "Owens");
+            .allow(1, "Duke & Owens set 1 (for soft/hard glue)")
+            .allow(2, "Duke & Owens set 2 (for soft/hard glue)")
+            .allow(3, "Eichten & al. set 1 (nucleons only)")
+            .allow(4, "Eichten & al. set 2 (nucleons only)")
+            .allow(5, "Owens set 1.1")
+            .allow(6, "MRST98LO (central alpha(S)/gluon)")
+            .allow(7, "MRST98LO (higher gluon)")
+            .allow(8, "MRST98LO (average of central and higher gluon)");
+        ;
         return desc;
       }
 
