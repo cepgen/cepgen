@@ -16,6 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/Utils/Collections.h"
 #include "CepGen/Utils/DocumentationGenerator.h"
 #include "CepGen/Utils/String.h"
 

@@ -29,6 +29,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Collections.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenAddOns/HepMC2Wrapper/HepMC2EventInterface.h"
 

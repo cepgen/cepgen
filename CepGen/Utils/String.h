@@ -36,18 +36,21 @@ namespace cepgen {
     inline std::string toString(const T& obj) {
       return std::to_string(obj);
     }
+    /// Specialisation of string conversion of parameters list
     template <>
     std::string toString(const ParametersList&);
+    /// Trivial specialisation of string conversion of string
     template <>
     inline std::string toString(const std::string& obj) {
       return obj;
     }
     template <>
-    std::string toString(const std::wstring&);
-    std::wstring toWstring(const std::string& str);  ///< Convert a wide characters to a standard characters string
+    std::string toString(const std::wstring&);       ///< Convert a wide characters to a standard characters string
+    std::wstring toWstring(const std::string& str);  ///< Convert a standard characters to a wide characters string
     std::string toCamelCase(const std::string&, bool lower = true);  ///< Convert any case into a camelCase string
     bool isInt(const std::string&);                                  ///< Check if a string is also an integer
     bool isFloat(const std::string&);  ///< Check if a string is also a floating point number
+
     /// Format a string using a printf style format descriptor.
     template <typename... Args>
     inline std::string format(const std::string& fmt, Args... args) {
@@ -119,7 +122,6 @@ namespace cepgen {
     /// Merge a collection of a printable type in a single string
     template <typename T>
     std::string merge(const std::vector<T>&, const std::string&);
-    /// Trivial dimension-1 "merger" for generic input
     /// Merge a collection of collections of a printable type in a single string
     template <typename T>
     std::string merge(const std::vector<std::vector<T> >&, const std::string&);
@@ -134,35 +136,16 @@ namespace cepgen {
     std::string merge(const ParametersList&, const std::string&);
     /// Trivial dimension-1 "merger" for limits input
     std::string merge(const Limits&, const std::string&);
-    /// Check if a collection contains an item
-    template <typename T>
-    inline bool contains(const std::vector<T>& coll, const T& item) {
-      return std::find(coll.begin(), coll.end(), item) != coll.end();
-    }
-    /// Check if a collection contains an item
-    template <typename T>
-    inline bool contains(const std::set<T>& coll, const T& item) {
-      return std::find(coll.begin(), coll.end(), item) != coll.end();
-    }
-    template <typename K, typename T>
-    inline bool contains(const std::unordered_map<K, T>& coll, const T& item) {
-      return std::find_if(coll.begin(), coll.end(), [&item](const auto& kv) { return kv.second == item; }) !=
-             coll.end();
-    }
-    template <typename T>
-    void normalise(std::vector<T>& coll);  ///< Remove duplicates and sort a collection
-    /// Check if all elements of a collection are uniform
-    template <typename T>
-    inline bool uniform(const std::vector<T>& coll) {
-      return coll.size() > 1 ? coll == std::vector<T>(coll.size(), coll.at(0)) : true;
-    }
+
     std::string toUpper(const std::string&);  ///< Capitalise a string
     std::string toLower(const std::string&);  ///< Lowercase version of a string
+
     /// Get a (list of) substring(s) between two characters chains
     /// \param[in] beg Start delimiter of the substring(s)
     /// \param[in] end End delimiter of the substring(s)
     std::vector<std::string> between(const std::string& str, const std::string& beg, const std::string& end);
     std::string s(const std::string&, float, bool = true);  ///< Add a trailing "s" when needed
+
     /// Helper to print a vector
     template <class T>
     inline std::string repr(const std::vector<T>& vec,

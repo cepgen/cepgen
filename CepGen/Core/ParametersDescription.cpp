@@ -20,6 +20,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersDescription.h"
+#include "CepGen/Utils/Collections.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {

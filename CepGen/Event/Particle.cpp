@@ -20,6 +20,7 @@
 
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Collections.h"
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 

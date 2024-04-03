@@ -18,6 +18,7 @@
 
 #include <cstdlib>
 
+#include "CepGen/Utils/Collections.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
 

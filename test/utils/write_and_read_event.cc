@@ -23,6 +23,7 @@
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Modules/EventImporterFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/Collections.h"
 #include "CepGen/Utils/Test.h"
 #include "CepGenAddOns/Common/EventUtils.h"
 

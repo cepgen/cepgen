@@ -20,6 +20,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
+#include "CepGen/Utils/Collections.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {

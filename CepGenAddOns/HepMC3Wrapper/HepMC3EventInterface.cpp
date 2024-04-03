@@ -30,7 +30,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Utils/String.h"
+#include "CepGen/Utils/Collections.h"
 #include "CepGenAddOns/HepMC3Wrapper/HepMC3EventInterface.h"
 
 namespace HepMC3 {

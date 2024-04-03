@@ -22,6 +22,7 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Physics/MCDFileParser.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Collections.h"
 #include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/String.h"
