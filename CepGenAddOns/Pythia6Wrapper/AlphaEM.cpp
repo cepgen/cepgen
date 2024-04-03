@@ -37,9 +37,11 @@ namespace cepgen {
         auto desc = cepgen::Coupling::description();
         desc.setDescription("Pythia6 modelling of alpha(EM) running");
         desc.add<int>("mode", mstu(101))
-            .setDescription(
-                "procedure for alpha(EM) evaluation (0=fix at 'fixedAlphaEM', 1=running accounting to fermion loops, "
-                "2=fix with low-high Q^2 splitting)");
+            .setDescription("procedure for alpha(EM) evaluation")
+            .values()
+            .allow(0, "fix at 'fixedAlphaEM'")
+            .allow(1, "running accounting to fermion loops")
+            .allow(2, "fix with low-high Q^2 splitting");
         desc.add<double>("fixedAlphaEM", paru(101))
             .setDescription("electromagnetic fine structure constant at vanishing mom.transfer");
         desc.add<double>("sin2ThetaW", paru(102)).setDescription("weak mixing angle of the standard electroweak model");
