@@ -20,6 +20,8 @@
 #include "CepGen/Utils/DocumentationGenerator.h"
 #include "CepGen/Utils/String.h"
 
+using namespace std::string_literals;
+
 namespace cepgen {
   namespace utils {
     /// Text documentation generator object
@@ -55,7 +57,11 @@ namespace cepgen {
           for (const auto& mod : cat.second.modules) {
             modules_names.emplace_back(camel_case ? utils::toCamelCase(mod.first) : mod.first);
             if (light) {
-              os << "\n> " << colourise(mod.first, Colour::cyan, Modifier::underline | Modifier::bold) << ": "
+              os << "\n"
+                 << (cat.second.modules_indices.count(mod.first) > 0
+                         ? "#"s + std::to_string(cat.second.modules_indices.at(mod.first)) + ": "
+                         : ""s)
+                 << colourise(mod.first, Colour::cyan, Modifier::underline | Modifier::bold) << ": "
                  << mod.second.description() << (mod.second.empty() ? " (*)" : "");
             } else {
               os << "\n";
