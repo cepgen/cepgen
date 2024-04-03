@@ -75,7 +75,9 @@ public:
       CTML::Node mods("p");
       for (const auto& mod : cat.second.modules)
         mods.AppendChild(CTML::Node("a").SetAttribute("name", utils::toString(cat.first) + mod.first))
-            .AppendChild(CTML::Node("span").AppendChild(moduleDescription(mod.second)));
+            .AppendChild(CTML::Node("span").AppendChild(moduleDescription(
+                mod.second,
+                cat.second.modules_indices.count(mod.first) > 0 ? cat.second.modules_indices.at(mod.first) : -1)));
       container_.AppendChild(mods);
     }
     doc_.AppendNodeToBody(container_);
@@ -88,11 +90,15 @@ public:
   }
 
 private:
-  inline static CTML::Node moduleDescription(const ParametersDescription& desc) {
+  inline static CTML::Node moduleDescription(const ParametersDescription& desc, int index = -1) {
     CTML::Node out("div.module");
     if (desc.empty())
       return out;
-    CTML::Node mod_summary(CTML::Node("summary").AppendChild(CTML::Node("b", desc.parameters().getNameString())));
+    CTML::Node node_summary("summary");
+    node_summary.AppendChild(CTML::Node("b", desc.parameters().getNameString()));
+    if (index > 0)
+      node_summary.AppendText(" (index ").AppendChild(CTML::Node("code", std::to_string(index))).AppendText(")");
+    CTML::Node mod_summary(node_summary);
     CTML::Node mod_details("details");
     CTML::Node mod_params_list(CTML::Node("p").AppendText("List of parameters:"));
     const auto desc_type = desc.type();
