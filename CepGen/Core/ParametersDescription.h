@@ -95,12 +95,14 @@ namespace cepgen {
     public:
       ParameterValues() {}
 
+      /// Short printout of allowed parameter values
       friend std::ostream& operator<<(std::ostream&, const ParameterValues&);
 
       bool empty() const;  ///< Check if a parameter has a limited set of allowed values
 
       ParameterValues& allow(int, const std::string& = "");                 ///< Allow an integer value for a parameter
       ParameterValues& allow(const std::string&, const std::string& = "");  ///< Allow a string value for a parameter
+      std::map<std::string, std::string> allowed() const;  ///< Helper list of allowed values (all types) for a parameter
 
       bool validate(int) const;                 ///< Check if an integer value is allowed for a parameter
       bool validate(const std::string&) const;  ///< Check if a string value is allowed for a parameter

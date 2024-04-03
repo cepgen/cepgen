@@ -127,9 +127,13 @@ namespace cepgen {
             os << "\"" << ParametersList::getString(key) << "\"";
           else
             os << ParametersList::getString(key);
-          const auto& par_desc = obj.description();
-          if (!par_desc.empty())
+          if (const auto& par_desc = obj.description(); !par_desc.empty())
             os << " <- " << utils::colourise(par_desc, utils::Colour::blue, utils::Modifier::italic);
+          if (const auto& allowed_vals = obj.values(); !allowed_vals.empty()) {
+            os << " with allowed values:";
+            for (const auto& kv : allowed_vals.allowed())
+              os << "\n" << sep(offset + 2) << kv.first << (!kv.second.empty() ? " (" + kv.second + ")" : "");
+          }
         } break;
         case Type::ParametersVector: {
           os << utils::colourise("Vector of parameters collections",
@@ -272,6 +276,13 @@ namespace cepgen {
     return *this;
   }
 
+  std::map<std::string, std::string> ParametersDescription::ParameterValues::allowed() const {
+    auto out = str_vals_;
+    for (const auto& val : int_vals_)
+      out[std::to_string(val.first)] = val.second;
+    return out;
+  }
+
   bool ParametersDescription::ParameterValues::validate(int val) const {
     if (empty())
       return true;
@@ -285,7 +296,13 @@ namespace cepgen {
   }
 
   std::ostream& operator<<(std::ostream& os, const ParametersDescription::ParameterValues& vals) {
-    return os << "Allowed values: integer" << utils::repr(utils::keys(vals.int_vals_)) << ", string"
-              << utils::repr(utils::keys(vals.str_vals_));
+    os << "Allowed values:";
+    if (vals.empty())
+      return os << " none";
+    if (!vals.int_vals_.empty())
+      os << " integer{" << utils::repr(utils::keys(vals.int_vals_)) << "}";
+    if (!vals.str_vals_.empty())
+      os << " string{" << utils::repr(utils::keys(vals.str_vals_)) << "}";
+    return os;
   }
 }  // namespace cepgen
