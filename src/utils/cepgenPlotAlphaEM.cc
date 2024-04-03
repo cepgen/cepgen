@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -30,16 +30,20 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
+  cepgen::initialise();
+
   cepgen::Limits q_range;
   int num_points;
   string output_file, plotter;
+  vector<string> models;
   bool q2mode, logx, logy, draw_grid, ratio_plot;
 
   cepgen::ArgumentsParser(argc, argv)
+      .addOptionalArgument("models,m", "models to draw", &models, cepgen::AlphaEMFactory::get().modules())
       .addOptionalArgument("qrange,q", "virtuality range (GeV)", &q_range, cepgen::Limits{1., 101.})
       .addOptionalArgument("q2mode", "plot as a function of Q^2", &q2mode, false)
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 100)
-      .addOptionalArgument("output,o", "output file name", &output_file, "alphas.scan.output.txt")
+      .addOptionalArgument("output,o", "output file name", &output_file, "alphaem.scan.output.txt")
       .addOptionalArgument("logx", "logarithmic x-scale", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
@@ -47,37 +51,17 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .parse();
 
-  cepgen::initialise();
-
   struct alpha_t {
     string name;
     vector<double> vals;
     cepgen::utils::Graph1D graph;
   };
-  vector<alpha_t> alphas, alphaem;
+  vector<alpha_t> alphaem;
 
   const auto qvals = q_range.generate(num_points, logx);
-
-  {
-    // alphaS(Q) modellings part
+  {  // alphaEM(Q) modellings part
     size_t i = 0;
-    for (const auto& mod : cepgen::AlphaSFactory::get().modules()) {
-      const auto& algo = cepgen::AlphaSFactory::get().build(mod);
-      alphas.emplace_back(alpha_t{
-          mod,
-          vector<double>(num_points),
-          cepgen::utils::Graph1D(
-              mod, cepgen::utils::replaceAll(cepgen::AlphaSFactory::get().describe(mod), "alpha(S)", "\\alpha_{S}"))});
-      auto& as = alphas[i++];
-      for (size_t j = 0; j < qvals.size(); ++j) {
-        const auto val = (*algo)(qvals[j]);
-        as.vals[j] = val;
-        as.graph.addPoint(q2mode ? qvals[j] * qvals[j] : qvals[j], val);
-      }
-    }
-    // alphaEM(Q) modellings part
-    i = 0;
-    for (const auto& mod : cepgen::AlphaEMFactory::get().modules()) {
+    for (const auto& mod : models) {
       const auto& algo = cepgen::AlphaEMFactory::get().build(mod);
       alphaem.emplace_back(alpha_t{
           mod,
@@ -97,14 +81,10 @@ int main(int argc, char* argv[]) {
   // output ascii file
   ofstream out(output_file);
   out << "#";
-  for (const auto& smp : alphas)
-    out << "\t" << smp.name;
   for (const auto& smp : alphaem)
     out << "\t" << smp.name;
   for (size_t i = 0; i < qvals.size(); ++i) {
     out << "\n" << (q2mode ? qvals[i] * qvals[i] : qvals[i]);
-    for (const auto& smp : alphas)
-      out << "\t" << smp.vals[i];
     for (const auto& smp : alphaem)
       out << "\t" << smp.vals[i];
   }
@@ -124,15 +104,6 @@ int main(int argc, char* argv[]) {
       dm |= cepgen::utils::Drawer::Mode::ratio;
     string xlabel = q2mode ? "Q^{2} (GeV^{2})" : "Q (GeV)", spectrum = q2mode ? "Q^{2}" : "Q";
 
-    {
-      cepgen::utils::DrawableColl mp;
-      for (size_t i = 0; i < alphas.size(); ++i) {
-        alphas[i].graph.xAxis().setLabel(xlabel);
-        alphas[i].graph.yAxis().setLabel("$\\alpha_{S}(" + spectrum + ")$");
-        mp.emplace_back(&alphas[i].graph);
-      }
-      plt->draw(mp, "comp_alphas", cepgen::utils::s("$\\alpha_{S}$ modelling", alphas.size(), false), dm);
-    }
     {
       cepgen::utils::DrawableColl mp;
       for (size_t i = 0; i < alphaem.size(); ++i) {
