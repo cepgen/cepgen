@@ -25,6 +25,7 @@
 namespace {
   extern "C" {
   void hwigin_();
+  void hwsfun_(double&, double&, int&, int&, double dist[13], int&);
   double hwuaem_(double&);
   double hwualf_(int&, double&);
   }
@@ -47,5 +48,10 @@ namespace cepgen {
     }
     double hwuaem(double q2) { return hwuaem_(q2); }
     double hwualf(int mode, double q2) { return hwualf_(mode, q2); }
+    double hwsfun(double xbj, double q2, int idhad, int nset, int ibeam) {
+      std::array<double, 13> dist;
+      hwsfun_(xbj, q2, idhad, nset, dist.data(), ibeam);
+      return dist[0];
+    }
   }  // namespace herwig6
 }  // namespace cepgen
