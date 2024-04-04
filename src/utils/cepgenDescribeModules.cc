@@ -18,20 +18,21 @@
 
 #include <fstream>
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/DocumentationGeneratorFactory.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/DocumentationGenerator.h"
-#include "CepGen/Utils/Message.h"
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
   string doc_generator, output_file;
-  vector<string> categories, modules_names;
+  vector<string> addons, categories, modules_names;
   bool quiet;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("documentation-generator,D", "type of documentation", &doc_generator, "text")
+      .addOptionalArgument("add-ons,a", "external runtime plugin", &addons)
       .addOptionalArgument("output,o", "output file", &output_file, "")
       .addOptionalArgument("categories,C", "categories to document", &categories, vector<string>{})
       .addOptionalArgument("modules,m", "module names to document", &modules_names, vector<string>{})
@@ -41,6 +42,12 @@ int main(int argc, char* argv[]) {
   if (quiet)
     CG_LOG_LEVEL(nothing);
   cepgen::initialise();
+  for (const auto& lib : addons)  // loading of additional plugins into the runtime environment manager
+    try {
+      cepgen::loadLibrary(lib);
+    } catch (const cepgen::Exception& e) {
+      e.dump();
+    }
   auto gen = cepgen::DocumentationGeneratorFactory::get().build(
       doc_generator, cepgen::ParametersList().set("categories", categories).set("modules", modules_names));
   const auto documentation = gen->describe();
