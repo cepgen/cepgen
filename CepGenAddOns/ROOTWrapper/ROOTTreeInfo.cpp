@@ -74,7 +74,8 @@ namespace ROOT {
     auto *process_name_view = new std::string(), *process_params_view = new std::string();
     tree_->SetBranchAddress("process_name", &process_name_view);
     tree_->SetBranchAddress("process_parameters", &process_params_view);
-    if (const auto num_entries = tree_->GetEntriesFast(); num_entries != 1) {
+    const auto num_entries = tree_->GetEntriesFast();
+    if (num_entries != 1) {
       if (num_entries <= 0) {
         CG_ERROR("CepGenRun:attach") << "No entries retrieved from the run tree. Aborting the 'attach' method.";
         return;

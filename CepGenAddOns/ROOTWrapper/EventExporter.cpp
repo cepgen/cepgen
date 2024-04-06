@@ -76,7 +76,8 @@ namespace cepgen {
         if (steer<bool>("autoFilename")) {
           auto filename = generateFilename();
           CG_INFO("root:EventExporter") << "Output ROOT filename automatically set to '" << filename << "'.";
-          if (file_.reset(TFile::Open(filename.data(), "recreate")); !file_->IsOpen())
+          file_.reset(TFile::Open(filename.data(), "recreate"));
+          if (!file_->IsOpen())
             throw CG_FATAL("root:EventExporter") << "Failed to create the output file!";
         }
         run_tree_.create();

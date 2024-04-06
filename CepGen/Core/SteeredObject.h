@@ -53,7 +53,7 @@ namespace cepgen {
     inline const ParametersList& parameters() const override {
 #define __TYPE_ENUM(type, map_name) \
   for (const auto& kv : map_name)   \
-    params_.set(kv.first, kv.second);
+    params_.set(kv.first, *kv.second);
       REGISTER_STEEREDOBJ_CONTENT_TYPE
 #undef __TYPE_ENUM
       return Steerable::parameters();
@@ -64,7 +64,7 @@ namespace cepgen {
       Steerable::setParameters(params);
 #define __TYPE_ENUM(type, map_name) \
   for (const auto& kv : map_name)   \
-    params_.fill(kv.first, kv.second);
+    params_.fill(kv.first, *kv.second);
       REGISTER_STEEREDOBJ_CONTENT_TYPE
 #undef __TYPE_ENUM
     }
@@ -82,15 +82,15 @@ namespace cepgen {
 
 #define __TYPE_ENUM(type, map_name)                              \
   inline SteeredObject& add(const std::string& key, type& var) { \
-    map_name.insert({key, var});                                 \
-    map_name.at(key) = params_.operator[]<type>(key);            \
+    map_name[key] = &var;                                        \
+    *map_name.at(key) = params_.operator[]<type>(key);           \
     return *this;                                                \
   }
     REGISTER_STEEREDOBJ_CONTENT_TYPE
 #undef __TYPE_ENUM
 
   private:
-#define __TYPE_ENUM(type, map_name) std::unordered_map<std::string, type&> map_name;
+#define __TYPE_ENUM(type, map_name) std::unordered_map<std::string, type*> map_name;
     REGISTER_STEEREDOBJ_CONTENT_TYPE
 #undef __TYPE_ENUM
   };
