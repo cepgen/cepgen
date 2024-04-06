@@ -120,6 +120,12 @@ public:
       defineVariable(mX2(), Mapping::power_law, mx_range(mA()), "MX2");
     if (beams_mode_ == mode::Kinematics::InelasticInelastic)  // second outgoing beam particle or remnant mass
       defineVariable(mY2(), Mapping::power_law, mx_range(mB()), "MY2");
+    if (symmetrise_ &&
+        (beams_mode_ == mode::Kinematics::InelasticElastic || beams_mode_ == mode::Kinematics::ElasticInelastic))
+      CG_INFO("LPAIR:prepareKinematics")
+          << "Single dissociation kinematics mode was enabled with symmetrisation of the outgoing system.\n\t"
+             "The generator-level cross section will be doubled, and beam particles, incoming partons, and central "
+             "system will be mirrored in z.";
   }
 
   void fillKinematics() override {
@@ -136,16 +142,14 @@ public:
     // randomly rotate all particles
     const short rany = rnd_gen_->uniformInt(0, 1) == 1 ? 1 : -1;
     const double ranphi = rnd_gen_->uniform(0., 2. * M_PI);
-    const bool mirror = rnd_gen_->uniformInt(0, 1) == 1;
-    for (auto* mom : {&q1(), &q2(), &pc(0), &pc(1), &pX(), &pY()}) {
+    for (auto* mom : {&q1(), &q2(), &pX(), &pY(), &pc(0), &pc(1)})
       mom->rotatePhi(ranphi, rany);
-      if (symmetrise_ && mirror)
-        mom->mirrorZ();
-    }
-    if (beams_mode_ == mode::Kinematics::ElasticInelastic) {  // mirror X/Y and dilepton systems if needed
+    if ((symmetrise_ && rnd_gen_->uniformInt(0, 1) == 1) ||
+        beams_mode_ == mode::Kinematics::ElasticInelastic) {  // mirror X/Y and dilepton systems if needed
       std::swap(pX(), pY());
+      std::swap(q1(), q2());
       std::swap(pc(0), pc(1));
-      for (auto* mom : {&pX(), &pY(), &pc(0), &pc(1)})
+      for (auto* mom : {&q1(), &q2(), &pX(), &pY(), &pc(0), &pc(1)})
         mom->mirrorZ();
     }
     // first outgoing beam

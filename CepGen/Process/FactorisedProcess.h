@@ -56,7 +56,11 @@ namespace cepgen {
 
       /// Kinematic variables generator for the phase space coverage
       const std::unique_ptr<PhaseSpaceGenerator> psgen_;
+      const bool symmetrise_;
       const bool store_alphas_;
+
+    private:
+      double kin_prefactor_{1.};
     };
   }  // namespace proc
 }  // namespace cepgen
