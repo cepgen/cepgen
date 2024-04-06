@@ -75,13 +75,18 @@ namespace cepgen {
         defineVariable(mX2(), Mapping::square, kinematics().cuts().remnants.mx, "Positive-z beam remnant squared mass");
       if (!kinematics().incomingBeams().negative().elastic())
         defineVariable(mY2(), Mapping::square, kinematics().cuts().remnants.mx, "Negative-z beam remnant squared mass");
+      // symmetrisation of the phase space: factor 2 in Jacobian for single-dissociation
+      kin_prefactor_ = symmetrise_ && (kinematics().incomingBeams().mode() == mode::Kinematics::ElasticInelastic ||
+                                       kinematics().incomingBeams().mode() == mode::Kinematics::InelasticElastic)
+                           ? 2.
+                           : 1.;
     }
 
     double FactorisedProcess::computeWeight() {
       if (!psgen_->generate())
         return 0.;
       if (const auto cent_weight = computeFactorisedMatrixElement(); utils::positive(cent_weight))
-        return cent_weight * psgen_->weight() * (symmetrise_ ? 2. : 1.);
+        return cent_weight * psgen_->weight() * kin_prefactor_;
       return 0.;
     }
 
