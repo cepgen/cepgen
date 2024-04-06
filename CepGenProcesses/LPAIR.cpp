@@ -142,10 +142,9 @@ public:
     // randomly rotate all particles
     const short rany = rnd_gen_->uniformInt(0, 1) == 1 ? 1 : -1;
     const double ranphi = rnd_gen_->uniform(0., 2. * M_PI);
-    const bool mirror = rnd_gen_->uniformInt(0, 1) == 1;
     for (auto* mom : {&q1(), &q2(), &pX(), &pY(), &pc(0), &pc(1)})
       mom->rotatePhi(ranphi, rany);
-    if ((symmetrise_ && mirror) ||
+    if ((symmetrise_ && rnd_gen_->uniformInt(0, 1) == 1) ||
         beams_mode_ == mode::Kinematics::ElasticInelastic) {  // mirror X/Y and dilepton systems if needed
       std::swap(pX(), pY());
       std::swap(q1(), q2());
