@@ -33,6 +33,7 @@ namespace cepgen {
           psgen_(PhaseSpaceGeneratorFactory::get().build(
               steer<ParametersList>("kinematicsGenerator")
                   .set("ids", std::vector<int>(central.begin(), central.end())))),
+          symmetrise_(steer<bool>("symmetrise")),
           store_alphas_(steer<bool>("storeAlphas")) {
       event().map()[Particle::CentralSystem].resize(central.size());
     }
@@ -40,6 +41,7 @@ namespace cepgen {
     FactorisedProcess::FactorisedProcess(const FactorisedProcess& proc)
         : Process(proc),
           psgen_(PhaseSpaceGeneratorFactory::get().build(proc.psgen_->parameters())),
+          symmetrise_(proc.symmetrise_),
           store_alphas_(proc.store_alphas_) {}
 
     void FactorisedProcess::addEventContent() {
@@ -73,13 +75,18 @@ namespace cepgen {
         defineVariable(mX2(), Mapping::square, kinematics().cuts().remnants.mx, "Positive-z beam remnant squared mass");
       if (!kinematics().incomingBeams().negative().elastic())
         defineVariable(mY2(), Mapping::square, kinematics().cuts().remnants.mx, "Negative-z beam remnant squared mass");
+      // symmetrisation of the phase space: factor 2 in Jacobian for single-dissociation
+      kin_prefactor_ = symmetrise_ && (kinematics().incomingBeams().mode() == mode::Kinematics::ElasticInelastic ||
+                                       kinematics().incomingBeams().mode() == mode::Kinematics::InelasticElastic)
+                           ? 2.
+                           : 1.;
     }
 
     double FactorisedProcess::computeWeight() {
       if (!psgen_->generate())
         return 0.;
       if (const auto cent_weight = computeFactorisedMatrixElement(); utils::positive(cent_weight))
-        return cent_weight * psgen_->weight();
+        return cent_weight * psgen_->weight() * kin_prefactor_;
       return 0.;
     }
 
@@ -95,6 +102,14 @@ namespace cepgen {
       auto& part2 = event().oneWithRole(Particle::Parton2);
       part1.setMomentum(pA() - pX(), true);
       part2.setMomentum(pB() - pY(), true);
+
+      if (symmetrise_ && rnd_gen_->uniformInt(0, 1) == 1) {  // symmetrise the el-in and in-el cases
+        std::swap(pX(), pY());
+        std::swap(q1(), q2());
+        std::swap(pc(0), pc(1));
+        for (auto* mom : {&q1(), &q2(), &pX(), &pY(), &pc(0), &pc(1)})
+          mom->mirrorZ();
+      }
 
       // add couplings to metadata
       if (store_alphas_) {
@@ -122,6 +137,7 @@ namespace cepgen {
                            2, PartonFluxFactory::get().describeParameters("BudnevElastic").parameters()))
                    .setDescription("Parton fluxes modelling"));
       desc.add("kinematicsGenerator", PhaseSpaceGeneratorFactory::get().describeParameters("kt2to4"));
+      desc.add<bool>("symmetrise", false).setDescription("Symmetrise along z the central system?");
       desc.add<bool>("storeAlphas", false)
           .setDescription("store the electromagnetic and strong coupling constants to the event content?");
       return desc;
