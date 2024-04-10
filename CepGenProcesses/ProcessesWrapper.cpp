@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023   Laurent Forthomme
+ *  Copyright (C) 2013-2024   Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,18 +21,10 @@
 #include "CepGen/Process/FortranFactorisedProcess.h"
 
 //=============================================================================
-// START BY LISTING ALL FORTRAN FUNCTIONS
-// usage:
-//  DECLARE_FORTRAN_FUNCTION(function_name)
-// with the Fortran function name written in lowercase (no trailing '_')
-//=============================================================================
-
-DECLARE_FORTRAN_FUNCTION(nucl_to_ff);
-
-//=============================================================================
 // START THE MAPPING name -> Fortran matrix element evaluation function
 // usage:
 //  REGISTER_FORTRAN_PROCESS(name, "description", function_name)
+// with the Fortran function name written in lowercase (no trailing '_')
 //=============================================================================
 
 REGISTER_FORTRAN_PROCESS(pptoff_f77, "(p/A)(p/A) ↝ (g/γ)γ → f⁺f¯", nucl_to_ff);
