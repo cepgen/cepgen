@@ -36,45 +36,61 @@ namespace cepgen {
             apfel_grid_{{apfel::SubGrid{100, 1e-5, 3},
                          apfel::SubGrid{60, 1e-1, 3},
                          apfel::SubGrid{50, 6e-1, 3},
-                         apfel::SubGrid{50, 8e-1, 3}}},
-            proc_(steer<std::string>("processDIS")) {
-        const auto masses = steer<std::vector<double> >("masses"),
-                   thresholds = steer<std::vector<double> >("thresholds");
+                         apfel::SubGrid{50, 8e-1, 3}}} {
+        const auto thresholds = steer<std::vector<double> >("thresholds");
         const auto perturb_order = steer<int>("perturbativeOrder");
-        const auto process_dis = steer<std::string>("processDIS");
 
         apfel::AlphaQCD alpha_s{0.35, sqrt(2), thresholds, perturb_order};
         const apfel::TabulateObject<double> alphas_tab{alpha_s, 100, 0.9, 1001, 3};
-        const auto as = [&](double const& mu) -> double { return alphas_tab.Evaluate(mu); };
+        const auto as = [&](double mu) -> double { return alphas_tab.Evaluate(mu); };
 
         // Effective charges
-        auto fBq = [=](double const& Q) -> std::vector<double> { return apfel::ElectroWeakCharges(Q, false); };
+        auto fBq = [=](double q) -> std::vector<double> { return apfel::ElectroWeakCharges(q, false); };
 
-        const auto dglap_obj = InitializeDglapObjectsQCD(apfel_grid_, thresholds);
+        const auto dglap_obj = apfel::InitializeDglapObjectsQCD(apfel_grid_, thresholds);
         auto evolved_pdfs = apfel::BuildDglap(dglap_obj, apfel::LHToyPDFs, steer<double>("mu0"), perturb_order, as);
         const apfel::TabulateObject<apfel::Set<apfel::Distribution> > tabulated_pdfs{*evolved_pdfs, 50, 1, 1000, 3};
-        const auto pdfs = [&](double const& x, double const& Q) -> std::map<int, double> {
-          return tabulated_pdfs.EvaluateMapxQ(x, Q);
+        const auto pdfs = [&](double x, double q) -> std::map<int, double> {
+          return tabulated_pdfs.EvaluateMapxQ(x, q);
         };
 
-        std::function<apfel::StructureFunctionObjects(double const&, std::vector<double> const&)> f2_obj, fl_obj;
+        const auto process_dis = steer<std::string>("processDIS");
         if (process_dis == "NC") {
-          f2_obj = apfel::InitializeF2NCObjectsMassive(apfel_grid_, masses);
-          fl_obj = apfel::InitializeFLNCObjectsMassive(apfel_grid_, masses);
+          const auto masses = steer<std::vector<double> >("masses");
+          const auto f2_obj = apfel::InitializeF2NCObjectsMassive(apfel_grid_, masses);
+          const auto fl_obj = apfel::InitializeFLNCObjectsMassive(apfel_grid_, masses);
+          auto f2 = apfel::BuildStructureFunctions(f2_obj, pdfs, perturb_order, as, fBq);
+          auto fl = apfel::BuildStructureFunctions(fl_obj, pdfs, perturb_order, as, fBq);
+          // tabulate structure functions
+          f2_total_.reset(new apfel::TabulateObject<apfel::Distribution>{
+              [&](double q) -> apfel::Distribution { return f2.at(0).Evaluate(q); }, 50, 1, 200, 3, thresholds});
+          fl_total_.reset(new apfel::TabulateObject<apfel::Distribution>{
+              [&](double q) -> apfel::Distribution { return fl.at(0).Evaluate(q); }, 50, 1, 200, 3, thresholds});
         } else if (process_dis == "CC") {
-          /*const auto F2PlusCCObj = InitializeF2CCPlusObjectsZM(apfel_grid_, thresholds);
-          const auto FLPlusCCObj = InitializeFLCCPlusObjectsZM(apfel_grid_, thresholds);
-          const auto F2MinusCCObj = InitializeF2CCMinusObjectsZM(apfel_grid_, thresholds);
-          const auto FLMinusCCObj = InitializeFLCCMinusObjectsZM(apfel_grid_, thresholds);*/
+          const auto f2p_obj = apfel::InitializeF2CCPlusObjectsZM(apfel_grid_, thresholds);
+          const auto f2m_obj = apfel::InitializeF2CCMinusObjectsZM(apfel_grid_, thresholds);
+          const auto flp_obj = apfel::InitializeFLCCPlusObjectsZM(apfel_grid_, thresholds);
+          const auto flm_obj = apfel::InitializeFLCCMinusObjectsZM(apfel_grid_, thresholds);
+          auto f2p = apfel::BuildStructureFunctions(f2p_obj, pdfs, perturb_order, as, fBq);
+          auto f2m = apfel::BuildStructureFunctions(f2m_obj, pdfs, perturb_order, as, fBq);
+          auto flp = apfel::BuildStructureFunctions(flp_obj, pdfs, perturb_order, as, fBq);
+          auto flm = apfel::BuildStructureFunctions(flm_obj, pdfs, perturb_order, as, fBq);
+          // tabulate structure functions
+          f2_total_.reset(new apfel::TabulateObject<apfel::Distribution>{
+              [&](double q) -> apfel::Distribution { return f2p.at(0).Evaluate(q) - f2m.at(0).Evaluate(q); },
+              50,
+              1,
+              200,
+              3,
+              thresholds});
+          fl_total_.reset(new apfel::TabulateObject<apfel::Distribution>{
+              [&](double q) -> apfel::Distribution { return flp.at(0).Evaluate(q) - flm.at(0).Evaluate(q); },
+              50,
+              1,
+              200,
+              3,
+              thresholds});
         }
-        f2_ = apfel::BuildStructureFunctions(f2_obj, pdfs, perturb_order, as, fBq);
-        fl_ = apfel::BuildStructureFunctions(fl_obj, pdfs, perturb_order, as, fBq);
-
-        // Tabulate Structure functions
-        f2_total_.reset(new apfel::TabulateObject<apfel::Distribution>{
-            [&](double const& Q) -> apfel::Distribution { return f2_.at(0).Evaluate(Q); }, 50, 1, 200, 3, thresholds});
-        fl_total_.reset(new apfel::TabulateObject<apfel::Distribution>{
-            [&](double const& Q) -> apfel::Distribution { return fl_.at(0).Evaluate(Q); }, 50, 1, 200, 3, thresholds});
       }
 
       static ParametersDescription description() {
@@ -92,16 +108,12 @@ namespace cepgen {
 
     private:
       void eval() override {
-        setF2(f2_total_->EvaluatexQ(args_.xbj, args_.q2));
-        setFL(fl_total_->EvaluatexQ(args_.xbj, args_.q2));
+        const auto q = std::sqrt(args_.q2);
+        setF2(f2_total_->EvaluatexQ(args_.xbj, q));
+        setFL(fl_total_->EvaluatexQ(args_.xbj, q));
       }
 
       const apfel::Grid apfel_grid_;  // x-space grid
-      const std::string proc_;
-
-      std::map<int, apfel::DglapObjects> dglap_obj_;
-
-      std::map<int, apfel::Observable<> > f2_, fl_;
       std::unique_ptr<apfel::TabulateObject<apfel::Distribution> > f2_total_, fl_total_;
     };
   }  // namespace apfelpp
