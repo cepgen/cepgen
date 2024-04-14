@@ -37,22 +37,20 @@ namespace cepgen {
                          apfel::SubGrid{60, 1e-1, 3},
                          apfel::SubGrid{50, 6e-1, 3},
                          apfel::SubGrid{50, 8e-1, 3}}} {
+        apfel::Banner();
         const auto thresholds = steer<std::vector<double> >("thresholds");
         const auto perturb_order = steer<int>("perturbativeOrder");
 
         apfel::AlphaQCD alpha_s{0.35, sqrt(2), thresholds, perturb_order};
         const apfel::TabulateObject<double> alphas_tab{alpha_s, 100, 0.9, 1001, 3};
-        const auto as = [&](double mu) -> double { return alphas_tab.Evaluate(mu); };
+        const auto as = [&](double mu) { return alphas_tab.Evaluate(mu); };
 
-        // Effective charges
-        auto fBq = [=](double q) -> std::vector<double> { return apfel::ElectroWeakCharges(q, false); };
+        const auto fBq = [=](double q) { return apfel::ElectroWeakCharges(q, false); };  // effective charges
 
         const auto dglap_obj = apfel::InitializeDglapObjectsQCD(apfel_grid_, thresholds);
         auto evolved_pdfs = apfel::BuildDglap(dglap_obj, apfel::LHToyPDFs, steer<double>("mu0"), perturb_order, as);
         const apfel::TabulateObject<apfel::Set<apfel::Distribution> > tabulated_pdfs{*evolved_pdfs, 50, 1, 1000, 3};
-        const auto pdfs = [&](double x, double q) -> std::map<int, double> {
-          return tabulated_pdfs.EvaluateMapxQ(x, q);
-        };
+        const auto pdfs = [&](double x, double q) { return tabulated_pdfs.EvaluateMapxQ(x, q); };
 
         const auto process_dis = steer<std::string>("processDIS");
         if (process_dis == "NC") {
@@ -63,9 +61,9 @@ namespace cepgen {
           auto fl = apfel::BuildStructureFunctions(fl_obj, pdfs, perturb_order, as, fBq);
           // tabulate structure functions
           f2_total_.reset(new apfel::TabulateObject<apfel::Distribution>{
-              [&](double q) -> apfel::Distribution { return f2.at(0).Evaluate(q); }, 50, 1, 200, 3, thresholds});
+              [&](double q) { return f2.at(0).Evaluate(q); }, 50, 1, 200, 3, thresholds});
           fl_total_.reset(new apfel::TabulateObject<apfel::Distribution>{
-              [&](double q) -> apfel::Distribution { return fl.at(0).Evaluate(q); }, 50, 1, 200, 3, thresholds});
+              [&](double q) { return fl.at(0).Evaluate(q); }, 50, 1, 200, 3, thresholds});
         } else if (process_dis == "CC") {
           const auto f2p_obj = apfel::InitializeF2CCPlusObjectsZM(apfel_grid_, thresholds);
           const auto f2m_obj = apfel::InitializeF2CCMinusObjectsZM(apfel_grid_, thresholds);
@@ -77,19 +75,9 @@ namespace cepgen {
           auto flm = apfel::BuildStructureFunctions(flm_obj, pdfs, perturb_order, as, fBq);
           // tabulate structure functions
           f2_total_.reset(new apfel::TabulateObject<apfel::Distribution>{
-              [&](double q) -> apfel::Distribution { return f2p.at(0).Evaluate(q) - f2m.at(0).Evaluate(q); },
-              50,
-              1,
-              200,
-              3,
-              thresholds});
+              [&](double q) { return f2p.at(0).Evaluate(q) - f2m.at(0).Evaluate(q); }, 50, 1, 200, 3, thresholds});
           fl_total_.reset(new apfel::TabulateObject<apfel::Distribution>{
-              [&](double q) -> apfel::Distribution { return flp.at(0).Evaluate(q) - flm.at(0).Evaluate(q); },
-              50,
-              1,
-              200,
-              3,
-              thresholds});
+              [&](double q) { return flp.at(0).Evaluate(q) - flm.at(0).Evaluate(q); }, 50, 1, 200, 3, thresholds});
         }
       }
 

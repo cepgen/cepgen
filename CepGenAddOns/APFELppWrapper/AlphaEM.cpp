@@ -33,7 +33,9 @@ namespace cepgen {
                       steer<double>("muQEDref"),
                       steer<std::vector<double> >("quarkThresholds"),
                       steer<std::vector<double> >("leptonThresholds"),
-                      steer<int>("order")) {}
+                      steer<int>("order")) {
+        apfel::Banner();
+      }
 
       static ParametersDescription description() {
         auto desc = cepgen::Coupling::description();
