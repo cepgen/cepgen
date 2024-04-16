@@ -160,6 +160,8 @@ namespace cepgen {
 
       std::unique_ptr<utils::RandomGenerator> rnd_gen_;  ///< Process-local random number generator engine
 
+      inline const std::vector<double>& lastCoordinates() const { return point_coord_; }  ///< Last coordinates fed
+
     private:
       double s_{-1.};        ///< \f$s\f$, squared centre of mass energy of the two-beam system, in GeV\f${}^2\f$
       double sqs_{-1.};      ///< \f$\sqrt s\f$, centre of mass energy of the two-beam system (in GeV)

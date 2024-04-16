@@ -63,6 +63,7 @@ namespace cepgen {
     //----- particles retrievers
 
     size_t size() const;                        ///< Number of particles in the event
+    bool empty() const;                         ///< Is the particles map empty?
     Particles particles() const;                ///< Vector of all particles in the event
     Particles stableParticles() const;          ///< Vector of all stable particles in the event
     ParticlesMap& map() { return particles_; }  ///< Internal particles map retrieval operator

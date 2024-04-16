@@ -396,10 +396,12 @@ namespace cepgen {
 
     void Process::setKinematics() {
       fillKinematics();
-      Momentum interm_mom;
-      for (size_t i = 0; i < event()[Particle::CentralSystem].size(); ++i)
-        interm_mom += pc(i);
-      event().oneWithRole(Particle::Intermediate).setMomentum(interm_mom, true);
+      if (event().hasRole(Particle::Intermediate)) {
+        Momentum interm_mom;
+        for (size_t i = 0; i < event()[Particle::CentralSystem].size(); ++i)
+          interm_mom += pc(i);
+        event().oneWithRole(Particle::Intermediate).setMomentum(interm_mom, true);
+      }
     }
 
     ParametersDescription Process::description() {

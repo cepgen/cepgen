@@ -306,6 +306,8 @@ namespace cepgen {
     });
   }
 
+  bool Event::empty() const { return particles_.empty(); }
+
   Particles Event::particles() const {
     Particles out;
     for (const auto& role_part : particles_)
