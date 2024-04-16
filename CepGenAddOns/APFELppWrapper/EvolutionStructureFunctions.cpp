@@ -39,16 +39,17 @@ namespace cepgen {
                          apfel::SubGrid{50, 8e-1, 3}}} {
         apfel::Banner();
         const auto thresholds = steer<std::vector<double> >("thresholds");
+        const auto mu0 = steer<double>("mu0");
         const auto perturb_order = steer<int>("perturbativeOrder");
 
-        apfel::AlphaQCD alpha_s{0.35, sqrt(2), thresholds, perturb_order};
+        apfel::AlphaQCD alpha_s{0.35, mu0, thresholds, perturb_order};
         const apfel::TabulateObject<double> alphas_tab{alpha_s, 100, 0.9, 1001, 3};
         const auto as = [&](double mu) { return alphas_tab.Evaluate(mu); };
 
         const auto fBq = [=](double q) { return apfel::ElectroWeakCharges(q, false); };  // effective charges
 
         const auto dglap_obj = apfel::InitializeDglapObjectsQCD(apfel_grid_, thresholds);
-        auto evolved_pdfs = apfel::BuildDglap(dglap_obj, apfel::LHToyPDFs, steer<double>("mu0"), perturb_order, as);
+        auto evolved_pdfs = apfel::BuildDglap(dglap_obj, apfel::LHToyPDFs, mu0, perturb_order, as);
         const apfel::TabulateObject<apfel::Set<apfel::Distribution> > tabulated_pdfs{*evolved_pdfs, 50, 1, 1000, 3};
         const auto pdfs = [&](double x, double q) { return tabulated_pdfs.EvaluateMapxQ(x, q); };
 
@@ -84,8 +85,8 @@ namespace cepgen {
       static ParametersDescription description() {
         auto desc = strfun::Parameterisation::description();
         desc.setDescription("APFEL++ DIS structure functions");
-        desc.add("mu0", M_SQRT2).setDescription("initial scale");
-        desc.add("masses", std::vector<double>{0., 0., 0., M_SQRT2, 4.5, 175.});
+        desc.add("mu0", 1.3).setDescription("initial scale");
+        desc.add("masses", std::vector<double>{0., 0., 0., 1.3, 4.75, 175.});
         desc.add("thresholds", std::vector<double>{0., 0., 0.});
         desc.add("perturbativeOrder", 0)
             .setDescription("perturbative order for alpha(S) evolution")
