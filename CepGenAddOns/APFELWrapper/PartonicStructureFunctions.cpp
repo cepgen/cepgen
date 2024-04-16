@@ -33,7 +33,7 @@ namespace cepgen {
       enum class Mode { full = 0, valence = 1, sea = 2 };
       /// Build a calculator from its Parameters object
       explicit PartonicStructureFunctions(const ParametersList& params)
-          : PartonicParameterisation(params), q_limits_(steer<Limits>("qrange")) {
+          : PartonicParameterisation(params), q_limits_(steer<Limits>("qrange")), xbj_min_(steer<double>("xBjmin")) {
         const auto perturbative_order = steer<int>("perturbativeOrder");
         APFEL::SetPerturbativeOrder(perturbative_order);
         APFEL::InitializeAPFEL();
@@ -43,7 +43,7 @@ namespace cepgen {
                                                     << " * APFEL version: " << APFEL::GetVersion() << "\n"
                                                     << " * number of flavours: " << num_flavours_ << "\n"
                                                     << " * quarks mode: " << mode_ << "\n"
-                                                    << " * Q range: " << q_limits_ << "\n"
+                                                    << " * Q range: " << q_limits_ << ", min xBj: " << xbj_min_ << "\n"
                                                     << " * perturbative order: " << perturbative_order << ".";
       }
 
@@ -52,17 +52,21 @@ namespace cepgen {
         desc.setDescription("APFEL (partonic)");
         desc.add<int>("perturbativeOrder", 2);
         desc.add<Limits>("qrange", {1., 100.});
+        desc.add<double>("xBjmin", 2.e-6).setDescription("minimum Bjorken-x reachable for this PDF set");
         return desc;
       }
 
     private:
       double evalxQ2(int flavour, double xbj, double q2) override {
+        if (xbj < xbj_min_)
+          return 0.;
         const auto q = std::sqrt(q2);
         if (!q_limits_.contains(q))
           return 0.;
         return APFEL::xPDFxQ(flavour, xbj, q);
       }
       const Limits q_limits_;
+      const double xbj_min_;
     };
   }  // namespace apfel
 }  // namespace cepgen
