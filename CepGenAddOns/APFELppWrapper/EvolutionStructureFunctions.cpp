@@ -87,6 +87,12 @@ namespace cepgen {
         desc.add("mu0", M_SQRT2).setDescription("initial scale");
         desc.add("masses", std::vector<double>{0., 0., 0., M_SQRT2, 4.5, 175.});
         desc.add("thresholds", std::vector<double>{0., 0., 0.});
+        desc.add("perturbativeOrder", 0)
+            .setDescription("perturbative order for alpha(S) evolution")
+            .allow(0, "LO")
+            .allow(1, "NLO")
+            .allow(2, "NNLO")
+            .allow(3, "NNNLO");
         desc.add("processDIS", "NC"s)
             .setDescription("process of the structure functions (NC, or CC)")
             .allow("NC", "neutral currents")
