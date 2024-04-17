@@ -129,7 +129,7 @@ namespace cepgen {
 
     // transverse-transverse
     return -0.5i * G_EM_SQ * kin.invA *
-           (2. * kin.beta * float(hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) -
+           (2. * kin.beta * double(hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) -
             kin.inv_gamma2 * (1. + hel.lam3 * hel.lam4) *
                 (2. * hel.lam1 * hel.lam2 + (1. - hel.lam1 * hel.lam2) * kin.cos_theta2) +
             (1. + hel.lam1 * hel.lam2 * hel.lam3 * hel.lam4) * (3. + hel.lam1 * hel.lam2) +
@@ -196,7 +196,7 @@ namespace cepgen {
   }
 
   std::complex<double> NachtmannAmplitudes::amplitudeWB(const Kinematics& kin, const Helicities& hel) const {
-    const double invB = 1. / (kin.shat - eft_ext_.mH * eft_ext_.mH);
+    const auto invB = 1. / (kin.shat - eft_ext_.mH * eft_ext_.mH);
     if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
       return 2i * G_EM_SQ * kin.invA * eft_ext_.c1() / eft_ext_.s1 *
                  (1 - hel.lam1 * hel.lam2 - 2 * kin.cos_theta2 -
@@ -207,7 +207,7 @@ namespace cepgen {
     if (hel.lam4 == 0)  // transverse-longitudinal
       return 0.5i * G_EM_SQ * kin.gamma * M_SQRT2 * kin.invA * eft_ext_.c1() / eft_ext_.s1 * kin.sin_theta *
              ((hel.lam2 - hel.lam1) * (1. + kin.inv_gamma2) +
-              (kin.beta * float(hel.lam1 + hel.lam2) + 2 * hel.lam3 * (hel.lam1 * hel.lam2 - kin.inv_gamma2)) *
+              (kin.beta * double(hel.lam1 + hel.lam2) + 2 * hel.lam3 * (hel.lam1 * hel.lam2 - kin.inv_gamma2)) *
                   kin.cos_theta);
 
     if (hel.lam3 == 0)  // longitudinal-transverse
@@ -215,7 +215,7 @@ namespace cepgen {
 
     // transverse-transverse
     return -0.5i * G_EM_SQ * kin.invA * eft_ext_.c1() / eft_ext_.s1 *
-               (kin.beta * float(hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) * (1. + kin.cos_theta2) +
+               (kin.beta * double(hel.lam1 + hel.lam2) * (hel.lam3 + hel.lam4) * (1. + kin.cos_theta2) +
                 2 * (2 + (hel.lam1 - hel.lam2) * (hel.lam3 - hel.lam4) * kin.cos_theta +
                      ((hel.lam1 * hel.lam2 - 1) * kin.cos_theta2 + 1. + hel.lam1 * hel.lam2) * hel.lam3 * hel.lam4)) +
            0.25i * kin.shat2 * M_SQRT2 * constants::G_F * kin.inv_gamma2 * invB * eft_ext_.s1 * eft_ext_.c1() *
@@ -224,26 +224,26 @@ namespace cepgen {
 
   std::complex<double> NachtmannAmplitudes::amplitudeWbarB(const Kinematics& kin, const Helicities& hel) const {
     CG_WARNING("NachtmannAmplitudes") << "Mode " << mode_ << " is not yet properly handled!";
-    const double invB = 1. / (kin.shat - eft_ext_.mH * eft_ext_.mH);
+    const auto invB = 1. / (kin.shat - eft_ext_.mH * eft_ext_.mH);
     if (hel.lam3 == 0 && hel.lam4 == 0)  // longitudinal-longitudinal
-      return 2. * G_EM_SQ * eft_ext_.c1() / eft_ext_.s1 * kin.gamma2 * float(hel.lam1 + hel.lam2) -
+      return 2. * G_EM_SQ * eft_ext_.c1() / eft_ext_.s1 * kin.gamma2 * double(hel.lam1 + hel.lam2) -
              0.5 * kin.shat2 * M_SQRT2 * constants::G_F /* /e^2 */ * eft_ext_.s1 * eft_ext_.c1() * (1. + kin.beta2) *
-                 float(hel.lam1 + hel.lam2);
+                 double(hel.lam1 + hel.lam2);
 
     if (hel.lam4 == 0)  // transverse-longitudinal
       return 0.5 * G_EM_SQ * kin.invA * kin.gamma * M_SQRT2 * eft_ext_.c1() / eft_ext_.s1 * kin.sin_theta *
              (kin.beta * (hel.lam2 - hel.lam1) * hel.lam3 -
-              kin.cos_theta * (2. * kin.beta + kin.beta2 * float(hel.lam1 + hel.lam2) * hel.lam3));
+              kin.cos_theta * (2. * kin.beta + kin.beta2 * double(hel.lam1 + hel.lam2) * hel.lam3));
 
     if (hel.lam3 == 0)  // longitudinal-transverse
       return amplitudeWbarB(kin, {hel.lam2, hel.lam1, hel.lam4, hel.lam3});
 
     // transverse-transverse
     return kin.invA * G_EM_SQ * eft_ext_.c1() * eft_ext_.c1() / eft_ext_.s1 *
-               (hel.lam3 * float(hel.lam1 + hel.lam2) + kin.beta * (hel.lam1 * hel.lam2 + kin.cos_theta2)) *
+               (hel.lam3 * double(hel.lam1 + hel.lam2) + kin.beta * (hel.lam1 * hel.lam2 + kin.cos_theta2)) *
                (hel.lam3 + hel.lam4) -
            0.25 * kin.shat2 * M_SQRT2 * constants::G_F /* /e^2 */ * kin.inv_gamma2 * invB * eft_ext_.s1 *
-               eft_ext_.c1() * eft_ext_.c1() * float(hel.lam1 + hel.lam2) * (1. + hel.lam3 * hel.lam4);
+               eft_ext_.c1() * eft_ext_.c1() * double(hel.lam1 + hel.lam2) * (1. + hel.lam3 * hel.lam4);
   }
 
   ParametersDescription NachtmannAmplitudes::description() {

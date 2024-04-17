@@ -66,21 +66,21 @@ namespace cepgen {
       }
 
     private:
-      float gp_h(float q0, float q2) const {
+      double gp_h(float q0, float q2) const {
         const auto gi = 2. * mp_ * q0;
         const auto ww = (gi + 1.642) / (q2 + 0.376), t = 1. - 1. / ww;
         const auto wp = 0.256 * std::pow(t, 3.) + 2.178 * std::pow(t, 4.) + 0.898 * std::pow(t, 5.) -
                         6.716 * std::pow(t, 6.) + 3.756 * std::pow(t, 7.);
         return wp * ww * q2 / gi;
       }
-      float bodek(double w, double q2) const {
+      double bodek(double w, double q2) const {
         const size_t NRES = 4, NBKG = 5;
 
         if (w <= mp_)
           return 0.;
         const auto w2 = w * w;
-        const float omega = 1. + (w2 - mp2_) / q2, x = 1. / omega;
-        const float xpx = constants_.at(21) + constants_.at(22) * std::pow(x - constants_.at(23), 2.);
+        const auto omega = 1. + (w2 - mp2_) / q2, x = 1. / omega;
+        const auto xpx = constants_.at(21) + constants_.at(22) * std::pow(x - constants_.at(23), 2.);
 
         auto b1 = 0., b2 = 0.;
         if (w != constants_.at(0))

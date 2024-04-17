@@ -235,7 +235,7 @@ namespace cepgen {
               std::distance(coords_.at(0).begin(), std::lower_bound(coords_.at(0).begin(), coords_.at(0).end(), val_x));
           const unsigned short id_y =
               std::distance(coords_.at(1).begin(), std::lower_bound(coords_.at(1).begin(), coords_.at(1).end(), val_y));
-          for (unsigned short i = 0; i < splines_2d_.size(); ++i)
+          for (size_t i = 0; i < splines_2d_.size(); ++i)
             gsl_spline2d_set(splines_2d_.at(i).get(), values_[i].get(), id_x, id_y, val.second[i]);
         }
 
