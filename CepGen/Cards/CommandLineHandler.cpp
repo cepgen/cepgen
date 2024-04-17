@@ -93,8 +93,7 @@ namespace cepgen {
         auto pars_kin = pars.get<ParametersList>("kinematics");
 
         //----- process definition
-        auto proc = pars.get<ParametersList>("process");
-        if (!proc.empty()) {
+        if (auto proc = pars.get<ParametersList>("process"); !proc.empty()) {
           if (runParameters()->hasProcess())
             proc = ParametersList(runParameters()->process().parameters()) + proc;
           runParameters()->setProcess(ProcessFactory::get().build(proc));
@@ -140,15 +139,13 @@ namespace cepgen {
           runParameters()->integrator().set<int>("seed", gen.get<int>("seed"));
 
         //----- event modification modules
-        const auto& mod = pars.get<ParametersList>("eventmod");
-        if (!mod.keys(true).empty()) {
+        if (const auto& mod = pars.get<ParametersList>("eventmod"); !mod.keys(true).empty()) {
           runParameters()->addModifier(EventModifierFactory::get().build(mod));
           runParameters()->eventModifiersSequence().rbegin()->get()->initialise(*runParameters());
         }
 
         //----- output modules definition
-        const auto& out = pars.get<ParametersList>("output");
-        if (!out.keys(true).empty())
+        if (const auto& out = pars.get<ParametersList>("output"); !out.keys(true).empty())
           runParameters()->addEventExporter(EventExporterFactory::get().build(out));
         return *this;
       }

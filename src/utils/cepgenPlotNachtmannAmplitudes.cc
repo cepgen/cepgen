@@ -33,11 +33,13 @@ using namespace std::complex_literals;
 int main(int argc, char* argv[]) {
   std::string integr_name, plotter;
   bool logy, draw_grid;
+  int num_points;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("integrator,i", "type of integrator used", &integr_name, "Vegas")
       .addOptionalArgument("logy,l", "logarithmic y-axis", &logy, false)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
+      .addOptionalArgument("num-points,n", "number of points to compute", &num_points, 20)
       .parse();
 
   cepgen::initialise();
@@ -117,7 +119,7 @@ int main(int argc, char* argv[]) {
     if (ampl.mode() == cepgen::NachtmannAmplitudes::Mode::SM) {
       cepgen::utils::Graph1D gr_sm_cth_400gev("sm_cth_400gev", "400 GeV;cos#theta;d#sigma/dcos#theta (pb)"),
           gr_sm_cth_2400gev("sm_cth_2400gev", "2400 GeV;cos#theta;d#sigma/dcos#theta (pb)");
-      for (double x = -1.; x <= 1.; x += 0.1) {
+      for (const auto x : cepgen::Limits{-1., 1.}.generate(num_points)) {
         CG_LOG << x;
         gr_sm_cth_400gev.addPoint(x, dsig_dcosth(ampl, 400., x));
         gr_sm_cth_2400gev.addPoint(x, dsig_dcosth(ampl, 2400., x));

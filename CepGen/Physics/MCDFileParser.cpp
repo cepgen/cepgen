@@ -34,7 +34,7 @@ namespace pdg {
       if (line[0] == '*')  // skip comments
         continue;
       std::vector<int> pdg_ids, charges;
-      double mass, width;
+      double mass{0.}, width{0.};
       std::string part_name;
       {  // pdg ids
         std::istringstream ss(line.substr(PDG_BEG, PDG_END));
@@ -43,22 +43,18 @@ namespace pdg {
         while (ss >> buf)
           pdg_ids.emplace_back(std::stoi(buf));
       }
-      {                                      // mass + error(s)
-        double mass_err_low, mass_err_high;  // unused
+      {                                              // mass + error(s)
+        double mass_err_low{0.}, mass_err_high{0.};  // unused
         const auto mass_substr = cepgen::utils::trim(line.substr(MASS_BEG, MASS_END));
-        if (mass_substr.empty())
-          mass = mass_err_low = mass_err_high = 0.;
-        else {
+        if (!mass_substr.empty()) {
           std::istringstream oss(mass_substr);
           oss >> mass >> mass_err_low >> mass_err_high;
         }
       }
-      {                                        // width + error(s)
-        double width_err_low, width_err_high;  // unused
+      {                                                // width + error(s)
+        double width_err_low{0.}, width_err_high{0.};  // unused
         const auto width_substr = cepgen::utils::trim(line.substr(WIDTH_BEG, WIDTH_END));
-        if (width_substr.empty())
-          width = width_err_low = width_err_high = 0.;
-        else {
+        if (!width_substr.empty()) {
           std::istringstream oss(width_substr);
           oss >> width >> width_err_low >> width_err_high;
         }
