@@ -44,9 +44,6 @@ namespace cepgen {
       for (const auto& var : variables_)
         oss_vars_ << sep << var, sep = separator_;
     }
-    ~TextVariablesHandler() {
-      file_.close();  // finalisation of the output file
-    }
 
     static ParametersDescription description() {
       auto desc = EventExporter::description();
