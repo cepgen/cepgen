@@ -82,7 +82,7 @@ jobs:
     - if: matrix.build-mode == 'manual'
       run: |
         cmake -B build/ -DCMAKE_BUILD_TYPE=Release -DCMAKE_BUILD_TESTS=ON
-        cmake --build build/
+        cmake --build build/ -j
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
