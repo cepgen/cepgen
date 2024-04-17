@@ -21,7 +21,9 @@
 #include <cmath>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Modules/CouplingFactory.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
+#include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
@@ -36,16 +38,15 @@ namespace cepgen {
             apfel_grid_{{apfel::SubGrid{100, 1e-5, 3},
                          apfel::SubGrid{60, 1e-1, 3},
                          apfel::SubGrid{50, 6e-1, 3},
-                         apfel::SubGrid{50, 8e-1, 3}}} {
-        apfel::Banner();
+                         apfel::SubGrid{50, 8e-1, 3}}},
+            alpha_s_(AlphaSFactory::get().build(steer<ParametersList>("alphaSParameters"))) {
+        if (alpha_s_->name() != "apfelpp")  // do not print twice the APFEL++ banner
+          apfel::Banner();
         const auto thresholds = steer<std::vector<double> >("thresholds");
         const auto mu0 = steer<double>("mu0");
         const auto perturb_order = steer<int>("perturbativeOrder");
 
-        apfel::AlphaQCD alpha_s{0.35, mu0, thresholds, perturb_order};
-        const apfel::TabulateObject<double> alphas_tab{alpha_s, 100, 0.9, 1001, 3};
-        const auto as = [&](double mu) { return alphas_tab.Evaluate(mu); };
-
+        const auto as = [&](double mu) { return (*alpha_s_)(mu); };
         const auto fBq = [=](double q) { return apfel::ElectroWeakCharges(q, false); };  // effective charges
 
         const auto dglap_obj = apfel::InitializeDglapObjectsQCD(apfel_grid_, thresholds);
@@ -98,6 +99,7 @@ namespace cepgen {
             .setDescription("process of the structure functions (NC, or CC)")
             .allow("NC", "neutral currents")
             .allow("CC", "charged currents");
+        desc.add("alphaSParameters", AlphaSFactory::get().describeParameters("apfelpp"));
         return desc;
       }
 
@@ -109,6 +111,7 @@ namespace cepgen {
       }
 
       const apfel::Grid apfel_grid_;  // x-space grid
+      const std::unique_ptr<Coupling> alpha_s_;
       std::unique_ptr<apfel::TabulateObject<apfel::Distribution> > f2_total_, fl_total_;
     };
   }  // namespace apfelpp
