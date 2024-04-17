@@ -244,16 +244,29 @@ namespace cepgen {
     double Hist1D::chi2test(const Hist1D& oth, size_t& ndfval) const {
       if (nbins() != oth.nbins())
         return 0.;
+      double sum1{0.}, sum2{0.};
+      for (size_t i = 0; i < nbins(); ++i) {
+        const auto ru1 = value(i).relativeUncertainty(), ru2 = oth.value(i).relativeUncertainty();
+        sum1 += ru1 > 0. ? 1. / ru1 / ru1 : 0.;
+        sum2 += ru2 > 0. ? 1. / ru2 / ru2 : 0.;
+      }
+      if (sum1 == 0. || sum2 == 0.) {
+        ndfval = 0;
+        return 0.;
+      }
+      // perform the test
       double chi2val = 0.;
       ndfval = nbins();
       for (size_t i = 0; i < nbins(); ++i) {
-        const auto bin_val1 = value(i), bin_val2 = oth.value(i);
-        if (bin_val1 == 0. && bin_val2 == 0.) {
+        const auto ru1 = value(i).relativeUncertainty(), ru2 = oth.value(i).relativeUncertainty();
+        const auto cnt1 = ru1 > 0. ? 1. / ru1 / ru1 : 0., cnt2 = ru2 > 0. ? 1. / ru2 / ru2 : 0.;
+        if (cnt1 == 0. && cnt2 == 0.) {
           --ndfval;
           continue;
         }
-        chi2val += std::pow((double)bin_val1 - (double)bin_val2, 2) / ((double)bin_val1);
+        chi2val += std::pow(sum2 * cnt1 - sum1 * cnt2, 2) / (cnt1 + cnt2);
       }
+      chi2val /= sum1 * sum2;
       return chi2val;
     }
   }  // namespace utils
