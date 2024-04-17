@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
     // test 1D graph
     cepgen::utils::Graph1D graph_sin("graph_sin", "sin(x)"), graph_cos("graph_cos", "cos(x)"),
         graph_der_sin("graph_der_sin", "(sin(x))'"), graph_diff("graph_diff", "cos(x)-(sin(x))'");
-    for (double x = -M_PI; x <= M_PI; x += 0.25) {
+    for (const auto x : cepgen::Limits{-M_PI, M_PI}.generate(25)) {
       graph_sin.addPoint(x, sin(x));
       graph_cos.addPoint(x, cos(x));
       const auto der_sin = der->derivate([](double x) { return sin(x); }, x);

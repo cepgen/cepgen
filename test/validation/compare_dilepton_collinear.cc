@@ -23,6 +23,7 @@
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/Collections.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Histogram.h"
@@ -94,6 +95,8 @@ int main(int argc, char* argv[]) {
   auto& pars = gen.runParameters();
   for (const auto& proc_name : processes) {
     auto proc = proc_name;
+    if (!cepgen::utils::contains(cepgen::ProcessFactory::get().modules(), proc_name))
+      continue;
     if (proc_name == "mg5_aMC")
       proc += "<process:'a a > mu- mu+'";
     else if (proc_name == "pptoff")

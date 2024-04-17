@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
 
     // test 1D graph
     cepgen::utils::Graph1D graph1d("graph1d", "A graph of the sin(x) function");
-    for (double x = -M_PI; x <= M_PI; x += 0.25)
+    for (const auto x : cepgen::Limits{-M_PI, M_PI}.generate(25))
       graph1d.addPoint(x, sin(x));
     graph1d.xAxis().setLabel("x (rad)");
     graph1d.yAxis().setLabel("sin(x)");
@@ -54,8 +54,8 @@ int main(int argc, char* argv[]) {
 
     // test 2D graph
     cepgen::utils::Graph2D graph2d("graph2d");
-    for (double x = -5.; x < 5.; x += 0.5)
-      for (double y = -5.; y < 5.; y += 0.2)
+    for (const auto x : cepgen::Limits{-5., 5.}.generate(21))
+      for (const auto y : cepgen::Limits{-5., 5.}.generate(51))
         graph2d.addPoint(x, y, (sin(x) / x) * (sin(y) / y));
     plt->draw(graph2d);
 
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
     CG_LOG << "\n--------- multiplots ---------";
 
     cepgen::utils::Graph1D graph1d_bis("graph1d_bis", "cos(x)"), graph1d_ter("graph1d_ter", "cos(x)*x");
-    for (double x = -M_PI; x <= M_PI; x += 0.25) {
+    for (const auto x : cepgen::Limits{-M_PI, M_PI}.generate(25)) {
       graph1d_bis.addPoint(x, cos(x));
       graph1d_ter.addPoint(x, cos(x) * x);
     }
