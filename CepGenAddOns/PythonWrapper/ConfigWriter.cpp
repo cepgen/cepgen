@@ -77,7 +77,6 @@ namespace cepgen {
       if (const auto filename = steer<std::string>("filename"); !filename.empty()) {
         std::ofstream of(filename);
         of << os_.str();
-        of.close();
       }
     }
 
