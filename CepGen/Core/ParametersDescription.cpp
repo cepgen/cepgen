@@ -55,7 +55,7 @@ namespace cepgen {
   ParametersDescription& ParametersDescription::operator+=(const ParametersDescription& oth) {
     for (const auto& key : ParametersList::keysOf<std::vector<ParametersList> >())
       // particular case if one describes a set of key-indexed parameters list as a vector of parameters lists
-      if (static_cast<ParametersList>(oth).has<ParametersList>(key)) {
+      if (oth.parameters().has<ParametersList>(key)) {
         const auto& desc = get(key);
         ParametersList::erase(key);
         add<ParametersDescription>(key, oth.get(key))
