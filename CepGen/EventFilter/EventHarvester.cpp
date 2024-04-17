@@ -97,7 +97,8 @@ namespace cepgen {
         CG_INFO("EventHarvester") << "Saved " << utils::s("histogram", hists_.size(), true) << " into \"" << filename_
                                   << "\".";
     } catch (const Exception& exc) {
-      CG_ERROR("EventHarvester") << "Failed to save the histograms harvested in this run.";
+      CG_ERROR("EventHarvester") << "Failed to save the histograms harvested in this run. Error received: "
+                                 << exc.what();
     }
   }
 
