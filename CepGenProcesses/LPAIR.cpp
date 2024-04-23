@@ -341,8 +341,8 @@ double LPAIR::pickin() {
   // definition from eq. (A.4) and (A.5) in [1]
   auto t1_max = mA2() + mX2() - 0.5 * (ss_ * sp + sl1_ * std::sqrt(rl2)) / s(),
        t1_min = (w31 * d3 + (d3 - w31) * (d3 * mA2() - w31 * mB2()) / s()) / t1_max;
-  t1_max = std::max(t1_max, -kinematics().cuts().initial.q2.max());
-  t1_min = std::min(t1_min, -kinematics().cuts().initial.q2.min());
+  t1_max = std::max(t1_max, -kinematics().cuts().initial.q2_1.max());
+  t1_min = std::min(t1_min, -kinematics().cuts().initial.q2_1.min());
   const auto t1_limits = Limits{t1_min, t1_max};
   CG_DEBUG_LOOP("LPAIR:pickin") << "t1 in range: " << t1_limits << ".";
   const auto [t1_val, t1_width] = map_expo(m_u_t1_, t1_limits);  // definition of the first photon propagator (t1 < 0)
@@ -362,8 +362,8 @@ double LPAIR::pickin() {
   // t2max, t2min definitions from eq. (A.12) and (A.13) in [1]
   auto t2_max = mB2() + mY2() - 0.5 * (r1 * r2 + std::sqrt(rl4)) / s2_,
        t2_min = (w52 * d4 + (d4 - w52) * (d4 * mB2() - w52 * t1()) / s2_) / t2_max;
-  t2_max = std::max(t2_max, -kinematics().cuts().initial.q2.max());
-  t2_min = std::min(t2_min, -kinematics().cuts().initial.q2.min());
+  t2_max = std::max(t2_max, -kinematics().cuts().initial.q2_2.max());
+  t2_min = std::min(t2_min, -kinematics().cuts().initial.q2_2.min());
   const auto t2_limits = Limits{t2_min, t2_max};
   CG_DEBUG_LOOP("LPAIR:pickin") << "t2 in range: " << t2_limits << ".";
   const auto [t2_val, t2_width] = map_expo(m_u_t2_, t2_limits);  // definition of the second photon propagator (t2 < 0)
