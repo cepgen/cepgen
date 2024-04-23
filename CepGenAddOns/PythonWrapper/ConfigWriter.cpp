@@ -53,6 +53,13 @@ namespace cepgen {
         return "["s + utils::repr(params.get<std::vector<int> >(key), ", ") + "]";
       else if (params.has<std::vector<double> >(key))
         return "["s + utils::repr(params.get<std::vector<double> >(key), ", ") + "]";
+      else if (params.has<std::vector<std::vector<double> > >(key)) {
+        std::string out{"["}, sep;
+        for (const auto& vec : params.get<std::vector<std::vector<double> > >(key))
+          out += sep + utils::repr(vec, ", "), sep = ", ";
+        return out + "]";
+      } else if (params.has<std::vector<std::string> >(key))
+        return "["s + utils::repr(params.get<std::vector<std::string> >(key), ", ") + "]";
       else if (params.has<ParametersList>(key)) {
         const auto plist = params.get<ParametersList>(key);
         return (plist.hasName() ? "cepgen.Module(\'" + plist.name() + "\'" : "cepgen.Parameters(") + repr(plist, key) +
