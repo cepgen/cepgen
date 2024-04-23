@@ -219,16 +219,20 @@ namespace cepgen {
                 StructureFunctionsFactory::get().describeParameters(beams.structureFunctions()).description())
          << "\n"
          << std::setw(wt) << "" << beams.structureFunctions().print(true) << "\n ";
+
+    // helper to print cuts list for a given category
+    const auto dump_cuts = [&os](const auto& obj) {
+      for (const auto& lim : obj.parameters().template keysOf<Limits>())
+        if (const auto& limit = obj.parameters().template get<Limits>(lim); limit.valid() && obj.description().has(lim))
+          os << std::setw(wt) << obj.description().get(lim).description() << limit << "\n";
+      for (const auto& vlim : obj.parameters().template keysOf<std::vector<Limits> >())
+        if (const auto& limit = obj.parameters().template get<std::vector<Limits> >(vlim); obj.description().has(vlim))
+          os << std::setw(wt) << obj.description().get(vlim).description() << utils::repr(limit, " and ") << "\n";
+    };
+
     os << "\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Incoming partons ") << std::setfill(' ') << "\n\n";
     const auto& cuts = kin.cuts();
-    auto dump_cuts = [&os](const auto& obj) {
-      for (const auto& lim : obj.parameters().template keysOf<Limits>()) {
-        const auto& limit = obj.parameters().template get<Limits>(lim);
-        if (limit.valid() && obj.description().has(lim))
-          os << std::setw(wt) << obj.description().get(lim).description() << limit << "\n";
-      }
-    };
     dump_cuts(cuts.initial);
     os << "\n"
        << std::setfill('-') << std::setw(wb + 6) << utils::boldify(" Outgoing central system ") << std::setfill(' ')
