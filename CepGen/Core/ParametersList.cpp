@@ -207,7 +207,7 @@ namespace cepgen {
       if (words.size() == 1)  // basic key:true
         set<bool>(key, true);
       else if (words.size() == 2) {  // basic key:value
-        const auto value = words.at(1);
+        const auto& value = words.at(1);
         if (utils::isInt(value))
           set<int>(key, std::stoi(value));
         else if (utils::isFloat(value))

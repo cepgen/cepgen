@@ -35,8 +35,6 @@ namespace cepgen {
                        Type type = Type::undefined,
                        const char* file = "",
                        short lineno = 0) noexcept;
-    /// Copy constructor
-    Exception(const Exception&) noexcept;
     /// Destructor (potentially killing the process)
     virtual ~Exception() noexcept override;
 
