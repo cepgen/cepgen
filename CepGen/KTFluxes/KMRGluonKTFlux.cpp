@@ -29,14 +29,14 @@ namespace cepgen {
       desc.setDescription("Proton inelastic gluon emission (KMR flux)");
       return desc;
     }
-    double fluxMX2(double x, double kt2, double mx2) const override final {
+    double fluxMX2(double x, double kt2, double mx2) const override {
       if (!x_range_.contains(x, true))
         return 0.;
       return kmr::GluonGrid::get()(x, kt2, mx2);
     }
-    pdgid_t partonPdgId() const override final { return PDG::gluon; }
-    bool fragmenting() const override final { return false; }
-    double mass2() const override final { return mp2_; }
+    pdgid_t partonPdgId() const override { return PDG::gluon; }
+    bool fragmenting() const override { return false; }
+    double mass2() const override { return mp2_; }
   };
 }  // namespace cepgen
 

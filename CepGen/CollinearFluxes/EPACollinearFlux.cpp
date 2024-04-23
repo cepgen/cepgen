@@ -40,8 +40,8 @@ namespace cepgen {
       return desc;
     }
 
-    bool fragmenting() const override final { return ff_->fragmenting(); }
-    pdgid_t partonPdgId() const override final { return PDG::photon; }
+    bool fragmenting() const override { return ff_->fragmenting(); }
+    pdgid_t partonPdgId() const override { return PDG::photon; }
 
     double fluxQ2(double x, double q2) const override {
       if (!x_range_.contains(x, true))
@@ -53,7 +53,7 @@ namespace cepgen {
       return prefactor_ * ((1. - x) * (1. - q2min / q2) * form_factors.FE + 0.5 * x * x * form_factors.FM) / x;
     }
 
-  protected:
+  private:
     double mass2() const override { return mp2_; }
     const std::unique_ptr<formfac::Parameterisation> ff_;
   };

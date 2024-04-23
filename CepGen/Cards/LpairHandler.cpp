@@ -250,8 +250,8 @@ namespace cepgen {
       }
 
       void setParameter(const std::string& key, const std::string& value);
-      std::string parameter(std::string key) const;
-      inline std::string describe(std::string key) const {
+      std::string parameter(const std::string& key) const;
+      inline std::string describe(const std::string& key) const {
 #define __TYPE_ENUM(type, map, default_val) \
   if (map.count(key))                       \
     return map.at(key).description;
@@ -294,7 +294,7 @@ namespace cepgen {
     REGISTER_LPAIR_CONTENT_TYPE
 #undef __TYPE_ENUM
 
-    std::string LpairHandler::parameter(std::string key) const {
+    std::string LpairHandler::parameter(const std::string& key) const {
 #define __TYPE_ENUM(type, map, default_val)          \
   if (auto var = get<type>(key); var != default_val) \
     return utils::toString(var);

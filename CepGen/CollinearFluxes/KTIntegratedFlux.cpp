@@ -36,12 +36,12 @@ namespace cepgen {
           integr_(AnalyticIntegratorFactory::get().build(steer<ParametersList>("integrator"))),
           flux_(KTFluxFactory::get().build(steer<ParametersList>("ktFlux"))),
           kt2_range_(steer<Limits>("kt2range")),
-          func_q2_([&](double kt2, void* params) {
-            const auto& args = *static_cast<std::pair<double, double>*>(params);
+          func_q2_([this](double kt2, void* pars) {
+            const auto& args = *static_cast<std::pair<double, double>*>(pars);
             return flux_->fluxQ2(args.first, kt2, args.second);
           }),
-          func_mx2_([&](double kt2, void* params) {
-            const auto& args = *static_cast<std::pair<double, double>*>(params);
+          func_mx2_([this](double kt2, void* pars) {
+            const auto& args = *static_cast<std::pair<double, double>*>(pars);
             return flux_->fluxMX2(args.first, kt2, args.second);
           }) {
       if (!flux_->ktFactorised())
