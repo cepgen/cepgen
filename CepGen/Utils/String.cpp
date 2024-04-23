@@ -161,6 +161,13 @@ namespace cepgen {
       return os.str();
     }
 
+    template <>
+    std::string toString(const Limits& lim) {
+      std::ostringstream os;
+      os << lim;
+      return os.str();
+    }
+
     std::wstring toWstring(const std::string& str) {
       typedef std::codecvt_utf8_utf16<wchar_t> convert_type;
       std::wstring_convert<convert_type, wchar_t> converter;

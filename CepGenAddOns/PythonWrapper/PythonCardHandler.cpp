@@ -99,6 +99,8 @@ namespace cepgen {
           plist_.set(attr, obj.value<ParametersList>());
         if (obj.isVector<ParametersList>())
           plist_.set(attr, obj.vector<ParametersList>());
+        if (obj.isVector<Limits>())
+          plist_.set(attr, obj.vector<Limits>());
       }
     }
     void parse() {

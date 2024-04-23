@@ -19,6 +19,7 @@ process = cepgen.Module('lpair',
         #--- other structure functions parameterisation are also available
         #structureFunctions = cepgen.StructureFunctions.fioreBrasse,
         #structureFunctions = cepgen.StructureFunctions.luxLike,
+        q2 = [(0., 10000.), (0., 10000.)],
     ),
     outKinematics = cepgen.Parameters(
         pt = (25.,),

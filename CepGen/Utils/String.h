@@ -36,6 +36,9 @@ namespace cepgen {
     inline std::string toString(const T& obj) {
       return std::to_string(obj);
     }
+    /// Specialisation of string conversion of limits
+    template <>
+    std::string toString(const Limits&);
     /// Specialisation of string conversion of parameters list
     template <>
     std::string toString(const ParametersList&);

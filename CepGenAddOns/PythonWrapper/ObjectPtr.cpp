@@ -110,8 +110,7 @@ namespace cepgen {
       const bool tuple = PyTuple_Check(get()), list = PyList_Check(get());
       if (!tuple && !list)  // only accept 'tuples' and 'lists'
         return false;
-      const auto size = tuple ? PyTuple_Size(get()) : list ? PyList_Size(get()) : 0;
-      if (size == 0)
+      if (const auto size = tuple ? PyTuple_Size(get()) : list ? PyList_Size(get()) : 0; size == 0)
         return true;
       const auto first = ObjectPtr::wrap(tuple  ? PyTuple_GetItem(get(), 0) /* borrowed */
                                          : list ? PyList_GetItem(get(), 0)  /* borrowed */
@@ -245,6 +244,8 @@ namespace cepgen {
             out.set(skey, val.vector<double>());
           } else if (val.isVector<std::string>())
             out.set(skey, val.vector<std::string>());
+          else if (val.isVector<Limits>())
+            out.set(skey, val.vector<Limits>());
           else  //if (val.isVector<ParametersList>())
             out.set(skey, val.vector<ParametersList>());
         } else if (pvalue == Py_None) {
@@ -351,6 +352,7 @@ namespace cepgen {
     template ObjectPtr ObjectPtr::tupleFromVector<int>(const std::vector<int>&);
     template ObjectPtr ObjectPtr::tupleFromVector<double>(const std::vector<double>&);
     template ObjectPtr ObjectPtr::tupleFromVector<std::string>(const std::vector<std::string>&);
+    template ObjectPtr ObjectPtr::tupleFromVector<Limits>(const std::vector<Limits>&);
 
     std::ostream& operator<<(std::ostream& os, const ObjectPtr& ptr) {
       os << "PyObject{";

@@ -101,11 +101,14 @@ namespace cepgen {
       if (params.empty())
         return;
       SteeredObject::setParameters(params);
-      if (q2.max() <= 0.) {
-        CG_WARNING("Initial:setParameters") << "Maximum parton virtuality (" << q2 << ") is invalid. "
-                                            << "It is now set to " << 1.e4 << " GeV^2.";
-        q2.max() = 1.e4;
-      }
+      if (const auto q2lim = params.get<Limits>("q2"); q2lim.valid())  // symmetric Q^2 cut specified
+        q2 = {q2lim, q2lim};
+      for (auto& q2lim : q2)
+        if (q2lim.max() <= 0.) {
+          CG_WARNING("Initial:setParameters") << "Maximum parton virtuality (" << q2lim << ") is invalid. "
+                                              << "It is now set to " << 1.e4 << " GeV^2.";
+          q2lim.max() = 1.e4;
+        }
     }
 
     bool Initial::contain(const Particles& parts, const Event*) const {
@@ -113,19 +116,22 @@ namespace cepgen {
         const auto& mom = part.momentum();
         if (!qt.contains(mom.pt()))
           return false;
-        if (!q2.contains(mom.mass2()))
+      }
+      if (parts.size() == 2) {
+        for (size_t i = 0; i < 2; ++i)
+          if (!q2.at(i).contains(parts.at(i).momentum().mass2()))
+            return false;
+        if (phi.valid() && !phi.contains(parts.at(0).momentum().deltaPhi(parts.at(1).momentum())))
           return false;
       }
-      if (parts.size() == 2 && phi.valid() && !phi.contains(parts.at(0).momentum().deltaPhi(parts.at(1).momentum())))
-        return false;
       return true;
     }
 
     ParametersDescription Initial::description() {
       auto desc = ParametersDescription();
-      desc.add<Limits>("q2", Limits{0., 1.e5}).setDescription("Virtuality (GeV^2)");
-      desc.add<Limits>("qt", Limits{}).setDescription("Transverse virtuality (GeV)");
-      desc.add<Limits>("phi", Limits{}).setDescription("Partons D(phi) (rad)");
+      desc.add("q2", std::vector<Limits>(2, {0., 1.e5})).setDescription("Parton virtuality(ies) (GeV^2)");
+      desc.add("qt", Limits{}).setDescription("Transverse virtuality (GeV)");
+      desc.add("phi", Limits{}).setDescription("Partons D(phi) (rad)");
       return desc;
     }
 

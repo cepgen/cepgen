@@ -67,17 +67,18 @@ namespace cepgen {
     set_flux_properties(kin.incomingBeams().negative(), neg_flux_);
 
     // register the incoming partons' virtuality
-    if (log_part_virt_) {
-      const auto log_lim_q2 = kin.cuts().initial.q2.truncate(Limits{1.e-10, 5.}).compute(std::log);
+    const auto lim_q2_1 = kin.cuts().initial.q2.at(0).truncate(Limits{1.e-10, 5.}),
+               lim_q2_2 = kin.cuts().initial.q2.at(1).truncate(Limits{1.e-10, 5.});
+    if (log_part_virt_)
       process()
-          .defineVariable(m_t1_, proc::Process::Mapping::exponential, log_lim_q2, "Positive-z parton virtuality")
-          .defineVariable(m_t2_, proc::Process::Mapping::exponential, log_lim_q2, "Negative-z parton virtuality");
-    } else {
-      const auto lim_q2 = kin.cuts().initial.q2.truncate(Limits{1.e-10, 5.});
+          .defineVariable(
+              m_t1_, proc::Process::Mapping::exponential, lim_q2_1.compute(std::log), "Positive-z parton virtuality")
+          .defineVariable(
+              m_t2_, proc::Process::Mapping::exponential, lim_q2_2.compute(std::log), "Negative-z parton virtuality");
+    else
       process()
-          .defineVariable(m_t1_, proc::Process::Mapping::linear, lim_q2, "Positive-z parton virtuality")
-          .defineVariable(m_t2_, proc::Process::Mapping::linear, lim_q2, "Negative-z parton virtuality");
-    }
+          .defineVariable(m_t1_, proc::Process::Mapping::linear, lim_q2_1, "Positive-z parton virtuality")
+          .defineVariable(m_t2_, proc::Process::Mapping::linear, lim_q2_2, "Negative-z parton virtuality");
   }
 
   bool PartonsCollinearPhaseSpaceGenerator::generatePartonKinematics() {
