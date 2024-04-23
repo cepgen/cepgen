@@ -27,7 +27,7 @@
 
 namespace cepgen {
   namespace pythia8 {
-    class CollinearFlux : public cepgen::CollinearFlux {
+    class CollinearFlux final : public cepgen::CollinearFlux {
     public:
       explicit CollinearFlux(const ParametersList& params)
           : cepgen::CollinearFlux(params), type_(steer<std::string>("type")), pdgid_(steer<pdgid_t>("partonPdgId")) {
@@ -70,9 +70,9 @@ namespace cepgen {
         return desc;
       }
 
-      pdgid_t partonPdgId() const override final { return pdgid_; }
-      bool fragmenting() const override final { return true; }
-      double mass2() const override final { return mp2_; }
+      pdgid_t partonPdgId() const override { return pdgid_; }
+      bool fragmenting() const override { return true; }
+      double mass2() const override { return mp2_; }
 
       double fluxQ2(double x, double q2) const override {
         if (x == 0. || x < pdf_->getXmin())
