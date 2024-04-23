@@ -93,4 +93,4 @@ namespace cepgen {
   }  // namespace lhapdf
 }  // namespace cepgen
 using LHAPDFCollinearFlux = cepgen::lhapdf::CollinearFlux;
-REGISTER_COLLINEAR_FLUX("LHAPDF", LHAPDFCollinearFlux);
+REGISTER_COLLINEAR_FLUX("lhapdf", LHAPDFCollinearFlux);

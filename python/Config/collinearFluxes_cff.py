@@ -25,7 +25,7 @@ class ProtonFlux:
         )
     )
     def LHAPDF(pdfset: str='', extrapolatePDF: bool=False):
-        return Module('LHAPDF',
+        return Module('lhapdf',
             set = pdfset,
             extrapolatePDF = extrapolatePDF)
     LHAPDFLUXlep = LHAPDF(
