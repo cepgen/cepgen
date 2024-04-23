@@ -68,14 +68,14 @@ namespace cepgen {
 
     // register the incoming partons' virtuality
     if (log_part_virt_) {
-      const auto log_lim_q2_1 = kin.cuts().initial.q2_1.truncate(Limits{1.e-10, 5.}).compute(std::log),
-                 log_lim_q2_2 = kin.cuts().initial.q2_2.truncate(Limits{1.e-10, 5.}).compute(std::log);
+      const auto log_lim_q2_1 = kin.cuts().initial.q2.at(0).truncate(Limits{1.e-10, 5.}).compute(std::log),
+                 log_lim_q2_2 = kin.cuts().initial.q2.at(1).truncate(Limits{1.e-10, 5.}).compute(std::log);
       process()
           .defineVariable(m_t1_, proc::Process::Mapping::exponential, log_lim_q2_1, "Positive-z parton virtuality")
           .defineVariable(m_t2_, proc::Process::Mapping::exponential, log_lim_q2_2, "Negative-z parton virtuality");
     } else {
-      const auto lim_q2_1 = kin.cuts().initial.q2_1.truncate(Limits{1.e-10, 5.}),
-                 lim_q2_2 = kin.cuts().initial.q2_2.truncate(Limits{1.e-10, 5.});
+      const auto lim_q2_1 = kin.cuts().initial.q2.at(0).truncate(Limits{1.e-10, 5.}),
+                 lim_q2_2 = kin.cuts().initial.q2.at(1).truncate(Limits{1.e-10, 5.});
       process()
           .defineVariable(m_t1_, proc::Process::Mapping::linear, lim_q2_1, "Positive-z parton virtuality")
           .defineVariable(m_t2_, proc::Process::Mapping::linear, lim_q2_2, "Negative-z parton virtuality");

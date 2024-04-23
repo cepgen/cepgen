@@ -31,7 +31,8 @@
   __TYPE_ENUM(std::string, map_strs_)          \
   __TYPE_ENUM(Limits, map_lims_)               \
   __TYPE_ENUM(ParametersList, map_params_)     \
-  __TYPE_ENUM(std::vector<int>, map_vints_)
+  __TYPE_ENUM(std::vector<int>, map_vec_ints_) \
+  __TYPE_ENUM(std::vector<Limits>, map_vec_lims_)
 
 namespace cepgen {
   /// Base user-steerable object
