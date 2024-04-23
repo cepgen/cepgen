@@ -43,10 +43,16 @@ namespace cepgen {
       else if (params.has<Limits>(key)) {
         const auto lim = params.get<Limits>(key);
         return "("s + std::to_string(lim.min()) + "," + (lim.hasMax() ? std::to_string(lim.max()) : "") + ")";
+      } else if (params.has<std::vector<Limits> >(key)) {
+        std::string out{"["}, sep;
+        for (const auto& lim : params.get<std::vector<Limits> >(key))
+          out += sep + "("s + std::to_string(lim.min()) + "," + (lim.hasMax() ? std::to_string(lim.max()) : "") + ")",
+              sep = ", ";
+        return out + "]";
       } else if (params.has<std::vector<int> >(key))
-        return "["s + utils::repr(params.get<std::vector<int> >(key)) + "]";
+        return "["s + utils::repr(params.get<std::vector<int> >(key), ", ") + "]";
       else if (params.has<std::vector<double> >(key))
-        return "["s + utils::repr(params.get<std::vector<double> >(key)) + "]";
+        return "["s + utils::repr(params.get<std::vector<double> >(key), ", ") + "]";
       else if (params.has<ParametersList>(key)) {
         const auto plist = params.get<ParametersList>(key);
         return (plist.hasName() ? "cepgen.Module(\'" + plist.name() + "\'" : "cepgen.Parameters(") + repr(plist, key) +
