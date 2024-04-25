@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2017-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,13 +28,17 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
+static std::unordered_map<int, std::unique_ptr<cepgen::strfun::Parameterisation> > kBuiltStrFunsParameterisations;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 /// Expose structure functions calculators to Fortran
 void cepgen_structure_functions_(int& sfmode, double& xbj, double& q2, double& f2, double& fl) {
   using namespace cepgen;
-  static auto sf = StructureFunctionsFactory::get().build(sfmode);
+  if (kBuiltStrFunsParameterisations.count(sfmode) == 0)
+    kBuiltStrFunsParameterisations[sfmode] = StructureFunctionsFactory::get().build(sfmode);
+  const auto& sf = kBuiltStrFunsParameterisations.at(sfmode);
   f2 = sf->F2(xbj, q2);
   fl = sf->FL(xbj, q2);
 }
