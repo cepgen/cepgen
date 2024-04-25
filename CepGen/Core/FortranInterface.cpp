@@ -30,6 +30,8 @@
 
 static std::unordered_map<int, std::unique_ptr<cepgen::strfun::Parameterisation> > kBuiltStrFunsParameterisations;
 static std::unordered_map<int, std::unique_ptr<cepgen::KTFlux> > kBuiltKtFluxParameterisations;
+static std::unordered_map<std::string, std::unique_ptr<cepgen::Coupling> > kBuiltAlphaSParameterisations,
+    kBuiltAlphaEMParameterisations;
 
 #ifdef __cplusplus
 extern "C" {
@@ -122,22 +124,18 @@ void cepgen_error_(char* str, int size) { CG_ERROR("fortran_process") << std::st
 
 void cepgen_fatal_(char* str, int size) { throw CG_FATAL("fortran_process") << std::string(str, size); }
 
-double cepgen_alphas_(double& q) {
-  static std::unique_ptr<cepgen::Coupling> kAlphaSPtr;
-  if (!kAlphaSPtr) {
-    CG_INFO("fortran_process") << "Initialisation of the alpha(S) evolution algorithm.";
-    kAlphaSPtr = cepgen::AlphaSFactory::get().build("pegasus");
-  }
-  return (*kAlphaSPtr)(q);
+double cepgen_alphas_(char* str, double& q, int size) {
+  const auto name = std::string(str, size);
+  if (kBuiltAlphaSParameterisations.count(name) == 0)
+    kBuiltAlphaSParameterisations[name] = cepgen::AlphaSFactory::get().build(name);
+  return kBuiltAlphaSParameterisations.at(name)->operator()(q);
 }
 
-double cepgen_alphaem_(double& q) {
-  static std::unique_ptr<cepgen::Coupling> kAlphaEMPtr;
-  if (!kAlphaEMPtr) {
-    CG_INFO("fortran_process") << "Initialisation of the alpha(EM) evolution algorithm.";
-    kAlphaEMPtr = cepgen::AlphaEMFactory::get().build("fixed");
-  }
-  return (*kAlphaEMPtr)(q);
+double cepgen_alphaem_(char* str, double& q, int size) {
+  const auto name = std::string(str, size);
+  if (kBuiltAlphaEMParameterisations.count(name) == 0)
+    kBuiltAlphaEMParameterisations[name] = cepgen::AlphaEMFactory::get().build(name);
+  return kBuiltAlphaEMParameterisations.at(name)->operator()(q);
 }
 
 #ifdef __cplusplus
