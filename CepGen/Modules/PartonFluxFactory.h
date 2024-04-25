@@ -31,13 +31,13 @@
   }                                                                               \
   static_assert(true, "")
 /// Add a generic KT-factorised flux evaluator builder definition
-#define REGISTER_KT_FLUX(name, obj)                                        \
-  namespace cepgen {                                                       \
-    struct BUILDERNM(obj) {                                                \
-      BUILDERNM(obj)() { KTFluxFactory::get().registerModule<obj>(name); } \
-    };                                                                     \
-    static const BUILDERNM(obj) gKTFlux##obj;                              \
-  }                                                                        \
+#define REGISTER_KT_FLUX(name, id, obj)                                                       \
+  namespace cepgen {                                                                          \
+    struct BUILDERNM(obj) {                                                                   \
+      BUILDERNM(obj)() { KTFluxFactory::get().addIndex(id, name).registerModule<obj>(name); } \
+    };                                                                                        \
+    static const BUILDERNM(obj) gKTFlux##obj;                                                 \
+  }                                                                                           \
   static_assert(true, "")
 
 namespace cepgen {

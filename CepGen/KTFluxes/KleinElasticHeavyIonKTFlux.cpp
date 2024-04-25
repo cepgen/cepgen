@@ -70,4 +70,4 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_KT_FLUX("KleinElasticHI", KleinElasticHeavyIonKTFlux);
+REGISTER_KT_FLUX("KleinElasticHI", 101, KleinElasticHeavyIonKTFlux);
