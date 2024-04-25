@@ -128,7 +128,7 @@ namespace cepgen {
   };
 }  // namespace cepgen
 
-REGISTER_KT_FLUX("Elastic", ElasticNucleonKTFlux);
-REGISTER_KT_FLUX("BudnevElastic", BudnevElasticNucleonKTFlux);
-REGISTER_KT_FLUX("BudnevElasticLepton", BudnevElasticLeptonKTFlux);
-REGISTER_KT_FLUX("ElasticHeavyIon", ElasticHeavyIonKTFlux);
+REGISTER_KT_FLUX("Elastic", 0, ElasticNucleonKTFlux);
+REGISTER_KT_FLUX("BudnevElastic", 10, BudnevElasticNucleonKTFlux);
+REGISTER_KT_FLUX("BudnevElasticLepton", 12, BudnevElasticLeptonKTFlux);
+REGISTER_KT_FLUX("ElasticHeavyIon", 100, ElasticHeavyIonKTFlux);

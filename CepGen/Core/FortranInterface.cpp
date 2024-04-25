@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2017-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,13 +28,20 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
+static std::unordered_map<int, std::unique_ptr<cepgen::strfun::Parameterisation> > kBuiltStrFunsParameterisations;
+static std::unordered_map<int, std::unique_ptr<cepgen::KTFlux> > kBuiltKtFluxParameterisations;
+static std::unordered_map<std::string, std::unique_ptr<cepgen::Coupling> > kBuiltAlphaSParameterisations,
+    kBuiltAlphaEMParameterisations;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 /// Expose structure functions calculators to Fortran
 void cepgen_structure_functions_(int& sfmode, double& xbj, double& q2, double& f2, double& fl) {
   using namespace cepgen;
-  static auto sf = StructureFunctionsFactory::get().build(sfmode);
+  if (kBuiltStrFunsParameterisations.count(sfmode) == 0)
+    kBuiltStrFunsParameterisations[sfmode] = StructureFunctionsFactory::get().build(sfmode);
+  const auto& sf = kBuiltStrFunsParameterisations.at(sfmode);
   f2 = sf->F2(xbj, q2);
   fl = sf->FL(xbj, q2);
 }
@@ -48,36 +55,19 @@ void cepgen_structure_functions_(int& sfmode, double& xbj, double& q2, double& f
 /// \param[in] mout Diffractive state mass for dissociative emission
 double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& min, double& mout) {
   using namespace cepgen;
-  const auto params =
-      ParametersList()
-          .set<double>("mass", min)
-          .set<ParametersList>("structureFunctions",
-                               StructureFunctionsFactory::get().describeParameters(sfmode).parameters())
-          .set<ParametersList>(
-              "formFactors",
-              FormFactorsFactory::get()
-                  .describeParameters(formfac::gFFStandardDipoleHandler)  // use another argument for the modelling?
-                  .parameters());
-  auto flux_name = [](int mode) -> std::string {
-    switch (mode) {
-      case 0:
-        return "Elastic";
-      case 10:
-        return "BudnevElastic";
-      case 1:
-        return "Inelastic";
-      case 11:
-        return "BudnevInelastic";
-      case 100:
-        return "ElasticHeavyIon";
-      case 20:
-        return "KMR";
-      default:
-        throw CG_FATAL("cepgen_kt_flux") << "Invalid flux modelling: " << mode << ".";
-    }
-  };
-  static auto* flux = KTFluxFactory::get().build(flux_name(fmode), params).release();
-  return flux->fluxMX2(x, kt2, mout * mout);
+  if (kBuiltKtFluxParameterisations.count(fmode) == 0)
+    kBuiltKtFluxParameterisations[fmode] = KTFluxFactory::get().build(
+        fmode,
+        ParametersList()
+            .set<double>("mass", min)
+            .set<ParametersList>("structureFunctions",
+                                 StructureFunctionsFactory::get().describeParameters(sfmode).parameters())
+            .set<ParametersList>(
+                "formFactors",
+                FormFactorsFactory::get()
+                    .describeParameters(formfac::gFFStandardDipoleHandler)  // use another argument for the modelling?
+                    .parameters()));
+  return kBuiltKtFluxParameterisations.at(fmode)->fluxMX2(x, kt2, mout * mout);
 }
 
 /// Compute a \f$k_{\rm T}\f$-dependent flux for heavy ions
@@ -88,13 +78,10 @@ double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& 
 /// \param[in] z Atomic number for the heavy ion
 double cepgen_kt_flux_hi_(int& fmode, double& x, double& kt2, int& a, int& z) {
   using namespace cepgen;
-  (void)fmode;
-  static auto* flux =
-      KTFluxFactory::get()
-          .build("ElasticHeavyIon",
-                 ParametersList().setAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon{(unsigned short)a, (Element)z}))
-          .release();
-  return flux->fluxMX2(x, kt2, 0.);
+  if (kBuiltKtFluxParameterisations.count(fmode) == 0)
+    kBuiltKtFluxParameterisations[fmode] = KTFluxFactory::get().build(
+        fmode, ParametersList().setAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon{(unsigned short)a, (Element)z}));
+  return kBuiltKtFluxParameterisations.at(fmode)->fluxMX2(x, kt2, 0.);
 }
 
 /// Mass of a particle, in GeV/c^2
@@ -137,22 +124,18 @@ void cepgen_error_(char* str, int size) { CG_ERROR("fortran_process") << std::st
 
 void cepgen_fatal_(char* str, int size) { throw CG_FATAL("fortran_process") << std::string(str, size); }
 
-double cepgen_alphas_(double& q) {
-  static std::unique_ptr<cepgen::Coupling> kAlphaSPtr;
-  if (!kAlphaSPtr) {
-    CG_INFO("fortran_process") << "Initialisation of the alpha(S) evolution algorithm.";
-    kAlphaSPtr = cepgen::AlphaSFactory::get().build("pegasus");
-  }
-  return (*kAlphaSPtr)(q);
+double cepgen_alphas_(char* str, double& q, int size) {
+  const auto name = std::string(str, size);
+  if (kBuiltAlphaSParameterisations.count(name) == 0)
+    kBuiltAlphaSParameterisations[name] = cepgen::AlphaSFactory::get().build(name);
+  return kBuiltAlphaSParameterisations.at(name)->operator()(q);
 }
 
-double cepgen_alphaem_(double& q) {
-  static std::unique_ptr<cepgen::Coupling> kAlphaEMPtr;
-  if (!kAlphaEMPtr) {
-    CG_INFO("fortran_process") << "Initialisation of the alpha(EM) evolution algorithm.";
-    kAlphaEMPtr = cepgen::AlphaEMFactory::get().build("fixed");
-  }
-  return (*kAlphaEMPtr)(q);
+double cepgen_alphaem_(char* str, double& q, int size) {
+  const auto name = std::string(str, size);
+  if (kBuiltAlphaEMParameterisations.count(name) == 0)
+    kBuiltAlphaEMParameterisations[name] = cepgen::AlphaEMFactory::get().build(name);
+  return kBuiltAlphaEMParameterisations.at(name)->operator()(q);
 }
 
 #ifdef __cplusplus
