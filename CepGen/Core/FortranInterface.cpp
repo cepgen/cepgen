@@ -29,6 +29,7 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
 static std::unordered_map<int, std::unique_ptr<cepgen::strfun::Parameterisation> > kBuiltStrFunsParameterisations;
+static std::unordered_map<int, std::unique_ptr<cepgen::KTFlux> > kBuiltKtFluxParameterisations;
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,36 +53,19 @@ void cepgen_structure_functions_(int& sfmode, double& xbj, double& q2, double& f
 /// \param[in] mout Diffractive state mass for dissociative emission
 double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& min, double& mout) {
   using namespace cepgen;
-  const auto params =
-      ParametersList()
-          .set<double>("mass", min)
-          .set<ParametersList>("structureFunctions",
-                               StructureFunctionsFactory::get().describeParameters(sfmode).parameters())
-          .set<ParametersList>(
-              "formFactors",
-              FormFactorsFactory::get()
-                  .describeParameters(formfac::gFFStandardDipoleHandler)  // use another argument for the modelling?
-                  .parameters());
-  auto flux_name = [](int mode) -> std::string {
-    switch (mode) {
-      case 0:
-        return "Elastic";
-      case 10:
-        return "BudnevElastic";
-      case 1:
-        return "Inelastic";
-      case 11:
-        return "BudnevInelastic";
-      case 100:
-        return "ElasticHeavyIon";
-      case 20:
-        return "KMR";
-      default:
-        throw CG_FATAL("cepgen_kt_flux") << "Invalid flux modelling: " << mode << ".";
-    }
-  };
-  static auto* flux = KTFluxFactory::get().build(flux_name(fmode), params).release();
-  return flux->fluxMX2(x, kt2, mout * mout);
+  if (kBuiltKtFluxParameterisations.count(fmode) == 0)
+    kBuiltKtFluxParameterisations[fmode] = KTFluxFactory::get().build(
+        fmode,
+        ParametersList()
+            .set<double>("mass", min)
+            .set<ParametersList>("structureFunctions",
+                                 StructureFunctionsFactory::get().describeParameters(sfmode).parameters())
+            .set<ParametersList>(
+                "formFactors",
+                FormFactorsFactory::get()
+                    .describeParameters(formfac::gFFStandardDipoleHandler)  // use another argument for the modelling?
+                    .parameters()));
+  return kBuiltKtFluxParameterisations.at(fmode)->fluxMX2(x, kt2, mout * mout);
 }
 
 /// Compute a \f$k_{\rm T}\f$-dependent flux for heavy ions
@@ -92,13 +76,10 @@ double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& 
 /// \param[in] z Atomic number for the heavy ion
 double cepgen_kt_flux_hi_(int& fmode, double& x, double& kt2, int& a, int& z) {
   using namespace cepgen;
-  (void)fmode;
-  static auto* flux =
-      KTFluxFactory::get()
-          .build("ElasticHeavyIon",
-                 ParametersList().setAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon{(unsigned short)a, (Element)z}))
-          .release();
-  return flux->fluxMX2(x, kt2, 0.);
+  if (kBuiltKtFluxParameterisations.count(fmode) == 0)
+    kBuiltKtFluxParameterisations[fmode] = KTFluxFactory::get().build(
+        fmode, ParametersList().setAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon{(unsigned short)a, (Element)z}));
+  return kBuiltKtFluxParameterisations.at(fmode)->fluxMX2(x, kt2, 0.);
 }
 
 /// Mass of a particle, in GeV/c^2
