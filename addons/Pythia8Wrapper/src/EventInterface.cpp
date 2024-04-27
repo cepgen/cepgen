@@ -21,15 +21,15 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGenPythia8/PythiaEventInterface.h"
+#include "CepGenPythia8/EventInterface.h"
 
-namespace Pythia8 {
+namespace cepgen::pythia8 {
   /// Convert a CepGen particle momentum into its Pythia8 counterpart
-  Vec4 momToVec4(const cepgen::Momentum& mom) { return Vec4(mom.px(), mom.py(), mom.pz(), mom.energy()); }
+  Pythia8::Vec4 momToVec4(const Momentum& mom) { return Pythia8::Vec4(mom.px(), mom.py(), mom.pz(), mom.energy()); }
 
-  CepGenEvent::CepGenEvent() : LHAup(3), mp_(cepgen::PDG::get().mass(cepgen::PDG::proton)), mp2_(mp_ * mp_) {}
+  EventInterface::EventInterface() : Pythia8::LHAup(3), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {}
 
-  void CepGenEvent::initialise(const cepgen::RunParameters& params) {
+  void EventInterface::initialise(const RunParameters& params) {
     params_ = &params;
     inel1_ = !params_->kinematics().incomingBeams().positive().elastic();
     inel2_ = !params_->kinematics().incomingBeams().negative().elastic();
@@ -41,36 +41,36 @@ namespace Pythia8 {
     //addProcess( 0, params_->integration().result, params_->integration().err_result, 100. );
   }
 
-  void CepGenEvent::addComments(const std::string& comments) {
+  void EventInterface::addComments(const std::string& comments) {
 #if PYTHIA_VERSION_INTEGER >= 8200
     osLHEF << comments;
 #else
-    CG_WARNING("CepGenEvent:addComments") << "Pythia 8 is too outdated... Unused comments: " << comments;
+    CG_WARNING("pythia8:EventInterface:addComments") << "Pythia 8 is too outdated... Unused comments: " << comments;
 #endif
   }
 
-  void CepGenEvent::setCrossSection(int id, double cross_section, double cross_section_err) {
+  void EventInterface::setCrossSection(int id, double cross_section, double cross_section_err) {
     addProcess(0, cross_section, cross_section_err, 100.);
     setXSec(id, cross_section);
     setXErr(id, cross_section_err);
     //listInit();
   }
 
-  void CepGenEvent::feedEvent(const cepgen::Event& ev, const Type& type) {
-    const double scale = ev(cepgen::Particle::Role::Intermediate)[0].momentum().mass();
+  void EventInterface::feedEvent(const Event& ev, const Type& type) {
+    const double scale = ev(Particle::Role::Intermediate)[0].momentum().mass();
     setProcess(0, 1., scale, ev.metadata("alphaEM"), ev.metadata("alphaS"));
 
-    const auto &part1 = ev(cepgen::Particle::Role::Parton1)[0], &part2 = ev(cepgen::Particle::Role::Parton2)[0];
-    const auto &op1 = ev(cepgen::Particle::Role::OutgoingBeam1)[0], &op2 = ev(cepgen::Particle::Role::OutgoingBeam2)[0];
+    const auto &part1 = ev(Particle::Role::Parton1)[0], &part2 = ev(Particle::Role::Parton2)[0];
+    const auto &op1 = ev(Particle::Role::OutgoingBeam1)[0], &op2 = ev(Particle::Role::OutgoingBeam2)[0];
     const double q2_1 = -part1.momentum().mass2(), q2_2 = -part2.momentum().mass2();
     const double x1 = q2_1 / (q2_1 + op1.momentum().mass2() - mp2_), x2 = q2_2 / (q2_2 + op2.momentum().mass2() - mp2_);
 
     unsigned short colour_index = MIN_COLOUR_INDEX;
 
-    const Vec4 mom_part1(momToVec4(part1.momentum())), mom_part2(momToVec4(part2.momentum()));
+    const auto mom_part1(momToVec4(part1.momentum())), mom_part2(momToVec4(part2.momentum()));
 
     if (type == Type::centralAndBeamRemnants) {  // full event content (with collinear partons)
-      Vec4 mom_iq1 = mom_part1, mom_iq2 = mom_part2;
+      auto mom_iq1 = mom_part1, mom_iq2 = mom_part2;
       unsigned short parton1_id, parton2_id;
       unsigned short parton1_pdgid = part1.integerPdgId(), parton2_pdgid = part2.integerPdgId();
       unsigned short parton1_colour = 0, parton2_colour = 0;
@@ -78,12 +78,12 @@ namespace Pythia8 {
       if (inel1_) {
         parton1_pdgid = 2;
         parton1_colour = colour_index++;
-        mom_iq1 = momToVec4(x1 * ev(cepgen::Particle::Role::IncomingBeam1)[0].momentum());
+        mom_iq1 = momToVec4(x1 * ev(Particle::Role::IncomingBeam1)[0].momentum());
       }
       if (inel2_) {
         parton2_pdgid = 2;
         parton2_colour = colour_index++;
-        mom_iq2 = momToVec4(x2 * ev(cepgen::Particle::Role::IncomingBeam2)[0].momentum());
+        mom_iq2 = momToVec4(x2 * ev(Particle::Role::IncomingBeam2)[0].momentum());
       }
 
       //--- flavour / x value of hard-process initiators
@@ -131,7 +131,7 @@ namespace Pythia8 {
       //===========================================================================================
 
       if (inel1_) {
-        const Vec4 mom_oq1 = mom_iq1 - mom_part1;
+        const auto mom_oq1 = mom_iq1 - mom_part1;
         addParticle(parton1_pdgid,
                     1,
                     parton1_id,
@@ -147,7 +147,7 @@ namespace Pythia8 {
                     1.);
       }
       if (inel2_) {
-        const Vec4 mom_oq2 = mom_iq2 - mom_part2;
+        const auto mom_oq2 = mom_iq2 - mom_part2;
         addParticle(parton2_pdgid,
                     1,
                     parton1_id,
@@ -175,7 +175,7 @@ namespace Pythia8 {
         // full beam remnants content
         //=========================================================================================
 
-        for (const auto& syst : {cepgen::Particle::Role::OutgoingBeam1, cepgen::Particle::Role::OutgoingBeam2}) {
+        for (const auto& syst : {Particle::Role::OutgoingBeam1, Particle::Role::OutgoingBeam2}) {
           for (const auto& p : ev(syst))
             addCepGenParticle(p, INVALID_ID, findMothers(ev, p));
         }
@@ -187,38 +187,38 @@ namespace Pythia8 {
     //=============================================================================================
 
     const unsigned short central_colour = colour_index++;
-    for (const auto& p : ev(cepgen::Particle::Role::CentralSystem)) {
+    for (const auto& p : ev(Particle::Role::CentralSystem)) {
       std::pair<int, int> colours = {0, 0}, mothers = {1, 2};
       if (type != Type::centralAndBeamRemnants)
         mothers = findMothers(ev, p);
       try {
-        if (cepgen::PDG::get().colours(p.pdgId()) > 1) {
+        if (PDG::get().colours(p.pdgId()) > 1) {
           if (p.integerPdgId() > 0)  //--- particle
             colours.first = central_colour;
           else  //--- anti-particle
             colours.second = central_colour;
         }
-      } catch (const cepgen::Exception&) {
+      } catch (const Exception&) {
       }
       int status = 1;
-      if (type == Type::centralAndFullBeamRemnants && p.status() == cepgen::Particle::Status::Resonance)
+      if (type == Type::centralAndFullBeamRemnants && p.status() == Particle::Status::Resonance)
         status = 2;
       addCepGenParticle(p, status, mothers, colours);
     }
   }
 
-  void CepGenEvent::setProcess(int id, double cross_section, double q2_scale, double alpha_qed, double alpha_qcd) {
+  void EventInterface::setProcess(int id, double cross_section, double q2_scale, double alpha_qed, double alpha_qcd) {
     LHAup::setProcess(id, cross_section, q2_scale, alpha_qed, alpha_qcd);
     py_cg_corresp_.clear();
   }
 
-  unsigned short CepGenEvent::cepgenId(unsigned short py_id) const {
+  unsigned short EventInterface::cepgenId(unsigned short py_id) const {
     if (py_cg_corresp_.count(py_id) == 0)
       return INVALID_ID;
     return py_cg_corresp_.at(py_id);
   }
 
-  unsigned short CepGenEvent::pythiaId(unsigned short cg_id) const {
+  unsigned short EventInterface::pythiaId(unsigned short cg_id) const {
     auto it = std::find_if(
         py_cg_corresp_.begin(), py_cg_corresp_.end(), [&cg_id](const auto& py_cg) { return py_cg.second == cg_id; });
     if (it != py_cg_corresp_.end())
@@ -226,16 +226,16 @@ namespace Pythia8 {
     return INVALID_ID;
   }
 
-  void CepGenEvent::addCepGenParticle(const cepgen::Particle& part,
-                                      int status,
-                                      const std::pair<int, int>& mothers,
-                                      const std::pair<int, int>& colours) {
-    const Vec4 mom_part(momToVec4(part.momentum()));
+  void EventInterface::addCepGenParticle(const Particle& part,
+                                         int status,
+                                         const std::pair<int, int>& mothers,
+                                         const std::pair<int, int>& colours) {
+    const auto mom_part(momToVec4(part.momentum()));
     int pdg_id = part.integerPdgId();
     if (status == INVALID_ID)
       switch (part.status()) {
-        case cepgen::Particle::Status::Resonance:
-        case cepgen::Particle::Status::Fragmented:
+        case Particle::Status::Resonance:
+        case Particle::Status::Fragmented:
           status = 2;
           break;
         default: {
@@ -262,17 +262,17 @@ namespace Pythia8 {
                 0.);
   }
 
-  void CepGenEvent::addCorresp(unsigned short py_id, unsigned short cg_id) { py_cg_corresp_[py_id] = cg_id; }
+  void EventInterface::addCorresp(unsigned short py_id, unsigned short cg_id) { py_cg_corresp_[py_id] = cg_id; }
 
-  void CepGenEvent::dumpCorresp() const {
-    CG_INFO("CepGenEvent:dump").log([&](auto& msg) {
+  void EventInterface::dumpCorresp() const {
+    CG_INFO("pythia8:EventInterface:dump").log([&](auto& msg) {
       msg << "List of Pythia ←|→ CepGen particle ids correspondence";
       for (const auto& py_cg : py_cg_corresp_)
         msg << "\n\t" << py_cg.first << " <-> " << py_cg.second;
     });
   }
 
-  std::pair<int, int> CepGenEvent::findMothers(const cepgen::Event& ev, const cepgen::Particle& p) const {
+  std::pair<int, int> EventInterface::findMothers(const Event& ev, const Particle& p) const {
     std::pair<int, int> out = {0, 0};
 
     const auto& mothers = p.mothers();
@@ -293,4 +293,4 @@ namespace Pythia8 {
     }
     return out;
   }
-}  // namespace Pythia8
+}  // namespace cepgen::pythia8

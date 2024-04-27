@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2016-2023  Laurent Forthomme
+ *  Copyright (C) 2016-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGenPythia8_PythiaEventInterface_h
-#define CepGenPythia8_PythiaEventInterface_h
+#ifndef CepGenPythia8_EventInterface_h
+#define CepGenPythia8_EventInterface_h
 
 #include <Pythia8/Pythia.h>
 
@@ -29,9 +29,9 @@ namespace cepgen {
   class Particle;
 }  // namespace cepgen
 
-namespace Pythia8 {
+namespace cepgen::pythia8 {
   /// Interfacing between CepGen and Pythia8 event definitions
-  class CepGenEvent : public LHAup {
+  class EventInterface : public Pythia8::LHAup {
   public:
     /// List of particles to be included to the event content
     enum struct Type {
@@ -39,13 +39,13 @@ namespace Pythia8 {
       centralAndBeamRemnants,     ///< include undissociated beam remnants and central system
       centralAndFullBeamRemnants  ///< include dissociated beam remnants and central system
     };
-    explicit CepGenEvent();
+    explicit EventInterface();
     /// Initialise this conversion object with CepGen parameters
-    void initialise(const cepgen::RunParameters&);
+    void initialise(const RunParameters&);
     /// Feed a new CepGen event to this conversion object
     /// \param[in] ev CepGen event to be fed
     /// \param[in] type Type of storage
-    void feedEvent(const cepgen::Event& ev, const Type& type);
+    void feedEvent(const Event& ev, const Type& type);
     /// Set the cross section for a given process
     /// \param[in] id Process identifier
     /// \param[in] cross_section Process cross section, in pb
@@ -71,7 +71,7 @@ namespace Pythia8 {
     /// \return Pythia8 particle id
     unsigned short pythiaId(unsigned short cg_id) const;
     /// Add a CepGen particle to the event content
-    void addCepGenParticle(const cepgen::Particle& part,
+    void addCepGenParticle(const Particle& part,
                            int status = INVALID_ID,
                            const std::pair<int, int>& mothers = {0, 0},
                            const std::pair<int, int>& colours = {0, 0});
@@ -93,11 +93,12 @@ namespace Pythia8 {
 #endif
 
   private:
-    std::pair<int, int> findMothers(const cepgen::Event& ev, const cepgen::Particle& p) const;
+    std::pair<int, int> findMothers(const Event& ev, const Particle& p) const;
     const double mp_, mp2_;
     bool inel1_{false}, inel2_{false};
     std::unordered_map<unsigned short, unsigned short> py_cg_corresp_;
-    const cepgen::RunParameters* params_{nullptr};  // borrowed
+    const RunParameters* params_{nullptr};  // borrowed
   };
-}  // namespace Pythia8
+}  // namespace cepgen::pythia8
+
 #endif
