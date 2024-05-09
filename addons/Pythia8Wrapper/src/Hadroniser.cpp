@@ -41,23 +41,32 @@ namespace cepgen::pythia8 {
           debug_lhef_(steer<bool>("debugLHEF")),
           output_config_(steer<std::string>("outputConfig")) {}
 
-    virtual ~Hadroniser() {
+    inline virtual ~Hadroniser() {
       if (!output_config_.empty())
         pythia_->settings.writeFile(output_config_, false);
       if (debug_lhef_)
         cg_evt_->closeLHEF(true);
     }
 
-    static ParametersDescription description();
+    inline static ParametersDescription description() {
+      auto desc = cepgen::hadr::Hadroniser::description();
+      desc.setDescription("Interface to the Pythia 8 string hadronisation/fragmentation algorithm");
+      desc.add<bool>("correctCentralSystem", false)
+          .setDescription("correct any discrepancy of the kinematics of the central system?");
+      desc.add<bool>("debugLHEF", false).setDescription("dump each event into a debugging LHEF file?");
+      desc.add<std::string>("outputConfig", "last_pythia_config.cmd")
+          .setDescription("Pythia configuration backup output filename");
+      return desc;
+    }
 
-    void readString(const std::string& param) override {
+    inline void readString(const std::string& param) override {
       if (!pythia_->readString(param))
         throw CG_FATAL("pythia8:Hadroniser") << "The Pythia8 core failed to parse the following setting:\n\t" << param;
     }
     void initialise() override;
     bool run(Event& ev, double& weight, bool fast) override;
 
-    void setCrossSection(const Value& cross_section) override {
+    inline void setCrossSection(const Value& cross_section) override {
       cg_evt_->setCrossSection(0, cross_section, cross_section.uncertainty());
     }
 
@@ -187,17 +196,13 @@ namespace cepgen::pythia8 {
 
     auto& num_hadr_trials = ev.metadata["pythia8:num_hadronisation_trials"];
     num_hadr_trials = 0;
-    while (true) {
+    while (true) {  // run the hadronisation/fragmentation algorithm
       if (num_hadr_trials++ > max_trials_)
         return false;
-      //--- run the hadronisation/fragmentation algorithm
-      if (pythia_->next()) {
-        //--- hadronisation successful
-        if (first_evt_ && !fast) {
-          offset_ = 0;
+      if (pythia_->next()) {        // hadronisation successful
+        if (first_evt_ && !fast) {  // we build the association map between the CepGen and Pythia8 events
           for (unsigned short i = 1; i < pythia_->event.size(); ++i)
-            if (pythia_->event[i].status() == -PYTHIA_STATUS_IN_BEAM)
-              //--- no incoming particles in further stages
+            if (pythia_->event[i].status() == -PYTHIA_STATUS_IN_BEAM)  // no incoming particles in later stages
               offset_++;
           first_evt_ = false;
         }
@@ -223,24 +228,10 @@ namespace cepgen::pythia8 {
                                     const Pythia8::Vec4& mom,
                                     unsigned short role) const {
     ParticleProperties prop;
-    const pdgid_t pdg_id = py_part.idAbs();
-    //--- define the particle if not already in the list of handled PDGs
-    try {
-      prop = PDG::get()(pdg_id);
-    } catch (const Exception&) {
-      prop.pdgid = pdg_id;
-      prop.name = prop.human_name = py_part.name();
-      prop.colours = py_part.col();  // colour factor
-      prop.mass = py_part.m0();
-      prop.width = py_part.mWidth();
-      if (const auto ch = int(py_part.charge() * 3.); std::abs(ch) > 0)
-        prop.charges = {ch, -ch};
-      prop.fermion = py_part.isLepton();
-      PDG::get().define(prop);
-    }
+    EventInterface::checkPDGid(py_part);  // define the particle if not already in the list of handled PDGs
     //--- add the particle to the event content
     Particle& op = ev.addParticle(static_cast<Particle::Role>(role));
-    op.setPdgId((long)py_part.id());
+    op.setIntegerPdgId(py_part.id());
     op.setStatus(py_part.isFinal()                                                    ? Particle::Status::FinalState
                  : static_cast<Particle::Role>(role) == Particle::Role::CentralSystem ? Particle::Status::Propagator
                                                                                       : Particle::Status::Fragmented);
@@ -252,12 +243,11 @@ namespace cepgen::pythia8 {
   void Hadroniser::updateEvent(Event& ev, double& weight) const {
     std::vector<unsigned short> central_parts;
 
-    for (unsigned short i = 1 + offset_; i < pythia_->event.size(); ++i) {
-      const Pythia8::Particle& p = pythia_->event[i];
+    for (int i = 1 + offset_; i < pythia_->event.size(); ++i) {
+      const auto& p = pythia_->event[i];
       const unsigned short cg_id = cg_evt_->cepgenId(i - offset_);
-      if (cg_id != pythia8::EventInterface::INVALID_ID) {
-        //----- particle already in the event
-        Particle& cg_part = ev[cg_id];
+      if (cg_id != pythia8::EventInterface::INVALID_ID) {  // particle is already in the event
+        auto& cg_part = ev[cg_id];
         //--- fragmentation result
         if (cg_part.role() == Particle::Role::OutgoingBeam1 || cg_part.role() == Particle::Role::OutgoingBeam2) {
           cg_part.setStatus(Particle::Status::Fragmented);
@@ -306,7 +296,7 @@ namespace cepgen::pythia8 {
             break;
         }
         // found the role ; now we can add the particle
-        Particle& cg_part = addParticle(ev, p, p.p(), role);
+        auto& cg_part = addParticle(ev, p, p.p(), role);
         if (correct_central_ && static_cast<Particle::Role>(role) == Particle::Role::CentralSystem) {
           if (const auto ip = std::find(central_parts.begin(), central_parts.end(), p.mother1());
               ip != central_parts.end())
@@ -344,17 +334,6 @@ namespace cepgen::pythia8 {
         return findRole(ev, pythia_->event[par_id]);
     }
     return (unsigned short)Particle::Role::UnknownRole;
-  }
-
-  ParametersDescription Hadroniser::description() {
-    auto desc = cepgen::hadr::Hadroniser::description();
-    desc.setDescription("Interface to the Pythia 8 string hadronisation/fragmentation algorithm");
-    desc.add<bool>("correctCentralSystem", false)
-        .setDescription("Correct the kinematics of the central system whenever required");
-    desc.add<bool>("debugLHEF", false).setDescription("Switch on the dump of each event into a debugging LHEF file");
-    desc.add<std::string>("outputConfig", "last_pythia_config.cmd")
-        .setDescription("Output filename for a backup of the last Pythia configuration snapshot");
-    return desc;
   }
 }  // namespace cepgen::pythia8
 using Pythia8Hadroniser = cepgen::pythia8::Hadroniser;

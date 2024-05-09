@@ -293,4 +293,19 @@ namespace cepgen::pythia8 {
     }
     return out;
   }
+
+  void EventInterface::checkPDGid(const Pythia8::Particle& part) {
+    if (cepgen::PDG::get().has(part.idAbs()))
+      return;
+    cepgen::ParticleProperties prop;
+    prop.pdgid = part.idAbs();
+    prop.name = prop.human_name = part.name();
+    prop.colours = part.col();  // colour factor
+    prop.mass = part.m0();
+    prop.width = part.mWidth();
+    if (const auto ch = int(part.charge() * 3.); std::abs(ch) > 0)
+      prop.charges = {ch, -ch};
+    prop.fermion = part.isLepton();
+    PDG::get().define(prop);
+  }
 }  // namespace cepgen::pythia8
