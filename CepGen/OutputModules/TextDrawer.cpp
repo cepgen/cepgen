@@ -54,18 +54,14 @@ namespace cepgen {
 
     private:
       friend class Drawable;
+      static const std::array<Colour, 7> kColours;
+      static const std::string kEmptyLabel;
 
       void drawValues(std::ostream&, const Drawable&, const Drawable::axis_t&, const Mode&, bool effects) const;
       void drawValues(std::ostream&, const Drawable&, const Drawable::dualaxis_t&, const Mode&, bool effects) const;
 
-      const char CHAR, ERR_CHAR;
-      const char* CHAR_ALT;
-      // greyscale ascii art from http://paulbourke.net/dataformats/asciiart/
-      //const std::string CHARS = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
-      //const std::string CHARS = " .:-=+*#%@";
-      const std::string CHARS;
-      static const std::array<Colour, 7> kColours;
-      const char NEG_CHAR = '-';
+      const char CHAR, ERR_CHAR, NEG_CHAR;
+      const std::string MARKERS_CHAR, VALUES_CHAR;
 
       static std::string delatexify(const std::string&);
 
@@ -85,13 +81,15 @@ namespace cepgen {
     const std::array<Colour, 7> TextDrawer::kColours = {
         Colour::red, Colour::cyan, Colour::blue, Colour::magenta, Colour::green, Colour::yellow, Colour::reset};
 
+    const std::string TextDrawer::kEmptyLabel = "E M P T Y ";
+
     TextDrawer::TextDrawer(const ParametersList& params)
         : Drawer(params),
           CHAR('*'),
           ERR_CHAR('-'),
-          CHAR_ALT("o.#@"),
-          CHARS(" .:oO0@%#"),
           NEG_CHAR('-'),
+          MARKERS_CHAR("o.#@"),
+          VALUES_CHAR(" .:oO0@%#"),
           width_(steerAs<int, size_t>("width")),
           colourise_(steer<bool>("colourise")) {}
 
@@ -212,7 +210,7 @@ namespace cepgen {
           }
           for (size_t j = 0; j < line.size(); ++j) {
             if (line[j] == CHAR)
-              base[j] = (num_plts > 1 ? CHAR_ALT[num_plts - 2] : CHAR);
+              base[j] = (num_plts > 1 ? MARKERS_CHAR[num_plts - 2] : CHAR);
             else if (line[j] == ERR_CHAR)
               base[j] = ERR_CHAR;
           }
@@ -255,7 +253,7 @@ namespace cepgen {
         if (num_plts > 1)
           log << "\tLegend:\n\t  " << CHAR << ": " << plt_names.at(0);
         for (size_t i = 1; i < num_plts; ++i)
-          log << "\n\t  " << CHAR_ALT[i - 1] << ": " << plt_names.at(i);
+          log << "\n\t  " << MARKERS_CHAR[i - 1] << ": " << plt_names.at(i);
       });
       return *this;
     }
@@ -282,11 +280,10 @@ namespace cepgen {
             coord_set.first.label.empty() ? utils::format("%17g", coord_set.first.value) : coord_set.first.label;
         if (min_val == max_val) {
           os << "\n" << left_label << ":";
-          if (idx == axis.size() / 2) {
-            const std::string empty = "E M P T Y ";
-            os << std::string((width_ - empty.size()) / 2, ' ') << empty
-               << std::string((width_ - empty.size()) / 2, ' ');
-          } else
+          if (idx == axis.size() / 2)
+            os << std::string((width_ - kEmptyLabel.size()) / 2, ' ') << kEmptyLabel
+               << std::string((width_ - kEmptyLabel.size()) / 2, ' ');
+          else
             os << std::string(width_, ' ');
           os << ":";
         } else {
@@ -353,7 +350,8 @@ namespace cepgen {
         os << "\n" << (xval.first.label.empty() ? utils::format("%16g ", xval.first.value) : xval.first.label) << ":";
         if (min_val == max_val) {
           if (idx == axes.size() / 2)
-            os << std::string((width_ - 10) / 2, ' ') << "E M P T Y " << std::string((width_ - 10) / 2, ' ');
+            os << std::string((width_ - kEmptyLabel.size()) / 2, ' ') << kEmptyLabel
+               << std::string((width_ - kEmptyLabel.size()) / 2, ' ');
           else
             os << std::string(width_, ' ');
         } else {
@@ -373,12 +371,12 @@ namespace cepgen {
             if (sign == -1)
               os << (effects ? utils::colourise(std::string(1, NEG_CHAR), kColours.at(0)) : std::string(1, NEG_CHAR));
             else {
-              size_t ch_id = ceil(val_norm * (CHARS.size() - 1));
+              size_t ch_id = ceil(val_norm * (VALUES_CHAR.size() - 1));
               size_t col_id = 1 + val_norm * (kColours.size() - 2);
-              os << (effects ? utils::colourise(std::string(1, CHARS.at(ch_id)),
+              os << (effects ? utils::colourise(std::string(1, VALUES_CHAR.at(ch_id)),
                                                 kColours.at(col_id),
                                                 (val_norm > 0.75 ? utils::Modifier::bold : utils::Modifier::reset))
-                             : std::string(1, CHARS.at(ch_id)));
+                             : std::string(1, VALUES_CHAR.at(ch_id)));
             }
           }
         }
@@ -401,7 +399,7 @@ namespace cepgen {
       os << "\n"
          << sep << ":" << std::string(y_axis.size(), '.') << ": "  // 2nd abscissa axis
          << delatexify(dr.yAxis().label()) << "\n\t"
-         << "(scale: \"" << CHARS << "\", ";
+         << "(scale: \"" << VALUES_CHAR << "\", ";
       for (size_t i = 0; i < kColours.size(); ++i)
         os << (effects ? utils::colourise("*", kColours.at(i)) : "") << (i == 0 ? "|" : "");
       os << ")\n";
