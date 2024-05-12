@@ -41,6 +41,7 @@ namespace cepgen {
     void restore();           ///< Restore the event to its "empty" state
     bool compressed() const;  ///< Is the event already without intermediate-channel information?
     Event compress() const;   ///< Compress the event record
+    void updateRoles();       ///< Update the table of particles roles
 
     /// Human-readable version of the event content
     friend std::ostream& operator<<(std::ostream&, const Event&);
@@ -62,11 +63,12 @@ namespace cepgen {
 
     //----- particles retrievers
 
-    size_t size() const;                        ///< Number of particles in the event
-    bool empty() const;                         ///< Is the particles map empty?
-    Particles particles() const;                ///< Vector of all particles in the event
-    Particles stableParticles() const;          ///< Vector of all stable particles in the event
-    ParticlesMap& map() { return particles_; }  ///< Internal particles map retrieval operator
+    size_t size() const;                                      ///< Number of particles in the event
+    bool empty() const;                                       ///< Is the particles map empty?
+    Particles particles() const;                              ///< Vector of all particles in the event
+    Particles stableParticles() const;                        ///< Vector of all stable particles in the event
+    Particles stableParticlesWithRole(Particle::Role) const;  ///< Vector of all stable particles of a given role
+    ParticlesMap& map() { return particles_; }                ///< Internal particles map retrieval operator
 
     /// List of references to Particle objects corresponding to a certain role in the process kinematics
     /// \param[in] role The role the particles have to play in the process
@@ -106,6 +108,8 @@ namespace cepgen {
     /// List of all parent Particle object for this given particle
     /// \param[in] part The particle for which the mother particles have to be retrieved
     ParticlesRefs mothers(const Particle& part);
+    /// Remove all mothers from a given particle (also affects the mothers' filiation)
+    void clearMothers(Particle& part);
     /// List of all the daughters from a particle
     /// \param[in] part The particle for which the daughter particles have to be retrieved
     Particles daughters(const Particle& part) const;
@@ -116,6 +120,8 @@ namespace cepgen {
     Particles stableDaughters(const Particle& part, bool recursive = false) const;
     /// List all the stable daughters of a particle in this event
     ParticlesRefs stableDaughters(const Particle& part, bool recursive = false);
+    /// Remove all daughters from a given particle (also affects the daughters' parentage)
+    void clearDaughters(Particle& part);
     /// List of roles defined for the given event (really process-dependant for the central system)
     ParticleRoles roles() const;
 

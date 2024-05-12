@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -121,8 +121,8 @@ namespace cepgen {
         auto& new_part = out.addParticle(role).get();
         new_part = old_part;  // copy all attributes
         new_part.setId(i++);
-        new_part.clearMothers();
-        new_part.clearDaughters();
+        new_part.mothers().clear();
+        new_part.mothers().clear();
       }
     }
     //--- fix parentage for outgoing beam particles
@@ -239,6 +239,12 @@ namespace cepgen {
 
   ParticlesRefs Event::mothers(const Particle& part) { return operator[](part.mothers()); }
 
+  void Event::clearMothers(Particle& part) {
+    for (const auto& mid : part.mothers())
+      operator[](mid).daughters().erase(part.id());
+    part.mothers().clear();
+  }
+
   Particles Event::daughters(const Particle& part) const { return operator()(part.daughters()); }
 
   ParticlesRefs Event::daughters(const Particle& part) { return operator[](part.daughters()); }
@@ -254,6 +260,8 @@ namespace cepgen {
             parts.end(), std::make_move_iterator(daugh_daugh.begin()), std::make_move_iterator(daugh_daugh.end()));
       }
     }
+    std::sort(parts.begin(), parts.end());
+    parts.erase(std::unique(parts.begin(), parts.end()), parts.end());
     return parts;
   }
 
@@ -268,7 +276,19 @@ namespace cepgen {
             parts.end(), std::make_move_iterator(daugh_daugh.begin()), std::make_move_iterator(daugh_daugh.end()));
       }
     }
+    std::sort(
+        parts.begin(), parts.end(), [](const auto& lhs, const auto& rhs) { return lhs.get().id() < rhs.get().id(); });
+    parts.erase(
+        std::unique(
+            parts.begin(), parts.end(), [](const auto& lhs, const auto& rhs) { return lhs.get() == rhs.get(); }),
+        parts.end());
     return parts;
+  }
+
+  void Event::clearDaughters(Particle& part) {
+    for (const auto& did : part.daughters())
+      operator[](did).mothers().erase(part.id());
+    part.daughters().clear();
   }
 
   ParticleRoles Event::roles() const {
@@ -276,6 +296,19 @@ namespace cepgen {
     std::transform(
         particles_.begin(), particles_.end(), std::back_inserter(out), [](const auto& pr) { return pr.first; });
     return out;
+  }
+
+  void Event::updateRoles() {
+    for (auto& parts_vs_role : particles_)  // 1st loop to copy particles to correct role container
+      for (const auto& part : parts_vs_role.second)
+        if (part.role() != parts_vs_role.first)
+          particles_[part.role()].emplace_back(part);
+    for (auto& parts_vs_role : particles_)  // 2nd loop to remove wrongly-assigned particles
+      parts_vs_role.second.erase(
+          std::remove_if(parts_vs_role.second.begin(),
+                         parts_vs_role.second.end(),
+                         [&parts_vs_role](const auto& part) { return part.role() != parts_vs_role.first; }),
+          parts_vs_role.second.end());
   }
 
   ParticleRef Event::addParticle(Particle& part, bool replace) {
@@ -328,6 +361,17 @@ namespace cepgen {
     return out;
   }
 
+  Particles Event::stableParticlesWithRole(Particle::Role role) const {
+    Particles out;
+    const auto& parts_role = particles_.at(role);
+    std::copy_if(parts_role.begin(), parts_role.end(), std::back_inserter(out), [](const auto& part) {
+      return (short)part.status() > 0;
+    });
+    std::sort(out.begin(), out.end());
+    out.erase(std::unique(out.begin(), out.end()), out.end());
+    return out;
+  }
+
   Momentum Event::missingMomentum() const {
     Momentum me;
     for (const auto& cp : operator()(Particle::Role::CentralSystem))
@@ -368,6 +412,12 @@ namespace cepgen {
   }
 
   void Event::dump() const { CG_INFO("Event") << *this; }
+
+  double Event::cmEnergy() const {
+    return (oneWithRole(Particle::Role::IncomingBeam1).momentum() +
+            oneWithRole(Particle::Role::IncomingBeam2).momentum())
+        .mass();
+  }
 
   std::ostream& operator<<(std::ostream& out, const Event& ev) {
     const auto parts = ev.particles();

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,26 +25,14 @@
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
-  Particle::Particle(Role role, pdgid_t pdgId, Status st) : role_(role), status_((int)st), pdg_id_(pdgId) {
-    if (PDG::get().has(pdg_id_))
-      phys_prop_ = PDG::get()(pdg_id_);
-  }
-
-  Particle::Particle(const Particle& part)
-      : id_(part.id_),
-        antiparticle_(part.antiparticle_),
-        momentum_(part.momentum_),
-        helicity_(part.helicity_),
-        role_(part.role_),
-        status_(part.status_),
-        mothers_(part.mothers_),
-        daughters_(part.daughters_),
-        pdg_id_(part.pdg_id_) {
-    if (PDG::get().has(pdg_id_))
-      phys_prop_ = PDG::get()(pdg_id_);
-  }
+  Particle::Particle(Role role, pdgid_t pdgId, Status st) : role_(role), status_((int)st), pdg_id_(pdgId) {}
 
   bool Particle::operator<(const Particle& rhs) const { return id_ >= 0 && rhs.id_ > 0 && id_ < rhs.id_; }
+
+  bool Particle::operator==(const Particle& oth) const {
+    return id_ == oth.id_ && pdg_id_ == oth.pdg_id_ && antiparticle_ == oth.antiparticle_ &&
+           helicity_ == oth.helicity_ && status_ == oth.status_ && momentum_ == oth.momentum_;
+  }
 
   bool Particle::valid() {
     if (pdg_id_ == PDG::invalid)
@@ -54,57 +42,42 @@ namespace cepgen {
     return true;
   }
 
-  float Particle::charge() const { return (antiparticle_ ? -1 : +1) * phys_prop_.integerCharge() / 3.; }
-
-  Particle& Particle::clearMothers() {
-    mothers_.clear();
-    return *this;
-  }
+  float Particle::charge() const { return (antiparticle_ ? -1 : +1) * PDG::get()(pdg_id_).integerCharge() / 3.; }
 
   Particle& Particle::addMother(Particle& part) {
-    const auto ret = mothers_.insert(part.id_);
-    if (part.status_ > 0)
-      part.status_ = (int)Status::Propagator;
-
-    if (ret.second) {
-      CG_DEBUG_LOOP("Particle") << "Particle " << id() << " (pdgId=" << part.pdg_id_ << ") "
-                                << "is a new mother of " << id_ << " (pdgId=" << pdg_id_ << ").";
+    if (const auto ret = mothers_.insert(part.id_); ret.second) {
+      CG_DEBUG_LOOP("Particle") << "Particle " << id() << " (pdgId=" << part.pdg_id_ << ") " << "is a new mother of "
+                                << id_ << " (pdgId=" << pdg_id_ << ").";
       if (!utils::contains(part.daughters_, id_))
         part.addDaughter(*this);
+      else if (part.status_ > 0)
+        part.status_ = (int)Status::Propagator;
     }
-    return *this;
-  }
-
-  Particle& Particle::clearDaughters() {
-    daughters_.clear();
     return *this;
   }
 
   Particle& Particle::addDaughter(Particle& part) {
-    const auto ret = daughters_.insert(part.id_);
-    if (status_ > 0)
-      status_ = (int)Status::Propagator;
-
-    CG_DEBUG_LOOP("Particle").log([&](auto& dbg) {
-      dbg << "Particle " << role_ << " (pdgId=" << (int)pdg_id_ << ")"
-          << " has now " << utils::s("daughter", daughters_.size(), true) << ":";
-      for (const auto& daughter : daughters_)
-        dbg << utils::format("\n\t * id=%d", daughter);
-    });
-
-    if (ret.second) {
+    if (const auto ret = daughters_.insert(part.id_); ret.second) {
       CG_DEBUG_LOOP("Particle") << "Particle " << part.role_ << " (pdgId=" << part.pdg_id_ << ") "
                                 << "is a new daughter of " << role_ << " (pdgId=" << pdg_id_ << ").";
       if (!utils::contains(part.mothers_, id_))
         part.addMother(*this);
+      if (status_ > 0)
+        status_ = (int)Status::Propagator;
     }
+    CG_DEBUG_LOOP("Particle").log([&](auto& dbg) {
+      dbg << "Particle " << role_ << " (pdgId=" << (int)pdg_id_ << ")" << " has now "
+          << utils::s("daughter", daughters_.size(), true) << ":";
+      for (const auto& daughter : daughters_)
+        dbg << utils::format("\n\t * id=%d", daughter);
+    });
     return *this;
   }
 
   Particle& Particle::setMomentum(const Momentum& mom, bool offshell) {
     momentum_ = mom;
     if (!offshell)
-      momentum_.computeEnergyFromMass(phys_prop_.mass);
+      momentum_.computeEnergyFromMass(PDG::get().mass(pdg_id_));
     return *this;
   }
 
@@ -120,11 +93,8 @@ namespace cepgen {
   Particle& Particle::setPdgId(pdgid_t pdg, short ch) { return setIntegerPdgId(pdg * (ch == 0 ? 1 : ch / abs(ch))); }
 
   Particle& Particle::setIntegerPdgId(long pdg) {
-    if (pdg_id_ = labs(pdg); PDG::get().has(pdg_id_)) {
-      phys_prop_ = PDG::get()(pdg_id_);
-      CG_DEBUG("Particle:setIntegerPdgId") << "Particle PDG id set to " << pdg_id_ << ", "
-                                           << "properties set " << phys_prop_ << ".";
-    }
+    if (pdg_id_ = labs(pdg); PDG::get().has(pdg_id_))
+      CG_DEBUG("Particle:setIntegerPdgId") << "Particle PDG id set to " << pdg_id_ << ".";
     antiparticle_ = pdg < 0;
     return *this;
   }
@@ -133,9 +103,9 @@ namespace cepgen {
 
   std::ostream& operator<<(std::ostream& os, const Particle& part) {
     os << std::resetiosflags(std::ios::showbase) << "Particle[" << part.id_ << "]{role=" << part.role_
-       << ", status=" << (int)part.status_ << ", "
-       << "pdg=" << part.integerPdgId() << ", p4=" << part.momentum_ << " GeV, m=" << part.momentum_.mass() << " GeV, "
-       << "p⟂=" << part.momentum_.pt() << " GeV, eta=" << part.momentum_.eta() << ", phi=" << part.momentum_.phi();
+       << ", status=" << (int)part.status_ << ", " << "pdg=" << part.integerPdgId() << ", p4=" << part.momentum_
+       << " GeV, m=" << part.momentum_.mass() << " GeV, " << "p⟂=" << part.momentum_.pt()
+       << " GeV, eta=" << part.momentum_.eta() << ", phi=" << part.momentum_.phi();
     if (part.primary())
       os << ", primary";
     else {

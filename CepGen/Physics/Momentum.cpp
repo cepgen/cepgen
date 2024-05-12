@@ -136,16 +136,15 @@ namespace cepgen {
   }
 
   double Momentum::threeProduct(const Momentum& mom) const {
-    CG_DEBUG_LOOP("Momentum") << "  (" << px() << ", " << py() << ", " << pz() << ")\n\t"
-                              << "* (" << mom.px() << ", " << mom.py() << ", " << mom.pz() << ")\n\t"
-                              << "= " << px() * mom.px() + py() * mom.py() + pz() * mom.pz();
+    CG_DEBUG_LOOP("Momentum") << "  (" << px() << ", " << py() << ", " << pz() << ")\n\t" << "* (" << mom.px() << ", "
+                              << mom.py() << ", " << mom.pz() << ")\n\t" << "= "
+                              << px() * mom.px() + py() * mom.py() + pz() * mom.pz();
     return px() * mom.px() + py() * mom.py() + pz() * mom.pz();
   }
 
   double Momentum::fourProduct(const Momentum& mom) const {
-    CG_DEBUG_LOOP("Momentum") << "  (" << px() << ", " << py() << ", " << pz() << ", " << energy() << ")\n\t"
-                              << "* (" << mom.px() << ", " << mom.py() << ", " << mom.pz() << ", " << mom.energy()
-                              << ")\n\t"
+    CG_DEBUG_LOOP("Momentum") << "  (" << px() << ", " << py() << ", " << pz() << ", " << energy() << ")\n\t" << "* ("
+                              << mom.px() << ", " << mom.py() << ", " << mom.pz() << ", " << mom.energy() << ")\n\t"
                               << "= " << energy() * mom.energy() - threeProduct(mom);
     return energy() * mom.energy() - threeProduct(mom);
   }
@@ -196,8 +195,7 @@ namespace cepgen {
   }
 
   Momentum& Momentum::truncate(double tolerance) {
-    std::replace_if(
-        begin(), end(), [&tolerance](const auto& p) { return p <= tolerance; }, 0.);
+    std::replace_if(begin(), end(), [&tolerance](const auto& p) { return p <= tolerance; }, 0.);
     return computeP();
   }
 
@@ -235,7 +233,9 @@ namespace cepgen {
 
   double Momentum::pt2() const { return px() * px() + py() * py(); }
 
-  Momentum Momentum::transverse() const { return Momentum::fromPxPyPzE(px(), py(), 0., energy()); }
+  Momentum Momentum::transverse() const {
+    return Momentum::fromPxPyPzE(px(), py(), 0., utils::fastSqrtSqDiff(energy(), pz()));
+  }
 
   double Momentum::eta() const {
     const int sign = pz() / fabs(pz());
@@ -297,34 +297,41 @@ namespace cepgen {
   Momentum& Momentum::betaGammaBoost(double gamma, double betagamma) {
     if (gamma == 1. && betagamma == 0.)
       return *this;  // trivial case
-
-    const double apz = pz(), ae = energy();
-
+    const auto apz = pz(), ae = energy();
     return setEnergy(gamma * ae + betagamma * apz).setPz(gamma * apz + betagamma * ae);
   }
 
   Momentum& Momentum::lorentzBoost(const Momentum& mom) {
-    //--- do not boost on a system at rest
     if (mom.p() == 0.)
+      return *this;  // do not boost on a system at rest
+    const auto mass = mom.mass();
+    if (mass == 0.)
       return *this;
-
-    const double mass = mom.mass();
-    const double pf4 = ((*this)[X] * mom[X] + (*this)[Y] * mom[Y] + (*this)[Z] * mom[Z] + (*this)[E] * mom[E]) / mass;
-    const double fn = (pf4 + (*this)[E]) / (mom[E] + mass);
+    const auto pf4 = (threeProduct(mom) + energy() * mom.energy()) / mass;
+    const auto fn = (pf4 + energy()) / (mass + mom.energy());
     (*this) += fn * mom;
     return setEnergy(pf4);
+    /*const auto norm_mom = mom * (1. / mom.energy());
+    const auto b2 = norm_mom.p2();
+    const auto gamma = std::sqrt(1. / (1. - b2)), gamma2 = b2 > 0 ? (gamma - 1.0) / b2 : 0.;
+    const auto bp = threeProduct(norm_mom);
+    return setPx(px() + gamma2 * bp * norm_mom.px() + gamma * norm_mom.px() * energy())
+        .setPy(py() + gamma2 * bp * norm_mom.py() + gamma * norm_mom.py() * energy())
+        .setPz(pz() + gamma2 * bp * norm_mom.pz() + gamma * norm_mom.pz() * energy())
+        .setEnergy(gamma * (energy() + bp));*/
   }
 
   Momentum& Momentum::rotatePhi(double phi, double sign) {
-    const double sphi = sin(phi), cphi = cos(phi);
-    const double px = (*this)[X] * cphi + sign * (*this)[Y] * sphi, py = -(*this)[X] * sphi + sign * (*this)[Y] * cphi;
-    return setPx(px).setPy(py);
+    const auto sphi = std::sin(phi), cphi = std::cos(phi);
+    const auto pxp = px() * cphi + sign * py() * sphi, pyp = -px() * sphi + sign * py() * cphi;
+    return setPx(pxp).setPy(pyp);
   }
 
   Momentum& Momentum::rotateThetaPhi(double theta, double phi) {
     const double ctheta = cos(theta), stheta = sin(theta);
     const double cphi = cos(phi), sphi = sin(phi);
-    double rotmtx[3][3], mom[3];  //FIXME check this! cos(phi)->-sin(phi) & sin(phi)->cos(phi) --> phi->phi+pi/2 ?
+    double rotmtx[3][3];  //FIXME check this! cos(phi)->-sin(phi) & sin(phi)->cos(phi) --> phi->phi+pi/2 ?
+    std::vector<double> mom(3, 0.);
     rotmtx[X][X] = -sphi;
     rotmtx[X][Y] = -ctheta * cphi;
     rotmtx[X][Z] = stheta * cphi;
@@ -335,12 +342,10 @@ namespace cepgen {
     rotmtx[Z][Y] = stheta;
     rotmtx[Z][Z] = ctheta;
 
-    for (size_t i = X; i <= Z; ++i) {
-      mom[i] = 0.;
+    for (size_t i = X; i <= Z; ++i)
       for (size_t j = X; j <= Z; ++j)
         mom[i] += rotmtx[i][j] * (*this)[j];
-    }
-    return setP(mom[X], mom[Y], mom[Z]);
+    return setP(mom.at(X), mom.at(Y), mom.at(Z));
   }
 
   //--- printout
