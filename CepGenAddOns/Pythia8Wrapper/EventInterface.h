@@ -33,22 +33,19 @@ namespace cepgen::pythia8 {
   /// Interfacing between CepGen and Pythia8 event definitions
   class EventInterface : public Pythia8::LHAup {
   public:
-    /// List of particles to be included to the event content
-    enum struct Type {
-      centralAndPartons,          ///< only include initiators and central system
-      centralAndBeamRemnants,     ///< include undissociated beam remnants and central system
-      centralAndFullBeamRemnants  ///< include dissociated beam remnants and central system
-    };
     explicit EventInterface();
 
     static void checkPDGid(const Pythia8::Particle&);  ///< Register particle properties if not found
 
+    /// Also store the remnants products?
+    void storeRemnants(bool store_remn) { store_remnants_ = store_remn; }
     void initialise(const RunParameters&);  ///< Initialise this conversion object with CepGen parameters
 
     /// Feed a new CepGen event to this conversion object
     /// \param[in] ev CepGen event to be fed
-    /// \param[in] type Type of storage
-    void feedEvent(const Event& ev, const Type& type);
+    void feedEvent(const Event& ev);
+    void updateEvent(const Pythia8::Event&, Event& ev, double& weight) const;
+
     /// Set the cross section for a given process
     /// \param[in] id Process identifier
     /// \param[in] cross_section Process cross section, in pb
@@ -64,19 +61,17 @@ namespace cepgen::pythia8 {
 
     void addComments(const std::string& comments);  ///< Feed comments to the LHEF block
 
-    /// Retrieve the CepGen particle index given its Pythia8 event id
-    /// \param[in] py_id Pythia8 particle id
-    /// \return CepGen particle id
-    unsigned short cepgenId(unsigned short py_id) const;
     /// Retrieve the Pythia8 particle index given its CepGen event id
     /// \param[in] cg_id CepGen particle id
     /// \return Pythia8 particle id
-    unsigned short pythiaId(unsigned short cg_id) const;
+    unsigned short lhaId(unsigned short cg_id) const;
+    typedef std::pair<int, int> range_t;  ///< A range of two particles ids
     /// Add a CepGen particle to the event content
-    void addCepGenParticle(const Particle& part,
-                           int status = INVALID_ID,
-                           const std::pair<int, int>& mothers = {0, 0},
-                           const std::pair<int, int>& colours = {0, 0});
+    /// \return Pythia 8 event identifier for the newly added particle
+    unsigned short addCepGenParticle(const Particle& part,
+                                     int status = INVALID_ID,
+                                     const range_t& mothers = {0, 0},
+                                     const range_t& colours = {0, 0});
     /// Register a new Pythia8 / CepGen particle mapping
     /// \param[in] py_id Pythia8 particle id
     /// \param[in] cg_id CepGen particle id
@@ -94,11 +89,13 @@ namespace cepgen::pythia8 {
 #endif
 
   private:
-    std::pair<int, int> findMothers(const Event& ev, const Particle& p) const;
+    range_t findMothers(const Event& ev, const Particle& p) const;
     const double mp_, mp2_;
+    bool store_remnants_{false};
     bool inel1_{false}, inel2_{false};
-    std::unordered_map<unsigned short, unsigned short> py_cg_corresp_;
+    std::unordered_map<unsigned short, unsigned short> lha_cg_corresp_;
     const RunParameters* params_{nullptr};  // borrowed
+    Momentum cm_mom_;
   };
 }  // namespace cepgen::pythia8
 

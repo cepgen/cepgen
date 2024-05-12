@@ -80,6 +80,7 @@ namespace cepgen::pythia8 {
       oss_init << std::endl;  // LHEF is usually not as beautifully parsed as a standard XML...
                               // we're physicists, what do you expect?
       lhaevt_->addComments(oss_init.str());
+      lhaevt_->storeRemnants(true);
       lhaevt_->initialise(runParameters());
 #if PYTHIA_VERSION_INTEGER < 8300
       pythia_->setLHAupPtr(lhaevt_.get());
@@ -96,8 +97,7 @@ namespace cepgen::pythia8 {
     }
 
     inline bool operator<<(const Event& ev) override {
-      lhaevt_->feedEvent(compress_event_ ? ev : ev.compress(),
-                         pythia8::EventInterface::Type::centralAndFullBeamRemnants);
+      lhaevt_->feedEvent(compress_event_ ? ev : ev.compress());
       pythia_->next();
       lhaevt_->eventLHEF();
       return true;
