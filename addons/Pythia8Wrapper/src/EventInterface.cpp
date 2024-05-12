@@ -24,8 +24,10 @@
 #include "CepGenPythia8/EventInterface.h"
 
 namespace cepgen::pythia8 {
-  /// Convert a CepGen particle momentum into its Pythia8 counterpart
+  /// Convert a CepGen particle momentum into its Pythia 8 counterpart
   Pythia8::Vec4 momToVec4(const Momentum& mom) { return Pythia8::Vec4(mom.px(), mom.py(), mom.pz(), mom.energy()); }
+  /// Convert a Pythia 8 particle momentum into its CepGen counterpart
+  Momentum vec4ToMom(const Pythia8::Vec4& v4) { return Momentum::fromPxPyPzM(v4.px(), v4.py(), v4.pz(), v4.mCalc()); }
 
   EventInterface::EventInterface() : Pythia8::LHAup(3), mp_(PDG::get().mass(PDG::proton)), mp2_(mp_ * mp_) {}
 
@@ -35,9 +37,9 @@ namespace cepgen::pythia8 {
     inel2_ = !params_->kinematics().incomingBeams().negative().elastic();
 
     setBeamA((short)params_->kinematics().incomingBeams().positive().integerPdgId(),
-             params_->kinematics().incomingBeams().positive().momentum().pz());
+             params_->kinematics().incomingBeams().positive().momentum().energy());
     setBeamB((short)params_->kinematics().incomingBeams().negative().integerPdgId(),
-             params_->kinematics().incomingBeams().negative().momentum().pz());
+             params_->kinematics().incomingBeams().negative().momentum().energy());
     //addProcess( 0, params_->integration().result, params_->integration().err_result, 100. );
   }
 
@@ -56,9 +58,9 @@ namespace cepgen::pythia8 {
     //listInit();
   }
 
-  void EventInterface::feedEvent(const Event& ev, const Type& type) {
+  void EventInterface::feedEvent(const Event& ev) {
     const double scale = ev(Particle::Role::Intermediate)[0].momentum().mass();
-    setProcess(0, 1., scale, ev.metadata("alphaEM"), ev.metadata("alphaS"));
+    setProcess(0, 1., ev.cmEnergy(), ev.metadata("alphaEM"), ev.metadata("alphaS"));
 
     const auto &part1 = ev(Particle::Role::Parton1)[0], &part2 = ev(Particle::Role::Parton2)[0];
     const auto &op1 = ev(Particle::Role::OutgoingBeam1)[0], &op2 = ev(Particle::Role::OutgoingBeam2)[0];
@@ -67,230 +69,169 @@ namespace cepgen::pythia8 {
 
     unsigned short colour_index = MIN_COLOUR_INDEX;
 
-    const auto mom_part1(momToVec4(part1.momentum())), mom_part2(momToVec4(part2.momentum()));
+    // incoming partons
+    setPdf(part1.integerPdgId(), part2.integerPdgId(), x1, x2, scale, 0., 0., false);
+    cm_mom_ = (part1.momentum() + part2.momentum()).transverse();
+    const auto parton1_id = addCepGenParticle(part1, -2), parton2_id = addCepGenParticle(part2, -2);
 
-    if (type == Type::centralAndBeamRemnants) {  // full event content (with collinear partons)
-      auto mom_iq1 = mom_part1, mom_iq2 = mom_part2;
-      unsigned short parton1_id, parton2_id;
-      unsigned short parton1_pdgid = part1.integerPdgId(), parton2_pdgid = part2.integerPdgId();
-      unsigned short parton1_colour = 0, parton2_colour = 0;
-      //FIXME select quark flavours accordingly
-      if (inel1_) {
-        parton1_pdgid = 2;
-        parton1_colour = colour_index++;
-        mom_iq1 = momToVec4(x1 * ev(Particle::Role::IncomingBeam1)[0].momentum());
-      }
-      if (inel2_) {
-        parton2_pdgid = 2;
-        parton2_colour = colour_index++;
-        mom_iq2 = momToVec4(x2 * ev(Particle::Role::IncomingBeam2)[0].momentum());
-      }
+    if (store_remnants_)  // full beam remnants content
+      for (const auto& syst : {Particle::Role::OutgoingBeam1, Particle::Role::OutgoingBeam2})
+        for (const auto& p : ev(syst))
+          addCepGenParticle(p, INVALID_ID, findMothers(ev, p));
 
-      //--- flavour / x value of hard-process initiators
-      setIdX(part1.integerPdgId(), part2.integerPdgId(), x1, x2);
-      setPdf(parton1_pdgid, parton2_pdgid, x1, x2, scale, 0., 0., false);
-
-      //===========================================================================================
-      // incoming valence quarks
-      //===========================================================================================
-
-      parton1_id = sizePart();
-      addCorresp(parton1_id, op1.id());
-      addParticle(parton1_pdgid,
-                  -1,
-                  0,
-                  0,
-                  parton1_colour,
-                  0,
-                  mom_iq1.px(),
-                  mom_iq1.py(),
-                  mom_iq1.pz(),
-                  mom_iq1.e(),
-                  mom_iq1.mCalc(),
-                  0.,
-                  1.);
-
-      parton2_id = sizePart();
-      addCorresp(parton2_id, op2.id());
-      addParticle(parton2_pdgid,
-                  -1,
-                  0,
-                  0,
-                  parton2_colour,
-                  0,
-                  mom_iq2.px(),
-                  mom_iq2.py(),
-                  mom_iq2.pz(),
-                  mom_iq2.e(),
-                  mom_iq2.mCalc(),
-                  0.,
-                  1.);
-
-      //===========================================================================================
-      // outgoing valence quarks
-      //===========================================================================================
-
-      if (inel1_) {
-        const auto mom_oq1 = mom_iq1 - mom_part1;
-        addParticle(parton1_pdgid,
-                    1,
-                    parton1_id,
-                    parton2_id,
-                    parton1_colour,
-                    0,
-                    mom_oq1.px(),
-                    mom_oq1.py(),
-                    mom_oq1.pz(),
-                    mom_oq1.e(),
-                    mom_oq1.mCalc(),
-                    0.,
-                    1.);
-      }
-      if (inel2_) {
-        const auto mom_oq2 = mom_iq2 - mom_part2;
-        addParticle(parton2_pdgid,
-                    1,
-                    parton1_id,
-                    parton2_id,
-                    parton2_colour,
-                    0,
-                    mom_oq2.px(),
-                    mom_oq2.py(),
-                    mom_oq2.pz(),
-                    mom_oq2.e(),
-                    mom_oq2.mCalc(),
-                    0.,
-                    1.);
-      }
-    } else {
-      //===========================================================================================
-      // incoming partons
-      //===========================================================================================
-
-      addCepGenParticle(part1, -2);
-      addCepGenParticle(part2, -2);
-
-      if (type == Type::centralAndFullBeamRemnants) {
-        //=========================================================================================
-        // full beam remnants content
-        //=========================================================================================
-
-        for (const auto& syst : {Particle::Role::OutgoingBeam1, Particle::Role::OutgoingBeam2}) {
-          for (const auto& p : ev(syst))
-            addCepGenParticle(p, INVALID_ID, findMothers(ev, p));
-        }
-      }
-    }
-
-    //=============================================================================================
     // central system
-    //=============================================================================================
-
     const unsigned short central_colour = colour_index++;
     for (const auto& p : ev(Particle::Role::CentralSystem)) {
-      std::pair<int, int> colours = {0, 0}, mothers = {1, 2};
-      if (type != Type::centralAndBeamRemnants)
-        mothers = findMothers(ev, p);
-      try {
-        if (PDG::get().colours(p.pdgId()) > 1) {
-          if (p.integerPdgId() > 0)  //--- particle
-            colours.first = central_colour;
-          else  //--- anti-particle
-            colours.second = central_colour;
-        }
-      } catch (const Exception&) {
+      range_t colours = {0, 0}, mothers = {1, 2};
+      if (mothers == std::make_pair((int)INVALID_ID, (int)INVALID_ID))
+        mothers = std::make_pair(parton1_id, parton2_id);
+      if (PDG::get().has(p.pdgId()) && PDG::get().colours(p.pdgId()) > 1) {
+        if (p.integerPdgId() > 0)  // particle
+          colours.first = central_colour;
+        else  // anti-particle
+          colours.second = central_colour;
       }
       int status = 1;
-      if (type == Type::centralAndFullBeamRemnants && p.status() == Particle::Status::Resonance)
+      if (p.status() == Particle::Status::Resonance)
         status = 2;
       addCepGenParticle(p, status, mothers, colours);
     }
   }
 
+  void EventInterface::updateEvent(const Pythia8::Event& pyevt, Event& ev, double& weight) const {
+    pyevt.list();
+    std::map<unsigned short, unsigned short> pyid_vs_cgid{{1, 5}, {2, 6}};  // keep it ordered...
+    for (auto& py_cg : lha_cg_corresp_)
+      pyid_vs_cgid[py_cg.first + 2 /* Pythia adds the two incoming beam particles to event content */] = py_cg.second;
+    if (pyevt.size() <= (int)lha_cg_corresp_.size() + 3) {
+      CG_WARNING("pythia6:EventInterface:updateEvent")
+          << "Failed to update the event with (possibly invalid) Pythia output.";
+      return;
+    }
+    // 0 = two-beam system
+    // 1 = incoming beam 1
+    // 2 = incoming beam 2
+    for (int i = lha_cg_corresp_.size() + 3; i < pyevt.size(); ++i) {  // 1st loop to add particles contents
+      const auto& pypart = pyevt.at(i);
+      checkPDGid(pypart);
+      auto& cgpart = ev.addParticle(Particle::Role::Intermediate).get();
+      cgpart.setStatus(Particle::Status::DebugResonance);
+      cgpart.setIntegerPdgId(pypart.id());
+      cgpart.setMomentum(vec4ToMom(pypart.p()).lorentzBoost(cm_mom_));
+      pyid_vs_cgid[i] = cgpart.id();
+    }
+    for (const auto& py_cg : pyid_vs_cgid) {  // 2nd loop to establish parentage
+      const auto& pypart = pyevt.at(py_cg.first);
+      auto& cgpart = ev[py_cg.second];
+      if (pyid_vs_cgid.count(pypart.mother1()) > 0)
+        cgpart.addMother(ev[pyid_vs_cgid.at(pypart.mother1())]);
+      if (pyid_vs_cgid.count(pypart.mother2()) > 0)
+        cgpart.addMother(ev[pyid_vs_cgid.at(pypart.mother2())]);
+      if (cgpart.role() == Particle::Role::Intermediate) {  // invalid role ; need to update from parentage
+        if (const auto& moths = cgpart.mothers(); !moths.empty()) {
+          const auto moth_role = ev[*moths.begin()].role();  // we only account for the first mother
+          if (pypart.status() == -61) {                      // intermediate partons
+            if (moth_role == Particle::Role::OutgoingBeam1) {
+              cgpart.setRole(Particle::Role::Parton1);
+              ev.clearMothers(cgpart);  // patch to set incoming beam as only mother
+              cgpart.addMother(ev[Particle::Role::IncomingBeam1][0]);
+            } else if (moth_role == Particle::Role::OutgoingBeam2) {
+              cgpart.setRole(Particle::Role::Parton2);
+              ev.clearMothers(cgpart);  // patch to set incoming beam as only mother
+              cgpart.addMother(ev[Particle::Role::IncomingBeam2][0]);
+            }
+            cgpart.setStatus(Particle::Status::Incoming);
+          } else
+            cgpart.setRole(moth_role);  // child inherits its parent's role
+        }
+      }
+      if (cgpart.status() == Particle::Status::DebugResonance) {  // fix whatever status we can fix
+        if (pypart.isResonance()) {
+          if (cgpart.role() == Particle::Role::CentralSystem && pypart.status() < 0)
+            weight *= pypart.particleDataEntry().pickChannel().bRatio();
+          cgpart.setStatus(Particle::Status::Resonance);
+        } else if (pypart.status() > 0)
+          cgpart.setStatus(Particle::Status::FinalState);
+      }
+    }
+    ev.updateRoles();  // update all newly-reassigned roles after 2nd loop
+    // post-fix to set outgoing diffractive systems as fragmented
+    if (inel1_)
+      if (auto& diffx = ev[Particle::Role::OutgoingBeam1][0].get(); !diffx.daughters().empty())
+        diffx.setStatus(Particle::Status::Fragmented);
+    if (inel2_)
+      if (auto& diffy = ev[Particle::Role::OutgoingBeam2][0].get(); !diffy.daughters().empty())
+        diffy.setStatus(Particle::Status::Fragmented);
+  }
+
   void EventInterface::setProcess(int id, double cross_section, double q2_scale, double alpha_qed, double alpha_qcd) {
     LHAup::setProcess(id, cross_section, q2_scale, alpha_qed, alpha_qcd);
-    py_cg_corresp_.clear();
+    lha_cg_corresp_.clear();
   }
 
-  unsigned short EventInterface::cepgenId(unsigned short py_id) const {
-    if (py_cg_corresp_.count(py_id) == 0)
-      return INVALID_ID;
-    return py_cg_corresp_.at(py_id);
-  }
-
-  unsigned short EventInterface::pythiaId(unsigned short cg_id) const {
-    auto it = std::find_if(
-        py_cg_corresp_.begin(), py_cg_corresp_.end(), [&cg_id](const auto& py_cg) { return py_cg.second == cg_id; });
-    if (it != py_cg_corresp_.end())
+  unsigned short EventInterface::lhaId(unsigned short cg_id) const {
+    if (auto it = std::find_if(lha_cg_corresp_.begin(),
+                               lha_cg_corresp_.end(),
+                               [&cg_id](const auto& py_cg) { return py_cg.second == cg_id; });
+        it != lha_cg_corresp_.end())
       return it->first;
     return INVALID_ID;
   }
 
-  void EventInterface::addCepGenParticle(const Particle& part,
-                                         int status,
-                                         const std::pair<int, int>& mothers,
-                                         const std::pair<int, int>& colours) {
-    const auto mom_part(momToVec4(part.momentum()));
-    int pdg_id = part.integerPdgId();
-    if (status == INVALID_ID)
-      switch (part.status()) {
-        case Particle::Status::Resonance:
-        case Particle::Status::Fragmented:
-          status = 2;
-          break;
-        default: {
-          if (part.pdgId() == 21 && (int)part.status() == 12)
-            pdg_id = -21;  // workaround for HepMC2 interface
-          else
-            status = 1;
-        } break;
-      }
-    addCorresp(sizePart(), part.id());
-    addParticle(pdg_id,
+  unsigned short EventInterface::addCepGenParticle(const Particle& part,
+                                                   int status,
+                                                   const EventInterface::range_t& mothers,
+                                                   const EventInterface::range_t& colours) {
+    if (status == INVALID_ID) {
+      if (const auto& ps = part.status(); ps == Particle::Status::Resonance || ps == Particle::Status::Fragmented)
+        status = 2;
+      else
+        status = 1;
+    }
+    const auto py_id = sizePart();
+    addCorresp(py_id, part.id());
+    const auto mom = Momentum(part.momentum()).lorentzBoost(-cm_mom_);
+    addParticle(part.integerPdgId(),
                 status,
                 mothers.first,
                 mothers.second,
                 colours.first,
                 colours.second,
-                mom_part.px(),
-                mom_part.py(),
-                mom_part.pz(),
-                mom_part.e(),
-                mom_part.mCalc(),
+                mom.px(),
+                mom.py(),
+                mom.pz(),
+                mom.energy(),
+                mom.mass(),
                 0.,
                 0.,
                 0.);
+    return py_id;
   }
 
-  void EventInterface::addCorresp(unsigned short py_id, unsigned short cg_id) { py_cg_corresp_[py_id] = cg_id; }
+  void EventInterface::addCorresp(unsigned short py_id, unsigned short cg_id) { lha_cg_corresp_[py_id] = cg_id; }
 
   void EventInterface::dumpCorresp() const {
     CG_INFO("pythia8:EventInterface:dump").log([&](auto& msg) {
       msg << "List of Pythia ←|→ CepGen particle ids correspondence";
-      for (const auto& py_cg : py_cg_corresp_)
+      for (const auto& py_cg : lha_cg_corresp_)
         msg << "\n\t" << py_cg.first << " <-> " << py_cg.second;
     });
   }
 
-  std::pair<int, int> EventInterface::findMothers(const Event& ev, const Particle& p) const {
-    std::pair<int, int> out = {0, 0};
-
+  EventInterface::range_t EventInterface::findMothers(const Event& ev, const Particle& p) const {
+    range_t out{0, 0};
     const auto& mothers = p.mothers();
     if (mothers.empty())
       return out;
     const unsigned short moth1_cg_id = *mothers.begin();
-    out.first = pythiaId(moth1_cg_id);
-    if (out.first == INVALID_ID) {
+    if (out.first = lhaId(moth1_cg_id); out.first == INVALID_ID) {  // did not find the Pythia equivalent to mother
       const auto& moth = ev(moth1_cg_id);
-      out = {(moth.mothers().size() > 0) ? pythiaId(*moth.mothers().begin()) : 0,
-             (moth.mothers().size() > 1) ? pythiaId(*moth.mothers().rbegin()) : 0};
+      out = {moth.mothers().size() > 0 ? lhaId(*moth.mothers().begin()) : 0,
+             moth.mothers().size() > 1 ? lhaId(*moth.mothers().rbegin()) : 0};
     }
-    if (mothers.size() > 1) {
-      const unsigned short moth2_cg_id = *mothers.rbegin();
-      out.second = pythiaId(moth2_cg_id);
-      if (out.second == INVALID_ID)
+    if (mothers.size() > 1)
+      if (out.second = lhaId(*mothers.rbegin()); out.second == INVALID_ID)
         out.second = 0;
-    }
     return out;
   }
 
