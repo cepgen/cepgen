@@ -21,6 +21,7 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Event/Particle.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Utils/Value.h"
 #include "CepGenPythia8/EventInterface.h"
 
 namespace cepgen::pythia8 {
@@ -40,22 +41,25 @@ namespace cepgen::pythia8 {
              params_->kinematics().incomingBeams().positive().momentum().energy());
     setBeamB((short)params_->kinematics().incomingBeams().negative().integerPdgId(),
              params_->kinematics().incomingBeams().negative().momentum().energy());
-    //addProcess( 0, params_->integration().result, params_->integration().err_result, 100. );
   }
 
   void EventInterface::addComments(const std::string& comments) {
 #if PYTHIA_VERSION_INTEGER >= 8200
     osLHEF << comments;
 #else
-    CG_WARNING("pythia8:EventInterface:addComments") << "Pythia 8 is too outdated... Unused comments: " << comments;
+    CG_WARNING("pythia8:EventInterface:addComments")
+        << "Pythia >= 8.2 is required to accept comments on run. Unused comments: " << comments;
 #endif
   }
 
-  void EventInterface::setCrossSection(int id, double cross_section, double cross_section_err) {
-    addProcess(0, cross_section, cross_section_err, 100.);
-    setXSec(id, cross_section);
-    setXErr(id, cross_section_err);
-    //listInit();
+  void EventInterface::setCrossSection(int id, const Value& cross_section) {
+    addProcess(0, (double)cross_section, cross_section.uncertainty(), 100.);
+    setXSec(id, (double)cross_section);
+    setXErr(id, cross_section.uncertainty());
+    CG_DEBUG("pythia8:EventInterface:setCrossSection").log([=](auto& log) {
+      log << "Cross section set to " << cross_section << " pb. Event kinematics:\n";
+      listInit();
+    });
   }
 
   void EventInterface::feedEvent(const Event& ev) {

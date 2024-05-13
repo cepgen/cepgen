@@ -66,9 +66,7 @@ namespace cepgen::pythia8 {
     void initialise() override;
     bool run(Event& ev, double& weight, bool fast) override;
 
-    inline void setCrossSection(const Value& cross_section) override {
-      cg_evt_->setCrossSection(0, cross_section, cross_section.uncertainty());
-    }
+    inline void setCrossSection(const Value& cross_section) override { cg_evt_->setCrossSection(0, cross_section); }
 
   private:
     void* enginePtr() override { return (void*)pythia_.get(); }
