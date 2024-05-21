@@ -1,7 +1,8 @@
 import Config.Core as cepgen
 import Config.ktProcess_cfi as kt
-from Config.Integration.vegas_cff import integrator
+from Config.generator_cfi import generator
 from Config.PDG_cfi import PDG, registerParticle
+from Integrators.vegas_cfi import vegas as integrator
 
 #--- auxiliary SUSY particles definition
 registerParticle(1000001, 'sd_l', mass=100., charge=1., fermion=False)
@@ -17,7 +18,7 @@ process = kt.process.clone('pptosusy',
     ),
     inKinematics = cepgen.Parameters(
         pz = (6500., 6500.),
-        structureFunctions = cepgen.StructureFunctions.SuriYennie,
+        structureFunctions = cepgen.StructureFunctions.suriYennie,
     ),
     outKinematics = kt.process.outKinematics.clone(
         pt = (0.,),
@@ -40,6 +41,4 @@ text = cepgen.Module('text',
 )
 output = cepgen.Sequence(text)
 
-#--- events generation
-from Config.generator_cff import generator
 generator.numEvents = 50000

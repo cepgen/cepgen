@@ -21,19 +21,19 @@
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Process/Process2to4.h"
+#include "CepGen/Process/FactorisedProcess.h"
 
 using namespace cepgen;
 
 /// Matrix element for the \f$\gamma\gamma\rightarrow \tilde{f}^+\tilde{f}^-/\tilde{\chi}^+\tilde{\chi}^-/H^+H^-\f$ process
-class PPtoSusy : public cepgen::proc::Process2to4 {
+class PPtoSusy : public cepgen::proc::FactorisedProcess {
 public:
   explicit PPtoSusy(const ParametersList& params)
-      : Process2to4(params, PDG::invalid),
+      : FactorisedProcess(params, {PDG::invalid, PDG::invalid}),
         pair_(steer<ParticleProperties>("pair")),
         mass2_(pair_.mass * pair_.mass),
         prefactor_(constants::G_EM_SQ * constants::G_EM_SQ) {
-    if (pair_.pdgid != PDG::invalid && pair_.charge == 0.)
+    if (pair_.pdgid != PDG::invalid && pair_.charges.empty())
       throw CG_FATAL("PPtoSusy:prepare") << "Invalid SUSY pair selected: " << pair_ << ")!";
 
     CG_DEBUG("PPtoSusy:prepare") << "Produced particles: " << pair_ << " (mass = " << pair_.mass << " GeV).";
@@ -41,17 +41,17 @@ public:
 
   proc::ProcessPtr clone() const override { return proc::ProcessPtr(new PPtoSusy(*this)); }
   static ParametersDescription description() {
-    auto desc = Process2to4::description();
+    auto desc = FactorisedProcess::description();
     desc.setDescription("gamma,gamma --> ~l+~l-/~chi+~chi-/H+H-");
     return desc;
   }
 
 private:
-  void prepareProcessKinematics() override {
+  void prepareFactorisedPhaseSpace() override {
     if (!kinematics().cuts().central.pt_diff.valid())
       kinematics().cuts().central.pt_diff = {0., 50.};
   }
-  double computeCentralMatrixElement() const override {
+  double computeFactorisedMatrixElement() override {
     // NOTE: only the on-shell formula is defined for the time being
 
     const double s_hat = shat();  // squared two-photon mass
