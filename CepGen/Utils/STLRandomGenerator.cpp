@@ -59,7 +59,20 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = utils::RandomGenerator::description();
       desc.setDescription("STL random number generator engine");
-      desc.add<std::string>("type", "default").setDescription("random number engine");
+      desc.add<std::string>("type", "default")
+          .allow("default", "implementation-defined algorithm")
+          .allow("minstd_rand0",
+                 "Discovered in 1969 by Lewis, Goodman and Miller, adopted as \"Minimal standard\" in 1988 by Park and "
+                 "Miller")
+          .allow("minstd_rand", "Newer \"Minimum standard\", recommended by Park, Miller, and Stockmeyer in 1993")
+          .allow("mt19937", "32-bit Mersenne Twister by Matsumoto and Nishimura, 1998")
+          .allow("mt19937_64", "64-bit Mersenne Twister by Matsumoto and Nishimura, 2000")
+          .allow("ranlux24_base", "subtract-w/-carry algorithm (24, 10, 24)")
+          .allow("ranlux48_base", "subtract-w/-carry algorithm (48, 5, 12)")
+          .allow("ranlux24", "24-bit RANLUX generator by Martin Lüscher and Fred James, 1994")
+          .allow("ranlux48", "48-bit RANLUX generator by Martin Lüscher and Fred James, 1994")
+          .allow("knuth_b", "PRN engine adaptor discarding a certain amount of data produced by base engine (389, 11)")
+          .setDescription("random number engine");
       return desc;
     }
 
