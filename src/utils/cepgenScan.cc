@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2024  Laurent Forthomme
+ *  Copyright (C) 2016-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 #include "CepGen/Modules/DrawerFactory.h"
+#include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/AbortHandler.h"
@@ -37,23 +38,25 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-  string input_config, output_file, scan, plotter;
+  string input_config, output_file, scan, plotter, integrator;
   int npoints;
-  double min_value, max_value;
+  cepgen::Limits range, yrange;
   vector<double> points;
-  bool draw_grid, logy;
+  bool draw_grid, logx, logy;
 
   cepgen::ArgumentsParser parser(argc, argv);
   parser.addArgument("config,i", "base configuration", &input_config)
       .addOptionalArgument("scan,s", "type of scan to perform", &scan, "ptmin")
-      .addOptionalArgument("min,m", "minimum value of scan", &min_value, 1.)
-      .addOptionalArgument("max,M", "maximum value of scan", &max_value, 11.)
+      .addOptionalArgument("range,r", "minimum value of scan", &range, cepgen::Limits{1., 11.})
       .addOptionalArgument("num-points,n", "number of points to consider", &npoints, 10)
       .addOptionalArgument("points", "list of points to consider", &points, vector<double>{})
       .addOptionalArgument("output,o", "output file", &output_file, "xsect.dat")
+      .addOptionalArgument("logx", "logarithmic x-scale", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
+      .addOptionalArgument("yrange,y", "y range", &yrange)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
+      .addOptionalArgument("integrator,I", "type of integrator used", &integrator, "")
       .parse();
 
   cepgen::Generator gen;
@@ -65,6 +68,8 @@ int main(int argc, char* argv[]) {
     args_handler->parseCommands(parser.extra_config());
     gen.setRunParameters(args_handler->runParameters());
   }
+  if (!integrator.empty())
+    gen.runParameters().integrator() = cepgen::IntegratorFactory::get().describeParameters(integrator).parameters();
 
   CG_LOG << gen.runParameters();
 
@@ -78,13 +83,11 @@ int main(int argc, char* argv[]) {
   par.eventExportersSequence().clear();
 
   if (points.empty())
-    for (int i = 0; i <= npoints; ++i)
-      points.emplace_back(min_value + (max_value - min_value) * i / npoints);
+    points = range.generate(npoints, logx);
 
   cepgen::utils::AbortHandler();
 
   cepgen::utils::Graph1D graph("comp_sigma_gen");
-
   auto& kin = par.process().kinematics();
   string scan_str = scan;
   for (const auto& value : points) {
@@ -104,7 +107,7 @@ int main(int argc, char* argv[]) {
         const auto tok = cepgen::utils::split(scan, ':');
         if (tok.size() > 2)
           throw CG_FATAL("main") << "Invalid mass scan defined: should follow the \"m:<pdgid int>\" convention!";
-        const cepgen::pdgid_t pdg = stod(tok.at(1));
+        const cepgen::pdgid_t pdg = abs(stoi(tok.at(1)));
         cepgen::PDG::get()[pdg].mass = value;
         scan_str = "$m_{" + cepgen::PDG::get()(pdg).name + "}$ (GeV)";
       } else {
@@ -126,12 +129,16 @@ int main(int argc, char* argv[]) {
 
   if (!plotter.empty()) {
     cepgen::utils::Drawer::Mode dm;
+    if (logx)
+      dm |= cepgen::utils::Drawer::Mode::logx;
     if (logy)
       dm |= cepgen::utils::Drawer::Mode::logy;
     if (draw_grid)
       dm |= cepgen::utils::Drawer::Mode::grid;
     graph.xAxis().setLabel(scan_str);
     graph.yAxis().setLabel("$\\sigma_{gen}$ (pb)");
+    if (yrange.valid())
+      graph.yAxis().setRange(yrange);
     auto plt = cepgen::DrawerFactory::get().build(plotter);
     plt->draw(graph, dm);
   }
