@@ -291,11 +291,9 @@ namespace cepgen {
       clear();  // also resets the "first run" flag
 
       // build the coupling objects
-      const auto& alpha_em = steer<ParametersList>("alphaEM");
-      if (!alpha_em.empty())
+      if (const auto& alpha_em = steer<ParametersList>("alphaEM"); !alpha_em.empty())
         alphaem_ = AlphaEMFactory::get().build(alpha_em);
-      const auto& alpha_s = steer<ParametersList>("alphaS");
-      if (!alpha_s.empty())
+      if (const auto& alpha_s = steer<ParametersList>("alphaS"); !alpha_s.empty())
         alphas_ = AlphaSFactory::get().build(alpha_s);
 
       const auto& p1 = kin_.incomingBeams().positive().momentum();

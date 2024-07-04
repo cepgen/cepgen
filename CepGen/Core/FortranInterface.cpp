@@ -126,6 +126,8 @@ void cepgen_fatal_(char* str, int size) { throw CG_FATAL("fortran_process") << s
 
 double cepgen_alphas_(char* str, double& q, int size) {
   const auto name = std::string(str, size);
+  if (name.empty())
+    throw CG_FATAL("cepgen_alphas") << "Invalid name retrieved for alphaS(q) parameterisation: '" << name << "'.";
   if (kBuiltAlphaSParameterisations.count(name) == 0)
     kBuiltAlphaSParameterisations[name] = cepgen::AlphaSFactory::get().build(name);
   return kBuiltAlphaSParameterisations.at(name)->operator()(q);
@@ -133,6 +135,8 @@ double cepgen_alphas_(char* str, double& q, int size) {
 
 double cepgen_alphaem_(char* str, double& q, int size) {
   const auto name = std::string(str, size);
+  if (name.empty())
+    throw CG_FATAL("cepgen_alphaem") << "Invalid name retrieved for alphaEM(q) parameterisation: '" << name << "'.";
   if (kBuiltAlphaEMParameterisations.count(name) == 0)
     kBuiltAlphaEMParameterisations[name] = cepgen::AlphaEMFactory::get().build(name);
   return kBuiltAlphaEMParameterisations.at(name)->operator()(q);
