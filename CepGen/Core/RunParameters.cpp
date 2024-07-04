@@ -135,7 +135,7 @@ namespace cepgen {
   void RunParameters::addModifier(std::unique_ptr<EventModifier> mod) { evt_modifiers_.emplace_back(std::move(mod)); }
 
   void RunParameters::addModifier(EventModifier* mod) {
-    evt_modifiers_.emplace_back(std::move(std::unique_ptr<EventModifier>(mod)));
+    evt_modifiers_.emplace_back(std::unique_ptr<EventModifier>(mod));
   }
 
   EventExporter& RunParameters::eventExporter(size_t i) { return *evt_exporters_.at(i); }
