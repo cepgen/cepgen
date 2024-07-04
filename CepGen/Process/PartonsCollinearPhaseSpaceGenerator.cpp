@@ -55,7 +55,7 @@ namespace cepgen {
           params = params_p_inel.validate(params);
         //TODO: fermions/pions
       }
-      flux = std::move(CollinearFluxFactory::get().build(params));
+      flux = CollinearFluxFactory::get().build(params);
       if (!flux)
         throw CG_FATAL("PartonsCollinearPhaseSpaceGenerator:init")
             << "Failed to initiate a parton flux object with properties: " << params << ".";
