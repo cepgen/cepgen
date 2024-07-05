@@ -26,7 +26,7 @@ namespace cepgen {
     class FactorisedProcess;
   }
   namespace cuts {
-    class Central;
+    struct Central;
   }
   /// Class template to define any phase space helper process
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
