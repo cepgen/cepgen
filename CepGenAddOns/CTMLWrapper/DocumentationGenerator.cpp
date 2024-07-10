@@ -75,14 +75,17 @@ namespace cepgen {
             .AppendText("Documentation last generated on " + utils::timeAs("%B %d, %Y"));
         container_.AppendChild(header);
         for (const auto& cat : categories_) {
-          container_.AppendChild(CTML::Node("a").SetAttribute("name", cat.first))
-              .AppendChild(CTML::Node("h2", cat.second.title));
+          container_.AppendChild(
+              CTML::Node("a").SetAttribute("name", cat.first).AppendChild(CTML::Node("h2", cat.second.title)));
           CTML::Node mods("p");
           for (const auto& mod : cat.second.modules)
-            mods.AppendChild(CTML::Node("a").SetAttribute("name", utils::toString(cat.first) + mod.first))
-                .AppendChild(CTML::Node("span").AppendChild(moduleDescription(
-                    mod.second,
-                    cat.second.modules_indices.count(mod.first) > 0 ? cat.second.modules_indices.at(mod.first) : -1)));
+            mods.AppendChild(
+                CTML::Node("a")
+                    .SetAttribute("name", utils::toString(cat.first) + mod.first)
+                    .AppendChild(CTML::Node("span").AppendChild(moduleDescription(
+                        mod.second,
+                        cat.second.modules_indices.count(mod.first) > 0 ? cat.second.modules_indices.at(mod.first)
+                                                                        : -1))));
           container_.AppendChild(mods);
         }
         doc_.AppendNodeToBody(container_);
