@@ -176,7 +176,7 @@ namespace cepgen {
 
     template <>
     std::string toString(const double& val) {
-      auto out = format("%g", val);
+      auto out = format("%.16g", val);
       if (out.find('.') == std::string::npos && out.find('e') == std::string::npos &&
           out.find('E') == std::string::npos)
         out += ".0";
