@@ -46,7 +46,7 @@ namespace cepgen {
 
   void ProcessIntegrand::setProcess(const proc::Process& proc) {
     //--- each integrand object has its own clone of the process
-    process_ = std::move(proc.clone());  // note: kinematics is already set by the process copy constructor
+    process_ = proc.clone();  // note: kinematics is already set by the process copy constructor
 
     CG_DEBUG("ProcessIntegrand:setProcess")
         << "New '" << process().name() << "' process cloned from '" << proc.name() << "' process.";

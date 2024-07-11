@@ -32,21 +32,15 @@ find_package(PythonLibs)
 if(NOT Boost_FOUND OR NOT PYTHONLIBS_FOUND)
   return()
 endif()
+find_package(Python COMPONENTS Interpreter Development)
+if(NOT Python_FOUND)
+  return()
+endif()
 
 add_library(pycepgen SHARED PythonWrapper.cpp PythonUtils.cpp)
 target_link_libraries(pycepgen CepGen ${Boost_LIBRARIES})
 target_include_directories(pycepgen PUBLIC ${PYTHON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 file(TOUCH_NOCREATE ${CMAKE_CURRENT_BINARY_DIR}/src/__init__.py)
 set_target_properties(pycepgen PROPERTIES PREFIX "")
-find_package(Python COMPONENTS Interpreter Development)
-if(NOT Python_FOUND)
-  execute_process(COMMAND "${Python_EXECUTABLE}" -c "if True:
-      from distutils import sysconfig as sc
-      print(sc.get_python_lib('platlib'))"
-    OUTPUT_VARIABLE Python_SITEARCH
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-else()
-  target_include_directories(pycepgen PUBLIC ${Python_INCLUDE_DIRS})
-endif()
-install(TARGETS pycepgen DESTINATION "${Python_SITEARCH}" COMPONENT boost)
-#install(TARGETS pycepgen __init__.py DESTINATION "${Python_SITEARCH}" COMPONENT boost)
+target_include_directories(pycepgen PUBLIC ${Python_INCLUDE_DIRS})
+install(TARGETS pycepgen DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT boost)

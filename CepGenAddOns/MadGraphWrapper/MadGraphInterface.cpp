@@ -73,7 +73,7 @@ namespace cepgen {
       // find the equivalent MadGraph particle to alias
       std::string found_mg_equiv;
       for (const auto& part : mg5_parts_)
-        if (std::labs(part.second) == extra_part_prop.pdgid)
+        if ((pdgid_t)std::labs(part.second) == extra_part_prop.pdgid)
           found_mg_equiv = part.first;
       if (found_mg_equiv.empty())
         throw CG_FATAL("MadGraphInterface")
