@@ -48,6 +48,8 @@ namespace cepgen {
       return obj;
     }
     template <>
+    std::string toString(const double&);
+    template <>
     std::string toString(const std::wstring&);       ///< Convert a wide characters to a standard characters string
     std::wstring toWstring(const std::string& str);  ///< Convert a standard characters to a wide characters string
     std::string toCamelCase(const std::string&, bool lower = true);  ///< Convert any case into a camelCase string
@@ -164,8 +166,7 @@ namespace cepgen {
     /// Helper to print a vector
     template <class T>
     inline std::string repr(const std::vector<T>& vec, const std::string& sep = ",") {
-      return repr<T>(
-          vec, [](const T& xv) { return toString(xv); }, sep);
+      return repr<T>(vec, [](const T& xv) { return toString(xv); }, sep);
     }
     std::string randomString(size_t size);      ///< Generate a random string of a given size
     std::string ltrim(const std::string& str);  ///< Trim leading spaces

@@ -174,6 +174,15 @@ namespace cepgen {
       return converter.from_bytes(str);
     }
 
+    template <>
+    std::string toString(const double& val) {
+      auto out = format("%g", val);
+      if (out.find('.') == std::string::npos && out.find('e') == std::string::npos &&
+          out.find('E') == std::string::npos)
+        out += ".0";
+      return out;
+    }
+
     std::string toCamelCase(const std::string& in, bool lower) {
       auto out = in;
       if (in.size() < 2 || (in.find('_') == std::string::npos && in.find('-') == std::string::npos &&

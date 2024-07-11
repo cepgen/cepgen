@@ -313,12 +313,7 @@ namespace cepgen {
   std::string ParametersList::getString(const std::string& key, bool wrap) const {
     // wrapper for the printout of a general variable
     auto wrap_val = [&wrap](const auto& val, const std::string& type) -> std::string {
-      std::ostringstream os;
-      if (type == "float" || type == "vfloat")
-        os << std::defaultfloat << std::showpoint;
-      os << utils::merge(val, ",");
-      return (wrap ? type + "(" : "")  //+ (type == "bool" ? utils::yesno(std::stoi(os.str())) : os.str()) +
-             + os.str() + (wrap ? ")" : "");
+      return (wrap ? type + "(" : "") + utils::merge(val, ",") + (wrap ? ")" : "");
     };
     // wrapper for the printout of a collection type (vector, array, ...)
     auto wrap_coll = [&wrap_val](const auto& coll, const std::string& type) -> std::string {
@@ -352,7 +347,7 @@ namespace cepgen {
       return "";
     throw CG_ERROR("ParametersList:getString")
         << "Unrecognised type for key '" << key << "' from parameters list " << *this << ".";
-  }  // namespace cepgen
+  }
 
   ParametersList& ParametersList::rename(const std::string& old_key, const std::string& new_key) {
 #define __TYPE_ENUM(type, map, name) \
