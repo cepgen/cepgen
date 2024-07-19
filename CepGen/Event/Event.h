@@ -30,7 +30,8 @@ namespace cepgen {
     explicit Event(bool compressed = false);  ///< Build an empty event
     Event(const Event&);                      ///< Copy constructor
 
-    Event& operator=(const Event&);  ///< Assignment operator
+    Event& operator=(const Event&);       ///< Assignment operator
+    bool operator==(const Event&) const;  ///< Equality operator
 
     /// Build a trivial event with the minimal information
     /// \param[in] num_out_particles produced particles multiplicity (excluding outgoing beam remnants)

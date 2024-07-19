@@ -39,6 +39,16 @@ namespace cepgen {
     return *this;
   }
 
+  bool Event::operator==(const Event& oth) const {
+    if (compressed_ != oth.compressed_)
+      return false;
+    if (metadata != oth.metadata)
+      CG_WARNING("Event:operator==") << "Comparison of two events with different metadata.";
+    if (particles_ != oth.particles_)
+      return false;
+    return true;
+  }
+
   Event Event::minimal(size_t num_out_particles) {
     auto evt = Event();
     // add the two incoming beam particles
