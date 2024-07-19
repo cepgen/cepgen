@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
                        << "Computation time: " << tmr.elapsed() * 1.e3 << " ms.";
       tmr.reset();
 
-      const string test_res = cepgen::utils::format(
+      CG_DEBUG("main") << cepgen::utils::format(
           "%-40s\tref=%g\tgot=%g\tratio=%g\tpull=%+10.5f", test.filename.c_str(), test.ref_cs, new_cs, ratio, pull);
       CG_TEST(fabs(pull) < num_sigma, filename);
       gen.runParameters().clearProcess();

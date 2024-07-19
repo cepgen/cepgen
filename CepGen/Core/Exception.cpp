@@ -27,16 +27,10 @@ namespace cepgen {
         std::runtime_error("cepgen::Exception"),
         type_(type) {}
 
-  Exception::Exception(const Exception& oth) noexcept
-      : LoggedMessage(oth), std::runtime_error("cepgen::Exception"), type_(oth.type_) {}
-
   Exception::~Exception() noexcept {
     // we stop this process' execution on fatal exception
-    if (type_ == Type::fatal) {
-      dump();
-      if (raise(SIGINT) != 0)
-        exit(0);
-    }
+    if (type_ == Type::fatal && raise(SIGINT) != 0)
+      exit(0);
   }
 
   const char* Exception::what() const noexcept {

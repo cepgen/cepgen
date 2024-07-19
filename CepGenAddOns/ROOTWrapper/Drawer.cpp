@@ -131,7 +131,7 @@ namespace cepgen {
         }
       }
       inline static TString delatexify(const std::string& tok) {
-        auto out = utils::replaceAll(tok, {{"$", ""}});
+        auto out = utils::replaceAll(tok, {{"$", ""}, {"\\", "#"}});
         return TString(out);
       }
       static TGraphErrors convert(const utils::Graph1D&);

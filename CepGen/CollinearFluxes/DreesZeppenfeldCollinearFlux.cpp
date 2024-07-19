@@ -29,7 +29,7 @@ namespace cepgen {
   /// Virtuality-dependent Drees-Zeppenfeld photon flux
   /// \note Corresponds to  PDF:Proton2gammaSet=2 in Pythia 8
   /// \cite Drees:1988pp
-  class DreesZeppenfeldCollinearFlux : public CollinearFlux {
+  class DreesZeppenfeldCollinearFlux final : public CollinearFlux {
   public:
     explicit DreesZeppenfeldCollinearFlux(const ParametersList& params)
         : CollinearFlux(params), scale_(steer<double>("scale")) {}
@@ -41,8 +41,8 @@ namespace cepgen {
       return desc;
     }
 
-    bool fragmenting() const override final { return true; }
-    pdgid_t partonPdgId() const override final { return PDG::photon; }
+    bool fragmenting() const override { return true; }
+    pdgid_t partonPdgId() const override { return PDG::photon; }
 
     double fluxQ2(double x, double q2) const override {
       if (!x_range_.contains(x, true))

@@ -34,6 +34,8 @@ namespace cepgen {
       const auto& type = steer<std::string>("type");
       if (type == "mt19937")
         rng_engine = const_cast<gsl_rng_type*>(gsl_rng_mt19937);
+      else if (type == "taus")
+        rng_engine = const_cast<gsl_rng_type*>(gsl_rng_taus);
       else if (type == "taus2")
         rng_engine = const_cast<gsl_rng_type*>(gsl_rng_taus2);
       else if (type == "gfsr4")
@@ -53,7 +55,14 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = utils::RandomGenerator::description();
       desc.setDescription("GSL random number generator engine");
-      desc.add<std::string>("type", "mt19937").setDescription("random number engine");
+      desc.add<std::string>("type", "mt19937")
+          .allow("mt19937", "Mersenne-Twister generator")
+          .allow("taus", "maximally equidistributed combined Tausworthe generator by L’Ecuyer")
+          .allow("taus2",
+                 "maximally equidistributed combined Tausworthe generator by L’Ecuyer (w/ improved seeding procedure)")
+          .allow("gfsr4", "lagged-fibonacci generator")
+          .allow("ranlxs0", "second-generation version of the RANLUX algorithm of Luscher")
+          .setDescription("random number engine");
       return desc;
     }
 

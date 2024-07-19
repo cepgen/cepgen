@@ -53,12 +53,6 @@ namespace cepgen {
 
   double Integrator::uniform(const Limits& lim) const { return rnd_gen_->uniform(lim.min(), lim.max()); }
 
-  Value Integrator::integrate(Integrand& integrand) {
-    if (limits_.size() != integrand.size())
-      limits_ = std::vector<Limits>(integrand.size(), Limits{0., 1.});
-    return integrate(integrand);
-  }
-
   Value Integrator::integrate(const std::function<double(const std::vector<double>&)>& func,
                               const ParametersList& params,
                               size_t num_vars) {

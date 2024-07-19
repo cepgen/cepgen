@@ -69,31 +69,37 @@ namespace cepgen {
     //--- histograms printout
     if (!show_hists_ && !save_hists_)
       return;
-    for (auto& h_var : hists_) {
-      h_var.hist.scale(cross_section_ / (num_evts_ + 1));
-      h_var.hist.setTitle(proc_name_);
-      std::ostringstream os;
-      if (drawer_)
-        drawer_->draw(h_var.hist, h_var.log ? utils::Drawer::Mode::logy : utils::Drawer::Mode::none);
-      if (show_hists_)
-        CG_INFO("EventHarvester") << os.str();
+    try {
+      for (auto& h_var : hists_) {
+        h_var.hist.scale(cross_section_ / (num_evts_ + 1));
+        h_var.hist.setTitle(proc_name_);
+        std::ostringstream os;
+        if (drawer_)
+          drawer_->draw(h_var.hist, h_var.log ? utils::Drawer::Mode::logy : utils::Drawer::Mode::none);
+        if (show_hists_)
+          CG_INFO("EventHarvester") << os.str();
+        if (save_hists_)
+          file_ << "\n" << os.str() << "\n";
+      }
+      for (auto& h_var : hists2d_) {
+        std::ostringstream os;
+        h_var.hist.setTitle(proc_name_);
+        if (drawer_)
+          drawer_->draw(
+              h_var.hist,
+              utils::Drawer::Mode::grid | (h_var.log ? utils::Drawer::Mode::logz : utils::Drawer::Mode::none));
+        if (show_hists_)
+          CG_INFO("EventHarvester") << os.str();
+        if (save_hists_)
+          file_ << "\n" << os.str() << "\n";
+      }
       if (save_hists_)
-        file_ << "\n" << os.str() << "\n";
+        CG_INFO("EventHarvester") << "Saved " << utils::s("histogram", hists_.size(), true) << " into \"" << filename_
+                                  << "\".";
+    } catch (const Exception& exc) {
+      CG_ERROR("EventHarvester") << "Failed to save the histograms harvested in this run. Error received: "
+                                 << exc.what();
     }
-    for (auto& h_var : hists2d_) {
-      std::ostringstream os;
-      h_var.hist.setTitle(proc_name_);
-      if (drawer_)
-        drawer_->draw(h_var.hist,
-                      utils::Drawer::Mode::grid | (h_var.log ? utils::Drawer::Mode::logz : utils::Drawer::Mode::none));
-      if (show_hists_)
-        CG_INFO("EventHarvester") << os.str();
-      if (save_hists_)
-        file_ << "\n" << os.str() << "\n";
-    }
-    if (save_hists_)
-      CG_INFO("EventHarvester") << "Saved " << utils::s("histogram", hists_.size(), true) << " into \"" << filename_
-                                << "\".";
   }
 
   void EventHarvester::initialise() {

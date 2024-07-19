@@ -291,11 +291,9 @@ namespace cepgen {
       clear();  // also resets the "first run" flag
 
       // build the coupling objects
-      const auto& alpha_em = steer<ParametersList>("alphaEM");
-      if (!alpha_em.empty())
+      if (const auto& alpha_em = steer<ParametersList>("alphaEM"); !alpha_em.empty())
         alphaem_ = AlphaEMFactory::get().build(alpha_em);
-      const auto& alpha_s = steer<ParametersList>("alphaS");
-      if (!alpha_s.empty())
+      if (const auto& alpha_s = steer<ParametersList>("alphaS"); !alpha_s.empty())
         alphas_ = AlphaSFactory::get().build(alpha_s);
 
       const auto& p1 = kin_.incomingBeams().positive().momentum();
@@ -396,10 +394,12 @@ namespace cepgen {
 
     void Process::setKinematics() {
       fillKinematics();
-      Momentum interm_mom;
-      for (size_t i = 0; i < event()[Particle::CentralSystem].size(); ++i)
-        interm_mom += pc(i);
-      event().oneWithRole(Particle::Intermediate).setMomentum(interm_mom, true);
+      if (event().hasRole(Particle::Intermediate)) {
+        Momentum interm_mom;
+        for (size_t i = 0; i < event()[Particle::CentralSystem].size(); ++i)
+          interm_mom += pc(i);
+        event().oneWithRole(Particle::Intermediate).setMomentum(interm_mom, true);
+      }
     }
 
     ParametersDescription Process::description() {

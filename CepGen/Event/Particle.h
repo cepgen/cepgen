@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -67,10 +67,9 @@ namespace cepgen {
     /// \param[in] id PDG identifier
     /// \param[in] st Current status
     explicit Particle(Role role = Role::UnknownRole, pdgid_t id = 0, Status st = Status::Undefined);
-    Particle(const Particle&);  ///< Copy constructor
-    inline ~Particle() = default;
-    Particle& operator=(const Particle&) = default;  ///< Assignment operator
-    bool operator<(const Particle& rhs) const;       ///< Comparison operator (from unique identifier)
+
+    bool operator<(const Particle&) const;   ///< Comparison operator (from unique identifier)
+    bool operator==(const Particle&) const;  ///< Equality operator
 
     // --- general particle properties
 
@@ -140,14 +139,13 @@ namespace cepgen {
 
     // --- particle relations
 
-    inline bool primary() const { return mothers_.empty(); }           ///< Is this particle a primary particle?
-    Particle& clearMothers();                                          ///< Clear the particle parentage
-    Particle& addMother(Particle& part);                               ///< Set the mother particle
-    inline ParticlesIds mothers() const { return mothers_; }           ///< Identifier to the mother particles
-    Particle& clearDaughters();                                        ///< Remove the decay products linking
-    Particle& addDaughter(Particle& part);                             ///< Add a decay product
-    inline size_t numDaughters() const { return daughters_.size(); };  ///< Number of daughter particles
-    inline ParticlesIds daughters() const { return daughters_; }       ///< Identifiers list of all daughter particles
+    inline bool primary() const { return mothers_.empty(); }      ///< Is this particle a primary particle?
+    Particle& addMother(Particle& part);                          ///< Set the mother particle
+    inline ParticlesIds mothers() const { return mothers_; }      ///< Identifier to the mother particles
+    inline ParticlesIds& mothers() { return mothers_; }           ///< Identifier to the mother particles
+    Particle& addDaughter(Particle& part);                        ///< Add a decay product
+    inline ParticlesIds daughters() const { return daughters_; }  ///< Identifiers list of all daughter particles
+    inline ParticlesIds& daughters() { return daughters_; }       ///< Identifiers list of all daughter particles
 
     // --- global particle information extraction
 
@@ -160,10 +158,9 @@ namespace cepgen {
     float helicity_{0.};                  ///< Helicity
     Role role_{UnknownRole};              ///< Role in the process
     int status_{(int)Status::Undefined};  ///< Decay/stability status
-    ParticlesIds mothers_{};              ///< List of mother particles
-    ParticlesIds daughters_{};            ///< List of daughter particles
+    ParticlesIds mothers_;                ///< List of mother particles
+    ParticlesIds daughters_;              ///< List of daughter particles
     pdgid_t pdg_id_{(pdgid_t)0};          ///< PDG id
-    ParticleProperties phys_prop_;        ///< Collection of standard, bare-level physical properties
   };
 
   // --- particle containers

@@ -32,18 +32,15 @@
     }                                                                         \
   }                                                                           \
   static_assert(true, "")
-/// Declare a Fortran process function name
-#define DECLARE_FORTRAN_FUNCTION(f77_func) \
-  extern "C" {                             \
-  extern double f77_func##_();             \
-  }                                        \
-  static_assert(true, "")
 /// Name of the process (Fortran scope)
 #define PROCESS_F77_NAME(name) F77_##name
 /// Convert a token into a string
 #define STRINGIFY(name) #name
 /// Add the Fortran process definition to the list of handled processes
 #define REGISTER_FORTRAN_PROCESS(name, descr, f77_func)                           \
+  extern "C" {                                                                    \
+  extern double f77_func##_();                                                    \
+  }                                                                               \
   struct PROCESS_F77_NAME(name) : public cepgen::proc::FortranFactorisedProcess { \
     PROCESS_F77_NAME(name)                                                        \
     (const cepgen::ParametersList& params = cepgen::ParametersList())             \

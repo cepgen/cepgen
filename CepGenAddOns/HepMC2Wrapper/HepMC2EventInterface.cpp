@@ -45,9 +45,10 @@ namespace HepMC {
     int cm_id = 0;
 
     auto convert_particle = [](const cepgen::Particle& cg_part) -> GenParticle* {
-      auto cg_mom = cg_part.momentum();
-      auto* part =
-          new GenParticle(FourVector(cg_mom.px(), cg_mom.py(), cg_mom.pz(), cg_mom.energy()), cg_part.integerPdgId());
+      const auto cg_mom = cg_part.momentum();
+      auto* part = new GenParticle(FourVector(cg_mom.px(), cg_mom.py(), cg_mom.pz(), cg_mom.energy()),
+                                   cg_part.integerPdgId(),
+                                   (int)cg_part.status());
       part->set_generated_mass(cepgen::PDG::get().mass(cg_part.pdgId()));
       return part;
     };
@@ -148,8 +149,6 @@ namespace HepMC {
     for (auto it_vtx = vertices_begin(); it_vtx != vertices_end(); ++it_vtx) {
       if ((*it_vtx)->particles_in_size() == 1) {
         auto role1 = cepgen::Particle::Role::UnknownRole, role2 = role1, role3 = role1;
-        auto status1 = cepgen::Particle::Status::PrimordialIncoming, status2 = cepgen::Particle::Status::Incoming,
-             status3 = cepgen::Particle::Status::Unfragmented;
         size_t id_beam_in = 0;
         if (auto* part = *(*it_vtx)->particles_in_const_begin(); part) {
           if (part->barcode() == ip1->barcode()) {
@@ -162,7 +161,7 @@ namespace HepMC {
             role3 = cepgen::Particle::OutgoingBeam2;
           }
           auto cg_part = convert_particle(*part, role1);
-          cg_part.setStatus(status1);
+          cg_part.setStatus(cepgen::Particle::Status::PrimordialIncoming);
           evt.addParticle(cg_part);
           h_to_cg[part->barcode()] = cg_part.id();
           id_beam_in = cg_part.id();
@@ -172,7 +171,8 @@ namespace HepMC {
           for (auto it_op = (*it_vtx)->particles_out_const_begin(); it_op != (*it_vtx)->particles_out_const_end();
                ++it_op, ++num_op) {
             auto cg_part = convert_particle(*(*it_op), num_op == 0 ? role2 : role3);
-            cg_part.setStatus(num_op == 0 ? status2 : status3);
+            cg_part.setStatus(num_op == 0 ? cepgen::Particle::Status::Incoming
+                                          : cepgen::Particle::Status::Unfragmented);
             cg_part.addMother(evt[id_beam_in]);
             evt.addParticle(cg_part);
             h_to_cg[(*it_op)->barcode()] = cg_part.id();

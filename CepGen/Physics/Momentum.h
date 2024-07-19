@@ -191,7 +191,7 @@ namespace cepgen {
     /// Rotate the transverse components by an angle phi (and reflect the y coordinate)
     Momentum& rotatePhi(double phi, double sign);
     /// Rotate the particle's momentum by a polar/azimuthal angle
-    Momentum& rotateThetaPhi(double theta_, double phi_);
+    Momentum& rotateThetaPhi(double theta, double phi);
     /// Apply a \f$ x\rightarrow -x\f$ transformation
     inline Momentum& mirrorX() {
       (*this)[X] *= -1.;

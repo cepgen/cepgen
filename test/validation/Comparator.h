@@ -48,7 +48,7 @@ namespace cepgen {
                 const auto chi2 = gr.second.chi2test(plot.second.at(ref_sample_), ndf);
                 chi2_info = cepgen::utils::format(", $\\chi^{2}$/ndf = %.2g/%zu", chi2, ndf);
               }
-              gr.second.setTitle(gr.first + chi2_info);
+              gr.second.setTitle(std::string(gr.first + chi2_info));
               coll.emplace_back(&gr.second);
             }
             plt->draw(coll, path_tmpl_ + plot.first, top_label_, m_draw_modes_[plot.first]);

@@ -69,15 +69,15 @@ int main(int argc, char* argv[]) {
           yrange.min() = xrange.min();
         if (!yrange.hasMax())
           yrange.max() = xrange.max();
-        for (unsigned short i = 0; i < num_points; ++i) {
+        for (int i = 0; i < num_points; ++i) {
           const double x = xrange.min() + (xrange.max() - xrange.min()) / (num_points - 1) * i;
-          for (unsigned short j = 0; j < num_points; ++j) {
+          for (int j = 0; j < num_points; ++j) {
             const double y = yrange.min() + (yrange.max() - yrange.min()) / (num_points - 1) * j;
             m_gr2d_fb[func].addPoint(x, y, (*test)({x, y}));
           }
         }
       } else
-        for (unsigned short i = 0; i < num_points; ++i) {
+        for (int i = 0; i < num_points; ++i) {
           const double x = xrange.min() + (xrange.max() - xrange.min()) / (num_points - 1) * i;
           m_gr_fb[func].addPoint(x, (*test)(x));
         }

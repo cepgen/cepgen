@@ -36,6 +36,9 @@ namespace cepgen {
     inline std::string toString(const T& obj) {
       return std::to_string(obj);
     }
+    /// Specialisation of string conversion of limits
+    template <>
+    std::string toString(const Limits&);
     /// Specialisation of string conversion of parameters list
     template <>
     std::string toString(const ParametersList&);
@@ -44,6 +47,8 @@ namespace cepgen {
     inline std::string toString(const std::string& obj) {
       return obj;
     }
+    template <>
+    std::string toString(const double&);
     template <>
     std::string toString(const std::wstring&);       ///< Convert a wide characters to a standard characters string
     std::wstring toWstring(const std::string& str);  ///< Convert a standard characters to a wide characters string
@@ -161,8 +166,7 @@ namespace cepgen {
     /// Helper to print a vector
     template <class T>
     inline std::string repr(const std::vector<T>& vec, const std::string& sep = ",") {
-      return repr<T>(
-          vec, [](const T& xv) { return toString(xv); }, sep);
+      return repr<T>(vec, [](const T& xv) { return toString(xv); }, sep);
     }
     std::string randomString(size_t size);      ///< Generate a random string of a given size
     std::string ltrim(const std::string& str);  ///< Trim leading spaces

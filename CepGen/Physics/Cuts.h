@@ -58,9 +58,9 @@ namespace cepgen {
 
       void setParameters(const ParametersList&) override;
 
-      Limits q2;   ///< parton virtuality
-      Limits qt;   ///< parton transverse virtuality
-      Limits phi;  ///< parton azimuthal angle
+      std::vector<Limits> q2;  ///< parton virtualities
+      Limits qt;               ///< parton transverse virtuality
+      Limits phi;              ///< parton azimuthal angle
     };
 
     /// Outgoing beam remnant-like particles phase space cuts

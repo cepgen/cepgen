@@ -1,2 +1,2 @@
 set(PROJECT_VERSION 1)
-set(VERSION 1.2.3_gcc710)
+set(VERSION 1.2.5_gcc710)

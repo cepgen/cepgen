@@ -51,9 +51,9 @@ namespace cepgen {
                                        << " * perturbative order: " << APFEL::GetPerturbativeOrder() << ".";
       }
 
-      cepgen::pdgid_t partonPdgId() const override final { return pdgid_; }
-      bool fragmenting() const override final { return true; }
-      double mass2() const override final { return mp2_; }
+      cepgen::pdgid_t partonPdgId() const override { return pdgid_; }
+      bool fragmenting() const override { return true; }
+      double mass2() const override { return mp2_; }
 
       double fluxQ2(double x, double q2) const override {
         if (!x_range_.contains(x, true))

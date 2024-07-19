@@ -25,8 +25,8 @@
 #include <memory>
 
 namespace cepgen {
-  struct Vector;
-  struct VectorRef;
+  class Vector;
+  class VectorRef;
   /// A \f$n\times m\f$ matrix object
   class Matrix {
   public:

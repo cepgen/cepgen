@@ -16,6 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef CepGen_Modules_ModuleFactoryImpl_h
+#define CepGen_Modules_ModuleFactoryImpl_h
+
 #include "CepGen/Cards/Handler.h"
 #include "CepGen/CollinearFluxes/CollinearFlux.h"
 #include "CepGen/Core/GeneratorWorker.h"
@@ -60,3 +63,5 @@ namespace cepgen {
   template class ModuleFactory<utils::Functional>;
   template class ModuleFactory<utils::RandomGenerator>;
 }  // namespace cepgen
+
+#endif
