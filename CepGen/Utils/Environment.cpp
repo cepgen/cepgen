@@ -35,14 +35,14 @@ namespace cepgen {
         const auto cepgen_path = fs::path(env::get("CEPGEN_PATH", "."));
         return std::vector<std::string>{cepgen_path,
                                         cepgen_path / "CepGen",
-                                        cepgen_path / "External",
-                                        cepgen_path / "build",
-                                        fs::path() / "/usr" / "share" / "CepGen",
-                                        fs::path() / "/usr" / "local",
-                                        fs::path() / "/usr" / "local" / "lib",
+                                        cepgen_path / "lib",
+                                        cepgen_path / "share" / "CepGen",
                                         fs::current_path(),
                                         fs::current_path().parent_path(),
-                                        fs::current_path().parent_path().parent_path()};
+                                        fs::current_path().parent_path().parent_path(),
+                                        // additional paths for local builds
+                                        cepgen_path / "External",
+                                        cepgen_path / "build"};
       }
 
       void set(const std::string& var, const std::string& value) { setenv(var.c_str(), value.c_str(), 1); }
@@ -62,5 +62,5 @@ namespace cepgen {
 
       void unset(const std::string& var) { unsetenv(var.c_str()); }
     }  // namespace env
-  }    // namespace utils
+  }  // namespace utils
 }  // namespace cepgen
