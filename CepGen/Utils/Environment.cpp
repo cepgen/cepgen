@@ -36,6 +36,7 @@ namespace cepgen {
         return std::vector<std::string>{cepgen_path,
                                         cepgen_path / "CepGen",
                                         cepgen_path / "lib",
+                                        cepgen_path / "lib64",
                                         cepgen_path / "share" / "CepGen",
                                         fs::current_path(),
                                         fs::current_path().parent_path(),
