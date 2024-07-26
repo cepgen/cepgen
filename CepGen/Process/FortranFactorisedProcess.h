@@ -40,10 +40,10 @@ namespace cepgen {
       const std::function<double(void)> func_;  ///< Function to be called for weight computation
 
       // mapped variables
-      double m_y1_;           ///< First outgoing particle rapidity
-      double m_y2_;           ///< Second outgoing particle rapidity
-      double m_pt_diff_;      ///< Transverse momentum balance between outgoing particles
-      double m_phi_pt_diff_;  ///< Azimuthal angle difference between outgoing particles
+      double m_y1_{0.};           ///< First outgoing particle rapidity
+      double m_y2_{0.};           ///< Second outgoing particle rapidity
+      double m_pt_diff_{0.};      ///< Transverse momentum balance between outgoing particles
+      double m_phi_pt_diff_{0.};  ///< Azimuthal angle difference between outgoing particles
     };
   }  // namespace proc
 }  // namespace cepgen

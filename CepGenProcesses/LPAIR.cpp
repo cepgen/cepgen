@@ -251,7 +251,7 @@ private:
   double ml_{0.};   ///< mass of the outgoing leptons
   double ml2_{0.};  ///< squared mass of the outgoing leptons
   double charge_factor_{0.};
-  mode::Kinematics beams_mode_;
+  mode::Kinematics beams_mode_{mode::Kinematics::invalid};
   double re_{0.};
   double ep1_{0.};  ///< energy of the first proton-like incoming particle
   double ep2_{0.};  ///< energy of the second proton-like incoming particle

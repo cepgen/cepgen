@@ -28,7 +28,7 @@ namespace cepgen {
       : func_(FunctionalFactory::get().build(
             func_eval,
             ParametersList().set<std::string>("expression", expr).set<std::vector<std::string> >("variables", vars))) {
-    CG_DEBUG("FunctionalIntegrand") << "Built a " << func_eval << " " << size()
+    CG_DEBUG("FunctionalIntegrand") << "Built a " << func_eval << " " << func_->variables().size()
                                     << "-dimensional functional with variables " << func_->variables() << " (" << vars
                                     << "): " << func_->expression() << ".";
   }

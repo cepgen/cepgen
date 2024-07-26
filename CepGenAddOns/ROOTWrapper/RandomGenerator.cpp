@@ -39,7 +39,7 @@ namespace cepgen {
           rng_.reset(new TRandom2);
         else if (type == "MersenneTwister")
           rng_.reset(new TRandom3);
-        else if (type == "Ranlux")
+        else if (type == "Ranluxpp")
           rng_.reset(new TRandomRanluxpp);
         else if (type == "MixMax")
           rng_.reset(new TRandomMixMax);
@@ -56,7 +56,15 @@ namespace cepgen {
       static ParametersDescription description() {
         auto desc = utils::RandomGenerator::description();
         desc.setDescription("ROOT random number generator engine");
-        desc.add<std::string>("type", "Ranlux").setDescription("random number engine");
+        desc.add<std::string>("type", "Ranlux")
+            .setDescription("random number engine")
+            .allow("Ranlux")
+            .allow("Tausworthe")
+            .allow("MersenneTwister")
+            .allow("Ranluxpp")
+            .allow("MixMax")
+            .allow("MixMax17")
+            .allow("MixMax256");
         return desc;
       }
 

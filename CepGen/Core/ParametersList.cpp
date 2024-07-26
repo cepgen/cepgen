@@ -428,19 +428,16 @@ namespace cepgen {
   template <>
   Limits ParametersList::get<Limits>(const std::string& key, const Limits& def) const {
     // first try to find Limits object in collections
-    Limits out;
-    auto val = std::find_if(lim_values_.begin(), lim_values_.end(), [&key](const auto& kv) { return kv.first == key; });
-    if (val != lim_values_.end())
+    auto out = def;
+    if (auto val =
+            std::find_if(lim_values_.begin(), lim_values_.end(), [&key](const auto& kv) { return kv.first == key; });
+        val != lim_values_.end())
       out = val->second;
     else {  // still trying to build it from (min/max) attributes
       fill<double>(key + "min", out.min());
       fill<double>(key + "max", out.max());
     }
     return out.validate();
-    // nothing found ; returning default
-    CG_DEBUG("ParametersList") << "Failed to retrieve limits parameter with key=" << key << ". "
-                               << "Default value: " << def << ".";
-    return def;
   }
 
   template <>

@@ -91,8 +91,6 @@ namespace cepgen {
       swprintf(sfilename, fn_len, L"%s", filename.c_str());
       const std::wstring readable_s_filename(sfilename);
 #endif
-      if (!sfilename)
-        throw CG_FATAL("PythonHandler") << "Invalid filename provided to the Python cards parser!";
 #if PY_VERSION_HEX >= 0x03080000
       config_.program_name = sfilename;
 #else

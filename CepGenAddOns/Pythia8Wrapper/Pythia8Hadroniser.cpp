@@ -230,8 +230,7 @@ namespace cepgen {
         prop = PDG::get()(pdg_id);
       } catch (const Exception&) {
         prop.pdgid = pdg_id;
-        prop.name = py_part.name();
-        prop.descr = py_part.name();
+        prop.name = prop.descr = py_part.name();
         prop.colours = py_part.col();  // colour factor
         prop.mass = py_part.m0();
         prop.width = py_part.mWidth();
@@ -310,15 +309,15 @@ namespace cepgen {
           // found the role ; now we can add the particle
           Particle& cg_part = addParticle(ev, p, p.p(), role);
           if (correct_central_ && (Particle::Role)role == Particle::CentralSystem) {
-            const auto& ip = std::find(central_parts.begin(), central_parts.end(), p.mother1());
-            if (ip != central_parts.end())
+            if (const auto ip = std::find(central_parts.begin(), central_parts.end(), p.mother1());
+                ip != central_parts.end())
               cg_part.setMomentum(ev[cg_evt_->cepgenId(*ip - offset_)].momentum());
           }
           for (const auto& moth_id : p.motherList()) {
             if (moth_id <= offset_)
               continue;
-            const unsigned short moth_cg_id = cg_evt_->cepgenId(moth_id - offset_);
-            if (moth_cg_id != Pythia8::CepGenEvent::INVALID_ID)
+            if (const unsigned short moth_cg_id = cg_evt_->cepgenId(moth_id - offset_);
+                moth_cg_id != Pythia8::CepGenEvent::INVALID_ID)
               cg_part.addMother(ev[moth_cg_id]);
             else
               cg_part.addMother(addParticle(ev, pythia_->event[moth_id], p.p(), role));
@@ -339,10 +338,11 @@ namespace cepgen {
           return (unsigned short)Particle::OutgoingBeam1;
         if (par_id == 2 && offset_ > 0)
           return (unsigned short)Particle::OutgoingBeam2;
-        const unsigned short par_cg_id = cg_evt_->cepgenId(par_id - offset_);
-        if (par_cg_id != Pythia8::CepGenEvent::INVALID_ID)
+        if (const unsigned short par_cg_id = cg_evt_->cepgenId(par_id - offset_);
+            par_cg_id != Pythia8::CepGenEvent::INVALID_ID)
           return (unsigned short)ev(par_cg_id).role();
-        return findRole(ev, pythia_->event[par_id]);
+        if (par_id != Pythia8::CepGenEvent::INVALID_ID)
+          return findRole(ev, pythia_->event[par_id]);
       }
       return (unsigned short)Particle::UnknownRole;
     }

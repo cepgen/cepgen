@@ -66,7 +66,7 @@ namespace cepgen {
     std::unique_ptr<PartonFlux> pos_flux_{nullptr}, neg_flux_{nullptr};
 
   private:
-    proc::FactorisedProcess* proc_;  //NOT owning
+    proc::FactorisedProcess* proc_{nullptr};  //NOT owning
   };
 }  // namespace cepgen
 

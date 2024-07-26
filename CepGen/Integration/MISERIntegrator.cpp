@@ -82,8 +82,8 @@ namespace cepgen {
     }
 
   private:
-    int ncvg_;
-    gsl_monte_miser_params miser_params_;
+    const int ncvg_;
+    gsl_monte_miser_params miser_params_{};
   };
 
 }  // namespace cepgen

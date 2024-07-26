@@ -52,8 +52,8 @@ namespace cepgen {
     const char* what() const noexcept override;
 
   private:
-    Type type_;
-    mutable char what_[50];
+    Type type_{Type::undefined};
+    mutable char what_[50]{""};
   };
 }  // namespace cepgen
 

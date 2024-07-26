@@ -238,37 +238,41 @@ namespace cepgen {
       std::vector<std::string> plot_cmds, splot_cmds;
       for (const auto* obj : objs) {
         if (obj->isGraph1D()) {
-          auto gr_cmds = drawGraph1D(*dynamic_cast<const Graph1D*>(obj), mode, plot_style_);
-          auto it = gr_cmds.begin();
-          while (it != gr_cmds.end())
-            if (startsWith(*it, "plot")) {
-              plot_cmds.emplace_back(replaceAll(it->substr(5), " notitle", " title " + delatexify(obj->title())));
-              it = gr_cmds.erase(it);
-            } else if (startsWith(*it, "splot")) {
-              splot_cmds.emplace_back(replaceAll(it->substr(6), " notitle", " title " + delatexify(obj->title())));
-              it = gr_cmds.erase(it);
-            } else
-              ++it;
-          if (plot_cmds.empty() && splot_cmds.empty())
-            throw CG_FATAL("GnuplotDrawer:draw")
-                << "No drawing command found for graph with name \"" << obj->name() << "\"!";
-          cmds += gr_cmds;
+          if (const auto* gr = dynamic_cast<const Graph1D*>(obj); gr) {
+            auto gr_cmds = drawGraph1D(*gr, mode, plot_style_);
+            auto it = gr_cmds.begin();
+            while (it != gr_cmds.end())
+              if (startsWith(*it, "plot")) {
+                plot_cmds.emplace_back(replaceAll(it->substr(5), " notitle", " title " + delatexify(obj->title())));
+                it = gr_cmds.erase(it);
+              } else if (startsWith(*it, "splot")) {
+                splot_cmds.emplace_back(replaceAll(it->substr(6), " notitle", " title " + delatexify(obj->title())));
+                it = gr_cmds.erase(it);
+              } else
+                ++it;
+            if (plot_cmds.empty() && splot_cmds.empty())
+              throw CG_FATAL("GnuplotDrawer:draw")
+                  << "No drawing command found for graph with name \"" << obj->name() << "\"!";
+            cmds += gr_cmds;
+          }
         } else if (obj->isHist1D()) {
-          auto h_cmds = drawHist1D(*dynamic_cast<const Hist1D*>(obj), mode);
-          auto it = h_cmds.begin();
-          while (it != h_cmds.end())
-            if (startsWith(*it, "plot")) {
-              plot_cmds.emplace_back(replaceAll(it->substr(5), " notitle", " title " + delatexify(obj->title())));
-              it = h_cmds.erase(it);
-            } else if (startsWith(*it, "splot")) {
-              splot_cmds.emplace_back(replaceAll(it->substr(6), " notitle", " title " + delatexify(obj->title())));
-              it = h_cmds.erase(it);
-            } else
-              ++it;
-          if (plot_cmds.empty() && splot_cmds.empty())
-            throw CG_FATAL("GnuplotDrawer:draw")
-                << "No drawing command found for histogram with name \"" << obj->name() << "\"!";
-          cmds += h_cmds;
+          if (const auto* hist = dynamic_cast<const Hist1D*>(obj); hist) {
+            auto h_cmds = drawHist1D(*hist, mode);
+            auto it = h_cmds.begin();
+            while (it != h_cmds.end())
+              if (startsWith(*it, "plot")) {
+                plot_cmds.emplace_back(replaceAll(it->substr(5), " notitle", " title " + delatexify(obj->title())));
+                it = h_cmds.erase(it);
+              } else if (startsWith(*it, "splot")) {
+                splot_cmds.emplace_back(replaceAll(it->substr(6), " notitle", " title " + delatexify(obj->title())));
+                it = h_cmds.erase(it);
+              } else
+                ++it;
+            if (plot_cmds.empty() && splot_cmds.empty())
+              throw CG_FATAL("GnuplotDrawer:draw")
+                  << "No drawing command found for histogram with name \"" << obj->name() << "\"!";
+            cmds += h_cmds;
+          }
         }
       }
       if (plot_cmds.empty() && splot_cmds.empty())
