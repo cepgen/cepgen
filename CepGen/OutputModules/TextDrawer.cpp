@@ -221,27 +221,29 @@ namespace cepgen {
       std::vector<std::string> plt_names;
       for (const auto* obj : objs)
         if (obj->isHist1D()) {
-          const auto* hist = dynamic_cast<const Hist1D*>(obj);
-          if (os_base.str().empty()) {
-            drawValues(os_base, *hist, hist->axis(), mode, false);
-            add_plot(inside_plot(os_base.str()));
-          } else {
-            std::ostringstream os;
-            drawValues(os, *hist, hist->axis(), mode, false);
-            add_plot(inside_plot(os.str()));
+          if (const auto* hist = dynamic_cast<const Hist1D*>(obj); hist) {
+            if (os_base.str().empty()) {
+              drawValues(os_base, *hist, hist->axis(), mode, false);
+              add_plot(inside_plot(os_base.str()));
+            } else {
+              std::ostringstream os;
+              drawValues(os, *hist, hist->axis(), mode, false);
+              add_plot(inside_plot(os.str()));
+            }
+            plt_names.emplace_back(hist->name());
           }
-          plt_names.emplace_back(hist->name());
         } else if (obj->isGraph1D()) {
-          const auto* gr = dynamic_cast<const Graph1D*>(obj);
-          if (os_base.str().empty()) {
-            drawValues(os_base, *gr, gr->points(), mode, false);
-            add_plot(inside_plot(os_base.str()));
-          } else {
-            std::ostringstream os;
-            drawValues(os, *gr, gr->points(), mode, false);
-            add_plot(inside_plot(os.str()));
+          if (const auto* gr = dynamic_cast<const Graph1D*>(obj); gr) {
+            if (os_base.str().empty()) {
+              drawValues(os_base, *gr, gr->points(), mode, false);
+              add_plot(inside_plot(os_base.str()));
+            } else {
+              std::ostringstream os;
+              drawValues(os, *gr, gr->points(), mode, false);
+              add_plot(inside_plot(os.str()));
+            }
+            plt_names.emplace_back(gr->name());
           }
-          plt_names.emplace_back(gr->name());
         } else {
           CG_WARNING("TextDrawer:draw") << "Cannot add drawable '" << obj->name() << "' to the stack.";
           continue;

@@ -47,32 +47,31 @@ namespace cepgen {
         auto desc = Parameterisation::description();
         desc.setDescription("CLAS");
         desc.add<std::string>("model", "proton")
-            .setDescription("Nucleon modelling ('proton', 'deuteron', or 'neutron' handled)");
+            .setDescription("Nucleon modelling ('proton', 'deuteron', or 'neutron' handled)")
+            .allow("proton", "parton-from-proton")
+            .allow("deuteron", "parton-from-deuteron")
+            .allow("neutron", "parton-from-neutron");
         return desc;
       }
 
       /// List of steering parameters for a physics case
       struct Parameters {
-        /// Standard parameterisation of a parton-from-neutron emission
-        static Parameters standard_neutron();
-        /// Standard parameterisation of a parton-from-proton emission
-        static Parameters standard_proton();
-        /// Standard parameterisation of a parton-from-deuteron emission
-        static Parameters standard_deuteron();
+        static Parameters standard_neutron();   ///< Parton-from-neutron emission
+        static Parameters standard_proton();    ///< Parton-from-proton emission
+        static Parameters standard_deuteron();  ///< Parton-from-deuteron emission
 
         /// Physical properties associated to a resonance
         struct Resonance {
-          double amplitude, mass, width;
-          short angular_momentum;
+          double amplitude{0.}, mass{0.}, width{0.};
+          short angular_momentum{0};
         };
 
-        enum { neutron = 0, proton = 1, deuteron = 2 } mode = proton;  ///< Nucleon type
-        // SLAC fit parameters
-        std::array<double, 7> c_slac = {};
+        enum { neutron = 0, proton = 1, deuteron = 2 } mode{proton};  ///< Nucleon type
+        std::array<double, 7> c_slac{};                               ///< SLAC fit parameters
         // CLAS parameterisation
-        double alpha = 0., beta = 0., mu = 0., mup = 0.;
-        std::array<double, 3> x = {};
-        std::array<double, 4> b = {};
+        double alpha{0.}, beta{0.}, mu{0.}, mup{0.};
+        std::array<double, 3> x{};
+        std::array<double, 4> b{};
         std::vector<Resonance> resonances;
       };
 
@@ -102,7 +101,6 @@ namespace cepgen {
 
     CLAS::Parameters CLAS::Parameters::standard_proton() {
       Parameters params;
-      params.mode = Parameters::proton;
       // SLAC fit parameters
       params.c_slac = {{0.25615, 2.1785, 0.89784, -6.7162, 3.7557, 1.6421, 0.37636}};
       // CLAS parameterisation

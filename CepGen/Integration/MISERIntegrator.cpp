@@ -47,20 +47,21 @@ namespace cepgen {
       std::unique_ptr<gsl_monte_miser_state, decltype(&gsl_monte_miser_free)> miser_state(
           gsl_monte_miser_alloc(function_->dim), gsl_monte_miser_free);
       miser_state->verbose = verbosity_;
-      gsl_monte_miser_params_get(miser_state.get(), &miser_params_);
-      miser_params_.estimate_frac = steer<double>("estimateFraction");
-      miser_params_.min_calls = steer<int>("minCalls");
-      miser_params_.min_calls_per_bisection = steer<int>("minCallsPerBisection");
-      miser_params_.alpha = steer<double>("alpha");
-      miser_params_.dither = steer<double>("dither");
-      gsl_monte_miser_params_set(miser_state.get(), &miser_params_);
+      gsl_monte_miser_params_get(miser_state.get(), miser_params_);
+      miser_params_->estimate_frac = steer<double>("estimateFraction");
+      miser_params_->min_calls = steer<int>("minCalls");
+      miser_params_->min_calls_per_bisection = steer<int>("minCallsPerBisection");
+      miser_params_->alpha = steer<double>("alpha");
+      miser_params_->dither = steer<double>("dither");
+      gsl_monte_miser_params_set(miser_state.get(), miser_params_);
 
       CG_DEBUG("Integrator:build") << "MISER parameters:\n\t"
-                                   << "Number of calls: " << miser_params_.min_calls << ", "
-                                   << "per bisection: " << miser_params_.min_calls_per_bisection << ",\n\t"
-                                   << "Estimate fraction: " << miser_params_.estimate_frac << ",\n\t"
-                                   << "α-value: " << miser_params_.alpha << ",\n\t"
-                                   << "Dither: " << miser_params_.dither << ".";
+                                   << "Number of calls: " << miser_params_->min_calls << ", "
+                                   << "per bisection: " << miser_params_->min_calls_per_bisection << ",\n\t"
+                                   << "Estimate fraction: " << miser_params_->estimate_frac << ",\n\t"
+                                   << "α-value: " << miser_params_->alpha << ",\n\t"
+                                   << "Dither: " << miser_params_->dither << ".";
+      miser_params_ = nullptr;
 
       // launch the full integration
       double result, abserr;
@@ -83,7 +84,7 @@ namespace cepgen {
 
   private:
     int ncvg_;
-    gsl_monte_miser_params miser_params_;
+    gsl_monte_miser_params* miser_params_{nullptr};
   };
 
 }  // namespace cepgen

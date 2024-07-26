@@ -27,7 +27,7 @@ namespace cepgen {
         central_pdgids_(steer<std::vector<int> >("outgoingSystem")) {}
 
   MadGraphProcess& MadGraphProcess::setMomentum(size_t i, const Momentum& mom) {
-    if (i > mom_.size())
+    if (i >= mom_.size())
       throw CG_FATAL("MadGraphProcess") << "Invalid index for momentum: " << i << "!";
     mom_[i][0] = mom.energy();
     mom_[i][1] = mom.px();

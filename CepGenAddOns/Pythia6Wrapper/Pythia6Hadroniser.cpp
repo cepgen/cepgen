@@ -74,7 +74,7 @@ namespace cepgen {
       }
 
     private:
-      mode::Kinematics kin_mode_;
+      mode::Kinematics kin_mode_{mode::Kinematics::ElasticElastic};
       const std::unique_ptr<utils::RandomGenerator> rnd_gen_;
     };
   }  // namespace hadr

@@ -116,9 +116,11 @@ namespace cepgen {
     double Parameterisation::gamma2(double xbj, double q2) const { return 1. + tau(xbj, q2); }
 
     Parameterisation& Parameterisation::computeFL(double xbj, double q2) {
-      if (!fl_computed_ && !r_ratio_)
+      if (fl_computed_)
+        return *this;
+      if (!r_ratio_)
         throw CG_FATAL("StructureFunctions:FL") << "Failed to retrieve a R-ratio calculator!";
-      double r_error;
+      double r_error;  // so far, nothing is done with the error propagation
       return computeFL(xbj, q2, (*r_ratio_)(xbj, q2, r_error));
     }
 

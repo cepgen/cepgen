@@ -48,7 +48,7 @@ namespace cepgen {
       return PDG::proton;
     if (*this == neutron())
       return PDG::neutron;
-    return (pdgid_t)(10'000'000 + 1000 * (unsigned short)Z + A);
+    return (pdgid_t)10'000'000 + 1000 * (unsigned short)Z + A;
   }
 
   bool HeavyIon::isHI(const spdgid_t& pdgid) { return pdgid / 10'000'000 != 0; }

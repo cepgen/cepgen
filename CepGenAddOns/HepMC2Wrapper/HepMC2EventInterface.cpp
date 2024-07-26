@@ -112,8 +112,15 @@ namespace HepMC {
               add_vertex(vprod);
             }
             vprod->add_particle_out(part);
-          } else
+          } else {
+            if (v1)
+              delete v1;
+            if (v2)
+              delete v2;
+            if (vcm)
+              delete vcm;
             throw CG_FATAL("HepMC2:fillEvent") << "Other particle requested! Not yet implemented!";
+          }
         } break;
       }
       idx++;

@@ -98,9 +98,11 @@ namespace cepgen {
       std::vector<const YODA::AnalysisObject*> objs_coll;
       for (const auto* obj : objs) {
         if (obj->isHist1D()) {
-          objs_coll.emplace_back(convert(*dynamic_cast<const Hist1D*>(obj)).newclone());
+          if (const auto* hist = dynamic_cast<const Hist1D*>(obj); hist)
+            objs_coll.emplace_back(convert(*hist).newclone());
         } else if (obj->isGraph1D()) {
-          objs_coll.emplace_back(convert(*dynamic_cast<const Graph1D*>(obj)).newclone());
+          if (const auto* graph = dynamic_cast<const Graph1D*>(obj); graph)
+            objs_coll.emplace_back(convert(*graph).newclone());
         } else {
           CG_WARNING("YODADrawer:draw") << "Cannot add drawable '" << obj->name() << "' to the stack.";
           continue;

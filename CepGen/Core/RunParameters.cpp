@@ -112,7 +112,7 @@ namespace cepgen {
     return process_->name();
   }
 
-  void RunParameters::clearProcess() { process_.release(); }
+  void RunParameters::clearProcess() { delete process_.release(); }
 
   void RunParameters::setProcess(std::unique_ptr<proc::Process> proc) { process_ = std::move(proc); }
 

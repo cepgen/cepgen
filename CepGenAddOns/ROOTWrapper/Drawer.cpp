@@ -158,17 +158,19 @@ namespace cepgen {
         auto colour = ROOTCanvas::colours.at(i % ROOTCanvas::colours.size());
         auto style = i + 1;
         if (obj->isHist1D()) {
-          auto* hist = new TH1D(convert(*dynamic_cast<const utils::Hist1D*>(obj)));
-          hist->SetLineColor(colour);
-          hist->SetLineStyle(style);
-          hs->Add(hist);
-          canv.AddLegendEntry(hist, hist->GetTitle(), "l");
+          if (auto* hist = new TH1D(convert(*dynamic_cast<const utils::Hist1D*>(obj))); hist) {
+            hist->SetLineColor(colour);
+            hist->SetLineStyle(style);
+            hs->Add(hist);
+            canv.AddLegendEntry(hist, hist->GetTitle(), "l");
+          }
         } else if (obj->isGraph1D()) {
-          auto* gr = new TGraphErrors(convert(*dynamic_cast<const utils::Graph1D*>(obj)));
-          gr->SetLineColor(colour);
-          gr->SetLineStyle(style);
-          mg->Add(gr);
-          canv.AddLegendEntry(gr, gr->GetTitle(), "l");
+          if (auto* gr = new TGraphErrors(convert(*dynamic_cast<const utils::Graph1D*>(obj))); gr) {
+            gr->SetLineColor(colour);
+            gr->SetLineStyle(style);
+            mg->Add(gr);
+            canv.AddLegendEntry(gr, gr->GetTitle(), "l");
+          }
         } else {
           plots_2d.emplace_back(obj);
           CG_DEBUG("root:Drawer:draw") << "Adding a 2-dimensional drawable '" << obj->name() << "' to the stack.";
@@ -197,26 +199,28 @@ namespace cepgen {
         const auto* obj = plots_2d.at(i);
         const std::string postfix = i == 0 ? "(" : i == plots_2d.size() - 1 ? ")" : "";
         if (obj->isHist2D()) {
-          const auto* hist = dynamic_cast<const utils::Hist2D*>(obj);
-          auto* h = new TH2D(convert(*hist));
-          setMode(canv, mode);
-          h->Draw("colz");
-          canv.Prettify(h);
-          postDraw(h, *hist);
+          if (const auto* hist = dynamic_cast<const utils::Hist2D*>(obj); hist) {
+            auto* h = new TH2D(convert(*hist));
+            setMode(canv, mode);
+            h->Draw("colz");
+            canv.Prettify(h);
+            postDraw(h, *hist);
+          }
         } else if (obj->isGraph2D()) {
-          const auto* graph = dynamic_cast<const utils::Graph2D*>(obj);
-          auto* gr = new TGraph2D(convert(*graph));
-          setMode(canv, mode);
-          if (mode & Mode::col)
-            gr->Draw("colz");
-          else if (mode & Mode::cont)
-            gr->Draw("cont");
-          else
-            gr->Draw("surf3");
-          gr->GetHistogram()->SetTitle(
-              delatexify(";" + graph->xAxis().label() + ";" + graph->yAxis().label() + ";" + graph->zAxis().label()));
-          canv.Prettify(gr->GetHistogram());
-          postDraw(gr->GetHistogram(), *graph);
+          if (const auto* graph = dynamic_cast<const utils::Graph2D*>(obj); graph) {
+            auto* gr = new TGraph2D(convert(*graph));
+            setMode(canv, mode);
+            if (mode & Mode::col)
+              gr->Draw("colz");
+            else if (mode & Mode::cont)
+              gr->Draw("cont");
+            else
+              gr->Draw("surf3");
+            gr->GetHistogram()->SetTitle(
+                delatexify(";" + graph->xAxis().label() + ";" + graph->yAxis().label() + ";" + graph->zAxis().label()));
+            canv.Prettify(gr->GetHistogram());
+            postDraw(gr->GetHistogram(), *graph);
+          }
         }
         canv.Print(utils::format("%s_multi.%s%s", canv.GetName(), def_extension_.data(), postfix.data()).data());
       }

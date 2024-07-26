@@ -132,7 +132,6 @@ namespace cepgen {
         new_part = old_part;  // copy all attributes
         new_part.setId(i++);
         new_part.mothers().clear();
-        new_part.mothers().clear();
       }
     }
     //--- fix parentage for outgoing beam particles
@@ -389,7 +388,7 @@ namespace cepgen {
         const auto pdg = cp.integerPdgId();
         if (pdg == 12 || pdg == 14 || pdg == 16)  // neutrinos
           me += cp.momentum();
-        if (pdg == 1000022 || pdg == 1000023 || pdg == 1000025 || 1000035)  // neutralinos
+        if (pdg == 1000022 || pdg == 1000023 || pdg == 1000025 || pdg == 1000035)  // neutralinos
           me += cp.momentum();
       }
     return me;

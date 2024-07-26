@@ -50,7 +50,8 @@ namespace cepgen {
         if (txt.Contains("\\")) {
           TObjArray* tok = txt.Tokenize("\\");
           for (int i = 0; i < tok->GetEntries(); ++i)
-            TPaveText::AddText(dynamic_cast<TObjString*>(tok->At(i))->String());
+            if (auto* str = dynamic_cast<TObjString*>(tok->At(i)); str)
+              TPaveText::AddText(str->String());
         } else
           TPaveText::AddText(txt);
       }
@@ -106,31 +107,34 @@ namespace cepgen {
 
     /// Draw main plot attributes in a pretty manner
     inline void Prettify(TH1* obj) {
-      auto* x = dynamic_cast<TAxis*>(obj->GetXaxis());
-      x->CenterTitle();
-      x->SetLabelFont(ROOTPaveText::fontType(3));
-      x->SetLabelSize(20);
-      x->SetTitleFont(ROOTPaveText::fontType(3));
-      x->SetTitleSize(29);
-      if (ratio_) {
-        x->SetTitleOffset(2.5);
-        x->SetLabelOffset(0.02);
+      if (auto* x = dynamic_cast<TAxis*>(obj->GetXaxis()); x) {
+        x->CenterTitle();
+        x->SetLabelFont(ROOTPaveText::fontType(3));
+        x->SetLabelSize(20);
+        x->SetTitleFont(ROOTPaveText::fontType(3));
+        x->SetTitleSize(29);
+        if (ratio_) {
+          x->SetTitleOffset(2.5);
+          x->SetLabelOffset(0.02);
+        }
+        x->SetTickLength(0.03);
       }
-      x->SetTickLength(0.03);
-      auto* y = dynamic_cast<TAxis*>(obj->GetYaxis());
-      y->CenterTitle();
-      y->SetLabelFont(ROOTPaveText::fontType(3));
-      y->SetLabelSize(20);
-      y->SetTitleFont(ROOTPaveText::fontType(3));
-      y->SetTitleSize(29);
-      y->SetTitleOffset(1.3);
-      y->SetTickLength(0.03);
-      auto* z = dynamic_cast<TAxis*>(obj->GetZaxis());
-      z->CenterTitle();
-      z->SetLabelFont(ROOTPaveText::fontType(3));
-      z->SetLabelSize(16);
-      z->SetTitleFont(ROOTPaveText::fontType(3));
-      z->SetTitleSize(29);
+      if (auto* y = dynamic_cast<TAxis*>(obj->GetYaxis()); y) {
+        y->CenterTitle();
+        y->SetLabelFont(ROOTPaveText::fontType(3));
+        y->SetLabelSize(20);
+        y->SetTitleFont(ROOTPaveText::fontType(3));
+        y->SetTitleSize(29);
+        y->SetTitleOffset(1.3);
+        y->SetTickLength(0.03);
+      }
+      if (auto* z = dynamic_cast<TAxis*>(obj->GetZaxis()); z) {
+        z->CenterTitle();
+        z->SetLabelFont(ROOTPaveText::fontType(3));
+        z->SetLabelSize(16);
+        z->SetTitleFont(ROOTPaveText::fontType(3));
+        z->SetTitleSize(29);
+      }
 
       // axis titles
       TString ttle = obj->GetTitle();
@@ -165,7 +169,7 @@ namespace cepgen {
               TString format = Form("%%s (%s / %%%s %%s)", distrib.Data(), form_spec.Data());
               y_title = Form(format.Data(), y_title.Data(), GetBinning(obj), unit.Data());
             } else
-              y_title = Form("%s (%s / %d %s)",
+              y_title = Form("%s (%s / %u %s)",
                              y_title.Data(),
                              distrib.Data(),
                              static_cast<unsigned int>(GetBinning(obj)),
@@ -175,11 +179,13 @@ namespace cepgen {
               TString format = Form("%%s / %%%s %%s", form_spec.Data());
               y_title = Form(format.Data(), y_title.Data(), GetBinning(obj), unit.Data());
             } else
-              y_title = Form("%s / %d %s", y_title.Data(), static_cast<unsigned int>(GetBinning(obj)), unit.Data());
+              y_title = Form("%s / %u %s", y_title.Data(), static_cast<unsigned int>(GetBinning(obj)), unit.Data());
           }
         }
-        x->SetTitle(x_title);
-        y->SetTitle(y_title);
+        if (auto* x = dynamic_cast<TAxis*>(obj->GetXaxis()); x)
+          x->SetTitle(x_title);
+        if (auto* y = dynamic_cast<TAxis*>(obj->GetYaxis()); y)
+          y->SetTitle(y_title);
         obj->SetTitle("");
       }
       //else obj->GetXaxis()->SetTitle(ttle);
@@ -196,10 +202,10 @@ namespace cepgen {
       std::vector<TH1*> numers{};
       for (int i = 0; i < objarr->GetEntries(); ++i)
         if (i == 0) {  // reference is conventionally the first histogram
-          denom = dynamic_cast<TH1*>(objarr->At(i)->Clone());
-          denom->GetXaxis()->SetTitle(hs->GetHistogram()->GetXaxis()->GetTitle());
-        } else
-          numers.emplace_back(dynamic_cast<TH1*>(objarr->At(i)->Clone()));
+          if (denom = dynamic_cast<TH1*>(objarr->At(i)->Clone()); denom)
+            denom->GetXaxis()->SetTitle(hs->GetHistogram()->GetXaxis()->GetTitle());
+        } else if (auto* numer = dynamic_cast<TH1*>(objarr->At(i)->Clone()); numer)
+          numers.emplace_back(numer);
       RatioPlot(denom, numers);
     }
     inline void Prettify(TMultiGraph* mg) {
@@ -215,22 +221,25 @@ namespace cepgen {
       for (int i = 0; i < list->GetEntries(); ++i) {
         TGraphErrors* gre{nullptr};
         if (strcmp(list->At(i)->ClassName(), "TGraph") == 0) {
-          auto* gr = dynamic_cast<TGraph*>(list->At(i));
-          gre = new TGraphErrors(gr->GetN(), gr->GetX(), gr->GetY());
-          gre->SetLineColor(gr->GetLineColor());
-          gre->SetLineWidth(gr->GetLineWidth());
-          gre->SetLineStyle(gr->GetLineStyle());
-          gre->SetTitle(gr->GetTitle());
+          if (auto* gr = dynamic_cast<TGraph*>(list->At(i)); gr) {
+            gre = new TGraphErrors(gr->GetN(), gr->GetX(), gr->GetY());
+            gre->SetLineColor(gr->GetLineColor());
+            gre->SetLineWidth(gr->GetLineWidth());
+            gre->SetLineStyle(gr->GetLineStyle());
+            gre->SetTitle(gr->GetTitle());
+          }
         } else if (strcmp(list->At(i)->ClassName(), "TGraphErrors") == 0)
           gre = dynamic_cast<TGraphErrors*>(list->At(i)->Clone());
-        gre->GetXaxis()->SetTitle(mg->GetHistogram()->GetXaxis()->GetTitle());
-        x_min = TMath::Min(TMath::MinElement(gre->GetN(), gre->GetX()), x_min);
-        x_max = TMath::Max(TMath::MaxElement(gre->GetN(), gre->GetX()), x_max);
-        if (i == 0) {  // reference is conventionally the first graph
-          denom = gre;
-          denom->GetXaxis()->SetTitle(mg->GetHistogram()->GetXaxis()->GetTitle());
-        } else
-          numers.emplace_back(gre);
+        if (gre) {
+          gre->GetXaxis()->SetTitle(mg->GetHistogram()->GetXaxis()->GetTitle());
+          x_min = TMath::Min(TMath::MinElement(gre->GetN(), gre->GetX()), x_min);
+          x_max = TMath::Max(TMath::MaxElement(gre->GetN(), gre->GetX()), x_max);
+          if (i == 0) {  // reference is conventionally the first graph
+            denom = gre;
+            denom->GetXaxis()->SetTitle(mg->GetHistogram()->GetXaxis()->GetTitle());
+          } else
+            numers.emplace_back(gre);
+        }
       }
       RatioPlot(denom, numers, x_min, x_max);
       mg->GetXaxis()->SetRangeUser(x_min, x_max);
@@ -249,13 +258,14 @@ namespace cepgen {
       TCanvas::cd(2);
       auto* hs = Make<THStack>();  // garbage collected
       for (const auto& numer : numers) {
-        auto* ratio = dynamic_cast<TH1*>(numer->Clone("ratio"));
-        ratio->Divide(denom);
-        auto* ratio_shadow = dynamic_cast<TH1*>(ratio->Clone("ratio_shadow"));
-        ratio_shadow->SetFillColorAlpha(ratio->GetLineColor(), 0.25);
-        hs->Add(ratio_shadow, "e2");
-        hs->Add(ratio, draw_style);
-        ratios.emplace_back(ratio);
+        if (auto* ratio = dynamic_cast<TH1*>(numer->Clone("ratio")); ratio) {
+          ratio->Divide(denom);
+          auto* ratio_shadow = dynamic_cast<TH1*>(ratio->Clone("ratio_shadow"));
+          ratio_shadow->SetFillColorAlpha(ratio->GetLineColor(), 0.25);
+          hs->Add(ratio_shadow, "e2");
+          hs->Add(ratio, draw_style);
+          ratios.emplace_back(ratio);
+        }
       }
       pads_.at(1)->SetLogy(false);
       hs->Draw("nostack");
@@ -497,26 +507,28 @@ namespace cepgen {
       TCanvas::Pad()->Divide(1, 2);
       pads_.clear();
       // main pad
-      auto* p1 = dynamic_cast<TPad*>(TCanvas::GetPad(1));
-      p1->SetPad(0., 0.3, 1., 1.);
-      p1->SetFillStyle(0);
-      p1->SetLeftMargin(TCanvas::GetLeftMargin());
-      p1->SetRightMargin(TCanvas::GetRightMargin());
-      p1->SetTopMargin(TCanvas::GetTopMargin() + 0.025);
-      p1->SetBottomMargin(0.02);
-      p1->SetTicks(1, 1);
-      pads_.emplace_back(p1);
+      if (auto* p1 = dynamic_cast<TPad*>(TCanvas::GetPad(1)); p1) {
+        p1->SetPad(0., 0.3, 1., 1.);
+        p1->SetFillStyle(0);
+        p1->SetLeftMargin(TCanvas::GetLeftMargin());
+        p1->SetRightMargin(TCanvas::GetRightMargin());
+        p1->SetTopMargin(TCanvas::GetTopMargin() + 0.025);
+        p1->SetBottomMargin(0.02);
+        p1->SetTicks(1, 1);
+        pads_.emplace_back(p1);
+      }
       // ratio plot(s) pad
-      auto* p2 = dynamic_cast<TPad*>(TCanvas::GetPad(2));
-      p2->SetPad(0., 0.0, 1., 0.3);
-      p2->SetFillStyle(0);
-      p2->SetLeftMargin(TCanvas::GetLeftMargin());
-      p2->SetRightMargin(TCanvas::GetRightMargin());
-      p2->SetTopMargin(0.02);
-      p2->SetBottomMargin(TCanvas::GetBottomMargin() + 0.25);
-      p2->SetTicks(1, 1);
-      p2->SetGrid(0, 1);
-      pads_.emplace_back(p2);
+      if (auto* p2 = dynamic_cast<TPad*>(TCanvas::GetPad(2)); p2) {
+        p2->SetPad(0., 0.0, 1., 0.3);
+        p2->SetFillStyle(0);
+        p2->SetLeftMargin(TCanvas::GetLeftMargin());
+        p2->SetRightMargin(TCanvas::GetRightMargin());
+        p2->SetTopMargin(0.02);
+        p2->SetBottomMargin(TCanvas::GetBottomMargin() + 0.25);
+        p2->SetTicks(1, 1);
+        p2->SetGrid(0, 1);
+        pads_.emplace_back(p2);
+      }
       // roll back to main pad
       TCanvas::cd(1);
     }

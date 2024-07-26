@@ -162,13 +162,11 @@ namespace cepgen {
       double jacob_weight = 1.;  // initialise the local weight for this variable
       switch (type) {
         case Mapping::linear:
+        case Mapping::exponential:
           jacob_weight = lim.range();
           break;
         case Mapping::square:
           jacob_weight = 2. * lim.range();
-          break;
-        case Mapping::exponential:
-          jacob_weight = lim.range();
           break;
         case Mapping::power_law:
           jacob_weight = log(lim.max() / lim.min());

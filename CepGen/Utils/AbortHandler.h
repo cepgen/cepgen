@@ -30,7 +30,7 @@ namespace cepgen {
     /// Exception raised when the user terminates the process
     struct RunAbortedException : std::runtime_error {
       RunAbortedException() : std::runtime_error("CepGen run aborted") {}
-      ~RunAbortedException() noexcept { CG_INFO("RunAbortedException") << "Run aborted: " << what(); }
+      ~RunAbortedException() noexcept { CG_INFO("RunAbortedException") << "Run aborted by user interaction."; }
 
       const char* what() const noexcept override { return "User abort through C-c."; }
     };
