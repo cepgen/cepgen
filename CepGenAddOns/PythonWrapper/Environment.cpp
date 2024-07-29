@@ -34,23 +34,12 @@ namespace cepgen {
 
     Environment::Environment(const ParametersList& params) : SteeredObject(params) {
       const auto cepgen_path = fs::path(utils::env::get("CEPGEN_PATH", "."));
-      CG_DEBUG("python:Environment") << "CEPGEN_PATH set to " << cepgen_path << ".";
-      for (const auto& path :
-           std::vector<std::string>{cepgen_path,
-                                    cepgen_path / "python",
-                                    cepgen_path / "python_modules",
-                                    cepgen_path / "build" / "python",
-                                    cepgen_path / "build" / "python_modules",
-                                    fs::current_path(),
-                                    fs::current_path() / "python",
-                                    fs::current_path() / "python_modules",
-                                    fs::current_path().parent_path() / "python",
-                                    fs::current_path().parent_path() / "python_modules",
-                                    fs::current_path().parent_path().parent_path() / "python",
-                                    fs::current_path().parent_path().parent_path() / "python_modules",
-                                    "/usr/share/CepGen/python",
-                                    "/usr/share/CepGen/python_modules"})
-        utils::env::append("PYTHONPATH", path);
+      for (const auto& path : utils::env::searchPaths()) {
+        const auto fs_path = fs::path(path);
+        utils::env::append("PYTHONPATH", fs_path);
+        utils::env::append("PYTHONPATH", fs_path / "python");
+        utils::env::append("PYTHONPATH", fs_path / "python_modules");
+      }
       CG_DEBUG("Python:Environment") << "PYTHONPATH set to " << utils::env::get("PYTHONPATH") << ".";
 
 #if PY_VERSION_HEX >= 0x03080000
