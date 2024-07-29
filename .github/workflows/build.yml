@@ -82,7 +82,7 @@ jobs:
       working-directory: ${{ env.CEPGEN_PATH }}
       run: |
         echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
-        ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" -E "benchmark_|validation_" --output-on-failure --repeat until-pass:2
+        ctest -j 2 -C ${{ env.BUILD_TYPE }} -LE "unstable" -E "benchmark_|validation_" --output-on-failure --repeat until-pass:2
 
   benchmark:
     needs: build
@@ -103,7 +103,7 @@ jobs:
       working-directory: ${{ env.CEPGEN_PATH }}
       run: |
         echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
-        ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" -R "benchmark_*" --output-on-failure
+        ctest -j 2 -C ${{ env.BUILD_TYPE }} -LE "unstable" -R "benchmark_*" --output-on-failure
     - name: 'Compress environment'
       run: tar cvfz benchmark-environment.tar.gz /Package/*.html
     - name: 'Upload artifacts'
@@ -131,7 +131,7 @@ jobs:
       working-directory: ${{ env.CEPGEN_PATH }}
       run: |
         echo "PYTHONPATH=${{ env.CEPGEN_PATH }}:$PYTHONPATH" >> $GITHUB_ENV
-        ctest -C ${{ env.BUILD_TYPE }} -LE "unstable" -R "validation_*" --output-on-failure
+        ctest -j 2 -C ${{ env.BUILD_TYPE }} -LE "unstable" -R "validation_*" --output-on-failure
     - name: 'Compress environment'
       run: |
         tar cvfz validation-environment.tar.gz ${{ env.CEPGEN_PATH }}/validation/
