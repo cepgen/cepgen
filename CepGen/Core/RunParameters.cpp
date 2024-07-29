@@ -102,9 +102,17 @@ namespace cepgen {
     num_gen_events_++;
   }
 
-  proc::Process& RunParameters::process() { return *process_.get(); }
+  proc::Process& RunParameters::process() {
+    if (!process_)
+      throw CG_FATAL("RunParameters:process") << "Failed to retrieve a process configuration block.";
+    return *process_.get();
+  }
 
-  const proc::Process& RunParameters::process() const { return *process_.get(); }
+  const proc::Process& RunParameters::process() const {
+    if (!process_)
+      throw CG_FATAL("RunParameters:process") << "Failed to retrieve a process configuration block.";
+    return *process_.get();
+  }
 
   std::string RunParameters::processName() const {
     if (!process_)
