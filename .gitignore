@@ -7,5 +7,6 @@
 *.sh
 .idea/
 build/
+install/
 cmake-build*/
 docs/
