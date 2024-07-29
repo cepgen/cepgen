@@ -37,3 +37,4 @@ cepgen_build(CepGenPythia6 SOURCES *.cpp
     EXT_LIBS ${PYTHIA6LIB}
     OPTIONS "-Wno-misleading-indentation"
     INSTALL_COMPONENT pythia6)
+add_test(NAME pythia6_kt_hadr COMMAND ${CMAKE_BINARY_DIR}/test/generator/ktfactor_proc_hadronisation -H pythia6)
