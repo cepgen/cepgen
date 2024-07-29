@@ -16,7 +16,6 @@ include(CepGenVersion)
 
 option(CMAKE_BUILD_CORE "Build Core library" ON)
 option(CMAKE_BUILD_PROCESSES "Build physics processes" ON)
-option(CMAKE_BUILD_PROCESSES_EXAMPLES "... also build example processes" OFF)
 option(CMAKE_BUILD_ADDONS "Build AddOns" ON)
 option(CMAKE_BUILD_TESTS "Build tests" OFF)
 option(CMAKE_BUILD_FOAM "Build FOAM integrator" OFF)
