@@ -34,13 +34,12 @@ namespace cepgen::pythia8 {
 
   void EventInterface::initialise(const RunParameters& params) {
     params_ = &params;
-    inel1_ = !params_->kinematics().incomingBeams().positive().elastic();
-    inel2_ = !params_->kinematics().incomingBeams().negative().elastic();
-
-    setBeamA((short)params_->kinematics().incomingBeams().positive().integerPdgId(),
-             params_->kinematics().incomingBeams().positive().momentum().energy());
-    setBeamB((short)params_->kinematics().incomingBeams().negative().integerPdgId(),
-             params_->kinematics().incomingBeams().negative().momentum().energy());
+    const auto &pos_beam = params_->kinematics().incomingBeams().positive(),
+               &neg_beam = params_->kinematics().incomingBeams().negative();
+    inel1_ = !pos_beam.elastic();
+    inel2_ = !neg_beam.elastic();
+    setBeamA(pos_beam.integerPdgId(), pos_beam.momentum().energy());
+    setBeamB(neg_beam.integerPdgId(), neg_beam.momentum().energy());
   }
 
   void EventInterface::addComments(const std::string& comments) {
@@ -187,10 +186,9 @@ namespace cepgen::pythia8 {
                                                    const EventInterface::range_t& mothers,
                                                    const EventInterface::range_t& colours) {
     if (status == INVALID_ID) {
+      status = 1;
       if (const auto& ps = part.status(); ps == Particle::Status::Resonance || ps == Particle::Status::Fragmented)
         status = 2;
-      else
-        status = 1;
     }
     const auto py_id = sizePart();
     addCorresp(py_id, part.id());
@@ -240,17 +238,23 @@ namespace cepgen::pythia8 {
   }
 
   void EventInterface::checkPDGid(const Pythia8::Particle& part) {
-    if (cepgen::PDG::get().has(part.idAbs()))
+    checkPDGid(part.particleDataEntry());
+    auto& prop = PDG::get()[part.idAbs()];
+    prop.colours = part.col();  // colour factor
+  }
+
+  void EventInterface::checkPDGid(const Pythia8::ParticleDataEntry& data) {
+    if (cepgen::PDG::get().has(std::abs(data.id())))
       return;
     cepgen::ParticleProperties prop;
-    prop.pdgid = part.idAbs();
-    prop.name = prop.human_name = part.name();
-    prop.colours = part.col();  // colour factor
-    prop.mass = part.m0();
-    prop.width = part.mWidth();
-    if (const auto ch = int(part.charge() * 3.); std::abs(ch) > 0)
+    prop.pdgid = std::abs(data.id());
+    prop.name = prop.human_name = data.name();
+    prop.colours = data.colType();  // colour factor
+    prop.mass = data.m0();
+    prop.width = data.mWidth();
+    if (const short ch = data.charge() * 3; std::abs(ch) > 0)
       prop.charges = {ch, -ch};
-    prop.fermion = part.isLepton();
+    prop.fermion = data.isLepton();
     PDG::get().define(prop);
   }
 }  // namespace cepgen::pythia8
