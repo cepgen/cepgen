@@ -36,7 +36,7 @@ namespace cepgen::pythia8 {
     explicit Hadroniser(const ParametersList& plist)
         : cepgen::hadr::Hadroniser(plist),
           pythia_(new Pythia8::Pythia),
-          cg_evt_(new pythia8::EventInterface),
+          cg_evt_(new EventInterface),
           correct_central_(steer<bool>("correctCentralSystem")),
           debug_lhef_(steer<bool>("debugLHEF")),
           output_config_(steer<std::string>("outputConfig")) {}
@@ -71,14 +71,10 @@ namespace cepgen::pythia8 {
   private:
     void* enginePtr() override { return (void*)pythia_.get(); }
 
-    static constexpr unsigned short PYTHIA_STATUS_IN_BEAM = 12;
-    static constexpr unsigned short PYTHIA_STATUS_IN_PARTON_KT = 61;
-
     pdgids_t min_ids_;
-    std::unordered_map<short, short> py_cg_corresp_;
 
-    const std::unique_ptr<Pythia8::Pythia> pythia_;          ///< Pythia 8 core to be wrapped
-    const std::shared_ptr<pythia8::EventInterface> cg_evt_;  ///< Event interface between CepGen and Pythia
+    const std::unique_ptr<Pythia8::Pythia> pythia_;  ///< Pythia 8 core to be wrapped
+    const std::shared_ptr<EventInterface> cg_evt_;   ///< Event interface between CepGen and Pythia
 
     const bool correct_central_;
     const bool debug_lhef_;
@@ -86,7 +82,6 @@ namespace cepgen::pythia8 {
     bool res_decay_{true};
     bool enable_hadr_{false};
     unsigned short offset_{0};
-    bool first_evt_{true};
   };
 
   void Hadroniser::initialise() {
@@ -191,15 +186,8 @@ namespace cepgen::pythia8 {
     while (true) {  // run the hadronisation/fragmentation algorithm
       if (num_hadr_trials++ > max_trials_)
         return false;
-      if (pythia_->next()) {        // hadronisation successful
-        if (first_evt_ && !fast) {  // we build the association map between the CepGen and Pythia8 events
-          for (unsigned short i = 1; i < pythia_->event.size(); ++i)
-            if (pythia_->event[i].status() == -PYTHIA_STATUS_IN_BEAM)  // no incoming particles in later stages
-              offset_++;
-          first_evt_ = false;
-        }
+      if (pythia_->next())  // hadronisation successful
         break;
-      }
     }
     CG_DEBUG("pythia8:Hadroniser") << "Pythia8 hadronisation performed successfully.\n\t"
                                    << "Number of trials: " << num_hadr_trials << "/" << max_trials_ << ".\n\t"
@@ -208,7 +196,7 @@ namespace cepgen::pythia8 {
                                    << "  indices offset: " << offset_ << ".";
 
     cg_evt_->updateEvent(pythia_->event, ev, weight);  // update the event content with Pythia's output
-    CG_LOG << ev;
+    CG_LOG << "Event updated to:\n" << ev;
     return true;
   }
 }  // namespace cepgen::pythia8

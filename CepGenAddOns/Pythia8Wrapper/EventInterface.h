@@ -23,6 +23,8 @@
 
 #include <unordered_map>
 
+#include "CepGen/Physics/Momentum.h"
+
 namespace cepgen {
   class Event;
   class Particle;
@@ -36,7 +38,8 @@ namespace cepgen::pythia8 {
   public:
     explicit EventInterface();
 
-    static void checkPDGid(const Pythia8::Particle&);  ///< Register particle properties if not found
+    static void checkPDGid(const Pythia8::Particle&);           ///< Register particle properties if not found
+    static void checkPDGid(const Pythia8::ParticleDataEntry&);  ///< Register particle properties if not found
 
     /// Also store the remnants products?
     void storeRemnants(bool store_remn) { store_remnants_ = store_remn; }
