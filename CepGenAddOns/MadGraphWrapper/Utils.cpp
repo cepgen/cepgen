@@ -33,6 +33,8 @@
 #include "CepGenAddOns/PythonWrapper/ObjectPtr.h"
 #include "CepGenAddOns/PythonWrapper/Utils.h"
 
+using namespace std::string_literals;
+
 namespace cepgen {
   namespace mg5amc {
     ProcessParticles unpackProcessParticles(const std::string& proc) {
@@ -79,16 +81,23 @@ namespace cepgen {
           cmds.emplace_back("display particles " + part_name);
           std::string py_output;
           bool found_properties{false};
-          for (const auto& line : runCommand(cmds, "/tmp/mg5_aMC_part_query.dat", true)) {
+          for (auto line : runCommand(cmds, "/tmp/mg5_aMC_part_query.dat", true)) {
             if (!found_properties) {
               if (line.find("has the following properties") != std::string::npos)
                 found_properties = true;
               continue;
             }
+            if (utils::startsWith(utils::trim(line), "'spin(2s+1 format)'"))  // SUPER hacky...
+              line = utils::replaceAll(line,
+                                       {{"(2s+1 format)"s, ""s},
+                                        {/*1*/ " (scalar)"s, ""s},
+                                        {/*2*/ " (fermion)"s, ""s},
+                                        {/*3*/ " (vector)"s, ""s}});
             if (utils::startsWith(line, "exit"))
               break;
             py_output += line;
           }
+          CG_DEBUG("MadGraphInterface:describeParticle") << "Will unpack the following attributes:\n" << py_output;
           if (py_output.empty())
             throw CG_ERROR("MadGraphInterface:describeParticle")
                 << "No output retrieved from MadGraph command '" << cmds << "'. See the possible message output above.";
