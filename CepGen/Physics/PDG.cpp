@@ -46,13 +46,13 @@ namespace cepgen {
   bool PDG::has(spdgid_t id) const { return particles_.count(std::abs(id)) > 0; }
 
   const ParticleProperties& PDG::operator()(spdgid_t id) const {
-    auto it = particles_.find(std::abs(id));
-    if (it != particles_.end())
+    if (auto it = particles_.find(std::abs(id)); it != particles_.end())
       return it->second;
-    throw CG_FATAL("PDG").log([this, &id](auto& log) {
-      log << "No particle with PDG id " << id << " in the catalogue. ";
+    CG_DEBUG("PDG").log([this, &id](auto& log) {
+      log << "List of particles registered in the PDG runtime database:\n";
       dump(&log.stream());
     });
+    throw CG_ERROR("PDG") << "No particle with PDG id " << id << " in the catalogue.";
   }
 
   ParticleProperties& PDG::operator[](spdgid_t id) { return particles_[std::abs(id)]; }
