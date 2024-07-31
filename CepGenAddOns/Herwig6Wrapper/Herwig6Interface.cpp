@@ -20,6 +20,7 @@
 
 #include <cstdio>
 
+#include "CepGen/Utils/Filesystem.h"
 #include "CepGenAddOns/Herwig6Wrapper/Herwig6Interface.h"
 
 namespace {
@@ -39,7 +40,7 @@ namespace cepgen {
         return;
       {  // capture stdout to avoid "polluting" consumer code with unmanaged output
         int out = dup(fileno(stdout));
-        freopen("/tmp/herwig.log", "w", stdout);
+        freopen((fs::temp_directory_path() / "herwig.log").string().data(), "w", stdout);
         hwigin_();
         dup2(out, fileno(stdout));
         close(out);

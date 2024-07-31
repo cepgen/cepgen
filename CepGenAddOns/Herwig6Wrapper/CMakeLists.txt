@@ -1,6 +1,6 @@
 #--- searching for Herwig 6
 set(HERWIG6_DIRS ${CMAKE_CURRENT_BINARY_DIR} $ENV{HERWIG6_DIR} /usr /usr/local /opt/herwig6)
-find_library(HERWIG6 herwig6 HINTS ${HERWIG6_DIRS} PATH_SUFFIXES lib)
+find_library(HERWIG6 NAMES herwig6 herwig herwig_pdfdummy HINTS ${HERWIG6_DIRS} PATH_SUFFIXES lib)
 
 if(NOT HERWIG6)
   file(GLOB HERWIG6_SRC ${PROJECT_SOURCE_DIR}/External/herwig65*.f)

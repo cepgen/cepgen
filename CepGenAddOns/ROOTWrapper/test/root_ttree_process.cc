@@ -37,7 +37,8 @@ int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("keep-file,k", "keep the output TTree", &keep_file, false)
       .addOptionalArgument("process,p", "process to generate", &proc_name, "lpair")
-      .addOptionalArgument("filename,f", "temporary filename", &tmp_filename, "/tmp/cepgen_test.root")
+      .addOptionalArgument(
+          "filename,f", "temporary filename", &tmp_filename, fs::temp_directory_path() / "cepgen_test.root")
       .addOptionalArgument("num-gen,n", "number of events to generate", &num_gen, 10)
       .parse();
 

@@ -304,12 +304,12 @@ namespace cepgen {
     auto desc = ParametersDescription();
     desc.add<std::string>("process", "").setDescription("MadGraph_aMC process definition");
     desc.add<std::string>("model", "sm-full").setDescription("MadGraph_aMC model name");
-    desc.add<std::string>("cardPath", "/tmp/cepgen_mg5_input.dat")
+    desc.add<std::string>("cardPath", fs::temp_directory_path() / "cepgen_mg5_input.dat")
         .setDescription("Temporary file where to store the input card for MadGraph_aMC");
     desc.add<std::string>("standaloneCppPath", "");
-    desc.add<std::string>("tmpDir", "/tmp/cepgen_mg5_aMC")
+    desc.add<std::string>("tmpDir", fs::temp_directory_path() / "cepgen_mg5_aMC")
         .setDescription("Temporary path where to store the MadGraph_aMC process definition files");
-    desc.add<std::string>("logFile", "/tmp/cepgen_mg5_aMC.log")
+    desc.add<std::string>("logFile", fs::temp_directory_path() / "cepgen_mg5_aMC.log")
         .setDescription("Temporary path where to store the log for this run");
     desc.add<ParametersDescription>("extraParticles", ParametersDescription())
         .setDescription("define internal MadGraph alias for a particle name");

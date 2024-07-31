@@ -81,7 +81,7 @@ namespace cepgen {
           cmds.emplace_back("display particles " + part_name);
           std::string py_output;
           bool found_properties{false};
-          for (auto line : runCommand(cmds, "/tmp/mg5_aMC_part_query.dat", true)) {
+          for (auto line : runCommand(cmds, fs::temp_directory_path() / "mg5_aMC_part_query.dat", true)) {
             if (!found_properties) {
               if (line.find("has the following properties") != std::string::npos)
                 found_properties = true;
