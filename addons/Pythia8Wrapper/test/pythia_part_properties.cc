@@ -21,27 +21,35 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Test.h"
-#include "CepGenAddOns/Pythia8Wrapper/EventInterface.h"
+#include "CepGenPythia8/EventInterface.h"
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
   vector<int> pdgids;
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("particles,p", "list of PDGids to probe", &pdgids, vector<int>{321, 13, 17, 42})
+      .addOptionalArgument("particles,p", "list of PDGids to probe", &pdgids, vector<int>{})
       .parse();
   //cepgen::initialise();  // do not initialise to fetch attributes from Pythia directly!
   auto pythia8 = make_unique<Pythia8::Pythia>();
+  if (pdgids.empty())
+    for (const auto& pd : pythia8->particleData)
+      if (pd.first != 0)
+        pdgids.emplace_back(pd.first);
   for (const auto& pdgid : pdgids) {
     {
+      if (cepgen::PDG::get().has(pdgid))  // skip particles already defined natively by CepGen
+        continue;
       auto unknown_pdgid = [&pdgid]() { cepgen::PDG::get()(pdgid); };
       CG_TEST_EXCEPT(unknown_pdgid, "unknown PDG id [" + to_string(pdgid) + "]");
     }
 
     if (auto data = pythia8->particleData.findParticle(pdgid); data) {
       cepgen::pythia8::EventInterface::checkPDGid(*data);
-      CG_TEST(!cepgen::PDG::get().name(pdgid).empty(), "valid name [" + to_string(pdgid) + "]");
-      CG_TEST(cepgen::PDG::get().mass(pdgid) >= 0., "valid mass [" + to_string(pdgid) + "]");
+      const auto name = cepgen::PDG::get().name(pdgid);
+      CG_TEST(!name.empty(), "valid name [" + to_string(pdgid) + "=" + name + "]");
+      const auto mass = cepgen::PDG::get().mass(pdgid);
+      CG_TEST(mass >= 0., "valid mass [" + to_string(pdgid) + "=" + to_string(mass) + "]");
     }
   }
 
