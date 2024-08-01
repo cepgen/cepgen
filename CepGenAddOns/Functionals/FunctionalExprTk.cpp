@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2020-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,39 +23,37 @@
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/String.h"
 
-namespace cepgen {
-  namespace utils {
-    class FunctionalExprTk final : public Functional {
-    public:
-      explicit FunctionalExprTk(const ParametersList&);
-      double eval() const override;
+namespace cepgen::utils {
+  class FunctionalExprTk final : public Functional {
+  public:
+    explicit FunctionalExprTk(const ParametersList&);
+    double eval() const override;
 
-      static ParametersDescription description();
+    static ParametersDescription description();
 
-    private:
-      exprtk::symbol_table<double> symbols_;
-      exprtk::expression<double> expr_;
-      exprtk::parser<double> parser_;
-    };
+  private:
+    exprtk::symbol_table<double> symbols_;
+    exprtk::expression<double> expr_;
+    exprtk::parser<double> parser_;
+  };
 
-    FunctionalExprTk::FunctionalExprTk(const ParametersList& params) : Functional(params) {
-      for (size_t i = 0; i < vars_.size(); ++i)
-        symbols_.add_variable(vars_[i], values_[i]);
-      symbols_.add_constants();
-      expr_.register_symbol_table(symbols_);
-      auto expr = replaceAll(expression_, {{"**", "^"}});
-      if (!parser_.compile(expr, expr_))
-        throw CG_WARNING("FunctionalExprTk") << "Failed to compile expression \"" << expression() << "\".";
-    }
+  FunctionalExprTk::FunctionalExprTk(const ParametersList& params) : Functional(params) {
+    for (size_t i = 0; i < vars_.size(); ++i)
+      symbols_.add_variable(vars_[i], values_[i]);
+    symbols_.add_constants();
+    expr_.register_symbol_table(symbols_);
+    auto expr = replaceAll(expression_, {{"**", "^"}});
+    if (!parser_.compile(expr, expr_))
+      throw CG_WARNING("FunctionalExprTk") << "Failed to compile expression \"" << expression() << "\".";
+  }
 
-    double FunctionalExprTk::eval() const { return expr_.value(); }
+  double FunctionalExprTk::eval() const { return expr_.value(); }
 
-    ParametersDescription FunctionalExprTk::description() {
-      auto desc = Functional::description();
-      desc.setDescription("ExprTk functional evaluator");
-      return desc;
-    }
-  }  // namespace utils
-}  // namespace cepgen
-typedef cepgen::utils::FunctionalExprTk ExprTkFunctional;
-REGISTER_FUNCTIONAL("ExprTk", ExprTkFunctional);
+  ParametersDescription FunctionalExprTk::description() {
+    auto desc = Functional::description();
+    desc.setDescription("ExprTk functional evaluator");
+    return desc;
+  }
+}  // namespace cepgen::utils
+using cepgen::utils::FunctionalExprTk;
+REGISTER_FUNCTIONAL("ExprTk", FunctionalExprTk);

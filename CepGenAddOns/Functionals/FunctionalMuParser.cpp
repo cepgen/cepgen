@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2020-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,20 +22,10 @@
 #include "CepGen/Modules/FunctionalFactory.h"
 #include "CepGen/Utils/Functional.h"
 
-namespace cepgen {
-  namespace utils {
-    class FunctionalMuParser final : public Functional {
-    public:
-      explicit FunctionalMuParser(const ParametersList&);
-      double eval() const override;
-
-      static ParametersDescription description();
-
-    private:
-      mu::Parser parser_;
-    };
-
-    FunctionalMuParser::FunctionalMuParser(const ParametersList& params) : Functional(params) {
+namespace cepgen::utils {
+  class FunctionalMuParser final : public Functional {
+  public:
+    explicit FunctionalMuParser(const ParametersList& params) : Functional(params) {
       try {
         for (size_t i = 0; i < vars_.size(); ++i)
           parser_.DefineVar(vars_[i], &values_[i]);
@@ -47,7 +37,13 @@ namespace cepgen {
       }
     }
 
-    double FunctionalMuParser::eval() const {
+    static ParametersDescription description() {
+      auto desc = Functional::description();
+      desc.setDescription("MuParser functional evaluator");
+      return desc;
+    }
+
+    inline double eval() const override {
       try {
         return parser_.Eval();
       } catch (const mu::Parser::exception_type& e) {
@@ -57,12 +53,9 @@ namespace cepgen {
       }
     }
 
-    ParametersDescription FunctionalMuParser::description() {
-      auto desc = Functional::description();
-      desc.setDescription("MuParser functional evaluator");
-      return desc;
-    }
-  }  // namespace utils
-}  // namespace cepgen
-typedef cepgen::utils::FunctionalMuParser MuParserFunctional;
-REGISTER_FUNCTIONAL("MuParser", MuParserFunctional);
+  private:
+    mu::Parser parser_;
+  };
+}  // namespace cepgen::utils
+using cepgen::utils::FunctionalMuParser;
+REGISTER_FUNCTIONAL("MuParser", FunctionalMuParser);
