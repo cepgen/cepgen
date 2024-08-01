@@ -25,44 +25,42 @@
 #define LHAPDF_GE_6 1
 #endif
 
-namespace cepgen {
-  namespace lhapdf {
-    /// A perturbative PDF-oriented \f$\alpha_S(Q^2)\f$ evaluator
-    class AlphaS final : public Coupling {
-    public:
-      explicit AlphaS(const ParametersList& params)
-          : Coupling(params)
+namespace cepgen::lhapdf {
+  /// A perturbative PDF-oriented \f$\alpha_S(Q^2)\f$ evaluator
+  class AlphaS final : public Coupling {
+  public:
+    explicit AlphaS(const ParametersList& params)
+        : Coupling(params)
 #ifdef LHAPDF_GE_6
-            ,
-            lhapdf_(LHAPDF::mkPDF(steer<std::string>("pdfSet"), steer<int>("pdfMember"))) {
-      }
+          ,
+          lhapdf_(LHAPDF::mkPDF(steer<std::string>("pdfSet"), steer<int>("pdfMember"))) {
+    }
 #else
-      {
-        LHAPDF::initPDFSet(steer<std::string>("pdfSet"), LHAPDF::LHGRID, steer<int>("pdfMember"));
-      }
+    {
+      LHAPDF::initPDFSet(steer<std::string>("pdfSet"), LHAPDF::LHGRID, steer<int>("pdfMember"));
+    }
 #endif
-      static ParametersDescription description() {
-        auto desc = Coupling::description();
-        desc.setDescription("LHAPDF pert.PDF-orient.evol.algo.");
-        desc.add<std::string>("pdfSet", "cteq66");
-        desc.add<int>("pdfMember", 0);
-        return desc;
-      }
+    static ParametersDescription description() {
+      auto desc = Coupling::description();
+      desc.setDescription("LHAPDF pert.PDF-orient.evol.algo.");
+      desc.add<std::string>("pdfSet", "cteq66");
+      desc.add<int>("pdfMember", 0);
+      return desc;
+    }
 
-      double operator()(double q) const override {
+    double operator()(double q) const override {
 #ifdef LHAPDF_GE_6
-        return lhapdf_->alphasQ(q);
+      return lhapdf_->alphasQ(q);
 #else
-        return LHAPDF::alphasPDF(q);
+      return LHAPDF::alphasPDF(q);
 #endif
-      }
+    }
 
-    private:
+  private:
 #ifdef LHAPDF_GE_6
-      const std::unique_ptr<LHAPDF::PDF> lhapdf_;
+    const std::unique_ptr<LHAPDF::PDF> lhapdf_;
 #endif
-    };
-  }  // namespace lhapdf
-}  // namespace cepgen
+  };
+}  // namespace cepgen::lhapdf
 using AlphaSLHAPDF = cepgen::lhapdf::AlphaS;
 REGISTER_ALPHAS_MODULE("lhapdf", AlphaSLHAPDF);

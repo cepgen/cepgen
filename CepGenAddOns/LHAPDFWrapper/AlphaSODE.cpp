@@ -24,34 +24,32 @@
 
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
 
-namespace cepgen {
-  namespace lhapdf {
-    /// A perturbative PDF-oriented \f$\alpha_S(Q^2)\f$ evaluator
-    class AlphaSODE final : public Coupling {
-    public:
-      explicit AlphaSODE(const ParametersList& params) : Coupling(params), ode_(new LHAPDF::AlphaS_ODE) {
-        ode_->setOrderQCD(steer<int>("order"));
-        ode_->setAlphaSMZ(steer<double>("alphaSMZ"));
-        ode_->setMZ(PDG::get().mass(23));  // set Z mass
-        for (int i = 1; i <= 6; ++i)       // set all quarks masses
-          ode_->setQuarkMass(i, PDG::get().mass(i));
-      }
+namespace cepgen::lhapdf {
+  /// A perturbative PDF-oriented \f$\alpha_S(Q^2)\f$ evaluator
+  class AlphaSODE final : public Coupling {
+  public:
+    explicit AlphaSODE(const ParametersList& params) : Coupling(params), ode_(new LHAPDF::AlphaS_ODE) {
+      ode_->setOrderQCD(steer<int>("order"));
+      ode_->setAlphaSMZ(steer<double>("alphaSMZ"));
+      ode_->setMZ(PDG::get().mass(23));  // set Z mass
+      for (int i = 1; i <= 6; ++i)       // set all quarks masses
+        ode_->setQuarkMass(i, PDG::get().mass(i));
+    }
 
-      static ParametersDescription description() {
-        auto desc = Coupling::description();
-        desc.setDescription("ODE LHAPDF evol.algo.");
-        desc.add<int>("order", 5).setDescription("QCD order");
-        desc.add<double>("alphaSMZ", 0.118);
-        return desc;
-      }
+    static ParametersDescription description() {
+      auto desc = Coupling::description();
+      desc.setDescription("ODE LHAPDF evol.algo.");
+      desc.add<int>("order", 5).setDescription("QCD order");
+      desc.add<double>("alphaSMZ", 0.118);
+      return desc;
+    }
 
-      double operator()(double q) const override { return ode_->alphasQ(q); }
+    double operator()(double q) const override { return ode_->alphasQ(q); }
 
-    private:
-      std::unique_ptr<LHAPDF::AlphaS_ODE> ode_;
-    };
-  }  // namespace lhapdf
-}  // namespace cepgen
+  private:
+    const std::unique_ptr<LHAPDF::AlphaS_ODE> ode_;
+  };
+}  // namespace cepgen::lhapdf
 using AlphaSLHAPDFODE = cepgen::lhapdf::AlphaSODE;
 REGISTER_ALPHAS_MODULE("lhapdfODE", AlphaSLHAPDFODE);
 

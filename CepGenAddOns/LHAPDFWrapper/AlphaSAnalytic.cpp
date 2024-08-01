@@ -24,37 +24,35 @@
 
 #if defined LHAPDF_MAJOR_VERSION && LHAPDF_MAJOR_VERSION == 6
 
-namespace cepgen {
-  namespace lhapdf {
-    /// A perturbative PDF-oriented \f$\alpha_S(Q^2)\f$ evaluator
-    class AlphaSAnalytic final : public Coupling {
-    public:
-      explicit AlphaSAnalytic(const ParametersList& params) : Coupling(params), ana_(new LHAPDF::AlphaS_Analytic) {
-        ana_->setOrderQCD(steer<int>("order"));
-        for (int i = 1; i <= 6; ++i)  // set all quarks masses for evolution
-          ana_->setQuarkMass(i, PDG::get().mass(i));
-        // set gradients for evolution
-        size_t i = 3;
-        for (const auto& lambda : steer<std::vector<double> >("lambdas"))
-          ana_->setLambda(i++, lambda);
-      }
+namespace cepgen::lhapdf {
+  /// A perturbative PDF-oriented \f$\alpha_S(Q^2)\f$ evaluator
+  class AlphaSAnalytic final : public Coupling {
+  public:
+    explicit AlphaSAnalytic(const ParametersList& params) : Coupling(params), ana_(new LHAPDF::AlphaS_Analytic) {
+      ana_->setOrderQCD(steer<int>("order"));
+      for (int i = 1; i <= 6; ++i)  // set all quarks masses for evolution
+        ana_->setQuarkMass(i, PDG::get().mass(i));
+      // set gradients for evolution
+      size_t i = 3;
+      for (const auto& lambda : steer<std::vector<double> >("lambdas"))
+        ana_->setLambda(i++, lambda);
+    }
 
-      static ParametersDescription description() {
-        auto desc = Coupling::description();
-        desc.setDescription("Analytic LHAPDF perturb.algo.");
-        desc.add<std::string>("pdfSet", "cteq66");
-        desc.add<int>("order", 4).setDescription("QCD order");
-        desc.add<std::vector<double> >("lambdas", {0.339, 0.296, 0.213});
-        return desc;
-      }
+    static ParametersDescription description() {
+      auto desc = Coupling::description();
+      desc.setDescription("Analytic LHAPDF perturb.algo.");
+      desc.add<std::string>("pdfSet", "cteq66");
+      desc.add<int>("order", 4).setDescription("QCD order");
+      desc.add<std::vector<double> >("lambdas", {0.339, 0.296, 0.213});
+      return desc;
+    }
 
-      double operator()(double q) const override { return ana_->alphasQ(q); }
+    double operator()(double q) const override { return ana_->alphasQ(q); }
 
-    private:
-      std::unique_ptr<LHAPDF::AlphaS_Analytic> ana_;
-    };
-  }  // namespace lhapdf
-}  // namespace cepgen
+  private:
+    const std::unique_ptr<LHAPDF::AlphaS_Analytic> ana_;
+  };
+}  // namespace cepgen::lhapdf
 using AlphaSLHAPDFAnalytic = cepgen::lhapdf::AlphaSAnalytic;
 REGISTER_ALPHAS_MODULE("lhapdfAnalytic", AlphaSLHAPDFAnalytic);
 
