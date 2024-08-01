@@ -28,29 +28,30 @@ namespace cepgen {
   namespace utils {
     class RandomGenerator;
   }
-  namespace pythia6 {
-    /// Interface to the Pythia 6 event content.
-    class EventInterface {
-    public:
-      explicit EventInterface(Event&, mode::Kinematics, utils::RandomGenerator*);
-
-      void prepareHadronisation();
-      size_t numStrings() const { return evt_strings_.size(); }
-      void run();
-
-    private:
-      void fillEventBlock();
-
-      Event& evt_;                   // NOT owning
-      utils::RandomGenerator* rnd_;  ///< Random number generator engine (not owning)
-      std::vector<Particle::Role> roles_;
-
-      std::pair<short, short> pickPartonsContent();
-
-      using string_t = std::vector<int>;
-      std::vector<string_t> evt_strings_;
-    };
-  }  // namespace pythia6
 }  // namespace cepgen
+
+namespace cepgen::pythia6 {
+  /// Interface to the Pythia 6 event content.
+  class EventInterface {
+  public:
+    explicit EventInterface(Event&, mode::Kinematics, utils::RandomGenerator*);
+
+    void prepareHadronisation();  ///< Add/edit event attributes to prepare for its fragmentation/hadronisation
+    size_t numStrings() const { return evt_strings_.size(); }  ///< Number of string-bound partons in the event
+    void run();                                                ///< Run the fragmentation/hadronisation algorithm
+
+  private:
+    void fillEventBlock();
+
+    Event& evt_;                   // NOT owning
+    utils::RandomGenerator* rnd_;  ///< Random number generator engine (not owning)
+    std::vector<Particle::Role> roles_;
+
+    std::pair<short, short> pickPartonsContent();
+
+    using string_t = std::vector<int>;
+    std::vector<string_t> evt_strings_;
+  };
+}  // namespace cepgen::pythia6
 
 #endif

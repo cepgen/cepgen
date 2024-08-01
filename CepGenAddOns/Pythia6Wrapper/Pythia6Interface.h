@@ -40,29 +40,27 @@ extern struct {
 } pydat1_;
 }
 
-namespace cepgen {
-  /// Pythia 6 utilities namespace
-  namespace pythia6 {
-    int pythia6Status(int);
-    int cepgenStatus(int);
-    void checkPDGid(int);
+/// Pythia 6 utilities namespace
+namespace cepgen::pythia6 {
+  int pythia6Status(int);
+  int cepgenStatus(int);
+  void checkPDGid(int);
 
-    double pyalem(double);
-    double pyalps(double);
-    void pyckbd();
-    void pyexec();
-    void pygive(const std::string&);
-    /// Connect entries with colour flow information
-    /// \param[in] join List of particles unique identifier to join in the colour flow
-    void pyjoin(std::vector<int> join);
-    int pyk(int id, int qty);
-    void pylist(int mlist);
-    double pymass(int pdgid_);
-    std::string pyname(int pdgid);
-    double pyp(int id, int qty);
-    inline static int& mstu(size_t i) { return pydat1_.mstu.at(i - 1); }
-    inline static double& paru(size_t i) { return pydat1_.paru.at(i - 1); }
-  }  // namespace pythia6
-}  // namespace cepgen
+  double pyalem(double);
+  double pyalps(double);
+  void pyckbd();
+  void pyexec();
+  void pygive(const std::string&);
+  /// Connect entries with colour flow information
+  /// \param[in] join List of particles unique identifier to join in the colour flow
+  void pyjoin(std::vector<int> join);
+  int pyk(int id, int qty);
+  void pylist(int mlist);
+  double pymass(int pdgid_);
+  std::string pyname(int pdgid);
+  double pyp(int id, int qty);
+  inline static int& mstu(size_t i) { return pydat1_.mstu.at(i - 1); }
+  inline static double& paru(size_t i) { return pydat1_.paru.at(i - 1); }
+}  // namespace cepgen::pythia6
 
 #endif
