@@ -24,26 +24,27 @@
 namespace cepgen {
   class RunParameters;
   class ParametersDescription;
-  namespace python {
-    /// Toolbox to dump user-steered configuration into Python scripts
-    class ConfigWriter final : public SteeredObject<ConfigWriter> {
-    public:
-      ConfigWriter(const ParametersList&);
-      ~ConfigWriter();
-
-      static ParametersDescription description();
-
-      ConfigWriter& operator<<(const RunParameters&);          ///< Feed a full run parameters block
-      ConfigWriter& operator<<(const ParametersDescription&);  ///< Feed a single parameters description object
-
-      std::string operator()() const;  ///< Retrieve the configuration as a string
-
-    private:
-      inline std::string offset(size_t num) { return std::string(num * tab_len_, ' '); }  ///< Compute a char-offset
-      mutable std::ostringstream os_;
-      const size_t tab_len_;
-    };
-  }  // namespace python
 }  // namespace cepgen
+
+namespace cepgen::python {
+  /// Toolbox to dump user-steered configuration into Python scripts
+  class ConfigWriter final : public SteeredObject<ConfigWriter> {
+  public:
+    ConfigWriter(const ParametersList&);
+    ~ConfigWriter();
+
+    static ParametersDescription description();
+
+    ConfigWriter& operator<<(const RunParameters&);          ///< Feed a full run parameters block
+    ConfigWriter& operator<<(const ParametersDescription&);  ///< Feed a single parameters description object
+
+    std::string operator()() const;  ///< Retrieve the configuration as a string
+
+  private:
+    inline std::string offset(size_t num) { return std::string(num * tab_len_, ' '); }  ///< Compute a char-offset
+    mutable std::ostringstream os_;
+    const size_t tab_len_;
+  };
+}  // namespace cepgen::python
 
 #endif

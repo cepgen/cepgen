@@ -20,39 +20,37 @@
 #include "CepGen/Utils/DocumentationGenerator.h"
 #include "CepGenAddOns/PythonWrapper/ConfigWriter.h"
 
-namespace cepgen {
-  namespace python {
-    /// Python modules documentation generator
-    /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
-    /// \date Mar 2024
-    class DocumentationGenerator final : public cepgen::utils::DocumentationGenerator {
-    public:
-      explicit DocumentationGenerator(const ParametersList& params)
-          : cepgen::utils::DocumentationGenerator(params), writer_(params_) {}
+namespace cepgen::python {
+  /// Python modules documentation generator
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date Mar 2024
+  class DocumentationGenerator final : public cepgen::utils::DocumentationGenerator {
+  public:
+    explicit DocumentationGenerator(const ParametersList& params)
+        : cepgen::utils::DocumentationGenerator(params), writer_(params_) {}
 
-      static ParametersDescription description() {
-        auto desc = cepgen::utils::DocumentationGenerator::description();
-        desc.setDescription("Python modules documentation generator");
-        desc += ConfigWriter::description();
-        desc.add<std::string>("filename", "output.py").setDescription("Python output filename");
-        desc.add<bool>("camelCaseModuleNames", true);
-        return desc;
+    static ParametersDescription description() {
+      auto desc = cepgen::utils::DocumentationGenerator::description();
+      desc.setDescription("Python modules documentation generator");
+      desc += ConfigWriter::description();
+      desc.add<std::string>("filename", "output.py").setDescription("Python output filename");
+      desc.add<bool>("camelCaseModuleNames", true);
+      return desc;
+    }
+
+    std::string describe() override {
+      for (const auto& cat : categories_) {
+        if (cat.second.modules.empty())
+          continue;
+        for (const auto& mod : cat.second.modules)
+          writer_ << mod.second;
       }
+      return writer_();
+    }
 
-      std::string describe() override {
-        for (const auto& cat : categories_) {
-          if (cat.second.modules.empty())
-            continue;
-          for (const auto& mod : cat.second.modules)
-            writer_ << mod.second;
-        }
-        return writer_();
-      }
-
-    private:
-      ConfigWriter writer_;
-    };
-  }  // namespace python
-}  // namespace cepgen
+  private:
+    ConfigWriter writer_;
+  };
+}  // namespace cepgen::python
 using cepgen::python::DocumentationGenerator;
 REGISTER_DOCUMENTATION_GENERATOR("python", DocumentationGenerator);

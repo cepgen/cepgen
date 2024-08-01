@@ -25,62 +25,60 @@
 #include "CepGenAddOns/PythonWrapper/Error.h"
 #include "CepGenAddOns/PythonWrapper/Utils.h"
 
-namespace cepgen {
-  namespace python {
-    class Integrator final : public cepgen::Integrator {
-    public:
-      explicit Integrator(const ParametersList& params)
-          : cepgen::Integrator(params), env_(ParametersList().setName("python_integrator")) {
-        auto cfg = ObjectPtr::importModule(steer<std::string>("module"));
-        if (!cfg)
-          throw PY_ERROR << "Failed to import the Python module '" << steer<std::string>("module") << "'.";
-        if (func_ = cfg.attribute("integrate"); !func_ || !PyCallable_Check(func_.get()))
-          throw PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";
-      }
+namespace cepgen::python {
+  class Integrator final : public cepgen::Integrator {
+  public:
+    explicit Integrator(const ParametersList& params)
+        : cepgen::Integrator(params), env_(ParametersList().setName("python_integrator")) {
+      auto cfg = ObjectPtr::importModule(steer<std::string>("module"));
+      if (!cfg)
+        throw PY_ERROR << "Failed to import the Python module '" << steer<std::string>("module") << "'.";
+      if (func_ = cfg.attribute("integrate"); !func_ || !PyCallable_Check(func_.get()))
+        throw PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";
+    }
 
-      void setLimits(const std::vector<Limits>& lims) override { lims_ = ObjectPtr::make(lims); }
+    void setLimits(const std::vector<Limits>& lims) override { lims_ = ObjectPtr::make(lims); }
 
-      Value integrate(Integrand& integrand) override {
-        gIntegrand = &integrand;
-        const auto iterations = steer<int>("iterations");
-        const auto evals = steer<int>("evals");
-        PyMethodDef py_integr = {"integrand", py_integrand, METH_VARARGS, "A python-wrapped integrand"};
-        ObjectPtr function(PyCFunction_NewEx(&py_integr, nullptr, ObjectPtr::make<std::string>("integrand").get()));
-        const auto value = lims_ ? func_(function.get(), (int)integrand.size(), iterations, 1000, evals, lims_.get())
-                                 : func_(function.get(), (int)integrand.size(), iterations, 1000, evals);
-        if (!value)
-          throw PY_ERROR;
-        const auto vals = value.vector<double>();
-        if (vals.size() < 2)
-          throw CG_FATAL("python:Integrator")
-              << "Wrong multiplicity of result returned from Python's integration algorithm: " << vals << ".";
+    Value integrate(Integrand& integrand) override {
+      gIntegrand = &integrand;
+      const auto iterations = steer<int>("iterations");
+      const auto evals = steer<int>("evals");
+      PyMethodDef py_integr = {"integrand", py_integrand, METH_VARARGS, "A python-wrapped integrand"};
+      ObjectPtr function(PyCFunction_NewEx(&py_integr, nullptr, ObjectPtr::make<std::string>("integrand").get()));
+      const auto value = lims_ ? func_(function.get(), (int)integrand.size(), iterations, 1000, evals, lims_.get())
+                               : func_(function.get(), (int)integrand.size(), iterations, 1000, evals);
+      if (!value)
+        throw PY_ERROR;
+      const auto vals = value.vector<double>();
+      if (vals.size() < 2)
+        throw CG_FATAL("python:Integrator")
+            << "Wrong multiplicity of result returned from Python's integration algorithm: " << vals << ".";
 
-        return Value{vals[0], vals[1]};
-      }
+      return Value{vals[0], vals[1]};
+    }
 
-      static ParametersDescription description() {
-        auto desc = cepgen::Integrator::description();
-        desc.setDescription("Python integration algorithm");
-        desc.add<std::string>("module", "IntegrationAlgos.Vegas")
-            .setDescription("name of the Python module embedding the integrate() function");
-        desc.add<int>("iterations", 10);
-        desc.add<int>("evals", 1000);
-        return desc;
-      }
-      static Integrand* gIntegrand;
+    static ParametersDescription description() {
+      auto desc = cepgen::Integrator::description();
+      desc.setDescription("Python integration algorithm");
+      desc.add<std::string>("module", "IntegrationAlgos.Vegas")
+          .setDescription("name of the Python module embedding the integrate() function");
+      desc.add<int>("iterations", 10);
+      desc.add<int>("evals", 1000);
+      return desc;
+    }
+    static Integrand* gIntegrand;
 
-    private:
-      Environment env_;
-      ObjectPtr func_{nullptr}, lims_{nullptr};
-      static PyObject* py_integrand(PyObject* /*self*/, PyObject* args) {
-        if (!gIntegrand)
-          throw CG_FATAL("python:Integrator") << "Integrand was not initialised.";
-        const auto c_args = ObjectPtr::wrap(PyTuple_GetItem(args, 0)).vector<double>();
-        return ObjectPtr::make<double>(gIntegrand->eval(c_args)).release();
-      }
-    };
-    Integrand* Integrator::gIntegrand = nullptr;
-  }  // namespace python
-}  // namespace cepgen
+  private:
+    Environment env_;
+    ObjectPtr func_{nullptr}, lims_{nullptr};
+    static PyObject* py_integrand(PyObject* /*self*/, PyObject* args) {
+      if (!gIntegrand)
+        throw CG_FATAL("python:Integrator") << "Integrand was not initialised.";
+      const auto c_args = ObjectPtr::wrap(PyTuple_GetItem(args, 0)).vector<double>();
+      return ObjectPtr::make<double>(gIntegrand->eval(c_args)).release();
+    }
+  };
+  Integrand* Integrator::gIntegrand = nullptr;
+}  // namespace cepgen::python
 using PythonIntegrator = cepgen::python::Integrator;
 REGISTER_INTEGRATOR("python", PythonIntegrator);

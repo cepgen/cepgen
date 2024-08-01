@@ -29,161 +29,158 @@
 
 using namespace std::string_literals;
 
-namespace cepgen {
-  namespace python {
-    static std::string repr(const ParametersList& params, const std::string& key) {
-      if (params.has<bool>(key))
-        return params.get<bool>(key) ? "True" : "False";
-      else if (params.has<int>(key))
-        return "int(" + std::to_string(params.get<int>(key)) + ")";
-      else if (params.has<unsigned long long>(key))
-        return "int(" + std::to_string(params.get<unsigned long long>(key)) + ")";
-      else if (params.has<std::string>(key))
-        return "'" + utils::replaceAll(params.get<std::string>(key), "'", "\\'") + "'";
-      else if (params.has<Limits>(key)) {
-        const auto lim = params.get<Limits>(key);
-        return "("s + std::to_string(lim.min()) + "," + (lim.hasMax() ? std::to_string(lim.max()) : "") + ")";
-      } else if (params.has<std::vector<Limits> >(key)) {
-        std::string out{"["}, sep;
-        for (const auto& lim : params.get<std::vector<Limits> >(key))
-          out += sep + "("s + std::to_string(lim.min()) + "," + (lim.hasMax() ? std::to_string(lim.max()) : "") + ")",
-              sep = ", ";
-        return out + "]";
-      } else if (params.has<std::vector<int> >(key))
-        return "["s + utils::repr(params.get<std::vector<int> >(key), ", ") + "]";
-      else if (params.has<std::vector<double> >(key))
-        return "["s + utils::repr(params.get<std::vector<double> >(key), ", ") + "]";
-      else if (params.has<std::vector<std::vector<double> > >(key)) {
-        std::string out{"["}, sep;
-        for (const auto& vec : params.get<std::vector<std::vector<double> > >(key))
-          out += sep + utils::repr(vec, ", "), sep = ", ";
-        return out + "]";
-      } else if (params.has<std::vector<std::string> >(key))
-        return "["s + utils::repr(params.get<std::vector<std::string> >(key), ", ") + "]";
-      else if (params.has<ParametersList>(key)) {
-        const auto plist = params.get<ParametersList>(key);
-        return (plist.hasName() ? "cepgen.Module(\'" + plist.name() + "\'" : "cepgen.Parameters(") + repr(plist, key) +
-               ")";
-      } else if (params.has<std::vector<ParametersList> >(key)) {
-        std::string out{"["}, sep;
-        for (const auto& param : params.get<std::vector<ParametersList> >(key)) {
-          out += sep + "cepgen.Parameters(";
-          for (const auto& key : param.keys())
-            out += key + " = " + repr(param, key);
-          out += ")";
-          sep = ", ";
-        }
-        return out + "]";
+namespace cepgen::python {
+  static std::string repr(const ParametersList& params, const std::string& key) {
+    if (params.has<bool>(key))
+      return params.get<bool>(key) ? "True" : "False";
+    else if (params.has<int>(key))
+      return "int(" + std::to_string(params.get<int>(key)) + ")";
+    else if (params.has<unsigned long long>(key))
+      return "int(" + std::to_string(params.get<unsigned long long>(key)) + ")";
+    else if (params.has<std::string>(key))
+      return "'" + utils::replaceAll(params.get<std::string>(key), "'", "\\'") + "'";
+    else if (params.has<Limits>(key)) {
+      const auto lim = params.get<Limits>(key);
+      return "("s + std::to_string(lim.min()) + "," + (lim.hasMax() ? std::to_string(lim.max()) : "") + ")";
+    } else if (params.has<std::vector<Limits> >(key)) {
+      std::string out{"["}, sep;
+      for (const auto& lim : params.get<std::vector<Limits> >(key))
+        out += sep + "("s + std::to_string(lim.min()) + "," + (lim.hasMax() ? std::to_string(lim.max()) : "") + ")",
+            sep = ", ";
+      return out + "]";
+    } else if (params.has<std::vector<int> >(key))
+      return "["s + utils::repr(params.get<std::vector<int> >(key), ", ") + "]";
+    else if (params.has<std::vector<double> >(key))
+      return "["s + utils::repr(params.get<std::vector<double> >(key), ", ") + "]";
+    else if (params.has<std::vector<std::vector<double> > >(key)) {
+      std::string out{"["}, sep;
+      for (const auto& vec : params.get<std::vector<std::vector<double> > >(key))
+        out += sep + utils::repr(vec, ", "), sep = ", ";
+      return out + "]";
+    } else if (params.has<std::vector<std::string> >(key))
+      return "["s + utils::repr(params.get<std::vector<std::string> >(key), ", ") + "]";
+    else if (params.has<ParametersList>(key)) {
+      const auto plist = params.get<ParametersList>(key);
+      return (plist.hasName() ? "cepgen.Module(\'" + plist.name() + "\'" : "cepgen.Parameters(") + repr(plist, key) +
+             ")";
+    } else if (params.has<std::vector<ParametersList> >(key)) {
+      std::string out{"["}, sep;
+      for (const auto& param : params.get<std::vector<ParametersList> >(key)) {
+        out += sep + "cepgen.Parameters(";
+        for (const auto& key : param.keys())
+          out += key + " = " + repr(param, key);
+        out += ")";
+        sep = ", ";
       }
-      return params.getString(key, true);
+      return out + "]";
     }
+    return params.getString(key, true);
+  }
 
-    ConfigWriter::ConfigWriter(const ParametersList& params)
-        : SteeredObject(params), tab_len_(steer<int>("tabLength")) {
-      if (steer<bool>("importPath"))
-        os_ << "from sys import path\n"
-            << "path.append('python')\n\n";
-      os_ << "import Config.Core as cepgen\n\n";
+  ConfigWriter::ConfigWriter(const ParametersList& params) : SteeredObject(params), tab_len_(steer<int>("tabLength")) {
+    if (steer<bool>("importPath"))
+      os_ << "from sys import path\n"
+          << "path.append('python')\n\n";
+    os_ << "import Config.Core as cepgen\n\n";
+  }
+
+  ConfigWriter::~ConfigWriter() {
+    if (const auto filename = steer<std::string>("filename"); !filename.empty()) {
+      std::ofstream of(filename);
+      of << os_.str();
     }
+  }
 
-    ConfigWriter::~ConfigWriter() {
-      if (const auto filename = steer<std::string>("filename"); !filename.empty()) {
-        std::ofstream of(filename);
-        of << os_.str();
-      }
-    }
+  ConfigWriter& ConfigWriter::operator<<(const RunParameters& params) {
+    if (params.timeKeeper())
+      (*this) << ParametersDescription("timer");
+    if (params.hasProcess())
+      (*this) << ParametersDescription(params.process().parameters()).setKey<std::string>("process");
+    for (const auto& mod : params.eventModifiersSequence())
+      (*this) << ParametersDescription(mod->parameters()).setKey<std::string>("eventSequence");
+    for (const auto& mod : params.eventExportersSequence())
+      (*this) << ParametersDescription(mod->parameters()).setKey<std::string>("output");
+    return *this;
+  }
 
-    ConfigWriter& ConfigWriter::operator<<(const RunParameters& params) {
-      if (params.timeKeeper())
-        (*this) << ParametersDescription("timer");
-      if (params.hasProcess())
-        (*this) << ParametersDescription(params.process().parameters()).setKey<std::string>("process");
-      for (const auto& mod : params.eventModifiersSequence())
-        (*this) << ParametersDescription(mod->parameters()).setKey<std::string>("eventSequence");
-      for (const auto& mod : params.eventExportersSequence())
-        (*this) << ParametersDescription(mod->parameters()).setKey<std::string>("output");
-      return *this;
-    }
+  ConfigWriter& ConfigWriter::operator<<(const ParametersDescription& pdesc) {
+    CG_DEBUG("ConfigWriter") << "Adding a parameters description object:\n" << pdesc;
+    const std::function<std::string(const ParametersDescription&, const std::string&, size_t)> write =
+        [&](const ParametersDescription& pdesc, const std::string& key, size_t offset_num) -> std::string {
+      // write a generic parameters description object
+      std::stringstream os;
+      os << offset(offset_num);
+      if (!key.empty())
+        os << key << " = ";
 
-    ConfigWriter& ConfigWriter::operator<<(const ParametersDescription& pdesc) {
-      CG_DEBUG("ConfigWriter") << "Adding a parameters description object:\n" << pdesc;
-      const std::function<std::string(const ParametersDescription&, const std::string&, size_t)> write =
-          [&](const ParametersDescription& pdesc, const std::string& key, size_t offset_num) -> std::string {
-        // write a generic parameters description object
-        std::stringstream os;
-        os << offset(offset_num);
-        if (!key.empty())
-          os << key << " = ";
-
-        std::string sep = "";
-        const auto& params = pdesc.parameters();
-        switch (pdesc.type()) {
-          case ParametersDescription::Type::Module:
-            os << "cepgen.Module('" + params.getNameString() + "'";
-            sep = ",";
-            break;
-          case ParametersDescription::Type::Value:
-          case ParametersDescription::Type::Parameters:
-            os << "cepgen.Parameters(";
-            break;
-          case ParametersDescription::Type::ParametersVector:
-            os << "list(";
-            break;
-        }
-        for (const auto& key : params.keys(false)) {
-          os << sep << "\n";
-          const auto& daugh = pdesc.get(key);
-          switch (daugh.type()) {
-            case ParametersDescription::Type::Module:
-            case ParametersDescription::Type::Parameters:
-              os << write(pdesc.get(key), key, offset_num + 1);
-              break;
-            case ParametersDescription::Type::ParametersVector: {
-              os << offset(offset_num + 1) << key << " = [\n";
-              for (const auto& it : params.get<std::vector<ParametersList> >(key))
-                os << write(ParametersDescription(it), "", offset_num + 2) << ",\n";
-              os << offset(offset_num + 1) << "]";
-            } break;
-            case ParametersDescription::Type::Value: {
-              if (params.has<ParametersList>(key))
-                os << write(ParametersDescription(params.get<ParametersList>(key)), key, offset_num + 1);
-              else
-                os << offset(offset_num + 1) << key << " = " << repr(params, key);
-            } break;
-          }
+      std::string sep = "";
+      const auto& params = pdesc.parameters();
+      switch (pdesc.type()) {
+        case ParametersDescription::Type::Module:
+          os << "cepgen.Module('" + params.getNameString() + "'";
           sep = ",";
-        }
-        switch (pdesc.type()) {
+          break;
+        case ParametersDescription::Type::Value:
+        case ParametersDescription::Type::Parameters:
+          os << "cepgen.Parameters(";
+          break;
+        case ParametersDescription::Type::ParametersVector:
+          os << "list(";
+          break;
+      }
+      for (const auto& key : params.keys(false)) {
+        os << sep << "\n";
+        const auto& daugh = pdesc.get(key);
+        switch (daugh.type()) {
           case ParametersDescription::Type::Module:
-            if (!params.keys(false).empty())
-              os << "\n" << offset(offset_num);
-            break;
           case ParametersDescription::Type::Parameters:
-            os << "\n" << offset(offset_num);
+            os << write(pdesc.get(key), key, offset_num + 1);
             break;
-          case ParametersDescription::Type::ParametersVector:
-            os << ")" << offset(offset_num);
-            break;
-          case ParametersDescription::Type::Value:
-            break;
+          case ParametersDescription::Type::ParametersVector: {
+            os << offset(offset_num + 1) << key << " = [\n";
+            for (const auto& it : params.get<std::vector<ParametersList> >(key))
+              os << write(ParametersDescription(it), "", offset_num + 2) << ",\n";
+            os << offset(offset_num + 1) << "]";
+          } break;
+          case ParametersDescription::Type::Value: {
+            if (params.has<ParametersList>(key))
+              os << write(ParametersDescription(params.get<ParametersList>(key)), key, offset_num + 1);
+            else
+              os << offset(offset_num + 1) << key << " = " << repr(params, key);
+          } break;
         }
-        os << ")";
-        return os.str();
-      };
-      const auto key = steer<bool>("camelCaseModuleNames") ? utils::toCamelCase(pdesc.key()) : pdesc.key();
-      os_ << write(pdesc, key, 0) << "\n";
-      return *this;
-    }
+        sep = ",";
+      }
+      switch (pdesc.type()) {
+        case ParametersDescription::Type::Module:
+          if (!params.keys(false).empty())
+            os << "\n" << offset(offset_num);
+          break;
+        case ParametersDescription::Type::Parameters:
+          os << "\n" << offset(offset_num);
+          break;
+        case ParametersDescription::Type::ParametersVector:
+          os << ")" << offset(offset_num);
+          break;
+        case ParametersDescription::Type::Value:
+          break;
+      }
+      os << ")";
+      return os.str();
+    };
+    const auto key = steer<bool>("camelCaseModuleNames") ? utils::toCamelCase(pdesc.key()) : pdesc.key();
+    os_ << write(pdesc, key, 0) << "\n";
+    return *this;
+  }
 
-    std::string ConfigWriter::operator()() const { return os_.str(); }
+  std::string ConfigWriter::operator()() const { return os_.str(); }
 
-    ParametersDescription ConfigWriter::description() {
-      auto desc = ParametersDescription();
-      desc.add<bool>("importPath", false).setDescription("prepare the Python environment with path?");
-      desc.add<bool>("camelCaseModuleNames", false).setDescription("convert the module names to camel case?");
-      desc.add<int>("tabLength", 4).setDescription("number of spaces for one tabulation");
-      desc.add<std::string>("filename", "").setDescription("Python output filename");
-      return desc;
-    }
-  }  // namespace python
-}  // namespace cepgen
+  ParametersDescription ConfigWriter::description() {
+    auto desc = ParametersDescription();
+    desc.add<bool>("importPath", false).setDescription("prepare the Python environment with path?");
+    desc.add<bool>("camelCaseModuleNames", false).setDescription("convert the module names to camel case?");
+    desc.add<int>("tabLength", 4).setDescription("number of spaces for one tabulation");
+    desc.add<std::string>("filename", "").setDescription("Python output filename");
+    return desc;
+  }
+}  // namespace cepgen::python

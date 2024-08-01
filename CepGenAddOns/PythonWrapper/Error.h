@@ -24,18 +24,16 @@
 
 #define PY_ERROR cepgen::python::Error(__FUNC__, __FILE__, __LINE__)
 
-namespace cepgen {
-  namespace python {
-    class Error final : public Exception {
-    public:
-      explicit Error(const char*, const char*, short) noexcept;
+namespace cepgen::python {
+  class Error final : public Exception {
+  public:
+    explicit Error(const char*, const char*, short) noexcept;
 
-    private:
-      PyObject* ptype_{nullptr};
-      PyObject* pvalue_{nullptr};
-      PyObject* ptraceback_obj_{nullptr};
-    };
-  }  // namespace python
-}  // namespace cepgen
+  private:
+    PyObject* ptype_{nullptr};
+    PyObject* pvalue_{nullptr};
+    PyObject* ptraceback_obj_{nullptr};
+  };
+}  // namespace cepgen::python
 
 #endif

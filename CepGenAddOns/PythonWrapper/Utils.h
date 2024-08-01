@@ -19,12 +19,9 @@
 #ifndef CepGenAddOns_PythonWrapper_Utils_h
 #define CepGenAddOns_PythonWrapper_Utils_h
 
-namespace cepgen {
-  namespace python {
-    /// Translate a filename into a python-compatible path
-    std::string pythonPath(const std::string&);
-    std::vector<std::wstring> info();
-  }  // namespace python
-}  // namespace cepgen
+namespace cepgen::python {
+  std::string pythonPath(const std::string&);  ///< Translate a filename into a python-compatible path
+  std::vector<std::wstring> info();
+}  // namespace cepgen::python
 
 #endif

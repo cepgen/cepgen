@@ -23,28 +23,22 @@
 
 #include "CepGen/Core/SteeredObject.h"
 
-namespace cepgen {
-  namespace python {
-    class Environment : SteeredObject<Environment> {
-    public:
-      /// Initialise the python environment
-      explicit Environment(const ParametersList&);
-      /// Finalise the python environment
-      ~Environment();
+namespace cepgen::python {
+  class Environment : SteeredObject<Environment> {
+  public:
+    explicit Environment(const ParametersList&);  ///< Initialise the python environment
+    virtual ~Environment();                       ///< Finalise the python environment
 
-      static ParametersDescription description();
+    static ParametersDescription description();
 
-      /// Set the name of the Python program
-      void setProgramName(const std::string&);
-      /// Is the python environment already initialised?
-      bool initialised();
+    void setProgramName(const std::string&);  ///< Set the name of the Python program
+    bool initialised();                       ///< Is the python environment already initialised?
 
-    private:
+  private:
 #if PY_VERSION_HEX >= 0x03080000
-      PyConfig config_;
+    PyConfig config_;
 #endif
-    };
-  }  // namespace python
-}  // namespace cepgen
+  };
+}  // namespace cepgen::python
 
 #endif

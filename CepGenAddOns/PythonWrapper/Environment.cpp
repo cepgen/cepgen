@@ -26,74 +26,72 @@
 #include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Filesystem.h"
 
-namespace cepgen {
-  namespace python {
-    //------------------------------------------------------------------
-    // Python API helpers
-    //------------------------------------------------------------------
+namespace cepgen::python {
+  //------------------------------------------------------------------
+  // Python API helpers
+  //------------------------------------------------------------------
 
-    Environment::Environment(const ParametersList& params) : SteeredObject(params) {
-      const auto cepgen_path = fs::path(utils::env::get("CEPGEN_PATH", "."));
-      for (const auto& path : utils::env::searchPaths()) {
-        const auto fs_path = fs::path(path);
-        utils::env::append("PYTHONPATH", fs_path);
-        utils::env::append("PYTHONPATH", fs_path / "python");
-        utils::env::append("PYTHONPATH", fs_path / "python_modules");
-      }
-      CG_DEBUG("Python:Environment") << "PYTHONPATH set to " << utils::env::get("PYTHONPATH") << ".";
+  Environment::Environment(const ParametersList& params) : SteeredObject(params) {
+    const auto cepgen_path = fs::path(utils::env::get("CEPGEN_PATH", "."));
+    for (const auto& path : utils::env::searchPaths()) {
+      const auto fs_path = fs::path(path);
+      utils::env::append("PYTHONPATH", fs_path);
+      utils::env::append("PYTHONPATH", fs_path / "python");
+      utils::env::append("PYTHONPATH", fs_path / "python_modules");
+    }
+    CG_DEBUG("Python:Environment") << "PYTHONPATH set to " << utils::env::get("PYTHONPATH") << ".";
 
 #if PY_VERSION_HEX >= 0x03080000
-      PyConfig_InitPythonConfig(&config_);
-      config_.parser_debug = steer<int>("debug");
-      config_.verbose = steer<int>("verbosity");
-      Py_InitializeFromConfig(&config_);
+    PyConfig_InitPythonConfig(&config_);
+    config_.parser_debug = steer<int>("debug");
+    config_.verbose = steer<int>("verbosity");
+    Py_InitializeFromConfig(&config_);
 #else
-      Py_DebugFlag = steer<int>("debug");
-      Py_VerboseFlag = steer<int>("verbosity");
-      Py_InitializeEx(1);
+    Py_DebugFlag = steer<int>("debug");
+    Py_VerboseFlag = steer<int>("verbosity");
+    Py_InitializeEx(1);
 #endif
-      if (!initialised())
-        throw CG_FATAL("Python:Environment") << "Failed to initialise the Python environment!";
-      utils::env::set("PYTHONDONTWRITEBYTECODE", "1");
-      if (const auto& name = steer<std::string>("name"); !name.empty())
-        setProgramName(name);
-    }
+    if (!initialised())
+      throw CG_FATAL("Python:Environment") << "Failed to initialise the Python environment!";
+    utils::env::set("PYTHONDONTWRITEBYTECODE", "1");
+    if (const auto& name = steer<std::string>("name"); !name.empty())
+      setProgramName(name);
+  }
 
-    Environment::~Environment() {
-      if (!initialised())
-        CG_WARNING("Python:Environment")
-            << "Python environment is set to be finalised while it was not initialised in the first place.";
-      else
-        Py_Finalize();
-    }
+  Environment::~Environment() {
+    if (!initialised())
+      CG_WARNING("Python:Environment")
+          << "Python environment is set to be finalised while it was not initialised in the first place.";
+    else
+      Py_Finalize();
+  }
 
-    bool Environment::initialised() { return Py_IsInitialized(); }
+  bool Environment::initialised() { return Py_IsInitialized(); }
 
-    void Environment::setProgramName(const std::string& filename) {
-      const size_t fn_len = filename.length() + 1;
+  void Environment::setProgramName(const std::string& filename) {
+    const size_t fn_len = filename.length() + 1;
 #ifdef PYTHON2
-      char* sfilename = new char[fn_len];
-      snprintf(sfilename, fn_len, "%s", filename.c_str());
-      const std::string readable_s_filename(sfilename);
+    char* sfilename = new char[fn_len];
+    snprintf(sfilename, fn_len, "%s", filename.c_str());
+    const std::string readable_s_filename(sfilename);
 #else
-      wchar_t* sfilename = new wchar_t[fn_len];
-      swprintf(sfilename, fn_len, L"%s", filename.c_str());
-      const std::wstring readable_s_filename(sfilename);
+    wchar_t* sfilename = new wchar_t[fn_len];
+    swprintf(sfilename, fn_len, L"%s", filename.c_str());
+    const std::wstring readable_s_filename(sfilename);
 #endif
 #if PY_VERSION_HEX >= 0x03080000
-      config_.program_name = sfilename;
+    config_.program_name = sfilename;
 #else
-      Py_SetProgramName(sfilename);
+    Py_SetProgramName(sfilename);
 #endif
-      delete[] sfilename;
-      CG_DEBUG("Python:setProgramName") << "Programme name set to \"" << readable_s_filename << "\".";
-    }
+    delete[] sfilename;
+    CG_DEBUG("Python:setProgramName") << "Programme name set to \"" << readable_s_filename << "\".";
+  }
 
-    ParametersDescription Environment::description() {
-      auto desc = ParametersDescription();
-      desc.add<int>("verbosity", 0).setDescription("overall Python verbosity");
-      desc.add<int>("debug", 0).setDescription("debugging level");
-      return desc;
-    }
-  }  // namespace python
-}  // namespace cepgen
+  ParametersDescription Environment::description() {
+    auto desc = ParametersDescription();
+    desc.add<int>("verbosity", 0).setDescription("overall Python verbosity");
+    desc.add<int>("debug", 0).setDescription("debugging level");
+    return desc;
+  }
+}  // namespace cepgen::python
