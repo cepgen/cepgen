@@ -42,6 +42,10 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("num-gen,n", "number of events to generate", &num_gen, 10)
       .parse();
 
+  if (cepgen::utils::isWriteable(tmp_filename))
+    throw CG_FATAL("main") << "Output file '" << tmp_filename
+                           << "' is not writeable. Please use another filename/path.";
+
   double cross_sec, cross_sec_unc;
   {  // generation + tree building part
     cepgen::Generator gen;
