@@ -20,25 +20,23 @@
 #include "CepGen/Physics/Coupling.h"
 #include "CepGenAddOns/Herwig6Wrapper/Herwig6Interface.h"
 
-namespace cepgen {
-  namespace herwig6 {
-    class AlphaEM final : public cepgen::Coupling {
-    public:
-      explicit AlphaEM(const ParametersList& params) : cepgen::Coupling(params) {
-        hwpram_.alphem = steer<double>("alphem");
-      }
+namespace cepgen::herwig6 {
+  class AlphaEM final : public cepgen::Coupling {
+  public:
+    explicit AlphaEM(const ParametersList& params) : cepgen::Coupling(params) {
+      hwpram_.alphem = steer<double>("alphem");
+    }
 
-      inline static ParametersDescription description() {
-        auto desc = cepgen::Coupling::description();
-        desc.setDescription("Herwig6 modelling of alpha(EM) running");
-        initialise();
-        desc.add<double>("alphem", hwpram_.alphem).setDescription("alpha(EM) at beginning of evolution");
-        return desc;
-      }
+    inline static ParametersDescription description() {
+      auto desc = cepgen::Coupling::description();
+      desc.setDescription("Herwig6 modelling of alpha(EM) running");
+      initialise();
+      desc.add<double>("alphem", hwpram_.alphem).setDescription("alpha(EM) at beginning of evolution");
+      return desc;
+    }
 
-      inline double operator()(double q) const override { return hwuaem(q * q); }
-    };
-  }  // namespace herwig6
-}  // namespace cepgen
+    inline double operator()(double q) const override { return hwuaem(q * q); }
+  };
+}  // namespace cepgen::herwig6
 using Herwig6AlphaEM = cepgen::herwig6::AlphaEM;
 REGISTER_ALPHAEM_MODULE("herwig6", Herwig6AlphaEM);

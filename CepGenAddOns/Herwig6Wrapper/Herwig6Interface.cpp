@@ -32,28 +32,26 @@ namespace {
   }
 }  // namespace
 
-namespace cepgen {
-  namespace herwig6 {
-    void initialise() {
-      static bool kInitialised = false;
-      if (kInitialised)
-        return;
-      {  // capture stdout to avoid "polluting" consumer code with unmanaged output
-        int out = dup(fileno(stdout));
-        if (const auto tmp_path = fs::temp_directory_path() / "herwig.log"; utils::isWriteable(tmp_path))
-          ::freopen(tmp_path.string().data(), "w", stdout);
-        hwigin_();
-        ::dup2(out, fileno(stdout));
-        close(out);
-      }
-      kInitialised = true;
+namespace cepgen::herwig6 {
+  void initialise() {
+    static bool kInitialised = false;
+    if (kInitialised)
+      return;
+    {  // capture stdout to avoid "polluting" consumer code with unmanaged output
+      int out = dup(fileno(stdout));
+      if (const auto tmp_path = fs::temp_directory_path() / "herwig.log"; utils::isWriteable(tmp_path))
+        ::freopen(tmp_path.string().data(), "w", stdout);
+      hwigin_();
+      ::dup2(out, fileno(stdout));
+      close(out);
     }
-    double hwuaem(double q2) { return hwuaem_(q2); }
-    double hwualf(int mode, double q2) { return hwualf_(mode, q2); }
-    double hwsfun(double xbj, double q2, int idhad, int nset, int ibeam) {
-      std::array<double, 13> dist;
-      hwsfun_(xbj, q2, idhad, nset, dist.data(), ibeam);
-      return dist[0];
-    }
-  }  // namespace herwig6
-}  // namespace cepgen
+    kInitialised = true;
+  }
+  double hwuaem(double q2) { return hwuaem_(q2); }
+  double hwualf(int mode, double q2) { return hwualf_(mode, q2); }
+  double hwsfun(double xbj, double q2, int idhad, int nset, int ibeam) {
+    std::array<double, 13> dist;
+    hwsfun_(xbj, q2, idhad, nset, dist.data(), ibeam);
+    return dist[0];
+  }
+}  // namespace cepgen::herwig6

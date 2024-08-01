@@ -47,14 +47,12 @@ extern struct {
 } hwpram_;
 }
 
-namespace cepgen {
-  /// Herwig 6 utilities namespace
-  namespace herwig6 {
-    void initialise();
-    double hwuaem(double q2);
-    double hwualf(int mode, double q2);
-    double hwsfun(double xbj, double q2, int idhad, int nset, int ibeam);
-  }  // namespace herwig6
-}  // namespace cepgen
+/// Herwig 6 utilities namespace
+namespace cepgen::herwig6 {
+  void initialise();
+  double hwuaem(double q2);
+  double hwualf(int mode, double q2);
+  double hwsfun(double xbj, double q2, int idhad, int nset, int ibeam);
+}  // namespace cepgen::herwig6
 
 #endif
