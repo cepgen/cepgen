@@ -196,8 +196,12 @@ namespace cepgen::python {
 #else
     if (PyUnicode_Check(get()))
       return PyUnicode_AsUTF8(get());
-    else  // if (PyBytes_Check(get()))
-      return strdup(PyBytes_AS_STRING(get()));
+    if (auto* str_buf = ::strdup(PyBytes_AS_STRING(get())); str_buf) {
+      auto out = std::string(str_buf);
+      free(str_buf);
+      return out;
+    }
+    throw CG_ERROR("Python:get") << "Failed to retrieve a string buffer from object.";
 #endif
   }
 

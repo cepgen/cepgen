@@ -35,25 +35,7 @@ namespace cepgen::validation {
           top_label_(steer<std::string>("topLabel")),
           path_tmpl_(steer<std::string>("pathTemplate")),
           num_events_(steer<int>("numEvents")) {}
-    inline ~Comparator() {
-      if (auto plotter = steer<ParametersList>("plotter"); !plotter.empty()) {
-        auto plt = cepgen::DrawerFactory::get().build(plotter.set<std::string>("format", "png,pdf"));
-        for (auto& plot : m_hist1ds_) {
-          cepgen::utils::DrawableColl coll;
-          for (auto& gr : plot.second) {
-            std::string chi2_info;
-            if (gr.first != ref_sample_) {  // do not compute chi^2 test for reference sample
-              size_t ndf;
-              const auto chi2 = gr.second.chi2test(plot.second.at(ref_sample_), ndf);
-              chi2_info = cepgen::utils::format(", $\\chi^{2}$/ndf = %.2g/%zu", chi2, ndf);
-            }
-            gr.second.setTitle(std::string(gr.first + chi2_info));
-            coll.emplace_back(&gr.second);
-          }
-          plt->draw(coll, path_tmpl_ + plot.first, top_label_, m_draw_modes_[plot.first]);
-        }
-      }
-    }
+    inline ~Comparator() { finalise(); }
     virtual void initialise() = 0;
     Comparator& book(const std::string& name, const std::string& var, const std::string& unit, utils::Hist1D hist) {
       hist.xAxis().setLabel(var + (unit.empty() ? "" : " (" + unit + ")"));
@@ -94,6 +76,26 @@ namespace cepgen::validation {
       return *this;
     }
     utils::Drawer::Mode& drawMode(const std::string& plot_name) { return m_draw_modes_[plot_name]; }
+    void finalise() {
+      auto plotter = steer<ParametersList>("plotter");
+      if (plotter.empty())
+        return;
+      auto plt = cepgen::DrawerFactory::get().build(plotter.set<std::string>("format", "png,pdf"));
+      for (auto& plot : m_hist1ds_) {
+        cepgen::utils::DrawableColl coll;
+        for (auto& gr : plot.second) {
+          std::string chi2_info;
+          if (gr.first != ref_sample_) {  // do not compute chi^2 test for reference sample
+            size_t ndf;
+            const auto chi2 = gr.second.chi2test(plot.second.at(ref_sample_), ndf);
+            chi2_info = cepgen::utils::format(", $\\chi^{2}$/ndf = %.2g/%zu", chi2, ndf);
+          }
+          gr.second.setTitle(std::string(gr.first + chi2_info));
+          coll.emplace_back(&gr.second);
+        }
+        plt->draw(coll, path_tmpl_ + plot.first, top_label_, m_draw_modes_[plot.first]);
+      }
+    }
 
   private:
     std::map<std::string, utils::Hist1D> m_hist1d_tmpl_;

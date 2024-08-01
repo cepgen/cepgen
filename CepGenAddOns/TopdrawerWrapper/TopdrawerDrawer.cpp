@@ -179,6 +179,8 @@ namespace cepgen::utils {
         throw CG_FATAL("TopdrawerDrawer:draw") << "Invalid object type to be plotted in multigraph!";
       ++plot_id;
     }
+    if (!first)
+      throw CG_FATAL("TopdrawerDrawer:draw") << "No object defined as the first drawable in the canvas.";
     cmds += preDraw(*first, mode);
     cmds += cmds_plots;
     cmds += postDraw(*first, mode);
