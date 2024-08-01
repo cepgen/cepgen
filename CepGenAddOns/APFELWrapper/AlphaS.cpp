@@ -23,37 +23,35 @@
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Physics/PDG.h"
 
-namespace cepgen {
-  namespace apfel {
-    class AlphaS final : public cepgen::Coupling {
-    public:
-      explicit AlphaS(const ParametersList& params) : cepgen::Coupling(params), q_range_(steer<Limits>("qrange")) {
-        APFEL::SetPerturbativeOrder(steer<int>("order"));
-        APFEL::SetPoleMasses(PDG::get().mass(4), PDG::get().mass(5), PDG::get().mass(6));
-        APFEL::InitializeAPFEL();
-        APFEL::EvolveAPFEL(q_range_.min(), q_range_.max());
-        if (steer<bool>("checkAPFEL") && !APFEL::CheckAPFEL())
-          throw CG_FATAL("apfel:AlphaS") << "Something is wrong with your APFEL configuration.";
-      }
-      static ParametersDescription description() {
-        auto desc = cepgen::Coupling::description();
-        desc.setDescription("APFEL alpha(S) evolution algorithm");
-        desc.add<bool>("checkAPFEL", false).setDescription("perform full check of APFEL configuration");
-        desc.add<int>("order", 2).setDescription("QCD perturbative evolution order");
-        desc.add<Limits>("qrange", {1., 1.e4}).setDescription("Q range reachable for evolution (in GeV)");
-        return desc;
-      }
+namespace cepgen::apfel {
+  class AlphaS final : public cepgen::Coupling {
+  public:
+    explicit AlphaS(const ParametersList& params) : cepgen::Coupling(params), q_range_(steer<Limits>("qrange")) {
+      APFEL::SetPerturbativeOrder(steer<int>("order"));
+      APFEL::SetPoleMasses(PDG::get().mass(4), PDG::get().mass(5), PDG::get().mass(6));
+      APFEL::InitializeAPFEL();
+      APFEL::EvolveAPFEL(q_range_.min(), q_range_.max());
+      if (steer<bool>("checkAPFEL") && !APFEL::CheckAPFEL())
+        throw CG_FATAL("apfel:AlphaS") << "Something is wrong with your APFEL configuration.";
+    }
+    static ParametersDescription description() {
+      auto desc = cepgen::Coupling::description();
+      desc.setDescription("APFEL alpha(S) evolution algorithm");
+      desc.add<bool>("checkAPFEL", false).setDescription("perform full check of APFEL configuration");
+      desc.add<int>("order", 2).setDescription("QCD perturbative evolution order");
+      desc.add<Limits>("qrange", {1., 1.e4}).setDescription("Q range reachable for evolution (in GeV)");
+      return desc;
+    }
 
-      double operator()(double q) const override {
-        if (!q_range_.contains(q))
-          CG_WARNING("apfel:AlphaS:get") << "q = " << q << " outside the evolution range" << q_range_ << ".";
-        return APFEL::AlphaQCD(q);
-      }
+    double operator()(double q) const override {
+      if (!q_range_.contains(q))
+        CG_WARNING("apfel:AlphaS:get") << "q = " << q << " outside the evolution range" << q_range_ << ".";
+      return APFEL::AlphaQCD(q);
+    }
 
-    private:
-      const Limits q_range_;
-    };
-  }  // namespace apfel
-}  // namespace cepgen
+  private:
+    const Limits q_range_;
+  };
+}  // namespace cepgen::apfel
 using AlphaSAPFEL = cepgen::apfel::AlphaS;
 REGISTER_ALPHAS_MODULE("apfel", AlphaSAPFEL);
