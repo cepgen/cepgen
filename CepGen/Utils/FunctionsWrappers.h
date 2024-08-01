@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,45 +23,40 @@
 
 #include "CepGen/Core/ParametersList.h"
 
-namespace cepgen {
-  namespace utils {
-    /// Wrapper to a 1-dimensional function with optional parameters
-    class Function1D {
-    public:
-      explicit Function1D(const std::function<double(double)>& func) : func_(func) {}
-      explicit Function1D(const std::function<double(double, const ParametersList&)>& func) : func_params_(func) {}
-      explicit Function1D(const std::function<double(double, void*)>& func) : func_obj_(func) {}
+namespace cepgen::utils {
+  /// Wrapper to a 1-dimensional function with optional parameters
+  class Function1D {
+  public:
+    explicit Function1D(const std::function<double(double)>& func) : func_(func) {}
+    explicit Function1D(const std::function<double(double, const ParametersList&)>& func) : func_params_(func) {}
+    explicit Function1D(const std::function<double(double, void*)>& func) : func_obj_(func) {}
 
-      /// Call the function with a user collection of parameters
-      double operator()(double x, const ParametersList& params = ParametersList()) const {
-        if (func_params_)
-          return func_params_(x, params);
-        return func_(x);
-      }
-      /// Call the function with an unspecified object as parameters
-      double operator()(double x, void* obj) const {
-        if (func_obj_)
-          return func_obj_(x, obj);
-        return func_(x);
-      }
-      /// Call the function with a templated object as parameters
-      template <typename T>
-      double operator()(double x, const T& obj) const {
-        return func_obj_(x, (void*)&obj);
-      }
+    /// Call the function with a user collection of parameters
+    inline double operator()(double x, const ParametersList& params = ParametersList()) const {
+      if (func_params_)
+        return func_params_(x, params);
+      return func_(x);
+    }
+    /// Call the function with an unspecified object as parameters
+    inline double operator()(double x, void* obj) const {
+      if (func_obj_)
+        return func_obj_(x, obj);
+      return func_(x);
+    }
+    /// Call the function with a templated object as parameters
+    template <typename T>
+    inline double operator()(double x, const T& obj) const {
+      return func_obj_(x, (void*)&obj);
+    }
 
-      operator const std::function<double(double)>&() { return func_; }
-      operator const std::function<double(double, void*)>&() { return func_obj_; }
+    inline operator const std::function<double(double)>&() { return func_; }
+    inline operator const std::function<double(double, void*)>&() { return func_obj_; }
 
-    private:
-      /// Reference to the parameters-less functor
-      std::function<double(double)> func_{nullptr};
-      /// Reference to the functor
-      std::function<double(double, const ParametersList&)> func_params_{nullptr};
-      /// Reference to the functor
-      std::function<double(double, void*)> func_obj_{nullptr};
-    };
-  }  // namespace utils
-}  // namespace cepgen
+  private:
+    std::function<double(double)> func_{nullptr};  ///< Reference to the parameters-less functor
+    std::function<double(double, const ParametersList&)> func_params_{nullptr};  ///< Reference to the functor
+    std::function<double(double, void*)> func_obj_{nullptr};                     ///< Reference to the functor
+  };
+}  // namespace cepgen::utils
 
 #endif

@@ -21,29 +21,27 @@
 
 #include "CepGen/Modules/ModuleFactory.h"
 
-namespace cepgen {
-  namespace utils {
-    /// Documentation generator object
-    /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
-    /// \date Mar 2024
-    class DocumentationGenerator : public NamedModule<DocumentationGenerator> {
-    public:
-      explicit DocumentationGenerator(const ParametersList&);
-      virtual ~DocumentationGenerator() = default;
+namespace cepgen::utils {
+  /// Documentation generator object
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date Mar 2024
+  class DocumentationGenerator : public NamedModule<DocumentationGenerator> {
+  public:
+    explicit DocumentationGenerator(const ParametersList&);
+    virtual ~DocumentationGenerator() = default;
 
-      static ParametersDescription description();
+    static ParametersDescription description();
 
-      virtual std::string describe() = 0;
+    virtual std::string describe() = 0;
 
-    protected:
-      struct category_t {
-        std::string name, title, description;
-        std::map<std::string, ParametersDescription> modules{};
-        std::map<std::string, int> modules_indices{};
-      };
-      std::vector<std::pair<std::string, category_t> > categories_;
+  protected:
+    struct category_t {
+      std::string name, title, description;
+      std::map<std::string, ParametersDescription> modules{};
+      std::map<std::string, int> modules_indices{};
     };
-  }  // namespace utils
-}  // namespace cepgen
+    std::vector<std::pair<std::string, category_t> > categories_;
+  };
+}  // namespace cepgen::utils
 
 #endif

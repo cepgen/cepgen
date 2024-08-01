@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2020-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,22 +22,13 @@
 #include <string>
 #include <vector>
 
-namespace cepgen {
-  namespace utils {
-    /// All environment variable-related utilities
-    namespace env {
-      /// Retrieve a list of all search paths for external files
-      std::vector<std::string> searchPaths();
-      /// Get an environment variable
-      std::string get(const std::string& var, const std::string& def = "");
-      /// Set an environment variable
-      void set(const std::string& var, const std::string& value);
-      /// Add a value to an environment variable
-      void append(const std::string& var, const std::string& value);
-      /// Clear an environment variable
-      void unset(const std::string& var);
-    }  // namespace env
-  }    // namespace utils
-}  // namespace cepgen
+/// All environment variable-related utilities
+namespace cepgen::utils::env {
+  std::vector<std::string> searchPaths();  ///< Retrieve a list of all search paths for external files
+  std::string get(const std::string& var, const std::string& def = "");  ///< Get an environment variable
+  void set(const std::string& var, const std::string& value);            ///< Set an environment variable
+  void append(const std::string& var, const std::string& value);         ///< Add a value to an environment variable
+  void unset(const std::string& var);                                    ///< Clear an environment variable
+}  // namespace cepgen::utils::env
 
 #endif

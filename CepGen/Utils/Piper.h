@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,48 +23,46 @@
 #include <string>
 #include <vector>
 
-namespace cepgen {
-  namespace utils {
-    /// External command piping utility
-    class Piper {
-    public:
-      /// Start a piped command
-      /// \param[in] command Command path for the session
-      explicit Piper(const std::string& command) : file_(popen(command.c_str(), "w"), pclose) {}
+namespace cepgen::utils {
+  /// External command piping utility
+  class Piper {
+  public:
+    /// Start a piped command
+    /// \param[in] command Command path for the session
+    explicit Piper(const std::string& command) : file_(popen(command.c_str(), "w"), pclose) {}
 
-      /// A collection of commands to pipe to the session
-      struct Commands : std::vector<std::string> {
-        using std::vector<std::string>::vector;
-        /// Append a set of commands to the end of the commands block
-        Commands& operator+=(const std::vector<std::string>& oth) {
-          std::copy(oth.begin(), oth.end(), std::back_inserter(*this));
-          return *this;
-        }
-        /// Append a command at the end of the commands block
-        Commands& operator+=(const std::string& str) {
-          emplace_back(str);
-          return *this;
-        }
-        /// Commands printout utility
-        friend std::ostream& operator<<(std::ostream& os, const Commands& cmds) {
-          std::string sep;
-          os << "{";
-          for (const auto& cmd : cmds)
-            os << sep << cmd, sep = "\n";
-          return os << "}";
-        }
-      };
-      /// Execute a chain of commands
-      const Piper& execute(const Commands& cmds) const {
-        for (const auto& cmd : cmds)
-          fputs((cmd + "\n").c_str(), file_.get());
+    /// A collection of commands to pipe to the session
+    struct Commands : std::vector<std::string> {
+      using std::vector<std::string>::vector;
+      /// Append a set of commands to the end of the commands block
+      inline Commands& operator+=(const std::vector<std::string>& oth) {
+        std::copy(oth.begin(), oth.end(), std::back_inserter(*this));
         return *this;
       }
-
-    private:
-      std::unique_ptr<FILE, decltype(&pclose)> file_;
+      /// Append a command at the end of the commands block
+      inline Commands& operator+=(const std::string& str) {
+        emplace_back(str);
+        return *this;
+      }
+      /// Commands printout utility
+      inline friend std::ostream& operator<<(std::ostream& os, const Commands& cmds) {
+        std::string sep;
+        os << "{";
+        for (const auto& cmd : cmds)
+          os << sep << cmd, sep = "\n";
+        return os << "}";
+      }
     };
-  }  // namespace utils
-}  // namespace cepgen
+    /// Execute a chain of commands
+    inline const Piper& execute(const Commands& cmds) const {
+      for (const auto& cmd : cmds)
+        fputs((cmd + "\n").c_str(), file_.get());
+      return *this;
+    }
+
+  private:
+    const std::unique_ptr<FILE, decltype(&pclose)> file_;
+  };
+}  // namespace cepgen::utils
 
 #endif

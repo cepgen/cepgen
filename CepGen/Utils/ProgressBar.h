@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2019-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,29 +21,27 @@
 
 #include <string>
 
-namespace cepgen {
-  namespace utils {
-    class Timer;
-    /// A simple progress indicator
-    class ProgressBar {
-    public:
-      /// Progress bar constructor
-      /// \param[in] tot Total number of steps before completion
-      /// \param[in] freq Frequency at which the tick is refreshed
-      explicit ProgressBar(size_t tot, size_t freq = 10);
-      ~ProgressBar();
-      /// Broadcast the current progress to the bar
-      /// \param[in] iter Current iteration
-      void update(size_t iter) const;
+namespace cepgen::utils {
+  class Timer;
+  /// A simple progress indicator
+  class ProgressBar {
+  public:
+    /// Progress bar constructor
+    /// \param[in] tot Total number of steps before completion
+    /// \param[in] freq Frequency at which the tick is refreshed
+    explicit ProgressBar(size_t tot, size_t freq = 10);
+    ~ProgressBar();
+    /// Broadcast the current progress to the bar
+    /// \param[in] iter Current iteration
+    void update(size_t iter) const;
 
-    private:
-      std::unique_ptr<Timer> tmr_;
-      const size_t bar_length_;
-      const std::string bar_pattern_;
-      const bool enabled_;
-      size_t total_, frequency_;
-    };
-  }  // namespace utils
-}  // namespace cepgen
+  private:
+    std::unique_ptr<Timer> tmr_;
+    const size_t bar_length_;
+    const std::string bar_pattern_;
+    const bool enabled_;
+    size_t total_, frequency_;
+  };
+}  // namespace cepgen::utils
 
 #endif

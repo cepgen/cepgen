@@ -23,40 +23,38 @@
 
 #include "CepGen/Modules/NamedModule.h"
 
-namespace cepgen {
-  namespace utils {
-    /// A random number generator
-    /// \author L. Forthomme <laurent.forthomme@cern.ch>
-    /// \date Nov 2023
-    class RandomGenerator : public NamedModule<RandomGenerator> {
-    public:
-      /// Default constructor
-      explicit RandomGenerator(const ParametersList&);
+namespace cepgen::utils {
+  /// A random number generator
+  /// \author L. Forthomme <laurent.forthomme@cern.ch>
+  /// \date Nov 2023
+  class RandomGenerator : public NamedModule<RandomGenerator> {
+  public:
+    /// Default constructor
+    explicit RandomGenerator(const ParametersList&);
 
-      static ParametersDescription description();
+    static ParametersDescription description();
 
-      // base distributions
-      virtual int uniformInt(int min, int max) = 0;
-      virtual double uniform(double min = 0., double max = 1.) = 0;
-      virtual double normal(double mean = 0., double rms = 1.) = 0;
+    // base distributions
+    virtual int uniformInt(int min, int max) = 0;
+    virtual double uniform(double min = 0., double max = 1.) = 0;
+    virtual double normal(double mean = 0., double rms = 1.) = 0;
 
-      // specialised distributions
-      virtual double exponential(double exponent = 1.);
-      virtual double breitWigner(double mean = 0., double scale = 1.);
-      virtual double landau(double location = 0., double width = 1.);
-      virtual int poisson(double mean = 0.);
+    // specialised distributions
+    virtual double exponential(double exponent = 1.);
+    virtual double breitWigner(double mean = 0., double scale = 1.);
+    virtual double landau(double location = 0., double width = 1.);
+    virtual int poisson(double mean = 0.);
 
-      /// Retrieve the engine object
-      template <typename T>
-      T* engine() {
-        return static_cast<T*>(enginePtr());
-      }
+    /// Retrieve the engine object
+    template <typename T>
+    T* engine() {
+      return static_cast<T*>(enginePtr());
+    }
 
-    protected:
-      unsigned long long seed_;
-      virtual void* enginePtr();  ///< engine object
-    };
-  }  // namespace utils
-}  // namespace cepgen
+  protected:
+    unsigned long long seed_;
+    virtual void* enginePtr();  ///< engine object
+  };
+}  // namespace cepgen::utils
 
 #endif

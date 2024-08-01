@@ -19,26 +19,24 @@
 #include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/Message.h"
 
-namespace cepgen {
-  namespace utils {
-    void Histogram::normalise(double integ) { scale(integ / integral()); }
+namespace cepgen::utils {
+  void Histogram::normalise(double integ) { scale(integ / integral()); }
 
-    std::set<double> Histogram::extractBins(BinMode mode,
-                                            size_t num_bins,
-                                            const std::function<Limits(size_t)>& bins_extractor) const {
-      std::set<double> bins;
-      for (size_t i = 0; i < num_bins; ++i) {
-        const auto range = bins_extractor(i);
-        if (mode == BinMode::low || mode == BinMode::both)
-          bins.insert(range.min());
-        if (mode == BinMode::high || mode == BinMode::both)
-          bins.insert(range.max());
-      }
-      const auto exp_bins = mode == BinMode::both ? num_bins + 1 : num_bins;
-      if (bins.size() != exp_bins)
-        CG_WARNING("Histogram:extractBins")
-            << "Invalid number of values to bin ranges: got " << bins.size() << ", expecting " << exp_bins << ".";
-      return bins;
+  std::set<double> Histogram::extractBins(BinMode mode,
+                                          size_t num_bins,
+                                          const std::function<Limits(size_t)>& bins_extractor) const {
+    std::set<double> bins;
+    for (size_t i = 0; i < num_bins; ++i) {
+      const auto range = bins_extractor(i);
+      if (mode == BinMode::low || mode == BinMode::both)
+        bins.insert(range.min());
+      if (mode == BinMode::high || mode == BinMode::both)
+        bins.insert(range.max());
     }
-  }  // namespace utils
-}  // namespace cepgen
+    const auto exp_bins = mode == BinMode::both ? num_bins + 1 : num_bins;
+    if (bins.size() != exp_bins)
+      CG_WARNING("Histogram:extractBins")
+          << "Invalid number of values to bin ranges: got " << bins.size() << ", expecting " << exp_bins << ".";
+    return bins;
+  }
+}  // namespace cepgen::utils

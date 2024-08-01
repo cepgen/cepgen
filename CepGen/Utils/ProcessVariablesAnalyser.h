@@ -21,26 +21,27 @@
 
 #include "CepGen/Core/SteeredObject.h"
 
-namespace cepgen {
-  namespace proc {
-    class Process;
-  }
-  namespace utils {
-    class Hist1D;
-    class ProcessVariablesAnalyser : public SteeredObject<ProcessVariablesAnalyser> {
-    public:
-      explicit ProcessVariablesAnalyser(const proc::Process&, const ParametersList&);
+namespace cepgen::proc {
+  class Process;
+}
+namespace cepgen::utils {
+  class Hist1D;
+}
 
-      static ParametersDescription description();
+namespace cepgen::utils {
+  class ProcessVariablesAnalyser : public SteeredObject<ProcessVariablesAnalyser> {
+  public:
+    explicit ProcessVariablesAnalyser(const proc::Process&, const ParametersList&);
 
-      void feed(double weight);
-      void analyse();
+    static ParametersDescription description();
 
-    private:
-      const proc::Process& proc_;
-      std::unordered_map<std::string, std::unique_ptr<Hist1D> > hists_;
-    };
-  }  // namespace utils
-}  // namespace cepgen
+    void feed(double weight);
+    void analyse();
+
+  private:
+    const proc::Process& proc_;
+    std::unordered_map<std::string, std::unique_ptr<Hist1D> > hists_;
+  };
+}  // namespace cepgen::utils
 
 #endif

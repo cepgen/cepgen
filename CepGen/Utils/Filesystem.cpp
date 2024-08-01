@@ -24,18 +24,16 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/Filesystem.h"
 
-namespace cepgen {
-  namespace utils {
-    bool fileExists(const std::string& path) { return fs::exists(path); }
+namespace cepgen::utils {
+  bool fileExists(const std::string& path) { return fs::exists(path); }
 
-    std::string fileExtension(const std::string& file) { return fs::path(file).extension(); }
+  std::string fileExtension(const std::string& file) { return fs::path(file).extension(); }
 
-    std::string readFile(const std::string& filename) {
-      if (auto ifile = std::ifstream(filename); ifile.good())
-        return std::string(std::istreambuf_iterator<char>(ifile), std::istreambuf_iterator<char>());
-      throw CG_FATAL("readFile") << "Failed to open the file '" << filename << "' for reading.";
-    }
+  std::string readFile(const std::string& filename) {
+    if (auto ifile = std::ifstream(filename); ifile.good())
+      return std::string(std::istreambuf_iterator<char>(ifile), std::istreambuf_iterator<char>());
+    throw CG_FATAL("readFile") << "Failed to open the file '" << filename << "' for reading.";
+  }
 
-    bool isWriteable(const std::string& path) { return ::access(path.data(), W_OK) == 0; }
-  }  //namespace utils
-}  // namespace cepgen
+  bool isWriteable(const std::string& path) { return ::access(path.data(), W_OK) == 0; }
+}  // namespace cepgen::utils

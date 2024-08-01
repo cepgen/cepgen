@@ -23,74 +23,72 @@
 
 #include "CepGen/Modules/NamedModule.h"
 
-namespace cepgen {
-  namespace utils {
-    class Graph1D;
-    class Graph2D;
-    class Hist1D;
-    class Hist2D;
-    class Drawable;
-    /// A collection of drawable objects
-    typedef std::vector<const Drawable*> DrawableColl;
-    /// A generic drawing utility
-    class Drawer : public NamedModule<Drawer> {
+namespace cepgen::utils {
+  class Graph1D;
+  class Graph2D;
+  class Hist1D;
+  class Hist2D;
+  class Drawable;
+  /// A collection of drawable objects
+  typedef std::vector<const Drawable*> DrawableColl;
+  /// A generic drawing utility
+  class Drawer : public NamedModule<Drawer> {
+  public:
+    /// Build a drawing utility
+    explicit Drawer(const ParametersList& params);
+
+    class Mode {
     public:
-      /// Build a drawing utility
-      explicit Drawer(const ParametersList& params);
-
-      class Mode {
-      public:
-        enum value_t : uint16_t {
-          none = 0,
-          logx = 1 << 0,
-          logy = 1 << 1,
-          logz = 1 << 2,
-          nostack = 1 << 3,
-          grid = 1 << 4,
-          col = 1 << 5,
-          cont = 1 << 6,
-          ratio = 1 << 7,
-          bar = 1 << 8
-        };
-        Mode() : value_(none) {}
-        Mode(int val) : value_((value_t)val) {}
-        Mode(const value_t& val) : value_(val) {}
-
-        friend std::ostream& operator<<(std::ostream&, const Mode&);
-        friend bool operator&(const Mode&, const Mode::value_t&);
-
-        const value_t& value() const { return value_; }
-
-      private:
-        value_t value_;
+      enum value_t : uint16_t {
+        none = 0,
+        logx = 1 << 0,
+        logy = 1 << 1,
+        logz = 1 << 2,
+        nostack = 1 << 3,
+        grid = 1 << 4,
+        col = 1 << 5,
+        cont = 1 << 6,
+        ratio = 1 << 7,
+        bar = 1 << 8
       };
+      Mode() : value_(none) {}
+      Mode(int val) : value_((value_t)val) {}
+      Mode(const value_t& val) : value_(val) {}
 
-      /// Draw a one-dimensional graph
-      virtual const Drawer& draw(const Graph1D&, const Mode& mode = Mode::none) const = 0;
-      /// Draw a two-dimensional graph
-      virtual const Drawer& draw(const Graph2D&, const Mode& mode = Mode::none) const = 0;
-      /// Draw a one-dimensional histogram
-      virtual const Drawer& draw(const Hist1D&, const Mode& mode = Mode::none) const = 0;
-      /// Draw a two-dimensional histogram
-      virtual const Drawer& draw(const Hist2D&, const Mode& mode = Mode::none) const = 0;
+      friend std::ostream& operator<<(std::ostream&, const Mode&);
+      friend bool operator&(const Mode&, const Mode::value_t&);
 
-      /// Draw a collection of drawables
-      virtual const Drawer& draw(const DrawableColl&,
-                                 const std::string& name = "",
-                                 const std::string& title = "",
-                                 const Mode& mode = Mode::none) const = 0;
+      const value_t& value() const { return value_; }
 
-      /// Output operator (when necessary)
-      virtual std::ostream& operator<<(std::ostream& os) const { return os; }
-
-    protected:
-      friend class Drawable;
-      friend class Graph1D;
-      friend class Graph2D;
-      friend class Hist1D;
-      friend class Hist2D;
+    private:
+      value_t value_;
     };
-  }  // namespace utils
+
+    virtual const Drawer& draw(const Graph1D&, const Mode& = Mode::none) const = 0;  ///< Draw a one-dimensional graph
+    virtual const Drawer& draw(const Graph2D&, const Mode& = Mode::none) const = 0;  ///< Draw a two-dimensional graph
+    /// Draw a one-dimensional histogram
+    virtual const Drawer& draw(const Hist1D&, const Mode& = Mode::none) const = 0;
+    /// Draw a two-dimensional histogram
+    virtual const Drawer& draw(const Hist2D&, const Mode& = Mode::none) const = 0;
+
+    /// Draw a collection of drawables
+    virtual const Drawer& draw(const DrawableColl&,
+                               const std::string& name = "",
+                               const std::string& title = "",
+                               const Mode& = Mode::none) const = 0;
+
+    /// Output operator (when necessary)
+    inline virtual std::ostream& operator<<(std::ostream& os) const { return os; }
+
+  protected:
+    friend class Drawable;
+    friend class Graph1D;
+    friend class Graph2D;
+    friend class Hist1D;
+    friend class Hist2D;
+  };
+}  // namespace cepgen::utils
+namespace cepgen {
   utils::Drawer::Mode operator|(const utils::Drawer::Mode&, const utils::Drawer::Mode::value_t&);
   utils::Drawer::Mode operator|(const utils::Drawer::Mode::value_t&, const utils::Drawer::Mode::value_t&);
 }  // namespace cepgen

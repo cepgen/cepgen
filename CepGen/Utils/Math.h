@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,17 +19,15 @@
 #ifndef CepGen_Utils_Math_h
 #define CepGen_Utils_Math_h
 
-namespace cepgen {
-  namespace utils {
-    /// Check if a number is positive and finite
-    template <typename T>
-    bool positive(const T& val);
+namespace cepgen::utils {
+  /// Check if a number is positive and finite
+  template <typename T>
+  bool positive(const T& val);
 
-    double fastHypot(double, double);
-    double fastHypot(double, double, double);
-    /// Compute the square root of the squared difference (sqrt(a^2-b^2))
-    double fastSqrtSqDiff(double, double);
-  }  // namespace utils
-}  // namespace cepgen
+  double fastHypot(double, double);
+  double fastHypot(double, double, double);
+  /// Compute the square root of the squared difference (sqrt(a^2-b^2))
+  double fastSqrtSqDiff(double, double);
+}  // namespace cepgen::utils
 
 #endif

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,30 +20,28 @@
 
 #include "CepGen/Utils/Math.h"
 
-namespace cepgen {
-  namespace utils {
-    template <typename T>
-    bool positive(const T& val) {
-      return val > T{} && std::isfinite(val);
-    }
-    template bool positive<double>(const double&);
-    template bool positive<float>(const float&);
-    template bool positive<int>(const int&);
+namespace cepgen::utils {
+  template <typename T>
+  bool positive(const T& val) {
+    return val > T{} && std::isfinite(val);
+  }
+  template bool positive<double>(const double&);
+  template bool positive<float>(const float&);
+  template bool positive<int>(const int&);
 
-    double fastHypot(double x, double y) {
-      x *= x, y *= y;
-      return std::sqrt(x + y);
-    }
+  double fastHypot(double x, double y) {
+    x *= x, y *= y;
+    return std::sqrt(x + y);
+  }
 
-    double fastHypot(double x, double y, double z) {
-      x *= x, y *= y, z *= z;
-      return std::sqrt(x + y + z);
-    }
+  double fastHypot(double x, double y, double z) {
+    x *= x, y *= y, z *= z;
+    return std::sqrt(x + y + z);
+  }
 
-    double fastSqrtSqDiff(double x, double y) {
-      if (std::fabs(x) == std::fabs(y))
-        return 0.;
-      return std::sqrt((x + y) * (x - y));
-    }
-  }  // namespace utils
-}  // namespace cepgen
+  double fastSqrtSqDiff(double x, double y) {
+    if (std::fabs(x) == std::fabs(y))
+      return 0.;
+    return std::sqrt((x + y) * (x - y));
+  }
+}  // namespace cepgen::utils

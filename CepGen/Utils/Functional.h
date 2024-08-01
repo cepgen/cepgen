@@ -25,45 +25,46 @@
 
 namespace cepgen {
   class ParametersList;
-  namespace utils {
-    /// A string-to-functional parser
-    /// \author L. Forthomme <laurent.forthomme@cern.ch>
-    /// \date 21 Aug 2017
-    class Functional : public NamedModule<Functional> {
-    public:
-      explicit Functional(const ParametersList&);  ///< Default constructor
+}
 
-      /// Build a collection of parameters to define a functional from its mathematical expression
-      /// \param[in] expr Mathematical expression to evaluate
-      /// \param[in] vars List of expression variables
-      static ParametersList fromExpression(const std::string& expr, const std::vector<std::string>& vars);
-      static ParametersDescription description();
+namespace cepgen::utils {
+  /// A string-to-functional parser
+  /// \author L. Forthomme <laurent.forthomme@cern.ch>
+  /// \date 21 Aug 2017
+  class Functional : public NamedModule<Functional> {
+  public:
+    explicit Functional(const ParametersList&);  ///< Default constructor
 
-      /// Compute the functional for a given value of the variable (one-dimensional case)
-      /// \param[in] x Variable value
-      double operator()(double x) const;
-      /// Compute the functional for a given value of the variables
-      /// \param[in] x Variables values
-      double operator()(const std::vector<double>& x) const;
+    /// Build a collection of parameters to define a functional from its mathematical expression
+    /// \param[in] expr Mathematical expression to evaluate
+    /// \param[in] vars List of expression variables
+    static ParametersList fromExpression(const std::string& expr, const std::vector<std::string>& vars);
+    static ParametersDescription description();
 
-      /// List of string variable names
-      inline const std::vector<std::string>& variables() const { return vars_orig_; }
-      /// String expression held by this functional parser
-      inline const std::string& expression() const { return expression_orig_; }
+    /// Compute the functional for a given value of the variable (one-dimensional case)
+    /// \param[in] x Variable value
+    double operator()(double x) const;
+    /// Compute the functional for a given value of the variables
+    /// \param[in] x Variables values
+    double operator()(const std::vector<double>& x) const;
 
-    protected:
-      virtual double eval() const = 0;  ///< Compute the functional for a given value of the variables
+    /// List of string variable names
+    inline const std::vector<std::string>& variables() const { return vars_orig_; }
+    /// String expression held by this functional parser
+    inline const std::string& expression() const { return expression_orig_; }
 
-    private:
-      std::vector<std::string> vars_orig_;  ///< User-defined variables to be reached
-      std::string expression_orig_;         ///< User-defined expression
+  protected:
+    virtual double eval() const = 0;  ///< Compute the functional for a given value of the variables
 
-    protected:
-      std::vector<std::string> vars_;       ///< Computer-readable variable to be reached
-      std::string expression_;              ///< Computer-readable expression
-      mutable std::vector<double> values_;  ///< Last arguments list fed to the functional
-    };
-  }  // namespace utils
-}  // namespace cepgen
+  private:
+    std::vector<std::string> vars_orig_;  ///< User-defined variables to be reached
+    std::string expression_orig_;         ///< User-defined expression
+
+  protected:
+    std::vector<std::string> vars_;       ///< Computer-readable variable to be reached
+    std::string expression_;              ///< Computer-readable expression
+    mutable std::vector<double> values_;  ///< Last arguments list fed to the functional
+  };
+}  // namespace cepgen::utils
 
 #endif

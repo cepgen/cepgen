@@ -61,7 +61,7 @@ namespace cepgen {
   };
 
   void GridOptimisedGeneratorWorker::initialise() {
-    grid_.reset(new GridParameters(steer<int>("binSize"), integrand_->size()));
+    grid_ = std::make_unique<GridParameters>(steer<int>("binSize"), integrand_->size());
     coords_ = std::vector<double>(integrand_->size());
     if (!grid_->prepared())
       computeGenerationParameters();

@@ -58,10 +58,10 @@ namespace cepgen {
           if (arg_val.size() > 1) {
             const auto& token = arg_val.at(1);
             if (token.find(":") == std::string::npos)
-              utils::Logger::get().output().reset(new std::ofstream(token));
+              utils::Logger::get().setOutput(new std::ofstream(token));
             else {
               const auto tokens = utils::split(token, ':');
-              utils::Logger::get().output().reset(new std::ofstream(tokens.at(1)));
+              utils::Logger::get().setOutput(new std::ofstream(tokens.at(1)));
               for (const auto& tok : utils::split(tokens.at(0), ';'))
                 utils::Logger::get().addExceptionRule(tok);
             }

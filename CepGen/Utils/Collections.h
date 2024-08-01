@@ -26,53 +26,50 @@
 #include <unordered_set>
 #include <vector>
 
-namespace cepgen {
-  namespace utils {
-    /// Retrieve all keys from a map
-    template <typename K, typename T>
-    inline std::vector<K> keys(const std::map<K, T>& coll) {
-      std::vector<K> keys;
-      std::transform(coll.begin(), coll.end(), std::back_inserter(keys), [](const auto& val) { return val.first; });
-      return keys;
-    }
-    /// Retrieve all keys from an unordered map
-    template <typename K, typename T>
-    inline std::vector<K> keys(const std::unordered_map<K, T>& coll) {
-      std::vector<K> keys;
-      std::transform(coll.begin(), coll.end(), std::back_inserter(keys), [](const auto& val) { return val.first; });
-      return keys;
-    }
-    /// Check if a vector contains an item
-    template <typename T>
-    inline bool contains(const std::vector<T>& coll, const T& item) {
-      return std::find(coll.begin(), coll.end(), item) != coll.end();
-    }
-    /// Check if a set contains an item
-    template <typename T>
-    inline bool contains(const std::set<T>& coll, const T& item) {
-      return std::find(coll.begin(), coll.end(), item) != coll.end();
-    }
-    /// Check if an unordered map contains an item
-    template <typename K, typename T>
-    inline bool contains(const std::unordered_map<K, T>& coll, const T& item) {
-      return std::find_if(coll.begin(), coll.end(), [&item](const auto& kv) { return kv.second == item; }) !=
-             coll.end();
-    }
-    /// Remove duplicates and sort a collection
-    template <typename T>
-    inline void normalise(std::vector<T>& coll) {
-      std::unordered_set<T> set;
-      for (const auto& it : coll)
-        set.insert(it);
-      coll.assign(set.begin(), set.end());
-      std::sort(coll.begin(), coll.end());
-    }
-    /// Check if all elements of a collection are uniform
-    template <typename T>
-    inline bool uniform(const std::vector<T>& coll) {
-      return coll.size() > 1 ? coll == std::vector<T>(coll.size(), coll.at(0)) : true;
-    }
-  }  // namespace utils
-}  // namespace cepgen
+namespace cepgen::utils {
+  /// Retrieve all keys from a map
+  template <typename K, typename T>
+  inline std::vector<K> keys(const std::map<K, T>& coll) {
+    std::vector<K> keys;
+    std::transform(coll.begin(), coll.end(), std::back_inserter(keys), [](const auto& val) { return val.first; });
+    return keys;
+  }
+  /// Retrieve all keys from an unordered map
+  template <typename K, typename T>
+  inline std::vector<K> keys(const std::unordered_map<K, T>& coll) {
+    std::vector<K> keys;
+    std::transform(coll.begin(), coll.end(), std::back_inserter(keys), [](const auto& val) { return val.first; });
+    return keys;
+  }
+  /// Check if a vector contains an item
+  template <typename T>
+  inline bool contains(const std::vector<T>& coll, const T& item) {
+    return std::find(coll.begin(), coll.end(), item) != coll.end();
+  }
+  /// Check if a set contains an item
+  template <typename T>
+  inline bool contains(const std::set<T>& coll, const T& item) {
+    return std::find(coll.begin(), coll.end(), item) != coll.end();
+  }
+  /// Check if an unordered map contains an item
+  template <typename K, typename T>
+  inline bool contains(const std::unordered_map<K, T>& coll, const T& item) {
+    return std::find_if(coll.begin(), coll.end(), [&item](const auto& kv) { return kv.second == item; }) != coll.end();
+  }
+  /// Remove duplicates and sort a collection
+  template <typename T>
+  inline void normalise(std::vector<T>& coll) {
+    std::unordered_set<T> set;
+    for (const auto& it : coll)
+      set.insert(it);
+    coll.assign(set.begin(), set.end());
+    std::sort(coll.begin(), coll.end());
+  }
+  /// Check if all elements of a collection are uniform
+  template <typename T>
+  inline bool uniform(const std::vector<T>& coll) {
+    return coll.size() > 1 ? coll == std::vector<T>(coll.size(), coll.at(0)) : true;
+  }
+}  // namespace cepgen::utils
 
 #endif

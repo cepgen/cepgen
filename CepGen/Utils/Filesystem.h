@@ -36,13 +36,11 @@ namespace fs = std::experimental::filesystem;
 
 #include <string>
 
-namespace cepgen {
-  namespace utils {
-    bool fileExists(const std::string&);                 ///< Check if the file exists
-    std::string fileExtension(const std::string& file);  ///< Small utility to retrieve the extension of a filename
-    std::string readFile(const std::string&);            ///< Read the content of a file into a string buffer
-    bool isWriteable(const std::string&);                ///< Check if path can be accessed for writing
-  }  //namespace utils
-}  // namespace cepgen
+namespace cepgen::utils {
+  bool fileExists(const std::string&);                 ///< Check if the file exists
+  std::string fileExtension(const std::string& file);  ///< Small utility to retrieve the extension of a filename
+  std::string readFile(const std::string&);            ///< Read the content of a file into a string buffer
+  bool isWriteable(const std::string&);                ///< Check if path can be accessed for writing
+}  // namespace cepgen::utils
 
 #endif

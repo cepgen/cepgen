@@ -26,28 +26,28 @@
 namespace cepgen {
   template <size_t D, size_t N>
   class GridHandler;
+}
 
-  namespace utils {
-    /// Utility object to draw a grid values mapping
-    class GridDrawer : public SteeredObject<GridDrawer> {
-    public:
-      static ParametersDescription description();
+namespace cepgen::utils {
+  /// Utility object to draw a grid values mapping
+  class GridDrawer : public SteeredObject<GridDrawer> {
+  public:
+    static ParametersDescription description();
 
-      /// Debugging drawing routing for single-dimensional grids
-      template <size_t N>
-      static void draw(const GridHandler<1, N>&, const Drawer::Mode& mode = Drawer::Mode::none);
-      /// Debugging drawing routing for double-dimensional grids
-      template <size_t N>
-      static void draw(const GridHandler<2, N>&, const Drawer::Mode& mode = Drawer::Mode::none);
-      /// Debugging drawing routing for triple-dimensional grids
-      template <size_t N>
-      static void draw(const GridHandler<3, N>&, const Drawer::Mode& mode = Drawer::Mode::none);
+    /// Debugging drawing routing for single-dimensional grids
+    template <size_t N>
+    static void draw(const GridHandler<1, N>&, const Drawer::Mode& mode = Drawer::Mode::none);
+    /// Debugging drawing routing for double-dimensional grids
+    template <size_t N>
+    static void draw(const GridHandler<2, N>&, const Drawer::Mode& mode = Drawer::Mode::none);
+    /// Debugging drawing routing for triple-dimensional grids
+    template <size_t N>
+    static void draw(const GridHandler<3, N>&, const Drawer::Mode& mode = Drawer::Mode::none);
 
-    private:
-      explicit GridDrawer(const ParametersList&);
-      std::unique_ptr<Drawer> drawer_;
-    };
-  }  // namespace utils
-}  // namespace cepgen
+  private:
+    explicit GridDrawer(const ParametersList&);
+    const std::unique_ptr<Drawer> drawer_;
+  };
+}  // namespace cepgen::utils
 
 #endif

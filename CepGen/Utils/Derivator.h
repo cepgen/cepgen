@@ -22,35 +22,33 @@
 #include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Utils/FunctionsWrappers.h"
 
-namespace cepgen {
-  namespace utils {
-    class Derivator : public NamedModule<Derivator> {
-    public:
-      explicit Derivator(const ParametersList& params) : NamedModule(params), h_(steer<double>("h")) {}
+namespace cepgen::utils {
+  class Derivator : public NamedModule<Derivator> {
+  public:
+    explicit Derivator(const ParametersList& params) : NamedModule(params), h_(steer<double>("h")) {}
 
-      static ParametersDescription description() {
-        auto desc = ParametersDescription();
-        desc.add<double>("h", 1.e-2).setDescription("step size");
-        return desc;
-      }
+    static ParametersDescription description() {
+      auto desc = ParametersDescription();
+      desc.add<double>("h", 1.e-2).setDescription("step size");
+      return desc;
+    }
 
-      /// Evaluate the derivative of a function at a given value
-      /// \param[in] func function to derive
-      /// \param[in] x coordinate
-      /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
-      inline double derivate(const std::function<double(double)>& func, double x, double h = -1.) const {
-        return derivate(Function1D(func), x, h);
-      }
-      /// Evaluate the derivative of a function at a given value
-      /// \param[in] func function to derive
-      /// \param[in] x coordinate
-      /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
-      virtual double derivate(const Function1D& func, double x, double h = -1.) const = 0;
+    /// Evaluate the derivative of a function at a given value
+    /// \param[in] func function to derive
+    /// \param[in] x coordinate
+    /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
+    inline double derivate(const std::function<double(double)>& func, double x, double h = -1.) const {
+      return derivate(Function1D(func), x, h);
+    }
+    /// Evaluate the derivative of a function at a given value
+    /// \param[in] func function to derive
+    /// \param[in] x coordinate
+    /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
+    virtual double derivate(const Function1D& func, double x, double h = -1.) const = 0;
 
-    protected:
-      const double h_;
-    };
-  }  // namespace utils
-}  // namespace cepgen
+  protected:
+    const double h_;
+  };
+}  // namespace cepgen::utils
 
 #endif

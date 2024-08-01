@@ -6,16 +6,14 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Utils/String.h"
 
-namespace cepgen {
-  namespace test {
-    bool debug = false;
-    double failure_tolerance = 0.;
-    const double base_precision = 1.e-3;
-    double precision = base_precision;
-    size_t num_total = 0;
-    size_t num_passed = 0;
-  }  // namespace test
-}  // namespace cepgen
+namespace cepgen::test {
+  bool debug = false;
+  double failure_tolerance = 0.;
+  const double base_precision = 1.e-3;
+  double precision = base_precision;
+  size_t num_total = 0;
+  size_t num_passed = 0;
+}  // namespace cepgen::test
 
 #define CG_FAILED(name)                                                                                            \
   CG_LOG << cepgen::utils::colourise("FAILED ", cepgen::utils::Colour::red, cepgen::utils::Modifier::bold) << name \

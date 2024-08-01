@@ -31,25 +31,25 @@ namespace cepgen {
       const auto seed = seed_ > 0ull ? seed_ : rd();
       const auto& type = steer<std::string>("type");
       if (type == "default")
-        gen_.reset(new Generator<std::default_random_engine>(seed));
+        gen_ = std::make_unique<Generator<std::default_random_engine> >(seed);
       else if (type == "minstd_rand0")
-        gen_.reset(new Generator<std::minstd_rand0>(seed));
+        gen_ = std::make_unique<Generator<std::minstd_rand0> >(seed);
       else if (type == "minstd_rand")
-        gen_.reset(new Generator<std::minstd_rand>(seed));
+        gen_ = std::make_unique<Generator<std::minstd_rand> >(seed);
       else if (type == "mt19937")
-        gen_.reset(new Generator<std::mt19937>(seed));
+        gen_ = std::make_unique<Generator<std::mt19937> >(seed);
       else if (type == "mt19937_64")
-        gen_.reset(new Generator<std::mt19937_64>(seed));
+        gen_ = std::make_unique<Generator<std::mt19937_64> >(seed);
       else if (type == "ranlux24_base")
-        gen_.reset(new Generator<std::ranlux24_base>(seed));
+        gen_ = std::make_unique<Generator<std::ranlux24_base> >(seed);
       else if (type == "ranlux48_base")
-        gen_.reset(new Generator<std::ranlux48_base>(seed));
+        gen_ = std::make_unique<Generator<std::ranlux48_base> >(seed);
       else if (type == "ranlux24")
-        gen_.reset(new Generator<std::ranlux24>(seed));
+        gen_ = std::make_unique<Generator<std::ranlux24> >(seed);
       else if (type == "ranlux48")
-        gen_.reset(new Generator<std::ranlux48>(seed));
+        gen_ = std::make_unique<Generator<std::ranlux48> >(seed);
       else if (type == "knuth_b")
-        gen_.reset(new Generator<std::knuth_b>(seed));
+        gen_ = std::make_unique<Generator<std::knuth_b> >(seed);
       else
         throw CG_FATAL("STLRandomGenerator") << "Random number generator engine invalid: '" << type << "'.";
 

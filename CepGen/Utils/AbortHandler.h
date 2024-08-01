@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2017-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,41 +24,39 @@
 
 #include "CepGen/Core/Exception.h"
 
-namespace cepgen {
-  namespace utils {
-    extern std::atomic<int> gSignal;
-    /// Exception raised when the user terminates the process
-    struct RunAbortedException : std::runtime_error {
-      RunAbortedException() : std::runtime_error("CepGen run aborted") {}
-      ~RunAbortedException() noexcept { CG_INFO("RunAbortedException") << "Run aborted by user interaction."; }
+namespace cepgen::utils {
+  extern std::atomic<int> gSignal;
+  /// Exception raised when the user terminates the process
+  struct RunAbortedException : std::runtime_error {
+    RunAbortedException() : std::runtime_error("CepGen run aborted") {}
+    ~RunAbortedException() noexcept { CG_INFO("RunAbortedException") << "Run aborted by user interaction."; }
 
-      const char* what() const noexcept override { return "User abort through C-c."; }
-    };
+    const char* what() const noexcept override { return "User abort through C-c."; }
+  };
 
-    /// Object handling an user-driven process abortion
-    class AbortHandler {
-    public:
-      /// Define a process abortion procedure
-      explicit AbortHandler(int flags = SA_SIGINFO) {
-        action_.sa_sigaction = handle_ctrl_c;
-        sigemptyset(&action_.sa_mask);
-        action_.sa_flags = flags;
-        init();
-      }
+  /// Object handling an user-driven process abortion
+  class AbortHandler {
+  public:
+    /// Define a process abortion procedure
+    explicit AbortHandler(int flags = SA_SIGINFO) {
+      action_.sa_sigaction = handle_ctrl_c;
+      sigemptyset(&action_.sa_mask);
+      action_.sa_flags = flags;
+      init();
+    }
 
-    private:
-      static void handle_ctrl_c(int signal, siginfo_t* si, void*) {
-        gSignal = signal;
-        if (abs(si->si_code) != SIGABRT)
-          throw RunAbortedException();
-      }
-      void init() {
-        if (sigaction(SIGINT, &action_, nullptr) != 0 || sigaction(SIGTERM, &action_, nullptr) != 0)
-          throw CG_FATAL("AbortHandler") << "Failed to initialise the C-c handler!";
-      }
-      struct sigaction action_;
-    };
-  }  // namespace utils
-}  // namespace cepgen
+  private:
+    static void handle_ctrl_c(int signal, siginfo_t* si, void*) {
+      gSignal = signal;
+      if (abs(si->si_code) != SIGABRT)
+        throw RunAbortedException();
+    }
+    void init() {
+      if (sigaction(SIGINT, &action_, nullptr) != 0 || sigaction(SIGTERM, &action_, nullptr) != 0)
+        throw CG_FATAL("AbortHandler") << "Failed to initialise the C-c handler!";
+    }
+    struct sigaction action_;
+  };
+}  // namespace cepgen::utils
 
 #endif
