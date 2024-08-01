@@ -39,167 +39,165 @@
 namespace pt = boost::property_tree;
 namespace bc = boost::cepgen;
 
-namespace cepgen {
-  namespace card {
-    /// Boost tree configuration cards reader/writer
-    class BoostTreeHandler : public Handler {
-    public:
-      /// Boost tree parser from a configuration card
-      explicit BoostTreeHandler(const ParametersList& params) : Handler(params) {}
+namespace cepgen::card {
+  /// Boost tree configuration cards reader/writer
+  class BoostTreeHandler : public Handler {
+  public:
+    /// Boost tree parser from a configuration card
+    explicit BoostTreeHandler(const ParametersList& params) : Handler(params) {}
 
-      static ParametersDescription description() {
-        auto desc = ParametersDescription();
-        desc.setDescription("Boost tree parser/writer");
-        return desc;
-      }
-
-      BoostTreeHandler& parseFile(const std::string&) override;
-      BoostTreeHandler& setRunParameters(const RunParameters* params) override;
-
-    protected:
-      /// Read and cast a file into the property tree
-      virtual void read(const std::string&) = 0;
-
-      /// The BOOST property tree translated by this configuration
-      pt::ptree tree_;
-
-    private:
-      static constexpr const char* ADDONS_NAME = "addons";
-      static constexpr const char* PROCESS_NAME = "process";
-      static constexpr const char* KIN_NAME = "kinematics";
-      static constexpr const char* INTEGR_NAME = "integrator";
-      static constexpr const char* GENERATOR_NAME = "generator";
-      static constexpr const char* EVT_MOD_SEQ_NAME = "eventSequence";
-      static constexpr const char* OUTPUT_NAME = "output";
-      static constexpr const char* TIMER_NAME = "timer";
-      static constexpr const char* LOGGER_NAME = "logger";
-
-      ParametersList proc_, gen_, log_;
-      ParametersList evt_mod_, evt_out_;
-    };
-
-    BoostTreeHandler& BoostTreeHandler::parseFile(const std::string& filename) {
-      read(filename);
-
-      if (tree_.count(ADDONS_NAME))
-        for (const auto& lib : bc::unpack(tree_.get_child(ADDONS_NAME)).keys())
-          loadLibrary(lib);
-
-      try {
-        proc_ = bc::unpack(tree_.get_child(PROCESS_NAME));
-        runParameters()->setProcess(ProcessFactory::get().build(proc_));
-      } catch (const boost::exception&) {
-        throw CG_FATAL("BoostTreeHandler") << "Failed to retrieve a valid \"" << PROCESS_NAME << "\" block"
-                                           << " in the steering card!";
-      }
-      ParametersList par_kinematics;
-      try {
-        //----- phase space definition
-        if (tree_.count(KIN_NAME))
-          par_kinematics += bc::unpack(tree_.get_child(KIN_NAME));
-        if (tree_.count(INTEGR_NAME))
-          runParameters()->integrator() += bc::unpack(tree_.get_child(INTEGR_NAME));
-        if (tree_.count(GENERATOR_NAME))
-          runParameters()->generation().setParameters(bc::unpack(tree_.get_child(GENERATOR_NAME)));
-        if (tree_.count(EVT_MOD_SEQ_NAME)) {
-          evt_mod_ = bc::unpack(tree_.get_child(EVT_MOD_SEQ_NAME));
-          for (const auto& name : evt_mod_.keys()) {
-            const auto& mod = evt_mod_.get<ParametersList>(name);
-            if (!mod.empty())
-              runParameters()->addModifier(EventModifierFactory::get().build(name, mod));
-          }
-        }
-        if (tree_.count(OUTPUT_NAME)) {
-          evt_out_ = bc::unpack(tree_.get_child(OUTPUT_NAME));
-          for (const auto& name : evt_out_.keys()) {
-            const auto& mod = evt_out_.get<ParametersList>(name);
-            if (!mod.empty())
-              runParameters()->addEventExporter(EventExporterFactory::get().build(name, mod));
-          }
-        }
-        if (tree_.count(TIMER_NAME))
-          runParameters()->setTimeKeeper(new utils::TimeKeeper);
-        if (tree_.count(LOGGER_NAME)) {
-          log_ = bc::unpack(tree_.get_child(LOGGER_NAME));
-          utils::Logger::get().setLevel(
-              log_.getAs<int, utils::Logger::Level>("level", utils::Logger::Level::information));
-          utils::Logger::get().setExtended(log_.get<bool>("extended", utils::Logger::get().extended()));
-          for (const auto& mod : log_.get<std::vector<std::string> >("enabledModules"))
-            utils::Logger::get().addExceptionRule(mod);
-        }
-        runParameters()->process().kinematics().setParameters(par_kinematics);
-      } catch (const boost::exception&) {
-      } catch (const Exception&) {
-      }
-      return *this;
+    static ParametersDescription description() {
+      auto desc = ParametersDescription();
+      desc.setDescription("Boost tree parser/writer");
+      return desc;
     }
 
-    BoostTreeHandler& BoostTreeHandler::setRunParameters(const RunParameters* params) {
-      Handler::setRunParameters(params);
-      tree_.add_child(PROCESS_NAME, bc::pack(runParameters()->process().parameters()));
-      if (!runParameters()->integrator().empty())
-        tree_.add_child(INTEGR_NAME, bc::pack(runParameters()->integrator()));
+    BoostTreeHandler& parseFile(const std::string&) override;
+    BoostTreeHandler& setRunParameters(const RunParameters* params) override;
 
-      //----- kinematics block
-      tree_.add_child(KIN_NAME, bc::pack(runParameters()->kinematics().parameters()));
+  protected:
+    /// Read and cast a file into the property tree
+    virtual void read(const std::string&) = 0;
 
-      //----- generation block
-      tree_.add_child(GENERATOR_NAME, bc::pack(runParameters()->generation().parameters()));
+    /// The BOOST property tree translated by this configuration
+    pt::ptree tree_;
 
-      //----- event modification and output
-      if (!runParameters()->eventModifiersSequence().empty()) {
-        auto evt_mod_tree = bc::pack(evt_mod_);
-        for (const auto& mod : runParameters()->eventModifiersSequence())
-          evt_mod_tree.put("", mod->name());
-        tree_.add_child(EVT_MOD_SEQ_NAME, evt_mod_tree);
+  private:
+    static constexpr const char* ADDONS_NAME = "addons";
+    static constexpr const char* PROCESS_NAME = "process";
+    static constexpr const char* KIN_NAME = "kinematics";
+    static constexpr const char* INTEGR_NAME = "integrator";
+    static constexpr const char* GENERATOR_NAME = "generator";
+    static constexpr const char* EVT_MOD_SEQ_NAME = "eventSequence";
+    static constexpr const char* OUTPUT_NAME = "output";
+    static constexpr const char* TIMER_NAME = "timer";
+    static constexpr const char* LOGGER_NAME = "logger";
+
+    ParametersList proc_, gen_, log_;
+    ParametersList evt_mod_, evt_out_;
+  };
+
+  BoostTreeHandler& BoostTreeHandler::parseFile(const std::string& filename) {
+    read(filename);
+
+    if (tree_.count(ADDONS_NAME))
+      for (const auto& lib : bc::unpack(tree_.get_child(ADDONS_NAME)).keys())
+        loadLibrary(lib);
+
+    try {
+      proc_ = bc::unpack(tree_.get_child(PROCESS_NAME));
+      runParameters()->setProcess(ProcessFactory::get().build(proc_));
+    } catch (const boost::exception&) {
+      throw CG_FATAL("BoostTreeHandler") << "Failed to retrieve a valid \"" << PROCESS_NAME << "\" block"
+                                         << " in the steering card!";
+    }
+    ParametersList par_kinematics;
+    try {
+      //----- phase space definition
+      if (tree_.count(KIN_NAME))
+        par_kinematics += bc::unpack(tree_.get_child(KIN_NAME));
+      if (tree_.count(INTEGR_NAME))
+        runParameters()->integrator() += bc::unpack(tree_.get_child(INTEGR_NAME));
+      if (tree_.count(GENERATOR_NAME))
+        runParameters()->generation().setParameters(bc::unpack(tree_.get_child(GENERATOR_NAME)));
+      if (tree_.count(EVT_MOD_SEQ_NAME)) {
+        evt_mod_ = bc::unpack(tree_.get_child(EVT_MOD_SEQ_NAME));
+        for (const auto& name : evt_mod_.keys()) {
+          const auto& mod = evt_mod_.get<ParametersList>(name);
+          if (!mod.empty())
+            runParameters()->addModifier(EventModifierFactory::get().build(name, mod));
+        }
       }
-      if (!runParameters()->eventExportersSequence().empty()) {
-        auto out_mod_tree = bc::pack(evt_out_);
-        for (const auto& mod : runParameters()->eventExportersSequence())
-          out_mod_tree.add_child(mod->name(), bc::pack(mod->parameters()));
-        tree_.add_child(OUTPUT_NAME, out_mod_tree);
+      if (tree_.count(OUTPUT_NAME)) {
+        evt_out_ = bc::unpack(tree_.get_child(OUTPUT_NAME));
+        for (const auto& name : evt_out_.keys()) {
+          const auto& mod = evt_out_.get<ParametersList>(name);
+          if (!mod.empty())
+            runParameters()->addEventExporter(EventExporterFactory::get().build(name, mod));
+        }
       }
+      if (tree_.count(TIMER_NAME))
+        runParameters()->setTimeKeeper(new utils::TimeKeeper);
+      if (tree_.count(LOGGER_NAME)) {
+        log_ = bc::unpack(tree_.get_child(LOGGER_NAME));
+        utils::Logger::get().setLevel(
+            log_.getAs<int, utils::Logger::Level>("level", utils::Logger::Level::information));
+        utils::Logger::get().setExtended(log_.get<bool>("extended", utils::Logger::get().extended()));
+        for (const auto& mod : log_.get<std::vector<std::string> >("enabledModules"))
+          utils::Logger::get().addExceptionRule(mod);
+      }
+      runParameters()->process().kinematics().setParameters(par_kinematics);
+    } catch (const boost::exception&) {
+    } catch (const Exception&) {
+    }
+    return *this;
+  }
 
-      //----- timing and logging
-      if (runParameters()->timeKeeper())
-        tree_.add_child(TIMER_NAME, bc::pack(ParametersList()));
-      log_.set<int>("level", (int)utils::Logger::get().level());
-      //TODO: implement the exceptions filtering rules
-      //for (const auto& mod : utils::Logger::get().exceptionRules())
-      //  log_.operator[]<std::vector<std::string> >("enabledModules").emplace_back(mod);
-      tree_.add_child(LOGGER_NAME, bc::pack(log_));
-      return *this;
+  BoostTreeHandler& BoostTreeHandler::setRunParameters(const RunParameters* params) {
+    Handler::setRunParameters(params);
+    tree_.add_child(PROCESS_NAME, bc::pack(runParameters()->process().parameters()));
+    if (!runParameters()->integrator().empty())
+      tree_.add_child(INTEGR_NAME, bc::pack(runParameters()->integrator()));
+
+    //----- kinematics block
+    tree_.add_child(KIN_NAME, bc::pack(runParameters()->kinematics().parameters()));
+
+    //----- generation block
+    tree_.add_child(GENERATOR_NAME, bc::pack(runParameters()->generation().parameters()));
+
+    //----- event modification and output
+    if (!runParameters()->eventModifiersSequence().empty()) {
+      auto evt_mod_tree = bc::pack(evt_mod_);
+      for (const auto& mod : runParameters()->eventModifiersSequence())
+        evt_mod_tree.put("", mod->name());
+      tree_.add_child(EVT_MOD_SEQ_NAME, evt_mod_tree);
+    }
+    if (!runParameters()->eventExportersSequence().empty()) {
+      auto out_mod_tree = bc::pack(evt_out_);
+      for (const auto& mod : runParameters()->eventExportersSequence())
+        out_mod_tree.add_child(mod->name(), bc::pack(mod->parameters()));
+      tree_.add_child(OUTPUT_NAME, out_mod_tree);
     }
 
-    //------------------------------------------------------------------
-    // class specialisations for each Boost format to be handled
-    //------------------------------------------------------------------
+    //----- timing and logging
+    if (runParameters()->timeKeeper())
+      tree_.add_child(TIMER_NAME, bc::pack(ParametersList()));
+    log_.set<int>("level", (int)utils::Logger::get().level());
+    //TODO: implement the exceptions filtering rules
+    //for (const auto& mod : utils::Logger::get().exceptionRules())
+    //  log_.operator[]<std::vector<std::string> >("enabledModules").emplace_back(mod);
+    tree_.add_child(LOGGER_NAME, bc::pack(log_));
+    return *this;
+  }
 
-    /// A JSON configuration file parser
-    class JsonHandler final : public BoostTreeHandler {
-      using BoostTreeHandler::BoostTreeHandler;
-      void read(const std::string& filename) override { pt::read_json(filename, tree_); }
-      void write(const std::string& filename) const override { pt::write_json(filename, tree_); }
-    };
+  //------------------------------------------------------------------
+  // class specialisations for each Boost format to be handled
+  //------------------------------------------------------------------
 
-    /// An INFO configuration file parser
-    class InfoHandler final : public BoostTreeHandler {
-      using BoostTreeHandler::BoostTreeHandler;
-      void read(const std::string& filename) override { pt::read_info(filename, tree_); }
-      void write(const std::string& filename) const override { pt::write_info(filename, tree_); }
-    };
+  /// A JSON configuration file parser
+  class JsonHandler final : public BoostTreeHandler {
+    using BoostTreeHandler::BoostTreeHandler;
+    void read(const std::string& filename) override { pt::read_json(filename, tree_); }
+    void write(const std::string& filename) const override { pt::write_json(filename, tree_); }
+  };
 
-    /// An XML configuration file parser
-    class XmlHandler final : public BoostTreeHandler {
-      using BoostTreeHandler::BoostTreeHandler;
-      void read(const std::string& filename) override { pt::read_xml(filename, tree_); }
-      void write(const std::string& filename) const override {
-        std::ofstream file(filename);
-        pt::write_xml(file, tree_);
-      }
-    };
-  }  // namespace card
-}  // namespace cepgen
+  /// An INFO configuration file parser
+  class InfoHandler final : public BoostTreeHandler {
+    using BoostTreeHandler::BoostTreeHandler;
+    void read(const std::string& filename) override { pt::read_info(filename, tree_); }
+    void write(const std::string& filename) const override { pt::write_info(filename, tree_); }
+  };
+
+  /// An XML configuration file parser
+  class XmlHandler final : public BoostTreeHandler {
+    using BoostTreeHandler::BoostTreeHandler;
+    void read(const std::string& filename) override { pt::read_xml(filename, tree_); }
+    void write(const std::string& filename) const override {
+      std::ofstream file(filename);
+      pt::write_xml(file, tree_);
+    }
+  };
+}  // namespace cepgen::card
 using cepgen::card::InfoHandler;
 using cepgen::card::JsonHandler;
 using cepgen::card::XmlHandler;

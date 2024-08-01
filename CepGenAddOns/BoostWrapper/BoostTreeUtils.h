@@ -25,29 +25,29 @@ namespace cepgen {
   class RunParameters;
   class ParametersDescription;
 }  // namespace cepgen
-
 namespace boost {
   namespace pt = property_tree;
-  namespace cepgen {
-    static constexpr const char* DAUGH_KEY = "DAUGHTER";
-    static constexpr const char* MIN_KEY = "min";
-    static constexpr const char* MAX_KEY = "max";
+}
 
-    void add(::cepgen::ParametersList&, const std::string&, const pt::ptree&);
+namespace boost::cepgen {
+  static constexpr const char* DAUGH_KEY = "DAUGHTER";
+  static constexpr const char* MIN_KEY = "min";
+  static constexpr const char* MAX_KEY = "max";
 
-    pt::ptree pack(const ::cepgen::RunParameters&);
-    pt::ptree pack(const ::cepgen::ParametersDescription&);
-    pt::ptree pack(const ::cepgen::ParametersList&);
-    template <typename T>
-    pt::ptree pack(const std::vector<T>&);
-    template <>
-    pt::ptree pack(const std::vector<::cepgen::ParametersList>&);
-    template <>
-    pt::ptree pack(const std::vector<double>&);
-    pt::ptree pack(const ::cepgen::Limits&);
+  void add(::cepgen::ParametersList&, const std::string&, const pt::ptree&);
 
-    ::cepgen::ParametersList unpack(const pt::ptree&);
-  }  // namespace cepgen
-}  // namespace boost
+  pt::ptree pack(const ::cepgen::RunParameters&);
+  pt::ptree pack(const ::cepgen::ParametersDescription&);
+  pt::ptree pack(const ::cepgen::ParametersList&);
+  template <typename T>
+  pt::ptree pack(const std::vector<T>&);
+  template <>
+  pt::ptree pack(const std::vector<::cepgen::ParametersList>&);
+  template <>
+  pt::ptree pack(const std::vector<double>&);
+  pt::ptree pack(const ::cepgen::Limits&);
+
+  ::cepgen::ParametersList unpack(const pt::ptree&);
+}  // namespace boost::cepgen
 
 #endif
