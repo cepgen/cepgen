@@ -14,7 +14,7 @@ macro(cepgen_build mod_name)
                    TESTS
                    UTILS)
     cmake_parse_arguments(ARG "${options}" "${one_val}" "${multi_vals}" ${ARGN})
-    message(STATUS "Building ${mod_name} add-on")
+    message(STATUS "Building ${mod_name} module")
     if(ARG_SOURCES)
         set(sources)
         foreach(_s ${ARG_SOURCES})
