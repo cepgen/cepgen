@@ -23,29 +23,30 @@
 
 namespace cepgen {
   class Integrand;
-  /// Interface objects to Cuba algorithms
-  namespace cuba {
-    /// Cuba integration algorithm
-    class Integrator : public cepgen::Integrator {
-    public:
-      explicit Integrator(const ParametersList&);
+}
 
-      static ParametersDescription description();
-      static Integrand* gIntegrand;
+/// Interface objects to Cuba algorithms
+namespace cepgen::cuba {
+  /// Cuba integration algorithm
+  class Integrator : public cepgen::Integrator {
+  public:
+    explicit Integrator(const ParametersList&);
 
-      Value integrate(Integrand&) override;
+    static ParametersDescription description();
+    static Integrand* gIntegrand;
 
-    protected:
-      virtual Value integrate() = 0;
+    Value integrate(Integrand&) override;
 
-      int ncomp_, nvec_;
-      double epsrel_, epsabs_;
-      int mineval_, maxeval_;
-      int verbose_;
-    };
+  protected:
+    virtual Value integrate() = 0;
 
-    int cuba_integrand(const int* ndim, const double xx[], const int* /*ncomp*/, double ff[], void* /*userdata*/);
-  }  // namespace cuba
-}  // namespace cepgen
+    int ncomp_, nvec_;
+    double epsrel_, epsabs_;
+    int mineval_, maxeval_;
+    int verbose_;
+  };
+
+  int cuba_integrand(const int* ndim, const double xx[], const int* /*ncomp*/, double ff[], void* /*userdata*/);
+}  // namespace cepgen::cuba
 
 #endif

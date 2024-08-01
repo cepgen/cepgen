@@ -22,64 +22,62 @@
 #include "CepGenAddOns/CubaWrapper/Integrator.h"
 #include "cuba.h"
 
-namespace cepgen {
-  namespace cuba {
-    /// Cuba implementation of the Suave integration algorithm
-    class SuaveIntegrator : public Integrator {
-    public:
-      explicit SuaveIntegrator(const ParametersList& params)
-          : Integrator(params),
-            nnew_(steer<int>("NNew")),
-            nmin_(steer<int>("NMin")),
-            flatness_(steer<double>("Flatness")) {
-        CG_DEBUG("Integrator:build") << "Cuba-Suave integrator built.";
-      }
+namespace cepgen::cuba {
+  /// Cuba implementation of the Suave integration algorithm
+  class SuaveIntegrator : public Integrator {
+  public:
+    explicit SuaveIntegrator(const ParametersList& params)
+        : Integrator(params),
+          nnew_(steer<int>("NNew")),
+          nmin_(steer<int>("NMin")),
+          flatness_(steer<double>("Flatness")) {
+      CG_DEBUG("Integrator:build") << "Cuba-Suave integrator built.";
+    }
 
-      static ParametersDescription description() {
-        auto desc = Integrator::description();
-        desc.setDescription("Cuba implementation of the Suave algorithm");
-        desc.add<int>("NNew", 1000).setDescription("number of new integrand evaluations in each subdivision");
-        desc.add<int>("NMin", 2).setDescription(
-            "minimum number of samples a former pass must contribute to a subregion to be considered in that region’s "
-            "compound integral value");
-        desc.add<double>("Flatness", 50.).setDescription("type of norm used to compute the fluctuation of a sample");
-        return desc;
-      }
+    static ParametersDescription description() {
+      auto desc = Integrator::description();
+      desc.setDescription("Cuba implementation of the Suave algorithm");
+      desc.add<int>("NNew", 1000).setDescription("number of new integrand evaluations in each subdivision");
+      desc.add<int>("NMin", 2).setDescription(
+          "minimum number of samples a former pass must contribute to a subregion to be considered in that region’s "
+          "compound integral value");
+      desc.add<double>("Flatness", 50.).setDescription("type of norm used to compute the fluctuation of a sample");
+      return desc;
+    }
 
-      Value integrate() override {
-        int neval, fail, nregions;
-        double integral, error, prob;
+    Value integrate() override {
+      int neval, fail, nregions;
+      double integral, error, prob;
 
-        Suave(gIntegrand->size(),
-              ncomp_,
-              cuba_integrand,
-              nullptr,
-              nvec_,
-              epsrel_,
-              epsabs_,
-              verbose_,
-              rnd_gen_->parameters().get<unsigned long long>("seed"),
-              mineval_,
-              maxeval_,
-              nnew_,
-              nmin_,
-              flatness_,
-              nullptr,  // const char* statefile
-              nullptr,  // void* spin
-              &nregions,
-              &neval,
-              &fail,
-              &integral,
-              &error,
-              &prob);
-        return Value{integral, error};
-      }
+      Suave(gIntegrand->size(),
+            ncomp_,
+            cuba_integrand,
+            nullptr,
+            nvec_,
+            epsrel_,
+            epsabs_,
+            verbose_,
+            rnd_gen_->parameters().get<unsigned long long>("seed"),
+            mineval_,
+            maxeval_,
+            nnew_,
+            nmin_,
+            flatness_,
+            nullptr,  // const char* statefile
+            nullptr,  // void* spin
+            &nregions,
+            &neval,
+            &fail,
+            &integral,
+            &error,
+            &prob);
+      return Value{integral, error};
+    }
 
-    private:
-      const int nnew_, nmin_;
-      const double flatness_;
-    };
-  }  // namespace cuba
-}  // namespace cepgen
+  private:
+    const int nnew_, nmin_;
+    const double flatness_;
+  };
+}  // namespace cepgen::cuba
 using SuaveIntegratorCuba = cepgen::cuba::SuaveIntegrator;
 REGISTER_INTEGRATOR("cuba_suave", SuaveIntegratorCuba);
