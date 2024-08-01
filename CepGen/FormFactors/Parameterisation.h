@@ -23,40 +23,38 @@
 #include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Physics/HeavyIon.h"
 
-namespace cepgen {
-  namespace formfac {
-    /// Nucleon electromagnetic form factors parameterisation
-    class Parameterisation : public NamedModule<Parameterisation> {
-    public:
-      explicit Parameterisation(const ParametersList&);
+namespace cepgen::formfac {
+  /// Nucleon electromagnetic form factors parameterisation
+  class Parameterisation : public NamedModule<Parameterisation> {
+  public:
+    explicit Parameterisation(const ParametersList&);
 
-      static ParametersDescription description();
+    static ParametersDescription description();
 
-      friend std::ostream& operator<<(std::ostream&, const Parameterisation&);  ///< Friendly printout operator
+    friend std::ostream& operator<<(std::ostream&, const Parameterisation&);  ///< Friendly printout operator
 
-      double tau(double q2) const;  ///< \f$\tau={Q^2}\over{4m_p^2}\f$ variable definition
+    double tau(double q2) const;  ///< \f$\tau={Q^2}\over{4m_p^2}\f$ variable definition
 
-      virtual const FormFactors& operator()(double /*q2*/);  ///< Compute all form factors for a given \f$Q^2\f$ value
-      virtual bool fragmenting() const { return false; }     ///< Is the nucleon surviving the exchange?
+    virtual const FormFactors& operator()(double /*q2*/);      ///< Compute all form factors for a given \f$Q^2\f$ value
+    inline virtual bool fragmenting() const { return false; }  ///< Is the nucleon surviving the exchange?
 
-    protected:
-      static constexpr double MU = 2.792847337;  ///< Proton magnetic moment
+  protected:
+    static constexpr double MU = 2.792847337;  ///< Proton magnetic moment
 
-      virtual void eval() = 0;  ///< Local form factors evaluation method
+    virtual void eval() = 0;  ///< Local form factors evaluation method
 
-      void setFEFM(double fe, double fm);  ///< Set the electromagnetic form factors
-      void setGEGM(double ge, double gm);  ///< Set the Sachs form factors
+    void setFEFM(double fe, double fm);  ///< Set the electromagnetic form factors
+    void setGEGM(double ge, double gm);  ///< Set the Sachs form factors
 
-      const pdgid_t pdg_id_;  ///< Incoming beam
-      const double mass2_;    ///< Incoming beam squared mass
-      const double mp_;       ///< Proton mass, in GeV/c\f$^2\f$
-      const double mp2_;      ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
+    const pdgid_t pdg_id_;  ///< Incoming beam
+    const double mass2_;    ///< Incoming beam squared mass
+    const double mp_;       ///< Proton mass, in GeV/c\f$^2\f$
+    const double mp2_;      ///< Squared proton mass, in GeV\f$^2\f$/c\f$^4\f$
 
-      double q2_{-1.};    ///< Virtuality at which the form factors are evaluated
-      FormFactors ff_{};  ///< Last form factors computed
-    };
-    std::ostream& operator<<(std::ostream&, const FormFactors&);
-  }  // namespace formfac
-}  // namespace cepgen
+    double q2_{-1.};    ///< Virtuality at which the form factors are evaluated
+    FormFactors ff_{};  ///< Last form factors computed
+  };
+  std::ostream& operator<<(std::ostream&, const FormFactors&);
+}  // namespace cepgen::formfac
 
 #endif

@@ -21,45 +21,43 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 
-namespace cepgen {
-  namespace formfac {
-    /// \cite Kelly:2004hm
-    class Kelly final : public Parameterisation {
-    public:
-      explicit Kelly(const ParametersList& params)
-          : Parameterisation(params),
-            ae_(steer<std::vector<double> >("aE")),
-            be_(steer<std::vector<double> >("bE")),
-            am_(steer<std::vector<double> >("aM")),
-            bm_(steer<std::vector<double> >("bM")) {}
+namespace cepgen::formfac {
+  /// \cite Kelly:2004hm
+  class Kelly final : public Parameterisation {
+  public:
+    explicit Kelly(const ParametersList& params)
+        : Parameterisation(params),
+          ae_(steer<std::vector<double> >("aE")),
+          be_(steer<std::vector<double> >("bE")),
+          am_(steer<std::vector<double> >("aM")),
+          bm_(steer<std::vector<double> >("bM")) {}
 
-      static ParametersDescription description() {
-        auto desc = Parameterisation::description();
-        desc.setDescription("Kelly");
-        desc.add<std::vector<double> >("aE", {1., -0.24});
-        desc.add<std::vector<double> >("bE", {10.98, 12.82, 21.97});
-        desc.add<std::vector<double> >("aM", {1., 0.12});
-        desc.add<std::vector<double> >("bM", {10.97, 18.86, 6.55});
-        return desc;
-      }
+    static ParametersDescription description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("Kelly");
+      desc.add<std::vector<double> >("aE", {1., -0.24});
+      desc.add<std::vector<double> >("bE", {10.98, 12.82, 21.97});
+      desc.add<std::vector<double> >("aM", {1., 0.12});
+      desc.add<std::vector<double> >("bM", {10.97, 18.86, 6.55});
+      return desc;
+    }
 
-    private:
-      double computeFF(double tau, const std::vector<double>& as, const std::vector<double>& bs) const {
-        double num{0.}, den{1.};
-        for (size_t i = 0; i < as.size(); ++i)
-          num += as.at(i) * std::pow(tau, i);
-        for (size_t i = 0; i < bs.size(); ++i)
-          den += bs.at(i) * std::pow(tau, i + 1);
-        return num / den;
-      }
-      void eval() override {
-        const auto ta = tau(q2_);
-        setGEGM(computeFF(ta, ae_, be_), MU * computeFF(ta, am_, bm_));
-      }
+  private:
+    double computeFF(double tau, const std::vector<double>& as, const std::vector<double>& bs) const {
+      double num{0.}, den{1.};
+      for (size_t i = 0; i < as.size(); ++i)
+        num += as.at(i) * std::pow(tau, i);
+      for (size_t i = 0; i < bs.size(); ++i)
+        den += bs.at(i) * std::pow(tau, i + 1);
+      return num / den;
+    }
+    void eval() override {
+      const auto ta = tau(q2_);
+      setGEGM(computeFF(ta, ae_, be_), MU * computeFF(ta, am_, bm_));
+    }
 
-      const std::vector<double> ae_, be_, am_, bm_;
-    };
-  }  // namespace formfac
-}  // namespace cepgen
+    const std::vector<double> ae_, be_, am_, bm_;
+  };
+}  // namespace cepgen::formfac
 using cepgen::formfac::Kelly;
 REGISTER_FORMFACTORS("Kelly", Kelly);

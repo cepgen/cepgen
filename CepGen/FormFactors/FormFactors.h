@@ -19,17 +19,15 @@
 #ifndef CepGen_FormFactors_FormFactors_h
 #define CepGen_FormFactors_FormFactors_h
 
-namespace cepgen {
-  /// Form factors definition scope
-  namespace formfac {
-    /// Form factors values
-    struct FormFactors {
-      double FE{0.};  ///< Electric form factor
-      double FM{0.};  ///< Magnetic form factor
-      double GE{0.};  ///< Sachs electric form factor
-      double GM{0.};  ///< Sachs magnetic form factor
-    };
-  }  // namespace formfac
-}  // namespace cepgen
+/// Form factors definition scope
+namespace cepgen::formfac {
+  /// Form factors values
+  struct FormFactors {
+    double FE{0.};  ///< Electric form factor
+    double FM{0.};  ///< Magnetic form factor
+    double GE{0.};  ///< Sachs electric form factor
+    double GM{0.};  ///< Sachs magnetic form factor
+  };
+}  // namespace cepgen::formfac
 
 #endif

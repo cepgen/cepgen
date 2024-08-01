@@ -21,61 +21,59 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Physics/PDG.h"
 
-namespace cepgen {
-  namespace formfac {
-    Parameterisation::Parameterisation(const ParametersList& params)
-        : NamedModule(params),
-          pdg_id_(steer<pdgid_t>("pdgId")),
-          mass2_(std::pow(PDG::get().mass(pdg_id_), 2)),
-          mp_(PDG::get().mass(PDG::proton)),
-          mp2_(mp_ * mp_) {}
+namespace cepgen::formfac {
+  Parameterisation::Parameterisation(const ParametersList& params)
+      : NamedModule(params),
+        pdg_id_(steer<pdgid_t>("pdgId")),
+        mass2_(std::pow(PDG::get().mass(pdg_id_), 2)),
+        mp_(PDG::get().mass(PDG::proton)),
+        mp2_(mp_ * mp_) {}
 
-    double Parameterisation::tau(double q2) const { return 0.25 * q2 / mass2_; }
+  double Parameterisation::tau(double q2) const { return 0.25 * q2 / mass2_; }
 
-    const FormFactors& Parameterisation::operator()(double q2) {
-      if (q2 < 0.)
-        ff_ = FormFactors{};
-      else if (q2 != q2_) {
-        q2_ = q2;
-        eval();
-      }
-      return ff_;
+  const FormFactors& Parameterisation::operator()(double q2) {
+    if (q2 < 0.)
+      ff_ = FormFactors{};
+    else if (q2 != q2_) {
+      q2_ = q2;
+      eval();
     }
+    return ff_;
+  }
 
-    ParametersDescription Parameterisation::description() {
-      auto desc = ParametersDescription();
-      desc.setDescription("Unnamed form factors parameterisation");
-      desc.add<pdgid_t>("pdgId", PDG::proton);
-      return desc;
-    }
+  ParametersDescription Parameterisation::description() {
+    auto desc = ParametersDescription();
+    desc.setDescription("Unnamed form factors parameterisation");
+    desc.add<pdgid_t>("pdgId", PDG::proton);
+    return desc;
+  }
 
-    void Parameterisation::setFEFM(double fe, double fm) {
-      ff_.FE = fe;
-      ff_.FM = fm;
-      ff_.GM = std::sqrt(ff_.FM);
-      const auto ta = tau(q2_);
-      ff_.GE = std::sqrt((1. + ta) * ff_.FE - ta * ff_.FM);
-    }
+  void Parameterisation::setFEFM(double fe, double fm) {
+    ff_.FE = fe;
+    ff_.FM = fm;
+    ff_.GM = std::sqrt(ff_.FM);
+    const auto ta = tau(q2_);
+    ff_.GE = std::sqrt((1. + ta) * ff_.FE - ta * ff_.FM);
+  }
 
-    void Parameterisation::setGEGM(double ge, double gm) {
-      ff_.GE = ge;
-      ff_.GM = gm;
-      ff_.FM = ff_.GM * ff_.GM;
-      const auto ta = tau(q2_);
-      ff_.FE = (ff_.GE * ff_.GE + ta * ff_.FM) / (1. + ta);
-    }
+  void Parameterisation::setGEGM(double ge, double gm) {
+    ff_.GE = ge;
+    ff_.GM = gm;
+    ff_.FM = ff_.GM * ff_.GM;
+    const auto ta = tau(q2_);
+    ff_.FE = (ff_.GE * ff_.GE + ta * ff_.FM) / (1. + ta);
+  }
 
-    //------------------------------------------------------------------
+  //------------------------------------------------------------------
 
-    std::ostream& operator<<(std::ostream& os, const Parameterisation& ff) {
-      os << ff.name();
-      if (ff.q2_ >= 0.)
-        os << "(Q^2=" << ff.q2_ << " GeV^2): " << ff.ff_;
-      return os;
-    }
+  std::ostream& operator<<(std::ostream& os, const Parameterisation& ff) {
+    os << ff.name();
+    if (ff.q2_ >= 0.)
+      os << "(Q^2=" << ff.q2_ << " GeV^2): " << ff.ff_;
+    return os;
+  }
 
-    std::ostream& operator<<(std::ostream& os, const FormFactors& ff) {
-      return os << "FE=" << ff.FE << ", FM=" << ff.FM << ", GE=" << ff.GE << ", GM=" << ff.GM;
-    }
-  }  // namespace formfac
-}  // namespace cepgen
+  std::ostream& operator<<(std::ostream& os, const FormFactors& ff) {
+    return os << "FE=" << ff.FE << ", FM=" << ff.FM << ", GE=" << ff.GE << ", GM=" << ff.GM;
+  }
+}  // namespace cepgen::formfac

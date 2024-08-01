@@ -27,64 +27,62 @@
 #include "CepGen/StructureFunctions/Parameterisation.h"
 #include "CepGen/Utils/Message.h"
 
-namespace cepgen {
-  namespace formfac {
-    class InelasticNucleon : public Parameterisation {
-    public:
-      explicit InelasticNucleon(const ParametersList& params)
-          : Parameterisation(params),
-            sf_(StructureFunctionsFactory::get().build(steer<ParametersList>("structureFunctions"))),
-            integr_(AnalyticIntegratorFactory::get().build(steer<ParametersList>("integrator"))),
-            compute_fm_(steer<bool>("computeFM")),
-            mx_range_(steer<Limits>("mxRange")),
-            mx2_range_{mx_range_.min() * mx_range_.min(), mx_range_.max() * mx_range_.max()},
-            dm2_range_{mx2_range_.min() - mp2_, mx2_range_.max() - mp2_},
-            eval_fe_([this](double mx2) {
-              const auto xbj = utils::xBj(q2_, mp2_, mx2);
-              return sf_->F2(xbj, q2_) * xbj;
-            }),
-            eval_fm_([this](double mx2) {
-              const auto xbj = utils::xBj(q2_, mp2_, mx2);
-              return sf_->F2(xbj, q2_) / xbj;
-            }) {
-        CG_INFO("InelasticNucleon") << "Inelastic nucleon form factors parameterisation built with:\n"
-                                    << " * structure functions modelling: "
-                                    << steer<ParametersList>("structureFunctions") << "\n"
-                                    << " * integrator algorithm: " << steer<ParametersList>("integrator") << "\n"
-                                    << " * diffractive mass range: " << steer<Limits>("mxRange") << " GeV^2.";
-      }
+namespace cepgen::formfac {
+  class InelasticNucleon : public Parameterisation {
+  public:
+    explicit InelasticNucleon(const ParametersList& params)
+        : Parameterisation(params),
+          sf_(StructureFunctionsFactory::get().build(steer<ParametersList>("structureFunctions"))),
+          integr_(AnalyticIntegratorFactory::get().build(steer<ParametersList>("integrator"))),
+          compute_fm_(steer<bool>("computeFM")),
+          mx_range_(steer<Limits>("mxRange")),
+          mx2_range_{mx_range_.min() * mx_range_.min(), mx_range_.max() * mx_range_.max()},
+          dm2_range_{mx2_range_.min() - mp2_, mx2_range_.max() - mp2_},
+          eval_fe_([this](double mx2) {
+            const auto xbj = utils::xBj(q2_, mp2_, mx2);
+            return sf_->F2(xbj, q2_) * xbj;
+          }),
+          eval_fm_([this](double mx2) {
+            const auto xbj = utils::xBj(q2_, mp2_, mx2);
+            return sf_->F2(xbj, q2_) / xbj;
+          }) {
+      CG_INFO("InelasticNucleon") << "Inelastic nucleon form factors parameterisation built with:\n"
+                                  << " * structure functions modelling: " << steer<ParametersList>("structureFunctions")
+                                  << "\n"
+                                  << " * integrator algorithm: " << steer<ParametersList>("integrator") << "\n"
+                                  << " * diffractive mass range: " << steer<Limits>("mxRange") << " GeV^2.";
+    }
 
-      static ParametersDescription description() {
-        auto desc = Parameterisation::description();
-        desc.setDescription("Proton inelastic (SF)");
-        desc.add<ParametersDescription>("structureFunctions",
-                                        StructureFunctionsFactory::get().describeParameters("LUXLike"))
-            .setDescription("type of structure functions parameterisation for the dissociative emission");
-        desc.add<ParametersDescription>("integrator", AnalyticIntegratorFactory::get().describeParameters("gsl"))
-            .setDescription("type of numerical integrator algorithm to use");
-        desc.add<bool>("computeFM", false).setDescription("compute, or neglect the F2/xbj^3 term");
-        desc.add<Limits>("mxRange", Limits{1.0732 /* mp + mpi0 */, 20.})
-            .setDescription("diffractive mass range (in GeV/c^2)");
-        return desc;
-      }
+    static ParametersDescription description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("Proton inelastic (SF)");
+      desc.add<ParametersDescription>("structureFunctions",
+                                      StructureFunctionsFactory::get().describeParameters("LUXLike"))
+          .setDescription("type of structure functions parameterisation for the dissociative emission");
+      desc.add<ParametersDescription>("integrator", AnalyticIntegratorFactory::get().describeParameters("gsl"))
+          .setDescription("type of numerical integrator algorithm to use");
+      desc.add<bool>("computeFM", false).setDescription("compute, or neglect the F2/xbj^3 term");
+      desc.add<Limits>("mxRange", Limits{1.0732 /* mp + mpi0 */, 20.})
+          .setDescription("diffractive mass range (in GeV/c^2)");
+      return desc;
+    }
 
-    protected:
-      void eval() override {
-        const auto inv_q2 = 1. / q2_;
-        const auto fe = integr_->integrate(eval_fe_, mx2_range_) * inv_q2;
-        const auto fm = compute_fm_ ? integr_->integrate(eval_fm_, mx2_range_) * inv_q2 : 0.;
-        setFEFM(fe, fm);
-      }
-      bool fragmenting() const override { return true; }
+  protected:
+    void eval() override {
+      const auto inv_q2 = 1. / q2_;
+      const auto fe = integr_->integrate(eval_fe_, mx2_range_) * inv_q2;
+      const auto fm = compute_fm_ ? integr_->integrate(eval_fm_, mx2_range_) * inv_q2 : 0.;
+      setFEFM(fe, fm);
+    }
+    bool fragmenting() const override { return true; }
 
-    private:
-      const std::unique_ptr<strfun::Parameterisation> sf_;
-      const std::unique_ptr<AnalyticIntegrator> integr_;
-      const double compute_fm_;
-      const Limits mx_range_, mx2_range_, dm2_range_;
-      const std::function<double(double)> eval_fe_, eval_fm_;
-    };
-  }  // namespace formfac
-}  // namespace cepgen
+  private:
+    const std::unique_ptr<strfun::Parameterisation> sf_;
+    const std::unique_ptr<AnalyticIntegrator> integr_;
+    const double compute_fm_;
+    const Limits mx_range_, mx2_range_, dm2_range_;
+    const std::function<double(double)> eval_fe_, eval_fm_;
+  };
+}  // namespace cepgen::formfac
 using cepgen::formfac::InelasticNucleon;
 REGISTER_FORMFACTORS("InelasticNucleon", InelasticNucleon);

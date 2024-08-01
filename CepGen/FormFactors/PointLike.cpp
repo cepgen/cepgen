@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,37 +19,35 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 
-namespace cepgen {
-  namespace formfac {
-    class PointLike : public Parameterisation {
-    public:
-      explicit PointLike(const ParametersList& params, double fe, double fm)
-          : Parameterisation(params), fe_(fe), fm_(fm) {}
+namespace cepgen::formfac {
+  class PointLike : public Parameterisation {
+  public:
+    explicit PointLike(const ParametersList& params, double fe, double fm)
+        : Parameterisation(params), fe_(fe), fm_(fm) {}
 
-    private:
-      void eval() override { setFEFM(fe_, fm_); }
-      const double fe_, fm_;
-    };
+  private:
+    void eval() override { setFEFM(fe_, fm_); }
+    const double fe_, fm_;
+  };
 
-    struct PointLikeScalar final : public PointLike {
-      explicit PointLikeScalar(const ParametersList& params) : PointLike(params, 1., 0.) {}
-      static ParametersDescription description() {
-        auto desc = Parameterisation::description();
-        desc.setDescription("Point-like scalar");
-        return desc;
-      }
-    };
+  struct PointLikeScalar final : public PointLike {
+    explicit PointLikeScalar(const ParametersList& params) : PointLike(params, 1., 0.) {}
+    static ParametersDescription description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("Point-like scalar");
+      return desc;
+    }
+  };
 
-    struct PointLikeFermion final : public PointLike {
-      explicit PointLikeFermion(const ParametersList& params) : PointLike(params, 1., 1.) {}
-      static ParametersDescription description() {
-        auto desc = Parameterisation::description();
-        desc.setDescription("Point-like fermion");
-        return desc;
-      }
-    };
-  }  // namespace formfac
-}  // namespace cepgen
+  struct PointLikeFermion final : public PointLike {
+    explicit PointLikeFermion(const ParametersList& params) : PointLike(params, 1., 1.) {}
+    static ParametersDescription description() {
+      auto desc = Parameterisation::description();
+      desc.setDescription("Point-like fermion");
+      return desc;
+    }
+  };
+}  // namespace cepgen::formfac
 using cepgen::formfac::PointLikeFermion;
 using cepgen::formfac::PointLikeScalar;
 REGISTER_FORMFACTORS("PointLikeScalar", PointLikeScalar);
