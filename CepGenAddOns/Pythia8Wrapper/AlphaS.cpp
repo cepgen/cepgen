@@ -23,31 +23,29 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Coupling.h"
 
-namespace cepgen {
-  namespace pythia8 {
-    class AlphaS final : public Coupling {
-    public:
-      explicit AlphaS(const ParametersList& params) : Coupling(params), alphas_(new Pythia8::AlphaStrong) {
-        alphas_->init(
-            steer<double>("alphaSvalue"), steer<int>("alphaSorder"), steer<int>("alphaSnfmax"), steer<bool>("useCMW"));
-      }
+namespace cepgen::pythia8 {
+  class AlphaS final : public Coupling {
+  public:
+    explicit AlphaS(const ParametersList& params) : Coupling(params), alphas_(new Pythia8::AlphaStrong) {
+      alphas_->init(
+          steer<double>("alphaSvalue"), steer<int>("alphaSorder"), steer<int>("alphaSnfmax"), steer<bool>("useCMW"));
+    }
 
-      inline static ParametersDescription description() {
-        auto desc = cepgen::Coupling::description();
-        desc.setDescription("Pythia8 modelling of alpha(S) running");
-        desc.add<double>("alphaSvalue", 0.13);
-        desc.add<int>("alphaSorder", 1);
-        desc.add<int>("alphaSnfmax", 6);
-        desc.add<bool>("useCMW", false);
-        return desc;
-      }
+    inline static ParametersDescription description() {
+      auto desc = cepgen::Coupling::description();
+      desc.setDescription("Pythia8 modelling of alpha(S) running");
+      desc.add<double>("alphaSvalue", 0.13);
+      desc.add<int>("alphaSorder", 1);
+      desc.add<int>("alphaSnfmax", 6);
+      desc.add<bool>("useCMW", false);
+      return desc;
+    }
 
-      inline double operator()(double q) const override { return alphas_->alphaS(q * q); }
+    inline double operator()(double q) const override { return alphas_->alphaS(q * q); }
 
-    private:
-      const std::unique_ptr<Pythia8::AlphaStrong> alphas_;
-    };
-  }  // namespace pythia8
-}  // namespace cepgen
+  private:
+    const std::unique_ptr<Pythia8::AlphaStrong> alphas_;
+  };
+}  // namespace cepgen::pythia8
 using Pythia8AlphaS = cepgen::pythia8::AlphaS;
 REGISTER_ALPHAS_MODULE("pythia8", Pythia8AlphaS);

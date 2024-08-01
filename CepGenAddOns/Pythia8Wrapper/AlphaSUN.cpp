@@ -23,42 +23,40 @@
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/Coupling.h"
 
-namespace cepgen {
-  namespace pythia8 {
-    class AlphaSUN final : public Coupling {
-    public:
-      explicit AlphaSUN(const ParametersList& params) : Coupling(params), alphas_(new Pythia8::AlphaSUN) {
-        const auto nCHV = steer<int>("Ngauge"), alphaHVorder = nCHV > 1 ? steer<int>("alphaOrder") : 0;
-        if (steer<bool>("setLambda")) {
-          lambda_ = steer<double>("Lambda");
-          alphas_->initLambda(nCHV, steer<int>("nFlav"), alphaHVorder, lambda_);
-        } else {
-          alphas_->initAlpha(
-              nCHV, steer<int>("nFlav"), alphaHVorder, steer<double>("alphaFSR"), steer<double>("alphaFSRrefScale"));
-          lambda_ = alphas_->Lambda();
-        }
+namespace cepgen::pythia8 {
+  class AlphaSUN final : public Coupling {
+  public:
+    explicit AlphaSUN(const ParametersList& params) : Coupling(params), alphas_(new Pythia8::AlphaSUN) {
+      const auto nCHV = steer<int>("Ngauge"), alphaHVorder = nCHV > 1 ? steer<int>("alphaOrder") : 0;
+      if (steer<bool>("setLambda")) {
+        lambda_ = steer<double>("Lambda");
+        alphas_->initLambda(nCHV, steer<int>("nFlav"), alphaHVorder, lambda_);
+      } else {
+        alphas_->initAlpha(
+            nCHV, steer<int>("nFlav"), alphaHVorder, steer<double>("alphaFSR"), steer<double>("alphaFSRrefScale"));
+        lambda_ = alphas_->Lambda();
       }
+    }
 
-      inline static ParametersDescription description() {
-        auto desc = cepgen::Coupling::description();
-        desc.setDescription("Pythia8 modelling of alpha(S) running in SU(N) model");
-        desc.add<int>("Ngauge", 1);
-        desc.add<int>("nFlav", 1);
-        desc.add<int>("alphaOrder", 0);
-        desc.add<bool>("setLambda", false);
-        desc.add<double>("Lambda", 0.4);
-        desc.add<double>("alphaFSR", 0.1);
-        desc.add<double>("alphaFSRrefScale", 91.188);
-        return desc;
-      }
+    inline static ParametersDescription description() {
+      auto desc = cepgen::Coupling::description();
+      desc.setDescription("Pythia8 modelling of alpha(S) running in SU(N) model");
+      desc.add<int>("Ngauge", 1);
+      desc.add<int>("nFlav", 1);
+      desc.add<int>("alphaOrder", 0);
+      desc.add<bool>("setLambda", false);
+      desc.add<double>("Lambda", 0.4);
+      desc.add<double>("alphaFSR", 0.1);
+      desc.add<double>("alphaFSRrefScale", 91.188);
+      return desc;
+    }
 
-      inline double operator()(double q) const override { return alphas_->alpha(q * q); }
+    inline double operator()(double q) const override { return alphas_->alpha(q * q); }
 
-    private:
-      const std::unique_ptr<Pythia8::AlphaSUN> alphas_;
-      double lambda_{0.};
-    };
-  }  // namespace pythia8
-}  // namespace cepgen
+  private:
+    const std::unique_ptr<Pythia8::AlphaSUN> alphas_;
+    double lambda_{0.};
+  };
+}  // namespace cepgen::pythia8
 using Pythia8AlphaSUN = cepgen::pythia8::AlphaSUN;
 REGISTER_ALPHAS_MODULE("pythia8UN", Pythia8AlphaSUN);
