@@ -25,33 +25,34 @@
 
 namespace cepgen {
   class RunParameters;
-  /// Location for all steering card parsers/writers
-  namespace card {
-    /// Base steering card module
-    class Handler : public NamedModule<Handler> {
-    public:
-      explicit Handler(const ParametersList&);  ///< Build a configuration from an external steering card
-      virtual ~Handler() = default;
+}
 
-      static ParametersDescription description();
+/// Location for all steering card parsers/writers
+namespace cepgen::card {
+  /// Base steering card module
+  class Handler : public NamedModule<Handler> {
+  public:
+    explicit Handler(const ParametersList&);  ///< Build a configuration from an external steering card
+    virtual ~Handler() = default;
 
-      /// Read configuration from command strings
-      inline virtual Handler& parseCommands(const std::vector<std::string>&) { return *this; }
-      /// Read configuration from steering card
-      inline virtual Handler& parseFile(const std::string&) { return *this; }
-      inline virtual void write(const std::string&) const {}  ///< Write steering card from configuration
+    static ParametersDescription description();
 
-      virtual Handler& setRunParameters(const RunParameters*);                        ///< Specify runtime parameters
-      inline const RunParameters* runParameters() const { return rt_params_.get(); }  ///< Parsed runtime parameters
-      inline std::unique_ptr<RunParameters>& runParameters() { return rt_params_; }   ///< Parsed runtime parameters
+    /// Read configuration from command strings
+    inline virtual Handler& parseCommands(const std::vector<std::string>&) { return *this; }
+    /// Read configuration from steering card
+    inline virtual Handler& parseFile(const std::string&) { return *this; }
+    inline virtual void write(const std::string&) const {}  ///< Write steering card from configuration
 
-    protected:
-      const std::string filename_;  ///< Input filename
+    virtual Handler& setRunParameters(const RunParameters*);                        ///< Specify runtime parameters
+    inline const RunParameters* runParameters() const { return rt_params_.get(); }  ///< Parsed runtime parameters
+    inline std::unique_ptr<RunParameters>& runParameters() { return rt_params_; }   ///< Parsed runtime parameters
 
-    private:
-      std::unique_ptr<RunParameters> rt_params_{nullptr};  ///< List of parameters parsed from a card handler
-    };
-  }  // namespace card
-}  // namespace cepgen
+  protected:
+    const std::string filename_;  ///< Input filename
+
+  private:
+    std::unique_ptr<RunParameters> rt_params_{nullptr};  ///< List of parameters parsed from a card handler
+  };
+}  // namespace cepgen::card
 
 #endif

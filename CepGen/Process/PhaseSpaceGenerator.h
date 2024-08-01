@@ -21,13 +21,14 @@
 
 #include "CepGen/Modules/NamedModule.h"
 
+namespace cepgen::proc {
+  class FactorisedProcess;
+}
+namespace cepgen::cuts {
+  struct Central;
+}
+
 namespace cepgen {
-  namespace proc {
-    class FactorisedProcess;
-  }
-  namespace cuts {
-    struct Central;
-  }
   /// Class template to define any phase space helper process
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Feb 2024
@@ -35,10 +36,10 @@ namespace cepgen {
   public:
     explicit PhaseSpaceGenerator(const ParametersList& params) : NamedModule(params) {}
 
-    virtual bool ktFactorised() const { return false; }
+    inline virtual bool ktFactorised() const { return false; }
 
-    virtual void setCentralCuts(const cuts::Central&) {}    ///< Set cuts on central particles
-    virtual void initialise(proc::FactorisedProcess*) = 0;  ///< Set all process parameters
+    inline virtual void setCentralCuts(const cuts::Central&) {}  ///< Set cuts on central particles
+    virtual void initialise(proc::FactorisedProcess*) = 0;       ///< Set all process parameters
 
     virtual bool generate() = 0;        ///< Generate a kinematics combination, and return a success flag
     virtual double weight() const = 0;  ///< Return the event weight for a kinematics combination

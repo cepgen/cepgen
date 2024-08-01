@@ -32,7 +32,7 @@ namespace cepgen {
 
   void GeneratorWorker::setRunParameters(const RunParameters* params) {
     params_ = params;
-    integrand_.reset(new ProcessIntegrand(params));
+    integrand_ = std::make_unique<ProcessIntegrand>(params);
     CG_DEBUG("GeneratorWorker") << "New generator worker initialised for integration/event generation.\n\t"
                                 << "Run parameters at " << (void*)params_ << ".";
   }

@@ -65,137 +65,126 @@ double cepgen_param_real_(char* pname, double& def) {
 }
 }
 
-namespace cepgen {
-  namespace proc {
-    ParametersList FortranFactorisedProcess::kProcParameters;  ///< List of parameters to steer the process
+namespace cepgen::proc {
+  ParametersList FortranFactorisedProcess::kProcParameters;  ///< List of parameters to steer the process
 
-    FortranFactorisedProcess::FortranFactorisedProcess(const ParametersList& params,
-                                                       const std::function<double(void)>& func)
-        : FactorisedProcess(params, {PDG::muon, PDG::muon}), func_(func) {
-      constants_.m_p = Process::mp_;
-      constants_.units = constants::GEVM2_TO_PB;
-      constants_.pi = M_PI;
-    }
+  FortranFactorisedProcess::FortranFactorisedProcess(const ParametersList& params,
+                                                     const std::function<double(void)>& func)
+      : FactorisedProcess(params, {PDG::muon, PDG::muon}), func_(func) {
+    constants_.m_p = Process::mp_;
+    constants_.units = constants::GEVM2_TO_PB;
+    constants_.pi = M_PI;
+  }
 
-    void FortranFactorisedProcess::prepareFactorisedPhaseSpace() {
-      const auto lim_rap = kinematics().cuts().central.rapidity_single.truncate(Limits{-6., 6.});
-      defineVariable(m_y1_, Mapping::linear, lim_rap, "y1", "First central particle rapidity");
-      defineVariable(m_y2_, Mapping::linear, lim_rap, "y2", "Second central particle rapidity");
+  void FortranFactorisedProcess::prepareFactorisedPhaseSpace() {
+    const auto lim_rap = kinematics().cuts().central.rapidity_single.truncate(Limits{-6., 6.});
+    defineVariable(m_y1_, Mapping::linear, lim_rap, "y1", "First central particle rapidity");
+    defineVariable(m_y2_, Mapping::linear, lim_rap, "y2", "Second central particle rapidity");
 
-      const auto lim_pt_diff = kinematics().cuts().central.pt_diff.truncate(Limits{0., 50.});
-      defineVariable(
-          m_pt_diff_, Mapping::linear, lim_pt_diff, "pt_diff", "Central particles transverse momentum difference");
+    const auto lim_pt_diff = kinematics().cuts().central.pt_diff.truncate(Limits{0., 50.});
+    defineVariable(
+        m_pt_diff_, Mapping::linear, lim_pt_diff, "pt_diff", "Central particles transverse momentum difference");
 
-      const auto lim_phi_diff = kinematics().cuts().central.phi_diff.truncate(Limits{0., 2. * M_PI});
-      defineVariable(
-          m_phi_pt_diff_, Mapping::linear, lim_phi_diff, "phi_diff", "Central particles azimuthal angle difference");
+    const auto lim_phi_diff = kinematics().cuts().central.phi_diff.truncate(Limits{0., 2. * M_PI});
+    defineVariable(
+        m_phi_pt_diff_, Mapping::linear, lim_phi_diff, "phi_diff", "Central particles azimuthal angle difference");
 
-      //===========================================================================================
-      // feed phase space cuts to the common block
-      //===========================================================================================
+    //===========================================================================================
+    // feed phase space cuts to the common block
+    //--- export the limits into external variables
+    auto save_lim = [](const Limits& lim, int& on, double& min, double& max) {
+      on = lim.valid();
+      min = lim.hasMin() ? lim.min() : -9999.999;
+      max = lim.hasMax() ? lim.max() : +9999.999;
+    };
+    save_lim(kinematics().cuts().central.pt_single, kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max);
+    save_lim(kinematics().cuts().central.energy_single, kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max);
+    save_lim(kinematics().cuts().central.eta_single, kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max);
+    save_lim(kinematics().cuts().central.mass_sum, kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max);
+    save_lim(kinematics().cuts().central.pt_sum, kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max);
+    save_lim(kinematics().cuts().central.rapidity_diff, kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max);
+    //===========================================================================================
 
-      // export the limits into external variables
-      auto save_lim = [](const Limits& lim, int& on, double& min, double& max) {
-        on = lim.valid();
-        min = lim.hasMin() ? lim.min() : -9999.999;
-        max = lim.hasMax() ? lim.max() : +9999.999;
-      };
+    //===========================================================================================
+    // feed run parameters to the common block
+    genparams_.icontri = (int)kinematics().incomingBeams().mode();
+    //===========================================================================================
 
-      save_lim(kinematics().cuts().central.pt_single, kincuts_.ipt, kincuts_.pt_min, kincuts_.pt_max);
-      save_lim(kinematics().cuts().central.energy_single, kincuts_.iene, kincuts_.ene_min, kincuts_.ene_max);
-      save_lim(kinematics().cuts().central.eta_single, kincuts_.ieta, kincuts_.eta_min, kincuts_.eta_max);
-      save_lim(kinematics().cuts().central.mass_sum, kincuts_.iinvm, kincuts_.invm_min, kincuts_.invm_max);
-      save_lim(kinematics().cuts().central.pt_sum, kincuts_.iptsum, kincuts_.ptsum_min, kincuts_.ptsum_max);
-      save_lim(kinematics().cuts().central.rapidity_diff, kincuts_.idely, kincuts_.dely_min, kincuts_.dely_max);
-
-      //===========================================================================================
-      // feed run parameters to the common block
-      //===========================================================================================
-
-      genparams_.icontri = (int)kinematics().incomingBeams().mode();
-
-      //-------------------------------------------------------------------------------------------
-      // incoming beams information
-      //-------------------------------------------------------------------------------------------
-
-      //--- positive-z incoming beam
-      genparams_.inp1 = kinematics().incomingBeams().positive().momentum().pz();
-      //--- check if first incoming beam is a heavy ion
-      if (HeavyIon::isHI(kinematics().incomingBeams().positive().integerPdgId())) {
-        const auto in1 = HeavyIon::fromPdgId(kinematics().incomingBeams().positive().integerPdgId());
-        genparams_.a_nuc1 = in1.A;
-        genparams_.z_nuc1 = (unsigned short)in1.Z;
-        if (genparams_.z_nuc1 > 1) {
-          event().oneWithRole(Particle::IncomingBeam1).setPdgId((pdgid_t)in1);
-          event().oneWithRole(Particle::OutgoingBeam1).setPdgId((pdgid_t)in1);
-        }
-      } else
-        genparams_.a_nuc1 = genparams_.z_nuc1 = 1;
-
-      //--- negative-z incoming beam
-      genparams_.inp2 = kinematics().incomingBeams().negative().momentum().pz();
-      //--- check if second incoming beam is a heavy ion
-      if (HeavyIon::isHI(kinematics().incomingBeams().negative().integerPdgId())) {
-        const auto in2 = HeavyIon::fromPdgId(kinematics().incomingBeams().negative().integerPdgId());
-        genparams_.a_nuc2 = in2.A;
-        genparams_.z_nuc2 = (unsigned short)in2.Z;
-        if (genparams_.z_nuc2 > 1) {
-          event().oneWithRole(Particle::IncomingBeam2).setPdgId((pdgid_t)in2);
-          event().oneWithRole(Particle::OutgoingBeam2).setPdgId((pdgid_t)in2);
-        }
-      } else
-        genparams_.a_nuc2 = genparams_.z_nuc2 = 1;
-
-      // intermediate partons information
-      genparams_.iflux1 = (int)psgen_->partons().at(0);
-      genparams_.iflux2 = (int)psgen_->partons().at(1);
-    }
-
-    double FortranFactorisedProcess::computeFactorisedMatrixElement() {
-      //===========================================================================================
-      // outgoing beam remnants
-      //===========================================================================================
-
-      pX() = Momentum(evtkin_.px);
-      pY() = Momentum(evtkin_.py);
-      // express these momenta per nucleon
-      pX() *= 1. / genparams_.a_nuc1;
-      pY() *= 1. / genparams_.a_nuc2;
-
-      //===========================================================================================
-      // intermediate partons
-      //===========================================================================================
-
-      q1() = pA() - pX();
-      q2() = pB() - pY();
-      event().oneWithRole(Particle::Intermediate).setMomentum(q1() + q2());
-
-      //===========================================================================================
-      // central system
-      //===========================================================================================
-
-      auto oc = event()[Particle::CentralSystem];  // retrieve all references
-                                                   // to central system particles
-      for (int i = 0; i < evtkin_.nout; ++i) {
-        auto& p = oc[i].get();  // retrieve a reference to the specific particle
-        p.setPdgId((long)evtkin_.pdg[i]);
-        p.setStatus(Particle::Status::FinalState);
-        p.setMomentum(Momentum(evtkin_.pc[i]));
+    //-------------------------------------------------------------------------------------------
+    // incoming beams information
+    //--- positive-z incoming beam
+    genparams_.inp1 = kinematics().incomingBeams().positive().momentum().pz();
+    //--- check if first incoming beam is a heavy ion
+    if (HeavyIon::isHI(kinematics().incomingBeams().positive().integerPdgId())) {
+      const auto in1 = HeavyIon::fromPdgId(kinematics().incomingBeams().positive().integerPdgId());
+      genparams_.a_nuc1 = in1.A;
+      genparams_.z_nuc1 = (unsigned short)in1.Z;
+      if (genparams_.z_nuc1 > 1) {
+        event().oneWithRole(Particle::IncomingBeam1).setPdgId((pdgid_t)in1);
+        event().oneWithRole(Particle::OutgoingBeam1).setPdgId((pdgid_t)in1);
       }
-      // set all kinematics variables for this phase space point
-      ktkin_.q1t = q1().p();
-      ktkin_.q2t = q2().p();
-      ktkin_.phiq1t = q1().phi();
-      ktkin_.phiq2t = q2().phi();
-      ktkin_.y1 = m_y1_;
-      ktkin_.y2 = m_y2_;
-      ktkin_.ptdiff = m_pt_diff_;
-      ktkin_.phiptdiff = m_phi_pt_diff_;
-      ktkin_.m_x = mX();
-      ktkin_.m_y = mY();
+    } else
+      genparams_.a_nuc1 = genparams_.z_nuc1 = 1;
+    //--- negative-z incoming beam
+    genparams_.inp2 = kinematics().incomingBeams().negative().momentum().pz();
+    //--- check if second incoming beam is a heavy ion
+    if (HeavyIon::isHI(kinematics().incomingBeams().negative().integerPdgId())) {
+      const auto in2 = HeavyIon::fromPdgId(kinematics().incomingBeams().negative().integerPdgId());
+      genparams_.a_nuc2 = in2.A;
+      genparams_.z_nuc2 = (unsigned short)in2.Z;
+      if (genparams_.z_nuc2 > 1) {
+        event().oneWithRole(Particle::IncomingBeam2).setPdgId((pdgid_t)in2);
+        event().oneWithRole(Particle::OutgoingBeam2).setPdgId((pdgid_t)in2);
+      }
+    } else
+      genparams_.a_nuc2 = genparams_.z_nuc2 = 1;
+    //-------------------------------------------------------------------------------------------
 
-      // compute the event weight
-      return func_();
+    // intermediate partons information
+    genparams_.iflux1 = (int)psgen_->partons().at(0);
+    genparams_.iflux2 = (int)psgen_->partons().at(1);
+  }
+
+  double FortranFactorisedProcess::computeFactorisedMatrixElement() {
+    //===========================================================================================
+    // outgoing beam remnants
+    pX() = Momentum(evtkin_.px);
+    pY() = Momentum(evtkin_.py);
+    // express these momenta per nucleon
+    pX() *= 1. / genparams_.a_nuc1;
+    pY() *= 1. / genparams_.a_nuc2;
+    //===========================================================================================
+
+    //===========================================================================================
+    // intermediate partons
+    q1() = pA() - pX();
+    q2() = pB() - pY();
+    event().oneWithRole(Particle::Intermediate).setMomentum(q1() + q2());
+    //===========================================================================================
+
+    //===========================================================================================
+    // central system
+    auto oc = event()[Particle::CentralSystem];  // retrieve all references
+                                                 // to central system particles
+    for (int i = 0; i < evtkin_.nout; ++i) {
+      auto& p = oc[i].get();  // retrieve a reference to the specific particle
+      p.setPdgId((long)evtkin_.pdg[i]);
+      p.setStatus(Particle::Status::FinalState);
+      p.setMomentum(Momentum(evtkin_.pc[i]));
     }
-  }  // namespace proc
-}  // namespace cepgen
+    //===========================================================================================
+
+    // set all kinematics variables for this phase space point
+    ktkin_.q1t = q1().p();
+    ktkin_.q2t = q2().p();
+    ktkin_.phiq1t = q1().phi();
+    ktkin_.phiq2t = q2().phi();
+    ktkin_.y1 = m_y1_;
+    ktkin_.y2 = m_y2_;
+    ktkin_.ptdiff = m_pt_diff_;
+    ktkin_.phiptdiff = m_phi_pt_diff_;
+    ktkin_.m_x = mX();
+    ktkin_.m_y = mY();
+    return func_();  // compute the event weight
+  }
+}  // namespace cepgen::proc

@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,21 +21,18 @@
 
 #include <iosfwd>
 
-namespace cepgen {
-  /// Collection of enums for the definition of process mode
-  namespace mode {
-    /// Type of scattering
-    enum class Kinematics {
-      invalid = 0,
-      ElasticElastic = 1,     ///< proton-proton elastic case
-      ElasticInelastic = 2,   ///< proton-proton single-dissociative (or inelastic-elastic) case
-      InelasticElastic = 3,   ///< proton-proton single-dissociative (or elastic-inelastic) case
-      InelasticInelastic = 4  ///< proton-proton double-dissociative case
-    };
-
-    /// Human-readable format of a process mode (elastic/dissociative parts)
-    std::ostream& operator<<(std::ostream&, const cepgen::mode::Kinematics&);
-  }  // namespace mode
-}  // namespace cepgen
+/// Collection of enums for the definition of process mode
+namespace cepgen::mode {
+  /// Type of scattering
+  enum class Kinematics {
+    invalid = 0,
+    ElasticElastic = 1,     ///< proton-proton elastic case
+    ElasticInelastic = 2,   ///< proton-proton single-dissociative (or inelastic-elastic) case
+    InelasticElastic = 3,   ///< proton-proton single-dissociative (or elastic-inelastic) case
+    InelasticInelastic = 4  ///< proton-proton double-dissociative case
+  };
+  /// Human-readable format of a process mode (elastic/dissociative parts)
+  std::ostream& operator<<(std::ostream&, const cepgen::mode::Kinematics&);
+}  // namespace cepgen::mode
 
 #endif

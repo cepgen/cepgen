@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,22 +20,20 @@
 
 #include "CepGen/Physics/Modes.h"
 
-namespace cepgen {
-  namespace mode {
-    std::ostream& operator<<(std::ostream& os, const Kinematics& pm) {
-      switch (pm) {
-        case Kinematics::invalid:
-          return os << "{invalid}";
-        case Kinematics::ElasticElastic:
-          return os << "elastic/elastic";
-        case Kinematics::InelasticElastic:
-          return os << "inelastic/elastic";
-        case Kinematics::ElasticInelastic:
-          return os << "elastic/inelastic";
-        case Kinematics::InelasticInelastic:
-          return os << "inelastic/inelastic";
-      }
-      return os;
+namespace cepgen::mode {
+  std::ostream& operator<<(std::ostream& os, const Kinematics& pm) {
+    switch (pm) {
+      case Kinematics::invalid:
+        return os << "{invalid}";
+      case Kinematics::ElasticElastic:
+        return os << "elastic/elastic";
+      case Kinematics::InelasticElastic:
+        return os << "inelastic/elastic";
+      case Kinematics::ElasticInelastic:
+        return os << "elastic/inelastic";
+      case Kinematics::InelasticInelastic:
+        return os << "inelastic/inelastic";
     }
-  }  // namespace mode
-}  // namespace cepgen
+    return os;
+  }
+}  // namespace cepgen::mode

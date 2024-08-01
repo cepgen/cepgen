@@ -19,7 +19,7 @@
 #ifndef CepGen_Physics_Kinematics_h
 #define CepGen_Physics_Kinematics_h
 
-#include "CepGen/Physics/Cuts.h"
+#include "CepGen/Physics/CutsList.h"
 #include "CepGen/Physics/IncomingBeams.h"
 
 namespace cepgen {

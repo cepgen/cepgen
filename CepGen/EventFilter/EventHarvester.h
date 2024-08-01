@@ -23,10 +23,13 @@
 
 namespace cepgen {
   class Event;
-  namespace utils {
-    class Drawer;
-    class EventBrowser;
-  }  // namespace utils
+}
+namespace cepgen::utils {
+  class Drawer;
+  class EventBrowser;
+}  // namespace cepgen::utils
+
+namespace cepgen {
   /// Generic text file output handler
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Jul 2019

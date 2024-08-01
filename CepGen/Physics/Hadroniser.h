@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2021  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,29 +21,23 @@
 
 #include "CepGen/EventFilter/EventModifier.h"
 
-namespace cepgen {
-  /// Location for all hadronisers to be run downstream to the events generation
-  namespace hadr {
-    /**
-     * \brief Class template to define any hadroniser as a general object with defined methods
-     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-     * \date January 2014
-     */
-    class Hadroniser : public EventModifier {
-    public:
-      /// Default constructor for an undefined hadroniser
-      explicit Hadroniser(const ParametersList&);
+/// Location for all hadronisers to be run downstream to the events generation
+namespace cepgen::hadr {
+  /// Class template to define any hadroniser as a general object with defined methods
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date January 2014
+  class Hadroniser : public EventModifier {
+  public:
+    /// Default constructor for an undefined hadroniser
+    explicit Hadroniser(const ParametersList&);
 
-      static ParametersDescription description();
+    static ParametersDescription description();
 
-      /// Specify whether the beam remnants are to be fragmented
-      bool fragmentRemnants() const { return remn_fragm_; }
+    inline bool fragmentRemnants() const { return remn_fragm_; }  ///< Fragment the beam remnants?
 
-    protected:
-      /// Switch on/off the remnants fragmentation where applicable
-      const bool remn_fragm_;
-    };
-  }  // namespace hadr
-}  // namespace cepgen
+  protected:
+    const bool remn_fragm_;  ///< Switch on/off the remnants fragmentation where applicable
+  };
+}  // namespace cepgen::hadr
 
 #endif

@@ -27,10 +27,12 @@ namespace cepgen {
   class Integrator;
   class GeneratorWorker;
   class RunParameters;
-  namespace proc {
-    class Process;
-  }
+}  // namespace cepgen
+namespace cepgen::proc {
+  class Process;
+}
 
+namespace cepgen {
   static std::vector<std::string> loaded_libraries;   ///< Collection of libraries loaded in RTE
   static std::vector<std::string> invalid_libraries;  ///< Collection of libraries tested not to work with RTE
   static std::vector<std::string> search_paths;       ///< Collection of search paths to build RTE

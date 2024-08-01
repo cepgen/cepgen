@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2023  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,11 +34,11 @@
 #include <dlfcn.h>
 #endif
 
-namespace cepgen {
-  namespace utils {
-    std::atomic<int> gSignal;  ///< Abort signal handler
-  }                            // namespace utils
+namespace cepgen::utils {
+  std::atomic<int> gSignal;  ///< Abort signal handler
+}
 
+namespace cepgen {
   bool loadLibrary(const std::string& path, bool match) {
     if (utils::contains(loaded_libraries, path))
       return true;
@@ -79,12 +79,9 @@ namespace cepgen {
       CG_WARNING("callPath") << "List of search paths is empty.";
       return false;
     }
-    for (const auto& search_path : search_paths) {
-      fs::path the_path{search_path};
-      the_path /= local_path;
-      if (utils::fileExists(the_path))
+    for (const auto& search_path : search_paths)
+      if (const auto the_path = fs::path{search_path} / local_path; utils::fileExists(the_path))
         return callback(the_path);
-    }
     return false;
   }
 

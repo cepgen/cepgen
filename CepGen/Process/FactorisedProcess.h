@@ -22,47 +22,43 @@
 #include "CepGen/Process/PhaseSpaceGenerator.h"
 #include "CepGen/Process/Process.h"
 
-namespace cepgen {
-  namespace proc {
-    /**
-     * Generic parton emission-factorised process
-     * \note 0 to 2 dimensions may be used for the scattered diffractive system(s)' invariant mass definition.
-     * \author Laurent Forthomme <laurent.forthomme@cern.ch>
-     * \date Jul 2023
-     */
-    class FactorisedProcess : public Process {
-    public:
-      /// Class constructor
-      /// \param[in] params Parameters list
-      /// \param[in] output Produced final state particles
-      explicit FactorisedProcess(const ParametersList& params, const spdgids_t& output);
-      FactorisedProcess(const FactorisedProcess&);
+namespace cepgen::proc {
+  /// Generic parton emission-factorised process
+  /// \note 0 to 2 dimensions may be used for the scattered diffractive system(s)' invariant mass definition.
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date Jul 2023
+  class FactorisedProcess : public Process {
+  public:
+    /// Class constructor
+    /// \param[in] params Parameters list
+    /// \param[in] output Produced final state particles
+    explicit FactorisedProcess(const ParametersList& params, const spdgids_t& output);
+    FactorisedProcess(const FactorisedProcess&);
 
-      double computeWeight() override;
-      void fillKinematics() override final;
+    double computeWeight() override;
+    void fillKinematics() override final;
 
-      static ParametersDescription description();
+    static ParametersDescription description();
 
-    protected:
-      void addEventContent() override;
-      void prepareKinematics() override final;
+  protected:
+    void addEventContent() override;
+    void prepareKinematics() override final;
 
-      virtual void prepareFactorisedPhaseSpace() = 0;  ///< Prepare central part of the Jacobian after kinematics is set
-      virtual double computeFactorisedMatrixElement() = 0;  ///< Factorised matrix element (event weight)
+    virtual void prepareFactorisedPhaseSpace() = 0;  ///< Prepare central part of the Jacobian after kinematics is set
+    virtual double computeFactorisedMatrixElement() = 0;  ///< Factorised matrix element (event weight)
 
-      //--- Mandelstam variables
-      double that() const;  ///< \f$\hat t=\frac{1}{2}\left[(p_1-p_3)^2+(p_2-p_4)^2\right]\f$
-      double uhat() const;  ///< \f$\hat u=\frac{1}{2}\left[(p_1-p_4)^2+(p_2-p_3)^2\right]\f$
+    //--- Mandelstam variables
+    double that() const;  ///< \f$\hat t=\frac{1}{2}\left[(p_1-p_3)^2+(p_2-p_4)^2\right]\f$
+    double uhat() const;  ///< \f$\hat u=\frac{1}{2}\left[(p_1-p_4)^2+(p_2-p_3)^2\right]\f$
 
-      /// Kinematic variables generator for the phase space coverage
-      const std::unique_ptr<PhaseSpaceGenerator> psgen_;
-      const bool symmetrise_;
-      const bool store_alphas_;
+    /// Kinematic variables generator for the phase space coverage
+    const std::unique_ptr<PhaseSpaceGenerator> psgen_;
+    const bool symmetrise_;
+    const bool store_alphas_;
 
-    private:
-      double kin_prefactor_{1.};
-    };
-  }  // namespace proc
-}  // namespace cepgen
+  private:
+    double kin_prefactor_{1.};
+  };
+}  // namespace cepgen::proc
 
 #endif

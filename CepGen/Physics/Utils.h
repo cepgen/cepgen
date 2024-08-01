@@ -19,19 +19,18 @@
 #ifndef CepGen_Physics_Utils_h
 #define CepGen_Physics_Utils_h
 
-namespace cepgen {
-  namespace utils {
-    double mX2(double xbj, double q2, double mp2);        ///< Compute the diffractive mass from virtuality/Bjorken x
-    double xBj(double q2, double mp2, double mx2);        ///< Compute Bjorken x from virtuality/diffractive mass
-    double q2(double xbj, double mp2, double mx2);        ///< Compute the virtuality from Bjorken x/diffractive mass
-    double energyFromW(double w, double mp2, double m2);  ///< Compute energy from mass and emitted mass
-    namespace kt {
-      /// Compute the diffractive mass from longitudinal loss/transverse virtuality/virtuality
-      double mX2(double x, double kt2, double q2, double mi2);
-      /// Compute the virtuality from longitudinal loss/transverse virtuality/diffractive mass
-      double q2(double x, double kt2, double mi2, double mf2 = -1.);
-    }  // namespace kt
-  }    // namespace utils
-}  // namespace cepgen
+namespace cepgen::utils {
+  double mX2(double xbj, double q2, double mp2);        ///< Compute the diffractive mass from virtuality/Bjorken x
+  double xBj(double q2, double mp2, double mx2);        ///< Compute Bjorken x from virtuality/diffractive mass
+  double q2(double xbj, double mp2, double mx2);        ///< Compute the virtuality from Bjorken x/diffractive mass
+  double energyFromW(double w, double mp2, double m2);  ///< Compute energy from mass and emitted mass
+}  // namespace cepgen::utils
+
+namespace cepgen::utils::kt {
+  /// Diffractive mass from longitudinal loss/transverse virtuality/virtuality
+  double mX2(double x, double kt2, double q2, double mi2);
+  /// Virtuality from longitudinal loss/transverse virtuality/diffractive mass
+  double q2(double x, double kt2, double mi2, double mf2 = -1.);
+}  // namespace cepgen::utils::kt
 
 #endif

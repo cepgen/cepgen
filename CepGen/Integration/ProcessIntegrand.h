@@ -26,12 +26,15 @@
 
 namespace cepgen {
   class RunParameters;
-  namespace proc {
-    class Process;
-  }
-  namespace utils {
-    class Timer;
-  }
+}
+namespace cepgen::proc {
+  class Process;
+}
+namespace cepgen::utils {
+  class Timer;
+}
+
+namespace cepgen {
   /// Wrapper to the function to be integrated
   class ProcessIntegrand : public Integrand {
   public:

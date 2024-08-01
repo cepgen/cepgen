@@ -25,9 +25,12 @@ namespace cepgen {
   class Integrator;
   class RunParameters;
   class ProcessIntegrand;
-  namespace proc {
-    class Process;
-  }
+}  // namespace cepgen
+namespace cepgen::proc {
+  class Process;
+}  // namespace cepgen::proc
+
+namespace cepgen {
   /// Event generator worker instance
   class GeneratorWorker : public SteeredObject<GeneratorWorker> {
   public:

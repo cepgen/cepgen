@@ -20,24 +20,22 @@
 #include "CepGen/Core/RunParameters.h"
 #include "CepGen/Modules/CardsHandlerFactory.h"
 
-namespace cepgen {
-  namespace card {
-    Handler::Handler(const ParametersList& params)
-        : NamedModule(params), filename_(steer<std::string>("filename")), rt_params_(new RunParameters) {
-      if (!filename_.empty())
-        parseFile(filename_);
-    }
+namespace cepgen::card {
+  Handler::Handler(const ParametersList& params)
+      : NamedModule(params), filename_(steer<std::string>("filename")), rt_params_(new RunParameters) {
+    if (!filename_.empty())
+      parseFile(filename_);
+  }
 
-    Handler& Handler::setRunParameters(const RunParameters* params) {
-      rt_params_.reset(const_cast<RunParameters*>(params));
-      return *this;
-    }
+  Handler& Handler::setRunParameters(const RunParameters* params) {
+    rt_params_.reset(const_cast<RunParameters*>(params));
+    return *this;
+  }
 
-    ParametersDescription Handler::description() {
-      auto desc = ParametersDescription();
-      desc.setDescription("Generic steering cards handler");
-      desc.add<std::string>("filename", "").setDescription("Steering card to parse");
-      return desc;
-    }
-  }  // namespace card
-}  // namespace cepgen
+  ParametersDescription Handler::description() {
+    auto desc = ParametersDescription();
+    desc.setDescription("Generic steering cards handler");
+    desc.add<std::string>("filename", "").setDescription("Steering card to parse");
+    return desc;
+  }
+}  // namespace cepgen::card

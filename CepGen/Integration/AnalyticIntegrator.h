@@ -24,10 +24,11 @@
 #include "CepGen/Modules/NamedModule.h"
 #include "CepGen/Utils/Limits.h"
 
+namespace cepgen::utils {
+  class Function1D;
+}
+
 namespace cepgen {
-  namespace utils {
-    class Function1D;
-  }
   /// Analytic (functional) integration algorithm
   class AnalyticIntegrator : public NamedModule<AnalyticIntegrator> {
   public:
