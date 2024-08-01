@@ -40,9 +40,10 @@ namespace cepgen {
         return;
       {  // capture stdout to avoid "polluting" consumer code with unmanaged output
         int out = dup(fileno(stdout));
-        freopen((fs::temp_directory_path() / "herwig.log").string().data(), "w", stdout);
+        if (const auto tmp_path = fs::temp_directory_path() / "herwig.log"; utils::isWriteable(tmp_path))
+          ::freopen(tmp_path.string().data(), "w", stdout);
         hwigin_();
-        dup2(out, fileno(stdout));
+        ::dup2(out, fileno(stdout));
         close(out);
       }
       kInitialised = true;

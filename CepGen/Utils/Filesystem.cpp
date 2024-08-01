@@ -17,6 +17,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <unistd.h>
+
 #include <fstream>
 
 #include "CepGen/Core/Exception.h"
@@ -33,5 +35,7 @@ namespace cepgen {
         return std::string(std::istreambuf_iterator<char>(ifile), std::istreambuf_iterator<char>());
       throw CG_FATAL("readFile") << "Failed to open the file '" << filename << "' for reading.";
     }
+
+    bool isWriteable(const std::string& path) { return ::access(path.data(), W_OK) == 0; }
   }  //namespace utils
 }  // namespace cepgen
