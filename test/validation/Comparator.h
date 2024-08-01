@@ -19,6 +19,7 @@
 #ifndef CepGen_Validation_Comparator_h
 #define CepGen_Validation_Comparator_h
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Generator.h"
 #include "CepGen/Modules/DrawerFactory.h"
@@ -35,7 +36,13 @@ namespace cepgen::validation {
           top_label_(steer<std::string>("topLabel")),
           path_tmpl_(steer<std::string>("pathTemplate")),
           num_events_(steer<int>("numEvents")) {}
-    inline ~Comparator() { finalise(); }
+    inline ~Comparator() {
+      try {
+        finalise();
+      } catch (const Exception& err) {
+        CG_ERROR("Comparator") << "Caught exception while finalising the comparison:\n" << err.what();
+      }
+    }
     virtual void initialise() = 0;
     Comparator& book(const std::string& name, const std::string& var, const std::string& unit, utils::Hist1D hist) {
       hist.xAxis().setLabel(var + (unit.empty() ? "" : " (" + unit + ")"));
