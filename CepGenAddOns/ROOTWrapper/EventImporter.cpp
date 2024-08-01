@@ -26,39 +26,37 @@
 #include "CepGen/Utils/Value.h"
 #include "CepGenAddOns/ROOTWrapper/ROOTTreeInfo.h"
 
-namespace cepgen {
-  namespace root {
-    /// ROOT handler for an event tree import
-    /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
-    /// \date Feb 2024
-    class EventImporter : public cepgen::EventImporter {
-    public:
-      explicit EventImporter(const ParametersList& params)
-          : cepgen::EventImporter(params), file_(TFile::Open(steer<std::string>("filename").data())) {
-        if (!file_)
-          throw CG_FATAL("root::EventImporter")
-              << "Failed to load the ROOT file '" << steer<std::string>("filename") << "'.";
-        run_tree_.attach(file_.get());
-        evt_tree_.attach(file_.get());
-      }
+namespace cepgen::root {
+  /// ROOT handler for an event tree import
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date Feb 2024
+  class EventImporter : public cepgen::EventImporter {
+  public:
+    explicit EventImporter(const ParametersList& params)
+        : cepgen::EventImporter(params), file_(TFile::Open(steer<std::string>("filename").data())) {
+      if (!file_)
+        throw CG_FATAL("root::EventImporter")
+            << "Failed to load the ROOT file '" << steer<std::string>("filename") << "'.";
+      run_tree_.attach(file_.get());
+      evt_tree_.attach(file_.get());
+    }
 
-      static ParametersDescription description() {
-        auto desc = cepgen::EventImporter::description();
-        desc.setDescription("ROOT TTree importer module");
-        desc.add<std::string>("filename", "output.root").setDescription("Input filename");
-        return desc;
-      }
+    static ParametersDescription description() {
+      auto desc = cepgen::EventImporter::description();
+      desc.setDescription("ROOT TTree importer module");
+      desc.add<std::string>("filename", "output.root").setDescription("Input filename");
+      return desc;
+    }
 
-      bool operator>>(Event& evt) override { return evt_tree_.next(evt); }
+    inline bool operator>>(Event& evt) override { return evt_tree_.next(evt); }
 
-    private:
-      void initialise() override { setCrossSection(Value{run_tree_.xsect, run_tree_.errxsect}); }
+  private:
+    inline void initialise() override { setCrossSection(Value{run_tree_.xsect, run_tree_.errxsect}); }
 
-      const std::unique_ptr<TFile> file_;
-      ROOT::CepGenRun run_tree_;
-      ROOT::CepGenEvent evt_tree_;
-    };
-  }  // namespace root
-}  // namespace cepgen
+    const std::unique_ptr<TFile> file_;
+    ROOT::CepGenRun run_tree_;
+    ROOT::CepGenEvent evt_tree_;
+  };
+}  // namespace cepgen::root
 using ROOTEventImporter = cepgen::root::EventImporter;
 REGISTER_EVENT_IMPORTER("root_tree", ROOTEventImporter);

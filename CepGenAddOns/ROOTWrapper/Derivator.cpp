@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2022  Laurent Forthomme
+ *  Copyright (C) 2022-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,13 +23,13 @@
 #include "CepGen/Utils/Derivator.h"
 #include "CepGen/Utils/FunctionsWrappers.h"
 
-namespace cepgen {
-  class ROOTDerivator : public utils::Derivator {
+namespace cepgen::root {
+  class Derivator : public utils::Derivator {
   public:
-    explicit ROOTDerivator(const ParametersList& params) : Derivator(params), order_(steer<int>("order")) {}
+    explicit Derivator(const ParametersList& params) : utils::Derivator(params), order_(steer<int>("order")) {}
 
     static ParametersDescription description() {
-      auto desc = Derivator::description();
+      auto desc = utils::Derivator::description();
       desc.setDescription("ROOT derivation algorithm (Richardson's extrapolation method)");
       desc.add<int>("order", 1).setDescription("order of the derivation");
       return desc;
@@ -55,13 +55,13 @@ namespace cepgen {
         case 3:
           return rfunc.Derivative3(x, nullptr, epsilon);
         default:
-          throw CG_FATAL("ROOTDerivator") << "Invalid derivation order requested: " << order_ << ".";
+          throw CG_FATAL("root:Derivator") << "Invalid derivation order requested: " << order_ << ".";
       }
     }
 
   private:
     const int order_;
   };
-}  // namespace cepgen
-
+}  // namespace cepgen::root
+using ROOTDerivator = cepgen::root::Derivator;
 REGISTER_DERIVATOR("root", ROOTDerivator);

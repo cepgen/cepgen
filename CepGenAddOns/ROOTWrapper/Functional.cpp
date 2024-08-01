@@ -23,37 +23,35 @@
 #include "CepGen/Utils/Functional.h"
 #include "CepGen/Utils/String.h"
 
-namespace cepgen {
-  namespace root {
-    /// Functional evaluator defined from a ROOT TFormula
-    class Functional final : public cepgen::utils::Functional {
-    public:
-      explicit Functional(const ParametersList& params) : cepgen::utils::Functional(params) {
-        for (auto& var : vars_)
-          func_.AddVariable(var, 0.);
-        auto expr = expression_;
-        expr = utils::replaceAll(expr, {{"min(", "TMath::Min("}, {"max(", "TMath::Max("}});
-        if (func_.Compile(expr.c_str()) != 0)
-          throw CG_ERROR("root:Functional") << "Failed to define the function\n\t" << expression_;
-        CG_DEBUG("root:Functional") << "Successfully defined a dimension-" << vars_.size()
-                                    << " function with arguments " << vars_ << ": " << expr << ".";
-      }
-      inline double eval() const override {
-        if (!func_.IsValid())
-          throw CG_WARNING("root:Functional") << "Cannot evaluate the invalid function at " << values_ << ".";
-        return func_.EvalPar(values_.data());
-      }
+namespace cepgen::root {
+  /// Functional evaluator defined from a ROOT TFormula
+  class Functional final : public cepgen::utils::Functional {
+  public:
+    explicit Functional(const ParametersList& params) : cepgen::utils::Functional(params) {
+      for (auto& var : vars_)
+        func_.AddVariable(var, 0.);
+      auto expr = expression_;
+      expr = utils::replaceAll(expr, {{"min(", "TMath::Min("}, {"max(", "TMath::Max("}});
+      if (func_.Compile(expr.c_str()) != 0)
+        throw CG_ERROR("root:Functional") << "Failed to define the function\n\t" << expression_;
+      CG_DEBUG("root:Functional") << "Successfully defined a dimension-" << vars_.size() << " function with arguments "
+                                  << vars_ << ": " << expr << ".";
+    }
+    inline double eval() const override {
+      if (!func_.IsValid())
+        throw CG_WARNING("root:Functional") << "Cannot evaluate the invalid function at " << values_ << ".";
+      return func_.EvalPar(values_.data());
+    }
 
-      inline static ParametersDescription description() {
-        auto desc = cepgen::utils::Functional::description();
-        desc.setDescription("Plain old TFormula evaluator from ROOT");
-        return desc;
-      }
+    inline static ParametersDescription description() {
+      auto desc = cepgen::utils::Functional::description();
+      desc.setDescription("Plain old TFormula evaluator from ROOT");
+      return desc;
+    }
 
-    private:
-      TFormula func_;
-    };
-  }  // namespace root
-}  // namespace cepgen
+  private:
+    TFormula func_;
+  };
+}  // namespace cepgen::root
 using cepgen::root::Functional;
 REGISTER_FUNCTIONAL("root", Functional);
