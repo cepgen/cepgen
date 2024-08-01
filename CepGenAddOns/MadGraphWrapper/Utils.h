@@ -21,28 +21,26 @@
 
 #include "CepGen/Physics/ParticleProperties.h"
 
-namespace cepgen {
-  namespace mg5amc {
-    using ProcessParticles = std::pair<std::vector<std::string>, std::vector<std::string> >;
-    /// Unpack the particles' content and role in the process from a string
-    /// \param[in] proc string, human-built process definition
-    ProcessParticles unpackProcessParticles(const std::string& proc);
-    /// Unpack all particle properties from MadGraph
-    /// \param[in] part_name mg5_aMC particle name
-    /// \param[in] model mg5_aMC model to use
-    ParticleProperties describeParticle(const std::string& part_name, const std::string& model = "");
-    /// Run a mg5_aMC command and return its result
-    /// \param[in] cmds list of commands to send to the mg5_aMC path
-    /// \param[in] card_path filename to use for the steering card
-    /// \param[in] keep_output keep the steering card after run?
-    /// \return full mg5_aMC output
-    std::vector<std::string> runCommand(const std::vector<std::string>& cmds,
-                                        const std::string& card_path,
-                                        bool keep_output = false);
-    /// Normalise a process name to make it computer-readable
-    /// \param[in] model mg5_aMC model to use
-    std::string normalise(const std::string& proc, const std::string& model = "");
-  }  // namespace mg5amc
-}  // namespace cepgen
+namespace cepgen::mg5amc {
+  using ProcessParticles = std::pair<std::vector<std::string>, std::vector<std::string> >;
+  /// Unpack the particles' content and role in the process from a string
+  /// \param[in] proc string, human-built process definition
+  ProcessParticles unpackProcessParticles(const std::string& proc);
+  /// Unpack all particle properties from MadGraph
+  /// \param[in] part_name mg5_aMC particle name
+  /// \param[in] model mg5_aMC model to use
+  ParticleProperties describeParticle(const std::string& part_name, const std::string& model = "");
+  /// Run a mg5_aMC command and return its result
+  /// \param[in] cmds list of commands to send to the mg5_aMC path
+  /// \param[in] card_path filename to use for the steering card
+  /// \param[in] keep_output keep the steering card after run?
+  /// \return full mg5_aMC output
+  std::vector<std::string> runCommand(const std::vector<std::string>& cmds,
+                                      const std::string& card_path,
+                                      bool keep_output = false);
+  /// Normalise a process name to make it computer-readable
+  /// \param[in] model mg5_aMC model to use
+  std::string normalise(const std::string& proc, const std::string& model = "");
+}  // namespace cepgen::mg5amc
 
 #endif
