@@ -17,6 +17,7 @@ process = kt.process.clone('pptosusy',
         #pair = PDG.H_ch,
     ),
     inKinematics = cepgen.Parameters(
+        pdgIds = (PDG.proton, PDG.proton),
         pz = (6500., 6500.),
         structureFunctions = cepgen.StructureFunctions.suriYennie,
     ),
