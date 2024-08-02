@@ -21,6 +21,8 @@
 #include <cstdio>
 
 #include "CepGen/Utils/Filesystem.h"
+#include "CepGen/Utils/Message.h"
+#include "CepGen/Utils/StreamCollector.h"
 #include "CepGenAddOns/Herwig6Wrapper/Herwig6Interface.h"
 
 namespace {
@@ -37,14 +39,12 @@ namespace cepgen::herwig6 {
     static bool kInitialised = false;
     if (kInitialised)
       return;
-    {  // capture stdout to avoid "polluting" consumer code with unmanaged output
-      int out = dup(fileno(stdout));
-      if (const auto tmp_path = fs::temp_directory_path() / "herwig.log"; utils::isWriteable(tmp_path))
-        ::freopen(tmp_path.string().data(), "w", stdout);
+    std::string buf;
+    {
+      auto sc = utils::StreamCollector(buf);
       hwigin_();
-      ::dup2(out, fileno(stdout));
-      close(out);
     }
+    CG_DEBUG("herwig6:initialise") << "Collected buffer at initialisation:\n" << buf;
     kInitialised = true;
   }
   double hwuaem(double q2) { return hwuaem_(q2); }
