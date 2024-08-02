@@ -26,6 +26,7 @@
 using namespace cepgen;
 
 /// Matrix element for the \f$\gamma\gamma\rightarrow \tilde{f}^+\tilde{f}^-/\tilde{\chi}^+\tilde{\chi}^-/H^+H^-\f$ process
+/// as defined in \cite Ohnemus:1993qw
 class PPtoSusy : public cepgen::proc::FactorisedProcess {
 public:
   explicit PPtoSusy(const ParametersList& params)
