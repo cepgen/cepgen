@@ -16,6 +16,7 @@ endif()
 
 #----- build the object
 
+enable_testing()
 cepgen_build(CepGenPythia8 SOURCES *.cpp
     EXT_LIBS ${PYTHIA8} dl
     EXT_HEADERS ${PYTHIA8_INCLUDE}
@@ -27,3 +28,4 @@ cpack_add_component(pythia8
     DISPLAY_NAME "CepGen Pythia 8 wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to Pythia 8"
     DEPENDS lib)
+add_test(NAME pythia8_kt_hadr COMMAND ${CMAKE_BINARY_DIR}/test/generator/ktfactor_proc_hadronisation -H pythia8)
