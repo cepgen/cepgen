@@ -31,7 +31,7 @@ namespace cepgen {
   public:
     explicit EventExporter(const ParametersList&);
 
-    virtual void setCrossSection(const Value&) {}  ///< Specify the cross section value, in pb
+    virtual void setCrossSection(const Value&) {}  ///< Specify the cross-section value, in pb
     inline void setEventNumber(unsigned long long ev_id) { event_num_ = ev_id; }  ///< Set event number
 
     virtual bool operator<<(const Event&) = 0;  ///< Writer operator

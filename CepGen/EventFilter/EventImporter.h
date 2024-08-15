@@ -19,7 +19,6 @@
 #ifndef CepGen_EventFilter_EventImporter_h
 #define CepGen_EventFilter_EventImporter_h
 
-#include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventHandler.h"
 #include "CepGen/Utils/Value.h"
 
@@ -37,15 +36,15 @@ namespace cepgen {
       return desc;
     }
 
-    virtual bool operator>>(Event&) = 0;                 ///< Read the next event
-    const Value& crossSection() const { return xsec_; }  ///< Process cross section and uncertainty, in pb
+    virtual bool operator>>(Event&) = 0;                          ///< Read the next event
+    const Value& crossSection() const { return cross_section_; }  ///< Process cross-section and uncertainty, in pb
 
   protected:
     /// Specify the process cross section and uncertainty, in pb
-    void setCrossSection(const Value& xsec) { xsec_ = xsec; }
+    void setCrossSection(const Value& cross_section) { cross_section_ = cross_section; }
 
   private:
-    Value xsec_;
+    Value cross_section_;
   };
 }  // namespace cepgen
 

@@ -160,7 +160,7 @@ namespace cepgen::hadr {
     // 1) the full event kinematics (i.e. with remnants) is to be specified,
     // 2) the remnants are to be fragmented, or
     // 3) the resonances are to be decayed.
-    if (!fast && !remn_fragm_ && !res_decay_)
+    if (!fast && !fragment_remnants_ && !res_decay_)
       return true;
     if (fast && !res_decay_)
       return true;
@@ -228,7 +228,7 @@ namespace cepgen::hadr {
       prop = PDG::get()(pdg_id);
     } catch (const Exception&) {
       prop.pdgid = pdg_id;
-      prop.name = prop.descr = py_part.name();
+      prop.name = prop.human_name = py_part.name();
       prop.colours = py_part.col();  // colour factor
       prop.mass = py_part.m0();
       prop.width = py_part.mWidth();
@@ -270,7 +270,7 @@ namespace cepgen::hadr {
           central_parts.emplace_back(i);
         }
         //--- particle is not what we expect
-        if (p.idAbs() != abs(cg_part.integerPdgId())) {
+        if (p.idAbs() != std::labs(cg_part.integerPdgId())) {
           CG_INFO("Pythia8Hadroniser:update") << "LHAEVT event content:";
           cg_evt_->listEvent();
           CG_INFO("Pythia8Hadroniser:update") << "Pythia event content:";

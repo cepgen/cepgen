@@ -37,10 +37,10 @@ namespace cepgen {
       else
         out_ = &std::cout;
     }
-    ~TextEventHandler() {
+    ~TextEventHandler() override {
       if (out_ != &std::cout) {
-        if (auto* fout = dynamic_cast<std::ofstream*>(out_); fout)
-          fout->close();
+        if (auto* file_out = dynamic_cast<std::ofstream*>(out_); file_out)
+          file_out->close();
         delete out_;
       }
     }

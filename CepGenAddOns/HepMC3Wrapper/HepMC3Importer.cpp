@@ -25,6 +25,7 @@
 #include <memory>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventImporter.h"
 #include "CepGen/Modules/EventImporterFactory.h"
 #include "CepGenAddOns/HepMC3Wrapper/HepMC3EventInterface.h"

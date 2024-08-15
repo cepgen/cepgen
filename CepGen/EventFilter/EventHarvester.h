@@ -16,6 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef CepGen_EventFilter_EventHarvester_h
+#define CepGen_EventFilter_EventHarvester_h
+
 #include <fstream>
 
 #include "CepGen/EventFilter/EventExporter.h"
@@ -36,7 +39,7 @@ namespace cepgen {
   class EventHarvester : public EventExporter {
   public:
     explicit EventHarvester(const ParametersList&);
-    virtual ~EventHarvester();
+    ~EventHarvester() override;
 
     static ParametersDescription description();
 
@@ -53,9 +56,9 @@ namespace cepgen {
     std::ofstream file_;
     std::unique_ptr<utils::Drawer> drawer_;
 
-    Value cross_section_{1., 0.};  ///< Cross section value, in pb
-    unsigned long num_evts_{0ul};  ///< Number of events processed
-    std::string proc_name_;        ///< Name of the physics process
+    Value cross_section_{1., 0.};    ///< Cross-section value, in pb
+    unsigned long num_events_{0ul};  ///< Number of events processed
+    std::string proc_name_;          ///< Name of the physics process
 
     /// 1D histogram definition
     struct Hist1DInfo {
@@ -73,3 +76,5 @@ namespace cepgen {
     std::vector<Hist2DInfo> hists2d_;  ///< List of 2D histograms
   };
 }  // namespace cepgen
+
+#endif

@@ -79,7 +79,7 @@ namespace cepgen::utils {
     static const std::string kEmptyLabel;
 
     void drawValues(std::ostream&, const Drawable&, const Drawable::axis_t&, const Mode&, bool effects) const;
-    void drawValues(std::ostream&, const Drawable&, const Drawable::dualaxis_t&, const Mode&, bool effects) const;
+    void drawValues(std::ostream&, const Drawable&, const Drawable::dual_axis_t&, const Mode&, bool effects) const;
 
     const char CHAR, ERR_CHAR, NEG_CHAR;
     const std::string MARKERS_CHAR, VALUES_CHAR;
@@ -89,7 +89,8 @@ namespace cepgen::utils {
     /// Sorting helper for the axis metadata container
     struct map_elements {
       /// Sort two values in an axis
-      bool operator()(const std::pair<Drawable::coord_t, Value>& lhs, const std::pair<Drawable::coord_t, Value>& rhs) {
+      bool operator()(const std::pair<Drawable::coord_t, Value>& lhs,
+                      const std::pair<Drawable::coord_t, Value>& rhs) const {
         return lhs.second < rhs.second;
       }
     };
@@ -109,10 +110,11 @@ namespace cepgen::utils {
         log << "plot of \"" << hist.name() << "\"\n";
       drawValues(log.stream(), hist, hist.axis(), mode, colourise_);
       const double bin_width = hist.range().range() / hist.nbins();
-      log << "\tbin width=" << utils::s("unit", bin_width, true) << ", "
+      log << "\t"
+          << "bin width=" << utils::s("unit", bin_width, true) << ", "
           << "mean=" << hist.mean() << ", "
-          << "st.dev.=" << hist.rms() << "\n\t"
-          << "integr.=" << hist.integral();
+          << "std.dev.=" << hist.rms() << "\n\t"
+          << "integral.=" << hist.integral();
       if (hist.underflow() > 0ull)
         log << ", underflow: " << hist.underflow();
       if (hist.overflow() > 0ull)
@@ -125,15 +127,15 @@ namespace cepgen::utils {
     CG_LOG.log([&](auto& log) {
       if (!hist.name().empty())
         log << "plot of \"" << hist.name() << "\"\n";
-      Drawable::dualaxis_t axes;
-      for (size_t binx = 0; binx < hist.nbinsX(); ++binx) {
-        const auto& range_x = hist.binRangeX(binx);
+      Drawable::dual_axis_t axes;
+      for (size_t bin_x = 0; bin_x < hist.nbinsX(); ++bin_x) {
+        const auto& range_x = hist.binRangeX(bin_x);
         auto& axis_x = axes[Drawable::coord_t{
             range_x.x(0.5), 0.5 * range_x.range(), utils::format("[%7.2f,%7.2f)", range_x.min(), range_x.max())}];
-        for (size_t biny = 0; biny < hist.nbinsY(); ++biny) {
-          const auto& range_y = hist.binRangeY(biny);
+        for (size_t bin_y = 0; bin_y < hist.nbinsY(); ++bin_y) {
+          const auto& range_y = hist.binRangeY(bin_y);
           axis_x[Drawable::coord_t{range_y.x(0.5), 0.5 * range_y.range(), utils::format("%+g", range_y.min())}] =
-              hist.value(binx, biny);
+              hist.value(bin_x, bin_y);
         }
       }
       drawValues(log.stream(), hist, axes, mode, colourise_);
@@ -187,9 +189,9 @@ namespace cepgen::utils {
       return out.str();
     };
     std::stringstream buf, os_base;
-    size_t num_plts = 0;
-    auto add_plot = [this, &buf, &num_plts](const std::string& plt) {
-      ++num_plts;
+    size_t num_plots = 0;
+    auto add_plot = [this, &buf, &num_plots](const std::string& plt) {
+      ++num_plots;
       if (plt.empty())
         return;
       std::istringstream ss(plt);
@@ -202,7 +204,7 @@ namespace cepgen::utils {
         }
         for (size_t j = 0; j < line.size(); ++j) {
           if (line[j] == CHAR)
-            base[j] = (num_plts > 1 ? MARKERS_CHAR[num_plts - 2] : CHAR);
+            base[j] = (num_plots > 1 ? MARKERS_CHAR[num_plots - 2] : CHAR);
           else if (line[j] == ERR_CHAR)
             base[j] = ERR_CHAR;
         }
@@ -244,9 +246,9 @@ namespace cepgen::utils {
       if (!name.empty())
         log << "plot of \"" << name << "\"\n";
       log << replace_plot(os_base.str(), buf.str());
-      if (num_plts > 1)
+      if (num_plots > 1)
         log << "\tLegend:\n\t  " << CHAR << ": " << plt_names.at(0);
-      for (size_t i = 1; i < num_plts; ++i)
+      for (size_t i = 1; i < num_plots; ++i)
         log << "\n\t  " << MARKERS_CHAR[i - 1] << ": " << plt_names.at(i);
     });
     return *this;
@@ -261,8 +263,8 @@ namespace cepgen::utils {
     const double min_val_log = std::log(std::max(min_val, 1.e-10));
     const double max_val_log = std::log(std::min(max_val, 1.e+10));
     if (!dr.yAxis().label().empty()) {
-      const auto ylabel = delatexify(dr.yAxis().label());
-      os << sep << std::string(std::max(0., 2. + width_ - ylabel.size()), ' ') << ylabel << "\n";
+      const auto y_label = delatexify(dr.yAxis().label());
+      os << sep << std::string(std::max(0., 2. + width_ - y_label.size()), ' ') << y_label << "\n";
     }
     os << sep << utils::format("%-5.2f ", (mode & Mode::logy) ? std::exp(min_val_log) : min_val)
        << std::setw(width_ - 11) << std::left << ((mode & Mode::logy) ? "logarithmic scale" : "linear scale")
@@ -282,7 +284,7 @@ namespace cepgen::utils {
         os << ":";
       } else {
         const auto& val = coord_set.second;
-        size_t ival = 0ull, ierr = 0ull;
+        size_t i_value = 0ull, i_uncertainty = 0ull;
         {
           double val_dbl = width_, unc_dbl = width_;
           if (mode & Mode::logy) {
@@ -296,16 +298,16 @@ namespace cepgen::utils {
             val_dbl *= (val - min_val) / (max_val - min_val);
             unc_dbl *= val.uncertainty() / (max_val - min_val);
           }
-          ival = std::ceil(val_dbl);
-          ierr = std::ceil(unc_dbl);
+          i_value = std::ceil(val_dbl);
+          i_uncertainty = std::ceil(unc_dbl);
         }
         os << "\n"
-           << left_label << ":" << (ival > ierr ? std::string(ival - ierr, ' ') : "")
-           << (ierr > 0 ? std::string(ierr, ERR_CHAR) : "")
+           << left_label << ":" << (i_value > i_uncertainty ? std::string(i_value - i_uncertainty, ' ') : "")
+           << (i_uncertainty > 0 ? std::string(i_uncertainty, ERR_CHAR) : "")
            << (effects ? utils::boldify(std::string(1, CHAR)) : std::string(1, CHAR))
-           << (ierr > 0 ? std::string(std::min(width_ - ival - 1, ierr), ERR_CHAR) : "")
-           << (ival + ierr < width_ + 1 ? std::string(width_ - ival - ierr - 1, ' ') : "") << ": "
-           << utils::format("%6.2e +/- %6.2e", val, val.uncertainty());
+           << (i_uncertainty > 0 ? std::string(std::min(width_ - i_value - 1, i_uncertainty), ERR_CHAR) : "")
+           << (i_value + i_uncertainty < width_ + 1 ? std::string(width_ - i_value - i_uncertainty - 1, ' ') : "")
+           << ": " << utils::format("%6.2e +/- %6.2e", val, val.uncertainty());
       }
       ++idx;
     }
@@ -315,24 +317,26 @@ namespace cepgen::utils {
   }
 
   void TextDrawer::drawValues(
-      std::ostream& os, const Drawable& dr, const Drawable::dualaxis_t& axes, const Mode& mode, bool effects) const {
+      std::ostream& os, const Drawable& dr, const Drawable::dual_axis_t& axes, const Mode& mode, bool effects) const {
     const std::string sep(17, ' ');
     if (!dr.yAxis().label().empty()) {
-      const auto ylabel = delatexify(dr.yAxis().label());
-      os << sep << std::string(std::max(0., 2. + width_ - ylabel.size()), ' ') << ylabel << "\n";
+      const auto y_label = delatexify(dr.yAxis().label());
+      os << sep << std::string(std::max(0., 2. + width_ - y_label.size()), ' ') << y_label << "\n";
     }
     // find the maximum element of the graph
     double min_val = -Limits::INVALID, max_val = Limits::INVALID;
-    double min_logval = -3.;
-    for (const auto& xval : axes) {
-      min_val =
-          std::min(min_val, (double)std::min_element(xval.second.begin(), xval.second.end(), map_elements())->second);
-      max_val =
-          std::max(max_val, (double)std::max_element(xval.second.begin(), xval.second.end(), map_elements())->second);
+    double min_log_value = -3.;
+    for (const auto& x_value : axes) {
+      min_val = std::min(
+          min_val,
+          static_cast<double>(std::min_element(x_value.second.begin(), x_value.second.end(), map_elements())->second));
+      max_val = std::max(
+          max_val,
+          static_cast<double>(std::max_element(x_value.second.begin(), x_value.second.end(), map_elements())->second));
       if (mode & Mode::logz)
-        for (const auto& yval : xval.second)
-          if (yval.second > 0.)
-            min_logval = std::min(min_logval, std::log(yval.second / max_val));
+        for (const auto& y_value : x_value.second)
+          if (y_value.second > 0.)
+            min_log_value = std::min(min_log_value, std::log(y_value.second / max_val));
     }
     const auto& y_axis = axes.begin()->second;
     os << sep << utils::format("%-5.2f", y_axis.begin()->first.value) << std::string(axes.size() - 11, ' ')
@@ -340,8 +344,9 @@ namespace cepgen::utils {
        << utils::format("%17s", delatexify(dr.xAxis().label()).c_str())
        << std::string(1 + y_axis.size() + 1, '.');  // abscissa axis
     size_t idx = 0;
-    for (const auto& xval : axes) {
-      os << "\n" << (xval.first.label.empty() ? utils::format("%16g ", xval.first.value) : xval.first.label) << ":";
+    for (const auto& x_value : axes) {
+      os << "\n"
+         << (x_value.first.label.empty() ? utils::format("%16g ", x_value.first.value) : x_value.first.label) << ":";
       if (min_val == max_val) {
         if (idx == axes.size() / 2)
           os << std::string((width_ - kEmptyLabel.size()) / 2, ' ') << kEmptyLabel
@@ -349,11 +354,12 @@ namespace cepgen::utils {
         else
           os << std::string(width_, ' ');
       } else {
-        for (const auto& yval : xval.second) {
-          const double val = yval.second;
+        for (const auto& y_value : x_value.second) {
+          const double val = y_value.second;
           double val_norm = 0.;
           if (mode & Mode::logz)
-            val_norm = positive(val) ? std::max(0., (std::log(val / max_val) - min_logval) / fabs(min_logval)) : 0.;
+            val_norm =
+                positive(val) ? std::max(0., (std::log(val / max_val) - min_log_value) / fabs(min_log_value)) : 0.;
           else
             val_norm = val / max_val;
           if (std::isnan(val_norm)) {
@@ -377,16 +383,16 @@ namespace cepgen::utils {
       os << ":";
       ++idx;
     }
-    std::vector<std::string> ylabels;
-    std::transform(y_axis.begin(), y_axis.end(), std::back_inserter(ylabels), [](auto& bin) {
+    std::vector<std::string> y_label;
+    std::transform(y_axis.begin(), y_axis.end(), std::back_inserter(y_label), [](auto& bin) {
       return bin.first.label.empty() ? utils::format("%+g", bin.first.value) : bin.first.label;
     });
-    struct stringlen {
-      bool operator()(const std::string& a, const std::string& b) { return a.size() < b.size(); }
+    struct string_length {
+      bool operator()(const std::string& a, const std::string& b) const { return a.size() < b.size(); }
     };
-    for (size_t i = 0; i < std::max_element(ylabels.begin(), ylabels.end(), stringlen())->size(); ++i) {
+    for (size_t i = 0; i < std::max_element(y_label.begin(), y_label.end(), string_length())->size(); ++i) {
       os << "\n" << sep << ":";
-      for (const auto& lab : ylabels)
+      for (const auto& lab : y_label)
         os << (lab.size() > i ? lab.at(i) : ' ');
       os << ":";
     }

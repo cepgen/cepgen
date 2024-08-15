@@ -33,7 +33,7 @@ namespace cepgen {
     static ParametersDescription description();
 
     /// \brief Specify a random numbers generator seed for the external module
-    /// \param[in] seed A RNG seed
+    /// \param[in] seed An RNG seed
     void setSeed(long long seed) { seed_ = seed; }
 
     inline virtual void readString(const std::string&) {}       ///< Parse a configuration string
@@ -43,7 +43,7 @@ namespace cepgen {
     /// \param[inout] ev Input/output event
     /// \param[inout] weight Event weight after modification
     /// \param[in] fast run a faster version of the algorithm (whenever available)
-    /// \return Boolean stating whether or not the modification occurred successfully
+    /// \return Boolean stating whether the modification occurred successfully
     virtual bool run(Event& ev, double& weight, bool fast = false) = 0;
     inline virtual void setCrossSection(const Value&) {}  ///< Specify the cross section value, in pb
 

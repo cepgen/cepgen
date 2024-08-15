@@ -71,11 +71,11 @@ namespace cepgen {
       return;
     try {
       for (auto& h_var : hists_) {
-        h_var.hist.scale(cross_section_ / (num_evts_ + 1));
+        h_var.hist.scale(cross_section_ / (num_events_ + 1));
         h_var.hist.setTitle(proc_name_);
         std::ostringstream os;
         if (drawer_)
-          drawer_->draw(h_var.hist, h_var.log ? utils::Drawer::Mode::logy : utils::Drawer::Mode::none);
+          (void)drawer_->draw(h_var.hist, h_var.log ? utils::Drawer::Mode::logy : utils::Drawer::Mode::none);
         if (show_hists_)
           CG_INFO("EventHarvester") << os.str();
         if (save_hists_)
@@ -85,7 +85,7 @@ namespace cepgen {
         std::ostringstream os;
         h_var.hist.setTitle(proc_name_);
         if (drawer_)
-          drawer_->draw(
+          (void)drawer_->draw(
               h_var.hist,
               utils::Drawer::Mode::grid | (h_var.log ? utils::Drawer::Mode::logz : utils::Drawer::Mode::none));
         if (show_hists_)
@@ -103,7 +103,7 @@ namespace cepgen {
   }
 
   void EventHarvester::initialise() {
-    num_evts_ = 0ul;
+    num_events_ = 0ul;
     proc_name_ = ProcessFactory::get().describe(runParameters().processName());
     proc_name_ +=
         ", \\sqrt{s} = " + utils::format("%g", runParameters().kinematics().incomingBeams().sqrtS() * 1.e-3) + " TeV";
@@ -117,7 +117,7 @@ namespace cepgen {
       h_var.hist.fill(browser_->get(ev, h_var.var));
     for (auto& h_var : hists2d_)
       h_var.hist.fill(browser_->get(ev, h_var.var1), browser_->get(ev, h_var.var2));
-    ++num_evts_;
+    ++num_events_;
     return true;
   }
 

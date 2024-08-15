@@ -116,7 +116,7 @@ namespace cepgen::pythia6 {
     cepgen::ParticleProperties prop;
     prop.pdgid = pdg_id;
     prop.name = name;
-    prop.descr = name;
+    prop.human_name = name;
     //prop.colours = pyk(p + 1, 12);  // colour factor
     prop.mass = pymass(pdg_id);
     prop.width = -1.;  //pmas( pdg_id, 2 ),

@@ -44,12 +44,12 @@ namespace cepgen::utils {
       return variable(ev, part1, part2, var_name);
     }
     //--- particle-level variables (indexed by role)
-    const auto check_role = [&](const std::string& role, const std::string& var) -> bool {
-      bool ret = role_str_.count(role) > 0;
-      if (!ret)
-        CG_WARNING("EventBrowser") << "Invalid particle role retrieved from configuration: \"" << role << "\".\n\t"
-                                   << "Skipping the variable \"" << var << "\" in the output module.";
-      return ret;
+    const auto check_role = [&](const std::string& role, const std::string& variable) -> bool {
+      if (role_str_.count(role) > 0)
+        return true;
+      CG_WARNING("EventBrowser") << "Invalid particle role retrieved from configuration: \"" << role << "\".\n\t"
+                                 << "Skipping the variable \"" << variable << "\" in the output module.";
+      return false;
     };
     if (std::regex_match(var, sm, rgx_select_role_)) {
       const auto& var_name = sm[1].str();
@@ -86,14 +86,14 @@ namespace cepgen::utils {
                                    << part;
         return INVALID_OUTPUT;
       }
-      return 1. - part.momentum().energy() / ev(int(*moth.begin())).momentum().energy();
+      return 1. - part.momentum().energy() / ev(static_cast<int>(*moth.begin())).momentum().energy();
     }
     if (var == "pdg")
-      return (double)part.integerPdgId();
+      return static_cast<double>(part.integerPdgId());
     if (var == "charge")
       return part.charge();
     if (var == "status")
-      return (double)part.status();
+      return static_cast<double>(part.status());
     throw CG_ERROR("EventBrowser") << "Failed to retrieve variable \"" << var << "\".";
   }
 
@@ -116,13 +116,13 @@ namespace cepgen::utils {
 
   double EventBrowser::variable(const Event& ev, const std::string& var) {
     if (var == "np")
-      return (double)ev.size();
+      return static_cast<double>(ev.size());
     //if ( var == "nev" )
     //  return (double)num_evts_+1;
     if (var == "nob1" || var == "nob2") {
       const auto& bparts = ev(var == "nob1" ? Particle::Role::OutgoingBeam1 : Particle::Role::OutgoingBeam2);
-      return (double)std::count_if(
-          bparts.begin(), bparts.end(), [](const auto& part) { return (int)part.status() > 0; });
+      return static_cast<double>(std::count_if(
+          bparts.begin(), bparts.end(), [](const auto& part) { return static_cast<int>(part.status()) > 0; }));
     }
     if (var == "met")
       return ev.missingMomentum().pt();

@@ -30,7 +30,7 @@ namespace cepgen {
   class EventHandler : public NamedModule<EventHandler> {
   public:
     explicit EventHandler(const ParametersList&);
-    virtual ~EventHandler();
+    ~EventHandler() override;
 
     static ParametersDescription description();
 
