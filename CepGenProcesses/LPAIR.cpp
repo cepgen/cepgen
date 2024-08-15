@@ -42,7 +42,7 @@ public:
   LPAIR(const LPAIR& oth)
       : proc::Process(oth), pair_(oth.pair_), symmetrise_(oth.symmetrise_), randomise_charge_(oth.randomise_charge_) {}
 
-  proc::ProcessPtr clone() const override { return proc::ProcessPtr(new LPAIR(*this)); }
+  proc::ProcessPtr clone() const override { return std::make_unique<LPAIR>(*this); }
 
   void addEventContent() override {
     proc::Process::setEventContent({{Particle::IncomingBeam1, {PDG::proton}},

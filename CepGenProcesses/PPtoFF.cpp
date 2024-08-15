@@ -42,7 +42,7 @@ public:
           << "Off-shell matrix element only defined for factorised process with partons kt.";
   }
 
-  proc::ProcessPtr clone() const override { return proc::ProcessPtr(new PPtoFF(*this)); }
+  proc::ProcessPtr clone() const override { return std::make_unique<PPtoFF>(*this); }
 
   static ParametersDescription description() {
     auto desc = FactorisedProcess::description();

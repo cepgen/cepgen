@@ -26,7 +26,6 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/Math.h"
-#include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen::proc {

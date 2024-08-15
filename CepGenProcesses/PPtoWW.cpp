@@ -60,7 +60,7 @@ public:
     }
   }
 
-  proc::ProcessPtr clone() const override { return proc::ProcessPtr(new PPtoWW(*this)); }
+  proc::ProcessPtr clone() const override { return std::make_unique<PPtoWW>(*this); }
 
   static ParametersDescription description() {
     auto desc = FactorisedProcess::description();

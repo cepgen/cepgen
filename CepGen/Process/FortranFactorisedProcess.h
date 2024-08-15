@@ -28,7 +28,7 @@ namespace cepgen::proc {
     /// Construct a Fortran-CepGen interface object using a double precision argument-less F77 function
     /// \param[in] func a double precision argument-less Fortran function returning the event weight
     explicit FortranFactorisedProcess(const ParametersList&, const std::function<double(void)>& func);
-    ProcessPtr clone() const override { return ProcessPtr(new FortranFactorisedProcess(*this)); }
+    ProcessPtr clone() const override { return std::make_unique<FortranFactorisedProcess>(*this); }
 
     static ParametersList kProcParameters;
 
