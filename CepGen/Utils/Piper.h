@@ -29,7 +29,7 @@ namespace cepgen::utils {
   public:
     /// Start a piped command
     /// \param[in] command Command path for the session
-    explicit Piper(const std::string& command) : file_(popen(command.c_str(), "w"), pclose) {}
+    explicit Piper(const std::string& command) : file_(popen(command.c_str(), "w")) {}
 
     /// A collection of commands to pipe to the session
     struct Commands : std::vector<std::string> {
@@ -61,7 +61,10 @@ namespace cepgen::utils {
     }
 
   private:
-    const std::unique_ptr<FILE, decltype(&pclose)> file_;
+    struct FILEDeleter {
+      void operator()(FILE* file) const noexcept { pclose(file); }
+    };
+    const std::unique_ptr<FILE, FILEDeleter> file_;
   };
 }  // namespace cepgen::utils
 
