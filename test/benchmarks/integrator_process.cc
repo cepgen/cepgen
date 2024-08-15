@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
   int num_epochs;
   string filename;
   vector<string> processes, integrators, outputs;
-  bool python_integ;
+  bool python_integrators;
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("epochs,e", "number of epochs to try", &num_epochs, 5)
       .addOptionalArgument("processes,p", "process to benchmark", &processes, vector<string>{"lpair"})
@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
                            "output filename",
                            &filename,
                            fs::path(cepgen::utils::env::get("CEPGEN_PATH", ".")) / "benchmark_integrator_process")
-      .addOptionalArgument("python,p", "also add python integrator?", &python_integ, false)
+      .addOptionalArgument("python,p", "also add python integrator?", &python_integrators, false)
       .parse();
 
   ankerl::nanobench::Bench bench;
@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
                                                                  .set<int>("mode", 1)
                                                                  .set<double>("ptmin", 25.));
     for (const auto& integrator_name : integrators) {
-      if (integrator_name == "python" && !python_integ)  // skip the python integrators test unless required
+      if (integrator_name == "python" && !python_integrators)  // skip the python integrators test unless required
         continue;
       bench.context("integrator", integrator_name).run(process + "+" + integrator_name, [&] {
         gen.setIntegrator(cepgen::IntegratorFactory::get().build(integrator_name));

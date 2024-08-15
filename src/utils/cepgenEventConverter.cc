@@ -18,6 +18,7 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Core/RunParameters.h"
+#include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
 #include "CepGen/EventFilter/EventImporter.h"
 #include "CepGen/Generator.h"

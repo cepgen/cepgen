@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
   }
   if (!plotter.empty()) {
     auto plt = cepgen::DrawerFactory::get().build(plotter);
-    plt->draw({&graph_sin, &graph_int_cos, &graph_diff}, "test_deriv");
+    (void)plt->draw({&graph_sin, &graph_int_cos, &graph_diff}, "test_deriv");
   }
 
   const auto chi2 = graph_sin.chi2(graph_int_cos);

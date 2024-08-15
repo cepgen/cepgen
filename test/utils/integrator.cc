@@ -27,7 +27,7 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
-  bool quiet, python_integ;
+  bool quiet, python_integrators;
   double num_sigma;
   vector<string> integrators;
   string func_mod;
@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
                            cepgen::IntegratorFactory::get().modules())  // by default, all integrators are tested
       .addOptionalArgument("functional,f", "type of functional parser user", &func_mod, "root")
       .addOptionalArgument("quiet,q", "quiet mode", &quiet, false)
-      .addOptionalArgument("python,p", "also add python integrator?", &python_integ, false)
+      .addOptionalArgument("python,p", "also add python integrator?", &python_integrators, false)
       .parse();
 
   if (quiet)
@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
   struct test_t {
     cepgen::FunctionalIntegrand integrand;
     double result{0.};
-    std::vector<cepgen::Limits> lims{};
+    std::vector<cepgen::Limits> limits{};
   };
 
   vector<test_t> tests;
@@ -67,18 +67,18 @@ int main(int argc, char* argv[]) {
 
   CG_TEST_SET_FAILURE_TOLERANCE_RATE(0.15);
 
-  for (const auto& integrator : integrators) {
-    if (integrator == "python" && !python_integ)  // skip the python integrators test unless required
+  for (const auto& integrator_name : integrators) {
+    if (integrator_name == "python" && !python_integrators)  // skip the python integrators test unless required
       continue;
-    auto integr = cepgen::IntegratorFactory::get().build(integrator);
+    auto integrator = cepgen::IntegratorFactory::get().build(integrator_name);
 
     //--- integration part
     size_t i = 0;
     for (auto& test : tests) {
-      if (!test.lims.empty())
-        integr->setLimits(test.lims);
-      const auto res = integr->integrate(test.integrand);
-      const auto test_name = integrator + " test " + to_string(i);
+      if (!test.limits.empty())
+        integrator->setLimits(test.limits);
+      const auto res = integrator->integrate(test.integrand);
+      const auto test_name = integrator_name + " test " + to_string(i);
       CG_DEBUG("main") << "Test " << i << ": ref.: " << test.result << ", result: " << res << ".";
       CG_TEST_VALUES(test.result, res, num_sigma, test_name + " rel. unc. control");
       ++i;

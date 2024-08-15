@@ -13,12 +13,12 @@ int main(int argc, char* argv[]) {
       cepgen::ParametersDescription desc("test_module");
       desc.add<int>("foo", 42);
       {
-        cepgen::ParametersDescription submod("test_submodule");
-        submod.add<double>("bar", 42.42);
-        submod.add<std::string>("bat", "man").setDescription("What is in a 'bat'?");
-        desc.add("sub_module_params", submod).setDescription("A sub-collection of parameters");
+        cepgen::ParametersDescription submodule_description("test_submodule");
+        submodule_description.add<double>("bar", 42.42);
+        submodule_description.add<std::string>("bat", "man").setDescription("What is in a 'bat'?");
+        desc.add("sub_module_params", submodule_description).setDescription("A sub-collection of parameters");
       }
-      desc.add<std::string>("baz", "fourty-two").setDescription("A beautiful 'baz' name");
+      desc.add<std::string>("baz", "forty-two").setDescription("A beautiful 'baz' name");
       return desc;
     }
   };
@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
                    << "\nEquivalent parameters list: " << TestModule::description().parameters()
                    << "\nSteered test module:\n"
                    << cepgen::ParametersDescription(mod.parameters());
-  CG_TEST_EQUAL(mod.parameters().get<std::string>("baz"), "fourty-two", "un-steered parameter in module");
+  CG_TEST_EQUAL(mod.parameters().get<std::string>("baz"), "forty-two", "un-steered parameter in module");
   CG_TEST_EQUAL(mod.parameters().get<int>("foo"), 21, "steered parameter in module");
   CG_TEST_EQUAL(mod.parameters().get<cepgen::ParametersList>("sub_module_params").get<std::string>("bat"),
                 "man",

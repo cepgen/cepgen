@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
           gr.yAxis().setRange(yrange);
         coll.emplace_back(&gr);
       }
-      plt->draw(coll, "comp_" + canv.first.first, "", dm);
+      (void)plt->draw(coll, "comp_" + canv.first.first, "", dm);
     }
   }
 

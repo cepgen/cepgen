@@ -43,8 +43,8 @@ int main(int argc, char* argv[]) {
       .parse();
 
   auto plt = cepgen::DrawerFactory::get().build(plotter);
-  for (const auto& deriv_name : derivators) {
-    auto der = cepgen::DerivatorFactory::get().build(deriv_name, cepgen::ParametersList().set<double>("h", 0.05));
+  for (const auto& derivator_name : derivators) {
+    auto der = cepgen::DerivatorFactory::get().build(derivator_name, cepgen::ParametersList().set<double>("h", 0.05));
 
     // test 1D graph
     cepgen::utils::Graph1D graph_sin("graph_sin", "sin(x)"), graph_cos("graph_cos", "cos(x)"),
@@ -56,10 +56,10 @@ int main(int argc, char* argv[]) {
       graph_der_sin.addPoint(x, der_sin);
       graph_diff.addPoint(x, cos(x) - der_sin);
     }
-    plt->draw({&graph_sin, &graph_der_sin, &graph_diff}, "test_deriv_" + deriv_name);
+    (void)plt->draw({&graph_sin, &graph_der_sin, &graph_diff}, "test_deriv_" + derivator_name);
 
     const auto chi2 = graph_cos.chi2(graph_der_sin);
-    CG_TEST(chi2 <= 1.e-6, "chi^2 test for " + deriv_name);
+    CG_TEST(chi2 <= 1.e-6, "chi^2 test for " + derivator_name);
   }
 
   CG_TEST_SUMMARY;

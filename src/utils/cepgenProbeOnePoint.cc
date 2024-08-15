@@ -44,11 +44,11 @@ int main(int argc, char* argv[]) {
   gen.runParameters().process().initialise();
   CG_DEBUG("main") << gen.runParameters();
 
-  const auto ndim = gen.runParameters().process().ndim();
+  const auto num_dimensions = gen.runParameters().process().ndim();
   vector<point_t> points;
   if (num_scans > 0) {
     for (const auto& range : cepgen::Limits{0., 1.}.generate(num_scans))
-      points.emplace_back(ndim, range);
+      points.emplace_back(num_dimensions, range);
   } else
     points = vector<point_t>{user_point};
   CG_DEBUG("main") << points;
@@ -56,9 +56,9 @@ int main(int argc, char* argv[]) {
   vector<pair<point_t, double> > values;
   for (auto& point : points) {
     if (point.size() < 2)
-      point = point_t(ndim, point[0]);
-    else if (point.size() != ndim)
-      point.resize(ndim);
+      point = point_t(num_dimensions, point[0]);
+    else if (point.size() != num_dimensions)
+      point.resize(num_dimensions);
     const double weight = gen.computePoint(point);
     CG_DEBUG("main") << "point " << point << ": weight=" << weight;
     if (weight > 0.)

@@ -10,14 +10,14 @@ int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).parse();
 
   {
-    const string feeded = "test/of/key:value";
+    const string fed = "test/of/key:value";
     cepgen::ParametersList plist;
-    plist.feed(feeded);
+    plist.feed(fed);
     CG_TEST_EQUAL(plist.get<cepgen::ParametersList>("test").get<cepgen::ParametersList>("of").get<std::string>("key"),
                   "value",
                   "parameters list chain");
     CG_DEBUG("main") << "Resulting parameters list: " << plist << ".";
-    CG_TEST_EQUAL(plist.serialise(), feeded, "parameters list serialisation");
+    CG_TEST_EQUAL(plist.serialise(), fed, "parameters list serialisation");
   }
   {
     cepgen::ParametersList plist;
@@ -32,23 +32,22 @@ int main(int argc, char* argv[]) {
     CG_TEST_EQUAL(plist.get<double>("foo", -1.), -1., "integer as float (from re-parsing)");
   }
   {
-    auto feeded = "this/is/a:test,this/works:true,that/{one:42,other:3.141592}";
+    auto fed = "this/is/a:test,this/works:true,that/{one:42,other:3.141592}";
     cepgen::ParametersList plist;
-    plist.feed(feeded);
-    const auto plist_refed = cepgen::ParametersList().feed(plist.serialise());
+    plist.feed(fed);
+    const auto re_fed = cepgen::ParametersList().feed(plist.serialise());
     CG_DEBUG("main") << "\n"
-                     << "Feeded string: " << feeded << "\n"
+                     << "Fed string: " << fed << "\n"
                      << "Fed parameters list:\n"
                      << cepgen::ParametersDescription(plist) << "\n"
                      << "Re-serialised string: " << plist.serialise() << "\n"
                      << "Re-fed parameters list:\n"
-                     << cepgen::ParametersDescription(plist_refed) << ".\n"
+                     << cepgen::ParametersDescription(re_fed) << ".\n"
                      << "Diff:\n"
-                     << cepgen::ParametersDescription(plist.diff(plist_refed)) << ".";
-    CG_TEST_EQUAL(plist_refed, plist, "serialised parameters list parsing");
+                     << cepgen::ParametersDescription(plist.diff(re_fed)) << ".";
+    CG_TEST_EQUAL(re_fed, plist, "serialised parameters list parsing");
   }
-  CG_TEST_EXCEPT([]() { cepgen::ParametersList().feed("invalid/string/{{feeded:true}"); },
-                 "parsing of an invalid string");
+  CG_TEST_EXCEPT([]() { cepgen::ParametersList().feed("invalid/string/{{fed:true}"); }, "parsing of an invalid string");
 
   CG_TEST_SUMMARY;
 }

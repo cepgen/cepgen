@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
       dm |= cepgen::utils::Drawer::Mode::grid;
 
     for (const auto& var : h_var_hist)
-      plt->draw(*var.second, dm);
+      (void)plt->draw(*var.second, dm);
   }
 
   return 0;

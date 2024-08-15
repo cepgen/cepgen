@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
   string output_file, plotter;
   vector<string> strfun_types;
   bool logx, logy, draw_grid, ratio_plot;
-  cepgen::Limits xrange, yrange;
+  cepgen::Limits x_range, y_range;
 
   cepgen::initialise();
 
@@ -47,8 +47,8 @@ int main(int argc, char* argv[]) {
           "sf,s", "structure functions modelling", &strfun_types, cepgen::StructureFunctionsFactory::get().modules())
       .addOptionalArgument("q2,q", "parton virtuality (GeV^2)", &q2, 10.)
       .addOptionalArgument("var,t", "variable to study (0=xBj, 1=w)", &var, 0)
-      .addOptionalArgument("xrange,x", "Bjorken x range", &xrange, cepgen::Limits{1.e-7, 1.})
-      .addOptionalArgument("yrange", "plotting range for y", &yrange, cepgen::Limits())
+      .addOptionalArgument("xrange,x", "Bjorken x range", &x_range, cepgen::Limits{1.e-7, 1.})
+      .addOptionalArgument("yrange", "plotting range for y", &y_range, cepgen::Limits())
       .addOptionalArgument("npoints,n", "number of x-points to scan", &num_points, 500)
       .addOptionalArgument("output,o", "output file name", &output_file, "strfuns.scan.output.txt")
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
   for (const auto& sf_type : strfun_types)
     out << sep << sf_type, sep = ", ";
   out << "\n"
-      << "# x in [" << xrange << "]\n";
+      << "# x in [" << x_range << "]\n";
 
   const float mp = cepgen::PDG::get().mass(2212), mp2 = mp * mp;
 
@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
     g_strfuns_w2.emplace_back("w2_" + sf_type, sf_name);
     strfuns.emplace_back(move(sf));
   }
-  const auto xvals = xrange.generate(num_points, logx);
+  const auto xvals = x_range.generate(num_points, logx);
   for (int i = 0; i < num_points; ++i) {
     const auto& x = xvals.at(i);
     out << x << "\t";
@@ -155,8 +155,8 @@ int main(int argc, char* argv[]) {
       for (auto& p : canv.second) {
         p.xAxis().setLabel(var_name + (!var_unit.empty() ? " (" + var_unit + ")" : ""));
         p.yAxis().setLabel(canv.first.second + (!var_name.empty() ? "(" + var_name + ", $Q^{2}$)" : ""));
-        if (yrange.valid())
-          p.yAxis().setRange(yrange);
+        if (y_range.valid())
+          p.yAxis().setRange(y_range);
         plots.emplace_back(&p);
       }
       plt->draw(plots, "sfcomp_" + canv.first.first, cepgen::utils::format("$Q^{2}$ = %g GeV$^{2}$", q2), dm);

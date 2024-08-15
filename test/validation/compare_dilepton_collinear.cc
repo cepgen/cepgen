@@ -25,7 +25,6 @@
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Collections.h"
 #include "CepGen/Utils/Drawer.h"
-#include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
@@ -48,7 +47,7 @@ int main(int argc, char* argv[]) {
       .parse();
 
   struct comparison_t : public cepgen::validation::Comparator {
-    using cepgen::validation::Comparator::Comparator;
+    using Comparator::Comparator;
     void initialise() override {
       (*this)
           .book("invmass", "$m(l^{+}l^{-})$", "GeV", cepgen::utils::Hist1D(50, {10., 510.}))

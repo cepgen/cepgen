@@ -30,9 +30,10 @@ int main() {
 
   //--- try with a bit of unicode too
   const std::string test_string = "Haha, ceci est un test à géométrie variable! ☺";
-  for (int type = (int)LoggedMessage::MessageType::undefined; type <= (int)LoggedMessage::MessageType::warning;
+  for (int type = static_cast<int>(LoggedMessage::MessageType::undefined);
+       type <= static_cast<int>(LoggedMessage::MessageType::warning);
        ++type) {
-    LoggedMessage("Test", "", (LoggedMessage::MessageType)type) << test_string;
+    LoggedMessage("Test", "", static_cast<LoggedMessage::MessageType>(type)) << test_string;
   }
   return 0;
 }

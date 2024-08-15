@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
   const auto evt = cepgen::utils::generateLPAIREvent();
   const vector<pair<string, double> > values = {
       {"pdg(ib1)", evt.oneWithRole(cepgen::Particle::Role::IncomingBeam1).integerPdgId()},
-      {"status(7)", (int)evt(7).status()},
+      {"status(7)", static_cast<int>(evt(7).status())},
       {"m(4)", evt(4).momentum().mass()},
       {"m2(4)", evt(4).momentum().mass2()},
       {"m(ob1)", evt.oneWithRole(cepgen::Particle::Role::OutgoingBeam1).momentum().mass()},

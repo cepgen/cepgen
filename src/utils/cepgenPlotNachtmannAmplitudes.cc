@@ -58,14 +58,14 @@ int main(int argc, char* argv[]) {
           return dp(theta) * exp(std::complex<double>(0., -phi));
         if (lam > 0)
           return dm(theta) * exp(std::complex<double>(0., +phi));
-        return -d0(theta);
+        return -std::complex<double>(d0(theta), 0.);
       };
       auto lbar = [&l](short lam, double theta, double phi) -> std::complex<double> {
         return std::conj(l(lam, theta, phi));
       };
 
       auto p = [&kin, &ampl](short lam3, short lam4, short lam3p, short lam4p) -> std::complex<double> {
-        std::complex<double> p{0.};
+        std::complex<double> p{0., 0.};
         for (const auto& lam1 : {-1, 1})
           for (const auto& lam2 : {-1, 1}) {
             CG_DEBUG("dsig_dcosth") << kin << "?" << ampl(kin, lam1, lam2, lam3, lam4) << "?"
@@ -106,12 +106,14 @@ int main(int argc, char* argv[]) {
     return 3. * kin.beta * std::pow(2., -13) * std::pow(M_1_PI, -3) / shat * val;
   };
 
-  for (auto i = (int)cepgen::NachtmannAmplitudes::Mode::SM; i <= (int)cepgen::NachtmannAmplitudes::Mode::WbarB; ++i) {
+  for (auto i = static_cast<int>(cepgen::NachtmannAmplitudes::Mode::SM);
+       i <= static_cast<int>(cepgen::NachtmannAmplitudes::Mode::WbarB);
+       ++i) {
     // first get mode name
     if (i > 0)
       break;
     std::ostringstream os;
-    os << (cepgen::NachtmannAmplitudes::Mode)i;
+    os << static_cast<cepgen::NachtmannAmplitudes::Mode>(i);
     const auto name = os.str();
     CG_LOG << "Computing " << name << ".";
     // then fill the plot
@@ -131,8 +133,8 @@ int main(int argc, char* argv[]) {
           dm |= cepgen::utils::Drawer::Mode::logy;
         if (draw_grid)
           dm |= cepgen::utils::Drawer::Mode::grid;
-        plt->draw(gr_sm_cth_400gev, dm);
-        plt->draw(gr_sm_cth_2400gev, dm);
+        (void)plt->draw(gr_sm_cth_400gev, dm);
+        (void)plt->draw(gr_sm_cth_2400gev, dm);
       }
     }
   }

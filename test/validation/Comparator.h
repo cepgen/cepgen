@@ -36,7 +36,7 @@ namespace cepgen::validation {
           top_label_(steer<std::string>("topLabel")),
           path_tmpl_(steer<std::string>("pathTemplate")),
           num_events_(steer<int>("numEvents")) {}
-    inline ~Comparator() {
+    ~Comparator() override {
       try {
         finalise();
       } catch (const Exception& err) {
@@ -57,7 +57,7 @@ namespace cepgen::validation {
         initialised_ = true;
       }
       addSample(sample_name);
-      weight_ = (double)gen_.computeXsection() / num_events_;
+      weight_ = static_cast<double>(gen_.computeXsection()) / num_events_;
       gen_.generate(num_events_, [&](const Event& evt, size_t) { process(evt); });
     }
     Comparator& fill(const std::string& plot_name, double value) {

@@ -40,20 +40,20 @@ using namespace std;
 int main(int argc, char* argv[]) {
   string input_config, output_file, scan, plotter, integrator;
   int npoints;
-  cepgen::Limits range, yrange;
+  cepgen::Limits x_range, y_range;
   vector<double> points;
   bool draw_grid, logx, logy;
 
   cepgen::ArgumentsParser parser(argc, argv);
   parser.addArgument("config,i", "base configuration", &input_config)
       .addOptionalArgument("scan,s", "type of scan to perform", &scan, "ptmin")
-      .addOptionalArgument("range,r", "minimum value of scan", &range, cepgen::Limits{1., 11.})
+      .addOptionalArgument("range,r", "minimum value of scan", &x_range, cepgen::Limits{1., 11.})
       .addOptionalArgument("num-points,n", "number of points to consider", &npoints, 10)
       .addOptionalArgument("points", "list of points to consider", &points, vector<double>{})
       .addOptionalArgument("output,o", "output file", &output_file, "xsect.dat")
       .addOptionalArgument("logx", "logarithmic x-scale", &logx, false)
       .addOptionalArgument("logy,l", "logarithmic y-scale", &logy, false)
-      .addOptionalArgument("yrange,y", "y range", &yrange)
+      .addOptionalArgument("yrange,y", "y range", &y_range)
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
       .addOptionalArgument("integrator,I", "type of integrator used", &integrator, "")
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
   par.eventExportersSequence().clear();
 
   if (points.empty())
-    points = range.generate(npoints, logx);
+    points = x_range.generate(npoints, logx);
 
   cepgen::utils::AbortHandler();
 
@@ -137,10 +137,10 @@ int main(int argc, char* argv[]) {
       dm |= cepgen::utils::Drawer::Mode::grid;
     graph.xAxis().setLabel(scan_str);
     graph.yAxis().setLabel("$\\sigma_{gen}$ (pb)");
-    if (yrange.valid())
-      graph.yAxis().setRange(yrange);
+    if (y_range.valid())
+      graph.yAxis().setRange(y_range);
     auto plt = cepgen::DrawerFactory::get().build(plotter);
-    plt->draw(graph, dm);
+    (void)plt->draw(graph, dm);
   }
 
   return 0;

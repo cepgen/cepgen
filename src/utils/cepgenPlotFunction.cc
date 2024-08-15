@@ -31,15 +31,15 @@ int main(int argc, char* argv[]) {
   string function, plotter;
   vector<string> functionals;
   int num_points;
-  cepgen::Limits xrange, yrange;
+  cepgen::Limits x_range, y_range;
   bool log, draw_grid, func_2d, ratio_plot;
 
   cepgen::ArgumentsParser(argc, argv)
       .addOptionalArgument("function,f", "function to parse", &function, "min(1.,exp(-x/10))")
       .addOptionalArgument("functional-eval,F", "functional evaluators", &functionals, vector<string>{})
       .addOptionalArgument("num-points,n", "number of points to consider", &num_points, 100)
-      .addOptionalArgument("x-range,x", "horizontal axis range", &xrange, cepgen::Limits{-5., +5.})
-      .addOptionalArgument("y-range,y", "vertical axis range", &yrange, cepgen::Limits{})
+      .addOptionalArgument("x-range,x", "horizontal axis range", &x_range, cepgen::Limits{-5., +5.})
+      .addOptionalArgument("y-range,y", "vertical axis range", &y_range, cepgen::Limits{})
       .addOptionalArgument("draw-grid,g", "draw the x/y grid", &draw_grid, false)
       .addOptionalArgument("log,l", "logarithmic y-axis", &log, false)
       .addOptionalArgument("plotter,p", "type of plotter to user", &plotter, "")
@@ -65,20 +65,20 @@ int main(int argc, char* argv[]) {
       auto test = cepgen::FunctionalFactory::get().build(
           func, cepgen::ParametersList().set<string>("expression", function).set<vector<string> >("variables", vars));
       if (func_2d) {
-        if (!yrange.hasMin())
-          yrange.min() = xrange.min();
-        if (!yrange.hasMax())
-          yrange.max() = xrange.max();
+        if (!y_range.hasMin())
+          y_range.min() = x_range.min();
+        if (!y_range.hasMax())
+          y_range.max() = x_range.max();
         for (int i = 0; i < num_points; ++i) {
-          const double x = xrange.min() + (xrange.max() - xrange.min()) / (num_points - 1) * i;
+          const double x = x_range.min() + (x_range.max() - x_range.min()) / (num_points - 1) * i;
           for (int j = 0; j < num_points; ++j) {
-            const double y = yrange.min() + (yrange.max() - yrange.min()) / (num_points - 1) * j;
+            const double y = y_range.min() + (y_range.max() - y_range.min()) / (num_points - 1) * j;
             m_gr2d_fb[func].addPoint(x, y, (*test)({x, y}));
           }
         }
       } else
         for (int i = 0; i < num_points; ++i) {
-          const double x = xrange.min() + (xrange.max() - xrange.min()) / (num_points - 1) * i;
+          const double x = x_range.min() + (x_range.max() - x_range.min()) / (num_points - 1) * i;
           m_gr_fb[func].addPoint(x, (*test)(x));
         }
     } catch (const cepgen::Exception&) {
@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
       for (auto& gr_fb : m_gr2d_fb) {
         gr_fb.second.setName("graph2d_" + gr_fb.first);
         gr_fb.second.setTitle(gr_fb.first);
-        plt->draw(gr_fb.second, dm);
+        (void)plt->draw(gr_fb.second, dm);
       }
     } else {
       if (log)
@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
         gr_fb.second.setTitle(gr_fb.first);
         mg.emplace_back(&gr_fb.second);
       }
-      plt->draw(mg, "comp_functionals", "", dm);
+      (void)plt->draw(mg, "comp_functionals", "", dm);
     }
   }
 

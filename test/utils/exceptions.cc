@@ -27,12 +27,12 @@ int main(int argc, char* argv[]) {
   cepgen::ArgumentsParser(argc, argv).addOptionalArgument("verbose", "verbose mode", &verbose, false).parse();
   CG_TEST_DEBUG(verbose);
 
-  const std::string test_string = "Haha, ceci est un test à géométrie variable! ☺";  // try with a bit of unicode too
-  for (int type = (int)cepgen::Exception::Type::undefined; type < (int)cepgen::Exception::Type::fatal; ++type) {
+  const std::string test_string = "Haha, ceci est un test à géométrie variable! ☺";  // try with a bit of Unicode too
+  for (int type = cepgen::Exception::Type::undefined; type < cepgen::Exception::Type::fatal; ++type) {
     ostringstream type_name;
-    type_name << "Type " << (cepgen::Exception::Type)type;
+    type_name << "Type " << static_cast<cepgen::Exception::Type>(type);
     auto throw_except = [&type, &test_string]() {
-      throw cepgen::Exception("Test", "", (cepgen::Exception::Type)type) << test_string;
+      throw cepgen::Exception("Test", "", static_cast<cepgen::Exception::Type>(type)) << test_string;
     };
     CG_TEST_EXCEPT(throw_except, type_name.str());
   }

@@ -67,14 +67,16 @@ int main(int argc, char* argv[]) {
         coord[dim.at(0)] = x;
         gr_scan_1d.addPoint(x, gen.computePoint(coord));
         break;
-      case 2:
+      case 2: {
         coord[dim.at(0)] = x;
         for (int j = 0; j < npoints; ++j) {
           const double y = j * 1. / npoints;
           coord[dim.at(1)] = y;
           gr_scan_2d.addPoint(x, y, gen.computePoint(coord));
         }
-        break;
+      } break;
+      default:
+        throw CG_FATAL("main") << "Unsupported dimension multiplicity: " << dim.size() << ".";
     }
   }
   if (!plotter.empty()) {
@@ -95,7 +97,7 @@ int main(int argc, char* argv[]) {
         gr_scan_1d.setTitle(cepgen::utils::format("%s variation, all others x_{i} at %g", xlabel.c_str(), def));
         gr_scan_1d.xAxis().setLabel(xlabel);
         gr_scan_2d.yAxis().setLabel(cepgen::utils::format("d^{%ld}#sigma/d#bf{x}^{%ld}", ndim, ndim));
-        plt->draw(gr_scan_1d, dm);
+        (void)plt->draw(gr_scan_1d, dm);
       } break;
       case 2: {
         if (log)
@@ -106,8 +108,10 @@ int main(int argc, char* argv[]) {
         gr_scan_2d.xAxis().setLabel(xlabel);
         gr_scan_2d.yAxis().setLabel(ylabel);
         gr_scan_2d.zAxis().setLabel(cepgen::utils::format("d^{%ld}#sigma/d#bf{x}^{%ld}", ndim, ndim));
-        plt->draw(gr_scan_2d, dm);
-      }
+        (void)plt->draw(gr_scan_2d, dm);
+      } break;
+      default:
+        throw CG_FATAL("main") << "Unsupported dimension multiplicity: " << dim.size() << ".";
     }
   }
 

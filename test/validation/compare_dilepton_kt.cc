@@ -25,7 +25,6 @@
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Collections.h"
 #include "CepGen/Utils/Drawer.h"
-#include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Histogram.h"
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"

@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
       .parse();
 
   CG_TEST_DEBUG(verbose);
-  const double epsilon = 1.e-9;  // tolerance
+  constexpr double epsilon = 1.e-9;  // tolerance
   cepgen::initialise();
 
   if (parsers.empty())
@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
   for (const auto& func : parsers) {
     CG_LOG << "Testing with \"" << func << "\" functional parser.";
     {  // test with a 1-variable function
-      const double exp_result_test1 = 6.795704571;
+      constexpr double exp_result_test1 = 6.795704571;
       CG_LOG << cepgen::utils::Functional::fromExpression("2.5*exp(0.1*x)", {"x"});
       auto test = cepgen::FunctionalFactory::get().build(
           func, cepgen::utils::Functional::fromExpression("2.5*exp(0.1*x)", {"x"}));
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
       auto test_invalid = [&func]() {
         auto test = cepgen::FunctionalFactory::get().build(
             func, cepgen::utils::Functional::fromExpression("sqrt(x+x**3-log(10)", {"x"}));
-        (*test)(10);
+        (void)(*test)(10);
       };
       CG_TEST_EXCEPT(test_invalid, "invalid function parsing");
     }
@@ -76,11 +76,11 @@ int main(int argc, char* argv[]) {
       try {
         auto test =
             cepgen::FunctionalFactory::get().build(func, cepgen::utils::Functional::fromExpression("a***2", {"a"}));
-        (*test)(10);
-        (*test)({10});
+        (void)(*test)(10);
+        (void)(*test)({10});
         CG_LOG << "Test 4 failed";
         return -1;
-      } catch (const cepgen::Exception& e) {
+      } catch (const cepgen::Exception&) {
         CG_LOG << "Test 4 passed.";
       }
     }

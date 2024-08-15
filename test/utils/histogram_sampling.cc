@@ -71,8 +71,8 @@ int main(int argc, char* argv[]) {
     CG_TEST_EQUIV(hist_resampled.rms(), hist.rms(), "histograms rms");
 
     if (plt) {
-      plt->draw(hist);
-      plt->draw(hist_resampled);
+      (void)plt->draw(hist);
+      (void)plt->draw(hist_resampled);
     }
   }
 
@@ -94,8 +94,8 @@ int main(int argc, char* argv[]) {
     CG_TEST_EQUIV(hist_resampled.rmsY(), hist.rmsY(), "histograms rms Y");
 
     if (plt) {
-      plt->draw(hist);
-      plt->draw(hist_resampled);
+      (void)plt->draw(hist);
+      (void)plt->draw(hist_resampled);
     }
   }
 
