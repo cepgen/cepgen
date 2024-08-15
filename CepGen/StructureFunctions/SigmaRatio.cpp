@@ -154,8 +154,8 @@ namespace cepgen::sigrat {
       const double w2 = utils::mX2(xbj, q2, mp2_), w = sqrt(w2);
       const double xth = q2 / (q2 + wth_ * wth_ - mp2_);  // xth = x( W = wth )
       const double zeta = std::log(25. * q2);
-      const double xitmp = (w < wth_) ? theta(xth, q2) : theta(xbj, q2);
-      const double tmp = p_.at(0) * xitmp / zeta + p_.at(1) / q2 - p_.at(2) / (q20_ * q20_ + q2 * q2);
+      const double xi_tmp = (w < wth_) ? theta(xth, q2) : theta(xbj, q2);
+      const double tmp = p_.at(0) * xi_tmp / zeta + p_.at(1) / q2 - p_.at(2) / (q20_ * q20_ + q2 * q2);
       if (w >= wth_)
         return tmp;
       return tmp * std::pow((1. - xbj) / (1. - xth), 3);

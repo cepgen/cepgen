@@ -33,7 +33,7 @@ namespace cepgen::formfac {
     explicit InelasticNucleon(const ParametersList& params)
         : Parameterisation(params),
           sf_(StructureFunctionsFactory::get().build(steer<ParametersList>("structureFunctions"))),
-          integr_(AnalyticIntegratorFactory::get().build(steer<ParametersList>("integrator"))),
+          integrator_(AnalyticIntegratorFactory::get().build(steer<ParametersList>("integrator"))),
           compute_fm_(steer<bool>("computeFM")),
           mx_range_(steer<Limits>("mxRange")),
           mx2_range_{mx_range_.min() * mx_range_.min(), mx_range_.max() * mx_range_.max()},
@@ -70,15 +70,15 @@ namespace cepgen::formfac {
   protected:
     void eval() override {
       const auto inv_q2 = 1. / q2_;
-      const auto fe = integr_->integrate(eval_fe_, mx2_range_) * inv_q2;
-      const auto fm = compute_fm_ ? integr_->integrate(eval_fm_, mx2_range_) * inv_q2 : 0.;
+      const auto fe = integrator_->integrate(eval_fe_, mx2_range_) * inv_q2;
+      const auto fm = compute_fm_ ? integrator_->integrate(eval_fm_, mx2_range_) * inv_q2 : 0.;
       setFEFM(fe, fm);
     }
     bool fragmenting() const override { return true; }
 
   private:
     const std::unique_ptr<strfun::Parameterisation> sf_;
-    const std::unique_ptr<AnalyticIntegrator> integr_;
+    const std::unique_ptr<AnalyticIntegrator> integrator_;
     const double compute_fm_;
     const Limits mx_range_, mx2_range_, dm2_range_;
     const std::function<double(double)> eval_fe_, eval_fm_;

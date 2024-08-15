@@ -44,9 +44,9 @@ namespace cepgen::strfun {
 
   private:
     void eval() override {
-      auto amu2 = (float)args_.q2 + q2_shift_;  // shift the overall scale
+      auto amu2 = static_cast<float>(args_.q2) + q2_shift_;  // shift the overall scale
       float xuv, xdv, xus, xds, xss, xg;
-      auto xbj_arg = (float)args_.xbj;
+      auto xbj_arg = static_cast<float>(args_.xbj);
 
       grv95lo_(xbj_arg, amu2, xuv, xdv, xus, xds, xss, xg);
 

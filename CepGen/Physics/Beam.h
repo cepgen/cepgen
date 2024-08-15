@@ -21,7 +21,6 @@
 
 #include <memory>
 
-#include "CepGen/FormFactors/FormFactors.h"
 #include "CepGen/Physics/Momentum.h"
 #include "CepGen/Physics/PartonFlux.h"
 
@@ -58,15 +57,15 @@ namespace cepgen {
       return *this;
     }
 
-    inline const ParametersList& formFactors() const { return formfac_; }             ///< Form factors parameters
+    inline const ParametersList& formFactors() const { return form_factors_; }        ///< Form factors parameters
     inline const ParametersList& partonFluxParameters() const { return flux_info_; }  ///< Parton flux modelling
 
   private:
-    spdgid_t pdg_id_{0};        ///< PDG identifier for the beam
-    Momentum momentum_;         ///< Incoming particle momentum
-    ParametersList formfac_;    ///< Form factors modelling parameters
-    ParametersList flux_info_;  ///< Incoming parton flux parameters
-    bool elastic_{true};        ///< Elastic parton emission?
+    spdgid_t pdg_id_{0};           ///< PDG identifier for the beam
+    Momentum momentum_;            ///< Incoming particle momentum
+    ParametersList form_factors_;  ///< Form factors modelling parameters
+    ParametersList flux_info_;     ///< Incoming parton flux parameters
+    bool elastic_{true};           ///< Elastic parton emission?
   };
 }  // namespace cepgen
 

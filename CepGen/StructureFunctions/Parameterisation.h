@@ -29,7 +29,7 @@ namespace cepgen::strfun {
   class Parameterisation : public NamedModule<Parameterisation> {
   public:
     explicit Parameterisation(const ParametersList&);
-    virtual ~Parameterisation() = default;
+    ~Parameterisation() override = default;
 
     static ParametersDescription description();  ///< Generic description for the structure functions
 
@@ -42,7 +42,7 @@ namespace cepgen::strfun {
     /// Compute all relevant structure functions for a given \f$(x_{\rm Bj},Q^2)\f$ couple
     /// \param[in] xbj Bjorken's x variable
     /// \param[in] q2 Squared 4-momentum transfer (in GeV^2)
-    Parameterisation& operator()(double /*xbj*/, double /*q2*/);
+    Parameterisation& operator()(double xbj, double q2);
 
     double F2(double xbj, double q2);  ///< Transverse structure function
     double FL(double xbj, double q2);  ///< Longitudinal structure function

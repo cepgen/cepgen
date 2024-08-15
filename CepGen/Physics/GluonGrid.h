@@ -24,9 +24,9 @@
 
 #define DEFAULT_KMR_GRID_PATH "gluon_mmht2014nlo_Watt.dat"
 
-/// Kimber-Martin-Ryskin unintegrated gluon densities
+/// Kimber-Martin-Ryskin un-integrated gluon densities
 namespace kmr {
-  /// A KMR unintegrated gluon densities grid interpolator
+  /// A KMR un-integrated gluon densities grid interpolator
   class GluonGrid : private cepgen::GridHandler<3, 1>, public cepgen::SteeredObject<GluonGrid> {
   public:
     /// Retrieve the grid interpolator (singleton)

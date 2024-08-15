@@ -48,33 +48,23 @@ namespace cepgen {
     bool operator==(const HeavyIon& oth) const { return Z == oth.Z && A == oth.A; }
     bool operator!=(const HeavyIon& oth) const { return !(*this == oth); }
 
-    /// Neutrons mass, in GeV/c2
-    double massN() const;
-    /// Protons mass, in GeV/c2
-    double massP() const;
-    /// Total heavy ion mass, in GeV/c2
-    double mass() const { return massN() + massP(); }
-    /// Heavy ion radius, in m
-    double radius() const;
+    double massN() const;                                     ///< Mass of all neutrons in HI, in GeV/c2
+    double massP() const;                                     ///< Mass of all protons in HI, in GeV/c2
+    inline double mass() const { return massN() + massP(); }  ///< Total heavy ion mass, in GeV/c2
+    double radius() const;                                    ///< Heavy ion radius, in m
 
-    /// Build from a custom PDG id
-    static HeavyIon fromPdgId(pdgid_t);
-    /// Check if the PDG id is compatible with a HI
-    static bool isHI(const spdgid_t&);
-    /// Check if the particle properties are compatible with a HI
-    static bool isHI(const ParticleProperties&);
+    static HeavyIon fromPdgId(pdgid_t);           ///< Build a HI from a custom PDG id
+    static bool isHI(const spdgid_t&);            ///< Check if the PDG id is compatible with a HI
+    static bool isHI(const ParticleProperties&);  ///< Check if the particle properties are compatible with a HI
+
     /// Mass of a heavy ion, in GeV/c\f$^2\f$
     /// \param hi Heavy ion type
     static double mass(const HeavyIon& hi) { return hi.mass(); }
 
-    /// Simple proton
-    static inline HeavyIon proton() { return HeavyIon(1, Element::H); }
-    /// Simple neutron
-    static inline HeavyIon neutron() { return HeavyIon(1, Element::neutron); }
-    /// Standard gold
-    static inline HeavyIon Au() { return HeavyIon(197, Element::Au); }
-    /// Standard lead
-    static inline HeavyIon Pb() { return HeavyIon(207, Element::Pb); }
+    static inline HeavyIon proton() { return HeavyIon(1, Element::H); }         ///< Simple proton
+    static inline HeavyIon neutron() { return HeavyIon(1, Element::neutron); }  ///< Simple neutron
+    static inline HeavyIon Au() { return HeavyIon(197, Element::Au); }          ///< Standard gold
+    static inline HeavyIon Pb() { return HeavyIon(207, Element::Pb); }          ///< Standard lead
 
     /// Convert the HI into a custom PDG id
     operator pdgid_t() const;

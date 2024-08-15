@@ -32,7 +32,7 @@ namespace cepgen {
     cuts_.setParameters(params_);
     if (params_.has<std::vector<int> >("minFinalState"))  // outgoing particles definition
       for (const auto& pdg : steer<std::vector<int> >("minFinalState"))
-        minimum_final_state_.emplace_back((pdgid_t)pdg);
+        minimum_final_state_.emplace_back(static_cast<pdgid_t>(pdg));
 
     if (const auto kmr_grid_path = steerPath("kmrGridPath"); !kmr_grid_path.empty())  // grid path for gluon emission
       kmr::GluonGrid::get(ParametersList(params_).set<std::string>("path", kmr_grid_path));
@@ -44,7 +44,7 @@ namespace cepgen {
     std::transform(minimum_final_state_.begin(),
                    minimum_final_state_.end(),
                    std::back_inserter(params_.operator[]<std::vector<int> >("minFinalState")),
-                   [](const auto& pdg) { return (int)pdg; });
+                   [](const auto& pdg) { return static_cast<int>(pdg); });
     return SteeredObject::parameters();
   }
 

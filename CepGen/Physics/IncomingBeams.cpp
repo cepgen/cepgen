@@ -46,25 +46,25 @@ namespace cepgen {
       if (const auto& hi_Z1 = steerAs<int, Element>("beam1Z"); hi_Z1 != Element::invalid)
         pos_pdg = HeavyIon(steer<int>("beam1A"), hi_Z1);
       else if (const auto& hi_beam1 = steer<std::vector<int> >("heavyIon1"); hi_beam1.size() >= 2)
-        pos_pdg = HeavyIon{(unsigned short)hi_beam1.at(0), static_cast<Element>(hi_beam1.at(1))};
+        pos_pdg = HeavyIon{static_cast<unsigned short>(hi_beam1.at(0)), static_cast<Element>(hi_beam1.at(1))};
     }
     auto& neg_pdg = plist_neg.operator[]<int>("pdgId");  // negative-z incoming beam
     if (neg_pdg = steer<int>("beam2id"); neg_pdg == PDG::invalid) {
       if (const auto& hi_Z2 = steerAs<int, Element>("beam2Z"); hi_Z2 != Element::invalid)
         neg_pdg = HeavyIon(steer<int>("beam2A"), hi_Z2);
       else if (const auto& hi_beam2 = steer<std::vector<int> >("heavyIon2"); hi_beam2.size() >= 2)
-        neg_pdg = HeavyIon{(unsigned short)hi_beam2.at(0), (Element)hi_beam2.at(1)};
+        neg_pdg = HeavyIon{static_cast<unsigned short>(hi_beam2.at(0)), static_cast<Element>(hi_beam2.at(1))};
     }
 
     //----- combined two-beam system
 
     //--- beams PDG ids
-    if (const auto& beams_pdg = steer<std::vector<ParametersList> >("pdgIds"); beams_pdg.size() >= 2) {
-      pos_pdg = beams_pdg.at(0).get<int>("pdgid");
-      neg_pdg = beams_pdg.at(1).get<int>("pdgid");
-    } else if (const auto& beams_pdg = steer<std::vector<int> >("pdgIds"); beams_pdg.size() >= 2) {
-      pos_pdg = beams_pdg.at(0);
-      neg_pdg = beams_pdg.at(1);
+    if (const auto& plist_pdg_ids = steer<std::vector<ParametersList> >("pdgIds"); plist_pdg_ids.size() >= 2) {
+      pos_pdg = plist_pdg_ids.at(0).get<int>("pdgid");
+      neg_pdg = plist_pdg_ids.at(1).get<int>("pdgid");
+    } else if (const auto& pdg_ids = steer<std::vector<int> >("pdgIds"); pdg_ids.size() >= 2) {
+      pos_pdg = pdg_ids.at(0);
+      neg_pdg = pdg_ids.at(1);
     }
 
     //--- beams longitudinal momentum
@@ -82,12 +82,12 @@ namespace cepgen {
       params_.fill<double>("beam1pz", p1z);
       params_.fill<double>("beam2pz", p2z);
       if (std::abs(pos_pdg) == std::abs(neg_pdg)) {  // special case: symmetric beams -> fill from centre-of-mass energy
-        if (const auto sqrts = params_.has<double>("sqrtS") && steer<double>("sqrtS") > 0. ? steer<double>("sqrtS")
-                               : params_.has<double>("cmEnergy") && steer<double>("cmEnergy") > 0.
-                                   ? steer<double>("cmEnergy")
-                                   : 0.;
-            sqrts > 0.) {  // compute momenta from energy
-          const auto pz_abs = utils::fastSqrtSqDiff(0.5 * sqrts, PDG::get().mass(pos_pdg));
+        if (const auto sqrt_s = params_.has<double>("sqrtS") && steer<double>("sqrtS") > 0. ? steer<double>("sqrtS")
+                                : params_.has<double>("cmEnergy") && steer<double>("cmEnergy") > 0.
+                                    ? steer<double>("cmEnergy")
+                                    : 0.;
+            sqrt_s > 0.) {  // compute momenta from energy
+          const auto pz_abs = utils::fastSqrtSqDiff(0.5 * sqrt_s, PDG::get().mass(pos_pdg));
           p1z = +pz_abs;
           p2z = -pz_abs;
         }
@@ -104,11 +104,12 @@ namespace cepgen {
 
     //--- form factors
     ParametersList pos_formfac, neg_formfac;
-    if (auto formfacs = steer<std::vector<ParametersList> >("formFactors"); formfacs.size() >= 2) {
-      pos_formfac = formfacs.at(0);
-      neg_formfac = formfacs.at(1);
-    } else if (auto formfacs = steer<ParametersList>("formFactors"); !formfacs.empty())
-      pos_formfac = neg_formfac = formfacs;
+    if (const auto& vec_form_factors = steer<std::vector<ParametersList> >("formFactors");
+        vec_form_factors.size() >= 2) {
+      pos_formfac = vec_form_factors.at(0);
+      neg_formfac = vec_form_factors.at(1);
+    } else if (const auto& form_factors = steer<ParametersList>("formFactors"); !form_factors.empty())
+      pos_formfac = neg_formfac = form_factors;
     pos_formfac.set<int>("pdgId", std::abs(pos_pdg));
     neg_formfac.set<int>("pdgId", std::abs(neg_pdg));
     plist_pos.set("formFactors", pos_formfac);
@@ -130,20 +131,22 @@ namespace cepgen {
       pos_flux = neg_flux = PartonFluxFactory::get().describeParameters(fluxes).parameters();
     };
 
-    if (auto fluxes = steer<std::vector<ParametersList> >("partonFluxes"); fluxes.size() >= 2) {
-      pos_flux = fluxes.at(0);
-      neg_flux = fluxes.at(1);
-    } else if (auto fluxes = steer<ParametersList>("partonFluxes"); !fluxes.empty())
-      pos_flux = neg_flux = fluxes;
-    else if (const auto& fluxes = steer<std::vector<std::string> >("partonFluxes"); !fluxes.empty())
-      set_part_fluxes_from_name_vector(fluxes);
-    else if (const auto& flux = steer<std::string>("partonFluxes"); !flux.empty())
-      set_part_fluxes_from_name(flux);
-    else if (const auto& fluxes = steer<std::vector<std::string> >("ktFluxes"); !fluxes.empty()) {
-      set_part_fluxes_from_name_vector(fluxes);
+    if (const auto& vec_parton_fluxes = steer<std::vector<ParametersList> >("partonFluxes");
+        vec_parton_fluxes.size() >= 2) {
+      pos_flux = vec_parton_fluxes.at(0);
+      neg_flux = vec_parton_fluxes.at(1);
+    } else if (const auto& parton_fluxes = steer<ParametersList>("partonFluxes"); !parton_fluxes.empty())
+      pos_flux = neg_flux = parton_fluxes;
+    else if (const auto& vec_parton_fluxes_names = steer<std::vector<std::string> >("partonFluxes");
+             !vec_parton_fluxes_names.empty())
+      set_part_fluxes_from_name_vector(vec_parton_fluxes_names);
+    else if (const auto& parton_fluxes_name = steer<std::string>("partonFluxes"); !parton_fluxes_name.empty())
+      set_part_fluxes_from_name(parton_fluxes_name);
+    else if (const auto& kt_fluxes_names = steer<std::vector<std::string> >("ktFluxes"); !kt_fluxes_names.empty()) {
+      set_part_fluxes_from_name_vector(kt_fluxes_names);
       CG_WARNING("IncomingBeams") << "Key 'ktFluxes' is deprecated. Please use 'partonFluxes' instead.";
-    } else if (const auto& flux = steer<std::string>("ktFluxes"); !flux.empty()) {
-      set_part_fluxes_from_name(flux);
+    } else if (const auto& kt_fluxes_name = steer<std::string>("ktFluxes"); !kt_fluxes_name.empty()) {
+      set_part_fluxes_from_name(kt_fluxes_name);
       CG_WARNING("IncomingBeams") << "Key 'ktFluxes' is deprecated. Please use 'partonFluxes' instead.";
     }
     pos_flux.set("formFactors", pos_formfac).set("structureFunctions", strfuns);
@@ -221,7 +224,7 @@ namespace cepgen {
   }
 
   void IncomingBeams::setStructureFunctions(int sf_model, int sr_model) {
-    const unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
+    static constexpr unsigned long kLHAPDFCodeDec = 10000000, kLHAPDFPartDec = 1000000;
     sf_model = (sf_model == 0 ? 11 /* SuriYennie */ : sf_model);
     sr_model = (sr_model == 0 ? 4 /* SibirtsevBlunden */ : sr_model);
     auto& sf_params = params_.operator[]<ParametersList>("structureFunctions");
@@ -246,11 +249,11 @@ namespace cepgen {
                   .setAs<int, mode::Kinematics>("mode", mode());
     if (HeavyIon::isHI(pos_beam_.integerPdgId())) {
       const auto hi1 = HeavyIon::fromPdgId(std::abs(pos_beam_.integerPdgId()));
-      params_.set<int>("beam1A", hi1.A).set<int>("beam1Z", (int)hi1.Z);
+      params_.set<int>("beam1A", hi1.A).set<int>("beam1Z", static_cast<int>(hi1.Z));
     }
     if (HeavyIon::isHI(neg_beam_.integerPdgId())) {
       const auto hi2 = HeavyIon::fromPdgId(std::abs(neg_beam_.integerPdgId()));
-      params_.set<int>("beam2A", hi2.A).set<int>("beam2Z", (int)hi2.Z);
+      params_.set<int>("beam2A", hi2.A).set<int>("beam2Z", static_cast<int>(hi2.Z));
     }
     return params_;
   }

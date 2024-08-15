@@ -48,7 +48,7 @@ namespace cepgen {
       return PDG::proton;
     if (*this == neutron())
       return PDG::neutron;
-    return (pdgid_t)10'000'000 + 1000 * (unsigned short)Z + A;
+    return static_cast<pdgid_t>(10'000'000) + 1000 * static_cast<unsigned short>(Z) + A;
   }
 
   bool HeavyIon::isHI(const spdgid_t& pdgid) { return pdgid / 10'000'000 != 0; }
@@ -60,13 +60,13 @@ namespace cepgen {
   double HeavyIon::massP() const {
     if (Z == Element::invalid)
       throw CG_FATAL("HeavyIon:massP") << "Invalid heavy ion: " << (*this) << "!";
-    return (short)Z * PDG::get().mass(PDG::proton);
+    return static_cast<short>(Z) * PDG::get().mass(PDG::proton);
   }
 
   double HeavyIon::massN() const {
     if (Z == Element::invalid)
       throw CG_FATAL("HeavyIon:massN") << "Invalid heavy ion: " << (*this) << "!";
-    return (A - (short)Z) * PDG::get().mass(PDG::neutron);
+    return (A - static_cast<short>(Z)) * PDG::get().mass(PDG::neutron);
   }
 
   double HeavyIon::radius() const {
@@ -100,7 +100,7 @@ namespace cepgen {
     std::ostringstream oss;
     oss << hi.Z;
     if (oss.str().empty() || hi.Z == Element::invalid)
-      return os << "HI{Z=" << (unsigned short)hi.Z << ", A=" << hi.A << "}";
+      return os << "HI{Z=" << static_cast<unsigned short>(hi.Z) << ", A=" << hi.A << "}";
     return os << hi.A << oss.str();
   }
 

@@ -45,7 +45,7 @@ namespace cepgen::strfun {
     void eval() override;
 
   private:
-    static constexpr double prefac_ =
+    static constexpr double prefactor_ =
         2. * M_PI * M_PI * constants::ALPHA_EM * constants::GEVM2_TO_PB * 1e-9;  // pb/GeV -> mb/GeV
     static constexpr std::array<float, 19> gmq_ = {{0.000,
                                                     0.200,
@@ -153,14 +153,14 @@ namespace cepgen::strfun {
       RealRes = 1,
       /// real photon cross section for q^2=0,
       /// q^2 dependence: resonant contribution as for Delta(1232),
-      /// nonresonant contribution according to S&Y
+      /// non-resonant contribution according to S&Y
       RealResAndNonRes = 2,
       /// real photon cross section for q^2=0,
       /// q^2 dependence according to S&Y
       RealAndSuriYennieNonRes = 3,
       /// real photon cross section for q^2=0,
       /// q^2 dependence: resonant contribution as for Delta(1232),
-      /// some fit for nonresonant contribution
+      /// some fit for non-resonant contribution
       RealAndFitNonRes = 4
     } mode_;
     size_t fit_model_;
@@ -168,7 +168,7 @@ namespace cepgen::strfun {
     const double gmb_;
     const double q20_;
     const double r_power_;
-    const double lowq2_;
+    const double low_q2_;
 
     GridHandler<1, 2> sigma_grid_{GridType::linear};
     GridHandler<1, 1> gm_grid_{GridType::linear};
@@ -187,7 +187,7 @@ namespace cepgen::strfun {
         gmb_(steer<double>("gmb")),
         q20_(steer<double>("q20")),
         r_power_(steer<double>("rPower")),
-        lowq2_(steer<double>("lowQ2")),
+        low_q2_(steer<double>("lowQ2")),
         sy_sf_(StructureFunctionsFactory::get().build("SuriYennie", steer<ParametersList>("syParams"))) {
     //----- initialise the interpolation grids
 
@@ -228,7 +228,7 @@ namespace cepgen::strfun {
           /// Some fit of the know e-p data. Good only for Q^2 < 6 GeV^2
           Gm = std::pow(1. + std::pow(args_.q2 / q20_, 2), -r_power_);
         else
-          Gm = sy_sf_->W1(args_.xbj, args_.q2) / sy_sf_->W1(args_.xbj, lowq2_);
+          Gm = sy_sf_->W1(args_.xbj, args_.q2) / sy_sf_->W1(args_.xbj, low_q2_);
       } else {                              // resonant
         if (args_.q2 >= gm_grid_.max()[0])  // above grid range
           Gm = gm0_ * exp(-gmb_ * args_.q2);
@@ -239,9 +239,9 @@ namespace cepgen::strfun {
       sgp *= Gm;  // cross section with some q^2 dependence
 
       //--- for W -> cross section
-      const double s1 = prefac_ * 4. * mp_ / (mx2 - mp2_);  // mb/GeV
-      const double s2 = prefac_ * (std::pow(mx2 - mp2_, 2) + 2. * (mx2 + mp2_) * args_.q2 + args_.q2 * args_.q2) / mp_ /
-                        args_.q2 / (mx2 - mp2_);  // mb/GeV
+      const double s1 = prefactor_ * 4. * mp_ / (mx2 - mp2_);  // mb/GeV
+      const double s2 = prefactor_ * (std::pow(mx2 - mp2_, 2) + 2. * (mx2 + mp2_) * args_.q2 + args_.q2 * args_.q2) /
+                        mp_ / args_.q2 / (mx2 - mp2_);  // mb/GeV
       //---  ratio (\sigma_T+\sigma_L)/\sigma_T according to S & Y
       const double ratio = (s2 * sy_sf_->W2(args_.xbj, args_.q2)) / (s1 * sy_sf_->W1(args_.xbj, args_.q2));
 

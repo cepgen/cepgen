@@ -42,7 +42,7 @@ namespace cepgen {
       // Calculate real part of photon vacuum polarization.
       // - for leptons simplify by using asymptotic (Q^2 >> m^2) expressions.
       // - for hadrons use parametrization of H. Burkhardt et al.
-      // See R. Kleiss et al, CERN 89-08, vol. 3, pp. 129-131.
+      // See R. Kleiss et al., CERN 89-08, vol. 3, pp. 129-131.
       double rpigg;
       if (q2 < 9.e-2)
         rpigg = AEM_3PI * (13.4916 + log_q2) + 0.00835 * log_1_pl_q2;

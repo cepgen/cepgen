@@ -21,14 +21,14 @@
 #include "CepGen/Physics/BreitWigner.h"
 
 namespace cepgen {
-  BreitWigner::BreitWigner(double mean, double gamma, double emin, double emax)
-      : mean_(mean), gamma_(gamma), emin_(emin), emax_(emax) {}
+  BreitWigner::BreitWigner(double mean, double gamma, double min_energy, double max_energy)
+      : mean_(mean), gamma_(gamma), min_energy_(min_energy), max_energy_(max_energy) {}
 
   double BreitWigner::operator()(double x) const {
     const double val = mean_ + 0.5 * gamma_ * tan((2. * x - 1.) * M_PI_2);
-    if (emin_ >= 0. && val < emin_)
+    if (min_energy_ >= 0. && val < min_energy_)
       return -1.;
-    if (emax_ >= 0. && val > emax_)
+    if (max_energy_ >= 0. && val > max_energy_)
       return -1.;
     return val;
   }

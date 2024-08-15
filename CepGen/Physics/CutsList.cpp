@@ -16,8 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
-
 #include "CepGen/Physics/CutsList.h"
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
@@ -38,7 +36,8 @@ namespace cepgen {
     if (params.has<ParametersList>("cuts")) {  // per-particle cuts
       const auto per_part_cuts = params.get<ParametersList>("cuts");
       for (const auto& part : per_part_cuts.keys())
-        central_particles[(pdgid_t)std::stoi(part)].setDescribedParameters(per_part_cuts.get<ParametersList>(part));
+        central_particles[static_cast<pdgid_t>(std::stoi(part))].setDescribedParameters(
+            per_part_cuts.get<ParametersList>(part));
     }
 
     // override the parameters from sub-parameters content

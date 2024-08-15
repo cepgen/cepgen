@@ -28,7 +28,7 @@ namespace cepgen {
     (*this)
         .add("pdgid", pdgid)
         .add("name", name)
-        .add("description", descr)
+        .add("description", human_name)
         .add("colours", colours)
         .add("mass", mass)
         .add("width", width)
@@ -38,7 +38,7 @@ namespace cepgen {
 
   ParticleProperties::ParticleProperties(pdgid_t ppdgid,
                                          const std::string& pname,
-                                         const std::string& pdescr,
+                                         const std::string& pdescription,
                                          int pcolours,
                                          double pmass,
                                          double pwidth,
@@ -47,7 +47,7 @@ namespace cepgen {
       : ParticleProperties(ParametersList()
                                .set("pdgid", ppdgid)
                                .set("name", pname)
-                               .set("description", pdescr)
+                               .set("description", pdescription)
                                .set("colours", pcolours)
                                .set("mass", pmass)
                                .set("width", pwidth)
@@ -78,7 +78,7 @@ namespace cepgen {
 
   std::ostream& operator<<(std::ostream& os, const ParticleProperties& prop) {
     return os << (prop.name.empty() ? "unnamed" : prop.name) << "{"
-              << "pdgid=" << prop.pdgid << ",desc=" << prop.descr << ",colours=" << prop.colours
+              << "pdgid=" << prop.pdgid << ",desc=" << prop.human_name << ",colours=" << prop.colours
               << ",mass=" << prop.mass << ",width=" << prop.width << ",charges={" << utils::merge(prop.charges, ", ")
               << "}" << (prop.fermion ? ",fermion" : "") << "}";
   }

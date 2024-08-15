@@ -16,10 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cmath>
-
 #include "CepGen/Core/Exception.h"
-#include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
@@ -29,7 +26,7 @@ namespace cepgen {
       : SteeredObject(params),
         pdg_id_(steerAs<int, pdgid_t>("pdgId")),
         momentum_(Momentum::fromPxPyPzM(0., 0., steer<double>("pz"), PDG::get().mass(pdg_id_))) {
-    (*this).add("formFactors", formfac_).add("partonFlux", flux_info_).add("elastic", elastic_);
+    (*this).add("formFactors", form_factors_).add("partonFlux", flux_info_).add("elastic", elastic_);
   }
 
   ParametersDescription Beam::description() {
@@ -40,12 +37,12 @@ namespace cepgen {
   }
 
   std::ostream& operator<<(std::ostream& os, const Beam& beam) {
-    os << (PDG::Id)beam.pdg_id_ << " (" << beam.momentum_.pz() << " GeV/c) "
+    os << static_cast<PDG::Id>(beam.pdg_id_) << " (" << beam.momentum_.pz() << " GeV/c) "
        << (beam.elastic_ ? "elastic" : "inelastic");
     if (const auto& part_flux_name = beam.flux_info_.name(); !part_flux_name.empty())
       os << " [parton flux: " << beam.flux_info_.print(true) << "]";
-    else if (const auto& formfac_name = beam.formfac_.name(); !formfac_name.empty())
-      os << " [form factors: " << beam.formfac_.print(true) << "]";
+    else if (const auto& form_factors_name = beam.form_factors_.name(); !form_factors_name.empty())
+      os << " [form factors: " << beam.form_factors_.print(true) << "]";
     return os;
   }
 }  // namespace cepgen

@@ -176,7 +176,7 @@ namespace cepgen::strfun {
     }
   };
 
-  /// Fixed target and HERA photoproduction total cross sections (1356 points)
+  /// Fixed target and HERA photoproduction total cross-sections (1356 points)
   struct ALLM97 final : public ALLM {
     using ALLM::ALLM;
     static ParametersDescription description() {

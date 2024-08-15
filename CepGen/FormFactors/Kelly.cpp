@@ -43,7 +43,7 @@ namespace cepgen::formfac {
     }
 
   private:
-    double computeFF(double tau, const std::vector<double>& as, const std::vector<double>& bs) const {
+    static double computeFF(double tau, const std::vector<double>& as, const std::vector<double>& bs) {
       double num{0.}, den{1.};
       for (size_t i = 0; i < as.size(); ++i)
         num += as.at(i) * std::pow(tau, i);

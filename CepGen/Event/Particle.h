@@ -124,8 +124,8 @@ namespace cepgen {
     /// Retrieve the momentum object associated with this particle
     inline const Momentum& momentum() const { return momentum_; }
     /// Associate a momentum object to this particle
-    /// \param[in] offshell allow the 4-momentum mass to compensate for E-p balance?
-    Particle& setMomentum(const Momentum&, bool offshell = false);
+    /// \param[in] off_shell allow the 4-momentum mass to compensate for E-p balance?
+    Particle& setMomentum(const Momentum&, bool off_shell = false);
     /// Set the 3- or 4-momentum associated to the particle
     /// \param[in] px Momentum along the \f$x\f$-axis, in GeV/c
     /// \param[in] py Momentum along the \f$y\f$-axis, in GeV/c
@@ -135,7 +135,7 @@ namespace cepgen {
     /// Set the 4-momentum associated to the particle
     /// \param[in] p 4-momentum
     inline Particle& setMomentum(double p[4]) { return setMomentum(p[0], p[1], p[2], p[3]); }
-    bool valid();  ///< Is this particle a valid particle which can be used for kinematic computations?
+    bool valid() const;  ///< Is this particle a valid particle which can be used for kinematic computations?
 
     // --- particle relations
 

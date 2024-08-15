@@ -16,6 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef CepGen_StructureFunctions_PartonicParameterisation_h
+#define CepGen_StructureFunctions_PartonicParameterisation_h
+
 #include <array>
 
 #include "CepGen/StructureFunctions/Parameterisation.h"
@@ -25,7 +28,7 @@ namespace cepgen::strfun {
   class PartonicParameterisation : public Parameterisation {
   public:
     explicit PartonicParameterisation(const ParametersList&);
-    virtual ~PartonicParameterisation() = default;
+    ~PartonicParameterisation() override = default;
 
     /// Quarks types
     enum class Mode { full = 0, valence = 1, sea = 2 };
@@ -39,9 +42,11 @@ namespace cepgen::strfun {
     const unsigned short num_flavours_;  ///< Number of quark flavours considered in the SF building
     const Mode mode_;                    ///< Quarks types considered in the SF building
 
-    static constexpr std::array<short, 6> QUARK_PDGS = {{1, 2, 3, 4, 5, 6}};
+    static constexpr std::array<short, 6> QUARK_PDG_IDS = {{1, 2, 3, 4, 5, 6}};
     static constexpr std::array<short, 6> Q_TIMES_3 = {{
         -1 /*d*/, 2 /*u*/, -1 /*s*/, 2 /*c*/, -1 /*b*/, 2 /*t*/
     }};
   };
 }  // namespace cepgen::strfun
+
+#endif

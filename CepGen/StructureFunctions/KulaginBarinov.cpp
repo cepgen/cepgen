@@ -199,10 +199,10 @@ namespace cepgen::strfun {
                                          << sfs_grid_file_ << "'!";
       CG_INFO("KulaginBarinov") << "Loading A08 structure function values from '" << sfs_grid_file_ << "' file.";
       std::ifstream grid_file(sfs_grid_file_);
-      static const size_t num_xbj = 99, num_q2 = 70, num_sf = 2;
-      static const double min_xbj = 1.01e-5;
+      static constexpr size_t num_xbj = 99, num_q2 = 70, num_sf = 2;
+      static constexpr double min_xbj = 1.01e-5;
       //--- xbj & Q2 binning
-      const size_t nxbb = num_xbj / 2;
+      constexpr size_t nxbb = num_xbj / 2;
       const double x1 = 0.3, xlog1 = log(x1), delx = (xlog1 - log(min_xbj)) / (nxbb - 1),
                    delx1 = std::pow(1. - x1, 2) / (nxbb + 1);
       const double dels =

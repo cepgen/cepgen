@@ -96,7 +96,7 @@ namespace cepgen {
     operator Vector() const;
 
     /// Forward \f$\beta-\gamma\f$ boost
-    Momentum& betaGammaBoost(double gamma, double betagamma);
+    Momentum& betaGammaBoost(double gamma, double beta_gamma);
     /// Forward Lorentz boost
     Momentum& lorentzBoost(const Momentum& p);
 
@@ -136,9 +136,9 @@ namespace cepgen {
     inline double energy() const { return (*this)[E]; }
     /// Squared energy (in GeV\f$^2\f$)
     inline double energy2() const { return (*this)[E] * (*this)[E]; }
-    /// Tranverse energy component (in GeV)
+    /// Transverse energy component (in GeV)
     double energyT() const;
-    /// Squared tranverse energy component (in GeV\f$^2\f$)
+    /// Squared transverse energy component (in GeV\f$^2\f$)
     double energyT2() const;
     /// Compute the energy from the mass
     Momentum& setMass2(double);
@@ -162,9 +162,9 @@ namespace cepgen {
     /// Rapidity
     double rapidity() const;
 
-    /// Pseudorapidity distance between two momenta
+    /// Pseudo-rapidity distance between two momenta
     double deltaEta(const Momentum&) const;
-    /// Azimutal angle opening between two momenta
+    /// Azimuthal angle opening between two momenta
     double deltaPhi(const Momentum&) const;
     /// Transverse momentum distance between two momenta
     double deltaPt(const Momentum&) const;
@@ -192,7 +192,7 @@ namespace cepgen {
     Momentum& rotatePhi(double phi, double sign);
     /// Rotate the particle's momentum by a polar/azimuthal angle
     Momentum& rotateThetaPhi(double theta, double phi);
-    /// Apply a \f$ x\rightarrow -x\f$ transformation
+    /// Apply an \f$ x\rightarrow -x\f$ transformation
     inline Momentum& mirrorX() {
       (*this)[X] *= -1.;
       return *this;

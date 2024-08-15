@@ -48,7 +48,7 @@ namespace cepgen {
   const ParticleProperties& PDG::operator()(spdgid_t id) const {
     if (auto it = particles_.find(std::abs(id)); it != particles_.end())
       return it->second;
-    CG_DEBUG("PDG").log([this, &id](auto& log) {
+    CG_DEBUG("PDG").log([this](auto& log) {
       log << "List of particles registered in the PDG runtime database:\n";
       dump(&log.stream());
     });
@@ -79,9 +79,8 @@ namespace cepgen {
   }
 
   const std::string& PDG::name(spdgid_t id) const {
-    const auto& descr = operator()(id).descr;
-    if (!descr.empty())
-      return descr;
+    if (const auto& human_name = operator()(id).human_name; !human_name.empty())
+      return human_name;
     return operator()(id).name;
   }
 

@@ -19,8 +19,6 @@
 #ifndef CepGen_Event_Event_h
 #define CepGen_Event_Event_h
 
-#include <memory>
-
 #include "CepGen/Event/Particle.h"
 
 namespace cepgen {
@@ -144,7 +142,7 @@ namespace cepgen {
       size_t cs{0};   ///< Index of the first central system particle
       size_t op1{0};  ///< Index of the first positive-z outgoing beam state
       size_t op2{0};  ///< Index of the first negative-z outgoing beam state
-    } evtcontent_{};
+    } event_content_{};
     bool compressed_{false};  ///< Is the event "compressed"?
   };
 }  // namespace cepgen

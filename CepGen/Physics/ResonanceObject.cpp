@@ -53,17 +53,17 @@ namespace cepgen {
 
   double ResonanceObject::partialWidth(const KinematicsBlock& kin) const {
     double par_width = 0.;
-    if (br_.singlepi > 0.) {
+    if (br_.single_pion > 0.) {
       //----- 1-pion decay mode
       const double pcmrpi = pcmr(mpi2_);
-      par_width += br_.singlepi * (std::pow(kin.ppicm / pcmrpi, 2. * ang_mom_ + 1.) *
-                                   std::pow((pcmrpi * pcmrpi + x02_) / (kin.ppicm * kin.ppicm + x02_), ang_mom_));
+      par_width += br_.single_pion * (std::pow(kin.ppicm / pcmrpi, 2. * ang_mom_ + 1.) *
+                                      std::pow((pcmrpi * pcmrpi + x02_) / (kin.ppicm * kin.ppicm + x02_), ang_mom_));
     }
-    if (br_.doublepi > 0.) {
+    if (br_.double_pion > 0.) {
       //----- 2-pion decay mode
       const double pcmrpi2 = pcmr(4. * mpi2_);
       par_width +=
-          br_.doublepi *
+          br_.double_pion *
           (std::pow(kin.ppi2cm / pcmrpi2, 2. * (ang_mom_ + 2.)) *
            std::pow((pcmrpi2 * pcmrpi2 + x02_) / (kin.ppi2cm * kin.ppi2cm + x02_), ang_mom_ + 2) * kin.w / mass_);
     }
@@ -95,12 +95,12 @@ namespace cepgen {
 
   ResonanceObject::BranchingRatios::BranchingRatios(const ParametersList& params)
       : SteeredObject(params),
-        singlepi(steer<double>("singlePi")),
-        doublepi(steer<double>("doublePi")),
+        single_pion(steer<double>("singlePi")),
+        double_pion(steer<double>("doublePi")),
         eta(steer<double>("eta")) {
     if (!valid())
       CG_WARNING("ResonanceObject:BranchingRatios")
-          << "Invalid branching fractions. Sum = " << (singlepi + doublepi + eta) << " != 1.";
+          << "Invalid branching fractions. Sum = " << (single_pion + double_pion + eta) << " != 1.";
   }
 
   ParametersDescription ResonanceObject::BranchingRatios::description() {

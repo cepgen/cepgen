@@ -73,7 +73,7 @@ namespace cepgen::strfun {
       return wp * ww * q2 / gi;
     }
     double bodek(double w, double q2) const {
-      const size_t NRES = 4, NBKG = 5;
+      constexpr size_t NRES = 4, NBKG = 5;
 
       if (w <= mp_)
         return 0.;

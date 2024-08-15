@@ -29,7 +29,7 @@
 namespace cepgen {
   /// Express an angle in between two extrema
   static double normalisePhi(double phi, const Limits& range) {
-    static const double M_2PI = 2. * M_PI;
+    static constexpr double M_2PI = 2. * M_PI;
     if (range.range() != M_2PI)
       throw CG_FATAL("Momentum:normalisePhi") << "Invalid boundaries for the angle normalisation: " << range
                                               << ". Must be of range 2*pi, has range " << range.range() << ".";
@@ -47,7 +47,7 @@ namespace cepgen {
   }
 
   Momentum::Momentum(double* p) {
-    std::copy(p, p + 4, begin());
+    std::copy_n(p, 4, begin());
     computeP();
   }
 
@@ -136,15 +136,16 @@ namespace cepgen {
   }
 
   double Momentum::threeProduct(const Momentum& mom) const {
-    CG_DEBUG_LOOP("Momentum") << "  (" << px() << ", " << py() << ", " << pz() << ")\n\t" << "* (" << mom.px() << ", "
-                              << mom.py() << ", " << mom.pz() << ")\n\t" << "= "
-                              << px() * mom.px() + py() * mom.py() + pz() * mom.pz();
+    CG_DEBUG_LOOP("Momentum") << "  (" << px() << ", " << py() << ", " << pz() << ")\n\t"
+                              << "* (" << mom.px() << ", " << mom.py() << ", " << mom.pz() << ")\n\t"
+                              << "= " << px() * mom.px() + py() * mom.py() + pz() * mom.pz();
     return px() * mom.px() + py() * mom.py() + pz() * mom.pz();
   }
 
   double Momentum::fourProduct(const Momentum& mom) const {
-    CG_DEBUG_LOOP("Momentum") << "  (" << px() << ", " << py() << ", " << pz() << ", " << energy() << ")\n\t" << "* ("
-                              << mom.px() << ", " << mom.py() << ", " << mom.pz() << ", " << mom.energy() << ")\n\t"
+    CG_DEBUG_LOOP("Momentum") << "  (" << px() << ", " << py() << ", " << pz() << ", " << energy() << ")\n\t"
+                              << "* (" << mom.px() << ", " << mom.py() << ", " << mom.pz() << ", " << mom.energy()
+                              << ")\n\t"
                               << "= " << energy() * mom.energy() - threeProduct(mom);
     return energy() * mom.energy() - threeProduct(mom);
   }
@@ -181,7 +182,7 @@ namespace cepgen {
 
   Momentum& Momentum::setP(double px, double py, double pz) { return setPx(px).setPy(py).setPz(pz); }
 
-  //--- kinematics constrainers
+  //--- kinematics constraints
 
   Momentum& Momentum::computeEnergyFromMass(double on_shell_mass) { return setMass(on_shell_mass); }
 
@@ -211,8 +212,8 @@ namespace cepgen {
   Momentum::operator Vector() const { return Vector{px(), py(), pz(), energy()}; }
 
   double Momentum::energyT2() const {
-    const auto ptsq = pt2();
-    return ptsq > 0. ? energy2() * ptsq / (ptsq + pz() * pz()) : 0.;
+    const auto square_pt_value = pt2();
+    return square_pt_value > 0. ? energy2() * square_pt_value / (square_pt_value + pz() * pz()) : 0.;
   }
 
   double Momentum::energyT() const { return normaliseSqrt(energyT2()); }
@@ -239,8 +240,8 @@ namespace cepgen {
 
   double Momentum::eta() const {
     const int sign = pz() / fabs(pz());
-    const auto ptval = pt();
-    return (ptval != 0. ? std::log((p() + fabs(pz())) / ptval) : 9999.) * sign;
+    const auto pt_value = pt();
+    return (pt_value != 0. ? std::log((p() + fabs(pz())) / pt_value) : 9999.) * sign;
   }
 
   double Momentum::rapidity() const {
@@ -273,7 +274,7 @@ namespace cepgen {
       }
     }
     if (mass2() <= 0.)
-      CG_WARNING("Momentum:beta") << "beta computed for an invalid, non-timelike momentum.";
+      CG_WARNING("Momentum:beta") << "beta computed for an invalid, non-time-like momentum.";
     return mom / ene;
   }
 
@@ -285,20 +286,20 @@ namespace cepgen {
       CG_WARNING("Momentum:gamma") << "gamma computed for t=0 momentum.";
     }
     if (ene2 < mom2) {
-      CG_WARNING("Momentum:gamma") << "gamma computed for an invalid spacelike momentum.";
+      CG_WARNING("Momentum:gamma") << "gamma computed for an invalid space-like momentum.";
       return 0.;
     } else if (ene2 == mom2)
-      CG_WARNING("Momentum:gamma") << "gamma computed for a lightlike momentum.";
+      CG_WARNING("Momentum:gamma") << "gamma computed for a light-like momentum.";
     return ene2 / (ene2 - mom2);
   }
 
   double Momentum::gamma() const { return std::sqrt(gamma2()); }
 
-  Momentum& Momentum::betaGammaBoost(double gamma, double betagamma) {
-    if (gamma == 1. && betagamma == 0.)
+  Momentum& Momentum::betaGammaBoost(double gamma, double beta_gamma) {
+    if (gamma == 1. && beta_gamma == 0.)
       return *this;  // trivial case
     const auto apz = pz(), ae = energy();
-    return setEnergy(gamma * ae + betagamma * apz).setPz(gamma * apz + betagamma * ae);
+    return setEnergy(gamma * ae + beta_gamma * apz).setPz(gamma * apz + beta_gamma * ae);
   }
 
   Momentum& Momentum::lorentzBoost(const Momentum& mom) {
@@ -322,29 +323,29 @@ namespace cepgen {
   }
 
   Momentum& Momentum::rotatePhi(double phi, double sign) {
-    const auto sphi = std::sin(phi), cphi = std::cos(phi);
-    const auto pxp = px() * cphi + sign * py() * sphi, pyp = -px() * sphi + sign * py() * cphi;
+    const auto sin_phi = std::sin(phi), cos_phi = std::cos(phi);
+    const auto pxp = px() * cos_phi + sign * py() * sin_phi, pyp = -px() * sin_phi + sign * py() * cos_phi;
     return setPx(pxp).setPy(pyp);
   }
 
   Momentum& Momentum::rotateThetaPhi(double theta, double phi) {
-    const double ctheta = cos(theta), stheta = sin(theta);
-    const double cphi = cos(phi), sphi = sin(phi);
-    double rotmtx[3][3];  //FIXME check this! cos(phi)->-sin(phi) & sin(phi)->cos(phi) --> phi->phi+pi/2 ?
+    const double cos_theta = std::cos(theta), sin_theta = std::sin(theta);
+    const double cos_phi = std::cos(phi), sin_phi = std::sin(phi);
+    double rotation_matrix[3][3];  //FIXME check this! cos(phi)->-sin(phi) & sin(phi)->cos(phi) --> phi->phi+pi/2 ?
     std::vector<double> mom(3, 0.);
-    rotmtx[X][X] = -sphi;
-    rotmtx[X][Y] = -ctheta * cphi;
-    rotmtx[X][Z] = stheta * cphi;
-    rotmtx[Y][X] = cphi;
-    rotmtx[Y][Y] = -ctheta * sphi;
-    rotmtx[Y][Z] = stheta * sphi;
-    rotmtx[Z][X] = 0.;
-    rotmtx[Z][Y] = stheta;
-    rotmtx[Z][Z] = ctheta;
+    rotation_matrix[X][X] = -sin_phi;
+    rotation_matrix[X][Y] = -cos_theta * cos_phi;
+    rotation_matrix[X][Z] = sin_theta * cos_phi;
+    rotation_matrix[Y][X] = cos_phi;
+    rotation_matrix[Y][Y] = -cos_theta * sin_phi;
+    rotation_matrix[Y][Z] = sin_theta * sin_phi;
+    rotation_matrix[Z][X] = 0.;
+    rotation_matrix[Z][Y] = sin_theta;
+    rotation_matrix[Z][Z] = cos_theta;
 
     for (size_t i = X; i <= Z; ++i)
       for (size_t j = X; j <= Z; ++j)
-        mom[i] += rotmtx[i][j] * (*this)[j];
+        mom[i] += rotation_matrix[i][j] * (*this)[j];
     return setP(mom.at(X), mom.at(Y), mom.at(Z));
   }
 

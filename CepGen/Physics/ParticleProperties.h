@@ -32,7 +32,7 @@ namespace cepgen {
     explicit ParticleProperties(const ParametersList&);
     explicit ParticleProperties(pdgid_t pdgid = 0ull,  // PDG::invalid
                                 const std::string& name = "",
-                                const std::string& descr = "",
+                                const std::string& description = "",
                                 int colours = -1,
                                 double mass = -1.,
                                 double width = -1.,
@@ -47,7 +47,7 @@ namespace cepgen {
 
     pdgid_t pdgid{0ull};         ///< PDG identifier
     std::string name{};          ///< Particle name
-    std::string descr{};         ///< Human-readable name
+    std::string human_name{};    ///< Human-readable name
     int colours{0};              ///< Colour factor
     double mass{0.};             ///< Mass, in GeV/c\f$^2\f$
     double width{0.};            ///< Decay width, in GeV/c\f$^2\f$

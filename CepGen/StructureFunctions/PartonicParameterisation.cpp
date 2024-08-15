@@ -20,11 +20,11 @@
 #include "CepGen/StructureFunctions/PartonicParameterisation.h"
 
 namespace cepgen::strfun {
-  constexpr std::array<short, 6> PartonicParameterisation::Q_TIMES_3, PartonicParameterisation::QUARK_PDGS;
+  constexpr std::array<short, 6> PartonicParameterisation::Q_TIMES_3, PartonicParameterisation::QUARK_PDG_IDS;
 
   PartonicParameterisation::PartonicParameterisation(const ParametersList& params)
       : Parameterisation(params), num_flavours_(steer<int>("numFlavours")), mode_(steerAs<int, Mode>("mode")) {
-    if (num_flavours_ == 0 || num_flavours_ > QUARK_PDGS.size())
+    if (num_flavours_ == 0 || num_flavours_ > QUARK_PDG_IDS.size())
       throw CG_FATAL("Partonic") << "Invalid number of flavours (" << num_flavours_ << " selected.";
   }
 
@@ -47,8 +47,8 @@ namespace cepgen::strfun {
     double f2 = 0.;
     for (int i = 0; i < num_flavours_; ++i) {
       const double prefactor = 1. / 9. * Q_TIMES_3.at(i) * Q_TIMES_3.at(i);
-      const double xq = evalxQ2(QUARK_PDGS.at(i), args_.xbj, args_.q2),
-                   xqbar = evalxQ2(-QUARK_PDGS.at(i), args_.xbj, args_.q2);
+      const double xq = evalxQ2(QUARK_PDG_IDS.at(i), args_.xbj, args_.q2),
+                   xqbar = evalxQ2(-QUARK_PDG_IDS.at(i), args_.xbj, args_.q2);
       switch (mode_) {
         case Mode::full:
           f2 += prefactor * (xq + xqbar);

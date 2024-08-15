@@ -26,7 +26,7 @@
 #include "CepGen/Utils/Message.h"
 
 namespace cepgen::strfun {
-  ///\f${\cal W}_{1,2}\f$ structure functions parameterisation by Fiore et al \cite Fiore:2002re and Brasse et al \cite Brasse:1976bf
+  ///\f${\cal W}_{1,2}\f$ structure functions parameterisation by Fiore et al \cite Fiore:2002re and Brasse et al. \cite Brasse:1976bf
   class FioreBrasse : public Parameterisation {
   public:
     /// Fiore \cite Fiore:2002re and Brasse \cite Brasse:1976bf proton structure functions

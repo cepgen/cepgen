@@ -33,7 +33,7 @@ namespace cepgen {
           nf_(steer<int>("nf")),
           lambda_(steer<double>("Lambda")),
           beta0_((11. * nc_ - 2. * nf_) / 3.),
-          prefac_(4. * M_PI / beta0_) {
+          prefactor_(4. * M_PI / beta0_) {
       CG_INFO("AlphaSWebber:init") << "Webber et al. alpha(S) evolution algorithm initialised with parameters:\n\t"
                                    << "Nc: " << nc_ << ", nf: " << nf_ << " -> beta0: " << beta0_
                                    << ", Lambda: " << lambda_ << ".";
@@ -50,13 +50,13 @@ namespace cepgen {
 
     double operator()(double q) const override {
       const auto mun = q * q / lambda_ / lambda_;
-      return prefac_ * (1. / std::log(mun) + 125. * (1. + 4. * mun) / (1. - mun) / std::pow(4. + mun, 4));
+      return prefactor_ * (1. / std::log(mun) + 125. * (1. + 4. * mun) / (1. - mun) / std::pow(4. + mun, 4));
     }
 
   private:
     const int nc_, nf_;
     const double lambda_, beta0_;
-    const double prefac_;
+    const double prefactor_;
   };
 }  // namespace cepgen
 

@@ -70,7 +70,7 @@ namespace cepgen::formfac {
         return;
       }
       const auto qr2 = q2_ * a2_;
-      if ((short)hi_.Z <= (short)Element::C) {  // Gaussian form factor for light nuclei
+      if (static_cast<short>(hi_.Z) <= static_cast<short>(Element::C)) {  // Gaussian form factor for light nuclei
         const auto ge = std::exp(-qr2 / 6.);
         setGEGM(ge, MU * ge);
         return;

@@ -34,9 +34,9 @@ namespace cepgen::strfun {
           pBd_(steer<double>("Bd")),
           alpha_r_(steer<double>("alphaR")),
           delta_0_(steer<double>("delta0")),
-          coeffs_(steer<std::vector<double> >("coeffs")) {
-      if (coeffs_.size() < 4)
-        throw CG_FATAL("CapellaEtAl") << "Invalid multiplicity of coefficients given: " << coeffs_ << ".";
+          coefficients_(steer<std::vector<double> >("coefficients")) {
+      if (coefficients_.size() < 4)
+        throw CG_FATAL("CapellaEtAl") << "Invalid multiplicity of coefficients given: " << coefficients_ << ".";
     }
 
     static ParametersDescription description() {
@@ -47,15 +47,15 @@ namespace cepgen::strfun {
       desc.add<double>("Bd", 0.1798);
       desc.add<double>("alphaR", 0.4150).setDescription("Reggeon intercept");
       desc.add<double>("delta0", 0.08).setDescription("effective intercept at Q^2=0");
-      desc.add<std::vector<double> >("coeffs", {0.2631, 0.6452, 3.5489, 1.1170});
+      desc.add<std::vector<double> >("coefficients", {0.2631, 0.6452, 3.5489, 1.1170});
       return desc;
     }
 
     void eval() override {
-      const auto nq2 = 1.5 * (1. + args_.q2 / (args_.q2 + coeffs_.at(2)));            // n(Q^2) function in the paper
-      const auto dq2 = delta_0_ * (1 + (2 * args_.q2) / (args_.q2 + coeffs_.at(0)));  // big-Delta(Q^2) function
-      const auto c1 = std::pow(args_.q2 / (args_.q2 + coeffs_.at(0)), 1. + dq2);
-      const auto c2 = std::pow(args_.q2 / (args_.q2 + coeffs_.at(1)), alpha_r_);
+      const auto nq2 = 1.5 * (1. + args_.q2 / (args_.q2 + coefficients_.at(2)));  // n(Q^2) function in the paper
+      const auto dq2 = delta_0_ * (1 + (2 * args_.q2) / (args_.q2 + coefficients_.at(0)));  // big-Delta(Q^2) function
+      const auto c1 = std::pow(args_.q2 / (args_.q2 + coefficients_.at(0)), 1. + dq2);
+      const auto c2 = std::pow(args_.q2 / (args_.q2 + coefficients_.at(1)), alpha_r_);
 
       setF2(pA_ * std::pow(args_.xbj, -dq2) * std::pow(1 - args_.xbj, nq2 + 4.0) * c1 +
             std::pow(args_.xbj, 1.0 - alpha_r_) *
@@ -66,7 +66,7 @@ namespace cepgen::strfun {
 
   private:
     const double pA_, pBu_, pBd_, alpha_r_, delta_0_;
-    const std::vector<double> coeffs_;
+    const std::vector<double> coefficients_;
   };
 }  // namespace cepgen::strfun
 using cepgen::strfun::CapellaEtAl;

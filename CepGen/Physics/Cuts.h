@@ -36,15 +36,15 @@ namespace cepgen::cuts {
     static ParametersDescription description();
     bool contain(const Particles&, const Event* evt = nullptr) const;
 
-    Limits pt_single;        ///< single particle transverse momentum
-    Limits eta_single;       ///< single particle pseudo-rapidity
-    Limits rapidity_single;  ///< single particle rapidity
-    Limits energy_single;    ///< single particle energy
-    Limits mass_single;      ///< single particle mass
-    Limits pt_sum;           ///< multiparticle system transverse momentum
-    Limits eta_sum;          ///< multiparticle system pseudo-rapidity
-    Limits energy_sum;       ///< multiparticle system energy
-    Limits mass_sum;         ///< multiparticle system invariant mass
+    Limits pt_single;        ///< single-particle transverse momentum
+    Limits eta_single;       ///< single-particle pseudo-rapidity
+    Limits rapidity_single;  ///< single-particle rapidity
+    Limits energy_single;    ///< single-particle energy
+    Limits mass_single;      ///< single-particle mass
+    Limits pt_sum;           ///< multi-particle system transverse momentum
+    Limits eta_sum;          ///< multi-particle system pseudo-rapidity
+    Limits energy_sum;       ///< multi-particle system energy
+    Limits mass_sum;         ///< multi-particle system invariant mass
     Limits pt_diff;          ///< transverse momentum balance between the central particles
     Limits phi_diff;         ///< azimuthal angles difference between the central particles
     Limits rapidity_diff;    ///< rapidity balance between the central particles

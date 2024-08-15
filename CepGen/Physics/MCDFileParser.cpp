@@ -79,13 +79,13 @@ namespace pdg {
                                         << " != " << charges.size() << ".";
       cepgen::ParticleProperties prop;
       prop.name = part_name;
-      prop.descr = part_name;
+      prop.human_name = part_name;
       prop.colours = 1;
       prop.mass = mass;
       prop.width = width;
       prop.fermion = false;
       for (size_t i = 0; i < pdg_ids.size(); ++i) {
-        prop.pdgid = (cepgen::pdgid_t)pdg_ids.at(i);
+        prop.pdgid = static_cast<cepgen::pdgid_t>(pdg_ids.at(i));
         if (const auto ch = charges.at(i); ch != 0)
           prop.charges = {ch, -ch};
         switch (pdg_ids.at(i)) {

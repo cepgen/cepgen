@@ -42,7 +42,7 @@ namespace cepgen {
       return constants::ALPHA_EM / (1. - c_ * (deltaAlphaL(q) + deltaAlphaH(q)));
     }
 
-    double deltaAlphaL(double q) const {
+    static double deltaAlphaL(double q) {
       // lepton contribution to alphaEM (photon propagator), as parameterised by
       //   Steinhauser, Phys.Lett.B 429 (1998) 158-161
       //   https://doi.org/10.1016/S0370-2693(98)00503-6
@@ -85,7 +85,7 @@ namespace cepgen {
 
       //----- compute lepton alphaQED contributions for all orders
 
-      const auto alpha_ov_pi = constants::ALPHA_EM * M_1_PI;
+      static constexpr auto alpha_ov_pi = constants::ALPHA_EM * M_1_PI;
       const auto order0 = -0.25 * alpha_ov_pi * (pi0(q2, m2_el) + pi0(q2, m2_mu) + pi0(q2, m2_tau));
       const auto order1 = -0.25 * alpha_ov_pi * alpha_ov_pi * (pi1(q2, m2_el) + pi1(q2, m2_mu) + pi1(q2, m2_tau));
       const auto order2_quenched = pi2A(q2, m2_el) + pi2A(q2, m2_mu) + pi2A(q2, m2_tau);
@@ -98,7 +98,7 @@ namespace cepgen {
       return order0 + order1 + order2;
     }
 
-    double deltaAlphaH(double q) const {
+    static double deltaAlphaH(double q) {
       // hadronic contribution to alphaEM, as parameterised by
       //   Burkhardt and Pietrzyk, Phys.Lett.B 513 (2001) 46-52
       //   https://doi.org/10.1016/S0370-2693(01)00393-8
@@ -113,7 +113,7 @@ namespace cepgen {
         return param(q * q, 0., 0.0024402, 3.2496684);
       if (q <= 10.)
         return param(q * q, 0., 0.0027340, 2.0995092);
-      static const double mZ = 91.1876;
+      static constexpr double mZ = 91.1876;  //FIXME retrieve this from PDG
       if (q <= mZ)
         return param(q * q, 0.0010485, 0.0029431, 1.);
       if (q <= 1.e4)

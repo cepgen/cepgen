@@ -21,7 +21,7 @@
 
 namespace cepgen::hadr {
   Hadroniser::Hadroniser(const ParametersList& plist)
-      : EventModifier(plist), remn_fragm_(steer<bool>("remnantsFragmentation")) {}
+      : EventModifier(plist), fragment_remnants_(steer<bool>("remnantsFragmentation")) {}
 
   ParametersDescription Hadroniser::description() {
     auto desc = EventModifier::description();

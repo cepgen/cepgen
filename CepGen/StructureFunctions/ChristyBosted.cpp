@@ -87,7 +87,7 @@ namespace cepgen::strfun {
           case Polarisation::L:
             return std::pow(a0l_ / (1. + fit_pars_.at(3) * q2) * q2 * exp(-q2 * fit_pars_.at(4)), 2);
           default:
-            throw CG_FATAL("ChristyBosted:Resonance") << "Invalid polarisation state: " << (int)pol << "!";
+            throw CG_FATAL("ChristyBosted:Resonance") << "Invalid polarisation state: " << static_cast<int>(pol) << "!";
         }
       }
 
@@ -181,7 +181,7 @@ namespace cepgen::strfun {
         const auto& dir = continuum_.at(2);
         const double expo = dir.fit_pars.at(0);
         const double xb = utils::xBj(q2, mp2_, w2);
-        const double norm_q2 = 1. / 0.330 / 0.330;
+        constexpr double norm_q2 = 1. / 0.330 / 0.330;
         const double t = log(log((q2 + m0_) * norm_q2) / log(m0_ * norm_q2));
         sig_nr += dir.sig0 * pow(1. - xpr, expo) / (1. - xb) * pow(q2 / (q2 + q20), dir.fit_pars.at(1)) / (q2 + q20) *
                   pow(xpr, dir.fit_pars.at(2) + dir.fit_pars.at(3) * t);
@@ -216,7 +216,7 @@ namespace cepgen::strfun {
     setF2(f2);
 
     if (sigT != 0.)
-      Parameterisation::computeFL(q2_eff, args_.xbj, sigL / sigT);
+      Parameterisation::computeFL(args_.xbj, q2_eff, sigL / sigT);
   }
 
   ParametersDescription ChristyBosted::description() {

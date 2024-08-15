@@ -33,7 +33,7 @@ namespace cepgen {
   Event& Event::operator=(const Event& oth) {
     clear();
     particles_ = oth.particles_;
-    evtcontent_ = oth.evtcontent_;
+    event_content_ = oth.event_content_;
     compressed_ = oth.compressed_;
     metadata = oth.metadata;
     return *this;
@@ -94,20 +94,20 @@ namespace cepgen {
 
   void Event::freeze() {
     if (particles_.count(Particle::CentralSystem) > 0)
-      evtcontent_.cs = particles_[Particle::CentralSystem].size();
+      event_content_.cs = particles_[Particle::CentralSystem].size();
     if (particles_.count(Particle::OutgoingBeam1) > 0)
-      evtcontent_.op1 = particles_[Particle::OutgoingBeam1].size();
+      event_content_.op1 = particles_[Particle::OutgoingBeam1].size();
     if (particles_.count(Particle::OutgoingBeam2) > 0)
-      evtcontent_.op2 = particles_[Particle::OutgoingBeam2].size();
+      event_content_.op2 = particles_[Particle::OutgoingBeam2].size();
   }
 
   void Event::restore() {
     if (particles_.count(Particle::CentralSystem) > 0)
-      particles_[Particle::CentralSystem].resize(evtcontent_.cs);
+      particles_[Particle::CentralSystem].resize(event_content_.cs);
     if (particles_.count(Particle::OutgoingBeam1) > 0)
-      particles_[Particle::OutgoingBeam1].resize(evtcontent_.op1);
+      particles_[Particle::OutgoingBeam1].resize(event_content_.op1);
     if (particles_.count(Particle::OutgoingBeam2) > 0)
-      particles_[Particle::OutgoingBeam2].resize(evtcontent_.op2);
+      particles_[Particle::OutgoingBeam2].resize(event_content_.op2);
   }
 
   bool Event::compressed() const { return compressed_; }
@@ -220,12 +220,11 @@ namespace cepgen {
 
   const Particle& Event::operator()(int id) const {
     for (const auto& role_part : particles_) {
-      auto it = std::find_if(
-          role_part.second.begin(), role_part.second.end(), [&id](const auto& part) { return part.id() == id; });
-      if (it != role_part.second.end())
+      if (auto it = std::find_if(
+              role_part.second.begin(), role_part.second.end(), [&id](const auto& part) { return part.id() == id; });
+          it != role_part.second.end())
         return *it;
     }
-
     throw CG_FATAL("Event") << "Failed to retrieve the particle with id=" << id << ".";
   }
 
@@ -323,7 +322,7 @@ namespace cepgen {
   ParticleRef Event::addParticle(Particle& part, bool replace) {
     CG_DEBUG_LOOP("Event") << "Particle with PDGid = " << part.integerPdgId() << " has role " << part.role();
     if (part.role() <= 0)
-      throw CG_FATAL("Event") << "Trying to add a particle with role=" << (int)part.role() << ".";
+      throw CG_FATAL("Event") << "Trying to add a particle with role=" << static_cast<int>(part.role()) << ".";
 
     auto& part_with_same_role = particles_[part.role()];  // list of particles with the same role
     if (part.id() < 0)
@@ -363,7 +362,7 @@ namespace cepgen {
     Particles out;
     for (const auto& role_part : particles_)
       std::copy_if(role_part.second.begin(), role_part.second.end(), std::back_inserter(out), [](const auto& part) {
-        return (short)part.status() > 0;
+        return static_cast<short>(part.status()) > 0;
       });
 
     std::sort(out.begin(), out.end());
@@ -374,7 +373,7 @@ namespace cepgen {
     Particles out;
     const auto& parts_role = particles_.at(role);
     std::copy_if(parts_role.begin(), parts_role.end(), std::back_inserter(out), [](const auto& part) {
-      return (short)part.status() > 0;
+      return static_cast<short>(part.status()) > 0;
     });
     std::sort(out.begin(), out.end());
     out.erase(std::unique(out.begin(), out.end()), out.end());
@@ -442,7 +441,7 @@ namespace cepgen {
           std::string delim;
           for (size_t i = 0; i < mothers.size(); ++i)
             try {
-              oss_pdg << delim << (PDG::Id)ev(*std::next(mothers.begin(), i)).pdgId(), delim = "/";
+              oss_pdg << delim << static_cast<PDG::Id>(ev(*std::next(mothers.begin(), i)).pdgId()), delim = "/";
             } catch (const Exception&) {
               oss_pdg << delim << ev(*std::next(mothers.begin(), i)).pdgId(), delim = "/";
             }
@@ -453,7 +452,7 @@ namespace cepgen {
             oss_pdg << HeavyIon::fromPdgId(part.pdgId());
           else
             try {
-              oss_pdg << (PDG::Id)part.pdgId();
+              oss_pdg << static_cast<PDG::Id>(part.pdgId());
             } catch (const Exception&) {
               oss_pdg << "?";
             }
@@ -461,11 +460,11 @@ namespace cepgen {
         }
       }
       os << "\t";
-      if (part.charge() != (int)part.charge()) {
-        if (part.charge() * 2 == (int)(part.charge() * 2))
-          os << utils::format("%-d/2", (int)(part.charge() * 2));
-        else if (part.charge() * 3 == (int)(part.charge() * 3))
-          os << utils::format("%-d/3", (int)(part.charge() * 3));
+      if (part.charge() != static_cast<int>(part.charge())) {
+        if (part.charge() * 2 == static_cast<int>(part.charge() * 2))
+          os << utils::format("%-d/2", static_cast<int>(part.charge() * 2));
+        else if (part.charge() * 3 == static_cast<int>(part.charge() * 3))
+          os << utils::format("%-d/3", static_cast<int>(part.charge() * 3));
         else
           os << utils::format("%-.2f", part.charge());
       } else
@@ -522,6 +521,6 @@ namespace cepgen {
       : std::unordered_map<std::string, float>{{"time:generation", -1.f},
                                                {"time:total", -1.f},
                                                {"weight", 1.f},
-                                               {"alphaEM", (float)constants::ALPHA_EM},
-                                               {"alphaS", (float)constants::ALPHA_QCD}} {}
+                                               {"alphaEM", static_cast<float>(constants::ALPHA_EM)},
+                                               {"alphaS", static_cast<float>(constants::ALPHA_QCD)}} {}
 }  // namespace cepgen

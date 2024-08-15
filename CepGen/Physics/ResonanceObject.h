@@ -19,6 +19,8 @@
 #ifndef CepGen_Physics_ResonanceObject_h
 #define CepGen_Physics_ResonanceObject_h
 
+#include <cmath>
+
 #include "CepGen/Core/SteeredObject.h"
 
 namespace cepgen {
@@ -57,11 +59,11 @@ namespace cepgen {
       static ParametersDescription description();
 
       /// Sanity check to ensure only three decay channels are opened
-      inline bool valid() const { return singlepi + doublepi + eta == 1.; }
+      inline bool valid() const { return single_pion + double_pion + eta == 1.; }
 
-      double singlepi;  ///< single pion branching ratio
-      double doublepi;  ///< double pion branching ratio
-      double eta;       ///< eta meson branching ratio
+      double single_pion;  ///< single pion branching ratio
+      double double_pion;  ///< double pion branching ratio
+      double eta;          ///< eta meson branching ratio
     } br_;
     const int ang_mom_;   ///< meson angular momentum
     const double x0_;     ///< damping parameter

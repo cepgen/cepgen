@@ -23,24 +23,18 @@ namespace cepgen {
   /// A Breit-Wigner/Cauchy distribution generator
   class BreitWigner {
   public:
-    explicit BreitWigner(double mean = 0., double gamma = 0., double emin = -1., double emax = -1.);
+    explicit BreitWigner(double mean = 0., double gamma = 0., double min_energy = -1., double max_energy = -1.);
 
-    /// Minimal energy to consider
-    double min() const { return emin_; }
-    /// Maximal energy to consider
-    double max() const { return emax_; }
-    /// Shoot a value according to parameterisation
-    double operator()(double x) const;
+    double min() const { return min_energy_; }  ///< Minimal energy to consider
+    double max() const { return max_energy_; }  ///< Maximal energy to consider
+
+    double operator()(double x) const;  ///< Shoot a value according to parameterisation
 
   private:
-    /// Mean of distribution
-    double mean_;
-    /// Width of distribution
-    double gamma_;
-    /// Minimal value
-    double emin_;
-    /// Maximal value
-    double emax_;
+    const double mean_;        ///< Mean of distribution
+    const double gamma_;       ///< Width of distribution
+    const double min_energy_;  ///< Minimum energy
+    const double max_energy_;  ///< Maximum energy
   };
 }  // namespace cepgen
 

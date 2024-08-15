@@ -25,9 +25,8 @@ namespace cepgen {
   /// A generic \f$\alpha_S(Q^2)\f$ evaluation algorithm
   class Coupling : public NamedModule<Coupling> {
   public:
-    /// Build an \f$\alpha_{S,EM}\f$ interpolator object
     explicit Coupling(const ParametersList& params) : NamedModule(params) {}
-    virtual ~Coupling() {}
+    ~Coupling() override {}
     virtual double operator()(double q) const = 0;  ///< Compute \f$\alpha_{S,EM}\f$ for a given \f$Q\f$
   };
 }  // namespace cepgen

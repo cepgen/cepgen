@@ -33,10 +33,10 @@ namespace cepgen::hadr {
 
     static ParametersDescription description();
 
-    inline bool fragmentRemnants() const { return remn_fragm_; }  ///< Fragment the beam remnants?
+    inline bool fragmentRemnants() const { return fragment_remnants_; }  ///< Fragment the beam remnants?
 
   protected:
-    const bool remn_fragm_;  ///< Switch on/off the remnants fragmentation where applicable
+    const bool fragment_remnants_;  ///< Switch on/off the remnants fragmentation where applicable
   };
 }  // namespace cepgen::hadr
 
