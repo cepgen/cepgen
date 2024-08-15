@@ -90,7 +90,7 @@ namespace cepgen::python {
 
   private:
     /// Convert the imported module into a CepGen user-steered configuration parameters object
-    void parseParameters(const ObjectPtr& cfg) {
+    void parseParameters(const ObjectPtr& cfg) const {
       CG_ASSERT(cfg);
       for (const auto& attr : cfg.attribute("__dir__")().vector<std::string>()) {
         if (attr[0] == '_')

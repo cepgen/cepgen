@@ -46,6 +46,25 @@ namespace cepgen::python {
     return ptr;
   }
 
+  // generic, un-specialised makers/getters
+
+  template <typename T>
+  ObjectPtr ObjectPtr::make(const T&) {
+    throw CG_FATAL("ObjectPtr:make") << "Type specialisation is not implemented.";
+  }
+
+  template <typename T>
+  bool ObjectPtr::is() const {
+    throw CG_FATAL("ObjectPtr:is") << "Type specialisation is not implemented.";
+  }
+
+  template <typename T>
+  T ObjectPtr::value() const {
+    throw CG_FATAL("ObjectPtr:value") << "Type specialisation is not implemented.";
+  }
+
+  // type specialisations
+
   template <>
   bool ObjectPtr::is<int>() const {
     CG_ASSERT(get());
@@ -116,7 +135,7 @@ namespace cepgen::python {
                                               : nullptr);
     if (!first)
       return false;
-    if (!first.template is<T>()) {  // only allow same-type tuples/lists
+    if (!first.is<T>()) {  // only allow same-type tuples/lists
       CG_DEBUG("python:ObjectPtr:isVector")
           << "Wrong object type unpacked from tuple/list: (python)" << first->ob_type->tp_name << " != (c++)"
           << utils::demangle(typeid(T).name()) << ".";
@@ -229,7 +248,7 @@ namespace cepgen::python {
                                : key.is<int>()       ? std::to_string(key.value<int>())  // integer-type key
                                                      : "invalid";
       if (val.is<bool>())
-        out.set(skey, (bool)val.value<int>());
+        out.set(skey, static_cast<bool>(val.value<int>()));
       else if (val.is<int>())
         out.set(skey, val.value<int>());
       else if (val.is<double>())

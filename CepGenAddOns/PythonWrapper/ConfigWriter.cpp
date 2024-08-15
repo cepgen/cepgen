@@ -67,8 +67,8 @@ namespace cepgen::python {
       std::string out{"["}, sep;
       for (const auto& param : params.get<std::vector<ParametersList> >(key)) {
         out += sep + "cepgen.Parameters(";
-        for (const auto& key : param.keys())
-          out += key + " = " + repr(param, key);
+        for (const auto& pkey : param.keys())
+          out += pkey + " = " + repr(param, pkey);
         out += ")";
         sep = ", ";
       }
@@ -106,7 +106,7 @@ namespace cepgen::python {
   ConfigWriter& ConfigWriter::operator<<(const ParametersDescription& pdesc) {
     CG_DEBUG("ConfigWriter") << "Adding a parameters description object:\n" << pdesc;
     const std::function<std::string(const ParametersDescription&, const std::string&, size_t)> write =
-        [&](const ParametersDescription& pdesc, const std::string& key, size_t offset_num) -> std::string {
+        [&](const ParametersDescription& w_pdesc, const std::string& key, size_t offset_num) -> std::string {
       // write a generic parameters description object
       std::stringstream os;
       os << offset(offset_num);
@@ -114,8 +114,8 @@ namespace cepgen::python {
         os << key << " = ";
 
       std::string sep = "";
-      const auto& params = pdesc.parameters();
-      switch (pdesc.type()) {
+      const auto& params = w_pdesc.parameters();
+      switch (w_pdesc.type()) {
         case ParametersDescription::Type::Module:
           os << "cepgen.Module('" + params.getNameString() + "'";
           sep = ",";
@@ -128,30 +128,30 @@ namespace cepgen::python {
           os << "list(";
           break;
       }
-      for (const auto& key : params.keys(false)) {
+      for (const auto& pkey : params.keys(false)) {
         os << sep << "\n";
-        const auto& daugh = pdesc.get(key);
+        const auto& daugh = w_pdesc.get(pkey);
         switch (daugh.type()) {
           case ParametersDescription::Type::Module:
           case ParametersDescription::Type::Parameters:
-            os << write(pdesc.get(key), key, offset_num + 1);
+            os << write(w_pdesc.get(pkey), pkey, offset_num + 1);
             break;
           case ParametersDescription::Type::ParametersVector: {
-            os << offset(offset_num + 1) << key << " = [\n";
-            for (const auto& it : params.get<std::vector<ParametersList> >(key))
+            os << offset(offset_num + 1) << pkey << " = [\n";
+            for (const auto& it : params.get<std::vector<ParametersList> >(pkey))
               os << write(ParametersDescription(it), "", offset_num + 2) << ",\n";
             os << offset(offset_num + 1) << "]";
           } break;
           case ParametersDescription::Type::Value: {
-            if (params.has<ParametersList>(key))
-              os << write(ParametersDescription(params.get<ParametersList>(key)), key, offset_num + 1);
+            if (params.has<ParametersList>(pkey))
+              os << write(ParametersDescription(params.get<ParametersList>(pkey)), pkey, offset_num + 1);
             else
-              os << offset(offset_num + 1) << key << " = " << repr(params, key);
+              os << offset(offset_num + 1) << pkey << " = " << repr(params, pkey);
           } break;
         }
         sep = ",";
       }
-      switch (pdesc.type()) {
+      switch (w_pdesc.type()) {
         case ParametersDescription::Type::Module:
           if (!params.keys(false).empty())
             os << "\n" << offset(offset_num);

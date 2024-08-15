@@ -23,7 +23,6 @@
 #include "CepGen/Utils/String.h"
 #include "CepGenAddOns/PythonWrapper/Environment.h"
 #include "CepGenAddOns/PythonWrapper/Error.h"
-#include "CepGenAddOns/PythonWrapper/Utils.h"
 
 namespace cepgen::python {
   class Integrator final : public cepgen::Integrator {
@@ -37,7 +36,7 @@ namespace cepgen::python {
         throw PY_ERROR << "Failed to retrieve/cast the object to a Python functional.";
     }
 
-    void setLimits(const std::vector<Limits>& lims) override { lims_ = ObjectPtr::make(lims); }
+    void setLimits(const std::vector<Limits>& limits) override { lims_ = ObjectPtr::make(limits); }
 
     Value integrate(Integrand& integrand) override {
       gIntegrand = &integrand;
@@ -45,8 +44,9 @@ namespace cepgen::python {
       const auto evals = steer<int>("evals");
       PyMethodDef py_integr = {"integrand", py_integrand, METH_VARARGS, "A python-wrapped integrand"};
       ObjectPtr function(PyCFunction_NewEx(&py_integr, nullptr, ObjectPtr::make<std::string>("integrand").get()));
-      const auto value = lims_ ? func_(function.get(), (int)integrand.size(), iterations, 1000, evals, lims_.get())
-                               : func_(function.get(), (int)integrand.size(), iterations, 1000, evals);
+      const auto value =
+          lims_ ? func_(function.get(), static_cast<int>(integrand.size()), iterations, 1000, evals, lims_.get())
+                : func_(function.get(), static_cast<int>(integrand.size()), iterations, 1000, evals);
       if (!value)
         throw PY_ERROR;
       const auto vals = value.vector<double>();

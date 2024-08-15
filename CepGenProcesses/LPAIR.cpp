@@ -403,7 +403,7 @@ double LPAIR::pickin() {
       }
       return out;
     };
-    double var_pm = 0., var_mp = 0., var_min = 0., var_max = 0.;
+    double var_pm = 0., var_max = 0.;
     if (mi2_1 == 0.) {
       var_max =
           (s() * (t_1 * (s() + del1 - mf2_1) - mi2_2 * mf2_1) + mi2_2 * mf2_1 * (mf2_1 - del1)) / ((s() + w12_) * del2);
@@ -422,6 +422,7 @@ double LPAIR::pickin() {
       const auto sb = mi2_2 + t_1 - 0.5 * (m_w4_ - t_1 - t_2) * (mf2_2 - mi2_2 - t_2) * inv_t,
                  sd = 2. * sign * std::sqrt(sa_2 * gamma4_) * inv_t,
                  se = del3 * del1 + (del3 - del1) * (del3 * mi2_2 - del1 * mf2_2) * inv_t;
+      double var_mp, var_min;
       std::tie(var_mp, var_min) = compute_boundaries(sb, sd, se);
       deltas[1] = -0.25 * (var_min - var) * (var_mp - var) * t_2;
     }

@@ -27,7 +27,7 @@ namespace cepgen::python {
   class Environment : SteeredObject<Environment> {
   public:
     explicit Environment(const ParametersList&);  ///< Initialise the python environment
-    virtual ~Environment();                       ///< Finalise the python environment
+    ~Environment() override;                      ///< Finalise the python environment
 
     static ParametersDescription description();
 

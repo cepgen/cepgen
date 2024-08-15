@@ -19,6 +19,8 @@
 #ifndef CepGenAddOns_PythonWrapper_ConfigWriter_h
 #define CepGenAddOns_PythonWrapper_ConfigWriter_h
 
+#include <sstream>
+
 #include "CepGen/Core/SteeredObject.h"
 
 namespace cepgen {
@@ -30,8 +32,8 @@ namespace cepgen::python {
   /// Toolbox to dump user-steered configuration into Python scripts
   class ConfigWriter final : public SteeredObject<ConfigWriter> {
   public:
-    ConfigWriter(const ParametersList&);
-    ~ConfigWriter();
+    explicit ConfigWriter(const ParametersList&);
+    ~ConfigWriter() override;
 
     static ParametersDescription description();
 
@@ -41,7 +43,7 @@ namespace cepgen::python {
     std::string operator()() const;  ///< Retrieve the configuration as a string
 
   private:
-    inline std::string offset(size_t num) { return std::string(num * tab_len_, ' '); }  ///< Compute a char-offset
+    inline std::string offset(size_t num) const { return std::string(num * tab_len_, ' '); }  ///< Compute a char-offset
     mutable std::ostringstream os_;
     const size_t tab_len_;
   };

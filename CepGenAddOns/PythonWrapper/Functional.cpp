@@ -22,7 +22,6 @@
 #include "CepGen/Utils/String.h"
 #include "CepGenAddOns/PythonWrapper/Environment.h"
 #include "CepGenAddOns/PythonWrapper/Error.h"
-#include "CepGenAddOns/PythonWrapper/Utils.h"
 
 using namespace std::string_literals;
 
@@ -44,7 +43,7 @@ namespace cepgen::python {
             << err.message();
       }
     }
-    inline double eval() const {
+    inline double eval() const override {
       auto args = ObjectPtr::tupleFromVector(values_);
       try {
         if (auto value = func_.call(args); value)

@@ -19,6 +19,9 @@
 #ifndef CepGen_Integration_Integrator_h
 #define CepGen_Integration_Integrator_h
 
+#include <functional>
+#include <memory>
+
 #include "CepGen/Utils/RandomGenerator.h"
 #include "CepGen/Utils/Value.h"
 
