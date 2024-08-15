@@ -107,7 +107,7 @@ namespace cepgen::proc {
 
     //===========================================================================================
     // feed run parameters to the common block
-    genparams_.icontri = (int)kinematics().incomingBeams().mode();
+    genparams_.icontri = static_cast<int>(kinematics().incomingBeams().mode());
     //===========================================================================================
 
     //-------------------------------------------------------------------------------------------
@@ -118,7 +118,7 @@ namespace cepgen::proc {
     if (HeavyIon::isHI(kinematics().incomingBeams().positive().integerPdgId())) {
       const auto in1 = HeavyIon::fromPdgId(kinematics().incomingBeams().positive().integerPdgId());
       genparams_.a_nuc1 = in1.A;
-      genparams_.z_nuc1 = (unsigned short)in1.Z;
+      genparams_.z_nuc1 = static_cast<unsigned short>(in1.Z);
       if (genparams_.z_nuc1 > 1) {
         event().oneWithRole(Particle::IncomingBeam1).setPdgId((pdgid_t)in1);
         event().oneWithRole(Particle::OutgoingBeam1).setPdgId((pdgid_t)in1);
@@ -131,7 +131,7 @@ namespace cepgen::proc {
     if (HeavyIon::isHI(kinematics().incomingBeams().negative().integerPdgId())) {
       const auto in2 = HeavyIon::fromPdgId(kinematics().incomingBeams().negative().integerPdgId());
       genparams_.a_nuc2 = in2.A;
-      genparams_.z_nuc2 = (unsigned short)in2.Z;
+      genparams_.z_nuc2 = static_cast<unsigned short>(in2.Z);
       if (genparams_.z_nuc2 > 1) {
         event().oneWithRole(Particle::IncomingBeam2).setPdgId((pdgid_t)in2);
         event().oneWithRole(Particle::OutgoingBeam2).setPdgId((pdgid_t)in2);
@@ -141,8 +141,8 @@ namespace cepgen::proc {
     //-------------------------------------------------------------------------------------------
 
     // intermediate partons information
-    genparams_.iflux1 = (int)psgen_->partons().at(0);
-    genparams_.iflux2 = (int)psgen_->partons().at(1);
+    genparams_.iflux1 = static_cast<int>(phase_space_generator_->partons().at(0));
+    genparams_.iflux2 = static_cast<int>(phase_space_generator_->partons().at(1));
   }
 
   double FortranFactorisedProcess::computeFactorisedMatrixElement() {

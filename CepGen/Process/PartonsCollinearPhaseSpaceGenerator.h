@@ -38,7 +38,7 @@ namespace cepgen {
   private:
     void initialise() override;
 
-    const bool log_part_virt_;
+    const bool log_parton_virtuality_;
     // mapped variables
     double m_t1_{0.}, m_t2_{0.};
   };

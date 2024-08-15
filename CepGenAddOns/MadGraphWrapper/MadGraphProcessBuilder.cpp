@@ -47,7 +47,7 @@ public:
       throw CG_FATAL("MadGraphProcessBuilder")
           << "Failed to retrieve produced particles system from MadGraph process:\n"
           << mg5_proc_->description().validate(mg5_proc_->parameters()) << ".";
-    psgen_->setCentral(mg5_proc_->centralSystem());
+    phase_space_generator_->setCentral(mg5_proc_->centralSystem());
   }
 
   proc::ProcessPtr clone() const override { return proc::ProcessPtr(new MadGraphProcessBuilder(parameters(), false)); }
@@ -71,11 +71,12 @@ public:
   }
 
   void prepareFactorisedPhaseSpace() override {
-    const auto psgen_partons = psgen_->partons();
+    const auto psgen_partons = phase_space_generator_->partons();
     if (mg5_proc_->intermediatePartons() != std::vector<int>(psgen_partons.begin(), psgen_partons.end()))
       throw CG_FATAL("MadGraphProcessBuilder")
           << "MadGraph unpacked process incoming state (" << mg5_proc_->intermediatePartons() << ") "
-          << "is incompatible with user-steered incoming fluxes particles (" << psgen_->partons() << ").";
+          << "is incompatible with user-steered incoming fluxes particles (" << phase_space_generator_->partons()
+          << ").";
     if (const auto params_card = steer<std::string>("parametersCard"); !params_card.empty()) {
       CG_INFO("MadGraphProcessBuilder") << "Preparing process kinematics for card at \"" << params_card << "\".";
       const auto unsteered_pcard = MadGraphInterface::extractParamCardParameters(utils::readFile(params_card));

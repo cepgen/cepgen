@@ -57,10 +57,11 @@ namespace cepgen::proc {
 
     inline size_t ndim() const { return mapped_variables_.size(); }  ///< Number of dimensions to perform integration
 
-    inline bool hasEvent() const { return (bool)event_; }  ///< Does the process contain (and hold) an event?
-    const Event& event() const;                            ///< Handled particles objects and their relationships
-    Event& event();                                        ///< Event object read/write accessor
-    Event* eventPtr();                                     ///< Event pointer read/write accessor
+    /// Does the process contain (and hold) an event?
+    inline bool hasEvent() const { return static_cast<bool>(event_); }
+    const Event& event() const;  ///< Handled particles objects and their relationships
+    Event& event();              ///< Event object read/write accessor
+    Event* eventPtr();           ///< Event pointer read/write accessor
 
     const Momentum& pA() const;                            ///< Positive-z incoming beam particle's 4-momentum
     inline double mA2() const { return mA2_; }             ///< Positive-z incoming beam particle's squared mass

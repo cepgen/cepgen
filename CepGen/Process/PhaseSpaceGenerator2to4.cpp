@@ -114,7 +114,7 @@ namespace cepgen {
     }
 
   private:
-    double generateCentralKinematics() {
+    double generateCentralKinematics() const {
       const auto& kin = proc_->kinematics();
       if (!kin.cuts().central.rapidity_diff.contains(std::fabs(m_y_c1_ - m_y_c2_)))  // rapidity distance
         return 0.;
@@ -139,8 +139,8 @@ namespace cepgen {
       }
 
       //--- window in central system invariant mass
-      const auto invm = (proc_->pc(0) + proc_->pc(1)).mass();
-      if (!kin.cuts().central.mass_sum.contains(invm))
+      const auto invariant_mass = (proc_->pc(0) + proc_->pc(1)).mass();
+      if (!kin.cuts().central.mass_sum.contains(invariant_mass))
         return 0.;
 
       //--- compute and sanitise the momentum losses
@@ -155,9 +155,9 @@ namespace cepgen {
 
       //--- additional conditions for energy-momentum conservation
       const auto s = proc_->s(), mx2 = proc_->mX2(), my2 = proc_->mY2();
-      if (!kin.incomingBeams().positive().elastic() && x2 * s - invm - proc_->q2().p2() <= mx2)
+      if (!kin.incomingBeams().positive().elastic() && x2 * s - invariant_mass - proc_->q2().p2() <= mx2)
         return 0.;
-      if (!kin.incomingBeams().negative().elastic() && x1 * s - invm - proc_->q1().p2() <= my2)
+      if (!kin.incomingBeams().negative().elastic() && x1 * s - invariant_mass - proc_->q1().p2() <= my2)
         return 0.;
 
       //--- four-momenta of the outgoing protons (or remnants)
@@ -183,14 +183,14 @@ namespace cepgen {
       }
 
       //--- four-momenta of the intermediate partons
-      const double norm = 1. / proc_->wCM() / proc_->wCM() / s, prefac = 0.5 / std::sqrt(norm);
+      const double norm = 1. / proc_->wCM() / proc_->wCM() / s, prefactor = 0.5 / std::sqrt(norm);
       {  // positive-z incoming parton collinear kinematics
         const double tau1 = norm * proc_->q1().p2() / x1;
-        proc_->q1().setPz(+prefac * (x1 - tau1)).setEnergy(+prefac * (x1 + tau1));
+        proc_->q1().setPz(+prefactor * (x1 - tau1)).setEnergy(+prefactor * (x1 + tau1));
       }
       {  // negative-z incoming parton collinear kinematics
         const double tau2 = norm * proc_->q2().p2() / x2;
-        proc_->q2().setPz(-prefac * (x2 - tau2)).setEnergy(+prefac * (x2 + tau2));
+        proc_->q2().setPz(-prefactor * (x2 - tau2)).setEnergy(+prefactor * (x2 + tau2));
       }
 
       CG_DEBUG_LOOP("2to4:partons") << "Squared c.m. energy = " << s << " GeV^2\n\t"

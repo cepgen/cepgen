@@ -38,7 +38,7 @@ namespace cepgen {
   private:
     void initialise() override;
 
-    const bool log_part_virt_;
+    const bool log_parton_virtuality_;
     // mapped variables
     double m_qt1_{0.};      ///< Virtuality of the first intermediate parton (photon, pomeron, ...)
     double m_phi_qt1_{0.};  ///< Azimuthal rotation of the first intermediate parton's transverse virtuality

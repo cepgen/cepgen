@@ -21,13 +21,12 @@
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/HeavyIon.h"
-#include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/FactorisedProcess.h"
 #include "CepGen/Process/PartonsCollinearPhaseSpaceGenerator.h"
 
 namespace cepgen {
   PartonsCollinearPhaseSpaceGenerator::PartonsCollinearPhaseSpaceGenerator(const ParametersList& params)
-      : PartonsPhaseSpaceGenerator(params), log_part_virt_(steer<bool>("logPartonVirtuality")) {}
+      : PartonsPhaseSpaceGenerator(params), log_parton_virtuality_(steer<bool>("logPartonVirtuality")) {}
 
   void PartonsCollinearPhaseSpaceGenerator::initialise() {
     const auto& kin = process().kinematics();
@@ -69,7 +68,7 @@ namespace cepgen {
     // register the incoming partons' virtuality
     const auto lim_q2_1 = kin.cuts().initial.q2.at(0).truncate(Limits{1.e-10, 5.}),
                lim_q2_2 = kin.cuts().initial.q2.at(1).truncate(Limits{1.e-10, 5.});
-    if (log_part_virt_)
+    if (log_parton_virtuality_)
       process()
           .defineVariable(
               m_t1_, proc::Process::Mapping::exponential, lim_q2_1.compute(std::log), "Positive-z parton virtuality")

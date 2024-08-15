@@ -29,7 +29,7 @@
 namespace cepgen::proc {
   FactorisedProcess::FactorisedProcess(const ParametersList& params, const spdgids_t& central)
       : Process(params),
-        psgen_(PhaseSpaceGeneratorFactory::get().build(
+        phase_space_generator_(PhaseSpaceGeneratorFactory::get().build(
             steer<ParametersList>("kinematicsGenerator").set("ids", std::vector<int>(central.begin(), central.end())))),
         symmetrise_(steer<bool>("symmetrise")),
         store_alphas_(steer<bool>("storeAlphas")) {
@@ -38,32 +38,33 @@ namespace cepgen::proc {
 
   FactorisedProcess::FactorisedProcess(const FactorisedProcess& proc)
       : Process(proc),
-        psgen_(PhaseSpaceGeneratorFactory::get().build(proc.psgen_->parameters())),
+        phase_space_generator_(PhaseSpaceGeneratorFactory::get().build(proc.phase_space_generator_->parameters())),
         symmetrise_(proc.symmetrise_),
         store_alphas_(proc.store_alphas_) {}
 
   void FactorisedProcess::addEventContent() {
-    CG_ASSERT(psgen_);
-    const auto cent_pdgids = psgen_->central();
+    CG_ASSERT(phase_space_generator_);
+    const auto central_pdg_ids = phase_space_generator_->central();
     Process::setEventContent({{Particle::IncomingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
                               {Particle::IncomingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
                               {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
                               {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
-                              {Particle::CentralSystem, spdgids_t(cent_pdgids.begin(), cent_pdgids.end())}});
+                              {Particle::CentralSystem, spdgids_t(central_pdg_ids.begin(), central_pdg_ids.end())}});
   }
 
   void FactorisedProcess::prepareKinematics() {
-    if (!psgen_)
+    if (!phase_space_generator_)
       throw CG_FATAL("FactorisedProcess:prepareKinematics")
           << "Phase space generator not set. Please check your process initialisation procedure, as you might "
              "be doing something irregular.";
-    psgen_->initialise(this);
+    phase_space_generator_->initialise(this);
 
-    event().oneWithRole(Particle::Parton1).setIntegerPdgId(psgen_->partons().at(0));
-    event().oneWithRole(Particle::Parton2).setIntegerPdgId(psgen_->partons().at(1));
+    event().oneWithRole(Particle::Parton1).setIntegerPdgId(phase_space_generator_->partons().at(0));
+    event().oneWithRole(Particle::Parton2).setIntegerPdgId(phase_space_generator_->partons().at(1));
 
-    CG_DEBUG("FactorisedProcess:prepareKinematics") << "Partons: " << psgen_->partons() << ", "
-                                                    << "central system: " << psgen_->central() << ". " << event();
+    CG_DEBUG("FactorisedProcess:prepareKinematics")
+        << "Partons: " << phase_space_generator_->partons() << ", "
+        << "central system: " << phase_space_generator_->central() << ". " << event();
 
     // register all process-dependent variables
     prepareFactorisedPhaseSpace();
@@ -81,10 +82,10 @@ namespace cepgen::proc {
   }
 
   double FactorisedProcess::computeWeight() {
-    if (!psgen_->generate())
+    if (!phase_space_generator_->generate())
       return 0.;
     if (const auto cent_weight = computeFactorisedMatrixElement(); utils::positive(cent_weight))
-      return cent_weight * psgen_->weight() * kin_prefactor_;
+      return cent_weight * phase_space_generator_->weight() * kin_prefactor_;
     return 0.;
   }
 
@@ -119,9 +120,9 @@ namespace cepgen::proc {
 
   //----- utilities
 
-  double FactorisedProcess::that() const { return psgen_->that(); }
+  double FactorisedProcess::that() const { return phase_space_generator_->that(); }
 
-  double FactorisedProcess::uhat() const { return psgen_->uhat(); }
+  double FactorisedProcess::uhat() const { return phase_space_generator_->uhat(); }
 
   ParametersDescription FactorisedProcess::description() {
     auto desc = Process::description();

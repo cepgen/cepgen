@@ -20,6 +20,7 @@
 #define CepGen_Process_PhaseSpaceGenerator_h
 
 #include "CepGen/Modules/NamedModule.h"
+#include "CepGen/Physics/PDG.h"
 
 namespace cepgen::proc {
   class FactorisedProcess;

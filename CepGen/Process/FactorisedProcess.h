@@ -24,7 +24,7 @@
 
 namespace cepgen::proc {
   /// Generic parton emission-factorised process
-  /// \note 0 to 2 dimensions may be used for the scattered diffractive system(s)' invariant mass definition.
+  /// \note 0 to 2 dimensions may be used for the scattered diffractive system('s) invariant mass definition.
   /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
   /// \date Jul 2023
   class FactorisedProcess : public Process {
@@ -52,7 +52,7 @@ namespace cepgen::proc {
     double uhat() const;  ///< \f$\hat u=\frac{1}{2}\left[(p_1-p_4)^2+(p_2-p_3)^2\right]\f$
 
     /// Kinematic variables generator for the phase space coverage
-    const std::unique_ptr<PhaseSpaceGenerator> psgen_;
+    const std::unique_ptr<PhaseSpaceGenerator> phase_space_generator_;
     const bool symmetrise_;
     const bool store_alphas_;
 

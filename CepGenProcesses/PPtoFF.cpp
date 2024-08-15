@@ -37,7 +37,7 @@ public:
       : cepgen::proc::FactorisedProcess(params, make_pdgids_pair(params.get<ParticleProperties>("pair").pdgid)),
         method_(steerAs<int, Mode>("method")),
         osp_(steer<ParametersList>("offShellParameters")) {
-    if (method_ == Mode::offShell && !psgen_->ktFactorised())
+    if (method_ == Mode::offShell && !phase_space_generator_->ktFactorised())
       throw CG_FATAL("PPtoFF:prepare")
           << "Off-shell matrix element only defined for factorised process with partons kt.";
   }
@@ -58,7 +58,7 @@ public:
 
 private:
   void prepareFactorisedPhaseSpace() override {
-    const auto cs_prop = PDG::get()(psgen_->central().at(0));
+    const auto cs_prop = PDG::get()(phase_space_generator_->central().at(0));
     // define central particle properties and couplings with partons
     if (!cs_prop.fermion || cs_prop.charges.empty())
       throw CG_FATAL("PPtoFF:prepare") << "Invalid fermion pair selected: " << cs_prop << ".";
@@ -81,7 +81,7 @@ private:
     g_part2_ = generate_coupling(event().oneWithRole(Particle::Parton2).pdgId());
 
     CG_DEBUG("PPtoFF:prepare") << "Incoming beams: mA = " << mA() << " GeV/mB = " << mB() << " GeV.\n\t"
-                               << "Produced particles: " << psgen_->central() << ".\n\t"
+                               << "Produced particles: " << phase_space_generator_->central() << ".\n\t"
                                << "ME computation method: " << (int)method_ << ".";
 
     // constrain central particles cuts

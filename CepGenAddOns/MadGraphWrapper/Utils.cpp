@@ -131,7 +131,7 @@ namespace cepgen::mg5amc {
       if (const auto last_chr = name[name.size() - 1]; last_chr == '-' || last_chr == '+')
         name.pop_back();
       props.name = name;
-      props.descr = name;
+      props.human_name = name;
     }
     props.pdgid = plist_part.get<int>("pdg_code");
     plist_part.fill<int>("color", props.colours);  //FIXME might not be correct

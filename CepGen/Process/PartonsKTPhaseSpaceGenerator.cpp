@@ -26,7 +26,7 @@
 
 namespace cepgen {
   PartonsKTPhaseSpaceGenerator::PartonsKTPhaseSpaceGenerator(const ParametersList& params)
-      : PartonsPhaseSpaceGenerator(params), log_part_virt_(steer<bool>("logPartonVirtuality")) {}
+      : PartonsPhaseSpaceGenerator(params), log_parton_virtuality_(steer<bool>("logPartonVirtuality")) {}
 
   void PartonsKTPhaseSpaceGenerator::initialise() {
     const auto& kin = process().kinematics();
@@ -59,7 +59,7 @@ namespace cepgen {
     set_flux_properties(kin.incomingBeams().negative(), neg_flux_);
 
     // register the incoming partons' transverse virtualities range
-    if (log_part_virt_) {
+    if (log_parton_virtuality_) {
       const auto log_lim_kt = kin.cuts().initial.qt.compute(std::log).truncate(Limits{-10., 10.});
       process()
           .defineVariable(
