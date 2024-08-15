@@ -52,7 +52,7 @@ namespace cepgen {
     /// Initialise the Monte Carlo integrator and event generator
     /// \param[in] safe_mode Load the generator without external libraries?
     explicit Generator(bool safe_mode = false);
-    explicit Generator(RunParameters*);  ///< Build a MC generator object
+    explicit Generator(RunParameters*);  ///< Build an MC generator object
     ~Generator();
 
     void parseRunParameters(const std::string&);  ///< Read a steering card to populate the run parameters block
@@ -65,11 +65,13 @@ namespace cepgen {
 
     Value computeXsection();  ///< Compute the cross section and uncertainty, in pb, for the run parameters
     /// Compute the cross section for the run parameters
-    /// \param[out] xsec The computed cross-section, in pb
+    /// \param[out] cross_section The computed cross-section, in pb
     /// \param[out] err The absolute integration error on the computed cross-section, in pb
     [[deprecated("Please use the parameters-less version")]] void computeXsection(double& cross_section, double& err);
-    double crossSection() const { return xsect_; }                     ///< Last cross section computed by the generator
-    double crossSectionError() const { return xsect_.uncertainty(); }  ///< Last error on the cross section computed
+    double crossSection() const { return cross_section_; }  ///< Last cross section computed by the generator
+    double crossSectionError() const {
+      return cross_section_.uncertainty();
+    }  ///< Last error on the cross section computed
 
     void generate(size_t num_events, const std::function<void(const Event&, size_t)>&);            ///< Generate events
     void generate(size_t num_events, const std::function<void(const proc::Process&)>& = nullptr);  ///< Generate events
@@ -89,7 +91,7 @@ namespace cepgen {
     std::unique_ptr<GeneratorWorker> worker_;    ///< Generator worker instance
     std::unique_ptr<Integrator> integrator_;     ///< Integration algorithm
     bool initialised_{false};                    ///< Has the event generator already been initialised?
-    Value xsect_{-1., -1.};                      ///< Cross section value computed at the last integration
+    Value cross_section_{-1., -1.};              ///< Cross-section value computed at the last integration
   };
 }  // namespace cepgen
 

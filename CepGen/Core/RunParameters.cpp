@@ -163,7 +163,7 @@ namespace cepgen {
   }
 
   std::ostream& operator<<(std::ostream& os, const RunParameters& param) {
-    const int wb = 90, wt = 33;
+    constexpr int wb = 90, wt = 33;
 
     os << std::left << "\n"
        << std::setfill('_') << std::setw(wb + 3) << "_/¯ RUN INFORMATION ¯\\_" << std::setfill(' ') << "\n\n";
@@ -249,14 +249,14 @@ namespace cepgen {
       os << std::setw(wt) << "Minimum final state";
       std::string sep;
       for (const auto& part : kin.minimumFinalState())
-        os << sep << (PDG::Id)part, sep = ", ";
+        os << sep << static_cast<PDG::Id>(part), sep = ", ";
       os << "\n";
     }
     dump_cuts(cuts.central);
     if (cuts.central_particles.size() > 0) {
       os << std::setw(wt) << utils::boldify(">>> per-particle cuts:") << "\n";
       for (const auto& part_per_lim : cuts.central_particles) {
-        os << " * all single " << std::setw(wt - 3) << (PDG::Id)part_per_lim.first << "\n";
+        os << " * all single " << std::setw(wt - 3) << static_cast<PDG::Id>(part_per_lim.first) << "\n";
         for (const auto& lim : part_per_lim.second.parameters().keysOf<Limits>()) {
           const auto& limit = part_per_lim.second.parameters().get<Limits>(lim);
           if (limit.valid())

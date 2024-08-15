@@ -27,9 +27,9 @@
 /// Name of the object builder
 #define BUILDERNM(obj) obj##Builder
 /// Define a new factory instance for the definition of modules
-#define DEFINE_FACTORY(name, obj_type, descr)                       \
+#define DEFINE_FACTORY(name, obj_type, description)                 \
   struct name : public ModuleFactory<obj_type> {                    \
-    explicit name() : ModuleFactory(descr) {}                       \
+    explicit name() : ModuleFactory(description) {}                 \
     inline static name& get() {                                     \
       static name instance;                                         \
       return instance;                                              \
@@ -74,7 +74,7 @@ namespace cepgen {
     }
     /// Build one instance of a named module
     /// \param[in] params List of parameters to be invoked by the constructor
-    std::unique_ptr<T> build(const ParametersList&) const;
+    std::unique_ptr<T> build(const ParametersList& params) const;
     /// Build one instance of a named module
     /// \param[in] name Module name to retrieve
     /// \param[in] params List of parameters to be invoked by the constructor
@@ -89,7 +89,7 @@ namespace cepgen {
     std::string describe(const std::string& name) const;  ///< Describe one named module
     /// Describe the parameters of one named module
     /// \param[in] params Parameters (incl. the name) to steer the description
-    ParametersDescription describeParameters(const ParametersList&) const;
+    ParametersDescription describeParameters(const ParametersList& params) const;
     /// Describe the parameters of one named module
     /// \param[in] name Name of the module to describe
     /// \param[in] params Additional parameters to steer the description
@@ -100,7 +100,7 @@ namespace cepgen {
     /// \param[in] params Additional parameters to steer the description
     ParametersDescription describeParameters(int index, const ParametersList& params = ParametersList()) const;
 
-    std::vector<std::string> modules() const;           ///< List of modules registred in the database
+    std::vector<std::string> modules() const;           ///< List of modules registered in the database
     inline bool empty() const { return map_.empty(); }  ///< Is the database empty?
     inline size_t size() const { return map_.size(); }  ///< Number of modules registered in the database
 

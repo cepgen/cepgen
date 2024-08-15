@@ -21,7 +21,7 @@
 
 #include "CepGen/Modules/ModuleFactory.h"
 
-/// Add a generic process definition to the list of handled processes
+/// Add a generic integration algorithm definition to the runtime list
 #define REGISTER_INTEGRATOR(name, obj)                                         \
   namespace cepgen {                                                           \
     struct BUILDERNM(obj) {                                                    \

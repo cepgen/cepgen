@@ -64,7 +64,7 @@ namespace cepgen {
 
     worker_->setRunParameters(const_cast<const RunParameters*>(parameters_.get()));
     worker_->setIntegrator(integrator_.get());
-    xsect_ = Value{-1., -1.};
+    cross_section_ = Value{-1., -1.};
     parameters_->prepareRun();
     initialised_ = false;
   }
@@ -112,18 +112,18 @@ namespace cepgen {
 
     integrate();  // run is cleared here
 
-    if (xsect_ < 1.e-2)
-      CG_INFO("Generator") << "Total cross section: " << xsect_ * 1.e3 << " fb.";
-    else if (xsect_ < 0.5e3)
-      CG_INFO("Generator") << "Total cross section: " << xsect_ << " pb.";
-    else if (xsect_ < 0.5e6)
-      CG_INFO("Generator") << "Total cross section: " << xsect_ * 1.e-3 << " nb.";
-    else if (xsect_ < 0.5e9)
-      CG_INFO("Generator") << "Total cross section: " << xsect_ * 1.e-6 << " µb.";
+    if (cross_section_ < 1.e-2)
+      CG_INFO("Generator") << "Total cross section: " << cross_section_ * 1.e3 << " fb.";
+    else if (cross_section_ < 0.5e3)
+      CG_INFO("Generator") << "Total cross section: " << cross_section_ << " pb.";
+    else if (cross_section_ < 0.5e6)
+      CG_INFO("Generator") << "Total cross section: " << cross_section_ * 1.e-3 << " nb.";
+    else if (cross_section_ < 0.5e9)
+      CG_INFO("Generator") << "Total cross section: " << cross_section_ * 1.e-6 << " µb.";
     else
-      CG_INFO("Generator") << "Total cross section: " << xsect_ * 1.e-9 << " mb.";
+      CG_INFO("Generator") << "Total cross section: " << cross_section_ * 1.e-9 << " mb.";
 
-    return xsect_;
+    return cross_section_;
   }
 
   void Generator::resetIntegrator() {
@@ -159,16 +159,16 @@ namespace cepgen {
     if (!integrator_)
       throw CG_FATAL("Generator:integrate") << "No integrator object was declared for the generator!";
 
-    xsect_ = integrator_->integrate(worker_->integrand());
+    cross_section_ = integrator_->integrate(worker_->integrand());
 
-    CG_DEBUG("Generator:integrate") << "Computed cross section: (" << xsect_ << ") pb.";
+    CG_DEBUG("Generator:integrate") << "Computed cross section: (" << cross_section_ << ") pb.";
 
-    // now that the cross section has been computed, feed it to the event modification algorithms...
+    // now that the cross-section has been computed, feed it to the event modification algorithms...
     for (auto& mod : parameters_->eventModifiersSequence())
-      mod->setCrossSection(xsect_);
+      mod->setCrossSection(cross_section_);
     // ...and to the event storage algorithms
     for (auto& mod : parameters_->eventExportersSequence())
-      mod->setCrossSection(xsect_);
+      mod->setCrossSection(cross_section_);
   }
 
   void Generator::initialise() {
@@ -208,7 +208,7 @@ namespace cepgen {
     //--- if invalid argument, retrieve from runtime parameters
     if (num_events < 1) {
       if (parameters_->generation().targetLuminosity() > 0.) {
-        num_events = std::ceil(parameters_->generation().targetLuminosity() * xsect_);
+        num_events = std::ceil(parameters_->generation().targetLuminosity() * cross_section_);
         CG_INFO("Generator") << "Target luminosity: " << parameters_->generation().targetLuminosity() << " pb-1.";
       } else
         num_events = parameters_->generation().maxGen();

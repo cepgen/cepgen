@@ -20,7 +20,6 @@
 #include "CepGen/Utils/Environment.h"
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/Message.h"
-#include "CepGen/Utils/String.h"
 
 namespace cepgen {
   Steerable::Steerable(const ParametersList& params) { setParameters(params); }

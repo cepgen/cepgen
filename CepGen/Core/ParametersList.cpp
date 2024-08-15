@@ -17,7 +17,6 @@
  */
 
 #include <iomanip>
-#include <limits>
 #include <regex>
 
 #include "CepGen/Core/Exception.h"

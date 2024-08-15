@@ -39,7 +39,7 @@ namespace cepgen {
     inline T steer(const std::string& key) const {
       return params_.get<T>(key);
     }
-    /// Retrieve a recasted parameters as previously steered
+    /// Retrieve a recast parameters as previously steered
     template <typename T, typename U>
     inline U steerAs(const std::string& key) const {
       return params_.getAs<T, U>(key);

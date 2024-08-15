@@ -49,7 +49,7 @@ namespace cepgen {
     ParametersDescription& setDescription(const std::string& descr);
     /// Description of this parameter (or parameters collection)
     const std::string& description() const { return mod_descr_; }
-    /// This parameters is a collection of sub-parameters
+    /// This parameter is a collection of sub-parameters
     ParametersDescription& setParametersVector(bool pv = true) {
       is_vec_params_ = pv;
       return *this;

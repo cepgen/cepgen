@@ -47,9 +47,9 @@ namespace cepgen {
 #elif defined(__APPLE__)
     const auto fullpath = match ? "lib" + path + ".dylib" : path;
 #else
-    const auto fullpath = match ? "lib" + path + ".so" : path;
+    const auto full_path = match ? "lib" + path + ".so" : path;
 #endif
-    if (callPath(fullpath, [](const auto& path) {
+    if (callPath(full_path, [](const auto& path) {
 #ifdef _WIN32
           if (LoadLibraryA(path.c_str()) != nullptr)
             return true;
@@ -70,7 +70,7 @@ namespace cepgen {
       return true;
     }
     invalid_libraries.emplace_back(path);
-    CG_DEBUG("loadLibrary") << "Library \"" << path << "\" (" << fullpath << ") does not exist.";
+    CG_DEBUG("loadLibrary") << "Library \"" << path << "\" (" << full_path << ") does not exist.";
     return false;
   }
 

@@ -19,6 +19,8 @@
 #ifndef CepGen_Core_GeneratorWorker_h
 #define CepGen_Core_GeneratorWorker_h
 
+#include <memory>
+
 #include "CepGen/Event/Event.h"
 
 namespace cepgen {
@@ -55,7 +57,7 @@ namespace cepgen {
   protected:
     /// Store the event in the output file
     /// \return A boolean stating whether or not the event was successfully saved
-    bool storeEvent();
+    bool storeEvent() const;
 
     // NOT owned
     const Integrator* integrator_{nullptr};  ///< Pointer to the mother-handled integrator instance

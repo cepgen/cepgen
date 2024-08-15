@@ -117,7 +117,7 @@ namespace cepgen {
     if (pdtype == Type::Module)
       os << " with parameters";
     os << ":";
-    // write list of parameters (if has some)
+    // write list of parameters (if it has some)
     for (const auto& key : keys) {
       if (pdtype == Type::ParametersVector && !ParametersList::has<ParametersList>(key))
         continue;

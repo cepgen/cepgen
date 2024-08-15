@@ -23,7 +23,7 @@
 
 namespace cepgen {
   template <typename T>
-  ModuleFactory<T>::ModuleFactory(const std::string& descr) : description_(descr) {}
+  ModuleFactory<T>::ModuleFactory(const std::string& description) : description_(description) {}
 
   template <typename T>
   std::unique_ptr<T> ModuleFactory<T>::build(const ParametersList& params) const {
@@ -99,12 +99,12 @@ namespace cepgen {
     const auto mod_name = extra_params.at(0);
     if (params_map_.count(mod_name) == 0)
       return ParametersDescription().setName(mod_name).setDescription("{module without description}").steer(params);
-    auto descr = params_map_.at(mod_name).steer(params);
+    auto description = params_map_.at(mod_name).steer(params);
     auto extra_params_obj = ParametersList();
     if (extra_params.size() > 1)
       for (size_t i = 1; i < extra_params.size(); ++i)
         extra_params_obj.feed(extra_params.at(i));
-    return descr.steer(extra_params_obj);
+    return description.steer(extra_params_obj);
   }
 
   template <typename T>

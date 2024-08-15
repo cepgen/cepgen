@@ -23,7 +23,7 @@
 
 #include "CepGen/Core/Steerable.h"
 
-#define REGISTER_STEEREDOBJ_CONTENT_TYPE       \
+#define REGISTER_STEERED_OBJECT_CONTENT_TYPE   \
   __TYPE_ENUM(bool, map_bools_)                \
   __TYPE_ENUM(int, map_ints_)                  \
   __TYPE_ENUM(unsigned long long, map_ulongs_) \
@@ -55,7 +55,7 @@ namespace cepgen {
 #define __TYPE_ENUM(type, map_name) \
   for (const auto& kv : map_name)   \
     params_.set(kv.first, kv.second);
-      REGISTER_STEEREDOBJ_CONTENT_TYPE
+      REGISTER_STEERED_OBJECT_CONTENT_TYPE
 #undef __TYPE_ENUM
       return Steerable::parameters();
     }
@@ -66,7 +66,7 @@ namespace cepgen {
 #define __TYPE_ENUM(type, map_name) \
   for (const auto& kv : map_name)   \
     params_.fill(kv.first, kv.second);
-      REGISTER_STEEREDOBJ_CONTENT_TYPE
+      REGISTER_STEERED_OBJECT_CONTENT_TYPE
 #undef __TYPE_ENUM
     }
     /// Set (documented) module parameters
@@ -87,16 +87,16 @@ namespace cepgen {
     map_name.at(key) = params_.operator[]<type>(key);            \
     return *this;                                                \
   }
-    REGISTER_STEEREDOBJ_CONTENT_TYPE
+    REGISTER_STEERED_OBJECT_CONTENT_TYPE
 #undef __TYPE_ENUM
 
   private:
 #define __TYPE_ENUM(type, map_name) std::unordered_map<std::string, type&> map_name;
-    REGISTER_STEEREDOBJ_CONTENT_TYPE
+    REGISTER_STEERED_OBJECT_CONTENT_TYPE
 #undef __TYPE_ENUM
   };
 }  // namespace cepgen
 
-#undef REGISTER_STEEREDOBJ_CONTENT_TYPE
+#undef REGISTER_STEERED_OBJECT_CONTENT_TYPE
 
 #endif

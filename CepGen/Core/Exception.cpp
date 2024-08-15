@@ -63,7 +63,7 @@ namespace cepgen {
       case Exception::Type::fatal:
         return os << utils::colourise("Fatal error", utils::Colour::red, utils::Modifier::bold);
       case Exception::Type::undefined:
-        return os << utils::colourise("Undef'd exception", utils::Colour::none, utils::Modifier::reverse);
+        return os << utils::colourise("Undefined exception", utils::Colour::none, utils::Modifier::reverse);
     }
     return os;
   }

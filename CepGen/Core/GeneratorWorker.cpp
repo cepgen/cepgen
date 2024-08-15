@@ -41,8 +41,8 @@ namespace cepgen {
     CG_DEBUG("GeneratorWorker") << "Generator worker destructed. Releasing the parameters at " << (void*)params_ << ".";
   }
 
-  void GeneratorWorker::setIntegrator(const Integrator* integr) {
-    integrator_ = integr;
+  void GeneratorWorker::setIntegrator(const Integrator* integrator) {
+    integrator_ = integrator;
     CG_DEBUG("GeneratorWorker:integrator")
         << "Dim-" << integrand_->size() << " " << integrator_->name() << " integrator set.";
   }
@@ -55,7 +55,7 @@ namespace cepgen {
       next();
   }
 
-  bool GeneratorWorker::storeEvent() {
+  bool GeneratorWorker::storeEvent() const {
     CG_TICKER(const_cast<RunParameters*>(params_)->timeKeeper());
 
     if (!integrand_->process().hasEvent())

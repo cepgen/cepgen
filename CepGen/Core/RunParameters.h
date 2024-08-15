@@ -48,7 +48,7 @@ namespace cepgen {
     RunParameters();
     RunParameters(RunParameters&);  ///< Copy constructor (transfers ownership to process/event modification algorithm!)
     RunParameters(const RunParameters&);  ///< Const copy constructor (all but process + event handling algorithms)
-    ~RunParameters();                     // required for unique_ptr initialisation!
+    ~RunParameters() override;            // required for unique_ptr initialisation!
 
     static ParametersDescription description();
 
@@ -133,7 +133,7 @@ namespace cepgen {
     inline const EventExportersSequence& eventExportersSequence() const { return evt_exporters_; }
     void clearEventExportersSequence();                     ///< Remove all output modules from sequence
     void addEventExporter(std::unique_ptr<EventExporter>);  ///< Set a new output module definition
-    void addEventExporter(EventExporter*);                  ///< Set the pointer to a output module
+    void addEventExporter(EventExporter*);                  ///< Set the pointer to an output module
 
     //----- taming functions
 

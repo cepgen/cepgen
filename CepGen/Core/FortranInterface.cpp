@@ -79,15 +79,17 @@ double cepgen_kt_flux_(int& fmode, double& x, double& kt2, int& sfmode, double& 
 double cepgen_kt_flux_hi_(int& fmode, double& x, double& kt2, int& a, int& z) {
   using namespace cepgen;
   if (kBuiltKtFluxParameterisations.count(fmode) == 0)
-    kBuiltKtFluxParameterisations[fmode] = KTFluxFactory::get().build(
-        fmode, ParametersList().setAs<pdgid_t, HeavyIon>("heavyIon", HeavyIon{(unsigned short)a, (Element)z}));
+    kBuiltKtFluxParameterisations[fmode] =
+        KTFluxFactory::get().build(fmode,
+                                   ParametersList().setAs<pdgid_t, HeavyIon>(
+                                       "heavyIon", HeavyIon{static_cast<unsigned short>(a), static_cast<Element>(z)}));
   return kBuiltKtFluxParameterisations.at(fmode)->fluxMX2(x, kt2, 0.);
 }
 
 /// Mass of a particle, in GeV/c^2
 double cepgen_particle_mass_(int& pdg_id) {
   try {
-    return cepgen::PDG::get().mass((cepgen::pdgid_t)pdg_id);
+    return cepgen::PDG::get().mass(static_cast<cepgen::pdgid_t>(pdg_id));
   } catch (const cepgen::Exception& e) {
     e.dump();
     exit(0);
@@ -97,7 +99,7 @@ double cepgen_particle_mass_(int& pdg_id) {
 /// Charge of a particle, in e
 double cepgen_particle_charge_(int& pdg_id) {
   try {
-    return cepgen::PDG::get().charge((cepgen::pdgid_t)pdg_id);
+    return cepgen::PDG::get().charge(static_cast<cepgen::pdgid_t>(pdg_id));
   } catch (const cepgen::Exception& e) {
     e.dump();
     exit(0);
@@ -107,7 +109,7 @@ double cepgen_particle_charge_(int& pdg_id) {
 /// Colour factor of a particle
 double cepgen_particle_colour_(int& pdg_id) {
   try {
-    return cepgen::PDG::get().colours((cepgen::pdgid_t)pdg_id);
+    return cepgen::PDG::get().colours(static_cast<cepgen::pdgid_t>(pdg_id));
   } catch (const cepgen::Exception& e) {
     e.dump();
     exit(0);

@@ -21,7 +21,7 @@
 
 #include "CepGen/Modules/ModuleFactory.h"
 
-/// Add a drawing utilitary
+/// Add a drawing utility
 #define REGISTER_DRAWER(name, obj)                                         \
   namespace cepgen {                                                       \
     struct BUILDERNM(obj) {                                                \
@@ -35,8 +35,8 @@ namespace cepgen {
   namespace utils {
     class Drawer;
   }
-  /// A plotting utilitaries factory
-  DEFINE_FACTORY(DrawerFactory, utils::Drawer, "Drawing utilitary factory");
+  /// A plotting utilities factory
+  DEFINE_FACTORY(DrawerFactory, utils::Drawer, "Drawing utility factory");
 }  // namespace cepgen
 
 #endif

@@ -30,7 +30,7 @@ namespace cepgen {
     /// Build a module from its steering parameters
     explicit NamedModule(const ParametersList& params)
         : SteeredObject<T>(params), name_(SteeredObject<T>::steerName()) {}
-    virtual ~NamedModule() = default;
+    ~NamedModule() override = default;
 
     /// Describe all steering parameters for this module
     static ParametersDescription description() {
