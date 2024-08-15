@@ -22,7 +22,7 @@
 #include "CepGen/Modules/ModuleFactory.h"
 
 /// Add a central phase space generator to the list of handled modules
-#define REGISTER_PSGEN(name, obj)                                                       \
+#define REGISTER_PHASE_SPACE_GENERATOR(name, obj)                                       \
   namespace cepgen {                                                                    \
     struct BUILDERNM(obj) {                                                             \
       BUILDERNM(obj)() { PhaseSpaceGeneratorFactory::get().registerModule<obj>(name); } \

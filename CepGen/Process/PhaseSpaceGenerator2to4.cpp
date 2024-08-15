@@ -235,5 +235,5 @@ namespace cepgen {
 }  // namespace cepgen
 using KT2to4 = cepgen::PhaseSpaceGenerator2to4<cepgen::PartonsKTPhaseSpaceGenerator>;
 using Coll2to4 = cepgen::PhaseSpaceGenerator2to4<cepgen::PartonsCollinearPhaseSpaceGenerator>;
-REGISTER_PSGEN("kt2to4", KT2to4);
-REGISTER_PSGEN("coll2to4", Coll2to4);
+REGISTER_PHASE_SPACE_GENERATOR("kt2to4", KT2to4);
+REGISTER_PHASE_SPACE_GENERATOR("coll2to4", Coll2to4);
