@@ -14,7 +14,7 @@ list(APPEND mg_defs "-DCC_CFLAGS=\"${CMAKE_CXX_COMPILER} ${CMAKE_CXX_FLAGS} -I${
 
 cepgen_build(CepGenMadGraph
     SOURCES *.cpp
-    EXT_LIBS stdc++fs CepGenPython
+    EXT_LIBS CepGenPython
     EXT_HEADERS ${Python_INCLUDE_DIRS}
     DEPENDS ${MADGRAPH_BIN}
     DEFINITIONS ${mg_defs}

@@ -1,8 +1,7 @@
 #--- first check if we are at CERN
-set(LXPLUS_ENV "${CMAKE_SOURCE_DIR}/source-lxplus.sh")
 if($ENV{HOSTNAME} MATCHES "^lxplus[0-9]+.cern.ch")
   if(NOT DEFINED ENV{CEPGEN_LXPLUS_ENV})
-    message(FATAL_ERROR "LXPLUS environment variables not set!\nPlease source ${LXPLUS_ENV}\nand clean up this build environment, i.e.\nrm -rf CMake*\nand try again...")
+    message(FATAL_ERROR "LXPLUS environment variables not set!\nPlease source ${CMAKE_SOURCE_DIR}/source-lxplus.sh\nand clean up this build environment, i.e.\nrm -rf CMake*\nand try again...")
   endif()
   message(STATUS "Compiling on LXPLUS.")
   set(IS_LXPLUS "yes")
@@ -48,6 +47,8 @@ if(CMAKE_BUILD_TESTS)
   endif()
 endif()
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_FLAGS_DEBUG "-pg")  # for gprof
 set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -O2")
 set(CMAKE_C_FLAGS_RELEASE "-O2")

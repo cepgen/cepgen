@@ -60,6 +60,6 @@ add_version_definition(${core_sources})
 
 cepgen_build(CepGen
         SOURCES ${core_sources} ${phys_sources} ${proc_sources}
-        EXT_LIBS ${CEPGEN_CORE_EXT} stdc++fs
+        EXT_LIBS ${CEPGEN_CORE_EXT}
         EXT_HEADERS ${core_includes}
         INSTALL_COMPONENT lib)
