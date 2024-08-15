@@ -30,11 +30,11 @@ namespace cepgen {
     explicit FunctionIntegrand(size_t, const std::function<double(const std::vector<double>&)>&);
 
     double eval(const std::vector<double>&) override;
-    size_t size() const override { return ndim_; }
+    size_t size() const override { return num_dimensions_; }
 
   private:
     std::function<double(const std::vector<double>&)> function_;
-    size_t ndim_;
+    size_t num_dimensions_;
   };
 }  // namespace cepgen
 

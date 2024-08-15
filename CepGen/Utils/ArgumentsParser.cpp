@@ -92,7 +92,7 @@ namespace cepgen {
 
   void ArgumentsParser::print_help() const { CG_LOG << help_message(); }
 
-  void ArgumentsParser::print_version() const { CG_LOG << cepgen::version::banner; }
+  void ArgumentsParser::print_version() { CG_LOG << cepgen::version::banner; }
 
   void ArgumentsParser::dump() const {
     CG_INFO("ArgumentsParser").log([&](auto& info) {
@@ -156,7 +156,7 @@ namespace cepgen {
     return *this;
   }
 
-  std::string ArgumentsParser::operator[](std::string name) const {
+  std::string ArgumentsParser::operator[](const std::string& name) const {
     for (const auto& par : params_) {
       if ("--" + par.name.at(0) == name)
         return par.value;
@@ -209,54 +209,94 @@ namespace cepgen {
             par.first.value.c_str());
     }
     oss << "\n   "
-        << "debugging:\n\t-d|--debug<=output file|=mod1,mod2,...:output file>\tredirect to output file, enable "
-           "module(s)";
+        << "debugging:\n\t"
+        << "-d|--debug<=output file|=mod1,mod2,...:output file>\t"
+        << "redirect to output file, enable module(s)";
     oss << std::endl;
     return oss.str();
   }
 
   //----- simple parameters
 
-  ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, std::string* var, std::string def)
-      : name(utils::split(pname, ',')), description(pdesc), value(def), str_variable_(var) {}
+  ArgumentsParser::Parameter::Parameter(const std::string& param_name,
+                                        const std::string& param_description,
+                                        std::string* var,
+                                        const std::string& def)
+      : name(utils::split(param_name, ',')), description(param_description), value(def), str_variable_(var) {}
 
-  ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, double* var, double def)
-      : name(utils::split(pname, ',')), description(pdesc), value(utils::format("%g", def)), float_variable_(var) {}
+  ArgumentsParser::Parameter::Parameter(const std::string& param_name,
+                                        const std::string& param_description,
+                                        double* var,
+                                        const double& def)
+      : name(utils::split(param_name, ',')),
+        description(param_description),
+        value(utils::format("%g", def)),
+        float_variable_(var) {}
 
-  ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, int* var, int def)
-      : name(utils::split(pname, ',')), description(pdesc), value(utils::format("%+i", def)), int_variable_(var) {}
+  ArgumentsParser::Parameter::Parameter(const std::string& param_name,
+                                        const std::string& param_description,
+                                        int* var,
+                                        const int& def)
+      : name(utils::split(param_name, ',')),
+        description(param_description),
+        value(utils::format("%+i", def)),
+        int_variable_(var) {}
 
-  ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, unsigned int* var, unsigned int def)
-      : name(utils::split(pname, ',')), description(pdesc), value(std::to_string(def)), uint_variable_(var) {}
+  ArgumentsParser::Parameter::Parameter(const std::string& param_name,
+                                        const std::string& param_description,
+                                        unsigned int* var,
+                                        const unsigned int& def)
+      : name(utils::split(param_name, ',')),
+        description(param_description),
+        value(std::to_string(def)),
+        uint_variable_(var) {}
 
-  ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, bool* var, bool def)
-      : name(utils::split(pname, ',')), description(pdesc), value(utils::format("%d", def)), bool_variable_(var) {}
+  ArgumentsParser::Parameter::Parameter(const std::string& param_name,
+                                        const std::string& param_description,
+                                        bool* var,
+                                        const bool& def)
+      : name(utils::split(param_name, ',')),
+        description(param_description),
+        value(utils::format("%d", def)),
+        bool_variable_(var) {}
 
-  ArgumentsParser::Parameter::Parameter(std::string pname, std::string pdesc, Limits* var, Limits def)
-      : name(utils::split(pname, ',')),
-        description(pdesc),
+  ArgumentsParser::Parameter::Parameter(const std::string& param_name,
+                                        const std::string& param_description,
+                                        Limits* var,
+                                        const Limits& def)
+      : name(utils::split(param_name, ',')),
+        description(param_description),
         value(utils::format("%g,%g", def.min(), def.max())),
         lim_variable_(var) {}
 
   //----- vector of parameters
 
-  ArgumentsParser::Parameter::Parameter(std::string pname,
-                                        std::string pdesc,
+  ArgumentsParser::Parameter::Parameter(const std::string& param_name,
+                                        const std::string& param_description,
                                         std::vector<std::string>* var,
-                                        std::vector<std::string> def)
-      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ";")), vec_str_variable_(var) {}
+                                        const std::vector<std::string>& def)
+      : name(utils::split(param_name, ',')),
+        description(param_description),
+        value(utils::merge(def, ";")),
+        vec_str_variable_(var) {}
 
-  ArgumentsParser::Parameter::Parameter(std::string pname,
-                                        std::string pdesc,
+  ArgumentsParser::Parameter::Parameter(const std::string& param_name,
+                                        const std::string& param_description,
                                         std::vector<int>* var,
-                                        std::vector<int> def)
-      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ";")), vec_int_variable_(var) {}
+                                        const std::vector<int>& def)
+      : name(utils::split(param_name, ',')),
+        description(param_description),
+        value(utils::merge(def, ";")),
+        vec_int_variable_(var) {}
 
-  ArgumentsParser::Parameter::Parameter(std::string pname,
-                                        std::string pdesc,
+  ArgumentsParser::Parameter::Parameter(const std::string& param_name,
+                                        const std::string& param_description,
                                         std::vector<double>* var,
-                                        std::vector<double> def)
-      : name(utils::split(pname, ',')), description(pdesc), value(utils::merge(def, ";")), vec_float_variable_(var) {}
+                                        const std::vector<double>& def)
+      : name(utils::split(param_name, ',')),
+        description(param_description),
+        value(utils::merge(def, ";")),
+        vec_float_variable_(var) {}
 
   bool ArgumentsParser::Parameter::matches(const std::string& key) const {
     if (key == "--" + name.at(0))

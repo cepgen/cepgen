@@ -19,6 +19,7 @@
 #ifndef CepGen_Utils_ProcessVariablesAnalyser_h
 #define CepGen_Utils_ProcessVariablesAnalyser_h
 
+#include <memory>
 #include "CepGen/Core/SteeredObject.h"
 
 namespace cepgen::proc {

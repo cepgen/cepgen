@@ -36,8 +36,8 @@ namespace cepgen::utils {
     double maximum() const;                                       ///< Maximum value registered in this graph
     double chi2(const Graph1D&) const;  ///< Compute the \f$\chi^{2}\f$ between this graph and another
 
-    std::set<double> xCoords() const;   ///< List of horizontal axis coordinates
-    const Value valueAt(double) const;  ///< Retrieve the value of the graph at a given coordinate
+    std::set<double> xCoords() const;    ///< List of horizontal axis coordinates
+    const Value& valueAt(double) const;  ///< Retrieve the value of the graph at a given coordinate
 
     inline bool isGraph1D() const override { return true; }
 
@@ -53,17 +53,17 @@ namespace cepgen::utils {
     Graph2D& addPoint(double x, double y, double z);  ///< Add one value to the graph
     /// Add one value and its uncertainties to the graph
     Graph2D& addPoint(double x, double y, double z, double ex, double ey, double ez);
-    inline const dualaxis_t& points() const { return values_; }  ///< Retrieve all values in the graph
-    void dumpPoints(std::ostream&) const;                        ///< List all values registered in the graph
+    inline const dual_axis_t& points() const { return values_; }  ///< Retrieve all values in the graph
+    void dumpPoints(std::ostream&) const;                         ///< List all values registered in the graph
 
-    std::set<double> xCoords() const;           ///< List of horizontal axis coordinates
-    std::set<double> yCoords() const;           ///< List of vertical axis coordinates
-    const Value valueAt(double, double) const;  ///< Retrieve the value of the graph at the given coordinates
+    std::set<double> xCoords() const;            ///< List of horizontal axis coordinates
+    std::set<double> yCoords() const;            ///< List of vertical axis coordinates
+    const Value& valueAt(double, double) const;  ///< Retrieve the value of the graph at the given coordinates
 
     inline bool isGraph2D() const override { return true; }
 
   private:
-    dualaxis_t values_;
+    dual_axis_t values_;
   };
 }  // namespace cepgen::utils
 

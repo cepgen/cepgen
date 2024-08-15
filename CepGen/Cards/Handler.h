@@ -33,7 +33,7 @@ namespace cepgen::card {
   class Handler : public NamedModule<Handler> {
   public:
     explicit Handler(const ParametersList&);  ///< Build a configuration from an external steering card
-    virtual ~Handler() = default;
+    ~Handler() override = default;
 
     static ParametersDescription description();
 

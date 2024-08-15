@@ -45,7 +45,7 @@ namespace cepgen {
     Value integrate(Integrand& integrand) override {
       setIntegrand(integrand);
       std::unique_ptr<gsl_monte_miser_state, decltype(&gsl_monte_miser_free)> miser_state(
-          gsl_monte_miser_alloc(function_->dim), gsl_monte_miser_free);
+          gsl_monte_miser_alloc(gsl_function_->dim), gsl_monte_miser_free);
       miser_state->verbose = verbosity_;
       gsl_monte_miser_params_get(miser_state.get(), &miser_params_);
       miser_params_.estimate_frac = steer<double>("estimateFraction");
@@ -63,22 +63,22 @@ namespace cepgen {
                                    << "Dither: " << miser_params_.dither << ".";
 
       // launch the full integration
-      double result, abserr;
-      int res = gsl_monte_miser_integrate(function_.get(),
-                                          &xlow_[0],
-                                          &xhigh_[0],
-                                          function_->dim,
+      double result, absolute_error;
+      int res = gsl_monte_miser_integrate(gsl_function_.get(),
+                                          &x_low_[0],
+                                          &x_high_[0],
+                                          gsl_function_->dim,
                                           ncvg_,
                                           rnd_gen_->engine<gsl_rng>(),
                                           miser_state.get(),
                                           &result,
-                                          &abserr);
+                                          &absolute_error);
 
       if (res != GSL_SUCCESS)
         throw CG_FATAL("Integrator:integrate") << "Error while performing the integration!\n\t"
                                                << "GSL error: " << gsl_strerror(res) << ".";
 
-      return Value{result, abserr};
+      return Value{result, absolute_error};
     }
 
   private:

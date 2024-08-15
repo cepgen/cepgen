@@ -19,8 +19,6 @@
 #ifndef CepGen_Integration_GSLIntegrator_h
 #define CepGen_Integration_GSLIntegrator_h
 
-#include <gsl/gsl_rng.h>
-
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/Utils/GSLFunctionsWrappers.h"
 
@@ -35,12 +33,12 @@ namespace cepgen {
 
   protected:
     void setIntegrand(Integrand&);
-    /// A functor wrapping GSL's function footprint
-    std::function<double(double*, size_t, void*)> funct_;
+    /// A functor wrapping GSL function footprint
+    std::function<double(double*, size_t, void*)> function_;
     /// GSL structure storing the function to be integrated by this
     /// integrator instance (along with its parameters)
-    std::unique_ptr<gsl_monte_function> function_;
-    std::vector<double> xlow_, xhigh_;
+    std::unique_ptr<gsl_monte_function> gsl_function_;
+    std::vector<double> x_low_, x_high_;
   };
 }  // namespace cepgen
 

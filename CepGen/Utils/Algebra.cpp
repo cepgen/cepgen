@@ -195,11 +195,11 @@ namespace cepgen {
 
   Matrix& Matrix::transpose() {
     //gsl_matrix_transpose(gsl_mat_.get()); // only works for square matrices in GSL
-    auto transp = Matrix(numColumns(), numRows());
+    auto transposed = Matrix(numColumns(), numRows());
     for (size_t ix = 0; ix < numRows(); ++ix)
       for (size_t iy = 0; iy < numColumns(); ++iy)
-        transp(iy, ix) = operator()(ix, iy);
-    *this = transp;
+        transposed(iy, ix) = operator()(ix, iy);
+    *this = transposed;
     return *this;
   }
 
@@ -332,8 +332,7 @@ namespace cepgen {
 
   double Vector::dot(const Vector& oth) const {
     if (size() != oth.size()) {
-      CG_WARNING("Vector:scalarproduct") << "Scalar product of two vectors only defined "
-                                         << "for same-length vectors.";
+      CG_WARNING("Vector:dot") << "Scalar product of two vectors only defined for same-length vectors.";
       return 0.;
     }
     double out = 0.;
@@ -344,10 +343,9 @@ namespace cepgen {
 
   Vector Vector::cross(const Vector& oth) const {
     if (size() != oth.size())
-      throw CG_FATAL("Vector:vectorproduct") << "Vector/cross product of two vectors only defined "
-                                             << "for same-length vectors.";
+      throw CG_FATAL("Vector:cross") << "Vector/cross product of two vectors only defined for same-length vectors.";
     if (oth.size() != 3)
-      throw CG_FATAL("Vector:vectorproduct") << "Vector product only implemented for 3-vectors.";
+      throw CG_FATAL("Vector:cross") << "Vector product only implemented for 3-vectors.";
     //FIXME extend to N-dimensional vectors
     return Vector{(operator()(1) * oth(2) - operator()(2) * oth(1)),
                   (operator()(2) * oth(0) - operator()(0) * oth(2)),

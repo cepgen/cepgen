@@ -35,14 +35,14 @@ namespace cepgen {
     /// \param[in] num_cols number of (vertical) columns for the matrix
     explicit Matrix(size_t num_rows, size_t num_cols);
     /// Object constructor (from vectors)
-    /// \param[in] vecs set of (vector) rows
-    Matrix(const std::initializer_list<Vector>& vecs);
+    /// \param[in] vectors set of (vector) rows
+    Matrix(const std::initializer_list<Vector>& vectors);
 
     Matrix(const Matrix&);             ///< Copy constructor
     Matrix& operator=(const Matrix&);  ///< Assignment operator
     operator Vector() const;           ///< Implicit conversion to vector
 
-    /// Build a zero'ed matrix
+    /// Build a zeroed matrix
     /// \param[in] num_rows number of (horizontal) rows for the matrix
     /// \param[in] num_cols number of (vertical) columns for the matrix
     static Matrix zero(size_t num_rows, size_t num_cols = 0ull);
@@ -135,7 +135,7 @@ namespace cepgen {
     friend class Vector;
   };
 
-  /// Specialisation of a \f$m\times 1\f$ matrix
+  /// Specialisation of an \f$m\times 1\f$ matrix
   class Vector : public Matrix {
   public:
     /// Object constructor

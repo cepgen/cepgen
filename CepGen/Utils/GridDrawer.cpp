@@ -87,7 +87,7 @@ namespace cepgen::utils {
     for (size_t i = 0; i < N; ++i)
       for (size_t j = 0; j < 3; ++j)
         coll.emplace_back(&plots[i][j]);
-    gd.drawer_->draw(coll, "", "", mode);
+    (void)gd.drawer_->draw(coll, "", "", mode);
   }
 
   ParametersDescription GridDrawer::description() {

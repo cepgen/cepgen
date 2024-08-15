@@ -28,7 +28,7 @@ namespace cepgen {
   class GridParameters {
   public:
     /// Build a generation grid for a ndim-dimensional phase space
-    explicit GridParameters(size_t mbin, size_t ndim);
+    explicit GridParameters(size_t mbin, size_t num_dimensions);
 
     typedef std::vector<unsigned short> coord_t;  ///< Coordinates definition
 
@@ -69,7 +69,7 @@ namespace cepgen {
 
     const size_t mbin_;         ///< Integration grid size parameter
     const double inv_mbin_;     ///< Weight of each grid coordinate
-    size_t ndim_{0};            ///< Phase space multiplicity
+    size_t num_dimensions_{0};  ///< Phase space multiplicity
     bool gen_prepared_{false};  ///< Has the grid been already prepared?
     float correc_{0.};          ///< Correction to apply on the next phase space point generation
     float correc2_{0.};

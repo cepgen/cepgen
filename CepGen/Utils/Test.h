@@ -7,12 +7,12 @@
 #include "CepGen/Utils/String.h"
 
 namespace cepgen::test {
-  bool debug = false;
-  double failure_tolerance = 0.;
-  const double base_precision = 1.e-3;
-  double precision = base_precision;
-  size_t num_total = 0;
-  size_t num_passed = 0;
+  inline bool debug = false;
+  inline double failure_tolerance = 0.;
+  inline constexpr double base_precision = 1.e-3;
+  inline double precision = base_precision;
+  inline size_t num_total = 0;
+  inline size_t num_passed = 0;
 }  // namespace cepgen::test
 
 #define CG_FAILED(name)                                                                                            \
@@ -67,15 +67,15 @@ namespace cepgen::test {
     cepgen::test::num_total++;                                                                                 \
   }
 
-#define CG_TEST_UNCERT(diff, unc, nsigma, name)                                                                      \
+#define CG_TEST_UNCERT(diff, unc, num_sigma, name)                                                                   \
   {                                                                                                                  \
     if (cepgen::test::debug)                                                                                         \
       CG_LOG << cepgen::utils::colourise("TEST INFO", cepgen::utils::Colour::magenta, cepgen::utils::Modifier::bold) \
              << " " << cepgen::utils::colourise(name, cepgen::utils::Colour::magenta) << "\n"                        \
              << "\tdifference: " << diff << ", sigma: " << unc << " = " << diff / unc << " * sigma "                 \
-             << ((diff > nsigma * unc) ? ">" : "<") << " " << nsigma << " * sigma.";                                 \
-    if (unc > 0 && diff > nsigma * unc)                                                                              \
-      CG_FAILED(name) << " difference " << diff << " is not within " << nsigma << " sigmas=" << unc << ".";          \
+             << ((diff > num_sigma * unc) ? ">" : "<") << " " << nsigma << " * sigma.";                              \
+    if (unc > 0 && diff > num_sigma * unc)                                                                           \
+      CG_FAILED(name) << " difference " << diff << " is not within " << num_sigma << " sigmas=" << unc << ".";       \
     else {                                                                                                           \
       CG_PASSED(name);                                                                                               \
       cepgen::test::num_passed++;                                                                                    \
@@ -83,7 +83,7 @@ namespace cepgen::test {
     cepgen::test::num_total++;                                                                                       \
   }
 
-#define CG_TEST_VALUES(val1, val2, nsigma, name)                                                                     \
+#define CG_TEST_VALUES(val1, val2, num_sigma, name)                                                                  \
   {                                                                                                                  \
     const auto diff = cepgen::Value(val1) - cepgen::Value(val2);                                                     \
     if (cepgen::test::debug)                                                                                         \
@@ -91,9 +91,10 @@ namespace cepgen::test {
              << " " << cepgen::utils::colourise(name, cepgen::utils::Colour::magenta) << "\n"                        \
              << "\tvals: " << val1 << ", " << val2 << ", difference: " << (val1 - val2)                              \
              << ", sigma: " << diff.uncertainty() << " = " << diff.relativeUncertainty() << " * sigma "              \
-             << ((std::fabs(1. / diff.relativeUncertainty()) > nsigma) ? ">" : "<") << " " << nsigma << " * sigma."; \
+             << ((std::fabs(1. / diff.relativeUncertainty()) > num_sigme) ? ">" : "<") << " " << num_sigma           \
+             << " * sigma.";                                                                                         \
     if (diff.uncertainty() > 0 && diff > nsigma * diff.uncertainty())                                                \
-      CG_FAILED(name) << " difference " << diff << " is not within " << nsigma << " sigmas.";                        \
+      CG_FAILED(name) << " difference " << diff << " is not within " << num_sigma << " sigmas.";                     \
     else {                                                                                                           \
       CG_PASSED(name);                                                                                               \
       cepgen::test::num_passed++;                                                                                    \

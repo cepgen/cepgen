@@ -55,8 +55,8 @@ namespace cepgen {
     /// \param[in] mod exception classifier
     /// \param[in] from method invoking the exception
     /// \param[in] type exception type
-    /// \param[in] file file where this occured
-    /// \param[in] lineno Line number where exception occured
+    /// \param[in] file file where this occurred
+    /// \param[in] lineno Line number where exception occurred
     explicit LoggedMessage(const char* mod,
                            const char* from = "",
                            MessageType type = MessageType::undefined,
@@ -159,9 +159,9 @@ namespace cepgen {
 
     /// Origin of the exception
     const std::string& from() const { return from_; }
-    /// File where the exception occured
+    /// File where the exception occurred
     const std::string& file() const { return file_; }
-    /// Line number where the exception occured
+    /// Line number where the exception occurred
     short lineNumber() const { return line_num_; }
     /// Message type
     const MessageType& type() const { return type_; }

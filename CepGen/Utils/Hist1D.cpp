@@ -29,8 +29,8 @@
 namespace cepgen::utils {
   Hist1D::Hist1D(const ParametersList& params)
       : Drawable(params.get<std::string>("name"), params.get<std::string>("title")) {
-    if (const auto& xbins = params.get<std::vector<double> >("xbins"); xbins.size() > 1)
-      buildFromBins(xbins);
+    if (const auto& x_bins = params.get<std::vector<double> >("xbins"); x_bins.size() > 1)
+      buildFromBins(x_bins);
     else if (const auto& xrange = params.get<Limits>("xrange"); xrange.valid())
       buildFromRange(params.get<int>("nbins") > 0 ? params.get<int>("nbins") : params.get<int>("nbinsX"), xrange);
     else
@@ -44,11 +44,11 @@ namespace cepgen::utils {
     buildFromRange(num_bins_x, xrange);
   }
 
-  Hist1D::Hist1D(const std::vector<double>& xbins, const std::string& name, const std::string& title)
+  Hist1D::Hist1D(const std::vector<double>& x_bins, const std::string& name, const std::string& title)
       : Drawable(name, title) {
-    if (xbins.empty())
+    if (x_bins.empty())
       throw CG_ERROR("Hist1D") << "Number of bins must be strictly positive!";
-    buildFromBins(xbins);
+    buildFromBins(x_bins);
   }
 
   Hist1D::Hist1D(const Hist1D& oth)
@@ -225,10 +225,10 @@ namespace cepgen::utils {
 
   double Hist1D::integral(bool include_out_of_range) const {
     CG_ASSERT(hist_);
-    auto integr = gsl_histogram_sum(hist_.get());
+    auto integral_value = gsl_histogram_sum(hist_.get());
     if (include_out_of_range)
-      integr += underflow_ + overflow_;
-    return integr;
+      integral_value += underflow_ + overflow_;
+    return integral_value;
   }
 
   double Hist1D::sample(RandomGenerator& rng) const {
@@ -240,7 +240,7 @@ namespace cepgen::utils {
     return gsl_histogram_pdf_sample(pdf_.get(), rng.uniform());
   }
 
-  double Hist1D::chi2test(const Hist1D& oth, size_t& ndfval) const {
+  double Hist1D::chi2test(const Hist1D& oth, size_t& ndf_value) const {
     if (nbins() != oth.nbins())
       return 0.;
     double sum1{0.}, sum2{0.};
@@ -250,17 +250,17 @@ namespace cepgen::utils {
       sum2 += ru2 > 0. ? 1. / ru2 / ru2 : 0.;
     }
     if (sum1 == 0. || sum2 == 0.) {
-      ndfval = 0;
+      ndf_value = 0;
       return 0.;
     }
     // perform the test
     double chi2val = 0.;
-    ndfval = nbins();
+    ndf_value = nbins();
     for (size_t i = 0; i < nbins(); ++i) {
       const auto ru1 = value(i).relativeUncertainty(), ru2 = oth.value(i).relativeUncertainty();
       const auto cnt1 = ru1 > 0. ? 1. / ru1 / ru1 : 0., cnt2 = ru2 > 0. ? 1. / ru2 / ru2 : 0.;
       if (cnt1 == 0. && cnt2 == 0.) {
-        --ndfval;
+        --ndf_value;
         continue;
       }
       chi2val += std::pow(sum2 * cnt1 - sum1 * cnt2, 2) / (cnt1 + cnt2);

@@ -29,12 +29,12 @@ namespace cepgen::utils {
   /// Exception raised when the user terminates the process
   struct RunAbortedException : std::runtime_error {
     RunAbortedException() : std::runtime_error("CepGen run aborted") {}
-    ~RunAbortedException() noexcept { CG_INFO("RunAbortedException") << "Run aborted by user interaction."; }
+    ~RunAbortedException() noexcept override { CG_INFO("RunAbortedException") << "Run aborted by user interaction."; }
 
     const char* what() const noexcept override { return "User abort through C-c."; }
   };
 
-  /// Object handling an user-driven process abortion
+  /// Object handling a user-driven process abortion
   class AbortHandler {
   public:
     /// Define a process abortion procedure
@@ -51,7 +51,7 @@ namespace cepgen::utils {
       if (abs(si->si_code) != SIGABRT)
         throw RunAbortedException();
     }
-    void init() {
+    void init() const {
       if (sigaction(SIGINT, &action_, nullptr) != 0 || sigaction(SIGTERM, &action_, nullptr) != 0)
         throw CG_FATAL("AbortHandler") << "Failed to initialise the C-c handler!";
     }

@@ -34,7 +34,7 @@ namespace cepgen {
   }
 
   template <size_t D, size_t N>
-  typename GridHandler<D, N>::values_t GridHandler<D, N>::eval(coord_t in_coords) const {
+  typename GridHandler<D, N>::values_t GridHandler<D, N>::eval(const coord_t& in_coords) const {
     if (!init_)
       throw CG_FATAL("GridHandler") << "Grid extrapolator called but not initialised!";
 
@@ -98,24 +98,24 @@ namespace cepgen {
         coord_t before(D), after(D);
         findIndices(coord, before, after);
         //--- find boundaries values
-        const gridpoint_t &ext_111 = values_raw_.at({before[0], before[1], before[2]}),
-                          &ext_112 = values_raw_.at({before[0], before[1], after[2]}),
-                          &ext_121 = values_raw_.at({before[0], after[1], before[2]}),
-                          &ext_122 = values_raw_.at({before[0], after[1], after[2]}),
-                          &ext_211 = values_raw_.at({after[0], before[1], before[2]}),
-                          &ext_212 = values_raw_.at({after[0], before[1], after[2]}),
-                          &ext_221 = values_raw_.at({after[0], after[1], before[2]}),
-                          &ext_222 = values_raw_.at({after[0], after[1], after[2]});
+        const grid_point_t &ext_111 = values_raw_.at({before[0], before[1], before[2]}),
+                           &ext_112 = values_raw_.at({before[0], before[1], after[2]}),
+                           &ext_121 = values_raw_.at({before[0], after[1], before[2]}),
+                           &ext_122 = values_raw_.at({before[0], after[1], after[2]}),
+                           &ext_211 = values_raw_.at({after[0], before[1], before[2]}),
+                           &ext_212 = values_raw_.at({after[0], before[1], after[2]}),
+                           &ext_221 = values_raw_.at({after[0], after[1], before[2]}),
+                           &ext_222 = values_raw_.at({after[0], after[1], after[2]});
         //--- now that we have the boundaries, we may interpolate
         coord_t c_d(D);
         for (size_t i = 0; i < D; ++i)
           c_d[i] = (after[i] != before[i]) ? (coord.at(i) - before[i]) / (after[i] - before[i]) : 0.;
-        const gridpoint_t ext_11 = ext_111 * (1. - c_d[0]) + ext_211 * c_d[0];
-        const gridpoint_t ext_12 = ext_112 * (1. - c_d[0]) + ext_212 * c_d[0];
-        const gridpoint_t ext_21 = ext_121 * (1. - c_d[0]) + ext_221 * c_d[0];
-        const gridpoint_t ext_22 = ext_122 * (1. - c_d[0]) + ext_222 * c_d[0];
-        const gridpoint_t ext_1 = ext_11 * (1. - c_d[1]) + ext_21 * c_d[1];
-        const gridpoint_t ext_2 = ext_12 * (1. - c_d[1]) + ext_22 * c_d[1];
+        const grid_point_t ext_11 = ext_111 * (1. - c_d[0]) + ext_211 * c_d[0];
+        const grid_point_t ext_12 = ext_112 * (1. - c_d[0]) + ext_212 * c_d[0];
+        const grid_point_t ext_21 = ext_121 * (1. - c_d[0]) + ext_221 * c_d[0];
+        const grid_point_t ext_22 = ext_122 * (1. - c_d[0]) + ext_222 * c_d[0];
+        const grid_point_t ext_1 = ext_11 * (1. - c_d[1]) + ext_21 * c_d[1];
+        const grid_point_t ext_2 = ext_12 * (1. - c_d[1]) + ext_22 * c_d[1];
         out = ext_1 * (1. - c_d[2]) + ext_2 * c_d[2];
       } break;
       default:
@@ -126,7 +126,7 @@ namespace cepgen {
   }
 
   template <size_t D, size_t N>
-  void GridHandler<D, N>::insert(coord_t coord, values_t value) {
+  void GridHandler<D, N>::insert(const coord_t& coord, values_t value) {
     auto mod_coord = coord;
     if (grid_type_ != GridType::linear)
       for (auto& c : mod_coord)
@@ -140,7 +140,7 @@ namespace cepgen {
           default:
             break;
         }
-    if (values_raw_.count(mod_coord) != 0)
+    if (values_raw_.count(mod_coord) > 0)
       CG_WARNING("GridHandler") << "Duplicate coordinate detected for x=" << coord << ".";
     values_raw_[mod_coord] = value;
     init_ = false;
@@ -215,7 +215,7 @@ namespace cepgen {
         if (values_raw_.size() < gsl_interp2d_type_min_size(gsl_interp2d_bicubic))
           CG_WARNING("GridHandler") << "The grid size is too small (" << values_raw_.size() << " < "
                                     << gsl_interp2d_type_min_size(gsl_interp2d_bicubic)
-                                    << ") for bicubic interpolation. Switching to a bilinear interpolation mode.";
+                                    << ") for bicubic interpolation. Switching to a bi-linear interpolation mode.";
         //const gsl_interp2d_type* type =
         //    (values_raw_.size() > gsl_interp2d_type_min_size(gsl_interp2d_bicubic) ? gsl_interp2d_bicubic
         //                                                                           : gsl_interp2d_bilinear);
@@ -322,15 +322,15 @@ namespace cepgen {
   //----------------------------------------------------------------------------
 
   template <size_t D, size_t N>
-  typename GridHandler<D, N>::gridpoint_t GridHandler<D, N>::gridpoint_t::operator*(double c) const {
-    gridpoint_t out = *this;
+  typename GridHandler<D, N>::grid_point_t GridHandler<D, N>::grid_point_t::operator*(double c) const {
+    grid_point_t out = *this;
     std::transform(out.begin(), out.end(), out.begin(), [&c](const auto& a) { return a * c; });
     return out;
   }
 
   template <size_t D, size_t N>
-  typename GridHandler<D, N>::gridpoint_t GridHandler<D, N>::gridpoint_t::operator+(const gridpoint_t& rhs) const {
-    gridpoint_t out = *this;
+  typename GridHandler<D, N>::grid_point_t GridHandler<D, N>::grid_point_t::operator+(const grid_point_t& rhs) const {
+    grid_point_t out = *this;
     for (size_t i = 0; i < out.size(); ++i)
       out[i] += rhs[i];
     return out;

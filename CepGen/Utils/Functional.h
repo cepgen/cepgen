@@ -19,8 +19,6 @@
 #ifndef CepGen_Utils_Functional_h
 #define CepGen_Utils_Functional_h
 
-#include <array>
-
 #include "CepGen/Modules/NamedModule.h"
 
 namespace cepgen {

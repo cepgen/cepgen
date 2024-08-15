@@ -29,15 +29,11 @@ namespace cepgen {
 
     friend std::ostream& operator<<(std::ostream&, const Value&);
 
-    /// Central value extraction
-    operator double() const { return val_; }
-    /// Absolute uncertainty around the central value
-    double uncertainty() const { return unc_; }
-    /// Relative uncertainty around the central value
-    double relativeUncertainty() const;
+    operator double() const { return val_; }     ///< Central value extraction
+    double uncertainty() const { return unc_; }  ///< Absolute uncertainty around the central value
+    double relativeUncertainty() const;          ///< Relative uncertainty around the central value
 
-    /// Comparison operator
-    bool operator<(const Value& oth) const { return val_ < oth.val_; }
+    bool operator<(const Value& oth) const { return val_ < oth.val_; }  ///< Comparison operator
 
     //--- error propagation operators
 

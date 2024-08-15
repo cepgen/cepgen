@@ -30,7 +30,7 @@ namespace cepgen {
   public:
     explicit GSLRandomGenerator(const ParametersList& params) : utils::RandomGenerator(params) {
       gsl_rng_env_setup();
-      gsl_rng_type* rng_engine{nullptr};
+      gsl_rng_type* rng_engine;
       const auto& type = steer<std::string>("type");
       if (type == "mt19937")
         rng_engine = const_cast<gsl_rng_type*>(gsl_rng_mt19937);
@@ -57,9 +57,9 @@ namespace cepgen {
       desc.setDescription("GSL random number generator engine");
       desc.add<std::string>("type", "mt19937")
           .allow("mt19937", "Mersenne-Twister generator")
-          .allow("taus", "maximally equidistributed combined Tausworthe generator by L’Ecuyer")
+          .allow("taus", "maximally equi-distributed combined Tausworthe generator by L’Ecuyer")
           .allow("taus2",
-                 "maximally equidistributed combined Tausworthe generator by L’Ecuyer (w/ improved seeding procedure)")
+                 "maximally equi-distributed combined Tausworthe generator by L’Ecuyer (w/ improved seeding procedure)")
           .allow("gfsr4", "lagged-fibonacci generator")
           .allow("ranlxs0", "second-generation version of the RANLUX algorithm of Luscher")
           .setDescription("random number engine");
@@ -78,7 +78,7 @@ namespace cepgen {
     /// A deleter object for GSL's random number generator
     struct gsl_rng_deleter {
       /// Destructor method for the random number generator service
-      inline void operator()(gsl_rng* rng) { gsl_rng_free(rng); }
+      inline void operator()(gsl_rng* rng) const { gsl_rng_free(rng); }
     };
     /// Instance of random number generator service
     std::unique_ptr<gsl_rng, gsl_rng_deleter> rng_;

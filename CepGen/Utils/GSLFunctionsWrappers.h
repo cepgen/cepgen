@@ -32,12 +32,12 @@ namespace cepgen::utils {
   public:
     /// Utility to build a gsl_function pointer from a functional
     static std::unique_ptr<gsl_function> build(const Function1D& func, void* obj) {
-      return std::unique_ptr<gsl_function>(new utils::GSLFunctionWrapper(func, ParametersList(), obj));
+      return std::unique_ptr<gsl_function>(new GSLFunctionWrapper(func, ParametersList(), obj));
     }
     /// Utility to build a gsl_function pointer from a functional
     static std::unique_ptr<gsl_function> build(const Function1D& func,
                                                const ParametersList& params = ParametersList()) {
-      return std::unique_ptr<gsl_function>(new utils::GSLFunctionWrapper(func, params, nullptr));
+      return std::unique_ptr<gsl_function>(new GSLFunctionWrapper(func, params, nullptr));
     }
 
   private:
@@ -65,20 +65,20 @@ namespace cepgen::utils {
   template <typename F>
   class GSLMonteFunctionWrapper : public gsl_monte_function {
   public:
-    explicit GSLMonteFunctionWrapper(const F& func, size_t ndim) : func_(func) {
+    explicit GSLMonteFunctionWrapper(const F& func, size_t num_dimensions) : func_(func) {
       f = &GSLMonteFunctionWrapper::eval;
-      dim = ndim;
+      dim = num_dimensions;
       params = this;
     }
     /// Utility to build a gsl_monte_function pointer from a functional and phase space size
-    static std::unique_ptr<gsl_monte_function> build(const F& func, size_t ndim) {
-      return std::unique_ptr<gsl_monte_function>(new utils::GSLMonteFunctionWrapper<decltype(func)>(func, ndim));
+    static std::unique_ptr<gsl_monte_function> build(const F& func, size_t num_dimensions) {
+      return std::unique_ptr<gsl_monte_function>(new GSLMonteFunctionWrapper<decltype(func)>(func, num_dimensions));
     }
 
   private:
     /// Static integrable functional
-    static double eval(double* x, size_t ndim, void* params) {
-      return static_cast<GSLMonteFunctionWrapper*>(params)->func_(x, ndim, params);
+    static double eval(double* x, size_t num_dimensions, void* params) {
+      return static_cast<GSLMonteFunctionWrapper*>(params)->func_(x, num_dimensions, params);
     }
     /// Reference to the functor
     const F& func_;

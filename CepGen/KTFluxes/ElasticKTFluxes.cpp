@@ -118,7 +118,7 @@ namespace cepgen {
     double mass2() const override { return mass2_; }
 
     double fluxMX2(double x, double kt2, double mx2) const override {
-      const auto z = (unsigned short)hi_.Z;
+      const auto z = static_cast<unsigned short>(hi_.Z);
       return z * z * ElasticNucleonKTFlux::fluxMX2(x, kt2, mx2);
     }
 

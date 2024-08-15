@@ -38,7 +38,6 @@
 #include <stdio.h>
 
 #include <array>
-#include <chrono>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -60,8 +59,8 @@ namespace cepgen::utils {
   private:
     int secure_dup(int src);
     void secure_pipe(int* pipes);
-    void secure_dup2(int src, int dest);
-    void secure_close(int& fd);
+    static void secure_dup2(int src, int dest);
+    static void secure_close(int& fd);
 
     std::array<int, 2> pipes_{0, 0};
     int old_stdout_{0}, old_stderr_{0};

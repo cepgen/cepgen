@@ -17,10 +17,11 @@
  */
 
 #include "CepGen/Utils/Histogram.h"
+
 #include "CepGen/Utils/Message.h"
 
 namespace cepgen::utils {
-  void Histogram::normalise(double integ) { scale(integ / integral()); }
+  void Histogram::normalise(double integral_value) { scale(integral_value / integral()); }
 
   std::set<double> Histogram::extractBins(BinMode mode,
                                           size_t num_bins,

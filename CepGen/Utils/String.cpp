@@ -24,8 +24,8 @@
 #include <locale>
 #include <unordered_set>
 
+#include "CepGen/Core/Exception.h"
 #include "CepGen/Core/ParametersList.h"
-#include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 
 #ifndef __APPLE__
@@ -42,6 +42,11 @@ namespace cepgen::utils {
   std::regex kFloatRegex("[+-]?[0-9]*\\.?[0-9]+([eEdD][+-]?[0-9]+)?", std::regex_constants::extended);
 
   std::string yesno(bool test) { return test ? colourise("true", Colour::green) : colourise("false", Colour::red); }
+
+  template <typename T>
+  std::string boldify(T) {
+    throw CG_ERROR("utils:boldify") << "Boldify not yet implemented for this variable type.";
+  }
 
   /// String implementation of the boldification procedure
   template <>
@@ -62,8 +67,8 @@ namespace cepgen::utils {
   }
 
   Modifier operator|(const Modifier& lhs, const Modifier& rhs) {
-    std::bitset<7> mod1((int)lhs), mod2((int)rhs);
-    return (Modifier)(mod1 | mod2).to_ulong();
+    std::bitset<7> mod1(static_cast<int>(lhs)), mod2(static_cast<int>(rhs));
+    return static_cast<Modifier>((mod1 | mod2).to_ulong());
   }
 
   std::string colourise(const std::string& str, const Colour& col, const Modifier& mod) {
@@ -73,17 +78,14 @@ namespace cepgen::utils {
     auto get_mod_str = [](const Colour& col, const Modifier& mod) -> std::string {
       std::string mod_str("\033[");
       if (col != Colour::none)
-        mod_str += std::to_string((int)col);
+        mod_str += std::to_string(static_cast<int>(col));
       if (mod > Modifier::reset)
         for (size_t i = 0; i < 7; ++i)
-          if (((uint16_t)mod >> i) & 0x1)
+          if ((static_cast<uint16_t>(mod) >> i) & 0x1)
             mod_str += ";" + std::to_string(i + 1);
       return mod_str + "m";
     };
-    out = get_mod_str(col, mod);
-    out += str;
-    out += get_mod_str(Colour::reset, Modifier::reset);
-    return out;
+    return get_mod_str(col, mod) + str + get_mod_str(Colour::reset, Modifier::reset);
   }
 
   std::string parseSpecialChars(const std::string& str) {
@@ -218,7 +220,7 @@ namespace cepgen::utils {
   std::string randomString(size_t size) {
     std::stringstream out;
     for (size_t i = 0; i < size; ++i)
-      out << (char)('a' + rand() % (('z' - 'a') + 1));
+      out << static_cast<char>('a' + rand() % (('z' - 'a') + 1));
     return out.str();
   }
 
@@ -338,7 +340,7 @@ namespace cepgen::utils {
   std::string demangle(const char* name) {
 #ifdef __GNUG__
     int status = 0;  // some arbitrary value to eliminate the compiler warning
-    std::unique_ptr<char, void (*)(void*)> res{abi::__cxa_demangle(name, NULL, NULL, &status), std::free};
+    std::unique_ptr<char, void (*)(void*)> res{abi::__cxa_demangle(name, nullptr, nullptr, &status), std::free};
     return status == 0 ? res.get() : name;
 #else
     return name;
@@ -367,12 +369,12 @@ namespace cepgen::utils {
     return std::equal(end.rbegin(), end.rend(), str.rbegin());
   }
 
-  std::string describeError(int errnum) {
+  std::string describeError(int error_number) {
 #ifdef __APPLE__
     return std::to_string(errnum);
 #else
-    char* error = strerror(errnum);
-    return std::to_string(errnum) + " (" + std::string(error, strlen(error)) + ")";
+    char* error = strerror(error_number);
+    return std::to_string(error_number) + " (" + std::string(error, strlen(error)) + ")";
 #endif
   }
 

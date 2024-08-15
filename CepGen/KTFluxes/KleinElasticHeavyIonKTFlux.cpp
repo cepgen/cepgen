@@ -56,7 +56,7 @@ namespace cepgen {
       const double ela1 = pow(kt2 / q2 / (1. - x), 2);
       const double ela2 = pow(ff.GE, 2);
       //const double ela3 = kt2 / q2;
-      const auto z = (unsigned short)hi_.Z;
+      const auto z = static_cast<unsigned short>(hi_.Z);
       return prefactor_ * z * z * ela1 * ela2 / q2;
     }
 

@@ -20,8 +20,9 @@
 #include "CepGen/Integration/FunctionIntegrand.h"
 
 namespace cepgen {
-  FunctionIntegrand::FunctionIntegrand(size_t ndim, const std::function<double(const std::vector<double>&)>& func)
-      : function_(func), ndim_(ndim) {}
+  FunctionIntegrand::FunctionIntegrand(size_t num_dimensions,
+                                       const std::function<double(const std::vector<double>&)>& func)
+      : function_(func), num_dimensions_(num_dimensions) {}
 
   double FunctionIntegrand::eval(const std::vector<double>& x) {
     if (x.size() != size())

@@ -24,7 +24,6 @@
 #include <numeric>
 #include <set>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 namespace cepgen {
@@ -120,7 +119,7 @@ namespace cepgen::utils {
   std::string replaceAll(const std::string& str, const std::vector<std::pair<std::string, std::string> >& keys);
   /// Split a string according to a separation character
   std::vector<std::string> split(const std::string&, char, bool trim = false);
-  /// Merge a a printable type in a single string
+  /// Merge a printable type in a single string
   template <typename T>
   inline std::string merge(const T& val, const std::string&) {
     return toString(val);
@@ -147,6 +146,7 @@ namespace cepgen::utils {
   std::string toLower(const std::string&);  ///< Lowercase version of a string
 
   /// Get a (list of) substring(s) between two characters chains
+  /// \param[in] str String to check
   /// \param[in] beg Start delimiter of the substring(s)
   /// \param[in] end End delimiter of the substring(s)
   std::vector<std::string> between(const std::string& str, const std::string& beg, const std::string& end);
@@ -176,7 +176,7 @@ namespace cepgen::utils {
   std::string strip(const std::string&);                    ///< Strip all special characters from string
   bool startsWith(const std::string&, const std::string&);  ///< Check if a string starts with a given token
   bool endsWith(const std::string&, const std::string&);    ///< Check if a string ends with a given token
-  std::string describeError(int errnum);                    ///< Describe an error code
+  std::string describeError(int error_number);              ///< Describe an error code
 
 }  // namespace cepgen::utils
 

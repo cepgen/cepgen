@@ -30,8 +30,8 @@ namespace cepgen::utils {
   std::string fileExtension(const std::string& file) { return fs::path(file).extension(); }
 
   std::string readFile(const std::string& filename) {
-    if (auto ifile = std::ifstream(filename); ifile.good())
-      return std::string(std::istreambuf_iterator<char>(ifile), std::istreambuf_iterator<char>());
+    if (auto input_file = std::ifstream(filename); input_file.good())
+      return std::string(std::istreambuf_iterator<char>(input_file), std::istreambuf_iterator<char>());
     throw CG_FATAL("readFile") << "Failed to open the file '" << filename << "' for reading.";
   }
 

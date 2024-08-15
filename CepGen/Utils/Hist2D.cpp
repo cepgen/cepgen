@@ -29,13 +29,13 @@
 namespace cepgen::utils {
   Hist2D::Hist2D(const ParametersList& params)
       : Drawable(params.get<std::string>("name"), params.get<std::string>("title")) {
-    const auto &xbins = params.get<std::vector<double> >("xbins"), &ybins = params.get<std::vector<double> >("ybins");
-    const auto &xrange = params.get<Limits>("xrange"), &yrange = params.get<Limits>("yrange");
-    const auto &nbinsx = params.get<int>("nbinsX"), &nbinsy = params.get<int>("nbinsY");
-    if (xbins.size() > 1 && ybins.size() > 1)
-      buildFromBins(xbins, ybins);
-    else if (xrange.valid() && yrange.valid() && nbinsx > 1 && nbinsy > 1)
-      buildFromRange(nbinsx, xrange, nbinsy, yrange);
+    const auto &x_bins = params.get<std::vector<double> >("xbins"), &y_bins = params.get<std::vector<double> >("ybins");
+    const auto &x_range = params.get<Limits>("xrange"), &y_range = params.get<Limits>("yrange");
+    const auto &num_bins_x = params.get<int>("nbinsX"), &num_bins_y = params.get<int>("nbinsY");
+    if (x_bins.size() > 1 && y_bins.size() > 1)
+      buildFromBins(x_bins, y_bins);
+    else if (x_range.valid() && y_range.valid() && num_bins_x > 1 && num_bins_y > 1)
+      buildFromRange(num_bins_x, x_range, num_bins_y, y_range);
     else
       throw CG_FATAL("Hist2D") << "Failed to build a 2D histogram with user parameters: " << params << ".";
   }
@@ -43,23 +43,23 @@ namespace cepgen::utils {
   Hist2D::Hist2D(size_t num_bins_x,
                  const Limits& xrange,
                  size_t num_bins_y,
-                 const Limits& yrange,
+                 const Limits& y_range,
                  const std::string& name,
                  const std::string& title)
       : Drawable(name, title) {
     if (num_bins_x == 0 || num_bins_y == 0)
       throw CG_ERROR("Hist1D") << "Number of bins must be strictly positive!";
-    buildFromRange(num_bins_x, xrange, num_bins_y, yrange);
+    buildFromRange(num_bins_x, xrange, num_bins_y, y_range);
   }
 
-  Hist2D::Hist2D(const std::vector<double>& xbins,
-                 const std::vector<double>& ybins,
+  Hist2D::Hist2D(const std::vector<double>& x_bins,
+                 const std::vector<double>& y_bins,
                  const std::string& name,
                  const std::string& title)
       : Drawable(name, title) {
-    if (xbins.empty() || ybins.empty())
+    if (x_bins.empty() || y_bins.empty())
       throw CG_ERROR("Hist1D") << "Number of bins must be strictly positive!";
-    buildFromBins(xbins, ybins);
+    buildFromBins(x_bins, y_bins);
   }
 
   Hist2D::Hist2D(const Hist2D& oth)
@@ -69,37 +69,37 @@ namespace cepgen::utils {
         hist_w2_(gsl_histogram2d_clone(oth.hist_w2_.get())),
         out_of_range_values_(oth.out_of_range_values_) {}
 
-  void Hist2D::buildFromBins(const std::vector<double>& xbins, const std::vector<double>& ybins) {
-    if (xbins.size() < 1 || ybins.size() < 1)
+  void Hist2D::buildFromBins(const std::vector<double>& x_bins, const std::vector<double>& y_bins) {
+    if (x_bins.size() < 1 || y_bins.size() < 1)
       throw CG_ERROR("Hist2D:buildFromBins") << "Building a 2D histogram requires at least 1x1 bin.";
-    hist_.reset(gsl_histogram2d_alloc(xbins.size() - 1, ybins.size() - 1));
+    hist_.reset(gsl_histogram2d_alloc(x_bins.size() - 1, y_bins.size() - 1));
     CG_ASSERT(hist_);
-    if (auto ret = gsl_histogram2d_set_ranges(hist_.get(), xbins.data(), xbins.size(), ybins.data(), ybins.size());
+    if (auto ret = gsl_histogram2d_set_ranges(hist_.get(), x_bins.data(), x_bins.size(), y_bins.data(), y_bins.size());
         ret != GSL_SUCCESS)
       throw CG_ERROR("Hist2D:buildFromBins") << gsl_strerror(ret);
     hist_w2_ = gsl_histogram2d_ptr(gsl_histogram2d_clone(hist_.get()));
     CG_ASSERT(hist_w2_);
-    CG_DEBUG("Hist2D:buildFromBins") << "Booking a 2D correlation plot with " << s("bin", xbins.size(), true)
-                                     << " in range x=" << xbins << " and " << s("bin", ybins.size(), true)
-                                     << " in range y=" << ybins << ".";
+    CG_DEBUG("Hist2D:buildFromBins") << "Booking a 2D correlation plot with " << s("bin", x_bins.size(), true)
+                                     << " in range x=" << x_bins << " and " << s("bin", y_bins.size(), true)
+                                     << " in range y=" << y_bins << ".";
   }
 
-  void Hist2D::buildFromRange(size_t num_bins_x, const Limits& xrange, size_t num_bins_y, const Limits& yrange) {
-    if (xrange.range() <= 0. || yrange.range() <= 0.)
-      throw CG_ERROR("Hist2D:buildFromRange") << "Invalid range for binning: " << xrange << "x" << yrange << ".";
+  void Hist2D::buildFromRange(size_t num_bins_x, const Limits& xrange, size_t num_bins_y, const Limits& y_range) {
+    if (xrange.range() <= 0. || y_range.range() <= 0.)
+      throw CG_ERROR("Hist2D:buildFromRange") << "Invalid range for binning: " << xrange << "x" << y_range << ".";
     if (num_bins_x < 1 || num_bins_y < 1)
       throw CG_ERROR("Hist2D:buildFromRange") << "Building a 2D histogram requires at least 1x1 bin.";
     hist_.reset(gsl_histogram2d_alloc(num_bins_x, num_bins_y));
     CG_ASSERT(hist_);
     if (auto ret =
-            gsl_histogram2d_set_ranges_uniform(hist_.get(), xrange.min(), xrange.max(), yrange.min(), yrange.max());
+            gsl_histogram2d_set_ranges_uniform(hist_.get(), xrange.min(), xrange.max(), y_range.min(), y_range.max());
         ret != GSL_SUCCESS)
       throw CG_ERROR("Hist2D:buildFromRange") << gsl_strerror(ret);
     hist_w2_ = gsl_histogram2d_ptr(gsl_histogram2d_clone(hist_.get()));
     CG_ASSERT(hist_w2_);
     CG_DEBUG("Hist2D:buildFromRange") << "Booking a 2D correlation plot with " << s("bin", num_bins_x, true)
                                       << " in range " << xrange << " and " << s("bin", num_bins_y, true) << " in range "
-                                      << yrange << ".";
+                                      << y_range << ".";
   }
 
   void Hist2D::clear() {
@@ -121,23 +121,23 @@ namespace cepgen::utils {
       if (ret != GSL_EDOM)
         throw CG_ERROR("Hist2D:fill") << gsl_strerror(ret);
     }
-    const auto &xrng = rangeX(), &yrng = rangeY();
-    if (xrng.contains(x)) {
-      if (y < yrng.min())
+    const auto &x_range = rangeX(), &y_range = rangeY();
+    if (x_range.contains(x)) {
+      if (y < y_range.min())
         out_of_range_values_[contents_t::IN_LT] += weight;
       else
         out_of_range_values_[contents_t::IN_GT] += weight;
-    } else if (x < xrng.min()) {
-      if (yrng.contains(y))
+    } else if (x < x_range.min()) {
+      if (y_range.contains(y))
         out_of_range_values_[contents_t::LT_IN] += weight;
-      else if (y < yrng.min())
+      else if (y < y_range.min())
         out_of_range_values_[contents_t::LT_LT] += weight;
       else
         out_of_range_values_[contents_t::LT_GT] += weight;
     } else {
-      if (yrng.contains(y))
+      if (y_range.contains(y))
         out_of_range_values_[contents_t::GT_IN] += weight;
-      else if (y < yrng.min())
+      else if (y < y_range.min())
         out_of_range_values_[contents_t::GT_LT] += weight;
       else
         out_of_range_values_[contents_t::GT_GT] += weight;
@@ -271,10 +271,10 @@ namespace cepgen::utils {
 
   double Hist2D::integral(bool include_out_of_range) const {
     CG_ASSERT(hist_);
-    auto integr = gsl_histogram2d_sum(hist_.get());
+    auto integral_value = gsl_histogram2d_sum(hist_.get());
     if (include_out_of_range)
-      integr += out_of_range_values_.total();
-    return integr;
+      integral_value += out_of_range_values_.total();
+    return integral_value;
   }
 
   size_t Hist2D::contents_t::total() const { return std::accumulate(begin(), end(), 0); }

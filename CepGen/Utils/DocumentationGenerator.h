@@ -28,7 +28,7 @@ namespace cepgen::utils {
   class DocumentationGenerator : public NamedModule<DocumentationGenerator> {
   public:
     explicit DocumentationGenerator(const ParametersList&);
-    virtual ~DocumentationGenerator() = default;
+    ~DocumentationGenerator() override = default;
 
     static ParametersDescription description();
 

@@ -23,7 +23,6 @@
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_version.h>
 #if defined(GSL_MAJOR_VERSION) && (GSL_MAJOR_VERSION > 2 || (GSL_MAJOR_VERSION == 2 && GSL_MINOR_VERSION >= 1))
-#include <gsl/gsl_interp2d.h>
 #include <gsl/gsl_spline2d.h>
 #define GSL_VERSION_ABOVE_2_1 1
 #endif
@@ -50,9 +49,9 @@ namespace cepgen {
     explicit GridHandler(const GridType& grid_type);  ///< Build a grid interpolator from a grid type
     virtual ~GridHandler() = default;
 
-    values_t eval(coord_t in_coords) const;  ///< Interpolate a point to a given coordinate
+    values_t eval(const coord_t& in_coords) const;  ///< Interpolate a point to a given coordinate
 
-    void insert(coord_t coord, values_t value);                                ///< Insert a new value in the grid
+    void insert(const coord_t& coord, values_t value);                         ///< Insert a new value in the grid
     inline std::map<coord_t, values_t> values() const { return values_raw_; }  ///< List of values in the grid
 
     void initialise();                         ///< Initialise the grid and all useful interpolators/accelerators
@@ -76,10 +75,10 @@ namespace cepgen {
   private:
     void findIndices(const coord_t& coord, coord_t& min, coord_t& max) const;  ///< Lower/upper indices for a coordinate
     /// A single value in grid coordinates
-    struct gridpoint_t : values_t {
-      gridpoint_t(const values_t& arr) : values_t(arr) {}
-      gridpoint_t operator*(double c) const;
-      gridpoint_t operator+(const gridpoint_t& rhs) const;
+    struct grid_point_t : values_t {
+      grid_point_t(const values_t& arr) : values_t(arr) {}
+      grid_point_t operator*(double c) const;
+      grid_point_t operator+(const grid_point_t& rhs) const;
     };
     bool init_{false};  ///< Has the extrapolator been initialised?
   };

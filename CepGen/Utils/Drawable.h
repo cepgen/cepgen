@@ -69,12 +69,12 @@ namespace cepgen::utils {
       Limits lim_;         ///< axis limits
     };
 
-    AxisInfo& xAxis() { return xaxis_; }
-    const AxisInfo& xAxis() const { return xaxis_; }
-    AxisInfo& yAxis() { return yaxis_; }
-    const AxisInfo& yAxis() const { return yaxis_; }
-    AxisInfo& zAxis() { return zaxis_; }
-    const AxisInfo& zAxis() const { return zaxis_; }
+    AxisInfo& xAxis() { return x_axis_; }
+    const AxisInfo& xAxis() const { return x_axis_; }
+    AxisInfo& yAxis() { return y_axis_; }
+    const AxisInfo& yAxis() const { return y_axis_; }
+    AxisInfo& zAxis() { return z_axis_; }
+    const AxisInfo& zAxis() const { return z_axis_; }
 
     /// Generic bin coordinate and its human-readable label
     struct coord_t {
@@ -88,12 +88,12 @@ namespace cepgen::utils {
     typedef std::map<coord_t, Value> axis_t;
     /// Comparator of an axis by the values it holds
     struct CompareAxisByValue {
-      bool operator()(const std::pair<coord_t, Value>& lhs, const std::pair<coord_t, Value>& rhs) {
+      bool operator()(const std::pair<coord_t, Value>& lhs, const std::pair<coord_t, Value>& rhs) const {
         return lhs.second < rhs.second;
       }
     };
     /// Metadata for a two-dimensional axis definition (coordinates and bins values)
-    typedef std::map<coord_t, axis_t> dualaxis_t;
+    typedef std::map<coord_t, axis_t> dual_axis_t;
 
     inline virtual bool isHist1D() const { return false; }   ///< Is this drawable a one-dimensional histogram?
     inline virtual bool isHist2D() const { return false; }   ///< Is this drawable a two-dimensional histogram?
@@ -103,9 +103,9 @@ namespace cepgen::utils {
   protected:
     std::string name_;   ///< Computer-readable name
     std::string title_;  ///< Human-readable title
-    AxisInfo xaxis_;     ///< x-axis metadata
-    AxisInfo yaxis_;     ///< y-axis metadata
-    AxisInfo zaxis_;     ///< z-axis metadata
+    AxisInfo x_axis_;    ///< x-axis metadata
+    AxisInfo y_axis_;    ///< y-axis metadata
+    AxisInfo z_axis_;    ///< z-axis metadata
   };
 }  // namespace cepgen::utils
 

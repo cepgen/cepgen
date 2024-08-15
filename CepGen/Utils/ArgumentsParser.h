@@ -19,7 +19,6 @@
 #ifndef CepGen_Utils_ArgumentsParser_h
 #define CepGen_Utils_ArgumentsParser_h
 
-#include <map>
 #include <string>
 
 #include "CepGen/Utils/Limits.h"
@@ -48,13 +47,13 @@ namespace cepgen {
       params_.rbegin()->optional = true;
       return *this;
     }
-    ArgumentsParser& parse();                             ///< Associate command-line arguments to parameters
-    std::string operator[](std::string name) const;       ///< Read required and optional parameters
-    void dump() const;                                    ///< Dump the list of arguments into the terminal
-    void print_help() const;                              ///< Show usage
-    void print_version() const;                           ///< Show version
-    std::string help_message() const;                     ///< Usage message
-    inline bool debugging() const { return debug_req_; }  ///< Is the debugging flag set?
+    ArgumentsParser& parse();                               ///< Associate command-line arguments to parameters
+    std::string operator[](const std::string& name) const;  ///< Read required and optional parameters
+    void dump() const;                                      ///< Dump the list of arguments into the terminal
+    void print_help() const;                                ///< Show usage
+    static void print_version();                            ///< Show version
+    std::string help_message() const;                       ///< Usage message
+    inline bool debugging() const { return debug_req_; }    ///< Is the debugging flag set?
     /// Extra configuration flags in arguments?
     inline const std::vector<std::string>& extra_config() const { return extra_config_; }
 
@@ -63,23 +62,26 @@ namespace cepgen {
     class Parameter {
     public:
       /// String parameter constructor
-      Parameter(std::string, std::string = "", std::string* = nullptr, std::string = "");
+      Parameter(const std::string&, const std::string& = "", std::string* = nullptr, const std::string& = "");
       /// Unsigned integer parameter constructor
-      Parameter(std::string name, std::string, unsigned int* = nullptr, unsigned int = 0);
+      Parameter(const std::string&, const std::string&, unsigned int* = nullptr, const unsigned int& = 0);
       /// Integer parameter constructor
-      Parameter(std::string, std::string, int* = nullptr, int = 0);
+      Parameter(const std::string&, const std::string&, int* = nullptr, const int& = 0);
       /// Boolean parameter constructor
-      Parameter(std::string, std::string, bool* = nullptr, bool = false);
+      Parameter(const std::string&, const std::string&, bool* = nullptr, const bool& = false);
       /// Double-precision floating point parameter constructor
-      Parameter(std::string, std::string, double* = nullptr, double = -999.999);
+      Parameter(const std::string&, const std::string&, double* = nullptr, const double& = -999.999);
       /// Vector of strings parameter constructor
-      Parameter(std::string, std::string, std::vector<std::string>* = nullptr, std::vector<std::string> = {});
+      Parameter(const std::string&,
+                const std::string&,
+                std::vector<std::string>* = nullptr,
+                const std::vector<std::string>& = {});
       /// Vector of integer parameter constructor
-      Parameter(std::string, std::string, std::vector<int>* = nullptr, std::vector<int> = {});
+      Parameter(const std::string&, const std::string&, std::vector<int>* = nullptr, const std::vector<int>& = {});
       /// Vector of floating point parameter constructor
-      Parameter(std::string, std::string, std::vector<double>* = nullptr, std::vector<double> = {});
+      Parameter(const std::string&, const std::string&, std::vector<double>* = nullptr, const std::vector<double>& = {});
       /// Vector of floating point parameter constructor
-      Parameter(std::string, std::string, Limits* = nullptr, Limits = Limits{});
+      Parameter(const std::string&, const std::string&, Limits* = nullptr, const Limits& = Limits{});
 
       Parameter& parse();  ///< Cast the user input into a proper container value
       inline bool boolean() const { return bool_variable_ != nullptr; }  ///< Is the parameter a simple boolean?

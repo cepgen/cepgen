@@ -50,9 +50,9 @@ namespace cepgen::utils {
     for (const auto& mon : monitors_) {
       const auto& tm = mon.second;
       const double total = tm.empty() ? -1. : std::accumulate(tm.begin(), tm.end(), 0.);
-      const double mean = total / double(tm.size());
-      const double rms = std::sqrt(
-          std::fabs(std::inner_product(tm.begin(), tm.end(), tm.begin(), 0.) / double(tm.size()) - mean * mean));
+      const double mean = total / static_cast<double>(tm.size());
+      const double rms = std::sqrt(std::fabs(
+          std::inner_product(tm.begin(), tm.end(), tm.begin(), 0.) / static_cast<double>(tm.size()) - mean * mean));
       mons.emplace_back(Monitor{mon.first, tm.size(), total, mean, rms});
       total_time += total;
     }
@@ -60,7 +60,7 @@ namespace cepgen::utils {
     std::sort(mons.rbegin(), mons.rend());  // sort by total clock time (desc.)
 
     // display the various probes
-    static const double s_to_ms = 1.e3;
+    static constexpr double s_to_ms = 1.e3;
     std::ostringstream oss;
     oss << utils::format("%2s | %-100s | %12s\t%10s\t%5s", "#", "Caller", "Total (ms)", "Average (ms)", "RMS (ms)");
     for (const auto& mon : mons)

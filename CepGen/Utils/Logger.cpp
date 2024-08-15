@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>  // for cout
+#include <iostream>  // for std::cout
 
 #include "CepGen/Utils/Logger.h"
 #include "CepGen/Utils/Message.h"

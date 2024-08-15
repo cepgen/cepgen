@@ -16,8 +16,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cmath>
-
 #include "CepGen/Physics/Utils.h"
 #include "CepGen/Utils/Limits.h"
 #include "CepGen/Utils/Math.h"

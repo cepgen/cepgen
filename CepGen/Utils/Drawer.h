@@ -52,7 +52,7 @@ namespace cepgen::utils {
         bar = 1 << 8
       };
       Mode() : value_(none) {}
-      Mode(int val) : value_((value_t)val) {}
+      Mode(int val) : value_(static_cast<value_t>(val)) {}
       Mode(const value_t& val) : value_(val) {}
 
       friend std::ostream& operator<<(std::ostream&, const Mode&);

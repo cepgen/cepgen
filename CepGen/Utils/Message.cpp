@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2013-2022  Laurent Forthomme
+ *  Copyright (C) 2013-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -105,7 +105,7 @@ namespace cepgen {
       case LoggedMessage::MessageType::verbatim:
         return os << utils::colourise("Verbatim", utils::Colour::none, utils::Modifier::bold);
       case LoggedMessage::MessageType::undefined:
-        return os << utils::colourise("Undef'd exception", utils::Colour::none, utils::Modifier::reverse);
+        return os << utils::colourise("Undefined exception", utils::Colour::none, utils::Modifier::reverse);
     }
     return os;
   }

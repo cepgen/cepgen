@@ -35,7 +35,7 @@ namespace cepgen::utils {
 
   ProgressBar::~ProgressBar() {
     const std::string message = format("[Finished in %g s]", tmr_->elapsed());
-    fprintf(stderr, "\r%s%.*s%*s\n", message.data(), 0, "", (int)bar_length_, "");
+    fprintf(stderr, "\r%s%.*s%*s\n", message.data(), 0, "", static_cast<int>(bar_length_), "");
     fflush(stderr);
   }
 
@@ -44,9 +44,9 @@ namespace cepgen::utils {
       return;
     const size_t percent = iter * 100. / total_;
     if (percent % frequency_ == 0 || iter == total_) {
-      int lpad = int(percent / 100. * bar_length_);
-      int rpad = bar_length_ - lpad;
-      fprintf(stderr, "\r%3zu%% [%.*s%*s]", percent, lpad, bar_pattern_.c_str(), rpad, "");
+      const auto left_padding = static_cast<int>(percent / 100. * bar_length_),
+                 right_padding = static_cast<int>(bar_length_) - left_padding;
+      fprintf(stderr, "\r%3zu%% [%.*s%*s]", percent, left_padding, bar_pattern_.c_str(), right_padding, "");
       fflush(stderr);
     }
   }

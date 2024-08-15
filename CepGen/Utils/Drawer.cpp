@@ -17,8 +17,6 @@
  */
 
 #include <bitset>
-#include <cstdint>
-#include <iostream>
 
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Message.h"
@@ -26,11 +24,13 @@
 namespace cepgen::utils {
   Drawer::Drawer(const ParametersList& params) : NamedModule(params) {}
 
-  bool operator&(const Drawer::Mode& lhs, const Drawer::Mode::value_t& rhs) { return (int)lhs.value_ & (int)rhs; }
+  bool operator&(const Drawer::Mode& lhs, const Drawer::Mode::value_t& rhs) {
+    return static_cast<int>(lhs.value_) & static_cast<int>(rhs);
+  }
 
   Drawer::Mode operator|(const Drawer::Mode& lhs, const Drawer::Mode::value_t& rhs) {
-    std::bitset<16> mod1((int)lhs.value()), mod2((int)rhs);
-    return Drawer::Mode((Drawer::Mode::value_t)(mod1 | mod2).to_ulong());
+    std::bitset<16> mod1(static_cast<int>(lhs.value())), mod2(static_cast<int>(rhs));
+    return Drawer::Mode(static_cast<Drawer::Mode::value_t>((mod1 | mod2).to_ulong()));
   }
 
   std::ostream& operator<<(std::ostream& os, const Drawer::Mode& mode) {
@@ -59,7 +59,7 @@ namespace cepgen::utils {
 
 namespace cepgen {
   utils::Drawer::Mode operator|(const utils::Drawer::Mode::value_t& lhs, const utils::Drawer::Mode::value_t& rhs) {
-    std::bitset<16> mod1((int)lhs), mod2((int)rhs);
+    std::bitset<16> mod1(static_cast<int>(lhs)), mod2(static_cast<int>(rhs));
     return utils::Drawer::Mode((mod1 | mod2).to_ulong());
   }
 }  // namespace cepgen

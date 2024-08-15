@@ -51,7 +51,7 @@ namespace cepgen {
     /// Apply a correction cycle to the grid
     bool correctionCycle(bool&);
     /// Prepare the object for event generation
-    void computeGenerationParameters();
+    void computeGenerationParameters() const;
 
     /// Set of parameters for the integration/event generation grid
     std::unique_ptr<GridParameters> grid_;
@@ -93,13 +93,13 @@ namespace cepgen {
 
     //--- normal generation cycle
 
-    double weight = 0.;
+    double weight;
     while (true) {
-      double y = -1.;
+      double y;
       // select a function value and reject if fmax is too small
       do {
         // ...
-        ps_bin_ = integrator_->uniform({0., (double)grid_->size()});
+        ps_bin_ = integrator_->uniform({0., static_cast<double>(grid_->size())});
         y = integrator_->uniform({0., grid_->globalMax()});
         grid_->increment(ps_bin_);
       } while (y > grid_->maxValue(ps_bin_));
@@ -156,7 +156,7 @@ namespace cepgen {
   // initial preparation run before the generation of unweighted events
   //-----------------------------------------------------------------------------------------------
 
-  void GridOptimisedGeneratorWorker::computeGenerationParameters() {
+  void GridOptimisedGeneratorWorker::computeGenerationParameters() const {
     if (!params_)
       throw CG_FATAL("GridOptimisedGeneratorWorker:setGen") << "No steering parameters specified!";
     if (!integrator_)

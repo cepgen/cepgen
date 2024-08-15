@@ -36,7 +36,7 @@ namespace cepgen {
     Limits operator-() const;                    ///< Invert this limit
     Limits& operator=(const Limits&) = default;  ///< Assignment operator
     /// Equality operator
-    inline bool operator==(const Limits& oth) const { return *this == (std::pair<double, double>)oth; }
+    inline bool operator==(const Limits& oth) const { return *this == static_cast<std::pair<double, double> >(oth); }
     inline bool operator!=(const Limits& oth) const { return !operator==(oth); }  ///< Inequality operator
     Limits& operator+=(double);                                                   ///< Add a constant to this limit
     Limits& operator-=(double);                                                   ///< Subtract a constant to this limit

@@ -130,7 +130,7 @@ namespace cepgen::card {
       //--- build the ticker if required
       if (timer_)
         runParameters()->setTimeKeeper(new utils::TimeKeeper);
-      utils::Logger::get().setLevel((utils::Logger::Level)log_level_);
+      utils::Logger::get().setLevel(static_cast<utils::Logger::Level>(log_level_));
       utils::Logger::get().setExtended(ext_log_);
 
       {  //--- parse the structure functions code
@@ -257,7 +257,7 @@ namespace cepgen::card {
     }
 
     ParametersList proc_params_, gen_params_, int_params_;
-    int timer_{0}, iend_{1}, log_level_{(int)utils::Logger::get().level()}, ext_log_{0};
+    int timer_{0}, iend_{1}, log_level_{static_cast<int>(utils::Logger::get().level())}, ext_log_{0};
     std::string emod_{"2"}, pmod_{"2"};
     int sr_type_{1}, lepton_id_{0};
     std::string proc_name_, evt_mod_name_, out_mod_name_;
@@ -412,8 +412,8 @@ namespace cepgen::card {
     //kmr_grid_path_ = kmr::GluonGrid::get().path();
     //mstw_grid_path_ =
     //pdg_input_path_ =
-    iend_ = (int)runParameters()->generation().enabled();
-    log_level_ = (int)utils::Logger::get().level();
+    iend_ = static_cast<int>(runParameters()->generation().enabled());
+    log_level_ = static_cast<int>(utils::Logger::get().level());
     ext_log_ = utils::Logger::get().extended();
     proc_name_ = runParameters()->processName();
     proc_params_ += runParameters()->process().parameters();

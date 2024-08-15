@@ -20,6 +20,7 @@
 #define CepGen_Utils_ProgressBar_h
 
 #include <string>
+#include <memory>
 
 namespace cepgen::utils {
   class Timer;

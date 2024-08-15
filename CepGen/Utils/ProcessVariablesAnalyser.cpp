@@ -46,7 +46,7 @@ namespace cepgen::utils {
   void ProcessVariablesAnalyser::analyse() {
     auto drawer = DrawerFactory::get().build(steer<ParametersList>("drawer"));
     for (const auto& var : hists_)
-      drawer->draw(*var.second);
+      (void)drawer->draw(*var.second);
   }
 
   ParametersDescription ProcessVariablesAnalyser::description() {

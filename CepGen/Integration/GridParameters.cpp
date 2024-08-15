@@ -25,10 +25,10 @@
 #include "CepGen/Utils/String.h"
 
 namespace cepgen {
-  GridParameters::GridParameters(size_t mbin, size_t ndim) : mbin_(mbin), inv_mbin_(1. / mbin_), ndim_(ndim) {
+  GridParameters::GridParameters(size_t mbin, size_t ndim) : mbin_(mbin), inv_mbin_(1. / mbin_), num_dimensions_(ndim) {
     //--- build and populate the grid
     coord_t coord(ndim, 0);
-    for (size_t i = 0; i < (size_t)std::pow(mbin_, ndim_); ++i) {
+    for (size_t i = 0; i < static_cast<size_t>(std::pow(mbin_, num_dimensions_)); ++i) {
       generateCoordinates(coord, i);
       coords_.emplace_back(coord);
       num_points_.emplace_back(0ul);
@@ -61,7 +61,7 @@ namespace cepgen {
 
   void GridParameters::generateCoordinates(coord_t& coord, size_t i) const {
     size_t jj = i;
-    for (size_t j = 0; j < ndim_; ++j) {
+    for (size_t j = 0; j < num_dimensions_; ++j) {
       size_t tmp = jj * inv_mbin_;
       coord[j] = jj - tmp * mbin_;
       jj = tmp;

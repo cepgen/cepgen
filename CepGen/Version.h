@@ -24,12 +24,9 @@
 namespace cepgen {
   /// Collection of CepGen version information handlers
   struct version {
-    /// CepGen version
-    static const std::string tag;
-    /// CepGen detailed version
-    static const std::string extended;
-    /// CepGen banner
-    static const std::string banner;
+    static const std::string tag;       ///< CepGen version
+    static const std::string extended;  ///< CepGen detailed version
+    static const std::string banner;    ///< CepGen banner
   };
 }  // namespace cepgen
 

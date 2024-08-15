@@ -41,22 +41,22 @@ namespace cepgen {
 
       //--- launch integration
       std::unique_ptr<gsl_monte_plain_state, decltype(&gsl_monte_plain_free)> pln_state(
-          gsl_monte_plain_alloc(function_->dim), gsl_monte_plain_free);
-      double result, abserr;
-      if (int res = gsl_monte_plain_integrate(function_.get(),
-                                              &xlow_[0],
-                                              &xhigh_[0],
-                                              function_->dim,
+          gsl_monte_plain_alloc(gsl_function_->dim), gsl_monte_plain_free);
+      double result, absolute_error;
+      if (int res = gsl_monte_plain_integrate(gsl_function_.get(),
+                                              &x_low_[0],
+                                              &x_high_[0],
+                                              gsl_function_->dim,
                                               ncvg_,
                                               rnd_gen_->engine<gsl_rng>(),
                                               pln_state.get(),
                                               &result,
-                                              &abserr);
+                                              &absolute_error);
           res != GSL_SUCCESS)
         throw CG_FATAL("Integrator:integrate") << "Error while performing the integration!\n\t"
                                                << "GSL error: " << gsl_strerror(res) << ".";
 
-      return Value{result, abserr};
+      return Value{result, absolute_error};
     }
 
   private:

@@ -44,9 +44,9 @@ namespace cepgen::utils {
 
     enum BinMode { low = 0, high, both };
 
-    virtual void clear() = 0;           ///< Reset the histogram
-    virtual void scale(double) = 0;     ///< Rescale all histogram bins by a constant factor
-    void normalise(double integ = 1.);  ///< Normalise the histogram to a given constant
+    virtual void clear() = 0;                    ///< Reset the histogram
+    virtual void scale(double) = 0;              ///< Rescale all histogram bins by a constant factor
+    void normalise(double integral_value = 1.);  ///< Normalise the histogram to a given constant
     virtual double integral(bool include_out_of_range = false) const = 0;  ///< Compute the histogram integral
 
     virtual double minimum() const = 0;  ///< Retrieve the maximum bin value
@@ -65,7 +65,7 @@ namespace cepgen::utils {
   /// 1D histogram container
   class Hist1D : public Histogram, public Drawable {
   public:
-    explicit Hist1D(const ParametersList&);  ///< Build a histogram from user-steeed parameters
+    explicit Hist1D(const ParametersList&);  ///< Build a histogram from user-steered parameters
     /// Build a histogram from uniform-width bins
     explicit Hist1D(size_t num_bins_x, const Limits&, const std::string& name = "", const std::string& title = "");
     /// Build a histogram from variable-width bins
@@ -92,7 +92,7 @@ namespace cepgen::utils {
     Limits range() const;                     ///< Axis range
     Limits binRange(size_t bin) const;        ///< Range for a single bin
     std::vector<double> bins(BinMode) const;  ///< List of bins limits (nbins+1 values if min-max, nbins otherwise)
-    size_t bin(double x) const;               ///< Retrieve the bin index for a x value
+    size_t bin(double x) const;               ///< Retrieve the bin index for an x value
 
     double mean() const;  ///< Compute the mean histogram value over full range
     double rms() const;   ///< Compute the root-mean-square value over full range
@@ -109,13 +109,13 @@ namespace cepgen::utils {
     void buildFromRange(size_t, const Limits&);
 
     struct gsl_histogram_deleter {
-      void operator()(gsl_histogram* h) { gsl_histogram_free(h); }
+      void operator()(gsl_histogram* h) const { gsl_histogram_free(h); }
     };
     typedef std::unique_ptr<gsl_histogram, gsl_histogram_deleter> gsl_histogram_ptr;
     gsl_histogram_ptr hist_, hist_w2_;
     size_t underflow_{0ull}, overflow_{0ull};
     struct gsl_histogram_pdf_deleter {
-      void operator()(gsl_histogram_pdf* h) { gsl_histogram_pdf_free(h); }
+      void operator()(gsl_histogram_pdf* h) const { gsl_histogram_pdf_free(h); }
     };
     typedef std::unique_ptr<gsl_histogram_pdf, gsl_histogram_pdf_deleter> gsl_histogram_pdf_ptr;
     mutable gsl_histogram_pdf_ptr pdf_;
@@ -124,17 +124,17 @@ namespace cepgen::utils {
   /// 2D histogram container
   class Hist2D : public Histogram, public Drawable {
   public:
-    explicit Hist2D(const ParametersList&);  ///< Build a histogram from user-steeed parameters
+    explicit Hist2D(const ParametersList&);  ///< Build a histogram from user-steered parameters
     /// Build a histogram from uniform-width bins
     explicit Hist2D(size_t num_bins_x,
-                    const Limits& xlim,
+                    const Limits& x_limits,
                     size_t num_bins_y,
-                    const Limits& ylim,
+                    const Limits& y_limits,
                     const std::string& name = "",
                     const std::string& title = "");
     /// Build a histogram from variable-width bins
-    explicit Hist2D(const std::vector<double>& xbins,
-                    const std::vector<double>& ybins,
+    explicit Hist2D(const std::vector<double>& x_bins,
+                    const std::vector<double>& y_bins,
                     const std::string& name = "",
                     const std::string& title = "");
     Hist2D(const Hist2D&);  ///< Copy constructor
@@ -195,13 +195,13 @@ namespace cepgen::utils {
     void buildFromRange(size_t, const Limits&, size_t, const Limits&);
 
     struct gsl_histogram2d_deleter {
-      void operator()(gsl_histogram2d* h) { gsl_histogram2d_free(h); }
+      void operator()(gsl_histogram2d* h) const { gsl_histogram2d_free(h); }
     };
     typedef std::unique_ptr<gsl_histogram2d, gsl_histogram2d_deleter> gsl_histogram2d_ptr;
     gsl_histogram2d_ptr hist_, hist_w2_;
     contents_t out_of_range_values_;
     struct gsl_histogram2d_pdf_deleter {
-      void operator()(gsl_histogram2d_pdf* h) { gsl_histogram2d_pdf_free(h); }
+      void operator()(gsl_histogram2d_pdf* h) const { gsl_histogram2d_pdf_free(h); }
     };
     typedef std::unique_ptr<gsl_histogram2d_pdf, gsl_histogram2d_pdf_deleter> gsl_histogram2d_pdf_ptr;
     mutable gsl_histogram2d_pdf_ptr pdf_;

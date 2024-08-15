@@ -51,7 +51,7 @@ namespace cepgen::utils {
       desc.add<int>("nodes", 100).setDescription("number of quadrature nodes for the fixed type integration");
       desc.add<double>("alpha", 0.).setDescription("alpha parameter for the fixed type integration");
       desc.add<double>("beta", 0.).setDescription("alpha parameter for the fixed type integration");
-      desc.add<int>("limit", 1000).setDescription("maximum number of subintervals to build");
+      desc.add<int>("limit", 1000).setDescription("maximum number of sub-intervals to build");
       desc.add<double>("epsabs", 0.).setDescription("desired absolute error limit");
       desc.add<double>("epsrel", 0.1).setDescription("desired relative error limit");
       return desc;
@@ -88,8 +88,7 @@ namespace cepgen::utils {
   double AnalyticalIntegratorGSL::eval(const gsl_function* wrp, const Limits& lim) const {
     double result{0.};
 #if defined(GSL_MAJOR_VERSION) && (GSL_MAJOR_VERSION > 2 || (GSL_MAJOR_VERSION == 2 && GSL_MINOR_VERSION >= 1))
-    const double xmin = (lim.hasMin() ? lim.min() : range_.min());
-    const double xmax = (lim.hasMax() ? lim.max() : range_.max());
+    const auto x_min = (lim.hasMin() ? lim.min() : range_.min()), x_max = (lim.hasMax() ? lim.max() : range_.max());
     int res = GSL_SUCCESS;
     if (mode_ == Mode::Fixed) {
       const gsl_integration_fixed_type* type{nullptr};
@@ -122,27 +121,28 @@ namespace cepgen::utils {
           type = gsl_integration_fixed_chebyshev2;
           break;
         default:
-          throw CG_FATAL("AnalyticalIntegratorGSL") << "Invalid fixed quadrature type: " << (int)fixed_type_ << ".";
+          throw CG_FATAL("AnalyticalIntegratorGSL")
+              << "Invalid fixed quadrature type: " << static_cast<int>(fixed_type_) << ".";
       }
       std::unique_ptr<gsl_integration_fixed_workspace, void (*)(gsl_integration_fixed_workspace*)> workspace(
-          gsl_integration_fixed_alloc(type, nodes_, xmin, xmax, alpha_, beta_), gsl_integration_fixed_free);
+          gsl_integration_fixed_alloc(type, nodes_, x_min, x_max, alpha_, beta_), gsl_integration_fixed_free);
       res = gsl_integration_fixed(wrp, &result, workspace.get());
     } else if (mode_ == Mode::QNG) {
       size_t neval;
       double error;
-      res = gsl_integration_qng(wrp, xmin, xmax, epsabs_, epsrel_, &result, &error, &neval);
+      res = gsl_integration_qng(wrp, x_min, x_max, epsabs_, epsrel_, &result, &error, &neval);
     } else {
       double error;
       std::unique_ptr<gsl_integration_workspace, void (*)(gsl_integration_workspace*)> workspace(
           gsl_integration_workspace_alloc(limit_), gsl_integration_workspace_free);
       if (mode_ == Mode::QAG) {
         int key = GSL_INTEG_GAUSS41;
-        res = gsl_integration_qag(wrp, xmin, xmax, epsabs_, epsrel_, limit_, key, workspace.get(), &result, &error);
+        res = gsl_integration_qag(wrp, x_min, x_max, epsabs_, epsrel_, limit_, key, workspace.get(), &result, &error);
       } else if (mode_ == Mode::QAGS)
-        res = gsl_integration_qags(wrp, xmin, xmax, epsabs_, epsrel_, limit_, workspace.get(), &result, &error);
+        res = gsl_integration_qags(wrp, x_min, x_max, epsabs_, epsrel_, limit_, workspace.get(), &result, &error);
       else if (mode_ == Mode::QAWC)
         res = gsl_integration_qawc(
-            const_cast<gsl_function*>(wrp), xmin, xmax, epsabs_, epsrel_, 0., limit_, workspace.get(), &result, &error);
+            const_cast<gsl_function*>(wrp), x_min, x_max, epsabs_, epsrel_, 0., limit_, workspace.get(), &result, &error);
     }
     if (res != GSL_SUCCESS)
       CG_WARNING("AnalyticalIntegratorGSL")

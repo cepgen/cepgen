@@ -38,14 +38,14 @@ namespace cepgen {
     else if (limits_.size() != ps_size) {
       CG_DEBUG("Integrator:checkLimits") << "Incompatible phase space size: prepared=" << limits_.size()
                                          << ", integrand=" << ps_size << ".";
-      auto lims = limits_;
-      const auto booked_size = lims.size();
+      auto limits = limits_;
+      const auto booked_size = limits.size();
       if (booked_size < ps_size)
         for (size_t i = 0; i < ps_size - booked_size; ++i)
-          lims.emplace_back(0., 1.);
+          limits.emplace_back(0., 1.);
       else
-        lims.resize(ps_size);
-      setLimits(lims);
+        limits.resize(ps_size);
+      setLimits(limits);
     }
   }
 
@@ -62,10 +62,10 @@ namespace cepgen {
   Value Integrator::integrate(const std::function<double(const std::vector<double>&)>& func,
                               const ParametersList& params,
                               const std::vector<Limits>& limits) {
-    auto integr = IntegratorFactory::get().build(params);
-    integr->setLimits(limits);
+    auto integrator = IntegratorFactory::get().build(params);
+    integrator->setLimits(limits);
     auto integrand = FunctionIntegrand(limits.size(), func);
-    return integr->integrate(integrand);
+    return integrator->integrate(integrand);
   }
 
   ParametersDescription Integrator::description() {

@@ -69,7 +69,7 @@ namespace cepgen::utils {
     return coords;
   }
 
-  const Value Graph1D::valueAt(double val) const {
+  const Value& Graph1D::valueAt(double val) const {
     auto it = std::find_if(values_.begin(), values_.end(), [&val](const auto& xv) { return xv.first.value == val; });
     if (it == values_.end())
       throw CG_ERROR("Graph1D:valueAt") << "Failed to retrieve a point a the coordinate x=" << val << ".";
@@ -91,33 +91,33 @@ namespace cepgen::utils {
   void Graph2D::dumpPoints(std::ostream& os) const {
     os << "Points registered in the 2D graph:";
     size_t np = 0ul;
-    for (const auto& xaxis : values_)
-      for (const auto& yaxis : xaxis.second)
-        os << utils::format("\n%6zu: (%5g, %5g) = %5g", np++, xaxis.first.value, yaxis.first.value, yaxis.second);
+    for (const auto& x_axis : values_)
+      for (const auto& yaxis : x_axis.second)
+        os << utils::format("\n%6zu: (%5g, %5g) = %5g", np++, x_axis.first.value, yaxis.first.value, yaxis.second);
   }
 
   std::set<double> Graph2D::xCoords() const {
     std::set<double> coords;
-    for (const auto& xval : values_)
-      coords.insert(xval.first.value);
+    for (const auto& x_value : values_)
+      coords.insert(x_value.first.value);
     return coords;
   }
 
   std::set<double> Graph2D::yCoords() const {
     std::set<double> coords;
-    for (const auto& xval : values_)
-      for (const auto& yval : xval.second)
-        coords.insert(yval.first.value);
+    for (const auto& x_value : values_)
+      for (const auto& y_value : x_value.second)
+        coords.insert(y_value.first.value);
     return coords;
   }
 
-  const Value Graph2D::valueAt(double xval, double yval) const {
+  const Value& Graph2D::valueAt(double x_value, double y_value) const {
     for (const auto& xv : values_)
-      if (xv.first.value == xval)
+      if (xv.first.value == x_value)
         for (const auto& yv : xv.second)
-          if (yv.first.value == yval)
+          if (yv.first.value == y_value)
             return yv.second;
-    throw CG_ERROR("Graph2D:valueAt") << "Failed to retrieve a point a the coordinate (x=" << xval << ", y=" << yval
-                                      << ").";
+    throw CG_ERROR("Graph2D:valueAt") << "Failed to retrieve a point a the coordinate (x=" << x_value
+                                      << ", y=" << y_value << ").";
   }
 }  // namespace cepgen::utils

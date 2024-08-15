@@ -29,25 +29,27 @@ namespace cepgen {
 
   void GSLIntegrator::setIntegrand(Integrand& integrand) {
     //--- specify the integrand through the GSL wrapper
-    funct_ = [&](double* x, size_t ndim, void*) -> double { return integrand.eval(std::vector<double>(x, x + ndim)); };
-    function_ = utils::GSLMonteFunctionWrapper<decltype(funct_)>::build(funct_, integrand.size());
-    if (!function_)
+    function_ = [&](double* x, size_t num_dimensions, void*) -> double {
+      return integrand.eval(std::vector<double>(x, x + num_dimensions));
+    };
+    gsl_function_ = utils::GSLMonteFunctionWrapper<decltype(function_)>::build(function_, integrand.size());
+    if (!gsl_function_)
       throw CG_FATAL("GSLIntegrator:setIntegrand") << "Integrand was not properly set.";
-    if (function_->dim <= 0)
-      throw CG_FATAL("GSLIntegrator:setIntegrand") << "Invalid phase space dimension: " << function_->dim << ".";
+    if (gsl_function_->dim <= 0)
+      throw CG_FATAL("GSLIntegrator:setIntegrand") << "Invalid phase space dimension: " << gsl_function_->dim << ".";
 
-    CG_DEBUG("GSLIntegrator:setIntegrand") << "Number of integration dimensions: " << function_->dim << ".";
+    CG_DEBUG("GSLIntegrator:setIntegrand") << "Number of integration dimensions: " << gsl_function_->dim << ".";
 
     checkLimits(integrand);  // check the integration bounds
   }
 
-  void GSLIntegrator::setLimits(const std::vector<Limits>& lims) {
-    Integrator::setLimits(lims);
-    xlow_.clear();
-    xhigh_.clear();
+  void GSLIntegrator::setLimits(const std::vector<Limits>& limits) {
+    Integrator::setLimits(limits);
+    x_low_.clear();
+    x_high_.clear();
     for (const auto& lim : limits_) {
-      xlow_.emplace_back(lim.min());
-      xhigh_.emplace_back(lim.max());
+      x_low_.emplace_back(lim.min());
+      x_high_.emplace_back(lim.max());
     }
   }
 
