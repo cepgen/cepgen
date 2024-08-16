@@ -19,14 +19,51 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
+#include "CepGen/Modules/PartonsPhaseSpaceGeneratorFactory.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Process/FactorisedProcess.h"
-#include "CepGen/Process/PartonsKTPhaseSpaceGenerator.h"
+#include "CepGen/Process/PartonsPhaseSpaceGenerator.h"
 
 namespace cepgen {
-  PartonsKTPhaseSpaceGenerator::PartonsKTPhaseSpaceGenerator(const ParametersList& params)
-      : PartonsPhaseSpaceGenerator(params), log_parton_virtuality_(steer<bool>("logPartonVirtuality")) {}
+  /// \f$k_{\rm T}\f$-factorisation phase space generator
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date Apr 2016
+  class PartonsKTPhaseSpaceGenerator final : public PartonsPhaseSpaceGenerator {
+  public:
+    explicit PartonsKTPhaseSpaceGenerator(const ParametersList& params)
+        : PartonsPhaseSpaceGenerator(params), log_parton_virtuality_(steer<bool>("logPartonVirtuality")) {}
+
+    static ParametersDescription description() {
+      auto desc = PartonsPhaseSpaceGenerator::description();
+      desc.setDescription("KT-dependent phase space mapper");
+      desc.add<bool>("logPartonVirtuality", true);
+      return desc;
+    }
+
+    bool ktFactorised() const override { return true; }
+    bool generatePartonKinematics() override {
+      // set the fully transverse kinematics (eta = 0) of initial partons
+      process().q1() = Momentum::fromPtEtaPhiE(m_qt1_, 0., m_phi_qt1_);
+      process().q2() = Momentum::fromPtEtaPhiE(m_qt2_, 0., m_phi_qt2_);
+      return true;
+    }
+    double fluxes() const override {
+      // factors 1/pi due to integration over d^2(kt1) d^2(kt2) instead of d(kt1^2) d(kt2^2)
+      return (positiveFlux<KTFlux>().fluxMX2(process().x1(), m_qt1_ * m_qt1_, process().mX2()) * M_1_PI * m_qt1_) *
+             (negativeFlux<KTFlux>().fluxMX2(process().x2(), m_qt2_ * m_qt2_, process().mY2()) * M_1_PI * m_qt2_);
+    }
+
+  private:
+    void initialise() override;
+
+    const bool log_parton_virtuality_;
+    // mapped variables
+    double m_qt1_{0.};      ///< Virtuality of the first intermediate parton (photon, pomeron, ...)
+    double m_phi_qt1_{0.};  ///< Azimuthal rotation of the first intermediate parton's transverse virtuality
+    double m_qt2_{0.};      ///< Virtuality of the second intermediate parton (photon, pomeron, ...)
+    double m_phi_qt2_{0.};  ///< Azimuthal rotation of the second intermediate parton's transverse virtuality
+  };
 
   void PartonsKTPhaseSpaceGenerator::initialise() {
     const auto& kin = process().kinematics();
@@ -81,24 +118,6 @@ namespace cepgen {
         .defineVariable(
             m_phi_qt2_, proc::Process::Mapping::linear, lim_phi, "phi_qt2", "Negative-z parton azimuthal angle");
   }
-
-  bool PartonsKTPhaseSpaceGenerator::generatePartonKinematics() {
-    // set the fully transverse kinematics (eta = 0) of initial partons
-    process().q1() = Momentum::fromPtEtaPhiE(m_qt1_, 0., m_phi_qt1_);
-    process().q2() = Momentum::fromPtEtaPhiE(m_qt2_, 0., m_phi_qt2_);
-    return true;
-  }
-
-  double PartonsKTPhaseSpaceGenerator::fluxes() const {
-    // factors 1/pi due to integration over d^2(kt1) d^2(kt2) instead of d(kt1^2) d(kt2^2)
-    return (positiveFlux<KTFlux>().fluxMX2(process().x1(), m_qt1_ * m_qt1_, process().mX2()) * M_1_PI * m_qt1_) *
-           (negativeFlux<KTFlux>().fluxMX2(process().x2(), m_qt2_ * m_qt2_, process().mY2()) * M_1_PI * m_qt2_);
-  }
-
-  ParametersDescription PartonsKTPhaseSpaceGenerator::description() {
-    auto desc = PartonsPhaseSpaceGenerator::description();
-    desc.setDescription("KT-dependent phase space mapper");
-    desc.add<bool>("logPartonVirtuality", true);
-    return desc;
-  }
 }  // namespace cepgen
+
+REGISTER_PARTONS_PHASE_SPACE_GENERATOR("kt", PartonsKTPhaseSpaceGenerator);

@@ -31,6 +31,7 @@
 #include "CepGen/Integration/Integrator.h"
 #include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Physics/Coupling.h"
+#include "CepGen/Process/PartonsPhaseSpaceGenerator.h"
 #include "CepGen/Process/PhaseSpaceGenerator.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
@@ -56,6 +57,7 @@ namespace cepgen {
   template class ModuleFactory<Integrator>;
   template class ModuleFactory<AnalyticIntegrator>;
   template class ModuleFactory<KTFlux>;
+  template class ModuleFactory<PartonsPhaseSpaceGenerator>;
   template class ModuleFactory<PhaseSpaceGenerator>;
   template class ModuleFactory<proc::Process>;
   template class ModuleFactory<sigrat::Parameterisation>;

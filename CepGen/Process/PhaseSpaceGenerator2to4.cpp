@@ -20,36 +20,35 @@
 
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Event/Event.h"
+#include "CepGen/Modules/PartonsPhaseSpaceGeneratorFactory.h"
 #include "CepGen/Modules/PhaseSpaceGeneratorFactory.h"
 #include "CepGen/Physics/Cuts.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/FactorisedProcess.h"
-#include "CepGen/Process/PartonsCollinearPhaseSpaceGenerator.h"
-#include "CepGen/Process/PartonsKTPhaseSpaceGenerator.h"
 #include "CepGen/Process/PartonsPhaseSpaceGenerator.h"
 #include "CepGen/Process/PhaseSpaceGenerator.h"
 #include "CepGen/Utils/Math.h"
 #include "CepGen/Utils/Message.h"
 
+using namespace std::string_literals;
+
 namespace cepgen {
   /// A 2-to-4 (or 2-to-2 central) phase space generator
-  template <typename T>
   class PhaseSpaceGenerator2to4 : public PhaseSpaceGenerator {
   public:
     explicit PhaseSpaceGenerator2to4(const ParametersList& params)
         : PhaseSpaceGenerator(params),
-          part_psgen_(new T(params)),
+          part_psgen_(PartonsPhaseSpaceGeneratorFactory::get().build(steer<std::string>("partonsGenerator"), params_)),
           particles_(steer<std::vector<int> >("ids")),
           randomise_charge_(steer<bool>("randomiseCharge")) {}
 
     static ParametersDescription description() {
       auto desc = PhaseSpaceGenerator::description();
-      desc.setDescription("2-to-4 phase space mapper (" + T::description().description() + "/" +
-                          T::description().description() + ")");
+      desc.setDescription("2-to-4 phase space mapper");
+      desc.add("partonsGenerator", ""s).setDescription("type of partons generator algorithm to use");
       desc.add<std::vector<int> >("ids", {}).setDescription("list of particles produced");
       desc.add<bool>("randomiseCharge", true)
           .setDescription("randomise the charges of the central system (if charged)?");
-      desc += T::description();
       return desc;
     }
 
@@ -233,7 +232,5 @@ namespace cepgen {
     double central_weight_{0.};
   };
 }  // namespace cepgen
-using KT2to4 = cepgen::PhaseSpaceGenerator2to4<cepgen::PartonsKTPhaseSpaceGenerator>;
-using Coll2to4 = cepgen::PhaseSpaceGenerator2to4<cepgen::PartonsCollinearPhaseSpaceGenerator>;
-REGISTER_PHASE_SPACE_GENERATOR("kt2to4", KT2to4);
-REGISTER_PHASE_SPACE_GENERATOR("coll2to4", Coll2to4);
+
+REGISTER_PHASE_SPACE_GENERATOR("2to4", PhaseSpaceGenerator2to4);

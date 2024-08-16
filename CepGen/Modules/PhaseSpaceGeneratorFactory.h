@@ -34,7 +34,11 @@
 namespace cepgen {
   class PhaseSpaceGenerator;
   /// A phase space mapping algorithms factory
-  DEFINE_FACTORY(PhaseSpaceGeneratorFactory, PhaseSpaceGenerator, "Phase space generator factory");
+  DEFINE_FACTORY(BasePhaseSpaceGeneratorFactory, PhaseSpaceGenerator, "Phase space generator factory");
+  struct PhaseSpaceGeneratorFactory : public BasePhaseSpaceGeneratorFactory {
+    static PhaseSpaceGeneratorFactory& get();
+    std::unique_ptr<PhaseSpaceGenerator> build(const ParametersList&) const override;
+  };
 }  // namespace cepgen
 
 #endif

@@ -19,14 +19,47 @@
 #include "CepGen/CollinearFluxes/CollinearFlux.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
+#include "CepGen/Modules/PartonsPhaseSpaceGeneratorFactory.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Process/FactorisedProcess.h"
-#include "CepGen/Process/PartonsCollinearPhaseSpaceGenerator.h"
+#include "CepGen/Process/PartonsPhaseSpaceGenerator.h"
 
 namespace cepgen {
-  PartonsCollinearPhaseSpaceGenerator::PartonsCollinearPhaseSpaceGenerator(const ParametersList& params)
-      : PartonsPhaseSpaceGenerator(params), log_parton_virtuality_(steer<bool>("logPartonVirtuality")) {}
+  /// Collinear factorisation phase space generator
+  /// \author Laurent Forthomme <laurent.forthomme@cern.ch>
+  /// \date Jul 2023
+  class PartonsCollinearPhaseSpaceGenerator final : public PartonsPhaseSpaceGenerator {
+  public:
+    explicit PartonsCollinearPhaseSpaceGenerator(const ParametersList& params)
+        : PartonsPhaseSpaceGenerator(params), log_parton_virtuality_(steer<bool>("logPartonVirtuality")) {}
+
+    static ParametersDescription description() {
+      auto desc = PartonsPhaseSpaceGenerator::description();
+      desc.setDescription("Collinear phase space mapper");
+      desc.add<bool>("logPartonVirtuality", true);
+      return desc;
+    }
+
+    bool ktFactorised() const override { return false; }
+    bool generatePartonKinematics() override {
+      // gaussian smearing of kt can be introduced here
+      process().q1() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t1_));
+      process().q2() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t2_));
+      return true;
+    }
+    double fluxes() const override {
+      return positiveFlux<CollinearFlux>().fluxQ2(process().x1(), m_t1_) * process().x1() / m_t1_ *
+             negativeFlux<CollinearFlux>().fluxQ2(process().x2(), m_t2_) * process().x2() / m_t2_;
+    }
+
+  private:
+    void initialise() override;
+
+    const bool log_parton_virtuality_;
+    // mapped variables
+    double m_t1_{0.}, m_t2_{0.};
+  };
 
   void PartonsCollinearPhaseSpaceGenerator::initialise() {
     const auto& kin = process().kinematics();
@@ -79,23 +112,6 @@ namespace cepgen {
           .defineVariable(m_t1_, proc::Process::Mapping::linear, lim_q2_1, "Positive-z parton virtuality")
           .defineVariable(m_t2_, proc::Process::Mapping::linear, lim_q2_2, "Negative-z parton virtuality");
   }
-
-  bool PartonsCollinearPhaseSpaceGenerator::generatePartonKinematics() {
-    // gaussian smearing of kt can be introduced here
-    process().q1() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t1_));
-    process().q2() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t2_));
-    return true;
-  }
-
-  double PartonsCollinearPhaseSpaceGenerator::fluxes() const {
-    return positiveFlux<CollinearFlux>().fluxQ2(process().x1(), m_t1_) * process().x1() / m_t1_ *
-           negativeFlux<CollinearFlux>().fluxQ2(process().x2(), m_t2_) * process().x2() / m_t2_;
-  }
-
-  ParametersDescription PartonsCollinearPhaseSpaceGenerator::description() {
-    auto desc = PartonsPhaseSpaceGenerator::description();
-    desc.setDescription("Collinear phase space mapper");
-    desc.add<bool>("logPartonVirtuality", true);
-    return desc;
-  }
 }  // namespace cepgen
+
+REGISTER_PARTONS_PHASE_SPACE_GENERATOR("coll", PartonsCollinearPhaseSpaceGenerator);

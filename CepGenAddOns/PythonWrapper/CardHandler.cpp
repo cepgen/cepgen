@@ -47,6 +47,8 @@
 
 #define Py_DEBUG
 
+using namespace std::string_literals;
+
 namespace cepgen::python {
   /// CepGen Python configuration cards reader/writer
   class CardHandler final : public card::Handler {
@@ -178,7 +180,7 @@ namespace cepgen::python {
           process.erase("outKinematics");
         }
         if (auto& pkgen = process.operator[]<ParametersList>("kinematicsGenerator"); pkgen.name().empty())
-          pkgen.setName(process.get<bool>("ktFactorised", true) ? "kt2to4" : "coll2to4");
+          pkgen.setName((process.get<bool>("ktFactorised", true) ? "kt"s : "coll"s) + ":2to4");
         runParameters()->setProcess(ProcessFactory::get().build(process));
 
         for (const auto& tf : process.get<std::vector<ParametersList> >("tamingFunctions"))

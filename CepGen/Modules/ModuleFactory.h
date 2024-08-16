@@ -74,7 +74,7 @@ namespace cepgen {
     }
     /// Build one instance of a named module
     /// \param[in] params List of parameters to be invoked by the constructor
-    std::unique_ptr<T> build(const ParametersList& params) const;
+    virtual std::unique_ptr<T> build(const ParametersList& params) const;
     /// Build one instance of a named module
     /// \param[in] name Module name to retrieve
     /// \param[in] params List of parameters to be invoked by the constructor
