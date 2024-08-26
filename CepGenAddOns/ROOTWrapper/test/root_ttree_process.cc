@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
       .addOptionalArgument("num-gen,n", "number of events to generate", &num_gen, 10)
       .parse();
 
-  if (cepgen::utils::isWriteable(tmp_filename))
+  if (!cepgen::utils::isWriteable(tmp_filename))
     throw CG_FATAL("main") << "Output file '" << tmp_filename
                            << "' is not writeable. Please use another filename/path.";
 
@@ -58,7 +58,6 @@ int main(int argc, char* argv[]) {
                                                   .set<double>("ptmin", 25.));
     pars.addEventExporter(cepgen::EventExporterFactory::get().build(
         "root_tree", cepgen::ParametersList().set<string>("filename", tmp_filename)));
-    CG_LOG << &pars;
     gen.generate(num_gen);
     cross_sec = gen.crossSection();
     cross_sec_unc = gen.crossSectionError();

@@ -17,7 +17,7 @@
  */
 
 // clang-format off
-R__ADD_INCLUDE_PATH(/home/forthomme/work/dev/cepgen)
+R__ADD_INCLUDE_PATH(/home/laurent/work/dev/cepgen)
 R__ADD_LIBRARY_PATH(../../../build)
 R__LOAD_LIBRARY(libCepGen.so)
 R__LOAD_LIBRARY(libCepGenRoot.so)
