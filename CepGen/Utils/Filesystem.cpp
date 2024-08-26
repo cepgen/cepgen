@@ -35,5 +35,8 @@ namespace cepgen::utils {
     throw CG_FATAL("readFile") << "Failed to open the file '" << filename << "' for reading.";
   }
 
-  bool isWriteable(const std::string& path) { return ::access(path.data(), W_OK) == 0; }
+  bool isWriteable(const std::string& path) {
+    std::ofstream file(path);
+    return file.good();
+  }
 }  // namespace cepgen::utils
