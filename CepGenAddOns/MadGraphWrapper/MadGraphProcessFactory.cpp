@@ -42,4 +42,12 @@ namespace cepgen {
                                       << "Registered modules: " << modules() << ".";
     return map_.at(mod_name)(params_map_.at(mod_name).validate(params));
   }
+
+  template <>
+  std::unique_ptr<MadGraphProcess> ModuleFactory<MadGraphProcess>::build(const ParametersList& params) const {
+    const auto mod_name = params.name();
+    if (mod_name.empty())
+      throw CG_FATAL("ModuleFactory") << "Failed to retrieve a process name for the mg5_aMC constructors lookup table.";
+    return build(mod_name, params);
+  }
 }  // namespace cepgen

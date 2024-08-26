@@ -68,7 +68,7 @@ namespace cepgen::mg5amc {
   ParticleProperties describeParticle(const std::string& part_name, const std::string& model) {
     ParametersList plist_part;
     {  // this part retrieves the list of parameters for a given particle name, using a python call to MadGraph
-      python::Environment env({});
+      python::Environment env(ParametersList().set("name", "MadGraph5_aMC__describeParticles"s));
       const std::string name_part_dict = "part_dict";
       std::vector<std::string> cmds;
       if (!model.empty()) {
@@ -79,23 +79,26 @@ namespace cepgen::mg5amc {
         cmds.emplace_back("display particles " + part_name);
         std::string py_output;
         bool found_properties{false};
-        if (const auto tmp_path = fs::temp_directory_path() / "mg5_aMC_part_query.dat"; utils::isWriteable(tmp_path))
-          for (auto line : runCommand(cmds, tmp_path, true)) {
-            if (!found_properties) {
-              if (line.find("has the following properties") != std::string::npos)
-                found_properties = true;
-              continue;
-            }
-            if (utils::startsWith(utils::trim(line), "'spin(2s+1 format)'"))  // SUPER hacky...
-              line = utils::replaceAll(line,
-                                       {{"(2s+1 format)"s, ""s},
-                                        {/*1*/ " (scalar)"s, ""s},
-                                        {/*2*/ " (fermion)"s, ""s},
-                                        {/*3*/ " (vector)"s, ""s}});
-            if (utils::startsWith(line, "exit"))
-              break;
-            py_output += line;
+        const auto tmp_path = fs::temp_directory_path() / "mg5_aMC_part_query.dat";
+        if (!utils::isWriteable(tmp_path))
+          throw CG_ERROR("MadGraphInterface:describeParticle")
+              << "Temporary path '" << tmp_path << "' is not writeable.";
+        for (auto line : runCommand(cmds, tmp_path, true)) {
+          if (!found_properties) {
+            if (line.find("has the following properties") != std::string::npos)
+              found_properties = true;
+            continue;
           }
+          if (utils::startsWith(utils::trim(line), "'spin(2s+1 format)'"))  // SUPER hacky...
+            line = utils::replaceAll(line,
+                                     {{"(2s+1 format)"s, ""s},
+                                      {/*1*/ " (scalar)"s, ""s},
+                                      {/*2*/ " (fermion)"s, ""s},
+                                      {/*3*/ " (vector)"s, ""s}});
+          if (utils::startsWith(line, "exit"))
+            break;
+          py_output += line;
+        }
         CG_DEBUG("MadGraphInterface:describeParticle") << "Will unpack the following attributes:\n" << py_output;
         if (py_output.empty())
           throw CG_ERROR("MadGraphInterface:describeParticle")
@@ -155,17 +158,24 @@ namespace cepgen::mg5amc {
   std::vector<std::string> runCommand(const std::vector<std::string>& cmds,
                                       const std::string& card_path,
                                       bool keep_output) {
+    CG_DEBUG("MadGraphInterface:runCommand")
+        << "Will run the following commands: " << cmds << " with the following card path: " << card_path
+        << ". Will keep output? " << std::boolalpha << keep_output << ".";
     std::ofstream tmp_card(card_path);
     for (const auto& cmd : cmds)
       tmp_card << cmd << "\n";
     tmp_card << "exit\n";
     tmp_card.close();
     std::vector<std::string> output;
+    const auto commands = std::vector<std::string>{MADGRAPH_BIN, "-f", card_path};
+    CG_DEBUG("MadGraphInterface:runCommand")
+        << "Calling mg5_aMC with the following command(s):\n\t'" << commands << "'.";
     {
       utils::Caller caller;
-      for (const auto& line : utils::split(caller.call({MADGRAPH_BIN, "-f", card_path}), '\n'))
+      for (const auto& line : utils::split(caller.call(commands), '\n')) {
         if (!utils::startsWith(line, "MG5_aMC>"))
           output.emplace_back(line);
+      }
     }
     CG_DEBUG("MadGraphInterface:runCommand") << "\nCommands:\n" << cmds << "\nOutput:\n" << utils::merge(output, "\n");
     if (!keep_output) {
