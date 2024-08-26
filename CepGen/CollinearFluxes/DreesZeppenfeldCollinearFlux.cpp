@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ namespace cepgen {
     static ParametersDescription description() {
       auto desc = CollinearFlux::description();
       desc.setDescription("Drees-Zeppenfeld Q^{2}-dependent flux");
-      desc.add<double>("scale", 0.71);
+      desc.add<double>("scale", 0.71).setDescription("factorisation scale (in GeV^2)");
       return desc;
     }
 
@@ -48,7 +48,7 @@ namespace cepgen {
       if (!x_range_.contains(x, true))
         return 0.;
       const auto fq4 = std::pow(1 + q2 / scale_, -4);  // Q^2-dependent form factor
-      return prefactor_ * 0.5 * (1. + std::pow(1. - x, 2)) / q2 * fq4;
+      return prefactor_ * 0.5 * (1. + std::pow(1. - x, 2)) * fq4 / x;
     }
 
   protected:
