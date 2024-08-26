@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
   auto mg5 = cepgen::ProcessFactory::get().build(
       "mg5_aMC",
       cepgen::ParametersList()
-          .set("kinematicsGenerator", cepgen::ParametersList().setName("coll2to4"s))
+          .set("kinematicsGenerator", cepgen::ParametersList().setName("coll:2to4"s))
           .set("extraParticles", cepgen::ParametersList().set("la", cepgen::PDG::get()(my_part)))
           .set("process", "a a > la+ la-"s));
   mg5->initialise();

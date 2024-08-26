@@ -135,7 +135,7 @@ namespace cepgen::proc {
                      std::vector<ParametersList>(
                          2, PartonFluxFactory::get().describeParameters("BudnevElastic").parameters()))
                  .setDescription("Parton fluxes modelling"));
-    desc.add("kinematicsGenerator", PhaseSpaceGeneratorFactory::get().describeParameters("kt2to4"));
+    desc.add("kinematicsGenerator", PhaseSpaceGeneratorFactory::get().describeParameters("kt:2to4"));
     desc.add<bool>("symmetrise", false).setDescription("Symmetrise along z the central system?");
     desc.add<bool>("storeAlphas", false)
         .setDescription("store the electromagnetic and strong coupling constants to the event content?");
