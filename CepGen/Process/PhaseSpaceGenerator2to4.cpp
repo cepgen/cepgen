@@ -143,7 +143,8 @@ namespace cepgen {
         return 0.;
 
       //--- compute and sanitise the momentum losses
-      const auto amt1 = proc_->pc(0).massT() / proc_->sqrtS(), amt2 = proc_->pc(1).massT() / proc_->sqrtS();
+      const auto amt1 = proc_->pc(0).massT() * proc_->inverseSqrtS(),
+                 amt2 = proc_->pc(1).massT() * proc_->inverseSqrtS();
       static const auto x_lim = Limits{0., 1.};
       const auto x1 = amt1 * exp(+m_y_c1_) + amt2 * exp(+m_y_c2_);
       if (!x_lim.contains(x1))
