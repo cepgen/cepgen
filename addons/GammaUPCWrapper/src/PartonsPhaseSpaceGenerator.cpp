@@ -19,6 +19,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/PartonsPhaseSpaceGeneratorFactory.h"
 #include "CepGen/PartonFluxes/CollinearFlux.h"
+#include "CepGen/PartonFluxes/PartonFlux.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Process/FactorisedProcess.h"
@@ -28,10 +29,10 @@
 using namespace cepgen;
 
 namespace gammaUPC {
-  class TrivialPartonFlux final : public cepgen::PartonFlux, public SteeredObject<TrivialPartonFlux> {
+  class TrivialPartonFlux final : public PartonFlux, public SteeredObject<TrivialPartonFlux> {
   public:
     explicit TrivialPartonFlux(const ParametersList& params)
-        : cepgen::PartonFlux(params),
+        : PartonFlux(params),
           SteeredObject<TrivialPartonFlux>(params),
           beam_id_(SteeredObject<TrivialPartonFlux>::steer<int>("beamPdgId")),
           parton_id_(SteeredObject<TrivialPartonFlux>::steer<int>("partonPdgId")),
@@ -44,7 +45,6 @@ namespace gammaUPC {
       return desc;
     }
 
-    bool ktFactorised() const override { return false; }
     bool fragmenting() const override { return false; }
     pdgid_t partonPdgId() const override { return parton_id_; }
     double mass2() const override { return mass2_; }
@@ -57,17 +57,24 @@ namespace gammaUPC {
   class PartonsPhaseSpaceGenerator final : public cepgen::PartonsPhaseSpaceGenerator {
   public:
     explicit PartonsPhaseSpaceGenerator(const ParametersList& params)
-        : cepgen::PartonsPhaseSpaceGenerator(params), log_parton_virtuality_(steer<bool>("logPartonVirtuality")) {
-      CG_LOG << ":::::" << params_;
-    }
+        : cepgen::PartonsPhaseSpaceGenerator(params),
+          log_parton_virtuality_(steer<bool>("logPartonVirtuality")),
+          force_p_nonhadr_(steer<bool>("forcePNonHadr")),
+          heavy_ion_mode_(steerAs<int, gammaUPC::HeavyIonMode>("heavyIonMode")) {}
     static ParametersDescription description() {
       auto desc = cepgen::PartonsPhaseSpaceGenerator::description();
       desc.setDescription("Two-photon central phase space generator w/ gammaUPC fluxes");
+      desc.add<bool>("logPartonVirtuality", false);
+      desc.add<bool>("forcePNonHadr", true)
+          .setDescription("disallow the hadronisation of beam remnants after parton emission?");
+      desc.addAs<int, HeavyIonMode>("heavyIonMode", HeavyIonMode::HardSphere)
+          .setDescription("type of modelling for the heavy ion parton emission")
+          .allow(static_cast<int>(gammaUPC::HeavyIonMode::HardSphere), "hard sphere model")
+          .allow(static_cast<int>(gammaUPC::HeavyIonMode::WoodsSaxon), "Woods-Saxon model");
       return desc;
     }
 
     void initialise() override {
-      CG_WARNING("") << params_;
       pos_flux_.reset(new TrivialPartonFlux(params_));
       neg_flux_.reset(new TrivialPartonFlux(params_));
       // register the incoming partons' virtuality
@@ -85,16 +92,18 @@ namespace gammaUPC {
             .defineVariable(m_t2_, proc::Process::Mapping::linear, lim_q2_2, "Negative-z parton virtuality");
       const auto hi_a = HeavyIon::isHI(process().kinematics().incomingBeams().positive().integerPdgId()),
                  hi_b = HeavyIon::isHI(process().kinematics().incomingBeams().negative().integerPdgId());
-      if (hi_a && hi_b)
-        beams_mode_ = BeamsMode::AB;
-      else if (!hi_a && hi_b)
-        beams_mode_ = BeamsMode::pB;
-      else if (hi_a && !hi_b)
-        beams_mode_ = BeamsMode::Ap;
-      else
-        beams_mode_ = BeamsMode::pp;
+      mass_number_prod_ = 1;
+      if (hi_a) {  // determine beams mode, and mass numbers for HI cases
+        mass_number_prod_ *= HeavyIon::fromPdgId(process().kinematics().incomingBeams().positive().integerPdgId()).A;
+        beams_mode_ = hi_b ? BeamsMode::AB : BeamsMode::Ap;
+      } else
+        beams_mode_ = hi_b ? BeamsMode::pB : BeamsMode::pp;
+      if (hi_b)
+        mass_number_prod_ *= HeavyIon::fromPdgId(process().kinematics().incomingBeams().negative().integerPdgId()).A;
       to_collider_.ebeam[0] = process().kinematics().incomingBeams().positive().momentum().energy();
       to_collider_.ebeam[1] = process().kinematics().incomingBeams().negative().momentum().energy();
+      if (beams_mode_ == BeamsMode::Ap)  // special case for asymmetric beams
+        std::swap(to_collider_.ebeam[0], to_collider_.ebeam[1]);
     }
     bool ktFactorised() const override { return false; }
     bool generatePartonKinematics() override {
@@ -106,7 +115,7 @@ namespace gammaUPC {
       return true;
     }
     double fluxes() const override {
-      const auto prefactor = process().x1() * process().x2() / std::sqrt(m_t1_ * m_t2_);
+      const auto prefactor = mass_number_prod_ * process().x1() * process().x2();
       switch (beams_mode_) {
         case BeamsMode::pp:
           return prefactor * twoPhotonFluxPP(process().x1(), process().x2(), force_p_nonhadr_);
@@ -126,9 +135,12 @@ namespace gammaUPC {
     const bool force_p_nonhadr_;
     const HeavyIonMode heavy_ion_mode_;
 
-    enum struct BeamsMode { pp, pB, Ap, AB } beams_mode_{BeamsMode::pp};
+    enum struct BeamsMode { pp, pB, Ap, AB } beams_mode_{BeamsMode::pp};  ///< type of beam-beam system
+    unsigned short mass_number_prod_{1};                                  ///< product of beams mass numbers
 
-    double m_t1_{0.}, m_t2_{0.};
+    // mapped variables in process kinematics definition
+    double m_t1_{0.};  ///< virtuality of positive-z beam parton
+    double m_t2_{0.};  ///< virtuality of negative-z beam parton
   };
 }  // namespace gammaUPC
 using gammaUPC_PPSG = gammaUPC::PartonsPhaseSpaceGenerator;
