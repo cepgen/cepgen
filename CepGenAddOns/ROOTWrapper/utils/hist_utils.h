@@ -26,7 +26,7 @@
 typedef vector<TH1D*> hists_t;
 
 hists_t fill_histograms(const string& filename) {
-  hists_t out = {new TH1D("invm", ";m_{central} (GeV);d#sigma/dm", 200, 150., 550.),
+  hists_t out = {new TH1D("invm", ";m_{central} (GeV);d#sigma/dm", 200, 0., 20.),
                  new TH1D("ptpair", ";p_{T}^{central} (GeV);d#sigma/dp_{T}", 100, 0., 5.),
                  new TH1D("acop", ";1-|#Delta#phi/#pi|;d#sigma/d#Delta#phi)", 50, 0., 1.e-2)};
   auto file = TFile::Open(filename.c_str(), "r");
@@ -38,9 +38,10 @@ hists_t fill_histograms(const string& filename) {
   evt_tree.attach(file);
   cepgen::Event evt;
   while (evt_tree.next(evt)) {
-    out[0]->Fill(evt(4).mass());
+    evt.dump();
+    out[0]->Fill(evt(4).momentum().mass());
     out[1]->Fill(evt(4).momentum().pt());
-    //out[2]->Fill(
+    out[2]->Fill(1. - fabs(evt(7).momentum().deltaPhi(evt(8).momentum()) * M_1_PI));
   }
   return out;
 }

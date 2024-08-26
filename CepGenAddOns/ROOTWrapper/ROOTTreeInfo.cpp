@@ -198,6 +198,7 @@ namespace ROOT {
   void CepGenEvent::attach(const std::string& filename, const std::string& events_tree) {
     file_.reset(TFile::Open(filename.data()));
     attach(file_.get(), events_tree);
+    num_read_events_ = 0;
   }
 
   bool CepGenEvent::next(cepgen::Event& ev) {
