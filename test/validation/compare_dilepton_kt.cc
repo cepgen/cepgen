@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
         proc,
         cepgen::ParametersList().set(
             "kinematicsGenerator",
-            cepgen::PhaseSpaceGeneratorFactory::get().describeParameters("kt2to4").parameters())));
+            cepgen::PhaseSpaceGeneratorFactory::get().describeParameters("kt:2to4").parameters())));
     pars.process().kinematics().setParameters(cepgen::ParametersList()
                                                   .set<vector<int> >("pdgIds", {2212, 2212})
                                                   .set<double>("sqrtS", 13.6e3)
