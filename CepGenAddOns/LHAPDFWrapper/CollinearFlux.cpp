@@ -31,7 +31,7 @@ namespace cepgen::lhapdf {
     explicit CollinearFlux(const ParametersList& params)
         : cepgen::CollinearFlux(params),
           pdf_(LHAPDF::mkPDF(steer<std::string>("set"), steer<int>("member"))),
-          pdgid_(steerAs<int, pdgid_t>("partonPdgId")),
+          pdgid_(steer<int>("partonPdgId")),
           extrapolate_pdf_(steer<bool>("extrapolatePDF")) {
       const auto& pdf_set = steer<std::string>("set");
       if (!pdf_)
@@ -47,10 +47,10 @@ namespace cepgen::lhapdf {
             << "PDF set '" << pdf_set << "' does not contain parton with PDG identifier=" << pdgid_ << "!\n"
             << "PDGs handled: " << pdf_->flavors() << ".";
 
-      CG_INFO("lhapdf:CollinearFlux") << "LHAPDF evaluator for collinear parton (" << (PDG::Id)pdgid_
+      CG_INFO("lhapdf:CollinearFlux") << "LHAPDF evaluator for collinear parton (" << static_cast<PDG::Id>(pdgid_)
                                       << ") flux initialised.\n\t"
-                                      << "PDF set: " << steer<std::string>("set") << " (flavours: " << pdf_->flavors()
-                                      << "), member: " << steer<int>("member") << ".\n\t"
+                                      << "PDF set: " << pdf_set << " (flavours: " << pdf_->flavors()
+                                      << "), member: " << pdf_->memberID() << ".\n\t"
                                       << "x range: " << Limits{pdf_->xMin(), pdf_->xMax()} << ", "
                                       << "Q^2 range: " << Limits{pdf_->q2Min(), pdf_->q2Max()} << " GeV^2.\n\t"
                                       << "Extrapolated from other flavours? " << extrapolate_pdf_ << ".";
@@ -59,7 +59,7 @@ namespace cepgen::lhapdf {
     static ParametersDescription description() {
       auto desc = cepgen::CollinearFlux::description();
       desc.setDescription("LHAPDF coll.flux");
-      desc.add<std::string>("set", "LUXqed17_plus_PDF4LHC15_nnlo_100").setDescription("PDFset to use");
+      desc.add<std::string>("set", "LUXlep-NNPDF31_nlo_as_0118_luxqed").setDescription("PDFset to use");
       desc.add<int>("member", 0).setDescription("PDF member");
       desc.addAs<int, pdgid_t>("partonPdgId", PDG::photon).setDescription("parton PDG identifier");
       desc.add<bool>("extrapolatePDF", false)
@@ -75,18 +75,18 @@ namespace cepgen::lhapdf {
       if (x == 0. || !pdf_->inPhysicalRangeXQ2(x, q2))
         return 0.;
       if (!extrapolate_pdf_)  // has parton PDF
-        return pdf_->xfxQ2((int)pdgid_, x, q2);
+        return pdf_->xfxQ2(pdgid_, x, q2);
       // extrapolate from other flavours imbalance
       double xf = 1.;
       for (const auto& flav : pdf_->xfxQ2(x, q2))
-        if (flav.first != (int)pdgid_)
+        if (flav.first != pdgid_)
           xf -= flav.second;
       return xf;
     }
 
   private:
     const std::unique_ptr<LHAPDF::PDF> pdf_;
-    const pdgid_t pdgid_;
+    const int pdgid_;
     const bool extrapolate_pdf_;
   };
 }  // namespace cepgen::lhapdf

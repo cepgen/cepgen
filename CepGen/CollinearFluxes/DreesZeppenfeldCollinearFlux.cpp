@@ -48,7 +48,7 @@ namespace cepgen {
       if (!x_range_.contains(x, true))
         return 0.;
       const auto fq4 = std::pow(1 + q2 / scale_, -4);  // Q^2-dependent form factor
-      return prefactor_ * 0.5 * (1. + std::pow(1. - x, 2)) * fq4 / x;
+      return prefactor_ * 0.5 * (1. + std::pow(1. - x, 2)) * fq4;
     }
 
   protected:

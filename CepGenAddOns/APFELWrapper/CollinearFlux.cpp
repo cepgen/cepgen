@@ -60,7 +60,7 @@ namespace cepgen::apfel {
       const auto q = std::sqrt(q2);
       if (!q_range_.contains(q))
         return 0.;
-      return prefactor_ * APFEL::xPDFxQ(pdgid_, x, q) / x;
+      return prefactor_ * APFEL::xPDFxQ(pdgid_, x, q);
     }
 
     static ParametersDescription description() {

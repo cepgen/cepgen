@@ -50,7 +50,7 @@ namespace cepgen {
       if (q2min == 0. || q2 < q2min)
         return 0.;
       const auto form_factors = (*ff_)(q2);
-      return prefactor_ * ((1. - x) * (1. - q2min / q2) * form_factors.FE + 0.5 * x * x * form_factors.FM) / x;
+      return prefactor_ * ((1. - x) * (1. - q2min / q2) * form_factors.FE + 0.5 * x * x * form_factors.FM);
     }
 
   private:

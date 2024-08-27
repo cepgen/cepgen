@@ -49,8 +49,8 @@ namespace cepgen {
       return true;
     }
     double fluxes() const override {
-      return positiveFlux<CollinearFlux>().fluxQ2(process().x1(), m_t1_) * process().x1() / m_t1_ *
-             negativeFlux<CollinearFlux>().fluxQ2(process().x2(), m_t2_) * process().x2() / m_t2_;
+      return positiveFlux<CollinearFlux>().fluxQ2(process().x1(), m_t1_) / m_t1_ *
+             negativeFlux<CollinearFlux>().fluxQ2(process().x2(), m_t2_) / m_t2_;
     }
 
   private:
