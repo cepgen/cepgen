@@ -55,7 +55,10 @@ namespace cepgen {
     throw CG_ERROR("PDG") << "No particle with PDG id " << id << " in the catalogue.";
   }
 
-  ParticleProperties& PDG::operator[](spdgid_t id) { return particles_[std::abs(id)]; }
+  ParticleProperties& PDG::operator[](spdgid_t id) {
+    CG_DEBUG("PDG") << "Retrieved editable particle properties for PDG id " << id << ".";
+    return particles_[std::abs(id)];
+  }
 
   void PDG::define(const ParticleProperties& props) {
     if (props.pdgid == PDG::invalid && props.name != "invalid")
