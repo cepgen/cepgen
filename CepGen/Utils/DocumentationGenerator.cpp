@@ -33,6 +33,7 @@
 #include "CepGen/Modules/GeneratorWorkerFactory.h"
 #include "CepGen/Modules/IntegratorFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
+#include "CepGen/Modules/PartonsPhaseSpaceGeneratorFactory.h"
 #include "CepGen/Modules/PhaseSpaceGeneratorFactory.h"
 #include "CepGen/Modules/ProcessFactory.h"
 #include "CepGen/Modules/RandomGeneratorFactory.h"
@@ -69,6 +70,7 @@ namespace cepgen::utils {
                  "Longitudinal/transverse cross section ratio parameterisations",
                  "",
                  cepgen::SigmaRatiosFactory::get());
+    add_category("partmap", "Partons generation algorithm", "", cepgen::PartonsPhaseSpaceGeneratorFactory::get());
     add_category("psmap", "Phase space mapper", "", cepgen::PhaseSpaceGeneratorFactory::get());
     add_category("collflux", "Collinear parton flux modelling", "", cepgen::CollinearFluxFactory::get());
     add_category("ktflux", "KT-factorised parton flux modelling", "", cepgen::KTFluxFactory::get());
