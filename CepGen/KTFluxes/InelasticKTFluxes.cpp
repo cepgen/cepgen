@@ -61,7 +61,7 @@ namespace cepgen {
     }
 
   protected:
-    std::unique_ptr<strfun::Parameterisation> sf_;
+    const std::unique_ptr<strfun::Parameterisation> sf_;
   };
 
   struct BudnevInelasticNucleonKTFlux final : public InelasticNucleonKTFlux {

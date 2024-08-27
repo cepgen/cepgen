@@ -27,6 +27,7 @@
 #include "CepGen/Physics/Utils.h"
 
 namespace cepgen {
+  /// Base class for all coherent, elastic kt-dependent photon emission from nucleons modellings
   class ElasticNucleonKTFlux : public KTFlux {
   public:
     explicit ElasticNucleonKTFlux(const ParametersList& params)
@@ -46,20 +47,19 @@ namespace cepgen {
     double mass2() const override { return mp2_; }
     pdgid_t partonPdgId() const override { return PDG::photon; }
 
-    double fluxMX2(double x, double kt2, double) const override {
+    double fluxQ2(double x, double kt2, double q2) const override {
       if (!x_range_.contains(x))
         return 0.;
-      const auto q2 = utils::kt::q2(x, kt2, mass2()), q2min = q2 - kt2 / (1. - x);
-      const double qnorm = 1. - q2min / q2;
+      const auto q2min = q2 - kt2 / (1. - x), qnorm = 1. - q2min / q2;
       const auto& formfac = (*ff_)(q2);
       return prefactor_ * formfac.FE * qnorm * qnorm / q2;
     }
 
   protected:
-    /// Elastic form factors computation
-    const std::unique_ptr<formfac::Parameterisation> ff_;
+    const std::unique_ptr<formfac::Parameterisation> ff_;  ///< elastic form factors modelling
   };
 
+  /// Budnev coherent photon emission from a nucleon
   struct BudnevElasticNucleonKTFlux : public ElasticNucleonKTFlux {
     using ElasticNucleonKTFlux::ElasticNucleonKTFlux;
     static ParametersDescription description() {
@@ -67,11 +67,10 @@ namespace cepgen {
       desc.setDescription("Nucl. el. photon emission (Budnev flux)");
       return desc;
     }
-    double fluxMX2(double x, double kt2, double) const override final {
+    double fluxQ2(double x, double kt2, double q2) const override final {
       if (!x_range_.contains(x))
         return 0.;
-      const auto q2 = utils::kt::q2(x, kt2, mass2()), q2min = q2 - kt2 / (1. - x);
-      const double qnorm = 1. - q2min / q2;
+      const auto q2min = q2 - kt2 / (1. - x), qnorm = 1. - q2min / q2;
       const auto& formfac = (*ff_)(q2);
       const double f_D = formfac.FE * (1. - x) * qnorm;
       const double f_C = formfac.FM;
@@ -79,6 +78,7 @@ namespace cepgen {
     }
   };
 
+  /// Budnev coherent photon emission from a lepton beam
   class BudnevElasticLeptonKTFlux final : public BudnevElasticNucleonKTFlux {
   public:
     explicit BudnevElasticLeptonKTFlux(const ParametersList& params)
@@ -96,6 +96,7 @@ namespace cepgen {
     const double ml2_;
   };
 
+  /// Photon emission from heavy ion
   class ElasticHeavyIonKTFlux final : public ElasticNucleonKTFlux {
   public:
     explicit ElasticHeavyIonKTFlux(const ParametersList& params)
@@ -117,9 +118,9 @@ namespace cepgen {
 
     double mass2() const override { return mass2_; }
 
-    double fluxMX2(double x, double kt2, double mx2) const override {
+    double fluxQ2(double x, double kt2, double q2) const override {
       const auto z = static_cast<unsigned short>(hi_.Z);
-      return z * z * ElasticNucleonKTFlux::fluxMX2(x, kt2, mx2);
+      return z * z * ElasticNucleonKTFlux::fluxQ2(x, kt2, q2);
     }
 
   private:
