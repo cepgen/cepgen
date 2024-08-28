@@ -20,7 +20,7 @@
 #define CepGen_Utils_Derivator_h
 
 #include "CepGen/Modules/NamedModule.h"
-#include "CepGen/Utils/FunctionsWrappers.h"
+#include "CepGen/Utils/FunctionWrapper.h"
 
 namespace cepgen::utils {
   class Derivator : public NamedModule<Derivator> {
@@ -38,13 +38,13 @@ namespace cepgen::utils {
     /// \param[in] x coordinate
     /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
     inline double derivate(const std::function<double(double)>& func, double x, double h = -1.) const {
-      return derivate(Function1D(func), x, h);
+      return derivate(FunctionWrapper(func), x, h);
     }
     /// Evaluate the derivative of a function at a given value
     /// \param[in] func function to derive
     /// \param[in] x coordinate
     /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
-    virtual double derivate(const Function1D& func, double x, double h = -1.) const = 0;
+    virtual double derivate(const FunctionWrapper& func, double x, double h = -1.) const = 0;
 
   protected:
     const double h_;

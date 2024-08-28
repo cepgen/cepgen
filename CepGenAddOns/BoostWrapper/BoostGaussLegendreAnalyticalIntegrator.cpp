@@ -20,7 +20,7 @@
 
 #include "CepGen/Integration/AnalyticIntegrator.h"
 #include "CepGen/Modules/AnalyticIntegratorFactory.h"
-#include "CepGen/Utils/FunctionsWrappers.h"
+#include "CepGen/Utils/FunctionWrapper.h"
 
 namespace cepgen {
   /// Gauss-Legendre integration algorithm
@@ -35,7 +35,7 @@ namespace cepgen {
       return desc;
     }
 
-    double integrate(const utils::Function1D& func, void* = nullptr, const Limits& lim = {}) const override {
+    double integrate(const utils::FunctionWrapper& func, void* = nullptr, const Limits& lim = {}) const override {
       return boost::math::quadrature::gauss<double, N>::integrate(
           func, lim.hasMin() ? lim.min() : range_.min(), lim.hasMax() ? lim.max() : range_.max());
     }

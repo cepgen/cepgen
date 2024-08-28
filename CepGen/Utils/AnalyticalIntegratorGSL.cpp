@@ -57,7 +57,7 @@ namespace cepgen::utils {
       return desc;
     }
 
-    double integrate(const Function1D& func, void* obj = nullptr, const Limits& lim = {}) const override {
+    double integrate(const FunctionWrapper& func, void* obj = nullptr, const Limits& lim = {}) const override {
       if (obj)
         return eval(GSLFunctionWrapper::build(func, obj).get(), lim);
       return eval(GSLFunctionWrapper::build(func, func_params_).get(), lim);

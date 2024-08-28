@@ -17,7 +17,7 @@
  */
 
 #include "CepGen/Integration/AnalyticIntegrator.h"
-#include "CepGen/Utils/FunctionsWrappers.h"
+#include "CepGen/Utils/FunctionWrapper.h"
 
 namespace cepgen {
   AnalyticIntegrator::AnalyticIntegrator(const ParametersList& params)
@@ -27,7 +27,7 @@ namespace cepgen {
         verbosity_(steer<int>("verbosity")) {}
 
   double AnalyticIntegrator::integrate(const std::function<double(double)>& func, const Limits& lim) const {
-    return integrate(utils::Function1D(func), nullptr, lim);
+    return integrate(utils::FunctionWrapper(func), nullptr, lim);
   }
 
   ParametersDescription AnalyticIntegrator::description() {

@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_Utils_FunctionsWrappers_h
-#define CepGen_Utils_FunctionsWrappers_h
+#ifndef CepGen_Utils_FunctionWrapper_h
+#define CepGen_Utils_FunctionWrapper_h
 
 #include <functional>
 
@@ -25,11 +25,11 @@
 
 namespace cepgen::utils {
   /// Wrapper to a 1-dimensional function with optional parameters
-  class Function1D {
+  class FunctionWrapper {
   public:
-    explicit Function1D(const std::function<double(double)>& func) : func_(func) {}
-    explicit Function1D(const std::function<double(double, const ParametersList&)>& func) : func_params_(func) {}
-    explicit Function1D(const std::function<double(double, void*)>& func) : func_obj_(func) {}
+    explicit FunctionWrapper(const std::function<double(double)>& func) : func_(func) {}
+    explicit FunctionWrapper(const std::function<double(double, const ParametersList&)>& func) : func_params_(func) {}
+    explicit FunctionWrapper(const std::function<double(double, void*)>& func) : func_obj_(func) {}
 
     /// Call the function with a user collection of parameters
     inline double operator()(double x, const ParametersList& params = ParametersList()) const {

@@ -20,7 +20,7 @@
 
 #include "CepGen/Integration/AnalyticIntegrator.h"
 #include "CepGen/Modules/AnalyticIntegratorFactory.h"
-#include "CepGen/Utils/FunctionsWrappers.h"
+#include "CepGen/Utils/FunctionWrapper.h"
 #include "CepGen/Utils/Message.h"
 
 namespace cepgen::root {
@@ -50,8 +50,10 @@ namespace cepgen::root {
       return desc;
     }
 
-    double integrate(const utils::Function1D& func, void* params = nullptr, const Limits& lim = {}) const override {
-      const auto func_local = utils::Function1D([&func, &params](double x) { return func(x, params); });
+    double integrate(const utils::FunctionWrapper& func,
+                     void* params = nullptr,
+                     const Limits& lim = {}) const override {
+      const auto func_local = utils::FunctionWrapper([&func, &params](double x) { return func(x, params); });
       const double xmin = lim.hasMin() ? lim.min() : range_.min();
       const double xmax = lim.hasMax() ? lim.max() : range_.max();
       return integr_.Integral(func_local, xmin, xmax);

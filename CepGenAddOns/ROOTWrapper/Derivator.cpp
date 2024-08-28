@@ -21,7 +21,7 @@
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/DerivatorFactory.h"
 #include "CepGen/Utils/Derivator.h"
-#include "CepGen/Utils/FunctionsWrappers.h"
+#include "CepGen/Utils/FunctionWrapper.h"
 
 namespace cepgen::root {
   class Derivator : public utils::Derivator {
@@ -39,7 +39,7 @@ namespace cepgen::root {
     /// \param[in] func function to derive
     /// \param[in] x coordinate
     /// \param[in] h (optional) step size ; if not provided, will use default algorithm value
-    double derivate(const utils::Function1D& func, double x, double h = -1.) const override {
+    double derivate(const utils::FunctionWrapper& func, double x, double h = -1.) const override {
       auto rfunc = TF1(
           "cepgen_functional",
           [&func](double vars[1], double* pars) { return func(vars[0], static_cast<void*>(pars)); },

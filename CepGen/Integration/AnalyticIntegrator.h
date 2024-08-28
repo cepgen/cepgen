@@ -25,7 +25,7 @@
 #include "CepGen/Utils/Limits.h"
 
 namespace cepgen::utils {
-  class Function1D;
+  class FunctionWrapper;
 }
 
 namespace cepgen {
@@ -45,14 +45,16 @@ namespace cepgen {
     /// \param[in] obj specific parameters object
     /// \param[in] range (optional) integration range
     template <typename T>
-    inline double integrate(const utils::Function1D& func, const T& obj, const Limits& range = {}) const {
+    inline double integrate(const utils::FunctionWrapper& func, const T& obj, const Limits& range = {}) const {
       return integrate(func, (void*)&obj, range);
     }
     /// Evaluate the integral of a function at a given value
     /// \param[in] func function to integrate
     /// \param[in] obj (optional) parameters object
     /// \param[in] range (optional) integration range
-    virtual double integrate(const utils::Function1D& func, void* obj = nullptr, const Limits& range = {}) const = 0;
+    virtual double integrate(const utils::FunctionWrapper& func,
+                             void* obj = nullptr,
+                             const Limits& range = {}) const = 0;
 
   protected:
     const Limits range_;

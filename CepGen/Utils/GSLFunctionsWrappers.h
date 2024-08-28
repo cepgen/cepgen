@@ -24,24 +24,24 @@
 
 #include <memory>
 
-#include "CepGen/Utils/FunctionsWrappers.h"
+#include "CepGen/Utils/FunctionWrapper.h"
 
 namespace cepgen::utils {
   /// GSL wrapper to define a functor as a GSL-digestible functional
   class GSLFunctionWrapper : public gsl_function {
   public:
     /// Utility to build a gsl_function pointer from a functional
-    static std::unique_ptr<gsl_function> build(const Function1D& func, void* obj) {
+    static std::unique_ptr<gsl_function> build(const FunctionWrapper& func, void* obj) {
       return std::unique_ptr<gsl_function>(new GSLFunctionWrapper(func, ParametersList(), obj));
     }
     /// Utility to build a gsl_function pointer from a functional
-    static std::unique_ptr<gsl_function> build(const Function1D& func,
+    static std::unique_ptr<gsl_function> build(const FunctionWrapper& func,
                                                const ParametersList& params = ParametersList()) {
       return std::unique_ptr<gsl_function>(new GSLFunctionWrapper(func, params, nullptr));
     }
 
   private:
-    explicit GSLFunctionWrapper(const Function1D& func, const ParametersList& plist, void* obj = nullptr)
+    explicit GSLFunctionWrapper(const FunctionWrapper& func, const ParametersList& plist, void* obj = nullptr)
         : func_(func), params_(plist), obj_(obj) {
       function = &GSLFunctionWrapper::eval;
       params = this;
@@ -55,7 +55,7 @@ namespace cepgen::utils {
         return wrp->func_(x, wrp->params_);
       return wrp->func_(x);
     }
-    const Function1D func_;
+    const FunctionWrapper func_;
     const ParametersList& params_;
     void* obj_{nullptr};
   };

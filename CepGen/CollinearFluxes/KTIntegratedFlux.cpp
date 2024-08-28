@@ -25,7 +25,7 @@
 #include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Utils/FunctionsWrappers.h"
+#include "CepGen/Utils/FunctionWrapper.h"
 #include "CepGen/Utils/Limits.h"
 
 namespace cepgen {
@@ -72,20 +72,20 @@ namespace cepgen {
     double fluxQ2(double x, double q2) const override {
       if (!x_range_.contains(x, true))
         return 0.;
-      return integr_->integrate(func_q2_, std::make_pair(x, q2), kt2_range_) / x;
+      return 2. * M_PI * integr_->integrate(func_q2_, std::make_pair(x, q2), kt2_range_);
     }
 
     double fluxMX2(double x, double mx2) const override {
       if (!x_range_.contains(x, true))
         return 0.;
-      return integr_->integrate(func_mx2_, std::make_pair(x, mx2), kt2_range_) / x;
+      return 2. * M_PI * integr_->integrate(func_mx2_, std::make_pair(x, mx2), kt2_range_);
     }
 
   private:
     const std::unique_ptr<AnalyticIntegrator> integr_;
     const std::unique_ptr<KTFlux> flux_;
     const Limits kt2_range_;
-    const utils::Function1D func_q2_, func_mx2_;
+    const utils::FunctionWrapper func_q2_, func_mx2_;
   };
 }  // namespace cepgen
 REGISTER_COLLINEAR_FLUX("KTIntegrated", KTIntegratedFlux);
