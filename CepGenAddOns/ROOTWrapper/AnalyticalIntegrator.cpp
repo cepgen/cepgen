@@ -50,9 +50,7 @@ namespace cepgen::root {
       return desc;
     }
 
-    double integrate(const utils::FunctionWrapper& func,
-                     void* params = nullptr,
-                     const Limits& lim = {}) const override {
+    double integrate(const utils::FunctionWrapper& func, void* params, const Limits& lim) const override {
       const auto func_local = utils::FunctionWrapper([&func, &params](double x) { return func(x, params); });
       const double xmin = lim.hasMin() ? lim.min() : range_.min();
       const double xmax = lim.hasMax() ? lim.max() : range_.max();

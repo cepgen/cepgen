@@ -43,7 +43,7 @@ namespace cepgen {
     Value integrate(Integrand& integrand) override {
       checkLimits(integrand);
 
-      auto funct = [&](const std::vector<double>& coord) -> double { return integrand.eval(coord); };
+      auto funct = [&integrand](const std::vector<double>& coord) -> double { return integrand.eval(coord); };
       boost::math::quadrature::naive_monte_carlo<double, decltype(funct)> mc(funct, bounds_, 1.e-2, true, 1);
       auto task = mc.integrate();
 

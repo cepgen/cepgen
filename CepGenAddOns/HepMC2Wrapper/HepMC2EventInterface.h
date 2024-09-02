@@ -34,7 +34,7 @@ namespace HepMC {
   class CepGenEvent : public GenEvent {
   public:
     /// Construct an event interface from a CepGen Event object
-    CepGenEvent(const cepgen::Event& ev);
+    explicit CepGenEvent(const cepgen::Event& ev);
     /// Extract a CepGen Event object from a HepMC2 GenEvent object
     operator cepgen::Event() const;
 
