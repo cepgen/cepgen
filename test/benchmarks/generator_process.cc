@@ -67,11 +67,12 @@ int main(int argc, char* argv[]) {
     gen.setIntegrator(cepgen::IntegratorFactory::get().build(integrator_name));
     for (const auto& generator_name : generators) {
       gen.integrate();  // prepare the grid first
-      bench.context("generator", generator_name).run(process + "+" + generator_name, [&] {
-        gen.runParameters().generation().setParameters(cepgen::ParametersList().set(
-            "worker", cepgen::GeneratorWorkerFactory::get().describeParameters(generator_name).parameters()));
-        gen.generate(num_events);
-      });
+      bench.context("generator", generator_name)
+          .run(process + "+" + generator_name, [&gen, &generator_name, &num_events] {
+            gen.runParameters().generation().setParameters(cepgen::ParametersList().set(
+                "worker", cepgen::GeneratorWorkerFactory::get().describeParameters(generator_name).parameters()));
+            gen.generate(num_events);
+          });
     }
   }
   render_benchmark(bench, filename, outputs);

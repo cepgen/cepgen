@@ -22,8 +22,6 @@
 #include "CepGen/Event/Event.h"
 #include "CepGen/Physics/PDG.h"
 
-using namespace std;
-
 namespace cepgen::utils {
   /// Generate a standard single-dissociative \f$pp \to p^\ast (\gamma\gamma \to \mu^+\mu^-) p\f$ LPAIR event
   Event generateLPAIREvent() {

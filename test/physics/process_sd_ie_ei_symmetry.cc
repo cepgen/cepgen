@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
     gen.runParameters().process().kinematics().setParameters(pkin);
     cs_ei = gen.computeXsection();
     if (num_gen > 0)
-      gen.generate(num_gen, [&](const cepgen::Event& evt, size_t) {
+      gen.generate(num_gen, [&h_eta_lead_ei, &h_eta_sublead_ei, &h_mdiff_ei](const cepgen::Event& evt, size_t) {
         const auto &mom1 = evt(cepgen::Particle::Role::CentralSystem).at(0).momentum(),
                    &mom2 = evt(cepgen::Particle::Role::CentralSystem).at(1).momentum();
         if (mom1.pt() > mom2.pt()) {
@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
     gen.runParameters().process().kinematics().setParameters(pkin);
     cs_ie = gen.computeXsection();
     if (num_gen > 0)
-      gen.generate(num_gen, [&](const cepgen::Event& evt, size_t) {
+      gen.generate(num_gen, [&h_eta_lead_ie, &h_eta_sublead_ie, &h_mdiff_ie](const cepgen::Event& evt, size_t) {
         const auto &mom1 = evt(cepgen::Particle::Role::CentralSystem).at(0).momentum(),
                    &mom2 = evt(cepgen::Particle::Role::CentralSystem).at(1).momentum();
         if (mom1.pt() > mom2.pt()) {

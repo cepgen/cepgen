@@ -58,7 +58,7 @@ namespace cepgen::validation {
       }
       addSample(sample_name);
       weight_ = static_cast<double>(gen_.computeXsection()) / num_events_;
-      gen_.generate(num_events_, [&](const Event& evt, size_t) { process(evt); });
+      gen_.generate(num_events_, [this](const Event& evt, size_t) { process(evt); });
     }
     Comparator& fill(const std::string& plot_name, double value) {
       m_hist1ds_.at(plot_name).at(this_sample_).fill(value, weight_);
