@@ -120,8 +120,8 @@ namespace cepgen::proc {
       genparams_.a_nuc1 = in1.A;
       genparams_.z_nuc1 = static_cast<unsigned short>(in1.Z);
       if (genparams_.z_nuc1 > 1) {
-        event().oneWithRole(Particle::IncomingBeam1).setPdgId((pdgid_t)in1);
-        event().oneWithRole(Particle::OutgoingBeam1).setPdgId((pdgid_t)in1);
+        event().oneWithRole(Particle::Role::IncomingBeam1).setPdgId((pdgid_t)in1);
+        event().oneWithRole(Particle::Role::OutgoingBeam1).setPdgId((pdgid_t)in1);
       }
     } else
       genparams_.a_nuc1 = genparams_.z_nuc1 = 1;
@@ -133,8 +133,8 @@ namespace cepgen::proc {
       genparams_.a_nuc2 = in2.A;
       genparams_.z_nuc2 = static_cast<unsigned short>(in2.Z);
       if (genparams_.z_nuc2 > 1) {
-        event().oneWithRole(Particle::IncomingBeam2).setPdgId((pdgid_t)in2);
-        event().oneWithRole(Particle::OutgoingBeam2).setPdgId((pdgid_t)in2);
+        event().oneWithRole(Particle::Role::IncomingBeam2).setPdgId((pdgid_t)in2);
+        event().oneWithRole(Particle::Role::OutgoingBeam2).setPdgId((pdgid_t)in2);
       }
     } else
       genparams_.a_nuc2 = genparams_.z_nuc2 = 1;
@@ -159,13 +159,13 @@ namespace cepgen::proc {
     // intermediate partons
     q1() = pA() - pX();
     q2() = pB() - pY();
-    event().oneWithRole(Particle::Intermediate).setMomentum(q1() + q2());
+    event().oneWithRole(Particle::Role::Intermediate).setMomentum(q1() + q2());
     //===========================================================================================
 
     //===========================================================================================
     // central system
-    auto oc = event()[Particle::CentralSystem];  // retrieve all references
-                                                 // to central system particles
+    auto oc = event()[Particle::Role::CentralSystem];  // retrieve all references
+                                                       // to central system particles
     for (int i = 0; i < evtkin_.nout; ++i) {
       auto& p = oc[i].get();  // retrieve a reference to the specific particle
       p.setPdgId((long)evtkin_.pdg[i]);

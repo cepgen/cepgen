@@ -53,12 +53,12 @@ int main(int argc, char* argv[]) {
   {  // first test: simple event content
     cepgen::Event ev;
 
-    cepgen::Particle p1(cepgen::Particle::IncomingBeam1, cepgen::PDG::proton);
+    cepgen::Particle p1(cepgen::Particle::Role::IncomingBeam1, cepgen::PDG::proton);
     p1.setMomentum(1., -15., 100.);
     p1.setStatus(cepgen::Particle::Status::Incoming);
     ev.addParticle(p1);
 
-    cepgen::Particle p2(cepgen::Particle::IncomingBeam2, cepgen::PDG::electron);
+    cepgen::Particle p2(cepgen::Particle::Role::IncomingBeam2, cepgen::PDG::electron);
     p2.setMomentum(10., 5., 3200.);
     p2.setStatus(cepgen::Particle::Status::Incoming);
     ev.addParticle(p2);

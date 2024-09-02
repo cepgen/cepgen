@@ -61,31 +61,31 @@ namespace HepMC {
       assoc_map_[idx] = part;
 
       switch (part_orig.role()) {
-        case cepgen::Particle::IncomingBeam1:
+        case cepgen::Particle::Role::IncomingBeam1:
           v1->add_particle_in(part);
           break;
-        case cepgen::Particle::IncomingBeam2:
+        case cepgen::Particle::Role::IncomingBeam2:
           v2->add_particle_in(part);
           break;
-        case cepgen::Particle::OutgoingBeam1:
+        case cepgen::Particle::Role::OutgoingBeam1:
           v1->add_particle_out(part);
           break;
-        case cepgen::Particle::OutgoingBeam2:
+        case cepgen::Particle::Role::OutgoingBeam2:
           v2->add_particle_out(part);
           break;
-        case cepgen::Particle::Parton1:
+        case cepgen::Particle::Role::Parton1:
           v1->add_particle_out(part);
           vcm->add_particle_in(part);
           break;
-        case cepgen::Particle::Parton2:
+        case cepgen::Particle::Role::Parton2:
           v2->add_particle_out(part);
           vcm->add_particle_in(part);
           break;
-        case cepgen::Particle::Intermediate:
+        case cepgen::Particle::Role::Intermediate:
           // skip the two-parton system and propagate the parentage
           cm_id = idx;
           continue;
-        case cepgen::Particle::CentralSystem:
+        case cepgen::Particle::Role::CentralSystem:
         default: {
           const auto& moth = part_orig.mothers();
           if (moth.empty())
@@ -159,13 +159,13 @@ namespace HepMC {
         size_t id_beam_in = 0;
         if (auto* part = *(*it_vtx)->particles_in_const_begin(); part) {
           if (part->barcode() == ip1->barcode()) {
-            role1 = cepgen::Particle::IncomingBeam1;
-            role2 = cepgen::Particle::Parton1;
-            role3 = cepgen::Particle::OutgoingBeam1;
+            role1 = cepgen::Particle::Role::IncomingBeam1;
+            role2 = cepgen::Particle::Role::Parton1;
+            role3 = cepgen::Particle::Role::OutgoingBeam1;
           } else if (part->barcode() == ip2->barcode()) {
-            role1 = cepgen::Particle::IncomingBeam2;
-            role2 = cepgen::Particle::Parton2;
-            role3 = cepgen::Particle::OutgoingBeam2;
+            role1 = cepgen::Particle::Role::IncomingBeam2;
+            role2 = cepgen::Particle::Role::Parton2;
+            role3 = cepgen::Particle::Role::OutgoingBeam2;
           }
           auto cg_part = convert_particle(*part, role1);
           cg_part.setStatus(cepgen::Particle::Status::PrimordialIncoming);

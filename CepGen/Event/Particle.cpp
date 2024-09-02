@@ -156,23 +156,23 @@ namespace cepgen {
 
   std::ostream& operator<<(std::ostream& os, const Particle::Role& rl) {
     switch (rl) {
-      case Particle::UnknownRole:
+      case Particle::Role::UnknownRole:
         return os << "unknown";
-      case Particle::IncomingBeam1:
+      case Particle::Role::IncomingBeam1:
         return os << "i.beam 1";
-      case Particle::IncomingBeam2:
+      case Particle::Role::IncomingBeam2:
         return os << "i.beam 2";
-      case Particle::OutgoingBeam1:
+      case Particle::Role::OutgoingBeam1:
         return os << "o.beam 1";
-      case Particle::OutgoingBeam2:
+      case Particle::Role::OutgoingBeam2:
         return os << "o.beam 2";
-      case Particle::Parton1:
+      case Particle::Role::Parton1:
         return os << "parton 1";
-      case Particle::Parton2:
+      case Particle::Role::Parton2:
         return os << "parton 2";
-      case Particle::Intermediate:
+      case Particle::Role::Intermediate:
         return os << "hard pr.";
-      case Particle::CentralSystem:
+      case Particle::Role::CentralSystem:
         return os << "central";
     }
     return os;

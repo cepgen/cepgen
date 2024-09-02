@@ -77,8 +77,8 @@ private:
           throw CG_FATAL("PPtoFF:prepare") << "Unsupported parton id: '" << parton_id << "'.";
       }
     };
-    g_part1_ = generate_coupling(event().oneWithRole(Particle::Parton1).pdgId());
-    g_part2_ = generate_coupling(event().oneWithRole(Particle::Parton2).pdgId());
+    g_part1_ = generate_coupling(event().oneWithRole(Particle::Role::Parton1).pdgId());
+    g_part2_ = generate_coupling(event().oneWithRole(Particle::Role::Parton2).pdgId());
 
     CG_DEBUG("PPtoFF:prepare") << "Incoming beams: mA = " << mA() << " GeV/mB = " << mB() << " GeV.\n\t"
                                << "Produced particles: " << phase_space_generator_->central() << ".\n\t"

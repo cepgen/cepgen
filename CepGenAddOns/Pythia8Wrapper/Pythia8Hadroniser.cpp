@@ -238,11 +238,11 @@ namespace cepgen::hadr {
       PDG::get().define(prop);
     }
     //--- add the particle to the event content
-    Particle& op = ev.addParticle((Particle::Role)role);
+    Particle& op = ev.addParticle(static_cast<Particle::Role>(role));
     op.setPdgId((long)py_part.id());
-    op.setStatus(py_part.isFinal()                                       ? Particle::Status::FinalState
-                 : (Particle::Role)role == Particle::Role::CentralSystem ? Particle::Status::Propagator
-                                                                         : Particle::Status::Fragmented);
+    op.setStatus(py_part.isFinal()                                                    ? Particle::Status::FinalState
+                 : static_cast<Particle::Role>(role) == Particle::Role::CentralSystem ? Particle::Status::Propagator
+                                                                                      : Particle::Status::Fragmented);
     op.setMomentum(Momentum(mom.px(), mom.py(), mom.pz(), mom.e()).setMass(mom.mCalc()));
     cg_evt_->addCorresp(py_part.index() - offset_, op.id());
     return op;
@@ -258,12 +258,12 @@ namespace cepgen::hadr {
         //----- particle already in the event
         Particle& cg_part = ev[cg_id];
         //--- fragmentation result
-        if (cg_part.role() == Particle::OutgoingBeam1 || cg_part.role() == Particle::OutgoingBeam2) {
+        if (cg_part.role() == Particle::Role::OutgoingBeam1 || cg_part.role() == Particle::Role::OutgoingBeam2) {
           cg_part.setStatus(Particle::Status::Fragmented);
           continue;
         }
         //--- resonance decayed; apply branching ratio for this decay
-        if (cg_part.role() == Particle::CentralSystem && p.status() < 0) {
+        if (cg_part.role() == Particle::Role::CentralSystem && p.status() < 0) {
           if (res_decay_)
             weight *= p.particleDataEntry().pickChannel().bRatio();
           cg_part.setStatus(Particle::Status::Resonance);
@@ -294,19 +294,19 @@ namespace cepgen::hadr {
       else {
         //----- new particle to be added
         const unsigned short role = findRole(ev, p);
-        switch ((Particle::Role)role) {
-          case Particle::OutgoingBeam1:
-            ev[Particle::OutgoingBeam1][0].get().setStatus(Particle::Status::Fragmented);
+        switch (static_cast<Particle::Role>(role)) {
+          case Particle::Role::OutgoingBeam1:
+            ev[Particle::Role::OutgoingBeam1][0].get().setStatus(Particle::Status::Fragmented);
             break;
-          case Particle::OutgoingBeam2:
-            ev[Particle::OutgoingBeam2][0].get().setStatus(Particle::Status::Fragmented);
+          case Particle::Role::OutgoingBeam2:
+            ev[Particle::Role::OutgoingBeam2][0].get().setStatus(Particle::Status::Fragmented);
             break;
           default:
             break;
         }
         // found the role ; now we can add the particle
         Particle& cg_part = addParticle(ev, p, p.p(), role);
-        if (correct_central_ && (Particle::Role)role == Particle::CentralSystem) {
+        if (correct_central_ && static_cast<Particle::Role>(role) == Particle::Role::CentralSystem) {
           if (const auto ip = std::find(central_parts.begin(), central_parts.end(), p.mother1());
               ip != central_parts.end())
             cg_part.setMomentum(ev[cg_evt_->cepgenId(*ip - offset_)].momentum());
@@ -333,16 +333,16 @@ namespace cepgen::hadr {
   unsigned short Pythia8Hadroniser::findRole(const Event& ev, const Pythia8::Particle& p) const {
     for (const auto& par_id : p.motherList()) {
       if (par_id == 1 && offset_ > 0)
-        return (unsigned short)Particle::OutgoingBeam1;
+        return (unsigned short)Particle::Role::OutgoingBeam1;
       if (par_id == 2 && offset_ > 0)
-        return (unsigned short)Particle::OutgoingBeam2;
+        return (unsigned short)Particle::Role::OutgoingBeam2;
       if (const unsigned short par_cg_id = cg_evt_->cepgenId(par_id - offset_);
           par_cg_id != Pythia8::CepGenEvent::INVALID_ID)
         return (unsigned short)ev(par_cg_id).role();
       if (par_id != Pythia8::CepGenEvent::INVALID_ID)
         return findRole(ev, pythia_->event[par_id]);
     }
-    return (unsigned short)Particle::UnknownRole;
+    return (unsigned short)Particle::Role::UnknownRole;
   }
 
   ParametersDescription Pythia8Hadroniser::description() {

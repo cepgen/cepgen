@@ -33,7 +33,7 @@ namespace cepgen::proc {
             steer<ParametersList>("kinematicsGenerator").set("ids", std::vector<int>(central.begin(), central.end())))),
         symmetrise_(steer<bool>("symmetrise")),
         store_alphas_(steer<bool>("storeAlphas")) {
-    event().map()[Particle::CentralSystem].resize(central.size());
+    event().map()[Particle::Role::CentralSystem].resize(central.size());
   }
 
   FactorisedProcess::FactorisedProcess(const FactorisedProcess& proc)
@@ -45,11 +45,12 @@ namespace cepgen::proc {
   void FactorisedProcess::addEventContent() {
     CG_ASSERT(phase_space_generator_);
     const auto central_pdg_ids = phase_space_generator_->central();
-    Process::setEventContent({{Particle::IncomingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
-                              {Particle::IncomingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
-                              {Particle::OutgoingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
-                              {Particle::OutgoingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
-                              {Particle::CentralSystem, spdgids_t(central_pdg_ids.begin(), central_pdg_ids.end())}});
+    Process::setEventContent(
+        {{Particle::Role::IncomingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
+         {Particle::Role::IncomingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
+         {Particle::Role::OutgoingBeam1, {kinematics().incomingBeams().positive().integerPdgId()}},
+         {Particle::Role::OutgoingBeam2, {kinematics().incomingBeams().negative().integerPdgId()}},
+         {Particle::Role::CentralSystem, spdgids_t(central_pdg_ids.begin(), central_pdg_ids.end())}});
   }
 
   void FactorisedProcess::prepareKinematics() {
@@ -59,8 +60,8 @@ namespace cepgen::proc {
              "be doing something irregular.";
     phase_space_generator_->initialise(this);
 
-    event().oneWithRole(Particle::Parton1).setIntegerPdgId(phase_space_generator_->partons().at(0));
-    event().oneWithRole(Particle::Parton2).setIntegerPdgId(phase_space_generator_->partons().at(1));
+    event().oneWithRole(Particle::Role::Parton1).setIntegerPdgId(phase_space_generator_->partons().at(0));
+    event().oneWithRole(Particle::Role::Parton2).setIntegerPdgId(phase_space_generator_->partons().at(1));
 
     CG_DEBUG("FactorisedProcess:prepareKinematics")
         << "Partons: " << phase_space_generator_->partons() << ", "
@@ -97,8 +98,8 @@ namespace cepgen::proc {
       pY().setMass2(mY2());
 
     // parton systems
-    auto& part1 = event().oneWithRole(Particle::Parton1);
-    auto& part2 = event().oneWithRole(Particle::Parton2);
+    auto& part1 = event().oneWithRole(Particle::Role::Parton1);
+    auto& part2 = event().oneWithRole(Particle::Role::Parton2);
     part1.setMomentum(pA() - pX(), true);
     part2.setMomentum(pB() - pY(), true);
 

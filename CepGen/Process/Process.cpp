@@ -85,42 +85,42 @@ namespace cepgen::proc {
     throw CG_FATAL("Process:clone") << "Process \"" << name_ << "\" has no cloning method implementation!";
   }
 
-  Momentum& Process::pA() { return event().oneWithRole(Particle::IncomingBeam1).momentum(); }
+  Momentum& Process::pA() { return event().oneWithRole(Particle::Role::IncomingBeam1).momentum(); }
 
-  const Momentum& Process::pA() const { return event().oneWithRole(Particle::IncomingBeam1).momentum(); }
+  const Momentum& Process::pA() const { return event().oneWithRole(Particle::Role::IncomingBeam1).momentum(); }
 
-  Momentum& Process::pB() { return event().oneWithRole(Particle::IncomingBeam2).momentum(); }
+  Momentum& Process::pB() { return event().oneWithRole(Particle::Role::IncomingBeam2).momentum(); }
 
-  const Momentum& Process::pB() const { return event().oneWithRole(Particle::IncomingBeam2).momentum(); }
+  const Momentum& Process::pB() const { return event().oneWithRole(Particle::Role::IncomingBeam2).momentum(); }
 
-  Momentum& Process::pX() { return event().oneWithRole(Particle::OutgoingBeam1).momentum(); }
+  Momentum& Process::pX() { return event().oneWithRole(Particle::Role::OutgoingBeam1).momentum(); }
 
-  const Momentum& Process::pX() const { return event().oneWithRole(Particle::OutgoingBeam1).momentum(); }
+  const Momentum& Process::pX() const { return event().oneWithRole(Particle::Role::OutgoingBeam1).momentum(); }
 
-  Momentum& Process::pY() { return event().oneWithRole(Particle::OutgoingBeam2).momentum(); }
+  Momentum& Process::pY() { return event().oneWithRole(Particle::Role::OutgoingBeam2).momentum(); }
 
-  const Momentum& Process::pY() const { return event().oneWithRole(Particle::OutgoingBeam2).momentum(); }
+  const Momentum& Process::pY() const { return event().oneWithRole(Particle::Role::OutgoingBeam2).momentum(); }
 
-  Momentum& Process::q1() { return event().oneWithRole(Particle::Parton1).momentum(); }
+  Momentum& Process::q1() { return event().oneWithRole(Particle::Role::Parton1).momentum(); }
 
-  const Momentum& Process::q1() const { return event().oneWithRole(Particle::Parton1).momentum(); }
+  const Momentum& Process::q1() const { return event().oneWithRole(Particle::Role::Parton1).momentum(); }
 
-  Momentum& Process::q2() { return event().oneWithRole(Particle::Parton2).momentum(); }
+  Momentum& Process::q2() { return event().oneWithRole(Particle::Role::Parton2).momentum(); }
 
-  const Momentum& Process::q2() const { return event().oneWithRole(Particle::Parton2).momentum(); }
+  const Momentum& Process::q2() const { return event().oneWithRole(Particle::Role::Parton2).momentum(); }
 
   Momentum& Process::pc(size_t i) {
-    if (event()[Particle::CentralSystem].size() <= i)
+    if (event()[Particle::Role::CentralSystem].size() <= i)
       throw CG_FATAL("Process:pc") << "Trying to retrieve central particle #" << i << " while only "
-                                   << event()[Particle::CentralSystem].size() << " is/are registered.";
-    return event()[Particle::CentralSystem].at(i).get().momentum();
+                                   << event()[Particle::Role::CentralSystem].size() << " is/are registered.";
+    return event()[Particle::Role::CentralSystem].at(i).get().momentum();
   }
 
   const Momentum& Process::pc(size_t i) const {
-    if (event()(Particle::CentralSystem).size() <= i)
+    if (event()(Particle::Role::CentralSystem).size() <= i)
       throw CG_FATAL("Process:pc") << "Trying to retrieve central particle #" << i << " while only "
-                                   << event()(Particle::CentralSystem).size() << " is/are registered.";
-    return event()(Particle::CentralSystem).at(i).momentum();
+                                   << event()(Particle::Role::CentralSystem).size() << " is/are registered.";
+    return event()(Particle::Role::CentralSystem).at(i).momentum();
   }
 
   double Process::shat() const { return (q1() + q2()).mass2(); }
@@ -297,21 +297,21 @@ namespace cepgen::proc {
     const auto& p2 = kin_.incomingBeams().negative().momentum();
     //--- define incoming system
     if (event_) {
-      auto& ib1 = event_->oneWithRole(Particle::IncomingBeam1);
+      auto& ib1 = event_->oneWithRole(Particle::Role::IncomingBeam1);
       ib1.setIntegerPdgId(kin_.incomingBeams().positive().integerPdgId());
       ib1.setMomentum(p1);
-      auto& ib2 = event_->oneWithRole(Particle::IncomingBeam2);
+      auto& ib2 = event_->oneWithRole(Particle::Role::IncomingBeam2);
       ib2.setIntegerPdgId(kin_.incomingBeams().negative().integerPdgId());
       ib2.setMomentum(p2);
-      auto& ob1 = event_->oneWithRole(Particle::OutgoingBeam1);
+      auto& ob1 = event_->oneWithRole(Particle::Role::OutgoingBeam1);
       ob1.setIntegerPdgId(kin_.incomingBeams().positive().integerPdgId());
       ob1.setStatus(kin_.incomingBeams().positive().elastic() ? Particle::Status::FinalState
                                                               : Particle::Status::Unfragmented);
-      auto& ob2 = event_->oneWithRole(Particle::OutgoingBeam2);
+      auto& ob2 = event_->oneWithRole(Particle::Role::OutgoingBeam2);
       ob2.setIntegerPdgId(kin_.incomingBeams().negative().integerPdgId());
       ob2.setStatus(kin_.incomingBeams().negative().elastic() ? Particle::Status::FinalState
                                                               : Particle::Status::Unfragmented);
-      for (auto& cp : (*event_)[Particle::CentralSystem])
+      for (auto& cp : (*event_)[Particle::Role::CentralSystem])
         cp.get().setIntegerPdgId(cp.get().integerPdgId());
     }
     s_ = kin_.incomingBeams().s();
@@ -390,11 +390,11 @@ namespace cepgen::proc {
 
   void Process::setKinematics() {
     fillKinematics();
-    if (event().hasRole(Particle::Intermediate)) {
+    if (event().hasRole(Particle::Role::Intermediate)) {
       Momentum interm_mom;
-      for (size_t i = 0; i < event()[Particle::CentralSystem].size(); ++i)
+      for (size_t i = 0; i < event()[Particle::Role::CentralSystem].size(); ++i)
         interm_mom += pc(i);
-      event().oneWithRole(Particle::Intermediate).setMomentum(interm_mom, true);
+      event().oneWithRole(Particle::Role::Intermediate).setMomentum(interm_mom, true);
     }
   }
 

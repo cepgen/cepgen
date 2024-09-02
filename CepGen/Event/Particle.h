@@ -47,7 +47,7 @@ namespace cepgen {
     };
     friend std::ostream& operator<<(std::ostream& os, const Status&);  ///< Human-readable particle's status
     /// Role of the particle in the process
-    enum Role {
+    enum class Role {
       UnknownRole = -1,   ///< Undefined role
       IncomingBeam1 = 1,  ///< \f$z>0\f$ incoming beam particle
       IncomingBeam2 = 2,  ///< \f$z<0\f$ incoming beam particle
@@ -156,7 +156,7 @@ namespace cepgen {
     bool antiparticle_{false};            ///< Are we dealing with the particle or antiparticle?
     Momentum momentum_;                   ///< Momentum properties handler
     float helicity_{0.};                  ///< Helicity
-    Role role_{UnknownRole};              ///< Role in the process
+    Role role_{Role::UnknownRole};        ///< Role in the process
     int status_{(int)Status::Undefined};  ///< Decay/stability status
     ParticlesIds mothers_;                ///< List of mother particles
     ParticlesIds daughters_;              ///< List of daughter particles

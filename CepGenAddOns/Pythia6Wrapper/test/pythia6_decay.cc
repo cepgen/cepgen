@@ -12,7 +12,7 @@ int main() {
   auto pythia = cepgen::EventModifierFactory::get().build("pythia6");
 
   cepgen::Event evt;
-  auto tau = cepgen::Particle(cepgen::Particle::CentralSystem, 15, cepgen::Particle::Status::Undecayed);
+  auto tau = cepgen::Particle(cepgen::Particle::Role::CentralSystem, 15, cepgen::Particle::Status::Undecayed);
   tau.setMomentum(cepgen::Momentum(0., 0., 1000.), false);
   evt.addParticle(tau);
   const auto evt_size_bef = evt.size();

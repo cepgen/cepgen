@@ -93,21 +93,21 @@ namespace cepgen {
   }
 
   void Event::freeze() {
-    if (particles_.count(Particle::CentralSystem) > 0)
-      event_content_.cs = particles_[Particle::CentralSystem].size();
-    if (particles_.count(Particle::OutgoingBeam1) > 0)
-      event_content_.op1 = particles_[Particle::OutgoingBeam1].size();
-    if (particles_.count(Particle::OutgoingBeam2) > 0)
-      event_content_.op2 = particles_[Particle::OutgoingBeam2].size();
+    if (particles_.count(Particle::Role::CentralSystem) > 0)
+      event_content_.cs = particles_[Particle::Role::CentralSystem].size();
+    if (particles_.count(Particle::Role::OutgoingBeam1) > 0)
+      event_content_.op1 = particles_[Particle::Role::OutgoingBeam1].size();
+    if (particles_.count(Particle::Role::OutgoingBeam2) > 0)
+      event_content_.op2 = particles_[Particle::Role::OutgoingBeam2].size();
   }
 
   void Event::restore() {
-    if (particles_.count(Particle::CentralSystem) > 0)
-      particles_[Particle::CentralSystem].resize(event_content_.cs);
-    if (particles_.count(Particle::OutgoingBeam1) > 0)
-      particles_[Particle::OutgoingBeam1].resize(event_content_.op1);
-    if (particles_.count(Particle::OutgoingBeam2) > 0)
-      particles_[Particle::OutgoingBeam2].resize(event_content_.op2);
+    if (particles_.count(Particle::Role::CentralSystem) > 0)
+      particles_[Particle::Role::CentralSystem].resize(event_content_.cs);
+    if (particles_.count(Particle::Role::OutgoingBeam1) > 0)
+      particles_[Particle::Role::OutgoingBeam1].resize(event_content_.op1);
+    if (particles_.count(Particle::Role::OutgoingBeam2) > 0)
+      particles_[Particle::Role::OutgoingBeam2].resize(event_content_.op2);
   }
 
   bool Event::compressed() const { return compressed_; }
@@ -118,13 +118,13 @@ namespace cepgen {
     Event out(/*compressed=*/true);
     int i = 0;
     //--- add all necessary particles
-    for (const auto& role : {Particle::IncomingBeam1,
-                             Particle::IncomingBeam2,
-                             Particle::OutgoingBeam1,
-                             Particle::OutgoingBeam2,
-                             Particle::Parton1,
-                             Particle::Parton2,
-                             Particle::CentralSystem}) {
+    for (const auto& role : {Particle::Role::IncomingBeam1,
+                             Particle::Role::IncomingBeam2,
+                             Particle::Role::OutgoingBeam1,
+                             Particle::Role::OutgoingBeam2,
+                             Particle::Role::Parton1,
+                             Particle::Role::Parton2,
+                             Particle::Role::CentralSystem}) {
       if (particles_.count(role) == 0)
         continue;
       for (const auto& old_part : operator()(role)) {
@@ -135,27 +135,27 @@ namespace cepgen {
       }
     }
     //--- fix parentage for outgoing beam particles
-    if (out[Particle::OutgoingBeam1].size() > 1 || out[Particle::OutgoingBeam2].size() > 1)
+    if (out[Particle::Role::OutgoingBeam1].size() > 1 || out[Particle::Role::OutgoingBeam2].size() > 1)
       CG_WARNING("Event:compress") << "Event compression not designed for already fragmented beam remnants!\n\t"
                                    << "Particles parentage is not guaranteed to be conserved.";
-    if (particles_.count(Particle::OutgoingBeam1) > 0)
-      for (auto& part : out[Particle::OutgoingBeam1])
-        part.get().addMother(out[Particle::IncomingBeam1][0].get());
-    if (particles_.count(Particle::OutgoingBeam2) > 0)
-      for (auto& part : out[Particle::OutgoingBeam2])
-        part.get().addMother(out[Particle::IncomingBeam2][0].get());
+    if (particles_.count(Particle::Role::OutgoingBeam1) > 0)
+      for (auto& part : out[Particle::Role::OutgoingBeam1])
+        part.get().addMother(out[Particle::Role::IncomingBeam1][0].get());
+    if (particles_.count(Particle::Role::OutgoingBeam2) > 0)
+      for (auto& part : out[Particle::Role::OutgoingBeam2])
+        part.get().addMother(out[Particle::Role::IncomingBeam2][0].get());
     //--- fix parentage for incoming partons
-    for (auto& part : out[Particle::Parton1])
-      if (particles_.count(Particle::IncomingBeam1) > 0)
-        part.get().addMother(out[Particle::IncomingBeam1][0].get());
-    if (particles_.count(Particle::IncomingBeam2) > 0)
-      for (auto& part : out[Particle::Parton2])
-        part.get().addMother(out[Particle::IncomingBeam2][0].get());
+    for (auto& part : out[Particle::Role::Parton1])
+      if (particles_.count(Particle::Role::IncomingBeam1) > 0)
+        part.get().addMother(out[Particle::Role::IncomingBeam1][0].get());
+    if (particles_.count(Particle::Role::IncomingBeam2) > 0)
+      for (auto& part : out[Particle::Role::Parton2])
+        part.get().addMother(out[Particle::Role::IncomingBeam2][0].get());
     //--- fix parentage for central system
-    if (particles_.count(Particle::Parton1) > 0 && particles_.count(Particle::Parton2) > 0)
-      for (auto& part : out[Particle::CentralSystem]) {
-        part.get().addMother(out[Particle::Parton1][0]);
-        part.get().addMother(out[Particle::Parton2][0]);
+    if (particles_.count(Particle::Role::Parton1) > 0 && particles_.count(Particle::Role::Parton2) > 0)
+      for (auto& part : out[Particle::Role::CentralSystem]) {
+        part.get().addMother(out[Particle::Role::Parton1][0]);
+        part.get().addMother(out[Particle::Role::Parton2][0]);
       }
     return out;
   }
@@ -321,7 +321,7 @@ namespace cepgen {
 
   ParticleRef Event::addParticle(Particle& part, bool replace) {
     CG_DEBUG_LOOP("Event") << "Particle with PDGid = " << part.integerPdgId() << " has role " << part.role();
-    if (part.role() <= 0)
+    if (static_cast<int>(part.role()) <= 0)
       throw CG_FATAL("Event") << "Trying to add a particle with role=" << static_cast<int>(part.role()) << ".";
 
     auto& part_with_same_role = particles_[part.role()];  // list of particles with the same role

@@ -146,11 +146,11 @@ namespace cepgen {
 
       if (randomise_charge_) {  // randomise the charge of outgoing system
         const auto sign = proc_->randomGenerator().uniformInt(0, 1) == 1;
-        proc_->event()[Particle::CentralSystem][0].get().setAntiparticle(sign);
-        proc_->event()[Particle::CentralSystem][1].get().setAntiparticle(!sign);
+        proc_->event()[Particle::Role::CentralSystem][0].get().setAntiparticle(sign);
+        proc_->event()[Particle::Role::CentralSystem][1].get().setAntiparticle(!sign);
       }
-      proc_->event()[Particle::CentralSystem][0].get().setStatus(Particle::Status::FinalState);
-      proc_->event()[Particle::CentralSystem][1].get().setStatus(Particle::Status::FinalState);
+      proc_->event()[Particle::Role::CentralSystem][0].get().setStatus(Particle::Status::FinalState);
+      proc_->event()[Particle::Role::CentralSystem][1].get().setStatus(Particle::Status::FinalState);
       return prefactor_ * m_pt_diff_;
     }
 

@@ -178,10 +178,10 @@ namespace ROOT {
       pdg_id[np] = part.integerPdgId();
       parent1[np] = (part.mothers().size() > 0) ? *part.mothers().begin() : -1;
       parent2[np] = (part.mothers().size() > 1) ? *part.mothers().rbegin() : -1;
-      status[np] = (int)part.status();
-      stable[np] = ((short)part.status() > 0);
+      status[np] = static_cast<int>(part.status());
+      stable[np] = status[np] > 0;
       charge[np] = part.charge();
-      role[np] = part.role();
+      role[np] = static_cast<int>(part.role());
       np++;
     }
     metadata = ev.metadata;
@@ -213,9 +213,9 @@ namespace ROOT {
     //--- first loop to populate the particles content
     for (unsigned short i = 0; i < np; ++i) {
       cepgen::Particle part;
-      part.setRole((cepgen::Particle::Role)role[i]);
+      part.setRole(static_cast<cepgen::Particle::Role>(role[i]));
       part.setPdgId((long)pdg_id[i]);
-      part.setStatus((cepgen::Particle::Status)status[i]);
+      part.setStatus(static_cast<cepgen::Particle::Status>(status[i]));
       part.setMomentum(cepgen::Momentum::fromPtEtaPhiE(pt[i], eta[i], phi[i], E[i]));
       ev.addParticle(part);
     }

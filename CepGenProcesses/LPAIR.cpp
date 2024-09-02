@@ -45,13 +45,13 @@ public:
   proc::ProcessPtr clone() const override { return std::make_unique<LPAIR>(*this); }
 
   void addEventContent() override {
-    proc::Process::setEventContent({{Particle::IncomingBeam1, {PDG::proton}},
-                                    {Particle::IncomingBeam2, {PDG::proton}},
-                                    {Particle::Parton1, {PDG::photon}},
-                                    {Particle::Parton2, {PDG::photon}},
-                                    {Particle::OutgoingBeam1, {PDG::proton}},
-                                    {Particle::OutgoingBeam2, {PDG::proton}},
-                                    {Particle::CentralSystem, {+(spdgid_t)pair_.pdgid, -(spdgid_t)pair_.pdgid}}});
+    proc::Process::setEventContent({{Particle::Role::IncomingBeam1, {PDG::proton}},
+                                    {Particle::Role::IncomingBeam2, {PDG::proton}},
+                                    {Particle::Role::Parton1, {PDG::photon}},
+                                    {Particle::Role::Parton2, {PDG::photon}},
+                                    {Particle::Role::OutgoingBeam1, {PDG::proton}},
+                                    {Particle::Role::OutgoingBeam2, {PDG::proton}},
+                                    {Particle::Role::CentralSystem, {+(spdgid_t)pair_.pdgid, -(spdgid_t)pair_.pdgid}}});
   }
 
   double computeWeight() override;
@@ -154,23 +154,23 @@ public:
     }
     // first outgoing beam
     event()
-        .oneWithRole(Particle::OutgoingBeam1)
+        .oneWithRole(Particle::Role::OutgoingBeam1)
         .setStatus(kinematics().incomingBeams().positive().elastic() ? Particle::Status::FinalState
                                                                      : Particle::Status::Unfragmented);
     // second outgoing beam
     event()
-        .oneWithRole(Particle::OutgoingBeam2)
+        .oneWithRole(Particle::Role::OutgoingBeam2)
         .setStatus(kinematics().incomingBeams().negative().elastic() ? Particle::Status::FinalState
                                                                      : Particle::Status::Unfragmented);
 
     // central system
     const auto ransign = rnd_gen_->uniformInt(0, 1) == 1;
     if (randomise_charge_) {  // randomise the charge of outgoing system
-      event()[Particle::CentralSystem][0].get().setAntiparticle(ransign);
-      event()[Particle::CentralSystem][1].get().setAntiparticle(!ransign);
+      event()[Particle::Role::CentralSystem][0].get().setAntiparticle(ransign);
+      event()[Particle::Role::CentralSystem][1].get().setAntiparticle(!ransign);
     }
-    event()[Particle::CentralSystem][0].get().setStatus(Particle::Status::FinalState);
-    event()[Particle::CentralSystem][1].get().setStatus(Particle::Status::FinalState);
+    event()[Particle::Role::CentralSystem][0].get().setStatus(Particle::Status::FinalState);
+    event()[Particle::Role::CentralSystem][1].get().setStatus(Particle::Status::FinalState);
   }
 
   static ParametersDescription description() {
@@ -666,7 +666,7 @@ double LPAIR::computeWeight() {
 
   for (size_t i = 0; i < 2; ++i)  // boost outgoing leptons' kinematics into lab frame
     pc(i).betaGammaBoost(gamma_cm_, beta_gamma_cm_);
-  if (!kinematics().cuts().central.contain(event()(Particle::CentralSystem)))  // cuts on outgoing leptons
+  if (!kinematics().cuts().central.contain(event()(Particle::Role::CentralSystem)))  // cuts on outgoing leptons
     return 0.;
 
   {  // preparation for the periPP call
