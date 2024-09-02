@@ -70,7 +70,14 @@ namespace cepgen::pythia8 {
     static ParametersDescription description() {
       auto desc = cepgen::CollinearFlux::description();
       desc.setDescription("Pythia 8 coll.flux");
-      desc.add<std::string>("type", "Proton2gammaDZ").setDescription("type of PDF evaluator to use");
+      desc.add<std::string>("type", "Proton2gammaDZ")
+          .setDescription("type of PDF evaluator to use")
+          .allow("Lepton", "photon-from-lepton modelling")
+          .allow("LHAGrid1", "LHAPDF grid modelling")
+          .allow("MSTWpdf", "MSTW grid modelling")
+          .allow("Proton2gammaDZ", "Drees-Zeppenfeld photon emission from proton")
+          .allow("Nucleus2gamma", "photon-from-HI emission")
+          .allow("ProtonPoint", "point-like photon emission from proton");
       desc.add<pdgid_t>("partonPdgId", PDG::photon).setDescription("parton PDG identifier");
       desc.add<pdgid_t>("beamPdgId", PDG::proton).setDescription("beam particle PDG identifier");
       auto lepton_desc = ParametersDescription();

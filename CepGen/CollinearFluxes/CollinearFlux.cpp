@@ -33,8 +33,6 @@ namespace cepgen {
   }
 
   double CollinearFlux::fluxMX2(double x, double mx2) const {
-    if (mx2 <= 0.)
-      mx2 = mass2();
-    return fluxQ2(x, utils::q2(x, mass2(), mx2) /*FIXME on-shell assumption: xbj == x*/);
+    return fluxQ2(x, utils::q2(x, mass2(), mx2 <= 0. ? mass2() : mx2) /*FIXME on-shell assumption: xbj == x*/);
   }
 }  // namespace cepgen

@@ -18,14 +18,11 @@
  */
 
 #include "CepGen/CollinearFluxes/CollinearFlux.h"
-#include "CepGen/Core/Exception.h"
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
-#include "CepGen/Utils/Limits.h"
 
 namespace cepgen {
   class EPACollinearFlux final : public CollinearFlux {
