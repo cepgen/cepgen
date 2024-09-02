@@ -16,28 +16,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cmath>
+
 #include "CepGen/CollinearFluxes/CollinearFlux.h"
-#include "CepGen/Core/Exception.h"
-#include "CepGen/FormFactors/Parameterisation.h"
-#include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
-#include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Utils/Limits.h"
+#include "CepGen/Physics/Utils.h"
 
 namespace cepgen {
   /// Virtuality-dependent Drees-Zeppenfeld photon flux
-  /// \note Corresponds to  PDF:Proton2gammaSet=2 in Pythia 8
+  /// \note Corresponds to PDF:Proton2gammaSet=2 in Pythia 8
   /// \cite Drees:1988pp
   class DreesZeppenfeldCollinearFlux final : public CollinearFlux {
   public:
     explicit DreesZeppenfeldCollinearFlux(const ParametersList& params)
-        : CollinearFlux(params), scale_(steer<double>("scale")) {}
+        : CollinearFlux(params), scale_(steer<double>("scale")), coeffs_a_(steer<std::vector<double> >("coeffsA")) {}
 
     static ParametersDescription description() {
       auto desc = CollinearFlux::description();
       desc.setDescription("Drees-Zeppenfeld Q^{2}-dependent flux");
       desc.add<double>("scale", 0.71).setDescription("factorisation scale (in GeV^2)");
+      desc.add<std::vector<double> >("coeffsA", {-11. / 6, 3., -1.5, 1. / 3});
       return desc;
     }
 
@@ -47,13 +46,22 @@ namespace cepgen {
     double fluxQ2(double x, double q2) const override {
       if (!x_range_.contains(x, true))
         return 0.;
+      const auto q2min = utils::kt::q2(x, 0. /* kt2 */, mp2_);
       const auto fq4 = std::pow(1 + q2 / scale_, -4);  // Q^2-dependent form factor
-      return prefactor_ * 0.5 * (1. + std::pow(1. - x, 2)) * fq4;
+      return prefactor_ * 0.5 * (1. + std::pow(1. - x, 2)) * factorA(1. + scale_ / q2min) * fq4;
     }
 
-  protected:
+  private:
     double mass2() const override { return mp2_; }
+    double factorA(double a) const {
+      auto ret = std::log(a);
+      for (int i = 0; i < static_cast<int>(coeffs_a_.size()); ++i)
+        ret += coeffs_a_.at(i) * std::pow(a, -i);
+      return ret;
+    }
+
     const double scale_;
+    const std::vector<double> coeffs_a_;
   };
 }  // namespace cepgen
 REGISTER_COLLINEAR_FLUX("DreesZeppenfeld", DreesZeppenfeldCollinearFlux);
