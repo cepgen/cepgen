@@ -339,8 +339,8 @@ double LPAIR::pickin() {
   }
   const auto w31 = mX2() - mA2();
   // definition from eq. (A.4) and (A.5) in [1]
-  auto t1_max = mA2() + mX2() - 0.5 * (ss_ * sp + sl1_ * std::sqrt(rl2)) / s(),
-       t1_min = (w31 * d3 + (d3 - w31) * (d3 * mA2() - w31 * mB2()) / s()) / t1_max;
+  auto t1_max = mA2() + mX2() - 0.5 * (ss_ * sp + sl1_ * std::sqrt(rl2)) * inverseS(),
+       t1_min = (w31 * d3 + (d3 - w31) * (d3 * mA2() - w31 * mB2()) * inverseS()) / t1_max;
   t1_max = std::max(t1_max, -kinematics().cuts().initial.q2.at(0).max());
   t1_min = std::min(t1_min, -kinematics().cuts().initial.q2.at(0).min());
   const auto t1_limits = Limits{t1_min, t1_max};
@@ -700,7 +700,7 @@ double LPAIR::computeWeight() {
     return 0.;
 
   const auto alpha_prod = alphaEM(std::sqrt(-t1())) * alphaEM(std::sqrt(-t2()));
-  jacobian *= constb_ * charge_factor_ * alpha_prod * alpha_prod / s();
+  jacobian *= constb_ * charge_factor_ * alpha_prod * alpha_prod * inverseS();
 
   CG_DEBUG_LOOP("LPAIR:f") << "Jacobian: " << jacobian << ", str.fun. factor: " << peripp << ".";
   return jacobian * peripp;  // compute the event weight using the Jacobian

@@ -58,6 +58,7 @@ namespace cepgen::proc {
   Process& Process::operator=(const Process& proc) {
     s_ = proc.s_;
     sqs_ = proc.sqs_;
+    inv_s_ = proc.inv_s_;
     inv_sqs_ = proc.inv_sqs_;
     mA2_ = proc.mA2_;
     mB2_ = proc.mB2_;
@@ -315,11 +316,12 @@ namespace cepgen::proc {
     }
     s_ = kin_.incomingBeams().s();
     sqs_ = std::sqrt(s_);
+    inv_s_ = 1. / s_;
     inv_sqs_ = 1. / sqs_;
 
     mA2_ = mX2_ = p1.mass2();
     mB2_ = mY2_ = p2.mass2();
-    wcm_ = 0.5 * (1. + std::sqrt(1. - 4. * std::sqrt(mA2_ * mB2_) / s_));
+    wcm_ = 0.5 * (1. + std::sqrt(1. - 4. * std::sqrt(mA2_ * mB2_) * inv_s_));
 
     prepareKinematics();
 

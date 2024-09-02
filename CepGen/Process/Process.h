@@ -105,6 +105,7 @@ namespace cepgen::proc {
 
     inline double s() const { return s_; }                   ///< Two-beam squared centre of mass energy
     inline double sqrtS() const { return sqs_; }             ///< Two-beam centre of mass energy
+    inline double inverseS() const { return inv_s_; }        ///< Inverse two-beam squared centre of mass energy
     inline double inverseSqrtS() const { return inv_sqs_; }  ///< Inverse two-beam centre of mass energy
 
     utils::RandomGenerator& randomGenerator() const;  ///< Accessor for this process' random number generator
@@ -163,6 +164,7 @@ namespace cepgen::proc {
   private:
     double s_{-1.};        ///< \f$s\f$, squared centre of mass energy of the two-beam system, in GeV\f${}^2\f$
     double sqs_{-1.};      ///< \f$\sqrt s\f$, centre of mass energy of the two-beam system (in GeV)
+    double inv_s_{-1.};    ///< \f$s^{-1}\f$, inverse squared CM energy of the two-beam system (in GeV\f${}^{-2}\f$)
     double inv_sqs_{-1.};  ///< \f$s^{-1/2}\f$, inverse CM energy of the two-beam system (in GeV\f${}^{-1}\f$)
     double wcm_{-1.};      ///< two-parton centre of mass energy
     double mA2_{-1.};      ///< first incoming beam particle squared mass
