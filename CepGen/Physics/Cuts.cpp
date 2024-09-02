@@ -30,6 +30,7 @@ namespace cepgen::cuts {
     (*this)
         .add("pt", pt_single)
         .add("eta", eta_single)
+        .add("phi", phi_single)
         .add("rapidity", rapidity_single)
         .add("energy", energy_single)
         .add("mass", mass_single)
@@ -73,6 +74,7 @@ namespace cepgen::cuts {
     auto desc = ParametersDescription();
     desc.add<Limits>("pt", Limits{0.}).setDescription("Single particle pt (GeV/c)");
     desc.add<Limits>("eta", Limits{}).setDescription("Single particle eta");
+    desc.add<Limits>("phi", Limits{0., 2. * M_PI}).setDescription("Single particle azimuthal angle");
     desc.add<Limits>("rapidity", Limits{}).setDescription("Single particle rapidity");
     desc.add<Limits>("energy", Limits{}).setDescription("Single particle energy (GeV)");
     desc.add<Limits>("mass", Limits{}).setDescription("Single particle mass (GeV/c^2)");

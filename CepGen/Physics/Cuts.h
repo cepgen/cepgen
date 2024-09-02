@@ -38,6 +38,7 @@ namespace cepgen::cuts {
 
     Limits pt_single;        ///< single-particle transverse momentum
     Limits eta_single;       ///< single-particle pseudo-rapidity
+    Limits phi_single;       ///< single-particle azimuthal angle
     Limits rapidity_single;  ///< single-particle rapidity
     Limits energy_single;    ///< single-particle energy
     Limits mass_single;      ///< single-particle mass

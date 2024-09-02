@@ -129,12 +129,17 @@ namespace cepgen {
           return 0.;
         if (!kin.cuts().central.pt_diff.contains(std::fabs(p1t - p2t)))  // transverse momentum difference
           return 0.;
+        const auto phi1 = pt_c1.phi(), phi2 = pt_c2.phi();
+        if (!kin.cuts().central.phi_single.contains(phi1) || !single_limits_.phi_single.contains(phi1))
+          return 0.;
+        if (!kin.cuts().central.phi_single.contains(phi2) || !single_limits_.phi_single.contains(phi2))
+          return 0.;
         //--- four-momenta of the outgoing central particles
         if (particles_.size() != 2)
           throw CG_FATAL("PhaseSpaceGenerator2to4:generateCentralKinematics")
               << "Invalid central particles multiplicity. Expecting 2, got " << particles_.size() << ".";
-        proc_->pc(0) = Momentum::fromPtYPhiM(p1t, m_y_c1_, pt_c1.phi(), PDG::get().mass(particles_.at(0)));
-        proc_->pc(1) = Momentum::fromPtYPhiM(p2t, m_y_c2_, pt_c2.phi(), PDG::get().mass(particles_.at(1)));
+        proc_->pc(0) = Momentum::fromPtYPhiM(p1t, m_y_c1_, phi1, PDG::get().mass(particles_.at(0)));
+        proc_->pc(1) = Momentum::fromPtYPhiM(p2t, m_y_c2_, phi2, PDG::get().mass(particles_.at(1)));
       }
 
       //--- window in central system invariant mass
