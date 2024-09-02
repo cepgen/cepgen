@@ -22,6 +22,7 @@
 #include <codecvt>
 #include <cstdint>
 #include <locale>
+#include <random>
 #include <unordered_set>
 
 #include "CepGen/Core/Exception.h"
@@ -31,10 +32,10 @@
 #ifndef __APPLE__
 #include <cstring>
 #endif
+
 #ifdef __GNUG__
 #include <cxxabi.h>
 
-#include <cstdlib>
 #include <memory>
 #endif
 
@@ -218,10 +219,15 @@ namespace cepgen::utils {
   }
 
   std::string randomString(size_t size) {
-    std::stringstream out;
-    for (size_t i = 0; i < size; ++i)
-      out << static_cast<char>('a' + rand() % (('z' - 'a') + 1));
-    return out.str();
+    static constexpr auto charset =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+    auto rng = std::mt19937{std::random_device{}()};
+    auto dist = std::uniform_int_distribution{{}, std::strlen(charset) - 1};
+    auto output = std::string(size, '\0');
+    std::generate_n(output.begin(), size, [=, &dist, &rng]() { return charset[dist(rng)]; });
+    return output;
   }
 
   std::string s(const std::string& word, float num, bool show_number) {
