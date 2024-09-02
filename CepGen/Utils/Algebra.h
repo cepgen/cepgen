@@ -121,7 +121,7 @@ namespace cepgen {
 
   class VectorRef : public gsl_vector_view {
   public:
-    VectorRef(const gsl_vector_view&);
+    explicit VectorRef(const gsl_vector_view&);
 
     VectorRef& operator=(const Vector&);                                          ///< Assignment operator
     operator Vector() const;                                                      ///< Conversion operator to a vector

@@ -44,14 +44,14 @@ namespace cepgen {
     auto& pos_pdg = plist_pos.operator[]<int>("pdgId");  // positive-z incoming beam
     if (pos_pdg = steer<int>("beam1id"); pos_pdg == PDG::invalid) {
       if (const auto& hi_Z1 = steerAs<int, Element>("beam1Z"); hi_Z1 != Element::invalid)
-        pos_pdg = HeavyIon(steer<int>("beam1A"), hi_Z1);
+        pos_pdg = HeavyIon{steerAs<int, unsigned short>("beam1A"), hi_Z1};
       else if (const auto& hi_beam1 = steer<std::vector<int> >("heavyIon1"); hi_beam1.size() >= 2)
         pos_pdg = HeavyIon{static_cast<unsigned short>(hi_beam1.at(0)), static_cast<Element>(hi_beam1.at(1))};
     }
     auto& neg_pdg = plist_neg.operator[]<int>("pdgId");  // negative-z incoming beam
     if (neg_pdg = steer<int>("beam2id"); neg_pdg == PDG::invalid) {
       if (const auto& hi_Z2 = steerAs<int, Element>("beam2Z"); hi_Z2 != Element::invalid)
-        neg_pdg = HeavyIon(steer<int>("beam2A"), hi_Z2);
+        neg_pdg = HeavyIon{steerAs<int, unsigned short>("beam2A"), hi_Z2};
       else if (const auto& hi_beam2 = steer<std::vector<int> >("heavyIon2"); hi_beam2.size() >= 2)
         neg_pdg = HeavyIon{static_cast<unsigned short>(hi_beam2.at(0)), static_cast<Element>(hi_beam2.at(1))};
     }

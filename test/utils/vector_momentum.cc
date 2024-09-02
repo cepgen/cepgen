@@ -26,12 +26,12 @@ int main() {
   {
     const cepgen::Vector vec{1., 2., 3., 4.};
     const cepgen::Momentum mom(vec);
-    CG_TEST_EQUAL((cepgen::Vector)mom, vec, "vec->mom->vec");
+    CG_TEST_EQUAL(static_cast<cepgen::Vector>(mom), vec, "vec->mom->vec");
   }
   {
     const cepgen::Momentum mom{1., 2., 3., 4.};
     const cepgen::Vector vec = mom;
-    CG_TEST_EQUAL((cepgen::Momentum)vec, mom, "mom->vec->mom");
+    CG_TEST_EQUAL(static_cast<cepgen::Momentum>(vec), mom, "mom->vec->mom");
   }
   CG_TEST_SUMMARY;
 }
