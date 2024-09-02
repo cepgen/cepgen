@@ -66,7 +66,7 @@ namespace cepgen {
       if (status_ > 0)
         status_ = static_cast<int>(Status::Propagator);
     }
-    CG_DEBUG_LOOP("Particle").log([&](auto& dbg) {
+    CG_DEBUG_LOOP("Particle").log([this](auto& dbg) {
       dbg << "Particle " << role_ << " (pdgId=" << static_cast<int>(pdg_id_) << ")"
           << " has now " << utils::s("daughter", daughters_.size(), true) << ":";
       for (const auto& daughter : daughters_)

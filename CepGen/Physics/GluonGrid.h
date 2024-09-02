@@ -22,8 +22,6 @@
 #include "CepGen/Core/SteeredObject.h"
 #include "CepGen/Utils/GridHandler.h"
 
-#define DEFAULT_KMR_GRID_PATH "gluon_mmht2014nlo_Watt.dat"
-
 /// Kimber-Martin-Ryskin un-integrated gluon densities
 namespace kmr {
   /// A KMR un-integrated gluon densities grid interpolator
@@ -42,6 +40,7 @@ namespace kmr {
     double operator()(double x, double kt2, double mu2) const;
 
   private:
+    static constexpr const char* DEFAULT_KMR_GRID_PATH = "gluon_mmht2014nlo_Watt.dat";
     explicit GluonGrid(const cepgen::ParametersList&);
     /// Location of the grid to be interpolated
     const std::string grid_path_;

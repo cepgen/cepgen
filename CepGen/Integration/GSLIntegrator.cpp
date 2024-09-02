@@ -31,7 +31,7 @@ namespace cepgen {
 
   void GSLIntegrator::setIntegrand(Integrand& integrand) {
     //--- specify the integrand through the GSL wrapper
-    function_ = [&](double* x, size_t num_dimensions, void*) -> double {
+    function_ = [&integrand](double* x, size_t num_dimensions, void*) -> double {
       return integrand.eval(std::vector<double>(x, x + num_dimensions));
     };
     gsl_function_ = utils::GSLMonteFunctionWrapper<decltype(function_)>::build(function_, integrand.size());

@@ -50,7 +50,7 @@ namespace cepgen::utils {
     }
 
     inline const TextDrawer& draw(const Graph1D& graph, const Mode& mode) const override {
-      CG_LOG.log([&](auto& log) {
+      CG_LOG.log([this, &graph, &mode](auto& log) {
         if (!graph.name().empty())
           log << "plot of \"" << graph.name() << "\"\n";
         drawValues(log.stream(), graph, graph.points(), mode, colourise_);
@@ -58,7 +58,7 @@ namespace cepgen::utils {
       return *this;
     }
     inline const TextDrawer& draw(const Graph2D& graph, const Mode& mode) const override {
-      CG_LOG.log([&](auto& log) {
+      CG_LOG.log([this, &graph, &mode](auto& log) {
         if (!graph.name().empty())
           log << "plot of \"" << graph.name() << "\"\n";
         drawValues(log.stream(), graph, graph.points(), mode, colourise_);
@@ -105,7 +105,7 @@ namespace cepgen::utils {
   const std::string TextDrawer::kEmptyLabel = "E M P T Y ";
 
   const TextDrawer& TextDrawer::draw(const Hist1D& hist, const Mode& mode) const {
-    CG_LOG.log([&](auto& log) {
+    CG_LOG.log([this, &hist, &mode](auto& log) {
       if (!hist.name().empty())
         log << "plot of \"" << hist.name() << "\"\n";
       drawValues(log.stream(), hist, hist.axis(), mode, colourise_);
@@ -124,7 +124,7 @@ namespace cepgen::utils {
   }
 
   const TextDrawer& TextDrawer::draw(const Hist2D& hist, const Mode& mode) const {
-    CG_LOG.log([&](auto& log) {
+    CG_LOG.log([this, &hist, &mode](auto& log) {
       if (!hist.name().empty())
         log << "plot of \"" << hist.name() << "\"\n";
       Drawable::dual_axis_t axes;
@@ -242,7 +242,7 @@ namespace cepgen::utils {
         CG_WARNING("TextDrawer:draw") << "Cannot add drawable '" << obj->name() << "' to the stack.";
         continue;
       }
-    CG_LOG.log([&](auto& log) {
+    CG_LOG.log([this, &name, &replace_plot, &os_base, &buf, &num_plots, &plt_names](auto& log) {
       if (!name.empty())
         log << "plot of \"" << name << "\"\n";
       log << replace_plot(os_base.str(), buf.str());

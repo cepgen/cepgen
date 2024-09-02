@@ -176,6 +176,7 @@ namespace cepgen {
     ParticlesMap() = default;
     ParticlesMap(const ParticlesMap&);             ///< Copy constructor
     ParticlesMap& operator=(const ParticlesMap&);  ///, Assignment operator
+    ~ParticlesMap() = default;
   };
 }  // namespace cepgen
 

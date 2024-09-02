@@ -233,7 +233,7 @@ namespace cepgen {
   }
 
   void Generator::generate(size_t num_events, const std::function<void(const Event&, size_t)>& callback) {
-    generate(num_events, [&](const proc::Process& proc) {
+    generate(num_events, [this, &callback](const proc::Process& proc) {
       if (callback)
         callback(proc.event(), parameters_->numGeneratedEvents());
     });
