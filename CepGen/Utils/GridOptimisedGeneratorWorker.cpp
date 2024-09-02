@@ -80,7 +80,7 @@ namespace cepgen {
     if (!grid_)
       throw CG_FATAL("GridOptimisedGeneratorWorker:next") << "Grid object was not initialised.";
 
-    CG_TICKER(const_cast<RunParameters*>(params_)->timeKeeper());
+    CG_TICKER(const_cast<RunParameters*>(run_params_)->timeKeeper());
 
     // apply correction cycles if required from previous event
     if (ps_bin_ != UNASSIGNED_BIN) {
@@ -123,7 +123,7 @@ namespace cepgen {
   }
 
   bool GridOptimisedGeneratorWorker::correctionCycle(bool& store) {
-    CG_TICKER(const_cast<RunParameters*>(params_)->timeKeeper());
+    CG_TICKER(const_cast<RunParameters*>(run_params_)->timeKeeper());
 
     CG_DEBUG_LOOP("GridOptimisedGeneratorWorker:correction")
         << "Correction cycles are started.\n\t"
@@ -157,7 +157,7 @@ namespace cepgen {
   //-----------------------------------------------------------------------------------------------
 
   void GridOptimisedGeneratorWorker::computeGenerationParameters() const {
-    if (!params_)
+    if (!run_params_)
       throw CG_FATAL("GridOptimisedGeneratorWorker:setGen") << "No steering parameters specified!";
     if (!integrator_)
       throw CG_FATAL("GridOptimisedGeneratorWorker:setGen") << "No integrator object specified!";
@@ -165,10 +165,10 @@ namespace cepgen {
     integrand_->setStorage(false);
 
     CG_INFO("GridOptimisedGeneratorWorker:setGen")
-        << "Preparing the grid (" << utils::s("point", params_->generation().numPoints(), true) << "/bin) "
+        << "Preparing the grid (" << utils::s("point", run_params_->generation().numPoints(), true) << "/bin) "
         << "for the generation of unweighted events.";
 
-    const double inv_num_points = 1. / params_->generation().numPoints();
+    const double inv_num_points = 1. / run_params_->generation().numPoints();
     std::vector<double> point_coord(integrand_->size(), 0.);
     if (point_coord.size() < grid_->n(0).size())
       throw CG_FATAL("GridParameters:shoot") << "Coordinates vector multiplicity is insufficient!";
@@ -181,7 +181,7 @@ namespace cepgen {
     //--- main loop
     for (unsigned int i = 0; i < grid_->size(); ++i) {
       double fsum = 0., fsum2 = 0.;
-      for (size_t j = 0; j < params_->generation().numPoints(); ++j) {
+      for (size_t j = 0; j < run_params_->generation().numPoints(); ++j) {
         grid_->shoot(integrator_, i, point_coord);
         const double weight = integrator_->eval(*integrand_, point_coord);
         grid_->setValue(i, weight);

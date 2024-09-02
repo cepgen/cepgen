@@ -50,7 +50,7 @@ namespace cepgen {
       if (integrator_->name() != "bases")
         throw CG_FATAL("SpringGeneratorWorker:next") << "Spring generator is only compatible with Bases integrator.";
 
-      CG_TICKER(const_cast<RunParameters*>(params_)->timeKeeper());
+      CG_TICKER(const_cast<RunParameters*>(run_params_)->timeKeeper());
 
       sprng2_.ntrial = 0;
       sprng2_.miss = 0;

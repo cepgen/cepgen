@@ -60,8 +60,8 @@ namespace cepgen {
     bool storeEvent() const;
 
     // NOT owned
-    const Integrator* integrator_{nullptr};  ///< Pointer to the mother-handled integrator instance
-    const RunParameters* params_{nullptr};   ///< Steering parameters for the event generation
+    const Integrator* integrator_{nullptr};     ///< Pointer to the mother-handled integrator instance
+    const RunParameters* run_params_{nullptr};  ///< Steering parameters for the event generation
 
     std::unique_ptr<ProcessIntegrand> integrand_;                       ///< Local event weight evaluator
     std::function<void(const proc::Process&)> callback_proc_{nullptr};  ///< Callback function for each new event

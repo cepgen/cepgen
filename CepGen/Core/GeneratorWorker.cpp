@@ -31,14 +31,15 @@ namespace cepgen {
   GeneratorWorker::GeneratorWorker(const ParametersList& params) : SteeredObject(params) {}
 
   void GeneratorWorker::setRunParameters(const RunParameters* params) {
-    params_ = params;
+    run_params_ = params;
     integrand_ = std::make_unique<ProcessIntegrand>(params);
     CG_DEBUG("GeneratorWorker") << "New generator worker initialised for integration/event generation.\n\t"
-                                << "Run parameters at " << (void*)params_ << ".";
+                                << "Run parameters at " << (void*)run_params_ << ".";
   }
 
   GeneratorWorker::~GeneratorWorker() {
-    CG_DEBUG("GeneratorWorker") << "Generator worker destructed. Releasing the parameters at " << (void*)params_ << ".";
+    CG_DEBUG("GeneratorWorker") << "Generator worker destructed. Releasing the parameters at " << (void*)run_params_
+                                << ".";
   }
 
   void GeneratorWorker::setIntegrator(const Integrator* integrator) {
@@ -48,28 +49,28 @@ namespace cepgen {
   }
 
   void GeneratorWorker::generate(size_t num_events, const std::function<void(const proc::Process&)>& callback) {
-    if (!params_)
+    if (!run_params_)
       throw CG_FATAL("GeneratorWorker:generate") << "No steering parameters specified!";
     callback_proc_ = callback;
-    while (params_->numGeneratedEvents() < num_events)
+    while (run_params_->numGeneratedEvents() < num_events)
       next();
   }
 
   bool GeneratorWorker::storeEvent() const {
-    CG_TICKER(const_cast<RunParameters*>(params_)->timeKeeper());
+    CG_TICKER(const_cast<RunParameters*>(run_params_)->timeKeeper());
 
     if (!integrand_->process().hasEvent())
       return true;
 
     const auto& event = integrand_->process().event();
-    const auto ngen = params_->numGeneratedEvents();
-    if ((ngen + 1) % params_->generation().printEvery() == 0)
+    const auto ngen = run_params_->numGeneratedEvents();
+    if ((ngen + 1) % run_params_->generation().printEvery() == 0)
       CG_INFO("GeneratorWorker:store") << utils::s("event", ngen + 1, true) << " generated.";
     if (callback_proc_)
       callback_proc_(integrand_->process());
-    for (const auto& mod : params_->eventExportersSequence())
+    for (const auto& mod : run_params_->eventExportersSequence())
       *mod << event;
-    const_cast<RunParameters*>(params_)->addGenerationTime(event.metadata("time:total"));
+    const_cast<RunParameters*>(run_params_)->addGenerationTime(event.metadata("time:total"));
     return true;
   }
 
