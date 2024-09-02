@@ -35,7 +35,7 @@ namespace cepgen {
   /// \date Feb 2024
   class PhaseSpaceGenerator : public NamedModule<PhaseSpaceGenerator> {
   public:
-    explicit PhaseSpaceGenerator(const ParametersList& params) : NamedModule(params) {}
+    explicit PhaseSpaceGenerator(const ParametersList&);
 
     inline virtual bool ktFactorised() const { return false; }
 
@@ -52,6 +52,11 @@ namespace cepgen {
     // Mandelstam variables
     virtual double that() const = 0;
     virtual double uhat() const = 0;
+
+  protected:
+    static constexpr double NUM_LIMITS = 1.e-3;  ///< Numerical limits for sanity comparisons (MeV/mm-level)
+
+    bool constrainBeamKinematics(proc::FactorisedProcess*);
   };
 }  // namespace cepgen
 

@@ -85,6 +85,8 @@ namespace cepgen {
       if (!part_psgen_->generatePartonKinematics())
         return false;
       central_weight_ = generateCentralKinematics();
+      if (!constrainBeamKinematics(proc_))
+        return false;
       return utils::positive(central_weight_);
     }
 
@@ -142,68 +144,6 @@ namespace cepgen {
         proc_->pc(1) = Momentum::fromPtYPhiM(p2t, m_y_c2_, phi2, PDG::get().mass(particles_.at(1)));
       }
 
-      //--- window in central system invariant mass
-      const auto invariant_mass = (proc_->pc(0) + proc_->pc(1)).mass();
-      if (!kin.cuts().central.mass_sum.contains(invariant_mass))
-        return 0.;
-
-      //--- compute and sanitise the momentum losses
-      const auto amt1 = proc_->pc(0).massT() * proc_->inverseSqrtS(),
-                 amt2 = proc_->pc(1).massT() * proc_->inverseSqrtS();
-      static const auto x_lim = Limits{0., 1.};
-      const auto x1 = amt1 * exp(+m_y_c1_) + amt2 * exp(+m_y_c2_);
-      if (!x_lim.contains(x1))
-        return 0.;
-      const auto x2 = amt1 * exp(-m_y_c1_) + amt2 * exp(-m_y_c2_);
-      if (!x_lim.contains(x2))
-        return 0.;
-
-      //--- additional conditions for energy-momentum conservation
-      const auto s = proc_->s(), mx2 = proc_->mX2(), my2 = proc_->mY2();
-      if (!kin.incomingBeams().positive().elastic() && x2 * s - invariant_mass - proc_->q2().p2() <= mx2)
-        return 0.;
-      if (!kin.incomingBeams().negative().elastic() && x1 * s - invariant_mass - proc_->q1().p2() <= my2)
-        return 0.;
-
-      //--- four-momenta of the outgoing protons (or remnants)
-
-      const auto px_p = (1. - x1) * proc_->pA().p() * M_SQRT2, px_m = (mx2 + proc_->q1().p2()) * 0.5 / px_p;
-      const auto py_m = (1. - x2) * proc_->pB().p() * M_SQRT2, py_p = (my2 + proc_->q2().p2()) * 0.5 / py_m;
-      CG_DEBUG_LOOP("2to4:pxy") << "px+ = " << px_p << " / px- = " << px_m << "\n\t"
-                                << "py+ = " << py_p << " / py- = " << py_m << ".";
-
-      const auto px = -Momentum(proc_->q1()).setPz((px_p - px_m) * M_SQRT1_2).setEnergy((px_p + px_m) * M_SQRT1_2),
-                 py = -Momentum(proc_->q2()).setPz((py_p - py_m) * M_SQRT1_2).setEnergy((py_p + py_m) * M_SQRT1_2);
-
-      CG_DEBUG_LOOP("2to4:remnants") << "First remnant:  " << px << ", mass = " << px.mass() << "\n\t"
-                                     << "Second remnant: " << py << ", mass = " << py.mass() << ".";
-
-      if (std::fabs(px.mass2() - mx2) > NUM_LIMITS) {
-        CG_WARNING("2to4:px") << "Invalid X system squared mass: " << px.mass2() << "/" << mx2 << ".";
-        return 0.;
-      }
-      if (std::fabs(py.mass2() - my2) > NUM_LIMITS) {
-        CG_WARNING("2to4:py") << "Invalid Y system squared mass: " << py.mass2() << "/" << my2 << ".";
-        return 0.;
-      }
-
-      //--- four-momenta of the intermediate partons
-      const double norm = 1. / proc_->wCM() / proc_->wCM() / s, prefactor = 0.5 / std::sqrt(norm);
-      {  // positive-z incoming parton collinear kinematics
-        const double tau1 = norm * proc_->q1().p2() / x1;
-        proc_->q1().setPz(+prefactor * (x1 - tau1)).setEnergy(+prefactor * (x1 + tau1));
-      }
-      {  // negative-z incoming parton collinear kinematics
-        const double tau2 = norm * proc_->q2().p2() / x2;
-        proc_->q2().setPz(-prefactor * (x2 - tau2)).setEnergy(+prefactor * (x2 + tau2));
-      }
-
-      CG_DEBUG_LOOP("2to4:partons") << "Squared c.m. energy = " << s << " GeV^2\n\t"
-                                    << "First parton: " << proc_->q1() << ", mass2 = " << proc_->q1().mass2()
-                                    << ", x1 = " << x1 << ", p = " << proc_->q1().p() << "\n\t"
-                                    << "Second parton: " << proc_->q2() << ", mass2 = " << proc_->q2().mass2()
-                                    << ", x2 = " << x2 << ", p = " << proc_->q2().p() << ".";
-
       if (randomise_charge_) {  // randomise the charge of outgoing system
         const auto sign = proc_->randomGenerator().uniformInt(0, 1) == 1;
         proc_->event()[Particle::CentralSystem][0].get().setAntiparticle(sign);
@@ -211,10 +151,6 @@ namespace cepgen {
       }
       proc_->event()[Particle::CentralSystem][0].get().setStatus(Particle::Status::FinalState);
       proc_->event()[Particle::CentralSystem][1].get().setStatus(Particle::Status::FinalState);
-      proc_->x1() = x1;
-      proc_->x2() = x2;
-      proc_->pX() = px;
-      proc_->pY() = py;
       return prefactor_ * m_pt_diff_;
     }
 
