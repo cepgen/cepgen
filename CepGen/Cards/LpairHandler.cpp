@@ -83,7 +83,7 @@ namespace cepgen::card {
           CG_WARNING("LpairHandler:parseCommands") << "Invalid command read: '" << line << "'.";
           continue;
         }
-        const auto key = fields.at(0), value = fields.at(1);
+        const auto &key = fields.at(0), &value = fields.at(1);
         setParameter(key, value);
         if (const auto descr = describe(key); descr != kInvalidStr)
           os << utils::format("\n\t>> %-8s %-25s (%s)", key.data(), parameter(key).data(), descr.data());
@@ -100,16 +100,15 @@ namespace cepgen::card {
       std::ofstream file(filename, std::fstream::out | std::fstream::trunc);
       if (!file.is_open())
         throw CG_ERROR("LpairHandler") << "Failed to open file '" << filename << "' for writing.";
-      for (const auto& it : p_strings_)
-        if (it.second.value && !it.second.value->empty())
-          file << utils::format(
-              "%-8s %-20s ! %s\n", it.first.data(), it.second.value->data(), it.second.description.data());
-      for (const auto& it : p_ints_)
-        if (it.second.value && *it.second.value != kInvalidInt)
-          file << utils::format("%-8s %-20d ! %s\n", it.first.data(), *it.second.value, it.second.description.data());
-      for (const auto& it : p_doubles_)
-        if (it.second.value && *it.second.value != Limits::INVALID)
-          file << utils::format("%-8s %-20e ! %s\n", it.first.data(), *it.second.value, it.second.description.data());
+      for (const auto& [key, value] : p_strings_)
+        if (value.value && !value.value->empty())
+          file << utils::format("%-8s %-20s ! %s\n", key.data(), value.value->data(), value.description.data());
+      for (const auto& [key, value] : p_ints_)
+        if (value.value && *value.value != kInvalidInt)
+          file << utils::format("%-8s %-20d ! %s\n", key.data(), *value.value, value.description.data());
+      for (const auto& [key, value] : p_doubles_)
+        if (value.value && *value.value != Limits::INVALID)
+          file << utils::format("%-8s %-20e ! %s\n", key.data(), *value.value, value.description.data());
       file.close();
     }
 
@@ -206,7 +205,8 @@ namespace cepgen::card {
     /// \tparam T Parameter type
     template <typename T>
     struct Parameter {
-      std::string key, description;
+      std::string key;
+      std::string description;
       T* value{nullptr};
     };
     /// Register a parameter to be steered to a configuration variable
