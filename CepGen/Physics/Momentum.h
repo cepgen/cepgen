@@ -55,6 +55,8 @@ namespace cepgen {
     static Momentum fromPxPyYM(double px, double py, double rap, double m);
     /// Build a 4-momentum from its transverse momentum, azimuthal angle, rapidity and mass
     static Momentum fromPtYPhiM(double pt, double rap, double phi, double m);
+    /// Build a 4-momentum from its transverse momentum, azimuthal angle, rapidity and energy
+    static Momentum fromPtYPhiE(double pt, double rap, double phi, double e);
 
     //--- vector and scalar operators
 

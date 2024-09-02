@@ -90,6 +90,10 @@ namespace cepgen {
     return Momentum(px, py, et * sinh(rap), et * cosh(rap));
   }
 
+  Momentum Momentum::fromPtYPhiE(double pt, double rap, double phi, double e) {
+    return Momentum(pt * cos(phi), pt * sin(phi), e * tanh(rap), e);
+  }
+
   Momentum Momentum::fromPtYPhiM(double pt, double rap, double phi, double m) {
     const double et = utils::fastHypot(pt, m);
     return Momentum(pt * cos(phi), pt * sin(phi), et * sinh(rap), et * cosh(rap));
