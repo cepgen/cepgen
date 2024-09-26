@@ -73,6 +73,7 @@ int main(int argc, char* argv[]) {
     if (plt) {
       (void)plt->draw(hist);
       (void)plt->draw(hist_resampled);
+      (void)plt->draw({&hist, &hist_resampled}, "histograms_generated_resampled");
     }
   }
 
