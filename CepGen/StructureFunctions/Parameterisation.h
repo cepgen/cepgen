@@ -95,14 +95,17 @@ namespace cepgen::strfun {
     double tau(double xbj, double q2) const;
     /// Dimensionless variable \f$\gamma^2=1+\frac{4x_{\rm Bj}^2 m_p^2}{Q^2}=1+\tau\f$
     double gamma2(double xbj, double q2) const;
+    double nu(double xbj, double q2) const;
 
   private:
+    bool has_w1_w2_;
     /// Longitudinal/transverse cross section ratio parameterisation used to compute \f$F_{1/L}\f$
     const std::unique_ptr<sigrat::Parameterisation> r_ratio_;
 
   protected:
     const double mp_;      ///< Proton mass, in GeV/c^2
     const double mp2_;     ///< Squared proton mass, in GeV^2/c^4
+    const double inv_mp_;  ///< Inverse proton mass, in c^2/GeV
     const double mx_min_;  ///< Minimum diffractive mass, in GeV/c^2
 
     Arguments args_;  ///< Last \f$(x_{\rm Bj},Q^2)\f$ couple computed

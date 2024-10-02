@@ -29,7 +29,6 @@ namespace cepgen::strfun {
     /// User-steered Suri-Yennie continuum structure functions calculator
     explicit SuriYennie(const ParametersList& params)
         : Parameterisation(params),
-          inv_mp_(1. / mp_),
           c1_(steer<double>("C1")),
           c2_(steer<double>("C2")),
           d1_(steer<double>("D1")),
@@ -40,6 +39,7 @@ namespace cepgen::strfun {
     static ParametersDescription description() {
       auto desc = Parameterisation::description();
       desc.setDescription("Suri-Yennie");
+      desc.add<bool>("hasW1W2", true);
       desc.add<double>("C1", 0.86926);
       desc.add<double>("C2", 2.23422);
       desc.add<double>("D1", 0.12549);
@@ -50,9 +50,8 @@ namespace cepgen::strfun {
     }
 
     inline void eval() override {
-      const double mx2 = utils::mX2(args_.xbj, args_.q2, mp2_), dm2 = mx2 - mp2_;  // [GeV^2]
-      const double en = args_.q2 + dm2;                                            // [GeV^2]
-      const double nu = 0.5 * en * inv_mp_, x_pr = args_.q2 / (args_.q2 + mx2),
+      const double mx2 = utils::mX2(args_.xbj, args_.q2, mp2_), dm2 = mx2 - mp2_, en = args_.q2 + dm2;  // [GeV^2]
+      const double nu_value = nu(args_.xbj, args_.q2), x_pr = args_.q2 / (args_.q2 + mx2),
                    tau = 0.25 * args_.q2 * inv_mp_ * inv_mp_;
       const double mq = rho2_ + args_.q2;
 
@@ -60,18 +59,17 @@ namespace cepgen::strfun {
 
       const double fm = inv_q2 * (c1_ * dm2 * std::pow(rho2_ / mq, 2) +
                                   c2_ * mp2_ * std::pow(1. - x_pr, 4) / (1. + x_pr * (x_pr * cp_ - 2. * bp_)));
-      const double fe =
-          (tau * fm + d1_ * dm2 * args_.q2 * rho2_ * std::pow(dm2 * inv_mp_ / mq / en, 2)) / (1. + nu * nu * inv_q2);
+      const double fe = (tau * fm + d1_ * dm2 * args_.q2 * rho2_ * std::pow(dm2 * inv_mp_ / mq / en, 2)) /
+                        (1. + nu_value * nu_value * inv_q2);
 
       setFE(fe);
       setFM(fm);
       setW1(0.5 * fm * args_.q2 * inv_mp_);
       setW2(2. * mp_ * fe);
-      setF2(2. * nu * fe);
+      setF2(2. * nu_value * fe);
     }
 
   private:
-    const double inv_mp_{0.};
     const double c1_{0.}, c2_{0.};
     const double d1_{0.};
     const double rho2_{0.};

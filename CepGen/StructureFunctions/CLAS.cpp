@@ -222,8 +222,8 @@ namespace cepgen::strfun {
       return std::make_pair(1., 0.);
     qs = 0.5 * sqrt(qs) / w;
 
-    const double omega = 0.5 * (w2 + q2 - mp2_) / mp_;
-    const double xn = 0.5 * q2 / (mp_ * omega);
+    const double omega = 0.5 * (w2 + q2 - mp2_) * inv_mp_;
+    const double xn = 0.5 * q2 * inv_mp_ / omega;
 
     const double bkg2 =
         (w > mod_params_.b[3]) ? exp(-mod_params_.b[2] * (w2 - mod_params_.b[3] * mod_params_.b[3])) : 1.;
@@ -256,7 +256,7 @@ namespace cepgen::strfun {
       f2resn += ai * dg / ((w - dmi) * (w - dmi) + dg * dg);
       ++i;
     }
-    f2resn *= 0.5 * (1. - mod_params_.b[0]) * bkg2 / mp_ * M_1_PI;
+    f2resn *= 0.5 * (1. - mod_params_.b[0]) * bkg2 * inv_mp_ * M_1_PI;
 
     return std::make_pair(f2bkg, f2resn);
   }

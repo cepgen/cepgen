@@ -240,8 +240,8 @@ namespace cepgen::strfun {
 
       //--- for W -> cross section
       const double s1 = prefactor_ * 4. * mp_ / (mx2 - mp2_);  // mb/GeV
-      const double s2 = prefactor_ * (std::pow(mx2 - mp2_, 2) + 2. * (mx2 + mp2_) * args_.q2 + args_.q2 * args_.q2) /
-                        mp_ / args_.q2 / (mx2 - mp2_);  // mb/GeV
+      const double s2 = prefactor_ * (std::pow(mx2 - mp2_, 2) + 2. * (mx2 + mp2_) * args_.q2 + args_.q2 * args_.q2) *
+                        inv_mp_ / args_.q2 / (mx2 - mp2_);  // mb/GeV
       //---  ratio (\sigma_T+\sigma_L)/\sigma_T according to S & Y
       const double ratio = (s2 * sy_sf_->W2(args_.xbj, args_.q2)) / (s1 * sy_sf_->W1(args_.xbj, args_.q2));
 
@@ -253,8 +253,8 @@ namespace cepgen::strfun {
         setW2(sgp / s2);
       }
     }
-    const double nu = 0.5 * (args_.q2 + mx2 - mp2_) / mp_;
-    setF2(W2(args_.xbj, args_.q2) * nu / mp_);
+    const double nu = 0.5 * (args_.q2 + mx2 - mp2_) * inv_mp_;
+    setF2(W2(args_.xbj, args_.q2) * nu * inv_mp_);
   }
 }  // namespace cepgen::strfun
 using cepgen::strfun::Shamov;

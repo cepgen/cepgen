@@ -20,14 +20,17 @@
 #include "CepGen/Core/ParametersList.h"
 #include "CepGen/Modules/StructureFunctionsFactory.h"
 #include "CepGen/Physics/PDG.h"
+#include "CepGen/Physics/Utils.h"
 #include "CepGen/StructureFunctions/Parameterisation.h"
 
 namespace cepgen::strfun {
   Parameterisation::Parameterisation(const ParametersList& params)
       : NamedModule(params),
+        has_w1_w2_(steer<bool>("hasW1W2")),
         r_ratio_(SigmaRatiosFactory::get().build(steer<ParametersList>("sigmaRatio"))),
         mp_(PDG::get().mass(PDG::proton)),
         mp2_(mp_ * mp_),
+        inv_mp_(1. / mp_),
         mx_min_(mp_ + PDG::get().mass(PDG::piZero)) {
     CG_DEBUG("Parameterisation") << "Structure functions parameterisation to be built using following parameters:\n"
                                  << ParametersDescription(params_).describe(true);
@@ -61,9 +64,19 @@ namespace cepgen::strfun {
     return operator()(xbj, q2).vals_.fl;
   }
 
-  double Parameterisation::W1(double xbj, double q2) { return operator()(xbj, q2).vals_.w1; }
+  double Parameterisation::W1(double xbj, double q2) {
+    if (has_w1_w2_)
+      return operator()(xbj, q2).vals_.w1;
+    double r_error;
+    const auto r_ratio = (*r_ratio_)(xbj, q2, r_error), nu_value = nu(xbj, q2);
+    return operator()(xbj, q2).vals_.f2 / q2 / nu_value * inv_mp_ * (q2 + nu_value * nu_value) / (1. + r_ratio);
+  }
 
-  double Parameterisation::W2(double xbj, double q2) { return operator()(xbj, q2).vals_.w2; }
+  double Parameterisation::W2(double xbj, double q2) {
+    if (has_w1_w2_)
+      return operator()(xbj, q2).vals_.w2;
+    return operator()(xbj, q2).vals_.f2 / nu(xbj, q2);
+  }
 
   double Parameterisation::FE(double xbj, double q2) { return operator()(xbj, q2).vals_.fe; }
 
@@ -113,6 +126,10 @@ namespace cepgen::strfun {
   double Parameterisation::tau(double xbj, double q2) const { return 4. * xbj * xbj * mp2_ / q2; }
 
   double Parameterisation::gamma2(double xbj, double q2) const { return 1. + tau(xbj, q2); }
+
+  double Parameterisation::nu(double xbj, double q2) const {
+    return 0.5 * (q2 + utils::mX2(xbj, q2, mp2_) - mp2_) * inv_mp_;
+  }
 
   Parameterisation& Parameterisation::computeFL(double xbj, double q2) {
     if (fl_computed_)

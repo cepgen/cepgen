@@ -58,7 +58,7 @@ namespace cepgen::strfun {
         setF1F2(0., 0.);
         return;
       }
-      const auto q0 = 0.5 * args_.q2 / mp_ / args_.xbj;
+      const auto q0 = 0.5 * args_.q2 * inv_mp_ / args_.xbj;
       const auto w2h = gp_h(q0, args_.q2) * bodek(std::sqrt(mx2), args_.q2) / q0,
                  w1h = (1. + q0 * q0 / args_.q2) / (1. + r_) * w2h;
       setF1F2(mp_ * w1h, q0 * w2h);
@@ -119,7 +119,7 @@ namespace cepgen::strfun {
         const auto gamres =
             0.5 * (rwd * std::pow(term / term0, j + 1) * (1. + std::pow(term0, j)) / (1. + std::pow(term, j)));
         const auto brwig = M_1_PI * gamres / (std::pow(w - rma, 2.) + std::pow(gamres, 2.));
-        ressum += ram * brwig / 2. / mp_;
+        ressum += 0.5 * ram * brwig * inv_mp_;
       }
 
       return BBKG * (1. + (1. - BBKG) * xpx) + ressum * (1. - BRES);

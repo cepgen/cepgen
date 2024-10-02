@@ -109,40 +109,41 @@ namespace cepgen::strfun {
     /// All resonances considered in this modelling
     std::vector<Resonance> resonances_;
     double s0_{0.}, norm_{0.};
+    static constexpr double constant_prefactor_ = 0.25 * M_1_PI / constants::ALPHA_EM;
   };
 
   void FioreBrasse::eval() {
-    const double prefactor =
-        args_.q2 * (1. - args_.xbj) / (4. * M_PI * constants::ALPHA_EM * gamma2(args_.xbj, args_.q2));
+    const double prefactor = constant_prefactor_ * args_.q2 * (1. - args_.xbj) / gamma2(args_.xbj, args_.q2);
     const double s = utils::mX2(args_.xbj, args_.q2, mp2_);
 
     double amplitude_res = 0.;
-    const double sqrts0 = sqrt(s0_);
+    const double sqrts0 = std::sqrt(s0_);
     for (unsigned short i = 0; i < 3; ++i) {  //FIXME 4??
       const auto& res = resonances_.at(i);
 
       std::complex<double> alpha;
       if (s > s0_)
-        alpha = std::complex<double>(res.alpha0 + res.alpha2 * sqrts0 + res.alpha1 * s, res.alpha2 * sqrt(s - s0_));
+        alpha =
+            std::complex<double>(res.alpha0 + res.alpha2 * sqrts0 + res.alpha1 * s, res.alpha2 * std::sqrt(s - s0_));
       else
-        alpha = std::complex<double>(res.alpha0 + res.alpha1 * s + res.alpha2 * (sqrts0 - sqrt(s0_ - s)), 0.);
+        alpha = std::complex<double>(res.alpha0 + res.alpha1 * s + res.alpha2 * (sqrts0 - std::sqrt(s0_ - s)), 0.);
 
-      double formfactor = 1. / pow(1. + args_.q2 / res.q02, 2);
-      double denom = pow(res.spinTimesTwo * 0.5 - std::real(alpha), 2) + pow(std::imag(alpha), 2);
+      double formfactor = std::pow(1. + args_.q2 / res.q02, -2);
+      double denom = std::pow(res.spinTimesTwo * 0.5 - std::real(alpha), 2) + std::pow(std::imag(alpha), 2);
       double ampli_imag = res.a * formfactor * formfactor * std::imag(alpha) / denom;
       amplitude_res += ampli_imag;
     }
     double amplitude_bg = 0.;
     {
       const auto& res = resonances_.at(3);
-      double sE = res.alpha2, sqrtsE = sqrt(sE);
+      double sE = res.alpha2, sqrtsE = std::sqrt(sE);
       std::complex<double> alpha;
       if (s > sE)
-        alpha = std::complex<double>(res.alpha0 + res.alpha1 * sqrtsE, res.alpha1 * sqrt(s - sE));
+        alpha = std::complex<double>(res.alpha0 + res.alpha1 * sqrtsE, res.alpha1 * std::sqrt(s - sE));
       else
-        alpha = std::complex<double>(res.alpha0 + res.alpha1 * (sqrtsE - sqrt(sE - s)), 0.);
-      double formfactor = 1. / pow(1. + args_.q2 / res.q02, 2);
-      double denom = pow(res.spinTimesTwo * 0.75 - std::real(alpha), 2) + pow(std::imag(alpha), 2);
+        alpha = std::complex<double>(res.alpha0 + res.alpha1 * (sqrtsE - std::sqrt(sE - s)), 0.);
+      double formfactor = std::pow(1. + args_.q2 / res.q02, -2);
+      double denom = std::pow(res.spinTimesTwo * 0.75 - std::real(alpha), 2) + std::pow(std::imag(alpha), 2);
       amplitude_bg = res.a * formfactor * formfactor * std::imag(alpha) / denom;
     }
     const double amplitude_tot = norm_ * (amplitude_res + amplitude_bg);
