@@ -2,7 +2,7 @@
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/Test.h"
-#include "CepGenAddOns/Pythia6Wrapper/Pythia6Interface.h"
+#include "CepGenPythia6/Pythia6Interface.h"
 
 using namespace std;
 

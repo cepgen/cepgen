@@ -16,12 +16,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGenAddOns_ROOTWrapper_utils_hist_utils_h
-#define CepGenAddOns_ROOTWrapper_utils_hist_utils_h
+#ifndef CepGenRoot_utils_hist_utils_h
+#define CepGenRoot_utils_hist_utils_h
 
 #include "CepGen/Event/Event.h"
-#include "CepGenAddOns/ROOTWrapper/ROOTCanvas.h"
-#include "CepGenAddOns/ROOTWrapper/ROOTTreeInfo.h"
+#include "CepGenRoot/ROOTCanvas.h"
+#include "CepGenRoot/ROOTTreeInfo.h"
 
 typedef vector<TH1D*> hists_t;
 

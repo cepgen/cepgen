@@ -22,8 +22,8 @@
 #include "CepGen/Modules/EventExporterFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/EventUtils.h"
 #include "CepGen/Utils/Test.h"
-#include "CepGenAddOns/Common/EventUtils.h"
 
 using namespace std;
 

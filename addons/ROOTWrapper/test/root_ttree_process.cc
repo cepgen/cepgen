@@ -26,7 +26,7 @@
 #include "CepGen/Utils/Filesystem.h"
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/Test.h"
-#include "CepGenAddOns/ROOTWrapper/ROOTTreeInfo.h"
+#include "CepGenRoot/ROOTTreeInfo.h"
 
 using namespace std;
 

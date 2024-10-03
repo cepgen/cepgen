@@ -28,7 +28,7 @@
 #include "CepGen/Modules/EventModifierFactory.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/String.h"
-#include "CepGenAddOns/HepMC3Wrapper/HepMC3EventInterface.h"
+#include "CepGenHepMC3/HepMC3EventInterface.h"
 
 using namespace Tauolapp;
 
