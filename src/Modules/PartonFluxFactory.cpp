@@ -16,10 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/CollinearFluxes/CollinearFlux.h"
 #include "CepGen/Core/Exception.h"
-#include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
+#include "CepGen/PartonFluxes/CollinearFlux.h"
+#include "CepGen/PartonFluxes/KTFlux.h"
 #include "CepGen/Utils/Collections.h"
 #include "CepGen/Utils/String.h"
 

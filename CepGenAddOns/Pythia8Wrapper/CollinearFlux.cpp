@@ -20,9 +20,9 @@
 
 #include <numeric>
 
-#include "CepGen/CollinearFluxes/CollinearFlux.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
+#include "CepGen/PartonFluxes/CollinearFlux.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 

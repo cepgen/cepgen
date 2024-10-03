@@ -18,12 +18,12 @@
 
 #include <cmath>
 
-#include "CepGen/CollinearFluxes/CollinearFlux.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Integration/AnalyticIntegrator.h"
-#include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/AnalyticIntegratorFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
+#include "CepGen/PartonFluxes/CollinearFlux.h"
+#include "CepGen/PartonFluxes/KTFlux.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Utils/FunctionWrapper.h"
 #include "CepGen/Utils/Limits.h"

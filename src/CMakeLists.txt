@@ -17,20 +17,6 @@ file(GLOB phys_sources
 file(GLOB proc_sources
         Process/*.cpp
         Process/*.f)
-file(GLOB core_includes
-        Cards
-        CollinearFluxes
-        Core
-        EventFilter
-        FormFactors
-        Integration
-        KTFluxes
-        Modules
-        OutputModules
-        Physics
-        Process
-        StructureFunctions
-        Utils)
 
 #----- check the external dependencies for SFs/alphaS
 
@@ -61,7 +47,6 @@ add_version_definition(${core_sources})
 cepgen_build(CepGen
         SOURCES ${core_sources} ${phys_sources} ${proc_sources}
         EXT_LIBS ${CEPGEN_CORE_EXT}
-        EXT_HEADERS ${core_includes}
         INSTALL_COMPONENT lib)
 
 set(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin")
@@ -73,8 +58,6 @@ foreach(exec_src ${exec_sources})
   target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES})
   install(TARGETS ${exec_bin} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT lib)
 endforeach()
-
-add_subdirectory(utils)
 
 add_test(NAME cepgen_list COMMAND cepgen -l)
 set_property(TEST cepgen_list PROPERTY ENVIRONMENT "CEPGEN_PATH=${CEPGEN_PATH}")

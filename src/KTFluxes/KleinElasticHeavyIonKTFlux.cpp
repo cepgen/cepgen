@@ -19,9 +19,9 @@
 #include <cmath>
 
 #include "CepGen/FormFactors/Parameterisation.h"
-#include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/FormFactorsFactory.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
+#include "CepGen/PartonFluxes/KTFlux.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"

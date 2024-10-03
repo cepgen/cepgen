@@ -16,25 +16,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_CollinearFluxes_CollinearFlux_h
-#define CepGen_CollinearFluxes_CollinearFlux_h
+#ifndef CepGen_PartonFluxes_KTFlux_h
+#define CepGen_PartonFluxes_KTFlux_h
 
-#include "CepGen/Physics/PartonFlux.h"
+#include "CepGen/PartonFluxes/PartonFlux.h"
 
 namespace cepgen {
-  /// Base object for a collinear parton flux parameterisation
-  class CollinearFlux : public PartonFlux {
+  class KTFlux : public PartonFlux {
   public:
-    explicit CollinearFlux(const ParametersList&);
+    explicit KTFlux(const ParametersList&);
 
     static ParametersDescription description();
 
-    /// Compute the collinear flux for this x value and virtuality
-    virtual double fluxQ2(double x, double q2) const;
-    /// Compute the collinear flux for this x value and remnant mass
-    virtual double fluxMX2(double x, double mf2 = 0.) const;
+    /// Compute the kt-dependent flux for this x value and virtuality
+    virtual double fluxQ2(double x, double kt2, double q2) const;
+    /// Compute the kt-dependent flux for this x value and remnant mass
+    virtual double fluxMX2(double x, double kt2, double mf2) const;
 
-    bool ktFactorised() const override final { return false; }
+    bool ktFactorised() const override final { return true; }
+
+  protected:
+    /// Minimal value taken for a \f$\k_{\rm T}\f$-factorised flux
+    static constexpr double kMinKTFlux{1.e-20};
   };
 }  // namespace cepgen
 

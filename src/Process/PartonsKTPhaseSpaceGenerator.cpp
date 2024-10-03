@@ -17,9 +17,9 @@
  */
 
 #include "CepGen/Core/Exception.h"
-#include "CepGen/KTFluxes/KTFlux.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/PartonsPhaseSpaceGeneratorFactory.h"
+#include "CepGen/PartonFluxes/KTFlux.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Process/FactorisedProcess.h"

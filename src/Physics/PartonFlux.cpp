@@ -16,9 +16,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "CepGen/PartonFluxes/PartonFlux.h"
 #include "CepGen/Physics/Constants.h"
 #include "CepGen/Physics/PDG.h"
-#include "CepGen/Physics/PartonFlux.h"
 
 namespace cepgen {
   PartonFlux::PartonFlux(const ParametersList& params)

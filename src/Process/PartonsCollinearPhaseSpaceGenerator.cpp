@@ -16,10 +16,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CepGen/CollinearFluxes/CollinearFlux.h"
 #include "CepGen/Core/Exception.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
 #include "CepGen/Modules/PartonsPhaseSpaceGeneratorFactory.h"
+#include "CepGen/PartonFluxes/CollinearFlux.h"
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Physics/HeavyIon.h"
 #include "CepGen/Process/FactorisedProcess.h"

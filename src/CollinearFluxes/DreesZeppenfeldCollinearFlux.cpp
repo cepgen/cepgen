@@ -18,8 +18,8 @@
 
 #include <cmath>
 
-#include "CepGen/CollinearFluxes/CollinearFlux.h"
 #include "CepGen/Modules/PartonFluxFactory.h"
+#include "CepGen/PartonFluxes/CollinearFlux.h"
 #include "CepGen/Physics/PDG.h"
 #include "CepGen/Physics/Utils.h"
 

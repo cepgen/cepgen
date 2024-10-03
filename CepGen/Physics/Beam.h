@@ -21,8 +21,8 @@
 
 #include <memory>
 
+#include "CepGen/PartonFluxes/PartonFlux.h"
 #include "CepGen/Physics/Momentum.h"
-#include "CepGen/Physics/PartonFlux.h"
 
 namespace cepgen {
   /// Incoming beams characteristics

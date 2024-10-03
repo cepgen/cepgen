@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,28 +16,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CepGen_KTFluxes_KTFlux_h
-#define CepGen_KTFluxes_KTFlux_h
+#ifndef CepGen_PartonFluxes_CollinearFlux_h
+#define CepGen_PartonFluxes_CollinearFlux_h
 
-#include "CepGen/Physics/PartonFlux.h"
+#include "CepGen/PartonFluxes/PartonFlux.h"
 
 namespace cepgen {
-  class KTFlux : public PartonFlux {
+  /// Base object for a collinear parton flux parameterisation
+  class CollinearFlux : public PartonFlux {
   public:
-    explicit KTFlux(const ParametersList&);
+    explicit CollinearFlux(const ParametersList&);
 
     static ParametersDescription description();
 
-    /// Compute the kt-dependent flux for this x value and virtuality
-    virtual double fluxQ2(double x, double kt2, double q2) const;
-    /// Compute the kt-dependent flux for this x value and remnant mass
-    virtual double fluxMX2(double x, double kt2, double mf2) const;
+    /// Compute the collinear flux for this x value and virtuality
+    virtual double fluxQ2(double x, double q2) const;
+    /// Compute the collinear flux for this x value and remnant mass
+    virtual double fluxMX2(double x, double mf2 = 0.) const;
 
-    bool ktFactorised() const override final { return true; }
-
-  protected:
-    /// Minimal value taken for a \f$\k_{\rm T}\f$-factorised flux
-    static constexpr double kMinKTFlux{1.e-20};
+    bool ktFactorised() const override final { return false; }
   };
 }  // namespace cepgen
 

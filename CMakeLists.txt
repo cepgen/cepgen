@@ -117,6 +117,7 @@ file(COPY ${readme_file} DESTINATION ${PROJECT_BINARY_DIR})
 #----- set the tests/utils directory
 if(CMAKE_BUILD_CORE)
   add_subdirectory(src)  # build the executables
+  add_subdirectory(utils)
   if(CMAKE_BUILD_TESTS)
     add_subdirectory(test)  # build the tests
     message(STATUS "... list of unstable tests: ${CEPGEN_UNSTABLE_TESTS}")
