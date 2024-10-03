@@ -129,6 +129,9 @@ endif()
 install(FILES ${external_files} ${readme_file} ${CEPGEN_ADDONS_FILE}
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
   COMPONENT lib)
+install(DIRECTORY CepGen
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  COMPONENT lib)
 
 #----- documentation
 find_package(Doxygen)
