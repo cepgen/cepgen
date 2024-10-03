@@ -34,11 +34,13 @@ cepgen_build(CepGenRoot SOURCES ${root_sources} ${foam_sources}
     TESTS test/*.cc
     PROPERTY CXX_STANDARD ${ROOT_CXX_STANDARD}
     CFLAGS "${ROOT_CXX_FLAGS}"
-    INSTALL_DIRECTORY CepGenRoot
     INSTALL_COMPONENT root)
 cpack_add_component(root
     DISPLAY_NAME "CepGen ROOT wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the ROOT library"
     DEPENDS lib)
+install(DIRECTORY CepGenRoot
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    COMPONENT root)
 
 message(STATUS "... ROOT v${ROOT_VERSION} standard is c++${ROOT_CXX_STANDARD}")

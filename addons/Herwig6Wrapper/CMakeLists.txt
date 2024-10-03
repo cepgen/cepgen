@@ -25,5 +25,7 @@ cepgen_build(CepGenHerwig6 SOURCES src/*.cpp
     EXT_LIBS ${HERWIG6}
     EXT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}
     OPTIONS "-Wno-misleading-indentation"
-    INSTALL_DIRECTORY CepGenHerwig6
     INSTALL_COMPONENT herwig6)
+install(DIRECTORY CepGenHerwig6
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    COMPONENT herwig6)

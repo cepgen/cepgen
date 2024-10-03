@@ -19,12 +19,14 @@ cepgen_build(CepGenBoost SOURCES ${sources}
     EXT_LIBS ${Boost_LIBRARIES}
     EXT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS}
     CFLAGS "-pthread -Wno-pedantic"
-    INSTALL_DIRECTORY CepGenBoost
     INSTALL_COMPONENT boost)
 cpack_add_component(boost
     DISPLAY_NAME "CepGen Boost wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the Boost library"
     DEPENDS lib)
+install(DIRECTORY CepGenBoost
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    COMPONENT boost)
 
 #----- Python bindings
 

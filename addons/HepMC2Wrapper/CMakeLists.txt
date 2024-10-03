@@ -12,8 +12,10 @@ cepgen_build(CepGenHepMC2 SOURCES src/*.cpp
     EXT_LIBS ${HEPMC_LIB}
     EXT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR} ${HEPMC_INCLUDE}
     TESTS test/*.cc
-    INSTALL_DIRECTORY CepGenHepMC2
     INSTALL_COMPONENT hepmc2)
+install(DIRECTORY CepGenHepMC2
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    COMPONENT hepmc2)
 cpack_add_component(hepmc2
     DISPLAY_NAME "CepGen HepMC wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the HepMC library"
