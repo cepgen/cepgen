@@ -8,7 +8,7 @@ set(mg_defs)
 file(GLOB tmpl template/*.cpp)
 list(APPEND mg_defs "-DMADGRAPH_BIN=\"${MADGRAPH_BIN}\"")
 list(APPEND mg_defs "-DMADGRAPH_PROC_TMPL=\"${tmpl}\"")
-list(APPEND mg_defs "-DCC_CFLAGS=\"${CMAKE_CXX_COMPILER} ${CMAKE_CXX_FLAGS} -I${PROJECT_SOURCE_DIR}\"")
+list(APPEND mg_defs "-DCC_CFLAGS=\"${CMAKE_CXX_COMPILER} ${CMAKE_CXX_FLAGS} -I${CMAKE_SOURCE_DIR} -I${CMAKE_CURRENT_SOURCE_DIR}\"")
 
 #----- build the object
 cepgen_build(CepGenMadGraph
