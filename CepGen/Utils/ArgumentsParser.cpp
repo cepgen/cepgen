@@ -30,14 +30,12 @@
 
 namespace cepgen {
   ArgumentsParser::ArgumentsParser(int argc, char* argv[]) : command_name_(argc > 0 ? argv[0] : "") {
-    //--- first remove the program name
     std::vector<std::string> args;
-    if (argc > 1) {
+    if (argc > 1) {  // drop remove the program name
       args.resize(argc - 1);
       std::copy(argv + 1, argv + argc, args.begin());
     }
-    //--- then loop on user arguments to identify word -> value pairs
-    for (auto it_arg = args.begin(); it_arg != args.end(); ++it_arg) {
+    for (auto it_arg = args.begin(); it_arg != args.end(); ++it_arg) {  // identify "arg->value" pairs in arguments
       auto arg_val = utils::split(*it_arg, '=');
       const auto argument = arg_val.at(0);
       std::string value;
@@ -45,13 +43,15 @@ namespace cepgen {
         value = arg_val.at(1);
       else if (it_arg != args.end() - 1 && (*(it_arg + 1))[0] != '-') {  // "--arg value" case
         value = *(it_arg + 1);
-        it_arg++;  // skip the next word, as it is already parsed as value for this argument one
+        ++it_arg;  // skip the next word, as it is already parsed as value for this argument one
       }
+      // at this point, "arg->value" pairs are identified ;
+      // parse specific commands that do not require further parsing
       if (Parameter{"help,h"}.matches(argument))  // help message is requested
         help_req_ = true;
-      if (Parameter{"version,v"}.matches(argument))  // version message is requested
+      else if (Parameter{"version,v"}.matches(argument))  // version message is requested
         version_req_ = true;
-      if (Parameter{"debug,d"}.matches(argument)) {  // debugging is enabled
+      else if (Parameter{"debug,d"}.matches(argument)) {  // debugging is enabled
         CG_LOG_LEVEL(debug);
         if (!value.empty()) {
           if (value.find(":") == std::string::npos)
@@ -64,16 +64,15 @@ namespace cepgen {
           }
         }
         debug_req_ = true;
-      }
-      if (Parameter{"add-ons,a"}.matches(argument) && !value.empty())  // extra add-ons are requested
+      } else if (Parameter{"add-ons,a"}.matches(argument) && !value.empty())  // extra add-ons are requested
         add_ons_ = utils::split(value, ';');
-      //--- check if configuration word is requested
-      if (Parameter{"cmd,c"}.matches(argument)) {
-        extra_config_ = std::vector<std::string>(it_arg + 1, args.end());
-        break;  // if a configuration word is found, all the remaining flags are parsed as such
-      }
-      args_.emplace_back(std::make_pair(argument, value));
+      else if (Parameter{"cmd,c"}.matches(argument) && !value.empty())  // configuration word is added
+        extra_config_.emplace_back(value);
+      else  // script/executable-specific argument
+        args_.emplace_back(std::make_pair(argument, value));
     }
+    CG_DEBUG("ArgumentsParser") << "List of arguments retrieved: " << args_ << ". "
+                                << "List of configuration words retrieved: " << extra_config_ << ".";
   }
 
   void ArgumentsParser::print_help() const { CG_LOG << help_message(); }
@@ -92,12 +91,12 @@ namespace cepgen {
   ArgumentsParser& ArgumentsParser::parse() {
     if (help_req_) {
       print_help();
-      exit(0);
+      std::exit(EXIT_SUCCESS);
     }
     //--- dump the generator version
     if (version_req_) {
       print_version();
-      exit(0);
+      std::exit(EXIT_SUCCESS);
     }
     if (debug_req_)
       CG_DEBUG("ArgumentsParser") << "Debugging mode enabled.";
@@ -108,37 +107,31 @@ namespace cepgen {
       } catch (const cepgen::Exception& e) {
         e.dump();
       }
-    //--- loop over all parameters
     size_t i = 0;
-    for (auto& par : params_) {
-      if (par.name.empty()) {
-        //--- no argument name ; fetching by index
+    for (auto& par : params_) {  // loop over all parameters
+      if (par.name.empty()) {    // no argument name ; fetching by index
         if (i >= args_.size())
           throw CG_FATAL("ArgumentsParser") << help_message() << " Failed to retrieve required <arg" << i << ">.";
-        par.value = !par.boolean() ? args_.at(i).second : "1";
-      } else {
-        // for each parameter, loop over arguments to find correspondence
-        auto it = std::find_if(args_.begin(), args_.end(), [&i, &par](const auto& arg) {
-          if (arg.first != "--" + par.name.at(0) && (par.name.size() < 2 || arg.first != "-" + par.name.at(1)))
-            return false;
-          par.value = arg.second;
-          if (par.boolean()) {  // all particular cases for boolean arguments
-            const auto word = utils::toLower(arg.second);
-            if (word.empty() || word == "1" || word == "on" || word == "yes" || word == "true")
-              par.value = "1";  // if the flag is set, enabled by default
-            else
-              par.value = "0";
-          }
-          ++i;
-          return true;
-        });
-        if (it == args_.end()) {
-          if (args_.size() > i && args_.at(i).first[0] != '-')
-            par.value = args_.at(i).first;
-          else if (!par.optional)  // no match
-            throw CG_FATAL("ArgumentsParser")
-                << help_message() << " The following parameter was not set: '" << par.name.at(0) << "'.";
-        }
+        par.value = par.boolean() ? "1" : args_.at(i).second;
+      } else if (std::find_if(args_.begin(), args_.end(), [&i, &par](const auto& arg) {
+                   if (!par.matches(arg.first))
+                     return false;
+                   if (par.boolean()) {  // all particular cases for boolean arguments
+                     if (const auto word = utils::toLower(arg.second);
+                         word.empty() || word == "1" || word == "on" || word == "yes" || word == "true")
+                       par.value = "1";  // if the flag is set, enabled by default
+                     else
+                       par.value = "0";
+                   } else
+                     par.value = arg.second;
+                   ++i;
+                   return true;
+                 }) == args_.end()) {  // for each parameter, loop over arguments to find correspondence
+        if (args_.size() > i && args_.at(i).first[0] != '-')
+          par.value = args_.at(i).first;
+        else if (!par.optional)  // no match
+          throw CG_FATAL("ArgumentsParser")
+              << help_message() << " The following parameter was not set: '" << par.name.at(0) << "'.";
       }
       par.parse();
       CG_DEBUG("ArgumentsParser") << "Parameter '" << i << "|--" << par.name.at(0)
@@ -150,12 +143,9 @@ namespace cepgen {
   }
 
   std::string ArgumentsParser::operator[](const std::string& name) const {
-    for (const auto& par : params_) {
-      if ("--" + par.name.at(0) == name)
+    for (const auto& par : params_)
+      if (par.matches(name))
         return par.value;
-      if (par.name.size() > 1 && "-" + par.name.at(1) == name)
-        return par.value;
-    }
     throw CG_FATAL("ArgumentsParser") << "The parameter \"" << name << "\" was not declared "
                                       << "in the arguments parser constructor!";
   }
