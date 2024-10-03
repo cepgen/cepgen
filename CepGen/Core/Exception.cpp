@@ -28,9 +28,10 @@ namespace cepgen {
         type_(type) {}
 
   Exception::~Exception() noexcept {
-    // we stop this process' execution on fatal exception
-    if (type_ == Type::fatal && raise(SIGINT) != 0)
-      exit(0);
+    if (type_ == Type::fatal && raise(SIGINT) != 0)  // we stop execution on fatal exception
+      std::exit(EXIT_FAILURE);
+    if (type_ == Type::error)
+      dump();
   }
 
   const char* Exception::what() const noexcept {

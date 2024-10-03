@@ -92,7 +92,7 @@ double cepgen_particle_mass_(int& pdg_id) {
     return cepgen::PDG::get().mass(static_cast<cepgen::pdgid_t>(pdg_id));
   } catch (const cepgen::Exception& e) {
     e.dump();
-    exit(0);
+    std::exit(EXIT_FAILURE);
   }
 }
 
@@ -102,7 +102,7 @@ double cepgen_particle_charge_(int& pdg_id) {
     return cepgen::PDG::get().charge(static_cast<cepgen::pdgid_t>(pdg_id));
   } catch (const cepgen::Exception& e) {
     e.dump();
-    exit(0);
+    std::exit(EXIT_FAILURE);
   }
 }
 
@@ -112,7 +112,7 @@ double cepgen_particle_colour_(int& pdg_id) {
     return cepgen::PDG::get().colours(static_cast<cepgen::pdgid_t>(pdg_id));
   } catch (const cepgen::Exception& e) {
     e.dump();
-    exit(0);
+    std::exit(EXIT_FAILURE);
   }
 }
 

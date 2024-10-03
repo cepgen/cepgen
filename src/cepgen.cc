@@ -55,12 +55,12 @@ int main(int argc, char* argv[]) {
     auto doc_dump =
         cepgen::DocumentationGeneratorFactory::get().build("text", cepgen::ParametersList().set("light", true));
     CG_LOG << doc_dump->describe();
-    return 0;
+    return EXIT_SUCCESS;
   }
 
   if (input_card.empty() && parser.extra_config().empty()) {  // no steering card nor additional flags found
-    CG_WARNING("main") << "Neither input card nor configuration word provided!\n\n " << parser.help_message();
-    return 0;
+    CG_ERROR("main") << "Neither input card nor configuration word provided!\n\n " << parser.help_message();
+    return EXIT_FAILURE;
   }
   if (!input_card.empty())
     gen.parseRunParameters(input_card);  // parse the steering card
@@ -98,6 +98,5 @@ int main(int argc, char* argv[]) {
   } catch (const exception& e) {
     CG_FATAL("main") << "Other exception caught!\n\t" << e.what();
   }
-
-  return 0;
+  return EXIT_SUCCESS;
 }
