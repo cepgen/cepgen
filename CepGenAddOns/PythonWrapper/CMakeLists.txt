@@ -26,7 +26,7 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/python
   FILES_MATCHING PATTERN "*.py"
   PATTERN "*.pyc" EXCLUDE)
 if(CMAKE_BUILD_UTILS)
-  set(MODULES_DESCRIPTOR ${PROJECT_BINARY_DIR}/bin/cepgenDescribeModules)
+  set(MODULES_DESCRIPTOR "${PROJECT_BINARY_DIR}/bin/cepgenDescribeModules")
   set(MODULES_OUTPUT ${PROJECT_BINARY_DIR}/python_modules)
   add_custom_target(CepGenPythonModules ALL
     DEPENDS ${MODULES_DESCRIPTOR}

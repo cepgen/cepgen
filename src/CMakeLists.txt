@@ -18,6 +18,8 @@ file(GLOB proc_sources
         Process/*.cpp
         Process/*.f)
 
+set(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin")
+
 #----- check the external dependencies for SFs/alphaS
 
 file(GLOB GRV_SRC ${PROJECT_SOURCE_DIR}/External/grv_*.f)
@@ -49,7 +51,6 @@ cepgen_build(CepGen
         EXT_LIBS ${CEPGEN_CORE_EXT}
         INSTALL_COMPONENT lib)
 
-set(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin")
 file(GLOB exec_sources *.cc)
 message(STATUS "Executables will be linked against ${CEPGEN_LIBRARIES}")
 foreach(exec_src ${exec_sources})
