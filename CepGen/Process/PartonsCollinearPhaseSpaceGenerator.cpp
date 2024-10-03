@@ -58,7 +58,8 @@ namespace cepgen {
 
     const bool log_parton_virtuality_;
     // mapped variables
-    double m_t1_{0.}, m_t2_{0.};
+    double m_t1_{0.};  ///< Virtuality of the first intermediate parton
+    double m_t2_{0.};  ///< Virtuality of the second intermediate parton
   };
 
   void PartonsCollinearPhaseSpaceGenerator::initialise() {
@@ -93,12 +94,12 @@ namespace cepgen {
             << "Failed to initiate a parton flux object with properties: " << params << ".";
       if (flux->ktFactorised())
         throw CG_FATAL("PartonsCollinearPhaseSpaceGenerator:init")
-            << "Invalid incoming parton flux: " << flux->name() << ".";
+            << "Invalid incoming parton flux modelling: " << flux->name() << ".";
     };
     set_flux_properties(kin.incomingBeams().positive(), pos_flux_);
     set_flux_properties(kin.incomingBeams().negative(), neg_flux_);
 
-    // register the incoming partons' virtuality
+    // register the incoming partons' virtualities range
     const auto lim_q2_1 = kin.cuts().initial.q2.at(0).truncate(Limits{1.e-10, 5.}),
                lim_q2_2 = kin.cuts().initial.q2.at(1).truncate(Limits{1.e-10, 5.});
     if (log_parton_virtuality_)

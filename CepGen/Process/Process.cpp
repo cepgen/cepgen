@@ -249,8 +249,9 @@ namespace cepgen::proc {
     //--- compute the integrand
     const auto me_integrand = computeWeight();
     CG_DEBUG_LOOP("Process:weight") << "Integrand = " << me_integrand << "\n\t"
-                                    << "Proc.-specific integrand * Jacobian (excl. global Jacobian) = "
-                                    << (me_integrand * aux_jacobian) << ".";
+                                    << "(Process-specific integrand = " << me_integrand
+                                    << ") * (Jacobian (excl. global Jacobian) = " << aux_jacobian
+                                    << ") = " << (base_jacobian_ * aux_jacobian) << ".";
     if (!utils::positive(me_integrand))
       return 0.;
 

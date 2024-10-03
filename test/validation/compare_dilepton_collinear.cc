@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
       .parse();
 
   struct comparison_t : public cepgen::validation::Comparator {
-    using Comparator::Comparator;
+    using cepgen::validation::Comparator::Comparator;
     void initialise() override {
       (*this)
           .book("invmass", "$m(l^{+}l^{-})$", "GeV", cepgen::utils::Hist1D(50, {10., 510.}))

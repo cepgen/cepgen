@@ -87,7 +87,8 @@ int main(int argc, char* argv[]) {
   auto comp = comparison_t(
       gen,
       cepgen::ParametersList()
-          .set("topLabel", "SD $\\gamma\\gamma \\rightarrow l^{+}l^{-}$ (13.6 TeV), $p_{T}^{l} > 10$ GeV, $k_{T}$"s)
+          .set("topLabel",
+               "Elastic $\\gamma\\gamma \\rightarrow l^{+}l^{-}$ (13.6 TeV), $p_{T}^{l} > 10$ GeV, $k_{T}$"s)
           .set("numEvents", num_gen)
           .set("pathTemplate", filename)
           .set("plotter", cepgen::ParametersList().setName(plotter).feed(plotter).set("format", "png,pdf"s)));

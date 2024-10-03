@@ -29,19 +29,18 @@
 using namespace std;
 
 int main(int argc, char* argv[]) {
+  cepgen::initialise();
+
   vector<string> parsers;
   bool verbose;
   cepgen::ArgumentsParser(argc, argv)
-      .addOptionalArgument("parsers,p", "list of parsers to use", &parsers, vector<string>{})
+      .addOptionalArgument("parsers,p", "list of parsers to use", &parsers, cepgen::FunctionalFactory::get().modules())
       .addOptionalArgument("verbose", "verbose mode", &verbose, false)
       .parse();
 
   CG_TEST_DEBUG(verbose);
   constexpr double epsilon = 1.e-9;  // tolerance
-  cepgen::initialise();
 
-  if (parsers.empty())
-    parsers = cepgen::FunctionalFactory::get().modules();
   CG_LOG << "Will test with " << cepgen::utils::s("module", parsers.size(), true) << ": " << parsers;
 
   for (const auto& func : parsers) {

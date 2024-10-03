@@ -31,14 +31,14 @@ namespace cepgen::utils::env {
 
   std::vector<std::string> searchPaths() {
     const auto cepgen_path = fs::path(env::get("CEPGEN_PATH", "."));
-    return std::vector<std::string>{cepgen_path,
+    return std::vector<std::string>{fs::current_path(),
+                                    fs::current_path().parent_path(),
+                                    fs::current_path().parent_path().parent_path(),
+                                    cepgen_path,
                                     cepgen_path / "CepGen",
                                     cepgen_path / "lib",
                                     cepgen_path / "lib64",
                                     cepgen_path / "share" / "CepGen",
-                                    fs::current_path(),
-                                    fs::current_path().parent_path(),
-                                    fs::current_path().parent_path().parent_path(),
                                     // additional paths for local builds
                                     cepgen_path / "External",
                                     cepgen_path / "build"};
