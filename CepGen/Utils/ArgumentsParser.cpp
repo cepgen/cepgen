@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2019-2023  Laurent Forthomme
+ *  Copyright (C) 2019-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,70 +23,56 @@
 #include <sstream>
 
 #include "CepGen/Core/Exception.h"
+#include "CepGen/Generator.h"
 #include "CepGen/Utils/ArgumentsParser.h"
 #include "CepGen/Utils/String.h"
 #include "CepGen/Version.h"
 
 namespace cepgen {
-  ArgumentsParser::ArgumentsParser(int argc, char* argv[])
-      : command_name_(argc > 0 ? argv[0] : ""),
-        help_str_({{"help,h"}}),
-        version_str_({{"version,v"}}),
-        config_str_({{"cmd,c"}}),
-        debug_str_({{"debug,d"}}) {
+  ArgumentsParser::ArgumentsParser(int argc, char* argv[]) : command_name_(argc > 0 ? argv[0] : "") {
     //--- first remove the program name
-    std::vector<std::string> args_tmp;
+    std::vector<std::string> args;
     if (argc > 1) {
-      args_tmp.resize(argc - 1);
-      std::copy(argv + 1, argv + argc, args_tmp.begin());
+      args.resize(argc - 1);
+      std::copy(argv + 1, argv + argc, args.begin());
     }
     //--- then loop on user arguments to identify word -> value pairs
-    for (auto it_arg = args_tmp.begin(); it_arg != args_tmp.end(); ++it_arg) {
-      auto arg_val = utils::split(*it_arg, '=');  // particular case for --arg=value
-      //--- check if help message is requested
-      for (const auto& str : help_str_)
-        if (arg_val.at(0) == "--" + str.name.at(0) || (str.name.size() > 1 && arg_val.at(0) == "-" + str.name.at(1)))
-          help_req_ = true;
-      //--- check if version message is requested
-      for (const auto& str : version_str_)
-        if (arg_val.at(0) == "--" + str.name.at(0) || (str.name.size() > 1 && arg_val.at(0) == "-" + str.name.at(1)))
-          version_req_ = true;
-      //--- check if debugging is requested
-      for (const auto& str : debug_str_)
-        if (arg_val.at(0) == "--" + str.name.at(0) || (str.name.size() > 1 && arg_val.at(0) == "-" + str.name.at(1))) {
-          CG_LOG_LEVEL(debug);
-          if (arg_val.size() > 1) {
-            const auto& token = arg_val.at(1);
-            if (token.find(":") == std::string::npos)
-              utils::Logger::get().setOutput(new std::ofstream(token));
-            else {
-              const auto tokens = utils::split(token, ':');
-              utils::Logger::get().setOutput(new std::ofstream(tokens.at(1)));
-              for (const auto& tok : utils::split(tokens.at(0), ';'))
-                utils::Logger::get().addExceptionRule(tok);
-            }
+    for (auto it_arg = args.begin(); it_arg != args.end(); ++it_arg) {
+      auto arg_val = utils::split(*it_arg, '=');
+      const auto argument = arg_val.at(0);
+      std::string value;
+      if (arg_val.size() > 1)  // "--arg=value" case
+        value = arg_val.at(1);
+      else if (it_arg != args.end() - 1 && (*(it_arg + 1))[0] != '-') {  // "--arg value" case
+        value = *(it_arg + 1);
+        it_arg++;  // skip the next word, as it is already parsed as value for this argument one
+      }
+      if (Parameter{"help,h"}.matches(argument))  // help message is requested
+        help_req_ = true;
+      if (Parameter{"version,v"}.matches(argument))  // version message is requested
+        version_req_ = true;
+      if (Parameter{"debug,d"}.matches(argument)) {  // debugging is enabled
+        CG_LOG_LEVEL(debug);
+        if (!value.empty()) {
+          if (value.find(":") == std::string::npos)
+            utils::Logger::get().setOutput(new std::ofstream(value));
+          else {
+            const auto tokens = utils::split(value, ':');
+            utils::Logger::get().setOutput(new std::ofstream(tokens.at(1)));
+            for (const auto& tok : utils::split(tokens.at(0), ';'))
+              utils::Logger::get().addExceptionRule(tok);
           }
-          debug_req_ = true;
         }
+        debug_req_ = true;
+      }
+      if (Parameter{"add-ons,a"}.matches(argument) && !value.empty())  // extra add-ons are requested
+        add_ons_ = utils::split(value, ';');
       //--- check if configuration word is requested
-      auto it = std::find_if(config_str_.begin(), config_str_.end(), [&arg_val](const auto& str) {
-        return (arg_val.at(0) == "--" + str.name.at(0) ||
-                (str.name.size() > 1 && arg_val.at(0) == "-" + str.name.at(1)));
-      });
-      if (it != config_str_.end()) {
-        // if a configuration word is found, all the remaining flags are parsed as such
-        extra_config_ = std::vector<std::string>(it_arg + 1, args_tmp.end());
-        break;
+      if (Parameter{"cmd,c"}.matches(argument)) {
+        extra_config_ = std::vector<std::string>(it_arg + 1, args.end());
+        break;  // if a configuration word is found, all the remaining flags are parsed as such
       }
-      //--- parse arguments if word found after
-      if (arg_val.size() == 1 && arg_val.at(0)[0] == '-' && it_arg != std::prev(args_tmp.end())) {
-        const auto& word = *std::next(it_arg);
-        if (word[0] != '-') {
-          arg_val.emplace_back(*std::next(it_arg));
-          ++it_arg;
-        }
-      }
-      args_.emplace_back(std::make_pair(arg_val.at(0), arg_val.size() > 1 ? arg_val.at(1) : ""));
+      args_.emplace_back(std::make_pair(argument, value));
     }
   }
 
@@ -115,6 +101,13 @@ namespace cepgen {
     }
     if (debug_req_)
       CG_DEBUG("ArgumentsParser") << "Debugging mode enabled.";
+    CG_DEBUG("ArgumentsParser") << "List of add-ons to be loaded along: " << add_ons_ << ".";
+    for (const auto& addon : add_ons_)
+      try {
+        cepgen::loadLibrary(addon);  // loading of an additional plugin into the runtime environment manager
+      } catch (const cepgen::Exception& e) {
+        e.dump();
+      }
     //--- loop over all parameters
     size_t i = 0;
     for (auto& par : params_) {
@@ -212,6 +205,10 @@ namespace cepgen {
         << "debugging:\n\t"
         << "-d|--debug<=output file|=mod1,mod2,...:output file>\t"
         << "redirect to output file, enable module(s)";
+    oss << "\n   "
+        << "add-ons:\n\t"
+        << "-a|--add-ons mod1<;mod2<;...>>\t"
+        << "load additional module(s) into the RTE";
     oss << std::endl;
     return oss.str();
   }

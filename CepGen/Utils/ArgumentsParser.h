@@ -110,13 +110,10 @@ namespace cepgen {
     typedef std::vector<Parameter> ParametersCollection;  ///< A collection of parameters
 
     std::string command_name_;
-    const ParametersCollection help_str_;
-    const ParametersCollection version_str_;
-    const ParametersCollection config_str_;
-    const ParametersCollection debug_str_;
     bool help_req_{false}, version_req_{false}, debug_req_{false};
     ParametersCollection params_;
     std::vector<std::pair<std::string, std::string> > args_;
+    std::vector<std::string> add_ons_;
     std::vector<std::string> extra_config_;
   };
 }  // namespace cepgen

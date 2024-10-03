@@ -39,24 +39,17 @@ int main(int argc, char* argv[]) {
   string input_card;
   int num_events;
   bool list_mods, safe_mode;
-  vector<string> addons, outputs;
+  vector<string> outputs;
 
   cepgen::ArgumentsParser parser(argc, argv);
   parser.addOptionalArgument("config,i", "path to the configuration file", &input_card)
       .addOptionalArgument("num-events,n", "number of events to generate", &num_events, -1)
       .addOptionalArgument("list-modules,l", "list all runtime modules", &list_mods, false)
-      .addOptionalArgument("add-ons,a", "external runtime plugin", &addons)
       .addOptionalArgument("output,o", "additional output module(s)", &outputs)
       .addOptionalArgument("safe-mode,s", "safe mode", &safe_mode, false)
       .parse();
 
   cepgen::Generator gen(safe_mode);  // first start by defining the generator object
-  for (const auto& lib : addons)     // loading of additional plugins into the runtime environment manager
-    try {
-      cepgen::loadLibrary(lib);
-    } catch (const cepgen::Exception& e) {
-      e.dump();
-    }
 
   if (list_mods) {  // modules listing is requested ; dump and exit
     auto doc_dump =
