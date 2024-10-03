@@ -101,7 +101,7 @@ if(CMAKE_BUILD_PROCESSES)
 endif()
 if(CMAKE_BUILD_ADDONS)
   file(REMOVE ${CEPGEN_ADDONS_FILE})
-  add_subdirectory(CepGenAddOns)
+  add_subdirectory(addons)
 endif()
 
 #----- copy the input cards and other files

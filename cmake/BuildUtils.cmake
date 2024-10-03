@@ -8,6 +8,7 @@ macro(cepgen_build mod_name)
                    EXT_HEADERS
                    EXT_BINS
                    INSTALL_COMPONENT
+                   INSTALL_DIRECTORY
                    OPTIONS
                    PROPERTY
                    SOURCES
@@ -128,6 +129,11 @@ macro(cepgen_build mod_name)
         install(TARGETS ${mod_name}
             DESTINATION ${CMAKE_INSTALL_LIBDIR}
             COMPONENT ${ARG_INSTALL_COMPONENT})
+        if(ARG_INSTALL_DIRECTORY)
+            install(DIRECTORY ${mod_name}
+                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+                COMPONENT ${ARG_INSTALL_COMPONENT})
+        endif()
         cmake_path(RELATIVE_PATH CMAKE_CURRENT_SOURCE_DIR
                    BASE_DIRECTORY ${CMAKE_SOURCE_DIR}
                    OUTPUT_VARIABLE mod_path)
