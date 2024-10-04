@@ -1,6 +1,6 @@
 /*
  *  CepGen: a central exclusive processes event generator
- *  Copyright (C) 2023  Laurent Forthomme
+ *  Copyright (C) 2023-2024  Laurent Forthomme
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,8 +48,8 @@ namespace cepgen {
       rng_.reset(gsl_rng_alloc(rng_engine));
       gsl_rng_set(rng_.get(), seed_);
 
-      CG_DEBUG("GSLRandomGenerator") << "Random numbers generator: " << gsl_rng_name(rng_.get()) << ".\n\t"
-                                     << "Seed: " << seed_ << ".";
+      CG_DEBUG("GSLRandomGenerator") << "Random numbers generator: " << gsl_rng_name(rng_.get()) << ". Seed: " << seed_
+                                     << ".";
     }
 
     static ParametersDescription description() {
@@ -80,8 +80,7 @@ namespace cepgen {
       /// Destructor method for the random number generator service
       inline void operator()(gsl_rng* rng) const { gsl_rng_free(rng); }
     };
-    /// Instance of random number generator service
-    std::unique_ptr<gsl_rng, gsl_rng_deleter> rng_;
+    std::unique_ptr<gsl_rng, gsl_rng_deleter> rng_;  ///< Instance of random number generator service
 
     void* enginePtr() override { return rng_.get(); }
   };
