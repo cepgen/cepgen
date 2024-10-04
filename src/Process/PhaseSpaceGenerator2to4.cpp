@@ -85,8 +85,6 @@ namespace cepgen {
       if (!part_psgen_->generatePartonKinematics())
         return false;
       central_weight_ = generateCentralKinematics();
-      if (!constrainBeamKinematics(proc_))
-        return false;
       return utils::positive(central_weight_);
     }
 
@@ -104,7 +102,12 @@ namespace cepgen {
 
     std::vector<int> central() const override { return particles_; }
 
-    void setCentral(const std::vector<int>& cent) override { particles_ = cent; }
+    void setCentral(const std::vector<int>& cent) override {
+      if (cent.size() != 2)
+        throw CG_FATAL("PhaseSpaceGenerator2to4:setCentral")
+            << "Invalid central particles multiplicity: expecting 2, got " << cent << ".";
+      particles_ = cent;
+    }
 
     double that() const override {
       return 0.5 * ((proc_->q1() - proc_->pc(0)).mass2() + (proc_->q2() - proc_->pc(1)).mass2());
@@ -143,6 +146,8 @@ namespace cepgen {
         proc_->pc(0) = Momentum::fromPtYPhiM(p1t, m_y_c1_, phi1, PDG::get().mass(particles_.at(0)));
         proc_->pc(1) = Momentum::fromPtYPhiM(p2t, m_y_c2_, phi2, PDG::get().mass(particles_.at(1)));
       }
+      if (!proc_->validatedBeamKinematics())
+        return 0.;
 
       if (randomise_charge_) {  // randomise the charge of outgoing system
         const auto sign = proc_->randomGenerator().uniformInt(0, 1) == 1;

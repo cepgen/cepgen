@@ -142,4 +142,68 @@ namespace cepgen::proc {
         .setDescription("store the electromagnetic and strong coupling constants to the event content?");
     return desc;
   }
+
+  bool FactorisedProcess::validatedBeamKinematics() {
+    // define a window in central system invariant mass
+    const auto invariant_mass = (q1() + q2()).mass();
+    if (!kinematics().cuts().central.mass_sum.contains(invariant_mass))
+      return false;
+
+    // compute and sanitise the momentum losses
+    x1() = x2() = 0.;
+    for (size_t i = 0; i < phase_space_generator_->central().size(); ++i) {
+      const auto amt = pc(i).massT() * inverseSqrtS(), ay = pc(i).rapidity();
+      x1() += amt * std::exp(+ay);
+      x2() += amt * std::exp(-ay);
+    }
+    if (!x_validity_range_.contains(x1()) || !x_validity_range_.contains(x2()))
+      return false;
+    // impose additional conditions for energy-momentum conservation
+    if (!kinematics().incomingBeams().positive().elastic() && x2() * s() - invariant_mass - q2().p2() <= mX2())
+      return false;
+    if (!kinematics().incomingBeams().negative().elastic() && x1() * s() - invariant_mass - q1().p2() <= mY2())
+      return false;
+
+    // compute the four-momenta of the outgoing protons (or remnants)
+    const auto px_p = (1. - x1()) * pA().p() * M_SQRT2, px_m = (mX2() + q1().p2()) * 0.5 / px_p;
+    const auto py_m = (1. - x2()) * pB().p() * M_SQRT2, py_p = (mY2() + q2().p2()) * 0.5 / py_m;
+    pX() = -Momentum(q1()).setPz((px_p - px_m) * M_SQRT1_2).setEnergy((px_p + px_m) * M_SQRT1_2);
+    pY() = -Momentum(q2()).setPz((py_p - py_m) * M_SQRT1_2).setEnergy((py_p + py_m) * M_SQRT1_2);
+    CG_DEBUG_LOOP("FactorisedProcess:validatedBeamKinematics")
+        << "px+ = " << px_p << " / px- = " << px_m << ", py+ = " << py_p << " / py- = " << py_m << ". Remnants:\n\t"
+        << "- X (positive-z): pX = " << pX() << ", mX = " << pX().mass() << "\n\t"
+        << "- Y (negative-z): pY = " << pY() << ", mY = " << pY().mass() << ".";
+
+    // impose numerical conditions on X/Y 4-momenta
+    if (std::fabs(pX().mass2() - mX2()) > NUM_LIMITS) {
+      CG_WARNING("FactorisedProcess:validatedBeamKinematics")
+          << "Invalid X system squared mass: " << pX().mass2() << "/" << mX2() << ".";
+      return false;
+    }
+    if (std::fabs(pY().mass2() - mY2()) > NUM_LIMITS) {
+      CG_WARNING("FactorisedProcess:validatedBeamKinematics")
+          << "Invalid Y system squared mass: " << pY().mass2() << "/" << mY2() << ".";
+      return false;
+    }
+
+    // compute the four-momenta of the intermediate partons
+    const double norm = 1. / wCM() / wCM() * inverseS(), prefactor = 0.5 / std::sqrt(norm);
+    {  // positive-z incoming parton collinear kinematics
+      const double tau1 = norm * q1().p2() / x1();
+      q1().setPz(+prefactor * (x1() - tau1)).setEnergy(+prefactor * (x1() + tau1));
+    }
+    {  // negative-z incoming parton collinear kinematics
+      const double tau2 = norm * q2().p2() / x2();
+      q2().setPz(-prefactor * (x2() - tau2)).setEnergy(+prefactor * (x2() + tau2));
+    }
+
+    CG_DEBUG_LOOP("FactorisedProcess:validatedBeamKinematics")
+        << "Squared c.m. energy = " << s() << " GeV^2\n\t"
+        << "First parton: " << q1() << ", mass2 = " << q1().mass2() << ", x1 = " << x1() << ", p = " << q1().p()
+        << "\n\t"
+        << "Second parton: " << q2() << ", mass2 = " << q2().mass2() << ", x2 = " << x2() << ", p = " << q2().p()
+        << ".";
+
+    return true;
+  }
 }  // namespace cepgen::proc
