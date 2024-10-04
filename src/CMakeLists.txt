@@ -8,10 +8,9 @@ file(GLOB core_sources
         Utils/*.cpp
         *.cpp)
 file(GLOB phys_sources
-        CollinearFluxes/*.cpp
         Event/*.cpp
         FormFactors/*.cpp
-        KTFluxes/*.cpp
+        PartonFluxes/*.cpp
         Physics/*.cpp
         StructureFunctions/*.cpp)
 file(GLOB proc_sources
