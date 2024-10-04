@@ -19,8 +19,8 @@
 #ifndef CepGen_Utils_ProgressBar_h
 #define CepGen_Utils_ProgressBar_h
 
-#include <string>
 #include <memory>
+#include <string>
 
 namespace cepgen::utils {
   class Timer;
@@ -28,20 +28,29 @@ namespace cepgen::utils {
   class ProgressBar {
   public:
     /// Progress bar constructor
-    /// \param[in] tot Total number of steps before completion
-    /// \param[in] freq Frequency at which the tick is refreshed
-    explicit ProgressBar(size_t tot, size_t freq = 10);
+    /// \param[in] total Total number of steps before completion
+    /// \param[in] period Periodicity of ticks refreshing
+    explicit ProgressBar(size_t total, size_t period = 10);
     ~ProgressBar();
+
+    /// Reset the progress bar to its initial state
+    void reset();
+    /// Enable the timer?
+    inline void setTimer(bool timer_enabled = true) { timer_enabled_ = timer_enabled; }
     /// Broadcast the current progress to the bar
     /// \param[in] iter Current iteration
     void update(size_t iter) const;
 
   private:
-    std::unique_ptr<Timer> tmr_;
-    const size_t bar_length_;
-    const std::string bar_pattern_;
-    const bool enabled_;
-    size_t total_, frequency_;
+    std::unique_ptr<Timer> timer_;   ///< Time tracker
+    const size_t total_;             ///< Total number of iterations expected
+    const size_t period_;            ///< Period at which an iteration is reported
+    const size_t bar_length_;        ///< Total number of ticks
+    const std::string bar_pattern_;  ///< Characters to use for the bar
+    const bool enabled_;             ///< Is the progress bar enabled?
+
+    bool timer_enabled_{false};  ///< Do we also track the time?
+    mutable bool ended_{false};  ///< Has the counting stopped?
   };
 }  // namespace cepgen::utils
 
