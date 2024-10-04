@@ -40,6 +40,8 @@ namespace cepgen::proc {
 
     static ParametersDescription description();
 
+    bool validatedBeamKinematics();
+
   protected:
     void addEventContent() override;
     void prepareKinematics() override final;
@@ -57,6 +59,8 @@ namespace cepgen::proc {
     const bool store_alphas_;
 
   private:
+    static constexpr double NUM_LIMITS = 1.e-3;  ///< Numerical limits for sanity comparisons (MeV/mm-level)
+    const Limits x_validity_range_{0., 1.};
     double kin_prefactor_{1.};
   };
 }  // namespace cepgen::proc

@@ -71,7 +71,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 set(CEPGEN_PATH ${PROJECT_SOURCE_DIR})
 set(CEPGEN_CORE_EXT dl)
-set(CEPGEN_LIBRARIES)
+set(CEPGEN_LIBRARIES CepGen)
 set(CEPGEN_LIB_DIR ${PROJECT_SOURCE_DIR}/CepGen)
 set(CEPGEN_ADDONS_FILE "${CMAKE_CURRENT_BINARY_DIR}/CepGenAddOns.txt")
 set(CEPGEN_UNSTABLE_TESTS)
@@ -85,11 +85,6 @@ enable_language(Fortran)
 
 #----- build all the intermediate objects
 include(BuildPackage)
-if(CMAKE_BUILD_CORE)
-  add_subdirectory(CepGen)
-  list(APPEND CEPGEN_LIBRARIES CepGen)
-endif()
-export(PACKAGE CepGen)
 
 #--- register packages
 cpack_add_component(lib
@@ -106,7 +101,7 @@ if(CMAKE_BUILD_PROCESSES)
 endif()
 if(CMAKE_BUILD_ADDONS)
   file(REMOVE ${CEPGEN_ADDONS_FILE})
-  add_subdirectory(CepGenAddOns)
+  add_subdirectory(addons)
 endif()
 
 #----- copy the input cards and other files
@@ -122,15 +117,20 @@ file(COPY ${readme_file} DESTINATION ${PROJECT_BINARY_DIR})
 #----- set the tests/utils directory
 if(CMAKE_BUILD_CORE)
   add_subdirectory(src)  # build the executables
+  add_subdirectory(utils)
   if(CMAKE_BUILD_TESTS)
     add_subdirectory(test)  # build the tests
     message(STATUS "... list of unstable tests: ${CEPGEN_UNSTABLE_TESTS}")
   endif()
+  export(PACKAGE CepGen)
 endif()
 
 #----- installation rules
 install(FILES ${external_files} ${readme_file} ${CEPGEN_ADDONS_FILE}
   DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/CepGen
+  COMPONENT lib)
+install(DIRECTORY CepGen
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   COMPONENT lib)
 
 #----- documentation

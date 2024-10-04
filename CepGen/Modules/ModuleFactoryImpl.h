@@ -20,7 +20,6 @@
 #define CepGen_Modules_ModuleFactoryImpl_h
 
 #include "CepGen/Cards/Handler.h"
-#include "CepGen/CollinearFluxes/CollinearFlux.h"
 #include "CepGen/Core/GeneratorWorker.h"
 #include "CepGen/Event/Event.h"
 #include "CepGen/EventFilter/EventExporter.h"
@@ -29,7 +28,8 @@
 #include "CepGen/FormFactors/Parameterisation.h"
 #include "CepGen/Integration/AnalyticIntegrator.h"
 #include "CepGen/Integration/Integrator.h"
-#include "CepGen/KTFluxes/KTFlux.h"
+#include "CepGen/PartonFluxes/CollinearFlux.h"
+#include "CepGen/PartonFluxes/KTFlux.h"
 #include "CepGen/Physics/Coupling.h"
 #include "CepGen/Process/PartonsPhaseSpaceGenerator.h"
 #include "CepGen/Process/PhaseSpaceGenerator.h"

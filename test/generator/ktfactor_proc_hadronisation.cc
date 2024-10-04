@@ -24,8 +24,8 @@
 #include "CepGen/Physics/Beam.h"
 #include "CepGen/Process/Process.h"
 #include "CepGen/Utils/ArgumentsParser.h"
+#include "CepGen/Utils/EventUtils.h"
 #include "CepGen/Utils/Test.h"
-#include "CepGenAddOns/Common/EventUtils.h"
 
 using namespace std;
 using namespace std::string_literals;

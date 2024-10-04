@@ -131,14 +131,6 @@ macro(cepgen_build mod_name)
         cmake_path(RELATIVE_PATH CMAKE_CURRENT_SOURCE_DIR
                    BASE_DIRECTORY ${CMAKE_SOURCE_DIR}
                    OUTPUT_VARIABLE mod_path)
-        install(DIRECTORY ./
-            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${mod_path}
-            COMPONENT ${ARG_INSTALL_COMPONENT}
-            FILES_MATCHING PATTERN "*.h")
-        install(DIRECTORY ./
-            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${mod_path}
-            COMPONENT ${ARG_INSTALL_COMPONENT}
-            FILES_MATCHING PATTERN "*.inc")
         foreach(_t ${utils})
             install(TARGETS ${_t}
                 DESTINATION ${CMAKE_INSTALL_BINDIR}/${mod_name}
