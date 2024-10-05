@@ -31,29 +31,44 @@ namespace cepgen::apfel {
   public:
     /// Build a calculator from its Parameters object
     explicit CollinearFlux(const ParametersList& params)
-        : cepgen::CollinearFlux(params), pdgid_(steer<pdgid_t>("partonPdgId")), q_range_(steer<Limits>("qrange")) {
+        : cepgen::CollinearFlux(params),
+          parton_pdgid_(steer<pdgid_t>("partonPdgId")),
+          q_range_(steer<Limits>("qrange")) {
       APFEL::SetPerturbativeOrder(steer<int>("perturbativeOrder"));
       const auto pdfset = steer<std::string>("set");
       if (!pdfset.empty())
         APFEL::SetPDFSet(pdfset);
-      //APFEL::SetMaxFlavourPDFs(7);
+      APFEL::SetMaxFlavourPDFs(steer<int>("maxFlavourPDFs"));
       APFEL::SetFastEvolution(steer<bool>("fastEvolution"));
       APFEL::InitializeAPFEL();
       APFEL::EvolveAPFEL(q_range_.min(), q_range_.max());
       APFEL::CachePDFsAPFEL(q_range_.min());
       CG_INFO("apfel:CollinearFlux") << "Partonic collinear parton flux evaluator successfully built.\n"
                                      << " * APFEL version: " << APFEL::GetVersion() << "\n"
-                                     << " * Parton PDG identifier: " << pdgid_
+                                     << " * Parton PDG identifier: " << parton_pdgid_
                                      << ", max flavours: " << APFEL::GetMaxFlavourPDFs() << "\n"
                                      << " * Q range: " << q_range_ << " (" << Limits{APFEL::GetMuF0(), APFEL::GetMuF()}
                                      << ") GeV\n"
                                      << " * perturbative order: " << APFEL::GetPerturbativeOrder() << ".";
     }
 
-    cepgen::pdgid_t partonPdgId() const override { return pdgid_; }
+    static ParametersDescription description() {
+      auto desc = cepgen::CollinearFlux::description();
+      desc.setDescription("APFEL coll.flux");
+      desc.add<std::string>("set", "").setDescription("LHAPDF set to use at the initial scale");
+      desc.add<pdgid_t>("partonPdgId", PDG::photon).setDescription("parton PDG identifier");
+      desc.add<Limits>("qrange", {1., 100.})
+          .setDescription("virtuality range (in GeV) for the PDFs/alphaQCD/alphaQED evolutions");
+      desc.add<int>("maxFlavourPDFs", 7)
+          .setDescription("maximum number of flavours that the evolution of alphaQCD and alphaQED can reach");
+      desc.add<int>("perturbativeOrder", 2).setDescription("evolution perturbative order");
+      desc.add<bool>("fastEvolution", false).setDescription("toggle the fast evolution");
+      return desc;
+    }
+
+    cepgen::pdgid_t partonPdgId() const override { return parton_pdgid_; }
     bool fragmenting() const override { return true; }
     double mass2() const override { return mp2_; }
-
     double fluxQ2(double x, double q2) const override {
       if (!x_range_.contains(x, true))
         return 0.;
@@ -63,19 +78,8 @@ namespace cepgen::apfel {
       return prefactor_ * APFEL::xPDFxQ(pdgid_, x, q);
     }
 
-    static ParametersDescription description() {
-      auto desc = cepgen::CollinearFlux::description();
-      desc.setDescription("APFEL coll.flux");
-      desc.add<std::string>("set", "").setDescription("LHAPDF set to use at the initial scale");
-      desc.add<pdgid_t>("partonPdgId", PDG::photon).setDescription("parton PDG identifier");
-      desc.add<Limits>("qrange", {1., 100.});
-      desc.add<int>("perturbativeOrder", 2);
-      desc.add<bool>("fastEvolution", false);
-      return desc;
-    }
-
   private:
-    const pdgid_t pdgid_;
+    const pdgid_t parton_pdgid_;
     const Limits q_range_;
   };
 }  // namespace cepgen::apfel

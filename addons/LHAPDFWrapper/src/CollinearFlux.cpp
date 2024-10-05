@@ -31,24 +31,24 @@ namespace cepgen::lhapdf {
     explicit CollinearFlux(const ParametersList& params)
         : cepgen::CollinearFlux(params),
           pdf_(LHAPDF::mkPDF(steer<std::string>("set"), steer<int>("member"))),
-          pdgid_(steer<int>("partonPdgId")),
+          parton_pdgid_(steer<int>("partonPdgId")),
           extrapolate_pdf_(steer<bool>("extrapolatePDF")) {
       const auto& pdf_set = steer<std::string>("set");
       if (!pdf_)
         throw CG_FATAL("lhapdf:CollinearFlux") << "Failed to initialise the LHAPDF evaluator!\n"
                                                << "Parameters: " << params_;
-      if (extrapolate_pdf_ && pdf_->hasFlavor(pdgid_))
+      if (extrapolate_pdf_ && pdf_->hasFlavor(parton_pdgid_))
         CG_WARNING("lhapdf:CollinearFlux") << "Asked to retrieve distribution from sum imbalance of other "
                                               "contributions although the distribution is present in the '"
                                            << pdf_set << "' PDF set.\n\t"
                                            << "You may want to steer the 'extrapolatePDF' parameter to 'false'?";
-      if (!extrapolate_pdf_ && !pdf_->hasFlavor(pdgid_))
+      if (!extrapolate_pdf_ && !pdf_->hasFlavor(parton_pdgid_))
         throw CG_FATAL("lhapdf:CollinearFlux")
-            << "PDF set '" << pdf_set << "' does not contain parton with PDG identifier=" << pdgid_ << "!\n"
+            << "PDF set '" << pdf_set << "' does not contain parton with PDG identifier=" << parton_pdgid_ << "!\n"
             << "PDGs handled: " << pdf_->flavors() << ".";
 
-      CG_INFO("lhapdf:CollinearFlux") << "LHAPDF evaluator for collinear parton (" << static_cast<PDG::Id>(pdgid_)
-                                      << ") flux initialised.\n\t"
+      CG_INFO("lhapdf:CollinearFlux") << "LHAPDF evaluator for collinear parton ("
+                                      << static_cast<PDG::Id>(parton_pdgid_) << ") flux initialised.\n\t"
                                       << "PDF set: " << pdf_set << " (flavours: " << pdf_->flavors()
                                       << "), member: " << pdf_->memberID() << ".\n\t"
                                       << "x range: " << Limits{pdf_->xMin(), pdf_->xMax()} << ", "
@@ -67,7 +67,7 @@ namespace cepgen::lhapdf {
       return desc;
     }
 
-    pdgid_t partonPdgId() const override { return pdgid_; }
+    pdgid_t partonPdgId() const override { return parton_pdgid_; }
     bool fragmenting() const override { return true; }
     double mass2() const override { return mp2_; }
 
@@ -79,14 +79,14 @@ namespace cepgen::lhapdf {
       // extrapolate from other flavours imbalance
       double xf = 1.;
       for (const auto& flav : pdf_->xfxQ2(x, q2))
-        if (flav.first != pdgid_)
+        if (flav.first != parton_pdgid_)
           xf -= flav.second;
       return xf;
     }
 
   private:
     const std::unique_ptr<LHAPDF::PDF> pdf_;
-    const int pdgid_;
+    const int parton_pdgid_;
     const bool extrapolate_pdf_;
   };
 }  // namespace cepgen::lhapdf
