@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
       gen,
       cepgen::ParametersList()
           .set("topLabel",
-               "Elastic $\\gamma\\gamma \\rightarrow l^{+}l^{-}$ (13.6 TeV), $p_{T}^{l} > 10$ GeV, $k_{T}$"s)
+               "Elastic $\\gamma\\gamma \\rightarrow l^{+}l^{-}$ (13.6 TeV), $p_{T}^{l} > 2.5$ GeV, $k_{T}$"s)
           .set("numEvents", num_gen)
           .set("pathTemplate", filename)
           .set("plotter", cepgen::ParametersList().setName(plotter).feed(plotter).set("format", "png,pdf"s)));

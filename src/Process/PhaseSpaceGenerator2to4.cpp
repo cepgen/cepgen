@@ -102,11 +102,11 @@ namespace cepgen {
 
     std::vector<int> central() const override { return particles_; }
 
-    void setCentral(const std::vector<int>& cent) override {
-      if (cent.size() != 2)
+    void setCentral(const std::vector<int>& central_pdgids) override {
+      if (central_pdgids.size() != 2)
         throw CG_FATAL("PhaseSpaceGenerator2to4:setCentral")
-            << "Invalid central particles multiplicity: expecting 2, got " << cent << ".";
-      particles_ = cent;
+            << "Invalid central particles multiplicity: expecting 2, got " << central_pdgids << ".";
+      particles_ = central_pdgids;
     }
 
     double that() const override {

@@ -199,9 +199,9 @@ namespace cepgen::proc {
 
     CG_DEBUG_LOOP("FactorisedProcess:validatedBeamKinematics")
         << "Squared c.m. energy = " << s() << " GeV^2\n\t"
-        << "First parton: " << q1() << ", mass2 = " << q1().mass2() << ", x1 = " << x1() << ", p = " << q1().p()
+        << "- positive-z parton: " << q1() << ", mass2 = " << q1().mass2() << ", x1 = " << x1() << ", p = " << q1().p()
         << "\n\t"
-        << "Second parton: " << q2() << ", mass2 = " << q2().mass2() << ", x2 = " << x2() << ", p = " << q2().p()
+        << "- negative-z parton: " << q2() << ", mass2 = " << q2().mass2() << ", x2 = " << x2() << ", p = " << q2().p()
         << ".";
 
     return true;

@@ -65,7 +65,7 @@ namespace cepgen {
     const auto& event = integrand_->process().event();
     const auto ngen = run_params_->numGeneratedEvents();
     if ((ngen + 1) % run_params_->generation().printEvery() == 0)
-      CG_INFO("GeneratorWorker:store") << utils::s("event", ngen + 1, true) << " generated.";
+      CG_DEBUG("GeneratorWorker:store") << utils::s("event", ngen + 1, true) << " generated.";
     if (callback_proc_)
       callback_proc_(integrand_->process());
     for (const auto& mod : run_params_->eventExportersSequence())

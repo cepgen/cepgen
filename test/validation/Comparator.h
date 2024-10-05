@@ -25,6 +25,7 @@
 #include "CepGen/Modules/DrawerFactory.h"
 #include "CepGen/Utils/Drawer.h"
 #include "CepGen/Utils/Histogram.h"
+#include "CepGen/Utils/ProgressBar.h"
 #include "CepGen/Utils/String.h"
 
 namespace cepgen::validation {
@@ -35,7 +36,10 @@ namespace cepgen::validation {
           gen_(gen),
           top_label_(steer<std::string>("topLabel")),
           path_tmpl_(steer<std::string>("pathTemplate")),
-          num_events_(steer<int>("numEvents")) {}
+          num_events_(steer<int>("numEvents")),
+          bar_(num_events_) {
+      bar_.setTimer();  // enable the time counter in progress bar
+    }
     ~Comparator() override {
       try {
         finalise();
@@ -44,30 +48,42 @@ namespace cepgen::validation {
       }
     }
     virtual void initialise() = 0;
-    Comparator& book(const std::string& name, const std::string& var, const std::string& unit, utils::Hist1D hist) {
+    /// Add a monitorable distribution to the stack to be analysed
+    inline Comparator& book(const std::string& name,
+                            const std::string& var,
+                            const std::string& unit,
+                            utils::Hist1D hist) {
       hist.xAxis().setLabel(var + (unit.empty() ? "" : " (" + unit + ")"));
       hist.yAxis().setLabel("d$\\sigma$/d" + var + " (pb" + (unit.empty() ? "" : "/" + unit) + ")");
       m_hist1d_tmpl_.insert(std::make_pair(name, std::move(hist)));
       m_draw_modes_[name] = cepgen::utils::Drawer::Mode::nostack | cepgen::utils::Drawer::Mode::grid;
       return *this;
     }
+    /// Perform the process initialisation and event generation
     inline void loop(const std::string& sample_name) {
+      bar_.reset();
       if (!initialised_) {
         initialise();
         initialised_ = true;
       }
       addSample(sample_name);
       weight_ = static_cast<double>(gen_.computeXsection()) / num_events_;
-      gen_.generate(num_events_, [this](const Event& evt, size_t) { process(evt); });
+      gen_.generate(num_events_, [this](const Event& event, size_t event_id) {
+        process(event);
+        bar_.update(++event_id);
+      });
     }
-    Comparator& fill(const std::string& plot_name, double value) {
+    /// Fill a named histogram with a scalar value
+    inline Comparator& fill(const std::string& plot_name, double value) {
       m_hist1ds_.at(plot_name).at(this_sample_).fill(value, weight_);
       return *this;
     }
 
   protected:
+    /// Event-level processing for analysis
     virtual void process(const Event&) = 0;
-    Comparator& addSample(const std::string& sample_name) {
+    /// Include a sample to the comparison
+    inline Comparator& addSample(const std::string& sample_name) {
       this_sample_ = sample_name;
       if (std::find(samples_.begin(), samples_.end(), this_sample_) == samples_.end()) {
         samples_.emplace_back(sample_name);
@@ -78,12 +94,15 @@ namespace cepgen::validation {
         setReferenceSample(this_sample_);
       return *this;
     }
-    Comparator& setReferenceSample(const std::string& sample_name) {
+    /// Specify which sample is used as reference for ratio plots
+    inline Comparator& setReferenceSample(const std::string& sample_name) {
       ref_sample_ = sample_name;
       return *this;
     }
-    utils::Drawer::Mode& drawMode(const std::string& plot_name) { return m_draw_modes_[plot_name]; }
-    void finalise() {
+    /// Provide some drawing options for the comparison output plots
+    inline utils::Drawer::Mode& drawMode(const std::string& plot_name) { return m_draw_modes_[plot_name]; }
+    /// Perform all comparisons: plots/analyses
+    inline void finalise() {
       auto plotter = steer<ParametersList>("plotter");
       if (plotter.empty())
         return;
@@ -110,9 +129,11 @@ namespace cepgen::validation {
     std::map<std::string, utils::Drawer::Mode> m_draw_modes_;
     std::vector<std::string> samples_;
     Generator& gen_;
-    bool initialised_{false};
     const std::string top_label_, path_tmpl_;
     const int num_events_;
+    utils::ProgressBar bar_;
+
+    bool initialised_{false};
     std::string ref_sample_, this_sample_;
     double weight_{0.};
   };
