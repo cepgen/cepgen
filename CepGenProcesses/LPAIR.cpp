@@ -612,8 +612,7 @@ double LPAIR::computeWeight() {
 
   const auto pt_gam = pg.pt(), p_gam = std::max(std::sqrt(eg * eg - t1()), pg.p() > 0.9 * pt_gam ? pg.p() : -999.);
   const auto cos_phi_gam = pg.px() / pt_gam, sin_phi_gam = pg.py() / pt_gam, sin_theta_gam = pt_gam / p_gam;
-  const short theta_sign = pg.pz() > 0. ? 1 : -1;
-  const auto cos_theta_gam = theta_sign * std::sqrt(1. - sin_theta_gam * sin_theta_gam);
+  const auto cos_theta_gam = utils::sign(pg.pz()) * std::sqrt(1. - sin_theta_gam * sin_theta_gam);
 
   const double amap = 0.5 * (m_w4_ - t1() - t2()),
                bmap = 0.5 * std::sqrt((std::pow(m_w4_ - t1() - t2(), 2) - 4. * t1() * t2()) * (1. - 4. * ml2_ / m_w4_)),

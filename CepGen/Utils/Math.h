@@ -23,8 +23,14 @@ namespace cepgen::utils {
   /// Check if a number is positive and finite
   template <typename T>
   bool positive(const T& val);
-
+  /// Type-safe C++ sign function
+  template <typename T>
+  inline short sign(const T& val) {
+    return (T(0) < val) - (val < T(0));
+  }
+  /// Compute the square root of the squared sum (sqrt(a^2+b^2))
   double fastHypot(double, double);
+  /// Compute the square root of the squared sum (sqrt(a^2+b^2+c^2))
   double fastHypot(double, double, double);
   /// Compute the square root of the squared difference (sqrt(a^2-b^2))
   double fastSqrtSqDiff(double, double);

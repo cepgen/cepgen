@@ -243,14 +243,13 @@ namespace cepgen {
   }
 
   double Momentum::eta() const {
-    const int sign = pz() / fabs(pz());
     const auto pt_value = pt();
-    return (pt_value != 0. ? std::log((p() + fabs(pz())) / pt_value) : 9999.) * sign;
+    return (utils::positive(pt_value) ? std::log((p() + fabs(pz())) / pt_value) : 9999.) * utils::sign(pz());
   }
 
   double Momentum::rapidity() const {
-    const int sign = pz() / fabs(pz());
-    return energy() >= 0. ? std::log((energy() + pz()) / (energy() - pz())) * 0.5 : 999. * sign;
+    return utils::positive(energy()) ? std::log((energy() + pz()) / (energy() - pz())) * 0.5
+                                     : std::numeric_limits<double>::infinity() * utils::sign(pz());
   }
 
   double Momentum::deltaEta(const Momentum& oth) const { return fabs(eta() - oth.eta()); }
