@@ -380,7 +380,10 @@ namespace cepgen::utils {
     return std::to_string(errnum);
 #else
     char* error = strerror(error_number);
-    return std::to_string(error_number) + " (" + std::string(error, strlen(error)) + ")";
+    std::string error_description;
+    if (const auto error_description_length = std::strlen(error); error_description_length > 0)
+      error_description = " (" + std::string(error, error_description_length) + ")";
+    return std::to_string(error_number) + error_description;
 #endif
   }
 
