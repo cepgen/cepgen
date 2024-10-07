@@ -46,8 +46,13 @@ namespace cepgen::utils {
     if (iter >= total_ - period_) {  // counter is over
       const std::string message = format("[Finished in %g s]", timer_->elapsed());
       fflush(stderr);
-      fprintf(
-          stderr, "\r%s%.*s%*s\n", message.data(), 0, "", static_cast<int>(bar_length_ + (timer_enabled_ ? 25 : 0)), "");
+      fprintf(stderr,
+              "\r%s%.*s%*s\n",
+              message.data(),
+              0,
+              "",
+              static_cast<int>(bar_length_ + (timer_enabled_ ? extra_bar_length_ : 0)),
+              "");
       fflush(stderr);
       ended_ = true;
       return;
@@ -58,7 +63,7 @@ namespace cepgen::utils {
         const auto elapsed_time = timer_->elapsed(), expected_time = elapsed_time * total_ / iter;
         extra_text =
             " " + format("%.2fs/%.2fs (remaining: %.2fs)", elapsed_time, expected_time, expected_time - elapsed_time);
-        extra_text.resize(25);
+        extra_text.resize(extra_bar_length_);
       }
       const auto left_padding = static_cast<int>(percent / 100. * bar_length_),
                  right_padding = static_cast<int>(bar_length_) - left_padding;

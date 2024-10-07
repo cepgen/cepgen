@@ -42,12 +42,14 @@ namespace cepgen::utils {
     void update(size_t iter) const;
 
   private:
-    std::unique_ptr<Timer> timer_;   ///< Time tracker
-    const size_t total_;             ///< Total number of iterations expected
-    const size_t period_;            ///< Period at which an iteration is reported
-    const size_t bar_length_;        ///< Total number of ticks
-    const std::string bar_pattern_;  ///< Characters to use for the bar
-    const bool enabled_;             ///< Is the progress bar enabled?
+    const std::unique_ptr<Timer> timer_;  ///< Time tracker
+    const size_t total_;                  ///< Total number of iterations expected
+    const size_t period_;                 ///< Period at which an iteration is reported
+    const size_t bar_length_;             ///< Total number of ticks
+    const std::string bar_pattern_;       ///< Characters to use for the bar
+    const bool enabled_;                  ///< Is the progress bar enabled?
+
+    const size_t extra_bar_length_{40};  ///< Size of the additional info in the progress bar
 
     bool timer_enabled_{false};  ///< Do we also track the time?
     mutable bool ended_{false};  ///< Has the counting stopped?
