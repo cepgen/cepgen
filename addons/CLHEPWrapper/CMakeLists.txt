@@ -5,7 +5,7 @@ if(NOT CLHEP_FOUND)
 endif()
 
 #----- build the object
-cepgen_build(CepGenCLHEP SOURCES *.cpp
+cepgen_build(CepGenCLHEP SOURCES src/*.cpp
     EXT_LIBS CLHEP::CLHEP
     INSTALL_COMPONENT clhep)
 cpack_add_component(clhep
