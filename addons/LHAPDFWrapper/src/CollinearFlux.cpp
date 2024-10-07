@@ -75,7 +75,7 @@ namespace cepgen::lhapdf {
       if (x == 0. || !pdf_->inPhysicalRangeXQ2(x, q2))
         return 0.;
       if (!extrapolate_pdf_)  // has parton PDF
-        return pdf_->xfxQ2(pdgid_, x, q2);
+        return pdf_->xfxQ2(parton_pdgid_, x, q2);
       // extrapolate from other flavours imbalance
       double xf = 1.;
       for (const auto& flav : pdf_->xfxQ2(x, q2))
