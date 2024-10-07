@@ -47,10 +47,11 @@ namespace cepgen {
     double mass2() const override { return mp2_; }
     pdgid_t partonPdgId() const override { return PDG::photon; }
 
-    double fluxQ2(double x, double kt2, double q2) const override {
+    double fluxMX2(double x, double kt2, double) const override {
       if (!x_range_.contains(x))
         return 0.;
-      const auto q2min = q2 - kt2 / (1. - x), qnorm = 1. - q2min / q2;
+      const auto q2 = utils::kt::q2(x, kt2, mass2()), q2min = q2 - kt2 / (1. - x);
+      const double qnorm = 1. - q2min / q2;
       const auto& formfac = (*ff_)(q2);
       return prefactor_ * formfac.FE * qnorm * qnorm / q2;
     }
@@ -67,10 +68,11 @@ namespace cepgen {
       desc.setDescription("Nucl. el. photon emission (Budnev flux)");
       return desc;
     }
-    double fluxQ2(double x, double kt2, double q2) const override final {
+    double fluxMX2(double x, double kt2, double) const override final {
       if (!x_range_.contains(x))
         return 0.;
-      const auto q2min = q2 - kt2 / (1. - x), qnorm = 1. - q2min / q2;
+      const auto q2 = utils::kt::q2(x, kt2, mass2()), q2min = q2 - kt2 / (1. - x);
+      const double qnorm = 1. - q2min / q2;
       const auto& formfac = (*ff_)(q2);
       const double f_D = formfac.FE * (1. - x) * qnorm;
       const double f_C = formfac.FM;
@@ -118,9 +120,9 @@ namespace cepgen {
 
     double mass2() const override { return mass2_; }
 
-    double fluxQ2(double x, double kt2, double q2) const override {
+    double fluxMX2(double x, double kt2, double mx2) const override {
       const auto z = static_cast<unsigned short>(hi_.Z);
-      return z * z * ElasticNucleonKTFlux::fluxQ2(x, kt2, q2);
+      return z * z * ElasticNucleonKTFlux::fluxMX2(x, kt2, mx2);
     }
 
   private:

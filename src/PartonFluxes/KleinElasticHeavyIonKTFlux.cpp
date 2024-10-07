@@ -51,6 +51,7 @@ namespace cepgen {
     double fluxQ2(double x, double kt2, double q2) const override {
       if (!x_range_.contains(x))
         return 0.;
+
       const auto ff = (*ff_)(q2);
       const double ela1 = pow(kt2 / q2 / (1. - x), 2);
       const double ela2 = pow(ff.GE, 2);
