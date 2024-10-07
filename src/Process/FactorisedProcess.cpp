@@ -152,10 +152,11 @@ namespace cepgen::proc {
     // compute and sanitise the momentum losses
     x1() = x2() = 0.;
     for (size_t i = 0; i < phase_space_generator_->central().size(); ++i) {
-      const auto amt = pc(i).massT() * inverseSqrtS(), ay = pc(i).rapidity();
-      x1() += amt * std::exp(+ay);
-      x2() += amt * std::exp(-ay);
+      const auto energy = pc(i).energy(), pz = pc(i).pz();
+      x1() += std::fabs(energy + pz);
+      x2() += std::fabs(energy - pz);
     }
+    x1() *= inverseSqrtS(), x2() *= inverseSqrtS();
     if (!x_validity_range_.contains(x1()) || !x_validity_range_.contains(x2()))
       return false;
     // impose additional conditions for energy-momentum conservation

@@ -43,7 +43,7 @@ namespace cepgen {
 
     bool ktFactorised() const override { return false; }
     bool generatePartonKinematics() override {
-      // gaussian smearing of kt can be introduced here
+      //TODO: gaussian smearing of kt can be introduced here
       process().q1() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t1_));
       process().q2() = Momentum::fromPtYPhiM(0., 0., 0., std::sqrt(m_t2_));
       return true;

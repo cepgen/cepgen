@@ -119,10 +119,10 @@ namespace cepgen {
 
   private:
     double generateCentralKinematics() const {
-      const auto& kin = proc_->kinematics();
-      if (!kin.cuts().central.rapidity_diff.contains(std::fabs(m_y_c1_ - m_y_c2_)))  // rapidity distance
-        return 0.;
       {
+        const auto& kin = proc_->kinematics();
+        if (!kin.cuts().central.rapidity_diff.contains(std::fabs(m_y_c1_ - m_y_c2_)))  // rapidity distance
+          return 0.;
         const auto qt_sum = (proc_->q1() + proc_->q2()).transverse();  // two-parton system
         const auto pt_diff = Momentum::fromPtEtaPhiE(m_pt_diff_, 0., m_phi_pt_diff_);
         const auto pt_c1 = 0.5 * (qt_sum + pt_diff), pt_c2 = 0.5 * (qt_sum - pt_diff);
