@@ -32,12 +32,13 @@ endif()
 enable_testing()
 
 #----- build the objects
-cepgen_build(CepGenPythia6 SOURCES src/*.cpp
+cepgen_build(CepGenPythia6
+    SOURCES src/*.cpp
     TESTS test/*.cc
-    EXT_LIBS ${PYTHIA6LIB}
-    EXT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}
+    LIBRARIES ${PYTHIA6LIB}
+    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}
     OPTIONS "-Wno-misleading-indentation"
-    INSTALL_COMPONENT pythia6)
+    COMPONENT pythia6)
 install(DIRECTORY CepGenPythia6
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     COMPONENT pythia6)

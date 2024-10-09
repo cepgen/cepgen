@@ -29,3 +29,4 @@ add_subdirectory(PythonWrapper)
 
 #----- propagate global variables to parent scope
 set(CEPGEN_UNSTABLE_TESTS ${CEPGEN_UNSTABLE_TESTS} PARENT_SCOPE)
+set(CEPGEN_EXTRA_LIBRARIES ${CEPGEN_EXTRA_LIBRARIES} PARENT_SCOPE)

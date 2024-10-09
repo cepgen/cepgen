@@ -16,28 +16,29 @@ if(NOT PHOTOSPP AND NOT TAUOLAPP)
   return()
 endif()
 
-set(SRCS)
-set(TESTS)
-set(EXT_LIBS)
-set(EXT_INCS)
+set(sources)
+set(tests)
+set(ext_libraries)
+set(ext_includes)
 if(PHOTOSPP)
-  list(APPEND SRCS src/PhotosFilter.cpp)
-  list(APPEND EXT_LIBS ${PHOTOSPP} ${PHOTOSPP_HEPMC3})
-  list(APPEND EXT_INCS ${PHOTOSPP_INCLUDE})
+  list(APPEND sources src/PhotosFilter.cpp)
+  list(APPEND ext_libraries ${PHOTOSPP} ${PHOTOSPP_HEPMC3})
+  list(APPEND ext_includes ${PHOTOSPP_INCLUDE})
 endif()
 if(TAUOLAPP)
-  list(APPEND SRCS src/TauolaFilter.cpp)
-  list(APPEND TESTS test/simple_tau_decay.cc)
-  list(APPEND EXT_LIBS ${TAUOLAPP} ${TAUOLAPP_HEPMC3})
-  list(APPEND EXT_INCS ${TAUOLAPP_INCLUDE})
+  list(APPEND sources src/TauolaFilter.cpp)
+  list(APPEND tests test/simple_tau_decay.cc)
+  list(APPEND ext_libraries ${TAUOLAPP} ${TAUOLAPP_HEPMC3})
+  list(APPEND ext_includes ${TAUOLAPP_INCLUDE})
 endif()
 
 #----- build the object
-cepgen_build(CepGenPhotosTauola SOURCES ${SRCS}
-    TESTS ${TESTS}
-    EXT_LIBS ${EXT_LIBS} CepGenHepMC3
-    EXT_HEADERS ${EXT_INCS} ${HEPMC3_INCLUDE}
-    INSTALL_COMPONENT photostauola)
+cepgen_build(CepGenPhotosTauola
+    SOURCES ${sources}
+    TESTS ${tests}
+    LIBRARIES ${ext_libraries} CepGenHepMC3
+    INCLUDES ${ext_includes} ${HEPMC3_INCLUDE}
+    COMPONENT photostauola)
 cpack_add_component(photostauola
     DISPLAY_NAME "CepGen Photos++/Tauola++ wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the Photos and Tauola libraries"

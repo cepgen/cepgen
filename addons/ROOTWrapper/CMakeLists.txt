@@ -28,13 +28,14 @@ if(CMAKE_BUILD_FOAM)
 endif()
 
 #----- build the object
-cepgen_build(CepGenRoot SOURCES ${root_sources} ${foam_sources}
-    EXT_LIBS ${ROOT_LIBRARIES}
-    EXT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIRS}
+cepgen_build(CepGenRoot
+    SOURCES ${root_sources} ${foam_sources}
+    LIBRARIES ${ROOT_LIBRARIES}
+    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR} ${ROOT_INCLUDE_DIRS}
     TESTS test/*.cc
     PROPERTY CXX_STANDARD ${ROOT_CXX_STANDARD}
     CFLAGS "${ROOT_CXX_FLAGS}"
-    INSTALL_COMPONENT root)
+    COMPONENT root)
 cpack_add_component(root
     DISPLAY_NAME "CepGen ROOT wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the ROOT library"

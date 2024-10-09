@@ -9,4 +9,4 @@ endif()
 #----- build the object
 cepgen_build(CepGenTopdrawer SOURCES src/*.cpp
     DEFINITIONS "-DTD_BIN=${TOPDRAWER_BIN}"
-    INSTALL_COMPONENT topdrawer)
+    COMPONENT topdrawer)

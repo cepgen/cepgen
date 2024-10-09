@@ -7,10 +7,11 @@ if(NOT LHAPDF)
 endif()
 
 #----- build the object
-cepgen_build(CepGenLHAPDF SOURCES src/*.cpp
-    EXT_LIBS ${LHAPDF}
-    EXT_HEADERS ${LHAPDF_INCLUDE}
-    INSTALL_COMPONENT lhapdf)
+cepgen_build(CepGenLHAPDF
+    SOURCES src/*.cpp
+    LIBRARIES ${LHAPDF}
+    INCLUDES ${LHAPDF_INCLUDE}
+    COMPONENT lhapdf)
 cpack_add_component(lhapdf
     DISPLAY_NAME "CepGen LHAPDF wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the LHAPDF library"

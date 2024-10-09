@@ -4,10 +4,10 @@ macro(cepgen_build mod_name)
     set(multi_vals CFLAGS
                    DEFINITIONS
                    DEPENDS
-                   EXT_LIBS
-                   EXT_HEADERS
+                   LIBRARIES
+                   INCLUDES
                    EXT_BINS
-                   INSTALL_COMPONENT
+                   COMPONENT
                    OPTIONS
                    PROPERTY
                    SOURCES
@@ -50,24 +50,24 @@ macro(cepgen_build mod_name)
             endforeach()
             message(STATUS "... utility tool(s): ${utils}")
         endif()
-        if(ARG_EXT_LIBS)
-            message(STATUS "... external libraries: ${ARG_EXT_LIBS}")
-            target_link_libraries(${mod_name} PUBLIC ${ARG_EXT_LIBS})
+        if(ARG_LIBRARIES)
+            message(STATUS "... external libraries: ${ARG_LIBRARIES}")
+            target_link_libraries(${mod_name} PUBLIC ${ARG_LIBRARIES})
             foreach(_t ${tests})
-                target_link_libraries(${_t} PRIVATE ${ARG_EXT_LIBS})
+                target_link_libraries(${_t} PRIVATE ${ARG_LIBRARIES})
             endforeach()
             foreach(_t ${utils})
-                target_link_libraries(${_t} PRIVATE ${ARG_EXT_LIBS})
+                target_link_libraries(${_t} PRIVATE ${ARG_LIBRARIES})
             endforeach()
         endif()
-        if(ARG_EXT_HEADERS)
-            message(STATUS "... external headers: ${ARG_EXT_HEADERS}")
-            target_include_directories(${mod_name} PUBLIC ${ARG_EXT_HEADERS})
+        if(ARG_INCLUDES)
+            message(STATUS "... external headers: ${ARG_INCLUDES}")
+            target_include_directories(${mod_name} PUBLIC ${ARG_INCLUDES})
             foreach(_t ${tests})
-                target_include_directories(${_t} PRIVATE ${ARG_EXT_HEADERS})
+                target_include_directories(${_t} PRIVATE ${ARG_INCLUDES})
             endforeach()
             foreach(_t ${utils})
-                target_include_directories(${_t} PRIVATE ${ARG_EXT_HEADERS})
+                target_include_directories(${_t} PRIVATE ${ARG_INCLUDES})
             endforeach()
         endif()
         if(ARG_DEPENDS)
@@ -123,19 +123,34 @@ macro(cepgen_build mod_name)
         add_library(${mod_name} INTERFACE)
     endif()
     target_include_directories(${mod_name} INTERFACE ${PROJECT_SOURCE_DIR})
-    if(ARG_INSTALL_COMPONENT)
+    if(ARG_COMPONENT)
         #----- installation rules
         install(TARGETS ${mod_name}
             DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            COMPONENT ${ARG_INSTALL_COMPONENT})
+            COMPONENT ${ARG_COMPONENT})
         cmake_path(RELATIVE_PATH CMAKE_CURRENT_SOURCE_DIR
                    BASE_DIRECTORY ${CMAKE_SOURCE_DIR}
                    OUTPUT_VARIABLE mod_path)
         foreach(_t ${utils})
             install(TARGETS ${_t}
                 DESTINATION ${CMAKE_INSTALL_BINDIR}/${mod_name}
-                COMPONENT ${ARG_INSTALL_COMPONENT})
+                COMPONENT ${ARG_COMPONENT})
         endforeach()
+        if(NOT ${ARG_COMPONENT} STREQUAL "lib")
+        set(CEPGEN_EXTRA_LIBRARIES "${CEPGEN_EXTRA_LIBRARIES}
+    if(NOT TARGET CepGen::${ARG_COMPONENT})
+        find_library(${mod_name}_LIBRARY
+            NAMES ${mod_name}
+            PATHS \$\{PC_CepGen_LIBRARY_DIRS\} \$\{CEPGEN_PATHS\}
+            PATH_SUFFIXES lib64 lib build)
+        if(${mod_name}_LIBRARY)
+            add_library(CepGen::${ARG_COMPONENT} UNKNOWN IMPORTED)
+            set_target_properties(CepGen::${ARG_COMPONENT} PROPERTIES
+                IMPORTED_LOCATION \$\{${mod_name}_LIBRARY\}
+                INTERFACE_INCLUDE_DIRECTORIES \"\$\{CepGen_INCLUDE_DIR\}/${mod_name}\")
+        endif()
+    endif()" PARENT_SCOPE)
+        endif()
         file(APPEND ${CEPGEN_ADDONS_FILE} "${mod_name}\n")
     endif()
 endmacro()
@@ -144,7 +159,7 @@ macro(cepgen_add_sources)
     set(options)
     set(one_val)
     set(multi_vals SOURCES
-                   EXT_LIBS
+                   LIBRARIES
                    PREPEND
                    OUTPUTS)
     cmake_parse_arguments(ARG "${options}" "${one_val}" "${multi_vals}" ${ARGN})
@@ -159,8 +174,8 @@ macro(cepgen_add_sources)
             if(CEPGEN_ROOT_FUNCTIONALS)
                 set_property(TARGET ${bin} PROPERTY CXX_STANDARD ${ROOT_CXX_STANDARD})
             endif()
-            if(ARG_EXT_LIBS)
-                target_link_libraries(${bin} PRIVATE ${ARG_EXT_LIBS})
+            if(ARG_LIBRARIES)
+                target_link_libraries(${bin} PRIVATE ${ARG_LIBRARIES})
             endif()
             list(APPEND ${ARG_OUTPUTS} ${bin})
         endforeach()
@@ -174,7 +189,7 @@ macro(cepgen_test_category)
     set(multi_vals SOURCES
                    BSOURCES
                    FSOURCES
-                   EXT_LIBS
+                   LIBRARIES
                    WORKING_DIRECTORY
                    PREPEND)
     cmake_parse_arguments(ARG "${options}" "${one_val}" "${multi_vals}" ${ARGN})
@@ -186,20 +201,20 @@ macro(cepgen_test_category)
     set(tests)
     if(ARG_SOURCES)
         cepgen_add_sources(SOURCES ${ARG_SOURCES}
-                           EXT_LIBS ${CEPGEN_LIBRARIES} ${ARG_EXT_LIBS}
+                           LIBRARIES ${CEPGEN_LIBRARIES} ${ARG_LIBRARIES}
                            OUTPUTS tests
                            PREPEND ${ARG_PREPEND})
     endif()
     if(ARG_FSOURCES)
         cepgen_add_sources(SOURCES ${ARG_FSOURCES}
-                           EXT_LIBS ${CEPGEN_LIBRARIES} ${ARG_EXT_LIBS}
+                           LIBRARIES ${CEPGEN_LIBRARIES} ${ARG_LIBRARIES}
                            OUTPUTS tests
                            PREPEND ${ARG_PREPEND})
     endif()
     set(benchmarks)
     if(ARG_BSOURCES)
         cepgen_add_sources(SOURCES ${ARG_BSOURCES}
-                           EXT_LIBS ${CEPGEN_LIBRARIES} ${ARG_EXT_LIBS}
+                           LIBRARIES ${CEPGEN_LIBRARIES} ${ARG_LIBRARIES}
                            OUTPUTS benchmarks
                            PREPEND ${ARG_PREPEND})
     endif()

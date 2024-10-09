@@ -8,6 +8,6 @@ FetchContent_MakeAvailable(nanobench)
 
 cepgen_test_category(NAME "Benchmarks"
                      BSOURCES *.cc
-                     EXT_LIBS nanobench
+                     LIBRARIES nanobench
                      PREPEND benchmark_
                      FSOURCES *.f)

@@ -10,7 +10,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 cepgen_build(CepGenGnuplot SOURCES src/*.cpp
     DEPENDS ${GNUPLOT_BIN}
     DEFINITIONS "-DGNUPLOT_BIN=${GNUPLOT_BIN}"
-    INSTALL_COMPONENT gnuplot)
+    COMPONENT gnuplot)
 cpack_add_component(gnuplot
     DISPLAY_NAME "CepGen Gnuplot wrappers library"
     DESCRIPTION "A CepGen wrapper to the Gnuplot plotter"

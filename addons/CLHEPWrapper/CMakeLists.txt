@@ -6,8 +6,8 @@ endif()
 
 #----- build the object
 cepgen_build(CepGenCLHEP SOURCES src/*.cpp
-    EXT_LIBS CLHEP::CLHEP
-    INSTALL_COMPONENT clhep)
+    LIBRARIES CLHEP::CLHEP
+    COMPONENT clhep)
 cpack_add_component(clhep
     DISPLAY_NAME "CepGen CLHEP wrappers library"
     DESCRIPTION "A CepGen wrapper to the CLHEP library"

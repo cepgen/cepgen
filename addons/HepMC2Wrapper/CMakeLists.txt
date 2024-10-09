@@ -8,11 +8,12 @@ if(NOT HEPMC_LIB)
 endif()
 
 #----- build the object
-cepgen_build(CepGenHepMC2 SOURCES src/*.cpp
-    EXT_LIBS ${HEPMC_LIB}
-    EXT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR} ${HEPMC_INCLUDE}
+cepgen_build(CepGenHepMC2
+    SOURCES src/*.cpp
+    LIBRARIES ${HEPMC_LIB}
+    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR} ${HEPMC_INCLUDE}
     TESTS test/*.cc
-    INSTALL_COMPONENT hepmc2)
+    COMPONENT hepmc2)
 install(DIRECTORY CepGenHepMC2
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     COMPONENT hepmc2)

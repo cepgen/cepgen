@@ -43,11 +43,12 @@ if(BZIP2_FOUND)
 endif()
 
 #----- build the object
-cepgen_build(CepGenHepMC3 SOURCES src/*.cpp
-    EXT_LIBS ${libs}
-    EXT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR} ${headers}
+cepgen_build(CepGenHepMC3
+    SOURCES src/*.cpp
+    LIBRARIES ${libs}
+    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR} ${headers}
     DEFINITIONS ${defs}
-    INSTALL_COMPONENT hepmc3)
+    COMPONENT hepmc3)
 cpack_add_component(hepmc3
     DISPLAY_NAME "CepGen HepMC3 wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the HepMC3 library"

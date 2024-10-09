@@ -13,12 +13,13 @@ string(REGEX MATCH "YODA_VERSION \"([0-9]*)\.([0-9]*)\.([0-9]*)\"" _ ${version_f
 math(EXPR YODA_VERSION "${CMAKE_MATCH_1} * 10000 + ${CMAKE_MATCH_2} * 100 + ${CMAKE_MATCH_3}")
 
 # build the object
-cepgen_build(CepGenRivet SOURCES src/*.cpp
-    EXT_LIBS ${YODA}
-    EXT_HEADERS ${YODA_INCLUDE}
+cepgen_build(CepGenRivet
+    SOURCES src/*.cpp
+    LIBRARIES ${YODA}
+    INCLUDES ${YODA_INCLUDE}
     DEFINITIONS -DYODA_VERSION=${YODA_VERSION}
     OPTIONS "-Wno-deprecated-copy"
-    INSTALL_COMPONENT rivet)
+    COMPONENT rivet)
 cpack_add_component(rivet
     DISPLAY_NAME "CepGen Rivet wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the Rivet library"

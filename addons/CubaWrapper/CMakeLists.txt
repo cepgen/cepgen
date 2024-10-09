@@ -9,11 +9,12 @@ if(NOT CUBA)
 endif()
 
 #----- build the object
-cepgen_build(CepGenCuba SOURCES src/*.cpp
-    EXT_LIBS ${CUBA}
-    EXT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR} ${CUBA_INCLUDE}
+cepgen_build(CepGenCuba
+    SOURCES src/*.cpp
+    LIBRARIES ${CUBA}
+    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR} ${CUBA_INCLUDE}
     PROPERTY POSITION_INDEPENDENT_CODE ON
-    INSTALL_COMPONENT cuba)
+    COMPONENT cuba)
 install(DIRECTORY CepGenCuba
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     COMPONENT cuba)

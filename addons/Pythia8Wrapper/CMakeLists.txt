@@ -15,13 +15,14 @@ if(GZIP_BIN)
 endif()
 
 #----- build the object
-cepgen_build(CepGenPythia8 SOURCES src/*.cpp
-    EXT_LIBS ${PYTHIA8} dl
-    EXT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR} ${PYTHIA8_INCLUDE}
+cepgen_build(CepGenPythia8
+    SOURCES src/*.cpp
+    LIBRARIES ${PYTHIA8} dl
+    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR} ${PYTHIA8_INCLUDE}
     DEFINITIONS ${PYTHIA_DEFS}
     TESTS test/*.cc
     OPTIONS "-Wno-misleading-indentation"
-    INSTALL_COMPONENT pythia8)
+    COMPONENT pythia8)
 cpack_add_component(pythia8
     DISPLAY_NAME "CepGen Pythia 8 wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to Pythia 8"

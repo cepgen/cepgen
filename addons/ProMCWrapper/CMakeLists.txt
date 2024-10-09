@@ -10,11 +10,12 @@ if(NOT PROMC_LIB)
 endif()
 
 #----- build the object
-cepgen_build(CepGenProMC SOURCES src/*.cpp
-    EXT_LIBS ${PROMC_LIB}
-    EXT_HEADERS ${PROMC_INCLUDE} ${PROMC_EXT_INCLUDE}
+cepgen_build(CepGenProMC
+    SOURCES src/*.cpp
+    LIBRARIES ${PROMC_LIB}
+    INCLUDES ${PROMC_INCLUDE} ${PROMC_EXT_INCLUDE}
     OPTIONS "-Wno-deprecated-declarations"
-    INSTALL_COMPONENT promc)
+    COMPONENT promc)
 cpack_add_component(promc
     DISPLAY_NAME "CepGen ProMC wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the ProMC library"

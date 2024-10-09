@@ -42,13 +42,12 @@ endif()
 
 #----- build the objects
 
-include(FindVersion)
 add_version_definition(${core_sources})
 
 cepgen_build(CepGen
         SOURCES ${core_sources} ${phys_sources} ${proc_sources}
-        EXT_LIBS ${CEPGEN_CORE_EXT}
-        INSTALL_COMPONENT lib)
+        LIBRARIES ${CEPGEN_CORE_EXT}
+        COMPONENT lib)
 
 file(GLOB exec_sources *.cc)
 message(STATUS "Executables will be linked against ${CEPGEN_LIBRARIES}")

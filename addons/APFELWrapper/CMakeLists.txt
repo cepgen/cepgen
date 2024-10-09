@@ -7,10 +7,11 @@ if(NOT APFEL)
 endif()
 
 #----- build the object
-cepgen_build(CepGenAPFEL SOURCES src/*.cpp
-    EXT_LIBS ${APFEL}
-    EXT_HEADERS ${APFEL_INCLUDE}
-    INSTALL_COMPONENT apfel)
+cepgen_build(CepGenAPFEL
+    SOURCES src/*.cpp
+    LIBRARIES ${APFEL}
+    INCLUDES ${APFEL_INCLUDE}
+    COMPONENT apfel)
 cpack_add_component(apfel
     DISPLAY_NAME "CepGen APFEL wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the APFEL library"

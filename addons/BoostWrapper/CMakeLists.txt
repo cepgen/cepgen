@@ -15,11 +15,12 @@ endif()
 
 #----- build the object
 
-cepgen_build(CepGenBoost SOURCES ${sources}
-    EXT_LIBS ${Boost_LIBRARIES}
-    EXT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS}
+cepgen_build(CepGenBoost
+    SOURCES ${sources}
+    LIBRARIES ${Boost_LIBRARIES}
+    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS}
     CFLAGS "-pthread -Wno-pedantic"
-    INSTALL_COMPONENT boost)
+    COMPONENT boost)
 cpack_add_component(boost
     DISPLAY_NAME "CepGen Boost wrappers library"
     DESCRIPTION "Collection of CepGen wrappers to the Boost library"

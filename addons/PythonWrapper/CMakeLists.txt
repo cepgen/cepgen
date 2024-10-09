@@ -14,11 +14,12 @@ endif()
 
 #----- build the object
 enable_testing()
-cepgen_build(CepGenPython SOURCES src/*.cpp
+cepgen_build(CepGenPython
+    SOURCES src/*.cpp
     TESTS ${tests}
-    EXT_LIBS ${Python_LIBRARIES}
-    EXT_HEADERS ${CMAKE_CURRENT_SOURCE_DIR} ${Python_INCLUDE_DIRS}
-    INSTALL_COMPONENT python)
+    LIBRARIES ${Python_LIBRARIES}
+    INCLUDES ${CMAKE_CURRENT_SOURCE_DIR} ${Python_INCLUDE_DIRS}
+    COMPONENT python)
 install(DIRECTORY CepGenPython
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     COMPONENT python)
