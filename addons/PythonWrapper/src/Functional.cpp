@@ -61,19 +61,33 @@ namespace cepgen::python {
   }
 
   double Functional::eval() const {
-    if (values_.size() == 1)
-      if (const auto value = func_.call(values_.at(0)); value)
-        return value.value<double>();
-    if (const auto func_arguments = ObjectPtr::tupleFromVector(values_); func_arguments)
-      try {
-        if (const auto value = func_.call(func_arguments); value)
-          return value.value<double>();
-        throw PY_ERROR;
-      } catch (const Error& err) {
-        throw CG_ERROR("python:Functional:eval")
-            << "Failed to call the function with arguments=" << func_arguments.vector<double>() << ".\n"
-            << err.message();
+    const auto get_value = [](const ObjectPtr& return_value) -> double {
+      if (return_value.is<double>())
+        return return_value.value<double>();
+      if (return_value.isVector<double>()) {
+        if (const auto vec = return_value.vector<double>(); !vec.empty()) {
+          if (vec.size() > 1)
+            CG_WARNING("python:Functional")
+                << "Invalid size for return vector: " << vec.size() << ". Values: " << vec << ".";
+          return vec.at(0);
+        } else
+          throw PY_ERROR << "Empty result vector returned.";
       }
+      throw PY_ERROR << "Invalid return type for function call: " << return_value << ".";
+    };
+    try {
+      if (values_.size() == 1) {  // single-argument function is a bit simpler to handle
+        if (const auto value = func_.call(values_.at(0)); value)
+          return get_value(value);
+      } else if (const auto func_arguments = ObjectPtr::tupleFromVector(values_); func_arguments) {
+        if (const auto value = func_.call(func_arguments); value)
+          return get_value(value);
+      } else
+        throw PY_ERROR << "Invalid functions argument building: " << values_ << ".";
+    } catch (const Error& err) {
+      throw CG_ERROR("python:Functional:eval") << "Failed to call the function with arguments=" << values_ << ".\n"
+                                               << err.message();
+    }
     throw CG_ERROR("python:Functional:eval") << "Failed to build a tuple for the arguments.";
   }
 

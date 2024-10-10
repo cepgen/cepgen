@@ -55,11 +55,12 @@ namespace cepgen::python {
   public:
     /// Read a standard configuration card
     explicit CardHandler(const ParametersList& params)
-        : Handler(params), env_(new Environment(params_)), plist_(params_.operator[]<ParametersList>("parsed")) {}
+        : Handler(params), plist_(params_.operator[]<ParametersList>("parsed")) {}
 
     CardHandler& parseFile(const std::string& file) override {
       const auto filename = pythonPath(file);
-      env_->setProgramName(filename);
+      Environment environment(params_);
+      environment.setProgramName(filename);
       auto cfg = ObjectPtr::importModule(filename) /* new */;
       if (!cfg)
         throw PY_ERROR << "Failed to import the configuration card '" << filename << "'\n"
@@ -70,7 +71,8 @@ namespace cepgen::python {
     }
     CardHandler& parseCommands(const std::vector<std::string>& str) override {
       const std::string name = "Cards.Core";
-      env_->setProgramName(name);
+      Environment environment(params_);
+      environment.setProgramName(name);
       auto cfg = ObjectPtr::defineModule(name, utils::merge(str, "\n")) /* new */;
       if (!cfg)
         throw PY_ERROR << "Failed to parse a configuration string:\n"
@@ -219,7 +221,6 @@ namespace cepgen::python {
       ConfigWriter writer(ParametersList().set("filename", filename));
       writer << *runParameters();
     }
-    std::unique_ptr<Environment> env_;
     ParametersList& plist_;
   };
 }  // namespace cepgen::python

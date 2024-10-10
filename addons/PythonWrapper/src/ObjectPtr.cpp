@@ -71,47 +71,6 @@ namespace cepgen::python {
     return ObjectPtr(obj);
   }
 
-  template <typename T>
-  bool ObjectPtr::isVector() const {
-    CG_ASSERT(get());
-    const bool tuple = PyTuple_Check(get()), list = PyList_Check(get());
-    if (!tuple && !list)  // only accept 'tuples' and 'lists'
-      return false;
-    if (const auto size = tuple ? PyTuple_Size(get()) : list ? PyList_Size(get()) : 0; size == 0)
-      return true;
-    const auto first = ObjectPtr::wrap(tuple  ? PyTuple_GetItem(get(), 0) /* borrowed */
-                                       : list ? PyList_GetItem(get(), 0)  /* borrowed */
-                                              : nullptr);
-    if (!first)
-      return false;
-    if (!first.is<T>()) {  // only allow same-type tuples/lists
-      CG_DEBUG("python:ObjectPtr:isVector")
-          << "Wrong object type unpacked from tuple/list: (python)" << first->ob_type->tp_name << " != (c++)"
-          << utils::demangle(typeid(T).name()) << ".";
-      return false;
-    }
-    return true;
-  }
-
-  template <typename T>
-  std::vector<T> ObjectPtr::vector() const {
-    if (!isVector<T>())
-      throw CG_ERROR("python::ObjectPtr:vector")
-          << "Object has invalid type: list/tuple != \"" << get()->ob_type->tp_name << "\".";
-    std::vector<T> vec;
-    const bool tuple = PyTuple_Check(get());
-    const Py_ssize_t num_entries = tuple ? PyTuple_Size(get()) : PyList_Size(get());
-    //--- check every single element inside the list/tuple
-    for (Py_ssize_t i = 0; i < num_entries; ++i) {
-      auto pit =
-          ObjectPtr::wrap(tuple ? PyTuple_GetItem(get(), i) /* borrowed */ : PyList_GetItem(get(), i) /* borrowed */);
-      if (!pit.is<T>())
-        throw CG_ERROR("python::ObjectPtr:vector") << "Mixed types detected in vector.";
-      vec.emplace_back(pit.value<T>());
-    }
-    return vec;
-  }
-
   // type specialisations
 
   //---------------------------------------------------------
@@ -409,6 +368,47 @@ namespace cepgen::python {
     return Functional(*this);
   }
   //---------------------------------------------------------
+
+  template <typename T>
+  bool ObjectPtr::isVector() const {
+    CG_ASSERT(get());
+    const bool tuple = PyTuple_Check(get()), list = PyList_Check(get());
+    if (!tuple && !list)  // only accept 'tuples' and 'lists'
+      return false;
+    if (const auto size = tuple ? PyTuple_Size(get()) : list ? PyList_Size(get()) : 0; size == 0)
+      return true;
+    const auto first = ObjectPtr::wrap(tuple  ? PyTuple_GetItem(get(), 0) /* borrowed */
+                                       : list ? PyList_GetItem(get(), 0)  /* borrowed */
+                                              : nullptr);
+    if (!first)
+      return false;
+    if (!first.is<T>()) {  // only allow same-type tuples/lists
+      CG_DEBUG("python:ObjectPtr:isVector")
+          << "Wrong object type unpacked from tuple/list: (python)" << first->ob_type->tp_name << " != (c++)"
+          << utils::demangle(typeid(T).name()) << ".";
+      return false;
+    }
+    return true;
+  }
+
+  template <typename T>
+  std::vector<T> ObjectPtr::vector() const {
+    if (!isVector<T>())
+      throw CG_ERROR("python::ObjectPtr:vector")
+          << "Object has invalid type: list/tuple != \"" << get()->ob_type->tp_name << "\".";
+    std::vector<T> vec;
+    const bool tuple = PyTuple_Check(get());
+    const Py_ssize_t num_entries = tuple ? PyTuple_Size(get()) : PyList_Size(get());
+    //--- check every single element inside the list/tuple
+    for (Py_ssize_t i = 0; i < num_entries; ++i) {
+      auto pit =
+          ObjectPtr::wrap(tuple ? PyTuple_GetItem(get(), i) /* borrowed */ : PyList_GetItem(get(), i) /* borrowed */);
+      if (!pit.is<T>())
+        throw CG_ERROR("python::ObjectPtr:vector") << "Mixed types detected in vector.";
+      vec.emplace_back(pit.value<T>());
+    }
+    return vec;
+  }
 
   template <typename T>
   ObjectPtr ObjectPtr::tupleFromVector(const std::vector<T>& vec) {
