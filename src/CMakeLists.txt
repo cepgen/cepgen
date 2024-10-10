@@ -50,11 +50,11 @@ cepgen_build(CepGen
         COMPONENT lib)
 
 file(GLOB exec_sources *.cc)
-message(STATUS "Executables will be linked against ${CEPGEN_LIBRARIES}")
+message(STATUS "Executables will be linked against CepGen core library")
 foreach(exec_src ${exec_sources})
   get_filename_component(exec_bin ${exec_src} NAME_WE)
   add_executable(${exec_bin} ${exec_src})
-  target_link_libraries(${exec_bin} ${CEPGEN_LIBRARIES})
+  target_link_libraries(${exec_bin} CepGen)
   install(TARGETS ${exec_bin} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT lib)
 endforeach()
 

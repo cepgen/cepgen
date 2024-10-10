@@ -22,9 +22,6 @@ macro(cepgen_build mod_name)
             list(APPEND sources ${s})
         endforeach()
         add_library(${mod_name} SHARED ${sources})
-        if(NOT("${mod_name}" STREQUAL "CepGen"))
-            target_link_libraries(${mod_name} PRIVATE CepGen)
-        endif()
         set(tests)
         if(ARG_TESTS AND CMAKE_BUILD_TESTS)
             file(GLOB tt "${ARG_TESTS}")
@@ -201,20 +198,20 @@ macro(cepgen_test_category)
     set(tests)
     if(ARG_SOURCES)
         cepgen_add_sources(SOURCES ${ARG_SOURCES}
-                           LIBRARIES ${CEPGEN_LIBRARIES} ${ARG_LIBRARIES}
+                           LIBRARIES CepGen ${ARG_LIBRARIES}
                            OUTPUTS tests
                            PREPEND ${ARG_PREPEND})
     endif()
     if(ARG_FSOURCES)
         cepgen_add_sources(SOURCES ${ARG_FSOURCES}
-                           LIBRARIES ${CEPGEN_LIBRARIES} ${ARG_LIBRARIES}
+                           LIBRARIES CepGen ${ARG_LIBRARIES}
                            OUTPUTS tests
                            PREPEND ${ARG_PREPEND})
     endif()
     set(benchmarks)
     if(ARG_BSOURCES)
         cepgen_add_sources(SOURCES ${ARG_BSOURCES}
-                           LIBRARIES ${CEPGEN_LIBRARIES} ${ARG_LIBRARIES}
+                           LIBRARIES CepGen ${ARG_LIBRARIES}
                            OUTPUTS benchmarks
                            PREPEND ${ARG_PREPEND})
     endif()
