@@ -21,6 +21,7 @@
 #include "CepGen/Utils/Message.h"
 #include "CepGen/Utils/String.h"
 #include "CepGenPython/Error.h"
+#include "CepGenPython/Functional.h"
 #include "CepGenPython/ObjectPtr.h"
 
 using namespace std::string_literals;
@@ -46,8 +47,9 @@ namespace cepgen::python {
     return ptr;
   }
 
+  //---------------------------------------------------------
   // generic, un-specialised makers/getters
-
+  //---------------------------------------------------------
   template <typename T>
   ObjectPtr ObjectPtr::make(const T&) {
     throw CG_FATAL("ObjectPtr:make") << "Type specialisation is not implemented.";
@@ -62,64 +64,11 @@ namespace cepgen::python {
   T ObjectPtr::value() const {
     throw CG_FATAL("ObjectPtr:value") << "Type specialisation is not implemented.";
   }
-
-  // type specialisations
-
-  template <>
-  bool ObjectPtr::is<int>() const {
-    CG_ASSERT(get());
-#ifdef PYTHON2
-    return PyInt_Check(get());
-#else
-    return PyLong_Check(get());
-#endif
-  }
+  //---------------------------------------------------------
 
   template <>
-  bool ObjectPtr::is<bool>() const {
-    CG_ASSERT(get());
-    return PyBool_Check(get());
-  }
-
-  template <>
-  bool ObjectPtr::is<long>() const {
-    CG_ASSERT(get());
-#ifdef PYTHON2
-    return PyInt_Check(get()) || PyLong_Check(get());
-#else
-    return PyLong_Check(get());
-#endif
-  }
-
-  template <>
-  bool ObjectPtr::is<double>() const {
-    CG_ASSERT(get());
-    return PyFloat_Check(get());
-  }
-
-  template <>
-  bool ObjectPtr::is<std::string>() const {
-    CG_ASSERT(get());
-#ifdef PYTHON2
-    return PyString_Check(get());
-#else
-    return PyUnicode_Check(get()) || PyBytes_Check(get());
-#endif
-  }
-
-  template <>
-  bool ObjectPtr::is<Limits>() const {
-    if (!isVector<double>())
-      return false;
-    if (const auto size = vector<double>().size(); size == 1 || size == 2)
-      return true;
-    return false;
-  }
-
-  template <>
-  bool ObjectPtr::is<ParametersList>() const {
-    CG_ASSERT(get());
-    return PyDict_Check(get());
+  ObjectPtr ObjectPtr::make<PyObject*>(PyObject* const& obj) {
+    return ObjectPtr(obj);
   }
 
   template <typename T>
@@ -163,10 +112,19 @@ namespace cepgen::python {
     return vec;
   }
 
+  // type specialisations
+
+  //---------------------------------------------------------
+  // integer parameters
+  //---------------------------------------------------------
   template <>
-  bool ObjectPtr::value<bool>() const {
+  bool ObjectPtr::is<int>() const {
     CG_ASSERT(get());
-    return PyObject_IsTrue(get());
+#ifdef PYTHON2
+    return PyInt_Check(get());
+#else
+    return PyLong_Check(get());
+#endif
   }
 
   template <>
@@ -181,6 +139,54 @@ namespace cepgen::python {
   }
 
   template <>
+  ObjectPtr ObjectPtr::make<int>(const int& val) {
+#ifdef PYTHON2
+    return ObjectPtr(PyInt_FromLong(val));
+#else
+    return ObjectPtr(PyLong_FromLong(val));
+#endif
+  }
+  //---------------------------------------------------------
+
+  //---------------------------------------------------------
+  // boolean parameters
+  //---------------------------------------------------------
+  template <>
+  bool ObjectPtr::is<bool>() const {
+    CG_ASSERT(get());
+    return PyBool_Check(get());
+  }
+
+  template <>
+  bool ObjectPtr::value<bool>() const {
+    CG_ASSERT(get());
+    return PyObject_IsTrue(get());
+  }
+
+  template <>
+  ObjectPtr ObjectPtr::make<bool>(const bool& val) {
+    return ObjectPtr(PyBool_FromLong(val));
+  }
+  //---------------------------------------------------------
+
+  //---------------------------------------------------------
+  // signed long integer parameters
+  //---------------------------------------------------------
+  template <>
+  bool ObjectPtr::is<long>() const {
+    CG_ASSERT(get());
+#ifdef PYTHON2
+    return PyInt_Check(get()) || PyLong_Check(get());
+#else
+    return PyLong_Check(get());
+#endif
+  }
+  //---------------------------------------------------------
+
+  //---------------------------------------------------------
+  // unsigned long integer parameters
+  //---------------------------------------------------------
+  template <>
   unsigned long ObjectPtr::value<unsigned long>() const {
     if (!is<long>())
       throw CG_ERROR("Python:get") << "Object has invalid type: unsigned long != \"" << get()->ob_type->tp_name
@@ -191,12 +197,26 @@ namespace cepgen::python {
     return PyLong_AsUnsignedLong(get());
 #endif
   }
+  //---------------------------------------------------------
 
+  //---------------------------------------------------------
+  // signed long long integer parameters
+  //---------------------------------------------------------
   template <>
   long long ObjectPtr::value<long long>() const {
     if (!is<long>())
       throw CG_ERROR("Python:get") << "Object has invalid type: long long != \"" << get()->ob_type->tp_name << "\".";
     return PyLong_AsLongLong(get());
+  }
+  //---------------------------------------------------------
+
+  //---------------------------------------------------------
+  // floating point value parameters
+  //---------------------------------------------------------
+  template <>
+  bool ObjectPtr::is<double>() const {
+    CG_ASSERT(get());
+    return PyFloat_Check(get());
   }
 
   template <>
@@ -204,6 +224,25 @@ namespace cepgen::python {
     if (!is<double>())
       throw CG_ERROR("Python:get") << "Object has invalid type: double != \"" << get()->ob_type->tp_name << "\".";
     return PyFloat_AsDouble(get());
+  }
+
+  template <>
+  ObjectPtr ObjectPtr::make<double>(const double& val) {
+    return ObjectPtr(PyFloat_FromDouble(val));
+  }
+  //---------------------------------------------------------
+
+  //---------------------------------------------------------
+  // string parameters
+  //---------------------------------------------------------
+  template <>
+  bool ObjectPtr::is<std::string>() const {
+    CG_ASSERT(get());
+#ifdef PYTHON2
+    return PyString_Check(get());
+#else
+    return PyUnicode_Check(get()) || PyBytes_Check(get());
+#endif
   }
 
   template <>
@@ -225,6 +264,28 @@ namespace cepgen::python {
   }
 
   template <>
+  ObjectPtr ObjectPtr::make<std::string>(const std::string& val) {
+#ifdef PYTHON2
+    return ObjectPtr(PyString_FromString(val.c_str()));
+#else
+    return ObjectPtr(PyUnicode_FromString(val.c_str()));
+#endif
+  }
+  //---------------------------------------------------------
+
+  //---------------------------------------------------------
+  // min/max limits parameters
+  //---------------------------------------------------------
+  template <>
+  bool ObjectPtr::is<Limits>() const {
+    if (!isVector<double>())
+      return false;
+    if (const auto size = vector<double>().size(); size == 1 || size == 2)
+      return true;
+    return false;
+  }
+
+  template <>
   Limits ObjectPtr::value<Limits>() const {
     if (!is<Limits>())
       throw CG_ERROR("Python:get") << "Object has invalid type: limits != \"" << get()->ob_type->tp_name << "\".";
@@ -232,6 +293,21 @@ namespace cepgen::python {
     if (vec.size() == 1)
       return Limits{vec.at(0)};
     return Limits{vec.at(0), vec.at(1)};
+  }
+
+  template <>
+  ObjectPtr ObjectPtr::make<Limits>(const Limits& val) {
+    return ObjectPtr::tupleFromVector(std::vector<double>{val.min(), val.max()});
+  }
+  //---------------------------------------------------------
+
+  //---------------------------------------------------------
+  // parameters collections
+  //---------------------------------------------------------
+  template <>
+  bool ObjectPtr::is<ParametersList>() const {
+    CG_ASSERT(get());
+    return PyDict_Check(get());
   }
 
   template <>
@@ -281,44 +357,6 @@ namespace cepgen::python {
   }
 
   template <>
-  ObjectPtr ObjectPtr::make<PyObject*>(PyObject* const& obj) {
-    return ObjectPtr(obj);
-  }
-
-  template <>
-  ObjectPtr ObjectPtr::make<int>(const int& val) {
-#ifdef PYTHON2
-    return ObjectPtr(PyInt_FromLong(val));
-#else
-    return ObjectPtr(PyLong_FromLong(val));
-#endif
-  }
-
-  template <>
-  ObjectPtr ObjectPtr::make<bool>(const bool& val) {
-    return ObjectPtr(PyBool_FromLong(val));
-  }
-
-  template <>
-  ObjectPtr ObjectPtr::make<double>(const double& val) {
-    return ObjectPtr(PyFloat_FromDouble(val));
-  }
-
-  template <>
-  ObjectPtr ObjectPtr::make<std::string>(const std::string& val) {
-#ifdef PYTHON2
-    return ObjectPtr(PyString_FromString(val.c_str()));
-#else
-    return ObjectPtr(PyUnicode_FromString(val.c_str()));
-#endif
-  }
-
-  template <>
-  ObjectPtr ObjectPtr::make<Limits>(const Limits& val) {
-    return ObjectPtr::tupleFromVector(std::vector<double>{val.min(), val.max()});
-  }
-
-  template <>
   ObjectPtr ObjectPtr::make<ParametersList>(const ParametersList& plist) {
     ObjectPtr obj(PyDict_New());
     for (const auto& key : plist.keys(true)) {
@@ -353,6 +391,24 @@ namespace cepgen::python {
     }
     return obj;
   }
+  //---------------------------------------------------------
+
+  //---------------------------------------------------------
+  // functional evaluator parameters
+  //---------------------------------------------------------
+  template <>
+  bool ObjectPtr::is<Functional>() const {
+    CG_ASSERT(get());
+    return PyFunction_Check(get());
+  }
+
+  template <>
+  Functional ObjectPtr::value<Functional>() const {
+    if (!is<utils::Functional>())
+      throw CG_ERROR("Python:get") << "Object has invalid type: functional != \"" << get()->ob_type->tp_name << "\".";
+    return Functional(*this);
+  }
+  //---------------------------------------------------------
 
   template <typename T>
   ObjectPtr ObjectPtr::tupleFromVector(const std::vector<T>& vec) {
